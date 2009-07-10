@@ -1,0 +1,11 @@
+ODK Aggregate is currently designed to store data on Google App Engine.
+
+WARNING! Google App Engine servers may be located anywhere in the world. Depending on the sensitivity of the data and specific storage rules/restrictions, the server infrastructure may not have all necessary security precautions (such as encryption). It is the organization's responsibility to research and comply with applicable laws and regulations before storing data on Google App Engine. The organization is also responsible for taking the appropriate security precautions and educating users that the information will be available to the organization and stored on Google servers.
+
+Some examples of data that may be sensitive to users or subject to local regulations and restrictions include:
+
+    * Financial Information: Bank account numbers, Social Security number, credit card information
+    * Health Information: Personally identifying health information or government-owned data that shouldn't reside on remote servers
+    * Customer Information: Names, passwords, or other login information. 
+
+Please refer to the Google App Engine Terms of Service for further details. 

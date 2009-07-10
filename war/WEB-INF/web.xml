@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE web-app PUBLIC
+ "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
+ "http://java.sun.com/dtd/web-app_2_3.dtd">
+
+<web-app xmlns="http://java.sun.com/xml/ns/javaee" version="2.5">
+ 
+   <servlet>
+    <servlet-name>forms</servlet-name>
+    <servlet-class>org.odk.aggregate.servlet.FormsServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>forms</servlet-name>
+    <url-pattern>/forms</url-pattern>
+  </servlet-mapping>
+ 
+  <servlet>
+    <servlet-name>submission</servlet-name>
+    <servlet-class>org.odk.aggregate.servlet.SubmissionServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>submission</servlet-name>
+    <url-pattern>/submission</url-pattern>
+  </servlet-mapping>
+  
+  <servlet>
+    <servlet-name>upload</servlet-name>
+    <servlet-class>org.odk.aggregate.servlet.FormUploadServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>upload</servlet-name>
+    <url-pattern>/upload</url-pattern>
+  </servlet-mapping>
+ 
+  <servlet>
+    <servlet-name>formXml</servlet-name>
+    <servlet-class>org.odk.aggregate.servlet.FormXmlServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>formXml</servlet-name>
+    <url-pattern>/formXml</url-pattern>
+  </servlet-mapping>
+  
+  <servlet>
+    <servlet-name>formList</servlet-name>
+    <servlet-class>org.odk.aggregate.servlet.FormListServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>formList</servlet-name>
+    <url-pattern>/formList</url-pattern>
+  </servlet-mapping>
+  
+  
+  <servlet>
+    <servlet-name>imageViewer</servlet-name>
+    <servlet-class>org.odk.aggregate.servlet.ImageViewerServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>imageViewer</servlet-name>
+    <url-pattern>/imageViewer</url-pattern>
+  </servlet-mapping>
+  
+  <servlet>
+    <servlet-name>formSubmissions</servlet-name>
+    <servlet-class>org.odk.aggregate.servlet.FormSubmissionsServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>formSubmissions</servlet-name>
+    <url-pattern>/formSubmissions</url-pattern>
+  </servlet-mapping>
+
+  <servlet>
+    <servlet-name>formMultipleValue</servlet-name>
+    <servlet-class>org.odk.aggregate.servlet.FormMultipleValueServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>formMultipleValue</servlet-name>
+    <url-pattern>/formMultipleValue</url-pattern>
+  </servlet-mapping>
+
+  <servlet>
+    <servlet-name>csv</servlet-name>
+    <servlet-class>org.odk.aggregate.servlet.CsvServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>csv</servlet-name>
+    <url-pattern>/csv</url-pattern>
+  </servlet-mapping>
+  
+	<welcome-file-list>
+		<welcome-file>index.html</welcome-file>
+	</welcome-file-list>
+</web-app>
