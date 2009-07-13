@@ -104,12 +104,12 @@ public class SubmissionServlet extends ServletUtilBase {
     
     PrintWriter out = resp.getWriter();
     Key submissionKey = null;
-    
+    PersistenceManager pm = PMFactory.get().getPersistenceManager();
     try {
       SubmissionParser submissionParser = null;
       if (ServletFileUpload.isMultipartContent(req)) {
         try {
-          submissionParser = new SubmissionParser(new MultiPartFormData(req));
+          submissionParser = new SubmissionParser(new MultiPartFormData(req), pm);
         } catch (FileUploadException e) {
           e.printStackTrace();
         }
@@ -117,7 +117,7 @@ public class SubmissionServlet extends ServletUtilBase {
       } else {
         // TODO: check that it is the proper types we can deal with
         // XML received
-        submissionParser = new SubmissionParser(req.getInputStream());
+        submissionParser = new SubmissionParser(req.getInputStream(), pm);
       }
 
       if (submissionParser == null) {
@@ -134,14 +134,16 @@ public class SubmissionServlet extends ServletUtilBase {
       return;
     }
 
+    pm.close();
+    
     if (ServletConsts.DEBUG) {
       out.println("QUERYING FROM DATASTORE");
 
-      PersistenceManager pm = PMFactory.get().getPersistenceManager();
+      pm = PMFactory.get().getPersistenceManager();
       DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
       try {
         Entity subEntity = ds.get(submissionKey);
-        Submission test = new Submission(subEntity);
+        Submission test = new Submission(subEntity, pm);
         test.printSubmission(out);
         
       } catch (EntityNotFoundException e) {

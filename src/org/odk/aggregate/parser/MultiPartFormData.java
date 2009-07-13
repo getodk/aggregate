@@ -92,7 +92,7 @@ public class MultiPartFormData {
         // may need to remove this code after ODK collect is fixed
         int indexOfExtension = fileName.lastIndexOf(".");
         if(indexOfExtension > 0) {
-          fileName = fileName.substring(0, indexOfExtension);
+          fileNameMap.put(fileName.substring(0, indexOfExtension), data);
         }
         fileNameMap.put(fileName, data);
       }

@@ -61,4 +61,32 @@ public class FormRepeat {
   public FormElement getFormElement(PersistenceManager pm) {
     return pm.getObjectById(FormElement.class, elementKey);
   }
+  
+  /**
+   * @see java.lang.Object#equals(java.lang.Object)
+   */
+  @Override
+  public boolean equals(Object obj) {
+    if (!(obj instanceof FormRepeat)) {
+      return false;
+    }
+    FormRepeat other = (FormRepeat) obj;
+    return (form == null ? (other.form == null) : (form.equals(other.form)))
+        && (primaryKey == null ? (other.primaryKey == null) : (primaryKey.equals(other.primaryKey)))
+        && (repeatElementName == null ? (other.repeatElementName == null) : (repeatElementName.equals(other.repeatElementName)))
+        && (elementKey == null ? (other.elementKey == null) : (elementKey.equals(other.elementKey)));
+  }
+
+  /**
+   * @see java.lang.Object#hashCode()
+   */
+  @Override
+  public int hashCode() {
+    int hashCode = 13;
+    if(form != null) hashCode += form.hashCode();
+    if(primaryKey != null) hashCode += primaryKey.hashCode();
+    if(repeatElementName != null) hashCode += repeatElementName.hashCode();
+    if(elementKey != null) hashCode += elementKey.hashCode();
+    return hashCode;
+  }
 }

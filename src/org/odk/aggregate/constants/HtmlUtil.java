@@ -154,21 +154,23 @@ public class HtmlUtil {
   }
 
   public static String wrapResultTableWithHtmlTags(ResultTable resultTable) {
-    String html = HtmlConsts.TABLE_OPEN;
+    StringBuilder html = new StringBuilder();
+    html.append(HtmlConsts.TABLE_OPEN);
   
     for (String header : resultTable.getHeader()) {
-      html += wrapWithHtmlTags(HtmlConsts.TABLE_HEADER, header);
+      html.append(wrapWithHtmlTags(HtmlConsts.TABLE_HEADER, header));
     }
   
     for (String[] row : resultTable.getRows()) {
-      html = html + HtmlConsts.TABLE_ROW_OPEN;
+      html.append(HtmlConsts.TABLE_ROW_OPEN);
       for (String item : row) {
-        html += wrapWithHtmlTags(HtmlConsts.TABLE_DATA, item);
+        html.append(wrapWithHtmlTags(HtmlConsts.TABLE_DATA, item));
       }
-      html += HtmlConsts.TABLE_ROW_CLOSE;
+      html.append(HtmlConsts.TABLE_ROW_CLOSE);
     }
-  
-    return html + HtmlConsts.TABLE_CLOSE;
+    html.append(HtmlConsts.TABLE_CLOSE);
+    
+    return html.toString();
   }
 
 }

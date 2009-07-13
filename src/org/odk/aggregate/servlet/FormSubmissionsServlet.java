@@ -16,17 +16,25 @@
 
 package org.odk.aggregate.servlet;
 
-import org.odk.aggregate.PMFactory;
-import org.odk.aggregate.constants.ServletConsts;
-import org.odk.aggregate.exception.ODKFormNotFoundException;
-import org.odk.aggregate.exception.ODKIncompleteSubmissionData;
-import org.odk.aggregate.table.SubmissionHtmlTable;
-
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.jdo.PersistenceManager;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.odk.aggregate.PMFactory;
+import org.odk.aggregate.constants.HtmlConsts;
+import org.odk.aggregate.constants.HtmlUtil;
+import org.odk.aggregate.constants.ServletConsts;
+import org.odk.aggregate.constants.TableConsts;
+import org.odk.aggregate.exception.ODKFormNotFoundException;
+import org.odk.aggregate.exception.ODKIncompleteSubmissionData;
+import org.odk.aggregate.table.SubmissionHtmlTable;
 
 /**
  * Servlet generates a webpage with a list of submissions from a specified form
@@ -62,6 +70,8 @@ public class FormSubmissionsServlet extends ServletUtilBase {
   public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
     // get parameter
     String odkId = getParameter(req, ServletConsts.ODK_ID);
+    String backwardString = getParameter(req, ServletConsts.BACKWARD);
+    String indexString = getParameter(req, ServletConsts.INDEX);
     
     if(odkId == null) {
       errorMissingKeyParam(resp);
@@ -79,7 +89,69 @@ public class FormSubmissionsServlet extends ServletUtilBase {
     PersistenceManager pm = PMFactory.get().getPersistenceManager();
     
     try {
-      resp.getWriter().print(new SubmissionHtmlTable(odkId, pm).generateHtmlSubmissionResultsTable());
+      Boolean backward = false;
+      if(backwardString != null) {
+        backward = Boolean.parseBoolean(backwardString);
+      }
+      
+      Date indexDate = TableConsts.EPOCH; 
+      if(indexString != null) {
+        try {
+          indexDate = DateFormat.getDateTimeInstance(DateFormat.FULL, DateFormat.FULL).parse(indexString);
+          if(!backward) {
+            indexDate = new Date(indexDate.getTime()+1000); // TODO: worse hack EVER!
+          }
+        } catch (ParseException e) {
+          // ignore exception as if we can't parse the string then keep the default
+        }
+      }
+      
+      
+      SubmissionHtmlTable submissions = new SubmissionHtmlTable(odkId, pm);
+      submissions.generateHtmlSubmissionResultsTable(indexDate, backward);
+
+      boolean createBack = false;
+      boolean createForward = false;
+      
+      if(indexString != null) {
+        if(submissions.isMoreRecords()) {
+          // create both directions
+          createBack = true;
+          createForward = true;
+        } else {
+          // create only the direction opposite of the previous move
+          if(backward) {
+            createForward = true;
+          } else {
+            createBack = true;
+          }
+        }
+      } else {
+        if(submissions.isMoreRecords()) {
+          // create forward
+          createForward = true;
+        }
+      }
+      
+      if(createBack) {
+        Map<String, String> properties = new HashMap<String,String>();
+        properties.put(ServletConsts.ODK_ID, odkId);
+        properties.put(ServletConsts.BACKWARD,  Boolean.TRUE.toString());
+        properties.put(ServletConsts.INDEX, submissions.getFirstDate());
+        String link = HtmlUtil.createHrefWithProperties(req.getRequestURI(), properties, ServletConsts.BACK_LINK_TEXT);
+        resp.getWriter().print(link);
+      }
+      resp.getWriter().print(HtmlConsts.TAB + HtmlConsts.TAB);
+      if(createForward) {
+        Map<String, String> properties = new HashMap<String,String>();
+        properties.put(ServletConsts.ODK_ID, odkId);
+        properties.put(ServletConsts.BACKWARD, Boolean.FALSE.toString());
+        properties.put(ServletConsts.INDEX, submissions.getLastDate());
+        String link = HtmlUtil.createHrefWithProperties(req.getRequestURI(), properties, ServletConsts.NEXT_LINK_TEXT);
+        resp.getWriter().print(link);
+      }
+
+      resp.getWriter().print(submissions.getResultsHtml());
 
       // footer info
       finishBasicHtmlResponse(resp);
@@ -92,4 +164,6 @@ public class FormSubmissionsServlet extends ServletUtilBase {
       pm.close();
     }
   }
+
+  
 }

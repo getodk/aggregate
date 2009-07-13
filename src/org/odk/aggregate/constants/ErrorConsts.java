@@ -67,5 +67,7 @@ public class ErrorConsts {
    * Constant string identifying XML stream
    */
   public static final String INPUTSTREAM_ERROR = "Problem obtaining submissionXML input stream!";
+  public static final String NO_IMAGE_EXISTS = "No Image Exists for this Entry!";
+  public static final String NOT_A_KEY = "Incorrect type was stored, expecting a key for the view link";
 
 }

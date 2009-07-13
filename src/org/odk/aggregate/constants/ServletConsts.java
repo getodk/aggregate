@@ -130,6 +130,36 @@ public class ServletConsts {
   public static final String UPLOAD_FORM_LINK_TEXT = "Upload Form";
 
 
+  public static final String BLOB_KEY = "blobKey";
+
+
+  public static final String INDEX = "index";
+
+
+  public static final String BACKWARD = "backward";
+
+
+  public static final int MAX_ENTITY_PER_PAGE = 20;
+
+
+  public static final String NEXT_LINK_TEXT = " (Next " + MAX_ENTITY_PER_PAGE + " Results) NEXT"+HtmlConsts.GREATER_THAN+HtmlConsts.GREATER_THAN;
+
+
+  public static final String BACK_LINK_TEXT = HtmlConsts.LESS_THAN + HtmlConsts.LESS_THAN +"BACK (Previous " + MAX_ENTITY_PER_PAGE + " Results)";
+
+
+  public static final String DOWNLOAD_XML_BUTTON_TXT = "Download XML";
+
+
+  public static final String ATTACHMENT_FILENAME_TXT = "attachment; filename=\"";
+
+
+  public static final String CONTENT_DISPOSITION = "Content-Disposition";
+
+
+  public static final String CSV_FILENAME_APPEND = "_results.csv";
+
+
 
 
   

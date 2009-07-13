@@ -16,6 +16,8 @@
 
 package org.odk.aggregate.submission;
 
+import javax.jdo.PersistenceManager;
+
 import org.odk.aggregate.exception.ODKFormNotFoundException;
 import org.odk.aggregate.exception.ODKIncompleteSubmissionData;
 
@@ -41,11 +43,12 @@ public interface SubmissionValue {
    * Get submission field value from database entity
    *
    * @param dbEntity entity to obtain value
+   * @param pm persistence manager
    *
    * @throws ODKFormNotFoundException
    * @throws ODKIncompleteSubmissionData
    */
-  public void getValueFromEntity(Entity dbEntity) throws ODKFormNotFoundException, ODKIncompleteSubmissionData;
+  public void getValueFromEntity(Entity dbEntity, PersistenceManager pm) throws ODKFormNotFoundException, ODKIncompleteSubmissionData;
 
   /**
    * Add submission field value to database entity

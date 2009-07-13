@@ -20,6 +20,8 @@ package org.odk.aggregate.submission.type;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.jdo.PersistenceManager;
+
 import org.odk.aggregate.constants.BasicConsts;
 import org.odk.aggregate.exception.ODKFormNotFoundException;
 import org.odk.aggregate.exception.ODKIncompleteSubmissionData;
@@ -94,7 +96,7 @@ public class RepeatSubmissionType implements SubmissionRepeat {
     }
   }
 
-  public void getValueFromEntity(Entity dbEntity) throws ODKFormNotFoundException, ODKIncompleteSubmissionData {
+  public void getValueFromEntity(Entity dbEntity, PersistenceManager pm) throws ODKFormNotFoundException, ODKIncompleteSubmissionData {
     @SuppressWarnings("unchecked")
     List<Key> submissionSetKeys = (List<Key>) dbEntity.getProperty(getPropertyName());
     if (submissionSetKeys != null) {
@@ -102,7 +104,7 @@ public class RepeatSubmissionType implements SubmissionRepeat {
         DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
         for(Key submissionSetKey : submissionSetKeys) {
           Entity entity = ds.get(submissionSetKey);
-          SubmissionSet set = new SubmissionSet(entity);
+          SubmissionSet set = new SubmissionSet(entity, pm);
           addSubmissionSet(set);
         }
       } catch (EntityNotFoundException e) {
@@ -123,23 +125,9 @@ public class RepeatSubmissionType implements SubmissionRepeat {
     
     RepeatSubmissionType other = (RepeatSubmissionType) obj;
     
-    boolean odkIdEquals = true;
-    boolean repeatIdEquals = true;
-    boolean submissionSetEquals = true;
-    
-    if(odkId != null) {
-      odkIdEquals = odkId.equals(other.odkId);
-    }
-    
-    if(submissionSetName != null) {
-      repeatIdEquals = submissionSetName.equals(other.submissionSetName);
-    }
-    
-    if(submissionSets != null) {
-      submissionSetEquals = submissionSets.equals(other.submissionSets);
-    }
-    
-    return odkIdEquals && repeatIdEquals && submissionSetEquals;    
+    return (odkId == null ? (other.odkId == null) : (odkId.equals(other.odkId)))
+      && (submissionSetName == null ? (other.submissionSetName == null) : (submissionSetName.equals(other.submissionSetName)))
+      && (submissionSets == null ? (other.submissionSets == null) : (submissionSets.equals(other.submissionSets))); 
   }
 
   /**
@@ -148,19 +136,11 @@ public class RepeatSubmissionType implements SubmissionRepeat {
   @Override
   public int hashCode() {
     int hashCode = 13;
-    if(submissionSetName != null) {
-      hashCode += submissionSetName.hashCode();
-    }
-    
-    if(odkId != null) {
-      hashCode += odkId.hashCode(); 
-    }
+ 
+    if(odkId != null) hashCode += odkId.hashCode(); 
+    if(submissionSetName != null) hashCode += submissionSetName.hashCode();
+    if(submissionSets != null) hashCode += submissionSets.hashCode();
 
-    if(submissionSets != null) {
-      hashCode += submissionSets.hashCode();
-    }
-
-    
     return hashCode; 
   }
   

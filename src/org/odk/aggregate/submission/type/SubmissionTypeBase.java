@@ -16,12 +16,15 @@
 
 package org.odk.aggregate.submission.type;
 
-import com.google.appengine.api.datastore.Entity;
+import javax.jdo.PersistenceManager;
 
 import org.odk.aggregate.constants.BasicConsts;
 import org.odk.aggregate.constants.ErrorConsts;
 import org.odk.aggregate.exception.ODKConversionException;
 import org.odk.aggregate.submission.SubmissionField;
+
+import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.Key;
 
 /**
  * Base class for type conversion
@@ -111,7 +114,7 @@ public abstract class SubmissionTypeBase<T> implements SubmissionField<T> {
    * @param byteArray byte form of the value
    * @throws ODKConversionException
    */  
-  public void setValueFromByteArray(byte [] byteArray) throws ODKConversionException {
+  public void setValueFromByteArray(byte [] byteArray, Key submissionSetKey) throws ODKConversionException {
     if(!binaryCreation) {
       setValueFromString(new String(byteArray));
     } else {
@@ -124,7 +127,7 @@ public abstract class SubmissionTypeBase<T> implements SubmissionField<T> {
    * 
    *  @param dbEntity entity to obtain value
    */
-  public void getValueFromEntity(Entity dbEntity) {
+  public void getValueFromEntity(Entity dbEntity, PersistenceManager pm) {
     @SuppressWarnings("unchecked")
     T value = (T) dbEntity.getProperty(propertyName);
     setValue(value);
@@ -151,19 +154,9 @@ public abstract class SubmissionTypeBase<T> implements SubmissionField<T> {
     @SuppressWarnings("unchecked")
     SubmissionTypeBase<T> other = (SubmissionTypeBase<T>) obj;
     
-    if(propertyName != null && value != null) {
-      return propertyName.equals(other.propertyName) && value.equals(other.value);
-    } else if (propertyName == null && other.propertyName == null) {
-      if(value == null) {
-        return (other.value == null);
-      } else {
-        return value.equals(other.value);
-      }
-    } else if (value == null && other.value == null) {
-      return propertyName.equals(other.propertyName);     
-    } else {
-      return false;
-    }
+    return (propertyName == null ? (other.propertyName == null) : (propertyName.equals(other.propertyName)))
+      && (value == null ? (other.value == null) : (value.equals(other.value)))
+      && (binaryCreation == other.binaryCreation);
     
   }
 
@@ -173,14 +166,9 @@ public abstract class SubmissionTypeBase<T> implements SubmissionField<T> {
   @Override
   public int hashCode() {
     int hashCode = 13;
-    if(propertyName != null) {
-      hashCode += propertyName.hashCode();
-    }
-    
-    if(value != null) {
-      hashCode += value.hashCode(); 
-    }
-        
+    if(propertyName != null) hashCode += propertyName.hashCode();
+    if(value != null) hashCode += value.hashCode(); 
+    if(binaryCreation) hashCode++;    
     return hashCode; 
   }
   

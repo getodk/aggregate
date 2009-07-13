@@ -16,11 +16,18 @@
 
 package org.odk.aggregate.parser;
 
-import com.google.appengine.api.datastore.DatastoreService;
-import com.google.appengine.api.datastore.DatastoreServiceFactory;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.jdo.PersistenceManager;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.codec.binary.Base64;
-import org.odk.aggregate.PMFactory;
 import org.odk.aggregate.constants.BasicConsts;
 import org.odk.aggregate.constants.ParserConsts;
 import org.odk.aggregate.constants.ServletConsts;
@@ -40,16 +47,8 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.jdo.PersistenceManager;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
+import com.google.appengine.api.datastore.DatastoreService;
+import com.google.appengine.api.datastore.DatastoreServiceFactory;
 
 /**
  * Parsers submission xml and saves to datastore
@@ -90,8 +89,9 @@ public class SubmissionParser {
    *         matching ODK ID
    * @throws ODKParseException 
    */
-  public SubmissionParser(InputStream inputStreamXML) throws IOException, 
+  public SubmissionParser(InputStream inputStreamXML, PersistenceManager persist) throws IOException, 
     ODKFormNotFoundException, ODKParseException {
+    pm = persist;
     constructorHelper(inputStreamXML);
   }
 
@@ -105,8 +105,9 @@ public class SubmissionParser {
    *         matching ODK ID
    * @throws ODKParseException 
    */
-  public SubmissionParser(MultiPartFormData submissionFormParser) throws IOException,
+  public SubmissionParser(MultiPartFormData submissionFormParser, PersistenceManager persist) throws IOException,
       ODKFormNotFoundException, ODKParseException {
+    pm = persist;
     if (submissionFormParser == null) {
       // TODO: review best error handling strategy
       throw new IOException("DID NOT GET A MULTIPARTFORMPARSER");
@@ -160,8 +161,6 @@ public class SubmissionParser {
     } catch (SAXException e) {
       throw new IOException(e.getCause());
     }
-    
-    pm = PMFactory.get().getPersistenceManager();
     Form form = Form.retrieveForm(pm, odkId);    
 
     submission = new Submission(form);
@@ -173,7 +172,6 @@ public class SubmissionParser {
     DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
     ds.put(submission.getEntity());
     inputStreamXML.close();
-    pm.close();
   }
 
   /**
@@ -244,7 +242,7 @@ public class SubmissionParser {
           if (submissionFormItems == null) {
             // TODO: problem, only accept a base64 encoded in a direct XML post
             byte[] receivedBytes = Base64.decodeBase64(value.getBytes());
-            submissionElement.setValueFromByteArray(receivedBytes);
+            submissionElement.setValueFromByteArray(receivedBytes, null);
           } else {
             // attempt to find binary data in multi-part form submission
             // first searching by file name, then field name
@@ -255,7 +253,7 @@ public class SubmissionParser {
             // after completing the search now check if found anything and
             // value, otherwise output error
             if (binaryData != null) {
-              submissionElement.setValueFromByteArray(binaryData.getStream().toByteArray());
+              submissionElement.setValueFromByteArray(binaryData.getStream().toByteArray(), null);
             } else {
               // TODO: decide if we want system to reject submission if file is
               // not found?

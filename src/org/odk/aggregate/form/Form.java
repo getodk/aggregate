@@ -23,7 +23,6 @@ import com.google.appengine.api.datastore.Text;
 import org.odk.aggregate.exception.ODKFormNotFoundException;
 
 import java.io.PrintStream;
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -398,10 +397,18 @@ public class Form {
       return false;
     }
     Form other = (Form) obj;
-    return other.key.equals(key) && other.odkId.equals(odkId)
-        && other.viewableName.equals(viewableName) && other.elementTreeRoot.equals(elementTreeRoot)
-        && other.creationDate.equals(creationDate) && other.updateDate.equals(updateDate)
-        && other.creationUser.equals(creationUser) && other.originalForm.equals(originalForm);
+    return (key == null ? (other.key == null) : (key.equals(other.key)))
+        && (odkId == null ? (other.odkId == null) : (odkId.equals(other.odkId)))
+        && (viewableName == null ? (other.viewableName == null) : (viewableName.equals(other.viewableName)))
+        && (elementTreeRoot == null ? (other.elementTreeRoot == null) : (elementTreeRoot.equals(other.elementTreeRoot)))
+        && (creationDate == null ? (other.creationDate == null) : (creationDate.equals(other.creationDate)))
+        && (updateDate == null ? (other.updateDate == null) : (updateDate.equals(other.updateDate)))
+        && (creationUser == null ? (other.creationUser == null) : (creationUser.equals(other.creationUser)))
+        && (originalForm == null ? (other.originalForm == null) : (originalForm.equals(other.originalForm)))
+        && (fileName == null ? (other.fileName == null) : (fileName.equals(other.fileName)))
+        && (downloadEnabled == null ? (other.downloadEnabled == null) : (downloadEnabled.equals(other.downloadEnabled)))
+        && (submissionEnabled == null ? (other.submissionEnabled == null) : (submissionEnabled.equals(other.submissionEnabled)))
+        && (repeatElements == null ? (other.repeatElements == null) : (repeatElements.equals(other.repeatElements)));
   }
 
   /**
@@ -409,16 +416,20 @@ public class Form {
    */
   @Override
   public int hashCode() {
-    // TODO: reduce so it does not use bigInt
-    BigInteger hashCode = BigInteger.valueOf(13);
-    hashCode = hashCode.add(BigInteger.valueOf(key.hashCode()));
-    hashCode = hashCode.add(BigInteger.valueOf(viewableName.hashCode()));
-    hashCode = hashCode.add(BigInteger.valueOf(elementTreeRoot.hashCode()));
-    hashCode = hashCode.add(BigInteger.valueOf(creationDate.hashCode()));
-    hashCode = hashCode.add(BigInteger.valueOf(updateDate.hashCode()));
-    hashCode = hashCode.add(BigInteger.valueOf(creationUser.hashCode()));
-    hashCode = hashCode.add(BigInteger.valueOf(originalForm.hashCode()));
-    return hashCode.intValue();
+    int hashCode = 13;
+    if(key != null) hashCode += key.hashCode();
+    if(odkId != null) hashCode += odkId.hashCode();
+    if(viewableName != null) hashCode += viewableName.hashCode();
+    if(elementTreeRoot != null) hashCode += elementTreeRoot.hashCode();
+    if(creationDate != null) hashCode += creationDate.hashCode();
+    if(updateDate != null) hashCode += updateDate.hashCode();
+    if(creationUser != null) hashCode += creationUser.hashCode();
+    if(originalForm != null) hashCode += originalForm.hashCode();
+    if(fileName != null) hashCode += fileName.hashCode();
+    if(downloadEnabled != null) hashCode += downloadEnabled.hashCode();
+    if(submissionEnabled != null) hashCode += submissionEnabled.hashCode();
+    if(repeatElements != null) hashCode += repeatElements.hashCode();
+    return hashCode;
   }
 
   /**

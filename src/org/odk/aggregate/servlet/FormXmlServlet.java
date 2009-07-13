@@ -96,7 +96,7 @@ public class FormXmlServlet extends ServletUtilBase {
       Map<String, String> properties = new HashMap<String, String>();
       properties.put(ServletConsts.ODK_FORM_KEY, URLEncoder.encode(odkFormKey, ServletConsts.ENCODE_SCHEME));
       String downloadXmlButton =
-          HtmlUtil.createHtmlButtonToGetServlet(ADDR, "Download XML", properties);
+          HtmlUtil.createHtmlButtonToGetServlet(ADDR, ServletConsts.DOWNLOAD_XML_BUTTON_TXT, properties);
 
       beginBasicHtmlResponse(TITLE_INFO, resp, true); // header info
       out.println("<h3>Form Name: <FONT COLOR=0000FF>" + form.getViewableName() + "</FONT></h3>");
@@ -106,7 +106,7 @@ public class FormXmlServlet extends ServletUtilBase {
       finishBasicHtmlResponse(resp); // footer info
     } else {
       resp.setContentType(ServletConsts.RESP_TYPE_XML);
-      resp.setHeader("Content-Disposition", "attachment; filename=\"" + form.getFileName() + "\";");
+      setDownloadFileName(resp, form.getFileName());
       out.print(xmlString);
     }
     pm.close();

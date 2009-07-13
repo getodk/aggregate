@@ -18,6 +18,8 @@ package org.odk.aggregate.submission;
 
 import org.odk.aggregate.exception.ODKConversionException;
 
+import com.google.appengine.api.datastore.Key;
+
 /**
  * Interface for submission field that can be used to store
  * a submission field in the datastore 
@@ -66,9 +68,10 @@ public interface SubmissionField<T> extends SubmissionValue{
    * Convert byte array to proper type for submission field
    * 
    * @param byteArray byte form of the value
+   * @param submissionSetKey key of submission set that will reference the blob
    * @throws ODKConversionException
    * 
    */  
-  public void setValueFromByteArray(byte [] byteArray) throws ODKConversionException;
+  public void setValueFromByteArray(byte [] byteArray, Key submissionSetKey) throws ODKConversionException;
   
 }

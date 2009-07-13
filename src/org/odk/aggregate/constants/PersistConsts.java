@@ -44,4 +44,25 @@ public class PersistConsts {
    */
   public static final String PARENT_KEY_PROPERTY = "PARENT_KEY";
 
+  public static final String BLOB_PROPERTY = "BLOB";
+
+  public static final String BLOB_STORE_KIND = "blob_store";
+
+  /**
+   * Constant string used to post affix to property name to create the db
+   * entity property name to represent the text property
+   */
+  public static final String TEXT_PROPERTY_ID = "text";
+
+  /**
+   * Constant string used to post affix to property name to create the db
+   * entity property name to represent the string property
+   */
+  public static final String STRING_PROPERTY_ID = "string";
+
+  /**
+   * Max size of string that can be stored in the
+   */
+  public static final int GAE_MAX_STRING_LEN = 250;
+
 }

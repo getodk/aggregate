@@ -238,6 +238,10 @@ public class ServletUtilBase extends HttpServlet {
     html += HtmlConsts.TAB;
     html += HtmlUtil.createHref(ServletConsts.UPLOAD_SUBMISSION_ADDR, ServletConsts.UPLOAD_SUB_LINK_TEXT);
     return html + HtmlConsts.TAB;
+  }
+
+  protected void setDownloadFileName(HttpServletResponse resp, String filename) {
+    resp.setHeader(ServletConsts.CONTENT_DISPOSITION, ServletConsts.ATTACHMENT_FILENAME_TXT + filename + BasicConsts.QUOTE + BasicConsts.SEMI_COLON);
   }  
   
 }

@@ -16,6 +16,7 @@
 
 package org.odk.aggregate.table;
 
+import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -24,6 +25,7 @@ import java.util.Map;
 
 import javax.jdo.PersistenceManager;
 
+import org.odk.aggregate.constants.BasicConsts;
 import org.odk.aggregate.constants.ErrorConsts;
 import org.odk.aggregate.constants.HtmlUtil;
 import org.odk.aggregate.constants.PersistConsts;
@@ -58,12 +60,15 @@ import com.google.appengine.api.datastore.Query;
  */
 public class SubmissionTable {
   
+  protected boolean moreRecords;
+
   protected String odkId;
     
   protected PersistenceManager pm;
   
   private Form form;
 
+  private int fetchLimit;
   
   /**
    * Constructs a table utils for the form
@@ -72,14 +77,20 @@ public class SubmissionTable {
    *    the ODK id of the form
    * @param persistenceManager
    *    the persistence manager used to manage generating the tables
+   * @param fetchSizeLimit TODO
    * @throws ODKFormNotFoundException 
    */
-  public SubmissionTable(String odkIdentifier, PersistenceManager persistenceManager) throws ODKFormNotFoundException {
+  public SubmissionTable(String odkIdentifier, PersistenceManager persistenceManager, int fetchSizeLimit) throws ODKFormNotFoundException {
     odkId = odkIdentifier;
     pm = persistenceManager;
     form = Form.retrieveForm(pm, odkId);
+    moreRecords = false;
+    fetchLimit = fetchSizeLimit;
   }
   
+  public boolean isMoreRecords() {
+    return moreRecords;
+  }
   
   /**
    * Generates a result table that contains all the submission data 
@@ -90,22 +101,43 @@ public class SubmissionTable {
    * @throws ODKFormNotFoundException
    * @throws ODKIncompleteSubmissionData 
    */
-  protected ResultTable generateResultTable() throws ODKFormNotFoundException, ODKIncompleteSubmissionData {
+  protected ResultTable generateResultTable(Date lastDate, boolean backward) throws ODKFormNotFoundException, ODKIncompleteSubmissionData {
     
     // create results table
     List<String> headers = new ArrayList<String>();
     headers.add(TableConsts.SUBMISSION_DATE_HEADER);
-    processElementForColumnHead(headers, form.getElementTreeRoot(), form.getElementTreeRoot());
+    processElementForColumnHead(headers, form.getElementTreeRoot(), form.getElementTreeRoot(), BasicConsts.EMPTY_STRING);
     ResultTable results = new ResultTable(headers);
 
-    // create a row for each submission
+    // retrieve submissions
     Query surveyQuery = new Query(odkId);
+    if(backward) {
+      surveyQuery.addSort(PersistConsts.SUBMITTED_TIME_PROPERTY_TAG, Query.SortDirection.DESCENDING);
+      surveyQuery.addFilter(PersistConsts.SUBMITTED_TIME_PROPERTY_TAG, Query.FilterOperator.LESS_THAN, lastDate);
+    } else {
+      surveyQuery.addSort(PersistConsts.SUBMITTED_TIME_PROPERTY_TAG, Query.SortDirection.ASCENDING);
+      surveyQuery.addFilter(PersistConsts.SUBMITTED_TIME_PROPERTY_TAG, Query.FilterOperator.GREATER_THAN, lastDate);
+    }
+    
     DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
     List<Entity> submissionEntities =
-        ds.prepare(surveyQuery).asList(FetchOptions.Builder.withLimit(TableConsts.QUERY_ROWS_MAX));
-
-    for (Entity subEntity : submissionEntities) {
-      Submission sub = new Submission(subEntity);
+        ds.prepare(surveyQuery).asList(FetchOptions.Builder.withLimit(fetchLimit + 1));
+    
+    if(submissionEntities.size() > fetchLimit) {
+      moreRecords = true;
+      submissionEntities.remove(fetchLimit);
+    }
+    
+    // create a row for each submission
+    int count = 0;
+    while(count < submissionEntities.size()) {
+      Entity subEntity;
+      if(backward) {
+        subEntity = submissionEntities.get(submissionEntities.size() - 1 - count);
+      } else {
+        subEntity = submissionEntities.get(count);
+      }
+      Submission sub = new Submission(subEntity, pm, form);
       Map<String, SubmissionValue> valueMap = sub.getSubmissionValuesMap();
       String[] row = new String[results.getNumColumns()];
       int index = 0;
@@ -113,7 +145,7 @@ public class SubmissionTable {
         if (header.equals(TableConsts.SUBMISSION_DATE_HEADER)) {
           Date submittedTime = sub.getSubmittedTime();
           if(submittedTime != null) {
-            row[index] = submittedTime.toString();
+            row[index] = DateFormat.getDateTimeInstance(DateFormat.FULL, DateFormat.FULL).format(submittedTime);
           }
         } else {
           processSubmissionFieldValue(sub.getKey(), valueMap, row, index, header);
@@ -121,6 +153,7 @@ public class SubmissionTable {
         index++;
       }
       results.addRow(row);
+      count++;
     }
     return results;
   }
@@ -159,9 +192,7 @@ public class SubmissionTable {
    */
   private String createViewLink(Key subKey, String porpertyName) {
     Map<String, String> properties = new HashMap<String,String>();
-    properties.put(ServletConsts.SUBMISSION_KEY, KeyFactory.keyToString(subKey));
-    properties.put(ServletConsts.PROPERTY_NAME, porpertyName);
-    
+    properties.put(ServletConsts.BLOB_KEY, KeyFactory.keyToString(subKey));   
     return HtmlUtil.createHrefWithProperties(ImageViewerServlet.ADDR, properties, TableConsts.VIEW_LINK_TEXT);
   }
 
@@ -176,26 +207,31 @@ public class SubmissionTable {
    *    node to act recursively on
    */
   private void processElementForColumnHead(List<String> columns, FormElement node,
-      FormElement root) {
+      FormElement root, String parentName) {
     if (node == null) return;
-    
+
     if (node.getSubmissionFieldType().equals(SubmissionFieldType.UNKNOWN)) {
-      if(node.isRepeatable() && !node.equals(root)) {
-        columns.add(node.getElementName());
-        return;
+      if (!node.equals(root)) {
+        if (node.isRepeatable()) {
+          columns.add(node.getElementName());
+          return;
+        } else {
+          // else skip and goto children as we do not know how to display
+          // append parent name incase embedded tag
+          parentName = node.getElementName() + BasicConsts.FORWARDSLASH;
+        }
       }
-      // else skip and goto children as we do not know how to display
     } else {
-      columns.add(node.getElementName());
+      columns.add(parentName + node.getElementName());
     }
-    
+
     List<FormElement> childDataElements = node.getChildren(pm);
     // TODO: do better error handling
     if (childDataElements == null) {
       return;
     }
     for (FormElement child : childDataElements) {
-      processElementForColumnHead(columns, child, root);
+      processElementForColumnHead(columns, child, root, parentName);
     }
   }
 
@@ -205,7 +241,7 @@ public class SubmissionTable {
       throw new ODKIncompleteSubmissionData();
     }
     List<String> headers = new ArrayList<String>();
-    processElementForColumnHead(headers, element, element);
+    processElementForColumnHead(headers, element, element, BasicConsts.EMPTY_STRING);
 
     ResultTable results = new ResultTable(headers);
 
@@ -214,10 +250,10 @@ public class SubmissionTable {
     surveyQuery.addFilter(PersistConsts.PARENT_KEY_PROPERTY, Query.FilterOperator.EQUAL, submissionParentKey);
     DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
     List<Entity> submissionEntities =
-        ds.prepare(surveyQuery).asList(FetchOptions.Builder.withLimit(TableConsts.QUERY_ROWS_MAX));
+        ds.prepare(surveyQuery).asList(FetchOptions.Builder.withLimit(fetchLimit));
 
     for (Entity subEntity : submissionEntities) {
-      SubmissionSet sub = new SubmissionSet(subEntity);
+      SubmissionSet sub = new SubmissionSet(subEntity, pm);
       Map<String, SubmissionValue> valueMap = sub.getSubmissionValuesMap();
       String[] row = new String[results.getNumColumns()];
       int index = 0;
@@ -233,15 +269,21 @@ public class SubmissionTable {
 
   private void processSubmissionFieldValue(Key submissionSetKey,
       Map<String, SubmissionValue> submissionValueMap, String[] row, int index, String header) {
-    SubmissionValue entry = submissionValueMap.get(header);
+    String propertyName = header.substring(header.lastIndexOf(BasicConsts.FORWARDSLASH) + 1);
+    SubmissionValue entry = submissionValueMap.get(propertyName);
     if (entry != null) {
       if(entry instanceof SubmissionField<?>) {
         SubmissionField<?> field = (SubmissionField<?>) entry;
-        if (field.isBinary()) {
-          row[index] = createViewLink(submissionSetKey, header);
-        } else {
-          Object value = field.getValue();
-          if (value != null) {
+        Object value = field.getValue();
+        if (value != null) {
+          if (field.isBinary()) {
+            if (value instanceof Key) {
+              Key blobKey = (Key) value;
+              row[index] = createViewLink(blobKey, header);
+            } else {
+              System.err.println(ErrorConsts.NOT_A_KEY);
+            }
+          } else {
             row[index] = value.toString();
           }
         }
