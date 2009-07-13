@@ -16,26 +16,19 @@
 
 package org.odk.aggregate.servlet;
 
-import com.google.appengine.api.datastore.Blob;
-import com.google.appengine.api.datastore.DatastoreService;
-import com.google.appengine.api.datastore.DatastoreServiceFactory;
-import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.EntityNotFoundException;
-import com.google.appengine.api.datastore.KeyFactory;
-
-import org.odk.aggregate.constants.ErrorConsts;
-import org.odk.aggregate.constants.ServletConsts;
-import org.odk.aggregate.exception.ODKFormNotFoundException;
-import org.odk.aggregate.exception.ODKIncompleteSubmissionData;
-import org.odk.aggregate.submission.Submission;
-import org.odk.aggregate.submission.SubmissionField;
-
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.odk.aggregate.constants.ErrorConsts;
+import org.odk.aggregate.constants.ServletConsts;
+import org.odk.aggregate.submission.SubmissionBlob;
+
+import com.google.appengine.api.datastore.Blob;
+import com.google.appengine.api.datastore.EntityNotFoundException;
+import com.google.appengine.api.datastore.KeyFactory;
 
 /**
  * Servlet to display the image from a submission
@@ -70,45 +63,28 @@ public class ImageViewerServlet extends ServletUtilBase {
     }
 
     // verify parameters are present
-    String keyString =  getParameter(req, ServletConsts.SUBMISSION_KEY);
-    String propertyName =  getParameter(req, ServletConsts.PROPERTY_NAME);
-    if (keyString == null || propertyName == null) {
+    String keyString =  getParameter(req, ServletConsts.BLOB_KEY);
+     if (keyString == null) {
       sendErrorNotEnoughParams(resp);
       return;
     }
 
-    // retrieve submission based on key passed as a parameter
-    Entity sub = null;
     try {
-      DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
-      sub = ds.get(KeyFactory.stringToKey(keyString));
+        SubmissionBlob blobStore = new SubmissionBlob(KeyFactory.stringToKey(keyString));
+        Blob imageBlob = blobStore.getBlob();
+        if(imageBlob != null) {
+          resp.setContentType(ServletConsts.RESP_TYPE_IMAGE_JPEG);
+          OutputStream os = resp.getOutputStream();
+          os.write(imageBlob.getBytes());
+          os.close();
+          return;
+        }
+
     } catch (EntityNotFoundException e) {
-      resp.sendError(HttpServletResponse.SC_NOT_FOUND, ErrorConsts.SUBMISSION_NOT_FOUND);
-      return;
+      // TODO: consider better error handling, right now defaulting to simple error message
     }
-
-    // extra data from submission
-    if (sub != null) {
-      Submission submission;
-      try {
-        submission = new Submission(sub);
-      } catch (ODKFormNotFoundException e) {
-        odkIdNotFoundError(resp);
-        return;
-      } catch (ODKIncompleteSubmissionData e) {
-        errorRetreivingData(resp);
-        return;
-      }
-
-
-      resp.setContentType(ServletConsts.RESP_TYPE_IMAGE_JPEG);
-      OutputStream os = resp.getOutputStream();
-      Map<String, SubmissionField<?>> fieldMap = submission.getSubmissionFieldsMap();
-      SubmissionField<?> image = fieldMap.get(propertyName);
-      Blob imageBlog = (Blob) image.getValue();
-      os.write(imageBlog.getBytes());
-      os.close();
-    }
+    resp.setContentType(ServletConsts.RESP_TYPE_PLAIN);
+    resp.getWriter().print(ErrorConsts.NO_IMAGE_EXISTS);
 
   }
 

@@ -16,14 +16,15 @@
 
 package org.odk.aggregate.table;
 
+import org.odk.aggregate.constants.BasicConsts;
+import org.odk.aggregate.constants.TableConsts;
+import org.odk.aggregate.exception.ODKFormNotFoundException;
+import org.odk.aggregate.exception.ODKIncompleteSubmissionData;
+
 import java.util.Arrays;
 import java.util.Iterator;
 
 import javax.jdo.PersistenceManager;
-
-import org.odk.aggregate.constants.BasicConsts;
-import org.odk.aggregate.exception.ODKFormNotFoundException;
-import org.odk.aggregate.exception.ODKIncompleteSubmissionData;
 
 /**
  * Generates a CSV of submission data of a form 
@@ -44,7 +45,7 @@ public class SubmissionCsvTable extends SubmissionTable {
    * @throws ODKFormNotFoundException 
    */
   public SubmissionCsvTable(String odkIdentifier, PersistenceManager persistenceManager) throws ODKFormNotFoundException {
-    super(odkIdentifier, persistenceManager);
+    super(odkIdentifier, persistenceManager, TableConsts.QUERY_ROWS_MAX);
   }
 
   /**
@@ -59,7 +60,7 @@ public class SubmissionCsvTable extends SubmissionTable {
   public String generateCsv() throws ODKFormNotFoundException, ODKIncompleteSubmissionData {
     String csv = BasicConsts.EMPTY_STRING;
 
-    ResultTable resultTable = generateResultTable();
+    ResultTable resultTable = generateResultTable(TableConsts.EPOCH, false);
 
     // generate headers
     csv += generateCommaSeperatedRow(resultTable.getHeader().iterator());
@@ -83,7 +84,7 @@ public class SubmissionCsvTable extends SubmissionTable {
   private String generateCommaSeperatedRow(Iterator<String> itr) {
     String row = BasicConsts.EMPTY_STRING;
     while (itr.hasNext()) {
-      row += itr.next();
+      row += BasicConsts.QUOTE + itr.next() + BasicConsts.QUOTE;
       if (itr.hasNext()) {
         row += BasicConsts.CSV_DELIMITER;
       } else {

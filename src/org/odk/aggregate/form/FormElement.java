@@ -22,13 +22,14 @@ import com.google.appengine.api.datastore.KeyFactory;
 import org.odk.aggregate.submission.SubmissionField;
 import org.odk.aggregate.submission.SubmissionFieldType;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import javax.jdo.PersistenceManager;
 import javax.jdo.annotations.IdGeneratorStrategy;
 import javax.jdo.annotations.IdentityType;
+import javax.jdo.annotations.NotPersistent;
 import javax.jdo.annotations.PersistenceCapable;
 import javax.jdo.annotations.Persistent;
 import javax.jdo.annotations.PrimaryKey;
@@ -80,6 +81,12 @@ public class FormElement {
   private List<Key> childKeys;
 
   /**
+   * A list of restored child objects
+   */
+  @NotPersistent
+  List<FormElement> childDataElements;
+  
+  /**
    * Construct a form element that defines an element in a submission
    * 
    * @param parent
@@ -127,21 +134,35 @@ public class FormElement {
    *    a list of Form Elements that is this form elements children
    */
   public List<FormElement> getChildren(PersistenceManager pm) {
-    List<FormElement> childDataElements = new ArrayList<FormElement>();
-    // TODO: do better error handling
+    if(childDataElements != null) {
+      return childDataElements;
+    }
+    
+    // create list of kids
+    childDataElements = new ArrayList<FormElement>();    
     if (childKeys == null) {
       return childDataElements;
     }
+    
+    // TODO: better error handling
     try {
+      Collection<Object> oids = new ArrayList<Object>();
+      
       for (Key childKey : childKeys) {
         if (childKey == null) {
           continue;
         }
-        FormElement element = pm.getObjectById(FormElement.class, childKey);
+        oids.add(pm.newObjectIdInstance(FormElement.class, childKey));
+      }
+      @SuppressWarnings("unchecked")
+      Collection<FormElement> elements = pm.getObjectsById(oids);
+
+      for(FormElement element: elements) {
         if (element != null) {
           childDataElements.add(element);
         }
       }
+      
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -228,9 +249,11 @@ public class FormElement {
       return false;
     }
     FormElement other = (FormElement) obj;
-    return other.key.equals(key) && other.isRepeatable.equals(isRepeatable)
-        && other.submissionFieldType.equals(submissionFieldType)
-        && other.childKeys.equals(childKeys);
+    return (key == null ? (other.key == null) : (key.equals(other.key)))
+        && (elementName == null ? (other.elementName == null) : (elementName.equals(other.elementName)))
+        && (submissionFieldType == null ? (other.submissionFieldType == null) : (submissionFieldType.equals(other.submissionFieldType)))
+        && (isRepeatable == null ? (other.isRepeatable == null) : (isRepeatable.equals(other.isRepeatable)))
+        && (childKeys == null ? (other.childKeys == null) : (childKeys.equals(other.childKeys)));
   }
 
   /**
@@ -238,12 +261,13 @@ public class FormElement {
    */
   @Override
   public int hashCode() {
-    BigInteger hashCode = new BigInteger("13");
-    hashCode = hashCode.add(BigInteger.valueOf(key.hashCode()));
-    hashCode = hashCode.add(BigInteger.valueOf(isRepeatable.hashCode()));
-    hashCode = hashCode.add(BigInteger.valueOf(submissionFieldType.hashCode()));
-    hashCode = hashCode.add(BigInteger.valueOf(childKeys.hashCode()));
-    return hashCode.intValue();
+    int hashCode = 13;
+    if(key != null) hashCode += key.hashCode();
+    if(elementName != null) hashCode += elementName.hashCode();
+    if(submissionFieldType != null) hashCode += submissionFieldType.hashCode();
+    if(isRepeatable != null) hashCode += isRepeatable.hashCode();
+    if(childKeys != null) hashCode += childKeys.hashCode();
+    return hashCode;
   }
 
   /**

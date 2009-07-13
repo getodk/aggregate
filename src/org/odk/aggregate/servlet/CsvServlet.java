@@ -55,7 +55,6 @@ public class CsvServlet extends ServletUtilBase {
    */
   @Override
   public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-    resp.setContentType(ServletConsts.RESP_TYPE_ENRICHED);
     
     // verify user is logged in
     if (!verifyCredentials(req, resp)) {
@@ -73,6 +72,9 @@ public class CsvServlet extends ServletUtilBase {
     PersistenceManager pm = PMFactory.get().getPersistenceManager();
 
     try {
+      resp.setContentType(ServletConsts.RESP_TYPE_ENRICHED);
+      setDownloadFileName(resp, odkId + ServletConsts.CSV_FILENAME_APPEND);
+
       // create CSV
       SubmissionCsvTable submissions = new SubmissionCsvTable(odkId,pm);
       resp.getWriter().print(submissions.generateCsv());

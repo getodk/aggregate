@@ -16,9 +16,14 @@
 
 package org.odk.aggregate.table;
 
+import java.util.Date;
+import java.util.List;
+
 import javax.jdo.PersistenceManager;
 
+import org.odk.aggregate.constants.BasicConsts;
 import org.odk.aggregate.constants.HtmlUtil;
+import org.odk.aggregate.constants.ServletConsts;
 import org.odk.aggregate.exception.ODKFormNotFoundException;
 import org.odk.aggregate.exception.ODKIncompleteSubmissionData;
 
@@ -32,6 +37,8 @@ import com.google.appengine.api.datastore.Key;
  */
 public class SubmissionHtmlTable extends SubmissionTable {
 
+  ResultTable resultTable;
+  
   /**
    * Construct a HTML table object for form with the specified ODK ID
    * 
@@ -42,25 +49,43 @@ public class SubmissionHtmlTable extends SubmissionTable {
    * @throws ODKFormNotFoundException 
    */
   public SubmissionHtmlTable(String odkIdentifier, PersistenceManager persistenceManager) throws ODKFormNotFoundException {
-    super(odkIdentifier, persistenceManager);
+    super(odkIdentifier, persistenceManager, ServletConsts.MAX_ENTITY_PER_PAGE);
   }
 
 
+
+  public void generateHtmlSubmissionResultsTable(Date lastDate, boolean backward) throws ODKFormNotFoundException,
+      ODKIncompleteSubmissionData {
+    resultTable = generateResultTable(lastDate, backward);
+  }
+  
+  public String getFirstDate() {
+    List<String []> rows = resultTable.getRows();
+    if(rows.isEmpty()) {
+      return null;
+    }
+    return rows.get(0)[0];
+  }
+
+  public String getLastDate() {
+    List<String []> rows = resultTable.getRows();
+    if(rows.size() != ServletConsts.MAX_ENTITY_PER_PAGE) {
+      return null;
+    }
+    return rows.get(ServletConsts.MAX_ENTITY_PER_PAGE-1)[0];
+  }
+  
   /**
-   * Generate an HTML table with the submission results for a form specified
-   * with odk identifier
+   * Generate an string that contains an HTML table with the submission results for a form specified
    * 
    * @return submissions received defined by the form
-   * @throws ODKFormNotFoundException
-   * @throws ODKIncompleteSubmissionData
    */
-  public String generateHtmlSubmissionResultsTable() throws ODKFormNotFoundException,
-      ODKIncompleteSubmissionData {
-    ResultTable resultTable = generateResultTable();
-
-    return HtmlUtil.wrapResultTableWithHtmlTags(resultTable);
+  public String getResultsHtml() {
+    if(resultTable != null) {
+      return HtmlUtil.wrapResultTableWithHtmlTags(resultTable);
+    }
+    return BasicConsts.EMPTY_STRING;
   }
-
 
   public String generateHtmlSubmissionRepeatResultsTable(String kind, Key elementKey,
       Key submissionParentKey) throws ODKFormNotFoundException, ODKIncompleteSubmissionData {

@@ -39,4 +39,6 @@ public class BasicConsts {
   public static final String EMPTY_STRING = "";
   public static final String FORWARDSLASH = "/";
   public static final String TRUE = "true";
+  public static final String QUOTE = "\"";
+  public static final String SEMI_COLON = ";";
 }

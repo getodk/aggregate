@@ -16,6 +16,8 @@
 
 package org.odk.aggregate.constants;
 
+import java.util.Date;
+
 /**
  * Constants used for generating tables of data
  *
@@ -52,6 +54,7 @@ public class TableConsts {
   public static final String BEGIN_FORMS_TAG = HtmlUtil.createBeginTag(FORMS_TAG);
   public static final String END_FORMS_TAG = HtmlUtil.createEndTag(FORMS_TAG);
   public static final String END_FORM_TAG = HtmlUtil.createEndTag(FORM_TAG);
-  public static final int QUERY_ROWS_MAX = 1000;
+  public static final int QUERY_ROWS_MAX = 990;
+  public static final Date EPOCH = new Date(0);
 
 }

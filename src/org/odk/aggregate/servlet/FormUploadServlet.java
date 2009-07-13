@@ -136,9 +136,12 @@ public class FormUploadServlet extends ServletUtilBase {
         xmlFileName = formXmlData.getFilename();
       }
       
+      // persist form
+      PersistenceManager pm = PMFactory.get().getPersistenceManager();
+      
       if(formName != null && formXml != null) {
         try {
-          parser = new FormParserForJavaRosa(formName, user.getNickname(), formXml, xmlFileName);
+          parser = new FormParserForJavaRosa(formName, user.getNickname(), formXml, xmlFileName, pm);
         } catch (ODKFormAlreadyExistsException e) {
           resp.sendError(HttpServletResponse.SC_CONFLICT, ErrorConsts.FORM_WITH_ODKID_EXISTS);
           return;
@@ -148,8 +151,7 @@ public class FormUploadServlet extends ServletUtilBase {
         return;
       } 
   
-      // persist form
-      PersistenceManager pm = PMFactory.get().getPersistenceManager();
+     
       // TODO: do better error handling
       try {
         Form form = parser.getForm();
