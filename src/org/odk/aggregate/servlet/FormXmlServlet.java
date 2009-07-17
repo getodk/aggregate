@@ -19,7 +19,7 @@ package org.odk.aggregate.servlet;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 
-import org.odk.aggregate.PMFactory;
+import org.odk.aggregate.EMFactory;
 import org.odk.aggregate.constants.HtmlUtil;
 import org.odk.aggregate.constants.ServletConsts;
 import org.odk.aggregate.form.Form;
@@ -30,7 +30,7 @@ import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.jdo.PersistenceManager;
+import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -80,8 +80,8 @@ public class FormXmlServlet extends ServletUtilBase {
     }
 
     Key formKey = KeyFactory.stringToKey(odkFormKey);
-    PersistenceManager pm = PMFactory.get().getPersistenceManager();
-    Form form = pm.getObjectById(Form.class, formKey);
+    EntityManager em = EMFactory.get().createEntityManager();
+    Form form = em.getReference(Form.class, formKey);
     String xmlString = null;
     
     if (form != null) {
@@ -109,7 +109,7 @@ public class FormXmlServlet extends ServletUtilBase {
       setDownloadFileName(resp, form.getFileName());
       out.print(xmlString);
     }
-    pm.close();
+    em.close();
 
   }
 }

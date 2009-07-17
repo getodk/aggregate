@@ -17,22 +17,22 @@
 
 package org.odk.aggregate.submission.type;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.jdo.PersistenceManager;
-
-import org.odk.aggregate.constants.BasicConsts;
-import org.odk.aggregate.exception.ODKFormNotFoundException;
-import org.odk.aggregate.exception.ODKIncompleteSubmissionData;
-import org.odk.aggregate.submission.SubmissionRepeat;
-import org.odk.aggregate.submission.SubmissionSet;
-
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.api.datastore.Key;
+
+import org.odk.aggregate.constants.BasicConsts;
+import org.odk.aggregate.exception.ODKFormNotFoundException;
+import org.odk.aggregate.exception.ODKIncompleteSubmissionData;
+import org.odk.aggregate.form.Form;
+import org.odk.aggregate.submission.SubmissionRepeat;
+import org.odk.aggregate.submission.SubmissionSet;
+
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Data Storage type for a repeat type. Store a list of datastore 
  * keys to submission sets in an entity
@@ -96,7 +96,7 @@ public class RepeatSubmissionType implements SubmissionRepeat {
     }
   }
 
-  public void getValueFromEntity(Entity dbEntity, PersistenceManager pm) throws ODKFormNotFoundException, ODKIncompleteSubmissionData {
+  public void getValueFromEntity(Entity dbEntity, Form form) throws ODKFormNotFoundException, ODKIncompleteSubmissionData {
     @SuppressWarnings("unchecked")
     List<Key> submissionSetKeys = (List<Key>) dbEntity.getProperty(getPropertyName());
     if (submissionSetKeys != null) {
@@ -104,7 +104,7 @@ public class RepeatSubmissionType implements SubmissionRepeat {
         DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
         for(Key submissionSetKey : submissionSetKeys) {
           Entity entity = ds.get(submissionSetKey);
-          SubmissionSet set = new SubmissionSet(entity, pm);
+          SubmissionSet set = new SubmissionSet(entity, form);
           addSubmissionSet(set);
         }
       } catch (EntityNotFoundException e) {

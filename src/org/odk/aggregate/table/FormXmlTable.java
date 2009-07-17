@@ -18,7 +18,7 @@ package org.odk.aggregate.table;
 
 import com.google.appengine.api.datastore.KeyFactory;
 
-import org.odk.aggregate.PMFactory;
+import org.odk.aggregate.EMFactory;
 import org.odk.aggregate.constants.BasicConsts;
 import org.odk.aggregate.constants.HtmlConsts;
 import org.odk.aggregate.constants.HtmlUtil;
@@ -31,8 +31,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.jdo.PersistenceManager;
-import javax.jdo.Query;
+import javax.persistence.EntityManager;
+import javax.persistence.Query;
 
 /**
  * Generates an xml description of forms for the servlets
@@ -42,28 +42,28 @@ import javax.jdo.Query;
  */
 public class FormXmlTable {
 
-  private String baseUrl;
+  private String baseServerUrl;
 
-  public FormXmlTable(String baseUrl) {
-    this.baseUrl = baseUrl + BasicConsts.FORWARDSLASH +FormXmlServlet.ADDR;
+  public FormXmlTable(String serverName) {
+    this.baseServerUrl = HtmlUtil.createUrl(serverName) + FormXmlServlet.ADDR;
   }
 
   private String generateFormXmlEntry(String odkFormKey, String formName) {
     Map<String, String> properties = new HashMap<String, String>();
     properties.put(ServletConsts.ODK_FORM_KEY, odkFormKey);
-    String urlLink = HtmlUtil.createLinkWithProperties(baseUrl, properties);
+    String urlLink = HtmlUtil.createLinkWithProperties(baseServerUrl, properties);
     return HtmlConsts.BEGIN_OPEN_TAG + TableConsts.FORM_TAG + BasicConsts.SPACE
         + HtmlUtil.createAttribute(TableConsts.URL_ATTR, urlLink) 
         + HtmlConsts.END_TAG + formName + TableConsts.END_FORM_TAG;
   }
 
   public String generateXmlListOfForms() {
-    PersistenceManager pm = PMFactory.get().getPersistenceManager();
+    EntityManager em = EMFactory.get().createEntityManager();
     String xml = TableConsts.BEGIN_FORMS_TAG + BasicConsts.NEW_LINE;
     try {
-      Query formQuery = pm.newQuery(Form.class);
+      Query formQuery = em.createQuery("select from Form");
       @SuppressWarnings("unchecked")
-      List<Form> forms = (List<Form>) formQuery.execute();
+      List<Form> forms = formQuery.getResultList();
 
       // build HTML table of form information
       for (Form form : forms) {
@@ -74,7 +74,7 @@ public class FormXmlTable {
     } catch (Exception e) {
       e.printStackTrace();
     } finally {
-      pm.close();
+      em.close();
     }
 
     return xml + TableConsts.END_FORMS_TAG;

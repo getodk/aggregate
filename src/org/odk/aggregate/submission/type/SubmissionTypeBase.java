@@ -16,15 +16,15 @@
 
 package org.odk.aggregate.submission.type;
 
-import javax.jdo.PersistenceManager;
+import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.Key;
 
 import org.odk.aggregate.constants.BasicConsts;
 import org.odk.aggregate.constants.ErrorConsts;
 import org.odk.aggregate.exception.ODKConversionException;
+import org.odk.aggregate.form.Form;
 import org.odk.aggregate.submission.SubmissionField;
 
-import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.Key;
 
 /**
  * Base class for type conversion
@@ -127,7 +127,7 @@ public abstract class SubmissionTypeBase<T> implements SubmissionField<T> {
    * 
    *  @param dbEntity entity to obtain value
    */
-  public void getValueFromEntity(Entity dbEntity, PersistenceManager pm) {
+  public void getValueFromEntity(Entity dbEntity, Form form) {
     @SuppressWarnings("unchecked")
     T value = (T) dbEntity.getProperty(propertyName);
     setValue(value);

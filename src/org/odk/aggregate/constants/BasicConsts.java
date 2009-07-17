@@ -41,4 +41,5 @@ public class BasicConsts {
   public static final String TRUE = "true";
   public static final String QUOTE = "\"";
   public static final String SEMI_COLON = ";";
+  public static final String COLON = ":";
 }

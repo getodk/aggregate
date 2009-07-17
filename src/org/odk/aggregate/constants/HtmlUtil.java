@@ -16,12 +16,12 @@
 
 package org.odk.aggregate.constants;
 
+import org.odk.aggregate.table.ResultTable;
+
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Map;
 import java.util.Set;
-
-import org.odk.aggregate.table.ResultTable;
 
 /**
  * Static HTML utility functions used to generate proper HTML
@@ -53,8 +53,12 @@ public class HtmlUtil {
     return HtmlConsts.BEGIN_OPEN_TAG + tag + HtmlConsts.END_TAG;
   }
 
+  public static String createUrl(String serverName) {
+    return HtmlConsts.HTTP + serverName + BasicConsts.FORWARDSLASH;
+  }
+  
   public static String createAttribute(String name, String value) {
-    return name + BasicConsts.EQUALS + HtmlConsts.QUOTE + value + HtmlConsts.QUOTE;
+    return name + BasicConsts.EQUALS + BasicConsts.QUOTE + value + BasicConsts.QUOTE;
   }
 
   public static String wrapWithHtmlTags(String htmlTag, String text) {
@@ -72,16 +76,18 @@ public class HtmlUtil {
   }
 
   public static String createLinkWithProperties(String url, Map<String, String> properties) {
+    StringBuilder urlBuilder = new StringBuilder();
+    urlBuilder.append(url);
     if (properties != null) {
       Set<Map.Entry<String, String>> propSet = properties.entrySet();
       if (!propSet.isEmpty()) {
-        url += ServletConsts.BEGIN_PARAM;
+        urlBuilder.append(ServletConsts.BEGIN_PARAM);
         boolean firstParam = true;
         for (Map.Entry<String, String> property : propSet) {
           if(firstParam) {
             firstParam = false;
           } else {
-            url += ServletConsts.PARAM_DELIMITER;
+            urlBuilder.append(ServletConsts.PARAM_DELIMITER);
           }
           String valueEncoded;
           try {
@@ -89,40 +95,51 @@ public class HtmlUtil {
           } catch (UnsupportedEncodingException e) {
             valueEncoded = BasicConsts.EMPTY_STRING;
           }
-          url += property.getKey() + BasicConsts.EQUALS + valueEncoded;
+          urlBuilder.append(property.getKey() + BasicConsts.EQUALS + valueEncoded);
         }
       }
     }
-    return url;
+    return urlBuilder.toString();
   }
 
   public static String createInput(String type, String name, String value) {
-    String html = HtmlConsts.BEGIN_OPEN_TAG + INPUT;
+    StringBuilder html = new StringBuilder();
+    html.append(HtmlConsts.BEGIN_OPEN_TAG + INPUT);
     if (type != null) {
-      html += BasicConsts.SPACE + createAttribute(ATTR_TYPE, type);
+      html.append(BasicConsts.SPACE);
+      html.append(createAttribute(ATTR_TYPE, type));
     }
     if (name != null) {
-      html += BasicConsts.SPACE + createAttribute(ATTR_NAME, name);
+      html.append(BasicConsts.SPACE);
+      html.append(createAttribute(ATTR_NAME, name));
     }
     if (value != null) {
-      html += BasicConsts.SPACE + createAttribute(ATTR_VALUE, value);
+      html.append(BasicConsts.SPACE);
+      html.append(createAttribute(ATTR_VALUE, value));
     }
-    return html + BasicConsts.SPACE + createAttribute(ATTR_SIZE, INPUT_WIDGET_SIZE_LIMIT)
-        + HtmlConsts.END_SELF_CLOSING_TAG;
+    html.append(BasicConsts.SPACE);
+    html.append(createAttribute(ATTR_SIZE, INPUT_WIDGET_SIZE_LIMIT));
+    html.append(HtmlConsts.END_SELF_CLOSING_TAG);
+    return html.toString();
   }
 
   public static String createFormBeginTag(String action, String encodingType, String method) {
-    String html = HtmlConsts.BEGIN_OPEN_TAG + HtmlConsts.FORM;
+    StringBuilder html = new StringBuilder();
+    html.append(HtmlConsts.BEGIN_OPEN_TAG + HtmlConsts.FORM);
     if (action != null) {
-      html += BasicConsts.SPACE + createAttribute(ATTR_ACTION, action);
+      html.append(BasicConsts.SPACE);
+      html.append(createAttribute(ATTR_ACTION, action));
     }
     if (encodingType != null) {
-      html += BasicConsts.SPACE + createAttribute(ATTR_ENCTYPE, encodingType);
+      html.append(BasicConsts.SPACE);
+      html.append(createAttribute(ATTR_ENCTYPE, encodingType));
     }
     if (method != null) {
-      html += BasicConsts.SPACE + createAttribute(ATTR_METHOD, method);
+      html.append(BasicConsts.SPACE);
+      html.append(createAttribute(ATTR_METHOD, method));
     }
-    return html + HtmlConsts.END_TAG;
+    html.append(HtmlConsts.END_TAG);
+    return html.toString();
   }
 
   /**
@@ -141,16 +158,19 @@ public class HtmlUtil {
    */
   public static String createHtmlButtonToGetServlet(String servletAddr, String label, Map<String,String> properties)
       throws UnsupportedEncodingException {
-    String html = createFormBeginTag(servletAddr, null, ServletConsts.GET);
+    StringBuilder html = new StringBuilder();
+    html.append(createFormBeginTag(servletAddr, null, ServletConsts.GET));
     
     if(properties != null) {
       Set<Map.Entry<String, String>> propSet = properties.entrySet();
       for(Map.Entry<String, String> property: propSet) {
         String valueEncoded = URLEncoder.encode(property.getValue(), ServletConsts.ENCODE_SCHEME);
-        html += createInput(HtmlConsts.INPUT_TYPE_HIDDEN, property.getKey(), valueEncoded);
+        html.append(createInput(HtmlConsts.INPUT_TYPE_HIDDEN, property.getKey(), valueEncoded));
       }
     }
-    return html + createInput(HtmlConsts.INPUT_TYPE_SUBMIT, null, label) + HtmlConsts.FORM_CLOSE;
+    html.append(createInput(HtmlConsts.INPUT_TYPE_SUBMIT, null, label));
+    html.append(HtmlConsts.FORM_CLOSE);
+    return html.toString();
   }
 
   public static String wrapResultTableWithHtmlTags(ResultTable resultTable) {

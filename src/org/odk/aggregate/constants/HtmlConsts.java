@@ -31,11 +31,10 @@ public class HtmlConsts {
   public static final String END_TAG = ">";
   public static final String END_SELF_CLOSING_TAG = "/>";
   
-  // html controls
+  // html
   public static final String SPACE = "&nbsp;";
   public static final String GREATER_THAN = "&gt;";
   public static final String LESS_THAN = "&lt;";
-  public static final String QUOTE = "\"";
   public static final String TAB = SPACE+SPACE+SPACE;
   
   // html control tag names
@@ -74,5 +73,7 @@ public class HtmlConsts {
   public static final String INPUT_TYPE_FILE = "file";
   public static final String INPUT_TYPE_TEXT = "text";
   public static final String INPUT_TYPE_HIDDEN = "hidden";
+  public static final String HTTP = "http://";
+  public static final int WEB_PORT = 80;
   
 }

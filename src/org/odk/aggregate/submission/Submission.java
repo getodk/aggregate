@@ -25,7 +25,6 @@ import org.odk.aggregate.form.Form;
 
 import java.util.Date;
 
-import javax.jdo.PersistenceManager;
 
 /**
  * Defines a form submission that can be converted into a datastore entity. 
@@ -56,16 +55,11 @@ public class Submission extends SubmissionSet {
    * 
    * @param submission
    *    submission entity that contains the data
-   * @param pm TODO
    * @throws ODKFormNotFoundException
    * @throws ODKIncompleteSubmissionData 
    */
-  public Submission(Entity submission, PersistenceManager pm) throws ODKFormNotFoundException, ODKIncompleteSubmissionData {
-    this(submission, pm, null);
-  }
-
-  public Submission(Entity submission, PersistenceManager pm, Form form) throws ODKFormNotFoundException, ODKIncompleteSubmissionData {
-    super(submission, pm, form);
+  public Submission(Entity submission, Form form) throws ODKFormNotFoundException, ODKIncompleteSubmissionData {
+    super(submission, form);
     submittedTime = (Date) dbEntity.getProperty(PersistConsts.SUBMITTED_TIME_PROPERTY_TAG);
   }
   

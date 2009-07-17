@@ -51,19 +51,8 @@ public class FormListServlet extends ServletUtilBase {
   @Override
   public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
     
-    String url = req.getRequestURL().toString();
-    String servlet = req.getServletPath();
-    
-    if(url != null && servlet != null) {
-      int index = url.indexOf(servlet);
-      if(index > 0) {
-        url = url.substring(0, index);
-      }
-    } else {
-      resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Problem parsing URL");
-    }
     resp.setContentType(ServletConsts.RESP_TYPE_XML);
-    FormXmlTable xmlFormTable = new FormXmlTable(url);
+    FormXmlTable xmlFormTable = new FormXmlTable(getServerURL(req));
     resp.getWriter().print(xmlFormTable.generateXmlListOfForms());
   }
 

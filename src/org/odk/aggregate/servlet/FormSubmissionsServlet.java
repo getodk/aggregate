@@ -16,18 +16,7 @@
 
 package org.odk.aggregate.servlet;
 
-import java.io.IOException;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.jdo.PersistenceManager;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.odk.aggregate.PMFactory;
+import org.odk.aggregate.EMFactory;
 import org.odk.aggregate.constants.HtmlConsts;
 import org.odk.aggregate.constants.HtmlUtil;
 import org.odk.aggregate.constants.ServletConsts;
@@ -35,6 +24,17 @@ import org.odk.aggregate.constants.TableConsts;
 import org.odk.aggregate.exception.ODKFormNotFoundException;
 import org.odk.aggregate.exception.ODKIncompleteSubmissionData;
 import org.odk.aggregate.table.SubmissionHtmlTable;
+
+import java.io.IOException;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.persistence.EntityManager;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * Servlet generates a webpage with a list of submissions from a specified form
@@ -86,7 +86,7 @@ public class FormSubmissionsServlet extends ServletUtilBase {
     // header info
     beginBasicHtmlResponse(TITLE_INFO, resp, true);
     
-    PersistenceManager pm = PMFactory.get().getPersistenceManager();
+    EntityManager em = EMFactory.get().createEntityManager();
     
     try {
       Boolean backward = false;
@@ -105,9 +105,8 @@ public class FormSubmissionsServlet extends ServletUtilBase {
           // ignore exception as if we can't parse the string then keep the default
         }
       }
-      
-      
-      SubmissionHtmlTable submissions = new SubmissionHtmlTable(odkId, pm);
+            
+      SubmissionHtmlTable submissions = new SubmissionHtmlTable(getServerURL(req), odkId, em);
       submissions.generateHtmlSubmissionResultsTable(indexDate, backward);
 
       boolean createBack = false;
@@ -161,7 +160,7 @@ public class FormSubmissionsServlet extends ServletUtilBase {
     } catch (ODKIncompleteSubmissionData e) {
       errorRetreivingData(resp);
     } finally {
-      pm.close();
+      em.close();
     }
   }
 

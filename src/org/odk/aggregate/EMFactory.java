@@ -16,34 +16,34 @@
 
 package org.odk.aggregate;
 
-import javax.jdo.JDOHelper;
-import javax.jdo.PersistenceManagerFactory;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
 
 /**
- * Persistence Manager Factory singleton to prevent unnecessary construction
+ * Entity Manager Factory singleton to prevent unnecessary construction
  *
  * @author wbrunette@gmail.com
  */
-public final class PMFactory {
+public final class EMFactory {
   /**
-   * Singleton of the persistence manager factory
+   * Singleton of the entity manager factory
    */
-  private static final PersistenceManagerFactory pmfInstance =
-      JDOHelper.getPersistenceManagerFactory("transactions-optional");
+  private static final EntityManagerFactory emfInstance =
+    Persistence.createEntityManagerFactory("transactions-optional");
 
   /**
    * Private constructor 
    */
-  private PMFactory() {
+  private EMFactory() {
   }
 
   /**
-   * Get the persistence manager singleton instance
+   * Get the entity manager factory singleton instance
    * 
    * @return
-   *    persistence manager factory instance
+   *    entity manager factory instance
    */
-  public static PersistenceManagerFactory get() {
-    return pmfInstance;
+  public static EntityManagerFactory get() {
+    return emfInstance;
   }
 }
