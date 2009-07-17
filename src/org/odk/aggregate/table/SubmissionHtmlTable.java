@@ -16,18 +16,23 @@
 
 package org.odk.aggregate.table;
 
-import java.util.Date;
-import java.util.List;
-
-import javax.jdo.PersistenceManager;
+import com.google.appengine.api.datastore.Key;
 
 import org.odk.aggregate.constants.BasicConsts;
 import org.odk.aggregate.constants.HtmlUtil;
 import org.odk.aggregate.constants.ServletConsts;
+import org.odk.aggregate.constants.TableConsts;
 import org.odk.aggregate.exception.ODKFormNotFoundException;
 import org.odk.aggregate.exception.ODKIncompleteSubmissionData;
+import org.odk.aggregate.servlet.FormMultipleValueServlet;
+import org.odk.aggregate.servlet.ImageViewerServlet;
+import org.odk.aggregate.submission.SubmissionRepeat;
 
-import com.google.appengine.api.datastore.Key;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
+import javax.persistence.EntityManager;
 
 /**
  * Used to generate submission results in html tables for the servlets
@@ -41,15 +46,16 @@ public class SubmissionHtmlTable extends SubmissionTable {
   
   /**
    * Construct a HTML table object for form with the specified ODK ID
-   * 
+   * @param serverName TODO
    * @param odkIdentifier
    *    the ODK id of the form
-   * @param persistenceManager
+   * @param entityManager
    *    the persistence manager used to manage generating the tables
+   * 
    * @throws ODKFormNotFoundException 
    */
-  public SubmissionHtmlTable(String odkIdentifier, PersistenceManager persistenceManager) throws ODKFormNotFoundException {
-    super(odkIdentifier, persistenceManager, ServletConsts.MAX_ENTITY_PER_PAGE);
+  public SubmissionHtmlTable(String serverName, String odkIdentifier, EntityManager entityManager) throws ODKFormNotFoundException {
+    super(serverName, odkIdentifier, entityManager, ServletConsts.MAX_ENTITY_PER_PAGE);
   }
 
 
@@ -94,4 +100,35 @@ public class SubmissionHtmlTable extends SubmissionTable {
     return HtmlUtil.wrapResultTableWithHtmlTags(resultTable);
   }
 
+  /**
+   * Helper function to create the view link for images
+   * @param subKey
+   *    datastore key to the submission entity
+   * @param porpertyName
+   *    entity's property to retrieve and display
+   * @return
+   *    the href that contains a link to view the image
+   */
+  @Override
+  protected String createViewLink(Key subKey, String porpertyName) {
+    Map<String, String> properties = createViewLinkProperties(subKey);
+    return HtmlUtil.createHrefWithProperties(baseServerUrl + ImageViewerServlet.ADDR, properties, TableConsts.VIEW_LINK_TEXT);
+  }
+  
+  /**
+   * Helper function to create the view link for repeat results
+   * @param repeat
+   *    the repeat object
+   * @param parentSubmissionSetKey
+   *    the submission set that contains the repeat value
+   *    
+   * @return
+   *    the href that contains a link to repeat results
+   */
+  @Override
+  protected String createRepeatLink(SubmissionRepeat repeat, Key parentSubmissionSetKey) { 
+    Map<String, String> properties = createRepeatLinkProperties(repeat, parentSubmissionSetKey);
+    return HtmlUtil.createHrefWithProperties(baseServerUrl + FormMultipleValueServlet.ADDR, properties, TableConsts.VIEW_LINK_TEXT);
+  }
+  
 }

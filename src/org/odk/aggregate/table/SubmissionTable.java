@@ -16,14 +16,13 @@
 
 package org.odk.aggregate.table;
 
-import java.text.DateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.jdo.PersistenceManager;
+import com.google.appengine.api.datastore.DatastoreService;
+import com.google.appengine.api.datastore.DatastoreServiceFactory;
+import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.FetchOptions;
+import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.KeyFactory;
+import com.google.appengine.api.datastore.Query;
 
 import org.odk.aggregate.constants.BasicConsts;
 import org.odk.aggregate.constants.ErrorConsts;
@@ -35,8 +34,6 @@ import org.odk.aggregate.exception.ODKFormNotFoundException;
 import org.odk.aggregate.exception.ODKIncompleteSubmissionData;
 import org.odk.aggregate.form.Form;
 import org.odk.aggregate.form.FormElement;
-import org.odk.aggregate.servlet.FormMultipleValueServlet;
-import org.odk.aggregate.servlet.ImageViewerServlet;
 import org.odk.aggregate.submission.Submission;
 import org.odk.aggregate.submission.SubmissionField;
 import org.odk.aggregate.submission.SubmissionFieldType;
@@ -44,13 +41,14 @@ import org.odk.aggregate.submission.SubmissionRepeat;
 import org.odk.aggregate.submission.SubmissionSet;
 import org.odk.aggregate.submission.SubmissionValue;
 
-import com.google.appengine.api.datastore.DatastoreService;
-import com.google.appengine.api.datastore.DatastoreServiceFactory;
-import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.FetchOptions;
-import com.google.appengine.api.datastore.Key;
-import com.google.appengine.api.datastore.KeyFactory;
-import com.google.appengine.api.datastore.Query;
+import java.text.DateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.persistence.EntityManager;
 
 /**
  * Used to process submission results into a result table
@@ -58,35 +56,98 @@ import com.google.appengine.api.datastore.Query;
  * @author wbrunette@gmail.com
  *
  */
-public class SubmissionTable {
+public abstract class SubmissionTable {
   
   protected boolean moreRecords;
 
   protected String odkId;
     
-  protected PersistenceManager pm;
+  protected EntityManager em;
   
   private Form form;
 
   private int fetchLimit;
   
+  protected String baseServerUrl;
+  
   /**
    * Constructs a table utils for the form
-   * 
+   * @param webServerName TODO
    * @param odkIdentifier
    *    the ODK id of the form
-   * @param persistenceManager
+   * @param entityManager
    *    the persistence manager used to manage generating the tables
    * @param fetchSizeLimit TODO
+   * 
    * @throws ODKFormNotFoundException 
    */
-  public SubmissionTable(String odkIdentifier, PersistenceManager persistenceManager, int fetchSizeLimit) throws ODKFormNotFoundException {
+  public SubmissionTable(String webServerName, String odkIdentifier, EntityManager entityManager, int fetchSizeLimit) throws ODKFormNotFoundException {
     odkId = odkIdentifier;
-    pm = persistenceManager;
-    form = Form.retrieveForm(pm, odkId);
+    em = entityManager;
+    form = Form.retrieveForm(em, odkId);
     moreRecords = false;
     fetchLimit = fetchSizeLimit;
+    baseServerUrl = HtmlUtil.createUrl(webServerName);
   }
+  
+  /**
+   * Helper function to create the view link for images
+   * @param subKey
+   *    datastore key to the submission entity
+   * @param porpertyName
+   *    entity's property to retrieve and display
+   * 
+   * @return
+   *    link to view the image
+   */
+  protected abstract String createViewLink(Key subKey, String porpertyName);
+  
+  /**
+   * Helper function to create the view link for repeat results
+   * @param repeat
+   *    the repeat object
+   * @param parentSubmissionSetKey
+   *    the submission set that contains the repeat value
+   *    
+   * @return
+   *    the link to repeat results
+   */
+  protected abstract String createRepeatLink(SubmissionRepeat repeat, Key parentSubmissionSetKey);
+  
+  /**
+   * Helper function to create the properties for a view link for images
+   * @param subKey
+   *    datastore key to the submission entity
+   * @return
+   *    property map
+   */
+  protected Map<String, String> createViewLinkProperties(Key subKey) {
+    Map<String, String> properties = new HashMap<String,String>();
+    properties.put(ServletConsts.BLOB_KEY, KeyFactory.keyToString(subKey)); 
+    return properties;
+  }
+  
+  /**
+   * Helper function to create the properties for a link to repeat results
+   * @param repeat
+   *    the repeat object
+   * @param parentSubmissionSetKey
+   *    the submission set that contains the repeat value
+   *    
+   * @return
+   *    property map
+   */
+  protected Map<String, String> createRepeatLinkProperties(SubmissionRepeat repeat, Key parentSubmissionSetKey) {
+    FormElement element = form.getBeginningElement(repeat.getPropertyName());
+    
+    Map<String, String> properties = new HashMap<String,String>();
+    properties.put(ServletConsts.ODK_ID, odkId);
+    properties.put(ServletConsts.KIND, repeat.getKindId());
+    properties.put(ServletConsts.FORM_ELEMENT_KEY, KeyFactory.keyToString(element.getKey()));
+    properties.put(ServletConsts.PARENT_KEY, KeyFactory.keyToString(parentSubmissionSetKey));
+    return properties;
+  }
+  
   
   public boolean isMoreRecords() {
     return moreRecords;
@@ -137,7 +198,7 @@ public class SubmissionTable {
       } else {
         subEntity = submissionEntities.get(count);
       }
-      Submission sub = new Submission(subEntity, pm, form);
+      Submission sub = new Submission(subEntity, form);
       Map<String, SubmissionValue> valueMap = sub.getSubmissionValuesMap();
       String[] row = new String[results.getNumColumns()];
       int index = 0;
@@ -157,45 +218,7 @@ public class SubmissionTable {
     }
     return results;
   }
-
-  /**
-   * Helper function to create the view link for repeat results
-   * @param repeat
-   *    the repeat object
-   * @param parentSubmissionSetKey
-   *    the submission set that contains the repeat value
-   *    
-   * @return
-   *    the href that contains a link to repeat results
-   */
-  private String createRepeatLink(SubmissionRepeat repeat, Key parentSubmissionSetKey) { 
-    FormElement element = form.getBeginningElement(repeat.getPropertyName(), pm);
-    
-    Map<String, String> properties = new HashMap<String,String>();
-    properties.put(ServletConsts.ODK_ID, odkId);
-    properties.put(ServletConsts.KIND, repeat.getKindId());
-    properties.put(ServletConsts.FORM_ELEMENT_KEY, KeyFactory.keyToString(element.getKey()));
-    properties.put(ServletConsts.PARENT_KEY, KeyFactory.keyToString(parentSubmissionSetKey));
-    
-    return HtmlUtil.createHrefWithProperties(FormMultipleValueServlet.ADDR, properties, TableConsts.VIEW_LINK_TEXT);
-  }
   
-  
-  /**
-   * Helper function to create the view link for images
-   * @param subKey
-   *    datastore key to the submission entity
-   * @param porpertyName
-   *    entity's property to retrieve and display
-   * @return
-   *    the href that contains a link to view the image
-   */
-  private String createViewLink(Key subKey, String porpertyName) {
-    Map<String, String> properties = new HashMap<String,String>();
-    properties.put(ServletConsts.BLOB_KEY, KeyFactory.keyToString(subKey));   
-    return HtmlUtil.createHrefWithProperties(ImageViewerServlet.ADDR, properties, TableConsts.VIEW_LINK_TEXT);
-  }
-
   
   /**
    * Helper function to recursively go through the element tree and create
@@ -225,7 +248,7 @@ public class SubmissionTable {
       columns.add(parentName + node.getElementName());
     }
 
-    List<FormElement> childDataElements = node.getChildren(pm);
+    List<FormElement> childDataElements = node.getChildren();
     // TODO: do better error handling
     if (childDataElements == null) {
       return;
@@ -236,7 +259,7 @@ public class SubmissionTable {
   }
 
   protected ResultTable generateResultRepeatTable(String kind, Key elementKey, Key submissionParentKey) throws ODKFormNotFoundException, ODKIncompleteSubmissionData {
-    FormElement element = pm.getObjectById(FormElement.class, elementKey);
+    FormElement element = em.getReference(FormElement.class, elementKey);
     if (element == null) {
       throw new ODKIncompleteSubmissionData();
     }
@@ -253,7 +276,7 @@ public class SubmissionTable {
         ds.prepare(surveyQuery).asList(FetchOptions.Builder.withLimit(fetchLimit));
 
     for (Entity subEntity : submissionEntities) {
-      SubmissionSet sub = new SubmissionSet(subEntity, pm);
+      SubmissionSet sub = new SubmissionSet(subEntity, form);
       Map<String, SubmissionValue> valueMap = sub.getSubmissionValuesMap();
       String[] row = new String[results.getNumColumns()];
       int index = 0;

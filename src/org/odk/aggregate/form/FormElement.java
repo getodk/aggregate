@@ -23,16 +23,16 @@ import org.odk.aggregate.submission.SubmissionField;
 import org.odk.aggregate.submission.SubmissionFieldType;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
-import javax.jdo.PersistenceManager;
-import javax.jdo.annotations.IdGeneratorStrategy;
-import javax.jdo.annotations.IdentityType;
-import javax.jdo.annotations.NotPersistent;
-import javax.jdo.annotations.PersistenceCapable;
-import javax.jdo.annotations.Persistent;
-import javax.jdo.annotations.PrimaryKey;
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.Enumerated;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
 
 /**
  * Form Elements describe how to convert the data
@@ -43,20 +43,20 @@ import javax.jdo.annotations.PrimaryKey;
  * @author wbrunette@gmail.com
  *
  */
-@PersistenceCapable(identityType = IdentityType.APPLICATION)
+@Entity
 public class FormElement {
 
   /**
    * GAE datastore key that uniquely identifies the form element
    */
-  @PrimaryKey
-  @Persistent(valueStrategy = IdGeneratorStrategy.IDENTITY)
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY) 
   private Key key;
 
   /**
    * Name of submission element
    */
-  @Persistent
+  @Enumerated
   private String elementName;
 
   /**
@@ -64,27 +64,27 @@ public class FormElement {
    * can handle the data conversion to the appengine datastore.
    * NOTE: stored as a string in the datastore
    */
-  @Persistent
+  @Enumerated
   private String submissionFieldType;
 
   /**
    * Specifies where the object can be repeated in the submission
    */
-  @Persistent
+  @Enumerated
   private Boolean isRepeatable;
-
-  /**
-   * A list of GAE datastore keys that point to the form elements children
-   */
-  // NOTE: delete may work differently because object is unowned
-  @Persistent
-  private List<Key> childKeys;
 
   /**
    * A list of restored child objects
    */
-  @NotPersistent
-  List<FormElement> childDataElements;
+  @OneToMany(cascade=CascadeType.ALL)
+  @OrderBy("childNumber ASC")
+  private List<FormElement> children;
+  
+  @Enumerated
+  private int numChildren;
+  
+  @Enumerated
+  private int childNumber;
   
   /**
    * Construct a form element that defines an element in a submission
@@ -113,6 +113,8 @@ public class FormElement {
     setSubmissionFieldType(type);
     elementName = name;
     isRepeatable = repeatable;
+    numChildren = 0;
+    childNumber = -1; // default to not part of the order
   }
 
   /**
@@ -128,46 +130,11 @@ public class FormElement {
   /**
    * Get a list of form elements that are children to this form element
    * 
-   * @param pm
-   *    Persistence Manager to use to query
    * @return
    *    a list of Form Elements that is this form elements children
    */
-  public List<FormElement> getChildren(PersistenceManager pm) {
-    if(childDataElements != null) {
-      return childDataElements;
-    }
-    
-    // create list of kids
-    childDataElements = new ArrayList<FormElement>();    
-    if (childKeys == null) {
-      return childDataElements;
-    }
-    
-    // TODO: better error handling
-    try {
-      Collection<Object> oids = new ArrayList<Object>();
-      
-      for (Key childKey : childKeys) {
-        if (childKey == null) {
-          continue;
-        }
-        oids.add(pm.newObjectIdInstance(FormElement.class, childKey));
-      }
-      @SuppressWarnings("unchecked")
-      Collection<FormElement> elements = pm.getObjectsById(oids);
-
-      for(FormElement element: elements) {
-        if (element != null) {
-          childDataElements.add(element);
-        }
-      }
-      
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-
-    return childDataElements;
+  public List<FormElement> getChildren() {
+    return children;
   }
 
   /**
@@ -177,10 +144,11 @@ public class FormElement {
    *    form element to be added as a child
    */
   public void addChild(FormElement child) {
-    if (childKeys == null) {
-      childKeys = new ArrayList<Key>();
+    if(children == null) {
+      children = new ArrayList<FormElement>();
     }
-    childKeys.add(child.getKey());
+    children.add(child);
+    child.childNumber = this.numChildren++;
   }
 
   /**
@@ -253,7 +221,7 @@ public class FormElement {
         && (elementName == null ? (other.elementName == null) : (elementName.equals(other.elementName)))
         && (submissionFieldType == null ? (other.submissionFieldType == null) : (submissionFieldType.equals(other.submissionFieldType)))
         && (isRepeatable == null ? (other.isRepeatable == null) : (isRepeatable.equals(other.isRepeatable)))
-        && (childKeys == null ? (other.childKeys == null) : (childKeys.equals(other.childKeys)));
+        && (children == null ? (other.children == null) : (children.equals(other.children)));
   }
 
   /**
@@ -266,7 +234,7 @@ public class FormElement {
     if(elementName != null) hashCode += elementName.hashCode();
     if(submissionFieldType != null) hashCode += submissionFieldType.hashCode();
     if(isRepeatable != null) hashCode += isRepeatable.hashCode();
-    if(childKeys != null) hashCode += childKeys.hashCode();
+    if(children != null) hashCode += children.hashCode();
     return hashCode;
   }
 
@@ -275,10 +243,10 @@ public class FormElement {
    */
   @Override
   public String toString() {
-    if (childKeys == null) {
+    if(children == null) {
       return submissionFieldType + " Repeatable:" + isRepeatable;
     } else {
-      return submissionFieldType + " Repeatable:" + isRepeatable + " " + childKeys.toString();
+      return submissionFieldType + " Repeatable:" + isRepeatable + " " + children.toString();
     }
   }
 }

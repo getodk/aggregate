@@ -18,7 +18,7 @@ package org.odk.aggregate.table;
 
 import com.google.appengine.api.datastore.KeyFactory;
 
-import org.odk.aggregate.PMFactory;
+import org.odk.aggregate.EMFactory;
 import org.odk.aggregate.constants.BasicConsts;
 import org.odk.aggregate.constants.HtmlUtil;
 import org.odk.aggregate.constants.ServletConsts;
@@ -34,8 +34,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.jdo.PersistenceManager;
-import javax.jdo.Query;
+import javax.persistence.EntityManager;
+import javax.persistence.Query;
 
 /**
  * Generates an html table of forms for the servlets
@@ -54,15 +54,16 @@ public class FormHtmlTable {
    * 
    * @return html table of available forms
    */
+
   public String generateHtmlFormTable() {
 
-    PersistenceManager pm = PMFactory.get().getPersistenceManager();
+    EntityManager em = EMFactory.get().createEntityManager();
     ResultTable results = new ResultTable(HEADERS);
 
     try {
-      Query formQuery = pm.newQuery(Form.class);
+      Query formQuery = em.createQuery("select from Form");
       @SuppressWarnings("unchecked")
-      List<Form> forms = (List<Form>) formQuery.execute();
+      List<Form> forms = formQuery.getResultList();
 
       // build HTML table of form information
       for (Form form : forms) {
@@ -106,7 +107,7 @@ public class FormHtmlTable {
     } catch (Exception e) {
       e.printStackTrace();
     } finally {
-      pm.close();
+      em.close();
     }
 
     return HtmlUtil.wrapResultTableWithHtmlTags(results);

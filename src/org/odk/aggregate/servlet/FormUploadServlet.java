@@ -22,7 +22,7 @@ import com.google.appengine.api.users.UserServiceFactory;
 
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
-import org.odk.aggregate.PMFactory;
+import org.odk.aggregate.EMFactory;
 import org.odk.aggregate.constants.ErrorConsts;
 import org.odk.aggregate.constants.HtmlConsts;
 import org.odk.aggregate.constants.HtmlUtil;
@@ -36,7 +36,7 @@ import org.odk.aggregate.parser.MutiPartFormItem;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-import javax.jdo.PersistenceManager;
+import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -137,11 +137,11 @@ public class FormUploadServlet extends ServletUtilBase {
       }
       
       // persist form
-      PersistenceManager pm = PMFactory.get().getPersistenceManager();
+      EntityManager em = EMFactory.get().createEntityManager();
       
       if(formName != null && formXml != null) {
         try {
-          parser = new FormParserForJavaRosa(formName, user.getNickname(), formXml, xmlFileName, pm);
+          parser = new FormParserForJavaRosa(formName, user.getNickname(), formXml, xmlFileName, em);
         } catch (ODKFormAlreadyExistsException e) {
           resp.sendError(HttpServletResponse.SC_CONFLICT, ErrorConsts.FORM_WITH_ODKID_EXISTS);
           return;
@@ -155,12 +155,12 @@ public class FormUploadServlet extends ServletUtilBase {
       // TODO: do better error handling
       try {
         Form form = parser.getForm();
-        pm.makePersistent(form);
-        form.printDataTree(pm, System.out);
+        em.persist(form);
+        form.printDataTree(System.out);
       } catch (Exception e) {
         e.printStackTrace();
       }
-      pm.close();
+      em.close();
       resp.sendRedirect(FormsServlet.ADDR);
 
     } catch (FileUploadException e) {

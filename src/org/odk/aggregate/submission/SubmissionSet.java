@@ -16,13 +16,9 @@
 
 package org.odk.aggregate.submission;
 
-import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.jdo.PersistenceManager;
+import com.google.appengine.api.datastore.DatastoreServiceFactory;
+import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.Key;
 
 import org.odk.aggregate.constants.BasicConsts;
 import org.odk.aggregate.constants.PersistConsts;
@@ -32,9 +28,12 @@ import org.odk.aggregate.form.Form;
 import org.odk.aggregate.form.FormElement;
 import org.odk.aggregate.submission.type.RepeatSubmissionType;
 
-import com.google.appengine.api.datastore.DatastoreServiceFactory;
-import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.Key;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 
 /**
  * Groups a set of submission values together so they can be
@@ -94,17 +93,12 @@ public class SubmissionSet {
    * Construct a submission from an entity from the data store
    * 
    * @param submissionSetEntity submission entity that contains the data
-   * @param pm TODO
+   * @param form TODO
    * @throws ODKFormNotFoundException
    * @throws ODKIncompleteSubmissionData
    */
-  public SubmissionSet(Entity submissionSetEntity, PersistenceManager pm) throws ODKFormNotFoundException,
-      ODKIncompleteSubmissionData {
-    
-      this(submissionSetEntity, pm, null);
-  }
-  
-  public SubmissionSet(Entity submissionSetEntity, PersistenceManager pm, Form form) throws ODKFormNotFoundException,
+ 
+  public SubmissionSet(Entity submissionSetEntity, Form form) throws ODKFormNotFoundException,
       ODKIncompleteSubmissionData {
     
     dbEntity = submissionSetEntity;
@@ -113,22 +107,19 @@ public class SubmissionSet {
     setName = (String) dbEntity.getProperty(PersistConsts.SET_NAME_PROPERTY);
     parentSubmissionSetKey = (Key) dbEntity.getProperty(PersistConsts.PARENT_KEY_PROPERTY);
     
-    if(form == null) {
-      form = Form.retrieveForm(pm, odkId);
-    }
-    FormElement element = form.getBeginningElement(setName, pm);
-    restoreSubmissionFields(pm, element);
+    FormElement element = form.getBeginningElement(setName);
+    restoreSubmissionFields(form, element);
   }
 
   /**
    * Recursively use form definition to recreate the submission
    * 
-   * @param pm persistence manager used to retrieve form elements
+   * @param form persistence manager used to retrieve form elements
    * @param element current element to recreate
    * @throws ODKFormNotFoundException
    * @throws ODKIncompleteSubmissionData
    */
-  private void restoreSubmissionFields(PersistenceManager pm, FormElement element)
+  private void restoreSubmissionFields(Form form, FormElement element)
       throws ODKFormNotFoundException, ODKIncompleteSubmissionData {
     if (element == null) {
       return;
@@ -141,17 +132,17 @@ public class SubmissionSet {
     }
     if(element.isRepeatable()) {
       SubmissionRepeat submissionRepeat = new RepeatSubmissionType(odkId, name);
-      submissionRepeat.getValueFromEntity(dbEntity, pm);
+      submissionRepeat.getValueFromEntity(dbEntity, form);
       addSubmissionValues(submissionRepeat);
     } else {
       SubmissionField<?> submissionField =
         element.getSubmissionFieldType().createSubmissionField(name);
-      submissionField.getValueFromEntity(dbEntity, pm);
+      submissionField.getValueFromEntity(dbEntity, form);
       addSubmissionValues(submissionField);
     }
     // iterate through all children
-    for (FormElement child : element.getChildren(pm)) {
-      restoreSubmissionFields(pm, child);
+    for (FormElement child : element.getChildren()) {
+      restoreSubmissionFields(form, child);
     }
   }
 

@@ -16,12 +16,7 @@
 
 package org.odk.aggregate.parser;
 
-import java.io.ByteArrayInputStream;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Vector;
-
-import javax.jdo.PersistenceManager;
+import com.google.appengine.api.datastore.Key;
 
 import org.javarosa.core.model.FormDef;
 import org.javarosa.core.model.instance.DataModelTree;
@@ -34,7 +29,12 @@ import org.odk.aggregate.form.Form;
 import org.odk.aggregate.form.FormElement;
 import org.odk.aggregate.submission.SubmissionFieldType;
 
-import com.google.appengine.api.datastore.Key;
+import java.io.ByteArrayInputStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Vector;
+
+import javax.persistence.EntityManager;
 
 /**
  * Parses an XML definition of an XForm based on java rosa types
@@ -70,7 +70,7 @@ public class FormParserForJavaRosa {
   // TODO: remove the need for createdNodes
   private List<FormElement> createdNodes = new ArrayList<FormElement>();
   
-  private PersistenceManager pm;
+  private EntityManager em;
 
   /**
    * Constructor that parses and xform from the input stream supplied and
@@ -90,7 +90,7 @@ public class FormParserForJavaRosa {
    * 
    * @throws ODKFormAlreadyExistsException
    */
-  public FormParserForJavaRosa(String formName, String userName, String inputXml, String fileName, PersistenceManager persistManager) throws ODKFormAlreadyExistsException {
+  public FormParserForJavaRosa(String formName, String userName, String inputXml, String fileName, EntityManager entityManager) throws ODKFormAlreadyExistsException {
 
     xml = inputXml;    
     String strippedXML = JRHelperUtil.removeNonJavaRosaCompliantTags(xml);
@@ -117,11 +117,11 @@ public class FormParserForJavaRosa {
       odkId = dataModel.schema;
     }
 
-    pm = persistManager;
+    em = entityManager;
     
     try {
       @SuppressWarnings("unused")
-      Form preexistingForm = Form.retrieveForm(pm, odkId);
+      Form preexistingForm = Form.retrieveForm(em, odkId);
       throw new ODKFormAlreadyExistsException();
     } catch (ODKFormNotFoundException e1) {
       // should throw an exception, else form already exists and exit parse
@@ -136,12 +136,6 @@ public class FormParserForJavaRosa {
     form = new Form(odkId, formName, userName, xml, fileName);
     FormElement root = processTreeElements(dataModel.getRoot(), form.getKey(), null);
     form.setElementTreeRoot(root);
-    
-    // TODO: get rid of persist hack once bug is resolved that allows JDO to
-    // have a tree
-    // TODO: or try two way pointers
-    // TODO: better error handling
-    pm.makePersistentAll(createdNodes);
   }
 
   /**
@@ -185,11 +179,7 @@ public class FormParserForJavaRosa {
     if (parent != null) {
       parent.addChild(dataElement);
     }
-
-    if(dataElement.isRepeatable()) {
-      form.addRepeat(dataElement, pm);
-    }
-    
+   
     @SuppressWarnings("unchecked")
     Vector<TreeElement> children = treeElement.getChildren();
     if (children == null) {

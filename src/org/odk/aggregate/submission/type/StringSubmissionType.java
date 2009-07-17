@@ -16,13 +16,13 @@
 
 package org.odk.aggregate.submission.type;
 
-import javax.jdo.PersistenceManager;
-
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Text;
 
 import org.odk.aggregate.constants.BasicConsts;
 import org.odk.aggregate.constants.PersistConsts;
+import org.odk.aggregate.form.Form;
+
 
 /**
  * Data Storage Converter for String Type. The GAE datastore string type can
@@ -93,7 +93,7 @@ public class StringSubmissionType extends SubmissionTypeBase<String> {
    * Get string values from database entity
    */
   @Override
-  public void getValueFromEntity(Entity dbEntity, PersistenceManager pm) {
+  public void getValueFromEntity(Entity dbEntity, Form form) {
     value = (String) dbEntity.getProperty(propertyName + PersistConsts.STRING_PROPERTY_ID);
     full_value = (Text) dbEntity.getProperty(propertyName + PersistConsts.TEXT_PROPERTY_ID);
   }

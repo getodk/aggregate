@@ -25,7 +25,7 @@ import com.google.appengine.api.datastore.KeyFactory;
 
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
-import org.odk.aggregate.PMFactory;
+import org.odk.aggregate.EMFactory;
 import org.odk.aggregate.constants.ErrorConsts;
 import org.odk.aggregate.constants.ServletConsts;
 import org.odk.aggregate.exception.ODKFormNotFoundException;
@@ -39,7 +39,7 @@ import org.odk.aggregate.submission.Submission;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-import javax.jdo.PersistenceManager;
+import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -78,16 +78,16 @@ public class SubmissionServlet extends ServletUtilBase {
     }
     
     // get form
-    PersistenceManager pm = PMFactory.get().getPersistenceManager();
+    EntityManager em = EMFactory.get().createEntityManager();
     Key formKey = KeyFactory.stringToKey(odkFormKey);
-    Form form = pm.getObjectById(Form.class, formKey);
+    Form form = em.getReference(Form.class, formKey);
 
     if (form != null) {
       resp.getWriter().print(form.getOriginalForm());
     } else {
       odkIdNotFoundError(resp);
     }
-    pm.close();
+    em.close();
   }
 
   /**
@@ -104,12 +104,14 @@ public class SubmissionServlet extends ServletUtilBase {
     
     PrintWriter out = resp.getWriter();
     Key submissionKey = null;
-    PersistenceManager pm = PMFactory.get().getPersistenceManager();
+    String odkId = null;
+    EntityManager em = EMFactory.get().createEntityManager();
     try {
       SubmissionParser submissionParser = null;
       if (ServletFileUpload.isMultipartContent(req)) {
         try {
-          submissionParser = new SubmissionParser(new MultiPartFormData(req), pm);
+          submissionParser = new SubmissionParser(new MultiPartFormData(req), em);
+          odkId = submissionParser.getOdkId();
         } catch (FileUploadException e) {
           e.printStackTrace();
         }
@@ -117,7 +119,7 @@ public class SubmissionServlet extends ServletUtilBase {
       } else {
         // TODO: check that it is the proper types we can deal with
         // XML received
-        submissionParser = new SubmissionParser(req.getInputStream(), pm);
+        submissionParser = new SubmissionParser(req.getInputStream(), em);
       }
 
       if (submissionParser == null) {
@@ -134,16 +136,22 @@ public class SubmissionServlet extends ServletUtilBase {
       return;
     }
 
-    pm.close();
+    em.close();
     
     if (ServletConsts.DEBUG) {
       out.println("QUERYING FROM DATASTORE");
 
-      pm = PMFactory.get().getPersistenceManager();
+      em = EMFactory.get().createEntityManager();
       DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
       try {
+        if(odkId == null) {
+          
+          // TODO: make better error decision
+          return;
+        }
         Entity subEntity = ds.get(submissionKey);
-        Submission test = new Submission(subEntity, pm);
+        Form form = Form.retrieveForm(em, odkId);
+        Submission test = new Submission(subEntity, form);
         test.printSubmission(out);
         
       } catch (EntityNotFoundException e) {
@@ -153,7 +161,7 @@ public class SubmissionServlet extends ServletUtilBase {
       } catch (ODKIncompleteSubmissionData e) {
         e.printStackTrace();
       }
-      pm.close();
+      em.close();
     } else {
       resp.sendRedirect(ServletConsts.WEB_ROOT);
     }

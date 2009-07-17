@@ -16,12 +16,12 @@
 
 package org.odk.aggregate.submission.type;
 
+import com.google.appengine.api.datastore.Blob;
+import com.google.appengine.api.datastore.Key;
+
 import org.odk.aggregate.constants.ErrorConsts;
 import org.odk.aggregate.exception.ODKConversionException;
 import org.odk.aggregate.submission.SubmissionBlob;
-
-import com.google.appengine.api.datastore.Blob;
-import com.google.appengine.api.datastore.Key;
 
 /**
  * Data Storage Converter for Blob Type

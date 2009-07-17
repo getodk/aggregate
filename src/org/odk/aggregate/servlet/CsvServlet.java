@@ -16,17 +16,17 @@
 
 package org.odk.aggregate.servlet;
 
-import java.io.IOException;
-
-import javax.jdo.PersistenceManager;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.odk.aggregate.PMFactory;
+import org.odk.aggregate.EMFactory;
 import org.odk.aggregate.constants.ServletConsts;
 import org.odk.aggregate.exception.ODKFormNotFoundException;
 import org.odk.aggregate.exception.ODKIncompleteSubmissionData;
 import org.odk.aggregate.table.SubmissionCsvTable;
+
+import java.io.IOException;
+
+import javax.persistence.EntityManager;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * Servlet to generate a CSV file for download
@@ -69,21 +69,21 @@ public class CsvServlet extends ServletUtilBase {
       return;
     }
 
-    PersistenceManager pm = PMFactory.get().getPersistenceManager();
+    EntityManager em = EMFactory.get().createEntityManager();
 
     try {
       resp.setContentType(ServletConsts.RESP_TYPE_ENRICHED);
       setDownloadFileName(resp, odkId + ServletConsts.CSV_FILENAME_APPEND);
 
       // create CSV
-      SubmissionCsvTable submissions = new SubmissionCsvTable(odkId,pm);
+      SubmissionCsvTable submissions = new SubmissionCsvTable(req.getServerName(),odkId, em);
       resp.getWriter().print(submissions.generateCsv());
     } catch (ODKFormNotFoundException e) {
       odkIdNotFoundError(resp);
     }catch (ODKIncompleteSubmissionData e) {
       errorRetreivingData(resp);
     } finally {
-      pm.close();
+      em.close();
     }
 
   }

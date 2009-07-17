@@ -20,7 +20,7 @@ import javax.jdo.JDOHelper;
 import javax.jdo.PersistenceManagerFactory;
 
 /**
- * Singleton to prevent unnecessary construction
+ * Persistence Manager Factory singleton to prevent unnecessary construction
  *
  * @author wbrunette@gmail.com
  */

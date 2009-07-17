@@ -16,20 +16,20 @@
 
 package org.odk.aggregate.servlet;
 
-import java.io.IOException;
+import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.KeyFactory;
 
-import javax.jdo.PersistenceManager;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.odk.aggregate.PMFactory;
+import org.odk.aggregate.EMFactory;
 import org.odk.aggregate.constants.ServletConsts;
 import org.odk.aggregate.exception.ODKFormNotFoundException;
 import org.odk.aggregate.exception.ODKIncompleteSubmissionData;
 import org.odk.aggregate.table.SubmissionHtmlTable;
 
-import com.google.appengine.api.datastore.Key;
-import com.google.appengine.api.datastore.KeyFactory;
+import java.io.IOException;
+
+import javax.persistence.EntityManager;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * Servlet generates a webpage with a list of submissions 
@@ -85,10 +85,10 @@ public class FormMultipleValueServlet extends ServletUtilBase {
     // header info
     beginBasicHtmlResponse(TITLE_INFO + kind, resp, true);
     
-    PersistenceManager pm = PMFactory.get().getPersistenceManager();
+    EntityManager em = EMFactory.get().createEntityManager();
     
     try {
-      String html = new SubmissionHtmlTable(odkId, pm).generateHtmlSubmissionRepeatResultsTable(kind, elementKey, submissionParentKey);
+      String html = new SubmissionHtmlTable(getServerURL(req), odkId, em).generateHtmlSubmissionRepeatResultsTable(kind, elementKey, submissionParentKey);
       resp.getWriter().print(html);
       
       // footer info
@@ -99,7 +99,7 @@ public class FormMultipleValueServlet extends ServletUtilBase {
     } catch (ODKIncompleteSubmissionData e) {
       errorRetreivingData(resp);
     } finally {
-      pm.close();
+      em.close();
     }
 
   }

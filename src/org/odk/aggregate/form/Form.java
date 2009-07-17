@@ -23,19 +23,21 @@ import com.google.appengine.api.datastore.Text;
 import org.odk.aggregate.exception.ODKFormNotFoundException;
 
 import java.io.PrintStream;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.jdo.PersistenceManager;
-import javax.jdo.annotations.IdGeneratorStrategy;
-import javax.jdo.annotations.IdentityType;
-import javax.jdo.annotations.NotPersistent;
-import javax.jdo.annotations.PersistenceCapable;
-import javax.jdo.annotations.Persistent;
-import javax.jdo.annotations.PrimaryKey;
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityNotFoundException;
+import javax.persistence.Enumerated;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.OneToOne;
+import javax.persistence.Transient;
 
 /**
  * Persistable definition of the XForm that defines how to store submissions
@@ -45,85 +47,78 @@ import javax.jdo.annotations.PrimaryKey;
  * @author wbrunette@gmail.com
  *
  */
-@PersistenceCapable(identityType = IdentityType.APPLICATION)
+@Entity
 public class Form {
   /**
    * GAE datastore key that uniquely identifies the form entity 
    */
-  @PrimaryKey
-  @Persistent(valueStrategy = IdGeneratorStrategy.IDENTITY)
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY) 
   private Key key;
 
   /**
    * ODK identifier that uniquely identifies the form
    */
-  @Persistent
+  @Enumerated
   private String odkId;
 
   /**
    * The name that is viewable on ODK Aggregate
    */
-  @Persistent
+  @Enumerated
   private String viewableName;
 
   /**
    * Root of the form elements that describe how to convert the data
    * from the XML submissions to the gae datastore types
    */
-  @Persistent
+  @OneToOne(cascade=CascadeType.ALL)
   private FormElement elementTreeRoot;
 
   /**
    * The date the form was created
    */
-  @Persistent
+  @Enumerated
   private Date creationDate;
 
   /**
    * The last date the form was updated
    */
-  @Persistent
+  @Enumerated
   private Date updateDate;
 
   /**
    * The user who uploaded/created the form
    */
-  @Persistent
+  @Enumerated
   private String creationUser;
 
   /**
    * The original XML that specified the form
    */
-  @Persistent
+  @Enumerated
   private Text originalForm;
 
   /**
    * String used to specify the filename when outputting the XML to file
    */
-  @Persistent
+  @Enumerated
   private String fileName;
- 
 
   /**
    * Specifies whether the form is downloadable
    */
-  @Persistent
+  @Enumerated
   private Boolean downloadEnabled;
  
   /**
    * Specifies whether the system can receive new form submissions
    */
-  @Persistent
+  @Enumerated
   private Boolean submissionEnabled;
-  
-  /**
-   * List of objects that point to the elements that begin the repeats
-   */
-  @Persistent(mappedBy = "form")
-  private List<FormRepeat> repeatElements;
-  
-  @NotPersistent
-  private Map<String, FormRepeat> repeatElementMap;
+    
+  @Transient
+  private Map<String, FormElement> repeatElementMap;
   
   /**
    * Construct a form definition that can be persisted
@@ -314,55 +309,48 @@ public class Form {
   public void setSubmissionEnabled(Boolean submissionEnabled) {
     this.submissionEnabled = submissionEnabled;
   }  
-  
-  public void addRepeat(FormElement repeatElement, PersistenceManager pm) {
-    FormRepeat repeat = new FormRepeat(repeatElement.getElementName(), repeatElement.getKey());
-    if(repeatElements == null) {
-      repeatElements = new ArrayList<FormRepeat>();
-    }
-    repeatElements.add(repeat);
-    pm.makePersistent(repeat);
-  }
-  
-  public FormElement getBeginningElement(String elementName, PersistenceManager pm) {
+   
+  public FormElement getBeginningElement(String elementName) {
     
     // check if it's the root of the form
     if(elementTreeRoot.getElementName().equals(elementName)) {
       return elementTreeRoot;
     }
-    
-    // check to see if any repeatsRoots exist
-    if(repeatElements == null) {
-      return null;
-    }
-    
+        
     // check to see if repeatRootMap needs to be created
     // NOTE: this assumes the form does NOT get altered!!!
     if(repeatElementMap == null) {
-      repeatElementMap = new HashMap<String, FormRepeat> ();
-      for(FormRepeat repeat : repeatElements) {
-        repeatElementMap.put(repeat.getRepeatElementName(), repeat);
-      }
+      repeatElementMap = new HashMap<String, FormElement> ();
+      populateRepeatElementMap(elementTreeRoot);      
     }
     
-    // check if element is in repeat set
-    FormRepeat repeatElement = repeatElementMap.get(elementName);
-    if(repeatElement != null) {
-      return repeatElement.getFormElement(pm);
-    }
-    return null;
+    return repeatElementMap.get(elementName);
   }
+  
+  private void populateRepeatElementMap(FormElement node) {
+    if (node == null) {
+      return;
+    }
+    if(node.isRepeatable()) {
+      repeatElementMap.put(node.getElementName(), node);
+    }
+    List<FormElement> children = node.getChildren();
+    if(children == null) {
+      return;
+    }
+    for (FormElement child : children) {
+      populateRepeatElementMap(child);
+    }
+  }
+
   
   /**
    * Prints the data element definitions to the print stream specified
-   * 
-   * @param pm
-   *    Persistence Manager to access the data
    * @param out
    *    Print stream to send the output to
    */
-  public void printDataTree(PersistenceManager pm, PrintStream out) {
-    printTreeHelper(elementTreeRoot, pm, out);
+  public void printDataTree(PrintStream out) {
+    printTreeHelper(elementTreeRoot, out);
   }
 
   /**
@@ -371,19 +359,20 @@ public class Form {
    *  
    * @param node
    *    node to be processed
-   * @param pm
-   *    Persistence Manager to be used 
    * @param out
    *    Print stream to send the output to
    */
-  private void printTreeHelper(FormElement node, PersistenceManager pm, PrintStream out) {
+  private void printTreeHelper(FormElement node, PrintStream out) {
     if (node == null) {
       return;
     }
     out.println(node.toString());
-    List<FormElement> children = node.getChildren(pm);
+    List<FormElement> children = node.getChildren();
+    if(children == null) {
+      return;
+    }
     for (FormElement child : children) {
-      printTreeHelper(child, pm, out);
+      printTreeHelper(child, out);
     }
   }
 
@@ -407,8 +396,7 @@ public class Form {
         && (originalForm == null ? (other.originalForm == null) : (originalForm.equals(other.originalForm)))
         && (fileName == null ? (other.fileName == null) : (fileName.equals(other.fileName)))
         && (downloadEnabled == null ? (other.downloadEnabled == null) : (downloadEnabled.equals(other.downloadEnabled)))
-        && (submissionEnabled == null ? (other.submissionEnabled == null) : (submissionEnabled.equals(other.submissionEnabled)))
-        && (repeatElements == null ? (other.repeatElements == null) : (repeatElements.equals(other.repeatElements)));
+        && (submissionEnabled == null ? (other.submissionEnabled == null) : (submissionEnabled.equals(other.submissionEnabled)));
   }
 
   /**
@@ -428,7 +416,6 @@ public class Form {
     if(fileName != null) hashCode += fileName.hashCode();
     if(downloadEnabled != null) hashCode += downloadEnabled.hashCode();
     if(submissionEnabled != null) hashCode += submissionEnabled.hashCode();
-    if(repeatElements != null) hashCode += repeatElements.hashCode();
     return hashCode;
   }
 
@@ -444,8 +431,8 @@ public class Form {
    * Static function to retrieve a form with the specified ODK id 
    * from the datastore
    *
-   * @param pm
-   *    Persistence Manager to use to retrieve form
+   * @param em
+   *    Entity Manager to use to retrieve form
    * @param odkId
    *    The ODK identifier that identifies the form
    * 
@@ -456,7 +443,7 @@ public class Form {
    * Thrown when a form was not able to be found with the
    * corresponding ODK ID
    */
-  public static Form retrieveForm(PersistenceManager pm, String odkId)
+  public static Form retrieveForm(EntityManager em, String odkId)
       throws ODKFormNotFoundException {
 
     // TODO: consider using memcache to have survey info in memory for faster
@@ -470,11 +457,12 @@ public class Form {
     Form form = null;
 
     try {
-      form = pm.getObjectById(Form.class, formKey);
-    } catch (javax.jdo.JDOObjectNotFoundException e) {
+      form = em.getReference(Form.class, formKey);
+    } catch (EntityNotFoundException e) {
       throw new ODKFormNotFoundException(e);
     } catch (Exception e) {
-      e.printStackTrace();
+      // TODO: change for better error handling and report bug to GAE
+      throw new ODKFormNotFoundException(e);
     }
 
     return form;

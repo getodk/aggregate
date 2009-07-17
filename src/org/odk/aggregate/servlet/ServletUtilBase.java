@@ -242,6 +242,15 @@ public class ServletUtilBase extends HttpServlet {
 
   protected void setDownloadFileName(HttpServletResponse resp, String filename) {
     resp.setHeader(ServletConsts.CONTENT_DISPOSITION, ServletConsts.ATTACHMENT_FILENAME_TXT + filename + BasicConsts.QUOTE + BasicConsts.SEMI_COLON);
+  }
+
+  protected String getServerURL(HttpServletRequest req) {
+    String serverName = req.getServerName();
+    int port = req.getServerPort();
+    if(port != HtmlConsts.WEB_PORT) {
+      serverName += BasicConsts.COLON + Integer.toString(port);
+    }
+    return serverName;
   }  
   
 }

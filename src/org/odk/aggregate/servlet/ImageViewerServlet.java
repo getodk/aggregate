@@ -16,19 +16,19 @@
 
 package org.odk.aggregate.servlet;
 
-import java.io.IOException;
-import java.io.OutputStream;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import com.google.appengine.api.datastore.Blob;
+import com.google.appengine.api.datastore.EntityNotFoundException;
+import com.google.appengine.api.datastore.KeyFactory;
 
 import org.odk.aggregate.constants.ErrorConsts;
 import org.odk.aggregate.constants.ServletConsts;
 import org.odk.aggregate.submission.SubmissionBlob;
 
-import com.google.appengine.api.datastore.Blob;
-import com.google.appengine.api.datastore.EntityNotFoundException;
-import com.google.appengine.api.datastore.KeyFactory;
+import java.io.IOException;
+import java.io.OutputStream;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * Servlet to display the image from a submission

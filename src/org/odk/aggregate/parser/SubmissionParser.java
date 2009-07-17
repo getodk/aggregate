@@ -16,16 +16,8 @@
 
 package org.odk.aggregate.parser;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.jdo.PersistenceManager;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
+import com.google.appengine.api.datastore.DatastoreService;
+import com.google.appengine.api.datastore.DatastoreServiceFactory;
 
 import org.apache.commons.codec.binary.Base64;
 import org.odk.aggregate.constants.BasicConsts;
@@ -47,8 +39,16 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import com.google.appengine.api.datastore.DatastoreService;
-import com.google.appengine.api.datastore.DatastoreServiceFactory;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.persistence.EntityManager;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 /**
  * Parsers submission xml and saves to datastore
@@ -62,6 +62,7 @@ public class SubmissionParser {
    * Odk Id of submission
    */
   private String odkId;
+
 
   /**
    * Root of XML submission
@@ -78,7 +79,7 @@ public class SubmissionParser {
    */
   private MultiPartFormData submissionFormItems;
 
-  PersistenceManager pm;
+  EntityManager em;
   
   /**
    * Construct an ODK submission by processing XML submission to extract values
@@ -89,9 +90,9 @@ public class SubmissionParser {
    *         matching ODK ID
    * @throws ODKParseException 
    */
-  public SubmissionParser(InputStream inputStreamXML, PersistenceManager persist) throws IOException, 
+  public SubmissionParser(InputStream inputStreamXML, EntityManager entityManager) throws IOException, 
     ODKFormNotFoundException, ODKParseException {
-    pm = persist;
+    em = entityManager;
     constructorHelper(inputStreamXML);
   }
 
@@ -105,9 +106,9 @@ public class SubmissionParser {
    *         matching ODK ID
    * @throws ODKParseException 
    */
-  public SubmissionParser(MultiPartFormData submissionFormParser, PersistenceManager persist) throws IOException,
+  public SubmissionParser(MultiPartFormData submissionFormParser, EntityManager entityManager) throws IOException,
       ODKFormNotFoundException, ODKParseException {
-    pm = persist;
+    em = entityManager;
     if (submissionFormParser == null) {
       // TODO: review best error handling strategy
       throw new IOException("DID NOT GET A MULTIPARTFORMPARSER");
@@ -161,7 +162,7 @@ public class SubmissionParser {
     } catch (SAXException e) {
       throw new IOException(e.getCause());
     }
-    Form form = Form.retrieveForm(pm, odkId);    
+    Form form = Form.retrieveForm(em, odkId);    
 
     submission = new Submission(form);
     
@@ -272,7 +273,7 @@ public class SubmissionParser {
       submissionSet.addSubmissionValues(submissionElement);
     }
 
-    List<FormElement> children = node.getChildren(pm);
+    List<FormElement> children = node.getChildren();
 
     // iterate through all children
     for (FormElement child : children) {
@@ -355,5 +356,12 @@ public class SubmissionParser {
     }
 
   }
-
+  /**
+   * Get the ODK Id of submission
+   * @return ODK Id
+   */
+  public String getOdkId() {
+    return odkId;
+  }
+  
 }
