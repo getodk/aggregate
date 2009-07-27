@@ -16,12 +16,12 @@
 
 package org.odk.aggregate.servlet;
 
-import com.google.appengine.api.datastore.DatastoreService;
-import com.google.appengine.api.datastore.DatastoreServiceFactory;
-import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.EntityNotFoundException;
-import com.google.appengine.api.datastore.Key;
-import com.google.appengine.api.datastore.KeyFactory;
+import java.io.IOException;
+import java.io.PrintWriter;
+
+import javax.persistence.EntityManager;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
@@ -35,19 +35,20 @@ import org.odk.aggregate.form.Form;
 import org.odk.aggregate.parser.MultiPartFormData;
 import org.odk.aggregate.parser.SubmissionParser;
 import org.odk.aggregate.submission.Submission;
+import org.odk.aggregate.table.SubmissionSpreadsheetTable;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-
-import javax.persistence.EntityManager;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import com.google.appengine.api.datastore.DatastoreService;
+import com.google.appengine.api.datastore.DatastoreServiceFactory;
+import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.EntityNotFoundException;
+import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.KeyFactory;
 
 /**
  * Servlet to process a submission from a form
- *
+ * 
  * @author wbrunette@gmail.com
- *
+ * 
  */
 public class SubmissionServlet extends ServletUtilBase {
   /**
@@ -72,11 +73,11 @@ public class SubmissionServlet extends ServletUtilBase {
 
     // get parameter
     String odkFormKey = getParameter(req, ServletConsts.ODK_FORM_KEY);
-    if(odkFormKey == null) {
+    if (odkFormKey == null) {
       errorMissingKeyParam(resp);
       return;
     }
-    
+
     // get form
     EntityManager em = EMFactory.get().createEntityManager();
     Key formKey = KeyFactory.stringToKey(odkFormKey);
@@ -101,7 +102,7 @@ public class SubmissionServlet extends ServletUtilBase {
   @Override
   public void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
     resp.setContentType(ServletConsts.RESP_TYPE_PLAIN);
-    
+
     PrintWriter out = resp.getWriter();
     Key submissionKey = null;
     String odkId = null;
@@ -128,6 +129,18 @@ public class SubmissionServlet extends ServletUtilBase {
       }
 
       submissionKey = submissionParser.getSubmission().getKey();
+      Form form = submissionParser.getForm();
+
+      try {
+        SubmissionSpreadsheetTable subResults =
+            new SubmissionSpreadsheetTable(form, req.getServerName(), em, this.getServletContext()
+                .getInitParameter("application_name"));
+
+        subResults.insertNewDataInSpreadsheet(submissionKey, form.getExternalRepos());
+      } catch (ODKIncompleteSubmissionData e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
     } catch (ODKFormNotFoundException e) {
       odkIdNotFoundError(resp);
       return;
@@ -137,15 +150,15 @@ public class SubmissionServlet extends ServletUtilBase {
     }
 
     em.close();
-    
+
     if (ServletConsts.DEBUG) {
       out.println("QUERYING FROM DATASTORE");
 
       em = EMFactory.get().createEntityManager();
       DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
       try {
-        if(odkId == null) {
-          
+        if (odkId == null) {
+
           // TODO: make better error decision
           return;
         }
@@ -153,7 +166,7 @@ public class SubmissionServlet extends ServletUtilBase {
         Form form = Form.retrieveForm(em, odkId);
         Submission test = new Submission(subEntity, form);
         test.printSubmission(out);
-        
+
       } catch (EntityNotFoundException e) {
         e.printStackTrace();
       } catch (ODKFormNotFoundException e) {

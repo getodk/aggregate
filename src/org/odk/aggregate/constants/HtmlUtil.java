@@ -20,6 +20,7 @@ import org.odk.aggregate.table.ResultTable;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -143,7 +144,7 @@ public class HtmlUtil {
   }
 
   /**
-   * Helper function that creates a button with the following parameters
+   * Helper function that creates an html button with the following parameters
    * 
    * @param servletAddr
    *    http action
@@ -181,7 +182,7 @@ public class HtmlUtil {
       html.append(wrapWithHtmlTags(HtmlConsts.TABLE_HEADER, header));
     }
   
-    for (String[] row : resultTable.getRows()) {
+    for (List<String> row : resultTable.getRows()) {
       html.append(HtmlConsts.TABLE_ROW_OPEN);
       for (String item : row) {
         html.append(wrapWithHtmlTags(HtmlConsts.TABLE_DATA, item));

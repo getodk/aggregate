@@ -86,7 +86,25 @@
     <servlet-name>csv</servlet-name>
     <url-pattern>/csv</url-pattern>
   </servlet-mapping>
-  
+
+  <servlet>
+    <servlet-name>spreadsheet</servlet-name>
+    <servlet-class>org.odk.aggregate.servlet.SpreadsheetServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>spreadsheet</servlet-name>
+    <url-pattern>/spreadsheet</url-pattern>
+  </servlet-mapping>
+ 
+  <servlet>
+    <servlet-name>worksheet</servlet-name>
+    <servlet-class>org.odk.aggregate.servlet.WorksheetServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>worksheet</servlet-name>
+    <url-pattern>/worksheet</url-pattern>
+  </servlet-mapping>
+
 	<welcome-file-list>
 		<welcome-file>index.html</welcome-file>
 	</welcome-file-list>

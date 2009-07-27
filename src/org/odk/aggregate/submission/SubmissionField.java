@@ -49,13 +49,6 @@ public interface SubmissionField<T> extends SubmissionValue{
   public T getValue();
 
   /**
-   * Set the value of submission field
-   *
-   * @param value value to set
-   */
-  public void setValue(T value);
-
-  /**
    * Parse the value from string format and convert to proper type for
    * submission field
    * 

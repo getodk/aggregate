@@ -22,7 +22,6 @@ import com.google.appengine.api.datastore.Key;
 
 import org.odk.aggregate.constants.BasicConsts;
 import org.odk.aggregate.constants.PersistConsts;
-import org.odk.aggregate.exception.ODKFormNotFoundException;
 import org.odk.aggregate.exception.ODKIncompleteSubmissionData;
 import org.odk.aggregate.form.Form;
 import org.odk.aggregate.form.FormElement;
@@ -42,7 +41,7 @@ import java.util.Map;
  * @author wbrunette@gmail.com
  *
  */
-public class SubmissionSet {
+public class SubmissionSet implements Comparable<SubmissionSet>{
   /**
    * GAE datastore entity
    */
@@ -74,16 +73,28 @@ public class SubmissionSet {
    */
   protected List<SubmissionValue> submissionValues;
  
+  protected long order;
+  
   /**
    * Construct an empty submission for the ODK ID form
    * 
    * @param formOdkIdentifier the ODK id of the form
    */
   public SubmissionSet(String formOdkIdentifier, String name, Key parentKey) {
+    this(formOdkIdentifier, name, parentKey, -1);
+  }
+  
+  /**
+   * Construct an empty submission for the ODK ID form
+   * 
+   * @param formOdkIdentifier the ODK id of the form
+   */
+  public SubmissionSet(String formOdkIdentifier, String name, Key parentKey, long orderNum) {
     odkId = formOdkIdentifier;
     setName = name;
     parentSubmissionSetKey = parentKey;
     dbEntity = new Entity(getKindId());
+    order = orderNum;
     
     // generate key from the datastore
     key = DatastoreServiceFactory.getDatastoreService().put(getEntity());
@@ -94,11 +105,10 @@ public class SubmissionSet {
    * 
    * @param submissionSetEntity submission entity that contains the data
    * @param form TODO
-   * @throws ODKFormNotFoundException
    * @throws ODKIncompleteSubmissionData
    */
  
-  public SubmissionSet(Entity submissionSetEntity, Form form) throws ODKFormNotFoundException,
+  public SubmissionSet(Entity submissionSetEntity, Form form) throws
       ODKIncompleteSubmissionData {
     
     dbEntity = submissionSetEntity;
@@ -106,6 +116,7 @@ public class SubmissionSet {
     odkId = (String) dbEntity.getProperty(PersistConsts.ODKID_PROPERTY);
     setName = (String) dbEntity.getProperty(PersistConsts.SET_NAME_PROPERTY);
     parentSubmissionSetKey = (Key) dbEntity.getProperty(PersistConsts.PARENT_KEY_PROPERTY);
+    order = (Long) dbEntity.getProperty(PersistConsts.ORDER_PROPERTY);
     
     FormElement element = form.getBeginningElement(setName);
     restoreSubmissionFields(form, element);
@@ -116,11 +127,11 @@ public class SubmissionSet {
    * 
    * @param form persistence manager used to retrieve form elements
    * @param element current element to recreate
-   * @throws ODKFormNotFoundException
+   *
    * @throws ODKIncompleteSubmissionData
    */
   private void restoreSubmissionFields(Form form, FormElement element)
-      throws ODKFormNotFoundException, ODKIncompleteSubmissionData {
+      throws ODKIncompleteSubmissionData {
     if (element == null) {
       return;
     }
@@ -239,6 +250,7 @@ public class SubmissionSet {
     dbEntity.setProperty(PersistConsts.SET_NAME_PROPERTY, setName);
     dbEntity.setProperty(PersistConsts.ODKID_PROPERTY, odkId);
     dbEntity.setProperty(PersistConsts.PARENT_KEY_PROPERTY, parentSubmissionSetKey);
+    dbEntity.setProperty(PersistConsts.ORDER_PROPERTY, Long.valueOf(order));
     
     if (submissionValues != null) {
       for (SubmissionValue value : submissionValues) {
@@ -255,6 +267,15 @@ public class SubmissionSet {
         out.println(value.toString());
       }
     }
+  }
+  
+  public int compareTo(SubmissionSet obj) {
+    long result = order - obj.order;
+    
+    if(order != 0) {
+      return Long.signum(result);
+    }
+    return key.compareTo(obj.key);
   }
   
   /**

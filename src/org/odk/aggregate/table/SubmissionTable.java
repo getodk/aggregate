@@ -19,6 +19,7 @@ package org.odk.aggregate.table;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.api.datastore.FetchOptions;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
@@ -40,6 +41,7 @@ import org.odk.aggregate.submission.SubmissionFieldType;
 import org.odk.aggregate.submission.SubmissionRepeat;
 import org.odk.aggregate.submission.SubmissionSet;
 import org.odk.aggregate.submission.SubmissionValue;
+import org.odk.aggregate.submission.type.GeoPoint;
 
 import java.text.DateFormat;
 import java.util.ArrayList;
@@ -70,6 +72,28 @@ public abstract class SubmissionTable {
   
   protected String baseServerUrl;
   
+  private List<String> headers;
+  
+  private List<String> propertyNames;
+  
+  
+  /**
+   * Constructs a table utils for the form
+   * @param xform TODO
+   * @param webServerName TODO
+   * @param entityManager
+   *    the persistence manager used to manage generating the tables
+   * @param fetchSizeLimit TODO
+   */
+  protected SubmissionTable(Form xform, String webServerName, EntityManager entityManager, int fetchSizeLimit) {
+    odkId = xform.getOdkId();
+    em = entityManager;
+    form = xform;
+    moreRecords = false;
+    fetchLimit = fetchSizeLimit;
+    baseServerUrl = HtmlUtil.createUrl(webServerName);
+  }
+  
   /**
    * Constructs a table utils for the form
    * @param webServerName TODO
@@ -81,7 +105,7 @@ public abstract class SubmissionTable {
    * 
    * @throws ODKFormNotFoundException 
    */
-  public SubmissionTable(String webServerName, String odkIdentifier, EntityManager entityManager, int fetchSizeLimit) throws ODKFormNotFoundException {
+  protected SubmissionTable(String webServerName, String odkIdentifier, EntityManager entityManager, int fetchSizeLimit) throws ODKFormNotFoundException {
     odkId = odkIdentifier;
     em = entityManager;
     form = Form.retrieveForm(em, odkId);
@@ -153,21 +177,45 @@ public abstract class SubmissionTable {
     return moreRecords;
   }
   
+  private void generatePropertyNamesAndHeaders(FormElement root, boolean submission) {
+    headers = new ArrayList<String>();
+    propertyNames = new ArrayList<String>();
+    
+    if(submission) {
+      headers.add(TableConsts.SUBMISSION_DATE_HEADER);
+      propertyNames.add(TableConsts.SUBMISSION_DATE_HEADER);
+    }
+    
+    processElementForColumnHead(root, root, BasicConsts.EMPTY_STRING);
+  }
+  
+  protected ResultTable generateSingleEntryResultTable(Key submissionKey) throws ODKIncompleteSubmissionData {
+    // create results table
+    generatePropertyNamesAndHeaders(form.getElementTreeRoot(), true);
+    ResultTable results = new ResultTable(headers);
+    
+    try {
+      DatastoreService ds = DatastoreServiceFactory.getDatastoreService();  
+      getSubmissionRow(results, ds.get(submissionKey));
+    } catch (EntityNotFoundException e) {
+      throw new ODKIncompleteSubmissionData();
+    }
+    
+    return results;
+  }
   /**
    * Generates a result table that contains all the submission data 
    * of the form specified by the ODK ID
    * 
    * @return
    *    a result table containing submission data
-   * @throws ODKFormNotFoundException
+   *
    * @throws ODKIncompleteSubmissionData 
    */
-  protected ResultTable generateResultTable(Date lastDate, boolean backward) throws ODKFormNotFoundException, ODKIncompleteSubmissionData {
+  protected ResultTable generateResultTable(Date lastDate, boolean backward) throws ODKIncompleteSubmissionData {
     
     // create results table
-    List<String> headers = new ArrayList<String>();
-    headers.add(TableConsts.SUBMISSION_DATE_HEADER);
-    processElementForColumnHead(headers, form.getElementTreeRoot(), form.getElementTreeRoot(), BasicConsts.EMPTY_STRING);
+    generatePropertyNamesAndHeaders(form.getElementTreeRoot(), true);
     ResultTable results = new ResultTable(headers);
 
     // retrieve submissions
@@ -198,25 +246,28 @@ public abstract class SubmissionTable {
       } else {
         subEntity = submissionEntities.get(count);
       }
-      Submission sub = new Submission(subEntity, form);
-      Map<String, SubmissionValue> valueMap = sub.getSubmissionValuesMap();
-      String[] row = new String[results.getNumColumns()];
-      int index = 0;
-      for (String header : headers) {
-        if (header.equals(TableConsts.SUBMISSION_DATE_HEADER)) {
-          Date submittedTime = sub.getSubmittedTime();
-          if(submittedTime != null) {
-            row[index] = DateFormat.getDateTimeInstance(DateFormat.FULL, DateFormat.FULL).format(submittedTime);
-          }
-        } else {
-          processSubmissionFieldValue(sub.getKey(), valueMap, row, index, header);
-        }
-        index++;
-      }
-      results.addRow(row);
+      getSubmissionRow(results, subEntity);
       count++;
     }
     return results;
+  }
+
+  private void getSubmissionRow(ResultTable results, Entity subEntity)
+      throws ODKIncompleteSubmissionData {
+    Submission sub = new Submission(subEntity, form);
+    Map<String, SubmissionValue> valueMap = sub.getSubmissionValuesMap();
+    List<String> row = new ArrayList<String>();
+    for (String propertyName : propertyNames) {
+      if (propertyName.equals(TableConsts.SUBMISSION_DATE_HEADER)) {
+        Date submittedTime = sub.getSubmittedTime();
+        if(submittedTime != null) {
+          row.add(DateFormat.getDateTimeInstance(DateFormat.FULL, DateFormat.FULL).format(submittedTime));
+        }
+      } else {
+        processSubmissionFieldValue(sub.getKey(), valueMap, row, propertyName);
+      }
+    }
+    results.addRow(row);
   }
   
   
@@ -224,50 +275,52 @@ public abstract class SubmissionTable {
    * Helper function to recursively go through the element tree and create
    * the column headings
    * 
-   * @param columns
-   *    list of column headings
-   * @param node
-   *    node to act recursively on
    */
-  private void processElementForColumnHead(List<String> columns, FormElement node,
+  private void processElementForColumnHead(FormElement node,
       FormElement root, String parentName) {
     if (node == null) return;
 
     if (node.getSubmissionFieldType().equals(SubmissionFieldType.UNKNOWN)) {
       if (!node.equals(root)) {
         if (node.isRepeatable()) {
-          columns.add(node.getElementName());
+          headers.add(node.getElementName());
+          propertyNames.add(node.getElementName()); 
           return;
         } else {
           // else skip and goto children as we do not know how to display
           // append parent name incase embedded tag
-          parentName = node.getElementName() + BasicConsts.FORWARDSLASH;
+          parentName = node.getElementName() + BasicConsts.DASH;
         }
       }
     } else {
-      columns.add(parentName + node.getElementName());
+      if(node.getSubmissionFieldType().equals(SubmissionFieldType.GEOPOINT)) {
+        headers.add(node.getElementName() + BasicConsts.DASH + BasicConsts.LATITUDE);
+        headers.add(node.getElementName() + BasicConsts.DASH + BasicConsts.LONGITUDE);
+      } else {
+        headers.add(parentName + node.getElementName());
+      }
+      propertyNames.add(node.getElementName()); 
     }
 
     List<FormElement> childDataElements = node.getChildren();
-    // TODO: do better error handling
     if (childDataElements == null) {
       return;
     }
     for (FormElement child : childDataElements) {
-      processElementForColumnHead(columns, child, root, parentName);
+      processElementForColumnHead(child, root, parentName);
     }
   }
 
-  protected ResultTable generateResultRepeatTable(String kind, Key elementKey, Key submissionParentKey) throws ODKFormNotFoundException, ODKIncompleteSubmissionData {
+  protected ResultTable generateResultRepeatTable(String kind, Key elementKey, Key submissionParentKey) throws ODKIncompleteSubmissionData {
     FormElement element = em.getReference(FormElement.class, elementKey);
     if (element == null) {
       throw new ODKIncompleteSubmissionData();
     }
-    List<String> headers = new ArrayList<String>();
-    processElementForColumnHead(headers, element, element, BasicConsts.EMPTY_STRING);
-
+    
+    // create results table
+    generatePropertyNamesAndHeaders(element, false);
     ResultTable results = new ResultTable(headers);
-
+    
     // create a row for each submission
     Query surveyQuery = new Query(kind);
     surveyQuery.addFilter(PersistConsts.PARENT_KEY_PROPERTY, Query.FilterOperator.EQUAL, submissionParentKey);
@@ -278,11 +331,9 @@ public abstract class SubmissionTable {
     for (Entity subEntity : submissionEntities) {
       SubmissionSet sub = new SubmissionSet(subEntity, form);
       Map<String, SubmissionValue> valueMap = sub.getSubmissionValuesMap();
-      String[] row = new String[results.getNumColumns()];
-      int index = 0;
-      for (String header : headers) {
-        processSubmissionFieldValue(sub.getKey(), valueMap, row, index, header);
-        index++;
+      List<String> row = new ArrayList<String>();
+      for (String propertyName : propertyNames) {
+        processSubmissionFieldValue(sub.getKey(), valueMap, row, propertyName);
       }
       results.addRow(row);
     }
@@ -291,8 +342,7 @@ public abstract class SubmissionTable {
   }
 
   private void processSubmissionFieldValue(Key submissionSetKey,
-      Map<String, SubmissionValue> submissionValueMap, String[] row, int index, String header) {
-    String propertyName = header.substring(header.lastIndexOf(BasicConsts.FORWARDSLASH) + 1);
+      Map<String, SubmissionValue> submissionValueMap, List<String> row, String propertyName) {
     SubmissionValue entry = submissionValueMap.get(propertyName);
     if (entry != null) {
       if(entry instanceof SubmissionField<?>) {
@@ -302,21 +352,43 @@ public abstract class SubmissionTable {
           if (field.isBinary()) {
             if (value instanceof Key) {
               Key blobKey = (Key) value;
-              row[index] = createViewLink(blobKey, header);
+              row.add(createViewLink(blobKey, propertyName));
             } else {
               System.err.println(ErrorConsts.NOT_A_KEY);
             }
           } else {
-            row[index] = value.toString();
+            if(value instanceof GeoPoint) {
+              GeoPoint coordinate = (GeoPoint) value;
+              if(coordinate.getLatitude() != null)
+              {
+                row.add(coordinate.getLatitude().toString());
+              } else {
+                row.add(null);
+              }
+              
+              if(coordinate.getLongitude() != null)
+              {
+                row.add(coordinate.getLongitude().toString());
+              } else {
+                row.add(null);
+              }
+
+            } else {
+              row.add(value.toString());
+            }
           }
+        } else {
+          row.add(null);
         }
       } else if(entry instanceof SubmissionRepeat) {
         SubmissionRepeat repeat = (SubmissionRepeat) entry;
-        row[index] = createRepeatLink(repeat, submissionSetKey);
+        row.add(createRepeatLink(repeat, submissionSetKey));
       } else {
         // TODO: deal with error
         System.err.println(ErrorConsts.UNKNOWN_INTERFACE);
       }
+    } else {
+      row.add(null);
     }
   }
   

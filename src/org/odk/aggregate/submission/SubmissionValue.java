@@ -18,7 +18,6 @@ package org.odk.aggregate.submission;
 
 import com.google.appengine.api.datastore.Entity;
 
-import org.odk.aggregate.exception.ODKFormNotFoundException;
 import org.odk.aggregate.exception.ODKIncompleteSubmissionData;
 import org.odk.aggregate.form.Form;
 
@@ -44,11 +43,9 @@ public interface SubmissionValue {
    *
    * @param dbEntity entity to obtain value
    * @param form the form definition object
-   *
-   * @throws ODKFormNotFoundException
    * @throws ODKIncompleteSubmissionData
    */
-  public void getValueFromEntity(Entity dbEntity, Form form) throws ODKFormNotFoundException, ODKIncompleteSubmissionData;
+  public void getValueFromEntity(Entity dbEntity, Form form) throws ODKIncompleteSubmissionData;
 
   /**
    * Add submission field value to database entity

@@ -83,6 +83,7 @@ public class FormElement {
   @Enumerated
   private int numChildren;
   
+  @SuppressWarnings("unused") // used by JPA for sort order
   @Enumerated
   private int childNumber;
   

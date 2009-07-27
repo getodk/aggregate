@@ -42,4 +42,8 @@ public class BasicConsts {
   public static final String QUOTE = "\"";
   public static final String SEMI_COLON = ";";
   public static final String COLON = ":";
+  public static final String LONGITUDE = "Longitude";
+  public static final String LATITUDE = "Latitude";
+  public static final String UNDERSCORE = "_";
+  public static final String DASH = "-";
 }

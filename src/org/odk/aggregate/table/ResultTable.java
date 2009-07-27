@@ -38,7 +38,7 @@ public class ResultTable {
   /**
    * List containing the rows of data 
    */
-  List<String[]> rows;
+  List<List<String>> rows;
 
   /**
    * Construct a table based on the column headers
@@ -47,7 +47,7 @@ public class ResultTable {
    */
   public ResultTable(List<String> tableHeader) {
     header = tableHeader;
-    rows = new ArrayList<String[]>();
+    rows = new ArrayList<List<String>>();
   }
 
   /**
@@ -55,8 +55,8 @@ public class ResultTable {
    * @param row
    *    array of strings representing a row
    */
-  public void addRow(String[] row) {
-    if (row.length != header.size()) {
+  public void addRow(List<String> row) {
+    if (row.size() != header.size()) {
       System.err.println(ErrorConsts.ROW_SIZE_ERROR);
       return;
     }
@@ -77,7 +77,7 @@ public class ResultTable {
    * @return
    *    list of string arrays that contain the data
    */
-  public List<String[]> getRows() {
+  public List<List<String>> getRows() {
     return rows;
   }
 

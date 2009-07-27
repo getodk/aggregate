@@ -35,13 +35,18 @@ import org.odk.aggregate.form.Form;
  * @author wbrunette@gmail.com
  *
  */
-public class StringSubmissionType extends SubmissionTypeBase<String> {
+public class StringSubmissionType extends SubmissionFieldBase<String> {
 
+  /**
+   * The string with a GAE_MAX_STRING_LEN character limit
+   */
+  private String shorten_string;
+  
   /**
    * The full string stored in text if string is too long to be stored
    * in a GAE datastore string
    */
-  protected Text full_value;
+  private Text full_string;
  
   /**
    * Constructor 
@@ -56,14 +61,13 @@ public class StringSubmissionType extends SubmissionTypeBase<String> {
   /**
    * Set the string value
    */
-  @Override
-  public void setValue(String value) {
+  private void setValue(String value) {
     if (value.length() < PersistConsts.GAE_MAX_STRING_LEN) {
-      this.value = value;
-      this.full_value = null;
+      this.shorten_string = value;
+      this.full_string = null;
     } else {
-      this.value = value.substring(0, PersistConsts.GAE_MAX_STRING_LEN - 1);
-      this.full_value = new Text(value);
+      this.shorten_string = value.substring(0, PersistConsts.GAE_MAX_STRING_LEN - 1);
+      this.full_string = new Text(value);
     }
   }
 
@@ -82,10 +86,10 @@ public class StringSubmissionType extends SubmissionTypeBase<String> {
    */
   @Override
   public String getValue() {
-    if (full_value == null) {
-      return value;
+    if (full_string == null) {
+      return shorten_string;
     } else {
-      return full_value.getValue();
+      return full_string.getValue();
     }
   }
 
@@ -94,8 +98,8 @@ public class StringSubmissionType extends SubmissionTypeBase<String> {
    */
   @Override
   public void getValueFromEntity(Entity dbEntity, Form form) {
-    value = (String) dbEntity.getProperty(propertyName + PersistConsts.STRING_PROPERTY_ID);
-    full_value = (Text) dbEntity.getProperty(propertyName + PersistConsts.TEXT_PROPERTY_ID);
+    shorten_string = (String) dbEntity.getProperty(propertyName + PersistConsts.STRING_PROPERTY_ID);
+    full_string = (Text) dbEntity.getProperty(propertyName + PersistConsts.TEXT_PROPERTY_ID);
   }
 
   /**
@@ -103,8 +107,8 @@ public class StringSubmissionType extends SubmissionTypeBase<String> {
    */
   @Override
   public void addValueToEntity(Entity dbEntity) {
-    dbEntity.setProperty(propertyName + PersistConsts.STRING_PROPERTY_ID, value);
-    dbEntity.setProperty(propertyName + PersistConsts.TEXT_PROPERTY_ID, full_value);
+    dbEntity.setProperty(propertyName + PersistConsts.STRING_PROPERTY_ID, shorten_string);
+    dbEntity.setProperty(propertyName + PersistConsts.TEXT_PROPERTY_ID, full_string);
   }
 
   /**
@@ -120,7 +124,8 @@ public class StringSubmissionType extends SubmissionTypeBase<String> {
       return false;
     }
     StringSubmissionType other = (StringSubmissionType) obj;
-    return (full_value == null ? (other.full_value == null) : (full_value.equals(other.full_value)));
+    return (full_string == null ? (other.full_string == null) : (full_string.equals(other.full_string)))
+      && (shorten_string == null ? (other.shorten_string == null) : (shorten_string.equals(other.shorten_string)));
   }
 
   /**
@@ -128,7 +133,7 @@ public class StringSubmissionType extends SubmissionTypeBase<String> {
    */
   @Override
   public int hashCode() {
-    return super.hashCode() + (full_value == null ? 0 : full_value.hashCode());
+    return super.hashCode() + (full_string == null ? 0 : full_string.hashCode()) + (shorten_string == null ? 0 : shorten_string.hashCode());
   }
 
   /**
@@ -136,7 +141,7 @@ public class StringSubmissionType extends SubmissionTypeBase<String> {
    */
   @Override
   public String toString() {
-    return (propertyName != null ? propertyName : BasicConsts.EMPTY_STRING) 
+    return super.toString()
       + BasicConsts.TO_STRING_DELIMITER + (getValue() != null ? getValue() : BasicConsts.EMPTY_STRING);
   }
 

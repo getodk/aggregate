@@ -42,7 +42,7 @@ public class TableConsts {
   public static final String FT_HEADER_NAME = "Name";
  
   // submission headers
-  public static final String SUBMISSION_DATE_HEADER = "Submission Date";
+  public static final String SUBMISSION_DATE_HEADER = "SubmissionDate";
   
   // link text 
   public static final String VIEW_LINK_TEXT = "View";
@@ -55,6 +55,8 @@ public class TableConsts {
   public static final String END_FORMS_TAG = HtmlUtil.createEndTag(FORMS_TAG);
   public static final String END_FORM_TAG = HtmlUtil.createEndTag(FORM_TAG);
   public static final int QUERY_ROWS_MAX = 990;
+  
+  // constant as only needs to be created once
   public static final Date EPOCH = new Date(0);
 
 }

@@ -44,6 +44,9 @@ public class PersistConsts {
    */
   public static final String PARENT_KEY_PROPERTY = "PARENT_KEY";
 
+  
+  public static final String ORDER_PROPERTY = "ORDER";
+  
   public static final String BLOB_PROPERTY = "BLOB";
 
   public static final String BLOB_STORE_KIND = "blob_store";
@@ -64,5 +67,9 @@ public class PersistConsts {
    * Max size of string that can be stored in the
    */
   public static final int GAE_MAX_STRING_LEN = 250;
+
+  public static final String LONGITUDE_PROPERTY = "LONGITUDE";
+
+  public static final String LATITUDE_PROPERTY = "LATITUDE";
 
 }

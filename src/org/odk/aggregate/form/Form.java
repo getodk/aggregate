@@ -23,6 +23,7 @@ import com.google.appengine.api.datastore.Text;
 import org.odk.aggregate.exception.ODKFormNotFoundException;
 
 import java.io.PrintStream;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -36,6 +37,7 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Transient;
 
@@ -116,10 +118,17 @@ public class Form {
    */
   @Enumerated
   private Boolean submissionEnabled;
-    
+  
+  
+  /**
+   * A list of spreadsheets to update
+   */
+  @OneToMany(cascade=CascadeType.ALL)
+  private List<GoogleSpreadsheet> externalRepos;
+  
   @Transient
   private Map<String, FormElement> repeatElementMap;
-  
+    
   /**
    * Construct a form definition that can be persisted
    * 
@@ -147,6 +156,34 @@ public class Form {
     this.submissionEnabled = true;
   }
 
+  public List<GoogleSpreadsheet> getExternalRepos() {
+    return externalRepos;
+  }
+
+  public void addExternalRepo(GoogleSpreadsheet sheet) {
+    if(externalRepos == null) {
+      externalRepos = new ArrayList<GoogleSpreadsheet>();
+    }
+    externalRepos.add(sheet);
+  }
+  
+  public GoogleSpreadsheet getExternalRepoWithName(String name) {
+    if(externalRepos == null) {
+      return null;
+    }
+    
+    for(GoogleSpreadsheet sheet : externalRepos) {
+      if(sheet.getSpreadsheetName().equals(name)) {
+        return sheet;
+      }
+    }
+    return null;
+  }
+  
+  public void removeExternalRepo(GoogleSpreadsheet sheet) {
+    externalRepos.remove(sheet);
+  }
+  
   /**
    *  Get the GAE datastore key that uniquely identifies the form entity 
    *

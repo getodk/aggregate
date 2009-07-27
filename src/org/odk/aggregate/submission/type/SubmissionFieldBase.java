@@ -16,45 +16,30 @@
 
 package org.odk.aggregate.submission.type;
 
+
+
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
 
 import org.odk.aggregate.constants.BasicConsts;
 import org.odk.aggregate.constants.ErrorConsts;
 import org.odk.aggregate.exception.ODKConversionException;
+import org.odk.aggregate.exception.ODKIncompleteSubmissionData;
 import org.odk.aggregate.form.Form;
 import org.odk.aggregate.submission.SubmissionField;
 
-
-/**
- * Base class for type conversion
- *
- * @author wbrunette@gmail.com
- *
- * @param <T>
- *  a GAE datastore type
- */
-public abstract class SubmissionTypeBase<T> implements SubmissionField<T> {
+public abstract class SubmissionFieldBase<T> implements SubmissionField<T>{
 
   /**
    * Submission property/element name
    */
   protected String propertyName;
-
-  /**
-   * Value of submission field
-   */
-  protected T value;
-
   /**
    * Can only be created with binary data
    */
   protected boolean binaryCreation;
 
-  /**
-   * Constructor
-   */
-  public SubmissionTypeBase(String propertyName, boolean binary) {
+  public SubmissionFieldBase(String propertyName, boolean binary) {
     this.propertyName = propertyName;
     this.binaryCreation = binary;
   }
@@ -78,6 +63,7 @@ public abstract class SubmissionTypeBase<T> implements SubmissionField<T> {
   public boolean isBinary() {
     return binaryCreation;
   }
+
   
   /**
    * Get the value of submission field
@@ -85,20 +71,8 @@ public abstract class SubmissionTypeBase<T> implements SubmissionField<T> {
    * @return
    *    value
    */
-  public T getValue() {
-    return value;
-  }
-
-  /**
-   * Set the value of submission field
-   *
-   * @param value 
-   *    value to set
-   */
-  public void setValue(T value) {
-    this.value = value;
-  }
-
+  public abstract T getValue();
+  
   /**
    * Parse the value from string format and convert to proper type for
    * submission field
@@ -107,7 +81,24 @@ public abstract class SubmissionTypeBase<T> implements SubmissionField<T> {
    * @throws ODKConversionException
    */
   public abstract void setValueFromString(String value) throws ODKConversionException;
-
+  
+  
+  /**
+   * Get submission field value from database entity
+   *
+   * @param dbEntity entity to obtain value
+   * @param form the form definition object
+   * @throws ODKIncompleteSubmissionData
+   */
+  public abstract void getValueFromEntity(Entity dbEntity, Form form) throws ODKIncompleteSubmissionData;
+  
+  /**
+   * Add submission field value to database entity
+   * 
+   * @param dbEntity entity to add value to
+   */
+  public abstract void addValueToEntity(Entity dbEntity);
+  
   /**
    * Convert byte array to proper type for submission field
    * 
@@ -123,41 +114,18 @@ public abstract class SubmissionTypeBase<T> implements SubmissionField<T> {
   }
   
   /**
-   * Get submission field value from database entity
-   * 
-   *  @param dbEntity entity to obtain value
-   */
-  public void getValueFromEntity(Entity dbEntity, Form form) {
-    @SuppressWarnings("unchecked")
-    T value = (T) dbEntity.getProperty(propertyName);
-    setValue(value);
-  }
-  
-  /**
-   * Add submission field value to database entity
-   * 
-   * @param dbEntity entity to add value to
-   */
-  public void addValueToEntity(Entity dbEntity) {
-    dbEntity.setProperty(propertyName, getValue());
-  }
-
-  /**
    * @see java.lang.Object#equals(java.lang.Object)
    */
   @Override
   public boolean equals(Object obj) {
-    if (!(obj instanceof SubmissionTypeBase)) {
+    if (!(obj instanceof SubmissionFieldBase)) {
       return false;
     }
     
-    @SuppressWarnings("unchecked")
-    SubmissionTypeBase<T> other = (SubmissionTypeBase<T>) obj;
+    SubmissionFieldBase<?> other = (SubmissionFieldBase<?>) obj;
     
     return (propertyName == null ? (other.propertyName == null) : (propertyName.equals(other.propertyName)))
-      && (value == null ? (other.value == null) : (value.equals(other.value)))
-      && (binaryCreation == other.binaryCreation);
-    
+      && (binaryCreation == other.binaryCreation);    
   }
 
   /**
@@ -167,7 +135,6 @@ public abstract class SubmissionTypeBase<T> implements SubmissionField<T> {
   public int hashCode() {
     int hashCode = 13;
     if(propertyName != null) hashCode += propertyName.hashCode();
-    if(value != null) hashCode += value.hashCode(); 
     if(binaryCreation) hashCode++;    
     return hashCode; 
   }
@@ -177,7 +144,8 @@ public abstract class SubmissionTypeBase<T> implements SubmissionField<T> {
    */
   @Override
   public String toString() {
-    return (propertyName != null ? propertyName : BasicConsts.EMPTY_STRING) 
-      + BasicConsts.TO_STRING_DELIMITER + (value != null ? value.toString() : BasicConsts.EMPTY_STRING);
+    return (propertyName != null ? propertyName : BasicConsts.EMPTY_STRING); 
+
   }
+  
 }

@@ -19,7 +19,6 @@ package org.odk.aggregate.submission;
 import com.google.appengine.api.datastore.Entity;
 
 import org.odk.aggregate.constants.PersistConsts;
-import org.odk.aggregate.exception.ODKFormNotFoundException;
 import org.odk.aggregate.exception.ODKIncompleteSubmissionData;
 import org.odk.aggregate.form.Form;
 
@@ -55,10 +54,9 @@ public class Submission extends SubmissionSet {
    * 
    * @param submission
    *    submission entity that contains the data
-   * @throws ODKFormNotFoundException
    * @throws ODKIncompleteSubmissionData 
    */
-  public Submission(Entity submission, Form form) throws ODKFormNotFoundException, ODKIncompleteSubmissionData {
+  public Submission(Entity submission, Form form) throws ODKIncompleteSubmissionData {
     super(submission, form);
     submittedTime = (Date) dbEntity.getProperty(PersistConsts.SUBMITTED_TIME_PROPERTY_TAG);
   }

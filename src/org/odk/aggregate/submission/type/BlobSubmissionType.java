@@ -29,7 +29,7 @@ import org.odk.aggregate.submission.SubmissionBlob;
  * @author wbrunette@gmail.com
  *
  */
-public class BlobSubmissionType extends SubmissionTypeBase<Key> {
+public class BlobSubmissionType extends SubmissionSingleValueBase<Key> {
   /**
    * Constructor 
    * 

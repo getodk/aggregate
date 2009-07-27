@@ -23,7 +23,7 @@ import java.io.ByteArrayOutputStream;
  * 
  * @author wbrunette@gmail.com
  */
-public class MutiPartFormItem {
+public class MultiPartFormItem {
 
   /**
    * form data field name
@@ -57,7 +57,7 @@ public class MutiPartFormItem {
    * @param byteStream
    *    form data's stream
    */
-  public MutiPartFormItem(String fieldName, String fileName, String contentType, ByteArrayOutputStream byteStream) {
+  public MultiPartFormItem(String fieldName, String fileName, String contentType, ByteArrayOutputStream byteStream) {
     this.name = fieldName;
     this.filename = fileName;
     this.contentType = contentType;

@@ -66,19 +66,19 @@ public class SubmissionHtmlTable extends SubmissionTable {
   }
   
   public String getFirstDate() {
-    List<String []> rows = resultTable.getRows();
+    List<List<String>> rows = resultTable.getRows();
     if(rows.isEmpty()) {
       return null;
     }
-    return rows.get(0)[0];
+    return rows.get(0).get(0);
   }
 
   public String getLastDate() {
-    List<String []> rows = resultTable.getRows();
+    List<List<String>> rows = resultTable.getRows();
     if(rows.size() != ServletConsts.MAX_ENTITY_PER_PAGE) {
       return null;
     }
-    return rows.get(ServletConsts.MAX_ENTITY_PER_PAGE-1)[0];
+    return rows.get(ServletConsts.MAX_ENTITY_PER_PAGE-1).get(0);
   }
   
   /**

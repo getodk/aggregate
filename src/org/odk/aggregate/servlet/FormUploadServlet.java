@@ -31,7 +31,7 @@ import org.odk.aggregate.exception.ODKFormAlreadyExistsException;
 import org.odk.aggregate.form.Form;
 import org.odk.aggregate.parser.FormParserForJavaRosa;
 import org.odk.aggregate.parser.MultiPartFormData;
-import org.odk.aggregate.parser.MutiPartFormItem;
+import org.odk.aggregate.parser.MultiPartFormItem;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -120,8 +120,8 @@ public class FormUploadServlet extends ServletUtilBase {
       // process form
       MultiPartFormData uploadedFormItems = new MultiPartFormData(req);
 
-      MutiPartFormItem formNameData = uploadedFormItems.getFormDataByFieldName(ServletConsts.FORM_NAME_PRAM);
-      MutiPartFormItem formXmlData = uploadedFormItems.getFormDataByFieldName(ServletConsts.FORM_DEF_PRAM);
+      MultiPartFormItem formNameData = uploadedFormItems.getFormDataByFieldName(ServletConsts.FORM_NAME_PRAM);
+      MultiPartFormItem formXmlData = uploadedFormItems.getFormDataByFieldName(ServletConsts.FORM_DEF_PRAM);
        
       FormParserForJavaRosa parser = null;
       String formName = null;

@@ -24,7 +24,6 @@ import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.api.datastore.Key;
 
 import org.odk.aggregate.constants.BasicConsts;
-import org.odk.aggregate.exception.ODKFormNotFoundException;
 import org.odk.aggregate.exception.ODKIncompleteSubmissionData;
 import org.odk.aggregate.form.Form;
 import org.odk.aggregate.submission.SubmissionRepeat;
@@ -32,6 +31,8 @@ import org.odk.aggregate.submission.SubmissionSet;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 /**
  * Data Storage type for a repeat type. Store a list of datastore 
@@ -55,24 +56,25 @@ public class RepeatSubmissionType implements SubmissionRepeat {
   /**
    * List of submission sets that are a part of this submission set
    */
-  private List<SubmissionSet> submissionSets;
+  private SortedSet<SubmissionSet> submissionSets;
 
   public RepeatSubmissionType(String odkId, String repeatIdentifier) {
     this.odkId = odkId;
     this.submissionSetName = repeatIdentifier;
+    this.submissionSets = new TreeSet<SubmissionSet>();
   }
 
   public void addSubmissionSet(SubmissionSet submissionSet) {
-    if (submissionSets == null) {
-      submissionSets = new ArrayList<SubmissionSet>();
-    }
     submissionSets.add(submissionSet);
   }
 
-  public List<SubmissionSet> getSubmissionSets() {
+  public SortedSet<SubmissionSet> getSubmissionSets() {
     return submissionSets;
   }
 
+  public int getNumberRepeats() {
+    return submissionSets.size();
+  }
 
   public String getKindId() {
     return odkId + submissionSetName;
@@ -96,7 +98,7 @@ public class RepeatSubmissionType implements SubmissionRepeat {
     }
   }
 
-  public void getValueFromEntity(Entity dbEntity, Form form) throws ODKFormNotFoundException, ODKIncompleteSubmissionData {
+  public void getValueFromEntity(Entity dbEntity, Form form) throws ODKIncompleteSubmissionData {
     @SuppressWarnings("unchecked")
     List<Key> submissionSetKeys = (List<Key>) dbEntity.getProperty(getPropertyName());
     if (submissionSetKeys != null) {

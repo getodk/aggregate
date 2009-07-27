@@ -28,7 +28,7 @@ import java.util.Date;
  * @author wbrunette@gmail.com
  *
  */
-public class DateSubmissionType extends SubmissionTypeBase<Date> {
+public class DateSubmissionType extends SubmissionSingleValueBase<Date> {
   /**
    * Constructor 
    * 
