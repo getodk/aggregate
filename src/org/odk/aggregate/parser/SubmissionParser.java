@@ -64,6 +64,8 @@ public class SubmissionParser {
   private String odkId;
 
 
+  private Form form;
+  
   /**
    * Root of XML submission
    */
@@ -114,7 +116,7 @@ public class SubmissionParser {
       throw new IOException("DID NOT GET A MULTIPARTFORMPARSER");
     }
     submissionFormItems = submissionFormParser;
-    MutiPartFormItem submission =
+    MultiPartFormItem submission =
         submissionFormItems.getFormDataByFieldName(ServletConsts.XML_SUBMISSION_FILE);
     if (submission == null) {
       // TODO: review best error handling strategy
@@ -162,7 +164,7 @@ public class SubmissionParser {
     } catch (SAXException e) {
       throw new IOException(e.getCause());
     }
-    Form form = Form.retrieveForm(em, odkId);    
+    form = Form.retrieveForm(em, odkId);    
 
     submission = new Submission(form);
     
@@ -224,7 +226,7 @@ public class SubmissionParser {
         RepeatSubmissionType repeats = new RepeatSubmissionType(odkId, submissionTag);
         submissionSet.addSubmissionValues(repeats);
         for (Element element : elements) {
-          SubmissionSet repeatableSubmissionSet = new SubmissionSet(odkId, submissionTag, submissionSet.getKey());
+          SubmissionSet repeatableSubmissionSet = new SubmissionSet(odkId, submissionTag, submissionSet.getKey(), repeats.getNumberRepeats());
           repeats.addSubmissionSet(repeatableSubmissionSet);
           parseSubmissionElement(node, submissionElement, element, repeatableSubmissionSet);
         }
@@ -247,7 +249,7 @@ public class SubmissionParser {
           } else {
             // attempt to find binary data in multi-part form submission
             // first searching by file name, then field name
-            MutiPartFormItem binaryData = submissionFormItems.getFormDataByFileName(value);
+            MultiPartFormItem binaryData = submissionFormItems.getFormDataByFileName(value);
             if (binaryData == null) {
               binaryData = submissionFormItems.getFormDataByFieldName(value);
             }
@@ -364,4 +366,7 @@ public class SubmissionParser {
     return odkId;
   }
   
+  public Form getForm() {
+    return form;
+  }
 }

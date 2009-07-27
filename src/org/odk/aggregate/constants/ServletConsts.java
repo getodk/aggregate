@@ -141,26 +141,73 @@ public class ServletConsts {
 
   public static final int MAX_ENTITY_PER_PAGE = 20;
 
-
+  
   public static final String NEXT_LINK_TEXT = " (Next " + MAX_ENTITY_PER_PAGE + " Results) NEXT"+HtmlConsts.GREATER_THAN+HtmlConsts.GREATER_THAN;
 
-
+  
   public static final String BACK_LINK_TEXT = HtmlConsts.LESS_THAN + HtmlConsts.LESS_THAN +"BACK (Previous " + MAX_ENTITY_PER_PAGE + " Results)";
 
-
+  
   public static final String DOWNLOAD_XML_BUTTON_TXT = "Download XML";
 
-
+  
   public static final String ATTACHMENT_FILENAME_TXT = "attachment; filename=\"";
 
-
+  
   public static final String CONTENT_DISPOSITION = "Content-Disposition";
 
-
+  
   public static final String CSV_FILENAME_APPEND = "_results.csv";
 
 
+  public static final String CREATE_SPREADSHEET_BUTTON_LABEL = "Create Spreadsheet";
 
 
+  public static final String SPREADSHEET_NAME_PARAM = "SpreadsheetName";
+
+
+  public static final String SPEADSHEET_NAME_LABEL = "Name of Spreadsheet:";
+
+
+  public static final String TOKEN_PARAM = "TOKEN";
+
+
+  public static final String ODK_PERMANENT_ACCESS_WARNING = "NOTE: A selection of 'CONTINUOUS' means ODK Aggregate will maintian permanent access to the spreadsheet";
+
+
+  public static final String CONTINUOUS_DATA_TRANSFER_BUTTON_TXT = "Create Worksheet with 'CONTINUOUS' Data Transfer";
+
+
+  public static final String ONE_TIME_DATA_TRANSFER_BUTTON_TXT = "Create Worksheet with 'ONE TIME' Data Transfer";
+
+
+  public static final String SPREADSHEET_SCOPE = "http://spreadsheets.google.com/feeds/";
+
+
+  public static final String SPREADSHEET_FEED = SPREADSHEET_SCOPE + "spreadsheets/private/full";
+
+
+  public static final String DOCS_SCOPE = "http://docs.google.com/feeds/";
+
+
+  public static final String DOC_FEED = DOCS_SCOPE + "documents/private/full/";
+
+
+  public static final String DOCS_PRE_KEY = "spreadsheet%3A";
+
+
+  public static final String AUTHORIZE_SPREADSHEET_CREATION = "Authorize Spreadsheet Creation";
+
+
+  public static final String GOOGLE_DOC_EXPLANATION = "Create Google Doc Spreadsheet for Form: ";
+
+
+  public static final String CONTINUOUS_TRANSFER_PARAM = "ContinuousTransfer";
+
+
+  public static final String AUTHORIZE_DATA_TRANSFER_BUTTON_TXT = "Authorize transfer of Data to Spreadsheet";
+
+
+  public static final String SPREADSHEET_EXPLANATION = "Populate Spreadsheet with Data from Form: ";
   
 }

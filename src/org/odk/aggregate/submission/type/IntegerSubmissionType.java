@@ -23,7 +23,7 @@ package org.odk.aggregate.submission.type;
  * @author wbrunette@gmail.com
  *
  */
-public class IntegerSubmissionType extends SubmissionTypeBase<Integer> {
+public class IntegerSubmissionType extends SubmissionSingleValueBase<Integer> {
   /**
    * Constructor 
    * 

@@ -6,6 +6,6 @@
 	<!-- Configure java.util.logging -->
 	<system-properties>
 		<property name="java.util.logging.config.file" value="WEB-INF/logging.properties"/>
-	</system-properties>
-	
+    <property name="com.google.gdata.DisableCookieHandler" value="true"/>
+  </system-properties>
 </appengine-web-app>

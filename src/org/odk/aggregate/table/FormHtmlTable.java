@@ -27,8 +27,9 @@ import org.odk.aggregate.form.Form;
 import org.odk.aggregate.servlet.CsvServlet;
 import org.odk.aggregate.servlet.FormSubmissionsServlet;
 import org.odk.aggregate.servlet.FormXmlServlet;
-import org.odk.aggregate.servlet.SubmissionServlet;
+import org.odk.aggregate.servlet.SpreadsheetServlet;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -47,14 +48,13 @@ public class FormHtmlTable {
   private static List<String> HEADERS =
       Arrays.asList(TableConsts.FT_HEADER_NAME, TableConsts.FT_HEADER_ODKID,
           TableConsts.FT_HEADER_USER, TableConsts.FT_HEADER_RESULTS, TableConsts.FT_HEADER_CSV,
-          TableConsts.FT_HEADER_XFORM, TableConsts.FT_HEADER_SUBMISSION);
+          TableConsts.FT_HEADER_XFORM, "Google Spreadsheet");
 
   /**
    * Generate a table of available forms in html format
    * 
    * @return html table of available forms
    */
-
   public String generateHtmlFormTable() {
 
     EntityManager em = EMFactory.get().createEntityManager();
@@ -84,23 +84,22 @@ public class FormHtmlTable {
             HtmlUtil.createHtmlButtonToGetServlet(FormXmlServlet.ADDR, TableConsts.XML_BUTTON_TXT,
                 xmlProperties);
 
-        Map<String, String> submissionProperties = new HashMap<String, String>();
-        submissionProperties.put(ServletConsts.ODK_FORM_KEY, KeyFactory.keyToString(form.getKey()));
-        String submissionButton =
-            HtmlUtil.createHtmlButtonToGetServlet(SubmissionServlet.ADDR,
-                TableConsts.SUBMISSION_BUTTON_TXT, submissionProperties);
-
+        properties = new HashMap<String, String>();
+        properties.put(ServletConsts.ODK_FORM_KEY, KeyFactory.keyToString(form.getKey()));
+        String spreadsheetButton =
+            HtmlUtil.createHtmlButtonToGetServlet(SpreadsheetServlet.ADDR, "Create Spreadsheet",
+                properties);
+        
         // create row
-        int index = 0;
-        String[] row = new String[results.getNumColumns()];
+        List<String> row = new ArrayList<String>();
 
-        row[index++] = form.getViewableName();
-        row[index++] = form.getOdkId();
-        row[index++] = form.getCreationUser();
-        row[index++] = resultButton;
-        row[index++] = csvButton;
-        row[index++] = xmlButton;
-        row[index++] = submissionButton;
+        row.add(form.getViewableName());
+        row.add(form.getOdkId());
+        row.add(form.getCreationUser());
+        row.add(resultButton);
+        row.add(csvButton);
+        row.add(xmlButton);
+        row.add(spreadsheetButton);
 
         results.addRow(row);
       }

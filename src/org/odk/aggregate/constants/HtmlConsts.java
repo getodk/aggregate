@@ -46,6 +46,7 @@ public class HtmlConsts {
   public static final String HEAD = "head";
   public static final String H1 = "h1";
   public static final String H2 = "h2";
+  public static final String H3 = "h3";
   public static final String P = "p";
   public static final String TABLE = "table";
   public static final String TABLE_HEADER = "th";
@@ -73,6 +74,7 @@ public class HtmlConsts {
   public static final String INPUT_TYPE_FILE = "file";
   public static final String INPUT_TYPE_TEXT = "text";
   public static final String INPUT_TYPE_HIDDEN = "hidden";
+
   public static final String HTTP = "http://";
   public static final int WEB_PORT = 80;
   

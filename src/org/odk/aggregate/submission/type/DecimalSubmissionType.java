@@ -22,7 +22,7 @@ package org.odk.aggregate.submission.type;
  * @author wbrunette@gmail.com
  *
  */
-public class DecimalSubmissionType extends SubmissionTypeBase<Double> {
+public class DecimalSubmissionType extends SubmissionSingleValueBase<Double> {
   /**
    * Constructor 
    * 

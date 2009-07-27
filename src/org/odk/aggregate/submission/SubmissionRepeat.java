@@ -16,7 +16,8 @@
 
 package org.odk.aggregate.submission;
 
-import java.util.List;
+import java.util.SortedSet;
+
 /**
  * Interface for submission repeat that can be used to store
  * a submission repeat in the datastore 
@@ -27,7 +28,7 @@ public interface SubmissionRepeat extends SubmissionValue {
   
   public String getKindId();
   
-  public List<SubmissionSet> getSubmissionSets();
+  public SortedSet<SubmissionSet> getSubmissionSets();
   
   public void addSubmissionSet(SubmissionSet submissionSet);
   

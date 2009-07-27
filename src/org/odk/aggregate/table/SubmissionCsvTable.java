@@ -23,12 +23,13 @@ import org.odk.aggregate.constants.HtmlUtil;
 import org.odk.aggregate.constants.TableConsts;
 import org.odk.aggregate.exception.ODKFormNotFoundException;
 import org.odk.aggregate.exception.ODKIncompleteSubmissionData;
+import org.odk.aggregate.form.Form;
 import org.odk.aggregate.servlet.FormMultipleValueServlet;
 import org.odk.aggregate.servlet.ImageViewerServlet;
 import org.odk.aggregate.submission.SubmissionRepeat;
 
-import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import javax.persistence.EntityManager;
@@ -41,7 +42,6 @@ import javax.persistence.EntityManager;
  */
 public class SubmissionCsvTable extends SubmissionTable {
 
- 
   /**
    * Construct a CSV table object for form with the specified ODK ID
    * @param serverName TODO
@@ -56,6 +56,18 @@ public class SubmissionCsvTable extends SubmissionTable {
     super(serverName, odkIdentifier, entityManager, TableConsts.QUERY_ROWS_MAX);
   }
 
+  /**
+   * Construct a CSV table object for form with the specified ODK ID
+   * @param xform TODO
+   * @param serverName TODO
+   * @param entityManager
+   *    the persistence manager used to manage generating the tables
+   * 
+   */
+  protected SubmissionCsvTable(Form xform, String serverName, EntityManager entityManager) {
+    super(xform, serverName, entityManager, TableConsts.QUERY_ROWS_MAX);
+  }
+  
   /**
    * Generates a CSV of submission data of the form specified by the ODK ID
    * 
@@ -74,8 +86,8 @@ public class SubmissionCsvTable extends SubmissionTable {
     csv += generateCommaSeperatedRow(resultTable.getHeader().iterator());
 
     // generate rows
-    for (String[] row : resultTable.getRows()) {
-      csv += generateCommaSeperatedRow(Arrays.asList(row).iterator());
+    for (List<String> row : resultTable.getRows()) {
+      csv += generateCommaSeperatedRow(row.iterator());
     }
 
     return csv;

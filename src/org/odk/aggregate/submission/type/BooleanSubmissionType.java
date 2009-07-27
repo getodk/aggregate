@@ -23,7 +23,7 @@ package org.odk.aggregate.submission.type;
  * @author wbrunette@gmail.com
  *
  */
-public class BooleanSubmissionType extends SubmissionTypeBase<Boolean> {
+public class BooleanSubmissionType extends SubmissionSingleValueBase<Boolean> {
   /**
    * Constructor 
    * 

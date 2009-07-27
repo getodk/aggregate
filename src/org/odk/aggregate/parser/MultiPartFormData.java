@@ -41,9 +41,9 @@ import javax.servlet.http.HttpServletRequest;
  */
 public class MultiPartFormData {
 
-  private Map<String, MutiPartFormItem> fieldNameMap;
+  private Map<String, MultiPartFormItem> fieldNameMap;
   
-  private Map<String, MutiPartFormItem> fileNameMap;
+  private Map<String, MultiPartFormItem> fileNameMap;
   
   /**
    * Construct a mult-part form data container by parsing
@@ -60,8 +60,8 @@ public class MultiPartFormData {
   public MultiPartFormData(HttpServletRequest req)
       throws FileUploadException, IOException {
     
-    fieldNameMap = new HashMap<String, MutiPartFormItem>();
-    fileNameMap = new HashMap<String, MutiPartFormItem>();
+    fieldNameMap = new HashMap<String, MultiPartFormItem>();
+    fileNameMap = new HashMap<String, MultiPartFormItem>();
     
     ServletFileUpload upload = new ServletFileUpload(new DiskFileItemFactory());
     upload.setFileSizeMax(ParserConsts.FILE_SIZE_MAX);
@@ -79,7 +79,7 @@ public class MultiPartFormData {
         nextByte = formStream.read();
       }
       
-      MutiPartFormItem data = new MutiPartFormItem(item.getFieldName(), item.getName(), item.getContentType(), byteStream);
+      MultiPartFormItem data = new MultiPartFormItem(item.getFieldName(), item.getName(), item.getContentType(), byteStream);
       
       String fieldName = item.getFieldName();
       if(fieldName != null) {
@@ -100,11 +100,11 @@ public class MultiPartFormData {
     }
   }
   
-  public MutiPartFormItem getFormDataByFieldName(String fieldName) {
+  public MultiPartFormItem getFormDataByFieldName(String fieldName) {
     return fieldNameMap.get(fieldName);
   }
   
-  public MutiPartFormItem getFormDataByFileName(String fileName) {
+  public MultiPartFormItem getFormDataByFileName(String fileName) {
     return fileNameMap.get(fileName);
   }
   

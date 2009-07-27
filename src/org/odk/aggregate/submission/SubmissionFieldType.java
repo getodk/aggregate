@@ -21,9 +21,10 @@ import org.odk.aggregate.submission.type.BlobSubmissionType;
 import org.odk.aggregate.submission.type.BooleanSubmissionType;
 import org.odk.aggregate.submission.type.DateSubmissionType;
 import org.odk.aggregate.submission.type.DecimalSubmissionType;
+import org.odk.aggregate.submission.type.GeoPointSubmissionType;
 import org.odk.aggregate.submission.type.IntegerSubmissionType;
 import org.odk.aggregate.submission.type.StringSubmissionType;
-import org.odk.aggregate.submission.type.SubmissionTypeBase;
+import org.odk.aggregate.submission.type.SubmissionFieldBase;
 import org.odk.aggregate.submission.type.jr.JRDateTimeType;
 import org.odk.aggregate.submission.type.jr.JRDateType;
 import org.odk.aggregate.submission.type.jr.JRTimeType;
@@ -44,13 +45,14 @@ import java.util.Map;
 public enum SubmissionFieldType {
   BOOLEAN(BooleanSubmissionType.class), 
   DATE(DateSubmissionType.class), 
-  DECIMAL(DecimalSubmissionType.class), 
+  DECIMAL(DecimalSubmissionType.class),
+  GEOPOINT(GeoPointSubmissionType.class),
   INTEGER(IntegerSubmissionType.class), 
   JAVA_ROSA_DATE(JRDateType.class), 
   JAVA_ROSA_DATETIME(JRDateTimeType.class),
   JAVA_ROSA_TIME(JRTimeType.class), 
   PICTURE(BlobSubmissionType.class),
-  STRING(StringSubmissionType.class), 
+  STRING(StringSubmissionType.class),
   UNKNOWN(StringSubmissionType.class);
 
   /**
@@ -62,7 +64,7 @@ public enum SubmissionFieldType {
   // initialize the java rosa types to SubmissionFieldType objects
   static {
     conversion = new HashMap<Integer, SubmissionFieldType>();
-    conversion.put(Constants.DATATYPE_UNSUPPORTED, PICTURE);
+    conversion.put(Constants.DATATYPE_UNSUPPORTED, STRING);
     conversion.put(Constants.DATATYPE_NULL, UNKNOWN);
     conversion.put(Constants.DATATYPE_TEXT, STRING);
     conversion.put(Constants.DATATYPE_INTEGER, INTEGER);
@@ -73,15 +75,16 @@ public enum SubmissionFieldType {
     conversion.put(Constants.DATATYPE_CHOICE, STRING);
     conversion.put(Constants.DATATYPE_CHOICE_LIST, STRING);
     conversion.put(Constants.DATATYPE_BOOLEAN, STRING);
-    conversion.put(Constants.DATATYPE_GEOPOINT, STRING);
+    conversion.put(Constants.DATATYPE_GEOPOINT, GEOPOINT);
     conversion.put(Constants.DATATYPE_BARCODE, STRING);
+    conversion.put(Constants.DATATYPE_BINARY, PICTURE);
   }
 
   /**
    * Class that should be used to convert from XML submission to database entity
    * and vice versa
    */
-  private Class<? extends SubmissionTypeBase<?>> submissionFieldTypeClass;
+  private Class<? extends SubmissionFieldBase<?>> submissionFieldTypeClass;
 
   /**
    * Constructor that assigns the mapping from SubmissionFieldType to the
@@ -90,7 +93,7 @@ public enum SubmissionFieldType {
    * @param submissionDataType
    *    class type used to convert to/from appengine datastore values
    */
-  private SubmissionFieldType(Class<? extends SubmissionTypeBase<?>> submissionDataType) {
+  private SubmissionFieldType(Class<? extends SubmissionFieldBase<?>> submissionDataType) {
     submissionFieldTypeClass = submissionDataType;
   }
 
@@ -101,7 +104,7 @@ public enum SubmissionFieldType {
    * @return
    *    class type used to convert to/from appengine datastore values
    */
-  public Class<? extends SubmissionTypeBase<?>> getSubmissionFieldType() {
+  public Class<? extends SubmissionFieldBase<?>> getSubmissionFieldType() {
     return submissionFieldTypeClass;
   }
 
@@ -122,7 +125,7 @@ public enum SubmissionFieldType {
     // TODO: if performance becomes a problem switch from dynamic construction
     // to factory style
     try {
-      Constructor<? extends SubmissionTypeBase<?>> constructor =
+      Constructor<? extends SubmissionFieldBase<?>> constructor =
           submissionFieldTypeClass.getConstructor(String.class);
       submissionData = constructor.newInstance(elementName);
     } catch (SecurityException e) {
