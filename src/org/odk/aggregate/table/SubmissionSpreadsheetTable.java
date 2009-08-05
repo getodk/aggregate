@@ -66,7 +66,7 @@ public class SubmissionSpreadsheetTable extends SubmissionCsvTable {
     ResultTable results = generateResultTable(TableConsts.EPOCH, false);
 
     // size worksheet correctly
-    worksheet.setTitle(new PlainTextConstruct(odkId));
+    worksheet.setTitle(new PlainTextConstruct(super.getOdkId()));
     worksheet.setRowCount(2);
     worksheet.setColCount(results.getNumColumns());
     worksheet.update();
@@ -119,7 +119,7 @@ public class SubmissionSpreadsheetTable extends SubmissionCsvTable {
       
       WorksheetEntry worksheet;
       try {
-        worksheet = getWorksheet(service, repo.getSpreadsheetKey(), odkId);
+        worksheet = getWorksheet(service, repo.getSpreadsheetKey(), super.getOdkId());
         insertNewData(service, worksheet, result.getHeader(), result.getRows().get(0));
       } catch (MalformedURLException e) {
         // TODO: determine better error handling

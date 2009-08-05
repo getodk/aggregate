@@ -6,6 +6,9 @@
 
     <persistence-unit name="transactions-optional">
         <provider>org.datanucleus.store.appengine.jpa.DatastorePersistenceProvider</provider>
+        <class>org.odk.aggregate.form.GoogleSpreadsheet</class>
+        <class>org.odk.aggregate.form.Form</class>
+        <class>org.odk.aggregate.form.FormElement</class>
         <properties>
             <property name="datanucleus.NontransactionalRead" value="true"/>
             <property name="datanucleus.NontransactionalWrite" value="true"/>

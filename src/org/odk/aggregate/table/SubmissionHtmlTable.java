@@ -60,8 +60,7 @@ public class SubmissionHtmlTable extends SubmissionTable {
 
 
 
-  public void generateHtmlSubmissionResultsTable(Date lastDate, boolean backward) throws ODKFormNotFoundException,
-      ODKIncompleteSubmissionData {
+  public void generateHtmlSubmissionResultsTable(Date lastDate, boolean backward) throws ODKIncompleteSubmissionData {
     resultTable = generateResultTable(lastDate, backward);
   }
   
@@ -112,7 +111,7 @@ public class SubmissionHtmlTable extends SubmissionTable {
   @Override
   protected String createViewLink(Key subKey, String porpertyName) {
     Map<String, String> properties = createViewLinkProperties(subKey);
-    return HtmlUtil.createHrefWithProperties(baseServerUrl + ImageViewerServlet.ADDR, properties, TableConsts.VIEW_LINK_TEXT);
+    return HtmlUtil.createHrefWithProperties(super.getBaseServerUrl() + ImageViewerServlet.ADDR, properties, TableConsts.VIEW_LINK_TEXT);
   }
   
   /**
@@ -128,7 +127,7 @@ public class SubmissionHtmlTable extends SubmissionTable {
   @Override
   protected String createRepeatLink(SubmissionRepeat repeat, Key parentSubmissionSetKey) { 
     Map<String, String> properties = createRepeatLinkProperties(repeat, parentSubmissionSetKey);
-    return HtmlUtil.createHrefWithProperties(baseServerUrl + FormMultipleValueServlet.ADDR, properties, TableConsts.VIEW_LINK_TEXT);
+    return HtmlUtil.createHrefWithProperties(super.getBaseServerUrl() + FormMultipleValueServlet.ADDR, properties, TableConsts.VIEW_LINK_TEXT);
   }
   
 }

@@ -51,7 +51,7 @@ import javax.servlet.http.HttpServletResponse;
 
 public class WorksheetServlet extends ServletUtilBase {
 
-  private static final int PROPOGATION_DELAY = 6000;
+  private static final int PROPOGATION_DELAY = 10000;
 
   /**
    * Serial number for serialization

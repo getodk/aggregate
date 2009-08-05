@@ -86,4 +86,33 @@ public class GoogleSpreadsheet {
   }
   
 
+  /**
+   * @see java.lang.Object#equals(java.lang.Object)
+   */
+  @Override
+  public boolean equals(Object obj) {
+    if (!(obj instanceof GoogleSpreadsheet)) {
+      return false;
+    }
+    GoogleSpreadsheet other = (GoogleSpreadsheet) obj;
+    return (key == null ? (other.key == null) : (key.equals(other.key)))
+        && (spreadsheetName == null ? (other.spreadsheetName == null) : (spreadsheetName.equals(other.spreadsheetName)))
+        && (spreadsheetKey == null ? (other.spreadsheetKey == null) : (spreadsheetKey.equals(other.spreadsheetKey)))
+        && (authToken == null ? (other.authToken == null) : (authToken.equals(other.authToken)))
+        && (ready == null ? (other.ready == null) : (ready.equals(other.ready)));
+  }
+
+  /**
+   * @see java.lang.Object#hashCode()
+   */
+  @Override
+  public int hashCode() {
+    int hashCode = 13;
+    if(key != null) hashCode += key.hashCode();
+    if(spreadsheetName != null) hashCode += spreadsheetName.hashCode();
+    if(spreadsheetKey != null) hashCode += spreadsheetKey.hashCode();
+    if(authToken != null) hashCode += authToken.hashCode();
+    if(ready != null) hashCode += ready.hashCode();
+    return hashCode;
+  }
 }
