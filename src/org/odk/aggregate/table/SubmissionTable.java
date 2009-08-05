@@ -60,22 +60,23 @@ import javax.persistence.EntityManager;
  */
 public abstract class SubmissionTable {
   
-  protected boolean moreRecords;
+  private boolean moreRecords;
 
-  protected String odkId;
+  private String odkId;
     
-  protected EntityManager em;
+  private EntityManager em;
   
   private Form form;
 
   private int fetchLimit;
   
-  protected String baseServerUrl;
-  
+  private String baseServerUrl;
+
   private List<String> headers;
   
   private List<String> propertyNames;
   
+  private Map<String, SubmissionFieldType> headerTypes;
   
   /**
    * Constructs a table utils for the form
@@ -177,13 +178,15 @@ public abstract class SubmissionTable {
     return moreRecords;
   }
   
-  private void generatePropertyNamesAndHeaders(FormElement root, boolean submission) {
+  private void generatePropertyNamesAndHeaders(FormElement root, boolean submissionRoot) {
     headers = new ArrayList<String>();
     propertyNames = new ArrayList<String>();
+    headerTypes = new HashMap<String, SubmissionFieldType>();
     
-    if(submission) {
+    if(submissionRoot) {
       headers.add(TableConsts.SUBMISSION_DATE_HEADER);
       propertyNames.add(TableConsts.SUBMISSION_DATE_HEADER);
+      headerTypes.put(TableConsts.SUBMISSION_DATE_HEADER, SubmissionFieldType.DATE);
     }
     
     processElementForColumnHead(root, root, BasicConsts.EMPTY_STRING);
@@ -283,7 +286,7 @@ public abstract class SubmissionTable {
     if (node.getSubmissionFieldType().equals(SubmissionFieldType.UNKNOWN)) {
       if (!node.equals(root)) {
         if (node.isRepeatable()) {
-          headers.add(node.getElementName());
+          addToHeaders(node.getElementName(), node.getSubmissionFieldType());
           propertyNames.add(node.getElementName()); 
           return;
         } else {
@@ -294,10 +297,10 @@ public abstract class SubmissionTable {
       }
     } else {
       if(node.getSubmissionFieldType().equals(SubmissionFieldType.GEOPOINT)) {
-        headers.add(node.getElementName() + BasicConsts.DASH + BasicConsts.LATITUDE);
-        headers.add(node.getElementName() + BasicConsts.DASH + BasicConsts.LONGITUDE);
+        addToHeaders(node.getElementName() + BasicConsts.DASH + BasicConsts.LATITUDE, node.getSubmissionFieldType());
+        addToHeaders(node.getElementName() + BasicConsts.DASH + BasicConsts.LONGITUDE, node.getSubmissionFieldType());
       } else {
-        headers.add(parentName + node.getElementName());
+        addToHeaders(parentName + node.getElementName(), node.getSubmissionFieldType());
       }
       propertyNames.add(node.getElementName()); 
     }
@@ -309,6 +312,11 @@ public abstract class SubmissionTable {
     for (FormElement child : childDataElements) {
       processElementForColumnHead(child, root, parentName);
     }
+  }
+  
+  private void addToHeaders(String name, SubmissionFieldType type) {
+    headers.add(name);
+    headerTypes.put(name, type);
   }
 
   protected ResultTable generateResultRepeatTable(String kind, Key elementKey, Key submissionParentKey) throws ODKIncompleteSubmissionData {
@@ -390,6 +398,18 @@ public abstract class SubmissionTable {
     } else {
       row.add(null);
     }
+  }
+  
+  public String getOdkId() {
+    return odkId;
+  }
+
+  public String getBaseServerUrl() {
+    return baseServerUrl;
+  }
+
+  public Map<String, SubmissionFieldType> getHeaderTypes() {
+    return headerTypes;
   }
   
 }

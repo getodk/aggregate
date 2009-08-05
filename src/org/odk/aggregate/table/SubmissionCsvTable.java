@@ -127,7 +127,7 @@ public class SubmissionCsvTable extends SubmissionTable {
   @Override
   protected String createViewLink(Key subKey, String porpertyName) {
     Map<String, String> properties = createViewLinkProperties(subKey);
-    return HtmlUtil.createLinkWithProperties(baseServerUrl + ImageViewerServlet.ADDR, properties);
+    return HtmlUtil.createLinkWithProperties(super.getBaseServerUrl() + ImageViewerServlet.ADDR, properties);
   }
  
   /**
@@ -143,7 +143,7 @@ public class SubmissionCsvTable extends SubmissionTable {
   @Override
   protected String createRepeatLink(SubmissionRepeat repeat, Key parentSubmissionSetKey) { 
     Map<String, String> properties = createRepeatLinkProperties(repeat, parentSubmissionSetKey);
-    return HtmlUtil.createLinkWithProperties(baseServerUrl + FormMultipleValueServlet.ADDR, properties);
+    return HtmlUtil.createLinkWithProperties(super.getBaseServerUrl() + FormMultipleValueServlet.ADDR, properties);
   }
   
 }
