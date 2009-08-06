@@ -158,7 +158,8 @@ public class SubmissionSpreadsheetTable extends SubmissionCsvTable {
 
     SpreadsheetEntry sheet = null;
     for (SpreadsheetEntry entry : spreadsheets) {
-      if (spreadsheetKey.equals(entry.getKey())) {
+      String entryKey = entry.getKey();
+      if (spreadsheetKey.equals(entryKey)) {
         sheet = entry;
       }
     }
