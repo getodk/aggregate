@@ -28,9 +28,8 @@ import com.google.gdata.data.spreadsheet.CellEntry;
 import com.google.gdata.data.spreadsheet.CellFeed;
 import com.google.gdata.data.spreadsheet.CustomElementCollection;
 import com.google.gdata.data.spreadsheet.ListEntry;
-import com.google.gdata.data.spreadsheet.SpreadsheetEntry;
-import com.google.gdata.data.spreadsheet.SpreadsheetFeed;
 import com.google.gdata.data.spreadsheet.WorksheetEntry;
+import com.google.gdata.data.spreadsheet.WorksheetFeed;
 import com.google.gdata.util.ServiceException;
 
 import org.odk.aggregate.constants.BasicConsts;
@@ -151,27 +150,13 @@ public class SubmissionSpreadsheetTable extends SubmissionCsvTable {
   
   public WorksheetEntry getWorksheet(SpreadsheetService service, String spreadsheetKey,
       String worksheetTitle) throws MalformedURLException, IOException, ServiceException {
-
-    SpreadsheetFeed feed =
-        service.getFeed(new URL(ServletConsts.SPREADSHEET_FEED), SpreadsheetFeed.class);
-    List<SpreadsheetEntry> spreadsheets = feed.getEntries();
-
-    SpreadsheetEntry sheet = null;
-    for (SpreadsheetEntry entry : spreadsheets) {
-      String entryKey = entry.getKey();
-      if (spreadsheetKey.equals(entryKey)) {
-        sheet = entry;
-      }
-    }
-
-    // verify spreadsheet was found
-    if (sheet == null) {
-      return null;
-    }
-
+    
     // get worksheet
     WorksheetEntry worksheet = null;
-    List<WorksheetEntry> worksheets = sheet.getWorksheets();
+    URL worksheetFeedUrl = new URL(ServletConsts.WORKSHEETS_FEED_PREFIX + spreadsheetKey + ServletConsts.FEED_PERMISSIONS);
+    WorksheetFeed worksheetFeed = service.getFeed(worksheetFeedUrl,
+    WorksheetFeed.class);
+    List<WorksheetEntry> worksheets = worksheetFeed.getEntries();
     for (WorksheetEntry wksheet : worksheets) {
       if (wksheet.getTitle().getPlainText().equals(worksheetTitle)) {
         worksheet = wksheet;
