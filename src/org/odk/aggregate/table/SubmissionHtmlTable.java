@@ -93,7 +93,7 @@ public class SubmissionHtmlTable extends SubmissionTable {
   }
 
   public String generateHtmlSubmissionRepeatResultsTable(String kind, Key elementKey,
-      Key submissionParentKey) throws ODKFormNotFoundException, ODKIncompleteSubmissionData {
+      Key submissionParentKey) throws ODKIncompleteSubmissionData {
     ResultTable resultTable = generateResultRepeatTable(kind, elementKey, submissionParentKey);
 
     return HtmlUtil.wrapResultTableWithHtmlTags(resultTable);

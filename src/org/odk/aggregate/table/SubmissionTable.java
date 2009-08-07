@@ -26,7 +26,6 @@ import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Query;
 
 import org.odk.aggregate.constants.ErrorConsts;
-import org.odk.aggregate.constants.HtmlUtil;
 import org.odk.aggregate.constants.PersistConsts;
 import org.odk.aggregate.constants.ServletConsts;
 import org.odk.aggregate.constants.TableConsts;
