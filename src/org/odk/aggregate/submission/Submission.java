@@ -16,13 +16,16 @@
 
 package org.odk.aggregate.submission;
 
-import com.google.appengine.api.datastore.Entity;
+import java.util.Date;
+import java.util.List;
 
 import org.odk.aggregate.constants.PersistConsts;
+import org.odk.aggregate.constants.TableConsts;
 import org.odk.aggregate.exception.ODKIncompleteSubmissionData;
 import org.odk.aggregate.form.Form;
 
-import java.util.Date;
+import com.google.appengine.api.datastore.Entity;
+import com.google.gson.JsonObject;
 
 
 /**
@@ -85,6 +88,20 @@ public class Submission extends SubmissionSet {
     return super.getEntity();
   }
 
+  /**
+   * Generate a JSON Object that contains the submission data
+   * 
+   * @return
+   *    populated JSON Object
+   */
+  @Override
+  public JsonObject generateJsonObject(List<String> propertyNames) {
+    JsonObject data = super.generateJsonObject(propertyNames);
+    // TODO: this is a deviation... matching to table instead of property... consider revising
+    data.addProperty(TableConsts.SUBMISSION_DATE_HEADER, submittedTime.toString());
+    return data;
+  }
+  
   @Override
   public String getKindId() {
     return odkId;

@@ -84,7 +84,7 @@ public class FormSubmissionsServlet extends ServletUtilBase {
     }
 
     // header info
-    beginBasicHtmlResponse(TITLE_INFO, resp, true);
+    beginBasicHtmlResponse(TITLE_INFO, resp, req, true);
     
     EntityManager em = EMFactory.get().createEntityManager();
     

@@ -60,7 +60,7 @@ public class FormsServlet extends ServletUtilBase {
       return;
     }
 
-    beginBasicHtmlResponse(TITLE_INFO, resp, true); // header info
+    beginBasicHtmlResponse(TITLE_INFO, resp, req, true); // header info
     resp.getWriter().print(new FormHtmlTable().generateHtmlFormTable());
     finishBasicHtmlResponse(resp);
 

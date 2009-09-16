@@ -18,9 +18,12 @@ package org.odk.aggregate.submission.type;
 
 import org.odk.aggregate.exception.ODKConversionException;
 
+import com.google.gson.JsonObject;
+
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Data Storage Converter for Data Type
@@ -58,6 +61,21 @@ public class DateSubmissionType extends SubmissionSingleValueBase<Date> {
     }
   }
 
+  /**
+   * Add submission field value to JsonObject
+   * @param JSON Object to add value to
+   */  
+  @Override
+  public void addValueToJsonObject(JsonObject jsonObject, List<String> propertyNames) {
+    if(!propertyNames.contains(propertyName)){
+      return;
+    }
+    if(getValue() != null) {
+      jsonObject.addProperty(propertyName, getValue().toString());
+    }
+  }
+  
+  
   /**
    * @see java.lang.Object#equals(java.lang.Object)
    */

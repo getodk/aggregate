@@ -92,13 +92,15 @@ public class FormXmlServlet extends ServletUtilBase {
 
     PrintWriter out = resp.getWriter();
     
+    resp.setCharacterEncoding("UTF-8");
+    
     if(humanReadable) {
       Map<String, String> properties = new HashMap<String, String>();
       properties.put(ServletConsts.ODK_FORM_KEY, URLEncoder.encode(odkFormKey, ServletConsts.ENCODE_SCHEME));
       String downloadXmlButton =
           HtmlUtil.createHtmlButtonToGetServlet(ADDR, ServletConsts.DOWNLOAD_XML_BUTTON_TXT, properties);
 
-      beginBasicHtmlResponse(TITLE_INFO, resp, true); // header info
+      beginBasicHtmlResponse(TITLE_INFO, resp, req, true); // header info
       out.println("<h3>Form Name: <FONT COLOR=0000FF>" + form.getViewableName() + "</FONT></h3>");
       out.println("<h3>File Name: <FONT COLOR=0000FF>" + form.getFileName() + "</FONT></h3>");
       out.println(downloadXmlButton); // download button

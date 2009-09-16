@@ -88,6 +88,34 @@
   </servlet-mapping>
 
   <servlet>
+    <servlet-name>externalRepo</servlet-name>
+    <servlet-class>org.odk.aggregate.servlet.ExternalRepoServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>externalRepo</servlet-name>
+    <url-pattern>/externalRepo</url-pattern>
+  </servlet-mapping>
+
+  <servlet>
+    <servlet-name>insight</servlet-name>
+    <servlet-class>org.odk.aggregate.servlet.InsightServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>insight</servlet-name>
+    <url-pattern>/insight</url-pattern>
+  </servlet-mapping>
+
+  <servlet>
+    <servlet-name>insightData</servlet-name>
+    <servlet-class>org.odk.aggregate.servlet.InsightDataServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>insightData</servlet-name>
+    <url-pattern>/insightData</url-pattern>
+  </servlet-mapping>
+
+
+  <servlet>
     <servlet-name>spreadsheet</servlet-name>
     <servlet-class>org.odk.aggregate.servlet.SpreadsheetServlet</servlet-class>
   </servlet>
@@ -103,6 +131,24 @@
   <servlet-mapping>
     <servlet-name>worksheet</servlet-name>
     <url-pattern>/worksheet</url-pattern>
+  </servlet-mapping>
+  
+  <servlet>
+    <servlet-name>kmlSettings</servlet-name>
+    <servlet-class>org.odk.aggregate.servlet.KmlSettingsServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>kmlSettings</servlet-name>
+    <url-pattern>/kmlSettings</url-pattern>
+  </servlet-mapping>
+  
+  <servlet>
+    <servlet-name>kml</servlet-name>
+    <servlet-class>org.odk.aggregate.servlet.KmlServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>kml</servlet-name>
+    <url-pattern>/kml</url-pattern>
   </servlet-mapping>
 
 	<welcome-file-list>

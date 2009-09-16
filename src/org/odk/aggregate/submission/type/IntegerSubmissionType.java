@@ -17,6 +17,13 @@
 package org.odk.aggregate.submission.type;
 
 
+
+
+import java.util.List;
+
+import com.google.gson.JsonObject;
+
+
 /**
  * Data Storage Converter for Integer Type
  *
@@ -44,6 +51,18 @@ public class IntegerSubmissionType extends SubmissionSingleValueBase<Integer> {
     setValue(new Integer(value));
   }
 
+  /**
+   * Add submission field value to JsonObject
+   * @param JSON Object to add value to
+   */  
+  @Override
+  public void addValueToJsonObject(JsonObject jsonObject, List<String> propertyNames) {
+    if(!propertyNames.contains(propertyName)){
+      return;
+    }
+    jsonObject.addProperty(propertyName, getValue());
+  }
+  
   /**
    * @see java.lang.Object#equals(java.lang.Object)
    */

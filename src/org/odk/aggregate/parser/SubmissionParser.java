@@ -16,8 +16,16 @@
 
 package org.odk.aggregate.parser;
 
-import com.google.appengine.api.datastore.DatastoreService;
-import com.google.appengine.api.datastore.DatastoreServiceFactory;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.persistence.EntityManager;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.codec.binary.Base64;
 import org.odk.aggregate.constants.BasicConsts;
@@ -39,16 +47,8 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.persistence.EntityManager;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
+import com.google.appengine.api.datastore.DatastoreService;
+import com.google.appengine.api.datastore.DatastoreServiceFactory;
 
 /**
  * Parsers submission xml and saves to datastore
@@ -122,7 +122,9 @@ public class SubmissionParser {
       // TODO: review best error handling strategy
       throw new IOException("DID NOT GET A SUBMISSION");
     }
+   
     String submissionXML = submission.getStream().toString();
+    System.out.println(submissionXML);
     constructorHelper(new ByteArrayInputStream(submissionXML.getBytes()));
   }
 
@@ -162,6 +164,7 @@ public class SubmissionParser {
     } catch (ParserConfigurationException e) {
       throw new IOException(e.getCause());
     } catch (SAXException e) {
+      e.printStackTrace();
       throw new IOException(e.getCause());
     }
     form = Form.retrieveForm(em, odkId);    

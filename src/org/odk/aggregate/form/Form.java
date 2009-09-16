@@ -124,8 +124,14 @@ public class Form {
    * A list of spreadsheets to update
    */
   @OneToMany(cascade=CascadeType.ALL)
-  private List<GoogleSpreadsheet> externalRepos;
+  private List<GoogleSpreadsheet> spreadsheetExternalRepos;
   
+  /**
+   * A list of rhiza insight servers to update
+   */
+  @OneToMany(cascade=CascadeType.ALL)
+  private List<RhizaInsight> insightExternalRepos;
+
   @Transient
   private Map<String, FormElement> repeatElementMap;
     
@@ -156,23 +162,43 @@ public class Form {
     this.submissionEnabled = true;
   }
 
-  public List<GoogleSpreadsheet> getExternalRepos() {
-    return externalRepos;
+  public List<RemoteServer> getExternalRepos() {
+    List<RemoteServer> allExternalRepos = new ArrayList<RemoteServer>();
+    if(spreadsheetExternalRepos != null)
+      allExternalRepos.addAll(spreadsheetExternalRepos);
+    if(insightExternalRepos != null)
+      allExternalRepos.addAll(insightExternalRepos);
+    return allExternalRepos;
   }
 
-  public void addExternalRepo(GoogleSpreadsheet sheet) {
-    if(externalRepos == null) {
-      externalRepos = new ArrayList<GoogleSpreadsheet>();
-    }
-    externalRepos.add(sheet);
+  public List<RhizaInsight> getInsightExternalRepos() {
+    return insightExternalRepos;
   }
   
-  public GoogleSpreadsheet getExternalRepoWithName(String name) {
-    if(externalRepos == null) {
+  public void removeInsightExternalRepos() {
+    insightExternalRepos.clear();
+  }
+  
+  public void addInsightExternalRepos(RhizaInsight insightInstance) {
+    if(insightExternalRepos == null) {
+      insightExternalRepos = new ArrayList<RhizaInsight>();
+    }
+    insightExternalRepos.add(insightInstance);
+  }
+  
+  public void addGoogleSpreadsheet(GoogleSpreadsheet sheet) {
+    if(spreadsheetExternalRepos == null) {
+      spreadsheetExternalRepos = new ArrayList<GoogleSpreadsheet>();
+    }
+    spreadsheetExternalRepos.add(sheet);
+  }
+  
+  public GoogleSpreadsheet getGoogleSpreadsheetWithName(String name) {
+    if(spreadsheetExternalRepos == null) {
       return null;
     }
     
-    for(GoogleSpreadsheet sheet : externalRepos) {
+    for(GoogleSpreadsheet sheet : spreadsheetExternalRepos) {
       if(sheet.getSpreadsheetName().equals(name)) {
         return sheet;
       }
@@ -180,8 +206,8 @@ public class Form {
     return null;
   }
   
-  public void removeExternalRepo(GoogleSpreadsheet sheet) {
-    externalRepos.remove(sheet);
+  public void removeGoogleSpreadsheet(GoogleSpreadsheet sheet) {
+    spreadsheetExternalRepos.remove(sheet);
   }
   
   /**

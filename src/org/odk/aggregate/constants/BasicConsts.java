@@ -27,7 +27,8 @@ public class BasicConsts {
   // system constants
   public static final String APPLICATION_NAME = "Open Data Kit Aggregate";
   public static final String TO_STRING_DELIMITER = ": ";
-
+  public static final String NULL = "NULL";
+  
   // general constants
   public static final String NEW_LINE = "\n";
   public static final String CSV_DELIMITER = ",";

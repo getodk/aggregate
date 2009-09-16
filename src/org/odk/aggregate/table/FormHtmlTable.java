@@ -16,19 +16,6 @@
 
 package org.odk.aggregate.table;
 
-import com.google.appengine.api.datastore.KeyFactory;
-
-import org.odk.aggregate.EMFactory;
-import org.odk.aggregate.constants.BasicConsts;
-import org.odk.aggregate.constants.HtmlUtil;
-import org.odk.aggregate.constants.ServletConsts;
-import org.odk.aggregate.constants.TableConsts;
-import org.odk.aggregate.form.Form;
-import org.odk.aggregate.servlet.CsvServlet;
-import org.odk.aggregate.servlet.FormSubmissionsServlet;
-import org.odk.aggregate.servlet.FormXmlServlet;
-import org.odk.aggregate.servlet.SpreadsheetServlet;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -38,6 +25,20 @@ import java.util.Map;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 
+import org.odk.aggregate.EMFactory;
+import org.odk.aggregate.constants.BasicConsts;
+import org.odk.aggregate.constants.HtmlUtil;
+import org.odk.aggregate.constants.ServletConsts;
+import org.odk.aggregate.constants.TableConsts;
+import org.odk.aggregate.form.Form;
+import org.odk.aggregate.servlet.CsvServlet;
+import org.odk.aggregate.servlet.ExternalRepoServlet;
+import org.odk.aggregate.servlet.FormSubmissionsServlet;
+import org.odk.aggregate.servlet.FormXmlServlet;
+import org.odk.aggregate.servlet.KmlSettingsServlet;
+
+import com.google.appengine.api.datastore.KeyFactory;
+
 /**
  * Generates an html table of forms for the servlets
  * 
@@ -45,10 +46,18 @@ import javax.persistence.Query;
  * 
  */
 public class FormHtmlTable {
+  /**
+   * GQL query to get forms
+   */
+  private static final String FORM_QUERY = "select from Form";
+  
+  /**
+   * Array containing the table header names
+   */
   private static List<String> HEADERS =
       Arrays.asList(TableConsts.FT_HEADER_NAME, TableConsts.FT_HEADER_ODKID,
           TableConsts.FT_HEADER_USER, TableConsts.FT_HEADER_RESULTS, TableConsts.FT_HEADER_CSV,
-          TableConsts.FT_HEADER_XFORM, "Google Spreadsheet");
+          TableConsts.FT_HEADER_EXTERNAL_SERVICE, TableConsts.FT_HEADER_KML, TableConsts.FT_HEADER_XFORM);
 
   /**
    * Generate a table of available forms in html format
@@ -61,7 +70,7 @@ public class FormHtmlTable {
     ResultTable results = new ResultTable(HEADERS);
 
     try {
-      Query formQuery = em.createQuery("select from Form");
+      Query formQuery = em.createQuery(FORM_QUERY);
       @SuppressWarnings("unchecked")
       List<Form> forms = formQuery.getResultList();
 
@@ -86,9 +95,13 @@ public class FormHtmlTable {
 
         properties = new HashMap<String, String>();
         properties.put(ServletConsts.ODK_FORM_KEY, KeyFactory.keyToString(form.getKey()));
-        String spreadsheetButton =
-            HtmlUtil.createHtmlButtonToGetServlet(SpreadsheetServlet.ADDR, "Create Spreadsheet",
+        String externalServiceButton =
+            HtmlUtil.createHtmlButtonToGetServlet(ExternalRepoServlet.ADDR, TableConsts.EXTERNAL_SERVICE_BUTTON_TXT,
                 properties);
+        
+        String kmlButton =
+          HtmlUtil.createHtmlButtonToGetServlet(KmlSettingsServlet.ADDR, TableConsts.KML_BUTTON_TXT,
+              properties);
         
         // create row
         List<String> row = new ArrayList<String>();
@@ -97,9 +110,10 @@ public class FormHtmlTable {
         row.add(form.getOdkId());
         row.add(form.getCreationUser());
         row.add(resultButton);
-        row.add(csvButton);
+        row.add(csvButton);       
+        row.add(externalServiceButton);
+        row.add(kmlButton);
         row.add(xmlButton);
-        row.add(spreadsheetButton);
 
         results.addRow(row);
       }
@@ -111,6 +125,5 @@ public class FormHtmlTable {
 
     return HtmlUtil.wrapResultTableWithHtmlTags(results);
   }
-
 
 }

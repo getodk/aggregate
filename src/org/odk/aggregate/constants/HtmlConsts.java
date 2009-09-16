@@ -74,7 +74,8 @@ public class HtmlConsts {
   public static final String INPUT_TYPE_FILE = "file";
   public static final String INPUT_TYPE_TEXT = "text";
   public static final String INPUT_TYPE_HIDDEN = "hidden";
-
+  public static final String INPUT_TYPE_RADIO = "radio";
+  
   public static final String HTTP = "http://";
   public static final int WEB_PORT = 80;
   

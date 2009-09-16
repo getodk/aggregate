@@ -58,9 +58,9 @@ public class ImageViewerServlet extends ServletUtilBase {
   public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 
     // verify user is logged in
-    if (!verifyCredentials(req, resp)) {
-      return;
-    }
+//    if (!verifyCredentials(req, resp)) {
+//      return;
+//    }
 
     // verify parameters are present
     String keyString =  getParameter(req, ServletConsts.BLOB_KEY);

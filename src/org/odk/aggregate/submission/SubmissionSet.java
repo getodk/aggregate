@@ -16,9 +16,11 @@
 
 package org.odk.aggregate.submission;
 
-import com.google.appengine.api.datastore.DatastoreServiceFactory;
-import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.Key;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.odk.aggregate.constants.BasicConsts;
 import org.odk.aggregate.constants.PersistConsts;
@@ -27,11 +29,10 @@ import org.odk.aggregate.form.Form;
 import org.odk.aggregate.form.FormElement;
 import org.odk.aggregate.submission.type.RepeatSubmissionType;
 
-import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import com.google.appengine.api.datastore.DatastoreServiceFactory;
+import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.Key;
+import com.google.gson.JsonObject;
 
 
 /**
@@ -75,6 +76,8 @@ public class SubmissionSet implements Comparable<SubmissionSet>{
  
   protected long order;
   
+
+
   /**
    * Construct an empty submission for the ODK ID form
    * 
@@ -141,6 +144,7 @@ public class SubmissionSet implements Comparable<SubmissionSet>{
     if (name == null) {
       return;
     }
+    
     if(element.isRepeatable()) {
       SubmissionRepeat submissionRepeat = new RepeatSubmissionType(odkId, name);
       submissionRepeat.getValueFromEntity(dbEntity, form);
@@ -150,6 +154,10 @@ public class SubmissionSet implements Comparable<SubmissionSet>{
         element.getSubmissionFieldType().createSubmissionField(name);
       submissionField.getValueFromEntity(dbEntity, form);
       addSubmissionValues(submissionField);
+    }
+    
+    if(element.getChildren() == null) {
+      return;
     }
     // iterate through all children
     for (FormElement child : element.getChildren()) {
@@ -258,6 +266,27 @@ public class SubmissionSet implements Comparable<SubmissionSet>{
       }
     }
     return dbEntity;
+  }
+  
+  
+  /**
+   * Generate a JSON Object that contains the submission set data
+   * 
+   * @return
+   *    populated JSON Object
+   */
+  public JsonObject generateJsonObject(List<String> propertyNames) {
+    JsonObject data = new JsonObject();
+    if (submissionValues != null) {
+      for (SubmissionValue value : submissionValues) {
+        value.addValueToJsonObject(data, propertyNames);
+      }
+    }  
+    return data;
+  }
+  
+  public long getOrder() {
+    return order;
   }
   
   public void printSubmission(PrintWriter out) {

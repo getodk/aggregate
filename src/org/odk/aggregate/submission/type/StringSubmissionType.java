@@ -16,12 +16,16 @@
 
 package org.odk.aggregate.submission.type;
 
-import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.Text;
+
+import java.util.List;
 
 import org.odk.aggregate.constants.BasicConsts;
 import org.odk.aggregate.constants.PersistConsts;
 import org.odk.aggregate.form.Form;
+
+import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.Text;
+import com.google.gson.JsonObject;
 
 
 /**
@@ -71,6 +75,18 @@ public class StringSubmissionType extends SubmissionFieldBase<String> {
     }
   }
 
+  /**
+   * Add submission field value to JsonObject
+   * @param JSON Object to add value to
+   */  
+  @Override
+  public void addValueToJsonObject(JsonObject jsonObject, List<String> propertyNames) {
+    if(!propertyNames.contains(propertyName)){
+      return;
+    }
+    jsonObject.addProperty(propertyName, getValue());
+  }
+  
   /**
    * Set the string value
    * 

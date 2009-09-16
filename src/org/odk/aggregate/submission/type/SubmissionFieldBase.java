@@ -18,8 +18,8 @@ package org.odk.aggregate.submission.type;
 
 
 
-import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.Key;
+
+import java.util.List;
 
 import org.odk.aggregate.constants.BasicConsts;
 import org.odk.aggregate.constants.ErrorConsts;
@@ -27,6 +27,10 @@ import org.odk.aggregate.exception.ODKConversionException;
 import org.odk.aggregate.exception.ODKIncompleteSubmissionData;
 import org.odk.aggregate.form.Form;
 import org.odk.aggregate.submission.SubmissionField;
+
+import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.Key;
+import com.google.gson.JsonObject;
 
 public abstract class SubmissionFieldBase<T> implements SubmissionField<T>{
 
@@ -98,6 +102,12 @@ public abstract class SubmissionFieldBase<T> implements SubmissionField<T>{
    * @param dbEntity entity to add value to
    */
   public abstract void addValueToEntity(Entity dbEntity);
+  
+  /**
+   * Add submission field value to JsonObject
+   * @param JSON Object to add value to
+   */  
+  public abstract void addValueToJsonObject(JsonObject jsonObject, List<String> propertyNames);
   
   /**
    * Convert byte array to proper type for submission field

@@ -16,10 +16,14 @@
 
 package org.odk.aggregate.submission;
 
-import com.google.appengine.api.datastore.Entity;
+
+import java.util.List;
 
 import org.odk.aggregate.exception.ODKIncompleteSubmissionData;
 import org.odk.aggregate.form.Form;
+
+import com.google.appengine.api.datastore.Entity;
+import com.google.gson.JsonObject;
 
 
 /**
@@ -53,4 +57,11 @@ public interface SubmissionValue {
    * @param dbEntity entity to add value to
    */
   public void addValueToEntity(Entity dbEntity);
+  
+  /**
+   * Add submission field value to JsonObject
+   * @param propertyNames TODO
+   * @param dbEntity entity to add value to
+   */  
+  public void addValueToJsonObject(JsonObject jsonObject, List<String> propertyNames);
 }

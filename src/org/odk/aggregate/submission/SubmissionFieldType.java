@@ -43,17 +43,17 @@ import java.util.Map;
  */
 //TODO: decide how we should treat an unknown type?
 public enum SubmissionFieldType {
-  BOOLEAN(BooleanSubmissionType.class), 
-  DATE(DateSubmissionType.class), 
-  DECIMAL(DecimalSubmissionType.class),
-  GEOPOINT(GeoPointSubmissionType.class),
-  INTEGER(IntegerSubmissionType.class), 
-  JAVA_ROSA_DATE(JRDateType.class), 
-  JAVA_ROSA_DATETIME(JRDateTimeType.class),
-  JAVA_ROSA_TIME(JRTimeType.class), 
-  PICTURE(BlobSubmissionType.class),
-  STRING(StringSubmissionType.class),
-  UNKNOWN(StringSubmissionType.class);
+  BOOLEAN(BooleanSubmissionType.class, RhizaInsightType.STRING), 
+  DATE(DateSubmissionType.class, RhizaInsightType.DATE), 
+  DECIMAL(DecimalSubmissionType.class, RhizaInsightType.NUMBER), 
+  GEOPOINT(GeoPointSubmissionType.class, RhizaInsightType.GPS), 
+  INTEGER(IntegerSubmissionType.class, RhizaInsightType.NUMBER),  
+  JAVA_ROSA_DATE(JRDateType.class, RhizaInsightType.DATE),  
+  JAVA_ROSA_DATETIME(JRDateTimeType.class, RhizaInsightType.DATE), 
+  JAVA_ROSA_TIME(JRTimeType.class, RhizaInsightType.DATE),  
+  PICTURE(BlobSubmissionType.class, RhizaInsightType.PICTURE), 
+  STRING(StringSubmissionType.class, RhizaInsightType.STRING), 
+  UNKNOWN(StringSubmissionType.class, RhizaInsightType.STRING);
 
   /**
    * Static conversion map from int (java rosa types) to the
@@ -87,14 +87,22 @@ public enum SubmissionFieldType {
   private Class<? extends SubmissionFieldBase<?>> submissionFieldTypeClass;
 
   /**
+   * The rhiza insight type that maps to ODK aggregate submission type
+   */
+  private RhizaInsightType rhizaInsightType;
+  
+  /**
    * Constructor that assigns the mapping from SubmissionFieldType to the
    * class used for converting data from the XML submission to the datastore entity
    * 
    * @param submissionDataType
    *    class type used to convert to/from appengine datastore values
+   * @param insightType
+   *    data type mapping for rhiza insight
    */
-  private SubmissionFieldType(Class<? extends SubmissionFieldBase<?>> submissionDataType) {
+  private SubmissionFieldType(Class<? extends SubmissionFieldBase<?>> submissionDataType,  RhizaInsightType insightType) {
     submissionFieldTypeClass = submissionDataType;
+    rhizaInsightType = insightType;
   }
 
   /**
@@ -108,6 +116,15 @@ public enum SubmissionFieldType {
     return submissionFieldTypeClass;
   }
 
+  /**
+   * 
+   * @return
+   *    Rhiza Insight Type
+   */
+  public RhizaInsightType getRhizaInsightType() {
+    return rhizaInsightType;
+  }
+  
   /**
    * Creates the submission conversion object based on enum value that will
    * take the value contained in the submission and convert it to the proper

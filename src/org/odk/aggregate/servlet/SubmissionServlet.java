@@ -16,12 +16,12 @@
 
 package org.odk.aggregate.servlet;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-
-import javax.persistence.EntityManager;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import com.google.appengine.api.datastore.DatastoreService;
+import com.google.appengine.api.datastore.DatastoreServiceFactory;
+import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.EntityNotFoundException;
+import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.KeyFactory;
 
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
@@ -32,17 +32,17 @@ import org.odk.aggregate.exception.ODKFormNotFoundException;
 import org.odk.aggregate.exception.ODKIncompleteSubmissionData;
 import org.odk.aggregate.exception.ODKParseException;
 import org.odk.aggregate.form.Form;
+import org.odk.aggregate.form.RemoteServer;
 import org.odk.aggregate.parser.MultiPartFormData;
 import org.odk.aggregate.parser.SubmissionParser;
 import org.odk.aggregate.submission.Submission;
-import org.odk.aggregate.table.SubmissionSpreadsheetTable;
 
-import com.google.appengine.api.datastore.DatastoreService;
-import com.google.appengine.api.datastore.DatastoreServiceFactory;
-import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.EntityNotFoundException;
-import com.google.appengine.api.datastore.Key;
-import com.google.appengine.api.datastore.KeyFactory;
+import java.io.IOException;
+import java.io.PrintWriter;
+
+import javax.persistence.EntityManager;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * Servlet to process a submission from a form
@@ -101,7 +101,7 @@ public class SubmissionServlet extends ServletUtilBase {
 
   @Override
   public void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-    resp.setContentType(ServletConsts.RESP_TYPE_PLAIN);
+    resp.setContentType(ServletConsts.RESP_TYPE_HTML);
 
     PrintWriter out = resp.getWriter();
     Key submissionKey = null;
@@ -128,18 +128,13 @@ public class SubmissionServlet extends ServletUtilBase {
         return;
       }
 
-      submissionKey = submissionParser.getSubmission().getKey();
       Form form = submissionParser.getForm();
+      String appName = this.getServletContext().getInitParameter("application_name");
+      Submission submission = submissionParser.getSubmission();
 
-      try {
-        SubmissionSpreadsheetTable subResults =
-            new SubmissionSpreadsheetTable(form, req.getServerName(), em, this.getServletContext()
-                .getInitParameter("application_name"));
-
-        subResults.insertNewDataInSpreadsheet(submissionKey, form.getExternalRepos());
-      } catch (ODKIncompleteSubmissionData e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
+      // send information to remote servers that need to be notified
+      for (RemoteServer rs : form.getExternalRepos()) {
+        rs.sendSubmissionToRemoteServer(form, req.getServerName(), em, appName, submission);
       }
     } catch (ODKFormNotFoundException e) {
       odkIdNotFoundError(resp);
@@ -176,10 +171,13 @@ public class SubmissionServlet extends ServletUtilBase {
       }
       em.close();
     } else {
-      resp.sendRedirect(ServletConsts.WEB_ROOT);
+      resp.setStatus(HttpServletResponse.SC_CREATED);
+      resp.setHeader("Location", getServerURL(req));
+
+      // TODO: get an auto redirect going
+      // resp.getWriter().print("<html><head><meta HTTP-EQUIV=\"REFRESH\" content=\"0; url=http://"
+      // + getServerURL(req) + "\"></head><body></body></html>");
     }
 
   }
-
-
 }
