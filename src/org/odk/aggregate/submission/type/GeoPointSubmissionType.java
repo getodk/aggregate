@@ -16,7 +16,11 @@
 
 package org.odk.aggregate.submission.type;
 
+
+import java.util.List;
+
 import com.google.appengine.api.datastore.Entity;
+import com.google.gson.JsonObject;
 
 import org.odk.aggregate.constants.BasicConsts;
 import org.odk.aggregate.constants.PersistConsts;
@@ -60,6 +64,21 @@ public class GeoPointSubmissionType extends SubmissionFieldBase<GeoPoint> {
     dbEntity.setProperty(propertyName + PersistConsts.LONGITUDE_PROPERTY, coordinates.getLongitude());
   }
 
+  /**
+   * Add submission field value to JsonObject
+   * @param JSON Object to add value to
+   */  
+  @Override
+  public void addValueToJsonObject(JsonObject jsonObject, List<String> propertyNames) {
+    if(!propertyNames.contains(propertyName)){
+      return;
+    }
+    if(coordinates != null) {
+      jsonObject.addProperty(propertyName + PersistConsts.LATITUDE_PROPERTY, coordinates.getLatitude());
+      jsonObject.addProperty(propertyName + PersistConsts.LONGITUDE_PROPERTY, coordinates.getLongitude());
+    }
+  }
+  
   @Override
   public void getValueFromEntity(Entity dbEntity, Form form) {
     Double latCoor = (Double) dbEntity.getProperty(propertyName + PersistConsts.LATITUDE_PROPERTY);
@@ -100,4 +119,5 @@ public class GeoPointSubmissionType extends SubmissionFieldBase<GeoPoint> {
     return super.toString()
       + BasicConsts.TO_STRING_DELIMITER + (getValue() != null ? getValue() : BasicConsts.EMPTY_STRING);
   }
+
 }

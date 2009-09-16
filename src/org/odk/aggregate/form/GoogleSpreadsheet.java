@@ -18,14 +18,18 @@ package org.odk.aggregate.form;
 
 import com.google.appengine.api.datastore.Key;
 
+import org.odk.aggregate.submission.Submission;
+import org.odk.aggregate.table.SubmissionSpreadsheetTable;
+
 import javax.persistence.Entity;
+import javax.persistence.EntityManager;
 import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
 @Entity
-public class GoogleSpreadsheet {
+public class GoogleSpreadsheet implements RemoteServer{
   /**
    * GAE datastore key that uniquely identifies the form element
    */
@@ -85,7 +89,13 @@ public class GoogleSpreadsheet {
     this.authToken = authToken;
   }
   
+  public void sendSubmissionToRemoteServer(Form xform, String serverName, EntityManager em, String appName, Submission submission) {
+    SubmissionSpreadsheetTable subResults =
+      new SubmissionSpreadsheetTable(xform, serverName, em, appName);
 
+  subResults.insertNewDataInSpreadsheet(submission, this);
+  }
+  
   /**
    * @see java.lang.Object#equals(java.lang.Object)
    */

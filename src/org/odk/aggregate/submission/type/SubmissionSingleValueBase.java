@@ -16,10 +16,10 @@
 
 package org.odk.aggregate.submission.type;
 
-import com.google.appengine.api.datastore.Entity;
-
 import org.odk.aggregate.constants.BasicConsts;
 import org.odk.aggregate.form.Form;
+
+import com.google.appengine.api.datastore.Entity;
 
 
 /**
@@ -86,7 +86,7 @@ public abstract class SubmissionSingleValueBase<T> extends SubmissionFieldBase<T
   public void addValueToEntity(Entity dbEntity) {
     dbEntity.setProperty(propertyName, getValue());
   }
-
+  
   /**
    * @see java.lang.Object#equals(java.lang.Object)
    */

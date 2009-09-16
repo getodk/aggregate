@@ -16,7 +16,6 @@
 
 package org.odk.aggregate.table;
 
-import com.google.appengine.api.datastore.Key;
 import com.google.gdata.client.batch.BatchInterruptedException;
 import com.google.gdata.client.spreadsheet.CellQuery;
 import com.google.gdata.client.spreadsheet.SpreadsheetService;
@@ -38,6 +37,8 @@ import org.odk.aggregate.constants.TableConsts;
 import org.odk.aggregate.exception.ODKIncompleteSubmissionData;
 import org.odk.aggregate.form.Form;
 import org.odk.aggregate.form.GoogleSpreadsheet;
+import org.odk.aggregate.report.FormProperties;
+import org.odk.aggregate.submission.Submission;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -50,36 +51,39 @@ import javax.persistence.EntityManager;
 public class SubmissionSpreadsheetTable extends SubmissionCsvTable {
 
   private String applicationName;
-  
-  public SubmissionSpreadsheetTable(Form xform, String serverName,
-      EntityManager entityManager, String appName) {
+
+  public SubmissionSpreadsheetTable(Form xform, String serverName, EntityManager entityManager,
+      String appName) {
     super(xform, serverName, entityManager);
     applicationName = appName;
   }
 
-  public void generateWorksheet(SpreadsheetService service,
-      WorksheetEntry worksheet) throws IOException, ServiceException,
-      BatchInterruptedException, MalformedURLException, ODKIncompleteSubmissionData {
+  public void generateWorksheet(SpreadsheetService service, WorksheetEntry worksheet)
+      throws IOException, ServiceException, BatchInterruptedException, MalformedURLException,
+      ODKIncompleteSubmissionData {
 
     // get data
-    ResultTable results = generateResultTable(TableConsts.EPOCH, false);
-
+    // TODO replaced the old with form properties need to make sure it will be
+    // old - ResultTable results = generateResultTable(TableConsts.EPOCH, false);
+    FormProperties formProp = new FormProperties(form, em);
+    List<String> headers = formProp.getHeaders();
+    
     // size worksheet correctly
     worksheet.setTitle(new PlainTextConstruct(super.getOdkId()));
     worksheet.setRowCount(2);
-    worksheet.setColCount(results.getNumColumns());
+    worksheet.setColCount(headers.size());
     worksheet.update();
 
-    List<String> headers = results.getHeader();
+
 
     CellQuery query = new CellQuery(worksheet.getCellFeedUrl());
     query.setMinimumRow(1);
     query.setMaximumRow(1);
     query.setMinimumCol(1);
-    query.setMaximumCol(results.getNumColumns());
+    query.setMaximumCol(headers.size());
     query.setReturnEmpty(true);
-    CellFeed cellFeed = service.query(query, CellFeed.class);
 
+    CellFeed cellFeed = service.query(query, CellFeed.class);
     CellFeed batchFeed = new CellFeed();
 
     List<CellEntry> cells = cellFeed.getEntries();
@@ -95,7 +99,11 @@ public class SubmissionSpreadsheetTable extends SubmissionCsvTable {
     // Submit the batch request.
     Link batchLink = cellFeed.getLink(Link.Rel.FEED_BATCH, Link.Type.ATOM);
     service.batch(new URL(batchLink.getHref()), batchFeed);
+  }
 
+  public void uploadSubmissionDataToSpreadsheet(SpreadsheetService service, WorksheetEntry worksheet)
+      throws ODKIncompleteSubmissionData, IOException, ServiceException {
+    ResultTable results = generateResultTable(TableConsts.EPOCH, false);
     // TODO: migrate to batch uploads
     List<List<String>> resultRows = results.getRows();
 
@@ -104,39 +112,34 @@ public class SubmissionSpreadsheetTable extends SubmissionCsvTable {
     }
   }
 
-  public void insertNewDataInSpreadsheet(Key submissionKey, List<GoogleSpreadsheet> spreadsheets) throws ODKIncompleteSubmissionData  {
-    ResultTable result = generateSingleEntryResultTable(submissionKey);
-    
-    // TODO: make threaded (even better task API)
-    
-    for(GoogleSpreadsheet repo : spreadsheets) {
-      if(!repo.getReady()) {
-        continue;
-      }
-      SpreadsheetService service = new SpreadsheetService(applicationName);
-      service.setAuthSubToken(repo.getAuthToken(), null);
-      
-      WorksheetEntry worksheet;
-      try {
-        worksheet = getWorksheet(service, repo.getSpreadsheetKey(), super.getOdkId());
-        insertNewData(service, worksheet, result.getHeader(), result.getRows().get(0));
-      } catch (MalformedURLException e) {
-        // TODO: determine better error handling
-        e.printStackTrace();
-      } catch (IOException e) {
-        // TODO: determine better error handling
-        e.printStackTrace();
-      } catch (ServiceException e) {
-        // TODO: determine better error handling
-        e.printStackTrace();
-      }
-      
-      
+  public void insertNewDataInSpreadsheet(Submission submission, GoogleSpreadsheet spreadsheet) {
+    ResultTable result = generateSingleEntryResultTable(submission);
+
+    if (!spreadsheet.getReady()) {
+      return;
     }
+    SpreadsheetService service = new SpreadsheetService(applicationName);
+    service.setAuthSubToken(spreadsheet.getAuthToken(), null);
+
+    WorksheetEntry worksheet;
+    try {
+      worksheet = getWorksheet(service, spreadsheet.getSpreadsheetKey(), super.getOdkId());
+      insertNewData(service, worksheet, result.getHeader(), result.getRows().get(0));
+    } catch (MalformedURLException e) {
+      // TODO: determine better error handling
+      e.printStackTrace();
+    } catch (IOException e) {
+      // TODO: determine better error handling
+      e.printStackTrace();
+    } catch (ServiceException e) {
+      // TODO: determine better error handling
+      e.printStackTrace();
+    }
+
   }
 
-  private void insertNewData(SpreadsheetService service, WorksheetEntry worksheet, List<String> headers, List<String> row) throws IOException,
-      ServiceException {
+  private void insertNewData(SpreadsheetService service, WorksheetEntry worksheet,
+      List<String> headers, List<String> row) throws IOException, ServiceException {
     ListEntry newEntry = new ListEntry();
     CustomElementCollection values = newEntry.getCustomElements();
     for (int colIndex = 0; colIndex < headers.size(); colIndex++) {
@@ -146,16 +149,17 @@ public class SubmissionSpreadsheetTable extends SubmissionCsvTable {
     }
     service.insert(worksheet.getListFeedUrl(), newEntry);
   }
-  
-  
+
+
   public WorksheetEntry getWorksheet(SpreadsheetService service, String spreadsheetKey,
       String worksheetTitle) throws MalformedURLException, IOException, ServiceException {
-    
+
     // get worksheet
     WorksheetEntry worksheet = null;
-    URL worksheetFeedUrl = new URL(ServletConsts.WORKSHEETS_FEED_PREFIX + spreadsheetKey + ServletConsts.FEED_PERMISSIONS);
-    WorksheetFeed worksheetFeed = service.getFeed(worksheetFeedUrl,
-    WorksheetFeed.class);
+    URL worksheetFeedUrl =
+        new URL(ServletConsts.WORKSHEETS_FEED_PREFIX + spreadsheetKey
+            + ServletConsts.FEED_PERMISSIONS);
+    WorksheetFeed worksheetFeed = service.getFeed(worksheetFeedUrl, WorksheetFeed.class);
     List<WorksheetEntry> worksheets = worksheetFeed.getEntries();
     for (WorksheetEntry wksheet : worksheets) {
       if (wksheet.getTitle().getPlainText().equals(worksheetTitle)) {
@@ -163,5 +167,5 @@ public class SubmissionSpreadsheetTable extends SubmissionCsvTable {
       }
     }
     return worksheet;
-  }  
+  }
 }

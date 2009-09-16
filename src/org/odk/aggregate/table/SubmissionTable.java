@@ -16,14 +16,14 @@
 
 package org.odk.aggregate.table;
 
-import com.google.appengine.api.datastore.DatastoreService;
-import com.google.appengine.api.datastore.DatastoreServiceFactory;
-import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.EntityNotFoundException;
-import com.google.appengine.api.datastore.FetchOptions;
-import com.google.appengine.api.datastore.Key;
-import com.google.appengine.api.datastore.KeyFactory;
-import com.google.appengine.api.datastore.Query;
+import java.text.DateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.persistence.EntityManager;
 
 import org.odk.aggregate.constants.ErrorConsts;
 import org.odk.aggregate.constants.PersistConsts;
@@ -39,15 +39,15 @@ import org.odk.aggregate.submission.SubmissionRepeat;
 import org.odk.aggregate.submission.SubmissionSet;
 import org.odk.aggregate.submission.SubmissionValue;
 import org.odk.aggregate.submission.type.GeoPoint;
+import org.odk.aggregate.submission.type.GeoPointSubmissionType;
 
-import java.text.DateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.persistence.EntityManager;
+import com.google.appengine.api.datastore.DatastoreService;
+import com.google.appengine.api.datastore.DatastoreServiceFactory;
+import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.FetchOptions;
+import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.KeyFactory;
+import com.google.appengine.api.datastore.Query;
 
 /**
  * Used to process submission results into a result table
@@ -151,18 +151,11 @@ public abstract class SubmissionTable extends SubmissionResultBase {
     return moreRecords;
   }
   
-  protected ResultTable generateSingleEntryResultTable(Key submissionKey) throws ODKIncompleteSubmissionData {
+  protected ResultTable generateSingleEntryResultTable(Submission submission) {
     // create results table
     generatePropertyNamesAndHeaders(form.getElementTreeRoot(), true);
     ResultTable results = new ResultTable(headers);
-    
-    try {
-      DatastoreService ds = DatastoreServiceFactory.getDatastoreService();  
-      getSubmissionRow(results, ds.get(submissionKey));
-    } catch (EntityNotFoundException e) {
-      throw new ODKIncompleteSubmissionData();
-    }
-    
+    getSubmissionRow(results, submission);
     return results;
   }
   /**
@@ -208,15 +201,13 @@ public abstract class SubmissionTable extends SubmissionResultBase {
       } else {
         subEntity = submissionEntities.get(count);
       }
-      getSubmissionRow(results, subEntity);
+      getSubmissionRow(results, new Submission(subEntity, form));
       count++;
     }
     return results;
   }
 
-  private void getSubmissionRow(ResultTable results, Entity subEntity)
-      throws ODKIncompleteSubmissionData {
-    Submission sub = new Submission(subEntity, form);
+  private void getSubmissionRow(ResultTable results, Submission sub) {
     Map<String, SubmissionValue> valueMap = sub.getSubmissionValuesMap();
     List<String> row = new ArrayList<String>();
     for (String propertyName : propertyNames) {
@@ -231,6 +222,8 @@ public abstract class SubmissionTable extends SubmissionResultBase {
     }
     results.addRow(row);
   }
+  
+  
   
   
   protected ResultTable generateResultRepeatTable(String kind, Key elementKey, Key submissionParentKey) throws ODKIncompleteSubmissionData {
@@ -301,6 +294,9 @@ public abstract class SubmissionTable extends SubmissionResultBase {
           }
         } else {
           row.add(null);
+          if(entry instanceof GeoPointSubmissionType) {
+            row.add(null); // need to add extra null because split for long/lat
+          }
         }
       } else if(entry instanceof SubmissionRepeat) {
         SubmissionRepeat repeat = (SubmissionRepeat) entry;

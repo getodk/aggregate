@@ -81,6 +81,20 @@ public class ServletConsts {
    * The name of the property that specifies URL of the page that requested the new page
    */
   public static final String BACK_URL = "backUrl";
+  /**
+   * The name of the property that specifies the type of interaction with an external service
+   */
+  public static final String EXTERNAL_SERVICE_TYPE = "externalServiceType";
+  /**
+   * The name of the property that specifies the session key for the doc service
+   */
+  public static final String DOC_AUTH = "docAuth";
+  /**
+   * The name of the property that specifies the session key for the doc service
+   */
+  public static final String SPREAD_AUTH = "spreadAuth";
+  
+  
   
   
   /**
@@ -158,9 +172,10 @@ public class ServletConsts {
 
   
   public static final String CSV_FILENAME_APPEND = "_results.csv";
+  
+  public static final String KML_FILENAME_APPEND = "_results.kml";
 
-
-  public static final String CREATE_SPREADSHEET_BUTTON_LABEL = "Create Spreadsheet";
+  public static final String CREATE_EXTERNAL_SERVICE_BUTTON_LABEL = "Create Connection To External Service";
 
 
   public static final String SPREADSHEET_NAME_PARAM = "SpreadsheetName";
@@ -198,7 +213,7 @@ public class ServletConsts {
   public static final String DOCS_PRE_KEY = "spreadsheet%3A";
 
 
-  public static final String AUTHORIZE_SPREADSHEET_CREATION = "Authorize Spreadsheet Creation";
+  public static final String AUTHORIZE_SPREADSHEET_CREATION = "Authorize Doc Service for Spreadsheet Creation";
 
 
   public static final String GOOGLE_DOC_EXPLANATION = "Create Google Doc Spreadsheet for Form: ";
@@ -207,9 +222,12 @@ public class ServletConsts {
   public static final String CONTINUOUS_TRANSFER_PARAM = "ContinuousTransfer";
 
 
-  public static final String AUTHORIZE_DATA_TRANSFER_BUTTON_TXT = "Authorize transfer of Data to Spreadsheet";
+  public static final String AUTHORIZE_DATA_TRANSFER_BUTTON_TXT = "Authorize Spreadsheet Service to transfer Data to Spreadsheet";
 
 
   public static final String SPREADSHEET_EXPLANATION = "Populate Spreadsheet with Data from Form: ";
+
+
+  public static final String ALREADY_EXISTS_PARAM = "alreadyExists";
   
 }

@@ -34,6 +34,7 @@ import org.odk.aggregate.parser.MultiPartFormData;
 import org.odk.aggregate.parser.MultiPartFormItem;
 
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 
 import javax.persistence.EntityManager;
@@ -77,7 +78,7 @@ public class FormUploadServlet extends ServletUtilBase {
       return;
     }
    
-    beginBasicHtmlResponse(TITLE_INFO, resp, true); // header info
+    beginBasicHtmlResponse(TITLE_INFO, resp, req, true); // header info
     
     
     PrintWriter out = resp.getWriter();
@@ -129,10 +130,11 @@ public class FormUploadServlet extends ServletUtilBase {
       String xmlFileName = "default.xml";
 
       if(formNameData != null) {
-        formName = formNameData.getStream().toString();
+        formName = formNameData.getStream().toString("UTF-8");
       }
       if(formXmlData != null) {
-        formXml =  formXmlData.getStream().toString();
+        // TODO: changed added output stream writer. probably something better exists
+        formXml =  formXmlData.getStream().toString("UTF-8");
         xmlFileName = formXmlData.getFilename();
       }
       

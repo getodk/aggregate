@@ -17,11 +17,10 @@
 
 package org.odk.aggregate.submission.type;
 
-import com.google.appengine.api.datastore.DatastoreService;
-import com.google.appengine.api.datastore.DatastoreServiceFactory;
-import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.EntityNotFoundException;
-import com.google.appengine.api.datastore.Key;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import org.odk.aggregate.constants.BasicConsts;
 import org.odk.aggregate.exception.ODKIncompleteSubmissionData;
@@ -29,10 +28,12 @@ import org.odk.aggregate.form.Form;
 import org.odk.aggregate.submission.SubmissionRepeat;
 import org.odk.aggregate.submission.SubmissionSet;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import com.google.appengine.api.datastore.DatastoreService;
+import com.google.appengine.api.datastore.DatastoreServiceFactory;
+import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.EntityNotFoundException;
+import com.google.appengine.api.datastore.Key;
+import com.google.gson.JsonObject;
 
 /**
  * Data Storage type for a repeat type. Store a list of datastore 
@@ -98,6 +99,20 @@ public class RepeatSubmissionType implements SubmissionRepeat {
     }
   }
 
+  
+  /**
+   * Add submission field value to JsonObject
+   * @param JSON Object to add value to
+   */  
+  public void addValueToJsonObject(JsonObject jsonObject, List<String> propertyNames) {
+    if (submissionSets != null) {
+      for (SubmissionSet submissionSet : submissionSets) {
+        JsonObject repeatJsonObject = submissionSet.generateJsonObject(propertyNames);
+        jsonObject.add(submissionSetName + submissionSet.getOrder(), repeatJsonObject);
+      }
+    }
+  }
+  
   public void getValueFromEntity(Entity dbEntity, Form form) throws ODKIncompleteSubmissionData {
     @SuppressWarnings("unchecked")
     List<Key> submissionSetKeys = (List<Key>) dbEntity.getProperty(getPropertyName());

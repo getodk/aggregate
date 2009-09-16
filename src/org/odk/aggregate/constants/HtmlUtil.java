@@ -16,6 +16,9 @@
 
 package org.odk.aggregate.constants;
 
+import com.google.appengine.repackaged.com.google.common.base.Pair;
+
+import org.apache.commons.lang.StringEscapeUtils;
 import org.odk.aggregate.table.ResultTable;
 
 import java.io.UnsupportedEncodingException;
@@ -38,6 +41,7 @@ public class HtmlUtil {
   private static final String HREF = "href";
   private static final String A = "a";
   private static final String INPUT = "input";
+  private static final String SELECT = "select";
   private static final String ATTR_VALUE = "value";
   private static final String ATTR_NAME = "name";
   private static final String ATTR_TYPE = "type";
@@ -90,9 +94,15 @@ public class HtmlUtil {
           } else {
             urlBuilder.append(ServletConsts.PARAM_DELIMITER);
           }
+          
+          String value = property.getValue();
+          if(value == null) {
+            value = BasicConsts.NULL;
+          }
+          
           String valueEncoded;
           try {
-            valueEncoded = URLEncoder.encode(property.getValue(), ServletConsts.ENCODE_SCHEME);
+            valueEncoded = URLEncoder.encode(value, ServletConsts.ENCODE_SCHEME);
           } catch (UnsupportedEncodingException e) {
             valueEncoded = BasicConsts.EMPTY_STRING;
           }
@@ -121,6 +131,54 @@ public class HtmlUtil {
     html.append(BasicConsts.SPACE);
     html.append(createAttribute(ATTR_SIZE, INPUT_WIDGET_SIZE_LIMIT));
     html.append(HtmlConsts.END_SELF_CLOSING_TAG);
+    return html.toString();
+  }
+  
+  public static String createRadio(String name, String value, String desc, boolean checked) {
+    StringBuilder html = new StringBuilder();
+    html.append(HtmlConsts.BEGIN_OPEN_TAG + INPUT + BasicConsts.SPACE);
+    html.append(createAttribute(ATTR_TYPE, HtmlConsts.INPUT_TYPE_RADIO));
+    if (name != null) {
+      html.append(BasicConsts.SPACE);
+      html.append(createAttribute(ATTR_NAME, name));
+    }
+    if (value != null) {
+      html.append(BasicConsts.SPACE);
+      html.append(createAttribute(ATTR_VALUE, value));
+    }
+    html.append(BasicConsts.SPACE);
+    if(checked) {
+      html.append("checked");
+    }
+    html.append(HtmlConsts.END_SELF_CLOSING_TAG);
+    html.append(desc);
+    html.append(HtmlConsts.LINE_BREAK);
+    return html.toString();
+  }
+  
+  /**
+   * 
+   * @param name The select name.
+   * @param values A list of pairs [option value, option title (text displayed to user)] for each option.
+   * @return
+   */
+  public static String createSelect(String name, List<Pair<String,String>> values) {
+    if (name == null){
+      return null;
+    }
+    StringBuilder html = new StringBuilder();
+    html.append("<select name='" + StringEscapeUtils.escapeHtml(name) + "'>");
+
+    if (values != null) {
+      for (Pair<String, String> v : values) {
+        html.append("<option value='" + StringEscapeUtils.escapeHtml(v.first) + "'>");
+        if (v.second != null) {
+          html.append(StringEscapeUtils.escapeHtml(v.second));
+        }
+        html.append("</option>");
+      }
+    }
+    html.append("</select>");
     return html.toString();
   }
 

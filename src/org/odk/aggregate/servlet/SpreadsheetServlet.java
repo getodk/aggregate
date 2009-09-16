@@ -16,18 +16,16 @@
 
 package org.odk.aggregate.servlet;
 
-import com.google.appengine.api.datastore.Key;
-import com.google.appengine.api.datastore.KeyFactory;
-import com.google.gdata.client.docs.DocsService;
-import com.google.gdata.client.http.AuthSubUtil;
-import com.google.gdata.data.PlainTextConstruct;
-import com.google.gdata.data.docs.DocumentListEntry;
-import com.google.gdata.data.docs.SpreadsheetEntry;
-import com.google.gdata.util.AuthenticationException;
-import com.google.gdata.util.ServiceException;
+import java.io.IOException;
+import java.net.URL;
+import java.security.GeneralSecurityException;
+import java.util.HashMap;
+import java.util.Map;
 
-import org.apache.commons.fileupload.FileUploadException;
-import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import javax.persistence.EntityManager;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.odk.aggregate.EMFactory;
 import org.odk.aggregate.constants.ErrorConsts;
 import org.odk.aggregate.constants.HtmlConsts;
@@ -37,22 +35,26 @@ import org.odk.aggregate.exception.ODKGDataAuthenticationError;
 import org.odk.aggregate.exception.ODKGDataServiceNotAuthenticated;
 import org.odk.aggregate.form.Form;
 import org.odk.aggregate.form.GoogleSpreadsheet;
-import org.odk.aggregate.parser.MultiPartFormData;
-import org.odk.aggregate.parser.MultiPartFormItem;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.net.URL;
-import java.net.URLDecoder;
-import java.security.GeneralSecurityException;
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.persistence.EntityManager;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.KeyFactory;
+import com.google.appengine.api.labs.taskqueue.Queue;
+import com.google.appengine.api.labs.taskqueue.QueueFactory;
+import com.google.appengine.api.labs.taskqueue.TaskOptions;
+import com.google.gdata.client.docs.DocsService;
+import com.google.gdata.client.http.AuthSubUtil;
+import com.google.gdata.data.PlainTextConstruct;
+import com.google.gdata.data.docs.DocumentListEntry;
+import com.google.gdata.data.docs.SpreadsheetEntry;
+import com.google.gdata.util.AuthenticationException;
+import com.google.gdata.util.ServiceException;
 
 public class SpreadsheetServlet extends ServletUtilBase {
+
+  // TODO: change code so a delay is not required
+  private static final int DELAY = 15000;
+
+  private static final String TOKEN_TYPE = "tokenType";
 
   /**
    * Serial number for serialization
@@ -68,9 +70,9 @@ public class SpreadsheetServlet extends ServletUtilBase {
    * Title for generated webpage
    */
   private static final String TITLE_INFO = "Create Google Doc Spreadsheet";
-  
+
   /**
-   * Handler for HTTP Get request to create xform upload page
+   * Handler for HTTP Get request to create a google spreadsheet
    * 
    * @see javax.servlet.http.HttpServlet#doGet(javax.servlet.http.HttpServletRequest,
    *      javax.servlet.http.HttpServletResponse)
@@ -84,145 +86,136 @@ public class SpreadsheetServlet extends ServletUtilBase {
     }
 
     // get parameter
+    String spreadsheetName = getParameter(req, ServletConsts.SPREADSHEET_NAME_PARAM);
     String odkFormKey = getParameter(req, ServletConsts.ODK_FORM_KEY);
-    if(odkFormKey == null) {
-      errorMissingKeyParam(resp);
+    String docSessionToken = getParameter(req, ServletConsts.DOC_AUTH);
+    String spreadSessionToken = getParameter(req, ServletConsts.SPREAD_AUTH);
+    String esType = getParameter(req, ServletConsts.EXTERNAL_SERVICE_TYPE);
+    String tokenTypeString = getParameter(req, TOKEN_TYPE);
+
+    Map<String, String> params = new HashMap<String, String>();
+    params.put(ServletConsts.SPREADSHEET_NAME_PARAM, spreadsheetName);
+    params.put(ServletConsts.ODK_FORM_KEY, odkFormKey);
+    params.put(ServletConsts.DOC_AUTH, docSessionToken);
+    params.put(ServletConsts.SPREAD_AUTH, spreadSessionToken);
+    params.put(ServletConsts.EXTERNAL_SERVICE_TYPE, esType);
+
+    if (spreadsheetName == null || odkFormKey == null) {
+      resp.sendError(HttpServletResponse.SC_BAD_REQUEST, ErrorConsts.MISSING_FORM_INFO);
       return;
     }
 
-    // get form
-    EntityManager em = EMFactory.get().createEntityManager();
-    Key formKey = KeyFactory.stringToKey(odkFormKey);
-    Form form = em.getReference(Form.class, formKey);
+    TokenType tokenType = TokenType.NONE;
 
-    
-    beginBasicHtmlResponse(TITLE_INFO, resp, true); // header info
-    PrintWriter out = resp.getWriter();
-    out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.H3, ServletConsts.GOOGLE_DOC_EXPLANATION + "<FONT COLOR=0000FF>" + form.getViewableName() + "</FONT>"));
-    
-    em.close();
-    
-    String sessionToken;
+    if (tokenTypeString != null) {
+      tokenType = TokenType.valueOf(tokenTypeString);
+    }
+
+
     try {
-      sessionToken = verifyGDataAuthorization(req, resp, ServletConsts.DOCS_SCOPE);
-    } catch (ODKGDataAuthenticationError e) {
-      return; // verifyGDataAuthroization function formats response
-    } catch (ODKGDataServiceNotAuthenticated e) {
-      out.write(HtmlConsts.LINE_BREAK);
-      out.write(HtmlUtil.createFormBeginTag(generateAuthorizationURL(req, ServletConsts.DOCS_SCOPE), null,
-          ServletConsts.POST));
-      out.write(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_SUBMIT, null,
-          ServletConsts.AUTHORIZE_SPREADSHEET_CREATION));
-      out.write(HtmlConsts.FORM_CLOSE);
-      finishBasicHtmlResponse(resp);      
-      return;
-    }
- 
-    out.write(HtmlConsts.LINE_BREAK);
-    out.write(HtmlUtil.createFormBeginTag(ADDR, ServletConsts.MULTIPART_FORM_DATA,
-        ServletConsts.POST));
-    out.write(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_HIDDEN, ServletConsts.ODK_FORM_KEY, encodeParameter(odkFormKey)));
-    out.write(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_HIDDEN, ServletConsts.TOKEN_PARAM, encodeParameter(sessionToken)));
-    out.write(ServletConsts.SPEADSHEET_NAME_LABEL + HtmlConsts.LINE_BREAK);
-    out.write(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_TEXT,
-        ServletConsts.SPREADSHEET_NAME_PARAM, null));
-    out.write(HtmlConsts.LINE_BREAK + HtmlConsts.LINE_BREAK);
-    out.write(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_SUBMIT, null,
-        ServletConsts.CREATE_SPREADSHEET_BUTTON_LABEL));
-    out.write(HtmlConsts.FORM_CLOSE);
-    finishBasicHtmlResponse(resp);
-  }
 
-  /**
-   * Handler for HTTP Post request that takes an xform, parses, and saves a
-   * parsed version in the datastore
-   * 
-   * @see javax.servlet.http.HttpServlet#doGet(javax.servlet.http.HttpServletRequest,
-   *      javax.servlet.http.HttpServletResponse)
-   */
-  @Override
-  public void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-    // verify user is logged in
-    if (!verifyCredentials(req, resp)) {
-      return;
-    }
-
-    // verify request is multipart
-    if (!ServletFileUpload.isMultipartContent(req)) {
-      resp.sendError(HttpServletResponse.SC_BAD_REQUEST, ErrorConsts.NO_MULTI_PART_CONTENT);
-      return;
-    }
-    
-    try {
-      // process form
-      MultiPartFormData uploadedFormItems = new MultiPartFormData(req);
-
-      MultiPartFormItem spreadsheetNameData =
-          uploadedFormItems.getFormDataByFieldName(ServletConsts.SPREADSHEET_NAME_PARAM);
-
-      MultiPartFormItem tokenData = uploadedFormItems.getFormDataByFieldName(ServletConsts.TOKEN_PARAM);
-      
-      MultiPartFormItem formKeyData = uploadedFormItems.getFormDataByFieldName(ServletConsts.ODK_FORM_KEY);
-      
-      String spreadsheetName = null;
-      if (spreadsheetNameData != null) {
-        spreadsheetName = URLDecoder.decode(spreadsheetNameData.getStream().toString(), ServletConsts.ENCODE_SCHEME);
-      }
-      
-      String token = null;
-      if (tokenData != null) {
-        token = URLDecoder.decode(tokenData.getStream().toString(), ServletConsts.ENCODE_SCHEME);
-      }
-
-      String odkFormKey = null; 
-      if (formKeyData != null) {
-        odkFormKey = URLDecoder.decode(formKeyData.getStream().toString(), ServletConsts.ENCODE_SCHEME);
-      }
-
-      
-      if (spreadsheetName != null && token != null && odkFormKey != null) {
-        // setup service
-        DocsService service = new DocsService(this.getServletContext().getInitParameter("application_name"));
-        service.setAuthSubToken(token, null);
-
-        // create spreadsheet
-        DocumentListEntry createdEntry = new SpreadsheetEntry();
-        createdEntry.setTitle(new PlainTextConstruct(spreadsheetName));
-        
-        DocumentListEntry updatedEntry = service.insert(new URL(ServletConsts.DOC_FEED), createdEntry);
-
-        // get key
-        String docKey =  updatedEntry.getKey();
-        String sheetKey = docKey.substring(docKey.lastIndexOf(ServletConsts.DOCS_PRE_KEY) + ServletConsts.DOCS_PRE_KEY.length());
-        
-        // get form
-        EntityManager em = EMFactory.get().createEntityManager();
-        Key formKey = KeyFactory.stringToKey(odkFormKey);
-        Form form = em.getReference(Form.class, formKey);        
-        form.addExternalRepo(new GoogleSpreadsheet(spreadsheetName, sheetKey));
-        em.close();
-
-        // remove docs permission no longer needed
+      if (tokenType.equals(TokenType.DOC)) {
         try {
-          AuthSubUtil.revokeToken(token, null);
-        } catch (GeneralSecurityException e) {
-          // TODO Auto-generated catch block
-          e.printStackTrace();
+          docSessionToken = verifyGDataAuthorization(req, resp, ServletConsts.DOCS_SCOPE);
+          params.put(ServletConsts.DOC_AUTH, docSessionToken);
+        } catch (ODKGDataAuthenticationError e) {
+          return; // verifyGDataAuthroization function formats response
+        } catch (ODKGDataServiceNotAuthenticated e) {
+          // do nothing already set to null
         }
-        
-        Map<String, String> properties = new HashMap<String, String>();
-        properties.put(ServletConsts.ODK_FORM_KEY, KeyFactory.keyToString(form.getKey()));
-        properties.put(ServletConsts.SPREADSHEET_NAME_PARAM, spreadsheetName);
-        
-        resp.sendRedirect(HtmlUtil.createLinkWithProperties(WorksheetServlet.ADDR, properties));
-        
-      } else {
-        resp.sendError(HttpServletResponse.SC_BAD_REQUEST, ErrorConsts.MISSING_FORM_INFO);
+      }
+      if (tokenType.equals(TokenType.SPREAD)) {
+        try {
+          spreadSessionToken = verifyGDataAuthorization(req, resp, ServletConsts.SPREADSHEET_SCOPE);
+          params.put(ServletConsts.SPREAD_AUTH, spreadSessionToken);
+        } catch (ODKGDataAuthenticationError e) {
+          return; // verifyGDataAuthroization function formats response
+        } catch (ODKGDataServiceNotAuthenticated e) {
+          // do nothing already set to null
+        }
+      }
+
+      // still need to obtain more authorizations
+      if (docSessionToken == null || spreadSessionToken == null) {
+        beginBasicHtmlResponse(TITLE_INFO, resp, req, true); // header info
+        if (docSessionToken == null) {
+          params.put(TOKEN_TYPE, TokenType.DOC.toString());
+          String authButton =
+              generateAuthButton(ServletConsts.DOCS_SCOPE,
+                  ServletConsts.AUTHORIZE_SPREADSHEET_CREATION, params, req, resp);
+          resp.getWriter().print(authButton);
+        } else {
+          resp.getWriter().print("Completed Doc Authorization <br>");
+        }
+
+        if (spreadSessionToken == null) {
+          params.put(TOKEN_TYPE, TokenType.SPREAD.toString());
+          String authButton =
+              generateAuthButton(ServletConsts.SPREADSHEET_SCOPE,
+                  ServletConsts.AUTHORIZE_DATA_TRANSFER_BUTTON_TXT, params, req, resp);
+          resp.getWriter().print(authButton);
+        } else {
+          resp.getWriter().print("Completed Spreadsheet Authorization <br>");
+        }
+
+        finishBasicHtmlResponse(resp);
         return;
       }
-      
-    } catch (FileUploadException e) {
-      e.printStackTrace(resp.getWriter());
+
+
+
+      // setup service
+      DocsService service =
+          new DocsService(this.getServletContext().getInitParameter("application_name"));
+      service.setAuthSubToken(docSessionToken, null);
+
+      // create spreadsheet
+      DocumentListEntry createdEntry = new SpreadsheetEntry();
+      createdEntry.setTitle(new PlainTextConstruct(spreadsheetName));
+
+      DocumentListEntry updatedEntry =
+          service.insert(new URL(ServletConsts.DOC_FEED), createdEntry);
+
+      // get key
+      String docKey = updatedEntry.getKey();
+      String sheetKey =
+          docKey.substring(docKey.lastIndexOf(ServletConsts.DOCS_PRE_KEY)
+              + ServletConsts.DOCS_PRE_KEY.length());
+
+      // get form
+      EntityManager em = EMFactory.get().createEntityManager();
+      Key formKey = KeyFactory.stringToKey(odkFormKey);
+      Form form = em.getReference(Form.class, formKey);
+
+      // create spreadsheet
+      GoogleSpreadsheet spreadsheet = new GoogleSpreadsheet(spreadsheetName, sheetKey);
+      spreadsheet.setAuthToken(spreadSessionToken);
+
+      form.addGoogleSpreadsheet(spreadsheet);
+      em.close();
+
+      // remove docs permission no longer needed
+      try {
+        AuthSubUtil.revokeToken(docSessionToken, null);
+      } catch (GeneralSecurityException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
+
+      TaskOptions task = TaskOptions.Builder.url("/" + WorksheetServlet.ADDR);
+      task.method(TaskOptions.Method.GET);
+      task.countdownMillis(DELAY);
+      task.param(ServletConsts.SPREADSHEET_NAME_PARAM, spreadsheetName);
+      task.param(ServletConsts.ODK_FORM_KEY, odkFormKey);
+      task.param(ServletConsts.EXTERNAL_SERVICE_TYPE, esType);
+
+      Queue queue = QueueFactory.getDefaultQueue();
+      try {
+        queue.add(task);
+      } catch (Exception e) {
+        System.out.println("PROBLEM WITH TASK");
+        e.printStackTrace();
+      }
     } catch (AuthenticationException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
@@ -230,6 +223,30 @@ public class SpreadsheetServlet extends ServletUtilBase {
       // TODO Auto-generated catch block
       e.printStackTrace();
     }
+
+    resp.sendRedirect(ServletConsts.WEB_ROOT);
+  }
+
+  private String generateAuthButton(String scope, String buttonText, Map<String, String> params,
+      HttpServletRequest req, HttpServletResponse resp) throws IOException {
+
+    String returnUrl =
+        "http://"
+            + HtmlUtil.createLinkWithProperties(getServerURL(req) + req.getRequestURI(), params);
+
+    String requestUrl = AuthSubUtil.getRequestUrl(returnUrl, scope, false, true);
+
+    StringBuilder form = new StringBuilder();
+    form.append(HtmlConsts.LINE_BREAK);
+    form.append(HtmlUtil.createFormBeginTag(requestUrl, null, ServletConsts.POST));
+    form.append(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_SUBMIT, null, buttonText));
+    form.append(HtmlConsts.FORM_CLOSE);
+
+    return form.toString();
+  }
+
+  private enum TokenType {
+    NONE, DOC, SPREAD;
   }
 
 }

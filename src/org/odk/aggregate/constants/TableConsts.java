@@ -31,6 +31,9 @@ public class TableConsts {
   public static final String XML_BUTTON_TXT = "View XML";
   public static final String CSV_BUTTON_TXT = "Download CSV";
   public static final String RESULTS_BUTTON_TXT = "View Submissions";
+  public static final String EXTERNAL_SERVICE_BUTTON_TXT = "External Service Connection";
+  public static final String KML_BUTTON_TXT = "Create KML File";
+
   
   // form table headers
   public static final String FT_HEADER_SUBMISSION = "Test Entry/Submission";
@@ -40,7 +43,9 @@ public class TableConsts {
   public static final String FT_HEADER_USER = "User";
   public static final String FT_HEADER_ODKID = "ODK Unique Identifier";
   public static final String FT_HEADER_NAME = "Name";
- 
+  public static final String FT_HEADER_KML = "KML File";
+  public static final String FT_HEADER_EXTERNAL_SERVICE = "Send Submissions to External Service";
+  
   // submission headers
   public static final String SUBMISSION_DATE_HEADER = "SubmissionDate";
   
@@ -58,5 +63,6 @@ public class TableConsts {
   
   // constant as only needs to be created once
   public static final Date EPOCH = new Date(0);
+
 
 }

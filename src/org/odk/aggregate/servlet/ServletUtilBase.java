@@ -49,6 +49,8 @@ import javax.servlet.http.HttpServletResponse;
 @SuppressWarnings("serial")
 public class ServletUtilBase extends HttpServlet {
 
+  private static final String HOST_HEADER = "Host";
+
   /**
    * Takes the request and displays request in plain text in the response
    * 
@@ -104,7 +106,7 @@ public class ServletUtilBase extends HttpServlet {
       throws IOException {
     UserService userService = UserServiceFactory.getUserService();
     if (!userService.isUserLoggedIn()) {
-      beginBasicHtmlResponse("Login Required", resp, false);
+      beginBasicHtmlResponse("Login Required", resp, req, false);
       String returnUrl = req.getRequestURI() + ServletConsts.BEGIN_PARAM + req.getQueryString();
       String loginHtml =
           HtmlUtil.wrapWithHtmlTags(HtmlConsts.P, "Please "
@@ -125,11 +127,13 @@ public class ServletUtilBase extends HttpServlet {
    * 
    * @param pageName name that should appear on the top of the page
    * @param resp http response to have the information appended to
+   * @param req TODO
    * @param displayLinks display links accross the top
    * @throws IOException
    */
   protected void beginBasicHtmlResponse(String pageName, HttpServletResponse resp,
-      boolean displayLinks) throws IOException {
+      HttpServletRequest req, boolean displayLinks) throws IOException {
+    resp.addHeader(HOST_HEADER, getServerURL(req));
     resp.setContentType(ServletConsts.RESP_TYPE_HTML);
     resp.setCharacterEncoding(ServletConsts.ENCODE_SCHEME);
     PrintWriter out = resp.getWriter();
@@ -221,6 +225,14 @@ public class ServletUtilBase extends HttpServlet {
     if (encodedParamter != null) {
       parameter = URLDecoder.decode(encodedParamter, ServletConsts.ENCODE_SCHEME);
     }
+    
+    // TODO: consider if aggregate should really be passing nulls in parameters
+    // TODO: FIX!!! as null happens when parameter not present, but what about passing nulls?
+    if(parameter != null) {
+      if(parameter.equals(BasicConsts.NULL)) {
+        return null;
+      }
+    } 
     return parameter;
   }
 
@@ -274,6 +286,7 @@ public class ServletUtilBase extends HttpServlet {
       try {
         sessionToken = AuthSubUtil.exchangeForSessionToken(onetimeUseToken, null);
       } catch (AuthenticationException e) {
+        e.printStackTrace();
         resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
             "Server rejected one time use token.");
         throw new ODKGDataAuthenticationError();
@@ -305,6 +318,7 @@ public class ServletUtilBase extends HttpServlet {
     return sessionToken;
   }
 
+  // TODO: see if can integrate better with helper functions in SpreadsheetServlet
   protected String generateAuthorizationURL(HttpServletRequest req, String scope) {
     String returnUrl =
         "http://" + getServerURL(req) + req.getRequestURI() + ServletConsts.BEGIN_PARAM
@@ -312,5 +326,5 @@ public class ServletUtilBase extends HttpServlet {
     String requestUrl = AuthSubUtil.getRequestUrl(returnUrl, scope, false, true);
     return requestUrl;
   }
-
+  
 }

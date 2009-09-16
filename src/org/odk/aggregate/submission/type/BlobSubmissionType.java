@@ -16,56 +16,83 @@
 
 package org.odk.aggregate.submission.type;
 
-import com.google.appengine.api.datastore.Blob;
-import com.google.appengine.api.datastore.Key;
+
+import java.util.List;
 
 import org.odk.aggregate.constants.ErrorConsts;
 import org.odk.aggregate.exception.ODKConversionException;
 import org.odk.aggregate.submission.SubmissionBlob;
 
+import com.google.appengine.api.datastore.Blob;
+import com.google.appengine.api.datastore.EntityNotFoundException;
+import com.google.appengine.api.datastore.Key;
+import com.google.appengine.repackaged.com.google.common.util.Base64;
+import com.google.gson.JsonObject;
+
 /**
  * Data Storage Converter for Blob Type
- *
+ * 
  * @author wbrunette@gmail.com
- *
+ * 
  */
 public class BlobSubmissionType extends SubmissionSingleValueBase<Key> {
   /**
-   * Constructor 
+   * Constructor
    * 
-   * @param propertyName
-   *    Name of submission element 
+   * @param propertyName Name of submission element
    */
   public BlobSubmissionType(String propertyName) {
     super(propertyName, true);
   }
 
   /**
-   * Convert value from byte array to data store blob type. Store blob
-   * in blob storage and save the key of the blob storage into submission set.
+   * Convert value from byte array to data store blob type. Store blob in blob
+   * storage and save the key of the blob storage into submission set.
    * 
-   * @param byteArray
-   *    array of bytes
-   *   
-   * @param submissionSetKey
-   *    submission set key that will reference the blob 
-   *   
+   * @param byteArray array of bytes
+   * 
+   * @param submissionSetKey submission set key that will reference the blob
+   * 
    */
   @Override
-  public void setValueFromByteArray(byte [] byteArray, Key submissionSetKey) {
+  public void setValueFromByteArray(byte[] byteArray, Key submissionSetKey) {
     SubmissionBlob blob = new SubmissionBlob(new Blob(byteArray), submissionSetKey);
     setValue(blob.getKey());
   }
-  
+
   /**
    * Cannot convert blob from a string
    * 
-   * @param value 
+   * @param value
    * @throws ODKConversionException
-   */  
+   */
   @Override
-  public void setValueFromString(String value) throws ODKConversionException{
+  public void setValueFromString(String value) throws ODKConversionException {
     throw new ODKConversionException(ErrorConsts.NO_STRING_TO_BLOB_CONVERT);
+  }
+
+  /**
+   * Add submission field value to JsonObject
+   * @param JSON Object to add value to
+   */
+  @Override
+  public void addValueToJsonObject(JsonObject jsonObject, List<String> propertyNames) {
+    if(getValue() == null) {
+      return;
+    }
+    if(!propertyNames.contains(propertyName)){
+      return;
+    }
+    try {
+      SubmissionBlob blobStore = new SubmissionBlob(getValue());
+      Blob imageBlob = blobStore.getBlob();
+      if (imageBlob != null) {
+        jsonObject.addProperty(propertyName, Base64.encode(imageBlob.getBytes()));
+      }
+
+    } catch (EntityNotFoundException e) {
+      // TODO: consider better error handling, right now just skip adding to object
+    }
   }
 
   /**
@@ -81,4 +108,5 @@ public class BlobSubmissionType extends SubmissionSingleValueBase<Key> {
     }
     return true;
   }
+
 }

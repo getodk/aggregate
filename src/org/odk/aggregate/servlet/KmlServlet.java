@@ -16,14 +16,11 @@
 
 package org.odk.aggregate.servlet;
 
-import com.google.appengine.api.datastore.Key;
-import com.google.appengine.api.datastore.KeyFactory;
-
 import org.odk.aggregate.EMFactory;
 import org.odk.aggregate.constants.ServletConsts;
 import org.odk.aggregate.exception.ODKFormNotFoundException;
 import org.odk.aggregate.exception.ODKIncompleteSubmissionData;
-import org.odk.aggregate.table.SubmissionHtmlTable;
+import org.odk.aggregate.table.SubmissionKml;
 
 import java.io.IOException;
 
@@ -32,30 +29,20 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * Servlet generates a webpage with a list of submissions 
- * from a repeat node of a form
+ * Servlet to generate a KML file for download
  *
- * @author wbrunette@gmail.com
+ * @author alerer@gmail.com, wbrunette@gmail.com
  *
  */
-public class FormMultipleValueServlet extends ServletUtilBase {
-  /**
-   *  Serial number for serialization
-   */
-  private static final long serialVersionUID = -5870882843863177371L;
+public class KmlServlet extends ServletUtilBase {
 
   /**
    * URI from base
    */
-  public static final String ADDR = "formMultipleValue";
+  public static final String ADDR = "kml";
 
   /**
-   * Title for generated webpage
-   */
-  private static final String TITLE_INFO = "Submissions Results: ";
-
-  /**
-   * Handler for HTTP Get request that responds with list of values from a repeat
+   * Handler for HTTP Get request that responds with CSV
    * 
    * @see javax.servlet.http.HttpServlet#doGet(javax.servlet.http.HttpServletRequest,
    *      javax.servlet.http.HttpServletResponse)
@@ -67,40 +54,37 @@ public class FormMultipleValueServlet extends ServletUtilBase {
     if (!verifyCredentials(req, resp)) {
       return;
     }
-    
+   
     // get parameter
     String odkId = getParameter(req, ServletConsts.ODK_ID);
-    String kind = getParameter(req, ServletConsts.KIND);
-    String elementKeyString = getParameter(req, ServletConsts.FORM_ELEMENT_KEY);
-    String submissionParentKeyString = getParameter(req, ServletConsts.PARENT_KEY);
     
-    if(odkId == null || kind == null || elementKeyString == null || submissionParentKeyString == null) {
-      sendErrorNotEnoughParams(resp);
+    String geopointField = getParameter(req, "geopointField");
+    String titleField = getParameter(req, "titleField");
+    String imageField = getParameter(req, "imageField");
+    
+    if(odkId == null || geopointField == null) {
+      errorMissingKeyParam(resp);
       return;
     }
-    
-    Key elementKey = KeyFactory.stringToKey(elementKeyString);
-    Key submissionParentKey = KeyFactory.stringToKey(submissionParentKeyString);
 
-    // header info
-    beginBasicHtmlResponse(TITLE_INFO + kind, resp, req, true);
-    
     EntityManager em = EMFactory.get().createEntityManager();
-    
+
     try {
-      String html = new SubmissionHtmlTable(getServerURL(req), odkId, em).generateHtmlSubmissionRepeatResultsTable(kind, elementKey, submissionParentKey);
-      resp.getWriter().print(html);
-      
-      // footer info
-      finishBasicHtmlResponse(resp);
-      
+      resp.setContentType(ServletConsts.RESP_TYPE_ENRICHED);
+      setDownloadFileName(resp, odkId + ServletConsts.KML_FILENAME_APPEND);
+
+      // create KML
+      SubmissionKml submissions = new SubmissionKml(odkId, req.getServerName(), em, geopointField, titleField, imageField);
+      submissions.generateKml(resp.getWriter());
     } catch (ODKFormNotFoundException e) {
       odkIdNotFoundError(resp);
-    } catch (ODKIncompleteSubmissionData e) {
+    }catch (ODKIncompleteSubmissionData e) {
       errorRetreivingData(resp);
     } finally {
       em.close();
     }
-
   }
+  
+
+
 }
