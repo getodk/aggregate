@@ -132,6 +132,14 @@ public class Form {
   @OneToMany(cascade=CascadeType.ALL)
   private List<RhizaInsight> insightExternalRepos;
 
+  
+  /**
+   * A list of fusion tables to update
+   */
+  @OneToMany(cascade=CascadeType.ALL)
+  private List<FusionTable> fusionTableExternalRepos;
+  
+  
   @Transient
   private Map<String, FormElement> repeatElementMap;
     
@@ -168,9 +176,26 @@ public class Form {
       allExternalRepos.addAll(spreadsheetExternalRepos);
     if(insightExternalRepos != null)
       allExternalRepos.addAll(insightExternalRepos);
+    if(fusionTableExternalRepos != null)
+        allExternalRepos.addAll(fusionTableExternalRepos);
     return allExternalRepos;
   }
 
+  public List<FusionTable> getFusionTableExternalRepos() {
+      return fusionTableExternalRepos;
+    }
+
+    public void removeFusionTableExternalRepos() {
+      fusionTableExternalRepos.clear();
+    }
+
+    public void addExternalRepos(FusionTable fusionTableInstance) {
+      if(fusionTableExternalRepos == null) {
+          fusionTableExternalRepos = new ArrayList<FusionTable>();
+      }
+      fusionTableExternalRepos.add(fusionTableInstance);
+    }
+    
   public List<RhizaInsight> getInsightExternalRepos() {
     return insightExternalRepos;
   }
@@ -185,6 +210,7 @@ public class Form {
     }
     insightExternalRepos.add(insightInstance);
   }
+  
   
   public void addGoogleSpreadsheet(GoogleSpreadsheet sheet) {
     if(spreadsheetExternalRepos == null) {
