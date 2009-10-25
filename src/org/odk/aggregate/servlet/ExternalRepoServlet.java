@@ -95,6 +95,7 @@ public class ExternalRepoServlet extends ServletUtilBase{
       // TODO: change so is based off enum
       out.write(generateServiceButton(odkFormKey, ExternalService.GOOGLE_SPREADSHEET));
       out.write(generateServiceButton(odkFormKey, ExternalService.RHIZA_INSIGHT));
+      out.write(generateServiceButton(odkFormKey, ExternalService.GOOGLE_FUSIONTABLES));
       
     } else {
       ExternalService service = ExternalService.valueOf(serviceString);
@@ -147,7 +148,8 @@ public class ExternalRepoServlet extends ServletUtilBase{
   
   private enum ExternalService {
     GOOGLE_SPREADSHEET("Google Spreadsheet", SpreadsheetServlet.ADDR, ServletConsts.SPEADSHEET_NAME_LABEL),
-    RHIZA_INSIGHT("Rhiza Insight", InsightServlet.ADDR, "Rhiza Insight Server Address");
+    RHIZA_INSIGHT("Rhiza Insight", InsightServlet.ADDR, "Rhiza Insight Server Address"),
+    GOOGLE_FUSIONTABLES("Google FusionTables", FusionTableServlet.ADDR, "Fusion Table ID");
     
     private String serviceName;
     

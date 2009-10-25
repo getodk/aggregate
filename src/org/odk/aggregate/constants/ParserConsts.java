@@ -26,7 +26,7 @@ public class ParserConsts {
 
   public static final String DEFAULT_NAMESPACE = "DEFAULT";
 
-  public static final String ODK_ATTRIBUTE_NAME = "odk_form";
+  public static final String ODK_ATTRIBUTE_NAME = "id";
 
   public static final String NAMESPACE_ATTRIBUTE = "xmlns";
 

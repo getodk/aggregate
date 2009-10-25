@@ -41,7 +41,7 @@ public class TableConsts {
   public static final String FT_HEADER_CSV = "Submissions in CSV";
   public static final String FT_HEADER_RESULTS = "Submission Results";
   public static final String FT_HEADER_USER = "User";
-  public static final String FT_HEADER_ODKID = "ODK Unique Identifier";
+  public static final String FT_HEADER_ODKID = "Identifier";
   public static final String FT_HEADER_NAME = "Name";
   public static final String FT_HEADER_KML = "KML File";
   public static final String FT_HEADER_EXTERNAL_SERVICE = "Send Submissions to External Service";
