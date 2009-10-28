@@ -54,7 +54,7 @@ public class RhizaInsight implements RemoteServer {
   private Key key;
 
   /**
-   * Name of spreadsheet
+   * URL of Insight Server
    */
   @Enumerated
   private Link serverUrl;

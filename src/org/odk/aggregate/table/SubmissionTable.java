@@ -25,6 +25,7 @@ import java.util.Map;
 
 import javax.persistence.EntityManager;
 
+import org.odk.aggregate.constants.BasicConsts;
 import org.odk.aggregate.constants.ErrorConsts;
 import org.odk.aggregate.constants.PersistConsts;
 import org.odk.aggregate.constants.ServletConsts;
@@ -69,6 +70,20 @@ public abstract class SubmissionTable extends SubmissionResultBase {
    */
   protected SubmissionTable(Form xform, String webServerName, EntityManager entityManager, int fetchSizeLimit) {
     super(xform, webServerName, entityManager, fetchSizeLimit);
+    moreRecords = false;
+  }
+  
+  /**
+   * Constructs a table utils for the form
+   * @param xform TODO
+   * @param webServerName TODO
+   * @param entityManager
+   *    the persistence manager used to manage generating the tables
+   * @param fetchSizeLimit TODO
+   * @param separateGeopoint TODO
+   */
+  protected SubmissionTable(Form xform, String webServerName, EntityManager entityManager, int fetchSizeLimit, boolean separateGeopoint) {
+    super(xform, webServerName, entityManager, fetchSizeLimit, separateGeopoint);
     moreRecords = false;
   }
   
@@ -272,22 +287,23 @@ public abstract class SubmissionTable extends SubmissionResultBase {
               System.err.println(ErrorConsts.NOT_A_KEY);
             }
           } else {
-            if(value instanceof GeoPoint) {
-              GeoPoint coordinate = (GeoPoint) value;
-              if(coordinate.getLatitude() != null)
-              {
-                row.add(coordinate.getLatitude().toString());
-              } else {
-                row.add(null);
-              }
-              
-              if(coordinate.getLongitude() != null)
-              {
-                row.add(coordinate.getLongitude().toString());
-              } else {
-                row.add(null);
-              }
+		    if (value instanceof GeoPoint) {
+		       GeoPoint coordinate = (GeoPoint) value;
+			   if (separateCoordinates) {
+				  if (coordinate.getLatitude() != null) {
+					 row.add(coordinate.getLatitude().toString());
+				  } else {
+					 row.add(null);
+				  }
 
+				  if (coordinate.getLongitude() != null) {
+					 row.add(coordinate.getLongitude().toString());
+				  } else {
+					 row.add(null);
+				  }
+			   } else {
+				   row.add(coordinate.getLatitude().toString() + BasicConsts.COMMA + BasicConsts.SPACE + coordinate.getLongitude().toString());
+			   }
             } else {
               row.add(value.toString());
             }

@@ -16,18 +16,18 @@
 
 package org.odk.aggregate.form.remoteserver;
 
-import com.google.appengine.api.datastore.Key;
-
-import org.odk.aggregate.form.Form;
-import org.odk.aggregate.submission.Submission;
-import org.odk.aggregate.table.SubmissionSpreadsheetTable;
-
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+
+import org.odk.aggregate.form.Form;
+import org.odk.aggregate.submission.Submission;
+import org.odk.aggregate.table.SubmissionSpreadsheetTable;
+
+import com.google.appengine.api.datastore.Key;
 
 @Entity
 public class GoogleSpreadsheet implements RemoteServer{

@@ -191,7 +191,7 @@ public class Form {
 		fusionTableExternalRepos.clear();
 	}
 
-	public void addExternalRepos(FusionTable fusionTableInstance) {
+	public void addFusionExternalRepos(FusionTable fusionTableInstance) {
 		if (fusionTableExternalRepos == null) {
 			fusionTableExternalRepos = new ArrayList<FusionTable>();
 		}

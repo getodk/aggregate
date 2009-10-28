@@ -31,7 +31,7 @@ public class BasicConsts {
   
   // general constants
   public static final String NEW_LINE = "\n";
-  public static final String CSV_DELIMITER = ",";
+  public static final String COMMA = ",";
   public static final String SPACE = " ";
   public static final String TAB = "\t";
   public static final String GREATER_THAN = ">";
@@ -41,10 +41,13 @@ public class BasicConsts {
   public static final String FORWARDSLASH = "/";
   public static final String TRUE = "true";
   public static final String QUOTE = "\"";
+  public static final String SINGLE_QUOTE = "'";
   public static final String SEMI_COLON = ";";
   public static final String COLON = ":";
   public static final String LONGITUDE = "Longitude";
   public static final String LATITUDE = "Latitude";
   public static final String UNDERSCORE = "_";
   public static final String DASH = "-";
+  
+  public static final String CSV_DELIMITER = COMMA;
 }

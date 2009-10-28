@@ -28,8 +28,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.odk.aggregate.EMFactory;
 import org.odk.aggregate.constants.ErrorConsts;
-import org.odk.aggregate.constants.HtmlConsts;
-import org.odk.aggregate.constants.HtmlUtil;
 import org.odk.aggregate.constants.ServletConsts;
 import org.odk.aggregate.exception.ODKGDataAuthenticationError;
 import org.odk.aggregate.exception.ODKGDataServiceNotAuthenticated;
@@ -225,24 +223,6 @@ public class SpreadsheetServlet extends ServletUtilBase {
     }
 
     resp.sendRedirect(ServletConsts.WEB_ROOT);
-  }
-
-  private String generateAuthButton(String scope, String buttonText, Map<String, String> params,
-      HttpServletRequest req, HttpServletResponse resp) throws IOException {
-
-    String returnUrl =
-        "http://"
-            + HtmlUtil.createLinkWithProperties(getServerURL(req) + req.getRequestURI(), params);
-
-    String requestUrl = AuthSubUtil.getRequestUrl(returnUrl, scope, false, true);
-
-    StringBuilder form = new StringBuilder();
-    form.append(HtmlConsts.LINE_BREAK);
-    form.append(HtmlUtil.createFormBeginTag(requestUrl, null, ServletConsts.POST));
-    form.append(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_SUBMIT, null, buttonText));
-    form.append(HtmlConsts.FORM_CLOSE);
-
-    return form.toString();
   }
 
   private enum TokenType {

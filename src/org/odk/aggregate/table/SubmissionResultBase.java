@@ -49,6 +49,25 @@ public abstract class SubmissionResultBase {
   protected List<String> propertyNames;
   protected Map<String, SubmissionFieldType> headerTypes;
 
+  protected boolean separateCoordinates;
+
+  /**
+   * Constructs a submission result base
+   * @param xform TODO
+   * @param webServerName TODO
+   * @param entityManager
+   *    the persistence manager used to manage generating the tables
+   * @param fetchSizeLimit TODO
+   */
+  protected SubmissionResultBase(Form xform, String webServerName, EntityManager entityManager, int fetchSizeLimit, boolean separateGeopoint) {
+    odkId = xform.getOdkId();
+    em = entityManager;
+    form = xform;
+    fetchLimit = fetchSizeLimit;
+    baseServerUrl = HtmlUtil.createUrl(webServerName);
+    separateCoordinates = separateGeopoint;
+  }
+  
   /**
    * Constructs a submission result base
    * @param xform TODO
@@ -63,6 +82,7 @@ public abstract class SubmissionResultBase {
     form = xform;
     fetchLimit = fetchSizeLimit;
     baseServerUrl = HtmlUtil.createUrl(webServerName);
+    separateCoordinates = true;
   }
   
   /**
@@ -82,6 +102,7 @@ public abstract class SubmissionResultBase {
     form = Form.retrieveForm(em, odkId);
     fetchLimit = fetchSizeLimit;
     baseServerUrl = HtmlUtil.createUrl(webServerName);
+    separateCoordinates = true;
   }
   
 
@@ -106,7 +127,7 @@ public abstract class SubmissionResultBase {
         }
       }
     } else {
-      if(node.getSubmissionFieldType().equals(SubmissionFieldType.GEOPOINT)) {
+      if(node.getSubmissionFieldType().equals(SubmissionFieldType.GEOPOINT) && separateCoordinates) {
         addToHeaders(node.getElementName() + BasicConsts.DASH + BasicConsts.LATITUDE, node.getSubmissionFieldType());
         addToHeaders(node.getElementName() + BasicConsts.DASH + BasicConsts.LONGITUDE, node.getSubmissionFieldType());
       } else {

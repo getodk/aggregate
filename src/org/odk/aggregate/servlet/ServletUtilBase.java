@@ -326,5 +326,23 @@ public class ServletUtilBase extends HttpServlet {
     String requestUrl = AuthSubUtil.getRequestUrl(returnUrl, scope, false, true);
     return requestUrl;
   }
+
+protected String generateAuthButton(String scope, String buttonText, Map<String, String> params,
+		HttpServletRequest req, HttpServletResponse resp) throws IOException {
+		
+		    String returnUrl =
+		        "http://"
+		            + HtmlUtil.createLinkWithProperties(getServerURL(req) + req.getRequestURI(), params);
+		
+		    String requestUrl = AuthSubUtil.getRequestUrl(returnUrl, scope, false, true);
+		
+		    StringBuilder form = new StringBuilder();
+		    form.append(HtmlConsts.LINE_BREAK);
+		    form.append(HtmlUtil.createFormBeginTag(requestUrl, null, ServletConsts.POST));
+		    form.append(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_SUBMIT, null, buttonText));
+		    form.append(HtmlConsts.FORM_CLOSE);
+		
+		    return form.toString();
+		  }
   
 }

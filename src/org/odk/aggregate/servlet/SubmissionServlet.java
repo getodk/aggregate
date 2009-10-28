@@ -18,6 +18,7 @@ package org.odk.aggregate.servlet;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
@@ -132,8 +133,9 @@ public class SubmissionServlet extends ServletUtilBase {
       String appName = this.getServletContext().getInitParameter("application_name");
       Submission submission = submissionParser.getSubmission();
 
+      List<RemoteServer> tmp = form.getExternalRepos();
       // send information to remote servers that need to be notified
-      for (RemoteServer rs : form.getExternalRepos()) {
+      for (RemoteServer rs : tmp) {
         rs.sendSubmissionToRemoteServer(form, req.getServerName(), em, appName, submission);
       }
     } catch (ODKFormNotFoundException e) {

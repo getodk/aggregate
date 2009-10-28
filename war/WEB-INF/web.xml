@@ -114,6 +114,16 @@
     <url-pattern>/insightData</url-pattern>
   </servlet-mapping>
 
+  <servlet>
+    <servlet-name>fusiontables</servlet-name>
+    <servlet-class>org.odk.aggregate.servlet.FusionTableServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>fusiontables</servlet-name>
+    <url-pattern>/fusiontables</url-pattern>
+  </servlet-mapping>
+
+
 
   <servlet>
     <servlet-name>spreadsheet</servlet-name>
