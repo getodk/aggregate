@@ -33,7 +33,7 @@ import com.google.gdata.util.ServiceException;
 public class SubmissionFusionTable extends SubmissionTable {
 
     public static final String USER = "odk.team";
-    public static final String PASS = "4z7cLAQb";
+    public static final String PASS = "";
 	
 	  public static final String URL_STRING = "http://tables.googlelabs.com/api/query";
 

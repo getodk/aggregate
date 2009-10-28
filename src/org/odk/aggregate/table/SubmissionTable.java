@@ -302,7 +302,11 @@ public abstract class SubmissionTable extends SubmissionResultBase {
 					 row.add(null);
 				  }
 			   } else {
-				   row.add(coordinate.getLatitude().toString() + BasicConsts.COMMA + BasicConsts.SPACE + coordinate.getLongitude().toString());
+			       if (coordinate.getLongitude() != null && coordinate.getLatitude() != null) {
+			           row.add(coordinate.getLatitude().toString() + BasicConsts.COMMA + BasicConsts.SPACE + coordinate.getLongitude().toString());
+			       } else {
+			           row.add(null);
+			       }
 			   }
             } else {
               row.add(value.toString());

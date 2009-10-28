@@ -98,6 +98,8 @@ public class FusionTableServlet extends ServletUtilBase {
 		}
 		
 		em.close();
+	    resp.sendRedirect(ServletConsts.WEB_ROOT);
+
 	}
 	
 
