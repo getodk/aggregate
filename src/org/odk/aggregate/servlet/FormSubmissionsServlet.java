@@ -16,15 +16,6 @@
 
 package org.odk.aggregate.servlet;
 
-import org.odk.aggregate.EMFactory;
-import org.odk.aggregate.constants.HtmlConsts;
-import org.odk.aggregate.constants.HtmlUtil;
-import org.odk.aggregate.constants.ServletConsts;
-import org.odk.aggregate.constants.TableConsts;
-import org.odk.aggregate.exception.ODKFormNotFoundException;
-import org.odk.aggregate.exception.ODKIncompleteSubmissionData;
-import org.odk.aggregate.table.SubmissionHtmlTable;
-
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -35,6 +26,15 @@ import java.util.Map;
 import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.odk.aggregate.EMFactory;
+import org.odk.aggregate.constants.HtmlConsts;
+import org.odk.aggregate.constants.HtmlUtil;
+import org.odk.aggregate.constants.ServletConsts;
+import org.odk.aggregate.constants.TableConsts;
+import org.odk.aggregate.exception.ODKFormNotFoundException;
+import org.odk.aggregate.exception.ODKIncompleteSubmissionData;
+import org.odk.aggregate.table.SubmissionHtmlTable;
 
 /**
  * Servlet generates a webpage with a list of submissions from a specified form

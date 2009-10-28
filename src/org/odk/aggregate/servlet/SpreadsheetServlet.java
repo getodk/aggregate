@@ -34,7 +34,7 @@ import org.odk.aggregate.constants.ServletConsts;
 import org.odk.aggregate.exception.ODKGDataAuthenticationError;
 import org.odk.aggregate.exception.ODKGDataServiceNotAuthenticated;
 import org.odk.aggregate.form.Form;
-import org.odk.aggregate.form.GoogleSpreadsheet;
+import org.odk.aggregate.form.remoteserver.GoogleSpreadsheet;
 
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;

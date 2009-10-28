@@ -37,7 +37,7 @@ import org.odk.aggregate.constants.PersistConsts;
 import org.odk.aggregate.constants.ServletConsts;
 import org.odk.aggregate.exception.ODKIncompleteSubmissionData;
 import org.odk.aggregate.form.Form;
-import org.odk.aggregate.form.RhizaInsight;
+import org.odk.aggregate.form.remoteserver.RhizaInsight;
 import org.odk.aggregate.report.FormProperties;
 import org.odk.aggregate.submission.Submission;
 import org.odk.aggregate.submission.SubmissionFieldType;
@@ -54,7 +54,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 public class InsightServlet extends ServletUtilBase {
-  private static final int DELAY = 6000;
   /**
    * Serial number for serialization
    */
@@ -164,14 +163,15 @@ public class InsightServlet extends ServletUtilBase {
 
       System.out.println(connection.getResponseMessage());
       if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+        InputStreamReader is = new InputStreamReader(connection.getInputStream());
+        BufferedReader reader = new BufferedReader(is);
         
         String responseLine = reader.readLine();
         while(responseLine != null) {
           System.out.print(responseLine);
           responseLine = reader.readLine();
         }
-      
+        is.close();
       } else {
         System.out.println("FAILURE OF RHIZA DATA COLLECTION CREATION");
       }

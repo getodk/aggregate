@@ -16,19 +16,6 @@
 
 package org.odk.aggregate.servlet;
 
-import com.google.appengine.api.users.UserService;
-import com.google.appengine.api.users.UserServiceFactory;
-import com.google.gdata.client.http.AuthSubUtil;
-import com.google.gdata.util.AuthenticationException;
-
-import org.odk.aggregate.constants.BasicConsts;
-import org.odk.aggregate.constants.ErrorConsts;
-import org.odk.aggregate.constants.HtmlConsts;
-import org.odk.aggregate.constants.HtmlUtil;
-import org.odk.aggregate.constants.ServletConsts;
-import org.odk.aggregate.exception.ODKGDataAuthenticationError;
-import org.odk.aggregate.exception.ODKGDataServiceNotAuthenticated;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -41,6 +28,19 @@ import java.util.Map;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.odk.aggregate.constants.BasicConsts;
+import org.odk.aggregate.constants.ErrorConsts;
+import org.odk.aggregate.constants.HtmlConsts;
+import org.odk.aggregate.constants.HtmlUtil;
+import org.odk.aggregate.constants.ServletConsts;
+import org.odk.aggregate.exception.ODKGDataAuthenticationError;
+import org.odk.aggregate.exception.ODKGDataServiceNotAuthenticated;
+
+import com.google.appengine.api.users.UserService;
+import com.google.appengine.api.users.UserServiceFactory;
+import com.google.gdata.client.http.AuthSubUtil;
+import com.google.gdata.util.AuthenticationException;
 
 /**
  * Base class for Servlets that contain useful utilities

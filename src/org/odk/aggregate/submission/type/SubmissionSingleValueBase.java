@@ -92,7 +92,7 @@ public abstract class SubmissionSingleValueBase<T> extends SubmissionFieldBase<T
    */
   @Override
   public boolean equals(Object obj) {
-    if (!(obj instanceof SubmissionSingleValueBase)) {
+    if (!(obj instanceof SubmissionSingleValueBase<?>)) {
       return false;
     }
     

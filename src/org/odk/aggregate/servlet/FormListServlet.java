@@ -16,13 +16,13 @@
 
 package org.odk.aggregate.servlet;
 
-import org.odk.aggregate.constants.ServletConsts;
-import org.odk.aggregate.table.FormXmlTable;
-
 import java.io.IOException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.odk.aggregate.constants.ServletConsts;
+import org.odk.aggregate.table.FormXmlTable;
 
 /**
  * Servlet to generate the XML list of forms to be

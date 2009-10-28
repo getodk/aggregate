@@ -113,8 +113,7 @@ public class SubmissionKml extends SubmissionResultBase{
     generatePropertyNamesAndHeaders(form.getElementTreeRoot(), true);
     
     List<Entity> submissionEntities = getEntities(TableConsts.EPOCH, false);
-    // create a row for each submission
-    int count = 0;
+
     w.write(getPreamble(odkId));
     w.write(generateStyle(headers, imageField != null));
     for (Entity subEntity : submissionEntities) {
@@ -155,7 +154,6 @@ public class SubmissionKml extends SubmissionResultBase{
     
     // create results table
     generatePropertyNamesAndHeaders(form.getElementTreeRoot(), true);
-    ResultTable results = new ResultTable(headers);
 
     // retrieve submissions
     Query surveyQuery = new Query(odkId);

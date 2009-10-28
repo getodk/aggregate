@@ -14,10 +14,11 @@
  * the License.
  */
 
-package org.odk.aggregate.form;
+package org.odk.aggregate.form.remoteserver;
 
 import com.google.appengine.api.datastore.Key;
 
+import org.odk.aggregate.form.Form;
 import org.odk.aggregate.submission.Submission;
 import org.odk.aggregate.table.SubmissionSpreadsheetTable;
 

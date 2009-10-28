@@ -128,7 +128,7 @@ public abstract class SubmissionFieldBase<T> implements SubmissionField<T>{
    */
   @Override
   public boolean equals(Object obj) {
-    if (!(obj instanceof SubmissionFieldBase)) {
+    if (!(obj instanceof SubmissionFieldBase<?>)) {
       return false;
     }
     

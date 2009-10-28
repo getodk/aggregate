@@ -19,13 +19,13 @@ package org.odk.aggregate.submission.type;
 
 import java.util.List;
 
-import com.google.appengine.api.datastore.Entity;
-import com.google.gson.JsonObject;
-
 import org.odk.aggregate.constants.BasicConsts;
 import org.odk.aggregate.constants.PersistConsts;
 import org.odk.aggregate.exception.ODKConversionException;
 import org.odk.aggregate.form.Form;
+
+import com.google.appengine.api.datastore.Entity;
+import com.google.gson.JsonObject;
 
 public class GeoPointSubmissionType extends SubmissionFieldBase<GeoPoint> {
   

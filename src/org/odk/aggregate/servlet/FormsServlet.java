@@ -16,12 +16,12 @@
 
 package org.odk.aggregate.servlet;
 
-import org.odk.aggregate.table.FormHtmlTable;
-
 import java.io.IOException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.odk.aggregate.table.FormHtmlTable;
 
 /**
  * Servlet generates a webpage with a list of forms

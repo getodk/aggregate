@@ -16,6 +16,13 @@
 
 package org.odk.aggregate.table;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.persistence.EntityManager;
+
 import org.odk.aggregate.constants.BasicConsts;
 import org.odk.aggregate.constants.HtmlUtil;
 import org.odk.aggregate.constants.TableConsts;
@@ -23,13 +30,6 @@ import org.odk.aggregate.exception.ODKFormNotFoundException;
 import org.odk.aggregate.form.Form;
 import org.odk.aggregate.form.FormElement;
 import org.odk.aggregate.submission.SubmissionFieldType;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.persistence.EntityManager;
 
 
 /**

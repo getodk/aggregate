@@ -16,12 +16,6 @@
 
 package org.odk.aggregate.form;
 
-import com.google.appengine.api.datastore.Key;
-import com.google.appengine.api.datastore.KeyFactory;
-
-import org.odk.aggregate.submission.SubmissionField;
-import org.odk.aggregate.submission.SubmissionFieldType;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,6 +27,12 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
+
+import org.odk.aggregate.submission.SubmissionField;
+import org.odk.aggregate.submission.SubmissionFieldType;
+
+import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.KeyFactory;
 
 /**
  * Form Elements describe how to convert the data

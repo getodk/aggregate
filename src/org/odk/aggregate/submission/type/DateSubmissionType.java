@@ -16,14 +16,14 @@
 
 package org.odk.aggregate.submission.type;
 
-import org.odk.aggregate.exception.ODKConversionException;
-
-import com.google.gson.JsonObject;
-
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
+
+import org.odk.aggregate.exception.ODKConversionException;
+
+import com.google.gson.JsonObject;
 
 /**
  * Data Storage Converter for Data Type

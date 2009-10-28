@@ -16,9 +16,9 @@
 
 package org.odk.aggregate.submission;
 
-import com.google.appengine.api.datastore.Key;
-
 import org.odk.aggregate.exception.ODKConversionException;
+
+import com.google.appengine.api.datastore.Key;
 
 /**
  * Interface for submission field that can be used to store

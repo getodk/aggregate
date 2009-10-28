@@ -1,12 +1,12 @@
 package org.odk.aggregate.servlet;
 
-import org.odk.aggregate.constants.ErrorConsts;
-import org.odk.aggregate.constants.ServletConsts;
-
 import java.io.IOException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.odk.aggregate.constants.ErrorConsts;
+import org.odk.aggregate.constants.ServletConsts;
 
 
 public class FusionTableServlet extends ServletUtilBase {

@@ -16,14 +16,6 @@
 
 package org.odk.aggregate.servlet;
 
-import com.google.appengine.api.datastore.Key;
-import com.google.appengine.api.datastore.KeyFactory;
-
-import org.odk.aggregate.EMFactory;
-import org.odk.aggregate.constants.HtmlUtil;
-import org.odk.aggregate.constants.ServletConsts;
-import org.odk.aggregate.form.Form;
-
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URLEncoder;
@@ -33,6 +25,14 @@ import java.util.Map;
 import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.odk.aggregate.EMFactory;
+import org.odk.aggregate.constants.HtmlUtil;
+import org.odk.aggregate.constants.ServletConsts;
+import org.odk.aggregate.form.Form;
+
+import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.KeyFactory;
 
 /**
  * Servlet to generate the XML file in plain text
