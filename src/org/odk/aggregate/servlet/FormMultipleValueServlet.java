@@ -16,8 +16,11 @@
 
 package org.odk.aggregate.servlet;
 
-import com.google.appengine.api.datastore.Key;
-import com.google.appengine.api.datastore.KeyFactory;
+import java.io.IOException;
+
+import javax.persistence.EntityManager;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.odk.aggregate.EMFactory;
 import org.odk.aggregate.constants.ServletConsts;
@@ -25,11 +28,8 @@ import org.odk.aggregate.exception.ODKFormNotFoundException;
 import org.odk.aggregate.exception.ODKIncompleteSubmissionData;
 import org.odk.aggregate.table.SubmissionHtmlTable;
 
-import java.io.IOException;
-
-import javax.persistence.EntityManager;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.KeyFactory;
 
 /**
  * Servlet generates a webpage with a list of submissions 

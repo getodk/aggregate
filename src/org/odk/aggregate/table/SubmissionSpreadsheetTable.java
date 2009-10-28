@@ -16,6 +16,22 @@
 
 package org.odk.aggregate.table;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.List;
+
+import javax.persistence.EntityManager;
+
+import org.odk.aggregate.constants.BasicConsts;
+import org.odk.aggregate.constants.ServletConsts;
+import org.odk.aggregate.constants.TableConsts;
+import org.odk.aggregate.exception.ODKIncompleteSubmissionData;
+import org.odk.aggregate.form.Form;
+import org.odk.aggregate.form.remoteserver.GoogleSpreadsheet;
+import org.odk.aggregate.report.FormProperties;
+import org.odk.aggregate.submission.Submission;
+
 import com.google.gdata.client.batch.BatchInterruptedException;
 import com.google.gdata.client.spreadsheet.CellQuery;
 import com.google.gdata.client.spreadsheet.SpreadsheetService;
@@ -30,22 +46,6 @@ import com.google.gdata.data.spreadsheet.ListEntry;
 import com.google.gdata.data.spreadsheet.WorksheetEntry;
 import com.google.gdata.data.spreadsheet.WorksheetFeed;
 import com.google.gdata.util.ServiceException;
-
-import org.odk.aggregate.constants.BasicConsts;
-import org.odk.aggregate.constants.ServletConsts;
-import org.odk.aggregate.constants.TableConsts;
-import org.odk.aggregate.exception.ODKIncompleteSubmissionData;
-import org.odk.aggregate.form.Form;
-import org.odk.aggregate.form.GoogleSpreadsheet;
-import org.odk.aggregate.report.FormProperties;
-import org.odk.aggregate.submission.Submission;
-
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.List;
-
-import javax.persistence.EntityManager;
 
 
 public class SubmissionSpreadsheetTable extends SubmissionCsvTable {

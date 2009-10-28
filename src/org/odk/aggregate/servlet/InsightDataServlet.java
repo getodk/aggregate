@@ -30,7 +30,7 @@ import org.odk.aggregate.constants.PersistConsts;
 import org.odk.aggregate.constants.ServletConsts;
 import org.odk.aggregate.exception.ODKIncompleteSubmissionData;
 import org.odk.aggregate.form.Form;
-import org.odk.aggregate.form.RhizaInsight;
+import org.odk.aggregate.form.remoteserver.RhizaInsight;
 import org.odk.aggregate.report.FormProperties;
 import org.odk.aggregate.submission.Submission;
 

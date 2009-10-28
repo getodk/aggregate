@@ -16,9 +16,14 @@
 
 package org.odk.aggregate.servlet;
 
-import com.google.appengine.api.datastore.Key;
-import com.google.appengine.api.datastore.KeyFactory;
-import com.google.appengine.repackaged.com.google.common.base.Pair;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.persistence.EntityManager;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.odk.aggregate.EMFactory;
 import org.odk.aggregate.constants.HtmlConsts;
@@ -28,14 +33,9 @@ import org.odk.aggregate.form.Form;
 import org.odk.aggregate.form.FormElement;
 import org.odk.aggregate.submission.SubmissionFieldType;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.persistence.EntityManager;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.KeyFactory;
+import com.google.appengine.repackaged.com.google.common.base.Pair;
 
 /**
  * Servlet to generate the XML list of forms to be
@@ -46,6 +46,11 @@ import javax.servlet.http.HttpServletResponse;
  *
  */
 public class KmlSettingsServlet extends ServletUtilBase {
+
+  /**
+   * Serial number for serialization
+   */
+  private static final long serialVersionUID = -7920604746551634550L;
 
   /**
    * URI from base

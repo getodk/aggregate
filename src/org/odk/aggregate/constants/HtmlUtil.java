@@ -16,16 +16,16 @@
 
 package org.odk.aggregate.constants;
 
-import com.google.appengine.repackaged.com.google.common.base.Pair;
-
-import org.apache.commons.lang.StringEscapeUtils;
-import org.odk.aggregate.table.ResultTable;
-
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import org.apache.commons.lang.StringEscapeUtils;
+import org.odk.aggregate.table.ResultTable;
+
+import com.google.appengine.repackaged.com.google.common.base.Pair;
 
 /**
  * Static HTML utility functions used to generate proper HTML
@@ -41,7 +41,6 @@ public class HtmlUtil {
   private static final String HREF = "href";
   private static final String A = "a";
   private static final String INPUT = "input";
-  private static final String SELECT = "select";
   private static final String ATTR_VALUE = "value";
   private static final String ATTR_NAME = "name";
   private static final String ATTR_TYPE = "type";

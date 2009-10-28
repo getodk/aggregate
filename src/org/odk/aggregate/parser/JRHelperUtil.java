@@ -16,10 +16,10 @@
 
 package org.odk.aggregate.parser;
 
-import org.odk.aggregate.constants.HtmlConsts;
-
 import java.util.Arrays;
 import java.util.List;
+
+import org.odk.aggregate.constants.HtmlConsts;
 
 /**
  * Contains helpful utility functions to make java rosa parsing easier

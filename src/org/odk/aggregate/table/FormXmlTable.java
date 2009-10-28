@@ -16,7 +16,12 @@
 
 package org.odk.aggregate.table;
 
-import com.google.appengine.api.datastore.KeyFactory;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.persistence.EntityManager;
+import javax.persistence.Query;
 
 import org.odk.aggregate.EMFactory;
 import org.odk.aggregate.constants.BasicConsts;
@@ -27,12 +32,7 @@ import org.odk.aggregate.constants.TableConsts;
 import org.odk.aggregate.form.Form;
 import org.odk.aggregate.servlet.FormXmlServlet;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.persistence.EntityManager;
-import javax.persistence.Query;
+import com.google.appengine.api.datastore.KeyFactory;
 
 /**
  * Generates an xml description of forms for the servlets

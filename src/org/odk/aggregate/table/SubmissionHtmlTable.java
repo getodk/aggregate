@@ -16,7 +16,11 @@
 
 package org.odk.aggregate.table;
 
-import com.google.appengine.api.datastore.Key;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
+import javax.persistence.EntityManager;
 
 import org.odk.aggregate.constants.BasicConsts;
 import org.odk.aggregate.constants.HtmlUtil;
@@ -28,11 +32,7 @@ import org.odk.aggregate.servlet.FormMultipleValueServlet;
 import org.odk.aggregate.servlet.ImageViewerServlet;
 import org.odk.aggregate.submission.SubmissionRepeat;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-
-import javax.persistence.EntityManager;
+import com.google.appengine.api.datastore.Key;
 
 /**
  * Used to generate submission results in html tables for the servlets

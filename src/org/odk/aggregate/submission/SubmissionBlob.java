@@ -1,12 +1,12 @@
 package org.odk.aggregate.submission;
 
+import org.odk.aggregate.constants.PersistConsts;
+
 import com.google.appengine.api.datastore.Blob;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.api.datastore.Key;
-
-import org.odk.aggregate.constants.PersistConsts;
 
 /**
  * Defines a submission blob that can be converted into a data store entity. 

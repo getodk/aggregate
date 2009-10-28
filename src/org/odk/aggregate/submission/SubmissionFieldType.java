@@ -16,6 +16,11 @@
 
 package org.odk.aggregate.submission;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.javarosa.core.model.Constants;
 import org.odk.aggregate.submission.type.BlobSubmissionType;
 import org.odk.aggregate.submission.type.BooleanSubmissionType;
@@ -28,11 +33,6 @@ import org.odk.aggregate.submission.type.SubmissionFieldBase;
 import org.odk.aggregate.submission.type.jr.JRDateTimeType;
 import org.odk.aggregate.submission.type.jr.JRDateType;
 import org.odk.aggregate.submission.type.jr.JRTimeType;
-
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Enum that maps the value from an XForm definition to the

@@ -301,6 +301,7 @@ public class SubmissionSet implements Comparable<SubmissionSet>{
   public int compareTo(SubmissionSet obj) {
     long result = order - obj.order;
     
+    // TODO: check if correct... not sure
     if(order != 0) {
       return Long.signum(result);
     }

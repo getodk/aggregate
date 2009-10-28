@@ -16,7 +16,12 @@
 
 package org.odk.aggregate.parser;
 
-import com.google.appengine.api.datastore.Key;
+import java.io.ByteArrayInputStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Vector;
+
+import javax.persistence.EntityManager;
 
 import org.javarosa.core.model.FormDef;
 import org.javarosa.core.model.instance.DataModelTree;
@@ -29,12 +34,7 @@ import org.odk.aggregate.form.Form;
 import org.odk.aggregate.form.FormElement;
 import org.odk.aggregate.submission.SubmissionFieldType;
 
-import java.io.ByteArrayInputStream;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Vector;
-
-import javax.persistence.EntityManager;
+import com.google.appengine.api.datastore.Key;
 
 /**
  * Parses an XML definition of an XForm based on java rosa types
@@ -53,11 +53,6 @@ public class FormParserForJavaRosa {
    * The XForm definition in XML
    */
   private String xml;
-
-  /**
-   * Locale Data
-   */
-  private String[] localeData;
 
   /**
    * The XForm data mapping for ODK aggregate
@@ -125,11 +120,6 @@ public class FormParserForJavaRosa {
       throw new ODKFormAlreadyExistsException();
     } catch (ODKFormNotFoundException e1) {
       // should throw an exception, else form already exists and exit parse
-    }
-
-    // get local Ids
-    if (formDef.getLocalizer() != null) {
-      localeData = formDef.getLocalizer().getAvailableLocales();
     }
     
     // TODO: clean up data access & recursion - a bit sloppy

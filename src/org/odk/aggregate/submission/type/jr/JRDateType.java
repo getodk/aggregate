@@ -16,10 +16,10 @@
 
 package org.odk.aggregate.submission.type.jr;
 
+import java.util.Date;
+
 import org.javarosa.core.model.utils.DateUtils;
 import org.odk.aggregate.submission.type.DateSubmissionType;
-
-import java.util.Date;
 
 /**
  * Data Storage Converter for Java Rosa Data Type

@@ -16,10 +16,10 @@
 
 package org.odk.aggregate.table;
 
-import org.odk.aggregate.constants.ErrorConsts;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import org.odk.aggregate.constants.ErrorConsts;
 
 /**
  * Stores results from queries as strings so results can

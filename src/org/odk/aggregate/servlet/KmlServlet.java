@@ -16,17 +16,17 @@
 
 package org.odk.aggregate.servlet;
 
-import org.odk.aggregate.EMFactory;
-import org.odk.aggregate.constants.ServletConsts;
-import org.odk.aggregate.exception.ODKFormNotFoundException;
-import org.odk.aggregate.exception.ODKIncompleteSubmissionData;
-import org.odk.aggregate.table.SubmissionKml;
-
 import java.io.IOException;
 
 import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.odk.aggregate.EMFactory;
+import org.odk.aggregate.constants.ServletConsts;
+import org.odk.aggregate.exception.ODKFormNotFoundException;
+import org.odk.aggregate.exception.ODKIncompleteSubmissionData;
+import org.odk.aggregate.table.SubmissionKml;
 
 /**
  * Servlet to generate a KML file for download
@@ -36,6 +36,11 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class KmlServlet extends ServletUtilBase {
 
+  /**
+   * Serial number for serialization
+   */
+  private static final long serialVersionUID = 2387155275645640699L;
+  
   /**
    * URI from base
    */

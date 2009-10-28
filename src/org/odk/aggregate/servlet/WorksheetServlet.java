@@ -28,7 +28,7 @@ import org.odk.aggregate.constants.ExternalServiceOption;
 import org.odk.aggregate.constants.ServletConsts;
 import org.odk.aggregate.exception.ODKIncompleteSubmissionData;
 import org.odk.aggregate.form.Form;
-import org.odk.aggregate.form.GoogleSpreadsheet;
+import org.odk.aggregate.form.remoteserver.GoogleSpreadsheet;
 import org.odk.aggregate.table.SubmissionSpreadsheetTable;
 
 import com.google.appengine.api.datastore.Key;
@@ -74,7 +74,7 @@ public class WorksheetServlet extends ServletUtilBase {
     }
 
     String esTypeString = getParameter(req, ServletConsts.EXTERNAL_SERVICE_TYPE);
-    if (spreadsheetName == null) {
+    if (esTypeString == null) {
       sendErrorNotEnoughParams(resp);
       return;
     }
@@ -86,6 +86,9 @@ public class WorksheetServlet extends ServletUtilBase {
         Form form = em.getReference(Form.class, formKey);
 
         GoogleSpreadsheet spreadsheet = form.getGoogleSpreadsheetWithName(spreadsheetName);
+        if(spreadsheet == null) {
+          return;
+        }
         String token = spreadsheet.getAuthToken();
         
         // verify form has a spreadsheet element

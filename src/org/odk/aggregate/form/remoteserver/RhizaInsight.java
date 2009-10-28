@@ -15,7 +15,7 @@
  */
 
 
-package org.odk.aggregate.form;
+package org.odk.aggregate.form.remoteserver;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -30,6 +30,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
+import org.odk.aggregate.form.Form;
 import org.odk.aggregate.report.FormProperties;
 import org.odk.aggregate.submission.Submission;
 
