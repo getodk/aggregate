@@ -314,8 +314,8 @@ public abstract class SubmissionTable extends SubmissionResultBase {
           }
         } else {
           row.add(null);
-          if(entry instanceof GeoPointSubmissionType) {
-            //row.add(null); // need to add extra null because split for long/lat
+          if((entry instanceof GeoPointSubmissionType) && separateCoordinates) {
+            row.add(null); // need to add extra null because split for long/lat
           }
         }
       } else if(entry instanceof SubmissionRepeat) {
