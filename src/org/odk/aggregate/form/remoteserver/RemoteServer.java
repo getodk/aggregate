@@ -16,10 +16,10 @@
 
 package org.odk.aggregate.form.remoteserver;
 
+import javax.persistence.EntityManager;
+
 import org.odk.aggregate.form.Form;
 import org.odk.aggregate.submission.Submission;
-
-import javax.persistence.EntityManager;
 
 public interface RemoteServer {
   public void sendSubmissionToRemoteServer(Form xform, String serverName, EntityManager entityManager, String appName, Submission submission);

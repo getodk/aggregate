@@ -205,7 +205,7 @@ public class ServletConsts {
 
 
   public static final String DOCS_SCOPE = "http://docs.google.com/feeds/";
-
+  
 
   public static final String DOC_FEED = DOCS_SCOPE + "documents" + FEED_PERMISSIONS;
 

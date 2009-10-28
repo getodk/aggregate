@@ -113,11 +113,12 @@ public class SubmissionSpreadsheetTable extends SubmissionCsvTable {
   }
 
   public void insertNewDataInSpreadsheet(Submission submission, GoogleSpreadsheet spreadsheet) {
-    ResultTable result = generateSingleEntryResultTable(submission);
+	if (!spreadsheet.getReady()) {
+		return;
+	}
+	  
+	ResultTable result = generateSingleEntryResultTable(submission);
 
-    if (!spreadsheet.getReady()) {
-      return;
-    }
     SpreadsheetService service = new SpreadsheetService(applicationName);
     service.setAuthSubToken(spreadsheet.getAuthToken(), null);
 
