@@ -48,6 +48,8 @@ public class PersistConsts {
   public static final String ORDER_PROPERTY = "ORDER";
   
   public static final String BLOB_PROPERTY = "BLOB";
+  
+  public static final String CONTENT_TYPE_PROPERTY = "CONTENT_TYPE";
 
   public static final String BLOB_STORE_KIND = "blob_store";
 

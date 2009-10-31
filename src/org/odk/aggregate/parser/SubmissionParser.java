@@ -248,7 +248,9 @@ public class SubmissionParser {
           if (submissionFormItems == null) {
             // TODO: problem, only accept a base64 encoded in a direct XML post
             byte[] receivedBytes = Base64.decodeBase64(value.getBytes());
-            submissionElement.setValueFromByteArray(receivedBytes, null);
+            // TODO: problem since we don't know how to tell what type of binary 
+            // without content type, defaulting to JPG
+            submissionElement.setValueFromByteArray(receivedBytes, null, ServletConsts.RESP_TYPE_IMAGE_JPEG);
           } else {
             // attempt to find binary data in multi-part form submission
             // first searching by file name, then field name
@@ -259,7 +261,7 @@ public class SubmissionParser {
             // after completing the search now check if found anything and
             // value, otherwise output error
             if (binaryData != null) {
-              submissionElement.setValueFromByteArray(binaryData.getStream().toByteArray(), null);
+              submissionElement.setValueFromByteArray(binaryData.getStream().toByteArray(), null, binaryData.getContentType());
             } else {
               // TODO: decide if we want system to reject submission if file is
               // not found?

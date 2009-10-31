@@ -57,6 +57,8 @@ public class ImageViewerServlet extends ServletUtilBase {
   @Override
   public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 
+      
+    // TOOD: figure out how to do picture security
     // verify user is logged in
 //    if (!verifyCredentials(req, resp)) {
 //      return;
@@ -73,7 +75,7 @@ public class ImageViewerServlet extends ServletUtilBase {
         SubmissionBlob blobStore = new SubmissionBlob(KeyFactory.stringToKey(keyString));
         Blob imageBlob = blobStore.getBlob();
         if(imageBlob != null) {
-          resp.setContentType(ServletConsts.RESP_TYPE_IMAGE_JPEG);
+          resp.setContentType(blobStore.getContentType());
           OutputStream os = resp.getOutputStream();
           os.write(imageBlob.getBytes());
           os.close();

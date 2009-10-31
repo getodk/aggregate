@@ -49,14 +49,15 @@ public class BlobSubmissionType extends SubmissionSingleValueBase<Key> {
    * Convert value from byte array to data store blob type. Store blob in blob
    * storage and save the key of the blob storage into submission set.
    * 
-   * @param byteArray array of bytes
-   * 
-   * @param submissionSetKey submission set key that will reference the blob
+   * @param byteArray byte form of the value
+   * @param submissionSetKey key of submission set that will reference the blob
+   * @param contentType type of binary data (NOTE: only used for binary data)
+   * @throws ODKConversionException
    * 
    */
   @Override
-  public void setValueFromByteArray(byte[] byteArray, Key submissionSetKey) {
-    SubmissionBlob blob = new SubmissionBlob(new Blob(byteArray), submissionSetKey);
+  public void setValueFromByteArray(byte[] byteArray, Key submissionSetKey, String submissionType) {
+    SubmissionBlob blob = new SubmissionBlob(new Blob(byteArray), submissionSetKey, submissionType);
     setValue(blob.getKey());
   }
 
