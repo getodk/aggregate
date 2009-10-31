@@ -109,13 +109,17 @@ public abstract class SubmissionFieldBase<T> implements SubmissionField<T>{
    */  
   public abstract void addValueToJsonObject(JsonObject jsonObject, List<String> propertyNames);
   
+  
   /**
    * Convert byte array to proper type for submission field
    * 
    * @param byteArray byte form of the value
+   * @param submissionSetKey key of submission set that will reference the blob
+   * @param contentType type of binary data (NOTE: only used for binary data)
    * @throws ODKConversionException
-   */  
-  public void setValueFromByteArray(byte [] byteArray, Key submissionSetKey) throws ODKConversionException {
+   * 
+   */ 
+  public void setValueFromByteArray(byte [] byteArray, Key submissionSetKey, String contentType) throws ODKConversionException {
     if(!binaryCreation) {
       setValueFromString(new String(byteArray));
     } else {

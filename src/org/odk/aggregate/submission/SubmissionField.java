@@ -62,9 +62,10 @@ public interface SubmissionField<T> extends SubmissionValue{
    * 
    * @param byteArray byte form of the value
    * @param submissionSetKey key of submission set that will reference the blob
+   * @param contentType type of binary data (NOTE: only used for binary data)
    * @throws ODKConversionException
    * 
    */  
-  public void setValueFromByteArray(byte [] byteArray, Key submissionSetKey) throws ODKConversionException;
+  public void setValueFromByteArray(byte [] byteArray, Key submissionSetKey, String contentType) throws ODKConversionException;
   
 }

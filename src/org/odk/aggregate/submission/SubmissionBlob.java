@@ -24,11 +24,13 @@ public class SubmissionBlob {
   
   private Key parentKey;
   
+  private String contentType;
+  
   /**
    * Construct an blob entity and store it in the data store
    *    
    */
-  public SubmissionBlob(Blob blob, Key parent) {
+  public SubmissionBlob(Blob blob, Key parent, String contentType) {
     this.blob = blob;
     this.parentKey = parent;
     
@@ -36,6 +38,7 @@ public class SubmissionBlob {
     dbEntity = new Entity(PersistConsts.BLOB_STORE_KIND);
     dbEntity.setProperty(PersistConsts.BLOB_PROPERTY, blob);
     dbEntity.setProperty(PersistConsts.PARENT_KEY_PROPERTY, parent);    
+    dbEntity.setProperty(PersistConsts.CONTENT_TYPE_PROPERTY, contentType);
     
     // put entity in the datastore
     key = DatastoreServiceFactory.getDatastoreService().put(dbEntity);
@@ -46,6 +49,7 @@ public class SubmissionBlob {
     key = blobKey;
     blob = (Blob) dbEntity.getProperty(PersistConsts.BLOB_PROPERTY);
     parentKey = (Key) dbEntity.getProperty(PersistConsts.PARENT_KEY_PROPERTY);
+    contentType = (String) dbEntity.getProperty(PersistConsts.CONTENT_TYPE_PROPERTY);
   }
 
   public Key getKey() {
@@ -60,5 +64,8 @@ public class SubmissionBlob {
     return parentKey;
   }
 
+  public String getContentType() {
+      return contentType;
+  }
 
 }
