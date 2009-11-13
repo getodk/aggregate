@@ -192,14 +192,6 @@ public class SpreadsheetServlet extends ServletUtilBase {
       form.addGoogleSpreadsheet(spreadsheet);
       em.close();
 
-      // remove docs permission no longer needed
-      try {
-        AuthSubUtil.revokeToken(docSessionToken, null);
-      } catch (GeneralSecurityException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-      }
-
       TaskOptions task = TaskOptions.Builder.url("/" + WorksheetServlet.ADDR);
       task.method(TaskOptions.Method.GET);
       task.countdownMillis(DELAY);
@@ -214,6 +206,15 @@ public class SpreadsheetServlet extends ServletUtilBase {
         System.out.println("PROBLEM WITH TASK");
         e.printStackTrace();
       }
+      
+      // remove docs permission no longer needed
+      try {
+        AuthSubUtil.revokeToken(docSessionToken, null);
+      } catch (GeneralSecurityException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
+      
     } catch (AuthenticationException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
