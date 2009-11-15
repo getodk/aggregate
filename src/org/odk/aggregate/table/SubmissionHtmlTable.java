@@ -58,7 +58,9 @@ public class SubmissionHtmlTable extends SubmissionTable {
     super(serverName, odkIdentifier, entityManager, ServletConsts.MAX_ENTITY_PER_PAGE);
   }
 
-
+  public void generateHtmlSubmissionResultsTableFromKeys(List<Key> keys) throws ODKIncompleteSubmissionData {
+    resultTable = generateResultTableFromKeys(keys);
+  }
 
   public void generateHtmlSubmissionResultsTable(Date lastDate, boolean backward) throws ODKIncompleteSubmissionData {
     resultTable = generateResultTable(lastDate, backward);
@@ -83,11 +85,14 @@ public class SubmissionHtmlTable extends SubmissionTable {
   /**
    * Generate an string that contains an HTML table with the submission results for a form specified
    * 
+   * @param checkboxes
+   *            true if checkboxes should be added to the table, false otherwise
+   * 
    * @return submissions received defined by the form
    */
-  public String getResultsHtml() {
+  public String getResultsHtml(boolean checkboxes) {
     if(resultTable != null) {
-      return HtmlUtil.wrapResultTableWithHtmlTags(resultTable);
+      return HtmlUtil.wrapResultTableWithHtmlTags(resultTable, checkboxes);
     }
     return BasicConsts.EMPTY_STRING;
   }
@@ -96,7 +101,7 @@ public class SubmissionHtmlTable extends SubmissionTable {
       Key submissionParentKey) throws ODKIncompleteSubmissionData {
     ResultTable resultTable = generateResultRepeatTable(kind, elementKey, submissionParentKey);
 
-    return HtmlUtil.wrapResultTableWithHtmlTags(resultTable);
+    return HtmlUtil.wrapResultTableWithHtmlTags(resultTable, false);
   }
 
   /**
@@ -128,6 +133,13 @@ public class SubmissionHtmlTable extends SubmissionTable {
   protected String createRepeatLink(SubmissionRepeat repeat, Key parentSubmissionSetKey) { 
     Map<String, String> properties = createRepeatLinkProperties(repeat, parentSubmissionSetKey);
     return HtmlUtil.createHrefWithProperties(super.getBaseServerUrl() + FormMultipleValueServlet.ADDR, properties, TableConsts.VIEW_LINK_TEXT);
+  }
+  
+  public int getNumRecords() {
+    if(resultTable != null) {
+      return resultTable.getNumRows();
+    }
+    return 0;
   }
   
 }

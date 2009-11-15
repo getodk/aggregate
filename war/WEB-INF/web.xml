@@ -123,8 +123,6 @@
     <url-pattern>/fusiontables</url-pattern>
   </servlet-mapping>
 
-
-
   <servlet>
     <servlet-name>spreadsheet</servlet-name>
     <servlet-class>org.odk.aggregate.servlet.SpreadsheetServlet</servlet-class>
@@ -159,6 +157,24 @@
   <servlet-mapping>
     <servlet-name>kml</servlet-name>
     <url-pattern>/kml</url-pattern>
+  </servlet-mapping>
+
+  <servlet>
+    <servlet-name>process</servlet-name>
+    <servlet-class>org.odk.aggregate.servlet.ProcessServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>process</servlet-name>
+    <url-pattern>/process</url-pattern>
+  </servlet-mapping>
+
+  <servlet>
+    <servlet-name>confirm</servlet-name>
+    <servlet-class>org.odk.aggregate.servlet.ConfirmServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>confirm</servlet-name>
+    <url-pattern>/confirm</url-pattern>
   </servlet-mapping>
 
 	<welcome-file-list>

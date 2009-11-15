@@ -115,7 +115,7 @@ public class FormHtmlTable {
         row.add(kmlButton);
         row.add(xmlButton);
 
-        results.addRow(row);
+        results.addRow(form.getKey(), row);
       }
     } catch (Exception e) {
       e.printStackTrace();
@@ -123,7 +123,7 @@ public class FormHtmlTable {
       em.close();
     }
 
-    return HtmlUtil.wrapResultTableWithHtmlTags(results);
+    return HtmlUtil.wrapResultTableWithHtmlTags(results, false);
   }
 
 }

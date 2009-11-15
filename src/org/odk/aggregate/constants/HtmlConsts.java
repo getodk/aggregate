@@ -16,7 +16,6 @@
 
 package org.odk.aggregate.constants;
 
-
 /**
  * HTML Constants used in ODK aggregate to create proper HTML
  *  
@@ -78,5 +77,8 @@ public class HtmlConsts {
   
   public static final String HTTP = "http://";
   public static final int WEB_PORT = 80;
+  public static final String CHECKBOX_HEADER = "Select";
+  static final String INPUT_TYPE_CHECKBOX = "checkbox";
+  static final String CHECKED = "checked";
   
 }
