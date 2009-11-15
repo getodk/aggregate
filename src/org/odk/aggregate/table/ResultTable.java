@@ -21,6 +21,9 @@ import java.util.List;
 
 import org.odk.aggregate.constants.ErrorConsts;
 
+import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.KeyFactory;
+
 /**
  * Stores results from queries as strings so results can
  * be easily formatted for various types of output
@@ -41,6 +44,11 @@ public class ResultTable {
   List<List<String>> rows;
 
   /**
+   * List containing the data store key
+   */
+  List<String> dbKeys;
+  
+  /**
    * Construct a table based on the column headers
    * @param tableHeader
    *    list of column headers
@@ -48,6 +56,7 @@ public class ResultTable {
   public ResultTable(List<String> tableHeader) {
     header = tableHeader;
     rows = new ArrayList<List<String>>();
+    dbKeys = new ArrayList<String>();
   }
 
   /**
@@ -55,12 +64,13 @@ public class ResultTable {
    * @param row
    *    array of strings representing a row
    */
-  public void addRow(List<String> row) {
+  public void addRow(Key dbKey, List<String> row) {
     if (row.size() != header.size()) {
       System.err.println(ErrorConsts.ROW_SIZE_ERROR);
       return;
     }
     rows.add(row);
+    dbKeys.add(KeyFactory.keyToString(dbKey));
   }
 
   /**
@@ -72,6 +82,15 @@ public class ResultTable {
     return header;
   }
 
+  /**
+   * Get a list of data store keys
+   * @return
+   *    list of string based data store keys
+   */
+  public List<String> getKeys() {
+    return dbKeys;
+  }
+  
   /**
    * Get a list of data rows
    * @return
@@ -91,4 +110,13 @@ public class ResultTable {
     return header.size();
   }
 
+  /**
+   * Get the number of rows in table
+   * 
+   * @return
+   *    number of columns
+   */
+  public int getNumRows() {
+    return rows.size();
+  }
 }

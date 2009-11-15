@@ -147,7 +147,7 @@ public class HtmlUtil {
     }
     html.append(BasicConsts.SPACE);
     if(checked) {
-      html.append("checked");
+      html.append(HtmlConsts.CHECKED);
     }
     html.append(HtmlConsts.END_SELF_CLOSING_TAG);
     html.append(desc);
@@ -231,16 +231,25 @@ public class HtmlUtil {
     return html.toString();
   }
 
-  public static String wrapResultTableWithHtmlTags(ResultTable resultTable) {
+  public static String wrapResultTableWithHtmlTags(ResultTable resultTable, boolean addCheckboxes) {
     StringBuilder html = new StringBuilder();
     html.append(HtmlConsts.TABLE_OPEN);
-  
+    List<String> keys = null;
+    if(addCheckboxes) {
+      keys = resultTable.getKeys();
+      html.append(wrapWithHtmlTags(HtmlConsts.TABLE_HEADER, HtmlConsts.CHECKBOX_HEADER));
+    }
     for (String header : resultTable.getHeader()) {
       html.append(wrapWithHtmlTags(HtmlConsts.TABLE_HEADER, header));
     }
   
-    for (List<String> row : resultTable.getRows()) {
+    List<List<String>> rows = resultTable.getRows(); 
+    for (int recordNum = 0; recordNum < rows.size(); recordNum++ ) {
+      List<String> row = rows.get(recordNum);
       html.append(HtmlConsts.TABLE_ROW_OPEN);
+      if(addCheckboxes) {
+        html.append(wrapWithHtmlTags(HtmlConsts.TABLE_DATA,createInput(HtmlConsts.INPUT_TYPE_CHECKBOX, ServletConsts.PROCESS_RECORD_PREFIX + recordNum, keys.get(recordNum))));
+      }
       for (String item : row) {
         html.append(wrapWithHtmlTags(HtmlConsts.TABLE_DATA, item));
       }

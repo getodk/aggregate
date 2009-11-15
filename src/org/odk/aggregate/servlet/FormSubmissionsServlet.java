@@ -17,6 +17,7 @@
 package org.odk.aggregate.servlet;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.util.Date;
@@ -34,6 +35,7 @@ import org.odk.aggregate.constants.ServletConsts;
 import org.odk.aggregate.constants.TableConsts;
 import org.odk.aggregate.exception.ODKFormNotFoundException;
 import org.odk.aggregate.exception.ODKIncompleteSubmissionData;
+import org.odk.aggregate.process.ProcessType;
 import org.odk.aggregate.table.SubmissionHtmlTable;
 
 /**
@@ -85,7 +87,7 @@ public class FormSubmissionsServlet extends ServletUtilBase {
 
     // header info
     beginBasicHtmlResponse(TITLE_INFO, resp, req, true);
-    
+    PrintWriter out = resp.getWriter();
     EntityManager em = EMFactory.get().createEntityManager();
     
     try {
@@ -138,7 +140,7 @@ public class FormSubmissionsServlet extends ServletUtilBase {
         properties.put(ServletConsts.BACKWARD,  Boolean.TRUE.toString());
         properties.put(ServletConsts.INDEX, submissions.getFirstDate());
         String link = HtmlUtil.createHrefWithProperties(req.getRequestURI(), properties, ServletConsts.BACK_LINK_TEXT);
-        resp.getWriter().print(link);
+        out.print(link);
       }
       resp.getWriter().print(HtmlConsts.TAB + HtmlConsts.TAB);
       if(createForward) {
@@ -147,11 +149,17 @@ public class FormSubmissionsServlet extends ServletUtilBase {
         properties.put(ServletConsts.BACKWARD, Boolean.FALSE.toString());
         properties.put(ServletConsts.INDEX, submissions.getLastDate());
         String link = HtmlUtil.createHrefWithProperties(req.getRequestURI(), properties, ServletConsts.NEXT_LINK_TEXT);
-        resp.getWriter().print(link);
+        out.print(link);
       }
 
-      resp.getWriter().print(submissions.getResultsHtml());
-
+      out.print(HtmlUtil.createFormBeginTag(ConfirmServlet.ADDR, ServletConsts.MULTIPART_FORM_DATA, ServletConsts.POST));
+      out.print(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_HIDDEN, ServletConsts.ODK_ID, odkId));
+      out.print(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_HIDDEN, ServletConsts.PROCESS_NUM_RECORDS, Integer.toString(submissions.getNumRecords())));
+      out.print(submissions.getResultsHtml(true));
+      out.print(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_SUBMIT, ServletConsts.PROCESS_TYPE, ProcessType.DELETE.getButtonText()));
+      out.print(HtmlConsts.LINE_BREAK);
+      out.print(HtmlConsts.FORM_CLOSE);
+     
       // footer info
       finishBasicHtmlResponse(resp);
       

@@ -45,6 +45,7 @@ import org.odk.aggregate.submission.type.GeoPointSubmissionType;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.api.datastore.FetchOptions;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
@@ -222,6 +223,25 @@ public abstract class SubmissionTable extends SubmissionResultBase {
     return results;
   }
 
+  protected ResultTable generateResultTableFromKeys(List<Key> keys) throws ODKIncompleteSubmissionData {
+    // create results table
+    generatePropertyNamesAndHeaders(form.getElementTreeRoot(), true);
+    ResultTable results = new ResultTable(headers);
+
+    // retrieve submissions
+    DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
+    for (Key submissionKey : keys) {
+      try {
+        Entity subEntity = ds.get(submissionKey);
+        getSubmissionRow(results, new Submission(subEntity, form));        
+      } catch (EntityNotFoundException e) {
+        // just move on
+      } 
+    }
+    return results;
+  }
+
+  
   private void getSubmissionRow(ResultTable results, Submission sub) {
     Map<String, SubmissionValue> valueMap = sub.getSubmissionValuesMap();
     List<String> row = new ArrayList<String>();
@@ -235,12 +255,9 @@ public abstract class SubmissionTable extends SubmissionResultBase {
         processSubmissionFieldValue(sub.getKey(), valueMap, row, propertyName);
       }
     }
-    results.addRow(row);
+    results.addRow(sub.getKey(), row);
   }
-  
-  
-  
-  
+
   protected ResultTable generateResultRepeatTable(String kind, Key elementKey, Key submissionParentKey) throws ODKIncompleteSubmissionData {
     FormElement element = em.getReference(FormElement.class, elementKey);
     if (element == null) {
@@ -265,7 +282,7 @@ public abstract class SubmissionTable extends SubmissionResultBase {
       for (String propertyName : propertyNames) {
         processSubmissionFieldValue(sub.getKey(), valueMap, row, propertyName);
       }
-      results.addRow(row);
+      results.addRow(sub.getKey(), row);
     }
 
     return results;

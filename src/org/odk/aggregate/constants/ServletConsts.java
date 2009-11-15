@@ -229,5 +229,14 @@ public class ServletConsts {
 
 
   public static final String ALREADY_EXISTS_PARAM = "alreadyExists";
+
+
+  public static final String PROCESS_RECORD_PREFIX = "record";
+
+  
+  public static final String PROCESS_TYPE = "processType";
+
+  
+  public static final String PROCESS_NUM_RECORDS = "numRecords";
   
 }
