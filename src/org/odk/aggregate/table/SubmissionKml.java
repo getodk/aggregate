@@ -140,7 +140,6 @@ public class SubmissionKml extends SubmissionResultBase{
     return String.format(STYLE_TEMPLATE, "odk_style", styleHtml);
   }
   
-  private boolean moreRecords;
   /**
    * Generates a result table that contains all the submission data 
    * of the form specified by the ODK ID
@@ -167,12 +166,8 @@ public class SubmissionKml extends SubmissionResultBase{
     
     DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
     List<Entity> submissionEntities =
-        ds.prepare(surveyQuery).asList(FetchOptions.Builder.withLimit(fetchLimit + 1));
+        ds.prepare(surveyQuery).asList(FetchOptions.Builder.withLimit(fetchLimit));
     
-    if(submissionEntities.size() > fetchLimit) {
-      moreRecords = true;
-      submissionEntities.remove(fetchLimit);
-    }
     return submissionEntities;
   }
   

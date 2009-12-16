@@ -74,4 +74,8 @@ public class PersistConsts {
 
   public static final String LATITUDE_PROPERTY = "LATITUDE";
 
+  public static final String ACCURACY_PROPERTY = "ACCURACY";
+
+  public static final String ALTITUDE_PROPERTY = "ALTITUDE";
+
 }

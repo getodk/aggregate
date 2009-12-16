@@ -50,4 +50,7 @@ public class BasicConsts {
   public static final String DASH = "-";
   
   public static final String CSV_DELIMITER = COMMA;
+  public static final String GEO_POINT = "GeoPoint";
+  public static final String ACCURACY = "accuracy";
+  public static final String ALTITUDE = "altitude";
 }

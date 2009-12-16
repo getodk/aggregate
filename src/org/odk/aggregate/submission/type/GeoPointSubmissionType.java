@@ -44,10 +44,15 @@ public class GeoPointSubmissionType extends SubmissionFieldBase<GeoPoint> {
   @Override
   public void setValueFromString(String value) throws ODKConversionException {
     String [] values = value.split("\\s+");
-    if(values.length != 2) {
+    if(values.length == 2) {
+    coordinates = new GeoPoint(Double.valueOf(values[0]), Double.valueOf(values[1]));    
+    } else if(values.length == 3) {
+    coordinates = new GeoPoint(Double.valueOf(values[0]), Double.valueOf(values[1]), Double.valueOf(values[2]));    
+    } else if(values.length == 4) {
+      coordinates = new GeoPoint(Double.valueOf(values[0]), Double.valueOf(values[1]), Double.valueOf(values[2]), Double.valueOf(values[3]));    
+    } else {
       throw new ODKConversionException("Problem with GPS Coordinates being parsed from XML");
     }
-    coordinates = new GeoPoint(Double.valueOf(values[0]), Double.valueOf(values[1]));    
   }
 
   @Override
@@ -62,6 +67,8 @@ public class GeoPointSubmissionType extends SubmissionFieldBase<GeoPoint> {
     }
     dbEntity.setProperty(propertyName + PersistConsts.LATITUDE_PROPERTY, coordinates.getLatitude());
     dbEntity.setProperty(propertyName + PersistConsts.LONGITUDE_PROPERTY, coordinates.getLongitude());
+    dbEntity.setProperty(propertyName + PersistConsts.ALTITUDE_PROPERTY, coordinates.getAltitude());
+    dbEntity.setProperty(propertyName + PersistConsts.ACCURACY_PROPERTY, coordinates.getAccuracy());
   }
 
   /**
@@ -76,6 +83,8 @@ public class GeoPointSubmissionType extends SubmissionFieldBase<GeoPoint> {
     if(coordinates != null) {
       jsonObject.addProperty(propertyName + PersistConsts.LATITUDE_PROPERTY, coordinates.getLatitude());
       jsonObject.addProperty(propertyName + PersistConsts.LONGITUDE_PROPERTY, coordinates.getLongitude());
+      jsonObject.addProperty(propertyName + PersistConsts.ALTITUDE_PROPERTY, coordinates.getAltitude());
+      jsonObject.addProperty(propertyName + PersistConsts.ACCURACY_PROPERTY, coordinates.getAccuracy());
     }
   }
   
@@ -83,7 +92,9 @@ public class GeoPointSubmissionType extends SubmissionFieldBase<GeoPoint> {
   public void getValueFromEntity(Entity dbEntity, Form form) {
     Double latCoor = (Double) dbEntity.getProperty(propertyName + PersistConsts.LATITUDE_PROPERTY);
     Double longCoor = (Double) dbEntity.getProperty(propertyName + PersistConsts.LONGITUDE_PROPERTY);
-    coordinates = new GeoPoint(latCoor, longCoor);    
+    Double altitude = (Double) dbEntity.getProperty(propertyName + PersistConsts.ALTITUDE_PROPERTY);
+    Double accuracy = (Double) dbEntity.getProperty(propertyName + PersistConsts.ACCURACY_PROPERTY);
+    coordinates = new GeoPoint(latCoor, longCoor, altitude, accuracy);    
   }
   
   /**

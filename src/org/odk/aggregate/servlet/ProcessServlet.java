@@ -25,6 +25,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.fileupload.FileUploadException;
 import org.odk.aggregate.EMFactory;
+import org.odk.aggregate.constants.ErrorConsts;
 import org.odk.aggregate.constants.ServletConsts;
 import org.odk.aggregate.exception.ODKFormNotFoundException;
 import org.odk.aggregate.parser.MultiPartFormData;
@@ -33,6 +34,9 @@ import org.odk.aggregate.process.ProcessParams;
 import org.odk.aggregate.process.ProcessType;
 
 import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.labs.taskqueue.Queue;
+import com.google.appengine.api.labs.taskqueue.QueueFactory;
+import com.google.appengine.api.labs.taskqueue.TaskOptions;
 
 /**
  * Processes request from web based interface based on users button
@@ -78,6 +82,19 @@ public class ProcessServlet extends ServletUtilBase {
         DeleteSubmissions delete = new DeleteSubmissions(params.getOdkId(), keys, em);
         delete.deleteSubmissions();
         resp.sendRedirect(ServletConsts.WEB_ROOT); 
+      } else if(params.getButtonText().equals(ProcessType.DELETE_FORM.getButtonText())) {
+        TaskOptions task = TaskOptions.Builder.url("/" + FormDeleteTaskServlet.ADDR);
+        task.method(TaskOptions.Method.GET);
+        task.countdownMillis(1);
+        task.param(ServletConsts.ODK_FORM_KEY, params.getOdkId());
+        Queue queue = QueueFactory.getDefaultQueue();
+        try {
+          queue.add(task);
+        } catch (Exception e) {
+          resp.getWriter().print(ErrorConsts.TASK_PROBLEM);
+          e.printStackTrace();
+        }
+
       } else {
         resp.getWriter().print("UNRECOGNIZED PROCESS TYPE!");
       }

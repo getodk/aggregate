@@ -18,8 +18,9 @@ package org.odk.aggregate.process;
 
 
 public enum ProcessType {
-  DELETE("Delete Selected Submissions");
-
+  DELETE("Delete Selected Submissions"),
+  DELETE_FORM("Delete Selected Forms");
+  
   private String buttonText;
   
   /**
