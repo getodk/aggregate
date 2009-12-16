@@ -318,9 +318,28 @@ public abstract class SubmissionTable extends SubmissionResultBase {
 				  } else {
 					 row.add(null);
 				  }
+				  
+                if (coordinate.getAltitude() != null) {
+                  row.add(coordinate.getAltitude().toString());
+                } else {
+                  row.add(null);
+                }
+                
+                if (coordinate.getAccuracy() != null) {
+                  row.add(coordinate.getAccuracy().toString());
+                } else {
+                  row.add(null);
+                }
 			   } else {
 			       if (coordinate.getLongitude() != null && coordinate.getLatitude() != null) {
-			           row.add(coordinate.getLatitude().toString() + BasicConsts.COMMA + BasicConsts.SPACE + coordinate.getLongitude().toString());
+			           String coordVal = coordinate.getLatitude().toString() + BasicConsts.COMMA + BasicConsts.SPACE + coordinate.getLongitude().toString();
+			           if(coordinate.getAltitude() != null) {
+			             coordVal += BasicConsts.COMMA + BasicConsts.SPACE + coordinate.getAltitude().toString();
+			           }
+			           if(coordinate.getAccuracy() != null) {
+                         coordVal += BasicConsts.COMMA + BasicConsts.SPACE + coordinate.getAccuracy().toString();			             
+			           }
+			           row.add(coordVal);
 			       } else {
 			           row.add(null);
 			       }
@@ -333,6 +352,8 @@ public abstract class SubmissionTable extends SubmissionResultBase {
           row.add(null);
           if((entry instanceof GeoPointSubmissionType) && separateCoordinates) {
             row.add(null); // need to add extra null because split for long/lat
+            row.add(null); // need to add extra null for altitude
+            row.add(null); // need to add extra null for accuracy
           }
         }
       } else if(entry instanceof SubmissionRepeat) {

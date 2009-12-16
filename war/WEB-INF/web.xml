@@ -4,6 +4,15 @@
  "http://java.sun.com/dtd/web-app_2_3.dtd">
 
 <web-app xmlns="http://java.sun.com/xml/ns/javaee" version="2.5">
+
+   <servlet>
+    <servlet-name>formDelete</servlet-name>
+    <servlet-class>org.odk.aggregate.servlet.FormDeleteServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>formDelete</servlet-name>
+    <url-pattern>/formDelete</url-pattern>
+  </servlet-mapping>
  
    <servlet>
     <servlet-name>forms</servlet-name>

@@ -33,6 +33,8 @@ import org.odk.aggregate.exception.ODKFormNotFoundException;
 import org.odk.aggregate.exception.ODKIncompleteSubmissionData;
 import org.odk.aggregate.parser.MultiPartFormData;
 import org.odk.aggregate.process.ProcessParams;
+import org.odk.aggregate.process.ProcessType;
+import org.odk.aggregate.table.FormHtmlTable;
 import org.odk.aggregate.table.SubmissionHtmlTable;
 
 import com.google.appengine.api.datastore.Key;
@@ -68,22 +70,34 @@ public class ConfirmServlet extends ServletUtilBase {
       PrintWriter out = resp.getWriter();
       List<Key> keys = params.getKeys();
     
-      if (params.getOdkId() == null || keys == null || params.getButtonText() == null) {
+      if (keys == null || params.getButtonText() == null) {
+        sendErrorNotEnoughParams(resp);
+        return;
+      }
+            
+      if((params.getOdkId() == null) && (params.getButtonText().equals(ProcessType.DELETE))) {
         sendErrorNotEnoughParams(resp);
         return;
       }
       
       beginBasicHtmlResponse(TITLE_INFO, resp, req, false); // header info
-      SubmissionHtmlTable submissions = new SubmissionHtmlTable(getServerURL(req), params.getOdkId(), em);
-      submissions.generateHtmlSubmissionResultsTableFromKeys(keys);
-     
       out.print(HtmlUtil.createFormBeginTag(ProcessServlet.ADDR, ServletConsts.MULTIPART_FORM_DATA, ServletConsts.POST));
       out.print(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_HIDDEN, ServletConsts.ODK_ID, params.getOdkId()));
       out.print(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_HIDDEN, ServletConsts.PROCESS_NUM_RECORDS, Integer.toString(keys.size())));
       for(int i=0; i < keys.size(); i++) {
         out.print(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_HIDDEN,ServletConsts.PROCESS_RECORD_PREFIX + i, KeyFactory.keyToString(keys.get(i))));
       }
-      out.print(submissions.getResultsHtml(false));
+      
+      if(params.getButtonText().equals(ProcessType.DELETE.getButtonText())) {
+        SubmissionHtmlTable submissions = new SubmissionHtmlTable(getServerURL(req), params.getOdkId(), em);
+        submissions.generateHtmlSubmissionResultsTableFromKeys(keys);
+        out.print(submissions.getResultsHtml(false)); 
+      } else if (params.getButtonText().equals(ProcessType.DELETE_FORM.getButtonText())) {
+        FormHtmlTable forms = new FormHtmlTable(keys, em);
+        forms.generateHtmlFormTable(false, false);
+        out.print(forms.getHtml());
+      }
+      
       out.print(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_SUBMIT, ServletConsts.PROCESS_TYPE, params.getButtonText()));
       finishBasicHtmlResponse(resp);
     } catch (ODKFormNotFoundException e) {

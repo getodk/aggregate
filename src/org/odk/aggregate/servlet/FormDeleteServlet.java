@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 Google Inc.
+ * Copyright (C) 2009 University of Washington
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -24,32 +24,28 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.odk.aggregate.EMFactory;
+import org.odk.aggregate.constants.HtmlConsts;
+import org.odk.aggregate.constants.HtmlUtil;
+import org.odk.aggregate.constants.ServletConsts;
+import org.odk.aggregate.process.ProcessType;
 import org.odk.aggregate.table.FormHtmlTable;
 
-/**
- * Servlet generates a webpage with a list of forms
- * 
- * @author wbrunette@gmail.com
- *
- */
-public class FormsServlet extends ServletUtilBase {
+public class FormDeleteServlet extends ServletUtilBase {
  
- // private static final String DELETE_FORMS = "Delete Forms";
-
   /**
    * Serial number for serialization
    */
-  private static final long serialVersionUID = -4405695604321586000L;
+  private static final long serialVersionUID = -7359069138151879679L;
 
   /**
    * URI from base
    */
-  public static final String ADDR = "forms";
+  public static final String ADDR = "formDelete";
   
   /**
    * Title for generated webpage
    */
-  private static final String TITLE_INFO = "Form Manager";
+  private static final String TITLE_INFO = "Form Delete";
   
   /**
    * Handler for HTTP Get request that shows the list of forms
@@ -67,11 +63,15 @@ public class FormsServlet extends ServletUtilBase {
     EntityManager em = EMFactory.get().createEntityManager();
     PrintWriter out = resp.getWriter();
     FormHtmlTable forms = new FormHtmlTable(em);
+    forms.generateHtmlFormTable(false, true);
     beginBasicHtmlResponse(TITLE_INFO, resp, req, true); // header info
-
-    forms.generateHtmlFormTable(true, false);
+    out.print(HtmlUtil.createFormBeginTag(ConfirmServlet.ADDR, ServletConsts.MULTIPART_FORM_DATA, ServletConsts.POST));
     out.print(forms.getHtml());
-//    out.print(HtmlUtil.createHref(FormDeleteServlet.ADDR, DELETE_FORMS));
+    out.print(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_HIDDEN, ServletConsts.PROCESS_NUM_RECORDS, Integer.toString(forms.getNumberForms())));
+    out.print(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_SUBMIT, ServletConsts.PROCESS_TYPE, ProcessType.DELETE_FORM.getButtonText()));
+    out.print(HtmlConsts.LINE_BREAK);
+    out.print(HtmlConsts.FORM_CLOSE);
+    
     finishBasicHtmlResponse(resp);
     em.close();
   }
