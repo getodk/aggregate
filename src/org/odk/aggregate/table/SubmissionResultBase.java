@@ -127,9 +127,13 @@ public abstract class SubmissionResultBase {
         }
       }
     } else {
-      if(node.getSubmissionFieldType().equals(SubmissionFieldType.GEOPOINT) && separateCoordinates) {
-        addToHeaders(node.getElementName() + BasicConsts.DASH + BasicConsts.LATITUDE, node.getSubmissionFieldType());
-        addToHeaders(node.getElementName() + BasicConsts.DASH + BasicConsts.LONGITUDE, node.getSubmissionFieldType());
+      if(node.getSubmissionFieldType().equals(SubmissionFieldType.GEOPOINT)) {
+        if(separateCoordinates) {
+          addToHeaders(node.getElementName() + BasicConsts.DASH + BasicConsts.LATITUDE, node.getSubmissionFieldType());
+          addToHeaders(node.getElementName() + BasicConsts.DASH + BasicConsts.LONGITUDE, node.getSubmissionFieldType());
+        } else {
+          addToHeaders(parentName + node.getElementName(), node.getSubmissionFieldType());
+        }
         addToHeaders(node.getElementName() + BasicConsts.DASH + BasicConsts.ALTITUDE, node.getSubmissionFieldType());
         addToHeaders(node.getElementName() + BasicConsts.DASH + BasicConsts.ACCURACY, node.getSubmissionFieldType());
       } else {

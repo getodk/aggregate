@@ -120,9 +120,12 @@ public class FormProperties {
       if(node.getSubmissionFieldType().equals(SubmissionFieldType.GEOPOINT)) {
         addToHeaders(node.getElementName() + BasicConsts.DASH + BasicConsts.LATITUDE, node.getSubmissionFieldType());
         addToHeaders(node.getElementName() + BasicConsts.DASH + BasicConsts.LONGITUDE, node.getSubmissionFieldType());
+        addToHeaders(node.getElementName() + BasicConsts.DASH + BasicConsts.ALTITUDE, node.getSubmissionFieldType());
+        addToHeaders(node.getElementName() + BasicConsts.DASH + BasicConsts.ACCURACY, node.getSubmissionFieldType());
       } else {
         addToHeaders(parentName + node.getElementName(), node.getSubmissionFieldType());
       }
+      
       addToPropertyNames(node.getElementName(), node.getSubmissionFieldType());
     }
   

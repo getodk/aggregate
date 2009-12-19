@@ -205,6 +205,10 @@ public class SubmissionKml extends SubmissionResultBase{
         data.put(headers.get(headerPointer++), String.valueOf(((GeoPoint) value).getLatitude()));
         System.out.println("Long: " + property + ", " + headers.get(headerPointer) + "((" + headerPointer);
         data.put(headers.get(headerPointer++), String.valueOf(((GeoPoint) value).getLongitude()));
+        System.out.println("Altitude: " + property + ", " + headers.get(headerPointer) + "((" + headerPointer);
+        data.put(headers.get(headerPointer++), String.valueOf(((GeoPoint) value).getAltitude()));
+        System.out.println("Accuracy: " + property + ", " + headers.get(headerPointer) + "((" + headerPointer);
+        data.put(headers.get(headerPointer++), String.valueOf(((GeoPoint) value).getAccuracy()));
       } else if (field.isBinary()) {
         data.put(headers.get(headerPointer++), "<a href='" + fieldString + "'>View</a>");
       } else {
@@ -223,7 +227,14 @@ public class SubmissionKml extends SubmissionResultBase{
     for (String n: data.keySet()) {
       dataString += generateDataElement(n, data.get(n));
     }
-    String point = (gp==null || gp.getLatitude()==null || gp.getLongitude()==null)?"":String.format(PLACEMARK_POINT_TEMPLATE, gp.getLongitude() + "," + gp.getLatitude() + ",0");
+    String point = BasicConsts.EMPTY_STRING;
+    if(gp != null && gp.getLatitude()!=null && gp.getLongitude()!=null) {
+      Double altitude = 0.0;
+      if(gp.getAltitude() != null) {
+        altitude = gp.getAltitude();
+      }
+      point = String.format(PLACEMARK_POINT_TEMPLATE, gp.getLongitude() + BasicConsts.COMMA + gp.getLatitude() + BasicConsts.COMMA + altitude);
+    } 
     return String.format(PLACEMARK_TEMPLATE, StringEscapeUtils.escapeXml(id), StringEscapeUtils.escapeXml(name), dataString, point);
   }
   
@@ -244,12 +255,6 @@ public class SubmissionKml extends SubmissionResultBase{
         System.err.println(ErrorConsts.NOT_A_KEY);
         return null;
       }
-//    } else if(value instanceof GeoPoint) {
-//      GeoPoint coordinate = (GeoPoint) value;
-//      if (coordinate.getLatitude() == null || coordinate.getLongitude() == null) {
-//        return null;
-//      }
-//      return coordinate.getLongitude() + "," + coordinate.getLatitude();
     } else {
       return value.toString();
     }

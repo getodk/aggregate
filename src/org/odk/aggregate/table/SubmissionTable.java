@@ -53,120 +53,139 @@ import com.google.appengine.api.datastore.Query;
 
 /**
  * Used to process submission results into a result table
- *
+ * 
  * @author wbrunette@gmail.com
- *
+ * 
  */
 public abstract class SubmissionTable extends SubmissionResultBase {
-  
+
   private boolean moreRecords;
 
   /**
    * Constructs a table utils for the form
-   * @param xform TODO
-   * @param webServerName TODO
+   * 
+   * @param xform
+   *          TODO
+   * @param webServerName
+   *          TODO
    * @param entityManager
-   *    the persistence manager used to manage generating the tables
-   * @param fetchSizeLimit TODO
+   *          the persistence manager used to manage generating the tables
+   * @param fetchSizeLimit
+   *          TODO
    */
-  protected SubmissionTable(Form xform, String webServerName, EntityManager entityManager, int fetchSizeLimit) {
+  protected SubmissionTable(Form xform, String webServerName,
+      EntityManager entityManager, int fetchSizeLimit) {
     super(xform, webServerName, entityManager, fetchSizeLimit);
     moreRecords = false;
   }
-  
+
   /**
    * Constructs a table utils for the form
-   * @param xform TODO
-   * @param webServerName TODO
+   * 
+   * @param xform
+   *          TODO
+   * @param webServerName
+   *          TODO
    * @param entityManager
-   *    the persistence manager used to manage generating the tables
-   * @param fetchSizeLimit TODO
-   * @param separateGeopoint TODO
+   *          the persistence manager used to manage generating the tables
+   * @param fetchSizeLimit
+   *          TODO
+   * @param separateGeopoint
+   *          TODO
    */
-  protected SubmissionTable(Form xform, String webServerName, EntityManager entityManager, int fetchSizeLimit, boolean separateGeopoint) {
+  protected SubmissionTable(Form xform, String webServerName,
+      EntityManager entityManager, int fetchSizeLimit, boolean separateGeopoint) {
     super(xform, webServerName, entityManager, fetchSizeLimit, separateGeopoint);
     moreRecords = false;
   }
-  
+
   /**
    * Constructs a table utils for the form
-   * @param webServerName TODO
-   * @param odkIdentifier
-   *    the ODK id of the form
-   * @param entityManager
-   *    the persistence manager used to manage generating the tables
-   * @param fetchSizeLimit TODO
    * 
-   * @throws ODKFormNotFoundException 
+   * @param webServerName
+   *          TODO
+   * @param odkIdentifier
+   *          the ODK id of the form
+   * @param entityManager
+   *          the persistence manager used to manage generating the tables
+   * @param fetchSizeLimit
+   *          TODO
+   * 
+   * @throws ODKFormNotFoundException
    */
-  protected SubmissionTable(String webServerName, String odkIdentifier, EntityManager entityManager, int fetchSizeLimit) throws ODKFormNotFoundException {
+  protected SubmissionTable(String webServerName, String odkIdentifier,
+      EntityManager entityManager, int fetchSizeLimit)
+      throws ODKFormNotFoundException {
     super(webServerName, odkIdentifier, entityManager, fetchSizeLimit);
     moreRecords = false;
   }
-  
+
   /**
    * Helper function to create the view link for images
-   * @param subKey
-   *    datastore key to the submission entity
-   * @param porpertyName
-   *    entity's property to retrieve and display
    * 
-   * @return
-   *    link to view the image
+   * @param subKey
+   *          datastore key to the submission entity
+   * @param porpertyName
+   *          entity's property to retrieve and display
+   * 
+   * @return link to view the image
    */
   protected abstract String createViewLink(Key subKey, String porpertyName);
-  
+
   /**
    * Helper function to create the view link for repeat results
+   * 
    * @param repeat
-   *    the repeat object
+   *          the repeat object
    * @param parentSubmissionSetKey
-   *    the submission set that contains the repeat value
-   *    
-   * @return
-   *    the link to repeat results
+   *          the submission set that contains the repeat value
+   * 
+   * @return the link to repeat results
    */
-  protected abstract String createRepeatLink(SubmissionRepeat repeat, Key parentSubmissionSetKey);
-  
+  protected abstract String createRepeatLink(SubmissionRepeat repeat,
+      Key parentSubmissionSetKey);
+
   /**
    * Helper function to create the properties for a view link for images
+   * 
    * @param subKey
-   *    datastore key to the submission entity
-   * @return
-   *    property map
+   *          datastore key to the submission entity
+   * @return property map
    */
   protected Map<String, String> createViewLinkProperties(Key subKey) {
-    Map<String, String> properties = new HashMap<String,String>();
-    properties.put(ServletConsts.BLOB_KEY, KeyFactory.keyToString(subKey)); 
+    Map<String, String> properties = new HashMap<String, String>();
+    properties.put(ServletConsts.BLOB_KEY, KeyFactory.keyToString(subKey));
     return properties;
   }
-  
+
   /**
    * Helper function to create the properties for a link to repeat results
+   * 
    * @param repeat
-   *    the repeat object
+   *          the repeat object
    * @param parentSubmissionSetKey
-   *    the submission set that contains the repeat value
-   *    
-   * @return
-   *    property map
+   *          the submission set that contains the repeat value
+   * 
+   * @return property map
    */
-  protected Map<String, String> createRepeatLinkProperties(SubmissionRepeat repeat, Key parentSubmissionSetKey) {
+  protected Map<String, String> createRepeatLinkProperties(
+      SubmissionRepeat repeat, Key parentSubmissionSetKey) {
     FormElement element = form.getBeginningElement(repeat.getPropertyName());
-    
-    Map<String, String> properties = new HashMap<String,String>();
+
+    Map<String, String> properties = new HashMap<String, String>();
     properties.put(ServletConsts.ODK_ID, odkId);
     properties.put(ServletConsts.KIND, repeat.getKindId());
-    properties.put(ServletConsts.FORM_ELEMENT_KEY, KeyFactory.keyToString(element.getKey()));
-    properties.put(ServletConsts.PARENT_KEY, KeyFactory.keyToString(parentSubmissionSetKey));
+    properties.put(ServletConsts.FORM_ELEMENT_KEY, KeyFactory
+        .keyToString(element.getKey()));
+    properties.put(ServletConsts.PARENT_KEY, KeyFactory
+        .keyToString(parentSubmissionSetKey));
     return properties;
   }
-  
-  
+
   public boolean isMoreRecords() {
     return moreRecords;
   }
-  
+
   protected ResultTable generateSingleEntryResultTable(Submission submission) {
     // create results table
     generatePropertyNamesAndHeaders(form.getElementTreeRoot(), true);
@@ -174,46 +193,52 @@ public abstract class SubmissionTable extends SubmissionResultBase {
     getSubmissionRow(results, submission);
     return results;
   }
+
   /**
-   * Generates a result table that contains all the submission data 
-   * of the form specified by the ODK ID
+   * Generates a result table that contains all the submission data of the form
+   * specified by the ODK ID
    * 
-   * @return
-   *    a result table containing submission data
-   *
-   * @throws ODKIncompleteSubmissionData 
+   * @return a result table containing submission data
+   * 
+   * @throws ODKIncompleteSubmissionData
    */
-  protected ResultTable generateResultTable(Date lastDate, boolean backward) throws ODKIncompleteSubmissionData {
-    
+  protected ResultTable generateResultTable(Date lastDate, boolean backward)
+      throws ODKIncompleteSubmissionData {
+
     // create results table
     generatePropertyNamesAndHeaders(form.getElementTreeRoot(), true);
     ResultTable results = new ResultTable(headers);
 
     // retrieve submissions
     Query surveyQuery = new Query(odkId);
-    if(backward) {
-      surveyQuery.addSort(PersistConsts.SUBMITTED_TIME_PROPERTY_TAG, Query.SortDirection.DESCENDING);
-      surveyQuery.addFilter(PersistConsts.SUBMITTED_TIME_PROPERTY_TAG, Query.FilterOperator.LESS_THAN, lastDate);
+    if (backward) {
+      surveyQuery.addSort(PersistConsts.SUBMITTED_TIME_PROPERTY_TAG,
+          Query.SortDirection.DESCENDING);
+      surveyQuery.addFilter(PersistConsts.SUBMITTED_TIME_PROPERTY_TAG,
+          Query.FilterOperator.LESS_THAN, lastDate);
     } else {
-      surveyQuery.addSort(PersistConsts.SUBMITTED_TIME_PROPERTY_TAG, Query.SortDirection.ASCENDING);
-      surveyQuery.addFilter(PersistConsts.SUBMITTED_TIME_PROPERTY_TAG, Query.FilterOperator.GREATER_THAN, lastDate);
+      surveyQuery.addSort(PersistConsts.SUBMITTED_TIME_PROPERTY_TAG,
+          Query.SortDirection.ASCENDING);
+      surveyQuery.addFilter(PersistConsts.SUBMITTED_TIME_PROPERTY_TAG,
+          Query.FilterOperator.GREATER_THAN, lastDate);
     }
-    
+
     DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
-    List<Entity> submissionEntities =
-        ds.prepare(surveyQuery).asList(FetchOptions.Builder.withLimit(fetchLimit + 1));
-    
-    if(submissionEntities.size() > fetchLimit) {
+    List<Entity> submissionEntities = ds.prepare(surveyQuery).asList(
+        FetchOptions.Builder.withLimit(fetchLimit + 1));
+
+    if (submissionEntities.size() > fetchLimit) {
       moreRecords = true;
       submissionEntities.remove(fetchLimit);
     }
-    
+
     // create a row for each submission
     int count = 0;
-    while(count < submissionEntities.size()) {
+    while (count < submissionEntities.size()) {
       Entity subEntity;
-      if(backward) {
-        subEntity = submissionEntities.get(submissionEntities.size() - 1 - count);
+      if (backward) {
+        subEntity = submissionEntities.get(submissionEntities.size() - 1
+            - count);
       } else {
         subEntity = submissionEntities.get(count);
       }
@@ -223,7 +248,8 @@ public abstract class SubmissionTable extends SubmissionResultBase {
     return results;
   }
 
-  protected ResultTable generateResultTableFromKeys(List<Key> keys) throws ODKIncompleteSubmissionData {
+  protected ResultTable generateResultTableFromKeys(List<Key> keys)
+      throws ODKIncompleteSubmissionData {
     // create results table
     generatePropertyNamesAndHeaders(form.getElementTreeRoot(), true);
     ResultTable results = new ResultTable(headers);
@@ -233,23 +259,23 @@ public abstract class SubmissionTable extends SubmissionResultBase {
     for (Key submissionKey : keys) {
       try {
         Entity subEntity = ds.get(submissionKey);
-        getSubmissionRow(results, new Submission(subEntity, form));        
+        getSubmissionRow(results, new Submission(subEntity, form));
       } catch (EntityNotFoundException e) {
         // just move on
-      } 
+      }
     }
     return results;
   }
 
-  
   private void getSubmissionRow(ResultTable results, Submission sub) {
     Map<String, SubmissionValue> valueMap = sub.getSubmissionValuesMap();
     List<String> row = new ArrayList<String>();
     for (String propertyName : propertyNames) {
       if (propertyName.equals(TableConsts.SUBMISSION_DATE_HEADER)) {
         Date submittedTime = sub.getSubmittedTime();
-        if(submittedTime != null) {
-          row.add(DateFormat.getDateTimeInstance(DateFormat.FULL, DateFormat.FULL).format(submittedTime));
+        if (submittedTime != null) {
+          row.add(DateFormat.getDateTimeInstance(DateFormat.FULL,
+              DateFormat.FULL).format(submittedTime));
         }
       } else {
         processSubmissionFieldValue(sub.getKey(), valueMap, row, propertyName);
@@ -258,22 +284,24 @@ public abstract class SubmissionTable extends SubmissionResultBase {
     results.addRow(sub.getKey(), row);
   }
 
-  protected ResultTable generateResultRepeatTable(String kind, Key elementKey, Key submissionParentKey) throws ODKIncompleteSubmissionData {
+  protected ResultTable generateResultRepeatTable(String kind, Key elementKey,
+      Key submissionParentKey) throws ODKIncompleteSubmissionData {
     FormElement element = em.getReference(FormElement.class, elementKey);
     if (element == null) {
       throw new ODKIncompleteSubmissionData();
     }
-    
+
     // create results table
     generatePropertyNamesAndHeaders(element, false);
     ResultTable results = new ResultTable(headers);
-    
+
     // create a row for each submission
     Query surveyQuery = new Query(kind);
-    surveyQuery.addFilter(PersistConsts.PARENT_KEY_PROPERTY, Query.FilterOperator.EQUAL, submissionParentKey);
+    surveyQuery.addFilter(PersistConsts.PARENT_KEY_PROPERTY,
+        Query.FilterOperator.EQUAL, submissionParentKey);
     DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
-    List<Entity> submissionEntities =
-        ds.prepare(surveyQuery).asList(FetchOptions.Builder.withLimit(fetchLimit));
+    List<Entity> submissionEntities = ds.prepare(surveyQuery).asList(
+        FetchOptions.Builder.withLimit(fetchLimit));
 
     for (Entity subEntity : submissionEntities) {
       SubmissionSet sub = new SubmissionSet(subEntity, form);
@@ -289,10 +317,11 @@ public abstract class SubmissionTable extends SubmissionResultBase {
   }
 
   private void processSubmissionFieldValue(Key submissionSetKey,
-      Map<String, SubmissionValue> submissionValueMap, List<String> row, String propertyName) {
+      Map<String, SubmissionValue> submissionValueMap, List<String> row,
+      String propertyName) {
     SubmissionValue entry = submissionValueMap.get(propertyName);
     if (entry != null) {
-      if(entry instanceof SubmissionField<?>) {
+      if (entry instanceof SubmissionField<?>) {
         SubmissionField<?> field = (SubmissionField<?>) entry;
         Object value = field.getValue();
         if (value != null) {
@@ -304,59 +333,56 @@ public abstract class SubmissionTable extends SubmissionResultBase {
               System.err.println(ErrorConsts.NOT_A_KEY);
             }
           } else {
-		    if (value instanceof GeoPoint) {
-		       GeoPoint coordinate = (GeoPoint) value;
-			   if (separateCoordinates) {
-				  if (coordinate.getLatitude() != null) {
-					 row.add(coordinate.getLatitude().toString());
-				  } else {
-					 row.add(null);
-				  }
+            if (value instanceof GeoPoint) {
+              GeoPoint coordinate = (GeoPoint) value;
+              if (separateCoordinates) {
+                if (coordinate.getLatitude() != null) {
+                  row.add(coordinate.getLatitude().toString());
+                } else {
+                  row.add(null);
+                }
 
-				  if (coordinate.getLongitude() != null) {
-					 row.add(coordinate.getLongitude().toString());
-				  } else {
-					 row.add(null);
-				  }
-				  
-                if (coordinate.getAltitude() != null) {
-                  row.add(coordinate.getAltitude().toString());
+                if (coordinate.getLongitude() != null) {
+                  row.add(coordinate.getLongitude().toString());
                 } else {
                   row.add(null);
                 }
-                
-                if (coordinate.getAccuracy() != null) {
-                  row.add(coordinate.getAccuracy().toString());
+              } else {
+                if (coordinate.getLongitude() != null
+                    && coordinate.getLatitude() != null) {
+                  String coordVal = coordinate.getLatitude().toString() + BasicConsts.COMMA + BasicConsts.SPACE + coordinate.getLongitude().toString();
+                  row.add(coordVal);
                 } else {
                   row.add(null);
                 }
-			   } else {
-			       if (coordinate.getLongitude() != null && coordinate.getLatitude() != null) {
-			           String coordVal = coordinate.getLatitude().toString() + BasicConsts.COMMA + BasicConsts.SPACE + coordinate.getLongitude().toString();
-			           if(coordinate.getAltitude() != null) {
-			             coordVal += BasicConsts.COMMA + BasicConsts.SPACE + coordinate.getAltitude().toString();
-			           }
-			           if(coordinate.getAccuracy() != null) {
-                         coordVal += BasicConsts.COMMA + BasicConsts.SPACE + coordinate.getAccuracy().toString();			             
-			           }
-			           row.add(coordVal);
-			       } else {
-			           row.add(null);
-			       }
-			   }
+              }
+              if (coordinate.getAltitude() != null) {
+                row.add(coordinate.getAltitude().toString());
+              } else {
+                row.add(null);
+              }
+
+              if (coordinate.getAccuracy() != null) {
+                row.add(coordinate.getAccuracy().toString());
+              } else {
+                row.add(null);
+              }
             } else {
               row.add(value.toString());
             }
           }
         } else {
           row.add(null);
-          if((entry instanceof GeoPointSubmissionType) && separateCoordinates) {
-            row.add(null); // need to add extra null because split for long/lat
+          if ((entry instanceof GeoPointSubmissionType) ) {
+            // need to add extra null because split for long/lat
+            if(separateCoordinates) {
+              row.add(null);
+            }
             row.add(null); // need to add extra null for altitude
             row.add(null); // need to add extra null for accuracy
           }
         }
-      } else if(entry instanceof SubmissionRepeat) {
+      } else if (entry instanceof SubmissionRepeat) {
         SubmissionRepeat repeat = (SubmissionRepeat) entry;
         row.add(createRepeatLink(repeat, submissionSetKey));
       } else {
@@ -367,5 +393,5 @@ public abstract class SubmissionTable extends SubmissionResultBase {
       row.add(null);
     }
   }
-  
+
 }
