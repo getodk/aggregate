@@ -43,17 +43,17 @@ import org.odk.aggregate.submission.type.jr.JRTimeType;
  */
 //TODO: decide how we should treat an unknown type?
 public enum SubmissionFieldType {
-  BOOLEAN(BooleanSubmissionType.class, RhizaInsightType.STRING), 
-  DATE(DateSubmissionType.class, RhizaInsightType.DATE), 
-  DECIMAL(DecimalSubmissionType.class, RhizaInsightType.NUMBER), 
-  GEOPOINT(GeoPointSubmissionType.class, RhizaInsightType.GPS), 
-  INTEGER(IntegerSubmissionType.class, RhizaInsightType.NUMBER),  
-  JAVA_ROSA_DATE(JRDateType.class, RhizaInsightType.DATE),  
-  JAVA_ROSA_DATETIME(JRDateTimeType.class, RhizaInsightType.DATE), 
-  JAVA_ROSA_TIME(JRTimeType.class, RhizaInsightType.DATE),  
-  PICTURE(BlobSubmissionType.class, RhizaInsightType.PICTURE), 
-  STRING(StringSubmissionType.class, RhizaInsightType.STRING), 
-  UNKNOWN(StringSubmissionType.class, RhizaInsightType.STRING);
+  BOOLEAN(BooleanSubmissionType.class, RhizaInsightType.STRING, FusionTableType.STRING), 
+  DATE(DateSubmissionType.class, RhizaInsightType.DATE, FusionTableType.DATE), 
+  DECIMAL(DecimalSubmissionType.class, RhizaInsightType.NUMBER, FusionTableType.NUMBER), 
+  GEOPOINT(GeoPointSubmissionType.class, RhizaInsightType.GPS, FusionTableType.GPS), 
+  INTEGER(IntegerSubmissionType.class, RhizaInsightType.NUMBER, FusionTableType.NUMBER),  
+  JAVA_ROSA_DATE(JRDateType.class, RhizaInsightType.DATE, FusionTableType.DATE),  
+  JAVA_ROSA_DATETIME(JRDateTimeType.class, RhizaInsightType.DATE, FusionTableType.DATE), 
+  JAVA_ROSA_TIME(JRTimeType.class, RhizaInsightType.DATE, FusionTableType.DATE),  
+  PICTURE(BlobSubmissionType.class, RhizaInsightType.PICTURE, FusionTableType.STRING), 
+  STRING(StringSubmissionType.class, RhizaInsightType.STRING, FusionTableType.STRING), 
+  UNKNOWN(StringSubmissionType.class, RhizaInsightType.STRING, FusionTableType.STRING);
 
   /**
    * Static conversion map from int (java rosa types) to the
@@ -92,6 +92,12 @@ public enum SubmissionFieldType {
   private RhizaInsightType rhizaInsightType;
   
   /**
+   * The Fusion Table type that maps to ODK aggregate submission type
+   */
+  private FusionTableType fusionTableType;
+  
+  
+  /**
    * Constructor that assigns the mapping from SubmissionFieldType to the
    * class used for converting data from the XML submission to the datastore entity
    * 
@@ -100,9 +106,10 @@ public enum SubmissionFieldType {
    * @param insightType
    *    data type mapping for rhiza insight
    */
-  private SubmissionFieldType(Class<? extends SubmissionFieldBase<?>> submissionDataType,  RhizaInsightType insightType) {
+  private SubmissionFieldType(Class<? extends SubmissionFieldBase<?>> submissionDataType,  RhizaInsightType insightType, FusionTableType ftType) {
     submissionFieldTypeClass = submissionDataType;
     rhizaInsightType = insightType;
+    fusionTableType = ftType;
   }
 
   /**
@@ -116,6 +123,15 @@ public enum SubmissionFieldType {
     return submissionFieldTypeClass;
   }
 
+  /**
+   * 
+   * @return
+   *    Fusion Table Type
+   */
+  public FusionTableType getFusionType() {
+    return fusionTableType;
+  }
+  
   /**
    * 
    * @return

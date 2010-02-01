@@ -99,7 +99,7 @@ public class InsightServlet extends ServletUtilBase {
     ExternalServiceOption esType = ExternalServiceOption.valueOf(esTypeString);
 
 
-    FormProperties formProp = new FormProperties(form, em);
+    FormProperties formProp = new FormProperties(form, em, true);
     createForm(formProp);
 
     

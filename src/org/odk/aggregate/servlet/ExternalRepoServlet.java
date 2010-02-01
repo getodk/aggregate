@@ -114,9 +114,12 @@ public class ExternalRepoServlet extends ServletUtilBase{
     form.append(HtmlUtil.createFormBeginTag(service.getAddr(), ServletConsts.RESP_TYPE_HTML,
         ServletConsts.GET));
     form.append(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_HIDDEN, ServletConsts.ODK_FORM_KEY, encodeParameter(odkFormKey)));
-    form.append(service.getDescriptionOfParam() + HtmlConsts.LINE_BREAK);
-    form.append(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_TEXT,
-        ServletConsts.SPREADSHEET_NAME_PARAM, null));
+    
+    if(!service.equals(ExternalService.GOOGLE_FUSIONTABLES)) {
+       form.append(service.getDescriptionOfParam() + HtmlConsts.LINE_BREAK);
+       form.append(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_TEXT,
+             ServletConsts.SPREADSHEET_NAME_PARAM, null));
+    }
     form.append(HtmlConsts.LINE_BREAK + HtmlConsts.LINE_BREAK);
     form.append(generateRadioOption(ExternalServiceOption.UPLOAD_ONLY, true));
     form.append(generateRadioOption(ExternalServiceOption.STREAM_ONLY, false));
