@@ -206,7 +206,7 @@ public class ServletConsts {
 
   public static final String DOCS_SCOPE = "http://docs.google.com/feeds/";
   
-
+  
   public static final String DOC_FEED = DOCS_SCOPE + "documents" + FEED_PERMISSIONS;
 
 
@@ -238,5 +238,9 @@ public class ServletConsts {
 
   
   public static final String PROCESS_NUM_RECORDS = "numRecords";
+  
+  public static final String FUSION_SCOPE = "http://tables.googlelabs.com/api/query";
+  
+  public static final String AUTHORIZE_FUSION_CREATION = "Authorize Fusion Table Creation from Google Account";
   
 }

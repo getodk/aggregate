@@ -65,7 +65,7 @@ public class SubmissionSpreadsheetTable extends SubmissionCsvTable {
     // get data
     // TODO replaced the old with form properties need to make sure it will be
     // old - ResultTable results = generateResultTable(TableConsts.EPOCH, false);
-    FormProperties formProp = new FormProperties(form, em);
+    FormProperties formProp = new FormProperties(form, em, true);
     List<String> headers = formProp.getHeaders();
     
     // size worksheet correctly

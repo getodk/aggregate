@@ -42,17 +42,20 @@ public class FormProperties {
   // TODO: turns out I don't need this
   protected Map<String, SubmissionFieldType> propertyTypes;
   
+  protected boolean separateGPSLatLong;
+  
   /**
    * Constructs a submission result base
    * @param xform TODO
    * @param entityManager
    *    the persistence manager used to manage generating the tables
    */
-  public FormProperties(Form xform, EntityManager entityManager) {
+  public FormProperties(Form xform, EntityManager entityManager, boolean separateGPS) {
     odkId = xform.getOdkId();
     em = entityManager;
     form = xform;
-
+    separateGPSLatLong = separateGPS;
+    
     headers = new ArrayList<String>();
     propertyNames = new ArrayList<String>();
     headerTypes = new HashMap<String, SubmissionFieldType>();
@@ -118,8 +121,12 @@ public class FormProperties {
       }
     } else {
       if(node.getSubmissionFieldType().equals(SubmissionFieldType.GEOPOINT)) {
-        addToHeaders(node.getElementName() + BasicConsts.DASH + BasicConsts.LATITUDE, node.getSubmissionFieldType());
-        addToHeaders(node.getElementName() + BasicConsts.DASH + BasicConsts.LONGITUDE, node.getSubmissionFieldType());
+         if(separateGPSLatLong) {
+            addToHeaders(node.getElementName() + BasicConsts.DASH + BasicConsts.LATITUDE, node.getSubmissionFieldType());
+            addToHeaders(node.getElementName() + BasicConsts.DASH + BasicConsts.LONGITUDE, node.getSubmissionFieldType());
+         } else {
+            addToHeaders(node.getElementName(), node.getSubmissionFieldType());
+         }
         addToHeaders(node.getElementName() + BasicConsts.DASH + BasicConsts.ALTITUDE, node.getSubmissionFieldType());
         addToHeaders(node.getElementName() + BasicConsts.DASH + BasicConsts.ACCURACY, node.getSubmissionFieldType());
       } else {

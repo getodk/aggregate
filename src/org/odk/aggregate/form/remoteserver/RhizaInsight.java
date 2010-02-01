@@ -70,7 +70,7 @@ public class RhizaInsight implements RemoteServer {
   public void sendSubmissionToRemoteServer(Form xform, String serverName, EntityManager em,
       String appName, Submission submission) {
 
-    FormProperties formProp = new FormProperties(xform, em);
+    FormProperties formProp = new FormProperties(xform, em, true);
     sendSubmissionToRemoteServer(formProp, submission);
   }
 
