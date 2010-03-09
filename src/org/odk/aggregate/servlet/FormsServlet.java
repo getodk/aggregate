@@ -33,8 +33,6 @@ import org.odk.aggregate.table.FormHtmlTable;
  *
  */
 public class FormsServlet extends ServletUtilBase {
- 
- // private static final String DELETE_FORMS = "Delete Forms";
 
   /**
    * Serial number for serialization
@@ -71,7 +69,6 @@ public class FormsServlet extends ServletUtilBase {
 
     forms.generateHtmlFormTable(true, false);
     out.print(forms.getHtml());
-//    out.print(HtmlUtil.createHref(FormDeleteServlet.ADDR, DELETE_FORMS));
     finishBasicHtmlResponse(resp);
     em.close();
   }

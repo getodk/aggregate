@@ -13,6 +13,15 @@
     <servlet-name>formDelete</servlet-name>
     <url-pattern>/formDelete</url-pattern>
   </servlet-mapping>
+
+   <servlet>
+    <servlet-name>formDeleteTask</servlet-name>
+    <servlet-class>org.odk.aggregate.servlet.FormDeleteTaskServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>formDeleteTask</servlet-name>
+    <url-pattern>/formDeleteTask</url-pattern>
+  </servlet-mapping>
  
    <servlet>
     <servlet-name>forms</servlet-name>
@@ -187,6 +196,6 @@
   </servlet-mapping>
 
 	<welcome-file-list>
-		<welcome-file>index.html</welcome-file>
+		<welcome-file>forms</welcome-file>
 	</welcome-file-list>
 </web-app>

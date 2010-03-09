@@ -25,6 +25,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.odk.aggregate.EMFactory;
+import org.odk.aggregate.constants.BasicConsts;
 import org.odk.aggregate.constants.ErrorConsts;
 import org.odk.aggregate.constants.PersistConsts;
 import org.odk.aggregate.constants.ServletConsts;
@@ -36,6 +37,7 @@ import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.FetchOptions;
+import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.labs.taskqueue.Queue;
@@ -63,9 +65,18 @@ public class FormDeleteTaskServlet extends ServletUtilBase {
   @Override
   public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
     // get parameter
-    String odkId = getParameter(req, ServletConsts.ODK_ID);
+    String formKeyStr = getParameter(req, ServletConsts.ODK_FORM_KEY);
+    
+    if(formKeyStr == null || formKeyStr.equals(BasicConsts.EMPTY_STRING)) {
+       return;
+    }
     
     EntityManager em = EMFactory.get().createEntityManager();
+    
+    Key formKey = KeyFactory.stringToKey(formKeyStr);
+    Form form = em.getReference(Form.class, formKey);
+    String odkId = form.getOdkId();
+    
     // retrieve submissions
     Query surveyQuery = new Query(odkId);
       surveyQuery.addSort(PersistConsts.SUBMITTED_TIME_PROPERTY_TAG, Query.SortDirection.DESCENDING);
@@ -90,7 +101,7 @@ public class FormDeleteTaskServlet extends ServletUtilBase {
       TaskOptions task = TaskOptions.Builder.url("/" + FormDeleteTaskServlet.ADDR);
       task.method(TaskOptions.Method.GET);
       task.countdownMillis(1);
-      task.param(ServletConsts.ODK_FORM_KEY, odkId);
+      task.param(ServletConsts.ODK_FORM_KEY, formKeyStr);
       Queue queue = QueueFactory.getDefaultQueue();
       try {
         queue.add(task);
@@ -100,14 +111,8 @@ public class FormDeleteTaskServlet extends ServletUtilBase {
       }
 
     } else {
-      Form form;
-      try {
-        form = Form.retrieveForm(em, odkId);
-      } catch (ODKFormNotFoundException e) {
-        e.printStackTrace();
-        return;
-      }
       em.remove(form);
     }
+    em.close();
   }
 }

@@ -139,10 +139,10 @@ public class ServletConsts {
 
 
   // href link text
-  public static final String FORMS_LINK_TEXT = "List of Forms";
+  public static final String FORMS_LINK_TEXT = "List Forms";
   public static final String UPLOAD_SUB_LINK_TEXT = "Upload a Submission";
   public static final String UPLOAD_FORM_LINK_TEXT = "Upload Form";
-
+  public static final String DELETE_FORM_LINK_TEXT = "Delete Form";
 
   public static final String BLOB_KEY = "blobKey";
 
