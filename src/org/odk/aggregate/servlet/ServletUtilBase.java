@@ -247,10 +247,12 @@ public class ServletUtilBase extends HttpServlet {
    * 
    * @return a string with href links
    */
-  public String generateNavigationInfo() {
+  public static String generateNavigationInfo() {
     String html = HtmlUtil.createHref(FormsServlet.ADDR, ServletConsts.FORMS_LINK_TEXT);
     html += HtmlConsts.TAB + HtmlConsts.TAB;
     html += HtmlUtil.createHref(FormUploadServlet.ADDR, ServletConsts.UPLOAD_FORM_LINK_TEXT);
+    html += HtmlConsts.TAB + HtmlConsts.TAB;
+    html += HtmlUtil.createHref(FormDeleteServlet.ADDR, ServletConsts.DELETE_FORM_LINK_TEXT);
     html += HtmlConsts.TAB + HtmlConsts.TAB;
     html +=
         HtmlUtil.createHref(ServletConsts.UPLOAD_SUBMISSION_ADDR,

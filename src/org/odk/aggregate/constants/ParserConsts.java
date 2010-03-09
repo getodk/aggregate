@@ -37,7 +37,7 @@ public class ParserConsts {
   public static final String NODE_FORMATTED = "Node: ";
 
   /**
-   * The max file size that can be uploaded/parsed
+   * The default max file size that can be uploaded/parsed
    */
-  public final static int FILE_SIZE_MAX = 500000;
+  public final static int FILE_SIZE_MAX = 5000000;
 }

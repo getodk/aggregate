@@ -34,76 +34,78 @@ import org.odk.aggregate.process.ProcessParams;
 import org.odk.aggregate.process.ProcessType;
 
 import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.labs.taskqueue.Queue;
 import com.google.appengine.api.labs.taskqueue.QueueFactory;
 import com.google.appengine.api.labs.taskqueue.TaskOptions;
 
 /**
- * Processes request from web based interface based on users button
- * press specifying the type of processing they want
+ * Processes request from web based interface based on users button press
+ * specifying the type of processing they want
  * 
  * @author wbrunette@gmail.com
  * 
  */
 public class ProcessServlet extends ServletUtilBase {
 
-  /**
-   * Serial number for serialization
-   */
-  private static final long serialVersionUID = 7328196170394698478L;
+   /**
+    * Serial number for serialization
+    */
+   private static final long serialVersionUID = 7328196170394698478L;
 
-  /**
-   * URI from base
-   */
-  public static final String ADDR = "process";
+   /**
+    * URI from base
+    */
+   public static final String ADDR = "process";
 
-  /**
-   * Handler for HTTP Post request
-   * 
-   * @see javax.servlet.http.HttpServlet#doGet(javax.servlet.http.HttpServletRequest,
-   *      javax.servlet.http.HttpServletResponse)
-   */
-  @Override
-  public void doPost(HttpServletRequest req, HttpServletResponse resp)
-      throws IOException {
+   /**
+    * Handler for HTTP Post request
+    * 
+    * @see javax.servlet.http.HttpServlet#doGet(javax.servlet.http.HttpServletRequest,
+    *      javax.servlet.http.HttpServletResponse)
+    */
+   @Override
+   public void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 
+      EntityManager em = EMFactory.get().createEntityManager();
+      try {
+         ProcessParams params = new ProcessParams(new MultiPartFormData(req));
+         List<Key> keys = params.getKeys();
 
-    EntityManager em = EMFactory.get().createEntityManager();
-    try {
-      ProcessParams params = new ProcessParams(new MultiPartFormData(req));
-      List<Key> keys = params.getKeys();
-    
-      if (params.getOdkId() == null || keys == null || params.getButtonText() == null) {
-        sendErrorNotEnoughParams(resp);
-        return;
+         if (params.getOdkId() == null || keys == null || params.getButtonText() == null) {
+            sendErrorNotEnoughParams(resp);
+            return;
+         }
+
+         if (params.getButtonText().equals(ProcessType.DELETE.getButtonText())) {
+            DeleteSubmissions delete = new DeleteSubmissions(params.getOdkId(), keys, em);
+            delete.deleteSubmissions();
+            resp.sendRedirect(ServletConsts.WEB_ROOT);
+         } else if (params.getButtonText().equals(ProcessType.DELETE_FORM.getButtonText())) {
+            for (Key key : keys) {
+               TaskOptions task = TaskOptions.Builder.url("/" + FormDeleteTaskServlet.ADDR);
+               task.method(TaskOptions.Method.GET);
+               task.countdownMillis(1);
+               task.param(ServletConsts.ODK_FORM_KEY, KeyFactory.keyToString(key));
+               Queue queue = QueueFactory.getDefaultQueue();
+               try {
+                  queue.add(task);
+               } catch (Exception e) {
+                  resp.getWriter().print(ErrorConsts.TASK_PROBLEM);
+                  e.printStackTrace();
+               }
+            }
+
+         } else {
+            resp.getWriter().print("UNRECOGNIZED PROCESS TYPE!");
+         }
+      } catch (ODKFormNotFoundException e) {
+         odkIdNotFoundError(resp);
+      } catch (FileUploadException e) {
+         e.printStackTrace();
       }
-      
-      if(params.getButtonText().equals(ProcessType.DELETE.getButtonText())) {
-        DeleteSubmissions delete = new DeleteSubmissions(params.getOdkId(), keys, em);
-        delete.deleteSubmissions();
-        resp.sendRedirect(ServletConsts.WEB_ROOT); 
-      } else if(params.getButtonText().equals(ProcessType.DELETE_FORM.getButtonText())) {
-        TaskOptions task = TaskOptions.Builder.url("/" + FormDeleteTaskServlet.ADDR);
-        task.method(TaskOptions.Method.GET);
-        task.countdownMillis(1);
-        task.param(ServletConsts.ODK_FORM_KEY, params.getOdkId());
-        Queue queue = QueueFactory.getDefaultQueue();
-        try {
-          queue.add(task);
-        } catch (Exception e) {
-          resp.getWriter().print(ErrorConsts.TASK_PROBLEM);
-          e.printStackTrace();
-        }
-
-      } else {
-        resp.getWriter().print("UNRECOGNIZED PROCESS TYPE!");
-      }
-    } catch (ODKFormNotFoundException e) {
-      odkIdNotFoundError(resp);
-    } catch (FileUploadException e) {
-      e.printStackTrace();
-    }
-    em.close();
-  }
+      em.close();
+      resp.sendRedirect(FormsServlet.ADDR);
+   }
 
 }

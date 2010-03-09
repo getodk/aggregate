@@ -64,8 +64,12 @@ public class MultiPartFormData {
     fileNameMap = new HashMap<String, MultiPartFormItem>();
     
     ServletFileUpload upload = new ServletFileUpload(new DiskFileItemFactory());
-    upload.setFileSizeMax(ParserConsts.FILE_SIZE_MAX);
-
+    int size = req.getContentLength();
+    if(size > 0) {
+       upload.setFileSizeMax(size);       
+    } else {
+       upload.setFileSizeMax(ParserConsts.FILE_SIZE_MAX);
+    }
     FileItemIterator items = upload.getItemIterator(req);
     while (items.hasNext()) {
       FileItemStream item = items.next();

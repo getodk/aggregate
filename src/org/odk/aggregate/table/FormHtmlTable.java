@@ -89,8 +89,9 @@ public class FormHtmlTable {
     this.forms = formQuery.getResultList();
   }
 
-  public FormHtmlTable(List<Key> formKeys, EntityManager entityManager) {
+  public FormHtmlTable(List<Key> formKeys, EntityManager entityManager, String user) {
     em = entityManager;
+    userName = user;
     forms = new ArrayList<Form>();
 
     for (Key formKey : formKeys) {

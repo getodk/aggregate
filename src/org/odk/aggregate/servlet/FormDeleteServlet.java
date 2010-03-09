@@ -30,6 +30,9 @@ import org.odk.aggregate.constants.ServletConsts;
 import org.odk.aggregate.process.ProcessType;
 import org.odk.aggregate.table.FormHtmlTable;
 
+import com.google.appengine.api.users.UserService;
+import com.google.appengine.api.users.UserServiceFactory;
+
 public class FormDeleteServlet extends ServletUtilBase {
  
   /**
@@ -60,9 +63,12 @@ public class FormDeleteServlet extends ServletUtilBase {
     if (!verifyCredentials(req, resp)) {
       return;
     }
+    
+    UserService userService = UserServiceFactory.getUserService();
+    
     EntityManager em = EMFactory.get().createEntityManager();
     PrintWriter out = resp.getWriter();
-    FormHtmlTable forms = new FormHtmlTable(em);
+    FormHtmlTable forms = new FormHtmlTable(em, userService.getCurrentUser().getNickname());
     forms.generateHtmlFormTable(false, true);
     beginBasicHtmlResponse(TITLE_INFO, resp, req, true); // header info
     out.print(HtmlUtil.createFormBeginTag(ConfirmServlet.ADDR, ServletConsts.MULTIPART_FORM_DATA, ServletConsts.POST));

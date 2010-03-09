@@ -39,6 +39,8 @@ import org.odk.aggregate.table.SubmissionHtmlTable;
 
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
+import com.google.appengine.api.users.UserService;
+import com.google.appengine.api.users.UserServiceFactory;
 
 public class ConfirmServlet extends ServletUtilBase {
   /**
@@ -64,7 +66,8 @@ public class ConfirmServlet extends ServletUtilBase {
   public void doPost(HttpServletRequest req, HttpServletResponse resp)
       throws IOException {
     EntityManager em = EMFactory.get().createEntityManager();
- 
+    UserService userService = UserServiceFactory.getUserService();
+    
     try {
       ProcessParams params = new ProcessParams(new MultiPartFormData(req));
       PrintWriter out = resp.getWriter();
@@ -93,7 +96,7 @@ public class ConfirmServlet extends ServletUtilBase {
         submissions.generateHtmlSubmissionResultsTableFromKeys(keys);
         out.print(submissions.getResultsHtml(false)); 
       } else if (params.getButtonText().equals(ProcessType.DELETE_FORM.getButtonText())) {
-        FormHtmlTable forms = new FormHtmlTable(keys, em);
+        FormHtmlTable forms = new FormHtmlTable(keys, em, userService.getCurrentUser().getNickname());
         forms.generateHtmlFormTable(false, false);
         out.print(forms.getHtml());
       }
