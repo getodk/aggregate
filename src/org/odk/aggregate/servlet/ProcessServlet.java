@@ -105,7 +105,7 @@ public class ProcessServlet extends ServletUtilBase {
          e.printStackTrace();
       }
       em.close();
-      resp.sendRedirect(FormsServlet.ADDR);
+      resp.sendRedirect(BlankServlet.ADDR);
    }
 
 }

@@ -22,6 +22,15 @@
     <servlet-name>formDeleteTask</servlet-name>
     <url-pattern>/formDeleteTask</url-pattern>
   </servlet-mapping>
+  
+     <servlet>
+    <servlet-name>blank</servlet-name>
+    <servlet-class>org.odk.aggregate.servlet.BlankServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>blank</servlet-name>
+    <url-pattern>/blank</url-pattern>
+  </servlet-mapping>
  
    <servlet>
     <servlet-name>forms</servlet-name>
