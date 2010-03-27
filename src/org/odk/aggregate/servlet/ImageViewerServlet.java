@@ -38,6 +38,8 @@ import com.google.appengine.api.datastore.KeyFactory;
  */
 public class ImageViewerServlet extends ServletUtilBase {
 
+   private static final String APPLICATION_OCTET_STREAM = "application/octet-stream";
+   
   /**
    * Serial number for serialization
    */
@@ -74,12 +76,17 @@ public class ImageViewerServlet extends ServletUtilBase {
     try {
         SubmissionBlob blobStore = new SubmissionBlob(KeyFactory.stringToKey(keyString));
         Blob imageBlob = blobStore.getBlob();
-        if(imageBlob != null) {
-          resp.setContentType(blobStore.getContentType());
-          OutputStream os = resp.getOutputStream();
-          os.write(imageBlob.getBytes());
-          os.close();
-          return;
+
+        if (imageBlob != null) {
+           String contentType = blobStore.getContentType();
+           if(contentType == null) {
+             resp.setContentType(ServletConsts.RESP_TYPE_IMAGE_JPEG);
+           } else if(/* NOTE ASSUMING contentType != null && */contentType.equals(APPLICATION_OCTET_STREAM)) {
+             resp.setContentType(ServletConsts.RESP_TYPE_IMAGE_JPEG);
+           }
+           OutputStream os = resp.getOutputStream();
+           os.write(imageBlob.getBytes());
+           os.close();
         }
 
     } catch (EntityNotFoundException e) {

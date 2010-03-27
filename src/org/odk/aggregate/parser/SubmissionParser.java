@@ -217,71 +217,81 @@ public class SubmissionParser {
       List<Element> elements = getElementsInTree(currentSubmissionElement, submissionTag);
       if (elements.isEmpty()) {
         // TODO: remove hack to get around root problem
-        parseSubmissionElement(node, submissionElement, currentSubmissionElement, submissionSet);
-      } else if (elements.size() == 1) {
-        parseSubmissionElement(node, submissionElement, elements.remove(0), submissionSet);
+        parseSubmissionElement(node, submissionElement, currentSubmissionElement, submissionSet, false);
+      } else if (node.isRepeatable()) {
+         RepeatSubmissionType repeats = new RepeatSubmissionType(odkId, submissionTag);
+         submissionSet.addSubmissionValues(repeats);
+         for (Element element : elements) {
+           SubmissionSet repeatableSubmissionSet = new SubmissionSet(odkId, submissionTag, submissionSet.getKey(), repeats.getNumberRepeats());
+           repeats.addSubmissionSet(repeatableSubmissionSet);
+           parseSubmissionElement(node, submissionElement, element, repeatableSubmissionSet, true);
+         }
       } else {
-        // verify that this node is able to be repeatable
-        if(!node.isRepeatable()) {
+        // verify there is only one element
+        if(elements.size() != 1) {
           throw new ODKParseException();
         }
-        
-        RepeatSubmissionType repeats = new RepeatSubmissionType(odkId, submissionTag);
-        submissionSet.addSubmissionValues(repeats);
-        for (Element element : elements) {
-          SubmissionSet repeatableSubmissionSet = new SubmissionSet(odkId, submissionTag, submissionSet.getKey(), repeats.getNumberRepeats());
-          repeats.addSubmissionSet(repeatableSubmissionSet);
-          parseSubmissionElement(node, submissionElement, element, repeatableSubmissionSet);
-        }
+        parseSubmissionElement(node, submissionElement, elements.remove(0), submissionSet, false);
       }
     }
   }
 
 
   private void parseSubmissionElement(FormElement node, SubmissionField<?> submissionElement,
-      Element elementNode, SubmissionSet submissionSet) throws ODKParseException {
-    try {
-      String value = getSubmissionValue(elementNode);
-      if (value != null) {
-        if (submissionElement.isBinary()) {
-          // check to see if we received a multipart submission
-          if (submissionFormItems == null) {
-            // TODO: problem, only accept a base64 encoded in a direct XML post
-            byte[] receivedBytes = Base64.decodeBase64(value.getBytes());
-            // TODO: problem since we don't know how to tell what type of binary 
-            // without content type, defaulting to JPG
-            submissionElement.setValueFromByteArray(receivedBytes, null, ServletConsts.RESP_TYPE_IMAGE_JPEG);
-          } else {
-            // attempt to find binary data in multi-part form submission
-            // first searching by file name, then field name
-            MultiPartFormItem binaryData = submissionFormItems.getFormDataByFileName(value);
-            if (binaryData == null) {
-              binaryData = submissionFormItems.getFormDataByFieldName(value);
-            }
-            // after completing the search now check if found anything and
-            // value, otherwise output error
-            if (binaryData != null) {
-              submissionElement.setValueFromByteArray(binaryData.getStream().toByteArray(), null, binaryData.getContentType());
+      Element elementNode, SubmissionSet submissionSet, boolean baseWithNoValue) throws ODKParseException {
+    
+    if (!baseWithNoValue) {
+
+      try {
+        String value = getSubmissionValue(elementNode);
+        if (value != null) {
+          if (submissionElement.isBinary()) {
+            // check to see if we received a multipart submission
+            if (submissionFormItems == null) {
+              // TODO: problem, only accept a base64 encoded in a direct XML
+              // post
+              byte[] receivedBytes = Base64.decodeBase64(value.getBytes());
+              // TODO: problem since we don't know how to tell what type of
+              // binary without content type, defaulting to JPG
+              submissionElement.setValueFromByteArray(receivedBytes, null,
+                  ServletConsts.RESP_TYPE_IMAGE_JPEG);
             } else {
-              // TODO: decide if we want system to reject submission if file is
-              // not found?
-              System.err.println("UNABLE TO FIND VALUE OF " + value);
+              // attempt to find binary data in multi-part form submission
+              // first searching by file name, then field name
+              MultiPartFormItem binaryData = submissionFormItems
+                  .getFormDataByFileName(value);
+              if (binaryData == null) {
+                binaryData = submissionFormItems.getFormDataByFieldName(value);
+              }
+              // after completing the search now check if found anything and
+              // value, otherwise output error
+              if (binaryData != null) {
+                submissionElement.setValueFromByteArray(binaryData.getStream()
+                    .toByteArray(), null, binaryData.getContentType());
+              } else {
+                // TODO: decide if we want system to reject submission if file
+                // is not found?
+                System.err.println("UNABLE TO FIND VALUE OF " + value);
+              }
             }
+          } else {
+            submissionElement.setValueFromString(value);
           }
-        } else {
-          submissionElement.setValueFromString(value);
         }
+      } catch (ODKConversionException e) {
+        e.printStackTrace();
       }
-    } catch (ODKConversionException e) {
-      e.printStackTrace();
-    }
 
-    if (submissionElement != null) {
-      submissionSet.addSubmissionValues(submissionElement);
+      if (submissionElement != null) {
+        submissionSet.addSubmissionValues(submissionElement);
+      }
     }
-
     List<FormElement> children = node.getChildren();
 
+    if (children == null) {
+      return;
+    }
+    
     // iterate through all children
     for (FormElement child : children) {
       processSubmissionElement(child, elementNode, submissionSet);
