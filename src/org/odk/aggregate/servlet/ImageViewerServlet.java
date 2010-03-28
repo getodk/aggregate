@@ -87,6 +87,7 @@ public class ImageViewerServlet extends ServletUtilBase {
            OutputStream os = resp.getOutputStream();
            os.write(imageBlob.getBytes());
            os.close();
+           return;
         }
 
     } catch (EntityNotFoundException e) {
