@@ -172,7 +172,7 @@ public class SubmissionParser {
     submission = new Submission(form);
     
     FormElement formRoot = form.getElementTreeRoot();
-    processSubmissionElement(formRoot, root, submission);
+    processSubmissionElement(formRoot, root, submission, true);
 
     // save the elements inserted into the submission
     DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
@@ -195,13 +195,16 @@ public class SubmissionParser {
    * extracting the corresponding value from the XML submission. Recursively
    * applies itself to children of the form element.
    * 
-   * @param node form element to parse from the XML submission
-   * @param submissionSet the set of submission to add the submission value to
-   * 
-   * @throws ODKParseException 
+   * @param node
+   *          form element to parse from the XML submission
+   * @param submissionSet
+   *          the set of submission to add the submission value to
+   * @param submissionRoot
+   *          value true if root of submission, false otherwise
+   * @throws ODKParseException
    */
   private void processSubmissionElement(FormElement node, Element currentSubmissionElement,
-      SubmissionSet submissionSet) throws ODKParseException {
+      SubmissionSet submissionSet, boolean submissionRoot) throws ODKParseException {
     if (node == null || currentSubmissionElement == null) {
       return;
     }
@@ -215,31 +218,33 @@ public class SubmissionParser {
 
     if (submissionElement != null) {
       List<Element> elements = getElementsInTree(currentSubmissionElement, submissionTag);
-      if (elements.isEmpty()) {
-        // TODO: remove hack to get around root problem
-        parseSubmissionElement(node, submissionElement, currentSubmissionElement, submissionSet, false);
-      } else if (node.isRepeatable()) {
-         RepeatSubmissionType repeats = new RepeatSubmissionType(odkId, submissionTag);
-         submissionSet.addSubmissionValues(repeats);
-         for (Element element : elements) {
-           SubmissionSet repeatableSubmissionSet = new SubmissionSet(odkId, submissionTag, submissionSet.getKey(), repeats.getNumberRepeats());
-           repeats.addSubmissionSet(repeatableSubmissionSet);
-           parseSubmissionElement(node, submissionElement, element, repeatableSubmissionSet, true);
-         }
-      } else {
-        // verify there is only one element
-        if(elements.size() != 1) {
-          throw new ODKParseException();
+      if (!elements.isEmpty()) {
+        if (node.isRepeatable()) {
+          RepeatSubmissionType repeats = new RepeatSubmissionType(odkId, submissionTag);
+          submissionSet.addSubmissionValues(repeats);
+          for (Element element : elements) {
+            SubmissionSet repeatableSubmissionSet = new SubmissionSet(odkId, submissionTag,
+                submissionSet.getKey(), repeats.getNumberRepeats());
+            repeats.addSubmissionSet(repeatableSubmissionSet);
+            parseSubmissionElement(node, submissionElement, element, repeatableSubmissionSet, true);
+          }
+        } else {
+          // verify there is only one element
+          if (elements.size() != 1) {
+            throw new ODKParseException();
+          }
+          parseSubmissionElement(node, submissionElement, elements.remove(0), submissionSet, false);
         }
-        parseSubmissionElement(node, submissionElement, elements.remove(0), submissionSet, false);
+      } else if (submissionRoot) {
+        parseSubmissionElement(node, submissionElement, currentSubmissionElement, submissionSet, false);
       }
     }
   }
 
-
   private void parseSubmissionElement(FormElement node, SubmissionField<?> submissionElement,
-      Element elementNode, SubmissionSet submissionSet, boolean baseWithNoValue) throws ODKParseException {
-    
+      Element elementNode, SubmissionSet submissionSet, boolean baseWithNoValue)
+      throws ODKParseException {
+
     if (!baseWithNoValue) {
 
       try {
@@ -248,8 +253,7 @@ public class SubmissionParser {
           if (submissionElement.isBinary()) {
             // check to see if we received a multipart submission
             if (submissionFormItems == null) {
-              // TODO: problem, only accept a base64 encoded in a direct XML
-              // post
+              // TODO: problem, only accept a base64 encoded in a direct XML post
               byte[] receivedBytes = Base64.decodeBase64(value.getBytes());
               // TODO: problem since we don't know how to tell what type of
               // binary without content type, defaulting to JPG
@@ -258,19 +262,17 @@ public class SubmissionParser {
             } else {
               // attempt to find binary data in multi-part form submission
               // first searching by file name, then field name
-              MultiPartFormItem binaryData = submissionFormItems
-                  .getFormDataByFileName(value);
+              MultiPartFormItem binaryData = submissionFormItems.getFormDataByFileName(value);
               if (binaryData == null) {
                 binaryData = submissionFormItems.getFormDataByFieldName(value);
               }
               // after completing the search now check if found anything and
               // value, otherwise output error
               if (binaryData != null) {
-                submissionElement.setValueFromByteArray(binaryData.getStream()
-                    .toByteArray(), null, binaryData.getContentType());
+                submissionElement.setValueFromByteArray(binaryData.getStream().toByteArray(), null,
+                    binaryData.getContentType());
               } else {
-                // TODO: decide if we want system to reject submission if file
-                // is not found?
+                // TODO: decide if we want system to reject submission if file is not found?
                 System.err.println("UNABLE TO FIND VALUE OF " + value);
               }
             }
@@ -291,10 +293,10 @@ public class SubmissionParser {
     if (children == null) {
       return;
     }
-    
+
     // iterate through all children
     for (FormElement child : children) {
-      processSubmissionElement(child, elementNode, submissionSet);
+      processSubmissionElement(child, elementNode, submissionSet, false);
     }
   }
 
