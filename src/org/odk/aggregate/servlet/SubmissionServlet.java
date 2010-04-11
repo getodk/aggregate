@@ -24,7 +24,6 @@ import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.odk.aggregate.EMFactory;
 import org.odk.aggregate.constants.ErrorConsts;
@@ -114,10 +113,9 @@ public class SubmissionServlet extends ServletUtilBase {
         try {
           submissionParser = new SubmissionParser(new MultiPartFormData(req), em);
           odkId = submissionParser.getOdkId();
-        } catch (FileUploadException e) {
+        } catch (Exception e) {
           e.printStackTrace();
-        }
-
+        } 
       } else {
         // TODO: check that it is the proper types we can deal with
         // XML received
