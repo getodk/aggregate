@@ -26,7 +26,6 @@ import org.odk.aggregate.constants.ErrorConsts;
 import org.odk.aggregate.constants.ServletConsts;
 import org.odk.aggregate.submission.SubmissionBlob;
 
-import com.google.appengine.api.datastore.Blob;
 import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.api.datastore.KeyFactory;
 
@@ -75,7 +74,7 @@ public class ImageViewerServlet extends ServletUtilBase {
 
     try {
         SubmissionBlob blobStore = new SubmissionBlob(KeyFactory.stringToKey(keyString));
-        Blob imageBlob = blobStore.getBlob();
+        byte[] imageBlob = blobStore.getBlob();
 
         if (imageBlob != null) {
            String contentType = blobStore.getContentType();
@@ -83,9 +82,11 @@ public class ImageViewerServlet extends ServletUtilBase {
              resp.setContentType(ServletConsts.RESP_TYPE_IMAGE_JPEG);
            } else if(/* NOTE ASSUMING contentType != null && */contentType.equals(APPLICATION_OCTET_STREAM)) {
              resp.setContentType(ServletConsts.RESP_TYPE_IMAGE_JPEG);
+           } else {
+             resp.setContentType(contentType);
            }
            OutputStream os = resp.getOutputStream();
-           os.write(imageBlob.getBytes());
+           os.write(imageBlob);
            os.close();
            return;
         }

@@ -114,7 +114,7 @@ public class SubmissionServlet extends ServletUtilBase {
           submissionParser = new SubmissionParser(new MultiPartFormData(req), em);
           odkId = submissionParser.getOdkId();
         } catch (Exception e) {
-          e.printStackTrace();
+          throw new IOException(e);
         } 
       } else {
         // TODO: check that it is the proper types we can deal with

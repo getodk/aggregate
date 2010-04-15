@@ -23,7 +23,6 @@ import org.odk.aggregate.constants.ErrorConsts;
 import org.odk.aggregate.exception.ODKConversionException;
 import org.odk.aggregate.submission.SubmissionBlob;
 
-import com.google.appengine.api.datastore.Blob;
 import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.repackaged.com.google.common.util.Base64;
@@ -57,7 +56,7 @@ public class BlobSubmissionType extends SubmissionSingleValueBase<Key> {
    */
   @Override
   public void setValueFromByteArray(byte[] byteArray, Key submissionSetKey, String submissionType) {
-    SubmissionBlob blob = new SubmissionBlob(new Blob(byteArray), submissionSetKey, submissionType);
+    SubmissionBlob blob = new SubmissionBlob(byteArray, submissionSetKey, submissionType);
     setValue(blob.getKey());
   }
 
@@ -86,9 +85,9 @@ public class BlobSubmissionType extends SubmissionSingleValueBase<Key> {
     }
     try {
       SubmissionBlob blobStore = new SubmissionBlob(getValue());
-      Blob imageBlob = blobStore.getBlob();
-      if (imageBlob != null) {
-        jsonObject.addProperty(propertyName, Base64.encode(imageBlob.getBytes()));
+      byte[] imageBlob = blobStore.getBlob();
+      if (imageBlob.length > 0) {       
+        jsonObject.addProperty(propertyName, Base64.encode(imageBlob));
       }
 
     } catch (EntityNotFoundException e) {
