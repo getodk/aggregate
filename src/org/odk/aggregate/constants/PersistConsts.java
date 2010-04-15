@@ -78,4 +78,10 @@ public class PersistConsts {
 
   public static final String ALTITUDE_PROPERTY = "ALTITUDE";
 
+  public static final String BLOB_KEYS_PROPERTY = "BLOB_KEYS";
+
+  public static final String MULTIPLE_BLOBS_KINDS = "multiple_blob_store";
+
+  public static final String BLOB_NUM_PROPERTY = "BLOB_NUMBER";
+
 }
