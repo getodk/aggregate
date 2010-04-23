@@ -31,6 +31,7 @@ import org.odk.aggregate.constants.HtmlConsts;
 import org.odk.aggregate.constants.HtmlUtil;
 import org.odk.aggregate.constants.ServletConsts;
 import org.odk.aggregate.exception.ODKFormAlreadyExistsException;
+import org.odk.aggregate.exception.ODKIncompleteSubmissionData;
 import org.odk.aggregate.form.Form;
 import org.odk.aggregate.parser.FormParserForJavaRosa;
 import org.odk.aggregate.parser.MultiPartFormData;
@@ -82,8 +83,6 @@ public class FormUploadServlet extends ServletUtilBase {
     
     PrintWriter out = resp.getWriter();
     out.write(HtmlUtil.createFormBeginTag(ADDR, ServletConsts.MULTIPART_FORM_DATA, ServletConsts.POST));
-    out.write("Name of Xform:" + HtmlConsts.LINE_BREAK);
-    out.write(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_TEXT, ServletConsts.FORM_NAME_PRAM, null));
     out.write(HtmlConsts.LINE_BREAK + HtmlConsts.LINE_BREAK);
     out.write("Location of Xform definition to be uploaded:" + HtmlConsts.LINE_BREAK); 
     out.write(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_FILE, ServletConsts.FORM_DEF_PRAM, null));
@@ -116,6 +115,8 @@ public class FormUploadServlet extends ServletUtilBase {
       return;
     }
     
+    // TODO Add in form title process
+    
     try {
       // process form
       MultiPartFormData uploadedFormItems = new MultiPartFormData(req);
@@ -132,7 +133,6 @@ public class FormUploadServlet extends ServletUtilBase {
         formName = formNameData.getStream().toString("UTF-8");
       }
       if(formXmlData != null) {
-        // TODO: changed added output stream writer. probably something better exists
         formXml =  formXmlData.getStream().toString("UTF-8");
         xmlFileName = formXmlData.getFilename();
       }
@@ -140,18 +140,30 @@ public class FormUploadServlet extends ServletUtilBase {
       // persist form
       EntityManager em = EMFactory.get().createEntityManager();
       
-      if(formName != null && formXml != null) {
-        try {
-          parser = new FormParserForJavaRosa(formName, user.getNickname(), formXml, xmlFileName, em);
-        } catch (ODKFormAlreadyExistsException e) {
-          resp.sendError(HttpServletResponse.SC_CONFLICT, ErrorConsts.FORM_WITH_ODKID_EXISTS);
-          return;
-        }
-      } else {
+      if(formXml == null) {
         resp.sendError(HttpServletResponse.SC_BAD_REQUEST, ErrorConsts.MISSING_FORM_INFO);
         return;
-      } 
-  
+      }
+
+      try {
+        parser = new FormParserForJavaRosa(null, user.getNickname(), formXml, xmlFileName, em);
+      } catch (ODKFormAlreadyExistsException e) {
+        resp.sendError(HttpServletResponse.SC_CONFLICT, ErrorConsts.FORM_WITH_ODKID_EXISTS);
+        return;
+      } catch (ODKIncompleteSubmissionData e) {
+        switch (e.getReason()) {
+        case TITLE_MISSING:
+          em.close();
+          resp.sendRedirect(FormTitleServlet.ADDR);
+          return;
+        case ID_MISSING:
+          em.close();
+          resp.sendError(HttpServletResponse.SC_BAD_REQUEST, ErrorConsts.MISSING_FORM_ID);
+          return;
+        default:
+          // just move on
+        }
+      }
      
       // TODO: do better error handling
       try {

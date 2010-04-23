@@ -24,6 +24,15 @@ package org.odk.aggregate.exception;
  *
  */
 public class ODKIncompleteSubmissionData extends Exception {
+  
+  public enum Reason {
+    UNKNOWN,
+    TITLE_MISSING,
+    ID_MISSING;
+  }
+  
+  private Reason reason;
+
   /**
    * Serial number for serialization
    */
@@ -34,6 +43,7 @@ public class ODKIncompleteSubmissionData extends Exception {
    */
   public ODKIncompleteSubmissionData() {
     super();
+    reason = Reason.UNKNOWN;
   }
 
   /**
@@ -43,6 +53,7 @@ public class ODKIncompleteSubmissionData extends Exception {
    */
   public ODKIncompleteSubmissionData(String message) {
     super(message);
+    reason = Reason.UNKNOWN;
   }
 
   /**
@@ -53,6 +64,7 @@ public class ODKIncompleteSubmissionData extends Exception {
    */
   public ODKIncompleteSubmissionData(String message, Throwable cause) {
     super(message, cause);
+    reason = Reason.UNKNOWN;
   }
 
   /**
@@ -62,6 +74,58 @@ public class ODKIncompleteSubmissionData extends Exception {
    */
   public ODKIncompleteSubmissionData(Throwable cause) {
     super(cause);
+    reason = Reason.UNKNOWN;
   }
 
+  /**
+   * Default constructor with reason
+   * 
+   * @param exceptionReason exception reason
+   */
+  public ODKIncompleteSubmissionData(Reason exceptionReason) {
+    super();
+    reason = exceptionReason;
+  }
+
+  /**
+   * Construct exception with the error message and reason
+   * 
+   * @param message exception message
+   * @param exceptionReason exception reason
+   */
+  public ODKIncompleteSubmissionData(String message, Reason exceptionReason) {
+    super(message);
+    reason = exceptionReason;
+  }
+
+  /**
+   * Construction exception with error message, throwable cause, and reason
+   * 
+   * @param message exception message
+   * @param cause throwable cause
+   * @param exceptionReason exception reason
+   */
+  public ODKIncompleteSubmissionData(String message, Throwable cause, Reason exceptionReason) {
+    super(message, cause);
+    reason = exceptionReason;
+  }
+
+  /**
+   * Construction exception with throwable cause and reason
+   * 
+   * @param cause throwable cause
+   * @param exceptionReason exception reason
+   */
+  public ODKIncompleteSubmissionData(Throwable cause, Reason exceptionReason) {
+    super(cause);
+    reason = exceptionReason;
+  }
+  
+  /**
+   * Get the reason why the exception was generated
+   * @return the reason
+   */
+  public Reason getReason() {
+    return reason;
+  }
 }

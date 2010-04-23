@@ -27,9 +27,12 @@ import org.javarosa.core.model.FormDef;
 import org.javarosa.core.model.instance.DataModelTree;
 import org.javarosa.core.model.instance.TreeElement;
 import org.javarosa.xform.util.XFormUtils;
+import org.odk.aggregate.constants.BasicConsts;
 import org.odk.aggregate.constants.ParserConsts;
 import org.odk.aggregate.exception.ODKFormAlreadyExistsException;
 import org.odk.aggregate.exception.ODKFormNotFoundException;
+import org.odk.aggregate.exception.ODKIncompleteSubmissionData;
+import org.odk.aggregate.exception.ODKIncompleteSubmissionData.Reason;
 import org.odk.aggregate.form.Form;
 import org.odk.aggregate.form.FormElement;
 import org.odk.aggregate.submission.SubmissionFieldType;
@@ -70,22 +73,18 @@ public class FormParserForJavaRosa {
   /**
    * Constructor that parses and xform from the input stream supplied and
    * creates the proper ODK Aggregate Form definition in the gae datastore
-   * 
-   * @param formName
+   * @param formName 
    *    name of xform to be parsed
-   *    
    * @param userName
    *    name of user who uploaded the form
-   * 
    * @param inputXml
    *    input stream containing the Xform definition
-   *  
    * @param fileName
    *    file name used for a file that specifies the form's XML definition
-   * 
    * @throws ODKFormAlreadyExistsException
+   * @throws ODKIncompleteSubmissionData 
    */
-  public FormParserForJavaRosa(String formName, String userName, String inputXml, String fileName, EntityManager entityManager) throws ODKFormAlreadyExistsException {
+  public FormParserForJavaRosa(String formName, String userName, String inputXml, String fileName, EntityManager entityManager) throws ODKFormAlreadyExistsException, ODKIncompleteSubmissionData {
 
     xml = inputXml;    
     String strippedXML = JRHelperUtil.removeNonJavaRosaCompliantTags(xml);
@@ -108,10 +107,12 @@ public class FormParserForJavaRosa {
       }
     }
 
-    if (odkId.equals(ParserConsts.DEFAULT_NAMESPACE) && dataModel.schema != null) {
-      odkId = dataModel.schema;
+    // obtain form id
+    if (dataModel.schema == null) {
+      throw new ODKIncompleteSubmissionData(Reason.ID_MISSING);
     }
-
+    odkId = dataModel.schema;
+    
     em = entityManager;
     
     try {
@@ -122,8 +123,20 @@ public class FormParserForJavaRosa {
       // should throw an exception, else form already exists and exit parse
     }
     
+    // obtain form title either from the xform itself or from user entry
+    String title = formDef.getTitle();
+    if(title == null) {
+      if(formName == null) {
+        throw new ODKIncompleteSubmissionData(Reason.TITLE_MISSING);
+      } else {
+        title = formName;
+      }
+    }
+    // clean illegal characters from title
+    title = title.replace(BasicConsts.FORWARDSLASH, BasicConsts.EMPTY_STRING);
+    
     // TODO: clean up data access & recursion - a bit sloppy
-    form = new Form(odkId, formName, userName, xml, fileName);
+    form = new Form(odkId, title , userName, xml, fileName);
     FormElement root = processTreeElements(dataModel.getRoot(), form.getKey(), null);
     form.setElementTreeRoot(root);
   }

@@ -25,7 +25,7 @@ package org.odk.aggregate.constants;
 public class ErrorConsts {
 
   /**
-   * Error message if the form with ODK ID is not found
+   * Error message if the form with FORM ID is not found
    */
   public static final String ODKID_NOT_FOUND =
       "Unable to find form to locate form with matching ODK id as submission";
@@ -34,13 +34,19 @@ public class ErrorConsts {
    */
   public static final String ODK_KEY_PROBLEM = "Encountered a problem receiving key";
   /**
-   * Error message if the ODK ID in the form already exists
+   * Error message if the Form ID in the form already exists
    */
-  public static final String FORM_WITH_ODKID_EXISTS = "Form Already Exists for this Namespace/Open Data Kit Identifier";
+  public static final String FORM_WITH_ODKID_EXISTS = "Form Already Exists for this Namespace/Id attribute";
   /**
    * Error message if not all information was received 
    */
   public static final String MISSING_FORM_INFO = "Did not receive Form Name and Form XML description";
+ 
+  /**
+   * Error message if form ID was not specified
+   */
+  public static final String MISSING_FORM_ID = "Form did not specify a Form ID. For information on Form ID please check the Open Data Kit FAQ";
+  
   /**
    * Error message if request is not multi-part 
    */

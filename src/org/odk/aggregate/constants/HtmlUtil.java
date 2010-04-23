@@ -16,25 +16,33 @@
 
 package org.odk.aggregate.constants;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.lang.StringEscapeUtils;
+import org.odk.aggregate.parser.MultiPartFormData;
+import org.odk.aggregate.parser.MultiPartFormItem;
 import org.odk.aggregate.table.ResultTable;
 
 import com.google.appengine.repackaged.com.google.common.base.Pair;
 
 /**
- * Static HTML utility functions used to generate proper HTML
- * for ODK Aggregate visual outputs
- *  
+ * Static HTML utility functions used to generate proper HTML for ODK Aggregate
+ * visual outputs
+ * 
  * @author wbrunette@gmail.com
- *
+ * 
  */
 public class HtmlUtil {
+
+  private static final String LOST_FORM_RE_ENCODING = "We lost the form somehow! Please report the bug!";
 
   private static final String INPUT_WIDGET_SIZE_LIMIT = "50";
 
@@ -48,7 +56,8 @@ public class HtmlUtil {
   private static final String ATTR_ENCTYPE = "enctype";
   private static final String ATTR_ACTION = "action";
   private static final String ATTR_SIZE = "size";
-
+  private static final String ATTR_SRC = "src";
+  
   static String createEndTag(String tag) {
     return HtmlConsts.BEGIN_CLOSE_TAG + tag + HtmlConsts.END_TAG;
   }
@@ -60,7 +69,7 @@ public class HtmlUtil {
   public static String createUrl(String serverName) {
     return HtmlConsts.HTTP + serverName + BasicConsts.FORWARDSLASH;
   }
-  
+
   public static String createAttribute(String name, String value) {
     return name + BasicConsts.EQUALS + BasicConsts.QUOTE + value + BasicConsts.QUOTE;
   }
@@ -88,17 +97,17 @@ public class HtmlUtil {
         urlBuilder.append(ServletConsts.BEGIN_PARAM);
         boolean firstParam = true;
         for (Map.Entry<String, String> property : propSet) {
-          if(firstParam) {
+          if (firstParam) {
             firstParam = false;
           } else {
             urlBuilder.append(ServletConsts.PARAM_DELIMITER);
           }
-          
+
           String value = property.getValue();
-          if(value == null) {
+          if (value == null) {
             value = BasicConsts.NULL;
           }
-          
+
           String valueEncoded;
           try {
             valueEncoded = URLEncoder.encode(value, ServletConsts.ENCODE_SCHEME);
@@ -132,7 +141,47 @@ public class HtmlUtil {
     html.append(HtmlConsts.END_SELF_CLOSING_TAG);
     return html.toString();
   }
-  
+
+  public static String encodeFormInHiddenInput(HttpServletRequest req) throws IOException {
+    
+    MultiPartFormData uploadedFormItems;
+    try {
+      uploadedFormItems = new MultiPartFormData(req);
+    } catch (FileUploadException e) {
+      throw new IOException(LOST_FORM_RE_ENCODING, e);
+    }
+    MultiPartFormItem formXmlData = uploadedFormItems
+        .getFormDataByFieldName(ServletConsts.FORM_DEF_PRAM);
+
+   
+    String formXml = null;
+    String xmlFileName = "default.xml";
+
+    if (formXmlData == null) {
+      throw new IOException(LOST_FORM_RE_ENCODING);
+    }
+    formXml = formXmlData.getStream().toString("UTF-8");
+    xmlFileName = formXmlData.getFilename();
+
+    if (formXml == null) {
+      throw new IOException(LOST_FORM_RE_ENCODING);
+    }
+
+    StringBuilder html = new StringBuilder();
+    html.append(HtmlConsts.BEGIN_OPEN_TAG + INPUT);
+    html.append(BasicConsts.SPACE);
+    html.append(createAttribute(ATTR_TYPE, HtmlConsts.INPUT_TYPE_HIDDEN));
+    html.append(BasicConsts.SPACE);
+    html.append(createAttribute(ATTR_NAME, ServletConsts.FORM_DEF_PRAM));
+    html.append(BasicConsts.SPACE);
+    html.append(createAttribute(ATTR_VALUE, formXml));
+    html.append(BasicConsts.SPACE);
+    html.append(createAttribute(ATTR_SRC, xmlFileName));
+    html.append(BasicConsts.SPACE);
+    html.append(HtmlConsts.END_SELF_CLOSING_TAG);
+    return html.toString();
+  }
+
   public static String createRadio(String name, String value, String desc, boolean checked) {
     StringBuilder html = new StringBuilder();
     html.append(HtmlConsts.BEGIN_OPEN_TAG + INPUT + BasicConsts.SPACE);
@@ -146,7 +195,7 @@ public class HtmlUtil {
       html.append(createAttribute(ATTR_VALUE, value));
     }
     html.append(BasicConsts.SPACE);
-    if(checked) {
+    if (checked) {
       html.append(HtmlConsts.CHECKED);
     }
     html.append(HtmlConsts.END_SELF_CLOSING_TAG);
@@ -154,15 +203,18 @@ public class HtmlUtil {
     html.append(HtmlConsts.LINE_BREAK);
     return html.toString();
   }
-  
+
   /**
    * 
-   * @param name The select name.
-   * @param values A list of pairs [option value, option title (text displayed to user)] for each option.
+   * @param name
+   *          The select name.
+   * @param values
+   *          A list of pairs [option value, option title (text displayed to
+   *          user)] for each option.
    * @return
    */
-  public static String createSelect(String name, List<Pair<String,String>> values) {
-    if (name == null){
+  public static String createSelect(String name, List<Pair<String, String>> values) {
+    if (name == null) {
       return null;
     }
     StringBuilder html = new StringBuilder();
@@ -204,24 +256,24 @@ public class HtmlUtil {
    * Helper function that creates an html button with the following parameters
    * 
    * @param servletAddr
-   *    http action
+   *          http action
    * @param label
-   *    button's label
+   *          button's label
    * @param properties
-   *    key/value pairs to be encoded as hidden input types to be used as parameters
-   * @return
-   *    html to generate specified button
-   *    
+   *          key/value pairs to be encoded as hidden input types to be used as
+   *          parameters
+   * @return html to generate specified button
+   * 
    * @throws UnsupportedEncodingException
    */
-  public static String createHtmlButtonToGetServlet(String servletAddr, String label, Map<String,String> properties)
-      throws UnsupportedEncodingException {
+  public static String createHtmlButtonToGetServlet(String servletAddr, String label,
+      Map<String, String> properties) throws UnsupportedEncodingException {
     StringBuilder html = new StringBuilder();
     html.append(createFormBeginTag(servletAddr, null, ServletConsts.GET));
-    
-    if(properties != null) {
+
+    if (properties != null) {
       Set<Map.Entry<String, String>> propSet = properties.entrySet();
-      for(Map.Entry<String, String> property: propSet) {
+      for (Map.Entry<String, String> property : propSet) {
         String valueEncoded = URLEncoder.encode(property.getValue(), ServletConsts.ENCODE_SCHEME);
         html.append(createInput(HtmlConsts.INPUT_TYPE_HIDDEN, property.getKey(), valueEncoded));
       }
@@ -235,20 +287,22 @@ public class HtmlUtil {
     StringBuilder html = new StringBuilder();
     html.append(HtmlConsts.TABLE_OPEN);
     List<String> keys = null;
-    if(addCheckboxes) {
+    if (addCheckboxes) {
       keys = resultTable.getKeys();
       html.append(wrapWithHtmlTags(HtmlConsts.TABLE_HEADER, HtmlConsts.CHECKBOX_HEADER));
     }
     for (String header : resultTable.getHeader()) {
       html.append(wrapWithHtmlTags(HtmlConsts.TABLE_HEADER, header));
     }
-  
-    List<List<String>> rows = resultTable.getRows(); 
-    for (int recordNum = 0; recordNum < rows.size(); recordNum++ ) {
+
+    List<List<String>> rows = resultTable.getRows();
+    for (int recordNum = 0; recordNum < rows.size(); recordNum++) {
       List<String> row = rows.get(recordNum);
       html.append(HtmlConsts.TABLE_ROW_OPEN);
-      if(addCheckboxes) {
-        html.append(wrapWithHtmlTags(HtmlConsts.TABLE_DATA,createInput(HtmlConsts.INPUT_TYPE_CHECKBOX, ServletConsts.PROCESS_RECORD_PREFIX + recordNum, keys.get(recordNum))));
+      if (addCheckboxes) {
+        html.append(wrapWithHtmlTags(HtmlConsts.TABLE_DATA, createInput(
+            HtmlConsts.INPUT_TYPE_CHECKBOX, ServletConsts.PROCESS_RECORD_PREFIX + recordNum, keys
+                .get(recordNum))));
       }
       for (String item : row) {
         html.append(wrapWithHtmlTags(HtmlConsts.TABLE_DATA, item));
@@ -256,7 +310,7 @@ public class HtmlUtil {
       html.append(HtmlConsts.TABLE_ROW_CLOSE);
     }
     html.append(HtmlConsts.TABLE_CLOSE);
-    
+
     return html.toString();
   }
 
