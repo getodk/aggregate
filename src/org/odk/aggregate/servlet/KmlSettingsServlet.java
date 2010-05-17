@@ -134,13 +134,16 @@ public class KmlSettingsServlet extends ServletUtilBase {
       FormElement root, String parentName) {
     if (node == null) return;
 
-    if(node.getSubmissionFieldType().equals(SubmissionFieldType.GEOPOINT)) {
-      geopointNodes.add(node);
-    } else if (node.getSubmissionFieldType().equals(SubmissionFieldType.PICTURE)){
-      imageNodes.add(node);
+    if (!node.getSubmissionFieldType().equals(SubmissionFieldType.UNKNOWN)) {
+      if (node.getSubmissionFieldType().equals(SubmissionFieldType.GEOPOINT)) {
+        geopointNodes.add(node);
+      } else if (node.getSubmissionFieldType().equals(
+          SubmissionFieldType.PICTURE)) {
+        imageNodes.add(node);
+      }
+      allNodes.add(node);
     }
-    allNodes.add(node);
-
+    
     List<FormElement> childDataElements = node.getChildren();
     if (childDataElements == null) {
       return;

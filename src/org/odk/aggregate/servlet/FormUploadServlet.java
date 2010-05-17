@@ -147,6 +147,9 @@ public class FormUploadServlet extends ServletUtilBase {
 
       try {
         parser = new FormParserForJavaRosa(null, user.getNickname(), formXml, xmlFileName, em);
+        Form form = parser.getForm();
+        em.persist(form);
+        form.printDataTree(System.out);
       } catch (ODKFormAlreadyExistsException e) {
         resp.sendError(HttpServletResponse.SC_CONFLICT, ErrorConsts.FORM_WITH_ODKID_EXISTS);
         return;
@@ -164,15 +167,7 @@ public class FormUploadServlet extends ServletUtilBase {
           // just move on
         }
       }
-     
-      // TODO: do better error handling
-      try {
-        Form form = parser.getForm();
-        em.persist(form);
-        form.printDataTree(System.out);
-      } catch (Exception e) {
-        e.printStackTrace();
-      }
+           
       em.close();
       resp.sendRedirect(FormsServlet.ADDR);
 
