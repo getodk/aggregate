@@ -97,6 +97,9 @@ public class FormParserForJavaRosa {
 
     DataModelTree dataModel = formDef.getDataModel();
     TreeElement rootElement = dataModel.getRoot();
+
+    // obtain form id
+    // first search for the "id" attribute
     if (rootElement != null) {
       for (int i = 0; i < rootElement.getAttributeCount(); i++) {
         String name = rootElement.getAttributeName(i);
@@ -106,15 +109,17 @@ public class FormParserForJavaRosa {
         }
       }
     }
-
-    // obtain form id
-    if (dataModel.schema == null) {
-      throw new ODKIncompleteSubmissionData(Reason.ID_MISSING);
+    // second check for the xmlns being defined
+    // otherwise throw exception
+    if (odkId == null) {
+      if (dataModel.schema == null) {
+        throw new ODKIncompleteSubmissionData(Reason.ID_MISSING);
+      }
+      odkId = dataModel.schema;
     }
-    odkId = dataModel.schema;
     
     em = entityManager;
-    
+
     try {
       @SuppressWarnings("unused")
       Form preexistingForm = Form.retrieveForm(em, odkId);
