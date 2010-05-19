@@ -50,7 +50,7 @@ public class FormParserForJavaRosa {
   /**
    * The ODK Id that uniquely identifies the form
    */
-  private String odkId = ParserConsts.DEFAULT_NAMESPACE;
+  private String odkId = null; // needs to be set to null initially for the logic to work
 
   /**
    * The XForm definition in XML
