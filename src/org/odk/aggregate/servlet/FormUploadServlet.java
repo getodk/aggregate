@@ -65,6 +65,16 @@ public class FormUploadServlet extends ServletUtilBase {
   private static final String TITLE_INFO = "Xform Upload";
   
   /**
+   * Title for generated webpage to obtain title
+   */
+  private static final String OBTAIN_TITLE_INFO = "Xform Title Entry";
+  
+  /**
+   * Text to display to user to obtain title
+   */
+  private static final String TITLE_OF_THE_XFORM = "Title of the Xform:";
+  
+  /**
    * Handler for HTTP Get request to create xform upload page
    * 
    * @see javax.servlet.http.HttpServlet#doGet(javax.servlet.http.HttpServletRequest,
@@ -115,7 +125,7 @@ public class FormUploadServlet extends ServletUtilBase {
       return;
     }
     
-    // TODO Add in form title process
+    // TODO Add in form title process so it will update the changes in the XML of form
     
     try {
       // process form
@@ -146,7 +156,7 @@ public class FormUploadServlet extends ServletUtilBase {
       }
 
       try {
-        parser = new FormParserForJavaRosa(null, user.getNickname(), formXml, xmlFileName, em);
+        parser = new FormParserForJavaRosa(formName, user.getNickname(), formXml, xmlFileName, em);
         Form form = parser.getForm();
         em.persist(form);
         form.printDataTree(System.out);
@@ -157,7 +167,7 @@ public class FormUploadServlet extends ServletUtilBase {
         switch (e.getReason()) {
         case TITLE_MISSING:
           em.close();
-          resp.sendRedirect(FormTitleServlet.ADDR);
+          createTitleQuestionWebpage(req, resp, formXml, xmlFileName); 
           return;
         case ID_MISSING:
           em.close();
@@ -175,5 +185,21 @@ public class FormUploadServlet extends ServletUtilBase {
       e.printStackTrace(resp.getWriter());
     }
 
+  }
+
+  private void createTitleQuestionWebpage(HttpServletRequest req, HttpServletResponse resp,
+      String formXml, String xmlFileName) throws IOException {
+    beginBasicHtmlResponse(OBTAIN_TITLE_INFO, resp, req, true); // header info
+
+    PrintWriter out = resp.getWriter();
+    out.write(HtmlUtil.createFormBeginTag(FormUploadServlet.ADDR, ServletConsts.MULTIPART_FORM_DATA, ServletConsts.POST));
+    out.write(TITLE_OF_THE_XFORM + HtmlConsts.LINE_BREAK);
+    out.write(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_TEXT, ServletConsts.FORM_NAME_PRAM, null));
+    out.write(HtmlConsts.LINE_BREAK + HtmlConsts.LINE_BREAK);
+    out.write(HtmlUtil.encodeFormInHiddenInput(formXml, xmlFileName));
+    out.write(HtmlConsts.LINE_BREAK + HtmlConsts.LINE_BREAK);
+    out.write(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_SUBMIT, null, "Submit"));
+    out.write(HtmlConsts.FORM_CLOSE);
+    finishBasicHtmlResponse(resp);
   }
 }
