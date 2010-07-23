@@ -30,6 +30,11 @@ public class ServletConsts {
    */
   public final static boolean DEBUG = false;
 
+  // TODO: remove constant and turn into a property file that is only present on version
+  /**
+   * Current version of Aggregate
+   */
+  public final static String VERSION = "v0.9.2.1";
   
   /**
    * Name of form field that contains XML submission
