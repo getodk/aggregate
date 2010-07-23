@@ -23,12 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.servlet.http.HttpServletRequest;
-
-import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.lang.StringEscapeUtils;
-import org.odk.aggregate.parser.MultiPartFormData;
-import org.odk.aggregate.parser.MultiPartFormItem;
 import org.odk.aggregate.table.ResultTable;
 
 import com.google.appengine.repackaged.com.google.common.base.Pair;
@@ -142,29 +137,14 @@ public class HtmlUtil {
     return html.toString();
   }
 
-  public static String encodeFormInHiddenInput(HttpServletRequest req) throws IOException {
-    
-    MultiPartFormData uploadedFormItems;
-    try {
-      uploadedFormItems = new MultiPartFormData(req);
-    } catch (FileUploadException e) {
-      throw new IOException(LOST_FORM_RE_ENCODING, e);
-    }
-    MultiPartFormItem formXmlData = uploadedFormItems
-        .getFormDataByFieldName(ServletConsts.FORM_DEF_PRAM);
-
+  public static String encodeFormInHiddenInput(String formXml, String xmlFileName) throws IOException {
    
-    String formXml = null;
-    String xmlFileName = "default.xml";
-
-    if (formXmlData == null) {
-      throw new IOException(LOST_FORM_RE_ENCODING);
-    }
-    formXml = formXmlData.getStream().toString("UTF-8");
-    xmlFileName = formXmlData.getFilename();
-
     if (formXml == null) {
       throw new IOException(LOST_FORM_RE_ENCODING);
+    } 
+    
+    if(xmlFileName == null){
+      xmlFileName = "default.xml";
     }
 
     StringBuilder html = new StringBuilder();
@@ -174,7 +154,7 @@ public class HtmlUtil {
     html.append(BasicConsts.SPACE);
     html.append(createAttribute(ATTR_NAME, ServletConsts.FORM_DEF_PRAM));
     html.append(BasicConsts.SPACE);
-    html.append(createAttribute(ATTR_VALUE, formXml));
+    html.append(createAttribute(ATTR_VALUE, StringEscapeUtils.escapeHtml(formXml)));
     html.append(BasicConsts.SPACE);
     html.append(createAttribute(ATTR_SRC, xmlFileName));
     html.append(BasicConsts.SPACE);

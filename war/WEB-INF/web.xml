@@ -6,15 +6,6 @@
 <web-app xmlns="http://java.sun.com/xml/ns/javaee" version="2.5">
 
    <servlet>
-    <servlet-name>formTitle</servlet-name>
-    <servlet-class>org.odk.aggregate.servlet.FormTitleServlet</servlet-class>
-  </servlet>
-  <servlet-mapping>
-    <servlet-name>formTitle</servlet-name>
-    <url-pattern>/formTitle</url-pattern>
-  </servlet-mapping>
-
-   <servlet>
     <servlet-name>formDelete</servlet-name>
     <servlet-class>org.odk.aggregate.servlet.FormDeleteServlet</servlet-class>
   </servlet>
