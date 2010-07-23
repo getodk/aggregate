@@ -148,6 +148,7 @@ public class ServletUtilBase extends HttpServlet {
       out.write(HtmlConsts.TAB + HtmlConsts.TAB);
       out.write(HtmlUtil.createHref(userService.createLogoutURL("/"), "Log Out from "
           + userService.getCurrentUser().getNickname()));
+      out.write(HtmlConsts.TAB + "<FONT SIZE=1>" + ServletConsts.VERSION + "</FONT>");
     }
     out.write(HtmlConsts.LINE_BREAK + HtmlConsts.LINE_BREAK);
     out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.H1, pageName));
