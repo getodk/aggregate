@@ -182,6 +182,15 @@ public abstract class SubmissionTable extends SubmissionResultBase {
     return properties;
   }
 
+  /**
+   * Added to support manipulations by derived class.
+   *  
+   * @param moreRecords the moreRecords to set
+   */
+  protected final void setMoreRecords(boolean moreRecords) {
+	this.moreRecords = moreRecords;
+  }
+
   public boolean isMoreRecords() {
     return moreRecords;
   }
@@ -267,20 +276,33 @@ public abstract class SubmissionTable extends SubmissionResultBase {
     return results;
   }
 
+  /**
+   * Abstracted out of getSubmissionRow for use by derived class.
+   * 
+   * @param valueMap map of values to be processed
+   * @param sub data values
+   * @param row
+   */
+  protected void processSubmissionIntoRow( Map<String, SubmissionValue> valueMap,
+		  							       Submission sub,
+		  							       List<String> row) {
+    for (String propertyName : propertyNames) {
+        if (propertyName.equals(TableConsts.SUBMISSION_DATE_HEADER)) {
+          Date submittedTime = sub.getSubmittedTime();
+          if (submittedTime != null) {
+            row.add(DateFormat.getDateTimeInstance(DateFormat.FULL,
+                DateFormat.FULL).format(submittedTime));
+          }
+        } else {
+          processSubmissionFieldValue(sub.getKey(), valueMap, row, propertyName);
+        }
+      }
+  }
+  
   private void getSubmissionRow(ResultTable results, Submission sub) {
     Map<String, SubmissionValue> valueMap = sub.getSubmissionValuesMap();
     List<String> row = new ArrayList<String>();
-    for (String propertyName : propertyNames) {
-      if (propertyName.equals(TableConsts.SUBMISSION_DATE_HEADER)) {
-        Date submittedTime = sub.getSubmittedTime();
-        if (submittedTime != null) {
-          row.add(DateFormat.getDateTimeInstance(DateFormat.FULL,
-              DateFormat.FULL).format(submittedTime));
-        }
-      } else {
-        processSubmissionFieldValue(sub.getKey(), valueMap, row, propertyName);
-      }
-    }
+    processSubmissionIntoRow(valueMap, sub, row);
     results.addRow(sub.getKey(), row);
   }
 
@@ -316,7 +338,7 @@ public abstract class SubmissionTable extends SubmissionResultBase {
     return results;
   }
 
-  private void processSubmissionFieldValue(Key submissionSetKey,
+  protected void processSubmissionFieldValue(Key submissionSetKey,
       Map<String, SubmissionValue> submissionValueMap, List<String> row,
       String propertyName) {
     SubmissionValue entry = submissionValueMap.get(propertyName);

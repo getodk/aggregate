@@ -48,6 +48,7 @@ public class ImageViewerServlet extends ServletUtilBase {
    * URI from base
    */
   public static final String ADDR = "imageViewer";
+  public static final String ADDR_BLOB = "blob";
 
   /**
    * Handler for HTTP Get request that responds with an Image

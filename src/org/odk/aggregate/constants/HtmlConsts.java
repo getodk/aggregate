@@ -47,6 +47,9 @@ public class HtmlConsts {
   public static final String H2 = "h2";
   public static final String H3 = "h3";
   public static final String P = "p";
+  public static final String B = "b";
+  public static final String UL = "ul";
+  public static final String LI = "li";
   public static final String TABLE = "table";
   public static final String TABLE_HEADER = "th";
   public static final String TABLE_ROW = "tr";

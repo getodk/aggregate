@@ -186,6 +186,18 @@ public class ServletUtilBase extends HttpServlet {
     resp.sendError(HttpServletResponse.SC_BAD_REQUEST, ErrorConsts.ODK_KEY_PROBLEM);
   }
 
+
+  /**
+   * Generate error response for missing the Key parameter
+   * 
+   * @param resp The HTTP response to be sent to client
+   * @throws IOException caused by problems writing error information to
+   *         response
+   */
+  protected void errorBadParam(HttpServletResponse resp) throws IOException {
+    resp.sendError(HttpServletResponse.SC_BAD_REQUEST, ErrorConsts.INVALID_PARAMS);
+  }
+
   /**
    * Generate error response for missing the Key parameter
    * 
