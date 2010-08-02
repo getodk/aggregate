@@ -99,8 +99,23 @@ public class ServletConsts {
    */
   public static final String SPREAD_AUTH = "spreadAuth";
   
+  /**
+   * The name of the parameter that specifies the cursor location for retrieving data
+   * from the data table (fragmented Csv servlet)
+   */
+  public static final String CURSOR = "cursor";
+  /**
+   * The name of the parameter that specifies how many rows to return from the cursor
+   * (fragmented Csv servlet).
+   */
+  public static final String NUM_ENTRIES = "numEntries";
   
-  
+  /**
+   * When constructing up an odkId, allow xpath-style restrictions on 'key' attribute
+   * of the form identity and repeating elements.
+   */
+  public static final String ELEMENT_REFERENCE_KEY_BEGIN_STRING = "[@key=" + BasicConsts.QUOTE;
+  public static final String ELEMENT_REFERENCE_KEY_END_STRING = BasicConsts.QUOTE + "]";
   
   /**
    * Constant for "text/enriched" content type for response message

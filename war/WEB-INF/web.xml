@@ -85,6 +85,7 @@
   <servlet-mapping>
     <servlet-name>imageViewer</servlet-name>
     <url-pattern>/imageViewer</url-pattern>
+    <url-pattern>/blob</url-pattern>
   </servlet-mapping>
   
   <servlet>
@@ -112,6 +113,15 @@
   <servlet-mapping>
     <servlet-name>csv</servlet-name>
     <url-pattern>/csv</url-pattern>
+  </servlet-mapping>
+  
+  <servlet>
+    <servlet-name>csvFragment</servlet-name>
+    <servlet-class>org.odk.aggregate.servlet.FragmentedCsvServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>csvFragment</servlet-name>
+    <url-pattern>/csvFragment</url-pattern>
   </servlet-mapping>
 
   <servlet>

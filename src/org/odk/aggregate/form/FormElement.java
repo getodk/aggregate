@@ -28,6 +28,7 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 
+import org.odk.aggregate.exception.ODKParseException;
 import org.odk.aggregate.submission.SubmissionField;
 import org.odk.aggregate.submission.SubmissionFieldType;
 
@@ -87,6 +88,42 @@ public class FormElement {
   @Enumerated
   private int childNumber;
   
+  /**
+   * Constructs the Key used to reference a particular form element.
+   * 
+   * @param odkPath -- must contain at least 2 strings
+   *    odkPath[0] = the odkId of the form
+   *    odkPath[1...] = the successive kinds of form elements
+   *    odkPath[size()-1] = the form element we seek
+   * @return Key for the form element
+   * @throws ODKParseException 
+   */
+  public static final Key constructKey(List<String> odkPath) throws ODKParseException {
+	  if ( odkPath.size() < 2 ) {
+		  throw new ODKParseException("bad odkId");
+	  }
+	  
+	  return constructKeyHelper(odkPath,
+			  KeyFactory.createKey(Form.class.getSimpleName(), odkPath.get(0)),
+			  1);
+  }
+  
+  /**
+   * Helper function for constructKey(List<String> odkPath).
+   * 
+   * @param odkPath
+   * @param parentKey the key of our parent.  Never null.
+   * @param idx index of the next form element to process in odkPath.
+   * @return Key for the form element specified by the odkPath
+   */
+  private static final Key constructKeyHelper(List<String> odkPath, Key parentKey, int idx ) {
+	  if ( idx >= odkPath.size() ) return parentKey;
+      return constructKeyHelper( odkPath, 
+          new KeyFactory.Builder(parentKey).addChild(FormElement.class.getSimpleName(), 
+        		                 odkPath.get(idx) + odkPath.get(0)).getKey(),
+        		                 idx+1 );
+  }
+
   /**
    * Construct a form element that defines an element in a submission
    * 

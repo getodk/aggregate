@@ -218,6 +218,13 @@ public class SubmissionSet implements Comparable<SubmissionSet>{
   
 
   /**
+   * @return the parent key for this entity
+   */
+  public Key getParentSubmissionSetKey() {
+	return parentSubmissionSetKey;
+}
+
+/**
    * Get the GAE datastore key that uniquely identifies the submission
    * 
    * @return datastore key

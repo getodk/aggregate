@@ -3,7 +3,7 @@
 	<application>opendatakit</application>
 	<version>1</version>
 	
-	<!-- Configure java.util.logging -->
+	<!-- Configure java.util.logging --> 
 	<system-properties>
 		<property name="java.util.logging.config.file" value="WEB-INF/logging.properties"/>
     <property name="com.google.gdata.DisableCookieHandler" value="true"/>

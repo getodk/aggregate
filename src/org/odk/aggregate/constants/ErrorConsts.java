@@ -57,6 +57,7 @@ public class ErrorConsts {
    */
   public static final String BINARY_ERROR = "System should have dispatched to a proper binary conversion method";
   public static final String PARSING_PROBLEM = "Problem parsing submission XML";
+  public static final String INVALID_PARAMS = "Parameter(s) are not valid";
   /**
    * Constant used to log error if string array does not match column size
    */
