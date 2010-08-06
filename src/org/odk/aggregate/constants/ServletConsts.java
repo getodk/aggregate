@@ -34,7 +34,7 @@ public class ServletConsts {
   /**
    * Current version of Aggregate
    */
-  public final static String VERSION = "v0.9.2.1";
+  public final static String VERSION = "v0.9.3";
   
   /**
    * Name of form field that contains XML submission
