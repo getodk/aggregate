@@ -18,6 +18,9 @@ package org.odk.aggregate.servlet;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Arrays;
+import java.util.List;
+import java.util.logging.Logger;
 
 import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
@@ -28,11 +31,9 @@ import org.odk.aggregate.constants.BasicConsts;
 import org.odk.aggregate.constants.HtmlConsts;
 import org.odk.aggregate.constants.HtmlUtil;
 import org.odk.aggregate.constants.ServletConsts;
-import org.odk.aggregate.constants.TableConsts;
 import org.odk.aggregate.exception.ODKFormNotFoundException;
 import org.odk.aggregate.exception.ODKIncompleteSubmissionData;
 import org.odk.aggregate.exception.ODKParseException;
-import org.odk.aggregate.form.Form;
 import org.odk.aggregate.form.FormElement;
 import org.odk.aggregate.table.FragmentedSubmissionTable;
 import org.odk.aggregate.table.ResultTable;
@@ -41,13 +42,6 @@ import org.odk.aggregate.table.SubmissionTable;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.apphosting.api.DeadlineExceededException;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.logging.*;
 
 /**
  * Servlet to generate a CSV file for download, in parts!
