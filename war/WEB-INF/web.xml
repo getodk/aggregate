@@ -85,7 +85,7 @@
   <servlet-mapping>
     <servlet-name>imageViewer</servlet-name>
     <url-pattern>/imageViewer</url-pattern>
-    <url-pattern>/blob</url-pattern>
+    <url-pattern>/binaryData</url-pattern>
   </servlet-mapping>
   
   <servlet>

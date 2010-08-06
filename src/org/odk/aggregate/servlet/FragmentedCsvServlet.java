@@ -87,14 +87,23 @@ public class FragmentedCsvServlet extends ServletUtilBase {
     // form or form element identity
     // -- a forward-slash separated list of identity and group or repeat names
     // that identifies the Form or FormElement to retrieve.  It is a form
-    // if the path has exactly one entry.
+    // if the path has one or two entries, otherwise it is a repeat group.
     String odkIdPath = getParameter(req, ServletConsts.ODK_ID);
     
     // optional common parameters
+    // for client-side simplicity, if these have "" values, treat them as null
+    
     // cursor -- tracks where we resume our record fetch (if missing, we start over)
-    String websafeCursorString = getParameter(req, ServletConsts.CURSOR);   
+    String websafeCursorString = getParameter(req, ServletConsts.CURSOR);
+    if ( websafeCursorString != null && websafeCursorString.length() == 0 ) {
+    	websafeCursorString = null;
+    }
+    
     // number of records to fetch
     String numEntriesStr = getParameter(req, ServletConsts.NUM_ENTRIES);
+    if ( numEntriesStr != null && numEntriesStr.length() == 0 ) {
+    	numEntriesStr = null;
+    }
     
     EntityManager em = EMFactory.get().createEntityManager();
     PrintWriter out = resp.getWriter();
@@ -190,6 +199,10 @@ public class FragmentedCsvServlet extends ServletUtilBase {
               					+ HtmlUtil.wrapWithHtmlTags(HtmlConsts.TABLE_DATA,"Description")
             			)
             		   + HtmlUtil.wrapWithHtmlTags(HtmlConsts.TABLE_ROW,
+             				    HtmlUtil.wrapWithHtmlTags(HtmlConsts.TABLE_DATA,ServletConsts.ODK_ID)
+             				    + HtmlUtil.wrapWithHtmlTags(HtmlConsts.TABLE_DATA,"Required for accessing all data associated with a form.  This is a path rooted at the Form Identity displayed in the forms list.")
+             		   )
+             		   + HtmlUtil.wrapWithHtmlTags(HtmlConsts.TABLE_ROW,
             				    HtmlUtil.wrapWithHtmlTags(HtmlConsts.TABLE_DATA,ServletConsts.NUM_ENTRIES)
             				    + HtmlUtil.wrapWithHtmlTags(HtmlConsts.TABLE_DATA,"Optional.  The number of rows of data to return in a result csv.  If you are having transmission issues, you may need to reduce the number of records you fetch.  The default is 1000.")
             		   )
@@ -197,25 +210,33 @@ public class FragmentedCsvServlet extends ServletUtilBase {
               				    HtmlUtil.wrapWithHtmlTags(HtmlConsts.TABLE_DATA,ServletConsts.CURSOR)
               				    + HtmlUtil.wrapWithHtmlTags(HtmlConsts.TABLE_DATA,"Optional.  Required for accessing subsequent blocks of data.  Supplied as the <cursor> value from the previous web request.")
               		   )
-              		   + HtmlUtil.wrapWithHtmlTags(HtmlConsts.TABLE_ROW,
-             				    HtmlUtil.wrapWithHtmlTags(HtmlConsts.TABLE_DATA,ServletConsts.ODK_ID)
-             				    + HtmlUtil.wrapWithHtmlTags(HtmlConsts.TABLE_DATA,"Required for accessing all data associated with a form.  This is a path rooted at the Form Identity displayed in the forms list.")
-             		   )
             		   );
             out.write(HtmlConsts.TABLE_CLOSE);
 
             String formIdentity = "widgets";
             out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.P, "To download a csv fragment for the non-repeating elements of a form, append the Form Identifier and the number of entries to fetch to this url, e.g., "));
-            out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.P, requestPath + "?" + ServletConsts.ODK_FORM_KEY + "=" + formIdentity + "&" + ServletConsts.NUM_ENTRIES + "=1000" ));
+            out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.PRE, requestPath + "?" + ServletConsts.ODK_ID + "=" + formIdentity + "&" + ServletConsts.NUM_ENTRIES + "=1000" ));
 
-            out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.P, "The " + ServletConsts.ODK_FORM_KEY + " supports an xpath-like specification of repeat groups within a form (e.g., widgets/widgets/repeat_a) and primary key restrictions on the last or next-to-last element in the path."));
+            out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.P, "The " + ServletConsts.ODK_ID + " parameter supports an xpath-like specification of repeat groups within a form (e.g., widgets/widgets/repeat_a) and primary key restrictions on the last or next-to-last element in the path."));
             out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.UL, 
             		HtmlUtil.wrapWithHtmlTags(HtmlConsts.LI,
-            				HtmlUtil.wrapWithHtmlTags(HtmlConsts.B, requestPath + "?" + ServletConsts.ODK_FORM_KEY + "=widgets/widgets[@key=\"aaaa\"]/repeat_a") 
+            				HtmlUtil.wrapWithHtmlTags(HtmlConsts.PRE, requestPath + "?" + ServletConsts.ODK_ID + "=widgets/widgets/repeat_a") 
+            				+ " returns all repeat_a rows.") +
+            		HtmlUtil.wrapWithHtmlTags(HtmlConsts.LI,
+            				HtmlUtil.wrapWithHtmlTags(HtmlConsts.PRE, requestPath + "?" + ServletConsts.ODK_ID + "=widgets/widgets[@key=\"aaaa\"]/repeat_a") 
             				+ " returns all repeat_a rows for the widgets record identified by key \"aaaa\".") +
             		HtmlUtil.wrapWithHtmlTags(HtmlConsts.LI,
-            				HtmlUtil.wrapWithHtmlTags(HtmlConsts.B, requestPath + "?" + ServletConsts.ODK_FORM_KEY + "=widgets/widgets/repeat_a[@key=\"bbb\"]")
+            				HtmlUtil.wrapWithHtmlTags(HtmlConsts.PRE, requestPath + "?" + ServletConsts.ODK_ID + "=widgets/widgets/repeat_a[@key=\"bbb\"]")
             				+ " returns the repeat_a row identified by key \"bbb\".")));
+            out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.P, "The data returned is a text/xml document as follows:"));
+            out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.PRE,
+            				"&lt;entries&gt;\n"+
+            				"  &lt;cursor&gt;...&lt;/cursor&gt; &lt;!-- only present if additional records may be fetched --&gt;\n"+
+            				"  &lt;header&gt;...&lt;/header&gt; &lt;!-- csv -- property names --&gt;\n"+
+            				"  &lt;result&gt;...&lt;/result&gt; &lt;!-- csv -- values -- repeats 0 or more times --&gt;\n"+
+            				"&lt;/entries&gt;\n"));
+            out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.P, "The returned form data includes an additional property (as the right-most column): KEY.  The KEY value is the URL for this item on the Aggregate server."));
+            out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.P, "The returned repeated group data within a form includes two additional properties (as the next-to-right-most and right-most columns): PARENT_KEY and KEY.  The PARENT_KEY value is the URL for the parent item of this repeated group on the Aggregate server; the KEY value is the URL for this repeated group item on the Aggregate server."));
             
 
             resp.setStatus(400);

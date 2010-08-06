@@ -64,15 +64,21 @@ import com.google.appengine.api.datastore.Query.FilterOperator;
  * specified number of records in a Form or in a repeated group
  * within a Form.
  * 
- * The xml-wrapped representation maintains a &lt;cursor/&gt; object so that 
- * follow-on requests passing in that &lt;cursor/&gt; object may retrieve 
+ * The xml-wrapped representation maintains a {@code <cursor/>} object so that 
+ * follow-on requests passing in that {@code <cursor/>}; object may retrieve 
  * subsequent records in the Form or in the repeated group within a Form.
  */
 public class FragmentedSubmissionTable extends SubmissionTable {
+	private static final String RESULT_TABLE_KEY_STRING = "KEY";
+	private static final String XML_TAG_NAMESPACE = "";
+	private static final String XML_TAG_RESULT = "result";
+	private static final String XML_TAG_HEADER = "header";
+	private static final String XML_TAG_CURSOR = "cursor";
+	private static final String XML_TAG_ENTRIES = "entries";
 	/**
 	 * Cursor value that should be used to continue the query.
 	 */
-	protected String websafeCursorString = null;
+	private String websafeCursorString = null;
 
 	/**
 	 * Constructor.
@@ -98,6 +104,14 @@ public class FragmentedSubmissionTable extends SubmissionTable {
 
 	/**
 	 * Emits the xml wrapped cursor and csv output of a given resultTable.
+	 * The format of the output is:
+	 * <pre>{@code
+	 * <entries>
+	 *    <cursor>...</cursor> <!-- only present if additional records may be fetched -->
+	 *    <header>...</header> <!-- csv -- property names -->
+	 *    <result>...</result> <!-- csv -- values -- repeats 0 or more times -->
+	 * </entries>
+	 * }</pre>
 	 * 
 	 * @param out
 	 * 			the output stream to write to
@@ -110,18 +124,17 @@ public class FragmentedSubmissionTable extends SubmissionTable {
 		Document d = new Document();
 		d.setStandalone(true);
 		d.setEncoding(ServletConsts.ENCODE_SCHEME);
-		String namespace = "";
-		Element e = d.createElement(namespace, "entries");
+		Element e = d.createElement(XML_TAG_NAMESPACE, XML_TAG_ENTRIES);
 		d.addChild(0, Node.ELEMENT, e);
 		int idx = 0;
 		e.addChild(idx++, Node.IGNORABLE_WHITESPACE, BasicConsts.NEW_LINE);
 		if ( websafeCursorString != null ) {
-			Element cursor = d.createElement(namespace, "cursor");
+			Element cursor = d.createElement(XML_TAG_NAMESPACE, XML_TAG_CURSOR);
 			e.addChild(idx++, Node.ELEMENT, cursor);
 			cursor.addChild(0, Node.TEXT, websafeCursorString);
 			e.addChild(idx++, Node.IGNORABLE_WHITESPACE, BasicConsts.NEW_LINE);
 		}
-		Element header = d.createElement(namespace, "header");
+		Element header = d.createElement(XML_TAG_NAMESPACE, XML_TAG_HEADER);
 		e.addChild(idx++, Node.ELEMENT, header);
 		header.addChild(0, Node.TEXT, generateCommaSeperatedRow(resultTable.getHeader().iterator()));
 		e.addChild(idx++, Node.IGNORABLE_WHITESPACE, BasicConsts.NEW_LINE);
@@ -129,7 +142,7 @@ public class FragmentedSubmissionTable extends SubmissionTable {
 		Element resultRow;
 		// generate rows
 		for (List<String> row : resultTable.getRows()) {
-			resultRow = d.createElement(namespace, "result");
+			resultRow = d.createElement(XML_TAG_NAMESPACE, XML_TAG_RESULT);
 			e.addChild(idx++, Node.ELEMENT, resultRow);
 			String csvRow = generateCommaSeperatedRow(row.iterator());
 			resultRow.addChild(0, Node.TEXT, csvRow);
@@ -151,29 +164,27 @@ public class FragmentedSubmissionTable extends SubmissionTable {
 	 * @return string containing comma separated values
 	 */
 	private String generateCommaSeperatedRow(Iterator<String> itr) {
-		String row = BasicConsts.EMPTY_STRING;
+		StringBuilder row = new StringBuilder();
 		while (itr.hasNext()) {
 			// replace all quotes in the string with doubled-quotes
 			// then wrap the whole thing with quotes.  Nulls are 
 			// distinguished from empty strings by the lack of a 
 			// value in that position (e.g., ,, vs ,"",)
 			String original = itr.next();
-			String str = "";
 			if (original != null ) {
-				str = BasicConsts.QUOTE 
-					+ original.replace(BasicConsts.QUOTE, BasicConsts.QUOTE_QUOTE) 
-					+ BasicConsts.QUOTE;
+				row.append(BasicConsts.QUOTE);
+				row.append(original.replace(BasicConsts.QUOTE, BasicConsts.QUOTE_QUOTE));
+				row.append(BasicConsts.QUOTE);
 			}
-			row += str;
 			if (itr.hasNext()) {
-				row += BasicConsts.CSV_DELIMITER;
+				row.append(BasicConsts.CSV_DELIMITER);
 			}
 		}
-		return row;
+		return row.toString();
 	}
 
 	/**
-	 * Create the link for blobs (images, audio, video).
+	 * Create a URL for blobs (images, audio, video).
 	 * 
 	 * @param subKey
 	 *            key to the blob entity
@@ -190,7 +201,7 @@ public class FragmentedSubmissionTable extends SubmissionTable {
 	}
 
 	/**
-	 * Create the link to retrieve all repeat records of the indicated
+	 * Create a URL to retrieve all repeat records of the indicated
 	 * type for the given parent record.
 	 * 
 	 * @param repeat
@@ -215,7 +226,7 @@ public class FragmentedSubmissionTable extends SubmissionTable {
 	}
 
 	/**
-	 * Construct a URL to access this one record.
+	 * Construct a URL to access ourself.
 	 * 
 	 * @param selfKey
 	 * @return
@@ -228,12 +239,12 @@ public class FragmentedSubmissionTable extends SubmissionTable {
 	}
 
 	/**
-	 * Construct a URL to access this one record.
+	 * Construct a URL to access the parent record of this.
 	 * 
 	 * @param parentKey
 	 * 			key for the parent (typically without type ancestry)
 	 * @param formElementKey
-	 * 			our well-formed type hierarchy
+	 * 			our parent in the well-formed type hierarchy
 	 * @return
 	 */
 	protected String createParentLink(Key parentKey, Key formElementKey) {
@@ -280,17 +291,17 @@ public class FragmentedSubmissionTable extends SubmissionTable {
 	}
 
 	/**
-	 * Construct the path for the key.
+	 * Construct a key reference that will return the rows of the given
+	 * form element key type that are associated with the given criteria key.
+	 * <p>
+	 * This is used to produce the xpath-like reference expressions for 
+	 * both the parent-key restrictions and the self-key restrictions.
+	 * <p>
+	 * The skeleton of a key reference is a key path.  The key path is a
+	 * left-to-right slash-separated nesting of repeat group names within
+	 * the form. If the form is defined as:
 	 * 
-	 * Key is to either a Form or a FormElement. The way the key is obtained
-	 * alters some of the features of the key.  It is important to be consistent
-	 * with the key construction.
-	 * 
-	 * The end result should be a slash-separated path of the repeating groups
-	 * within a form. If the form is defined as:
-	 * 
-	 * <pre>
-	 * {{{
+	 * <pre>{@code
 	 * <model>
 	 *   <instance>
 	 *     <data id="myDataForm">
@@ -316,53 +327,32 @@ public class FragmentedSubmissionTable extends SubmissionTable {
 	 *       ...
 	 *    </repeat>
 	 *  </repeat>
-	 * }}}
-	 * </pre>
+	 * }</pre>
 	 * 
-	 * Then there are three FormElement structures, one for the top-level form,
-	 * one for the repeated1 elements, and one for the repeated2 elements.
-	 * 
-	 * The paths inside the form are therefore: myDataForm/data
-	 * myDataForm/data/repeated1 myDataForm/data/repeated1/repeated2
-	 * 
-	 * @param key
-	 * @return
-	 */
-	private String getKeyPath(Key key) {
-		String nameSuffix = form.getOdkId();
-		List<String> path = new ArrayList<String>();
-		// build path in reverse order
-		while (key != null) {
-			String name = key.getName();
-			if (name == null) {
-				// degenerate case of being passed a Form key vs. FormElement
-				path.add(key.getKind());
-			} else if (name.equals(nameSuffix)) {
-				// terminating case for FormElement key
-				path.add(name);
-			} else {
-				path
-						.add(name.substring(0, name.length()
-								- nameSuffix.length()));
-			}
-			key = key.getParent();
-		}
-		Collections.reverse(path);
-		StringBuilder b = new StringBuilder();
-		for (String s : path) {
-			b.append(BasicConsts.FORWARDSLASH);
-			b.append(s);
-		}
-		return b.substring(1); // drop the leading slash
-	}
-
-	/**
-	 * Construct a key reference that will return the rows of the given
-	 * form element key type that are associated with the given criteria key
-	 * (if that functionality is implemented).
-	 * 
-	 * This is used to produce the xpath-like reference expressions for 
-	 * both the parent_key restrictions and the self-key restrictions.
+	 * Then there are three key path elements corresponding to the
+	 * three FormElement structures in the persistence model.
+	 * <ol>
+	 * <li>the top-level form</li>
+	 * <li>the repeated1 elements</li>
+	 * <li>the repeated2 elements</li>
+	 * </ol>
+	 * The corresponding key paths are therefore:
+	 * <ul>
+	 * <li>myDataForm/data</li>
+	 * <li>myDataForm/data/repeated1</li>
+	 * <li>myDataForm/data/repeated1/repeated2</li>
+	 * </ul>
+	 * A key reference then adorns the rightmost or next-to-rightmost 
+	 * path element with a {@code [@key="..."]} restriction.  These restrictions
+	 * filter the result set described by the key path as follows:
+	 * <ul>
+	 * <li>{@code myDataForm/data/repeated1/repeated2} - return all repeated2 records.</li>
+	 * <li>{@code myDataForm/data/repeated1[@key="..."]/repeated2} - filter is on 
+	 * the next-to-rightmost path element: return the repeated2 records with 
+	 * the given parent key.</li>
+	 * <li>{@code myDataForm/data/repeated1/repeated2[@key="..."]} - filter is on 
+	 * the rightmost path element: return the repeated2 record with the given key.</li>
+	 * </ul> 
 	 * 
 	 * @param criteriaKey 
 	 * 			the specific key that will be value-matched.
@@ -429,15 +419,17 @@ public class FragmentedSubmissionTable extends SubmissionTable {
 	}
 	
 	/**
-	 * Queries datastore entries and makes a Result Table for the given Odk ID.
+	 * Queries the datastore to produce a Result Table for the
+	 * top-level data of the form identified in the 
+	 * FragmentedSubmissionTable constructor.
 	 * 
 	 * Reworked from SubmissionTable.generateResultTable
 	 * 
 	 * @param elementReference
-	 * 			  if specified, identifies a specific Form record
+	 * 			  if specified, identifies a specific Form record to retrieve.
 	 * @param websafeCursorString
-	 *            the String for a cursor if this query is being repeated. is
-	 *            null if this is the first attempt
+	 *            the String for a cursor if this is a query continuation. 
+	 *            null if this is the first attempt.
 	 * @return ResultTable of Submissions.
 	 * @throws ODKIncompleteSubmissionData
 	 */
@@ -447,9 +439,9 @@ public class FragmentedSubmissionTable extends SubmissionTable {
 
 		// create results table
 		generatePropertyNamesAndHeaders(form.getElementTreeRoot(), true);
-		headers.add("KEY");
-		propertyNames.add("KEY");
-		headerTypes.put("KEY", SubmissionFieldType.STRING);
+		headers.add(RESULT_TABLE_KEY_STRING);
+		propertyNames.add(RESULT_TABLE_KEY_STRING);
+		headerTypes.put(RESULT_TABLE_KEY_STRING, SubmissionFieldType.STRING);
 
 		ResultTable results = new ResultTable(headers);
 		DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
@@ -513,9 +505,9 @@ public class FragmentedSubmissionTable extends SubmissionTable {
 	
 			// and add the self-KEY to the map...
 			StringSubmissionType submissionData = new StringSubmissionType(
-					"KEY");
+					RESULT_TABLE_KEY_STRING);
 			submissionData.setValueFromString(createSelfLink(sub.getKey(), form.getElementTreeRoot().getKey()));
-			valueMap.put("KEY", submissionData);
+			valueMap.put(RESULT_TABLE_KEY_STRING, submissionData);
 
 			List<String> row = new ArrayList<String>();
 			processSubmissionIntoRow(valueMap, sub, row);
@@ -528,13 +520,13 @@ public class FragmentedSubmissionTable extends SubmissionTable {
 	}
 
 	/**
-	 * Generates a result table that contains repeats of the table whose parent
-	 * is specified by ODKId and datastore entry type is kind.
+	 * Queries the datastore to produce a ResultTable containing data for a repeat group
+	 * within the form identified in the FragmentedSubmissionTable constructor.
 	 * 
 	 * @param kind
-	 *            datastore entry type.
+	 *            datastore entry type of the repeat group.
 	 * @param elementKey
-	 *            the element type
+	 *            the element type of the repeat group.
 	 * @param elementReference
 	 *            if not null, the specific element instance to retrieve.
 	 * @param parentKey
@@ -564,9 +556,9 @@ public class FragmentedSubmissionTable extends SubmissionTable {
 		propertyNames.add(PersistConsts.PARENT_KEY_PROPERTY);
 		headerTypes.put(PersistConsts.PARENT_KEY_PROPERTY, SubmissionFieldType.STRING);
 
-		headers.add("KEY");
-		propertyNames.add("KEY");
-		headerTypes.put("KEY", SubmissionFieldType.STRING);
+		headers.add(RESULT_TABLE_KEY_STRING);
+		propertyNames.add(RESULT_TABLE_KEY_STRING);
+		headerTypes.put(RESULT_TABLE_KEY_STRING, SubmissionFieldType.STRING);
 
 		ResultTable results = new ResultTable(headers);
 		DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
@@ -629,9 +621,9 @@ public class FragmentedSubmissionTable extends SubmissionTable {
 					.setValueFromString(createParentLink(sub.getParentSubmissionSetKey(),elementKey.getParent()));
 			valueMap.put(PersistConsts.PARENT_KEY_PROPERTY, submissionData);
 			// and add the self-KEY to the map...
-			submissionData = new StringSubmissionType("KEY");
+			submissionData = new StringSubmissionType(RESULT_TABLE_KEY_STRING);
 			submissionData.setValueFromString(createSelfLink(sub.getKey(),elementKey));
-			valueMap.put("KEY", submissionData);
+			valueMap.put(RESULT_TABLE_KEY_STRING, submissionData);
 
 			List<String> row = new ArrayList<String>();
 			for (String propertyName : propertyNames) {
@@ -642,14 +634,5 @@ public class FragmentedSubmissionTable extends SubmissionTable {
 		}
 
 		return results;
-	}
-
-	/**
-	 * getter for websafeCursorString
-	 * 
-	 * @return the websafeCursorString
-	 */
-	public String getCursorStr() {
-		return websafeCursorString;
 	}
 }
