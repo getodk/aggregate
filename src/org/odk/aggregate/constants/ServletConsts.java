@@ -216,7 +216,7 @@ public class ServletConsts {
   public static final String ONE_TIME_DATA_TRANSFER_BUTTON_TXT = "Create Worksheet with 'ONE TIME' Data Transfer";
 
 
-  public static final String SPREADSHEET_SCOPE = "http://spreadsheets.google.com/feeds/";
+  public static final String SPREADSHEET_SCOPE = "https://spreadsheets.google.com/feeds/";
 
 
   public static final String WORKSHEETS_FEED_PREFIX = SPREADSHEET_SCOPE + "worksheets/";
