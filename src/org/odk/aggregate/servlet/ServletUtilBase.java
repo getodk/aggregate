@@ -299,6 +299,7 @@ public class ServletUtilBase extends HttpServlet {
     } else {
 
       try {
+        onetimeUseToken = URLDecoder.decode(onetimeUseToken, "UTF-8");
         sessionToken = AuthSubUtil.exchangeForSessionToken(onetimeUseToken, null);
       } catch (AuthenticationException e) {
         e.printStackTrace();
