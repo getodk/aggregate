@@ -290,7 +290,8 @@ public class ServletUtilBase extends HttpServlet {
   protected String verifyGDataAuthorization(HttpServletRequest req, HttpServletResponse resp,
       String scope) throws IOException, ODKGDataAuthenticationError,
       ODKGDataServiceNotAuthenticated {
-    String onetimeUseToken = AuthSubUtil.getTokenFromReply(req.getQueryString());
+    String query = URLDecoder.decode(req.getQueryString(), "UTF-8");
+    String onetimeUseToken = AuthSubUtil.getTokenFromReply(query);
 
     String sessionToken = null;
 
@@ -299,7 +300,6 @@ public class ServletUtilBase extends HttpServlet {
     } else {
 
       try {
-        onetimeUseToken = URLDecoder.decode(onetimeUseToken, "UTF-8");
         sessionToken = AuthSubUtil.exchangeForSessionToken(onetimeUseToken, null);
       } catch (AuthenticationException e) {
         e.printStackTrace();
