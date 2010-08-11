@@ -9,8 +9,6 @@
 	<classpathentry kind="lib" path="war/WEB-INF/lib/gdata-client-1.0.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/gdata-client-meta-1.0.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/gdata-core-1.0.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/gdata-docs-2.0.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/gdata-docs-meta-2.0.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/gdata-maps-2.0.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/gdata-maps-meta-2.0.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/gdata-media-1.0.jar"/>
@@ -21,6 +19,8 @@
 	<classpathentry kind="lib" path="war/WEB-INF/lib/javarosa-libraries.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/jsr305.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/kxml2-2.3.0.jar"/>
-	<classpathentry kind="con" path="com.google.appengine.eclipse.core.GAE_CONTAINER/App Engine (6)"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/gdata-docs-3.0.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/gdata-docs-meta-3.0.jar"/>
+	<classpathentry kind="con" path="com.google.appengine.eclipse.core.GAE_CONTAINER"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>
