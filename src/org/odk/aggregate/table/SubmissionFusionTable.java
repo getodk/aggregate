@@ -131,21 +131,24 @@ public class SubmissionFusionTable extends SubmissionTable {
       request.execute();
    }
 
-   // TODO: make more of a utility function with CSV
-   private String createCsvString(Iterator<String> itr, boolean header) {
-      String str = " (";
-      while (itr.hasNext()) {
-         if (header) {
-            str += BasicConsts.SINGLE_QUOTE + itr.next() + BasicConsts.SINGLE_QUOTE;
-         } else {
-            str += Compatibility.removeDashes(itr.next());
-         }
-
-         if (itr.hasNext()) {
-            str += BasicConsts.CSV_DELIMITER;
-         }
+  // TODO: make more of a utility function with CSV
+  private String createCsvString(Iterator<String> itr, boolean header) {
+    StringBuilder str = new StringBuilder();
+    str.append(" (");
+    while (itr.hasNext()) {
+      str.append(BasicConsts.SINGLE_QUOTE);
+      if (header) {
+        str.append(itr.next());
+      } else {
+        str.append(Compatibility.removeDashes(itr.next()));
       }
-      return str + ") ";
-   }
+      str.append(BasicConsts.SINGLE_QUOTE);
+      if (itr.hasNext()) {
+        str.append(BasicConsts.CSV_DELIMITER);
+      }
+    }
+    str.append(") ");
+    return str.toString();
+  }
 
 }

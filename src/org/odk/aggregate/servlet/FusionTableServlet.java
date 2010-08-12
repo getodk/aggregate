@@ -106,8 +106,8 @@ public class FusionTableServlet extends ServletUtilBase {
 
       while (entries.hasNext()) {
          Map.Entry<String, SubmissionFieldType> entry = entries.next();
-         createQuery += Compatibility.removeDashes(entry.getKey()) + BasicConsts.COLON
-               + entry.getValue().getFusionType().getFusionTypeValue();
+         createQuery += BasicConsts.SINGLE_QUOTE + Compatibility.removeDashes(entry.getKey()) 
+           + BasicConsts.SINGLE_QUOTE + BasicConsts.COLON + entry.getValue().getFusionType().getFusionTypeValue();
          if (entries.hasNext()) {
             createQuery += BasicConsts.COMMA;
          }
@@ -126,7 +126,7 @@ public class FusionTableServlet extends ServletUtilBase {
             throw new IOException("ERROR CREATING FUSION TABLE - DID NOT GET A TABLE NUMBER");
          }
       } catch (ServiceException e) {
-         throw new IOException(e);
+         throw new IOException(e.getCause());
       }
 
       ExternalServiceOption esType = ExternalServiceOption.valueOf(esTypeString);
