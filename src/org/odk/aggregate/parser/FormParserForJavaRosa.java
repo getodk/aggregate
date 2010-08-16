@@ -88,11 +88,16 @@ public class FormParserForJavaRosa {
 
     xml = inputXml;    
     String strippedXML = JRHelperUtil.removeNonJavaRosaCompliantTags(xml);
-    FormDef formDef = XFormUtils.getFormFromInputStream(new ByteArrayInputStream(strippedXML.getBytes()));
+   
+    FormDef formDef;
+    try {
+      formDef = XFormUtils.getFormFromInputStream(new ByteArrayInputStream(strippedXML.getBytes()));
 
-    // TODO: figure out a better way to handle this situation
-    if (formDef == null) {
-      return;
+      if (formDef == null) {
+        throw new ODKIncompleteSubmissionData(Reason.BAD_JR_PARSE);
+      }
+    } catch (Exception e) {
+      throw new ODKIncompleteSubmissionData(e.getCause(), Reason.BAD_JR_PARSE);
     }
 
     DataModelTree dataModel = formDef.getDataModel();

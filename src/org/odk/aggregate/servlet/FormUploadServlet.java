@@ -173,6 +173,10 @@ public class FormUploadServlet extends ServletUtilBase {
           em.close();
           resp.sendError(HttpServletResponse.SC_BAD_REQUEST, ErrorConsts.MISSING_FORM_ID);
           return;
+        case BAD_JR_PARSE:
+          em.close();
+          resp.sendError(HttpServletResponse.SC_BAD_REQUEST, ErrorConsts.JAVA_ROSA_PARSING_PROBLEM + e.getMessage());
+          return;          
         default:
           // just move on
         }
