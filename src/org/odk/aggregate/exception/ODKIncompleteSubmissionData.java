@@ -28,7 +28,8 @@ public class ODKIncompleteSubmissionData extends Exception {
   public enum Reason {
     UNKNOWN,
     TITLE_MISSING,
-    ID_MISSING;
+    ID_MISSING, 
+    BAD_JR_PARSE;
   }
   
   private Reason reason;
