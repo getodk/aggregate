@@ -133,12 +133,31 @@ public class ServletUtilBase extends HttpServlet {
    */
   protected void beginBasicHtmlResponse(String pageName, HttpServletResponse resp,
       HttpServletRequest req, boolean displayLinks) throws IOException {
+	  beginBasicHtmlResponse(pageName, "", resp, req, displayLinks );
+  }
+
+  /**
+   * Generate HTML header string for web responses. NOTE: beginBasicHtmlResponse
+   * and finishBasicHtmlResponse are a paired set of functions.
+   * beginBasicHtmlResponse should be called first before adding other
+   * information to the http response. When response is finished
+   * finishBasicHtmlResponse should be called.
+   * 
+   * @param pageName name that should appear on the top of the page
+   * @param headContent additional head content emitted before title
+   * @param resp http response to have the information appended to
+   * @param req TODO
+   * @param displayLinks display links accross the top
+   * @throws IOException
+   */
+  protected void beginBasicHtmlResponse(String pageName, String headContent, HttpServletResponse resp,
+	      HttpServletRequest req, boolean displayLinks) throws IOException {
     resp.addHeader(HOST_HEADER, getServerURL(req));
     resp.setContentType(ServletConsts.RESP_TYPE_HTML);
     resp.setCharacterEncoding(ServletConsts.ENCODE_SCHEME);
     PrintWriter out = resp.getWriter();
     out.write(HtmlConsts.HTML_OPEN);
-    out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.HEAD, HtmlUtil.wrapWithHtmlTags(
+    out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.HEAD, headContent + HtmlUtil.wrapWithHtmlTags(
         HtmlConsts.TITLE, BasicConsts.APPLICATION_NAME)));
     out.write(HtmlConsts.BODY_OPEN);
     out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.H2, "<FONT COLOR=330066>" + BasicConsts.APPLICATION_NAME) + "</FONT>");
@@ -270,6 +289,8 @@ public class ServletUtilBase extends HttpServlet {
     html +=
         HtmlUtil.createHref(ServletConsts.UPLOAD_SUBMISSION_ADDR,
             ServletConsts.UPLOAD_SUB_LINK_TEXT);
+    html += HtmlConsts.TAB + HtmlConsts.TAB;
+    html += HtmlUtil.createHref(BriefcaseServlet.ADDR, ServletConsts.BRIEFCASE_LINK_TEXT);
     return html + HtmlConsts.TAB;
   }
 

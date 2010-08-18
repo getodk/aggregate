@@ -28,7 +28,7 @@ public class ErrorConsts {
    * Error message if the form with FORM ID is not found
    */
   public static final String ODKID_NOT_FOUND =
-      "Unable to find form to locate form with matching ODK id as submission";
+      "Unable to locate form with matching ODK id as submission";
   /**
    * Error message for if key was not successfully part of the request
    */
