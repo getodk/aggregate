@@ -37,7 +37,6 @@ import org.odk.aggregate.exception.ODKParseException;
 import org.odk.aggregate.form.FormElement;
 import org.odk.aggregate.table.FragmentedSubmissionTable;
 import org.odk.aggregate.table.ResultTable;
-import org.odk.aggregate.table.SubmissionTable;
 
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
@@ -50,8 +49,6 @@ public class FragmentedCsvServlet extends ServletUtilBase {
 
 	private static final long serialVersionUID = 9161862118534323521L;
 
-	private static final Logger log = Logger.getLogger(SubmissionTable.class.getName());
-	
    /**
     * Title for generated webpage
     */
