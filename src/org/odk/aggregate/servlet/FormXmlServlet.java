@@ -29,10 +29,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.odk.aggregate.EMFactory;
 import org.odk.aggregate.constants.HtmlUtil;
 import org.odk.aggregate.constants.ServletConsts;
+import org.odk.aggregate.exception.ODKFormNotFoundException;
 import org.odk.aggregate.form.Form;
-
-import com.google.appengine.api.datastore.Key;
-import com.google.appengine.api.datastore.KeyFactory;
 
 /**
  * Servlet to generate the XML file in plain text
@@ -67,8 +65,8 @@ public class FormXmlServlet extends ServletUtilBase {
   public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
     
     // get parameters
-    String odkFormKey = getParameter(req, ServletConsts.ODK_FORM_KEY);
-    if(odkFormKey == null) {
+    String odkIdParam = getParameter(req, ServletConsts.ODK_ID);
+    if(odkIdParam == null) {
       errorMissingKeyParam(resp);
       return;
     }
@@ -79,9 +77,14 @@ public class FormXmlServlet extends ServletUtilBase {
       humanReadable = Boolean.parseBoolean(readable);
     }
 
-    Key formKey = KeyFactory.stringToKey(odkFormKey);
     EntityManager em = EMFactory.get().createEntityManager();
-    Form form = em.getReference(Form.class, formKey);
+    Form form;
+    try {
+      form = Form.retrieveForm(em, odkIdParam);
+    } catch (ODKFormNotFoundException e) {
+      odkIdNotFoundError(resp);
+      return;
+    }
     String xmlString = null;
     
     if (form != null) {
@@ -96,7 +99,7 @@ public class FormXmlServlet extends ServletUtilBase {
     
     if(humanReadable) {
       Map<String, String> properties = new HashMap<String, String>();
-      properties.put(ServletConsts.ODK_FORM_KEY, URLEncoder.encode(odkFormKey, ServletConsts.ENCODE_SCHEME));
+      properties.put(ServletConsts.ODK_ID, URLEncoder.encode(odkIdParam, ServletConsts.ENCODE_SCHEME));
       String downloadXmlButton =
           HtmlUtil.createHtmlButtonToGetServlet(ADDR, ServletConsts.DOWNLOAD_XML_BUTTON_TXT, properties);
 

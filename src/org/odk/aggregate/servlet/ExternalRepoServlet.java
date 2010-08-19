@@ -29,10 +29,8 @@ import org.odk.aggregate.constants.ExternalServiceOption;
 import org.odk.aggregate.constants.HtmlConsts;
 import org.odk.aggregate.constants.HtmlUtil;
 import org.odk.aggregate.constants.ServletConsts;
+import org.odk.aggregate.exception.ODKFormNotFoundException;
 import org.odk.aggregate.form.Form;
-
-import com.google.appengine.api.datastore.Key;
-import com.google.appengine.api.datastore.KeyFactory;
 
 /**
  * Servlet to setup connection to an external 
@@ -74,8 +72,8 @@ public class ExternalRepoServlet extends ServletUtilBase{
     }
 
     // get parameter
-    String odkFormKey = getParameter(req, ServletConsts.ODK_FORM_KEY);
-    if(odkFormKey == null) {
+    String odkIdParam = getParameter(req, ServletConsts.ODK_ID);
+    if(odkIdParam == null) {
       errorMissingKeyParam(resp);
       return;
     }
@@ -84,8 +82,15 @@ public class ExternalRepoServlet extends ServletUtilBase{
     
     // get form
     EntityManager em = EMFactory.get().createEntityManager();
-    Key formKey = KeyFactory.stringToKey(odkFormKey);
-    Form form = em.getReference(Form.class, formKey);
+
+    Form form;
+    try {
+      form = Form.retrieveForm(em, odkIdParam);
+    } catch (ODKFormNotFoundException e) {
+      odkIdNotFoundError(resp);
+      return;
+    }
+    
     
     beginBasicHtmlResponse(TITLE_INFO, resp, req, true); // header info
     PrintWriter out = resp.getWriter();
@@ -93,14 +98,14 @@ public class ExternalRepoServlet extends ServletUtilBase{
     
     if(serviceString == null) {
       // TODO: change so is based off enum
-      out.write(generateServiceButton(odkFormKey, ExternalService.GOOGLE_SPREADSHEET));
-      out.write(generateServiceButton(odkFormKey, ExternalService.RHIZA_INSIGHT));
-      out.write(generateServiceButton(odkFormKey, ExternalService.GOOGLE_FUSIONTABLES));
+      out.write(generateServiceButton(odkIdParam, ExternalService.GOOGLE_SPREADSHEET));
+      out.write(generateServiceButton(odkIdParam, ExternalService.RHIZA_INSIGHT));
+      out.write(generateServiceButton(odkIdParam, ExternalService.GOOGLE_FUSIONTABLES));
       
     } else {
       ExternalService service = ExternalService.valueOf(serviceString);
       out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.H3, "To: " + "<FONT COLOR=0000FF>" + service.getServiceName() + "</FONT>" + " Service"));
-      out.write(generateExternalServiceEntry(odkFormKey, service ));
+      out.write(generateExternalServiceEntry(odkIdParam, service ));
     }
     
     em.close(); 
@@ -108,12 +113,12 @@ public class ExternalRepoServlet extends ServletUtilBase{
     finishBasicHtmlResponse(resp);
   }
 
-  private String generateExternalServiceEntry(String odkFormKey, ExternalService service) throws UnsupportedEncodingException {
+  private String generateExternalServiceEntry(String odkId, ExternalService service) throws UnsupportedEncodingException {
     StringBuilder form = new StringBuilder();
     form.append(HtmlConsts.LINE_BREAK);
     form.append(HtmlUtil.createFormBeginTag(service.getAddr(), ServletConsts.RESP_TYPE_HTML,
         ServletConsts.GET));
-    form.append(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_HIDDEN, ServletConsts.ODK_FORM_KEY, encodeParameter(odkFormKey)));
+    form.append(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_HIDDEN, ServletConsts.ODK_ID, encodeParameter(odkId)));
     
     if(!service.equals(ExternalService.GOOGLE_FUSIONTABLES)) {
        form.append(service.getDescriptionOfParam() + HtmlConsts.LINE_BREAK);
@@ -135,13 +140,13 @@ public class ExternalRepoServlet extends ServletUtilBase{
     return HtmlUtil.createRadio(ServletConsts.EXTERNAL_SERVICE_TYPE, option.toString(), option.getDescriptionOfOption(), checked);
   }
   
-  private String generateServiceButton(String odkFormKey, ExternalService service) throws UnsupportedEncodingException {
+  private String generateServiceButton(String odkId, ExternalService service) throws UnsupportedEncodingException {
      
 
     StringBuilder form = new StringBuilder();
     form.append(HtmlConsts.LINE_BREAK);
     form.append(HtmlUtil.createFormBeginTag("/" + ADDR, null, ServletConsts.GET));
-    form.append(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_HIDDEN, ServletConsts.ODK_FORM_KEY, encodeParameter(odkFormKey)));
+    form.append(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_HIDDEN, ServletConsts.ODK_ID, encodeParameter(odkId)));
     form.append(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_HIDDEN, SERVICE, encodeParameter(service.toString())));
     form.append(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_SUBMIT, null, service.getServiceName()));
     form.append(HtmlConsts.FORM_CLOSE);
