@@ -15,6 +15,7 @@ import org.odk.aggregate.constants.BasicConsts;
 import org.odk.aggregate.constants.Compatibility;
 import org.odk.aggregate.constants.ExternalServiceOption;
 import org.odk.aggregate.constants.ServletConsts;
+import org.odk.aggregate.exception.ODKFormNotFoundException;
 import org.odk.aggregate.exception.ODKGDataAuthenticationError;
 import org.odk.aggregate.exception.ODKGDataServiceNotAuthenticated;
 import org.odk.aggregate.exception.ODKIncompleteSubmissionData;
@@ -24,8 +25,6 @@ import org.odk.aggregate.report.FormProperties;
 import org.odk.aggregate.submission.SubmissionFieldType;
 import org.odk.aggregate.table.SubmissionFusionTable;
 
-import com.google.appengine.api.datastore.Key;
-import com.google.appengine.api.datastore.KeyFactory;
 import com.google.gdata.client.GoogleService;
 import com.google.gdata.client.http.AuthSubUtil;
 import com.google.gdata.util.AuthenticationException;
@@ -64,11 +63,11 @@ public class FusionTableServlet extends ServletUtilBase {
          return;
       }
 
-      String odkFormKey = getParameter(req, ServletConsts.ODK_FORM_KEY);
+      String odkIdParam = getParameter(req, ServletConsts.ODK_ID);
       String esTypeString = getParameter(req, ServletConsts.EXTERNAL_SERVICE_TYPE);
 
       Map<String, String> params = new HashMap<String, String>();
-      params.put(ServletConsts.ODK_FORM_KEY, odkFormKey);
+      params.put(ServletConsts.ODK_ID, odkIdParam);
       params.put(ServletConsts.EXTERNAL_SERVICE_TYPE, esTypeString);
 
       String authToken = null;
@@ -96,9 +95,15 @@ public class FusionTableServlet extends ServletUtilBase {
 
       // get form
       EntityManager em = EMFactory.get().createEntityManager();
-      Key formKey = KeyFactory.stringToKey(odkFormKey);
-      Form form = em.getReference(Form.class, formKey);
 
+      Form form;
+      try {
+        form = Form.retrieveForm(em, odkIdParam);
+      } catch (ODKFormNotFoundException e) {
+        odkIdNotFoundError(resp);
+        return;
+      }
+      
       FormProperties formProp = new FormProperties(form, em, false);
       Map<String, SubmissionFieldType> types = formProp.getHeaderTypes();
       String createQuery = "CREATE TABLE " + form.getOdkId() + "(";

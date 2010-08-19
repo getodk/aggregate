@@ -152,15 +152,6 @@
 	</servlet-mapping>
 
 	<servlet>
-		<servlet-name>insightData</servlet-name>
-		<servlet-class>org.odk.aggregate.servlet.InsightDataServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>insightData</servlet-name>
-		<url-pattern>/insightData</url-pattern>
-	</servlet-mapping>
-
-	<servlet>
 		<servlet-name>fusiontables</servlet-name>
 		<servlet-class>org.odk.aggregate.servlet.FusionTableServlet</servlet-class>
 	</servlet>

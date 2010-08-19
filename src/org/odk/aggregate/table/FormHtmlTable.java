@@ -37,7 +37,6 @@ import org.odk.aggregate.servlet.FormXmlServlet;
 import org.odk.aggregate.servlet.KmlSettingsServlet;
 
 import com.google.appengine.api.datastore.Key;
-import com.google.appengine.api.datastore.KeyFactory;
 
 /**
  * Generates an html table of forms for the servlets
@@ -160,15 +159,13 @@ public class FormHtmlTable {
               CsvServlet.ADDR, TableConsts.CSV_BUTTON_TXT, properties);
 
           Map<String, String> xmlProperties = new HashMap<String, String>();
-          xmlProperties.put(ServletConsts.ODK_FORM_KEY, KeyFactory
-              .keyToString(form.getKey()));
+          xmlProperties.put(ServletConsts.ODK_ID, form.getOdkId());
           xmlProperties.put(ServletConsts.HUMAN_READABLE, BasicConsts.TRUE);
           String xmlButton = HtmlUtil.createHtmlButtonToGetServlet(
               FormXmlServlet.ADDR, TableConsts.XML_BUTTON_TXT, xmlProperties);
 
           properties = new HashMap<String, String>();
-          properties.put(ServletConsts.ODK_FORM_KEY, KeyFactory
-              .keyToString(form.getKey()));
+          properties.put(ServletConsts.ODK_ID, form.getOdkId());
 
           String externalServiceButton = HtmlUtil.createHtmlButtonToGetServlet(
               ExternalRepoServlet.ADDR,

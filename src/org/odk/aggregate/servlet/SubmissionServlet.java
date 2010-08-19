@@ -42,7 +42,6 @@ import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.api.datastore.Key;
-import com.google.appengine.api.datastore.KeyFactory;
 
 /**
  * Servlet to process a submission from a form
@@ -72,16 +71,21 @@ public class SubmissionServlet extends ServletUtilBase {
     resp.setContentType(ServletConsts.RESP_TYPE_XML);
 
     // get parameter
-    String odkFormKey = getParameter(req, ServletConsts.ODK_FORM_KEY);
-    if (odkFormKey == null) {
+    String odkIdParam = getParameter(req, ServletConsts.ODK_ID);
+    if (odkIdParam == null) {
       errorMissingKeyParam(resp);
       return;
     }
 
     // get form
     EntityManager em = EMFactory.get().createEntityManager();
-    Key formKey = KeyFactory.stringToKey(odkFormKey);
-    Form form = em.getReference(Form.class, formKey);
+    Form form;
+    try {
+      form = Form.retrieveForm(em, odkIdParam);
+    } catch (ODKFormNotFoundException e) {
+      odkIdNotFoundError(resp);
+      return;
+    }
 
     if (form != null) {
       resp.getWriter().print(form.getOriginalForm());

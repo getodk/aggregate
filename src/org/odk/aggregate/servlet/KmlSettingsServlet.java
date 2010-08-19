@@ -29,12 +29,11 @@ import org.odk.aggregate.EMFactory;
 import org.odk.aggregate.constants.HtmlConsts;
 import org.odk.aggregate.constants.HtmlUtil;
 import org.odk.aggregate.constants.ServletConsts;
+import org.odk.aggregate.exception.ODKFormNotFoundException;
 import org.odk.aggregate.form.Form;
 import org.odk.aggregate.form.FormElement;
 import org.odk.aggregate.submission.SubmissionFieldType;
 
-import com.google.appengine.api.datastore.Key;
-import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.repackaged.com.google.common.base.Pair;
 
 /**
@@ -77,16 +76,21 @@ public class KmlSettingsServlet extends ServletUtilBase {
     }
    
     // get parameter
-    String odkFormKey = getParameter(req, ServletConsts.ODK_FORM_KEY);
-    if (odkFormKey == null) {
+    String odkIdParam = getParameter(req, ServletConsts.ODK_ID);
+    if (odkIdParam == null) {
       errorMissingKeyParam(resp);
       return;
     }
 
     // get form
     EntityManager em = EMFactory.get().createEntityManager();
-    Key formKey = KeyFactory.stringToKey(odkFormKey);
-    Form form = em.getReference(Form.class, formKey);
+    Form form;
+    try {
+      form = Form.retrieveForm(em, odkIdParam);
+    } catch (ODKFormNotFoundException e) {
+      odkIdNotFoundError(resp);
+      return;
+    }
     
     geopointNodes = new ArrayList<FormElement>();
     imageNodes = new ArrayList<FormElement>();

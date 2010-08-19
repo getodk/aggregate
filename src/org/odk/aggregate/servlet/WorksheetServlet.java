@@ -26,13 +26,12 @@ import javax.servlet.http.HttpServletResponse;
 import org.odk.aggregate.EMFactory;
 import org.odk.aggregate.constants.ExternalServiceOption;
 import org.odk.aggregate.constants.ServletConsts;
+import org.odk.aggregate.exception.ODKFormNotFoundException;
 import org.odk.aggregate.exception.ODKIncompleteSubmissionData;
 import org.odk.aggregate.form.Form;
 import org.odk.aggregate.form.remoteserver.GoogleSpreadsheet;
 import org.odk.aggregate.table.SubmissionSpreadsheetTable;
 
-import com.google.appengine.api.datastore.Key;
-import com.google.appengine.api.datastore.KeyFactory;
 import com.google.gdata.client.http.AuthSubUtil;
 import com.google.gdata.client.spreadsheet.SpreadsheetService;
 import com.google.gdata.data.spreadsheet.WorksheetEntry;
@@ -61,8 +60,8 @@ public class WorksheetServlet extends ServletUtilBase {
   public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
     
     // get parameter
-    String odkFormKey = getParameter(req, ServletConsts.ODK_FORM_KEY);
-    if (odkFormKey == null) {
+    String odkIdParam = getParameter(req, ServletConsts.ODK_ID);
+    if (odkIdParam == null) {
       errorMissingKeyParam(resp);
       return;
     }
@@ -82,8 +81,13 @@ public class WorksheetServlet extends ServletUtilBase {
     try {
         // get form
         EntityManager em = EMFactory.get().createEntityManager();
-        Key formKey = KeyFactory.stringToKey(odkFormKey);
-        Form form = em.getReference(Form.class, formKey);
+        Form form;
+        try {
+          form = Form.retrieveForm(em, odkIdParam);
+        } catch (ODKFormNotFoundException e) {
+          odkIdNotFoundError(resp);
+          return;
+        }
 
         GoogleSpreadsheet spreadsheet = form.getGoogleSpreadsheetWithName(spreadsheetName);
         if(spreadsheet == null) {

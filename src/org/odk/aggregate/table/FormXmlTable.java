@@ -32,8 +32,6 @@ import org.odk.aggregate.constants.TableConsts;
 import org.odk.aggregate.form.Form;
 import org.odk.aggregate.servlet.FormXmlServlet;
 
-import com.google.appengine.api.datastore.KeyFactory;
-
 /**
  * Generates an xml description of forms for the servlets
  * 
@@ -48,9 +46,9 @@ public class FormXmlTable {
     this.baseServerUrl = HtmlUtil.createUrl(serverName) + FormXmlServlet.ADDR;
   }
 
-  private String generateFormXmlEntry(String odkFormKey, String formName) {
+  private String generateFormXmlEntry(String odkId, String formName) {
     Map<String, String> properties = new HashMap<String, String>();
-    properties.put(ServletConsts.ODK_FORM_KEY, odkFormKey);
+    properties.put(ServletConsts.ODK_ID, odkId);
     String urlLink = HtmlUtil.createLinkWithProperties(baseServerUrl, properties);
     return HtmlConsts.BEGIN_OPEN_TAG + TableConsts.FORM_TAG + BasicConsts.SPACE
         + HtmlUtil.createAttribute(TableConsts.URL_ATTR, urlLink) 
@@ -68,7 +66,7 @@ public class FormXmlTable {
       // build HTML table of form information
       for (Form form : forms) {
         xml +=
-            generateFormXmlEntry(KeyFactory.keyToString(form.getKey()), form.getViewableName())
+            generateFormXmlEntry(form.getOdkId(), form.getViewableName())
                 + BasicConsts.NEW_LINE;
       }
     } catch (Exception e) {

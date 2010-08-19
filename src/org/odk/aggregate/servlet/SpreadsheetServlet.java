@@ -29,13 +29,12 @@ import javax.servlet.http.HttpServletResponse;
 import org.odk.aggregate.EMFactory;
 import org.odk.aggregate.constants.ErrorConsts;
 import org.odk.aggregate.constants.ServletConsts;
+import org.odk.aggregate.exception.ODKFormNotFoundException;
 import org.odk.aggregate.exception.ODKGDataAuthenticationError;
 import org.odk.aggregate.exception.ODKGDataServiceNotAuthenticated;
 import org.odk.aggregate.form.Form;
 import org.odk.aggregate.form.remoteserver.GoogleSpreadsheet;
 
-import com.google.appengine.api.datastore.Key;
-import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.labs.taskqueue.Queue;
 import com.google.appengine.api.labs.taskqueue.QueueFactory;
 import com.google.appengine.api.labs.taskqueue.TaskOptions;
@@ -85,7 +84,7 @@ public class SpreadsheetServlet extends ServletUtilBase {
 
     // get parameter
     String spreadsheetName = getParameter(req, ServletConsts.SPREADSHEET_NAME_PARAM);
-    String odkFormKey = getParameter(req, ServletConsts.ODK_FORM_KEY);
+    String odkIdParam = getParameter(req, ServletConsts.ODK_ID);
     String docSessionToken = getParameter(req, ServletConsts.DOC_AUTH);
     String spreadSessionToken = getParameter(req, ServletConsts.SPREAD_AUTH);
     String esType = getParameter(req, ServletConsts.EXTERNAL_SERVICE_TYPE);
@@ -93,12 +92,12 @@ public class SpreadsheetServlet extends ServletUtilBase {
 
     Map<String, String> params = new HashMap<String, String>();
     params.put(ServletConsts.SPREADSHEET_NAME_PARAM, spreadsheetName);
-    params.put(ServletConsts.ODK_FORM_KEY, odkFormKey);
+    params.put(ServletConsts.ODK_ID, odkIdParam);
     params.put(ServletConsts.DOC_AUTH, docSessionToken);
     params.put(ServletConsts.SPREAD_AUTH, spreadSessionToken);
     params.put(ServletConsts.EXTERNAL_SERVICE_TYPE, esType);
 
-    if (spreadsheetName == null || odkFormKey == null) {
+    if (spreadsheetName == null || odkIdParam == null) {
       resp.sendError(HttpServletResponse.SC_BAD_REQUEST, ErrorConsts.MISSING_FORM_INFO);
       return;
     }
@@ -182,9 +181,15 @@ public class SpreadsheetServlet extends ServletUtilBase {
 
       // get form
       EntityManager em = EMFactory.get().createEntityManager();
-      Key formKey = KeyFactory.stringToKey(odkFormKey);
-      Form form = em.getReference(Form.class, formKey);
 
+      Form form;
+      try {
+        form = Form.retrieveForm(em, odkIdParam);
+      } catch (ODKFormNotFoundException e) {
+        odkIdNotFoundError(resp);
+        return;
+      }
+      
       // create spreadsheet
       GoogleSpreadsheet spreadsheet = new GoogleSpreadsheet(spreadsheetName, sheetKey);
       spreadsheet.setAuthToken(spreadSessionToken);
@@ -196,7 +201,7 @@ public class SpreadsheetServlet extends ServletUtilBase {
       task.method(TaskOptions.Method.GET);
       task.countdownMillis(DELAY);
       task.param(ServletConsts.SPREADSHEET_NAME_PARAM, spreadsheetName);
-      task.param(ServletConsts.ODK_FORM_KEY, odkFormKey);
+      task.param(ServletConsts.ODK_ID, odkIdParam);
       task.param(ServletConsts.EXTERNAL_SERVICE_TYPE, esType);
 
       Queue queue = QueueFactory.getDefaultQueue();

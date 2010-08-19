@@ -35,6 +35,7 @@ import org.odk.aggregate.constants.ErrorConsts;
 import org.odk.aggregate.constants.ExternalServiceOption;
 import org.odk.aggregate.constants.PersistConsts;
 import org.odk.aggregate.constants.ServletConsts;
+import org.odk.aggregate.exception.ODKFormNotFoundException;
 import org.odk.aggregate.exception.ODKIncompleteSubmissionData;
 import org.odk.aggregate.form.Form;
 import org.odk.aggregate.form.remoteserver.RhizaInsight;
@@ -46,8 +47,6 @@ import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.FetchOptions;
-import com.google.appengine.api.datastore.Key;
-import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Link;
 import com.google.appengine.api.datastore.Query;
 import com.google.gson.JsonArray;
@@ -81,18 +80,23 @@ public class InsightServlet extends ServletUtilBase {
 
     // get parameter
     String spreadsheetName = getParameter(req, ServletConsts.SPREADSHEET_NAME_PARAM);
-    String odkFormKey = getParameter(req, ServletConsts.ODK_FORM_KEY);
+    String odkIdParam = getParameter(req, ServletConsts.ODK_ID);
     String esTypeString = getParameter(req, ServletConsts.EXTERNAL_SERVICE_TYPE);
 
-    if (spreadsheetName == null || odkFormKey == null || esTypeString == null) {
+    if (spreadsheetName == null || odkIdParam == null || esTypeString == null) {
       resp.sendError(HttpServletResponse.SC_BAD_REQUEST, ErrorConsts.MISSING_FORM_INFO);
       return;
     }
 
     // get form
     EntityManager em = EMFactory.get().createEntityManager();
-    Key formKey = KeyFactory.stringToKey(odkFormKey);
-    Form form = em.getReference(Form.class, formKey);
+    Form form;
+    try {
+      form = Form.retrieveForm(em, odkIdParam);
+    } catch (ODKFormNotFoundException e) {
+      odkIdNotFoundError(resp);
+      return;
+    }
 
     RhizaInsight insightServer = new RhizaInsight(new Link(spreadsheetName));
 
