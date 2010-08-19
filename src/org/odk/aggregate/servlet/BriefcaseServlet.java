@@ -127,7 +127,8 @@ public class BriefcaseServlet extends ServletUtilBase {
 "\naccessing this page frequently, you may want to import the certificate into your browser's certificate " +
 "\nstore to suppress the security warnings.  Note that whenever you import a certificate, you are trusting " +
 "\nthe owner of that certificate with your system security, as it will allow any software that the owner " +
-"\nsigns to be transparently executed on your system. Click <a href=\"/briefcase/OpenDataKit.cer\">here</a> to " +
+"\nsigns to be transparently executed on your system. Note further that anyone can create a self-signed " +
+"\ncertificate and claim to be the named organization. Click <a href=\"/briefcase/OpenDataKit.cer\">here</a> to " +
 "\ndownload the certificate.  Then import it to suppress the security warnings; on Windows systems, " +
 "\nthe most restricted way to import the certificate would be through <code>Control Panel/Java</code>. Go to " +
 "\nthe <code>Security</code> tab, click <code>Certificates...</code> then <code>Import</code> to import " +
