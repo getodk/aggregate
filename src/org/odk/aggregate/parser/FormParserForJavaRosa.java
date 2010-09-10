@@ -19,12 +19,11 @@ package org.odk.aggregate.parser;
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 import javax.persistence.EntityManager;
 
 import org.javarosa.core.model.FormDef;
-import org.javarosa.core.model.instance.DataModelTree;
+import org.javarosa.core.model.instance.FormInstance;
 import org.javarosa.core.model.instance.TreeElement;
 import org.javarosa.xform.util.XFormUtils;
 import org.odk.aggregate.constants.BasicConsts;
@@ -100,7 +99,7 @@ public class FormParserForJavaRosa {
       throw new ODKIncompleteSubmissionData(e.getCause(), Reason.BAD_JR_PARSE);
     }
 
-    DataModelTree dataModel = formDef.getDataModel();
+    FormInstance dataModel = formDef.getInstance();
     TreeElement rootElement = dataModel.getRoot();
 
     // obtain form id
@@ -192,16 +191,18 @@ public class FormParserForJavaRosa {
     if (parent != null) {
       parent.addChild(dataElement);
     }
-   
-    @SuppressWarnings("unchecked")
-    Vector<TreeElement> children = treeElement.getChildren();
-    if (children == null) {
-      return dataElement;
+    
+    int numChildren = treeElement.getNumChildren();
+
+    if(numChildren <= 0) {
+       return dataElement;
     }
-    for (TreeElement element : children) {
-      processTreeElements(element, dataElement.getKey(), dataElement);
+
+    for(int i=0; i < numChildren; i++){
+       processTreeElements(treeElement.getChildAt(i), dataElement.getKey(), dataElement);
     }
-    return dataElement;
+
+    return dataElement;    
   }
 
 }
