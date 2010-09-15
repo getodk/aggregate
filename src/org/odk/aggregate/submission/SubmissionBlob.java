@@ -24,12 +24,12 @@ public class SubmissionBlob {
   /**
    * Make size limit approximately 1MB, needs to be smaller to support storing the parent and contentType
    */
-  private static final int BLOB_SPLIT_LIMIT = 1040000;
+  private static final int BLOB_SPLIT_LIMIT = 990000;
 
   /**
-   * Maximum size limit 1MB (1024*1024-1)
+   * Maximum size limit is not 1MB (1024*1024-1) but according to google error on 9/15/2010 the limit is 1000000
    */
-  private static final int BLOB_MAX_SIZE = 1048575;
+  private static final int BLOB_MAX_SIZE = 999999;
   
   private Entity dbEntity;
   
