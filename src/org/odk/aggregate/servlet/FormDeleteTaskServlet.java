@@ -73,8 +73,17 @@ public class FormDeleteTaskServlet extends ServletUtilBase {
     
     EntityManager em = EMFactory.get().createEntityManager();
     
-    Key formKey = KeyFactory.stringToKey(formKeyStr);
-    Form form = em.getReference(Form.class, formKey);
+    Form form;
+    try {
+      Key formKey = KeyFactory.stringToKey(formKeyStr);
+      form = em.getReference(Form.class, formKey);
+    } catch (Exception e2) {
+      // TODO Auto-generated catch block
+      e2.printStackTrace();
+      return;
+    }
+    
+    
     String odkId = form.getOdkId();
     
     // retrieve submissions
