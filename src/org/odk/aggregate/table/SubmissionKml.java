@@ -58,6 +58,8 @@ import com.google.appengine.api.datastore.Query;
 
 public class SubmissionKml {
   
+  private static final String LIMITATION_MSG = "limitation: image and title must be in the submission (top-level) or must be in the same repeat group";
+
   private class ColumnNamePair {
     private String columnName;
     private String displayName;
@@ -169,37 +171,43 @@ public class SubmissionKml {
     baseServerUrl = HtmlUtil.createUrl(webServerName);
 
     gpsInRepeat = geopointField.contains(BasicConsts.COLON);
-    
+
     gpField = getColumnName(geopointField);
     titleField = getColumnName(nameField);
     imgField = getColumnName(imageField);
-    
+
     gpSubmissionSet = getSubmissionSet(geopointField);
-    imgSubmissionSet =  getSubmissionSet(imageField);
-    titleSubmissionSet =  getSubmissionSet(nameField);
-    
+    imgSubmissionSet = getSubmissionSet(imageField);
+    titleSubmissionSet = getSubmissionSet(nameField);
+
     submissionSetColumns = new HashMap<String, List<ColumnNamePair>>();
-    
+
     List<ColumnNamePair> currentColumnPairs = new ArrayList<ColumnNamePair>();
     addSubmissionSetColumn(odkId, currentColumnPairs);
-    
-    processElementForColumnNames(form.getElementTreeRoot(), form.getElementTreeRoot(), BasicConsts.EMPTY_STRING, currentColumnPairs);
+
+    processElementForColumnNames(form.getElementTreeRoot(), form.getElementTreeRoot(),
+        BasicConsts.EMPTY_STRING, currentColumnPairs);
+
+    if (!imgSubmissionSet.equals(odkId) && !titleSubmissionSet.equals(odkId)
+        && !imgSubmissionSet.equals(titleSubmissionSet)) {
+      throw new IllegalStateException(LIMITATION_MSG);
+    }
+
   }
 
   private String getColumnName(String field) {
     int lastIndex = field.lastIndexOf(BasicConsts.COLON);
-    if(lastIndex < 1){
-      return field;
+    String remaining = field;
+    
+    if(lastIndex > 0){    
+      remaining = field.substring(lastIndex+1);
     }
     
-    String remaining = field.substring(lastIndex);
-
-    lastIndex = field.lastIndexOf(BasicConsts.DASH);
-    if(lastIndex < 1){
-      return remaining;
-    } else {
-      return remaining = remaining.substring(lastIndex);
-    }
+    lastIndex = remaining.lastIndexOf(BasicConsts.DASH);
+    if(lastIndex > 0){
+      return remaining = remaining.substring(lastIndex+1);
+    } 
+    return remaining;
   }
   
   private String getSubmissionSet(String field) {
@@ -267,11 +275,11 @@ public class SubmissionKml {
             id = KeyFactory.keyToString(repeat.getKey());
             processSubmissionSet(repeat, submissionSetColumns.get(repeatName), clonedData, true);
             if (titleSubmissionSet.equals(repeatName)) {
-              title = getTitle(repeats.getSubmissionSets().first());
+              title = getTitle(repeat);
             }
 
             if (imgSubmissionSet.equals(repeatName)) {
-              imageUrl = getImageUrl(repeats.getSubmissionSets().first());
+              imageUrl = getImageUrl(repeat);
             }
             placemarks.append(generateFormattedPlacemark(clonedData, id, title, imageUrl, gp));
           }
