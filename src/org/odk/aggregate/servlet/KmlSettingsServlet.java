@@ -26,6 +26,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.odk.aggregate.EMFactory;
+import org.odk.aggregate.constants.BasicConsts;
 import org.odk.aggregate.constants.HtmlConsts;
 import org.odk.aggregate.constants.HtmlUtil;
 import org.odk.aggregate.constants.ServletConsts;
@@ -61,6 +62,10 @@ public class KmlSettingsServlet extends ServletUtilBase {
    */
   private static final String TITLE_INFO = "KML Settings";
 
+  private List<String> geopointNodeNames;
+  private List<String> imageNodesNames;
+  private List<String> allNodesNames;
+  
   
   /**
    * Handler for HTTP Get request that responds with an XML list of forms to download
@@ -92,11 +97,11 @@ public class KmlSettingsServlet extends ServletUtilBase {
       return;
     }
     
-    geopointNodes = new ArrayList<FormElement>();
-    imageNodes = new ArrayList<FormElement>();
-    allNodes = new ArrayList<FormElement>();
+    geopointNodeNames = new ArrayList<String>();
+    imageNodesNames = new ArrayList<String>();
+    allNodesNames = new ArrayList<String>();
     
-    processElementForColumnHead(form.getElementTreeRoot(), form.getElementTreeRoot(), "");
+    processElementForColumnHead(form.getElementTreeRoot(), form.getElementTreeRoot(), BasicConsts.EMPTY_STRING);
     
     beginBasicHtmlResponse(TITLE_INFO, resp, req, true); // header info
     
@@ -104,19 +109,19 @@ public class KmlSettingsServlet extends ServletUtilBase {
     out.write(HtmlUtil.createFormBeginTag(KmlServlet.ADDR, null, ServletConsts.GET));
     
     out.write("Field to map:" + HtmlConsts.LINE_BREAK);
-    List<Pair<String,String>> geopointOptions = createSelectOptionsFromFormElements(geopointNodes);
-    out.write(HtmlUtil.createSelect("geopointField", geopointOptions));
+    List<Pair<String,String>> geopointOptions = createSelectOptionsFromFormElements(geopointNodeNames);
+    out.write(HtmlUtil.createSelect(KmlServlet.GEOPOINT_FIELD, geopointOptions));
     out.write("<p/>");
     
     out.write("Title field:" + HtmlConsts.LINE_BREAK);
-    List<Pair<String,String>> allOptions = createSelectOptionsFromFormElements(allNodes);
-    out.write(HtmlUtil.createSelect("titleField", allOptions));
+    List<Pair<String,String>> allOptions = createSelectOptionsFromFormElements(allNodesNames);
+    out.write(HtmlUtil.createSelect(KmlServlet.TITLE_FIELD, allOptions));
     out.write("<p/>");
     
     out.write("Picture field to display:" + HtmlConsts.LINE_BREAK);
-    List<Pair<String,String>> imageOptions = createSelectOptionsFromFormElements(imageNodes);
+    List<Pair<String,String>> imageOptions = createSelectOptionsFromFormElements(imageNodesNames);
     imageOptions.add(new Pair<String,String>("", "None"));
-    out.write(HtmlUtil.createSelect("imageField", imageOptions));
+    out.write(HtmlUtil.createSelect(KmlServlet.IMAGE_FIELD, imageOptions));
     
     out.write("<p/>");
     out.write(HtmlUtil.createInput("hidden", ServletConsts.ODK_ID, form.getOdkId()));
@@ -126,26 +131,30 @@ public class KmlSettingsServlet extends ServletUtilBase {
     finishBasicHtmlResponse(resp);
   }
   
-  List<FormElement> geopointNodes;
-  List<FormElement> imageNodes;
-  List<FormElement> allNodes;
+
   /**
    * Helper function to recursively go through the element tree and create
    * the column headings
    * 
    */
-  private void processElementForColumnHead(FormElement node,
-      FormElement root, String parentName) {
+  private void processElementForColumnHead(FormElement node, FormElement root, String parentName) {
     if (node == null) return;
 
     if (!node.getSubmissionFieldType().equals(SubmissionFieldType.UNKNOWN)) {
+      String nodeName = parentName + node.getElementName();
       if (node.getSubmissionFieldType().equals(SubmissionFieldType.GEOPOINT)) {
-        geopointNodes.add(node);
+        geopointNodeNames.add(nodeName);
       } else if (node.getSubmissionFieldType().equals(
           SubmissionFieldType.PICTURE)) {
-        imageNodes.add(node);
+        imageNodesNames.add(nodeName);
       }
-      allNodes.add(node);
+      allNodesNames.add(nodeName);
+    } else if(node.isRepeatable()) {
+      parentName = parentName + node.getElementName() + BasicConsts.COLON;
+    } else {
+      if(node != root) { 
+        parentName = parentName + node.getElementName() + BasicConsts.DASH;
+      }
     }
     
     List<FormElement> childDataElements = node.getChildren();
@@ -157,10 +166,10 @@ public class KmlSettingsServlet extends ServletUtilBase {
     }
   }
   
-  private List<Pair<String,String>> createSelectOptionsFromFormElements(List<FormElement> l) {
+  private List<Pair<String,String>> createSelectOptionsFromFormElements(List<String> l) {
     List<Pair<String,String>> options = new ArrayList<Pair<String,String>>();
-    for (FormElement fe: l){
-      options.add(new Pair<String,String>(fe.getElementName(), fe.getElementName()));
+    for (String fe: l){
+      options.add(new Pair<String,String>(fe, fe));
     }
     return options;
   }
