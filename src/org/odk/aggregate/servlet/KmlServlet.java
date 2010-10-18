@@ -36,6 +36,12 @@ import org.odk.aggregate.table.SubmissionKml;
  */
 public class KmlServlet extends ServletUtilBase {
 
+  public static final String IMAGE_FIELD = "imageField";
+
+  public static final String TITLE_FIELD = "titleField";
+
+  public static final String GEOPOINT_FIELD = "geopointField";
+
   /**
    * Serial number for serialization
    */
@@ -63,9 +69,9 @@ public class KmlServlet extends ServletUtilBase {
     // get parameter
     String odkId = getParameter(req, ServletConsts.ODK_ID);
     
-    String geopointField = getParameter(req, "geopointField");
-    String titleField = getParameter(req, "titleField");
-    String imageField = getParameter(req, "imageField");
+    String geopointField = getParameter(req, GEOPOINT_FIELD);
+    String titleField = getParameter(req, TITLE_FIELD);
+    String imageField = getParameter(req, IMAGE_FIELD);
     
     if(odkId == null || geopointField == null) {
       errorMissingKeyParam(resp);

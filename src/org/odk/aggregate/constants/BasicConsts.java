@@ -54,4 +54,11 @@ public class BasicConsts {
   public static final String GEO_POINT = "GeoPoint";
   public static final String ACCURACY = "Accuracy";
   public static final String ALTITUDE = "Altitude";
+  
+  public static final String LEFT_BRACE = "{";
+  public static final String RIGHT_BRACE = "}";
+  public static final String LEFT_BRACKET = "[";
+  public static final String RIGHT_BRACKET = "]";
+  public static final String LEFT_PARENTHESIS = "(";
+  public static final String RIGHT_PARENTHESIS = ")";
 }
