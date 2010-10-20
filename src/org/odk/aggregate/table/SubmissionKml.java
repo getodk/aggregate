@@ -96,12 +96,16 @@ public class SubmissionKml {
     }
   }
   
+  private static final String IMAGE_VARIABLE = "__imgUrl";
+  private static final String TITLE_VARIABLE = "__title";
+  private static final String DATA_VARIABLE = "__data";
+  private static final String VARIABLE_BEGIN = "$[";
+  
   private static final int APPROX_ITEM_LENGTHS = 100;
   private static final int APPROX_TABLE_FORMATTING_LENGTH = 1000;
   private static final String OPEN_TABLE_W_HEADER_TABLE_FORMAT = "<table border='1' style='border-collapse: collapse;' >";
   private static final String OPEN_TABLE_W_PARENT_TABLE_FORMAT = "<table width='300' cellpadding='0' cellspacing='0'>";
-  private static final String IMAGE_FORMAT_BEGIN = "<td align='center'><img style='padding:5px' src="; 
-  private static final String IMAGE_FORMAT_END = "/></td>";   
+  private static final String IMAGE_FORMAT = "<td align='center'><img style='padding:5px' src='" + VARIABLE_BEGIN + IMAGE_VARIABLE + BasicConsts.RIGHT_BRACKET + "'/></td>";   
   private static final String DATA_ITEM_TEMPLATE = HtmlUtil.wrapWithHtmlTags(HtmlConsts.TABLE_DATA, HtmlUtil.wrapWithHtmlTags(HtmlConsts.B, " %s ")) + HtmlUtil.wrapWithHtmlTags(HtmlConsts.TABLE_DATA, " %s ");
   private static final String DATA_ROW_TEMPLATE = HtmlUtil.wrapWithHtmlTags(HtmlConsts.TABLE_ROW, DATA_ITEM_TEMPLATE);
   
@@ -123,25 +127,35 @@ public class SubmissionKml {
   private static final String STYLE_TEMPLATE =
     "<Style id='%s'>\n" +
     "  <BalloonStyle>\n" +
+    "    <text>\n" +
+    "      <![CDATA[\n" +
+    "        %s\n" +
+    "      ]]>\n" +
+    "    </text>\n" +
     "  </BalloonStyle>\n" +
     "</Style>\n";
+  
   
   private final String PLACEMARK_TEMPLATE = 
     "<Placemark id='%s'>\n" +
     "  <name>%s</name>\n" +
     "  <styleUrl>#odk_style</styleUrl>\n" +
     "  <Snippet maxLines='0'></Snippet>\n" +
-    "  <description>\n" +
-    "    <![CDATA[ " +
+    "  <ExtendedData>\n" + 
     "  %s" +
-    "  ]]>\n" +
-    "  </description>\n" +
+    "  %s" +
+    "  %s" +
+    "</ExtendedData>\n" +
     "%s</Placemark>\n"; //PLACEMARK_POINT_TEMPLATE goes in %s
   
   private final String PLACEMARK_POINT_TEMPLATE = 
     "  <Point>\n" +
     "    <coordinates>%s</coordinates>\n" +
     "  </Point>\n";
+  
+  public static final String KML_DATA_ELEMENT_TEMPLATE = "<Data name='%s'>\n"
+    + "  <value>%s</value>\n" 
+    + "</Data>\n";
   
   private String gpField;
   private String titleField;
@@ -163,12 +177,17 @@ public class SubmissionKml {
   
   
   public SubmissionKml(String odkIdentifier, String webServerName, EntityManager entityManager,
-      String geopointField, String nameField, String imageField) throws ODKFormNotFoundException {
+      String geopointField, String nameField, String imageField, int maxQuery) throws ODKFormNotFoundException {
     odkId = odkIdentifier;
     em = entityManager;
     form = Form.retrieveForm(em, odkId);
-    fetchLimit = TableConsts.QUERY_ROWS_MAX;
     baseServerUrl = HtmlUtil.createUrl(webServerName);
+
+    if(maxQuery > 0) {
+      fetchLimit = maxQuery;
+    } else {
+      fetchLimit = TableConsts.QUERY_ROWS_MAX;
+    }
 
     gpsInRepeat = geopointField.contains(BasicConsts.COLON);
 
@@ -223,7 +242,7 @@ public class SubmissionKml {
     List<Entity> submissionEntities = getEntities(TableConsts.EPOCH, false);
 
     w.write(String.format(PREAMBLE_TEMPLATE, odkId, odkId));
-    w.write(String.format(STYLE_TEMPLATE, "odk_style"));
+    w.write(generateStyle(imgField!=null));
     for (Entity subEntity : submissionEntities) {
       w.write(generatePlacemarks(subEntity));
     }
@@ -231,6 +250,18 @@ public class SubmissionKml {
   }
 
 
+  private String generateStyle(boolean hasImage) {
+    String styleHtml = OPEN_TABLE_W_PARENT_TABLE_FORMAT;
+    styleHtml += wrapInBothRowNData(HtmlUtil.wrapWithHtmlTags(HtmlConsts.H2, wrapVariable(TITLE_VARIABLE)));
+    if (hasImage) {
+      styleHtml += HtmlUtil.wrapWithHtmlTags(HtmlConsts.TABLE_ROW, IMAGE_FORMAT);
+    }
+    styleHtml += wrapInBothRowNData(wrapVariable(DATA_VARIABLE));
+    styleHtml += HtmlConsts.TABLE_CLOSE;
+
+    return String.format(STYLE_TEMPLATE, "odk_style", styleHtml);
+  }
+  
   private String generatePlacemarks(Entity subEntity) throws ODKIncompleteSubmissionData {
     Submission sub = new Submission(subEntity, form);
 
@@ -395,19 +426,19 @@ public class SubmissionKml {
         GeoPoint geoPoint = (GeoPoint)value;
         
         Double latitude = geoPoint.getLatitude();
-        String latName = BasicConsts.LATITUDE + BasicConsts.DASH + displayName;
+        String latName = displayName + BasicConsts.DASH + BasicConsts.LATITUDE;
         data.add(new DisplayPair(latName, (latitude != null ? Double.toString(latitude) : BasicConsts.EMPTY_STRING)));
         
         Double longitude = geoPoint.getLongitude();
-        String longName = BasicConsts.LONGITUDE + BasicConsts.DASH + displayName;
+        String longName = displayName + BasicConsts.DASH + BasicConsts.LONGITUDE;
         data.add(new DisplayPair(longName, (longitude != null ? Double.toString(longitude) : BasicConsts.EMPTY_STRING)));
         
         Double altitude = geoPoint.getAltitude();
-        String altName = BasicConsts.ALTITUDE + BasicConsts.DASH + displayName;
+        String altName = displayName + BasicConsts.DASH + BasicConsts.ALTITUDE;
         data.add(new DisplayPair(altName, (altitude != null ? Double.toString(altitude) : BasicConsts.EMPTY_STRING)));
 
         Double accuracy = geoPoint.getAccuracy();
-        String accName = BasicConsts.ACCURACY + BasicConsts.DASH + displayName;
+        String accName = displayName + BasicConsts.DASH + BasicConsts.ACCURACY;
         data.add(new DisplayPair(accName, (accuracy != null ? Double.toString(accuracy) : BasicConsts.EMPTY_STRING)));
       } else if (field.isBinary()) {
         if (value instanceof Key) {
@@ -431,20 +462,20 @@ public class SubmissionKml {
     String id = (identifier == null) ? BasicConsts.EMPTY_STRING : identifier;
     String name = (title == null) ? BasicConsts.EMPTY_STRING : title;
 
+    // determine what data values to create
+    String titleStr = (title == null) ? BasicConsts.EMPTY_STRING : generateDataElement(TITLE_VARIABLE, title);
+    String imgStr = (imageURL == null) ? BasicConsts.EMPTY_STRING : generateDataElement(IMAGE_VARIABLE, imageURL);
+    
+    
     // create data section
-    StringBuilder formattedDataStr = new StringBuilder(APPROX_TABLE_FORMATTING_LENGTH
-        + items.size() * APPROX_ITEM_LENGTHS);
-    formattedDataStr.append(OPEN_TABLE_W_PARENT_TABLE_FORMAT);
-    formattedDataStr.append(BasicConsts.SPACE + BasicConsts.SPACE);
-    if (imageURL != null) {
-      formattedDataStr.append(BasicConsts.SPACE + BasicConsts.SPACE);
-      formattedDataStr.append(HtmlUtil.wrapWithHtmlTags(HtmlConsts.TABLE_ROW, IMAGE_FORMAT_BEGIN
-          + imageURL + IMAGE_FORMAT_END));
+    String dataStr = BasicConsts.EMPTY_STRING;
+    if(!items.isEmpty()) {
+      StringBuilder formattedDataStr = new StringBuilder(APPROX_TABLE_FORMATTING_LENGTH
+        + items.size() * APPROX_ITEM_LENGTHS);   
+      createFormattedDataTable(formattedDataStr, items);
+      dataStr = generateDataElement(DATA_VARIABLE, formattedDataStr.toString());    
     }
-    formattedDataStr.append(HtmlConsts.TABLE_ROW_OPEN);
-    createFormattedDataTable(formattedDataStr, items);
-    formattedDataStr.append(HtmlConsts.TABLE_ROW_CLOSE);
-
+    
     // Create Geopoint
     String geopoint = BasicConsts.EMPTY_STRING;
     if (gp != null) {
@@ -459,7 +490,7 @@ public class SubmissionKml {
     }
 
     return String.format(PLACEMARK_TEMPLATE, StringEscapeUtils.escapeXml(id), StringEscapeUtils
-        .escapeXml(name), formattedDataStr.toString(), geopoint);
+        .escapeXml(name), titleStr, imgStr, dataStr, geopoint);
   }
 
   private void createFormattedDataTable(StringBuilder out, List<DisplayPair> items) {
@@ -522,7 +553,7 @@ public class SubmissionKml {
       ColumnNamePair pair = new ColumnNamePair(node.getElementName(), parentName + node.getElementName());
       currentColumnPairs.add(pair);
     } else if(node.isRepeatable()) {
-      parentName = parentName + node.getElementName() + BasicConsts.COLON;
+      parentName = parentName + node.getElementName() + BasicConsts.COLON + BasicConsts.SPACE;
       currentColumnPairs = new ArrayList<ColumnNamePair>();
       addSubmissionSetColumn(node.getElementName(), currentColumnPairs);
     } else {
@@ -542,5 +573,18 @@ public class SubmissionKml {
   
   private void addSubmissionSetColumn(String submissionSetID, List<ColumnNamePair> columnNamePairs) {
     submissionSetColumns.put(submissionSetID, columnNamePairs);
+  }
+  
+  private String generateDataElement(String name, String value){
+    return String.format(KML_DATA_ELEMENT_TEMPLATE, StringEscapeUtils.escapeXml(name), StringEscapeUtils.escapeXml(value));
+  }
+  
+  private String wrapVariable(String variable) {
+    return VARIABLE_BEGIN + variable + BasicConsts.RIGHT_BRACKET;
+  }
+  
+  private String wrapInBothRowNData(String value) {
+    return HtmlUtil.wrapWithHtmlTags(HtmlConsts.TABLE_ROW, HtmlUtil.wrapWithHtmlTags(
+        HtmlConsts.TABLE_DATA, value));
   }
 }

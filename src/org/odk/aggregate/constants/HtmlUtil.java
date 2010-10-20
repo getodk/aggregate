@@ -39,7 +39,7 @@ public class HtmlUtil {
 
   private static final String LOST_FORM_RE_ENCODING = "We lost the form somehow! Please report the bug!";
 
-  private static final String INPUT_WIDGET_SIZE_LIMIT = "50";
+  private static final int INPUT_WIDGET_SIZE_LIMIT = 50;
 
   private static final String HREF = "href";
   private static final String A = "a";
@@ -116,7 +116,7 @@ public class HtmlUtil {
     return urlBuilder.toString();
   }
 
-  public static String createInput(String type, String name, String value) {
+  public static String createInput(String type, String name, String value, int size) {
     StringBuilder html = new StringBuilder();
     html.append(HtmlConsts.BEGIN_OPEN_TAG + INPUT);
     if (type != null) {
@@ -132,9 +132,13 @@ public class HtmlUtil {
       html.append(createAttribute(ATTR_VALUE, value));
     }
     html.append(BasicConsts.SPACE);
-    html.append(createAttribute(ATTR_SIZE, INPUT_WIDGET_SIZE_LIMIT));
+    html.append(createAttribute(ATTR_SIZE, Integer.toString(size)));
     html.append(HtmlConsts.END_SELF_CLOSING_TAG);
     return html.toString();
+  }
+  
+  public static String createInput(String type, String name, String value) {
+    return HtmlUtil.createInput(type, name, value, INPUT_WIDGET_SIZE_LIMIT);
   }
 
   public static String encodeFormInHiddenInput(String formXml, String xmlFileName) throws IOException {

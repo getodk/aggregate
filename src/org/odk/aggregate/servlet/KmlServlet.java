@@ -36,12 +36,16 @@ import org.odk.aggregate.table.SubmissionKml;
  */
 public class KmlServlet extends ServletUtilBase {
 
+  private static final String INVALID_NUM_SUBMISSIONS_FORMAT = "ERROR! INVALID NUMBER OF SUBMISSIONS FORMAT";
+
   public static final String IMAGE_FIELD = "imageField";
 
   public static final String TITLE_FIELD = "titleField";
 
   public static final String GEOPOINT_FIELD = "geopointField";
 
+  public static final String NUMBER_SUBMISSIONS = "numberSubmissions";
+  
   /**
    * Serial number for serialization
    */
@@ -72,12 +76,24 @@ public class KmlServlet extends ServletUtilBase {
     String geopointField = getParameter(req, GEOPOINT_FIELD);
     String titleField = getParameter(req, TITLE_FIELD);
     String imageField = getParameter(req, IMAGE_FIELD);
+    String numSubmissionStr = getParameter(req, NUMBER_SUBMISSIONS);
     
     if(odkId == null || geopointField == null) {
       errorMissingKeyParam(resp);
       return;
     }
 
+    int maxSubmissions = 100;
+    
+    try {
+      if(numSubmissionStr != null) {
+        maxSubmissions = Integer.parseInt(numSubmissionStr);
+      }
+    } catch (NumberFormatException e1) {
+      resp.sendError(HttpServletResponse.SC_BAD_REQUEST, INVALID_NUM_SUBMISSIONS_FORMAT);
+      return;
+    }
+    
     EntityManager em = EMFactory.get().createEntityManager();
 
     try {
@@ -85,7 +101,7 @@ public class KmlServlet extends ServletUtilBase {
       setDownloadFileName(resp, odkId + ServletConsts.KML_FILENAME_APPEND);
 
       // create KML
-      SubmissionKml submissions = new SubmissionKml(odkId, req.getServerName(), em, geopointField, titleField, imageField);
+      SubmissionKml submissions = new SubmissionKml(odkId, req.getServerName(), em, geopointField, titleField, imageField, maxSubmissions);
       submissions.generateKml(resp.getWriter());
     } catch (ODKFormNotFoundException e) {
       odkIdNotFoundError(resp);
