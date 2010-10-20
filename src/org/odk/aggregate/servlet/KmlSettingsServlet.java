@@ -122,8 +122,12 @@ public class KmlSettingsServlet extends ServletUtilBase {
     List<Pair<String,String>> imageOptions = createSelectOptionsFromFormElements(imageNodesNames);
     imageOptions.add(new Pair<String,String>("", "None"));
     out.write(HtmlUtil.createSelect(KmlServlet.IMAGE_FIELD, imageOptions));
-    
     out.write("<p/>");
+    
+    out.write("Maximum Number Of Submissions To Include:" + HtmlConsts.LINE_BREAK);
+    out.write(HtmlUtil.createInput("text", KmlServlet.NUMBER_SUBMISSIONS, "500", 4));
+    out.write("<p/>");
+    
     out.write(HtmlUtil.createInput("hidden", ServletConsts.ODK_ID, form.getOdkId()));
     out.write(HtmlUtil.createInput("submit", null, null));
     out.write("</form>");
