@@ -21,6 +21,7 @@ package org.odk.aggregate.constants;
  *
  * @author wbrunette@gmail.com
  *
+ *
  */
 public class BasicConsts {
 
