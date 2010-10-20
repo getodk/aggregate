@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
+
+
+<bean id="datastore" class="org.opendatakit.common.persistence.engine.mysql.DatastoreImpl" />
+<bean id="user_service" class="org.opendatakit.common.security.tomcat.UserServiceImpl" /> 
+<bean id="worksheet_creator" class="org.opendatakit.aggregate.task.tomcat.WorksheetCreatorImpl" /> 
+<bean id="form_delete" class="org.opendatakit.aggregate.task.tomcat.FormDeleteImpl" /> 
+ 
+</beans>
