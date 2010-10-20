@@ -1,0 +1,165 @@
+/*
+ * Copyright (C) 2009 Google Inc. 
+ * Copyright (C) 2010 University of Washington.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+
+package org.opendatakit.aggregate.submission.type;
+
+import java.math.BigDecimal;
+import java.util.List;
+
+import org.opendatakit.aggregate.constants.FormatConsts;
+import org.opendatakit.aggregate.datamodel.FormDataModel;
+import org.opendatakit.aggregate.exception.ODKConversionException;
+import org.opendatakit.aggregate.format.element.ElementFormatter;
+import org.opendatakit.aggregate.format.element.Row;
+import org.opendatakit.common.constants.BasicConsts;
+import org.opendatakit.common.persistence.CommonFieldsBase;
+import org.opendatakit.common.persistence.Datastore;
+import org.opendatakit.common.persistence.EntityKey;
+import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+import org.opendatakit.common.security.User;
+
+public class GeoPointSubmissionType extends SubmissionFieldBase<GeoPoint> {
+
+	private GeoPoint coordinates;
+
+	/**
+	 * Constructor
+	 * 
+	 * @param propertyName
+	 *            Name of submission element
+	 */
+	public GeoPointSubmissionType(FormDataModel element) {
+		super(element);
+	}
+
+	@Override
+	public void setValueFromString(String value) throws ODKConversionException {
+		if ( value == null ) {
+			coordinates = new GeoPoint();
+		} else {
+			String[] values = value.split("\\s+");
+			if (values.length == 2) {
+				coordinates = new GeoPoint( new BigDecimal(values[0]), 
+											new BigDecimal(values[1]));
+			} else if (values.length == 3) {
+				coordinates = new GeoPoint( new BigDecimal(values[0]), 
+											new BigDecimal(values[1]),
+											new BigDecimal(values[2]));
+			} else if (values.length == 4) {
+				coordinates = new GeoPoint( new BigDecimal(values[0]), 
+											new BigDecimal(values[1]),
+											new BigDecimal(values[2]),
+											new BigDecimal(values[3]));
+			} else {
+				throw new ODKConversionException(
+						"Problem with GPS Coordinates being parsed from XML");
+			}
+		}
+	}
+
+	@Override
+	public GeoPoint getValue() {
+		return coordinates;
+	}
+
+	/**
+	 * Format value for output
+	 * 
+	 * @param elemFormatter
+	 *            the element formatter that will convert the value to the
+	 *            proper format for output
+	 */
+	@Override
+	public void formatValue(ElementFormatter elemFormatter, Row row)
+			throws ODKDatastoreException {
+		elemFormatter.formatGeoPoint(coordinates, element.getElementName(), row);
+	}
+
+	@Override
+	public void getValueFromEntity(CommonFieldsBase dbEntity,
+			String uriAssociatedRow, EntityKey topLevelTableKey,
+			Datastore datastore, User user, boolean fetchElement) {
+		BigDecimal latCoor = null;
+		BigDecimal longCoor = null;
+		BigDecimal altitude = null;
+		BigDecimal accuracy = null;
+		for ( FormDataModel m : element.getChildren()) {
+			switch ( m.getOrdinalNumber().intValue() ) {
+			case FormDataModel.GEOPOINT_LATITUDE_ORDINAL_NUMBER:
+				latCoor = dbEntity.getNumericField(m.getBackingKey());
+				break;
+			case FormDataModel.GEOPOINT_LONGITUDE_ORDINAL_NUMBER:
+				longCoor = dbEntity.getNumericField(m.getBackingKey());
+				break;
+			case FormDataModel.GEOPOINT_ALTITUDE_ORDINAL_NUMBER:
+				altitude = dbEntity.getNumericField(m.getBackingKey());
+				break;
+			case FormDataModel.GEOPOINT_ACCURACY_ORDINAL_NUMBER:
+				accuracy = dbEntity.getNumericField(m.getBackingKey());
+				break;
+			}
+		}
+		coordinates = new GeoPoint(latCoor, longCoor, altitude, accuracy);
+	}
+
+	/**
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if (!(obj instanceof GeoPointSubmissionType)) {
+			return false;
+		}
+		// super will compare value
+		if (!super.equals(obj)) {
+			return false;
+		}
+
+		GeoPointSubmissionType other = (GeoPointSubmissionType) obj;
+		return (coordinates == null ? (other.coordinates == null)
+				: (coordinates.equals(other.coordinates)));
+	}
+
+	/**
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		return super.hashCode()
+				+ (coordinates == null ? 0 : coordinates.hashCode());
+	}
+
+	/**
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return super.toString() + FormatConsts.TO_STRING_DELIMITER
+				+ (getValue() != null ? getValue() : BasicConsts.EMPTY_STRING);
+	}
+
+	@Override
+	public void recursivelyAddEntityKeys(List<EntityKey> keyList) {
+		// geopoint storage is handled by SubmissionSet
+	}
+
+	@Override
+	public void persist(Datastore datastore, User user) {
+		// geopoint persistence is handled by SubmissionSet
+	}
+
+}
