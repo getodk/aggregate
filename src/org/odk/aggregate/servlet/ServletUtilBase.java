@@ -157,10 +157,12 @@ public class ServletUtilBase extends HttpServlet {
     resp.setCharacterEncoding(ServletConsts.ENCODE_SCHEME);
     PrintWriter out = resp.getWriter();
     out.write(HtmlConsts.HTML_OPEN);
+    out.write("<link rel=\"icon\" type=\"image/png\" href=\"/odk_color_sq.png\">");
+
     out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.HEAD, headContent + HtmlUtil.wrapWithHtmlTags(
         HtmlConsts.TITLE, BasicConsts.APPLICATION_NAME)));
     out.write(HtmlConsts.BODY_OPEN);
-    out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.H2, "<FONT COLOR=330066>" + BasicConsts.APPLICATION_NAME) + "</FONT>");
+    out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.H2, "<FONT COLOR=330066 size=7><img src='/odk_color.png'/>" + HtmlConsts.SPACE + BasicConsts.APPLICATION_NAME) + "</FONT>");
     if (displayLinks) {
       UserService userService = UserServiceFactory.getUserService();
       out.write(generateNavigationInfo());
@@ -286,9 +288,7 @@ public class ServletUtilBase extends HttpServlet {
     html += HtmlConsts.TAB + HtmlConsts.TAB;
     html += HtmlUtil.createHref(FormDeleteServlet.ADDR, ServletConsts.DELETE_FORM_LINK_TEXT);
     html += HtmlConsts.TAB + HtmlConsts.TAB;
-    html +=
-        HtmlUtil.createHref(ServletConsts.UPLOAD_SUBMISSION_ADDR,
-            ServletConsts.UPLOAD_SUB_LINK_TEXT);
+    html += HtmlUtil.createHref(SubmissionServlet.ADDR, ServletConsts.UPLOAD_SUB_LINK_TEXT);
     html += HtmlConsts.TAB + HtmlConsts.TAB;
     html += HtmlUtil.createHref(BriefcaseServlet.ADDR, ServletConsts.BRIEFCASE_LINK_TEXT);
     return html + HtmlConsts.TAB;

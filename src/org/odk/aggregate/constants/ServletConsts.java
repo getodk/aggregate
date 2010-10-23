@@ -154,7 +154,6 @@ public class ServletConsts {
   public static final String GET = "get";
   
   // web addresses
-  public static final String UPLOAD_SUBMISSION_ADDR = "UploadSubmission.html";
   public static final String WEB_ROOT = "/";
 
 
