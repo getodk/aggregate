@@ -27,6 +27,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.odk.aggregate.EMFactory;
 import org.odk.aggregate.constants.ErrorConsts;
+import org.odk.aggregate.constants.HtmlConsts;
+import org.odk.aggregate.constants.HtmlUtil;
 import org.odk.aggregate.constants.ServletConsts;
 import org.odk.aggregate.exception.ODKFormNotFoundException;
 import org.odk.aggregate.exception.ODKIncompleteSubmissionData;
@@ -50,6 +52,10 @@ import com.google.appengine.api.datastore.Key;
  * 
  */
 public class SubmissionServlet extends ServletUtilBase {
+  private static final String DATAFILE = "datafile";
+
+  private static final String TITLE = "Submission Upload";
+
   /**
    * Serial number for serialization
    */
@@ -68,31 +74,27 @@ public class SubmissionServlet extends ServletUtilBase {
    */
   @Override
   public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-    resp.setContentType(ServletConsts.RESP_TYPE_XML);
+    PrintWriter out = resp.getWriter();
+    
+    beginBasicHtmlResponse(TITLE, resp, req, true); // header info
+    out.write(HtmlUtil.createFormBeginTag(ADDR, ServletConsts.MULTIPART_FORM_DATA, ServletConsts.POST));
+    out.write("XML Submission File:" + HtmlConsts.LINE_BREAK );
+    out.write(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_FILE, ServletConsts.XML_SUBMISSION_FILE, null));
+    out.write(HtmlConsts.LINE_BREAK + HtmlConsts.LINE_BREAK);
+    out.write("Data File(s) that are Part of the Submission (Pictures, Video, etc):" + HtmlConsts.LINE_BREAK); 
+    out.write(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_FILE, DATAFILE, null));
+    out.write(HtmlConsts.LINE_BREAK);
+    out.write(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_FILE, DATAFILE, null));
+    out.write(HtmlConsts.LINE_BREAK);
+    out.write(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_FILE, DATAFILE, null));
+    out.write(HtmlConsts.LINE_BREAK);
+    out.write(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_FILE, DATAFILE, null));
+    out.write(HtmlConsts.LINE_BREAK + HtmlConsts.LINE_BREAK);
+    out.write(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_SUBMIT, null, "Upload"));
+    out.write(HtmlConsts.FORM_CLOSE);
 
-    // get parameter
-    String odkIdParam = getParameter(req, ServletConsts.ODK_ID);
-    if (odkIdParam == null) {
-      errorMissingKeyParam(resp);
-      return;
-    }
-
-    // get form
-    EntityManager em = EMFactory.get().createEntityManager();
-    Form form;
-    try {
-      form = Form.retrieveForm(em, odkIdParam);
-    } catch (ODKFormNotFoundException e) {
-      odkIdNotFoundError(resp);
-      return;
-    }
-
-    if (form != null) {
-      resp.getWriter().print(form.getOriginalForm());
-    } else {
-      odkIdNotFoundError(resp);
-    }
-    em.close();
+    
+    finishBasicHtmlResponse(resp);
   }
 
   /**

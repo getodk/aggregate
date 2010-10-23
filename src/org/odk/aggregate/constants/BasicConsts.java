@@ -26,7 +26,7 @@ package org.odk.aggregate.constants;
 public class BasicConsts {
 
   // system constants
-  public static final String APPLICATION_NAME = "Open Data Kit Aggregate";
+  public static final String APPLICATION_NAME = "ODK AGGREGATE";
   public static final String TO_STRING_DELIMITER = ": ";
   public static final String NULL = "NULL";
   

@@ -304,7 +304,7 @@ public class SubmissionKml {
             // by definition of if statement the geopoint must be in this repeat
             gp = getGeoPoint(repeat);
             id = KeyFactory.keyToString(repeat.getKey());
-            processSubmissionSet(repeat, submissionSetColumns.get(repeatName), clonedData, true);
+            processSubmissionSet(repeat, submissionSetColumns.get(repeatName), clonedData, false);
             if (titleSubmissionSet.equals(repeatName)) {
               title = getTitle(repeat);
             }
@@ -410,47 +410,60 @@ public class SubmissionKml {
     return null;
   }
   
-  private void processSubmissionSet(SubmissionSet set, List<ColumnNamePair> columns, List<DisplayPair> data, boolean repeated) {
+  private void processSubmissionSet(SubmissionSet set, List<ColumnNamePair> columns,
+      List<DisplayPair> data, boolean repeated) {
     Map<String, SubmissionField<?>> fieldMap = set.getSubmissionFieldsMap();
     for (ColumnNamePair column : columns) {
       SubmissionField<?> field = fieldMap.get(column.getColumnName());
-      String displayName = column.getDisplayName() + (repeated ? set.getOrder() : BasicConsts.EMPTY_STRING);
+      String displayName = column.getDisplayName()
+          + (repeated ? set.getOrder() : BasicConsts.EMPTY_STRING);
       if (field == null) {
         data.add(new DisplayPair(displayName, BasicConsts.EMPTY_STRING));
         continue;
       }
       Object value = field.getValue();
-      if (value == null) {
-        data.add(new DisplayPair(displayName, BasicConsts.EMPTY_STRING));
-      } else if(value instanceof GeoPoint) {
-        GeoPoint geoPoint = (GeoPoint)value;
-        
-        Double latitude = geoPoint.getLatitude();
-        String latName = displayName + BasicConsts.DASH + BasicConsts.LATITUDE;
-        data.add(new DisplayPair(latName, (latitude != null ? Double.toString(latitude) : BasicConsts.EMPTY_STRING)));
-        
-        Double longitude = geoPoint.getLongitude();
-        String longName = displayName + BasicConsts.DASH + BasicConsts.LONGITUDE;
-        data.add(new DisplayPair(longName, (longitude != null ? Double.toString(longitude) : BasicConsts.EMPTY_STRING)));
-        
-        Double altitude = geoPoint.getAltitude();
-        String altName = displayName + BasicConsts.DASH + BasicConsts.ALTITUDE;
-        data.add(new DisplayPair(altName, (altitude != null ? Double.toString(altitude) : BasicConsts.EMPTY_STRING)));
+      if (value != null) {
+        // if value is equal to null we do not want to make it part of the
+        // balloon
+        if (value instanceof GeoPoint) {
+          GeoPoint geoPoint = (GeoPoint) value;
 
-        Double accuracy = geoPoint.getAccuracy();
-        String accName = displayName + BasicConsts.DASH + BasicConsts.ACCURACY;
-        data.add(new DisplayPair(accName, (accuracy != null ? Double.toString(accuracy) : BasicConsts.EMPTY_STRING)));
-      } else if (field.isBinary()) {
-        if (value instanceof Key) {
-          Key blobKey = (Key) value;
-          Map<String, String> properties = createViewLinkProperties(blobKey);
-          String url = HtmlUtil.createHrefWithProperties(baseServerUrl + ImageViewerServlet.ADDR, properties, "View");
-          data.add(new DisplayPair(displayName, url));
+          Double latitude = geoPoint.getLatitude();
+          if (latitude != null) {
+            String latName = displayName + BasicConsts.DASH + BasicConsts.LATITUDE;
+            data.add(new DisplayPair(latName, Double.toString(latitude)));
+          }
+
+          Double longitude = geoPoint.getLongitude();
+          if (longitude != null) {
+            String longName = displayName + BasicConsts.DASH + BasicConsts.LONGITUDE;
+            data.add(new DisplayPair(longName, Double.toString(longitude)));
+          }
+
+          Double altitude = geoPoint.getAltitude();
+          if (altitude != null) {
+            String altName = displayName + BasicConsts.DASH + BasicConsts.ALTITUDE;
+            data.add(new DisplayPair(altName, Double.toString(altitude)));
+          }
+
+          Double accuracy = geoPoint.getAccuracy();
+          if (accuracy != null) {
+            String accName = displayName + BasicConsts.DASH + BasicConsts.ACCURACY;
+            data.add(new DisplayPair(accName, Double.toString(accuracy)));
+          }
+        } else if (field.isBinary()) {
+          if (value instanceof Key) {
+            Key blobKey = (Key) value;
+            Map<String, String> properties = createViewLinkProperties(blobKey);
+            String url = HtmlUtil.createHrefWithProperties(baseServerUrl + ImageViewerServlet.ADDR,
+                properties, "View");
+            data.add(new DisplayPair(displayName, url));
+          } else {
+            System.err.println(ErrorConsts.NOT_A_KEY);
+          }
         } else {
-          System.err.println(ErrorConsts.NOT_A_KEY);
+          data.add(new DisplayPair(displayName, value.toString()));
         }
-      } else {
-        data.add(new DisplayPair(displayName, value.toString()));
       }
     }
   }

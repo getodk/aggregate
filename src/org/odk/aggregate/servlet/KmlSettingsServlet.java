@@ -47,6 +47,8 @@ import com.google.appengine.repackaged.com.google.common.base.Pair;
  */
 public class KmlSettingsServlet extends ServletUtilBase {
 
+  private static final String DEFAULT_NUM_SUBMISSIONS = "200";
+
   /**
    * Serial number for serialization
    */
@@ -125,7 +127,7 @@ public class KmlSettingsServlet extends ServletUtilBase {
     out.write("<p/>");
     
     out.write("Maximum Number Of Submissions To Include:" + HtmlConsts.LINE_BREAK);
-    out.write(HtmlUtil.createInput("text", KmlServlet.NUMBER_SUBMISSIONS, "500", 4));
+    out.write(HtmlUtil.createInput("text", KmlServlet.NUMBER_SUBMISSIONS, DEFAULT_NUM_SUBMISSIONS, 4));
     out.write("<p/>");
     
     out.write(HtmlUtil.createInput("hidden", ServletConsts.ODK_ID, form.getOdkId()));
