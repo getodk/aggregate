@@ -105,7 +105,7 @@ public class SubmissionKml {
   private static final int APPROX_TABLE_FORMATTING_LENGTH = 1000;
   private static final String OPEN_TABLE_W_HEADER_TABLE_FORMAT = "<table border='1' style='border-collapse: collapse;' >";
   private static final String OPEN_TABLE_W_PARENT_TABLE_FORMAT = "<table width='300' cellpadding='0' cellspacing='0'>";
-  private static final String IMAGE_FORMAT = "<td align='center'><img style='padding:5px' src='" + VARIABLE_BEGIN + IMAGE_VARIABLE + BasicConsts.RIGHT_BRACKET + "'/></td>";   
+  private static final String IMAGE_FORMAT = "<td align='center'><img style='padding:5px' height='144px' src='" + VARIABLE_BEGIN + IMAGE_VARIABLE + BasicConsts.RIGHT_BRACKET + "'/></td>";   
   private static final String DATA_ITEM_TEMPLATE = HtmlUtil.wrapWithHtmlTags(HtmlConsts.TABLE_DATA, HtmlUtil.wrapWithHtmlTags(HtmlConsts.B, " %s ")) + HtmlUtil.wrapWithHtmlTags(HtmlConsts.TABLE_DATA, " %s ");
   private static final String DATA_ROW_TEMPLATE = HtmlUtil.wrapWithHtmlTags(HtmlConsts.TABLE_ROW, DATA_ITEM_TEMPLATE);
   
