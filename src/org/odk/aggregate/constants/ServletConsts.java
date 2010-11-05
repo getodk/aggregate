@@ -171,6 +171,10 @@ public class ServletConsts {
 
 
   public static final String BACKWARD = "backward";
+  
+  public static final String AUTHENTICATION = "auth";
+  
+  public static final String AUTHENTICATION_OAUTH = "oauth";
 
 
   public static final int MAX_ENTITY_PER_PAGE = 20;

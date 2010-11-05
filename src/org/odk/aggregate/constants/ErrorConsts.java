@@ -78,5 +78,8 @@ public class ErrorConsts {
   public static final String NOT_A_KEY = "Incorrect type was stored, expecting a key for the view link";
   public static final String TASK_PROBLEM = "PROBLEM WITH TASK";
   public static final String JAVA_ROSA_PARSING_PROBLEM = "Problem with JavaRosa Parsing Form:";
-
+  /**
+   * Error message if OAuth authentication failed.
+   */
+  public static final String OAUTH_ERROR = "OAuth authentication failed.";
 }
