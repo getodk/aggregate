@@ -37,6 +37,9 @@ import org.odk.aggregate.parser.FormParserForJavaRosa;
 import org.odk.aggregate.parser.MultiPartFormData;
 import org.odk.aggregate.parser.MultiPartFormItem;
 
+import com.google.appengine.api.oauth.OAuthRequestException;
+import com.google.appengine.api.oauth.OAuthService;
+import com.google.appengine.api.oauth.OAuthServiceFactory;
 import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
@@ -111,13 +114,42 @@ public class FormUploadServlet extends ServletUtilBase {
    */
   @Override
   public void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-    UserService userService = UserServiceFactory.getUserService();
-    User user = userService.getCurrentUser();
-    
-    // verify user is logged in
-    if (!verifyCredentials(req, resp)) {
-      return;
-    }
+
+	  String authParam = getParameter(req, ServletConsts.AUTHENTICATION);
+   
+	  User user = null;
+	
+	  if (authParam != null && authParam.equalsIgnoreCase(ServletConsts.AUTHENTICATION_OAUTH))
+	  {
+		  // Try OAuth authentication
+		  try
+		  {
+			  OAuthService oauth = OAuthServiceFactory.getOAuthService();
+			  user = oauth.getCurrentUser();
+			  if (user == null)
+			  {
+				  resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, ErrorConsts.OAUTH_ERROR);
+				  return;
+			  }
+		  }
+		  catch (OAuthRequestException e)
+		  {
+			  resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, ErrorConsts.OAUTH_ERROR + "\n Reason: " + e.getLocalizedMessage());
+			  return;
+		  }
+	  }
+	  else
+	  {
+		  // Try User Service authentication
+		  UserService userService = UserServiceFactory.getUserService();
+		  user = userService.getCurrentUser();
+		  
+		  // verify user is logged in
+		  if (!verifyCredentials(req, resp)) 
+		  {
+			  return;
+		  }
+	  }
     
     // verify request is multipart
     if(!ServletFileUpload.isMultipartContent(req)) {
