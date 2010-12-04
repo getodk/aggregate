@@ -1,15 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <datastore-indexes autoGenerate="true">
-    <datastore-index kind="opendatakit._form_info_bin" ancestor="false" source="manual">
-        <property name="_PARENT_AURI" direction="asc"/>
-        <property name="_ORDINAL_NUMBER" direction="asc"/>
-    </datastore-index>
-    <datastore-index kind="opendatakit._form_info_vbn" ancestor="false" source="manual">
-        <property name="_PARENT_AURI" direction="asc"/>
-        <property name="_CREATION_DATE" direction="asc"/>
-    </datastore-index>
-    <datastore-index kind="opendatakit._form_info_ref" ancestor="false" source="manual">
-        <property name="_DOM_AURI" direction="asc"/>
-        <property name="PART" direction="asc"/>
+    <datastore-index kind="FormElement" ancestor="true" source="auto"/>
+
+    <datastore-index kind="GoogleSpreadsheet" ancestor="true" source="auto"/>
+
+    <datastore-index kind="FormElement" ancestor="true" source="auto">
+        <property name="childNumber" direction="asc"/>
     </datastore-index>
 </datastore-indexes>
