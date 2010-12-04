@@ -22,8 +22,12 @@ import java.util.List;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.Datastore;
+import org.opendatakit.common.persistence.DynamicAssociationBase;
+import org.opendatakit.common.persistence.DynamicBase;
+import org.opendatakit.common.persistence.DynamicDocumentBase;
 import org.opendatakit.common.persistence.EntityKey;
 import org.opendatakit.common.persistence.Query;
+import org.opendatakit.common.persistence.TaskLock;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
@@ -39,6 +43,12 @@ import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Text;
 
+/**
+ * 
+ * @author wbrunette@gmail.com
+ * @author mitchellsundt@gmail.com
+ * 
+ */
 public class DatastoreImpl implements Datastore {
 
 	/**
@@ -51,8 +61,8 @@ public class DatastoreImpl implements Datastore {
 	
 	private static final Long GAE_MAX_STRING_LEN = 250L;
 	// these aren't actually used for filtering...
-	public static final Integer DEFAULT_DBL_NUMERIC_SCALE = 6;
-	public static final Integer DEFAULT_DBL_NUMERIC_PRECISION = 9;
+	public static final Integer DEFAULT_DBL_NUMERIC_SCALE = 10;
+	public static final Integer DEFAULT_DBL_NUMERIC_PRECISION = 38;
 	public static final Integer DEFAULT_INT_NUMERIC_PRECISION = 10;
 
 	private final String schemaName;
@@ -61,7 +71,7 @@ public class DatastoreImpl implements Datastore {
 
 	public DatastoreImpl() throws Exception {
 		ds = DatastoreServiceFactory.getDatastoreService();
-		schemaName = "odk";
+		schemaName = "opendatakit";
 	}
 
 	DatastoreService getDatastoreService() {
@@ -118,11 +128,16 @@ public class DatastoreImpl implements Datastore {
 	 */
 	@Override
 	public boolean hasRelation(String schema, String tableName, User user) {
-		com.google.appengine.api.datastore.Query query =
-			new com.google.appengine.api.datastore.Query( schema + "." + tableName);
-		query.setKeysOnly();
-	    PreparedQuery preparedQuery = ds.prepare(query);
-	    List<com.google.appengine.api.datastore.Entity> gaeKeys = preparedQuery.asList(FetchOptions.Builder.withLimit(2));
+	    List<com.google.appengine.api.datastore.Entity> gaeKeys = null;
+	    try {
+			com.google.appengine.api.datastore.Query query =
+				new com.google.appengine.api.datastore.Query( schema + "." + tableName);
+			query.setKeysOnly();
+		    PreparedQuery preparedQuery = ds.prepare(query);
+		    gaeKeys = preparedQuery.asList(FetchOptions.Builder.withLimit(2));
+		} catch ( Exception ex ) {
+			// No-op
+		}
 	    if ( gaeKeys == null || gaeKeys.size() == 0 ) return false;
 	    return true;
 	}
@@ -145,22 +160,22 @@ public class DatastoreImpl implements Datastore {
 	@Override
 	public <T extends CommonFieldsBase> T createEntityUsingRelation(T relation,
 			EntityKey topLevelAuriKey, User user) {
-		CommonFieldsBase row = relation.getEmptyRow(relation.getClass(), user);
-
-		com.google.appengine.api.datastore.Entity gaeEntity;
-
-		if (topLevelAuriKey != null) {
-			row.setTopLevelAuri(topLevelAuriKey.getKey());
-			Key gaeParentKey = constructGaeKey(topLevelAuriKey.getRelation(),
-					topLevelAuriKey.getKey());
-			gaeEntity = new com.google.appengine.api.datastore.Entity(
-					constructGaeKind(row), row.getUri(), gaeParentKey);
-		} else {
-			gaeEntity = new com.google.appengine.api.datastore.Entity(
-					constructGaeKind(row), row.getUri());
+		CommonFieldsBase row;
+		try {
+			row = (T) relation.getEmptyRow(user);
+		} catch (Exception e) {
+			throw new IllegalStateException("failed to create empty row", e);
 		}
 
-		row.setOpaquePersistenceData(gaeEntity);
+		if (topLevelAuriKey != null) {
+			if ( row instanceof DynamicAssociationBase ) {
+				((DynamicAssociationBase) row).setTopLevelAuri(topLevelAuriKey.getKey());
+			} else if ( row instanceof DynamicDocumentBase ) {
+				((DynamicDocumentBase) row).setTopLevelAuri(topLevelAuriKey.getKey());
+			} else if ( row instanceof DynamicBase ) {
+				((DynamicBase) row).setTopLevelAuri(topLevelAuriKey.getKey());
+			}
+		}
 		return (T) row;
 	}
 
@@ -173,11 +188,15 @@ public class DatastoreImpl implements Datastore {
 		try {
 			gaeEntity = ds.get(selfKey);
 		} catch (EntityNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 			throw new ODKEntityNotFoundException(e);
 		}
-		CommonFieldsBase row = relation.getEmptyRow(relation.getClass(), user);
+		
+		CommonFieldsBase row;
+		try {
+			row = relation.getEmptyRow(user);
+		} catch ( Exception e ) {
+			throw new IllegalStateException("failed to create empty row", e);
+		}
 		updateRowFromGae(row, gaeEntity);
 		return (T) row;
 	}
@@ -197,7 +216,10 @@ public class DatastoreImpl implements Datastore {
 				switch ( d.getDataType() ) {
 				case BINARY:
 					Blob bin = (Blob) o;
-					row.setBlobField(d, bin.getBytes());
+					byte[] array = bin.getBytes();
+					if ( array != null && array.length != 0 ) {
+						row.setBlobField(d, array);
+					}
 					break;
 				case LONG_STRING:
 					Text txt = (Text) o;
@@ -241,6 +263,19 @@ public class DatastoreImpl implements Datastore {
 		if (entity.isFromDatabase()) {
 			entity.setDateField(entity.lastUpdateDate, new Date());
 			entity.setStringField(entity.lastUpdateUriUser, user.getUriUser());
+		} else {
+			// we need to create the backing object...
+			//
+			com.google.appengine.api.datastore.Entity gaeEntity;
+			// because we sometimes access the nested records without first 
+			// accessing the top level record, it seems we can't leverage
+			// the Google BigTable parent-key feature for colocation unless
+			// we want to take a hit on the getEntity call and turn that 
+			// into a query.
+			gaeEntity = new com.google.appengine.api.datastore.Entity(
+							constructGaeKind(entity), entity.getUri());
+
+			entity.setOpaquePersistenceData(gaeEntity);
 		}
 
 		// get the google backing object...
@@ -258,8 +293,13 @@ public class DatastoreImpl implements Datastore {
 				} else
 				switch ( d.getDataType() ) {
 				case BINARY:
-					Blob bin = new Blob(entity.getBlobField(d));
-					e.setProperty(d.getName(), bin);
+					byte[] array = entity.getBlobField(d);
+					if ( array == null || array.length == 0 ) {
+						e.removeProperty(d.getName());
+					} else {
+						Blob bin = new Blob(array);
+						e.setProperty(d.getName(), bin);
+					}
 					break;
 				case LONG_STRING:
 					Text txt = new Text(entity.getStringField(d));
@@ -300,7 +340,11 @@ public class DatastoreImpl implements Datastore {
 			throws ODKEntityPersistException {
 		com.google.appengine.api.datastore.Entity e = prepareGaeFromRow(entity,
 				user);
-		ds.put(e);
+		try {
+			ds.put(e);
+		} catch ( Exception ex ) {
+			throw new ODKEntityPersistException(ex);
+		}
 	}
 
 	@Override
@@ -310,7 +354,13 @@ public class DatastoreImpl implements Datastore {
 		for (CommonFieldsBase entity : entities) {
 			gaeEntities.add(prepareGaeFromRow(entity, user));
 		}
-		ds.put(gaeEntities);
+		try {
+			if ( gaeEntities.size() != 0 ) {
+				ds.put(gaeEntities);
+			}
+		} catch ( Exception ex ) {
+			throw new ODKEntityPersistException(ex);
+		}
 	}
 
 	@Override
@@ -318,7 +368,11 @@ public class DatastoreImpl implements Datastore {
 			throws ODKDatastoreException {
 		Key dsKey = constructGaeKey(key.getRelation(), key.getKey());
 		// TODO: log deletion
-		ds.delete(dsKey);
+		try {
+			ds.delete(dsKey);
+		} catch ( Exception ex ) {
+			throw new ODKDatastoreException(ex);
+		}
 	}
 
 	@Override
@@ -335,7 +389,16 @@ public class DatastoreImpl implements Datastore {
 					entityKey.getKey()));
 		}
 		// TODO: log deletion
-		ds.delete(datastoreKeys);
+		try {
+			ds.delete(datastoreKeys);
+		} catch ( Exception ex ) {
+			throw new ODKDatastoreException(ex);
+		}
 
 	}
+
+  @Override
+  public TaskLock createTaskLock() {
+    return new TaskLockImpl();
+  }
 }

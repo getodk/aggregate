@@ -21,7 +21,8 @@ package org.opendatakit.aggregate.exception;
  * Exception for the case a parsing problem occurs
  *
  * @author wbrunette@gmail.com
- *
+ * @author mitchellsundt@gmail.com
+ * 
  */
 public class ODKParseException extends Exception {
   /**

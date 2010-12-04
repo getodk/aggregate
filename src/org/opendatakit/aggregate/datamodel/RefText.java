@@ -13,8 +13,9 @@
  */
 package org.opendatakit.aggregate.datamodel;
 
-import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
+import org.opendatakit.common.persistence.DynamicDocumentBase;
+import org.opendatakit.common.security.User;
 
 /**
  * Long strings may span multiple texts; this class holds one 
@@ -28,27 +29,40 @@ import org.opendatakit.common.persistence.DataField;
  * other document storage services. 
  * 
  * @author mitchellsundt@gmail.com
- *
+ * @author wbrunette@gmail.com
+ * 
  */
-public final class RefText extends CommonFieldsBase {
+public final class RefText extends DynamicDocumentBase {
 
 	private static final DataField VALUE = new DataField("VALUE",DataField.DataType.LONG_STRING, false);
 	public final DataField value;
 	
+	/**
+	 * Construct a relation prototype.
+	 * 
+	 * @param databaseSchema
+	 * @param tableName
+	 */
 	public RefText(String databaseSchema, String tableName) {
-		super(databaseSchema, tableName, BaseType.DYNAMIC_DOCUMENT);
+		super(databaseSchema, tableName);
 		fieldList.add(value = new DataField(VALUE));
 	}
 
 	/**
-	 * Copy constructor for use by {@link #getEmptyRow(Class)}   
-	 * This does not populate any fields related to the values of this row. 
-	 *
-	 * @param d
+	 * Construct an empty entity.  Only called via {@link #getEmptyRow(User)}
+	 * 
+	 * @param ref
+	 * @param user
 	 */
-	public RefText(RefText ref) {
-		super(ref);
+	private RefText(RefText ref, User user) {
+		super(ref, user);
 		value = ref.value;
+	}
+
+	// Only called from within the persistence layer.
+	@Override
+	public RefText getEmptyRow(User user) {
+		return new RefText(this, user);
 	}
 
 	public String getValue() {

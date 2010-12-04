@@ -20,12 +20,13 @@ package org.opendatakit.aggregate.submission.type;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.opendatakit.aggregate.constants.FormatConsts;
 import org.opendatakit.aggregate.constants.ServletConsts;
-import org.opendatakit.aggregate.datamodel.FormDataModel;
+import org.opendatakit.aggregate.constants.format.FormatConsts;
 import org.opendatakit.aggregate.datamodel.FormDefinition;
+import org.opendatakit.aggregate.datamodel.FormElementModel;
+import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.format.element.ElementFormatter;
-import org.opendatakit.aggregate.format.element.Row;
+import org.opendatakit.aggregate.submission.SubmissionElement;
 import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.submission.SubmissionKeyPart;
 import org.opendatakit.aggregate.submission.SubmissionRepeat;
@@ -33,9 +34,10 @@ import org.opendatakit.aggregate.submission.SubmissionSet;
 import org.opendatakit.aggregate.submission.SubmissionValue;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.Datastore;
+import org.opendatakit.common.persistence.DynamicBase;
 import org.opendatakit.common.persistence.EntityKey;
-import org.opendatakit.common.persistence.InstanceDataBase;
 import org.opendatakit.common.persistence.Query;
+import org.opendatakit.common.persistence.Query.Direction;
 import org.opendatakit.common.persistence.Query.FilterOperation;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
@@ -46,6 +48,7 @@ import org.opendatakit.common.security.User;
  * submission sets in an entity
  * 
  * @author wbrunette@gmail.com
+ * @author mitchellsundt@gmail.com
  * 
  */
 public class RepeatSubmissionType implements SubmissionRepeat {
@@ -63,7 +66,7 @@ public class RepeatSubmissionType implements SubmissionRepeat {
 	/**
 	 * Identifier for repeat
 	 */
-	private FormDataModel repeatGroup;
+	private FormElementModel repeatGroup;
 
 	/**
 	 * List of submission sets that are a part of this submission set Ordered by
@@ -72,7 +75,7 @@ public class RepeatSubmissionType implements SubmissionRepeat {
 	private List<SubmissionSet> submissionSets = new ArrayList<SubmissionSet>();
 
 	public RepeatSubmissionType(SubmissionSet enclosingSet,
-			FormDataModel repeatGroup, FormDefinition formDefinition) {
+			FormElementModel repeatGroup, FormDefinition formDefinition) {
 		this.enclosingSet = enclosingSet;
 		this.formDefinition = formDefinition;
 		this.repeatGroup = repeatGroup;
@@ -80,6 +83,11 @@ public class RepeatSubmissionType implements SubmissionRepeat {
 
 	public SubmissionSet getEnclosingSet() {
 		return enclosingSet;
+	}
+	
+	public String getUniqueKeyStr() {
+	  EntityKey key = enclosingSet.getKey();
+	  return key.getKey();
 	}
 	
 	public void addSubmissionSet(SubmissionSet submissionSet) {
@@ -109,9 +117,9 @@ public class RepeatSubmissionType implements SubmissionRepeat {
 	 *            proper format for output
 	 */
 	@Override
-	public void formatValue(ElementFormatter elemFormatter, Row row)
+	public void formatValue(ElementFormatter elemFormatter, Row row, String ordinalValue)
 			throws ODKDatastoreException {
-		elemFormatter.formatRepeats(this, repeatGroup.getElementName(), row);
+		elemFormatter.formatRepeats(this, repeatGroup, row);
 	}
 
 	@Override
@@ -119,14 +127,15 @@ public class RepeatSubmissionType implements SubmissionRepeat {
 			String uriAssociatedRow, EntityKey topLevelTableKey,
 			Datastore datastore, User user, boolean fetchElement) throws ODKDatastoreException {
 
-		Query q = datastore.createQuery(repeatGroup.getBackingObjectPrototype(), user);
-		q.addFilter(repeatGroup.getBackingObjectPrototype().parentAuri,
+		Query q = datastore.createQuery(repeatGroup.getFormDataModel().getBackingObjectPrototype(), user);
+		q.addFilter(((DynamicBase) repeatGroup.getFormDataModel().getBackingObjectPrototype()).parentAuri,
 				FilterOperation.EQUAL, uriAssociatedRow);
+		q.addSort(repeatGroup.getFormDataModel().ordinalNumber, Direction.ASCENDING);
 
 		List<? extends CommonFieldsBase> repeatGroupList = q
 				.executeQuery(ServletConsts.FETCH_LIMIT);
 		for (CommonFieldsBase cb : repeatGroupList) {
-			InstanceDataBase d = (InstanceDataBase) cb;
+			DynamicBase d = (DynamicBase) cb;
 			SubmissionSet set = new SubmissionSet(enclosingSet, d, repeatGroup,
 					formDefinition, datastore, user);
 			submissionSets.add(set);
@@ -191,7 +200,7 @@ public class RepeatSubmissionType implements SubmissionRepeat {
 	}
 
 	@Override
-	public FormDataModel getElement() {
+	public FormElementModel getElement() {
 		return repeatGroup;
 	}
 
@@ -204,7 +213,7 @@ public class RepeatSubmissionType implements SubmissionRepeat {
 		return repeatGroup.getElementName();
 	}
 
-	public List<SubmissionValue> findElementValue(FormDataModel element) {
+	public List<SubmissionValue> findElementValue(FormElementModel element) {
 		// TODO Auto-generated method stub
 		List<SubmissionValue> values = new ArrayList<SubmissionValue>();
 
@@ -215,13 +224,20 @@ public class RepeatSubmissionType implements SubmissionRepeat {
 	}
 
 	@Override
-	public SubmissionValue resolveSubmissionKeyBeginningAt(int i,
+	public SubmissionElement resolveSubmissionKeyBeginningAt(int i,
 			List<SubmissionKeyPart> parts) {
 		SubmissionKeyPart p = parts.get(i);
+		
+		Long ordinalNumber = p.getOrdinalNumber();
+		if ( ordinalNumber != null ) {
+			return submissionSets.get(ordinalNumber.intValue()-1).resolveSubmissionKeyBeginningAt(i, parts);
+		}
+		
 		String auri = p.getAuri();
 		if ( auri == null ) {
-			throw new IllegalArgumentException("submission key repeat part does not have auri");
+			return this; // they want the repeat group...
 		}
+		
 		for (SubmissionSet s : submissionSets) {
 			if ( s.getKey().getKey().equals(auri)) {
 				return s.resolveSubmissionKeyBeginningAt(i, parts);

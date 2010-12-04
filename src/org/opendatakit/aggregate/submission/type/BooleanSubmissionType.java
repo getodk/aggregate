@@ -17,13 +17,13 @@
 
 package org.opendatakit.aggregate.submission.type;
 
-import org.opendatakit.aggregate.datamodel.FormDataModel;
+import org.opendatakit.aggregate.datamodel.FormElementModel;
+import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.format.element.ElementFormatter;
-import org.opendatakit.aggregate.format.element.Row;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.Datastore;
+import org.opendatakit.common.persistence.DynamicCommonFieldsBase;
 import org.opendatakit.common.persistence.EntityKey;
-import org.opendatakit.common.persistence.InstanceDataBase;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.security.User;
 
@@ -31,6 +31,7 @@ import org.opendatakit.common.security.User;
  * Data Storage Converter for Boolean Type
  * 
  * @author wbrunette@gmail.com
+ * @author mitchellsundt@gmail.com
  * 
  */
 public class BooleanSubmissionType extends SubmissionSingleValueBase<Boolean> {
@@ -40,8 +41,8 @@ public class BooleanSubmissionType extends SubmissionSingleValueBase<Boolean> {
 	 * @param propertyName
 	 *            Name of submission element
 	 */
-	public BooleanSubmissionType(InstanceDataBase backingObject,
-			FormDataModel element) {
+	public BooleanSubmissionType(DynamicCommonFieldsBase backingObject,
+			FormElementModel element) {
 		super(backingObject, element);
 	}
 
@@ -93,7 +94,7 @@ public class BooleanSubmissionType extends SubmissionSingleValueBase<Boolean> {
 	public void getValueFromEntity(CommonFieldsBase dbEntity,
 			String uriAssociatedRow, EntityKey topLevelTableKey,
 			Datastore datastore, User user, boolean fetchElement) {
-		Boolean value = dbEntity.getBooleanField(element.getBackingKey());
+		Boolean value = dbEntity.getBooleanField(element.getFormDataModel().getBackingKey());
 		setValue(value);
 	}
 
@@ -105,9 +106,9 @@ public class BooleanSubmissionType extends SubmissionSingleValueBase<Boolean> {
 	 *            proper format for output
 	 */
 	@Override
-	public void formatValue(ElementFormatter elemFormatter, Row row)
+	public void formatValue(ElementFormatter elemFormatter, Row row, String ordinalValue)
 			throws ODKDatastoreException {
-		elemFormatter.formatBoolean(getValue(), element.getElementName(), row);
+		elemFormatter.formatBoolean(getValue(), element.getGroupQualifiedElementName() + ordinalValue, row);
 	}
 
 	/**
@@ -126,7 +127,7 @@ public class BooleanSubmissionType extends SubmissionSingleValueBase<Boolean> {
 
 	@Override
 	public Boolean getValue() {
-		return backingObject.getBooleanField(element.getBackingKey());
+		return backingObject.getBooleanField(element.getFormDataModel().getBackingKey());
 	}
 
 	/**
@@ -136,7 +137,7 @@ public class BooleanSubmissionType extends SubmissionSingleValueBase<Boolean> {
 	 *            value to set
 	 */
 	protected void setValue(Boolean value) {
-		backingObject.setBooleanField(element.getBackingKey(), (Boolean) value);
+		backingObject.setBooleanField(element.getFormDataModel().getBackingKey(), (Boolean) value);
 	}
 
 }

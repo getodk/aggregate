@@ -19,13 +19,23 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
-import org.opendatakit.aggregate.submission.SubmissionKey;
+import org.opendatakit.aggregate.datamodel.FormElementModel;
+import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.submission.SubmissionRepeat;
+import org.opendatakit.aggregate.submission.type.BlobSubmissionType;
 import org.opendatakit.aggregate.submission.type.GeoPoint;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 
+/**
+ * 
+ * @author wbrunette@gmail.com
+ * @author mitchellsundt@gmail.com
+ * 
+ */
 public interface ElementFormatter {
-  public void formatBinary(SubmissionKey key, String propertyName, Row row) throws ODKDatastoreException;
+  public void formatUid(String uri, String propertyName, Row row);
+  
+  public void formatBinary(BlobSubmissionType blobSubmission, String propertyName, Row row) throws ODKDatastoreException;
   
   public void formatBoolean(Boolean bool, String propertyName, Row row);
   
@@ -41,6 +51,6 @@ public interface ElementFormatter {
   
   public void formatString(String string, String propertyName, Row row);
   
-  public void formatRepeats(SubmissionRepeat repeat, String propertyName, Row row) throws ODKDatastoreException;
+  public void formatRepeats(SubmissionRepeat repeat, FormElementModel repeatElement, Row row) throws ODKDatastoreException;
   
 }

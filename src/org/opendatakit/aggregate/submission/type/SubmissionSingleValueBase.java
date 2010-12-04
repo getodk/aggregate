@@ -19,12 +19,12 @@ package org.opendatakit.aggregate.submission.type;
 
 import java.util.List;
 
-import org.opendatakit.aggregate.constants.FormatConsts;
-import org.opendatakit.aggregate.datamodel.FormDataModel;
+import org.opendatakit.aggregate.constants.format.FormatConsts;
+import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.common.constants.BasicConsts;
 import org.opendatakit.common.persistence.Datastore;
+import org.opendatakit.common.persistence.DynamicCommonFieldsBase;
 import org.opendatakit.common.persistence.EntityKey;
-import org.opendatakit.common.persistence.InstanceDataBase;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
 import org.opendatakit.common.security.User;
 
@@ -33,21 +33,23 @@ import org.opendatakit.common.security.User;
  * Base class for type conversion
  *
  * @author wbrunette@gmail.com
- *
+ * @author mitchellsundt@gmail.com
+ * 
  * @param <T>
  *  a GAE datastore type
+ * 
  */
 public abstract class SubmissionSingleValueBase<T> extends SubmissionFieldBase<T> {
 
   /**
    * Backing object holding the value of the submission field
    */
-  protected InstanceDataBase backingObject;
+  protected DynamicCommonFieldsBase backingObject;
 
   /**
    * Constructor
    */
-  public SubmissionSingleValueBase(InstanceDataBase backingObject, FormDataModel element) {
+  public SubmissionSingleValueBase(DynamicCommonFieldsBase backingObject, FormElementModel element) {
     super(element);
     this.backingObject = backingObject;
   }

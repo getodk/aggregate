@@ -15,6 +15,12 @@
  */
 package org.opendatakit.common.security;
 
+/**
+ * 
+ * @author wbrunette@gmail.com
+ * @author mitchellsundt@gmail.com
+ * 
+ */
 public interface UserService {
   
   public String createLoginURL(String destinationURL);

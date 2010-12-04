@@ -23,6 +23,9 @@ import java.util.Set;
 
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
+import org.opendatakit.common.persistence.DynamicAssociationBase;
+import org.opendatakit.common.persistence.DynamicBase;
+import org.opendatakit.common.persistence.DynamicDocumentBase;
 import org.opendatakit.common.persistence.EntityKey;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.security.User;
@@ -34,6 +37,12 @@ import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.appengine.api.datastore.Query.SortDirection;
 
+/**
+ * 
+ * @author wbrunette@gmail.com
+ * @author mitchellsundt@gmail.com
+ * 
+ */
 public class QueryImpl implements org.opendatakit.common.persistence.Query {
 
 	private static Map<FilterOperation, FilterOperator> operationMap = new HashMap<FilterOperation, FilterOperator>();
@@ -69,6 +78,11 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
 	}
 
 	@Override
+	public void addValueSetFilter(DataField attribute, Set<?> valueSet) {
+		query.addFilter(attribute.getName(), FilterOperator.IN, valueSet);
+	}
+
+	@Override
 	public void addSort(DataField attribute, Direction direction) {
 		if (direction.equals(Direction.ASCENDING)) {
 			query.addSort(attribute.getName(), SortDirection.ASCENDING);
@@ -82,8 +96,12 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
 			throws ODKDatastoreException {
 		DatastoreService ds = datastore.getDatastoreService();
 		PreparedQuery preparedQuery = ds.prepare(query);
-		List<com.google.appengine.api.datastore.Entity> gaeEntities = preparedQuery
-				.asList(FetchOptions.Builder.withLimit(fetchLimit));
+		List<com.google.appengine.api.datastore.Entity> gaeEntities;
+		if ( fetchLimit == 0 ) {
+			gaeEntities = preparedQuery.asList(FetchOptions.Builder.withDefaults());
+		} else {
+			gaeEntities = preparedQuery.asList(FetchOptions.Builder.withLimit(fetchLimit));
+		}
 		List<CommonFieldsBase> odkEntities = new ArrayList<CommonFieldsBase>();
 
 		try {
@@ -112,9 +130,23 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
 
 		DatastoreService ds = datastore.getDatastoreService();
 		PreparedQuery preparedQuery = ds.prepare(query);
-		List<com.google.appengine.api.datastore.Entity> gaeEntities = preparedQuery
-				.asList(FetchOptions.Builder.withLimit(fetchLimit));
-		
+		List<com.google.appengine.api.datastore.Entity> gaeEntities;
+		if ( fetchLimit == 0 ) {
+			gaeEntities = preparedQuery.asList(FetchOptions.Builder.withDefaults());
+		} else {
+			gaeEntities = preparedQuery.asList(FetchOptions.Builder.withLimit(fetchLimit));
+		}
+		DataField topLevelAuri = null;
+		if ( relation instanceof DynamicAssociationBase ) {
+			topLevelAuri = ((DynamicAssociationBase) relation).topLevelAuri;
+		} else if ( relation instanceof DynamicDocumentBase ) {
+			topLevelAuri = ((DynamicDocumentBase) relation).topLevelAuri;
+		} else if ( relation instanceof DynamicBase ) {
+			topLevelAuri = ((DynamicBase) relation).topLevelAuri;
+		} else {
+			throw new IllegalStateException("unexpected persistence backing object type");
+		}
+
 		Set<EntityKey> keySet = new HashSet<EntityKey>();
 		try {
 			// convert to odk entities
@@ -124,7 +156,7 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
 				CommonFieldsBase odkEntity;
 				odkEntity = (CommonFieldsBase) m.mapRow(datastore, gaeEntity,
 						idx++);
-				keySet.add( new EntityKey( topLevelTable, odkEntity.getTopLevelAuri()));
+				keySet.add( new EntityKey( topLevelTable, odkEntity.getStringField(topLevelAuri)));
 			}
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
@@ -141,8 +173,8 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
 
 		DatastoreService ds = datastore.getDatastoreService();
 		PreparedQuery preparedQuery = ds.prepare(query);
-		List<com.google.appengine.api.datastore.Entity> gaeEntities = preparedQuery
-				.asList(FetchOptions.Builder.withLimit(0));
+		List<com.google.appengine.api.datastore.Entity> gaeEntities;
+		gaeEntities = preparedQuery.asList(FetchOptions.Builder.withDefaults());
 		Set valueList = new HashSet();
 		try {
 			// convert to odk entities

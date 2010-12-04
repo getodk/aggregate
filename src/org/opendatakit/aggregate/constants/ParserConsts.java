@@ -21,16 +21,25 @@ package org.opendatakit.aggregate.constants;
  * Constants used for parsing in ODK aggregate 
  *  
  * @author wbrunette@gmail.com
- *
+ * @author mitchellsundt@gmail.com
+ * 
  */
-public class ParserConsts {
+public final class ParserConsts {
 
   public static final String DEFAULT_NAMESPACE = "ODK_DEFAULT";
 
-  public static final String ODK_ATTRIBUTE_NAME = "id";
+  public static final String FORM_ID_ATTRIBUTE_NAME = "id";
+
+  public static final String MODEL_VERSION_ATTRIBUTE_NAME = "version";
+
+  public static final String UI_VERSION_ATTRIBUTE_NAME = "uiVersion";
 
   public static final String NAMESPACE_ATTRIBUTE = "xmlns";
 
+  public static final String FORWARD_SLASH = "/";
+  
+  public static final String FORWARD_SLASH_SUBSTITUTION = "&frasl;";
+  
   public static final String VALUE_FORMATTED = "  Value: ";
 
   public static final String ATTRIBUTE_FORMATTED = " Attribute> ";

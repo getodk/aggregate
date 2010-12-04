@@ -23,6 +23,8 @@ import java.io.ByteArrayOutputStream;
  * Object representation of multi part form data
  * 
  * @author wbrunette@gmail.com
+ * @author mitchellsundt@gmail.com
+ * 
  */
 public class MultiPartFormItem {
 

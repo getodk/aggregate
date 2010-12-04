@@ -23,7 +23,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.opendatakit.aggregate.ContextFactory;
-import org.opendatakit.aggregate.constants.ServletConsts;
+import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
 import org.opendatakit.aggregate.format.form.FormXmlTable;
 import org.opendatakit.aggregate.query.QueryFormList;
@@ -38,6 +38,7 @@ import org.opendatakit.common.security.UserService;
  * forms for computers
  * 
  * @author wbrunette@gmail.com
+ * @author mitchellsundt@gmail.com
  * 
  */
 public class FormListServlet extends ServletUtilBase {
@@ -61,8 +62,8 @@ public class FormListServlet extends ServletUtilBase {
   @Override
   public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 
-    Datastore ds = (Datastore) ContextFactory.get().getBean(ServletConsts.DATASTORE_BEAN);
-    UserService userService = (UserService) ContextFactory.get().getBean(ServletConsts.USER_BEAN);
+    Datastore ds = (Datastore) ContextFactory.get().getBean(BeanDefs.DATASTORE_BEAN);
+    UserService userService = (UserService) ContextFactory.get().getBean(BeanDefs.USER_BEAN);
     User user = userService.getCurrentUser();
     
     try {

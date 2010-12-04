@@ -24,19 +24,18 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang.StringEscapeUtils;
-import org.opendatakit.common.constants.BasicConsts;
-import org.opendatakit.common.constants.HtmlConsts;
 
 /**
  * Static HTML utility functions used to generate proper HTML for ODK Aggregate
  * visual outputs
  * 
  * @author wbrunette@gmail.com
+ * @author mitchellsundt@gmail.com
  * 
  */
 public class HtmlUtil {
 
-  private static final String INPUT_WIDGET_SIZE_LIMIT = "50";
+  private static final int INPUT_WIDGET_SIZE_LIMIT = 50;
 
   protected static final String HREF = "href";
   protected static final String A = "a";
@@ -45,6 +44,7 @@ public class HtmlUtil {
   protected static final String ATTR_NAME = "name";
   protected static final String ATTR_TYPE = "type";
   protected static final String ATTR_METHOD = "method";
+  protected static final String ATTR_ACCEPT_CHARSET = "accept-charset";
   protected static final String ATTR_ENCTYPE = "enctype";
   protected static final String ATTR_ACTION = "action";
   protected static final String ATTR_SIZE = "size";
@@ -58,6 +58,10 @@ public class HtmlUtil {
     return HtmlConsts.BEGIN_OPEN_TAG + tag + HtmlConsts.END_TAG;
   }
 
+  public static final String createSelfClosingTag(String tag) {
+    return HtmlConsts.BEGIN_OPEN_TAG + tag + HtmlConsts.END_SELF_CLOSING_TAG;
+  }
+  
   public static final String createUrl(String serverName) {
     return HtmlConsts.HTTP + serverName + BasicConsts.FORWARDSLASH;
   }
@@ -102,7 +106,7 @@ public class HtmlUtil {
 
           String valueEncoded;
           try {
-            valueEncoded = URLEncoder.encode(value, HtmlConsts.ENCODE_SCHEME);
+            valueEncoded = URLEncoder.encode(value, HtmlConsts.UTF8_ENCODE);
           } catch (UnsupportedEncodingException e) {
             valueEncoded = BasicConsts.EMPTY_STRING;
           }
@@ -113,7 +117,7 @@ public class HtmlUtil {
     return urlBuilder.toString();
   }
 
-  public static final String createInput(String type, String name, String value) {
+  public static final String createInput(String type, String name, String value, int size) {
     StringBuilder html = new StringBuilder();
     html.append(HtmlConsts.BEGIN_OPEN_TAG + INPUT);
     if (type != null) {
@@ -129,11 +133,15 @@ public class HtmlUtil {
       html.append(createAttribute(ATTR_VALUE, value));
     }
     html.append(BasicConsts.SPACE);
-    html.append(createAttribute(ATTR_SIZE, INPUT_WIDGET_SIZE_LIMIT));
+    html.append(createAttribute(ATTR_SIZE, Integer.toString(size)));
     html.append(HtmlConsts.END_SELF_CLOSING_TAG);
     return html.toString();
   }
 
+  public static final String createInput(String type, String name, String value) {
+    return HtmlUtil.createInput(type, name, value, INPUT_WIDGET_SIZE_LIMIT);
+  }
+  
   public static final String createRadio(String name, String value, String desc, boolean checked) {
     StringBuilder html = new StringBuilder();
     html.append(HtmlConsts.BEGIN_OPEN_TAG + INPUT + BasicConsts.SPACE);
@@ -198,6 +206,8 @@ public class HtmlUtil {
       html.append(BasicConsts.SPACE);
       html.append(createAttribute(ATTR_METHOD, method));
     }
+    html.append(BasicConsts.SPACE);
+    html.append(createAttribute(ATTR_ACCEPT_CHARSET, HtmlConsts.UTF8_ENCODE));
     html.append(HtmlConsts.END_TAG);
     return html.toString();
   }
@@ -224,7 +234,7 @@ public class HtmlUtil {
     if (properties != null) {
       Set<Map.Entry<String, String>> propSet = properties.entrySet();
       for (Map.Entry<String, String> property : propSet) {
-        String valueEncoded = URLEncoder.encode(property.getValue(), HtmlConsts.ENCODE_SCHEME);
+        String valueEncoded = URLEncoder.encode(property.getValue(), HtmlConsts.UTF8_ENCODE);
         html.append(createInput(HtmlConsts.INPUT_TYPE_HIDDEN, property.getKey(), valueEncoded));
       }
     }
@@ -233,4 +243,7 @@ public class HtmlUtil {
     return html.toString();
   }
 
+  public static final String createHttpServletLink(String baseWebServerUrl, String servlet) {
+    return "http://" + baseWebServerUrl + "/" + servlet;
+  }
 }

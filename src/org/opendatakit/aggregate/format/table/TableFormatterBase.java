@@ -19,27 +19,33 @@ import java.io.PrintWriter;
 import java.util.Collection;
 import java.util.List;
 
-import org.opendatakit.aggregate.datamodel.FormDataModel;
-import org.opendatakit.aggregate.datamodel.FormDefinition;
+import org.opendatakit.aggregate.datamodel.FormElementModel;
+import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.format.SubmissionFormatter;
-import org.opendatakit.aggregate.format.element.BasicHeaderFormatter;
 import org.opendatakit.aggregate.format.element.ElementFormatter;
-import org.opendatakit.aggregate.format.element.HeaderFormatter;
+import org.opendatakit.aggregate.format.header.BasicHeaderFormatter;
+import org.opendatakit.aggregate.format.header.HeaderFormatter;
 import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.aggregate.submission.SubmissionSet;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 
+/**
+ * 
+ * @author wbrunette@gmail.com
+ * @author mitchellsundt@gmail.com
+ * 
+ */
 public abstract class TableFormatterBase implements SubmissionFormatter {
 
   protected ElementFormatter elemFormatter;
   protected HeaderFormatter headerFormatter;
-  protected List<FormDataModel> propertyNames;
-  protected final FormDefinition formDefinition;
+  protected List<FormElementModel> propertyNames;
+  protected final Form form;
   protected final PrintWriter output;
 
-  public TableFormatterBase(FormDefinition xform, PrintWriter printWriter,
-      List<FormDataModel> selectedColumnNames) {
-    formDefinition = xform;
+  public TableFormatterBase(Form xform, PrintWriter printWriter,
+      List<FormElementModel> selectedColumnNames) {
+    form = xform;
     output = printWriter;
     propertyNames = selectedColumnNames;
     headerFormatter = new BasicHeaderFormatter(true, true, true);
@@ -47,16 +53,10 @@ public abstract class TableFormatterBase implements SubmissionFormatter {
 
   @Override
   public void processSubmissions(List<Submission> submissions) throws ODKDatastoreException {
-    processSubmissionSet(submissions, formDefinition.getTopLevelGroup());
-  }
-
-  @Override
-  public void processRepeatedSubmssionSets(FormDataModel repeatGroup, List<SubmissionSet> repeats)
-      throws ODKDatastoreException {
-      processSubmissionSet(repeats, repeatGroup);
+    processSubmissionSet(submissions, form.getFormDefinition().getTopLevelGroupElement());
   }
 
   protected abstract void processSubmissionSet(Collection<? extends SubmissionSet> submissions,
-		  FormDataModel rootGroup) throws ODKDatastoreException;
+		  FormElementModel rootGroup) throws ODKDatastoreException;
   
 }

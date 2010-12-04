@@ -19,28 +19,34 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import org.opendatakit.aggregate.datamodel.FormDefinition;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
+import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.Datastore;
-import org.opendatakit.common.persistence.InstanceDataBase;
 import org.opendatakit.common.persistence.Query;
+import org.opendatakit.common.persistence.TopLevelDynamicBase;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.security.User;
 
+/**
+ * 
+ * @author wbrunette@gmail.com
+ * @author mitchellsundt@gmail.com
+ * 
+ */
 public class QueryByDate extends QueryBase {
 
   private boolean backward;
 
-  public QueryByDate(FormDefinition formDefinition, Date lastDate,
+  public QueryByDate(Form form, Date lastDate,
       boolean backwardDirection, int maxFetchLimit, Datastore datastore, User user) throws ODKFormNotFoundException {
-    super(formDefinition, maxFetchLimit, datastore, user);
+    super(form, maxFetchLimit, datastore, user);
 
     backward = backwardDirection;
 
-    CommonFieldsBase tbl = formDefinition.getTopLevelGroup().getBackingObjectPrototype();
+    CommonFieldsBase tbl = form.getFormDefinition().getTopLevelGroup().getBackingObjectPrototype();
     
     query = ds.createQuery(tbl, user);
     if (backward) {
@@ -69,7 +75,7 @@ public class QueryByDate extends QueryBase {
         subEntity = submissionEntities.get(count);
       }
 
-      retrievedSubmissions.add(new Submission((InstanceDataBase) subEntity, formDefinition, ds, user));
+      retrievedSubmissions.add(new Submission((TopLevelDynamicBase) subEntity, form.getFormDefinition(), ds, user));
       count++;
 
     }

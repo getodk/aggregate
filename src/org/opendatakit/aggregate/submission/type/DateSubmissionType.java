@@ -21,14 +21,14 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.util.Date;
 
-import org.opendatakit.aggregate.datamodel.FormDataModel;
+import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.exception.ODKConversionException;
+import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.format.element.ElementFormatter;
-import org.opendatakit.aggregate.format.element.Row;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.Datastore;
+import org.opendatakit.common.persistence.DynamicCommonFieldsBase;
 import org.opendatakit.common.persistence.EntityKey;
-import org.opendatakit.common.persistence.InstanceDataBase;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.security.User;
 
@@ -36,6 +36,7 @@ import org.opendatakit.common.security.User;
  * Data Storage Converter for Data Type
  * 
  * @author wbrunette@gmail.com
+ * @author mitchellsundt@gmail.com
  * 
  */
 public class DateSubmissionType extends SubmissionSingleValueBase<Date> {
@@ -45,7 +46,7 @@ public class DateSubmissionType extends SubmissionSingleValueBase<Date> {
 	 * @param propertyName
 	 *            Name of submission element
 	 */
-	public DateSubmissionType(InstanceDataBase backingObject, FormDataModel element) {
+	public DateSubmissionType(DynamicCommonFieldsBase backingObject, FormElementModel element) {
 		super(backingObject, element);
 	}
 
@@ -83,7 +84,7 @@ public class DateSubmissionType extends SubmissionSingleValueBase<Date> {
 	public void getValueFromEntity(CommonFieldsBase dbEntity,
 			String uriAssociatedRow, EntityKey topLevelTableKey,
 			Datastore datastore, User user, boolean fetchElement) {
-		Date value = dbEntity.getDateField(element.getBackingKey());
+		Date value = dbEntity.getDateField(element.getFormDataModel().getBackingKey());
 		setValue(value);
 	}
 
@@ -95,9 +96,9 @@ public class DateSubmissionType extends SubmissionSingleValueBase<Date> {
 	 *            proper format for output
 	 */
 	@Override
-	public void formatValue(ElementFormatter elemFormatter, Row row)
+	public void formatValue(ElementFormatter elemFormatter, Row row, String ordinalValue)
 			throws ODKDatastoreException {
-		elemFormatter.formatDate(getValue(), element.getElementName(), row);
+		elemFormatter.formatDate(getValue(), element.getGroupQualifiedElementName() + ordinalValue, row);
 	}
 
 	/**
@@ -116,7 +117,7 @@ public class DateSubmissionType extends SubmissionSingleValueBase<Date> {
 
 	@Override
 	public Date getValue() {
-		return backingObject.getDateField(element.getBackingKey());
+		return backingObject.getDateField(element.getFormDataModel().getBackingKey());
 	}
 
 	/**
@@ -126,7 +127,7 @@ public class DateSubmissionType extends SubmissionSingleValueBase<Date> {
 	 *            value to set
 	 */
 	protected void setValue(Date value) {
-		backingObject.setDateField(element.getBackingKey(), (Date) value);
+		backingObject.setDateField(element.getFormDataModel().getBackingKey(), (Date) value);
 	}
 
 }

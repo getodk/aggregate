@@ -22,7 +22,8 @@ package org.opendatakit.aggregate.exception;
  * problems with systems ability to display properly
  *
  * @author wbrunette@gmail.com
- *
+ * @author mitchellsundt@gmail.com
+ * 
  */
 public class ODKIncompleteSubmissionData extends Exception {
   
@@ -30,6 +31,8 @@ public class ODKIncompleteSubmissionData extends Exception {
     UNKNOWN,
     TITLE_MISSING,
     ID_MISSING,
+    ID_MALFORMED,
+    MISSING_XML,
     BAD_JR_PARSE;
   }
   

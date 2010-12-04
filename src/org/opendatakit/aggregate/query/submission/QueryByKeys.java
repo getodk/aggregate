@@ -18,42 +18,43 @@ package org.opendatakit.aggregate.query.submission;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.opendatakit.aggregate.datamodel.FormDefinition;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
 import org.opendatakit.aggregate.submission.Submission;
-import org.opendatakit.common.persistence.CommonFieldsBase;
+import org.opendatakit.aggregate.submission.SubmissionKey;
+import org.opendatakit.aggregate.submission.SubmissionKeyPart;
 import org.opendatakit.common.persistence.Datastore;
-import org.opendatakit.common.persistence.EntityKey;
-import org.opendatakit.common.persistence.InstanceDataBase;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.security.User;
 
+/**
+ * 
+ * @author wbrunette@gmail.com
+ * @author mitchellsundt@gmail.com
+ * 
+ */
 public class QueryByKeys {
 
-  private List<EntityKey> entityKeys;
+  private List<SubmissionKey> submissionKeys;
 
-  private FormDefinition formDefinition;
-  
   private Datastore ds;
   
   private User user;
   
-  public QueryByKeys(FormDefinition formDefinition, List<EntityKey> keys, Datastore datastore, User user) throws ODKFormNotFoundException {
+  public QueryByKeys(List<SubmissionKey> keys, Datastore datastore, User user) throws ODKFormNotFoundException {
     ds = datastore;
     this.user = user;
-    entityKeys = keys;
-    this.formDefinition = formDefinition;
+    submissionKeys = keys;
   }
 
-  public List<Submission> getResultSubmissions() throws ODKIncompleteSubmissionData, ODKDatastoreException {
+  public List<Submission> getResultSubmissions() throws ODKIncompleteSubmissionData, ODKDatastoreException, ODKFormNotFoundException {
     List<Submission> submissions = new ArrayList<Submission>();
     
-    for (EntityKey submissionKey : entityKeys) {
+    for (SubmissionKey submissionKey : submissionKeys) {
       try {
-        CommonFieldsBase subEntity = ds.getEntity(submissionKey.getRelation(), submissionKey.getKey(), user);
-        submissions.add(new Submission((InstanceDataBase) subEntity, formDefinition, ds, user));
+  		List<SubmissionKeyPart> parts = SubmissionKeyPart.splitSubmissionKey(submissionKey);
+  		submissions.add( Submission.fetchSubmission(parts, ds, user) );
       } catch (ODKEntityNotFoundException e) {
         // TODO Decide how to handle the exceptions
         throw new ODKIncompleteSubmissionData(e);
@@ -61,9 +62,5 @@ public class QueryByKeys {
     }
     return submissions;
 
-  }
-
-  public FormDefinition getFormDefinition() {
-    return formDefinition;
   }
 }

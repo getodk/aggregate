@@ -21,33 +21,39 @@ import java.util.Collection;
 import java.util.List;
 
 import org.opendatakit.aggregate.constants.HtmlUtil;
-import org.opendatakit.aggregate.datamodel.FormDataModel;
-import org.opendatakit.aggregate.datamodel.FormDefinition;
+import org.opendatakit.aggregate.datamodel.FormElementModel;
+import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.format.SubmissionFormatter;
 import org.opendatakit.aggregate.format.element.HtmlLinkElementFormatter;
-import org.opendatakit.aggregate.format.element.Row;
 import org.opendatakit.aggregate.submission.SubmissionSet;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 
+/**
+ * 
+ * @author wbrunette@gmail.com
+ * @author mitchellsundt@gmail.com
+ * 
+ */
 public class HtmlFormatter extends TableFormatterBase implements SubmissionFormatter {
 
   private boolean checkboxes;
   
-  public HtmlFormatter(FormDefinition formDefinition, String webServerUrl, PrintWriter printWriter, List<FormDataModel> selectedColumnNames, boolean includeCheckboxes) {
-    super(formDefinition, printWriter, selectedColumnNames);
+  public HtmlFormatter(Form form, String webServerUrl, PrintWriter printWriter, List<FormElementModel> selectedColumnNames, boolean includeCheckboxes) {
+    super(form, printWriter, selectedColumnNames);
     checkboxes = includeCheckboxes;
-    elemFormatter = new HtmlLinkElementFormatter(formDefinition, webServerUrl, true, true, true);
+    elemFormatter = new HtmlLinkElementFormatter(webServerUrl, true, true, true);
   }
 
   @Override
   public void processSubmissionSet(Collection<? extends SubmissionSet> submissions,
-		  FormDataModel rootGroup) throws ODKDatastoreException {
+		  FormElementModel rootGroup) throws ODKDatastoreException {
     List<Row> formattedElements = new ArrayList<Row>();
-    List<String> headers = headerFormatter.generateHeaders(formDefinition, rootGroup, propertyNames);
+    List<String> headers = headerFormatter.generateHeaders(form, rootGroup, propertyNames);
 
     // format row elements 
     for (SubmissionSet sub : submissions) {
-      Row row = sub.getFormattedValuesAsRow(propertyNames, elemFormatter);
+      Row row = sub.getFormattedValuesAsRow(propertyNames, elemFormatter, false);
       formattedElements.add(row);
     }
     
@@ -60,8 +66,8 @@ public class HtmlFormatter extends TableFormatterBase implements SubmissionForma
 
 
   public void processSubmissionSetPublic(Collection<? extends SubmissionSet> submissions,
-	FormDataModel rootElement) throws ODKDatastoreException {
-	processSubmissionSet(submissions, rootElement);
+	FormElementModel formElementModel) throws ODKDatastoreException {
+	processSubmissionSet(submissions, formElementModel);
   }
 
 }

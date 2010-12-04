@@ -18,21 +18,28 @@
 package org.opendatakit.aggregate.externalservice;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 import org.opendatakit.aggregate.constants.ServletConsts;
-import org.opendatakit.aggregate.datamodel.FormDefinition;
+import org.opendatakit.aggregate.constants.externalservice.ExternalServiceOption;
+import org.opendatakit.aggregate.constants.externalservice.ExternalServiceType;
+import org.opendatakit.aggregate.constants.externalservice.SpreadsheetConsts;
+import org.opendatakit.aggregate.datamodel.FormElementKey;
+import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
-import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
-import org.opendatakit.aggregate.externalservice.constants.ExternalServiceOption;
+import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
+import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.format.element.BasicElementFormatter;
-import org.opendatakit.aggregate.format.element.BasicHeaderFormatter;
-import org.opendatakit.aggregate.format.element.HeaderFormatter;
-import org.opendatakit.aggregate.format.element.Row;
+import org.opendatakit.aggregate.format.header.BasicHeaderFormatter;
 import org.opendatakit.aggregate.submission.Submission;
+import org.opendatakit.aggregate.submission.SubmissionSet;
+import org.opendatakit.aggregate.submission.SubmissionValue;
+import org.opendatakit.aggregate.submission.type.RepeatSubmissionType;
 import org.opendatakit.common.constants.BasicConsts;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.EntityKey;
@@ -41,258 +48,404 @@ import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
 import org.opendatakit.common.security.User;
 
-import com.google.gdata.client.batch.BatchInterruptedException;
+import com.google.gdata.client.authn.oauth.GoogleOAuthHelper;
+import com.google.gdata.client.authn.oauth.GoogleOAuthParameters;
+import com.google.gdata.client.authn.oauth.OAuthException;
+import com.google.gdata.client.authn.oauth.OAuthHmacSha1Signer;
+import com.google.gdata.client.docs.DocsService;
 import com.google.gdata.client.spreadsheet.CellQuery;
 import com.google.gdata.client.spreadsheet.SpreadsheetService;
 import com.google.gdata.data.Link;
 import com.google.gdata.data.PlainTextConstruct;
 import com.google.gdata.data.batch.BatchOperationType;
+import com.google.gdata.data.batch.BatchStatus;
 import com.google.gdata.data.batch.BatchUtils;
+import com.google.gdata.data.docs.SpreadsheetEntry;
 import com.google.gdata.data.spreadsheet.CellEntry;
 import com.google.gdata.data.spreadsheet.CellFeed;
 import com.google.gdata.data.spreadsheet.CustomElementCollection;
 import com.google.gdata.data.spreadsheet.ListEntry;
 import com.google.gdata.data.spreadsheet.WorksheetEntry;
-import com.google.gdata.data.spreadsheet.WorksheetFeed;
 import com.google.gdata.util.ServiceException;
 
-public class GoogleSpreadsheet extends AbstractExternalService implements
-		ExternalService {
+/**
+ * 
+ * @author wbrunette@gmail.com
+ * @author mitchellsundt@gmail.com
+ * 
+ */
+public class GoogleSpreadsheet extends AbstractExternalService implements ExternalService {
 
-	/**
-	 * Datastore entity holding registration of an external service for a
-	 * specific form and the cursor position within that form that was last
-	 * processed by this service.
-	 */
-	private FormServiceCursor fsc;
+  /**
+   * Datastore entity specific to this type of external service
+   */
+  private GoogleSpreadsheetParameterTable objectEntity;
 
-	/**
-	 * Datastore entity specific to this type of external service
-	 */
-	private GoogleSpreadsheetParameterTable objectEntity;
+  private List<GoogleSpreadsheetRepeatParameterTable> repeatElementTableIds;
+  private final SpreadsheetService spreadsheetService;
 
-	private Datastore datastore;
+  private GoogleSpreadsheet(Form form, Datastore datastore, User user) {
+    super(form, new BasicElementFormatter(true, true, true), new BasicHeaderFormatter(true, true,
+        true), datastore, user);
+    spreadsheetService = new SpreadsheetService(ServletConsts.APPLICATION_NAME);
+    // TODO: REMOVE after bug is fixed
+    // http://code.google.com/p/gdata-java-client/issues/detail?id=103
+    spreadsheetService.setProtocolVersion(SpreadsheetService.Versions.V1);
+  }
 
-	private User user;
+  private void constructorHelper() {
+    GoogleOAuthParameters oauthParameters = new GoogleOAuthParameters();
+    oauthParameters.setOAuthConsumerKey(ServletConsts.OAUTH_CONSUMER_KEY);
+    oauthParameters.setOAuthConsumerSecret(ServletConsts.OAUTH_CONSUMER_SECRET);
+    oauthParameters.setOAuthToken(objectEntity.getAuthToken());
+    oauthParameters.setOAuthTokenSecret(objectEntity.getAuthTokenSecret());
+    try {
+      spreadsheetService.setOAuthCredentials(oauthParameters, new OAuthHmacSha1Signer());
+    } catch (OAuthException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+  }
 
-	/**
-	 * NOT PERSISTED
-	 */
-	private SpreadsheetService spreadsheetService;
+  public GoogleSpreadsheet(FormServiceCursor fsc, Datastore datastore, User user)
+      throws ODKEntityNotFoundException, ODKDatastoreException, ODKFormNotFoundException {
+    this(Form.retrieveForm(fsc.getFormId(), datastore, user), datastore, user);
+    GoogleSpreadsheetParameterTable gp = GoogleSpreadsheetParameterTable.createRelation(datastore,
+        user);
+    objectEntity = datastore.getEntity(gp, fsc.getServiceAuri(), user);
+    repeatElementTableIds = GoogleSpreadsheetRepeatParameterTable.getRepeatGroupAssociations(
+        new EntityKey(gp, objectEntity.getUri()), datastore, user);
+    this.fsc = fsc;
+    constructorHelper();
+  }
 
-	/**
-	 * NOT PERSISTED - created for each object
-	 */
-	private HeaderFormatter headerFormatter;
+  public GoogleSpreadsheet(Form form, String name, String spreadKey, OAuthToken authToken,
+      ExternalServiceOption externalServiceOption, Datastore datastore, User user)
+      throws ODKDatastoreException {
+    this(form, datastore, user);
+    objectEntity = datastore.createEntityUsingRelation(GoogleSpreadsheetParameterTable
+        .createRelation(datastore, user), null, user);
+    fsc = FormServiceCursor.createFormServiceCursor(form, ExternalServiceType.GOOGLE_SPREADSHEET,
+        objectEntity, datastore, user);
+    fsc.setExternalServiceOption(externalServiceOption);
+    fsc.setEstablishmentDateTime(new Date());
+    fsc.setUploadCompleted(false);
+    objectEntity.setAuthToken(authToken.getToken());
+    objectEntity.setAuthTokenSecret(authToken.getTokenSecret());
+    objectEntity.setSpreadsheetName(name);
+    objectEntity.setSpreadsheetKey(spreadKey);
+    updateReadyValue();
 
-	private List<String> headers;
+    // initialize repeat list; it will be filled when the worksheets are created
+    repeatElementTableIds = new ArrayList<GoogleSpreadsheetRepeatParameterTable>();
 
-	private GoogleSpreadsheet(FormDefinition formDefinition,
-			FormServiceCursor fsc, Datastore datastore, User user)
-			throws ODKEntityNotFoundException, ODKDatastoreException {
-		super(formDefinition, new BasicElementFormatter(true, true, true));
-		this.datastore = datastore;
-		this.user = user;
-		this.fsc = fsc;
+    persist();
+    constructorHelper();
+  }
 
-		objectEntity = datastore.getEntity(GoogleSpreadsheetParameterTable
-				.createRelation(datastore, user), fsc.getSubAuri(), user);
+  public void persist() throws ODKEntityPersistException {
+    ds.putEntities(repeatElementTableIds, user);
+    ds.putEntity(objectEntity, user);
+    ds.putEntity(fsc, user);
+  }
 
-		spreadsheetService = new SpreadsheetService(
-				ServletConsts.APPLICATION_NAME);
-		spreadsheetService.setAuthSubToken(getAuthToken(), null);
-		// TODO: REMOVE after bug is fixed
-		// http://code.google.com/p/gdata-java-client/issues/detail?id=103
-		spreadsheetService.setProtocolVersion(SpreadsheetService.Versions.V1);
+  public void delete() throws ODKDatastoreException {
+    // remove spreadsheet permission as no longer needed
+    // TODO: test that the revoke REALLY works, can be easy to miss since we ignore exception
+    try {
+      OAuthToken token = getAuthToken();
+      GoogleOAuthParameters oauthParameters = new GoogleOAuthParameters();
+      oauthParameters.setOAuthConsumerKey(ServletConsts.OAUTH_CONSUMER_KEY);
+      oauthParameters.setOAuthConsumerSecret(ServletConsts.OAUTH_CONSUMER_SECRET);
+      oauthParameters.setOAuthToken(token.getToken());
+      oauthParameters.setOAuthTokenSecret(token.getTokenSecret());
+      GoogleOAuthHelper oauthHelper = new GoogleOAuthHelper(new OAuthHmacSha1Signer());
 
-		headerFormatter = new BasicHeaderFormatter(true, true, true);
-		headers = headerFormatter.generateHeaders(formDefinition,
-				formDefinition.getTopLevelGroup(), null);
-	}
+      oauthHelper.revokeToken(oauthParameters);
+    } catch (OAuthException e) {
+      // just moving on, as we still want to delete
+      e.printStackTrace();
+    }
 
-	public GoogleSpreadsheet(FormDefinition formDefinition, String name,
-			String spreadKey, String authToken, 
-			ExternalServiceOption externalServiceOption,
-			Datastore datastore, User user) throws ODKDatastoreException {
-		super(formDefinition, new BasicElementFormatter(true, true, true));
-		this.datastore = datastore;
-		this.user = user;
-		fsc = datastore.createEntityUsingRelation(FormServiceCursor
-				.createRelation(datastore, user), null, user);
-		objectEntity = datastore.createEntityUsingRelation(
-				GoogleSpreadsheetParameterTable.createRelation(datastore, user),
-				new EntityKey(fsc, fsc.getUri()), user);
-		fsc.setSubAuri(objectEntity.getUri());
-		fsc.setServiceClassname(GoogleSpreadsheet.class.getCanonicalName());
-		fsc.setExternalServiceOption(externalServiceOption);
-		fsc.setEstablishmentDateTime(new Date());
-		fsc.setUploadCompleted(false);
-		objectEntity.setAuthToken(authToken);
-		objectEntity.setSpreadsheetName(name);
-		objectEntity.setSpreadsheetKey(spreadKey);
-		updateReadyValue();
+    List<EntityKey> keys = new ArrayList<EntityKey>();
+    for (GoogleSpreadsheetRepeatParameterTable repeat : repeatElementTableIds) {
+      keys.add(new EntityKey(repeat, repeat.getUri()));
+    }
+    ds.deleteEntities(keys, user);
+    ds.deleteEntity(new EntityKey(objectEntity, objectEntity.getUri()), user);
+    ds.deleteEntity(new EntityKey(fsc, fsc.getUri()), user);
+  }
 
-		spreadsheetService = new SpreadsheetService(
-				ServletConsts.APPLICATION_NAME);
-		spreadsheetService.setAuthSubToken(getAuthToken(), null);
-		// TODO: REMOVE after bug is fixed
-		// http://code.google.com/p/gdata-java-client/issues/detail?id=103
-		spreadsheetService.setProtocolVersion(SpreadsheetService.Versions.V1);
+  public Boolean getReady() {
+    return objectEntity.getReady();
+  }
 
-		headerFormatter = new BasicHeaderFormatter(true, true, true);
-		headers = headerFormatter.generateHeaders(formDefinition,
-				formDefinition.getTopLevelGroup(), null);
+  public void updateReadyValue() {
+    OAuthToken authToken = getAuthToken();
+    boolean ready = (getSpreadsheetName() != null) && (getSpreadsheetKey() != null)
+        && (authToken.getToken() != null) && (authToken.getTokenSecret() != null);
+    objectEntity.setReady(ready);
+  }
 
-		datastore.putEntity(objectEntity, user);
-		datastore.putEntity(fsc, user);
-	}
+  public String getSpreadsheetName() {
+    return objectEntity.getSpreadsheetName();
+  }
 
-	public void persist() throws ODKEntityPersistException {
-		datastore.putEntity(objectEntity, user);
-		datastore.putEntity(fsc, user);
-	}
+  public String getSpreadsheetKey() {
+    return objectEntity.getSpreadsheetKey();
+  }
 
-	public void delete() throws ODKDatastoreException {
-		datastore.deleteEntity(new EntityKey(objectEntity, objectEntity
-				.getUri()), user);
-		datastore.deleteEntity(new EntityKey(fsc, fsc.getUri()), user);
-	}
+  public void setAuthToken(OAuthToken authToken) {
+    objectEntity.setAuthToken(authToken.getToken());
+    objectEntity.setAuthTokenSecret(authToken.getTokenSecret());
+  }
 
-	public Boolean getReady() {
-		return objectEntity.getReady();
-	}
+  public OAuthToken getAuthToken() {
+    return new OAuthToken(objectEntity.getAuthToken(), objectEntity.getAuthTokenSecret());
+  }
 
-	public void updateReadyValue() {
-		boolean ready = (getSpreadsheetName() != null)
-				&& (getSpreadsheetKey() != null) && (getAuthToken() != null);
-		objectEntity.setReady(ready);
-	}
+  public void generateWorksheets() throws ODKDatastoreException, IOException, ServiceException {
 
-	public String getSpreadsheetName() {
-		return objectEntity.getSpreadsheetName();
-	}
+    // retrieve pre-existing worksheets
+    URL url = new URL(SpreadsheetConsts.SPREADSHEETS_FEED
+        + URLEncoder.encode(getSpreadsheetKey(), "UTF-8"));
+    com.google.gdata.data.spreadsheet.SpreadsheetEntry entry = spreadsheetService.getEntry(url,
+        com.google.gdata.data.spreadsheet.SpreadsheetEntry.class);
+    List<WorksheetEntry> preExistingWorksheets = entry.getWorksheets();
 
-	public String getSpreadsheetKey() {
-		return objectEntity.getSpreadsheetKey();
-	}
+    // create top level worksheet
+    FormElementModel topLevelGroupElement = form.getTopLevelGroupElement();
+    List<String> headers = headerFormatter.generateHeaders(form, topLevelGroupElement, null);
+    WorksheetEntry topLevelWorksheet = executeCreateWorksheet(entry, form.getFormId(), headers);
+    objectEntity.setTopLevelWorksheetId(extractWorksheetId(topLevelWorksheet));
 
-	public String getAuthToken() {
-		return objectEntity.getAuthToken();
-	}
+    // delete pre-existing worksheets
+    for (WorksheetEntry worksheet : preExistingWorksheets) {
+      worksheet.getSelf().delete();
+    }
 
-	public void setAuthToken(String authToken) {
-		objectEntity.setAuthToken(authToken);
-	}
+    // get relation prototype for creating repeat parameter table entries
+    GoogleSpreadsheetRepeatParameterTable repeatPrototype = GoogleSpreadsheetRepeatParameterTable
+        .createRelation(ds, user);
 
-	public void generateWorksheet(WorksheetEntry worksheet) throws IOException,
-			ServiceException, BatchInterruptedException, MalformedURLException,
-			ODKIncompleteSubmissionData {
+    // create repeat worksheets
+    List<FormElementModel> repeatGroupElements = form.getRepeatGroupsInModel();
+    for (FormElementModel repeatGroupElement : repeatGroupElements) {
+      // create the worksheet
+      headers = headerFormatter.generateHeaders(form, repeatGroupElement, null);
+      WorksheetEntry repeatWorksheet = executeCreateWorksheet(entry, repeatGroupElement
+          .getElementName(), headers);
 
-		// size worksheet correctly
-		worksheet.setTitle(new PlainTextConstruct(formDefinition.getFormId()));
-		worksheet.setRowCount(2);
-		worksheet.setColCount(headers.size());
-		worksheet.update();
+      // add the worksheet id to the repeat element table -- NOTE: the added
+      // entry is not actually persisted here
+      GoogleSpreadsheetRepeatParameterTable t = ds.createEntityUsingRelation(repeatPrototype, null,
+          user);
+      t.setDomAuri(objectEntity.getUri());
+      t.setFormElementKey(repeatGroupElement.constructFormElementKey(form));
+      t.setWorksheetId(extractWorksheetId(repeatWorksheet));
+      repeatElementTableIds.add(t);
+    }
 
-		CellQuery query = new CellQuery(worksheet.getCellFeedUrl());
-		query.setMinimumRow(1);
-		query.setMaximumRow(1);
-		query.setMinimumCol(1);
-		query.setMaximumCol(headers.size());
-		query.setReturnEmpty(true);
+    // persist the changes we have made to the repeat element table (changes
+    // from calling executeCreateWorksheet)
+    persist();
+  }
 
-		CellFeed cellFeed = spreadsheetService.query(query, CellFeed.class);
-		CellFeed batchFeed = new CellFeed();
+  private String extractWorksheetId(WorksheetEntry entry) throws IOException, ServiceException {
+    String[] urlElements = entry.getSelf().getId().split("/");
+    String worksheetId = urlElements[urlElements.length - 1];
+    return worksheetId;
+  }
 
-		List<CellEntry> cells = cellFeed.getEntries();
-		int index = 0;
-		for (CellEntry cell : cells) {
-			cell.changeInputValueLocal(headers.get(index));
-			BatchUtils.setBatchId(cell, Integer.toString(index));
-			BatchUtils.setBatchOperationType(cell, BatchOperationType.UPDATE);
-			batchFeed.getEntries().add(cell);
-			index++;
-		}
+  private WorksheetEntry executeCreateWorksheet(
+      com.google.gdata.data.spreadsheet.SpreadsheetEntry entry, String title, List<String> headers)
+      throws IOException, ServiceException {
 
-		// Submit the batch request.
-		Link batchLink = cellFeed.getLink(Link.Rel.FEED_BATCH, Link.Type.ATOM);
-		spreadsheetService.batch(new URL(batchLink.getHref()), batchFeed);
-	}
+    // create the worksheet
+    WorksheetEntry uncreatedWorksheet = new WorksheetEntry();
+    uncreatedWorksheet.setTitle(new PlainTextConstruct(title));
+    uncreatedWorksheet.setRowCount(2);
+    uncreatedWorksheet.setColCount(headers.size());
+    URL worksheetFeedUrl = entry.getWorksheetFeedUrl();
+    WorksheetEntry createdWorksheet = spreadsheetService.insert(worksheetFeedUrl,
+        uncreatedWorksheet);
 
-	@Override
-	public void insertData(Submission submission)
-			throws ODKExternalServiceException {
+    // update the cells of the worksheet with the proper headers
+    // first query the worksheet for the cells we need to change
+    CellQuery query = new CellQuery(createdWorksheet.getCellFeedUrl());
+    query.setMinimumRow(1);
+    query.setMaximumRow(1);
+    query.setMinimumCol(1);
+    query.setMaximumCol(headers.size());
+    query.setReturnEmpty(true);
+    CellFeed existingCellFeed = spreadsheetService.query(query, CellFeed.class);
+    // create the new cell feed based on our headers
+    CellFeed batchRequest = new CellFeed();
+    List<CellEntry> cells = existingCellFeed.getEntries();
+    int index = 0;
+    for (CellEntry cell : cells) {
+      String header = headers.get(index);
+      header = removeUnsafeCharsFromHeader(header);
+      cell.changeInputValueLocal(header);
+      BatchUtils.setBatchId(cell, Integer.toString(index));
+      BatchUtils.setBatchOperationType(cell, BatchOperationType.UPDATE);
+      batchRequest.getEntries().add(cell);
+      index++;
+    }
+    // submit the cell feed update as a batch operation
+    Link batchLink = existingCellFeed.getLink(Link.Rel.FEED_BATCH, Link.Type.ATOM);
+    CellFeed batchResponse = spreadsheetService.batch(new URL(batchLink.getHref()), batchRequest);
 
-		// TODO: Waylon -- not sure what this is doing w.r.t. FusionTable
-		try {
-			WorksheetEntry worksheet = getWorksheet(formDefinition.getFormId());
-			ListEntry newEntry = new ListEntry();
-			CustomElementCollection values = newEntry.getCustomElements();
+    // Check the results
+    for (CellEntry cellEntry : batchResponse.getEntries()) {
+      String batchId = BatchUtils.getBatchId(cellEntry);
+      if (!BatchUtils.isSuccess(cellEntry)) {
+        BatchStatus status = BatchUtils.getBatchStatus(cellEntry);
+        System.out.printf("%s failed (%s) %s", batchId, status.getReason(), status.getContent());
+        // TODO: throw exception?
+      }
+    }
 
-			Row row = submission.getFormattedValuesAsRow(null, formatter);
-			List<String> formattedValues = row.getFormattedValues();
+    return createdWorksheet;
+  }
 
-			for (int colIndex = 0; colIndex < headers.size(); colIndex++) {
-				String headerString = headers.get(colIndex);
-				String rowString = formattedValues.get(colIndex);
-				values.setValueLocal(headerString,
-						(rowString == null) ? BasicConsts.SPACE : rowString);
-			}
+  @Override
+  public void insertData(Submission submission) throws ODKExternalServiceException {
+    if (getReady())
+    {
+      try {
+        // upload base submission values
+        List<String> headers = headerFormatter.generateHeaders(form, form.getTopLevelGroupElement(),
+            null);
+        WorksheetEntry topLevelWorksheet = getWorksheet(objectEntity.getTopLevelWorksheetId());
+        executeInsertData(submission, headers, topLevelWorksheet);
+  
+        // upload repeat values
+        for (GoogleSpreadsheetRepeatParameterTable tableId : repeatElementTableIds) {
+          FormElementKey elementKey = tableId.getFormElementKey();
+          FormElementModel element = FormElementModel.retrieveFormElementModel(form, elementKey);
+          headers = headerFormatter.generateHeaders(form, element, null);
+  
+          List<SubmissionValue> values = submission.findElementValue(element);
+          for (SubmissionValue value : values) {
+            if (value instanceof RepeatSubmissionType) {
+              RepeatSubmissionType repeat = (RepeatSubmissionType) value;
+              if (repeat.getElement().equals(element)) {
+                for (SubmissionSet set : repeat.getSubmissionSets()) {
+                  WorksheetEntry repeatWorksheet = getWorksheet(tableId.getWorksheetId());
+                  executeInsertData(set, headers, repeatWorksheet);
+                }
+              }
+            } else {
+              System.out.println("ERROR: How did a non Repeat Submission Type get in the for loop?");
+            }
+          }
+        }
+      } catch (Exception e) {
+        throw new ODKExternalServiceException(e);
+      }
+    }
+  }
 
-			spreadsheetService.insert(worksheet.getListFeedUrl(), newEntry);
-		} catch (Exception e) {
-			throw new ODKExternalServiceException(e.getCause());
-		}
-	}
+  private void executeInsertData(SubmissionSet set, List<String> headers, WorksheetEntry worksheet)
+      throws ODKDatastoreException, IOException, ServiceException {
+    ListEntry newEntry = new ListEntry();
+    CustomElementCollection values = newEntry.getCustomElements();
 
-	public WorksheetEntry getWorksheet(String worksheetTitle)
-			throws MalformedURLException, IOException, ServiceException {
+    Row row = set.getFormattedValuesAsRow(null, formatter, false);
+    List<String> formattedValues = row.getFormattedValues();
 
-		// get worksheet
-		WorksheetEntry worksheet = null;
-		URL worksheetFeedUrl = new URL(ServletConsts.WORKSHEETS_FEED_PREFIX
-				+ getSpreadsheetKey() + ServletConsts.FEED_PERMISSIONS);
-		WorksheetFeed worksheetFeed = spreadsheetService.getFeed(
-				worksheetFeedUrl, WorksheetFeed.class);
-		List<WorksheetEntry> worksheets = worksheetFeed.getEntries();
-		for (WorksheetEntry wksheet : worksheets) {
-			if (wksheet.getTitle().getPlainText().equals(worksheetTitle)) {
-				worksheet = wksheet;
-			}
-		}
-		return worksheet;
-	}
+    for (int colIndex = 0; colIndex < headers.size(); colIndex++) {
+      String headerString = headers.get(colIndex);
+      headerString = removeUnsafeCharsFromHeader(headerString);
+      String rowString = formattedValues.get(colIndex);
+      values.setValueLocal(headerString, (rowString == null) ? BasicConsts.SPACE : rowString);
+    }
 
-	/**
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
-	@Override
-	public boolean equals(Object obj) {
-		if (!(obj instanceof GoogleSpreadsheet)) {
-			return false;
-		}
-		GoogleSpreadsheet other = (GoogleSpreadsheet) obj;
-		return (objectEntity == null ? (other.objectEntity == null)
-				: (objectEntity.equals(other.objectEntity)))
-				&& (fsc == null ? (other.fsc == null) : (fsc.equals(other.fsc)));
-	}
+    spreadsheetService.insert(worksheet.getListFeedUrl(), newEntry);
+  }
 
-	/**
-	 * @see java.lang.Object#hashCode()
-	 */
-	@Override
-	public int hashCode() {
-		int hashCode = 13;
-		if (objectEntity != null)
-			hashCode += objectEntity.hashCode();
-		if (fsc != null)
-			hashCode += fsc.hashCode();
-		return hashCode;
-	}
+  // TODO: figure out better way to handle unsafe chars.
+  private String removeUnsafeCharsFromHeader(String header) {
+    return header.replaceAll(SpreadsheetConsts.UNSUPPORTED_CHAR_CLASS,
+        SpreadsheetConsts.REPLACEMENT_CHAR);
+  }
 
-	@Override
-	public void setUploadCompleted() throws ODKEntityPersistException {
-		fsc.setUploadCompleted(true);
-		datastore.putEntity(fsc, user);
-	}
+  public WorksheetEntry getWorksheet(String worksheetId) throws IOException, ServiceException {
+    URL url = new URL(SpreadsheetConsts.WORKSHEETS_FEED
+        + URLEncoder.encode(getSpreadsheetKey(), "UTF-8") + SpreadsheetConsts.FEED_PERMISSIONS
+        + URLEncoder.encode(worksheetId, "UTF-8"));
+    WorksheetEntry worksheetEntry = spreadsheetService.getEntry(url, WorksheetEntry.class);
+    return worksheetEntry;
+  }
+
+  public static GoogleSpreadsheet createSpreadsheet(Form form, OAuthToken authToken,
+      String spreadsheetName, ExternalServiceOption externalServiceOption, Datastore datastore,
+      User user) throws ODKDatastoreException, ODKExternalServiceException {
+
+    // setup service
+    DocsService service = new DocsService(ServletConsts.APPLICATION_NAME);
+    try {
+      GoogleOAuthParameters oauthParameters = new GoogleOAuthParameters();
+      oauthParameters.setOAuthConsumerKey(ServletConsts.OAUTH_CONSUMER_KEY);
+      oauthParameters.setOAuthConsumerSecret(ServletConsts.OAUTH_CONSUMER_SECRET);
+      oauthParameters.setOAuthToken(authToken.getToken());
+      oauthParameters.setOAuthTokenSecret(authToken.getTokenSecret());
+      service.setOAuthCredentials(oauthParameters, new OAuthHmacSha1Signer());
+    } catch (OAuthException e) {
+      // TODO
+      e.printStackTrace();
+    }
+
+    // create spreadsheet
+    com.google.gdata.data.docs.SpreadsheetEntry createdEntry = new SpreadsheetEntry();
+    createdEntry.setTitle(new PlainTextConstruct(spreadsheetName));
+
+    com.google.gdata.data.docs.SpreadsheetEntry updatedEntry;
+    try {
+      updatedEntry = service.insert(new URL(SpreadsheetConsts.DOC_FEED), createdEntry);
+    } catch (Exception e) {
+      throw new ODKExternalServiceException(e);
+    }
+
+    // get key
+    String spreadKey = updatedEntry.getDocId();
+
+    return new GoogleSpreadsheet(form, spreadsheetName, spreadKey, authToken,
+        externalServiceOption, datastore, user);
+  }
+
+  @Override
+  public void setUploadCompleted() throws ODKEntityPersistException {
+    fsc.setUploadCompleted(true);
+    ds.putEntity(fsc, user);
+  }
+
+  /**
+   * @see java.lang.Object#equals(java.lang.Object)
+   */
+  @Override
+  public boolean equals(Object obj) {
+    if (!(obj instanceof GoogleSpreadsheet)) {
+      return false;
+    }
+    GoogleSpreadsheet other = (GoogleSpreadsheet) obj;
+    return (objectEntity == null ? (other.objectEntity == null) : (objectEntity
+        .equals(other.objectEntity)))
+        && (fsc == null ? (other.fsc == null) : (fsc.equals(other.fsc)));
+  }
+
+  /**
+   * @see java.lang.Object#hashCode()
+   */
+  @Override
+  public int hashCode() {
+    int hashCode = 13;
+    if (objectEntity != null)
+      hashCode += objectEntity.hashCode();
+    if (fsc != null)
+      hashCode += fsc.hashCode();
+    return hashCode;
+  }
+
 }

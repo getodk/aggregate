@@ -17,35 +17,38 @@ package org.opendatakit.aggregate.servlet;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.opendatakit.aggregate.ContextFactory;
+import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.ServletConsts;
-import org.opendatakit.aggregate.datamodel.FormDefinition;
+import org.opendatakit.aggregate.constants.externalservice.ExternalServiceConsts;
+import org.opendatakit.aggregate.constants.externalservice.ExternalServiceOption;
+import org.opendatakit.aggregate.constants.externalservice.FusionTableConsts;
 import org.opendatakit.aggregate.exception.ODKExternalServiceAuthenticationError;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
 import org.opendatakit.aggregate.exception.ODKExternalServiceNotAuthenticated;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
-import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
 import org.opendatakit.aggregate.externalservice.FusionTable;
-import org.opendatakit.aggregate.externalservice.constants.ExternalServiceOption;
-import org.opendatakit.aggregate.query.submission.QueryByDate;
-import org.opendatakit.aggregate.submission.Submission;
-import org.opendatakit.common.constants.BasicConsts;
+import org.opendatakit.aggregate.externalservice.OAuthToken;
+import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.task.UploadSubmissions;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
-import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.security.UserService;
 
+/**
+ * 
+ * @author wbrunette@gmail.com
+ * @author mitchellsundt@gmail.com
+ * 
+ */
 public class FusionTableServlet extends ServletUtilBase {
 
-
-  
   /**
    * Serial number for serialization
    */
@@ -60,7 +63,7 @@ public class FusionTableServlet extends ServletUtilBase {
    * Title for generated webpage
    */
   private static final String TITLE_INFO = "Create Google Fusion Table";
-  
+
   /**
    * Handler for HTTP Get request to create a google spreadsheet
    * 
@@ -76,88 +79,71 @@ public class FusionTableServlet extends ServletUtilBase {
       return;
     }
 
-    UserService userService = (UserService) ContextFactory.get().getBean(
-        ServletConsts.USER_BEAN);
+    UserService userService = (UserService) ContextFactory.get().getBean(BeanDefs.USER_BEAN);
     User user = userService.getCurrentUser();
 
     // get parameters
-    String formId = getParameter(req, ServletConsts.ODK_ID);
+    String formId = getParameter(req, ServletConsts.FORM_ID);
     String esTypeString = getParameter(req, ServletConsts.EXTERNAL_SERVICE_TYPE);
 
     ExternalServiceOption esType = ExternalServiceOption.valueOf(esTypeString);
-    
+
     // store parameters for web redirect
     Map<String, String> params = new HashMap<String, String>();
-    params.put(ServletConsts.ODK_ID, formId);
+    params.put(ServletConsts.FORM_ID, formId);
     params.put(ServletConsts.EXTERNAL_SERVICE_TYPE, esTypeString);
 
     // verify user has been authorized for google fusion tables
-    String authToken = null;
+    OAuthToken authToken = null;
     try {
-       authToken = verifyGDataAuthorization(req, resp, ServletConsts.FUSION_SCOPE);
+      authToken = verifyGDataAuthorization(req, resp);
     } catch (ODKExternalServiceAuthenticationError e) {
-       return; // verifyGDataAuthroization function formats response
+      return; // verifyGDataAuthroization function formats response
     } catch (ODKExternalServiceNotAuthenticated e) {
-       // do nothing already set to null
+      // do nothing already set to null
     }
 
     // need to obtain authorization to fusion table
     if (authToken == null) {
-       beginBasicHtmlResponse(TITLE_INFO, resp, req, true); // header info
-       String authButton = generateAuthButton(ServletConsts.FUSION_SCOPE,
-             ServletConsts.AUTHORIZE_FUSION_CREATION, params, req, resp);
-       resp.getWriter().print(authButton);
-       finishBasicHtmlResponse(resp);
-       return;
+      beginBasicHtmlResponse(TITLE_INFO, resp, req, true); // header info
+      String authButton = generateAuthButton(ExternalServiceConsts.AUTHORIZE_FUSION_CREATION,
+          params, req, resp, FusionTableConsts.FUSION_SCOPE);
+      resp.getWriter().print(authButton);
+      finishBasicHtmlResponse(resp);
+      return;
     }
 
-
-    // get form
-    Datastore ds = (Datastore) ContextFactory.get().getBean(ServletConsts.DATASTORE_BEAN);
-    FormDefinition fd;
-      fd = FormDefinition.getFormDefinition(formId, ds, user);
-      if ( fd == null ) {
-       	odkIdNotFoundError(resp);
-       	return;
-      }
-    
+    // create fusion table
+    Datastore ds = (Datastore) ContextFactory.get().getBean(BeanDefs.DATASTORE_BEAN);
     FusionTable fusion;
+
     try {
-      fusion = new FusionTable(fd, authToken, esType, ds, user);
-    } catch (ODKEntityPersistException e1) {
-      // TODO Auto-generated catch block
-      e1.printStackTrace();
+      Form form = Form.retrieveForm(formId, ds, user);
+      fusion = FusionTable.createFusionTable(form, authToken, esType, getServerURL(req), ds, user);
+    } catch (ODKFormNotFoundException e) {
+      odkIdNotFoundError(resp);
       return;
     } catch (ODKExternalServiceException e1) {
-      // TODO Auto-generated catch block
+      resp.sendError(HttpServletResponse.SC_BAD_REQUEST, e1.getMessage());
       e1.printStackTrace();
       return;
     } catch (ODKDatastoreException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-		return;
-	}
-    
+      resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+      e.printStackTrace();
+      return;
+    }
+
+    // upload data to fusion table
     if (!esType.equals(ExternalServiceOption.STREAM_ONLY)) {
       try {
-        QueryByDate query = new QueryByDate(fd, BasicConsts.EPOCH, false,
-                  ServletConsts.FETCH_LIMIT, ds, user);
-        List<Submission> submissions = query.getResultSubmissions();
-        fusion.sendSubmissions(submissions);
-      } catch (ODKFormNotFoundException e) {
-        // TODO Auto-generated catch block
+        UploadSubmissions uploadTask = (UploadSubmissions) ContextFactory.get().getBean(
+            BeanDefs.UPLOAD_TASK_BEAN);
+        uploadTask.createFormUploadTask(fusion.getFormServiceCursor(), user);
+      } catch (Exception e) {
+        resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
         e.printStackTrace();
-      } catch (ODKIncompleteSubmissionData e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-      } catch (ODKExternalServiceException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-      } catch (ODKDatastoreException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-	}
-      
+        return;
+      }
     }
 
     resp.sendRedirect(ServletConsts.WEB_ROOT);

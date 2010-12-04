@@ -13,254 +13,279 @@
  */
 package org.opendatakit.aggregate.externalservice;
 
-import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import org.opendatakit.aggregate.datamodel.FormDefinition;
-import org.opendatakit.aggregate.externalservice.constants.ExternalServiceOption;
+import org.opendatakit.aggregate.constants.externalservice.ExternalServiceOption;
+import org.opendatakit.aggregate.constants.externalservice.ExternalServiceType;
+import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.Datastore;
-import org.opendatakit.common.persistence.EntityKey;
 import org.opendatakit.common.persistence.Query;
+import org.opendatakit.common.persistence.StaticAssociationBase;
 import org.opendatakit.common.persistence.Query.FilterOperation;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.security.User;
 
-public final class FormServiceCursor extends CommonFieldsBase {
+/**
+ * 
+ * @author wbrunette@gmail.com
+ * @author mitchellsundt@gmail.com
+ * 
+ */
+public final class FormServiceCursor extends StaticAssociationBase {
 
-	private static final String TABLE_NAME = "_form_service_cursor";
-	/*
-	 * Property Names for datastore
+  private static final String TABLE_NAME = "_form_service_cursor";
+  /*
+   * Property Names for datastore
+   */
+  private static final DataField EXT_SERVICE_TYPE_PROPERTY = new DataField("EXT_SERVICE_TYPE",
+      DataField.DataType.STRING, false, 200L);
+  private static final DataField EXTERNAL_SERVICE_OPTION = new DataField("EXTERNAL_SERVICE_OPTION",
+      DataField.DataType.STRING, false, 80L);
+  private static final DataField ESTABLISHMENT_DATETIME = new DataField("ESTABLISHMENT_DATETIME",
+      DataField.DataType.DATETIME, false);
+  private static final DataField UPLOAD_COMPLETED_PROPERTY = new DataField("UPLOAD_COMPLETED",
+      DataField.DataType.BOOLEAN, true);
+  private static final DataField LAST_UPLOAD_PERSISTENCE_CURSOR_PROPERTY = new DataField(
+      "LAST_UPLOAD_PERSISTENCE_CURSOR", DataField.DataType.STRING, true, 4096L);
+  private static final DataField LAST_UPLOAD_KEY_PROPERTY = new DataField("LAST_UPLOAD_KEY",
+      DataField.DataType.STRING, true, 4096L);
+  private static final DataField LAST_STREAMING_PERSISTENCE_CURSOR_PROPERTY = new DataField(
+      "LAST_STREAMING_PERSISTENCE_CURSOR", DataField.DataType.STRING, true, 4096L);
+  private static final DataField LAST_STREAMING_KEY_PROPERTY = new DataField("LAST_STREAMING_KEY",
+      DataField.DataType.STRING, true, 4096L);
+  private static final DataField FORM_ID_PROPERTY = new DataField("FORM_ID",
+      DataField.DataType.STRING, true, 4096L);
+
+  public final DataField externalServiceType;
+  public final DataField externalServiceOption;
+  public final DataField establishmentDateTime;
+  public final DataField uploadCompleted;
+  public final DataField lastUploadPersistenceCursor;
+  public final DataField lastUploadKey;
+  public final DataField lastStreamingPersistenceCursor;
+  public final DataField lastStreamingKey;
+  public final DataField formId;
+
+	/**
+	 * Construct a relation prototype.
+	 * 
+	 * @param databaseSchema
+	 * @param tableName
 	 */
-	private static final DataField SERVICE_CLASSNAME_PROPERTY = new DataField(
-			"SERVICE_CLASSNAME", DataField.DataType.STRING, false, 200L);
-	private static final DataField EXTERNAL_SERVICE_OPTION = new DataField(
-			"EXTERNAL_SERVICE_OPTION", DataField.DataType.STRING, false, 80L);
-	private static final DataField ESTABLISHMENT_DATETIME = new DataField(
-			"ESTABLISHMENT_DATETIME", DataField.DataType.DATETIME, false);
-	private static final DataField UPLOAD_COMPLETED_PROPERTY = new DataField(
-			"UPLOAD_COMPLETED", DataField.DataType.BOOLEAN, true);
-	private static final DataField LAST_UPLOAD_PERSISTENCE_CURSOR_PROPERTY = new DataField(
-			"LAST_UPLOAD_PERSISTENCE_CURSOR", DataField.DataType.STRING, true,
-			4096L);
-	private static final DataField LAST_UPLOAD_KEY_PROPERTY = new DataField(
-			"LAST_UPLOAD_KEY", DataField.DataType.STRING, true, 4096L);
-	private static final DataField LAST_STREAMING_PERSISTENCE_CURSOR_PROPERTY = new DataField(
-			"LAST_STREAMING_PERSISTENCE_CURSOR", DataField.DataType.STRING,
-			true, 4096L);
-	private static final DataField LAST_STREAMING_KEY_PROPERTY = new DataField(
-			"LAST_STREAMING_KEY", DataField.DataType.STRING, true, 4096L);
+  private FormServiceCursor(String schemaName) {
+    super(schemaName, TABLE_NAME);
+    fieldList.add(externalServiceType = new DataField(EXT_SERVICE_TYPE_PROPERTY));
+    fieldList.add(externalServiceOption = new DataField(EXTERNAL_SERVICE_OPTION));
+    fieldList.add(establishmentDateTime = new DataField(ESTABLISHMENT_DATETIME));
+    fieldList.add(uploadCompleted = new DataField(UPLOAD_COMPLETED_PROPERTY));
+    fieldList.add(lastUploadPersistenceCursor = new DataField(
+        LAST_UPLOAD_PERSISTENCE_CURSOR_PROPERTY));
+    fieldList.add(lastUploadKey = new DataField(LAST_UPLOAD_KEY_PROPERTY));
+    fieldList.add(lastStreamingPersistenceCursor = new DataField(
+        LAST_STREAMING_PERSISTENCE_CURSOR_PROPERTY));
+    fieldList.add(lastStreamingKey = new DataField(LAST_STREAMING_KEY_PROPERTY));
+    fieldList.add(formId = new DataField(FORM_ID_PROPERTY));
+  }
 
-	public final DataField serviceClassname;
-	public final DataField externalServiceOption;
-	public final DataField establishmentDateTime;
-	public final DataField uploadCompleted;
-	public final DataField lastUploadPersistenceCursor;
-	public final DataField lastUploadKey;
-	public final DataField lastStreamingPersistenceCursor;
-	public final DataField lastStreamingKey;
+	/**
+	 * Construct an empty entity.  Only called via {@link #getEmptyRow(User)}
+	 * 
+	 * @param ref
+	 * @param user
+	 */
+  private FormServiceCursor(FormServiceCursor ref, User user) {
+    super(ref, user);
+    externalServiceType = ref.externalServiceType;
+    externalServiceOption = ref.externalServiceOption;
+    establishmentDateTime = ref.establishmentDateTime;
+    uploadCompleted = ref.uploadCompleted;
+    lastUploadPersistenceCursor = ref.lastUploadPersistenceCursor;
+    lastUploadKey = ref.lastUploadKey;
+    lastStreamingPersistenceCursor = ref.lastStreamingPersistenceCursor;
+    lastStreamingKey = ref.lastStreamingKey;
+    formId = ref.formId;
+  }
 
-	private FormServiceCursor(String schemaName) {
-		super(schemaName, TABLE_NAME,
-				CommonFieldsBase.BaseType.STATIC_ASSOCIATION);
-		fieldList.add(serviceClassname = new DataField(
-				SERVICE_CLASSNAME_PROPERTY));
-		fieldList.add(externalServiceOption = new DataField(
-				EXTERNAL_SERVICE_OPTION));
-		fieldList.add(establishmentDateTime = new DataField(
-				ESTABLISHMENT_DATETIME));
-		fieldList
-				.add(uploadCompleted = new DataField(UPLOAD_COMPLETED_PROPERTY));
-		fieldList.add(lastUploadPersistenceCursor = new DataField(
-				LAST_UPLOAD_PERSISTENCE_CURSOR_PROPERTY));
-		fieldList.add(lastUploadKey = new DataField(LAST_UPLOAD_KEY_PROPERTY));
-		fieldList.add(lastStreamingPersistenceCursor = new DataField(
-				LAST_STREAMING_PERSISTENCE_CURSOR_PROPERTY));
-		fieldList.add(lastStreamingKey = new DataField(
-				LAST_STREAMING_KEY_PROPERTY));
-	}
+  // Only called from within the persistence layer.
+  @Override
+  public FormServiceCursor getEmptyRow(User user) {
+	return new FormServiceCursor(this, user);
+  }
 
-	// for creating empty rows
-	public FormServiceCursor(FormServiceCursor ref) {
-		super(ref);
-		serviceClassname = ref.serviceClassname;
-		externalServiceOption = ref.externalServiceOption;
-		establishmentDateTime = ref.establishmentDateTime;
-		uploadCompleted = ref.uploadCompleted;
-		lastUploadPersistenceCursor = ref.lastUploadPersistenceCursor;
-		lastUploadKey = ref.lastUploadKey;
-		lastStreamingPersistenceCursor = ref.lastStreamingPersistenceCursor;
-		lastStreamingKey = ref.lastStreamingKey;
-	}
+  public ExternalServiceType getExternalServiceType() {
+    String type = getStringField(externalServiceType);
+    return ExternalServiceType.valueOf(type);
+  }
 
-	public String getServiceClassname() {
-		return getStringField(serviceClassname);
-	}
+  public void setServiceClassname(ExternalServiceType value) {
+    if (!setStringField(externalServiceType, value.toString())) {
+      throw new IllegalArgumentException("overflow externalServiceType");
+    }
+  }
 
-	public void setServiceClassname(String value) {
-		if (!setStringField(serviceClassname, value)) {
-			throw new IllegalArgumentException("overflow serviceClassname");
-		}
-	}
+  public ExternalServiceOption getExternalServiceOption() {
+    return ExternalServiceOption.valueOf(getStringField(externalServiceOption));
+  }
 
-	public ExternalServiceOption getExternalServiceOption() {
-		return ExternalServiceOption
-				.valueOf(getStringField(externalServiceOption));
-	}
+  public void setExternalServiceOption(ExternalServiceOption value) {
+    if (!setStringField(externalServiceOption, value.toString())) {
+      throw new IllegalArgumentException("overflow externalServiceOption");
+    }
+  }
 
-	public void setExternalServiceOption(ExternalServiceOption value) {
-		if (!setStringField(externalServiceOption, value.toString())) {
-			throw new IllegalArgumentException("overflow externalServiceOption");
-		}
-	}
+  public Date getEstablishmentDateTime() {
+    return getDateField(establishmentDateTime);
+  }
 
-	public Date getEstablishmentDateTime() {
-		return getDateField(establishmentDateTime);
-	}
+  public void setEstablishmentDateTime(Date value) {
+    setDateField(establishmentDateTime, value);
+  }
 
-	public void setEstablishmentDateTime(Date value) {
-		setDateField(establishmentDateTime, value);
-	}
+  public Boolean getUploadCompleted() {
+    return getBooleanField(uploadCompleted);
+  }
 
-	public Boolean getUploadCompleted() {
-		return getBooleanField(uploadCompleted);
-	}
+  public void setUploadCompleted(Boolean value) {
+    setBooleanField(uploadCompleted, value);
+  }
 
-	public void setUploadCompleted(Boolean value) {
-		setBooleanField(uploadCompleted, value);
-	}
+  public String getLastUploadPersistenceCursor() {
+    return getStringField(lastUploadPersistenceCursor);
+  }
 
-	public String getLastUploadPersistenceCursor() {
-		return getStringField(lastUploadPersistenceCursor);
-	}
+  public void setLastUploadPersistenceCursor(String value) {
+    if (!setStringField(lastUploadPersistenceCursor, value)) {
+      throw new IllegalArgumentException("overflow lastUploadPersistenceCursor");
+    }
+  }
 
-	public void setLastUploadPersistenceCursor(String value) {
-		if (!setStringField(lastUploadPersistenceCursor, value)) {
-			throw new IllegalArgumentException("overflow lastUploadPersistenceCursor");
-		}
-	}
+  public String getLastUploadKey() {
+    return getStringField(lastUploadKey);
+  }
 
-	public String getLastUploadKey() {
-		return getStringField(lastUploadKey);
-	}
+  public void setLastUploadKey(String value) {
+    if (!setStringField(lastUploadKey, value)) {
+      throw new IllegalArgumentException("overflow lastUploadKey");
+    }
+  }
 
-	public void setLastUploadKey(String value) {
-		if (!setStringField(lastUploadKey, value)) {
-			throw new IllegalArgumentException("overflow lastUploadKey");
-		}
-	}
+  public String getLastStreamingPersistenceCursor() {
+    return getStringField(lastStreamingPersistenceCursor);
+  }
 
-	public String getLastStreamingPersistenceCursor() {
-		return getStringField(lastStreamingPersistenceCursor);
-	}
+  public void setLastStreamingPersistenceCursor(String value) {
+    if (!setStringField(lastStreamingPersistenceCursor, value)) {
+      throw new IllegalArgumentException("overflow lastStreamingPersistenceCursor");
+    }
+  }
 
-	public void setLastStreamingPersistenceCursor(String value) {
-		if (!setStringField(lastStreamingPersistenceCursor, value)) {
-			throw new IllegalArgumentException("overflow lastStreamingPersistenceCursor");
-		}
-	}
+  public String getLastStreamingKey() {
+    return getStringField(lastStreamingKey);
+  }
 
-	public String getLastStreamingKey() {
-		return getStringField(lastStreamingKey);
-	}
+  public void setLastStreamingKey(String value) {
+    if (!setStringField(lastStreamingKey, value)) {
+      throw new IllegalArgumentException("overflow lastStreamingKey");
+    }
+  }
 
-	public void setLastStreamingKey(String value) {
-		if (!setStringField(lastStreamingKey, value)) {
-			throw new IllegalArgumentException("overflow lastStreamingKey");
-		}
-	}
+  public String getServiceAuri() {
+    return getStringField(subAuri);
+  }
 
-	private static FormServiceCursor reference = null;
+  public void setServiceAuri(String value) {
+    if (!setStringField(subAuri, value)) {
+      throw new IllegalArgumentException("overflow serviceAuri");
+    }
+  }
 
-	public static final FormServiceCursor createRelation(Datastore ds, User user)
-			throws ODKDatastoreException {
-		if (reference == null) {
-			// create the reference prototype using the schema of the form data
-			// model object
-			reference = new FormServiceCursor(ds.getDefaultSchemaName());
-			ds.createRelation(reference, user);
-		}
-		return reference;
-	}
+  public String getFormUri() {
+    return getStringField(domAuri);
+  }
 
-	public static final FormServiceCursor createFormServiceCursor(
-			EntityKey formKey, Class<?> serviceClass, CommonFieldsBase service,
-			Datastore ds, User user) throws ODKDatastoreException {
-		FormServiceCursor relationPrototype = createRelation(ds, user);
+  public void setFormUri(String value) {
+    if (!setStringField(domAuri, value)) {
+      throw new IllegalArgumentException("overflow domAuri");
+    }
+  }
 
-		FormServiceCursor c = ds.createEntityUsingRelation(relationPrototype, formKey,
-				user);
+  public String getFormId() {
+    return getStringField(formId);
+  }
 
-		c.setDomAuri(formKey.getKey());
-		c.setSubAuri(service.getUri());
-		c.setServiceClassname(serviceClass.getName());
+  public void setFormId(String value) {
+    if (!setStringField(formId, value)) {
+      throw new IllegalArgumentException("overflow formId");
+    }
+  }
+  
+  public ExternalService getExternalService(String baseWebServerUrl, Datastore ds, User user) throws ODKEntityNotFoundException {
+    return getExternalServiceType().constructExternalService(this, baseWebServerUrl, ds, user);
+  }
+  
+  private static FormServiceCursor relation = null;
 
-		return c;
-	}
+  private static final FormServiceCursor createRelation(Datastore ds, User user)
+      throws ODKDatastoreException {
+    if (relation == null) {
+      FormServiceCursor relationPrototype;
+      relationPrototype = new FormServiceCursor(ds.getDefaultSchemaName());
+      ds.createRelation(relationPrototype, user); // may throw exception...
+      // at this point, the prototype has become fully populated
+      relation = relationPrototype;  // set static variable only upon success...
+    }
+    return relation;
+  }
 
-	public static final List<ExternalService> getExternalServicesForForm(
-			EntityKey formKey, FormDefinition fd, Datastore ds, User user)
-			throws ODKDatastoreException {
-		FormServiceCursor relationPrototype = createRelation(ds, user);
-		Query query = ds.createQuery(relationPrototype, user);
-		query.addFilter(relationPrototype.domAuri, FilterOperation.EQUAL, formKey
-				.getKey());
-		List<ExternalService> esList = new ArrayList<ExternalService>();
+  public static final FormServiceCursor createFormServiceCursor(Form form,
+      ExternalServiceType type, CommonFieldsBase service, Datastore ds, User user)
+      throws ODKDatastoreException {
+    FormServiceCursor relationPrototype = createRelation(ds, user);
 
-		List<? extends CommonFieldsBase> fscList = query.executeQuery(0);
-		for (CommonFieldsBase cb : fscList) {
-			FormServiceCursor c = (FormServiceCursor) cb;
-			Class<?> clazz = null;
-			try {
-				clazz = Class.forName(c.getServiceClassname());
-			} catch (ClassNotFoundException e) {
-				e.printStackTrace();
-				throw new IllegalStateException(
-						"FormServiceCursor identifies a class "
-								+ c.getServiceClassname()
-								+ " that could not be found", e);
-			}
-			if (!ExternalService.class.isAssignableFrom(clazz)) {
-				throw new IllegalStateException(
-						"FormServiceCursor identifies a class that is not derived from ExternalService");
-			}
-			Class<?> paramTypes[] = new Class<?>[4];
-			paramTypes[0] = FormDefinition.class;
-			paramTypes[1] = FormServiceCursor.class;
-			paramTypes[2] = Datastore.class;
-			paramTypes[3] = String.class;
-			Constructor<?> ec = null;
-			try {
-				ec = clazz.getConstructor(paramTypes);
-			} catch (SecurityException e) {
-				e.printStackTrace();
-				throw new IllegalStateException("Constructor for "
-						+ clazz.getCanonicalName() + " inaccessible!", e);
-			} catch (NoSuchMethodException e) {
-				e.printStackTrace();
-				throw new IllegalStateException("Constructor for "
-						+ clazz.getCanonicalName() + " not found!", e);
-			}
-			Object argList[] = new Object[4];
-			argList[0] = fd;
-			argList[1] = c;
-			argList[2] = ds;
-			argList[3] = user.getUriUser();
-			ExternalService obj;
-			try {
-				obj = (ExternalService) ec.newInstance(argList);
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				throw new IllegalStateException("Constructor failed for "
-						+ clazz.getCanonicalName(), e);
-			}
-			esList.add(obj);
-		}
-		return esList;
-	}
+    FormServiceCursor c = ds.createEntityUsingRelation(relationPrototype, null, user);
 
+    c.setDomAuri(form.getEntityKey().getKey());
+    c.setSubAuri(service.getUri());
+    c.setFormId(form.getFormId());
+    c.setServiceClassname(type);
+
+    return c;
+  }
+  
+  public static final List<ExternalService> getExternalServicesForForm(Form form,
+      String baseWebServerUrl, Datastore ds, User user) throws ODKDatastoreException {
+    FormServiceCursor relationPrototype = createRelation(ds, user);
+    Query query = ds.createQuery(relationPrototype, user);
+    // filter on the Form's Uri. We cannot filter on the FORM_ID since it is a
+    // Text field in bigtable
+    query.addFilter(relationPrototype.domAuri, FilterOperation.EQUAL, form.getEntityKey().getKey());
+    List<ExternalService> esList = new ArrayList<ExternalService>();
+
+    List<? extends CommonFieldsBase> fscList = query.executeQuery(0);
+    for (CommonFieldsBase cb : fscList) {
+      FormServiceCursor c = (FormServiceCursor) cb;
+      ExternalService obj;
+
+      obj = c.getExternalServiceType().constructExternalService(c, baseWebServerUrl, ds, user);
+      esList.add(obj);
+
+    }
+    return esList;
+  }
+
+  public static final FormServiceCursor getFormServiceCursor(String uri, Datastore ds, User user) throws ODKEntityNotFoundException {
+    try {
+      FormServiceCursor relationPrototype = createRelation(ds, user);
+      CommonFieldsBase entity = ds.getEntity(relationPrototype, uri, user);
+      return (FormServiceCursor) entity;
+    } catch (ODKDatastoreException e) {
+      throw new ODKEntityNotFoundException(e);
+    }
+  }
+  
 }

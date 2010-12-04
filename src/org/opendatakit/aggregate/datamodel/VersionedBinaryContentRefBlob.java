@@ -13,8 +13,9 @@
  */
 package org.opendatakit.aggregate.datamodel;
 
-import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
+import org.opendatakit.common.persistence.DynamicAssociationBase;
+import org.opendatakit.common.security.User;
 
 /**
  * Binary content for a given field in a form is held in a set of tables
@@ -39,28 +40,41 @@ import org.opendatakit.common.persistence.DataField;
  * records are never updated, but Binary Content records are.
  * 
  * @author mitchellsundt@gmail.com
- *
+ * @author wbrunette@gmail.com
+ * 
  */
-public final class VersionedBinaryContentRefBlob extends CommonFieldsBase {
+public final class VersionedBinaryContentRefBlob extends DynamicAssociationBase {
 
 	private static final DataField PART = new DataField("PART",DataField.DataType.INTEGER, false);
 	
 	public final DataField part;
 	
+	/**
+	 * Construct a relation prototype.
+	 * 
+	 * @param databaseSchema
+	 * @param tableName
+	 */
 	public VersionedBinaryContentRefBlob(String databaseSchema, String tableName) {
-		super(databaseSchema, tableName, BaseType.DYNAMIC_ASSOCIATION);
+		super(databaseSchema, tableName);
 		fieldList.add(part = new DataField(PART));
 	}
 
 	/**
-	 * Copy constructor for use by {@link #getEmptyRow(Class)}   
-	 * This does not populate any fields related to the values of this row. 
-	 *
-	 * @param d
+	 * Construct an empty entity.  Only called via {@link #getEmptyRow(User)}
+	 * 
+	 * @param ref
+	 * @param user
 	 */
-	public VersionedBinaryContentRefBlob(VersionedBinaryContentRefBlob ref) {
-		super(ref);
+	private VersionedBinaryContentRefBlob(VersionedBinaryContentRefBlob ref, User user) {
+		super(ref, user);
 		part = ref.part;
+	}
+
+	// Only called from within the persistence layer.
+	@Override
+	public VersionedBinaryContentRefBlob getEmptyRow(User user) {
+		return new VersionedBinaryContentRefBlob(this, user);
 	}
 
 	public Long getPart() {

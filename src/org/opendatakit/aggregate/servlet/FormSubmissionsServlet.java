@@ -30,11 +30,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.opendatakit.aggregate.ContextFactory;
+import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.ServletConsts;
-import org.opendatakit.aggregate.datamodel.FormDefinition;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
+import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.format.table.HtmlFormatter;
 import org.opendatakit.aggregate.process.ProcessType;
 import org.opendatakit.aggregate.query.submission.QueryByDate;
@@ -50,6 +51,7 @@ import org.opendatakit.common.security.UserService;
  * Servlet generates a webpage with a list of submissions from a specified form
  * 
  * @author wbrunette@gmail.com
+ * @author mitchellsundt@gmail.com
  * 
  */
 public class FormSubmissionsServlet extends ServletUtilBase {
@@ -79,11 +81,11 @@ public class FormSubmissionsServlet extends ServletUtilBase {
   @Override
   public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
     // get parameter
-    String odkId = getParameter(req, ServletConsts.ODK_ID);
+    String formId = getParameter(req, ServletConsts.FORM_ID);
     String backwardString = getParameter(req, ServletConsts.BACKWARD);
     String indexString = getParameter(req, ServletConsts.INDEX);
 
-    if (odkId == null) {
+    if (formId == null) {
       errorMissingKeyParam(resp);
       return;
     }
@@ -94,13 +96,13 @@ public class FormSubmissionsServlet extends ServletUtilBase {
     }
 
     UserService userService = (UserService) ContextFactory.get().getBean(
-        ServletConsts.USER_BEAN);
+        BeanDefs.USER_BEAN);
     User user = userService.getCurrentUser();
 
     // header info
     beginBasicHtmlResponse(TITLE_INFO, resp, req, true);
     PrintWriter out = resp.getWriter();
-    Datastore ds = (Datastore) ContextFactory.get().getBean(ServletConsts.DATASTORE_BEAN);
+    Datastore ds = (Datastore) ContextFactory.get().getBean(BeanDefs.DATASTORE_BEAN);
 
     try {
       Boolean backward = false;
@@ -122,11 +124,12 @@ public class FormSubmissionsServlet extends ServletUtilBase {
           // default
         }
       }
-      FormDefinition fd = FormDefinition.getFormDefinition(odkId, ds, user);
+      
+      Form form = Form.retrieveForm(formId, ds, user);
 
-      QueryByDate query = new QueryByDate(fd, BasicConsts.EPOCH, false,
+      QueryByDate query = new QueryByDate(form, BasicConsts.EPOCH, false,
               ServletConsts.FETCH_LIMIT, ds, user);
-      HtmlFormatter formatter = new HtmlFormatter(query.getFormDefinition(), getServerURL(req), resp.getWriter(), null, true);
+      HtmlFormatter formatter = new HtmlFormatter(form, getServerURL(req), resp.getWriter(), null, true);
       List<Submission> submissions = query.getResultSubmissions();
 
       boolean createBack = false;
@@ -156,7 +159,7 @@ public class FormSubmissionsServlet extends ServletUtilBase {
         Date firstDate = submissions.get(0).getSubmittedTime();
         
         Map<String, String> properties = new HashMap<String, String>();
-        properties.put(ServletConsts.ODK_ID, odkId);
+        properties.put(ServletConsts.FORM_ID, formId);
         properties.put(ServletConsts.BACKWARD, Boolean.TRUE.toString());
         properties.put(ServletConsts.INDEX, firstDate.toString());
     
@@ -168,7 +171,7 @@ public class FormSubmissionsServlet extends ServletUtilBase {
       if (createForward) {
         Date lastDate = submissions.get(submissions.size()-1).getSubmittedTime();
         Map<String, String> properties = new HashMap<String, String>();
-        properties.put(ServletConsts.ODK_ID, odkId);
+        properties.put(ServletConsts.FORM_ID, formId);
         properties.put(ServletConsts.BACKWARD, Boolean.FALSE.toString());
         properties.put(ServletConsts.INDEX, lastDate.toString());
         String link = HtmlUtil.createHrefWithProperties(req.getRequestURI(), properties,
@@ -178,7 +181,7 @@ public class FormSubmissionsServlet extends ServletUtilBase {
 
       out.print(HtmlUtil.createFormBeginTag(ConfirmServlet.ADDR, HtmlConsts.MULTIPART_FORM_DATA,
           HtmlConsts.POST));
-      out.print(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_HIDDEN, ServletConsts.ODK_ID, odkId));
+      out.print(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_HIDDEN, ServletConsts.FORM_ID, formId));
       out.print(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_HIDDEN,
           ServletConsts.PROCESS_NUM_RECORDS, Integer.toString(query.getNumRecords())));
       

@@ -23,7 +23,8 @@ package org.opendatakit.aggregate.exception;
  * via the gData interface 
  *
  * @author wbrunette@gmail.com
- *
+ * @author mitchellsundt@gmail.com
+ * 
  */
 public class ODKExternalServiceNotAuthenticated extends Exception {
 

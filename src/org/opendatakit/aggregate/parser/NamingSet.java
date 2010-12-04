@@ -37,7 +37,8 @@ import org.opendatakit.common.security.User;
  * caller then replaces the unique placeholders with the appropriate resolved name.
  * 
  * @author mitchellsundt@gmail.com
- *
+ * @author wbrunette@gmail.com
+ * 
  */
 final class NamingSet {
 	private static final String DROP_CHARS = "AEIOUY";

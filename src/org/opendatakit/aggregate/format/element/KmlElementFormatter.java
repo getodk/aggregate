@@ -21,18 +21,28 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang.StringEscapeUtils;
-import org.opendatakit.aggregate.servlet.BinaryDataServlet;
-import org.opendatakit.aggregate.constants.FormatConsts;
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.ServletConsts;
-import org.opendatakit.aggregate.format.structure.KmlFormatter;
+import org.opendatakit.aggregate.constants.format.FormTableConsts;
+import org.opendatakit.aggregate.constants.format.FormatConsts;
+import org.opendatakit.aggregate.constants.format.KmlConsts;
+import org.opendatakit.aggregate.datamodel.FormElementModel;
+import org.opendatakit.aggregate.format.RepeatCallbackFormatter;
+import org.opendatakit.aggregate.format.Row;
+import org.opendatakit.aggregate.servlet.BinaryDataServlet;
 import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.submission.SubmissionRepeat;
+import org.opendatakit.aggregate.submission.type.BlobSubmissionType;
 import org.opendatakit.aggregate.submission.type.GeoPoint;
 import org.opendatakit.common.constants.BasicConsts;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 
+/**
+ * 
+ * @author wbrunette@gmail.com
+ * @author mitchellsundt@gmail.com
+ * 
+ */
 public class KmlElementFormatter implements ElementFormatter {
    
   private String baseWebServerUrl;
@@ -42,29 +52,37 @@ public class KmlElementFormatter implements ElementFormatter {
    */
   private boolean includeAccuracy;
   
+  RepeatCallbackFormatter callbackFormatter;
+  
   /**
-   * Construct a KML Link Element Formatter
+   * Construct a KML Element Formatter
    * @param webServerUrl TODO
    * @param includeGpsAccuracy
    *          include GPS accuracy data
    */
-  public KmlElementFormatter(String webServerUrl, boolean includeGpsAccuracy) {
+  public KmlElementFormatter(String webServerUrl, boolean includeGpsAccuracy, RepeatCallbackFormatter formatter) {
     baseWebServerUrl = webServerUrl;
     includeAccuracy = includeGpsAccuracy;
+    callbackFormatter = formatter;
   }
- 
   
   @Override
-  public void formatBinary(SubmissionKey key, String propertyName, Row row)
+  public void formatUid(String uri, String propertyName, Row row) {
+    // unneeded so unimplemented
+  }
+  
+  @Override
+  public void formatBinary(BlobSubmissionType blobSubmission, String propertyName, Row row)
       throws ODKDatastoreException {
-    if(key == null) {
+    if(blobSubmission == null) {
       row.addFormattedValue(null);
       return;
     }
     
+    SubmissionKey key = blobSubmission.getValue();
     Map<String, String> properties = new HashMap<String, String>();
     properties.put(ServletConsts.BLOB_KEY, key.toString());
-    String url = HtmlUtil.createHrefWithProperties(baseWebServerUrl + BinaryDataServlet.ADDR, properties, FormatConsts.VIEW_LINK_TEXT);
+    String url = HtmlUtil.createHrefWithProperties(HtmlUtil.createUrl(baseWebServerUrl) + BinaryDataServlet.ADDR, properties, FormTableConsts.VIEW_LINK_TEXT);
     generateDataElement(url, propertyName, row);
   }
 
@@ -100,12 +118,12 @@ public class KmlElementFormatter implements ElementFormatter {
   @Override
   public void formatGeoPoint(GeoPoint coordinate, String propertyName, Row row) {
     String preName = propertyName + FormatConsts.HEADER_CONCAT;
-    generateDataElement(coordinate.getLatitude(), preName + FormatConsts.LATITUDE, row);
-    generateDataElement(coordinate.getLongitude(), preName + FormatConsts.LONGITUDE, row);
-    generateDataElement(coordinate.getAltitude(), preName + FormatConsts.ALTITUDE, row);
+    generateDataElement(coordinate.getLatitude(), preName + GeoPoint.LATITUDE, row);
+    generateDataElement(coordinate.getLongitude(), preName + GeoPoint.LONGITUDE, row);
+    generateDataElement(coordinate.getAltitude(), preName + GeoPoint.ALTITUDE, row);
 
     if (includeAccuracy) {
-      generateDataElement(coordinate.getAccuracy(), preName + FormatConsts.ACCURACY, row);
+      generateDataElement(coordinate.getAccuracy(), preName + GeoPoint.ACCURACY, row);
     }
     
   }
@@ -116,10 +134,9 @@ public class KmlElementFormatter implements ElementFormatter {
   }
 
   @Override
-  public void formatRepeats(SubmissionRepeat repeat, String propertyName, Row row)
+  public void formatRepeats(SubmissionRepeat repeat, FormElementModel repeatElement, Row row)
       throws ODKDatastoreException {
-    // TODO FIGURE OUT WHAT TO DO WITH REPEATS IN KML
-
+    callbackFormatter.processRepeatedSubmssionSetsIntoRow(repeat.getSubmissionSets(), repeatElement, row);
   }
 
   @Override
@@ -130,9 +147,9 @@ public class KmlElementFormatter implements ElementFormatter {
   private void generateDataElement(Object value, String name, Row row){
     String valueAsString = BasicConsts.EMPTY_STRING;
     if(value != null) {
-      valueAsString += StringEscapeUtils.escapeXml(value.toString());
+      valueAsString = value.toString();
     }
-    row.addFormattedValue(String.format(KmlFormatter.KML_DATA_ELEMENT_TEMPLATE, StringEscapeUtils.escapeXml(name), valueAsString));
+    row.addFormattedValue(String.format(KmlConsts.KML_DATA_ITEM_TEMPLATE, name, valueAsString));
   }
     
 }

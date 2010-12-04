@@ -15,19 +15,25 @@
  */
 package org.opendatakit.aggregate.task.tomcat;
 
+import org.opendatakit.aggregate.constants.externalservice.ExternalServiceOption;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
-import org.opendatakit.aggregate.externalservice.constants.ExternalServiceOption;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.task.AbstractWorksheetCreatorImpl;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.security.User;
 
+/**
+ * 
+ * @author wbrunette@gmail.com
+ * @author mitchellsundt@gmail.com
+ * 
+ */
 public class WorksheetCreatorImpl extends AbstractWorksheetCreatorImpl {
 
   @Override
-  public final void createWorksheetTask(String appName, String serverURL, String spreadsheetName, 
-      ExternalServiceOption esType, int delay, Form form, Datastore datastore, User user) throws ODKExternalServiceException, ODKDatastoreException {
+  public final void createWorksheetTask(String baseWebServerUrl, String spreadsheetName, ExternalServiceOption esType, 
+      int delay, Form form, Datastore datastore, User user) throws ODKExternalServiceException, ODKDatastoreException {
     try {
       Thread.sleep(delay);
     } catch (InterruptedException e) {
@@ -35,7 +41,7 @@ public class WorksheetCreatorImpl extends AbstractWorksheetCreatorImpl {
       e.printStackTrace();
     }
     
-    worksheetCreator(appName, serverURL, spreadsheetName, esType, form, datastore, user); 
+    worksheetCreator(baseWebServerUrl, spreadsheetName, esType, form, datastore, user); 
     
   }
 }

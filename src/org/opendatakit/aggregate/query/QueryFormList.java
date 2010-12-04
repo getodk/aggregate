@@ -19,18 +19,24 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.opendatakit.aggregate.constants.ServletConsts;
-import org.opendatakit.aggregate.datamodel.FormDefinition;
+import org.opendatakit.aggregate.datamodel.FormDataModel;
 import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
 import org.opendatakit.aggregate.form.Form;
-import org.opendatakit.aggregate.form.FormInfo;
+import org.opendatakit.aggregate.submission.SubmissionKey;
+import org.opendatakit.aggregate.submission.SubmissionKeyPart;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.Datastore;
-import org.opendatakit.common.persistence.EntityKey;
-import org.opendatakit.common.persistence.InstanceDataBase;
 import org.opendatakit.common.persistence.Query;
+import org.opendatakit.common.persistence.TopLevelDynamicBase;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.security.User;
 
+/**
+ * 
+ * @author wbrunette@gmail.com
+ * @author mitchellsundt@gmail.com
+ * 
+ */
 public class QueryFormList {
   private final Datastore ds;
   private final User user;
@@ -63,11 +69,10 @@ public class QueryFormList {
   public QueryFormList(boolean checkAuthorization, Datastore datastore, User user) throws ODKDatastoreException, ODKIncompleteSubmissionData{
     this(datastore, user);
     
-    FormDefinition fd = FormInfo.getFormDefinition(datastore);
-    Query formQuery = ds.createQuery(fd.getTopLevelGroup().getBackingObjectPrototype(), user);
+    Query formQuery = ds.createQuery(Form.getFormInfoRelation(datastore, user), user);
     List<? extends CommonFieldsBase> formEntities = formQuery.executeQuery(ServletConsts.FETCH_LIMIT);
     for (CommonFieldsBase formEntity : formEntities) {
-      Form form = new Form((InstanceDataBase) formEntity, ds, user);
+      Form form = new Form((TopLevelDynamicBase) formEntity, ds, user);
       addIfAuthorized(form, checkAuthorization);
     }
   }
@@ -75,18 +80,26 @@ public class QueryFormList {
   /**
    * Constructor that queries the database for the forms referenced by the formkeys. List will only contain forms that are specified in arguments
    * 
-   * @param formKeys
+   * @param submissionKeys
    * @param requestingUser user that is requesting the forms to be queried
    * @param checkAuthorization true if authorization rules should be used to filter form list, false otherwise
    * @param datastore  datastore reference
+ * @throws ODKDatastoreException 
    */
-  public QueryFormList(List<EntityKey> formKeys, boolean checkAuthorization, Datastore datastore, User user) {
+  public QueryFormList(List<SubmissionKey> submissionKeys, boolean checkAuthorization, Datastore datastore, User user) throws ODKDatastoreException {
     this(datastore, user);
     
-    for (EntityKey formKey : formKeys) {
+    for (SubmissionKey submissionKey : submissionKeys) {
       try {
-    	CommonFieldsBase rel = ds.getEntity(formKey.getRelation(), formKey.getKey(), user);
-        Form form = new Form((InstanceDataBase) rel, ds, user);
+		List<SubmissionKeyPart> parts = SubmissionKeyPart.splitSubmissionKey(submissionKey);
+		if ( parts.size() != 2 ) {
+			throw new ODKIncompleteSubmissionData();
+		}
+		if ( !parts.get(0).getElementName().equals(FormDataModel.URI_FORM_ID_VALUE_FORM_INFO) ) {
+			throw new ODKIncompleteSubmissionData();
+		}
+
+        Form form = new Form(parts.get(1).getAuri(), ds, user);
         addIfAuthorized(form, checkAuthorization);
       } catch (Exception e) {
         // TODO: determine how to better handle error

@@ -21,7 +21,8 @@ package org.opendatakit.aggregate.exception;
  * Exception for the case that a form already exists with the ODK specified
  *
  * @author wbrunette@gmail.com
- *
+ * @author mitchellsundt@gmail.com
+ * 
  */
 public class ODKFormAlreadyExistsException extends Exception {
 

@@ -20,19 +20,28 @@ package org.opendatakit.aggregate.submission.type;
 import java.math.BigDecimal;
 import java.util.List;
 
-import org.opendatakit.aggregate.constants.FormatConsts;
+import org.opendatakit.aggregate.constants.format.FormatConsts;
 import org.opendatakit.aggregate.datamodel.FormDataModel;
+import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.exception.ODKConversionException;
+import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.format.element.ElementFormatter;
-import org.opendatakit.aggregate.format.element.Row;
 import org.opendatakit.common.constants.BasicConsts;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.Datastore;
+import org.opendatakit.common.persistence.DynamicCommonFieldsBase;
 import org.opendatakit.common.persistence.EntityKey;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.security.User;
 
-public class GeoPointSubmissionType extends SubmissionFieldBase<GeoPoint> {
+/**
+ * Geopoints appear as a single complex-valued field to their callers.
+ * 
+ * @author wbrunette@gmail.com
+ * @author mitchellsundt@gmail.com
+ * 
+ */
+public class GeoPointSubmissionType extends SubmissionSingleValueBase<GeoPoint> {
 
 	private GeoPoint coordinates;
 
@@ -42,8 +51,8 @@ public class GeoPointSubmissionType extends SubmissionFieldBase<GeoPoint> {
 	 * @param propertyName
 	 *            Name of submission element
 	 */
-	public GeoPointSubmissionType(FormDataModel element) {
-		super(element);
+	public GeoPointSubmissionType(DynamicCommonFieldsBase backingObject, FormElementModel element) {
+		super(backingObject, element);
 	}
 
 	@Override
@@ -69,6 +78,22 @@ public class GeoPointSubmissionType extends SubmissionFieldBase<GeoPoint> {
 						"Problem with GPS Coordinates being parsed from XML");
 			}
 		}
+		for ( FormDataModel m : element.getFormDataModel().getChildren()) {
+			switch ( m.getOrdinalNumber().intValue() ) {
+			case FormDataModel.GEOPOINT_LATITUDE_ORDINAL_NUMBER:
+				backingObject.setNumericField(m.getBackingKey(), coordinates.getLatitude());
+				break;
+			case FormDataModel.GEOPOINT_LONGITUDE_ORDINAL_NUMBER:
+				backingObject.setNumericField(m.getBackingKey(), coordinates.getLongitude());
+				break;
+			case FormDataModel.GEOPOINT_ALTITUDE_ORDINAL_NUMBER:
+				backingObject.setNumericField(m.getBackingKey(), coordinates.getAltitude());
+				break;
+			case FormDataModel.GEOPOINT_ACCURACY_ORDINAL_NUMBER:
+				backingObject.setNumericField(m.getBackingKey(), coordinates.getAccuracy());
+				break;
+			}
+		}
 	}
 
 	@Override
@@ -84,9 +109,9 @@ public class GeoPointSubmissionType extends SubmissionFieldBase<GeoPoint> {
 	 *            proper format for output
 	 */
 	@Override
-	public void formatValue(ElementFormatter elemFormatter, Row row)
+	public void formatValue(ElementFormatter elemFormatter, Row row, String ordinalValue)
 			throws ODKDatastoreException {
-		elemFormatter.formatGeoPoint(coordinates, element.getElementName(), row);
+		elemFormatter.formatGeoPoint(coordinates, element.getGroupQualifiedElementName() + ordinalValue, row);
 	}
 
 	@Override
@@ -97,7 +122,7 @@ public class GeoPointSubmissionType extends SubmissionFieldBase<GeoPoint> {
 		BigDecimal longCoor = null;
 		BigDecimal altitude = null;
 		BigDecimal accuracy = null;
-		for ( FormDataModel m : element.getChildren()) {
+		for ( FormDataModel m : element.getFormDataModel().getChildren()) {
 			switch ( m.getOrdinalNumber().intValue() ) {
 			case FormDataModel.GEOPOINT_LATITUDE_ORDINAL_NUMBER:
 				latCoor = dbEntity.getNumericField(m.getBackingKey());

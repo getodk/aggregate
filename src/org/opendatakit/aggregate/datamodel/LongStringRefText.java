@@ -13,8 +13,9 @@
  */
 package org.opendatakit.aggregate.datamodel;
 
-import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
+import org.opendatakit.common.persistence.DynamicAssociationBase;
+import org.opendatakit.common.security.User;
 
 /**
  * Long strings that exceed the maximum string length of the column 
@@ -29,31 +30,44 @@ import org.opendatakit.common.persistence.DataField;
  * blob, not as text, so it can be versioned.
  * 
  * @author mitchellsundt@gmail.com
- *
+ * @author wbrunette@gmail.com
+ * 
  */
-public final class LongStringRefText extends CommonFieldsBase {
+public final class LongStringRefText extends DynamicAssociationBase {
 
 	private static final DataField URI_FORM_DATA_MODEL = new DataField("URI_FORM_DATA_MODEL",DataField.DataType.URI, false);
 	private static final DataField PART = new DataField("PART",DataField.DataType.INTEGER, false);
 	public final DataField part;
 	public final DataField uriFormDataModel;
 	
+	/**
+	 * Construct a relation prototype.
+	 * 
+	 * @param databaseSchema
+	 * @param tableName
+	 */
 	public LongStringRefText(String databaseSchema, String tableName) {
-		super(databaseSchema, tableName, BaseType.DYNAMIC_ASSOCIATION);
+		super(databaseSchema, tableName);
 		fieldList.add(part = new DataField(PART));
 		fieldList.add(uriFormDataModel = new DataField(URI_FORM_DATA_MODEL));
 	}
 
 	/**
-	 * Copy constructor for use by {@link #getEmptyRow(Class)}   
-	 * This does not populate any fields related to the values of this row. 
-	 *
-	 * @param d
+	 * Construct an empty entity.  Only called via {@link #getEmptyRow(User)}
+	 * 
+	 * @param ref
+	 * @param user
 	 */
-	public LongStringRefText(LongStringRefText ref) {
-		super(ref);
+	private LongStringRefText(LongStringRefText ref, User user) {
+		super(ref, user);
 		part = ref.part;
 		uriFormDataModel = ref.uriFormDataModel;
+	}
+
+	// Only called from within the persistence layer.
+	@Override
+	public LongStringRefText getEmptyRow(User user) {
+		return new LongStringRefText(this, user);
 	}
 
 	public Long getPart() {

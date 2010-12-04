@@ -19,12 +19,21 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
+import org.opendatakit.aggregate.datamodel.FormElementModel;
+import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.submission.SubmissionRepeat;
+import org.opendatakit.aggregate.submission.type.BlobSubmissionType;
 import org.opendatakit.aggregate.submission.type.GeoPoint;
 import org.opendatakit.common.constants.BasicConsts;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 
+/**
+ * 
+ * @author wbrunette@gmail.com
+ * @author mitchellsundt@gmail.com
+ * 
+ */
 public class BasicElementFormatter implements ElementFormatter {
 
   /**
@@ -60,12 +69,17 @@ public class BasicElementFormatter implements ElementFormatter {
     includeAccuracy = includeGpsAccuracy;
   }
 
-  public void formatBinary(SubmissionKey key, String propertyName, Row row) throws ODKDatastoreException {
-    basicStringConverstion(key.toString(), row);
+  public void formatUid(String uri, String propertyName, Row row) {
+    basicStringConversion(uri, row);
+  }
+  
+  public void formatBinary(BlobSubmissionType blobSubmission, String propertyName, Row row) throws ODKDatastoreException {
+	  SubmissionKey key = blobSubmission.getValue();
+	  basicStringConversion(key.toString(), row);
   }
 
   public void formatBoolean(Boolean bool, String propertyName, Row row) {
-    basicStringConverstion(bool, row);
+    basicStringConversion(bool, row);
   }
 
   public void formatChoices(List<String> choices, String propertyName, Row row) {
@@ -74,33 +88,33 @@ public class BasicElementFormatter implements ElementFormatter {
 	boolean first = true;
 	for ( String s : choices ) {
 		if ( !first ) {
-			b.append(" ");
+			b.append(BasicConsts.SPACE);
 		}
 		first = false;
 		b.append(s);
 	}
-	basicStringConverstion(b.toString(), row);
+	basicStringConversion(b.toString(), row);
   }
 
   public void formatDate(Date date, String propertyName, Row row) {
-    basicStringConverstion(date, row);
+    basicStringConversion(date, row);
   }
 
   public void formatDecimal(BigDecimal dub, String propertyName, Row row) {
-    basicStringConverstion(dub, row);
+    basicStringConversion(dub, row);
   }
 
   public void formatGeoPoint(GeoPoint coordinate, String propertyName, Row row) {
     if (separateCoordinates) {
-      basicStringConverstion(coordinate.getLatitude(), row);
-      basicStringConverstion(coordinate.getLongitude(), row);
+      basicStringConversion(coordinate.getLatitude(), row);
+      basicStringConversion(coordinate.getLongitude(), row);
 
       if (includeAltitude) {
-        basicStringConverstion(coordinate.getAltitude(), row);
+        basicStringConversion(coordinate.getAltitude(), row);
       }
 
       if (includeAccuracy) {
-        basicStringConverstion(coordinate.getAccuracy(), row);
+        basicStringConversion(coordinate.getAccuracy(), row);
       }
     } else {
       if (coordinate.getLongitude() != null && coordinate.getLatitude() != null) {
@@ -122,22 +136,23 @@ public class BasicElementFormatter implements ElementFormatter {
   }
 
   public void formatLong(Long longInt, String propertyName, Row row) {
-    basicStringConverstion(longInt, row);
+    basicStringConversion(longInt, row);
   }
 
   public void formatString(String string, String propertyName, Row row) {
-    basicStringConverstion(string, row);
+    basicStringConversion(string, row);
   }
 
-  public void formatRepeats(SubmissionRepeat repeat, String propertyName, Row row) throws ODKDatastoreException {
-    // TODO: decide how to handle in basic case
+  public void formatRepeats(SubmissionRepeat repeat, FormElementModel repeatElement, Row row) throws ODKDatastoreException {
+    basicStringConversion(repeat.getUniqueKeyStr(), row);
   }
 
-  private void basicStringConverstion(Object value, Row row) {
+  protected void basicStringConversion(Object value, Row row) {
     if (value != null) {
       row.addFormattedValue(value.toString());
     } else {
       row.addFormattedValue(null);
     }
   }
+
 }

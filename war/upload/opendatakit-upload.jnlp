@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<jnlp href="opendatakit-upload.jnlp">
+ <information>
+   <title>ODK Upload</title>
+   <vendor>Open Data Kit<vendor/>
+   <homepage href="http://code.google.com/p/opendatakit/" />
+   <description kind="one-line">Uploads submissions to ODK Aggregate</description>
+ </information>
+ <security>
+    <all-permissions/>
+ </security>
+ <update check="always" policy="always"/>
+ <resources>
+   <java version="1.5+"/>
+    
+<jar href="upload-applet-0.1-alpha.jar" main="true"/>
+<jar href="httpclient-4.0.3.jar"/>
+<jar href="httpcore-4.0.1.jar"/>
+<jar href="commons-logging-1.1.1.jar"/>
+<jar href="commons-codec-1.3.jar"/>
+<jar href="httpmime-4.0.3.jar"/>
+<jar href="apache-mime4j-0.6.jar"/>
+
+ </resources>
+ <applet-desc 
+   name="ODK Upload"
+   main-class="org.opendatakit.aggregate.upload.applet.UploadApplet"
+   width="900"
+   height="200" />
+</jnlp>	

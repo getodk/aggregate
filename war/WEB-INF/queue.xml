@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<queue-entries>
+  <queue>
+    <name>default</name>
+    <rate>1/s</rate>
+  </queue>
+  <queue>
+    <name>upload-submission-queue</name>
+    <rate>1/s</rate>
+    <bucket-size>50</bucket-size>
+  </queue>
+</queue-entries>

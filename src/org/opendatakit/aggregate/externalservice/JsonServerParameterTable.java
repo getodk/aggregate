@@ -19,7 +19,13 @@ import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.security.User;
 
-final class JsonServerParameterTable extends CommonFieldsBase {
+/**
+ * 
+ * @author wbrunette@gmail.com
+ * @author mitchellsundt@gmail.com
+ * 
+ */
+public final class JsonServerParameterTable extends CommonFieldsBase {
 
 	private static final String TABLE_NAME = "_json_server";
 	/*
@@ -31,15 +37,32 @@ final class JsonServerParameterTable extends CommonFieldsBase {
 
 	public final DataField serverUrl;
 
+	/**
+	 * Construct a relation prototype.
+	 * 
+	 * @param databaseSchema
+	 * @param tableName
+	 */
 	JsonServerParameterTable(String schemaName) {
 		super(schemaName, TABLE_NAME, CommonFieldsBase.BaseType.STATIC);
 		fieldList.add(serverUrl = new DataField(SERVER_URL_PROPERTY));
 	}
 
-	// for creating empty rows
-	JsonServerParameterTable(JsonServerParameterTable ref) {
-		super(ref);
+	  /**
+	   * Construct an empty entity.  Only called via {@link #getEmptyRow(User)}
+	   * 
+	   * @param ref
+	   * @param user
+	   */
+	private JsonServerParameterTable(JsonServerParameterTable ref, User user) {
+		super(ref, user);
 		serverUrl = ref.serverUrl;
+	}
+
+	// Only called from within the persistence layer.
+	@Override
+	public JsonServerParameterTable getEmptyRow(User user) {
+		return new JsonServerParameterTable(this, user);
 	}
 
 	public String getServerUrl() {
@@ -52,16 +75,18 @@ final class JsonServerParameterTable extends CommonFieldsBase {
 		}
 	}
 
-	private static JsonServerParameterTable jsonServerParameterTable = null;
+	private static JsonServerParameterTable relation = null;
 
 	public static JsonServerParameterTable createRelation(Datastore datastore, User user)
 			throws ODKDatastoreException {
-		if (jsonServerParameterTable == null) {
-			jsonServerParameterTable = new JsonServerParameterTable(
-					datastore.getDefaultSchemaName());
-			datastore.createRelation(jsonServerParameterTable, user);
+		if (relation == null) {
+			JsonServerParameterTable relationPrototype;
+	        relationPrototype = new JsonServerParameterTable(datastore.getDefaultSchemaName());
+	        datastore.createRelation(relationPrototype, user); // may throw exception...
+	        // at this point, the prototype has become fully populated
+	        relation = relationPrototype; // set static variable only upon success...
 		}
-		return jsonServerParameterTable;
+		return relation;
 	}
 
 }

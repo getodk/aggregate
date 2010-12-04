@@ -25,7 +25,8 @@ package org.opendatakit.common.persistence;
  * only 8 digits of precision are configured, rounding will occur. 
  * 
  * @author mitchellsundt@gmail.com
- *
+ * @author wbrunette@gmail.com
+ * 
  */
 public final class DataField {
 	

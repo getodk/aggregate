@@ -13,8 +13,8 @@
  */
 package org.opendatakit.aggregate.parser;
 
-import java.util.regex.Pattern;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Utility class for converting a list of XForm (XML) tag names to the SQL

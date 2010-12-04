@@ -15,24 +15,31 @@
  */
 package org.opendatakit.aggregate.task.gae;
 
-import org.opendatakit.aggregate.servlet.FormDeleteTaskServlet;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.task.AbstractFormDeleteImpl;
+import org.opendatakit.aggregate.task.gae.servlet.FormDeleteTaskServlet;
 import org.opendatakit.common.security.User;
 
-import com.google.appengine.api.labs.taskqueue.Queue;
-import com.google.appengine.api.labs.taskqueue.QueueFactory;
-import com.google.appengine.api.labs.taskqueue.TaskOptions;
+import com.google.appengine.api.taskqueue.Queue;
+import com.google.appengine.api.taskqueue.QueueFactory;
+import com.google.appengine.api.taskqueue.TaskOptions;
 
+
+/**
+ * 
+ * @author wbrunette@gmail.com
+ * @author mitchellsundt@gmail.com
+ * 
+ */
 public class FormDeleteImpl extends AbstractFormDeleteImpl {
 
   @Override
   public final void createFormDeleteTask(Form form, User user) {
-    TaskOptions task = TaskOptions.Builder.url("/" + FormDeleteTaskServlet.ADDR);
+    TaskOptions task = TaskOptions.Builder.withUrl("/" + FormDeleteTaskServlet.ADDR);
     task.method(TaskOptions.Method.GET);
     task.countdownMillis(1);
-    task.param(ServletConsts.ODK_ID, form.getFormId());
+    task.param(ServletConsts.FORM_ID, form.getFormId());
     Queue queue = QueueFactory.getDefaultQueue();
     queue.add(task);
   }

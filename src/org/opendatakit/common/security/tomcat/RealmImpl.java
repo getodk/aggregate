@@ -16,10 +16,17 @@
 package org.opendatakit.common.security.tomcat;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.opendatakit.common.security.Realm;
 
+/**
+ * 
+ * @author wbrunette@gmail.com
+ * @author mitchellsundt@gmail.com
+ * 
+ */
 public class RealmImpl implements Realm {
 
 	final String realmString;
@@ -36,7 +43,7 @@ public class RealmImpl implements Realm {
 	
 	@Override
 	public List<String> getDomains() {
-		return domains;
+		return Collections.unmodifiableList(domains);
 	}
 
 	@Override

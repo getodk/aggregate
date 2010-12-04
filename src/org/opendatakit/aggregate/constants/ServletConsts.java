@@ -17,15 +17,17 @@
 
 package org.opendatakit.aggregate.constants;
 
+import org.opendatakit.common.constants.BasicConsts;
 import org.opendatakit.common.constants.HtmlConsts;
 
 /**
  * Constant values used in ODK aggregate to aid with servlet management
  * 
  * @author wbrunette@gmail.com
+ * @author mitchellsundt@gmail.com
  * 
  */
-public class ServletConsts {
+public final class ServletConsts {
 
   // TODO: remove temporary debug variable
   /**
@@ -33,12 +35,16 @@ public class ServletConsts {
    */
   public final static boolean DEBUG = false;
 
-  // TODO: remove constant and turn into a property file that is only present on version
+  // TODO: remove constant and turn into a property file that is only present on
+  // version
   /**
    * Current version of Aggregate
    */
-  public final static String VERSION = "v0.9.2.1";
-  
+  public final static String VERSION = "v1.x ALPHA TWO";
+
+  // system constants
+  public static final String APPLICATION_NAME = "ODK AGGREGATE";
+
   /**
    * Name of form field that contains XML submission
    */
@@ -53,54 +59,21 @@ public class ServletConsts {
   public final static String FORM_DEF_PRAM = "form_def_file";
 
   /**
-   * The name of the property that includes the ODK id
+   * The name of the property that includes the form id
    */
-  public static final String ODK_ID = "odkId";
-  /**
-   * The name of the property that includes the submission key
-   */
-  public static final String SUBMISSION_KEY = "submissionKey";
-  /**
-   * The name of the property that includes the entity property name
-   */
-  public static final String PROPERTY_NAME = "propertyName";
+  public static final String FORM_ID = "formId";
+
   /**
    * The name of the property that determines how to format webpage
    */
   public static final String HUMAN_READABLE = "readable";
-  /**
-   * The name of the property that includes the key of the parent submission set
-   */
-  public static final String PARENT_KEY = "parentKey";
-  /**
-   * The name of the property that includes the form element key
-   */
-  public static final String FORM_ELEMENT_KEY = "formElementKey";
-  /**
-   * The name of the property that specifies the entity kind
-   */
-  public static final String KIND = "kind";
-  /**
-   * The name of the property that specifies URL of the page that requested the
-   * new page
-   */
-  public static final String BACK_URL = "backUrl";
+
   /**
    * The name of the property that specifies the type of interaction with an
    * external service
    */
   public static final String EXTERNAL_SERVICE_TYPE = "externalServiceType";
-  /**
-   * The name of the property that specifies the session key for the doc service
-   */
-  public static final String DOC_AUTH = "docAuth";
-  /**
-   * The name of the property that specifies the session key for the doc service
-   */
-  public static final String SPREAD_AUTH = "spreadAuth";
-
   // web addresses
-  public static final String UPLOAD_SUBMISSION_ADDR = "UploadSubmission.html";
   public static final String WEB_ROOT = "/";
 
   // href link text
@@ -108,29 +81,35 @@ public class ServletConsts {
   public static final String UPLOAD_SUB_LINK_TEXT = "Upload a Submission";
   public static final String UPLOAD_FORM_LINK_TEXT = "Upload Form";
   public static final String DELETE_FORM_LINK_TEXT = "Delete Form";
+  public static final String BRIEFCASE_LINK_TEXT = "Briefcase";
+  public static final String UPLOAD_APPLET_LINK_TEXT = "Upload Submissons from a Phone";
 
-  
-  // bean constant
-  public static final String WORKSHEET_BEAN = "worksheet_creator";  
-  public static final String FORM_DELETE_BEAN = "form_delete";  
-  public static final String USER_BEAN = "user_service";
-  public static final String DATASTORE_BEAN = "datastore";
-  
-  
+
   public static final String BLOB_KEY = "blobKey";
 
   public static final String INDEX = "index";
 
   public static final String BACKWARD = "backward";
 
+  public static final String AUTHENTICATION = "auth";
+  
+  public static final String AUTHENTICATION_OAUTH = "oauth";
+
+  public static final String OAUTH_CONSUMER_KEY = "anonymous";
+  
+  public static final String OAUTH_CONSUMER_SECRET = "anonymous";
+  
+  public static final String OAUTH_TOKEN_PARAMETER = "oauth_token";
+  
+  public static final String OAUTH_TOKEN_SECRET_PARAMETER = "oauth_token_secret";
+  
   public static final int MAX_ENTITY_PER_PAGE = 20;
 
-  public static final String NEXT_LINK_TEXT = " (Next " + MAX_ENTITY_PER_PAGE
-      + " Results) NEXT" + HtmlConsts.GREATER_THAN + HtmlConsts.GREATER_THAN;
+  public static final String NEXT_LINK_TEXT = " (Next " + MAX_ENTITY_PER_PAGE + " Results) NEXT"
+      + HtmlConsts.GREATER_THAN + HtmlConsts.GREATER_THAN;
 
-  public static final String BACK_LINK_TEXT = HtmlConsts.LESS_THAN
-      + HtmlConsts.LESS_THAN + "BACK (Previous " + MAX_ENTITY_PER_PAGE
-      + " Results)";
+  public static final String BACK_LINK_TEXT = HtmlConsts.LESS_THAN + HtmlConsts.LESS_THAN
+      + "BACK (Previous " + MAX_ENTITY_PER_PAGE + " Results)";
 
   public static final String DOWNLOAD_XML_BUTTON_TXT = "Download XML";
 
@@ -138,54 +117,10 @@ public class ServletConsts {
 
   public static final String KML_FILENAME_APPEND = "_results.kml";
 
-  public static final String CREATE_EXTERNAL_SERVICE_BUTTON_LABEL = "Create Connection To External Service";
-
-  public static final String SPREADSHEET_NAME_PARAM = "SpreadsheetName";
-
-  public static final String SPEADSHEET_NAME_LABEL = "Name of Spreadsheet:";
-
-  public static final String TOKEN_PARAM = "TOKEN";
-
-  public static final String ODK_PERMANENT_ACCESS_WARNING = "NOTE: A selection of 'CONTINUOUS' means ODK Aggregate will maintian permanent access to the spreadsheet";
-
-  public static final String CONTINUOUS_DATA_TRANSFER_BUTTON_TXT = "Create Worksheet with 'CONTINUOUS' Data Transfer";
-
-  public static final String ONE_TIME_DATA_TRANSFER_BUTTON_TXT = "Create Worksheet with 'ONE TIME' Data Transfer";
-
-  public static final String SPREADSHEET_SCOPE = "https://spreadsheets.google.com/feeds/";
-
-  public static final String WORKSHEETS_FEED_PREFIX = SPREADSHEET_SCOPE
-      + "worksheets/";
-
-  public static final String FEED_PERMISSIONS = "/private/full/";
-
-  public static final String DOCS_SCOPE = "http://docs.google.com/feeds/";
-
-  public static final String DOC_FEED = DOCS_SCOPE + "default"
-      + FEED_PERMISSIONS;
-
-  public static final String DOCS_PRE_KEY = "spreadsheet%3A";
-
-  public static final String AUTHORIZE_SPREADSHEET_CREATION = "Authorize Doc Service for Spreadsheet Creation";
-
-  public static final String GOOGLE_DOC_EXPLANATION = "Create Google Doc Spreadsheet for Form: ";
-
-  public static final String CONTINUOUS_TRANSFER_PARAM = "ContinuousTransfer";
-
-  public static final String AUTHORIZE_DATA_TRANSFER_BUTTON_TXT = "Authorize Spreadsheet Service to transfer Data to Spreadsheet";
-
-  public static final String SPREADSHEET_EXPLANATION = "Populate Spreadsheet with Data from Form: ";
-
-  public static final String ALREADY_EXISTS_PARAM = "alreadyExists";
-
   public static final String PROCESS_RECORD_PREFIX = "record";
 
   public static final String PROCESS_TYPE = "processType";
 
-  public static final String FUSION_SCOPE = "http://tables.googlelabs.com/api/query";
-
-  public static final String AUTHORIZE_FUSION_CREATION = "Authorize Fusion Table Creation from Google Account";  
-  
   public static final String PROCESS_NUM_RECORDS = "numRecords";
 
   public static final String QUERY_VALUE_PARAM = "value";
@@ -194,16 +129,33 @@ public class ServletConsts {
 
   public static final String QUERY_FIELD_PARAM = "field";
 
-  public static final String PLEASE_WAIT_PARAM = "pleaseWait";
+  public static final int FORM_DELETE_RECORD_QUERY_LIMIT = 20;
 
-  public static final String URI_USER = "uriUser";
-
-public static final int FORM_DELETE_RECORD_QUERY_LIMIT = 20;
-
-// TODO: revise so no retrieval form limit
+  // TODO: revise so no retrieval form limit
   public static final int FETCH_LIMIT = 1000;
+  
+  public static final int SUBMISSIONS_FETCH_LIMIT = 20;
 
-// system constants
-  public static final String APPLICATION_NAME = "Open Data Kit Aggregate";
+  /**
+   * The name of the parameter that specifies the cursor location for retrieving
+   * data from the data table (fragmented Csv servlet)
+   */
+  public static final String CURSOR = "cursor";
+  /**
+   * The name of the parameter that specifies how many rows to return from the
+   * cursor (fragmented Csv servlet).
+   */
+  public static final String NUM_ENTRIES = "numEntries";
 
+  /**
+   * When constructing up an odkId, allow xpath-style restrictions on 'key'
+   * attribute of the form identity and repeating elements.
+   */
+  public static final String ELEMENT_REFERENCE_KEY_BEGIN_STRING = "[@key=" + BasicConsts.QUOTE;
+  public static final String ELEMENT_REFERENCE_KEY_END_STRING = BasicConsts.QUOTE + "]";
+
+  public static final String HTTP = "http://";
+
+  public static final String AUTH_SUB_SCOPE = "Scope";
+  
 }

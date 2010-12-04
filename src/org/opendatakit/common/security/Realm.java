@@ -17,6 +17,12 @@ package org.opendatakit.common.security;
 
 import java.util.List;
 
+/**
+ * 
+ * @author wbrunette@gmail.com
+ * @author mitchellsundt@gmail.com
+ * 
+ */
 public interface Realm {
 
 	/**

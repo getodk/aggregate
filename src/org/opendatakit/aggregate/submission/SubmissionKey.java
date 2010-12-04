@@ -15,11 +15,28 @@
  */
 package org.opendatakit.aggregate.submission;
 
+/**
+ * 
+ * @author wbrunette@gmail.com
+ * @author mitchellsundt@gmail.com
+ * 
+ */
 public class SubmissionKey {
 	private final String key;
 	
 	public SubmissionKey( String key ) {
 		this.key = key;
+	}
+	
+	public SubmissionKey( String formId, String topLevelGroupElementName, String uri ) {
+		StringBuilder b = new StringBuilder();
+		b.append(formId);
+		b.append("/");
+		b.append(topLevelGroupElementName);
+		b.append("[@key=");
+		b.append(uri);
+		b.append("]");
+		this.key = b.toString();
 	}
 	
 	public String toString() {

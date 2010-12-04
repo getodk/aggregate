@@ -19,20 +19,32 @@ package org.opendatakit.aggregate.submission.type;
 
 import java.math.BigDecimal;
 
-import org.opendatakit.aggregate.constants.FormatConsts;
 import org.opendatakit.common.constants.BasicConsts;
 
-
+/**
+ * 
+ * @author wbrunette@gmail.com
+ * @author mitchellsundt@gmail.com
+ * 
+ */
 public class GeoPoint {
 
+  // gps coordinate constants
+  public static final String GEO_POINT = "GeoPoint";
+  public static final String LATITUDE = "Latitude";
+  public static final String LONGITUDE = "Longitude";
+  public static final String ALTITUDE = "Altitude";
+  public static final String ACCURACY = "Accuracy";
+
+  
   private BigDecimal latitude;
 
   private BigDecimal longitude;
   
   private BigDecimal altitude;
   
-  private BigDecimal accuracy;
-  
+  private BigDecimal accuracy;  
+
   /**
    * Constructs a GeoPoint with given latitude and longitude coordinates
    * 
@@ -158,18 +170,18 @@ public class GeoPoint {
    */
   @Override
   public String toString() {
-    String str = FormatConsts.GEO_POINT+ BasicConsts.COLON + BasicConsts.SPACE;
+    String str = GeoPoint.GEO_POINT+ BasicConsts.COLON + BasicConsts.SPACE;
     if(latitude != null) {
-      str += FormatConsts.LATITUDE + BasicConsts.COLON + latitude + BasicConsts.SPACE; 
+      str += GeoPoint.LATITUDE + BasicConsts.COLON + latitude + BasicConsts.SPACE; 
     }
     if(longitude != null) {
-      str += FormatConsts.LATITUDE + BasicConsts.COLON + longitude + BasicConsts.SPACE; 
+      str += GeoPoint.LATITUDE + BasicConsts.COLON + longitude + BasicConsts.SPACE; 
     }
     if(altitude != null) {
-      str += FormatConsts.ALTITUDE + BasicConsts.COLON + altitude + BasicConsts.SPACE; 
+      str += GeoPoint.ALTITUDE + BasicConsts.COLON + altitude + BasicConsts.SPACE; 
     }
     if(accuracy != null) {
-      str += FormatConsts.ACCURACY + BasicConsts.COLON + accuracy + BasicConsts.SPACE; 
+      str += GeoPoint.ACCURACY + BasicConsts.COLON + accuracy + BasicConsts.SPACE; 
     }
 
     return str;

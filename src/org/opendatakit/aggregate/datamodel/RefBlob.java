@@ -13,8 +13,9 @@
  */
 package org.opendatakit.aggregate.datamodel;
 
-import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
+import org.opendatakit.common.persistence.DynamicDocumentBase;
+import org.opendatakit.common.security.User;
 
 /**
  * Binary objects may span multiple blobs; this class holds one 
@@ -28,27 +29,40 @@ import org.opendatakit.common.persistence.DataField;
  * other document storage services. 
  * 
  * @author mitchellsundt@gmail.com
- *
+ * @author wbrunette@gmail.com
+ * 
  */
-public final class RefBlob extends CommonFieldsBase {
+public final class RefBlob extends DynamicDocumentBase {
 
 	private static final DataField VALUE = new DataField("VALUE",DataField.DataType.BINARY, false);
 	public final DataField value;
 	
+	/**
+	 * Construct a relation prototype.
+	 * 
+	 * @param databaseSchema
+	 * @param tableName
+	 */
 	public RefBlob(String databaseSchema, String tableName) {
-		super(databaseSchema, tableName, BaseType.DYNAMIC_DOCUMENT);
+		super(databaseSchema, tableName);
 		fieldList.add(value = new DataField(VALUE));
 	}
 
 	/**
-	 * Copy constructor for use by {@link #getEmptyRow(Class)}   
-	 * This does not populate any fields related to the values of this row. 
-	 *
-	 * @param d
+	 * Construct an empty entity.  Only called via {@link #getEmptyRow(User)}
+	 * 
+	 * @param ref
+	 * @param user
 	 */
-	public RefBlob(RefBlob ref) {
-		super(ref);
+	private RefBlob(RefBlob ref, User user) {
+		super(ref, user);
 		value = ref.value;
+	}
+
+	// Only called from within the persistence layer.
+	@Override
+	public RefBlob getEmptyRow(User user) {
+		return new RefBlob(this, user);
 	}
 
 	public byte[] getValue() {

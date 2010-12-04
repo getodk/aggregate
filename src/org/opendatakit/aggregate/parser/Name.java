@@ -17,7 +17,8 @@ package org.opendatakit.aggregate.parser;
  * Simple data structure used in {@link NamingSet} to resolve table and column names.
  * 
  * @author mitchellsundt@gmail.com
- *
+ * @author wbrunette@gmail.com
+ * 
  */
 final class Name {
 	final String schema;

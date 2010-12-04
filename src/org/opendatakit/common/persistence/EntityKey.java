@@ -18,6 +18,9 @@ package org.opendatakit.common.persistence;
  * The EntityKey class defines a key which corresponds to a specific Entity
  * in a specific relation.
  * 
+ * @author wbrunette@gmail.com
+ * @author mitchellsundt@gmail.com
+ * 
  */
 public class EntityKey {
 

@@ -25,6 +25,9 @@ import org.opendatakit.common.security.User;
  * Aggregate. It is designed to be the sole point of interaction for code above
  * the org.opendatakit.common.persistence layer.
  * 
+ * @author wbrunette@gmail.com
+ * @author mitchellsundt@gmail.com
+ * 
  */
 public interface Datastore {
 
@@ -112,7 +115,7 @@ public interface Datastore {
 	 * The object returned is of the same class as the relation (the 
 	 * relation acts as a prototype).
 	 * 
-	 * @param relation the prototype relation to be fetched.
+	 * @param relation -  the prototype relation to be fetched.
 	 * @param uri the key corresponding to the desired Entity
 	 * @param user non-null user responsible for this request.
 	 * 
@@ -178,4 +181,6 @@ public interface Datastore {
 	 */
 	public void deleteEntities(Collection<EntityKey> keys, User user)
 			throws ODKDatastoreException;
+	
+	public TaskLock createTaskLock();
 }

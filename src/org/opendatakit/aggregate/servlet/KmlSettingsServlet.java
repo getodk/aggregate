@@ -25,23 +25,28 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.lang.StringEscapeUtils;
 import org.opendatakit.aggregate.ContextFactory;
+import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.ServletConsts;
-import org.opendatakit.aggregate.datamodel.FormDataModel;
-import org.opendatakit.aggregate.datamodel.FormDefinition;
+import org.opendatakit.aggregate.datamodel.FormElementKey;
+import org.opendatakit.aggregate.datamodel.FormElementModel;
+import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
+import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.common.constants.HtmlConsts;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.security.UserService;
 
 /**
- * Servlet to generate the XML list of forms to be
- * presented as the API for forms for computers
- *
+ * Servlet to generate the XML list of forms to be presented as the API for
+ * forms for computers
+ * 
  * @author alerer@gmail.com
  * @author wbrunette@gmail.com
- *
+ * @author mitchellsundt@gmail.com
+ * 
  */
 public class KmlSettingsServlet extends ServletUtilBase {
 
@@ -54,15 +59,27 @@ public class KmlSettingsServlet extends ServletUtilBase {
    * URI from base
    */
   public static final String ADDR = "kmlSettings";
-  
+
   /**
    * Title for generated webpage
    */
   private static final String TITLE_INFO = "KML Settings";
 
-  
+  private static final String PIC_TXT = "Picture field to display:";
+
+  private static final String TITLE_TXT = "Title field:";
+
+  private static final String GEOPOINT_TXT = "Field to map:";
+
+  public static final String NONE = "None";
+
+  private List<FormElementKey> geopointNodesNames;
+  private List<FormElementKey> binaryNodeNames;
+  private List<FormElementKey> allNodesNames;
+
   /**
-   * Handler for HTTP Get request that responds with an XML list of forms to download
+   * Handler for HTTP Get request that responds with an XML list of forms to
+   * download
    * 
    * @see javax.servlet.http.HttpServlet#doGet(javax.servlet.http.HttpServletRequest,
    *      javax.servlet.http.HttpServletResponse)
@@ -74,104 +91,112 @@ public class KmlSettingsServlet extends ServletUtilBase {
       return;
     }
 
-    UserService userService = (UserService) ContextFactory.get().getBean(
-        ServletConsts.USER_BEAN);
+    UserService userService = (UserService) ContextFactory.get().getBean(BeanDefs.USER_BEAN);
     User user = userService.getCurrentUser();
-   
+
     // get parameter
-    String odkId = getParameter(req, ServletConsts.ODK_ID);
+    String odkId = getParameter(req, ServletConsts.FORM_ID);
     if (odkId == null) {
       errorMissingKeyParam(resp);
       return;
     }
 
     // get form
-    Datastore ds = (Datastore) ContextFactory.get().getBean(ServletConsts.DATASTORE_BEAN);
-    FormDefinition fd = FormDefinition.getFormDefinition(odkId, ds, user);
-    if ( fd == null ) {
-    	odkIdNotFoundError(resp);
-    	return;
+    Datastore ds = (Datastore) ContextFactory.get().getBean(BeanDefs.DATASTORE_BEAN);
+    Form form = null;
+    try {
+      form = Form.retrieveForm(odkId, ds, user);
+      geopointNodesNames = new ArrayList<FormElementKey>();
+      binaryNodeNames = new ArrayList<FormElementKey>();
+      allNodesNames = new ArrayList<FormElementKey>();
+
+      FormElementModel root = form.getTopLevelGroupElement();
+      processElementForColumnHead(form, root, root);
+
+    } catch (ODKFormNotFoundException e) {
+      odkIdNotFoundError(resp);
+      return;
     }
-    
-    geopointNodes = new ArrayList<FormDataModel>();
-    imageNodes = new ArrayList<FormDataModel>();
-    allNodes = new ArrayList<FormDataModel>();
-    
-    processElementForColumnHead(fd.getTopLevelGroup(), fd.getTopLevelGroup(), "");
-    
+
     beginBasicHtmlResponse(TITLE_INFO, resp, req, true); // header info
-    
+    String spaceBetweenInputs = HtmlUtil.createSelfClosingTag(HtmlConsts.P);
+
     PrintWriter out = resp.getWriter();
     out.write(HtmlUtil.createFormBeginTag(KmlServlet.ADDR, null, HtmlConsts.GET));
-    
-    out.write("Field to map:" + HtmlConsts.LINE_BREAK);
-    List<String> geopointOptions = createSelectOptionsFromFormElements(geopointNodes);
-    out.write(HtmlUtil.createSelect("geopointField", geopointOptions));
-    out.write("<p/>");
-    
-    out.write("Title field:" + HtmlConsts.LINE_BREAK);
-    List<String> allOptions = createSelectOptionsFromFormElements(allNodes);
-    out.write(HtmlUtil.createSelect("titleField", allOptions));
-    out.write("<p/>");
-    
-    out.write("Picture field to display:" + HtmlConsts.LINE_BREAK);
-    List<String> imageOptions = createSelectOptionsFromFormElements(imageNodes);
-    imageOptions.add("None");
-    out.write(HtmlUtil.createSelect("imageField", imageOptions));
-    
-    out.write("<p/>");
-    out.write(HtmlUtil.createInput("hidden", ServletConsts.ODK_ID, fd.getFormId()));
-    out.write(HtmlUtil.createInput("submit", null, null));
-    out.write("</form>");
-    
+
+    out.write(GEOPOINT_TXT + HtmlConsts.LINE_BREAK);
+    out.write(createSelect(KmlServlet.GEOPOINT_FIELD, geopointNodesNames, false, form));
+    out.write(spaceBetweenInputs);
+
+    out.write(TITLE_TXT + HtmlConsts.LINE_BREAK);
+    out.write(createSelect(KmlServlet.TITLE_FIELD, allNodesNames, false, form));
+    out.write(spaceBetweenInputs);
+
+    out.write(PIC_TXT + HtmlConsts.LINE_BREAK);
+    out.write(createSelect(KmlServlet.IMAGE_FIELD, binaryNodeNames, true, form));
+    out.write(spaceBetweenInputs);
+
+    out.write(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_HIDDEN, ServletConsts.FORM_ID, form
+        .getFormId()));
+    out.write(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_SUBMIT, null, null));
+    out.write(HtmlConsts.FORM_CLOSE);
+
     finishBasicHtmlResponse(resp);
   }
-  
-  private List<FormDataModel> geopointNodes;
-  private List<FormDataModel> imageNodes;
-  private List<FormDataModel> allNodes;
+
   /**
-   * Helper function to recursively go through the element tree and create
-   * the column headings
+   * Helper function to recursively go through the element tree and create the
+   * FormElementKeys
    * 
    */
-  private void processElementForColumnHead(FormDataModel node,
-		  FormDataModel root, String parentName) {
-    if (node == null) return;
+  private void processElementForColumnHead(Form form, FormElementModel node, FormElementModel root) {
+    if (node == null)
+      return;
 
-    switch ( node.getElementType() ) {
+    FormElementKey key = node.constructFormElementKey(form);
+    switch (node.getElementType()) {
     case GEOPOINT:
-    	geopointNodes.add(node);
-    	break;
+      geopointNodesNames.add(key);
+      break;
     case BINARY:
-    	imageNodes.add(node);
-    	break;
-    }
-    
-    switch ( node.getElementType() ) {
-    case GROUP:
+      binaryNodeNames.add(key);
+      break;
     case REPEAT:
-    case PHANTOM:
-    	break;
-	default:
-    	allNodes.add(node);	
+    case GROUP:
+      break; // should not be in any list
+    default:
+      allNodesNames.add(key);
     }
 
-    List<FormDataModel> childDataElements = node.getChildren();
+    List<FormElementModel> childDataElements = node.getChildren();
     if (childDataElements == null) {
       return;
     }
-    for (FormDataModel child : childDataElements) {
-      processElementForColumnHead(child, root, parentName);
+    for (FormElementModel child : childDataElements) {
+      processElementForColumnHead(form, child, root);
     }
   }
-  
-  private List<String> createSelectOptionsFromFormElements(List<FormDataModel> l) {
-    List<String> options = new ArrayList<String>();
-    for (FormDataModel fe: l){
-      options.add(fe.getElementName());
-    }
-    return options;
-  }
-}
 
+  public final String createSelect(String name, List<FormElementKey> values, boolean addNone, Form form) {
+    if (name == null) {
+      return null;
+    }
+    StringBuilder html = new StringBuilder();
+    html.append("<select name='" + StringEscapeUtils.escapeHtml(name) + "'>");
+
+    if(addNone) {
+      html.append("<option value='" + NONE + "'>" + NONE + "</option>");
+    }
+    
+    if (values != null) {
+      for (FormElementKey key : values) {
+        html.append("<option value='" + StringEscapeUtils.escapeHtml(key.toString()) + "'>");
+        html.append(StringEscapeUtils.escapeHtml(key.userFriendlyString(form)));
+        html.append("</option>");
+      }
+    }
+    html.append("</select>");
+    return html.toString();
+  }
+
+}

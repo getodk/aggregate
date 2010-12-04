@@ -20,6 +20,12 @@ import java.util.List;
 
 import com.google.appengine.api.users.User;
 
+/**
+ * 
+ * @author wbrunette@gmail.com
+ * @author mitchellsundt@gmail.com
+ * 
+ */
 public class UserImpl implements org.opendatakit.common.security.User {
 
 	private final boolean privileged;

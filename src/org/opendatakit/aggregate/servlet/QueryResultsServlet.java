@@ -23,20 +23,28 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.opendatakit.aggregate.ContextFactory;
+import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.ServletConsts;
-import org.opendatakit.aggregate.datamodel.FormDataModel;
-import org.opendatakit.aggregate.datamodel.FormDefinition;
+import org.opendatakit.aggregate.datamodel.FormElementModel;
+import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
+import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.format.SubmissionFormatter;
 import org.opendatakit.aggregate.format.table.HtmlFormatter;
 import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.Datastore;
-import org.opendatakit.common.persistence.InstanceDataBase;
 import org.opendatakit.common.persistence.Query;
+import org.opendatakit.common.persistence.TopLevelDynamicBase;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.security.UserService;
 
+/**
+ * 
+ * @author wbrunette@gmail.com
+ * @author mitchellsundt@gmail.com
+ * 
+ */
 public class QueryResultsServlet extends ServletUtilBase {
 
 	/**
@@ -70,11 +78,11 @@ public class QueryResultsServlet extends ServletUtilBase {
 		}
 
 		UserService userService = (UserService) ContextFactory.get().getBean(
-				ServletConsts.USER_BEAN);
+				BeanDefs.USER_BEAN);
 		User user = userService.getCurrentUser();
 
 		// get parameter
-		String formId = getParameter(req, ServletConsts.ODK_ID);
+		String formId = getParameter(req, ServletConsts.FORM_ID);
 		if (formId == null) {
 			errorMissingKeyParam(resp);
 			return;
@@ -91,17 +99,19 @@ public class QueryResultsServlet extends ServletUtilBase {
 
 		// get form
 		Datastore ds = (Datastore) ContextFactory.get().getBean(
-				ServletConsts.DATASTORE_BEAN);
-		FormDefinition fd = FormDefinition.getFormDefinition(formId, ds, user);
-		if (fd == null) {
+				BeanDefs.DATASTORE_BEAN);
+		Form form = null;
+		try {
+			form = Form.retrieveForm(formId, ds, user);
+		} catch ( ODKFormNotFoundException e) {
 			odkIdNotFoundError(resp);
 			return;
 		}
-		FormDataModel fdm = fd.getElementByName(formId);
+		FormElementModel fdm = form.getFormDefinition().getElementByName(formId);
 
-		CommonFieldsBase tbl = fdm.getBackingObjectPrototype();
+		CommonFieldsBase tbl = fdm.getFormDataModel().getBackingObjectPrototype();
 
-		FormDataModel element = fdm.findElementByName(field);
+		FormElementModel element = fdm.findElementByName(field);
 
 		if (element == null) {
 			errorRetreivingData(resp);
@@ -123,18 +133,18 @@ public class QueryResultsServlet extends ServletUtilBase {
 			break;
 		}
 		Query query = ds.createQuery(tbl, user);
-		query.addFilter(element.getBackingKey(), Query.FilterOperation
+		query.addFilter(element.getFormDataModel().getBackingKey(), Query.FilterOperation
 				.valueOf(op), compareValue);
 		try {
 			List<Submission> submissions = new ArrayList<Submission>();
 			List<? extends CommonFieldsBase> entities = query
 					.executeQuery(1000);
 			for (CommonFieldsBase entity : entities) {
-				submissions.add(new Submission((InstanceDataBase) entity, fd,
+				submissions.add(new Submission((TopLevelDynamicBase) entity, form.getFormDefinition(),
 						ds, user));
 			}
 
-			SubmissionFormatter formatter = new HtmlFormatter(fd,
+			SubmissionFormatter formatter = new HtmlFormatter(form,
 					getServerURL(req), resp.getWriter(), null, true);
 
 			beginBasicHtmlResponse(TITLE_INFO, resp, req, true); // header info

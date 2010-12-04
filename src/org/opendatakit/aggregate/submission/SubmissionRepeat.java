@@ -19,17 +19,19 @@ package org.opendatakit.aggregate.submission;
 
 import java.util.List;
 
-import org.opendatakit.aggregate.datamodel.FormDataModel;
+import org.opendatakit.aggregate.datamodel.FormElementModel;
 
 /**
  * Interface for submission repeat that can be used to store a submission repeat
  * in the datastore
  * 
  * @author wbrunette@gmail.com
+ * @author mitchellsundt@gmail.com
+ * 
  */
 public interface SubmissionRepeat extends SubmissionValue {
 
-	public FormDataModel getElement();
+	public FormElementModel getElement();
 
 	public SubmissionKey constructSubmissionKey();
 
@@ -37,7 +39,9 @@ public interface SubmissionRepeat extends SubmissionValue {
 
 	public void addSubmissionSet(SubmissionSet submissionSet);
 
-	public SubmissionValue resolveSubmissionKeyBeginningAt(int i,
+	public SubmissionElement resolveSubmissionKeyBeginningAt(int i,
 			List<SubmissionKeyPart> parts);
+	
+	public String getUniqueKeyStr();
 
 }

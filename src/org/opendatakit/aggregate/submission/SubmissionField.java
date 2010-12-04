@@ -30,7 +30,8 @@ import org.opendatakit.common.security.User;
  * 
  * @param <T>
  *  a GAE datastore type
- *
+ * @author mitchellsundt@gmail.com
+ * 
  */
 public interface SubmissionField<T> extends SubmissionValue{
   

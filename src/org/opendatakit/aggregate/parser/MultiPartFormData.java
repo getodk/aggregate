@@ -21,9 +21,11 @@ import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -40,6 +42,7 @@ import org.opendatakit.aggregate.constants.ParserConsts;
  * name (or both) provided in the http submission
  * 
  * @author wbrunette@gmail.com
+ * @author mitchellsundt@gmail.com
  * 
  */
 public class MultiPartFormData {
@@ -171,6 +174,10 @@ public class MultiPartFormData {
 
 	public MultiPartFormItem getFormDataByFileName(String fileName) {
 		return fileNameMap.get(fileName);
+	}
+	
+	public Set<Map.Entry<String,MultiPartFormItem>> getFileNameEntrySet() {
+		return Collections.unmodifiableSet(fileNameMap.entrySet());
 	}
 
 }

@@ -26,14 +26,15 @@ import java.util.List;
 import java.util.Map;
 
 import org.opendatakit.aggregate.constants.ErrorConsts;
-import org.opendatakit.aggregate.constants.FormatConsts;
+import org.opendatakit.aggregate.constants.format.FormatConsts;
 import org.opendatakit.aggregate.datamodel.BinaryContent;
 import org.opendatakit.aggregate.datamodel.FormDataModel;
 import org.opendatakit.aggregate.datamodel.FormDefinition;
+import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.datamodel.VersionedBinaryContent;
 import org.opendatakit.aggregate.exception.ODKConversionException;
+import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.format.element.ElementFormatter;
-import org.opendatakit.aggregate.format.element.Row;
 import org.opendatakit.aggregate.submission.SubmissionBlob;
 import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.submission.SubmissionKeyPart;
@@ -53,6 +54,7 @@ import org.opendatakit.common.security.User;
  * Data Storage Converter for Blob Type
  * 
  * @author wbrunette@gmail.com
+ * @author mitchellsundt@gmail.com
  * 
  */
 public class BlobSubmissionType extends SubmissionFieldBase<SubmissionKey> {
@@ -126,6 +128,20 @@ public class BlobSubmissionType extends SubmissionFieldBase<SubmissionKey> {
 		throw new IllegalArgumentException("Version does not match a known version");
 	}
 	
+	public String getContentHash( int ordinal, String version ) {
+		BinaryContent b = attachments.get(ordinal-1);
+		if ( b.getOrdinalNumber() != ordinal ) {
+			// we are somehow out of sync!
+			throw new IllegalStateException("missing attachment declaration");
+		}
+		for ( VersionedBinaryContent vbc : versionedAttachments.get(b)) {
+			if ( vbc.getVersion().equals(version) ) {
+				return vbc.getContentHash();
+			}
+		}
+		throw new IllegalArgumentException("Version does not match a known version");
+	}
+	
 	public Long getContentLength( int ordinal, String version ) {
 		BinaryContent b = attachments.get(ordinal-1);
 		if ( b.getOrdinalNumber() != ordinal ) {
@@ -147,7 +163,7 @@ public class BlobSubmissionType extends SubmissionFieldBase<SubmissionKey> {
 			// we are somehow out of sync!
 			throw new IllegalStateException("missing attachment declaration");
 		}
-	    FormDataModel vbcDataModel = element.getChildren().get(0);
+	    FormDataModel vbcDataModel = element.getFormDataModel().getChildren().get(0);
 		for ( VersionedBinaryContent vbc : versionedAttachments.get(b)) {
 			if ( vbc.getVersion().equals(version) ) {
 				SubmissionBlob blb = new SubmissionBlob(vbc.getUri(), vbcDataModel.getChildren().get(0), formDefinition, datastore, user);
@@ -161,7 +177,7 @@ public class BlobSubmissionType extends SubmissionFieldBase<SubmissionKey> {
    * 
    * @param propertyName Name of submission element
    */
-  public BlobSubmissionType(FormDataModel element, String parentKey, EntityKey topLevelTableKey, 
+  public BlobSubmissionType(FormElementModel element, String parentKey, EntityKey topLevelTableKey, 
 		  	FormDefinition formDefinition, SubmissionKey submissionKey, Datastore datastore, User user) {
     super(element);
     this.parentKey = parentKey;
@@ -187,36 +203,56 @@ public class BlobSubmissionType extends SubmissionFieldBase<SubmissionKey> {
   @Override
   public void setValueFromByteArray(byte[] byteArray, String contentType, Long contentLength, String unrootedFilePath, Datastore datastore, User user) throws ODKConversionException, ODKDatastoreException{
 
+	  String md5Hash = CommonFieldsBase.newMD5HashUri(byteArray);
+
+	  boolean existingContent = false;
 	  BinaryContent matchedBc = null;
+	  
 	  for ( BinaryContent bc : attachments ) {
 		  String bcFilePath = bc.getUnrootedFilePath();
 		  if ( (bcFilePath == null && unrootedFilePath == null) || (bcFilePath != null && bcFilePath.equals(unrootedFilePath))) {
 			  matchedBc = bc;
+			  existingContent = true;
 			  break;
 		  }
 	  }
+
+	  FormDataModel vbcDataModel = element.getFormDataModel().getChildren().get(0);
+	  VersionedBinaryContent vbcReference = (VersionedBinaryContent) vbcDataModel.getBackingObjectPrototype();
 	  
 	  final String version = CommonFieldsBase.newUri();
 	  if ( matchedBc == null ) {
 		  // adding a new file...
-		  matchedBc = (BinaryContent) datastore.createEntityUsingRelation(element.getBackingObjectPrototype(), topLevelTableKey, user);
+		  matchedBc = (BinaryContent) datastore.createEntityUsingRelation(element.getFormDataModel().getBackingObjectPrototype(), topLevelTableKey, user);
 		  matchedBc.setParentAuri(parentKey);
 		  matchedBc.setOrdinalNumber(attachments.size()+1L);
 		  matchedBc.setVersion(version);
 		  matchedBc.setUnrootedFilePath(unrootedFilePath);
-		  attachments.add(matchedBc);
+		  // later: attachments.add(matchedBc);
 	  } else {
-		  // updating an existing file...
-		  matchedBc.setVersion(version);
+		  // updating an existing file... or a no-op if the hash value is the same...
+		  List<VersionedBinaryContent> vcList = versionedAttachments.get(matchedBc);
+		  if ( vcList != null ) {
+			  for ( VersionedBinaryContent vc : vcList ) {
+				  if ( vc.getContentHash() == md5Hash ) {
+					  // same content -- reuse it.  
+					  // Change the bc to have this content's version as its active version.
+					  matchedBc.setVersion(vc.getVersion());
+					  datastore.putEntity(matchedBc, user);
+					  return;
+				  }
+			  }
+		  }
+		  // we are creating a newer version of the attachment or defining it for the first time...
+		  // later: matchedBc.setVersion(version);
 	  }
-	  
-	  FormDataModel vbcDataModel = element.getChildren().get(0);
-	  VersionedBinaryContent vbcReference = (VersionedBinaryContent) vbcDataModel.getBackingObjectPrototype();
+
 	  VersionedBinaryContent vbc = (VersionedBinaryContent) datastore.createEntityUsingRelation(vbcReference, topLevelTableKey, user);
 	  vbc.setParentAuri(matchedBc.getUri());
 	  vbc.setOrdinalNumber(1L);
 	  vbc.setContentLength(contentLength);
 	  vbc.setContentType(contentType);
+	  vbc.setContentHash(md5Hash);
 	  vbc.setVersion(version);
 	  
 	  List<VersionedBinaryContent> vcList = versionedAttachments.get(matchedBc);
@@ -224,15 +260,28 @@ public class BlobSubmissionType extends SubmissionFieldBase<SubmissionKey> {
 		  vcList = new ArrayList<VersionedBinaryContent>();
 		  versionedAttachments.put(matchedBc, vcList);
 	  }
-	  vcList.add(vbc);
-	  // persist the top level linkages...
-	  datastore.putEntity(vbc, user);
-	  datastore.putEntity(matchedBc, user);
-	  
+
 	  // and create the SubmissionBlob (persisting it...)
       try {
+    	// persist the data
 		SubmissionBlob subBlob = new SubmissionBlob(byteArray, vbc.getUri(), vbcDataModel.getChildren().get(0), formDefinition, topLevelTableKey, datastore, user);
+		// persist the version linkage
+	    datastore.putEntity(vbc, user);
+	    vcList.add(vbc);
+		matchedBc.setVersion(version);
+		// persist the top level linkages...
+		datastore.putEntity(matchedBc, user);
+	    if ( !existingContent ) attachments.add(matchedBc);
+	    
 	  } catch (ODKDatastoreException e) {
+		// there may be trash in the database upon failure.
+		vcList.remove(vbc);
+		try {
+			// try to clean up...
+			datastore.deleteEntity(new EntityKey(vbc, vbc.getUri()), user);
+		} catch ( ODKDatastoreException ex) {
+			ex.printStackTrace();
+		}
 		throw new ODKConversionException(e);
 	  }
   }
@@ -259,8 +308,8 @@ public class BlobSubmissionType extends SubmissionFieldBase<SubmissionKey> {
   public void getValueFromEntity(CommonFieldsBase dbEntity, String uriAssociatedRow,
 		  					EntityKey topLevelTableKey, Datastore datastore, User user, boolean fetchData) throws ODKDatastoreException {
 		
-		BinaryContent ctnt = (BinaryContent) element.getBackingObjectPrototype();
-		VersionedBinaryContent vc = (VersionedBinaryContent) element.getChildren().get(0).getBackingObjectPrototype();
+		BinaryContent ctnt = (BinaryContent) element.getFormDataModel().getBackingObjectPrototype();
+		VersionedBinaryContent vc = (VersionedBinaryContent) element.getFormDataModel().getChildren().get(0).getBackingObjectPrototype();
 		Query q = datastore.createQuery(ctnt, user);
 		q.addFilter(ctnt.parentAuri, FilterOperation.EQUAL, uriAssociatedRow);
 		q.addSort(ctnt.ordinalNumber, Direction.ASCENDING);
@@ -305,8 +354,8 @@ public class BlobSubmissionType extends SubmissionFieldBase<SubmissionKey> {
    *          format for output
    */ 
   @Override
-  public void formatValue(ElementFormatter elemFormatter, Row row) throws ODKDatastoreException {
-    elemFormatter.formatBinary(getValue(), element.getElementName(), row);
+  public void formatValue(ElementFormatter elemFormatter, Row row, String ordinalValue) throws ODKDatastoreException {
+    elemFormatter.formatBinary(this, element.getGroupQualifiedElementName() + ordinalValue, row);
   }
 
   /**
@@ -335,7 +384,7 @@ public class BlobSubmissionType extends SubmissionFieldBase<SubmissionKey> {
 	@Override
 	public void recursivelyAddEntityKeys(List<EntityKey> keyList) throws ODKDatastoreException {
 
-        FormDataModel vbcDataModel = element.getChildren().get(0);
+        FormDataModel vbcDataModel = element.getFormDataModel().getChildren().get(0);
 		for ( List<VersionedBinaryContent> vcList : versionedAttachments.values()) {
 			for ( VersionedBinaryContent vc : vcList ) {
 				SubmissionBlob b = new SubmissionBlob(vc.getUri(), vbcDataModel.getChildren().get(0), formDefinition, datastore, user);
@@ -400,5 +449,11 @@ public class BlobSubmissionType extends SubmissionFieldBase<SubmissionKey> {
 		// TODO: need to support qualifying the element we want.
 		// For now, we assume the requested blob is the first element.
 		return this;
+	}
+
+	public SubmissionKey generateSubmissionKey(
+			int i, String currentVersion) {
+		return new SubmissionKey(submissionKey.toString() +
+				"[@ordinal=" + Integer.toString(i) + " and @version=" + currentVersion + "]");
 	}
 }
