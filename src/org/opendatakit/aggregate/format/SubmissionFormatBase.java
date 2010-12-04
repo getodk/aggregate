@@ -28,7 +28,8 @@ import org.opendatakit.common.security.User;
  * Base class used to process submission results into usable form
  *
  * @author wbrunette@gmail.com
- *
+ * @author mitchellsundt@gmail.com
+ * 
  */
 public abstract class SubmissionFormatBase {
  

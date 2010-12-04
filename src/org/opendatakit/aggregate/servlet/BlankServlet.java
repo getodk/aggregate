@@ -23,6 +23,12 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.opendatakit.common.constants.BasicConsts;
 
+/**
+ * 
+ * @author wbrunette@gmail.com
+ * @author mitchellsundt@gmail.com
+ * 
+ */
 public class BlankServlet extends ServletUtilBase {
 
    /**

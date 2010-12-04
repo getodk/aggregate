@@ -15,20 +15,26 @@
  */
 package org.opendatakit.aggregate.task;
 
+import org.opendatakit.aggregate.constants.externalservice.ExternalServiceOption;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
-import org.opendatakit.aggregate.externalservice.constants.ExternalServiceOption;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.security.User;
 
+/**
+ * 
+ * @author wbrunette@gmail.com
+ * @author mitchellsundt@gmail.com
+ * 
+ */
 public interface WorksheetCreator {
 
-  public void createWorksheetTask(String appName, 
-		  String serverURL, String spreadsheetName, ExternalServiceOption esType, int delay, 
-      Form form, Datastore datastore, User user) throws ODKExternalServiceException, ODKDatastoreException;
+  public void createWorksheetTask(String serverURL, String spreadsheetName,
+      ExternalServiceOption esType, int delay, Form form, Datastore datastore, User user)
+      throws ODKExternalServiceException, ODKDatastoreException;
 
-  public void worksheetCreator(String appName,
-      String serverURL, String spreadsheetName, ExternalServiceOption esType,
-      Form form, Datastore ds, User user) throws ODKExternalServiceException, ODKDatastoreException;
+  public void worksheetCreator(String serverURL, String spreadsheetName,
+      ExternalServiceOption esType, Form form, Datastore ds, User user)
+      throws ODKExternalServiceException, ODKDatastoreException;
 }

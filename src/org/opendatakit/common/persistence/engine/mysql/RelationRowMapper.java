@@ -22,6 +22,12 @@ import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.security.User;
 import org.springframework.jdbc.core.RowMapper;
 
+/**
+ * 
+ * @author wbrunette@gmail.com
+ * @author mitchellsundt@gmail.com
+ * 
+ */
 public class RelationRowMapper implements RowMapper {
 
 	private final CommonFieldsBase relation;
@@ -35,7 +41,12 @@ public class RelationRowMapper implements RowMapper {
 	@Override
 	public Object mapRow(ResultSet rs, int rowNum) throws SQLException {
 		
-		CommonFieldsBase row = relation.getEmptyRow(relation.getClass(), user);
+		CommonFieldsBase row;
+		try {
+			row = relation.getEmptyRow(user);
+		} catch ( Exception e ) {
+			throw new IllegalStateException("failed to create empty row", e);
+		}
 
 		/**
 		 * Correct for the funky handling of nulls by the various accessors...
@@ -71,7 +82,7 @@ public class RelationRowMapper implements RowMapper {
 				}
 				break;
 			case DATETIME:
-				Date d = rs.getDate(f.getName());
+				Date d = rs.getTimestamp(f.getName());			
 				if ( d == null ) {
 					row.setDateField(f, null);
 				} else {

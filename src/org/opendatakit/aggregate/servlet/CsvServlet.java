@@ -23,12 +23,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.opendatakit.aggregate.ContextFactory;
+import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.ServletConsts;
-import org.opendatakit.aggregate.datamodel.FormDefinition;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
+import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.format.SubmissionFormatter;
 import org.opendatakit.aggregate.format.table.CsvFormatter;
-import org.opendatakit.aggregate.format.table.TableFormatterBase;
 import org.opendatakit.aggregate.query.submission.QueryByDate;
 import org.opendatakit.common.constants.BasicConsts;
 import org.opendatakit.common.constants.HtmlConsts;
@@ -42,6 +43,7 @@ import org.opendatakit.common.security.UserService;
  * 
  * 
  * @author wbrunette@gmail.com
+ * @author mitchellsundt@gmail.com
  * 
  */
 public class CsvServlet extends ServletUtilBase {
@@ -70,29 +72,35 @@ public class CsvServlet extends ServletUtilBase {
       return;
     }
 
-    UserService userService = (UserService) ContextFactory.get().getBean(
-        ServletConsts.USER_BEAN);
+    UserService userService = (UserService) ContextFactory.get().getBean(BeanDefs.USER_BEAN);
     User user = userService.getCurrentUser();
 
     // get parameter
-    String odkId = getParameter(req, ServletConsts.ODK_ID);
+    String formId = getParameter(req, ServletConsts.FORM_ID);
 
-    if (odkId == null) {
+    if (formId == null) {
       errorMissingKeyParam(resp);
       return;
     }
 
-    Datastore ds = (Datastore) ContextFactory.get().getBean(ServletConsts.DATASTORE_BEAN);
-    FormDefinition fd = FormDefinition.getFormDefinition(odkId, ds, user);
+    Datastore ds = (Datastore) ContextFactory.get().getBean(BeanDefs.DATASTORE_BEAN);
+    Form form = null;
+    try {
+      form = Form.retrieveForm(formId, ds, user);
+    } catch (ODKFormNotFoundException e1) {
+      odkIdNotFoundError(resp);
+      return;
+    }
 
     try {
       resp.setContentType(HtmlConsts.RESP_TYPE_ENRICHED);
-      setDownloadFileName(resp, odkId + ServletConsts.CSV_FILENAME_APPEND);
+      setDownloadFileName(resp, formId + ServletConsts.CSV_FILENAME_APPEND);
 
       // create CSV
-      QueryByDate query = new QueryByDate(fd, BasicConsts.EPOCH, false, ServletConsts.FETCH_LIMIT, ds, user);
-      TableFormatterBase formatter = new CsvFormatter(query.getFormDefinition(), getServerURL(req), resp
-          .getWriter(), null);
+      QueryByDate query = new QueryByDate(form, BasicConsts.EPOCH, false,
+          ServletConsts.FETCH_LIMIT, ds, user);
+      SubmissionFormatter formatter = new CsvFormatter(form, getServerURL(req), resp.getWriter(),
+          null);
       formatter.processSubmissions(query.getResultSubmissions());
 
     } catch (ODKFormNotFoundException e) {

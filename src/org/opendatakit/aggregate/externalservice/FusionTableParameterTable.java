@@ -19,64 +19,103 @@ import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.security.User;
 
-final class FusionTableParameterTable extends CommonFieldsBase {
+/**
+ * 
+ * @author wbrunette@gmail.com
+ * @author mitchellsundt@gmail.com
+ * 
+ */
+public final class FusionTableParameterTable extends CommonFieldsBase {
 
-	private static final String TABLE_NAME = "_fusion_table";
-	/*
-	 * Property Names for datastore
+  private static final String TABLE_NAME = "_fusion_table";
+  /*
+   * Property Names for datastore
+   */
+  /****************************************************/
+  private static final DataField FUSION_TABLE_ID_PROPERTY = new DataField("FUSION_TABLE_ID",
+      DataField.DataType.STRING, true, 4096L);
+  private static final DataField AUTH_TOKEN_PROPERTY = new DataField("AUTH_TOKEN",
+      DataField.DataType.STRING, true, 4096L);
+  private static final DataField AUTH_TOKEN_SECRET_PROPERTY = new DataField("AUTH_TOKEN_SECRET",
+		  DataField.DataType.STRING, true, 4096L);
+
+  public final DataField fusionTableId;
+  public final DataField authToken;
+  public final DataField authTokenSecret;
+
+	/**
+	 * Construct a relation prototype.
+	 * 
+	 * @param databaseSchema
+	 * @param tableName
 	 */
-	/****************************************************/
-	private static final DataField FUSION_TABLE_NAME_PROPERTY = new DataField(
-			"FUSION_TABLE_NAME", DataField.DataType.STRING, true, 4096L);
-	private static final DataField AUTH_TOKEN_PROPERTY = new DataField(
-			"AUTH_TOKEN", DataField.DataType.STRING, true, 4096L);
+  FusionTableParameterTable(String schemaName) {
+    super(schemaName, TABLE_NAME, CommonFieldsBase.BaseType.STATIC);
+    fieldList.add(fusionTableId = new DataField(FUSION_TABLE_ID_PROPERTY));
+    fieldList.add(authToken = new DataField(AUTH_TOKEN_PROPERTY));
+    fieldList.add(authTokenSecret = new DataField(AUTH_TOKEN_SECRET_PROPERTY));
+  }
 
-	public final DataField fusionTableName;
-	public final DataField authToken;
+	/**
+	 * Construct an empty entity.  Only called via {@link #getEmptyRow(User)}
+	 * 
+	 * @param ref
+	 * @param user
+	 */
+  private FusionTableParameterTable(FusionTableParameterTable ref, User user) {
+    super(ref, user);
+    fusionTableId = ref.fusionTableId;
+    authToken = ref.authToken;
+    authTokenSecret = ref.authTokenSecret;
+  }
 
-	FusionTableParameterTable(String schemaName) {
-		super(schemaName, TABLE_NAME, CommonFieldsBase.BaseType.STATIC);
-		fieldList.add(fusionTableName = new DataField(
-				FUSION_TABLE_NAME_PROPERTY));
-		fieldList.add(authToken = new DataField(AUTH_TOKEN_PROPERTY));
-	}
+  // Only called from within the persistence layer.
+  @Override
+  public FusionTableParameterTable getEmptyRow(User user) {
+	return new FusionTableParameterTable(this, user);
+  }
 
-	// for creating empty rows
-	FusionTableParameterTable(FusionTableParameterTable ref) {
-		super(ref);
-		fusionTableName = ref.fusionTableName;
-		authToken = ref.authToken;
-	}
+  public String getFusionTableId() {
+    return getStringField(fusionTableId);
+  }
 
-	public String getFusionTableName() {
-		return getStringField(fusionTableName);
-	}
+  public void setFusionTableId(String value) {
+    if (!setStringField(fusionTableId, value)) {
+      throw new IllegalArgumentException("overflow fusionTableName");
+    }
+  }
 
-	public void setFusionTableName(String value) {
-		if (!setStringField(fusionTableName, value)) {
-			throw new IllegalArgumentException("overflow fusionTableName");
-		}
-	}
+  public String getAuthToken() {
+    return getStringField(authToken);
+  }
 
-	public String getAuthToken() {
-		return getStringField(authToken);
-	}
+  public void setAuthToken(String value) {
+    if (!setStringField(authToken, value)) {
+      throw new IllegalArgumentException("overflow authToken");
+    }
+  }
+  
+  public String getAuthTokenSecret() {
+	  return getStringField(authTokenSecret);
+  }
+  
+  public void setAuthTokenSecret(String value) {
+	  if (!setStringField(authTokenSecret, value)) {
+		  throw new IllegalArgumentException("overflow authTokenSecret");
+	  }
+  }
+  
+  private static FusionTableParameterTable relation = null;
 
-	public void setAuthToken(String value) {
-		if (!setStringField(authToken, value)) {
-			throw new IllegalArgumentException("overflow authToken");
-		}
-	}
-
-	private static FusionTableParameterTable fusionTableParameterTable = null;
-
-	public static FusionTableParameterTable createRelation(Datastore datastore, User user)
-			throws ODKDatastoreException {
-		if (fusionTableParameterTable == null) {
-			fusionTableParameterTable = new FusionTableParameterTable(
-					datastore.getDefaultSchemaName());
-			datastore.createRelation(fusionTableParameterTable, user);
-		}
-		return fusionTableParameterTable;
-	}
+  public static FusionTableParameterTable createRelation(Datastore datastore, User user)
+      throws ODKDatastoreException {
+    if (relation == null) {
+      FusionTableParameterTable relationPrototype;
+      relationPrototype = new FusionTableParameterTable(datastore.getDefaultSchemaName());
+      datastore.createRelation(relationPrototype, user); // may throw exception...
+      // at this point, the prototype has become fully populated
+      relation = relationPrototype; // set static variable only upon success...
+    }
+    return relation;
+  }
 }

@@ -15,22 +15,45 @@ package org.opendatakit.aggregate.externalservice;
 
 import java.util.List;
 
-import org.opendatakit.aggregate.datamodel.FormDefinition;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
+import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.format.element.ElementFormatter;
+import org.opendatakit.aggregate.format.header.HeaderFormatter;
 import org.opendatakit.aggregate.submission.Submission;
+import org.opendatakit.common.persistence.Datastore;
+import org.opendatakit.common.security.User;
 
+/**
+ * 
+ * @author wbrunette@gmail.com
+ * @author mitchellsundt@gmail.com
+ * 
+ */
 public abstract class AbstractExternalService implements ExternalService{
-
-  public static String APP_NAME = "Aggregate";
   
-  protected FormDefinition formDefinition;
+  /**
+   * Datastore entity holding registration of an external service for a specific
+   * form and the cursor position within that form that was last processed by
+   * this service.
+   */
+  protected FormServiceCursor fsc;
+  
+  protected Form form;
   
   protected ElementFormatter formatter;
+  
+  protected final Datastore ds;
 
-  protected AbstractExternalService(FormDefinition formDefinition, ElementFormatter elemFormatter) {
-    this.formDefinition = formDefinition;
-    formatter = elemFormatter;
+  protected final User user;
+
+  protected final HeaderFormatter headerFormatter;
+  
+  protected AbstractExternalService(Form form, ElementFormatter elemFormatter, HeaderFormatter header, Datastore datastore, User user) {
+    this.form = form;
+    this.formatter = elemFormatter;
+    this.headerFormatter = header;
+    this.ds = datastore;
+    this.user = user;
   }
   
   public void sendSubmissions(List<Submission> submissions) throws ODKExternalServiceException {
@@ -41,6 +64,10 @@ public abstract class AbstractExternalService implements ExternalService{
   
   public void sendSubmission(Submission submission) throws ODKExternalServiceException {
     insertData(submission);    
+  }
+  
+  public FormServiceCursor getFormServiceCursor() {
+    return fsc;
   }
   
   protected abstract void insertData(Submission submission) throws ODKExternalServiceException;

@@ -13,9 +13,12 @@
  */
 package org.opendatakit.common.persistence;
 
-import java.lang.reflect.Constructor;
 import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -29,13 +32,15 @@ import org.opendatakit.common.security.User;
  * Base class defining the audit fields for a table.
  * 
  * @author mitchellsundt@gmail.com
- *
+ * @author wbrunette@gmail.com
+ * 
  */
 public abstract class CommonFieldsBase {
 
 	public static enum BaseType {
 		STATIC,
 		STATIC_ASSOCIATION,
+		TOP_LEVEL_DYNAMIC,
 		DYNAMIC,
 		DYNAMIC_DOCUMENT,
 		DYNAMIC_ASSOCIATION
@@ -54,32 +59,7 @@ public abstract class CommonFieldsBase {
 	/** primary key for all tables */
 	private static final DataField URI = new DataField("_URI", DataField.DataType.URI, false, PersistConsts.URI_STRING_LEN);
 
-	/** containment within all dynamic_* tables */
 	
-	/** key into the dynamic table that is our top level (colocation) container */
-	private static final DataField TOP_LEVEL_AURI = new DataField("_TOP_LEVEL_AURI", DataField.DataType.URI, true, PersistConsts.URI_STRING_LEN);
-	
-	/* dynamic */
-	
-	/** key into the dynamic table that is our parent container */
-	private static final DataField PARENT_AURI = new DataField("_PARENT_AURI", DataField.DataType.URI, true, PersistConsts.URI_STRING_LEN);
-	/** ordinal (1st, 2nd, ... ) of this item in the form element */
-	private static final DataField ORDINAL_NUMBER = new DataField("_ORDINAL_NUMBER", DataField.DataType.INTEGER, false);
-	
-	/** association
-	 * <p>
-	 * The tables to which the DOM (dominant) and SUB (subordinate) AURIs point
-	 * can be determined by the model information for this table (what is the 
-	 * enclosing form element for this table name; what is the nested element).
-	 * If types are ambiguous, then the table should include information to
-	 * resolve the ambiguity. 
-	 */
-	
-	/** key into the dynamic table for the dominant relation */
-	private static final DataField DOM_AURI = new DataField("_DOM_AURI", DataField.DataType.URI, false, PersistConsts.URI_STRING_LEN );
-	/** key into the dynamic table for the subordinate relation */
-	private static final DataField SUB_AURI = new DataField("_SUB_AURI", DataField.DataType.URI, false, PersistConsts.URI_STRING_LEN );
-
 	/** member variables */
 	protected final String schemaName;
 	protected final String tableName;
@@ -90,85 +70,57 @@ public abstract class CommonFieldsBase {
 	protected final Map<DataField, Object> fieldValueMap = new HashMap<DataField, Object>();
 	
 	public final DataField primaryKey;
-	public final DataField topLevelAuri;
-	public final DataField parentAuri;
-	public final DataField ordinalNumber;
-	public final DataField domAuri;
-	public final DataField subAuri;
 	public final DataField creatorUriUser;
 	public final DataField creationDate;
 	public final DataField lastUpdateUriUser;
 	public final DataField lastUpdateDate;
-	
-	/** 
-	 * Copy constructor to be invoked through getEmptyRow().
-	 * This does NOT copy the fieldValueMap.
-	 *  
-	 * @param ref
+
+	/**
+	 * Construct a relation prototype.
+	 * 
+	 * @param schemaName
+	 * @param tableName
+	 * @param tableType
 	 */
-	protected CommonFieldsBase(CommonFieldsBase ref) {
-		schemaName = ref.schemaName;
-		tableName = ref.tableName;
-		tableType = ref.tableType;
-		
-		primaryKey = ref.primaryKey;
-		topLevelAuri = ref.topLevelAuri;
-		parentAuri = ref.parentAuri;
-		ordinalNumber = ref.ordinalNumber;
-		domAuri = ref.domAuri;
-		subAuri = ref.subAuri;
-		creatorUriUser = ref.creatorUriUser;
-		creationDate = ref.creationDate;
-		lastUpdateUriUser = ref.lastUpdateUriUser;
-		lastUpdateDate = ref.lastUpdateDate;
-
-		fieldList.addAll(ref.fieldList);
-	}
-
 	protected CommonFieldsBase(String schemaName, String tableName, BaseType tableType) {
 		this.schemaName = schemaName;
 		this.tableName = tableName;
 		this.tableType = tableType;
 		// always primary key with the same name...
 		fieldList.add(primaryKey = new DataField(URI));
-		// top level auri is only non-null for non-static tables 
-		if ((tableType == BaseType.STATIC) || (tableType == BaseType.STATIC_ASSOCIATION)) {
-			topLevelAuri = null;
-		} else {
-			fieldList.add(topLevelAuri=new DataField(TOP_LEVEL_AURI));
-		}
-		
-		// add fields specific to the table type...
-		switch ( tableType ) {
-		case STATIC:
-		case DYNAMIC_DOCUMENT:
-			domAuri = null;
-			subAuri = null;
-			parentAuri = null;
-			ordinalNumber = null;
-			break;
-		case STATIC_ASSOCIATION:
-		case DYNAMIC_ASSOCIATION:
-			fieldList.add(domAuri=new DataField(DOM_AURI));
-			fieldList.add(subAuri=new DataField(SUB_AURI));
-			parentAuri = null;
-			ordinalNumber = null;
-			break;
-		case DYNAMIC:
-			domAuri = null;
-			subAuri = null;
-			fieldList.add(parentAuri=new DataField(PARENT_AURI));
-			fieldList.add(ordinalNumber=new DataField(ORDINAL_NUMBER));
-			break;
-		default:
-			throw new IllegalArgumentException("Unrecognized BaseType");
-		}
 		
 		// and add audit fields everywhere...
 		fieldList.add(creatorUriUser=new DataField(CREATOR_URI_USER));
 		fieldList.add(creationDate=new DataField(CREATION_DATE));
 		fieldList.add(lastUpdateUriUser=new DataField(LAST_UPDATE_URI_USER));
 		fieldList.add(lastUpdateDate=new DataField(LAST_UPDATE_DATE));
+	}
+
+	/**
+	 * Construct an empty entity.
+	 * 
+	 * @param ref
+	 * @param user
+	 */
+	protected CommonFieldsBase(CommonFieldsBase ref, User user) {
+		schemaName = ref.schemaName;
+		tableName = ref.tableName;
+		tableType = ref.tableType;
+		
+		primaryKey = ref.primaryKey;
+		creatorUriUser = ref.creatorUriUser;
+		creationDate = ref.creationDate;
+		lastUpdateUriUser = ref.lastUpdateUriUser;
+		lastUpdateDate = ref.lastUpdateDate;
+
+		fieldList.addAll(ref.fieldList);
+		
+		// populate the audit fields...
+		Date now = new Date();
+		fieldValueMap.put(creationDate, now);
+		fieldValueMap.put(lastUpdateDate, now);
+		fieldValueMap.put(creatorUriUser,  user.getUriUser());
+		fieldValueMap.put(primaryKey, CommonFieldsBase.newUri());
 	}
 
 	public final String getSchemaName() {
@@ -184,84 +136,6 @@ public abstract class CommonFieldsBase {
 	 */
 	public final String getUri() {
 		return getStringField(primaryKey);
-	}
-	
-	public final String getTopLevelAuri() {
-		if (( tableType == BaseType.STATIC) || (tableType == BaseType.STATIC_ASSOCIATION)) {
-			throw new IllegalStateException("Attempting to get topLevelAuri of non-DYNAMIC table");
-		}
-		return getStringField(topLevelAuri);
-	}
-	
-	public final void setTopLevelAuri(String value) {
-		if (( tableType == BaseType.STATIC) || (tableType == BaseType.STATIC_ASSOCIATION)) {
-			throw new IllegalStateException("Attempting to set topLevelAuri of non-DYNAMIC table");
-		}
-		if ( ! setStringField(topLevelAuri, value) ) {
-			throw new IllegalStateException("overflow on topLevelAuri");
-		}
-	}
-	
-	public final String getParentAuri() {
-		if ( tableType != BaseType.DYNAMIC ) {
-			throw new IllegalStateException("Attempting to get parentAuri of non-DYNAMIC table");
-		}
-		return getStringField(parentAuri);
-	}
-	
-	public final void setParentAuri(String value) {
-		if ( tableType != BaseType.DYNAMIC ) {
-			throw new IllegalStateException("Attempting to set parentAuri of non-DYNAMIC table");
-		}
-		if ( ! setStringField(parentAuri, value) ) {
-			throw new IllegalStateException("overflow on parentAuri");
-		}
-	}
-
-	public final Long getOrdinalNumber() {
-		if ( tableType != BaseType.DYNAMIC ) {
-			throw new IllegalStateException("Attempting to get ordinalNumber of non-DYNAMIC table");
-		}
-		return getLongField(ordinalNumber);
-	}
-
-	public final void setOrdinalNumber(Long value) {
-		if ( tableType != BaseType.DYNAMIC ) {
-			throw new IllegalStateException("Attempting to set ordinalNumber of non-DYNAMIC table");
-		}
-		setLongField(ordinalNumber, value);
-	}
-	
-	public final String getDomAuri() {
-		if ( !((tableType == BaseType.STATIC_ASSOCIATION) || (tableType == BaseType.DYNAMIC_ASSOCIATION))) {
-			throw new IllegalStateException("Attempting to get domAuri of non-ASSOCIATION table");
-		}
-		return getStringField(domAuri);
-	}
-	
-	public final void setDomAuri(String value) {
-		if ( !((tableType == BaseType.STATIC_ASSOCIATION) || (tableType == BaseType.DYNAMIC_ASSOCIATION))) {
-			throw new IllegalStateException("Attempting to set domAuri of non-ASSOCIATION table");
-		}
-		if ( !setStringField(domAuri, value) ) {
-			throw new IllegalStateException("overflow on domAuri");
-		}
-	}
-
-	public final String getSubAuri() {
-		if ( !((tableType == BaseType.STATIC_ASSOCIATION) || (tableType == BaseType.DYNAMIC_ASSOCIATION))) {
-			throw new IllegalStateException("Attempting to get subAuri of non-ASSOCIATION table");
-		}
-		return getStringField(subAuri);
-	}
-
-	public final void setSubAuri(String value) {
-		if ( !((tableType == BaseType.STATIC_ASSOCIATION) || (tableType == BaseType.DYNAMIC_ASSOCIATION))) {
-			throw new IllegalStateException("Attempting to set subAuri of non-ASSOCIATION table");
-		}
-		if ( !setStringField(subAuri, value) ) {
-			throw new IllegalStateException("overflow on subAuri");
-		}
 	}
 
 	public final String getCreatorUriUser() {
@@ -289,7 +163,7 @@ public abstract class CommonFieldsBase {
 	}
 
 	public final List<DataField> getFieldList() {
-		return fieldList;
+		return Collections.unmodifiableList(fieldList);
 	}
 
 	public final String getStringField(DataField f) {
@@ -509,37 +383,59 @@ public abstract class CommonFieldsBase {
 		return s;
 	}
 
-	/**********************************************************************************
-	 * APIs that should only be used by the persistence layer
-	 */
+	public final static String newMD5HashUri(String value) {
+        try {
+			MessageDigest md = MessageDigest.getInstance("MD5");
+			byte[] asBytes = value.getBytes();
+			md.update(asBytes);
+			
+            byte[] messageDigest = md.digest();
 
-	public final <T extends CommonFieldsBase> T getEmptyRow(Class<T> clazz, User user) {
-		if (! this.getClass().equals(clazz) ) {
-			throw new IllegalArgumentException("Not requesting most derived class!");
-		}
-		
-		try {
-			Class<?> paramTypes[] = new Class<?>[1];
-			paramTypes[0] = clazz;
-			Constructor<T> c = clazz.getConstructor(paramTypes);
-			if ( c == null ) {
-				throw new IllegalStateException("Copy constructor for " + clazz.getCanonicalName() + " not defined!");
-			}
-			Object argList[] = new Object[1];
-			argList[0] = this;
-			T obj = c.newInstance(argList);
-			Date now = new Date();
-			obj.fieldValueMap.put(creationDate, now);
-			obj.fieldValueMap.put(lastUpdateDate, now);
-			obj.fieldValueMap.put(creatorUriUser,  user.getUriUser());
-			obj.fieldValueMap.put(primaryKey, CommonFieldsBase.newUri());
-			return obj;
-		} catch ( Exception e ) {
-			e.printStackTrace();
-			return null;
+            BigInteger number = new BigInteger(1, messageDigest);
+            String md5 = number.toString(16);
+            while (md5.length() < 32)
+                md5 = "0" + md5;
+            return "md5:" + md5;
+        } catch (NoSuchAlgorithmException e) {
+        	throw new IllegalStateException("Unexpected problem computing md5 hash", e);
 		}
 	}
 
+	public final static String newMD5HashUri(byte[] asBytes) {
+        try {
+			MessageDigest md = MessageDigest.getInstance("MD5");
+			md.update(asBytes);
+			
+            byte[] messageDigest = md.digest();
+
+            BigInteger number = new BigInteger(1, messageDigest);
+            String md5 = number.toString(16);
+            while (md5.length() < 32)
+                md5 = "0" + md5;
+            return "md5:" + md5;
+        } catch (NoSuchAlgorithmException e) {
+        	throw new IllegalStateException("Unexpected problem computing md5 hash", e);
+		}
+	}
+
+	/**********************************************************************************
+	 **********************************************************************************
+	 **********************************************************************************
+	 * APIs that should only be used by the persistence layer
+	 **********************************************************************************
+	 **********************************************************************************
+	 **********************************************************************************/
+
+	/**
+	 * Method implemented in the most derived class to clone the (concrete) relation
+	 * instance to produce an empty entity.
+	 * Only called via {@link org.opendatakit.common.persistence.Datastore#createEntityUsingRelation(CommonFieldsBase, org.opendatakit.common.persistence.EntityKey, User)}
+	 * 
+	 * @param user
+	 * @return empty entity
+	 */
+	public abstract CommonFieldsBase getEmptyRow(User user);
+	
 	/**
 	 * @return true if the row contains data that originated from the persistent store.
 	 */

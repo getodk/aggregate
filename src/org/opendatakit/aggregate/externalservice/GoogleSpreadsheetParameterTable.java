@@ -19,7 +19,13 @@ import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.security.User;
 
-final class GoogleSpreadsheetParameterTable extends CommonFieldsBase {
+/**
+ * 
+ * @author wbrunette@gmail.com
+ * @author mitchellsundt@gmail.com
+ * 
+ */
+public final class GoogleSpreadsheetParameterTable extends CommonFieldsBase {
 
 	private static final String TABLE_NAME = "_google_spreadsheet";
 	/*
@@ -30,32 +36,58 @@ final class GoogleSpreadsheetParameterTable extends CommonFieldsBase {
 			"SPREADSHEET_NAME", DataField.DataType.STRING, true, 4096L);
 	private static final DataField SPREADSHEET_KEY_PROPERTY = new DataField(
 			"SPREADSHEET_KEY", DataField.DataType.STRING, true, 4096L);
+	private static final DataField TOP_LEVEL_WORKSHEET_ID_PROPERTY = new DataField("TOP_LEVEL_WORKSHEET_ID",
+		      DataField.DataType.STRING, true, 4096L);
 	private static final DataField AUTH_TOKEN_PROPERTY = new DataField(
 			"AUTH_TOKEN", DataField.DataType.STRING, true, 4096L);
+	private static final DataField AUTH_TOKEN_SECRET_PROPERTY = new DataField(
+			"AUTH_TOKEN_SECRET", DataField.DataType.STRING, true, 4096L);
 	private static final DataField READY_PROPERTY = new DataField("READY",
 			DataField.DataType.BOOLEAN, true);
 
 	public final DataField spreadsheetName;
 	public final DataField spreadsheetKey;
+	public final DataField topLevelWorksheetId;
 	public final DataField authToken;
+	public final DataField authTokenSecret;
 	public final DataField ready;
 
+	/**
+	 * Construct a relation prototype.
+	 * 
+	 * @param databaseSchema
+	 * @param tableName
+	 */
 	GoogleSpreadsheetParameterTable(String schemaName) {
 		super(schemaName, TABLE_NAME, CommonFieldsBase.BaseType.STATIC);
-		fieldList
-				.add(spreadsheetName = new DataField(SPREADSHEET_NAME_PROPERTY));
+		fieldList.add(spreadsheetName = new DataField(SPREADSHEET_NAME_PROPERTY));
 		fieldList.add(spreadsheetKey = new DataField(SPREADSHEET_KEY_PROPERTY));
+		fieldList.add(topLevelWorksheetId = new DataField(TOP_LEVEL_WORKSHEET_ID_PROPERTY));
 		fieldList.add(authToken = new DataField(AUTH_TOKEN_PROPERTY));
+		fieldList.add(authTokenSecret = new DataField(AUTH_TOKEN_SECRET_PROPERTY));
 		fieldList.add(ready = new DataField(READY_PROPERTY));
 	}
 
-	// for creating empty rows
-	GoogleSpreadsheetParameterTable(GoogleSpreadsheetParameterTable ref) {
-		super(ref);
+	  /**
+	   * Construct an empty entity.  Only called via {@link #getEmptyRow(User)}
+	   * 
+	   * @param ref
+	   * @param user
+	   */
+	private GoogleSpreadsheetParameterTable(GoogleSpreadsheetParameterTable ref, User user) {
+		super(ref, user);
 		spreadsheetName = ref.spreadsheetName;
 		spreadsheetKey = ref.spreadsheetKey;
+		topLevelWorksheetId = ref.topLevelWorksheetId;
 		authToken = ref.authToken;
+		authTokenSecret = ref.authTokenSecret;
 		ready = ref.ready;
+	}
+
+	// Only called from within the persistence layer.
+	@Override
+	public GoogleSpreadsheetParameterTable getEmptyRow(User user) {
+		return new GoogleSpreadsheetParameterTable(this, user);
 	}
 
 	public String getSpreadsheetName() {
@@ -77,6 +109,16 @@ final class GoogleSpreadsheetParameterTable extends CommonFieldsBase {
 			throw new IllegalArgumentException("overflow spreadsheetKey");
 		}
 	}
+	
+	public void setTopLevelWorksheetId(String value) {
+		if (!setStringField(topLevelWorksheetId, value)) {
+			throw new IllegalArgumentException("overflow topLevelWorksheetId");
+		}
+	}
+	
+	public String getTopLevelWorksheetId() {
+		return getStringField(topLevelWorksheetId);
+	}
 
 	public String getAuthToken() {
 		return getStringField(authToken);
@@ -85,6 +127,16 @@ final class GoogleSpreadsheetParameterTable extends CommonFieldsBase {
 	public void setAuthToken(String value) {
 		if (!setStringField(authToken, value)) {
 			throw new IllegalArgumentException("overflow authToken");
+		}
+	}
+	
+	public String getAuthTokenSecret(){
+		return getStringField(authTokenSecret);
+	}
+	
+	public void setAuthTokenSecret(String value) {
+		if (!setStringField(authTokenSecret, value)) {
+			throw new IllegalArgumentException("overflow authTokenSecret");
 		}
 	}
 
@@ -96,16 +148,18 @@ final class GoogleSpreadsheetParameterTable extends CommonFieldsBase {
 		setBooleanField(ready, value);
 	}
 
-	private static GoogleSpreadsheetParameterTable googleSpreadsheetParameterTable = null;
+	private static GoogleSpreadsheetParameterTable relation = null;
 
 	public static GoogleSpreadsheetParameterTable createRelation(
 			Datastore datastore, User user) throws ODKDatastoreException {
-		if (googleSpreadsheetParameterTable == null) {
-			googleSpreadsheetParameterTable = new GoogleSpreadsheetParameterTable(
-					datastore.getDefaultSchemaName());
-			datastore.createRelation(googleSpreadsheetParameterTable, user);
+		if (relation == null) {
+			GoogleSpreadsheetParameterTable relationPrototype;
+	        relationPrototype = new GoogleSpreadsheetParameterTable(datastore.getDefaultSchemaName());
+	        datastore.createRelation(relationPrototype, user); // may throw exception...
+	        // at this point, the prototype has become fully populated
+	        relation = relationPrototype; // set static variable only upon success...
 		}
-		return googleSpreadsheetParameterTable;
+		return relation;
 	}
 
 }

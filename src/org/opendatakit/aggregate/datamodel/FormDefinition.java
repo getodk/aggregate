@@ -15,22 +15,26 @@ package org.opendatakit.aggregate.datamodel;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.datamodel.FormDataModel.ElementType;
+import org.opendatakit.aggregate.form.FormInfo;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.Datastore;
+import org.opendatakit.common.persistence.DynamicCommonFieldsBase;
 import org.opendatakit.common.persistence.EntityKey;
 import org.opendatakit.common.persistence.Query;
+import org.opendatakit.common.persistence.TopLevelDynamicBase;
 import org.opendatakit.common.persistence.Query.Direction;
 import org.opendatakit.common.persistence.Query.FilterOperation;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
-import org.opendatakit.common.security.Realm;
 import org.opendatakit.common.security.User;
 
 /**
@@ -41,55 +45,257 @@ import org.opendatakit.common.security.User;
  * separately in the form information table.
  * 
  * @author mitchellsundt@gmail.com
- *
+ * @author wbrunette@gmail.com
+ * 
  */
 public class FormDefinition {
-	public static final String domainRoot = "test.test";
 	
-	public static final Map<String, FormDefinition> formDefinitions = new HashMap<String, FormDefinition>();
+	private static final Map<String, FormDefinition> formDefinitions = new HashMap<String, FormDefinition>();
 	
 	/** map from uri to FormDataModel; with navigable parent/child structure */
 	public final Map<String, FormDataModel> uriMap = new HashMap<String, FormDataModel>();
 	/** list of all tables (form, repeat group and auxillary) */
-	public final List<FormDataModel> tableList = new ArrayList<FormDataModel>();
+	private final List<FormDataModel> tableList = new ArrayList<FormDataModel>();
 	/** list of non-repeat groups in xform */
-	public final List<FormDataModel> groupList = new ArrayList<FormDataModel>();
+	private final List<FormDataModel> groupList = new ArrayList<FormDataModel>();
 	/** list of structured fields in xform */
-	public final List<FormDataModel> geopointList = new ArrayList<FormDataModel>();
+	private final List<FormDataModel> geopointList = new ArrayList<FormDataModel>();
 	/** map from fully qualified tableName to CFB definition */
-	public final Map<String, CommonFieldsBase> backingTableMap;
+	private final Map<String, DynamicCommonFieldsBase> backingTableMap;
 
-	FormDataModel longStringRefTextModel = null;
-	LongStringRefText longStringRefTextTable = null;
-	FormDataModel refTextModel = null;
-	RefText refTextTable = null;
-	FormDataModel formName = null;
-	FormDataModel topLevelGroup = null;
+	private FormDataModel longStringRefTextModel = null;
+	private LongStringRefText longStringRefTextTable = null;
+	private FormDataModel refTextModel = null;
+	private RefText refTextTable = null;
+	private FormDataModel topLevelGroup = null;
+	private FormElementModel topLevelGroupElement = null;
 	
 	private final String qualifiedTopLevelTable;
 	private final String formId;
-
-	private static FormDataModel fdm = null;
 	
-	public static final FormDataModel getFormDataModel(Datastore datastore, User user) throws ODKDatastoreException {
-		if ( fdm == null ) {
-			fdm = new FormDataModel(datastore.getDefaultSchemaName());
-			datastore.createRelation(fdm, user);
+	/**
+	 * Append to the list the FormDataModel entries needed to represent this
+	 * dynamic table.  Useful for generating the FormInfo data model from its 
+	 * base tables.
+	 * 
+	 * @param list
+	 * @param definitionKey
+	 * @param form
+	 * @param topLevel
+	 * @param parent
+	 * @param ordinal
+	 * @param datastore
+	 * @param user
+	 * @return the ordinal of the last field defined.
+	 * @throws ODKDatastoreException
+	 */
+	public static final Long buildTableFormDataModel( List<FormDataModel> list, 
+													EntityKey definitionKey,
+													DynamicCommonFieldsBase form, 
+													DynamicCommonFieldsBase topLevel, 
+													DynamicCommonFieldsBase parent,
+													Long ordinal,
+													Datastore datastore, User user ) throws ODKDatastoreException {
+		FormDataModel fdm = FormDataModel.createRelation(datastore, user);
+		FormDataModel d;
+		
+		if ( topLevel == null || 
+			 ((form != fdm) && !( topLevel instanceof TopLevelDynamicBase )) ) {
+			throw new IllegalStateException("topLevel entity must be present and a TopLevelDynamicBase!");
 		}
-		return fdm;
+		// we are making use of the fact that the PK in the 
+		// FormDataModel is the PK within the relation model.
+		final EntityKey k = new EntityKey( fdm, topLevel.getUri());
+		final String parentURI = (parent == null) ? null : parent.getUri();
+		
+		// define the table...
+		d = datastore.createEntityUsingRelation(fdm, k, user);
+		list.add(d);
+		// reset the PK to be the PK of the table we are representing
+		d.setStringField(fdm.primaryKey, form.getUri());
+		d.setLongField(fdm.ordinalNumber, ordinal);
+		d.setStringField(fdm.parentAuri, parentURI);
+		d.setStringField(fdm.uriSubmissionDataModel, definitionKey.getKey());
+		d.setStringField(fdm.elementName, form.getTableName());
+		d.setStringField(fdm.elementType,
+				(parent == topLevel) ?
+				FormDataModel.ElementType.GROUP.toString() :
+				FormDataModel.ElementType.REPEAT.toString() );
+		d.setStringField(fdm.persistAsColumn, null);
+		d.setStringField(fdm.persistAsTable, form.getTableName());
+		d.setStringField(fdm.persistAsSchema, form.getSchemaName());
+		
+		// enforce defined ordinal positions based upon alphabetical sort
+		List<DataField> sortedFields = new ArrayList<DataField>();
+		sortedFields.addAll(form.getFieldList());
+		Collections.sort(sortedFields, new Comparator<DataField>() {
+			@Override
+			public int compare(DataField o1, DataField o2) {
+				return o1.getName().compareTo(o2.getName());
+			}
+		});
+		
+		// loop through the fields...
+		Long l = 0L;
+		for ( DataField f : sortedFields ) {
+			if ( f.getName().startsWith("_")) continue; // ignore metadata
+			++l;
+			
+			// this field should be in the fdm model...
+			d = datastore.createEntityUsingRelation(fdm, k, user);
+			list.add(d);
+			d.setLongField(fdm.ordinalNumber, l);
+			d.setStringField(fdm.parentAuri, form.getUri());
+			d.setStringField(fdm.uriSubmissionDataModel, definitionKey.getKey());
+			d.setStringField(fdm.elementName, f.getName());
+			switch ( f.getDataType() ) {
+			case STRING:
+				d.setStringField(fdm.elementType, FormDataModel.ElementType.STRING.toString());
+				break;
+			case INTEGER:
+				d.setStringField(fdm.elementType, FormDataModel.ElementType.INTEGER.toString());
+				break;
+			case DECIMAL:
+				d.setStringField(fdm.elementType, FormDataModel.ElementType.DECIMAL.toString());
+				break;
+			case BOOLEAN:
+				d.setStringField(fdm.elementType, FormDataModel.ElementType.BOOLEAN.toString());
+				break;
+			case DATETIME:
+				d.setStringField(fdm.elementType, FormDataModel.ElementType.JRDATETIME.toString());
+				break;
+			case URI:
+			case BINARY: // this data type is hidden under BINARY content structure...
+			case LONG_STRING: // this data type does not appear in model...
+				default:
+					throw new IllegalStateException("Unexpected DataType");
+			}
+			d.setStringField(fdm.persistAsColumn, f.getName());
+			d.setStringField(fdm.persistAsTable, form.getTableName());
+			d.setStringField(fdm.persistAsSchema, form.getSchemaName());
+		}
+		
+		return l;
 	}
 	
-	public static final String extractWellFormedFormId(String submissionKey, Realm realm) {
-		int firstSlash = submissionKey.indexOf('/');
-		String formId = submissionKey;
-		if ( firstSlash != -1 ) {
-			// strip off the group path of the key
-			formId = submissionKey.substring(0, firstSlash);
-		}
-		if ( formId.indexOf(':') == -1 ) {
-			return realm.getRootDomain() + ":" + formId;
-		}
-		return formId;
+	public static final void buildBinaryContentFormDataModel( List<FormDataModel> list, 
+			EntityKey definitionKey,
+			String binaryContentElementName,
+			String binaryContentTableName,
+			String versionedBinaryContentTableName,
+			String versionedBinaryContentRefBlobTableName,
+			String refBlobTableName,
+			TopLevelDynamicBase topLevel, 
+			DynamicCommonFieldsBase parent,
+			Long ordinal,
+			Datastore datastore, User user ) throws ODKDatastoreException {
+		
+		FormDataModel fdm = FormDataModel.createRelation(datastore, user);
+		FormDataModel d;
+		
+		// we are making use of the fact that the PK in the 
+		// FormDataModel is the PK within the relation model.
+		final EntityKey k = new EntityKey( fdm, topLevel.getUri());
+		final String topLevelURI = topLevel.getUri();
+		final String parentURI = parent.getUri(); // there better be a parent!!!
+		
+		// record for binary content...
+		d = datastore.createEntityUsingRelation(fdm, k, user);
+		list.add(d);
+		final String bcURI = d.getUri();
+		d.setLongField(fdm.ordinalNumber, ordinal);
+		d.setStringField(fdm.parentAuri, parentURI);
+		d.setStringField(fdm.topLevelAuri, topLevelURI);
+		d.setStringField(fdm.uriSubmissionDataModel, definitionKey.getKey());
+		d.setStringField(fdm.elementName, binaryContentElementName);
+		d.setStringField(fdm.elementType, FormDataModel.ElementType.BINARY.toString());
+		d.setStringField(fdm.persistAsColumn, null);
+		d.setStringField(fdm.persistAsTable, binaryContentTableName);
+		d.setStringField(fdm.persistAsSchema, fdm.getSchemaName());
+
+		// record for versioned binary content...
+		d = datastore.createEntityUsingRelation(fdm, k, user);
+		list.add(d);
+		final String vbcURI = d.getUri();
+		d.setLongField(fdm.ordinalNumber, 1L);
+		d.setStringField(fdm.parentAuri, bcURI);
+		d.setStringField(fdm.topLevelAuri, topLevelURI);
+		d.setStringField(fdm.uriSubmissionDataModel, definitionKey.getKey());
+		d.setStringField(fdm.elementName, binaryContentElementName);
+		d.setStringField(fdm.elementType, FormDataModel.ElementType.VERSIONED_BINARY.toString());
+		d.setStringField(fdm.persistAsColumn, null);
+		d.setStringField(fdm.persistAsTable, versionedBinaryContentTableName);
+		d.setStringField(fdm.persistAsSchema, fdm.getSchemaName());
+
+		// record for binary content ref blob..
+		d = datastore.createEntityUsingRelation(fdm, k, user);
+		list.add(d);
+		final String bcbURI = d.getUri();
+		d.setLongField(fdm.ordinalNumber, 1L);
+		d.setStringField(fdm.parentAuri, vbcURI);
+		d.setStringField(fdm.topLevelAuri, topLevelURI);
+		d.setStringField(fdm.uriSubmissionDataModel, definitionKey.getKey());
+		d.setStringField(fdm.elementName, binaryContentElementName);
+		d.setStringField(fdm.elementType, FormDataModel.ElementType.VERSIONED_BINARY_CONTENT_REF_BLOB.toString());
+		d.setStringField(fdm.persistAsColumn, null);
+		d.setStringField(fdm.persistAsTable, versionedBinaryContentRefBlobTableName);
+		d.setStringField(fdm.persistAsSchema, fdm.getSchemaName());
+
+		// record for ref blob...
+		d = datastore.createEntityUsingRelation(fdm, k, user);
+		list.add(d);
+		d.setLongField(fdm.ordinalNumber, 1L);
+		d.setStringField(fdm.parentAuri, bcbURI);
+		d.setStringField(fdm.topLevelAuri, topLevelURI);
+		d.setStringField(fdm.uriSubmissionDataModel, definitionKey.getKey());
+		d.setStringField(fdm.elementName, binaryContentElementName);
+		d.setStringField(fdm.elementType, FormDataModel.ElementType.REF_BLOB.toString());
+		d.setStringField(fdm.persistAsColumn, null);
+		d.setStringField(fdm.persistAsTable, refBlobTableName);
+		d.setStringField(fdm.persistAsSchema, fdm.getSchemaName());
+	}
+	
+	
+	public static final void buildLongStringFormDataModel( List<FormDataModel> list, 
+			EntityKey definitionKey,
+			String longStringRefTextTableName,
+			String refTextTableName,
+			TopLevelDynamicBase topLevel, 
+			Long ordinal,
+			Datastore datastore, User user ) throws ODKDatastoreException {
+		
+		FormDataModel fdm = FormDataModel.createRelation(datastore, user);
+		FormDataModel d;
+		
+		// we are making use of the fact that the PK in the 
+		// FormDataModel is the PK within the relation model.
+		final EntityKey k = new EntityKey( fdm, topLevel.getUri());
+		final String topLevelURI = topLevel.getUri();
+		
+		// record for long string ref text...
+		d = datastore.createEntityUsingRelation(fdm, k, user);
+		list.add(d);
+		final String lst = d.getUri();
+		d.setLongField(fdm.ordinalNumber, ordinal);
+		d.setStringField(fdm.parentAuri, topLevelURI);
+		d.setStringField(fdm.uriSubmissionDataModel, definitionKey.getKey());
+		d.setStringField(fdm.elementName, null);
+		d.setStringField(fdm.elementType, FormDataModel.ElementType.LONG_STRING_REF_TEXT.toString());
+		d.setStringField(fdm.persistAsColumn, null);
+		d.setStringField(fdm.persistAsTable, longStringRefTextTableName);
+		d.setStringField(fdm.persistAsSchema, fdm.getSchemaName());
+
+		// record for ref text...
+		d = datastore.createEntityUsingRelation(fdm, k, user);
+		list.add(d);
+		d.setLongField(fdm.ordinalNumber, 1L);
+		d.setStringField(fdm.parentAuri, lst);
+		d.setStringField(fdm.uriSubmissionDataModel, definitionKey.getKey());
+		d.setStringField(fdm.elementName, null);
+		d.setStringField(fdm.elementType, FormDataModel.ElementType.REF_TEXT.toString());
+		d.setStringField(fdm.persistAsColumn, null);
+		d.setStringField(fdm.persistAsTable, refTextTableName);
+		d.setStringField(fdm.persistAsSchema, fdm.getSchemaName());
 	}
 	
 	public static final FormDefinition getFormDefinition(String formId, Datastore datastore, User user) {
@@ -97,17 +303,15 @@ public class FormDefinition {
 		if ( formId.indexOf('/') != -1 ) {
 			throw new IllegalArgumentException("formId is not well formed: " + formId);
 		}
-		if (formId.indexOf(':') == -1) {
-			throw new IllegalArgumentException("formId is not well formed: " + formId);
-		}
 		
 		FormDefinition fd = formDefinitions.get(formId);
 		if ( fd == null ) {
 			List<? extends CommonFieldsBase> fdmList = null;
 			try {
-				FormDataModel fdm = FormDefinition.getFormDataModel(datastore, user);
+				FormDataModel fdm = FormDataModel.createRelation(datastore, user);
 				Query query = datastore.createQuery(fdm, user);
-				query.addFilter(fdm.uriFormId, FilterOperation.EQUAL, formId);
+				String submissionUri = CommonFieldsBase.newMD5HashUri(formId);
+				query.addFilter(fdm.uriSubmissionDataModel, FilterOperation.EQUAL, submissionUri);
 				fdmList = query.executeQuery(0);
 			} catch (ODKDatastoreException e) {
 				return null;
@@ -117,11 +321,12 @@ public class FormDefinition {
 			}
 			
 			fd = new FormDefinition(formId, fdmList);
+			
 			if ( fd != null ) {
 				try {
 					// update the form data model with the actual dimensions
 					// of its columns -- or create the tables from scratch...
-					for ( Map.Entry<String, CommonFieldsBase> e : fd.backingTableMap.entrySet() ) {
+					for ( Map.Entry<String, DynamicCommonFieldsBase> e : fd.backingTableMap.entrySet() ) {
 						
 						datastore.createRelation(e.getValue(), user);
 					}
@@ -152,6 +357,10 @@ public class FormDefinition {
 		return fd;
 	}
 
+	public static void forgetFormId(String formId) {
+		formDefinitions.remove(formId);
+	}
+
 	public FormDefinition(String formId, List<?> formDataModelList) {
 		this.formId = formId;
 		
@@ -173,12 +382,6 @@ public class FormDefinition {
 				if ( table == null ) {
 					// should be structured field (e.g., geopoint) or form name.
 					switch ( type ) {
-					case FORM_NAME:
-						if ( formName != null ) {
-							throw new IllegalStateException("Multiple formName entries!");
-						}
-						formName = m;
-						break;
 					case GEOPOINT:
 						geopointList.add(m);
 						break;
@@ -196,6 +399,7 @@ public class FormDefinition {
 						break;
 					case GROUP:
 					case REPEAT:
+					case PHANTOM:
 						groupList.add(m);
 						break;
 					default:
@@ -215,12 +419,28 @@ public class FormDefinition {
 		}
 		
 		// stitch up data model's parent and child links...
+		// everything has a parent except the top-level group and 
+		// long string text ref tables, which refer to the 
+		// key into the form_info table...
+		int nullParentCount = 0;
 		for ( FormDataModel m : uriMap.values() ) {
 			String uriParent = m.getParentAuri();
-			if ( uriParent != null ) {
-				FormDataModel p = uriMap.get(uriParent);
+			if ( uriParent == null ) {
+				throw new IllegalStateException("Every record in FormDataModel should have a parent key");
+			}
+			
+			FormDataModel p = uriMap.get(uriParent);
+			if ( p != null ) {
 				m.setParent(p);
 				p.setChild(m.getOrdinalNumber(), m);
+			} else if ( m.getElementType() != ElementType.LONG_STRING_REF_TEXT ) {
+				if ( m.getElementType() != ElementType.GROUP ) {
+					throw new IllegalStateException("Expected upward references only from GROUP elements");
+				}
+				if ( ++nullParentCount > 1 ) {
+					throw new IllegalStateException("Expected at most one top level group");
+				}
+				topLevelGroup = m;
 			}
 		}
 
@@ -236,20 +456,16 @@ public class FormDefinition {
 		
 		// Now construct the descriptions of the tables
 		// that represent this form.
-		backingTableMap = new HashMap<String, CommonFieldsBase>();
+		backingTableMap = new HashMap<String, DynamicCommonFieldsBase>();
 		for ( FormDataModel m : tableList ) {
 			String tableName = (String) m.getPersistAsQualifiedTableName();
 			
-			CommonFieldsBase b = backingTableMap.get(tableName);
+			DynamicCommonFieldsBase b = backingTableMap.get(tableName);
 			if ( b != null ) {
 				throw new IllegalStateException("Backing table already linked back: " + tableName);
 			}
 
 			switch ( m.getElementType()) {
-			case SELECT1: // obsoleting this...
-				b = new SelectChoice(m.getPersistAsSchema(),m.getPersistAsTable());
-				m.setBackingObject(b);
-				break;
 			case SELECTN:
 				b = new SelectChoice(m.getPersistAsSchema(),m.getPersistAsTable());
 				m.setBackingObject(b);
@@ -294,16 +510,100 @@ public class FormDefinition {
 			backingTableMap.put(tableName, b);
 		}
 		
-		// and now handle the tables in the main form...
+
+		boolean isWellKnownForm = false;
+		// set the backing objects for the tables identified in the groupList
+		if ( formId.equals(FormDataModel.URI_FORM_ID_VALUE_FORM_INFO) ) {
+			// it is the FormInfo table -- pre-populate the backingTableMap
+			// with the table relations we know...
+			FormInfo.populateBackingTableMap(backingTableMap);
+			isWellKnownForm = true;
+		}
+		
+		for ( FormDataModel m : groupList ) {
+			if ( m.getPersistAsTable() == null ) {
+				throw new IllegalStateException("groups, phantoms and repeats should identify their backing table");
+			}
+			String tableName = m.getPersistAsQualifiedTableName();
+			DynamicCommonFieldsBase b = backingTableMap.get(tableName);
+			if ( b == null ) {
+				if ( isWellKnownForm ) {
+					throw new IllegalStateException("Well-known forms expect all backing tables to be defined");
+				}
+				/*
+				 * Determine if the given group is equivalent to the top level group.  This
+				 * occurs when a given group's elements can be collapsed into the top level group
+				 * within the persistence layer (the top level group's backing object then holds
+				 * the data elements defined within it and within the given group).
+				 * When this collapse happens, the group and the parent group share
+				 * the same qualified table name.  Phantom and Repeat elements are automatically
+				 * not equivalent to the top level group.
+				 */
+				boolean equivalentToTopLevelGroup = true;
+				FormDataModel current = m;
+				while ( current != null ) {
+					if ( (current.getElementType() == ElementType.REPEAT) ||
+						 (current.getElementType() == ElementType.PHANTOM)) {
+						// automatically not equivalent
+						equivalentToTopLevelGroup = false;
+						break;
+					}
+					FormDataModel parent = current.getParent();
+					if ( parent != null && 
+						 ( !current.getPersistAsQualifiedTableName().equals(parent.getPersistAsQualifiedTableName())) ) {
+						// backing tables are different -- not equivalent!
+						equivalentToTopLevelGroup = false;
+						break;
+					}
+					current = parent;
+				}
+
+				if ( equivalentToTopLevelGroup ) {
+					b = new TopLevelInstanceData(m.getPersistAsSchema(), m.getPersistAsTable());
+				} else {
+					b = new InstanceData(m.getPersistAsSchema(), m.getPersistAsTable());
+				}
+				backingTableMap.put(tableName, b);
+			}
+			m.setBackingObject(b);
+		}
+
+		// set the backing object for the geopointList.
+		// Geopoint value fields are all stored within the same table...
+		// if the backing table was not yet defined by the groupList loop
+		// above, then the backing table will never be equivalent to 
+		// a top-level group.
+		for ( FormDataModel m : geopointList ) {
+			if ( m.getPersistAsTable() == null ) {
+				throw new IllegalStateException("geopoints should identify their backing table");
+			}
+			String tableName = m.getPersistAsQualifiedTableName();
+			DynamicCommonFieldsBase b = backingTableMap.get(tableName);
+			if ( b == null ) {
+				if ( isWellKnownForm ) {
+					throw new IllegalStateException("Well-known forms expect all backing tables to be defined");
+				}
+				b = new InstanceData(m.getPersistAsSchema(), m.getPersistAsTable());
+				backingTableMap.put(tableName, b);
+			}
+			m.setBackingObject(b);
+		}
+
+		// and now handle the primitive data elements in the main form...
+		// all the backing tables must have been created at this point, 
+		// so it is a logic error if we find one that isn't.
 		for ( Map.Entry<String, Map<String, FormDataModel>> e : eeMap.entrySet() ) {
 			String tableName = e.getKey();
-			CommonFieldsBase b = backingTableMap.get(tableName);
+			DynamicCommonFieldsBase b = backingTableMap.get(tableName);
 			Collection<FormDataModel> c = e.getValue().values();
+			
+			// we should have created all the backing tables in the previous
+			// two loops.  If not, it is a logic error.
+			if ( b == null ) {
+				throw new IllegalStateException("Backing table is not yet defined!");
+			}
+
 			for ( FormDataModel m : c) {
-				if ( b == null ) {
-					b = new InstanceData(m.getPersistAsSchema(), m.getPersistAsTable());
-					backingTableMap.put(tableName, b);
-				}
 				DataField.DataType dataType = DataField.DataType.STRING;
 				switch ( m.getElementType() ) {
 				case STRING:
@@ -329,54 +629,33 @@ public class FormDefinition {
 					throw new IllegalStateException("Element: " + name + "uri: " + m.getUri() + "Unexpected data type: " + m.getElementType().toString());
 				}
 				
-				DataField dfd = new DataField(m.getPersistAsColumn(), dataType, true);
-				b.getFieldList().add( dfd );
+				DataField dfd = null;
+				if ( isWellKnownForm ) {
+					for ( DataField f : b.getFieldList() ) {
+						if ( m.getPersistAsColumn().equals(f.getName())) {
+							dfd = f;
+							break;
+						}
+					}
+					if ( dfd == null ) {
+						throw new IllegalStateException("Unable to locate data field in a well-known form");
+					}
+					if ( !dfd.getDataType().equals(dataType) ) {
+						throw new IllegalStateException("Data type of data field " + dfd.getName() + " is different than expected");
+					}
+				} else {
+					dfd = new DataField(m.getPersistAsColumn(), dataType, true);
+					b.addDataField(dfd);
+				}
 				m.setBackingKey(dfd);
 				m.setBackingObject(b);
 			}
 		}
-
-		// set the backing object for the geopointList
-		// geopoint values are all stored within the same table...
-		// it is fine to grab the backing object of the first child...
-		for ( FormDataModel m : geopointList ) {
-			if ( m.getPersistAsTable() == null ) {
-				throw new IllegalStateException("geopoints should identify their backing table");
-			}
-			String tableName = m.getPersistAsQualifiedTableName();
-			CommonFieldsBase b = backingTableMap.get(tableName);
-			if ( b == null ) {
-				b = new InstanceData(m.getPersistAsSchema(), m.getPersistAsTable());
-				backingTableMap.put(tableName, b);
-			}
-			m.setBackingObject(b);
-		}
-
-		// set the backing object for the groupList
-		for ( FormDataModel m : groupList ) {
-			if ( m.getPersistAsTable() == null ) {
-				throw new IllegalStateException("groups and repeats should identify their backing table");
-			}
-			String tableName = m.getPersistAsQualifiedTableName();
-			CommonFieldsBase b = backingTableMap.get(tableName);
-			if ( b == null ) {
-				b = new InstanceData(m.getPersistAsSchema(), m.getPersistAsTable());
-				backingTableMap.put(tableName, b);
-			}
-			m.setBackingObject(b);
-		}
-
-		if ( formName == null ) {
-			throw new IllegalStateException("No form name defined");
-		}
 		
-		
-		if ( (formName.getChildren().size() != 2) || 
-			 (formName.getChildren().get(1).getElementType() != ElementType.LONG_STRING_REF_TEXT)) {
-			throw new IllegalStateException("Expected only one group and one long string element at top level");
+		if ( topLevelGroup == null ) {
+			throw new IllegalStateException("Top level group could not be found");
 		}
 
-		topLevelGroup = formName.getChildren().get(0);
 		if ( topLevelGroup.getElementType() != ElementType.GROUP ) {
 			throw new IllegalStateException("Top level group is a non-group!");
 		}
@@ -390,6 +669,8 @@ public class FormDefinition {
 		if ( longStringRefTextTable == null ) {
 			throw new IllegalStateException("No long string ref text table declared!");
 		}
+		
+		topLevelGroupElement = new FormElementModel(topLevelGroup, null);
 	}
 	
 	/**
@@ -401,9 +682,13 @@ public class FormDefinition {
 		return topLevelGroup;
 	}
 	
-	public final FormDataModel getElementByName(String name) {
+	public final FormElementModel getTopLevelGroupElement() {
+		return topLevelGroupElement;
+	}
+	
+	public final FormElementModel getElementByName(String name) {
 		String[] path = name.split("/");
-		FormDataModel m = topLevelGroup;
+		FormElementModel m = topLevelGroupElement;
 		boolean first = true;
 		for ( String p : path ) {
 			if ( first ) {
@@ -418,51 +703,16 @@ public class FormDefinition {
 		return m;		
 	}
 	
-	private final FormDataModel getElementByNameHelper(FormDataModel group, String name) {
+	private final FormElementModel getElementByNameHelper(FormElementModel group, String name) {
 		if ( group.getElementName() != null && group.getElementName().equals(name)) {
 			return group;
 		}
-		for ( FormDataModel m : group.getChildren() ) {
+		for ( FormElementModel m : group.getChildren() ) {
 			// depth first traversal...
-			FormDataModel tmp = getElementByNameHelper( m, name);
+			FormElementModel tmp = getElementByNameHelper( m, name);
 			if ( tmp != null ) return tmp;
 		}
 		return null;
-	}
-	
-	/**
-	 * Return the first-level repeat groups within this group.
-	 * 
-	 * @param group
-	 * @return first-level list of groups within this group that are repeating.
-	 */
-	public final List<FormDataModel> getImmediateRepeatGroups(FormDataModel group) {
-		List<FormDataModel> l = new ArrayList<FormDataModel>();
-
-		// You could optimize this quite a bit, but the nesting of the groups 
-		// is likely to be fairly shallow.  Leave as-is until it is proven
-		// that this is a performance bottleneck.
-		
-		for ( FormDataModel m : groupList ) {
-			if ( m == group ) continue;
-			if ( m.getElementType() == ElementType.REPEAT ) {
-				// OK -- verify that this is nested within 'group' and that
-				// there are no intervening repeat groups in the chain up to 'group'
-				// it is OK if parent ends up being the form name, as  that means 
-				// the iterated-over group 'm' was not contained in 'group'
-				FormDataModel parent = m.getParent();
-				while ( parent != null && parent != group ) {
-					if ( parent.getElementType() == ElementType.REPEAT) break;
-					parent = m.getParent();
-				}
-				if ( parent == group ) {
-					// OK. we found a first-level repeating group within this group
-					l.add(m);
-				}
-			}
-		}
-		
-		return l;
 	}
 	
 	public final String getQualifiedTopLevelTable() {
@@ -471,6 +721,10 @@ public class FormDefinition {
 	
 	public CommonFieldsBase getQualifiedTable(String qualifiedTableName) {
 		return backingTableMap.get(qualifiedTableName);
+	}
+	
+	public Collection<? extends CommonFieldsBase> getBackingTableSet() {
+		return backingTableMap.values();
 	}
 
 	public RefText getRefTextTable() {
@@ -485,8 +739,8 @@ public class FormDefinition {
 		return formId;
 	}
 	
-	public String getFormName() {
-		return formName.getElementName();
+	public String getTopLevelAuri() {
+		return topLevelGroup.getTopLevelAuri();
 	}
 	
 	public void tagLongStringElements(List<?> fdmsWithLongStrings) {
@@ -498,13 +752,6 @@ public class FormDefinition {
 			}
 			m.setMayHaveExtendedStringData(true);
 		}
-	}
-
-	public FormDataModel getElementForTable(CommonFieldsBase table) {
-		for ( FormDataModel m : tableList ) {
-			if ( table.sameTable(m.getBackingObjectPrototype()) ) return m;
-		}
-		return null;
 	}
 
 	public void setLongString(String text, String parentKey, String uriFormDataModel, EntityKey topLevelTableAuri, Datastore datastore,

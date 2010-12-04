@@ -16,7 +16,12 @@
 
 package org.opendatakit.aggregate.process;
 
-
+/**
+ * 
+ * @author wbrunette@gmail.com
+ * @author mitchellsundt@gmail.com
+ * 
+ */
 public enum ProcessType {
   DELETE("Delete Selected Submissions"),
   DELETE_FORM("Delete Selected Forms");

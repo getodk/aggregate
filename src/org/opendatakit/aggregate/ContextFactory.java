@@ -24,6 +24,8 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
  * Server Context creates a singleton for application context to prevent unnecessary construction
  *
  * @author wbrunette@gmail.com
+ * @author mitchellsundt@gmail.com
+ * 
  */
 public class ContextFactory {
   
@@ -38,8 +40,7 @@ public class ContextFactory {
     /**
      * Private constructor 
      */
-    private ContextFactory() {
-    }
+    private ContextFactory() {}
 
     /**
      * Get the application context factory singleton instance

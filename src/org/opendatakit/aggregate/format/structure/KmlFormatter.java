@@ -17,222 +17,307 @@ package org.opendatakit.aggregate.format.structure;
 
 import java.io.PrintWriter;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.StringEscapeUtils;
-import org.opendatakit.aggregate.servlet.BinaryDataServlet;
-import org.opendatakit.aggregate.constants.FormatConsts;
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.ServletConsts;
-import org.opendatakit.aggregate.datamodel.FormDataModel;
-import org.opendatakit.aggregate.datamodel.FormDefinition;
+import org.opendatakit.aggregate.constants.format.KmlConsts;
+import org.opendatakit.aggregate.datamodel.FormElementModel;
+import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.format.RepeatCallbackFormatter;
+import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.format.SubmissionFormatter;
-import org.opendatakit.aggregate.format.element.BasicHeaderFormatter;
 import org.opendatakit.aggregate.format.element.ElementFormatter;
-import org.opendatakit.aggregate.format.element.HeaderFormatter;
 import org.opendatakit.aggregate.format.element.KmlElementFormatter;
-import org.opendatakit.aggregate.format.element.Row;
+import org.opendatakit.aggregate.servlet.BinaryDataServlet;
 import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.aggregate.submission.SubmissionField;
+import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.submission.SubmissionSet;
 import org.opendatakit.aggregate.submission.SubmissionValue;
 import org.opendatakit.aggregate.submission.type.GeoPoint;
 import org.opendatakit.common.constants.BasicConsts;
 import org.opendatakit.common.constants.HtmlConsts;
 import org.opendatakit.common.persistence.Datastore;
-import org.opendatakit.common.persistence.EntityKey;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 
-public class KmlFormatter implements SubmissionFormatter {
+/**
+ * 
+ * @author wbrunette@gmail.com
+ * @author adam.lerer@gmail.com
+ * @author mitchellsundt@gmail.com
+ * 
+ */
+public class KmlFormatter implements SubmissionFormatter, RepeatCallbackFormatter {
 
-  public static final String KML_DATA_ELEMENT_TEMPLATE = "<Data name='%s'>\n"
-    + "  <value>%s</value>\n" 
-    + "</Data>\n";
-  
-  private static final String KML_PLACEMARK_TEMPLATE = "<Placemark id='%s'>\n"
-    + "  <name>%s</name>\n" 
-    + "  <styleUrl>#odk_style</styleUrl>\n"
-    + "  <Snippet maxLines='0'></Snippet>\n" 
-    + "  <ExtendedData>\n" 
-    + "  %s</ExtendedData>\n"
-    + "%s</Placemark>\n"; // PLACEMARK_POINT_TEMPLATE goes in %s
-  
-  private static final String IMAGE_VARIABLE = "__imgUrl";
+  private class GpsRepeatRowData {
+    private GeoPoint gps;
+    private Row row;
+    private String title;
+    private String imgUrl;
 
-  private static final String NAME_VARIABLE = "__name";
+    public GpsRepeatRowData(GeoPoint gps, String title, String imgUrl, Row row) {
+      this.gps = gps;
+      this.row = row;
+      this.title = title;
+      this.imgUrl = imgUrl;
+    }
 
-  private static final String VARIABLE_BEGIN = "$[";
-  
-  private static final String TABLE_DATA_CUSTOM = "<td align='center'>";
+    public GeoPoint getGeoPoint() {
+      return gps;
+    }
 
-  private static final String OPEN_TABLE_W_HEADER_TABLE_FORMAT = "<table border='1' style='border-collapse: collapse;' >";
+    public Row getRow() {
+      return row;
+    }
 
-  private static final String OPEN_TABLE_W_PARENT_TABLE_FORMAT = "<table width='300' cellpadding='0' cellspacing='0'> +";
+    public String getTitle() {
+      return title;
+    }
 
-  private static final String IMAGE_FORMATTING = "<td align='center'><img style='padding:5px' src='$[" + IMAGE_VARIABLE + "]' /></td>";
+    public String getImgUrl() {
+      return imgUrl;
+    }
+    
+  }
 
-  private FormDataModel geopointFieldName = null;
-  private FormDataModel titleFieldName = null;
-  private FormDataModel imageFieldName = null;
+  private static final String LIMITATION_MSG = "limitation: image and title must be in the submission (top-level) or must be in the same repeat group as the gps";
+  private static final int APPROX_ITEM_LENGTHS = 100;
+  private static final int APPROX_TABLE_FORMATTING_LENGTH = 1000;
+
+  private Form form;
+  private List<FormElementModel> propertyNames;
+
+  private FormElementModel gpsElement;
+  private FormElementModel imgElement;
+  private FormElementModel titleElement;
+  private FormElementModel topElement;
+  private FormElementModel gpsParent;
 
   private ElementFormatter elemFormatter;
 
-  private List<FormDataModel> propertyNames;
-
+  private String baseWebServerUrl;
   private PrintWriter output;
 
-  private FormDefinition formDefinition;
-  
-  private HeaderFormatter headerFormatter;
-  
-  private String baseWebServerUrl;
+  private List<GpsRepeatRowData> rowsForGpsInRepeats;
 
-  public KmlFormatter(FormDefinition xform, String webServerUrl, FormDataModel gpsField, FormDataModel titleField,
-		  FormDataModel imgField, PrintWriter printWriter, List<FormDataModel> selectedColumnNames,
-      Datastore datastore) {
-    formDefinition = xform;
-    output = printWriter;
-    propertyNames = selectedColumnNames;
-    elemFormatter = new KmlElementFormatter(webServerUrl, true);
-    headerFormatter = new BasicHeaderFormatter(true, true, true);
+  private boolean imgInGpsRepeat;
+  private boolean titleInGpsRepeat;
+  
+  public KmlFormatter(Form xform, String webServerUrl, FormElementModel gpsField,
+      FormElementModel titleField, FormElementModel imgField, PrintWriter printWriter,
+      List<FormElementModel> selectedColumnNames, Datastore datastore) {
 
-    geopointFieldName = gpsField;
-    titleFieldName = titleField;
-    imageFieldName = imgField;
+    form = xform;
     baseWebServerUrl = webServerUrl;
+    propertyNames = selectedColumnNames;
+    output = printWriter;
+
+    elemFormatter = new KmlElementFormatter(webServerUrl, true, this);
+
+    gpsElement = gpsField;
+    titleElement = titleField;
+    imgElement = imgField;
+    topElement = form.getTopLevelGroupElement();
+    gpsParent = gpsField.getParent();
+
+    //verify constraints hold
+    FormElementModel titleParent = titleElement.getParent();
+    titleInGpsRepeat = (!titleParent.equals(topElement));
+    if (!titleParent.equals(topElement) && !titleParent.equals(gpsParent)) {
+      throw new IllegalStateException(LIMITATION_MSG);
+    }
+    if (imgElement == null) {
+      imgInGpsRepeat = false;
+    } else {
+      FormElementModel imgParent = imgElement.getParent();
+      imgInGpsRepeat = (!imgParent.equals(topElement));
+      if (!imgParent.equals(topElement) && !imgParent.equals(gpsParent)) {
+        throw new IllegalStateException(LIMITATION_MSG);
+      }
+    } 
   }
 
   @Override
   public void processSubmissions(List<Submission> submissions) throws ODKDatastoreException {
-    // output preamble
-    output.append(String.format(FormatConsts.KML_PREAMBLE_TEMPLATE, formDefinition.getFormName(), formDefinition.getFormName()));
+    // output preamble & placemark style
+    output.write(String.format(KmlConsts.KML_PREAMBLE_TEMPLATE, form.getFormId(), form
+        .getViewableName(), form.getViewableName()));
+    output.write(generateStyle(imgElement != null));
 
-    // create headers
-    List<String> headers = headerFormatter.generateHeaders(formDefinition, formDefinition.getTopLevelGroup(), propertyNames);
-    output.append(generateStyle(headers, imageFieldName != null));
-    
     // format row elements
-    for (SubmissionSet sub : submissions) {
-      String point = BasicConsts.EMPTY_STRING;
-      String name = BasicConsts.EMPTY_STRING;
-      String formattedData = BasicConsts.EMPTY_STRING;
+    for (Submission sub : submissions) {
 
-      SubmissionValue nameField = sub.getElementValue(titleFieldName);
-      if (nameField != null) {
-        Object nameValue = ((SubmissionField<?>) nameField).getValue();
-        if(nameValue != null){
-          name = nameValue.toString();
-        }
-      }
-      
-      formattedData += generateDataElement(NAME_VARIABLE, name);
-      
-      SubmissionValue geopointField = sub.getElementValue(geopointFieldName);
-      if (geopointField != null) {
-        Object value = ((SubmissionField<?>) geopointField).getValue();
-        if (value != null && value instanceof GeoPoint) {
 
-          GeoPoint gp = (GeoPoint) value;
-          if (gp != null && gp.getLatitude() != null && gp.getLongitude() != null) {
-            BigDecimal altitude = BigDecimal.ZERO;
-            if (gp.getAltitude() != null) {
-              altitude = gp.getAltitude();
-            }
-            point = String.format(FormatConsts.KML_PLACEMARK_POINT_TEMPLATE, gp.getLongitude()
-                + BasicConsts.COMMA + gp.getLatitude() + BasicConsts.COMMA + altitude);
-          }
-        }
-      } 
-      
-      String imageUrl = BasicConsts.EMPTY_STRING;
-      SubmissionValue imageField = sub.getElementValue(imageFieldName);
-      if (imageField != null) {
-        Object value = ((SubmissionField<?>) imageField).getValue();
-        if (value != null && value instanceof EntityKey) {
-          EntityKey key = (EntityKey) value;
-          Map<String, String> properties = new HashMap<String, String>();
-          properties.put(ServletConsts.BLOB_KEY, key.getKey());
-          imageUrl = HtmlUtil.createHrefWithProperties(baseWebServerUrl + BinaryDataServlet.ADDR, properties, FormatConsts.VIEW_LINK_TEXT);
-        }
-      } 
-      formattedData += generateDataElement(IMAGE_VARIABLE, imageUrl);
-      
-      Row row = sub.getFormattedValuesAsRow(propertyNames, elemFormatter);
-      for(String formattedString : row.getFormattedValues()) {
-        formattedData += formattedString;
-      }
-     
-       
-      
       String id = sub.getKey().getKey();
-      output.append(String.format(KML_PLACEMARK_TEMPLATE, StringEscapeUtils.escapeXml(id), StringEscapeUtils.escapeXml(name), formattedData, point));
+      StringBuilder placemarks = new StringBuilder();
 
+      // check if gps coordinate is in top element, else it's in a repeat
+      if (gpsParent == topElement) {
+        // since both gpsParent equals top element, title & imageURL must be in submission
+        String title = getTitle(sub);
+        String imageURL = getImageUrl(sub);
+        
+        GeoPoint geopoint = getGeoPoint(sub);
+        Row row = sub.getFormattedValuesAsRow(propertyNames, elemFormatter, false);
+        placemarks.append(generateFormattedPlacemark(row, StringEscapeUtils.escapeXml(id),
+            StringEscapeUtils.escapeXml(title), imageURL, geopoint));
+      } else {
+        // clear previous rows generated
+        rowsForGpsInRepeats = new ArrayList<GpsRepeatRowData>();
+       
+        // the call back will populate rowsForGpsInRepeats
+        sub.getFormattedValuesAsRow(propertyNames, elemFormatter, false);
+        for (GpsRepeatRowData repeatData : rowsForGpsInRepeats) {
+          String title = titleInGpsRepeat ? repeatData.getTitle() : getTitle(sub);
+          String imageURL = imgInGpsRepeat ? repeatData.getImgUrl() : getImageUrl(sub);
+          placemarks.append(generateFormattedPlacemark(repeatData.getRow(), StringEscapeUtils
+              .escapeXml(id), StringEscapeUtils.escapeXml(title), imageURL, repeatData
+              .getGeoPoint()));
+        }
+      }
+      output.write(placemarks.toString());
     }
 
     // output postamble
-    output.append(FormatConsts.KML_POSTAMBLE_TEMPLATE);
-
+    output.write(KmlConsts.KML_POSTAMBLE_TEMPLATE);
   }
 
-  @Override
-  public void processRepeatedSubmssionSets(FormDataModel repeatGroup, List<SubmissionSet> repeats)
-      throws ODKDatastoreException {
-    // TODO: Figure out how to incorporate repeats into KML. Large problem is
-    // how to deal with the GPS coordinate being in the repeat.
+  private String generateFormattedPlacemark(Row row, String identifier, String title,
+      String imageURL, GeoPoint gp) {
 
+    // make sure no null values slip by
+    String id = (identifier == null) ? BasicConsts.EMPTY_STRING : identifier;
+    String name = (title == null) ? BasicConsts.EMPTY_STRING : title;
+
+    // determine what data values to create
+    String titleStr = (title == null) ? BasicConsts.EMPTY_STRING : generateDataElement(
+        KmlConsts.TITLE_VARIABLE, title);
+    String imgStr = (imageURL == null) ? BasicConsts.EMPTY_STRING : generateDataElement(
+        KmlConsts.IMAGE_VARIABLE, imageURL);
+
+    // create data section
+    String dataStr = BasicConsts.EMPTY_STRING;
+    if (row.size() > 0) {
+      StringBuilder formattedDataStr = new StringBuilder(APPROX_TABLE_FORMATTING_LENGTH
+          + row.size() * APPROX_ITEM_LENGTHS);
+      formattedDataStr.append(KmlConsts.OPEN_TABLE_W_HEADER_TABLE_FORMAT);
+      for (String item : row.getFormattedValues()) {
+        formattedDataStr.append(item);
+      }
+      formattedDataStr.append(HtmlConsts.TABLE_CLOSE);
+      dataStr = generateDataElement(KmlConsts.DATA_VARIABLE, formattedDataStr.toString());
+    }
+
+    // Create Geopoint
+    String geopoint = BasicConsts.EMPTY_STRING;
+    if (gp != null) {
+      if (gp.getLatitude() != null && gp.getLongitude() != null) {
+        // TODO: why are we using BigDecimal
+        BigDecimal altitude = new BigDecimal(0.0);
+        if (gp.getAltitude() != null) {
+          altitude = gp.getAltitude();
+        }
+        geopoint = String.format(KmlConsts.KML_PLACEMARK_POINT_TEMPLATE, gp.getLongitude()
+            + BasicConsts.COMMA + gp.getLatitude() + BasicConsts.COMMA + altitude);
+      }
+    }
+
+    return String.format(KmlConsts.KML_PLACEMARK_TEMPLATE, id, name, titleStr, imgStr, dataStr,
+        geopoint);
   }
 
-  private String generateDataElement(String name, String value){
-    return String.format(KML_DATA_ELEMENT_TEMPLATE, StringEscapeUtils.escapeXml(name), StringEscapeUtils.escapeXml(value));
+  public void processRepeatedSubmssionSetsIntoRow(List<SubmissionSet> repeats,
+      FormElementModel repeatElement, Row row) throws ODKDatastoreException {
+    
+    for (SubmissionSet repeatSet : repeats) {
+      Row rowFromRepeat = repeatSet.getFormattedValuesAsRow(propertyNames, elemFormatter, false);
+      if (repeatElement.equals(gpsParent)) {
+        Row clonedRow = Row.cloneRowValues(row);
+        clonedRow.addDataFromRow(rowFromRepeat);
+        GeoPoint geopoint = getGeoPoint(repeatSet);
+        String title = titleInGpsRepeat ?  getTitle(repeatSet) : null;
+        String imageURL = imgInGpsRepeat ?  getImageUrl(repeatSet) : null;
+        GpsRepeatRowData repeatData = new GpsRepeatRowData(geopoint, title, imageURL, clonedRow);
+        rowsForGpsInRepeats.add(repeatData);
+      } else {
+        row.addDataFromRow(rowFromRepeat);
+      }
+    }
   }
-
   
-  private String generateStyle(List<String> headers, boolean hasImage) {
-    String styleHtml = OPEN_TABLE_W_PARENT_TABLE_FORMAT;
-    styleHtml += BasicConsts.SPACE + BasicConsts.SPACE;
-    styleHtml += wrapInBothRowNData(HtmlUtil.wrapWithHtmlTags(HtmlConsts.H2, VARIABLE_BEGIN
-        + NAME_VARIABLE + BasicConsts.RIGHT_BRACKET));
-    styleHtml += generateImageStyle(hasImage);
-    styleHtml += BasicConsts.SPACE + BasicConsts.SPACE;
-    styleHtml += HtmlUtil.wrapWithHtmlTags(HtmlConsts.TABLE_ROW, createHeaderFormat(headers));
+  private String generateStyle(boolean hasImage) {
+    String styleHtml = KmlConsts.OPEN_TABLE_W_PARENT_TABLE_FORMAT;
+    styleHtml += wrapInBothRowNData(HtmlUtil.wrapWithHtmlTags(HtmlConsts.H2,
+        wrapVariable(KmlConsts.TITLE_VARIABLE)));
+    if (hasImage) {
+      styleHtml += HtmlUtil.wrapWithHtmlTags(HtmlConsts.TABLE_ROW, KmlConsts.IMAGE_FORMAT);
+    }
+    styleHtml += wrapInBothRowNData(wrapVariable(KmlConsts.DATA_VARIABLE));
     styleHtml += HtmlConsts.TABLE_CLOSE;
 
-    return String.format(FormatConsts.KML_STYLE_TEMPLATE, "odk_style", styleHtml);
+    return String.format(KmlConsts.KML_STYLE_TEMPLATE, KmlConsts.PLACEMARK_STYLE, styleHtml);
   }
 
-  private String createHeaderFormat(List<String> headers) {
-    String tmp = TABLE_DATA_CUSTOM;
-    tmp += OPEN_TABLE_W_HEADER_TABLE_FORMAT;
-    for (String header : headers) {
-      tmp += wrapRowHeaderStyle(StringEscapeUtils.escapeHtml(header));
-
-    }
-    tmp += HtmlConsts.TABLE_CLOSE;
-    tmp += HtmlConsts.TABLE_DATA_CLOSE;
-    return tmp;
+  private String generateDataElement(String name, String value) {
+    return String.format(KmlConsts.KML_DATA_ELEMENT_TEMPLATE, StringEscapeUtils.escapeXml(name),
+        StringEscapeUtils.escapeXml(value));
   }
 
-  private String generateImageStyle(boolean hasImage) {
-    if (hasImage) {
-      return BasicConsts.SPACE + BasicConsts.SPACE
-          + HtmlUtil.wrapWithHtmlTags(HtmlConsts.TABLE_ROW, IMAGE_FORMATTING);
-    } else {
-      return BasicConsts.EMPTY_STRING;
-    }
-  }
-
-  private String wrapRowHeaderStyle(String escapedHeader) {
-    String data = HtmlUtil.wrapWithHtmlTags(HtmlConsts.TABLE_DATA, HtmlUtil.wrapWithHtmlTags(
-        HtmlConsts.B, escapedHeader));
-    data += HtmlUtil.wrapWithHtmlTags(HtmlConsts.TABLE_DATA, VARIABLE_BEGIN + escapedHeader
-        + BasicConsts.RIGHT_BRACKET);
-    return HtmlUtil.wrapWithHtmlTags(HtmlConsts.TABLE_ROW, data);
+  private String wrapVariable(String variable) {
+    return KmlConsts.VARIABLE_BEGIN + variable + BasicConsts.RIGHT_BRACKET;
   }
 
   private String wrapInBothRowNData(String value) {
     return HtmlUtil.wrapWithHtmlTags(HtmlConsts.TABLE_ROW, HtmlUtil.wrapWithHtmlTags(
         HtmlConsts.TABLE_DATA, value));
+  }
+
+  private Map<String, String> createViewLinkProperties(SubmissionKey subKey) {
+    Map<String, String> properties = new HashMap<String, String>();
+    properties.put(ServletConsts.BLOB_KEY, subKey.toString());
+    return properties;
+  }
+
+  private GeoPoint getGeoPoint(SubmissionSet set) {
+    SubmissionValue geopointField = set.getElementValue(gpsElement);
+    if (geopointField != null) {
+      Object value = ((SubmissionField<?>) geopointField).getValue();
+      if (value != null && value instanceof GeoPoint) {
+        return (GeoPoint) value;
+      }
+    }
+    return null;
+  }
+
+  private String getTitle(SubmissionSet set) {
+    // TODO: why are we not dealing in SubmissionField?
+    SubmissionValue titleField = set.getElementValue(titleElement);
+    if (titleField != null) {
+      Object titleValue = ((SubmissionField<?>) titleField).getValue();
+      if (titleValue != null) {
+        return titleValue.toString();
+      }
+    }
+    return null;
+  }
+
+  private String getImageUrl(SubmissionSet set) {
+    // TODO: why are we not dealing in SubmissionField?
+    SubmissionValue imageField = set.getElementValue(imgElement);
+    if (imageField != null) {
+      Object value = ((SubmissionField<?>) imageField).getValue();
+      if (value != null && value instanceof SubmissionKey) {
+        SubmissionKey key = (SubmissionKey) value;
+        Map<String, String> properties = createViewLinkProperties(key);
+        String url = HtmlUtil.createHttpServletLink(baseWebServerUrl, BinaryDataServlet.ADDR);
+        return HtmlUtil.createLinkWithProperties(url, properties);
+      }
+    }
+    return null;
   }
 }

@@ -22,6 +22,12 @@ import org.opendatakit.aggregate.task.AbstractFormDeleteImpl;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.security.User;
 
+/**
+ * 
+ * @author wbrunette@gmail.com
+ * @author mitchellsundt@gmail.com
+ * 
+ */
 public class FormDeleteImpl extends AbstractFormDeleteImpl {
 
   @Override

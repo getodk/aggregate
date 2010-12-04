@@ -21,6 +21,12 @@ import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
 
+/**
+ * 
+ * @author wbrunette@gmail.com
+ * @author mitchellsundt@gmail.com
+ * 
+ */
 public interface ExternalService {
   
   public void sendSubmission(Submission submission) throws ODKExternalServiceException;
@@ -32,4 +38,6 @@ public interface ExternalService {
   public void delete() throws ODKDatastoreException;
   
   public void persist() throws ODKEntityPersistException;
+
+  public FormServiceCursor getFormServiceCursor();
 }

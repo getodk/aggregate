@@ -20,11 +20,11 @@ package org.opendatakit.aggregate.submission.type;
 
 
 import org.opendatakit.aggregate.constants.ErrorConsts;
-import org.opendatakit.aggregate.datamodel.FormDataModel;
+import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.datamodel.FormDataModel.ElementType;
 import org.opendatakit.aggregate.exception.ODKConversionException;
+import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.format.element.ElementFormatter;
-import org.opendatakit.aggregate.format.element.Row;
 import org.opendatakit.aggregate.submission.SubmissionField;
 import org.opendatakit.common.constants.BasicConsts;
 import org.opendatakit.common.persistence.CommonFieldsBase;
@@ -33,15 +33,20 @@ import org.opendatakit.common.persistence.EntityKey;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.security.User;
 
-
+/**
+ * 
+ * @author wbrunette@gmail.com
+ * @author mitchellsundt@gmail.com
+ * 
+ */
 public abstract class SubmissionFieldBase<T> implements SubmissionField<T>{
 
   /**
    * Submission property/element name
    */
-  protected FormDataModel element;
+  protected FormElementModel element;
 
-  public SubmissionFieldBase(FormDataModel element) {
+  public SubmissionFieldBase(FormElementModel element) {
     this.element = element;
   }
 
@@ -90,11 +95,11 @@ public abstract class SubmissionFieldBase<T> implements SubmissionField<T>{
    * Add submission field value to JsonObject
    * @param JSON Object to add value to
    */  
-  public abstract void formatValue(ElementFormatter elemFormatter, Row row) throws ODKDatastoreException;
+  public abstract void formatValue(ElementFormatter elemFormatter, Row row, String ordinalValue) throws ODKDatastoreException;
   
   @Override
   public final boolean isBinary() {
-	  return (element.getElementType() == ElementType.REF_BLOB);
+	  return (element.getFormDataModel().getElementType() == ElementType.REF_BLOB);
   }
   
   /**

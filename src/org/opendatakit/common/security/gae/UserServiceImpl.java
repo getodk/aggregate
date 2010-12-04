@@ -24,6 +24,12 @@ import org.opendatakit.common.security.User;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 
+/**
+ * 
+ * @author wbrunette@gmail.com
+ * @author mitchellsundt@gmail.com
+ * 
+ */
 public class UserServiceImpl implements org.opendatakit.common.security.UserService {
 
 	final Realm realm;

@@ -20,25 +20,31 @@ package org.opendatakit.aggregate.form;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.opendatakit.aggregate.datamodel.FormDataModel;
 import org.opendatakit.aggregate.datamodel.FormDefinition;
+import org.opendatakit.aggregate.datamodel.FormElementModel;
+import org.opendatakit.aggregate.datamodel.FormElementModel.ElementType;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
-import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
 import org.opendatakit.aggregate.submission.Submission;
+import org.opendatakit.aggregate.submission.SubmissionKey;
+import org.opendatakit.aggregate.submission.SubmissionSet;
 import org.opendatakit.aggregate.submission.type.BlobSubmissionType;
 import org.opendatakit.aggregate.submission.type.BooleanSubmissionType;
+import org.opendatakit.aggregate.submission.type.LongSubmissionType;
+import org.opendatakit.aggregate.submission.type.RepeatSubmissionType;
 import org.opendatakit.aggregate.submission.type.StringSubmissionType;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.EntityKey;
-import org.opendatakit.common.persistence.InstanceDataBase;
 import org.opendatakit.common.persistence.Query;
+import org.opendatakit.common.persistence.TopLevelDynamicBase;
 import org.opendatakit.common.persistence.Query.FilterOperation;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
-import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
-import org.opendatakit.common.security.Realm;
+import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.security.User;
 
 /**
@@ -47,49 +53,70 @@ import org.opendatakit.common.security.User;
  * the data to/from the datastore.
  * 
  * @author wbrunette@gmail.com
+ * @author mitchellsundt@gmail.com
  * 
  */
 public class Form {
+
   /**
    * Submission entity
    */
-  private Submission objectEntity;
+  private final Submission objectEntity;
 
   /**
    * Definition of what the Submission xform is.
    */
-  private FormDefinition formDefinition;
+  private final FormDefinition formDefinition;
 
   /**
-   * Construct a form definition that can be persisted
-   * 
-   * @param formOdkId
-   *          Form's unique ODK id
-   * @param viewableName
-   *          Name to be displayed
-   * @param user
-   *          User that created the form
-   * @param formDefinition
-   *          The xml definition or the form
-   * @param fileName
-   *          The name of xml used for outputting form
-   * @param datastore
-   *          datastore to access
-   * @throws ODKEntityPersistException
+   * NOT persisted
    */
-  public Form(InstanceDataBase formInfo, Datastore datastore, User user) throws ODKIncompleteSubmissionData, ODKDatastoreException {
-    this(new Submission(formInfo, FormInfo.getFormDefinition(datastore), datastore, user), datastore, user);
-    StringSubmissionType formId = (StringSubmissionType) objectEntity.getElementValue(FormInfo.formId);
-    formDefinition = FormDefinition.getFormDefinition(formId.getValue(), datastore, user);
+  private Map<String, FormElementModel> repeatElementMap;
+
+  private final List<SubmissionAssociationTable> submissionAssociations = new ArrayList<SubmissionAssociationTable>();
+  
+  private final Datastore datastore;
+  
+  private final User user;
+ 
+  public Form(TopLevelDynamicBase formEntity, Datastore datastore, User user) throws ODKEntityNotFoundException, ODKDatastoreException {
+		this( new Submission(
+				formEntity,
+				FormInfo.getFormDefinition(datastore), 
+				datastore, 
+				user),
+				datastore,
+				user);
+	  }
+
+  /**
+   * Retrieve a form definition from the database.
+   * 
+   * @param topLevelAuri
+   * @param datastore
+   * @param user
+   * @throws ODKEntityNotFoundException
+   * @throws ODKDatastoreException
+   */
+  public Form(String topLevelAuri, Datastore datastore, User user) throws ODKEntityNotFoundException, ODKDatastoreException {
+	this( new Submission(
+			(FormInfoTable) datastore.getEntity(FormInfo.getFormDefinition(datastore).getTopLevelGroup().getBackingObjectPrototype(), topLevelAuri, user),
+			FormInfo.getFormDefinition(datastore), 
+			datastore, 
+			user),
+			datastore,
+			user);
   }
 
-  public Form(Submission submission, Datastore datastore, User user) throws ODKDatastoreException {
+  Form(Submission submission, Datastore datastore, User user) throws ODKDatastoreException {
+    this.datastore = datastore;
+	this.user = user;
     objectEntity = submission;
-    StringSubmissionType formId = (StringSubmissionType) objectEntity.getElementValue(FormInfo.formId);
-    formDefinition = FormDefinition.getFormDefinition(formId.getValue(), datastore, user);
+    formDefinition = FormDefinition.getFormDefinition(getFormId(), datastore, user);
   }
 
   public void persist(Datastore datastore, User user) throws ODKDatastoreException {
+    datastore.putEntities(submissionAssociations, user);
     objectEntity.persist(datastore, user);
     
     // TODO: redo this further after mitch's list of key changes
@@ -105,22 +132,37 @@ public class Form {
    * @throws ODKDatastoreException
    */
   public void deleteForm(Datastore ds, User user) throws ODKDatastoreException {
-	  // TODO: Waylon -- I would delegate the details to the external service
-	  // for cleanup.  Not do it here.  Not sure about overhead to clean things up...
-//    List<ExternalService> remoteServers = getRemoteServers();
-//    for (ExternalService rs : remoteServers) {
-//      EntityKey rsEntityKey = rs.getEntityKey();
-//      ds.deleteEntity(rsEntityKey, uriUser);
-//    }
+	  // Save the formId to the stack so we have it...
+	  String formId = getFormId();
 	  
-    List<EntityKey> eks = new ArrayList<EntityKey>();
+	FormDataModel fdm = FormDataModel.createRelation(ds, user);
+    List<EntityKey> eksFormInfo = new ArrayList<EntityKey>();
+    // queue everything in formInfo for delete
+    objectEntity.recursivelyAddEntityKeys(eksFormInfo);
+    
+	List<EntityKey> eks = new ArrayList<EntityKey>();
+	if ( formDefinition != null ) {
+	    // queue everything in the formDataModel for delete
+	    for ( FormDataModel m : formDefinition.uriMap.values() ) {
+	    	
+			eks.add(new EntityKey(fdm, m.getUri()));
+	    }
+	    // delete everything out of FDM
+	    ds.deleteEntities(eks, user);
+	    // drop the tables...
+	    for ( CommonFieldsBase b : formDefinition.getBackingTableSet()) {
+	    	try {
+	    		ds.deleteRelation(b, user);
+	    	} catch ( ODKDatastoreException e ) {
+	    		e.printStackTrace();
+	    	}
+	    }
+	}
+    // tell FormDefinition to forget me...
+    FormDefinition.forgetFormId(formId);
+
     // delete everything in formInfo
-    objectEntity.recursivelyAddEntityKeys(eks);
-    // delete everything in the formDataModel
-    for ( FormDataModel m : formDefinition.uriMap.values() ) {
-		eks.add(new EntityKey(m.getBackingObjectPrototype(), m.getUri()));
-    }
-    ds.deleteEntities(eks, user);
+    ds.deleteEntities(eksFormInfo, user);
   }
 
   /**
@@ -128,16 +170,17 @@ public class Form {
    * 
    * @return datastore key
    */
-  public EntityKey getKey() {
-    return objectEntity.getKey();
-  }
-
   public EntityKey getEntityKey() {
 	  return objectEntity.getKey();
   }
   
-  public FormDataModel getTopLevelGroup() {
-	  return formDefinition.getTopLevelGroup();
+  public SubmissionKey getSubmissionKey() {
+  	// TODO Auto-generated method stub
+  	return objectEntity.constructSubmissionKey(null);
+  }
+
+  public FormElementModel getTopLevelGroupElement(){
+		  return formDefinition.getTopLevelGroupElement();
   }
   
   public FormDefinition getFormDefinition() {
@@ -150,16 +193,73 @@ public class Form {
    * @return odk identifier
    */
   public String getFormId() {
-    return formDefinition.getFormId();
+    StringSubmissionType formId = (StringSubmissionType) objectEntity.getElementValue(FormInfo.formId);
+    return formId.getValue();
   }
 
+  public boolean hasManifestFileset() {
+	  // TODO: deal with version...
+		RepeatSubmissionType r = (RepeatSubmissionType) objectEntity.getElementValue(FormInfo.fiFilesetTable);
+		for ( SubmissionSet filesetRecord : r.getSubmissionSets()) {
+			BlobSubmissionType bt = (BlobSubmissionType) filesetRecord.getElementValue(FormInfo.manifestFileset);
+			return ( bt.getAttachmentCount() != 0 );
+		}
+		return false;
+  }
+
+  public BlobSubmissionType getManifestFileset() {
+	  // TODO: deal with version...
+		RepeatSubmissionType r = (RepeatSubmissionType) objectEntity.getElementValue(FormInfo.fiFilesetTable);
+		for ( SubmissionSet filesetRecord : r.getSubmissionSets()) {
+			BlobSubmissionType bt = (BlobSubmissionType) filesetRecord.getElementValue(FormInfo.manifestFileset);
+			return bt;
+		}
+		return null;
+  }
+  
+  private String getDescriptionTableFieldValue(String languageCode, FormElementModel field) {
+		RepeatSubmissionType r = (RepeatSubmissionType) objectEntity.getElementValue(FormInfo.fiDescriptionTable);
+		String preferredViewableName = null;
+		String defaultViewableName = null;
+		for ( SubmissionSet descriptionRecord : r.getSubmissionSets()) {
+			String value = ((StringSubmissionType) descriptionRecord.getElementValue(field)).getValue();
+			String lc = ((StringSubmissionType) descriptionRecord.getElementValue(FormInfo.languageCode)).getValue();
+			if ( lc == null ) {
+				defaultViewableName = value;
+			} else if ( lc.equals(languageCode) ) {
+				preferredViewableName = value;
+			}
+		}
+		return ( preferredViewableName == null ) ? defaultViewableName : preferredViewableName;
+	  }
+  
   /**
    * Get the name that is viewable on ODK Aggregate
    * 
    * @return viewable name
    */
+  public String getViewableName(String languageCode) {
+	  return getDescriptionTableFieldValue(languageCode, FormInfo.formName);
+  }
+
   public String getViewableName() {
-    return formDefinition.getFormName();
+	  return getViewableName(null);
+  }
+  
+  public String getDescription(String languageCode) {
+	  return getDescriptionTableFieldValue(languageCode, FormInfo.description);
+		}
+  
+  public String getDescription() {
+	  return getDescription(null);
+  }
+
+  public String getDescriptionUrl(String languageCode) {
+	  return getDescriptionTableFieldValue(languageCode, FormInfo.descriptionUrl);
+  }
+  
+  public String getDescriptionUrl() {
+	  return getDescriptionUrl(null);
   }
 
   /**
@@ -195,7 +295,14 @@ public class Form {
    * @return xml file name
    */
   public String getFormFilename() throws ODKDatastoreException {
-	  BlobSubmissionType bt = (BlobSubmissionType) objectEntity.getElementValue(FormInfo.formBinaryContent);
+	// assume for now that there is only one fileset...
+	RepeatSubmissionType r = (RepeatSubmissionType) objectEntity.getElementValue(FormInfo.fiFilesetTable);
+	List<SubmissionSet> filesets = r.getSubmissionSets();
+	if ( filesets.size() != 1 ) {
+		throw new IllegalStateException("Expecting only one fileset record at this time!");
+	}
+	SubmissionSet filesetRecord = filesets.get(0);
+	BlobSubmissionType bt = (BlobSubmissionType) filesetRecord.getElementValue(FormInfo.xformDefinition);
 	  
 	  int count = bt.getAttachmentCount();
 	  // we use ordinal counting here: 1..count
@@ -217,7 +324,14 @@ public class Form {
    * @return get XML definition of XForm
    */
   public String getFormXml() throws ODKDatastoreException {
-	  BlobSubmissionType bt = (BlobSubmissionType) objectEntity.getElementValue(FormInfo.formBinaryContent);
+		// assume for now that there is only one fileset...
+		RepeatSubmissionType r = (RepeatSubmissionType) objectEntity.getElementValue(FormInfo.fiFilesetTable);
+		List<SubmissionSet> filesets = r.getSubmissionSets();
+		if ( filesets.size() != 1 ) {
+			throw new IllegalStateException("Expecting only one fileset record at this time!");
+		}
+		SubmissionSet filesetRecord = filesets.get(0);
+		BlobSubmissionType bt = (BlobSubmissionType) filesetRecord.getElementValue(FormInfo.xformDefinition);
 	  
 	  int count = bt.getAttachmentCount();
 	  // we use ordinal counting here: 1..count
@@ -240,7 +354,14 @@ public class Form {
    * @return true if form can be downloaded, false otherwise
    */
   public Boolean getDownloadEnabled() {
-    return ((BooleanSubmissionType) objectEntity.getElementValue(FormInfo.downloadEnabled)).getValue();
+	// assume for now that there is only one fileset...
+	RepeatSubmissionType r = (RepeatSubmissionType) objectEntity.getElementValue(FormInfo.fiFilesetTable);
+	List<SubmissionSet> filesets = r.getSubmissionSets();
+	if ( filesets.size() != 1 ) {
+		throw new IllegalStateException("Expecting only one fileset record at this time!");
+	}
+	SubmissionSet filesetRecord = filesets.get(0);
+    return ((BooleanSubmissionType) filesetRecord.getElementValue(FormInfo.isDownloadAllowed)).getValue();
   }
 
   /**
@@ -251,7 +372,14 @@ public class Form {
    * 
    */
   public void setDownloadEnabled(Boolean downloadEnabled) {
-    ((BooleanSubmissionType) objectEntity.getElementValue(FormInfo.downloadEnabled)).setBooleanValue(downloadEnabled);
+	// assume for now that there is only one fileset...
+	RepeatSubmissionType r = (RepeatSubmissionType) objectEntity.getElementValue(FormInfo.fiFilesetTable);
+	List<SubmissionSet> filesets = r.getSubmissionSets();
+	if ( filesets.size() != 1 ) {
+		throw new IllegalStateException("Expecting only one fileset record at this time!");
+	}
+	SubmissionSet filesetRecord = filesets.get(0);
+    ((BooleanSubmissionType) filesetRecord.getElementValue(FormInfo.isDownloadAllowed)).setBooleanValue(downloadEnabled);
   }
 
   /**
@@ -260,7 +388,15 @@ public class Form {
    * @return true if a new submission can be received, false otherwise
    */
   public Boolean getSubmissionEnabled() {
-    return ((BooleanSubmissionType) objectEntity.getElementValue(FormInfo.submissionEnabled)).getValue();
+	// assume for now that there is only one submission...
+	RepeatSubmissionType r = (RepeatSubmissionType) objectEntity.getElementValue(FormInfo.fiSubmissionTable);
+	List<SubmissionSet> filesets = r.getSubmissionSets();
+	if ( filesets.size() != 1 ) {
+		throw new IllegalStateException("Expecting only one submission record at this time!");
+	}
+	SubmissionSet submissionRecord = filesets.get(0);
+	SubmissionAssociationTable sa = findSubmission(submissionRecord);
+	return (sa == null) ? false : sa.getIsSubmissionAllowed();
   }
 
   /**
@@ -271,33 +407,99 @@ public class Form {
    * 
    */
   public void setSubmissionEnabled(Boolean submissionEnabled) {
-    ((BooleanSubmissionType) objectEntity.getElementValue(FormInfo.submissionEnabled)).setBooleanValue(submissionEnabled);
+	// assume for now that there is only one submission...
+	RepeatSubmissionType r = (RepeatSubmissionType) objectEntity.getElementValue(FormInfo.fiSubmissionTable);
+	List<SubmissionSet> filesets = r.getSubmissionSets();
+	if ( filesets.size() != 1 ) {
+		throw new IllegalStateException("Expecting only one submission record at this time!");
+	}
+	SubmissionSet submissionRecord = filesets.get(0);
+	SubmissionAssociationTable sa = findSubmission(submissionRecord);
+	if ( sa != null ) sa.setIsSubmissionAllowed(submissionEnabled);
   }
 
-  public FormDataModel getBeginningElement(String elementName) {
-	  return formDefinition.getTopLevelGroup();
-  }
-
-  public FormDataModel getFormElement(String name) {
-	return getFormElementHelper(formDefinition.getTopLevelGroup(), name);
+  private boolean isMatch(SubmissionAssociationTable a, 
+		  String submissionFormId, Long submissionModelVersion, Long submissionUiVersion ) {
+	  return( a.getSubmissionFormId().equals(submissionFormId) &&
+			   a.getSubmissionModelVersion().equals(submissionModelVersion) &&
+			   a.getSubmissionUiVersion().equals(submissionUiVersion) );
   }
   
-  private FormDataModel getFormElementHelper(FormDataModel node, String name) {
+  private SubmissionAssociationTable findSubmission(SubmissionSet submissionRecord) {
+	  String submissionFormId = ((StringSubmissionType) submissionRecord.getElementValue(FormInfo.submissionFormId)).getValue();
+	  Long submissionModelVersion = ((LongSubmissionType) submissionRecord.getElementValue(FormInfo.submissionModelVersion)).getValue();
+	  Long submissionUiVersion = ((LongSubmissionType) submissionRecord.getElementValue(FormInfo.submissionUiVersion)).getValue();
+	  
+	  for ( SubmissionAssociationTable a : submissionAssociations ) {
+		  if ( isMatch(a, submissionFormId, submissionModelVersion, submissionUiVersion) ) {
+			  return a;
+		  }
+	  }
+	  
+	  // not found -- try to fetch it...
+	  try {
+		SubmissionAssociationTable sa = SubmissionAssociationTable.createRelation(datastore, user);
+		Query q = datastore.createQuery(SubmissionAssociationTable.createRelation(datastore, user), user);
+		q.addFilter(sa.domAuri, FilterOperation.EQUAL, CommonFieldsBase.newMD5HashUri(submissionFormId));
+		List<? extends CommonFieldsBase> l = q.executeQuery(0);
+		SubmissionAssociationTable match = null;
+		for ( CommonFieldsBase b : l ) {
+			SubmissionAssociationTable a = (SubmissionAssociationTable) b;
+			submissionAssociations.add(a);
+			if ( isMatch(a, submissionFormId, submissionModelVersion, submissionUiVersion) ) {
+				match = a;
+			}
+		}
+		return match;
+	} catch (ODKDatastoreException e) {
+		return null;
+	}
+  }
+  
+  private void getRepeatGroupsInModelHelper(FormElementModel current, List<FormElementModel> accumulation) {
+	  for ( FormElementModel m : current.getChildren() ) {
+		  if ( m.getElementType() == FormElementModel.ElementType.REPEAT ) {
+			  accumulation.add(m);
+		  }
+		  getRepeatGroupsInModelHelper(m, accumulation);
+	  }
+  }
+  
+  public List<FormElementModel> getRepeatGroupsInModel() {
+	  List<FormElementModel> list = new ArrayList<FormElementModel>();
+	
+	  getRepeatGroupsInModelHelper(getTopLevelGroupElement(), list);
+	  return list;
+  }
+
+  public Map<String, FormElementModel> getRepeatElementModels() {
+
+    // check to see if repeatRootMap needs to be created
+    // NOTE: this assumes the form does NOT get altered!!!
+    if (repeatElementMap == null) {
+      repeatElementMap = new HashMap<String, FormElementModel>();
+      populateRepeatElementMap(formDefinition.getTopLevelGroupElement());
+    }
+
+    return repeatElementMap;
+  }
+
+  private void populateRepeatElementMap(FormElementModel node) {
     if (node == null) {
-      return null;
+      return;
     }
-
-    if (node.getElementName().equals(name)) {
-      return node;
+    if (node.getElementType() == ElementType.REPEAT) {
+    	// TODO: this should be fully qualified element name or 
+    	// you could get collisions.
+      repeatElementMap.put(node.getElementName(), node);
     }
-
-    List<FormDataModel> children = node.getChildren();
-    if (children != null) {
-      for (FormDataModel child : children) {
-        getFormElementHelper(child, name);
-      }
+    List<FormElementModel> children = node.getChildren();
+    if (children == null) {
+      return;
     }
-    return null;
+    for (FormElementModel child : children) {
+      populateRepeatElementMap(child);
+    }
   }
   
   /**
@@ -342,8 +544,9 @@ public class Form {
       return false;
     }
     Form other = (Form) obj;
-    return (objectEntity == null ? (other.objectEntity == null) : (objectEntity
-            .equals(other.objectEntity)));
+    if ( objectEntity == null ) return (other.objectEntity == null);
+    
+    return (objectEntity.equals(other.objectEntity));
     // TODO: do we care about external services?
   }
 
@@ -364,50 +567,163 @@ public class Form {
    */
   @Override
   public String toString() {
-    return getViewableName();
+    return getViewableName(null);
   }
-
+  
   /**
-   * Static function to retrieve a form with the specified ODK id from the
-   * datastore
-   * 
-   * @param submissionKey
-   *          The ODK identifier that identifies the form
-   * 
-   * @return The ODK aggregate form definition/conversion object
-   * 
-   * @throws ODKFormNotFoundException
-   *           Thrown when a form was not able to be found with the
-   *           corresponding ODK ID
+   * Returns the top level dynamic class for the FormInfo table.
+   * @param datastore
+   * @param user
+   * @return
+   * @throws ODKDatastoreException
    */
-  public static Form retrieveForm(String submissionKey, Datastore ds, User user, Realm realm) throws ODKFormNotFoundException {
-
-    // TODO: consider using memcache to have form info in memory for
-    // faster response times
-
-    if (submissionKey == null) {
-      return null;
-    }
-    String formId = FormDefinition.extractWellFormedFormId(submissionKey, realm);
-    FormDefinition fd = FormDefinition.getFormDefinition(formId, ds, user);
-    if ( fd == null ) {
-    	throw new ODKFormNotFoundException("No data model for form");
-    }
-    
-    try {
-    	Query query = ds.createQuery(FormInfo.reference, user);
-    	query.addFilter(FormInfo.formId.getBackingKey(), FilterOperation.EQUAL, fd.getFormId());
-    	List<? extends CommonFieldsBase> eList = query.executeQuery(0);
-    	if ( eList.size() == 1 ) {
-    		InstanceDataBase formEntity = (InstanceDataBase) eList.get(0);
-    		Form form = new Form(formEntity, ds, user);
-    		return form;
-    	} else if ( eList.size() > 1 ) {
-    		throw new IllegalStateException("more than one FormInfo entry for the given form id: " + fd.getFormId());
-    	}
-    } catch (Exception e) {
-      throw new ODKFormNotFoundException(e);
-    }
-    throw new ODKFormNotFoundException("No FormInfo record for the given form id: " + formId);
+  public static final FormInfoTable getFormInfoRelation(Datastore datastore, User user) throws ODKDatastoreException {
+	  return FormInfoTable.createRelation(datastore, user);
   }
+  
+  	/**
+  	 * Clean up the incoming string to extract just the formId from it.
+  	 * 
+  	 * @param submissionKey
+  	 * @return
+  	 */
+	public static final String extractWellFormedFormId(String submissionKey) {
+		int firstSlash = submissionKey.indexOf('/');
+		String formId = submissionKey;
+		if ( firstSlash != -1 ) {
+			// strip off the group path of the key
+			formId = submissionKey.substring(0, firstSlash);
+		}
+		return formId;
+	}
+
+	/**
+	 * Static function to retrieve a form with the specified ODK id from the
+	 * datastore
+	 * 
+	 * @param submissionKey
+	 *            The ODK identifier that identifies the form
+	 * 
+	 * @return The ODK aggregate form definition/conversion object
+	 * 
+	 * @throws ODKFormNotFoundException
+	 *             Thrown when a form was not able to be found with the
+	 *             corresponding ODK ID
+	 */
+	public static Form retrieveForm(String submissionKey, Datastore ds,
+			User user) throws ODKFormNotFoundException {
+
+		// TODO: consider using memcache to have form info in memory for
+		// faster response times.  Note that we already cache the 
+		// FormDefinition...
+		Form formInfoForm = null;
+		try {
+			// make sure the FormInfo table definition is loaded...
+			formInfoForm = FormInfo.getFormInfoForm(ds);
+		} catch (ODKDatastoreException e) {
+			throw new ODKFormNotFoundException(e);
+		}
+
+		if (submissionKey == null) {
+			return null;
+		}
+		String formIdValue = extractWellFormedFormId(
+				submissionKey);
+		if (formIdValue.equals(FormDataModel.URI_FORM_ID_VALUE_FORM_INFO)) {
+			return formInfoForm;
+		}
+
+		try {
+			String formUri = CommonFieldsBase.newMD5HashUri(formIdValue);
+			Form form = new Form(formUri, ds, user);
+			if ( !formIdValue.equals(form.getFormId()) ) {
+				throw new IllegalStateException(
+						"more than one FormInfo entry for the given form id: " + formIdValue );
+			}
+			return form;
+		} catch (Exception e) {
+			throw new ODKFormNotFoundException(e);
+		}
+	}
+	
+	/**
+	 * Create or fetch the given formId.
+	 * 
+	 * @param formId
+	 * @param ds
+	 * @param user
+	 * @return
+	 * @throws ODKDatastoreException
+	 */
+	public static final Submission createOrFetchFormId(String formId, Datastore ds, User user) throws ODKDatastoreException {
+
+		// TODO: consider using memcache to have form info in memory for
+		// faster response times.  Note that we already cache the 
+		// FormDefinition...
+		Form formInfoForm = null;
+		// make sure the FormInfo table definition is loaded...
+		formInfoForm = FormInfo.getFormInfoForm(ds);
+
+		if (formId.equals(FormDataModel.URI_FORM_ID_VALUE_FORM_INFO)) {
+			throw new IllegalStateException("Unexpectedly retrieving formInfo definition");
+		}
+		Submission formInfo = null;
+		String formUri = CommonFieldsBase.newMD5HashUri(formId);
+		
+		try {
+			FormInfoTable fi = (FormInfoTable) ds.getEntity(formInfoForm.getFormDefinition().getTopLevelGroup().getBackingObjectPrototype(), formUri, user);
+	    	formInfo = new Submission(fi, formInfoForm.getFormDefinition(), ds, user);
+		} catch ( ODKEntityNotFoundException e ) {
+			formInfo = new Submission(1L, 0L, formUri, formInfoForm.getFormDefinition(), ds, user);
+
+	    	((StringSubmissionType) formInfo.getElementValue(FormInfo.formId)).setValueFromString(formId);
+	    }
+	    return formInfo;
+	}
+	
+	public static final FormDefinition getFormInfoDefinition(Datastore datastore) throws ODKDatastoreException {
+		return FormInfo.getFormDefinition(datastore);
+	}
+
+	/**
+	 * Static function to find form by FormId
+	 * 
+	 * @param formKey
+	 *            The entity key for the FormInfo record defining the form
+	 * 
+	 * @return The ODK aggregate form definition/conversion object
+	 * 
+	 * @throws ODKFormNotFoundException
+	 *             Thrown when a form was not able to be found with the
+	 *             corresponding ODK ID
+	 */
+	public static Form retrieveFormByEntityKey(EntityKey formKey, Datastore ds,
+			User user) throws ODKFormNotFoundException {
+
+		// TODO: consider using memcache to have form info in memory for
+		// faster response times.  Note that we already cache the 
+		// FormDefinition...
+		Form formInfoForm = null;
+		try {
+			// make sure the FormInfo table definition is loaded...
+			formInfoForm = FormInfo.getFormInfoForm(ds);
+		} catch (ODKDatastoreException e) {
+			throw new ODKFormNotFoundException(e);
+		}
+
+		if (formKey == null) {
+			return null;
+		}
+		
+		if (formKey.getKey().equals(formInfoForm.getEntityKey().getKey())) {
+			return formInfoForm;
+		}
+		
+		try {
+			Form form = new Form(formKey.getKey(), ds, user);
+			return form;
+		} catch (Exception e) {
+			throw new ODKFormNotFoundException(e);
+		}
+	}
 }

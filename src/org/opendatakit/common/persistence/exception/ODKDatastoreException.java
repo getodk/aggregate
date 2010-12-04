@@ -20,7 +20,8 @@ package org.opendatakit.common.persistence.exception;
  * Exception when a problem occurs with the datastore
  *
  * @author wbrunette@gmail.com
- *
+ * @author mitchellsundt@gmail.com
+ * 
  */
 public class ODKDatastoreException extends Exception {
 

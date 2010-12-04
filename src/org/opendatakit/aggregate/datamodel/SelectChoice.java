@@ -13,8 +13,9 @@
  */
 package org.opendatakit.aggregate.datamodel;
 
-import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
+import org.opendatakit.common.persistence.DynamicBase;
+import org.opendatakit.common.security.User;
 
 /**
  * Selection choices are stored in separate tables for each 
@@ -33,26 +34,39 @@ import org.opendatakit.common.persistence.DataField;
  * would need to account for the changing value-set of the field).
  * 
  * @author mitchellsundt@gmail.com
- *
+ * @author wbrunette@gmail.com
+ * 
  */
-public final class SelectChoice extends CommonFieldsBase {
+public final class SelectChoice extends DynamicBase {
 	private static final DataField VALUE = new DataField("VALUE", DataField.DataType.STRING, false);
 	public final DataField value;
 	
+	/**
+	 * Construct a relation prototype.
+	 * 
+	 * @param databaseSchema
+	 * @param tableName
+	 */
 	public SelectChoice(String databaseSchema, String tableName) {
-		super(databaseSchema, tableName, BaseType.DYNAMIC);
+		super(databaseSchema, tableName);
 		fieldList.add(value = new DataField(VALUE));
 	}
 	
 	/**
-	 * Copy constructor for use by {@link #getEmptyRow(Class)}   
-	 * This does not populate any fields related to the values of this row. 
-	 *
-	 * @param d
+	 * Construct an empty entity.  Only called via {@link #getEmptyRow(User)}
+	 * 
+	 * @param ref
+	 * @param user
 	 */
-	public SelectChoice(SelectChoice ref) {
-		super(ref);
+	private SelectChoice(SelectChoice ref, User user) {
+		super(ref, user);
 		value = ref.value;
+	}
+
+	// Only called from within the persistence layer.
+	@Override
+	public SelectChoice getEmptyRow(User user) {
+		return new SelectChoice(this, user);
 	}
 
 	public String getValue() {

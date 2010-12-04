@@ -39,7 +39,8 @@ import org.opendatakit.common.security.User;
  * Defines a submission blob that can be converted into a data store entity. 
  *
  * @author wbrunette@gmail.com
- *
+ * @author mitchellsundt@gmail.com
+ * 
  */
 public class SubmissionBlob {
   
@@ -127,7 +128,7 @@ public class SubmissionBlob {
 			  return null;
 		  }
 		  // by construction these should all have the same parent...
-		return dbBcbEntityList.get(0).getParentAuri();
+		return dbBcbEntityList.get(0).getDomAuri();
 	}
   
   public byte [] getBlob() {

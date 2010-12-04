@@ -20,6 +20,12 @@ import java.util.List;
 
 import org.opendatakit.common.security.Realm;
 
+/**
+ * 
+ * @author wbrunette@gmail.com
+ * @author mitchellsundt@gmail.com
+ * 
+ */
 public class RealmImpl implements Realm {
 	public static final String GAE_REALM = "Google Account";
 	

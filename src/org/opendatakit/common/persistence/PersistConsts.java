@@ -21,7 +21,8 @@ package org.opendatakit.common.persistence;
  * Constant strings used to identify properties in an entity
  *  
  * @author wbrunette@gmail.com
- *
+ * @author mitchellsundt@gmail.com
+ * 
  */
 public class PersistConsts {
   

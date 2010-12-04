@@ -21,6 +21,12 @@ import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.security.User;
 
+/**
+ * 
+ * @author wbrunette@gmail.com
+ * @author mitchellsundt@gmail.com
+ * 
+ */
 public interface FormDelete {
 
   public void createFormDeleteTask(Form form, User user) throws ODKDatastoreException, ODKFormNotFoundException, ODKExternalServiceDependencyException;

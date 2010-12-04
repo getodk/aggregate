@@ -74,26 +74,6 @@ public abstract class CommonServletBase extends HttpServlet {
     }
   }
 
-  /** 
-   * Removes HTML sensitive characters and replaces them with the 
-   * HTML versions that can be properly displayed.
-   * For example: '<' becomes '&lt;'
-   * 
-   * @param htmlString
-   *    string of HTML that will have its HTML sensitive characters removed
-   * @return
-   *    string of HTML that has been replace with proper HTML display characters
-   */
-  protected final String formatHtmlString(String htmlString) {
-    String formatted = htmlString;
-    formatted = formatted.replace(BasicConsts.LESS_THAN, HtmlConsts.LESS_THAN);
-    formatted = formatted.replace(BasicConsts.GREATER_THAN, HtmlConsts.GREATER_THAN);
-    formatted = formatted.replace(BasicConsts.NEW_LINE, HtmlConsts.LINE_BREAK);
-    formatted = formatted.replace(BasicConsts.TAB, HtmlConsts.TAB);
-    formatted = formatted.replace(BasicConsts.SPACE, HtmlConsts.SPACE);
-    return formatted;
-  }
-
   /**
    * Takes request and verifies the user has logged in. If the user has not
    * logged in generates the appropriate text for response to user
@@ -118,7 +98,7 @@ public abstract class CommonServletBase extends HttpServlet {
     }
     return true;
   }
-
+  
   /**
    * Generate HTML header string for web responses. NOTE: beginBasicHtmlResponse
    * and finishBasicHtmlResponse are a paired set of functions.
@@ -128,25 +108,47 @@ public abstract class CommonServletBase extends HttpServlet {
    * 
    * @param pageName name that should appear on the top of the page
    * @param resp http response to have the information appended to
-   * @param req http request to obtain information
+   * @param req TODO
    * @param displayLinks display links accross the top
    * @throws IOException
    */
-  protected final void beginBasicHtmlResponse(String pageName, HttpServletResponse resp,
+  protected void beginBasicHtmlResponse(String pageName, HttpServletResponse resp,
       HttpServletRequest req, boolean displayLinks) throws IOException {
+          beginBasicHtmlResponse(pageName, BasicConsts.EMPTY_STRING, resp, req, displayLinks );
+  }
+
+  /**
+   * Generate HTML header string for web responses. NOTE: beginBasicHtmlResponse
+   * and finishBasicHtmlResponse are a paired set of functions.
+   * beginBasicHtmlResponse should be called first before adding other
+   * information to the http response. When response is finished
+   * finishBasicHtmlResponse should be called.
+   * 
+   * @param pageName name that should appear on the top of the page
+   * @param headContent additional head content emitted before title
+   * @param resp http response to have the information appended to
+   * @param req TODO
+   * @param displayLinks display links accross the top
+   * @throws IOException
+   */
+  protected void beginBasicHtmlResponse(String pageName, String headContent, HttpServletResponse resp,
+              HttpServletRequest req, boolean displayLinks) throws IOException {
     resp.addHeader(HOST_HEADER, getServerURL(req));
     resp.setContentType(HtmlConsts.RESP_TYPE_HTML);
-    resp.setCharacterEncoding(HtmlConsts.ENCODE_SCHEME);
+    resp.setCharacterEncoding(HtmlConsts.UTF8_ENCODE);
     PrintWriter out = resp.getWriter();
     out.write(HtmlConsts.HTML_OPEN);
-    out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.HEAD, HtmlUtil.wrapWithHtmlTags(
+    out.write("<link rel=\"icon\" type=\"image/png\" href=\"/odk_color_sq.png\">");
+
+    out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.HEAD, headContent + HtmlUtil.wrapWithHtmlTags(
         HtmlConsts.TITLE, applicationName)));
     out.write(HtmlConsts.BODY_OPEN);
-    out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.H2, "<FONT COLOR=330066>" + applicationName) + "</FONT>");
+    out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.H2, "<FONT COLOR=330066 size=7><img src='/odk_color.png'/>" + HtmlConsts.SPACE + applicationName) + "</FONT>");
     emitPageHeader(out, displayLinks);
     out.write(HtmlConsts.LINE_BREAK + HtmlConsts.LINE_BREAK);
     out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.H1, pageName));
   }
+
 
   protected abstract void emitPageHeader(PrintWriter out,  boolean displayLinks);
   
@@ -187,7 +189,7 @@ public abstract class CommonServletBase extends HttpServlet {
     String parameter = null;
 
     if (encodedParamter != null) {
-      parameter = URLDecoder.decode(encodedParamter, HtmlConsts.ENCODE_SCHEME);
+      parameter = URLDecoder.decode(encodedParamter, HtmlConsts.UTF8_ENCODE);
     }
     
     // TODO: consider if aggregate should really be passing nulls in parameters
@@ -202,7 +204,7 @@ public abstract class CommonServletBase extends HttpServlet {
 
 
   protected final String encodeParameter(String parameter) throws UnsupportedEncodingException {
-    return URLEncoder.encode(parameter, HtmlConsts.ENCODE_SCHEME);
+    return URLEncoder.encode(parameter, HtmlConsts.UTF8_ENCODE);
   }
 
   protected final void setDownloadFileName(HttpServletResponse resp, String filename) {
@@ -217,7 +219,7 @@ public abstract class CommonServletBase extends HttpServlet {
     
     String fullPath = serverName;
     if (port != HtmlConsts.WEB_PORT) {
-	fullPath += BasicConsts.COLON + Integer.toString(port);
+      fullPath += BasicConsts.COLON + Integer.toString(port);
     }
     fullPath += path;
     return fullPath;

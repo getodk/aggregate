@@ -20,37 +20,43 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-import org.opendatakit.aggregate.constants.FormatConsts;
-import org.opendatakit.aggregate.datamodel.FormDataModel;
-import org.opendatakit.aggregate.datamodel.FormDefinition;
+import org.opendatakit.aggregate.constants.format.FormatConsts;
+import org.opendatakit.aggregate.datamodel.FormElementModel;
+import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.format.SubmissionFormatter;
-import org.opendatakit.aggregate.format.element.BasicHeaderFormatter;
-import org.opendatakit.aggregate.format.element.HtmlLinkElementFormatter;
-import org.opendatakit.aggregate.format.element.Row;
+import org.opendatakit.aggregate.format.element.LinkElementFormatter;
+import org.opendatakit.aggregate.format.header.BasicHeaderFormatter;
 import org.opendatakit.aggregate.submission.SubmissionSet;
 import org.opendatakit.common.constants.BasicConsts;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 
+/**
+ * 
+ * @author wbrunette@gmail.com
+ * @author mitchellsundt@gmail.com
+ * 
+ */
 public class CsvFormatter extends TableFormatterBase implements SubmissionFormatter {
 
-  public CsvFormatter(FormDefinition xform, String webServerUrl, PrintWriter printWriter,
-      List<FormDataModel> selectedColumnNames) {
+  public CsvFormatter(Form xform, String webServerUrl, PrintWriter printWriter,
+      List<FormElementModel> selectedColumnNames) {
     super(xform, printWriter, selectedColumnNames);
-    elemFormatter = new HtmlLinkElementFormatter(xform, webServerUrl, true, true, true);
+    elemFormatter = new LinkElementFormatter(webServerUrl, true, true, true);
     headerFormatter = new BasicHeaderFormatter(true, true, true);
   }
 
   @Override
   protected void processSubmissionSet(Collection<? extends SubmissionSet> submissions,
-		  FormDataModel rootGroup) throws ODKDatastoreException {
+		  FormElementModel rootGroup) throws ODKDatastoreException {
 
-    List<String> headers = headerFormatter.generateHeaders(formDefinition, rootGroup, propertyNames);
+    List<String> headers = headerFormatter.generateHeaders(form, rootGroup, propertyNames);
     // format headers
     appendCsvRow(headers.iterator());
 
     // format row elements
     for (SubmissionSet sub : submissions) {
-      Row row = sub.getFormattedValuesAsRow(propertyNames, elemFormatter);
+      Row row = sub.getFormattedValuesAsRow(propertyNames, elemFormatter, false);
       appendCsvRow(row.getFormattedValues().iterator());
     }
   }

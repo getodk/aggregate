@@ -20,12 +20,12 @@ package org.opendatakit.aggregate.format.form;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.opendatakit.aggregate.query.QueryFormList;
-import org.opendatakit.aggregate.servlet.FormXmlServlet;
-import org.opendatakit.aggregate.constants.FormatConsts;
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.ServletConsts;
+import org.opendatakit.aggregate.constants.format.FormTableConsts;
 import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.query.QueryFormList;
+import org.opendatakit.aggregate.servlet.FormXmlServlet;
 import org.opendatakit.common.constants.BasicConsts;
 import org.opendatakit.common.constants.HtmlConsts;
 
@@ -33,6 +33,7 @@ import org.opendatakit.common.constants.HtmlConsts;
  * Generates an xml description of forms for the servlets
  * 
  * @author wbrunette@gmail.com
+ * @author mitchellsundt@gmail.com
  * 
  */
 public class FormXmlTable {
@@ -47,22 +48,22 @@ public class FormXmlTable {
   }
 
   public String generateXmlListOfForms() {
-    String xml = FormatConsts.BEGIN_FORMS_TAG + BasicConsts.NEW_LINE;
+    String xml = FormTableConsts.BEGIN_FORMS_TAG + BasicConsts.NEW_LINE;
 
     // build XML table of form information
     for (Form form : forms.getForms()) {
       xml += generateFormXmlEntry(form.getFormId(), form.getViewableName()) + BasicConsts.NEW_LINE;
     }
-    return xml + FormatConsts.END_FORMS_TAG;
+    return xml + FormTableConsts.END_FORMS_TAG;
   }
 
   private String generateFormXmlEntry(String odkId, String formName) {
     Map<String, String> properties = new HashMap<String, String>();
-    properties.put(ServletConsts.ODK_ID, odkId);
+    properties.put(ServletConsts.FORM_ID, odkId);
     String urlLink = HtmlUtil.createLinkWithProperties(requestURL, properties);
-    return HtmlConsts.BEGIN_OPEN_TAG + FormatConsts.FORM_TAG + BasicConsts.SPACE
-        + HtmlUtil.createAttribute(FormatConsts.URL_ATTR, urlLink) + HtmlConsts.END_TAG + formName
-        + FormatConsts.END_FORM_TAG;
+    return HtmlConsts.BEGIN_OPEN_TAG + FormTableConsts.FORM_TAG + BasicConsts.SPACE
+        + HtmlUtil.createAttribute(FormTableConsts.URL_ATTR, urlLink) + HtmlConsts.END_TAG + formName
+        + FormTableConsts.END_FORM_TAG;
   }
 
 }

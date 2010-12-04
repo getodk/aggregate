@@ -23,9 +23,10 @@ import org.opendatakit.aggregate.constants.HtmlUtil;
  * HTML Constants used in ODK aggregate to create proper HTML
  * 
  * @author wbrunette@gmail.com
+ * @author mitchellsundt@gmail.com
  * 
  */
-public class HtmlConsts {
+public final class HtmlConsts {
 
 	// tag brackets
 	public static final String BEGIN_OPEN_TAG = "<";
@@ -50,7 +51,10 @@ public class HtmlConsts {
 	public static final String H2 = "h2";
 	public static final String H3 = "h3";
 	public static final String P = "p";
+	public static final String PRE = "pre";
 	public static final String B = "b";
+	public static final String UL = "ul";
+	public static final String LI = "li";
 	public static final String TABLE = "table";
 	public static final String TABLE_HEADER = "th";
 	public static final String TABLE_ROW = "tr";
@@ -112,7 +116,7 @@ public class HtmlConsts {
 	/**
 	 * Encoding scheme for servlets
 	 */
-	public static final String ENCODE_SCHEME = "UTF-8";
+	public static final String UTF8_ENCODE = "UTF-8";
 	// types of posts
 	public static final String MULTIPART_FORM_DATA = "multipart/form-data";
 	public static final String POST = "post";

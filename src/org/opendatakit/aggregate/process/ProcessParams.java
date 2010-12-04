@@ -23,24 +23,30 @@ import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.parser.MultiPartFormData;
 import org.opendatakit.aggregate.parser.MultiPartFormItem;
 
+/**
+ * 
+ * @author wbrunette@gmail.com
+ * @author mitchellsundt@gmail.com
+ * 
+ */
 public class ProcessParams {
 
-  private String odkId;
+  private String formId;
 
   private String buttonText;
   
   private List<String> keys;
   
   public ProcessParams(MultiPartFormData reqData) {
-    MultiPartFormItem odkIdData = reqData
-        .getFormDataByFieldName(ServletConsts.ODK_ID);
+    MultiPartFormItem formIdData = reqData
+        .getFormDataByFieldName(ServletConsts.FORM_ID);
     MultiPartFormItem numRecordData = reqData
         .getFormDataByFieldName(ServletConsts.PROCESS_NUM_RECORDS);
     MultiPartFormItem processTypeData = reqData
         .getFormDataByFieldName(ServletConsts.PROCESS_TYPE);
     
-    if(odkIdData != null) {
-      odkId = odkIdData.getStream().toString();
+    if(formIdData != null) {
+      formId = formIdData.getStream().toString();
     } 
     
     if(processTypeData != null) {
@@ -65,8 +71,8 @@ public class ProcessParams {
     }
   }
 
-  public String getOdkId() {
-    return odkId;
+  public String getFormId() {
+    return formId;
   }
 
   public String getButtonText() {

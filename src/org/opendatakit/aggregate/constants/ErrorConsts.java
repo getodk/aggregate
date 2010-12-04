@@ -21,15 +21,16 @@ package org.opendatakit.aggregate.constants;
  * Constants used in ODK aggregate to report errors
  *  
  * @author wbrunette@gmail.com
- *
+ * @author mitchellsundt@gmail.com
+ * 
  */
-public class ErrorConsts {
+public final class ErrorConsts {
 
   /**
    * Error message if the form with FORM ID is not found
    */
   public static final String ODKID_NOT_FOUND =
-      "Unable to find form to locate form with matching ODK id as submission";
+      "Unable to find form with matching Form Id as submission";
   /**
    * Error message for if key was not successfully part of the request
    */
@@ -70,17 +71,26 @@ public class ErrorConsts {
   "Did NOT find submission matching the provided parameters";
   public static final String NO_STRING_TO_BLOB_CONVERT = "Blob cannot be created from string";
   public static final String UNKNOWN_INTERFACE = "Some how did not get a SubmissionField or SubmissionRepeat";
+  public static final String INVALID_PARAMS = "Parameter(s) are not valid";
+  
   /**
    * Constant string identifying XML stream
    */
   public static final String INPUTSTREAM_ERROR = "Problem obtaining submissionXML input stream!";
   public static final String NO_IMAGE_EXISTS = "No Image Exists for this Entry!";
   public static final String NOT_A_KEY = "Incorrect type was stored, expecting a key for the view link";
-  public static final String TASK_PROBLEM = "PROBLEM WITH TASK";
+  public static final String TASK_PROBLEM = "PROBLEM WITH TASK: ";
 
   public static final String PERSISTENCE_LAYER_PROBLEM = "Problem persisting data or accessing data";
   public static final String UPLOAD_PROBLEM = "Upload transmission unexpectedly failed";
   
   public static final String JAVA_ROSA_PARSING_PROBLEM = "Problem with JavaRosa Parsing Form:";
   public static final String ERROR_OBTAINING_FUSION_TABLE_ID = "ERROR CREATING FUSION TABLE - DID NOT GET A TABLE NUMBER";
+
+  /**
+   * Error message if OAuth authentication failed.
+   */
+  public static final String OAUTH_ERROR = "OAuth authentication failed.";
+  public static final String OAUTH_SECURITY_ERROR_WHILE_RETRIEVING_SESSION_TOKEN = "Security error while retrieving session token.";
+  public static final String OAUTH_SERVER_REJECTED_ONE_TIME_USE_TOKEN = "Server rejected one time use token.";
 }

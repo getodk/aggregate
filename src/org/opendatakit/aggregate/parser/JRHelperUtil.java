@@ -26,7 +26,8 @@ import org.opendatakit.common.constants.HtmlConsts;
  * Contains helpful utility functions to make java rosa parsing easier
  *
  * @author wbrunette@gmail.com
- *
+ * @author mitchellsundt@gmail.com
+ * 
  */
 public class JRHelperUtil {
 

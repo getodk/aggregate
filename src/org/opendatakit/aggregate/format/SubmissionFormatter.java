@@ -17,14 +17,15 @@ package org.opendatakit.aggregate.format;
 
 import java.util.List;
 
-import org.opendatakit.aggregate.datamodel.FormDataModel;
 import org.opendatakit.aggregate.submission.Submission;
-import org.opendatakit.aggregate.submission.SubmissionSet;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 
+/**
+ * 
+ * @author wbrunette@gmail.com
+ * @author mitchellsundt@gmail.com
+ * 
+ */
 public interface SubmissionFormatter {
-  public void processSubmissions(List<Submission> submissions) throws ODKDatastoreException;
- 
-  public void processRepeatedSubmssionSets(FormDataModel repeatGroup, List<SubmissionSet> repeats) throws ODKDatastoreException;
-  
+  public void processSubmissions(List<Submission> submissions) throws ODKDatastoreException;  
 }

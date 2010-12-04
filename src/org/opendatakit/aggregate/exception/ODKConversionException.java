@@ -22,7 +22,8 @@ package org.opendatakit.aggregate.exception;
  * the data to be stored in the data store
  *
  * @author wbrunette@gmail.com
- *
+ * @author mitchellsundt@gmail.com
+ * 
  */
 public class ODKConversionException extends Exception {
 

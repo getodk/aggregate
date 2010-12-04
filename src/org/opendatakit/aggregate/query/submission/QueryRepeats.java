@@ -20,27 +20,34 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
-import org.opendatakit.aggregate.datamodel.FormDataModel;
-import org.opendatakit.aggregate.datamodel.FormDefinition;
+import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
+import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.aggregate.submission.SubmissionSet;
 import org.opendatakit.aggregate.submission.SubmissionValue;
 import org.opendatakit.aggregate.submission.type.RepeatSubmissionType;
 import org.opendatakit.common.persistence.Datastore;
+import org.opendatakit.common.persistence.DynamicBase;
 import org.opendatakit.common.persistence.EntityKey;
-import org.opendatakit.common.persistence.InstanceDataBase;
 import org.opendatakit.common.persistence.Query;
+import org.opendatakit.common.persistence.TopLevelDynamicBase;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.security.User;
 
+/**
+ * 
+ * @author wbrunette@gmail.com
+ * @author mitchellsundt@gmail.com
+ * 
+ */
 public class QueryRepeats {
 
-  private final FormDefinition formDefinition;
+  private final Form form;
 
-  private final FormDataModel repeatGroup;
+  private final FormElementModel repeatGroup;
   
   private final Datastore ds;
 
@@ -48,35 +55,35 @@ public class QueryRepeats {
   
   private final User user;
 
-  public QueryRepeats(FormDefinition formDefinition, String submissionKey,
+  public QueryRepeats(Form form, String submissionKey,
       String submissionParentKey, Datastore datastore, User user) throws ODKFormNotFoundException,
       ODKEntityNotFoundException {
     this.ds = datastore;
-    this.formDefinition = formDefinition;
+    this.form = form;
     this.parentKey = submissionParentKey;
     this.user = user;
     // TODO: kindId should be concatenation of enclosing element names...
-    this.repeatGroup = formDefinition.getElementByName(submissionKey);
+    this.repeatGroup = form.getFormDefinition().getElementByName(submissionKey);
   }
 
   public Collection<? extends SubmissionSet> getRepeatSubmissionSet() throws ODKIncompleteSubmissionData, ODKDatastoreException {
     List<SubmissionSet> submissionSets = new ArrayList<SubmissionSet>();
 
-    InstanceDataBase topLevelRelation = (InstanceDataBase) formDefinition.getTopLevelGroup().getBackingObjectPrototype();
+    TopLevelDynamicBase topLevelRelation = (TopLevelDynamicBase) form.getFormDefinition().getTopLevelGroup().getBackingObjectPrototype();
 
     // TODO: this doesn't work with PHANTOM or GROUP splits...
     
     // get the key to the top level relation where this repeat group has the given parent key
-    Query topLevelKeyQuery = ds.createQuery(repeatGroup.getBackingObjectPrototype(), user);
-    topLevelKeyQuery.addFilter(repeatGroup.getBackingObjectPrototype().parentAuri, Query.FilterOperation.EQUAL, parentKey);
+    Query topLevelKeyQuery = ds.createQuery(repeatGroup.getFormDataModel().getBackingObjectPrototype(), user);
+    topLevelKeyQuery.addFilter(((DynamicBase) repeatGroup.getFormDataModel().getBackingObjectPrototype()).parentAuri, Query.FilterOperation.EQUAL, parentKey);
     Set<EntityKey> submissionKeys = topLevelKeyQuery.executeTopLevelKeyQuery(topLevelRelation, 0);
     if ( submissionKeys.size() != 1 ) {
     	throw new IllegalStateException("unexpectedly found the same parent key in two different top-level tables!");
     }
     EntityKey k = submissionKeys.iterator().next();
     // fetch the top-level relation and recreate the entire submission...
-    InstanceDataBase d = (InstanceDataBase) ds.getEntity(k.getRelation(), k.getKey(), user);
-	Submission s = new Submission(d, formDefinition, ds, user);
+    TopLevelDynamicBase d = (TopLevelDynamicBase) ds.getEntity(k.getRelation(), k.getKey(), user);
+	Submission s = new Submission(d, form.getFormDefinition(), ds, user);
 	// find the repeat group elements.
 	List<SubmissionValue> vList = s.findElementValue(repeatGroup);
 	for ( SubmissionValue v : vList ) {
@@ -88,9 +95,5 @@ public class QueryRepeats {
 		}
 	}
     return submissionSets;
-  }
-
-  public FormDefinition getFormDefinition() {
-    return formDefinition;
   }
 }

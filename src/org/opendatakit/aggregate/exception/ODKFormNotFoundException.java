@@ -22,7 +22,8 @@ package org.opendatakit.aggregate.exception;
  * corresponding ODK ID
  *
  * @author wbrunette@gmail.com
- *
+ * @author mitchellsundt@gmail.com
+ * 
  */
 public class ODKFormNotFoundException extends Exception {
 

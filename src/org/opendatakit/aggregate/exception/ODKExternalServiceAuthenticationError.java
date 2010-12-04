@@ -22,9 +22,9 @@ package org.opendatakit.aggregate.exception;
  * getting an error from the AuthSubProxy service
  *
  * @author wbrunette@gmail.com
- *
+ * @author mitchellsundt@gmail.com
+ * 
  */
-
 public class ODKExternalServiceAuthenticationError extends Exception {
 
   /**

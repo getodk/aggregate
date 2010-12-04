@@ -15,29 +15,37 @@
  */
 package org.opendatakit.aggregate.task.gae;
 
-import org.opendatakit.aggregate.servlet.WorksheetServlet;
 import org.opendatakit.aggregate.constants.ServletConsts;
+import org.opendatakit.aggregate.constants.externalservice.ExternalServiceConsts;
+import org.opendatakit.aggregate.constants.externalservice.ExternalServiceOption;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
-import org.opendatakit.aggregate.externalservice.constants.ExternalServiceOption;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.task.AbstractWorksheetCreatorImpl;
+import org.opendatakit.aggregate.task.gae.servlet.WorksheetServlet;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.security.User;
 
-import com.google.appengine.api.labs.taskqueue.Queue;
-import com.google.appengine.api.labs.taskqueue.QueueFactory;
-import com.google.appengine.api.labs.taskqueue.TaskOptions;
+import com.google.appengine.api.taskqueue.Queue;
+import com.google.appengine.api.taskqueue.QueueFactory;
+import com.google.appengine.api.taskqueue.TaskOptions;
 
+/**
+ * 
+ * @author wbrunette@gmail.com
+ * @author mitchellsundt@gmail.com
+ * 
+ */
 public class WorksheetCreatorImpl extends AbstractWorksheetCreatorImpl {
 
   @Override
-  public final void createWorksheetTask(String appName, String serverName, String spreadsheetName, 
-      ExternalServiceOption esType, int delay, Form form, Datastore datastore, User user) throws ODKExternalServiceException {
-    TaskOptions task = TaskOptions.Builder.url("/" + WorksheetServlet.ADDR);
+  public final void createWorksheetTask(String serverName, String spreadsheetName,
+      ExternalServiceOption esType, int delay, Form form, Datastore datastore, User user)
+      throws ODKExternalServiceException {
+    TaskOptions task = TaskOptions.Builder.withUrl(ServletConsts.WEB_ROOT + WorksheetServlet.ADDR);
     task.method(TaskOptions.Method.GET);
     task.countdownMillis(delay);
-    task.param(ServletConsts.SPREADSHEET_NAME_PARAM, spreadsheetName);
-    task.param(ServletConsts.ODK_ID, form.getFormId());
+    task.param(ExternalServiceConsts.EXT_SERV_ADDRESS, spreadsheetName);
+    task.param(ServletConsts.FORM_ID, form.getFormId());
     task.param(ServletConsts.EXTERNAL_SERVICE_TYPE, esType.toString());
 
     Queue queue = QueueFactory.getDefaultQueue();

@@ -17,6 +17,12 @@ package org.opendatakit.common.security;
 
 import java.util.List;
 
+/**
+ * 
+ * @author wbrunette@gmail.com
+ * @author mitchellsundt@gmail.com
+ * 
+ */
 public interface User {
 	public static final String ANONYMOUS_USER = "mailto:anonymous";
 	public static final String ANONYMOUS_USER_NICKNAME = "anonymous user";

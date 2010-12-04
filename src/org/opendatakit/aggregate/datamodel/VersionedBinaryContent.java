@@ -13,8 +13,9 @@
  */
 package org.opendatakit.aggregate.datamodel;
 
-import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
+import org.opendatakit.common.persistence.DynamicBase;
+import org.opendatakit.common.security.User;
 
 /**
  * Binary content for a given field in a form is held in a set of tables
@@ -49,38 +50,56 @@ import org.opendatakit.common.persistence.DataField;
  * records are never updated, but Binary Content records are.
  * 
  * @author mitchellsundt@gmail.com
+ * @author wbrunette@gmail.com
  * 
  */
-public final class VersionedBinaryContent extends CommonFieldsBase {
+public final class VersionedBinaryContent extends DynamicBase {
 	private static final DataField VERSION = new DataField("VERSION",
 			DataField.DataType.URI, false);
 	private static final DataField CONTENT_TYPE = new DataField("CONTENT_TYPE",
 			DataField.DataType.STRING, false, 80L);
 	private static final DataField CONTENT_LENGTH = new DataField("CONTENT_LENGTH",
 			DataField.DataType.INTEGER, false);
+	private static final DataField CONTENT_HASH = new DataField("CONTENT_HASH", 
+			DataField.DataType.STRING, true);
 
 	public final DataField version;
 	public final DataField contentType;
 	public final DataField contentLength;
+	public final DataField contentHash;
 
+	/**
+	 * Construct a relation prototype.
+	 * 
+	 * @param databaseSchema
+	 * @param tableName
+	 */
 	public VersionedBinaryContent(String databaseSchema, String tableName) {
-		super(databaseSchema, tableName, BaseType.DYNAMIC);
+		super(databaseSchema, tableName);
 		fieldList.add(version = new DataField(VERSION));
 		fieldList.add(contentType = new DataField(CONTENT_TYPE));
 		fieldList.add(contentLength = new DataField(CONTENT_LENGTH));
+		fieldList.add(contentHash = new DataField(CONTENT_HASH));
 	}
 
 	/**
-	 * Copy constructor for use by {@link #getEmptyRow(Class)} This does not
-	 * populate any fields related to the values of this row.
+	 * Construct an empty entity.  Only called via {@link #getEmptyRow(User)}
 	 * 
-	 * @param d
+	 * @param ref
+	 * @param user
 	 */
-	public VersionedBinaryContent(VersionedBinaryContent ref) {
-		super(ref);
+	private VersionedBinaryContent(VersionedBinaryContent ref, User user) {
+		super(ref, user);
 		version = ref.version;
 		contentType = ref.contentType;
 		contentLength = ref.contentLength;
+		contentHash = ref.contentHash;
+	}
+
+	// Only called from within the persistence layer.
+	@Override
+	public VersionedBinaryContent getEmptyRow(User user) {
+		return new VersionedBinaryContent(this, user);
 	}
 
 	public String getVersion() {
@@ -109,5 +128,15 @@ public final class VersionedBinaryContent extends CommonFieldsBase {
 
 	public void setContentLength(Long value) {
 		setLongField(contentLength, value);
+	}
+
+	public String getContentHash() {
+		return getStringField(contentHash);
+	}
+
+	public void setContentHash(String value) {
+		if ( !setStringField(contentHash, value)) {
+			throw new IllegalStateException("overflow on contentHash");
+		}
 	}
 }

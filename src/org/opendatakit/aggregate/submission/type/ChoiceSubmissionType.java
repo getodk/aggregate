@@ -18,11 +18,11 @@ package org.opendatakit.aggregate.submission.type;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.opendatakit.aggregate.datamodel.FormDataModel;
+import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.datamodel.SelectChoice;
 import org.opendatakit.aggregate.exception.ODKConversionException;
+import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.format.element.ElementFormatter;
-import org.opendatakit.aggregate.format.element.Row;
 import org.opendatakit.aggregate.submission.SubmissionKeyPart;
 import org.opendatakit.aggregate.submission.SubmissionValue;
 import org.opendatakit.common.persistence.CommonFieldsBase;
@@ -35,6 +35,12 @@ import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
 import org.opendatakit.common.security.User;
 
+/**
+ * 
+ * @author wbrunette@gmail.com
+ * @author mitchellsundt@gmail.com
+ * 
+ */
 public class ChoiceSubmissionType extends SubmissionFieldBase<List<String>> {
 
 	List<String> values = new ArrayList<String>();
@@ -45,7 +51,7 @@ public class ChoiceSubmissionType extends SubmissionFieldBase<List<String>> {
 	Datastore datastore;
 	User user;
 	
-	public ChoiceSubmissionType(FormDataModel element, String parentKey, EntityKey topLevelTableKey, Datastore datastore, User user) {
+	public ChoiceSubmissionType(FormElementModel element, String parentKey, EntityKey topLevelTableKey, Datastore datastore, User user) {
 		super(element);
 		this.parentKey = parentKey;
 		this.topLevelTableKey = topLevelTableKey;
@@ -54,9 +60,9 @@ public class ChoiceSubmissionType extends SubmissionFieldBase<List<String>> {
 	}
 
 	@Override
-	public void formatValue(ElementFormatter elemFormatter, Row row)
+	public void formatValue(ElementFormatter elemFormatter, Row row, String ordinalValue)
 			throws ODKDatastoreException {
-		elemFormatter.formatChoices(values, getPropertyName(), row);
+		elemFormatter.formatChoices(values, element.getGroupQualifiedElementName()+ ordinalValue, row);
 	}
 
 	@Override
@@ -69,8 +75,8 @@ public class ChoiceSubmissionType extends SubmissionFieldBase<List<String>> {
 			String uriAssociatedRow, EntityKey topLevelTableKey,
 			Datastore datastore, User user, boolean fetchElement) throws ODKDatastoreException {
 		
-		SelectChoice sel = (SelectChoice) element.getBackingObjectPrototype();
-		Query q = datastore.createQuery(element.getBackingObjectPrototype(), user);
+		SelectChoice sel = (SelectChoice) element.getFormDataModel().getBackingObjectPrototype();
+		Query q = datastore.createQuery(element.getFormDataModel().getBackingObjectPrototype(), user);
 		q.addFilter(sel.parentAuri, FilterOperation.EQUAL, uriAssociatedRow);
 		q.addSort(sel.ordinalNumber, Direction.ASCENDING);
 
@@ -98,7 +104,7 @@ public class ChoiceSubmissionType extends SubmissionFieldBase<List<String>> {
 			String[] valueArray = concatenatedValues.split(" ");
 			int i = 1;
 			for ( String v : valueArray ) {
-				SelectChoice c = (SelectChoice) datastore.createEntityUsingRelation(element.getBackingObjectPrototype(), topLevelTableKey, user);
+				SelectChoice c = (SelectChoice) datastore.createEntityUsingRelation(element.getFormDataModel().getBackingObjectPrototype(), topLevelTableKey, user);
 				c.setParentAuri(parentKey);
 				c.setOrdinalNumber(Long.valueOf(i++));
 				c.setValue(v);

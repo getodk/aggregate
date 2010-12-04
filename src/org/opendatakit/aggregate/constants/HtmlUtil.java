@@ -21,7 +21,7 @@ import java.io.IOException;
 import java.util.List;
 
 import org.apache.commons.lang.StringEscapeUtils;
-import org.opendatakit.aggregate.format.element.Row;
+import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.common.constants.BasicConsts;
 import org.opendatakit.common.constants.HtmlConsts;
 
@@ -30,9 +30,10 @@ import org.opendatakit.common.constants.HtmlConsts;
  * visual outputs
  * 
  * @author wbrunette@gmail.com
+ * @author mitchellsundt@gmail.com
  * 
  */
-public class HtmlUtil extends org.opendatakit.common.constants.HtmlUtil {
+public final class HtmlUtil extends org.opendatakit.common.constants.HtmlUtil {
 
   private static final String LOST_FORM_RE_ENCODING = "We lost the form somehow! Please report the bug!";
 
@@ -78,7 +79,8 @@ public class HtmlUtil extends org.opendatakit.common.constants.HtmlUtil {
       html.append(HtmlConsts.TABLE_ROW_OPEN);
       if (addCheckboxes) {
         html.append(wrapWithHtmlTags(HtmlConsts.TABLE_DATA, createInput(
-            HtmlConsts.INPUT_TYPE_CHECKBOX, ServletConsts.PROCESS_RECORD_PREFIX + recordNum, row.getEntityKey().getKey())));
+            HtmlConsts.INPUT_TYPE_CHECKBOX, ServletConsts.PROCESS_RECORD_PREFIX + recordNum, 
+            		row.getSubmissionKey().toString())));
       }
       for (Object item : row.getFormattedValues()) {
         if(item != null) {

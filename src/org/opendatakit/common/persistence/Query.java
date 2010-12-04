@@ -20,7 +20,10 @@ import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 
 /**
  * The Query interface defines how persistence implementations should create query functionality.
- *
+ * 
+ * @author wbrunette@gmail.com
+ * @author mitchellsundt@gmail.com
+ * 
  */
 public interface Query {
   
@@ -61,6 +64,15 @@ public interface Query {
    * @param value the value to filter with
    */
   public void addFilter(DataField attributeName, FilterOperation op, Object value);
+  
+  /**
+   * Adds a filter to the query using the given attribute name, filtered by the values
+   * IN the value set.
+   * 
+   * @param attributeName
+   * @param valueSet
+   */
+  public void addValueSetFilter(DataField attributeName, Set<?> valueSet );
   
   /**
    * Returns a list of entities which are the results of executing the query.

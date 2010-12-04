@@ -18,6 +18,7 @@
 package org.opendatakit.aggregate.servlet;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -26,9 +27,10 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.opendatakit.aggregate.ContextFactory;
+import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.ErrorConsts;
+import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.ServletConsts;
-import org.opendatakit.aggregate.datamodel.FormDefinition;
 import org.opendatakit.aggregate.exception.ODKConversionException;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
@@ -40,6 +42,7 @@ import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.parser.MultiPartFormData;
 import org.opendatakit.aggregate.parser.SubmissionParser;
 import org.opendatakit.aggregate.submission.Submission;
+import org.opendatakit.aggregate.task.UploadSubmissions;
 import org.opendatakit.common.constants.HtmlConsts;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
@@ -51,9 +54,15 @@ import org.opendatakit.common.security.UserService;
  * Servlet to process a submission from a form
  * 
  * @author wbrunette@gmail.com
+ * @author mitchellsundt@gmail.com
  * 
  */
 public class SubmissionServlet extends ServletUtilBase {
+
+  private static final String XML_FILE_DESC = "XML Submission File:";
+
+  private static final String ATTACHMENT_FILE_DESC = "Data File(s) that are Part of the Submission (Pictures, Video, etc):";
+
   /**
    * Serial number for serialization
    */
@@ -64,6 +73,10 @@ public class SubmissionServlet extends ServletUtilBase {
    */
   public static final String ADDR = "submission";
 
+  private static final String TITLE = "Submission Upload";
+
+  private static final String DATAFILE = "datafile";
+
   /**
    * Handler for HTTP Get request that processes a form submission
    * 
@@ -72,40 +85,28 @@ public class SubmissionServlet extends ServletUtilBase {
    */
   @Override
   public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-    resp.setContentType(HtmlConsts.RESP_TYPE_XML);
+    PrintWriter out = resp.getWriter();
 
-    UserService userService = (UserService) ContextFactory.get().getBean(
-        ServletConsts.USER_BEAN);
-    User user = userService.getCurrentUser();
-    
-    // get parameter
-    String odkId = getParameter(req, ServletConsts.ODK_ID);
-    if (odkId == null) {
-      errorMissingKeyParam(resp);
-      return;
-    }
+    beginBasicHtmlResponse(TITLE, resp, req, true); // header info
+    out.write(HtmlUtil.createFormBeginTag(ADDR, HtmlConsts.MULTIPART_FORM_DATA, HtmlConsts.POST));
+    out.write(XML_FILE_DESC + HtmlConsts.LINE_BREAK);
+    out.write(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_FILE, ServletConsts.XML_SUBMISSION_FILE,
+        null));
+    out.write(HtmlConsts.LINE_BREAK + HtmlConsts.LINE_BREAK);
+    out.write(ATTACHMENT_FILE_DESC + HtmlConsts.LINE_BREAK);
+    out.write(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_FILE, DATAFILE, null));
+    out.write(HtmlConsts.LINE_BREAK);
+    out.write(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_FILE, DATAFILE, null));
+    out.write(HtmlConsts.LINE_BREAK);
+    out.write(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_FILE, DATAFILE, null));
+    out.write(HtmlConsts.LINE_BREAK);
+    out.write(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_FILE, DATAFILE, null));
+    out.write(HtmlConsts.LINE_BREAK + HtmlConsts.LINE_BREAK);
+    out.write(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_SUBMIT, null, "Upload"));
+    out.write(HtmlConsts.FORM_CLOSE);
 
-    // get form
-    Datastore ds = (Datastore) ContextFactory.get().getBean(ServletConsts.DATASTORE_BEAN);
-    Form form;
-    String originalText;
-    try {
-      form = Form.retrieveForm(odkId, ds, user, userService.getCurrentRealm());
-      originalText = form.getFormXml();
-    } catch (ODKFormNotFoundException e) {
-      odkIdNotFoundError(resp);
-      return;
-    } catch (ODKDatastoreException e) {
-    	e.printStackTrace();
-    	odkIdNotFoundError(resp);
-    	return;
-    }
+    finishBasicHtmlResponse(resp);
 
-    if (form != null) {
-      resp.getWriter().print(originalText);
-    } else {
-      odkIdNotFoundError(resp);
-    }
   }
 
   /**
@@ -120,22 +121,19 @@ public class SubmissionServlet extends ServletUtilBase {
   public void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
     resp.setContentType(HtmlConsts.RESP_TYPE_HTML);
 
-    UserService userService = (UserService) ContextFactory.get().getBean(
-        ServletConsts.USER_BEAN);
+    UserService userService = (UserService) ContextFactory.get().getBean(BeanDefs.USER_BEAN);
     User user = userService.getCurrentUser();
 
-    Datastore ds = (Datastore) ContextFactory.get().getBean(ServletConsts.DATASTORE_BEAN);
+    Datastore ds = (Datastore) ContextFactory.get().getBean(BeanDefs.DATASTORE_BEAN);
 
-    String reqUrl = req.getRequestURL().toString();
-    
     try {
       SubmissionParser submissionParser = null;
       if (ServletFileUpload.isMultipartContent(req)) {
-        submissionParser = new SubmissionParser(new MultiPartFormData(req), ds, user, userService.getCurrentRealm());
+        submissionParser = new SubmissionParser(new MultiPartFormData(req), ds, user);
       } else {
         // TODO: check that it is the proper types we can deal with
         // XML received
-        submissionParser = new SubmissionParser(req.getInputStream(), ds, user, userService.getCurrentRealm());
+        submissionParser = new SubmissionParser(req.getInputStream(), ds, user);
       }
 
       if (submissionParser == null) {
@@ -143,49 +141,45 @@ public class SubmissionServlet extends ServletUtilBase {
         return;
       }
 
-      FormDefinition formDefinition = submissionParser.getFormDefinition();
-      String appName = this.getServletContext().getInitParameter("application_name");
+      // TODO: mitch are we assuming the submissionParser always persists?
+      Form form = Form.retrieveForm(submissionParser.getOdkId(), ds, user);
       Submission submission = submissionParser.getSubmission();
-      
-      // TODO: Waylon -- I think you're moving this to a background task.
-      // Is this still needed here?  If so, 
-      Form form = Form.retrieveForm(formDefinition.getFormId(), ds, user, userService.getCurrentRealm());
-      List<ExternalService> tmp = FormServiceCursor.getExternalServicesForForm(form.getKey(), 
-				formDefinition, ds, user);
+
       // send information to remote servers that need to be notified
+      List<ExternalService> tmp = FormServiceCursor.getExternalServicesForForm(form,
+          getServerURL(req), ds, user);
+      UploadSubmissions uploadTask = (UploadSubmissions) ContextFactory.get().getBean(
+          BeanDefs.UPLOAD_TASK_BEAN);
       for (ExternalService rs : tmp) {
-        rs.sendSubmission(submission);
+        uploadTask.createFormUploadTask(rs.getFormServiceCursor(), user);
       }
+
+      resp.setStatus(HttpServletResponse.SC_CREATED);
     } catch (ODKFormNotFoundException e) {
       odkIdNotFoundError(resp);
     } catch (ODKParseException e) {
       resp.sendError(HttpServletResponse.SC_BAD_REQUEST, ErrorConsts.PARSING_PROBLEM);
     } catch (ODKEntityPersistException e) {
+      e.printStackTrace();
+      resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ErrorConsts.PARSING_PROBLEM);
+    } catch (ODKExternalServiceException e) {
+      e.printStackTrace();
+    } catch (ODKIncompleteSubmissionData e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
       resp.sendError(HttpServletResponse.SC_BAD_REQUEST, ErrorConsts.PARSING_PROBLEM);
-    } catch (ODKExternalServiceException e) {
+    } catch (ODKConversionException e) {
       // TODO Auto-generated catch block
-      e.printStackTrace();      
-      // TODO: is this the right error?
-      resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ErrorConsts.TASK_PROBLEM);
-    } catch (ODKIncompleteSubmissionData e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-	      resp.sendError(HttpServletResponse.SC_BAD_REQUEST, ErrorConsts.PARSING_PROBLEM);
-	} catch (ODKConversionException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-	      resp.sendError(HttpServletResponse.SC_BAD_REQUEST, ErrorConsts.PARSING_PROBLEM);
-	} catch (ODKDatastoreException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-	      resp.sendError(HttpServletResponse.SC_BAD_REQUEST, ErrorConsts.PARSING_PROBLEM);
-	} catch (FileUploadException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-	      resp.sendError(HttpServletResponse.SC_BAD_REQUEST, ErrorConsts.PARSING_PROBLEM);
-	}
-    resp.setHeader("Location", reqUrl);
+      e.printStackTrace();
+      resp.sendError(HttpServletResponse.SC_BAD_REQUEST, ErrorConsts.PARSING_PROBLEM);
+    } catch (ODKDatastoreException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+      resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ErrorConsts.PARSING_PROBLEM);
+    } catch (FileUploadException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+      resp.sendError(HttpServletResponse.SC_BAD_REQUEST, ErrorConsts.PARSING_PROBLEM);
+    }
   }
 }

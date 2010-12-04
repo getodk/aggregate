@@ -22,9 +22,9 @@ import java.util.logging.Logger;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.Datastore;
-import org.opendatakit.common.persistence.EntityKey;
-import org.opendatakit.common.persistence.InstanceDataBase;
+import org.opendatakit.common.persistence.DynamicBase;
 import org.opendatakit.common.persistence.PersistConsts;
+import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.security.User;
 
 /**
@@ -62,14 +62,22 @@ import org.opendatakit.common.security.User;
  * (e.g., lat, long, alt, acc). 
  * 
  * @author mitchellsundt@gmail.com
- *
+ * @author wbrunette@gmail.com
+ * 
  */
-public final class FormDataModel extends InstanceDataBase {
+public final class FormDataModel extends DynamicBase {
+	// special values for bootstrapping
+	public static final String URI_FORM_ID_VALUE_FORM_INFO = "aggregate.opendatakit.org:FormInfo"; 
+	public static final String URI_FORM_ID_VALUE_FORM_INFO_FILESET = "aggregate.opendatakit.org:FormInfoFileset"; 
+	public static final String URI_FORM_ID_VALUE_FORM_INFO_DESCRIPTION = "aggregate.opendatakit.org:FormInfoDescription"; 
+	public static final String URI_FORM_ID_VALUE_FORM_INFO_SUBMISSION = "aggregate.opendatakit.org:FormInfoSubmission"; 
+	public static final String URI_FORM_ID_VALUE_FORM_INFO_SUBMISSION_ASSOCIATION = "aggregate.opendatakit.org:FormInfoSubmissionAssociation"; 
+	
+	public static final String URI_FORM_ID_VALUE_FORM_DATA_MODEL = "aggregate.opendatakit.org:FormDataModel"; 
+	private static final String FORM_DATA_MODEL_DEFINITION_URI = "aggregate.opendatakit.org:FormDataModel-Definition";
 
 	/* xform element types */
 	public static enum ElementType {
-		// top level tag -- holds the form name
-		FORM_NAME,
 		// xform tag types
 		STRING,
 		JRDATETIME,
@@ -100,20 +108,15 @@ public final class FormDataModel extends InstanceDataBase {
 	public static final int GEOPOINT_ACCURACY_ORDINAL_NUMBER = 4;
 	
 	private static final String TABLE_NAME = "_form_data_model";
-	private static final String FORM_DATA_MODEL_REF_TEXT = "_form_data_model_ref_text";
-	private static final String FORM_DATA_MODEL_LONG_STRING_REF_TEXT = "_form_data_model_long_string_ref_text";
 
-	private static final DataField URI_FORM_ID = new DataField("URI_FORM_ID", DataField.DataType.URI, false, PersistConsts.MAX_SIMPLE_STRING_LEN);
+	private static final DataField URI_SUBMISSION_DATA_MODEL = new DataField("URI_SUBMISSION_DATA_MODEL", DataField.DataType.STRING, false, PersistConsts.URI_STRING_LEN);
 	private static final DataField ELEMENT_TYPE = new DataField("ELEMENT_TYPE", DataField.DataType.STRING, false, PersistConsts.URI_STRING_LEN);
 	private static final DataField ELEMENT_NAME = new DataField("ELEMENT_NAME", DataField.DataType.STRING, true, PersistConsts.MAX_SIMPLE_STRING_LEN);
 	private static final DataField PERSIST_AS_COLUMN_NAME = new DataField("PERSIST_AS_COLUMN_NAME", DataField.DataType.STRING, true, PersistConsts.URI_STRING_LEN);
 	private static final DataField PERSIST_AS_TABLE_NAME = new DataField("PERSIST_AS_TABLE_NAME", DataField.DataType.STRING, true, PersistConsts.URI_STRING_LEN);
 	private static final DataField PERSIST_AS_SCHEMA_NAME = new DataField("PERSIST_AS_SCHEMA_NAME", DataField.DataType.STRING, true, PersistConsts.URI_STRING_LEN);
 
-	// special values for bootstrapping
-	public static final String URI_FORM_ID_VALUE_FORM_DATA_MODEL = "aggregate.opendatakit.org:FormElement"; 
-
-	public final DataField uriFormId;
+	public final DataField uriSubmissionDataModel;
 	public final DataField elementType;
 	public final DataField elementName;
 	public final DataField persistAsColumn;
@@ -139,33 +142,41 @@ public final class FormDataModel extends InstanceDataBase {
 	 */
 	FormDataModel(String schemaName) {
 		super(schemaName, TABLE_NAME);
-		fieldList.add(uriFormId = new DataField(URI_FORM_ID));
+		fieldList.add(uriSubmissionDataModel = new DataField(URI_SUBMISSION_DATA_MODEL));
 		fieldList.add(elementType = new DataField(ELEMENT_TYPE));
 		fieldList.add(elementName = new DataField(ELEMENT_NAME));
 		fieldList.add(persistAsColumn = new DataField(PERSIST_AS_COLUMN_NAME));
 		fieldList.add(persistAsTable = new DataField(PERSIST_AS_TABLE_NAME));
 		fieldList.add(persistAsSchema = new DataField(PERSIST_AS_SCHEMA_NAME));
+
+		fieldValueMap.put(primaryKey, FormDataModel.URI_FORM_ID_VALUE_FORM_DATA_MODEL);
 	}
 
 	/**
-	 * Copy constructor for use by {@link #getEmptyRow(Class)}   
-	 * This does not populate any fields related to the values of this row. 
-	 *
-	 * @param d
+	 * Construct an empty entity.  Only called via {@link #getEmptyRow(User)}
+	 * 
+	 * @param ref
+	 * @param user
 	 */
-	public FormDataModel(FormDataModel d) {
-		super(d);
+	private FormDataModel(FormDataModel ref, User user) {
+		super(ref, user);
 
-		uriFormId = d.uriFormId;
-		elementType = d.elementType;
-		elementName = d.elementName;
-		persistAsColumn = d.persistAsColumn;
-		persistAsTable = d.persistAsTable;
-		persistAsSchema = d.persistAsSchema;
+		uriSubmissionDataModel = ref.uriSubmissionDataModel;
+		elementType = ref.elementType;
+		elementName = ref.elementName;
+		persistAsColumn = ref.persistAsColumn;
+		persistAsTable = ref.persistAsTable;
+		persistAsSchema = ref.persistAsSchema;
+	}
+
+	// Only called from within the persistence layer.
+	@Override
+	public FormDataModel getEmptyRow(User user) {
+		return new FormDataModel(this, user);
 	}
 
 	public final String getUriFormId() {
-		return getStringField(uriFormId);
+		return getStringField(uriSubmissionDataModel);
 	}
 
 	public final ElementType getElementType() {
@@ -195,6 +206,22 @@ public final class FormDataModel extends InstanceDataBase {
 	 * @return the colon-separated qualified name for this element.
 	 */
 	public final String getGroupQualifiedElementName() {
+		String groupPrefix;
+		// find our "real" parent (one that is not a phantom)
+		FormDataModel pReal = getParent();
+		while ( pReal != null && pReal.getElementType() == ElementType.PHANTOM ) {
+			pReal = pReal.getParent();
+		}
+		if ( pReal == null ) {
+			groupPrefix = "";
+		} else if ( pReal.getElementType() == ElementType.REPEAT ) {
+			groupPrefix = "";
+		} else if ( pReal.getParent() == null ) {
+			groupPrefix = "";
+		} else {
+			groupPrefix = pReal.getGroupQualifiedElementName() + ":";
+		}
+		
 		switch ( getElementType() ) {
 		// xform tag types
 		case STRING:
@@ -208,22 +235,13 @@ public final class FormDataModel extends InstanceDataBase {
 		case BOOLEAN:
 		case SELECT1: // identifies SelectChoice table
 		case SELECTN: // identifies SelectChoice table
-			return getParent().getGroupQualifiedElementName() + ":" + getElementName();
-		case PHANTOM: // if a relation needs to be divided in order to fit
-			return getParent().getGroupQualifiedElementName();
 		case REPEAT:
-			return "";
 		case GROUP:
-			if ( getParent().getElementType() == ElementType.FORM_NAME ) {
-				return "";
-			} else {
-				return getParent().getGroupQualifiedElementName() + ":" + getElementName();
-			}
 		case VERSIONED_BINARY: // association between BINARY and VERSIONED_BINARY_CONTENT_REF_BLOB
 			// this shares the element name of the binary content record, so leave it...
+			return groupPrefix + getElementName();
+		case PHANTOM: // if a relation needs to be divided in order to fit
 			return getParent().getGroupQualifiedElementName();
-			// top level tag -- holds the form name
-		case FORM_NAME:
 		case VERSIONED_BINARY_CONTENT_REF_BLOB: // association between VERSIONED_BINARY and REF_BLOB
 		case REF_BLOB: // the table of the actual byte[] data (xxxBLOB)
 		case LONG_STRING_REF_TEXT: // association between any field and REF_TEXT
@@ -359,132 +377,17 @@ public final class FormDataModel extends InstanceDataBase {
 		return false;
 	}
 
-	public static final List<FormDataModel> constructFormDataModel(Datastore ds, FormDataModel fdm, String schemaName, User user) {
-
-		List<FormDataModel> idDefn = new ArrayList<FormDataModel>();
-		
-		FormDataModel d;
-		
-		// data record...
-		d = ds.createEntityUsingRelation(fdm, null, user);
-		idDefn.add(d);
-		final String topLevelURI = d.getUri();
-		d.setLongField(fdm.ordinalNumber, 1L);
-		d.setStringField(fdm.parentAuri, null);
-		d.setStringField(fdm.uriFormId, URI_FORM_ID_VALUE_FORM_DATA_MODEL);
-		d.setStringField(fdm.elementName, "FormDataModel");
-		d.setStringField(fdm.elementType, FormDataModel.ElementType.FORM_NAME.toString());
-		d.setStringField(fdm.persistAsColumn, null);
-		d.setStringField(fdm.persistAsTable, null);
-		d.setStringField(fdm.persistAsSchema, fdm.getSchemaName());
-		final EntityKey k = new EntityKey( d, d.getUri());
-
-		// data record...
-		d = ds.createEntityUsingRelation(fdm, k, user);
-		idDefn.add(d);
-		final String groupURI = d.getUri();
-		d.setLongField(fdm.ordinalNumber, 1L);
-		d.setStringField(fdm.parentAuri, topLevelURI);
-		d.setStringField(fdm.uriFormId, URI_FORM_ID_VALUE_FORM_DATA_MODEL);
-		d.setStringField(fdm.elementName, "data");
-		d.setStringField(fdm.elementType, FormDataModel.ElementType.GROUP.toString());
-		d.setStringField(fdm.persistAsColumn, null);
-		d.setStringField(fdm.persistAsTable, fdm.getTableName());
-		d.setStringField(fdm.persistAsSchema, fdm.getSchemaName());
-		
-		// uriFormId record...
-		d = ds.createEntityUsingRelation(fdm, k, user);
-		idDefn.add(d);
-		d.setLongField(fdm.ordinalNumber, 1L);
-		d.setStringField(fdm.parentAuri, groupURI);
-		d.setStringField(fdm.uriFormId, URI_FORM_ID_VALUE_FORM_DATA_MODEL);
-		d.setStringField(fdm.elementName, "uriFormId");
-		d.setStringField(fdm.elementType, FormDataModel.ElementType.STRING.toString());
-		d.setStringField(fdm.persistAsColumn, fdm.uriFormId.getName());
-		d.setStringField(fdm.persistAsTable, fdm.getTableName());
-		d.setStringField(fdm.persistAsSchema, fdm.getSchemaName());
-		// elementName record...
-		d = ds.createEntityUsingRelation(fdm, k, user);
-		idDefn.add(d);
-		d.setLongField(fdm.ordinalNumber, 2L);
-		d.setStringField(fdm.parentAuri, groupURI);
-		d.setStringField(fdm.uriFormId, URI_FORM_ID_VALUE_FORM_DATA_MODEL);
-		d.setStringField(fdm.elementName, "elementName");
-		d.setStringField(fdm.elementType, FormDataModel.ElementType.STRING.toString());
-		d.setStringField(fdm.persistAsColumn, fdm.elementName.getName());
-		d.setStringField(fdm.persistAsTable, fdm.getTableName());
-		d.setStringField(fdm.persistAsSchema, fdm.getSchemaName());
-		// elementType record...
-		d = ds.createEntityUsingRelation(fdm, k, user);
-		idDefn.add(d);
-		d.setLongField(fdm.ordinalNumber, 3L);
-		d.setStringField(fdm.parentAuri, groupURI);
-		d.setStringField(fdm.uriFormId, URI_FORM_ID_VALUE_FORM_DATA_MODEL);
-		d.setStringField(fdm.elementName, "elementType");
-		d.setStringField(fdm.elementType, FormDataModel.ElementType.STRING.toString());
-		d.setStringField(fdm.persistAsColumn, fdm.elementType.getName());
-		d.setStringField(fdm.persistAsTable, fdm.getTableName());
-		d.setStringField(fdm.persistAsSchema, fdm.getSchemaName());
-		// persistAsColumn record...
-		d = ds.createEntityUsingRelation(fdm, k, user);
-		idDefn.add(d);
-		d.setLongField(fdm.ordinalNumber, 4L);
-		d.setStringField(fdm.parentAuri, groupURI);
-		d.setStringField(fdm.uriFormId, URI_FORM_ID_VALUE_FORM_DATA_MODEL);
-		d.setStringField(fdm.elementName, "persistAsColumn");
-		d.setStringField(fdm.elementType, FormDataModel.ElementType.STRING.toString());
-		d.setStringField(fdm.persistAsColumn, fdm.persistAsColumn.getName());
-		d.setStringField(fdm.persistAsTable, fdm.getTableName());
-		d.setStringField(fdm.persistAsSchema, fdm.getSchemaName());
-		// persistAsTable record...
-		d = ds.createEntityUsingRelation(fdm, k, user);
-		idDefn.add(d);
-		d.setLongField(fdm.ordinalNumber, 5L);
-		d.setStringField(fdm.parentAuri, groupURI);
-		d.setStringField(fdm.uriFormId, URI_FORM_ID_VALUE_FORM_DATA_MODEL);
-		d.setStringField(fdm.elementName, "persistAsTable");
-		d.setStringField(fdm.elementType, FormDataModel.ElementType.STRING.toString());
-		d.setStringField(fdm.persistAsColumn, fdm.persistAsSchema.getName());
-		d.setStringField(fdm.persistAsTable, fdm.getTableName());
-		d.setStringField(fdm.persistAsSchema, fdm.getSchemaName());
-		// persistAsSchema record...
-		d = ds.createEntityUsingRelation(fdm, k, user);
-		idDefn.add(d);
-		d.setLongField(fdm.ordinalNumber, 6L);
-		d.setStringField(fdm.parentAuri, groupURI);
-		d.setStringField(fdm.uriFormId, URI_FORM_ID_VALUE_FORM_DATA_MODEL);
-		d.setStringField(fdm.elementName, "persistAsSchema");
-		d.setStringField(fdm.elementType, FormDataModel.ElementType.STRING.toString());
-		d.setStringField(fdm.persistAsColumn, fdm.persistAsSchema.getName());
-		d.setStringField(fdm.persistAsTable, fdm.getTableName());
-		d.setStringField(fdm.persistAsSchema, fdm.getSchemaName());
-
-		// record for long string ref text...
-		d = ds.createEntityUsingRelation(fdm, k, user);
-		idDefn.add(d);
-		final String lst = d.getUri();
-		d.setLongField(fdm.ordinalNumber, 2L);
-		d.setStringField(fdm.parentAuri, topLevelURI);
-		d.setStringField(fdm.uriFormId, URI_FORM_ID_VALUE_FORM_DATA_MODEL);
-		d.setStringField(fdm.elementName, null);
-		d.setStringField(fdm.elementType, FormDataModel.ElementType.LONG_STRING_REF_TEXT.toString());
-		d.setStringField(fdm.persistAsColumn, null);
-		d.setStringField(fdm.persistAsTable, FORM_DATA_MODEL_LONG_STRING_REF_TEXT);
-		d.setStringField(fdm.persistAsSchema, fdm.getSchemaName());
-
-		// record for ref text...
-		d = ds.createEntityUsingRelation(fdm, k, user);
-		idDefn.add(d);
-		d.setLongField(fdm.ordinalNumber, 1L);
-		d.setStringField(fdm.parentAuri, lst);
-		d.setStringField(fdm.uriFormId, URI_FORM_ID_VALUE_FORM_DATA_MODEL);
-		d.setStringField(fdm.elementName, null);
-		d.setStringField(fdm.elementType, FormDataModel.ElementType.REF_TEXT.toString());
-		d.setStringField(fdm.persistAsColumn, null);
-		d.setStringField(fdm.persistAsTable, FORM_DATA_MODEL_REF_TEXT);
-		d.setStringField(fdm.persistAsSchema, fdm.getSchemaName());
-
-		return idDefn;
+	private static FormDataModel relation = null;
+	
+	public static final FormDataModel createRelation(Datastore datastore, User user) throws ODKDatastoreException {
+		if ( relation == null ) {
+			FormDataModel relationPrototype;
+			relationPrototype = new FormDataModel(datastore.getDefaultSchemaName());
+			datastore.createRelation(relationPrototype, user); // may throw exception...
+		    // at this point, the prototype has become fully populated
+			relation = relationPrototype; // set static variable only upon success...
+		}
+		return relation;
 	}
 	
 	public void print(PrintStream out) {

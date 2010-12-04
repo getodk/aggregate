@@ -24,14 +24,15 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.opendatakit.aggregate.ContextFactory;
+import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.ErrorConsts;
 import org.opendatakit.aggregate.constants.ServletConsts;
-import org.opendatakit.aggregate.datamodel.FormDefinition;
+import org.opendatakit.aggregate.constants.externalservice.ExternalServiceOption;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
 import org.opendatakit.aggregate.externalservice.JsonServer;
-import org.opendatakit.aggregate.externalservice.constants.ExternalServiceOption;
+import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.query.submission.QueryByDate;
 import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.common.constants.BasicConsts;
@@ -41,6 +42,12 @@ import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.security.UserService;
 
+/**
+ * 
+ * @author wbrunette@gmail.com
+ * @author mitchellsundt@gmail.com
+ * 
+ */
 public class JsonServlet extends ServletUtilBase {
   /**
    * Serial number for serialization
@@ -67,14 +74,14 @@ public class JsonServlet extends ServletUtilBase {
     }
 
     UserService userService = (UserService) ContextFactory.get().getBean(
-        ServletConsts.USER_BEAN);
+        BeanDefs.USER_BEAN);
     User user = userService.getCurrentUser();
 
     // TODO: rename params so not spreadsheet
 
     // get parameter
     String serverUrl = "bogusUrl"; // TODO: hook this up...
-    String formId = getParameter(req, ServletConsts.ODK_ID);
+    String formId = getParameter(req, ServletConsts.FORM_ID);
     String esTypeString = getParameter(req, ServletConsts.EXTERNAL_SERVICE_TYPE);
     
     ExternalServiceOption esType = ExternalServiceOption.valueOf(esTypeString);
@@ -84,16 +91,15 @@ public class JsonServlet extends ServletUtilBase {
       return;
     }
 
-    Datastore ds = (Datastore) ContextFactory.get().getBean(ServletConsts.DATASTORE_BEAN);
-    FormDefinition fd;
+    Datastore ds = (Datastore) ContextFactory.get().getBean(BeanDefs.DATASTORE_BEAN);
+    Form form;
     JsonServer jsonServer;
     try {
-      fd = FormDefinition.getFormDefinition(formId, ds, user);
-      if ( fd == null ) {
-    	  odkIdNotFoundError(resp);
-    	  return;
-      }
-      jsonServer = new JsonServer(fd, serverUrl, esType, ds, user, userService.getCurrentRealm());
+      form = Form.retrieveForm(formId, ds, user);
+      jsonServer = new JsonServer(form, serverUrl, esType, ds, user);
+    } catch (ODKFormNotFoundException e) {
+  	  odkIdNotFoundError(resp);
+	  return;
     } catch (ODKExternalServiceException e) {
       e.printStackTrace();
       return;
@@ -110,7 +116,7 @@ public class JsonServlet extends ServletUtilBase {
     if (!esType.equals(ExternalServiceOption.STREAM_ONLY)) {
 
       try {
-    	QueryByDate query = new QueryByDate(fd, BasicConsts.EPOCH, false,
+    	QueryByDate query = new QueryByDate(form, BasicConsts.EPOCH, false,
                   ServletConsts.FETCH_LIMIT, ds, user);
 
         List<Submission> submissions = query.getResultSubmissions();

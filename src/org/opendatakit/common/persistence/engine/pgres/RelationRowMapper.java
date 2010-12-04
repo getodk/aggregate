@@ -22,6 +22,12 @@ import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.security.User;
 import org.springframework.jdbc.core.RowMapper;
 
+/**
+ * 
+ * @author wbrunette@gmail.com
+ * @author mitchellsundt@gmail.com
+ * 
+ */
 public class RelationRowMapper implements RowMapper {
 
 	private final CommonFieldsBase relation;
@@ -36,7 +42,12 @@ public class RelationRowMapper implements RowMapper {
 	public Object mapRow(ResultSet rs, int rowNum) throws SQLException {
 		
 		// TODO: do a better job creating the entity based upon odkId...
-		CommonFieldsBase row = relation.getEmptyRow(relation.getClass(), user);
+		CommonFieldsBase row;
+		try {
+			row = relation.getEmptyRow(user);
+		} catch ( Exception e ) {
+			throw new IllegalStateException("failed to create empty row", e);
+		}
 
 		for ( DataField f : relation.getFieldList() ) {
 			switch ( f.getDataType() ) {

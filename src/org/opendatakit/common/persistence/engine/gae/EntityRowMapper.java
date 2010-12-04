@@ -18,6 +18,12 @@ import java.sql.SQLException;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.security.User;
 
+/**
+ * 
+ * @author wbrunette@gmail.com
+ * @author mitchellsundt@gmail.com
+ * 
+ */
 public class EntityRowMapper {
 
 	private final CommonFieldsBase relation;
@@ -30,7 +36,12 @@ public class EntityRowMapper {
 	
 	public Object mapRow(DatastoreImpl ds, com.google.appengine.api.datastore.Entity rs, int rowNum) throws SQLException {
 		
-		CommonFieldsBase row = relation.getEmptyRow(relation.getClass(), user);
+		CommonFieldsBase row;
+		try {
+			row = relation.getEmptyRow(user);
+		} catch (Exception e ) {
+			throw new IllegalStateException("failed to create empty row", e);
+		}
 		ds.updateRowFromGae(row, rs);
 		return row;
 	}

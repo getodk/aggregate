@@ -24,16 +24,24 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.opendatakit.aggregate.ContextFactory;
+import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.ServletConsts;
-import org.opendatakit.aggregate.datamodel.FormDataModel;
-import org.opendatakit.aggregate.datamodel.FormDefinition;
+import org.opendatakit.aggregate.datamodel.FormElementModel;
+import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
+import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.common.constants.HtmlConsts;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.security.UserService;
 
+/**
+ * 
+ * @author wbrunette@gmail.com
+ * @author mitchellsundt@gmail.com
+ * 
+ */
 public class QueryServlet extends ServletUtilBase {
 
     /**
@@ -51,7 +59,7 @@ public class QueryServlet extends ServletUtilBase {
      */
     private static final String TITLE_INFO = "Query from: ";
 
-    private List<FormDataModel> queryElement;
+    private List<FormElementModel> queryElement;
 
     /**
      * Handler for HTTP Get request that responds with an XML list of forms to
@@ -69,11 +77,11 @@ public class QueryServlet extends ServletUtilBase {
 	}
 
     UserService userService = (UserService) ContextFactory.get().getBean(
-        ServletConsts.USER_BEAN);
+        BeanDefs.USER_BEAN);
     User user = userService.getCurrentUser();
 	
 	// get parameter
-	String odkId = getParameter(req, ServletConsts.ODK_ID);
+	String odkId = getParameter(req, ServletConsts.FORM_ID);
 	if (odkId == null) {
 	    errorMissingKeyParam(resp);
 	    return;
@@ -81,18 +89,20 @@ public class QueryServlet extends ServletUtilBase {
 
 	// get form
 	Datastore ds = (Datastore) ContextFactory.get().getBean(
-		ServletConsts.DATASTORE_BEAN);
-	FormDefinition fd = FormDefinition.getFormDefinition(odkId, ds, user);
-	if ( fd == null ) {
+		BeanDefs.DATASTORE_BEAN);
+	Form form = null;
+	try {
+		form = Form.retrieveForm(odkId, ds, user);
+	} catch ( ODKFormNotFoundException e ) {
 	    odkIdNotFoundError(resp);
 	    return;
 	}
 
-	queryElement = new ArrayList<FormDataModel>();
+	queryElement = new ArrayList<FormElementModel>();
 
-	processElementForColumnHead(fd.getTopLevelGroup(), fd.getTopLevelGroup(), "");
+	processElementForColumnHead(form.getFormDefinition().getTopLevelGroupElement(), form.getFormDefinition().getTopLevelGroupElement(), "");
 
-	beginBasicHtmlResponse(TITLE_INFO + fd.getFormName(), resp, req,
+	beginBasicHtmlResponse(TITLE_INFO + form.getViewableName(), resp, req,
 		true); // header info
 
 	PrintWriter out = resp.getWriter();
@@ -116,8 +126,7 @@ public class QueryServlet extends ServletUtilBase {
 	out.write(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_TEXT,
 		ServletConsts.QUERY_VALUE_PARAM, null));
 	out.write("<p/>");
-	out.write(HtmlUtil.createInput("hidden", ServletConsts.ODK_ID, fd
-		.getFormId()));
+	out.write(HtmlUtil.createInput("hidden", ServletConsts.FORM_ID, form.getFormId()));
 	out.write(HtmlUtil.createInput("submit", null, null));
 	out.write("</form>");
 
@@ -129,8 +138,8 @@ public class QueryServlet extends ServletUtilBase {
      * sortable list
      * 
      */
-    private void processElementForColumnHead(FormDataModel node,
-    		FormDataModel root, String parentName) {
+    private void processElementForColumnHead(FormElementModel node,
+    		FormElementModel root, String parentName) {
 	if (node == null)
 	    return;
 
@@ -146,18 +155,18 @@ public class QueryServlet extends ServletUtilBase {
 		break;
 	}
 
-	List<FormDataModel> childDataElements = node.getChildren();
+	List<FormElementModel> childDataElements = node.getChildren();
 	if (childDataElements == null) {
 	    return;
 	}
-	for (FormDataModel child : childDataElements) {
+	for (FormElementModel child : childDataElements) {
 	    processElementForColumnHead(child, root, parentName);
 	}
     }
 
-    private List<String> createSelectOptionsFromFormElements(List<FormDataModel> l) {
+    private List<String> createSelectOptionsFromFormElements(List<FormElementModel> l) {
 	List<String> options = new ArrayList<String>();
-	for (FormDataModel fe : l) {
+	for (FormElementModel fe : l) {
 	    options.add(fe.getElementName());
 	}
 	return options;

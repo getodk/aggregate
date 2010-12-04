@@ -21,7 +21,8 @@ package org.opendatakit.common.persistence.exception;
  * Exception for the case that a data store does not contain the entity requested
  *
  * @author wbrunette@gmail.com
- *
+ * @author mitchellsundt@gmail.com
+ * 
  */
 public class ODKEntityNotFoundException extends ODKDatastoreException {
 

@@ -26,6 +26,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.opendatakit.aggregate.ContextFactory;
+import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
@@ -40,6 +41,7 @@ import org.opendatakit.common.security.UserService;
  * Servlet to generate the XML file in plain text
  * 
  * @author wbrunette@gmail.com
+ * @author mitchellsundt@gmail.com
  * 
  */
 public class FormXmlServlet extends ServletUtilBase {
@@ -70,12 +72,12 @@ public class FormXmlServlet extends ServletUtilBase {
       throws IOException {
 
     UserService userService = (UserService) ContextFactory.get().getBean(
-              ServletConsts.USER_BEAN);
+              BeanDefs.USER_BEAN);
     User user = userService.getCurrentUser();
     
     // get parameters
-    String odkId = getParameter(req, ServletConsts.ODK_ID);
-    if (odkId == null) {
+    String formId = getParameter(req, ServletConsts.FORM_ID);
+    if (formId == null) {
       errorMissingKeyParam(resp);
       return;
     }
@@ -86,10 +88,10 @@ public class FormXmlServlet extends ServletUtilBase {
       humanReadable = Boolean.parseBoolean(readable);
     }
 
-    Datastore ds = (Datastore) ContextFactory.get().getBean(ServletConsts.DATASTORE_BEAN);
+    Datastore ds = (Datastore) ContextFactory.get().getBean(BeanDefs.DATASTORE_BEAN);
     Form form;
     try {
-      form = Form.retrieveForm(odkId, ds, user, userService.getCurrentRealm());
+      form = Form.retrieveForm(formId, ds, user);
     } catch (ODKFormNotFoundException e) {
       odkIdNotFoundError(resp);
       return;
@@ -105,11 +107,11 @@ public class FormXmlServlet extends ServletUtilBase {
 	
 	    PrintWriter out = resp.getWriter();
 	
-	    resp.setCharacterEncoding("UTF-8");
+	    resp.setCharacterEncoding(HtmlConsts.UTF8_ENCODE);
 	
 	    if (humanReadable) {
 	      Map<String, String> properties = new HashMap<String, String>();
-	      properties.put(ServletConsts.ODK_ID, odkId);
+	      properties.put(ServletConsts.FORM_ID, formId);
 	      String downloadXmlButton = HtmlUtil.createHtmlButtonToGetServlet(ADDR,
 	          ServletConsts.DOWNLOAD_XML_BUTTON_TXT, properties);
 	
@@ -119,7 +121,7 @@ public class FormXmlServlet extends ServletUtilBase {
 	      out.println("<h3>File Name: <FONT COLOR=0000FF>" + form.getFormFilename()
 	          + "</FONT></h3>");
 	      out.println(downloadXmlButton); // download button
-	      out.print(formatHtmlString(xmlString));// form xml
+	      out.print(encodeParameter(xmlString));// form xml
 	      finishBasicHtmlResponse(resp); // footer info
 	    } else {
 	      resp.setContentType(HtmlConsts.RESP_TYPE_XML);

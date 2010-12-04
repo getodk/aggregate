@@ -16,6 +16,12 @@
 
 package org.opendatakit.aggregate.exception;
 
+/**
+ * 
+ * @author wbrunette@gmail.com
+ * @author mitchellsundt@gmail.com
+ * 
+ */
 public class ODKExternalServiceException extends Exception {
   /**
    * Serial number for serialization

@@ -32,7 +32,7 @@ public class UserServiceImpl implements org.opendatakit.common.security.UserServ
 		List<String> domains = new ArrayList<String>();
 		domains.add("aggregate.test.org");
 		domains.add("test.net");
-		realm = new RealmImpl("test realm", "mail.test.org", "test.org", domains);
+		realm = new RealmImpl("test realm", "mail.test.org", "opendatakit.org", domains);
 		anonymous = new UserImpl(User.ANONYMOUS_USER, realm.getRealmString(), 
 				User.ANONYMOUS_USER_NICKNAME, null, null );
 		daemonAccount = new UserImpl(User.DAEMON_USER, realm.getRealmString(), 

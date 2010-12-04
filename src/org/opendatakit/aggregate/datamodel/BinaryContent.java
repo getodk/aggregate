@@ -13,8 +13,9 @@
  */
 package org.opendatakit.aggregate.datamodel;
 
-import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
+import org.opendatakit.common.persistence.DynamicBase;
+import org.opendatakit.common.security.User;
 
 /**
  * Binary content for a given field in a form is held in a set of tables
@@ -47,9 +48,10 @@ import org.opendatakit.common.persistence.DataField;
  * records are never updated, but Binary Content records are.
  * 
  * @author mitchellsundt@gmail.com
+ * @author wbrunette@gmail.com
  * 
  */
-public final class BinaryContent extends CommonFieldsBase {
+public final class BinaryContent extends DynamicBase {
 	private static final DataField VERSION = new DataField("VERSION",
 			DataField.DataType.URI, false);
 	private static final DataField UNROOTED_FILE_PATH = new DataField(
@@ -58,22 +60,34 @@ public final class BinaryContent extends CommonFieldsBase {
 	public final DataField version;
 	public final DataField unrootedFilePath;
 
+	/**
+	 * Construct a relation prototype.
+	 * 
+	 * @param databaseSchema
+	 * @param tableName
+	 */
 	public BinaryContent(String databaseSchema, String tableName) {
-		super(databaseSchema, tableName, BaseType.DYNAMIC);
+		super(databaseSchema, tableName);
 		fieldList.add(version = new DataField(VERSION));
 		fieldList.add(unrootedFilePath = new DataField(UNROOTED_FILE_PATH));
 	}
 
 	/**
-	 * Copy constructor for use by {@link #getEmptyRow(Class)} This does not
-	 * populate any fields related to the values of this row.
+	 * Construct an empty entity.  Only called via {@link #getEmptyRow(User)}
 	 * 
-	 * @param d
+	 * @param ref
+	 * @param user
 	 */
-	public BinaryContent(BinaryContent ref) {
-		super(ref);
+	private BinaryContent(BinaryContent ref, User user) {
+		super(ref, user);
 		version = ref.version;
 		unrootedFilePath = ref.unrootedFilePath;
+	}
+
+	// Only called from within the persistence layer.
+	@Override
+	public BinaryContent getEmptyRow(User user) {
+		return new BinaryContent(this, user);
 	}
 
 	public String getVersion() {

@@ -19,33 +19,39 @@ import java.io.PrintWriter;
 import java.util.Iterator;
 import java.util.List;
 
-import org.opendatakit.aggregate.constants.FormatConsts;
-import org.opendatakit.aggregate.datamodel.FormDataModel;
-import org.opendatakit.aggregate.datamodel.FormDefinition;
+import org.opendatakit.aggregate.constants.format.FormatConsts;
+import org.opendatakit.aggregate.datamodel.FormElementModel;
+import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.format.RepeatCallbackFormatter;
+import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.format.SubmissionFormatter;
 import org.opendatakit.aggregate.format.element.JsonElementFormatter;
-import org.opendatakit.aggregate.format.element.Row;
 import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.aggregate.submission.SubmissionSet;
 import org.opendatakit.common.constants.BasicConsts;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
-import org.opendatakit.common.security.Realm;
 import org.opendatakit.common.security.User;
 
-public class JsonFormatter implements SubmissionFormatter {
+/**
+ * 
+ * @author wbrunette@gmail.com
+ * @author mitchellsundt@gmail.com
+ * 
+ */
+public class JsonFormatter implements SubmissionFormatter, RepeatCallbackFormatter {
 
   private JsonElementFormatter elemFormatter;
 
-  private List<FormDataModel> propertyNames;
+  private List<FormElementModel> propertyNames;
 
   private PrintWriter output;
 
   public JsonFormatter(PrintWriter printWriter,
-      List<FormDataModel> selectedColumnNames, FormDefinition formDefinition, Datastore datastore, User user, Realm realm) {
+      List<FormElementModel> selectedColumnNames, Form form, Datastore datastore, User user) {
     output = printWriter;
     propertyNames = selectedColumnNames;
-    elemFormatter = new JsonElementFormatter(true, true, true, formDefinition, datastore, user, realm, this);
+    elemFormatter = new JsonElementFormatter(true, true, true);
   }
 
   @Override
@@ -54,30 +60,29 @@ public class JsonFormatter implements SubmissionFormatter {
 
     // format row elements
     for (Submission sub : submissions) {
-    	elemFormatter.setSubmission(sub);
-      Row row = sub.getFormattedValuesAsRow(propertyNames, elemFormatter);
+      Row row = sub.getFormattedValuesAsRow(propertyNames, elemFormatter, false);
       appendJsonObject(row.getFormattedValues().iterator());
     }
   }
   
-  @Override
-  public void processRepeatedSubmssionSets(FormDataModel repeatGroup, List<SubmissionSet> repeats)
-      throws ODKDatastoreException {
- 
+  public void processRepeatedSubmssionSetsIntoRow(List<SubmissionSet> repeats,
+      FormElementModel repeatElement, Row row) throws ODKDatastoreException {
+    // TODO: check what is best way to deal with ordinal
+
     output.append(BasicConsts.LEFT_BRACE);
     output.append(BasicConsts.QUOTE);
-    output.append(repeatGroup.getElementName());
+    output.append(repeatElement.getElementName());
     output.append(BasicConsts.QUOTE + BasicConsts.COLON);
     output.append(BasicConsts.LEFT_BRACKET);
     // format row elements
     for (SubmissionSet repeat : repeats) {
-      Row row = repeat.getFormattedValuesAsRow(propertyNames, elemFormatter);
-      appendJsonObject(row.getFormattedValues().iterator());
+      Row repeatRow = repeat.getFormattedValuesAsRow(propertyNames, elemFormatter, false);
+      appendJsonObject(repeatRow.getFormattedValues().iterator());
     }
     output.append(BasicConsts.RIGHT_BRACKET);
     output.append(BasicConsts.RIGHT_BRACE);
   }
-  
+    
   
   /**
    * Helper function used to convert row to a JSON object and append to the

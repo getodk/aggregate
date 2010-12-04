@@ -20,14 +20,14 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.opendatakit.aggregate.datamodel.FormDefinition;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.submission.Submission;
+import org.opendatakit.aggregate.submission.SubmissionKey;
+import org.opendatakit.aggregate.submission.SubmissionKeyPart;
 import org.opendatakit.aggregate.submission.SubmissionSet;
 import org.opendatakit.aggregate.submission.SubmissionValue;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.EntityKey;
-import org.opendatakit.common.persistence.InstanceDataBase;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.security.User;
@@ -36,24 +36,22 @@ import org.opendatakit.common.security.User;
  * Takes a list of submission keys and performs recursive delete on all elements
  * 
  * @author wbrunette@gmail.com
+ * @author mitchellsundt@gmail.com
  * 
  */
 public class DeleteSubmissions {
 
-  private List<EntityKey> submissionKeys;
-
-  private FormDefinition form;
+  private List<SubmissionKey> submissionKeys;
 
   private Datastore ds;
   
   private User user;
   
-  public DeleteSubmissions(String formId, List<EntityKey> keys, Datastore datastore, User user)
+  public DeleteSubmissions(List<SubmissionKey> keys, Datastore datastore, User user)
       throws IOException, ODKFormNotFoundException {
     if (keys == null) {
       throw new IOException();
     }
-    this.form =  FormDefinition.getFormDefinition(formId, ds, user);
     this.submissionKeys = keys;
     this.ds = datastore;
     this.user = user;
@@ -62,13 +60,15 @@ public class DeleteSubmissions {
   public void deleteSubmissions() throws ODKDatastoreException{
     List<EntityKey> deleteKeys = new ArrayList<EntityKey>();
 
-    for (EntityKey submissionKey : submissionKeys) {
+    for (SubmissionKey submissionKey : submissionKeys) {
       try {
-    	InstanceDataBase subEntity = (InstanceDataBase) ds.getEntity(submissionKey.getRelation(), submissionKey.getKey(), user);
-        Submission sub = new Submission(subEntity, form, ds, user);
+		List<SubmissionKeyPart> parts = SubmissionKeyPart.splitSubmissionKey(submissionKey);
+  		Submission sub = Submission.fetchSubmission(parts, ds, user);
         deleteHelper(sub, deleteKeys);
       } catch (ODKEntityNotFoundException e) {
         // just move on
+      } catch (ODKFormNotFoundException e) {
+		e.printStackTrace();
       }
     }
     ds.deleteEntities(deleteKeys, user);

@@ -27,9 +27,14 @@ import javax.sql.DataSource;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.Datastore;
+import org.opendatakit.common.persistence.DynamicAssociationBase;
+import org.opendatakit.common.persistence.DynamicBase;
+import org.opendatakit.common.persistence.DynamicDocumentBase;
 import org.opendatakit.common.persistence.EntityKey;
 import org.opendatakit.common.persistence.PersistConsts;
 import org.opendatakit.common.persistence.Query;
+import org.opendatakit.common.persistence.StaticAssociationBase;
+import org.opendatakit.common.persistence.TaskLock;
 import org.opendatakit.common.persistence.DataField.DataType;
 import org.opendatakit.common.persistence.Query.FilterOperation;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
@@ -42,6 +47,12 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 
+/**
+ * 
+ * @author wbrunette@gmail.com
+ * @author mitchellsundt@gmail.com
+ * 
+ */
 public class DatastoreImpl implements Datastore {
 
 	/**
@@ -97,8 +108,8 @@ public class DatastoreImpl implements Datastore {
 	public static final String K_DELETE_FROM = "DELETE FROM ";
 
 	public static final Long DEFAULT_MAX_STRING_SIZE = 255L;
-	public static final Integer DEFAULT_DBL_NUMERIC_SCALE = 6;
-	public static final Integer DEFAULT_DBL_NUMERIC_PRECISION = 9;
+	public static final Integer DEFAULT_DBL_NUMERIC_SCALE = 10;
+	public static final Integer DEFAULT_DBL_NUMERIC_PRECISION = 38;
 	public static final Integer DEFAULT_INT_NUMERIC_PRECISION = 10;
 	
 	private static final class TableDefinition {
@@ -427,13 +438,17 @@ public class DatastoreImpl implements Datastore {
 			case DYNAMIC:
 				// index by parent
 				idx = "FKP_" + relation.getTableName();
-				createIndex(relation, idx, relation.parentAuri, false);
+				createIndex(relation, idx, ((DynamicBase) relation).parentAuri, false);
 				break;
 			case STATIC_ASSOCIATION:
+				// index by dominant type
+				idx = "FKD_" + relation.getTableName().substring(0,60);
+				createIndex(relation, idx, ((StaticAssociationBase) relation).domAuri, false);
+				break;
 			case DYNAMIC_ASSOCIATION:
 				// index by dominant type
 				idx = "FKD_" + relation.getTableName().substring(0,60);
-				createIndex(relation, idx, relation.domAuri, false);
+				createIndex(relation, idx, ((DynamicAssociationBase) relation).domAuri, false);
 				break;
 			}
 			
@@ -501,12 +516,23 @@ public class DatastoreImpl implements Datastore {
 			EntityKey topLevelAuriKey, User user) {
 		
 		// we are generating our own PK, so we don't need to interact with DB yet...
-		T rel = (T) relation.getEmptyRow(relation.getClass(), user);
+		T row;
+		try {
+			row = (T) relation.getEmptyRow(user);
+		} catch ( Exception e ) {
+			throw new IllegalStateException("failed to create empty row", e);
+		}
 
 		if ( topLevelAuriKey != null ) {
-			rel.setTopLevelAuri(topLevelAuriKey.getKey());
+			if ( row instanceof DynamicAssociationBase ) {
+				((DynamicAssociationBase) row).setTopLevelAuri(topLevelAuriKey.getKey());
+			} else if ( row instanceof DynamicDocumentBase ) {
+				((DynamicDocumentBase) row).setTopLevelAuri(topLevelAuriKey.getKey());
+			} else if ( row instanceof DynamicBase ) {
+				((DynamicBase) row).setTopLevelAuri(topLevelAuriKey.getKey());
+			}
 		}
-		return rel;
+		return row;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -524,7 +550,6 @@ public class DatastoreImpl implements Datastore {
 			}
 			return (T) results.get(0);
 		} catch (ODKDatastoreException e) {
-			e.printStackTrace();
 			throw new ODKEntityNotFoundException("Unable to retrieve "
 					+ relation.getSchemaName() + "." + relation.getTableName() 
 					+ " key: " + uri, e );
@@ -724,4 +749,9 @@ public class DatastoreImpl implements Datastore {
 			deleteEntity(k, user);
 		}
 	}
+
+  @Override
+  public TaskLock createTaskLock() {
+    return new TaskLockImpl();
+  }
 }

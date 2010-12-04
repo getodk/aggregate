@@ -20,14 +20,15 @@ package org.opendatakit.aggregate.submission.type.jr;
 import java.util.Date;
 
 import org.javarosa.core.model.utils.DateUtils;
-import org.opendatakit.aggregate.datamodel.FormDataModel;
+import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.submission.type.DateSubmissionType;
-import org.opendatakit.common.persistence.InstanceDataBase;
+import org.opendatakit.common.persistence.DynamicCommonFieldsBase;
 
 /**
  * Data Storage Converter for Java Rosa DataTime Type
  * 
  * @author wbrunette@gmail.com
+ * @author mitchellsundt@gmail.com
  * 
  */
 public class JRDateTimeType extends DateSubmissionType {
@@ -38,7 +39,7 @@ public class JRDateTimeType extends DateSubmissionType {
 	 * @param propertyName
 	 *            Name of submission element
 	 */
-	public JRDateTimeType(InstanceDataBase backingObject, FormDataModel element) {
+	public JRDateTimeType(DynamicCommonFieldsBase backingObject, FormElementModel element) {
 		super(backingObject, element);
 	}
 

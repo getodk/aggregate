@@ -24,7 +24,8 @@ package org.opendatakit.aggregate.exception;
  * form before all data has been uploaded off the server.
  * 
  * @author mitchellsundt@gmail.com
- *
+ * @author wbrunette@gmail.com
+ * 
  */
 public class ODKExternalServiceDependencyException extends Exception {
   /**

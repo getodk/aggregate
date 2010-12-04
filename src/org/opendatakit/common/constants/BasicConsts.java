@@ -23,9 +23,10 @@ import java.util.Date;
  * Constants used in ODK aggregate that are shared everywhere
  *
  * @author wbrunette@gmail.com
- *
+ * @author mitchellsundt@gmail.com
+ * 
  */
-public class BasicConsts {
+public final class BasicConsts {
 
   public static final String NULL = "NULL";
   
