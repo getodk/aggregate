@@ -15,6 +15,8 @@
  */
 package org.opendatakit.aggregate.task.tomcat;
 
+import org.opendatakit.aggregate.ContextFactory;
+import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.externalservice.ExternalServiceOption;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
 import org.opendatakit.aggregate.form.Form;
@@ -29,19 +31,37 @@ import org.opendatakit.common.security.User;
  * @author mitchellsundt@gmail.com
  * 
  */
-public class WorksheetCreatorImpl extends AbstractWorksheetCreatorImpl {
+public class WorksheetCreatorImpl extends AbstractWorksheetCreatorImpl implements Runnable {
 
+  private String baseWebServerUrl;
+  private String spreadsheetName;
+  private ExternalServiceOption esType;
+  private Form form;
+  private User user;
+  
   @Override
   public final void createWorksheetTask(String baseWebServerUrl, String spreadsheetName, ExternalServiceOption esType, 
       int delay, Form form, Datastore datastore, User user) throws ODKExternalServiceException, ODKDatastoreException {
+
+    this.baseWebServerUrl = baseWebServerUrl;
+    this.spreadsheetName = spreadsheetName;
+    this.esType = esType;
+    this.form = form;
+    this.user = user;
+    System.out.println("THIS IS CREATE WORKSHEET IN TOMCAT");
+    AggregrateThreadExecutor exec = AggregrateThreadExecutor.getAggregateThreadExecutor();
+    exec.execute(this);
+  }
+
+  @Override
+  public void run() {
+    Datastore ds = (Datastore) ContextFactory.get().getBean(BeanDefs.DATASTORE_BEAN);
     try {
-      Thread.sleep(delay);
-    } catch (InterruptedException e) {
-      // TODO Auto-generated catch block
+      worksheetCreator(baseWebServerUrl, spreadsheetName, esType, form, ds, user);
+    } catch (Exception e) {
       e.printStackTrace();
-    }
-    
-    worksheetCreator(baseWebServerUrl, spreadsheetName, esType, form, datastore, user); 
+      // TODO: Problem - decide what to do if an exception occurs
+    } 
     
   }
 }

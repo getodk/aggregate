@@ -25,6 +25,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.lang.StringEscapeUtils;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.HtmlUtil;
@@ -121,7 +122,9 @@ public class FormXmlServlet extends ServletUtilBase {
 	      out.println("<h3>File Name: <FONT COLOR=0000FF>" + form.getFormFilename()
 	          + "</FONT></h3>");
 	      out.println(downloadXmlButton); // download button
-	      out.print(encodeParameter(xmlString));// form xml
+	      out.println("<PRE>");
+	      StringEscapeUtils.escapeHtml(out, xmlString);// form xml
+	      out.println("</PRE>");
 	      finishBasicHtmlResponse(resp); // footer info
 	    } else {
 	      resp.setContentType(HtmlConsts.RESP_TYPE_XML);

@@ -41,7 +41,7 @@ public class UploadSubmissionsImpl extends AbstractUploadSubmissionImpl {
   private static final String UPLOAD_SUBMISSION_QUEUE = "upload-submission-queue";
   
   @Override
-  public void createFormUploadTask(FormServiceCursor fsc, User user)
+  public void createFormUploadTask(FormServiceCursor fsc, String baseServerWebUrl, User user)
       throws ODKExternalServiceException {
 
     try {

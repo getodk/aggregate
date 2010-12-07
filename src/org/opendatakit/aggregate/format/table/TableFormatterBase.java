@@ -53,7 +53,7 @@ public abstract class TableFormatterBase implements SubmissionFormatter {
 
   @Override
   public void processSubmissions(List<Submission> submissions) throws ODKDatastoreException {
-    processSubmissionSet(submissions, form.getFormDefinition().getTopLevelGroupElement());
+    processSubmissionSet(submissions, form.getTopLevelGroupElement());
   }
 
   protected abstract void processSubmissionSet(Collection<? extends SubmissionSet> submissions,

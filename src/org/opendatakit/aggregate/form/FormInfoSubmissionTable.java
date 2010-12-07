@@ -18,12 +18,10 @@ package org.opendatakit.aggregate.form;
 import java.util.List;
 
 import org.opendatakit.aggregate.datamodel.FormDataModel;
-import org.opendatakit.aggregate.datamodel.FormDefinition;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.DynamicBase;
 import org.opendatakit.common.persistence.DynamicCommonFieldsBase;
-import org.opendatakit.common.persistence.EntityKey;
 import org.opendatakit.common.persistence.PersistConsts;
 import org.opendatakit.common.persistence.TopLevelDynamicBase;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
@@ -97,7 +95,7 @@ public class FormInfoSubmissionTable extends DynamicBase {
 		return relation;
 	}
 	
-	static final void createFormDataModel(List<FormDataModel> model, EntityKey definitionKey, Long ordinal, 
+	static final void createFormDataModel(List<FormDataModel> model, Long ordinal, 
 			TopLevelDynamicBase formInfoDefinitionRelation, 
 			DynamicCommonFieldsBase formInfoTableRelation, 
 			Datastore datastore, User user) throws ODKDatastoreException {
@@ -105,7 +103,6 @@ public class FormInfoSubmissionTable extends DynamicBase {
 		FormInfoSubmissionTable submissionRelation = createRelation(datastore, user);
 		
 		FormDefinition.buildTableFormDataModel( model, 
-				definitionKey,
 				submissionRelation, 
 				formInfoDefinitionRelation, // top level table
 				formInfoTableRelation, // also the parent table

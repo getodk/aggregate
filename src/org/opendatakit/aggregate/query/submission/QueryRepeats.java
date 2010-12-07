@@ -69,14 +69,14 @@ public class QueryRepeats {
   public Collection<? extends SubmissionSet> getRepeatSubmissionSet() throws ODKIncompleteSubmissionData, ODKDatastoreException {
     List<SubmissionSet> submissionSets = new ArrayList<SubmissionSet>();
 
-    TopLevelDynamicBase topLevelRelation = (TopLevelDynamicBase) form.getFormDefinition().getTopLevelGroup().getBackingObjectPrototype();
+    TopLevelDynamicBase topLevelRelation = (TopLevelDynamicBase) form.getTopLevelGroupElement().getFormDataModel().getBackingObjectPrototype();
 
     // TODO: this doesn't work with PHANTOM or GROUP splits...
     
     // get the key to the top level relation where this repeat group has the given parent key
     Query topLevelKeyQuery = ds.createQuery(repeatGroup.getFormDataModel().getBackingObjectPrototype(), user);
     topLevelKeyQuery.addFilter(((DynamicBase) repeatGroup.getFormDataModel().getBackingObjectPrototype()).parentAuri, Query.FilterOperation.EQUAL, parentKey);
-    Set<EntityKey> submissionKeys = topLevelKeyQuery.executeTopLevelKeyQuery(topLevelRelation, 0);
+    Set<EntityKey> submissionKeys = topLevelKeyQuery.executeTopLevelKeyQuery(topLevelRelation);
     if ( submissionKeys.size() != 1 ) {
     	throw new IllegalStateException("unexpectedly found the same parent key in two different top-level tables!");
     }

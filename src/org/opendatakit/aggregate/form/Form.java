@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.opendatakit.aggregate.datamodel.FormDataModel;
-import org.opendatakit.aggregate.datamodel.FormDefinition;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.datamodel.FormElementModel.ElementType;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
@@ -112,9 +111,44 @@ public class Form {
     this.datastore = datastore;
 	this.user = user;
     objectEntity = submission;
-    formDefinition = FormDefinition.getFormDefinition(getFormId(), datastore, user);
+    formDefinition = fetchSubmissionAssociations();
   }
 
+  private FormDefinition fetchSubmissionAssociations() {
+
+	RepeatSubmissionType r = (RepeatSubmissionType) objectEntity.getElementValue(FormInfo.fiSubmissionTable);
+	List<SubmissionSet> submissions = r.getSubmissionSets();
+	if ( submissions.size() != 1 ) {
+		throw new IllegalStateException("Expecting only one submission record at this time!");
+	}
+	SubmissionSet submissionRecord = submissions.get(0);
+	
+	String submissionFormId = ((StringSubmissionType) submissionRecord.getElementValue(FormInfo.submissionFormId)).getValue();
+	Long submissionModelVersion = ((LongSubmissionType) submissionRecord.getElementValue(FormInfo.submissionModelVersion)).getValue();
+	Long submissionUiVersion = ((LongSubmissionType) submissionRecord.getElementValue(FormInfo.submissionUiVersion)).getValue();
+	XFormParameters submissionDefn = new XFormParameters(submissionFormId, submissionModelVersion, submissionUiVersion);
+
+	try {
+		SubmissionAssociationTable saRelation = SubmissionAssociationTable.createRelation(datastore, user);
+		Query q = datastore.createQuery(saRelation, user);
+		q.addFilter(saRelation.domAuri, FilterOperation.EQUAL, CommonFieldsBase.newMD5HashUri(submissionFormId));
+		List<? extends CommonFieldsBase> l = q.executeQuery(0);
+		for ( CommonFieldsBase b : l ) {
+			SubmissionAssociationTable a = (SubmissionAssociationTable) b;
+			submissionAssociations.add(a);
+		}
+	} catch (ODKDatastoreException e) {
+	}
+	
+	if ( submissionAssociations.size() == 0 ) return null;
+	SubmissionAssociationTable match = submissionAssociations.get(0);
+	if ( submissionAssociations.size() > 1 ) {
+		throw new IllegalStateException("Logic is not yet in place for cross-form submission sharing");
+	}
+	
+	return FormDefinition.getFormDefinition(match.getXFormParameters(), datastore, user);
+  }
+  
   public void persist(Datastore datastore, User user) throws ODKDatastoreException {
     datastore.putEntities(submissionAssociations, user);
     objectEntity.persist(datastore, user);
@@ -132,17 +166,28 @@ public class Form {
    * @throws ODKDatastoreException
    */
   public void deleteForm(Datastore ds, User user) throws ODKDatastoreException {
-	  // Save the formId to the stack so we have it...
-	  String formId = getFormId();
-	  
 	FormDataModel fdm = FormDataModel.createRelation(ds, user);
     List<EntityKey> eksFormInfo = new ArrayList<EntityKey>();
+
+    if ( submissionAssociations.size() > 1 ) {
+    	throw new IllegalStateException("Logic is not in place for multiple submissions");
+    }
+    
+    XFormParameters ref = null;
+    
+    if ( submissionAssociations.size() == 1 ) {
+    	SubmissionAssociationTable a = submissionAssociations.get(0);
+    	ref = a.getXFormParameters();
+    	eksFormInfo.add(new EntityKey(a, a.getUri()));
+    }
+    
     // queue everything in formInfo for delete
     objectEntity.recursivelyAddEntityKeys(eksFormInfo);
     
-	List<EntityKey> eks = new ArrayList<EntityKey>();
 	if ( formDefinition != null ) {
-	    // queue everything in the formDataModel for delete
+		List<EntityKey> eks = new ArrayList<EntityKey>();
+
+		// queue everything in the formDataModel for delete
 	    for ( FormDataModel m : formDefinition.uriMap.values() ) {
 	    	
 			eks.add(new EntityKey(fdm, m.getUri()));
@@ -158,8 +203,9 @@ public class Form {
 	    	}
 	    }
 	}
-    // tell FormDefinition to forget me...
-    FormDefinition.forgetFormId(formId);
+
+	// tell FormDefinition to forget me...
+    FormDefinition.forgetFormId(ref);
 
     // delete everything in formInfo
     ds.deleteEntities(eksFormInfo, user);
@@ -181,6 +227,26 @@ public class Form {
 
   public FormElementModel getTopLevelGroupElement(){
 		  return formDefinition.getTopLevelGroupElement();
+  }
+  
+  public String getMajorMinorVersionString() {
+	  RepeatSubmissionType r = (RepeatSubmissionType) objectEntity.getElementValue(FormInfo.fiFilesetTable);
+	  if ( r.getNumberRepeats() != 1 ) {
+		  throw new IllegalStateException("Expecting exactly one fileset at this time");
+	  }
+	  SubmissionSet s = r.getSubmissionSets().get(0);
+	  
+	  Long modelVersion = ((LongSubmissionType) s.getElementValue(FormInfo.rootElementModelVersion)).getValue();
+	  Long uiVersion = ((LongSubmissionType) s.getElementValue(FormInfo.rootElementUiVersion)).getValue();
+	  StringBuilder b = new StringBuilder();
+	  if ( modelVersion != null ) {
+		  b.append(modelVersion.toString());
+	  }
+	  if ( uiVersion != null ) {
+		  b.append(".");
+		  b.append(uiVersion.toString());
+	  }
+	  return b.toString();
   }
   
   public FormDefinition getFormDefinition() {
@@ -417,21 +483,15 @@ public class Form {
 	SubmissionAssociationTable sa = findSubmission(submissionRecord);
 	if ( sa != null ) sa.setIsSubmissionAllowed(submissionEnabled);
   }
-
-  private boolean isMatch(SubmissionAssociationTable a, 
-		  String submissionFormId, Long submissionModelVersion, Long submissionUiVersion ) {
-	  return( a.getSubmissionFormId().equals(submissionFormId) &&
-			   a.getSubmissionModelVersion().equals(submissionModelVersion) &&
-			   a.getSubmissionUiVersion().equals(submissionUiVersion) );
-  }
-  
+ 
   private SubmissionAssociationTable findSubmission(SubmissionSet submissionRecord) {
 	  String submissionFormId = ((StringSubmissionType) submissionRecord.getElementValue(FormInfo.submissionFormId)).getValue();
 	  Long submissionModelVersion = ((LongSubmissionType) submissionRecord.getElementValue(FormInfo.submissionModelVersion)).getValue();
 	  Long submissionUiVersion = ((LongSubmissionType) submissionRecord.getElementValue(FormInfo.submissionUiVersion)).getValue();
+	  XFormParameters p = new XFormParameters(submissionFormId, submissionModelVersion, submissionUiVersion);
 	  
 	  for ( SubmissionAssociationTable a : submissionAssociations ) {
-		  if ( isMatch(a, submissionFormId, submissionModelVersion, submissionUiVersion) ) {
+		  if ( a.getXFormParameters().equals(p) ) {
 			  return a;
 		  }
 	  }
@@ -446,7 +506,7 @@ public class Form {
 		for ( CommonFieldsBase b : l ) {
 			SubmissionAssociationTable a = (SubmissionAssociationTable) b;
 			submissionAssociations.add(a);
-			if ( isMatch(a, submissionFormId, submissionModelVersion, submissionUiVersion) ) {
+			if ( a.getXFormParameters().equals(p) ) {
 				match = a;
 			}
 		}
@@ -454,6 +514,27 @@ public class Form {
 	} catch (ODKDatastoreException e) {
 		return null;
 	}
+  }
+  
+  private FormElementModel findElementByNameHelper(FormElementModel current, String name) {
+	if ( current.getElementName().equals(name) ) return current;
+	FormElementModel m = null;
+	for ( FormElementModel c : current.getChildren() ) {
+		m = findElementByNameHelper(c, name);
+		if ( m != null ) break;
+	}
+	return m;
+  }
+  
+  /**
+   * Relies on getElementName() to determine the match of the FormElementModel.
+   * Does a depth-first traversal of the list.
+   * 
+   * @param name
+   * @return the found element or null if not found.
+   */
+  public FormElementModel findElementByName(String name) {
+	  return findElementByNameHelper( getTopLevelGroupElement(), name );
   }
   
   private void getRepeatGroupsInModelHelper(FormElementModel current, List<FormElementModel> accumulation) {
@@ -509,7 +590,7 @@ public class Form {
    *          Print stream to send the output to
    */
   public void printDataTree(PrintStream out) {
-    printTreeHelper(formDefinition.getTopLevelGroup(), out);
+    printTreeHelper(formDefinition.getTopLevelGroupElement(), out);
   }
 
   /**
@@ -521,16 +602,16 @@ public class Form {
    * @param out
    *          Print stream to send the output to
    */
-  private void printTreeHelper(FormDataModel node, PrintStream out) {
+  private void printTreeHelper(FormElementModel node, PrintStream out) {
     if (node == null) {
       return;
     }
     out.println(node.toString());
-    List<FormDataModel> children = node.getChildren();
+    List<FormElementModel> children = node.getChildren();
     if (children == null) {
       return;
     }
-    for (FormDataModel child : children) {
+    for (FormElementModel child : children) {
       printTreeHelper(child, out);
     }
   }
@@ -577,8 +658,8 @@ public class Form {
    * @return
    * @throws ODKDatastoreException
    */
-  public static final FormInfoTable getFormInfoRelation(Datastore datastore, User user) throws ODKDatastoreException {
-	  return FormInfoTable.createRelation(datastore, user);
+  public static final FormInfoTable getFormInfoRelation(Datastore datastore) throws ODKDatastoreException {
+	  return (FormInfoTable) FormInfo.getFormInfoForm(datastore).getTopLevelGroupElement().getFormDataModel().getBackingObjectPrototype();
   }
   
   	/**
@@ -671,7 +752,7 @@ public class Form {
 		String formUri = CommonFieldsBase.newMD5HashUri(formId);
 		
 		try {
-			FormInfoTable fi = (FormInfoTable) ds.getEntity(formInfoForm.getFormDefinition().getTopLevelGroup().getBackingObjectPrototype(), formUri, user);
+			FormInfoTable fi = (FormInfoTable) ds.getEntity(formInfoForm.getTopLevelGroupElement().getFormDataModel().getBackingObjectPrototype(), formUri, user);
 	    	formInfo = new Submission(fi, formInfoForm.getFormDefinition(), ds, user);
 		} catch ( ODKEntityNotFoundException e ) {
 			formInfo = new Submission(1L, 0L, formUri, formInfoForm.getFormDefinition(), ds, user);

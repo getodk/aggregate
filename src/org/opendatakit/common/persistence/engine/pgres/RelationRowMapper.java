@@ -45,6 +45,7 @@ public class RelationRowMapper implements RowMapper {
 		CommonFieldsBase row;
 		try {
 			row = relation.getEmptyRow(user);
+			row.setFromDatabase(true);
 		} catch ( Exception e ) {
 			throw new IllegalStateException("failed to create empty row", e);
 		}

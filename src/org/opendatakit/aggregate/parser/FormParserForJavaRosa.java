@@ -18,6 +18,7 @@
 package org.opendatakit.aggregate.parser;
 
 import java.io.ByteArrayInputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -27,25 +28,30 @@ import java.util.Set;
 import java.util.logging.Logger;
 
 import org.javarosa.core.model.FormDef;
+import org.javarosa.core.model.SubmissionProfile;
 import org.javarosa.core.model.instance.FormInstance;
 import org.javarosa.core.model.instance.TreeElement;
 import org.javarosa.xform.util.XFormUtils;
 import org.opendatakit.aggregate.constants.ParserConsts;
 import org.opendatakit.aggregate.datamodel.FormDataModel;
-import org.opendatakit.aggregate.datamodel.FormDefinition;
 import org.opendatakit.aggregate.exception.ODKConversionException;
 import org.opendatakit.aggregate.exception.ODKFormAlreadyExistsException;
 import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
 import org.opendatakit.aggregate.exception.ODKParseException;
 import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData.Reason;
 import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.form.FormDefinition;
 import org.opendatakit.aggregate.form.FormInfo;
+import org.opendatakit.aggregate.form.SubmissionAssociationTable;
+import org.opendatakit.aggregate.form.XFormParameters;
 import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.common.constants.BasicConsts;
+import org.opendatakit.common.constants.HtmlConsts;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.DynamicCommonFieldsBase;
 import org.opendatakit.common.persistence.EntityKey;
+import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
 import org.opendatakit.common.security.Realm;
@@ -63,33 +69,64 @@ public class FormParserForJavaRosa {
   /**
    * The ODK Id that uniquely identifies the form
    */
-  private String formId = null; // needs to be set to null initially for the
-  // logic to work;
+  private final XFormParameters rootElementDefn;
+  private final TreeElement submissionElement;
+  private final XFormParameters submissionElementDefn;
   
-  private final String submissionUri;
+  private String fdmSubmissionUri;
+  private int elementCount = 0;
+  private int phantomCount = 0;
 
   /**
    * The XForm definition in XML
    */
   private final String xml;
 
-  private final Datastore ds;
+  private final Datastore datastore;
+  private final User user;
+  
+  /**
+   * Extract the form id, version and uiVersion.
+   * 
+   * @param rootElement - the tree element that is the root submission.
+   * @param defaultFormIdValue - used if no "id" attribute found.  This should already be slash-substituted.
+   * @return
+   */
+  private XFormParameters extractFormParameters( TreeElement rootElement, String defaultFormIdValue ) {
+
+	String formIdValue = null;
+	String versionString = rootElement.getAttributeValue(null, "version");
+	String uiVersionString = rootElement.getAttributeValue(null, "uiVersion");
+	
+	// search for the "id" attribute
+	for (int i = 0; i < rootElement.getAttributeCount(); i++) {
+	  String name = rootElement.getAttributeName(i);
+	  if (name.equals(ParserConsts.FORM_ID_ATTRIBUTE_NAME)) {
+	    formIdValue = rootElement.getAttributeValue(i);
+		formIdValue = formIdValue.replaceAll(ParserConsts.FORWARD_SLASH, ParserConsts.FORWARD_SLASH_SUBSTITUTION);
+	    break;
+	  }
+	}
+	
+	return new XFormParameters((formIdValue == null) ? defaultFormIdValue : formIdValue, 
+					(versionString == null) ? null : Long.valueOf(versionString),
+					(uiVersionString == null) ? null : Long.valueOf(uiVersionString));
+  }
 
   /**
    * Constructor that parses and xform from the input stream supplied and
-   * creates the proper ODK Aggregate Form definition in the gae datastore
+   * creates the proper ODK Aggregate Form definition in the gae datastore.
    * 
-   * @param formName
-   *          name of xform to be parsed
-   * @param inputXml
-   *          input stream containing the Xform definition
-   * @param fileName
-   *          file name used for a file that specifies the form's XML definition
+   * @param formName - title of the form
+   * @param formXmlData - Multipart form element defining the xml form...
+   * @param inputXml - string containing the Xform definition
+   * @param fileName - file name used for a file that specifies the form's XML definition
+   * @param uploadedFormItems - Multipart form elements
    * @param datastore
-   *          TODO
-   * @param uriUser
-   * 
+   * @param user
+   * @param rootDomain
    * @throws ODKFormAlreadyExistsException
+   * @throws ODKIncompleteSubmissionData
    * @throws ODKConversionException
    * @throws ODKDatastoreException
    * @throws ODKParseException
@@ -110,70 +147,77 @@ public class FormParserForJavaRosa {
     FormDef formDef;
     try {
       formDef = XFormUtils.getFormFromInputStream(new ByteArrayInputStream(strippedXML.getBytes()));
-
-      if (formDef == null) {
-        throw new ODKIncompleteSubmissionData(Reason.BAD_JR_PARSE);
-      }
     } catch (Exception e) {
       throw new ODKIncompleteSubmissionData(e, Reason.BAD_JR_PARSE);
     }
 
-    FormInstance dataModel = formDef.getInstance();
-    TreeElement rootElement = dataModel.getRoot();
-    // TODO: locate the submission entry and adjust rootElement to point to that...
-
-    String versionString = rootElement.getAttributeValue(null, "version");
-    String uiVersionString = rootElement.getAttributeValue(null, "uiVersion");
-    
-    // obtain form id
-    // first search for the "id" attribute
-    if (rootElement != null) {
-      for (int i = 0; i < rootElement.getAttributeCount(); i++) {
-        String name = rootElement.getAttributeName(i);
-        if (name.equals(ParserConsts.FORM_ID_ATTRIBUTE_NAME)) {
-          formId = rootElement.getAttributeValue(i);
-          formId = formId.replaceAll(ParserConsts.FORWARD_SLASH, ParserConsts.FORWARD_SLASH_SUBSTITUTION);
-          break;
-        }
-      }
+    if (formDef == null) {
+        throw new ODKIncompleteSubmissionData("Javarosa failed to construct a FormDef.  Is this an XForm definition?", Reason.BAD_JR_PARSE);
     }
+    FormInstance dataModel = formDef.getInstance();
+    if ( dataModel == null ) {
+    	throw new ODKIncompleteSubmissionData("Javarosa failed to construct a FormInstance.  Is this an XForm definition?", Reason.BAD_JR_PARSE);
+    }
+    TreeElement rootElement = dataModel.getRoot();
 
-    // second check for the xmlns being defined
-    // otherwise throw exception
-    if (formId == null) {
-      if (dataModel.schema == null) {
-  		throw new ODKIncompleteSubmissionData(
-	            "The data model does not have an id or xmlns attribute.  Add an id=\"your.domain.org:formId\" attribute to the top-level instance data element of your form.",
-	            Reason.ID_MISSING);
-      }
-
-	  int idx = dataModel.schema.indexOf(":");
+    boolean schemaMalformed = false;
+    String schemaValue = dataModel.schema;
+    if ( schemaValue != null ) {
+	  int idx = schemaValue.indexOf(":");
 	  if ( idx != -1 ) {
-		if ( dataModel.schema.indexOf("/") < idx ) {
-			throw new ODKIncompleteSubmissionData(
-		            "xmlns attribute for the data model is not well-formed: '"
-		                + dataModel.schema
-		                + "' should be of the form xmlns=\"http://your.domain.org/formId\"\nConsider defining the formId using the 'id' attribute instead of the 'xmlns' attribute (id=\"formId\")",
-		                Reason.ID_MALFORMED);
-		}
-		
-	    // need to escape all slashes... for xpath processing...
-		formId = dataModel.schema.replaceAll(ParserConsts.FORWARD_SLASH, ParserConsts.FORWARD_SLASH_SUBSTITUTION);
+		  if ( schemaValue.indexOf("/") < idx ) {
+			  // malformed...
+			  schemaValue = null;
+			  schemaMalformed = true;
+		  } else {
+			  // need to escape all slashes... for xpath processing...
+			  schemaValue = schemaValue.replaceAll(ParserConsts.FORWARD_SLASH, ParserConsts.FORWARD_SLASH_SUBSTITUTION);
+		  }
 	  } else {
-		throw new ODKIncompleteSubmissionData(
-		            "xmlns attribute for the data model is not well-formed: '"
-		                + dataModel.schema
-		                + "' should be of the form xmlns=\"http://your.domain.org/formId\"\nConsider defining the formId using the 'id' attribute instead of the 'xmlns' attribute (id=\"formId\")",
-		                Reason.ID_MALFORMED);
+		  // malformed...
+		  schemaValue = null;
+		  schemaMalformed = true;
 	  }
     }
+    
+    rootElementDefn = extractFormParameters( rootElement, schemaValue );
+    if (rootElementDefn.formId == null) {
+    	if ( schemaMalformed ) {
+    		throw new ODKIncompleteSubmissionData(
+	            "xmlns attribute for the data model is not well-formed: '"
+	                + dataModel.schema
+	                + "' should be of the form xmlns=\"http://your.domain.org/formId\"\nConsider defining the formId using the 'id' attribute instead of the 'xmlns' attribute (id=\"formId\")",
+	                Reason.ID_MALFORMED);
+    	} else {
+    		throw new ODKIncompleteSubmissionData(
+	            "The data model does not have an id or xmlns attribute.  Add an id=\"your.domain.org:formId\" attribute to the top-level instance data element of your form.",
+	            Reason.ID_MISSING);
+    	}
+    }
 
-    ds = datastore;
+    // Determine the information about the submission...
+    SubmissionProfile p = formDef.getSubmissionProfile();
+    if ( p == null || p.getRef() == null ) {
+    	submissionElement = rootElement;
+    	submissionElementDefn = rootElementDefn;
+    } else {
+    	submissionElement = formDef.getInstance().resolveReference(p.getRef());
+    	try {
+    		submissionElementDefn = extractFormParameters( submissionElement, null );
+    	} catch ( Exception e ) {
+    		throw new ODKIncompleteSubmissionData(
+    	            "The non-root submission element in the data model does not have an id attribute.  Add an id=\"your.domain.org:formId\" attribute to the submission element of your form.",
+    	            Reason.ID_MISSING);
+    	}
+    }
 
-    // And construct the base table prefix candidate from the formId.
+    this.datastore = datastore;
+    this.user = user;
+
+    // And construct the base table prefix candidate from the submissionElementDefn.formId.
     // First, replace all slash substitutions with underscores.
     // Then replace all non-alphanumerics with underscores.
-    String persistenceStoreFormId = formId.substring(formId.indexOf(':') + 1);
+    String persistenceStoreFormId = submissionElementDefn.formId.substring(submissionElementDefn.formId.indexOf(':') + 1);
     persistenceStoreFormId = persistenceStoreFormId.replace(ParserConsts.FORWARD_SLASH_SUBSTITUTION, "_");
     persistenceStoreFormId = persistenceStoreFormId.replaceAll("[^\\p{Digit}\\p{javaUpperCase}\\p{javaLowerCase}]", "_");
     persistenceStoreFormId = persistenceStoreFormId.replaceAll("^_*","");
@@ -211,8 +255,7 @@ public class FormParserForJavaRosa {
     // OK -- we removed the organization's domain from what will be the 
     // database the table name prefix.  
     //
-    submissionUri = CommonFieldsBase.newMD5HashUri(formId); // key under which FormInfoTable is located...
-
+    
     // obtain form title either from the xform itself or from user entry
     String title = formDef.getTitle();
     if (title == null) {
@@ -224,45 +267,114 @@ public class FormParserForJavaRosa {
     }
     // clean illegal characters from title
     title = title.replace(BasicConsts.FORWARDSLASH, BasicConsts.EMPTY_STRING);
+
+    initHelper(uploadedFormItems, formXmlData, inputXml,
+    		  title, persistenceStoreFormId, formDef);
+  }
+  
+  enum AuxType { NONE, VBN, VBN_REF, REF_BLOB, GEO_LAT, GEO_LNG, GEO_ALT, GEO_ACC, LONG_STRING_REF, REF_TEXT };
+  
+  private String generatePhantomKey( String uriSubmissionFormModel ) {
+	  return String.format("elem+%1$s(%2$08d-phantom:%3$08d)", uriSubmissionFormModel,
+				  		elementCount, ++phantomCount );
+  }
+  
+  private void setPrimaryKey( FormDataModel m, String uriSubmissionFormModel, AuxType aux ) {
+	  String pkString;
+	  if ( aux != AuxType.NONE ) {
+		  pkString = String.format("elem+%1$s(%2$08d-%3$s)", uriSubmissionFormModel,
+				  		elementCount, aux.toString().toLowerCase());
+	  } else {
+		  ++elementCount;
+		  pkString = String.format("elem+%1$s(%2$08d)", uriSubmissionFormModel, elementCount);
+	  }
+	  m.setStringField(m.primaryKey, pkString);
+  }
+  
+  private void initHelper(MultiPartFormData uploadedFormItems, MultiPartFormItem xformXmlData,  
+		  String inputXml, String title, String persistenceStoreFormId, 
+		  FormDef formDef) throws ODKDatastoreException, ODKConversionException, ODKFormAlreadyExistsException, ODKParseException {
     
     /////////////////
-    // Step 1: create a Form (FormInfo) submission
+    // Step 1: create or fetch the Form (FormInfo) submission
     //
-	Long modelVersion = (versionString == null) ? null : Long.valueOf(versionString);
-    Long uiVersion = (uiVersionString == null) ? null : Long.valueOf(uiVersionString);
     // This allows us to delete the form if upload goes bad...
     // create an empty submission then set values in it...
-    Submission formInfo = Form.createOrFetchFormId(formId, ds, user);
-	FormInfo.setFormDescription( formInfo, null, title, null, null, ds, user);
-	FormInfo.setFormSubmission( formInfo, formId, modelVersion, uiVersion, ds, user );
-    FormInfo.setXFormDefinition( formInfo, 
-    					modelVersion, uiVersion,
-    					title, inputXml.getBytes(), datastore, user );
+    Submission formInfo = Form.createOrFetchFormId(rootElementDefn.formId, datastore, user);
+	// TODO: the following function throws an exception unless new or identical inputXml
+    byte[] xmlBytes;
+    try {
+		xmlBytes = inputXml.getBytes(HtmlConsts.UTF8_ENCODE);
+	} catch (UnsupportedEncodingException e) {
+		throw new IllegalStateException("not reachable");
+	}
+    boolean sameXForm = FormInfo.setXFormDefinition( formInfo, 
+    					rootElementDefn.modelVersion, rootElementDefn.uiVersion,
+    					title, xmlBytes, datastore, user );
+
+    FormInfo.setFormDescription( formInfo, null, title, null, null, datastore, user);
 
     Set<Map.Entry<String,MultiPartFormItem>> fileSet = uploadedFormItems.getFileNameEntrySet();
     for ( Map.Entry<String,MultiPartFormItem> itm : fileSet) {
-    	if ( itm.getValue() == formXmlData ) continue;// ignore the xform -- stored above.
+    	if ( itm.getValue() == xformXmlData ) continue;// ignore the xform -- stored above.
     	FormInfo.setXFormMediaFile(formInfo,
-    			modelVersion, uiVersion,
+    			rootElementDefn.modelVersion, rootElementDefn.uiVersion,
 				itm.getValue(), datastore, user);
     }
-    formInfo.persist(ds, user);
+    // Determine the information about the submission...
+	FormInfo.setFormSubmission( formInfo, submissionElementDefn.formId, 
+			submissionElementDefn.modelVersion, submissionElementDefn.uiVersion, datastore, user );
+    formInfo.persist(datastore, user);
 
-    // TODO: remove this and allow multiple form variants...
-    FormDefinition fd = FormDefinition.getFormDefinition(formId, ds, user);
-    if (fd != null) {
-      throw new ODKFormAlreadyExistsException();
+    SubmissionAssociationTable saRelation = SubmissionAssociationTable.createRelation(datastore, user);
+    String submissionFormIdUri = CommonFieldsBase.newMD5HashUri(submissionElementDefn.formId); // key under which submission is located...
+    Query q = datastore.createQuery(saRelation, user);
+    q.addFilter( saRelation.domAuri, Query.FilterOperation.EQUAL, submissionFormIdUri);
+    List<? extends CommonFieldsBase> l = q.executeQuery(0);
+    SubmissionAssociationTable sa = null;
+    fdmSubmissionUri = CommonFieldsBase.newUri();
+    for ( CommonFieldsBase b : l ) {
+    	SubmissionAssociationTable t = (SubmissionAssociationTable) b;
+    	if ( t.getXFormParameters().equals(submissionElementDefn)) {
+    		sa = t;
+    		fdmSubmissionUri = sa.getUriSubmissionDataModel();
+    		break;
+    	}
     }
     
-    final EntityKey k = formInfo.getKey();
-
+    if ( sa == null ) {
+	    sa = datastore.createEntityUsingRelation(saRelation, null, user);
+	    sa.setSubmissionFormId(submissionElementDefn.formId);
+	    sa.setSubmissionModelVersion(submissionElementDefn.modelVersion);
+	    sa.setSubmissionUiVersion(submissionElementDefn.uiVersion);
+	    sa.setIsPersistenceModelComplete(false);
+	    sa.setIsSubmissionAllowed(false);
+	    sa.setUriSubmissionDataModel(fdmSubmissionUri);
+	    sa.setDomAuri(submissionFormIdUri);
+	    sa.setSubAuri(formInfo.getKey().getKey());
+	    datastore.putEntity(sa, user);
+    } else {
+    	// the entry already exists...
+    	if ( !sameXForm ) {
+    		throw new ODKFormAlreadyExistsException();
+    	}
+    	// TODO: should do a transaction around persisting the FDM we are about to generate.
+    	FormDefinition fd = FormDefinition.getFormDefinition(submissionElementDefn, datastore, user);
+    	if ( fd != null ) return;
+    }
+    
+    // so we have the formInfo record, but no data model backing it.
+    // Find the submission associated with this form...
+    
     final List<FormDataModel> fdmList = new ArrayList<FormDataModel>();
 
     try {
 	    //////////////////////////////////////////////////
 	    // Step 2: Now build up the parse tree for the form...
 	    //
-	    final FormDataModel fdm = FormDataModel.createRelation(ds, user);
+	    final FormDataModel fdm = FormDataModel.createRelation(datastore, user);
+	    
+	    final EntityKey k = new EntityKey( fdm, fdmSubmissionUri);
 	
 	    NamingSet opaque = new NamingSet();
 	
@@ -271,19 +383,19 @@ public class FormParserForJavaRosa {
 	    final String tableNamePlaceholder = opaque
 	        .getTableName(fdm.getSchemaName(), persistenceStoreFormId, "", "CORE");
 	
-	    constructDataModel(opaque, k, fdmList, fdm, user, k.getKey(), 1, persistenceStoreFormId, "",
-	        tableNamePlaceholder, dataModel.getRoot());
+	    constructDataModel(opaque, k, fdmList, fdm, k.getKey(), 1, persistenceStoreFormId, "",
+	        tableNamePlaceholder, submissionElement);
 	
 	    // emit the long string and ref text tables...
-	
+	    ++elementCount; // to give these tables their own element #.
 	    String persistAsTable = opaque.getTableName(fdm.getSchemaName(), persistenceStoreFormId, "", "STRING_REF");
 	    // long string ref text record...
-	    FormDataModel d = ds.createEntityUsingRelation(fdm, k, user);
+	    FormDataModel d = datastore.createEntityUsingRelation(fdm, k, user);
+	    setPrimaryKey( d, fdmSubmissionUri, AuxType.LONG_STRING_REF );
 	    fdmList.add(d);
 	    final String lstURI = d.getUri();
 	    d.setOrdinalNumber(2L);
 	    d.setParentAuri(k.getKey());
-	    d.setStringField(fdm.uriSubmissionDataModel, submissionUri);
 	    d.setStringField(fdm.elementName, null);
 	    d.setStringField(fdm.elementType, FormDataModel.ElementType.LONG_STRING_REF_TEXT.toString());
 	    d.setStringField(fdm.persistAsColumn, null);
@@ -292,11 +404,11 @@ public class FormParserForJavaRosa {
 	
 	    persistAsTable = opaque.getTableName(fdm.getSchemaName(), persistenceStoreFormId, "", "STRING_TXT");
 	    // ref text record...
-	    d = ds.createEntityUsingRelation(fdm, k, user);
+	    d = datastore.createEntityUsingRelation(fdm, k, user);
+	    setPrimaryKey( d, fdmSubmissionUri, AuxType.REF_TEXT );
 	    fdmList.add(d);
 	    d.setOrdinalNumber(1L);
 	    d.setParentAuri(lstURI);
-	    d.setStringField(fdm.uriSubmissionDataModel, submissionUri);
 	    d.setStringField(fdm.elementName, null);
 	    d.setStringField(fdm.elementType, FormDataModel.ElementType.REF_TEXT.toString());
 	    d.setStringField(fdm.persistAsColumn, null);
@@ -306,7 +418,7 @@ public class FormParserForJavaRosa {
 	    // find a good set of names...
 	    // this also ensures that the table names don't overlap existing tables
 	    // in the datastore.
-	    opaque.resolveNames(ds, user);
+	    opaque.resolveNames(datastore, user);
 	
 	    // and revise the data model with those names...
 	    for (FormDataModel m : fdmList) {
@@ -348,21 +460,21 @@ public class FormParserForJavaRosa {
 	    // 
 	    try {
 		    for (;;) {
-		      fd = new FormDefinition(formId, fdmList);
+		      FormDefinition fd = new FormDefinition(submissionElementDefn, fdmList);
 		
 		      List<CommonFieldsBase> badTables = new ArrayList<CommonFieldsBase>();
 		
 		      for (CommonFieldsBase tbl : fd.getBackingTableSet()) {
 		
 		        try {
-		          ds.createRelation(tbl, user);
+		          datastore.createRelation(tbl, user);
 		        } catch (Exception e1) {
 		          // assume it is because the table is too wide...
 		          Logger.getLogger(FormParserForJavaRosa.class.getName()).warning(
 		              "Create failed -- assuming phantom table required " + tbl.getSchemaName() + "."
 		                  + tbl.getTableName());
 		          try {
-		            ds.deleteRelation(tbl, user);
+		            datastore.deleteRelation(tbl, user);
 		          } catch (Exception e2) {
 		            // no-op
 		          }
@@ -373,21 +485,21 @@ public class FormParserForJavaRosa {
 		      for (CommonFieldsBase tbl : badTables) {
 		        // dang. We need to create phantom tables...
 		        String newPhantom = opaque.generateUniqueTableName(tbl.getSchemaName(), tbl.getTableName(),
-		            ds, user);
+		            datastore, user);
 		
-		        orderlyDivideTable(fdmList, FormDataModel.createRelation(ds, user), user,
-		            tbl, newPhantom);
+		        orderlyDivideTable(fdmList, FormDataModel.createRelation(datastore, user), 
+		        		tbl, newPhantom);
 		      }
 		
 		      if (badTables.isEmpty())
 		        break;
 		    }
 	    } catch ( Exception e ) {
-		      fd = new FormDefinition(formId, fdmList);
+		      FormDefinition fd = new FormDefinition(submissionElementDefn, fdmList);
 		  	
 		      for (CommonFieldsBase tbl : fd.getBackingTableSet()) {
 		    	  try {
-		    		  ds.deleteRelation(tbl, user);
+		    		  datastore.deleteRelation(tbl, user);
 		    	  } catch ( Exception e3 ) {
 		    		  // do nothing...
 		    		  e3.printStackTrace();
@@ -397,10 +509,10 @@ public class FormParserForJavaRosa {
     
     // TODO: if the above gets killed, how do we clean up?
     } catch ( ODKParseException e ) {
-    	ds.deleteEntity(formInfo.getKey(), user);
+    	datastore.deleteEntity(formInfo.getKey(), user);
     	throw e;
     } catch ( ODKDatastoreException e ) {
-    	ds.deleteEntity(formInfo.getKey(), user);
+    	datastore.deleteEntity(formInfo.getKey(), user);
     	throw e;
     }
 
@@ -409,12 +521,12 @@ public class FormParserForJavaRosa {
     //
     // if we get here, we were able to create the tables -- record the
     // form description....
-	ds.putEntities(fdmList, user);
+	datastore.putEntities(fdmList, user);
 	
     // TODO: if above write fails, how do we clean this up?
   }
 
-  private void orderlyDivideTable(List<FormDataModel> fdmList, FormDataModel fdm, User user,
+  private void orderlyDivideTable(List<FormDataModel> fdmList, FormDataModel fdm,
       CommonFieldsBase tbl, String newPhantomTableName) {
 	  
     if (!(tbl instanceof DynamicCommonFieldsBase)) {
@@ -519,7 +631,7 @@ public class FormParserForJavaRosa {
     // that is in this table.
     // We will need to subdivide this manually by creating a phantom
     // table...
-    String phantomURI = CommonFieldsBase.newUri();
+    String phantomURI = generatePhantomKey(fdmSubmissionUri);
 
     // OK -- attempt to split the column count in half...
     long desiredOriginalTableColCount = (nCol / 2);
@@ -533,13 +645,12 @@ public class FormParserForJavaRosa {
     }
 
     // data record...
-    FormDataModel d = ds.createEntityUsingRelation(fdm,
+    FormDataModel d = datastore.createEntityUsingRelation(fdm,
         new EntityKey(fdm, fdmList.get(0).getUri()), user);
     fdmList.add(d);
     d.setStringField(fdm.primaryKey, phantomURI);
     d.setOrdinalNumber(Long.valueOf(desiredOriginalTableColCount + 1));
     d.setParentAuri(parentTable.getUri());
-    d.setStringField(fdm.uriSubmissionDataModel, formId);
     d.setStringField(fdm.elementName, null);
     d.setStringField(fdm.elementType, FormDataModel.ElementType.PHANTOM.toString());
     d.setStringField(fdm.persistAsColumn, null);
@@ -596,7 +707,7 @@ public class FormParserForJavaRosa {
    */
 
   private void constructDataModel(final NamingSet opaque, final EntityKey k,
-      final List<FormDataModel> dmList, final FormDataModel fdm, final User user, 
+      final List<FormDataModel> dmList, final FormDataModel fdm, 
       String parent, int ordinal, String tablePrefix, String nrGroupPrefix, String tableName,
       TreeElement treeElement) throws ODKEntityPersistException, ODKParseException {
     System.out.println("processing te: " + treeElement.getName() + " type: " + treeElement.dataType
@@ -735,12 +846,12 @@ public class FormParserForJavaRosa {
     }
 
     // data record...
-    d = ds.createEntityUsingRelation(fdm, k, user);
+    d = datastore.createEntityUsingRelation(fdm, k, user);
+    setPrimaryKey( d, fdmSubmissionUri, AuxType.NONE );
     dmList.add(d);
     final String groupURI = d.getUri();
     d.setOrdinalNumber(Long.valueOf(ordinal));
     d.setParentAuri(parent);
-    d.setStringField(fdm.uriSubmissionDataModel, submissionUri);
     d.setStringField(fdm.elementName, treeElement.getName());
     d.setStringField(fdm.elementType, et.toString());
     d.setStringField(fdm.persistAsColumn, persistAsColumn);
@@ -756,12 +867,12 @@ public class FormParserForJavaRosa {
           treeElement.getName() + "_VBN");
 
       // record for VersionedBinaryContent..
-      d = ds.createEntityUsingRelation(fdm, k, user);
+      d = datastore.createEntityUsingRelation(fdm, k, user);
+	  setPrimaryKey( d, fdmSubmissionUri, AuxType.VBN );
       dmList.add(d);
       final String vbnURI = d.getUri();
       d.setOrdinalNumber(1L);
       d.setParentAuri(groupURI);
-      d.setStringField(fdm.uriSubmissionDataModel, submissionUri);
       d.setStringField(fdm.elementName, treeElement.getName());
       d.setStringField(fdm.elementType, FormDataModel.ElementType.VERSIONED_BINARY.toString());
       d.setStringField(fdm.persistAsColumn, null);
@@ -772,12 +883,12 @@ public class FormParserForJavaRosa {
           treeElement.getName() + "_REF");
 
       // record for VersionedBinaryContentRefBlob..
-      d = ds.createEntityUsingRelation(fdm, k, user);
-      dmList.add(d);
+      d = datastore.createEntityUsingRelation(fdm, k, user);
+	  setPrimaryKey( d, fdmSubmissionUri, AuxType.VBN_REF );
+	  dmList.add(d);
       final String bcbURI = d.getUri();
       d.setOrdinalNumber(1L);
       d.setParentAuri(vbnURI);
-      d.setStringField(fdm.uriSubmissionDataModel, submissionUri);
       d.setStringField(fdm.elementName, treeElement.getName());
       d.setStringField(fdm.elementType, FormDataModel.ElementType.VERSIONED_BINARY_CONTENT_REF_BLOB
           .toString());
@@ -789,11 +900,11 @@ public class FormParserForJavaRosa {
           treeElement.getName() + "_BLB");
 
       // record for RefBlob...
-      d = ds.createEntityUsingRelation(fdm, k, user);
-      dmList.add(d);
+      d = datastore.createEntityUsingRelation(fdm, k, user);
+	  setPrimaryKey( d, fdmSubmissionUri, AuxType.REF_BLOB );
+	  dmList.add(d);
       d.setOrdinalNumber(1L);
       d.setParentAuri(bcbURI);
-      d.setStringField(fdm.uriSubmissionDataModel, submissionUri);
       d.setStringField(fdm.elementName, treeElement.getName());
       d.setStringField(fdm.elementType, FormDataModel.ElementType.REF_BLOB.toString());
       d.setStringField(fdm.persistAsColumn, null);
@@ -811,11 +922,11 @@ public class FormParserForJavaRosa {
       persistAsColumn = opaque.getColumnName(persistAsTable, nrGroupPrefix, treeElement.getName()
           + "_LAT");
 
-      d = ds.createEntityUsingRelation(fdm, k, user);
+      d = datastore.createEntityUsingRelation(fdm, k, user);
+	  setPrimaryKey( d, fdmSubmissionUri, AuxType.GEO_LAT );
       dmList.add(d);
       d.setOrdinalNumber(Long.valueOf(FormDataModel.GEOPOINT_LATITUDE_ORDINAL_NUMBER));
       d.setParentAuri(groupURI);
-      d.setStringField(fdm.uriSubmissionDataModel, submissionUri);
       d.setStringField(fdm.elementName, treeElement.getName());
       d.setStringField(fdm.elementType, FormDataModel.ElementType.DECIMAL.toString());
       d.setStringField(fdm.persistAsColumn, persistAsColumn);
@@ -825,11 +936,11 @@ public class FormParserForJavaRosa {
       persistAsColumn = opaque.getColumnName(persistAsTable, nrGroupPrefix, treeElement.getName()
           + "_LNG");
 
-      d = ds.createEntityUsingRelation(fdm, k, user);
+      d = datastore.createEntityUsingRelation(fdm, k, user);
+	  setPrimaryKey( d, fdmSubmissionUri, AuxType.GEO_LNG );
       dmList.add(d);
       d.setOrdinalNumber(Long.valueOf(FormDataModel.GEOPOINT_LONGITUDE_ORDINAL_NUMBER));
       d.setParentAuri(groupURI);
-      d.setStringField(fdm.uriSubmissionDataModel, submissionUri);
       d.setStringField(fdm.elementName, treeElement.getName());
       d.setStringField(fdm.elementType, FormDataModel.ElementType.DECIMAL.toString());
       d.setStringField(fdm.persistAsColumn, persistAsColumn);
@@ -839,11 +950,11 @@ public class FormParserForJavaRosa {
       persistAsColumn = opaque.getColumnName(persistAsTable, nrGroupPrefix, treeElement.getName()
           + "_ALT");
 
-      d = ds.createEntityUsingRelation(fdm, k, user);
+      d = datastore.createEntityUsingRelation(fdm, k, user);
+	  setPrimaryKey( d, fdmSubmissionUri, AuxType.GEO_ALT );
       dmList.add(d);
       d.setOrdinalNumber(Long.valueOf(FormDataModel.GEOPOINT_ALTITUDE_ORDINAL_NUMBER));
       d.setParentAuri(groupURI);
-      d.setStringField(fdm.uriSubmissionDataModel, submissionUri);
       d.setStringField(fdm.elementName, treeElement.getName());
       d.setStringField(fdm.elementType, FormDataModel.ElementType.DECIMAL.toString());
       d.setStringField(fdm.persistAsColumn, persistAsColumn);
@@ -853,11 +964,11 @@ public class FormParserForJavaRosa {
       persistAsColumn = opaque.getColumnName(persistAsTable, nrGroupPrefix, treeElement.getName()
           + "_ACC");
 
-      d = ds.createEntityUsingRelation(fdm, k, user);
+      d = datastore.createEntityUsingRelation(fdm, k, user);
+	  setPrimaryKey( d, fdmSubmissionUri, AuxType.GEO_ACC );
       dmList.add(d);
       d.setOrdinalNumber(Long.valueOf(FormDataModel.GEOPOINT_ACCURACY_ORDINAL_NUMBER));
       d.setParentAuri(groupURI);
-      d.setStringField(fdm.uriSubmissionDataModel, submissionUri);
       d.setStringField(fdm.elementName, treeElement.getName());
       d.setStringField(fdm.elementType, FormDataModel.ElementType.DECIMAL.toString());
       d.setStringField(fdm.persistAsColumn, persistAsColumn);
@@ -890,7 +1001,7 @@ public class FormParserForJavaRosa {
     		  // it is the end-group tag...
     		  prior = current;
     	  } else {
-    		  constructDataModel(opaque, k, dmList, fdm, user, groupURI, i + 1, tablePrefix,
+    		  constructDataModel(opaque, k, dmList, fdm, groupURI, i + 1, tablePrefix,
     				  nrGroupPrefix, persistAsTable, current);
     		  prior = current;
     	  }
@@ -912,7 +1023,7 @@ public class FormParserForJavaRosa {
     		  // it is the end-group tag...
     		  prior = current;
     	  } else {
-    		  constructDataModel(opaque, k, dmList, fdm, user, groupURI, i + 1, tablePrefix,
+    		  constructDataModel(opaque, k, dmList, fdm, groupURI, i + 1, tablePrefix,
     				  "", persistAsTable, current);
     		  prior = current;
     	  }
@@ -922,7 +1033,6 @@ public class FormParserForJavaRosa {
   }
 
   public String getFormId() {
-    // TODO Auto-generated method stub
-    return formId;
+    return rootElementDefn.formId;
   }
 }

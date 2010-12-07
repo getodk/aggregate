@@ -138,7 +138,7 @@ public class FusionTableServlet extends ServletUtilBase {
       try {
         UploadSubmissions uploadTask = (UploadSubmissions) ContextFactory.get().getBean(
             BeanDefs.UPLOAD_TASK_BEAN);
-        uploadTask.createFormUploadTask(fusion.getFormServiceCursor(), user);
+        uploadTask.createFormUploadTask(fusion.getFormServiceCursor(), getServerURL(req), user);
       } catch (Exception e) {
         resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
         e.printStackTrace();
@@ -146,7 +146,7 @@ public class FusionTableServlet extends ServletUtilBase {
       }
     }
 
-    resp.sendRedirect(ServletConsts.WEB_ROOT);
+    resp.sendRedirect(FormsServlet.ADDR);
 
   }
 

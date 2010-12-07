@@ -20,16 +20,17 @@ package org.opendatakit.aggregate.submission;
 import java.util.Date;
 import java.util.List;
 
-import org.opendatakit.aggregate.datamodel.FormDefinition;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.form.FormDefinition;
 import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.format.element.ElementFormatter;
 import org.opendatakit.common.constants.BasicConsts;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.TopLevelDynamicBase;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.security.User;
 
 /**
@@ -95,6 +96,12 @@ public class Submission extends SubmissionSet {
 				formDefinition, datastore, user);
 		submittedTime = submission.getCreationDate();
 	}
+	
+	public Submission(String uri, Form form, Datastore datastore, User user) throws ODKEntityNotFoundException, ODKDatastoreException {
+		super(null, (TopLevelDynamicBase) datastore.getEntity(form.getTopLevelGroupElement().getFormDataModel().getBackingObjectPrototype(), uri, user),
+				form.getTopLevelGroupElement(), form.getFormDefinition(), datastore, user);
+		submittedTime = super.getCreationDate();
+	}
 
 	/**
 	 * Get the time that the submission was created/received
@@ -112,7 +119,15 @@ public class Submission extends SubmissionSet {
 	public Long getUiVersion() {
 		return ((TopLevelDynamicBase) getGroupBackingObject()).getUiVersion();
 	}
-
+	
+	public void setIsComplete(Boolean value) {
+		((TopLevelDynamicBase) getGroupBackingObject()).setIsComplete(value); 
+	}
+	
+	public Boolean isComplete() {
+		return ((TopLevelDynamicBase) getGroupBackingObject()).getIsComplete();
+	}
+	
 	/**
 	 * Format the submission set for output
 	 * 

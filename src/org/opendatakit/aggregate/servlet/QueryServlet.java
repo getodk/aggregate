@@ -100,7 +100,7 @@ public class QueryServlet extends ServletUtilBase {
 
 	queryElement = new ArrayList<FormElementModel>();
 
-	processElementForColumnHead(form.getFormDefinition().getTopLevelGroupElement(), form.getFormDefinition().getTopLevelGroupElement(), "");
+	processElementForColumnHead(form.getTopLevelGroupElement(), form.getTopLevelGroupElement(), "");
 
 	beginBasicHtmlResponse(TITLE_INFO + form.getViewableName(), resp, req,
 		true); // header info

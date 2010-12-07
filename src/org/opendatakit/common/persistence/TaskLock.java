@@ -32,4 +32,13 @@ public interface TaskLock {
   public boolean renewLock(String lockId, Form form, TaskLockType taskType) throws ODKTaskLockException ;
   
   public boolean releaseLock(String lockId, Form form, TaskLockType taskType) throws ODKTaskLockException;
+
+  // TODO: remove string versions, only added for quick unit tests
+  
+  boolean obtainLock(String lockId, String formId, TaskLockType taskType) throws ODKTaskLockException;
+  
+  boolean renewLock(String lockId, String formId, TaskLockType taskType) throws ODKTaskLockException;
+  
+  boolean releaseLock(String lockId, String formId, TaskLockType taskType) throws ODKTaskLockException;
+  
 }

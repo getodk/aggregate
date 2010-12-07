@@ -142,7 +142,7 @@ public class SubmissionServlet extends ServletUtilBase {
       }
 
       // TODO: mitch are we assuming the submissionParser always persists?
-      Form form = Form.retrieveForm(submissionParser.getOdkId(), ds, user);
+      Form form = Form.retrieveForm(submissionParser.getSubmissionFormId(), ds, user);
       Submission submission = submissionParser.getSubmission();
 
       // send information to remote servers that need to be notified
@@ -151,7 +151,7 @@ public class SubmissionServlet extends ServletUtilBase {
       UploadSubmissions uploadTask = (UploadSubmissions) ContextFactory.get().getBean(
           BeanDefs.UPLOAD_TASK_BEAN);
       for (ExternalService rs : tmp) {
-        uploadTask.createFormUploadTask(rs.getFormServiceCursor(), user);
+        uploadTask.createFormUploadTask(rs.getFormServiceCursor(), getServerURL(req), user);
       }
 
       resp.setStatus(HttpServletResponse.SC_CREATED);

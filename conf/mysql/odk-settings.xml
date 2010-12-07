@@ -11,5 +11,7 @@
 <bean id="worksheet_creator" class="org.opendatakit.aggregate.task.tomcat.WorksheetCreatorImpl" /> 
 <bean id="form_delete" class="org.opendatakit.aggregate.task.tomcat.FormDeleteImpl" /> 
 <bean id="upload_task" class="org.opendatakit.aggregate.task.tomcat.UploadSubmissionsImpl" /> 
+<bean id="kml_task" class="org.opendatakit.aggregate.task.tomcat.KmlGeneratorImpl" /> 
+<bean id="csv_task" class="org.opendatakit.aggregate.task.tomcat.CsvGeneratorImpl" /> 
  
 </beans>

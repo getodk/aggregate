@@ -26,15 +26,9 @@ import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
-import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
 import org.opendatakit.aggregate.form.Form;
-import org.opendatakit.aggregate.format.SubmissionFormatter;
-import org.opendatakit.aggregate.format.table.CsvFormatter;
-import org.opendatakit.aggregate.query.submission.QueryByDate;
-import org.opendatakit.common.constants.BasicConsts;
-import org.opendatakit.common.constants.HtmlConsts;
+import org.opendatakit.aggregate.task.CsvGenerator;
 import org.opendatakit.common.persistence.Datastore;
-import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.security.UserService;
 
@@ -92,24 +86,8 @@ public class CsvServlet extends ServletUtilBase {
       return;
     }
 
-    try {
-      resp.setContentType(HtmlConsts.RESP_TYPE_ENRICHED);
-      setDownloadFileName(resp, formId + ServletConsts.CSV_FILENAME_APPEND);
-
-      // create CSV
-      QueryByDate query = new QueryByDate(form, BasicConsts.EPOCH, false,
-          ServletConsts.FETCH_LIMIT, ds, user);
-      SubmissionFormatter formatter = new CsvFormatter(form, getServerURL(req), resp.getWriter(),
-          null);
-      formatter.processSubmissions(query.getResultSubmissions());
-
-    } catch (ODKFormNotFoundException e) {
-      odkIdNotFoundError(resp);
-    } catch (ODKDatastoreException e) {
-      errorRetreivingData(resp);
-    } catch (ODKIncompleteSubmissionData e) {
-      errorRetreivingData(resp);
-    }
+    CsvGenerator generator = (CsvGenerator) ContextFactory.get().getBean(BeanDefs.CSV_BEAN);
+    generator.createCsvTask(form, getServerURL(req), user);
+    resp.sendRedirect(ResultServlet.ADDR);
   }
-
 }

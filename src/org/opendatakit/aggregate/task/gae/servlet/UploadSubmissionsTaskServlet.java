@@ -28,6 +28,7 @@ import org.opendatakit.aggregate.servlet.ServletUtilBase;
 import org.opendatakit.aggregate.task.UploadSubmissions;
 import org.opendatakit.aggregate.task.gae.UploadSubmissionsImpl;
 import org.opendatakit.common.persistence.Datastore;
+import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.security.UserService;
 
@@ -67,16 +68,24 @@ public class UploadSubmissionsTaskServlet extends ServletUtilBase{
       errorMissingKeyParam(resp);
       return;
     }
-    
+    System.out.println("STARTING UPLOAD SUBMISSION TASK!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
     Datastore ds = (Datastore) ContextFactory.get().getBean(BeanDefs.DATASTORE_BEAN);
-
+    FormServiceCursor fsc;
     try {
-      FormServiceCursor fsc = FormServiceCursor.getFormServiceCursor(fscUri, ds, user);
+      fsc = FormServiceCursor.getFormServiceCursor(fscUri, ds, user);
+    } catch (ODKEntityNotFoundException e1) {
+      // TODO: fix bug we should not be generating tasks for fsc that don't exist
+      // however not critical bug as execution path dies with this try/catch
+      System.err.println("BUG: we generated an task for a form service cursor that didn't exist");
+      return;
+    }
+    
+    try {
       UploadSubmissions worker = new UploadSubmissionsImpl();
- //     worker.uploadSubmissions(fsc, getServerURL(req), ds, user);
+      worker.uploadSubmissions(fsc, getServerURL(req), ds, user);
     } catch (Exception e) {
       e.printStackTrace();
-      throw new IOException(e);
+      return;
     }
   }
 }

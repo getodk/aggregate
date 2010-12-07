@@ -15,9 +15,12 @@
  */
 package org.opendatakit.aggregate.task.tomcat;
 
+import org.opendatakit.aggregate.ContextFactory;
+import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
 import org.opendatakit.aggregate.externalservice.FormServiceCursor;
 import org.opendatakit.aggregate.task.AbstractUploadSubmissionImpl;
+import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.security.User;
 
 /**
@@ -26,12 +29,34 @@ import org.opendatakit.common.security.User;
  * @author mitchellsundt@gmail.com
  * 
  */
-public class UploadSubmissionsImpl extends AbstractUploadSubmissionImpl {
+public class UploadSubmissionsImpl extends AbstractUploadSubmissionImpl implements Runnable {
+
+  private FormServiceCursor fsc;
+  private String baseServerWebUrl;
+  private User user;
+  
+  @Override
+  public void createFormUploadTask(FormServiceCursor fsc, String baseServerWebUrl, User user)
+      throws ODKExternalServiceException {
+    this.fsc = fsc;
+    this.baseServerWebUrl = baseServerWebUrl;
+    this.user = user;
+    
+    System.out.println("THIS IS UPLOAD TASK IN TOMCAT");
+    AggregrateThreadExecutor exec = AggregrateThreadExecutor.getAggregateThreadExecutor();
+    exec.execute(this);
+  }
 
   @Override
-  public void createFormUploadTask(FormServiceCursor fsc, User user)
-      throws ODKExternalServiceException {
-    // TODO: implement upload form for tomcat
+  public void run() {
+    Datastore ds = (Datastore) ContextFactory.get().getBean(BeanDefs.DATASTORE_BEAN);
+    try {
+      uploadSubmissions(fsc, baseServerWebUrl, ds, user);
+    } catch (Exception e) {
+      e.printStackTrace();
+      // just move on as the task restarting the 
+    }
+    
   }
 
 }

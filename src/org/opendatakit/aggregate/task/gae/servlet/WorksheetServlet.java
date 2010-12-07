@@ -110,10 +110,8 @@ public class WorksheetServlet extends ServletUtilBase {
       ws.worksheetCreator(getServerURL(req), spreadsheetName, esType, form, ds, user);
     } catch (ODKExternalServiceException e) {
       e.printStackTrace();
-      resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
     } catch (ODKDatastoreException e) {
       e.printStackTrace();
-      resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
     }
 
   }

@@ -40,6 +40,7 @@ import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.aggregate.submission.SubmissionField;
 import org.opendatakit.aggregate.submission.SubmissionSet;
+import org.opendatakit.aggregate.submission.type.BlobSubmissionType;
 import org.opendatakit.aggregate.submission.type.RepeatSubmissionType;
 import org.opendatakit.common.constants.BasicConsts;
 import org.opendatakit.common.constants.HtmlConsts;
@@ -64,7 +65,7 @@ import org.xml.sax.SAXException;
 public class SubmissionParser {
 
 	/**
-	 * Odk Id of submission
+	 * form Id of submission
 	 */
 	private String formId;
 
@@ -151,9 +152,7 @@ public class SubmissionParser {
 			throw new IOException("DID NOT GET A SUBMISSION");
 		}
 
-		String submissionXML = submission.getStream().toString();
-		System.out.println(submissionXML);
-		constructorHelper(new ByteArrayInputStream(submissionXML.getBytes()));
+		constructorHelper(new ByteArrayInputStream(submission.getStream().toByteArray()));
 	}
 
 	/**
@@ -228,8 +227,10 @@ public class SubmissionParser {
 		topLevelTableKey = submission.getKey();
 
 		FormElementModel formRoot = form.getTopLevelGroupElement();
-		processSubmissionElement(formRoot, root, submission);
+		boolean uploadAllBinaries = processSubmissionElement(formRoot, root, submission);
 
+		// TODO: figure out if we actually have all the binary content uploaded...
+		submission.setIsComplete(true);
 		// save the elements inserted into the top-level submission
 		submission.persist(ds, user);
 		inputStreamXML.close();
@@ -261,19 +262,19 @@ public class SubmissionParser {
 	 * @throws ODKConversionException
 	 * @throws ODKDatastoreException
 	 */
-	private void processSubmissionElement(FormElementModel node,
+	private boolean processSubmissionElement(FormElementModel node,
 			Element currentSubmissionElement, SubmissionSet submissionSet)
 			throws ODKParseException, ODKIncompleteSubmissionData,
 			ODKConversionException, ODKDatastoreException {
 
 		if (node == null || currentSubmissionElement == null) {
-			return;
+			return true;
 		}
 
 		// the element name of the fdm is the tag name...
 		String submissionTag = node.getElementName();
 		if (submissionTag == null) {
-			return;
+			return true;
 		}
 
 		// verify that the xml matches the node we are processing...
@@ -291,6 +292,7 @@ public class SubmissionParser {
 		// and for each of these, they should be fields under the given fdm
 		// and
 		// values within the submissionSet
+		boolean complete = true;
 		for (Element e : elements) {
 			FormElementModel m = node.findElementByName(e.getNodeName());
 			if (m == null) {
@@ -301,7 +303,8 @@ public class SubmissionParser {
 			case GROUP:
 				// need to recurse on these elements keeping the same
 				// submissionSet...
-				processSubmissionElement(m, e, submissionSet);
+				complete = complete && 
+					processSubmissionElement(m, e, submissionSet);
 				break;
 			case REPEAT:
 				// get the field that will hold the repeats...
@@ -313,7 +316,8 @@ public class SubmissionParser {
 						submissionSet, l, m, form.getFormDefinition(),
 						topLevelTableKey, ds, user);
 				// populate the instance's submission set with values from e...
-				processSubmissionElement(m, e, repeatableSubmissionSet);
+				complete = complete && 
+					processSubmissionElement(m, e, repeatableSubmissionSet);
 				// add the instance to the repeat group...
 				repeats.addSubmissionSet(repeatableSubmissionSet);
 				break;
@@ -339,13 +343,15 @@ public class SubmissionParser {
 				value = getSubmissionValue(e);
 				SubmissionField<?> submissionElement = ((SubmissionField<?>) submissionSet
 						.getElementValue(m));
-				processBinarySubmission(m, submissionElement, value);
+				complete = complete && 
+					processBinarySubmission(m, submissionElement, value);
 				break;
 			}
 		}
+		return complete;
 	}
 
-	private void processBinarySubmission(FormElementModel m,
+	private boolean processBinarySubmission(FormElementModel m,
 			SubmissionField<?> submissionElement, String value)
 			throws ODKConversionException, ODKDatastoreException {
 		
@@ -379,11 +385,10 @@ public class SubmissionParser {
 						.getContentType(), binaryData.getContentLength(), fileName,
 						ds, user);
 			} else {
-				// TODO: decide if we want system to reject submission if file
-				// is not found?
-				System.err.println("UNABLE TO FIND VALUE OF " + value);
+				return (((BlobSubmissionType) submissionElement).getAttachmentCount() >= 1);
 			}
 		}
+		return true;
 	}
 
 	private List<Element> getElements(Element rootNode) {
@@ -466,11 +471,11 @@ public class SubmissionParser {
 	}
 
 	/**
-	 * Get the ODK Id of submission
+	 * Get the form Id of submission
 	 * 
-	 * @return ODK Id
+	 * @return form Id
 	 */
-	public String getOdkId() {
+	public String getSubmissionFormId() {
 		return formId;
 	}
 

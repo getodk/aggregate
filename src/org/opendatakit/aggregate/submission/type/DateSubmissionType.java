@@ -73,7 +73,16 @@ public class DateSubmissionType extends SubmissionSingleValueBase<Date> {
 			}
 		}
 	}
-
+	
+	/**
+	 * Helper for updating dates in predefined forms...
+	 * 
+	 * @param date
+	 */
+	public void setValueFromDate(Date date) {
+		setValue(date);
+	}
+	
 	/**
 	 * Get submission field value from database entity
 	 * 

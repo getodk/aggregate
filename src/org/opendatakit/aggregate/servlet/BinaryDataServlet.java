@@ -80,6 +80,8 @@ public class BinaryDataServlet extends ServletUtilBase {
 	
     // verify parameters are present
     String keyString = getParameter(req, ServletConsts.BLOB_KEY);
+    String downloadAsAttachmentString = getParameter(req, ServletConsts.AS_ATTACHMENT);
+    
     if (keyString == null) {
       sendErrorNotEnoughParams(resp);
       return;
@@ -106,6 +108,7 @@ public class BinaryDataServlet extends ServletUtilBase {
 						"Unable to retrieve attachment");
 		return;
 	}
+	
     if ( sub != null ) {
     	SubmissionElement v = sub.resolveSubmissionKey(parts);
     	BlobSubmissionType b = (BlobSubmissionType) v;
@@ -126,15 +129,20 @@ public class BinaryDataServlet extends ServletUtilBase {
     		SubmissionKeyPart p = parts.get(parts.size()-1);
     		String version = p.getVersion();
     		Long ordinal = p.getOrdinalNumber();
-    		try {
-    			imageBlob = b.getBlob(ordinal.intValue(), version);
-    			unrootedFileName = b.getUnrootedFilename(ordinal.intValue());
-    			contentType = b.getContentType(ordinal.intValue(), version);
-    			contentLength = b.getContentLength(ordinal.intValue(), version);
-    		} catch (ODKDatastoreException e) {
-    			e.printStackTrace();
-    			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-    							"Unable to retrieve attachment");
+    		if ((version == null) || (ordinal == null)) {
+    			resp.sendError(HttpServletResponse.SC_BAD_REQUEST, 
+    					"attachment request must be fully qualified");
+    		} else {
+	    		try {
+	    			imageBlob = b.getBlob(ordinal.intValue(), version);
+	    			unrootedFileName = b.getUnrootedFilename(ordinal.intValue());
+	    			contentType = b.getContentType(ordinal.intValue(), version);
+	    			contentLength = b.getContentLength(ordinal.intValue(), version);
+	    		} catch (ODKDatastoreException e) {
+	    			e.printStackTrace();
+	    			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+	    							"Unable to retrieve attachment");
+	    		}
     		}
     	}
     }
@@ -148,11 +156,15 @@ public class BinaryDataServlet extends ServletUtilBase {
     	if ( contentLength != null ) {
     		resp.setContentLength(contentLength.intValue());
     	}
-    	// set filename if we are downloading to disk...
-    	// need this for manifest fetch logic...
-//    	if ( unrootedFileName != null ) {
-//    		resp.addHeader("Content-Disposition:", "attachment; filename=\""+unrootedFileName+"\"");
-//    	}
+    	
+    	if ( downloadAsAttachmentString != null && ! "".equals(downloadAsAttachmentString) ) {
+    		// set filename if we are downloading to disk...
+    		// need this for manifest fetch logic...
+	    	if ( unrootedFileName != null ) {
+	    		resp.addHeader("Content-Disposition:", "attachment; filename=\""+unrootedFileName+"\"");
+	    	}
+    	}
+    	
         OutputStream os = resp.getOutputStream();
         os.write(imageBlob);
         os.close();

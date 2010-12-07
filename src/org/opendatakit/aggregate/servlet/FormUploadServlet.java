@@ -95,17 +95,15 @@ public class FormUploadServlet extends ServletUtilBase {
   @Override
   public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 
-    // verify user is logged in
-    if (!verifyCredentials(req, resp)) {
-      return;
-    }
-
-    beginBasicHtmlResponse(TITLE_INFO, resp, req, true); // header info
-
     PrintWriter out = resp.getWriter();
+
+	if (!verifyCredentials(req, resp)) {
+		return;
+	}
+
+	beginBasicHtmlResponse(TITLE_INFO, resp, req, true); // header info
     out.write(HtmlUtil.createFormBeginTag(ADDR, HtmlConsts.MULTIPART_FORM_DATA,
         HtmlConsts.POST));
-    out.write(HtmlConsts.LINE_BREAK + HtmlConsts.LINE_BREAK);
     out.write("Location of Xform definition to be uploaded:" + HtmlConsts.LINE_BREAK);
     out.write(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_FILE, ServletConsts.FORM_DEF_PRAM, null));
     out.write(HtmlConsts.LINE_BREAK + HtmlConsts.LINE_BREAK);

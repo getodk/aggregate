@@ -29,10 +29,10 @@ import org.opendatakit.aggregate.constants.ErrorConsts;
 import org.opendatakit.aggregate.constants.format.FormatConsts;
 import org.opendatakit.aggregate.datamodel.BinaryContent;
 import org.opendatakit.aggregate.datamodel.FormDataModel;
-import org.opendatakit.aggregate.datamodel.FormDefinition;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.datamodel.VersionedBinaryContent;
 import org.opendatakit.aggregate.exception.ODKConversionException;
+import org.opendatakit.aggregate.form.FormDefinition;
 import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.format.element.ElementFormatter;
 import org.opendatakit.aggregate.submission.SubmissionBlob;
@@ -196,13 +196,16 @@ public class BlobSubmissionType extends SubmissionFieldBase<SubmissionKey> {
    * @param byteArray byte form of the value
    * @param submissionSetKey key of submission set that will reference the blob
    * @param contentType type of binary data (NOTE: only used for binary data)
+   * @return the outcome of the storage attempt.  md5 hashes are used to determine file equivalence. 
    * @throws ODKConversionException
- * @throws ODKDatastoreException 
+   * @throws ODKDatastoreException 
    * 
    */
   @Override
-  public void setValueFromByteArray(byte[] byteArray, String contentType, Long contentLength, String unrootedFilePath, Datastore datastore, User user) throws ODKConversionException, ODKDatastoreException{
+  public BlobSubmissionOutcome setValueFromByteArray(byte[] byteArray, String contentType, Long contentLength, String unrootedFilePath, Datastore datastore, User user) throws ODKConversionException, ODKDatastoreException{
 
+	  BlobSubmissionOutcome outcome = BlobSubmissionOutcome.FILE_UNCHANGED;
+	  
 	  String md5Hash = CommonFieldsBase.newMD5HashUri(byteArray);
 
 	  boolean existingContent = false;
@@ -223,6 +226,7 @@ public class BlobSubmissionType extends SubmissionFieldBase<SubmissionKey> {
 	  final String version = CommonFieldsBase.newUri();
 	  if ( matchedBc == null ) {
 		  // adding a new file...
+		  outcome = BlobSubmissionOutcome.COMPLETELY_NEW_FILE;
 		  matchedBc = (BinaryContent) datastore.createEntityUsingRelation(element.getFormDataModel().getBackingObjectPrototype(), topLevelTableKey, user);
 		  matchedBc.setParentAuri(parentKey);
 		  matchedBc.setOrdinalNumber(attachments.size()+1L);
@@ -230,20 +234,27 @@ public class BlobSubmissionType extends SubmissionFieldBase<SubmissionKey> {
 		  matchedBc.setUnrootedFilePath(unrootedFilePath);
 		  // later: attachments.add(matchedBc);
 	  } else {
+		  outcome = BlobSubmissionOutcome.NEW_FILE_VERSION;
 		  // updating an existing file... or a no-op if the hash value is the same...
 		  List<VersionedBinaryContent> vcList = versionedAttachments.get(matchedBc);
 		  if ( vcList != null ) {
 			  for ( VersionedBinaryContent vc : vcList ) {
-				  if ( vc.getContentHash() == md5Hash ) {
-					  // same content -- reuse it.  
-					  // Change the bc to have this content's version as its active version.
-					  matchedBc.setVersion(vc.getVersion());
-					  datastore.putEntity(matchedBc, user);
-					  return;
+				  if ( vc.getContentHash().equals(md5Hash) ) {
+					  // found a version of this content with the same hash (same file).
+					  // The content is the same, so we don't need to save the binary.  
+					  if ( vc.getVersion().equals(matchedBc.getVersion()) ) {
+						  // the current version is this version -- no change
+						  return BlobSubmissionOutcome.FILE_UNCHANGED;
+					  } else {
+						  // the current version is different -- update to this version.
+						  matchedBc.setVersion(vc.getVersion());
+						  datastore.putEntity(matchedBc, user);
+						  return BlobSubmissionOutcome.NEW_FILE_VERSION;
+					  }
 				  }
 			  }
 		  }
-		  // we are creating a newer version of the attachment or defining it for the first time...
+		  // no version matches -- need to create a new version record and store the binary.
 		  // later: matchedBc.setVersion(version);
 	  }
 
@@ -263,8 +274,6 @@ public class BlobSubmissionType extends SubmissionFieldBase<SubmissionKey> {
 
 	  // and create the SubmissionBlob (persisting it...)
       try {
-    	// persist the data
-		SubmissionBlob subBlob = new SubmissionBlob(byteArray, vbc.getUri(), vbcDataModel.getChildren().get(0), formDefinition, topLevelTableKey, datastore, user);
 		// persist the version linkage
 	    datastore.putEntity(vbc, user);
 	    vcList.add(vbc);
@@ -272,6 +281,9 @@ public class BlobSubmissionType extends SubmissionFieldBase<SubmissionKey> {
 		// persist the top level linkages...
 		datastore.putEntity(matchedBc, user);
 	    if ( !existingContent ) attachments.add(matchedBc);
+
+	    // persist the binary data
+		SubmissionBlob subBlob = new SubmissionBlob(byteArray, vbc.getUri(), vbcDataModel.getChildren().get(0), formDefinition, topLevelTableKey, datastore, user);
 	    
 	  } catch (ODKDatastoreException e) {
 		// there may be trash in the database upon failure.
@@ -284,6 +296,7 @@ public class BlobSubmissionType extends SubmissionFieldBase<SubmissionKey> {
 		}
 		throw new ODKConversionException(e);
 	  }
+	  return outcome;
   }
 
   /**

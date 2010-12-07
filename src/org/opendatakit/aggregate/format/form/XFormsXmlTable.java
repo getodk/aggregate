@@ -20,6 +20,7 @@ package org.opendatakit.aggregate.format.form;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.lang.StringEscapeUtils;
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.format.XFormsTableConsts;
@@ -76,16 +77,20 @@ public class XFormsXmlTable {
 	b.append(HtmlUtil.createBeginTag(XFormsTableConsts.XFORM_TAG));
     b.append(BasicConsts.NEW_LINE);
 	b.append(HtmlUtil.createBeginTag(XFormsTableConsts.FORM_ID_TAG));
-	b.append(form.getFormId());
+	b.append(StringEscapeUtils.escapeXml(form.getFormId()));
 	b.append(HtmlUtil.createEndTag(XFormsTableConsts.FORM_ID_TAG));
     b.append(BasicConsts.NEW_LINE);
 	b.append(HtmlUtil.createBeginTag(XFormsTableConsts.FORM_NAME_TAG));
-	b.append(formName);
+	b.append(StringEscapeUtils.escapeXml(formName));
 	b.append(HtmlUtil.createEndTag(XFormsTableConsts.FORM_NAME_TAG));
+    b.append(BasicConsts.NEW_LINE);
+    b.append(HtmlUtil.createBeginTag(XFormsTableConsts.MAJOR_MINOR_VERSION_TAG));
+    b.append(form.getMajorMinorVersionString());
+    b.append(HtmlUtil.createEndTag(XFormsTableConsts.MAJOR_MINOR_VERSION_TAG));
     b.append(BasicConsts.NEW_LINE);
     if ( description != null ) {
 		b.append(HtmlUtil.createBeginTag(XFormsTableConsts.DESCRIPTION_TEXT_TAG));
-		b.append(description);
+		b.append(StringEscapeUtils.escapeXml(description));
 		b.append(HtmlUtil.createEndTag(XFormsTableConsts.DESCRIPTION_TEXT_TAG));
 	    b.append(BasicConsts.NEW_LINE);
     }

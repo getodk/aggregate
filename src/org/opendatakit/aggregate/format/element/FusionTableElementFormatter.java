@@ -17,10 +17,12 @@ package org.opendatakit.aggregate.format.element;
 
 import java.math.BigDecimal;
 
-import org.opendatakit.aggregate.constants.format.KmlConsts;
+import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.format.Row;
+import org.opendatakit.aggregate.submission.SubmissionRepeat;
 import org.opendatakit.aggregate.submission.type.GeoPoint;
 import org.opendatakit.common.constants.BasicConsts;
+import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 
 /**
  * 
@@ -30,31 +32,30 @@ import org.opendatakit.common.constants.BasicConsts;
  */
 public class FusionTableElementFormatter extends LinkElementFormatter {
 
+  private static final String FT_PLACEMARK_POINT_TEMPLATE = "<Point><coordinates>%s</coordinates></Point>";
   
   public FusionTableElementFormatter(String webServerUrl) {
     super(webServerUrl, true, true, true);
   }
-
   
   @Override
   public void formatGeoPoint(GeoPoint gp, String propertyName, Row row) {
     if (gp != null) {
       BigDecimal latitude = new BigDecimal(0.0);
       if (gp.getLatitude() != null) {
-        latitude = gp.getAltitude();
+        latitude = gp.getLatitude();
       }
 
       BigDecimal longitude = new BigDecimal(0.0);
       if (gp.getLongitude() != null) {
-        longitude = gp.getAltitude();
+        longitude = gp.getLongitude();
       }
 
       BigDecimal altitude = new BigDecimal(0.0);
       if (gp.getAltitude() != null) {
         altitude = gp.getAltitude();
       }
-      String point = String.format(KmlConsts.KML_PLACEMARK_POINT_TEMPLATE, longitude
-          + BasicConsts.COMMA + latitude + BasicConsts.COMMA + altitude);
+      String point = String.format(FT_PLACEMARK_POINT_TEMPLATE, longitude + BasicConsts.COMMA + latitude + BasicConsts.COMMA + altitude);
       basicStringConversion(point, row);
       basicStringConversion(gp.getAccuracy(), row);
     } else {
@@ -62,5 +63,11 @@ public class FusionTableElementFormatter extends LinkElementFormatter {
       basicStringConversion(null, row);
     }
   }
+  
+  @Override
+  public void formatRepeats(SubmissionRepeat repeat, FormElementModel repeatElement, Row row) throws ODKDatastoreException {
+    basicStringConversion(repeat.getUniqueKeyStr(), row);
+  }
+  
 
 }

@@ -28,7 +28,7 @@ import org.opendatakit.aggregate.form.Form;
  * @author wbrunette@gmail.com
  * 
  */
-public class FormElementModel {
+public final class FormElementModel {
 
 	/* xform element types */
 	public static enum ElementType {
@@ -113,7 +113,7 @@ public class FormElementModel {
 		}
 	}
 	
-	private void addChildHelper( FormDataModel f ) {
+	private final void addChildHelper( FormDataModel f ) {
 		switch ( f.getElementType() ) {
 			// xform tag types
 		case STRING:
@@ -143,7 +143,7 @@ public class FormElementModel {
 		}
 	}
 	
-	public boolean equals(Object obj) {
+	public final boolean equals(Object obj) {
 		if ((obj == null) || !(obj instanceof FormElementModel))
 			return false;
 		FormElementModel ref = (FormElementModel) obj;
@@ -161,11 +161,11 @@ public class FormElementModel {
 		return parent;
 	}
 
-	public FormDataModel getFormDataModel() {
+	public final FormDataModel getFormDataModel() {
 		return fdm;
 	}
 	
-	public Metadata getType() {
+	public final Metadata getType() {
 		return type;
 	}
 
@@ -280,7 +280,14 @@ public class FormElementModel {
 		return new FormElementKey(getFullyQualifiedElementName(form));
 	}
 	
-	public FormElementModel findElementByName(String elementName) {
+	/**
+	 * Search the children of this element and return the one that has 
+	 * the name that matches.
+	 * 
+	 * @param elementName - name to match
+	 * @return the element or null if not found.
+	 */
+	public final FormElementModel findElementByName(String elementName) {
 		if ( elementName == null ) {
 			throw new IllegalArgumentException("null elementName passed in!");
 		}
@@ -292,6 +299,10 @@ public class FormElementModel {
 		}
 		return null;
 	}
+	
+	////////////////////////////////////////////////////////////////////////////////
+	//  Static methods
+	////////////////////////////////////////////////////////////////////////////////
 	
 	/**
 	 * Given a form definition and a FormElementKey, retrieves the FormElementModel
@@ -340,5 +351,9 @@ public class FormElementModel {
 			++slashPosition;
 		}
 		return currentElement;
+	}
+	
+	public static final FormElementModel buildFormElementModelTree(FormDataModel topLevelGroup) {
+		return  new FormElementModel(topLevelGroup, null);
 	}
 }

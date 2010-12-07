@@ -15,7 +15,6 @@
  */
 package org.opendatakit.aggregate.form;
 
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -23,23 +22,21 @@ import java.util.Map;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.datamodel.FormDataModel;
-import org.opendatakit.aggregate.datamodel.FormDefinition;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.exception.ODKConversionException;
+import org.opendatakit.aggregate.exception.ODKFormAlreadyExistsException;
 import org.opendatakit.aggregate.parser.MultiPartFormItem;
 import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.aggregate.submission.SubmissionSet;
+import org.opendatakit.aggregate.submission.SubmissionField.BlobSubmissionOutcome;
 import org.opendatakit.aggregate.submission.type.BlobSubmissionType;
 import org.opendatakit.aggregate.submission.type.BooleanSubmissionType;
 import org.opendatakit.aggregate.submission.type.LongSubmissionType;
 import org.opendatakit.aggregate.submission.type.RepeatSubmissionType;
 import org.opendatakit.aggregate.submission.type.StringSubmissionType;
-import org.opendatakit.common.constants.HtmlConsts;
 import org.opendatakit.common.persistence.CommonFieldsBase;
-import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.DynamicCommonFieldsBase;
-import org.opendatakit.common.persistence.EntityKey;
 import org.opendatakit.common.persistence.TopLevelDynamicBase;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
@@ -60,6 +57,8 @@ public class FormInfo {
 	
 	private static FormInfoTable reference = null;
 	
+	public static final XFormParameters formInfoXFormParameters =
+		new XFormParameters(FormDataModel.URI_FORM_ID_VALUE_FORM_INFO, 1L, 0L);
 	/*
 	 * Following public fields are valid after the first 
 	 * successful call to getFormDefinition()
@@ -104,19 +103,20 @@ public class FormInfo {
 	        UserService userService = (UserService) ContextFactory.get().getBean(
 	                BeanDefs.USER_BEAN);
             User user = userService.getDaemonAccountUser();
-		    formDefinition = FormDefinition.getFormDefinition(FormDataModel.URI_FORM_ID_VALUE_FORM_INFO, datastore, user);
+		    formDefinition = FormDefinition.getFormDefinition(formInfoXFormParameters, datastore, user);
+
+		    String formInfoUri = CommonFieldsBase.newMD5HashUri(formInfoXFormParameters.formId);
+		    
 		    if ( formDefinition == null ) {
 				// doesn't have the form definition tables defined ...
 				// need to insert definition records into the fdm table...
 				final FormDataModel fdm = FormDataModel.createRelation(datastore, user);
 				
 				List<FormDataModel> idDefn = new ArrayList<FormDataModel>();
-				EntityKey definitionKey = new EntityKey(fdm, CommonFieldsBase.newMD5HashUri(FormDataModel.URI_FORM_ID_VALUE_FORM_INFO));
-				FormInfoTable.createFormDataModel(idDefn, definitionKey, datastore, user);
-
-				datastore.putEntities(idDefn, user);
+				FormInfoTable.createFormDataModel(idDefn, datastore, user);
+				FormDefinition.assertModel(formInfoXFormParameters, idDefn, datastore, user);
 				
-			    formDefinition = FormDefinition.getFormDefinition(FormDataModel.URI_FORM_ID_VALUE_FORM_INFO, datastore, user);
+			    formDefinition = FormDefinition.getFormDefinition(formInfoXFormParameters, datastore, user);
 				
 				if ( formDefinition == null ) {
 					throw new IllegalStateException("Unable to create form definition definition!");
@@ -127,24 +127,24 @@ public class FormInfo {
 			// and update the FormInfo object so it has the canonical data fields...
 			reference = (FormInfoTable) formDefinition.getTopLevelGroup().getBackingObjectPrototype();
 			
-			formId = findElement(formDefinition.getTopLevelGroupElement(), FormInfoTable.createRelation(datastore, user).formId);
+			formId = FormDefinition.findElement(formDefinition.getTopLevelGroupElement(), FormInfoTable.createRelation(datastore, user).formId);
 			// FormInfoDescriptionTable element...
 			{
 				fiDescriptionTable = formDefinition.getTopLevelGroupElement().findElementByName(FormInfoDescriptionTable.TABLE_NAME);
 				FormInfoDescriptionTable f = FormInfoDescriptionTable.createRelation(datastore, user);
-				languageCode = findElement(fiDescriptionTable, f.languageCode);
-				formName = findElement(fiDescriptionTable, f.formName);
-				description = findElement(fiDescriptionTable, f.description);
-				descriptionUrl = findElement(fiDescriptionTable, f.descriptionUrl);
+				languageCode = FormDefinition.findElement(fiDescriptionTable, f.languageCode);
+				formName = FormDefinition.findElement(fiDescriptionTable, f.formName);
+				description = FormDefinition.findElement(fiDescriptionTable, f.description);
+				descriptionUrl = FormDefinition.findElement(fiDescriptionTable, f.descriptionUrl);
 			}
 			// FormInfoFilesetTable element...
 			{
 				fiFilesetTable = formDefinition.getTopLevelGroupElement().findElementByName(FormInfoFilesetTable.TABLE_NAME);
 				FormInfoFilesetTable f = FormInfoFilesetTable.createRelation(datastore, user);
-				rootElementModelVersion = findElement(fiFilesetTable, f.rootElementModelVersion);
-				rootElementUiVersion = findElement(fiFilesetTable, f.rootElementUiVersion);
-				isFilesetComplete = findElement(fiFilesetTable, f.isFilesetComplete);
-				isDownloadAllowed = findElement(fiFilesetTable, f.isDownloadAllowed);
+				rootElementModelVersion = FormDefinition.findElement(fiFilesetTable, f.rootElementModelVersion);
+				rootElementUiVersion = FormDefinition.findElement(fiFilesetTable, f.rootElementUiVersion);
+				isFilesetComplete = FormDefinition.findElement(fiFilesetTable, f.isFilesetComplete);
+				isDownloadAllowed = FormDefinition.findElement(fiFilesetTable, f.isDownloadAllowed);
 				xformDefinition = fiFilesetTable.findElementByName(FormInfoFilesetTable.ELEMENT_NAME_XFORM_DEFINITION);
 				manifestFileset = fiFilesetTable.findElementByName(FormInfoFilesetTable.ELEMENT_NAME_MANIFEST_FILESET);
 			}
@@ -152,20 +152,21 @@ public class FormInfo {
 			{
 				fiSubmissionTable = formDefinition.getTopLevelGroupElement().findElementByName(FormInfoSubmissionTable.TABLE_NAME);
 				FormInfoSubmissionTable f = FormInfoSubmissionTable.createRelation(datastore, user);
-				submissionFormId = findElement(fiSubmissionTable, f.submissionFormId);
-				submissionModelVersion = findElement(fiSubmissionTable, f.submissionModelVersion);
-				submissionUiVersion = findElement(fiSubmissionTable, f.submissionUiVersion);
+				submissionFormId = FormDefinition.findElement(fiSubmissionTable, f.submissionFormId);
+				submissionModelVersion = FormDefinition.findElement(fiSubmissionTable, f.submissionModelVersion);
+				submissionUiVersion = FormDefinition.findElement(fiSubmissionTable, f.submissionUiVersion);
 			}
-			
-			String formInfoUri = CommonFieldsBase.newMD5HashUri(FormDataModel.URI_FORM_ID_VALUE_FORM_INFO);
+
+			// Now create a record in the FormInfo table for the FormInfo table itself...
 			TopLevelDynamicBase fi = null;
 			try {
 				fi = datastore.getEntity(reference, formInfoUri, user);
 			} catch ( ODKEntityNotFoundException e ) {
 				// we must have failed before persisting a FormInfo record
 				// or this must be our first time through...
-				Submission formInfo = new Submission(1L, 0L, formInfoUri, formDefinition, datastore, user);
-				((StringSubmissionType) formInfo.getElementValue(formId)).setValueFromString(FormDataModel.URI_FORM_ID_VALUE_FORM_INFO);
+				Submission formInfo = new Submission(formInfoXFormParameters.modelVersion, formInfoXFormParameters.uiVersion,
+													 formInfoUri, formDefinition, datastore, user);
+				((StringSubmissionType) formInfo.getElementValue(formId)).setValueFromString(formInfoXFormParameters.formId);
 				// default description...
 				{
 					RepeatSubmissionType r = (RepeatSubmissionType) formInfo.getElementValue(fiDescriptionTable);
@@ -178,8 +179,8 @@ public class FormInfo {
 				{
 					RepeatSubmissionType r = (RepeatSubmissionType) formInfo.getElementValue(fiFilesetTable);
 					SubmissionSet sFileset = new SubmissionSet(formInfo, 1L, fiFilesetTable, formDefinition, formInfo.getKey(), datastore, user);
-					((LongSubmissionType) sFileset.getElementValue(rootElementModelVersion)).setValueFromString("1");
-					((LongSubmissionType) sFileset.getElementValue(rootElementUiVersion)).setValueFromString("0");
+					((LongSubmissionType) sFileset.getElementValue(rootElementModelVersion)).setValueFromString(formInfoXFormParameters.modelVersion.toString());
+					((LongSubmissionType) sFileset.getElementValue(rootElementUiVersion)).setValueFromString(formInfoXFormParameters.uiVersion.toString());
 					((BooleanSubmissionType) sFileset.getElementValue(isFilesetComplete)).setValueFromString("yes");
 					((BooleanSubmissionType) sFileset.getElementValue(isDownloadAllowed)).setValueFromString("yes");
 					r.addSubmissionSet(sFileset);
@@ -188,31 +189,31 @@ public class FormInfo {
 				{
 					RepeatSubmissionType r = (RepeatSubmissionType) formInfo.getElementValue(fiSubmissionTable);
 					SubmissionSet sSubmission = new SubmissionSet(formInfo, 1L, fiSubmissionTable, formDefinition, formInfo.getKey(), datastore, user);
-					((StringSubmissionType) sSubmission.getElementValue(submissionFormId)).setValueFromString(FormDataModel.URI_FORM_ID_VALUE_FORM_INFO);
-					((LongSubmissionType) sSubmission.getElementValue(submissionModelVersion)).setValueFromString("1");
-					((LongSubmissionType) sSubmission.getElementValue(submissionUiVersion)).setValueFromString("0");
+					((StringSubmissionType) sSubmission.getElementValue(submissionFormId)).setValueFromString(formInfoXFormParameters.formId);
+					((LongSubmissionType) sSubmission.getElementValue(submissionModelVersion)).setValueFromString(formInfoXFormParameters.modelVersion.toString());
+					((LongSubmissionType) sSubmission.getElementValue(submissionUiVersion)).setValueFromString(formInfoXFormParameters.uiVersion.toString());
 					r.addSubmissionSet(sSubmission);
 				}
 				formInfo.persist(datastore, user);
+				
 				fi = datastore.getEntity(reference, formInfoUri, user);
 			}
 			
 			// and retrieve cleanly... 
 		    Submission formInfo = new Submission(fi, formDefinition, datastore, user);
 			formInfoForm = new Form(formInfo, datastore, user);
-			
-			// and now configure the SubmissionAssociation table.
-			
+
+			try {
+				// and we can create other well-known forms here 
+				PersistentResults.createForm(datastore,user);
+			} catch ( ODKDatastoreException e ) {
+				// we have an error...
+				formDefinition = null;
+				formInfoForm = null;
+				throw e;
+			}
 		}
 		return formDefinition;
-	}
-	
-	private static final FormElementModel findElement(FormElementModel group, DataField backingKey) {
-		for ( FormElementModel m : group.getChildren()) {
-			if ( m.isMetadata() ) continue;
-			if ( m.getFormDataModel().getBackingKey() == backingKey ) return m;
-		}
-		return null;
 	}
 	
 	static final Form getFormInfoForm(Datastore datastore) throws ODKDatastoreException {
@@ -275,7 +276,22 @@ public class FormInfo {
 	    }
 	}
 	
-	public static final void setXFormDefinition( Submission aFormDefinition, Long rootModelVersion, Long rootUiVersion, String title, byte[] definition, Datastore datastore, User user ) throws ODKDatastoreException, ODKConversionException {
+	/**
+	 * Set the Xform definition.
+	 * 
+	 * @param aFormDefinition
+	 * @param rootModelVersion
+	 * @param rootUiVersion
+	 * @param title
+	 * @param definition
+	 * @param datastore
+	 * @param user
+	 * @return true if the file is identical to the currently-stored one.
+	 * @throws ODKDatastoreException
+	 * @throws ODKConversionException
+	 * @throws ODKFormAlreadyExistsException 
+	 */
+	public static final boolean setXFormDefinition( Submission aFormDefinition, Long rootModelVersion, Long rootUiVersion, String title, byte[] definition, Datastore datastore, User user ) throws ODKDatastoreException, ODKConversionException, ODKFormAlreadyExistsException {
 	    RepeatSubmissionType r = (RepeatSubmissionType) aFormDefinition.getElementValue(FormInfo.fiFilesetTable);
 	    List<SubmissionSet> filesets = r.getSubmissionSets();
 	    SubmissionSet matchingSet = null;
@@ -287,7 +303,12 @@ public class FormInfo {
 	    	}
 	    }
 	    
-	    if ( matchingSet == null ) {
+	    boolean matchingFile = true;
+	    if ( matchingSet == null ) {	    	
+	    	// we don't support multiple file versions yet...
+	    	if ( filesets.size() != 0 ) throw new ODKFormAlreadyExistsException();
+	    	
+	    	matchingFile = false; // nothing there yet...
 	    	// create a matching set...
 			SubmissionSet sFileset = new SubmissionSet(aFormDefinition, filesets.size()+1L, fiFilesetTable, formDefinition, aFormDefinition.getKey(), datastore, user);
 			((LongSubmissionType) sFileset.getElementValue(rootElementModelVersion)).setValueFromString(rootModelVersion == null ? null : rootModelVersion.toString());
@@ -297,10 +318,19 @@ public class FormInfo {
 			r.addSubmissionSet(sFileset);
 			matchingSet = sFileset;
 	    }
-
+	    
 	    BlobSubmissionType bt = (BlobSubmissionType) matchingSet.getElementValue(FormInfo.xformDefinition);
-	    bt.setValueFromByteArray(definition, "text/xml", Long.valueOf(definition.length), title + ".xml",
-	        datastore, user);
+	    if ( bt.getAttachmentCount() == 0 ) {
+	    	return bt.setValueFromByteArray(definition, "text/xml", Long.valueOf(definition.length), title + ".xml",
+	    			datastore, user) == BlobSubmissionOutcome.FILE_UNCHANGED;
+	    } else {
+	    	List<String> versions = bt.getBinaryVersions(1);
+	    	if ( versions.size() > 1 || bt.getAttachmentCount() > 1) throw new ODKFormAlreadyExistsException();
+	    	String hash = bt.getContentHash(1, versions.get(0));
+	    	String thisHash = CommonFieldsBase.newMD5HashUri(definition);
+	    	if (! hash.equals(thisHash) ) throw new ODKFormAlreadyExistsException();
+	    	return true;
+	    }
 	}
 	
 	/**
@@ -313,10 +343,11 @@ public class FormInfo {
 	 * @param item
 	 * @param datastore
 	 * @param user
+	 * @return true if the files are completely new or are identical to the currently-stored ones.
 	 * @throws ODKDatastoreException
 	 * @throws ODKConversionException
 	 */
-	public static final void setXFormMediaFile( Submission aFormDefinition, Long rootModelVersion, Long rootUiVersion, MultiPartFormItem item, Datastore datastore, User user ) throws ODKDatastoreException, ODKConversionException {
+	public static final boolean setXFormMediaFile( Submission aFormDefinition, Long rootModelVersion, Long rootUiVersion, MultiPartFormItem item, Datastore datastore, User user ) throws ODKDatastoreException, ODKConversionException {
 	    RepeatSubmissionType r = (RepeatSubmissionType) aFormDefinition.getElementValue(FormInfo.fiFilesetTable);
 	    List<SubmissionSet> filesets = r.getSubmissionSets();
 	    SubmissionSet matchingSet = null;
@@ -339,17 +370,17 @@ public class FormInfo {
 			matchingSet = sFileset;
 	    }
 
+	    boolean matchingFiles = true;
 	    BlobSubmissionType bt = (BlobSubmissionType) matchingSet.getElementValue(FormInfo.manifestFileset);
-	    try {
-	    	String filePath = item.getFilename();
-	    	if ( filePath.indexOf("/") != -1 ) {
-	    		filePath = filePath.substring(filePath.indexOf("/")+1);
-	    	}
-			bt.setValueFromByteArray(item.getStream().toString(HtmlConsts.UTF8_ENCODE).getBytes(), item.getContentType(), item.getContentLength(), filePath,
-			    datastore, user);
-		} catch (UnsupportedEncodingException e) {
-			throw new IllegalStateException("encoding conversion error for UTF-8", e);
-		}
+    	String filePath = item.getFilename();
+    	if ( filePath.indexOf("/") != -1 ) {
+    		filePath = filePath.substring(filePath.indexOf("/")+1);
+    	}
+		matchingFiles = matchingFiles &&
+			(BlobSubmissionOutcome.NEW_FILE_VERSION != 
+				bt.setValueFromByteArray(item.getStream().toByteArray(), item.getContentType(), item.getContentLength(), filePath,
+		    datastore, user));
+		return matchingFiles;
 	}
 
 	public static void setFormSubmission(Submission aFormDefinition, String submissionFormIdValue,

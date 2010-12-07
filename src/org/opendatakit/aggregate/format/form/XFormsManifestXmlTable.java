@@ -17,9 +17,15 @@
 
 package org.opendatakit.aggregate.format.form;
 
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.kxml2.io.KXmlSerializer;
+import org.kxml2.kdom.Document;
+import org.kxml2.kdom.Element;
+import org.kxml2.kdom.Node;
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.format.XFormsTableConsts;
@@ -38,6 +44,7 @@ import org.opendatakit.common.constants.HtmlConsts;
  * 
  */
 public class XFormsManifestXmlTable {
+  private static final String XML_TAG_NAMESPACE = "http://openrosa.org/xforms/xformsManifest";
 
   private final String downloadRequestURL;
 
@@ -48,53 +55,56 @@ public class XFormsManifestXmlTable {
     this.form = form;
   }
 
-  public String generateXmlManifestList() {
-    StringBuilder b = new StringBuilder();
-    b.append(HtmlConsts.BEGIN_OPEN_TAG);
-    b.append(XFormsTableConsts.MANIFEST_TAG);
-    b.append(BasicConsts.SPACE);
-    b.append(HtmlUtil.createAttribute("xmlns", "http://openrosa.org/xforms/xformsManifest"));
-    b.append(HtmlConsts.END_TAG);
-
+  public void generateXmlManifestList(PrintWriter output) throws IOException {
+	Document d = new Document();
+	d.setStandalone(true);
+	d.setEncoding(HtmlConsts.UTF8_ENCODE);
+	Element e = d.createElement(XML_TAG_NAMESPACE, XFormsTableConsts.MANIFEST_TAG);
+	d.addChild(0, Node.ELEMENT, e);
+	int idx = 0;
+	e.addChild(idx++, Node.IGNORABLE_WHITESPACE, BasicConsts.NEW_LINE);
 
     // build XML table of form information
     BlobSubmissionType manifest = form.getManifestFileset();
     if ( manifest != null ) {
     	int fileCount = manifest.getAttachmentCount();
     	for ( int i = 1 ; i <= fileCount ; ++i ) {
-	      generateManifestXmlEntry(b, manifest, i);
-	      b.append(BasicConsts.NEW_LINE);
+	      idx = generateManifestXmlEntry(d, e, idx, manifest, i);
     	}
     }
-    b.append(HtmlUtil.createEndTag(XFormsTableConsts.MANIFEST_TAG));
-    return b.toString();
+
+	KXmlSerializer serializer = new KXmlSerializer();
+	serializer.setOutput(output);
+	// setting the response content type emits the xml header.
+	// just write the body here...
+	d.writeChildren(serializer); 
   }
 
-  private void generateManifestXmlEntry(StringBuilder b, BlobSubmissionType m, int i) {
+  private int generateManifestXmlEntry(Document d, Element e, int idx, BlobSubmissionType m, int i) {
 	  String filename = m.getUnrootedFilename(i);
 	  String hash = m.getContentHash(i, m.getCurrentVersion(i));
-		  
-	b.append(HtmlUtil.createBeginTag(XFormsTableConsts.FILE_TAG));
-    b.append(BasicConsts.NEW_LINE);
-	b.append(HtmlUtil.createBeginTag(XFormsTableConsts.FILE_NAME_TAG));
-	b.append(filename);
-	b.append(HtmlUtil.createEndTag(XFormsTableConsts.FILE_NAME_TAG));
-    b.append(BasicConsts.NEW_LINE);
-	b.append(HtmlUtil.createBeginTag(XFormsTableConsts.HASH_TAG));
-	b.append(hash);
-	b.append(HtmlUtil.createEndTag(XFormsTableConsts.HASH_TAG));
-    b.append(BasicConsts.NEW_LINE);
-	b.append(HtmlUtil.createBeginTag(XFormsTableConsts.DOWNLOAD_URL_TAG));
-	{
+
+	  int feIdx = 0;
+	  Element fileEntryElement = d.createElement(BasicConsts.EMPTY_STRING, XFormsTableConsts.MEDIA_FILE_TAG);
+	  e.addChild(idx++, Node.ELEMENT, fileEntryElement);
+	  Element fileNameElement = d.createElement(BasicConsts.EMPTY_STRING, XFormsTableConsts.FILE_NAME_TAG);
+	  fileEntryElement.addChild(feIdx++, Node.ELEMENT, fileNameElement);
+	  fileNameElement.addChild(0, Node.TEXT, filename);
+	  Element hashElement = d.createElement(BasicConsts.EMPTY_STRING, XFormsTableConsts.HASH_TAG);
+	  fileEntryElement.addChild(feIdx++, Node.ELEMENT, hashElement);
+	  hashElement.addChild(0, Node.TEXT, hash);
+	  Element downloadElement = d.createElement(BasicConsts.EMPTY_STRING, XFormsTableConsts.DOWNLOAD_URL_TAG);
+	  fileEntryElement.addChild(feIdx++, Node.IGNORABLE_WHITESPACE, BasicConsts.NEW_LINE);
+	  fileEntryElement.addChild(feIdx++, Node.ELEMENT, downloadElement);
+	  {
 		Map<String, String> properties = new HashMap<String, String>();
 		SubmissionKey k = m.generateSubmissionKey(i, m.getCurrentVersion(i));
 	    properties.put(ServletConsts.BLOB_KEY, k.toString());
+	    properties.put(ServletConsts.AS_ATTACHMENT, "true");
 	    String urlLink = HtmlUtil.createLinkWithProperties(downloadRequestURL, properties);
-	    b.append(urlLink);
-	}
-	b.append(HtmlUtil.createEndTag(XFormsTableConsts.DOWNLOAD_URL_TAG));
-    b.append(BasicConsts.NEW_LINE);
-	b.append(HtmlUtil.createEndTag(XFormsTableConsts.FILE_TAG));
-    b.append(BasicConsts.NEW_LINE);
+	    downloadElement.addChild(0, Node.TEXT, urlLink);
+	  }
+      e.addChild(idx++, Node.IGNORABLE_WHITESPACE, BasicConsts.NEW_LINE);
+      return idx;
   }
 }

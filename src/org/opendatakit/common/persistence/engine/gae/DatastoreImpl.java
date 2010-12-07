@@ -210,6 +210,7 @@ public class DatastoreImpl implements Datastore {
 	
 	public void updateRowFromGae(CommonFieldsBase row, com.google.appengine.api.datastore.Entity gaeEntity) {
 		row.setOpaquePersistenceData(gaeEntity);
+		row.setFromDatabase(true);
 		for ( DataField d : row.getFieldList() ) {
 			Object o = gaeEntity.getProperty(d.getName());
 			if ( o != null ) {

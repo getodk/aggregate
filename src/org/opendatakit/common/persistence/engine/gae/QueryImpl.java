@@ -13,8 +13,12 @@
  */
 package org.opendatakit.common.persistence.engine.gae;
 
+import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -27,9 +31,11 @@ import org.opendatakit.common.persistence.DynamicAssociationBase;
 import org.opendatakit.common.persistence.DynamicBase;
 import org.opendatakit.common.persistence.DynamicDocumentBase;
 import org.opendatakit.common.persistence.EntityKey;
+import org.opendatakit.common.persistence.TopLevelDynamicBase;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.security.User;
 
+import com.google.appengine.api.datastore.DatastoreNeedIndexException;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.FetchOptions;
 import com.google.appengine.api.datastore.PreparedQuery;
@@ -62,8 +68,167 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
 	private final DatastoreImpl datastore;
 	private final User user;
 	private final Query query;
+	
+	/**
+	 * Track the attributes that we are querying and sorting on...
+	 * 
+	 * @author mitchellsundt@gmail.com
+	 *
+	 */
+	abstract class Tracker {
+		final DataField attribute;
+		
+		Tracker(DataField attribute) {
+			this.attribute = attribute;
+		}
+		
+		DataField getAttribute() {
+			return attribute;
+		}
+		
+		public int simpleValueCompare(CommonFieldsBase b1, CommonFieldsBase b2) {
+			Object value;
+			switch ( attribute.getDataType() ) {
+			default:
+				throw new IllegalStateException("missing dataType implementation");
+			case BINARY:
+			case LONG_STRING:
+				throw new IllegalStateException("should never filter on large objects (text or blob)");
+			case STRING:
+			case URI:
+				value = b2.getStringField(attribute);
+				break;
+			case INTEGER:
+				value = b2.getLongField(attribute);
+				break;
+			case DECIMAL:
+				value = b2.getNumericField(attribute);
+				break;
+			case BOOLEAN:
+				value = b2.getBooleanField(attribute);
+				break;
+			case DATETIME:
+				value = b2.getDateField(attribute);
+				break;
+			}
+			return compareField(b1, value);
+		}
 
+		<T extends Comparable<T>> int compareObjects(T b1, T b2) {
+			if ( b1 == null ) {
+				if ( b2 == null ) return 0;
+				return 1; // nulls (==b2) appear last in ordering
+			}
+			if ( b2 == null ) return -1; // nulls (==b1) appear last in ordering 
+			return b1.compareTo(b2);
+		}
+		
+		int compareField(CommonFieldsBase record, Object value) {
+			switch ( attribute.getDataType() ) {
+			default:
+				throw new IllegalStateException("missing dataType implementation");
+			case BINARY:
+			case LONG_STRING:
+				throw new IllegalStateException("should never filter on large objects (text or blob)");
+			case STRING:
+			case URI:
+				String eStr = record.getStringField(attribute);
+				String vStr = (value == null) ? null : (String) value;
+				return compareObjects(eStr, vStr);
+			case INTEGER:
+				Long eLong = record.getLongField(attribute);
+				Long vLong = (value == null) ? null : (Long) value;
+				return compareObjects(eLong, vLong);
+			case DECIMAL:
+				BigDecimal eDec = record.getNumericField(attribute);
+				BigDecimal vDec = (value == null) ? null : (BigDecimal) value;
+				return compareObjects(eDec, vDec);
+			case BOOLEAN:
+				Boolean eBool = record.getBooleanField(attribute);
+				Boolean vBool = (value == null) ? null : (Boolean) value;
+				return compareObjects(eBool, vBool);
+			case DATETIME:
+				Date eDate = record.getDateField(attribute);
+				Date vDate = (value == null) ? null : (Date) value;
+				return compareObjects(eDate, vDate);
+			}
+		}
+		abstract boolean passFilter(CommonFieldsBase record);
+	}
+	
+	class SimpleFilterTracker extends Tracker {
+		final FilterOperation op;
+		final Object value;
+		
+		SimpleFilterTracker( DataField attribute, FilterOperation op, Object value) {
+			super(attribute);
+			this.op = op;
+			this.value = value;
+		}
+		
+		boolean passFilter(CommonFieldsBase record) {
+			int result = compareField(record, value);
+			switch ( op ) {
+			case EQUAL:
+				return result == 0;
+			case LESS_THAN:
+				return result < 0;
+			case LESS_THAN_OR_EQUAL:
+				return result <= 0;
+			case GREATER_THAN:
+				return result > 0;
+			case GREATER_THAN_OR_EQUAL:
+				return result >= 0;
+			default:
+				throw new IllegalStateException("missing a filter operation!");
+			}
+		}
+	}
+	
+	class ValueSetFilterTracker extends Tracker {
+		final Set<?> valueSet;
+		
+		ValueSetFilterTracker( DataField attribute, Set<?> valueSet) {
+			super(attribute);
+			this.valueSet = valueSet;
+		}
 
+		boolean passFilter(CommonFieldsBase record) {
+			for ( Object o : valueSet ) {
+				int result = compareField(record, o);
+				if ( result == 0 ) return true;
+			}
+			return false;
+		}
+	}
+	
+	List<Tracker> filterList = new ArrayList<Tracker>();
+
+	class SortTracker<T extends CommonFieldsBase> extends Tracker implements Comparator<T> {
+		final Direction direction;
+		
+		SortTracker( DataField attribute, Direction direction ) {
+			super(attribute);
+			this.direction = direction;
+		}
+
+		@Override
+		boolean passFilter(CommonFieldsBase record) {
+			throw new IllegalStateException("not implemented");
+		}
+
+		@Override
+		public int compare(T o1, T o2) {
+			if ( direction == Direction.ASCENDING ) {
+				return simpleValueCompare(o1, o2);
+			} else { 
+				return -simpleValueCompare(o1, o2);
+			}
+		}
+	}
+	
+	List<SortTracker> sortList = new ArrayList<SortTracker>();
+	
 	public QueryImpl(CommonFieldsBase relation, DatastoreImpl datastore, User user) {
 		this.relation = relation;
 		this.datastore = datastore;
@@ -75,11 +240,13 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
 	@Override
 	public void addFilter(DataField attribute, FilterOperation op, Object value) {
 		query.addFilter(attribute.getName(), operationMap.get(op), value);
+		filterList.add(new SimpleFilterTracker(attribute, op, value));
 	}
 
 	@Override
 	public void addValueSetFilter(DataField attribute, Set<?> valueSet) {
 		query.addFilter(attribute.getName(), FilterOperator.IN, valueSet);
+		filterList.add(new ValueSetFilterTracker(attribute, valueSet));
 	}
 
 	@Override
@@ -89,20 +256,40 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
 		} else {
 			query.addSort(attribute.getName(), SortDirection.DESCENDING);
 		}
+		sortList.add(new SortTracker(attribute, direction));
 	}
 
-	@Override
-	public List<? extends CommonFieldsBase> executeQuery(int fetchLimit)
-			throws ODKDatastoreException {
-		DatastoreService ds = datastore.getDatastoreService();
-		PreparedQuery preparedQuery = ds.prepare(query);
-		List<com.google.appengine.api.datastore.Entity> gaeEntities;
-		if ( fetchLimit == 0 ) {
-			gaeEntities = preparedQuery.asList(FetchOptions.Builder.withDefaults());
-		} else {
-			gaeEntities = preparedQuery.asList(FetchOptions.Builder.withLimit(fetchLimit));
-		}
+	private List<CommonFieldsBase> coreExecuteQuery(int fetchLimit) throws ODKDatastoreException {
 		List<CommonFieldsBase> odkEntities = new ArrayList<CommonFieldsBase>();
+
+		DatastoreService ds = datastore.getDatastoreService();
+		List<com.google.appengine.api.datastore.Entity> gaeEntities = null;
+		boolean filterAndSortLocally = true;
+		try {
+			if (!filterAndSortLocally) {
+				PreparedQuery preparedQuery = ds.prepare(query);
+				if ( fetchLimit == 0 ) {
+					gaeEntities = preparedQuery.asList(FetchOptions.Builder.withDefaults());
+				} else {
+					gaeEntities = preparedQuery.asList(FetchOptions.Builder.withLimit(fetchLimit));
+				}
+			}
+		} catch ( DatastoreNeedIndexException e ) {
+			 e.printStackTrace();
+			 filterAndSortLocally = true;
+		}
+		
+		if ( filterAndSortLocally) {
+			gaeEntities = null;
+			try {
+				 Query hack = new Query(relation.getSchemaName() + "."
+										+ relation.getTableName());
+				 PreparedQuery preparedHack = ds.prepare(hack);
+				 gaeEntities = preparedHack.asList(FetchOptions.Builder.withDefaults());
+			} catch ( Exception e ) {
+				throw new ODKDatastoreException("Unable to complete request", e);
+			}
+		}
 
 		try {
 			// convert to odk entities
@@ -112,32 +299,59 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
 				CommonFieldsBase odkEntity;
 				odkEntity = (CommonFieldsBase) m.mapRow(datastore, gaeEntity,
 						idx++);
-				odkEntities.add(odkEntity);
+				if ( filterAndSortLocally ) {
+					boolean passed = true;
+					for ( Tracker t : filterList ) {
+						if ( !t.passFilter(odkEntity) ) {
+							passed = false;
+							break;
+						}
+					}
+					if ( passed ) {
+						odkEntities.add(odkEntity);
+					}
+				} else {
+					odkEntities.add(odkEntity);
+				}
 			}
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			throw new ODKDatastoreException(e);
 		}
-
+		if ( filterAndSortLocally ) {
+			// OK. We have our list of results.  Now sort it...
+			Collections.reverse(sortList); // stable sorts nest backwards...
+			
+			for ( SortTracker t : sortList ) {
+				Collections.sort(odkEntities, t);
+			}
+			
+			if (fetchLimit != 0 ) {
+				while ( odkEntities.size() > fetchLimit ) {
+					odkEntities.remove(odkEntities.size()-1);
+				}
+			}
+		}
+		
 		return odkEntities;
+	}
+	
+	@Override
+	public List<? extends CommonFieldsBase> executeQuery(int fetchLimit)
+			throws ODKDatastoreException {
+		return coreExecuteQuery(fetchLimit);
 	}
 
 	@Override
 	public Set<EntityKey> executeTopLevelKeyQuery(
-			CommonFieldsBase topLevelTable, int fetchLimit)
+			CommonFieldsBase topLevelTable)
 			throws ODKDatastoreException {
 
-		DatastoreService ds = datastore.getDatastoreService();
-		PreparedQuery preparedQuery = ds.prepare(query);
-		List<com.google.appengine.api.datastore.Entity> gaeEntities;
-		if ( fetchLimit == 0 ) {
-			gaeEntities = preparedQuery.asList(FetchOptions.Builder.withDefaults());
-		} else {
-			gaeEntities = preparedQuery.asList(FetchOptions.Builder.withLimit(fetchLimit));
-		}
 		DataField topLevelAuri = null;
-		if ( relation instanceof DynamicAssociationBase ) {
+		if ( relation instanceof TopLevelDynamicBase ) {
+			topLevelAuri = ((TopLevelDynamicBase) relation).primaryKey;
+		} else if ( relation instanceof DynamicAssociationBase ) {
 			topLevelAuri = ((DynamicAssociationBase) relation).topLevelAuri;
 		} else if ( relation instanceof DynamicDocumentBase ) {
 			topLevelAuri = ((DynamicDocumentBase) relation).topLevelAuri;
@@ -148,20 +362,10 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
 		}
 
 		Set<EntityKey> keySet = new HashSet<EntityKey>();
-		try {
-			// convert to odk entities
-			EntityRowMapper m = new EntityRowMapper(relation, user);
-			int idx = 0;
-			for (com.google.appengine.api.datastore.Entity gaeEntity : gaeEntities) {
-				CommonFieldsBase odkEntity;
-				odkEntity = (CommonFieldsBase) m.mapRow(datastore, gaeEntity,
-						idx++);
-				keySet.add( new EntityKey( topLevelTable, odkEntity.getStringField(topLevelAuri)));
-			}
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			throw new ODKDatastoreException(e);
+
+		List<? extends CommonFieldsBase> entities = coreExecuteQuery(0);
+		for ( CommonFieldsBase entity : entities ) {
+			keySet.add( new EntityKey( topLevelTable, entity.getStringField(topLevelAuri)));
 		}
 		return keySet;
 	}
@@ -169,46 +373,31 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<?> executeDistinctValueForDataField(DataField dataField) throws ODKDatastoreException {
-		// TODO Auto-generated method stub
-
-		DatastoreService ds = datastore.getDatastoreService();
-		PreparedQuery preparedQuery = ds.prepare(query);
-		List<com.google.appengine.api.datastore.Entity> gaeEntities;
-		gaeEntities = preparedQuery.asList(FetchOptions.Builder.withDefaults());
 		Set valueList = new HashSet();
-		try {
-			// convert to odk entities
-			EntityRowMapper m = new EntityRowMapper(relation, user);
-			int idx = 0;
-			for ( com.google.appengine.api.datastore.Entity gaeEntity : gaeEntities) {
-				CommonFieldsBase odkEntity;
-					odkEntity = (CommonFieldsBase) m.mapRow(datastore, gaeEntity, idx++);
-				switch ( dataField.getDataType() ) {
-				case BINARY:
-					throw new IllegalStateException("unsupported fetch of binary data");
-				case BOOLEAN:
-					valueList.add( odkEntity.getBooleanField(dataField) );
-					break;
-				case DATETIME:
-					valueList.add( odkEntity.getDateField(dataField) );
-					break;
-				case DECIMAL:
-					valueList.add( odkEntity.getNumericField(dataField) );
-					break;
-				case INTEGER:
-					valueList.add( odkEntity.getLongField(dataField) );
-					break;
-				case LONG_STRING:
-				case STRING:
-				case URI:
-					valueList.add( odkEntity.getStringField(dataField) );
-					break;
-				}
+
+		List<? extends CommonFieldsBase> entities = coreExecuteQuery(0);
+		for ( CommonFieldsBase entity : entities ) {
+			switch ( dataField.getDataType() ) {
+			case BINARY:
+				throw new IllegalStateException("unsupported fetch of binary data");
+			case BOOLEAN:
+				valueList.add( entity.getBooleanField(dataField) );
+				break;
+			case DATETIME:
+				valueList.add( entity.getDateField(dataField) );
+				break;
+			case DECIMAL:
+				valueList.add( entity.getNumericField(dataField) );
+				break;
+			case INTEGER:
+				valueList.add( entity.getLongField(dataField) );
+				break;
+			case LONG_STRING:
+			case STRING:
+			case URI:
+				valueList.add( entity.getStringField(dataField) );
+				break;
 			}
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			throw new ODKDatastoreException(e);
 		}
 		return new ArrayList(valueList);
 	}

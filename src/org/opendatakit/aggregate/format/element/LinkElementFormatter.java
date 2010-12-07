@@ -24,6 +24,7 @@ import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.servlet.BinaryDataServlet;
+import org.opendatakit.aggregate.servlet.FormMultipleValueServlet;
 import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.submission.SubmissionRepeat;
 import org.opendatakit.aggregate.submission.SubmissionSet;
@@ -61,7 +62,7 @@ public class LinkElementFormatter extends BasicElementFormatter {
   @Override
   public void formatBinary(BlobSubmissionType blobSubmission, String propertyName, Row row)
       throws ODKDatastoreException {
-    if (blobSubmission == null) {
+    if (blobSubmission == null || (blobSubmission.getAttachmentCount() == 0) ) {
       row.addFormattedValue(null);
       return;
     }
@@ -91,7 +92,7 @@ public class LinkElementFormatter extends BasicElementFormatter {
     Map<String, String> properties = new HashMap<String, String>();
     properties.put(ServletConsts.FORM_ID, repeat.constructSubmissionKey().toString());
     String url = HtmlUtil.createLinkWithProperties(HtmlUtil.createUrl(baseWebServerUrl)
-        + BinaryDataServlet.ADDR, properties);
+        + FormMultipleValueServlet.ADDR, properties);
     row.addFormattedValue(url);
   }
 }

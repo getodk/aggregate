@@ -23,11 +23,9 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.BeanDefs;
-import org.opendatakit.aggregate.constants.ErrorConsts;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.form.Form;
-import org.opendatakit.aggregate.servlet.FormsServlet;
 import org.opendatakit.aggregate.servlet.ServletUtilBase;
 import org.opendatakit.aggregate.task.FormDelete;
 import org.opendatakit.common.persistence.Datastore;
@@ -76,7 +74,6 @@ public class FormDeleteTaskServlet extends ServletUtilBase {
       form = Form.retrieveForm(odkId, datastore, user);
     } catch (ODKFormNotFoundException e) {
       e.printStackTrace();
-      odkIdNotFoundError(resp);
       return;
     }
 
@@ -85,9 +82,8 @@ public class FormDeleteTaskServlet extends ServletUtilBase {
     try {
       formDelete.deleteForm(form, user);
     } catch (Exception e) {
-      resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ErrorConsts.TASK_PROBLEM + e.toString());
+      e.printStackTrace();
       return;
     }
-    resp.sendRedirect(FormsServlet.ADDR);
   }
 }

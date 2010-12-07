@@ -120,8 +120,7 @@ public class JsonServer extends AbstractExternalService implements ExternalServi
 
     // TODO: Waylon -- I need to understand this to recommend an alternative
     // mechanism...
-    List<String> headers = headerFormatter.generateHeaders(form, form.getFormDefinition()
-        .getTopLevelGroupElement(), null);
+    List<String> headers = headerFormatter.generateHeaders(form, form.getTopLevelGroupElement(), null);
     List<ElementType> types = headerFormatter.getHeaderTypes();
     for (int i = 0; i < headers.size(); ++i) {
       String name = headers.get(i);

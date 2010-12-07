@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.opendatakit.aggregate.datamodel;
+package org.opendatakit.aggregate.form;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -22,8 +22,18 @@ import java.util.List;
 import java.util.Map;
 
 import org.opendatakit.aggregate.constants.ServletConsts;
+import org.opendatakit.aggregate.datamodel.BinaryContent;
+import org.opendatakit.aggregate.datamodel.FormDataModel;
+import org.opendatakit.aggregate.datamodel.FormElementModel;
+import org.opendatakit.aggregate.datamodel.InstanceData;
+import org.opendatakit.aggregate.datamodel.LongStringRefText;
+import org.opendatakit.aggregate.datamodel.RefBlob;
+import org.opendatakit.aggregate.datamodel.RefText;
+import org.opendatakit.aggregate.datamodel.SelectChoice;
+import org.opendatakit.aggregate.datamodel.TopLevelInstanceData;
+import org.opendatakit.aggregate.datamodel.VersionedBinaryContent;
+import org.opendatakit.aggregate.datamodel.VersionedBinaryContentRefBlob;
 import org.opendatakit.aggregate.datamodel.FormDataModel.ElementType;
-import org.opendatakit.aggregate.form.FormInfo;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.Datastore;
@@ -34,6 +44,7 @@ import org.opendatakit.common.persistence.TopLevelDynamicBase;
 import org.opendatakit.common.persistence.Query.Direction;
 import org.opendatakit.common.persistence.Query.FilterOperation;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
 import org.opendatakit.common.security.User;
 
@@ -50,7 +61,7 @@ import org.opendatakit.common.security.User;
  */
 public class FormDefinition {
 	
-	private static final Map<String, FormDefinition> formDefinitions = new HashMap<String, FormDefinition>();
+	private static final Map<XFormParameters, FormDefinition> formDefinitions = new HashMap<XFormParameters, FormDefinition>();
 	
 	/** map from uri to FormDataModel; with navigable parent/child structure */
 	public final Map<String, FormDataModel> uriMap = new HashMap<String, FormDataModel>();
@@ -71,7 +82,7 @@ public class FormDefinition {
 	private FormElementModel topLevelGroupElement = null;
 	
 	private final String qualifiedTopLevelTable;
-	private final String formId;
+	private final XFormParameters xformParameters;
 	
 	/**
 	 * Append to the list the FormDataModel entries needed to represent this
@@ -89,8 +100,7 @@ public class FormDefinition {
 	 * @return the ordinal of the last field defined.
 	 * @throws ODKDatastoreException
 	 */
-	public static final Long buildTableFormDataModel( List<FormDataModel> list, 
-													EntityKey definitionKey,
+	static final Long buildTableFormDataModel( List<FormDataModel> list, 
 													DynamicCommonFieldsBase form, 
 													DynamicCommonFieldsBase topLevel, 
 													DynamicCommonFieldsBase parent,
@@ -115,7 +125,6 @@ public class FormDefinition {
 		d.setStringField(fdm.primaryKey, form.getUri());
 		d.setLongField(fdm.ordinalNumber, ordinal);
 		d.setStringField(fdm.parentAuri, parentURI);
-		d.setStringField(fdm.uriSubmissionDataModel, definitionKey.getKey());
 		d.setStringField(fdm.elementName, form.getTableName());
 		d.setStringField(fdm.elementType,
 				(parent == topLevel) ?
@@ -144,9 +153,9 @@ public class FormDefinition {
 			// this field should be in the fdm model...
 			d = datastore.createEntityUsingRelation(fdm, k, user);
 			list.add(d);
+			d.setStringField(fdm.primaryKey, form.getUri() + "-" + Long.toString(l));
 			d.setLongField(fdm.ordinalNumber, l);
 			d.setStringField(fdm.parentAuri, form.getUri());
-			d.setStringField(fdm.uriSubmissionDataModel, definitionKey.getKey());
 			d.setStringField(fdm.elementName, f.getName());
 			switch ( f.getDataType() ) {
 			case STRING:
@@ -178,12 +187,15 @@ public class FormDefinition {
 		return l;
 	}
 	
-	public static final void buildBinaryContentFormDataModel( List<FormDataModel> list, 
-			EntityKey definitionKey,
+	static final void buildBinaryContentFormDataModel( List<FormDataModel> list, 
 			String binaryContentElementName,
+			String binaryContentUri,
 			String binaryContentTableName,
+			String versionedBinaryUri,
 			String versionedBinaryContentTableName,
+			String versionedRefBlobUri,
 			String versionedBinaryContentRefBlobTableName,
+			String refBlobUri,
 			String refBlobTableName,
 			TopLevelDynamicBase topLevel, 
 			DynamicCommonFieldsBase parent,
@@ -201,12 +213,12 @@ public class FormDefinition {
 		
 		// record for binary content...
 		d = datastore.createEntityUsingRelation(fdm, k, user);
+		d.setStringField(fdm.primaryKey, binaryContentUri);
 		list.add(d);
 		final String bcURI = d.getUri();
 		d.setLongField(fdm.ordinalNumber, ordinal);
 		d.setStringField(fdm.parentAuri, parentURI);
 		d.setStringField(fdm.topLevelAuri, topLevelURI);
-		d.setStringField(fdm.uriSubmissionDataModel, definitionKey.getKey());
 		d.setStringField(fdm.elementName, binaryContentElementName);
 		d.setStringField(fdm.elementType, FormDataModel.ElementType.BINARY.toString());
 		d.setStringField(fdm.persistAsColumn, null);
@@ -215,12 +227,12 @@ public class FormDefinition {
 
 		// record for versioned binary content...
 		d = datastore.createEntityUsingRelation(fdm, k, user);
+		d.setStringField(fdm.primaryKey, versionedBinaryUri);
 		list.add(d);
 		final String vbcURI = d.getUri();
 		d.setLongField(fdm.ordinalNumber, 1L);
 		d.setStringField(fdm.parentAuri, bcURI);
 		d.setStringField(fdm.topLevelAuri, topLevelURI);
-		d.setStringField(fdm.uriSubmissionDataModel, definitionKey.getKey());
 		d.setStringField(fdm.elementName, binaryContentElementName);
 		d.setStringField(fdm.elementType, FormDataModel.ElementType.VERSIONED_BINARY.toString());
 		d.setStringField(fdm.persistAsColumn, null);
@@ -229,12 +241,12 @@ public class FormDefinition {
 
 		// record for binary content ref blob..
 		d = datastore.createEntityUsingRelation(fdm, k, user);
+		d.setStringField(fdm.primaryKey, versionedRefBlobUri);
 		list.add(d);
 		final String bcbURI = d.getUri();
 		d.setLongField(fdm.ordinalNumber, 1L);
 		d.setStringField(fdm.parentAuri, vbcURI);
 		d.setStringField(fdm.topLevelAuri, topLevelURI);
-		d.setStringField(fdm.uriSubmissionDataModel, definitionKey.getKey());
 		d.setStringField(fdm.elementName, binaryContentElementName);
 		d.setStringField(fdm.elementType, FormDataModel.ElementType.VERSIONED_BINARY_CONTENT_REF_BLOB.toString());
 		d.setStringField(fdm.persistAsColumn, null);
@@ -243,11 +255,11 @@ public class FormDefinition {
 
 		// record for ref blob...
 		d = datastore.createEntityUsingRelation(fdm, k, user);
+		d.setStringField(fdm.primaryKey, refBlobUri);
 		list.add(d);
 		d.setLongField(fdm.ordinalNumber, 1L);
 		d.setStringField(fdm.parentAuri, bcbURI);
 		d.setStringField(fdm.topLevelAuri, topLevelURI);
-		d.setStringField(fdm.uriSubmissionDataModel, definitionKey.getKey());
 		d.setStringField(fdm.elementName, binaryContentElementName);
 		d.setStringField(fdm.elementType, FormDataModel.ElementType.REF_BLOB.toString());
 		d.setStringField(fdm.persistAsColumn, null);
@@ -256,9 +268,10 @@ public class FormDefinition {
 	}
 	
 	
-	public static final void buildLongStringFormDataModel( List<FormDataModel> list, 
-			EntityKey definitionKey,
+	static final void buildLongStringFormDataModel( List<FormDataModel> list, 
+			String longStringRefTextUri,
 			String longStringRefTextTableName,
+			String refTextUri,
 			String refTextTableName,
 			TopLevelDynamicBase topLevel, 
 			Long ordinal,
@@ -274,11 +287,11 @@ public class FormDefinition {
 		
 		// record for long string ref text...
 		d = datastore.createEntityUsingRelation(fdm, k, user);
+		d.setStringField(fdm.primaryKey, longStringRefTextUri);
 		list.add(d);
 		final String lst = d.getUri();
 		d.setLongField(fdm.ordinalNumber, ordinal);
 		d.setStringField(fdm.parentAuri, topLevelURI);
-		d.setStringField(fdm.uriSubmissionDataModel, definitionKey.getKey());
 		d.setStringField(fdm.elementName, null);
 		d.setStringField(fdm.elementType, FormDataModel.ElementType.LONG_STRING_REF_TEXT.toString());
 		d.setStringField(fdm.persistAsColumn, null);
@@ -287,10 +300,10 @@ public class FormDefinition {
 
 		// record for ref text...
 		d = datastore.createEntityUsingRelation(fdm, k, user);
+		d.setStringField(fdm.primaryKey, refTextUri);
 		list.add(d);
 		d.setLongField(fdm.ordinalNumber, 1L);
 		d.setStringField(fdm.parentAuri, lst);
-		d.setStringField(fdm.uriSubmissionDataModel, definitionKey.getKey());
 		d.setStringField(fdm.elementName, null);
 		d.setStringField(fdm.elementType, FormDataModel.ElementType.REF_TEXT.toString());
 		d.setStringField(fdm.persistAsColumn, null);
@@ -298,20 +311,82 @@ public class FormDefinition {
 		d.setStringField(fdm.persistAsSchema, fdm.getSchemaName());
 	}
 	
-	public static final FormDefinition getFormDefinition(String formId, Datastore datastore, User user) {
-
-		if ( formId.indexOf('/') != -1 ) {
-			throw new IllegalArgumentException("formId is not well formed: " + formId);
+	static final void assertModel(XFormParameters p, List<FormDataModel> model, Datastore datastore, User user) throws ODKDatastoreException {
+		FormDataModel fdm = FormDataModel.createRelation(datastore, user);
+		if ( model == null || model.size() == 0 ) {
+			throw new IllegalArgumentException("should never be null");
+		}
+		for ( FormDataModel m : model ) {
+			try {
+				datastore.getEntity(fdm, m.getUri(), user);
+			} catch ( ODKEntityNotFoundException e ) {
+				datastore.putEntity(m, user);
+			}
 		}
 		
-		FormDefinition fd = formDefinitions.get(formId);
+		// and if the model is all stored, then...
+		String definitionUri = model.get(0).getTopLevelAuri();
+		String formUri = CommonFieldsBase.newMD5HashUri(p.formId);
+		
+		SubmissionAssociationTable saRelation = SubmissionAssociationTable.createRelation(datastore, user);
+		SubmissionAssociationTable sa = datastore.createEntityUsingRelation(saRelation, null, user);
+		
+		sa.setStringField(saRelation.primaryKey, definitionUri );
+		sa.setDomAuri(formUri); // md5 of submissionFormId
+		sa.setSubAuri(formUri); // md5 of rootElementFormId
+		sa.setSubmissionFormId(p.formId);
+		sa.setSubmissionModelVersion(p.modelVersion);
+		sa.setSubmissionUiVersion(p.uiVersion);
+		sa.setIsPersistenceModelComplete(true);
+		sa.setIsSubmissionAllowed(true);
+		sa.setUriSubmissionDataModel(definitionUri); // in general, this is arbitrary.  Fixed for FormInfo...
+		
+		try {
+			datastore.getEntity(saRelation, definitionUri, user);
+		} catch ( ODKEntityNotFoundException e ) {
+			datastore.putEntity(sa, user);
+		}
+	}
+	
+	static final FormElementModel findElement(FormElementModel group, DataField backingKey) {
+		for ( FormElementModel m : group.getChildren()) {
+			if ( m.isMetadata() ) continue;
+			if ( m.getFormDataModel().getBackingKey() == backingKey ) return m;
+		}
+		return null;
+	}
+
+	public static final FormDefinition getFormDefinition(XFormParameters p, Datastore datastore, User user) {
+
+		if ( p.formId.indexOf('/') != -1 ) {
+			throw new IllegalArgumentException("formId is not well formed: " + p.formId);
+		}
+		
+		FormDefinition fd = formDefinitions.get(p);
 		if ( fd == null ) {
 			List<? extends CommonFieldsBase> fdmList = null;
 			try {
-				FormDataModel fdm = FormDataModel.createRelation(datastore, user);
+				// changes here should be paralleled in the FormParserForJavaRosa
+			    SubmissionAssociationTable saRelation = SubmissionAssociationTable.createRelation(datastore, user);
+			    String submissionFormIdUri = CommonFieldsBase.newMD5HashUri(p.formId); // key under which submission is located...
+			    Query q = datastore.createQuery(saRelation, user);
+			    q.addFilter( saRelation.domAuri, Query.FilterOperation.EQUAL, submissionFormIdUri);
+			    List<? extends CommonFieldsBase> l = q.executeQuery(0);
+			    SubmissionAssociationTable sa = null;
+			    String fdmSubmissionUri = CommonFieldsBase.newUri();
+			    for ( CommonFieldsBase b : l ) {
+			    	SubmissionAssociationTable t = (SubmissionAssociationTable) b;
+			    	if ( t.getXFormParameters().equals(p) ) {
+			    		sa = t;
+			    		fdmSubmissionUri = sa.getUriSubmissionDataModel();
+			    		break;
+			    	}
+			    }
+			    if ( sa == null ) return null;
+			    // OK.  Found an sa record -- use it to find the fdm entries...
+			    FormDataModel fdm = FormDataModel.createRelation(datastore, user);
 				Query query = datastore.createQuery(fdm, user);
-				String submissionUri = CommonFieldsBase.newMD5HashUri(formId);
-				query.addFilter(fdm.uriSubmissionDataModel, FilterOperation.EQUAL, submissionUri);
+				query.addFilter(fdm.topLevelAuri, FilterOperation.EQUAL, fdmSubmissionUri);
 				fdmList = query.executeQuery(0);
 			} catch (ODKDatastoreException e) {
 				return null;
@@ -320,7 +395,7 @@ public class FormDefinition {
 				return null;
 			}
 			
-			fd = new FormDefinition(formId, fdmList);
+			fd = new FormDefinition(p, fdmList);
 			
 			if ( fd != null ) {
 				try {
@@ -350,19 +425,19 @@ public class FormDefinition {
 				// errors might have cleared the fd...
 				if ( fd != null ) {
 					// remember details about this form
-					formDefinitions.put(formId, fd);
+					formDefinitions.put(p, fd);
 				}
 			}
 		}
 		return fd;
 	}
 
-	public static void forgetFormId(String formId) {
-		formDefinitions.remove(formId);
+    static final void forgetFormId(XFormParameters p) {
+		formDefinitions.remove(p);
 	}
 
-	public FormDefinition(String formId, List<?> formDataModelList) {
-		this.formId = formId;
+	public FormDefinition(XFormParameters xformParameters, List<?> formDataModelList) {
+		this.xformParameters = xformParameters;
 		
 		// map of tableName to map of columnName, FDM record
 		Map<String, Map<String, FormDataModel >> eeMap = new HashMap< String, Map<String, FormDataModel>>();
@@ -373,7 +448,7 @@ public class FormDefinition {
 			String table = m.getPersistAsQualifiedTableName();
 			String column = m.getPersistAsColumn();
 			if ( column != null && table == null ) {
-				throw new IllegalStateException("Form id: " + m.getUriFormId() +
+				throw new IllegalStateException("Fdm uri: " + m.getUri() +
 					" - Unexpected null persist-as table name when persist-as column name is: "
 					+ column );
 			}
@@ -513,10 +588,14 @@ public class FormDefinition {
 
 		boolean isWellKnownForm = false;
 		// set the backing objects for the tables identified in the groupList
-		if ( formId.equals(FormDataModel.URI_FORM_ID_VALUE_FORM_INFO) ) {
+		if ( xformParameters.formId.equals(FormDataModel.URI_FORM_ID_VALUE_FORM_INFO) ) {
 			// it is the FormInfo table -- pre-populate the backingTableMap
 			// with the table relations we know...
 			FormInfo.populateBackingTableMap(backingTableMap);
+			isWellKnownForm = true;
+		} else if ( xformParameters.formId.equals(PersistentResults.FORM_ID_PERSISTENT_RESULT)) {
+			// it is the PersistentResults table - pre-populate the backingTableMap
+			PersistentResults.populateBackingTableMap(backingTableMap);
 			isWellKnownForm = true;
 		}
 		
@@ -670,7 +749,7 @@ public class FormDefinition {
 			throw new IllegalStateException("No long string ref text table declared!");
 		}
 		
-		topLevelGroupElement = new FormElementModel(topLevelGroup, null);
+		topLevelGroupElement = FormElementModel.buildFormElementModelTree(topLevelGroup);
 	}
 	
 	/**
@@ -694,7 +773,7 @@ public class FormDefinition {
 			if ( first ) {
 				first = false;
 				// first entry can be form id...
-				if ( formId.equals(p) ) continue; 
+				if ( xformParameters.formId.equals(p) ) continue; 
 			}
 
 			m = getElementByNameHelper(m, p);
@@ -736,7 +815,15 @@ public class FormDefinition {
 	}
 
 	public String getFormId() {
-		return formId;
+		return xformParameters.formId;
+	}
+	
+	public Long getModelVersion() {
+		return xformParameters.modelVersion;
+	}
+	
+	public Long getUiVersion() {
+		return xformParameters.uiVersion;
 	}
 	
 	public String getTopLevelAuri() {

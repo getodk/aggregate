@@ -22,9 +22,9 @@ import java.util.List;
 
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.datamodel.FormDataModel;
-import org.opendatakit.aggregate.datamodel.FormDefinition;
 import org.opendatakit.aggregate.datamodel.RefBlob;
 import org.opendatakit.aggregate.datamodel.VersionedBinaryContentRefBlob;
+import org.opendatakit.aggregate.form.FormDefinition;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.EntityKey;

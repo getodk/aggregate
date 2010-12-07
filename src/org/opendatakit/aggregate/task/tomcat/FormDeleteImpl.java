@@ -28,11 +28,28 @@ import org.opendatakit.common.security.User;
  * @author mitchellsundt@gmail.com
  * 
  */
-public class FormDeleteImpl extends AbstractFormDeleteImpl {
+public class FormDeleteImpl extends AbstractFormDeleteImpl implements Runnable {
 
+  private Form form;
+  private User user;
+  
   @Override
   public final void createFormDeleteTask(Form form, User user) throws ODKDatastoreException, ODKFormNotFoundException, ODKExternalServiceDependencyException {
-    super.deleteForm(form, user);
+    this.form = form;
+    this.user = user;
+    AggregrateThreadExecutor exec = AggregrateThreadExecutor.getAggregateThreadExecutor();
+    exec.execute(this);
+  }
+
+  @Override
+  public void run() {
+    try {
+      deleteForm(form, user);
+    } catch (Exception e) {
+      e.printStackTrace();
+      // TODO: PROBLEM - figure out how we are going to restart it 
+    }
+    
   }
 
 }
