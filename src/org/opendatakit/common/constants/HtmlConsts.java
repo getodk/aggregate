@@ -96,15 +96,15 @@ public final class HtmlConsts {
 	/**
 	 * Constant for "text/enriched" content type for response message
 	 */
-	public static final String RESP_TYPE_ENRICHED = "text/enriched";
+	public static final String RESP_TYPE_ENRICHED = "text/enriched; charset=utf-8";
 	/**
 	 * Constant for "text/html" content type for response message
 	 */
-	public static final String RESP_TYPE_HTML = "text/html";
+	public static final String RESP_TYPE_HTML = "text/html; charset=utf-8";
 	/**
 	 * Constant for "text/plain" content type for response message
 	 */
-	public static final String RESP_TYPE_PLAIN = "text/plain";
+	public static final String RESP_TYPE_PLAIN = "text/plain; charset=utf-8";
 	/**
 	 * Constant for "image/jpeg" content type for response message
 	 */
@@ -112,7 +112,7 @@ public final class HtmlConsts {
 	/**
 	 * Constant for "text/xml" content type for response message
 	 */
-	public static final String RESP_TYPE_XML = "text/xml";
+	public static final String RESP_TYPE_XML = "text/xml; charset=utf-8";
 	/**
 	 * Encoding scheme for servlets
 	 */

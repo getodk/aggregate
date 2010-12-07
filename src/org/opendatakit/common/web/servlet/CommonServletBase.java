@@ -138,12 +138,12 @@ public abstract class CommonServletBase extends HttpServlet {
     resp.setCharacterEncoding(HtmlConsts.UTF8_ENCODE);
     PrintWriter out = resp.getWriter();
     out.write(HtmlConsts.HTML_OPEN);
-    out.write("<link rel=\"icon\" type=\"image/png\" href=\"/odk_color_sq.png\">");
+    out.write("<link rel=\"icon\" type=\"image/png\" href=\"odk_color_sq.png\">");
 
     out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.HEAD, headContent + HtmlUtil.wrapWithHtmlTags(
         HtmlConsts.TITLE, applicationName)));
     out.write(HtmlConsts.BODY_OPEN);
-    out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.H2, "<FONT COLOR=330066 size=7><img src='/odk_color.png'/>" + HtmlConsts.SPACE + applicationName) + "</FONT>");
+    out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.H2, "<FONT COLOR=330066 size=7><img src='odk_color.png'/>" + HtmlConsts.SPACE + applicationName) + "</FONT>");
     emitPageHeader(out, displayLinks);
     out.write(HtmlConsts.LINE_BREAK + HtmlConsts.LINE_BREAK);
     out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.H1, pageName));

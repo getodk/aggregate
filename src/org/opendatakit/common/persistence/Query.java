@@ -88,12 +88,11 @@ public interface Query {
    * returned by the query.
    * 
    * @param topLevelTable definition of the relation that the topLevelAuri corresponds to.
-   * @param fetchLimit
    * @return
    * @throws ODKDatastoreException
    */
-  public Set<EntityKey> executeTopLevelKeyQuery(CommonFieldsBase topLevelTable,
-		  						int fetchLimit) throws ODKDatastoreException;
+  public Set<EntityKey> executeTopLevelKeyQuery(CommonFieldsBase topLevelTable)
+  							throws ODKDatastoreException;
 
 
   /**

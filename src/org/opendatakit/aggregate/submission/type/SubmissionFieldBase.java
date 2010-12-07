@@ -108,12 +108,12 @@ public abstract class SubmissionFieldBase<T> implements SubmissionField<T>{
    * @param byteArray byte form of the value
    * @param submissionSetKey key of submission set that will reference the blob
    * @param contentType type of binary data (NOTE: only used for binary data)
+   * @return the outcome of the storage attempt.  md5 hashes are used to determine file equivalence. 
    * @throws ODKConversionException
- * @throws ODKDatastoreException 
-   * 
+   * @throws ODKDatastoreException 
    */ 
   @Override
-  public void setValueFromByteArray(byte [] byteArray, String contentType, Long contentLength, String unrootedFilePath, Datastore datastore, User user) throws ODKConversionException, ODKDatastoreException {
+  public BlobSubmissionOutcome setValueFromByteArray(byte [] byteArray, String contentType, Long contentLength, String unrootedFilePath, Datastore datastore, User user) throws ODKConversionException, ODKDatastoreException {
     if(isBinary()) {
       throw new IllegalStateException("Should be overridden in derived class");
     } else {

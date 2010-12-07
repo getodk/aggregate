@@ -27,6 +27,7 @@ import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.persistence.TopLevelDynamicBase;
+import org.opendatakit.common.persistence.Query.FilterOperation;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.security.User;
 
@@ -41,23 +42,32 @@ public class QueryByDate extends QueryBase {
   private boolean backward;
 
   public QueryByDate(Form form, Date lastDate,
-      boolean backwardDirection, int maxFetchLimit, Datastore datastore, User user) throws ODKFormNotFoundException {
+      boolean backwardDirection, boolean secondaryOrderingByPrimaryKey, Boolean completionStatus, int maxFetchLimit, Datastore datastore, User user) throws ODKFormNotFoundException {
     super(form, maxFetchLimit, datastore, user);
 
     backward = backwardDirection;
 
-    CommonFieldsBase tbl = form.getFormDefinition().getTopLevelGroup().getBackingObjectPrototype();
+    TopLevelDynamicBase tbl = (TopLevelDynamicBase) form.getTopLevelGroupElement().getFormDataModel().getBackingObjectPrototype();
     
     query = ds.createQuery(tbl, user);
     if (backward) {
-    	query.addSort(tbl.creationDate, Query.Direction.DESCENDING);
-    	query.addFilter(tbl.creationDate, Query.FilterOperation.LESS_THAN, lastDate);
+    	query.addSort(tbl.lastUpdateDate, Query.Direction.DESCENDING);
+    	query.addFilter(tbl.lastUpdateDate, Query.FilterOperation.LESS_THAN, lastDate);
     } else {
-    	query.addSort(tbl.creationDate, Query.Direction.ASCENDING);
-    	query.addFilter(tbl.creationDate, Query.FilterOperation.GREATER_THAN, lastDate);
+    	query.addSort(tbl.lastUpdateDate, Query.Direction.ASCENDING);
+    	query.addFilter(tbl.lastUpdateDate, Query.FilterOperation.GREATER_THAN, lastDate);
     }
+    if (secondaryOrderingByPrimaryKey) {
+    	query.addSort(tbl.primaryKey, Query.Direction.ASCENDING);
+    }
+	query.addFilter(tbl.isComplete, FilterOperation.EQUAL, completionStatus);
   }
 
+  public QueryByDate(Form form, Date lastDate,
+      boolean backwardDirection, int maxFetchLimit, Datastore datastore, User user) throws ODKFormNotFoundException {
+	  this(form, lastDate, backwardDirection, false, true, maxFetchLimit, datastore, user);
+  }
+  
   public List<Submission> getResultSubmissions() throws ODKIncompleteSubmissionData, ODKDatastoreException {
 
     List<Submission> retrievedSubmissions = new ArrayList<Submission>();

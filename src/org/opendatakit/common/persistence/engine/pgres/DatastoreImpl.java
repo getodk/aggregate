@@ -66,19 +66,19 @@ public class DatastoreImpl implements Datastore {
 
 	public static final String DATASOURCE_NAME = "dataSource";
 
+	public final DataSource dataSource;
+	
 	private static final int MAX_COLUMN_NAME_LEN = 64;
 	private static final int MAX_TABLE_NAME_LEN = 60; // reserve 4 char for idx name
-
-	private final JdbcTemplate jdbcTemplate;
 
 	private final String schemaName;
 
 	public DatastoreImpl() throws ODKDatastoreException {
 		ApplicationContext context = new ClassPathXmlApplicationContext(
 				PERSISTENCE_CONTEXT);
-		DataSource dataSource = (DataSource) context.getBean(DATASOURCE_NAME);
+		dataSource = (DataSource) context.getBean(DATASOURCE_NAME);
 
-		this.jdbcTemplate = new JdbcTemplate(dataSource);
+		JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
 		List<?> databaseNames = jdbcTemplate.queryForList("SELECT DATABASE()",
 				String.class);
 		this.schemaName = (String) databaseNames.get(0);
@@ -235,8 +235,8 @@ public class DatastoreImpl implements Datastore {
 		}
 	};
 
-	JdbcTemplate getJdbcTemplate() {
-		return jdbcTemplate;
+	JdbcTemplate getJdbcConnection() {
+		return new JdbcTemplate(dataSource);
 	}
 
 	@Override
@@ -257,7 +257,7 @@ public class DatastoreImpl implements Datastore {
 	private final boolean updateRelation(CommonFieldsBase relation ) {
 
 		String qs = TableDefinition.TABLE_DEF_QUERY;
-		List<?> columns = jdbcTemplate.query(qs,
+		List<?> columns = getJdbcConnection().query(qs,
 					new Object[] {relation.getSchemaName(), relation.getTableName()}, tableDef);
 
 		if ( columns.size() > 0 ) {
@@ -418,7 +418,7 @@ public class DatastoreImpl implements Datastore {
 			b.append(K_CLOSE_PAREN);
 	
 			try {
-				jdbcTemplate.execute(b.toString());
+				getJdbcConnection().execute(b.toString());
 			} catch ( DataAccessException e ) {
 				e.printStackTrace();
 				throw new IllegalStateException("unable to execute: " + b.toString() +
@@ -476,7 +476,7 @@ public class DatastoreImpl implements Datastore {
 		b.append(K_BQ);
 		
 		try {
-			jdbcTemplate.execute(b.toString());
+			getJdbcConnection().execute(b.toString());
 		} catch ( DataAccessException e ) {
 			e.printStackTrace();
 			throw new IllegalStateException("unable to execute: " + b.toString() +
@@ -487,7 +487,7 @@ public class DatastoreImpl implements Datastore {
 	@Override
 	public boolean hasRelation(String schema, String tableName, User user) {
 		String qs = TableDefinition.TABLE_EXISTS_QUERY;
-		int columnCount = jdbcTemplate.queryForInt(qs, new Object[] {schema, tableName});
+		int columnCount = getJdbcConnection().queryForInt(qs, new Object[] {schema, tableName});
 		return (columnCount != 0);
 	}
 
@@ -502,7 +502,7 @@ public class DatastoreImpl implements Datastore {
 		b.append(relation.getTableName());
 		b.append(K_BQ);
 		
-		jdbcTemplate.execute(b.toString());
+		getJdbcConnection().execute(b.toString());
 	}
 
 	/***************************************************************************
@@ -637,7 +637,7 @@ public class DatastoreImpl implements Datastore {
 			il[idx] = java.sql.Types.VARCHAR;
 			
 			// update...
-			jdbcTemplate.update(b.toString(), ol, il);
+			getJdbcConnection().update(b.toString(), ol, il);
 		} else {
 			// not yet in database -- insert
 			b.append(K_INSERT_INTO);
@@ -705,7 +705,7 @@ public class DatastoreImpl implements Datastore {
 			b.append(K_CLOSE_PAREN);
 			
 			// insert...
-			jdbcTemplate.update(b.toString(), ol, il);
+			getJdbcConnection().update(b.toString(), ol, il);
 			entity.setFromDatabase(true); // now it is in the database...
 		}
 	}
@@ -738,7 +738,7 @@ public class DatastoreImpl implements Datastore {
 		b.append(K_BIND_VALUE);
 
 		// TODO: log the deletion
-		jdbcTemplate.update(b.toString(), new Object[] {key.getKey()});
+		getJdbcConnection().update(b.toString(), new Object[] {key.getKey()});
 	}
 
 	@Override

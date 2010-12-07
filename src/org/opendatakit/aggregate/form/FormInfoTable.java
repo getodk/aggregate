@@ -18,11 +18,9 @@ package org.opendatakit.aggregate.form;
 import java.util.List;
 
 import org.opendatakit.aggregate.datamodel.FormDataModel;
-import org.opendatakit.aggregate.datamodel.FormDefinition;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.Datastore;
-import org.opendatakit.common.persistence.EntityKey;
 import org.opendatakit.common.persistence.PersistConsts;
 import org.opendatakit.common.persistence.TopLevelDynamicBase;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
@@ -38,6 +36,8 @@ public class FormInfoTable extends TopLevelDynamicBase {
 	static final String TABLE_NAME = "_form_info";
 	
 	private static final String FORM_INFO_DEFINITION_URI = "aggregate.opendatakit.org:FormInfo-Definition";
+	private static final String FORM_INFO_LONG_STRING_REF_TEXT_URI = "aggregate.opendatakit.org:FormInfoLongStringRefText";
+	private static final String FORM_INFO_REF_TEXT_URI = "aggregate.opendatakit.org:FormInfoRefText";
 
 	private static final DataField FORM_ID = new DataField("FORM_ID",
 			DataField.DataType.STRING, false, PersistConsts.MAX_SIMPLE_STRING_LEN);
@@ -59,8 +59,8 @@ public class FormInfoTable extends TopLevelDynamicBase {
 		super(databaseSchema, TABLE_NAME);
 		fieldList.add(formId = new DataField(FORM_ID));
 
-		fieldValueMap.put(primaryKey, CommonFieldsBase.newMD5HashUri(FormDataModel.URI_FORM_ID_VALUE_FORM_INFO));
-		fieldValueMap.put(formId, FormDataModel.URI_FORM_ID_VALUE_FORM_INFO);
+		fieldValueMap.put(primaryKey, CommonFieldsBase.newMD5HashUri(FormInfo.formInfoXFormParameters.formId));
+		fieldValueMap.put(formId, FormInfo.formInfoXFormParameters.formId);
 	}
 
 	/**
@@ -92,10 +92,10 @@ public class FormInfoTable extends TopLevelDynamicBase {
 		return relation;
 	}
 	
-	static final String createFormDataModel(List<FormDataModel> model, EntityKey definitionKey, Datastore datastore, User user) throws ODKDatastoreException {
+	static final String createFormDataModel(List<FormDataModel> model, Datastore datastore, User user) throws ODKDatastoreException {
 
 		FormDataModel.createRelation(datastore, user);
-		SubmissionAssociationTable.createRelation(datastore, user);
+		SubmissionAssociationTable saRelation = SubmissionAssociationTable.createRelation(datastore, user);
 		
 		FormInfoTable formInfoTableRelation = createRelation(datastore, user);
 		FormInfoTable formInfoDefinition = datastore.createEntityUsingRelation(formInfoTableRelation, null, user);
@@ -104,7 +104,6 @@ public class FormInfoTable extends TopLevelDynamicBase {
 		Long lastOrdinal = 0L;
 		
 		lastOrdinal = FormDefinition.buildTableFormDataModel( model, 
-				definitionKey,
 				formInfoTableRelation, 
 				formInfoDefinition, // top level table
 				formInfoDefinition, // parent table...
@@ -112,35 +111,33 @@ public class FormInfoTable extends TopLevelDynamicBase {
 				datastore, user );
 		
 		FormInfoDescriptionTable.createFormDataModel(model, 
-				definitionKey, 
 				++lastOrdinal, 
 				formInfoDefinition, // top level table
 				formInfoTableRelation, 
 				datastore, user );
 		
 		FormInfoFilesetTable.createFormDataModel(model, 
-				definitionKey, 
 				++lastOrdinal, 
 				formInfoDefinition, // top level table
 				formInfoTableRelation, 
 				datastore, user );
 		
 		FormInfoSubmissionTable.createFormDataModel(model, 
-				definitionKey, 
 				++lastOrdinal, 
 				formInfoDefinition, // top level table
 				formInfoTableRelation, 
 				datastore, user );
 		
 		FormDefinition.buildLongStringFormDataModel(model, 
-				definitionKey, 
+				FORM_INFO_LONG_STRING_REF_TEXT_URI,
 				FORM_INFO_LONG_STRING_REF_TEXT, 
+				FORM_INFO_REF_TEXT_URI,
 				FORM_INFO_REF_TEXT, 
 				formInfoDefinition, // top level and parent table
 				2L, 
 				datastore, 
 				user);
-		
+
 		return formInfoTableRelation.getUri();
 	}
 }

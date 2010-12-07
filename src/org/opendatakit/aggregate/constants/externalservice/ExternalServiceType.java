@@ -72,7 +72,7 @@ public enum ExternalServiceType {
       case GOOGLE_FUSIONTABLES:
         return new FusionTable(fsc, webServiceUrl, ds, user);
       case GOOGLE_SPREADSHEET:
-        return new GoogleSpreadsheet(fsc, ds, user);
+        return new GoogleSpreadsheet(fsc, webServiceUrl, ds, user);
       case JSON_SERVER:
         return new JsonServer(fsc, ds, user);
       default:

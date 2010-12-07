@@ -15,12 +15,9 @@
  */
 package org.opendatakit.aggregate.form;
 
-import java.util.List;
-
 import org.opendatakit.aggregate.datamodel.FormDataModel;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.Datastore;
-import org.opendatakit.common.persistence.EntityKey;
 import org.opendatakit.common.persistence.PersistConsts;
 import org.opendatakit.common.persistence.StaticAssociationBase;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
@@ -102,6 +99,11 @@ public class SubmissionAssociationTable extends StaticAssociationBase {
 		return new SubmissionAssociationTable(this, user);
 	}
 	
+	public XFormParameters getXFormParameters() {
+		return new XFormParameters( getSubmissionFormId(), 
+				getSubmissionModelVersion(), getSubmissionUiVersion());
+	}
+	
 	public String getSubmissionFormId() {
 		return getStringField(submissionFormId);
 	}
@@ -152,7 +154,7 @@ public class SubmissionAssociationTable extends StaticAssociationBase {
 
 	private static SubmissionAssociationTable relation = null;
 	
-	static final SubmissionAssociationTable createRelation(Datastore datastore, User user) throws ODKDatastoreException {
+	public static final SubmissionAssociationTable createRelation(Datastore datastore, User user) throws ODKDatastoreException {
 		if ( relation == null ) {
 			SubmissionAssociationTable relationPrototype;
 			relationPrototype = new SubmissionAssociationTable(datastore.getDefaultSchemaName());
@@ -162,12 +164,4 @@ public class SubmissionAssociationTable extends StaticAssociationBase {
 		}
 		return relation;
 	}
-	
-	static final void createFormDataModel(List<FormDataModel> model, EntityKey definitionKey, Long ordinal, 
-			Datastore datastore, User user) throws ODKDatastoreException {
-		
-		// this is static, so it isn't persisted in the form_data_model...
-		createRelation(datastore, user);		
-	}
-
 }

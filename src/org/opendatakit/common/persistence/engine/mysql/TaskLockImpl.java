@@ -29,18 +29,35 @@ public class TaskLockImpl implements TaskLock {
 
   @Override
   public boolean obtainLock(String lockId, Form form, TaskLockType taskType) {
-    // TODO Auto-generated method stub
-    return false;
+    return obtainLock(lockId, form.getFormId(), taskType);
+  }
+
+  @Override
+  public boolean obtainLock(String lockId, String formId, TaskLockType taskType) {
+    // TODO: NEEDS TO BE IMPLEMENTED
+    return true;
   }
 
   @Override
   public boolean renewLock(String lockId, Form form, TaskLockType taskType) {
-    // TODO Auto-generated method stub
-    return false;
+    return renewLock(lockId, form.getFormId(), taskType);
+  }
+
+  @Override
+  public boolean renewLock(String lockId, String formId, TaskLockType taskType) {
+    // TODO: NEEDS TO BE IMPLEMENTED
+    return true;
   }
 
   @Override
   public boolean releaseLock(String lockId, Form form, TaskLockType taskType) {
-    return false;
+    return releaseLock(lockId, form.getFormId(), taskType);
   }
+
+  @Override
+  public boolean releaseLock(String lockId, String formId, TaskLockType taskType) {
+    // TODO: NEEDS TO BE IMPLEMENTED
+    return true;
+  }
+
 }

@@ -87,6 +87,8 @@ public final class ServletConsts {
 
   public static final String BLOB_KEY = "blobKey";
 
+  public static final String AS_ATTACHMENT = "as_attachment";
+
   public static final String INDEX = "index";
 
   public static final String BACKWARD = "backward";
@@ -133,8 +135,6 @@ public final class ServletConsts {
 
   // TODO: revise so no retrieval form limit
   public static final int FETCH_LIMIT = 1000;
-  
-  public static final int SUBMISSIONS_FETCH_LIMIT = 20;
 
   /**
    * The name of the parameter that specifies the cursor location for retrieving

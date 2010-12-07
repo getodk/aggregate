@@ -61,7 +61,7 @@ public class HtmlLinkElementFormatter extends BasicElementFormatter{
  
   @Override
   public void formatBinary(BlobSubmissionType blobSubmission, String propertyName, Row row) throws ODKDatastoreException {
-    if(blobSubmission == null) {
+    if(blobSubmission == null || (blobSubmission.getAttachmentCount() == 0)) {
       row.addFormattedValue(null);
       return;
     }

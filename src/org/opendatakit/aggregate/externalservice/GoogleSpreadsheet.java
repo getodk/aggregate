@@ -34,7 +34,7 @@ import org.opendatakit.aggregate.exception.ODKExternalServiceException;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.format.Row;
-import org.opendatakit.aggregate.format.element.BasicElementFormatter;
+import org.opendatakit.aggregate.format.element.LinkElementFormatter;
 import org.opendatakit.aggregate.format.header.BasicHeaderFormatter;
 import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.aggregate.submission.SubmissionSet;
@@ -84,8 +84,8 @@ public class GoogleSpreadsheet extends AbstractExternalService implements Extern
   private List<GoogleSpreadsheetRepeatParameterTable> repeatElementTableIds;
   private final SpreadsheetService spreadsheetService;
 
-  private GoogleSpreadsheet(Form form, Datastore datastore, User user) {
-    super(form, new BasicElementFormatter(true, true, true), new BasicHeaderFormatter(true, true,
+  private GoogleSpreadsheet(Form form, String webServerUrl, Datastore datastore, User user) {
+    super(form, new LinkElementFormatter(webServerUrl, true, true, true), new BasicHeaderFormatter(true, true,
         true), datastore, user);
     spreadsheetService = new SpreadsheetService(ServletConsts.APPLICATION_NAME);
     // TODO: REMOVE after bug is fixed
@@ -107,9 +107,9 @@ public class GoogleSpreadsheet extends AbstractExternalService implements Extern
     }
   }
 
-  public GoogleSpreadsheet(FormServiceCursor fsc, Datastore datastore, User user)
+  public GoogleSpreadsheet(FormServiceCursor fsc, String webServerUrl, Datastore datastore, User user)
       throws ODKEntityNotFoundException, ODKDatastoreException, ODKFormNotFoundException {
-    this(Form.retrieveForm(fsc.getFormId(), datastore, user), datastore, user);
+    this(Form.retrieveForm(fsc.getFormId(), datastore, user), webServerUrl, datastore, user);
     GoogleSpreadsheetParameterTable gp = GoogleSpreadsheetParameterTable.createRelation(datastore,
         user);
     objectEntity = datastore.getEntity(gp, fsc.getServiceAuri(), user);
@@ -120,9 +120,9 @@ public class GoogleSpreadsheet extends AbstractExternalService implements Extern
   }
 
   public GoogleSpreadsheet(Form form, String name, String spreadKey, OAuthToken authToken,
-      ExternalServiceOption externalServiceOption, Datastore datastore, User user)
+      ExternalServiceOption externalServiceOption, String webServerUrl, Datastore datastore, User user)
       throws ODKDatastoreException {
-    this(form, datastore, user);
+    this(form, webServerUrl, datastore, user);
     objectEntity = datastore.createEntityUsingRelation(GoogleSpreadsheetParameterTable
         .createRelation(datastore, user), null, user);
     fsc = FormServiceCursor.createFormServiceCursor(form, ExternalServiceType.GOOGLE_SPREADSHEET,
@@ -380,8 +380,8 @@ public class GoogleSpreadsheet extends AbstractExternalService implements Extern
   }
 
   public static GoogleSpreadsheet createSpreadsheet(Form form, OAuthToken authToken,
-      String spreadsheetName, ExternalServiceOption externalServiceOption, Datastore datastore,
-      User user) throws ODKDatastoreException, ODKExternalServiceException {
+      String spreadsheetName, ExternalServiceOption externalServiceOption, String webServerUrl, 
+      Datastore datastore, User user) throws ODKDatastoreException, ODKExternalServiceException {
 
     // setup service
     DocsService service = new DocsService(ServletConsts.APPLICATION_NAME);
@@ -412,7 +412,7 @@ public class GoogleSpreadsheet extends AbstractExternalService implements Extern
     String spreadKey = updatedEntry.getDocId();
 
     return new GoogleSpreadsheet(form, spreadsheetName, spreadKey, authToken,
-        externalServiceOption, datastore, user);
+        externalServiceOption, webServerUrl, datastore, user);
   }
 
   @Override

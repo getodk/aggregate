@@ -26,12 +26,12 @@ import java.io.ByteArrayOutputStream;
  * @author mitchellsundt@gmail.com
  * 
  */
-public class MultiPartFormItem {
+public final class MultiPartFormItem {
 
   /**
    * form data field name
    */
-  private String name;
+  private final String name;
 
   /**
    * form data file name
@@ -41,16 +41,16 @@ public class MultiPartFormItem {
   /**
    * form data content type
    */
-  private String contentType;
+  private final String contentType;
   
   /**
    * form data content length
    */
-  private Long contentLength;
+  private final Long contentLength;
   /**
    * form data's stream
    */
-  private ByteArrayOutputStream stream;
+  private final ByteArrayOutputStream stream;
   
   /**
    * Constructor of a multi part of data 
@@ -67,7 +67,7 @@ public class MultiPartFormItem {
   public MultiPartFormItem(String fieldName, String fileName, String contentType, ByteArrayOutputStream byteStream) {
     this.name = fieldName;
     this.filename = fileName;
-    this.contentType = contentType;
+	this.contentType = contentType;
     this.contentLength = Long.valueOf(byteStream.size());
     this.stream = byteStream;
   }

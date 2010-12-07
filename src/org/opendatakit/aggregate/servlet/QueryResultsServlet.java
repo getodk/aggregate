@@ -16,8 +16,10 @@
 package org.opendatakit.aggregate.servlet;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -33,6 +35,7 @@ import org.opendatakit.aggregate.format.table.HtmlFormatter;
 import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.Datastore;
+import org.opendatakit.common.persistence.EntityKey;
 import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.persistence.TopLevelDynamicBase;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
@@ -107,14 +110,13 @@ public class QueryResultsServlet extends ServletUtilBase {
 			odkIdNotFoundError(resp);
 			return;
 		}
-		FormElementModel fdm = form.getFormDefinition().getElementByName(formId);
-
-		CommonFieldsBase tbl = fdm.getFormDataModel().getBackingObjectPrototype();
-
-		FormElementModel element = fdm.findElementByName(field);
+		
+		FormElementModel element = form.findElementByName(field);
+		CommonFieldsBase tbl = element.getParent().getFormDataModel().getBackingObjectPrototype();
 
 		if (element == null) {
 			errorRetreivingData(resp);
+			return;
 		}
 
 		Object compareValue = null;
@@ -123,25 +125,26 @@ public class QueryResultsServlet extends ServletUtilBase {
 			compareValue = Boolean.parseBoolean(value);
 			break;
 		case INTEGER:
-			compareValue = Integer.parseInt(value);
+			compareValue = Long.valueOf(value);
 			break;
 		case DECIMAL:
-			compareValue = Double.parseDouble(value);
+			compareValue = new BigDecimal(value);
 			break;
 		case STRING:
 			compareValue = value;
 			break;
+		default:
+			throw new IllegalStateException("datatype not supported");			
 		}
 		Query query = ds.createQuery(tbl, user);
 		query.addFilter(element.getFormDataModel().getBackingKey(), Query.FilterOperation
 				.valueOf(op), compareValue);
 		try {
 			List<Submission> submissions = new ArrayList<Submission>();
-			List<? extends CommonFieldsBase> entities = query
-					.executeQuery(1000);
-			for (CommonFieldsBase entity : entities) {
-				submissions.add(new Submission((TopLevelDynamicBase) entity, form.getFormDefinition(),
-						ds, user));
+			Set<EntityKey> keys = query
+					.executeTopLevelKeyQuery(form.getTopLevelGroupElement().getFormDataModel().getBackingObjectPrototype());
+			for ( EntityKey k : keys ) {
+				submissions.add( new Submission(k.getKey(), form, ds, user));
 			}
 
 			SubmissionFormatter formatter = new HtmlFormatter(form,

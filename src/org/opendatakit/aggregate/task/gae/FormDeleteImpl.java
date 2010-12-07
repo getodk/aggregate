@@ -36,7 +36,7 @@ public class FormDeleteImpl extends AbstractFormDeleteImpl {
 
   @Override
   public final void createFormDeleteTask(Form form, User user) {
-    TaskOptions task = TaskOptions.Builder.withUrl("/" + FormDeleteTaskServlet.ADDR);
+    TaskOptions task = TaskOptions.Builder.withUrl(ServletConsts.WEB_ROOT + FormDeleteTaskServlet.ADDR);
     task.method(TaskOptions.Method.GET);
     task.countdownMillis(1);
     task.param(ServletConsts.FORM_ID, form.getFormId());

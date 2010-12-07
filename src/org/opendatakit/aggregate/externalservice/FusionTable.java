@@ -156,24 +156,25 @@ public class FusionTable extends AbstractExternalService implements ExternalServ
         if (value instanceof RepeatSubmissionType) {
           RepeatSubmissionType repeat = (RepeatSubmissionType) value;
           if (repeat.getElement().equals(element)) {
-            for (SubmissionSet set : repeat.getSubmissionSets())
+            for (SubmissionSet set : repeat.getSubmissionSets()) {
               executeInsertData(tableId.getFusionTableId(), set, headers);
+            }
           }
         } else {
-          System.out.println("ERROR: How did a non Repeat Submission Type get in the for loop?");
+          System.err.println("ERROR: How did a non Repeat Submission Type get in the for loop?");
         }
       }
     }
   }
 
   private void executeInsertData(String tableId, SubmissionSet set, List<String> headers) throws ODKExternalServiceException {
+ 
     try {
       Row row = set.getFormattedValuesAsRow(null, formatter, true);
 
       String insertQuery = FusionTableConsts.INSERT_STMT + tableId
           + createCsvString(headers.iterator()) + FusionTableConsts.VALUES_STMT
           + createCsvString(row.getFormattedValues().iterator());
-      // TODO figure out how to do this
       OAuthToken authToken = new OAuthToken(objectEntity.getAuthToken(), objectEntity.getAuthTokenSecret());
 		executeInsert(fusionTableService, insertQuery, authToken);
     } catch (Exception e) {
@@ -265,6 +266,7 @@ public class FusionTable extends AbstractExternalService implements ExternalServ
 		request.setDoOutput(true);
 		request.setDoInput(true);
 		request.setRequestMethod("POST");
+		request.setFixedLengthStreamingMode(0);
 		try {
 			consumer.sign(request);
 		} catch (OAuthMessageSignerException e) {
@@ -278,8 +280,8 @@ public class FusionTable extends AbstractExternalService implements ExternalServ
 			throw new IOException("Failed to sign request: " + e.getMessage());
 		}
 		
-		
 		// TODO: this section of code is possibly causing 'WARNING: Going to buffer response body of large or unknown size. Using getResponseBodyAsStream instead is recommended.'
+	    // The WARNING is most likely only happening when running appengine locally, but we should investigate to make sure
 		InputStream is = request.getInputStream();
 		request.connect();
 		
@@ -291,13 +293,13 @@ public class FusionTable extends AbstractExternalService implements ExternalServ
 			response.append(responseLine);
 		}		
       if (request.getResponseCode() != HttpURLConnection.HTTP_OK) {
-        throw new ODKExternalServiceException(response.toString());
+        throw new ODKExternalServiceException(response.toString() + insertStmt);
       }
       return response.toString();
   }
 
   private String executeQuery(GoogleService service, String queryStmt, OAuthToken authToken) throws IOException,
-      ServiceException {
+      ServiceException, ODKExternalServiceException {
 	  	OAuthConsumer consumer = new DefaultOAuthConsumer(ServletConsts.OAUTH_CONSUMER_KEY, ServletConsts.OAUTH_CONSUMER_SECRET);
 		consumer.setTokenWithSecret(authToken.getToken(), authToken.getTokenSecret());
 	  
@@ -305,9 +307,10 @@ public class FusionTable extends AbstractExternalService implements ExternalServ
 	    		+ FusionTableConsts.BEGIN_SQL
 	    		+ URLEncoder.encode(queryStmt, FusionTableConsts.FUSTABLE_ENCODE));		  
 		HttpURLConnection request = (HttpURLConnection) url.openConnection();
-		request.setDoOutput(true);
-		request.setDoInput(true);
-		request.setRequestMethod("POST");
+	   request.setDoOutput(true);
+	   request.setDoInput(true);
+      request.setRequestMethod("POST");
+      request.setFixedLengthStreamingMode(0);
 		try {
 			consumer.sign(request);
 		} catch (OAuthMessageSignerException e) {
@@ -321,19 +324,22 @@ public class FusionTable extends AbstractExternalService implements ExternalServ
 			throw new IOException("Failed to sign request: " + e.getMessage());
 		}
 		
-		InputStream is = request.getInputStream();
-		request.connect();
-		
-		BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-		StringBuffer response = new StringBuffer();
-		// Now we are reading body
-		String responseLine;
-		while ((responseLine = reader.readLine()) != null)
-		{
-			response.append(responseLine);
-		}
-		
-		return response.toString();
+      // TODO: this section of code is possibly causing 'WARNING: Going to buffer response body of large or unknown size. Using getResponseBodyAsStream instead is recommended.'
+		// The WARNING is most likely only happening when running appengine locally, but we should investigate to make sure
+      InputStream is = request.getInputStream();
+      request.connect();
+      
+      BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+      StringBuffer response = new StringBuffer();
+      String responseLine;
+      while ((responseLine = reader.readLine()) != null)
+      {
+         response.append(responseLine);
+      }     
+      if (request.getResponseCode() != HttpURLConnection.HTTP_OK) {
+        throw new ODKExternalServiceException(response.toString() + queryStmt);
+      }
+      return response.toString();
   }
 
   private String createCsvString(Iterator<String> itr) {
@@ -373,7 +379,7 @@ public class FusionTable extends AbstractExternalService implements ExternalServ
 	  }
 
     HeaderFormatter headerFormatter = new FusionTableHeaderFormatter();
-    FormElementModel root = form.getFormDefinition().getTopLevelGroupElement();
+    FormElementModel root = form.getTopLevelGroupElement();
 
     String tableid = executeFusionTableCreation(form, fusionTableService, headerFormatter, root, authToken);
 

@@ -151,10 +151,10 @@ public class SpreadsheetServlet extends ServletUtilBase {
 
     try {
       OAuthToken authToken = new OAuthToken(sessionToken, sessionTokenSecret);
-      GoogleSpreadsheet.createSpreadsheet(form, authToken, spreadsheetName, esType, ds, user);
+      GoogleSpreadsheet.createSpreadsheet(form, authToken, spreadsheetName, esType, getServerURL(req), ds, user);
 
       WorksheetCreator ws = (WorksheetCreator) ContextFactory.get().getBean(
-          SpreadsheetConsts.WORKSHEET_BEAN);
+          BeanDefs.WORKSHEET_BEAN);
 
       ws.createWorksheetTask(getServerURL(req), spreadsheetName, esType,
           SpreadsheetConsts.WORKSHEET_CREATION_DELAY, form, ds, user);
@@ -168,6 +168,9 @@ public class SpreadsheetServlet extends ServletUtilBase {
       return;
     }
 
-    resp.sendRedirect(ServletConsts.WEB_ROOT);
+
+    
+    System.out.println("USING URL: " + getServerURL(req));
+    resp.sendRedirect(FormsServlet.ADDR);
   }
 }

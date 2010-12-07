@@ -61,12 +61,9 @@ public final class SpreadsheetConsts {
   public static final String OAUTH_TOKEN = "oauthToken";
   public static final String OAUTH_TOKEN_SECRET = "oauthTokenSecret";
 
-  // bean constant
-  public static final String WORKSHEET_BEAN = "worksheet_creator";
-
   public static final int WORKSHEET_CREATION_DELAY = 15000;
   public static final String COMPLETED_AUTH = "Completed Authorization <br>";
   
-  public static final String UNSUPPORTED_CHAR_CLASS = "[*]";
+  public static final String UNSUPPORTED_CHAR_CLASS = "[*:]";
   public static final String REPLACEMENT_CHAR = "-";
 }

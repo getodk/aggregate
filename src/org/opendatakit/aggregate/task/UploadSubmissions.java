@@ -31,7 +31,7 @@ import org.opendatakit.common.security.User;
  */
 public interface UploadSubmissions {
 
-  public void createFormUploadTask(FormServiceCursor fsc, User user) throws ODKExternalServiceException;
+  public void createFormUploadTask(FormServiceCursor fsc, String baseServerWebUrl, User user) throws ODKExternalServiceException;
   
   public void uploadSubmissions(FormServiceCursor fsc, String baseServerWebUrl, Datastore ds, User user) throws ODKEntityNotFoundException, ODKExternalServiceException, ODKFormNotFoundException, ODKTaskLockException;
 }

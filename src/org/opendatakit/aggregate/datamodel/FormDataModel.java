@@ -109,14 +109,12 @@ public final class FormDataModel extends DynamicBase {
 	
 	private static final String TABLE_NAME = "_form_data_model";
 
-	private static final DataField URI_SUBMISSION_DATA_MODEL = new DataField("URI_SUBMISSION_DATA_MODEL", DataField.DataType.STRING, false, PersistConsts.URI_STRING_LEN);
 	private static final DataField ELEMENT_TYPE = new DataField("ELEMENT_TYPE", DataField.DataType.STRING, false, PersistConsts.URI_STRING_LEN);
 	private static final DataField ELEMENT_NAME = new DataField("ELEMENT_NAME", DataField.DataType.STRING, true, PersistConsts.MAX_SIMPLE_STRING_LEN);
 	private static final DataField PERSIST_AS_COLUMN_NAME = new DataField("PERSIST_AS_COLUMN_NAME", DataField.DataType.STRING, true, PersistConsts.URI_STRING_LEN);
 	private static final DataField PERSIST_AS_TABLE_NAME = new DataField("PERSIST_AS_TABLE_NAME", DataField.DataType.STRING, true, PersistConsts.URI_STRING_LEN);
 	private static final DataField PERSIST_AS_SCHEMA_NAME = new DataField("PERSIST_AS_SCHEMA_NAME", DataField.DataType.STRING, true, PersistConsts.URI_STRING_LEN);
 
-	public final DataField uriSubmissionDataModel;
 	public final DataField elementType;
 	public final DataField elementName;
 	public final DataField persistAsColumn;
@@ -142,7 +140,6 @@ public final class FormDataModel extends DynamicBase {
 	 */
 	FormDataModel(String schemaName) {
 		super(schemaName, TABLE_NAME);
-		fieldList.add(uriSubmissionDataModel = new DataField(URI_SUBMISSION_DATA_MODEL));
 		fieldList.add(elementType = new DataField(ELEMENT_TYPE));
 		fieldList.add(elementName = new DataField(ELEMENT_NAME));
 		fieldList.add(persistAsColumn = new DataField(PERSIST_AS_COLUMN_NAME));
@@ -161,7 +158,6 @@ public final class FormDataModel extends DynamicBase {
 	private FormDataModel(FormDataModel ref, User user) {
 		super(ref, user);
 
-		uriSubmissionDataModel = ref.uriSubmissionDataModel;
 		elementType = ref.elementType;
 		elementName = ref.elementName;
 		persistAsColumn = ref.persistAsColumn;
@@ -173,10 +169,6 @@ public final class FormDataModel extends DynamicBase {
 	@Override
 	public FormDataModel getEmptyRow(User user) {
 		return new FormDataModel(this, user);
-	}
-
-	public final String getUriFormId() {
-		return getStringField(uriSubmissionDataModel);
 	}
 
 	public final ElementType getElementType() {
@@ -395,8 +387,8 @@ public final class FormDataModel extends DynamicBase {
 		if ( ppk == null ) {
 			ppk = "";
 		}
-		out.format("FDM(%d,%s)  uriFormId %s\n",
-				getOrdinalNumber().intValue(), ppk, getUriFormId());
+		out.format("FDM(%d,%s)  fdmSubmissionUri %s\n",
+				getOrdinalNumber().intValue(), ppk, getTopLevelAuri());
 		String tpk = getTopLevelAuri();
 		if ( tpk == null ) {
 			tpk = "";

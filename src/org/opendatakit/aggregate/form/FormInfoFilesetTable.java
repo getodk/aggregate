@@ -18,12 +18,10 @@ package org.opendatakit.aggregate.form;
 import java.util.List;
 
 import org.opendatakit.aggregate.datamodel.FormDataModel;
-import org.opendatakit.aggregate.datamodel.FormDefinition;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.DynamicBase;
 import org.opendatakit.common.persistence.DynamicCommonFieldsBase;
-import org.opendatakit.common.persistence.EntityKey;
 import org.opendatakit.common.persistence.TopLevelDynamicBase;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.security.User;
@@ -126,7 +124,7 @@ public class FormInfoFilesetTable extends DynamicBase {
 		return relation;
 	}
 	
-	static final void createFormDataModel(List<FormDataModel> model, EntityKey definitionKey, Long ordinal, 
+	static final void createFormDataModel(List<FormDataModel> model, Long ordinal, 
 			TopLevelDynamicBase formInfoDefinitionRelation, 
 			DynamicCommonFieldsBase formInfoTableRelation, 
 			Datastore datastore, User user) throws ODKDatastoreException {
@@ -136,29 +134,37 @@ public class FormInfoFilesetTable extends DynamicBase {
 		Long lastOrdinal = 0L;
 		
 		lastOrdinal = FormDefinition.buildTableFormDataModel( model, 
-				definitionKey,
 				filesetRelation, 
 				formInfoDefinitionRelation, // top level table
 				formInfoTableRelation, // also the parent table
 				ordinal,
 				datastore, user );
 
-		FormDefinition.buildBinaryContentFormDataModel(model, definitionKey, 
+		String uriPrefix = FormDataModel.URI_FORM_ID_VALUE_FORM_INFO;
+		FormDefinition.buildBinaryContentFormDataModel(model, 
 				ELEMENT_NAME_XFORM_DEFINITION, 
+				uriPrefix + FORM_INFO_XFORM_BINARY_CONTENT,
 				FORM_INFO_XFORM_BINARY_CONTENT, 
+				uriPrefix + FORM_INFO_XFORM_VERSIONED_BINARY_CONTENT, 
 				FORM_INFO_XFORM_VERSIONED_BINARY_CONTENT, 
+				uriPrefix + FORM_INFO_XFORM_VERSIONED_BINARY_CONTENT_REF_BLOB, 
 				FORM_INFO_XFORM_VERSIONED_BINARY_CONTENT_REF_BLOB, 
+				uriPrefix + FORM_INFO_XFORM_REF_BLOB, 
 				FORM_INFO_XFORM_REF_BLOB, 
 				formInfoDefinitionRelation, // top level table
 				filesetRelation, // parent table
 				++lastOrdinal, 
 				datastore, user);
 		
-		FormDefinition.buildBinaryContentFormDataModel(model, definitionKey, 
+		FormDefinition.buildBinaryContentFormDataModel(model, 
 				ELEMENT_NAME_MANIFEST_FILESET, 
+				uriPrefix + FORM_INFO_MANIFEST_BINARY_CONTENT, 
 				FORM_INFO_MANIFEST_BINARY_CONTENT, 
+				uriPrefix + FORM_INFO_MANIFEST_VERSIONED_BINARY_CONTENT, 
 				FORM_INFO_MANIFEST_VERSIONED_BINARY_CONTENT, 
+				uriPrefix + FORM_INFO_MANIFEST_VERSIONED_BINARY_CONTENT_REF_BLOB, 
 				FORM_INFO_MANIFEST_VERSIONED_BINARY_CONTENT_REF_BLOB, 
+				uriPrefix + FORM_INFO_MANIFEST_REF_BLOB, 
 				FORM_INFO_MANIFEST_REF_BLOB, 
 				formInfoDefinitionRelation, // top level table
 				filesetRelation, // parent table

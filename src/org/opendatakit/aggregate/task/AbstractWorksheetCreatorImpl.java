@@ -79,12 +79,12 @@ public abstract class AbstractWorksheetCreatorImpl implements WorksheetCreator {
     } catch (Exception e) {
       throw new ODKExternalServiceException(e);
     }
-
+    
     // if we need to upload submissions, start a task to do so
     if (!esType.equals(ExternalServiceOption.STREAM_ONLY)) {
       UploadSubmissions uploadTask = (UploadSubmissions) ContextFactory.get().getBean(
           BeanDefs.UPLOAD_TASK_BEAN);
-      uploadTask.createFormUploadTask(spreadsheet.getFormServiceCursor(), user);
+      uploadTask.createFormUploadTask(spreadsheet.getFormServiceCursor(), baseWebServerUrl, user);
     }
   }
 }

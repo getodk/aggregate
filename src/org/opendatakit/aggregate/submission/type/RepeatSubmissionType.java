@@ -22,8 +22,8 @@ import java.util.List;
 
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.format.FormatConsts;
-import org.opendatakit.aggregate.datamodel.FormDefinition;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
+import org.opendatakit.aggregate.form.FormDefinition;
 import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.format.element.ElementFormatter;
 import org.opendatakit.aggregate.submission.SubmissionElement;
@@ -130,7 +130,8 @@ public class RepeatSubmissionType implements SubmissionRepeat {
 		Query q = datastore.createQuery(repeatGroup.getFormDataModel().getBackingObjectPrototype(), user);
 		q.addFilter(((DynamicBase) repeatGroup.getFormDataModel().getBackingObjectPrototype()).parentAuri,
 				FilterOperation.EQUAL, uriAssociatedRow);
-		q.addSort(repeatGroup.getFormDataModel().ordinalNumber, Direction.ASCENDING);
+		q.addSort(((DynamicBase) repeatGroup.getFormDataModel().getBackingObjectPrototype()).ordinalNumber, 
+				Direction.ASCENDING);
 
 		List<? extends CommonFieldsBase> repeatGroupList = q
 				.executeQuery(ServletConsts.FETCH_LIMIT);

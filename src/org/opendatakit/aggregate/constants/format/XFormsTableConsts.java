@@ -38,7 +38,7 @@ public final class XFormsTableConsts {
   
     // OpenRosa Compliant xforms manifest list
   public static final String MANIFEST_TAG = "manifest";
-  public static final String FILE_TAG = "file";
+  public static final String MEDIA_FILE_TAG = "mediaFile";
   public static final String FILE_NAME_TAG = "filename";
   public static final String HASH_TAG = "hash";
 }

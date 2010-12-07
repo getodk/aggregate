@@ -27,5 +27,7 @@ public class BeanDefs {
   public static final String USER_BEAN = "user_service";
   public static final String DATASTORE_BEAN = "datastore";
   public static final String UPLOAD_TASK_BEAN = "upload_task";
-
+  public static final String KML_BEAN = "kml_task";
+  public static final String CSV_BEAN = "csv_task";
+  public static final String WORKSHEET_BEAN = "worksheet_creator";
 }

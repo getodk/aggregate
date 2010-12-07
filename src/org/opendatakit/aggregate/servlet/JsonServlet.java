@@ -137,7 +137,7 @@ public class JsonServlet extends ServletUtilBase {
 	}
     }
 
-    resp.sendRedirect(ServletConsts.WEB_ROOT);
+    resp.sendRedirect(FormsServlet.ADDR);
   }
 
 }

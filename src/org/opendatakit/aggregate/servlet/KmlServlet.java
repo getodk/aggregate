@@ -28,15 +28,9 @@ import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.datamodel.FormElementKey;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
-import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
 import org.opendatakit.aggregate.form.Form;
-import org.opendatakit.aggregate.format.SubmissionFormatter;
-import org.opendatakit.aggregate.format.structure.KmlFormatter;
-import org.opendatakit.aggregate.query.submission.QueryByDate;
-import org.opendatakit.common.constants.BasicConsts;
-import org.opendatakit.common.constants.HtmlConsts;
+import org.opendatakit.aggregate.task.KmlGenerator;
 import org.opendatakit.common.persistence.Datastore;
-import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.security.UserService;
 
@@ -119,23 +113,14 @@ public class KmlServlet extends ServletUtilBase {
         }
       }
 
-      resp.setContentType(HtmlConsts.RESP_TYPE_XML);
-      resp.setCharacterEncoding(HtmlConsts.UTF8_ENCODE);
-      setDownloadFileName(resp, formId + ServletConsts.KML_FILENAME_APPEND);
+      KmlGenerator generator = (KmlGenerator) ContextFactory.get().getBean(BeanDefs.KML_BEAN);
+      generator.createKmlTask(form, titleField, geopointField, imageField, getServerURL(req), user);
 
-      // create KML
-      QueryByDate query = new QueryByDate(form, BasicConsts.EPOCH, false,
-          ServletConsts.FETCH_LIMIT, ds, user);
-      SubmissionFormatter formatter = new KmlFormatter(form, getServerURL(req), geopointField,
-          titleField, imageField, resp.getWriter(), null, ds);
-      formatter.processSubmissions(query.getResultSubmissions());
     } catch (ODKFormNotFoundException e) {
       odkIdNotFoundError(resp);
-    } catch (ODKIncompleteSubmissionData e) {
-      errorRetreivingData(resp);
-    } catch (ODKDatastoreException e) {
-      errorRetreivingData(resp);
     }
+    
+    resp.sendRedirect(ResultServlet.ADDR);
+    
   }
-
 }

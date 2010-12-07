@@ -69,7 +69,7 @@ public class QueryFormList {
   public QueryFormList(boolean checkAuthorization, Datastore datastore, User user) throws ODKDatastoreException, ODKIncompleteSubmissionData{
     this(datastore, user);
     
-    Query formQuery = ds.createQuery(Form.getFormInfoRelation(datastore, user), user);
+    Query formQuery = ds.createQuery(Form.getFormInfoRelation(datastore), user);
     List<? extends CommonFieldsBase> formEntities = formQuery.executeQuery(ServletConsts.FETCH_LIMIT);
     for (CommonFieldsBase formEntity : formEntities) {
       Form form = new Form((TopLevelDynamicBase) formEntity, ds, user);
