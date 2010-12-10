@@ -106,7 +106,7 @@ public class FusionTableServlet extends ServletUtilBase {
       
       FormProperties formProp = new FormProperties(form, em, false);
       Map<String, SubmissionFieldType> types = formProp.getHeaderTypes();
-      String createQuery = "CREATE TABLE " + form.getOdkId() + "(";
+      String createQuery = "CREATE TABLE '" + form.getOdkId() + "' (";
       Iterator<Map.Entry<String, SubmissionFieldType>> entries = types.entrySet().iterator();
 
       while (entries.hasNext()) {
@@ -131,7 +131,7 @@ public class FusionTableServlet extends ServletUtilBase {
             throw new IOException("ERROR CREATING FUSION TABLE - DID NOT GET A TABLE NUMBER");
          }
       } catch (ServiceException e) {
-         throw new IOException(e.getCause());
+         throw new IOException(e);
       }
 
       ExternalServiceOption esType = ExternalServiceOption.valueOf(esTypeString);
