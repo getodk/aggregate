@@ -75,13 +75,12 @@ public interface SubmissionField<T> extends SubmissionValue{
    * @param contentType type of binary data (NOTE: only used for binary data)
    * @param datastore TODO
    * @return the outcome of the storage attempt.  md5 hashes are used to determine file equivalence. 
-   * @throws ODKConversionException
    * @throws ODKDatastoreException
    * 
    */  
   public BlobSubmissionOutcome setValueFromByteArray(byte[] byteArray,
 		String contentType, Long contentLength, String unrootedFilePath,
 		Datastore datastore, User user)
-		throws ODKConversionException, ODKDatastoreException;
+		throws ODKDatastoreException;
   
 }

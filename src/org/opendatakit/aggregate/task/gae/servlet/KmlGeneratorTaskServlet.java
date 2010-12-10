@@ -25,11 +25,13 @@ import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.datamodel.FormElementKey;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
+import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.servlet.KmlServlet;
 import org.opendatakit.aggregate.servlet.KmlSettingsServlet;
 import org.opendatakit.aggregate.servlet.ServletUtilBase;
-import org.opendatakit.aggregate.task.gae.KmlGeneratorImpl;
+import org.opendatakit.aggregate.submission.SubmissionKey;
+import org.opendatakit.aggregate.task.KmlWorkerImpl;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.security.UserService;
@@ -70,24 +72,36 @@ public class KmlGeneratorTaskServlet extends ServletUtilBase {
     String geopointFieldName = getParameter(req, KmlServlet.GEOPOINT_FIELD);
     String titleFieldName = getParameter(req, KmlServlet.TITLE_FIELD);
     String imageFieldName = getParameter(req, KmlServlet.IMAGE_FIELD);
-
+    String persistentResultsString = getParameter(req, ServletConsts.PERSISTENT_RESULTS_KEY);
+    if ( persistentResultsString == null ) {
+    	errorBadParam(resp);
+    	return;
+    }
+    SubmissionKey persistentResultsKey = new SubmissionKey(persistentResultsString);
+    String attemptCountString = getParameter(req, ServletConsts.ATTEMPT_COUNT);
+    if ( attemptCountString == null ) {
+    	errorBadParam(resp);
+    	return;
+    }
+    Long attemptCount = Long.valueOf(attemptCountString);
+    
     Datastore ds = (Datastore) ContextFactory.get().getBean(BeanDefs.DATASTORE_BEAN);
 
     Form form = null;
+    FormElementModel titleField = null;
+    FormElementModel geopointField = null;
+    FormElementModel imageField = null;
     try {
       form = Form.retrieveForm(formId, ds, user);
 
-      FormElementModel titleField = null;
       if (titleFieldName != null) {
         FormElementKey titleKey = new FormElementKey(titleFieldName);
         titleField = FormElementModel.retrieveFormElementModel(form, titleKey);
       }
-      FormElementModel geopointField = null;
       if (geopointFieldName != null) {
         FormElementKey geopointKey = new FormElementKey(geopointFieldName);
         geopointField = FormElementModel.retrieveFormElementModel(form, geopointKey);
       }
-      FormElementModel imageField = null;
       if (imageFieldName != null) {
         if (!imageFieldName.equals(KmlSettingsServlet.NONE)) {
           FormElementKey imageKey = new FormElementKey(imageFieldName);
@@ -95,12 +109,12 @@ public class KmlGeneratorTaskServlet extends ServletUtilBase {
         }
       }
 
-      KmlGeneratorImpl worker = new KmlGeneratorImpl();
-      worker.generateKml(form, titleField, geopointField, imageField, getServerURL(req), ds, user);
-
-    } catch (Exception e) {
-      e.printStackTrace();
-      return;
+    } catch (ODKFormNotFoundException e) {
+        odkIdNotFoundError(resp);
+        return;
     }
+
+    KmlWorkerImpl worker = new KmlWorkerImpl(form, persistentResultsKey, attemptCount, titleField, geopointField, imageField, getServerURL(req), ds, user);
+	worker.generateKml();
   }
 }

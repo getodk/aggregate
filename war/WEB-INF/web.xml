@@ -14,6 +14,15 @@
 	</servlet-mapping>
 
 	<servlet>
+		<servlet-name>result</servlet-name>
+		<servlet-class>org.opendatakit.aggregate.servlet.ResultServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>result</servlet-name>
+		<url-pattern>/result</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
 		<servlet-name>formDelete</servlet-name>
 		<servlet-class>org.opendatakit.aggregate.servlet.FormDeleteServlet</servlet-class>
 	</servlet>
@@ -215,6 +224,24 @@
 	</servlet-mapping>
 
 	<servlet>
+		<servlet-name>kmlGeneratorTask</servlet-name>
+		<servlet-class>org.opendatakit.aggregate.task.gae.servlet.KmlGeneratorTaskServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>kmlGeneratorTask</servlet-name>
+		<url-pattern>/kmlGeneratorTask</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>csvGeneratorTask</servlet-name>
+		<servlet-class>org.opendatakit.aggregate.task.gae.servlet.CsvGeneratorTaskServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>csvGeneratorTask</servlet-name>
+		<url-pattern>/csvGeneratorTask</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
 		<servlet-name>uploadSubmissionsTask</servlet-name>
 		<servlet-class>org.opendatakit.aggregate.task.gae.servlet.UploadSubmissionsTaskServlet</servlet-class>
 	</servlet>
@@ -230,6 +257,15 @@
 	<servlet-mapping>
 		<servlet-name>formDeleteTask</servlet-name>
 		<url-pattern>/formDeleteTask</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>watchdog</servlet-name>
+		<servlet-class>org.opendatakit.aggregate.task.gae.servlet.WatchdogServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>watchdog</servlet-name>
+		<url-pattern>/watchdog</url-pattern>
 	</servlet-mapping>
 
 	<servlet>

@@ -26,8 +26,8 @@ import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.servlet.ServletUtilBase;
-import org.opendatakit.aggregate.task.CsvGenerator;
-import org.opendatakit.aggregate.task.gae.CsvGeneratorImpl;
+import org.opendatakit.aggregate.submission.SubmissionKey;
+import org.opendatakit.aggregate.task.CsvWorkerImpl;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.security.UserService;
@@ -64,6 +64,18 @@ public class CsvGeneratorTaskServlet extends ServletUtilBase {
 
     // get parameter
     String formId = getParameter(req, ServletConsts.FORM_ID);
+    String persistentResultsString = getParameter(req, ServletConsts.PERSISTENT_RESULTS_KEY);
+    if ( persistentResultsString == null ) {
+    	errorBadParam(resp);
+    	return;
+    }
+    SubmissionKey persistentResultsKey = new SubmissionKey(persistentResultsString);
+    String attemptCountString = getParameter(req, ServletConsts.ATTEMPT_COUNT);
+    if ( attemptCountString == null ) {
+    	errorBadParam(resp);
+    	return;
+    }
+    Long attemptCount = Long.valueOf(attemptCountString);
 
     if (formId == null) {
       errorMissingKeyParam(resp);
@@ -75,11 +87,12 @@ public class CsvGeneratorTaskServlet extends ServletUtilBase {
     try {
       form = Form.retrieveForm(formId, ds, user);
     } catch (ODKFormNotFoundException e1) {
-      e1.printStackTrace();
+      odkIdNotFoundError(resp);
       return;
     }
-
-    CsvGenerator generator = new CsvGeneratorImpl();
-    generator.createCsvTask(form, getServerURL(req), user);
+    
+    CsvWorkerImpl impl = new CsvWorkerImpl(form, persistentResultsKey, attemptCount, getServerURL(req), ds, user);
+    
+    impl.generateCsv();
   }
 }

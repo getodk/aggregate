@@ -31,6 +31,7 @@ import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.task.KmlGenerator;
 import org.opendatakit.common.persistence.Datastore;
+import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.security.UserService;
 
@@ -114,11 +115,16 @@ public class KmlServlet extends ServletUtilBase {
       }
 
       KmlGenerator generator = (KmlGenerator) ContextFactory.get().getBean(BeanDefs.KML_BEAN);
-      generator.createKmlTask(form, titleField, geopointField, imageField, getServerURL(req), user);
+      generator.createKmlTask(form, titleField, geopointField, imageField, getServerURL(req), ds, user);
 
     } catch (ODKFormNotFoundException e) {
       odkIdNotFoundError(resp);
-    }
+      return;
+    } catch (ODKDatastoreException e) {
+  	  e.printStackTrace();
+      resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.toString());
+      return;
+	}
     
     resp.sendRedirect(ResultServlet.ADDR);
     

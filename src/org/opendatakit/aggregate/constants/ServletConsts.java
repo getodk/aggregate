@@ -64,6 +64,13 @@ public final class ServletConsts {
   public static final String FORM_ID = "formId";
 
   /**
+   * For PersistentResults generator gae servlets, the key holding the Uri of the persistent result.
+   */
+  public static final String PERSISTENT_RESULTS_KEY = "persistentResult";
+
+  public static final String ATTEMPT_COUNT = "attemptCount";
+
+  /**
    * The name of the property that determines how to format webpage
    */
   public static final String HUMAN_READABLE = "readable";
@@ -83,6 +90,7 @@ public final class ServletConsts {
   public static final String DELETE_FORM_LINK_TEXT = "Delete Form";
   public static final String BRIEFCASE_LINK_TEXT = "Briefcase";
   public static final String UPLOAD_APPLET_LINK_TEXT = "Upload Submissons from a Phone";
+  public static final String RESULT_FILES_LINK_TEXT = "Downloadable Data Files";
 
 
   public static final String BLOB_KEY = "blobKey";
@@ -157,5 +165,7 @@ public final class ServletConsts {
   public static final String HTTP = "http://";
 
   public static final String AUTH_SUB_SCOPE = "Scope";
+  
+  public static final String CHECK_INTERVAL_PARAM = "checkIntervalMilliseconds";
   
 }

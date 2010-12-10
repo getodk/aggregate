@@ -29,8 +29,9 @@ import org.opendatakit.common.constants.BasicConsts;
  */
 public abstract class AbstractHeaderFormatter implements HeaderFormatter {
 
-  protected List<String> headers;
-  protected List<ElementType> types;
+  protected List<FormElementModel> propertyNames = null;
+  protected List<String> headers = null;
+  protected List<ElementType> types = null;
   
   @Override
   public List<ElementType> getHeaderTypes() {
@@ -69,16 +70,20 @@ public abstract class AbstractHeaderFormatter implements HeaderFormatter {
         }
       } else {
         // we are processing this as a table element
-        headers.add(nodeName);
-        types.add(ElementType.REPEAT);
+    	  if ( (propertyNames == null) || propertyNames.contains(node)) {
+    		  headers.add(nodeName);
+    		  types.add(ElementType.REPEAT);
+    	  }
       }
       return;
     case GEOPOINT:
       processGeoPoint(node, nodeName);
       break;
     default:
-      headers.add(node.getElementName());
-      types.add(node.getElementType());
+  	  if ( (propertyNames == null) || propertyNames.contains(node)) {
+	      headers.add(node.getElementName());
+	      types.add(node.getElementType());
+	  }
     }
 
     // only recurse into the elements that are not binary, geopoint,

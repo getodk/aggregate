@@ -21,8 +21,10 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.datamodel.FormDataModel;
@@ -140,7 +142,7 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 		}
 		dbEntities.put(group.getFormDataModel(), tlg);
 		recursivelyCreateEntities(group.getFormDataModel(), datastore, user);
-		buildSubmissionFields(group, datastore, user, false);
+		buildSubmissionFields(group, datastore, user);
 	}
 
 	public SubmissionSet(Long modelVersion, Long uiVersion, 
@@ -170,7 +172,7 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 		// persist and recursively construct it...
 		dbEntities.put(group.getFormDataModel(), tlg);
 		recursivelyCreateEntities(group.getFormDataModel(), datastore, user);
-		buildSubmissionFields(group, datastore, user, false);
+		buildSubmissionFields(group, datastore, user);
 	}
 
 	/**
@@ -184,21 +186,23 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 	 */
 	private boolean isPhantomOfSubmissionSet(FormDataModel m) {
 		return (m.getPersistAsColumn() == null)
-				&& ((m.getElementType() == ElementType.PHANTOM)
-						|| (m.getElementType() == ElementType.GEOPOINT) || (m
-						.getElementType() == ElementType.GROUP));
+				&& ((m.getElementType() == ElementType.PHANTOM) ||
+					(m.getElementType() == ElementType.GEOPOINT) ||
+					(m.getElementType() == ElementType.GROUP));
 	}
 
 	private void recursivelyCreateEntities(FormDataModel groupDataModel,
 			Datastore datastore, User user) {
+		DynamicCommonFieldsBase groupRelation = (DynamicCommonFieldsBase) groupDataModel.getBackingObjectPrototype();
 		for (FormDataModel m : groupDataModel.getChildren()) {
 			if (isPhantomOfSubmissionSet(m)) {
-				if (m.getBackingObjectPrototype() == null
-						|| groupDataModel.getBackingObjectPrototype().equals(
-								m.getBackingObjectPrototype())) {
+				// backing object should never be null, so this should never throw NullPointerException...
+				DynamicCommonFieldsBase mRelation = (DynamicCommonFieldsBase) m.getBackingObjectPrototype();
+				if (groupRelation.equals(mRelation)) {
 					// same backing object prototype as parent.
 					// record the parent's actual backing object
 					// as the backing object for this phantom.
+					// NOTE: parent's backing object must have already been created.
 					dbEntities.put(m, dbEntities.get(groupDataModel));
 				}
 				else
@@ -206,13 +210,12 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 					// prototypes aren't the same.
 					// create a new backing instance.
 					DynamicBase row = (DynamicBase) datastore
-							.createEntityUsingRelation(m
-									.getBackingObjectPrototype(),
+							.createEntityUsingRelation(mRelation,
 									topLevelTableKey, user);
 					row.setParentAuri(dbEntities.get(groupDataModel).getUri());
 					row.setOrdinalNumber(1L); // these are always the
-					// one-and-only record in the
-					// order...
+					// one-and-only record in the order, as this
+					// is a phantom table...
 					dbEntities.put(m, row);
 				}
 
@@ -255,27 +258,29 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 		}
 		dbEntities.put(group.getFormDataModel(), row);
 		recursivelyGetEntities(row.getUri(), group.getFormDataModel(), datastore, user);
-		buildSubmissionFields(group, datastore, user, true);
+		buildSubmissionFields(group, datastore, user);
 	}
 
 	private void recursivelyGetEntities(String uriParent, FormDataModel groupDataModel,
 			Datastore datastore, User user) throws ODKDatastoreException {
+		DynamicCommonFieldsBase groupRelation = (DynamicCommonFieldsBase) groupDataModel.getBackingObjectPrototype();
 		for (FormDataModel m : groupDataModel.getChildren()) {
 			if (isPhantomOfSubmissionSet(m)) {
-				if (m.getBackingObjectPrototype() == null
-						|| groupDataModel.getBackingObjectPrototype().equals(
-								m.getBackingObjectPrototype())) {
+				// backing object should never be null, so this should never throw NullPointerException...
+				DynamicCommonFieldsBase mRelation = (DynamicCommonFieldsBase) m.getBackingObjectPrototype();
+				String nestedGroupUriParent;
+				if (groupRelation.equals(mRelation)) {
 					// same backing object prototype as parent.
 					// record the parent's actual backing object
 					// as the backing object for this phantom.
 					dbEntities.put(m, dbEntities.get(groupDataModel));
+					nestedGroupUriParent = uriParent;
 				}
 				else
 				{
 					DynamicCommonFieldsBase row = dbEntities.get(m);
 					if (row == null) {
-						Query query = datastore.createQuery(m
-								.getBackingObjectPrototype(), user);
+						Query query = datastore.createQuery(mRelation, user);
 						query.addFilter(m.parentAuri, FilterOperation.EQUAL,
 								uriParent);
 						List<? extends CommonFieldsBase> rows = query
@@ -287,9 +292,10 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 						row = (DynamicBase) rows.get(0);
 						dbEntities.put(m, row);
 					}
-					// and ensure that we create the other datastores...
-					recursivelyGetEntities(row.getUri(), m, datastore, user);
+					nestedGroupUriParent = row.getUri();
 				}
+				// and ensure that we create the other datastores...
+				recursivelyGetEntities(nestedGroupUriParent, m, datastore, user);
 			}
 		}
 	}
@@ -304,119 +310,98 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 	 * @throws ODKDatastoreException
 	 */
 	private void buildSubmissionFields(FormElementModel group,
-			Datastore datastore, User user, boolean fetchElement)
+			Datastore datastore, User user)
 			throws ODKDatastoreException {
-		DynamicCommonFieldsBase rowGroup = getGroupBackingObject();
 		for (FormElementModel m : group.getChildren()) {
 			SubmissionField<?> submissionField;
 			if ( !m.isMetadata() ) {
+				DynamicCommonFieldsBase rowGroup = getGroupBackingObject(m);
+				if ( rowGroup == null ) {
+					rowGroup = getGroupBackingObject(group);
+				}
+				if ( rowGroup == null ) {
+					throw new IllegalStateException("Unexpectedly null backingObject");
+				}
 				switch (m.getFormDataModel().getElementType()) {
 				case STRING:
 					submissionField = new StringSubmissionType(rowGroup, m,
+							rowGroup.getUri(),
 							formDefinition, topLevelTableKey, datastore, user);
-					submissionField.getValueFromEntity(rowGroup, rowGroup.getUri(),
-							topLevelTableKey, datastore, user, fetchElement);
+					submissionField.getValueFromEntity(datastore, user);
 					elementsToValues.put(m, submissionField);
 					break;
 				case JRDATETIME:
 					submissionField = new JRDateTimeType(rowGroup, m);
-					submissionField.getValueFromEntity(rowGroup, rowGroup.getUri(),
-							topLevelTableKey, datastore, user, fetchElement);
+					submissionField.getValueFromEntity(datastore, user);
 					elementsToValues.put(m, submissionField);
 					break;
 				case JRDATE:
 					submissionField = new JRDateType(rowGroup, m);
-					submissionField.getValueFromEntity(rowGroup, rowGroup.getUri(),
-							topLevelTableKey, datastore, user, fetchElement);
+					submissionField.getValueFromEntity(datastore, user);
 					elementsToValues.put(m, submissionField);
 					break;
 				case JRTIME:
 					submissionField = new JRTimeType(rowGroup, m);
-					submissionField.getValueFromEntity(rowGroup, rowGroup.getUri(),
-							topLevelTableKey, datastore, user, fetchElement);
+					submissionField.getValueFromEntity(datastore, user);
 					elementsToValues.put(m, submissionField);
 					break;
 				case INTEGER:
 					submissionField = new LongSubmissionType(rowGroup, m);
-					submissionField.getValueFromEntity(rowGroup, rowGroup.getUri(),
-							topLevelTableKey, datastore, user, fetchElement);
+					submissionField.getValueFromEntity(datastore, user);
 					elementsToValues.put(m, submissionField);
 					break;
 				case DECIMAL:
 					submissionField = new DecimalSubmissionType(rowGroup, m);
-					submissionField.getValueFromEntity(rowGroup, rowGroup.getUri(),
-							topLevelTableKey, datastore, user, fetchElement);
+					submissionField.getValueFromEntity(datastore, user);
 					elementsToValues.put(m, submissionField);
 					break;
 				case GEOPOINT:
-					// geopoints may be moved to subordinate table...
-					DynamicCommonFieldsBase geopoint = dbEntities.get(m.getFormDataModel());
-					submissionField = new GeoPointSubmissionType(geopoint, m);
-					submissionField.getValueFromEntity(geopoint, geopoint.getUri(),
-							topLevelTableKey, datastore, user, fetchElement);
+					submissionField = new GeoPointSubmissionType(rowGroup, m);
+					submissionField.getValueFromEntity(datastore, user);
 					elementsToValues.put(m, submissionField);
 					break;
 				case BOOLEAN:
 					submissionField = new BooleanSubmissionType(rowGroup, m);
-					submissionField.getValueFromEntity(rowGroup, rowGroup.getUri(),
-							topLevelTableKey, datastore, user, fetchElement);
+					submissionField.getValueFromEntity(datastore, user);
 					elementsToValues.put(m, submissionField);
 					break;
 				case GROUP:
 					// groups are not manifest unless they repeat...
 					// just recurse to build out the fields under them...
-					buildSubmissionFields(m, datastore, user, fetchElement);
+					buildSubmissionFields(m, datastore, user);
 					break;
 				// additional supporting tables
 				case PHANTOM: // if a relation needs to be divided in order to fit
 					// phantoms are not manifest...
 					// just recurse to build out the fields under them...
-					buildSubmissionFields(m, datastore, user, fetchElement);
+					buildSubmissionFields(m, datastore, user);
 					break;
 				case BINARY: // identifies BinaryContent table
 					submissionField = new BlobSubmissionType(m, rowGroup.getUri(),
 							topLevelTableKey, formDefinition, 
 							constructSubmissionKey(m), datastore, user);
 					// pass in row we occur under (to access parentAuri)
-					submissionField.getValueFromEntity(null, rowGroup.getUri(),
-							topLevelTableKey, datastore, user, fetchElement);
+					submissionField.getValueFromEntity(datastore, user);
 					elementsToValues.put(m, submissionField);
 					break;
 				case SELECT1: // identifies SelectChoice table
-					submissionField = new ChoiceSubmissionType(m,
-							rowGroup.getUri(), topLevelTableKey, datastore, user); // pass
-					// in
-					// row
-					// we
-					// occur
-					// under
-					// (to
-					// access
-					// parentAuri)
-					submissionField.getValueFromEntity(null, rowGroup.getUri(),
-							topLevelTableKey, datastore, user, fetchElement);
+					submissionField = new ChoiceSubmissionType(m, rowGroup.getUri(),
+							topLevelTableKey, datastore, user); // pass
+					// in row we occur under to access parentAuri
+					submissionField.getValueFromEntity(datastore, user);
 					elementsToValues.put(m, submissionField);
 					break;
 				case SELECTN: // identifies SelectChoice table
-					submissionField = new ChoiceSubmissionType(m,
-							rowGroup.getUri(), topLevelTableKey, datastore, user); // pass
-					// in
-					// row
-					// we
-					// occur
-					// under
-					// (to
-					// access
-					// parentAuri)
-					submissionField.getValueFromEntity(null, rowGroup.getUri(),
-							topLevelTableKey, datastore, user, fetchElement);
+					submissionField = new ChoiceSubmissionType(m, rowGroup.getUri(),
+							topLevelTableKey, datastore, user); // pass
+					// in row we occur under to access parentAuri
+					submissionField.getValueFromEntity(datastore, user);
 					elementsToValues.put(m, submissionField);
 					break;
 				case REPEAT:
 					RepeatSubmissionType repeatNode = new RepeatSubmissionType(
-							this, m, formDefinition);
-					repeatNode.getValueFromEntity(null, rowGroup.getUri(),
-							topLevelTableKey, datastore, user, fetchElement);
+							this, m,  rowGroup.getUri(),formDefinition);
+					repeatNode.getValueFromEntity(datastore, user);
 					elementsToValues.put(m, repeatNode);
 					break;
 				case VERSIONED_BINARY_CONTENT_REF_BLOB: // association between
@@ -522,6 +507,11 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 					return ((ChoiceSubmissionType) v).resolveSubmissionKeyBeginningAt(i+1,parts);
 				} else if ( v instanceof BlobSubmissionType ) {
 					return ((BlobSubmissionType) v).resolveSubmissionKeyBeginningAt(i+1,parts);
+				} else {
+					if ( i+2 != parts.size() ) {
+						throw new IllegalStateException("submission key parts remaining at leaf node");
+					}
+					return v;
 				}
 			}
 		}
@@ -616,8 +606,12 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 		return formDefinition;
 	}
 
+	protected DynamicCommonFieldsBase getGroupBackingObject(FormElementModel m) {
+		return dbEntities.get(m.getFormDataModel());
+	}
+
 	protected DynamicCommonFieldsBase getGroupBackingObject() {
-		return dbEntities.get(group.getFormDataModel());
+		return getGroupBackingObject(group);
 	}
 	
 	public Date getCreationDate() {
@@ -724,8 +718,14 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 			}
 		}
 
-		// and persist us...
-		datastore.putEntities(dbEntities.values(), user);
+		// persist phantom tables excluding ourselves...
+		Set<CommonFieldsBase> others = new HashSet<CommonFieldsBase>();
+		others.addAll(dbEntities.values());
+		others.remove(getGroupBackingObject());
+		datastore.putEntities(others, user);
+		
+		// and finally, persist us...
+		datastore.putEntity(getGroupBackingObject(), user);
 	}
 
 	public int compareTo(SubmissionSet obj) {

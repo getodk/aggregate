@@ -1,15 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
 <datastore-indexes autoGenerate="true">
-    <datastore-index kind="opendatakit._form_info_bin" ancestor="false" source="manual">
+
+    <!-- Used 15 times in query history -->
+    <datastore-index kind="opendatakit._form_info_description" ancestor="false" source="manual">
         <property name="_PARENT_AURI" direction="asc"/>
         <property name="_ORDINAL_NUMBER" direction="asc"/>
     </datastore-index>
-    <datastore-index kind="opendatakit._form_info_vbn" ancestor="false" source="manual">
+
+    <!-- Used 15 times in query history -->
+    <datastore-index kind="opendatakit._form_info_fileset" ancestor="false" source="manual">
+        <property name="_PARENT_AURI" direction="asc"/>
+        <property name="_ORDINAL_NUMBER" direction="asc"/>
+    </datastore-index>
+
+    <!-- Used 15 times in query history -->
+    <datastore-index kind="opendatakit._form_info_xform_bin" ancestor="false" source="manual">
+        <property name="_PARENT_AURI" direction="asc"/>
+        <property name="_ORDINAL_NUMBER" direction="asc"/>
+    </datastore-index>
+
+    <!-- Used 15 times in query history -->
+    <datastore-index kind="opendatakit._form_info_manifest_bin" ancestor="false" source="manual">
+        <property name="_PARENT_AURI" direction="asc"/>
+        <property name="_ORDINAL_NUMBER" direction="asc"/>
+    </datastore-index>
+
+    <!-- Used 15 times in query history -->
+    <datastore-index kind="opendatakit._form_info_submission" ancestor="false" source="manual">
+        <property name="_PARENT_AURI" direction="asc"/>
+        <property name="_ORDINAL_NUMBER" direction="asc"/>
+    </datastore-index>
+
+    <!-- Used 11 times in query history -->
+    <datastore-index kind="opendatakit._form_info_xform_vbn" ancestor="false" source="manual">
         <property name="_PARENT_AURI" direction="asc"/>
         <property name="_CREATION_DATE" direction="asc"/>
     </datastore-index>
-    <datastore-index kind="opendatakit._form_info_ref" ancestor="false" source="manual">
-        <property name="_DOM_AURI" direction="asc"/>
-        <property name="PART" direction="asc"/>
+
+    <!-- Used 3 times in query history -->
+    <datastore-index kind="opendatakit._form_info_manifest_vbn" ancestor="false" source="manual">
+        <property name="_PARENT_AURI" direction="asc"/>
+        <property name="_CREATION_DATE" direction="asc"/>
     </datastore-index>
+
 </datastore-indexes>

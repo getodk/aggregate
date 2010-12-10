@@ -262,6 +262,9 @@ public class FusionTable extends AbstractExternalService implements ExternalServ
 		URL url = new URL(FusionTableConsts.FUSION_SCOPE + HtmlConsts.BEGIN_PARAM
 		            + FusionTableConsts.BEGIN_SQL
 		            + URLEncoder.encode(insertStmt, FusionTableConsts.FUSTABLE_ENCODE));		  
+		
+       System.out.println(url.toString());
+
 		HttpURLConnection request = (HttpURLConnection) url.openConnection();
 		request.setDoOutput(true);
 		request.setDoInput(true);
@@ -346,8 +349,11 @@ public class FusionTable extends AbstractExternalService implements ExternalServ
     StringBuilder str = new StringBuilder();
     str.append(BasicConsts.SPACE + BasicConsts.LEFT_PARENTHESIS);
     while (itr.hasNext()) {
+      String cur = itr.next();
       str.append(BasicConsts.SINGLE_QUOTE);
-      str.append(itr.next());
+      if ( cur != null ) {
+	      str.append(escapeSingleQuotes(cur));
+      }
       str.append(BasicConsts.SINGLE_QUOTE);
       if (itr.hasNext()) {
         str.append(FormatConsts.CSV_DELIMITER);
@@ -355,6 +361,10 @@ public class FusionTable extends AbstractExternalService implements ExternalServ
     }
     str.append(BasicConsts.RIGHT_PARENTHESIS + BasicConsts.SPACE);
     return str.toString();
+  }
+  
+  private String escapeSingleQuotes(String string) {
+     return string.replaceAll(FusionTableConsts.SINGLE_QUOTE, FusionTableConsts.HTML_ESCAPED_SINGLE_QUOTE);
   }
 
   public static FusionTable createFusionTable(Form form, OAuthToken authToken,

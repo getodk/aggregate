@@ -25,6 +25,7 @@ import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.persistence.StaticAssociationBase;
+import org.opendatakit.common.persistence.Query.Direction;
 import org.opendatakit.common.persistence.Query.FilterOperation;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
@@ -50,12 +51,12 @@ public final class FormServiceCursor extends StaticAssociationBase {
       DataField.DataType.DATETIME, false);
   private static final DataField UPLOAD_COMPLETED_PROPERTY = new DataField("UPLOAD_COMPLETED",
       DataField.DataType.BOOLEAN, true);
-  private static final DataField LAST_UPLOAD_PERSISTENCE_CURSOR_PROPERTY = new DataField(
-      "LAST_UPLOAD_PERSISTENCE_CURSOR", DataField.DataType.STRING, true, 4096L);
+  private static final DataField LAST_UPLOAD_CURSOR_DATE_PROPERTY = new DataField(
+      "LAST_UPLOAD_PERSISTENCE_CURSOR", DataField.DataType.DATETIME, true);
   private static final DataField LAST_UPLOAD_KEY_PROPERTY = new DataField("LAST_UPLOAD_KEY",
       DataField.DataType.STRING, true, 4096L);
-  private static final DataField LAST_STREAMING_PERSISTENCE_CURSOR_PROPERTY = new DataField(
-      "LAST_STREAMING_PERSISTENCE_CURSOR", DataField.DataType.STRING, true, 4096L);
+  private static final DataField LAST_STREAMING_CURSOR_DATE_PROPERTY = new DataField(
+      "LAST_STREAMING_PERSISTENCE_CURSOR", DataField.DataType.DATETIME, true);
   private static final DataField LAST_STREAMING_KEY_PROPERTY = new DataField("LAST_STREAMING_KEY",
       DataField.DataType.STRING, true, 4096L);
   private static final DataField FORM_ID_PROPERTY = new DataField("FORM_ID",
@@ -65,9 +66,9 @@ public final class FormServiceCursor extends StaticAssociationBase {
   public final DataField externalServiceOption;
   public final DataField establishmentDateTime;
   public final DataField uploadCompleted;
-  public final DataField lastUploadPersistenceCursor;
+  public final DataField lastUploadCursorDate;
   public final DataField lastUploadKey;
-  public final DataField lastStreamingPersistenceCursor;
+  public final DataField lastStreamingCursorDate;
   public final DataField lastStreamingKey;
   public final DataField formId;
 
@@ -83,11 +84,11 @@ public final class FormServiceCursor extends StaticAssociationBase {
     fieldList.add(externalServiceOption = new DataField(EXTERNAL_SERVICE_OPTION));
     fieldList.add(establishmentDateTime = new DataField(ESTABLISHMENT_DATETIME));
     fieldList.add(uploadCompleted = new DataField(UPLOAD_COMPLETED_PROPERTY));
-    fieldList.add(lastUploadPersistenceCursor = new DataField(
-        LAST_UPLOAD_PERSISTENCE_CURSOR_PROPERTY));
+    fieldList.add(lastUploadCursorDate = new DataField(
+        LAST_UPLOAD_CURSOR_DATE_PROPERTY));
     fieldList.add(lastUploadKey = new DataField(LAST_UPLOAD_KEY_PROPERTY));
-    fieldList.add(lastStreamingPersistenceCursor = new DataField(
-        LAST_STREAMING_PERSISTENCE_CURSOR_PROPERTY));
+    fieldList.add(lastStreamingCursorDate = new DataField(
+        LAST_STREAMING_CURSOR_DATE_PROPERTY));
     fieldList.add(lastStreamingKey = new DataField(LAST_STREAMING_KEY_PROPERTY));
     fieldList.add(formId = new DataField(FORM_ID_PROPERTY));
   }
@@ -104,9 +105,9 @@ public final class FormServiceCursor extends StaticAssociationBase {
     externalServiceOption = ref.externalServiceOption;
     establishmentDateTime = ref.establishmentDateTime;
     uploadCompleted = ref.uploadCompleted;
-    lastUploadPersistenceCursor = ref.lastUploadPersistenceCursor;
+    lastUploadCursorDate = ref.lastUploadCursorDate;
     lastUploadKey = ref.lastUploadKey;
-    lastStreamingPersistenceCursor = ref.lastStreamingPersistenceCursor;
+    lastStreamingCursorDate = ref.lastStreamingCursorDate;
     lastStreamingKey = ref.lastStreamingKey;
     formId = ref.formId;
   }
@@ -154,14 +155,12 @@ public final class FormServiceCursor extends StaticAssociationBase {
     setBooleanField(uploadCompleted, value);
   }
 
-  public String getLastUploadPersistenceCursor() {
-    return getStringField(lastUploadPersistenceCursor);
+  public Date getLastUploadCursorDate() {
+    return getDateField(lastUploadCursorDate);
   }
 
-  public void setLastUploadPersistenceCursor(String value) {
-    if (!setStringField(lastUploadPersistenceCursor, value)) {
-      throw new IllegalArgumentException("overflow lastUploadPersistenceCursor");
-    }
+  public void setLastUploadCursorDate(Date value) {
+    setDateField(lastUploadCursorDate, value);
   }
 
   public String getLastUploadKey() {
@@ -174,14 +173,12 @@ public final class FormServiceCursor extends StaticAssociationBase {
     }
   }
 
-  public String getLastStreamingPersistenceCursor() {
-    return getStringField(lastStreamingPersistenceCursor);
+  public Date getLastStreamingCursorDate() {
+    return getDateField(lastStreamingCursorDate);
   }
 
-  public void setLastStreamingPersistenceCursor(String value) {
-    if (!setStringField(lastStreamingPersistenceCursor, value)) {
-      throw new IllegalArgumentException("overflow lastStreamingPersistenceCursor");
-    }
+  public void setLastStreamingCursorDate(Date value) {
+    setDateField(lastStreamingCursorDate, value);
   }
 
   public String getLastStreamingKey() {
@@ -288,4 +285,22 @@ public final class FormServiceCursor extends StaticAssociationBase {
     }
   }
   
+   public static final List<FormServiceCursor> queryFormServiceCursorRelation(Date olderThanDate,
+         Datastore ds, User user) throws ODKEntityNotFoundException {
+      List<FormServiceCursor> fscList = new ArrayList<FormServiceCursor>();
+      try {
+         FormServiceCursor relationPrototype = createRelation(ds, user);
+         Query query = ds.createQuery(relationPrototype, user);
+         query.addFilter(relationPrototype.lastUpdateDate, FilterOperation.LESS_THAN_OR_EQUAL,
+               olderThanDate);
+         query.addSort(relationPrototype.lastUpdateDate, Direction.ASCENDING);
+         List<? extends CommonFieldsBase> cfbList = query.executeQuery(0);
+         for (CommonFieldsBase cfb : cfbList) {
+            fscList.add((FormServiceCursor) cfb);
+         }
+      } catch (ODKDatastoreException e) {
+         throw new ODKEntityNotFoundException(e);
+      }
+      return fscList;
+   }
 }

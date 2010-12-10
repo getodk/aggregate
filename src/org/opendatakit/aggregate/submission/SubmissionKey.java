@@ -15,6 +15,9 @@
  */
 package org.opendatakit.aggregate.submission;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * 
  * @author wbrunette@gmail.com
@@ -41,5 +44,14 @@ public class SubmissionKey {
 	
 	public String toString() {
 		return key;
+	}
+
+	public final List<SubmissionKeyPart> splitSubmissionKey() {
+		List<SubmissionKeyPart> parts = new ArrayList<SubmissionKeyPart>();
+		String[] stringParts = this.toString().split(Submission.K_SL);
+		for ( String s : stringParts ) {
+			parts.add( new SubmissionKeyPart(s));
+		}
+		return parts;
 	}
 }

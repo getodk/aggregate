@@ -15,43 +15,53 @@
  */
 package org.opendatakit.aggregate.task.tomcat;
 
-import org.opendatakit.aggregate.ContextFactory;
-import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.form.Form;
-import org.opendatakit.aggregate.task.AbstractCsvGeneratorImpl;
+import org.opendatakit.aggregate.form.PersistentResults;
+import org.opendatakit.aggregate.form.PersistentResults.ResultType;
+import org.opendatakit.aggregate.submission.SubmissionKey;
+import org.opendatakit.aggregate.task.CsvGenerator;
+import org.opendatakit.aggregate.task.CsvWorkerImpl;
 import org.opendatakit.common.persistence.Datastore;
+import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.security.User;
 
 /**
+ * This is a singleton bean.  It cannot have any per-request state.
+ * It uses a static inner class to encapsulate the per-request state
+ * of a running background task.
  * 
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
  * 
  */
-public class CsvGeneratorImpl extends AbstractCsvGeneratorImpl implements Runnable {
+public class CsvGeneratorImpl implements CsvGenerator {
 
-  private Form form;
-  private String baseWebServerUrl;
-  private User user;
+	static class CsvRunner implements Runnable {
+		final CsvWorkerImpl impl;
+		
+		public CsvRunner( Form form, SubmissionKey persistentResultsKey, Long attemptCount, String baseWebServerUrl, Datastore datastore, User user) {
+			impl = new CsvWorkerImpl(form, persistentResultsKey, attemptCount, baseWebServerUrl, datastore, user );
+		}
 
+		@Override
+		public void run() {
+			impl.generateCsv();
+		}
+	}
+	
   @Override
-  public void createCsvTask(Form form, String baseServerWebUrl, User user) {
-    this.form = form;
-    this.baseWebServerUrl = baseServerWebUrl;
-    this.user = user;
-    AggregrateThreadExecutor exec = AggregrateThreadExecutor.getAggregateThreadExecutor();
-    exec.execute(this);
+  public void createCsvTask(Form form, String baseServerWebUrl, Datastore datastore, User user) throws ODKDatastoreException {
+	PersistentResults r = new PersistentResults( ResultType.CSV, null, datastore, user);
+	r.persist(datastore, user);
+	recreateCsvTask(form, r.getSubmissionKey(), 1L, baseServerWebUrl, datastore, user );
   }
 
   @Override
-  public void run() {
-    Datastore ds = (Datastore) ContextFactory.get().getBean(BeanDefs.DATASTORE_BEAN);
-    try {
-      generatorCsv(form, baseWebServerUrl, ds, user);
-    } catch (Exception e) {
-      e.printStackTrace();
-      // TODO: PROBLEM - figure out how we are going to restart it
-    }
-
+  public void recreateCsvTask(Form form, SubmissionKey persistentResultsKey,
+		Long attemptCount, String baseServerWebUrl, Datastore datastore, User user)
+		throws ODKDatastoreException {
+	CsvRunner runner = new CsvRunner(form, persistentResultsKey, attemptCount, baseServerWebUrl, datastore, user );
+    AggregrateThreadExecutor exec = AggregrateThreadExecutor.getAggregateThreadExecutor();
+    exec.execute(runner);
   }
 }

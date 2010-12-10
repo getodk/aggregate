@@ -13,6 +13,7 @@
  */
 package org.opendatakit.common.persistence;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -72,7 +73,7 @@ public interface Query {
    * @param attributeName
    * @param valueSet
    */
-  public void addValueSetFilter(DataField attributeName, Set<?> valueSet );
+  public void addValueSetFilter(DataField attributeName, Collection<?> valueSet );
   
   /**
    * Returns a list of entities which are the results of executing the query.

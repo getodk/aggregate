@@ -15,8 +15,6 @@
  */
 package org.opendatakit.aggregate.submission;
 
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Helper class for extracting parts of a SubmissionKey
@@ -98,14 +96,5 @@ public class SubmissionKeyPart {
 
 	public String getVersion() {
 		return version;
-	}
-
-	public static final List<SubmissionKeyPart> splitSubmissionKey(SubmissionKey submissionKey) {
-		List<SubmissionKeyPart> parts = new ArrayList<SubmissionKeyPart>();
-		String[] stringParts = submissionKey.toString().split(Submission.K_SL);
-		for ( String s : stringParts ) {
-			parts.add( new SubmissionKeyPart(s));
-		}
-		return parts;
 	}
 }

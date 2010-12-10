@@ -30,7 +30,4 @@ import org.opendatakit.common.security.User;
 public interface FormDelete {
 
   public void createFormDeleteTask(Form form, User user) throws ODKDatastoreException, ODKFormNotFoundException, ODKExternalServiceDependencyException;
-  
-  public void deleteForm(Form form, User user) throws ODKDatastoreException, ODKFormNotFoundException, ODKExternalServiceDependencyException;
-  
 }

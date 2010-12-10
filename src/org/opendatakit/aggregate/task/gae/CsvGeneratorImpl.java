@@ -17,8 +17,13 @@ package org.opendatakit.aggregate.task.gae;
 
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.form.Form;
-import org.opendatakit.aggregate.task.AbstractCsvGeneratorImpl;
+import org.opendatakit.aggregate.form.PersistentResults;
+import org.opendatakit.aggregate.form.PersistentResults.ResultType;
+import org.opendatakit.aggregate.submission.SubmissionKey;
+import org.opendatakit.aggregate.task.CsvGenerator;
 import org.opendatakit.aggregate.task.gae.servlet.CsvGeneratorTaskServlet;
+import org.opendatakit.common.persistence.Datastore;
+import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.security.User;
 
 import com.google.appengine.api.taskqueue.Queue;
@@ -26,23 +31,33 @@ import com.google.appengine.api.taskqueue.QueueFactory;
 import com.google.appengine.api.taskqueue.TaskOptions;
 
 /**
+ * This is a singleton bean.  It cannot have any per-request state.
+ * It uses a static inner class to encapsulate the per-request state
+ * of a running background task.
  * 
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
  * 
  */
-public class CsvGeneratorImpl extends AbstractCsvGeneratorImpl {
+public class CsvGeneratorImpl implements CsvGenerator {
 
   @Override
-  public void createCsvTask(Form form, String baseServerWebUrl, User user) {
+  public void recreateCsvTask(Form form, SubmissionKey persistentResultsKey, Long attemptCount, String baseServerWebUrl, Datastore datastore, User user) throws ODKDatastoreException {
     TaskOptions task = TaskOptions.Builder.withUrl(ServletConsts.WEB_ROOT
         + CsvGeneratorTaskServlet.ADDR);
     task.method(TaskOptions.Method.GET);
     task.countdownMillis(1);
     task.param(ServletConsts.FORM_ID, form.getFormId());
+    task.param(ServletConsts.PERSISTENT_RESULTS_KEY, persistentResultsKey.toString());
+    task.param(ServletConsts.ATTEMPT_COUNT, attemptCount.toString());
     Queue queue = QueueFactory.getDefaultQueue();
     queue.add(task);
-
   }
 
+  @Override
+  public void createCsvTask(Form form, String baseServerWebUrl, Datastore datastore, User user) throws ODKDatastoreException {
+		PersistentResults r = new PersistentResults( ResultType.CSV, null, datastore, user);
+		r.persist(datastore, user);
+		recreateCsvTask(form, r.getSubmissionKey(), 1L, baseServerWebUrl, datastore, user);
+	  }
 }

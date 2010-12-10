@@ -39,7 +39,7 @@ public abstract class StaticAssociationBase extends CommonFieldsBase {
 	/** key into the dynamic table for the dominant relation */
 	private static final DataField DOM_AURI = new DataField("_DOM_AURI", DataField.DataType.URI, false, PersistConsts.URI_STRING_LEN );
 	/** key into the dynamic table for the subordinate relation */
-	private static final DataField SUB_AURI = new DataField("_SUB_AURI", DataField.DataType.URI, false, PersistConsts.URI_STRING_LEN );
+	private static final DataField SUB_AURI = new DataField("_SUB_AURI", DataField.DataType.URI, true, PersistConsts.URI_STRING_LEN );
 
 	public final DataField domAuri;
 	public final DataField subAuri;

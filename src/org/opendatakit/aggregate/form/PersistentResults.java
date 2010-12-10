@@ -17,16 +17,18 @@ package org.opendatakit.aggregate.form;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang.StringEscapeUtils;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.datamodel.FormDataModel;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
-import org.opendatakit.aggregate.exception.ODKConversionException;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.submission.Submission;
+import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.submission.SubmissionSet;
 import org.opendatakit.aggregate.submission.type.BlobSubmissionType;
 import org.opendatakit.aggregate.submission.type.BooleanSubmissionType;
@@ -38,7 +40,9 @@ import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.DynamicCommonFieldsBase;
+import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.persistence.TopLevelDynamicBase;
+import org.opendatakit.common.persistence.Query.FilterOperation;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
@@ -52,6 +56,51 @@ import org.opendatakit.common.security.UserService;
  * 
  */
 public class PersistentResults {
+	private static final String K_XML_END_PARAMETERS = "</parameters>\n";
+	private static final String K_XML_BEGIN_PARAMETER_BEGIN_KEY = "<parameter><key>";
+	private static final String K_XML_END_KEY_BEGIN_VALUE = "</key><value>";
+	private static final String K_XML_END_VALUE_END_PARAMETER = "</value></parameter>\n";
+	private static final String K_XML_BEGIN_PARAMETERS = "<parameters>\n";
+	public static final long RETRY_INTERVAL_MILLISECONDS = (11 * 60) * 1000;
+	public static final long MAX_RETRY_ATTEMPTS = 3;
+	
+	public enum Status {
+		GENERATION_IN_PROGRESS, // created or task is running
+		RETRY_IN_PROGRESS, // task is running
+		FAILED,    // task completed with failure; retry again later.
+		ABANDONED, // task completed with failure; no more retries should occur.
+		AVAILABLE; // task completed; results are available.
+		
+		public String toString() {
+			switch ( this ) {
+			case GENERATION_IN_PROGRESS:
+				return "Generation in progress";
+			case RETRY_IN_PROGRESS:
+				return "Retry in progress";
+			case FAILED:
+				return "Failure - will retry later";
+			case ABANDONED:
+				return "Failure - abandoned all retry attempts";
+			case AVAILABLE:
+				return "Dataset Available";
+			default:
+				throw new IllegalStateException("missing enum case");
+			}
+		}
+	};
+	
+	public enum ResultType {
+		CSV,
+		KML;
+		
+		public String toString() {
+			if ( this == CSV ) {
+				return "Csv file";
+			} else {
+				return "Kml file";
+			}
+		}
+	};
 	
 	public static final String FORM_ID_PERSISTENT_RESULT = "aggregate.opendatakit.org:PersistentResults";
 
@@ -60,7 +109,11 @@ public class PersistentResults {
 
 	private static FormElementModel requestingUser;
 	private static FormElementModel requestDate;
+	private static FormElementModel requestParameters;
+	private static FormElementModel lastRetryDate;
+	private static FormElementModel attemptCount;
 	private static FormElementModel status;
+	private static FormElementModel resultType;
 	private static FormElementModel completionDate;
 	private static FormElementModel resultFile;
 
@@ -72,8 +125,24 @@ public class PersistentResults {
 		return requestDate;
 	}
 
+	public static FormElementModel getRequestParametersKey() {
+		return requestParameters;
+	}
+	
+	public static FormElementModel getLastRetryDateKey() {
+		return lastRetryDate;
+	}
+	
+	public static FormElementModel getAttemptCountKey() {
+		return attemptCount;
+	}
+
 	public static FormElementModel getStatusKey() {
 		return status;
+	}
+
+	public static FormElementModel getResultTypeKey() {
+		return resultType;
 	}
 
 	public static FormElementModel getCompletionDateKey() {
@@ -107,8 +176,7 @@ public class PersistentResults {
 	 * @param user
 	 * @throws ODKDatastoreException
 	 */
-	public PersistentResults(String requestingUser, Date requestDate, String status,
-							 Datastore datastore, User user) throws ODKDatastoreException {
+	public PersistentResults(ResultType type, Map<String,String> parameters, Datastore datastore, User user) throws ODKDatastoreException {
 		Form form;
 		try {
 			form = Form.retrieveForm(FORM_ID_PERSISTENT_RESULT, datastore, user);
@@ -118,9 +186,14 @@ public class PersistentResults {
 		objectEntity = new Submission(xformPersistentResultsParameters.modelVersion,
 								xformPersistentResultsParameters.uiVersion,
 								form.getFormDefinition(), datastore, user);
-		setRequestingUser(requestingUser);
-		setRequestDate(requestDate);
-		setStatus(status);
+		setRequestingUser(user.getUriUser());
+		Date now = new Date();
+		setRequestDate(now);
+		setRequestParameters(parameters);
+		setLastRetryDate(now);
+		setAttemptCount(1L);
+		setStatus(Status.GENERATION_IN_PROGRESS);
+		setResultType(type);
 		
 		objectEntity.setIsComplete(true); // indicate that the data should be visible on queries
 		// NOTE: the entity is not yet persisted! 
@@ -141,13 +214,96 @@ public class PersistentResults {
 	public void setRequestDate(Date value) {
 		((DateSubmissionType) objectEntity.getElementValue(requestDate)).setValueFromDate(value);
 	}
-	
-	public String getStatus() {
-		return ((StringSubmissionType) objectEntity.getElementValue(status)).getValue();
+
+	public Map<String,String> getRequestParameters() throws ODKDatastoreException {
+		String parameterDocument = ((StringSubmissionType) objectEntity.getElementValue(requestParameters)).getValue();
+		Map<String,String> parameters = new HashMap<String,String>();	
+		if ( parameterDocument == null ) return parameters;
+		if ( !parameterDocument.startsWith(K_XML_BEGIN_PARAMETERS)) {
+			throw new ODKDatastoreException("bad parameter list in database -- not beginning with " +
+					K_XML_BEGIN_PARAMETERS );
+		}
+		int iNext = K_XML_BEGIN_PARAMETERS.length();
+		while (parameterDocument.regionMatches(iNext,
+							K_XML_BEGIN_PARAMETER_BEGIN_KEY,
+							0,
+							K_XML_BEGIN_PARAMETER_BEGIN_KEY.length())) {
+			iNext += K_XML_BEGIN_PARAMETER_BEGIN_KEY.length();
+			int iEnd = parameterDocument.indexOf(K_XML_END_KEY_BEGIN_VALUE, iNext);
+			if ( iEnd == -1 ) {
+				throw new ODKDatastoreException("bad parameter list in database -- end-key-begin-value not found");
+			}
+			String key = StringEscapeUtils.unescapeXml(parameterDocument.substring(iNext, iEnd));
+			iNext = iEnd + K_XML_END_KEY_BEGIN_VALUE.length();
+			iEnd = parameterDocument.indexOf(K_XML_END_VALUE_END_PARAMETER, iNext);
+			if ( iEnd == -1 ) {
+				throw new ODKDatastoreException("bad parameter list in database -- end-value-end-parameter not found");
+			}
+			String value = StringEscapeUtils.unescapeXml(parameterDocument.substring(iNext, iEnd));
+			iNext = iEnd + K_XML_END_VALUE_END_PARAMETER.length();
+			parameters.put(key, value);
+		}
+		if ( !parameterDocument.regionMatches(iNext,
+							K_XML_END_PARAMETERS,
+							0,
+							K_XML_END_PARAMETERS.length())) {
+			throw new ODKDatastoreException("bad parameter list in database -- end-parameters not found");
+		}
+		iNext += K_XML_END_PARAMETERS.length();
+		if ( iNext != parameterDocument.length() ) {
+			throw new ODKDatastoreException("bad parameter list in database -- extra characters found");
+		}
+		return parameters;
+	}
+
+	public void setRequestParameters(Map<String,String> value) throws ODKEntityPersistException {
+		if ( value == null ) {
+			((StringSubmissionType) objectEntity.getElementValue(requestParameters)).setValueFromString(null);
+			return;
+		}
+		StringBuilder b = new StringBuilder();
+		b.append(K_XML_BEGIN_PARAMETERS);
+		for ( Map.Entry<String, String> e : value.entrySet()) {
+			b.append(K_XML_BEGIN_PARAMETER_BEGIN_KEY);
+			b.append(StringEscapeUtils.escapeXml(e.getKey()));
+			b.append(K_XML_END_KEY_BEGIN_VALUE);
+			b.append(StringEscapeUtils.escapeXml(e.getValue()));
+			b.append(K_XML_END_VALUE_END_PARAMETER);
+		}
+		b.append(K_XML_END_PARAMETERS);
+		((StringSubmissionType) objectEntity.getElementValue(requestParameters)).setValueFromString(b.toString());
+	}
+
+	public Date getLastRetryDate() {
+		return ((DateSubmissionType) objectEntity.getElementValue(lastRetryDate)).getValue();
+	}
+
+	public void setLastRetryDate(Date value) {
+		((DateSubmissionType) objectEntity.getElementValue(lastRetryDate)).setValueFromDate(value);
 	}
 	
-	public void setStatus(String value) throws ODKEntityPersistException {
-		((StringSubmissionType) objectEntity.getElementValue(status)).setValueFromString(value);
+	public Long getAttemptCount() {
+		return ((LongSubmissionType) objectEntity.getElementValue(attemptCount)).getValue();
+	}
+	
+	public void setAttemptCount(Long value) {
+		((LongSubmissionType) objectEntity.getElementValue(attemptCount)).setValue(value);
+	}
+	
+	public Status getStatus() {
+		return Status.valueOf(((StringSubmissionType) objectEntity.getElementValue(status)).getValue());
+	}
+	
+	public void setStatus(Status value) throws ODKEntityPersistException {
+		((StringSubmissionType) objectEntity.getElementValue(status)).setValueFromString(value.name());
+	}
+	
+	public ResultType getResultType() {
+		return ResultType.valueOf(((StringSubmissionType) objectEntity.getElementValue(resultType)).getValue());
+	}
+	
+	public void setResultType(ResultType value) throws ODKEntityPersistException {
+		((StringSubmissionType) objectEntity.getElementValue(resultType)).setValueFromString(value.name());
 	}
 	
 	public Date getCompletionDate() {
@@ -169,7 +325,7 @@ public class PersistentResults {
 	}
 
 	public void setResultFile(byte[] byteArray, String contentType, Long contentLength,
-								String unrootedFilePath, Datastore datastore, User user) throws ODKConversionException, ODKDatastoreException {
+								String unrootedFilePath, Datastore datastore, User user) throws ODKDatastoreException {
 		BlobSubmissionType bt = ((BlobSubmissionType) objectEntity.getElementValue(resultFile));
 		if ( bt.getAttachmentCount() > 0 ) {
 			throw new IllegalStateException("Results are already attached!");
@@ -177,6 +333,63 @@ public class PersistentResults {
 		bt.setValueFromByteArray(byteArray, contentType, contentLength, unrootedFilePath, datastore, user);
 	}
 
+	public void deleteResultFile(Datastore datastore, User user) throws ODKDatastoreException {
+		BlobSubmissionType bt = ((BlobSubmissionType) objectEntity.getElementValue(resultFile));
+		if ( bt.getAttachmentCount() > 0 ) {
+			bt.deleteAll(datastore, user);
+		}
+	}
+	
+	public void persist(Datastore datastore, User user) throws ODKEntityPersistException {
+		objectEntity.persist(datastore, user);
+	}
+	
+	public SubmissionKey getSubmissionKey() {
+		return objectEntity.constructSubmissionKey(null);
+	}
+	
+	public static final List<PersistentResults> getStalledRequests(Datastore datastore, User user) throws ODKDatastoreException {
+		Form form;
+		try {
+			form = Form.retrieveForm(FORM_ID_PERSISTENT_RESULT, datastore, user);
+		} catch ( ODKFormNotFoundException e) {
+			throw new ODKDatastoreException(e);
+		}
+		Query q = datastore.createQuery(form.getTopLevelGroupElement().getFormDataModel().getBackingObjectPrototype(), user);
+		Date now = new Date();
+	
+		Date limit = new Date(now.getTime() - RETRY_INTERVAL_MILLISECONDS );
+		q.addFilter(getLastRetryDateKey().getFormDataModel().getBackingKey(), FilterOperation.LESS_THAN, limit );
+		List<? extends CommonFieldsBase> l = q.executeQuery(0);
+		/*
+		 * The list of objects consists only of those that were last 
+		 * fired at a lastRetryDate older than the retry interval, which
+		 * should be longer than the allowed Task lifetime.
+		 */
+		List<PersistentResults> r = new ArrayList<PersistentResults>();
+		for ( CommonFieldsBase b : l ) {
+			Submission s = new Submission( b.getUri(), form, datastore, user );
+			PersistentResults result = new PersistentResults(s);
+			if ( result.getStatus() == Status.AVAILABLE ) continue;
+			if ( result.getStatus() == Status.ABANDONED ) continue;
+			if ( result.getAttemptCount() >= MAX_RETRY_ATTEMPTS ) {
+				// the task is stale, and should be marked abandoned,
+				// but the worker thread must have failed.  Attempt 
+				// it here...
+				result.setAttemptCount(result.getAttemptCount()+1L);
+				result.setStatus(Status.ABANDONED);
+				result.setCompletionDate(now);
+				result.objectEntity.persist(datastore, user);
+				continue;
+			}
+			// OK.  If we are here, a task was last fired for this request
+			// more than the retry interval ago and the task is eligible
+			// to be restarted.
+			r.add(result);
+		}
+		return r;
+	}
+	
 	/**
 	 * Underlying top-level persistent object for the PerisistentResults form.
 	 * 
@@ -194,8 +407,20 @@ public class PersistentResults {
 	
 		private static final DataField REQUEST_DATE = new DataField("REQUEST_DATE",
 				DataField.DataType.DATETIME, true);
+		
+		private static final DataField REQUEST_PARAMETERS = new DataField("REQUEST_PARAMETERS",
+				DataField.DataType.STRING, true, 4096L);
+
+		private static final DataField LAST_RETRY_DATE = new DataField("LAST_RETRY_DATE",
+				DataField.DataType.DATETIME, true);
+	
+		private static final DataField ATTEMPT_COUNT = new DataField("ATTEMPT_COUNT",
+				DataField.DataType.INTEGER, true);
 	
 		private static final DataField STATUS = new DataField("STATUS",
+				DataField.DataType.STRING, true);
+
+		private static final DataField RESULT_TYPE = new DataField("RESULT_TYPE",
 				DataField.DataType.STRING, true);
 	
 		private static final DataField COMPLETION_DATE = new DataField("COMPLETION_DATE",
@@ -203,7 +428,11 @@ public class PersistentResults {
 	
 		public final DataField requestingUser;
 		public final DataField requestDate;
+		public final DataField requestParameters;
+		public final DataField lastRetryDate;
+		public final DataField attemptCount;
 		public final DataField status;
+		public final DataField resultType;
 		public final DataField completionDate;
 	
 		// additional virtual DataField -- binary content
@@ -233,7 +462,11 @@ public class PersistentResults {
 			super(databaseSchema, TABLE_NAME);
 			fieldList.add(requestingUser = new DataField(REQUESTING_USER));
 			fieldList.add(requestDate = new DataField(REQUEST_DATE));
+			fieldList.add(requestParameters = new DataField(REQUEST_PARAMETERS));
+			fieldList.add(lastRetryDate = new DataField(LAST_RETRY_DATE));
+			fieldList.add(attemptCount = new DataField(ATTEMPT_COUNT));
 			fieldList.add(status = new DataField(STATUS));
+			fieldList.add(resultType = new DataField(RESULT_TYPE));
 			fieldList.add(completionDate = new DataField(COMPLETION_DATE));
 	
 			fieldValueMap.put(primaryKey, CommonFieldsBase.newMD5HashUri(FORM_ID_PERSISTENT_RESULT));
@@ -249,7 +482,11 @@ public class PersistentResults {
 			super(ref, user);
 			requestingUser = ref.requestingUser;
 			requestDate = ref.requestDate;
+			requestParameters = ref.requestParameters;
+			lastRetryDate = ref.lastRetryDate;
+			attemptCount = ref.attemptCount;
 			status = ref.status;
+			resultType = ref.resultType;
 			completionDate = ref.completionDate;
 		}
 	
@@ -335,7 +572,11 @@ public class PersistentResults {
 		// and discover the form element model values for submissions of this type.
 		requestingUser = FormDefinition.findElement(formDefinition.getTopLevelGroupElement(), PersistentResultsTable.relation.requestingUser);
 		requestDate = FormDefinition.findElement(formDefinition.getTopLevelGroupElement(), PersistentResultsTable.relation.requestDate);
+		requestParameters = FormDefinition.findElement(formDefinition.getTopLevelGroupElement(), PersistentResultsTable.relation.requestParameters);
+		lastRetryDate = FormDefinition.findElement(formDefinition.getTopLevelGroupElement(), PersistentResultsTable.relation.lastRetryDate);
+		attemptCount = FormDefinition.findElement(formDefinition.getTopLevelGroupElement(), PersistentResultsTable.relation.attemptCount);
 		status = FormDefinition.findElement(formDefinition.getTopLevelGroupElement(), PersistentResultsTable.relation.status);
+		resultType = FormDefinition.findElement(formDefinition.getTopLevelGroupElement(), PersistentResultsTable.relation.resultType);
 		completionDate = FormDefinition.findElement(formDefinition.getTopLevelGroupElement(), PersistentResultsTable.relation.completionDate);
 		resultFile = formDefinition.getTopLevelGroupElement().findElementByName(PersistentResultsTable.ELEMENT_NAME_RESULT_FILE_DEFINITION);
 

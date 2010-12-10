@@ -66,15 +66,6 @@ import org.opendatakit.common.security.User;
  * 
  */
 public final class FormDataModel extends DynamicBase {
-	// special values for bootstrapping
-	public static final String URI_FORM_ID_VALUE_FORM_INFO = "aggregate.opendatakit.org:FormInfo"; 
-	public static final String URI_FORM_ID_VALUE_FORM_INFO_FILESET = "aggregate.opendatakit.org:FormInfoFileset"; 
-	public static final String URI_FORM_ID_VALUE_FORM_INFO_DESCRIPTION = "aggregate.opendatakit.org:FormInfoDescription"; 
-	public static final String URI_FORM_ID_VALUE_FORM_INFO_SUBMISSION = "aggregate.opendatakit.org:FormInfoSubmission"; 
-	public static final String URI_FORM_ID_VALUE_FORM_INFO_SUBMISSION_ASSOCIATION = "aggregate.opendatakit.org:FormInfoSubmissionAssociation"; 
-	
-	public static final String URI_FORM_ID_VALUE_FORM_DATA_MODEL = "aggregate.opendatakit.org:FormDataModel"; 
-	private static final String FORM_DATA_MODEL_DEFINITION_URI = "aggregate.opendatakit.org:FormDataModel-Definition";
 
 	/* xform element types */
 	public static enum ElementType {
@@ -127,14 +118,26 @@ public final class FormDataModel extends DynamicBase {
 	private CommonFieldsBase backingObject = null;
 	private DataField backingKey = null;
 	private boolean mayHaveExtendedStringData = false;
+
+	/**
+	 * Reset the linked up values so FormDefinition can construct a new model.
+	 * 
+	 * Called by the FormParserForJavaRosa to reset the FDM prior to 
+	 * trying once again to create the relations it describes.
+	 */
+	public void resetDerivedFields() {
+		parent = null;
+		children.clear();
+		backingObject = null;
+		backingKey = null;
+		mayHaveExtendedStringData = false;
+	}
 	
 	/**
-	 * Constructor used by e.g., FormDefinition when initially starting up.
+	 * Constructor to create the relation prototype.
 	 * 
 	 * Note that the backing relation is not created by this constructor.
-	 * The Datastore.createRelation(formDataModel, User) method should
-	 * be called to complete the initialization of the object and 
-	 * create the backing relation in the database.
+	 * See the {@link #createRelation(Datastore, User)} method.
 	 * 
 	 * @param schemaName
 	 */
@@ -145,8 +148,6 @@ public final class FormDataModel extends DynamicBase {
 		fieldList.add(persistAsColumn = new DataField(PERSIST_AS_COLUMN_NAME));
 		fieldList.add(persistAsTable = new DataField(PERSIST_AS_TABLE_NAME));
 		fieldList.add(persistAsSchema = new DataField(PERSIST_AS_SCHEMA_NAME));
-
-		fieldValueMap.put(primaryKey, FormDataModel.URI_FORM_ID_VALUE_FORM_DATA_MODEL);
 	}
 
 	/**

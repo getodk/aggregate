@@ -22,6 +22,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -50,6 +51,8 @@ import org.opendatakit.common.constants.HtmlConsts;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.DynamicCommonFieldsBase;
+import org.opendatakit.common.persistence.DynamicBase;
+import org.opendatakit.common.persistence.TopLevelDynamicBase;
 import org.opendatakit.common.persistence.EntityKey;
 import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
@@ -293,7 +296,7 @@ public class FormParserForJavaRosa {
   
   private void initHelper(MultiPartFormData uploadedFormItems, MultiPartFormItem xformXmlData,  
 		  String inputXml, String title, String persistenceStoreFormId, 
-		  FormDef formDef) throws ODKDatastoreException, ODKConversionException, ODKFormAlreadyExistsException, ODKParseException {
+		  FormDef formDef) throws ODKDatastoreException, ODKFormAlreadyExistsException, ODKParseException {
     
     /////////////////
     // Step 1: create or fetch the Form (FormInfo) submission
@@ -324,6 +327,7 @@ public class FormParserForJavaRosa {
     // Determine the information about the submission...
 	FormInfo.setFormSubmission( formInfo, submissionElementDefn.formId, 
 			submissionElementDefn.modelVersion, submissionElementDefn.uiVersion, datastore, user );
+	formInfo.setIsComplete(true);
     formInfo.persist(datastore, user);
 
     SubmissionAssociationTable saRelation = SubmissionAssociationTable.createRelation(datastore, user);
@@ -368,6 +372,8 @@ public class FormParserForJavaRosa {
     
     final List<FormDataModel> fdmList = new ArrayList<FormDataModel>();
 
+    final Set<CommonFieldsBase> createdRelations = new HashSet<CommonFieldsBase>();
+    
     try {
 	    //////////////////////////////////////////////////
 	    // Step 2: Now build up the parse tree for the form...
@@ -462,12 +468,16 @@ public class FormParserForJavaRosa {
 		    for (;;) {
 		      FormDefinition fd = new FormDefinition(submissionElementDefn, fdmList);
 		
+		      createdRelations.add(fd.getLongStringRefTextTable());
+		      createdRelations.add(fd.getRefTextTable());
+		      
 		      List<CommonFieldsBase> badTables = new ArrayList<CommonFieldsBase>();
 		
 		      for (CommonFieldsBase tbl : fd.getBackingTableSet()) {
 		
 		        try {
-		          datastore.createRelation(tbl, user);
+		        	datastore.createRelation(tbl, user);
+		        	createdRelations.add(tbl);
 		        } catch (Exception e1) {
 		          // assume it is because the table is too wide...
 		          Logger.getLogger(FormParserForJavaRosa.class.getName()).warning(
@@ -478,21 +488,28 @@ public class FormParserForJavaRosa {
 		          } catch (Exception e2) {
 		            // no-op
 		          }
-		          badTables.add(tbl);
+		          if ((tbl instanceof DynamicBase) ||
+		        	  (tbl instanceof TopLevelDynamicBase)) {
+			          badTables.add(tbl); // we know how to subdivide these
+		          } else {
+		        	  throw e1; // must be something amiss with database...
+		          }
 		        }
 		      }
 		
 		      for (CommonFieldsBase tbl : badTables) {
 		        // dang. We need to create phantom tables...
-		        String newPhantom = opaque.generateUniqueTableName(tbl.getSchemaName(), tbl.getTableName(),
-		            datastore, user);
-		
 		        orderlyDivideTable(fdmList, FormDataModel.createRelation(datastore, user), 
-		        		tbl, newPhantom);
+		        		tbl, opaque);
 		      }
 		
 		      if (badTables.isEmpty())
 		        break;
+		      
+		      // reset the derived fields so that the FormDefinition construction will work.
+		      for ( FormDataModel m : fdmList ) {
+		    	  m.resetDerivedFields();
+		      }
 		    }
 	    } catch ( Exception e ) {
 		      FormDefinition fd = new FormDefinition(submissionElementDefn, fdmList);
@@ -500,19 +517,44 @@ public class FormParserForJavaRosa {
 		      for (CommonFieldsBase tbl : fd.getBackingTableSet()) {
 		    	  try {
 		    		  datastore.deleteRelation(tbl, user);
+		    		  createdRelations.remove(tbl);
 		    	  } catch ( Exception e3 ) {
 		    		  // do nothing...
 		    		  e3.printStackTrace();
 		    	  }
 		      }
+		      if ( !createdRelations.isEmpty()) {
+		    	  Logger.getLogger(FormParserForJavaRosa.class.getName()).severe(
+		    			  "createdRelations not fully unwound!");
+		    	  for (CommonFieldsBase tbl : createdRelations ) {
+			    	  try {
+				    	  Logger.getLogger(FormParserForJavaRosa.class.getName()).severe(
+		    			  "--dropping " + tbl.getSchemaName() + "." + tbl.getTableName());
+			    		  datastore.deleteRelation(tbl, user);
+			    		  createdRelations.remove(tbl);
+			    	  } catch ( Exception e3 ) {
+			    		  // do nothing...
+			    		  e3.printStackTrace();
+			    	  }
+		    	  }
+		    	  createdRelations.clear();
+		      }
 	    }
     
     // TODO: if the above gets killed, how do we clean up?
     } catch ( ODKParseException e ) {
-    	datastore.deleteEntity(formInfo.getKey(), user);
+    	List<EntityKey> keys = new ArrayList<EntityKey>();
+    	formInfo.recursivelyAddEntityKeys(keys);
+    	keys.add(new EntityKey(sa, sa.getUri()));
+    	keys.add(formInfo.getKey());
+    	datastore.deleteEntities(keys, user);
     	throw e;
     } catch ( ODKDatastoreException e ) {
-    	datastore.deleteEntity(formInfo.getKey(), user);
+    	List<EntityKey> keys = new ArrayList<EntityKey>();
+    	formInfo.recursivelyAddEntityKeys(keys);
+    	keys.add(new EntityKey(sa, sa.getUri()));
+    	keys.add(formInfo.getKey());
+    	datastore.deleteEntities(keys, user);
     	throw e;
     }
 
@@ -526,14 +568,18 @@ public class FormParserForJavaRosa {
     // TODO: if above write fails, how do we clean this up?
   }
 
-  private void orderlyDivideTable(List<FormDataModel> fdmList, FormDataModel fdm,
-      CommonFieldsBase tbl, String newPhantomTableName) {
+  /**
+   * The creation of the tbl relation has failed.  
+   * We need to split it into multiple sub-tables and try again.
+   * 
+   * @param fdmList
+   * @param fdmRelation
+   * @param tbl
+   * @param newPhantomTableName
+   */
+  private void orderlyDivideTable(List<FormDataModel> fdmList, FormDataModel fdmRelation,
+      CommonFieldsBase tbl, NamingSet opaque) {
 	  
-    if (!(tbl instanceof DynamicCommonFieldsBase)) {
-      throw new IllegalArgumentException("Yikes! Don't expect this to be a non-form table");
-    }
-    // OK. It is a table for holding xform data.
-
     // Find out how many columns it has...
     int nCol = tbl.getFieldList().size() - DynamicCommonFieldsBase.WELL_KNOWN_COLUMN_COUNT;
 
@@ -542,15 +588,12 @@ public class FormParserForJavaRosa {
           + "." + tbl.getTableName());
     }
 
-    // find the entry corresponding to this parent table.
+    // search the fdmList for the most-enclosing element that uses this tbl as its backingObject.
     FormDataModel parentTable = null;
+
+    // Step 1: find any FormDataModel that uses tbl as its backing object.
     for (FormDataModel m : fdmList) {
-      if (m.getPersistAsColumn() != null)
-        continue;
-      String table = m.getPersistAsTable();
-      if (table == null)
-        continue; // FORM_NAME...
-      if (table.equals(tbl.getTableName()) && m.getPersistAsSchema().equals(tbl.getSchemaName())) {
+      if (tbl.equals(m.getBackingObjectPrototype())) {
         parentTable = m; // anything we find is good enough...
         break;
       }
@@ -560,30 +603,35 @@ public class FormParserForJavaRosa {
       throw new IllegalStateException("Unable to locate model for backing table");
     }
 
-    // ensure that it is the highest model element with this backing object.
+    // Step 2: chain up to the parent whose parent doesn't have tbl as its backing object
     while (parentTable.getParent() != null) {
       FormDataModel parent = parentTable.getParent();
       if (!tbl.equals(parent.getBackingObjectPrototype()))
         break;
       // daisy-chain up to parent
-      // we must have had a subordinate group...
+      // we must have had an element or a subordinate group...
       parentTable = parent;
     }
 
-    // go through the fdmList identifying the entries immediately below
-    // the parent that are backed by the table we need to split.
+    // go through the parent's children identifying those that 
+    // are backed by the table we need to split.
     List<FormDataModel> topElementChange = new ArrayList<FormDataModel>();
     List<FormDataModel> groups = new ArrayList<FormDataModel>();
     for (;;) {
-      for (FormDataModel m : fdmList) {
+      for (FormDataModel m : parentTable.getChildren()) {
+    	// ignore the choice and binary data fields of the parentTable
         if (tbl.equals(m.getBackingObjectPrototype())) {
-          if (m != parentTable) {
-            if (parentTable.getUri().equals(m.getParentAuri())) {
-              if (!m.getElementType().equals(FormDataModel.ElementType.GROUP)) {
-                topElementChange.add(m);
-              } else {
+          // geopoints, phantoms and groups don't have backing keys
+          if (m.getBackingKey() != null ) {
+            topElementChange.add(m);
+          } else {
+            int count = recursivelyCountChildrenInSameTable(m);
+            if ( (nCol < 4*count) || (count > 10) ) {
+            	// it is big enough to consider moving...
                 groups.add(m);
-              }
+            } else {
+            	// clump it into the individual elements to move...
+            	topElementChange.add(m);
             }
           }
         }
@@ -599,71 +647,113 @@ public class FormParserForJavaRosa {
 
         if (parentTable == null) {
           throw new IllegalStateException(
-              "Failure in create table when there are no nested groups!");
+              "Are there database problems? Failure in create table when there are no nested groups!");
         }
+        // note that we don't have to patch up the parentTable we are
+        // moving off of, because the tbl will continue to exist.  We
+        // just need to move some of its contents to a second table, 
+        // either by moving a nested group or geopoint off, or by 
+        // creating a phantom table.
       } else {
         // OK we have a chance to do something at this level...
         break;
       }
     }
 
-    if (groups.size() > 0 && topElementChange.size() > 1) {
-      // add phantom table for largest group -- since flec > 1, we know
-      // that other columns will remain in the original table...
-      // the nice thing is, this doesn't require any new fdm records!
-      int biggestCount = 0;
-      FormDataModel biggest = null;
-      for (FormDataModel m : groups) {
-        int count = recursivelyCountChildrenInSameTable(m);
-        if (biggestCount <= count) {
-          biggestCount = count;
-          biggest = m;
-        }
-      }
-      // reassign biggest and its children, etc. to the new table...
-      recursivelyReassignChildren(biggest, newPhantomTableName);
+    // If we have any decent-sized groups, we should cleave off up to 2/3 of the 
+    // total elements that may be under a group...
+    if (groups.size() > 0) {
+      // order the list from high to low...
+      Collections.sort(groups, new Comparator<FormDataModel>() {
+		@Override
+		public int compare(FormDataModel o1, FormDataModel o2) {
+	        int c1 = recursivelyCountChildrenInSameTable(o1);
+	        int c2 = recursivelyCountChildrenInSameTable(o2);
+	        if ( c1 > c2 ) return -1;
+	        if ( c1 < c2 ) return 1;
+	        return 0;
+		}
+      });
 
-      // and try it again now...
-      return;
+      // go through the list moving the larger groups into tables
+      // until close to half of the elements are moved...
+      int cleaveCount = 0;
+      for ( FormDataModel m : groups ) {
+    	  int groupSize = recursivelyCountChildrenInSameTable(m);
+    	  if ( cleaveCount+groupSize > (3*nCol)/4) {
+    		  continue; // just too big to split this way see if there is a smaller group...
+    	  }
+          String newGroupTable = opaque.generateUniqueTableName(tbl.getSchemaName(), tbl.getTableName(),
+        		  				datastore, user);
+          recursivelyReassignChildren(m, tbl, newGroupTable);
+          cleaveCount += groupSize;
+          // and if we have cleaved over half, (divide and conquer), retry it with the database.
+          if ( cleaveCount > (nCol/2) ) return;
+      }
+      // and otherwise, if we did cleave anything off, try anyway...
+      // the next time through, we won't have any groups and will need
+      // to create phantom tables, so it is worth trying for this here now...
+      if ( cleaveCount > 0 ) return;
     }
 
-    // Urgh! we don't have a nested group we can cleave off or it is all
-    // that is in this table.
-    // We will need to subdivide this manually by creating a phantom
-    // table...
+    // Urgh! we don't have a nested group we can cleave off.
+    // or the nested groups are all small ones.  Create a 
+    // phantom table.  We need to preserve the parent-child
+    // relationship and the ordinal ordering even for the 
+    // external tables like choices and binary objects.
+    //
+    // The children array is ordered by ordinal number, 
+    // so we just need to get that, and update the entries
+    // in the last half of the array.
     String phantomURI = generatePhantomKey(fdmSubmissionUri);
-
-    // OK -- attempt to split the column count in half...
-    long desiredOriginalTableColCount = (nCol / 2);
-    for (FormDataModel m : topElementChange) {
-      long newOrdinal = m.getOrdinalNumber() - desiredOriginalTableColCount;
-      if (newOrdinal > 0) {
-        m.setParentAuri(phantomURI);
-        m.setOrdinalNumber(newOrdinal);
-        recursivelyReassignChildren(m, newPhantomTableName);
-      }
+    String newPhantomTableName = opaque.generateUniqueTableName(tbl.getSchemaName(), tbl.getTableName(),
+				datastore, user);
+    int desiredOriginalTableColCount = (nCol / 2);
+    List<FormDataModel> children = parentTable.getChildren();
+    int skipCleaveCount = 0;
+    int idxStart;
+    for (idxStart = 0 ; idxStart < children.size() ; ++idxStart ) {
+    	FormDataModel m = children.get(idxStart);
+        if (!tbl.equals(m.getBackingObjectPrototype())) continue;        
+    	if (m.getBackingKey() == null) {
+    		skipCleaveCount += recursivelyCountChildrenInSameTable(m);
+    	} else {
+    		++skipCleaveCount;
+    	}
+    	if ( skipCleaveCount > desiredOriginalTableColCount ) break;
     }
-
+    // everything after idxStart should be moved to be "under" the 
+    // phantom table.
+    FormDataModel firstToMove = children.get(++idxStart);
     // data record...
-    FormDataModel d = datastore.createEntityUsingRelation(fdm,
-        new EntityKey(fdm, fdmList.get(0).getUri()), user);
+    FormDataModel d = datastore.createEntityUsingRelation(fdmRelation,
+        new EntityKey(fdmRelation, fdmSubmissionUri), user);
     fdmList.add(d);
-    d.setStringField(fdm.primaryKey, phantomURI);
-    d.setOrdinalNumber(Long.valueOf(desiredOriginalTableColCount + 1));
+    d.setStringField(fdmRelation.primaryKey, phantomURI);
+    d.setOrdinalNumber(firstToMove.getOrdinalNumber());
     d.setParentAuri(parentTable.getUri());
-    d.setStringField(fdm.elementName, null);
-    d.setStringField(fdm.elementType, FormDataModel.ElementType.PHANTOM.toString());
-    d.setStringField(fdm.persistAsColumn, null);
-    d.setStringField(fdm.persistAsTable, newPhantomTableName);
-    d.setStringField(fdm.persistAsSchema, fdm.getSchemaName());
+    d.setStringField(fdmRelation.elementName, null);
+    d.setStringField(fdmRelation.elementType, FormDataModel.ElementType.PHANTOM.toString());
+    d.setStringField(fdmRelation.persistAsColumn, null);
+    d.setStringField(fdmRelation.persistAsTable, newPhantomTableName);
+    d.setStringField(fdmRelation.persistAsSchema, fdmRelation.getSchemaName());
+
+    // OK -- update ordinals and move remaining columns...
+    long ordinalNumber = 0L;
+    for ( ; idxStart < children.size() ; ++ idxStart ) {
+    	FormDataModel m = children.get(idxStart);
+        m.setParentAuri(phantomURI);
+        m.setOrdinalNumber(++ordinalNumber);
+    	recursivelyReassignChildren(m, tbl, newPhantomTableName);
+    }
   }
 
   private int recursivelyCountChildrenInSameTable(FormDataModel parent) {
 
     int count = 0;
     for (FormDataModel m : parent.getChildren()) {
-      if (parent.getTableName().equals(m.getPersistAsTable())
-          && parent.getSchemaName().equals(m.getSchemaName())) {
+      if (parent.getPersistAsTable().equals(m.getPersistAsTable())
+          && parent.getPersistAsSchema().equals(m.getPersistAsSchema())) {
         count += recursivelyCountChildrenInSameTable(m);
       }
     }
@@ -673,18 +763,18 @@ public class FormParserForJavaRosa {
     return count;
   }
 
-  private void recursivelyReassignChildren(FormDataModel biggest, String newPhantomTableName) {
-
-    for (FormDataModel m : biggest.getChildren()) {
-      if (biggest.getTableName().equals(m.getPersistAsTable())
-          && biggest.getSchemaName().equals(m.getSchemaName())) {
-        recursivelyReassignChildren(m, newPhantomTableName);
-      }
-    }
-
+  private void recursivelyReassignChildren(FormDataModel biggest, CommonFieldsBase tbl, String newPhantomTableName) {
+	  
+    if (!tbl.equals(biggest.getBackingObjectPrototype())) return;
+    
     if (!biggest.setStringField(biggest.persistAsTable, newPhantomTableName)) {
-      throw new IllegalArgumentException("overflow of persistAsTable");
+        throw new IllegalArgumentException("overflow of persistAsTable");
     }
+
+	for (FormDataModel m : biggest.getChildren()) {
+		recursivelyReassignChildren(m, tbl, newPhantomTableName);
+    }
+
   }
 
   /**
@@ -827,10 +917,10 @@ public class FormParserForJavaRosa {
         // the developer likely has not set a type for the field.
         et = FormDataModel.ElementType.STRING;
         Logger.getLogger(FormParserForJavaRosa.class.getCanonicalName()).warning(
-            "Element " + treeElement.getName() + " does not have a type");
+            "Element " + getTreeElementPath(treeElement) + " does not have a type");
         throw new ODKParseException(
             "Field name: "
-                + treeElement.getName()
+                + getTreeElementPath(treeElement)
                 + " appears to be a value field (it has no fields nested within it) but does not have a type.");
       } else /* one or more children -- this is a non-repeating group */{
         persistAsColumn = null;
@@ -1032,6 +1122,13 @@ public class FormParserForJavaRosa {
     }
   }
 
+  public String getTreeElementPath(TreeElement e) {
+	  if ( e ==  null ) return null;
+	  String s = getTreeElementPath(e.getParent());
+	  if ( s == null ) return e.getName();
+	  return s + "/" + e.getName();
+  }
+  
   public String getFormId() {
     return rootElementDefn.formId;
   }

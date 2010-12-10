@@ -46,10 +46,11 @@ public class ChoiceSubmissionType extends SubmissionFieldBase<List<String>> {
 	List<String> values = new ArrayList<String>();
 	
 	List<SelectChoice> choices = new ArrayList<SelectChoice>();
-	String parentKey;
-	EntityKey topLevelTableKey;
-	Datastore datastore;
-	User user;
+	
+	private final String parentKey;
+	private final EntityKey topLevelTableKey;
+	private final Datastore datastore;
+	private final User user;
 	
 	public ChoiceSubmissionType(FormElementModel element, String parentKey, EntityKey topLevelTableKey, Datastore datastore, User user) {
 		super(element);
@@ -71,13 +72,11 @@ public class ChoiceSubmissionType extends SubmissionFieldBase<List<String>> {
 	}
 
 	@Override
-	public void getValueFromEntity(CommonFieldsBase dbEntity,
-			String uriAssociatedRow, EntityKey topLevelTableKey,
-			Datastore datastore, User user, boolean fetchElement) throws ODKDatastoreException {
+	public void getValueFromEntity(Datastore datastore, User user) throws ODKDatastoreException {
 		
 		SelectChoice sel = (SelectChoice) element.getFormDataModel().getBackingObjectPrototype();
 		Query q = datastore.createQuery(element.getFormDataModel().getBackingObjectPrototype(), user);
-		q.addFilter(sel.parentAuri, FilterOperation.EQUAL, uriAssociatedRow);
+		q.addFilter(sel.parentAuri, FilterOperation.EQUAL, parentKey);
 		q.addSort(sel.ordinalNumber, Direction.ASCENDING);
 
 		List<? extends CommonFieldsBase> choiceHits = q.executeQuery(0);

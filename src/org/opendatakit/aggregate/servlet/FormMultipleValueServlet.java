@@ -93,8 +93,7 @@ public class FormMultipleValueServlet extends ServletUtilBase {
 
 		Datastore ds = (Datastore) ContextFactory.get().getBean(
 				BeanDefs.DATASTORE_BEAN);
-		List<SubmissionKeyPart> parts = SubmissionKeyPart
-				.splitSubmissionKey(key);
+		List<SubmissionKeyPart> parts = key.splitSubmissionKey();
 		Submission sub = null;
 		try {
 			Form form = Form.retrieveForm(parts.get(0).getElementName(), ds, user);

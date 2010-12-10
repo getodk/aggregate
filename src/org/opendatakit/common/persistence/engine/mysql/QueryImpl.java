@@ -14,6 +14,7 @@
 package org.opendatakit.common.persistence.engine.mysql;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -152,7 +153,7 @@ public class QueryImpl implements Query {
 	}
 
 	@Override
-	public void addValueSetFilter(DataField attributeName, Set<?> valueSet) {
+	public void addValueSetFilter(DataField attributeName, Collection<?> valueSet) {
 		if ( queryBindBuilder.length() == 0 ) {
 			queryBindBuilder.append(K_WHERE);
 		} else {

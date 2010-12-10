@@ -81,7 +81,8 @@ public class BasicHeaderFormatter extends AbstractHeaderFormatter implements Hea
    *          return all properties for the SubmissionSet
    */
   public List<String> generateHeaders(Form form, FormElementModel rootGroup,
-      List<FormElementModel> propertyNames) {
+      List<FormElementModel> propertyNamesArg) {
+	propertyNames = propertyNamesArg;
     headers = new ArrayList<String>();
     types = new ArrayList<ElementType>();
 
@@ -90,6 +91,7 @@ public class BasicHeaderFormatter extends AbstractHeaderFormatter implements Hea
   }
 
   protected void processGeoPoint(FormElementModel node, String nodeName) {
+	if ((propertyNames != null) && !propertyNames.contains(node)) return;
     if (separateCoordinates) {
       headers.add(nodeName + BasicConsts.COLON + GeoPoint.LATITUDE);
       types.add(ElementType.DECIMAL);

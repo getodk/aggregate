@@ -53,6 +53,8 @@ public class FormInfoDescriptionTable extends DynamicBase {
 	public final DataField description;
 	public final DataField descriptionUrl;
 
+	public static final String URI_FORM_ID_VALUE_FORM_INFO_DESCRIPTION = "aggregate.opendatakit.org:FormInfoDescription";
+
 	/**
 	 * Construct a relation prototype.
 	 * 
@@ -65,7 +67,7 @@ public class FormInfoDescriptionTable extends DynamicBase {
 		fieldList.add(description = new DataField(DESCRIPTION));
 		fieldList.add(descriptionUrl = new DataField(DESCRIPTION_URL));
 		
-		fieldValueMap.put(primaryKey, FormDataModel.URI_FORM_ID_VALUE_FORM_INFO_DESCRIPTION);
+		fieldValueMap.put(primaryKey, FormInfoDescriptionTable.URI_FORM_ID_VALUE_FORM_INFO_DESCRIPTION);
 	}
 
 	/**

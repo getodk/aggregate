@@ -31,7 +31,6 @@ import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
-import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
 import org.opendatakit.aggregate.exception.ODKParseException;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.format.table.FragmentedCsvFormatter;
@@ -155,7 +154,7 @@ public class FragmentedCsvServlet extends ServletUtilBase {
     	// odkPath ends up being: [ "myDataForm", "data", "repeat1" ]
     	// elementReference is either null, or the key to the record
     	// elementParentKey is the parent key that the record must have.
-    	List<SubmissionKeyPart> submissionKeyParts = SubmissionKeyPart.splitSubmissionKey(submissionKey);
+    	List<SubmissionKeyPart> submissionKeyParts = submissionKey.splitSubmissionKey();
 //    	Key elementReference = null;
 //    	Key elementParentKey = null;
     	
@@ -278,8 +277,6 @@ public class FragmentedCsvServlet extends ServletUtilBase {
         }	
     } catch (ODKFormNotFoundException e) {
         odkIdNotFoundError(resp);
-    } catch (ODKIncompleteSubmissionData e) {
-        errorRetreivingData(resp);
     } catch (ODKParseException e) {
     	errorBadParam(resp);
 	} catch (ODKDatastoreException e) {

@@ -41,6 +41,7 @@ import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 public class HtmlLinkElementFormatter extends BasicElementFormatter{
   
   private final String baseWebServerUrl;
+  private final boolean binariesAsDownloadLink;
   
   /**
    * Construct a Html Link Element Formatter
@@ -55,9 +56,15 @@ public class HtmlLinkElementFormatter extends BasicElementFormatter{
    */
   public HtmlLinkElementFormatter(String webServerUrl, boolean separateGpsCoordinates,
       boolean includeGpsAltitude, boolean includeGpsAccuracy) {
-    super(separateGpsCoordinates, includeGpsAltitude,includeGpsAccuracy);
-    baseWebServerUrl = webServerUrl;
+	  this(webServerUrl, separateGpsCoordinates, includeGpsAltitude, includeGpsAccuracy, false);
   }
+
+  public HtmlLinkElementFormatter(String webServerUrl, boolean separateGpsCoordinates,
+	      boolean includeGpsAltitude, boolean includeGpsAccuracy, boolean binariesAsDownloadLink) {
+	    super(separateGpsCoordinates, includeGpsAltitude,includeGpsAccuracy);
+	    baseWebServerUrl = webServerUrl;
+	    this.binariesAsDownloadLink = binariesAsDownloadLink;
+	  }
  
   @Override
   public void formatBinary(BlobSubmissionType blobSubmission, String propertyName, Row row) throws ODKDatastoreException {
@@ -67,9 +74,22 @@ public class HtmlLinkElementFormatter extends BasicElementFormatter{
     }
     
     SubmissionKey key = blobSubmission.getValue();
+    String linkText;
     Map<String, String> properties = new HashMap<String, String>();
     properties.put(ServletConsts.BLOB_KEY, key.toString());
-    String url = HtmlUtil.createHrefWithProperties(HtmlUtil.createUrl(baseWebServerUrl) + BinaryDataServlet.ADDR, properties, FormTableConsts.VIEW_LINK_TEXT);
+    if ( binariesAsDownloadLink ) {
+    	properties.put(ServletConsts.AS_ATTACHMENT, "yes");
+    	linkText = FormTableConsts.DOWNLOAD_LINK_TEXT;
+    	if ( blobSubmission.getAttachmentCount() == 1 ) {
+    		linkText = blobSubmission.getUnrootedFilename(1);
+    		if ( linkText == null || linkText.length() == 0 ) {
+    	    	linkText = FormTableConsts.DOWNLOAD_LINK_TEXT;
+    		}
+    	}
+    } else {
+    	linkText = FormTableConsts.VIEW_LINK_TEXT; 
+    }
+    String url = HtmlUtil.createHrefWithProperties(HtmlUtil.createUrl(baseWebServerUrl) + BinaryDataServlet.ADDR, properties, linkText);
     row.addFormattedValue(url);    
   }
 

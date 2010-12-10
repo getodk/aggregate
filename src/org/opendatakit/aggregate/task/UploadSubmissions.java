@@ -16,14 +16,11 @@
 package org.opendatakit.aggregate.task;
 
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
-import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
-import org.opendatakit.aggregate.exception.ODKTaskLockException;
 import org.opendatakit.aggregate.externalservice.FormServiceCursor;
-import org.opendatakit.common.persistence.Datastore;
-import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.security.User;
 
 /**
+ * API for creation of form upload (to an external service) tasks.
  * 
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
@@ -32,6 +29,4 @@ import org.opendatakit.common.security.User;
 public interface UploadSubmissions {
 
   public void createFormUploadTask(FormServiceCursor fsc, String baseServerWebUrl, User user) throws ODKExternalServiceException;
-  
-  public void uploadSubmissions(FormServiceCursor fsc, String baseServerWebUrl, Datastore ds, User user) throws ODKEntityNotFoundException, ODKExternalServiceException, ODKFormNotFoundException, ODKTaskLockException;
 }

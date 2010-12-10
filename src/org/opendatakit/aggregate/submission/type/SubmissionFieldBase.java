@@ -29,7 +29,6 @@ import org.opendatakit.aggregate.submission.SubmissionField;
 import org.opendatakit.common.constants.BasicConsts;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.Datastore;
-import org.opendatakit.common.persistence.EntityKey;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.security.User;
 
@@ -44,7 +43,7 @@ public abstract class SubmissionFieldBase<T> implements SubmissionField<T>{
   /**
    * Submission property/element name
    */
-  protected FormElementModel element;
+  protected final FormElementModel element;
 
   public SubmissionFieldBase(FormElementModel element) {
     this.element = element;
@@ -82,13 +81,11 @@ public abstract class SubmissionFieldBase<T> implements SubmissionField<T>{
   /**
    * Get submission field value from database entity
    *
-   * @param dbEntity entity to obtain value
-   * @param formDefinition the form definition object
+   * @param database - from which to retrieve value
+   * @param user - requesting the value
  * @throws ODKDatastoreException 
    */
-  public abstract void getValueFromEntity(CommonFieldsBase dbEntity, String uriAssociatedRow,
-		  									EntityKey topLevelTableKey, 
-		  									Datastore datastore, User user, boolean fetchElement)
+  public abstract void getValueFromEntity(Datastore datastore, User user)
   					throws ODKDatastoreException;
   
   /**
@@ -109,15 +106,14 @@ public abstract class SubmissionFieldBase<T> implements SubmissionField<T>{
    * @param submissionSetKey key of submission set that will reference the blob
    * @param contentType type of binary data (NOTE: only used for binary data)
    * @return the outcome of the storage attempt.  md5 hashes are used to determine file equivalence. 
-   * @throws ODKConversionException
    * @throws ODKDatastoreException 
    */ 
   @Override
-  public BlobSubmissionOutcome setValueFromByteArray(byte [] byteArray, String contentType, Long contentLength, String unrootedFilePath, Datastore datastore, User user) throws ODKConversionException, ODKDatastoreException {
+  public BlobSubmissionOutcome setValueFromByteArray(byte [] byteArray, String contentType, Long contentLength, String unrootedFilePath, Datastore datastore, User user) throws ODKDatastoreException {
     if(isBinary()) {
       throw new IllegalStateException("Should be overridden in derived class");
     } else {
-      throw new ODKConversionException(ErrorConsts.BINARY_ERROR);
+      throw new IllegalStateException(ErrorConsts.BINARY_ERROR);
     }
   }
   

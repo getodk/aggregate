@@ -50,6 +50,8 @@ public class FormInfoSubmissionTable extends DynamicBase {
 	public final DataField submissionModelVersion;
 	public final DataField submissionUiVersion;
 
+	public static final String URI_FORM_ID_VALUE_FORM_INFO_SUBMISSION = "aggregate.opendatakit.org:FormInfoSubmission";
+
 	/**
 	 * Construct a relation prototype.
 	 * 
@@ -61,7 +63,7 @@ public class FormInfoSubmissionTable extends DynamicBase {
 		fieldList.add(submissionModelVersion = new DataField(SUBMISSION_MODEL_VERSION));
 		fieldList.add(submissionUiVersion = new DataField(SUBMISSION_UI_VERSION));
 		
-		fieldValueMap.put(primaryKey, FormDataModel.URI_FORM_ID_VALUE_FORM_INFO_SUBMISSION);
+		fieldValueMap.put(primaryKey, FormInfoSubmissionTable.URI_FORM_ID_VALUE_FORM_INFO_SUBMISSION);
 	}
 
 	/**

@@ -19,9 +19,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.opendatakit.aggregate.constants.ServletConsts;
-import org.opendatakit.aggregate.datamodel.FormDataModel;
 import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
 import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.form.PersistentResults;
 import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.submission.SubmissionKeyPart;
 import org.opendatakit.common.persistence.CommonFieldsBase;
@@ -73,6 +73,8 @@ public class QueryFormList {
     List<? extends CommonFieldsBase> formEntities = formQuery.executeQuery(ServletConsts.FETCH_LIMIT);
     for (CommonFieldsBase formEntity : formEntities) {
       Form form = new Form((TopLevelDynamicBase) formEntity, ds, user);
+      if ( form.getFormId().equals(PersistentResults.FORM_ID_PERSISTENT_RESULT)) continue;
+      if ( form.getFormId().equals(Form.URI_FORM_ID_VALUE_FORM_INFO)) continue;
       addIfAuthorized(form, checkAuthorization);
     }
   }
@@ -91,11 +93,11 @@ public class QueryFormList {
     
     for (SubmissionKey submissionKey : submissionKeys) {
       try {
-		List<SubmissionKeyPart> parts = SubmissionKeyPart.splitSubmissionKey(submissionKey);
+		List<SubmissionKeyPart> parts = submissionKey.splitSubmissionKey();
 		if ( parts.size() != 2 ) {
 			throw new ODKIncompleteSubmissionData();
 		}
-		if ( !parts.get(0).getElementName().equals(FormDataModel.URI_FORM_ID_VALUE_FORM_INFO) ) {
+		if ( !parts.get(0).getElementName().equals(Form.URI_FORM_ID_VALUE_FORM_INFO) ) {
 			throw new ODKIncompleteSubmissionData();
 		}
 

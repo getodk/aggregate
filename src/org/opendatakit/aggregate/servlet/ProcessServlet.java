@@ -28,7 +28,6 @@ import org.apache.commons.fileupload.FileUploadException;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.ErrorConsts;
-import org.opendatakit.aggregate.datamodel.FormDataModel;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
 import org.opendatakit.aggregate.form.Form;
@@ -107,7 +106,7 @@ public class ProcessServlet extends ServletUtilBase {
         Form form = Form.retrieveForm(formId, ds, user);
 
         // don't allow the deletion of the FormInfo submissions.
-        if (!form.getFormId().equals(FormDataModel.URI_FORM_ID_VALUE_FORM_INFO)) {
+        if (!form.getFormId().equals(Form.URI_FORM_ID_VALUE_FORM_INFO)) {
           DeleteSubmissions delete = new DeleteSubmissions(submissionKeys, ds, user);
           delete.deleteSubmissions();
           resp.sendRedirect(FormsServlet.ADDR);
@@ -123,7 +122,7 @@ public class ProcessServlet extends ServletUtilBase {
             BeanDefs.FORM_DELETE_BEAN);
         for (SubmissionKey submissionKey : submissionKeys) {
           try {
-            List<SubmissionKeyPart> parts = SubmissionKeyPart.splitSubmissionKey(submissionKey);
+            List<SubmissionKeyPart> parts = submissionKey.splitSubmissionKey();
             if (parts.size() != 2) {
               throw new ODKIncompleteSubmissionData();
             }
@@ -139,7 +138,7 @@ public class ProcessServlet extends ServletUtilBase {
             // If the FormInfo table is the target, log an error!
             if (rel != null) {
               Form formToDelete = new Form((TopLevelDynamicBase) rel, ds, user);
-              if (!formToDelete.getFormId().equals(FormDataModel.URI_FORM_ID_VALUE_FORM_INFO)) {
+              if (!formToDelete.getFormId().equals(Form.URI_FORM_ID_VALUE_FORM_INFO)) {
                 formDelete.createFormDeleteTask(formToDelete, user);
                 resp.sendRedirect(FormsServlet.ADDR);
                 return;

@@ -62,7 +62,7 @@ public class DeleteSubmissions {
 
     for (SubmissionKey submissionKey : submissionKeys) {
       try {
-		List<SubmissionKeyPart> parts = SubmissionKeyPart.splitSubmissionKey(submissionKey);
+		List<SubmissionKeyPart> parts = submissionKey.splitSubmissionKey();
   		Submission sub = Submission.fetchSubmission(parts, ds, user);
         deleteHelper(sub, deleteKeys);
       } catch (ODKEntityNotFoundException e) {

@@ -74,9 +74,7 @@ public class FormDefinition {
 	/** map from fully qualified tableName to CFB definition */
 	private final Map<String, DynamicCommonFieldsBase> backingTableMap;
 
-	private FormDataModel longStringRefTextModel = null;
 	private LongStringRefText longStringRefTextTable = null;
-	private FormDataModel refTextModel = null;
 	private RefText refTextTable = null;
 	private FormDataModel topLevelGroup = null;
 	private FormElementModel topLevelGroupElement = null;
@@ -565,7 +563,6 @@ public class FormDefinition {
 				if ( longStringRefTextTable != null ) {
 					throw new IllegalStateException("multiple long string ref text tables defined!");
 				}
-				longStringRefTextModel = m;
 				longStringRefTextTable = new LongStringRefText(m.getPersistAsSchema(),m.getPersistAsTable());
 				b = longStringRefTextTable;
 				m.setBackingObject(b);
@@ -574,7 +571,6 @@ public class FormDefinition {
 				if ( refTextTable != null ) {
 					throw new IllegalStateException("multiple ref text tables defined!");
 				}
-				refTextModel = m;
 				refTextTable = new RefText(m.getPersistAsSchema(),m.getPersistAsTable());
 				b = refTextTable;
 				m.setBackingObject(b);
@@ -588,7 +584,7 @@ public class FormDefinition {
 
 		boolean isWellKnownForm = false;
 		// set the backing objects for the tables identified in the groupList
-		if ( xformParameters.formId.equals(FormDataModel.URI_FORM_ID_VALUE_FORM_INFO) ) {
+		if ( xformParameters.formId.equals(Form.URI_FORM_ID_VALUE_FORM_INFO) ) {
 			// it is the FormInfo table -- pre-populate the backingTableMap
 			// with the table relations we know...
 			FormInfo.populateBackingTableMap(backingTableMap);

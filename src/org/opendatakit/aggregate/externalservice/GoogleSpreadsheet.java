@@ -404,6 +404,13 @@ public class GoogleSpreadsheet extends AbstractExternalService implements Extern
     com.google.gdata.data.docs.SpreadsheetEntry updatedEntry;
     try {
       updatedEntry = service.insert(new URL(SpreadsheetConsts.DOC_FEED), createdEntry);
+    } catch (IOException e) {
+      // try one more time
+      try {
+         updatedEntry = service.insert(new URL(SpreadsheetConsts.DOC_FEED), createdEntry);
+      } catch (Exception e1) {
+         throw new ODKExternalServiceException(e1);
+      }
     } catch (Exception e) {
       throw new ODKExternalServiceException(e);
     }
