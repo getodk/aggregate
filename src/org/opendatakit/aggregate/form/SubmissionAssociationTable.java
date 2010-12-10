@@ -15,7 +15,6 @@
  */
 package org.opendatakit.aggregate.form;
 
-import org.opendatakit.aggregate.datamodel.FormDataModel;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.PersistConsts;
@@ -57,6 +56,8 @@ public class SubmissionAssociationTable extends StaticAssociationBase {
 	public final DataField isSubmissionAllowed;
 	public final DataField uriSubmissionDataModel;
 
+	public static final String URI_FORM_ID_VALUE_FORM_INFO_SUBMISSION_ASSOCIATION = "aggregate.opendatakit.org:FormInfoSubmissionAssociation";
+
 	/**
 	 * DOM_AURI (md5 of submission form_id)
 	 * SUB_AURI (URI_FORM_INFO)
@@ -75,7 +76,7 @@ public class SubmissionAssociationTable extends StaticAssociationBase {
 		fieldList.add(isSubmissionAllowed = new DataField(IS_SUBMISSION_ALLOWED));
 		fieldList.add(uriSubmissionDataModel = new DataField(URI_SUBMISSION_DATA_MODEL));
 		
-		fieldValueMap.put(primaryKey, FormDataModel.URI_FORM_ID_VALUE_FORM_INFO_SUBMISSION_ASSOCIATION);
+		fieldValueMap.put(primaryKey, SubmissionAssociationTable.URI_FORM_ID_VALUE_FORM_INFO_SUBMISSION_ASSOCIATION);
 	}
 
 	/**

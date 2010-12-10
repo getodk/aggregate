@@ -95,7 +95,7 @@ public class BinaryDataServlet extends ServletUtilBase {
     String contentType = null;
     Long contentLength = null;
     
-    List<SubmissionKeyPart> parts = SubmissionKeyPart.splitSubmissionKey(key);
+    List<SubmissionKeyPart> parts = key.splitSubmissionKey();
     Submission sub = null;
 	try {
 		sub = Submission.fetchSubmission(parts, ds, user);

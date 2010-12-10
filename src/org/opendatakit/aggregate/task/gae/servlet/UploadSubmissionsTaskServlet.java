@@ -23,10 +23,12 @@ import javax.servlet.http.HttpServletResponse;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.externalservice.ExternalServiceConsts;
+import org.opendatakit.aggregate.exception.ODKExternalServiceException;
+import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
+import org.opendatakit.aggregate.exception.ODKTaskLockException;
 import org.opendatakit.aggregate.externalservice.FormServiceCursor;
 import org.opendatakit.aggregate.servlet.ServletUtilBase;
-import org.opendatakit.aggregate.task.UploadSubmissions;
-import org.opendatakit.aggregate.task.gae.UploadSubmissionsImpl;
+import org.opendatakit.aggregate.task.UploadSubmissionsWorkerImpl;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.security.User;
@@ -73,19 +75,33 @@ public class UploadSubmissionsTaskServlet extends ServletUtilBase{
     FormServiceCursor fsc;
     try {
       fsc = FormServiceCursor.getFormServiceCursor(fscUri, ds, user);
-    } catch (ODKEntityNotFoundException e1) {
+    } catch (ODKEntityNotFoundException e) {
       // TODO: fix bug we should not be generating tasks for fsc that don't exist
       // however not critical bug as execution path dies with this try/catch
       System.err.println("BUG: we generated an task for a form service cursor that didn't exist");
+      resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.toString());
       return;
     }
     
     try {
-      UploadSubmissions worker = new UploadSubmissionsImpl();
-      worker.uploadSubmissions(fsc, getServerURL(req), ds, user);
-    } catch (Exception e) {
+    	UploadSubmissionsWorkerImpl worker = 
+    		new UploadSubmissionsWorkerImpl(fsc, getServerURL(req), ds, user);
+      worker.uploadAllSubmissions();
+    } catch (ODKTaskLockException e) {
       e.printStackTrace();
+      resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.toString());
       return;
-    }
+    } catch (ODKEntityNotFoundException e) {
+	  e.printStackTrace();
+	  resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.toString());
+	  return;
+	} catch (ODKExternalServiceException e) {
+	  e.printStackTrace();
+	  resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.toString());
+	  return;
+	} catch (ODKFormNotFoundException e) {
+	  odkIdNotFoundError(resp);
+	  return;
+	}
   }
 }

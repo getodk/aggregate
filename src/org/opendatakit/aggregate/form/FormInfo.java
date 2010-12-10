@@ -23,7 +23,6 @@ import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.datamodel.FormDataModel;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
-import org.opendatakit.aggregate.exception.ODKConversionException;
 import org.opendatakit.aggregate.exception.ODKFormAlreadyExistsException;
 import org.opendatakit.aggregate.parser.MultiPartFormItem;
 import org.opendatakit.aggregate.submission.Submission;
@@ -58,7 +57,7 @@ public class FormInfo {
 	private static FormInfoTable reference = null;
 	
 	public static final XFormParameters formInfoXFormParameters =
-		new XFormParameters(FormDataModel.URI_FORM_ID_VALUE_FORM_INFO, 1L, 0L);
+		new XFormParameters(Form.URI_FORM_ID_VALUE_FORM_INFO, 1L, 0L);
 	/*
 	 * Following public fields are valid after the first 
 	 * successful call to getFormDefinition()
@@ -288,10 +287,9 @@ public class FormInfo {
 	 * @param user
 	 * @return true if the file is identical to the currently-stored one.
 	 * @throws ODKDatastoreException
-	 * @throws ODKConversionException
 	 * @throws ODKFormAlreadyExistsException 
 	 */
-	public static final boolean setXFormDefinition( Submission aFormDefinition, Long rootModelVersion, Long rootUiVersion, String title, byte[] definition, Datastore datastore, User user ) throws ODKDatastoreException, ODKConversionException, ODKFormAlreadyExistsException {
+	public static final boolean setXFormDefinition( Submission aFormDefinition, Long rootModelVersion, Long rootUiVersion, String title, byte[] definition, Datastore datastore, User user ) throws ODKDatastoreException, ODKFormAlreadyExistsException {
 	    RepeatSubmissionType r = (RepeatSubmissionType) aFormDefinition.getElementValue(FormInfo.fiFilesetTable);
 	    List<SubmissionSet> filesets = r.getSubmissionSets();
 	    SubmissionSet matchingSet = null;
@@ -345,9 +343,8 @@ public class FormInfo {
 	 * @param user
 	 * @return true if the files are completely new or are identical to the currently-stored ones.
 	 * @throws ODKDatastoreException
-	 * @throws ODKConversionException
 	 */
-	public static final boolean setXFormMediaFile( Submission aFormDefinition, Long rootModelVersion, Long rootUiVersion, MultiPartFormItem item, Datastore datastore, User user ) throws ODKDatastoreException, ODKConversionException {
+	public static final boolean setXFormMediaFile( Submission aFormDefinition, Long rootModelVersion, Long rootUiVersion, MultiPartFormItem item, Datastore datastore, User user ) throws ODKDatastoreException {
 	    RepeatSubmissionType r = (RepeatSubmissionType) aFormDefinition.getElementValue(FormInfo.fiFilesetTable);
 	    List<SubmissionSet> filesets = r.getSubmissionSets();
 	    SubmissionSet matchingSet = null;

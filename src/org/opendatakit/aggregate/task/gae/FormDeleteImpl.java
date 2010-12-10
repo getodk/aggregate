@@ -17,7 +17,7 @@ package org.opendatakit.aggregate.task.gae;
 
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.form.Form;
-import org.opendatakit.aggregate.task.AbstractFormDeleteImpl;
+import org.opendatakit.aggregate.task.FormDelete;
 import org.opendatakit.aggregate.task.gae.servlet.FormDeleteTaskServlet;
 import org.opendatakit.common.security.User;
 
@@ -27,12 +27,15 @@ import com.google.appengine.api.taskqueue.TaskOptions;
 
 
 /**
+ * This is a singleton bean.  It cannot have any per-request state.
+ * It uses a static inner class to encapsulate the per-request state
+ * of a running background task.
  * 
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
  * 
  */
-public class FormDeleteImpl extends AbstractFormDeleteImpl {
+public class FormDeleteImpl implements FormDelete {
 
   @Override
   public final void createFormDeleteTask(Form form, User user) {

@@ -17,6 +17,7 @@ package org.opendatakit.aggregate.query.submission;
 
 import java.util.List;
 
+import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
 import org.opendatakit.aggregate.form.Form;
@@ -24,6 +25,7 @@ import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.Query;
+import org.opendatakit.common.persistence.Query.FilterOperation;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.security.User;
 
@@ -52,7 +54,19 @@ public abstract class QueryBase {
     numOfRecords = 0;
     this.form = form;
   }
-  
+
+  /**
+   * CAUTION: the attribute must be in the top-level record!
+   * 
+   * @param attribute
+   * @param op
+   * @param value
+   */
+  public void addFilter(FormElementModel attribute, FilterOperation op,
+  						Object value) {
+  	query.addFilter(attribute.getFormDataModel().getBackingKey(), op, value);
+  }
+
   public abstract List<Submission> getResultSubmissions() throws ODKIncompleteSubmissionData, ODKDatastoreException;
 
   public boolean moreRecordsAvailable() {

@@ -21,8 +21,9 @@ import org.opendatakit.common.security.User;
  * have specific structures required by Aggregate should 
  * extend InstanceDataBase.
  * <p>
- * All instance data for an xform is stored in InstanceData tables
- * specific to that xform.
+ * All instance data for an xform is stored in {@link TopLevelInstanceData}
+ * or {@link InstanceData} tables.  Each xform is stored in its own 
+ * independent set of tables, enabling easy data migration.
  * <p>
  * The xml tag for the xform's instance data field is used to name
  * the specific column that holds that tag's data value. 

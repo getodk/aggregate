@@ -23,7 +23,6 @@ import org.opendatakit.aggregate.format.element.ElementFormatter;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.DynamicCommonFieldsBase;
-import org.opendatakit.common.persistence.EntityKey;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.security.User;
 
@@ -84,17 +83,9 @@ public class BooleanSubmissionType extends SubmissionSingleValueBase<Boolean> {
 		setValue(value);
 	}
 
-	/**
-	 * Get submission field value from database entity
-	 * 
-	 * @param dbEntity
-	 *            entity to obtain value
-	 */
 	@Override
-	public void getValueFromEntity(CommonFieldsBase dbEntity,
-			String uriAssociatedRow, EntityKey topLevelTableKey,
-			Datastore datastore, User user, boolean fetchElement) {
-		Boolean value = dbEntity.getBooleanField(element.getFormDataModel().getBackingKey());
+	public void getValueFromEntity(Datastore datastore, User user) {
+		Boolean value = backingObject.getBooleanField(element.getFormDataModel().getBackingKey());
 		setValue(value);
 	}
 

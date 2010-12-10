@@ -42,12 +42,17 @@ public class QueryByDateRange extends QueryBase {
       throws ODKFormNotFoundException {
     super(form, maxFetchLimit, datastore, user);
    
-    CommonFieldsBase tbl = form.getFormDefinition().getTopLevelGroup().getBackingObjectPrototype();
+    TopLevelDynamicBase tbl = (TopLevelDynamicBase) form.getFormDefinition().getTopLevelGroup().getBackingObjectPrototype();
     
+    // Query by lastUpdateDate, filtering by isCompleted.
+    // Submissions may be partially uploaded and are marked completed once they 
+    // are fully uploaded.  We want the query to be aware of that and to not 
+    // report anything that is not yet fully loaded.
     query = ds.createQuery(tbl, user);
-    query.addSort(tbl.creationDate, Query.Direction.ASCENDING);
-    query.addFilter(tbl.creationDate, Query.FilterOperation.LESS_THAN, endDate);
-    query.addFilter(tbl.creationDate, Query.FilterOperation.GREATER_THAN, startDate);
+    query.addSort(tbl.lastUpdateDate, Query.Direction.ASCENDING);
+    query.addFilter(tbl.lastUpdateDate, Query.FilterOperation.LESS_THAN, endDate);
+    query.addFilter(tbl.lastUpdateDate, Query.FilterOperation.GREATER_THAN, startDate);
+    query.addFilter(tbl.isComplete, Query.FilterOperation.EQUAL, Boolean.TRUE);
   }
 
   @Override

@@ -115,9 +115,7 @@ public class GeoPointSubmissionType extends SubmissionSingleValueBase<GeoPoint> 
 	}
 
 	@Override
-	public void getValueFromEntity(CommonFieldsBase dbEntity,
-			String uriAssociatedRow, EntityKey topLevelTableKey,
-			Datastore datastore, User user, boolean fetchElement) {
+	public void getValueFromEntity(Datastore datastore, User user) {
 		BigDecimal latCoor = null;
 		BigDecimal longCoor = null;
 		BigDecimal altitude = null;
@@ -125,16 +123,16 @@ public class GeoPointSubmissionType extends SubmissionSingleValueBase<GeoPoint> 
 		for ( FormDataModel m : element.getFormDataModel().getChildren()) {
 			switch ( m.getOrdinalNumber().intValue() ) {
 			case FormDataModel.GEOPOINT_LATITUDE_ORDINAL_NUMBER:
-				latCoor = dbEntity.getNumericField(m.getBackingKey());
+				latCoor = backingObject.getNumericField(m.getBackingKey());
 				break;
 			case FormDataModel.GEOPOINT_LONGITUDE_ORDINAL_NUMBER:
-				longCoor = dbEntity.getNumericField(m.getBackingKey());
+				longCoor = backingObject.getNumericField(m.getBackingKey());
 				break;
 			case FormDataModel.GEOPOINT_ALTITUDE_ORDINAL_NUMBER:
-				altitude = dbEntity.getNumericField(m.getBackingKey());
+				altitude = backingObject.getNumericField(m.getBackingKey());
 				break;
 			case FormDataModel.GEOPOINT_ACCURACY_ORDINAL_NUMBER:
-				accuracy = dbEntity.getNumericField(m.getBackingKey());
+				accuracy = backingObject.getNumericField(m.getBackingKey());
 				break;
 			}
 		}

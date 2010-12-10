@@ -17,13 +17,14 @@ package org.opendatakit.aggregate.task;
 
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
-import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
 import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.security.User;
 
 /**
+ * API for creating and restarting Kml generation tasks.
  * 
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
@@ -31,10 +32,8 @@ import org.opendatakit.common.security.User;
  */
 public interface KmlGenerator {
   public void createKmlTask(Form form, FormElementModel titleField, FormElementModel geopointField,
-      FormElementModel imageField, String baseServerWebUrl, User user);
+      FormElementModel imageField, String baseServerWebUrl, Datastore datastore, User user) throws ODKDatastoreException, ODKFormNotFoundException;
 
-  public void generateKml(Form form, FormElementModel titleField, FormElementModel geopointField,
-      FormElementModel imageField, String baseServerWebUrl, Datastore datastore, User usr)
-      throws ODKFormNotFoundException, ODKDatastoreException, ODKIncompleteSubmissionData;
-
+  public void recreateKmlTask(Form form, SubmissionKey persistentResultsKey, Long attemptCount,
+	  String baseServerWebUrl, Datastore datastore, User user) throws ODKDatastoreException, ODKFormNotFoundException;
 }

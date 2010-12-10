@@ -152,7 +152,12 @@ public class SubmissionParser {
 			throw new IOException("DID NOT GET A SUBMISSION");
 		}
 
-		constructorHelper(new ByteArrayInputStream(submission.getStream().toByteArray()));
+		InputStream inputStreamXML = new ByteArrayInputStream(submission.getStream().toByteArray());
+		try {
+			constructorHelper(inputStreamXML);
+		} finally {
+			inputStreamXML.close();
+		}
 	}
 
 	/**
@@ -232,8 +237,19 @@ public class SubmissionParser {
 		// TODO: figure out if we actually have all the binary content uploaded...
 		submission.setIsComplete(true);
 		// save the elements inserted into the top-level submission
-		submission.persist(ds, user);
-		inputStreamXML.close();
+		try {
+			submission.persist(ds, user);
+		} catch (Exception e) {
+			List<EntityKey> keys = new ArrayList<EntityKey>();
+			submission.recursivelyAddEntityKeys(keys);
+			keys.add(submission.getKey());
+			try {
+				ds.deleteEntities(keys, user);
+			} catch ( Exception ex) {
+				// ignore... we are rolling back...
+			}
+			throw new ODKDatastoreException("Unable to persist data", e);
+		}
 	}
 
 	/**
@@ -287,11 +303,10 @@ public class SubmissionParser {
 		// get the structure under the fdm tag name...
 		List<Element> elements = getElements(currentSubmissionElement);
 		if (elements.size() == 0) {
-			throw new ODKParseException();
+			return true; // the group is not relevant...
 		}
 		// and for each of these, they should be fields under the given fdm
-		// and
-		// values within the submissionSet
+		// and values within the submissionSet
 		boolean complete = true;
 		for (Element e : elements) {
 			FormElementModel m = node.findElementByName(e.getNodeName());
@@ -353,7 +368,7 @@ public class SubmissionParser {
 
 	private boolean processBinarySubmission(FormElementModel m,
 			SubmissionField<?> submissionElement, String value)
-			throws ODKConversionException, ODKDatastoreException {
+			throws ODKDatastoreException {
 		
 		// check to see if we received a multipart submission
 		if (submissionFormItems == null) {

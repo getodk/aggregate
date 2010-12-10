@@ -24,11 +24,13 @@ import javax.servlet.http.HttpServletResponse;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.ServletConsts;
+import org.opendatakit.aggregate.exception.ODKExternalServiceDependencyException;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.servlet.ServletUtilBase;
-import org.opendatakit.aggregate.task.FormDelete;
+import org.opendatakit.aggregate.task.FormDeleteWorkerImpl;
 import org.opendatakit.common.persistence.Datastore;
+import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.security.UserService;
 
@@ -73,17 +75,24 @@ public class FormDeleteTaskServlet extends ServletUtilBase {
     try {
       form = Form.retrieveForm(odkId, datastore, user);
     } catch (ODKFormNotFoundException e) {
-      e.printStackTrace();
+      odkIdNotFoundError(resp);
       return;
     }
 
-    FormDelete formDelete = (FormDelete) ContextFactory.get().getBean(
-        BeanDefs.FORM_DELETE_BEAN);
-    try {
-      formDelete.deleteForm(form, user);
-    } catch (Exception e) {
-      e.printStackTrace();
-      return;
-    }
+    FormDeleteWorkerImpl formDelete = new FormDeleteWorkerImpl(form, user);
+      try {
+		formDelete.deleteForm();
+	} catch (ODKDatastoreException e) {
+		e.printStackTrace();
+		resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.toString());
+		return;
+	} catch (ODKFormNotFoundException e) {
+		odkIdNotFoundError(resp);
+		return;
+	} catch (ODKExternalServiceDependencyException e) {
+		e.printStackTrace();
+		resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.toString());
+		return;
+	}
   }
 }

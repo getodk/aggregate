@@ -16,9 +16,34 @@
 package org.opendatakit.aggregate.servlet;
 
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.opendatakit.aggregate.ContextFactory;
+import org.opendatakit.aggregate.constants.BeanDefs;
+import org.opendatakit.aggregate.constants.HtmlUtil;
+import org.opendatakit.aggregate.constants.ServletConsts;
+import org.opendatakit.aggregate.datamodel.FormElementModel;
+import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
+import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.form.PersistentResults;
+import org.opendatakit.aggregate.format.Row;
+import org.opendatakit.aggregate.format.element.ElementFormatter;
+import org.opendatakit.aggregate.format.element.HtmlLinkElementFormatter;
+import org.opendatakit.aggregate.query.submission.QueryByDate;
+import org.opendatakit.aggregate.submission.Submission;
+import org.opendatakit.aggregate.submission.SubmissionSet;
+import org.opendatakit.common.constants.HtmlConsts;
+import org.opendatakit.common.persistence.Datastore;
+import org.opendatakit.common.persistence.Query.FilterOperation;
+import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+import org.opendatakit.common.security.User;
+import org.opendatakit.common.security.UserService;
 
 /**
  * 
@@ -41,7 +66,7 @@ public class ResultServlet extends ServletUtilBase {
   /**
    * Title for generated webpage
    */
-  private static final String TITLE_INFO = "Result";
+  private static final String TITLE_INFO = "Results";
   
   /**
    * Handler for HTTP Get request to create blank page that is navigable
@@ -58,7 +83,69 @@ public class ResultServlet extends ServletUtilBase {
        return;
      }
      
-     beginBasicHtmlResponse(TITLE_INFO, resp, req, true); // header info
-     finishBasicHtmlResponse(resp);
+     // get parameter
+     String formId = PersistentResults.FORM_ID_PERSISTENT_RESULT;
+
+     UserService userService = (UserService) ContextFactory.get().getBean(
+         BeanDefs.USER_BEAN);
+     User user = userService.getCurrentUser();
+
+     Datastore ds = (Datastore) ContextFactory.get().getBean(BeanDefs.DATASTORE_BEAN);
+
+     try {
+       Form form = Form.retrieveForm(formId, ds, user);
+
+       // header info
+       beginBasicHtmlResponse(TITLE_INFO, resp, req, true);
+       PrintWriter out = resp.getWriter();
+
+       QueryByDate query = new QueryByDate(form, new Date(), true,
+               ServletConsts.FETCH_LIMIT, ds, user);
+       query.addFilter(PersistentResults.getRequestingUserKey(), FilterOperation.EQUAL, user.getUriUser());
+       List<Submission> submissions = query.getResultSubmissions();
+
+       List<FormElementModel> columns = new ArrayList<FormElementModel>();
+       columns.add(PersistentResults.getResultTypeKey());
+       columns.add(PersistentResults.getRequestDateKey());
+       columns.add(PersistentResults.getStatusKey());
+       columns.add(PersistentResults.getLastRetryDateKey());
+       columns.add(PersistentResults.getCompletionDateKey());
+       columns.add(PersistentResults.getResultFileKey());
+
+       List<Row> formattedElements = new ArrayList<Row>();
+       List<String> headers = new ArrayList<String>();
+       headers.add("File Type");
+       headers.add("Time Requested");
+       headers.add("Status");
+       headers.add("Time of last retry");
+       headers.add("Time Completed");
+       headers.add("Result File");
+       ElementFormatter elemFormatter = new HtmlLinkElementFormatter(getServerURL(req), true, true, true, true);
+       
+       // format row elements 
+       for (SubmissionSet sub : submissions) {
+         Row row = sub.getFormattedValuesAsRow(columns, elemFormatter, false);
+         formattedElements.add(row);
+       }
+       
+       // format into html table
+       out.append(HtmlUtil.wrapResultTableWithHtmlTags(false, headers, formattedElements));
+
+       out.print(HtmlConsts.LINE_BREAK);
+       out.print(HtmlConsts.LINE_BREAK);
+       
+       out.print(HtmlUtil.createFormBeginTag(ADDR, null, HtmlConsts.GET));
+       out.print(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_SUBMIT, null, "Refresh"));
+       out.print(HtmlConsts.FORM_CLOSE);
+
+       // footer info
+       finishBasicHtmlResponse(resp);
+
+     } catch (ODKFormNotFoundException e) {
+       odkIdNotFoundError(resp);
+     } catch (ODKDatastoreException e) {
+       errorRetreivingData(resp);
+     }
+
   }
 }

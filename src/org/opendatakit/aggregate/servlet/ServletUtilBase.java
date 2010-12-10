@@ -148,6 +148,8 @@ public class ServletUtilBase extends CommonServletBase {
     html.append(HtmlUtil.createHref(SubmissionServlet.ADDR, ServletConsts.UPLOAD_SUB_LINK_TEXT));
     html.append(HtmlConsts.TAB + HtmlConsts.TAB);
     html.append(HtmlUtil.createHref(UploadAppletServlet.ADDR, ServletConsts.UPLOAD_APPLET_LINK_TEXT));
+    html.append(HtmlConsts.TAB + HtmlConsts.TAB);
+    html.append(HtmlUtil.createHref(ResultServlet.ADDR, ServletConsts.RESULT_FILES_LINK_TEXT));
     return html.toString();
   }
 

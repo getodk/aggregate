@@ -56,7 +56,7 @@ public class RepeatSubmissionType implements SubmissionRepeat {
 	/**
 	 * ODK identifier that uniquely identifies the form
 	 */
-	private FormDefinition formDefinition;
+	private final FormDefinition formDefinition;
 
 	/**
 	 * Enclosing submission set
@@ -66,8 +66,9 @@ public class RepeatSubmissionType implements SubmissionRepeat {
 	/**
 	 * Identifier for repeat
 	 */
-	private FormElementModel repeatGroup;
+	private final FormElementModel repeatGroup;
 
+	private final String uriAssociatedRow;
 	/**
 	 * List of submission sets that are a part of this submission set Ordered by
 	 * OrdinalNumber...
@@ -75,10 +76,12 @@ public class RepeatSubmissionType implements SubmissionRepeat {
 	private List<SubmissionSet> submissionSets = new ArrayList<SubmissionSet>();
 
 	public RepeatSubmissionType(SubmissionSet enclosingSet,
-			FormElementModel repeatGroup, FormDefinition formDefinition) {
+			FormElementModel repeatGroup, String uriAssociatedRow,
+			FormDefinition formDefinition) {
 		this.enclosingSet = enclosingSet;
 		this.formDefinition = formDefinition;
 		this.repeatGroup = repeatGroup;
+		this.uriAssociatedRow = uriAssociatedRow;
 	}
 
 	public SubmissionSet getEnclosingSet() {
@@ -123,9 +126,7 @@ public class RepeatSubmissionType implements SubmissionRepeat {
 	}
 
 	@Override
-	public void getValueFromEntity(CommonFieldsBase dbEntity,
-			String uriAssociatedRow, EntityKey topLevelTableKey,
-			Datastore datastore, User user, boolean fetchElement) throws ODKDatastoreException {
+	public void getValueFromEntity(Datastore datastore, User user) throws ODKDatastoreException {
 
 		Query q = datastore.createQuery(repeatGroup.getFormDataModel().getBackingObjectPrototype(), user);
 		q.addFilter(((DynamicBase) repeatGroup.getFormDataModel().getBackingObjectPrototype()).parentAuri,

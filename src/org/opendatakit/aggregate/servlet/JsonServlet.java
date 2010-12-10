@@ -30,7 +30,6 @@ import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.externalservice.ExternalServiceOption;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
-import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
 import org.opendatakit.aggregate.externalservice.JsonServer;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.query.submission.QueryByDate;
@@ -123,9 +122,6 @@ public class JsonServlet extends ServletUtilBase {
         jsonServer.sendSubmissions(submissions);
 
       } catch (ODKFormNotFoundException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-      } catch (ODKIncompleteSubmissionData e) {
         // TODO Auto-generated catch block
         e.printStackTrace();
       } catch (ODKExternalServiceException e) {

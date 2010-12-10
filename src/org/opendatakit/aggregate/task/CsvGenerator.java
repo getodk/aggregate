@@ -15,14 +15,14 @@
  */
 package org.opendatakit.aggregate.task;
 
-import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
-import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
 import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.security.User;
 
 /**
+ * API for creating and restarting Csv generation tasks.
  * 
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
@@ -30,8 +30,7 @@ import org.opendatakit.common.security.User;
  */
 public interface CsvGenerator {
 
-  public void createCsvTask(Form form, String baseServerWebUrl, User user);
+  public void createCsvTask(Form form, String baseServerWebUrl, Datastore datastore, User user) throws ODKDatastoreException;
 
-  public void generatorCsv(Form form, String baseWebServerUrl, Datastore ds, User user)
-      throws ODKFormNotFoundException, ODKDatastoreException, ODKIncompleteSubmissionData;
+  public void recreateCsvTask(Form form, SubmissionKey persistentResultsKey, Long attemptCount, String baseServerWebUrl, Datastore datastore, User user) throws ODKDatastoreException;
 }

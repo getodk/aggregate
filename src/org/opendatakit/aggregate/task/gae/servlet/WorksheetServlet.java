@@ -31,8 +31,7 @@ import org.opendatakit.aggregate.exception.ODKExternalServiceException;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.servlet.ServletUtilBase;
-import org.opendatakit.aggregate.task.WorksheetCreator;
-import org.opendatakit.aggregate.task.gae.WorksheetCreatorImpl;
+import org.opendatakit.aggregate.task.WorksheetCreatorWorkerImpl;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.security.User;
@@ -104,14 +103,18 @@ public class WorksheetServlet extends ServletUtilBase {
       return;
     }
 
-    WorksheetCreator ws = new WorksheetCreatorImpl();
+    WorksheetCreatorWorkerImpl ws = new WorksheetCreatorWorkerImpl(getServerURL(req), spreadsheetName, esType, form, ds, user);
 
     try {
-      ws.worksheetCreator(getServerURL(req), spreadsheetName, esType, form, ds, user);
+      ws.worksheetCreator();
     } catch (ODKExternalServiceException e) {
       e.printStackTrace();
+      resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.toString());
+      return;
     } catch (ODKDatastoreException e) {
       e.printStackTrace();
+      resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.toString());
+      return;
     }
 
   }

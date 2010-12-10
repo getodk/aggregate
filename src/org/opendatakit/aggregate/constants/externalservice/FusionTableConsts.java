@@ -38,6 +38,8 @@ public final class FusionTableConsts {
   public static final String INSERT_STMT = "INSERT INTO ";
   public static final String CREATE_STMT = "CREATE TABLE ";
   public static final String FUSION_SCOPE = "http://www.google.com/fusiontables/api/query";
+  public static final String SINGLE_QUOTE = "'";
+  public static final String HTML_ESCAPED_SINGLE_QUOTE = "&#39;";
 
   public static final Map<ElementType, FusionTableType> typeMap = new HashMap<ElementType, FusionTableType>();
   static {  

@@ -21,7 +21,7 @@ import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.externalservice.ExternalServiceConsts;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
 import org.opendatakit.aggregate.externalservice.FormServiceCursor;
-import org.opendatakit.aggregate.task.AbstractUploadSubmissionImpl;
+import org.opendatakit.aggregate.task.UploadSubmissions;
 import org.opendatakit.aggregate.task.gae.servlet.UploadSubmissionsTaskServlet;
 import org.opendatakit.common.constants.HtmlConsts;
 import org.opendatakit.common.security.User;
@@ -31,12 +31,15 @@ import com.google.appengine.api.taskqueue.QueueFactory;
 import com.google.appengine.api.taskqueue.TaskOptions;
 
 /**
+ * This is a singleton bean.  It cannot have any per-request state.
+ * It uses a static inner class to encapsulate the per-request state
+ * of a running background task.
  * 
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
  * 
  */
-public class UploadSubmissionsImpl extends AbstractUploadSubmissionImpl {
+public class UploadSubmissionsImpl implements UploadSubmissions {
 
   private static final String UPLOAD_SUBMISSION_QUEUE = "upload-submission-queue";
   

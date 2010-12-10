@@ -53,7 +53,7 @@ public class QueryByKeys {
     
     for (SubmissionKey submissionKey : submissionKeys) {
       try {
-  		List<SubmissionKeyPart> parts = SubmissionKeyPart.splitSubmissionKey(submissionKey);
+  		List<SubmissionKeyPart> parts = submissionKey.splitSubmissionKey();
   		submissions.add( Submission.fetchSubmission(parts, ds, user) );
       } catch (ODKEntityNotFoundException e) {
         // TODO Decide how to handle the exceptions

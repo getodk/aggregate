@@ -77,6 +77,8 @@ public class FormInfoFilesetTable extends DynamicBase {
 	public final DataField isFilesetComplete;
 	public final DataField isDownloadAllowed;
 
+	public static final String URI_FORM_ID_VALUE_FORM_INFO_FILESET = "aggregate.opendatakit.org:FormInfoFileset";
+
 	/**
 	 * Construct a relation prototype.
 	 * 
@@ -89,7 +91,7 @@ public class FormInfoFilesetTable extends DynamicBase {
 		fieldList.add(isFilesetComplete = new DataField(IS_FILESET_COMPLETE));
 		fieldList.add(isDownloadAllowed = new DataField(IS_DOWNLOAD_ALLOWED));
 		
-		fieldValueMap.put(primaryKey, FormDataModel.URI_FORM_ID_VALUE_FORM_INFO_FILESET);
+		fieldValueMap.put(primaryKey, FormInfoFilesetTable.URI_FORM_ID_VALUE_FORM_INFO_FILESET);
 	}
 
 	/**
@@ -140,7 +142,7 @@ public class FormInfoFilesetTable extends DynamicBase {
 				ordinal,
 				datastore, user );
 
-		String uriPrefix = FormDataModel.URI_FORM_ID_VALUE_FORM_INFO;
+		String uriPrefix = Form.URI_FORM_ID_VALUE_FORM_INFO;
 		FormDefinition.buildBinaryContentFormDataModel(model, 
 				ELEMENT_NAME_XFORM_DEFINITION, 
 				uriPrefix + FORM_INFO_XFORM_BINARY_CONTENT,

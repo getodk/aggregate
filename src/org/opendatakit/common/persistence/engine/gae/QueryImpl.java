@@ -16,6 +16,7 @@ package org.opendatakit.common.persistence.engine.gae;
 import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -67,7 +68,7 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
 	private final CommonFieldsBase relation;
 	private final DatastoreImpl datastore;
 	private final User user;
-	private final Query query;
+	private final com.google.appengine.api.datastore.Query query;
 	
 	/**
 	 * Track the attributes that we are querying and sorting on...
@@ -153,7 +154,10 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
 				return compareObjects(eDate, vDate);
 			}
 		}
+
 		abstract boolean passFilter(CommonFieldsBase record);
+		
+		abstract void setFilter(com.google.appengine.api.datastore.Query q);
 	}
 	
 	class SimpleFilterTracker extends Tracker {
@@ -166,6 +170,7 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
 			this.value = value;
 		}
 		
+		@Override
 		boolean passFilter(CommonFieldsBase record) {
 			int result = compareField(record, value);
 			switch ( op ) {
@@ -183,16 +188,22 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
 				throw new IllegalStateException("missing a filter operation!");
 			}
 		}
+
+		@Override
+		void setFilter(com.google.appengine.api.datastore.Query q) {
+			q.addFilter(attribute.getName(), operationMap.get(op), value);
+		}
 	}
 	
 	class ValueSetFilterTracker extends Tracker {
-		final Set<?> valueSet;
+		final Collection<?> valueSet;
 		
-		ValueSetFilterTracker( DataField attribute, Set<?> valueSet) {
+		ValueSetFilterTracker( DataField attribute, Collection<?> valueSet) {
 			super(attribute);
 			this.valueSet = valueSet;
 		}
 
+		@Override
 		boolean passFilter(CommonFieldsBase record) {
 			for ( Object o : valueSet ) {
 				int result = compareField(record, o);
@@ -200,11 +211,16 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
 			}
 			return false;
 		}
+
+		@Override
+		void setFilter(com.google.appengine.api.datastore.Query q) {
+			q.addFilter(attribute.getName(), FilterOperator.IN, valueSet);
+		}
 	}
 	
 	List<Tracker> filterList = new ArrayList<Tracker>();
 
-	class SortTracker<T extends CommonFieldsBase> extends Tracker implements Comparator<T> {
+	class SortTracker extends Tracker implements Comparator<CommonFieldsBase> {
 		final Direction direction;
 		
 		SortTracker( DataField attribute, Direction direction ) {
@@ -216,9 +232,14 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
 		boolean passFilter(CommonFieldsBase record) {
 			throw new IllegalStateException("not implemented");
 		}
+		
+		@Override
+		void setFilter(com.google.appengine.api.datastore.Query q) {
+			throw new IllegalStateException("not implemented");
+		}
 
 		@Override
-		public int compare(T o1, T o2) {
+		public int compare(CommonFieldsBase o1, CommonFieldsBase o2) {
 			if ( direction == Direction.ASCENDING ) {
 				return simpleValueCompare(o1, o2);
 			} else { 
@@ -233,8 +254,8 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
 		this.relation = relation;
 		this.datastore = datastore;
 		this.user = user;
-		query = new Query(relation.getSchemaName() + "."
-				+ relation.getTableName());
+		query = new com.google.appengine.api.datastore.Query(
+					relation.getSchemaName() + "." + relation.getTableName());
 	}
 
 	@Override
@@ -244,7 +265,7 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
 	}
 
 	@Override
-	public void addValueSetFilter(DataField attribute, Set<?> valueSet) {
+	public void addValueSetFilter(DataField attribute, Collection<?> valueSet) {
 		query.addFilter(attribute.getName(), FilterOperator.IN, valueSet);
 		filterList.add(new ValueSetFilterTracker(attribute, valueSet));
 	}
@@ -264,7 +285,7 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
 
 		DatastoreService ds = datastore.getDatastoreService();
 		List<com.google.appengine.api.datastore.Entity> gaeEntities = null;
-		boolean filterAndSortLocally = true;
+		boolean filterAndSortLocally = false;
 		try {
 			if (!filterAndSortLocally) {
 				PreparedQuery preparedQuery = ds.prepare(query);
@@ -282,8 +303,12 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
 		if ( filterAndSortLocally) {
 			gaeEntities = null;
 			try {
-				 Query hack = new Query(relation.getSchemaName() + "."
+				 Query hack = new com.google.appengine.api.datastore.Query(relation.getSchemaName() + "."
 										+ relation.getTableName());
+				 if ( filterList.size() > 0 ) {
+					 Tracker t = filterList.get(0);
+					 t.setFilter(hack);
+				 }
 				 PreparedQuery preparedHack = ds.prepare(hack);
 				 gaeEntities = preparedHack.asList(FetchOptions.Builder.withDefaults());
 			} catch ( Exception e ) {

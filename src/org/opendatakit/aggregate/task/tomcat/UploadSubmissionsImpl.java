@@ -19,44 +19,50 @@ import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
 import org.opendatakit.aggregate.externalservice.FormServiceCursor;
-import org.opendatakit.aggregate.task.AbstractUploadSubmissionImpl;
+import org.opendatakit.aggregate.task.UploadSubmissions;
+import org.opendatakit.aggregate.task.UploadSubmissionsWorkerImpl;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.security.User;
 
 /**
+ * This is a singleton bean.  It cannot have any per-request state.
+ * It uses a static inner class to encapsulate the per-request state
+ * of a running background task.
  * 
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
  * 
  */
-public class UploadSubmissionsImpl extends AbstractUploadSubmissionImpl implements Runnable {
+public class UploadSubmissionsImpl implements UploadSubmissions {
 
-  private FormServiceCursor fsc;
-  private String baseServerWebUrl;
-  private User user;
-  
+	static class UploadSubmissionsRunner implements Runnable {
+		final UploadSubmissionsWorkerImpl impl;
+
+		public UploadSubmissionsRunner(FormServiceCursor fsc,
+				String baseWebServerUrl, Datastore datastore, User user) {
+			impl = new UploadSubmissionsWorkerImpl(fsc, baseWebServerUrl, datastore, user);
+		}
+
+		@Override
+		public void run() {
+			try {
+				impl.uploadAllSubmissions();
+			} catch (Exception e) {
+				e.printStackTrace();
+				// TODO: Problem - decide what to do if an exception occurs
+			}
+		}
+	}
+
   @Override
-  public void createFormUploadTask(FormServiceCursor fsc, String baseServerWebUrl, User user)
+  public void createFormUploadTask(FormServiceCursor fsc, String baseWebServerUrl, User user)
       throws ODKExternalServiceException {
-    this.fsc = fsc;
-    this.baseServerWebUrl = baseServerWebUrl;
-    this.user = user;
-    
+
+	  Datastore datastore = (Datastore) ContextFactory.get().getBean(BeanDefs.DATASTORE_BEAN);
+	UploadSubmissionsRunner ur = new UploadSubmissionsRunner(fsc,
+				baseWebServerUrl, datastore, user);
     System.out.println("THIS IS UPLOAD TASK IN TOMCAT");
     AggregrateThreadExecutor exec = AggregrateThreadExecutor.getAggregateThreadExecutor();
-    exec.execute(this);
+    exec.execute(ur);
   }
-
-  @Override
-  public void run() {
-    Datastore ds = (Datastore) ContextFactory.get().getBean(BeanDefs.DATASTORE_BEAN);
-    try {
-      uploadSubmissions(fsc, baseServerWebUrl, ds, user);
-    } catch (Exception e) {
-      e.printStackTrace();
-      // just move on as the task restarting the 
-    }
-    
-  }
-
 }

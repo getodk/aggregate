@@ -46,13 +46,14 @@ public class StringSubmissionType extends SubmissionFieldBase<String> {
 	  /**
 	   * Backing object holding the value of the submission field
 	   */
-	protected DynamicCommonFieldsBase backingObject;
+	protected final DynamicCommonFieldsBase backingObject;
 
 	private String fullValue = null;
-	private FormDefinition formDefinition;
-	private EntityKey topLevelTableKey;
-	private Datastore datastore;
-	private User user;
+	private final String parentKey;
+	private final FormDefinition formDefinition;
+	private final EntityKey topLevelTableKey;
+	private final Datastore datastore;
+	private final User user;
 	private List<LongStringRefText> lsts = new ArrayList<LongStringRefText>();
 	private List<RefText> refs = new ArrayList<RefText>();
 
@@ -66,9 +67,11 @@ public class StringSubmissionType extends SubmissionFieldBase<String> {
 	 * @param propertyName
 	 *            Name of submission element
 	 */
-	public StringSubmissionType(DynamicCommonFieldsBase backingObject, FormElementModel m, FormDefinition formDefinition, EntityKey topLevelTableKey, Datastore datastore, User user) {
+	public StringSubmissionType(DynamicCommonFieldsBase backingObject, FormElementModel m, 
+						String parentKey, FormDefinition formDefinition, EntityKey topLevelTableKey, Datastore datastore, User user) {
 		super(m);
 		this.backingObject = backingObject;
+		this.parentKey = parentKey;
 		this.formDefinition = formDefinition;
 		this.topLevelTableKey = topLevelTableKey;
 		this.datastore = datastore;
@@ -103,22 +106,13 @@ public class StringSubmissionType extends SubmissionFieldBase<String> {
 		}
 	}
 
-	/**
-	 * Get submission field value from database entity
-	 * 
-	 * @param dbEntity
-	 *            entity to obtain value
-	 * @throws ODKDatastoreException 
-	 */
 	@Override
-	public void getValueFromEntity(CommonFieldsBase dbEntity,
-			String uriAssociatedRow, EntityKey topLevelTableKey,
-			Datastore datastore, User user, boolean fetchElement)
+	public void getValueFromEntity(Datastore datastore, User user)
 			throws ODKDatastoreException {
 		
-		String value = (String) dbEntity.getStringField(element.getFormDataModel().getBackingKey());
-		if (element.getFormDataModel().isPossibleLongStringField(dbEntity, element.getFormDataModel().getBackingKey())) {
-			String longValue = formDefinition.getLongString(uriAssociatedRow, element.getFormDataModel().getUri(), datastore, user);
+		String value = (String) backingObject.getStringField(element.getFormDataModel().getBackingKey());
+		if (element.getFormDataModel().isPossibleLongStringField(backingObject, element.getFormDataModel().getBackingKey())) {
+			String longValue = formDefinition.getLongString(parentKey, element.getFormDataModel().getUri(), datastore, user);
 			if ( longValue != null ) {
 				value = longValue;
 			}

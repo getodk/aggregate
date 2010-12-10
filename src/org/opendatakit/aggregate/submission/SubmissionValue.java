@@ -43,17 +43,13 @@ public interface SubmissionValue extends SubmissionElement {
   /**
    * Get submission field value from database entity
    * 
-   * @param dbEntity
-   *          entity to obtain value
-   * @param form
-   *          the form definition object
    * @param datastore
-   *          TODO
+   *          datastore to obtain value
+   * @param user
+   *          user requesting data
  * @throws ODKDatastoreException 
    */
-  public void getValueFromEntity(CommonFieldsBase dbEntity, String uriAssociatedRow,
-			EntityKey persistenceColocationKey, 
-			Datastore datastore, User user, boolean fetchElement)
+  public void getValueFromEntity(Datastore datastore, User user)
   		throws ODKDatastoreException;
 
   /**

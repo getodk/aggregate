@@ -77,6 +77,9 @@ public class Form {
   private final Datastore datastore;
   
   private final User user;
+
+// special values for bootstrapping
+public static final String URI_FORM_ID_VALUE_FORM_INFO = "aggregate.opendatakit.org:FormInfo";
  
   public Form(TopLevelDynamicBase formEntity, Datastore datastore, User user) throws ODKEntityNotFoundException, ODKDatastoreException {
 		this( new Submission(
@@ -310,6 +313,11 @@ public class Form {
 
   public String getViewableName() {
 	  return getViewableName(null);
+  }
+  
+  public String getViewableFormNameSuitableAsFileName() {
+	String name = getViewableName();
+	return name.replaceAll("[^\\p{L}0-9]","_"); // any non-alphanumeric is replaced with underscore
   }
   
   public String getDescription(String languageCode) {
@@ -710,7 +718,7 @@ public class Form {
 		}
 		String formIdValue = extractWellFormedFormId(
 				submissionKey);
-		if (formIdValue.equals(FormDataModel.URI_FORM_ID_VALUE_FORM_INFO)) {
+		if (formIdValue.equals(Form.URI_FORM_ID_VALUE_FORM_INFO)) {
 			return formInfoForm;
 		}
 
@@ -745,7 +753,7 @@ public class Form {
 		// make sure the FormInfo table definition is loaded...
 		formInfoForm = FormInfo.getFormInfoForm(ds);
 
-		if (formId.equals(FormDataModel.URI_FORM_ID_VALUE_FORM_INFO)) {
+		if (formId.equals(Form.URI_FORM_ID_VALUE_FORM_INFO)) {
 			throw new IllegalStateException("Unexpectedly retrieving formInfo definition");
 		}
 		Submission formInfo = null;

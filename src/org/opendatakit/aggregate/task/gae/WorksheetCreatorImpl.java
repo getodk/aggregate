@@ -20,7 +20,7 @@ import org.opendatakit.aggregate.constants.externalservice.ExternalServiceConsts
 import org.opendatakit.aggregate.constants.externalservice.ExternalServiceOption;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
 import org.opendatakit.aggregate.form.Form;
-import org.opendatakit.aggregate.task.AbstractWorksheetCreatorImpl;
+import org.opendatakit.aggregate.task.WorksheetCreator;
 import org.opendatakit.aggregate.task.gae.servlet.WorksheetServlet;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.security.User;
@@ -30,12 +30,15 @@ import com.google.appengine.api.taskqueue.QueueFactory;
 import com.google.appengine.api.taskqueue.TaskOptions;
 
 /**
+ * This is a singleton bean.  It cannot have any per-request state.
+ * It uses a static inner class to encapsulate the per-request state
+ * of a running background task.
  * 
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
  * 
  */
-public class WorksheetCreatorImpl extends AbstractWorksheetCreatorImpl {
+public class WorksheetCreatorImpl implements WorksheetCreator {
 
   @Override
   public final void createWorksheetTask(String serverName, String spreadsheetName,

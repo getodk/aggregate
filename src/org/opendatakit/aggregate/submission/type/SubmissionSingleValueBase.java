@@ -44,7 +44,7 @@ public abstract class SubmissionSingleValueBase<T> extends SubmissionFieldBase<T
   /**
    * Backing object holding the value of the submission field
    */
-  protected DynamicCommonFieldsBase backingObject;
+  protected final DynamicCommonFieldsBase backingObject;
 
   /**
    * Constructor

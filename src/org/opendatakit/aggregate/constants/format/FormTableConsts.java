@@ -47,6 +47,7 @@ public final class FormTableConsts {
   public static final String URL_ATTR = "url";
   // link text
   public static final String VIEW_LINK_TEXT = "View";
+  public static final String DOWNLOAD_LINK_TEXT = "Download";
   public static final String FORMS_TAG = "forms";
   public static final String FORM_TAG = "form";
   public static final String BEGIN_FORMS_TAG = HtmlUtil.createBeginTag(FORMS_TAG);

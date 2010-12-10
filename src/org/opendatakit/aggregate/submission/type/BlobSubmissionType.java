@@ -63,12 +63,12 @@ public class BlobSubmissionType extends SubmissionFieldBase<SubmissionKey> {
 	Map<BinaryContent, List<VersionedBinaryContent> > versionedAttachments = new HashMap<BinaryContent, List<VersionedBinaryContent> >();
 	Map<VersionedBinaryContent, SubmissionBlob> inMemoryAttachments = new HashMap<VersionedBinaryContent, SubmissionBlob>();
 
-	private FormDefinition formDefinition;
-	private EntityKey topLevelTableKey;
-	private Datastore datastore;
-	private User user;
-	private String parentKey;
-	private SubmissionKey submissionKey;
+	private final FormDefinition formDefinition;
+	private final EntityKey topLevelTableKey;
+	private final Datastore datastore;
+	private final User user;
+	private final String parentKey;
+	private final SubmissionKey submissionKey;
 	
 	public int getAttachmentCount() {
 		return attachments.size();
@@ -197,12 +197,11 @@ public class BlobSubmissionType extends SubmissionFieldBase<SubmissionKey> {
    * @param submissionSetKey key of submission set that will reference the blob
    * @param contentType type of binary data (NOTE: only used for binary data)
    * @return the outcome of the storage attempt.  md5 hashes are used to determine file equivalence. 
-   * @throws ODKConversionException
    * @throws ODKDatastoreException 
    * 
    */
   @Override
-  public BlobSubmissionOutcome setValueFromByteArray(byte[] byteArray, String contentType, Long contentLength, String unrootedFilePath, Datastore datastore, User user) throws ODKConversionException, ODKDatastoreException{
+  public BlobSubmissionOutcome setValueFromByteArray(byte[] byteArray, String contentType, Long contentLength, String unrootedFilePath, Datastore datastore, User user) throws ODKDatastoreException{
 
 	  BlobSubmissionOutcome outcome = BlobSubmissionOutcome.FILE_UNCHANGED;
 	  
@@ -294,7 +293,7 @@ public class BlobSubmissionType extends SubmissionFieldBase<SubmissionKey> {
 		} catch ( ODKDatastoreException ex) {
 			ex.printStackTrace();
 		}
-		throw new ODKConversionException(e);
+		throw e;
 	  }
 	  return outcome;
   }
@@ -310,43 +309,41 @@ public class BlobSubmissionType extends SubmissionFieldBase<SubmissionKey> {
     throw new ODKConversionException(ErrorConsts.NO_STRING_TO_BLOB_CONVERT);
   }
 
+  private void refreshFromDatabase() throws ODKDatastoreException {
+	// clear our mutable state.
+	attachments.clear();
+	versionedAttachments.clear();
+	inMemoryAttachments.clear();
+	  
+	BinaryContent ctnt = (BinaryContent) element.getFormDataModel().getBackingObjectPrototype();
+	VersionedBinaryContent vc = (VersionedBinaryContent) element.getFormDataModel().getChildren().get(0).getBackingObjectPrototype();
+	Query q = datastore.createQuery(ctnt, user);
+	q.addFilter(ctnt.parentAuri, FilterOperation.EQUAL, parentKey);
+	q.addSort(ctnt.ordinalNumber, Direction.ASCENDING);
 
-  /**
-   * Get submission field value from database entity
-   * 
-   *  @param dbEntity entity to obtain value
- * @throws ODKDatastoreException 
-   */
+	List<? extends CommonFieldsBase> contentHits = q.executeQuery(0);
+	attachments.clear();
+	for ( CommonFieldsBase cb : contentHits ) {
+		attachments.add((BinaryContent) cb);
+	}
+
+	for ( BinaryContent c : attachments ) {
+		Query qv = datastore.createQuery(vc, user);
+		qv.addFilter(vc.parentAuri, FilterOperation.EQUAL, c.getUri());
+		qv.addSort(vc.creationDate, Direction.ASCENDING);
+		// sort so that the list in earliest-to-latest order...
+		List<VersionedBinaryContent> vcList = new ArrayList<VersionedBinaryContent>();
+		List<? extends CommonFieldsBase> cbList = qv.executeQuery(0);
+		for ( CommonFieldsBase cb : cbList ) {
+			vcList.add((VersionedBinaryContent) cb);
+		}
+		versionedAttachments.put(c, vcList);
+	}
+  }
+
   @Override
-  public void getValueFromEntity(CommonFieldsBase dbEntity, String uriAssociatedRow,
-		  					EntityKey topLevelTableKey, Datastore datastore, User user, boolean fetchData) throws ODKDatastoreException {
-		
-		BinaryContent ctnt = (BinaryContent) element.getFormDataModel().getBackingObjectPrototype();
-		VersionedBinaryContent vc = (VersionedBinaryContent) element.getFormDataModel().getChildren().get(0).getBackingObjectPrototype();
-		Query q = datastore.createQuery(ctnt, user);
-		q.addFilter(ctnt.parentAuri, FilterOperation.EQUAL, uriAssociatedRow);
-		q.addSort(ctnt.ordinalNumber, Direction.ASCENDING);
-
-		List<? extends CommonFieldsBase> contentHits = q.executeQuery(0);
-		attachments.clear();
-		for ( CommonFieldsBase cb : contentHits ) {
-			attachments.add((BinaryContent) cb);
-		}
-
-		for ( BinaryContent c : attachments ) {
-			Query qv = datastore.createQuery(vc, user);
-			qv.addFilter(vc.parentAuri, FilterOperation.EQUAL, c.getUri());
-			qv.addSort(vc.creationDate, Direction.ASCENDING);
-			// sort so that the list in earliest-to-latest order...
-			List<VersionedBinaryContent> vcList = new ArrayList<VersionedBinaryContent>();
-			List<? extends CommonFieldsBase> cbList = qv.executeQuery(0);
-			for ( CommonFieldsBase cb : cbList ) {
-				vcList.add((VersionedBinaryContent) cb);
-			}
-			versionedAttachments.put(c, vcList);
-		}
-
-	  // no-op...
+  public void getValueFromEntity(Datastore datastore, User user) throws ODKDatastoreException {
+	refreshFromDatabase();
   }
   
   @Override
@@ -357,6 +354,25 @@ public class BlobSubmissionType extends SubmissionFieldBase<SubmissionKey> {
 		  b.persist(datastore, user);
 	  }
 	  datastore.putEntities(attachments, user);
+  }
+  
+  /**
+   * Restore to a BlobSubmissionType with no attachments at all.
+   * 
+   * @param datastore
+   * @param user
+ * @throws ODKDatastoreException 
+   */
+  public void deleteAll(Datastore datastore, User user) throws ODKDatastoreException {
+	  
+	  List<EntityKey> keys = new ArrayList<EntityKey>();
+	  try {
+		recursivelyAddEntityKeys(keys);
+		datastore.deleteEntities(keys, user);
+	  } finally {
+		// re-initialize ourselves...
+		refreshFromDatabase();
+	  }
   }
   
   /**

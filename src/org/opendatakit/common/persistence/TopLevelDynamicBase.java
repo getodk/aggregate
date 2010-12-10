@@ -40,7 +40,16 @@ public abstract class TopLevelDynamicBase extends DynamicCommonFieldsBase {
 	private static final DataField MODEL_VERSION = new DataField("_MODEL_VERSION", DataField.DataType.INTEGER, true);
 	/** uiVersion from submission */
 	private static final DataField UI_VERSION = new DataField("_UI_VERSION", DataField.DataType.INTEGER, true);
-	/** whether or not the submission is complete */
+	/** whether or not the submission is complete.
+	 * 
+	 * Because submissions may be uploaded across multiple transport requests, we need
+	 * a flag to say whether the submission has been fully uploaded w.r.t. the transport.
+	 * 
+	 * Only completed submissions appear in reports and are forwarded to external services
+	 * 
+	 * Note that the metadata block of a submission is available for implementing workflow 
+	 * state transitions, if you want to do that.
+	 */
 	private static final DataField IS_COMPLETE = new DataField("_IS_COMPLETE", DataField.DataType.BOOLEAN, true);
 
 	public final DataField modelVersion;

@@ -34,7 +34,6 @@ import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
-import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.format.table.HtmlFormatter;
 import org.opendatakit.aggregate.process.ProcessType;
@@ -69,7 +68,7 @@ public class FormSubmissionsServlet extends ServletUtilBase {
   /**
    * Title for generated webpage
    */
-  private static final String TITLE_INFO = "Form Submissions Results";
+  private static final String TITLE_INFO = "Submissions for ";
 
   /**
    * Handler for HTTP Get request that responds list of submissions from a
@@ -99,9 +98,6 @@ public class FormSubmissionsServlet extends ServletUtilBase {
         BeanDefs.USER_BEAN);
     User user = userService.getCurrentUser();
 
-    // header info
-    beginBasicHtmlResponse(TITLE_INFO, resp, req, true);
-    PrintWriter out = resp.getWriter();
     Datastore ds = (Datastore) ContextFactory.get().getBean(BeanDefs.DATASTORE_BEAN);
 
     try {
@@ -126,6 +122,10 @@ public class FormSubmissionsServlet extends ServletUtilBase {
       }
       
       Form form = Form.retrieveForm(formId, ds, user);
+
+      // header info
+      beginBasicHtmlResponse(TITLE_INFO + form.getViewableName(), resp, req, true);
+      PrintWriter out = resp.getWriter();
 
       QueryByDate query = new QueryByDate(form, BasicConsts.EPOCH, false,
               ServletConsts.FETCH_LIMIT, ds, user);
@@ -197,8 +197,6 @@ public class FormSubmissionsServlet extends ServletUtilBase {
 
     } catch (ODKFormNotFoundException e) {
       odkIdNotFoundError(resp);
-    } catch (ODKIncompleteSubmissionData e) {
-      errorRetreivingData(resp);
     } catch (ODKDatastoreException e) {
       errorRetreivingData(resp);
     }

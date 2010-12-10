@@ -20,7 +20,6 @@ import java.util.Date;
 import java.util.List;
 
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
-import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.common.persistence.CommonFieldsBase;
@@ -68,7 +67,7 @@ public class QueryByDate extends QueryBase {
 	  this(form, lastDate, backwardDirection, false, true, maxFetchLimit, datastore, user);
   }
   
-  public List<Submission> getResultSubmissions() throws ODKIncompleteSubmissionData, ODKDatastoreException {
+  public List<Submission> getResultSubmissions() throws ODKDatastoreException {
 
     List<Submission> retrievedSubmissions = new ArrayList<Submission>();
 

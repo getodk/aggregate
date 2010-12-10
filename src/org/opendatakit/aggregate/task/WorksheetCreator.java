@@ -23,6 +23,7 @@ import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.security.User;
 
 /**
+ * API for creating a task to create/define a destination Google spreadsheet
  * 
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
@@ -32,9 +33,5 @@ public interface WorksheetCreator {
 
   public void createWorksheetTask(String serverURL, String spreadsheetName,
       ExternalServiceOption esType, int delay, Form form, Datastore datastore, User user)
-      throws ODKExternalServiceException, ODKDatastoreException;
-
-  public void worksheetCreator(String serverURL, String spreadsheetName,
-      ExternalServiceOption esType, Form form, Datastore ds, User user)
       throws ODKExternalServiceException, ODKDatastoreException;
 }

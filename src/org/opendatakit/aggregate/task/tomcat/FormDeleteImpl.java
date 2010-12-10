@@ -18,38 +18,44 @@ package org.opendatakit.aggregate.task.tomcat;
 import org.opendatakit.aggregate.exception.ODKExternalServiceDependencyException;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.form.Form;
-import org.opendatakit.aggregate.task.AbstractFormDeleteImpl;
+import org.opendatakit.aggregate.task.FormDelete;
+import org.opendatakit.aggregate.task.FormDeleteWorkerImpl;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.security.User;
 
 /**
+ * This is a singleton bean.  It cannot have any per-request state.
+ * It uses a static inner class to encapsulate the per-request state
+ * of a running background task.
  * 
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
  * 
  */
-public class FormDeleteImpl extends AbstractFormDeleteImpl implements Runnable {
+public class FormDeleteImpl implements FormDelete {
 
-  private Form form;
-  private User user;
-  
+	static class FormDeleteRunner implements Runnable {
+		final FormDeleteWorkerImpl impl;
+
+		public FormDeleteRunner(Form form, User user) {
+			impl = new FormDeleteWorkerImpl( form, user);
+		}
+
+		@Override
+		public void run() {
+			try {
+				impl.deleteForm();
+			} catch (Exception e) {
+				e.printStackTrace();
+				// TODO: Problem - decide what to do if an exception occurs
+			}
+		}
+	}
+
   @Override
   public final void createFormDeleteTask(Form form, User user) throws ODKDatastoreException, ODKFormNotFoundException, ODKExternalServiceDependencyException {
-    this.form = form;
-    this.user = user;
+    FormDeleteRunner dr = new FormDeleteRunner(form, user);
     AggregrateThreadExecutor exec = AggregrateThreadExecutor.getAggregateThreadExecutor();
-    exec.execute(this);
+    exec.execute(dr);
   }
-
-  @Override
-  public void run() {
-    try {
-      deleteForm(form, user);
-    } catch (Exception e) {
-      e.printStackTrace();
-      // TODO: PROBLEM - figure out how we are going to restart it 
-    }
-    
-  }
-
 }
