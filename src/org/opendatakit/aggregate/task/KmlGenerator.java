@@ -15,7 +15,6 @@
  */
 package org.opendatakit.aggregate.task;
 
-import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.submission.SubmissionKey;
@@ -31,9 +30,8 @@ import org.opendatakit.common.security.User;
  * 
  */
 public interface KmlGenerator {
-  public void createKmlTask(Form form, FormElementModel titleField, FormElementModel geopointField,
-      FormElementModel imageField, String baseServerWebUrl, Datastore datastore, User user) throws ODKDatastoreException, ODKFormNotFoundException;
 
-  public void recreateKmlTask(Form form, SubmissionKey persistentResultsKey, Long attemptCount,
-	  String baseServerWebUrl, Datastore datastore, User user) throws ODKDatastoreException, ODKFormNotFoundException;
+  public void createKmlTask(Form form, SubmissionKey persistentResultsKey, Long attemptCount,
+      String baseServerWebUrl, Datastore datastore, User user) throws ODKDatastoreException,
+      ODKFormNotFoundException;
 }

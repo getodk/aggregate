@@ -41,22 +41,28 @@ public class FusionTableElementFormatter extends LinkElementFormatter {
   @Override
   public void formatGeoPoint(GeoPoint gp, String propertyName, Row row) {
     if (gp != null) {
-      BigDecimal latitude = new BigDecimal(0.0);
-      if (gp.getLatitude() != null) {
-        latitude = gp.getLatitude();
-      }
+      // TODO: fix geopoint null bug... the geopoint should be null if it was never in a submission
+      if (gp.getLatitude() == null && gp.getLongitude() == null && gp.getAltitude() == null) {
+        basicStringConversion(null, row);
+      } else {
+        BigDecimal latitude = new BigDecimal(0.0);
+        if (gp.getLatitude() != null) {
+          latitude = gp.getLatitude();
+        }
 
-      BigDecimal longitude = new BigDecimal(0.0);
-      if (gp.getLongitude() != null) {
-        longitude = gp.getLongitude();
-      }
+        BigDecimal longitude = new BigDecimal(0.0);
+        if (gp.getLongitude() != null) {
+          longitude = gp.getLongitude();
+        }
 
-      BigDecimal altitude = new BigDecimal(0.0);
-      if (gp.getAltitude() != null) {
-        altitude = gp.getAltitude();
+        BigDecimal altitude = new BigDecimal(0.0);
+        if (gp.getAltitude() != null) {
+          altitude = gp.getAltitude();
+        }
+        String point = String.format(FT_PLACEMARK_POINT_TEMPLATE, longitude + BasicConsts.COMMA
+            + latitude + BasicConsts.COMMA + altitude);
+        basicStringConversion(point, row);
       }
-      String point = String.format(FT_PLACEMARK_POINT_TEMPLATE, longitude + BasicConsts.COMMA + latitude + BasicConsts.COMMA + altitude);
-      basicStringConversion(point, row);
       basicStringConversion(gp.getAccuracy(), row);
     } else {
       basicStringConversion(null, row);

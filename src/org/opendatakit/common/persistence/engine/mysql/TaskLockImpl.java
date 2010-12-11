@@ -16,7 +16,6 @@
 package org.opendatakit.common.persistence.engine.mysql;
 
 import org.opendatakit.aggregate.constants.TaskLockType;
-import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.common.persistence.TaskLock;
 
 /**
@@ -27,10 +26,6 @@ import org.opendatakit.common.persistence.TaskLock;
  */
 public class TaskLockImpl implements TaskLock {
 
-  @Override
-  public boolean obtainLock(String lockId, Form form, TaskLockType taskType) {
-    return obtainLock(lockId, form.getFormId(), taskType);
-  }
 
   @Override
   public boolean obtainLock(String lockId, String formId, TaskLockType taskType) {
@@ -39,19 +34,9 @@ public class TaskLockImpl implements TaskLock {
   }
 
   @Override
-  public boolean renewLock(String lockId, Form form, TaskLockType taskType) {
-    return renewLock(lockId, form.getFormId(), taskType);
-  }
-
-  @Override
   public boolean renewLock(String lockId, String formId, TaskLockType taskType) {
     // TODO: NEEDS TO BE IMPLEMENTED
     return true;
-  }
-
-  @Override
-  public boolean releaseLock(String lockId, Form form, TaskLockType taskType) {
-    return releaseLock(lockId, form.getFormId(), taskType);
   }
 
   @Override

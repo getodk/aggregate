@@ -56,6 +56,9 @@ public class CsvWorkerImpl {
 		this.baseWebServerUrl = baseWebServerUrl;
 		this.datastore = datastore;
 		this.user = user;
+		if ( attemptCount == null ) {
+			throw new IllegalArgumentException("attempt count cannot be null");
+		}
 	}
 
 	public void generateCsv() {
@@ -75,8 +78,8 @@ public class CsvWorkerImpl {
 	
 		    Submission s = Submission.fetchSubmission(persistentResultsKey.splitSubmissionKey(), datastore, user);
 		    PersistentResults r = new PersistentResults(s);
-		    if ( r.getAttemptCount() == attemptCount ) {
-				r.setResultFile(outputFile, HtmlConsts.RESP_TYPE_PLAIN, 
+		    if ( attemptCount.equals(r.getAttemptCount()) ) {
+				r.setResultFile(outputFile, HtmlConsts.RESP_TYPE_CSV, 
 						Long.valueOf(outputFile.length), 
 						form.getViewableFormNameSuitableAsFileName() + ServletConsts.CSV_FILENAME_APPEND, datastore, user);
 				r.setStatus(Status.AVAILABLE);
@@ -96,7 +99,7 @@ public class CsvWorkerImpl {
 		try {
 			s = Submission.fetchSubmission(persistentResultsKey.splitSubmissionKey(), datastore, user);
 		    PersistentResults r = new PersistentResults(s);
-		    if ( attemptCount == r.getAttemptCount() ) {
+		    if ( attemptCount.equals(r.getAttemptCount()) ) {
 		    	r.deleteResultFile(datastore, user);
 		    	r.setStatus(Status.FAILED);
 		    	r.persist(datastore, user);

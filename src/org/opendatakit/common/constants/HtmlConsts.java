@@ -113,6 +113,12 @@ public final class HtmlConsts {
 	 * Constant for "text/xml" content type for response message
 	 */
 	public static final String RESP_TYPE_XML = "text/xml; charset=utf-8";
+	
+	  /**
+    * Constant for "text/csv" content type for response message
+    */
+   public static final String RESP_TYPE_CSV = "text/csv; charset=utf-8";
+
 	/**
 	 * Encoding scheme for servlets
 	 */

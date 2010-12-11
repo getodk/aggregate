@@ -89,8 +89,8 @@ public final class ServletConsts {
   public static final String UPLOAD_FORM_LINK_TEXT = "Upload Form";
   public static final String DELETE_FORM_LINK_TEXT = "Delete Form";
   public static final String BRIEFCASE_LINK_TEXT = "Briefcase";
-  public static final String UPLOAD_APPLET_LINK_TEXT = "Upload Submissons from a Phone";
-  public static final String RESULT_FILES_LINK_TEXT = "Downloadable Data Files";
+  public static final String UPLOAD_APPLET_LINK_TEXT = "Upload Bulk Submissons from Phone";
+  public static final String RESULT_FILES_LINK_TEXT = "Report Results";
 
 
   public static final String BLOB_KEY = "blobKey";

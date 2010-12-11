@@ -17,8 +17,6 @@ package org.opendatakit.aggregate.task.gae;
 
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.form.Form;
-import org.opendatakit.aggregate.form.PersistentResults;
-import org.opendatakit.aggregate.form.PersistentResults.ResultType;
 import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.task.CsvGenerator;
 import org.opendatakit.aggregate.task.gae.servlet.CsvGeneratorTaskServlet;
@@ -42,7 +40,7 @@ import com.google.appengine.api.taskqueue.TaskOptions;
 public class CsvGeneratorImpl implements CsvGenerator {
 
   @Override
-  public void recreateCsvTask(Form form, SubmissionKey persistentResultsKey, Long attemptCount, String baseServerWebUrl, Datastore datastore, User user) throws ODKDatastoreException {
+  public void createCsvTask(Form form, SubmissionKey persistentResultsKey, Long attemptCount, String baseServerWebUrl, Datastore datastore, User user) throws ODKDatastoreException {
     TaskOptions task = TaskOptions.Builder.withUrl(ServletConsts.WEB_ROOT
         + CsvGeneratorTaskServlet.ADDR);
     task.method(TaskOptions.Method.GET);
@@ -53,11 +51,4 @@ public class CsvGeneratorImpl implements CsvGenerator {
     Queue queue = QueueFactory.getDefaultQueue();
     queue.add(task);
   }
-
-  @Override
-  public void createCsvTask(Form form, String baseServerWebUrl, Datastore datastore, User user) throws ODKDatastoreException {
-		PersistentResults r = new PersistentResults( ResultType.CSV, null, datastore, user);
-		r.persist(datastore, user);
-		recreateCsvTask(form, r.getSubmissionKey(), 1L, baseServerWebUrl, datastore, user);
-	  }
 }

@@ -17,7 +17,6 @@ package org.opendatakit.common.persistence.engine.pgres;
 
 import org.opendatakit.aggregate.constants.TaskLockType;
 import org.opendatakit.aggregate.exception.ODKTaskLockException;
-import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.common.persistence.TaskLock;
 
 /**
@@ -27,23 +26,6 @@ import org.opendatakit.common.persistence.TaskLock;
  * 
  */
 public class TaskLockImpl implements TaskLock {
-
-  @Override
-  public boolean obtainLock(String lockId, Form form, TaskLockType taskType) {
-    // TODO Auto-generated method stub
-    return false;
-  }
-
-  @Override
-  public boolean renewLock(String lockId, Form form, TaskLockType taskType) {
-    // TODO Auto-generated method stub
-    return false;
-  }
-
-  @Override
-  public boolean releaseLock(String lockId, Form form, TaskLockType taskType) {
-    return false;
-  }
 
   @Override
   public boolean obtainLock(String lockId, String formId, TaskLockType taskType)

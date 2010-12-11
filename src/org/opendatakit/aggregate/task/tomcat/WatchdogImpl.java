@@ -34,16 +34,25 @@ public class WatchdogImpl implements Watchdog {
 	static class WatchdogRunner implements Runnable {
 		final WatchdogWorkerImpl impl;
 
+		final long checkIntervalMilliseconds;
+		final String baseWebServerUrl;
+		final Datastore ds;
+		final User user;
+		
 		public WatchdogRunner(long checkIntervalMilliseconds,
 				String baseWebServerUrl, Datastore ds, User user) {
-			impl = new WatchdogWorkerImpl(checkIntervalMilliseconds,
-										baseWebServerUrl, ds, user);
+			impl = new WatchdogWorkerImpl();
+			this.checkIntervalMilliseconds = checkIntervalMilliseconds;
+			this.baseWebServerUrl = baseWebServerUrl;
+			this.ds = ds;
+			this.user = user;
 		}
 
 		@Override
 		public void run() {
 			try {
-				impl.checkTasks();
+				impl.checkTasks(checkIntervalMilliseconds,
+                baseWebServerUrl, ds, user);
 			} catch (Exception e) {
 				e.printStackTrace();
 				// TODO: Problem - decide what to do if an exception occurs

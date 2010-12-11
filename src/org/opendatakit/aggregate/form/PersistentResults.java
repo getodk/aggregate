@@ -116,6 +116,7 @@ public class PersistentResults {
 	private static FormElementModel resultType;
 	private static FormElementModel completionDate;
 	private static FormElementModel resultFile;
+	private static FormElementModel formId;
 
 	public static FormElementModel getRequestingUserKey() {
 		return requestingUser;
@@ -152,6 +153,10 @@ public class PersistentResults {
 	public static FormElementModel getResultFileKey() {
 		return resultFile;
 	}
+	
+	public static FormElementModel getFormIdKey() {
+	  return formId;
+	}
 
 	public Submission objectEntity;
 	
@@ -176,16 +181,16 @@ public class PersistentResults {
 	 * @param user
 	 * @throws ODKDatastoreException
 	 */
-	public PersistentResults(ResultType type, Map<String,String> parameters, Datastore datastore, User user) throws ODKDatastoreException {
-		Form form;
+	public PersistentResults(ResultType type, Form form, Map<String,String> parameters, Datastore datastore, User user) throws ODKDatastoreException {
+		Form persistentResultsForm;
 		try {
-			form = Form.retrieveForm(FORM_ID_PERSISTENT_RESULT, datastore, user);
+			persistentResultsForm = Form.retrieveForm(FORM_ID_PERSISTENT_RESULT, datastore, user);
 		} catch ( ODKFormNotFoundException e) {
 			throw new ODKDatastoreException(e);
 		}
 		objectEntity = new Submission(xformPersistentResultsParameters.modelVersion,
 								xformPersistentResultsParameters.uiVersion,
-								form.getFormDefinition(), datastore, user);
+								persistentResultsForm.getFormDefinition(), datastore, user);
 		setRequestingUser(user.getUriUser());
 		Date now = new Date();
 		setRequestDate(now);
@@ -194,6 +199,7 @@ public class PersistentResults {
 		setAttemptCount(1L);
 		setStatus(Status.GENERATION_IN_PROGRESS);
 		setResultType(type);
+		setFormId(form.getFormId());
 		
 		objectEntity.setIsComplete(true); // indicate that the data should be visible on queries
 		// NOTE: the entity is not yet persisted! 
@@ -332,6 +338,14 @@ public class PersistentResults {
 		}
 		bt.setValueFromByteArray(byteArray, contentType, contentLength, unrootedFilePath, datastore, user);
 	}
+	
+	public String getFormId() {
+	  return ((StringSubmissionType) objectEntity.getElementValue(formId)).getValue();
+	}
+	
+	public void setFormId(String value) throws ODKEntityPersistException {
+	  ((StringSubmissionType) objectEntity.getElementValue(PersistentResults.formId)).setValueFromString(value);
+	}
 
 	public void deleteResultFile(Datastore datastore, User user) throws ODKDatastoreException {
 		BlobSubmissionType bt = ((BlobSubmissionType) objectEntity.getElementValue(resultFile));
@@ -425,6 +439,9 @@ public class PersistentResults {
 	
 		private static final DataField COMPLETION_DATE = new DataField("COMPLETION_DATE",
 				DataField.DataType.DATETIME, true);
+		
+		private static final DataField FORM_ID = new DataField("FORM_ID_KEY",
+		      DataField.DataType.STRING, true);
 	
 		public final DataField requestingUser;
 		public final DataField requestDate;
@@ -434,6 +451,7 @@ public class PersistentResults {
 		public final DataField status;
 		public final DataField resultType;
 		public final DataField completionDate;
+		public final DataField formId;
 	
 		// additional virtual DataField -- binary content
 		
@@ -468,6 +486,7 @@ public class PersistentResults {
 			fieldList.add(status = new DataField(STATUS));
 			fieldList.add(resultType = new DataField(RESULT_TYPE));
 			fieldList.add(completionDate = new DataField(COMPLETION_DATE));
+			fieldList.add(formId = new DataField(FORM_ID));
 	
 			fieldValueMap.put(primaryKey, CommonFieldsBase.newMD5HashUri(FORM_ID_PERSISTENT_RESULT));
 		}
@@ -488,6 +507,7 @@ public class PersistentResults {
 			status = ref.status;
 			resultType = ref.resultType;
 			completionDate = ref.completionDate;
+			formId = ref.formId;
 		}
 	
 		@Override
@@ -579,6 +599,8 @@ public class PersistentResults {
 		resultType = FormDefinition.findElement(formDefinition.getTopLevelGroupElement(), PersistentResultsTable.relation.resultType);
 		completionDate = FormDefinition.findElement(formDefinition.getTopLevelGroupElement(), PersistentResultsTable.relation.completionDate);
 		resultFile = formDefinition.getTopLevelGroupElement().findElementByName(PersistentResultsTable.ELEMENT_NAME_RESULT_FILE_DEFINITION);
+		formId = FormDefinition.findElement(formDefinition.getTopLevelGroupElement(), PersistentResultsTable.relation.formId);
+		
 
 		String persistentResultsUri = persistentResultsRelation.getUri();
 		// Now create a record in the FormInfo table for the PersistentResults table itself...

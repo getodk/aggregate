@@ -106,6 +106,38 @@ public final class FormDataModel extends DynamicBase {
 	private static final DataField PERSIST_AS_TABLE_NAME = new DataField("PERSIST_AS_TABLE_NAME", DataField.DataType.STRING, true, PersistConsts.URI_STRING_LEN);
 	private static final DataField PERSIST_AS_SCHEMA_NAME = new DataField("PERSIST_AS_SCHEMA_NAME", DataField.DataType.STRING, true, PersistConsts.URI_STRING_LEN);
 
+	/**
+	 * Class wrapping the persisted object name.
+	 * Used when dealing with backing object maps.
+	 * 
+	 * @author mitchellsundt@gmail.com
+	 *
+	 */
+	public final class DDRelationName {
+
+		private DDRelationName() {
+		}
+		
+		@Override
+		public boolean equals(Object obj) {
+			if ( !(obj instanceof DDRelationName) ) return false;
+			DDRelationName ref = (DDRelationName) obj;
+			return toString().equals(ref.toString());
+		}
+
+		@Override
+		public int hashCode() {
+			return FormDataModel.this.getPersistAsTable().hashCode() +
+					103*FormDataModel.this.getPersistAsSchema().hashCode();
+		}
+
+		@Override
+		public String toString() {
+			return FormDataModel.this.getPersistAsSchema() + "." +
+					FormDataModel.this.getPersistAsTable();
+		}
+	};
+	
 	public final DataField elementType;
 	public final DataField elementName;
 	public final DataField persistAsColumn;
@@ -170,6 +202,10 @@ public final class FormDataModel extends DynamicBase {
 	@Override
 	public FormDataModel getEmptyRow(User user) {
 		return new FormDataModel(this, user);
+	}
+	
+	public final DDRelationName getDDRelationName() {
+		return new DDRelationName();
 	}
 
 	public final ElementType getElementType() {

@@ -25,6 +25,7 @@ import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
+import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
 import org.opendatakit.aggregate.servlet.ServletUtilBase;
 import org.opendatakit.aggregate.task.WatchdogWorkerImpl;
 import org.opendatakit.common.persistence.Datastore;
@@ -72,12 +73,12 @@ public class WatchdogServlet extends ServletUtilBase{
     System.out.println("STARTING WATCHDOG TASK");
     Datastore ds = (Datastore) ContextFactory.get().getBean(BeanDefs.DATASTORE_BEAN);
     
-    WatchdogWorkerImpl worker = new WatchdogWorkerImpl(checkIntervalMilliseconds, getServerURL(req), ds, user);
+    WatchdogWorkerImpl worker = new WatchdogWorkerImpl();
     try {
-      worker.checkTasks();
+      worker.checkTasks(checkIntervalMilliseconds, getServerURL(req), ds, user);
     } catch (ODKExternalServiceException e) {
       e.printStackTrace();
-      resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.toString());
+      resp.sendError(HttpServletResponse.SC_BAD_GATEWAY, e.toString());
       return;
     } catch (ODKFormNotFoundException e) {
       odkIdNotFoundError(resp);
@@ -86,6 +87,9 @@ public class WatchdogServlet extends ServletUtilBase{
       e.printStackTrace();
       resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.toString());
       return;
+    } catch (ODKIncompleteSubmissionData e) {
+      e.printStackTrace();
+      resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.toString());
     }
   }
 }

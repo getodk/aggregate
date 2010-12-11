@@ -27,6 +27,8 @@ import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.form.PersistentResults;
+import org.opendatakit.aggregate.form.PersistentResults.ResultType;
 import org.opendatakit.aggregate.task.CsvGenerator;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
@@ -87,9 +89,12 @@ public class CsvServlet extends ServletUtilBase {
       return;
     }
 
+
     CsvGenerator generator = (CsvGenerator) ContextFactory.get().getBean(BeanDefs.CSV_BEAN);
     try {
-		generator.createCsvTask(form, getServerURL(req), ds, user);
+      PersistentResults r = new PersistentResults( ResultType.CSV, form, null, ds, user);
+      r.persist(ds, user);
+		generator.createCsvTask(form, r.getSubmissionKey(), 1L, getServerURL(req), ds, user);
 	} catch (ODKDatastoreException e) {
 		e.printStackTrace();
 		resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.toString());

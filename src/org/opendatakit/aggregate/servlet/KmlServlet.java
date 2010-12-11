@@ -18,6 +18,8 @@
 package org.opendatakit.aggregate.servlet;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -29,6 +31,8 @@ import org.opendatakit.aggregate.datamodel.FormElementKey;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.form.PersistentResults;
+import org.opendatakit.aggregate.form.PersistentResults.ResultType;
 import org.opendatakit.aggregate.task.KmlGenerator;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
@@ -95,7 +99,7 @@ public class KmlServlet extends ServletUtilBase {
     Form form = null;
     try {
       form = Form.retrieveForm(formId, ds, user);
-     
+
       FormElementModel titleField = null;
       if (titleFieldName != null) {
         FormElementKey titleKey = new FormElementKey(titleFieldName);
@@ -108,25 +112,36 @@ public class KmlServlet extends ServletUtilBase {
       }
       FormElementModel imageField = null;
       if (imageFieldName != null) {
-        if(!imageFieldName.equals(KmlSettingsServlet.NONE)) {
+        if (!imageFieldName.equals(KmlSettingsServlet.NONE)) {
           FormElementKey imageKey = new FormElementKey(imageFieldName);
           imageField = FormElementModel.retrieveFormElementModel(form, imageKey);
         }
       }
 
+      Map<String, String> params = new HashMap<String, String>();
+      params.put(KmlServlet.TITLE_FIELD, (titleField == null) ? null : titleField
+          .constructFormElementKey(form).toString());
+      params.put(KmlServlet.IMAGE_FIELD, (imageField == null) ? KmlSettingsServlet.NONE : imageField
+          .constructFormElementKey(form).toString());
+      params.put(KmlServlet.GEOPOINT_FIELD, (geopointField == null) ? null : geopointField
+          .constructFormElementKey(form).toString());
+
+      PersistentResults r = new PersistentResults(ResultType.KML, form, params, ds, user);
+      r.persist(ds, user);
+
       KmlGenerator generator = (KmlGenerator) ContextFactory.get().getBean(BeanDefs.KML_BEAN);
-      generator.createKmlTask(form, titleField, geopointField, imageField, getServerURL(req), ds, user);
+      generator.createKmlTask(form, r.getSubmissionKey(), 1L, getServerURL(req), ds, user);
 
     } catch (ODKFormNotFoundException e) {
       odkIdNotFoundError(resp);
       return;
     } catch (ODKDatastoreException e) {
-  	  e.printStackTrace();
+      e.printStackTrace();
       resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.toString());
       return;
-	}
-    
+    }
+
     resp.sendRedirect(ResultServlet.ADDR);
-    
+
   }
 }

@@ -87,7 +87,7 @@ public class KmlWorkerImpl {
 
 	    Submission s = Submission.fetchSubmission(persistentResultsKey.splitSubmissionKey(), datastore, user);
 	    PersistentResults r = new PersistentResults(s);
-	    if ( attemptCount == r.getAttemptCount() ) {
+	    if ( attemptCount.equals(r.getAttemptCount()) ) {
 			r.setResultFile(outputFile, HtmlConsts.RESP_TYPE_PLAIN, Long.valueOf(outputFile.length), form.getViewableFormNameSuitableAsFileName() + ServletConsts.KML_FILENAME_APPEND, datastore, user);
 			r.setStatus(Status.AVAILABLE);
 			r.setCompletionDate(new Date());
@@ -106,7 +106,7 @@ public class KmlWorkerImpl {
 		try {
 			s = Submission.fetchSubmission(persistentResultsKey.splitSubmissionKey(), datastore, user);
 		    PersistentResults r = new PersistentResults(s);
-		    if ( attemptCount == r.getAttemptCount() ) {
+		    if ( attemptCount.equals(r.getAttemptCount()) ) {
 		    	r.deleteResultFile(datastore, user);
 		    	r.setStatus(Status.FAILED);
 		    	r.objectEntity.persist(datastore, user);

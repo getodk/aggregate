@@ -15,15 +15,12 @@
  */
 package org.opendatakit.aggregate.task.gae;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import org.opendatakit.aggregate.constants.ServletConsts;
-import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.form.PersistentResults;
-import org.opendatakit.aggregate.form.PersistentResults.ResultType;
 import org.opendatakit.aggregate.servlet.KmlServlet;
 import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.aggregate.submission.SubmissionKey;
@@ -48,46 +45,25 @@ import com.google.appengine.api.taskqueue.TaskOptions;
  */
 public class KmlGeneratorImpl implements KmlGenerator {
 
-	@Override
-	public void recreateKmlTask(Form form, SubmissionKey persistentResultsKey,
-			Long attemptCount, String baseServerWebUrl, Datastore datastore,
-			User user) throws ODKDatastoreException, ODKFormNotFoundException {
-		Submission s = Submission.fetchSubmission(persistentResultsKey
-				.splitSubmissionKey(), datastore, user);
-		PersistentResults r = new PersistentResults(s);
-		Map<String, String> params = r.getRequestParameters();
-		TaskOptions task = TaskOptions.Builder.withUrl(ServletConsts.WEB_ROOT
-				+ KmlGeneratorTaskServlet.ADDR);
-		task.method(TaskOptions.Method.GET);
-		task.countdownMillis(1);
-		task.param(ServletConsts.FORM_ID, form.getFormId());
-		task.param(ServletConsts.PERSISTENT_RESULTS_KEY, persistentResultsKey
-				.toString());
-		task.param(ServletConsts.ATTEMPT_COUNT, attemptCount.toString());
-		task.param(KmlServlet.GEOPOINT_FIELD, params.get(KmlServlet.GEOPOINT_FIELD));
-		task.param(KmlServlet.TITLE_FIELD, params.get(KmlServlet.TITLE_FIELD));
-		task.param(KmlServlet.IMAGE_FIELD, params.get(KmlServlet.IMAGE_FIELD));
-		Queue queue = QueueFactory.getDefaultQueue();
-		queue.add(task);
-	}
-
-	@Override
-	public void createKmlTask(Form form, FormElementModel titleField,
-			FormElementModel geopointField, FormElementModel imageField,
-			String baseServerWebUrl, Datastore datastore, User user)
-			throws ODKDatastoreException, ODKFormNotFoundException {
-		Map<String, String> params = new HashMap<String, String>();
-		params.put(KmlServlet.TITLE_FIELD, (titleField == null) ? null
-				: titleField.constructFormElementKey(form).toString());
-		params.put(KmlServlet.IMAGE_FIELD, (imageField == null) ? null
-				: imageField.constructFormElementKey(form).toString());
-		params.put(KmlServlet.GEOPOINT_FIELD, (geopointField == null) ? null
-				: geopointField.constructFormElementKey(form).toString());
-
-		PersistentResults r = new PersistentResults(ResultType.KML, params,
-				datastore, user);
-		r.persist(datastore, user);
-		recreateKmlTask(form, r.getSubmissionKey(), 1L, baseServerWebUrl,
-				datastore, user);
-	}
+  @Override
+  public void createKmlTask(Form form, SubmissionKey persistentResultsKey, Long attemptCount,
+      String baseServerWebUrl, Datastore datastore, User user) throws ODKDatastoreException,
+      ODKFormNotFoundException {
+    Submission s = Submission.fetchSubmission(persistentResultsKey.splitSubmissionKey(), datastore,
+        user);
+    PersistentResults r = new PersistentResults(s);
+    Map<String, String> params = r.getRequestParameters();
+    TaskOptions task = TaskOptions.Builder.withUrl(ServletConsts.WEB_ROOT
+        + KmlGeneratorTaskServlet.ADDR);
+    task.method(TaskOptions.Method.GET);
+    task.countdownMillis(1);
+    task.param(ServletConsts.FORM_ID, form.getFormId());
+    task.param(ServletConsts.PERSISTENT_RESULTS_KEY, persistentResultsKey.toString());
+    task.param(ServletConsts.ATTEMPT_COUNT, attemptCount.toString());
+    task.param(KmlServlet.GEOPOINT_FIELD, params.get(KmlServlet.GEOPOINT_FIELD));
+    task.param(KmlServlet.TITLE_FIELD, params.get(KmlServlet.TITLE_FIELD));
+    task.param(KmlServlet.IMAGE_FIELD, params.get(KmlServlet.IMAGE_FIELD));
+    Queue queue = QueueFactory.getDefaultQueue();
+    queue.add(task);
+  }
 }

@@ -25,12 +25,17 @@ package org.opendatakit.aggregate.submission;
  */
 public class SubmissionKeyPart {
 
+	public static final String K_SLASH = "/";
 	public static final String K_OPEN_BRACKET = "[";
 	public static final String K_OPEN_BRACKET_KEY_EQUALS = "[@key=";
 	public static final String K_OPEN_BRACKET_ORDINAL_EQUALS = "[@ordinal=";
 	public static final String K_AND_VERSION_EQUALS = " and @version=";
+	public static final String K_OPEN_BRACKET_VERSION_EQUALS = "[@version=";
+	public static final String K_AND_UI_VERSION_EQUALS = " and @uiVersion=";
 	public static final String K_CLOSE_BRACKET = "]";
 	final String elementName;
+	final Long modelVersion; // only valid in form part!  Not propagated to nested elements.
+	final Long uiVersion;  // only valid in form part!  Not propagated to nested elements.
 	final String auri;
 	final Long ordinal;
 	final String version;
@@ -40,6 +45,8 @@ public class SubmissionKeyPart {
 		if (idx == -1) {
 			if (part.indexOf(K_CLOSE_BRACKET) == -1) {
 				elementName = part;
+				modelVersion = null;
+				uiVersion = null;
 				auri = null;
 				ordinal = null;
 				version = null;
@@ -56,6 +63,8 @@ public class SubmissionKeyPart {
 							+ part + " is not well formed");
 				}
 				auri = remainder.substring(K_OPEN_BRACKET_KEY_EQUALS.length(), remainder.length() - 1);
+				modelVersion = null;
+				uiVersion = null;
 				ordinal = null;
 				version = null;
 			} 
@@ -65,6 +74,8 @@ public class SubmissionKeyPart {
 							+ part + " is not well formed");
 				}
 				auri = null;
+				modelVersion = null;
+				uiVersion = null;
 				String ordinalStr = remainder.substring(K_OPEN_BRACKET_ORDINAL_EQUALS.length(), remainder.length() - 1);
 				if ( ordinalStr.contains(K_AND_VERSION_EQUALS) ) {
 					idx = ordinalStr.indexOf(K_AND_VERSION_EQUALS);
@@ -74,6 +85,24 @@ public class SubmissionKeyPart {
 					version = null;
 				}
 				ordinal = Long.valueOf(ordinalStr);
+			}
+			else if (remainder.startsWith(K_OPEN_BRACKET_VERSION_EQUALS)) {
+				if (!remainder.endsWith(K_CLOSE_BRACKET)) {
+					throw new IllegalArgumentException("submission key part "
+							+ part + " is not well formed");
+				}
+				auri = null;
+				ordinal = null;
+				version = null;
+				String modelVersionStr = remainder.substring(K_OPEN_BRACKET_VERSION_EQUALS.length(), remainder.length() - 1);
+				String uiVersionStr = null;
+				if ( modelVersionStr.contains(K_AND_UI_VERSION_EQUALS) ) {
+					idx = modelVersionStr.indexOf(K_AND_UI_VERSION_EQUALS);
+					uiVersionStr = modelVersionStr.substring(idx+K_AND_UI_VERSION_EQUALS.length());
+					modelVersionStr = modelVersionStr.substring(0,idx);
+				}
+				modelVersion = "null".equals(modelVersionStr) ? null : Long.valueOf(modelVersionStr);
+				uiVersion = "null".equals(uiVersionStr) ? null : Long.valueOf(uiVersionStr);
 			}
 			else {
 				throw new IllegalArgumentException("submission key part "
