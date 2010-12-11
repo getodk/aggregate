@@ -17,12 +17,15 @@ package org.opendatakit.aggregate.task;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.ServletConsts;
+import org.opendatakit.aggregate.constants.TaskLockType;
 import org.opendatakit.aggregate.exception.ODKExternalServiceDependencyException;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
+import org.opendatakit.aggregate.exception.ODKTaskLockException;
 import org.opendatakit.aggregate.externalservice.ExternalService;
 import org.opendatakit.aggregate.externalservice.FormServiceCursor;
 import org.opendatakit.aggregate.form.Form;
@@ -31,6 +34,8 @@ import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.Query;
+import org.opendatakit.common.persistence.TaskLock;
+import org.opendatakit.common.persistence.TopLevelDynamicBase;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.security.User;
 
@@ -51,17 +56,51 @@ public class FormDeleteWorkerImpl {
 		this.user = user;
 	}
 
-	public final void deleteForm()
-			throws ODKDatastoreException, ODKFormNotFoundException,
-			ODKExternalServiceDependencyException {
+	public final void deleteForm() throws ODKDatastoreException,
+			ODKFormNotFoundException, ODKExternalServiceDependencyException {
 		Datastore ds = (Datastore) ContextFactory.get().getBean(
 				BeanDefs.DATASTORE_BEAN);
 
 		List<ExternalService> services = FormServiceCursor
 				.getExternalServicesForForm(form, null, ds, user);
-		if (services.size() != 0) {
-			throw new ODKExternalServiceDependencyException(
-					"Delete this form's configured external services before deleting the form");
+		for (ExternalService service : services) {
+			String uriExternalService = service.getFormServiceCursor()
+					.getUri();
+			TaskLock taskLock = ds.createTaskLock();
+			String pLockId = UUID.randomUUID().toString();
+			boolean deleted = false;
+			try {
+				if (taskLock.obtainLock(pLockId, uriExternalService,
+						TaskLockType.UPLOAD_SUBMISSION)) {
+					taskLock = null;
+					service.delete();
+					deleted = true;
+				}
+			} catch (ODKTaskLockException e1) {
+				e1.printStackTrace();
+			} finally {
+				if ( !deleted ) {
+					// TODO: repost...
+					return;
+				}
+			}
+			taskLock = ds.createTaskLock();
+			try {
+				for (int i = 0; i < 10; i++) {
+					if (taskLock.releaseLock(pLockId, uriExternalService,
+							TaskLockType.UPLOAD_SUBMISSION))
+						break;
+					try {
+						Thread.sleep(1000);
+					} catch (InterruptedException e) {
+						// just move on, this retry mechanism is to only
+						// make things
+						// nice
+					}
+				}
+			} catch (ODKTaskLockException e) {
+				e.printStackTrace();
+			}
 		}
 
 		CommonFieldsBase relation = null;
@@ -81,10 +120,13 @@ public class FormDeleteWorkerImpl {
 
 			if (submissionEntities.size() > 0) {
 				List<SubmissionKey> keys = new ArrayList<SubmissionKey>();
+				String topLevelGroupName = form.getTopLevelGroupElement()
+						.getElementName();
 				for (CommonFieldsBase en : submissionEntities) {
-					keys.add(new SubmissionKey(form.getFormId(), form
-							.getTopLevelGroupElement().getElementName(), en
-							.getUri()));
+					TopLevelDynamicBase tl = (TopLevelDynamicBase) en;
+					keys.add(new SubmissionKey(form.getFormId(), tl
+							.getModelVersion(), tl.getUiVersion(),
+							topLevelGroupName, tl.getUri()));
 				}
 				DeleteSubmissions delete;
 				try {
@@ -95,7 +137,7 @@ public class FormDeleteWorkerImpl {
 				delete.deleteSubmissions();
 				FormDelete fd = (FormDelete) ContextFactory.get().getBean(
 						BeanDefs.FORM_DELETE_BEAN);
-				
+
 				fd.createFormDeleteTask(form, user);
 				return;
 			}

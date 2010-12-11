@@ -15,7 +15,6 @@
  */
 package org.opendatakit.aggregate.task.tomcat;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import org.opendatakit.aggregate.datamodel.FormElementKey;
@@ -23,7 +22,6 @@ import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.form.PersistentResults;
-import org.opendatakit.aggregate.form.PersistentResults.ResultType;
 import org.opendatakit.aggregate.servlet.KmlServlet;
 import org.opendatakit.aggregate.servlet.KmlSettingsServlet;
 import org.opendatakit.aggregate.submission.Submission;
@@ -65,24 +63,7 @@ public class KmlGeneratorImpl implements KmlGenerator {
 	}
 
 	@Override
-	public void createKmlTask(Form form, FormElementModel titleField,
-			FormElementModel geopointField, FormElementModel imageField,
-			String baseWebServerUrl, Datastore datastore, User user)
-			throws ODKDatastoreException, ODKFormNotFoundException {
-		Map<String,String> params = new HashMap<String,String>();
-		params.put(KmlServlet.TITLE_FIELD, titleField.constructFormElementKey(form).toString());
-		params.put(KmlServlet.IMAGE_FIELD, imageField.constructFormElementKey(form).toString());
-		params.put(KmlServlet.GEOPOINT_FIELD, geopointField.constructFormElementKey(form).toString());
-		
-		PersistentResults r = new PersistentResults(ResultType.KML, params, datastore,
-				user);
-		r.persist(datastore, user);
-		recreateKmlTask(form, r.getSubmissionKey(), 1L,
-					baseWebServerUrl, datastore, user );
-	}
-
-	@Override
-	public void recreateKmlTask(Form form, SubmissionKey persistentResultsKey, Long attemptCount,
+	public void createKmlTask(Form form, SubmissionKey persistentResultsKey, Long attemptCount,
 			String baseWebServerUrl,
 			Datastore datastore, User user) throws ODKDatastoreException, ODKFormNotFoundException {
 		Submission s = Submission.fetchSubmission(persistentResultsKey.splitSubmissionKey(), datastore, user);

@@ -16,8 +16,6 @@
 package org.opendatakit.aggregate.task.tomcat;
 
 import org.opendatakit.aggregate.form.Form;
-import org.opendatakit.aggregate.form.PersistentResults;
-import org.opendatakit.aggregate.form.PersistentResults.ResultType;
 import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.task.CsvGenerator;
 import org.opendatakit.aggregate.task.CsvWorkerImpl;
@@ -48,16 +46,9 @@ public class CsvGeneratorImpl implements CsvGenerator {
 			impl.generateCsv();
 		}
 	}
-	
-  @Override
-  public void createCsvTask(Form form, String baseServerWebUrl, Datastore datastore, User user) throws ODKDatastoreException {
-	PersistentResults r = new PersistentResults( ResultType.CSV, null, datastore, user);
-	r.persist(datastore, user);
-	recreateCsvTask(form, r.getSubmissionKey(), 1L, baseServerWebUrl, datastore, user );
-  }
 
   @Override
-  public void recreateCsvTask(Form form, SubmissionKey persistentResultsKey,
+  public void createCsvTask(Form form, SubmissionKey persistentResultsKey,
 		Long attemptCount, String baseServerWebUrl, Datastore datastore, User user)
 		throws ODKDatastoreException {
 	CsvRunner runner = new CsvRunner(form, persistentResultsKey, attemptCount, baseServerWebUrl, datastore, user );

@@ -66,7 +66,7 @@ public class ResultServlet extends ServletUtilBase {
   /**
    * Title for generated webpage
    */
-  private static final String TITLE_INFO = "Results";
+  private static final String TITLE_INFO = "Result Data Reports";
   
   /**
    * Handler for HTTP Get request to create blank page that is navigable

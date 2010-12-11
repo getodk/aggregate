@@ -85,7 +85,7 @@ public class UploadSubmissionsWorkerImpl {
 
 		TaskLock taskLock = pDatastore.createTaskLock();
 		if (!taskLock
-				.obtainLock(pLockId, pForm, TaskLockType.UPLOAD_SUBMISSION)) {
+				.obtainLock(pLockId, pFsc.getUri(), TaskLockType.UPLOAD_SUBMISSION)) {
 			return;
 			// TODO: what should happen if you can't obtain a lock
 			// TODO: come back and think about this
@@ -121,7 +121,7 @@ public class UploadSubmissionsWorkerImpl {
 		} finally {
 			taskLock = pDatastore.createTaskLock();
 			for (int i = 0; i < MAX_NUMBER_OF_RELEASE_RETRIES; i++) {
-				if (taskLock.releaseLock(pLockId, pForm,
+				if (taskLock.releaseLock(pLockId, pFsc.getUri(),
 						TaskLockType.UPLOAD_SUBMISSION))
 					break;
 				try {
@@ -199,7 +199,7 @@ public class UploadSubmissionsWorkerImpl {
 
 	private List<Submission> getRemainingSubmissions(String lastUploadKey,
 			List<Submission> submissions) {
-
+	  
 		// find the last submission sent, so we don't resend records
 		int indexOfLastSubmission = -1;
 		for (int i = 0; i < submissions.size(); i++) {
@@ -242,7 +242,7 @@ public class UploadSubmissionsWorkerImpl {
 				if (++counter >= SUBMISSIONS_PER_LOCK_RENEWAL) {
 					TaskLock taskLock = pDatastore.createTaskLock();
 					// TODO: figure out what to do if this returns false
-					taskLock.renewLock(pLockId, pForm,
+					taskLock.renewLock(pLockId, pFsc.getUri(),
 							TaskLockType.UPLOAD_SUBMISSION);
 					taskLock = null;
 					counter = 0;

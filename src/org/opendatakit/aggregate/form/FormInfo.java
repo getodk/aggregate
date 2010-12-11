@@ -296,7 +296,10 @@ public class FormInfo {
 	    for ( SubmissionSet f : filesets ) {
 	    	Long rootModel = ((LongSubmissionType) f.getElementValue(rootElementModelVersion)).getValue();
 	    	Long rootUi = ((LongSubmissionType) f.getElementValue(rootElementUiVersion)).getValue();
-	    	if ((rootModelVersion == rootModel) && (rootUiVersion == rootUi)) {
+	    	if (((rootModelVersion == rootModel) || 
+	    			((rootModelVersion != null) && (rootModelVersion.equals(rootModel)))) &&
+	    		((rootUiVersion == rootUi) || 
+	    			((rootUiVersion != null) && (rootUiVersion.equals(rootUi))))) {
 	    		matchingSet = f;
 	    	}
 	    }
@@ -351,7 +354,8 @@ public class FormInfo {
 	    for ( SubmissionSet f : filesets ) {
 	    	Long rootModel = ((LongSubmissionType) f.getElementValue(rootElementModelVersion)).getValue();
 	    	Long rootUi = ((LongSubmissionType) f.getElementValue(rootElementUiVersion)).getValue();
-	    	if ((rootModelVersion == rootModel) && (rootUiVersion == rootUi)) {
+	    	if (((rootModelVersion == rootModel) || ((rootModelVersion != null) && rootModelVersion.equals(rootModel))) &&
+	    		((rootUiVersion == rootUi) || ((rootUiVersion != null) && (rootUiVersion.equals(rootUi))))) {
 	    		matchingSet = f;
 	    	}
 	    }
@@ -392,7 +396,8 @@ public class FormInfo {
 	    	String formIdStr = ((StringSubmissionType) f.getElementValue(submissionFormId)).getValue();
 	    	Long subModel = ((LongSubmissionType) f.getElementValue(submissionModelVersion)).getValue();
 	    	Long subUi = ((LongSubmissionType) f.getElementValue(submissionUiVersion)).getValue();
-	    	if (( modelVersionValue == subModel ) && ( uiVersionValue == subUi) &&
+	    	if ((( modelVersionValue == subModel ) || ((modelVersionValue != null) && modelVersionValue.equals(subModel))) &&
+	    		(( uiVersionValue == subUi ) || ((uiVersionValue != null) && uiVersionValue.equals(subUi))) &&
 	    		( submissionFormIdValue.equals(formIdStr)) ) {
 	    		return;
 	    	}

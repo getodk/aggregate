@@ -17,7 +17,6 @@ package org.opendatakit.common.persistence;
 
 import org.opendatakit.aggregate.constants.TaskLockType;
 import org.opendatakit.aggregate.exception.ODKTaskLockException;
-import org.opendatakit.aggregate.form.Form;
 
 /**
  * 
@@ -26,14 +25,6 @@ import org.opendatakit.aggregate.form.Form;
  * 
  */
 public interface TaskLock {
-  
-  public boolean obtainLock(String lockId, Form form, TaskLockType taskType) throws ODKTaskLockException;
-  
-  public boolean renewLock(String lockId, Form form, TaskLockType taskType) throws ODKTaskLockException ;
-  
-  public boolean releaseLock(String lockId, Form form, TaskLockType taskType) throws ODKTaskLockException;
-
-  // TODO: remove string versions, only added for quick unit tests
   
   boolean obtainLock(String lockId, String formId, TaskLockType taskType) throws ODKTaskLockException;
   

@@ -268,7 +268,7 @@ public class FusionTable extends AbstractExternalService implements ExternalServ
 		HttpURLConnection request = (HttpURLConnection) url.openConnection();
 		request.setDoOutput(true);
 		request.setDoInput(true);
-		request.setRequestMethod("POST");
+		request.setRequestMethod(HtmlConsts.POST);
 		request.setFixedLengthStreamingMode(0);
 		try {
 			consumer.sign(request);
@@ -312,7 +312,7 @@ public class FusionTable extends AbstractExternalService implements ExternalServ
 		HttpURLConnection request = (HttpURLConnection) url.openConnection();
 	   request.setDoOutput(true);
 	   request.setDoInput(true);
-      request.setRequestMethod("POST");
+      request.setRequestMethod(HtmlConsts.POST);
       request.setFixedLengthStreamingMode(0);
 		try {
 			consumer.sign(request);
@@ -433,7 +433,9 @@ public class FusionTable extends AbstractExternalService implements ExternalServ
     List<ElementType> types = headerFormatter.getHeaderTypes();
     StringBuilder createStmt = new StringBuilder();
     createStmt.append(FusionTableConsts.CREATE_STMT);
+    createStmt.append(BasicConsts.SINGLE_QUOTE);
     createStmt.append(rootNode.getElementName());
+    createStmt.append(BasicConsts.SINGLE_QUOTE);
     createStmt.append(BasicConsts.LEFT_PARENTHESIS);
 
     boolean first = true;

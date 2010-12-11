@@ -78,14 +78,20 @@ public class FormUploadServlet extends ServletUtilBase {
    * Title for generated webpage to obtain title
    */
   private static final String OBTAIN_TITLE_INFO = "Xform Title Entry";
-  
+
   /**
    * Text to display to user to obtain title
    */
   private static final String TITLE_OF_THE_XFORM = "Title of the Xform:";
 
   private static final String DATAFILE = "datafile";
-  
+
+  private static final String LOCATION_OF_XFORM_DEFINITION = "Location of Xform definition to be uploaded:";
+
+  private static final String DATA_FILES_DESCRIPTION = "Data File(s) that are Part of the Form Definition (Pictures, Video, etc):";
+
+  private static final String UPLOAD_BUTTON_TEXT = "Upload Form";
+
   /**
    * Handler for HTTP Get request to create xform upload page
    * 
@@ -97,18 +103,18 @@ public class FormUploadServlet extends ServletUtilBase {
 
     PrintWriter out = resp.getWriter();
 
-	if (!verifyCredentials(req, resp)) {
-		return;
-	}
+    if (!verifyCredentials(req, resp)) {
+      return;
+    }
 
-	beginBasicHtmlResponse(TITLE_INFO, resp, req, true); // header info
-    out.write(HtmlUtil.createFormBeginTag(ADDR, HtmlConsts.MULTIPART_FORM_DATA,
-        HtmlConsts.POST));
-    out.write("Location of Xform definition to be uploaded:" + HtmlConsts.LINE_BREAK);
+    beginBasicHtmlResponse(TITLE_INFO, resp, req, true); // header info
+    out.write(HtmlUtil.createFormBeginTag(ADDR, HtmlConsts.MULTIPART_FORM_DATA, HtmlConsts.POST));
+    out.write(LOCATION_OF_XFORM_DEFINITION + HtmlConsts.LINE_BREAK);
     out.write(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_FILE, ServletConsts.FORM_DEF_PRAM, null));
     out.write(HtmlConsts.LINE_BREAK + HtmlConsts.LINE_BREAK);
-    out.write("Data File(s) that are Part of the Submission (Pictures, Video, etc):"
-        + HtmlConsts.LINE_BREAK);
+    out.write(DATA_FILES_DESCRIPTION + HtmlConsts.LINE_BREAK);
+    out.write(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_FILE, DATAFILE, null));
+    out.write(HtmlConsts.LINE_BREAK);
     out.write(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_FILE, DATAFILE, null));
     out.write(HtmlConsts.LINE_BREAK);
     out.write(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_FILE, DATAFILE, null));
@@ -117,7 +123,7 @@ public class FormUploadServlet extends ServletUtilBase {
     out.write(HtmlConsts.LINE_BREAK);
     out.write(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_FILE, DATAFILE, null));
     out.write(HtmlConsts.LINE_BREAK + HtmlConsts.LINE_BREAK);
-    out.write(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_SUBMIT, null, "Upload"));
+    out.write(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_SUBMIT, null, UPLOAD_BUTTON_TEXT));
     out.write(HtmlConsts.FORM_CLOSE);
     finishBasicHtmlResponse(resp);
   }
@@ -132,44 +138,43 @@ public class FormUploadServlet extends ServletUtilBase {
   @Override
   public void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 
-      UserService userService = (UserService) ContextFactory.get().getBean(
-              BeanDefs.USER_BEAN);
-      User user = userService.getCurrentUser();
-	
-		if (user instanceof org.opendatakit.common.security.gae.UserImpl) {
-			// We are in app engine
-	
-			String authParam = getParameter(req, ServletConsts.AUTHENTICATION);
-	
-			if (authParam != null && authParam.equalsIgnoreCase(ServletConsts.AUTHENTICATION_OAUTH)) {
-				// Try OAuth authentication
-				try {
-					OAuthService oauth = OAuthServiceFactory.getOAuthService();
-					com.google.appengine.api.users.User gaeUser = oauth.getCurrentUser();
-					user = new org.opendatakit.common.security.gae.UserImpl(gaeUser);
-					if (user == null) {
-						resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, ErrorConsts.OAUTH_ERROR);
-						return;
-					}
-				} catch (OAuthRequestException e) {
-					resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, ErrorConsts.OAUTH_ERROR + "\n Reason: "
-									+ e.getLocalizedMessage());
-					return;
-				}
-			} else {
-				// Use User Service authentication
-				// verify user is logged in
-				if (!verifyCredentials(req, resp)) {
-					return;
-				}
-			}
-		} else {
-			// We are not in app engine
-			// verify user is logged in
-			if (!verifyCredentials(req, resp)) {
-				return;
-			}
-		}
+    UserService userService = (UserService) ContextFactory.get().getBean(BeanDefs.USER_BEAN);
+    User user = userService.getCurrentUser();
+
+    if (user instanceof org.opendatakit.common.security.gae.UserImpl) {
+      // We are in app engine
+
+      String authParam = getParameter(req, ServletConsts.AUTHENTICATION);
+
+      if (authParam != null && authParam.equalsIgnoreCase(ServletConsts.AUTHENTICATION_OAUTH)) {
+        // Try OAuth authentication
+        try {
+          OAuthService oauth = OAuthServiceFactory.getOAuthService();
+          com.google.appengine.api.users.User gaeUser = oauth.getCurrentUser();
+          user = new org.opendatakit.common.security.gae.UserImpl(gaeUser);
+          if (user == null) {
+            resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, ErrorConsts.OAUTH_ERROR);
+            return;
+          }
+        } catch (OAuthRequestException e) {
+          resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, ErrorConsts.OAUTH_ERROR
+              + "\n Reason: " + e.getLocalizedMessage());
+          return;
+        }
+      } else {
+        // Use User Service authentication
+        // verify user is logged in
+        if (!verifyCredentials(req, resp)) {
+          return;
+        }
+      }
+    } else {
+      // We are not in app engine
+      // verify user is logged in
+      if (!verifyCredentials(req, resp)) {
+        return;
+      }
+    }
 
     // verify request is multipart
     if (!ServletFileUpload.isMultipartContent(req)) {
@@ -178,7 +183,8 @@ public class FormUploadServlet extends ServletUtilBase {
     }
 
     boolean bOk = false;
-    // TODO Add in form title process so it will update the changes in the XML of form
+    // TODO Add in form title process so it will update the changes in the XML
+    // of form
 
     try {
       // process form
@@ -201,32 +207,32 @@ public class FormUploadServlet extends ServletUtilBase {
       if (formXmlData != null) {
         // TODO: changed added output stream writer. probably something better
         // exists
-    	inputXml = formXmlData.getStream().toString(HtmlConsts.UTF8_ENCODE);
+        inputXml = formXmlData.getStream().toString(HtmlConsts.UTF8_ENCODE);
         xmlFileName = formXmlData.getFilename();
       }
 
       // persist form
       Datastore ds = (Datastore) ContextFactory.get().getBean(BeanDefs.DATASTORE_BEAN);
 
-
       try {
-        parser = new FormParserForJavaRosa(formName, formXmlData, inputXml, xmlFileName, uploadedFormItems,
-        		ds, user, userService.getCurrentRealm());
-        
+        parser = new FormParserForJavaRosa(formName, formXmlData, inputXml, xmlFileName,
+            uploadedFormItems, ds, user, userService.getCurrentRealm());
+
         Form form = Form.retrieveForm(parser.getFormId(), ds, user);
         form.printDataTree(System.out);
         bOk = true;
-        
+
       } catch (ODKFormAlreadyExistsException e) {
         resp.sendError(HttpServletResponse.SC_CONFLICT, ErrorConsts.FORM_WITH_ODKID_EXISTS);
         return;
       } catch (ODKIncompleteSubmissionData e) {
         switch (e.getReason()) {
         case TITLE_MISSING:
-          createTitleQuestionWebpage(req, resp, inputXml, xmlFileName); 
+          createTitleQuestionWebpage(req, resp, inputXml, xmlFileName);
           return;
         case ID_MALFORMED:
-          resp.sendError(HttpServletResponse.SC_BAD_REQUEST, ErrorConsts.JAVA_ROSA_PARSING_PROBLEM + e.getMessage());
+          resp.sendError(HttpServletResponse.SC_BAD_REQUEST, ErrorConsts.JAVA_ROSA_PARSING_PROBLEM
+              + e.getMessage());
           return;
         case ID_MISSING:
           resp.sendError(HttpServletResponse.SC_BAD_REQUEST, ErrorConsts.MISSING_FORM_ID);
@@ -235,39 +241,46 @@ public class FormUploadServlet extends ServletUtilBase {
           resp.sendError(HttpServletResponse.SC_BAD_REQUEST, ErrorConsts.MISSING_FORM_INFO);
           return;
         case BAD_JR_PARSE:
-          resp.sendError(HttpServletResponse.SC_BAD_REQUEST, ErrorConsts.JAVA_ROSA_PARSING_PROBLEM + e.getMessage());
-          return; 
+          resp.sendError(HttpServletResponse.SC_BAD_REQUEST, ErrorConsts.JAVA_ROSA_PARSING_PROBLEM
+              + e.getMessage());
+          return;
         default:
           // just move on
         }
       } catch (ODKEntityPersistException e) {
         // TODO NEED TO FIGURE OUT PROPER ACTION FOR ERROR
         e.printStackTrace();
-        resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ErrorConsts.PERSISTENCE_LAYER_PROBLEM);
+        resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+            ErrorConsts.PERSISTENCE_LAYER_PROBLEM);
       } catch (ODKDatastoreException e) {
         // TODO NEED TO FIGURE OUT PROPER ACTION FOR ERROR
         e.printStackTrace();
-        resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ErrorConsts.PERSISTENCE_LAYER_PROBLEM);
+        resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+            ErrorConsts.PERSISTENCE_LAYER_PROBLEM);
       } catch (ODKConversionException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-        resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ErrorConsts.PARSING_PROBLEM + "\n" + e.getMessage());
-	} catch (ODKFormNotFoundException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+        resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ErrorConsts.PARSING_PROBLEM
+            + "\n" + e.getMessage());
+      } catch (ODKFormNotFoundException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
         resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ErrorConsts.ODKID_NOT_FOUND);
-	} catch (ODKParseException e) {
-		// unfortunately, the underlying javarosa utility swallows the parsing error.
-		e.printStackTrace();
-        resp.sendError(HttpServletResponse.SC_BAD_REQUEST, ErrorConsts.PARSING_PROBLEM + "\n" + e.getMessage());
-	}
+      } catch (ODKParseException e) {
+        // unfortunately, the underlying javarosa utility swallows the parsing
+        // error.
+        e.printStackTrace();
+        resp.sendError(HttpServletResponse.SC_BAD_REQUEST, ErrorConsts.PARSING_PROBLEM + "\n"
+            + e.getMessage());
+      }
 
     } catch (FileUploadException e) {
       e.printStackTrace(resp.getWriter());
       resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ErrorConsts.UPLOAD_PROBLEM);
     }
 
-    if ( bOk ) resp.sendRedirect(FormsServlet.ADDR);
+    if (bOk)
+      resp.sendRedirect(FormsServlet.ADDR);
   }
 
   private void createTitleQuestionWebpage(HttpServletRequest req, HttpServletResponse resp,
@@ -275,7 +288,8 @@ public class FormUploadServlet extends ServletUtilBase {
     beginBasicHtmlResponse(OBTAIN_TITLE_INFO, resp, req, true); // header info
 
     PrintWriter out = resp.getWriter();
-    out.write(HtmlUtil.createFormBeginTag(FormUploadServlet.ADDR, HtmlConsts.MULTIPART_FORM_DATA, HtmlConsts.POST));
+    out.write(HtmlUtil.createFormBeginTag(FormUploadServlet.ADDR, HtmlConsts.MULTIPART_FORM_DATA,
+        HtmlConsts.POST));
     out.write(TITLE_OF_THE_XFORM + HtmlConsts.LINE_BREAK);
     out.write(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_TEXT, ServletConsts.FORM_NAME_PRAM, null));
     out.write(HtmlConsts.LINE_BREAK + HtmlConsts.LINE_BREAK);
@@ -286,5 +300,4 @@ public class FormUploadServlet extends ServletUtilBase {
     finishBasicHtmlResponse(resp);
   }
 
-  
 }

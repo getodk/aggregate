@@ -96,6 +96,8 @@ public class DatastoreImpl implements Datastore {
 	@Override
 	public void createRelation(CommonFieldsBase relation, User user)
 			throws ODKDatastoreException {
+		int nColumns = 0;
+		long nBytes = 0L;
 		for ( DataField d : relation.getFieldList() ) {
 			switch ( d.getDataType() ) {
 			case LONG_STRING:
@@ -107,17 +109,34 @@ public class DatastoreImpl implements Datastore {
 				if ( d.getMaxCharLen() == null ) {
 					d.setMaxCharLen(GAE_MAX_STRING_LEN);
 				}
+				nBytes += d.getMaxCharLen();
+				++nColumns;
 				break;
 			case DATETIME:
+				nBytes += 24;
+				++nColumns;
 				break;
 			case INTEGER:
 				d.setNumericPrecision(DEFAULT_INT_NUMERIC_PRECISION);
+				nBytes += 8;
+				++nColumns;
 				break;
 			case DECIMAL:
 				d.setNumericPrecision(DEFAULT_DBL_NUMERIC_PRECISION);
 				d.setNumericScale(DEFAULT_DBL_NUMERIC_SCALE);
+				nBytes += 8;
+				++nColumns;
 				break;
 			}
+		}
+		// limits for GAE are 5000 columns and 1Mb for a batch put request.
+		// Don't know how much overhead there is in the construction of the 
+		// request, but figure 30% overhead (which is absurd).
+		//
+		// Insist the upper layers partition the data tables when they have
+		// more than potentially 4000 columns or 700,000 bytes of data per row.
+		if ( (nColumns > 4000) || (nBytes > 700000)) {
+			throw new ODKDatastoreException("table is overly large");
 		}
 	}
 

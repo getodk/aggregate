@@ -19,6 +19,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * The submission key represents an XPath-style identification of a particular data element
+ * on the server.  The base 
  * 
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
@@ -31,14 +33,29 @@ public class SubmissionKey {
 		this.key = key;
 	}
 	
-	public SubmissionKey( String formId, String topLevelGroupElementName, String uri ) {
+	/**
+	 * Used by form deletion. 
+	 * 
+	 * @param formId
+	 * @param modelVersion
+	 * @param uiVersion
+	 * @param topLevelGroupElementName
+	 * @param uri
+	 */
+	public SubmissionKey( String formId, Long modelVersion, Long uiVersion,
+							String topLevelGroupElementName, String uri ) {
 		StringBuilder b = new StringBuilder();
 		b.append(formId);
-		b.append("/");
+		b.append(SubmissionKeyPart.K_OPEN_BRACKET_VERSION_EQUALS);
+		b.append(modelVersion);
+		b.append(SubmissionKeyPart.K_AND_UI_VERSION_EQUALS);
+		b.append(uiVersion);
+		b.append(SubmissionKeyPart.K_CLOSE_BRACKET);
+		b.append(SubmissionKeyPart.K_SLASH);
 		b.append(topLevelGroupElementName);
-		b.append("[@key=");
+		b.append(SubmissionKeyPart.K_OPEN_BRACKET_KEY_EQUALS);
 		b.append(uri);
-		b.append("]");
+		b.append(SubmissionKeyPart.K_CLOSE_BRACKET);
 		this.key = b.toString();
 	}
 	

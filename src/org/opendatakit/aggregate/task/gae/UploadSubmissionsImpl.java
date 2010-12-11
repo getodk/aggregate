@@ -48,6 +48,7 @@ public class UploadSubmissionsImpl implements UploadSubmissions {
       throws ODKExternalServiceException {
 
     try {
+      System.out.println("Creating " + fsc.getExternalServiceOption().toString().toLowerCase() + " upload task: " + fsc.getExternalServiceType());
       String fscUri = URLEncoder.encode(fsc.getUri(), HtmlConsts.UTF8_ENCODE);
 
       TaskOptions task = TaskOptions.Builder.withUrl(ServletConsts.WEB_ROOT + UploadSubmissionsTaskServlet.ADDR);

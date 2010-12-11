@@ -15,14 +15,17 @@
  */
 package org.opendatakit.common.persistence.engine.gae;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.opendatakit.aggregate.constants.TaskLockType;
 import org.opendatakit.aggregate.exception.ODKTaskLockException;
-import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.common.persistence.TaskLock;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Transaction;
@@ -43,8 +46,7 @@ public class TaskLockImpl implements TaskLock {
   private static final String FORM_ID_PROPERTY = "FORM_ID";
   private static final String TASK_TYPE_PROPERTY = "TASK_TYPE";
   private static final String TIMESTAMP_PROPERTY = "TIMESTAMP";
-    
-  
+
   private DatastoreService ds;
 
   public TaskLockImpl() {
@@ -52,76 +54,114 @@ public class TaskLockImpl implements TaskLock {
   }
 
   @Override
-  public boolean obtainLock(String lockId, String formId, TaskLockType taskType)
-      throws ODKTaskLockException {
+  public boolean obtainLock(String lockId, String formId, TaskLockType taskType) {
     boolean result = false;
     Transaction transaction = ds.beginTransaction();
 
     try {
       Entity gaeEntity = queryForLock(formId, taskType);
+      System.out.println("Trying to get lock : " + lockId);
       if (gaeEntity == null) {
         gaeEntity = new Entity(KIND);
         updateValuesNpersist(transaction, lockId, formId, taskType, gaeEntity);
         result = true;
-      } else if(checkForExpiration(gaeEntity)) { 
-        // note don't delete as there is no guarantee that the lock is in the same
+      } else if (checkForExpiration(gaeEntity)) {
+        // note don't delete as there is no guarantee that the lock is in the
+        // same
         // entity group (only one entity group per transaction)
         updateValuesNpersist(transaction, lockId, formId, taskType, gaeEntity);
         result = true;
       }
       // else you did not get the lock
+    } catch (ODKTaskLockException e) {
+      result = false;
+      e.printStackTrace();
     } finally {
-      if(result) {
+      if (result) {
         transaction.commit();
       } else {
         transaction.rollback();
+        return result;
+      }
+    }
+    try {
+      // verify no one else made a lock
+      lockVerification(lockId, formId, taskType);
+    } catch (ODKTaskLockException e) {
+      result = false;
+      boolean deleteResult = false;
+      // The lock state in the db is bad, so delete bad locks
+      Transaction deleteTransaction = ds.beginTransaction();
+      try {
+        Query query = new Query(KIND);
+        query.addFilter(FORM_ID_PROPERTY, Query.FilterOperator.EQUAL, formId);
+        query.addFilter(TASK_TYPE_PROPERTY, Query.FilterOperator.EQUAL, taskType.toString());
+        PreparedQuery pquery = ds.prepare(query);
+        Iterable<Entity> entities = pquery.asIterable();
+        List<Key> keysToDelete = new ArrayList<Key>();
+//        long oldestTimestamp = System.currentTimeMillis();
+        for (Entity entity : entities) {
+          Object value = entity.getProperty(LOCK_ID_PROPERTY);
+          if (value instanceof String) {
+            String retrievedLockId = (String) value;
+            if (lockId.equals(retrievedLockId)) {
+              keysToDelete.add(entity.getKey());
+            }
+//            oldestTimestamp = Math.min(oldestTimestamp, Long.parseLong((String) entity.getProperty(TIMESTAMP_PROPERTY)));
+          }
+        }
+        ds.delete(deleteTransaction, keysToDelete);
+        deleteResult = true;
+      } catch (Exception e1) {
+        deleteResult = false;
+        e1.printStackTrace();
+      }
+      finally {
+        if (deleteResult) {
+          deleteTransaction.commit();
+        } else {
+          deleteTransaction.rollback();
+        }
       }
     }
 
     return result;
   }
 
-  
-  @Override
-  public boolean obtainLock(String lockId, Form form, TaskLockType taskType) throws ODKTaskLockException {
-    return obtainLock(lockId, form.getFormId(), taskType);
-  }
-
   private boolean checkForExpiration(Entity entity) {
-    if(entity == null) {
+    if (entity == null) {
       return false;
     }
     Object obj = entity.getProperty(TIMESTAMP_PROPERTY);
-    if(obj instanceof Long) {
+    if (obj instanceof Long) {
       Long timestamp = (Long) obj;
       Long current = System.currentTimeMillis();
-      if(current > timestamp) {
+      System.out.println("Time left on lock: " + (timestamp - current));
+      if (current > timestamp) {
         return true;
       }
     }
     return false;
   }
-  
-  @Override
-  public boolean renewLock(String lockId, Form form, TaskLockType taskType)
-      throws ODKTaskLockException {
-    return renewLock(lockId, form.getFormId(), taskType);
-  }
-  
-  public boolean renewLock(String lockId, String formId, TaskLockType taskType) throws ODKTaskLockException {
-    
+
+  public boolean renewLock(String lockId, String formId, TaskLockType taskType) {
     boolean result = false;
     Transaction transaction = ds.beginTransaction();
     try {
       Entity gaeEntity = queryForLock(formId, taskType);
-      if(gaeEntity != null) {
+      if (gaeEntity != null) {
         if (gaeEntity.getProperty(LOCK_ID_PROPERTY).equals(lockId)) {
           updateValuesNpersist(transaction, lockId, formId, taskType, gaeEntity);
           result = true;
         }
       }
-    } finally {
-      if(result) {
+      // verify no one else made a lock
+      lockVerification(lockId, formId, taskType);
+    }catch (ODKTaskLockException e) {
+        result = false;
+        e.printStackTrace();
+       } finally {
+      if (result) {
         transaction.commit();
       } else {
         transaction.rollback();
@@ -130,13 +170,9 @@ public class TaskLockImpl implements TaskLock {
     return result;
   }
 
-  @Override
-  public boolean releaseLock(String lockId, Form form, TaskLockType taskType) throws ODKTaskLockException{    
-    return releaseLock(lockId, form.getFormId(), taskType);
-  }
 
-  public boolean releaseLock(String lockId, String formId, TaskLockType taskType)
-      throws ODKTaskLockException {
+
+  public boolean releaseLock(String lockId, String formId, TaskLockType taskType) throws ODKTaskLockException {
     boolean result = false;
     Transaction transaction = ds.beginTransaction();
     try {
@@ -146,7 +182,7 @@ public class TaskLockImpl implements TaskLock {
         result = true;
       }
     } finally {
-      if(result) {
+      if (result) {
         transaction.commit();
       } else {
         transaction.rollback();
@@ -154,9 +190,22 @@ public class TaskLockImpl implements TaskLock {
     }
     return result;
   }
-  
+
+  private void lockVerification(String lockId, String formId, TaskLockType taskType)
+      throws ODKTaskLockException {
+    Entity verificationEntity = queryForLock(formId, taskType);
+    Object value = verificationEntity.getProperty(LOCK_ID_PROPERTY);
+    if (value instanceof String) {
+      String retrievedLockId = (String) value;
+      if (!lockId.equals(retrievedLockId)) {
+        throw new ODKTaskLockException("SOMEONE OVERWROTE THE LOCK" + " Actual: " + retrievedLockId + " Expected: " + lockId);
+      }
+    }
+  }
+
   private void updateValuesNpersist(Transaction transaction, String lockId, String formId,
-      TaskLockType taskType, Entity gaeEntity) throws ODKTaskLockException{
+      TaskLockType taskType, Entity gaeEntity) throws ODKTaskLockException {
+    System.out.println("Persisting lock: " + lockId);
     try {
       Long timestamp = System.currentTimeMillis() + taskType.getLockExpirationTimeout();
       gaeEntity.setProperty(TIMESTAMP_PROPERTY, timestamp);
@@ -166,7 +215,7 @@ public class TaskLockImpl implements TaskLock {
       ds.put(transaction, gaeEntity);
     } catch (IllegalStateException e) {
       throw new ODKTaskLockException(NO_TRANSACTION_ACTIVE, e);
-    } 
+    }
   }
 
   private Entity queryForLock(String formId, TaskLockType taskType) throws ODKTaskLockException {

@@ -32,6 +32,7 @@ import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.exception.ODKExternalServiceAuthenticationError;
 import org.opendatakit.aggregate.exception.ODKExternalServiceNotAuthenticated;
 import org.opendatakit.aggregate.externalservice.OAuthToken;
+import org.opendatakit.common.constants.BasicConsts;
 import org.opendatakit.common.constants.HtmlConsts;
 import org.opendatakit.common.security.UserService;
 import org.opendatakit.common.web.servlet.CommonServletBase;
@@ -141,15 +142,15 @@ public class ServletUtilBase extends CommonServletBase {
     StringBuilder html = new StringBuilder();
     html.append(HtmlUtil.createHref(FormsServlet.ADDR, ServletConsts.FORMS_LINK_TEXT));
     html.append(HtmlConsts.TAB + HtmlConsts.TAB);
+    html.append(HtmlUtil.createHref(ResultServlet.ADDR, ServletConsts.RESULT_FILES_LINK_TEXT));
+    html.append(HtmlConsts.TAB + HtmlConsts.TAB);
+    html.append(HtmlUtil.createHref(UploadAppletServlet.ADDR, ServletConsts.UPLOAD_APPLET_LINK_TEXT));
+    html.append(HtmlConsts.TAB + HtmlConsts.TAB);
     html.append(HtmlUtil.createHref(FormUploadServlet.ADDR, ServletConsts.UPLOAD_FORM_LINK_TEXT));
     html.append(HtmlConsts.TAB + HtmlConsts.TAB);
     html.append(HtmlUtil.createHref(FormDeleteServlet.ADDR, ServletConsts.DELETE_FORM_LINK_TEXT));
     html.append(HtmlConsts.TAB + HtmlConsts.TAB);
     html.append(HtmlUtil.createHref(SubmissionServlet.ADDR, ServletConsts.UPLOAD_SUB_LINK_TEXT));
-    html.append(HtmlConsts.TAB + HtmlConsts.TAB);
-    html.append(HtmlUtil.createHref(UploadAppletServlet.ADDR, ServletConsts.UPLOAD_APPLET_LINK_TEXT));
-    html.append(HtmlConsts.TAB + HtmlConsts.TAB);
-    html.append(HtmlUtil.createHref(ResultServlet.ADDR, ServletConsts.RESULT_FILES_LINK_TEXT));
     return html.toString();
   }
 
@@ -186,10 +187,10 @@ public class ServletUtilBase extends CommonServletBase {
 	GoogleOAuthParameters oauthParameters = new GoogleOAuthParameters();
 	oauthParameters.setOAuthConsumerKey(ServletConsts.OAUTH_CONSUMER_KEY);
 	oauthParameters.setOAuthConsumerSecret(ServletConsts.OAUTH_CONSUMER_SECRET);
-	String scope = "";
+	String scope = BasicConsts.EMPTY_STRING;
 	for (String singleScope : scopes)
 	{
-		scope += singleScope + " ";
+		scope += singleScope + BasicConsts.SPACE;
 	}
 	oauthParameters.setScope(scope);
 	
