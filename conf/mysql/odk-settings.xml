@@ -5,7 +5,6 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans
            http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
 
-
 <bean id="datastore" class="org.opendatakit.common.persistence.engine.mysql.DatastoreImpl" />
 <bean id="user_service" class="org.opendatakit.common.security.tomcat.UserServiceImpl" /> 
 <bean id="worksheet_creator" class="org.opendatakit.aggregate.task.tomcat.WorksheetCreatorImpl" /> 
