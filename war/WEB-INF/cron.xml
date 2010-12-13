@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cronentries>
+  <cron>
+    <url>/watchdog?checkIntervalMilliseconds=180000</url>
+    <description>Check tasks every 3 minutes</description>
+    <schedule>every 3 minutes</schedule>
+  </cron>
+</cronentries>
