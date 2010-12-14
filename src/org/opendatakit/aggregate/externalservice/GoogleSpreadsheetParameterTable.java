@@ -59,7 +59,7 @@ public final class GoogleSpreadsheetParameterTable extends CommonFieldsBase {
 	 * @param tableName
 	 */
 	GoogleSpreadsheetParameterTable(String schemaName) {
-		super(schemaName, TABLE_NAME, CommonFieldsBase.BaseType.STATIC);
+		super(schemaName, TABLE_NAME);
 		fieldList.add(spreadsheetName = new DataField(SPREADSHEET_NAME_PROPERTY));
 		fieldList.add(spreadsheetKey = new DataField(SPREADSHEET_KEY_PROPERTY));
 		fieldList.add(topLevelWorksheetId = new DataField(TOP_LEVEL_WORKSHEET_ID_PROPERTY));
@@ -150,7 +150,7 @@ public final class GoogleSpreadsheetParameterTable extends CommonFieldsBase {
 
 	private static GoogleSpreadsheetParameterTable relation = null;
 
-	public static GoogleSpreadsheetParameterTable createRelation(
+	public static synchronized final GoogleSpreadsheetParameterTable createRelation(
 			Datastore datastore, User user) throws ODKDatastoreException {
 		if (relation == null) {
 			GoogleSpreadsheetParameterTable relationPrototype;

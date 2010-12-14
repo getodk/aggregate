@@ -63,7 +63,7 @@ public abstract class TopLevelDynamicBase extends DynamicCommonFieldsBase {
 	 * @param tableName
 	 */
 	protected TopLevelDynamicBase(String databaseSchema, String tableName) {
-		super(databaseSchema, tableName, BaseType.TOP_LEVEL_DYNAMIC);
+		super(databaseSchema, tableName);
 		fieldList.add(modelVersion=new DataField(MODEL_VERSION));
 		fieldList.add(uiVersion=new DataField(UI_VERSION));
 		fieldList.add(isComplete=new DataField(IS_COMPLETE));
@@ -83,44 +83,26 @@ public abstract class TopLevelDynamicBase extends DynamicCommonFieldsBase {
 	}
 
 	public final Long getModelVersion() {
-		if ( tableType != BaseType.TOP_LEVEL_DYNAMIC ) {
-			throw new IllegalStateException("Attempting to get modelVersion of non-TOP-LEVEL-DYNAMIC table");
-		}
 		return getLongField(modelVersion);
 	}
 
 	public final void setModelVersion(Long value) {
-		if ( tableType != BaseType.TOP_LEVEL_DYNAMIC ) {
-			throw new IllegalStateException("Attempting to set modelVersion of non-TOP-LEVEL-DYNAMIC table");
-		}
 		setLongField(modelVersion, value);
 	}
 
 	public final Long getUiVersion() {
-		if ( tableType != BaseType.TOP_LEVEL_DYNAMIC ) {
-			throw new IllegalStateException("Attempting to get uiVersion of non-TOP-LEVEL-DYNAMIC table");
-		}
 		return getLongField(uiVersion);
 	}
 
 	public final void setUiVersion(Long value) {
-		if ( tableType != BaseType.TOP_LEVEL_DYNAMIC ) {
-			throw new IllegalStateException("Attempting to set uiVersion of non-TOP-LEVEL-DYNAMIC table");
-		}
 		setLongField(uiVersion, value);
 	}
 
 	public final Boolean getIsComplete() {
-		if ( tableType != BaseType.TOP_LEVEL_DYNAMIC ) {
-			throw new IllegalStateException("Attempting to get isComplete of non-TOP-LEVEL-DYNAMIC table");
-		}
 		return getBooleanField(isComplete);
 	}
 
 	public final void setIsComplete(Boolean value) {
-		if ( tableType != BaseType.TOP_LEVEL_DYNAMIC ) {
-			throw new IllegalStateException("Attempting to set isComplete of non-TOP-LEVEL-DYNAMIC table");
-		}
 		setBooleanField(isComplete, value);
 	}
 }

@@ -28,6 +28,7 @@ import org.opendatakit.aggregate.exception.ODKExternalServiceDependencyException
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.servlet.ServletUtilBase;
+import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.task.FormDeleteWorkerImpl;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
@@ -64,22 +65,35 @@ public class FormDeleteTaskServlet extends ServletUtilBase {
     User user = userService.getCurrentUser();
     // get parameter
 
-    String odkId = getParameter(req, ServletConsts.FORM_ID);
-    if (odkId == null) {
+    String formId = getParameter(req, ServletConsts.FORM_ID);
+    if (formId == null) {
       errorMissingKeyParam(resp);
       return;
     }
+    String miscTasksString = getParameter(req, ServletConsts.MISC_TASKS_KEY);
+    if ( miscTasksString == null ) {
+    	errorBadParam(resp);
+    	return;
+    }
+    SubmissionKey miscTasksKey = new SubmissionKey(miscTasksString);
+    String attemptCountString = getParameter(req, ServletConsts.ATTEMPT_COUNT);
+    if ( attemptCountString == null ) {
+    	errorBadParam(resp);
+    	return;
+    }
+    Long attemptCount = Long.valueOf(attemptCountString);
 
     Datastore datastore = (Datastore) ContextFactory.get().getBean(BeanDefs.DATASTORE_BEAN);
     Form form;
     try {
-      form = Form.retrieveForm(odkId, datastore, user);
+      form = Form.retrieveForm(formId, datastore, user);
     } catch (ODKFormNotFoundException e) {
       odkIdNotFoundError(resp);
       return;
     }
 
-    FormDeleteWorkerImpl formDelete = new FormDeleteWorkerImpl(form, user);
+    FormDeleteWorkerImpl formDelete = new FormDeleteWorkerImpl(form, miscTasksKey, 
+    					attemptCount, getServerURL(req), datastore, user);
       try {
 		formDelete.deleteForm();
 	} catch (ODKDatastoreException e) {

@@ -24,8 +24,11 @@ import org.opendatakit.aggregate.exception.ODKExternalServiceException;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
 import org.opendatakit.aggregate.externalservice.FormServiceCursor;
+import org.opendatakit.aggregate.externalservice.FormServiceCursor.OperationalStatus;
 import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.form.MiscTasks;
 import org.opendatakit.aggregate.form.PersistentResults;
+import org.opendatakit.aggregate.form.MiscTasks.TaskType;
 import org.opendatakit.aggregate.query.submission.QueryByDate;
 import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.common.persistence.Datastore;
@@ -46,6 +49,7 @@ public class WatchdogWorkerImpl {
       ODKDatastoreException, ODKIncompleteSubmissionData {
     checkFormServiceCursors(checkIntervalMilliseconds, baseWebServerUrl, datastore, user);
     checkPersistentResults(baseWebServerUrl, datastore, user);
+    checkMiscTasks(baseWebServerUrl, datastore, user);
   }
 
   private void checkFormServiceCursors(long checkIntervalMilliseconds, String baseWebServerUrl,
@@ -55,6 +59,9 @@ public class WatchdogWorkerImpl {
     List<FormServiceCursor> fscList = FormServiceCursor.queryFormServiceCursorRelation(
         olderThanDate, datastore, user);
     for (FormServiceCursor fsc : fscList) {
+      if ( !fsc.isExternalServicePrepared() ) continue;
+      if ( fsc.getOperationalStatus() != OperationalStatus.ACTIVE ) continue;
+      
       switch (fsc.getExternalServiceOption()) {
       case UPLOAD_ONLY:
         checkUpload(fsc, baseWebServerUrl, user);
@@ -140,6 +147,35 @@ public class WatchdogWorkerImpl {
       case KML:
         KmlGenerator kmlGenerator = (KmlGenerator) ContextFactory.get().getBean(BeanDefs.KML_BEAN);
         kmlGenerator.createKmlTask(form, persistentResult.getSubmissionKey(), attemptCount,
+            baseWebServerUrl, datastore, user);
+        break;
+      }
+    }
+  }
+
+
+  private void checkMiscTasks(String baseWebServerUrl, Datastore datastore, User user)
+      throws ODKDatastoreException, ODKFormNotFoundException {
+    // TODO: remove
+    System.out.println("Checking miscellaneous tasks");
+    List<MiscTasks> miscTasks = MiscTasks.getStalledRequests(datastore,
+        user);
+    for (MiscTasks aTask : miscTasks) {
+      // TODO: remove
+      System.out.println("Found stalled request: " + aTask.getSubmissionKey());
+      long attemptCount = aTask.getAttemptCount();
+      aTask.setAttemptCount(++attemptCount);
+      aTask.persist(datastore, user);
+      Form form = Form.retrieveForm(aTask.getFormId(), datastore, user);
+      switch (aTask.getTaskType()) {
+      case WORKSHEET_CREATE:
+    	WorksheetCreator wsCreator = (WorksheetCreator) ContextFactory.get().getBean(BeanDefs.WORKSHEET_BEAN);
+    	wsCreator.createWorksheetTask(form, aTask.getSubmissionKey(), attemptCount,
+            baseWebServerUrl, datastore, user);
+        break;
+      case DELETE_FORM:
+        FormDelete formDelete = (FormDelete) ContextFactory.get().getBean(BeanDefs.FORM_DELETE_BEAN);
+        formDelete.createFormDeleteTask(form, aTask.getSubmissionKey(), attemptCount,
             baseWebServerUrl, datastore, user);
         break;
       }

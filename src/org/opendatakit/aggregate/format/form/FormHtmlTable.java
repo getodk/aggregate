@@ -28,6 +28,7 @@ import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.format.FormTableConsts;
 import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.form.MiscTasks;
 import org.opendatakit.aggregate.form.PersistentResults;
 import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.query.QueryFormList;
@@ -85,8 +86,6 @@ public class FormHtmlTable {
     
     // build HTML table of form information
     for (Form form : forms.getForms()) {
-    	if ( form.getFormId().equals(Form.URI_FORM_ID_VALUE_FORM_INFO)) continue;
-    	if ( form.getFormId().equals(PersistentResults.FORM_ID_PERSISTENT_RESULT)) continue;
 
       // create row
       SubmissionKey submissionKey = form.getSubmissionKey();

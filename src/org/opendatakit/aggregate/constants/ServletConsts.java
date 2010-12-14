@@ -64,9 +64,12 @@ public final class ServletConsts {
   public static final String FORM_ID = "formId";
 
   /**
-   * For PersistentResults generator gae servlets, the key holding the Uri of the persistent result.
+   * For PersistentResults and MiscTasks generator gae servlets.
+   * the key holding the Uri of the persistent result or misc task record.
    */
   public static final String PERSISTENT_RESULTS_KEY = "persistentResult";
+
+  public static final String MISC_TASKS_KEY = "miscTask";
 
   public static final String ATTEMPT_COUNT = "attemptCount";
 
@@ -91,6 +94,7 @@ public final class ServletConsts {
   public static final String BRIEFCASE_LINK_TEXT = "Briefcase";
   public static final String UPLOAD_APPLET_LINK_TEXT = "Upload Bulk Submissons from Phone";
   public static final String RESULT_FILES_LINK_TEXT = "Report Results";
+  public static final String EXTERNAL_SERVICES_LINK_TEXT = "Configured Services";
 
 
   public static final String BLOB_KEY = "blobKey";

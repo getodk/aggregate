@@ -36,6 +36,7 @@ import org.opendatakit.common.persistence.PersistConsts;
 import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.persistence.StaticAssociationBase;
 import org.opendatakit.common.persistence.TaskLock;
+import org.opendatakit.common.persistence.DataField.IndexType;
 import org.opendatakit.common.persistence.Query.FilterOperation;
 import org.opendatakit.common.persistence.engine.pgres.TaskLockImpl;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
@@ -434,44 +435,19 @@ public class DatastoreImpl implements Datastore {
 			b.append(K_BQ);
 			b.append(K_CLOSE_PAREN);
 			b.append(K_USING_HASH);
-			// index by parent
-			b.append(", INDEX(" );
-			b.append(K_BQ);
-			b.append(relation.lastUpdateDate.getName());
-			b.append(K_BQ);
-			b.append(K_CLOSE_PAREN);
-			switch ( relation.getTableType()) {
-			case STATIC:
-			case DYNAMIC_DOCUMENT:
-				// no index
-				break;
-			case DYNAMIC:
-				// index by parent
-				b.append(", INDEX(" );
-				b.append(K_BQ);
-				b.append(((DynamicBase) relation).parentAuri.getName());
-				b.append(K_BQ);
-				b.append(K_CLOSE_PAREN);
-				b.append(K_USING_HASH);
-				break;
-			case STATIC_ASSOCIATION:
-				// index by dominant type
-				b.append(", INDEX(" );
-				b.append(K_BQ);
-				b.append(((StaticAssociationBase) relation).domAuri.getName());
-				b.append(K_BQ);
-				b.append(K_CLOSE_PAREN);
-				b.append(K_USING_HASH);
-				break;
-			case DYNAMIC_ASSOCIATION:
-				// index by dominant type
-				b.append(", INDEX(" );
-				b.append(K_BQ);
-				b.append(((DynamicAssociationBase) relation).domAuri.getName());
-				b.append(K_BQ);
-				b.append(K_CLOSE_PAREN);
-				b.append(K_USING_HASH);
-				break;
+			// create other indicies
+			for ( DataField f : relation.getFieldList() ) {
+				if ( (f.getIndexable() != IndexType.NONE) && 
+					 (f != relation.getPrimaryKey()) ) {
+					b.append(", INDEX(" );
+					b.append(K_BQ);
+					b.append(f.getName());
+					b.append(K_BQ);
+					b.append(K_CLOSE_PAREN);
+					if ( f.getIndexable() == IndexType.HASH ) {
+						b.append(K_USING_HASH);
+					}
+				}
 			}
 			b.append(K_CLOSE_PAREN);
 	

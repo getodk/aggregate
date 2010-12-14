@@ -38,8 +38,8 @@ public abstract class DynamicCommonFieldsBase extends CommonFieldsBase {
 	 * @param tableName
 	 * @param type
 	 */
-	protected DynamicCommonFieldsBase(String databaseSchema, String tableName, BaseType type) {
-		super(databaseSchema, tableName, type);
+	protected DynamicCommonFieldsBase(String databaseSchema, String tableName) {
+		super(databaseSchema, tableName);
 	}
 
 	/**

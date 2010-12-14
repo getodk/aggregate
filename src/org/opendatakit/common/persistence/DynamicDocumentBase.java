@@ -39,7 +39,7 @@ public abstract class DynamicDocumentBase extends DynamicCommonFieldsBase {
 	 * @param tableName
 	 */
 	protected DynamicDocumentBase(String databaseSchema, String tableName) {
-		super(databaseSchema, tableName, BaseType.DYNAMIC_DOCUMENT);
+		super(databaseSchema, tableName);
 		fieldList.add(topLevelAuri=new DataField(TOP_LEVEL_AURI));
 	}
 
@@ -55,20 +55,10 @@ public abstract class DynamicDocumentBase extends DynamicCommonFieldsBase {
 	}
 	
 	public final String getTopLevelAuri() {
-		if (( tableType == BaseType.STATIC) ||
-			(tableType == BaseType.STATIC_ASSOCIATION) ||
-			(tableType == BaseType.TOP_LEVEL_DYNAMIC)) {
-			throw new IllegalStateException("Attempting to get topLevelAuri of non-DYNAMIC table");
-		}
 		return getStringField(topLevelAuri);
 	}
 	
 	public final void setTopLevelAuri(String value) {
-		if (( tableType == BaseType.STATIC) ||
-			(tableType == BaseType.STATIC_ASSOCIATION) ||
-			(tableType == BaseType.TOP_LEVEL_DYNAMIC)) {
-			throw new IllegalStateException("Attempting to set topLevelAuri of non-DYNAMIC table");
-		}
 		if ( ! setStringField(topLevelAuri, value) ) {
 			throw new IllegalStateException("overflow on topLevelAuri");
 		}

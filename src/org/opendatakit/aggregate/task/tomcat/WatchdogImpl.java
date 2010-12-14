@@ -15,6 +15,8 @@
  */
 package org.opendatakit.aggregate.task.tomcat;
 
+import java.util.concurrent.TimeUnit;
+
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.task.Watchdog;
@@ -22,6 +24,8 @@ import org.opendatakit.aggregate.task.WatchdogWorkerImpl;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.security.UserService;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.context.SmartLifecycle;
 
 /**
  * 
@@ -29,7 +33,15 @@ import org.opendatakit.common.security.UserService;
  * @author mitchellsundt@gmail.com
  * 
  */
-public class WatchdogImpl implements Watchdog {
+public class WatchdogImpl implements Watchdog, SmartLifecycle, InitializingBean {
+
+	boolean afterPropertiesSet = false;
+	boolean shouldStart = false;
+	boolean isStarted = false;
+	AggregrateThreadExecutor exec = AggregrateThreadExecutor
+			.getAggregateThreadExecutor();
+	Datastore datastore = null;
+	UserService userService = null;
 
 	static class WatchdogRunner implements Runnable {
 		final WatchdogWorkerImpl impl;
@@ -38,7 +50,7 @@ public class WatchdogImpl implements Watchdog {
 		final String baseWebServerUrl;
 		final Datastore ds;
 		final User user;
-		
+
 		public WatchdogRunner(long checkIntervalMilliseconds,
 				String baseWebServerUrl, Datastore ds, User user) {
 			impl = new WatchdogWorkerImpl();
@@ -51,8 +63,9 @@ public class WatchdogImpl implements Watchdog {
 		@Override
 		public void run() {
 			try {
-				impl.checkTasks(checkIntervalMilliseconds,
-                baseWebServerUrl, ds, user);
+				System.out.println("RUNNING WATCHDOG TASK IN TOMCAT");
+				impl.checkTasks(checkIntervalMilliseconds, baseWebServerUrl,
+						ds, user);
 			} catch (Exception e) {
 				e.printStackTrace();
 				// TODO: Problem - decide what to do if an exception occurs
@@ -60,17 +73,98 @@ public class WatchdogImpl implements Watchdog {
 		}
 	}
 
+	// TODO: nothing calls this method right now. Figure out how to start
+	// watchdog in Tomcat
+	public void createWatchdogTask(long checkIntervalMilliseconds,
+			String baseWebServerUrl) {
+		User user = userService.getDaemonAccountUser();
+		WatchdogRunner wr = new WatchdogRunner(checkIntervalMilliseconds,
+				baseWebServerUrl, datastore, user);
 
-  // TODO: nothing calls this method right now. Figure out how to start watchdog in Tomcat
-  public void createWatchdogTask(long checkIntervalMilliseconds, String baseWebServerUrl) {
-      Datastore ds = (Datastore) ContextFactory.get().getBean(BeanDefs.DATASTORE_BEAN);
-      UserService userService = (UserService) ContextFactory.get().getBean(BeanDefs.USER_BEAN);
-      User user = userService.getDaemonAccountUser();
-	  WatchdogRunner wr = new WatchdogRunner(checkIntervalMilliseconds, baseWebServerUrl,
-			  				ds, user);
+		exec = AggregrateThreadExecutor.getAggregateThreadExecutor();
+		System.out.println("THIS IS CREATE WATCHDOG TASK IN TOMCAT");
+		exec.scheduleAtFixedRate(wr, 0, checkIntervalMilliseconds);
+	}
 
-    System.out.println("THIS IS WATCHDOG TASK IN TOMCAT");
-    AggregrateThreadExecutor exec = AggregrateThreadExecutor.getAggregateThreadExecutor();
-    exec.scheduleAtFixedRate(wr, 0, checkIntervalMilliseconds);
-  }
+	@Override
+	public boolean isAutoStartup() {
+		System.out.println("isAutoStartup IS CREATE WATCHDOG TASK IN TOMCAT");
+		return true;
+	}
+
+	@Override
+	public void stop(Runnable signal) {
+		System.out.println("stop(runnable) IS CREATE WATCHDOG TASK IN TOMCAT");
+		try {
+			exec.shutdown();
+			isStarted = false;
+			shouldStart = false;
+			exec.awaitTermination(20, TimeUnit.SECONDS);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		} finally {
+			signal.run();
+		}
+	}
+
+	@Override
+	public boolean isRunning() {
+		System.out.println("isRunning IS CREATE WATCHDOG TASK IN TOMCAT");
+		return isStarted && !exec.isTerminated();
+	}
+
+	@Override
+	public void start() {
+		System.out.println("start IS CREATE WATCHDOG TASK IN TOMCAT");
+		if ( !afterPropertiesSet ) {
+			shouldStart = true;
+		} else {
+			// TODO: discover base web server URL or eliminate this as arg.
+			shouldStart = false;
+			String baseWebServerUrl = "/ODKAggregatePlatform";
+			createWatchdogTask(3 * 60 * 1000, baseWebServerUrl);
+			isStarted = true;
+		}
+	}
+
+	@Override
+	public void stop() {
+		System.out.println("stop IS CREATE WATCHDOG TASK IN TOMCAT");
+		exec.shutdown();
+	}
+
+	public int getPhase() {
+		System.out.println("getPhase IS CREATE WATCHDOG TASK IN TOMCAT");
+		return 10;
+	}
+
+	public Datastore getDatastore() {
+		return datastore;
+	}
+
+	public void setDatastore(Datastore datastore) {
+		System.out.println("setDatastore IS CREATE WATCHDOG TASK IN TOMCAT");
+		this.datastore = datastore;
+	}
+
+	public UserService getUserService() {
+		return userService;
+	}
+
+	public void setUserService(UserService userService) {
+		System.out.println("setUserService IS CREATE WATCHDOG TASK IN TOMCAT");
+		this.userService = userService;
+	}
+
+	@Override
+	public void afterPropertiesSet() throws Exception {
+		System.out.println("afterPropertiesSet IS CREATE WATCHDOG TASK IN TOMCAT");
+		afterPropertiesSet = true;
+		if (shouldStart ) {
+			shouldStart = false;
+			String baseWebServerUrl = "/ODKAggregatePlatform";
+			createWatchdogTask(3 * 60 * 1000, baseWebServerUrl);
+			isStarted = true;
+		}
+	}
 }

@@ -32,6 +32,7 @@ import org.opendatakit.aggregate.datamodel.FormElementKey;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
+import org.opendatakit.aggregate.externalservice.FormServiceCursor.OperationalStatus;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.format.element.LinkElementFormatter;
@@ -128,6 +129,8 @@ public class GoogleSpreadsheet extends AbstractExternalService implements Extern
     fsc = FormServiceCursor.createFormServiceCursor(form, ExternalServiceType.GOOGLE_SPREADSHEET,
         objectEntity, datastore, user);
     fsc.setExternalServiceOption(externalServiceOption);
+    fsc.setIsExternalServicePrepared(false); // need to perform worksheet creation...
+    fsc.setOperationalStatus(OperationalStatus.ACTIVE);
     fsc.setEstablishmentDateTime(new Date());
     fsc.setUploadCompleted(false);
     objectEntity.setAuthToken(authToken.getToken());
@@ -141,6 +144,14 @@ public class GoogleSpreadsheet extends AbstractExternalService implements Extern
 
     persist();
     constructorHelper();
+  }
+
+  @Override
+  public void abandon() throws ODKDatastoreException {
+	if ( fsc.getOperationalStatus() != OperationalStatus.COMPLETED ) {
+	  fsc.setOperationalStatus(OperationalStatus.ABANDONED);
+	  persist();  
+	}
   }
 
   public void persist() throws ODKEntityPersistException {
@@ -248,6 +259,7 @@ public class GoogleSpreadsheet extends AbstractExternalService implements Extern
 
     // persist the changes we have made to the repeat element table (changes
     // from calling executeCreateWorksheet)
+    fsc.setIsExternalServicePrepared(true); // we have completed worksheet creation...
     persist();
   }
 
@@ -425,6 +437,9 @@ public class GoogleSpreadsheet extends AbstractExternalService implements Extern
   @Override
   public void setUploadCompleted() throws ODKEntityPersistException {
     fsc.setUploadCompleted(true);
+    if ( fsc.getExternalServiceOption() == ExternalServiceOption.UPLOAD_ONLY) {
+    	fsc.setOperationalStatus(OperationalStatus.COMPLETED);
+    }
     ds.putEntity(fsc, user);
   }
 
@@ -453,6 +468,11 @@ public class GoogleSpreadsheet extends AbstractExternalService implements Extern
     if (fsc != null)
       hashCode += fsc.hashCode();
     return hashCode;
+  }
+
+  @Override
+  public String getDescriptiveTargetString() {
+	return getSpreadsheetName();
   }
 
 }

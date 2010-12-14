@@ -15,14 +15,21 @@
  */
 package org.opendatakit.aggregate.task.gae;
 
+import java.util.Map;
+
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.externalservice.ExternalServiceConsts;
-import org.opendatakit.aggregate.constants.externalservice.ExternalServiceOption;
+import org.opendatakit.aggregate.constants.externalservice.SpreadsheetConsts;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
+import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.form.MiscTasks;
+import org.opendatakit.aggregate.submission.Submission;
+import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.task.WorksheetCreator;
 import org.opendatakit.aggregate.task.gae.servlet.WorksheetServlet;
 import org.opendatakit.common.persistence.Datastore;
+import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.security.User;
 
 import com.google.appengine.api.taskqueue.Queue;
@@ -41,22 +48,26 @@ import com.google.appengine.api.taskqueue.TaskOptions;
 public class WorksheetCreatorImpl implements WorksheetCreator {
 
   @Override
-  public final void createWorksheetTask(String serverName, String spreadsheetName,
-      ExternalServiceOption esType, int delay, Form form, Datastore datastore, User user)
-      throws ODKExternalServiceException {
+  public final void createWorksheetTask(Form form,
+			SubmissionKey miscTasksKey, long attemptCount,
+			String baseServerWebUrl, Datastore datastore, User user)
+      throws ODKFormNotFoundException, ODKDatastoreException {
+    Submission s = Submission.fetchSubmission(miscTasksKey.splitSubmissionKey(), datastore,
+            user);
+    MiscTasks r = new MiscTasks(s);
+    Map<String, String> params = r.getRequestParameters();
+
     TaskOptions task = TaskOptions.Builder.withUrl(ServletConsts.WEB_ROOT + WorksheetServlet.ADDR);
     task.method(TaskOptions.Method.GET);
-    task.countdownMillis(delay);
-    task.param(ExternalServiceConsts.EXT_SERV_ADDRESS, spreadsheetName);
+    task.countdownMillis(SpreadsheetConsts.WORKSHEET_CREATION_DELAY);
     task.param(ServletConsts.FORM_ID, form.getFormId());
-    task.param(ServletConsts.EXTERNAL_SERVICE_TYPE, esType.toString());
+    task.param(ExternalServiceConsts.EXT_SERV_ADDRESS, params.get(ExternalServiceConsts.EXT_SERV_ADDRESS));
+    task.param(ServletConsts.EXTERNAL_SERVICE_TYPE, params.get(ServletConsts.EXTERNAL_SERVICE_TYPE));
+    task.param(ServletConsts.MISC_TASKS_KEY, miscTasksKey.toString());
+    task.param(ServletConsts.ATTEMPT_COUNT, Long.toString(attemptCount));
 
     Queue queue = QueueFactory.getDefaultQueue();
-    try {
-      queue.add(task);
-    } catch (Exception e) {
-      throw new ODKExternalServiceException(e);
-    }
+	queue.add(task);
   }
 
 }

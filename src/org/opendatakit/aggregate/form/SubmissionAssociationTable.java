@@ -155,7 +155,7 @@ public class SubmissionAssociationTable extends StaticAssociationBase {
 
 	private static SubmissionAssociationTable relation = null;
 	
-	public static final SubmissionAssociationTable createRelation(Datastore datastore, User user) throws ODKDatastoreException {
+	public static synchronized final SubmissionAssociationTable createRelation(Datastore datastore, User user) throws ODKDatastoreException {
 		if ( relation == null ) {
 			SubmissionAssociationTable relationPrototype;
 			relationPrototype = new SubmissionAssociationTable(datastore.getDefaultSchemaName());

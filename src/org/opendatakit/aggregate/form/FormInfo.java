@@ -94,7 +94,7 @@ public class FormInfo {
 	 * @return
 	 * @throws ODKDatastoreException 
 	 */
-	static FormDefinition getFormDefinition(Datastore datastore) throws ODKDatastoreException {
+	static synchronized FormDefinition getFormDefinition(Datastore datastore) throws ODKDatastoreException {
 		if ( formDefinition == null ) {
 			// The FormDefn list of registered forms is itself a well-known
 			// form within the Aggregate instance.  Load the form definition
@@ -156,55 +156,17 @@ public class FormInfo {
 				submissionUiVersion = FormDefinition.findElement(fiSubmissionTable, f.submissionUiVersion);
 			}
 
-			// Now create a record in the FormInfo table for the FormInfo table itself...
-			TopLevelDynamicBase fi = null;
-			try {
-				fi = datastore.getEntity(reference, formInfoUri, user);
-			} catch ( ODKEntityNotFoundException e ) {
-				// we must have failed before persisting a FormInfo record
-				// or this must be our first time through...
-				Submission formInfo = new Submission(formInfoXFormParameters.modelVersion, formInfoXFormParameters.uiVersion,
-													 formInfoUri, formDefinition, datastore, user);
-				((StringSubmissionType) formInfo.getElementValue(formId)).setValueFromString(formInfoXFormParameters.formId);
-				// default description...
-				{
-					RepeatSubmissionType r = (RepeatSubmissionType) formInfo.getElementValue(fiDescriptionTable);
-					SubmissionSet sDescription = new SubmissionSet(formInfo, 1L, fiDescriptionTable, formDefinition, formInfo.getKey(), datastore, user);
-					((StringSubmissionType) sDescription.getElementValue(formName)).setValueFromString("Form Information");
-					((StringSubmissionType) sDescription.getElementValue(description)).setValueFromString("Form information table used by Aggregate to track all forms uploaded to this server.");
-					r.addSubmissionSet(sDescription);
-				}
-				// fileset...
-				{
-					RepeatSubmissionType r = (RepeatSubmissionType) formInfo.getElementValue(fiFilesetTable);
-					SubmissionSet sFileset = new SubmissionSet(formInfo, 1L, fiFilesetTable, formDefinition, formInfo.getKey(), datastore, user);
-					((LongSubmissionType) sFileset.getElementValue(rootElementModelVersion)).setValueFromString(formInfoXFormParameters.modelVersion.toString());
-					((LongSubmissionType) sFileset.getElementValue(rootElementUiVersion)).setValueFromString(formInfoXFormParameters.uiVersion.toString());
-					((BooleanSubmissionType) sFileset.getElementValue(isFilesetComplete)).setValueFromString("yes");
-					((BooleanSubmissionType) sFileset.getElementValue(isDownloadAllowed)).setValueFromString("yes");
-					r.addSubmissionSet(sFileset);
-				}
-				// submission...
-				{
-					RepeatSubmissionType r = (RepeatSubmissionType) formInfo.getElementValue(fiSubmissionTable);
-					SubmissionSet sSubmission = new SubmissionSet(formInfo, 1L, fiSubmissionTable, formDefinition, formInfo.getKey(), datastore, user);
-					((StringSubmissionType) sSubmission.getElementValue(submissionFormId)).setValueFromString(formInfoXFormParameters.formId);
-					((LongSubmissionType) sSubmission.getElementValue(submissionModelVersion)).setValueFromString(formInfoXFormParameters.modelVersion.toString());
-					((LongSubmissionType) sSubmission.getElementValue(submissionUiVersion)).setValueFromString(formInfoXFormParameters.uiVersion.toString());
-					r.addSubmissionSet(sSubmission);
-				}
-				formInfo.persist(datastore, user);
-				
-				fi = datastore.getEntity(reference, formInfoUri, user);
-			}
+			Submission formInfo = FormDefinition.assertFormInfoRecord(reference, formDefinition, formInfoXFormParameters,
+					"Form Information", 
+					"Form information table used by Aggregate to track all forms uploaded to this server.", 
+					formInfoUri, datastore, user);
 			
-			// and retrieve cleanly... 
-		    Submission formInfo = new Submission(fi, formDefinition, datastore, user);
 			formInfoForm = new Form(formInfo, datastore, user);
 
 			try {
 				// and we can create other well-known forms here 
 				PersistentResults.createForm(datastore,user);
+				MiscTasks.createForm(datastore, user);
 			} catch ( ODKDatastoreException e ) {
 				// we have an error...
 				formDefinition = null;

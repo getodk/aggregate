@@ -662,7 +662,7 @@ public static final String URI_FORM_ID_VALUE_FORM_INFO = "aggregate.opendatakit.
   /**
    * Returns the top level dynamic class for the FormInfo table.
    * @param datastore
-   * @param user
+   * @param userService
    * @return
    * @throws ODKDatastoreException
    */

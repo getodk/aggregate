@@ -50,6 +50,15 @@
 	</servlet-mapping>
 
 	<servlet>
+		<servlet-name>externalServices</servlet-name>
+		<servlet-class>org.opendatakit.aggregate.servlet.ExternalServicesListServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>externalServices</servlet-name>
+		<url-pattern>/externalServices</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
 		<servlet-name>forms</servlet-name>
 		<servlet-class>org.opendatakit.aggregate.servlet.FormsServlet</servlet-class>
 	</servlet>

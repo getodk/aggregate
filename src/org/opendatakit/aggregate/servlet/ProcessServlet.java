@@ -31,6 +31,8 @@ import org.opendatakit.aggregate.constants.ErrorConsts;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
 import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.form.MiscTasks;
+import org.opendatakit.aggregate.form.MiscTasks.TaskType;
 import org.opendatakit.aggregate.parser.MultiPartFormData;
 import org.opendatakit.aggregate.process.DeleteSubmissions;
 import org.opendatakit.aggregate.process.ProcessParams;
@@ -139,7 +141,10 @@ public class ProcessServlet extends ServletUtilBase {
             if (rel != null) {
               Form formToDelete = new Form((TopLevelDynamicBase) rel, ds, user);
               if (!formToDelete.getFormId().equals(Form.URI_FORM_ID_VALUE_FORM_INFO)) {
-                formDelete.createFormDeleteTask(formToDelete, user);
+            	MiscTasks m = new MiscTasks(TaskType.DELETE_FORM, formToDelete, null, ds, user);
+            	m.persist(ds, user);
+                formDelete.createFormDeleteTask(formToDelete, m.getSubmissionKey(), 1L, 
+                			getServerURL(req), ds, user);
                 resp.sendRedirect(FormsServlet.ADDR);
                 return;
               } else {

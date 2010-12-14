@@ -115,7 +115,7 @@ public class FormInfoFilesetTable extends DynamicBase {
 	
 	private static FormInfoFilesetTable relation = null;
 	
-	static final FormInfoFilesetTable createRelation(Datastore datastore, User user) throws ODKDatastoreException {
+	static synchronized final FormInfoFilesetTable createRelation(Datastore datastore, User user) throws ODKDatastoreException {
 		if ( relation == null ) {
 			FormInfoFilesetTable relationPrototype;
 			relationPrototype = new FormInfoFilesetTable(datastore.getDefaultSchemaName());

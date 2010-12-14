@@ -33,6 +33,9 @@ public final class DataField {
 	public static enum DataType {
 		BINARY, LONG_STRING, STRING, INTEGER, DECIMAL, BOOLEAN, DATETIME, URI
 	}
+	public static enum IndexType {
+		NONE, ORDERED, HASH
+	}
 	
 	private String name;
 	private DataType dataType;
@@ -41,6 +44,7 @@ public final class DataField {
 	private Long maxCharLen;
 	private Integer numericScale;
 	private Integer numericPrecision;
+	private IndexType indexable = IndexType.NONE; // clue for persistence layer to define index.
 	
 	public DataField(String name, DataType dataType, boolean nullable) {
 		this(name, dataType, nullable, null, null, null);
@@ -66,6 +70,7 @@ public final class DataField {
 		this.maxCharLen = src.maxCharLen;
 		this.numericScale = src.numericScale;
 		this.numericPrecision = src.numericPrecision;
+		this.indexable = src.indexable;
 	}
 	
 	public String getName() {
@@ -110,5 +115,14 @@ public final class DataField {
 
 	public void setNumericPrecision(Integer numericPrecision) {
 		this.numericPrecision = numericPrecision;
+	}
+	
+	public DataField setIndexable(IndexType type) {
+		this.indexable = type;
+		return this;
+	}
+	
+	public IndexType getIndexable() {
+		return indexable;
 	}
 }

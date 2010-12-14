@@ -15,9 +15,10 @@
  */
 package org.opendatakit.aggregate.task;
 
-import org.opendatakit.aggregate.constants.externalservice.ExternalServiceOption;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
+import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.security.User;
@@ -31,7 +32,8 @@ import org.opendatakit.common.security.User;
  */
 public interface WorksheetCreator {
 
-  public void createWorksheetTask(String serverURL, String spreadsheetName,
-      ExternalServiceOption esType, int delay, Form form, Datastore datastore, User user)
-      throws ODKExternalServiceException, ODKDatastoreException;
+	public void createWorksheetTask(Form form,
+			SubmissionKey miscTasksKey, long attemptCount,
+			String baseServerWebUrl, Datastore datastore, User user)
+			throws ODKDatastoreException, ODKFormNotFoundException;
 }

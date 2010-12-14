@@ -91,7 +91,7 @@ public class FormInfoDescriptionTable extends DynamicBase {
 	
 	private static FormInfoDescriptionTable relation = null;
 	
-	static final FormInfoDescriptionTable createRelation(Datastore datastore, User user) throws ODKDatastoreException {
+	static synchronized final FormInfoDescriptionTable createRelation(Datastore datastore, User user) throws ODKDatastoreException {
 		if ( relation == null ) {
 			FormInfoDescriptionTable relationPrototype;
 			relationPrototype = new FormInfoDescriptionTable(datastore.getDefaultSchemaName());

@@ -104,7 +104,7 @@ public class GoogleSpreadsheetRepeatParameterTable extends StaticAssociationBase
 
 	  private static GoogleSpreadsheetRepeatParameterTable relation = null;
 
-	  public static GoogleSpreadsheetRepeatParameterTable createRelation(Datastore datastore, User user)
+	  public static synchronized final GoogleSpreadsheetRepeatParameterTable createRelation(Datastore datastore, User user)
 	      throws ODKDatastoreException {
 	    if (relation == null) {
 	    	GoogleSpreadsheetRepeatParameterTable relationPrototype;

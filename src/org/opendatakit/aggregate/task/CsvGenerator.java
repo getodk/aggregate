@@ -30,5 +30,7 @@ import org.opendatakit.common.security.User;
  */
 public interface CsvGenerator {
 
-  public void createCsvTask(Form form, SubmissionKey persistentResultsKey, Long attemptCount, String baseServerWebUrl, Datastore datastore, User user) throws ODKDatastoreException;
+	public void createCsvTask(Form form, SubmissionKey persistentResultsKey,
+			long attemptCount, String baseServerWebUrl, Datastore datastore,
+			User user) throws ODKDatastoreException;
 }

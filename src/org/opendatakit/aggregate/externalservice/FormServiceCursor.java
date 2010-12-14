@@ -40,6 +40,14 @@ import org.opendatakit.common.security.User;
 public final class FormServiceCursor extends StaticAssociationBase {
 
   private static final String TABLE_NAME = "_form_service_cursor";
+  
+  public static enum OperationalStatus {
+	  ACTIVE,
+	  PAUSED,
+	  COMPLETED,
+	  ABANDONED
+  };
+  
   /*
    * Property Names for datastore
    */
@@ -47,6 +55,11 @@ public final class FormServiceCursor extends StaticAssociationBase {
       DataField.DataType.STRING, false, 200L);
   private static final DataField EXTERNAL_SERVICE_OPTION = new DataField("EXTERNAL_SERVICE_OPTION",
       DataField.DataType.STRING, false, 80L);
+  // some external services need to be prepared before they can receive data...
+  private static final DataField IS_EXTERNAL_SERVICE_PREPARED = new DataField("IS_EXTERNAL_SERVICE_PREPARED",
+		  DataField.DataType.BOOLEAN, true);
+  private static final DataField OPERATIONAL_STATUS = new DataField("OPERATIONAL_STATUS",
+		  DataField.DataType.STRING, true, 80L);
   private static final DataField ESTABLISHMENT_DATETIME = new DataField("ESTABLISHMENT_DATETIME",
       DataField.DataType.DATETIME, false);
   private static final DataField UPLOAD_COMPLETED_PROPERTY = new DataField("UPLOAD_COMPLETED",
@@ -64,6 +77,8 @@ public final class FormServiceCursor extends StaticAssociationBase {
 
   public final DataField externalServiceType;
   public final DataField externalServiceOption;
+  public final DataField isExternalServicePrepared;
+  public final DataField operationalStatus;
   public final DataField establishmentDateTime;
   public final DataField uploadCompleted;
   public final DataField lastUploadCursorDate;
@@ -82,6 +97,8 @@ public final class FormServiceCursor extends StaticAssociationBase {
     super(schemaName, TABLE_NAME);
     fieldList.add(externalServiceType = new DataField(EXT_SERVICE_TYPE_PROPERTY));
     fieldList.add(externalServiceOption = new DataField(EXTERNAL_SERVICE_OPTION));
+    fieldList.add(isExternalServicePrepared = new DataField(IS_EXTERNAL_SERVICE_PREPARED));
+    fieldList.add(operationalStatus = new DataField(OPERATIONAL_STATUS));
     fieldList.add(establishmentDateTime = new DataField(ESTABLISHMENT_DATETIME));
     fieldList.add(uploadCompleted = new DataField(UPLOAD_COMPLETED_PROPERTY));
     fieldList.add(lastUploadCursorDate = new DataField(
@@ -103,6 +120,8 @@ public final class FormServiceCursor extends StaticAssociationBase {
     super(ref, user);
     externalServiceType = ref.externalServiceType;
     externalServiceOption = ref.externalServiceOption;
+    isExternalServicePrepared = ref.isExternalServicePrepared;
+    operationalStatus = ref.operationalStatus;
     establishmentDateTime = ref.establishmentDateTime;
     uploadCompleted = ref.uploadCompleted;
     lastUploadCursorDate = ref.lastUploadCursorDate;
@@ -139,6 +158,26 @@ public final class FormServiceCursor extends StaticAssociationBase {
     }
   }
 
+  public Boolean isExternalServicePrepared() {
+	  return getBooleanField(isExternalServicePrepared);
+  }
+  
+  public void setIsExternalServicePrepared(Boolean value) {
+	  setBooleanField(isExternalServicePrepared, value);
+  }
+  
+  public OperationalStatus getOperationalStatus() {
+	  String value = getStringField(operationalStatus);
+	  if ( value == null ) return null;
+	  return OperationalStatus.valueOf(value);
+  }
+  
+  public void setOperationalStatus(OperationalStatus value) {
+    if (!setStringField(operationalStatus, value.name())) {
+        throw new IllegalArgumentException("overflow operationalStatus");
+    }
+  }
+  
   public Date getEstablishmentDateTime() {
     return getDateField(establishmentDateTime);
   }
@@ -227,7 +266,7 @@ public final class FormServiceCursor extends StaticAssociationBase {
   
   private static FormServiceCursor relation = null;
 
-  private static final FormServiceCursor createRelation(Datastore ds, User user)
+  private static synchronized final FormServiceCursor createRelation(Datastore ds, User user)
       throws ODKDatastoreException {
     if (relation == null) {
       FormServiceCursor relationPrototype;
@@ -242,9 +281,9 @@ public final class FormServiceCursor extends StaticAssociationBase {
   public static final FormServiceCursor createFormServiceCursor(Form form,
       ExternalServiceType type, CommonFieldsBase service, Datastore ds, User user)
       throws ODKDatastoreException {
-    FormServiceCursor relationPrototype = createRelation(ds, user);
+    FormServiceCursor relation = createRelation(ds, user);
 
-    FormServiceCursor c = ds.createEntityUsingRelation(relationPrototype, null, user);
+    FormServiceCursor c = ds.createEntityUsingRelation(relation, null, user);
 
     c.setDomAuri(form.getEntityKey().getKey());
     c.setSubAuri(service.getUri());
@@ -256,11 +295,11 @@ public final class FormServiceCursor extends StaticAssociationBase {
   
   public static final List<ExternalService> getExternalServicesForForm(Form form,
       String baseWebServerUrl, Datastore ds, User user) throws ODKDatastoreException {
-    FormServiceCursor relationPrototype = createRelation(ds, user);
-    Query query = ds.createQuery(relationPrototype, user);
+    FormServiceCursor relation = createRelation(ds, user);
+    Query query = ds.createQuery(relation, user);
     // filter on the Form's Uri. We cannot filter on the FORM_ID since it is a
     // Text field in bigtable
-    query.addFilter(relationPrototype.domAuri, FilterOperation.EQUAL, form.getEntityKey().getKey());
+    query.addFilter(relation.domAuri, FilterOperation.EQUAL, form.getEntityKey().getKey());
     List<ExternalService> esList = new ArrayList<ExternalService>();
 
     List<? extends CommonFieldsBase> fscList = query.executeQuery(0);
@@ -277,8 +316,8 @@ public final class FormServiceCursor extends StaticAssociationBase {
 
   public static final FormServiceCursor getFormServiceCursor(String uri, Datastore ds, User user) throws ODKEntityNotFoundException {
     try {
-      FormServiceCursor relationPrototype = createRelation(ds, user);
-      CommonFieldsBase entity = ds.getEntity(relationPrototype, uri, user);
+      FormServiceCursor relation = createRelation(ds, user);
+      CommonFieldsBase entity = ds.getEntity(relation, uri, user);
       return (FormServiceCursor) entity;
     } catch (ODKDatastoreException e) {
       throw new ODKEntityNotFoundException(e);
@@ -289,11 +328,11 @@ public final class FormServiceCursor extends StaticAssociationBase {
          Datastore ds, User user) throws ODKEntityNotFoundException {
       List<FormServiceCursor> fscList = new ArrayList<FormServiceCursor>();
       try {
-         FormServiceCursor relationPrototype = createRelation(ds, user);
-         Query query = ds.createQuery(relationPrototype, user);
-         query.addFilter(relationPrototype.lastUpdateDate, FilterOperation.LESS_THAN_OR_EQUAL,
+         FormServiceCursor relation = createRelation(ds, user);
+         Query query = ds.createQuery(relation, user);
+         query.addFilter(relation.lastUpdateDate, FilterOperation.LESS_THAN_OR_EQUAL,
                olderThanDate);
-         query.addSort(relationPrototype.lastUpdateDate, Direction.ASCENDING);
+         query.addSort(relation.lastUpdateDate, Direction.ASCENDING);
          List<? extends CommonFieldsBase> cfbList = query.executeQuery(0);
          for (CommonFieldsBase cfb : cfbList) {
             fscList.add((FormServiceCursor) cfb);

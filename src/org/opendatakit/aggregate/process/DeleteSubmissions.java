@@ -47,11 +47,7 @@ public class DeleteSubmissions {
   
   private User user;
   
-  public DeleteSubmissions(List<SubmissionKey> keys, Datastore datastore, User user)
-      throws IOException, ODKFormNotFoundException {
-    if (keys == null) {
-      throw new IOException();
-    }
+  public DeleteSubmissions(List<SubmissionKey> keys, Datastore datastore, User user) {
     this.submissionKeys = keys;
     this.ds = datastore;
     this.user = user;
@@ -64,7 +60,8 @@ public class DeleteSubmissions {
       try {
 		List<SubmissionKeyPart> parts = submissionKey.splitSubmissionKey();
   		Submission sub = Submission.fetchSubmission(parts, ds, user);
-        deleteHelper(sub, deleteKeys);
+  		sub.recursivelyAddEntityKeys(deleteKeys);
+  		deleteKeys.add(sub.getKey());
       } catch (ODKEntityNotFoundException e) {
         // just move on
       } catch (ODKFormNotFoundException e) {
@@ -72,17 +69,5 @@ public class DeleteSubmissions {
       }
     }
     ds.deleteEntities(deleteKeys, user);
-  }
-
-  private void deleteHelper(SubmissionSet sub, List<EntityKey> deleteKeys) throws ODKDatastoreException {
-    deleteKeys.add(sub.getKey());
-    List<SubmissionValue> values = sub.getSubmissionValues();
-
-    // TODO: change submission so it can add keys to the list of keys to delete.
-    
-    // iterate through values looking for the two types that contain keys
-    for (SubmissionValue v : values) {
-    	v.recursivelyAddEntityKeys(deleteKeys);
-    }
   }
 }

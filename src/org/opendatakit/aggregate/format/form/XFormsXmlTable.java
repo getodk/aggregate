@@ -26,6 +26,7 @@ import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.format.XFormsTableConsts;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.form.FormInfoTable;
+import org.opendatakit.aggregate.form.MiscTasks;
 import org.opendatakit.aggregate.form.PersistentResults;
 import org.opendatakit.aggregate.query.QueryFormList;
 import org.opendatakit.aggregate.servlet.FormXmlServlet;
@@ -67,6 +68,7 @@ public class XFormsXmlTable {
     for (Form form : forms.getForms()) {
     	if ( form.getFormId().equals(Form.URI_FORM_ID_VALUE_FORM_INFO)) continue;
     	if ( form.getFormId().equals(PersistentResults.FORM_ID_PERSISTENT_RESULT)) continue;
+    	if ( form.getFormId().equals(MiscTasks.FORM_ID_MISC_TASKS)) continue;
     	generateFormXmlEntry(b, form);
     }
     b.append(HtmlUtil.createEndTag(XFormsTableConsts.XFORMS_TAG));

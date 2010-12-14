@@ -86,7 +86,7 @@ public class FormInfoSubmissionTable extends DynamicBase {
 	
 	private static FormInfoSubmissionTable relation = null;
 	
-	static final FormInfoSubmissionTable createRelation(Datastore datastore, User user) throws ODKDatastoreException {
+	static synchronized final FormInfoSubmissionTable createRelation(Datastore datastore, User user) throws ODKDatastoreException {
 		if ( relation == null ) {
 			FormInfoSubmissionTable relationPrototype;
 			relationPrototype = new FormInfoSubmissionTable(datastore.getDefaultSchemaName());

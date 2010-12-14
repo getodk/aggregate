@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.BeanDefs;
@@ -31,6 +32,7 @@ import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
 import org.opendatakit.aggregate.exception.ODKTaskLockException;
 import org.opendatakit.aggregate.externalservice.ExternalService;
 import org.opendatakit.aggregate.externalservice.FormServiceCursor;
+import org.opendatakit.aggregate.externalservice.FormServiceCursor.OperationalStatus;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.query.submission.QueryByDate;
 import org.opendatakit.aggregate.query.submission.QueryByDateRange;
@@ -75,6 +77,10 @@ public class UploadSubmissionsWorkerImpl {
 		pLockId = UUID.randomUUID().toString();
 	}
 
+	public String getUploadSubmissionsTaskLockName() {
+		return pFsc.getUri();
+	}
+	
 	public void uploadAllSubmissions()
 			throws ODKEntityNotFoundException, ODKExternalServiceException,
 			ODKFormNotFoundException, ODKTaskLockException {
@@ -85,7 +91,7 @@ public class UploadSubmissionsWorkerImpl {
 
 		TaskLock taskLock = pDatastore.createTaskLock();
 		if (!taskLock
-				.obtainLock(pLockId, pFsc.getUri(), TaskLockType.UPLOAD_SUBMISSION)) {
+				.obtainLock(pLockId, getUploadSubmissionsTaskLockName(), TaskLockType.UPLOAD_SUBMISSION)) {
 			return;
 			// TODO: what should happen if you can't obtain a lock
 			// TODO: come back and think about this
@@ -93,11 +99,19 @@ public class UploadSubmissionsWorkerImpl {
 		}
 		taskLock = null;
 
+		if ( !pFsc.isExternalServicePrepared() ) return;
+		if ( pFsc.getOperationalStatus() != OperationalStatus.ACTIVE ) return;
+		
 		try {
 			switch (pEsOption) {
 			case UPLOAD_ONLY:
 				if (pFsc.getUploadCompleted()) {
-					pExtService.delete();
+					// leave the record so we know action has occurred.
+					Logger.getLogger(UploadSubmissionsWorkerImpl.class.getName())
+						.warning("Upload completed for UPLOAD_ONLY but formServiceCursor operational status slow to be revised");
+					// update this value here, but it should have already been set...
+					pFsc.setOperationalStatus(OperationalStatus.COMPLETED);
+					pDatastore.putEntity(pFsc, pUser);
 				} else {
 					uploadSubmissions();
 				}
@@ -121,7 +135,7 @@ public class UploadSubmissionsWorkerImpl {
 		} finally {
 			taskLock = pDatastore.createTaskLock();
 			for (int i = 0; i < MAX_NUMBER_OF_RELEASE_RETRIES; i++) {
-				if (taskLock.releaseLock(pLockId, pFsc.getUri(),
+				if (taskLock.releaseLock(pLockId, getUploadSubmissionsTaskLockName(),
 						TaskLockType.UPLOAD_SUBMISSION))
 					break;
 				try {
@@ -242,7 +256,7 @@ public class UploadSubmissionsWorkerImpl {
 				if (++counter >= SUBMISSIONS_PER_LOCK_RENEWAL) {
 					TaskLock taskLock = pDatastore.createTaskLock();
 					// TODO: figure out what to do if this returns false
-					taskLock.renewLock(pLockId, pFsc.getUri(),
+					taskLock.renewLock(pLockId, getUploadSubmissionsTaskLockName(),
 							TaskLockType.UPLOAD_SUBMISSION);
 					taskLock = null;
 					counter = 0;

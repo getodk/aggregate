@@ -31,6 +31,7 @@ import org.opendatakit.aggregate.exception.ODKExternalServiceException;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.servlet.ServletUtilBase;
+import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.task.WorksheetCreatorWorkerImpl;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
@@ -91,6 +92,18 @@ public class WorksheetServlet extends ServletUtilBase {
           + ServletConsts.EXTERNAL_SERVICE_TYPE);
       return;
     }
+    String miscTasksString = getParameter(req, ServletConsts.MISC_TASKS_KEY);
+    if ( miscTasksString == null ) {
+    	errorBadParam(resp);
+    	return;
+    }
+    SubmissionKey miscTasksKey = new SubmissionKey(miscTasksString);
+    String attemptCountString = getParameter(req, ServletConsts.ATTEMPT_COUNT);
+    if ( attemptCountString == null ) {
+    	errorBadParam(resp);
+    	return;
+    }
+    Long attemptCount = Long.valueOf(attemptCountString);
 
     Datastore ds = (Datastore) ContextFactory.get().getBean(BeanDefs.DATASTORE_BEAN);
 
@@ -103,20 +116,10 @@ public class WorksheetServlet extends ServletUtilBase {
       return;
     }
 
-    WorksheetCreatorWorkerImpl ws = new WorksheetCreatorWorkerImpl(getServerURL(req), spreadsheetName, esType, form, ds, user);
+    WorksheetCreatorWorkerImpl ws = new WorksheetCreatorWorkerImpl(form, miscTasksKey, attemptCount, 
+    					spreadsheetName, esType, getServerURL(req), ds, user);
 
-    try {
-      ws.worksheetCreator();
-    } catch (ODKExternalServiceException e) {
-      e.printStackTrace();
-      resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.toString());
-      return;
-    } catch (ODKDatastoreException e) {
-      e.printStackTrace();
-      resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.toString());
-      return;
-    }
-
+    ws.worksheetCreator();
   }
 
 }

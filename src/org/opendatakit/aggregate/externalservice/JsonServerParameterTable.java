@@ -44,7 +44,7 @@ public final class JsonServerParameterTable extends CommonFieldsBase {
 	 * @param tableName
 	 */
 	JsonServerParameterTable(String schemaName) {
-		super(schemaName, TABLE_NAME, CommonFieldsBase.BaseType.STATIC);
+		super(schemaName, TABLE_NAME);
 		fieldList.add(serverUrl = new DataField(SERVER_URL_PROPERTY));
 	}
 
@@ -77,7 +77,7 @@ public final class JsonServerParameterTable extends CommonFieldsBase {
 
 	private static JsonServerParameterTable relation = null;
 
-	public static JsonServerParameterTable createRelation(Datastore datastore, User user)
+	public static synchronized final JsonServerParameterTable createRelation(Datastore datastore, User user)
 			throws ODKDatastoreException {
 		if (relation == null) {
 			JsonServerParameterTable relationPrototype;

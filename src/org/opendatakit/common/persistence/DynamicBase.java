@@ -13,6 +13,7 @@
  */
 package org.opendatakit.common.persistence;
 
+import org.opendatakit.common.persistence.DataField.IndexType;
 import org.opendatakit.common.security.User;
 
 
@@ -37,7 +38,7 @@ public abstract class DynamicBase extends DynamicCommonFieldsBase {
 	/* dynamic */
 	
 	/** key into the dynamic table that is our parent container */
-	private static final DataField PARENT_AURI = new DataField("_PARENT_AURI", DataField.DataType.URI, true, PersistConsts.URI_STRING_LEN);
+	private static final DataField PARENT_AURI = new DataField("_PARENT_AURI", DataField.DataType.URI, true, PersistConsts.URI_STRING_LEN).setIndexable(IndexType.HASH);
 	/** ordinal (1st, 2nd, ... ) of this item in the form element */
 	private static final DataField ORDINAL_NUMBER = new DataField("_ORDINAL_NUMBER", DataField.DataType.INTEGER, false);
 
@@ -57,7 +58,7 @@ public abstract class DynamicBase extends DynamicCommonFieldsBase {
 	 * @param tableName
 	 */
 	protected DynamicBase(String databaseSchema, String tableName) {
-		super(databaseSchema, tableName, BaseType.DYNAMIC);
+		super(databaseSchema, tableName);
 		fieldList.add(parentAuri=new DataField(PARENT_AURI));
 		fieldList.add(ordinalNumber=new DataField(ORDINAL_NUMBER));
 		fieldList.add(topLevelAuri=new DataField(TOP_LEVEL_AURI));
@@ -77,52 +78,30 @@ public abstract class DynamicBase extends DynamicCommonFieldsBase {
 	}
 	
 	public final String getTopLevelAuri() {
-		if (( tableType == BaseType.STATIC) ||
-			(tableType == BaseType.STATIC_ASSOCIATION) ||
-			(tableType == BaseType.TOP_LEVEL_DYNAMIC)) {
-			throw new IllegalStateException("Attempting to get topLevelAuri of non-DYNAMIC table");
-		}
 		return getStringField(topLevelAuri);
 	}
 	
 	public final void setTopLevelAuri(String value) {
-		if (( tableType == BaseType.STATIC) ||
-			(tableType == BaseType.STATIC_ASSOCIATION) ||
-			(tableType == BaseType.TOP_LEVEL_DYNAMIC)) {
-			throw new IllegalStateException("Attempting to set topLevelAuri of non-DYNAMIC table");
-		}
 		if ( ! setStringField(topLevelAuri, value) ) {
 			throw new IllegalStateException("overflow on topLevelAuri");
 		}
 	}
 	
 	public final String getParentAuri() {
-		if ( tableType != BaseType.DYNAMIC ) {
-			throw new IllegalStateException("Attempting to get parentAuri of non-DYNAMIC table");
-		}
 		return getStringField(parentAuri);
 	}
 	
 	public final void setParentAuri(String value) {
-		if ( tableType != BaseType.DYNAMIC ) {
-			throw new IllegalStateException("Attempting to set parentAuri of non-DYNAMIC table");
-		}
 		if ( ! setStringField(parentAuri, value) ) {
 			throw new IllegalStateException("overflow on parentAuri");
 		}
 	}
 
 	public final Long getOrdinalNumber() {
-		if ( tableType != BaseType.DYNAMIC ) {
-			throw new IllegalStateException("Attempting to get ordinalNumber of non-DYNAMIC table");
-		}
 		return getLongField(ordinalNumber);
 	}
 
 	public final void setOrdinalNumber(Long value) {
-		if ( tableType != BaseType.DYNAMIC ) {
-			throw new IllegalStateException("Attempting to set ordinalNumber of non-DYNAMIC table");
-		}
 		setLongField(ordinalNumber, value);
 	}
 

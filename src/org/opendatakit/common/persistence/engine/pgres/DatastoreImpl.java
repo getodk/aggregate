@@ -36,6 +36,7 @@ import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.persistence.StaticAssociationBase;
 import org.opendatakit.common.persistence.TaskLock;
 import org.opendatakit.common.persistence.DataField.DataType;
+import org.opendatakit.common.persistence.DataField.IndexType;
 import org.opendatakit.common.persistence.Query.FilterOperation;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
@@ -428,33 +429,41 @@ public class DatastoreImpl implements Datastore {
 			String idx;
 			idx = "PK_" + relation.getTableName();
 			createIndex(relation, idx, relation.getPrimaryKey(), true);
+			// create other indicies
+			for ( DataField f : relation.getFieldList() ) {
+				if ( (f.getIndexable() != IndexType.NONE) && 
+					 (f != relation.getPrimaryKey()) ) {
+					idx = shortPrefix(f.getName()) + "_" + relation.getTableName();
+					createIndex(relation, idx, f, false);
+				}
+			}
+
 			idx = "LUD_" + relation.getTableName();
 			createIndex(relation, idx, relation.lastUpdateDate, false);
-			switch ( relation.getTableType() ) {
-			case STATIC:
-			case DYNAMIC_DOCUMENT:
-				// no index
-				break;
-			case DYNAMIC:
-				// index by parent
-				idx = "FKP_" + relation.getTableName();
-				createIndex(relation, idx, ((DynamicBase) relation).parentAuri, false);
-				break;
-			case STATIC_ASSOCIATION:
-				// index by dominant type
-				idx = "FKD_" + relation.getTableName().substring(0,60);
-				createIndex(relation, idx, ((StaticAssociationBase) relation).domAuri, false);
-				break;
-			case DYNAMIC_ASSOCIATION:
-				// index by dominant type
-				idx = "FKD_" + relation.getTableName().substring(0,60);
-				createIndex(relation, idx, ((DynamicAssociationBase) relation).domAuri, false);
-				break;
-			}
 			
 			// and update the relation with actual dimensions...
 			updateRelation(relation);
 		}
+	}
+
+	/**
+	 * Construct a 3-character or more prefix for use in the index name.
+	 * 
+	 * @param name
+	 * @return
+	 */
+	private String shortPrefix(String name) {
+		StringBuilder b = new StringBuilder();
+		String[] splits = name.split("_");
+		for ( int i = 0 ; i < splits.length ; ++i ) {
+			if ( splits[i].length() > 0 ) {
+				b.append(splits[i].charAt(0));
+			}
+		}
+		if ( b.length() < 3 ) {
+			b.append(Integer.toString(name.length()%10));
+		}
+		return b.toString();
 	}
 	
 	private void createIndex(CommonFieldsBase tbl, String idxName, DataField field, boolean isUnique) {

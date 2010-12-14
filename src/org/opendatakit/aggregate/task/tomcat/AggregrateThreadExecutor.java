@@ -15,6 +15,7 @@
  */
 package org.opendatakit.aggregate.task.tomcat;
 
+import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -71,5 +72,26 @@ public class AggregrateThreadExecutor {
       long periodInMilliseconds) {
     exec.scheduleAtFixedRate(command, initialDelayInMilliseconds, periodInMilliseconds,
         TimeUnit.MILLISECONDS);
+  }
+
+  public boolean awaitTermination(long timeout, TimeUnit unit)
+		throws InterruptedException {
+	return exec.awaitTermination(timeout, unit);
+  }
+
+  public boolean isShutdown() {
+	return exec.isShutdown();
+  }
+
+  public boolean isTerminated() {
+	return exec.isTerminated();
+  }
+
+  public void shutdown() {
+	exec.shutdown();
+  }
+
+  public List<Runnable> shutdownNow() {
+	return exec.shutdownNow();
   }
 }

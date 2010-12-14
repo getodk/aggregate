@@ -18,8 +18,10 @@ package org.opendatakit.aggregate.task.tomcat;
 import org.opendatakit.aggregate.exception.ODKExternalServiceDependencyException;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.task.FormDelete;
 import org.opendatakit.aggregate.task.FormDeleteWorkerImpl;
+import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.security.User;
 
@@ -37,8 +39,9 @@ public class FormDeleteImpl implements FormDelete {
 	static class FormDeleteRunner implements Runnable {
 		final FormDeleteWorkerImpl impl;
 
-		public FormDeleteRunner(Form form, User user) {
-			impl = new FormDeleteWorkerImpl( form, user);
+		public FormDeleteRunner(Form form, SubmissionKey miscTasksKey,
+				long attemptCount, String baseServerWebUrl, Datastore datastore, User user) {
+			impl = new FormDeleteWorkerImpl( form, miscTasksKey, attemptCount, baseServerWebUrl, datastore, user);
 		}
 
 		@Override
@@ -53,8 +56,9 @@ public class FormDeleteImpl implements FormDelete {
 	}
 
   @Override
-  public final void createFormDeleteTask(Form form, User user) throws ODKDatastoreException, ODKFormNotFoundException, ODKExternalServiceDependencyException {
-    FormDeleteRunner dr = new FormDeleteRunner(form, user);
+  public final void createFormDeleteTask(Form form, SubmissionKey miscTasksKey,
+			long attemptCount, String baseServerWebUrl, Datastore datastore, User user) throws ODKDatastoreException, ODKFormNotFoundException {
+    FormDeleteRunner dr = new FormDeleteRunner(form, miscTasksKey, attemptCount, baseServerWebUrl, datastore, user);
     AggregrateThreadExecutor exec = AggregrateThreadExecutor.getAggregateThreadExecutor();
     exec.execute(dr);
   }

@@ -16,6 +16,8 @@
 package org.opendatakit.aggregate.form;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -24,6 +26,7 @@ import java.util.Map;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.BeanDefs;
+import org.opendatakit.aggregate.constants.TaskLockType;
 import org.opendatakit.aggregate.datamodel.FormDataModel;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
@@ -51,69 +54,101 @@ import org.opendatakit.common.security.User;
 import org.opendatakit.common.security.UserService;
 
 /**
+ * Table of miscellaneous tasks.  These should be deleted after 
+ * a certain number of days... .
  * 
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
  * 
  */
-public class PersistentResults {
-//	public static final long RETRY_INTERVAL_MILLISECONDS = (11 * 60) * 1000;
-	public static final long RETRY_INTERVAL_MILLISECONDS = 10000;
-	public static final long MAX_RETRY_ATTEMPTS = 3;
+public class MiscTasks {
 	
+	/**
+	 * Enumerated values that appear in the TaskType column of the
+	 * MiscTasks table.  This has a tie-in to the TaskLockType,
+	 * which defines the work time limit of a task, etc.
+	 * 
+	 * @author mitchellsundt@gmail.com
+	 *
+	 */
+	public enum TaskType {
+		DELETE_FORM(TaskLockType.FORM_DELETION,10),
+		WORKSHEET_CREATE(TaskLockType.WORKSHEET_CREATION,10);
+		
+		private final TaskLockType lockType;
+		private final int maxAttemptCount;
+		
+		private TaskType(TaskLockType type, int maxAttemptCount) {
+			this.lockType = type;
+			this.maxAttemptCount = maxAttemptCount;
+		}
+		
+		public final String toString() {
+			if ( this == DELETE_FORM ) {
+				return "Delete form";
+			} else {
+				return "Create Google Worsheet";
+			}
+		}
+		
+		public final TaskLockType getLockType() {
+			return lockType;
+		}
+		
+		public final int getMaxAttemptCount() {
+			return maxAttemptCount;
+		}
+	};
+	
+	/**
+	 * Status of a task in the miscTasks table.
+	 * 
+	 * @author mitchellsundt@gmail.com
+	 *
+	 */
 	public enum Status {
-		GENERATION_IN_PROGRESS, // created or task is running
+		IN_PROGRESS, // created or task is running
 		RETRY_IN_PROGRESS, // task is running
 		FAILED,    // task completed with failure; retry again later.
 		ABANDONED, // task completed with failure; no more retries should occur.
-		AVAILABLE; // task completed; results are available.
+		SUCCESSFUL; // task completed successfully.
 		
 		public String toString() {
 			switch ( this ) {
-			case GENERATION_IN_PROGRESS:
-				return "Generation in progress";
+			case IN_PROGRESS:
+				return "Operation in progress";
 			case RETRY_IN_PROGRESS:
 				return "Retry in progress";
 			case FAILED:
 				return "Failure - will retry later";
 			case ABANDONED:
 				return "Failure - abandoned all retry attempts";
-			case AVAILABLE:
-				return "Dataset Available";
+			case SUCCESSFUL:
+				return "Operation completed successfully";
 			default:
 				throw new IllegalStateException("missing enum case");
 			}
 		}
 	};
 	
-	public enum ResultType {
-		CSV,
-		KML;
-		
-		public String toString() {
-			if ( this == CSV ) {
-				return "Csv file";
-			} else {
-				return "Kml file";
-			}
-		}
-	};
-	
-	public static final String FORM_ID_PERSISTENT_RESULT = "aggregate.opendatakit.org:PersistentResults";
+	public static final String FORM_ID_MISC_TASKS = "aggregate.opendatakit.org:MiscTasks";
 
-	public static final XFormParameters xformPersistentResultsParameters = 
-		new XFormParameters( FORM_ID_PERSISTENT_RESULT, 1L, 0L);
+	public static final XFormParameters xformMiscTaskParameters = 
+		new XFormParameters( FORM_ID_MISC_TASKS, 1L, 0L);
 
+	private static FormElementModel formId;
 	private static FormElementModel requestingUser;
 	private static FormElementModel requestDate;
 	private static FormElementModel requestParameters;
-	private static FormElementModel lastRetryDate;
+	private static FormElementModel lastActivityDate;
 	private static FormElementModel attemptCount;
 	private static FormElementModel status;
-	private static FormElementModel resultType;
+	private static FormElementModel taskType;
 	private static FormElementModel completionDate;
-	private static FormElementModel resultFile;
-	private static FormElementModel formId;
+
+	public static FormElementModel getFormIdKey() {
+		return formId;
+	}
 
 	public static FormElementModel getRequestingUserKey() {
 		return requestingUser;
@@ -127,8 +162,8 @@ public class PersistentResults {
 		return requestParameters;
 	}
 	
-	public static FormElementModel getLastRetryDateKey() {
-		return lastRetryDate;
+	public static FormElementModel getLastActivityDateKey() {
+		return lastActivityDate;
 	}
 	
 	public static FormElementModel getAttemptCountKey() {
@@ -139,20 +174,12 @@ public class PersistentResults {
 		return status;
 	}
 
-	public static FormElementModel getResultTypeKey() {
-		return resultType;
+	public static FormElementModel getTaskTypeKey() {
+		return taskType;
 	}
 
 	public static FormElementModel getCompletionDateKey() {
 		return completionDate;
-	}
-
-	public static FormElementModel getResultFileKey() {
-		return resultFile;
-	}
-	
-	public static FormElementModel getFormIdKey() {
-	  return formId;
 	}
 
 	public Submission objectEntity;
@@ -164,7 +191,7 @@ public class PersistentResults {
 	 * 
 	 * @param s
 	 */
-	public PersistentResults(Submission s) {
+	public MiscTasks(Submission s) {
 		objectEntity = s;
 	}
 
@@ -178,28 +205,40 @@ public class PersistentResults {
 	 * @param user
 	 * @throws ODKDatastoreException
 	 */
-	public PersistentResults(ResultType type, Form form, Map<String,String> parameters, Datastore datastore, User user) throws ODKDatastoreException {
-		Form persistentResultsForm;
+	public MiscTasks(TaskType type, Form formRequested, Map<String,String> parameters, Datastore datastore, User user) throws ODKDatastoreException {
+		Form form;
 		try {
-			persistentResultsForm = Form.retrieveForm(FORM_ID_PERSISTENT_RESULT, datastore, user);
+			form = Form.retrieveForm(FORM_ID_MISC_TASKS, datastore, user);
 		} catch ( ODKFormNotFoundException e) {
 			throw new ODKDatastoreException(e);
 		}
-		objectEntity = new Submission(xformPersistentResultsParameters.modelVersion,
-								xformPersistentResultsParameters.uiVersion,
-								persistentResultsForm.getFormDefinition(), datastore, user);
+		objectEntity = new Submission(xformMiscTaskParameters.modelVersion,
+								xformMiscTaskParameters.uiVersion,
+								form.getFormDefinition(), datastore, user);
+		setFormId(formRequested.getFormId());
 		setRequestingUser(user.getUriUser());
 		Date now = new Date();
 		setRequestDate(now);
 		setRequestParameters(parameters);
-		setLastRetryDate(now);
+		setLastActivityDate(now);
 		setAttemptCount(1L);
-		setStatus(Status.GENERATION_IN_PROGRESS);
-		setResultType(type);
-		setFormId(form.getFormId());
+		setStatus(Status.IN_PROGRESS);
+		setTaskType(type);
 		
 		objectEntity.setIsComplete(true); // indicate that the data should be visible on queries
 		// NOTE: the entity is not yet persisted! 
+	}
+	
+	public String getUri() {
+		return objectEntity.getKey().getKey();
+	}
+	
+	public String getFormId() {
+		return ((StringSubmissionType) objectEntity.getElementValue(formId)).getValue();
+	}
+	
+	public void setFormId(String value) throws ODKEntityPersistException {
+		((StringSubmissionType) objectEntity.getElementValue(formId)).setValueFromString(value);
 	}
 	
 	public String getRequestingUser() {
@@ -229,15 +268,15 @@ public class PersistentResults {
 
 	public void setRequestParameters(Map<String,String> value) throws ODKEntityPersistException {
 		((StringSubmissionType) objectEntity.getElementValue(requestParameters)).setValueFromString(
-					PropertyMapSerializer.serializeRequestParameters(value));
+				PropertyMapSerializer.serializeRequestParameters(value));
 	}
 
-	public Date getLastRetryDate() {
-		return ((DateSubmissionType) objectEntity.getElementValue(lastRetryDate)).getValue();
+	public Date getLastActivityDate() {
+		return ((DateSubmissionType) objectEntity.getElementValue(lastActivityDate)).getValue();
 	}
 
-	public void setLastRetryDate(Date value) {
-		((DateSubmissionType) objectEntity.getElementValue(lastRetryDate)).setValueFromDate(value);
+	public void setLastActivityDate(Date value) {
+		((DateSubmissionType) objectEntity.getElementValue(lastActivityDate)).setValueFromDate(value);
 	}
 	
 	public Long getAttemptCount() {
@@ -256,12 +295,12 @@ public class PersistentResults {
 		((StringSubmissionType) objectEntity.getElementValue(status)).setValueFromString(value.name());
 	}
 	
-	public ResultType getResultType() {
-		return ResultType.valueOf(((StringSubmissionType) objectEntity.getElementValue(resultType)).getValue());
+	public TaskType getTaskType() {
+		return TaskType.valueOf(((StringSubmissionType) objectEntity.getElementValue(taskType)).getValue());
 	}
 	
-	public void setResultType(ResultType value) throws ODKEntityPersistException {
-		((StringSubmissionType) objectEntity.getElementValue(resultType)).setValueFromString(value.name());
+	public void setTaskType(TaskType value) throws ODKEntityPersistException {
+		((StringSubmissionType) objectEntity.getElementValue(taskType)).setValueFromString(value.name());
 	}
 	
 	public Date getCompletionDate() {
@@ -271,39 +310,9 @@ public class PersistentResults {
 	public void setCompletionDate(Date value) {
 		((DateSubmissionType) objectEntity.getElementValue(completionDate)).setValueFromDate(value);
 	}
-
-	public byte[] getResultFile() throws ODKDatastoreException {
-		BlobSubmissionType bt = ((BlobSubmissionType) objectEntity.getElementValue(resultFile));
-		if ( bt.getAttachmentCount() == 0 ) return null;
-		if ( bt.getAttachmentCount() > 1 ) {
-			throw new IllegalStateException("Too many results attached!");
-		}
-		String version = bt.getCurrentVersion(1);
-		return bt.getBlob(1, version);
-	}
-
-	public void setResultFile(byte[] byteArray, String contentType, Long contentLength,
-								String unrootedFilePath, Datastore datastore, User user) throws ODKDatastoreException {
-		BlobSubmissionType bt = ((BlobSubmissionType) objectEntity.getElementValue(resultFile));
-		if ( bt.getAttachmentCount() > 0 ) {
-			throw new IllegalStateException("Results are already attached!");
-		}
-		bt.setValueFromByteArray(byteArray, contentType, contentLength, unrootedFilePath, datastore, user);
-	}
 	
-	public String getFormId() {
-	  return ((StringSubmissionType) objectEntity.getElementValue(formId)).getValue();
-	}
-	
-	public void setFormId(String value) throws ODKEntityPersistException {
-	  ((StringSubmissionType) objectEntity.getElementValue(PersistentResults.formId)).setValueFromString(value);
-	}
-
-	public void deleteResultFile(Datastore datastore, User user) throws ODKDatastoreException {
-		BlobSubmissionType bt = ((BlobSubmissionType) objectEntity.getElementValue(resultFile));
-		if ( bt.getAttachmentCount() > 0 ) {
-			bt.deleteAll(datastore, user);
-		}
+	public String getMiscTaskLockName() {
+		return "MT:" + getFormId();
 	}
 	
 	public void persist(Datastore datastore, User user) throws ODKEntityPersistException {
@@ -320,32 +329,50 @@ public class PersistentResults {
 	public SubmissionKey getSubmissionKey() {
 		return objectEntity.constructSubmissionKey(null);
 	}
+	public static final List<MiscTasks> getStalledRequests(Datastore datastore, User user) throws ODKDatastoreException {
+		List<MiscTasks> taskList = new ArrayList<MiscTasks>();
+		TaskType[] taskTypes = TaskType.values();
+		for ( int i = 0 ; i < taskTypes.length ; ++i ) {
+			getStalledTaskRequests(taskList, taskTypes[i], datastore, user);
+		}
+		// The list, at this point, displays bias toward the first
+		// task type.  Reorder the list to bias toward the most-stale
+		// task.  This ensures that we process the stalled tasks in
+		// a fair order regardless of their resource locking requirements.
+		Collections.sort(taskList, new Comparator<MiscTasks>() {
+			@Override
+			public int compare(MiscTasks o1, MiscTasks o2) {
+				return o1.getLastActivityDate().compareTo(o2.getLastActivityDate());// TODO Auto-generated method stub
+			}			
+		});
+		return taskList;
+	}
 	
-	public static final List<PersistentResults> getStalledRequests(Datastore datastore, User user) throws ODKDatastoreException {
+	public static final void getStalledTaskRequests(List<MiscTasks> taskList, TaskType taskType, Datastore datastore, User user) throws ODKDatastoreException {
 		Form form;
 		try {
-			form = Form.retrieveForm(FORM_ID_PERSISTENT_RESULT, datastore, user);
+			form = Form.retrieveForm(FORM_ID_MISC_TASKS, datastore, user);
 		} catch ( ODKFormNotFoundException e) {
 			throw new ODKDatastoreException(e);
 		}
 		Query q = datastore.createQuery(form.getTopLevelGroupElement().getFormDataModel().getBackingObjectPrototype(), user);
 		Date now = new Date();
-	
-		Date limit = new Date(now.getTime() - RETRY_INTERVAL_MILLISECONDS );
-		q.addFilter(getLastRetryDateKey().getFormDataModel().getBackingKey(), FilterOperation.LESS_THAN, limit );
+
+		// TODO: rework for each task type...
+		Date limit = new Date(now.getTime() - taskType.getLockType().getLockExpirationTimeout() - 1 );
+		q.addFilter(getLastActivityDateKey().getFormDataModel().getBackingKey(), FilterOperation.LESS_THAN, limit );
 		List<? extends CommonFieldsBase> l = q.executeQuery(0);
 		/*
 		 * The list of objects consists only of those that were last 
-		 * fired at a lastRetryDate older than the retry interval, which
+		 * fired at a lastActivityDate older than the retry interval, which
 		 * should be longer than the allowed Task lifetime.
 		 */
-		List<PersistentResults> r = new ArrayList<PersistentResults>();
 		for ( CommonFieldsBase b : l ) {
 			Submission s = new Submission( b.getUri(), form, datastore, user );
-			PersistentResults result = new PersistentResults(s);
-			if ( result.getStatus() == Status.AVAILABLE ) continue;
+			MiscTasks result = new MiscTasks(s);
+			if ( result.getStatus() == Status.SUCCESSFUL ) continue;
 			if ( result.getStatus() == Status.ABANDONED ) continue;
-			if ( result.getAttemptCount() >= MAX_RETRY_ATTEMPTS ) {
+			if ( result.getAttemptCount() >= taskType.getMaxAttemptCount() ) {
 				// the task is stale, and should be marked abandoned,
 				// but the worker thread must have failed.  Attempt 
 				// it here...
@@ -358,30 +385,29 @@ public class PersistentResults {
 			// OK.  If we are here, a task was last fired for this request
 			// more than the retry interval ago and the task is eligible
 			// to be restarted.
-			r.add(result);
+			taskList.add(result);
 		}
-		return r;
 	}
 
-	public static List<PersistentResults> getAllTasksForForm(Form theForm,
-			Datastore datastore, User user) throws ODKDatastoreException {
-		Form form;
+	public static List<MiscTasks> getAllTasksForForm(Form form, Datastore datastore,
+			User user) throws ODKDatastoreException {
+		List<MiscTasks> taskList = new ArrayList<MiscTasks>();
+		Form miscTasksForm;
 		try {
-			form = Form.retrieveForm(FORM_ID_PERSISTENT_RESULT, datastore, user);
+			miscTasksForm = Form.retrieveForm(FORM_ID_MISC_TASKS, datastore, user);
 		} catch ( ODKFormNotFoundException e) {
 			throw new ODKDatastoreException(e);
 		}
-		Query q = datastore.createQuery(form.getTopLevelGroupElement().getFormDataModel().getBackingObjectPrototype(), user);
-		q.addFilter(PersistentResults.getFormIdKey().getFormDataModel().getBackingKey(), FilterOperation.EQUAL, theForm.getFormId());
+		Query q = datastore.createQuery(miscTasksForm.getTopLevelGroupElement().getFormDataModel().getBackingObjectPrototype(), user);
+		q.addFilter(MiscTasks.getFormIdKey().getFormDataModel().getBackingKey(), FilterOperation.EQUAL, form.getFormId());
+		// collect all MiscTasks entries that refer to the given form...
 		List<? extends CommonFieldsBase> l = q.executeQuery(0);
-		
-		List<PersistentResults> r = new ArrayList<PersistentResults>();
 		for ( CommonFieldsBase b : l ) {
-			Submission s = new Submission( b.getUri(), form, datastore, user );
-			PersistentResults result = new PersistentResults(s);
-			r.add(result);
+			Submission s = new Submission( b.getUri(), miscTasksForm, datastore, user );
+			MiscTasks result = new MiscTasks(s);
+			taskList.add(result);
 		}
-		return r;
+		return taskList;
 	}
 	
 	/**
@@ -390,11 +416,14 @@ public class PersistentResults {
 	 * @author mitchellsundt@gmail.com
 	 *
 	 */
-	private static final class PersistentResultsTable extends TopLevelDynamicBase {
+	private static final class MiscTasksTable extends TopLevelDynamicBase {
 
-		static final String TABLE_NAME = "_persistent_results";
+		static final String TABLE_NAME = "_misc_tasks";
 	
-		private static final String PERSISTENT_RESULT_DEFINITION_URI = "aggregate.opendatakit.org:PersistentResults-Definition";
+		private static final String MISC_TASK_DEFINITION_URI = "aggregate.opendatakit.org:MiscTasks-Definition";
+		
+		private static final DataField FORM_ID = new DataField("FORM_ID",
+				DataField.DataType.STRING, true);
 		
 		private static final DataField REQUESTING_USER = new DataField("REQUESTING_USER",
 				DataField.DataType.STRING, true);
@@ -405,7 +434,7 @@ public class PersistentResults {
 		private static final DataField REQUEST_PARAMETERS = new DataField("REQUEST_PARAMETERS",
 				DataField.DataType.STRING, true, 4096L);
 
-		private static final DataField LAST_RETRY_DATE = new DataField("LAST_RETRY_DATE",
+		private static final DataField LAST_ACTIVITY_DATE = new DataField("LAST_ACTIVITY_DATE",
 				DataField.DataType.DATETIME, true);
 	
 		private static final DataField ATTEMPT_COUNT = new DataField("ATTEMPT_COUNT",
@@ -414,61 +443,46 @@ public class PersistentResults {
 		private static final DataField STATUS = new DataField("STATUS",
 				DataField.DataType.STRING, true);
 
-		private static final DataField RESULT_TYPE = new DataField("RESULT_TYPE",
+		private static final DataField TASK_TYPE = new DataField("TASK_TYPE",
 				DataField.DataType.STRING, true);
 	
 		private static final DataField COMPLETION_DATE = new DataField("COMPLETION_DATE",
 				DataField.DataType.DATETIME, true);
-		
-		private static final DataField FORM_ID = new DataField("FORM_ID_KEY",
-		      DataField.DataType.STRING, true);
 	
+		public final DataField formId;
 		public final DataField requestingUser;
 		public final DataField requestDate;
 		public final DataField requestParameters;
-		public final DataField lastRetryDate;
+		public final DataField lastActivityDate;
 		public final DataField attemptCount;
 		public final DataField status;
-		public final DataField resultType;
+		public final DataField taskType;
 		public final DataField completionDate;
-		public final DataField formId;
-	
-		// additional virtual DataField -- binary content
-		
-		static final String ELEMENT_NAME_RESULT_FILE_DEFINITION = "resultFile";
-	
-		private static final String PERSISTENT_RESULT_FILE_REF_BLOB = "_persistent_result_file_blb";
-	
-		private static final String PERSISTENT_RESULT_FILE_VERSIONED_BINARY_CONTENT_REF_BLOB = "_persistent_result_file_ref";
-	
-		private static final String PERSISTENT_RESULT_FILE_VERSIONED_BINARY_CONTENT = "_persistent_result_file_vbn";
-	
-		private static final String PERSISTENT_RESULT_FILE_BINARY_CONTENT = "_persistent_result_file_bin";
 	
 		// additional virtual DataField -- long string text
 		
-		private static final String PERSISTENT_RESULT_REF_TEXT = "_persistent_result_string_txt";
+		private static final String MISC_TASKS_REF_TEXT = "_misc_task_string_txt";
 	
-		private static final String PERSISTENT_RESULT_LONG_STRING_REF_TEXT = "_persistent_result_string_ref";
+		private static final String MISC_TASKS_LONG_STRING_REF_TEXT = "_misc_task_string_ref";
 	
 		/**
 		 * Construct a relation prototype.
 		 * 
 		 * @param databaseSchema
 		 */
-		private PersistentResultsTable(String databaseSchema) {
+		private MiscTasksTable(String databaseSchema) {
 			super(databaseSchema, TABLE_NAME);
+			fieldList.add(formId = new DataField(FORM_ID));
 			fieldList.add(requestingUser = new DataField(REQUESTING_USER));
 			fieldList.add(requestDate = new DataField(REQUEST_DATE));
 			fieldList.add(requestParameters = new DataField(REQUEST_PARAMETERS));
-			fieldList.add(lastRetryDate = new DataField(LAST_RETRY_DATE));
+			fieldList.add(lastActivityDate = new DataField(LAST_ACTIVITY_DATE));
 			fieldList.add(attemptCount = new DataField(ATTEMPT_COUNT));
 			fieldList.add(status = new DataField(STATUS));
-			fieldList.add(resultType = new DataField(RESULT_TYPE));
+			fieldList.add(taskType = new DataField(TASK_TYPE));
 			fieldList.add(completionDate = new DataField(COMPLETION_DATE));
-			fieldList.add(formId = new DataField(FORM_ID));
 	
-			fieldValueMap.put(primaryKey, CommonFieldsBase.newMD5HashUri(FORM_ID_PERSISTENT_RESULT));
+			fieldValueMap.put(primaryKey, CommonFieldsBase.newMD5HashUri(FORM_ID_MISC_TASKS));
 		}
 	
 		/**
@@ -477,30 +491,30 @@ public class PersistentResults {
 		 * @param ref
 		 * @param user
 		 */
-		private PersistentResultsTable(PersistentResultsTable ref, User user) {
+		private MiscTasksTable(MiscTasksTable ref, User user) {
 			super(ref, user);
+			formId = ref.formId;
 			requestingUser = ref.requestingUser;
 			requestDate = ref.requestDate;
 			requestParameters = ref.requestParameters;
-			lastRetryDate = ref.lastRetryDate;
+			lastActivityDate = ref.lastActivityDate;
 			attemptCount = ref.attemptCount;
 			status = ref.status;
-			resultType = ref.resultType;
+			taskType = ref.taskType;
 			completionDate = ref.completionDate;
-			formId = ref.formId;
 		}
 	
 		@Override
-		public PersistentResultsTable getEmptyRow(User user) {
-			return new PersistentResultsTable(this, user);
+		public MiscTasksTable getEmptyRow(User user) {
+			return new MiscTasksTable(this, user);
 		}
 		
-		private static PersistentResultsTable relation = null;
+		private static MiscTasksTable relation = null;
 		
-		static synchronized final PersistentResultsTable createRelation(Datastore datastore, User user) throws ODKDatastoreException {
+		static synchronized final MiscTasksTable createRelation(Datastore datastore, User user) throws ODKDatastoreException {
 			if ( relation == null ) {
-				PersistentResultsTable relationPrototype;
-				relationPrototype = new PersistentResultsTable(datastore.getDefaultSchemaName());
+				MiscTasksTable relationPrototype;
+				relationPrototype = new MiscTasksTable(datastore.getDefaultSchemaName());
 			    datastore.createRelation(relationPrototype, user); // may throw exception...
 			    // at this point, the prototype has become fully populated
 			    relation = relationPrototype; // set static variable only upon success...
@@ -522,72 +536,51 @@ public class PersistentResults {
 		FormDataModel.createRelation(datastore, user);
 		SubmissionAssociationTable.createRelation(datastore, user);
 		
-		PersistentResultsTable persistentResultsRelation = PersistentResultsTable.createRelation(datastore, user);
-		PersistentResultsTable persistentResultsDefinition = datastore.createEntityUsingRelation(persistentResultsRelation, null, user);
-		persistentResultsDefinition.setStringField(persistentResultsRelation.primaryKey, PersistentResultsTable.PERSISTENT_RESULT_DEFINITION_URI);
+		MiscTasksTable miscTasksRelation = MiscTasksTable.createRelation(datastore, user);
+		MiscTasksTable miscTasksDefinition = datastore.createEntityUsingRelation(miscTasksRelation, null, user);
+		miscTasksDefinition.setStringField(miscTasksRelation.primaryKey, MiscTasksTable.MISC_TASK_DEFINITION_URI);
 		
-		Long lastOrdinal = 0L;
-		
-		lastOrdinal = FormDefinition.buildTableFormDataModel( model, 
-				persistentResultsRelation, 
-				persistentResultsDefinition, // top level table
-				persistentResultsDefinition, // parent table...
+		FormDefinition.buildTableFormDataModel( model, 
+				miscTasksRelation, 
+				miscTasksDefinition, // top level table
+				miscTasksDefinition, // parent table...
 				1L,
 				datastore, user );
 
-		String uriPrefix = FORM_ID_PERSISTENT_RESULT;
-		FormDefinition.buildBinaryContentFormDataModel(model, 
-				PersistentResultsTable.ELEMENT_NAME_RESULT_FILE_DEFINITION, 
-				uriPrefix + PersistentResultsTable.PERSISTENT_RESULT_FILE_BINARY_CONTENT, 
-				PersistentResultsTable.PERSISTENT_RESULT_FILE_BINARY_CONTENT, 
-				uriPrefix + PersistentResultsTable.PERSISTENT_RESULT_FILE_VERSIONED_BINARY_CONTENT, 
-				PersistentResultsTable.PERSISTENT_RESULT_FILE_VERSIONED_BINARY_CONTENT, 
-				uriPrefix + PersistentResultsTable.PERSISTENT_RESULT_FILE_VERSIONED_BINARY_CONTENT_REF_BLOB, 
-				PersistentResultsTable.PERSISTENT_RESULT_FILE_VERSIONED_BINARY_CONTENT_REF_BLOB, 
-				uriPrefix + PersistentResultsTable.PERSISTENT_RESULT_FILE_REF_BLOB, 
-				PersistentResultsTable.PERSISTENT_RESULT_FILE_REF_BLOB, 
-				persistentResultsDefinition, // top level table
-				persistentResultsRelation, // parent table
-				++lastOrdinal, 
-				datastore, user);
+		String uriPrefix = FORM_ID_MISC_TASKS;
 		
 		FormDefinition.buildLongStringFormDataModel(model, 
-				uriPrefix + PersistentResultsTable.PERSISTENT_RESULT_LONG_STRING_REF_TEXT, 
-				PersistentResultsTable.PERSISTENT_RESULT_LONG_STRING_REF_TEXT, 
-				uriPrefix + PersistentResultsTable.PERSISTENT_RESULT_REF_TEXT, 
-				PersistentResultsTable.PERSISTENT_RESULT_REF_TEXT, 
-				persistentResultsDefinition, // top level and parent table
+				uriPrefix + MiscTasksTable.MISC_TASKS_LONG_STRING_REF_TEXT, 
+				MiscTasksTable.MISC_TASKS_LONG_STRING_REF_TEXT, 
+				uriPrefix + MiscTasksTable.MISC_TASKS_REF_TEXT, 
+				MiscTasksTable.MISC_TASKS_REF_TEXT, 
+				miscTasksDefinition, // top level and parent table
 				2L, 
 				datastore, 
 				user);
 		
-		FormDefinition.assertModel(xformPersistentResultsParameters, model, datastore, user);
+		FormDefinition.assertModel(xformMiscTaskParameters, model, datastore, user);
 
-		FormDefinition formDefinition = FormDefinition.getFormDefinition(xformPersistentResultsParameters, datastore, user);
+		FormDefinition formDefinition = FormDefinition.getFormDefinition(xformMiscTaskParameters, datastore, user);
 		
-		if ( PersistentResultsTable.relation != (PersistentResultsTable) formDefinition.getTopLevelGroup().getBackingObjectPrototype() ) {
+		if ( MiscTasksTable.relation != (MiscTasksTable) formDefinition.getTopLevelGroup().getBackingObjectPrototype() ) {
 			throw new IllegalStateException("PersistentResults form is not the canonical relation");
 		}
 
 		// and discover the form element model values for submissions of this type.
-		requestingUser = FormDefinition.findElement(formDefinition.getTopLevelGroupElement(), PersistentResultsTable.relation.requestingUser);
-		requestDate = FormDefinition.findElement(formDefinition.getTopLevelGroupElement(), PersistentResultsTable.relation.requestDate);
-		requestParameters = FormDefinition.findElement(formDefinition.getTopLevelGroupElement(), PersistentResultsTable.relation.requestParameters);
-		lastRetryDate = FormDefinition.findElement(formDefinition.getTopLevelGroupElement(), PersistentResultsTable.relation.lastRetryDate);
-		attemptCount = FormDefinition.findElement(formDefinition.getTopLevelGroupElement(), PersistentResultsTable.relation.attemptCount);
-		status = FormDefinition.findElement(formDefinition.getTopLevelGroupElement(), PersistentResultsTable.relation.status);
-		resultType = FormDefinition.findElement(formDefinition.getTopLevelGroupElement(), PersistentResultsTable.relation.resultType);
-		completionDate = FormDefinition.findElement(formDefinition.getTopLevelGroupElement(), PersistentResultsTable.relation.completionDate);
-		resultFile = formDefinition.getTopLevelGroupElement().findElementByName(PersistentResultsTable.ELEMENT_NAME_RESULT_FILE_DEFINITION);
-		formId = FormDefinition.findElement(formDefinition.getTopLevelGroupElement(), PersistentResultsTable.relation.formId);
+		formId = FormDefinition.findElement(formDefinition.getTopLevelGroupElement(), MiscTasksTable.relation.formId);
+		requestingUser = FormDefinition.findElement(formDefinition.getTopLevelGroupElement(), MiscTasksTable.relation.requestingUser);
+		requestDate = FormDefinition.findElement(formDefinition.getTopLevelGroupElement(), MiscTasksTable.relation.requestDate);
+		requestParameters = FormDefinition.findElement(formDefinition.getTopLevelGroupElement(), MiscTasksTable.relation.requestParameters);
+		lastActivityDate = FormDefinition.findElement(formDefinition.getTopLevelGroupElement(), MiscTasksTable.relation.lastActivityDate);
+		attemptCount = FormDefinition.findElement(formDefinition.getTopLevelGroupElement(), MiscTasksTable.relation.attemptCount);
+		status = FormDefinition.findElement(formDefinition.getTopLevelGroupElement(), MiscTasksTable.relation.status);
+		taskType = FormDefinition.findElement(formDefinition.getTopLevelGroupElement(), MiscTasksTable.relation.taskType);
+		completionDate = FormDefinition.findElement(formDefinition.getTopLevelGroupElement(), MiscTasksTable.relation.completionDate);
+
+		String persistentResultsUri = miscTasksRelation.getUri();
 		
-
-		String persistentResultsUri = persistentResultsRelation.getUri();
-		// Now create a record in the FormInfo table for the PersistentResults table itself...
-		FormInfoTable fiRelation = Form.getFormInfoRelation(datastore);
-		FormDefinition formInfoDefinition = Form.getFormInfoDefinition(datastore);
-
-		FormDefinition.assertFormInfoRecord(xformPersistentResultsParameters, "Result Files", "Result files generated by Aggregate.", persistentResultsUri, datastore, user);
+		FormDefinition.assertFormInfoRecord(xformMiscTaskParameters, "Miscellaneous Tasks", "Miscellaneous tasks run in the background and managed by Aggregate", persistentResultsUri, datastore, user);
 	}
 
 	/**
@@ -605,7 +598,7 @@ public class PersistentResults {
 		    Datastore datastore = (Datastore) ContextFactory.get().getBean(BeanDefs.DATASTORE_BEAN);
 
 		    DynamicCommonFieldsBase b;
-			b = PersistentResultsTable.createRelation(datastore, user);
+			b = MiscTasksTable.createRelation(datastore, user);
 			backingTableMap.put(b.getSchemaName() + "." + b.getTableName(), b);
 		} catch (ODKDatastoreException e) {
 			throw new IllegalStateException("the relations should already have been created");
