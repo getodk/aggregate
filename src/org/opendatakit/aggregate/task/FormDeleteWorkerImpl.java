@@ -75,9 +75,13 @@ public class FormDeleteWorkerImpl {
 	public final void deleteForm() throws ODKDatastoreException,
 			ODKFormNotFoundException, ODKExternalServiceDependencyException {
 
-		Submission s = Submission.fetchSubmission(miscTasksKey.splitSubmissionKey(), datastore, user);
+		Submission s;
+		try {
+			s = Submission.fetchSubmission(miscTasksKey.splitSubmissionKey(), datastore, user);
+		} catch (Exception e) {
+			return;
+		}
 	    MiscTasks t = new MiscTasks(s);
-		boolean deleted = false;
 		// gain lock on the formId itself...
 		// the locked resource should be the formId, but for testing
 		// it is useful to have the external services collide using 
@@ -89,56 +93,49 @@ public class FormDeleteWorkerImpl {
 			if (formIdTaskLock.obtainLock(pFormIdLockId, lockedResourceName,
 					TaskLockType.FORM_DELETION)) {
 				formIdTaskLock = null;
-				doDeletion(t);
-				deleted = true;
+				boolean deleted = doDeletion(t);
 			}
 		} catch (ODKTaskLockException e1) {
 			e1.printStackTrace();
+		} catch (Exception e2) {
+			e2.printStackTrace();
 		} finally {
-			if ( !deleted ) {
-				// TODO: repost...
-				return;
-			}
-		}
-		formIdTaskLock = datastore.createTaskLock();
-		try {
-			for (int i = 0; i < 10; i++) {
-				if (formIdTaskLock.releaseLock(pFormIdLockId, lockedResourceName,
-						TaskLockType.FORM_DELETION))
-					break;
-				try {
-					Thread.sleep(1000);
-				} catch (InterruptedException e) {
-					// just move on, this retry mechanism 
-					// is to make things nice
+			formIdTaskLock = datastore.createTaskLock();
+			try {
+				for (int i = 0; i < 10; i++) {
+					if (formIdTaskLock.releaseLock(pFormIdLockId, lockedResourceName,
+							TaskLockType.FORM_DELETION))
+						break;
+					try {
+						Thread.sleep(1000);
+					} catch (InterruptedException e) {
+						// just move on, this retry mechanism 
+						// is to make things nice
+					}
 				}
+			} catch (ODKTaskLockException e) {
+				e.printStackTrace();
 			}
-		} catch (ODKTaskLockException e) {
-			e.printStackTrace();
 		}
 	}
 	
 	/**
-	 * Abandon any miscellaneous tasks for this form.
+	 * Delete any miscellaneous tasks for this form.
 	 * 
 	 * @param self
 	 * @return
 	 * @throws ODKDatastoreException
 	 */
-	private boolean abandonMiscTasks(MiscTasks self) throws ODKDatastoreException {
+	private boolean deleteMiscTasks(MiscTasks self) throws ODKDatastoreException {
 		// first, delete all the tasks for this form.
 		List<MiscTasks> tasks = MiscTasks.getAllTasksForForm(form, datastore, user);
 		for (MiscTasks task : tasks ) {
 			if ( task.getUri().equals(self.getUri())) continue; // us!
-			if ( task.getStatus() == Status.SUCCESSFUL ) continue;
-			if ( task.getStatus() == Status.ABANDONED ) continue;
 			String lockedResourceName = task.getMiscTaskLockName();
 			if ( lockedResourceName.equals(self.getMiscTaskLockName()) ) {
 				// we hold this lock already!
-				// abaondon the task...
-				task.setStatus(Status.ABANDONED);
-				task.setAttemptCount(task.getTaskType().getMaxAttemptCount()+1L);
-				task.persist(datastore, user);
+				// delete the task...
+				task.delete(datastore, user);
 			} else {
 				// otherwise, gain the lock on the task 
 				TaskLock taskLock = datastore.createTaskLock();
@@ -148,10 +145,8 @@ public class FormDeleteWorkerImpl {
 					if (taskLock.obtainLock(pLockId, lockedResourceName,
 							task.getTaskType().getLockType())) {
 						taskLock = null;
-						// mark the task as abandoned...
-						task.setStatus(Status.ABANDONED);
-						task.setAttemptCount(task.getTaskType().getMaxAttemptCount()+1L);
-						task.persist(datastore, user);
+						// delete the task...
+						task.delete(datastore, user);
 						deleted = true;
 					}
 				} catch (ODKTaskLockException e1) {
@@ -186,33 +181,29 @@ public class FormDeleteWorkerImpl {
 	}
 
 	/**
-	 * Abandon any persistent result tasks for this form.
+	 * Delete any persistent result tasks (and results files) for this form.
 	 * 
 	 * @param self
 	 * @return
 	 * @throws ODKDatastoreException
 	 */
-	private boolean abandonPersistentResultTasks() throws ODKDatastoreException {
+	private boolean deletePersistentResultTasks() throws ODKDatastoreException {
 		// first, delete all the tasks for this form.
 		List<PersistentResults> tasks = PersistentResults.getAllTasksForForm(form, datastore, user);
 		for (PersistentResults task : tasks ) {
-			if ( task.getStatus() == PersistentResults.Status.AVAILABLE ) continue;
-			if ( task.getStatus() == PersistentResults.Status.ABANDONED ) continue;
-			// abandon the task...
-			task.setStatus(PersistentResults.Status.ABANDONED);
-			task.setAttemptCount(PersistentResults.MAX_RETRY_ATTEMPTS+1L);
-			task.persist(datastore, user);
+			// delete the task...
+			task.delete(datastore, user);
 		}
 		return true;
 	}
 
 	/**
-	 * Abandon any external service tasks for this form.
+	 * Delete any external service tasks for this form.
 	 * 
 	 * @return
 	 * @throws ODKDatastoreException
 	 */
-	private boolean abandonExternalServiceTasks() throws ODKDatastoreException {
+	private boolean deleteExternalServiceTasks() throws ODKDatastoreException {
 		List<ExternalService> services = FormServiceCursor
 		.getExternalServicesForForm(form, null, datastore, user);
 		
@@ -227,7 +218,7 @@ public class FormDeleteWorkerImpl {
 				if (taskLock.obtainLock(pLockId, uriExternalService,
 						TaskLockType.UPLOAD_SUBMISSION)) {
 					taskLock = null;
-					service.abandon();
+					service.delete();
 					deleted = true;
 				}
 			} catch (ODKTaskLockException e1) {
@@ -261,19 +252,20 @@ public class FormDeleteWorkerImpl {
 	/**
 	 * we have gained a lock on the form.  Now go through and 
 	 * try to delete all other MTs and external services related
-	 * to this form. 
+	 * to this form.
+	 * @return true if form is fully deleted... 
 	 * @throws ODKDatastoreException 
 	 * @throws ODKTaskLockException 
 	 */
-	private void doDeletion(MiscTasks t) throws ODKDatastoreException, ODKTaskLockException {
+	private boolean doDeletion(MiscTasks t) throws ODKDatastoreException, ODKTaskLockException {
 		Datastore ds = (Datastore) ContextFactory.get().getBean(
 				BeanDefs.DATASTORE_BEAN);
 		
-		if ( !abandonMiscTasks(t) ) return;
+		if ( !deleteMiscTasks(t) ) return false;
 		
-		abandonPersistentResultTasks();
+		deletePersistentResultTasks();
 		
-		if ( !abandonExternalServiceTasks() ) return;
+		if ( !deleteExternalServiceTasks() ) return false;
 
 		CommonFieldsBase relation = null;
 		relation = form.getTopLevelGroupElement().getFormDataModel()
@@ -320,12 +312,12 @@ public class FormDeleteWorkerImpl {
 
 		// we are avoiding strong locking, so some services might
 		// have been set up during the deletion.  Delete them.
-		if ( !abandonExternalServiceTasks() ) return;
+		if ( !deleteExternalServiceTasks() ) return false;
 		
-		abandonPersistentResultTasks();
+		deletePersistentResultTasks();
 		
 		// same is true with other miscellaneous tasks.  Delete them.
-		if ( !abandonMiscTasks(t) ) return;
+		if ( !deleteMiscTasks(t) ) return false;
 
 		// delete the form.
 		form.deleteForm(ds, user);
@@ -334,5 +326,6 @@ public class FormDeleteWorkerImpl {
 		t.setCompletionDate(new Date());
 		t.setStatus(Status.SUCCESSFUL);
 		t.persist(ds, user);
+		return true;
 	}
 }

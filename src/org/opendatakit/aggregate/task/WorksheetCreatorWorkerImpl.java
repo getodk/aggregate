@@ -17,12 +17,14 @@ package org.opendatakit.aggregate.task;
 
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.BeanDefs;
+import org.opendatakit.aggregate.constants.TaskLockType;
 import org.opendatakit.aggregate.constants.externalservice.ExternalServiceOption;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
-import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
+import org.opendatakit.aggregate.exception.ODKTaskLockException;
 import org.opendatakit.aggregate.externalservice.ExternalService;
 import org.opendatakit.aggregate.externalservice.FormServiceCursor;
 import org.opendatakit.aggregate.externalservice.GoogleSpreadsheet;
@@ -32,6 +34,7 @@ import org.opendatakit.aggregate.form.MiscTasks.Status;
 import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.common.persistence.Datastore;
+import org.opendatakit.common.persistence.TaskLock;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.security.User;
 
@@ -52,6 +55,7 @@ public class WorksheetCreatorWorkerImpl {
 	private final String baseWebServerUrl;
 	private final Datastore datastore;
 	private final User user;
+	private final String pFormIdLockId;
 	
 	public WorksheetCreatorWorkerImpl(Form form, 
 			SubmissionKey miscTasksKey, long attemptCount, 
@@ -65,6 +69,7 @@ public class WorksheetCreatorWorkerImpl {
 		this.baseWebServerUrl = baseWebServerUrl;
 		this.datastore = datastore;
 		this.user = user;
+		pFormIdLockId = UUID.randomUUID().toString();
 	}
 
 	private final GoogleSpreadsheet getGoogleSpreadsheetWithName() 
@@ -92,6 +97,52 @@ public class WorksheetCreatorWorkerImpl {
 	}
 
 	public final void worksheetCreator() {
+		Submission s;
+		try {
+			s = Submission.fetchSubmission(miscTasksKey.splitSubmissionKey(), datastore, user);
+		} catch (Exception e) {
+			return;
+		}
+	    MiscTasks t = new MiscTasks(s);
+		// gain lock on the formId itself...
+		// the locked resource should be the formId, but for testing
+		// it is useful to have the external services collide using 
+		// formId.  Prefix with MT: to indicate that it is a miscellaneousTask
+		// lock.
+		String lockedResourceName = t.getMiscTaskLockName();
+		TaskLock formIdTaskLock = datastore.createTaskLock();
+		try {
+			if (formIdTaskLock.obtainLock(pFormIdLockId, lockedResourceName,
+					TaskLockType.WORKSHEET_CREATION)) {
+				formIdTaskLock = null;
+				doWorksheetCreator();
+			}
+		} catch (ODKTaskLockException e1) {
+			e1.printStackTrace(); // Occasionally expected...
+		} catch (Exception e2) {
+			// some other unexpected exception...
+			e2.printStackTrace();
+		} finally {
+			formIdTaskLock = datastore.createTaskLock();
+			try {
+				for (int i = 0; i < 10; i++) {
+					if (formIdTaskLock.releaseLock(pFormIdLockId, lockedResourceName,
+							TaskLockType.WORKSHEET_CREATION))
+						break;
+					try {
+						Thread.sleep(1000);
+					} catch (InterruptedException e) {
+						// just move on, this retry mechanism 
+						// is to make things nice
+					}
+				}
+			} catch (ODKTaskLockException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	public final void doWorksheetCreator() {
 	  try {
 		// get spreadsheet
 		GoogleSpreadsheet spreadsheet = getGoogleSpreadsheetWithName();
@@ -108,6 +159,7 @@ public class WorksheetCreatorWorkerImpl {
 			throw new ODKExternalServiceException(e);
 		}
 
+		// the above may have taken a while -- re-fetch the data to see if it has changed...
 	    Submission s = Submission.fetchSubmission(miscTasksKey.splitSubmissionKey(), datastore, user);
 	    MiscTasks r = new MiscTasks(s);
 	    if ( attemptCount.equals(r.getAttemptCount()) ) {
