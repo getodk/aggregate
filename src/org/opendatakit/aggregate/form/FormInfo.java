@@ -36,9 +36,7 @@ import org.opendatakit.aggregate.submission.type.StringSubmissionType;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.DynamicCommonFieldsBase;
-import org.opendatakit.common.persistence.TopLevelDynamicBase;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
-import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.security.UserService;
 

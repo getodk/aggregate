@@ -16,7 +16,6 @@
 
 package org.opendatakit.aggregate.process;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,8 +23,6 @@ import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.submission.SubmissionKeyPart;
-import org.opendatakit.aggregate.submission.SubmissionSet;
-import org.opendatakit.aggregate.submission.SubmissionValue;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.EntityKey;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;

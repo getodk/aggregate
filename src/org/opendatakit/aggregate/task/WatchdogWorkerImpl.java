@@ -28,7 +28,6 @@ import org.opendatakit.aggregate.externalservice.FormServiceCursor.OperationalSt
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.form.MiscTasks;
 import org.opendatakit.aggregate.form.PersistentResults;
-import org.opendatakit.aggregate.form.MiscTasks.TaskType;
 import org.opendatakit.aggregate.query.submission.QueryByDate;
 import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.common.persistence.Datastore;

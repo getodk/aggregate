@@ -28,8 +28,6 @@ import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.format.FormTableConsts;
 import org.opendatakit.aggregate.form.Form;
-import org.opendatakit.aggregate.form.MiscTasks;
-import org.opendatakit.aggregate.form.PersistentResults;
 import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.query.QueryFormList;
 import org.opendatakit.aggregate.servlet.CsvServlet;

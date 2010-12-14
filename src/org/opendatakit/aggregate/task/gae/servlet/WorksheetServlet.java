@@ -27,14 +27,12 @@ import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.externalservice.ExternalServiceConsts;
 import org.opendatakit.aggregate.constants.externalservice.ExternalServiceOption;
-import org.opendatakit.aggregate.exception.ODKExternalServiceException;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.servlet.ServletUtilBase;
 import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.task.WorksheetCreatorWorkerImpl;
 import org.opendatakit.common.persistence.Datastore;
-import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.security.UserService;
 
