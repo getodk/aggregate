@@ -22,7 +22,9 @@ package org.opendatakit.aggregate.constants;
  * 
  */
 public enum TaskLockType {
-  UPLOAD_SUBMISSION(60000);
+  UPLOAD_SUBMISSION(60000),
+  WORKSHEET_CREATION(120000),
+  FORM_DELETION(120000);
   
   private long timeout;
 

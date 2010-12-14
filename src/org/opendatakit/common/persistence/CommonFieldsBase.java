@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.opendatakit.common.persistence.DataField.DataType;
+import org.opendatakit.common.persistence.DataField.IndexType;
 import org.opendatakit.common.security.User;
 
 /**
@@ -36,15 +37,6 @@ import org.opendatakit.common.security.User;
  * 
  */
 public abstract class CommonFieldsBase {
-
-	public static enum BaseType {
-		STATIC,
-		STATIC_ASSOCIATION,
-		TOP_LEVEL_DYNAMIC,
-		DYNAMIC,
-		DYNAMIC_DOCUMENT,
-		DYNAMIC_ASSOCIATION
-	}
 	/** standard audit fields */
 	
 	/** creator */
@@ -54,16 +46,15 @@ public abstract class CommonFieldsBase {
 	/** last user to update record */
 	private static final DataField LAST_UPDATE_URI_USER = new DataField("_LAST_UPDATE_URI_USER", DataField.DataType.URI, true, PersistConsts.URI_STRING_LEN);
 	/** last update date */
-	private static final DataField LAST_UPDATE_DATE = new DataField("_LAST_UPDATE_DATE", DataField.DataType.DATETIME, false);
+	private static final DataField LAST_UPDATE_DATE = new DataField("_LAST_UPDATE_DATE", DataField.DataType.DATETIME, false).setIndexable(IndexType.ORDERED);
 
 	/** primary key for all tables */
-	private static final DataField URI = new DataField("_URI", DataField.DataType.URI, false, PersistConsts.URI_STRING_LEN);
+	private static final DataField URI = new DataField("_URI", DataField.DataType.URI, false, PersistConsts.URI_STRING_LEN).setIndexable(IndexType.HASH);
 
 	
 	/** member variables */
 	protected final String schemaName;
 	protected final String tableName;
-	protected final BaseType tableType;
 	private boolean fromDatabase = false;
 	private Object opaquePersistenceData = null;
 	protected final List<DataField> fieldList = new ArrayList<DataField>();
@@ -82,10 +73,9 @@ public abstract class CommonFieldsBase {
 	 * @param tableName
 	 * @param tableType
 	 */
-	protected CommonFieldsBase(String schemaName, String tableName, BaseType tableType) {
+	protected CommonFieldsBase(String schemaName, String tableName) {
 		this.schemaName = schemaName;
 		this.tableName = tableName;
-		this.tableType = tableType;
 		// always primary key with the same name...
 		fieldList.add(primaryKey = new DataField(URI));
 		
@@ -105,7 +95,6 @@ public abstract class CommonFieldsBase {
 	protected CommonFieldsBase(CommonFieldsBase ref, User user) {
 		schemaName = ref.schemaName;
 		tableName = ref.tableName;
-		tableType = ref.tableType;
 		
 		primaryKey = ref.primaryKey;
 		creatorUriUser = ref.creatorUriUser;
@@ -152,10 +141,6 @@ public abstract class CommonFieldsBase {
 
 	public final Date getLastUpdateDate() {
 		return getDateField(lastUpdateDate);
-	}
-
-	public final BaseType getTableType() {
-		return tableType;
 	}
 	
 	public final DataField getPrimaryKey() {

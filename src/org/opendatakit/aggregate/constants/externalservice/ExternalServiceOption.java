@@ -18,8 +18,9 @@
 package org.opendatakit.aggregate.constants.externalservice;
 
 /**
- * Enum that contains values used in ODK aggregate 
- * to aid with external repository management 
+ * Enum of upload-only, streaming-only and upload-then-streaming
+ * data propagation actions.  Used when configuring aggregate's 
+ * external services connections. 
  *  
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com

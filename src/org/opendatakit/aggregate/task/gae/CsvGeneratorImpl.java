@@ -40,14 +40,14 @@ import com.google.appengine.api.taskqueue.TaskOptions;
 public class CsvGeneratorImpl implements CsvGenerator {
 
   @Override
-  public void createCsvTask(Form form, SubmissionKey persistentResultsKey, Long attemptCount, String baseServerWebUrl, Datastore datastore, User user) throws ODKDatastoreException {
+  public void createCsvTask(Form form, SubmissionKey persistentResultsKey, long attemptCount, String baseServerWebUrl, Datastore datastore, User user) throws ODKDatastoreException {
     TaskOptions task = TaskOptions.Builder.withUrl(ServletConsts.WEB_ROOT
         + CsvGeneratorTaskServlet.ADDR);
     task.method(TaskOptions.Method.GET);
     task.countdownMillis(1);
     task.param(ServletConsts.FORM_ID, form.getFormId());
     task.param(ServletConsts.PERSISTENT_RESULTS_KEY, persistentResultsKey.toString());
-    task.param(ServletConsts.ATTEMPT_COUNT, attemptCount.toString());
+    task.param(ServletConsts.ATTEMPT_COUNT, Long.toString(attemptCount));
     Queue queue = QueueFactory.getDefaultQueue();
     queue.add(task);
   }

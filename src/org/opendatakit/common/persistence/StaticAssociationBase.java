@@ -13,6 +13,7 @@
  */
 package org.opendatakit.common.persistence;
 
+import org.opendatakit.common.persistence.DataField.IndexType;
 import org.opendatakit.common.security.User;
 
 
@@ -37,7 +38,7 @@ public abstract class StaticAssociationBase extends CommonFieldsBase {
 	 */
 	
 	/** key into the dynamic table for the dominant relation */
-	private static final DataField DOM_AURI = new DataField("_DOM_AURI", DataField.DataType.URI, false, PersistConsts.URI_STRING_LEN );
+	private static final DataField DOM_AURI = new DataField("_DOM_AURI", DataField.DataType.URI, false, PersistConsts.URI_STRING_LEN ).setIndexable(IndexType.HASH);
 	/** key into the dynamic table for the subordinate relation */
 	private static final DataField SUB_AURI = new DataField("_SUB_AURI", DataField.DataType.URI, true, PersistConsts.URI_STRING_LEN );
 
@@ -51,7 +52,7 @@ public abstract class StaticAssociationBase extends CommonFieldsBase {
 	 * @param tableName
 	 */
 	protected StaticAssociationBase(String databaseSchema, String tableName) {
-		super(databaseSchema, tableName, BaseType.STATIC_ASSOCIATION);
+		super(databaseSchema, tableName);
 		fieldList.add(domAuri=new DataField(DOM_AURI));
 		fieldList.add(subAuri=new DataField(SUB_AURI));
 	}
@@ -70,32 +71,20 @@ public abstract class StaticAssociationBase extends CommonFieldsBase {
 	
 	
 	public final String getDomAuri() {
-		if ( !((tableType == BaseType.STATIC_ASSOCIATION) || (tableType == BaseType.DYNAMIC_ASSOCIATION))) {
-			throw new IllegalStateException("Attempting to get domAuri of non-ASSOCIATION table");
-		}
 		return getStringField(domAuri);
 	}
 	
 	public final void setDomAuri(String value) {
-		if ( !((tableType == BaseType.STATIC_ASSOCIATION) || (tableType == BaseType.DYNAMIC_ASSOCIATION))) {
-			throw new IllegalStateException("Attempting to set domAuri of non-ASSOCIATION table");
-		}
 		if ( !setStringField(domAuri, value) ) {
 			throw new IllegalStateException("overflow on domAuri");
 		}
 	}
 
 	public final String getSubAuri() {
-		if ( !((tableType == BaseType.STATIC_ASSOCIATION) || (tableType == BaseType.DYNAMIC_ASSOCIATION))) {
-			throw new IllegalStateException("Attempting to get subAuri of non-ASSOCIATION table");
-		}
 		return getStringField(subAuri);
 	}
 
 	public final void setSubAuri(String value) {
-		if ( !((tableType == BaseType.STATIC_ASSOCIATION) || (tableType == BaseType.DYNAMIC_ASSOCIATION))) {
-			throw new IllegalStateException("Attempting to set subAuri of non-ASSOCIATION table");
-		}
 		if ( !setStringField(subAuri, value) ) {
 			throw new IllegalStateException("overflow on subAuri");
 		}

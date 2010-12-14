@@ -35,9 +35,38 @@ public interface ExternalService {
   
   public void setUploadCompleted() throws ODKEntityPersistException;
   
+  /**
+   * Abandon the action.  
+   * 
+   * @throws ODKDatastoreException
+   */
+  public void abandon() throws ODKDatastoreException;
+  
+  /**
+   * Delete the external service connection record.
+   * 
+   * @throws ODKDatastoreException
+   */
   public void delete() throws ODKDatastoreException;
   
+  /**
+   * Persist status changes to the persistence layer.
+   * 
+   * @throws ODKEntityPersistException
+   */
   public void persist() throws ODKEntityPersistException;
 
+  /**
+   * get the FormServiceCursor for this external service connection.
+   * 
+   * @return
+   */
   public FormServiceCursor getFormServiceCursor();
+  
+  /**
+   * get the descriptive string for the target service (e.g., spreadsheet name)
+   * 
+   * @return
+   */
+  public String getDescriptiveTargetString();
 }

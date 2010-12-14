@@ -15,9 +15,20 @@
  */
 package org.opendatakit.aggregate.task.tomcat;
 
+import java.util.Map;
+
+import javax.servlet.http.HttpServletResponse;
+
+import org.opendatakit.aggregate.constants.ServletConsts;
+import org.opendatakit.aggregate.constants.externalservice.ExternalServiceConsts;
 import org.opendatakit.aggregate.constants.externalservice.ExternalServiceOption;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
+import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.form.MiscTasks;
+import org.opendatakit.aggregate.form.PersistentResults;
+import org.opendatakit.aggregate.submission.Submission;
+import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.task.WorksheetCreator;
 import org.opendatakit.aggregate.task.WorksheetCreatorWorkerImpl;
 import org.opendatakit.common.persistence.Datastore;
@@ -38,11 +49,13 @@ public class WorksheetCreatorImpl implements WorksheetCreator {
 	static class WorksheetCreatorRunner implements Runnable {
 		final WorksheetCreatorWorkerImpl impl;
 
-		public WorksheetCreatorRunner(String baseWebServerUrl,
+		public WorksheetCreatorRunner(Form form, SubmissionKey miscTasksKey,
+				long attemptCount, 
 				String spreadsheetName, ExternalServiceOption esType,
-				Form form, Datastore datastore, User user) {
-			impl = new WorksheetCreatorWorkerImpl(baseWebServerUrl,
-					spreadsheetName, esType, form, datastore, user);
+				String baseWebServerUrl, Datastore datastore, User user) {
+			impl = new WorksheetCreatorWorkerImpl(form, miscTasksKey, 
+					attemptCount, 
+					spreadsheetName, esType, baseWebServerUrl, datastore, user);
 		}
 
 		@Override
@@ -57,14 +70,29 @@ public class WorksheetCreatorImpl implements WorksheetCreator {
 	}
 
 	@Override
-	public final void createWorksheetTask(String baseWebServerUrl,
-			String spreadsheetName, ExternalServiceOption esType, int delay,
-			Form form, Datastore datastore, User user)
-			throws ODKExternalServiceException, ODKDatastoreException {
-
-		WorksheetCreatorRunner wr = new WorksheetCreatorRunner( baseWebServerUrl,
+	public final void createWorksheetTask(Form form, SubmissionKey miscTasksKey, long attemptCount,
+			String baseWebServerUrl,
+			Datastore datastore, User user) throws ODKDatastoreException, ODKFormNotFoundException {
+		Submission s = Submission.fetchSubmission(miscTasksKey.splitSubmissionKey(), datastore, user);
+	    MiscTasks r = new MiscTasks(s);
+	    Map<String,String> params = r.getRequestParameters();
+	    String esTypeString = params.get(ServletConsts.EXTERNAL_SERVICE_TYPE);
+	    if (esTypeString == null) {
+	        throw new IllegalStateException("no external service type specified on create worksheet task");
+	    }
+	    ExternalServiceOption esType = ExternalServiceOption.valueOf(esTypeString);
+	    if (esType == null) {
+	    	throw new IllegalStateException("external service type not recognized in create worksheet task");
+	    }
+	    String spreadsheetName = params.get(ExternalServiceConsts.EXT_SERV_ADDRESS);
+	    if (spreadsheetName == null) {
+	    	throw new IllegalStateException("spreadsheet name is null in create worksheet task");
+	    }
+	    
+	    WorksheetCreatorRunner wr = new WorksheetCreatorRunner( form, miscTasksKey,
+	    		attemptCount, 
 				spreadsheetName, esType,
-				form, datastore, user );
+				baseWebServerUrl, datastore, user );
 		System.out.println("THIS IS CREATE WORKSHEET IN TOMCAT");
 		AggregrateThreadExecutor exec = AggregrateThreadExecutor
 				.getAggregateThreadExecutor();

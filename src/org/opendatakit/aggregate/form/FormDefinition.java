@@ -34,6 +34,12 @@ import org.opendatakit.aggregate.datamodel.TopLevelInstanceData;
 import org.opendatakit.aggregate.datamodel.VersionedBinaryContent;
 import org.opendatakit.aggregate.datamodel.VersionedBinaryContentRefBlob;
 import org.opendatakit.aggregate.datamodel.FormDataModel.ElementType;
+import org.opendatakit.aggregate.submission.Submission;
+import org.opendatakit.aggregate.submission.SubmissionSet;
+import org.opendatakit.aggregate.submission.type.BooleanSubmissionType;
+import org.opendatakit.aggregate.submission.type.LongSubmissionType;
+import org.opendatakit.aggregate.submission.type.RepeatSubmissionType;
+import org.opendatakit.aggregate.submission.type.StringSubmissionType;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.Datastore;
@@ -346,6 +352,75 @@ public class FormDefinition {
 		}
 	}
 	
+	static final Submission assertFormInfoRecord(XFormParameters thisFormVersion, String thisFormName, String thisFormDescription, String formIdMd5Uri, Datastore datastore, User user) throws ODKDatastoreException {
+		FormInfoTable fiRelation = Form.getFormInfoRelation(datastore);
+		FormDefinition formInfoDefinition = Form.getFormInfoDefinition(datastore);
+		return assertFormInfoRecord(fiRelation, formInfoDefinition, thisFormVersion, thisFormName, thisFormDescription, formIdMd5Uri, datastore, user); 
+	}
+
+	/**
+	 * Use the variant of this method without the first two arguments for every form definition
+	 * except the FormInfo table itself.  This variant is provided to support bootstrapping only.
+	 * 
+	 * @param fiRelation
+	 * @param formInfoDefinition
+	 * @param thisFormVersion
+	 * @param thisFormName
+	 * @param thisFormDescription
+	 * @param thisFormIdMd5Uri
+	 * @param datastore
+	 * @param user
+	 * @return
+	 * @throws ODKDatastoreException
+	 */
+	static final Submission assertFormInfoRecord(FormInfoTable fiRelation, FormDefinition formInfoDefinition, XFormParameters thisFormVersion, String thisFormName, String thisFormDescription, String thisFormIdMd5Uri, Datastore datastore, User user) throws ODKDatastoreException {
+		// Now create a record in the FormInfo table for the PersistentResults table itself...
+		TopLevelDynamicBase fi = null;
+		try {
+			fi = datastore.getEntity(fiRelation, thisFormIdMd5Uri, user);
+		} catch ( ODKEntityNotFoundException e ) {
+			// we must have failed before persisting a FormInfo record
+			// or this must be our first time through...
+			Submission formInfo = new Submission(thisFormVersion.modelVersion, thisFormVersion.uiVersion,
+					thisFormIdMd5Uri, formInfoDefinition, datastore, user);
+			((StringSubmissionType) formInfo.getElementValue(FormInfo.formId)).setValueFromString(thisFormVersion.formId);
+			// default description...
+			{
+				RepeatSubmissionType r = (RepeatSubmissionType) formInfo.getElementValue(FormInfo.fiDescriptionTable);
+				SubmissionSet sDescription = new SubmissionSet(formInfo, 1L, FormInfo.fiDescriptionTable, formInfoDefinition, formInfo.getKey(), datastore, user);
+				((StringSubmissionType) sDescription.getElementValue(FormInfo.formName)).setValueFromString(thisFormName);
+				((StringSubmissionType) sDescription.getElementValue(FormInfo.description)).setValueFromString(thisFormDescription);
+				r.addSubmissionSet(sDescription);
+			}
+			// fileset...
+			{
+				RepeatSubmissionType r = (RepeatSubmissionType) formInfo.getElementValue(FormInfo.fiFilesetTable);
+				SubmissionSet sFileset = new SubmissionSet(formInfo, 1L, FormInfo.fiFilesetTable, formInfoDefinition, formInfo.getKey(), datastore, user);
+				((LongSubmissionType) sFileset.getElementValue(FormInfo.rootElementModelVersion)).setValueFromString(thisFormVersion.modelVersion.toString());
+				((LongSubmissionType) sFileset.getElementValue(FormInfo.rootElementUiVersion)).setValueFromString(thisFormVersion.uiVersion.toString());
+				((BooleanSubmissionType) sFileset.getElementValue(FormInfo.isFilesetComplete)).setValueFromString("yes");
+				((BooleanSubmissionType) sFileset.getElementValue(FormInfo.isDownloadAllowed)).setValueFromString("yes");
+				r.addSubmissionSet(sFileset);
+			}
+			// submission...
+			{
+				RepeatSubmissionType r = (RepeatSubmissionType) formInfo.getElementValue(FormInfo.fiSubmissionTable);
+				SubmissionSet sSubmission = new SubmissionSet(formInfo, 1L, FormInfo.fiSubmissionTable, formInfoDefinition, formInfo.getKey(), datastore, user);
+				((StringSubmissionType) sSubmission.getElementValue(FormInfo.submissionFormId)).setValueFromString(thisFormVersion.formId);
+				((LongSubmissionType) sSubmission.getElementValue(FormInfo.submissionModelVersion)).setValueFromString(thisFormVersion.modelVersion.toString());
+				((LongSubmissionType) sSubmission.getElementValue(FormInfo.submissionUiVersion)).setValueFromString(thisFormVersion.uiVersion.toString());
+				r.addSubmissionSet(sSubmission);
+			}
+			formInfo.persist(datastore, user);
+			
+			fi = datastore.getEntity(fiRelation, thisFormIdMd5Uri, user);
+		}
+		
+		// and retrieve cleanly... 
+	    Submission formInfo = new Submission(fi, formInfoDefinition, datastore, user);
+	    return formInfo;
+	}
+
 	static final FormElementModel findElement(FormElementModel group, DataField backingKey) {
 		for ( FormElementModel m : group.getChildren()) {
 			if ( m.isMetadata() ) continue;
@@ -592,6 +667,10 @@ public class FormDefinition {
 		} else if ( xformParameters.formId.equals(PersistentResults.FORM_ID_PERSISTENT_RESULT)) {
 			// it is the PersistentResults table - pre-populate the backingTableMap
 			PersistentResults.populateBackingTableMap(backingTableMap);
+			isWellKnownForm = true;
+		} else if ( xformParameters.formId.equals(MiscTasks.FORM_ID_MISC_TASKS)) {
+			// it is the PersistentResults table - pre-populate the backingTableMap
+			MiscTasks.populateBackingTableMap(backingTableMap);
 			isWellKnownForm = true;
 		}
 		

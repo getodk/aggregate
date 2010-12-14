@@ -15,16 +15,22 @@
  */
 package org.opendatakit.aggregate.task;
 
+import java.util.Date;
 import java.util.List;
 
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.externalservice.ExternalServiceOption;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
+import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.externalservice.ExternalService;
 import org.opendatakit.aggregate.externalservice.FormServiceCursor;
 import org.opendatakit.aggregate.externalservice.GoogleSpreadsheet;
 import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.form.MiscTasks;
+import org.opendatakit.aggregate.form.MiscTasks.Status;
+import org.opendatakit.aggregate.submission.Submission;
+import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.security.User;
@@ -38,20 +44,25 @@ import org.opendatakit.common.security.User;
  */
 public class WorksheetCreatorWorkerImpl {
 
-	private final String baseWebServerUrl;
+	private final Form form;
+	private final SubmissionKey miscTasksKey;
+	private final Long attemptCount;
 	private final String spreadsheetName;
 	private final ExternalServiceOption esType;
-	private final Form form;
+	private final String baseWebServerUrl;
 	private final Datastore datastore;
 	private final User user;
 	
-	public WorksheetCreatorWorkerImpl(String baseWebServerUrl,
-			String spreadsheetName, ExternalServiceOption esType, Form form,
-			Datastore datastore, User user) {
-		this.baseWebServerUrl = baseWebServerUrl;
+	public WorksheetCreatorWorkerImpl(Form form, 
+			SubmissionKey miscTasksKey, long attemptCount, 
+			String spreadsheetName, ExternalServiceOption esType,
+			String baseWebServerUrl,Datastore datastore, User user) {
+		this.form = form;
+		this.miscTasksKey = miscTasksKey;
+		this.attemptCount = attemptCount;
 		this.spreadsheetName = spreadsheetName;
 		this.esType = esType;
-		this.form = form;
+		this.baseWebServerUrl = baseWebServerUrl;
 		this.datastore = datastore;
 		this.user = user;
 	}
@@ -80,9 +91,8 @@ public class WorksheetCreatorWorkerImpl {
 		return null;
 	}
 
-	public final void worksheetCreator() throws ODKExternalServiceException,
-			ODKDatastoreException {
-
+	public final void worksheetCreator() {
+	  try {
 		// get spreadsheet
 		GoogleSpreadsheet spreadsheet = getGoogleSpreadsheetWithName();
 
@@ -98,12 +108,40 @@ public class WorksheetCreatorWorkerImpl {
 			throw new ODKExternalServiceException(e);
 		}
 
-		// if we need to upload submissions, start a task to do so
-		if (!esType.equals(ExternalServiceOption.STREAM_ONLY)) {
-			UploadSubmissions uploadTask = (UploadSubmissions) ContextFactory
-					.get().getBean(BeanDefs.UPLOAD_TASK_BEAN);
-			uploadTask.createFormUploadTask(spreadsheet.getFormServiceCursor(),
-					baseWebServerUrl, user);
-		}
+	    Submission s = Submission.fetchSubmission(miscTasksKey.splitSubmissionKey(), datastore, user);
+	    MiscTasks r = new MiscTasks(s);
+	    if ( attemptCount.equals(r.getAttemptCount()) ) {
+			// if we need to upload submissions, start a task to do so
+			if (!esType.equals(ExternalServiceOption.STREAM_ONLY)) {
+				UploadSubmissions uploadTask = (UploadSubmissions) ContextFactory
+						.get().getBean(BeanDefs.UPLOAD_TASK_BEAN);
+				uploadTask.createFormUploadTask(spreadsheet.getFormServiceCursor(),
+						baseWebServerUrl, user);
+			}
+	    	r.setStatus(Status.SUCCESSFUL);
+			r.setCompletionDate(new Date());
+			r.objectEntity.persist(datastore, user);
+	    }
+	  } catch (Exception e ) {
+		  failureRecovery(e);
+	  }
 	}
+
+	private void failureRecovery(Exception e) {
+	// three exceptions possible: 
+	// ODKFormNotFoundException, ODKDatastoreException, ODKExternalServiceException, Exception
+	e.printStackTrace();
+    Submission s;
+	try {
+		s = Submission.fetchSubmission(miscTasksKey.splitSubmissionKey(), datastore, user);
+		MiscTasks r = new MiscTasks(s);
+	    if ( attemptCount.equals(r.getAttemptCount()) ) {
+	    	r.setStatus(Status.FAILED);
+	    	r.objectEntity.persist(datastore, user);
+	    }
+	} catch (Exception ex) {
+		// something is hosed -- don't attempt to continue.
+		// TODO: watchdog: find this once lastRetryDate is way late?
+	}
+}
 }

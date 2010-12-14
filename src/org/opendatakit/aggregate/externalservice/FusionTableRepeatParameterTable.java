@@ -104,7 +104,7 @@ public class FusionTableRepeatParameterTable extends StaticAssociationBase {
 
 	  private static FusionTableRepeatParameterTable relation = null;
 
-	  public static FusionTableRepeatParameterTable createRelation(Datastore datastore, User user)
+	  public static synchronized final FusionTableRepeatParameterTable createRelation(Datastore datastore, User user)
 	      throws ODKDatastoreException {
 	    if (relation == null) {
 	    	FusionTableRepeatParameterTable relationPrototype;

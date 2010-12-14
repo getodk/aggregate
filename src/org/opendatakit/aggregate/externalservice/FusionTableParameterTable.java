@@ -50,7 +50,7 @@ public final class FusionTableParameterTable extends CommonFieldsBase {
 	 * @param tableName
 	 */
   FusionTableParameterTable(String schemaName) {
-    super(schemaName, TABLE_NAME, CommonFieldsBase.BaseType.STATIC);
+    super(schemaName, TABLE_NAME);
     fieldList.add(fusionTableId = new DataField(FUSION_TABLE_ID_PROPERTY));
     fieldList.add(authToken = new DataField(AUTH_TOKEN_PROPERTY));
     fieldList.add(authTokenSecret = new DataField(AUTH_TOKEN_SECRET_PROPERTY));
@@ -107,7 +107,7 @@ public final class FusionTableParameterTable extends CommonFieldsBase {
   
   private static FusionTableParameterTable relation = null;
 
-  public static FusionTableParameterTable createRelation(Datastore datastore, User user)
+  public static synchronized final FusionTableParameterTable createRelation(Datastore datastore, User user)
       throws ODKDatastoreException {
     if (relation == null) {
       FusionTableParameterTable relationPrototype;

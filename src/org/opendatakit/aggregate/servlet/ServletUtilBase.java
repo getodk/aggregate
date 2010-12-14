@@ -144,6 +144,8 @@ public class ServletUtilBase extends CommonServletBase {
     html.append(HtmlConsts.TAB + HtmlConsts.TAB);
     html.append(HtmlUtil.createHref(ResultServlet.ADDR, ServletConsts.RESULT_FILES_LINK_TEXT));
     html.append(HtmlConsts.TAB + HtmlConsts.TAB);
+    html.append(HtmlUtil.createHref(ExternalServicesListServlet.ADDR, ServletConsts.EXTERNAL_SERVICES_LINK_TEXT));
+    html.append(HtmlConsts.TAB + HtmlConsts.TAB);
     html.append(HtmlUtil.createHref(UploadAppletServlet.ADDR, ServletConsts.UPLOAD_APPLET_LINK_TEXT));
     html.append(HtmlConsts.TAB + HtmlConsts.TAB);
     html.append(HtmlUtil.createHref(FormUploadServlet.ADDR, ServletConsts.UPLOAD_FORM_LINK_TEXT));

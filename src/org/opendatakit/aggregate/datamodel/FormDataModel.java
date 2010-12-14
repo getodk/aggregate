@@ -408,7 +408,7 @@ public final class FormDataModel extends DynamicBase {
 
 	private static FormDataModel relation = null;
 	
-	public static final FormDataModel createRelation(Datastore datastore, User user) throws ODKDatastoreException {
+	public static synchronized final FormDataModel createRelation(Datastore datastore, User user) throws ODKDatastoreException {
 		if ( relation == null ) {
 			FormDataModel relationPrototype;
 			relationPrototype = new FormDataModel(datastore.getDefaultSchemaName());

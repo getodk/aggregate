@@ -34,6 +34,7 @@ import org.opendatakit.aggregate.constants.externalservice.JsonServerType;
 import org.opendatakit.aggregate.datamodel.FormElementModel.ElementType;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
+import org.opendatakit.aggregate.externalservice.FormServiceCursor.OperationalStatus;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.format.element.BasicElementFormatter;
 import org.opendatakit.aggregate.format.header.BasicHeaderFormatter;
@@ -86,6 +87,8 @@ public class JsonServer extends AbstractExternalService implements ExternalServi
     fsc = FormServiceCursor.createFormServiceCursor(form, ExternalServiceType.JSON_SERVER, objectEntity,
         datastore, user);
     fsc.setExternalServiceOption(externalServiceOption);
+    fsc.setIsExternalServicePrepared(true);
+    fsc.setOperationalStatus(OperationalStatus.ACTIVE);
     fsc.setEstablishmentDateTime(new Date());
     fsc.setUploadCompleted(false);
     objectEntity.setServerUrl(serverURL);
@@ -93,6 +96,14 @@ public class JsonServer extends AbstractExternalService implements ExternalServi
     datastore.putEntity(objectEntity, user);
 
     // createForm();
+  }
+
+  @Override
+  public void abandon() throws ODKDatastoreException {
+	if ( fsc.getOperationalStatus() != OperationalStatus.COMPLETED ) {
+	  fsc.setOperationalStatus(OperationalStatus.ABANDONED);
+	  persist();  
+	}
   }
 
   public void persist() throws ODKEntityPersistException {
@@ -246,11 +257,19 @@ public class JsonServer extends AbstractExternalService implements ExternalServi
   @Override
   public void setUploadCompleted() throws ODKEntityPersistException {
     fsc.setUploadCompleted(true);
+    if ( fsc.getExternalServiceOption() == ExternalServiceOption.UPLOAD_ONLY) {
+    	fsc.setOperationalStatus(OperationalStatus.COMPLETED);
+    }
     ds.putEntity(fsc, user);
   }
 
   @Override
   protected void insertData(Submission submission) throws ODKExternalServiceException {
     sendSubmission(submission);
+  }
+
+  @Override
+  public String getDescriptiveTargetString() {
+	return getServerUrl();
   }
 }

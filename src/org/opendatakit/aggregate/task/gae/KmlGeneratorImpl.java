@@ -46,7 +46,7 @@ import com.google.appengine.api.taskqueue.TaskOptions;
 public class KmlGeneratorImpl implements KmlGenerator {
 
   @Override
-  public void createKmlTask(Form form, SubmissionKey persistentResultsKey, Long attemptCount,
+  public void createKmlTask(Form form, SubmissionKey persistentResultsKey, long attemptCount,
       String baseServerWebUrl, Datastore datastore, User user) throws ODKDatastoreException,
       ODKFormNotFoundException {
     Submission s = Submission.fetchSubmission(persistentResultsKey.splitSubmissionKey(), datastore,
@@ -59,7 +59,7 @@ public class KmlGeneratorImpl implements KmlGenerator {
     task.countdownMillis(1);
     task.param(ServletConsts.FORM_ID, form.getFormId());
     task.param(ServletConsts.PERSISTENT_RESULTS_KEY, persistentResultsKey.toString());
-    task.param(ServletConsts.ATTEMPT_COUNT, attemptCount.toString());
+    task.param(ServletConsts.ATTEMPT_COUNT, Long.toString(attemptCount));
     task.param(KmlServlet.GEOPOINT_FIELD, params.get(KmlServlet.GEOPOINT_FIELD));
     task.param(KmlServlet.TITLE_FIELD, params.get(KmlServlet.TITLE_FIELD));
     task.param(KmlServlet.IMAGE_FIELD, params.get(KmlServlet.IMAGE_FIELD));

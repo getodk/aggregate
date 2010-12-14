@@ -31,7 +31,7 @@ import org.opendatakit.common.security.User;
  */
 public interface KmlGenerator {
 
-  public void createKmlTask(Form form, SubmissionKey persistentResultsKey, Long attemptCount,
-      String baseServerWebUrl, Datastore datastore, User user) throws ODKDatastoreException,
-      ODKFormNotFoundException;
+	public void createKmlTask(Form form, SubmissionKey persistentResultsKey,
+			long attemptCount, String baseServerWebUrl, Datastore datastore,
+			User user) throws ODKDatastoreException, ODKFormNotFoundException;
 }

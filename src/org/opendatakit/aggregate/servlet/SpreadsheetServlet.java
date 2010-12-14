@@ -38,6 +38,8 @@ import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.externalservice.GoogleSpreadsheet;
 import org.opendatakit.aggregate.externalservice.OAuthToken;
 import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.form.MiscTasks;
+import org.opendatakit.aggregate.form.MiscTasks.TaskType;
 import org.opendatakit.aggregate.task.WorksheetCreator;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
@@ -156,8 +158,16 @@ public class SpreadsheetServlet extends ServletUtilBase {
       WorksheetCreator ws = (WorksheetCreator) ContextFactory.get().getBean(
           BeanDefs.WORKSHEET_BEAN);
 
-      ws.createWorksheetTask(getServerURL(req), spreadsheetName, esType,
-          SpreadsheetConsts.WORKSHEET_CREATION_DELAY, form, ds, user);
+      Map<String,String> parameters = new HashMap<String,String>();
+      
+      parameters.put(ExternalServiceConsts.EXT_SERV_ADDRESS, spreadsheetName);
+      parameters.put(ServletConsts.EXTERNAL_SERVICE_TYPE, esType.toString());
+      
+      MiscTasks m = new MiscTasks(TaskType.WORKSHEET_CREATE, form, parameters, ds, user);
+      m.persist(ds, user);
+      
+      ws.createWorksheetTask(form, m.getSubmissionKey(), 1L,
+    		  					getServerURL(req), ds, user);
     } catch (ODKExternalServiceException e) {
       e.printStackTrace();
       resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
@@ -166,7 +176,10 @@ public class SpreadsheetServlet extends ServletUtilBase {
       e.printStackTrace();
       resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
       return;
-    }
+    } catch (ODKFormNotFoundException e) {
+      e.printStackTrace();
+      resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+	}
 
 
     

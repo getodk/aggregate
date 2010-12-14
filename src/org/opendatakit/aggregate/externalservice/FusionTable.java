@@ -27,8 +27,10 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import oauth.signpost.OAuthConsumer;
 import oauth.signpost.basic.DefaultOAuthConsumer;
@@ -37,6 +39,7 @@ import oauth.signpost.exception.OAuthExpectationFailedException;
 import oauth.signpost.exception.OAuthMessageSignerException;
 
 import org.opendatakit.aggregate.constants.ErrorConsts;
+import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.externalservice.ExternalServiceOption;
 import org.opendatakit.aggregate.constants.externalservice.ExternalServiceType;
@@ -47,6 +50,7 @@ import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.datamodel.FormElementModel.ElementType;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
+import org.opendatakit.aggregate.externalservice.FormServiceCursor.OperationalStatus;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.format.element.FusionTableElementFormatter;
@@ -115,6 +119,8 @@ public class FusionTable extends AbstractExternalService implements ExternalServ
     fsc = FormServiceCursor.createFormServiceCursor(form, 
     		ExternalServiceType.GOOGLE_FUSIONTABLES, objectEntity, datastore, user);
     fsc.setExternalServiceOption(externalServiceOption);
+    fsc.setIsExternalServicePrepared(true);
+    fsc.setOperationalStatus(OperationalStatus.ACTIVE);
     fsc.setEstablishmentDateTime(new Date());
     
     fsc.setUploadCompleted(false);
@@ -186,9 +192,20 @@ public class FusionTable extends AbstractExternalService implements ExternalServ
   @Override
   public void setUploadCompleted() throws ODKEntityPersistException {
     fsc.setUploadCompleted(true);
+    if ( fsc.getExternalServiceOption() == ExternalServiceOption.UPLOAD_ONLY) {
+    	fsc.setOperationalStatus(OperationalStatus.COMPLETED);
+    }
     ds.putEntity(fsc, user);
   }
 
+  @Override
+  public void abandon() throws ODKDatastoreException {
+	if ( fsc.getOperationalStatus() != OperationalStatus.COMPLETED ) {
+	  fsc.setOperationalStatus(OperationalStatus.ABANDONED);
+	  persist();  
+	}
+  }
+  
   public void persist() throws ODKEntityPersistException {
   	ds.putEntities(repeatElementTableIds, user);
     ds.putEntity(objectEntity, user);
@@ -457,4 +474,10 @@ public class FusionTable extends AbstractExternalService implements ExternalServ
     return createStmt.toString();
   }
 
+  @Override
+  public String getDescriptiveTargetString() {
+	Map<String,String> properties = new HashMap<String,String>();
+	properties.put("dsrcid", objectEntity.getFusionTableId());
+	return HtmlUtil.createHrefWithProperties("http://www.google.com/fusiontables/DataSource", properties, "View Fusion Table");
+  }
 }
