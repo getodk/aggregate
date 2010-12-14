@@ -33,7 +33,6 @@ import org.opendatakit.common.persistence.DynamicDocumentBase;
 import org.opendatakit.common.persistence.EntityKey;
 import org.opendatakit.common.persistence.PersistConsts;
 import org.opendatakit.common.persistence.Query;
-import org.opendatakit.common.persistence.StaticAssociationBase;
 import org.opendatakit.common.persistence.TaskLock;
 import org.opendatakit.common.persistence.DataField.DataType;
 import org.opendatakit.common.persistence.DataField.IndexType;

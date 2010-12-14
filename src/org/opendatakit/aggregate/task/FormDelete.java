@@ -15,7 +15,6 @@
  */
 package org.opendatakit.aggregate.task;
 
-import org.opendatakit.aggregate.exception.ODKExternalServiceDependencyException;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.submission.SubmissionKey;

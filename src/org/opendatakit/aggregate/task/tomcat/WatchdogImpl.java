@@ -17,8 +17,6 @@ package org.opendatakit.aggregate.task.tomcat;
 
 import java.util.concurrent.TimeUnit;
 
-import org.opendatakit.aggregate.ContextFactory;
-import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.task.Watchdog;
 import org.opendatakit.aggregate.task.WatchdogWorkerImpl;
 import org.opendatakit.common.persistence.Datastore;
