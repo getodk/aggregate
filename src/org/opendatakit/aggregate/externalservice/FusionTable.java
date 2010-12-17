@@ -114,7 +114,7 @@ public class FusionTable extends AbstractExternalService implements ExternalServ
     this(form, webServerUrl, datastore, user);    
 
     objectEntity = datastore.createEntityUsingRelation(FusionTableParameterTable.createRelation(
-        datastore, user), null, user);
+        datastore, user), user);
     
     fsc = FormServiceCursor.createFormServiceCursor(form, 
     		ExternalServiceType.GOOGLE_FUSIONTABLES, objectEntity, datastore, user);
@@ -136,7 +136,7 @@ public class FusionTable extends AbstractExternalService implements ExternalServ
     FusionTableRepeatParameterTable frpt = FusionTableRepeatParameterTable.createRelation(datastore, user);
     
     for ( TableId a : repeatElementTableIdAssociations ) {
-    	FusionTableRepeatParameterTable t = datastore.createEntityUsingRelation(frpt, null, user);
+    	FusionTableRepeatParameterTable t = datastore.createEntityUsingRelation(frpt, user);
     	t.setDomAuri(objectEntity.getUri());
     	t.setFormElementKey(a.getElement().constructFormElementKey(form));
     	t.setFusionTableId(a.getId());

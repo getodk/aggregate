@@ -14,7 +14,6 @@
 package org.opendatakit.aggregate.datamodel;
 
 import org.opendatakit.common.persistence.DataField;
-import org.opendatakit.common.persistence.DynamicAssociationBase;
 import org.opendatakit.common.security.User;
 
 /**

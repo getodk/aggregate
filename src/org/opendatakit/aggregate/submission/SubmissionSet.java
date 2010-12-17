@@ -27,8 +27,11 @@ import java.util.Map;
 import java.util.Set;
 
 import org.opendatakit.aggregate.constants.ServletConsts;
+import org.opendatakit.aggregate.datamodel.DynamicBase;
+import org.opendatakit.aggregate.datamodel.DynamicCommonFieldsBase;
 import org.opendatakit.aggregate.datamodel.FormDataModel;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
+import org.opendatakit.aggregate.datamodel.TopLevelDynamicBase;
 import org.opendatakit.aggregate.datamodel.FormDataModel.DDRelationName;
 import org.opendatakit.aggregate.datamodel.FormDataModel.ElementType;
 import org.opendatakit.aggregate.form.FormDefinition;
@@ -48,11 +51,8 @@ import org.opendatakit.aggregate.submission.type.jr.JRTimeType;
 import org.opendatakit.common.constants.BasicConsts;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.Datastore;
-import org.opendatakit.common.persistence.DynamicBase;
-import org.opendatakit.common.persistence.DynamicCommonFieldsBase;
 import org.opendatakit.common.persistence.EntityKey;
 import org.opendatakit.common.persistence.Query;
-import org.opendatakit.common.persistence.TopLevelDynamicBase;
 import org.opendatakit.common.persistence.Query.FilterOperation;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
@@ -140,7 +140,8 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 		this.group = group;
 		this.enclosingSet = enclosingSet;
 		DynamicBase tlg = (DynamicBase) datastore.createEntityUsingRelation(
-				group.getFormDataModel().getBackingObjectPrototype(), topLevelTableKey, user);
+				group.getFormDataModel().getBackingObjectPrototype(), user);
+		tlg.setTopLevelAuri(topLevelTableKey.getKey());
 		tlg.setOrdinalNumber(ordinalNumber);
 		if ( enclosingSet != null ) {
 			tlg.setParentAuri(enclosingSet.getKey().getKey());
@@ -172,7 +173,7 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 		this.enclosingSet = null;
 		// this is a top level table...
 		TopLevelDynamicBase tlg = (TopLevelDynamicBase) datastore.createEntityUsingRelation(
-				group.getFormDataModel().getBackingObjectPrototype(), null, user);
+				group.getFormDataModel().getBackingObjectPrototype(), user);
 		if ( uriTopLevelGroup != null ) {
 			tlg.setStringField(tlg.primaryKey, uriTopLevelGroup);
 		}
@@ -221,8 +222,8 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 					// prototypes aren't the same.
 					// create a new backing instance.
 					DynamicBase row = (DynamicBase) datastore
-							.createEntityUsingRelation(mRelation,
-									topLevelTableKey, user);
+							.createEntityUsingRelation(mRelation, user);
+					row.setTopLevelAuri(topLevelTableKey.getKey());
 					row.setParentAuri(dbEntities.get(groupDataModel.getDDRelationName()).getUri());
 					row.setOrdinalNumber(1L); // these are always the
 					// one-and-only record in the order, as this

@@ -83,7 +83,7 @@ public class JsonServer extends AbstractExternalService implements ExternalServi
     this(form, datastore, user);
 
     objectEntity = datastore.createEntityUsingRelation(JsonServerParameterTable.createRelation(
-        datastore, user), null, user);
+        datastore, user), user);
     fsc = FormServiceCursor.createFormServiceCursor(form, ExternalServiceType.JSON_SERVER, objectEntity,
         datastore, user);
     fsc.setExternalServiceOption(externalServiceOption);

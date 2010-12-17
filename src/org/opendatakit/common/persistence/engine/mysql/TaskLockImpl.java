@@ -221,7 +221,7 @@ public class TaskLockImpl implements TaskLock {
 		boolean result = false;
 		try {
 			TaskLockTable relation = TaskLockTable.createRelation(datastore, user);
-			TaskLockTable entity = datastore.createEntityUsingRelation(relation, null, user);
+			TaskLockTable entity = datastore.createEntityUsingRelation(relation, user);
 			entity.setStringField(entity.primaryKey, lockId);
 			entity.setFormId(formId);
 			entity.setTaskType(taskType.getName());

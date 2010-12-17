@@ -19,12 +19,12 @@ import java.util.List;
 
 import org.opendatakit.aggregate.constants.externalservice.ExternalServiceOption;
 import org.opendatakit.aggregate.constants.externalservice.ExternalServiceType;
+import org.opendatakit.aggregate.datamodel.StaticAssociationBase;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.Query;
-import org.opendatakit.common.persistence.StaticAssociationBase;
 import org.opendatakit.common.persistence.Query.Direction;
 import org.opendatakit.common.persistence.Query.FilterOperation;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
@@ -283,7 +283,7 @@ public final class FormServiceCursor extends StaticAssociationBase {
       throws ODKDatastoreException {
     FormServiceCursor relation = createRelation(ds, user);
 
-    FormServiceCursor c = ds.createEntityUsingRelation(relation, null, user);
+    FormServiceCursor c = ds.createEntityUsingRelation(relation, user);
 
     c.setDomAuri(form.getEntityKey().getKey());
     c.setSubAuri(service.getUri());

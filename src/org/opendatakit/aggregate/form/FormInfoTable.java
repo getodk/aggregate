@@ -18,11 +18,11 @@ package org.opendatakit.aggregate.form;
 import java.util.List;
 
 import org.opendatakit.aggregate.datamodel.FormDataModel;
+import org.opendatakit.aggregate.datamodel.TopLevelDynamicBase;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.PersistConsts;
-import org.opendatakit.common.persistence.TopLevelDynamicBase;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.security.User;
 
@@ -98,7 +98,7 @@ public class FormInfoTable extends TopLevelDynamicBase {
 		SubmissionAssociationTable saRelation = SubmissionAssociationTable.createRelation(datastore, user);
 		
 		FormInfoTable formInfoTableRelation = createRelation(datastore, user);
-		FormInfoTable formInfoDefinition = datastore.createEntityUsingRelation(formInfoTableRelation, null, user);
+		FormInfoTable formInfoDefinition = datastore.createEntityUsingRelation(formInfoTableRelation, user);
 		formInfoDefinition.setStringField(formInfoTableRelation.primaryKey, FORM_INFO_DEFINITION_URI);
 		
 		Long lastOrdinal = 0L;

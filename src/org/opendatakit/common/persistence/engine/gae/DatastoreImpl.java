@@ -22,9 +22,6 @@ import java.util.List;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.Datastore;
-import org.opendatakit.common.persistence.DynamicAssociationBase;
-import org.opendatakit.common.persistence.DynamicBase;
-import org.opendatakit.common.persistence.DynamicDocumentBase;
 import org.opendatakit.common.persistence.EntityKey;
 import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.persistence.TaskLock;
@@ -177,23 +174,12 @@ public class DatastoreImpl implements Datastore {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <T extends CommonFieldsBase> T createEntityUsingRelation(T relation,
-			EntityKey topLevelAuriKey, User user) {
+	public <T extends CommonFieldsBase> T createEntityUsingRelation(T relation, User user) {
 		CommonFieldsBase row;
 		try {
 			row = (T) relation.getEmptyRow(user);
 		} catch (Exception e) {
 			throw new IllegalStateException("failed to create empty row", e);
-		}
-
-		if (topLevelAuriKey != null) {
-			if ( row instanceof DynamicAssociationBase ) {
-				((DynamicAssociationBase) row).setTopLevelAuri(topLevelAuriKey.getKey());
-			} else if ( row instanceof DynamicDocumentBase ) {
-				((DynamicDocumentBase) row).setTopLevelAuri(topLevelAuriKey.getKey());
-			} else if ( row instanceof DynamicBase ) {
-				((DynamicBase) row).setTopLevelAuri(topLevelAuriKey.getKey());
-			}
 		}
 		return (T) row;
 	}

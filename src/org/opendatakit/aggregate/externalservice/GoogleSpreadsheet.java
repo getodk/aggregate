@@ -125,7 +125,7 @@ public class GoogleSpreadsheet extends AbstractExternalService implements Extern
       throws ODKDatastoreException {
     this(form, webServerUrl, datastore, user);
     objectEntity = datastore.createEntityUsingRelation(GoogleSpreadsheetParameterTable
-        .createRelation(datastore, user), null, user);
+        .createRelation(datastore, user), user);
     fsc = FormServiceCursor.createFormServiceCursor(form, ExternalServiceType.GOOGLE_SPREADSHEET,
         objectEntity, datastore, user);
     fsc.setExternalServiceOption(externalServiceOption);
@@ -249,7 +249,7 @@ public class GoogleSpreadsheet extends AbstractExternalService implements Extern
 
       // add the worksheet id to the repeat element table -- NOTE: the added
       // entry is not actually persisted here
-      GoogleSpreadsheetRepeatParameterTable t = ds.createEntityUsingRelation(repeatPrototype, null,
+      GoogleSpreadsheetRepeatParameterTable t = ds.createEntityUsingRelation(repeatPrototype,
           user);
       t.setDomAuri(objectEntity.getUri());
       t.setFormElementKey(repeatGroupElement.constructFormElementKey(form));
