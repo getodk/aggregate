@@ -62,16 +62,31 @@ public class RelationRowMapper implements RowMapper<CommonFieldsBase> {
 				row.setStringField(f, rs.getString(f.getName()));
 				break;
 			case INTEGER:
-				row.setLongField(f, Long.valueOf(rs.getLong(f.getName())));
+				long l = rs.getLong(f.getName());
+				if (rs.wasNull()) {
+					row.setLongField(f, null);
+				} else {
+					row.setLongField(f, Long.valueOf(l));
+				}
 				break;
 			case DECIMAL:
 				row.setNumericField(f, rs.getBigDecimal(f.getName()));
 				break;
 			case BOOLEAN:
-				row.setBooleanField(f, rs.getBoolean(f.getName()));
+				Boolean b = rs.getBoolean(f.getName());
+				if ( rs.wasNull()) {
+					row.setBooleanField(f, null);
+				} else {
+					row.setBooleanField(f, b);
+				}
 				break;
 			case DATETIME:
-				row.setDateField(f, (Date) rs.getDate(f.getName()).clone());
+				Date d = rs.getTimestamp(f.getName());			
+				if ( d == null ) {
+					row.setDateField(f, null);
+				} else {
+					row.setDateField(f, (Date) d.clone());
+				}
 				break;
 			default:
 				throw new IllegalStateException("Did not expect non-primitive type in column fetch");

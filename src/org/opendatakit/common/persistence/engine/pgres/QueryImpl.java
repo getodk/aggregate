@@ -43,7 +43,7 @@ public class QueryImpl implements Query {
 
 	private static final String K_SELECT = "SELECT ";
 	private static final String K_SELECT_DISTINCT = "SELECT DISTINCT ";
-	private static final String K_BQ = "`";
+	private static final String K_BQ = "\"";
 	private static final String K_CS = ", ";
 	private static final String K_FROM = " FROM ";
 	private static final String K_WHERE = " WHERE ";
@@ -100,7 +100,9 @@ public class QueryImpl implements Query {
 		baseQueryBuilder.append(K_FROM);
 		baseQueryBuilder.append(K_BQ);
 		baseQueryBuilder.append(relation.getSchemaName());
+		baseQueryBuilder.append(K_BQ);
 		baseQueryBuilder.append(".");
+		baseQueryBuilder.append(K_BQ);
 		baseQueryBuilder.append(relation.getTableName());
 		baseQueryBuilder.append(K_BQ);
 		
