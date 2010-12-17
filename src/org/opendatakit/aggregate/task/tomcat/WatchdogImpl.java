@@ -33,8 +33,6 @@ import org.springframework.context.SmartLifecycle;
  */
 public class WatchdogImpl implements Watchdog, SmartLifecycle, InitializingBean {
 
-	boolean afterPropertiesSet = false;
-	boolean shouldStart = false;
 	boolean isStarted = false;
 	AggregrateThreadExecutor exec = AggregrateThreadExecutor
 			.getAggregateThreadExecutor();
@@ -96,7 +94,6 @@ public class WatchdogImpl implements Watchdog, SmartLifecycle, InitializingBean 
 		try {
 			exec.shutdown();
 			isStarted = false;
-			shouldStart = false;
 			exec.awaitTermination(20, TimeUnit.SECONDS);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
@@ -114,15 +111,10 @@ public class WatchdogImpl implements Watchdog, SmartLifecycle, InitializingBean 
 	@Override
 	public void start() {
 		System.out.println("start IS CREATE WATCHDOG TASK IN TOMCAT");
-		if ( !afterPropertiesSet ) {
-			shouldStart = true;
-		} else {
-			// TODO: discover base web server URL or eliminate this as arg.
-			shouldStart = false;
-			String baseWebServerUrl = "/ODKAggregatePlatform";
-			createWatchdogTask(3 * 60 * 1000, baseWebServerUrl);
-			isStarted = true;
-		}
+		// TODO: eliminate this arg
+		String baseWebServerUrl = "/ODKAggregatePlatform";
+		createWatchdogTask(3 * 60 * 1000, baseWebServerUrl);
+		isStarted = true;
 	}
 
 	@Override
@@ -157,12 +149,7 @@ public class WatchdogImpl implements Watchdog, SmartLifecycle, InitializingBean 
 	@Override
 	public void afterPropertiesSet() throws Exception {
 		System.out.println("afterPropertiesSet IS CREATE WATCHDOG TASK IN TOMCAT");
-		afterPropertiesSet = true;
-		if (shouldStart ) {
-			shouldStart = false;
-			String baseWebServerUrl = "/ODKAggregatePlatform";
-			createWatchdogTask(3 * 60 * 1000, baseWebServerUrl);
-			isStarted = true;
-		}
+		if ( datastore == null ) throw new IllegalStateException("no datastore specified");
+		if ( userService == null ) throw new IllegalStateException("no user service specified");
 	}
 }
