@@ -476,7 +476,7 @@ public class FormDefinition {
 					// of its columns -- or create the tables from scratch...
 					for ( Map.Entry<String, DynamicCommonFieldsBase> e : fd.backingTableMap.entrySet() ) {
 						
-						datastore.createRelation(e.getValue(), user);
+						datastore.assertRelation(e.getValue(), user);
 					}
 					
 					// and compute the set of element URIs that 

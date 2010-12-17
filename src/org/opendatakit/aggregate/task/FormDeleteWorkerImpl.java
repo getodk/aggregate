@@ -26,7 +26,6 @@ import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.TaskLockType;
 import org.opendatakit.aggregate.exception.ODKExternalServiceDependencyException;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
-import org.opendatakit.aggregate.exception.ODKTaskLockException;
 import org.opendatakit.aggregate.externalservice.ExternalService;
 import org.opendatakit.aggregate.externalservice.FormServiceCursor;
 import org.opendatakit.aggregate.form.Form;
@@ -42,6 +41,7 @@ import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.persistence.TaskLock;
 import org.opendatakit.common.persistence.TopLevelDynamicBase;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.security.User;
 
 /**

@@ -94,7 +94,7 @@ public class DatastoreImpl implements Datastore {
 	}
 
 	@Override
-	public void createRelation(CommonFieldsBase relation, User user)
+	public void assertRelation(CommonFieldsBase relation, User user)
 			throws ODKDatastoreException {
 		int nColumns = 0;
 		long nBytes = 0L;
@@ -162,7 +162,7 @@ public class DatastoreImpl implements Datastore {
 	}
 
 	@Override
-	public void deleteRelation(CommonFieldsBase relation, User user)
+	public void dropRelation(CommonFieldsBase relation, User user)
 			throws ODKDatastoreException {
 		// TODO: delete all entities in the relation
 	}

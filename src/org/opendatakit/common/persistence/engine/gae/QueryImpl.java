@@ -28,11 +28,7 @@ import java.util.Set;
 
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
-import org.opendatakit.common.persistence.DynamicAssociationBase;
-import org.opendatakit.common.persistence.DynamicBase;
-import org.opendatakit.common.persistence.DynamicDocumentBase;
 import org.opendatakit.common.persistence.EntityKey;
-import org.opendatakit.common.persistence.TopLevelDynamicBase;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.security.User;
 
@@ -369,22 +365,9 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
 	}
 
 	@Override
-	public Set<EntityKey> executeTopLevelKeyQuery(
-			CommonFieldsBase topLevelTable)
+	public Set<EntityKey> executeForeignKeyQuery(
+			CommonFieldsBase topLevelTable, DataField topLevelAuri )
 			throws ODKDatastoreException {
-
-		DataField topLevelAuri = null;
-		if ( relation instanceof TopLevelDynamicBase ) {
-			topLevelAuri = ((TopLevelDynamicBase) relation).primaryKey;
-		} else if ( relation instanceof DynamicAssociationBase ) {
-			topLevelAuri = ((DynamicAssociationBase) relation).topLevelAuri;
-		} else if ( relation instanceof DynamicDocumentBase ) {
-			topLevelAuri = ((DynamicDocumentBase) relation).topLevelAuri;
-		} else if ( relation instanceof DynamicBase ) {
-			topLevelAuri = ((DynamicBase) relation).topLevelAuri;
-		} else {
-			throw new IllegalStateException("unexpected persistence backing object type");
-		}
 
 		Set<EntityKey> keySet = new HashSet<EntityKey>();
 

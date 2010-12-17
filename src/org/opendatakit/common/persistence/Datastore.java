@@ -47,20 +47,24 @@ public interface Datastore {
 	public int getMaxLenColumnName();
 	
 	/**
-	 * Ensures that the relation exists in the datastore.  The details of the 
+	 * Asserts that the relation exists in the datastore.  The details of the 
 	 * field storage capabilities (e.g., max binary size, max long string size) 
 	 * of each data field is filled in before returning.  This means that the 
 	 * database administrator can use "ALTER TABLE" commands to redefine column
 	 * dimensions and those changes will be reflected in the operations of
 	 * aggregate.
 	 * 
-	 * @param relation to be defined.  
-	 *         The field list of this relation defines all the columns in the relation.
+	 * @param relation
+	 * 		   The prototype of the relation is passed into this routine.  The
+	 * 		   persistence layer asserts the relation in the datastore and updates
+	 *         the prototype with the field storage capabilities of the relation as
+	 *         it exists in the datastore.  After this call, the relation is a 
+	 *         full-blown relation for use in the other persistence layer APIs. 
 	 * @param user non-null user responsible for this request.
 	 * @throws ODKDatastoreException
 	 *             if there was an error creating the relation
 	 */
-	public void createRelation(CommonFieldsBase relation, User user ) throws ODKDatastoreException;
+	public void assertRelation(CommonFieldsBase relation, User user ) throws ODKDatastoreException;
 
 	/**
 	 * Drops the given relation from the Datastore.
@@ -73,7 +77,7 @@ public interface Datastore {
 	 * @throws ODKDatastoreException
 	 *             if there was an error deleting the relation
 	 */
-	public void deleteRelation(CommonFieldsBase relation, User user ) throws ODKDatastoreException;
+	public void dropRelation(CommonFieldsBase relation, User user ) throws ODKDatastoreException;
 
 	/**
 	 * Quick API to test whether a relation with the given schema and tableName 
@@ -94,7 +98,7 @@ public interface Datastore {
 	 * its uri (getUri()) defined.
 	 * 
 	 * @param relation
-	 *            the prototype relation for which and empty entity should be created
+	 *            the relation for which and empty entity should be created.
 	 * @param topLevelAuriKey
 	 * 			  the uri of the top-level entity to which the created 
 	 *            entity will have affinity (e.g., for Google joins).
@@ -116,7 +120,7 @@ public interface Datastore {
 	 * relation acts as a prototype).
 	 * 
 	 * @param relation -  the prototype relation to be fetched.
-	 * @param uri the key corresponding to the desired Entity
+	 * @param uri the primary key corresponding to the desired Entity
 	 * @param user non-null user responsible for this request.
 	 * 
 	 * @return the Entity associated with the given uri

@@ -1,8 +1,8 @@
 package org.opendatakit.aggregate.datamodel;
 
-import org.opendatakit.aggregate.datamodel.FormDataModel.ElementType;
-
 import junit.framework.TestCase;
+
+import org.opendatakit.aggregate.datamodel.FormDataModel.ElementType;
 
 public class FormElementModelTest extends TestCase {
 

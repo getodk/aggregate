@@ -476,7 +476,7 @@ public class FormParserForJavaRosa {
 		      for (CommonFieldsBase tbl : fd.getBackingTableSet()) {
 		
 		        try {
-		        	datastore.createRelation(tbl, user);
+		        	datastore.assertRelation(tbl, user);
 		        	createdRelations.add(tbl);
 		        } catch (Exception e1) {
 		          // assume it is because the table is too wide...
@@ -484,7 +484,7 @@ public class FormParserForJavaRosa {
 		              "Create failed -- assuming phantom table required " + tbl.getSchemaName() + "."
 		                  + tbl.getTableName());
 		          try {
-		            datastore.deleteRelation(tbl, user);
+		            datastore.dropRelation(tbl, user);
 		          } catch (Exception e2) {
 		            // no-op
 		          }
@@ -516,7 +516,7 @@ public class FormParserForJavaRosa {
 		  	
 		      for (CommonFieldsBase tbl : fd.getBackingTableSet()) {
 		    	  try {
-		    		  datastore.deleteRelation(tbl, user);
+		    		  datastore.dropRelation(tbl, user);
 		    		  createdRelations.remove(tbl);
 		    	  } catch ( Exception e3 ) {
 		    		  // do nothing...
@@ -530,7 +530,7 @@ public class FormParserForJavaRosa {
 			    	  try {
 				    	  Logger.getLogger(FormParserForJavaRosa.class.getName()).severe(
 		    			  "--dropping " + tbl.getSchemaName() + "." + tbl.getTableName());
-			    		  datastore.deleteRelation(tbl, user);
+			    		  datastore.dropRelation(tbl, user);
 			    		  createdRelations.remove(tbl);
 			    	  } catch ( Exception e3 ) {
 			    		  // do nothing...

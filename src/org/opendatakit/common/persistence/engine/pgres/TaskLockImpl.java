@@ -24,15 +24,15 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import org.apache.commons.lang.StringEscapeUtils;
-import org.opendatakit.aggregate.constants.TaskLockType;
-import org.opendatakit.aggregate.exception.ODKTaskLockException;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.EntityKey;
+import org.opendatakit.common.persistence.ITaskLockType;
 import org.opendatakit.common.persistence.TaskLock;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
+import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.security.User;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.ConnectionCallback;
@@ -202,14 +202,14 @@ public class TaskLockImpl implements TaskLock {
 	
 	@Override
 	public boolean obtainLock(String lockId, String formId,
-			TaskLockType taskType) {
+			ITaskLockType taskType) {
 		boolean result = false;
 		try {
 			TaskLockTable relation = TaskLockTable.createRelation(datastore, user);
 			TaskLockTable entity = datastore.createEntityUsingRelation(relation, null, user);
 			entity.setStringField(entity.primaryKey, lockId);
 			entity.setFormId(formId);
-			entity.setTaskType(taskType.name());
+			entity.setTaskType(taskType.getName());
 			entity = doTransaction( entity, taskType.getLockExpirationTimeout());
 			result = true;
 		} catch (ODKEntityNotFoundException e) {
@@ -225,13 +225,13 @@ public class TaskLockImpl implements TaskLock {
 	}
 
 	@Override
-	public boolean renewLock(String lockId, String formId, TaskLockType taskType) {
+	public boolean renewLock(String lockId, String formId, ITaskLockType taskType) {
 	    boolean result = false;
 	    try {
 		    TaskLockTable relation = TaskLockTable.createRelation(datastore, user);
 		    TaskLockTable entity = datastore.getEntity(relation, lockId, user);
 		    if ( !(entity.getFormId().equals(formId) && 
-		    	   entity.getTaskType().equals(taskType.name())) ) {
+		    	   entity.getTaskType().equals(taskType.getName())) ) {
 		    	throw new IllegalArgumentException("formId or taskType don't match datastore values");
 		    }
 		    entity = doTransaction( entity, taskType.getLockExpirationTimeout());
@@ -254,7 +254,7 @@ public class TaskLockImpl implements TaskLock {
 
 	@Override
 	public boolean releaseLock(String lockId, String formId,
-			TaskLockType taskType) {
+			ITaskLockType taskType) {
 		boolean result = false;
 		try {
 			TaskLockTable relation = TaskLockTable.createRelation(datastore, user);
@@ -339,7 +339,7 @@ public class TaskLockImpl implements TaskLock {
 				TaskLockTable relationPrototype;
 				relationPrototype = new TaskLockTable(datastore
 						.getDefaultSchemaName());
-				datastore.createRelation(relationPrototype, user);
+				datastore.assertRelation(relationPrototype, user);
 				relation = relationPrototype;
 			}
 			return relation;
