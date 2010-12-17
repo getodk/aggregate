@@ -1,17 +1,42 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <beans xmlns="http://www.springframework.org/schema/beans"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
            http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
 
 
-<bean id="datastore" class="org.opendatakit.common.persistence.engine.pgres.DatastoreImpl" />
-<bean id="user_service" class="org.opendatakit.common.security.tomcat.UserServiceImpl" /> 
-<bean id="worksheet_creator" class="org.opendatakit.aggregate.task.tomcat.WorksheetCreatorImpl" /> 
-<bean id="form_delete" class="org.opendatakit.aggregate.task.tomcat.FormDeleteImpl" /> 
-<bean id="upload_task" class="org.opendatakit.aggregate.task.tomcat.UploadSubmissionsImpl" /> 
-<bean id="kml_task" class="org.opendatakit.aggregate.task.tomcat.KmlGeneratorImpl" /> 
-<bean id="csv_task" class="org.opendatakit.aggregate.task.tomcat.CsvGeneratorImpl" /> 
- 
+	<bean
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="locations">
+			<value>classpath:jdbc.properties</value>
+		</property>
+	</bean>
+
+	<bean id="dataSource" destroy-method="close"
+		class="org.apache.tomcat.dbcp.dbcp.BasicDataSource">
+		<property name="driverClassName" value="${jdbc.driverClassName}" />
+		<property name="url" value="${jdbc.url}" />
+		<property name="username" value="${jdbc.username}" />
+		<property name="password" value="${jdbc.password}" />
+	</bean>
+
+	<bean id="datastore"
+		class="org.opendatakit.common.persistence.engine.pgres.DatastoreImpl">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+	<bean id="user_service" class="org.opendatakit.common.security.tomcat.UserServiceImpl" />
+	<bean id="worksheet_creator"
+		class="org.opendatakit.aggregate.task.tomcat.WorksheetCreatorImpl" />
+	<bean id="form_delete" class="org.opendatakit.aggregate.task.tomcat.FormDeleteImpl" />
+	<bean id="upload_task"
+		class="org.opendatakit.aggregate.task.tomcat.UploadSubmissionsImpl" />
+	<bean id="kml_task" class="org.opendatakit.aggregate.task.tomcat.KmlGeneratorImpl" />
+	<bean id="csv_task" class="org.opendatakit.aggregate.task.tomcat.CsvGeneratorImpl" />
+
+	<bean id="watchdog" class="org.opendatakit.aggregate.task.tomcat.WatchdogImpl">
+		<property name="datastore" ref="datastore" />
+		<property name="userService" ref="user_service" />
+	</bean>
+
 </beans>
