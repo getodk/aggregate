@@ -24,7 +24,10 @@
 	<bean id="datastore"
 		class="org.opendatakit.common.persistence.engine.pgres.DatastoreImpl">
 		<property name="dataSource" ref="dataSource" />
+<!--		schemaName defaults to the database name.  Override this with: -->
+<!--		<property name="schemaName" value="mySchemaName" />   -->
 	</bean>
+	
 	<bean id="user_service" class="org.opendatakit.common.security.tomcat.UserServiceImpl" />
 	<bean id="worksheet_creator"
 		class="org.opendatakit.aggregate.task.tomcat.WorksheetCreatorImpl" />

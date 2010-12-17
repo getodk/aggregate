@@ -200,7 +200,7 @@ public static final String URI_FORM_ID_VALUE_FORM_INFO = "aggregate.opendatakit.
 	    // drop the tables...
 	    for ( CommonFieldsBase b : formDefinition.getBackingTableSet()) {
 	    	try {
-	    		ds.deleteRelation(b, user);
+	    		ds.dropRelation(b, user);
 	    	} catch ( ODKDatastoreException e ) {
 	    		e.printStackTrace();
 	    	}

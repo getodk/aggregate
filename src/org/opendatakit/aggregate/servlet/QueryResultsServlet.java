@@ -34,9 +34,14 @@ import org.opendatakit.aggregate.format.SubmissionFormatter;
 import org.opendatakit.aggregate.format.table.HtmlFormatter;
 import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.common.persistence.CommonFieldsBase;
+import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.Datastore;
+import org.opendatakit.common.persistence.DynamicAssociationBase;
+import org.opendatakit.common.persistence.DynamicBase;
+import org.opendatakit.common.persistence.DynamicDocumentBase;
 import org.opendatakit.common.persistence.EntityKey;
 import org.opendatakit.common.persistence.Query;
+import org.opendatakit.common.persistence.TopLevelDynamicBase;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.security.UserService;
@@ -140,8 +145,21 @@ public class QueryResultsServlet extends ServletUtilBase {
 				.valueOf(op), compareValue);
 		try {
 			List<Submission> submissions = new ArrayList<Submission>();
+			DataField foreignKey = null;
+			if ( tbl instanceof TopLevelDynamicBase ) {
+				foreignKey = ((TopLevelDynamicBase) tbl).primaryKey;
+			} else if ( tbl instanceof DynamicAssociationBase ) {
+				foreignKey = ((DynamicAssociationBase) tbl).topLevelAuri;
+			} else if ( tbl instanceof DynamicDocumentBase ) {
+				foreignKey = ((DynamicDocumentBase) tbl).topLevelAuri;
+			} else if ( tbl instanceof DynamicBase ) {
+				foreignKey = ((DynamicBase) tbl).topLevelAuri;
+			} else {
+				throw new IllegalStateException("unexpected persistence backing object type");
+			}
 			Set<EntityKey> keys = query
-					.executeTopLevelKeyQuery(form.getTopLevelGroupElement().getFormDataModel().getBackingObjectPrototype());
+					.executeForeignKeyQuery(form.getTopLevelGroupElement().getFormDataModel().getBackingObjectPrototype(),
+												foreignKey);
 			for ( EntityKey k : keys ) {
 				submissions.add( new Submission(k.getKey(), form, ds, user));
 			}

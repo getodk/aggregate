@@ -15,13 +15,15 @@
  */
 package org.opendatakit.aggregate.constants;
 
+import org.opendatakit.common.persistence.ITaskLockType;
+
 /**
  * 
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
  * 
  */
-public enum TaskLockType {
+public enum TaskLockType implements ITaskLockType {
   UPLOAD_SUBMISSION(60000),
   WORKSHEET_CREATION(120000),
   FORM_DELETION(120000);
@@ -32,7 +34,13 @@ public enum TaskLockType {
     this.timeout = timeout;
   }
  
+  @Override
   public long getLockExpirationTimeout() {
     return timeout;
+  }
+
+  @Override
+  public String getName() {
+	return name();
   }
 }

@@ -88,11 +88,12 @@ public interface Query {
    * Returns a list of distinct EntityKeys of the topLevelAuri for the set of records
    * returned by the query.
    * 
-   * @param topLevelTable definition of the relation that the topLevelAuri corresponds to.
+   * @param topLevelTable - the relation that the topLevelAuri corresponds to.
+   * @param foreignKeyField - the topLevelAuri DataField in the table being queried.
    * @return
    * @throws ODKDatastoreException
    */
-  public Set<EntityKey> executeTopLevelKeyQuery(CommonFieldsBase topLevelTable)
+  public Set<EntityKey> executeForeignKeyQuery(CommonFieldsBase topLevelTable, DataField foreignKeyField )
   							throws ODKDatastoreException;
 
 

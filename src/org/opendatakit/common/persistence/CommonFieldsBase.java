@@ -142,10 +142,6 @@ public abstract class CommonFieldsBase {
 	public final Date getLastUpdateDate() {
 		return getDateField(lastUpdateDate);
 	}
-	
-	public final DataField getPrimaryKey() {
-		return primaryKey;
-	}
 
 	public final List<DataField> getFieldList() {
 		return Collections.unmodifiableList(fieldList);

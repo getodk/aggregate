@@ -74,9 +74,10 @@ public class QueryRepeats {
     // TODO: this doesn't work with PHANTOM or GROUP splits...
     
     // get the key to the top level relation where this repeat group has the given parent key
-    Query topLevelKeyQuery = ds.createQuery(repeatGroup.getFormDataModel().getBackingObjectPrototype(), user);
-    topLevelKeyQuery.addFilter(((DynamicBase) repeatGroup.getFormDataModel().getBackingObjectPrototype()).parentAuri, Query.FilterOperation.EQUAL, parentKey);
-    Set<EntityKey> submissionKeys = topLevelKeyQuery.executeTopLevelKeyQuery(topLevelRelation);
+    DynamicBase backingObject = ((DynamicBase) repeatGroup.getFormDataModel().getBackingObjectPrototype());
+    Query topLevelKeyQuery = ds.createQuery(backingObject, user);
+    topLevelKeyQuery.addFilter(backingObject.parentAuri, Query.FilterOperation.EQUAL, parentKey);
+    Set<EntityKey> submissionKeys = topLevelKeyQuery.executeForeignKeyQuery(topLevelRelation, backingObject.topLevelAuri);
     if ( submissionKeys.size() != 1 ) {
     	throw new IllegalStateException("unexpectedly found the same parent key in two different top-level tables!");
     }

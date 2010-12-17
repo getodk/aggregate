@@ -21,6 +21,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import javax.sql.DataSource;
 
@@ -34,7 +35,6 @@ import org.opendatakit.common.persistence.EntityKey;
 import org.opendatakit.common.persistence.PersistConsts;
 import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.persistence.TaskLock;
-import org.opendatakit.common.persistence.DataField.DataType;
 import org.opendatakit.common.persistence.DataField.IndexType;
 import org.opendatakit.common.persistence.Query.FilterOperation;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
@@ -42,9 +42,6 @@ import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
 import org.opendatakit.common.security.User;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 
@@ -62,7 +59,7 @@ public class DatastoreImpl implements Datastore, InitializingBean {
 	private static final int MAX_TABLE_NAME_LEN = 60; // reserve 4 char for idx name
 
 	private static final Long MAX_BLOB_SIZE = 65536*4096L;
-	private String schemaName;
+	private String schemaName = null;
 
 	public DatastoreImpl() throws ODKDatastoreException {
 	}
@@ -71,16 +68,21 @@ public class DatastoreImpl implements Datastore, InitializingBean {
 		this.dataSource = dataSource;
 	}
 	
+	public void setSchemaName(String schemaName) {
+		this.schemaName = schemaName;
+	}
+	
 	@Override
 	public void afterPropertiesSet() throws Exception {
 		if ( dataSource == null ) {
 			throw new IllegalStateException("dataSource property must be set!");
 		}
-		
-		JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
-		List<?> databaseNames = jdbcTemplate.queryForList("SELECT current_database()",
-				String.class);
-		schemaName = (String) databaseNames.get(0);
+		if ( schemaName == null ) {
+			JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
+			List<?> databaseNames = jdbcTemplate.queryForList("SELECT current_database()",
+					String.class);
+			schemaName = (String) databaseNames.get(0);
+		}
 	}
 
 	public static final String K_CREATE_TABLE = "CREATE TABLE ";
@@ -302,8 +304,11 @@ public class DatastoreImpl implements Datastore, InitializingBean {
 	private final boolean updateRelation(CommonFieldsBase relation ) {
 
 		String qs = TableDefinition.TABLE_DEF_QUERY;
-		List<?> columns = getJdbcConnection().query(qs,
-					new Object[] {relation.getSchemaName(), relation.getTableName()}, tableDef);
+		List<?> columns;
+		columns = getJdbcConnection().query(
+			qs,
+			new Object[] { relation.getSchemaName(),
+					relation.getTableName() }, tableDef);
 
 		if ( columns.size() > 0 ) {
 			Map<String, TableDefinition> map = new HashMap<String, TableDefinition> ();
@@ -361,126 +366,123 @@ public class DatastoreImpl implements Datastore, InitializingBean {
 	/**
 	 * Relation manipulation APIs
 	 */
-	public void createRelation(CommonFieldsBase relation, User user ) throws ODKDatastoreException {
-
-		// see if relation already is defined and update it with dimensions...
-		if ( updateRelation( relation ) ) {
-			// it exists -- we're done!
-			return;
-		} else {
-			// need to create the table...
-			StringBuilder b = new StringBuilder();
-			b.append(K_CREATE_TABLE );
-			b.append(K_BQ);
-			b.append(relation.getSchemaName());
-			b.append(K_BQ);
-			b.append(".");
-			b.append(K_BQ);
-			b.append(relation.getTableName());
-			b.append(K_BQ);
-			b.append(K_OPEN_PAREN);
-			boolean firstTime = true;
-			for ( DataField f : relation.getFieldList() ) {
-				if ( !firstTime ) {
-					b.append(K_CS);
-				}
-				firstTime = false;
+	public void assertRelation(CommonFieldsBase relation, User user ) throws ODKDatastoreException {
+		try {
+			// see if relation already is defined and update it with dimensions...
+			if ( updateRelation( relation ) ) {
+				// it exists -- we're done!
+				return;
+			} else {
+				// need to create the table...
+				StringBuilder b = new StringBuilder();
+				b.append(K_CREATE_TABLE );
 				b.append(K_BQ);
-				b.append(f.getName());
+				b.append(relation.getSchemaName());
 				b.append(K_BQ);
-				DataField.DataType type = f.getDataType();
-				switch ( type ) {
-				case BINARY:
-					b.append(" BYTEA");
-					break;
-				case LONG_STRING:
-					b.append(" TEXT");// b.append(" CHARACTER SET utf8");
-					break;
-				case STRING:
-					b.append(" VARCHAR(");
-					Long len = f.getMaxCharLen();
-					if ( len == null ) {
-						len = DEFAULT_MAX_STRING_SIZE;
+				b.append(".");
+				b.append(K_BQ);
+				b.append(relation.getTableName());
+				b.append(K_BQ);
+				b.append(K_OPEN_PAREN);
+				boolean firstTime = true;
+				for ( DataField f : relation.getFieldList() ) {
+					if ( !firstTime ) {
+						b.append(K_CS);
 					}
-					b.append(len.toString());
-					b.append(K_CLOSE_PAREN);
-					// b.append(" CHARACTER SET utf8");
-					break;
-				case BOOLEAN:
-					b.append(" BOOLEAN");
-					break;
-				case INTEGER:
-					Integer int_digits = f.getNumericPrecision();
-					if ( int_digits == null ) {
-						int_digits = DEFAULT_INT_NUMERIC_PRECISION;
+					firstTime = false;
+					b.append(K_BQ);
+					b.append(f.getName());
+					b.append(K_BQ);
+					DataField.DataType type = f.getDataType();
+					switch ( type ) {
+					case BINARY:
+						b.append(" BYTEA");
+						break;
+					case LONG_STRING:
+						b.append(" TEXT");// b.append(" CHARACTER SET utf8");
+						break;
+					case STRING:
+						b.append(" VARCHAR(");
+						Long len = f.getMaxCharLen();
+						if ( len == null ) {
+							len = DEFAULT_MAX_STRING_SIZE;
+						}
+						b.append(len.toString());
+						b.append(K_CLOSE_PAREN);
+						// b.append(" CHARACTER SET utf8");
+						break;
+					case BOOLEAN:
+						b.append(" BOOLEAN");
+						break;
+					case INTEGER:
+						Integer int_digits = f.getNumericPrecision();
+						if ( int_digits == null ) {
+							int_digits = DEFAULT_INT_NUMERIC_PRECISION;
+						}
+		
+						if ( int_digits > 9 ) {
+							b.append(" BIGINT");
+						} else {
+							b.append(" INTEGER");
+						}
+						break;
+					case DECIMAL:
+						Integer dbl_digits = f.getNumericPrecision();
+						Integer dbl_fract = f.getNumericScale();
+						if ( dbl_digits == null ) {
+							dbl_digits = DEFAULT_DBL_NUMERIC_PRECISION;
+						}
+						if ( dbl_fract == null ) {
+							dbl_fract = DEFAULT_DBL_NUMERIC_SCALE;
+						}
+						b.append(" DECIMAL(");
+						b.append(dbl_digits.toString());
+						b.append(K_CS);
+						b.append(dbl_fract.toString());
+						b.append(K_CLOSE_PAREN);
+						break;
+					case DATETIME:
+						b.append(" TIMESTAMP WITHOUT TIME ZONE");
+						break;
+					case URI:
+						b.append(" VARCHAR(");
+						len = f.getMaxCharLen();
+						if ( len == null ) {
+							len = PersistConsts.URI_STRING_LEN;
+						}
+						b.append(len.toString());
+						b.append(")");// b.append(" CHARACTER SET utf8");
+						break;
 					}
-	
-					if ( int_digits > 9 ) {
-						b.append(" BIGINT");
+					
+					if ( f == relation.primaryKey ) {
+						b.append(" UNIQUE ");
+					}
+					if ( f.getNullable()) {
+						b.append(" NULL ");
 					} else {
-						b.append(" INTEGER");
+						b.append(" NOT NULL ");
 					}
-					break;
-				case DECIMAL:
-					Integer dbl_digits = f.getNumericPrecision();
-					Integer dbl_fract = f.getNumericScale();
-					if ( dbl_digits == null ) {
-						dbl_digits = DEFAULT_DBL_NUMERIC_PRECISION;
+				}
+				b.append(K_CLOSE_PAREN);
+		
+				getJdbcConnection().execute(b.toString());
+				
+				String idx;
+				// create other indicies
+				for ( DataField f : relation.getFieldList() ) {
+					if ( (f.getIndexable() != IndexType.NONE) && 
+						 (f != relation.primaryKey) ) {
+						idx = relation.getTableName() + "_" + shortPrefix(f.getName());
+						createIndex(relation, idx, f);
 					}
-					if ( dbl_fract == null ) {
-						dbl_fract = DEFAULT_DBL_NUMERIC_SCALE;
-					}
-					b.append(" DECIMAL(");
-					b.append(dbl_digits.toString());
-					b.append(K_CS);
-					b.append(dbl_fract.toString());
-					b.append(K_CLOSE_PAREN);
-					break;
-				case DATETIME:
-					b.append(" TIMESTAMP WITHOUT TIME ZONE");
-					break;
-				case URI:
-					b.append(" VARCHAR(");
-					len = f.getMaxCharLen();
-					if ( len == null ) {
-						len = PersistConsts.URI_STRING_LEN;
-					}
-					b.append(len.toString());
-					b.append(")");// b.append(" CHARACTER SET utf8");
-					break;
 				}
 				
-				if ( f == relation.primaryKey ) {
-					b.append(" UNIQUE ");
-				}
-				if ( f.getNullable()) {
-					b.append(" NULL ");
-				} else {
-					b.append(" NOT NULL ");
-				}
+				// and update the relation with actual dimensions...
+				updateRelation(relation);
 			}
-			b.append(K_CLOSE_PAREN);
-	
-			try {
-				getJdbcConnection().execute(b.toString());
-			} catch ( DataAccessException e ) {
-				e.printStackTrace();
-				throw new IllegalStateException("unable to execute: " + b.toString() +
-						" exception: " + e.getMessage() );
-			}
-			
-			String idx;
-			// create other indicies
-			for ( DataField f : relation.getFieldList() ) {
-				if ( (f.getIndexable() != IndexType.NONE) && 
-					 (f != relation.getPrimaryKey()) ) {
-					idx = relation.getTableName() + "_" + shortPrefix(f.getName());
-					createIndex(relation, idx, f);
-				}
-			}
-			
-			// and update the relation with actual dimensions...
-			updateRelation(relation);
+		} catch ( Exception e ) {
+			throw new ODKDatastoreException(e);
 		}
 	}
 
@@ -528,13 +530,7 @@ public class DatastoreImpl implements Datastore, InitializingBean {
 		b.append(K_BQ);
 		b.append(" )");
 		
-		try {
-			getJdbcConnection().execute(b.toString());
-		} catch ( DataAccessException e ) {
-			e.printStackTrace();
-			throw new IllegalStateException("unable to execute: " + b.toString() +
-					" exception: " + e.getMessage() );
-		}
+		getJdbcConnection().execute(b.toString());
 	}
 
 	@Override
@@ -545,17 +541,25 @@ public class DatastoreImpl implements Datastore, InitializingBean {
 	}
 
 	@Override
-	public void deleteRelation(CommonFieldsBase relation, User user)
+	public void dropRelation(CommonFieldsBase relation, User user)
 			throws ODKDatastoreException {
-		StringBuilder b = new StringBuilder();
-		b.append(K_DROP_TABLE);
-		b.append(K_BQ);
-		b.append(relation.getSchemaName());
-		b.append(".");
-		b.append(relation.getTableName());
-		b.append(K_BQ);
-		
-		getJdbcConnection().execute(b.toString());
+		try {
+			StringBuilder b = new StringBuilder();
+			b.append(K_DROP_TABLE);
+			b.append(K_BQ);
+			b.append(relation.getSchemaName());
+			b.append(K_BQ);
+			b.append(".");
+			b.append(K_BQ);
+			b.append(relation.getTableName());
+			b.append(K_BQ);
+			
+			Logger.getLogger(this.getClass().getName()).info(
+					"Executing " + b.toString() + " by user " + user.getUriUser());
+			getJdbcConnection().execute(b.toString());
+		} catch ( Exception e ) {
+			throw new ODKDatastoreException(e);
+		}
 	}
 
 	/***************************************************************************
@@ -573,7 +577,7 @@ public class DatastoreImpl implements Datastore, InitializingBean {
 		try {
 			row = (T) relation.getEmptyRow(user);
 		} catch ( Exception e ) {
-			throw new IllegalStateException("failed to create empty row", e);
+			throw new IllegalArgumentException("failed to create empty row", e);
 		}
 
 		if ( topLevelAuriKey != null ) {
@@ -618,103 +622,106 @@ public class DatastoreImpl implements Datastore, InitializingBean {
 	@Override
 	public void putEntity(CommonFieldsBase entity, User user)
 			throws ODKEntityPersistException {
-
-		boolean first;
-		StringBuilder b = new StringBuilder();
-		if ( entity.isFromDatabase() ) {
-			// we need to do an update
-			entity.setDateField(entity.lastUpdateDate, new Date());
-			entity.setStringField(entity.lastUpdateUriUser, user.getUriUser());
-			
-			b.append(K_UPDATE);
-			b.append(K_BQ);
-			b.append(entity.getSchemaName());
-			b.append(K_BQ);
-			b.append(".");
-			b.append(K_BQ);
-			b.append(entity.getTableName());
-			b.append(K_BQ);
-			b.append(K_SET);
-
-			int idx = 0;
-			Object[] ol = new Object[entity.getFieldList().size()];
-			int[] il = new int[entity.getFieldList().size()];
-			
-			first = true;
-			// fields...
-			for ( DataField f : entity.getFieldList()) {
-				// primary key goes in the where clause...
-				if ( f == entity.getPrimaryKey() ) continue;
-				if ( !first ) {
-					b.append(K_CS);
-				}
-				first = false;
+		try {
+			boolean first;
+			StringBuilder b = new StringBuilder();
+			if ( entity.isFromDatabase() ) {
+				// we need to do an update
+				entity.setDateField(entity.lastUpdateDate, new Date());
+				entity.setStringField(entity.lastUpdateUriUser, user.getUriUser());
+				
+				b.append(K_UPDATE);
 				b.append(K_BQ);
-				b.append(f.getName());
+				b.append(entity.getSchemaName());
+				b.append(K_BQ);
+				b.append(".");
+				b.append(K_BQ);
+				b.append(entity.getTableName());
+				b.append(K_BQ);
+				b.append(K_SET);
+	
+				int idx = 0;
+				Object[] ol = new Object[entity.getFieldList().size()];
+				int[] il = new int[entity.getFieldList().size()];
+				
+				first = true;
+				// fields...
+				for ( DataField f : entity.getFieldList()) {
+					// primary key goes in the where clause...
+					if ( f == entity.primaryKey ) continue;
+					if ( !first ) {
+						b.append(K_CS);
+					}
+					first = false;
+					b.append(K_BQ);
+					b.append(f.getName());
+					b.append(K_BQ);
+					b.append(K_EQ);
+					b.append(K_BIND_VALUE);
+					
+					buildArgumentList(ol, il, idx, entity, f);
+					++idx;
+				}
+				b.append(K_WHERE);
+				b.append(K_BQ);
+				b.append(entity.primaryKey.getName());
 				b.append(K_BQ);
 				b.append(K_EQ);
 				b.append(K_BIND_VALUE);
+				buildArgumentList(ol, il, idx, entity, entity.primaryKey);
 				
-				buildArgumentList(ol, il, idx, entity, f);
-				++idx;
-			}
-			b.append(K_WHERE);
-			b.append(K_BQ);
-			b.append(entity.primaryKey.getName());
-			b.append(K_BQ);
-			b.append(K_EQ);
-			b.append(K_BIND_VALUE);
-			buildArgumentList(ol, il, idx, entity, entity.primaryKey);
-			
-			// update...
-			getJdbcConnection().update(b.toString(), ol, il);
-		} else {
-			// not yet in database -- insert
-			b.append(K_INSERT_INTO);
-			b.append(K_BQ);
-			b.append(entity.getSchemaName());
-			b.append(K_BQ);
-			b.append(".");
-			b.append(K_BQ);
-			b.append(entity.getTableName());
-			b.append(K_BQ);
-			first = true;
-			b.append(K_OPEN_PAREN);
-			// fields...
-			for ( DataField f : entity.getFieldList()) {
-				if ( !first ) {
-					b.append(K_CS);
-				}
-				first = false;
+				// update...
+				getJdbcConnection().update(b.toString(), ol, il);
+			} else {
+				// not yet in database -- insert
+				b.append(K_INSERT_INTO);
 				b.append(K_BQ);
-				b.append(f.getName());
+				b.append(entity.getSchemaName());
 				b.append(K_BQ);
-			}
-			b.append(K_CLOSE_PAREN);
-			b.append(K_VALUES);
-			
-			int idx = 0;
-			Object[] ol = new Object[entity.getFieldList().size()];
-			int[] il = new int[entity.getFieldList().size()];
-			
-			first = true;
-			b.append(K_OPEN_PAREN);
-			// fields...
-			for ( DataField f : entity.getFieldList()) {
-				if ( !first ) {
-					b.append(K_CS);
+				b.append(".");
+				b.append(K_BQ);
+				b.append(entity.getTableName());
+				b.append(K_BQ);
+				first = true;
+				b.append(K_OPEN_PAREN);
+				// fields...
+				for ( DataField f : entity.getFieldList()) {
+					if ( !first ) {
+						b.append(K_CS);
+					}
+					first = false;
+					b.append(K_BQ);
+					b.append(f.getName());
+					b.append(K_BQ);
 				}
-				first = false;
-				b.append(K_BIND_VALUE);
-
-				buildArgumentList(ol, il, idx, entity, f);
-				++idx;
+				b.append(K_CLOSE_PAREN);
+				b.append(K_VALUES);
+				
+				int idx = 0;
+				Object[] ol = new Object[entity.getFieldList().size()];
+				int[] il = new int[entity.getFieldList().size()];
+				
+				first = true;
+				b.append(K_OPEN_PAREN);
+				// fields...
+				for ( DataField f : entity.getFieldList()) {
+					if ( !first ) {
+						b.append(K_CS);
+					}
+					first = false;
+					b.append(K_BIND_VALUE);
+	
+					buildArgumentList(ol, il, idx, entity, f);
+					++idx;
+				}
+				b.append(K_CLOSE_PAREN);
+				
+				// insert...
+				getJdbcConnection().update(b.toString(), ol, il);
+				entity.setFromDatabase(true); // now it is in the database...
 			}
-			b.append(K_CLOSE_PAREN);
-			
-			// insert...
-			getJdbcConnection().update(b.toString(), ol, il);
-			entity.setFromDatabase(true); // now it is in the database...
+		} catch ( Exception e ) {
+			throw new ODKEntityPersistException(e);
 		}
 	}
 
@@ -729,35 +736,48 @@ public class DatastoreImpl implements Datastore, InitializingBean {
 	@Override
 	public void deleteEntity(EntityKey key, User user) throws ODKDatastoreException {
 
-		CommonFieldsBase d = key.getRelation();
-		
-		StringBuilder b = new StringBuilder();
-		b.append(K_DELETE_FROM);
-		b.append(K_BQ);
-		b.append(d.getSchemaName());
-		b.append(K_BQ);
-		b.append(".");
-		b.append(K_BQ);
-		b.append(d.getTableName());
-		b.append(K_BQ);
-		b.append(K_WHERE);
-		b.append(K_BQ);
-		b.append(d.getPrimaryKey().getName());
-		b.append(K_BQ);
-		b.append(K_EQ);
-		b.append(K_BIND_VALUE);
-
-		// TODO: log the deletion
-		getJdbcConnection().update(b.toString(), new Object[] {key.getKey()});
+		try {
+			CommonFieldsBase d = key.getRelation();
+			
+			StringBuilder b = new StringBuilder();
+			b.append(K_DELETE_FROM);
+			b.append(K_BQ);
+			b.append(d.getSchemaName());
+			b.append(K_BQ);
+			b.append(".");
+			b.append(K_BQ);
+			b.append(d.getTableName());
+			b.append(K_BQ);
+			b.append(K_WHERE);
+			b.append(K_BQ);
+			b.append(d.primaryKey.getName());
+			b.append(K_BQ);
+			b.append(K_EQ);
+			b.append(K_BIND_VALUE);
+	
+			Logger.getLogger(this.getClass().getName()).info(
+					"Executing " + b.toString() + " with key " + key.getKey() + " by user " + user.getUriUser());
+			getJdbcConnection().update(b.toString(), new Object[] {key.getKey()});
+		} catch (Exception e) {
+			throw new ODKDatastoreException("delete failed", e);
+		}
 	}
 
 	@Override
 	public void deleteEntities(Collection<EntityKey> keys, User user)
 			throws ODKDatastoreException {
-		
-		for ( EntityKey k : keys ) {
-			deleteEntity(k, user);
+		ODKDatastoreException e = null;
+		for (EntityKey k : keys) {
+			try {
+				deleteEntity(k, user);
+			} catch ( ODKDatastoreException ex ) {
+				ex.printStackTrace();
+				if ( e == null ) {
+					e = ex; // save the first exception...
+				}
+			}
 		}
+		if ( e != null ) throw e; // throw the first exception...
 	}
 
   @Override

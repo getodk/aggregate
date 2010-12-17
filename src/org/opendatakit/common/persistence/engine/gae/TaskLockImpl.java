@@ -18,9 +18,9 @@ package org.opendatakit.common.persistence.engine.gae;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.opendatakit.aggregate.constants.TaskLockType;
-import org.opendatakit.aggregate.exception.ODKTaskLockException;
+import org.opendatakit.common.persistence.ITaskLockType;
 import org.opendatakit.common.persistence.TaskLock;
+import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
@@ -54,7 +54,7 @@ public class TaskLockImpl implements TaskLock {
   }
 
   @Override
-  public boolean obtainLock(String lockId, String formId, TaskLockType taskType) {
+  public boolean obtainLock(String lockId, String formId, ITaskLockType taskType) {
     boolean result = false;
     Transaction transaction = ds.beginTransaction();
 
@@ -95,7 +95,7 @@ public class TaskLockImpl implements TaskLock {
       try {
         Query query = new Query(KIND);
         query.addFilter(FORM_ID_PROPERTY, Query.FilterOperator.EQUAL, formId);
-        query.addFilter(TASK_TYPE_PROPERTY, Query.FilterOperator.EQUAL, taskType.toString());
+        query.addFilter(TASK_TYPE_PROPERTY, Query.FilterOperator.EQUAL, taskType.getName());
         PreparedQuery pquery = ds.prepare(query);
         Iterable<Entity> entities = pquery.asIterable();
         List<Key> keysToDelete = new ArrayList<Key>();
@@ -144,7 +144,7 @@ public class TaskLockImpl implements TaskLock {
     return false;
   }
 
-  public boolean renewLock(String lockId, String formId, TaskLockType taskType) {
+  public boolean renewLock(String lockId, String formId, ITaskLockType taskType) {
     boolean result = false;
     Transaction transaction = ds.beginTransaction();
     try {
@@ -172,7 +172,7 @@ public class TaskLockImpl implements TaskLock {
 
 
 
-  public boolean releaseLock(String lockId, String formId, TaskLockType taskType) throws ODKTaskLockException {
+  public boolean releaseLock(String lockId, String formId, ITaskLockType taskType) throws ODKTaskLockException {
     boolean result = false;
     Transaction transaction = ds.beginTransaction();
     try {
@@ -191,7 +191,7 @@ public class TaskLockImpl implements TaskLock {
     return result;
   }
 
-  private void lockVerification(String lockId, String formId, TaskLockType taskType)
+  private void lockVerification(String lockId, String formId, ITaskLockType taskType)
       throws ODKTaskLockException {
     Entity verificationEntity = queryForLock(formId, taskType);
     Object value = verificationEntity.getProperty(LOCK_ID_PROPERTY);
@@ -204,25 +204,25 @@ public class TaskLockImpl implements TaskLock {
   }
 
   private void updateValuesNpersist(Transaction transaction, String lockId, String formId,
-      TaskLockType taskType, Entity gaeEntity) throws ODKTaskLockException {
+		  ITaskLockType taskType, Entity gaeEntity) throws ODKTaskLockException {
     System.out.println("Persisting lock: " + lockId);
     try {
       Long timestamp = System.currentTimeMillis() + taskType.getLockExpirationTimeout();
       gaeEntity.setProperty(TIMESTAMP_PROPERTY, timestamp);
       gaeEntity.setProperty(LOCK_ID_PROPERTY, lockId);
       gaeEntity.setProperty(FORM_ID_PROPERTY, formId);
-      gaeEntity.setProperty(TASK_TYPE_PROPERTY, taskType.toString());
+      gaeEntity.setProperty(TASK_TYPE_PROPERTY, taskType.getName());
       ds.put(transaction, gaeEntity);
     } catch (IllegalStateException e) {
       throw new ODKTaskLockException(NO_TRANSACTION_ACTIVE, e);
     }
   }
 
-  private Entity queryForLock(String formId, TaskLockType taskType) throws ODKTaskLockException {
+  private Entity queryForLock(String formId, ITaskLockType taskType) throws ODKTaskLockException {
     try {
       Query query = new Query(KIND);
       query.addFilter(FORM_ID_PROPERTY, Query.FilterOperator.EQUAL, formId);
-      query.addFilter(TASK_TYPE_PROPERTY, Query.FilterOperator.EQUAL, taskType.toString());
+      query.addFilter(TASK_TYPE_PROPERTY, Query.FilterOperator.EQUAL, taskType.getName());
       PreparedQuery pquery = ds.prepare(query);
       return pquery.asSingleEntity();
     } catch (TooManyResultsException e) {

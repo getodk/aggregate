@@ -13,8 +13,6 @@
  */
 package org.opendatakit.aggregate.parser;
 
-import org.opendatakit.aggregate.parser.Naming;
-
 import junit.framework.TestCase;
 
 /**
