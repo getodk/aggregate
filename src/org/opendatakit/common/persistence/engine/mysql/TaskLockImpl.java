@@ -87,9 +87,6 @@ public class TaskLockImpl implements TaskLock {
 		b.append(", "); b.append(tableName); b.append(" AS t1 WRITE ");
 		b.append(", "); b.append(tableName); b.append(" AS t3 READ ");
 		b.append(", "); b.append(tableName); b.append(" AS t4 WRITE "); stmts.add(b.toString()); b.setLength(0);
-		// delete stale locks (don't care who's)
-		b.append("DELETE t1 FROM "); b.append(tableName); b.append(" AS t1 WHERE t1.");
-			b.append(K_BQ); b.append(entity.expirationDateTime.getName()); b.append(K_BQ); b.append(" <= @present"); stmts.add(b.toString()); b.setLength(0);
 
 		if ( !entity.isFromDatabase() ) {
 			// insert a new record
@@ -162,23 +159,29 @@ public class TaskLockImpl implements TaskLock {
 			b.append(K_BQ); b.append(entity.primaryKey.getName()); b.append(K_BQ);
 			b.append(" = "); b.append("@uriLock");  stmts.add(b.toString()); b.setLength(0);
 		}
+		// delete stale locks (don't care who's)
+		b.append("DELETE t1 FROM "); b.append(tableName); b.append(" AS t1 WHERE t1.");
+			b.append(K_BQ); b.append(entity.expirationDateTime.getName()); b.append(K_BQ); b.append(" <= @present"); stmts.add(b.toString()); b.setLength(0);
+		// determine the time of the oldest lock for this resource and task type... 
 		b.append("SET @minExpiration = @present"); stmts.add(b.toString()); b.setLength(0);
 		b.append("SELECT @minExpiration:=MIN(t3.");
 		b.append(K_BQ); b.append(entity.expirationDateTime.getName()); b.append(K_BQ);
 		b.append(") FROM "); b.append(tableName); b.append(" AS t3 WHERE t3.");
 		b.append(K_BQ); b.append(entity.formId.getName()); b.append(K_BQ); b.append(" = @formId AND t3.");
 		b.append(K_BQ); b.append(entity.taskType.getName()); b.append(K_BQ); b.append(" = @taskType"); stmts.add(b.toString()); b.setLength(0);
+		// delete all locks except the oldest one for this resource and task type...
+		// whatever lock exists identifies the owner of the resource.
 		b.append("DELETE t4 FROM ");
 		b.append(tableName);
 		b.append(" AS t4 WHERE t4.");
 
-		b.append(K_BQ); b.append(TaskLockTable.STR_FORM_ID); b.append(K_BQ);
+		b.append(K_BQ); b.append(entity.formId.getName()); b.append(K_BQ);
 		  b.append(" = @formId AND t4.");
 
-		b.append(K_BQ); b.append(TaskLockTable.STR_TASK_TYPE); b.append(K_BQ);
+		b.append(K_BQ); b.append(entity.taskType.getName()); b.append(K_BQ);
 		  b.append(" = @taskType AND TIMESTAMPDIFF(MICROSECOND, t4.");
 		
-		b.append(K_BQ); b.append(TaskLockTable.STR_EXPIRATION_DATETIME); b.append(K_BQ);
+		b.append(K_BQ); b.append(entity.expirationDateTime.getName()); b.append(K_BQ);
 		b.append(",@minExpiration) > 0"); stmts.add(b.toString()); b.setLength(0);
 		
 		TaskLockTable relation;
@@ -293,15 +296,11 @@ public class TaskLockImpl implements TaskLock {
 	private static class TaskLockTable extends CommonFieldsBase {
 		static final String TABLE_NAME = "_task_lock";
 
-		static final String STR_EXPIRATION_DATETIME = "EXPIRATION_DATETIME";
-		static final String STR_TASK_TYPE = "TASK_TYPE";
-		static final String STR_FORM_ID = "FORM_ID";
-
-		private static final DataField FORM_ID = new DataField(STR_FORM_ID,
+		private static final DataField FORM_ID = new DataField("FORM_ID",
 				DataField.DataType.STRING, false, 4096L);
-		private static final DataField TASK_TYPE = new DataField(STR_TASK_TYPE,
+		private static final DataField TASK_TYPE = new DataField("TASK_TYPE",
 				DataField.DataType.STRING, false, 80L);
-		private static final DataField EXPIRATION_DATETIME = new DataField(STR_EXPIRATION_DATETIME,
+		private static final DataField EXPIRATION_DATETIME = new DataField("EXPIRATION_DATETIME",
 				DataField.DataType.DATETIME, true);
 
 		DataField formId;
