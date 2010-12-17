@@ -103,7 +103,8 @@ public class ChoiceSubmissionType extends SubmissionFieldBase<List<String>> {
 			String[] valueArray = concatenatedValues.split(" ");
 			int i = 1;
 			for ( String v : valueArray ) {
-				SelectChoice c = (SelectChoice) datastore.createEntityUsingRelation(element.getFormDataModel().getBackingObjectPrototype(), topLevelTableKey, user);
+				SelectChoice c = (SelectChoice) datastore.createEntityUsingRelation(element.getFormDataModel().getBackingObjectPrototype(), user);
+				c.setTopLevelAuri(topLevelTableKey.getKey());
 				c.setParentAuri(parentKey);
 				c.setOrdinalNumber(Long.valueOf(i++));
 				c.setValue(v);

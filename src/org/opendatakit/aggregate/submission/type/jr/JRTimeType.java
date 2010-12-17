@@ -20,9 +20,9 @@ package org.opendatakit.aggregate.submission.type.jr;
 import java.util.Date;
 
 import org.javarosa.core.model.utils.DateUtils;
+import org.opendatakit.aggregate.datamodel.DynamicCommonFieldsBase;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.submission.type.DateSubmissionType;
-import org.opendatakit.common.persistence.DynamicCommonFieldsBase;
 
 /**
  * Data Storage Converter for Java Time Type

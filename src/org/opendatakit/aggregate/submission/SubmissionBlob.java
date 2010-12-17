@@ -73,10 +73,12 @@ public class SubmissionBlob {
     	long endCopy = index + blobLimit;
     	if ( endCopy > blob.length ) endCopy = blob.length;
         byte [] partialBlob = Arrays.copyOfRange(blob, (int) index, (int) endCopy);
-        RefBlob eBlob = datastore.createEntityUsingRelation(ref, colocationKey, user);
+        RefBlob eBlob = datastore.createEntityUsingRelation(ref, user);
+        eBlob.setTopLevelAuri(colocationKey.getKey());
         eBlob.setValue(partialBlob);
         dbRefBlobList.add(eBlob);
-        VersionedBinaryContentRefBlob bcb = datastore.createEntityUsingRelation(bcbRef, colocationKey, user);
+        VersionedBinaryContentRefBlob bcb = datastore.createEntityUsingRelation(bcbRef, user);
+        bcb.setTopLevelAuri(colocationKey.getKey());
         bcb.setDomAuri(uriVersionedContent);
         bcb.setSubAuri(eBlob.getUri());
         bcb.setPart(i++);

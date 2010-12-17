@@ -95,24 +95,16 @@ public interface Datastore {
 	 * Returns an empty entity able to be stored in the given relation. The
 	 * type of the object returned is the type of the relation passed in.
 	 * This is a "not-yet-stored-in-the-persistence-layer" entity.  It has 
-	 * its uri (getUri()) defined.
+	 * its uri (getUri()) defined, but the caller can change that if desired.
 	 * 
 	 * @param relation
 	 *            the relation for which and empty entity should be created.
-	 * @param topLevelAuriKey
-	 * 			  the uri of the top-level entity to which the created 
-	 *            entity will have affinity (e.g., for Google joins).
-	 *            If the table is dynamic, the Uri of this key is also 
-	 *            stored in the topLevelAuri field.  Specify null if 
-	 *            there is no appropriate affinity for is relation.  
-	 *            This is for bigTable and other distributed systems 
-	 *            that have big performance gains if the data that are 
-	 *            commonly joined are co-resident in the cloud.
-	 * @param user non-null user responsible for this request.
+	 * @param user 
+	 * 			  the user responsible for this request.
 	 *            
 	 * @return an empty Entity set up for storage in the given relation
 	 */
-	public <T extends CommonFieldsBase> T createEntityUsingRelation(T relation, EntityKey topLevelAuriKey, User user);
+	public <T extends CommonFieldsBase> T createEntityUsingRelation(T relation, User user);
 
 	/**
 	 * Returns the entity corresponding to the given relation and uri.

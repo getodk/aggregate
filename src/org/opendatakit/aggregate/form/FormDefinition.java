@@ -23,6 +23,7 @@ import java.util.Map;
 
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.datamodel.BinaryContent;
+import org.opendatakit.aggregate.datamodel.DynamicCommonFieldsBase;
 import org.opendatakit.aggregate.datamodel.FormDataModel;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.datamodel.InstanceData;
@@ -30,6 +31,7 @@ import org.opendatakit.aggregate.datamodel.LongStringRefText;
 import org.opendatakit.aggregate.datamodel.RefBlob;
 import org.opendatakit.aggregate.datamodel.RefText;
 import org.opendatakit.aggregate.datamodel.SelectChoice;
+import org.opendatakit.aggregate.datamodel.TopLevelDynamicBase;
 import org.opendatakit.aggregate.datamodel.TopLevelInstanceData;
 import org.opendatakit.aggregate.datamodel.VersionedBinaryContent;
 import org.opendatakit.aggregate.datamodel.VersionedBinaryContentRefBlob;
@@ -43,10 +45,8 @@ import org.opendatakit.aggregate.submission.type.StringSubmissionType;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.Datastore;
-import org.opendatakit.common.persistence.DynamicCommonFieldsBase;
 import org.opendatakit.common.persistence.EntityKey;
 import org.opendatakit.common.persistence.Query;
-import org.opendatakit.common.persistence.TopLevelDynamicBase;
 import org.opendatakit.common.persistence.Query.Direction;
 import org.opendatakit.common.persistence.Query.FilterOperation;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
@@ -123,12 +123,13 @@ public class FormDefinition {
 		final String parentURI = (parent == null) ? null : parent.getUri();
 		
 		// define the table...
-		d = datastore.createEntityUsingRelation(fdm, k, user);
+		d = datastore.createEntityUsingRelation(fdm, user);
 		list.add(d);
 		// reset the PK to be the PK of the table we are representing
 		d.setStringField(fdm.primaryKey, form.getUri());
 		d.setLongField(fdm.ordinalNumber, ordinal);
 		d.setStringField(fdm.parentAuri, parentURI);
+		d.setStringField(fdm.topLevelAuri, topLevel.getUri());
 		d.setStringField(fdm.elementName, form.getTableName());
 		d.setStringField(fdm.elementType,
 				(parent == topLevel) ?
@@ -155,11 +156,12 @@ public class FormDefinition {
 			++l;
 			
 			// this field should be in the fdm model...
-			d = datastore.createEntityUsingRelation(fdm, k, user);
+			d = datastore.createEntityUsingRelation(fdm, user);
 			list.add(d);
 			d.setStringField(fdm.primaryKey, form.getUri() + "-" + Long.toString(l));
 			d.setLongField(fdm.ordinalNumber, l);
 			d.setStringField(fdm.parentAuri, form.getUri());
+			d.setStringField(fdm.topLevelAuri, k.getKey());
 			d.setStringField(fdm.elementName, f.getName());
 			switch ( f.getDataType() ) {
 			case STRING:
@@ -216,7 +218,7 @@ public class FormDefinition {
 		final String parentURI = parent.getUri(); // there better be a parent!!!
 		
 		// record for binary content...
-		d = datastore.createEntityUsingRelation(fdm, k, user);
+		d = datastore.createEntityUsingRelation(fdm, user);
 		d.setStringField(fdm.primaryKey, binaryContentUri);
 		list.add(d);
 		final String bcURI = d.getUri();
@@ -230,7 +232,7 @@ public class FormDefinition {
 		d.setStringField(fdm.persistAsSchema, fdm.getSchemaName());
 
 		// record for versioned binary content...
-		d = datastore.createEntityUsingRelation(fdm, k, user);
+		d = datastore.createEntityUsingRelation(fdm, user);
 		d.setStringField(fdm.primaryKey, versionedBinaryUri);
 		list.add(d);
 		final String vbcURI = d.getUri();
@@ -244,7 +246,7 @@ public class FormDefinition {
 		d.setStringField(fdm.persistAsSchema, fdm.getSchemaName());
 
 		// record for binary content ref blob..
-		d = datastore.createEntityUsingRelation(fdm, k, user);
+		d = datastore.createEntityUsingRelation(fdm, user);
 		d.setStringField(fdm.primaryKey, versionedRefBlobUri);
 		list.add(d);
 		final String bcbURI = d.getUri();
@@ -258,7 +260,7 @@ public class FormDefinition {
 		d.setStringField(fdm.persistAsSchema, fdm.getSchemaName());
 
 		// record for ref blob...
-		d = datastore.createEntityUsingRelation(fdm, k, user);
+		d = datastore.createEntityUsingRelation(fdm, user);
 		d.setStringField(fdm.primaryKey, refBlobUri);
 		list.add(d);
 		d.setLongField(fdm.ordinalNumber, 1L);
@@ -290,12 +292,13 @@ public class FormDefinition {
 		final String topLevelURI = topLevel.getUri();
 		
 		// record for long string ref text...
-		d = datastore.createEntityUsingRelation(fdm, k, user);
+		d = datastore.createEntityUsingRelation(fdm, user);
 		d.setStringField(fdm.primaryKey, longStringRefTextUri);
 		list.add(d);
 		final String lst = d.getUri();
 		d.setLongField(fdm.ordinalNumber, ordinal);
 		d.setStringField(fdm.parentAuri, topLevelURI);
+		d.setStringField(fdm.topLevelAuri, topLevelURI);
 		d.setStringField(fdm.elementName, null);
 		d.setStringField(fdm.elementType, FormDataModel.ElementType.LONG_STRING_REF_TEXT.toString());
 		d.setStringField(fdm.persistAsColumn, null);
@@ -303,11 +306,12 @@ public class FormDefinition {
 		d.setStringField(fdm.persistAsSchema, fdm.getSchemaName());
 
 		// record for ref text...
-		d = datastore.createEntityUsingRelation(fdm, k, user);
+		d = datastore.createEntityUsingRelation(fdm, user);
 		d.setStringField(fdm.primaryKey, refTextUri);
 		list.add(d);
 		d.setLongField(fdm.ordinalNumber, 1L);
 		d.setStringField(fdm.parentAuri, lst);
+		d.setStringField(fdm.topLevelAuri, topLevelURI);
 		d.setStringField(fdm.elementName, null);
 		d.setStringField(fdm.elementType, FormDataModel.ElementType.REF_TEXT.toString());
 		d.setStringField(fdm.persistAsColumn, null);
@@ -333,7 +337,7 @@ public class FormDefinition {
 		String formUri = CommonFieldsBase.newMD5HashUri(p.formId);
 		
 		SubmissionAssociationTable saRelation = SubmissionAssociationTable.createRelation(datastore, user);
-		SubmissionAssociationTable sa = datastore.createEntityUsingRelation(saRelation, null, user);
+		SubmissionAssociationTable sa = datastore.createEntityUsingRelation(saRelation, user);
 		
 		sa.setStringField(saRelation.primaryKey, definitionUri );
 		sa.setDomAuri(formUri); // md5 of submissionFormId
@@ -926,10 +930,12 @@ public class FormDefinition {
 	    	long endCopy = index + textLimit;
 	    	if ( endCopy > text.length() ) endCopy = text.length();
 	    	String subString = text.substring((int) index, (int) endCopy);
-	        RefText eElem = datastore.createEntityUsingRelation(refTextTable, topLevelTableAuri, user);
+	        RefText eElem = datastore.createEntityUsingRelation(refTextTable, user);
+	        eElem.setTopLevelAuri(topLevelTableAuri.getKey());
 	        eElem.setValue(subString);
 	        
-			LongStringRefText t = datastore.createEntityUsingRelation(longStringRefTextTable, topLevelTableAuri, user);
+			LongStringRefText t = datastore.createEntityUsingRelation(longStringRefTextTable, user);
+			t.setTopLevelAuri(topLevelTableAuri.getKey());
 			t.setDomAuri(parentKey);
 			t.setSubAuri(eElem.getUri());
 			t.setPart(i++);

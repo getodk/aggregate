@@ -410,7 +410,7 @@ public abstract class CommonFieldsBase {
 	/**
 	 * Method implemented in the most derived class to clone the (concrete) relation
 	 * instance to produce an empty entity.
-	 * Only called via {@link org.opendatakit.common.persistence.Datastore#createEntityUsingRelation(CommonFieldsBase, org.opendatakit.common.persistence.EntityKey, User)}
+	 * Only called via {@link org.opendatakit.common.persistence.Datastore#createEntityUsingRelation(CommonFieldsBase, User)}
 	 * 
 	 * @param user
 	 * @return empty entity

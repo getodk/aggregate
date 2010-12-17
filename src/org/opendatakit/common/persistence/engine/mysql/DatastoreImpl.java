@@ -28,9 +28,6 @@ import javax.sql.DataSource;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.Datastore;
-import org.opendatakit.common.persistence.DynamicAssociationBase;
-import org.opendatakit.common.persistence.DynamicBase;
-import org.opendatakit.common.persistence.DynamicDocumentBase;
 import org.opendatakit.common.persistence.EntityKey;
 import org.opendatakit.common.persistence.PersistConsts;
 import org.opendatakit.common.persistence.Query;
@@ -558,8 +555,7 @@ public class DatastoreImpl implements Datastore, InitializingBean {
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
-	public <T extends CommonFieldsBase> T createEntityUsingRelation(T relation,
-			EntityKey topLevelAuriKey, User user) {
+	public <T extends CommonFieldsBase> T createEntityUsingRelation(T relation, User user) {
 
 		// we are generating our own PK, so we don't need to interact with DB
 		// yet...
@@ -568,18 +564,6 @@ public class DatastoreImpl implements Datastore, InitializingBean {
 			row = (T) relation.getEmptyRow(user);
 		} catch (Exception e) {
 			throw new IllegalArgumentException("failed to create empty row", e);
-		}
-
-		if (topLevelAuriKey != null) {
-			if (row instanceof DynamicAssociationBase) {
-				((DynamicAssociationBase) row).setTopLevelAuri(topLevelAuriKey
-						.getKey());
-			} else if (row instanceof DynamicDocumentBase) {
-				((DynamicDocumentBase) row).setTopLevelAuri(topLevelAuriKey
-						.getKey());
-			} else if (row instanceof DynamicBase) {
-				((DynamicBase) row).setTopLevelAuri(topLevelAuriKey.getKey());
-			}
 		}
 		return row;
 	}

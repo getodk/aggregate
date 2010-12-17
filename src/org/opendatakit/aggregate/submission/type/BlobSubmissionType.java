@@ -226,7 +226,8 @@ public class BlobSubmissionType extends SubmissionFieldBase<SubmissionKey> {
 	  if ( matchedBc == null ) {
 		  // adding a new file...
 		  outcome = BlobSubmissionOutcome.COMPLETELY_NEW_FILE;
-		  matchedBc = (BinaryContent) datastore.createEntityUsingRelation(element.getFormDataModel().getBackingObjectPrototype(), topLevelTableKey, user);
+		  matchedBc = (BinaryContent) datastore.createEntityUsingRelation(element.getFormDataModel().getBackingObjectPrototype(), user);
+		  matchedBc.setTopLevelAuri(topLevelTableKey.getKey());
 		  matchedBc.setParentAuri(parentKey);
 		  matchedBc.setOrdinalNumber(attachments.size()+1L);
 		  matchedBc.setVersion(version);
@@ -257,7 +258,8 @@ public class BlobSubmissionType extends SubmissionFieldBase<SubmissionKey> {
 		  // later: matchedBc.setVersion(version);
 	  }
 
-	  VersionedBinaryContent vbc = (VersionedBinaryContent) datastore.createEntityUsingRelation(vbcReference, topLevelTableKey, user);
+	  VersionedBinaryContent vbc = (VersionedBinaryContent) datastore.createEntityUsingRelation(vbcReference, user);
+	  vbc.setTopLevelAuri(topLevelTableKey.getKey());
 	  vbc.setParentAuri(matchedBc.getUri());
 	  vbc.setOrdinalNumber(1L);
 	  vbc.setContentLength(contentLength);

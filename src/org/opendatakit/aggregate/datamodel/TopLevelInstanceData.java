@@ -13,7 +13,6 @@
  */
 package org.opendatakit.aggregate.datamodel;
 
-import org.opendatakit.common.persistence.TopLevelDynamicBase;
 import org.opendatakit.common.security.User;
 
 /**
