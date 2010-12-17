@@ -418,7 +418,7 @@ public class DatastoreImpl implements Datastore {
 	}
 
   @Override
-  public TaskLock createTaskLock() {
+  public TaskLock createTaskLock(User user) {
     return new TaskLockImpl();
   }
 }

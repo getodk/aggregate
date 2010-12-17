@@ -182,5 +182,11 @@ public interface Datastore {
 	public void deleteEntities(Collection<EntityKey> keys, User user)
 			throws ODKDatastoreException;
 	
-	public TaskLock createTaskLock();
+	/**
+	 * Create a task lock object.  A database-mediated global mutex.
+	 * 
+	 * @param user
+	 * @return
+	 */
+	public TaskLock createTaskLock(User user);
 }

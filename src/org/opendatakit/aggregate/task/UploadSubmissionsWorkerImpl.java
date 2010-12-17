@@ -89,7 +89,7 @@ public class UploadSubmissionsWorkerImpl {
 				pUser);
 		pForm = Form.retrieveForm(pFsc.getFormId(), pDatastore, pUser);
 
-		TaskLock taskLock = pDatastore.createTaskLock();
+		TaskLock taskLock = pDatastore.createTaskLock(pUser);
 		if (!taskLock
 				.obtainLock(pLockId, getUploadSubmissionsTaskLockName(), TaskLockType.UPLOAD_SUBMISSION)) {
 			return;
@@ -133,7 +133,7 @@ public class UploadSubmissionsWorkerImpl {
 			// TODO: do something smarter with exceptions
 			throw new ODKExternalServiceException(e);
 		} finally {
-			taskLock = pDatastore.createTaskLock();
+			taskLock = pDatastore.createTaskLock(pUser);
 			for (int i = 0; i < MAX_NUMBER_OF_RELEASE_RETRIES; i++) {
 				if (taskLock.releaseLock(pLockId, getUploadSubmissionsTaskLockName(),
 						TaskLockType.UPLOAD_SUBMISSION))
@@ -254,7 +254,7 @@ public class UploadSubmissionsWorkerImpl {
 
 				// after a certain amount of submissions sent renew lock
 				if (++counter >= SUBMISSIONS_PER_LOCK_RENEWAL) {
-					TaskLock taskLock = pDatastore.createTaskLock();
+					TaskLock taskLock = pDatastore.createTaskLock(pUser);
 					// TODO: figure out what to do if this returns false
 					taskLock.renewLock(pLockId, getUploadSubmissionsTaskLockName(),
 							TaskLockType.UPLOAD_SUBMISSION);

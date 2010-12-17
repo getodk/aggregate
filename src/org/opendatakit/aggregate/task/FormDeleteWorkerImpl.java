@@ -55,8 +55,6 @@ public class FormDeleteWorkerImpl {
 
 	private final Form form;
 	private final SubmissionKey miscTasksKey;
-	private final long attemptCount;
-	private final String baseWebServerUrl;
 	private final Datastore datastore;
 	private final User user;
 	private final String pFormIdLockId;
@@ -65,8 +63,6 @@ public class FormDeleteWorkerImpl {
 			long attemptCount, String baseWebServerUrl, Datastore datastore, User user) {
 		this.form = form;
 		this.miscTasksKey = miscTasksKey;
-		this.attemptCount = attemptCount;
-		this.baseWebServerUrl = baseWebServerUrl;
 		this.datastore = datastore;
 		this.user = user;
 		pFormIdLockId = UUID.randomUUID().toString();
@@ -88,19 +84,19 @@ public class FormDeleteWorkerImpl {
 		// formId.  Prefix with MT: to indicate that it is a miscellaneousTask
 		// lock.
 		String lockedResourceName = t.getMiscTaskLockName();
-		TaskLock formIdTaskLock = datastore.createTaskLock();
+		TaskLock formIdTaskLock = datastore.createTaskLock(user);
 		try {
 			if (formIdTaskLock.obtainLock(pFormIdLockId, lockedResourceName,
 					TaskLockType.FORM_DELETION)) {
 				formIdTaskLock = null;
-				boolean deleted = doDeletion(t);
+				doDeletion(t);
 			}
 		} catch (ODKTaskLockException e1) {
 			e1.printStackTrace();
 		} catch (Exception e2) {
 			e2.printStackTrace();
 		} finally {
-			formIdTaskLock = datastore.createTaskLock();
+			formIdTaskLock = datastore.createTaskLock(user);
 			try {
 				for (int i = 0; i < 10; i++) {
 					if (formIdTaskLock.releaseLock(pFormIdLockId, lockedResourceName,
@@ -138,7 +134,7 @@ public class FormDeleteWorkerImpl {
 				task.delete(datastore, user);
 			} else {
 				// otherwise, gain the lock on the task 
-				TaskLock taskLock = datastore.createTaskLock();
+				TaskLock taskLock = datastore.createTaskLock(user);
 				String pLockId = UUID.randomUUID().toString();
 				boolean deleted = false;
 				try {
@@ -158,7 +154,7 @@ public class FormDeleteWorkerImpl {
 					}
 				}
 				// release the lock
-				taskLock = datastore.createTaskLock();
+				taskLock = datastore.createTaskLock(user);
 				try {
 					for (int i = 0; i < 10; i++) {
 						if (taskLock.releaseLock(pLockId, lockedResourceName,
@@ -211,7 +207,7 @@ public class FormDeleteWorkerImpl {
 		for (ExternalService service : services) {
 			String uriExternalService = service.getFormServiceCursor()
 					.getUri();
-			TaskLock taskLock = datastore.createTaskLock();
+			TaskLock taskLock = datastore.createTaskLock(user);
 			String pLockId = UUID.randomUUID().toString();
 			boolean deleted = false;
 			try {
@@ -228,7 +224,7 @@ public class FormDeleteWorkerImpl {
 					allDeleted = false;
 				}
 			}
-			taskLock = datastore.createTaskLock();
+			taskLock = datastore.createTaskLock(user);
 			try {
 				for (int i = 0; i < 10; i++) {
 					if (taskLock.releaseLock(pLockId, uriExternalService,
@@ -302,7 +298,7 @@ public class FormDeleteWorkerImpl {
 				t.persist(ds, user);
 				// renew lock
 				
-				TaskLock taskLock = ds.createTaskLock();
+				TaskLock taskLock = ds.createTaskLock(user);
 				// TODO: figure out what to do if this returns false
 				taskLock.renewLock(pFormIdLockId, t.getMiscTaskLockName(),
 									t.getTaskType().getLockType());

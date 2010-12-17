@@ -228,13 +228,50 @@ public class DatastoreImpl implements Datastore {
 		}
 	};
 	
-	private static RowMapper tableDef = new RowMapper() {
+	private static RowMapper<TableDefinition> tableDef = new RowMapper<TableDefinition>() {
 		@Override
-		public Object mapRow(ResultSet rs, int rowNum) throws SQLException {
+		public TableDefinition mapRow(ResultSet rs, int rowNum) throws SQLException {
 			return new TableDefinition(rs);
 		}
 	};
 
+	public static void buildArgumentList(Object[] ol, int[] il, int idx, CommonFieldsBase entity, DataField f ) {
+		switch ( f.getDataType() ) {
+		case BOOLEAN:
+			ol[idx] = entity.getBooleanField(f);
+			il[idx] = java.sql.Types.BOOLEAN;
+			break;
+		case STRING:
+		case URI:
+			ol[idx] = entity.getStringField(f);
+			il[idx] = java.sql.Types.VARCHAR;
+			break;
+		case INTEGER:
+			ol[idx] = entity.getLongField(f);
+			il[idx] = java.sql.Types.BIGINT;
+			break;
+		case DECIMAL:
+			ol[idx] = entity.getNumericField(f);
+			il[idx] = java.sql.Types.DECIMAL;
+			break;
+		case DATETIME:
+			ol[idx] = entity.getDateField(f);
+			il[idx] = java.sql.Types.DATE;
+			break;
+		case BINARY:
+			ol[idx] = entity.getBlobField(f);
+			il[idx] = java.sql.Types.LONGVARBINARY;
+			break;
+		case LONG_STRING:
+			ol[idx] = entity.getStringField(f);
+			il[idx] = java.sql.Types.LONGNVARCHAR;
+			break;
+
+		default:
+			throw new IllegalStateException("Unexpected data type");
+		}
+	}
+	
 	JdbcTemplate getJdbcConnection() {
 		return new JdbcTemplate(dataSource);
 	}
@@ -608,31 +645,7 @@ public class DatastoreImpl implements Datastore {
 				b.append(K_EQ);
 				b.append(K_BIND_VALUE);
 				
-				switch ( f.getDataType() ) {
-				case BOOLEAN:
-					ol[idx] = entity.getBooleanField(f);
-					il[idx] = java.sql.Types.BOOLEAN;
-					break;
-				case STRING:
-				case URI:
-					ol[idx] = entity.getStringField(f);
-					il[idx] = java.sql.Types.VARCHAR;
-					break;
-				case INTEGER:
-					ol[idx] = entity.getLongField(f);
-					il[idx] = java.sql.Types.BIGINT;
-					break;
-				case DECIMAL:
-					ol[idx] = entity.getNumericField(f);
-					il[idx] = java.sql.Types.DECIMAL;
-					break;
-				case DATETIME:
-					ol[idx] = entity.getDateField(f);
-					il[idx] = java.sql.Types.DATE;
-					break;
-				default:
-					throw new IllegalStateException("Unexpected data type");
-				}
+				buildArgumentList(ol, il, idx, entity, f);
 				++idx;
 			}
 			b.append(K_WHERE);
@@ -641,8 +654,7 @@ public class DatastoreImpl implements Datastore {
 			b.append(K_BQ);
 			b.append(K_EQ);
 			b.append(K_BIND_VALUE);
-			ol[idx] = entity.getUri();
-			il[idx] = java.sql.Types.VARCHAR;
+			buildArgumentList(ol, il, idx, entity, entity.primaryKey);
 			
 			// update...
 			getJdbcConnection().update(b.toString(), ol, il);
@@ -682,32 +694,8 @@ public class DatastoreImpl implements Datastore {
 				}
 				first = false;
 				b.append(K_BIND_VALUE);
-				
-				switch ( f.getDataType() ) {
-				case BOOLEAN:
-					ol[idx] = entity.getBooleanField(f);
-					il[idx] = java.sql.Types.BOOLEAN;
-					break;
-				case STRING:
-				case URI:
-					ol[idx] = entity.getStringField(f);
-					il[idx] = java.sql.Types.VARCHAR;
-					break;
-				case INTEGER:
-					ol[idx] = entity.getLongField(f);
-					il[idx] = java.sql.Types.BIGINT;
-					break;
-				case DECIMAL:
-					ol[idx] = entity.getNumericField(f);
-					il[idx] = java.sql.Types.DECIMAL;
-					break;
-				case DATETIME:
-					ol[idx] = entity.getDateField(f);
-					il[idx] = java.sql.Types.DATE;
-					break;
-				default:
-					throw new IllegalStateException("Unexpected data type");
-				}
+
+				buildArgumentList(ol, il, idx, entity, f);
 				++idx;
 			}
 			b.append(K_CLOSE_PAREN);
@@ -759,7 +747,7 @@ public class DatastoreImpl implements Datastore {
 	}
 
   @Override
-  public TaskLock createTaskLock() {
-    return new TaskLockImpl();
+  public TaskLock createTaskLock(User user) {
+    return new TaskLockImpl(this, user);
   }
 }

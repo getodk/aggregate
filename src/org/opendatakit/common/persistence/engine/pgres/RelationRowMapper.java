@@ -28,7 +28,7 @@ import org.springframework.jdbc.core.RowMapper;
  * @author mitchellsundt@gmail.com
  * 
  */
-public class RelationRowMapper implements RowMapper {
+public class RelationRowMapper implements RowMapper<CommonFieldsBase> {
 
 	private final CommonFieldsBase relation;
 	private final User user;
@@ -39,7 +39,7 @@ public class RelationRowMapper implements RowMapper {
 	}
 	
 	@Override
-	public Object mapRow(ResultSet rs, int rowNum) throws SQLException {
+	public CommonFieldsBase mapRow(ResultSet rs, int rowNum) throws SQLException {
 		
 		// TODO: do a better job creating the entity based upon odkId...
 		CommonFieldsBase row;

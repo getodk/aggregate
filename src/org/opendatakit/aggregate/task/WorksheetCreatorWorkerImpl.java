@@ -110,7 +110,7 @@ public class WorksheetCreatorWorkerImpl {
 		// formId.  Prefix with MT: to indicate that it is a miscellaneousTask
 		// lock.
 		String lockedResourceName = t.getMiscTaskLockName();
-		TaskLock formIdTaskLock = datastore.createTaskLock();
+		TaskLock formIdTaskLock = datastore.createTaskLock(user);
 		try {
 			if (formIdTaskLock.obtainLock(pFormIdLockId, lockedResourceName,
 					TaskLockType.WORKSHEET_CREATION)) {
@@ -123,7 +123,7 @@ public class WorksheetCreatorWorkerImpl {
 			// some other unexpected exception...
 			e2.printStackTrace();
 		} finally {
-			formIdTaskLock = datastore.createTaskLock();
+			formIdTaskLock = datastore.createTaskLock(user);
 			try {
 				for (int i = 0; i < 10; i++) {
 					if (formIdTaskLock.releaseLock(pFormIdLockId, lockedResourceName,
