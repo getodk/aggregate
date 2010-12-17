@@ -41,6 +41,7 @@ import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
 import org.opendatakit.common.security.User;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.dao.DataAccessException;
@@ -53,37 +54,35 @@ import org.springframework.jdbc.core.RowMapper;
  * @author mitchellsundt@gmail.com
  * 
  */
-public class DatastoreImpl implements Datastore {
+public class DatastoreImpl implements Datastore, InitializingBean {
 
-	/**
-	 * Maximum size limit, 0 is considered infinite
-	 */
-	//private static final int BLOB_MAX_SIZE = 0;
-
-	//private static final Integer DEFAULT_FETCH_LIMIT = 1000;
-
-	public static final String PERSISTENCE_CONTEXT = "mysqlPersistenceContext.xml";
-
-	public static final String DATASOURCE_NAME = "dataSource";
-
-	public final DataSource dataSource;
+	public DataSource dataSource;
 	
 	private static final int MAX_COLUMN_NAME_LEN = 64;
 	private static final int MAX_TABLE_NAME_LEN = 60; // reserve 4 char for idx name
 
-	private final String schemaName;
+	private static final Long MAX_BLOB_SIZE = 65536*4096L;
+	private String schemaName;
 
 	public DatastoreImpl() throws ODKDatastoreException {
-		ApplicationContext context = new ClassPathXmlApplicationContext(
-				PERSISTENCE_CONTEXT);
-		dataSource = (DataSource) context.getBean(DATASOURCE_NAME);
-
-		JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
-		List<?> databaseNames = jdbcTemplate.queryForList("SELECT DATABASE()",
-				String.class);
-		this.schemaName = (String) databaseNames.get(0);
 	}
 	
+	public void setDataSource(DataSource dataSource) {
+		this.dataSource = dataSource;
+	}
+	
+	@Override
+	public void afterPropertiesSet() throws Exception {
+		if ( dataSource == null ) {
+			throw new IllegalStateException("dataSource property must be set!");
+		}
+		
+		JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
+		List<?> databaseNames = jdbcTemplate.queryForList("SELECT current_database()",
+				String.class);
+		schemaName = (String) databaseNames.get(0);
+	}
+
 	public static final String K_CREATE_TABLE = "CREATE TABLE ";
 	public static final String K_DROP_TABLE = "DROP TABLE ";
 	
@@ -92,7 +91,7 @@ public class DatastoreImpl implements Datastore {
 	public static final String K_SELECT = "SELECT ";
 	public static final String K_SELECT_DISTINCT = "SELECT DISTINCT ";
 	public static final String K_CS = ", ";
-	public static final String K_BQ = "`";
+	public static final String K_BQ = "\"";
 	public static final String K_FROM = " FROM ";
 	public static final String K_WHERE = " WHERE ";
 	public static final String K_AND = " AND ";
@@ -110,7 +109,7 @@ public class DatastoreImpl implements Datastore {
 	public static final Long DEFAULT_MAX_STRING_SIZE = 255L;
 	public static final Integer DEFAULT_DBL_NUMERIC_SCALE = 10;
 	public static final Integer DEFAULT_DBL_NUMERIC_PRECISION = 38;
-	public static final Integer DEFAULT_INT_NUMERIC_PRECISION = 10;
+	public static final Integer DEFAULT_INT_NUMERIC_PRECISION = 9;
 	
 	private static final class TableDefinition {
 		
@@ -142,15 +141,15 @@ public class DatastoreImpl implements Datastore {
 			return numericPrecision;
 		}
 
-		public static final String COLUMN_NAME = "isc.COLUMN_NAME";
-		public static final String TABLE_NAME = "isc.TABLE_NAME";
-		public static final String TABLE_SCHEMA = "isc.TABLE_SCHEMA";
-		public static final String CHARACTER_MAXIMUM_LENGTH = "isc.CHARACTER_MAXIMUM_LENGTH";
-		public static final String NUMERIC_PRECISION = "isc.NUMERIC_PRECISION";
-		public static final String NUMERIC_SCALE = "isc.NUMERIC_SCALE";
-		public static final String DATA_TYPE = "isc.DATA_TYPE";
-		public static final String IS_NULLABLE = "isc.IS_NULLABLE";
-		public static final String INFORMATION_SCHEMA_COLUMNS = "information_schema.COLUMNS isc";
+		public static final String COLUMN_NAME = "column_name";
+		public static final String TABLE_NAME = "table_name";
+		public static final String TABLE_SCHEMA = "table_schema";
+		public static final String CHARACTER_MAXIMUM_LENGTH = "character_maximum_length";
+		public static final String NUMERIC_PRECISION = "numeric_precision";
+		public static final String NUMERIC_SCALE = "numeric_scale";
+		public static final String DATA_TYPE = "data_type";
+		public static final String IS_NULLABLE = "is_nullable";
+		public static final String INFORMATION_SCHEMA_COLUMNS = "information_schema.columns";
 		public static final String K_COUNT_ONE = "COUNT(1)";
 		
 		public static final String TABLE_DEF_QUERY = K_SELECT +
@@ -171,6 +170,7 @@ public class DatastoreImpl implements Datastore {
 		private static final String BLOB = "blob"; 
 		private static final String BYTEA = "bytea"; // different in pgres
 		private static final String DATE = "date";
+		private static final String BOOLEAN = "boolean";
 		// private static final String DATETIME = "datetime";
 		private static final String TIME = "time";
 		private static final Long MAX_ROW_SIZE = 65000L; // to allow PK room
@@ -188,7 +188,15 @@ public class DatastoreImpl implements Datastore {
 			isNullable = YES.equalsIgnoreCase(s);
 			String type = rs.getString(DATA_TYPE);
 			BigDecimal num = rs.getBigDecimal(CHARACTER_MAXIMUM_LENGTH);
-			if ( num != null ) {
+			if ( type.equalsIgnoreCase(BOOLEAN) ){
+				dataType = DataField.DataType.BOOLEAN;
+			} else if ( type.equalsIgnoreCase(BYTEA) ){
+				dataType = DataField.DataType.BINARY;
+				maxCharLen = MAX_BLOB_SIZE;
+			}  else if ( type.equalsIgnoreCase(TEXT) ){
+				dataType = DataField.DataType.LONG_STRING;
+				maxCharLen = MAX_BLOB_SIZE;
+			} else if ( num != null ) {
 				maxCharLen = num.longValueExact();
 				if ( type.contains(TEXT) || type.contains(CHAR)) {
 					if ( maxCharLen <= MAX_ROW_SIZE ) {
@@ -399,7 +407,7 @@ public class DatastoreImpl implements Datastore {
 					// b.append(" CHARACTER SET utf8");
 					break;
 				case BOOLEAN:
-					b.append(" CHAR(1)");// b.append(" CHARACTER SET utf8");
+					b.append(" BOOLEAN");
 					break;
 				case INTEGER:
 					Integer int_digits = f.getNumericPrecision();
@@ -408,13 +416,9 @@ public class DatastoreImpl implements Datastore {
 					}
 	
 					if ( int_digits > 9 ) {
-						b.append(" BIGINT(");
-						b.append(int_digits.toString());
-						b.append(K_CLOSE_PAREN);
+						b.append(" BIGINT");
 					} else {
-						b.append(" INTEGER(");
-						b.append(int_digits.toString());
-						b.append(K_CLOSE_PAREN);
+						b.append(" INTEGER");
 					}
 					break;
 				case DECIMAL:
@@ -446,6 +450,9 @@ public class DatastoreImpl implements Datastore {
 					break;
 				}
 				
+				if ( f == relation.primaryKey ) {
+					b.append(" UNIQUE ");
+				}
 				if ( f.getNullable()) {
 					b.append(" NULL ");
 				} else {
@@ -463,19 +470,14 @@ public class DatastoreImpl implements Datastore {
 			}
 			
 			String idx;
-			idx = "PK_" + relation.getTableName();
-			createIndex(relation, idx, relation.getPrimaryKey(), true);
 			// create other indicies
 			for ( DataField f : relation.getFieldList() ) {
 				if ( (f.getIndexable() != IndexType.NONE) && 
 					 (f != relation.getPrimaryKey()) ) {
-					idx = shortPrefix(f.getName()) + "_" + relation.getTableName();
-					createIndex(relation, idx, f, false);
+					idx = relation.getTableName() + "_" + shortPrefix(f.getName());
+					createIndex(relation, idx, f);
 				}
 			}
-
-			idx = "LUD_" + relation.getTableName();
-			createIndex(relation, idx, relation.lastUpdateDate, false);
 			
 			// and update the relation with actual dimensions...
 			updateRelation(relation);
@@ -499,26 +501,32 @@ public class DatastoreImpl implements Datastore {
 		if ( b.length() < 3 ) {
 			b.append(Integer.toString(name.length()%10));
 		}
-		return b.toString();
+		return b.toString().toLowerCase();
 	}
 	
-	private void createIndex(CommonFieldsBase tbl, String idxName, DataField field, boolean isUnique) {
+	private void createIndex(CommonFieldsBase tbl, String idxName, DataField field) {
 		StringBuilder b = new StringBuilder();
 		
 		b.append(K_CREATE_INDEX);
+		b.append(K_BQ);
 		b.append(idxName);
+		b.append(K_BQ);
 		b.append(K_ON);
 		b.append(K_BQ);
 		b.append(tbl.getSchemaName());
+		b.append(K_BQ);
 		b.append(".");
+		b.append(K_BQ);
 		b.append(tbl.getTableName());
 		b.append(K_BQ);
-		if ( field.getDataType() == DataType.URI ) {
+		if ( field.getIndexable() == IndexType.HASH ) {
 			b.append(K_USING_HASH);
 		}
+		b.append(" (");
 		b.append(K_BQ);
 		b.append(field.getName());
 		b.append(K_BQ);
+		b.append(" )");
 		
 		try {
 			getJdbcConnection().execute(b.toString());
@@ -621,7 +629,9 @@ public class DatastoreImpl implements Datastore {
 			b.append(K_UPDATE);
 			b.append(K_BQ);
 			b.append(entity.getSchemaName());
+			b.append(K_BQ);
 			b.append(".");
+			b.append(K_BQ);
 			b.append(entity.getTableName());
 			b.append(K_BQ);
 			b.append(K_SET);
@@ -663,7 +673,9 @@ public class DatastoreImpl implements Datastore {
 			b.append(K_INSERT_INTO);
 			b.append(K_BQ);
 			b.append(entity.getSchemaName());
+			b.append(K_BQ);
 			b.append(".");
+			b.append(K_BQ);
 			b.append(entity.getTableName());
 			b.append(K_BQ);
 			first = true;
@@ -723,7 +735,9 @@ public class DatastoreImpl implements Datastore {
 		b.append(K_DELETE_FROM);
 		b.append(K_BQ);
 		b.append(d.getSchemaName());
+		b.append(K_BQ);
 		b.append(".");
+		b.append(K_BQ);
 		b.append(d.getTableName());
 		b.append(K_BQ);
 		b.append(K_WHERE);
