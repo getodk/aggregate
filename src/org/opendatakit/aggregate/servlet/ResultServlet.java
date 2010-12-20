@@ -61,7 +61,7 @@ public class ResultServlet extends ServletUtilBase {
   /**
    * URI from base
    */
-  public static final String ADDR = "result";
+  public static final String ADDR = "view/result";
 
   /**
    * Title for generated webpage

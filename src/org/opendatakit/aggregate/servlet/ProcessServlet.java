@@ -66,7 +66,7 @@ public class ProcessServlet extends ServletUtilBase {
   /**
    * URI from base
    */
-  public static final String ADDR = "process";
+  public static final String ADDR = "admin/process";
 
   /**
    * Handler for HTTP Post request

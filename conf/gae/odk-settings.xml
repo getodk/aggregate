@@ -1,17 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <beans xmlns="http://www.springframework.org/schema/beans"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
            http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
 
 
-<bean id="datastore" class="org.opendatakit.common.persistence.engine.gae.DatastoreImpl" />
-<bean id="user_service" class="org.opendatakit.common.security.gae.UserServiceImpl" /> 
-<bean id="worksheet_creator" class="org.opendatakit.aggregate.task.gae.WorksheetCreatorImpl" /> 
-<bean id="form_delete" class="org.opendatakit.aggregate.task.gae.FormDeleteImpl" /> 
-<bean id="upload_task" class="org.opendatakit.aggregate.task.gae.UploadSubmissionsImpl" /> 
-<bean id="kml_task" class="org.opendatakit.aggregate.task.gae.KmlGeneratorImpl" /> 
-<bean id="csv_task" class="org.opendatakit.aggregate.task.gae.CsvGeneratorImpl" /> 
- 
+	<bean id="datastore"
+		class="org.opendatakit.common.persistence.engine.gae.DatastoreImpl" />
+
+
+	<!--	Website domain information	-->
+	<bean id="realm" class="org.opendatakit.common.security.Realm">
+		<property name="mailToDomain" value="gmail.com" />
+		<property name="rootDomain" value="opendatakit.org" />
+		<property name="realmString" value="opendatakit.org Aggregate 1.0 realm" />
+		<property name="domains">
+			<list>
+				<value>aggregate-opendatakit.org</value>
+			</list>
+		</property>
+	</bean>
+
+	<bean id="user_service" class="org.opendatakit.common.security.gae.UserServiceImpl">
+		<property name="realm" ref="realm" />
+	</bean>
+	<bean id="worksheet_creator" class="org.opendatakit.aggregate.task.gae.WorksheetCreatorImpl" />
+	<bean id="form_delete" class="org.opendatakit.aggregate.task.gae.FormDeleteImpl" />
+	<bean id="upload_task"
+		class="org.opendatakit.aggregate.task.gae.UploadSubmissionsImpl" />
+	<bean id="kml_task" class="org.opendatakit.aggregate.task.gae.KmlGeneratorImpl" />
+	<bean id="csv_task" class="org.opendatakit.aggregate.task.gae.CsvGeneratorImpl" />
+
 </beans>

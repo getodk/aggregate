@@ -50,7 +50,7 @@ public interface User {
 	public String getRealmString();
 	
 	/**
-	 * @return list of groups to which the user belongs
+	 * @return true if this user is the anonymous user.
 	 */
-	public List<String> getGroups();
+	public boolean isAnonymous();
 }

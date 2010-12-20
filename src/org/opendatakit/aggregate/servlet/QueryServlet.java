@@ -52,7 +52,7 @@ public class QueryServlet extends ServletUtilBase {
     /**
      * URI from base
      */
-    public static final String ADDR = "query";
+    public static final String ADDR = "view/query";
 
     /**
      * Title for generated webpage

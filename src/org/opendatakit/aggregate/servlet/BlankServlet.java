@@ -39,7 +39,7 @@ public class BlankServlet extends ServletUtilBase {
    /**
     * URI from base
     */
-   public static final String ADDR = "blank";
+   public static final String ADDR = "www/blank";
 
    /**
     * Handler for HTTP Get request to create blank page that is navigable

@@ -57,7 +57,7 @@ public class KmlServlet extends ServletUtilBase {
   /**
    * URI from base
    */
-  public static final String ADDR = "kml";
+  public static final String ADDR = "view/kml";
 
   public static final String IMAGE_FIELD = "imageField";
 

@@ -56,7 +56,7 @@ public class ExternalServiceServlet extends ServletUtilBase {
   /**
    * URI from base
    */
-  public static final String ADDR = "externalService";
+  public static final String ADDR = "extern/externalService";
 
   /**
    * Title for generated webpage
@@ -81,8 +81,8 @@ public class ExternalServiceServlet extends ServletUtilBase {
     User user = userService.getCurrentUser();
 
     // get parameter
-    String odkId = getParameter(req, ServletConsts.FORM_ID);
-    if (odkId == null) {
+    String formId = getParameter(req, ServletConsts.FORM_ID);
+    if (formId == null) {
       errorMissingKeyParam(resp);
       return;
     }
@@ -93,7 +93,7 @@ public class ExternalServiceServlet extends ServletUtilBase {
     Datastore ds = (Datastore) ContextFactory.get().getBean(BeanDefs.DATASTORE_BEAN);
     Form form;
     try {
-      form = Form.retrieveForm(odkId, ds, user);
+      form = Form.retrieveForm(formId, ds, user);
     } catch (ODKFormNotFoundException e) {
       odkIdNotFoundError(resp);
       return;
@@ -106,28 +106,28 @@ public class ExternalServiceServlet extends ServletUtilBase {
 
     if (serviceString == null) {
       
-      out.write(generateServiceButton(odkId, getServerURL(req), ExternalServiceType.GOOGLE_SPREADSHEET));
-      out.write(generateServiceButton(odkId, getServerURL(req), ExternalServiceType.JSON_SERVER));
-      out.write(generateServiceButton(odkId, getServerURL(req), ExternalServiceType.GOOGLE_FUSIONTABLES));
+      out.write(generateServiceButton(formId, getServerURL(req), ExternalServiceType.GOOGLE_SPREADSHEET));
+      out.write(generateServiceButton(formId, getServerURL(req), ExternalServiceType.JSON_SERVER));
+      out.write(generateServiceButton(formId, getServerURL(req), ExternalServiceType.GOOGLE_FUSIONTABLES));
 
     } else {
       ExternalServiceType service = ExternalServiceType.valueOf(serviceString);
       out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.H3, "To: " + "<FONT COLOR=0000FF>"
           + service.getServiceName() + "</FONT>" + " Service"));
-      out.write(generateExternalServiceEntry(odkId, service));
+      out.write(generateExternalServiceEntry(formId, service));
     }
 
     finishBasicHtmlResponse(resp);
   }
 
-  private String generateExternalServiceEntry(String odkId, ExternalServiceType service)
+  private String generateExternalServiceEntry(String formId, ExternalServiceType service)
       throws UnsupportedEncodingException {
     StringBuilder form = new StringBuilder();
     form.append(HtmlConsts.LINE_BREAK);
     form.append(HtmlUtil.createFormBeginTag(service.getAddr(), HtmlConsts.RESP_TYPE_HTML,
         HtmlConsts.GET));
     form.append(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_HIDDEN, ServletConsts.FORM_ID,
-        encodeParameter(odkId)));
+        encodeParameter(formId)));
 
     if (!service.equals(ExternalServiceType.GOOGLE_FUSIONTABLES)) {
       form.append(service.getDescriptionOfParam() + HtmlConsts.LINE_BREAK);

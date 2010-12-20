@@ -67,7 +67,7 @@ public class FormUploadServlet extends ServletUtilBase {
   /**
    * URI from base
    */
-  public static final String ADDR = "upload";
+  public static final String ADDR = "admin/upload";
 
   /**
    * Title for generated webpage
@@ -149,10 +149,8 @@ public class FormUploadServlet extends ServletUtilBase {
       if (authParam != null && authParam.equalsIgnoreCase(ServletConsts.AUTHENTICATION_OAUTH)) {
         // Try OAuth authentication
         try {
-          OAuthService oauth = OAuthServiceFactory.getOAuthService();
-          com.google.appengine.api.users.User gaeUser = oauth.getCurrentUser();
-          user = new org.opendatakit.common.security.gae.UserImpl(gaeUser);
-          if (user == null) {
+          user = ((org.opendatakit.common.security.gae.UserServiceImpl) userService).getCurrentOAuthUser();
+          if (user.isAnonymous()) {
             resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, ErrorConsts.OAUTH_ERROR);
             return;
           }

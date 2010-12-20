@@ -48,7 +48,7 @@ public class WatchdogServlet extends ServletUtilBase{
   /**
    * URI from base
    */
-  public static final String ADDR = "watchdog";
+  public static final String ADDR = "gae/watchdog";
   
   /**
    * Handler for HTTP Get request to run watchdog task

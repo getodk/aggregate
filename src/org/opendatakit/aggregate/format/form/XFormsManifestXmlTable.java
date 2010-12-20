@@ -31,6 +31,7 @@ import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.format.XFormsTableConsts;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.servlet.BinaryDataServlet;
+import org.opendatakit.aggregate.servlet.XFormsDownloadServlet;
 import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.submission.type.BlobSubmissionType;
 import org.opendatakit.common.constants.BasicConsts;
@@ -51,7 +52,7 @@ public class XFormsManifestXmlTable {
   private Form form;
 
   public XFormsManifestXmlTable(Form form, String webServerURL) {
-    this.downloadRequestURL = HtmlUtil.createUrl(webServerURL) + BinaryDataServlet.ADDR;
+    this.downloadRequestURL = HtmlUtil.createUrl(webServerURL) + XFormsDownloadServlet.ADDR;
     this.form = form;
   }
 

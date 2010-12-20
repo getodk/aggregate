@@ -64,7 +64,7 @@ public class SpreadsheetServlet extends ServletUtilBase {
   /**
    * URI from base
    */
-  public static final String ADDR = "spreadsheet";
+  public static final String ADDR = "extern/spreadsheet";
 
   /**
    * Title for generated webpage

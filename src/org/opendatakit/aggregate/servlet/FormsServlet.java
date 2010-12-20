@@ -49,7 +49,7 @@ public class FormsServlet extends ServletUtilBase {
   /**
    * URI from base
    */
-  public static final String ADDR = "forms";
+  public static final String ADDR = "www/forms";
 
   /**
    * Title for generated webpage

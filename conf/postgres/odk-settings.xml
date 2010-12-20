@@ -5,7 +5,7 @@
 	xsi:schemaLocation="http://www.springframework.org/schema/beans
            http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
 
-
+	<!--Datasource configuration-->
 	<bean
 		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
 		<property name="locations">
@@ -24,11 +24,26 @@
 	<bean id="datastore"
 		class="org.opendatakit.common.persistence.engine.pgres.DatastoreImpl">
 		<property name="dataSource" ref="dataSource" />
-<!--		schemaName defaults to the database name.  Override this with: -->
-<!--		<property name="schemaName" value="mySchemaName" />   -->
+		<!--		schemaName defaults to the database name.  Override this with: -->
+		<!--		<property name="schemaName" value="mySchemaName" />   -->
+	</bean>
+
+	<!--	Website domain information	-->
+	<bean id="realm" class="org.opendatakit.common.security.Realm">
+		<property name="mailToDomain" value="gmail.com" />
+		<property name="rootDomain" value="opendatakit.org" />
+		<property name="realmString" value="opendatakit.org Aggregate 1.0 realm" />
+		<property name="domains">
+			<list>
+				<value>aggregate-opendatakit.org</value>
+			</list>
+		</property>
+	</bean>
+
+	<bean id="user_service" class="org.opendatakit.common.security.tomcat.UserServiceImpl">
+		<property name="realm" ref="realm" />
 	</bean>
 	
-	<bean id="user_service" class="org.opendatakit.common.security.tomcat.UserServiceImpl" />
 	<bean id="worksheet_creator"
 		class="org.opendatakit.aggregate.task.tomcat.WorksheetCreatorImpl" />
 	<bean id="form_delete" class="org.opendatakit.aggregate.task.tomcat.FormDeleteImpl" />

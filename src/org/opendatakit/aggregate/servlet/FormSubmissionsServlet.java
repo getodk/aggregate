@@ -63,7 +63,7 @@ public class FormSubmissionsServlet extends ServletUtilBase {
   /**
    * URI from base
    */
-  public static final String ADDR = "formSubmissions";
+  public static final String ADDR = "view/formSubmissions";
 
   /**
    * Title for generated webpage

@@ -78,8 +78,8 @@ public class Form {
   
   private final User user;
 
-// special values for bootstrapping
-public static final String URI_FORM_ID_VALUE_FORM_INFO = "aggregate.opendatakit.org:FormInfo";
+  // special values for bootstrapping
+  public static final String URI_FORM_ID_VALUE_FORM_INFO = "aggregate.opendatakit.org:FormInfo";
  
   public Form(TopLevelDynamicBase formEntity, Datastore datastore, User user) throws ODKEntityNotFoundException, ODKDatastoreException {
 		this( new Submission(

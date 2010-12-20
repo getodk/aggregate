@@ -15,34 +15,78 @@
  */
 package org.opendatakit.common.security;
 
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+
+import org.springframework.beans.factory.InitializingBean;
 
 /**
+ * A bean class used to capture configuration values about this server
+ * deployment, its default mailto: domain and the service domains it 
+ * authorizes.
  * 
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
  * 
  */
-public interface Realm {
+public class Realm implements InitializingBean {
 
-	/**
-	 * @return realm string displayed to user during login.
-	 */
-	public String getRealmString();
+	private String realmString;
+	private String mailToDomain;
+	private String rootDomain;
+	private Set<String> domains = new HashSet<String>();
 	
-	/**
-	 * @return the e-mail domain.  
-	 * Used to assemble the uriUser string if it is not already qualified.
-	 */
-	public String getMailToDomain();
+	public Realm() {
+	}
 
-	/**
-	 * @return the domain of the organization.  Used to qualify ids.
-	 */
-	public String getRootDomain();
-	
-	/**
-	 * @return list of domains for which authentications to this realm apply.
-	 */
-	public List<String> getDomains();
+	@Override
+	public void afterPropertiesSet() throws Exception {
+		if ( mailToDomain == null ) {
+			throw new IllegalStateException("mailToDomain (e.g., mydomain.org) must be specified");
+		}
+		if ( realmString == null ) {
+			realmString = mailToDomain;
+		}
+		if ( rootDomain == null ) {
+			rootDomain = mailToDomain;
+		}
+		// root domain implicitly granted access
+		domains.add(rootDomain);
+		domains.add(mailToDomain);
+	}
+
+	public String getRealmString() {
+		return realmString;
+	}
+
+	public void setRealmString(String realmString) {
+		this.realmString = realmString;
+	}
+
+	public String getMailToDomain() {
+		return mailToDomain;
+	}
+
+	public void setMailToDomain(String mailToDomain) {
+		this.mailToDomain = mailToDomain;
+	}
+
+	public String getRootDomain() {
+		return rootDomain;
+	}
+
+	public void setRootDomain(String rootDomain) {
+		this.rootDomain = rootDomain;
+	}
+
+	public Set<String> getDomains() {
+		return Collections.unmodifiableSet(domains);
+	}
+
+	public void setDomains(Set<String> domains) {
+		this.domains.clear();
+		this.domains.addAll(domains);
+	}
 }

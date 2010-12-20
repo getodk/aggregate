@@ -56,7 +56,7 @@ public class FormMultipleValueServlet extends ServletUtilBase {
 	/**
 	 * URI from base
 	 */
-	public static final String ADDR = "formMultipleValue";
+	public static final String ADDR = "view/formMultipleValue";
 
 	/**
 	 * Title for generated webpage

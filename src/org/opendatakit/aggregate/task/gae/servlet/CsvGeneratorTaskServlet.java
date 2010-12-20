@@ -47,7 +47,7 @@ public class CsvGeneratorTaskServlet extends ServletUtilBase {
   /**
    * URI from base
    */
-  public static final String ADDR = "csvGeneratorTask";
+  public static final String ADDR = "gae/csvGeneratorTask";
 
   /**
    * Handler for HTTP Get request to create xform upload page

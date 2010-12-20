@@ -73,13 +73,13 @@ public class ServletUtilBase extends CommonServletBase {
   }
 
   @Override
-  protected void emitPageHeader(PrintWriter out, boolean displayLinks) {
+  protected void emitPageHeader(PrintWriter out, HttpServletRequest req, boolean displayLinks) {
     if (displayLinks) {
-      out.write(generateNavigationInfo());
+      out.write(generateNavigationInfo(req));
       out.write(HtmlConsts.TAB + HtmlConsts.TAB);
 
       UserService userService = (UserService) ContextFactory.get().getBean(BeanDefs.USER_BEAN);
-      out.write(HtmlUtil.createHref(userService.createLogoutURL(ServletConsts.WEB_ROOT), LOGOUT
+      out.write(HtmlUtil.createHref(appBasePath(req) + userService.createLogoutURL(ServletConsts.WEB_ROOT), LOGOUT
           + userService.getCurrentUser().getNickname()));
       out.write(HtmlConsts.TAB + "<FONT SIZE=1>" + ServletConsts.VERSION + "</FONT>");
     }
@@ -135,24 +135,25 @@ public class ServletUtilBase extends CommonServletBase {
 
   /**
    * Generate common navigation links
+ * @param req 
    * 
    * @return a string with href links
    */
-  public final String generateNavigationInfo() {
+  public final String generateNavigationInfo(HttpServletRequest req) {
     StringBuilder html = new StringBuilder();
-    html.append(HtmlUtil.createHref(FormsServlet.ADDR, ServletConsts.FORMS_LINK_TEXT));
+    html.append(HtmlUtil.createHref(appBasePath(req) + FormsServlet.ADDR, ServletConsts.FORMS_LINK_TEXT));
     html.append(HtmlConsts.TAB + HtmlConsts.TAB);
-    html.append(HtmlUtil.createHref(ResultServlet.ADDR, ServletConsts.RESULT_FILES_LINK_TEXT));
+    html.append(HtmlUtil.createHref(appBasePath(req) + ResultServlet.ADDR, ServletConsts.RESULT_FILES_LINK_TEXT));
     html.append(HtmlConsts.TAB + HtmlConsts.TAB);
-    html.append(HtmlUtil.createHref(ExternalServicesListServlet.ADDR, ServletConsts.EXTERNAL_SERVICES_LINK_TEXT));
+    html.append(HtmlUtil.createHref(appBasePath(req) + ExternalServicesListServlet.ADDR, ServletConsts.EXTERNAL_SERVICES_LINK_TEXT));
     html.append(HtmlConsts.TAB + HtmlConsts.TAB);
-    html.append(HtmlUtil.createHref(UploadAppletServlet.ADDR, ServletConsts.UPLOAD_APPLET_LINK_TEXT));
+    html.append(HtmlUtil.createHref(appBasePath(req) + UploadAppletServlet.ADDR, ServletConsts.UPLOAD_APPLET_LINK_TEXT));
     html.append(HtmlConsts.TAB + HtmlConsts.TAB);
-    html.append(HtmlUtil.createHref(FormUploadServlet.ADDR, ServletConsts.UPLOAD_FORM_LINK_TEXT));
+    html.append(HtmlUtil.createHref(appBasePath(req) + FormUploadServlet.ADDR, ServletConsts.UPLOAD_FORM_LINK_TEXT));
     html.append(HtmlConsts.TAB + HtmlConsts.TAB);
-    html.append(HtmlUtil.createHref(FormDeleteServlet.ADDR, ServletConsts.DELETE_FORM_LINK_TEXT));
+    html.append(HtmlUtil.createHref(appBasePath(req) + FormDeleteServlet.ADDR, ServletConsts.DELETE_FORM_LINK_TEXT));
     html.append(HtmlConsts.TAB + HtmlConsts.TAB);
-    html.append(HtmlUtil.createHref(SubmissionServlet.ADDR, ServletConsts.UPLOAD_SUB_LINK_TEXT));
+    html.append(HtmlUtil.createHref(appBasePath(req) + SubmissionServlet.ADDR, ServletConsts.UPLOAD_SUB_LINK_TEXT));
     return html.toString();
   }
 

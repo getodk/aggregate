@@ -91,7 +91,7 @@ public abstract class CommonServletBase extends HttpServlet {
       String returnUrl = req.getRequestURI() + HtmlConsts.BEGIN_PARAM + req.getQueryString();
       String loginHtml =
           HtmlUtil.wrapWithHtmlTags(HtmlConsts.P, PLEASE
-              + HtmlUtil.createHref(userService.createLoginURL(returnUrl), LOG_IN));
+              + HtmlUtil.createHref(appBasePath(req)+userService.createLoginURL(returnUrl), LOG_IN));
       resp.getWriter().print(loginHtml);
       finishBasicHtmlResponse(resp);
       return false;
@@ -138,19 +138,29 @@ public abstract class CommonServletBase extends HttpServlet {
     resp.setCharacterEncoding(HtmlConsts.UTF8_ENCODE);
     PrintWriter out = resp.getWriter();
     out.write(HtmlConsts.HTML_OPEN);
-    out.write("<link rel=\"icon\" type=\"image/png\" href=\"odk_color_sq.png\">");
+    out.write("<link rel=\"shortcut icon\" href=\"" + appBasePath(req) + "favicon.ico\">");
 
     out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.HEAD, headContent + HtmlUtil.wrapWithHtmlTags(
         HtmlConsts.TITLE, applicationName)));
     out.write(HtmlConsts.BODY_OPEN);
-    out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.H2, "<FONT COLOR=330066 size=7><img src='odk_color.png'/>" + HtmlConsts.SPACE + applicationName) + "</FONT>");
-    emitPageHeader(out, displayLinks);
+    out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.H2, "<FONT COLOR=330066 size=7><img src='" + appBasePath(req) + "odk_color.png'/>" + HtmlConsts.SPACE + applicationName) + "</FONT>");
+    emitPageHeader(out, req, displayLinks);
     out.write(HtmlConsts.LINE_BREAK + HtmlConsts.LINE_BREAK);
     out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.H1, pageName));
   }
 
+  protected String appBasePath( HttpServletRequest req ) {
+	  String pathInfo = req.getServletPath();
+	  StringBuilder b = new StringBuilder();
+	  int idx = pathInfo.indexOf('/', 1);
+	  while ( idx != -1 ) {
+		  b.append("../");
+		  idx = pathInfo.indexOf('/', idx+1);
+	  }
+	  return b.toString();
+  }
 
-  protected abstract void emitPageHeader(PrintWriter out,  boolean displayLinks);
+  protected abstract void emitPageHeader(PrintWriter out,  HttpServletRequest req, boolean displayLinks);
   
   /**
    * Generate HTML footer string for web responses
