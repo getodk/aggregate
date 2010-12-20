@@ -49,7 +49,7 @@ public class UploadSubmissionsTaskServlet extends ServletUtilBase{
   /**
    * URI from base
    */
-  public static final String ADDR = "uploadSubmissionsTask";
+  public static final String ADDR = "gae/uploadSubmissionsTask";
 
   /**
    * Handler for HTTP Get request to create xform upload page

@@ -18,6 +18,9 @@ package org.opendatakit.common.security.tomcat;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.opendatakit.common.security.User;
+import org.springframework.security.core.GrantedAuthority;
+
 // TODO: implement
 public class UserImpl implements org.opendatakit.common.security.User {
 
@@ -25,11 +28,11 @@ public class UserImpl implements org.opendatakit.common.security.User {
 	final String passwordTreatment;
 	final String realmString;
 	final String uriUser;
-	final List<String> groups = new ArrayList<String>();
+	final List<GrantedAuthority> groups = new ArrayList<GrantedAuthority>();
 	
 	
 	UserImpl(String uriUser, String realmString, String nickName,
-			 String passwordTreatment, List<String> groups) {
+			 String passwordTreatment, List<GrantedAuthority> groups) {
 		this.uriUser = uriUser;
 		this.realmString = realmString;
 		this.nickName = nickName;
@@ -44,8 +47,7 @@ public class UserImpl implements org.opendatakit.common.security.User {
 		return nickName;
 	}
 
-	@Override
-	public List<String> getGroups() {
+	public List<GrantedAuthority> getGroups() {
 		return groups;
 	}
 
@@ -62,5 +64,10 @@ public class UserImpl implements org.opendatakit.common.security.User {
 	@Override
 	public String getUriUser() {
 		return uriUser;
+	}
+
+	@Override
+	public boolean isAnonymous() {
+		return uriUser.equals(User.ANONYMOUS_USER);
 	}
 }

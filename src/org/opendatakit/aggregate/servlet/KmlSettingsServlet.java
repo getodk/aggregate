@@ -58,7 +58,7 @@ public class KmlSettingsServlet extends ServletUtilBase {
   /**
    * URI from base
    */
-  public static final String ADDR = "kmlSettings";
+  public static final String ADDR = "view/kmlSettings";
 
   /**
    * Title for generated webpage

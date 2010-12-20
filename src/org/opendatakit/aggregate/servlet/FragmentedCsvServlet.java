@@ -65,7 +65,7 @@ public class FragmentedCsvServlet extends ServletUtilBase {
    /**
     * URI from base
     */
-	public static final String ADDR = "csvFragment";
+	public static final String ADDR = "view/csvFragment";
 
 	private static final int DEFAULT_NUM_ENTRIES = 1000;
 	

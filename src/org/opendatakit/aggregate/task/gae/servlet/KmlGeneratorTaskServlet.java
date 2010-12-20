@@ -51,7 +51,7 @@ public class KmlGeneratorTaskServlet extends ServletUtilBase {
   /**
    * URI from base
    */
-  public static final String ADDR = "kmlGeneratorTask";
+  public static final String ADDR = "gae/kmlGeneratorTask";
 
   /**
    * Handler for HTTP Get request to create xform upload page

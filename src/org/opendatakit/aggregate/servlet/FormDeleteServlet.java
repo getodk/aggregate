@@ -52,7 +52,7 @@ public class FormDeleteServlet extends ServletUtilBase {
   /**
    * URI from base
    */
-  public static final String ADDR = "formDelete";
+  public static final String ADDR = "admin/formDelete";
 
   /**
    * Title for generated webpage

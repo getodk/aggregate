@@ -53,7 +53,7 @@ public class CsvServlet extends ServletUtilBase {
   /**
    * URI from base
    */
-  public static final String ADDR = "csv";
+  public static final String ADDR = "view/csv";
 
   /**
    * Handler for HTTP Get request that responds with CSV

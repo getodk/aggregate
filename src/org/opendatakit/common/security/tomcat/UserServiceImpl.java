@@ -20,23 +20,38 @@ import java.util.List;
 
 import org.opendatakit.common.security.Realm;
 import org.opendatakit.common.security.User;
+import org.springframework.beans.factory.InitializingBean;
 
 //TODO: implement
-public class UserServiceImpl implements org.opendatakit.common.security.UserService {
+public class UserServiceImpl implements org.opendatakit.common.security.UserService, InitializingBean {
 	
-	final Realm realm;
-	final User anonymous;
-	final User daemonAccount;
+	Realm realm;
+	User anonymous;
+	User daemonAccount;
 	
 	UserServiceImpl() {
 		List<String> domains = new ArrayList<String>();
 		domains.add("aggregate.test.org");
 		domains.add("test.net");
-		realm = new RealmImpl("test realm", "mail.test.org", "opendatakit.org", domains);
+	}
+
+	@Override
+	public void afterPropertiesSet() throws Exception {
+		if ( realm == null ) {
+			throw new IllegalStateException("realm must be set");
+		}
 		anonymous = new UserImpl(User.ANONYMOUS_USER, realm.getRealmString(), 
 				User.ANONYMOUS_USER_NICKNAME, null, null );
 		daemonAccount = new UserImpl(User.DAEMON_USER, realm.getRealmString(), 
 				User.DAEMON_USER_NICKNAME, null, null );
+	}
+
+	public Realm getRealm() {
+		return realm;
+	}
+
+	public void setRealm(Realm realm) {
+		this.realm = realm;
 	}
 
 	@Override

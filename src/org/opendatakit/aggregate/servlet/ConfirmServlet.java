@@ -61,7 +61,7 @@ public class ConfirmServlet extends ServletUtilBase {
   /**
    * URI from base
    */
-  public static final String ADDR = "confirm";
+  public static final String ADDR = "admin/confirm";
   /**
    * Title for generated webpage
    */

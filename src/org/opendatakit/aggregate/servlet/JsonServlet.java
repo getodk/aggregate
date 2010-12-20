@@ -55,7 +55,7 @@ public class JsonServlet extends ServletUtilBase {
   /**
    * URI from base
    */
-  public static final String ADDR = "json";
+  public static final String ADDR = "extern/json";
 
   /**
    * Handler for HTTP Get request to create a google spreadsheet

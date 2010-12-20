@@ -1,8 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <web-app xmlns="http://java.sun.com/xml/ns/javaee" version="2.5"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.0.5.xsd">
 
+	<context-param>
+		<param-name>contextConfigLocation</param-name>
+		<param-value>/WEB-INF/applicationContext-security.xml</param-value>
+	</context-param>
+
+	<filter>
+		<filter-name>serverSpringSecurityFilterChain</filter-name>
+		<filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+	</filter>
+
+	<filter-mapping>
+		<filter-name>serverSpringSecurityFilterChain</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+
+	<listener>
+		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+	</listener>
 
 	<servlet>
 		<servlet-name>blank</servlet-name>
@@ -10,7 +28,7 @@
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>blank</servlet-name>
-		<url-pattern>/blank</url-pattern>
+		<url-pattern>/www/blank</url-pattern>
 	</servlet-mapping>
 
 	<servlet>
@@ -19,7 +37,7 @@
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>result</servlet-name>
-		<url-pattern>/result</url-pattern>
+		<url-pattern>/view/result</url-pattern>
 	</servlet-mapping>
 
 	<servlet>
@@ -28,7 +46,7 @@
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>formDelete</servlet-name>
-		<url-pattern>/formDelete</url-pattern>
+		<url-pattern>/admin/formDelete</url-pattern>
 	</servlet-mapping>
 
 	<servlet>
@@ -37,7 +55,7 @@
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>query</servlet-name>
-		<url-pattern>/query</url-pattern>
+		<url-pattern>/view/query</url-pattern>
 	</servlet-mapping>
 
 	<servlet>
@@ -46,7 +64,7 @@
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>queryResults</servlet-name>
-		<url-pattern>/queryResults</url-pattern>
+		<url-pattern>/view/queryResults</url-pattern>
 	</servlet-mapping>
 
 	<servlet>
@@ -55,7 +73,7 @@
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>externalServices</servlet-name>
-		<url-pattern>/externalServices</url-pattern>
+		<url-pattern>/extern/externalServices</url-pattern>
 	</servlet-mapping>
 
 	<servlet>
@@ -64,7 +82,7 @@
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>forms</servlet-name>
-		<url-pattern>/forms</url-pattern>
+		<url-pattern>/www/forms</url-pattern>
 	</servlet-mapping>
 
 	<servlet>
@@ -82,7 +100,7 @@
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>upload</servlet-name>
-		<url-pattern>/upload</url-pattern>
+		<url-pattern>/admin/upload</url-pattern>
 	</servlet-mapping>
 
 	<servlet>
@@ -124,13 +142,21 @@
 	</servlet-mapping>
 
 	<servlet>
+		<servlet-name>xformsDownload</servlet-name>
+		<servlet-class>org.opendatakit.aggregate.servlet.XFormsDownloadServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>xformsDownload</servlet-name>
+		<url-pattern>/xformsDownload</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
 		<servlet-name>binaryData</servlet-name>
 		<servlet-class>org.opendatakit.aggregate.servlet.BinaryDataServlet</servlet-class>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>binaryData</servlet-name>
-		<url-pattern>/binaryData</url-pattern>
-		<url-pattern>/imageViewer</url-pattern>
+		<url-pattern>/view/binaryData</url-pattern>
 	</servlet-mapping>
 
 	<servlet>
@@ -139,7 +165,7 @@
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>formSubmissions</servlet-name>
-		<url-pattern>/formSubmissions</url-pattern>
+		<url-pattern>/view/formSubmissions</url-pattern>
 	</servlet-mapping>
 
 	<servlet>
@@ -148,7 +174,7 @@
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>formMultipleValue</servlet-name>
-		<url-pattern>/formMultipleValue</url-pattern>
+		<url-pattern>/view/formMultipleValue</url-pattern>
 	</servlet-mapping>
 
 	<servlet>
@@ -157,7 +183,7 @@
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>csv</servlet-name>
-		<url-pattern>/csv</url-pattern>
+		<url-pattern>/view/csv</url-pattern>
 	</servlet-mapping>
 
 	<servlet>
@@ -166,7 +192,7 @@
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>csvFragment</servlet-name>
-		<url-pattern>/csvFragment</url-pattern>
+		<url-pattern>/view/csvFragment</url-pattern>
 	</servlet-mapping>
 
 	<servlet>
@@ -193,7 +219,7 @@
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>externalService</servlet-name>
-		<url-pattern>/externalService</url-pattern>
+		<url-pattern>/extern/externalService</url-pattern>
 	</servlet-mapping>
 
 	<servlet>
@@ -202,7 +228,7 @@
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>json</servlet-name>
-		<url-pattern>/json</url-pattern>
+		<url-pattern>/extern/json</url-pattern>
 	</servlet-mapping>
 
 	<servlet>
@@ -211,7 +237,7 @@
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>fusiontables</servlet-name>
-		<url-pattern>/fusiontables</url-pattern>
+		<url-pattern>/extern/fusiontables</url-pattern>
 	</servlet-mapping>
 
 	<servlet>
@@ -220,7 +246,7 @@
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>spreadsheet</servlet-name>
-		<url-pattern>/spreadsheet</url-pattern>
+		<url-pattern>/extern/spreadsheet</url-pattern>
 	</servlet-mapping>
 
 	<servlet>
@@ -229,7 +255,7 @@
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>worksheet</servlet-name>
-		<url-pattern>/worksheet</url-pattern>
+		<url-pattern>/extern/worksheet</url-pattern>
 	</servlet-mapping>
 
 	<servlet>
@@ -238,7 +264,7 @@
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>kmlGeneratorTask</servlet-name>
-		<url-pattern>/kmlGeneratorTask</url-pattern>
+		<url-pattern>/gae/kmlGeneratorTask</url-pattern>
 	</servlet-mapping>
 
 	<servlet>
@@ -247,7 +273,7 @@
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>csvGeneratorTask</servlet-name>
-		<url-pattern>/csvGeneratorTask</url-pattern>
+		<url-pattern>/gae/csvGeneratorTask</url-pattern>
 	</servlet-mapping>
 
 	<servlet>
@@ -256,7 +282,7 @@
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>uploadSubmissionsTask</servlet-name>
-		<url-pattern>/uploadSubmissionsTask</url-pattern>
+		<url-pattern>/gae/uploadSubmissionsTask</url-pattern>
 	</servlet-mapping>
 
 	<servlet>
@@ -265,7 +291,7 @@
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>formDeleteTask</servlet-name>
-		<url-pattern>/formDeleteTask</url-pattern>
+		<url-pattern>/gae/formDeleteTask</url-pattern>
 	</servlet-mapping>
 	
 	<servlet>
@@ -274,7 +300,7 @@
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>watchdog</servlet-name>
-		<url-pattern>/watchdog</url-pattern>
+		<url-pattern>/gae/watchdog</url-pattern>
 	</servlet-mapping>
 
 	<servlet>
@@ -283,7 +309,7 @@
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>kmlSettings</servlet-name>
-		<url-pattern>/kmlSettings</url-pattern>
+		<url-pattern>/view/kmlSettings</url-pattern>
 	</servlet-mapping>
 
 	<servlet>
@@ -292,7 +318,7 @@
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>kml</servlet-name>
-		<url-pattern>/kml</url-pattern>
+		<url-pattern>/view/kml</url-pattern>
 	</servlet-mapping>
 
 	<servlet>
@@ -301,7 +327,7 @@
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>process</servlet-name>
-		<url-pattern>/process</url-pattern>
+		<url-pattern>/admin/process</url-pattern>
 	</servlet-mapping>
 
 	<servlet>
@@ -310,11 +336,11 @@
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>confirm</servlet-name>
-		<url-pattern>/confirm</url-pattern>
+		<url-pattern>/admin/confirm</url-pattern>
 	</servlet-mapping>
 
 	<welcome-file-list>
-		<welcome-file>forms</welcome-file>
+		<welcome-file>index.html</welcome-file>
 	</welcome-file-list>
 
 	<session-config>

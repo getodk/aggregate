@@ -18,6 +18,8 @@ package org.opendatakit.common.security.gae;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.security.core.GrantedAuthority;
+
 import com.google.appengine.api.users.User;
 
 /**
@@ -28,17 +30,20 @@ import com.google.appengine.api.users.User;
  */
 public class UserImpl implements org.opendatakit.common.security.User {
 
+	private final String realmString;
 	private final boolean privileged;
 	private final User gaeUser;
-	private final List<String> groups = new ArrayList<String>();
+	private final List<GrantedAuthority> groups = new ArrayList<GrantedAuthority>();
 
-	public UserImpl(User user) {
+	public UserImpl(String realmString, User user) {
 		this.privileged = false;
+		this.realmString = realmString;
 		gaeUser = user;
 	}
 
-	public UserImpl(boolean privileged) {
+	public UserImpl(String realmString, boolean privileged) {
 		this.privileged = privileged;
+		this.realmString = realmString;
 		gaeUser = null;
 	}
 	
@@ -54,8 +59,7 @@ public class UserImpl implements org.opendatakit.common.security.User {
 		return gaeUser.getNickname();
 	}
 
-	@Override
-	public List<String> getGroups() {
+	public List<GrantedAuthority> getGroups() {
 		return groups;
 	}
 
@@ -66,18 +70,23 @@ public class UserImpl implements org.opendatakit.common.security.User {
 
 	@Override
 	public String getRealmString() {
-		return RealmImpl.GAE_REALM;
+		return realmString;
 	}
 
 	@Override
 	public String getUriUser() {
 		if (gaeUser == null) {
 			if ( privileged ) {
-				return ANONYMOUS_USER;
-			} else {
 				return DAEMON_USER_NICKNAME;
+			} else {
+				return ANONYMOUS_USER;
 			}
 		}
 		return "mailto:" + gaeUser.getEmail();
+	}
+
+	@Override
+	public boolean isAnonymous() {
+		return (gaeUser == null) && !privileged;
 	}
 }

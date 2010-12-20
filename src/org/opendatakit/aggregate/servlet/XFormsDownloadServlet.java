@@ -29,6 +29,7 @@ import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.ErrorConsts;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
+import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.aggregate.submission.SubmissionElement;
 import org.opendatakit.aggregate.submission.SubmissionKey;
@@ -41,13 +42,16 @@ import org.opendatakit.common.security.User;
 import org.opendatakit.common.security.UserService;
 
 /**
- * Servlet to display the binary data from a submission
+ * Servlet to download the manifest-declared files of a form. 
+ * 
+ * Largely copied from BinaryDataServlet.  
+ * Restricts the form to be the FormInfo form.
  * 
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
  * 
  */
-public class BinaryDataServlet extends ServletUtilBase {
+public class XFormsDownloadServlet extends ServletUtilBase {
 
   /**
    * Serial number for serialization
@@ -57,7 +61,7 @@ public class BinaryDataServlet extends ServletUtilBase {
   /**
    * URI from base
    */
-  public static final String ADDR = "view/binaryData";
+  public static final String ADDR = "xformsDownload";
 
   /**
    * Handler for HTTP Get request that responds with an Image
@@ -68,15 +72,9 @@ public class BinaryDataServlet extends ServletUtilBase {
   @Override
   public void doGet(HttpServletRequest req, HttpServletResponse resp)
       throws IOException {
-
-    // TOOD: figure out how to do picture security
-    // verify user is logged in
-    // if (!verifyCredentials(req, resp)) {
-    // return;
-    // }
-      UserService userService = (UserService) ContextFactory.get().getBean(
-              BeanDefs.USER_BEAN);
-      User user = userService.getCurrentUser();
+    UserService userService = (UserService) ContextFactory.get().getBean(
+          BeanDefs.USER_BEAN);
+    User user = userService.getCurrentUser();
 	
     // verify parameters are present
     String keyString = getParameter(req, ServletConsts.BLOB_KEY);
@@ -110,6 +108,12 @@ public class BinaryDataServlet extends ServletUtilBase {
 	}
 	
     if ( sub != null ) {
+    	// only allow retrieval of binary data from within the FormInfo definition.
+    	// I.e., only files related to the definition of an XForm.
+    	if ( !sub.getFormDefinition().getFormId().equals(Form.URI_FORM_ID_VALUE_FORM_INFO) ) {
+    		errorBadParam(resp);
+    		return;
+    	}
     	SubmissionElement v = sub.resolveSubmissionKey(parts);
     	BlobSubmissionType b = (BlobSubmissionType) v;
     	if ( b.getAttachmentCount() == 1 ) {

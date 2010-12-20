@@ -51,7 +51,7 @@ public class FormDeleteTaskServlet extends ServletUtilBase {
   /**
    * URI from base
    */
-  public static final String ADDR = "formDeleteTask";
+  public static final String ADDR = "gae/formDeleteTask";
 
   /**
    * Handler for HTTP Get request that shows the list of forms

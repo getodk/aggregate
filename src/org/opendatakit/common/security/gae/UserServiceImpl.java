@@ -20,7 +20,11 @@ import java.util.List;
 
 import org.opendatakit.common.security.Realm;
 import org.opendatakit.common.security.User;
+import org.springframework.beans.factory.InitializingBean;
 
+import com.google.appengine.api.oauth.OAuthRequestException;
+import com.google.appengine.api.oauth.OAuthService;
+import com.google.appengine.api.oauth.OAuthServiceFactory;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 
@@ -30,22 +34,36 @@ import com.google.appengine.api.users.UserServiceFactory;
  * @author mitchellsundt@gmail.com
  * 
  */
-public class UserServiceImpl implements org.opendatakit.common.security.UserService {
+public class UserServiceImpl implements org.opendatakit.common.security.UserService, InitializingBean {
 
-	final Realm realm;
-	final User anonymous;
-	final User daemonAccount;
+	Realm realm;
+	User anonymous;
+	User daemonAccount;
 	private UserService userService;
+	private OAuthService oauth;
+
 
 	public UserServiceImpl() {
+	}
+
+	@Override
+	public void afterPropertiesSet() throws Exception {
+		if ( realm == null ) {
+			throw new IllegalStateException("realm must be set");
+		}
 		userService = UserServiceFactory.getUserService();
-		List<String> domains = new ArrayList<String>();
-		domains.add("aggregate.test.org");
-		domains.add("test.net");
-		realm = new RealmImpl(RealmImpl.GAE_REALM, "gmail.com", "test.org",
-				domains);
-		anonymous = new UserImpl(false);
-		daemonAccount = new UserImpl(true);
+        oauth = OAuthServiceFactory.getOAuthService();
+
+        anonymous = new UserImpl(realm.getRealmString(), false);
+		daemonAccount = new UserImpl(realm.getRealmString(), true);
+	}
+
+	public Realm getRealm() {
+		return realm;
+	}
+
+	public void setRealm(Realm realm) {
+		this.realm = realm;
 	}
 
 	@Override
@@ -65,12 +83,21 @@ public class UserServiceImpl implements org.opendatakit.common.security.UserServ
 
 	@Override
 	public User getCurrentUser() {
-		com.google.appengine.api.users.User gaeUser = userService.getCurrentUser();
-		if ( gaeUser == null ) {
-			return anonymous;
-		} else {
-			return new UserImpl(gaeUser);
+		com.google.appengine.api.users.User gaeUser = null;
+		gaeUser = userService.getCurrentUser();
+		if ( gaeUser != null ) {
+			return new UserImpl(realm.getRealmString(), gaeUser);
 		}
+		return anonymous;
+	}
+
+	public User getCurrentOAuthUser() throws OAuthRequestException {
+		com.google.appengine.api.users.User gaeUser = null;
+		gaeUser = oauth.getCurrentUser();
+		if ( gaeUser != null ) {
+			return new UserImpl(realm.getRealmString(), gaeUser);
+		}
+		return anonymous;
 	}
 
 	@Override

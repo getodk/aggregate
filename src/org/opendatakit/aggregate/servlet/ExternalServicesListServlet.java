@@ -57,7 +57,7 @@ public class ExternalServicesListServlet extends ServletUtilBase {
 	/**
 	 * URI from base
 	 */
-	public static final String ADDR = "externalServices";
+	public static final String ADDR = "extern/externalServices";
 
 	/**
 	 * Title for generated webpage

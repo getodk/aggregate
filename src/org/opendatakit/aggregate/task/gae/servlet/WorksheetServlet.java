@@ -52,7 +52,7 @@ public class WorksheetServlet extends ServletUtilBase {
   /**
    * URI from base
    */
-  public static final String ADDR = "worksheet";
+  public static final String ADDR = "gae/worksheet";
 
   /**
    * Handler for HTTP Get request to create xform upload page
