@@ -21,10 +21,15 @@
 			</list>
 		</property>
 	</bean>
-
-	<bean id="user_service" class="org.opendatakit.common.security.gae.UserServiceImpl">
+	
+	<bean id="user_service" class="org.opendatakit.common.security.spring.UserServiceImpl">
+		<property name="datastore" ref="datastore" />
 		<property name="realm" ref="realm" />
 	</bean>
+
+<!--	<bean id="user_service" class="org.opendatakit.common.security.gae.UserServiceImpl">-->
+<!--		<property name="realm" ref="realm" />-->
+<!--	</bean>-->
 	<bean id="worksheet_creator" class="org.opendatakit.aggregate.task.gae.WorksheetCreatorImpl" />
 	<bean id="form_delete" class="org.opendatakit.aggregate.task.gae.FormDeleteImpl" />
 	<bean id="upload_task"
