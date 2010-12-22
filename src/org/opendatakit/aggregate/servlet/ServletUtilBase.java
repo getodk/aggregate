@@ -25,7 +25,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.opendatakit.aggregate.ContextFactory;
-import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.ErrorConsts;
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.ServletConsts;
@@ -53,32 +52,13 @@ public class ServletUtilBase extends CommonServletBase {
     super(ServletConsts.APPLICATION_NAME);
   }
 
-  /**
-   * Takes request and verifies the user has logged in. If the user has not
-   * logged in generates the appropriate text for response to user
-   * 
-   * @param req
-   *          The HTTP request received at the server
-   * @param resp
-   *          The HTTP response to be sent to client
-   * @return boolean value of whether the user is logged in
-   * @throws IOException
-   *           Throws IO Exception if problem occurs creating the login link in
-   *           response
-   */
-  protected boolean verifyCredentials(HttpServletRequest req, HttpServletResponse resp)
-      throws IOException {
-    UserService userService = (UserService) ContextFactory.get().getBean(BeanDefs.USER_BEAN);
-    return verifyCredentials(req, resp, userService);
-  }
-
   @Override
   protected void emitPageHeader(PrintWriter out, HttpServletRequest req, boolean displayLinks) {
     if (displayLinks) {
       out.write(generateNavigationInfo(req));
       out.write(HtmlConsts.TAB + HtmlConsts.TAB);
 
-      UserService userService = (UserService) ContextFactory.get().getBean(BeanDefs.USER_BEAN);
+      UserService userService = ContextFactory.getCallingContext(getServletContext()).getUserService();
       out.write(HtmlUtil.createHref(appBasePath(req) + userService.createLogoutURL(ServletConsts.WEB_ROOT), LOGOUT
           + userService.getCurrentUser().getNickname()));
       out.write(HtmlConsts.TAB + "<FONT SIZE=1>" + ServletConsts.VERSION + "</FONT>");

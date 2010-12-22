@@ -17,6 +17,7 @@ package org.opendatakit.aggregate.form;
 
 import java.util.List;
 
+import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.datamodel.DynamicBase;
 import org.opendatakit.aggregate.datamodel.DynamicCommonFieldsBase;
 import org.opendatakit.aggregate.datamodel.FormDataModel;
@@ -91,11 +92,13 @@ public class FormInfoDescriptionTable extends DynamicBase {
 	
 	private static FormInfoDescriptionTable relation = null;
 	
-	static synchronized final FormInfoDescriptionTable createRelation(Datastore datastore, User user) throws ODKDatastoreException {
+	static synchronized final FormInfoDescriptionTable createRelation(CallingContext cc) throws ODKDatastoreException {
 		if ( relation == null ) {
 			FormInfoDescriptionTable relationPrototype;
-			relationPrototype = new FormInfoDescriptionTable(datastore.getDefaultSchemaName());
-		    datastore.assertRelation(relationPrototype, user); // may throw exception...
+			Datastore ds = cc.getDatastore();
+			User user = cc.getUserService().getDaemonAccountUser();
+			relationPrototype = new FormInfoDescriptionTable(ds.getDefaultSchemaName());
+		    ds.assertRelation(relationPrototype, user); // may throw exception...
 		    // at this point, the prototype has become fully populated
 		    relation = relationPrototype; // set static variable only upon success...
 		}
@@ -105,15 +108,20 @@ public class FormInfoDescriptionTable extends DynamicBase {
 	static final void createFormDataModel(List<FormDataModel> model, Long ordinal,
 				TopLevelDynamicBase formInfoDefinitionRelation, 
 				DynamicCommonFieldsBase formInfoTableRelation, 
-				Datastore datastore, User user) throws ODKDatastoreException {
+				CallingContext cc) throws ODKDatastoreException {
 		
-		FormInfoDescriptionTable descriptionRelation = createRelation(datastore, user);
-		
-		FormDefinition.buildTableFormDataModel( model, 
+		FormInfoDescriptionTable descriptionRelation = createRelation(cc);
+		boolean asDaemon = cc.getAsDeamon();
+		try {
+			cc.setAsDaemon(true);
+			FormDefinition.buildTableFormDataModel( model, 
 				descriptionRelation, 
 				formInfoDefinitionRelation, // top level table
 				formInfoTableRelation, // also the parent table
 				ordinal,
-				datastore, user );
+				cc );
+		} finally {
+			cc.setAsDaemon(asDaemon);
+		}
 	}
 }

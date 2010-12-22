@@ -15,9 +15,9 @@
  */
 package org.opendatakit.aggregate.task;
 
+import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
 import org.opendatakit.aggregate.externalservice.FormServiceCursor;
-import org.opendatakit.common.security.User;
 
 /**
  * API for creation of form upload (to an external service) tasks.
@@ -29,6 +29,6 @@ import org.opendatakit.common.security.User;
 public interface UploadSubmissions {
 
 	public void createFormUploadTask(FormServiceCursor fsc,
-			String baseServerWebUrl, User user)
+			String baseServerWebUrl, CallingContext cc)
 			throws ODKExternalServiceException;
 }

@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
+import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.Datastore;
@@ -407,11 +408,13 @@ public final class FormDataModel extends DynamicBase {
 
 	private static FormDataModel relation = null;
 	
-	public static synchronized final FormDataModel createRelation(Datastore datastore, User user) throws ODKDatastoreException {
+	public static synchronized final FormDataModel createRelation(CallingContext cc) throws ODKDatastoreException {
 		if ( relation == null ) {
 			FormDataModel relationPrototype;
-			relationPrototype = new FormDataModel(datastore.getDefaultSchemaName());
-			datastore.assertRelation(relationPrototype, user); // may throw exception...
+			Datastore ds = cc.getDatastore();
+			User user = cc.getUserService().getDaemonAccountUser();
+			relationPrototype = new FormDataModel(ds.getDefaultSchemaName());
+			ds.assertRelation(relationPrototype, user); // may throw exception...
 		    // at this point, the prototype has become fully populated
 			relation = relationPrototype; // set static variable only upon success...
 		}

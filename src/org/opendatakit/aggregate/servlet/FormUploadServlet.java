@@ -25,8 +25,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.ContextFactory;
-import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.ErrorConsts;
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.ServletConsts;
@@ -40,15 +40,11 @@ import org.opendatakit.aggregate.parser.FormParserForJavaRosa;
 import org.opendatakit.aggregate.parser.MultiPartFormData;
 import org.opendatakit.aggregate.parser.MultiPartFormItem;
 import org.opendatakit.common.constants.HtmlConsts;
-import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
 import org.opendatakit.common.security.User;
-import org.opendatakit.common.security.UserService;
 
 import com.google.appengine.api.oauth.OAuthRequestException;
-import com.google.appengine.api.oauth.OAuthService;
-import com.google.appengine.api.oauth.OAuthServiceFactory;
 
 /**
  * Servlet to upload, parse, and save an XForm
@@ -103,10 +99,6 @@ public class FormUploadServlet extends ServletUtilBase {
 
     PrintWriter out = resp.getWriter();
 
-    if (!verifyCredentials(req, resp)) {
-      return;
-    }
-
     beginBasicHtmlResponse(TITLE_INFO, resp, req, true); // header info
     out.write(HtmlUtil.createFormBeginTag(ADDR, HtmlConsts.MULTIPART_FORM_DATA, HtmlConsts.POST));
     out.write(LOCATION_OF_XFORM_DEFINITION + HtmlConsts.LINE_BREAK);
@@ -137,10 +129,9 @@ public class FormUploadServlet extends ServletUtilBase {
    */
   @Override
   public void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+	CallingContext cc = ContextFactory.getCallingContext(getServletContext());
 
-    UserService userService = (UserService) ContextFactory.get().getBean(BeanDefs.USER_BEAN);
-    User user = userService.getCurrentUser();
-
+	User user = cc.getCurrentUser();
     if (user instanceof org.opendatakit.common.security.gae.UserImpl) {
       // We are in app engine
 
@@ -149,7 +140,7 @@ public class FormUploadServlet extends ServletUtilBase {
       if (authParam != null && authParam.equalsIgnoreCase(ServletConsts.AUTHENTICATION_OAUTH)) {
         // Try OAuth authentication
         try {
-          user = ((org.opendatakit.common.security.gae.UserServiceImpl) userService).getCurrentOAuthUser();
+          user = ((org.opendatakit.common.security.gae.UserServiceImpl) cc.getUserService()).getCurrentOAuthUser();
           if (user.isAnonymous()) {
             resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, ErrorConsts.OAUTH_ERROR);
             return;
@@ -159,18 +150,6 @@ public class FormUploadServlet extends ServletUtilBase {
               + "\n Reason: " + e.getLocalizedMessage());
           return;
         }
-      } else {
-        // Use User Service authentication
-        // verify user is logged in
-        if (!verifyCredentials(req, resp)) {
-          return;
-        }
-      }
-    } else {
-      // We are not in app engine
-      // verify user is logged in
-      if (!verifyCredentials(req, resp)) {
-        return;
       }
     }
 
@@ -209,14 +188,11 @@ public class FormUploadServlet extends ServletUtilBase {
         xmlFileName = formXmlData.getFilename();
       }
 
-      // persist form
-      Datastore ds = (Datastore) ContextFactory.get().getBean(BeanDefs.DATASTORE_BEAN);
-
       try {
         parser = new FormParserForJavaRosa(formName, formXmlData, inputXml, xmlFileName,
-            uploadedFormItems, ds, user, userService.getCurrentRealm());
+            uploadedFormItems, cc);
 
-        Form form = Form.retrieveForm(parser.getFormId(), ds, user);
+        Form form = Form.retrieveForm(parser.getFormId(), cc);
         form.printDataTree(System.out);
         bOk = true;
 

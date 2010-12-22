@@ -5,21 +5,22 @@
 	xsi:schemaLocation="http://www.springframework.org/schema/beans
            http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
 
+	<bean
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="locations">
+			<value>classpath:security.properties</value>
+		</property>
+	</bean>
 
 	<bean id="datastore"
 		class="org.opendatakit.common.persistence.engine.gae.DatastoreImpl" />
 
-
 	<!--	Website domain information	-->
 	<bean id="realm" class="org.opendatakit.common.security.Realm">
-		<property name="mailToDomain" value="gmail.com" />
-		<property name="rootDomain" value="opendatakit.org" />
-		<property name="realmString" value="opendatakit.org Aggregate 1.0 realm" />
-		<property name="domains">
-			<list>
-				<value>aggregate-opendatakit.org</value>
-			</list>
-		</property>
+		<property name="mailToDomain" value="${security.server.realm.mailToDomain}" />
+		<property name="rootDomain" value="${security.server.realm.rootDomain}" />
+		<property name="realmString" value="${security.server.realm.realmString}" />
+		<property name="domains" value="${security.server.realm.domains}" />
 	</bean>
 	
 	<bean id="user_service" class="org.opendatakit.common.security.spring.UserServiceImpl">

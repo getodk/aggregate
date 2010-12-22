@@ -17,6 +17,7 @@ package org.opendatakit.aggregate.task.gae;
 
 import java.util.Map;
 
+import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.externalservice.ExternalServiceConsts;
 import org.opendatakit.aggregate.constants.externalservice.SpreadsheetConsts;
@@ -27,9 +28,7 @@ import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.task.WorksheetCreator;
 import org.opendatakit.aggregate.task.gae.servlet.WorksheetServlet;
-import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
-import org.opendatakit.common.security.User;
 
 import com.google.appengine.api.taskqueue.Queue;
 import com.google.appengine.api.taskqueue.QueueFactory;
@@ -49,10 +48,10 @@ public class WorksheetCreatorImpl implements WorksheetCreator {
   @Override
   public final void createWorksheetTask(Form form,
 			SubmissionKey miscTasksKey, long attemptCount,
-			String baseServerWebUrl, Datastore datastore, User user)
+			String baseServerWebUrl, 
+			CallingContext cc)
       throws ODKFormNotFoundException, ODKDatastoreException {
-    Submission s = Submission.fetchSubmission(miscTasksKey.splitSubmissionKey(), datastore,
-            user);
+    Submission s = Submission.fetchSubmission(miscTasksKey.splitSubmissionKey(), cc);
     MiscTasks r = new MiscTasks(s);
     Map<String, String> params = r.getRequestParameters();
 

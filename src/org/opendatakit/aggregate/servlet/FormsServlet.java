@@ -22,15 +22,12 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.ContextFactory;
-import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
 import org.opendatakit.aggregate.format.form.FormHtmlTable;
 import org.opendatakit.aggregate.query.QueryFormList;
-import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
-import org.opendatakit.common.security.User;
-import org.opendatakit.common.security.UserService;
 
 /**
  * Servlet generates a webpage with a list of forms
@@ -65,18 +62,11 @@ public class FormsServlet extends ServletUtilBase {
   @Override
   public void doGet(HttpServletRequest req, HttpServletResponse resp)
       throws IOException {
-
-    // verify user is logged in
-    if (!verifyCredentials(req, resp)) {
-      return;
-    }
-    Datastore ds = (Datastore) ContextFactory.get().getBean(BeanDefs.DATASTORE_BEAN);
-    UserService userService = (UserService) ContextFactory.get().getBean(BeanDefs.USER_BEAN);
-    User user = userService.getCurrentUser();
+	CallingContext cc = ContextFactory.getCallingContext(getServletContext());
     
     try {
       // ensure that Form table exists...
-      QueryFormList formsList = new QueryFormList(false, ds, user);
+      QueryFormList formsList = new QueryFormList(false, cc);
       FormHtmlTable formFormatter = new FormHtmlTable(formsList);
       
       // generate html

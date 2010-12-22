@@ -20,17 +20,14 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.ContextFactory;
-import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.servlet.ServletUtilBase;
 import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.task.CsvWorkerImpl;
-import org.opendatakit.common.persistence.Datastore;
-import org.opendatakit.common.security.User;
-import org.opendatakit.common.security.UserService;
 
 /**
  * 
@@ -57,10 +54,9 @@ public class CsvGeneratorTaskServlet extends ServletUtilBase {
    */
   @Override
   public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-
     // TODO: talk to MITCH about the fact the user will be incorrect
-    UserService userService = (UserService) ContextFactory.get().getBean(BeanDefs.USER_BEAN);
-    User user = userService.getCurrentUser();
+	CallingContext cc = ContextFactory.getCallingContext(getServletContext());
+	cc.setAsDaemon(true);
 
     // get parameter
     String formId = getParameter(req, ServletConsts.FORM_ID);
@@ -82,16 +78,15 @@ public class CsvGeneratorTaskServlet extends ServletUtilBase {
       return;
     }
 
-    Datastore ds = (Datastore) ContextFactory.get().getBean(BeanDefs.DATASTORE_BEAN);
     Form form = null;
     try {
-      form = Form.retrieveForm(formId, ds, user);
+      form = Form.retrieveForm(formId, cc);
     } catch (ODKFormNotFoundException e1) {
       odkIdNotFoundError(resp);
       return;
     }
     
-    CsvWorkerImpl impl = new CsvWorkerImpl(form, persistentResultsKey, attemptCount, getServerURL(req), ds, user);
+    CsvWorkerImpl impl = new CsvWorkerImpl(form, persistentResultsKey, attemptCount, getServerURL(req), cc);
     
     impl.generateCsv();
   }

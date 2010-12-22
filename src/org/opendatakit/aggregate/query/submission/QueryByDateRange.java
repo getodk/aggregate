@@ -19,16 +19,15 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.datamodel.TopLevelDynamicBase;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.common.persistence.CommonFieldsBase;
-import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
-import org.opendatakit.common.security.User;
 
 /**
  * 
@@ -38,9 +37,9 @@ import org.opendatakit.common.security.User;
  */
 public class QueryByDateRange extends QueryBase {
 
-  public QueryByDateRange(Form form, int maxFetchLimit, Date startDate, Date endDate, Datastore datastore, User user)
+  public QueryByDateRange(Form form, int maxFetchLimit, Date startDate, Date endDate, CallingContext cc)
       throws ODKFormNotFoundException {
-    super(form, maxFetchLimit, datastore, user);
+    super(form, maxFetchLimit, cc);
    
     TopLevelDynamicBase tbl = (TopLevelDynamicBase) form.getFormDefinition().getTopLevelGroup().getBackingObjectPrototype();
     
@@ -48,7 +47,7 @@ public class QueryByDateRange extends QueryBase {
     // Submissions may be partially uploaded and are marked completed once they 
     // are fully uploaded.  We want the query to be aware of that and to not 
     // report anything that is not yet fully loaded.
-    query = ds.createQuery(tbl, user);
+    query = cc.getDatastore().createQuery(tbl, cc.getCurrentUser());
     query.addSort(tbl.lastUpdateDate, Query.Direction.ASCENDING);
     query.addFilter(tbl.lastUpdateDate, Query.FilterOperation.LESS_THAN, endDate);
     query.addFilter(tbl.lastUpdateDate, Query.FilterOperation.GREATER_THAN, startDate);
@@ -67,7 +66,7 @@ public class QueryByDateRange extends QueryBase {
     // create a row for each submission
     for (int count = 0; count < submissionEntities.size(); count++) {
     CommonFieldsBase subEntity = submissionEntities.get(count);
-      retrievedSubmissions.add(new Submission((TopLevelDynamicBase) subEntity, form.getFormDefinition(), ds, user));
+      retrievedSubmissions.add(new Submission((TopLevelDynamicBase) subEntity, form.getFormDefinition(), cc));
     }
     return retrievedSubmissions;
   }

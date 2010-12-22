@@ -22,6 +22,7 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.ServletConsts;
@@ -30,10 +31,7 @@ import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.form.PersistentResults;
 import org.opendatakit.aggregate.form.PersistentResults.ResultType;
 import org.opendatakit.aggregate.task.CsvGenerator;
-import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
-import org.opendatakit.common.security.User;
-import org.opendatakit.common.security.UserService;
 
 /**
  * Servlet to generate a CSV file for download
@@ -63,14 +61,7 @@ public class CsvServlet extends ServletUtilBase {
    */
   @Override
   public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-
-    // verify user is logged in
-    if (!verifyCredentials(req, resp)) {
-      return;
-    }
-
-    UserService userService = (UserService) ContextFactory.get().getBean(BeanDefs.USER_BEAN);
-    User user = userService.getCurrentUser();
+	CallingContext cc = ContextFactory.getCallingContext(getServletContext());
 
     // get parameter
     String formId = getParameter(req, ServletConsts.FORM_ID);
@@ -80,21 +71,19 @@ public class CsvServlet extends ServletUtilBase {
       return;
     }
 
-    Datastore ds = (Datastore) ContextFactory.get().getBean(BeanDefs.DATASTORE_BEAN);
     Form form = null;
     try {
-      form = Form.retrieveForm(formId, ds, user);
+      form = Form.retrieveForm(formId, cc);
     } catch (ODKFormNotFoundException e1) {
       odkIdNotFoundError(resp);
       return;
     }
 
-
-    CsvGenerator generator = (CsvGenerator) ContextFactory.get().getBean(BeanDefs.CSV_BEAN);
+    CsvGenerator generator = (CsvGenerator) cc.getBean(BeanDefs.CSV_BEAN);
     try {
-      PersistentResults r = new PersistentResults( ResultType.CSV, form, null, ds, user);
-      r.persist(ds, user);
-		generator.createCsvTask(form, r.getSubmissionKey(), 1L, getServerURL(req), ds, user);
+      PersistentResults r = new PersistentResults( ResultType.CSV, form, null, cc);
+      r.persist(cc);
+		generator.createCsvTask(form, r.getSubmissionKey(), 1L, getServerURL(req), cc);
 	} catch (ODKDatastoreException e) {
 		e.printStackTrace();
 		resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.toString());

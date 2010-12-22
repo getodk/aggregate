@@ -15,13 +15,12 @@
  */
 package org.opendatakit.aggregate.task.tomcat;
 
+import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.task.CsvGenerator;
 import org.opendatakit.aggregate.task.CsvWorkerImpl;
-import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
-import org.opendatakit.common.security.User;
 
 /**
  * This is a singleton bean.  It cannot have any per-request state.
@@ -37,8 +36,8 @@ public class CsvGeneratorImpl implements CsvGenerator {
 	static class CsvRunner implements Runnable {
 		final CsvWorkerImpl impl;
 		
-		public CsvRunner( Form form, SubmissionKey persistentResultsKey, long attemptCount, String baseWebServerUrl, Datastore datastore, User user) {
-			impl = new CsvWorkerImpl(form, persistentResultsKey, attemptCount, baseWebServerUrl, datastore, user );
+		public CsvRunner( Form form, SubmissionKey persistentResultsKey, long attemptCount, String baseWebServerUrl, CallingContext cc) {
+			impl = new CsvWorkerImpl(form, persistentResultsKey, attemptCount, baseWebServerUrl, cc );
 		}
 
 		@Override
@@ -49,9 +48,9 @@ public class CsvGeneratorImpl implements CsvGenerator {
 
   @Override
   public void createCsvTask(Form form, SubmissionKey persistentResultsKey,
-		long attemptCount, String baseServerWebUrl, Datastore datastore, User user)
+		long attemptCount, String baseServerWebUrl, CallingContext cc)
 		throws ODKDatastoreException {
-	CsvRunner runner = new CsvRunner(form, persistentResultsKey, attemptCount, baseServerWebUrl, datastore, user );
+	CsvRunner runner = new CsvRunner(form, persistentResultsKey, attemptCount, baseServerWebUrl, cc );
     AggregrateThreadExecutor exec = AggregrateThreadExecutor.getAggregateThreadExecutor();
     exec.execute(runner);
   }

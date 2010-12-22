@@ -17,13 +17,12 @@
 
 package org.opendatakit.aggregate.submission.type;
 
+import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.datamodel.DynamicCommonFieldsBase;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.format.element.ElementFormatter;
-import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
-import org.opendatakit.common.security.User;
 
 /**
  * Data Storage Converter for Integer Type
@@ -58,7 +57,7 @@ public class LongSubmissionType extends SubmissionSingleValueBase<Long> {
 		}
 	}
 
-	public void getValueFromEntity(Datastore datastore, User user) {
+	public void getValueFromEntity(CallingContext cc) {
 		Long value = backingObject.getLongField(element.getFormDataModel().getBackingKey());
 		setValue(value);
 	}

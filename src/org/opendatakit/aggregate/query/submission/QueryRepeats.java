@@ -20,6 +20,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
+import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.datamodel.DynamicBase;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.datamodel.TopLevelDynamicBase;
@@ -49,19 +50,16 @@ public class QueryRepeats {
 
   private final FormElementModel repeatGroup;
   
-  private final Datastore ds;
+  private final CallingContext cc;
 
   private final String parentKey;
-  
-  private final User user;
 
   public QueryRepeats(Form form, String submissionKey,
-      String submissionParentKey, Datastore datastore, User user) throws ODKFormNotFoundException,
+      String submissionParentKey, CallingContext cc) throws ODKFormNotFoundException,
       ODKEntityNotFoundException {
-    this.ds = datastore;
+    this.cc = cc;
     this.form = form;
     this.parentKey = submissionParentKey;
-    this.user = user;
     // TODO: kindId should be concatenation of enclosing element names...
     this.repeatGroup = form.getFormDefinition().getElementByName(submissionKey);
   }
@@ -72,7 +70,8 @@ public class QueryRepeats {
     TopLevelDynamicBase topLevelRelation = (TopLevelDynamicBase) form.getTopLevelGroupElement().getFormDataModel().getBackingObjectPrototype();
 
     // TODO: this doesn't work with PHANTOM or GROUP splits...
-    
+    Datastore ds = cc.getDatastore();
+    User user = cc.getCurrentUser(); 
     // get the key to the top level relation where this repeat group has the given parent key
     DynamicBase backingObject = ((DynamicBase) repeatGroup.getFormDataModel().getBackingObjectPrototype());
     Query topLevelKeyQuery = ds.createQuery(backingObject, user);
@@ -84,7 +83,7 @@ public class QueryRepeats {
     EntityKey k = submissionKeys.iterator().next();
     // fetch the top-level relation and recreate the entire submission...
     TopLevelDynamicBase d = (TopLevelDynamicBase) ds.getEntity(k.getRelation(), k.getKey(), user);
-	Submission s = new Submission(d, form.getFormDefinition(), ds, user);
+	Submission s = new Submission(d, form.getFormDefinition(), cc);
 	// find the repeat group elements.
 	List<SubmissionValue> vList = s.findElementValue(repeatGroup);
 	for ( SubmissionValue v : vList ) {

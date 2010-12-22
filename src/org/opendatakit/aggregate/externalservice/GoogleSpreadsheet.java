@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.externalservice.ExternalServiceOption;
 import org.opendatakit.aggregate.constants.externalservice.ExternalServiceType;
@@ -85,9 +86,9 @@ public class GoogleSpreadsheet extends AbstractExternalService implements Extern
   private List<GoogleSpreadsheetRepeatParameterTable> repeatElementTableIds;
   private final SpreadsheetService spreadsheetService;
 
-  private GoogleSpreadsheet(Form form, String webServerUrl, Datastore datastore, User user) {
+  private GoogleSpreadsheet(Form form, String webServerUrl, CallingContext cc) {
     super(form, new LinkElementFormatter(webServerUrl, true, true, true), new BasicHeaderFormatter(true, true,
-        true), datastore, user);
+        true), cc);
     spreadsheetService = new SpreadsheetService(ServletConsts.APPLICATION_NAME);
     // TODO: REMOVE after bug is fixed
     // http://code.google.com/p/gdata-java-client/issues/detail?id=103
@@ -108,26 +109,25 @@ public class GoogleSpreadsheet extends AbstractExternalService implements Extern
     }
   }
 
-  public GoogleSpreadsheet(FormServiceCursor fsc, String webServerUrl, Datastore datastore, User user)
+  public GoogleSpreadsheet(FormServiceCursor fsc, String webServerUrl, CallingContext cc)
       throws ODKEntityNotFoundException, ODKDatastoreException, ODKFormNotFoundException {
-    this(Form.retrieveForm(fsc.getFormId(), datastore, user), webServerUrl, datastore, user);
-    GoogleSpreadsheetParameterTable gp = GoogleSpreadsheetParameterTable.createRelation(datastore,
-        user);
-    objectEntity = datastore.getEntity(gp, fsc.getServiceAuri(), user);
+    this(Form.retrieveForm(fsc.getFormId(), cc), webServerUrl, cc);
+    GoogleSpreadsheetParameterTable gp = GoogleSpreadsheetParameterTable.createRelation(cc);
+    objectEntity = cc.getDatastore().getEntity(gp, fsc.getServiceAuri(), cc.getCurrentUser());
     repeatElementTableIds = GoogleSpreadsheetRepeatParameterTable.getRepeatGroupAssociations(
-        new EntityKey(gp, objectEntity.getUri()), datastore, user);
+        new EntityKey(gp, objectEntity.getUri()), cc);
     this.fsc = fsc;
     constructorHelper();
   }
 
   public GoogleSpreadsheet(Form form, String name, String spreadKey, OAuthToken authToken,
-      ExternalServiceOption externalServiceOption, String webServerUrl, Datastore datastore, User user)
+      ExternalServiceOption externalServiceOption, String webServerUrl, CallingContext cc)
       throws ODKDatastoreException {
-    this(form, webServerUrl, datastore, user);
-    objectEntity = datastore.createEntityUsingRelation(GoogleSpreadsheetParameterTable
-        .createRelation(datastore, user), user);
+    this(form, webServerUrl, cc);
+    objectEntity = cc.getDatastore().createEntityUsingRelation(GoogleSpreadsheetParameterTable
+        .createRelation(cc), cc.getCurrentUser());
     fsc = FormServiceCursor.createFormServiceCursor(form, ExternalServiceType.GOOGLE_SPREADSHEET,
-        objectEntity, datastore, user);
+        objectEntity, cc);
     fsc.setExternalServiceOption(externalServiceOption);
     fsc.setIsExternalServicePrepared(false); // need to perform worksheet creation...
     fsc.setOperationalStatus(OperationalStatus.ACTIVE);
@@ -155,6 +155,8 @@ public class GoogleSpreadsheet extends AbstractExternalService implements Extern
   }
 
   public void persist() throws ODKEntityPersistException {
+	Datastore ds = cc.getDatastore();
+	User user = cc.getCurrentUser();
     ds.putEntities(repeatElementTableIds, user);
     ds.putEntity(objectEntity, user);
     ds.putEntity(fsc, user);
@@ -182,6 +184,8 @@ public class GoogleSpreadsheet extends AbstractExternalService implements Extern
     for (GoogleSpreadsheetRepeatParameterTable repeat : repeatElementTableIds) {
       keys.add(new EntityKey(repeat, repeat.getUri()));
     }
+	Datastore ds = cc.getDatastore();
+	User user = cc.getCurrentUser();
     ds.deleteEntities(keys, user);
     ds.deleteEntity(new EntityKey(objectEntity, objectEntity.getUri()), user);
     ds.deleteEntity(new EntityKey(fsc, fsc.getUri()), user);
@@ -237,9 +241,11 @@ public class GoogleSpreadsheet extends AbstractExternalService implements Extern
 
     // get relation prototype for creating repeat parameter table entries
     GoogleSpreadsheetRepeatParameterTable repeatPrototype = GoogleSpreadsheetRepeatParameterTable
-        .createRelation(ds, user);
+        .createRelation(cc);
 
     // create repeat worksheets
+	Datastore ds = cc.getDatastore();
+	User user = cc.getCurrentUser();
     List<FormElementModel> repeatGroupElements = form.getRepeatGroupsInModel();
     for (FormElementModel repeatGroupElement : repeatGroupElements) {
       // create the worksheet
@@ -393,7 +399,7 @@ public class GoogleSpreadsheet extends AbstractExternalService implements Extern
 
   public static GoogleSpreadsheet createSpreadsheet(Form form, OAuthToken authToken,
       String spreadsheetName, ExternalServiceOption externalServiceOption, String webServerUrl, 
-      Datastore datastore, User user) throws ODKDatastoreException, ODKExternalServiceException {
+      CallingContext cc) throws ODKDatastoreException, ODKExternalServiceException {
 
     // setup service
     DocsService service = new DocsService(ServletConsts.APPLICATION_NAME);
@@ -431,7 +437,7 @@ public class GoogleSpreadsheet extends AbstractExternalService implements Extern
     String spreadKey = updatedEntry.getDocId();
 
     return new GoogleSpreadsheet(form, spreadsheetName, spreadKey, authToken,
-        externalServiceOption, webServerUrl, datastore, user);
+        externalServiceOption, webServerUrl, cc);
   }
 
   @Override
@@ -440,6 +446,8 @@ public class GoogleSpreadsheet extends AbstractExternalService implements Extern
     if ( fsc.getExternalServiceOption() == ExternalServiceOption.UPLOAD_ONLY) {
     	fsc.setOperationalStatus(OperationalStatus.COMPLETED);
     }
+	Datastore ds = cc.getDatastore();
+	User user = cc.getCurrentUser();
     ds.putEntity(fsc, user);
   }
 

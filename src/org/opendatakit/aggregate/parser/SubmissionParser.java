@@ -28,6 +28,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.codec.binary.Base64;
+import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.constants.ParserConsts;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
@@ -44,10 +45,8 @@ import org.opendatakit.aggregate.submission.type.BlobSubmissionType;
 import org.opendatakit.aggregate.submission.type.RepeatSubmissionType;
 import org.opendatakit.common.constants.BasicConsts;
 import org.opendatakit.common.constants.HtmlConsts;
-import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.EntityKey;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
-import org.opendatakit.common.security.User;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
@@ -86,8 +85,7 @@ public class SubmissionParser {
 	 */
 	private MultiPartFormData submissionFormItems;
 
-	private final Datastore ds;
-	private final User user;
+	private final CallingContext cc;
 
 	private EntityKey topLevelTableKey = null;
 
@@ -107,12 +105,11 @@ public class SubmissionParser {
 	 * @throws ODKConversionException
 	 * @throws ODKDatastoreException
 	 */
-	public SubmissionParser(InputStream inputStreamXML, Datastore datastore,
-			User user) throws IOException, ODKFormNotFoundException,
+	public SubmissionParser(InputStream inputStreamXML, CallingContext cc)
+		throws IOException, ODKFormNotFoundException,
 			ODKParseException, ODKIncompleteSubmissionData,
 			ODKConversionException, ODKDatastoreException {
-		this.ds = datastore;
-		this.user = user;
+		this.cc = cc;
 		constructorHelper(inputStreamXML);
 	}
 
@@ -134,12 +131,11 @@ public class SubmissionParser {
 	 * @throws ODKDatastoreException
 	 */
 	public SubmissionParser(MultiPartFormData submissionFormParser,
-			Datastore datastore, User user) throws IOException,
+			CallingContext cc) throws IOException,
 			ODKFormNotFoundException, ODKParseException,
 			ODKIncompleteSubmissionData, ODKConversionException,
 			ODKDatastoreException {
-		this.ds = datastore;
-		this.user = user;
+		this.cc = cc;
 		if (submissionFormParser == null) {
 			// TODO: review best error handling strategy
 			throw new IOException("DID NOT GET A MULTIPARTFORMPARSER");
@@ -214,7 +210,7 @@ public class SubmissionParser {
 		
 		String fullyQualifiedId = Form.extractWellFormedFormId(formId);
 
-		form = Form.retrieveForm(fullyQualifiedId, ds, user);
+		form = Form.retrieveForm(fullyQualifiedId, cc);
 		
 		String modelVersionString = root.getAttribute(ParserConsts.MODEL_VERSION_ATTRIBUTE_NAME);
 		String uiVersionString = root.getAttribute(ParserConsts.UI_VERSION_ATTRIBUTE_NAME);
@@ -227,7 +223,7 @@ public class SubmissionParser {
 			uiVersion = Long.valueOf(uiVersionString);
 		}
 		
-		submission = new Submission(modelVersion, uiVersion, form.getFormDefinition(), ds, user);
+		submission = new Submission(modelVersion, uiVersion, form.getFormDefinition(), cc);
 
 		topLevelTableKey = submission.getKey();
 
@@ -238,13 +234,13 @@ public class SubmissionParser {
 		submission.setIsComplete(true);
 		// save the elements inserted into the top-level submission
 		try {
-			submission.persist(ds, user);
+			submission.persist(cc);
 		} catch (Exception e) {
 			List<EntityKey> keys = new ArrayList<EntityKey>();
 			submission.recursivelyAddEntityKeys(keys);
 			keys.add(submission.getKey());
 			try {
-				ds.deleteEntities(keys, user);
+				cc.getDatastore().deleteEntities(keys, cc.getCurrentUser());
 			} catch ( Exception ex) {
 				// ignore... we are rolling back...
 			}
@@ -329,7 +325,7 @@ public class SubmissionParser {
 				long l = repeats.getNumberRepeats()+1L;
 				SubmissionSet repeatableSubmissionSet = new SubmissionSet(
 						submissionSet, l, m, form.getFormDefinition(),
-						topLevelTableKey, ds, user);
+						topLevelTableKey, cc);
 				// populate the instance's submission set with values from e...
 				complete = complete && 
 					processSubmissionElement(m, e, repeatableSubmissionSet);
@@ -378,7 +374,7 @@ public class SubmissionParser {
 			// binary without content type, defaulting to JPG
 			submissionElement.setValueFromByteArray(receivedBytes,
 					HtmlConsts.RESP_TYPE_IMAGE_JPEG, Long
-							.valueOf(receivedBytes.length), null, ds, user);
+							.valueOf(receivedBytes.length), null);
 		} else {
 			// attempt to find binary data in multi-part form submission
 			// first searching by file name, then field name
@@ -397,8 +393,7 @@ public class SubmissionParser {
 				}
 				byte[] byteArray = binaryData.getStream().toByteArray();
 				submissionElement.setValueFromByteArray(byteArray, binaryData
-						.getContentType(), binaryData.getContentLength(), fileName,
-						ds, user);
+						.getContentType(), binaryData.getContentLength(), fileName);
 			} else {
 				return (((BlobSubmissionType) submissionElement).getAttachmentCount() >= 1);
 			}

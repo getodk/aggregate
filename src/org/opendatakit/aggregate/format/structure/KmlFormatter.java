@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.StringEscapeUtils;
+import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.format.KmlConsts;
@@ -42,7 +43,6 @@ import org.opendatakit.aggregate.submission.SubmissionValue;
 import org.opendatakit.aggregate.submission.type.GeoPoint;
 import org.opendatakit.common.constants.BasicConsts;
 import org.opendatakit.common.constants.HtmlConsts;
-import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 
 /**
@@ -110,7 +110,7 @@ public class KmlFormatter implements SubmissionFormatter, RepeatCallbackFormatte
   
   public KmlFormatter(Form xform, String webServerUrl, FormElementModel gpsField,
       FormElementModel titleField, FormElementModel imgField, PrintWriter printWriter,
-      List<FormElementModel> selectedColumnNames, Datastore datastore) {
+      List<FormElementModel> selectedColumnNames, CallingContext cc) {
 
     form = xform;
     baseWebServerUrl = webServerUrl;

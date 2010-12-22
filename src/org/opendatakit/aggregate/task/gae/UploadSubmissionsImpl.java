@@ -17,6 +17,7 @@ package org.opendatakit.aggregate.task.gae;
 
 import java.net.URLEncoder;
 
+import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.externalservice.ExternalServiceConsts;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
@@ -24,7 +25,6 @@ import org.opendatakit.aggregate.externalservice.FormServiceCursor;
 import org.opendatakit.aggregate.task.UploadSubmissions;
 import org.opendatakit.aggregate.task.gae.servlet.UploadSubmissionsTaskServlet;
 import org.opendatakit.common.constants.HtmlConsts;
-import org.opendatakit.common.security.User;
 
 import com.google.appengine.api.taskqueue.Queue;
 import com.google.appengine.api.taskqueue.QueueFactory;
@@ -44,7 +44,7 @@ public class UploadSubmissionsImpl implements UploadSubmissions {
   private static final String UPLOAD_SUBMISSION_QUEUE = "upload-submission-queue";
   
   @Override
-  public void createFormUploadTask(FormServiceCursor fsc, String baseServerWebUrl, User user)
+  public void createFormUploadTask(FormServiceCursor fsc, String baseServerWebUrl, CallingContext cc)
       throws ODKExternalServiceException {
 
     try {

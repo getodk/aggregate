@@ -19,6 +19,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
 import java.util.Date;
 
+import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.form.Form;
@@ -31,8 +32,6 @@ import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.common.constants.BasicConsts;
 import org.opendatakit.common.constants.HtmlConsts;
-import org.opendatakit.common.persistence.Datastore;
-import org.opendatakit.common.security.User;
 
 /**
  * Common worker implementation for the generation of kml files.
@@ -50,13 +49,12 @@ public class KmlWorkerImpl {
 	private final FormElementModel geopointField;
 	private final FormElementModel imageField;
 	private final String baseWebServerUrl;
-	private final Datastore datastore;
-	private final User user;
+	private final CallingContext cc;
 
 	public KmlWorkerImpl(Form form, SubmissionKey persistentResultsKey,
 			long attemptCount, FormElementModel titleField,
 			FormElementModel geopointField, FormElementModel imageField,
-			String baseWebServerUrl, Datastore datastore, User user) {
+			String baseWebServerUrl, CallingContext cc) {
 		this.form = form;
 		this.persistentResultsKey = persistentResultsKey;
 		this.attemptCount = attemptCount;
@@ -64,8 +62,7 @@ public class KmlWorkerImpl {
 		this.geopointField = geopointField;
 		this.imageField = imageField;
 		this.baseWebServerUrl = baseWebServerUrl;
-		this.datastore = datastore;
-		this.user = user;
+		this.cc = cc;
 	}
 
 	public void generateKml() {
@@ -76,22 +73,22 @@ public class KmlWorkerImpl {
 
 	    // create KML
 	    QueryByDate query = new QueryByDate(form, BasicConsts.EPOCH, false, ServletConsts.FETCH_LIMIT,
-	    		datastore, user);
+	    		cc);
 	    SubmissionFormatter formatter = new KmlFormatter(form, baseWebServerUrl, geopointField,
-	        titleField, imageField, pw, null, datastore);
+	        titleField, imageField, pw, null, cc);
 	    formatter.processSubmissions(query.getResultSubmissions());
 
 	    // output file
 	    pw.close();
 	    byte[] outputFile = stream.toByteArray();
 
-	    Submission s = Submission.fetchSubmission(persistentResultsKey.splitSubmissionKey(), datastore, user);
+	    Submission s = Submission.fetchSubmission(persistentResultsKey.splitSubmissionKey(), cc);
 	    PersistentResults r = new PersistentResults(s);
 	    if ( attemptCount.equals(r.getAttemptCount()) ) {
-			r.setResultFile(outputFile, HtmlConsts.RESP_TYPE_PLAIN, Long.valueOf(outputFile.length), form.getViewableFormNameSuitableAsFileName() + ServletConsts.KML_FILENAME_APPEND, datastore, user);
+			r.setResultFile(outputFile, HtmlConsts.RESP_TYPE_PLAIN, Long.valueOf(outputFile.length), form.getViewableFormNameSuitableAsFileName() + ServletConsts.KML_FILENAME_APPEND);
 			r.setStatus(Status.AVAILABLE);
 			r.setCompletionDate(new Date());
-			r.objectEntity.persist(datastore, user);
+			r.objectEntity.persist(cc);
 	    }
 	  } catch (Exception e ) {
 		  failureRecovery(e);
@@ -104,12 +101,12 @@ public class KmlWorkerImpl {
 		e.printStackTrace();
 	    Submission s;
 		try {
-			s = Submission.fetchSubmission(persistentResultsKey.splitSubmissionKey(), datastore, user);
+			s = Submission.fetchSubmission(persistentResultsKey.splitSubmissionKey(), cc);
 		    PersistentResults r = new PersistentResults(s);
 		    if ( attemptCount.equals(r.getAttemptCount()) ) {
-		    	r.deleteResultFile(datastore, user);
+		    	r.deleteResultFile(cc);
 		    	r.setStatus(Status.FAILED);
-		    	r.objectEntity.persist(datastore, user);
+		    	r.objectEntity.persist(cc);
 		    }
 		} catch (Exception ex) {
 			// something is hosed -- don't attempt to continue.

@@ -20,18 +20,15 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.ContextFactory;
-import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
 import org.opendatakit.aggregate.servlet.ServletUtilBase;
 import org.opendatakit.aggregate.task.WatchdogWorkerImpl;
-import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
-import org.opendatakit.common.security.User;
-import org.opendatakit.common.security.UserService;
 
 /**
  * 
@@ -58,6 +55,9 @@ public class WatchdogServlet extends ServletUtilBase{
    */
   @Override
   public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+    // TODO: talk to MITCH about the fact the user will be incorrect
+	CallingContext cc = ContextFactory.getCallingContext(getServletContext());
+	cc.setAsDaemon(true);
 
     // get parameter
     String checkIntervalString = getParameter(req, ServletConsts.CHECK_INTERVAL_PARAM);
@@ -67,15 +67,10 @@ public class WatchdogServlet extends ServletUtilBase{
     }
     long checkIntervalMilliseconds = Long.parseLong(checkIntervalString);
     
-    UserService userService = (UserService) ContextFactory.get().getBean(BeanDefs.USER_BEAN);
-    User user = userService.getDaemonAccountUser();
-
     System.out.println("STARTING WATCHDOG TASK");
-    Datastore ds = (Datastore) ContextFactory.get().getBean(BeanDefs.DATASTORE_BEAN);
-    
     WatchdogWorkerImpl worker = new WatchdogWorkerImpl();
     try {
-      worker.checkTasks(checkIntervalMilliseconds, getServerURL(req), ds, user);
+      worker.checkTasks(checkIntervalMilliseconds, getServerURL(req), cc);
     } catch (ODKExternalServiceException e) {
       e.printStackTrace();
       resp.sendError(HttpServletResponse.SC_BAD_GATEWAY, e.toString());

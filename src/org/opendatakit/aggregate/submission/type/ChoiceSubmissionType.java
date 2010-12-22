@@ -18,6 +18,7 @@ package org.opendatakit.aggregate.submission.type;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.datamodel.SelectChoice;
 import org.opendatakit.aggregate.exception.ODKConversionException;
@@ -49,15 +50,13 @@ public class ChoiceSubmissionType extends SubmissionFieldBase<List<String>> {
 	
 	private final String parentKey;
 	private final EntityKey topLevelTableKey;
-	private final Datastore datastore;
-	private final User user;
+	private final CallingContext cc;
 	
-	public ChoiceSubmissionType(FormElementModel element, String parentKey, EntityKey topLevelTableKey, Datastore datastore, User user) {
+	public ChoiceSubmissionType(FormElementModel element, String parentKey, EntityKey topLevelTableKey, CallingContext cc) {
 		super(element);
 		this.parentKey = parentKey;
 		this.topLevelTableKey = topLevelTableKey;
-		this.datastore = datastore;
-		this.user = user;
+		this.cc = cc;
 	}
 
 	@Override
@@ -72,10 +71,10 @@ public class ChoiceSubmissionType extends SubmissionFieldBase<List<String>> {
 	}
 
 	@Override
-	public void getValueFromEntity(Datastore datastore, User user) throws ODKDatastoreException {
+	public void getValueFromEntity(CallingContext cc) throws ODKDatastoreException {
 		
 		SelectChoice sel = (SelectChoice) element.getFormDataModel().getBackingObjectPrototype();
-		Query q = datastore.createQuery(element.getFormDataModel().getBackingObjectPrototype(), user);
+		Query q = cc.getDatastore().createQuery(element.getFormDataModel().getBackingObjectPrototype(), cc.getCurrentUser());
 		q.addFilter(sel.parentAuri, FilterOperation.EQUAL, parentKey);
 		q.addSort(sel.ordinalNumber, Direction.ASCENDING);
 
@@ -92,10 +91,12 @@ public class ChoiceSubmissionType extends SubmissionFieldBase<List<String>> {
 	@Override
 	public void setValueFromString(String concatenatedValues) throws ODKConversionException, ODKDatastoreException {
 		
+		Datastore ds = cc.getDatastore();
+		User user = cc.getCurrentUser();
 		// clear the old values and underlying data records...
 		values.clear();
 		for ( SelectChoice c: choices ) {
-			datastore.deleteEntity(new EntityKey(c, c.getUri()), user);
+			ds.deleteEntity(new EntityKey(c, c.getUri()), user);
 		}
 		choices.clear();
 		
@@ -103,7 +104,7 @@ public class ChoiceSubmissionType extends SubmissionFieldBase<List<String>> {
 			String[] valueArray = concatenatedValues.split(" ");
 			int i = 1;
 			for ( String v : valueArray ) {
-				SelectChoice c = (SelectChoice) datastore.createEntityUsingRelation(element.getFormDataModel().getBackingObjectPrototype(), user);
+				SelectChoice c = (SelectChoice) ds.createEntityUsingRelation(element.getFormDataModel().getBackingObjectPrototype(), user);
 				c.setTopLevelAuri(topLevelTableKey.getKey());
 				c.setParentAuri(parentKey);
 				c.setOrdinalNumber(Long.valueOf(i++));
@@ -111,7 +112,7 @@ public class ChoiceSubmissionType extends SubmissionFieldBase<List<String>> {
 				choices.add(c);
 				values.add(v);
 			}
-			datastore.putEntities(choices, user);
+			ds.putEntities(choices, user);
 		}
 	}
 
@@ -123,8 +124,8 @@ public class ChoiceSubmissionType extends SubmissionFieldBase<List<String>> {
 	}
 	
 	@Override
-	public void persist(Datastore datastore, User user) throws ODKEntityPersistException {
-		datastore.putEntities(choices, user);
+	public void persist(CallingContext cc) throws ODKEntityPersistException {
+		cc.getDatastore().putEntities(choices, cc.getCurrentUser());
 	}
 
 	public SubmissionValue resolveSubmissionKeyBeginningAt(int i,

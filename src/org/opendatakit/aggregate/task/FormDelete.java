@@ -15,12 +15,11 @@
  */
 package org.opendatakit.aggregate.task;
 
+import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.submission.SubmissionKey;
-import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
-import org.opendatakit.common.security.User;
 
 /**
  * 
@@ -31,5 +30,5 @@ import org.opendatakit.common.security.User;
 public interface FormDelete {
 
   public void createFormDeleteTask(Form form, SubmissionKey miscTasksKey,
-			long attemptCount, String baseServerWebUrl, Datastore datastore, User user) throws ODKDatastoreException, ODKFormNotFoundException;
+			long attemptCount, String baseServerWebUrl, CallingContext cc) throws ODKDatastoreException, ODKFormNotFoundException;
 }

@@ -20,6 +20,7 @@ package org.opendatakit.aggregate.submission.type;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.format.FormatConsts;
 import org.opendatakit.aggregate.datamodel.DynamicBase;
@@ -34,14 +35,12 @@ import org.opendatakit.aggregate.submission.SubmissionRepeat;
 import org.opendatakit.aggregate.submission.SubmissionSet;
 import org.opendatakit.aggregate.submission.SubmissionValue;
 import org.opendatakit.common.persistence.CommonFieldsBase;
-import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.EntityKey;
 import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.persistence.Query.Direction;
 import org.opendatakit.common.persistence.Query.FilterOperation;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
-import org.opendatakit.common.security.User;
 
 /**
  * Data Storage type for a repeat type. Store a list of datastore keys to
@@ -126,9 +125,9 @@ public class RepeatSubmissionType implements SubmissionRepeat {
 	}
 
 	@Override
-	public void getValueFromEntity(Datastore datastore, User user) throws ODKDatastoreException {
+	public void getValueFromEntity(CallingContext cc) throws ODKDatastoreException {
 
-		Query q = datastore.createQuery(repeatGroup.getFormDataModel().getBackingObjectPrototype(), user);
+		Query q = cc.getDatastore().createQuery(repeatGroup.getFormDataModel().getBackingObjectPrototype(), cc.getCurrentUser());
 		q.addFilter(((DynamicBase) repeatGroup.getFormDataModel().getBackingObjectPrototype()).parentAuri,
 				FilterOperation.EQUAL, uriAssociatedRow);
 		q.addSort(((DynamicBase) repeatGroup.getFormDataModel().getBackingObjectPrototype()).ordinalNumber, 
@@ -139,7 +138,7 @@ public class RepeatSubmissionType implements SubmissionRepeat {
 		for (CommonFieldsBase cb : repeatGroupList) {
 			DynamicBase d = (DynamicBase) cb;
 			SubmissionSet set = new SubmissionSet(enclosingSet, d, repeatGroup,
-					formDefinition, datastore, user);
+					formDefinition, cc);
 			submissionSets.add(set);
 		}
 	}
@@ -194,10 +193,10 @@ public class RepeatSubmissionType implements SubmissionRepeat {
 	}
 
 	@Override
-	public void persist(Datastore datastore, User user)
+	public void persist(CallingContext cc)
 			throws ODKEntityPersistException {
 		for (SubmissionSet s : submissionSets) {
-			s.persist(datastore, user);
+			s.persist(cc);
 		}
 	}
 

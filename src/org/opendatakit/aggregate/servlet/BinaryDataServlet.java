@@ -24,8 +24,8 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.ContextFactory;
-import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.ErrorConsts;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
@@ -35,10 +35,7 @@ import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.submission.SubmissionKeyPart;
 import org.opendatakit.aggregate.submission.type.BlobSubmissionType;
 import org.opendatakit.common.constants.HtmlConsts;
-import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
-import org.opendatakit.common.security.User;
-import org.opendatakit.common.security.UserService;
 
 /**
  * Servlet to display the binary data from a submission
@@ -69,14 +66,7 @@ public class BinaryDataServlet extends ServletUtilBase {
   public void doGet(HttpServletRequest req, HttpServletResponse resp)
       throws IOException {
 
-    // TOOD: figure out how to do picture security
-    // verify user is logged in
-    // if (!verifyCredentials(req, resp)) {
-    // return;
-    // }
-      UserService userService = (UserService) ContextFactory.get().getBean(
-              BeanDefs.USER_BEAN);
-      User user = userService.getCurrentUser();
+	CallingContext cc = ContextFactory.getCallingContext(getServletContext());
 	
     // verify parameters are present
     String keyString = getParameter(req, ServletConsts.BLOB_KEY);
@@ -88,8 +78,6 @@ public class BinaryDataServlet extends ServletUtilBase {
     }
     SubmissionKey key = new SubmissionKey(keyString);
 
-    Datastore ds = (Datastore) ContextFactory.get().getBean(BeanDefs.DATASTORE_BEAN);
-
     byte[] imageBlob = null;
     String unrootedFileName = null;
     String contentType = null;
@@ -98,7 +86,7 @@ public class BinaryDataServlet extends ServletUtilBase {
     List<SubmissionKeyPart> parts = key.splitSubmissionKey();
     Submission sub = null;
 	try {
-		sub = Submission.fetchSubmission(parts, ds, user);
+		sub = Submission.fetchSubmission(parts, cc);
 	} catch (ODKFormNotFoundException e1) {
 		odkIdNotFoundError(resp);
 		return;

@@ -19,13 +19,12 @@ package org.opendatakit.aggregate.submission.type;
 
 import java.math.BigDecimal;
 
+import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.datamodel.DynamicCommonFieldsBase;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.format.element.ElementFormatter;
-import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
-import org.opendatakit.common.security.User;
 
 /**
  * Data Storage Converter for Decimal Type
@@ -63,7 +62,7 @@ public class DecimalSubmissionType extends
 	}
 
 	@Override
-	public void getValueFromEntity(Datastore datastore, User user) {
+	public void getValueFromEntity(CallingContext cc) {
 		BigDecimal value = backingObject.getNumericField(element.getFormDataModel().getBackingKey());
 		setValue(value);
 	}

@@ -17,7 +17,6 @@ package org.opendatakit.common.security;
 
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.springframework.beans.factory.InitializingBean;
@@ -36,7 +35,8 @@ public class Realm implements InitializingBean {
 	private String realmString;
 	private String mailToDomain;
 	private String rootDomain;
-	private Set<String> domains = new HashSet<String>();
+	private String domains;
+	private Set<String> domainSet = new HashSet<String>();
 	
 	public Realm() {
 	}
@@ -52,9 +52,16 @@ public class Realm implements InitializingBean {
 		if ( rootDomain == null ) {
 			rootDomain = mailToDomain;
 		}
+		if ( domains == null ) { 
+			domains = rootDomain;
+		}
+		String[] elems = domains.split("[, ]");
+		for ( String e : elems ) {
+			domainSet.add(e);
+		}
 		// root domain implicitly granted access
-		domains.add(rootDomain);
-		domains.add(mailToDomain);
+		domainSet.add(rootDomain);
+		domainSet.add(mailToDomain);
 	}
 
 	public String getRealmString() {
@@ -81,12 +88,16 @@ public class Realm implements InitializingBean {
 		this.rootDomain = rootDomain;
 	}
 
-	public Set<String> getDomains() {
-		return Collections.unmodifiableSet(domains);
+	public void setDomains(String domains) {
+		this.domains = domains;
+	}
+	
+	public Set<String> getDomainSet() {
+		return Collections.unmodifiableSet(domainSet);
 	}
 
-	public void setDomains(Set<String> domains) {
-		this.domains.clear();
-		this.domains.addAll(domains);
+	public void setDomainSet(Set<String> domains) {
+		this.domainSet.clear();
+		this.domainSet.addAll(domains);
 	}
 }

@@ -30,7 +30,6 @@ import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.format.XFormsTableConsts;
 import org.opendatakit.aggregate.form.Form;
-import org.opendatakit.aggregate.servlet.BinaryDataServlet;
 import org.opendatakit.aggregate.servlet.XFormsDownloadServlet;
 import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.submission.type.BlobSubmissionType;

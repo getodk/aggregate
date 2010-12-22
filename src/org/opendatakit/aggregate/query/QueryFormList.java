@@ -18,6 +18,7 @@ package org.opendatakit.aggregate.query;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.datamodel.TopLevelDynamicBase;
 import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
@@ -27,10 +28,8 @@ import org.opendatakit.aggregate.form.PersistentResults;
 import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.submission.SubmissionKeyPart;
 import org.opendatakit.common.persistence.CommonFieldsBase;
-import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
-import org.opendatakit.common.security.User;
 
 /**
  * 
@@ -39,8 +38,7 @@ import org.opendatakit.common.security.User;
  * 
  */
 public class QueryFormList {
-  private final Datastore ds;
-  private final User user;
+  private final CallingContext cc;
 
   private List<Form> forms;
   
@@ -51,9 +49,8 @@ public class QueryFormList {
    * @param datastore   datastore reference
    */
   
-  private QueryFormList(Datastore datastore, User user) {
-    ds = datastore;
-    this.user = user;
+  private QueryFormList(CallingContext cc) {
+    this.cc = cc;
     forms = new ArrayList<Form>();    
   }
 
@@ -67,13 +64,13 @@ public class QueryFormList {
    * @throws ODKDatastoreException
  * @throws ODKIncompleteSubmissionData 
    */
-  public QueryFormList(boolean checkAuthorization, Datastore datastore, User user) throws ODKDatastoreException, ODKIncompleteSubmissionData{
-    this(datastore, user);
+  public QueryFormList(boolean checkAuthorization, CallingContext cc) throws ODKDatastoreException, ODKIncompleteSubmissionData{
+    this(cc);
     
-    Query formQuery = ds.createQuery(Form.getFormInfoRelation(datastore), user);
+    Query formQuery = cc.getDatastore().createQuery(Form.getFormInfoRelation(cc), cc.getCurrentUser());
     List<? extends CommonFieldsBase> formEntities = formQuery.executeQuery(ServletConsts.FETCH_LIMIT);
     for (CommonFieldsBase formEntity : formEntities) {
-      Form form = new Form((TopLevelDynamicBase) formEntity, ds, user);
+      Form form = new Form((TopLevelDynamicBase) formEntity, cc);
       if ( form.getFormId().equals(MiscTasks.FORM_ID_MISC_TASKS)) continue;
       if ( form.getFormId().equals(PersistentResults.FORM_ID_PERSISTENT_RESULT)) continue;
       if ( form.getFormId().equals(Form.URI_FORM_ID_VALUE_FORM_INFO)) continue;
@@ -90,8 +87,8 @@ public class QueryFormList {
    * @param datastore  datastore reference
  * @throws ODKDatastoreException 
    */
-  public QueryFormList(List<SubmissionKey> submissionKeys, boolean checkAuthorization, Datastore datastore, User user) throws ODKDatastoreException {
-    this(datastore, user);
+  public QueryFormList(List<SubmissionKey> submissionKeys, boolean checkAuthorization, CallingContext cc) throws ODKDatastoreException {
+    this(cc);
     
     for (SubmissionKey submissionKey : submissionKeys) {
       try {
@@ -103,7 +100,7 @@ public class QueryFormList {
 			throw new ODKIncompleteSubmissionData();
 		}
 
-        Form form = new Form(parts.get(1).getAuri(), ds, user);
+        Form form = new Form(parts.get(1).getAuri(), cc);
         addIfAuthorized(form, checkAuthorization);
       } catch (Exception e) {
         // TODO: determine how to better handle error
@@ -127,7 +124,7 @@ public class QueryFormList {
    */
   private void addIfAuthorized(Form form, boolean checkAuthorization) {
     // TODO: improve with groups management, etc
-    if(form.getCreationUser().equals(user)) {
+    if(form.getCreationUser().equals(cc.getCurrentUser())) {
       forms.add(form);
     } else {
       forms.add(form);

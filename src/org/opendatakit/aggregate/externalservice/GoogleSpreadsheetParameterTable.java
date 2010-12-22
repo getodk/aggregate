@@ -13,6 +13,7 @@
  */
 package org.opendatakit.aggregate.externalservice;
 
+import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.Datastore;
@@ -151,11 +152,13 @@ public final class GoogleSpreadsheetParameterTable extends CommonFieldsBase {
 	private static GoogleSpreadsheetParameterTable relation = null;
 
 	public static synchronized final GoogleSpreadsheetParameterTable createRelation(
-			Datastore datastore, User user) throws ODKDatastoreException {
+			CallingContext cc) throws ODKDatastoreException {
 		if (relation == null) {
 			GoogleSpreadsheetParameterTable relationPrototype;
-	        relationPrototype = new GoogleSpreadsheetParameterTable(datastore.getDefaultSchemaName());
-	        datastore.assertRelation(relationPrototype, user); // may throw exception...
+			Datastore ds = cc.getDatastore();
+			User user = cc.getCurrentUser();
+	        relationPrototype = new GoogleSpreadsheetParameterTable(ds.getDefaultSchemaName());
+	        ds.assertRelation(relationPrototype, user); // may throw exception...
 	        // at this point, the prototype has become fully populated
 	        relation = relationPrototype; // set static variable only upon success...
 		}

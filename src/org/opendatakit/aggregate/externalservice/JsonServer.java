@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.constants.externalservice.ExternalServiceOption;
 import org.opendatakit.aggregate.constants.externalservice.ExternalServiceType;
 import org.opendatakit.aggregate.constants.externalservice.JsonServerConsts;
@@ -63,37 +64,39 @@ public class JsonServer extends AbstractExternalService implements ExternalServi
    */
   private JsonServerParameterTable objectEntity;
 
-  private JsonServer(Form form, Datastore datastore, User user) {
+  private JsonServer(Form form, CallingContext cc) {
     super(form, new BasicElementFormatter(true, true, true), new BasicHeaderFormatter(true, true,
-        true), datastore, user);
+        true), cc);
   }
 
-  public JsonServer(FormServiceCursor fsc, Datastore datastore, User user)
+  public JsonServer(FormServiceCursor fsc, CallingContext cc)
       throws ODKEntityNotFoundException, ODKDatastoreException, ODKFormNotFoundException {
-    this(Form.retrieveForm(fsc.getFormId(), datastore, user), datastore, user);
+    this(Form.retrieveForm(fsc.getFormId(), cc), cc);
 
-    objectEntity = datastore.getEntity(JsonServerParameterTable.createRelation(datastore, user),
-        fsc.getSubAuri(), user);
+    objectEntity = cc.getDatastore().getEntity(JsonServerParameterTable.createRelation(cc),
+        fsc.getSubAuri(), cc.getCurrentUser());
 
     // createForm();
   }
 
   public JsonServer(Form form, String serverURL, ExternalServiceOption externalServiceOption,
-      Datastore datastore, User user) throws ODKDatastoreException, ODKExternalServiceException {
-    this(form, datastore, user);
+      CallingContext cc) throws ODKDatastoreException, ODKExternalServiceException {
+    this(form, cc);
 
-    objectEntity = datastore.createEntityUsingRelation(JsonServerParameterTable.createRelation(
-        datastore, user), user);
+    Datastore ds = cc.getDatastore();
+    User user = cc.getCurrentUser();
+    objectEntity = ds.createEntityUsingRelation(JsonServerParameterTable.createRelation(
+        cc), user);
     fsc = FormServiceCursor.createFormServiceCursor(form, ExternalServiceType.JSON_SERVER, objectEntity,
-        datastore, user);
+        cc);
     fsc.setExternalServiceOption(externalServiceOption);
     fsc.setIsExternalServicePrepared(true);
     fsc.setOperationalStatus(OperationalStatus.ACTIVE);
     fsc.setEstablishmentDateTime(new Date());
     fsc.setUploadCompleted(false);
     objectEntity.setServerUrl(serverURL);
-    datastore.putEntity(fsc, user);
-    datastore.putEntity(objectEntity, user);
+    ds.putEntity(fsc, user);
+    ds.putEntity(objectEntity, user);
 
     // createForm();
   }
@@ -107,11 +110,15 @@ public class JsonServer extends AbstractExternalService implements ExternalServi
   }
 
   public void persist() throws ODKEntityPersistException {
+	Datastore ds = cc.getDatastore();
+	User user = cc.getCurrentUser();
     ds.putEntity(objectEntity, user);
     ds.putEntity(fsc, user);
   }
 
   public void delete() throws ODKDatastoreException {
+	Datastore ds = cc.getDatastore();
+	User user = cc.getCurrentUser();
     ds.deleteEntity(new EntityKey(objectEntity, objectEntity.getUri()), user);
     ds.deleteEntity(new EntityKey(fsc, fsc.getUri()), user);
   }
@@ -207,7 +214,7 @@ public class JsonServer extends AbstractExternalService implements ExternalServi
       OutputStreamWriter writer = new OutputStreamWriter(connection.getOutputStream(), "UTF-8");
       PrintWriter pWriter = new PrintWriter(writer);
 
-      JsonFormatter formatter = new JsonFormatter(pWriter, null, form, ds, user);
+      JsonFormatter formatter = new JsonFormatter(pWriter, null, form, cc);
       formatter.processSubmissions(submissions);
 
       writer.flush();
@@ -260,6 +267,8 @@ public class JsonServer extends AbstractExternalService implements ExternalServi
     if ( fsc.getExternalServiceOption() == ExternalServiceOption.UPLOAD_ONLY) {
     	fsc.setOperationalStatus(OperationalStatus.COMPLETED);
     }
+	Datastore ds = cc.getDatastore();
+	User user = cc.getCurrentUser();
     ds.putEntity(fsc, user);
   }
 

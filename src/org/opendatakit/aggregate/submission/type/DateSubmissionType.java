@@ -21,14 +21,13 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.util.Date;
 
+import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.datamodel.DynamicCommonFieldsBase;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.exception.ODKConversionException;
 import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.format.element.ElementFormatter;
-import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
-import org.opendatakit.common.security.User;
 
 /**
  * Data Storage Converter for Data Type
@@ -82,7 +81,7 @@ public class DateSubmissionType extends SubmissionSingleValueBase<Date> {
 	}
 	
 	@Override
-	public void getValueFromEntity(Datastore datastore, User user) {
+	public void getValueFromEntity(CallingContext cc) {
 		Date value = backingObject.getDateField(element.getFormDataModel().getBackingKey());
 		setValue(value);
 	}

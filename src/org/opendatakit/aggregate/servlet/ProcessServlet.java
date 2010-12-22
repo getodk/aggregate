@@ -25,6 +25,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.fileupload.FileUploadException;
+import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.ErrorConsts;
@@ -43,10 +44,7 @@ import org.opendatakit.aggregate.submission.SubmissionKeyPart;
 import org.opendatakit.aggregate.task.FormDelete;
 import org.opendatakit.common.constants.BasicConsts;
 import org.opendatakit.common.persistence.CommonFieldsBase;
-import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
-import org.opendatakit.common.security.User;
-import org.opendatakit.common.security.UserService;
 
 /**
  * Processes request from web based interface based on users button press
@@ -76,10 +74,7 @@ public class ProcessServlet extends ServletUtilBase {
    */
   @Override
   public void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-
-    Datastore ds = (Datastore) ContextFactory.get().getBean(BeanDefs.DATASTORE_BEAN);
-    UserService userService = (UserService) ContextFactory.get().getBean(BeanDefs.USER_BEAN);
-    User user = userService.getCurrentUser();
+	CallingContext cc = ContextFactory.getCallingContext(getServletContext());
     StringBuilder errorText = new StringBuilder();
 
     try {
@@ -105,11 +100,11 @@ public class ProcessServlet extends ServletUtilBase {
           return;
         }
 
-        Form form = Form.retrieveForm(formId, ds, user);
+        Form form = Form.retrieveForm(formId, cc);
 
         // don't allow the deletion of the FormInfo submissions.
         if (!form.getFormId().equals(Form.URI_FORM_ID_VALUE_FORM_INFO)) {
-          DeleteSubmissions delete = new DeleteSubmissions(submissionKeys, ds, user);
+          DeleteSubmissions delete = new DeleteSubmissions(submissionKeys, cc);
           delete.deleteSubmissions();
           resp.sendRedirect(FormsServlet.ADDR);
           return;
@@ -120,8 +115,7 @@ public class ProcessServlet extends ServletUtilBase {
         }
       } else if (params.getButtonText().equals(ProcessType.DELETE_FORM.getButtonText())) {
 
-        FormDelete formDelete = (FormDelete) ContextFactory.get().getBean(
-            BeanDefs.FORM_DELETE_BEAN);
+        FormDelete formDelete = (FormDelete) cc.getBean(BeanDefs.FORM_DELETE_BEAN);
         for (SubmissionKey submissionKey : submissionKeys) {
           try {
             List<SubmissionKeyPart> parts = submissionKey.splitSubmissionKey();
@@ -129,22 +123,22 @@ public class ProcessServlet extends ServletUtilBase {
               throw new ODKIncompleteSubmissionData();
             }
 
-            Form form = Form.retrieveForm(parts.get(0).getElementName(), ds, user);
+            Form form = Form.retrieveForm(parts.get(0).getElementName(), cc);
 
             if (form == null) {
               throw new ODKFormNotFoundException();
             }
 
-            CommonFieldsBase rel = ds.getEntity(form.getTopLevelGroupElement().getFormDataModel()
-                .getBackingObjectPrototype(), parts.get(1).getAuri(), user);
+            CommonFieldsBase rel = cc.getDatastore().getEntity(form.getTopLevelGroupElement().getFormDataModel()
+                .getBackingObjectPrototype(), parts.get(1).getAuri(), cc.getCurrentUser());
             // If the FormInfo table is the target, log an error!
             if (rel != null) {
-              Form formToDelete = new Form((TopLevelDynamicBase) rel, ds, user);
+              Form formToDelete = new Form((TopLevelDynamicBase) rel, cc);
               if (!formToDelete.getFormId().equals(Form.URI_FORM_ID_VALUE_FORM_INFO)) {
-            	MiscTasks m = new MiscTasks(TaskType.DELETE_FORM, formToDelete, null, ds, user);
-            	m.persist(ds, user);
+            	MiscTasks m = new MiscTasks(TaskType.DELETE_FORM, formToDelete, null, cc);
+            	m.persist(cc);
                 formDelete.createFormDeleteTask(formToDelete, m.getSubmissionKey(), 1L, 
-                			getServerURL(req), ds, user);
+                			getServerURL(req), cc);
                 resp.sendRedirect(FormsServlet.ADDR);
                 return;
               } else {

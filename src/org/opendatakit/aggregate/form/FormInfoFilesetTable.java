@@ -17,6 +17,7 @@ package org.opendatakit.aggregate.form;
 
 import java.util.List;
 
+import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.datamodel.DynamicBase;
 import org.opendatakit.aggregate.datamodel.DynamicCommonFieldsBase;
 import org.opendatakit.aggregate.datamodel.FormDataModel;
@@ -115,11 +116,13 @@ public class FormInfoFilesetTable extends DynamicBase {
 	
 	private static FormInfoFilesetTable relation = null;
 	
-	static synchronized final FormInfoFilesetTable createRelation(Datastore datastore, User user) throws ODKDatastoreException {
+	static synchronized final FormInfoFilesetTable createRelation(CallingContext cc) throws ODKDatastoreException {
 		if ( relation == null ) {
 			FormInfoFilesetTable relationPrototype;
-			relationPrototype = new FormInfoFilesetTable(datastore.getDefaultSchemaName());
-		    datastore.assertRelation(relationPrototype, user); // may throw exception...
+			Datastore ds = cc.getDatastore();
+			User user = cc.getUserService().getDaemonAccountUser();
+			relationPrototype = new FormInfoFilesetTable(ds.getDefaultSchemaName());
+		    ds.assertRelation(relationPrototype, user); // may throw exception...
 		    // at this point, the prototype has become fully populated
 		    relation = relationPrototype; // set static variable only upon success...
 		}
@@ -129,21 +132,24 @@ public class FormInfoFilesetTable extends DynamicBase {
 	static final void createFormDataModel(List<FormDataModel> model, Long ordinal, 
 			TopLevelDynamicBase formInfoDefinitionRelation, 
 			DynamicCommonFieldsBase formInfoTableRelation, 
-			Datastore datastore, User user) throws ODKDatastoreException {
+			CallingContext cc) throws ODKDatastoreException {
 		
-		FormInfoFilesetTable filesetRelation = createRelation(datastore, user);
+		FormInfoFilesetTable filesetRelation = createRelation(cc);
 		
-		Long lastOrdinal = 0L;
-		
-		lastOrdinal = FormDefinition.buildTableFormDataModel( model, 
+		boolean asDaemon = cc.getAsDeamon();
+		try {
+			cc.setAsDaemon(true);
+			Long lastOrdinal = 0L;
+			
+			lastOrdinal = FormDefinition.buildTableFormDataModel( model, 
 				filesetRelation, 
 				formInfoDefinitionRelation, // top level table
 				formInfoTableRelation, // also the parent table
 				ordinal,
-				datastore, user );
+				cc );
 
-		String uriPrefix = Form.URI_FORM_ID_VALUE_FORM_INFO;
-		FormDefinition.buildBinaryContentFormDataModel(model, 
+			String uriPrefix = Form.URI_FORM_ID_VALUE_FORM_INFO;
+			FormDefinition.buildBinaryContentFormDataModel(model, 
 				ELEMENT_NAME_XFORM_DEFINITION, 
 				uriPrefix + FORM_INFO_XFORM_BINARY_CONTENT,
 				FORM_INFO_XFORM_BINARY_CONTENT, 
@@ -156,9 +162,9 @@ public class FormInfoFilesetTable extends DynamicBase {
 				formInfoDefinitionRelation, // top level table
 				filesetRelation, // parent table
 				++lastOrdinal, 
-				datastore, user);
+				cc );
 		
-		FormDefinition.buildBinaryContentFormDataModel(model, 
+			FormDefinition.buildBinaryContentFormDataModel(model, 
 				ELEMENT_NAME_MANIFEST_FILESET, 
 				uriPrefix + FORM_INFO_MANIFEST_BINARY_CONTENT, 
 				FORM_INFO_MANIFEST_BINARY_CONTENT, 
@@ -171,6 +177,10 @@ public class FormInfoFilesetTable extends DynamicBase {
 				formInfoDefinitionRelation, // top level table
 				filesetRelation, // parent table
 				++lastOrdinal, 
-				datastore, user);
+				cc );
+		} finally {
+			cc.setAsDaemon(asDaemon);
+		}
+		
 	}
 }

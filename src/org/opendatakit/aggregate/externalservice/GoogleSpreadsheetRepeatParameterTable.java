@@ -18,6 +18,7 @@ package org.opendatakit.aggregate.externalservice;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.datamodel.FormElementKey;
 import org.opendatakit.aggregate.datamodel.StaticAssociationBase;
 import org.opendatakit.common.persistence.CommonFieldsBase;
@@ -104,12 +105,14 @@ public class GoogleSpreadsheetRepeatParameterTable extends StaticAssociationBase
 
 	  private static GoogleSpreadsheetRepeatParameterTable relation = null;
 
-	  public static synchronized final GoogleSpreadsheetRepeatParameterTable createRelation(Datastore datastore, User user)
+	  public static synchronized final GoogleSpreadsheetRepeatParameterTable createRelation(CallingContext cc)
 	      throws ODKDatastoreException {
 	    if (relation == null) {
 	    	GoogleSpreadsheetRepeatParameterTable relationPrototype;
-	        relationPrototype = new GoogleSpreadsheetRepeatParameterTable(datastore.getDefaultSchemaName());
-	        datastore.assertRelation(relationPrototype, user); // may throw exception...
+	    	Datastore ds = cc.getDatastore();
+	    	User user = cc.getCurrentUser();
+	        relationPrototype = new GoogleSpreadsheetRepeatParameterTable(ds.getDefaultSchemaName());
+	        ds.assertRelation(relationPrototype, user); // may throw exception...
 	        // at this point, the prototype has become fully populated
 	        relation = relationPrototype; // set static variable only upon success...
 	    }
@@ -117,11 +120,13 @@ public class GoogleSpreadsheetRepeatParameterTable extends StaticAssociationBase
 	  }
 	  
 	  public static List<GoogleSpreadsheetRepeatParameterTable> getRepeatGroupAssociations(EntityKey googleSpreadsheetParameterTable,
-			  												Datastore datastore, User user) throws ODKDatastoreException {
+			  												CallingContext cc) throws ODKDatastoreException {
 		  List<GoogleSpreadsheetRepeatParameterTable> list = new ArrayList<GoogleSpreadsheetRepeatParameterTable> ();
-		  GoogleSpreadsheetRepeatParameterTable frpt = createRelation(datastore,user);
+		  GoogleSpreadsheetRepeatParameterTable frpt = createRelation(cc);
 
-		  Query query = datastore.createQuery(frpt, user);
+		  Datastore ds = cc.getDatastore();
+		  User user = cc.getCurrentUser();
+		  Query query = ds.createQuery(frpt, user);
 		  query.addFilter(frpt.domAuri, FilterOperation.EQUAL, googleSpreadsheetParameterTable.getKey());
 
 		  List<? extends CommonFieldsBase> results = query.executeQuery(0);

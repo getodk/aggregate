@@ -19,6 +19,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
 import java.util.Date;
 
+import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.form.PersistentResults;
@@ -30,8 +31,6 @@ import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.common.constants.BasicConsts;
 import org.opendatakit.common.constants.HtmlConsts;
-import org.opendatakit.common.persistence.Datastore;
-import org.opendatakit.common.security.User;
 
 /**
  * Common worker implementation for the generation of csv files.
@@ -46,16 +45,14 @@ public class CsvWorkerImpl {
 	private final SubmissionKey persistentResultsKey;
 	private final Long attemptCount;
 	private final String baseWebServerUrl;
-	private final Datastore datastore;
-	private final User user;
+	private final CallingContext cc;
 
-	public CsvWorkerImpl( Form form, SubmissionKey persistentResultsKey, Long attemptCount, String baseWebServerUrl, Datastore datastore, User user) {
+	public CsvWorkerImpl( Form form, SubmissionKey persistentResultsKey, Long attemptCount, String baseWebServerUrl, CallingContext cc) {
 		this.form = form;
 		this.persistentResultsKey = persistentResultsKey;
 		this.attemptCount = attemptCount;
 		this.baseWebServerUrl = baseWebServerUrl;
-		this.datastore = datastore;
-		this.user = user;
+		this.cc = cc;
 		if ( attemptCount == null ) {
 			throw new IllegalArgumentException("attempt count cannot be null");
 		}
@@ -68,7 +65,7 @@ public class CsvWorkerImpl {
 		   
 		    // create CSV
 		    QueryByDate query = new QueryByDate(form, BasicConsts.EPOCH, false, ServletConsts.FETCH_LIMIT,
-		    		datastore, user);
+		    		cc);
 		    SubmissionFormatter formatter = new CsvFormatter(form, baseWebServerUrl, pw, null);
 		    formatter.processSubmissions(query.getResultSubmissions());
 	
@@ -76,16 +73,16 @@ public class CsvWorkerImpl {
 		    pw.close();
 		    byte[] outputFile = stream.toByteArray();
 	
-		    Submission s = Submission.fetchSubmission(persistentResultsKey.splitSubmissionKey(), datastore, user);
+		    Submission s = Submission.fetchSubmission(persistentResultsKey.splitSubmissionKey(), cc);
 		    PersistentResults r = new PersistentResults(s);
 		    if ( attemptCount.equals(r.getAttemptCount()) ) {
 				r.setResultFile(outputFile, HtmlConsts.RESP_TYPE_CSV, 
 						Long.valueOf(outputFile.length), 
-						form.getViewableFormNameSuitableAsFileName() + ServletConsts.CSV_FILENAME_APPEND, datastore, user);
+						form.getViewableFormNameSuitableAsFileName() + ServletConsts.CSV_FILENAME_APPEND);
 				r.setStatus(Status.AVAILABLE);
 				r.setCompletionDate(new Date());
 		    }
-			r.persist(datastore, user);
+			r.persist(cc);
 		} catch ( Exception e ) {
 			failureRecovery(e);
 		}
@@ -97,12 +94,12 @@ public class CsvWorkerImpl {
 		e.printStackTrace();
 	    Submission s;
 		try {
-			s = Submission.fetchSubmission(persistentResultsKey.splitSubmissionKey(), datastore, user);
+			s = Submission.fetchSubmission(persistentResultsKey.splitSubmissionKey(), cc);
 		    PersistentResults r = new PersistentResults(s);
 		    if ( attemptCount.equals(r.getAttemptCount()) ) {
-		    	r.deleteResultFile(datastore, user);
+		    	r.deleteResultFile(cc);
 		    	r.setStatus(Status.FAILED);
-		    	r.persist(datastore, user);
+		    	r.persist(cc);
 		    }
 		} catch (Exception ex) {
 			// something is hosed -- don't attempt to continue.

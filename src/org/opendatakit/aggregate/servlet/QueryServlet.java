@@ -23,18 +23,15 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.ContextFactory;
-import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.common.constants.HtmlConsts;
-import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.Query;
-import org.opendatakit.common.security.User;
-import org.opendatakit.common.security.UserService;
 
 /**
  * 
@@ -71,16 +68,9 @@ public class QueryServlet extends ServletUtilBase {
     @Override
     public void doGet(HttpServletRequest req, HttpServletResponse resp)
 	    throws IOException {
-	// verify user is logged in
-	if (!verifyCredentials(req, resp)) {
-	    return;
-	}
+	CallingContext cc = ContextFactory.getCallingContext(getServletContext());
 
-    UserService userService = (UserService) ContextFactory.get().getBean(
-        BeanDefs.USER_BEAN);
-    User user = userService.getCurrentUser();
-	
-	// get parameter
+    // get parameter
 	String odkId = getParameter(req, ServletConsts.FORM_ID);
 	if (odkId == null) {
 	    errorMissingKeyParam(resp);
@@ -88,11 +78,9 @@ public class QueryServlet extends ServletUtilBase {
 	}
 
 	// get form
-	Datastore ds = (Datastore) ContextFactory.get().getBean(
-		BeanDefs.DATASTORE_BEAN);
 	Form form = null;
 	try {
-		form = Form.retrieveForm(odkId, ds, user);
+		form = Form.retrieveForm(odkId, cc);
 	} catch ( ODKFormNotFoundException e ) {
 	    odkIdNotFoundError(resp);
 	    return;
