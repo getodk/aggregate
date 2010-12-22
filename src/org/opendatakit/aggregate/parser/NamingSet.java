@@ -22,6 +22,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Logger;
 
+import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.security.User;
 
@@ -255,7 +256,9 @@ final class NamingSet {
 	 * @param user
 	 * @return
 	 */
-	public String generateUniqueTableName(String schema, String originalTable, Datastore ds, User user) {
+	public String generateUniqueTableName(String schema, String originalTable, CallingContext cc) {
+		Datastore ds = cc.getDatastore();
+		User user = cc.getCurrentUser();
 		int maxLenTableName = ds.getMaxLenTableName();
 		if ( uniqueTables.contains(originalTable) || ds.hasRelation(schema, originalTable, user) ) {
 			// collision

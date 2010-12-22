@@ -50,11 +50,6 @@ public class BlankServlet extends ServletUtilBase {
    @Override
    public void doGet(HttpServletRequest req, HttpServletResponse resp)
          throws IOException {
-
-      // verify user is logged in
-      if (!verifyCredentials(req, resp)) {
-        return;
-      }
       
       beginBasicHtmlResponse(BasicConsts.EMPTY_STRING, resp, req, true); // header info
       finishBasicHtmlResponse(resp);

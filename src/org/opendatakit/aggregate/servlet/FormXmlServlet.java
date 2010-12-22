@@ -26,17 +26,14 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang.StringEscapeUtils;
+import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.ContextFactory;
-import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.common.constants.HtmlConsts;
-import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
-import org.opendatakit.common.security.User;
-import org.opendatakit.common.security.UserService;
 
 /**
  * Servlet to generate the XML file in plain text
@@ -71,10 +68,7 @@ public class FormXmlServlet extends ServletUtilBase {
   @Override
   public void doGet(HttpServletRequest req, HttpServletResponse resp)
       throws IOException {
-
-    UserService userService = (UserService) ContextFactory.get().getBean(
-              BeanDefs.USER_BEAN);
-    User user = userService.getCurrentUser();
+	CallingContext cc = ContextFactory.getCallingContext(getServletContext());
     
     // get parameters
     String formId = getParameter(req, ServletConsts.FORM_ID);
@@ -89,10 +83,9 @@ public class FormXmlServlet extends ServletUtilBase {
       humanReadable = Boolean.parseBoolean(readable);
     }
 
-    Datastore ds = (Datastore) ContextFactory.get().getBean(BeanDefs.DATASTORE_BEAN);
     Form form;
     try {
-      form = Form.retrieveForm(formId, ds, user);
+      form = Form.retrieveForm(formId, cc);
     } catch (ODKFormNotFoundException e) {
       odkIdNotFoundError(resp);
       return;

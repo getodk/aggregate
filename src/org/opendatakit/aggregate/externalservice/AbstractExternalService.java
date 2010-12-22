@@ -15,13 +15,12 @@ package org.opendatakit.aggregate.externalservice;
 
 import java.util.List;
 
+import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.format.element.ElementFormatter;
 import org.opendatakit.aggregate.format.header.HeaderFormatter;
 import org.opendatakit.aggregate.submission.Submission;
-import org.opendatakit.common.persistence.Datastore;
-import org.opendatakit.common.security.User;
 
 /**
  * 
@@ -42,18 +41,15 @@ public abstract class AbstractExternalService implements ExternalService{
   
   protected ElementFormatter formatter;
   
-  protected final Datastore ds;
-
-  protected final User user;
+  protected final CallingContext cc;
 
   protected final HeaderFormatter headerFormatter;
   
-  protected AbstractExternalService(Form form, ElementFormatter elemFormatter, HeaderFormatter header, Datastore datastore, User user) {
+  protected AbstractExternalService(Form form, ElementFormatter elemFormatter, HeaderFormatter header, CallingContext cc) {
     this.form = form;
     this.formatter = elemFormatter;
     this.headerFormatter = header;
-    this.ds = datastore;
-    this.user = user;
+    this.cc = cc;
   }
   
   public void sendSubmissions(List<Submission> submissions) throws ODKExternalServiceException {

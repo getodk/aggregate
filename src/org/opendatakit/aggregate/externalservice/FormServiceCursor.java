@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.constants.externalservice.ExternalServiceOption;
 import org.opendatakit.aggregate.constants.externalservice.ExternalServiceType;
 import org.opendatakit.aggregate.datamodel.StaticAssociationBase;
@@ -260,16 +261,18 @@ public final class FormServiceCursor extends StaticAssociationBase {
     }
   }
   
-  public ExternalService getExternalService(String baseWebServerUrl, Datastore ds, User user) throws ODKEntityNotFoundException {
-    return getExternalServiceType().constructExternalService(this, baseWebServerUrl, ds, user);
+  public ExternalService getExternalService(String baseWebServerUrl, CallingContext cc) throws ODKEntityNotFoundException {
+    return getExternalServiceType().constructExternalService(this, baseWebServerUrl, cc);
   }
   
   private static FormServiceCursor relation = null;
 
-  private static synchronized final FormServiceCursor createRelation(Datastore ds, User user)
+  private static synchronized final FormServiceCursor createRelation(CallingContext cc)
       throws ODKDatastoreException {
     if (relation == null) {
       FormServiceCursor relationPrototype;
+      Datastore ds = cc.getDatastore();
+      User user = cc.getUserService().getDaemonAccountUser();
       relationPrototype = new FormServiceCursor(ds.getDefaultSchemaName());
       ds.assertRelation(relationPrototype, user); // may throw exception...
       // at this point, the prototype has become fully populated
@@ -279,11 +282,11 @@ public final class FormServiceCursor extends StaticAssociationBase {
   }
 
   public static final FormServiceCursor createFormServiceCursor(Form form,
-      ExternalServiceType type, CommonFieldsBase service, Datastore ds, User user)
+      ExternalServiceType type, CommonFieldsBase service, CallingContext cc)
       throws ODKDatastoreException {
-    FormServiceCursor relation = createRelation(ds, user);
+    FormServiceCursor relation = createRelation(cc);
 
-    FormServiceCursor c = ds.createEntityUsingRelation(relation, user);
+    FormServiceCursor c = cc.getDatastore().createEntityUsingRelation(relation, cc.getCurrentUser());
 
     c.setDomAuri(form.getEntityKey().getKey());
     c.setSubAuri(service.getUri());
@@ -294,9 +297,9 @@ public final class FormServiceCursor extends StaticAssociationBase {
   }
   
   public static final List<ExternalService> getExternalServicesForForm(Form form,
-      String baseWebServerUrl, Datastore ds, User user) throws ODKDatastoreException {
-    FormServiceCursor relation = createRelation(ds, user);
-    Query query = ds.createQuery(relation, user);
+      String baseWebServerUrl, CallingContext cc) throws ODKDatastoreException {
+    FormServiceCursor relation = createRelation(cc);
+    Query query = cc.getDatastore().createQuery(relation, cc.getCurrentUser());
     // filter on the Form's Uri. We cannot filter on the FORM_ID since it is a
     // Text field in bigtable
     query.addFilter(relation.domAuri, FilterOperation.EQUAL, form.getEntityKey().getKey());
@@ -307,17 +310,17 @@ public final class FormServiceCursor extends StaticAssociationBase {
       FormServiceCursor c = (FormServiceCursor) cb;
       ExternalService obj;
 
-      obj = c.getExternalServiceType().constructExternalService(c, baseWebServerUrl, ds, user);
+      obj = c.getExternalServiceType().constructExternalService(c, baseWebServerUrl, cc);
       esList.add(obj);
 
     }
     return esList;
   }
 
-  public static final FormServiceCursor getFormServiceCursor(String uri, Datastore ds, User user) throws ODKEntityNotFoundException {
+  public static final FormServiceCursor getFormServiceCursor(String uri, CallingContext cc) throws ODKEntityNotFoundException {
     try {
-      FormServiceCursor relation = createRelation(ds, user);
-      CommonFieldsBase entity = ds.getEntity(relation, uri, user);
+      FormServiceCursor relation = createRelation(cc);
+      CommonFieldsBase entity = cc.getDatastore().getEntity(relation, uri, cc.getCurrentUser());
       return (FormServiceCursor) entity;
     } catch (ODKDatastoreException e) {
       throw new ODKEntityNotFoundException(e);
@@ -325,11 +328,11 @@ public final class FormServiceCursor extends StaticAssociationBase {
   }
   
    public static final List<FormServiceCursor> queryFormServiceCursorRelation(Date olderThanDate,
-         Datastore ds, User user) throws ODKEntityNotFoundException {
+         CallingContext cc) throws ODKEntityNotFoundException {
       List<FormServiceCursor> fscList = new ArrayList<FormServiceCursor>();
       try {
-         FormServiceCursor relation = createRelation(ds, user);
-         Query query = ds.createQuery(relation, user);
+         FormServiceCursor relation = createRelation(cc);
+         Query query = cc.getDatastore().createQuery(relation, cc.getCurrentUser());
          query.addFilter(relation.lastUpdateDate, FilterOperation.LESS_THAN_OR_EQUAL,
                olderThanDate);
          query.addSort(relation.lastUpdateDate, Direction.ASCENDING);

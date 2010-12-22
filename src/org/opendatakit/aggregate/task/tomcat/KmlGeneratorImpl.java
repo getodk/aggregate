@@ -17,6 +17,7 @@ package org.opendatakit.aggregate.task.tomcat;
 
 import java.util.Map;
 
+import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.datamodel.FormElementKey;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
@@ -28,9 +29,7 @@ import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.task.KmlGenerator;
 import org.opendatakit.aggregate.task.KmlWorkerImpl;
-import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
-import org.opendatakit.common.security.User;
 
 /**
  * This is a singleton bean.  It cannot have any per-request state.
@@ -49,11 +48,11 @@ public class KmlGeneratorImpl implements KmlGenerator {
 		public KmlRunner(Form form, SubmissionKey persistentResultsKey,
 				long attemptCount, FormElementModel titleField,
 				FormElementModel geopointField, FormElementModel imageField,
-				String baseWebServerUrl, Datastore datastore, User user) {
+				String baseWebServerUrl, CallingContext cc) {
 			
 			impl = new KmlWorkerImpl(form, persistentResultsKey, attemptCount,
 					titleField, geopointField, imageField, baseWebServerUrl,
-					datastore, user);
+					cc);
 		}
 
 		@Override
@@ -65,8 +64,8 @@ public class KmlGeneratorImpl implements KmlGenerator {
 	@Override
 	public void createKmlTask(Form form, SubmissionKey persistentResultsKey, long attemptCount,
 			String baseWebServerUrl,
-			Datastore datastore, User user) throws ODKDatastoreException, ODKFormNotFoundException {
-		Submission s = Submission.fetchSubmission(persistentResultsKey.splitSubmissionKey(), datastore, user);
+			CallingContext cc) throws ODKDatastoreException, ODKFormNotFoundException {
+		Submission s = Submission.fetchSubmission(persistentResultsKey.splitSubmissionKey(), cc);
 	    PersistentResults r = new PersistentResults(s);
 	    Map<String,String> params = r.getRequestParameters();
 	    FormElementModel titleField = null;
@@ -94,7 +93,7 @@ public class KmlGeneratorImpl implements KmlGenerator {
 	    }
 		KmlRunner runner = new KmlRunner(form, persistentResultsKey, attemptCount,
 				titleField, geopointField, imageField, baseWebServerUrl,
-				datastore, user);
+				cc);
 		AggregrateThreadExecutor exec = AggregrateThreadExecutor
 				.getAggregateThreadExecutor();
 		exec.execute(runner);

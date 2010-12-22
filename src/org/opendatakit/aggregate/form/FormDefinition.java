@@ -15,12 +15,11 @@ package org.opendatakit.aggregate.form;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.datamodel.BinaryContent;
 import org.opendatakit.aggregate.datamodel.DynamicCommonFieldsBase;
@@ -109,8 +108,8 @@ public class FormDefinition {
 													DynamicCommonFieldsBase topLevel, 
 													DynamicCommonFieldsBase parent,
 													Long ordinal,
-													Datastore datastore, User user ) throws ODKDatastoreException {
-		FormDataModel fdm = FormDataModel.createRelation(datastore, user);
+													CallingContext cc ) throws ODKDatastoreException {
+		FormDataModel fdm = FormDataModel.createRelation(cc);
 		FormDataModel d;
 		
 		if ( topLevel == null || 
@@ -123,7 +122,9 @@ public class FormDefinition {
 		final String parentURI = (parent == null) ? null : parent.getUri();
 		
 		// define the table...
-		d = datastore.createEntityUsingRelation(fdm, user);
+		Datastore ds = cc.getDatastore();
+		User user = cc.getCurrentUser();
+		d = ds.createEntityUsingRelation(fdm, user);
 		list.add(d);
 		// reset the PK to be the PK of the table we are representing
 		d.setStringField(fdm.primaryKey, form.getUri());
@@ -139,24 +140,16 @@ public class FormDefinition {
 		d.setStringField(fdm.persistAsTable, form.getTableName());
 		d.setStringField(fdm.persistAsSchema, form.getSchemaName());
 		
-		// enforce defined ordinal positions based upon alphabetical sort
-		List<DataField> sortedFields = new ArrayList<DataField>();
-		sortedFields.addAll(form.getFieldList());
-		Collections.sort(sortedFields, new Comparator<DataField>() {
-			@Override
-			public int compare(DataField o1, DataField o2) {
-				return o1.getName().compareTo(o2.getName());
-			}
-		});
+		// enforce defined ordinal positions based upon order in fieldList
 		
 		// loop through the fields...
 		Long l = 0L;
-		for ( DataField f : sortedFields ) {
+		for ( DataField f : form.getFieldList() ) {
 			if ( f.getName().startsWith("_")) continue; // ignore metadata
 			++l;
 			
 			// this field should be in the fdm model...
-			d = datastore.createEntityUsingRelation(fdm, user);
+			d = ds.createEntityUsingRelation(fdm, user);
 			list.add(d);
 			d.setStringField(fdm.primaryKey, form.getUri() + "-" + Long.toString(l));
 			d.setLongField(fdm.ordinalNumber, l);
@@ -206,19 +199,20 @@ public class FormDefinition {
 			TopLevelDynamicBase topLevel, 
 			DynamicCommonFieldsBase parent,
 			Long ordinal,
-			Datastore datastore, User user ) throws ODKDatastoreException {
+			CallingContext cc ) throws ODKDatastoreException {
 		
-		FormDataModel fdm = FormDataModel.createRelation(datastore, user);
+		FormDataModel fdm = FormDataModel.createRelation(cc);
 		FormDataModel d;
 		
 		// we are making use of the fact that the PK in the 
 		// FormDataModel is the PK within the relation model.
-		final EntityKey k = new EntityKey( fdm, topLevel.getUri());
 		final String topLevelURI = topLevel.getUri();
 		final String parentURI = parent.getUri(); // there better be a parent!!!
 		
+		Datastore ds = cc.getDatastore();
+		User user = cc.getCurrentUser();
 		// record for binary content...
-		d = datastore.createEntityUsingRelation(fdm, user);
+		d = ds.createEntityUsingRelation(fdm, user);
 		d.setStringField(fdm.primaryKey, binaryContentUri);
 		list.add(d);
 		final String bcURI = d.getUri();
@@ -232,7 +226,7 @@ public class FormDefinition {
 		d.setStringField(fdm.persistAsSchema, fdm.getSchemaName());
 
 		// record for versioned binary content...
-		d = datastore.createEntityUsingRelation(fdm, user);
+		d = ds.createEntityUsingRelation(fdm, user);
 		d.setStringField(fdm.primaryKey, versionedBinaryUri);
 		list.add(d);
 		final String vbcURI = d.getUri();
@@ -246,7 +240,7 @@ public class FormDefinition {
 		d.setStringField(fdm.persistAsSchema, fdm.getSchemaName());
 
 		// record for binary content ref blob..
-		d = datastore.createEntityUsingRelation(fdm, user);
+		d = ds.createEntityUsingRelation(fdm, user);
 		d.setStringField(fdm.primaryKey, versionedRefBlobUri);
 		list.add(d);
 		final String bcbURI = d.getUri();
@@ -260,7 +254,7 @@ public class FormDefinition {
 		d.setStringField(fdm.persistAsSchema, fdm.getSchemaName());
 
 		// record for ref blob...
-		d = datastore.createEntityUsingRelation(fdm, user);
+		d = ds.createEntityUsingRelation(fdm, user);
 		d.setStringField(fdm.primaryKey, refBlobUri);
 		list.add(d);
 		d.setLongField(fdm.ordinalNumber, 1L);
@@ -281,18 +275,19 @@ public class FormDefinition {
 			String refTextTableName,
 			TopLevelDynamicBase topLevel, 
 			Long ordinal,
-			Datastore datastore, User user ) throws ODKDatastoreException {
+			CallingContext cc ) throws ODKDatastoreException {
 		
-		FormDataModel fdm = FormDataModel.createRelation(datastore, user);
+		FormDataModel fdm = FormDataModel.createRelation(cc);
 		FormDataModel d;
 		
 		// we are making use of the fact that the PK in the 
 		// FormDataModel is the PK within the relation model.
-		final EntityKey k = new EntityKey( fdm, topLevel.getUri());
 		final String topLevelURI = topLevel.getUri();
+		Datastore ds = cc.getDatastore();
+		User user = cc.getCurrentUser();
 		
 		// record for long string ref text...
-		d = datastore.createEntityUsingRelation(fdm, user);
+		d = ds.createEntityUsingRelation(fdm, user);
 		d.setStringField(fdm.primaryKey, longStringRefTextUri);
 		list.add(d);
 		final String lst = d.getUri();
@@ -306,7 +301,7 @@ public class FormDefinition {
 		d.setStringField(fdm.persistAsSchema, fdm.getSchemaName());
 
 		// record for ref text...
-		d = datastore.createEntityUsingRelation(fdm, user);
+		d = ds.createEntityUsingRelation(fdm, user);
 		d.setStringField(fdm.primaryKey, refTextUri);
 		list.add(d);
 		d.setLongField(fdm.ordinalNumber, 1L);
@@ -319,16 +314,18 @@ public class FormDefinition {
 		d.setStringField(fdm.persistAsSchema, fdm.getSchemaName());
 	}
 	
-	static final void assertModel(XFormParameters p, List<FormDataModel> model, Datastore datastore, User user) throws ODKDatastoreException {
-		FormDataModel fdm = FormDataModel.createRelation(datastore, user);
+	static final void assertModel(XFormParameters p, List<FormDataModel> model, CallingContext cc) throws ODKDatastoreException {
+		FormDataModel fdm = FormDataModel.createRelation(cc);
 		if ( model == null || model.size() == 0 ) {
 			throw new IllegalArgumentException("should never be null");
 		}
+		Datastore ds = cc.getDatastore();
+		User user = cc.getCurrentUser();
 		for ( FormDataModel m : model ) {
 			try {
-				datastore.getEntity(fdm, m.getUri(), user);
+				ds.getEntity(fdm, m.getUri(), user);
 			} catch ( ODKEntityNotFoundException e ) {
-				datastore.putEntity(m, user);
+				ds.putEntity(m, user);
 			}
 		}
 		
@@ -336,8 +333,8 @@ public class FormDefinition {
 		String definitionUri = model.get(0).getTopLevelAuri();
 		String formUri = CommonFieldsBase.newMD5HashUri(p.formId);
 		
-		SubmissionAssociationTable saRelation = SubmissionAssociationTable.createRelation(datastore, user);
-		SubmissionAssociationTable sa = datastore.createEntityUsingRelation(saRelation, user);
+		SubmissionAssociationTable saRelation = SubmissionAssociationTable.createRelation(cc);
+		SubmissionAssociationTable sa = ds.createEntityUsingRelation(saRelation, user);
 		
 		sa.setStringField(saRelation.primaryKey, definitionUri );
 		sa.setDomAuri(formUri); // md5 of submissionFormId
@@ -350,16 +347,16 @@ public class FormDefinition {
 		sa.setUriSubmissionDataModel(definitionUri); // in general, this is arbitrary.  Fixed for FormInfo...
 		
 		try {
-			datastore.getEntity(saRelation, definitionUri, user);
+			ds.getEntity(saRelation, definitionUri, user);
 		} catch ( ODKEntityNotFoundException e ) {
-			datastore.putEntity(sa, user);
+			ds.putEntity(sa, user);
 		}
 	}
 	
-	static final Submission assertFormInfoRecord(XFormParameters thisFormVersion, String thisFormName, String thisFormDescription, String formIdMd5Uri, Datastore datastore, User user) throws ODKDatastoreException {
-		FormInfoTable fiRelation = Form.getFormInfoRelation(datastore);
-		FormDefinition formInfoDefinition = Form.getFormInfoDefinition(datastore);
-		return assertFormInfoRecord(fiRelation, formInfoDefinition, thisFormVersion, thisFormName, thisFormDescription, formIdMd5Uri, datastore, user); 
+	static final Submission assertFormInfoRecord(XFormParameters thisFormVersion, String thisFormName, String thisFormDescription, String formIdMd5Uri, CallingContext cc) throws ODKDatastoreException {
+		FormInfoTable fiRelation = Form.getFormInfoRelation(cc);
+		FormDefinition formInfoDefinition = Form.getFormInfoDefinition(cc);
+		return assertFormInfoRecord(fiRelation, formInfoDefinition, thisFormVersion, thisFormName, thisFormDescription, formIdMd5Uri, cc); 
 	}
 
 	/**
@@ -377,52 +374,60 @@ public class FormDefinition {
 	 * @return
 	 * @throws ODKDatastoreException
 	 */
-	static final Submission assertFormInfoRecord(FormInfoTable fiRelation, FormDefinition formInfoDefinition, XFormParameters thisFormVersion, String thisFormName, String thisFormDescription, String thisFormIdMd5Uri, Datastore datastore, User user) throws ODKDatastoreException {
-		// Now create a record in the FormInfo table for the PersistentResults table itself...
-		TopLevelDynamicBase fi = null;
+	static final Submission assertFormInfoRecord(FormInfoTable fiRelation, FormDefinition formInfoDefinition, XFormParameters thisFormVersion, String thisFormName, String thisFormDescription, String thisFormIdMd5Uri, CallingContext cc) throws ODKDatastoreException {
+		boolean oldAsDaemon = cc.getAsDeamon();
 		try {
-			fi = datastore.getEntity(fiRelation, thisFormIdMd5Uri, user);
-		} catch ( ODKEntityNotFoundException e ) {
-			// we must have failed before persisting a FormInfo record
-			// or this must be our first time through...
-			Submission formInfo = new Submission(thisFormVersion.modelVersion, thisFormVersion.uiVersion,
-					thisFormIdMd5Uri, formInfoDefinition, datastore, user);
-			((StringSubmissionType) formInfo.getElementValue(FormInfo.formId)).setValueFromString(thisFormVersion.formId);
-			// default description...
-			{
-				RepeatSubmissionType r = (RepeatSubmissionType) formInfo.getElementValue(FormInfo.fiDescriptionTable);
-				SubmissionSet sDescription = new SubmissionSet(formInfo, 1L, FormInfo.fiDescriptionTable, formInfoDefinition, formInfo.getKey(), datastore, user);
-				((StringSubmissionType) sDescription.getElementValue(FormInfo.formName)).setValueFromString(thisFormName);
-				((StringSubmissionType) sDescription.getElementValue(FormInfo.description)).setValueFromString(thisFormDescription);
-				r.addSubmissionSet(sDescription);
+			cc.setAsDaemon(true);
+			Datastore ds = cc.getDatastore();
+			User user = cc.getCurrentUser();
+			// Now create a record in the FormInfo table for the PersistentResults table itself...
+			TopLevelDynamicBase fi = null;
+			try {
+				fi = ds.getEntity(fiRelation, thisFormIdMd5Uri, user);
+			} catch ( ODKEntityNotFoundException e ) {
+				// we must have failed before persisting a FormInfo record
+				// or this must be our first time through...
+				Submission formInfo = new Submission(thisFormVersion.modelVersion, thisFormVersion.uiVersion,
+						thisFormIdMd5Uri, formInfoDefinition, cc);
+				((StringSubmissionType) formInfo.getElementValue(FormInfo.formId)).setValueFromString(thisFormVersion.formId);
+				// default description...
+				{
+					RepeatSubmissionType r = (RepeatSubmissionType) formInfo.getElementValue(FormInfo.fiDescriptionTable);
+					SubmissionSet sDescription = new SubmissionSet(formInfo, 1L, FormInfo.fiDescriptionTable, formInfoDefinition, formInfo.getKey(), cc);
+					((StringSubmissionType) sDescription.getElementValue(FormInfo.formName)).setValueFromString(thisFormName);
+					((StringSubmissionType) sDescription.getElementValue(FormInfo.description)).setValueFromString(thisFormDescription);
+					r.addSubmissionSet(sDescription);
+				}
+				// fileset...
+				{
+					RepeatSubmissionType r = (RepeatSubmissionType) formInfo.getElementValue(FormInfo.fiFilesetTable);
+					SubmissionSet sFileset = new SubmissionSet(formInfo, 1L, FormInfo.fiFilesetTable, formInfoDefinition, formInfo.getKey(), cc);
+					((LongSubmissionType) sFileset.getElementValue(FormInfo.rootElementModelVersion)).setValueFromString(thisFormVersion.modelVersion.toString());
+					((LongSubmissionType) sFileset.getElementValue(FormInfo.rootElementUiVersion)).setValueFromString(thisFormVersion.uiVersion.toString());
+					((BooleanSubmissionType) sFileset.getElementValue(FormInfo.isFilesetComplete)).setValueFromString("yes");
+					((BooleanSubmissionType) sFileset.getElementValue(FormInfo.isDownloadAllowed)).setValueFromString("yes");
+					r.addSubmissionSet(sFileset);
+				}
+				// submission...
+				{
+					RepeatSubmissionType r = (RepeatSubmissionType) formInfo.getElementValue(FormInfo.fiSubmissionTable);
+					SubmissionSet sSubmission = new SubmissionSet(formInfo, 1L, FormInfo.fiSubmissionTable, formInfoDefinition, formInfo.getKey(), cc);
+					((StringSubmissionType) sSubmission.getElementValue(FormInfo.submissionFormId)).setValueFromString(thisFormVersion.formId);
+					((LongSubmissionType) sSubmission.getElementValue(FormInfo.submissionModelVersion)).setValueFromString(thisFormVersion.modelVersion.toString());
+					((LongSubmissionType) sSubmission.getElementValue(FormInfo.submissionUiVersion)).setValueFromString(thisFormVersion.uiVersion.toString());
+					r.addSubmissionSet(sSubmission);
+				}
+				formInfo.persist(cc);
+				
+				fi = ds.getEntity(fiRelation, thisFormIdMd5Uri, user);
 			}
-			// fileset...
-			{
-				RepeatSubmissionType r = (RepeatSubmissionType) formInfo.getElementValue(FormInfo.fiFilesetTable);
-				SubmissionSet sFileset = new SubmissionSet(formInfo, 1L, FormInfo.fiFilesetTable, formInfoDefinition, formInfo.getKey(), datastore, user);
-				((LongSubmissionType) sFileset.getElementValue(FormInfo.rootElementModelVersion)).setValueFromString(thisFormVersion.modelVersion.toString());
-				((LongSubmissionType) sFileset.getElementValue(FormInfo.rootElementUiVersion)).setValueFromString(thisFormVersion.uiVersion.toString());
-				((BooleanSubmissionType) sFileset.getElementValue(FormInfo.isFilesetComplete)).setValueFromString("yes");
-				((BooleanSubmissionType) sFileset.getElementValue(FormInfo.isDownloadAllowed)).setValueFromString("yes");
-				r.addSubmissionSet(sFileset);
-			}
-			// submission...
-			{
-				RepeatSubmissionType r = (RepeatSubmissionType) formInfo.getElementValue(FormInfo.fiSubmissionTable);
-				SubmissionSet sSubmission = new SubmissionSet(formInfo, 1L, FormInfo.fiSubmissionTable, formInfoDefinition, formInfo.getKey(), datastore, user);
-				((StringSubmissionType) sSubmission.getElementValue(FormInfo.submissionFormId)).setValueFromString(thisFormVersion.formId);
-				((LongSubmissionType) sSubmission.getElementValue(FormInfo.submissionModelVersion)).setValueFromString(thisFormVersion.modelVersion.toString());
-				((LongSubmissionType) sSubmission.getElementValue(FormInfo.submissionUiVersion)).setValueFromString(thisFormVersion.uiVersion.toString());
-				r.addSubmissionSet(sSubmission);
-			}
-			formInfo.persist(datastore, user);
 			
-			fi = datastore.getEntity(fiRelation, thisFormIdMd5Uri, user);
+			// and retrieve cleanly... 
+		    Submission formInfo = new Submission(fi, formInfoDefinition, cc);
+		    return formInfo;
+		} finally {
+			cc.setAsDaemon(oldAsDaemon);
 		}
-		
-		// and retrieve cleanly... 
-	    Submission formInfo = new Submission(fi, formInfoDefinition, datastore, user);
-	    return formInfo;
 	}
 
 	static final FormElementModel findElement(FormElementModel group, DataField backingKey) {
@@ -433,7 +438,7 @@ public class FormDefinition {
 		return null;
 	}
 
-	public static final FormDefinition getFormDefinition(XFormParameters p, Datastore datastore, User user) {
+	public static final FormDefinition getFormDefinition(XFormParameters p, CallingContext cc) {
 
 		if ( p.formId.indexOf('/') != -1 ) {
 			throw new IllegalArgumentException("formId is not well formed: " + p.formId);
@@ -441,69 +446,77 @@ public class FormDefinition {
 		
 		FormDefinition fd = formDefinitions.get(p);
 		if ( fd == null ) {
-			List<? extends CommonFieldsBase> fdmList = null;
+			boolean asDaemon = cc.getAsDeamon();
 			try {
-				// changes here should be paralleled in the FormParserForJavaRosa
-			    SubmissionAssociationTable saRelation = SubmissionAssociationTable.createRelation(datastore, user);
-			    String submissionFormIdUri = CommonFieldsBase.newMD5HashUri(p.formId); // key under which submission is located...
-			    Query q = datastore.createQuery(saRelation, user);
-			    q.addFilter( saRelation.domAuri, Query.FilterOperation.EQUAL, submissionFormIdUri);
-			    List<? extends CommonFieldsBase> l = q.executeQuery(0);
-			    SubmissionAssociationTable sa = null;
-			    String fdmSubmissionUri = CommonFieldsBase.newUri();
-			    for ( CommonFieldsBase b : l ) {
-			    	SubmissionAssociationTable t = (SubmissionAssociationTable) b;
-			    	if ( t.getXFormParameters().equals(p) ) {
-			    		sa = t;
-			    		fdmSubmissionUri = sa.getUriSubmissionDataModel();
-			    		break;
-			    	}
-			    }
-			    if ( sa == null ) return null;
-			    // OK.  Found an sa record -- use it to find the fdm entries...
-			    FormDataModel fdm = FormDataModel.createRelation(datastore, user);
-				Query query = datastore.createQuery(fdm, user);
-				query.addFilter(fdm.topLevelAuri, FilterOperation.EQUAL, fdmSubmissionUri);
-				fdmList = query.executeQuery(0);
-			} catch (ODKDatastoreException e) {
-				return null;
-			}
-			if ( fdmList == null || fdmList.size() == 0 ) {
-				return null;
-			}
-			
-			fd = new FormDefinition(p, fdmList);
-			
-			if ( fd != null ) {
+				cc.setAsDaemon(true);
+				List<? extends CommonFieldsBase> fdmList = null;
+				Datastore ds = cc.getDatastore();
+				User user = cc.getCurrentUser();
 				try {
-					// update the form data model with the actual dimensions
-					// of its columns -- or create the tables from scratch...
-					for ( Map.Entry<String, DynamicCommonFieldsBase> e : fd.backingTableMap.entrySet() ) {
-						
-						datastore.assertRelation(e.getValue(), user);
-					}
-					
-					// and compute the set of element URIs that 
-					// have text within the longStringText table.
-					
-					// this should be a small number, so we should be able to cache
-					// it effectively.  It will simplify the follow-on query construction.
-					LongStringRefText lsr = fd.getLongStringRefTextTable();
-					
-					Query queryLsr = datastore.createQuery(lsr, user);
-					List<?> fdmsWithLongStrings = queryLsr.executeDistinctValueForDataField( lsr.uriFormDataModel );
-					fd.tagLongStringElements(fdmsWithLongStrings);
-					
-				} catch (ODKDatastoreException e1) {
-					e1.printStackTrace();
-					fd = null;
+					// changes here should be paralleled in the FormParserForJavaRosa
+				    SubmissionAssociationTable saRelation = SubmissionAssociationTable.createRelation(cc);
+				    String submissionFormIdUri = CommonFieldsBase.newMD5HashUri(p.formId); // key under which submission is located...
+				    Query q = ds.createQuery(saRelation, user);
+				    q.addFilter( saRelation.domAuri, Query.FilterOperation.EQUAL, submissionFormIdUri);
+				    List<? extends CommonFieldsBase> l = q.executeQuery(0);
+				    SubmissionAssociationTable sa = null;
+				    String fdmSubmissionUri = CommonFieldsBase.newUri();
+				    for ( CommonFieldsBase b : l ) {
+				    	SubmissionAssociationTable t = (SubmissionAssociationTable) b;
+				    	if ( t.getXFormParameters().equals(p) ) {
+				    		sa = t;
+				    		fdmSubmissionUri = sa.getUriSubmissionDataModel();
+				    		break;
+				    	}
+				    }
+				    if ( sa == null ) return null;
+				    // OK.  Found an sa record -- use it to find the fdm entries...
+				    FormDataModel fdm = FormDataModel.createRelation(cc);
+					Query query = ds.createQuery(fdm, user);
+					query.addFilter(fdm.topLevelAuri, FilterOperation.EQUAL, fdmSubmissionUri);
+					fdmList = query.executeQuery(0);
+				} catch (ODKDatastoreException e) {
+					return null;
 				}
-
-				// errors might have cleared the fd...
+				if ( fdmList == null || fdmList.size() == 0 ) {
+					return null;
+				}
+				
+				fd = new FormDefinition(p, fdmList, cc);
+				
 				if ( fd != null ) {
-					// remember details about this form
-					formDefinitions.put(p, fd);
+					try {
+						// update the form data model with the actual dimensions
+						// of its columns -- or create the tables from scratch...
+						for ( Map.Entry<String, DynamicCommonFieldsBase> e : fd.backingTableMap.entrySet() ) {
+							
+							ds.assertRelation(e.getValue(), user);
+						}
+						
+						// and compute the set of element URIs that 
+						// have text within the longStringText table.
+						
+						// this should be a small number, so we should be able to cache
+						// it effectively.  It will simplify the follow-on query construction.
+						LongStringRefText lsr = fd.getLongStringRefTextTable();
+						
+						Query queryLsr = ds.createQuery(lsr, user);
+						List<?> fdmsWithLongStrings = queryLsr.executeDistinctValueForDataField( lsr.uriFormDataModel );
+						fd.tagLongStringElements(fdmsWithLongStrings);
+						
+					} catch (ODKDatastoreException e1) {
+						e1.printStackTrace();
+						fd = null;
+					}
+	
+					// errors might have cleared the fd...
+					if ( fd != null ) {
+						// remember details about this form
+						formDefinitions.put(p, fd);
+					}
 				}
+			} finally {
+				cc.setAsDaemon(asDaemon);
 			}
 		}
 		return fd;
@@ -513,7 +526,7 @@ public class FormDefinition {
 		formDefinitions.remove(p);
 	}
 
-	public FormDefinition(XFormParameters xformParameters, List<?> formDataModelList) {
+	public FormDefinition(XFormParameters xformParameters, List<?> formDataModelList, CallingContext cc) {
 		this.xformParameters = xformParameters;
 		
 		// map of tableName to map of columnName, FDM record
@@ -666,15 +679,15 @@ public class FormDefinition {
 		if ( xformParameters.formId.equals(Form.URI_FORM_ID_VALUE_FORM_INFO) ) {
 			// it is the FormInfo table -- pre-populate the backingTableMap
 			// with the table relations we know...
-			FormInfo.populateBackingTableMap(backingTableMap);
+			FormInfo.populateBackingTableMap(backingTableMap, cc);
 			isWellKnownForm = true;
 		} else if ( xformParameters.formId.equals(PersistentResults.FORM_ID_PERSISTENT_RESULT)) {
 			// it is the PersistentResults table - pre-populate the backingTableMap
-			PersistentResults.populateBackingTableMap(backingTableMap);
+			PersistentResults.populateBackingTableMap(backingTableMap, cc);
 			isWellKnownForm = true;
 		} else if ( xformParameters.formId.equals(MiscTasks.FORM_ID_MISC_TASKS)) {
 			// it is the PersistentResults table - pre-populate the backingTableMap
-			MiscTasks.populateBackingTableMap(backingTableMap);
+			MiscTasks.populateBackingTableMap(backingTableMap, cc);
 			isWellKnownForm = true;
 		}
 		
@@ -920,38 +933,41 @@ public class FormDefinition {
 		}
 	}
 
-	public void setLongString(String text, String parentKey, String uriFormDataModel, EntityKey topLevelTableAuri, Datastore datastore,
-			User user) throws ODKEntityPersistException {
+	public void setLongString(String text, String parentKey, String uriFormDataModel, EntityKey topLevelTableAuri, 
+			CallingContext cc) throws ODKEntityPersistException {
 		
 		long textLimit = refTextTable.value.getMaxCharLen();
 		// TODO: create the parts...
+		Datastore ds = cc.getDatastore();
+		User user = cc.getCurrentUser();
 		long i = 1;
 	    for(long index = 0; index < text.length(); index = index + textLimit) {
 	    	long endCopy = index + textLimit;
 	    	if ( endCopy > text.length() ) endCopy = text.length();
 	    	String subString = text.substring((int) index, (int) endCopy);
-	        RefText eElem = datastore.createEntityUsingRelation(refTextTable, user);
+	        RefText eElem = ds.createEntityUsingRelation(refTextTable, user);
 	        eElem.setTopLevelAuri(topLevelTableAuri.getKey());
 	        eElem.setValue(subString);
 	        
-			LongStringRefText t = datastore.createEntityUsingRelation(longStringRefTextTable, user);
+			LongStringRefText t = ds.createEntityUsingRelation(longStringRefTextTable, user);
 			t.setTopLevelAuri(topLevelTableAuri.getKey());
 			t.setDomAuri(parentKey);
 			t.setSubAuri(eElem.getUri());
 			t.setPart(i++);
 			t.setUriFormDataModel(uriFormDataModel);
 			
-			datastore.putEntity(eElem, user);
-			datastore.putEntity(t, user);
+			ds.putEntity(eElem, user);
+			ds.putEntity(t, user);
 	    }
 	}
 
-	public String getLongString(String parentKey, String uriFormDataModel, Datastore datastore,
-			User user) throws ODKDatastoreException {
+	public String getLongString(String parentKey, String uriFormDataModel, CallingContext cc) throws ODKDatastoreException {
 		
 		StringBuilder b = new StringBuilder();
 		
-		Query q = datastore.createQuery(longStringRefTextTable, user);
+		Datastore ds = cc.getDatastore();
+		User user = cc.getCurrentUser();
+		Query q = ds.createQuery(longStringRefTextTable, user);
 		q.addFilter(longStringRefTextTable.domAuri, FilterOperation.EQUAL, parentKey);
 		q.addFilter(longStringRefTextTable.uriFormDataModel, FilterOperation.EQUAL, uriFormDataModel);
 		q.addSort(longStringRefTextTable.part, Direction.ASCENDING);
@@ -959,7 +975,7 @@ public class FormDefinition {
 		List<? extends CommonFieldsBase> elements = q.executeQuery(ServletConsts.FETCH_LIMIT);
 		for (CommonFieldsBase cb : elements ) {
 			LongStringRefText e = (LongStringRefText) cb;
-			RefText eElem = datastore.getEntity(refTextTable, e.getSubAuri(), user);
+			RefText eElem = ds.getEntity(refTextTable, e.getSubAuri(), user);
 			b.append(eElem.getValue());
 		}
 		return b.toString();

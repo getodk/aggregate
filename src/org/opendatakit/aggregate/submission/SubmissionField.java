@@ -18,9 +18,7 @@
 package org.opendatakit.aggregate.submission;
 
 import org.opendatakit.aggregate.exception.ODKConversionException;
-import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
-import org.opendatakit.common.security.User;
 
 /**
  * Interface for submission field that can be used to store
@@ -79,8 +77,7 @@ public interface SubmissionField<T> extends SubmissionValue{
    * 
    */  
   public BlobSubmissionOutcome setValueFromByteArray(byte[] byteArray,
-		String contentType, Long contentLength, String unrootedFilePath,
-		Datastore datastore, User user)
+		String contentType, Long contentLength, String unrootedFilePath)
 		throws ODKDatastoreException;
   
 }

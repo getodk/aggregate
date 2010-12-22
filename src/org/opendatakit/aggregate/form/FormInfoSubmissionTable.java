@@ -17,6 +17,7 @@ package org.opendatakit.aggregate.form;
 
 import java.util.List;
 
+import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.datamodel.DynamicBase;
 import org.opendatakit.aggregate.datamodel.DynamicCommonFieldsBase;
 import org.opendatakit.aggregate.datamodel.FormDataModel;
@@ -86,11 +87,13 @@ public class FormInfoSubmissionTable extends DynamicBase {
 	
 	private static FormInfoSubmissionTable relation = null;
 	
-	static synchronized final FormInfoSubmissionTable createRelation(Datastore datastore, User user) throws ODKDatastoreException {
+	static synchronized final FormInfoSubmissionTable createRelation(CallingContext cc) throws ODKDatastoreException {
 		if ( relation == null ) {
 			FormInfoSubmissionTable relationPrototype;
-			relationPrototype = new FormInfoSubmissionTable(datastore.getDefaultSchemaName());
-		    datastore.assertRelation(relationPrototype, user); // may throw exception...
+			Datastore ds = cc.getDatastore();
+			User user = cc.getUserService().getDaemonAccountUser();
+			relationPrototype = new FormInfoSubmissionTable(ds.getDefaultSchemaName());
+		    ds.assertRelation(relationPrototype, user); // may throw exception...
 		    // at this point, the prototype has become fully populated
 		    relation = relationPrototype; // set static variable only upon success...
 		}
@@ -100,16 +103,21 @@ public class FormInfoSubmissionTable extends DynamicBase {
 	static final void createFormDataModel(List<FormDataModel> model, Long ordinal, 
 			TopLevelDynamicBase formInfoDefinitionRelation, 
 			DynamicCommonFieldsBase formInfoTableRelation, 
-			Datastore datastore, User user) throws ODKDatastoreException {
+			CallingContext cc) throws ODKDatastoreException {
 		
-		FormInfoSubmissionTable submissionRelation = createRelation(datastore, user);
-		
-		FormDefinition.buildTableFormDataModel( model, 
-				submissionRelation, 
-				formInfoDefinitionRelation, // top level table
-				formInfoTableRelation, // also the parent table
-				ordinal,
-				datastore, user );
+		FormInfoSubmissionTable submissionRelation = createRelation(cc);
+		boolean asDaemon = cc.getAsDeamon();
+		try {
+			cc.setAsDaemon(true);
+			FormDefinition.buildTableFormDataModel( model, 
+					submissionRelation, 
+					formInfoDefinitionRelation, // top level table
+					formInfoTableRelation, // also the parent table
+					ordinal,
+					cc );
+		} finally {
+			cc.setAsDaemon(asDaemon);
+		}
 	}
 
 }

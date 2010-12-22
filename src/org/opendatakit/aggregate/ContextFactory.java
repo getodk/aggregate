@@ -17,8 +17,15 @@
 
 package org.opendatakit.aggregate;
 
+import javax.servlet.ServletContext;
+
+import org.opendatakit.aggregate.constants.BeanDefs;
+import org.opendatakit.common.persistence.Datastore;
+import org.opendatakit.common.security.User;
+import org.opendatakit.common.security.UserService;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.web.context.support.WebApplicationContextUtils;
 
 /**
  * Server Context creates a singleton for application context to prevent unnecessary construction
@@ -36,20 +43,63 @@ public class ContextFactory {
      */
     private static final ApplicationContext applicationContext = new ClassPathXmlApplicationContext(APP_CONTEXT_PATH);
 
+    public static final class CallingContextImpl implements CallingContext {
+    	final ServletContext ctxt;
+    	final Datastore datastore;
+    	final UserService userService;
+    	boolean asDaemon = false;
+    	
+    	CallingContextImpl(ServletContext ctxt) {
+    		this.ctxt = ctxt;
+    		this.datastore = (Datastore) getBean(BeanDefs.DATASTORE_BEAN);
+    		this.userService = (UserService) getBean(BeanDefs.USER_BEAN);
+    	}
+    	
+    	public Object getBean(String beanName) {
+    		if ( ctxt == null ) {
+    			return applicationContext.getBean(beanName);
+    		} else {
+    			return WebApplicationContextUtils.getRequiredWebApplicationContext(ctxt).getBean(beanName);
+    		}
+    	}
+    	
+    	public Datastore getDatastore() {
+    		return datastore;
+    	}
+    	
+    	public UserService getUserService() {
+    		return userService;
+    	}
+    	
+    	public void setAsDaemon(boolean asDaemon ) {
+    		this.asDaemon = true;
+    	}
+    	
+    	public boolean getAsDeamon() {
+    		return asDaemon;
+    	}
+    	
+    	public User getCurrentUser() {
+    		return asDaemon ? userService.getDaemonAccountUser() : userService.getCurrentUser();
+    	}
+    }
 
     /**
      * Private constructor 
      */
     private ContextFactory() {}
-
+    
     /**
-     * Get the application context factory singleton instance
+     * For unit testing only...
      * 
+     * @param beanName
      * @return
-     *    application context instance
      */
-    public static ApplicationContext get() {
-      return applicationContext;
+    public static Object getbean(String beanName) {
+    	return applicationContext.getBean(beanName);
     }
-  
+    
+    public static CallingContext getCallingContext(ServletContext ctxt) {
+    	return new CallingContextImpl(ctxt);
+    }
 }

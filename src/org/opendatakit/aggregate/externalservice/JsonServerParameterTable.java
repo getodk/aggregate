@@ -13,6 +13,7 @@
  */
 package org.opendatakit.aggregate.externalservice;
 
+import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.Datastore;
@@ -77,12 +78,14 @@ public final class JsonServerParameterTable extends CommonFieldsBase {
 
 	private static JsonServerParameterTable relation = null;
 
-	public static synchronized final JsonServerParameterTable createRelation(Datastore datastore, User user)
+	public static synchronized final JsonServerParameterTable createRelation(CallingContext cc)
 			throws ODKDatastoreException {
 		if (relation == null) {
 			JsonServerParameterTable relationPrototype;
-	        relationPrototype = new JsonServerParameterTable(datastore.getDefaultSchemaName());
-	        datastore.assertRelation(relationPrototype, user); // may throw exception...
+			Datastore ds = cc.getDatastore();
+			User user = cc.getUserService().getDaemonAccountUser();
+	        relationPrototype = new JsonServerParameterTable(ds.getDefaultSchemaName());
+	        ds.assertRelation(relationPrototype, user); // may throw exception...
 	        // at this point, the prototype has become fully populated
 	        relation = relationPrototype; // set static variable only upon success...
 		}

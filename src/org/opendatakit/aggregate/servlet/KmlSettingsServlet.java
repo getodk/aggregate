@@ -26,8 +26,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang.StringEscapeUtils;
+import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.ContextFactory;
-import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.datamodel.FormElementKey;
@@ -35,9 +35,6 @@ import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.common.constants.HtmlConsts;
-import org.opendatakit.common.persistence.Datastore;
-import org.opendatakit.common.security.User;
-import org.opendatakit.common.security.UserService;
 
 /**
  * Servlet to generate the XML list of forms to be presented as the API for
@@ -86,13 +83,7 @@ public class KmlSettingsServlet extends ServletUtilBase {
    */
   @Override
   public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-    // verify user is logged in
-    if (!verifyCredentials(req, resp)) {
-      return;
-    }
-
-    UserService userService = (UserService) ContextFactory.get().getBean(BeanDefs.USER_BEAN);
-    User user = userService.getCurrentUser();
+	CallingContext cc = ContextFactory.getCallingContext(getServletContext());
 
     // get parameter
     String odkId = getParameter(req, ServletConsts.FORM_ID);
@@ -102,10 +93,9 @@ public class KmlSettingsServlet extends ServletUtilBase {
     }
 
     // get form
-    Datastore ds = (Datastore) ContextFactory.get().getBean(BeanDefs.DATASTORE_BEAN);
     Form form = null;
     try {
-      form = Form.retrieveForm(odkId, ds, user);
+      form = Form.retrieveForm(odkId, cc);
       geopointNodesNames = new ArrayList<FormElementKey>();
       binaryNodeNames = new ArrayList<FormElementKey>();
       allNodesNames = new ArrayList<FormElementKey>();

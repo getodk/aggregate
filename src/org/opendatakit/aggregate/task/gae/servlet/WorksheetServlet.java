@@ -22,8 +22,8 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.ContextFactory;
-import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.externalservice.ExternalServiceConsts;
 import org.opendatakit.aggregate.constants.externalservice.ExternalServiceOption;
@@ -32,9 +32,6 @@ import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.servlet.ServletUtilBase;
 import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.task.WorksheetCreatorWorkerImpl;
-import org.opendatakit.common.persistence.Datastore;
-import org.opendatakit.common.security.User;
-import org.opendatakit.common.security.UserService;
 
 /**
  * 
@@ -62,9 +59,9 @@ public class WorksheetServlet extends ServletUtilBase {
    */
   @Override
   public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-
-    UserService userService = (UserService) ContextFactory.get().getBean(BeanDefs.USER_BEAN);
-    User user = userService.getCurrentUser();
+    // TODO: talk to MITCH about the fact the user will be incorrect
+	CallingContext cc = ContextFactory.getCallingContext(getServletContext());
+	cc.setAsDaemon(true);
 
     // get parameter
     String formId = getParameter(req, ServletConsts.FORM_ID);
@@ -103,19 +100,17 @@ public class WorksheetServlet extends ServletUtilBase {
     }
     Long attemptCount = Long.valueOf(attemptCountString);
 
-    Datastore ds = (Datastore) ContextFactory.get().getBean(BeanDefs.DATASTORE_BEAN);
-
     // get form
     Form form;
     try {
-      form = Form.retrieveForm(formId, ds, user);
+      form = Form.retrieveForm(formId, cc);
     } catch (ODKFormNotFoundException e) {
       odkIdNotFoundError(resp);
       return;
     }
 
     WorksheetCreatorWorkerImpl ws = new WorksheetCreatorWorkerImpl(form, miscTasksKey, attemptCount, 
-    					spreadsheetName, esType, getServerURL(req), ds, user);
+    					spreadsheetName, esType, getServerURL(req), cc);
 
     ws.worksheetCreator();
   }

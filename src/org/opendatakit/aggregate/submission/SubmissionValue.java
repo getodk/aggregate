@@ -21,13 +21,12 @@ package org.opendatakit.aggregate.submission;
 
 import java.util.List;
 
+import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.format.element.ElementFormatter;
-import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.EntityKey;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
-import org.opendatakit.common.security.User;
 
 /**
  * Interface for submission value that can be used to store a submission value
@@ -48,7 +47,7 @@ public interface SubmissionValue extends SubmissionElement {
    *          user requesting data
  * @throws ODKDatastoreException 
    */
-  public void getValueFromEntity(Datastore datastore, User user)
+  public void getValueFromEntity(CallingContext cc)
   		throws ODKDatastoreException;
 
   /**
@@ -63,11 +62,10 @@ public interface SubmissionValue extends SubmissionElement {
   /**
    * Recursively persist this submission to the datastore.
    * 
-   * @param datastore
-   * @param uriUser
+   * @param callingContext
  * @throws ODKEntityPersistException 
    */
-  public void persist(Datastore datastore, User user ) throws ODKEntityPersistException;
+  public void persist(CallingContext cc ) throws ODKEntityPersistException;
   
   /**
    * Format value for output

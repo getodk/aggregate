@@ -15,7 +15,6 @@
  */
 package org.opendatakit.common.security;
 
-import java.util.List;
 
 /**
  * 

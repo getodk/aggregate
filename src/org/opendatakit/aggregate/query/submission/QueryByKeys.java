@@ -18,15 +18,14 @@ package org.opendatakit.aggregate.query.submission;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
 import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.submission.SubmissionKeyPart;
-import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
-import org.opendatakit.common.security.User;
 
 /**
  * 
@@ -38,13 +37,10 @@ public class QueryByKeys {
 
   private List<SubmissionKey> submissionKeys;
 
-  private Datastore ds;
+  private CallingContext cc;
   
-  private User user;
-  
-  public QueryByKeys(List<SubmissionKey> keys, Datastore datastore, User user) throws ODKFormNotFoundException {
-    ds = datastore;
-    this.user = user;
+  public QueryByKeys(List<SubmissionKey> keys, CallingContext cc) throws ODKFormNotFoundException {
+    this.cc = cc;
     submissionKeys = keys;
   }
 
@@ -54,7 +50,7 @@ public class QueryByKeys {
     for (SubmissionKey submissionKey : submissionKeys) {
       try {
   		List<SubmissionKeyPart> parts = submissionKey.splitSubmissionKey();
-  		submissions.add( Submission.fetchSubmission(parts, ds, user) );
+  		submissions.add( Submission.fetchSubmission(parts, cc) );
       } catch (ODKEntityNotFoundException e) {
         // TODO Decide how to handle the exceptions
         throw new ODKIncompleteSubmissionData(e);

@@ -15,14 +15,11 @@
  */
 package org.opendatakit.aggregate.task.tomcat;
 
-import org.opendatakit.aggregate.ContextFactory;
-import org.opendatakit.aggregate.constants.BeanDefs;
+import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
 import org.opendatakit.aggregate.externalservice.FormServiceCursor;
 import org.opendatakit.aggregate.task.UploadSubmissions;
 import org.opendatakit.aggregate.task.UploadSubmissionsWorkerImpl;
-import org.opendatakit.common.persistence.Datastore;
-import org.opendatakit.common.security.User;
 
 /**
  * This is a singleton bean.  It cannot have any per-request state.
@@ -39,8 +36,8 @@ public class UploadSubmissionsImpl implements UploadSubmissions {
 		final UploadSubmissionsWorkerImpl impl;
 
 		public UploadSubmissionsRunner(FormServiceCursor fsc,
-				String baseWebServerUrl, Datastore datastore, User user) {
-			impl = new UploadSubmissionsWorkerImpl(fsc, baseWebServerUrl, datastore, user);
+				String baseWebServerUrl, CallingContext cc) {
+			impl = new UploadSubmissionsWorkerImpl(fsc, baseWebServerUrl, cc);
 		}
 
 		@Override
@@ -55,12 +52,10 @@ public class UploadSubmissionsImpl implements UploadSubmissions {
 	}
 
   @Override
-  public void createFormUploadTask(FormServiceCursor fsc, String baseWebServerUrl, User user)
+  public void createFormUploadTask(FormServiceCursor fsc, String baseWebServerUrl, CallingContext cc)
       throws ODKExternalServiceException {
 
-	  Datastore datastore = (Datastore) ContextFactory.get().getBean(BeanDefs.DATASTORE_BEAN);
-	UploadSubmissionsRunner ur = new UploadSubmissionsRunner(fsc,
-				baseWebServerUrl, datastore, user);
+	UploadSubmissionsRunner ur = new UploadSubmissionsRunner(fsc, baseWebServerUrl, cc);
     System.out.println("THIS IS UPLOAD TASK IN TOMCAT");
     AggregrateThreadExecutor exec = AggregrateThreadExecutor.getAggregateThreadExecutor();
     exec.execute(ur);

@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.logging.Logger;
 
-import org.opendatakit.aggregate.ContextFactory;
+import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.TaskLockType;
@@ -58,23 +58,21 @@ public class UploadSubmissionsWorkerImpl {
 	private static final int MAX_NUMBER_OF_RELEASE_RETRIES = 10;
 	private static final int SUBMISSIONS_PER_LOCK_RENEWAL = 25;
 
-	private final String pLockId;
-	private final Datastore pDatastore;
-	private final User pUser;
+	private final String lockId;
+	private final CallingContext cc;
 	private final FormServiceCursor pFsc;
 	private final ExternalServiceOption pEsOption;
-	private final String pBaseServerWebUrl;
+	private final String baseWebServerUrl;
 	private ExternalService pExtService;
-	private Form pForm;
+	private Form form;
 
 	public UploadSubmissionsWorkerImpl(FormServiceCursor fsc,
-			String baseServerWebUrl, Datastore ds, User user) {
+			String baseServerWebUrl, CallingContext cc) {
 		pFsc = fsc;
-		pDatastore = ds;
-		pUser = user;
+		this.cc = cc;
 		pEsOption = fsc.getExternalServiceOption();
-		pBaseServerWebUrl = baseServerWebUrl;
-		pLockId = UUID.randomUUID().toString();
+		this.baseWebServerUrl = baseServerWebUrl;
+		lockId = UUID.randomUUID().toString();
 	}
 
 	public String getUploadSubmissionsTaskLockName() {
@@ -85,13 +83,14 @@ public class UploadSubmissionsWorkerImpl {
 			throws ODKEntityNotFoundException, ODKExternalServiceException,
 			ODKFormNotFoundException, ODKTaskLockException {
 
-		pExtService = pFsc.getExternalService(pBaseServerWebUrl, pDatastore,
-				pUser);
-		pForm = Form.retrieveForm(pFsc.getFormId(), pDatastore, pUser);
+		pExtService = pFsc.getExternalService(baseWebServerUrl, cc);
+		form = Form.retrieveForm(pFsc.getFormId(), cc);
 
-		TaskLock taskLock = pDatastore.createTaskLock(pUser);
+		Datastore ds = cc.getDatastore();
+		User user = cc.getCurrentUser();
+		TaskLock taskLock = ds.createTaskLock(user);
 		if (!taskLock
-				.obtainLock(pLockId, getUploadSubmissionsTaskLockName(), TaskLockType.UPLOAD_SUBMISSION)) {
+				.obtainLock(lockId, getUploadSubmissionsTaskLockName(), TaskLockType.UPLOAD_SUBMISSION)) {
 			return;
 			// TODO: what should happen if you can't obtain a lock
 			// TODO: come back and think about this
@@ -111,7 +110,7 @@ public class UploadSubmissionsWorkerImpl {
 						.warning("Upload completed for UPLOAD_ONLY but formServiceCursor operational status slow to be revised");
 					// update this value here, but it should have already been set...
 					pFsc.setOperationalStatus(OperationalStatus.COMPLETED);
-					pDatastore.putEntity(pFsc, pUser);
+					ds.putEntity(pFsc, user);
 				} else {
 					uploadSubmissions();
 				}
@@ -133,9 +132,9 @@ public class UploadSubmissionsWorkerImpl {
 			// TODO: do something smarter with exceptions
 			throw new ODKExternalServiceException(e);
 		} finally {
-			taskLock = pDatastore.createTaskLock(pUser);
+			taskLock = ds.createTaskLock(user);
 			for (int i = 0; i < MAX_NUMBER_OF_RELEASE_RETRIES; i++) {
-				if (taskLock.releaseLock(pLockId, getUploadSubmissionsTaskLockName(),
+				if (taskLock.releaseLock(lockId, getUploadSubmissionsTaskLockName(),
 						TaskLockType.UPLOAD_SUBMISSION))
 					break;
 				try {
@@ -179,9 +178,8 @@ public class UploadSubmissionsWorkerImpl {
 
 		// create another task to either start streaming
 		// OR to delete if upload ONLY
-		UploadSubmissions us = (UploadSubmissions) 
-				ContextFactory.get().getBean(BeanDefs.UPLOAD_TASK_BEAN);
-		us.createFormUploadTask(pFsc, pBaseServerWebUrl, pUser);
+		UploadSubmissions uploadSubmissionsBean = (UploadSubmissions) cc.getBean(BeanDefs.UPLOAD_TASK_BEAN);
+		uploadSubmissionsBean.createFormUploadTask(pFsc, baseWebServerUrl, cc);
 	}
 
 	private void streamSubmissions() throws ODKFormNotFoundException,
@@ -234,6 +232,8 @@ public class UploadSubmissionsWorkerImpl {
 			boolean streaming) throws ODKExternalServiceException {
 		Date lastDateSent = null;
 		String lastKeySent = null;
+		Datastore ds = cc.getDatastore();
+		User user = cc.getCurrentUser();
 		try {
 			int counter = 0;
 			for (Submission submission : submissionsToSend) {
@@ -250,13 +250,13 @@ public class UploadSubmissionsWorkerImpl {
 					pFsc.setLastUploadCursorDate(lastDateSent);
 					pFsc.setLastUploadKey(lastKeySent);
 				}
-				pDatastore.putEntity(pFsc, pUser);
+				ds.putEntity(pFsc, user);
 
 				// after a certain amount of submissions sent renew lock
 				if (++counter >= SUBMISSIONS_PER_LOCK_RENEWAL) {
-					TaskLock taskLock = pDatastore.createTaskLock(pUser);
+					TaskLock taskLock = ds.createTaskLock(user);
 					// TODO: figure out what to do if this returns false
-					taskLock.renewLock(pLockId, getUploadSubmissionsTaskLockName(),
+					taskLock.renewLock(lockId, getUploadSubmissionsTaskLockName(),
 							TaskLockType.UPLOAD_SUBMISSION);
 					taskLock = null;
 					counter = 0;
@@ -273,8 +273,8 @@ public class UploadSubmissionsWorkerImpl {
 			Date endDate) throws ODKFormNotFoundException,
 			ODKIncompleteSubmissionData, ODKDatastoreException {
 		// query for next set of submissions
-		QueryByDateRange query = new QueryByDateRange(pForm, MAX_QUERY_LIMIT,
-				startDate, endDate, pDatastore, pUser);
+		QueryByDateRange query = new QueryByDateRange(form, MAX_QUERY_LIMIT,
+				startDate, endDate, cc);
 		List<Submission> submissions = query.getResultSubmissions();
 
 		// here so we don't have to do null checks on the rest of the code in
@@ -290,8 +290,8 @@ public class UploadSubmissionsWorkerImpl {
 			throws ODKFormNotFoundException, ODKIncompleteSubmissionData,
 			ODKDatastoreException {
 		// query for next set of submissions
-		QueryByDate query = new QueryByDate(pForm, startDate, false,
-				MAX_QUERY_LIMIT, pDatastore, pUser);
+		QueryByDate query = new QueryByDate(form, startDate, false,
+				MAX_QUERY_LIMIT, cc);
 		List<Submission> submissions = query.getResultSubmissions();
 
 		// here so we don't have to do null checks on the rest of the code in

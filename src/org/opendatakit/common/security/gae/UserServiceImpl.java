@@ -15,9 +15,6 @@
  */
 package org.opendatakit.common.security.gae;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.opendatakit.common.security.Realm;
 import org.opendatakit.common.security.User;
 import org.springframework.beans.factory.InitializingBean;

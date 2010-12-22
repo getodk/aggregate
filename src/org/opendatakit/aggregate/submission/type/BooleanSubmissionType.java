@@ -17,13 +17,12 @@
 
 package org.opendatakit.aggregate.submission.type;
 
+import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.datamodel.DynamicCommonFieldsBase;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.format.element.ElementFormatter;
-import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
-import org.opendatakit.common.security.User;
 
 /**
  * Data Storage Converter for Boolean Type
@@ -83,7 +82,7 @@ public class BooleanSubmissionType extends SubmissionSingleValueBase<Boolean> {
 	}
 
 	@Override
-	public void getValueFromEntity(Datastore datastore, User user) {
+	public void getValueFromEntity(CallingContext cc) {
 		Boolean value = backingObject.getBooleanField(element.getFormDataModel().getBackingKey());
 		setValue(value);
 	}

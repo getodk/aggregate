@@ -19,14 +19,13 @@ package org.opendatakit.aggregate.submission.type;
 
 import java.util.List;
 
+import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.constants.format.FormatConsts;
 import org.opendatakit.aggregate.datamodel.DynamicCommonFieldsBase;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.common.constants.BasicConsts;
-import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.EntityKey;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
-import org.opendatakit.common.security.User;
 
 
 /**
@@ -91,6 +90,6 @@ public abstract class SubmissionSingleValueBase<T> extends SubmissionFieldBase<T
   }
   
   @Override
-  public void persist(Datastore datastore, User user) throws ODKEntityPersistException {
+  public void persist(CallingContext cc) throws ODKEntityPersistException {
   }
 }

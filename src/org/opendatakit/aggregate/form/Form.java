@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.datamodel.FormDataModel;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.datamodel.TopLevelDynamicBase;
@@ -74,21 +75,17 @@ public class Form {
 
   private final List<SubmissionAssociationTable> submissionAssociations = new ArrayList<SubmissionAssociationTable>();
   
-  private final Datastore datastore;
-  
-  private final User user;
+  private final CallingContext cc;
 
   // special values for bootstrapping
   public static final String URI_FORM_ID_VALUE_FORM_INFO = "aggregate.opendatakit.org:FormInfo";
  
-  public Form(TopLevelDynamicBase formEntity, Datastore datastore, User user) throws ODKEntityNotFoundException, ODKDatastoreException {
+  public Form(TopLevelDynamicBase formEntity, CallingContext cc) throws ODKEntityNotFoundException, ODKDatastoreException {
 		this( new Submission(
 				formEntity,
-				FormInfo.getFormDefinition(datastore), 
-				datastore, 
-				user),
-				datastore,
-				user);
+				FormInfo.getFormDefinition(cc), 
+				cc),
+				cc);
 	  }
 
   /**
@@ -100,19 +97,16 @@ public class Form {
    * @throws ODKEntityNotFoundException
    * @throws ODKDatastoreException
    */
-  public Form(String topLevelAuri, Datastore datastore, User user) throws ODKEntityNotFoundException, ODKDatastoreException {
+  public Form(String topLevelAuri, CallingContext cc) throws ODKEntityNotFoundException, ODKDatastoreException {
 	this( new Submission(
-			(FormInfoTable) datastore.getEntity(FormInfo.getFormDefinition(datastore).getTopLevelGroup().getBackingObjectPrototype(), topLevelAuri, user),
-			FormInfo.getFormDefinition(datastore), 
-			datastore, 
-			user),
-			datastore,
-			user);
+			(FormInfoTable) cc.getDatastore().getEntity(FormInfo.getFormDefinition(cc).getTopLevelGroup().getBackingObjectPrototype(), topLevelAuri, cc.getCurrentUser()),
+			FormInfo.getFormDefinition(cc), 
+			cc),
+			cc);
   }
 
-  Form(Submission submission, Datastore datastore, User user) throws ODKDatastoreException {
-    this.datastore = datastore;
-	this.user = user;
+  Form(Submission submission, CallingContext cc) throws ODKDatastoreException {
+    this.cc = cc;
     objectEntity = submission;
     formDefinition = fetchSubmissionAssociations();
   }
@@ -132,8 +126,8 @@ public class Form {
 	XFormParameters submissionDefn = new XFormParameters(submissionFormId, submissionModelVersion, submissionUiVersion);
 
 	try {
-		SubmissionAssociationTable saRelation = SubmissionAssociationTable.createRelation(datastore, user);
-		Query q = datastore.createQuery(saRelation, user);
+		SubmissionAssociationTable saRelation = SubmissionAssociationTable.createRelation(cc);
+		Query q = cc.getDatastore().createQuery(saRelation, cc.getCurrentUser());
 		q.addFilter(saRelation.domAuri, FilterOperation.EQUAL, CommonFieldsBase.newMD5HashUri(submissionFormId));
 		List<? extends CommonFieldsBase> l = q.executeQuery(0);
 		for ( CommonFieldsBase b : l ) {
@@ -149,12 +143,14 @@ public class Form {
 		throw new IllegalStateException("Logic is not yet in place for cross-form submission sharing");
 	}
 	
-	return FormDefinition.getFormDefinition(match.getXFormParameters(), datastore, user);
+	return FormDefinition.getFormDefinition(match.getXFormParameters(), cc);
   }
   
-  public void persist(Datastore datastore, User user) throws ODKDatastoreException {
-    datastore.putEntities(submissionAssociations, user);
-    objectEntity.persist(datastore, user);
+  public void persist() throws ODKDatastoreException {
+	Datastore ds = cc.getDatastore();
+	User user = cc.getCurrentUser();
+    ds.putEntities(submissionAssociations, user);
+    objectEntity.persist(cc);
     
     // TODO: redo this further after mitch's list of key changes
     
@@ -168,8 +164,8 @@ public class Form {
    *          Datastore
    * @throws ODKDatastoreException
    */
-  public void deleteForm(Datastore ds, User user) throws ODKDatastoreException {
-	FormDataModel fdm = FormDataModel.createRelation(ds, user);
+  public void deleteForm() throws ODKDatastoreException {
+	FormDataModel fdm = FormDataModel.createRelation(cc);
     List<EntityKey> eksFormInfo = new ArrayList<EntityKey>();
 
     if ( submissionAssociations.size() > 1 ) {
@@ -186,6 +182,8 @@ public class Form {
     
     // queue everything in formInfo for delete
     objectEntity.recursivelyAddEntityKeys(eksFormInfo);
+    Datastore ds = cc.getDatastore();
+    User user = cc.getCurrentUser();
     
 	if ( formDefinition != null ) {
 		List<EntityKey> eks = new ArrayList<EntityKey>();
@@ -506,9 +504,11 @@ public class Form {
 	  
 	  // not found -- try to fetch it...
 	  try {
-		SubmissionAssociationTable sa = SubmissionAssociationTable.createRelation(datastore, user);
-		Query q = datastore.createQuery(SubmissionAssociationTable.createRelation(datastore, user), user);
-		q.addFilter(sa.domAuri, FilterOperation.EQUAL, CommonFieldsBase.newMD5HashUri(submissionFormId));
+		Datastore ds = cc.getDatastore();
+		User user = cc.getCurrentUser();
+		SubmissionAssociationTable saRelation = SubmissionAssociationTable.createRelation(cc);
+		Query q = ds.createQuery(saRelation, user);
+		q.addFilter(saRelation.domAuri, FilterOperation.EQUAL, CommonFieldsBase.newMD5HashUri(submissionFormId));
 		List<? extends CommonFieldsBase> l = q.executeQuery(0);
 		SubmissionAssociationTable match = null;
 		for ( CommonFieldsBase b : l ) {
@@ -666,8 +666,8 @@ public class Form {
    * @return
    * @throws ODKDatastoreException
    */
-  public static final FormInfoTable getFormInfoRelation(Datastore datastore) throws ODKDatastoreException {
-	  return (FormInfoTable) FormInfo.getFormInfoForm(datastore).getTopLevelGroupElement().getFormDataModel().getBackingObjectPrototype();
+  public static final FormInfoTable getFormInfoRelation(CallingContext cc) throws ODKDatastoreException {
+	  return (FormInfoTable) FormInfo.getFormInfoForm(cc).getTopLevelGroupElement().getFormDataModel().getBackingObjectPrototype();
   }
   
   	/**
@@ -699,8 +699,8 @@ public class Form {
 	 *             Thrown when a form was not able to be found with the
 	 *             corresponding ODK ID
 	 */
-	public static Form retrieveForm(String submissionKey, Datastore ds,
-			User user) throws ODKFormNotFoundException {
+	public static Form retrieveForm(String submissionKey, CallingContext cc) 
+				throws ODKFormNotFoundException {
 
 		// TODO: consider using memcache to have form info in memory for
 		// faster response times.  Note that we already cache the 
@@ -708,7 +708,7 @@ public class Form {
 		Form formInfoForm = null;
 		try {
 			// make sure the FormInfo table definition is loaded...
-			formInfoForm = FormInfo.getFormInfoForm(ds);
+			formInfoForm = FormInfo.getFormInfoForm(cc);
 		} catch (ODKDatastoreException e) {
 			throw new ODKFormNotFoundException(e);
 		}
@@ -724,7 +724,7 @@ public class Form {
 
 		try {
 			String formUri = CommonFieldsBase.newMD5HashUri(formIdValue);
-			Form form = new Form(formUri, ds, user);
+			Form form = new Form(formUri, cc);
 			if ( !formIdValue.equals(form.getFormId()) ) {
 				throw new IllegalStateException(
 						"more than one FormInfo entry for the given form id: " + formIdValue );
@@ -744,14 +744,14 @@ public class Form {
 	 * @return
 	 * @throws ODKDatastoreException
 	 */
-	public static final Submission createOrFetchFormId(String formId, Datastore ds, User user) throws ODKDatastoreException {
+	public static final Submission createOrFetchFormId(String formId, CallingContext cc) throws ODKDatastoreException {
 
 		// TODO: consider using memcache to have form info in memory for
 		// faster response times.  Note that we already cache the 
 		// FormDefinition...
 		Form formInfoForm = null;
 		// make sure the FormInfo table definition is loaded...
-		formInfoForm = FormInfo.getFormInfoForm(ds);
+		formInfoForm = FormInfo.getFormInfoForm(cc);
 
 		if (formId.equals(Form.URI_FORM_ID_VALUE_FORM_INFO)) {
 			throw new IllegalStateException("Unexpectedly retrieving formInfo definition");
@@ -760,18 +760,20 @@ public class Form {
 		String formUri = CommonFieldsBase.newMD5HashUri(formId);
 		
 		try {
+			Datastore ds = cc.getDatastore();
+			User user = cc.getCurrentUser();
 			FormInfoTable fi = (FormInfoTable) ds.getEntity(formInfoForm.getTopLevelGroupElement().getFormDataModel().getBackingObjectPrototype(), formUri, user);
-	    	formInfo = new Submission(fi, formInfoForm.getFormDefinition(), ds, user);
+	    	formInfo = new Submission(fi, formInfoForm.getFormDefinition(), cc);
 		} catch ( ODKEntityNotFoundException e ) {
-			formInfo = new Submission(1L, 0L, formUri, formInfoForm.getFormDefinition(), ds, user);
+			formInfo = new Submission(1L, 0L, formUri, formInfoForm.getFormDefinition(), cc);
 
 	    	((StringSubmissionType) formInfo.getElementValue(FormInfo.formId)).setValueFromString(formId);
 	    }
 	    return formInfo;
 	}
 	
-	public static final FormDefinition getFormInfoDefinition(Datastore datastore) throws ODKDatastoreException {
-		return FormInfo.getFormDefinition(datastore);
+	public static final FormDefinition getFormInfoDefinition(CallingContext cc) throws ODKDatastoreException {
+		return FormInfo.getFormDefinition(cc);
 	}
 
 	/**
@@ -786,8 +788,7 @@ public class Form {
 	 *             Thrown when a form was not able to be found with the
 	 *             corresponding ODK ID
 	 */
-	public static Form retrieveFormByEntityKey(EntityKey formKey, Datastore ds,
-			User user) throws ODKFormNotFoundException {
+	public static Form retrieveFormByEntityKey(EntityKey formKey, CallingContext cc) throws ODKFormNotFoundException {
 
 		// TODO: consider using memcache to have form info in memory for
 		// faster response times.  Note that we already cache the 
@@ -795,7 +796,7 @@ public class Form {
 		Form formInfoForm = null;
 		try {
 			// make sure the FormInfo table definition is loaded...
-			formInfoForm = FormInfo.getFormInfoForm(ds);
+			formInfoForm = FormInfo.getFormInfoForm(cc);
 		} catch (ODKDatastoreException e) {
 			throw new ODKFormNotFoundException(e);
 		}
@@ -809,7 +810,7 @@ public class Form {
 		}
 		
 		try {
-			Form form = new Form(formKey.getKey(), ds, user);
+			Form form = new Form(formKey.getKey(), cc);
 			return form;
 		} catch (Exception e) {
 			throw new ODKFormNotFoundException(e);

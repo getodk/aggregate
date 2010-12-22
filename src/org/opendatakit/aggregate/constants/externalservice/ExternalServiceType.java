@@ -15,6 +15,7 @@
  */
 package org.opendatakit.aggregate.constants.externalservice;
 
+import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.externalservice.ExternalService;
 import org.opendatakit.aggregate.externalservice.FormServiceCursor;
 import org.opendatakit.aggregate.externalservice.FusionTable;
@@ -23,9 +24,7 @@ import org.opendatakit.aggregate.externalservice.JsonServer;
 import org.opendatakit.aggregate.servlet.FusionTableServlet;
 import org.opendatakit.aggregate.servlet.JsonServlet;
 import org.opendatakit.aggregate.servlet.SpreadsheetServlet;
-import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
-import org.opendatakit.common.security.User;
 
 /**
  * Enum of all the available external services. Provides UI and type mapping
@@ -66,15 +65,15 @@ public enum ExternalServiceType {
   }
 
   public ExternalService constructExternalService(FormServiceCursor fsc, String webServiceUrl,
-      Datastore ds, User user) throws ODKEntityNotFoundException {
+      CallingContext cc) throws ODKEntityNotFoundException {
     try {
       switch (this) {
       case GOOGLE_FUSIONTABLES:
-        return new FusionTable(fsc, webServiceUrl, ds, user);
+        return new FusionTable(fsc, webServiceUrl, cc);
       case GOOGLE_SPREADSHEET:
-        return new GoogleSpreadsheet(fsc, webServiceUrl, ds, user);
+        return new GoogleSpreadsheet(fsc, webServiceUrl, cc);
       case JSON_SERVER:
-        return new JsonServer(fsc, ds, user);
+        return new JsonServer(fsc, cc);
       default:
         return null;
       }

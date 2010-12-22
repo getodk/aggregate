@@ -26,6 +26,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.ErrorConsts;
@@ -44,11 +45,8 @@ import org.opendatakit.aggregate.parser.SubmissionParser;
 import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.aggregate.task.UploadSubmissions;
 import org.opendatakit.common.constants.HtmlConsts;
-import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
-import org.opendatakit.common.security.User;
-import org.opendatakit.common.security.UserService;
 
 /**
  * Servlet to process a submission from a form
@@ -119,21 +117,18 @@ public class SubmissionServlet extends ServletUtilBase {
 
   @Override
   public void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+	CallingContext cc = ContextFactory.getCallingContext(getServletContext());
+
     resp.setContentType(HtmlConsts.RESP_TYPE_HTML);
-
-    UserService userService = (UserService) ContextFactory.get().getBean(BeanDefs.USER_BEAN);
-    User user = userService.getCurrentUser();
-
-    Datastore ds = (Datastore) ContextFactory.get().getBean(BeanDefs.DATASTORE_BEAN);
 
     try {
       SubmissionParser submissionParser = null;
       if (ServletFileUpload.isMultipartContent(req)) {
-        submissionParser = new SubmissionParser(new MultiPartFormData(req), ds, user);
+        submissionParser = new SubmissionParser(new MultiPartFormData(req), cc);
       } else {
         // TODO: check that it is the proper types we can deal with
         // XML received
-        submissionParser = new SubmissionParser(req.getInputStream(), ds, user);
+        submissionParser = new SubmissionParser(req.getInputStream(), cc);
       }
 
       if (submissionParser == null) {
@@ -142,16 +137,20 @@ public class SubmissionServlet extends ServletUtilBase {
       }
 
       // TODO: mitch are we assuming the submissionParser always persists?
-      Form form = Form.retrieveForm(submissionParser.getSubmissionFormId(), ds, user);
+      Form form = Form.retrieveForm(submissionParser.getSubmissionFormId(), cc);
       Submission submission = submissionParser.getSubmission();
 
       // send information to remote servers that need to be notified
       List<ExternalService> tmp = FormServiceCursor.getExternalServicesForForm(form,
-          getServerURL(req), ds, user);
-      UploadSubmissions uploadTask = (UploadSubmissions) ContextFactory.get().getBean(
-          BeanDefs.UPLOAD_TASK_BEAN);
-      for (ExternalService rs : tmp) {
-        uploadTask.createFormUploadTask(rs.getFormServiceCursor(), getServerURL(req), user);
+          getServerURL(req), cc);
+      UploadSubmissions uploadTask = (UploadSubmissions) cc.getBean(BeanDefs.UPLOAD_TASK_BEAN);
+      try {
+    	  cc.setAsDaemon(true);
+	      for (ExternalService rs : tmp) {
+	        uploadTask.createFormUploadTask(rs.getFormServiceCursor(), getServerURL(req), cc);
+	      }
+      } finally {
+    	  cc.setAsDaemon(false);
       }
 
       resp.setStatus(HttpServletResponse.SC_CREATED);

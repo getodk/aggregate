@@ -6,9 +6,12 @@
 
 	<!--	Configure values in the security.properties file (from the conf/common directory)-->
     <beans:bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
-    	<beans:property name="locations">
-    	    <beans:value>classpath:security.properties</beans:value>
-    	</beans:property>
+		<beans:property name="locations">
+			<beans:list>
+				<beans:value>classpath:jdbc.properties</beans:value>
+				<beans:value>classpath:security.properties</beans:value>
+			</beans:list>
+		</beans:property>
 	</beans:bean>
 
 	<!--	Configure user names and passwords here for ODK Collect digestAuth access -->
@@ -190,7 +193,7 @@
 
 	<beans:bean id="basicEntryPoint"
 		class="org.springframework.security.web.authentication.www.BasicAuthenticationEntryPoint">
-		<beans:property name="realmName" value="{security.server.basicAuth.realmName}" />
+		<beans:property name="realmName" value="${security.server.realm.realmString}" />
 	</beans:bean>
 
 	<beans:bean id="exceptionBasicTranslationFilter"
@@ -222,7 +225,7 @@
 		<beans:constructor-arg name="userDetailsService"
 			ref="basicUnderlyingLoginService" />
 		<beans:constructor-arg name="mailtoDomain"
-			value="${security.server.basicAuth.mailtoDomain}" />
+			value="${security.server.realm.mailToDomain}" />
 		<beans:constructor-arg name="authorities">
 			<beans:list>
 				<beans:value>AUTH_BASIC</beans:value>
@@ -254,7 +257,6 @@
 
 	<beans:bean id="openId4JavaConsumer"
 		class="org.springframework.security.openid.OpenID4JavaConsumer">
-<!--		<beans:constructor-arg name="consumerManager" ref="openId4JavaConsumerManager" />-->
 		<beans:constructor-arg name="attributes">
 			<beans:list>
 				<beans:bean class="org.springframework.security.openid.OpenIDAttribute">
@@ -272,49 +274,14 @@
 		</beans:constructor-arg>
 	</beans:bean>
 
-<!--	<beans:bean id="openId4JavaConsumerManager" class="org.openid4java.consumer.ConsumerManager">-->
-<!--		<beans:constructor-arg name="realmFactory" ref="openId4JavaRealmFactory" />-->
-<!--		<beans:constructor-arg name="discovery" ref="openId4JavaDiscovery" />-->
-<!--		<beans:constructor-arg name="httpFetcherFactory" ref="openId4JavaHttpFetcherFactory" />-->
-<!--	</beans:bean>-->
-<!--	-->
-<!--	<beans:bean id="openId4JavaRealmFactory" class="org.openid4java.server.RealmVerifierFactory">-->
-<!--  		<beans:constructor-arg index="0" ref="openId4JavaYadisResolver"></beans:constructor-arg>-->
-<!-- 	</beans:bean>-->
+<!--	GoogleAppEngine Specific Stuff-->
+<!--	<beans:bean id="org.openid4java.util.HttpFetcherFactory" -->
+<!--				class="org.springframework.security.openid.google.appengine.AppEngineHttpFetcherFactory"-->
+<!--				factory-method="createHttpFetcherFactory" />-->
 <!-- 	-->
-<!--	<beans:bean id="openId4JavaYadisResolver" class="org.openid4java.discovery.yadis.YadisResolver">-->
-<!--  		<beans:constructor-arg index="0" ref="openId4JavaHttpFetcherFactory"></beans:constructor-arg>-->
-<!-- 	</beans:bean>-->
-<!-- 	  -->
-<!-- 	<beans:bean id="openId4JavaHtmlResolver" class="org.openid4java.discovery.html.HtmlResolver">-->
-<!--  		<beans:constructor-arg index="0" ref="openId4JavaHttpFetcherFactory"></beans:constructor-arg>-->
-<!-- 	</beans:bean>-->
+<!--	<beans:bean id="com.google.step2.http.HttpFetcher" class="org.springframework.security.openid.google.appengine.AppEngineHttpFetcher" />-->
 <!--  -->
-<!-- 	<beans:bean id="openId4JavaXriResolver" class="org.openid4java.discovery.xri.XriDotNetProxyResolver">-->
-<!--  		<beans:constructor-arg index="0" ref="openId4JavaHttpFetcherFactory"></beans:constructor-arg>-->
-<!-- 	</beans:bean>-->
-<!-- 	-->
-<!--	<beans:bean id="openId4JavaDiscovery" class="org.openid4java.discovery.Discovery">-->
-<!--  		<beans:constructor-arg index="0" ref="openId4JavaHtmlResolver"></beans:constructor-arg>-->
-<!--  		<beans:constructor-arg index="1" ref="openId4JavaYadisResolver"></beans:constructor-arg>-->
-<!--  		<beans:constructor-arg index="2" ref="openId4JavaXriResolver"></beans:constructor-arg>-->
-<!-- 	</beans:bean>-->
-<!--  -->
-<!--	<beans:bean id="openId4JavaHttpFetcherFactory" class="org.openid4java.util.HttpFetcherFactory">-->
-<!--  		<beans:constructor-arg index="0" ref="openId4JavaFetcherProvider"></beans:constructor-arg>-->
-<!-- 	</beans:bean>-->
-
-	<!--	Secret sauce for Google App Engine functionality  	-->
-	<!--	See http://technowobble.blogspot.com/2010/06/using-spring-securitys-openid.html -->
-<!--	<beans:bean id="openId4JavaFetcherProvider" class="com.technowobble.security.MyHttpCacheProvider"></beans:bean>-->
-
-	<beans:bean id="org.openid4java.util.HttpFetcherFactory" 
-				class="org.springframework.security.openid.google.appengine.AppEngineHttpFetcherFactory"
-				factory-method="createHttpFetcherFactory" />
- 	
-	<beans:bean id="com.google.step2.http.HttpFetcher" class="org.springframework.security.openid.google.appengine.AppEngineHttpFetcher" />
-  
-    <beans:bean id="com.google.step2.xmlsimplesign.TrustRootsProvider" class="org.springframework.security.openid.google.appengine.AppEngineTrustRootsProvider" />
+<!--    <beans:bean id="com.google.step2.xmlsimplesign.TrustRootsProvider" class="org.springframework.security.openid.google.appengine.AppEngineTrustRootsProvider" />-->
     
 	<beans:bean id="openIdFilter"
 		class="org.springframework.security.openid.OpenIDAuthenticationFilter">
@@ -366,7 +333,7 @@
 	<beans:bean id="digestEntryPoint"
 		class="org.springframework.security.web.authentication.www.DigestAuthenticationEntryPoint">
 		<beans:property name="realmName"
-			value="${security.server.digestAuth.realmString}" />
+			value="${security.server.realm.realmString}" />
 		<beans:property name="key" value="${security.server.siteKey}" />
 		<beans:property name="nonceValiditySeconds" value="10" />
 	</beans:bean>
@@ -435,7 +402,7 @@
 		<beans:constructor-arg name="userDetailsService"
 			ref="digestUnderlyingLoginService" />
 		<beans:constructor-arg name="mailtoDomain"
-			value="${security.server.digestAuth.mailtoDomain}" />
+			value="${security.server.realm.mailToDomain}" />
 		<beans:constructor-arg name="authorities">
 			<beans:list>
 				<beans:value>AUTH_DIGEST</beans:value>

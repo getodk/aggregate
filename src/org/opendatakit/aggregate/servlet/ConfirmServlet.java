@@ -25,8 +25,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.fileupload.FileUploadException;
+import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.ContextFactory;
-import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
@@ -42,10 +42,7 @@ import org.opendatakit.aggregate.query.QueryFormList;
 import org.opendatakit.aggregate.query.submission.QueryByKeys;
 import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.common.constants.HtmlConsts;
-import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
-import org.opendatakit.common.security.User;
-import org.opendatakit.common.security.UserService;
 
 /**
  * 
@@ -76,9 +73,7 @@ public class ConfirmServlet extends ServletUtilBase {
   @Override
   public void doPost(HttpServletRequest req, HttpServletResponse resp)
       throws IOException {
-    Datastore ds = (Datastore) ContextFactory.get().getBean(BeanDefs.DATASTORE_BEAN);
-    UserService userService = (UserService) ContextFactory.get().getBean(BeanDefs.USER_BEAN);
-    User user = userService.getCurrentUser();
+	CallingContext cc = ContextFactory.getCallingContext(getServletContext());
     
     try {
       ProcessParams params = new ProcessParams(new MultiPartFormData(req));
@@ -111,16 +106,16 @@ public class ConfirmServlet extends ServletUtilBase {
 	        return;
 	      }
       
-    	  Form form = Form.retrieveForm(params.getFormId(), ds, user);
+    	  Form form = Form.retrieveForm(params.getFormId(), cc);
 
 	      out.print(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_HIDDEN,
 	          ServletConsts.FORM_ID, form.getFormId()));
       
-		  QueryByKeys query = new QueryByKeys(keys, ds, user);
+		  QueryByKeys query = new QueryByKeys(keys, cc);
 		  SubmissionFormatter formatter = new HtmlFormatter(form, getServerURL(req), resp.getWriter(), null, true);
 		  formatter.processSubmissions(query.getResultSubmissions());
       } else if (params.getButtonText().equals(ProcessType.DELETE_FORM.getButtonText())) {
-		  QueryFormList formsList = new QueryFormList(keys, true, ds, user);
+		  QueryFormList formsList = new QueryFormList(keys, true, cc);
 		  FormHtmlTable formFormatter = new FormHtmlTable(formsList);
 		  out.print(formFormatter.generateHtmlFormTable(false, false));
       }

@@ -20,8 +20,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
-import org.opendatakit.aggregate.ContextFactory;
-import org.opendatakit.aggregate.constants.BeanDefs;
+import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.TaskLockType;
 import org.opendatakit.aggregate.datamodel.TopLevelDynamicBase;
@@ -55,16 +54,14 @@ public class FormDeleteWorkerImpl {
 
 	private final Form form;
 	private final SubmissionKey miscTasksKey;
-	private final Datastore datastore;
-	private final User user;
+	private final CallingContext cc;
 	private final String pFormIdLockId;
 
 	public FormDeleteWorkerImpl(Form form, SubmissionKey miscTasksKey,
-			long attemptCount, String baseWebServerUrl, Datastore datastore, User user) {
+			long attemptCount, String baseWebServerUrl, CallingContext cc) {
 		this.form = form;
 		this.miscTasksKey = miscTasksKey;
-		this.datastore = datastore;
-		this.user = user;
+		this.cc = cc;
 		pFormIdLockId = UUID.randomUUID().toString();
 	}
 
@@ -73,7 +70,7 @@ public class FormDeleteWorkerImpl {
 
 		Submission s;
 		try {
-			s = Submission.fetchSubmission(miscTasksKey.splitSubmissionKey(), datastore, user);
+			s = Submission.fetchSubmission(miscTasksKey.splitSubmissionKey(), cc);
 		} catch (Exception e) {
 			return;
 		}
@@ -83,8 +80,10 @@ public class FormDeleteWorkerImpl {
 		// it is useful to have the external services collide using 
 		// formId.  Prefix with MT: to indicate that it is a miscellaneousTask
 		// lock.
+	    Datastore ds = cc.getDatastore();
+	    User user = cc.getCurrentUser();
 		String lockedResourceName = t.getMiscTaskLockName();
-		TaskLock formIdTaskLock = datastore.createTaskLock(user);
+		TaskLock formIdTaskLock = ds.createTaskLock(user);
 		try {
 			if (formIdTaskLock.obtainLock(pFormIdLockId, lockedResourceName,
 					TaskLockType.FORM_DELETION)) {
@@ -96,7 +95,7 @@ public class FormDeleteWorkerImpl {
 		} catch (Exception e2) {
 			e2.printStackTrace();
 		} finally {
-			formIdTaskLock = datastore.createTaskLock(user);
+			formIdTaskLock = ds.createTaskLock(user);
 			try {
 				for (int i = 0; i < 10; i++) {
 					if (formIdTaskLock.releaseLock(pFormIdLockId, lockedResourceName,
@@ -124,17 +123,19 @@ public class FormDeleteWorkerImpl {
 	 */
 	private boolean deleteMiscTasks(MiscTasks self) throws ODKDatastoreException {
 		// first, delete all the tasks for this form.
-		List<MiscTasks> tasks = MiscTasks.getAllTasksForForm(form, datastore, user);
+		Datastore ds = cc.getDatastore();
+	    User user = cc.getCurrentUser();
+		List<MiscTasks> tasks = MiscTasks.getAllTasksForForm(form, cc);
 		for (MiscTasks task : tasks ) {
 			if ( task.getUri().equals(self.getUri())) continue; // us!
 			String lockedResourceName = task.getMiscTaskLockName();
 			if ( lockedResourceName.equals(self.getMiscTaskLockName()) ) {
 				// we hold this lock already!
 				// delete the task...
-				task.delete(datastore, user);
+				task.delete(cc);
 			} else {
 				// otherwise, gain the lock on the task 
-				TaskLock taskLock = datastore.createTaskLock(user);
+				TaskLock taskLock = ds.createTaskLock(user);
 				String pLockId = UUID.randomUUID().toString();
 				boolean deleted = false;
 				try {
@@ -142,7 +143,7 @@ public class FormDeleteWorkerImpl {
 							task.getTaskType().getLockType())) {
 						taskLock = null;
 						// delete the task...
-						task.delete(datastore, user);
+						task.delete(cc);
 						deleted = true;
 					}
 				} catch (ODKTaskLockException e1) {
@@ -154,7 +155,7 @@ public class FormDeleteWorkerImpl {
 					}
 				}
 				// release the lock
-				taskLock = datastore.createTaskLock(user);
+				taskLock = ds.createTaskLock(user);
 				try {
 					for (int i = 0; i < 10; i++) {
 						if (taskLock.releaseLock(pLockId, lockedResourceName,
@@ -185,10 +186,10 @@ public class FormDeleteWorkerImpl {
 	 */
 	private boolean deletePersistentResultTasks() throws ODKDatastoreException {
 		// first, delete all the tasks for this form.
-		List<PersistentResults> tasks = PersistentResults.getAllTasksForForm(form, datastore, user);
+		List<PersistentResults> tasks = PersistentResults.getAllTasksForForm(form, cc);
 		for (PersistentResults task : tasks ) {
 			// delete the task...
-			task.delete(datastore, user);
+			task.delete(cc);
 		}
 		return true;
 	}
@@ -201,13 +202,15 @@ public class FormDeleteWorkerImpl {
 	 */
 	private boolean deleteExternalServiceTasks() throws ODKDatastoreException {
 		List<ExternalService> services = FormServiceCursor
-		.getExternalServicesForForm(form, null, datastore, user);
-		
+		.getExternalServicesForForm(form, null, cc);
+		Datastore ds = cc.getDatastore();
+	    User user = cc.getCurrentUser();
+
 		boolean allDeleted = true;
 		for (ExternalService service : services) {
 			String uriExternalService = service.getFormServiceCursor()
 					.getUri();
-			TaskLock taskLock = datastore.createTaskLock(user);
+			TaskLock taskLock = ds.createTaskLock(user);
 			String pLockId = UUID.randomUUID().toString();
 			boolean deleted = false;
 			try {
@@ -224,7 +227,7 @@ public class FormDeleteWorkerImpl {
 					allDeleted = false;
 				}
 			}
-			taskLock = datastore.createTaskLock(user);
+			taskLock = ds.createTaskLock(user);
 			try {
 				for (int i = 0; i < 10; i++) {
 					if (taskLock.releaseLock(pLockId, uriExternalService,
@@ -254,9 +257,6 @@ public class FormDeleteWorkerImpl {
 	 * @throws ODKTaskLockException 
 	 */
 	private boolean doDeletion(MiscTasks t) throws ODKDatastoreException, ODKTaskLockException {
-		Datastore ds = (Datastore) ContextFactory.get().getBean(
-				BeanDefs.DATASTORE_BEAN);
-		
 		if ( !deleteMiscTasks(t) ) return false;
 		
 		deletePersistentResultTasks();
@@ -266,6 +266,8 @@ public class FormDeleteWorkerImpl {
 		CommonFieldsBase relation = null;
 		relation = form.getTopLevelGroupElement().getFormDataModel()
 				.getBackingObjectPrototype();
+		Datastore ds = cc.getDatastore();
+	    User user = cc.getCurrentUser();
 
 		if (relation != null) {
 			for (;;) {
@@ -291,11 +293,11 @@ public class FormDeleteWorkerImpl {
 							topLevelGroupName, tl.getUri()));
 				}
 				DeleteSubmissions delete;
-				delete = new DeleteSubmissions(keys, ds, user);
+				delete = new DeleteSubmissions(keys, cc);
 				delete.deleteSubmissions();
 				
 				t.setLastActivityDate(new Date());
-				t.persist(ds, user);
+				t.persist(cc);
 				// renew lock
 				
 				TaskLock taskLock = ds.createTaskLock(user);
@@ -316,12 +318,12 @@ public class FormDeleteWorkerImpl {
 		if ( !deleteMiscTasks(t) ) return false;
 
 		// delete the form.
-		form.deleteForm(ds, user);
+		form.deleteForm();
 
 		// and mark us as completed... (don't delete for audit..).
 		t.setCompletionDate(new Date());
 		t.setStatus(Status.SUCCESSFUL);
-		t.persist(ds, user);
+		t.persist(cc);
 		return true;
 	}
 }

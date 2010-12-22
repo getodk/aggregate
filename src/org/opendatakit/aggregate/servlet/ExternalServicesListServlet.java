@@ -24,8 +24,8 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.ContextFactory;
-import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
 import org.opendatakit.aggregate.externalservice.ExternalService;
@@ -35,10 +35,7 @@ import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.query.QueryFormList;
 import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.common.constants.HtmlConsts;
-import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
-import org.opendatakit.common.security.User;
-import org.opendatakit.common.security.UserService;
 
 /**
  * Servlet to list all external services actions for a particular form
@@ -73,30 +70,20 @@ public class ExternalServicesListServlet extends ServletUtilBase {
 	@Override
 	public void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws IOException {
-
-		// verify user is logged in
-		if (!verifyCredentials(req, resp)) {
-			return;
-		}
-		Datastore ds = (Datastore) ContextFactory.get().getBean(
-				BeanDefs.DATASTORE_BEAN);
-		UserService userService = (UserService) ContextFactory.get().getBean(
-				BeanDefs.USER_BEAN);
-		User user = userService.getCurrentUser();
+		CallingContext cc = ContextFactory.getCallingContext(getServletContext());
 
 		// generate html
 		beginBasicHtmlResponse(TITLE_INFO, resp, req, true); // header info
 
 		try {
-			QueryFormList formsList = new QueryFormList(false, ds, user);
+			QueryFormList formsList = new QueryFormList(false, cc);
 
 			List<Form> forms = formsList.getForms();
 
 			for (Form form : forms) {
 
 				List<ExternalService> esList = FormServiceCursor
-						.getExternalServicesForForm(form, getServerURL(req),
-								ds, user);
+						.getExternalServicesForForm(form, getServerURL(req), cc);
 				if ( esList.size() == 0 ) continue;
 				
 				resp.getWriter().print(

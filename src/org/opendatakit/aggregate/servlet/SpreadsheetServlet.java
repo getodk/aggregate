@@ -24,6 +24,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.ErrorConsts;
@@ -41,10 +42,7 @@ import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.form.MiscTasks;
 import org.opendatakit.aggregate.form.MiscTasks.TaskType;
 import org.opendatakit.aggregate.task.WorksheetCreator;
-import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
-import org.opendatakit.common.security.User;
-import org.opendatakit.common.security.UserService;
 
 /**
  * 
@@ -79,14 +77,7 @@ public class SpreadsheetServlet extends ServletUtilBase {
    */
   @Override
   public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-
-    // verify user is logged in
-    if (!verifyCredentials(req, resp)) {
-      return;
-    }
-    // get current user
-    UserService userService = (UserService) ContextFactory.get().getBean(BeanDefs.USER_BEAN);
-    User user = userService.getCurrentUser();
+	CallingContext cc = ContextFactory.getCallingContext(getServletContext());
 
     // collect and save all request parameters
     String spreadsheetName = getParameter(req, ExternalServiceConsts.EXT_SERV_ADDRESS);
@@ -140,10 +131,9 @@ public class SpreadsheetServlet extends ServletUtilBase {
     }
 
     // authorization is complete so now we can create the spreadsheet
-    Datastore ds = (Datastore) ContextFactory.get().getBean(BeanDefs.DATASTORE_BEAN);
     Form form = null;
     try {
-      form = Form.retrieveForm(formId, ds, user);
+      form = Form.retrieveForm(formId, cc);
     } catch (ODKFormNotFoundException e) {
       odkIdNotFoundError(resp);
       return;
@@ -153,21 +143,20 @@ public class SpreadsheetServlet extends ServletUtilBase {
 
     try {
       OAuthToken authToken = new OAuthToken(sessionToken, sessionTokenSecret);
-      GoogleSpreadsheet.createSpreadsheet(form, authToken, spreadsheetName, esType, getServerURL(req), ds, user);
+      GoogleSpreadsheet.createSpreadsheet(form, authToken, spreadsheetName, esType, getServerURL(req), cc);
 
-      WorksheetCreator ws = (WorksheetCreator) ContextFactory.get().getBean(
-          BeanDefs.WORKSHEET_BEAN);
+      WorksheetCreator ws = (WorksheetCreator) cc.getBean(BeanDefs.WORKSHEET_BEAN);
 
       Map<String,String> parameters = new HashMap<String,String>();
       
       parameters.put(ExternalServiceConsts.EXT_SERV_ADDRESS, spreadsheetName);
       parameters.put(ServletConsts.EXTERNAL_SERVICE_TYPE, esType.toString());
       
-      MiscTasks m = new MiscTasks(TaskType.WORKSHEET_CREATE, form, parameters, ds, user);
-      m.persist(ds, user);
+      MiscTasks m = new MiscTasks(TaskType.WORKSHEET_CREATE, form, parameters, cc);
+      m.persist(cc);
       
       ws.createWorksheetTask(form, m.getSubmissionKey(), 1L,
-    		  					getServerURL(req), ds, user);
+    		  					getServerURL(req), cc);
     } catch (ODKExternalServiceException e) {
       e.printStackTrace();
       resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());

@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.datamodel.DynamicBase;
 import org.opendatakit.aggregate.datamodel.DynamicCommonFieldsBase;
@@ -134,11 +135,13 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 	 */
 	public SubmissionSet(SubmissionSet enclosingSet, Long ordinalNumber,
 			FormElementModel group, FormDefinition formDefinition,
-			EntityKey topLevelTableKey, Datastore datastore, User user)
+			EntityKey topLevelTableKey, CallingContext cc)
 			throws ODKDatastoreException {
 		this.formDefinition = formDefinition;
 		this.group = group;
 		this.enclosingSet = enclosingSet;
+		Datastore datastore = cc.getDatastore();
+		User user = cc.getCurrentUser();
 		DynamicBase tlg = (DynamicBase) datastore.createEntityUsingRelation(
 				group.getFormDataModel().getBackingObjectPrototype(), user);
 		tlg.setTopLevelAuri(topLevelTableKey.getKey());
@@ -154,23 +157,25 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 		}
 		dbEntities.put(group.getFormDataModel().getDDRelationName(), tlg);
 		recursivelyCreateEntities(group.getFormDataModel(), datastore, user);
-		buildSubmissionFields(group, datastore, user);
+		buildSubmissionFields(group, cc);
 	}
 
 	public SubmissionSet(Long modelVersion, Long uiVersion, 
 			FormDefinition formDefinition,
-			Datastore datastore, User user)
+			CallingContext cc)
 			throws ODKDatastoreException {
-		this(modelVersion, uiVersion, null, formDefinition, datastore, user);
+		this(modelVersion, uiVersion, null, formDefinition, cc);
 	}
 
 	public SubmissionSet(Long modelVersion, Long uiVersion, String uriTopLevelGroup, 
 			FormDefinition formDefinition,
-			Datastore datastore, User user)
+			CallingContext cc)
 			throws ODKDatastoreException {
 		this.formDefinition = formDefinition;
 		this.group = formDefinition.getTopLevelGroupElement();
 		this.enclosingSet = null;
+		Datastore datastore = cc.getDatastore();
+		User user = cc.getCurrentUser();
 		// this is a top level table...
 		TopLevelDynamicBase tlg = (TopLevelDynamicBase) datastore.createEntityUsingRelation(
 				group.getFormDataModel().getBackingObjectPrototype(), user);
@@ -184,7 +189,7 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 		// persist and recursively construct it...
 		dbEntities.put(group.getFormDataModel().getDDRelationName(), tlg);
 		recursivelyCreateEntities(group.getFormDataModel(), datastore, user);
-		buildSubmissionFields(group, datastore, user);
+		buildSubmissionFields(group, cc);
 	}
 
 	/**
@@ -250,12 +255,15 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 	 */
 	public SubmissionSet(SubmissionSet enclosingSet, DynamicCommonFieldsBase row,
 			FormElementModel group, FormDefinition formDefinition,
-			Datastore datastore, User user)
+			CallingContext cc)
 			throws ODKDatastoreException {
 		this.formDefinition = formDefinition;
 		this.group = group;
 		this.enclosingSet = enclosingSet;
 		this.key = new EntityKey(row, row.getUri());
+		Datastore datastore = cc.getDatastore();
+		User user = cc.getCurrentUser();
+
 		if (!key.getRelation().sameTable(group.getFormDataModel().getBackingObjectPrototype())) {
 			throw new IllegalArgumentException(
 					"self-key and group backing object do not match");
@@ -270,7 +278,7 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 		}
 		dbEntities.put(group.getFormDataModel().getDDRelationName(), row);
 		recursivelyGetEntities(row.getUri(), group.getFormDataModel(), datastore, user);
-		buildSubmissionFields(group, datastore, user);
+		buildSubmissionFields(group, cc);
 	}
 
 	private void recursivelyGetEntities(String uriParent, FormDataModel groupDataModel,
@@ -323,8 +331,7 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 	 *            current element to recreate
 	 * @throws ODKDatastoreException
 	 */
-	private void buildSubmissionFields(FormElementModel group,
-			Datastore datastore, User user)
+	private void buildSubmissionFields(FormElementModel group, CallingContext cc)
 			throws ODKDatastoreException {
 		DynamicCommonFieldsBase groupRowGroup = getGroupBackingObject();
 		for (FormElementModel m : group.getChildren()) {
@@ -338,8 +345,8 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 					}
 					submissionField = new StringSubmissionType(rowGroup, m,
 							rowGroup.getUri(),
-							formDefinition, topLevelTableKey, datastore, user);
-					submissionField.getValueFromEntity(datastore, user);
+							formDefinition, topLevelTableKey, cc);
+					submissionField.getValueFromEntity(cc);
 					elementsToValues.put(m, submissionField);
 					break;
 				case JRDATETIME:
@@ -347,7 +354,7 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 						throw new IllegalStateException("Unexpectedly null backingObject");
 					}
 					submissionField = new JRDateTimeType(rowGroup, m);
-					submissionField.getValueFromEntity(datastore, user);
+					submissionField.getValueFromEntity(cc);
 					elementsToValues.put(m, submissionField);
 					break;
 				case JRDATE:
@@ -355,7 +362,7 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 						throw new IllegalStateException("Unexpectedly null backingObject");
 					}
 					submissionField = new JRDateType(rowGroup, m);
-					submissionField.getValueFromEntity(datastore, user);
+					submissionField.getValueFromEntity(cc);
 					elementsToValues.put(m, submissionField);
 					break;
 				case JRTIME:
@@ -363,7 +370,7 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 						throw new IllegalStateException("Unexpectedly null backingObject");
 					}
 					submissionField = new JRTimeType(rowGroup, m);
-					submissionField.getValueFromEntity(datastore, user);
+					submissionField.getValueFromEntity(cc);
 					elementsToValues.put(m, submissionField);
 					break;
 				case INTEGER:
@@ -371,7 +378,7 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 						throw new IllegalStateException("Unexpectedly null backingObject");
 					}
 					submissionField = new LongSubmissionType(rowGroup, m);
-					submissionField.getValueFromEntity(datastore, user);
+					submissionField.getValueFromEntity(cc);
 					elementsToValues.put(m, submissionField);
 					break;
 				case DECIMAL:
@@ -379,7 +386,7 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 						throw new IllegalStateException("Unexpectedly null backingObject");
 					}
 					submissionField = new DecimalSubmissionType(rowGroup, m);
-					submissionField.getValueFromEntity(datastore, user);
+					submissionField.getValueFromEntity(cc);
 					elementsToValues.put(m, submissionField);
 					break;
 				case GEOPOINT:
@@ -387,7 +394,7 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 						throw new IllegalStateException("Unexpectedly null backingObject");
 					}
 					submissionField = new GeoPointSubmissionType(rowGroup, m);
-					submissionField.getValueFromEntity(datastore, user);
+					submissionField.getValueFromEntity(cc);
 					elementsToValues.put(m, submissionField);
 					break;
 				case BOOLEAN:
@@ -395,7 +402,7 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 						throw new IllegalStateException("Unexpectedly null backingObject");
 					}
 					submissionField = new BooleanSubmissionType(rowGroup, m);
-					submissionField.getValueFromEntity(datastore, user);
+					submissionField.getValueFromEntity(cc);
 					elementsToValues.put(m, submissionField);
 					break;
 				case GROUP:
@@ -404,7 +411,7 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 					}
 					// groups are not manifest unless they repeat...
 					// just recurse to build out the fields under them...
-					buildSubmissionFields(m, datastore, user);
+					buildSubmissionFields(m, cc);
 					break;
 				// additional supporting tables
 				case PHANTOM: // if a relation needs to be divided in order to fit
@@ -413,34 +420,34 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 					}
 					// phantoms are not manifest...
 					// just recurse to build out the fields under them...
-					buildSubmissionFields(m, datastore, user);
+					buildSubmissionFields(m, cc);
 					break;
 				case BINARY: // identifies BinaryContent table
 					submissionField = new BlobSubmissionType(m, groupRowGroup.getUri(),
 							topLevelTableKey, formDefinition, 
-							constructSubmissionKey(m), datastore, user);
+							constructSubmissionKey(m), cc);
 					// pass in row we occur under (to access parentAuri)
-					submissionField.getValueFromEntity(datastore, user);
+					submissionField.getValueFromEntity(cc);
 					elementsToValues.put(m, submissionField);
 					break;
 				case SELECT1: // identifies SelectChoice table
 					submissionField = new ChoiceSubmissionType(m, groupRowGroup.getUri(),
-							topLevelTableKey, datastore, user); // pass
+							topLevelTableKey, cc); // pass
 					// in row we occur under to access parentAuri
-					submissionField.getValueFromEntity(datastore, user);
+					submissionField.getValueFromEntity(cc);
 					elementsToValues.put(m, submissionField);
 					break;
 				case SELECTN: // identifies SelectChoice table
 					submissionField = new ChoiceSubmissionType(m, groupRowGroup.getUri(),
-							topLevelTableKey, datastore, user); // pass
+							topLevelTableKey, cc); // pass
 					// in row we occur under to access parentAuri
-					submissionField.getValueFromEntity(datastore, user);
+					submissionField.getValueFromEntity(cc);
 					elementsToValues.put(m, submissionField);
 					break;
 				case REPEAT:
 					RepeatSubmissionType repeatNode = new RepeatSubmissionType(
 							this, m,  groupRowGroup.getUri(), formDefinition);
-					repeatNode.getValueFromEntity(datastore, user);
+					repeatNode.getValueFromEntity(cc);
 					elementsToValues.put(m, repeatNode);
 					break;
 				case VERSIONED_BINARY_CONTENT_REF_BLOB: // association between
@@ -738,7 +745,7 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 		}
 	}
 
-	public void persist(Datastore datastore, User user)
+	public void persist(CallingContext cc)
 			throws ODKEntityPersistException {
 		// persist everything underneath us...
 		for (Map.Entry<FormElementModel, SubmissionValue> entry : elementsToValues
@@ -757,7 +764,7 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 			case BINARY:
 			case STRING:
 			case REPEAT:
-				entry.getValue().persist(datastore, user);
+				entry.getValue().persist(cc);
 				break;
 			}
 		}
@@ -766,10 +773,12 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 		Set<CommonFieldsBase> others = new HashSet<CommonFieldsBase>();
 		others.addAll(dbEntities.values());
 		others.remove(getGroupBackingObject());
-		datastore.putEntities(others, user);
+		Datastore ds = cc.getDatastore();
+		User user = cc.getCurrentUser();
+		ds.putEntities(others, user);
 		
 		// and finally, persist us...
-		datastore.putEntity(getGroupBackingObject(), user);
+		ds.putEntity(getGroupBackingObject(), user);
 	}
 
 	public int compareTo(SubmissionSet obj) {

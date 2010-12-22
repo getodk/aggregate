@@ -15,14 +15,13 @@
  */
 package org.opendatakit.aggregate.task.gae;
 
+import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.task.CsvGenerator;
 import org.opendatakit.aggregate.task.gae.servlet.CsvGeneratorTaskServlet;
-import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
-import org.opendatakit.common.security.User;
 
 import com.google.appengine.api.taskqueue.Queue;
 import com.google.appengine.api.taskqueue.QueueFactory;
@@ -40,7 +39,7 @@ import com.google.appengine.api.taskqueue.TaskOptions;
 public class CsvGeneratorImpl implements CsvGenerator {
 
   @Override
-  public void createCsvTask(Form form, SubmissionKey persistentResultsKey, long attemptCount, String baseServerWebUrl, Datastore datastore, User user) throws ODKDatastoreException {
+  public void createCsvTask(Form form, SubmissionKey persistentResultsKey, long attemptCount, String baseServerWebUrl, CallingContext cc) throws ODKDatastoreException {
     TaskOptions task = TaskOptions.Builder.withUrl(ServletConsts.WEB_ROOT
         + CsvGeneratorTaskServlet.ADDR);
     task.method(TaskOptions.Method.GET);

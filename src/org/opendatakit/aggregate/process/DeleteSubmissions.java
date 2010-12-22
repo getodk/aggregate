@@ -19,15 +19,14 @@ package org.opendatakit.aggregate.process;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.submission.SubmissionKeyPart;
-import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.EntityKey;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
-import org.opendatakit.common.security.User;
 
 /**
  * Takes a list of submission keys and performs recursive delete on all elements
@@ -40,14 +39,11 @@ public class DeleteSubmissions {
 
   private List<SubmissionKey> submissionKeys;
 
-  private Datastore ds;
+  private CallingContext cc;
   
-  private User user;
-  
-  public DeleteSubmissions(List<SubmissionKey> keys, Datastore datastore, User user) {
+  public DeleteSubmissions(List<SubmissionKey> keys, CallingContext cc) {
     this.submissionKeys = keys;
-    this.ds = datastore;
-    this.user = user;
+    this.cc = cc;
   }
 
   public void deleteSubmissions() throws ODKDatastoreException{
@@ -56,7 +52,7 @@ public class DeleteSubmissions {
     for (SubmissionKey submissionKey : submissionKeys) {
       try {
 		List<SubmissionKeyPart> parts = submissionKey.splitSubmissionKey();
-  		Submission sub = Submission.fetchSubmission(parts, ds, user);
+  		Submission sub = Submission.fetchSubmission(parts, cc);
   		sub.recursivelyAddEntityKeys(deleteKeys);
   		deleteKeys.add(sub.getKey());
       } catch (ODKEntityNotFoundException e) {
@@ -65,6 +61,6 @@ public class DeleteSubmissions {
 		e.printStackTrace();
       }
     }
-    ds.deleteEntities(deleteKeys, user);
+    cc.getDatastore().deleteEntities(deleteKeys, cc.getCurrentUser());
   }
 }

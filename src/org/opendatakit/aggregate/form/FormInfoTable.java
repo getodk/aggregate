@@ -17,6 +17,7 @@ package org.opendatakit.aggregate.form;
 
 import java.util.List;
 
+import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.datamodel.FormDataModel;
 import org.opendatakit.aggregate.datamodel.TopLevelDynamicBase;
 import org.opendatakit.common.persistence.CommonFieldsBase;
@@ -81,63 +82,72 @@ public class FormInfoTable extends TopLevelDynamicBase {
 	
 	private static FormInfoTable relation = null;
 	
-	static synchronized final FormInfoTable createRelation(Datastore datastore, User user) throws ODKDatastoreException {
+	static synchronized final FormInfoTable createRelation(CallingContext cc) throws ODKDatastoreException {
 		if ( relation == null ) {
 			FormInfoTable relationPrototype;
-			relationPrototype = new FormInfoTable(datastore.getDefaultSchemaName());
-		    datastore.assertRelation(relationPrototype, user); // may throw exception...
+			Datastore ds = cc.getDatastore();
+			User user = cc.getUserService().getDaemonAccountUser();
+			relationPrototype = new FormInfoTable(ds.getDefaultSchemaName());
+		    ds.assertRelation(relationPrototype, user); // may throw exception...
 		    // at this point, the prototype has become fully populated
 		    relation = relationPrototype; // set static variable only upon success...
 		}
 		return relation;
 	}
 	
-	static synchronized final String createFormDataModel(List<FormDataModel> model, Datastore datastore, User user) throws ODKDatastoreException {
+	static synchronized final String createFormDataModel(List<FormDataModel> model, CallingContext cc) throws ODKDatastoreException {
 
-		FormDataModel.createRelation(datastore, user);
-		SubmissionAssociationTable saRelation = SubmissionAssociationTable.createRelation(datastore, user);
+		FormDataModel.createRelation(cc);
+		SubmissionAssociationTable saRelation = SubmissionAssociationTable.createRelation(cc);
+		FormInfoTable formInfoTableRelation = createRelation(cc);
 		
-		FormInfoTable formInfoTableRelation = createRelation(datastore, user);
-		FormInfoTable formInfoDefinition = datastore.createEntityUsingRelation(formInfoTableRelation, user);
-		formInfoDefinition.setStringField(formInfoTableRelation.primaryKey, FORM_INFO_DEFINITION_URI);
-		
-		Long lastOrdinal = 0L;
-		
-		lastOrdinal = FormDefinition.buildTableFormDataModel( model, 
-				formInfoTableRelation, 
-				formInfoDefinition, // top level table
-				formInfoDefinition, // parent table...
-				1L,
-				datastore, user );
-		
-		FormInfoDescriptionTable.createFormDataModel(model, 
-				++lastOrdinal, 
-				formInfoDefinition, // top level table
-				formInfoTableRelation, 
-				datastore, user );
-		
-		FormInfoFilesetTable.createFormDataModel(model, 
-				++lastOrdinal, 
-				formInfoDefinition, // top level table
-				formInfoTableRelation, 
-				datastore, user );
-		
-		FormInfoSubmissionTable.createFormDataModel(model, 
-				++lastOrdinal, 
-				formInfoDefinition, // top level table
-				formInfoTableRelation, 
-				datastore, user );
-		
-		FormDefinition.buildLongStringFormDataModel(model, 
-				FORM_INFO_LONG_STRING_REF_TEXT_URI,
-				FORM_INFO_LONG_STRING_REF_TEXT, 
-				FORM_INFO_REF_TEXT_URI,
-				FORM_INFO_REF_TEXT, 
-				formInfoDefinition, // top level and parent table
-				2L, 
-				datastore, 
-				user);
-
-		return formInfoTableRelation.getUri();
+		boolean asDaemon = cc.getAsDeamon();
+		try {
+			cc.setAsDaemon(true);
+			Datastore ds = cc.getDatastore();
+			User user = cc.getUserService().getDaemonAccountUser();
+			FormInfoTable formInfoDefinition = ds.createEntityUsingRelation(formInfoTableRelation, user);
+			formInfoDefinition.setStringField(formInfoTableRelation.primaryKey, FORM_INFO_DEFINITION_URI);
+			
+			Long lastOrdinal = 0L;
+			
+			lastOrdinal = FormDefinition.buildTableFormDataModel( model, 
+					formInfoTableRelation, 
+					formInfoDefinition, // top level table
+					formInfoDefinition, // parent table...
+					1L,
+					cc );
+			
+			FormInfoDescriptionTable.createFormDataModel(model, 
+					++lastOrdinal, 
+					formInfoDefinition, // top level table
+					formInfoTableRelation, 
+					cc );
+			
+			FormInfoFilesetTable.createFormDataModel(model, 
+					++lastOrdinal, 
+					formInfoDefinition, // top level table
+					formInfoTableRelation, 
+					cc );
+			
+			FormInfoSubmissionTable.createFormDataModel(model, 
+					++lastOrdinal, 
+					formInfoDefinition, // top level table
+					formInfoTableRelation, 
+					cc );
+			
+			FormDefinition.buildLongStringFormDataModel(model, 
+					FORM_INFO_LONG_STRING_REF_TEXT_URI,
+					FORM_INFO_LONG_STRING_REF_TEXT, 
+					FORM_INFO_REF_TEXT_URI,
+					FORM_INFO_REF_TEXT, 
+					formInfoDefinition, // top level and parent table
+					2L, 
+					cc );
+	
+			return formInfoTableRelation.getUri();
+		} finally {
+			cc.setAsDaemon(asDaemon);
+		}
 	}
 }

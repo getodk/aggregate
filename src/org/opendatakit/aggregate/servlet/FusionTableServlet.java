@@ -22,6 +22,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.ServletConsts;
@@ -36,10 +37,7 @@ import org.opendatakit.aggregate.externalservice.FusionTable;
 import org.opendatakit.aggregate.externalservice.OAuthToken;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.task.UploadSubmissions;
-import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
-import org.opendatakit.common.security.User;
-import org.opendatakit.common.security.UserService;
 
 /**
  * 
@@ -73,14 +71,7 @@ public class FusionTableServlet extends ServletUtilBase {
 
   @Override
   public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-
-    // verify user is logged in
-    if (!verifyCredentials(req, resp)) {
-      return;
-    }
-
-    UserService userService = (UserService) ContextFactory.get().getBean(BeanDefs.USER_BEAN);
-    User user = userService.getCurrentUser();
+	CallingContext cc = ContextFactory.getCallingContext(getServletContext());
 
     // get parameters
     String formId = getParameter(req, ServletConsts.FORM_ID);
@@ -114,12 +105,11 @@ public class FusionTableServlet extends ServletUtilBase {
     }
 
     // create fusion table
-    Datastore ds = (Datastore) ContextFactory.get().getBean(BeanDefs.DATASTORE_BEAN);
     FusionTable fusion;
 
     try {
-      Form form = Form.retrieveForm(formId, ds, user);
-      fusion = FusionTable.createFusionTable(form, authToken, esType, getServerURL(req), ds, user);
+      Form form = Form.retrieveForm(formId, cc);
+      fusion = FusionTable.createFusionTable(form, authToken, esType, getServerURL(req), cc);
     } catch (ODKFormNotFoundException e) {
       odkIdNotFoundError(resp);
       return;
@@ -136,9 +126,8 @@ public class FusionTableServlet extends ServletUtilBase {
     // upload data to fusion table
     if (!esType.equals(ExternalServiceOption.STREAM_ONLY)) {
       try {
-        UploadSubmissions uploadTask = (UploadSubmissions) ContextFactory.get().getBean(
-            BeanDefs.UPLOAD_TASK_BEAN);
-        uploadTask.createFormUploadTask(fusion.getFormServiceCursor(), getServerURL(req), user);
+        UploadSubmissions uploadTask = (UploadSubmissions) cc.getBean(BeanDefs.UPLOAD_TASK_BEAN);
+        uploadTask.createFormUploadTask(fusion.getFormServiceCursor(), getServerURL(req), cc);
       } catch (Exception e) {
         resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
         e.printStackTrace();

@@ -17,6 +17,7 @@ package org.opendatakit.aggregate.task.gae;
 
 import java.util.Map;
 
+import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.form.Form;
@@ -26,9 +27,7 @@ import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.task.KmlGenerator;
 import org.opendatakit.aggregate.task.gae.servlet.KmlGeneratorTaskServlet;
-import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
-import org.opendatakit.common.security.User;
 
 import com.google.appengine.api.taskqueue.Queue;
 import com.google.appengine.api.taskqueue.QueueFactory;
@@ -47,10 +46,9 @@ public class KmlGeneratorImpl implements KmlGenerator {
 
   @Override
   public void createKmlTask(Form form, SubmissionKey persistentResultsKey, long attemptCount,
-      String baseServerWebUrl, Datastore datastore, User user) throws ODKDatastoreException,
+      String baseServerWebUrl, CallingContext cc) throws ODKDatastoreException,
       ODKFormNotFoundException {
-    Submission s = Submission.fetchSubmission(persistentResultsKey.splitSubmissionKey(), datastore,
-        user);
+    Submission s = Submission.fetchSubmission(persistentResultsKey.splitSubmissionKey(), cc);
     PersistentResults r = new PersistentResults(s);
     Map<String, String> params = r.getRequestParameters();
     TaskOptions task = TaskOptions.Builder.withUrl(ServletConsts.WEB_ROOT

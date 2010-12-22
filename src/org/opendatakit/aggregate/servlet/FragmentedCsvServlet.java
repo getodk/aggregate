@@ -26,8 +26,8 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.ContextFactory;
-import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
@@ -40,10 +40,7 @@ import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.submission.SubmissionKeyPart;
 import org.opendatakit.common.constants.BasicConsts;
 import org.opendatakit.common.constants.HtmlConsts;
-import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
-import org.opendatakit.common.security.User;
-import org.opendatakit.common.security.UserService;
 
 /**
  * Servlet to generate a CSV file for download, in parts!
@@ -77,17 +74,8 @@ public class FragmentedCsvServlet extends ServletUtilBase {
    */
   @Override
   public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+	CallingContext cc = ContextFactory.getCallingContext(getServletContext());
 
-      UserService userService = (UserService) ContextFactory.get().getBean(
-              BeanDefs.USER_BEAN);
-      User user = userService.getCurrentUser();
-      
-      Datastore datastore = (Datastore) ContextFactory.get().getBean(BeanDefs.DATASTORE_BEAN);
-
-    // verify user is logged in
-    if (!verifyCredentials(req, resp)) {
-      return;
-    }
     // required common parameters
     // form or form element identity
     // -- a forward-slash separated list of identity and group or repeat names
@@ -161,11 +149,11 @@ public class FragmentedCsvServlet extends ServletUtilBase {
         if (submissionKeyParts != null && submissionKeyParts.size() > 2 && numEntriesToFetch > 0) {
         	// repeating groups...
         	// reworked from formmultiplevalueservlet.java
-        	Form form = Form.retrieveForm(submissionKeyParts.get(0).toString(), datastore, user);
+        	Form form = Form.retrieveForm(submissionKeyParts.get(0).toString(), cc);
 
 
             QueryByDate query = new QueryByDate(form, dateCode, false, true, true,
-                    numEntriesToFetch, datastore, user);
+                    numEntriesToFetch, cc);
             List<Submission> submissions = query.getResultSubmissions();
             List<Submission> activeList = new ArrayList<Submission>();
             Submission lastSubmission = null;
@@ -195,10 +183,10 @@ public class FragmentedCsvServlet extends ServletUtilBase {
         	// top-level form has no parent...
         	// top-level form can be referenced either by just "form-identity" or by "form-identity/top-level-tag"
 	    	// reworked from formxmlservlet.java
-        	Form form = Form.retrieveForm(submissionKeyParts.get(0).toString(), datastore, user);
+        	Form form = Form.retrieveForm(submissionKeyParts.get(0).toString(), cc);
 
             QueryByDate query = new QueryByDate(form, dateCode, false, true, true,
-                    numEntriesToFetch, datastore, user);
+                    numEntriesToFetch, cc);
             List<Submission> submissions = query.getResultSubmissions();
             List<Submission> activeList = new ArrayList<Submission>();
             Submission lastSubmission = null;

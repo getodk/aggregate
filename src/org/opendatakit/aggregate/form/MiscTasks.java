@@ -22,8 +22,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import org.opendatakit.aggregate.ContextFactory;
-import org.opendatakit.aggregate.constants.BeanDefs;
+import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.constants.TaskLockType;
 import org.opendatakit.aggregate.datamodel.DynamicCommonFieldsBase;
 import org.opendatakit.aggregate.datamodel.FormDataModel;
@@ -44,7 +43,6 @@ import org.opendatakit.common.persistence.Query.FilterOperation;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
 import org.opendatakit.common.security.User;
-import org.opendatakit.common.security.UserService;
 
 /**
  * Table of miscellaneous tasks.  These should be deleted after 
@@ -198,16 +196,17 @@ public class MiscTasks {
 	 * @param user
 	 * @throws ODKDatastoreException
 	 */
-	public MiscTasks(TaskType type, Form formRequested, Map<String,String> parameters, Datastore datastore, User user) throws ODKDatastoreException {
+	public MiscTasks(TaskType type, Form formRequested, Map<String,String> parameters, CallingContext cc) throws ODKDatastoreException {
 		Form form;
 		try {
-			form = Form.retrieveForm(FORM_ID_MISC_TASKS, datastore, user);
+			form = Form.retrieveForm(FORM_ID_MISC_TASKS, cc);
 		} catch ( ODKFormNotFoundException e) {
 			throw new ODKDatastoreException(e);
 		}
+		User user = cc.getCurrentUser();
 		objectEntity = new Submission(xformMiscTaskParameters.modelVersion,
 								xformMiscTaskParameters.uiVersion,
-								form.getFormDefinition(), datastore, user);
+								form.getFormDefinition(), cc);
 		setFormId(formRequested.getFormId());
 		setRequestingUser(user.getUriUser());
 		Date now = new Date();
@@ -308,25 +307,25 @@ public class MiscTasks {
 		return "MT:" + getFormId();
 	}
 	
-	public void persist(Datastore datastore, User user) throws ODKEntityPersistException {
-		objectEntity.persist(datastore, user);
+	public void persist(CallingContext cc) throws ODKEntityPersistException {
+		objectEntity.persist(cc);
 	}
 	
-	public void delete(Datastore datastore, User user) throws ODKDatastoreException {
+	public void delete(CallingContext cc) throws ODKDatastoreException {
 		List<EntityKey> keys = new ArrayList<EntityKey>();
 		objectEntity.recursivelyAddEntityKeys(keys);
 		keys.add(objectEntity.getKey());
-		datastore.deleteEntities(keys, user);
+		cc.getDatastore().deleteEntities(keys, cc.getCurrentUser());
 	}
 	
 	public SubmissionKey getSubmissionKey() {
 		return objectEntity.constructSubmissionKey(null);
 	}
-	public static final List<MiscTasks> getStalledRequests(Datastore datastore, User user) throws ODKDatastoreException {
+	public static final List<MiscTasks> getStalledRequests(CallingContext cc) throws ODKDatastoreException {
 		List<MiscTasks> taskList = new ArrayList<MiscTasks>();
 		TaskType[] taskTypes = TaskType.values();
 		for ( int i = 0 ; i < taskTypes.length ; ++i ) {
-			getStalledTaskRequests(taskList, taskTypes[i], datastore, user);
+			getStalledTaskRequests(taskList, taskTypes[i], cc);
 		}
 		// The list, at this point, displays bias toward the first
 		// task type.  Reorder the list to bias toward the most-stale
@@ -341,14 +340,14 @@ public class MiscTasks {
 		return taskList;
 	}
 	
-	public static final void getStalledTaskRequests(List<MiscTasks> taskList, TaskType taskType, Datastore datastore, User user) throws ODKDatastoreException {
+	public static final void getStalledTaskRequests(List<MiscTasks> taskList, TaskType taskType, CallingContext cc) throws ODKDatastoreException {
 		Form form;
 		try {
-			form = Form.retrieveForm(FORM_ID_MISC_TASKS, datastore, user);
+			form = Form.retrieveForm(FORM_ID_MISC_TASKS, cc);
 		} catch ( ODKFormNotFoundException e) {
 			throw new ODKDatastoreException(e);
 		}
-		Query q = datastore.createQuery(form.getTopLevelGroupElement().getFormDataModel().getBackingObjectPrototype(), user);
+		Query q = cc.getDatastore().createQuery(form.getTopLevelGroupElement().getFormDataModel().getBackingObjectPrototype(), cc.getCurrentUser());
 		Date now = new Date();
 
 		// TODO: rework for each task type...
@@ -361,7 +360,7 @@ public class MiscTasks {
 		 * should be longer than the allowed Task lifetime.
 		 */
 		for ( CommonFieldsBase b : l ) {
-			Submission s = new Submission( b.getUri(), form, datastore, user );
+			Submission s = new Submission( b.getUri(), form, cc );
 			MiscTasks result = new MiscTasks(s);
 			if ( result.getStatus() == Status.SUCCESSFUL ) continue;
 			if ( result.getStatus() == Status.ABANDONED ) continue;
@@ -372,7 +371,7 @@ public class MiscTasks {
 				result.setAttemptCount(result.getAttemptCount()+1L);
 				result.setStatus(Status.ABANDONED);
 				result.setCompletionDate(now);
-				result.objectEntity.persist(datastore, user);
+				result.objectEntity.persist(cc);
 				continue;
 			}
 			// OK.  If we are here, a task was last fired for this request
@@ -382,21 +381,21 @@ public class MiscTasks {
 		}
 	}
 
-	public static List<MiscTasks> getAllTasksForForm(Form form, Datastore datastore,
-			User user) throws ODKDatastoreException {
+	public static List<MiscTasks> getAllTasksForForm(Form form, CallingContext cc) throws ODKDatastoreException {
 		List<MiscTasks> taskList = new ArrayList<MiscTasks>();
 		Form miscTasksForm;
 		try {
-			miscTasksForm = Form.retrieveForm(FORM_ID_MISC_TASKS, datastore, user);
+			miscTasksForm = Form.retrieveForm(FORM_ID_MISC_TASKS, cc);
 		} catch ( ODKFormNotFoundException e) {
 			throw new ODKDatastoreException(e);
 		}
-		Query q = datastore.createQuery(miscTasksForm.getTopLevelGroupElement().getFormDataModel().getBackingObjectPrototype(), user);
+		User user = cc.getCurrentUser();
+		Query q = cc.getDatastore().createQuery(miscTasksForm.getTopLevelGroupElement().getFormDataModel().getBackingObjectPrototype(), user);
 		q.addFilter(MiscTasks.getFormIdKey().getFormDataModel().getBackingKey(), FilterOperation.EQUAL, form.getFormId());
 		// collect all MiscTasks entries that refer to the given form...
 		List<? extends CommonFieldsBase> l = q.executeQuery(0);
 		for ( CommonFieldsBase b : l ) {
-			Submission s = new Submission( b.getUri(), miscTasksForm, datastore, user );
+			Submission s = new Submission( b.getUri(), miscTasksForm, cc );
 			MiscTasks result = new MiscTasks(s);
 			taskList.add(result);
 		}
@@ -504,11 +503,13 @@ public class MiscTasks {
 		
 		private static MiscTasksTable relation = null;
 		
-		static synchronized final MiscTasksTable createRelation(Datastore datastore, User user) throws ODKDatastoreException {
+		static synchronized final MiscTasksTable createRelation(CallingContext cc) throws ODKDatastoreException {
 			if ( relation == null ) {
 				MiscTasksTable relationPrototype;
-				relationPrototype = new MiscTasksTable(datastore.getDefaultSchemaName());
-			    datastore.assertRelation(relationPrototype, user); // may throw exception...
+				Datastore ds = cc.getDatastore();
+				User user = cc.getUserService().getDaemonAccountUser();
+				relationPrototype = new MiscTasksTable(ds.getDefaultSchemaName());
+			    ds.assertRelation(relationPrototype, user); // may throw exception...
 			    // at this point, the prototype has become fully populated
 			    relation = relationPrototype; // set static variable only upon success...
 			}
@@ -523,57 +524,64 @@ public class MiscTasks {
 	 * @param user
 	 * @throws ODKDatastoreException
 	 */
-	static final void createForm(Datastore datastore, User user) throws ODKDatastoreException {
-		List<FormDataModel> model = new ArrayList<FormDataModel>();
-
-		FormDataModel.createRelation(datastore, user);
-		SubmissionAssociationTable.createRelation(datastore, user);
+	static final void createForm(CallingContext cc) throws ODKDatastoreException {
 		
-		MiscTasksTable miscTasksRelation = MiscTasksTable.createRelation(datastore, user);
-		MiscTasksTable miscTasksDefinition = datastore.createEntityUsingRelation(miscTasksRelation, user);
-		miscTasksDefinition.setStringField(miscTasksRelation.primaryKey, MiscTasksTable.MISC_TASK_DEFINITION_URI);
-		
-		FormDefinition.buildTableFormDataModel( model, 
-				miscTasksRelation, 
-				miscTasksDefinition, // top level table
-				miscTasksDefinition, // parent table...
-				1L,
-				datastore, user );
-
-		String uriPrefix = FORM_ID_MISC_TASKS;
-		
-		FormDefinition.buildLongStringFormDataModel(model, 
-				uriPrefix + MiscTasksTable.MISC_TASKS_LONG_STRING_REF_TEXT, 
-				MiscTasksTable.MISC_TASKS_LONG_STRING_REF_TEXT, 
-				uriPrefix + MiscTasksTable.MISC_TASKS_REF_TEXT, 
-				MiscTasksTable.MISC_TASKS_REF_TEXT, 
-				miscTasksDefinition, // top level and parent table
-				2L, 
-				datastore, 
-				user);
-		
-		FormDefinition.assertModel(xformMiscTaskParameters, model, datastore, user);
-
-		FormDefinition formDefinition = FormDefinition.getFormDefinition(xformMiscTaskParameters, datastore, user);
-		
-		if ( MiscTasksTable.relation != (MiscTasksTable) formDefinition.getTopLevelGroup().getBackingObjectPrototype() ) {
-			throw new IllegalStateException("PersistentResults form is not the canonical relation");
+		boolean asDaemon = cc.getAsDeamon();
+		try {
+			cc.setAsDaemon(true);
+			List<FormDataModel> model = new ArrayList<FormDataModel>();
+			Datastore ds = cc.getDatastore();
+			User user = cc.getCurrentUser();
+			FormDataModel.createRelation(cc);
+			SubmissionAssociationTable.createRelation(cc);
+			
+			MiscTasksTable miscTasksRelation = MiscTasksTable.createRelation(cc);
+			MiscTasksTable miscTasksDefinition = ds.createEntityUsingRelation(miscTasksRelation, user);
+			miscTasksDefinition.setStringField(miscTasksRelation.primaryKey, MiscTasksTable.MISC_TASK_DEFINITION_URI);
+			
+			FormDefinition.buildTableFormDataModel( model, 
+					miscTasksRelation, 
+					miscTasksDefinition, // top level table
+					miscTasksDefinition, // parent table...
+					1L,
+					cc );
+	
+			String uriPrefix = FORM_ID_MISC_TASKS;
+			
+			FormDefinition.buildLongStringFormDataModel(model, 
+					uriPrefix + MiscTasksTable.MISC_TASKS_LONG_STRING_REF_TEXT, 
+					MiscTasksTable.MISC_TASKS_LONG_STRING_REF_TEXT, 
+					uriPrefix + MiscTasksTable.MISC_TASKS_REF_TEXT, 
+					MiscTasksTable.MISC_TASKS_REF_TEXT, 
+					miscTasksDefinition, // top level and parent table
+					2L, 
+					cc);
+			
+			FormDefinition.assertModel(xformMiscTaskParameters, model, cc);
+	
+			FormDefinition formDefinition = FormDefinition.getFormDefinition(xformMiscTaskParameters, cc);
+			
+			if ( MiscTasksTable.relation != (MiscTasksTable) formDefinition.getTopLevelGroup().getBackingObjectPrototype() ) {
+				throw new IllegalStateException("PersistentResults form is not the canonical relation");
+			}
+	
+			// and discover the form element model values for submissions of this type.
+			formId = FormDefinition.findElement(formDefinition.getTopLevelGroupElement(), MiscTasksTable.relation.formId);
+			requestingUser = FormDefinition.findElement(formDefinition.getTopLevelGroupElement(), MiscTasksTable.relation.requestingUser);
+			requestDate = FormDefinition.findElement(formDefinition.getTopLevelGroupElement(), MiscTasksTable.relation.requestDate);
+			requestParameters = FormDefinition.findElement(formDefinition.getTopLevelGroupElement(), MiscTasksTable.relation.requestParameters);
+			lastActivityDate = FormDefinition.findElement(formDefinition.getTopLevelGroupElement(), MiscTasksTable.relation.lastActivityDate);
+			attemptCount = FormDefinition.findElement(formDefinition.getTopLevelGroupElement(), MiscTasksTable.relation.attemptCount);
+			status = FormDefinition.findElement(formDefinition.getTopLevelGroupElement(), MiscTasksTable.relation.status);
+			taskType = FormDefinition.findElement(formDefinition.getTopLevelGroupElement(), MiscTasksTable.relation.taskType);
+			completionDate = FormDefinition.findElement(formDefinition.getTopLevelGroupElement(), MiscTasksTable.relation.completionDate);
+	
+			String persistentResultsUri = miscTasksRelation.getUri();
+			
+			FormDefinition.assertFormInfoRecord(xformMiscTaskParameters, "Miscellaneous Tasks", "Miscellaneous tasks run in the background and managed by Aggregate", persistentResultsUri, cc);
+		} finally {
+			cc.setAsDaemon(asDaemon);
 		}
-
-		// and discover the form element model values for submissions of this type.
-		formId = FormDefinition.findElement(formDefinition.getTopLevelGroupElement(), MiscTasksTable.relation.formId);
-		requestingUser = FormDefinition.findElement(formDefinition.getTopLevelGroupElement(), MiscTasksTable.relation.requestingUser);
-		requestDate = FormDefinition.findElement(formDefinition.getTopLevelGroupElement(), MiscTasksTable.relation.requestDate);
-		requestParameters = FormDefinition.findElement(formDefinition.getTopLevelGroupElement(), MiscTasksTable.relation.requestParameters);
-		lastActivityDate = FormDefinition.findElement(formDefinition.getTopLevelGroupElement(), MiscTasksTable.relation.lastActivityDate);
-		attemptCount = FormDefinition.findElement(formDefinition.getTopLevelGroupElement(), MiscTasksTable.relation.attemptCount);
-		status = FormDefinition.findElement(formDefinition.getTopLevelGroupElement(), MiscTasksTable.relation.status);
-		taskType = FormDefinition.findElement(formDefinition.getTopLevelGroupElement(), MiscTasksTable.relation.taskType);
-		completionDate = FormDefinition.findElement(formDefinition.getTopLevelGroupElement(), MiscTasksTable.relation.completionDate);
-
-		String persistentResultsUri = miscTasksRelation.getUri();
-		
-		FormDefinition.assertFormInfoRecord(xformMiscTaskParameters, "Miscellaneous Tasks", "Miscellaneous tasks run in the background and managed by Aggregate", persistentResultsUri, datastore, user);
 	}
 
 	/**
@@ -583,15 +591,10 @@ public class MiscTasks {
 	 * @param backingTableMap
 	 */
 	static void populateBackingTableMap(
-			Map<String, DynamicCommonFieldsBase> backingTableMap) {
+			Map<String, DynamicCommonFieldsBase> backingTableMap, CallingContext cc) {
 		try {
-		    UserService userService = (UserService) ContextFactory.get().getBean(
-		    		BeanDefs.USER_BEAN);
-		    User user = userService.getDaemonAccountUser();
-		    Datastore datastore = (Datastore) ContextFactory.get().getBean(BeanDefs.DATASTORE_BEAN);
-
 		    DynamicCommonFieldsBase b;
-			b = MiscTasksTable.createRelation(datastore, user);
+			b = MiscTasksTable.createRelation(cc);
 			backingTableMap.put(b.getSchemaName() + "." + b.getTableName(), b);
 		} catch (ODKDatastoreException e) {
 			throw new IllegalStateException("the relations should already have been created");

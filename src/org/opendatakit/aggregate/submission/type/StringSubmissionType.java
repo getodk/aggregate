@@ -20,6 +20,7 @@ package org.opendatakit.aggregate.submission.type;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.datamodel.DynamicCommonFieldsBase;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.datamodel.LongStringRefText;
@@ -52,8 +53,7 @@ public class StringSubmissionType extends SubmissionFieldBase<String> {
 	private final String parentKey;
 	private final FormDefinition formDefinition;
 	private final EntityKey topLevelTableKey;
-	private final Datastore datastore;
-	private final User user;
+	private final CallingContext cc;
 	private List<LongStringRefText> lsts = new ArrayList<LongStringRefText>();
 	private List<RefText> refs = new ArrayList<RefText>();
 
@@ -68,14 +68,13 @@ public class StringSubmissionType extends SubmissionFieldBase<String> {
 	 *            Name of submission element
 	 */
 	public StringSubmissionType(DynamicCommonFieldsBase backingObject, FormElementModel m, 
-						String parentKey, FormDefinition formDefinition, EntityKey topLevelTableKey, Datastore datastore, User user) {
+						String parentKey, FormDefinition formDefinition, EntityKey topLevelTableKey, CallingContext cc) {
 		super(m);
 		this.backingObject = backingObject;
 		this.parentKey = parentKey;
 		this.formDefinition = formDefinition;
 		this.topLevelTableKey = topLevelTableKey;
-		this.datastore = datastore;
-		this.user = user;
+		this.cc = cc;
 	}
 
 	/**
@@ -102,17 +101,17 @@ public class StringSubmissionType extends SubmissionFieldBase<String> {
 	public void setValueFromString(String value) throws ODKEntityPersistException {
 		fullValue = value;
 		if ( !backingObject.setStringField(element.getFormDataModel().getBackingKey(), value)) {
-			formDefinition.setLongString(value, backingObject.getUri(), element.getFormDataModel().getUri(), topLevelTableKey, datastore, user);
+			formDefinition.setLongString(value, backingObject.getUri(), element.getFormDataModel().getUri(), topLevelTableKey, cc);
 		}
 	}
 
 	@Override
-	public void getValueFromEntity(Datastore datastore, User user)
+	public void getValueFromEntity(CallingContext cc)
 			throws ODKDatastoreException {
 		
 		String value = (String) backingObject.getStringField(element.getFormDataModel().getBackingKey());
 		if (element.getFormDataModel().isPossibleLongStringField(backingObject, element.getFormDataModel().getBackingKey())) {
-			String longValue = formDefinition.getLongString(parentKey, element.getFormDataModel().getUri(), datastore, user);
+			String longValue = formDefinition.getLongString(parentKey, element.getFormDataModel().getUri(), cc);
 			if ( longValue != null ) {
 				value = longValue;
 			}
@@ -145,8 +144,10 @@ public class StringSubmissionType extends SubmissionFieldBase<String> {
 	}
 	
 	@Override
-	public void persist(Datastore datastore, User user) throws ODKEntityPersistException {
-		datastore.putEntities(refs, user);
-		datastore.putEntities(lsts, user);
+	public void persist(CallingContext cc) throws ODKEntityPersistException {
+		Datastore ds = cc.getDatastore();
+		User user = cc.getCurrentUser();
+		ds.putEntities(refs, user);
+		ds.putEntities(lsts, user);
 	}
 }

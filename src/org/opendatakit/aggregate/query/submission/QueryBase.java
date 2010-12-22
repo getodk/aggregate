@@ -17,17 +17,16 @@ package org.opendatakit.aggregate.query.submission;
 
 import java.util.List;
 
+import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.common.persistence.CommonFieldsBase;
-import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.persistence.Query.FilterOperation;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
-import org.opendatakit.common.security.User;
 
 /**
  * 
@@ -38,8 +37,7 @@ import org.opendatakit.common.security.User;
 public abstract class QueryBase {
 
   protected Query query;
-  protected final Datastore ds;
-  protected final User user;
+  protected final CallingContext cc;
   protected final Form form;
   
   private boolean moreRecords;
@@ -47,9 +45,8 @@ public abstract class QueryBase {
   
   private int numOfRecords;
   
-  protected QueryBase(Form form, int maxFetchLimit, Datastore datastore, User user) throws ODKFormNotFoundException {
-    ds = datastore;
-    this.user = user;
+  protected QueryBase(Form form, int maxFetchLimit, CallingContext cc) throws ODKFormNotFoundException {
+    this.cc = cc;
     fetchLimit = maxFetchLimit;
     numOfRecords = 0;
     this.form = form;

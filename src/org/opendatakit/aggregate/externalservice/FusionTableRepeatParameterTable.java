@@ -18,6 +18,7 @@ package org.opendatakit.aggregate.externalservice;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.datamodel.FormElementKey;
 import org.opendatakit.aggregate.datamodel.StaticAssociationBase;
 import org.opendatakit.common.persistence.CommonFieldsBase;
@@ -104,12 +105,14 @@ public class FusionTableRepeatParameterTable extends StaticAssociationBase {
 
 	  private static FusionTableRepeatParameterTable relation = null;
 
-	  public static synchronized final FusionTableRepeatParameterTable createRelation(Datastore datastore, User user)
+	  public static synchronized final FusionTableRepeatParameterTable createRelation(CallingContext cc)
 	      throws ODKDatastoreException {
 	    if (relation == null) {
 	    	FusionTableRepeatParameterTable relationPrototype;
-	        relationPrototype = new FusionTableRepeatParameterTable(datastore.getDefaultSchemaName());
-	        datastore.assertRelation(relationPrototype, user); // may throw exception...
+	    	Datastore ds = cc.getDatastore();
+	    	User user = cc.getUserService().getDaemonAccountUser();
+	        relationPrototype = new FusionTableRepeatParameterTable(ds.getDefaultSchemaName());
+	        ds.assertRelation(relationPrototype, user); // may throw exception...
 	        // at this point, the prototype has become fully populated
 	        relation = relationPrototype; // set static variable only upon success...
 	    }
@@ -117,11 +120,11 @@ public class FusionTableRepeatParameterTable extends StaticAssociationBase {
 	  }
 	  
 	  public static List<FusionTableRepeatParameterTable> getRepeatGroupAssociations(EntityKey fusionTableParameterTable,
-			  												Datastore datastore, User user) throws ODKDatastoreException {
+			  												CallingContext cc) throws ODKDatastoreException {
 		  List<FusionTableRepeatParameterTable> list = new ArrayList<FusionTableRepeatParameterTable> ();
-		  FusionTableRepeatParameterTable frpt = createRelation(datastore,user);
+		  FusionTableRepeatParameterTable frpt = createRelation(cc);
 
-		  Query query = datastore.createQuery(frpt, user);
+		  Query query = cc.getDatastore().createQuery(frpt, cc.getCurrentUser());
 		  query.addFilter(frpt.domAuri, FilterOperation.EQUAL, fusionTableParameterTable.getKey());
 
 		  List<? extends CommonFieldsBase> results = query.executeQuery(0);

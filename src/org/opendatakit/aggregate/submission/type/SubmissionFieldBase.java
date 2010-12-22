@@ -19,6 +19,7 @@ package org.opendatakit.aggregate.submission.type;
 
 
 
+import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.constants.ErrorConsts;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.datamodel.FormDataModel.ElementType;
@@ -27,9 +28,7 @@ import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.format.element.ElementFormatter;
 import org.opendatakit.aggregate.submission.SubmissionField;
 import org.opendatakit.common.constants.BasicConsts;
-import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
-import org.opendatakit.common.security.User;
 
 /**
  * 
@@ -84,7 +83,7 @@ public abstract class SubmissionFieldBase<T> implements SubmissionField<T>{
    * @param user - requesting the value
  * @throws ODKDatastoreException 
    */
-  public abstract void getValueFromEntity(Datastore datastore, User user)
+  public abstract void getValueFromEntity(CallingContext cc)
   					throws ODKDatastoreException;
   
   /**
@@ -108,7 +107,7 @@ public abstract class SubmissionFieldBase<T> implements SubmissionField<T>{
    * @throws ODKDatastoreException 
    */ 
   @Override
-  public BlobSubmissionOutcome setValueFromByteArray(byte [] byteArray, String contentType, Long contentLength, String unrootedFilePath, Datastore datastore, User user) throws ODKDatastoreException {
+  public BlobSubmissionOutcome setValueFromByteArray(byte [] byteArray, String contentType, Long contentLength, String unrootedFilePath) throws ODKDatastoreException {
     if(isBinary()) {
       throw new IllegalStateException("Should be overridden in derived class");
     } else {

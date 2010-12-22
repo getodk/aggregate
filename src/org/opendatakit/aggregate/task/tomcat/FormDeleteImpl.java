@@ -15,14 +15,13 @@
  */
 package org.opendatakit.aggregate.task.tomcat;
 
+import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.task.FormDelete;
 import org.opendatakit.aggregate.task.FormDeleteWorkerImpl;
-import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
-import org.opendatakit.common.security.User;
 
 /**
  * This is a singleton bean.  It cannot have any per-request state.
@@ -39,8 +38,8 @@ public class FormDeleteImpl implements FormDelete {
 		final FormDeleteWorkerImpl impl;
 
 		public FormDeleteRunner(Form form, SubmissionKey miscTasksKey,
-				long attemptCount, String baseServerWebUrl, Datastore datastore, User user) {
-			impl = new FormDeleteWorkerImpl( form, miscTasksKey, attemptCount, baseServerWebUrl, datastore, user);
+				long attemptCount, String baseServerWebUrl, CallingContext cc) {
+			impl = new FormDeleteWorkerImpl( form, miscTasksKey, attemptCount, baseServerWebUrl, cc);
 		}
 
 		@Override
@@ -56,8 +55,8 @@ public class FormDeleteImpl implements FormDelete {
 
   @Override
   public final void createFormDeleteTask(Form form, SubmissionKey miscTasksKey,
-			long attemptCount, String baseServerWebUrl, Datastore datastore, User user) throws ODKDatastoreException, ODKFormNotFoundException {
-    FormDeleteRunner dr = new FormDeleteRunner(form, miscTasksKey, attemptCount, baseServerWebUrl, datastore, user);
+			long attemptCount, String baseServerWebUrl, CallingContext cc) throws ODKDatastoreException, ODKFormNotFoundException {
+    FormDeleteRunner dr = new FormDeleteRunner(form, miscTasksKey, attemptCount, baseServerWebUrl, cc);
     AggregrateThreadExecutor exec = AggregrateThreadExecutor.getAggregateThreadExecutor();
     exec.execute(dr);
   }

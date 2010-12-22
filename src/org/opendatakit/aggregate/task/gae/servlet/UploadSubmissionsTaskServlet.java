@@ -20,19 +20,16 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.ContextFactory;
-import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.externalservice.ExternalServiceConsts;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.externalservice.FormServiceCursor;
 import org.opendatakit.aggregate.servlet.ServletUtilBase;
 import org.opendatakit.aggregate.task.UploadSubmissionsWorkerImpl;
-import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
-import org.opendatakit.common.security.User;
-import org.opendatakit.common.security.UserService;
 
 /**
  * 
@@ -59,10 +56,9 @@ public class UploadSubmissionsTaskServlet extends ServletUtilBase{
    */
   @Override
   public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-
     // TODO: talk to MITCH about the fact the user will be incorrect
-    UserService userService = (UserService) ContextFactory.get().getBean(BeanDefs.USER_BEAN);
-    User user = userService.getCurrentUser();
+	CallingContext cc = ContextFactory.getCallingContext(getServletContext());
+	cc.setAsDaemon(true);
 
     // get parameter
     String fscUri = getParameter(req, ExternalServiceConsts.FSC_URI_PARAM);
@@ -71,10 +67,9 @@ public class UploadSubmissionsTaskServlet extends ServletUtilBase{
       return;
     }
     System.out.println("STARTING UPLOAD SUBMISSION TASK!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-    Datastore ds = (Datastore) ContextFactory.get().getBean(BeanDefs.DATASTORE_BEAN);
     FormServiceCursor fsc;
     try {
-      fsc = FormServiceCursor.getFormServiceCursor(fscUri, ds, user);
+      fsc = FormServiceCursor.getFormServiceCursor(fscUri, cc);
     } catch (ODKEntityNotFoundException e) {
       // TODO: fix bug we should not be generating tasks for fsc that don't exist
       // however not critical bug as execution path dies with this try/catch
@@ -85,7 +80,7 @@ public class UploadSubmissionsTaskServlet extends ServletUtilBase{
     
     try {
     	UploadSubmissionsWorkerImpl worker = 
-    		new UploadSubmissionsWorkerImpl(fsc, getServerURL(req), ds, user);
+    		new UploadSubmissionsWorkerImpl(fsc, getServerURL(req), cc);
       worker.uploadAllSubmissions();
     } catch (ODKTaskLockException e) {
       e.printStackTrace();

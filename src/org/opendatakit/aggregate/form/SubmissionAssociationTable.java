@@ -15,6 +15,7 @@
  */
 package org.opendatakit.aggregate.form;
 
+import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.datamodel.StaticAssociationBase;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.Datastore;
@@ -155,11 +156,13 @@ public class SubmissionAssociationTable extends StaticAssociationBase {
 
 	private static SubmissionAssociationTable relation = null;
 	
-	public static synchronized final SubmissionAssociationTable createRelation(Datastore datastore, User user) throws ODKDatastoreException {
+	public static synchronized final SubmissionAssociationTable createRelation(CallingContext cc) throws ODKDatastoreException {
 		if ( relation == null ) {
+			Datastore ds = cc.getDatastore();
+			User user = cc.getCurrentUser();
 			SubmissionAssociationTable relationPrototype;
-			relationPrototype = new SubmissionAssociationTable(datastore.getDefaultSchemaName());
-		    datastore.assertRelation(relationPrototype, user); // may throw exception...
+			relationPrototype = new SubmissionAssociationTable(ds.getDefaultSchemaName());
+			ds.assertRelation(relationPrototype, user); // may throw exception...
 		    // at this point, the prototype has become fully populated
 		    relation = relationPrototype; // set static variable only upon success...
 		}

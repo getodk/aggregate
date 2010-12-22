@@ -20,6 +20,7 @@ package org.opendatakit.aggregate.submission.type;
 import java.math.BigDecimal;
 import java.util.List;
 
+import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.constants.format.FormatConsts;
 import org.opendatakit.aggregate.datamodel.DynamicCommonFieldsBase;
 import org.opendatakit.aggregate.datamodel.FormDataModel;
@@ -28,10 +29,8 @@ import org.opendatakit.aggregate.exception.ODKConversionException;
 import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.format.element.ElementFormatter;
 import org.opendatakit.common.constants.BasicConsts;
-import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.EntityKey;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
-import org.opendatakit.common.security.User;
 
 /**
  * Geopoints appear as a single complex-valued field to their callers.
@@ -114,7 +113,7 @@ public class GeoPointSubmissionType extends SubmissionSingleValueBase<GeoPoint> 
 	}
 
 	@Override
-	public void getValueFromEntity(Datastore datastore, User user) {
+	public void getValueFromEntity(CallingContext cc) {
 		BigDecimal latCoor = null;
 		BigDecimal longCoor = null;
 		BigDecimal altitude = null;
@@ -180,7 +179,7 @@ public class GeoPointSubmissionType extends SubmissionSingleValueBase<GeoPoint> 
 	}
 
 	@Override
-	public void persist(Datastore datastore, User user) {
+	public void persist(CallingContext cc) {
 		// geopoint persistence is handled by SubmissionSet
 	}
 

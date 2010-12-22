@@ -5,14 +5,17 @@
 	xsi:schemaLocation="http://www.springframework.org/schema/beans
            http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
 
-	<!--Datasource configuration-->
 	<bean
 		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
 		<property name="locations">
-			<value>classpath:jdbc.properties</value>
+			<list>
+				<value>classpath:jdbc.properties</value>
+				<value>classpath:security.properties</value>
+			</list>
 		</property>
 	</bean>
 
+	<!--Datasource configuration-->
 	<bean id="dataSource" destroy-method="close"
 		class="org.apache.tomcat.dbcp.dbcp.BasicDataSource">
 		<property name="driverClassName" value="${jdbc.driverClassName}" />
@@ -25,31 +28,21 @@
 		class="org.opendatakit.common.persistence.engine.mysql.DatastoreImpl">
 		<property name="dataSource" ref="dataSource" />
 		<!--		schemaName defaults to the database name.  Override this with: -->
-		<!--		<property name="schemaName" value="mySchemaName" />   -->
+		<property name="schemaName" value="${jdbc.schema}" />
 	</bean>
 
 	<!--	Website domain information	-->
 	<bean id="realm" class="org.opendatakit.common.security.Realm">
-		<property name="mailToDomain" value="gmail.com" />
-		<property name="rootDomain" value="opendatakit.org" />
-		<property name="realmString" value="opendatakit.org Aggregate 1.0 realm" />
-		<property name="domains">
-			<list>
-				<value>aggregate-opendatakit.org</value>
-			</list>
-		</property>
+		<property name="mailToDomain" value="${security.server.realm.mailToDomain}" />
+		<property name="rootDomain" value="${security.server.realm.rootDomain}" />
+		<property name="realmString" value="${security.server.realm.realmString}" />
+		<property name="domains" value="${security.server.realm.domains}" />
 	</bean>
 	
 	<bean id="user_service" class="org.opendatakit.common.security.spring.UserServiceImpl">
 		<property name="datastore" ref="datastore" />
 		<property name="realm" ref="realm" />
 	</bean>
-	<!--
-		<bean id="user_service"
-		class="org.opendatakit.common.security.tomcat.UserServiceImpl">
-			<property name="realm" ref="realm" />
-		</bean>
-	-->
 
 	<bean id="worksheet_creator"
 		class="org.opendatakit.aggregate.task.tomcat.WorksheetCreatorImpl" />
@@ -62,6 +55,11 @@
 	<bean id="watchdog" class="org.opendatakit.aggregate.task.tomcat.WatchdogImpl">
 		<property name="datastore" ref="datastore" />
 		<property name="userService" ref="user_service" />
+		<property name="worksheetCreator" ref="worksheet_creator" />
+		<property name="formDelete" ref="form_delete" />
+		<property name="uploadSubmissions" ref="upload_task" />
+		<property name="kmlGenerator" ref="kml_task" />
+		<property name="csvGenerator" ref="csv_task" />
 	</bean>
 
 </beans>

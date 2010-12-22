@@ -19,16 +19,15 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.datamodel.TopLevelDynamicBase;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.common.persistence.CommonFieldsBase;
-import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.persistence.Query.FilterOperation;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
-import org.opendatakit.common.security.User;
 
 /**
  * 
@@ -41,14 +40,14 @@ public class QueryByDate extends QueryBase {
   private boolean backward;
 
   public QueryByDate(Form form, Date lastDate,
-      boolean backwardDirection, boolean secondaryOrderingByPrimaryKey, Boolean completionStatus, int maxFetchLimit, Datastore datastore, User user) throws ODKFormNotFoundException {
-    super(form, maxFetchLimit, datastore, user);
+      boolean backwardDirection, boolean secondaryOrderingByPrimaryKey, Boolean completionStatus, int maxFetchLimit, CallingContext cc) throws ODKFormNotFoundException {
+    super(form, maxFetchLimit, cc);
 
     backward = backwardDirection;
 
     TopLevelDynamicBase tbl = (TopLevelDynamicBase) form.getTopLevelGroupElement().getFormDataModel().getBackingObjectPrototype();
     
-    query = ds.createQuery(tbl, user);
+    query = cc.getDatastore().createQuery(tbl, cc.getCurrentUser());
     if (backward) {
     	query.addSort(tbl.lastUpdateDate, Query.Direction.DESCENDING);
     	query.addFilter(tbl.lastUpdateDate, Query.FilterOperation.LESS_THAN, lastDate);
@@ -63,8 +62,8 @@ public class QueryByDate extends QueryBase {
   }
 
   public QueryByDate(Form form, Date lastDate,
-      boolean backwardDirection, int maxFetchLimit, Datastore datastore, User user) throws ODKFormNotFoundException {
-	  this(form, lastDate, backwardDirection, false, true, maxFetchLimit, datastore, user);
+      boolean backwardDirection, int maxFetchLimit, CallingContext cc) throws ODKFormNotFoundException {
+	  this(form, lastDate, backwardDirection, false, true, maxFetchLimit, cc);
   }
   
   public List<Submission> getResultSubmissions() throws ODKDatastoreException {
@@ -84,7 +83,7 @@ public class QueryByDate extends QueryBase {
         subEntity = submissionEntities.get(count);
       }
 
-      retrievedSubmissions.add(new Submission((TopLevelDynamicBase) subEntity, form.getFormDefinition(), ds, user));
+      retrievedSubmissions.add(new Submission((TopLevelDynamicBase) subEntity, form.getFormDefinition(), cc));
       count++;
 
     }

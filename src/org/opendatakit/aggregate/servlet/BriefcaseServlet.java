@@ -160,11 +160,6 @@ public class BriefcaseServlet extends ServletUtilBase {
 	public void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws IOException {
 
-		// verify user is logged in
-		if (!verifyCredentials(req, resp)) {
-			return;
-		}
-
 		String cookieSet = "";
 		Cookie[] cookies = req.getCookies();
 		if ( cookies != null ) {

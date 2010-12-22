@@ -24,8 +24,8 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.ContextFactory;
-import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.datamodel.DynamicAssociationBase;
 import org.opendatakit.aggregate.datamodel.DynamicBase;
@@ -39,12 +39,9 @@ import org.opendatakit.aggregate.format.table.HtmlFormatter;
 import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
-import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.EntityKey;
 import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
-import org.opendatakit.common.security.User;
-import org.opendatakit.common.security.UserService;
 
 /**
  * 
@@ -79,14 +76,7 @@ public class QueryResultsServlet extends ServletUtilBase {
 	@Override
 	public void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws IOException {
-		// verify user is logged in
-		if (!verifyCredentials(req, resp)) {
-			return;
-		}
-
-		UserService userService = (UserService) ContextFactory.get().getBean(
-				BeanDefs.USER_BEAN);
-		User user = userService.getCurrentUser();
+		CallingContext cc = ContextFactory.getCallingContext(getServletContext());
 
 		// get parameter
 		String formId = getParameter(req, ServletConsts.FORM_ID);
@@ -105,11 +95,9 @@ public class QueryResultsServlet extends ServletUtilBase {
 		}
 
 		// get form
-		Datastore ds = (Datastore) ContextFactory.get().getBean(
-				BeanDefs.DATASTORE_BEAN);
 		Form form = null;
 		try {
-			form = Form.retrieveForm(formId, ds, user);
+			form = Form.retrieveForm(formId, cc);
 		} catch ( ODKFormNotFoundException e) {
 			odkIdNotFoundError(resp);
 			return;
@@ -140,7 +128,7 @@ public class QueryResultsServlet extends ServletUtilBase {
 		default:
 			throw new IllegalStateException("datatype not supported");			
 		}
-		Query query = ds.createQuery(tbl, user);
+		Query query = cc.getDatastore().createQuery(tbl, cc.getCurrentUser());
 		query.addFilter(element.getFormDataModel().getBackingKey(), Query.FilterOperation
 				.valueOf(op), compareValue);
 		try {
@@ -161,7 +149,7 @@ public class QueryResultsServlet extends ServletUtilBase {
 					.executeForeignKeyQuery(form.getTopLevelGroupElement().getFormDataModel().getBackingObjectPrototype(),
 												foreignKey);
 			for ( EntityKey k : keys ) {
-				submissions.add( new Submission(k.getKey(), form, ds, user));
+				submissions.add( new Submission(k.getKey(), form, cc));
 			}
 
 			SubmissionFormatter formatter = new HtmlFormatter(form,

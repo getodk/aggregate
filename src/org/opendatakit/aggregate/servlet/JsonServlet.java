@@ -23,8 +23,8 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.ContextFactory;
-import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.ErrorConsts;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.externalservice.ExternalServiceOption;
@@ -35,11 +35,8 @@ import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.query.submission.QueryByDate;
 import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.common.constants.BasicConsts;
-import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
-import org.opendatakit.common.security.User;
-import org.opendatakit.common.security.UserService;
 
 /**
  * 
@@ -66,15 +63,7 @@ public class JsonServlet extends ServletUtilBase {
 
   @Override
   public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-
-    // verify user is logged in
-    if (!verifyCredentials(req, resp)) {
-      return;
-    }
-
-    UserService userService = (UserService) ContextFactory.get().getBean(
-        BeanDefs.USER_BEAN);
-    User user = userService.getCurrentUser();
+	CallingContext cc = ContextFactory.getCallingContext(getServletContext());
 
     // TODO: rename params so not spreadsheet
 
@@ -90,12 +79,11 @@ public class JsonServlet extends ServletUtilBase {
       return;
     }
 
-    Datastore ds = (Datastore) ContextFactory.get().getBean(BeanDefs.DATASTORE_BEAN);
     Form form;
     JsonServer jsonServer;
     try {
-      form = Form.retrieveForm(formId, ds, user);
-      jsonServer = new JsonServer(form, serverUrl, esType, ds, user);
+      form = Form.retrieveForm(formId, cc);
+      jsonServer = new JsonServer(form, serverUrl, esType, cc);
     } catch (ODKFormNotFoundException e) {
   	  odkIdNotFoundError(resp);
 	  return;
@@ -116,7 +104,7 @@ public class JsonServlet extends ServletUtilBase {
 
       try {
     	QueryByDate query = new QueryByDate(form, BasicConsts.EPOCH, false,
-                  ServletConsts.FETCH_LIMIT, ds, user);
+                  ServletConsts.FETCH_LIMIT, cc);
 
         List<Submission> submissions = query.getResultSubmissions();
         jsonServer.sendSubmissions(submissions);

@@ -19,7 +19,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
-import org.opendatakit.aggregate.ContextFactory;
+import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.TaskLockType;
 import org.opendatakit.aggregate.constants.externalservice.ExternalServiceOption;
@@ -53,30 +53,28 @@ public class WorksheetCreatorWorkerImpl {
 	private final String spreadsheetName;
 	private final ExternalServiceOption esType;
 	private final String baseWebServerUrl;
-	private final Datastore datastore;
-	private final User user;
+	private final CallingContext cc;
 	private final String pFormIdLockId;
 	
 	public WorksheetCreatorWorkerImpl(Form form, 
 			SubmissionKey miscTasksKey, long attemptCount, 
 			String spreadsheetName, ExternalServiceOption esType,
-			String baseWebServerUrl,Datastore datastore, User user) {
+			String baseWebServerUrl,
+			CallingContext cc) {
 		this.form = form;
 		this.miscTasksKey = miscTasksKey;
 		this.attemptCount = attemptCount;
 		this.spreadsheetName = spreadsheetName;
 		this.esType = esType;
 		this.baseWebServerUrl = baseWebServerUrl;
-		this.datastore = datastore;
-		this.user = user;
+		this.cc = cc;
 		pFormIdLockId = UUID.randomUUID().toString();
 	}
 
 	private final GoogleSpreadsheet getGoogleSpreadsheetWithName() 
 						throws ODKDatastoreException {
 		List<ExternalService> remoteServers = FormServiceCursor
-				.getExternalServicesForForm(form, baseWebServerUrl, datastore,
-						user);
+				.getExternalServicesForForm(form, baseWebServerUrl, cc);
 
 		if (remoteServers == null) {
 			return null;
@@ -99,7 +97,7 @@ public class WorksheetCreatorWorkerImpl {
 	public final void worksheetCreator() {
 		Submission s;
 		try {
-			s = Submission.fetchSubmission(miscTasksKey.splitSubmissionKey(), datastore, user);
+			s = Submission.fetchSubmission(miscTasksKey.splitSubmissionKey(), cc);
 		} catch (Exception e) {
 			return;
 		}
@@ -109,8 +107,10 @@ public class WorksheetCreatorWorkerImpl {
 		// it is useful to have the external services collide using 
 		// formId.  Prefix with MT: to indicate that it is a miscellaneousTask
 		// lock.
+	    Datastore ds = cc.getDatastore();
+	    User user = cc.getCurrentUser();
 		String lockedResourceName = t.getMiscTaskLockName();
-		TaskLock formIdTaskLock = datastore.createTaskLock(user);
+		TaskLock formIdTaskLock = ds.createTaskLock(user);
 		try {
 			if (formIdTaskLock.obtainLock(pFormIdLockId, lockedResourceName,
 					TaskLockType.WORKSHEET_CREATION)) {
@@ -123,7 +123,7 @@ public class WorksheetCreatorWorkerImpl {
 			// some other unexpected exception...
 			e2.printStackTrace();
 		} finally {
-			formIdTaskLock = datastore.createTaskLock(user);
+			formIdTaskLock = ds.createTaskLock(user);
 			try {
 				for (int i = 0; i < 10; i++) {
 					if (formIdTaskLock.releaseLock(pFormIdLockId, lockedResourceName,
@@ -160,19 +160,18 @@ public class WorksheetCreatorWorkerImpl {
 		}
 
 		// the above may have taken a while -- re-fetch the data to see if it has changed...
-	    Submission s = Submission.fetchSubmission(miscTasksKey.splitSubmissionKey(), datastore, user);
+	    Submission s = Submission.fetchSubmission(miscTasksKey.splitSubmissionKey(), cc);
 	    MiscTasks r = new MiscTasks(s);
 	    if ( attemptCount.equals(r.getAttemptCount()) ) {
 			// if we need to upload submissions, start a task to do so
+	    	UploadSubmissions us = (UploadSubmissions) cc.getBean(BeanDefs.UPLOAD_TASK_BEAN);
 			if (!esType.equals(ExternalServiceOption.STREAM_ONLY)) {
-				UploadSubmissions uploadTask = (UploadSubmissions) ContextFactory
-						.get().getBean(BeanDefs.UPLOAD_TASK_BEAN);
-				uploadTask.createFormUploadTask(spreadsheet.getFormServiceCursor(),
-						baseWebServerUrl, user);
+				us.createFormUploadTask(spreadsheet.getFormServiceCursor(),
+						baseWebServerUrl, cc);
 			}
 	    	r.setStatus(Status.SUCCESSFUL);
 			r.setCompletionDate(new Date());
-			r.objectEntity.persist(datastore, user);
+			r.objectEntity.persist(cc);
 	    }
 	  } catch (Exception e ) {
 		  failureRecovery(e);
@@ -185,11 +184,11 @@ public class WorksheetCreatorWorkerImpl {
 	e.printStackTrace();
     Submission s;
 	try {
-		s = Submission.fetchSubmission(miscTasksKey.splitSubmissionKey(), datastore, user);
+		s = Submission.fetchSubmission(miscTasksKey.splitSubmissionKey(), cc);
 		MiscTasks r = new MiscTasks(s);
 	    if ( attemptCount.equals(r.getAttemptCount()) ) {
 	    	r.setStatus(Status.FAILED);
-	    	r.objectEntity.persist(datastore, user);
+	    	r.objectEntity.persist(cc);
 	    }
 	} catch (Exception ex) {
 		// something is hosed -- don't attempt to continue.

@@ -20,6 +20,7 @@ package org.opendatakit.aggregate.submission;
 import java.util.Date;
 import java.util.List;
 
+import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.datamodel.TopLevelDynamicBase;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
@@ -57,9 +58,8 @@ public class Submission extends SubmissionSet {
 	 * @throws ODKDatastoreException
 	 */
 	public Submission(Long modelVersion, Long uiVersion, 
-			FormDefinition formDefinition, Datastore datastore,
-			User user) throws ODKDatastoreException {
-		this(modelVersion, uiVersion, null, formDefinition, datastore, user);
+			FormDefinition formDefinition, CallingContext cc) throws ODKDatastoreException {
+		this(modelVersion, uiVersion, null, formDefinition, cc);
 	}
 
 	/**
@@ -74,9 +74,8 @@ public class Submission extends SubmissionSet {
 	 * @throws ODKDatastoreException
 	 */
 	public Submission(Long modelVersion, Long uiVersion, String uriTopLevelGroup,
-			FormDefinition formDefinition, Datastore datastore,
-			User user) throws ODKDatastoreException {
-		super( modelVersion, uiVersion, uriTopLevelGroup, formDefinition, datastore, user);
+			FormDefinition formDefinition, CallingContext cc) throws ODKDatastoreException {
+		super( modelVersion, uiVersion, uriTopLevelGroup, formDefinition, cc);
 		submittedTime = new Date();
 	}
 
@@ -90,16 +89,16 @@ public class Submission extends SubmissionSet {
 	 * @throws ODKDatastoreException
 	 */
 	public Submission(TopLevelDynamicBase submission,
-			FormDefinition formDefinition, Datastore datastore, User user)
+			FormDefinition formDefinition, CallingContext cc)
 			throws ODKDatastoreException {
 		super(null, submission, formDefinition.getTopLevelGroupElement(),
-				formDefinition, datastore, user);
+				formDefinition, cc);
 		submittedTime = submission.getCreationDate();
 	}
 	
-	public Submission(String uri, Form form, Datastore datastore, User user) throws ODKEntityNotFoundException, ODKDatastoreException {
-		super(null, (TopLevelDynamicBase) datastore.getEntity(form.getTopLevelGroupElement().getFormDataModel().getBackingObjectPrototype(), uri, user),
-				form.getTopLevelGroupElement(), form.getFormDefinition(), datastore, user);
+	public Submission(String uri, Form form, CallingContext cc) throws ODKEntityNotFoundException, ODKDatastoreException {
+		super(null, (TopLevelDynamicBase) cc.getDatastore().getEntity(form.getTopLevelGroupElement().getFormDataModel().getBackingObjectPrototype(), uri, cc.getCurrentUser()),
+				form.getTopLevelGroupElement(), form.getFormDefinition(), cc);
 		submittedTime = super.getCreationDate();
 	}
 
@@ -202,12 +201,12 @@ public class Submission extends SubmissionSet {
 	}
 
 	public static final Submission fetchSubmission(List<SubmissionKeyPart> parts,
-			Datastore datastore, User user)
+			CallingContext cc)
 			throws ODKFormNotFoundException, ODKDatastoreException {
 		if (parts == null || parts.size() == 0 ) {
 			throw new IllegalArgumentException("submission key is empty");
 		}
-		Form form = Form.retrieveForm(parts.get(0).getElementName(), datastore, user);
+		Form form = Form.retrieveForm(parts.get(0).getElementName(), cc);
 		if (parts.size() < 2) {
 			throw new IllegalArgumentException(
 					"submission key does not have a top level group");
@@ -223,9 +222,11 @@ public class Submission extends SubmissionSet {
 			throw new IllegalArgumentException("submission key does not have top level auri");
 		}
 		
-		TopLevelDynamicBase tle = (TopLevelDynamicBase) datastore.getEntity(form
+		Datastore ds = cc.getDatastore();
+		User user = cc.getCurrentUser();
+		TopLevelDynamicBase tle = (TopLevelDynamicBase) ds.getEntity(form
 				.getTopLevelGroupElement().getFormDataModel().getBackingObjectPrototype(), tlg.getAuri(), user);
 
-		return new Submission(tle, form.getFormDefinition(), datastore, user);
+		return new Submission(tle, form.getFormDefinition(), cc);
 	}
 }

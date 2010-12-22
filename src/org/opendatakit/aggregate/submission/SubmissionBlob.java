@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.datamodel.FormDataModel;
 import org.opendatakit.aggregate.datamodel.RefBlob;
@@ -44,7 +45,7 @@ import org.opendatakit.common.security.User;
  */
 public class SubmissionBlob {
   
-  private final Datastore datastore;
+  private final CallingContext cc;
   private final FormDefinition formDefinition;
   private final FormDataModel versionedBinaryContentRefBlobModel;
   private List<VersionedBinaryContentRefBlob> dbBcbEntityList = new ArrayList<VersionedBinaryContentRefBlob>();
@@ -56,10 +57,10 @@ public class SubmissionBlob {
    * @throws ODKDatastoreException 
    *    
    */
-  public SubmissionBlob(byte [] blob, String uriVersionedContent, FormDataModel versionedBinaryContentRefBlobModel, FormDefinition formDefinition, EntityKey colocationKey, Datastore datastore, User user) throws ODKDatastoreException {
+  public SubmissionBlob(byte [] blob, String uriVersionedContent, FormDataModel versionedBinaryContentRefBlobModel, FormDefinition formDefinition, EntityKey colocationKey, CallingContext cc) throws ODKDatastoreException {
 
 	this.versionedBinaryContentRefBlobModel = versionedBinaryContentRefBlobModel;
-	this.datastore = datastore;
+	this.cc = cc;
 	this.formDefinition = formDefinition;
 	FormDataModel blobModel = versionedBinaryContentRefBlobModel.getChildren().get(0);
     // get prototype entities...
@@ -69,37 +70,41 @@ public class SubmissionBlob {
     // loop to create the VBCRB and RB entries for each part of the larger blob
     long blobLimit = ref.value.getMaxCharLen();
     long i=1;
+    Datastore ds = cc.getDatastore();
+    User user = cc.getCurrentUser();
     for(long index = 0; index < blob.length; index = index + blobLimit) {
     	long endCopy = index + blobLimit;
     	if ( endCopy > blob.length ) endCopy = blob.length;
         byte [] partialBlob = Arrays.copyOfRange(blob, (int) index, (int) endCopy);
-        RefBlob eBlob = datastore.createEntityUsingRelation(ref, user);
+        RefBlob eBlob = ds.createEntityUsingRelation(ref, user);
         eBlob.setTopLevelAuri(colocationKey.getKey());
         eBlob.setValue(partialBlob);
         dbRefBlobList.add(eBlob);
-        VersionedBinaryContentRefBlob bcb = datastore.createEntityUsingRelation(bcbRef, user);
+        VersionedBinaryContentRefBlob bcb = ds.createEntityUsingRelation(bcbRef, user);
         bcb.setTopLevelAuri(colocationKey.getKey());
         bcb.setDomAuri(uriVersionedContent);
         bcb.setSubAuri(eBlob.getUri());
         bcb.setPart(i++);
         dbBcbEntityList.add(bcb);
-    	datastore.putEntity(eBlob, user);
-    	datastore.putEntity(bcb, user);
+    	ds.putEntity(eBlob, user);
+    	ds.putEntity(bcb, user);
     }
   }
 
-  public SubmissionBlob(String uriVersionedContent, FormDataModel versionedBinaryContentRefBlobModel, FormDefinition formDefinition, Datastore datastore, User user) throws ODKDatastoreException {
+  public SubmissionBlob(String uriVersionedContent, FormDataModel versionedBinaryContentRefBlobModel, FormDefinition formDefinition, CallingContext cc) throws ODKDatastoreException {
 	  
 	this.versionedBinaryContentRefBlobModel = versionedBinaryContentRefBlobModel;
-	this.datastore = datastore;
+	this.cc = cc;
 	this.formDefinition = formDefinition;
 	FormDataModel blobModel = versionedBinaryContentRefBlobModel.getChildren().get(0);
     // get prototype entities...
     VersionedBinaryContentRefBlob bcbRef = (VersionedBinaryContentRefBlob) versionedBinaryContentRefBlobModel.getBackingObjectPrototype();
     RefBlob ref = (RefBlob) blobModel.getBackingObjectPrototype();
 
+    Datastore ds = cc.getDatastore();
+    User user = cc.getCurrentUser();
     // gather the ordered list of parts...
-    Query q = datastore.createQuery(bcbRef, user);
+    Query q = ds.createQuery(bcbRef, user);
     q.addFilter(bcbRef.domAuri, FilterOperation.EQUAL, uriVersionedContent);
     q.addSort(bcbRef.part, Direction.ASCENDING);
     List<? extends CommonFieldsBase> bcbList = q.executeQuery(ServletConsts.FETCH_LIMIT);
@@ -109,7 +114,7 @@ public class SubmissionBlob {
     
     // and gather the blob parts themselves...
     for ( VersionedBinaryContentRefBlob b : dbBcbEntityList ) {
-    	RefBlob eBlob = datastore.getEntity(ref, b.getSubAuri(), user);
+    	RefBlob eBlob = ds.getEntity(ref, b.getSubAuri(), user);
     	if ( eBlob == null ) {
     		throw new IllegalStateException("Missing blob part!");
     	}
@@ -151,10 +156,10 @@ public class SubmissionBlob {
 	    }
 	}
 
-	public void persist(Datastore datastore, User user) throws ODKEntityPersistException {
+	public void persist(CallingContext cc) throws ODKEntityPersistException {
 		List<CommonFieldsBase> rows = new ArrayList<CommonFieldsBase>();
 		rows.addAll(dbRefBlobList);
 		rows.addAll(dbBcbEntityList);
-		datastore.putEntities(rows, user);
+		cc.getDatastore().putEntities(rows, cc.getCurrentUser());
 	}
 }

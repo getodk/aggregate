@@ -20,8 +20,8 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.ContextFactory;
-import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.datamodel.FormElementKey;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
@@ -32,9 +32,6 @@ import org.opendatakit.aggregate.servlet.KmlSettingsServlet;
 import org.opendatakit.aggregate.servlet.ServletUtilBase;
 import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.task.KmlWorkerImpl;
-import org.opendatakit.common.persistence.Datastore;
-import org.opendatakit.common.security.User;
-import org.opendatakit.common.security.UserService;
 
 /**
  * 
@@ -61,10 +58,8 @@ public class KmlGeneratorTaskServlet extends ServletUtilBase {
    */
   @Override
   public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-
     // TODO: talk to MITCH about the fact the user will be incorrect
-    UserService userService = (UserService) ContextFactory.get().getBean(BeanDefs.USER_BEAN);
-    User user = userService.getCurrentUser();
+	CallingContext cc = ContextFactory.getCallingContext(getServletContext());
 
     // get parameter
     String formId = getParameter(req, ServletConsts.FORM_ID);
@@ -85,14 +80,12 @@ public class KmlGeneratorTaskServlet extends ServletUtilBase {
     }
     Long attemptCount = Long.valueOf(attemptCountString);
     
-    Datastore ds = (Datastore) ContextFactory.get().getBean(BeanDefs.DATASTORE_BEAN);
-
     Form form = null;
     FormElementModel titleField = null;
     FormElementModel geopointField = null;
     FormElementModel imageField = null;
     try {
-      form = Form.retrieveForm(formId, ds, user);
+      form = Form.retrieveForm(formId, cc);
 
       if (titleFieldName != null) {
         FormElementKey titleKey = new FormElementKey(titleFieldName);
@@ -114,7 +107,7 @@ public class KmlGeneratorTaskServlet extends ServletUtilBase {
         return;
     }
 
-    KmlWorkerImpl worker = new KmlWorkerImpl(form, persistentResultsKey, attemptCount, titleField, geopointField, imageField, getServerURL(req), ds, user);
+    KmlWorkerImpl worker = new KmlWorkerImpl(form, persistentResultsKey, attemptCount, titleField, geopointField, imageField, getServerURL(req), cc);
 	worker.generateKml();
   }
 }

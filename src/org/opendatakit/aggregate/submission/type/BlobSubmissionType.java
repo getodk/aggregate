@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.constants.ErrorConsts;
 import org.opendatakit.aggregate.constants.format.FormatConsts;
 import org.opendatakit.aggregate.datamodel.BinaryContent;
@@ -65,8 +66,7 @@ public class BlobSubmissionType extends SubmissionFieldBase<SubmissionKey> {
 
 	private final FormDefinition formDefinition;
 	private final EntityKey topLevelTableKey;
-	private final Datastore datastore;
-	private final User user;
+	private final CallingContext cc;
 	private final String parentKey;
 	private final SubmissionKey submissionKey;
 	
@@ -166,7 +166,7 @@ public class BlobSubmissionType extends SubmissionFieldBase<SubmissionKey> {
 	    FormDataModel vbcDataModel = element.getFormDataModel().getChildren().get(0);
 		for ( VersionedBinaryContent vbc : versionedAttachments.get(b)) {
 			if ( vbc.getVersion().equals(version) ) {
-				SubmissionBlob blb = new SubmissionBlob(vbc.getUri(), vbcDataModel.getChildren().get(0), formDefinition, datastore, user);
+				SubmissionBlob blb = new SubmissionBlob(vbc.getUri(), vbcDataModel.getChildren().get(0), formDefinition, cc);
 				return blb.getBlob();
 			}
 		}
@@ -178,14 +178,13 @@ public class BlobSubmissionType extends SubmissionFieldBase<SubmissionKey> {
    * @param propertyName Name of submission element
    */
   public BlobSubmissionType(FormElementModel element, String parentKey, EntityKey topLevelTableKey, 
-		  	FormDefinition formDefinition, SubmissionKey submissionKey, Datastore datastore, User user) {
+		  	FormDefinition formDefinition, SubmissionKey submissionKey, CallingContext cc) {
     super(element);
     this.parentKey = parentKey;
     this.topLevelTableKey = topLevelTableKey;
     this.formDefinition = formDefinition;
     this.submissionKey = submissionKey;
-    this.datastore = datastore;
-    this.user = user;
+    this.cc = cc;
   }
 
   /**
@@ -201,7 +200,7 @@ public class BlobSubmissionType extends SubmissionFieldBase<SubmissionKey> {
    * 
    */
   @Override
-  public BlobSubmissionOutcome setValueFromByteArray(byte[] byteArray, String contentType, Long contentLength, String unrootedFilePath, Datastore datastore, User user) throws ODKDatastoreException{
+  public BlobSubmissionOutcome setValueFromByteArray(byte[] byteArray, String contentType, Long contentLength, String unrootedFilePath) throws ODKDatastoreException{
 
 	  BlobSubmissionOutcome outcome = BlobSubmissionOutcome.FILE_UNCHANGED;
 	  
@@ -222,11 +221,13 @@ public class BlobSubmissionType extends SubmissionFieldBase<SubmissionKey> {
 	  FormDataModel vbcDataModel = element.getFormDataModel().getChildren().get(0);
 	  VersionedBinaryContent vbcReference = (VersionedBinaryContent) vbcDataModel.getBackingObjectPrototype();
 	  
+	  Datastore ds = cc.getDatastore();
+	  User user = cc.getCurrentUser();
 	  final String version = CommonFieldsBase.newUri();
 	  if ( matchedBc == null ) {
 		  // adding a new file...
 		  outcome = BlobSubmissionOutcome.COMPLETELY_NEW_FILE;
-		  matchedBc = (BinaryContent) datastore.createEntityUsingRelation(element.getFormDataModel().getBackingObjectPrototype(), user);
+		  matchedBc = (BinaryContent) ds.createEntityUsingRelation(element.getFormDataModel().getBackingObjectPrototype(), user);
 		  matchedBc.setTopLevelAuri(topLevelTableKey.getKey());
 		  matchedBc.setParentAuri(parentKey);
 		  matchedBc.setOrdinalNumber(attachments.size()+1L);
@@ -248,7 +249,7 @@ public class BlobSubmissionType extends SubmissionFieldBase<SubmissionKey> {
 					  } else {
 						  // the current version is different -- update to this version.
 						  matchedBc.setVersion(vc.getVersion());
-						  datastore.putEntity(matchedBc, user);
+						  ds.putEntity(matchedBc, user);
 						  return BlobSubmissionOutcome.NEW_FILE_VERSION;
 					  }
 				  }
@@ -258,7 +259,7 @@ public class BlobSubmissionType extends SubmissionFieldBase<SubmissionKey> {
 		  // later: matchedBc.setVersion(version);
 	  }
 
-	  VersionedBinaryContent vbc = (VersionedBinaryContent) datastore.createEntityUsingRelation(vbcReference, user);
+	  VersionedBinaryContent vbc = (VersionedBinaryContent) ds.createEntityUsingRelation(vbcReference, user);
 	  vbc.setTopLevelAuri(topLevelTableKey.getKey());
 	  vbc.setParentAuri(matchedBc.getUri());
 	  vbc.setOrdinalNumber(1L);
@@ -276,22 +277,22 @@ public class BlobSubmissionType extends SubmissionFieldBase<SubmissionKey> {
 	  // and create the SubmissionBlob (persisting it...)
       try {
 		// persist the version linkage
-	    datastore.putEntity(vbc, user);
+	    ds.putEntity(vbc, user);
 	    vcList.add(vbc);
 		matchedBc.setVersion(version);
 		// persist the top level linkages...
-		datastore.putEntity(matchedBc, user);
+		ds.putEntity(matchedBc, user);
 	    if ( !existingContent ) attachments.add(matchedBc);
 
 	    // persist the binary data
-		SubmissionBlob subBlob = new SubmissionBlob(byteArray, vbc.getUri(), vbcDataModel.getChildren().get(0), formDefinition, topLevelTableKey, datastore, user);
+		SubmissionBlob subBlob = new SubmissionBlob(byteArray, vbc.getUri(), vbcDataModel.getChildren().get(0), formDefinition, topLevelTableKey, cc);
 	    
 	  } catch (ODKDatastoreException e) {
 		// there may be trash in the database upon failure.
 		vcList.remove(vbc);
 		try {
 			// try to clean up...
-			datastore.deleteEntity(new EntityKey(vbc, vbc.getUri()), user);
+			ds.deleteEntity(new EntityKey(vbc, vbc.getUri()), user);
 		} catch ( ODKDatastoreException ex) {
 			ex.printStackTrace();
 		}
@@ -317,9 +318,11 @@ public class BlobSubmissionType extends SubmissionFieldBase<SubmissionKey> {
 	versionedAttachments.clear();
 	inMemoryAttachments.clear();
 	  
+	Datastore ds = cc.getDatastore();
+	User user = cc.getCurrentUser();
 	BinaryContent ctnt = (BinaryContent) element.getFormDataModel().getBackingObjectPrototype();
 	VersionedBinaryContent vc = (VersionedBinaryContent) element.getFormDataModel().getChildren().get(0).getBackingObjectPrototype();
-	Query q = datastore.createQuery(ctnt, user);
+	Query q = ds.createQuery(ctnt, user);
 	q.addFilter(ctnt.parentAuri, FilterOperation.EQUAL, parentKey);
 	q.addSort(ctnt.ordinalNumber, Direction.ASCENDING);
 
@@ -330,7 +333,7 @@ public class BlobSubmissionType extends SubmissionFieldBase<SubmissionKey> {
 	}
 
 	for ( BinaryContent c : attachments ) {
-		Query qv = datastore.createQuery(vc, user);
+		Query qv = ds.createQuery(vc, user);
 		qv.addFilter(vc.parentAuri, FilterOperation.EQUAL, c.getUri());
 		qv.addSort(vc.creationDate, Direction.ASCENDING);
 		// sort so that the list in earliest-to-latest order...
@@ -344,18 +347,18 @@ public class BlobSubmissionType extends SubmissionFieldBase<SubmissionKey> {
   }
 
   @Override
-  public void getValueFromEntity(Datastore datastore, User user) throws ODKDatastoreException {
+  public void getValueFromEntity(CallingContext cc) throws ODKDatastoreException {
 	refreshFromDatabase();
   }
   
   @Override
-  public void persist(Datastore datastore, User user) throws ODKEntityPersistException {
+  public void persist(CallingContext cc) throws ODKEntityPersistException {
 	  // the two items to store are the attachments vector.
 	  // and the inMemoryAttachments map.
 	  for ( SubmissionBlob b : inMemoryAttachments.values() ) {
-		  b.persist(datastore, user);
+		  b.persist(cc);
 	  }
-	  datastore.putEntities(attachments, user);
+	  cc.getDatastore().putEntities(attachments, cc.getCurrentUser());
   }
   
   /**
@@ -365,12 +368,12 @@ public class BlobSubmissionType extends SubmissionFieldBase<SubmissionKey> {
    * @param user
  * @throws ODKDatastoreException 
    */
-  public void deleteAll(Datastore datastore, User user) throws ODKDatastoreException {
+  public void deleteAll(CallingContext cc) throws ODKDatastoreException {
 	  
 	  List<EntityKey> keys = new ArrayList<EntityKey>();
 	  try {
 		recursivelyAddEntityKeys(keys);
-		datastore.deleteEntities(keys, user);
+		cc.getDatastore().deleteEntities(keys, cc.getCurrentUser());
 	  } finally {
 		// re-initialize ourselves...
 		refreshFromDatabase();
@@ -405,8 +408,7 @@ public class BlobSubmissionType extends SubmissionFieldBase<SubmissionKey> {
     
     // don't care about in-memory blobs -- they should be read-only
     return ( formDefinition.equals(bt.formDefinition) &&
-    		 datastore.equals(bt.datastore) &&
-    		 user.equals(bt.user) &&
+    		 cc.equals(bt.cc) &&
     		 parentKey.equals(bt.parentKey) &&
     		 attachments.equals(bt.attachments) &&
     		 versionedAttachments.equals(bt.versionedAttachments));
@@ -418,7 +420,7 @@ public class BlobSubmissionType extends SubmissionFieldBase<SubmissionKey> {
         FormDataModel vbcDataModel = element.getFormDataModel().getChildren().get(0);
 		for ( List<VersionedBinaryContent> vcList : versionedAttachments.values()) {
 			for ( VersionedBinaryContent vc : vcList ) {
-				SubmissionBlob b = new SubmissionBlob(vc.getUri(), vbcDataModel.getChildren().get(0), formDefinition, datastore, user);
+				SubmissionBlob b = new SubmissionBlob(vc.getUri(), vbcDataModel.getChildren().get(0), formDefinition, cc);
 				b.recursivelyAddKeys(keyList);
 				keyList.add(new EntityKey(vc, vc.getUri()));
 			}
@@ -439,7 +441,7 @@ public class BlobSubmissionType extends SubmissionFieldBase<SubmissionKey> {
 	  @Override
 	  public int hashCode() {
 	    return super.hashCode() + formDefinition.hashCode() +
-	    		datastore.hashCode() + user.hashCode() + parentKey.hashCode()
+	    		cc.hashCode() + parentKey.hashCode()
 	    		+ attachments.hashCode() + versionedAttachments.hashCode(); 
 	  }
 	  
