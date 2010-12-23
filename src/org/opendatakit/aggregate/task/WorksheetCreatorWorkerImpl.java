@@ -15,6 +15,7 @@
  */
 package org.opendatakit.aggregate.task;
 
+import java.security.interfaces.DSAKey;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -160,12 +161,19 @@ public class WorksheetCreatorWorkerImpl {
 	    Submission s = Submission.fetchSubmission(miscTasksKey.splitSubmissionKey(), cc);
 	    MiscTasks r = new MiscTasks(s);
 	    if ( attemptCount.equals(r.getAttemptCount()) ) {
+	    	
+	    	// inform the form service cursor that it can start uploading or streaming
+	    	FormServiceCursor fsc = spreadsheet.getFormServiceCursor();
+	    	fsc.setIsExternalServicePrepared(true);
+	    	cc.getDatastore().putEntity(fsc, cc.getCurrentUser());
+	    	
 			// if we need to upload submissions, start a task to do so
 	    	UploadSubmissions us = (UploadSubmissions) cc.getBean(BeanDefs.UPLOAD_TASK_BEAN);
 			if (!esType.equals(ExternalServiceOption.STREAM_ONLY)) {
-				us.createFormUploadTask(spreadsheet.getFormServiceCursor(),
-						cc);
+				us.createFormUploadTask(fsc, cc);
 			}
+			
+			// and mark us as completing successfully
 	    	r.setStatus(Status.SUCCESSFUL);
 			r.setCompletionDate(new Date());
 			r.objectEntity.persist(cc);

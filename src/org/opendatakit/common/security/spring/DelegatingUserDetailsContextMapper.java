@@ -44,7 +44,7 @@
 //		}
 //		String mungedMailtoDomain = "MAILTO_" + mailtoDomain.replaceAll("[^\\p{Digit}\\p{javaUpperCase}\\p{javaLowerCase}]", "_");
 //		this.authorities.add(new GrantedAuthorityImpl(mungedMailtoDomain.toUpperCase()));
-//		this.authorities.add(new GrantedAuthorityImpl("ROLE_AUTHENTICATED"));
+//		this.authorities.add(new GrantedAuthorityImpl("USER_IS_AUTHENTICATED"));
 //	}
 //
 //}

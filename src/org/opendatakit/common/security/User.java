@@ -39,16 +39,6 @@ public interface User {
 	public String getUriUser();
 	
 	/**
-	 * @return treatment to be communicated to password handler for authentication
-	 */
-	public String getPasswordTreatment();
-
-	/**
-	 * @return realm string displayed to user during login
-	 */
-	public String getRealmString();
-	
-	/**
 	 * @return true if this user is the anonymous user.
 	 */
 	public boolean isAnonymous();

@@ -15,23 +15,20 @@ import org.opendatakit.common.security.User;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.GrantedAuthorityImpl;
 
-public class UserGrantedAuthority extends CommonFieldsBase {
+public final class UserGrantedAuthority extends CommonFieldsBase {
 
 	private static final String TABLE_NAME = "_user_granted_authority";
 
+	/*
+	 * Property Names for datastore
+	 */
 	private static final DataField USER = new DataField(
-			"USER", DataField.DataType.URI, false ).setIndexable(IndexType.HASH);
+			"USER", DataField.DataType.URI, false ).setIndexable(IndexType.ORDERED);
 	private static final DataField GRANTED_AUTHORITY = new DataField(
 			"GRANTED_AUTHORITY", DataField.DataType.URI, false );
 	
 	public final DataField user;
 	public final DataField grantedAuthority;
-	/*
-	 * Property Names for datastore
-	 * 
-	 * USER (email) is DOM_AURI
-	 * GRANTED is SUB_AURI  (may be roles (ROLE_...) or groups (anything else))
-	 */
 
 	/**
 	 * Construct a relation prototype.
@@ -50,7 +47,7 @@ public class UserGrantedAuthority extends CommonFieldsBase {
 	 * @param ref
 	 * @param user
 	 */
-	public UserGrantedAuthority(UserGrantedAuthority ref, User user) {
+	UserGrantedAuthority(UserGrantedAuthority ref, User user) {
 		super(ref, user);
 		this.user = ref.user;
 		grantedAuthority = ref.grantedAuthority;
@@ -72,7 +69,7 @@ public class UserGrantedAuthority extends CommonFieldsBase {
 
 	private static UserGrantedAuthority reference = null;
 
-	public static final UserGrantedAuthority createRelation(Datastore ds, User user)
+	public static synchronized final UserGrantedAuthority createRelation(Datastore ds, User user)
 			throws ODKDatastoreException {
 		if (reference == null) {
 			UserGrantedAuthority referencePrototype;
@@ -85,19 +82,15 @@ public class UserGrantedAuthority extends CommonFieldsBase {
 		return reference;
 	}
 
-	static final Set<GrantedAuthority> getGrantedAuthorities(String uriUser, Datastore ds, User user) {
+	static final Set<GrantedAuthority> getGrantedAuthorities(String uriUser, Datastore ds, User user) throws ODKDatastoreException {
 		Set<GrantedAuthority> authorized = new HashSet<GrantedAuthority>();
 		
 		if ( uriUser != null ) {
-			try {
-				Query q = ds.createQuery(createRelation(ds, user), user);
-				q.addFilter(reference.user, FilterOperation.EQUAL, uriUser);
-				List<?> values= q.executeDistinctValueForDataField(reference.grantedAuthority);
-				for ( Object value : values ) {
-					authorized.add(new GrantedAuthorityImpl((String) value));
-				}
-			} catch (ODKDatastoreException e) {
-				e.printStackTrace();
+			Query q = ds.createQuery(createRelation(ds, user), user);
+			q.addFilter(reference.user, FilterOperation.EQUAL, uriUser);
+			List<?> values= q.executeDistinctValueForDataField(reference.grantedAuthority);
+			for ( Object value : values ) {
+				authorized.add(new GrantedAuthorityImpl((String) value));
 			}
 		}
 		return authorized;

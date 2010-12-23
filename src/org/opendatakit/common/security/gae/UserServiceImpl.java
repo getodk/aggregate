@@ -52,8 +52,8 @@ public class UserServiceImpl implements org.opendatakit.common.security.UserServ
 		userService = UserServiceFactory.getUserService();
         oauth = OAuthServiceFactory.getOAuthService();
 
-        anonymous = new UserImpl(realm.getRealmString(), false);
-		daemonAccount = new UserImpl(realm.getRealmString(), true);
+        anonymous = new UserImpl(false);
+		daemonAccount = new UserImpl(true);
 	}
 
 	public Realm getRealm() {
@@ -84,7 +84,7 @@ public class UserServiceImpl implements org.opendatakit.common.security.UserServ
 		com.google.appengine.api.users.User gaeUser = null;
 		gaeUser = userService.getCurrentUser();
 		if ( gaeUser != null ) {
-			return new UserImpl(realm.getRealmString(), gaeUser);
+			return new UserImpl(gaeUser);
 		}
 		return anonymous;
 	}
@@ -93,7 +93,7 @@ public class UserServiceImpl implements org.opendatakit.common.security.UserServ
 		com.google.appengine.api.users.User gaeUser = null;
 		gaeUser = oauth.getCurrentUser();
 		if ( gaeUser != null ) {
-			return new UserImpl(realm.getRealmString(), gaeUser);
+			return new UserImpl(gaeUser);
 		}
 		return anonymous;
 	}
