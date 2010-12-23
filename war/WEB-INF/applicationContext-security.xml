@@ -81,7 +81,8 @@
 		<intercept-url pattern="/submission" access="isFullyAuthenticated() and hasRole('ROLE_SUBMISSION_UPLOAD')" />
 		<intercept-url pattern="/www/**" access="isFullyAuthenticated() and hasRole('ROLE_USER')" />
 		<intercept-url pattern="/view/**" access="isFullyAuthenticated() and hasRole('ROLE_ANALYST')" />
-		<intercept-url pattern="/gae/**" access="isFullyAuthenticated() and hasRole('ROLE_DAEMON')" />
+<!--	gae should have	 ROLE_DAEMON-->
+		<intercept-url pattern="/gae/**" access="true" /> 
 		<intercept-url pattern="/extern/**" access="isFullyAuthenticated() and hasRole('ROLE_SERVICES_ADMIN')" />
 		<intercept-url pattern="/admin/**" access="isFullyAuthenticated() and hasRole('ROLE_XFORMS_ADMIN')" />
 		<intercept-url pattern="/**" access="isAnonymous()" />
@@ -268,15 +269,8 @@
 			</beans:list>
 		</beans:constructor-arg>
 	</beans:bean>
-
-<!--	GoogleAppEngine Specific Stuff-->
-<!--	<beans:bean id="org.openid4java.util.HttpFetcherFactory" -->
-<!--				class="org.springframework.security.openid.google.appengine.AppEngineHttpFetcherFactory"-->
-<!--				factory-method="createHttpFetcherFactory" />-->
-<!-- 	-->
-<!--	<beans:bean id="com.google.step2.http.HttpFetcher" class="org.springframework.security.openid.google.appengine.AppEngineHttpFetcher" />-->
-<!--  -->
-<!--    <beans:bean id="com.google.step2.xmlsimplesign.TrustRootsProvider" class="org.springframework.security.openid.google.appengine.AppEngineTrustRootsProvider" />-->
+	
+<!--	There are magic settings for this to work on GoogleAppEngine.  See odk-settings.xml -->
     
 	<beans:bean id="openIdFilter"
 		class="org.springframework.security.openid.OpenIDAuthenticationFilter">
@@ -299,6 +293,15 @@
 			</beans:list>
 		</beans:property>
 	</beans:bean>
+
+<!--	GoogleAppEngine Specific Security Stuff-->
+	<beans:bean id="org.openid4java.util.HttpFetcherFactory" 
+				class="org.springframework.security.openid.google.appengine.AppEngineHttpFetcherFactory"
+				factory-method="createHttpFetcherFactory" />
+ 	
+	<beans:bean id="com.google.step2.http.HttpFetcher" class="org.springframework.security.openid.google.appengine.AppEngineHttpFetcher" />
+  
+    <beans:bean id="com.google.step2.xmlsimplesign.TrustRootsProvider" class="org.springframework.security.openid.google.appengine.AppEngineTrustRootsProvider" />
 
 	<beans:bean id="exceptionOpenIdTranslationFilter"
 		class="org.springframework.security.web.access.ExceptionTranslationFilter">
