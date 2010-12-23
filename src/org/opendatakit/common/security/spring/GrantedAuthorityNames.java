@@ -21,6 +21,7 @@ public enum GrantedAuthorityNames {
 	ROLE_USER, 		// protects forms page, human-readable xform xml listing
 	ROLE_ANALYST,  	// protects generation of csv, kml, and viewing of submissions
 	ROLE_SERVICES_ADMIN, // protects external services configuration and change
-	ROLE_XFORMS_ADMIN // protects uploading of new xform, changes, and deletions
+	ROLE_XFORMS_ADMIN, // protects uploading of new xform, changes, and deletions
+	ROLE_ACCESS_ADMIN  // protects the user and group access administration pages
 	
 }
