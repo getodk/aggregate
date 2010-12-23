@@ -125,8 +125,8 @@ public final class HtmlConsts {
 	public static final String UTF8_ENCODE = "UTF-8";
 	// types of posts
 	public static final String MULTIPART_FORM_DATA = "multipart/form-data";
-	public static final String POST = "post";
-	public static final String GET = "get";
+	public static final String POST = "POST";
+	public static final String GET = "GET";
 	public static final String BEGIN_PARAM = "?";
 	public static final String PARAM_DELIMITER = "&";
 	public static final String ATTACHMENT_FILENAME_TXT = "attachment; filename=\"";
