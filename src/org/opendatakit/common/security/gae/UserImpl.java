@@ -30,20 +30,17 @@ import com.google.appengine.api.users.User;
  */
 public class UserImpl implements org.opendatakit.common.security.User {
 
-	private final String realmString;
 	private final boolean privileged;
 	private final User gaeUser;
 	private final List<GrantedAuthority> groups = new ArrayList<GrantedAuthority>();
 
-	public UserImpl(String realmString, User user) {
+	public UserImpl(User user) {
 		this.privileged = false;
-		this.realmString = realmString;
 		gaeUser = user;
 	}
 
-	public UserImpl(String realmString, boolean privileged) {
+	public UserImpl(boolean privileged) {
 		this.privileged = privileged;
-		this.realmString = realmString;
 		gaeUser = null;
 	}
 	
@@ -61,16 +58,6 @@ public class UserImpl implements org.opendatakit.common.security.User {
 
 	public List<GrantedAuthority> getGroups() {
 		return groups;
-	}
-
-	@Override
-	public String getPasswordTreatment() {
-		return null;
-	}
-
-	@Override
-	public String getRealmString() {
-		return realmString;
 	}
 
 	@Override

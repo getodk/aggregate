@@ -29,32 +29,23 @@ import org.springframework.security.core.GrantedAuthority;
 public class UserImpl implements org.opendatakit.common.security.User {
 
 	final String nickName;
-	final String passwordTreatment;
-	final String realmString;
 	final String uriUser;
-	final Set<GrantedAuthority> grantedAuthorities = new HashSet<GrantedAuthority>();
 	final Set<GrantedAuthority> groups = new HashSet<GrantedAuthority>();
 	final Datastore datastore;
 	Map<String, Set<GrantedAuthority> > formIdGrantedAuthorities = null;
 	
 	
-	UserImpl(String uriUser, String realmString, String nickName,
-			 String passwordTreatment, 
-			 Collection<GrantedAuthority> groupsAndGrantedAuthorities,
-			 Datastore datastore) {
+	UserImpl(String uriUser, String nickName,
+			Collection<GrantedAuthority> groupsAndGrantedAuthorities,
+			Datastore datastore) {
 		this.uriUser = uriUser;
-		this.realmString = realmString;
 		this.nickName = nickName;
-		this.passwordTreatment = passwordTreatment;
 		this.datastore = datastore;
 		for ( GrantedAuthority g : groupsAndGrantedAuthorities ) {
-			if ( g.getAuthority().startsWith("ROLE_") ) {
-				grantedAuthorities.add(g);
-			} else {
+			if ( !g.getAuthority().startsWith("ROLE_") ) {
 				groups.add(g);
 			}
 		}
-		grantedAuthorities.addAll(GroupGrantedAuthority.getGrantedAuthorities(groups, datastore, this));
 	}
 	
 	@Override
@@ -64,20 +55,6 @@ public class UserImpl implements org.opendatakit.common.security.User {
 
 	public Set<GrantedAuthority> getGroups() {
 		return Collections.unmodifiableSet(groups);
-	}
-
-	public Set<GrantedAuthority> getGrantedAuthorities() {
-		return Collections.unmodifiableSet(grantedAuthorities);
-	}
-
-	@Override
-	public String getPasswordTreatment() {
-		return passwordTreatment;
-	}
-
-	@Override
-	public String getRealmString() {
-		return realmString;
 	}
 
 	@Override

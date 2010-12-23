@@ -110,8 +110,8 @@ public class GrantedAuthorityHierarchyTable extends CommonFieldsBase {
 		GrantedAuthorityHierarchyTable t;
 		List<GrantedAuthorityHierarchyTable> tList = new ArrayList<GrantedAuthorityHierarchyTable>();
 		
-		GrantedAuthorityNames ra = GrantedAuthorityNames.ROLE_AUTHENTICATED;
-		GrantedAuthorityNames ranon = GrantedAuthorityNames.ROLE_ANONYMOUS;
+		GrantedAuthorityNames ra = GrantedAuthorityNames.USER_IS_AUTHENTICATED;
+		GrantedAuthorityNames ranon = GrantedAuthorityNames.USER_IS_ANONYMOUS;
 		
 		// the anonymous user can download forms and upload submissions
 		for ( GrantedAuthorityNames name : new GrantedAuthorityNames[] {
@@ -127,7 +127,7 @@ public class GrantedAuthorityHierarchyTable extends CommonFieldsBase {
 		// the authenticated user can do everything the
 		// anonymous user can, and everything else...
 		for ( GrantedAuthorityNames name : new GrantedAuthorityNames[] {
-				GrantedAuthorityNames.ROLE_ANONYMOUS,
+				GrantedAuthorityNames.USER_IS_ANONYMOUS,
 				GrantedAuthorityNames.ROLE_USER,
 				GrantedAuthorityNames.ROLE_ANALYST,
 				GrantedAuthorityNames.ROLE_SERVICES_ADMIN,

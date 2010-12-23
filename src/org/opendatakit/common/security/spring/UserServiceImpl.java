@@ -17,7 +17,6 @@ package org.opendatakit.common.security.spring;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
@@ -30,8 +29,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.GrantedAuthorityImpl;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.openid.OpenIDAttribute;
-import org.springframework.security.openid.OpenIDAuthenticationToken;
 
 public class UserServiceImpl implements org.opendatakit.common.security.UserService, InitializingBean {
 
@@ -42,8 +39,6 @@ public class UserServiceImpl implements org.opendatakit.common.security.UserServ
 	User anonymous;
 	User daemonAccount;
 	final Map<String, User> activeUsers = new HashMap<String, User>();
-	static final String AnonymousGroup = "-AnonymousGroup-";
-	static final String DaemonGroup = "-DaemonGroup-";
 	
 	public UserServiceImpl() {
 	}
@@ -57,15 +52,14 @@ public class UserServiceImpl implements org.opendatakit.common.security.UserServ
 			throw new IllegalStateException("datastore must be configured");
 		}
 		Set<GrantedAuthority> anonGroups = new HashSet<GrantedAuthority>();
-		anonGroups.add(new GrantedAuthorityImpl(AnonymousGroup));
-		anonGroups.add(new GrantedAuthorityImpl("ROLE_ANONYMOUS"));
-		anonymous = new UserImpl(User.ANONYMOUS_USER, realm.getRealmString(), 
-				User.ANONYMOUS_USER_NICKNAME, null, anonGroups, datastore );
+		anonGroups.add(new GrantedAuthorityImpl(GrantedAuthorityNames.USER_IS_ANONYMOUS.name()));
+		anonymous = new UserImpl(User.ANONYMOUS_USER, 
+				User.ANONYMOUS_USER_NICKNAME, anonGroups, datastore );
 		Set<GrantedAuthority> daemonGroups = new HashSet<GrantedAuthority>();
 		daemonGroups = new HashSet<GrantedAuthority>();
-		daemonGroups.add(new GrantedAuthorityImpl(DaemonGroup));
-		daemonAccount = new UserImpl(User.DAEMON_USER, realm.getRealmString(), 
-				User.DAEMON_USER_NICKNAME, null, daemonGroups, datastore );
+		daemonGroups.add(new GrantedAuthorityImpl(GrantedAuthorityNames.USER_IS_DAEMON.name()));
+		daemonAccount = new UserImpl(User.DAEMON_USER, 
+				User.DAEMON_USER_NICKNAME, daemonGroups, datastore );
 		
 		activeUsers.put(anonymous.getUriUser(), anonymous);
 		activeUsers.put(daemonAccount.getUriUser(), daemonAccount);
@@ -125,47 +119,7 @@ public class UserServiceImpl implements org.opendatakit.common.security.UserServ
 			Logger.getLogger(UserServiceImpl.class.getCanonicalName()).info("Logged in user: " + anonymous.getUriUser());
 			return anonymous.getUriUser();
 		} else {
-			// construct the e-mail...
-			String eMail = null;
-			Object p = auth.getPrincipal();
-			if ( p == null ) {
-				throw new IllegalStateException("Principal in Authentication is null -- is Spring AnonymousAuthenticationFilter configured?");
-			}
-			
-			// expect all user principals to be AggregateUser types.
-			AggregateUser principal = null;
-			if (p instanceof AggregateUser) {
-					principal = (AggregateUser) p;
-			} else {
-				throw new IllegalStateException("All UserDetails services should be wrapped by DelegatingUserDetailsService");
-			}
-			
-			if ( auth instanceof OpenIDAuthenticationToken ) {
-				List<OpenIDAttribute> oAttrList = ((OpenIDAuthenticationToken) auth).getAttributes();
-				for ( OpenIDAttribute oAttr : oAttrList ) {
-					if ( "email".equals(oAttr.getName()) ) {
-						Object o = oAttr.getValues().get(0);
-						if ( o != null ) {
-							eMail= (String) o;
-						}
-					}
-				}
-				if ( eMail == null ) {
-					throw new IllegalStateException("Email from OpenID Authentication is null -- is name 'email' configured to retrieve this OpenIDAttribute?");
-				}
-				
-			} else if ( principal != null ) {
-				eMail = principal.getUsername();
-			}
-
-			if ( !eMail.startsWith("mailto:") ) {
-				if ( eMail.contains("@") ) {
-					eMail = "mailto:" + eMail;
-				} else {
-					eMail = "mailto:" + eMail + "@" + principal.getMailtoDomain();
-				}
-			}
-			return eMail;
+			return auth.getName();
 		}
   }
   
@@ -187,9 +141,7 @@ public class UserServiceImpl implements org.opendatakit.common.security.UserServ
 	if ( match != null ) {
 		return match; 
 	} else {
-		Set<GrantedAuthority> userAuthorities = UserGrantedAuthority.getGrantedAuthorities(eMail, datastore, daemonAccount);
-		userAuthorities.addAll(auth.getAuthorities());
-		match = new UserImpl(eMail, name, name, "", userAuthorities, datastore);
+		match = new UserImpl(eMail, name, auth.getAuthorities(), datastore);
 		activeUsers.put(eMail, match);
 		return match;
 	}

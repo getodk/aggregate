@@ -8,15 +8,29 @@
 
 	<!--	Configure user names and passwords here for ODK Collect digestAuth access -->
 	<!--	  TODO: can the password be something other than plain text? -->
-	<user-service id="digestUnderlyingLoginService">
-		<user name="msundt" password="test" authorities="HAPPY_GROUP" />
-	</user-service>
+	<beans:bean id="digestUnderlyingLoginService" class="org.opendatakit.common.security.spring.UserDetailsServiceImpl">
+		<beans:property name="datastore" ref="datastore"/>
+		<beans:property name="userService" ref="user_service"/>
+		<beans:property name="passwordType" value="DigestAuth"/>
+	</beans:bean>
 
 	<!--	If using BasicAuth this defines the underlying user service -->
-<!--	basicAuthenticationProvider is configured to work with an MD5 hash of the password  -->
-	<user-service id="basicUnderlyingLoginService">
-		<user name="msundt" password="098f6bcd4621d373cade4e832627b4f6" authorities="HAPPY_GROUP" />
-	</user-service>
+	<!--	basicAuthenticationProvider is configured to work with an MD5 hash of the password  -->
+	<beans:bean id="basicUnderlyingLoginService" class="org.opendatakit.common.security.spring.UserDetailsServiceImpl">
+		<beans:property name="datastore" ref="datastore"/>
+		<beans:property name="userService" ref="user_service"/>
+		<beans:property name="passwordType" value="BasicAuth"/>
+	</beans:bean>
+
+<!--	If using OpenID (for all providers), this user service re-wraps the-->
+<!--	UserDetails from the specific authentication domain (gmail, yahoo, etc.)-->
+<!--	to end up with the user's eMail as their name, rather than their OpenID string-->
+	 
+	<beans:bean id="openIdUserDetailsService" class="org.opendatakit.common.security.spring.UserDetailsServiceImpl">
+		<beans:property name="datastore" ref="datastore"/>
+		<beans:property name="userService" ref="user_service"/>
+		<beans:property name="passwordType" value="Random"/>
+	</beans:bean>
 
 	<!--	Configure the role hierarchy.  -->
 	<!--	For now, group-to-role mappings go here -->
@@ -25,7 +39,7 @@
 <!--	will automatically convert the mailtoDomain to an authority:-->
 <!--		gmail.com  -> MAILTO_GMAIL_COM-->
 <!--		uw.edu  -> MAILTO_UW_EDU-->
-<!--	These classes will also automatically add ROLE_AUTHENTICATED to the user.-->
+<!--	These classes will also automatically add USER_IS_AUTHENTICATED to the user.-->
 <!--	And they should be configured to add the appropriate MODE and AUTH authorities.-->
 <!--	E.g., -->
 <!--	     AUTH_DIGEST-->
@@ -61,7 +75,7 @@
 		<intercept-url pattern="/submission" access="hasRole('ROLE_SUBMISSION_UPLOAD')" />
 		<intercept-url pattern="/www/**" access="isFullyAuthenticated() and hasRole('ROLE_USER')" />
 		<intercept-url pattern="/view/**" access="isFullyAuthenticated() and hasRole('ROLE_ANALYST')" />
-<!--	gae should have	 ROLE_DAEMON-->
+<!--	TODO: gae should be: hasRole(USER_IS_DAEMON) -->
 		<intercept-url pattern="/gae/**" access="true" /> 
 		<intercept-url pattern="/extern/**" access="isFullyAuthenticated() and hasRole('ROLE_SERVICES_ADMIN')" />
 		<intercept-url pattern="/admin/**" access="isFullyAuthenticated() and hasRole('ROLE_XFORMS_ADMIN')" />
@@ -147,7 +161,7 @@
 	<beans:bean id="anonymousFilter"
 		class="org.springframework.security.web.authentication.AnonymousAuthenticationFilter">
 		<beans:property name="key" value="${security.server.siteKey}" />
-		<beans:property name="userAttribute" value="anonymousUser,ROLE_ANONYMOUS" />
+		<beans:property name="userAttribute" value="anonymousUser,USER_IS_ANONYMOUS" />
 	</beans:bean>
 
 	<beans:bean id="sessionManagerFilter"
@@ -198,16 +212,15 @@
 
 	<beans:bean id="basicLoginService"
 		class="org.opendatakit.common.security.spring.DelegatingUserDetailsService">
-		<beans:constructor-arg name="userDetailsService"
-			ref="basicUnderlyingLoginService" />
-		<beans:constructor-arg name="mailtoDomain"
-			value="${security.server.realm.mailToDomain}" />
-		<beans:constructor-arg name="authorities">
+		<beans:property name="userDetailsService" ref="basicUnderlyingLoginService" />
+		<beans:property name="passDownUriUser" value="true" />
+		<beans:property name="mailtoDomain"	value="${security.server.realm.mailToDomain}" />
+		<beans:property name="authorities">
 			<beans:list>
 				<beans:value>AUTH_BASIC</beans:value>
 				<beans:value>MODE_WEBSITE</beans:value>
 			</beans:list>
-		</beans:constructor-arg>
+		</beans:property>
 	</beans:bean>
 
 
@@ -218,17 +231,17 @@
 
 	<beans:bean id="gmailUserDetailsService"
 		class="org.opendatakit.common.security.spring.DelegatingUserDetailsService">
-		<beans:constructor-arg name="userDetailsService">
+		<beans:property name="userDetailsService">
 			<beans:bean
 				class="org.opendatakit.common.security.spring.EmptyUserDetailsService" />
-		</beans:constructor-arg>
-		<beans:constructor-arg name="mailtoDomain"	value="gmail.com" />
-		<beans:constructor-arg name="authorities">
+		</beans:property>
+		<beans:property name="mailtoDomain"	value="gmail.com" />
+		<beans:property name="authorities">
 			<beans:list>
 				<beans:value>AUTH_OPENID</beans:value>
 				<beans:value>MODE_WEBSITE</beans:value>
 			</beans:list>
-		</beans:constructor-arg>
+		</beans:property>
 	</beans:bean>
 
 	<beans:bean id="openId4JavaConsumer"
@@ -280,8 +293,11 @@
 	</beans:bean>
 
 	<beans:bean id="openIdAuthenticationProvider"
-		class="org.springframework.security.openid.OpenIDAuthenticationProvider">
+		class="org.opendatakit.common.security.spring.WrappingOpenIDAuthenticationProvider">
+<!--		Stub userDetailsService that accepts any authenticated party-->
 		<beans:property name="userDetailsService" ref="gmailUserDetailsService" />
+<!--		userDetailsService that retrieves registeredUser info based upon the party's mailto: address -->
+		<beans:property name="wrappingUserDetailsService" ref="openIdUserDetailsService" />
 	</beans:bean>
 
 	<!--
@@ -368,16 +384,15 @@
 
 	<beans:bean id="digestLoginService"
 		class="org.opendatakit.common.security.spring.DelegatingUserDetailsService">
-		<beans:constructor-arg name="userDetailsService"
-			ref="digestUnderlyingLoginService" />
-		<beans:constructor-arg name="mailtoDomain"
-			value="${security.server.realm.mailToDomain}" />
-		<beans:constructor-arg name="authorities">
+		<beans:property name="userDetailsService" ref="digestUnderlyingLoginService" />
+		<beans:property name="mailtoDomain"	value="${security.server.realm.mailToDomain}" />
+		<beans:property name="passDownUriUser" value="true" />
+		<beans:property name="authorities">
 			<beans:list>
 				<beans:value>AUTH_DIGEST</beans:value>
 				<beans:value>MODE_DEVICE</beans:value>
 			</beans:list>
-		</beans:constructor-arg>
+		</beans:property>
 	</beans:bean>
 
 
@@ -399,17 +414,17 @@
 
 <!--	<beans:bean id="gmailUserDetailsService"-->
 <!--		class="org.opendatakit.common.security.spring.DelegatingUserDetailsService">-->
-<!--		<beans:constructor-arg name="userDetailsService">-->
+<!--		<beans:property-arg name="userDetailsService">-->
 <!--			<beans:bean-->
 <!--				class="org.opendatakit.common.security.spring.EmptyUserDetailsService" />-->
-<!--		</beans:constructor-arg>-->
-<!--		<beans:constructor-arg name="mailtoDomain"	value="gmail.com" />-->
-<!--		<beans:constructor-arg name="authorities">-->
+<!--		</beans:property-arg>-->
+<!--		<beans:property-arg name="mailtoDomain"	value="gmail.com" />-->
+<!--		<beans:property-arg name="authorities">-->
 <!--			<beans:list>-->
 <!--				<beans:value>AUTH_OPENID</beans:value>-->
 <!--				<beans:value>MODE_WEBSITE</beans:value>-->
 <!--			</beans:list>-->
-<!--		</beans:constructor-arg>-->
+<!--		</beans:property-arg>-->
 <!--	</beans:bean>-->
 <!--	<http>-->
 <!--		<intercept-url pattern="/google_login.html"-->
