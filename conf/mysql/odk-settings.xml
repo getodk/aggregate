@@ -60,7 +60,8 @@
 		<property name="uploadSubmissions" ref="upload_task" />
 		<property name="kmlGenerator" ref="kml_task" />
 		<property name="csvGenerator" ref="csv_task" />
-		<property name="baseUrl" value="${security.server.baseUrl}" />
+		<property name="hostname" value="${security.server.hostname}" />
+		<property name="port" value="${security.server.port}" />
 	</bean>
 
 </beans>

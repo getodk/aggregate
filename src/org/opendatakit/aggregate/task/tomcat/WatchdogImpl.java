@@ -15,6 +15,7 @@
  */
 package org.opendatakit.aggregate.task.tomcat;
 
+import java.net.InetAddress;
 import java.util.concurrent.TimeUnit;
 
 import javax.servlet.ServletContext;
@@ -29,6 +30,7 @@ import org.opendatakit.aggregate.task.Watchdog;
 import org.opendatakit.aggregate.task.WatchdogWorkerImpl;
 import org.opendatakit.aggregate.task.WorksheetCreator;
 import org.opendatakit.common.constants.BasicConsts;
+import org.opendatakit.common.constants.HtmlConsts;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.security.UserService;
@@ -55,7 +57,8 @@ public class WatchdogImpl implements Watchdog, SmartLifecycle, InitializingBean,
 	FormDelete formDelete = null;
 	WorksheetCreator worksheetCreator = null;
 	ServletContext ctxt = null;
-	String baseUrl = null;
+	String hostname = null;
+	int port = HtmlConsts.WEB_PORT;
 
 	/**
 	 * Implementation of CallingContext for use by watchdog-launched tasks.
@@ -114,7 +117,12 @@ public class WatchdogImpl implements Watchdog, SmartLifecycle, InitializingBean,
 
 		@Override
 		public String getServerURL() {
-			return baseUrl + ctxt.getContextPath();
+			if ( port != HtmlConsts.WEB_PORT ) {
+				return hostname + BasicConsts.COLON + Integer.toString(port) + 
+						ctxt.getContextPath();
+			} else {
+				return hostname + ctxt.getContextPath();
+			}
 		}
 
 		@Override
@@ -261,12 +269,20 @@ public class WatchdogImpl implements Watchdog, SmartLifecycle, InitializingBean,
 		this.worksheetCreator = worksheetCreator;
 	}
 
-	public String getBaseUrl() {
-		return baseUrl;
+	public String getHostname() {
+		return hostname;
 	}
 
-	public void setBaseUrl(String baseUrl) {
-		this.baseUrl = baseUrl;
+	public void setHostname(String hostname) {
+		this.hostname = hostname;
+	}
+
+	public int getPort() {
+		return port;
+	}
+
+	public void setPort(int port) {
+		this.port = port;
 	}
 
 	@Override
@@ -279,6 +295,10 @@ public class WatchdogImpl implements Watchdog, SmartLifecycle, InitializingBean,
 		if ( kmlGenerator == null ) throw new IllegalStateException("no kmlGenerator specified");
 		if ( formDelete == null ) throw new IllegalStateException("no formDelete specified");
 		if ( worksheetCreator == null ) throw new IllegalStateException("no worksheetCreator specified");
+		
+		if ( hostname == null || hostname.length() == 0 ) {
+			hostname = InetAddress.getLocalHost().getCanonicalHostName();
+		}
 	}
 
 	@Override
