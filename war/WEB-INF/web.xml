@@ -260,7 +260,7 @@
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>worksheet</servlet-name>
-		<url-pattern>/extern/worksheet</url-pattern>
+		<url-pattern>/gae/worksheetCreatorTask</url-pattern>
 	</servlet-mapping>
 
 	<servlet>

@@ -4,15 +4,7 @@
 	xmlns:beans="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.0.xsd">
 
-	<!--	Configure values in the security.properties file (from the conf/common directory)-->
-    <beans:bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
-		<beans:property name="locations">
-			<beans:list>
-				<beans:value>classpath:jdbc.properties</beans:value>
-				<beans:value>classpath:security.properties</beans:value>
-			</beans:list>
-		</beans:property>
-	</beans:bean>
+	<beans:import resource="classpath:odk-security-settings.xml"/>
 
 	<!--	Configure user names and passwords here for ODK Collect digestAuth access -->
 	<!--	  TODO: can the password be something other than plain text? -->
@@ -44,21 +36,9 @@
 <!--	     MODE_DEVICE  - - assumes the filter-chains define digestAuth only for ODK Collect APIs.-->
 <!--	     MODE_WEBSITE - - assumes the filter-chains define the other auths for website access.-->
 	
-	<beans:bean id="hierarchicalRoleRelationships" class="org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl">
-		<beans:property name="hierarchy">
-			<beans:value>
-			HAPPY_GROUP > ROLE_AUTHENTICATED
-			MODE_WEBSITE > ROLE_USER
-			ROLE_USER > ROLE_AUTHENTICATED
-			ROLE_USER > ROLE_FORM_LIST
-			ROLE_USER > ROLE_FORM_DOWNLOAD
-			ROLE_USER > ROLE_SUBMISSION_UPLOAD
-			ROLE_USER > ROLE_ANALYST
-			ROLE_USER > ROLE_SERVICES_ADMIN
-			ROLE_USER > ROLE_XFORMS_ADMIN
-			ROLE_AUTHENTICATED > ROLE_ANONYMOUS
-			</beans:value>
-		</beans:property>
+	<beans:bean id="hierarchicalRoleRelationships" class="org.opendatakit.common.security.spring.RoleHierarchyImpl">
+		<beans:property name="datastore" ref="datastore"/>
+		<beans:property name="userService" ref="user_service"/>
 	</beans:bean>
 	
 	<!--	Configure the access policy to the pages here	-->
@@ -76,9 +56,9 @@
 		<intercept-url pattern="/xformsDownload" access="isFullyAuthenticated() and hasRole('ROLE_FORM_DOWNLOAD')" />
 		<intercept-url pattern="/xformsList" access="isFullyAuthenticated() and hasRole('ROLE_FORM_LIST')" />
 		<intercept-url pattern="/xformsManifest" access="isFullyAuthenticated() and hasRole('ROLE_FORM_LIST')" />
-		<intercept-url pattern="/formList" access="isFullyAuthenticated() and hasRole('ROLE_FORM_LIST')" />
-		<intercept-url pattern="/formXml" access="isFullyAuthenticated() and hasRole('ROLE_FORM_DOWNLOAD')" />
-		<intercept-url pattern="/submission" access="isFullyAuthenticated() and hasRole('ROLE_SUBMISSION_UPLOAD')" />
+		<intercept-url pattern="/formList" access="hasRole('ROLE_FORM_LIST')" />
+		<intercept-url pattern="/formXml" access="hasRole('ROLE_FORM_DOWNLOAD')" />
+		<intercept-url pattern="/submission" access="hasRole('ROLE_SUBMISSION_UPLOAD')" />
 		<intercept-url pattern="/www/**" access="isFullyAuthenticated() and hasRole('ROLE_USER')" />
 		<intercept-url pattern="/view/**" access="isFullyAuthenticated() and hasRole('ROLE_ANALYST')" />
 <!--	gae should have	 ROLE_DAEMON-->
@@ -293,15 +273,6 @@
 			</beans:list>
 		</beans:property>
 	</beans:bean>
-
-<!--	GoogleAppEngine Specific Security Stuff-->
-	<beans:bean id="org.openid4java.util.HttpFetcherFactory" 
-				class="org.springframework.security.openid.google.appengine.AppEngineHttpFetcherFactory"
-				factory-method="createHttpFetcherFactory" />
- 	
-	<beans:bean id="com.google.step2.http.HttpFetcher" class="org.springframework.security.openid.google.appengine.AppEngineHttpFetcher" />
-  
-    <beans:bean id="com.google.step2.xmlsimplesign.TrustRootsProvider" class="org.springframework.security.openid.google.appengine.AppEngineTrustRootsProvider" />
 
 	<beans:bean id="exceptionOpenIdTranslationFilter"
 		class="org.springframework.security.web.access.ExceptionTranslationFilter">
