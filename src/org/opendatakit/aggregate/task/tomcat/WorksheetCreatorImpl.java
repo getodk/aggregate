@@ -47,10 +47,10 @@ public class WorksheetCreatorImpl implements WorksheetCreator {
 		public WorksheetCreatorRunner(Form form, SubmissionKey miscTasksKey,
 				long attemptCount, 
 				String spreadsheetName, ExternalServiceOption esType,
-				String baseWebServerUrl, CallingContext cc) {
+				CallingContext cc) {
 			impl = new WorksheetCreatorWorkerImpl(form, miscTasksKey, 
 					attemptCount, 
-					spreadsheetName, esType, baseWebServerUrl, cc);
+					spreadsheetName, esType, cc);
 		}
 
 		@Override
@@ -66,7 +66,7 @@ public class WorksheetCreatorImpl implements WorksheetCreator {
 
 	@Override
 	public final void createWorksheetTask(Form form, SubmissionKey miscTasksKey, long attemptCount,
-			String baseWebServerUrl, CallingContext cc) throws ODKDatastoreException, ODKFormNotFoundException {
+			CallingContext cc) throws ODKDatastoreException, ODKFormNotFoundException {
 		Submission s = Submission.fetchSubmission(miscTasksKey.splitSubmissionKey(), cc);
 	    MiscTasks r = new MiscTasks(s);
 	    Map<String,String> params = r.getRequestParameters();
@@ -86,7 +86,7 @@ public class WorksheetCreatorImpl implements WorksheetCreator {
 	    WorksheetCreatorRunner wr = new WorksheetCreatorRunner( form, miscTasksKey,
 	    		attemptCount, 
 				spreadsheetName, esType,
-				baseWebServerUrl, cc );
+				cc );
 		System.out.println("THIS IS CREATE WORKSHEET IN TOMCAT");
 		AggregrateThreadExecutor exec = AggregrateThreadExecutor
 				.getAggregateThreadExecutor();

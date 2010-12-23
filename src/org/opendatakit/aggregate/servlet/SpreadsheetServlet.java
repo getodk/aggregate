@@ -77,7 +77,7 @@ public class SpreadsheetServlet extends ServletUtilBase {
    */
   @Override
   public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-	CallingContext cc = ContextFactory.getCallingContext(getServletContext());
+	CallingContext cc = ContextFactory.getCallingContext(this, ADDR, req);
 
     // collect and save all request parameters
     String spreadsheetName = getParameter(req, ExternalServiceConsts.EXT_SERV_ADDRESS);
@@ -119,7 +119,7 @@ public class SpreadsheetServlet extends ServletUtilBase {
     // 1st step: generate the auth button that will send the oauth request to
     // Google and allow the user to grant us access
     if (sessionToken == null || sessionToken.isEmpty()) {
-      beginBasicHtmlResponse(TITLE_INFO, resp, req, true); // header info
+      beginBasicHtmlResponse(TITLE_INFO, resp, true, cc); // header info
       params.put(CALLBACK, Boolean.toString(true));
       String authButton = generateAuthButton(SpreadsheetConsts.AUTHORIZE_SPREADSHEET_CREATION,
           params, req, resp, SpreadsheetConsts.DOCS_SCOPE, SpreadsheetConsts.SPREADSHEETS_SCOPE);
@@ -143,7 +143,7 @@ public class SpreadsheetServlet extends ServletUtilBase {
 
     try {
       OAuthToken authToken = new OAuthToken(sessionToken, sessionTokenSecret);
-      GoogleSpreadsheet.createSpreadsheet(form, authToken, spreadsheetName, esType, getServerURL(req), cc);
+      GoogleSpreadsheet.createSpreadsheet(form, authToken, spreadsheetName, esType, cc);
 
       WorksheetCreator ws = (WorksheetCreator) cc.getBean(BeanDefs.WORKSHEET_BEAN);
 
@@ -155,8 +155,7 @@ public class SpreadsheetServlet extends ServletUtilBase {
       MiscTasks m = new MiscTasks(TaskType.WORKSHEET_CREATE, form, parameters, cc);
       m.persist(cc);
       
-      ws.createWorksheetTask(form, m.getSubmissionKey(), 1L,
-    		  					getServerURL(req), cc);
+      ws.createWorksheetTask(form, m.getSubmissionKey(), 1L, cc);
     } catch (ODKExternalServiceException e) {
       e.printStackTrace();
       resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
@@ -172,7 +171,7 @@ public class SpreadsheetServlet extends ServletUtilBase {
 
 
     
-    System.out.println("USING URL: " + getServerURL(req));
-    resp.sendRedirect(FormsServlet.ADDR);
+    System.out.println("USING URL: " + cc.getServerURL());
+    resp.sendRedirect(cc.getWebApplicationURL(FormsServlet.ADDR));
   }
 }

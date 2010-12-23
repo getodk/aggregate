@@ -53,6 +53,7 @@ public class FormXmlServlet extends ServletUtilBase {
    * URI from base
    */
   public static final String ADDR = "formXml";
+  public static final String WWW_ADDR = "www/formXml";
 
   /**
    * Title for generated webpage
@@ -68,7 +69,6 @@ public class FormXmlServlet extends ServletUtilBase {
   @Override
   public void doGet(HttpServletRequest req, HttpServletResponse resp)
       throws IOException {
-	CallingContext cc = ContextFactory.getCallingContext(getServletContext());
     
     // get parameters
     String formId = getParameter(req, ServletConsts.FORM_ID);
@@ -82,6 +82,9 @@ public class FormXmlServlet extends ServletUtilBase {
     if (readable != null) {
       humanReadable = Boolean.parseBoolean(readable);
     }
+
+    // servlet has two different paths to it -- depdending upon whether it is human readable or not.
+    CallingContext cc = ContextFactory.getCallingContext(this, humanReadable ? WWW_ADDR : ADDR, req);
 
     Form form;
     try {
@@ -106,10 +109,11 @@ public class FormXmlServlet extends ServletUtilBase {
 	    if (humanReadable) {
 	      Map<String, String> properties = new HashMap<String, String>();
 	      properties.put(ServletConsts.FORM_ID, formId);
-	      String downloadXmlButton = HtmlUtil.createHtmlButtonToGetServlet(ADDR,
+	      String downloadXmlButton = HtmlUtil.createHtmlButtonToGetServlet(
+	    		  cc.getWebApplicationURL(ADDR),
 	          ServletConsts.DOWNLOAD_XML_BUTTON_TXT, properties);
 	
-	      beginBasicHtmlResponse(TITLE_INFO, resp, req, true); // header info
+	      beginBasicHtmlResponse(TITLE_INFO, resp, true, cc); // header info
 	      out.println("<h3>Form Name: <FONT COLOR=0000FF>" + form.getViewableName()
 	          + "</FONT></h3>");
 	      out.println("<h3>File Name: <FONT COLOR=0000FF>" + form.getFormFilename()

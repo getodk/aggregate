@@ -41,7 +41,6 @@ public class RelationRowMapper implements RowMapper<CommonFieldsBase> {
 	@Override
 	public CommonFieldsBase mapRow(ResultSet rs, int rowNum) throws SQLException {
 		
-		// TODO: do a better job creating the entity based upon odkId...
 		CommonFieldsBase row;
 		try {
 			row = relation.getEmptyRow(user);

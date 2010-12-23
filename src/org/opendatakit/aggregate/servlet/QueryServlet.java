@@ -68,7 +68,7 @@ public class QueryServlet extends ServletUtilBase {
     @Override
     public void doGet(HttpServletRequest req, HttpServletResponse resp)
 	    throws IOException {
-	CallingContext cc = ContextFactory.getCallingContext(getServletContext());
+	CallingContext cc = ContextFactory.getCallingContext(this, ADDR, req);
 
     // get parameter
 	String odkId = getParameter(req, ServletConsts.FORM_ID);
@@ -90,11 +90,10 @@ public class QueryServlet extends ServletUtilBase {
 
 	processElementForColumnHead(form.getTopLevelGroupElement(), form.getTopLevelGroupElement(), "");
 
-	beginBasicHtmlResponse(TITLE_INFO + form.getViewableName(), resp, req,
-		true); // header info
+	beginBasicHtmlResponse(TITLE_INFO + form.getViewableName(), resp, true, cc); // header info
 
 	PrintWriter out = resp.getWriter();
-	out.write(HtmlUtil.createFormBeginTag(QueryResultsServlet.ADDR, null,
+	out.write(HtmlUtil.createFormBeginTag(cc.getWebApplicationURL(QueryResultsServlet.ADDR), null,
 		HtmlConsts.GET));
 
 	out.write("Field to Filter:" + HtmlConsts.LINE_BREAK);

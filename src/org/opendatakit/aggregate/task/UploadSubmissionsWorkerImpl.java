@@ -62,16 +62,13 @@ public class UploadSubmissionsWorkerImpl {
 	private final CallingContext cc;
 	private final FormServiceCursor pFsc;
 	private final ExternalServiceOption pEsOption;
-	private final String baseWebServerUrl;
 	private ExternalService pExtService;
 	private Form form;
 
-	public UploadSubmissionsWorkerImpl(FormServiceCursor fsc,
-			String baseServerWebUrl, CallingContext cc) {
+	public UploadSubmissionsWorkerImpl(FormServiceCursor fsc, CallingContext cc) {
 		pFsc = fsc;
 		this.cc = cc;
 		pEsOption = fsc.getExternalServiceOption();
-		this.baseWebServerUrl = baseServerWebUrl;
 		lockId = UUID.randomUUID().toString();
 	}
 
@@ -83,7 +80,7 @@ public class UploadSubmissionsWorkerImpl {
 			throws ODKEntityNotFoundException, ODKExternalServiceException,
 			ODKFormNotFoundException, ODKTaskLockException {
 
-		pExtService = pFsc.getExternalService(baseWebServerUrl, cc);
+		pExtService = pFsc.getExternalService(cc);
 		form = Form.retrieveForm(pFsc.getFormId(), cc);
 
 		Datastore ds = cc.getDatastore();
@@ -179,7 +176,7 @@ public class UploadSubmissionsWorkerImpl {
 		// create another task to either start streaming
 		// OR to delete if upload ONLY
 		UploadSubmissions uploadSubmissionsBean = (UploadSubmissions) cc.getBean(BeanDefs.UPLOAD_TASK_BEAN);
-		uploadSubmissionsBean.createFormUploadTask(pFsc, baseWebServerUrl, cc);
+		uploadSubmissionsBean.createFormUploadTask(pFsc, cc);
 	}
 
 	private void streamSubmissions() throws ODKFormNotFoundException,

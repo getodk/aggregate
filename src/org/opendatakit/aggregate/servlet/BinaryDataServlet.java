@@ -66,7 +66,7 @@ public class BinaryDataServlet extends ServletUtilBase {
   public void doGet(HttpServletRequest req, HttpServletResponse resp)
       throws IOException {
 
-	CallingContext cc = ContextFactory.getCallingContext(getServletContext());
+	CallingContext cc = ContextFactory.getCallingContext(this, ADDR, req);
 	
     // verify parameters are present
     String keyString = getParameter(req, ServletConsts.BLOB_KEY);

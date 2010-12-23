@@ -93,26 +93,26 @@ public class FusionTable extends AbstractExternalService implements ExternalServ
   private final GoogleService fusionTableService;
 
   
-  private FusionTable(Form form, String webServerUrl, CallingContext cc){
-    super(form, new FusionTableElementFormatter(webServerUrl), new FusionTableHeaderFormatter(), cc);
+  private FusionTable(Form form, CallingContext cc){
+    super(form, new FusionTableElementFormatter(cc.getServerURL()), new FusionTableHeaderFormatter(), cc);
     fusionTableService = new GoogleService(FusionTableConsts.FUSTABLE_SERVICE_NAME,
         ServletConsts.APPLICATION_NAME);
  
   }
   
-  public FusionTable(FormServiceCursor fsc, String webServerUrl, CallingContext cc)
+  public FusionTable(FormServiceCursor fsc, CallingContext cc)
       throws ODKEntityNotFoundException, ODKDatastoreException, ODKFormNotFoundException {
-    this(Form.retrieveForm(fsc.getFormId(), cc), webServerUrl, cc);
+    this(Form.retrieveForm(fsc.getFormId(), cc), cc);
     this.fsc = fsc;
     FusionTableParameterTable fp = FusionTableParameterTable.createRelation(cc);
-    objectEntity = cc.getDatastore().getEntity(fp, fsc.getServiceAuri(), cc.getCurrentUser());
+    objectEntity = cc.getDatastore().getEntity(fp, fsc.getAuriService(), cc.getCurrentUser());
     repeatElementTableIds = FusionTableRepeatParameterTable.getRepeatGroupAssociations(new EntityKey(fp, objectEntity.getUri()), cc);
   }
 
   public FusionTable(Form form, OAuthToken authToken, ExternalServiceOption externalServiceOption,
-      String tableId, List<TableId> repeatElementTableIdAssociations, String webServerUrl, CallingContext cc) throws ODKDatastoreException,
+      String tableId, List<TableId> repeatElementTableIdAssociations, CallingContext cc) throws ODKDatastoreException,
       ODKExternalServiceException {
-    this(form, webServerUrl, cc);    
+    this(form, cc);    
 
     objectEntity = cc.getDatastore().createEntityUsingRelation(FusionTableParameterTable.createRelation(cc), cc.getCurrentUser());
     
@@ -139,7 +139,7 @@ public class FusionTable extends AbstractExternalService implements ExternalServ
 	User user = cc.getCurrentUser();
     for ( TableId a : repeatElementTableIdAssociations ) {
     	FusionTableRepeatParameterTable t = ds.createEntityUsingRelation(frpt, user);
-    	t.setDomAuri(objectEntity.getUri());
+    	t.setUriFusionTable(objectEntity.getUri());
     	t.setFormElementKey(a.getElement().constructFormElementKey(form));
     	t.setFusionTableId(a.getId());
     	repeatElementTableIds.add(t);
@@ -393,7 +393,7 @@ public class FusionTable extends AbstractExternalService implements ExternalServ
   }
 
   public static FusionTable createFusionTable(Form form, OAuthToken authToken,
-      ExternalServiceOption externalServiceOption, String webServerUrl, CallingContext cc)
+      ExternalServiceOption externalServiceOption, CallingContext cc)
       throws ODKDatastoreException, ODKExternalServiceException {
 
     GoogleService fusionTableService = new GoogleService(FusionTableConsts.FUSTABLE_SERVICE_NAME,
@@ -409,7 +409,7 @@ public class FusionTable extends AbstractExternalService implements ExternalServ
 	  }
 	  catch (OAuthException e)
 	  {
-		  // TODO
+		  // TODO: handle OAuth failure
     	e.printStackTrace();
 	  }
 
@@ -426,7 +426,7 @@ public class FusionTable extends AbstractExternalService implements ExternalServ
       repeatIds.add(repeatId);
     }
     
-    return new FusionTable(form, authToken, externalServiceOption, tableid.trim(), repeatIds, webServerUrl, cc);
+    return new FusionTable(form, authToken, externalServiceOption, tableid.trim(), repeatIds, cc);
   }
 
   private static String executeFusionTableCreation(Form form, GoogleService fusionTableService,

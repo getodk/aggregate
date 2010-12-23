@@ -52,10 +52,14 @@ public class SubmissionBlob {
   private List<RefBlob> dbRefBlobList = new ArrayList<RefBlob>();
   
   /**
-   * Construct an blob entity and store it in the data store
-   * @param datastore TODO
-   * @throws ODKDatastoreException 
-   *    
+   * Construct an blob entity and persist it into the data store
+   * @param blob
+   * @param uriVersionedContent
+   * @param versionedBinaryContentRefBlobModel
+   * @param formDefinition
+   * @param colocationKey
+   * @param cc - the CallingContext of this request
+   * @throws ODKDatastoreException
    */
   public SubmissionBlob(byte [] blob, String uriVersionedContent, FormDataModel versionedBinaryContentRefBlobModel, FormDefinition formDefinition, EntityKey colocationKey, CallingContext cc) throws ODKDatastoreException {
 

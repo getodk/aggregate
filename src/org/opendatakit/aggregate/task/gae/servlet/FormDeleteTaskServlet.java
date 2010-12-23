@@ -59,7 +59,7 @@ public class FormDeleteTaskServlet extends ServletUtilBase {
   @Override
   public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
     // TODO: talk to MITCH about the fact the user will be incorrect
-	CallingContext cc = ContextFactory.getCallingContext(getServletContext());
+	CallingContext cc = ContextFactory.getCallingContext(this, ADDR, req);
 	cc.setAsDaemon(true);
 
     // get parameter
@@ -91,7 +91,7 @@ public class FormDeleteTaskServlet extends ServletUtilBase {
     }
 
     FormDeleteWorkerImpl formDelete = new FormDeleteWorkerImpl(form, miscTasksKey, 
-    					attemptCount, getServerURL(req), cc);
+    					attemptCount, cc);
       try {
 		formDelete.deleteForm();
 	} catch (ODKDatastoreException e) {

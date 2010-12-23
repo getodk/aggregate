@@ -40,7 +40,7 @@ public class FormDeleteImpl implements FormDelete {
 
   @Override
   public final void createFormDeleteTask(Form form, SubmissionKey miscTasksKey, long attemptCount,
-	      String baseServerWebUrl, CallingContext cc) {
+	      CallingContext cc) {
     TaskOptions task = TaskOptions.Builder.withUrl(ServletConsts.WEB_ROOT + FormDeleteTaskServlet.ADDR);
     task.method(TaskOptions.Method.GET);
     task.countdownMillis(1);

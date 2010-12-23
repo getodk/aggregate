@@ -26,7 +26,7 @@ import org.opendatakit.aggregate.task.Watchdog;
 public class WatchdogImpl implements Watchdog {
 
   @Override
-  public void createWatchdogTask(long checkIntervalMilliseconds, String baseWebServerUrl) {
+  public void createWatchdogTask(long checkIntervalMilliseconds) {
     // No op because appengine cron.xml automatically schedules and calls the task    
 	  throw new IllegalStateException("this should not be called!");
   }

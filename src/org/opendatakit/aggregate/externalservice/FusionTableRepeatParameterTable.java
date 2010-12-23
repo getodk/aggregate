@@ -20,11 +20,11 @@ import java.util.List;
 
 import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.datamodel.FormElementKey;
-import org.opendatakit.aggregate.datamodel.StaticAssociationBase;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.EntityKey;
+import org.opendatakit.common.persistence.PersistConsts;
 import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.persistence.Query.FilterOperation;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
@@ -36,18 +36,21 @@ import org.opendatakit.common.security.User;
  * @author mitchellsundt@gmail.com
  * 
  */
-public class FusionTableRepeatParameterTable extends StaticAssociationBase {
+public class FusionTableRepeatParameterTable extends CommonFieldsBase {
 
 	  private static final String TABLE_NAME = "_fusion_table_repeat";
 	  /*
 	   * Property Names for datastore
 	   */
 	  /****************************************************/
+	  private static final DataField URI_FUSION_TABLE_PROPERTY = new DataField("URI_FUSION_TABLE",
+		      DataField.DataType.URI, false, PersistConsts.URI_STRING_LEN);
 	  private static final DataField FUSION_TABLE_ID_PROPERTY = new DataField("FUSION_TABLE_ID",
 	      DataField.DataType.STRING, true, 4096L);
 	  private static final DataField FORM_ELEMENT_KEY_PROPERTY = new DataField("FORM_ELEMENT_KEY",
 	      DataField.DataType.STRING, true, 4096L);
 
+	  public final DataField uriFusionTable;
 	  public final DataField fusionTableId;
 	  public final DataField formElementKey;
 
@@ -59,6 +62,7 @@ public class FusionTableRepeatParameterTable extends StaticAssociationBase {
 		 */
 	  FusionTableRepeatParameterTable(String schemaName) {
 	    super(schemaName, TABLE_NAME);
+	    fieldList.add(uriFusionTable = new DataField(URI_FUSION_TABLE_PROPERTY));
 	    fieldList.add(fusionTableId = new DataField(FUSION_TABLE_ID_PROPERTY));
 	    fieldList.add(formElementKey = new DataField(FORM_ELEMENT_KEY_PROPERTY));
 	  }
@@ -71,6 +75,7 @@ public class FusionTableRepeatParameterTable extends StaticAssociationBase {
 	   */
 	  private FusionTableRepeatParameterTable(FusionTableRepeatParameterTable ref, User user) {
 	    super(ref, user);
+	    uriFusionTable = ref.uriFusionTable;
 	    fusionTableId = ref.fusionTableId;
 	    formElementKey = ref.formElementKey;
 	  }
@@ -81,13 +86,23 @@ public class FusionTableRepeatParameterTable extends StaticAssociationBase {
 		return new FusionTableRepeatParameterTable(this, user);
 	  }
 
+	  public String getUriFusionTable() {
+	    return getStringField(uriFusionTable);
+	  }
+
+	  public void setUriFusionTable(String value) {
+	    if (!setStringField(uriFusionTable, value)) {
+	      throw new IllegalArgumentException("overflow uriFusionTable");
+	    }
+	  }
+
 	  public String getFusionTableId() {
 	    return getStringField(fusionTableId);
 	  }
 
 	  public void setFusionTableId(String value) {
 	    if (!setStringField(fusionTableId, value)) {
-	      throw new IllegalArgumentException("overflow fusionTableName");
+	      throw new IllegalArgumentException("overflow fusionTableId");
 	    }
 	  }
 
@@ -125,7 +140,7 @@ public class FusionTableRepeatParameterTable extends StaticAssociationBase {
 		  FusionTableRepeatParameterTable frpt = createRelation(cc);
 
 		  Query query = cc.getDatastore().createQuery(frpt, cc.getCurrentUser());
-		  query.addFilter(frpt.domAuri, FilterOperation.EQUAL, fusionTableParameterTable.getKey());
+		  query.addFilter(frpt.uriFusionTable, FilterOperation.EQUAL, fusionTableParameterTable.getKey());
 
 		  List<? extends CommonFieldsBase> results = query.executeQuery(0);
 		  for ( CommonFieldsBase b : results ) {

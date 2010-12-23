@@ -38,8 +38,8 @@ public class FormDeleteImpl implements FormDelete {
 		final FormDeleteWorkerImpl impl;
 
 		public FormDeleteRunner(Form form, SubmissionKey miscTasksKey,
-				long attemptCount, String baseServerWebUrl, CallingContext cc) {
-			impl = new FormDeleteWorkerImpl( form, miscTasksKey, attemptCount, baseServerWebUrl, cc);
+				long attemptCount, CallingContext cc) {
+			impl = new FormDeleteWorkerImpl( form, miscTasksKey, attemptCount, cc);
 		}
 
 		@Override
@@ -55,8 +55,8 @@ public class FormDeleteImpl implements FormDelete {
 
   @Override
   public final void createFormDeleteTask(Form form, SubmissionKey miscTasksKey,
-			long attemptCount, String baseServerWebUrl, CallingContext cc) throws ODKDatastoreException, ODKFormNotFoundException {
-    FormDeleteRunner dr = new FormDeleteRunner(form, miscTasksKey, attemptCount, baseServerWebUrl, cc);
+			long attemptCount, CallingContext cc) throws ODKDatastoreException, ODKFormNotFoundException {
+    FormDeleteRunner dr = new FormDeleteRunner(form, miscTasksKey, attemptCount, cc);
     AggregrateThreadExecutor exec = AggregrateThreadExecutor.getAggregateThreadExecutor();
     exec.execute(dr);
   }

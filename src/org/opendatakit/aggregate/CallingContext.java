@@ -64,4 +64,25 @@ public interface CallingContext {
 	 * @return the logged-in user, anonymous user, or the daemon user.
 	 */
 	public User getCurrentUser();
+	
+	/**
+	 * @return the slash-rooted path of this web application
+	 */
+	public String getWebApplicationURL();
+	
+	/**
+	 * Use this to form the URLs for pages within this web application.
+	 * 
+	 * @param servletAddr -- the root-relative path of a servlet
+	 * @return the slash-rooted path for the servlet within this web application
+	 */
+	public String getWebApplicationURL(String servletAddr);
+	
+	/**
+	 * Return the base of a URL for this server.  These are of the form: "localhost:8080/webApp"
+	 * 
+	 * @return the serverURL useful for external links.  
+	 */
+	public String getServerURL();
+
 }

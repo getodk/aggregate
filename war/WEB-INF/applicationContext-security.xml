@@ -18,20 +18,12 @@
 	<!--	  TODO: can the password be something other than plain text? -->
 	<user-service id="digestUnderlyingLoginService">
 		<user name="msundt" password="test" authorities="HAPPY_GROUP" />
-		<!--
-			<user name="bob" password="12b141f35d58b8b3a46eea65e6ac179e"
-			authorities="ROLE_SUPERVISOR,ROLE_USER" />
-		-->
-		<!--
-			<user name="sam" password="d1a5e26d0558c455d386085fad77d427"
-			authorities="ROLE_USER" />
-		-->
 	</user-service>
 
 	<!--	If using BasicAuth this defines the underlying user service -->
 <!--	basicAuthenticationProvider is configured to work with an MD5 hash of the password  -->
 	<user-service id="basicUnderlyingLoginService">
-		<user name="msundt" password="098f6bcd4621d373cade4e832627b4f6" authorities="SAD_GROUP" />
+		<user name="msundt" password="098f6bcd4621d373cade4e832627b4f6" authorities="HAPPY_GROUP" />
 	</user-service>
 
 	<!--	Configure the role hierarchy.  -->
@@ -55,7 +47,7 @@
 	<beans:bean id="hierarchicalRoleRelationships" class="org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl">
 		<beans:property name="hierarchy">
 			<beans:value>
-			HAPPY_GROUP > ROLE_USER
+			HAPPY_GROUP > ROLE_AUTHENTICATED
 			MODE_WEBSITE > ROLE_USER
 			ROLE_USER > ROLE_AUTHENTICATED
 			ROLE_USER > ROLE_FORM_LIST
@@ -70,20 +62,23 @@
 	</beans:bean>
 	
 	<!--	Configure the access policy to the pages here	-->
-	
+<!--	You can do things like this: and hasRole('AUTH_DIGEST') -->
 	<filter-security-metadata-source id="securityPolicy" use-expressions="true">
 		<intercept-url pattern="/favicon.ico" access="true" />
 		<intercept-url pattern="/odk_color.png" access="true" />
 		<intercept-url pattern="/index.html" access="true" />
 		<intercept-url pattern="/google_login.html" access="isAnonymous()" />
 		<intercept-url pattern="/UploadApplet" access="isFullyAuthenticated()" />
+		<intercept-url pattern="/upload/**" access="isFullyAuthenticated()" />
+		<intercept-url pattern="/Briefcase" access="isFullyAuthenticated()" />
+		<intercept-url pattern="/briefcase/**" access="isFullyAuthenticated()" />
 		<intercept-url pattern="/logout.html" access="isAnonymous()" />
-		<intercept-url pattern="/xformsDownload" access="isFullyAuthenticated() and hasRole('AUTH_DIGEST') and hasRole('ROLE_FORM_DOWNLOAD')" />
-		<intercept-url pattern="/xformsList" access="isFullyAuthenticated() and hasRole('AUTH_DIGEST') and hasRole('ROLE_FORM_LIST')" />
-		<intercept-url pattern="/xformsManifest" access="isFullyAuthenticated() and hasRole('AUTH_DIGEST') and hasRole('ROLE_FORM_LIST')" />
-		<intercept-url pattern="/formList" access="isFullyAuthenticated() and hasRole('AUTH_DIGEST') and hasRole('ROLE_FORM_LIST')" />
-		<intercept-url pattern="/formXml" access="isFullyAuthenticated() and hasRole('AUTH_DIGEST') and hasRole('ROLE_FORM_DOWNLOAD')" />
-		<intercept-url pattern="/submission" access="isFullyAuthenticated() and hasRole('AUTH_DIGEST') and hasRole('ROLE_SUBMISSION_UPLOAD')" />
+		<intercept-url pattern="/xformsDownload" access="isFullyAuthenticated() and hasRole('ROLE_FORM_DOWNLOAD')" />
+		<intercept-url pattern="/xformsList" access="isFullyAuthenticated() and hasRole('ROLE_FORM_LIST')" />
+		<intercept-url pattern="/xformsManifest" access="isFullyAuthenticated() and hasRole('ROLE_FORM_LIST')" />
+		<intercept-url pattern="/formList" access="isFullyAuthenticated() and hasRole('ROLE_FORM_LIST')" />
+		<intercept-url pattern="/formXml" access="isFullyAuthenticated() and hasRole('ROLE_FORM_DOWNLOAD')" />
+		<intercept-url pattern="/submission" access="isFullyAuthenticated() and hasRole('ROLE_SUBMISSION_UPLOAD')" />
 		<intercept-url pattern="/www/**" access="isFullyAuthenticated() and hasRole('ROLE_USER')" />
 		<intercept-url pattern="/view/**" access="isFullyAuthenticated() and hasRole('ROLE_ANALYST')" />
 		<intercept-url pattern="/gae/**" access="isFullyAuthenticated() and hasRole('ROLE_DAEMON')" />

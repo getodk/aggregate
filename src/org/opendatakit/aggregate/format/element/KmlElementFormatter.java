@@ -56,7 +56,7 @@ public class KmlElementFormatter implements ElementFormatter {
   
   /**
    * Construct a KML Element Formatter
-   * @param webServerUrl TODO
+   * @param webServerUrl base url for the web app (e.g., localhost:8080/ODKAggregatePlatform)
    * @param includeGpsAccuracy
    *          include GPS accuracy data
    */

@@ -23,5 +23,5 @@ package org.opendatakit.aggregate.task;
  */
 public interface Watchdog {
 
-  public void createWatchdogTask(long checkIntervalMilliseconds, String baseWebServerUrl);
+  public void createWatchdogTask(long checkIntervalMilliseconds);
 }

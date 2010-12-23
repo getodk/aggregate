@@ -76,7 +76,7 @@ public class FormSubmissionsServlet extends ServletUtilBase {
    */
   @Override
   public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-	CallingContext cc = ContextFactory.getCallingContext(getServletContext());
+	CallingContext cc = ContextFactory.getCallingContext(this, ADDR, req);
 
     // get parameter
     String formId = getParameter(req, ServletConsts.FORM_ID);
@@ -100,8 +100,7 @@ public class FormSubmissionsServlet extends ServletUtilBase {
           indexDate = DateFormat.getDateTimeInstance(DateFormat.FULL, DateFormat.FULL).parse(
               indexString);
           if (!backward) {
-            indexDate = new Date(indexDate.getTime() + 1000); // TODO: worse
-                                                              // hack EVER!
+            indexDate = new Date(indexDate.getTime() + 1000); // TODO: worse hack EVER!
           }
         } catch (ParseException e) {
           // ignore exception as if we can't parse the string then keep the
@@ -112,12 +111,12 @@ public class FormSubmissionsServlet extends ServletUtilBase {
       Form form = Form.retrieveForm(formId, cc);
 
       // header info
-      beginBasicHtmlResponse(TITLE_INFO + form.getViewableName(), resp, req, true);
+      beginBasicHtmlResponse(TITLE_INFO + form.getViewableName(), resp, true, cc);
       PrintWriter out = resp.getWriter();
 
       QueryByDate query = new QueryByDate(form, BasicConsts.EPOCH, false,
               ServletConsts.FETCH_LIMIT, cc);
-      HtmlFormatter formatter = new HtmlFormatter(form, getServerURL(req), resp.getWriter(), null, true);
+      HtmlFormatter formatter = new HtmlFormatter(form, cc.getServerURL(), resp.getWriter(), null, true);
       List<Submission> submissions = query.getResultSubmissions();
 
       boolean createBack = false;
@@ -167,7 +166,7 @@ public class FormSubmissionsServlet extends ServletUtilBase {
         out.print(link);
       }
 
-      out.print(HtmlUtil.createFormBeginTag(ConfirmServlet.ADDR, HtmlConsts.MULTIPART_FORM_DATA,
+      out.print(HtmlUtil.createFormBeginTag(cc.getWebApplicationURL(ConfirmServlet.ADDR), HtmlConsts.MULTIPART_FORM_DATA,
           HtmlConsts.POST));
       out.print(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_HIDDEN, ServletConsts.FORM_ID, formId));
       out.print(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_HIDDEN,

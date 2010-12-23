@@ -51,10 +51,10 @@ public class Submission extends SubmissionSet {
 	/**
 	 * Construct an empty submission for the given form definition
 	 * 
-	 * @param formDefinition
-	 *            the form to base the submission on
-	 * @param datastore
-	 *            TODO
+	 * @param modelVersion - the version attribute of the submission
+	 * @param uiVersion - the uiVersion attribute of the submission
+	 * @param formDefinition - the form to base the submission on
+	 * @param cc - the CallingContext for this request
 	 * @throws ODKDatastoreException
 	 */
 	public Submission(Long modelVersion, Long uiVersion, 
@@ -82,10 +82,9 @@ public class Submission extends SubmissionSet {
 	/**
 	 * Construct a submission from an entity from the data store
 	 * 
-	 * @param submission
-	 *            submission entity that contains the data
-	 * @param datastore
-	 *            TODO
+	 * @param submission - top level entity of the submission to restore
+	 * @param formDefinition - the definition of the form
+	 * @param cc - the CallingContext for this request
 	 * @throws ODKDatastoreException
 	 */
 	public Submission(TopLevelDynamicBase submission,

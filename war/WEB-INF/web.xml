@@ -111,6 +111,11 @@
 		<servlet-name>formXml</servlet-name>
 		<url-pattern>/formXml</url-pattern>
 	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>formXml</servlet-name>
+		<url-pattern>/www/formXml</url-pattern>
+	</servlet-mapping>
 
 	<servlet>
 		<servlet-name>formList</servlet-name>

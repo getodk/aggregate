@@ -71,7 +71,7 @@ public class FusionTableServlet extends ServletUtilBase {
 
   @Override
   public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-	CallingContext cc = ContextFactory.getCallingContext(getServletContext());
+	CallingContext cc = ContextFactory.getCallingContext(this, ADDR, req);
 
     // get parameters
     String formId = getParameter(req, ServletConsts.FORM_ID);
@@ -96,7 +96,7 @@ public class FusionTableServlet extends ServletUtilBase {
 
     // need to obtain authorization to fusion table
     if (authToken == null) {
-      beginBasicHtmlResponse(TITLE_INFO, resp, req, true); // header info
+      beginBasicHtmlResponse(TITLE_INFO, resp, true, cc); // header info
       String authButton = generateAuthButton(ExternalServiceConsts.AUTHORIZE_FUSION_CREATION,
           params, req, resp, FusionTableConsts.FUSION_SCOPE);
       resp.getWriter().print(authButton);
@@ -109,7 +109,7 @@ public class FusionTableServlet extends ServletUtilBase {
 
     try {
       Form form = Form.retrieveForm(formId, cc);
-      fusion = FusionTable.createFusionTable(form, authToken, esType, getServerURL(req), cc);
+      fusion = FusionTable.createFusionTable(form, authToken, esType, cc);
     } catch (ODKFormNotFoundException e) {
       odkIdNotFoundError(resp);
       return;
@@ -127,7 +127,7 @@ public class FusionTableServlet extends ServletUtilBase {
     if (!esType.equals(ExternalServiceOption.STREAM_ONLY)) {
       try {
         UploadSubmissions uploadTask = (UploadSubmissions) cc.getBean(BeanDefs.UPLOAD_TASK_BEAN);
-        uploadTask.createFormUploadTask(fusion.getFormServiceCursor(), getServerURL(req), cc);
+        uploadTask.createFormUploadTask(fusion.getFormServiceCursor(), cc);
       } catch (Exception e) {
         resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
         e.printStackTrace();
@@ -135,7 +135,7 @@ public class FusionTableServlet extends ServletUtilBase {
       }
     }
 
-    resp.sendRedirect(FormsServlet.ADDR);
+    resp.sendRedirect(cc.getWebApplicationURL(FormsServlet.ADDR));
 
   }
 

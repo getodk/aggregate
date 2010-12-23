@@ -39,7 +39,7 @@ import com.google.appengine.api.taskqueue.TaskOptions;
 public class CsvGeneratorImpl implements CsvGenerator {
 
   @Override
-  public void createCsvTask(Form form, SubmissionKey persistentResultsKey, long attemptCount, String baseServerWebUrl, CallingContext cc) throws ODKDatastoreException {
+  public void createCsvTask(Form form, SubmissionKey persistentResultsKey, long attemptCount, CallingContext cc) throws ODKDatastoreException {
     TaskOptions task = TaskOptions.Builder.withUrl(ServletConsts.WEB_ROOT
         + CsvGeneratorTaskServlet.ADDR);
     task.method(TaskOptions.Method.GET);

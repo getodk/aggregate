@@ -62,15 +62,15 @@ public class FormsServlet extends ServletUtilBase {
   @Override
   public void doGet(HttpServletRequest req, HttpServletResponse resp)
       throws IOException {
-	CallingContext cc = ContextFactory.getCallingContext(getServletContext());
+	CallingContext cc = ContextFactory.getCallingContext(this, ADDR, req);
     
     try {
       // ensure that Form table exists...
       QueryFormList formsList = new QueryFormList(false, cc);
-      FormHtmlTable formFormatter = new FormHtmlTable(formsList);
+      FormHtmlTable formFormatter = new FormHtmlTable(formsList, cc);
       
       // generate html
-      beginBasicHtmlResponse(TITLE_INFO, resp, req, true); // header info
+      beginBasicHtmlResponse(TITLE_INFO, resp, true, cc); // header info
       resp.getWriter().print(formFormatter.generateHtmlFormTable(true, false));
       finishBasicHtmlResponse(resp);
       

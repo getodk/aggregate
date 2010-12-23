@@ -48,11 +48,10 @@ public class KmlGeneratorImpl implements KmlGenerator {
 		public KmlRunner(Form form, SubmissionKey persistentResultsKey,
 				long attemptCount, FormElementModel titleField,
 				FormElementModel geopointField, FormElementModel imageField,
-				String baseWebServerUrl, CallingContext cc) {
+				CallingContext cc) {
 			
 			impl = new KmlWorkerImpl(form, persistentResultsKey, attemptCount,
-					titleField, geopointField, imageField, baseWebServerUrl,
-					cc);
+					titleField, geopointField, imageField, cc);
 		}
 
 		@Override
@@ -63,7 +62,6 @@ public class KmlGeneratorImpl implements KmlGenerator {
 
 	@Override
 	public void createKmlTask(Form form, SubmissionKey persistentResultsKey, long attemptCount,
-			String baseWebServerUrl,
 			CallingContext cc) throws ODKDatastoreException, ODKFormNotFoundException {
 		Submission s = Submission.fetchSubmission(persistentResultsKey.splitSubmissionKey(), cc);
 	    PersistentResults r = new PersistentResults(s);
@@ -92,8 +90,7 @@ public class KmlGeneratorImpl implements KmlGenerator {
 	        }
 	    }
 		KmlRunner runner = new KmlRunner(form, persistentResultsKey, attemptCount,
-				titleField, geopointField, imageField, baseWebServerUrl,
-				cc);
+				titleField, geopointField, imageField, cc);
 		AggregrateThreadExecutor exec = AggregrateThreadExecutor
 				.getAggregateThreadExecutor();
 		exec.execute(runner);

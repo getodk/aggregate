@@ -36,8 +36,8 @@ public class CsvGeneratorImpl implements CsvGenerator {
 	static class CsvRunner implements Runnable {
 		final CsvWorkerImpl impl;
 		
-		public CsvRunner( Form form, SubmissionKey persistentResultsKey, long attemptCount, String baseWebServerUrl, CallingContext cc) {
-			impl = new CsvWorkerImpl(form, persistentResultsKey, attemptCount, baseWebServerUrl, cc );
+		public CsvRunner( Form form, SubmissionKey persistentResultsKey, long attemptCount, CallingContext cc) {
+			impl = new CsvWorkerImpl(form, persistentResultsKey, attemptCount, cc );
 		}
 
 		@Override
@@ -48,9 +48,9 @@ public class CsvGeneratorImpl implements CsvGenerator {
 
   @Override
   public void createCsvTask(Form form, SubmissionKey persistentResultsKey,
-		long attemptCount, String baseServerWebUrl, CallingContext cc)
+		long attemptCount, CallingContext cc)
 		throws ODKDatastoreException {
-	CsvRunner runner = new CsvRunner(form, persistentResultsKey, attemptCount, baseServerWebUrl, cc );
+	CsvRunner runner = new CsvRunner(form, persistentResultsKey, attemptCount, cc );
     AggregrateThreadExecutor exec = AggregrateThreadExecutor.getAggregateThreadExecutor();
     exec.execute(runner);
   }

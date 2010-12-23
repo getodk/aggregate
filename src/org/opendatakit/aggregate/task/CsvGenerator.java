@@ -30,5 +30,5 @@ import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 public interface CsvGenerator {
 
 	public void createCsvTask(Form form, SubmissionKey persistentResultsKey,
-			long attemptCount, String baseServerWebUrl, CallingContext cc) throws ODKDatastoreException;
+			long attemptCount, CallingContext cc) throws ODKDatastoreException;
 }

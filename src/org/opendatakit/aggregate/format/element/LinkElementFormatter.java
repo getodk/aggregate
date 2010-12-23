@@ -44,7 +44,7 @@ public class LinkElementFormatter extends BasicElementFormatter {
    * Construct a Html Link Element Formatter
    * 
    * @param webServerUrl
-   *          TODO
+   *          base url for the web app (e.g., localhost:8080/ODKAggregatePlatform)
    * @param separateGpsCoordinates
    *          separate the GPS coordinates of latitude and longitude into
    *          columns

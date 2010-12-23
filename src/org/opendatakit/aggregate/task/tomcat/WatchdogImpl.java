@@ -17,6 +17,8 @@ package org.opendatakit.aggregate.task.tomcat;
 
 import java.util.concurrent.TimeUnit;
 
+import javax.servlet.ServletContext;
+
 import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.task.CsvGenerator;
@@ -26,11 +28,13 @@ import org.opendatakit.aggregate.task.UploadSubmissions;
 import org.opendatakit.aggregate.task.Watchdog;
 import org.opendatakit.aggregate.task.WatchdogWorkerImpl;
 import org.opendatakit.aggregate.task.WorksheetCreator;
+import org.opendatakit.common.constants.BasicConsts;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.security.UserService;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.SmartLifecycle;
+import org.springframework.web.context.ServletContextAware;
 
 /**
  * 
@@ -38,7 +42,7 @@ import org.springframework.context.SmartLifecycle;
  * @author mitchellsundt@gmail.com
  * 
  */
-public class WatchdogImpl implements Watchdog, SmartLifecycle, InitializingBean {
+public class WatchdogImpl implements Watchdog, SmartLifecycle, InitializingBean, ServletContextAware {
 
 	boolean isStarted = false;
 	AggregrateThreadExecutor exec = AggregrateThreadExecutor
@@ -50,6 +54,8 @@ public class WatchdogImpl implements Watchdog, SmartLifecycle, InitializingBean 
 	KmlGenerator kmlGenerator = null;
 	FormDelete formDelete = null;
 	WorksheetCreator worksheetCreator = null;
+	ServletContext ctxt = null;
+	String baseUrl = null;
 
 	/**
 	 * Implementation of CallingContext for use by watchdog-launched tasks.
@@ -105,20 +111,32 @@ public class WatchdogImpl implements Watchdog, SmartLifecycle, InitializingBean 
 		public void setAsDaemon(boolean asDaemon) {
 			this.asDaemon = asDaemon;
 		}
+
+		@Override
+		public String getServerURL() {
+			return baseUrl + ctxt.getContextPath();
+		}
+
+		@Override
+		public String getWebApplicationURL() {
+			return ctxt.getContextPath();
+		}
+
+		@Override
+		public String getWebApplicationURL(String servletAddr) {
+			return ctxt.getContextPath() + BasicConsts.FORWARDSLASH + servletAddr;
+		}
 	}
 	
 	static class WatchdogRunner implements Runnable {
 		final WatchdogWorkerImpl impl;
 
 		final long checkIntervalMilliseconds;
-		final String baseWebServerUrl;
 		final CallingContext cc;
 
-		public WatchdogRunner(long checkIntervalMilliseconds,
-				String baseWebServerUrl, CallingContext cc) {
+		public WatchdogRunner(long checkIntervalMilliseconds, CallingContext cc) {
 			impl = new WatchdogWorkerImpl();
 			this.checkIntervalMilliseconds = checkIntervalMilliseconds;
-			this.baseWebServerUrl = baseWebServerUrl;
 			this.cc = cc;
 		}
 
@@ -126,7 +144,7 @@ public class WatchdogImpl implements Watchdog, SmartLifecycle, InitializingBean 
 		public void run() {
 			try {
 				System.out.println("RUNNING WATCHDOG TASK IN TOMCAT");
-				impl.checkTasks(checkIntervalMilliseconds, baseWebServerUrl, cc);
+				impl.checkTasks(checkIntervalMilliseconds, cc);
 			} catch (Exception e) {
 				e.printStackTrace();
 				// TODO: Problem - decide what to do if an exception occurs
@@ -134,12 +152,9 @@ public class WatchdogImpl implements Watchdog, SmartLifecycle, InitializingBean 
 		}
 	}
 
-	// TODO: nothing calls this method right now. Figure out how to start
-	// watchdog in Tomcat
-	public void createWatchdogTask(long checkIntervalMilliseconds,
-			String baseWebServerUrl) {
-		WatchdogRunner wr = new WatchdogRunner(checkIntervalMilliseconds,
-				baseWebServerUrl, new CallingContextImpl());
+	public void createWatchdogTask(long checkIntervalMilliseconds) {
+		WatchdogRunner wr = new WatchdogRunner(checkIntervalMilliseconds, 
+									new CallingContextImpl());
 
 		exec = AggregrateThreadExecutor.getAggregateThreadExecutor();
 		System.out.println("CREATE WATCHDOG TASK IN TOMCAT");
@@ -175,9 +190,7 @@ public class WatchdogImpl implements Watchdog, SmartLifecycle, InitializingBean 
 	@Override
 	public void start() {
 		System.out.println("start WATCHDOG TASK IN TOMCAT");
-		// TODO: eliminate this arg
-		String baseWebServerUrl = "/ODKAggregatePlatform";
-		createWatchdogTask(3 * 60 * 1000, baseWebServerUrl);
+		createWatchdogTask(3 * 60 * 1000);
 		isStarted = true;
 	}
 
@@ -248,6 +261,14 @@ public class WatchdogImpl implements Watchdog, SmartLifecycle, InitializingBean 
 		this.worksheetCreator = worksheetCreator;
 	}
 
+	public String getBaseUrl() {
+		return baseUrl;
+	}
+
+	public void setBaseUrl(String baseUrl) {
+		this.baseUrl = baseUrl;
+	}
+
 	@Override
 	public void afterPropertiesSet() throws Exception {
 		System.out.println("afterPropertiesSet WATCHDOG TASK IN TOMCAT");
@@ -258,5 +279,11 @@ public class WatchdogImpl implements Watchdog, SmartLifecycle, InitializingBean 
 		if ( kmlGenerator == null ) throw new IllegalStateException("no kmlGenerator specified");
 		if ( formDelete == null ) throw new IllegalStateException("no formDelete specified");
 		if ( worksheetCreator == null ) throw new IllegalStateException("no worksheetCreator specified");
+	}
+
+	@Override
+	public void setServletContext(ServletContext context) {
+		System.out.print("Inside setServletContext");
+		ctxt = context;
 	}
 }

@@ -58,11 +58,11 @@ public class XFormsListServlet extends ServletUtilBase {
    */
   @Override
   public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-	CallingContext cc = ContextFactory.getCallingContext(getServletContext());
+	CallingContext cc = ContextFactory.getCallingContext(this, ADDR, req);
     
     try {
       QueryFormList formsList = new QueryFormList(false, cc);
-      XFormsXmlTable formFormatter = new XFormsXmlTable(formsList, getServerURL(req));
+      XFormsXmlTable formFormatter = new XFormsXmlTable(formsList, cc.getServerURL());
 
       resp.setContentType(HtmlConsts.RESP_TYPE_XML);
       resp.getWriter().print(formFormatter.generateXmlListOfForms());

@@ -20,12 +20,13 @@ import java.util.List;
 import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.constants.externalservice.ExternalServiceOption;
 import org.opendatakit.aggregate.constants.externalservice.ExternalServiceType;
-import org.opendatakit.aggregate.datamodel.StaticAssociationBase;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.Datastore;
+import org.opendatakit.common.persistence.PersistConsts;
 import org.opendatakit.common.persistence.Query;
+import org.opendatakit.common.persistence.DataField.IndexType;
 import org.opendatakit.common.persistence.Query.Direction;
 import org.opendatakit.common.persistence.Query.FilterOperation;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
@@ -38,7 +39,7 @@ import org.opendatakit.common.security.User;
  * @author mitchellsundt@gmail.com
  * 
  */
-public final class FormServiceCursor extends StaticAssociationBase {
+public final class FormServiceCursor extends CommonFieldsBase {
 
   private static final String TABLE_NAME = "_form_service_cursor";
   
@@ -52,6 +53,11 @@ public final class FormServiceCursor extends StaticAssociationBase {
   /*
    * Property Names for datastore
    */
+  private static final DataField URI_MD5_FORM_ID_PROPERTY = new DataField("URI_MD5_FORM_ID",
+	      DataField.DataType.URI, false, PersistConsts.URI_STRING_LEN).setIndexable(IndexType.HASH);
+  private static final DataField AURI_SERVICE_PROPERTY = new DataField("AURI_SERVICE",
+	      DataField.DataType.URI, false, PersistConsts.URI_STRING_LEN).setIndexable(IndexType.HASH);
+  
   private static final DataField EXT_SERVICE_TYPE_PROPERTY = new DataField("EXT_SERVICE_TYPE",
       DataField.DataType.STRING, false, 200L);
   private static final DataField EXTERNAL_SERVICE_OPTION = new DataField("EXTERNAL_SERVICE_OPTION",
@@ -76,6 +82,8 @@ public final class FormServiceCursor extends StaticAssociationBase {
   private static final DataField FORM_ID_PROPERTY = new DataField("FORM_ID",
       DataField.DataType.STRING, true, 4096L);
 
+  public final DataField uriMd5FormId;
+  public final DataField auriService;
   public final DataField externalServiceType;
   public final DataField externalServiceOption;
   public final DataField isExternalServicePrepared;
@@ -96,6 +104,8 @@ public final class FormServiceCursor extends StaticAssociationBase {
 	 */
   private FormServiceCursor(String schemaName) {
     super(schemaName, TABLE_NAME);
+    fieldList.add(uriMd5FormId = new DataField(URI_MD5_FORM_ID_PROPERTY));
+    fieldList.add(auriService = new DataField(AURI_SERVICE_PROPERTY));
     fieldList.add(externalServiceType = new DataField(EXT_SERVICE_TYPE_PROPERTY));
     fieldList.add(externalServiceOption = new DataField(EXTERNAL_SERVICE_OPTION));
     fieldList.add(isExternalServicePrepared = new DataField(IS_EXTERNAL_SERVICE_PREPARED));
@@ -119,6 +129,8 @@ public final class FormServiceCursor extends StaticAssociationBase {
 	 */
   private FormServiceCursor(FormServiceCursor ref, User user) {
     super(ref, user);
+    uriMd5FormId = ref.uriMd5FormId;
+    auriService = ref.auriService;
     externalServiceType = ref.externalServiceType;
     externalServiceOption = ref.externalServiceOption;
     isExternalServicePrepared = ref.isExternalServicePrepared;
@@ -231,23 +243,23 @@ public final class FormServiceCursor extends StaticAssociationBase {
     }
   }
 
-  public String getServiceAuri() {
-    return getStringField(subAuri);
+  public String getAuriService() {
+    return getStringField(auriService);
   }
 
-  public void setServiceAuri(String value) {
-    if (!setStringField(subAuri, value)) {
-      throw new IllegalArgumentException("overflow serviceAuri");
+  public void setAuriService(String value) {
+    if (!setStringField(auriService, value)) {
+      throw new IllegalArgumentException("overflow auriService");
     }
   }
 
-  public String getFormUri() {
-    return getStringField(domAuri);
+  public String getUriMd5FormId() {
+    return getStringField(uriMd5FormId);
   }
 
-  public void setFormUri(String value) {
-    if (!setStringField(domAuri, value)) {
-      throw new IllegalArgumentException("overflow domAuri");
+  public void setUriMd5FormId(String value) {
+    if (!setStringField(uriMd5FormId, value)) {
+      throw new IllegalArgumentException("overflow uriMd5FormId");
     }
   }
 
@@ -261,8 +273,8 @@ public final class FormServiceCursor extends StaticAssociationBase {
     }
   }
   
-  public ExternalService getExternalService(String baseWebServerUrl, CallingContext cc) throws ODKEntityNotFoundException {
-    return getExternalServiceType().constructExternalService(this, baseWebServerUrl, cc);
+  public ExternalService getExternalService(CallingContext cc) throws ODKEntityNotFoundException {
+    return getExternalServiceType().constructExternalService(this, cc);
   }
   
   private static FormServiceCursor relation = null;
@@ -288,8 +300,8 @@ public final class FormServiceCursor extends StaticAssociationBase {
 
     FormServiceCursor c = cc.getDatastore().createEntityUsingRelation(relation, cc.getCurrentUser());
 
-    c.setDomAuri(form.getEntityKey().getKey());
-    c.setSubAuri(service.getUri());
+    c.setUriMd5FormId(form.getEntityKey().getKey());
+    c.setAuriService(service.getUri());
     c.setFormId(form.getFormId());
     c.setServiceClassname(type);
 
@@ -297,12 +309,12 @@ public final class FormServiceCursor extends StaticAssociationBase {
   }
   
   public static final List<ExternalService> getExternalServicesForForm(Form form,
-      String baseWebServerUrl, CallingContext cc) throws ODKDatastoreException {
+      CallingContext cc) throws ODKDatastoreException {
     FormServiceCursor relation = createRelation(cc);
     Query query = cc.getDatastore().createQuery(relation, cc.getCurrentUser());
     // filter on the Form's Uri. We cannot filter on the FORM_ID since it is a
     // Text field in bigtable
-    query.addFilter(relation.domAuri, FilterOperation.EQUAL, form.getEntityKey().getKey());
+    query.addFilter(relation.uriMd5FormId, FilterOperation.EQUAL, form.getEntityKey().getKey());
     List<ExternalService> esList = new ArrayList<ExternalService>();
 
     List<? extends CommonFieldsBase> fscList = query.executeQuery(0);
@@ -310,7 +322,7 @@ public final class FormServiceCursor extends StaticAssociationBase {
       FormServiceCursor c = (FormServiceCursor) cb;
       ExternalService obj;
 
-      obj = c.getExternalServiceType().constructExternalService(c, baseWebServerUrl, cc);
+      obj = c.getExternalServiceType().constructExternalService(c, cc);
       esList.add(obj);
 
     }

@@ -29,6 +29,6 @@ import org.opendatakit.aggregate.externalservice.FormServiceCursor;
 public interface UploadSubmissions {
 
 	public void createFormUploadTask(FormServiceCursor fsc,
-			String baseServerWebUrl, CallingContext cc)
+			CallingContext cc)
 			throws ODKExternalServiceException;
 }

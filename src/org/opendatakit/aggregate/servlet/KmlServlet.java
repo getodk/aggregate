@@ -71,7 +71,7 @@ public class KmlServlet extends ServletUtilBase {
    */
   @Override
   public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-	CallingContext cc = ContextFactory.getCallingContext(getServletContext());
+	CallingContext cc = ContextFactory.getCallingContext(this, ADDR, req);
 
     // get parameter
     String formId = getParameter(req, ServletConsts.FORM_ID);
@@ -119,7 +119,7 @@ public class KmlServlet extends ServletUtilBase {
       r.persist(cc);
 
       KmlGenerator generator = (KmlGenerator) cc.getBean(BeanDefs.KML_BEAN);
-      generator.createKmlTask(form, r.getSubmissionKey(), 1L, getServerURL(req), cc);
+      generator.createKmlTask(form, r.getSubmissionKey(), 1L, cc);
 
     } catch (ODKFormNotFoundException e) {
       odkIdNotFoundError(resp);
@@ -130,7 +130,7 @@ public class KmlServlet extends ServletUtilBase {
       return;
     }
 
-    resp.sendRedirect(ResultServlet.ADDR);
+    resp.sendRedirect(cc.getWebApplicationURL(ResultServlet.ADDR));
 
   }
 }
