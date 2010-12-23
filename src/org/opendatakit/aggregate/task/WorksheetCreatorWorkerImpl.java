@@ -15,7 +15,6 @@
  */
 package org.opendatakit.aggregate.task;
 
-import java.security.interfaces.DSAKey;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
