@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.format.FormTableConsts;
@@ -61,10 +62,12 @@ public class FormHtmlTable {
   private static List<String> HEADERS_WO_BUTTONS = Arrays.asList(FormTableConsts.FT_HEADER_NAME,
       FormTableConsts.FT_HEADER_FORM_ID, FormTableConsts.FT_HEADER_USER);
  
-  private QueryFormList forms;
+  private final QueryFormList forms;
+  private final CallingContext cc;
 
-  public FormHtmlTable(QueryFormList formsToFormat)  {
+  public FormHtmlTable(QueryFormList formsToFormat, CallingContext cc)  {
     forms = formsToFormat;
+    this.cc = cc;
   }
 
   public int getNumberForms() {
@@ -117,24 +120,26 @@ public class FormHtmlTable {
     Map<String, String> properties = new HashMap<String, String>();
     properties.put(ServletConsts.FORM_ID, formId);
 
-    String resultButton = HtmlUtil.createHtmlButtonToGetServlet(FormSubmissionsServlet.ADDR,
+    String resultButton = HtmlUtil.createHtmlButtonToGetServlet(cc.getWebApplicationURL(FormSubmissionsServlet.ADDR),
         FormTableConsts.RESULTS_BUTTON_TXT, properties);
-    String csvButton = HtmlUtil.createHtmlButtonToGetServlet(CsvServlet.ADDR,
+    
+    String csvButton = HtmlUtil.createHtmlButtonToGetServlet(cc.getWebApplicationURL(CsvServlet.ADDR),
         FormTableConsts.CSV_BUTTON_TXT, properties);
-    String externalServiceButton = HtmlUtil.createHtmlButtonToGetServlet(
-        ExternalServiceServlet.ADDR, FormTableConsts.EXTERNAL_SERVICE_BUTTON_TXT, properties);
+    
+    String externalServiceButton = HtmlUtil.createHtmlButtonToGetServlet(cc.getWebApplicationURL(ExternalServiceServlet.ADDR),
+    		FormTableConsts.EXTERNAL_SERVICE_BUTTON_TXT, properties);
 
-    String kmlButton = HtmlUtil.createHtmlButtonToGetServlet(KmlSettingsServlet.ADDR,
+    String kmlButton = HtmlUtil.createHtmlButtonToGetServlet(cc.getWebApplicationURL(KmlSettingsServlet.ADDR),
         FormTableConsts.KML_BUTTON_TXT, properties);
 
-    String queryButton = HtmlUtil.createHtmlButtonToGetServlet(QueryServlet.ADDR, 
+    String queryButton = HtmlUtil.createHtmlButtonToGetServlet(cc.getWebApplicationURL(QueryServlet.ADDR), 
         FormTableConsts.QUERY_BUTTON_TXT, properties);
             
     
     Map<String, String> xmlProperties = new HashMap<String, String>();
     xmlProperties.put(ServletConsts.FORM_ID, formId);
     xmlProperties.put(ServletConsts.HUMAN_READABLE, BasicConsts.TRUE);
-    String xmlButton = HtmlUtil.createHtmlButtonToGetServlet(FormXmlServlet.ADDR,
+    String xmlButton = HtmlUtil.createHtmlButtonToGetServlet(cc.getWebApplicationURL(FormXmlServlet.WWW_ADDR),
         FormTableConsts.XML_BUTTON_TXT, xmlProperties);
 
     row.addFormattedValue(resultButton);

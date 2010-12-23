@@ -31,5 +31,5 @@ import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 public interface KmlGenerator {
 
 	public void createKmlTask(Form form, SubmissionKey persistentResultsKey,
-			long attemptCount, String baseServerWebUrl, CallingContext cc) throws ODKDatastoreException, ODKFormNotFoundException;
+			long attemptCount, CallingContext cc) throws ODKDatastoreException, ODKFormNotFoundException;
 }

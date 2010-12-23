@@ -55,7 +55,7 @@ public class CsvGeneratorTaskServlet extends ServletUtilBase {
   @Override
   public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
     // TODO: talk to MITCH about the fact the user will be incorrect
-	CallingContext cc = ContextFactory.getCallingContext(getServletContext());
+	CallingContext cc = ContextFactory.getCallingContext(this, ADDR, req);
 	cc.setAsDaemon(true);
 
     // get parameter
@@ -86,7 +86,7 @@ public class CsvGeneratorTaskServlet extends ServletUtilBase {
       return;
     }
     
-    CsvWorkerImpl impl = new CsvWorkerImpl(form, persistentResultsKey, attemptCount, getServerURL(req), cc);
+    CsvWorkerImpl impl = new CsvWorkerImpl(form, persistentResultsKey, attemptCount, cc);
     
     impl.generateCsv();
   }

@@ -15,6 +15,7 @@
  */
 package org.opendatakit.common.security.gae;
 
+import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.common.security.Realm;
 import org.opendatakit.common.security.User;
 import org.springframework.beans.factory.InitializingBean;
@@ -64,13 +65,13 @@ public class UserServiceImpl implements org.opendatakit.common.security.UserServ
 	}
 
 	@Override
-	public String createLoginURL(String destinationURL) {
-		return userService.createLoginURL(destinationURL);
+	public String createLoginURL() {
+		return userService.createLoginURL(ServletConsts.WEB_ROOT);
 	}
 
 	@Override
-	public String createLogoutURL(String destinationURL) {
-		return userService.createLogoutURL(destinationURL);
+	public String createLogoutURL() {
+		return userService.createLogoutURL(ServletConsts.WEB_ROOT);
 	}
 
 	@Override

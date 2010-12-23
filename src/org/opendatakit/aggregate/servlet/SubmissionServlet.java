@@ -83,10 +83,12 @@ public class SubmissionServlet extends ServletUtilBase {
    */
   @Override
   public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-    PrintWriter out = resp.getWriter();
+	CallingContext cc = ContextFactory.getCallingContext(this, ADDR, req);
 
-    beginBasicHtmlResponse(TITLE, resp, req, true); // header info
-    out.write(HtmlUtil.createFormBeginTag(ADDR, HtmlConsts.MULTIPART_FORM_DATA, HtmlConsts.POST));
+	PrintWriter out = resp.getWriter();
+
+    beginBasicHtmlResponse(TITLE, resp, true, cc); // header info
+    out.write(HtmlUtil.createFormBeginTag(cc.getWebApplicationURL(ADDR), HtmlConsts.MULTIPART_FORM_DATA, HtmlConsts.POST));
     out.write(XML_FILE_DESC + HtmlConsts.LINE_BREAK);
     out.write(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_FILE, ServletConsts.XML_SUBMISSION_FILE,
         null));
@@ -117,7 +119,7 @@ public class SubmissionServlet extends ServletUtilBase {
 
   @Override
   public void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-	CallingContext cc = ContextFactory.getCallingContext(getServletContext());
+	CallingContext cc = ContextFactory.getCallingContext(this, ADDR, req);
 
     resp.setContentType(HtmlConsts.RESP_TYPE_HTML);
 
@@ -127,7 +129,7 @@ public class SubmissionServlet extends ServletUtilBase {
         submissionParser = new SubmissionParser(new MultiPartFormData(req), cc);
       } else {
         // TODO: check that it is the proper types we can deal with
-        // XML received
+        // XML received, we hope...
         submissionParser = new SubmissionParser(req.getInputStream(), cc);
       }
 
@@ -141,13 +143,12 @@ public class SubmissionServlet extends ServletUtilBase {
       Submission submission = submissionParser.getSubmission();
 
       // send information to remote servers that need to be notified
-      List<ExternalService> tmp = FormServiceCursor.getExternalServicesForForm(form,
-          getServerURL(req), cc);
+      List<ExternalService> tmp = FormServiceCursor.getExternalServicesForForm(form, cc);
       UploadSubmissions uploadTask = (UploadSubmissions) cc.getBean(BeanDefs.UPLOAD_TASK_BEAN);
       try {
     	  cc.setAsDaemon(true);
 	      for (ExternalService rs : tmp) {
-	        uploadTask.createFormUploadTask(rs.getFormServiceCursor(), getServerURL(req), cc);
+	        uploadTask.createFormUploadTask(rs.getFormServiceCursor(), cc);
 	      }
       } finally {
     	  cc.setAsDaemon(false);

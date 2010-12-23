@@ -86,8 +86,8 @@ public class GoogleSpreadsheet extends AbstractExternalService implements Extern
   private List<GoogleSpreadsheetRepeatParameterTable> repeatElementTableIds;
   private final SpreadsheetService spreadsheetService;
 
-  private GoogleSpreadsheet(Form form, String webServerUrl, CallingContext cc) {
-    super(form, new LinkElementFormatter(webServerUrl, true, true, true), new BasicHeaderFormatter(true, true,
+  private GoogleSpreadsheet(Form form, CallingContext cc) {
+    super(form, new LinkElementFormatter(cc.getServerURL(), true, true, true), new BasicHeaderFormatter(true, true,
         true), cc);
     spreadsheetService = new SpreadsheetService(ServletConsts.APPLICATION_NAME);
     // TODO: REMOVE after bug is fixed
@@ -109,11 +109,11 @@ public class GoogleSpreadsheet extends AbstractExternalService implements Extern
     }
   }
 
-  public GoogleSpreadsheet(FormServiceCursor fsc, String webServerUrl, CallingContext cc)
+  public GoogleSpreadsheet(FormServiceCursor fsc, CallingContext cc)
       throws ODKEntityNotFoundException, ODKDatastoreException, ODKFormNotFoundException {
-    this(Form.retrieveForm(fsc.getFormId(), cc), webServerUrl, cc);
+    this(Form.retrieveForm(fsc.getFormId(), cc), cc);
     GoogleSpreadsheetParameterTable gp = GoogleSpreadsheetParameterTable.createRelation(cc);
-    objectEntity = cc.getDatastore().getEntity(gp, fsc.getServiceAuri(), cc.getCurrentUser());
+    objectEntity = cc.getDatastore().getEntity(gp, fsc.getAuriService(), cc.getCurrentUser());
     repeatElementTableIds = GoogleSpreadsheetRepeatParameterTable.getRepeatGroupAssociations(
         new EntityKey(gp, objectEntity.getUri()), cc);
     this.fsc = fsc;
@@ -121,9 +121,9 @@ public class GoogleSpreadsheet extends AbstractExternalService implements Extern
   }
 
   public GoogleSpreadsheet(Form form, String name, String spreadKey, OAuthToken authToken,
-      ExternalServiceOption externalServiceOption, String webServerUrl, CallingContext cc)
+      ExternalServiceOption externalServiceOption, CallingContext cc)
       throws ODKDatastoreException {
-    this(form, webServerUrl, cc);
+    this(form, cc);
     objectEntity = cc.getDatastore().createEntityUsingRelation(GoogleSpreadsheetParameterTable
         .createRelation(cc), cc.getCurrentUser());
     fsc = FormServiceCursor.createFormServiceCursor(form, ExternalServiceType.GOOGLE_SPREADSHEET,
@@ -257,7 +257,7 @@ public class GoogleSpreadsheet extends AbstractExternalService implements Extern
       // entry is not actually persisted here
       GoogleSpreadsheetRepeatParameterTable t = ds.createEntityUsingRelation(repeatPrototype,
           user);
-      t.setDomAuri(objectEntity.getUri());
+      t.setUriGoogleSpreadsheet(objectEntity.getUri());
       t.setFormElementKey(repeatGroupElement.constructFormElementKey(form));
       t.setWorksheetId(extractWorksheetId(repeatWorksheet));
       repeatElementTableIds.add(t);
@@ -398,7 +398,7 @@ public class GoogleSpreadsheet extends AbstractExternalService implements Extern
   }
 
   public static GoogleSpreadsheet createSpreadsheet(Form form, OAuthToken authToken,
-      String spreadsheetName, ExternalServiceOption externalServiceOption, String webServerUrl, 
+      String spreadsheetName, ExternalServiceOption externalServiceOption, 
       CallingContext cc) throws ODKDatastoreException, ODKExternalServiceException {
 
     // setup service
@@ -411,7 +411,7 @@ public class GoogleSpreadsheet extends AbstractExternalService implements Extern
       oauthParameters.setOAuthTokenSecret(authToken.getTokenSecret());
       service.setOAuthCredentials(oauthParameters, new OAuthHmacSha1Signer());
     } catch (OAuthException e) {
-      // TODO
+      // TODO: handle OAuth failure
       e.printStackTrace();
     }
 
@@ -437,7 +437,7 @@ public class GoogleSpreadsheet extends AbstractExternalService implements Extern
     String spreadKey = updatedEntry.getDocId();
 
     return new GoogleSpreadsheet(form, spreadsheetName, spreadKey, authToken,
-        externalServiceOption, webServerUrl, cc);
+        externalServiceOption, cc);
   }
 
   @Override

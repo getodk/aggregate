@@ -113,7 +113,7 @@ public class FormDefinition {
 		FormDataModel d;
 		
 		if ( topLevel == null || 
-			 ((form != fdm) && !( topLevel instanceof TopLevelDynamicBase )) ) {
+			 !( topLevel instanceof TopLevelDynamicBase ) ) {
 			throw new IllegalStateException("topLevel entity must be present and a TopLevelDynamicBase!");
 		}
 		// we are making use of the fact that the PK in the 
@@ -129,8 +129,8 @@ public class FormDefinition {
 		// reset the PK to be the PK of the table we are representing
 		d.setStringField(fdm.primaryKey, form.getUri());
 		d.setLongField(fdm.ordinalNumber, ordinal);
-		d.setStringField(fdm.parentAuri, parentURI);
-		d.setStringField(fdm.topLevelAuri, topLevel.getUri());
+		d.setStringField(fdm.parentUriFormDataModel, parentURI);
+		d.setStringField(fdm.uriSubmissionDataModel, topLevel.getUri());
 		d.setStringField(fdm.elementName, form.getTableName());
 		d.setStringField(fdm.elementType,
 				(parent == topLevel) ?
@@ -153,8 +153,8 @@ public class FormDefinition {
 			list.add(d);
 			d.setStringField(fdm.primaryKey, form.getUri() + "-" + Long.toString(l));
 			d.setLongField(fdm.ordinalNumber, l);
-			d.setStringField(fdm.parentAuri, form.getUri());
-			d.setStringField(fdm.topLevelAuri, k.getKey());
+			d.setStringField(fdm.parentUriFormDataModel, form.getUri());
+			d.setStringField(fdm.uriSubmissionDataModel, k.getKey());
 			d.setStringField(fdm.elementName, f.getName());
 			switch ( f.getDataType() ) {
 			case STRING:
@@ -217,8 +217,8 @@ public class FormDefinition {
 		list.add(d);
 		final String bcURI = d.getUri();
 		d.setLongField(fdm.ordinalNumber, ordinal);
-		d.setStringField(fdm.parentAuri, parentURI);
-		d.setStringField(fdm.topLevelAuri, topLevelURI);
+		d.setStringField(fdm.parentUriFormDataModel, parentURI);
+		d.setStringField(fdm.uriSubmissionDataModel, topLevelURI);
 		d.setStringField(fdm.elementName, binaryContentElementName);
 		d.setStringField(fdm.elementType, FormDataModel.ElementType.BINARY.toString());
 		d.setStringField(fdm.persistAsColumn, null);
@@ -231,8 +231,8 @@ public class FormDefinition {
 		list.add(d);
 		final String vbcURI = d.getUri();
 		d.setLongField(fdm.ordinalNumber, 1L);
-		d.setStringField(fdm.parentAuri, bcURI);
-		d.setStringField(fdm.topLevelAuri, topLevelURI);
+		d.setStringField(fdm.parentUriFormDataModel, bcURI);
+		d.setStringField(fdm.uriSubmissionDataModel, topLevelURI);
 		d.setStringField(fdm.elementName, binaryContentElementName);
 		d.setStringField(fdm.elementType, FormDataModel.ElementType.VERSIONED_BINARY.toString());
 		d.setStringField(fdm.persistAsColumn, null);
@@ -245,8 +245,8 @@ public class FormDefinition {
 		list.add(d);
 		final String bcbURI = d.getUri();
 		d.setLongField(fdm.ordinalNumber, 1L);
-		d.setStringField(fdm.parentAuri, vbcURI);
-		d.setStringField(fdm.topLevelAuri, topLevelURI);
+		d.setStringField(fdm.parentUriFormDataModel, vbcURI);
+		d.setStringField(fdm.uriSubmissionDataModel, topLevelURI);
 		d.setStringField(fdm.elementName, binaryContentElementName);
 		d.setStringField(fdm.elementType, FormDataModel.ElementType.VERSIONED_BINARY_CONTENT_REF_BLOB.toString());
 		d.setStringField(fdm.persistAsColumn, null);
@@ -258,8 +258,8 @@ public class FormDefinition {
 		d.setStringField(fdm.primaryKey, refBlobUri);
 		list.add(d);
 		d.setLongField(fdm.ordinalNumber, 1L);
-		d.setStringField(fdm.parentAuri, bcbURI);
-		d.setStringField(fdm.topLevelAuri, topLevelURI);
+		d.setStringField(fdm.parentUriFormDataModel, bcbURI);
+		d.setStringField(fdm.uriSubmissionDataModel, topLevelURI);
 		d.setStringField(fdm.elementName, binaryContentElementName);
 		d.setStringField(fdm.elementType, FormDataModel.ElementType.REF_BLOB.toString());
 		d.setStringField(fdm.persistAsColumn, null);
@@ -292,8 +292,8 @@ public class FormDefinition {
 		list.add(d);
 		final String lst = d.getUri();
 		d.setLongField(fdm.ordinalNumber, ordinal);
-		d.setStringField(fdm.parentAuri, topLevelURI);
-		d.setStringField(fdm.topLevelAuri, topLevelURI);
+		d.setStringField(fdm.parentUriFormDataModel, topLevelURI);
+		d.setStringField(fdm.uriSubmissionDataModel, topLevelURI);
 		d.setStringField(fdm.elementName, null);
 		d.setStringField(fdm.elementType, FormDataModel.ElementType.LONG_STRING_REF_TEXT.toString());
 		d.setStringField(fdm.persistAsColumn, null);
@@ -305,8 +305,8 @@ public class FormDefinition {
 		d.setStringField(fdm.primaryKey, refTextUri);
 		list.add(d);
 		d.setLongField(fdm.ordinalNumber, 1L);
-		d.setStringField(fdm.parentAuri, lst);
-		d.setStringField(fdm.topLevelAuri, topLevelURI);
+		d.setStringField(fdm.parentUriFormDataModel, lst);
+		d.setStringField(fdm.uriSubmissionDataModel, topLevelURI);
 		d.setStringField(fdm.elementName, null);
 		d.setStringField(fdm.elementType, FormDataModel.ElementType.REF_TEXT.toString());
 		d.setStringField(fdm.persistAsColumn, null);
@@ -330,15 +330,15 @@ public class FormDefinition {
 		}
 		
 		// and if the model is all stored, then...
-		String definitionUri = model.get(0).getTopLevelAuri();
+		String definitionUri = model.get(0).getUriSubmissionDataModel();
 		String formUri = CommonFieldsBase.newMD5HashUri(p.formId);
 		
 		SubmissionAssociationTable saRelation = SubmissionAssociationTable.createRelation(cc);
 		SubmissionAssociationTable sa = ds.createEntityUsingRelation(saRelation, user);
 		
 		sa.setStringField(saRelation.primaryKey, definitionUri );
-		sa.setDomAuri(formUri); // md5 of submissionFormId
-		sa.setSubAuri(formUri); // md5 of rootElementFormId
+		sa.setUriMd5SubmissionFormId(formUri); // md5 of submissionFormId
+		sa.setUriMd5FormId(formUri); // md5 of rootElementFormId
 		sa.setSubmissionFormId(p.formId);
 		sa.setSubmissionModelVersion(p.modelVersion);
 		sa.setSubmissionUiVersion(p.uiVersion);
@@ -457,15 +457,15 @@ public class FormDefinition {
 				    SubmissionAssociationTable saRelation = SubmissionAssociationTable.createRelation(cc);
 				    String submissionFormIdUri = CommonFieldsBase.newMD5HashUri(p.formId); // key under which submission is located...
 				    Query q = ds.createQuery(saRelation, user);
-				    q.addFilter( saRelation.domAuri, Query.FilterOperation.EQUAL, submissionFormIdUri);
+				    q.addFilter( saRelation.uriMd5SubmissionFormId, Query.FilterOperation.EQUAL, submissionFormIdUri);
 				    List<? extends CommonFieldsBase> l = q.executeQuery(0);
 				    SubmissionAssociationTable sa = null;
-				    String fdmSubmissionUri = CommonFieldsBase.newUri();
+				    String thisUriSubmissionDataModel = CommonFieldsBase.newUri();
 				    for ( CommonFieldsBase b : l ) {
 				    	SubmissionAssociationTable t = (SubmissionAssociationTable) b;
 				    	if ( t.getXFormParameters().equals(p) ) {
 				    		sa = t;
-				    		fdmSubmissionUri = sa.getUriSubmissionDataModel();
+				    		thisUriSubmissionDataModel = sa.getUriSubmissionDataModel();
 				    		break;
 				    	}
 				    }
@@ -473,7 +473,7 @@ public class FormDefinition {
 				    // OK.  Found an sa record -- use it to find the fdm entries...
 				    FormDataModel fdm = FormDataModel.createRelation(cc);
 					Query query = ds.createQuery(fdm, user);
-					query.addFilter(fdm.topLevelAuri, FilterOperation.EQUAL, fdmSubmissionUri);
+					query.addFilter(fdm.uriSubmissionDataModel, FilterOperation.EQUAL, thisUriSubmissionDataModel);
 					fdmList = query.executeQuery(0);
 				} catch (ODKDatastoreException e) {
 					return null;
@@ -589,7 +589,7 @@ public class FormDefinition {
 		// key into the form_info table...
 		int nullParentCount = 0;
 		for ( FormDataModel m : uriMap.values() ) {
-			String uriParent = m.getParentAuri();
+			String uriParent = m.getParentUriFormDataModel();
 			if ( uriParent == null ) {
 				throw new IllegalStateException("Every record in FormDataModel should have a parent key");
 			}
@@ -918,10 +918,6 @@ public class FormDefinition {
 		return xformParameters.uiVersion;
 	}
 	
-	public String getTopLevelAuri() {
-		return topLevelGroup.getTopLevelAuri();
-	}
-	
 	public void tagLongStringElements(List<?> fdmsWithLongStrings) {
 		for ( Object o : fdmsWithLongStrings ) {
 			String uri = (String) o;
@@ -937,7 +933,6 @@ public class FormDefinition {
 			CallingContext cc) throws ODKEntityPersistException {
 		
 		long textLimit = refTextTable.value.getMaxCharLen();
-		// TODO: create the parts...
 		Datastore ds = cc.getDatastore();
 		User user = cc.getCurrentUser();
 		long i = 1;

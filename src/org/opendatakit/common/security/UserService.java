@@ -23,9 +23,9 @@ package org.opendatakit.common.security;
  */
 public interface UserService {
   
-  public String createLoginURL(String destinationURL);
+  public String createLoginURL();
   
-  public String createLogoutURL(String destinationURL);
+  public String createLogoutURL();
   
   public Realm getCurrentRealm();
   

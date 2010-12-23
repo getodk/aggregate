@@ -335,7 +335,7 @@ public class FormParserForJavaRosa {
     SubmissionAssociationTable saRelation = SubmissionAssociationTable.createRelation(cc);
     String submissionFormIdUri = CommonFieldsBase.newMD5HashUri(submissionElementDefn.formId); // key under which submission is located...
     Query q = ds.createQuery(saRelation, user);
-    q.addFilter( saRelation.domAuri, Query.FilterOperation.EQUAL, submissionFormIdUri);
+    q.addFilter( saRelation.uriMd5SubmissionFormId, Query.FilterOperation.EQUAL, submissionFormIdUri);
     List<? extends CommonFieldsBase> l = q.executeQuery(0);
     SubmissionAssociationTable sa = null;
     fdmSubmissionUri = CommonFieldsBase.newUri();
@@ -356,8 +356,8 @@ public class FormParserForJavaRosa {
 	    sa.setIsPersistenceModelComplete(false);
 	    sa.setIsSubmissionAllowed(false);
 	    sa.setUriSubmissionDataModel(fdmSubmissionUri);
-	    sa.setDomAuri(submissionFormIdUri);
-	    sa.setSubAuri(formInfo.getKey().getKey());
+	    sa.setUriMd5SubmissionFormId(submissionFormIdUri);
+	    sa.setUriMd5FormId(formInfo.getKey().getKey());
 	    ds.putEntity(sa, user);
     } else {
     	// the entry already exists...
@@ -403,8 +403,8 @@ public class FormParserForJavaRosa {
 	    fdmList.add(d);
 	    final String lstURI = d.getUri();
 	    d.setOrdinalNumber(2L);
-	    d.setTopLevelAuri(k.getKey());
-	    d.setParentAuri(k.getKey());
+	    d.setUriSubmissionDataModel(k.getKey());
+	    d.setParentUriFormDataModel(k.getKey());
 	    d.setStringField(fdm.elementName, null);
 	    d.setStringField(fdm.elementType, FormDataModel.ElementType.LONG_STRING_REF_TEXT.toString());
 	    d.setStringField(fdm.persistAsColumn, null);
@@ -417,8 +417,8 @@ public class FormParserForJavaRosa {
 	    setPrimaryKey( d, fdmSubmissionUri, AuxType.REF_TEXT );
 	    fdmList.add(d);
 	    d.setOrdinalNumber(1L);
-	    d.setTopLevelAuri(k.getKey());
-	    d.setParentAuri(lstURI);
+	    d.setUriSubmissionDataModel(k.getKey());
+	    d.setParentUriFormDataModel(lstURI);
 	    d.setStringField(fdm.elementName, null);
 	    d.setStringField(fdm.elementType, FormDataModel.ElementType.REF_TEXT.toString());
 	    d.setStringField(fdm.persistAsColumn, null);
@@ -734,8 +734,8 @@ public class FormParserForJavaRosa {
     fdmList.add(d);
     d.setStringField(fdmRelation.primaryKey, phantomURI);
     d.setOrdinalNumber(firstToMove.getOrdinalNumber());
-    d.setTopLevelAuri(fdmSubmissionUri);
-    d.setParentAuri(parentTable.getUri());
+    d.setUriSubmissionDataModel(fdmSubmissionUri);
+    d.setParentUriFormDataModel(parentTable.getUri());
     d.setStringField(fdmRelation.elementName, null);
     d.setStringField(fdmRelation.elementType, FormDataModel.ElementType.PHANTOM.toString());
     d.setStringField(fdmRelation.persistAsColumn, null);
@@ -746,7 +746,7 @@ public class FormParserForJavaRosa {
     long ordinalNumber = 0L;
     for ( ; idxStart < children.size() ; ++ idxStart ) {
     	FormDataModel m = children.get(idxStart);
-        m.setParentAuri(phantomURI);
+        m.setParentUriFormDataModel(phantomURI);
         m.setOrdinalNumber(++ordinalNumber);
     	recursivelyReassignChildren(m, tbl, newPhantomTableName);
     }
@@ -947,8 +947,8 @@ public class FormParserForJavaRosa {
     dmList.add(d);
     final String groupURI = d.getUri();
     d.setOrdinalNumber(Long.valueOf(ordinal));
-    d.setTopLevelAuri(k.getKey());
-    d.setParentAuri(parent);
+    d.setUriSubmissionDataModel(k.getKey());
+    d.setParentUriFormDataModel(parent);
     d.setStringField(fdm.elementName, treeElement.getName());
     d.setStringField(fdm.elementType, et.toString());
     d.setStringField(fdm.persistAsColumn, persistAsColumn);
@@ -969,8 +969,8 @@ public class FormParserForJavaRosa {
       dmList.add(d);
       final String vbnURI = d.getUri();
       d.setOrdinalNumber(1L);
-      d.setTopLevelAuri(k.getKey());
-      d.setParentAuri(groupURI);
+      d.setUriSubmissionDataModel(k.getKey());
+      d.setParentUriFormDataModel(groupURI);
       d.setStringField(fdm.elementName, treeElement.getName());
       d.setStringField(fdm.elementType, FormDataModel.ElementType.VERSIONED_BINARY.toString());
       d.setStringField(fdm.persistAsColumn, null);
@@ -986,8 +986,8 @@ public class FormParserForJavaRosa {
 	  dmList.add(d);
       final String bcbURI = d.getUri();
       d.setOrdinalNumber(1L);
-      d.setTopLevelAuri(k.getKey());
-      d.setParentAuri(vbnURI);
+      d.setUriSubmissionDataModel(k.getKey());
+      d.setParentUriFormDataModel(vbnURI);
       d.setStringField(fdm.elementName, treeElement.getName());
       d.setStringField(fdm.elementType, FormDataModel.ElementType.VERSIONED_BINARY_CONTENT_REF_BLOB
           .toString());
@@ -1003,8 +1003,8 @@ public class FormParserForJavaRosa {
 	  setPrimaryKey( d, fdmSubmissionUri, AuxType.REF_BLOB );
 	  dmList.add(d);
       d.setOrdinalNumber(1L);
-      d.setTopLevelAuri(k.getKey());
-      d.setParentAuri(bcbURI);
+      d.setUriSubmissionDataModel(k.getKey());
+      d.setParentUriFormDataModel(bcbURI);
       d.setStringField(fdm.elementName, treeElement.getName());
       d.setStringField(fdm.elementType, FormDataModel.ElementType.REF_BLOB.toString());
       d.setStringField(fdm.persistAsColumn, null);
@@ -1026,8 +1026,8 @@ public class FormParserForJavaRosa {
 	  setPrimaryKey( d, fdmSubmissionUri, AuxType.GEO_LAT );
       dmList.add(d);
       d.setOrdinalNumber(Long.valueOf(FormDataModel.GEOPOINT_LATITUDE_ORDINAL_NUMBER));
-      d.setTopLevelAuri(k.getKey());
-      d.setParentAuri(groupURI);
+      d.setUriSubmissionDataModel(k.getKey());
+      d.setParentUriFormDataModel(groupURI);
       d.setStringField(fdm.elementName, treeElement.getName());
       d.setStringField(fdm.elementType, FormDataModel.ElementType.DECIMAL.toString());
       d.setStringField(fdm.persistAsColumn, persistAsColumn);
@@ -1041,8 +1041,8 @@ public class FormParserForJavaRosa {
 	  setPrimaryKey( d, fdmSubmissionUri, AuxType.GEO_LNG );
       dmList.add(d);
       d.setOrdinalNumber(Long.valueOf(FormDataModel.GEOPOINT_LONGITUDE_ORDINAL_NUMBER));
-      d.setTopLevelAuri(k.getKey());
-      d.setParentAuri(groupURI);
+      d.setUriSubmissionDataModel(k.getKey());
+      d.setParentUriFormDataModel(groupURI);
       d.setStringField(fdm.elementName, treeElement.getName());
       d.setStringField(fdm.elementType, FormDataModel.ElementType.DECIMAL.toString());
       d.setStringField(fdm.persistAsColumn, persistAsColumn);
@@ -1056,8 +1056,8 @@ public class FormParserForJavaRosa {
 	  setPrimaryKey( d, fdmSubmissionUri, AuxType.GEO_ALT );
       dmList.add(d);
       d.setOrdinalNumber(Long.valueOf(FormDataModel.GEOPOINT_ALTITUDE_ORDINAL_NUMBER));
-      d.setTopLevelAuri(k.getKey());
-      d.setParentAuri(groupURI);
+      d.setUriSubmissionDataModel(k.getKey());
+      d.setParentUriFormDataModel(groupURI);
       d.setStringField(fdm.elementName, treeElement.getName());
       d.setStringField(fdm.elementType, FormDataModel.ElementType.DECIMAL.toString());
       d.setStringField(fdm.persistAsColumn, persistAsColumn);
@@ -1071,8 +1071,8 @@ public class FormParserForJavaRosa {
 	  setPrimaryKey( d, fdmSubmissionUri, AuxType.GEO_ACC );
       dmList.add(d);
       d.setOrdinalNumber(Long.valueOf(FormDataModel.GEOPOINT_ACCURACY_ORDINAL_NUMBER));
-      d.setTopLevelAuri(k.getKey());
-      d.setParentAuri(groupURI);
+      d.setUriSubmissionDataModel(k.getKey());
+      d.setParentUriFormDataModel(groupURI);
       d.setStringField(fdm.elementName, treeElement.getName());
       d.setStringField(fdm.elementType, FormDataModel.ElementType.DECIMAL.toString());
       d.setStringField(fdm.persistAsColumn, persistAsColumn);

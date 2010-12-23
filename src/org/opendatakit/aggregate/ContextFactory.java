@@ -18,13 +18,15 @@
 package org.opendatakit.aggregate;
 
 import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
 
 import org.opendatakit.aggregate.constants.BeanDefs;
+import org.opendatakit.common.constants.BasicConsts;
+import org.opendatakit.common.constants.HtmlConsts;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.security.UserService;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
 /**
@@ -36,31 +38,40 @@ import org.springframework.web.context.support.WebApplicationContextUtils;
  */
 public class ContextFactory {
   
-    private static final String APP_CONTEXT_PATH = "odk-settings.xml";
   
     /**
      * Singleton of the application context
      */
-    private static final ApplicationContext applicationContext = new ClassPathXmlApplicationContext(APP_CONTEXT_PATH);
+    // TODO: write a CallingContextImpl that uses a standalone applicationContext for unit testing.
+	//
+    // private static final String APP_CONTEXT_PATH = "odk-settings.xml";
+    // private static final ApplicationContext applicationContext = new ClassPathXmlApplicationContext(APP_CONTEXT_PATH);
 
     public static final class CallingContextImpl implements CallingContext {
+    	final String serverUrl;
+    	final String webApplicationBase;
     	final ServletContext ctxt;
     	final Datastore datastore;
     	final UserService userService;
     	boolean asDaemon = false;
     	
-    	CallingContextImpl(ServletContext ctxt) {
-    		this.ctxt = ctxt;
+    	CallingContextImpl(HttpServlet servlet, String unrootedPath, HttpServletRequest req) {
+    		// for now, only store the servlet context and the serverUrl
+    		ctxt = servlet.getServletContext();
+    		String path = ctxt.getContextPath();
+    	    if (req.getServerPort() != HtmlConsts.WEB_PORT) {
+    	    	serverUrl = req.getServerName() + BasicConsts.COLON + 
+    	    		Integer.toString(req.getServerPort()) + path;
+    	    } else {
+    	    	serverUrl = req.getServerName() + path;
+    	    }
+    	    webApplicationBase = path;
     		this.datastore = (Datastore) getBean(BeanDefs.DATASTORE_BEAN);
     		this.userService = (UserService) getBean(BeanDefs.USER_BEAN);
     	}
     	
     	public Object getBean(String beanName) {
-    		if ( ctxt == null ) {
-    			return applicationContext.getBean(beanName);
-    		} else {
-    			return WebApplicationContextUtils.getRequiredWebApplicationContext(ctxt).getBean(beanName);
-    		}
+			return WebApplicationContextUtils.getRequiredWebApplicationContext(ctxt).getBean(beanName);
     	}
     	
     	public Datastore getDatastore() {
@@ -69,6 +80,18 @@ public class ContextFactory {
     	
     	public UserService getUserService() {
     		return userService;
+    	}
+    	
+    	public String getWebApplicationURL() {
+    		return webApplicationBase + BasicConsts.FORWARDSLASH;
+    	}
+    	
+    	public String getWebApplicationURL(String servletAddr) {
+    		return webApplicationBase + BasicConsts.FORWARDSLASH + servletAddr;
+    	}
+    	
+    	public String getServerURL() {
+    		return serverUrl;
     	}
     	
     	public void setAsDaemon(boolean asDaemon ) {
@@ -89,17 +112,7 @@ public class ContextFactory {
      */
     private ContextFactory() {}
     
-    /**
-     * For unit testing only...
-     * 
-     * @param beanName
-     * @return
-     */
-    public static Object getbean(String beanName) {
-    	return applicationContext.getBean(beanName);
-    }
-    
-    public static CallingContext getCallingContext(ServletContext ctxt) {
-    	return new CallingContextImpl(ctxt);
+    public static CallingContext getCallingContext(HttpServlet servlet, String unrootedPath, HttpServletRequest req) {
+    	return new CallingContextImpl(servlet, unrootedPath, req);
     }
 }

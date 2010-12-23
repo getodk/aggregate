@@ -97,10 +97,12 @@ public class FormUploadServlet extends ServletUtilBase {
   @Override
   public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 
-    PrintWriter out = resp.getWriter();
+	CallingContext cc = ContextFactory.getCallingContext(this, ADDR, req);
 
-    beginBasicHtmlResponse(TITLE_INFO, resp, req, true); // header info
-    out.write(HtmlUtil.createFormBeginTag(ADDR, HtmlConsts.MULTIPART_FORM_DATA, HtmlConsts.POST));
+	PrintWriter out = resp.getWriter();
+
+    beginBasicHtmlResponse(TITLE_INFO, resp, true, cc); // header info
+    out.write(HtmlUtil.createFormBeginTag(cc.getWebApplicationURL(ADDR), HtmlConsts.MULTIPART_FORM_DATA, HtmlConsts.POST));
     out.write(LOCATION_OF_XFORM_DEFINITION + HtmlConsts.LINE_BREAK);
     out.write(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_FILE, ServletConsts.FORM_DEF_PRAM, null));
     out.write(HtmlConsts.LINE_BREAK + HtmlConsts.LINE_BREAK);
@@ -129,7 +131,7 @@ public class FormUploadServlet extends ServletUtilBase {
    */
   @Override
   public void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-	CallingContext cc = ContextFactory.getCallingContext(getServletContext());
+	CallingContext cc = ContextFactory.getCallingContext(this, ADDR, req);
 
 	User user = cc.getCurrentUser();
     if (user instanceof org.opendatakit.common.security.gae.UserImpl) {
@@ -202,7 +204,7 @@ public class FormUploadServlet extends ServletUtilBase {
       } catch (ODKIncompleteSubmissionData e) {
         switch (e.getReason()) {
         case TITLE_MISSING:
-          createTitleQuestionWebpage(req, resp, inputXml, xmlFileName);
+          createTitleQuestionWebpage(resp, inputXml, xmlFileName, cc);
           return;
         case ID_MALFORMED:
           resp.sendError(HttpServletResponse.SC_BAD_REQUEST, ErrorConsts.JAVA_ROSA_PARSING_PROBLEM
@@ -254,15 +256,15 @@ public class FormUploadServlet extends ServletUtilBase {
     }
 
     if (bOk)
-      resp.sendRedirect(FormsServlet.ADDR);
+      resp.sendRedirect(cc.getWebApplicationURL(FormsServlet.ADDR));
   }
 
-  private void createTitleQuestionWebpage(HttpServletRequest req, HttpServletResponse resp,
-      String formXml, String xmlFileName) throws IOException {
-    beginBasicHtmlResponse(OBTAIN_TITLE_INFO, resp, req, true); // header info
+  private void createTitleQuestionWebpage(HttpServletResponse resp,
+      String formXml, String xmlFileName, CallingContext cc) throws IOException {
+    beginBasicHtmlResponse(OBTAIN_TITLE_INFO, resp, true, cc); // header info
 
     PrintWriter out = resp.getWriter();
-    out.write(HtmlUtil.createFormBeginTag(FormUploadServlet.ADDR, HtmlConsts.MULTIPART_FORM_DATA,
+    out.write(HtmlUtil.createFormBeginTag(cc.getWebApplicationURL(FormUploadServlet.ADDR), HtmlConsts.MULTIPART_FORM_DATA,
         HtmlConsts.POST));
     out.write(TITLE_OF_THE_XFORM + HtmlConsts.LINE_BREAK);
     out.write(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_TEXT, ServletConsts.FORM_NAME_PRAM, null));

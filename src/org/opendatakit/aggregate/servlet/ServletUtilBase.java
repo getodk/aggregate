@@ -24,7 +24,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.opendatakit.aggregate.ContextFactory;
+import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.constants.ErrorConsts;
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.ServletConsts;
@@ -53,13 +53,13 @@ public class ServletUtilBase extends CommonServletBase {
   }
 
   @Override
-  protected void emitPageHeader(PrintWriter out, HttpServletRequest req, boolean displayLinks) {
+  protected void emitPageHeader(PrintWriter out, boolean displayLinks, CallingContext cc) {
     if (displayLinks) {
-      out.write(generateNavigationInfo(req));
+      out.write(generateNavigationInfo(cc));
       out.write(HtmlConsts.TAB + HtmlConsts.TAB);
 
-      UserService userService = ContextFactory.getCallingContext(getServletContext()).getUserService();
-      out.write(HtmlUtil.createHref(appBasePath(req) + userService.createLogoutURL(ServletConsts.WEB_ROOT), LOGOUT
+      UserService userService = cc.getUserService();
+      out.write(HtmlUtil.createHref(cc.getWebApplicationURL(userService.createLogoutURL()), LOGOUT
           + userService.getCurrentUser().getNickname()));
       out.write(HtmlConsts.TAB + "<FONT SIZE=1>" + ServletConsts.VERSION + "</FONT>");
     }
@@ -119,21 +119,21 @@ public class ServletUtilBase extends CommonServletBase {
    * 
    * @return a string with href links
    */
-  public final String generateNavigationInfo(HttpServletRequest req) {
+  public final String generateNavigationInfo(CallingContext cc) {
     StringBuilder html = new StringBuilder();
-    html.append(HtmlUtil.createHref(appBasePath(req) + FormsServlet.ADDR, ServletConsts.FORMS_LINK_TEXT));
+    html.append(HtmlUtil.createHref(cc.getWebApplicationURL(FormsServlet.ADDR), ServletConsts.FORMS_LINK_TEXT));
     html.append(HtmlConsts.TAB + HtmlConsts.TAB);
-    html.append(HtmlUtil.createHref(appBasePath(req) + ResultServlet.ADDR, ServletConsts.RESULT_FILES_LINK_TEXT));
+    html.append(HtmlUtil.createHref(cc.getWebApplicationURL(ResultServlet.ADDR), ServletConsts.RESULT_FILES_LINK_TEXT));
     html.append(HtmlConsts.TAB + HtmlConsts.TAB);
-    html.append(HtmlUtil.createHref(appBasePath(req) + ExternalServicesListServlet.ADDR, ServletConsts.EXTERNAL_SERVICES_LINK_TEXT));
+    html.append(HtmlUtil.createHref(cc.getWebApplicationURL(ExternalServicesListServlet.ADDR), ServletConsts.EXTERNAL_SERVICES_LINK_TEXT));
     html.append(HtmlConsts.TAB + HtmlConsts.TAB);
-    html.append(HtmlUtil.createHref(appBasePath(req) + UploadAppletServlet.ADDR, ServletConsts.UPLOAD_APPLET_LINK_TEXT));
+    html.append(HtmlUtil.createHref(cc.getWebApplicationURL(UploadAppletServlet.ADDR), ServletConsts.UPLOAD_APPLET_LINK_TEXT));
     html.append(HtmlConsts.TAB + HtmlConsts.TAB);
-    html.append(HtmlUtil.createHref(appBasePath(req) + FormUploadServlet.ADDR, ServletConsts.UPLOAD_FORM_LINK_TEXT));
+    html.append(HtmlUtil.createHref(cc.getWebApplicationURL(FormUploadServlet.ADDR), ServletConsts.UPLOAD_FORM_LINK_TEXT));
     html.append(HtmlConsts.TAB + HtmlConsts.TAB);
-    html.append(HtmlUtil.createHref(appBasePath(req) + FormDeleteServlet.ADDR, ServletConsts.DELETE_FORM_LINK_TEXT));
+    html.append(HtmlUtil.createHref(cc.getWebApplicationURL(FormDeleteServlet.ADDR), ServletConsts.DELETE_FORM_LINK_TEXT));
     html.append(HtmlConsts.TAB + HtmlConsts.TAB);
-    html.append(HtmlUtil.createHref(appBasePath(req) + SubmissionServlet.ADDR, ServletConsts.UPLOAD_SUB_LINK_TEXT));
+    html.append(HtmlUtil.createHref(cc.getWebApplicationURL(SubmissionServlet.ADDR), ServletConsts.UPLOAD_SUB_LINK_TEXT));
     return html.toString();
   }
 

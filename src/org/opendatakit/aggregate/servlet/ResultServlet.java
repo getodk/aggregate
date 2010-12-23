@@ -74,7 +74,7 @@ public class ResultServlet extends ServletUtilBase {
   @Override
   public void doGet(HttpServletRequest req, HttpServletResponse resp)
         throws IOException {
-	CallingContext cc = ContextFactory.getCallingContext(getServletContext());
+	CallingContext cc = ContextFactory.getCallingContext(this, ADDR, req);
 	 
 	// get parameter
 	String formId = PersistentResults.FORM_ID_PERSISTENT_RESULT;
@@ -83,7 +83,7 @@ public class ResultServlet extends ServletUtilBase {
 	  Form form = Form.retrieveForm(formId, cc);
 
       // header info
-      beginBasicHtmlResponse(TITLE_INFO, resp, req, true);
+      beginBasicHtmlResponse(TITLE_INFO, resp, true, cc);
       PrintWriter out = resp.getWriter();
 
       QueryByDate query = new QueryByDate(form, new Date(), true,
@@ -107,7 +107,7 @@ public class ResultServlet extends ServletUtilBase {
       headers.add("Time of last retry");
       headers.add("Time Completed");
       headers.add("Result File");
-      ElementFormatter elemFormatter = new HtmlLinkElementFormatter(getServerURL(req), true, true, true, true);
+      ElementFormatter elemFormatter = new HtmlLinkElementFormatter(cc.getServerURL(), true, true, true, true);
       
       // format row elements 
       for (SubmissionSet sub : submissions) {
@@ -120,7 +120,7 @@ public class ResultServlet extends ServletUtilBase {
       out.print(HtmlConsts.LINE_BREAK);
       out.print(HtmlConsts.LINE_BREAK);
       
-      out.print(HtmlUtil.createFormBeginTag(ADDR, null, HtmlConsts.GET));
+      out.print(HtmlUtil.createFormBeginTag(cc.getWebApplicationURL(ADDR), null, HtmlConsts.GET));
       out.print(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_SUBMIT, null, "Refresh"));
       out.print(HtmlConsts.FORM_CLOSE);
 

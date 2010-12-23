@@ -58,7 +58,7 @@ public class FormDeleteWorkerImpl {
 	private final String pFormIdLockId;
 
 	public FormDeleteWorkerImpl(Form form, SubmissionKey miscTasksKey,
-			long attemptCount, String baseWebServerUrl, CallingContext cc) {
+			long attemptCount, CallingContext cc) {
 		this.form = form;
 		this.miscTasksKey = miscTasksKey;
 		this.cc = cc;
@@ -202,7 +202,7 @@ public class FormDeleteWorkerImpl {
 	 */
 	private boolean deleteExternalServiceTasks() throws ODKDatastoreException {
 		List<ExternalService> services = FormServiceCursor
-		.getExternalServicesForForm(form, null, cc);
+		.getExternalServicesForForm(form, cc);
 		Datastore ds = cc.getDatastore();
 	    User user = cc.getCurrentUser();
 

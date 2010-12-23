@@ -66,16 +66,15 @@ public interface SubmissionField<T> extends SubmissionValue{
   public void setValueFromString(String value) throws ODKConversionException, ODKDatastoreException;
 
   /**
-   * Convert byte array to proper type for submission field
+   * Store the given blob into the submission field.
    * 
-   * @param byteArray byte form of the value
-   * @param submissionSetKey key of submission set that will reference the blob
-   * @param contentType type of binary data (NOTE: only used for binary data)
-   * @param datastore TODO
-   * @return the outcome of the storage attempt.  md5 hashes are used to determine file equivalence. 
+   * @param byteArray - data to be stored
+   * @param contentType
+   * @param contentLength
+   * @param unrootedFilePath
+   * @return outcome of storage attempt
    * @throws ODKDatastoreException
-   * 
-   */  
+   */
   public BlobSubmissionOutcome setValueFromByteArray(byte[] byteArray,
 		String contentType, Long contentLength, String unrootedFilePath)
 		throws ODKDatastoreException;

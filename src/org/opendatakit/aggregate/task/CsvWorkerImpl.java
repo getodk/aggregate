@@ -44,14 +44,12 @@ public class CsvWorkerImpl {
 	private final Form form;
 	private final SubmissionKey persistentResultsKey;
 	private final Long attemptCount;
-	private final String baseWebServerUrl;
 	private final CallingContext cc;
 
-	public CsvWorkerImpl( Form form, SubmissionKey persistentResultsKey, Long attemptCount, String baseWebServerUrl, CallingContext cc) {
+	public CsvWorkerImpl( Form form, SubmissionKey persistentResultsKey, Long attemptCount, CallingContext cc) {
 		this.form = form;
 		this.persistentResultsKey = persistentResultsKey;
 		this.attemptCount = attemptCount;
-		this.baseWebServerUrl = baseWebServerUrl;
 		this.cc = cc;
 		if ( attemptCount == null ) {
 			throw new IllegalArgumentException("attempt count cannot be null");
@@ -66,7 +64,7 @@ public class CsvWorkerImpl {
 		    // create CSV
 		    QueryByDate query = new QueryByDate(form, BasicConsts.EPOCH, false, ServletConsts.FETCH_LIMIT,
 		    		cc);
-		    SubmissionFormatter formatter = new CsvFormatter(form, baseWebServerUrl, pw, null);
+		    SubmissionFormatter formatter = new CsvFormatter(form, cc.getServerURL(), pw, null);
 		    formatter.processSubmissions(query.getResultSubmissions());
 	
 		    // output file

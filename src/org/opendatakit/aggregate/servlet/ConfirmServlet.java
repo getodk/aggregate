@@ -73,7 +73,7 @@ public class ConfirmServlet extends ServletUtilBase {
   @Override
   public void doPost(HttpServletRequest req, HttpServletResponse resp)
       throws IOException {
-	CallingContext cc = ContextFactory.getCallingContext(getServletContext());
+	CallingContext cc = ContextFactory.getCallingContext(this, ADDR, req);
     
     try {
       ProcessParams params = new ProcessParams(new MultiPartFormData(req));
@@ -89,8 +89,8 @@ public class ConfirmServlet extends ServletUtilBase {
       for (String paramKey : paramKeys) {
     	  keys.add(new SubmissionKey(paramKey));
       }
-      beginBasicHtmlResponse(TITLE_INFO, resp, req, false); // header info
-      out.print(HtmlUtil.createFormBeginTag(ProcessServlet.ADDR,
+      beginBasicHtmlResponse(TITLE_INFO, resp, false, cc); // header info
+      out.print(HtmlUtil.createFormBeginTag(cc.getWebApplicationURL(ProcessServlet.ADDR),
               HtmlConsts.MULTIPART_FORM_DATA, HtmlConsts.POST));
       out.print(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_HIDDEN,
               ServletConsts.PROCESS_NUM_RECORDS, Integer.toString(keys.size())));
@@ -112,11 +112,11 @@ public class ConfirmServlet extends ServletUtilBase {
 	          ServletConsts.FORM_ID, form.getFormId()));
       
 		  QueryByKeys query = new QueryByKeys(keys, cc);
-		  SubmissionFormatter formatter = new HtmlFormatter(form, getServerURL(req), resp.getWriter(), null, true);
+		  SubmissionFormatter formatter = new HtmlFormatter(form, cc.getServerURL(), resp.getWriter(), null, true);
 		  formatter.processSubmissions(query.getResultSubmissions());
       } else if (params.getButtonText().equals(ProcessType.DELETE_FORM.getButtonText())) {
 		  QueryFormList formsList = new QueryFormList(keys, true, cc);
-		  FormHtmlTable formFormatter = new FormHtmlTable(formsList);
+		  FormHtmlTable formFormatter = new FormHtmlTable(formsList, cc);
 		  out.print(formFormatter.generateHtmlFormTable(false, false));
       }
       

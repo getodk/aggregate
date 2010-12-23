@@ -125,12 +125,14 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 					new HashMap<FormElementModel, SubmissionValue>();
 
 	/**
-	 * Construct an empty submission for a repeating group within a form
+	 * Construct an empty repeating group.
 	 * 
-	 * @param formOdkIdentifier
-	 *            the ODK id of the form
-	 * @param datastore
-	 *            TODO
+	 * @param enclosingSet
+	 * @param ordinalNumber
+	 * @param group
+	 * @param formDefinition
+	 * @param topLevelTableKey
+	 * @param cc - the CallingContext for this request
 	 * @throws ODKDatastoreException
 	 */
 	public SubmissionSet(SubmissionSet enclosingSet, Long ordinalNumber,
@@ -243,14 +245,12 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 	}
 
 	/**
-	 * Construct a submission set from the data store
-	 * 
-	 * @param entity
-	 *            submission entity that contains the data
-	 * @param form
-	 *            TODO
-	 * @param datastore
-	 *            TODO
+	 * Construct a submission set from the datastore.
+	 * @param enclosingSet - the enclosing submission set.
+	 * @param row - the base record for this submission set.
+	 * @param group - the form group mapped to the base record.
+	 * @param formDefinition - the definition of the form.
+	 * @param cc - the CallingContext of this request.
 	 * @throws ODKDatastoreException
 	 */
 	public SubmissionSet(SubmissionSet enclosingSet, DynamicCommonFieldsBase row,
@@ -302,8 +302,9 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 				else
 				{
 					if (mBackingObject == null) {
-						Query query = datastore.createQuery(mRelation, user);
-						query.addFilter(m.parentAuri, FilterOperation.EQUAL,
+						DynamicBase mBaseRelation = (DynamicBase) mRelation;
+						Query query = datastore.createQuery(mBaseRelation, user);
+						query.addFilter(mBaseRelation.parentAuri, FilterOperation.EQUAL,
 								uriParent);
 						List<? extends CommonFieldsBase> rows = query
 								.executeQuery(ServletConsts.FETCH_LIMIT);
@@ -706,15 +707,12 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 	}
 
 	/**
-	 * Format the submission set for output
-	 * 
-	 * @param propertyNames
-	 *            if null includes all properties, otherwise will only include
-	 *            property listed
+	 * Format this submission's properties into a Row object.
+	 *  
+	 * @param propertyNames - if null, all properties are emitted.  Otherwise, a list of those to emit.
 	 * @param elemFormatter
-	 *            formatter to use to properly format the values
-	 * @param includeParentUid TODO
-	 * @return TODO
+	 * @param includeParentUid - true if the parentUid should be included
+	 * @return
 	 * @throws ODKDatastoreException
 	 */
 	public Row getFormattedValuesAsRow(List<FormElementModel> propertyNames,

@@ -128,7 +128,7 @@ public class Form {
 	try {
 		SubmissionAssociationTable saRelation = SubmissionAssociationTable.createRelation(cc);
 		Query q = cc.getDatastore().createQuery(saRelation, cc.getCurrentUser());
-		q.addFilter(saRelation.domAuri, FilterOperation.EQUAL, CommonFieldsBase.newMD5HashUri(submissionFormId));
+		q.addFilter(saRelation.uriMd5SubmissionFormId, FilterOperation.EQUAL, CommonFieldsBase.newMD5HashUri(submissionFormId));
 		List<? extends CommonFieldsBase> l = q.executeQuery(0);
 		for ( CommonFieldsBase b : l ) {
 			SubmissionAssociationTable a = (SubmissionAssociationTable) b;
@@ -508,7 +508,7 @@ public class Form {
 		User user = cc.getCurrentUser();
 		SubmissionAssociationTable saRelation = SubmissionAssociationTable.createRelation(cc);
 		Query q = ds.createQuery(saRelation, user);
-		q.addFilter(saRelation.domAuri, FilterOperation.EQUAL, CommonFieldsBase.newMD5HashUri(submissionFormId));
+		q.addFilter(saRelation.uriMd5SubmissionFormId, FilterOperation.EQUAL, CommonFieldsBase.newMD5HashUri(submissionFormId));
 		List<? extends CommonFieldsBase> l = q.executeQuery(0);
 		SubmissionAssociationTable match = null;
 		for ( CommonFieldsBase b : l ) {

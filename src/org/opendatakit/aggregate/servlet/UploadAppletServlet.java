@@ -22,6 +22,9 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.opendatakit.aggregate.CallingContext;
+import org.opendatakit.aggregate.ContextFactory;
+
 
 /**
  * The only purpose of this servlet is to insert Set-Cookie META tags into the
@@ -76,6 +79,8 @@ public class UploadAppletServlet extends ServletUtilBase {
 	@Override
 	public void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws IOException {
+		CallingContext cc = ContextFactory.getCallingContext(this, ADDR, req);
+
 		String cookieSet = "";
 		Cookie[] cookies = req.getCookies();
 		if ( cookies != null ) {
@@ -88,7 +93,7 @@ public class UploadAppletServlet extends ServletUtilBase {
 			}
 		}
 		String headContent = cookieSet;
-		beginBasicHtmlResponse(TITLE_INFO, headContent, resp, req, true); // header
+		beginBasicHtmlResponse(TITLE_INFO, headContent, resp, true, cc); // header
 	    PrintWriter out = resp.getWriter();
 	    out.write(UPLOAD_BODY);
 		finishBasicHtmlResponse(resp);

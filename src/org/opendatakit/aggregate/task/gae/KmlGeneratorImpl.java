@@ -46,7 +46,7 @@ public class KmlGeneratorImpl implements KmlGenerator {
 
   @Override
   public void createKmlTask(Form form, SubmissionKey persistentResultsKey, long attemptCount,
-      String baseServerWebUrl, CallingContext cc) throws ODKDatastoreException,
+      CallingContext cc) throws ODKDatastoreException,
       ODKFormNotFoundException {
     Submission s = Submission.fetchSubmission(persistentResultsKey.splitSubmissionKey(), cc);
     PersistentResults r = new PersistentResults(s);

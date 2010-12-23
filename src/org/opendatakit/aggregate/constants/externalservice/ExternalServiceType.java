@@ -64,14 +64,14 @@ public enum ExternalServiceType {
     return serviceName;
   }
 
-  public ExternalService constructExternalService(FormServiceCursor fsc, String webServiceUrl,
-      CallingContext cc) throws ODKEntityNotFoundException {
+  public ExternalService constructExternalService(FormServiceCursor fsc, CallingContext cc)
+  			throws ODKEntityNotFoundException {
     try {
       switch (this) {
       case GOOGLE_FUSIONTABLES:
-        return new FusionTable(fsc, webServiceUrl, cc);
+        return new FusionTable(fsc, cc);
       case GOOGLE_SPREADSHEET:
-        return new GoogleSpreadsheet(fsc, webServiceUrl, cc);
+        return new GoogleSpreadsheet(fsc, cc);
       case JSON_SERVER:
         return new JsonServer(fsc, cc);
       default:

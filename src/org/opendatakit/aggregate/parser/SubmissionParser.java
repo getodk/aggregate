@@ -91,12 +91,12 @@ public class SubmissionParser {
 
 	/**
 	 * Construct an ODK submission by processing XML submission to extract
-	 * values
+	 * values.  The submission is persisted to the database before returning.
 	 * 
 	 * @param inputStreamXML
 	 *            xml submission input stream
-	 * @param datastore
-	 *            TODO
+	 * @param cc
+	 *            the CallingContext of this request
 	 * @throws IOException
 	 * @throws ODKFormNotFoundException
 	 *             thrown if a form is not found with a matching ODK ID
@@ -115,13 +115,13 @@ public class SubmissionParser {
 
 	/**
 	 * Construct an ODK submission by processing XML submission to extract
-	 * values
+	 * values.  The submission is persisted to the database before returning.
 	 * 
 	 * @param submissionFormParser
 	 *            multipart data submission that includes XML submission &
 	 *            possibly other data
-	 * @param datastore
-	 *            TODO
+	 * @param cc
+	 *            the CallingContext of this request
 	 * @throws IOException
 	 * @throws ODKFormNotFoundException
 	 *             thrown if a form is not found with a matching ODK ID

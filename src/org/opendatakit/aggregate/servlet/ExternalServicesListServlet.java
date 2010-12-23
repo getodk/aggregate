@@ -70,10 +70,10 @@ public class ExternalServicesListServlet extends ServletUtilBase {
 	@Override
 	public void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws IOException {
-		CallingContext cc = ContextFactory.getCallingContext(getServletContext());
+		CallingContext cc = ContextFactory.getCallingContext(this, ADDR, req);
 
 		// generate html
-		beginBasicHtmlResponse(TITLE_INFO, resp, req, true); // header info
+		beginBasicHtmlResponse(TITLE_INFO, resp, true, cc); // header info
 
 		try {
 			QueryFormList formsList = new QueryFormList(false, cc);
@@ -83,7 +83,7 @@ public class ExternalServicesListServlet extends ServletUtilBase {
 			for (Form form : forms) {
 
 				List<ExternalService> esList = FormServiceCursor
-						.getExternalServicesForForm(form, getServerURL(req), cc);
+						.getExternalServicesForForm(form, cc);
 				if ( esList.size() == 0 ) continue;
 				
 				resp.getWriter().print(

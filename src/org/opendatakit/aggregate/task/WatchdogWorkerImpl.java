@@ -41,20 +41,19 @@ import org.opendatakit.common.persistence.exception.ODKDatastoreException;
  */
 public class WatchdogWorkerImpl {
 
-  public void checkTasks(long checkIntervalMilliseconds, String baseWebServerUrl,
-		  CallingContext cc) throws ODKExternalServiceException, ODKFormNotFoundException,
+  public void checkTasks(long checkIntervalMilliseconds, CallingContext cc) throws ODKExternalServiceException, ODKFormNotFoundException,
       ODKDatastoreException, ODKIncompleteSubmissionData {
 	UploadSubmissions uploadSubmissions = (UploadSubmissions) cc.getBean(BeanDefs.UPLOAD_TASK_BEAN);
 	CsvGenerator csvGenerator = (CsvGenerator) cc.getBean(BeanDefs.CSV_BEAN);
 	KmlGenerator kmlGenerator = (KmlGenerator) cc.getBean(BeanDefs.KML_BEAN);
 	WorksheetCreator worksheetCreator = (WorksheetCreator) cc.getBean(BeanDefs.WORKSHEET_BEAN);
 	FormDelete formDelete = (FormDelete) cc.getBean(BeanDefs.FORM_DELETE_BEAN);
-	checkFormServiceCursors(checkIntervalMilliseconds, baseWebServerUrl, uploadSubmissions, cc);
-    checkPersistentResults(baseWebServerUrl, csvGenerator, kmlGenerator, cc);
-    checkMiscTasks(baseWebServerUrl, uploadSubmissions, worksheetCreator, formDelete, cc);
+	checkFormServiceCursors(checkIntervalMilliseconds, uploadSubmissions, cc);
+    checkPersistentResults(csvGenerator, kmlGenerator, cc);
+    checkMiscTasks(worksheetCreator, formDelete, cc);
   }
 
-  private void checkFormServiceCursors(long checkIntervalMilliseconds, String baseWebServerUrl,
+  private void checkFormServiceCursors(long checkIntervalMilliseconds, 
 		  UploadSubmissions uploadSubmissions,
 		  CallingContext cc) throws ODKExternalServiceException, ODKFormNotFoundException,
       ODKDatastoreException, ODKIncompleteSubmissionData {
@@ -67,16 +66,16 @@ public class WatchdogWorkerImpl {
       
       switch (fsc.getExternalServiceOption()) {
       case UPLOAD_ONLY:
-        checkUpload(fsc, baseWebServerUrl, uploadSubmissions, cc);
+        checkUpload(fsc, uploadSubmissions, cc);
         break;
       case STREAM_ONLY:
-        checkStreaming(fsc, baseWebServerUrl, uploadSubmissions, cc);
+        checkStreaming(fsc, uploadSubmissions, cc);
         break;
       case UPLOAD_N_STREAM:
         if (!fsc.getUploadCompleted())
-          checkUpload(fsc, baseWebServerUrl, uploadSubmissions, cc);
+          checkUpload(fsc, uploadSubmissions, cc);
         if (fsc.getUploadCompleted())
-          checkStreaming(fsc, baseWebServerUrl, uploadSubmissions, cc);
+          checkStreaming(fsc, uploadSubmissions, cc);
         break;
       case NONE:
         break;
@@ -84,7 +83,7 @@ public class WatchdogWorkerImpl {
     }
   }
 
-  private void checkUpload(FormServiceCursor fsc, String baseWebServerUrl, 
+  private void checkUpload(FormServiceCursor fsc, 
 		  UploadSubmissions uploadSubmissions,
 		  CallingContext cc)
       throws ODKExternalServiceException {
@@ -96,12 +95,12 @@ public class WatchdogWorkerImpl {
       if (establishmentDate != null && lastUploadDate == null
           || lastUploadDate.compareTo(establishmentDate) < 0) {
         // there is still work to do
-    	  uploadSubmissions.createFormUploadTask(fsc, baseWebServerUrl, cc);
+    	  uploadSubmissions.createFormUploadTask(fsc, cc);
       }
     }
   }
 
-  private void checkStreaming(FormServiceCursor fsc, String baseWebServerUrl, 
+  private void checkStreaming(FormServiceCursor fsc,
 		  UploadSubmissions uploadSubmissions,
 		  CallingContext cc) throws ODKFormNotFoundException, ODKDatastoreException,
       ODKExternalServiceException, ODKIncompleteSubmissionData {
@@ -123,11 +122,11 @@ public class WatchdogWorkerImpl {
     if (lastSubmissionKey != null
         && (lastStreamingKey == null || !lastStreamingKey.equals(lastSubmissionKey))) {
       // there is still work to do
-    	uploadSubmissions.createFormUploadTask(fsc, baseWebServerUrl, cc);
+    	uploadSubmissions.createFormUploadTask(fsc, cc);
     }
   }
 
-  private void checkPersistentResults(String baseWebServerUrl, 
+  private void checkPersistentResults( 
 		  CsvGenerator csvGenerator, KmlGenerator kmlGenerator,
 		  CallingContext cc)
       throws ODKDatastoreException, ODKFormNotFoundException {
@@ -144,19 +143,18 @@ public class WatchdogWorkerImpl {
       switch (persistentResult.getResultType()) {
       case CSV:
         csvGenerator.createCsvTask(form, persistentResult.getSubmissionKey(), attemptCount,
-            baseWebServerUrl, cc);
+            cc);
         break;
       case KML:
         kmlGenerator.createKmlTask(form, persistentResult.getSubmissionKey(), attemptCount,
-            baseWebServerUrl, cc);
+            cc);
         break;
       }
     }
   }
 
 
-  private void checkMiscTasks(String baseWebServerUrl, 
-		  UploadSubmissions uploadSubmissions, WorksheetCreator wsCreator, FormDelete formDelete,
+  private void checkMiscTasks(WorksheetCreator wsCreator, FormDelete formDelete,
 		  CallingContext cc)
       throws ODKDatastoreException, ODKFormNotFoundException {
     // TODO: remove
@@ -172,11 +170,11 @@ public class WatchdogWorkerImpl {
       switch (aTask.getTaskType()) {
       case WORKSHEET_CREATE:
     	wsCreator.createWorksheetTask(form, aTask.getSubmissionKey(), attemptCount,
-            baseWebServerUrl, cc);
+            cc);
         break;
       case DELETE_FORM:
         formDelete.createFormDeleteTask(form, aTask.getSubmissionKey(), attemptCount,
-            baseWebServerUrl, cc);
+            cc);
         break;
       }
     }

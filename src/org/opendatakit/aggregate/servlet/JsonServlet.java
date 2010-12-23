@@ -63,7 +63,7 @@ public class JsonServlet extends ServletUtilBase {
 
   @Override
   public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-	CallingContext cc = ContextFactory.getCallingContext(getServletContext());
+	CallingContext cc = ContextFactory.getCallingContext(this, ADDR, req);
 
     // TODO: rename params so not spreadsheet
 
@@ -121,7 +121,7 @@ public class JsonServlet extends ServletUtilBase {
 	}
     }
 
-    resp.sendRedirect(FormsServlet.ADDR);
+    resp.sendRedirect(cc.getWebApplicationURL(FormsServlet.ADDR));
   }
 
 }

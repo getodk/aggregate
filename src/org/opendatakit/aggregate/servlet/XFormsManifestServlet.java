@@ -59,7 +59,7 @@ public class XFormsManifestServlet extends ServletUtilBase {
    */
   @Override
   public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-	CallingContext cc = ContextFactory.getCallingContext(getServletContext());
+	CallingContext cc = ContextFactory.getCallingContext(this, ADDR, req);
     
     // get parameters
     String formId = getParameter(req, ServletConsts.FORM_ID);
@@ -76,7 +76,7 @@ public class XFormsManifestServlet extends ServletUtilBase {
       return;
     }
 
-    XFormsManifestXmlTable formFormatter = new XFormsManifestXmlTable(form, getServerURL(req));
+    XFormsManifestXmlTable formFormatter = new XFormsManifestXmlTable(form, cc.getServerURL());
     PrintWriter out = resp.getWriter();
     resp.setContentType(HtmlConsts.RESP_TYPE_XML);
     formFormatter.generateXmlManifestList(out);

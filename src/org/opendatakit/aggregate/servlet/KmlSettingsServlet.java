@@ -83,7 +83,7 @@ public class KmlSettingsServlet extends ServletUtilBase {
    */
   @Override
   public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-	CallingContext cc = ContextFactory.getCallingContext(getServletContext());
+	CallingContext cc = ContextFactory.getCallingContext(this, ADDR, req);
 
     // get parameter
     String odkId = getParameter(req, ServletConsts.FORM_ID);
@@ -108,11 +108,11 @@ public class KmlSettingsServlet extends ServletUtilBase {
       return;
     }
 
-    beginBasicHtmlResponse(TITLE_INFO, resp, req, true); // header info
+    beginBasicHtmlResponse(TITLE_INFO, resp, true, cc); // header info
     String spaceBetweenInputs = HtmlUtil.createSelfClosingTag(HtmlConsts.P);
 
     PrintWriter out = resp.getWriter();
-    out.write(HtmlUtil.createFormBeginTag(KmlServlet.ADDR, null, HtmlConsts.GET));
+    out.write(HtmlUtil.createFormBeginTag(cc.getWebApplicationURL(KmlServlet.ADDR), null, HtmlConsts.GET));
 
     out.write(GEOPOINT_TXT + HtmlConsts.LINE_BREAK);
     out.write(createSelect(KmlServlet.GEOPOINT_FIELD, geopointNodesNames, false, form));

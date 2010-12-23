@@ -35,9 +35,8 @@ public class UploadSubmissionsImpl implements UploadSubmissions {
 	static class UploadSubmissionsRunner implements Runnable {
 		final UploadSubmissionsWorkerImpl impl;
 
-		public UploadSubmissionsRunner(FormServiceCursor fsc,
-				String baseWebServerUrl, CallingContext cc) {
-			impl = new UploadSubmissionsWorkerImpl(fsc, baseWebServerUrl, cc);
+		public UploadSubmissionsRunner(FormServiceCursor fsc, CallingContext cc) {
+			impl = new UploadSubmissionsWorkerImpl(fsc, cc);
 		}
 
 		@Override
@@ -52,10 +51,10 @@ public class UploadSubmissionsImpl implements UploadSubmissions {
 	}
 
   @Override
-  public void createFormUploadTask(FormServiceCursor fsc, String baseWebServerUrl, CallingContext cc)
+  public void createFormUploadTask(FormServiceCursor fsc, CallingContext cc)
       throws ODKExternalServiceException {
 
-	UploadSubmissionsRunner ur = new UploadSubmissionsRunner(fsc, baseWebServerUrl, cc);
+	UploadSubmissionsRunner ur = new UploadSubmissionsRunner(fsc, cc);
     System.out.println("THIS IS UPLOAD TASK IN TOMCAT");
     AggregrateThreadExecutor exec = AggregrateThreadExecutor.getAggregateThreadExecutor();
     exec.execute(ur);

@@ -28,10 +28,10 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.common.constants.BasicConsts;
 import org.opendatakit.common.constants.HtmlConsts;
 import org.opendatakit.common.constants.HtmlUtil;
-import org.opendatakit.common.security.UserService;
 
 /**
  * Base class for Servlets that contain useful utilities
@@ -75,31 +75,6 @@ public abstract class CommonServletBase extends HttpServlet {
   }
 
   /**
-   * Takes request and verifies the user has logged in. If the user has not
-   * logged in generates the appropriate text for response to user
-   * 
-   * @param req The HTTP request received at the server
-   * @param resp The HTTP response to be sent to client
-   * @return boolean value of whether the user is logged in
-   * @throws IOException Throws IO Exception if problem occurs creating the
-   *         login link in response
-   */
-  protected final boolean verifyCredentials(HttpServletRequest req, HttpServletResponse resp, UserService userService)
-      throws IOException {
-    if (!userService.isUserLoggedIn()) {
-      beginBasicHtmlResponse(LOGIN_REQUIRED, resp, req, false);
-      String returnUrl = req.getRequestURI() + HtmlConsts.BEGIN_PARAM + req.getQueryString();
-      String loginHtml =
-          HtmlUtil.wrapWithHtmlTags(HtmlConsts.P, PLEASE
-              + HtmlUtil.createHref(appBasePath(req)+userService.createLoginURL(returnUrl), LOG_IN));
-      resp.getWriter().print(loginHtml);
-      finishBasicHtmlResponse(resp);
-      return false;
-    }
-    return true;
-  }
-  
-  /**
    * Generate HTML header string for web responses. NOTE: beginBasicHtmlResponse
    * and finishBasicHtmlResponse are a paired set of functions.
    * beginBasicHtmlResponse should be called first before adding other
@@ -108,13 +83,13 @@ public abstract class CommonServletBase extends HttpServlet {
    * 
    * @param pageName name that should appear on the top of the page
    * @param resp http response to have the information appended to
-   * @param req TODO
+   * @param req request
    * @param displayLinks display links accross the top
    * @throws IOException
    */
   protected void beginBasicHtmlResponse(String pageName, HttpServletResponse resp,
-      HttpServletRequest req, boolean displayLinks) throws IOException {
-          beginBasicHtmlResponse(pageName, BasicConsts.EMPTY_STRING, resp, req, displayLinks );
+      boolean displayLinks, CallingContext cc) throws IOException {
+          beginBasicHtmlResponse(pageName, BasicConsts.EMPTY_STRING, resp, displayLinks, cc );
   }
 
   /**
@@ -127,40 +102,29 @@ public abstract class CommonServletBase extends HttpServlet {
    * @param pageName name that should appear on the top of the page
    * @param headContent additional head content emitted before title
    * @param resp http response to have the information appended to
-   * @param req TODO
+   * @param req request
    * @param displayLinks display links accross the top
    * @throws IOException
    */
   protected void beginBasicHtmlResponse(String pageName, String headContent, HttpServletResponse resp,
-              HttpServletRequest req, boolean displayLinks) throws IOException {
-    resp.addHeader(HOST_HEADER, getServerURL(req));
+              boolean displayLinks, CallingContext cc) throws IOException {
+    resp.addHeader(HOST_HEADER, cc.getServerURL());
     resp.setContentType(HtmlConsts.RESP_TYPE_HTML);
     resp.setCharacterEncoding(HtmlConsts.UTF8_ENCODE);
     PrintWriter out = resp.getWriter();
     out.write(HtmlConsts.HTML_OPEN);
-    out.write("<link rel=\"shortcut icon\" href=\"" + appBasePath(req) + "favicon.ico\">");
+    out.write("<link rel=\"shortcut icon\" href=\"" + cc.getWebApplicationURL("favicon.ico") + "\">");
 
     out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.HEAD, headContent + HtmlUtil.wrapWithHtmlTags(
         HtmlConsts.TITLE, applicationName)));
     out.write(HtmlConsts.BODY_OPEN);
-    out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.H2, "<FONT COLOR=330066 size=7><img src='" + appBasePath(req) + "odk_color.png'/>" + HtmlConsts.SPACE + applicationName) + "</FONT>");
-    emitPageHeader(out, req, displayLinks);
+    out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.H2, "<FONT COLOR=330066 size=7><img src='" + cc.getWebApplicationURL("odk_color.png") + "'/>" + HtmlConsts.SPACE + applicationName) + "</FONT>");
+    emitPageHeader(out, displayLinks, cc);
     out.write(HtmlConsts.LINE_BREAK + HtmlConsts.LINE_BREAK);
     out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.H1, pageName));
   }
 
-  protected String appBasePath( HttpServletRequest req ) {
-	  String pathInfo = req.getServletPath();
-	  StringBuilder b = new StringBuilder();
-	  int idx = pathInfo.indexOf('/', 1);
-	  while ( idx != -1 ) {
-		  b.append("../");
-		  idx = pathInfo.indexOf('/', idx+1);
-	  }
-	  return b.toString();
-  }
-
-  protected abstract void emitPageHeader(PrintWriter out,  HttpServletRequest req, boolean displayLinks);
+  protected abstract void emitPageHeader(PrintWriter out,  boolean displayLinks, CallingContext cc);
   
   /**
    * Generate HTML footer string for web responses
@@ -221,6 +185,14 @@ public abstract class CommonServletBase extends HttpServlet {
     resp.setHeader(HtmlConsts.CONTENT_DISPOSITION, HtmlConsts.ATTACHMENT_FILENAME_TXT
         + filename + BasicConsts.QUOTE + BasicConsts.SEMI_COLON);
   }
+
+//  protected final String getWebApplicationURL() {
+//    return this.getServletContext().getContextPath() + BasicConsts.FORWARDSLASH;
+//  }
+//
+//  protected final String getWebApplicationURL(String servletPath) {
+//    return this.getServletContext().getContextPath() + BasicConsts.FORWARDSLASH + servletPath;
+//  }
 
   protected final String getServerURL(HttpServletRequest req) {
     final String serverName = req.getServerName();

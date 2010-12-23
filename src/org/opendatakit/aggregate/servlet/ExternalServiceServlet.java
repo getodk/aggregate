@@ -68,7 +68,7 @@ public class ExternalServiceServlet extends ServletUtilBase {
    */
   @Override
   public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-	CallingContext cc = ContextFactory.getCallingContext(getServletContext());
+	CallingContext cc = ContextFactory.getCallingContext(this, ADDR, req);
 
     // get parameter
     String formId = getParameter(req, ServletConsts.FORM_ID);
@@ -88,32 +88,32 @@ public class ExternalServiceServlet extends ServletUtilBase {
       return;
     }
 
-    beginBasicHtmlResponse(TITLE_INFO, resp, req, true); // header info
+    beginBasicHtmlResponse(TITLE_INFO, resp, true, cc); // header info
     PrintWriter out = resp.getWriter();
     out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.H3, "Create a Connection for Form: "
         + "<FONT COLOR=0000FF>" + form.getViewableName() + "</FONT>"));
 
     if (serviceString == null) {
       
-      out.write(generateServiceButton(formId, getServerURL(req), ExternalServiceType.GOOGLE_SPREADSHEET));
-      out.write(generateServiceButton(formId, getServerURL(req), ExternalServiceType.JSON_SERVER));
-      out.write(generateServiceButton(formId, getServerURL(req), ExternalServiceType.GOOGLE_FUSIONTABLES));
+      out.write(generateServiceButton(formId, ExternalServiceType.GOOGLE_SPREADSHEET, cc));
+      out.write(generateServiceButton(formId, ExternalServiceType.JSON_SERVER, cc));
+      out.write(generateServiceButton(formId, ExternalServiceType.GOOGLE_FUSIONTABLES, cc));
 
     } else {
       ExternalServiceType service = ExternalServiceType.valueOf(serviceString);
       out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.H3, "To: " + "<FONT COLOR=0000FF>"
           + service.getServiceName() + "</FONT>" + " Service"));
-      out.write(generateExternalServiceEntry(formId, service));
+      out.write(generateExternalServiceEntry(formId, service, cc));
     }
 
     finishBasicHtmlResponse(resp);
   }
 
-  private String generateExternalServiceEntry(String formId, ExternalServiceType service)
+  private String generateExternalServiceEntry(String formId, ExternalServiceType service, CallingContext cc)
       throws UnsupportedEncodingException {
     StringBuilder form = new StringBuilder();
     form.append(HtmlConsts.LINE_BREAK);
-    form.append(HtmlUtil.createFormBeginTag(service.getAddr(), HtmlConsts.RESP_TYPE_HTML,
+    form.append(HtmlUtil.createFormBeginTag(cc.getWebApplicationURL(service.getAddr()), HtmlConsts.RESP_TYPE_HTML,
         HtmlConsts.GET));
     form.append(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_HIDDEN, ServletConsts.FORM_ID,
         encodeParameter(formId)));
@@ -140,14 +140,14 @@ public class ExternalServiceServlet extends ServletUtilBase {
         .getDescriptionOfOption(), checked);
   }
 
-  private String generateServiceButton(String odkId, String url, ExternalServiceType service)
+  private String generateServiceButton(String formId, ExternalServiceType service, CallingContext cc)
       throws UnsupportedEncodingException {
 
     StringBuilder form = new StringBuilder();
     form.append(HtmlConsts.LINE_BREAK);
-    form.append(HtmlUtil.createFormBeginTag(HtmlUtil.createUrl(url)+ ADDR, null, HtmlConsts.GET));
+    form.append(HtmlUtil.createFormBeginTag(cc.getWebApplicationURL(ADDR), null, HtmlConsts.GET));
     form.append(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_HIDDEN, ServletConsts.FORM_ID,
-        encodeParameter(odkId)));
+        encodeParameter(formId)));
     form.append(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_HIDDEN, SERVICE, encodeParameter(service
         .toString())));
     form.append(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_SUBMIT, null, service.getServiceName()));

@@ -76,7 +76,7 @@ public class QueryResultsServlet extends ServletUtilBase {
 	@Override
 	public void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws IOException {
-		CallingContext cc = ContextFactory.getCallingContext(getServletContext());
+		CallingContext cc = ContextFactory.getCallingContext(this, ADDR, req);
 
 		// get parameter
 		String formId = getParameter(req, ServletConsts.FORM_ID);
@@ -153,9 +153,9 @@ public class QueryResultsServlet extends ServletUtilBase {
 			}
 
 			SubmissionFormatter formatter = new HtmlFormatter(form,
-					getServerURL(req), resp.getWriter(), null, true);
+					cc.getServerURL(), resp.getWriter(), null, true);
 
-			beginBasicHtmlResponse(TITLE_INFO, resp, req, true); // header info
+			beginBasicHtmlResponse(TITLE_INFO, resp, true, cc); // header info
 			formatter.processSubmissions(submissions);
 			finishBasicHtmlResponse(resp);
 		} catch (ODKDatastoreException e) {

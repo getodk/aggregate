@@ -48,7 +48,6 @@ public class WorksheetCreatorImpl implements WorksheetCreator {
   @Override
   public final void createWorksheetTask(Form form,
 			SubmissionKey miscTasksKey, long attemptCount,
-			String baseServerWebUrl, 
 			CallingContext cc)
       throws ODKFormNotFoundException, ODKDatastoreException {
     Submission s = Submission.fetchSubmission(miscTasksKey.splitSubmissionKey(), cc);

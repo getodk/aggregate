@@ -20,12 +20,13 @@ import java.util.List;
 
 import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.datamodel.FormElementKey;
-import org.opendatakit.aggregate.datamodel.StaticAssociationBase;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.EntityKey;
+import org.opendatakit.common.persistence.PersistConsts;
 import org.opendatakit.common.persistence.Query;
+import org.opendatakit.common.persistence.DataField.IndexType;
 import org.opendatakit.common.persistence.Query.FilterOperation;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.security.User;
@@ -36,18 +37,21 @@ import org.opendatakit.common.security.User;
  * @author mitchellsundt@gmail.com
  * 
  */
-public class GoogleSpreadsheetRepeatParameterTable extends StaticAssociationBase {
+public class GoogleSpreadsheetRepeatParameterTable extends CommonFieldsBase {
 
 	  private static final String TABLE_NAME = "_google_spreadsheet_repeat";
 	  /*
 	   * Property Names for datastore
 	   */
 	  /****************************************************/
+	  private static final DataField URI_GOOGLE_SPREADSHEET = new DataField("URI_GOOGLE_SPREADSHEET",
+			  DataField.DataType.URI, false, PersistConsts.URI_STRING_LEN).setIndexable(IndexType.HASH);
 	  private static final DataField WORKSHEET_ID = new DataField("WORKSHEET_ID",
 	      DataField.DataType.STRING, true, 4096L);
 	  private static final DataField FORM_ELEMENT_KEY_PROPERTY = new DataField("FORM_ELEMENT_KEY",
 	      DataField.DataType.STRING, true, 4096L);
 
+	  public final DataField uriGoogleSpreadsheet;
 	  public final DataField worksheetId;
 	  public final DataField formElementKey;
 
@@ -59,6 +63,7 @@ public class GoogleSpreadsheetRepeatParameterTable extends StaticAssociationBase
 		 */
 	  GoogleSpreadsheetRepeatParameterTable(String schemaName) {
 	    super(schemaName, TABLE_NAME);
+	    fieldList.add(uriGoogleSpreadsheet = new DataField(URI_GOOGLE_SPREADSHEET));
 	    fieldList.add(worksheetId = new DataField(WORKSHEET_ID));
 	    fieldList.add(formElementKey = new DataField(FORM_ELEMENT_KEY_PROPERTY));
 	  }
@@ -71,6 +76,7 @@ public class GoogleSpreadsheetRepeatParameterTable extends StaticAssociationBase
 	   */
 	  private GoogleSpreadsheetRepeatParameterTable(GoogleSpreadsheetRepeatParameterTable ref, User user) {
 	    super(ref, user);
+	    uriGoogleSpreadsheet = ref.uriGoogleSpreadsheet;
 	    worksheetId = ref.worksheetId;
 	    formElementKey = ref.formElementKey;
 	  }
@@ -80,6 +86,16 @@ public class GoogleSpreadsheetRepeatParameterTable extends StaticAssociationBase
 	  public GoogleSpreadsheetRepeatParameterTable getEmptyRow(User user) {
 		return new GoogleSpreadsheetRepeatParameterTable(this, user);
 	  }
+	  
+	  public String getUriGoogleSpreadsheet() {
+		  return getStringField(uriGoogleSpreadsheet);
+	  }
+
+	  public void setUriGoogleSpreadsheet(String value) {
+	    if (!setStringField(uriGoogleSpreadsheet, value)) {
+	      throw new IllegalArgumentException("overflow uriGoogleSpreadsheet");
+	    }
+	  }
 
 	  public String getWorksheetId() {
 	    return getStringField(worksheetId);
@@ -87,7 +103,7 @@ public class GoogleSpreadsheetRepeatParameterTable extends StaticAssociationBase
 
 	  public void setWorksheetId(String value) {
 	    if (!setStringField(worksheetId, value)) {
-	      throw new IllegalArgumentException("overflow googleSpreadsheetName");
+	      throw new IllegalArgumentException("overflow worksheetId");
 	    }
 	  }
 
@@ -127,7 +143,7 @@ public class GoogleSpreadsheetRepeatParameterTable extends StaticAssociationBase
 		  Datastore ds = cc.getDatastore();
 		  User user = cc.getCurrentUser();
 		  Query query = ds.createQuery(frpt, user);
-		  query.addFilter(frpt.domAuri, FilterOperation.EQUAL, googleSpreadsheetParameterTable.getKey());
+		  query.addFilter(frpt.uriGoogleSpreadsheet, FilterOperation.EQUAL, googleSpreadsheetParameterTable.getKey());
 
 		  List<? extends CommonFieldsBase> results = query.executeQuery(0);
 		  for ( CommonFieldsBase b : results ) {

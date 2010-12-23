@@ -74,7 +74,7 @@ public class FragmentedCsvServlet extends ServletUtilBase {
    */
   @Override
   public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-	CallingContext cc = ContextFactory.getCallingContext(getServletContext());
+	CallingContext cc = ContextFactory.getCallingContext(this, ADDR, req);
 
     // required common parameters
     // form or form element identity
@@ -174,7 +174,7 @@ public class FragmentedCsvServlet extends ServletUtilBase {
         	resp.setContentType("text/xml; charset=UTF-8");
         	resp.setCharacterEncoding("UTF-8");
 
-        	FragmentedCsvFormatter fmt = new FragmentedCsvFormatter(form, submissionKeyParts, getServerURL(req), websafeCursorString, out);
+        	FragmentedCsvFormatter fmt = new FragmentedCsvFormatter(form, submissionKeyParts, cc.getServerURL(), websafeCursorString, out);
         	fmt.processSubmissions(submissions);
         } else if( submissionKeyParts != null &&
         		((submissionKeyParts.size() == 2 && submissionKeyParts.get(1).getAuri() == null) ||
@@ -207,12 +207,12 @@ public class FragmentedCsvServlet extends ServletUtilBase {
             resp.setContentType("text/xml; charset=UTF-8");
         	resp.setCharacterEncoding("UTF-8");
 
-        	FragmentedCsvFormatter fmt = new FragmentedCsvFormatter(form, submissionKeyParts, getServerURL(req), websafeCursorString, out);
+        	FragmentedCsvFormatter fmt = new FragmentedCsvFormatter(form, submissionKeyParts, cc.getServerURL(), websafeCursorString, out);
         	fmt.processSubmissions(submissions);
         	
         } else {
-            beginBasicHtmlResponse(TITLE_INFO, resp, req, true); // header info
-            String requestPath = HtmlUtil.createUrl(getServerURL(req)) + ADDR;
+            beginBasicHtmlResponse(TITLE_INFO, resp, true, cc); // header info
+            String requestPath = HtmlUtil.createUrl(cc.getServerURL()) + ADDR;
             out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.H3, "Parameters are not correctly specified."));
             out.write(HtmlConsts.TABLE_OPEN);
             out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.TABLE_ROW,

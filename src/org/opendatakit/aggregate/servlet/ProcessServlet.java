@@ -74,7 +74,7 @@ public class ProcessServlet extends ServletUtilBase {
    */
   @Override
   public void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-	CallingContext cc = ContextFactory.getCallingContext(getServletContext());
+	CallingContext cc = ContextFactory.getCallingContext(this, ADDR, req);
     StringBuilder errorText = new StringBuilder();
 
     try {
@@ -106,7 +106,7 @@ public class ProcessServlet extends ServletUtilBase {
         if (!form.getFormId().equals(Form.URI_FORM_ID_VALUE_FORM_INFO)) {
           DeleteSubmissions delete = new DeleteSubmissions(submissionKeys, cc);
           delete.deleteSubmissions();
-          resp.sendRedirect(FormsServlet.ADDR);
+          resp.sendRedirect(cc.getWebApplicationURL(FormsServlet.ADDR));
           return;
         } else {
           String errString = "Attempting to delete FormInfo records!";
@@ -137,9 +137,8 @@ public class ProcessServlet extends ServletUtilBase {
               if (!formToDelete.getFormId().equals(Form.URI_FORM_ID_VALUE_FORM_INFO)) {
             	MiscTasks m = new MiscTasks(TaskType.DELETE_FORM, formToDelete, null, cc);
             	m.persist(cc);
-                formDelete.createFormDeleteTask(formToDelete, m.getSubmissionKey(), 1L, 
-                			getServerURL(req), cc);
-                resp.sendRedirect(FormsServlet.ADDR);
+                formDelete.createFormDeleteTask(formToDelete, m.getSubmissionKey(), 1L, cc);
+                resp.sendRedirect(cc.getWebApplicationURL(FormsServlet.ADDR));
                 return;
               } else {
                 String errString = "Attempting to delete FormInfo table definition record!";

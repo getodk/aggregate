@@ -74,7 +74,7 @@ public class JsonServer extends AbstractExternalService implements ExternalServi
     this(Form.retrieveForm(fsc.getFormId(), cc), cc);
 
     objectEntity = cc.getDatastore().getEntity(JsonServerParameterTable.createRelation(cc),
-        fsc.getSubAuri(), cc.getCurrentUser());
+        fsc.getAuriService(), cc.getCurrentUser());
 
     // createForm();
   }

@@ -59,7 +59,7 @@ public class KmlGeneratorTaskServlet extends ServletUtilBase {
   @Override
   public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
     // TODO: talk to MITCH about the fact the user will be incorrect
-	CallingContext cc = ContextFactory.getCallingContext(getServletContext());
+	CallingContext cc = ContextFactory.getCallingContext(this, ADDR, req);
 
     // get parameter
     String formId = getParameter(req, ServletConsts.FORM_ID);
@@ -107,7 +107,7 @@ public class KmlGeneratorTaskServlet extends ServletUtilBase {
         return;
     }
 
-    KmlWorkerImpl worker = new KmlWorkerImpl(form, persistentResultsKey, attemptCount, titleField, geopointField, imageField, getServerURL(req), cc);
+    KmlWorkerImpl worker = new KmlWorkerImpl(form, persistentResultsKey, attemptCount, titleField, geopointField, imageField, cc);
 	worker.generateKml();
   }
 }

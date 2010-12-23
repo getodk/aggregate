@@ -16,10 +16,11 @@
 package org.opendatakit.aggregate.form;
 
 import org.opendatakit.aggregate.CallingContext;
-import org.opendatakit.aggregate.datamodel.StaticAssociationBase;
+import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.PersistConsts;
+import org.opendatakit.common.persistence.DataField.IndexType;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.security.User;
 
@@ -29,9 +30,15 @@ import org.opendatakit.common.security.User;
  * @author mitchellsundt@gmail.com
  * 
  */
-public class SubmissionAssociationTable extends StaticAssociationBase {
+public class SubmissionAssociationTable extends CommonFieldsBase {
 	private static final String TABLE_NAME = "_form_info_submission_association";
 
+	private static final DataField URI_MD5_SUBMISSION_FORM_ID = new DataField("URI_MD5_SUBMISSION_FORM_ID",
+			DataField.DataType.URI, false, PersistConsts.URI_STRING_LEN).setIndexable(IndexType.HASH);
+	
+	private static final DataField URI_MD5_FORM_ID = new DataField("URI_MD5_FORM_ID",
+			DataField.DataType.URI, false, PersistConsts.URI_STRING_LEN).setIndexable(IndexType.HASH);
+	
 	private static final DataField SUBMISSION_FORM_ID = new DataField("SUBMISSION_FORM_ID",
 			DataField.DataType.STRING, true, PersistConsts.MAX_SIMPLE_STRING_LEN);
 
@@ -50,6 +57,8 @@ public class SubmissionAssociationTable extends StaticAssociationBase {
 	private static final DataField URI_SUBMISSION_DATA_MODEL = new DataField("URI_SUBMISSION_DATA_MODEL",
 			DataField.DataType.URI, true);
 
+	public final DataField uriMd5SubmissionFormId;
+	public final DataField uriMd5FormId;
 	public final DataField submissionFormId;
 	public final DataField submissionModelVersion;
 	public final DataField submissionUiVersion;
@@ -70,6 +79,9 @@ public class SubmissionAssociationTable extends StaticAssociationBase {
 	 */
 	private SubmissionAssociationTable(String databaseSchema) {
 		super(databaseSchema, TABLE_NAME);
+
+		fieldList.add(uriMd5SubmissionFormId = new DataField(URI_MD5_SUBMISSION_FORM_ID));
+		fieldList.add(uriMd5FormId = new DataField(URI_MD5_FORM_ID));
 		fieldList.add(submissionFormId = new DataField(SUBMISSION_FORM_ID));
 		fieldList.add(submissionModelVersion = new DataField(SUBMISSION_MODEL_VERSION));
 		fieldList.add(submissionUiVersion = new DataField(SUBMISSION_UI_VERSION));
@@ -88,6 +100,8 @@ public class SubmissionAssociationTable extends StaticAssociationBase {
 	 */
 	private SubmissionAssociationTable(SubmissionAssociationTable ref, User user) {
 		super(ref, user);
+		uriMd5SubmissionFormId = ref.uriMd5SubmissionFormId;
+		uriMd5FormId = ref.uriMd5FormId;
 		submissionFormId = ref.submissionFormId;
 		submissionModelVersion = ref.submissionModelVersion;
 		submissionUiVersion = ref.submissionUiVersion;
@@ -106,12 +120,34 @@ public class SubmissionAssociationTable extends StaticAssociationBase {
 				getSubmissionModelVersion(), getSubmissionUiVersion());
 	}
 	
+	public String getUriMd5FormId() {
+		return getStringField(uriMd5FormId);
+	}
+	
+	public void setUriMd5FormId(String value) {
+		if ( !setStringField(uriMd5FormId, value) ) {
+			throw new IllegalStateException("overflow uriMd5FormId");
+		}
+	}
+	
+	public String getUriMd5SubmissionFormId() {
+		return getStringField(uriMd5SubmissionFormId);
+	}
+	
+	public void setUriMd5SubmissionFormId(String value) {
+		if ( !setStringField(uriMd5SubmissionFormId, value) ) {
+			throw new IllegalStateException("overflow uriMd5SubmissionFormId");
+		}
+	}
+	
 	public String getSubmissionFormId() {
 		return getStringField(submissionFormId);
 	}
 	
 	public void setSubmissionFormId(String value) {
-		setStringField(submissionFormId, value);
+		if ( !setStringField(submissionFormId, value) ) {
+			throw new IllegalStateException("overflow submissionFormId");
+		}
 	}
 
 	public Long getSubmissionModelVersion() {
@@ -151,7 +187,9 @@ public class SubmissionAssociationTable extends StaticAssociationBase {
 	}
 
 	public void setUriSubmissionDataModel(String value) {
-		setStringField(uriSubmissionDataModel, value);
+		if ( !setStringField(uriSubmissionDataModel, value) ) {
+			throw new IllegalStateException("overflow uriSubmissionDataModel");
+		}
 	}
 
 	private static SubmissionAssociationTable relation = null;

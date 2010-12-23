@@ -64,17 +64,17 @@ public class FormDeleteServlet extends ServletUtilBase {
    */
   @Override
   public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-	CallingContext cc = ContextFactory.getCallingContext(getServletContext());
+	CallingContext cc = ContextFactory.getCallingContext(this, ADDR, req);
     
     PrintWriter out = resp.getWriter();
  
     try {
       
       QueryFormList formsList = new QueryFormList(true, cc);
-      FormHtmlTable formFormatter = new FormHtmlTable(formsList);
+      FormHtmlTable formFormatter = new FormHtmlTable(formsList, cc);
 
-      beginBasicHtmlResponse(TITLE_INFO, resp, req, true); // header info
-      out.print(HtmlUtil.createFormBeginTag(ConfirmServlet.ADDR, HtmlConsts.MULTIPART_FORM_DATA, HtmlConsts.POST));
+      beginBasicHtmlResponse(TITLE_INFO, resp, true, cc); // header info
+      out.print(HtmlUtil.createFormBeginTag(cc.getWebApplicationURL(ConfirmServlet.ADDR), HtmlConsts.MULTIPART_FORM_DATA, HtmlConsts.POST));
       out.print(formFormatter.generateHtmlFormTable(false, true));
       out.print(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_HIDDEN, ServletConsts.PROCESS_NUM_RECORDS, Integer.toString(formFormatter.getNumberForms())));
       out.print(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_SUBMIT, ServletConsts.PROCESS_TYPE, ProcessType.DELETE_FORM.getButtonText()));

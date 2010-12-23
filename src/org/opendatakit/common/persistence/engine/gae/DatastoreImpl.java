@@ -161,7 +161,10 @@ public class DatastoreImpl implements Datastore {
 	@Override
 	public void dropRelation(CommonFieldsBase relation, User user)
 			throws ODKDatastoreException {
-		// TODO: delete all entities in the relation
+		// TODO: delete all entities in the relation.  
+		// as long as it is a form, the form delete will delete all
+		// submissions before calling this, so we are OK for the common
+		// case.
 	}
 
 	private String constructGaeKind(CommonFieldsBase entity) {

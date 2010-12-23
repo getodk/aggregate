@@ -52,21 +52,18 @@ public class WorksheetCreatorWorkerImpl {
 	private final Long attemptCount;
 	private final String spreadsheetName;
 	private final ExternalServiceOption esType;
-	private final String baseWebServerUrl;
 	private final CallingContext cc;
 	private final String pFormIdLockId;
 	
 	public WorksheetCreatorWorkerImpl(Form form, 
 			SubmissionKey miscTasksKey, long attemptCount, 
 			String spreadsheetName, ExternalServiceOption esType,
-			String baseWebServerUrl,
 			CallingContext cc) {
 		this.form = form;
 		this.miscTasksKey = miscTasksKey;
 		this.attemptCount = attemptCount;
 		this.spreadsheetName = spreadsheetName;
 		this.esType = esType;
-		this.baseWebServerUrl = baseWebServerUrl;
 		this.cc = cc;
 		pFormIdLockId = UUID.randomUUID().toString();
 	}
@@ -74,7 +71,7 @@ public class WorksheetCreatorWorkerImpl {
 	private final GoogleSpreadsheet getGoogleSpreadsheetWithName() 
 						throws ODKDatastoreException {
 		List<ExternalService> remoteServers = FormServiceCursor
-				.getExternalServicesForForm(form, baseWebServerUrl, cc);
+				.getExternalServicesForForm(form, cc);
 
 		if (remoteServers == null) {
 			return null;
@@ -167,7 +164,7 @@ public class WorksheetCreatorWorkerImpl {
 	    	UploadSubmissions us = (UploadSubmissions) cc.getBean(BeanDefs.UPLOAD_TASK_BEAN);
 			if (!esType.equals(ExternalServiceOption.STREAM_ONLY)) {
 				us.createFormUploadTask(spreadsheet.getFormServiceCursor(),
-						baseWebServerUrl, cc);
+						cc);
 			}
 	    	r.setStatus(Status.SUCCESSFUL);
 			r.setCompletionDate(new Date());

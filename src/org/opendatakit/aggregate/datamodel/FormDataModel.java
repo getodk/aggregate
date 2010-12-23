@@ -24,13 +24,15 @@ import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.PersistConsts;
+import org.opendatakit.common.persistence.DataField.IndexType;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.security.User;
 
 /**
  * This entity defines the mapping between a submission element and a 
- * backing object and data field.  It is xform-specific, but is present
- * because the DataField object has reverse-pointers to the submission.
+ * backing object and data field.  It is xform-specific.  When processed
+ * by the FormDefinition class, it will have weak pointers to itself within
+ * the DataField object of the backing keys.
  * <p>
  * The element tags of a form and phantom sub-tables for large forms
  * are maintained in the FormDataModel table.  All tags are recorded,
@@ -39,33 +41,34 @@ import org.opendatakit.common.security.User;
  * for any subsequent processing.
  * <p>
  * Each form element records:
- * <ol><li>the uri of the form in which it belongs</li>
- * <li>the enclosing form element, if any</li>
- * <li>the position of this element within the enclosing form element</li>
- * <li>the type of this element</li>
- * <li>the name of the element (null if this is a phantom sub-table)</li>
- * <li>the column name in which it is stored (null if it is not a column)</li>
- * <li>the table name in which it is stored (null if it is not a table)</li>
+ * <ol><li>the uri of the submission data model (submission form id,
+ *  version, and uiVersion) to which it belongs (URI_SUBMISSION_DATA_MODEL)</li>
+ * <li>the enclosing form element, if any (PARENT_URI_FORM_DATA_MODEL)</li>
+ * <li>the one-based position of this element within the enclosing form element (ORDINAL_NUMBER)</li>
+ * <li>the type of this element (ELEMENT_TYPE)</li>
+ * <li>the name of the element (ELEMENT_NAME - null if this is a phantom sub-table)</li>
+ * <li>the column name in which it is stored (PERSIST_AS_COLUMN_NAME - null if it is not a column)</li>
+ * <li>the table name in which it is stored (PERSIST_AS_TABLE_NAME)</li>
+ * <li>the schema name in which it is stored (PERSIST_AS_SCHEMA_NAME)</li>
  * </ol>
- * The table in which a column appears is found by following the chain of 
- * enclosing uri form elements upward until the first non-null table name
- * is encountered.  Thus, for non-repeat groups, they would have null
- * column and table names, and their columns would be stored under the 
- * enclosing table name.  Repeat groups are their own tables.  If a dataset
+ * If this is a data element, the (column, table, schema) are all non-null.
+ * Otherwise, for a repeat, group, geopoint, phantom, multiple-choice or binary element,
+ * the column element will be null, but the (table, schema) will be non-null. 
+ * <p>
+ * Repeat groups are their own tables.  If a dataset
  * has many columns, it will be split across many tables due to limitations
  * in the underlying data store (e.g., MySql has a 65536-byte row-size limit).
  * These phantom sub-tables are represented as form elements with null element
- * names.  Structured types, such as geopoints, are stored in phantom columns.
- * The geopoint field has null column and table name.  It has form elements 
- * enclosed within it that have non-null column names, and a type indicating
- * the portion of the structured field contained in that column
- * (e.g., lat, long, alt, acc). 
+ * names and null columns.  Structured types, such as geopoints, are represented
+ * as a record to mark the structure field (with a null column name) plus one 
+ * data element underneath that marker for each value in the structured type
+ * (e.g., lat, long, alt, acc).   
  * 
  * @author mitchellsundt@gmail.com
  * @author wbrunette@gmail.com
  * 
  */
-public final class FormDataModel extends DynamicBase {
+public final class FormDataModel extends CommonFieldsBase {
 
 	/* xform element types */
 	public static enum ElementType {
@@ -100,6 +103,10 @@ public final class FormDataModel extends DynamicBase {
 	
 	private static final String TABLE_NAME = "_form_data_model";
 
+	private static final DataField URI_SUBMISSION_DATA_MODEL = new DataField("URI_SUBMISSION_DATA_MODEL", DataField.DataType.STRING, false, PersistConsts.URI_STRING_LEN).setIndexable(IndexType.HASH);
+	private static final DataField PARENT_URI_FORM_DATA_MODEL = new DataField("PARENT_URI_FORM_DATA_MODEL", DataField.DataType.STRING, false, PersistConsts.URI_STRING_LEN);
+	/** ordinal (1st, 2nd, ... ) of this item in the form element */
+	private static final DataField ORDINAL_NUMBER = new DataField("ORDINAL_NUMBER", DataField.DataType.INTEGER, false);
 	private static final DataField ELEMENT_TYPE = new DataField("ELEMENT_TYPE", DataField.DataType.STRING, false, PersistConsts.URI_STRING_LEN);
 	private static final DataField ELEMENT_NAME = new DataField("ELEMENT_NAME", DataField.DataType.STRING, true, PersistConsts.MAX_SIMPLE_STRING_LEN);
 	private static final DataField PERSIST_AS_COLUMN_NAME = new DataField("PERSIST_AS_COLUMN_NAME", DataField.DataType.STRING, true, PersistConsts.URI_STRING_LEN);
@@ -138,6 +145,9 @@ public final class FormDataModel extends DynamicBase {
 		}
 	};
 	
+	public final DataField uriSubmissionDataModel;
+	public final DataField parentUriFormDataModel;
+	public final DataField ordinalNumber;
 	public final DataField elementType;
 	public final DataField elementName;
 	public final DataField persistAsColumn;
@@ -175,6 +185,9 @@ public final class FormDataModel extends DynamicBase {
 	 */
 	FormDataModel(String schemaName) {
 		super(schemaName, TABLE_NAME);
+		fieldList.add(uriSubmissionDataModel = new DataField(URI_SUBMISSION_DATA_MODEL));
+		fieldList.add(parentUriFormDataModel = new DataField(PARENT_URI_FORM_DATA_MODEL));
+		fieldList.add(ordinalNumber = new DataField(ORDINAL_NUMBER));
 		fieldList.add(elementType = new DataField(ELEMENT_TYPE));
 		fieldList.add(elementName = new DataField(ELEMENT_NAME));
 		fieldList.add(persistAsColumn = new DataField(PERSIST_AS_COLUMN_NAME));
@@ -191,6 +204,9 @@ public final class FormDataModel extends DynamicBase {
 	private FormDataModel(FormDataModel ref, User user) {
 		super(ref, user);
 
+		uriSubmissionDataModel = ref.uriSubmissionDataModel;
+		parentUriFormDataModel = ref.parentUriFormDataModel;
+		ordinalNumber = ref.ordinalNumber;
 		elementType = ref.elementType;
 		elementName = ref.elementName;
 		persistAsColumn = ref.persistAsColumn;
@@ -206,6 +222,34 @@ public final class FormDataModel extends DynamicBase {
 	
 	public final DDRelationName getDDRelationName() {
 		return new DDRelationName();
+	}
+	
+	public final String getUriSubmissionDataModel() {
+		return getStringField(uriSubmissionDataModel);
+	}
+	
+	public final void setUriSubmissionDataModel(String value) {
+		if ( ! setStringField(uriSubmissionDataModel, value) ) {
+			throw new IllegalStateException("overflow on uriSubmissionDataModel");
+		}
+	}
+	
+	public final String getParentUriFormDataModel() {
+		return getStringField(parentUriFormDataModel);
+	}
+	
+	public final void setParentUriFormDataModel(String value) {
+		if ( ! setStringField(parentUriFormDataModel, value) ) {
+			throw new IllegalStateException("overflow on parentUriFormDataModel");
+		}
+	}
+
+	public final Long getOrdinalNumber() {
+		return getLongField(ordinalNumber);
+	}
+
+	public final void setOrdinalNumber(Long value) {
+		setLongField(ordinalNumber, value);
 	}
 
 	public final ElementType getElementType() {
@@ -422,13 +466,13 @@ public final class FormDataModel extends DynamicBase {
 	}
 	
 	public void print(PrintStream out) {
-		String ppk = getParentAuri();
+		String ppk = getParentUriFormDataModel();
 		if ( ppk == null ) {
 			ppk = "";
 		}
 		out.format("FDM(%d,%s)  fdmSubmissionUri %s\n",
-				getOrdinalNumber().intValue(), ppk, getTopLevelAuri());
-		String tpk = getTopLevelAuri();
+				getOrdinalNumber().intValue(), ppk, getUriSubmissionDataModel());
+		String tpk = getUriSubmissionDataModel();
 		if ( tpk == null ) {
 			tpk = "";
 		}

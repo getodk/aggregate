@@ -48,20 +48,18 @@ public class KmlWorkerImpl {
 	private final FormElementModel titleField;
 	private final FormElementModel geopointField;
 	private final FormElementModel imageField;
-	private final String baseWebServerUrl;
 	private final CallingContext cc;
 
 	public KmlWorkerImpl(Form form, SubmissionKey persistentResultsKey,
 			long attemptCount, FormElementModel titleField,
 			FormElementModel geopointField, FormElementModel imageField,
-			String baseWebServerUrl, CallingContext cc) {
+			CallingContext cc) {
 		this.form = form;
 		this.persistentResultsKey = persistentResultsKey;
 		this.attemptCount = attemptCount;
 		this.titleField = titleField;
 		this.geopointField = geopointField;
 		this.imageField = imageField;
-		this.baseWebServerUrl = baseWebServerUrl;
 		this.cc = cc;
 	}
 
@@ -74,7 +72,7 @@ public class KmlWorkerImpl {
 	    // create KML
 	    QueryByDate query = new QueryByDate(form, BasicConsts.EPOCH, false, ServletConsts.FETCH_LIMIT,
 	    		cc);
-	    SubmissionFormatter formatter = new KmlFormatter(form, baseWebServerUrl, geopointField,
+	    SubmissionFormatter formatter = new KmlFormatter(form, cc.getServerURL(), geopointField,
 	        titleField, imageField, pw, null, cc);
 	    formatter.processSubmissions(query.getResultSubmissions());
 

@@ -70,7 +70,7 @@ public class FormMultipleValueServlet extends ServletUtilBase {
 	@Override
 	public void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws IOException {
-		CallingContext cc = ContextFactory.getCallingContext(getServletContext());
+		CallingContext cc = ContextFactory.getCallingContext(this, ADDR, req);
 
 		// verify parameters are present
 		String keyString = getParameter(req, ServletConsts.FORM_ID);
@@ -90,12 +90,11 @@ public class FormMultipleValueServlet extends ServletUtilBase {
 				SubmissionElement v = sub.resolveSubmissionKey(parts);
 				RepeatSubmissionType b = (RepeatSubmissionType) v;
 
-				HtmlFormatter formatter = new HtmlFormatter(form, getServerURL(req), resp
+				HtmlFormatter formatter = new HtmlFormatter(form, cc.getServerURL(), resp
 						.getWriter(), null, false);
 
 				// header info
-				beginBasicHtmlResponse(TITLE_INFO + b.getPropertyName(), resp,
-						req, true);
+				beginBasicHtmlResponse(TITLE_INFO + b.getPropertyName(), resp, true, cc);
 
 				formatter.processSubmissionSetPublic(b.getSubmissionSets(), b
 						.getElement());
