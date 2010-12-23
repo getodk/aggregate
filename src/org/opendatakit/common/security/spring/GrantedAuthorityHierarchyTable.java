@@ -131,7 +131,8 @@ public class GrantedAuthorityHierarchyTable extends CommonFieldsBase {
 				GrantedAuthorityNames.ROLE_USER,
 				GrantedAuthorityNames.ROLE_ANALYST,
 				GrantedAuthorityNames.ROLE_SERVICES_ADMIN,
-				GrantedAuthorityNames.ROLE_XFORMS_ADMIN
+				GrantedAuthorityNames.ROLE_XFORMS_ADMIN,
+				GrantedAuthorityNames.ROLE_ACCESS_ADMIN
 			} ) {
 			t = datastore.createEntityUsingRelation(tRelation, user);
 			t.setDominatingGrantedAuthority(ra);
