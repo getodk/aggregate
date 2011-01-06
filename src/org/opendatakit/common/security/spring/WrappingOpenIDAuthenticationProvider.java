@@ -81,7 +81,7 @@ public class WrappingOpenIDAuthenticationProvider extends OpenIDAuthenticationPr
 		eMail = SecurityUtils.normalizeUsername(eMail, null);
 		String mailtoDomain = SecurityUtils.getMailtoDomain(eMail);
 		
-		AggregateUser userDetails = (AggregateUser) rawUserDetails;
+		UserDetails userDetails = rawUserDetails;
 		
 		Set<GrantedAuthority> authorities = new HashSet<GrantedAuthority>();
 		
@@ -93,9 +93,9 @@ public class WrappingOpenIDAuthenticationProvider extends OpenIDAuthenticationPr
 			authorities.add(new GrantedAuthorityImpl(mailtoAuthority));
 		}
 
-		AggregateUser partialDetails = null;
+		UserDetails partialDetails = null;
 		try {
-			partialDetails = (AggregateUser) wrappingUserDetailsService.loadUserByUsername(eMail);
+			partialDetails = wrappingUserDetailsService.loadUserByUsername(eMail);
 			authorities.addAll(partialDetails.getAuthorities());
 		} catch (Exception e) {
 			partialDetails = userDetails;
