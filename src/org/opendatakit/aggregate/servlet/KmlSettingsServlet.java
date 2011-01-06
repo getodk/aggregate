@@ -86,8 +86,8 @@ public class KmlSettingsServlet extends ServletUtilBase {
 	CallingContext cc = ContextFactory.getCallingContext(this, ADDR, req);
 
     // get parameter
-    String odkId = getParameter(req, ServletConsts.FORM_ID);
-    if (odkId == null) {
+    String formId = getParameter(req, ServletConsts.FORM_ID);
+    if (formId == null) {
       errorMissingKeyParam(resp);
       return;
     }
@@ -95,7 +95,7 @@ public class KmlSettingsServlet extends ServletUtilBase {
     // get form
     Form form = null;
     try {
-      form = Form.retrieveForm(odkId, cc);
+      form = Form.retrieveForm(formId, cc);
       geopointNodesNames = new ArrayList<FormElementKey>();
       binaryNodeNames = new ArrayList<FormElementKey>();
       allNodesNames = new ArrayList<FormElementKey>();

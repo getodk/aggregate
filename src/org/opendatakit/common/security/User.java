@@ -17,6 +17,9 @@ package org.opendatakit.common.security;
 
 
 /**
+ * Minimal features of a user.  Note that the security permissions granted a 
+ * user are not defined here.  That is a security aspect that doesn't get 
+ * exposed to the application layer.
  * 
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com

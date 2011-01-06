@@ -32,6 +32,7 @@ import org.opendatakit.aggregate.datamodel.FormElementModel.ElementType;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.aggregate.submission.SubmissionKey;
+import org.opendatakit.aggregate.submission.SubmissionKeyPart;
 import org.opendatakit.aggregate.submission.SubmissionSet;
 import org.opendatakit.aggregate.submission.type.BlobSubmissionType;
 import org.opendatakit.aggregate.submission.type.BooleanSubmissionType;
@@ -544,6 +545,38 @@ public class Form {
   public FormElementModel findElementByName(String name) {
 	  return findElementByNameHelper( getTopLevelGroupElement(), name );
   }
+
+  public FormElementModel getFormElementModel(
+			List<SubmissionKeyPart> submissionKeyParts) {
+		FormElementModel m = null;
+		boolean formIdElement = true;
+		for (SubmissionKeyPart p : submissionKeyParts) {
+			if ( formIdElement ) {
+				if (!p.getElementName().equals(getFormId())) {
+					return null;
+				}
+				formIdElement = false;
+			} else if (m == null) {
+				m = getTopLevelGroupElement();
+				if ( !p.getElementName().equals(m.getElementName())) {
+					return null;
+				}
+			} else {
+				boolean found = false;
+				for (FormElementModel c : m.getChildren()) {
+					if (c.getElementName().equals(p.getElementName())) {
+						m = c;
+						found = true;
+						break;
+					}
+				}
+				if (!found) {
+					return null;
+				}
+			}
+		}
+		return m;
+	}
   
   private void getRepeatGroupsInModelHelper(FormElementModel current, List<FormElementModel> accumulation) {
 	  for ( FormElementModel m : current.getChildren() ) {

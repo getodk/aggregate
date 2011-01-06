@@ -5,50 +5,25 @@
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.0.xsd">
 
 	<beans:import resource="classpath:odk-security-settings.xml"/>
+	
+	<!--	The Basic Authentication passwords are sha1-encoded with a salt -->
+	<beans:bean id="basicAuthenticationMessageDigestPasswordEncoder"
+			class="org.springframework.security.authentication.encoding.ShaPasswordEncoder"/>
 
-	<!--	Configure user names and passwords here for ODK Collect digestAuth access -->
-	<!--	  TODO: can the password be something other than plain text? -->
-	<beans:bean id="digestUnderlyingLoginService" class="org.opendatakit.common.security.spring.UserDetailsServiceImpl">
-		<beans:property name="datastore" ref="datastore"/>
-		<beans:property name="userService" ref="user_service"/>
-		<beans:property name="passwordType" value="DigestAuth"/>
-	</beans:bean>
-
-	<!--	If using BasicAuth this defines the underlying user service -->
-	<!--	basicAuthenticationProvider is configured to work with an MD5 hash of the password  -->
-	<beans:bean id="basicUnderlyingLoginService" class="org.opendatakit.common.security.spring.UserDetailsServiceImpl">
-		<beans:property name="datastore" ref="datastore"/>
-		<beans:property name="userService" ref="user_service"/>
-		<beans:property name="passwordType" value="BasicAuth"/>
-	</beans:bean>
-
-<!--	If using OpenID (for all providers), this user service re-wraps the-->
-<!--	UserDetails from the specific authentication domain (gmail, yahoo, etc.)-->
-<!--	to end up with the user's eMail as their name, rather than their OpenID string-->
-	 
-	<beans:bean id="openIdUserDetailsService" class="org.opendatakit.common.security.spring.UserDetailsServiceImpl">
-		<beans:property name="datastore" ref="datastore"/>
-		<beans:property name="userService" ref="user_service"/>
-		<beans:property name="passwordType" value="Random"/>
-	</beans:bean>
-
-	<!--	Configure the role hierarchy.  -->
-	<!--	For now, group-to-role mappings go here -->
-
-<!--	The DelegatingUserDetailsService and DelegatingUserDetailsContextMapper (for LDAP)-->
-<!--	will automatically convert the mailtoDomain to an authority:-->
-<!--		gmail.com  -> MAILTO_GMAIL_COM-->
-<!--		uw.edu  -> MAILTO_UW_EDU-->
-<!--	These classes will also automatically add USER_IS_AUTHENTICATED to the user.-->
-<!--	And they should be configured to add the appropriate MODE and AUTH authorities.-->
-<!--	E.g., -->
-<!--	     AUTH_DIGEST-->
-<!--	     AUTH_OPENID-->
-<!--	     AUTH_BASIC-->
-<!--	     AUTH_LDAP-->
-<!--	and, for discriminating the mode that is being accessed, -->
-<!--	     MODE_DEVICE  - - assumes the filter-chains define digestAuth only for ODK Collect APIs.-->
-<!--	     MODE_WEBSITE - - assumes the filter-chains define the other auths for website access.-->
+	<!--	The group and role hierarchy is maintained in the granted authority hierarchy table.  -->
+	<!--	Unauthenticated accesses possess the USER_IS_ANONYMOUS group -->
+	<!--    Authenticated accesses possess the USER_IS_AUTHENTICATED group and -->
+	<!--    will possess a group prefixed by MAILTO_ that describes their e-mail domain.  i.e., -->
+	<!-- 		gmail.com  -> MAILTO_GMAIL_COM-->
+	<!--		uw.edu  -> MAILTO_UW_EDU-->
+	<!--    If the user is registered (present in the registered users table), the user will also --> 
+	<!--  	possess the USER_IS_REGISTERED group.  -->
+	<!--    An authenticated users will also possess an AUTH_ group defining the mechanism by which -->
+	<!--    they were authenticated.  i.e., either AUTH_OPENID or AUTH_LOCAL -->
+	<!--  -->
+	<!-- 	The granted authority hierarchy table defines the mapping of these groups, and -->
+	<!-- 	other site-specific administrator-defined groups to the roles needed to access --> 
+	<!--	web pages on the site. -->
 	
 	<beans:bean id="hierarchicalRoleRelationships" class="org.opendatakit.common.security.spring.RoleHierarchyImpl">
 		<beans:property name="datastore" ref="datastore"/>
@@ -56,17 +31,18 @@
 	</beans:bean>
 	
 	<!--	Configure the access policy to the pages here	-->
-<!--	You can do things like this: and hasRole('AUTH_DIGEST') -->
+	<!--	You can do things like this: and hasRole('AUTH_LOCAL') -->
 	<filter-security-metadata-source id="securityPolicy" use-expressions="true">
 		<intercept-url pattern="/favicon.ico" access="true" />
 		<intercept-url pattern="/odk_color.png" access="true" />
 		<intercept-url pattern="/index.html" access="true" />
-		<intercept-url pattern="/google_login.html" access="isAnonymous()" />
+		<intercept-url pattern="/openid_login.html" access="isAnonymous()" />
 		<intercept-url pattern="/UploadApplet" access="isFullyAuthenticated()" />
 		<intercept-url pattern="/upload/**" access="isFullyAuthenticated()" />
 		<intercept-url pattern="/Briefcase" access="isFullyAuthenticated()" />
 		<intercept-url pattern="/briefcase/**" access="isFullyAuthenticated()" />
-		<intercept-url pattern="/logout.html" access="isAnonymous()" />
+		<intercept-url pattern="/logout.html" access="true" />
+		<intercept-url pattern="/local_login.html" access="isFullyAuthenticated() and hasRole('AUTH_LOCAL')" />
 		<intercept-url pattern="/xformsDownload" access="isFullyAuthenticated() and hasRole('ROLE_FORM_DOWNLOAD')" />
 		<intercept-url pattern="/xformsList" access="isFullyAuthenticated() and hasRole('ROLE_FORM_LIST')" />
 		<intercept-url pattern="/xformsManifest" access="isFullyAuthenticated() and hasRole('ROLE_FORM_LIST')" />
@@ -74,55 +50,27 @@
 		<intercept-url pattern="/formXml" access="hasRole('ROLE_FORM_DOWNLOAD')" />
 		<intercept-url pattern="/submission" access="hasRole('ROLE_SUBMISSION_UPLOAD')" />
 		<intercept-url pattern="/www/**" access="isFullyAuthenticated() and hasRole('ROLE_USER')" />
+		<intercept-url pattern="/ssl/**" access="isFullyAuthenticated() and hasRole('USER_IS_REGISTERED') and hasRole('ROLE_USER')" />
 		<intercept-url pattern="/view/**" access="isFullyAuthenticated() and hasRole('ROLE_ANALYST')" />
 <!--	TODO: gae should be: hasRole(USER_IS_DAEMON) -->
 		<intercept-url pattern="/gae/**" access="true" /> 
 		<intercept-url pattern="/extern/**" access="isFullyAuthenticated() and hasRole('ROLE_SERVICES_ADMIN')" />
 		<intercept-url pattern="/admin/**" access="isFullyAuthenticated() and hasRole('ROLE_XFORMS_ADMIN')" />
+		<intercept-url pattern="/access/**" access="isFullyAuthenticated() and hasRole('ROLE_ACCESS_ADMIN')" />
 		<intercept-url pattern="/**" access="isAnonymous()" />
 	</filter-security-metadata-source>
 
-	<!-- Pages being filtered and the filters applied to them. -->
-	<!--  Prerequisite for the applying of the access policies above -->
-
+	<!-- Pages being filtered and the filters applied to them (everything). -->
+	<!-- Prerequisite for the applying of the access policies above.   -->
 	<beans:bean id="serverSpringSecurityFilterChain"
 		class="org.springframework.security.web.FilterChainProxy">
 		<filter-chain-map path-type="ant">
-
-			<!--			If you need multiple OpenId providers (e.g., google and Yahoo, you need multiple login pages) -->
-<!--			<filter-chain pattern="/google_login.html"-->
-<!--				filters="securityContextPersistenceFilter,logoutFilter,anonymousFilter,exceptionOpenIdTranslationFilter,filterSecurityInterceptor" />-->
-
-			<!--			Filter chains for anonymous authentication (login, logout)	-->
-<!--			<filter-chain pattern="/logout.html"-->
-<!--				filters="securityContextPersistenceFilter,logoutFilter,anonymousFilter,exceptionOpenIdTranslationFilter,filterSecurityInterceptor" />-->
-			<!--
-				Filter chains for digest authentication (used by ODK Collect)
-				(exceptionDigestTranslationFilter is critical!)
-			-->
-			<filter-chain pattern="/xformsDownload"
-				filters="securityContextPersistenceFilter,logoutFilter,anonymousFilter,digestFilter,requestCacheAwareFilter,securityContextHolderAwareFilter,sessionManagerFilter,exceptionDigestTranslationFilter,filterSecurityInterceptor" />
-			<filter-chain pattern="/xformsList"
-				filters="securityContextPersistenceFilter,logoutFilter,anonymousFilter,digestFilter,requestCacheAwareFilter,securityContextHolderAwareFilter,sessionManagerFilter,exceptionDigestTranslationFilter,filterSecurityInterceptor" />
-			<filter-chain pattern="/xformsManifest"
-				filters="securityContextPersistenceFilter,logoutFilter,anonymousFilter,digestFilter,requestCacheAwareFilter,securityContextHolderAwareFilter,sessionManagerFilter,exceptionDigestTranslationFilter,filterSecurityInterceptor" />
-			<filter-chain pattern="/formList"
-				filters="securityContextPersistenceFilter,logoutFilter,anonymousFilter,digestFilter,requestCacheAwareFilter,securityContextHolderAwareFilter,sessionManagerFilter,exceptionDigestTranslationFilter,filterSecurityInterceptor" />
-			<filter-chain pattern="/formXml"
-				filters="securityContextPersistenceFilter,logoutFilter,anonymousFilter,digestFilter,requestCacheAwareFilter,securityContextHolderAwareFilter,sessionManagerFilter,exceptionDigestTranslationFilter,filterSecurityInterceptor" />
-			<filter-chain pattern="/submission"
-				filters="securityContextPersistenceFilter,logoutFilter,anonymousFilter,digestFilter,requestCacheAwareFilter,securityContextHolderAwareFilter,sessionManagerFilter,exceptionDigestTranslationFilter,filterSecurityInterceptor" />
-
-			<!--			Alternate #1: Filter chain for BasicAuth authentication -->
-			<!--
-				<filter-chain pattern="/**"
-				filters="securityContextPersistenceFilter,logoutFilter,anonymousFilter,basicAuthFilter,requestCacheAwareFilter,securityContextHolderAwareFilter,sessionManagerFilter,exceptionBasicTranslationFilter,filterSecurityInterceptor"/>
-			-->
-			<!--			Alternate #2: Filter chain for openID authentication -->
+			<filter-chain pattern="/local_login.html"
+				filters="securityContextPersistenceFilter,logoutFilter,anonymousFilter,${security.server.deviceAuthentication}AuthFilter,requestCacheAwareFilter,securityContextHolderAwareFilter,sessionManagerFilter,localExceptionTranslationFilter,filterSecurityInterceptor" />
 			<filter-chain pattern="/*"
-				filters="securityContextPersistenceFilter,logoutFilter,anonymousFilter,digestFilter,openIdFilter,requestCacheAwareFilter,securityContextHolderAwareFilter,sessionManagerFilter,exceptionOpenIdTranslationFilter,filterSecurityInterceptor" />
+				filters="securityContextPersistenceFilter,logoutFilter,anonymousFilter,${security.server.deviceAuthentication}AuthFilter,openIdFilter,requestCacheAwareFilter,securityContextHolderAwareFilter,sessionManagerFilter,exceptionTranslationFilter,filterSecurityInterceptor" />
 			<filter-chain pattern="/**"
-				filters="securityContextPersistenceFilter,logoutFilter,anonymousFilter,digestFilter,openIdFilter,requestCacheAwareFilter,securityContextHolderAwareFilter,sessionManagerFilter,exceptionOpenIdTranslationFilter,filterSecurityInterceptor" />
+				filters="securityContextPersistenceFilter,logoutFilter,anonymousFilter,${security.server.deviceAuthentication}AuthFilter,openIdFilter,requestCacheAwareFilter,securityContextHolderAwareFilter,sessionManagerFilter,exceptionTranslationFilter,filterSecurityInterceptor" />
 		</filter-chain-map>
 	</beans:bean>
 
@@ -145,7 +93,7 @@
 						Basic and Digest Auth don't have server side logout (may want to
 						invalidate session to work around this).
 					-->
-					<!--				OpenID logins can be disabled through this mechanism.  -->
+					<!-- OpenID logins can be disabled through this mechanism.  -->
 					<beans:property name="invalidateHttpSession" value="true"/>
 				</beans:bean>
 			</beans:list>
@@ -158,26 +106,65 @@
 	<beans:bean id="securityContextHolderAwareFilter"
 		class="org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter" />
 
-	<beans:bean id="anonymousFilter"
-		class="org.springframework.security.web.authentication.AnonymousAuthenticationFilter">
-		<beans:property name="key" value="${security.server.siteKey}" />
-		<beans:property name="userAttribute" value="anonymousUser,USER_IS_ANONYMOUS" />
-	</beans:bean>
-
 	<beans:bean id="sessionManagerFilter"
 		class="org.springframework.security.web.session.SessionManagementFilter">
 		<beans:constructor-arg ref="securityContextRepository" />
 	</beans:bean>
 
-	<!--
-		If this is an interactive page, request a login through whatever means
-		is appropriate.
-	-->
+	<!--	This class determines what authentication to initiate.  It uses the -->
+	<!--	User-Agent header value to determine whether it is being accessed by a -->
+	<!--	browser or the device.  If it is not a browser, it does basic or digest auth.-->
+	<!--	Otherwise, it does openId auth.-->
+	<beans:bean id="exceptionTranslationFilter"
+		class="org.springframework.security.web.access.ExceptionTranslationFilter">
+		<beans:property name="authenticationEntryPoint">
+			<beans:bean
+				class="org.springframework.security.web.authentication.DelegatingAuthenticationEntryPoint">
+				<beans:constructor-arg>
+					<beans:map>
+						<beans:entry key="hasHeader('User-Agent','Chrome') or hasHeader('User-Agent','Safari')" value-ref="openIdEntryPoint" />
+						<beans:entry key="hasHeader('User-Agent','Mozilla')" value-ref="openIdEntryPoint" />
+						<beans:entry key="hasHeader('User-Agent','Firefox') or hasHeader('User-Agent','MSIE') or hasHeader('User-Agent','Opera')" value-ref="openIdEntryPoint" />
+					</beans:map>
+				</beans:constructor-arg>
+				<beans:property name="defaultEntryPoint" ref="${security.server.deviceAuthentication}EntryPoint" />
+			</beans:bean>
+		</beans:property>
+	</beans:bean>
 
-	<!--			BasicAuth - if you want it -->
+	<!-- This forces the login to use the configured locally-held credential mechanism -->
+	<beans:bean id="localExceptionTranslationFilter"
+		class="org.springframework.security.web.access.ExceptionTranslationFilter">
+		<beans:property name="authenticationEntryPoint" ref="${security.server.deviceAuthentication}EntryPoint" />
+	</beans:bean>
+
+	<!-- 			Anonymous User -->
+
+	<beans:bean id="anonymousFilter"
+		class="org.springframework.security.web.authentication.AnonymousAuthenticationFilter">
+		<beans:property name="key" value="${security.server.siteKey}" />
+		<beans:property name="userAttribute" value="anonymousUser,USER_IS_ANONYMOUS" />
+	</beans:bean>
+	
+	<beans:bean id="anonymousProvider"
+		class="org.springframework.security.authentication.AnonymousAuthenticationProvider">
+		<beans:property name="key" value="${security.server.siteKey}" />
+	</beans:bean>
+
+	<!--			Basic Authentication -->
+	
 	<beans:bean id="basicAuthFilter"
 		class="org.springframework.security.web.authentication.www.BasicAuthenticationFilter">
-		<beans:property name="authenticationManager" ref="basicAuthenticationManager" />
+		<beans:property name="authenticationManager">
+			<beans:bean class="org.springframework.security.authentication.ProviderManager">
+				<beans:property name="providers">
+					<beans:list>
+						<beans:ref bean="basicAuthenticationProvider" />
+						<beans:ref bean="anonymousProvider" />
+					</beans:list>
+				</beans:property>
+			</beans:bean>
+		</beans:property>
 		<beans:property name="authenticationEntryPoint" ref="basicEntryPoint" />
 	</beans:bean>
 
@@ -186,148 +173,144 @@
 		<beans:property name="realmName" value="${security.server.realm.realmString}" />
 	</beans:bean>
 
-	<beans:bean id="exceptionBasicTranslationFilter"
-		class="org.springframework.security.web.access.ExceptionTranslationFilter">
-		<beans:property name="authenticationEntryPoint" ref="basicEntryPoint" />
-	</beans:bean>
-
-	<beans:bean id="basicAuthenticationManager"
-		class="org.springframework.security.authentication.ProviderManager">
-		<beans:property name="providers">
-			<beans:list>
-				<beans:ref bean="basicAuthenticationProvider" />
-				<beans:ref bean="anonymousProvider" />
-			</beans:list>
-		</beans:property>
-	</beans:bean>
 
 	<beans:bean id="basicAuthenticationProvider"
 		class="org.springframework.security.authentication.dao.DaoAuthenticationProvider">
-        <beans:property name="passwordEncoder">
-			<beans:bean
-			class="org.springframework.security.authentication.encoding.Md5PasswordEncoder"/>
-        </beans:property> 
+        <beans:property name="passwordEncoder" ref="basicAuthenticationMessageDigestPasswordEncoder" />
+        <beans:property name="saltSource">
+        	<beans:bean class="org.opendatakit.common.security.spring.AggregateUserSaltSource"/>
+        </beans:property>
 		<beans:property name="userDetailsService" ref="basicLoginService" />
 	</beans:bean>
 
 	<beans:bean id="basicLoginService"
 		class="org.opendatakit.common.security.spring.DelegatingUserDetailsService">
-		<beans:property name="userDetailsService" ref="basicUnderlyingLoginService" />
+		<beans:property name="userDetailsService">
+			<!--	Known registered users are maintained in the registered users table -->
+			<!--	Passwords are stored as salted sha1 hashes-->
+			<beans:bean class="org.opendatakit.common.security.spring.UserDetailsServiceImpl">
+				<beans:property name="datastore" ref="datastore"/>
+				<beans:property name="userService" ref="user_service"/>
+				<beans:property name="passwordType" value="BasicAuth"/>
+			</beans:bean>
+		</beans:property>
 		<beans:property name="passDownUriUser" value="true" />
 		<beans:property name="mailtoDomain"	value="${security.server.realm.mailToDomain}" />
 		<beans:property name="authorities">
 			<beans:list>
-				<beans:value>AUTH_BASIC</beans:value>
-				<beans:value>MODE_WEBSITE</beans:value>
+				<beans:value>AUTH_LOCAL</beans:value>
 			</beans:list>
 		</beans:property>
-	</beans:bean>
-
-
-	<!--		Gmail OpenID authentication mechanism	(copy for Yahoo, others) -->
-	<!--		Gmail OpenID authentication mechanism	(copy for Yahoo, others) -->
-	<!--		Gmail OpenID authentication mechanism	(copy for Yahoo, others) -->
-	<!--		Gmail OpenID authentication mechanism	(copy for Yahoo, others) -->
-
-	<beans:bean id="gmailUserDetailsService"
-		class="org.opendatakit.common.security.spring.DelegatingUserDetailsService">
-		<beans:property name="userDetailsService">
-			<beans:bean
-				class="org.opendatakit.common.security.spring.EmptyUserDetailsService" />
-		</beans:property>
-		<beans:property name="mailtoDomain"	value="gmail.com" />
-		<beans:property name="authorities">
-			<beans:list>
-				<beans:value>AUTH_OPENID</beans:value>
-				<beans:value>MODE_WEBSITE</beans:value>
-			</beans:list>
-		</beans:property>
-	</beans:bean>
-
-	<beans:bean id="openId4JavaConsumer"
-		class="org.springframework.security.openid.OpenID4JavaConsumer">
-		<beans:constructor-arg name="attributes">
-			<beans:list>
-				<beans:bean class="org.springframework.security.openid.OpenIDAttribute">
-					<beans:constructor-arg name="name" value="email" />
-					<beans:constructor-arg name="type"
-						value="http://axschema.org/contact/email" />
-					<beans:property name="required" value="true" />
-				</beans:bean>
-				<beans:bean class="org.springframework.security.openid.OpenIDAttribute">
-					<beans:constructor-arg name="name" value="name" />
-					<beans:constructor-arg name="type"
-						value="http://axschema.org/contact/namePerson/first" />
-				</beans:bean>
-			</beans:list>
-		</beans:constructor-arg>
-	</beans:bean>
-	
-<!--	There are magic settings for this to work on GoogleAppEngine.  See odk-settings.xml -->
-    
-	<beans:bean id="openIdFilter"
-		class="org.springframework.security.openid.OpenIDAuthenticationFilter">
-		<beans:property name="authenticationManager" ref="openIdAuthenticationManager" />
-		<beans:property name="consumer" ref="openId4JavaConsumer" />
-	</beans:bean>
-
-	<beans:bean id="openIdEntryPoint"
-		class="org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint">
-		<beans:property name="loginFormUrl" value="/google_login.html" />
-		<!--        <beans:property name="forceHttps" value="true"/>-->
-	</beans:bean>
-
-	<beans:bean id="openIdAuthenticationManager"
-		class="org.springframework.security.authentication.ProviderManager">
-		<beans:property name="providers">
-			<beans:list>
-				<beans:ref bean="openIdAuthenticationProvider" />
-				<beans:ref bean="anonymousProvider" />
-			</beans:list>
-		</beans:property>
-	</beans:bean>
-
-	<beans:bean id="exceptionOpenIdTranslationFilter"
-		class="org.springframework.security.web.access.ExceptionTranslationFilter">
-		<beans:property name="authenticationEntryPoint" ref="openIdEntryPoint" />
-	</beans:bean>
-
-	<beans:bean id="openIdAuthenticationProvider"
-		class="org.opendatakit.common.security.spring.WrappingOpenIDAuthenticationProvider">
-<!--		Stub userDetailsService that accepts any authenticated party-->
-		<beans:property name="userDetailsService" ref="gmailUserDetailsService" />
-<!--		userDetailsService that retrieves registeredUser info based upon the party's mailto: address -->
-		<beans:property name="wrappingUserDetailsService" ref="openIdUserDetailsService" />
 	</beans:bean>
 
 	<!--
 		Digest Authentication configuration. This is used for device access.
 	-->
-	<!--	 It consists of a filter, an entry point, and -->
-	<!--
-		an exceptionTranslationFilter instance that references the entry
-		point.
-	-->
 
-	<beans:bean id="digestFilter"
+	<beans:bean id="digestAuthFilter"
 		class="org.springframework.security.web.authentication.www.DigestAuthenticationFilter">
+		<beans:property name="passwordAlreadyEncoded" value="true" />
 		<beans:property name="userDetailsService" ref="digestLoginService" />
 		<beans:property name="authenticationEntryPoint" ref="digestEntryPoint" />
 	</beans:bean>
 
 	<beans:bean id="digestEntryPoint"
 		class="org.springframework.security.web.authentication.www.DigestAuthenticationEntryPoint">
-		<beans:property name="realmName"
-			value="${security.server.realm.realmString}" />
+		<beans:property name="realmName" value="${security.server.realm.realmString}" />
 		<beans:property name="key" value="${security.server.siteKey}" />
 		<beans:property name="nonceValiditySeconds" value="10" />
 	</beans:bean>
 
-	<beans:bean id="exceptionDigestTranslationFilter"
-		class="org.springframework.security.web.access.ExceptionTranslationFilter">
-		<beans:property name="authenticationEntryPoint" ref="digestEntryPoint">
+	<beans:bean id="digestAuthenticationProvider"
+		class="org.springframework.security.authentication.dao.DaoAuthenticationProvider">
+		<beans:property name="userDetailsService" ref="digestLoginService" />
+	</beans:bean>
+
+	<beans:bean id="digestLoginService"
+		class="org.opendatakit.common.security.spring.DelegatingUserDetailsService">
+		<beans:property name="userDetailsService">
+			<!--	Known registered users are maintained in the registered users table -->
+			<!--	Passwords are stored as the A1 value in the protocol (MD5 hash of username + realm string + password). -->
+			<beans:bean class="org.opendatakit.common.security.spring.UserDetailsServiceImpl">
+				<beans:property name="datastore" ref="datastore"/>
+				<beans:property name="userService" ref="user_service"/>
+				<beans:property name="passwordType" value="DigestAuth"/>
+			</beans:bean>
+		</beans:property>
+		<beans:property name="mailtoDomain"	value="${security.server.realm.mailToDomain}" />
+		<beans:property name="passDownUriUser" value="true" />
+		<beans:property name="authorities">
+			<beans:list>
+				<beans:value>AUTH_LOCAL</beans:value>
+			</beans:list>
 		</beans:property>
 	</beans:bean>
+
+	<!--		Gmail OpenID authentication mechanism	(copy for Yahoo, others) -->
+	<!--		Gmail OpenID authentication mechanism	(copy for Yahoo, others) -->
+	<!--		Gmail OpenID authentication mechanism	(copy for Yahoo, others) -->
+	<!--		Gmail OpenID authentication mechanism	(copy for Yahoo, others) -->
+	
+	<!--	There are additional settings for this to work on GoogleAppEngine. -->
+	<!--    See odk-security-settings.xml -->
+    
+	<beans:bean id="openIdFilter"
+		class="org.springframework.security.openid.OpenIDAuthenticationFilter">
+		<beans:property name="authenticationManager">
+			<beans:bean class="org.springframework.security.authentication.ProviderManager">
+				<beans:property name="providers">
+					<beans:list>
+						<beans:ref bean="openIdAuthenticationProvider" />
+						<beans:ref bean="anonymousProvider" />
+					</beans:list>
+				</beans:property>
+			</beans:bean>
+		</beans:property>
+		<beans:property name="consumer">
+			<beans:bean class="org.springframework.security.openid.OpenID4JavaConsumer">
+				<beans:constructor-arg name="attributes">
+					<beans:list>
+						<beans:bean class="org.springframework.security.openid.OpenIDAttribute">
+							<beans:constructor-arg name="name" value="email" />
+							<beans:constructor-arg name="type"
+								value="http://axschema.org/contact/email" />
+							<beans:property name="required" value="true" />
+						</beans:bean>
+					</beans:list>
+				</beans:constructor-arg>
+			</beans:bean>
+		</beans:property>
+	</beans:bean>
+
+	<beans:bean id="openIdEntryPoint"
+		class="org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint">
+		<beans:property name="loginFormUrl" value="/openid_login.html" />
+	</beans:bean>
+
+	<!--	This OpenId authentication implementation first accepts all authenticated -->
+	<!--	users (via the EmptyUserDetailsService).  If you are using more than gmail, -->
+	<!--    you just need to modify the /openid_login.html to add a button to the alternate -->
+	<!--    OpenId sites.  After accepting the authentication, this provider then -->
+	<!--	determines whether the user is a registered user, using the wrappingUserDetailsService.-->
+	<!--	Finally, it adds the AUTH_OPENID and the MAILTO_domain granted authorities to the set of -->
+	<!--	the registered user's granted authorities (which is empty if the user is not registered). -->
+	<beans:bean id="openIdAuthenticationProvider"
+		class="org.opendatakit.common.security.spring.WrappingOpenIDAuthenticationProvider">
+		<!--	Stub userDetailsService that accepts any authenticated party-->
+		<beans:property name="userDetailsService">
+			<beans:bean class="org.opendatakit.common.security.spring.EmptyUserDetailsService" />
+		</beans:property>
+		<beans:property name="wrappingUserDetailsService">
+			<!--	Known registered users are maintained in the registered users table -->
+			<!--	There is no password for OpenId-authenticated users, so it is set to a random value. -->
+			<beans:bean id="openIdUserDetailsService" class="org.opendatakit.common.security.spring.UserDetailsServiceImpl">
+				<beans:property name="datastore" ref="datastore"/>
+				<beans:property name="userService" ref="user_service"/>
+				<beans:property name="passwordType" value="Random"/>
+			</beans:bean>
+		</beans:property>
+	</beans:bean>
+
 
 	<!--		This enforces the security applied to specific URLs   -->
 
@@ -367,98 +350,12 @@
 			<beans:list>
 				<beans:ref bean="digestAuthenticationProvider" />
 				<beans:ref bean="basicAuthenticationProvider" />
+				<beans:ref bean="openIdAuthenticationProvider" />
 				<beans:ref bean="anonymousProvider" />
 			</beans:list>
 		</beans:property>
 	</beans:bean>
 
-	<beans:bean id="digestAuthenticationProvider"
-		class="org.springframework.security.authentication.dao.DaoAuthenticationProvider">
-		<beans:property name="userDetailsService" ref="digestLoginService" />
-	</beans:bean>
-
-	<beans:bean id="anonymousProvider"
-		class="org.springframework.security.authentication.AnonymousAuthenticationProvider">
-		<beans:property name="key" value="${security.server.siteKey}" />
-	</beans:bean>
-
-	<beans:bean id="digestLoginService"
-		class="org.opendatakit.common.security.spring.DelegatingUserDetailsService">
-		<beans:property name="userDetailsService" ref="digestUnderlyingLoginService" />
-		<beans:property name="mailtoDomain"	value="${security.server.realm.mailToDomain}" />
-		<beans:property name="passDownUriUser" value="true" />
-		<beans:property name="authorities">
-			<beans:list>
-				<beans:value>AUTH_DIGEST</beans:value>
-				<beans:value>MODE_DEVICE</beans:value>
-			</beans:list>
-		</beans:property>
-	</beans:bean>
-
-
-	<!--
-		WORKING CONFIGURATION USING OPENID AND NOTHING ELSE - - START HERE!
-	-->
-	<!--
-		WORKING CONFIGURATION USING OPENID AND NOTHING ELSE - - START HERE!
-	-->
-	<!--
-		WORKING CONFIGURATION USING OPENID AND NOTHING ELSE - - START HERE!
-	-->
-	<!--
-		WORKING CONFIGURATION USING OPENID AND NOTHING ELSE - - START HERE!
-	-->
-	<!--
-		WORKING CONFIGURATION USING OPENID AND NOTHING ELSE - - START HERE!
-	-->
-
-<!--	<beans:bean id="gmailUserDetailsService"-->
-<!--		class="org.opendatakit.common.security.spring.DelegatingUserDetailsService">-->
-<!--		<beans:property-arg name="userDetailsService">-->
-<!--			<beans:bean-->
-<!--				class="org.opendatakit.common.security.spring.EmptyUserDetailsService" />-->
-<!--		</beans:property-arg>-->
-<!--		<beans:property-arg name="mailtoDomain"	value="gmail.com" />-->
-<!--		<beans:property-arg name="authorities">-->
-<!--			<beans:list>-->
-<!--				<beans:value>AUTH_OPENID</beans:value>-->
-<!--				<beans:value>MODE_WEBSITE</beans:value>-->
-<!--			</beans:list>-->
-<!--		</beans:property-arg>-->
-<!--	</beans:bean>-->
-<!--	<http>-->
-<!--		<intercept-url pattern="/google_login.html"-->
-<!--		access="IS_AUTHENTICATED_ANONYMOUSLY"/>-->
-<!--		<intercept-url pattern="/formList"-->
-<!--		access="IS_AUTHENTICATED_ANONYMOUSLY" />-->
-<!--		<intercept-url pattern="/formXml"-->
-<!--		access="IS_AUTHENTICATED_ANONYMOUSLY" />-->
-<!--		<intercept-url pattern="/submission"-->
-<!--		access="IS_AUTHENTICATED_ANONYMOUSLY" />-->
-<!--		<intercept-url pattern="/**" access="IS_AUTHENTICATED_FULLY" />-->
-<!--		<openid-login login-page="/google_login.html" user-service-ref="gmailUserDetailsService" >-->
-<!--		   <attribute-exchange>-->
-<!--				<openid-attribute name="email" type="http://axschema.org/contact/email" required="true" />-->
-<!--				<openid-attribute name="name" type="http://axschema.org/namePerson/first" />-->
-<!--		   </attribute-exchange>-->
-<!--	    </openid-login>-->
-<!--	    <logout/>-->
-<!--	</http>-->
-<!--	<authentication-manager>-->
-<!--	</authentication-manager>-->
-
-	<!--
-		WORKING CONFIGURATION USING OPENID AND NOTHING ELSE - - END HERE!
-	-->
-	<!--
-		WORKING CONFIGURATION USING OPENID AND NOTHING ELSE - - END HERE!
-	-->
-	<!--
-		WORKING CONFIGURATION USING OPENID AND NOTHING ELSE - - END HERE!
-	-->
-	<!--
-		WORKING CONFIGURATION USING OPENID AND NOTHING ELSE - - END HERE!
-	-->
 
 	<!--	CONFIGURATION TO APPLY ACCESS RESTRICTIONS TO BEANS    -->
 	<!--	CONFIGURATION TO APPLY ACCESS RESTRICTIONS TO BEANS    -->

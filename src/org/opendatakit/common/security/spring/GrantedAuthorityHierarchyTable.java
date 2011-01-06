@@ -1,3 +1,18 @@
+/*
+ * Copyright (C) 2010 University of Washington
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
 package org.opendatakit.common.security.spring;
 
 import java.util.ArrayList;
@@ -12,6 +27,13 @@ import org.opendatakit.common.security.User;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.GrantedAuthorityImpl;
 
+/**
+ * Persistence object used by {@link RoleHierarchyImpl} to maintain the hierarchy tree of
+ * granted authorities.  
+ * 
+ * @author mitchellsundt@gmail.com
+ *
+ */
 public class GrantedAuthorityHierarchyTable extends CommonFieldsBase {
 	private static final String TABLE_NAME = "_granted_authority_hierarchy";
 
@@ -63,8 +85,8 @@ public class GrantedAuthorityHierarchyTable extends CommonFieldsBase {
 		return new GrantedAuthorityImpl(getStringField(dominatingGrantedAuthority));
 	}
 	
-	public final void setDominatingGrantedAuthority(GrantedAuthorityNames name) {
-		if ( ! setStringField(dominatingGrantedAuthority, name.name())) {
+	public final void setDominatingGrantedAuthority(String name) {
+		if ( ! setStringField(dominatingGrantedAuthority, name)) {
 			throw new IllegalStateException("overflow dominatingGrantedAuthority");
 		}
 	}
@@ -73,8 +95,8 @@ public class GrantedAuthorityHierarchyTable extends CommonFieldsBase {
 		return new GrantedAuthorityImpl(getStringField(subordinateGrantedAuthority));
 	}
 
-	public final void setSubordinateGrantedAuthority(GrantedAuthorityNames name) {
-		if ( ! setStringField(subordinateGrantedAuthority, name.name())) {
+	public final void setSubordinateGrantedAuthority(String name) {
+		if ( ! setStringField(subordinateGrantedAuthority, name)) {
 			throw new IllegalStateException("overflow subordinateGrantedAuthority");
 		}
 	}
@@ -120,8 +142,8 @@ public class GrantedAuthorityHierarchyTable extends CommonFieldsBase {
 					GrantedAuthorityNames.ROLE_SUBMISSION_UPLOAD
 				} ) {
 			t = datastore.createEntityUsingRelation(tRelation, user);
-			t.setDominatingGrantedAuthority(ranon);
-			t.setSubordinateGrantedAuthority(name);
+			t.setDominatingGrantedAuthority(ranon.name());
+			t.setSubordinateGrantedAuthority(name.name());
 			tList.add(t);
 		}
 		// the authenticated user can do everything the
@@ -135,8 +157,8 @@ public class GrantedAuthorityHierarchyTable extends CommonFieldsBase {
 				GrantedAuthorityNames.ROLE_ACCESS_ADMIN
 			} ) {
 			t = datastore.createEntityUsingRelation(tRelation, user);
-			t.setDominatingGrantedAuthority(ra);
-			t.setSubordinateGrantedAuthority(name);
+			t.setDominatingGrantedAuthority(ra.name());
+			t.setSubordinateGrantedAuthority(name.name());
 			tList.add(t);
 		}
 		datastore.putEntities(tList, user);

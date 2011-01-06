@@ -42,7 +42,7 @@ public class UserImpl implements org.opendatakit.common.security.User {
 		this.nickName = nickName;
 		this.datastore = datastore;
 		for ( GrantedAuthority g : groupsAndGrantedAuthorities ) {
-			if ( !g.getAuthority().startsWith("ROLE_") ) {
+			if ( !GrantedAuthorityNames.permissionsCanBeAssigned(g.getAuthority()) ) {
 				groups.add(g);
 			}
 		}

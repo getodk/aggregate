@@ -72,6 +72,7 @@ public final class ErrorConsts {
   public static final String NO_STRING_TO_BLOB_CONVERT = "Blob cannot be created from string";
   public static final String UNKNOWN_INTERFACE = "Some how did not get a SubmissionField or SubmissionRepeat";
   public static final String INVALID_PARAMS = "Parameter(s) are not valid";
+  public static final String MISSING_PARAMS = "One or more required parameters are missing";
   
   /**
    * Constant string identifying XML stream

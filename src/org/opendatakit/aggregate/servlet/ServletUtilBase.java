@@ -89,6 +89,9 @@ public class ServletUtilBase extends CommonServletBase {
     resp.sendError(HttpServletResponse.SC_BAD_REQUEST, ErrorConsts.ODK_KEY_PROBLEM);
   }
 
+  protected void errorMissingParam(HttpServletResponse resp) throws IOException {
+	    resp.sendError(HttpServletResponse.SC_BAD_REQUEST, ErrorConsts.MISSING_PARAMS);
+  }
   /**
    * Generate error response for invalid parameters
    * 
@@ -134,6 +137,10 @@ public class ServletUtilBase extends CommonServletBase {
     html.append(HtmlUtil.createHref(cc.getWebApplicationURL(FormDeleteServlet.ADDR), ServletConsts.DELETE_FORM_LINK_TEXT));
     html.append(HtmlConsts.TAB + HtmlConsts.TAB);
     html.append(HtmlUtil.createHref(cc.getWebApplicationURL(SubmissionServlet.ADDR), ServletConsts.UPLOAD_SUB_LINK_TEXT));
+    html.append(HtmlConsts.TAB + HtmlConsts.TAB);
+    html.append(HtmlUtil.createHref(cc.getWebApplicationURL(AccessManagementServlet.ADDR), AccessManagementServlet.TITLE_INFO));
+    html.append(HtmlConsts.TAB + HtmlConsts.TAB);
+    html.append(HtmlUtil.createHref(cc.getWebApplicationURL(UserPasswordServlet.ADDR), UserPasswordServlet.TITLE_INFO));
     return html.toString();
   }
 

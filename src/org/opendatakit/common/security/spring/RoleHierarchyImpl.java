@@ -56,15 +56,12 @@ public class RoleHierarchyImpl implements RoleHierarchy, InitializingBean {
 	private Datastore datastore = null;
 	/** bean to the userService */
 	private UserService userService = null;
-    /**
-     * rolesReachableInOneStepMap is a Map that under the key of a specific role name contains a set of all roles
-     * reachable from this role in 1 step
-     */
-    private Map<GrantedAuthority, Set<GrantedAuthority>> rolesReachableInOneStepMap = null;
 
     /**
-     * rolesReachableInOneOrMoreStepsMap is a Map that under the key of a specific role name contains a set of all
-     * roles reachable from this role in 1 or more steps
+     * rolesReachableInOneOrMoreStepsMap is a Map that under the key of a specific role 
+     * name contains a set of all roles reachable from this role in 1 or more steps.
+     * 
+     * NOTE: should only be set/accessed with updateRolesMap()/getRolesMap()
      */
     private Map<GrantedAuthority, Set<GrantedAuthority>> rolesReachableInOneOrMoreStepsMap = null;
 	
@@ -92,21 +89,51 @@ public class RoleHierarchyImpl implements RoleHierarchy, InitializingBean {
 		if ( userService == null ) {
 			throw new IllegalStateException("userService cannot be unspecified");
 		}
+		
+		refreshReachableGrantedAuthorities();
+	}
 
-		buildRolesReachableInOneStepMap();
-        buildRolesReachableInOneOrMoreStepsMap();
+	/**
+	 * Update the rolesReachableInOneOrMoreStepsMap with a clean fetch from the database.
+	 * 
+	 * @throws ODKDatastoreException
+	 */
+	public void refreshReachableGrantedAuthorities() throws ODKDatastoreException {
+		Map<GrantedAuthority, Set<GrantedAuthority>> localRolesReachableInOneOrMoreStepsMap =
+			buildRolesReachableInOneOrMoreStepsMap(buildRolesReachableInOneStepMap());
+		updateRolesMap(localRolesReachableInOneOrMoreStepsMap);
 	}
 	
+	/**
+	 * Atomically swap out the rolesReachableInOneOrMoreStepsMap.
+	 * 
+	 * @param localRolesReachableInOneOrMoreStepsMap
+	 */
+	private synchronized void updateRolesMap(Map<GrantedAuthority, Set<GrantedAuthority>> localRolesReachableInOneOrMoreStepsMap) {
+		rolesReachableInOneOrMoreStepsMap = localRolesReachableInOneOrMoreStepsMap;
+	}
+
+	/**
+	 * Atomically fetch the rolesReachableInOneOrMoreStepsMap.
+	 * @return
+	 */
+	private synchronized Map<GrantedAuthority, Set<GrantedAuthority>> getRolesMap() {
+		return rolesReachableInOneOrMoreStepsMap;
+	}
+
+	@Override
     public Collection<GrantedAuthority> getReachableGrantedAuthorities(Collection<GrantedAuthority> authorities) {
         if (authorities == null || authorities.isEmpty()) {
             return AuthorityUtils.NO_AUTHORITIES;
         }
-
+        Map<GrantedAuthority, Set<GrantedAuthority>> localRolesReachableInOneOrMoreStepsMap = getRolesMap();
+        
         Set<GrantedAuthority> reachableRoles = new HashSet<GrantedAuthority>();
 
         for (GrantedAuthority authority : authorities) {
             addReachableRoles(reachableRoles, authority);
-            Set<GrantedAuthority> additionalReachableRoles = getRolesReachableInOneOrMoreSteps(authority);
+            Set<GrantedAuthority> additionalReachableRoles = 
+            		getRolesReachableInOneOrMoreSteps(localRolesReachableInOneOrMoreStepsMap, authority);
             if (additionalReachableRoles != null) {
                 reachableRoles.addAll(additionalReachableRoles);
             }
@@ -140,18 +167,19 @@ public class RoleHierarchyImpl implements RoleHierarchy, InitializingBean {
 
     // SEC-863
     private Set<GrantedAuthority> getRolesReachableInOneOrMoreSteps(
+    		Map<GrantedAuthority, Set<GrantedAuthority>> localRolesReachableInOneOrMoreStepsMap,
             GrantedAuthority authority) {
 
         if (authority.getAuthority() == null) {
             return null;
         }
 
-        Iterator<GrantedAuthority> iterator = rolesReachableInOneOrMoreStepsMap.keySet().iterator();
+        Iterator<GrantedAuthority> iterator = localRolesReachableInOneOrMoreStepsMap.keySet().iterator();
         while (iterator.hasNext()) {
             GrantedAuthority testAuthority = iterator.next();
             String testKey = testAuthority.getAuthority();
             if ((testKey != null) && (testKey.equals(authority.getAuthority()))) {
-                return rolesReachableInOneOrMoreStepsMap.get(testAuthority);
+                return localRolesReachableInOneOrMoreStepsMap.get(testAuthority);
             }
         }
 
@@ -162,8 +190,10 @@ public class RoleHierarchyImpl implements RoleHierarchy, InitializingBean {
      * roles reachable in one or more steps. (Or throw a CycleInRoleHierarchyException if a cycle in the role
      * hierarchy definition is detected)
      */
-    private void buildRolesReachableInOneOrMoreStepsMap() {
-        rolesReachableInOneOrMoreStepsMap = new HashMap<GrantedAuthority, Set<GrantedAuthority>>();
+    private Map<GrantedAuthority, Set<GrantedAuthority>> buildRolesReachableInOneOrMoreStepsMap(
+    		Map<GrantedAuthority, Set<GrantedAuthority>> rolesReachableInOneStepMap) {
+    	Map<GrantedAuthority, Set<GrantedAuthority>> localCopyRolesReachableInOneOrMoreStepsMap =
+    		new HashMap<GrantedAuthority, Set<GrantedAuthority>>();
         // iterate over all higher roles from rolesReachableInOneStepMap
 
         for(GrantedAuthority role : rolesReachableInOneStepMap.keySet()) {
@@ -192,12 +222,13 @@ public class RoleHierarchyImpl implements RoleHierarchy, InitializingBean {
                     }
                 }
             }
-            rolesReachableInOneOrMoreStepsMap.put(role, visitedRolesSet);
+            localCopyRolesReachableInOneOrMoreStepsMap.put(role, visitedRolesSet);
 
             logger.debug("buildRolesReachableInOneOrMoreStepsMap() - From role "
                     + role + " one can reach " + visitedRolesSet + " in one or more steps.");
         }
 
+        return localCopyRolesReachableInOneOrMoreStepsMap;
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -208,8 +239,8 @@ public class RoleHierarchyImpl implements RoleHierarchy, InitializingBean {
      * references a set of the reachable lower roles.
      * @throws ODKDatastoreException 
      */
-    private synchronized void buildRolesReachableInOneStepMap() throws ODKDatastoreException {
-        rolesReachableInOneStepMap = new HashMap<GrantedAuthority, Set<GrantedAuthority>>();
+    private Map<GrantedAuthority, Set<GrantedAuthority>> buildRolesReachableInOneStepMap() throws ODKDatastoreException {
+    	Map<GrantedAuthority, Set<GrantedAuthority>> rolesReachableInOneStepMap = new HashMap<GrantedAuthority, Set<GrantedAuthority>>();
 
         User user = userService.getDaemonAccountUser();
         GrantedAuthorityHierarchyTable relation = GrantedAuthorityHierarchyTable.assertRelation(datastore, user);
@@ -237,5 +268,7 @@ public class RoleHierarchyImpl implements RoleHierarchy, InitializingBean {
             logger.debug("buildRolesReachableInOneStepMap() - From role "
                     + higherRole + " one can reach role " + lowerRole + " in one step.");
         }
+        
+        return rolesReachableInOneStepMap;
     }
 }

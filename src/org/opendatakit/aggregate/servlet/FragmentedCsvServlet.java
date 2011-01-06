@@ -30,14 +30,18 @@ import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.ServletConsts;
+import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.exception.ODKParseException;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.format.table.FragmentedCsvFormatter;
 import org.opendatakit.aggregate.query.submission.QueryByDate;
 import org.opendatakit.aggregate.submission.Submission;
+import org.opendatakit.aggregate.submission.SubmissionElement;
 import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.submission.SubmissionKeyPart;
+import org.opendatakit.aggregate.submission.SubmissionSet;
+import org.opendatakit.aggregate.submission.type.RepeatSubmissionType;
 import org.opendatakit.common.constants.BasicConsts;
 import org.opendatakit.common.constants.HtmlConsts;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
@@ -81,8 +85,14 @@ public class FragmentedCsvServlet extends ServletUtilBase {
     // -- a forward-slash separated list of identity and group or repeat names
     // that identifies the Form or FormElement to retrieve.  It is a form
     // if the path has one or two entries, otherwise it is a repeat group.
-    SubmissionKey submissionKey = new SubmissionKey(getParameter(req, ServletConsts.FORM_ID));
-    
+	String submissionKeyString = getParameter(req, ServletConsts.FORM_ID);
+	if ( submissionKeyString == null || submissionKeyString.length() == 0 ) {
+		errorBadParam(resp);
+		return;
+	}
+    SubmissionKey submissionKey = new SubmissionKey(submissionKeyString);
+    List<SubmissionKeyPart> submissionKeyParts = submissionKey.splitSubmissionKey();
+	
     // optional common parameters
     // for client-side simplicity, if these have "" values, treat them as null
     
@@ -90,7 +100,7 @@ public class FragmentedCsvServlet extends ServletUtilBase {
     String websafeCursorString = getParameter(req, ServletConsts.CURSOR);
     Date dateCode = null;
     String uriAfter = null;
-    if ( websafeCursorString != null && websafeCursorString.length() == 0 ) {
+    if ( websafeCursorString == null || websafeCursorString.length() == 0 ) {
     	websafeCursorString = null;
     	dateCode = BasicConsts.EPOCH;
     } else {
@@ -129,61 +139,30 @@ public class FragmentedCsvServlet extends ServletUtilBase {
     		throw new ODKParseException("Invalid number of entries parameter", e);
     	}
     	
-    	// Pick apart the odkId to identify any specific element references
-    	// Element references have [@key="..."] clauses on the element name.
-    	// At most one [@key="..."] clause should appear prior to the last element.
-    	// That clause will be assumed to be the parent key for the last element's relation.
-    	//
-    	// e.g., 
-    	//  myDataForm/data/repeat1   -- access all rows of repeat1 values.
-    	//  myDataForm/data[@key="abc"]/repeat1 -- access all repeat1 values with parent data "abc"
-    	//  myDataForm/data/repeat1[@key="abc"] -- access the repeat1 record "abc"
-    	//
-    	// odkPath ends up being: [ "myDataForm", "data", "repeat1" ]
-    	// elementReference is either null, or the key to the record
-    	// elementParentKey is the parent key that the record must have.
-    	List<SubmissionKeyPart> submissionKeyParts = submissionKey.splitSubmissionKey();
-//    	Key elementReference = null;
-//    	Key elementParentKey = null;
-    	
-        if (submissionKeyParts != null && submissionKeyParts.size() > 2 && numEntriesToFetch > 0) {
-        	// repeating groups...
-        	// reworked from formmultiplevalueservlet.java
-        	Form form = Form.retrieveForm(submissionKeyParts.get(0).toString(), cc);
-
-
-            QueryByDate query = new QueryByDate(form, dateCode, false, true, true,
-                    numEntriesToFetch, cc);
-            List<Submission> submissions = query.getResultSubmissions();
-            List<Submission> activeList = new ArrayList<Submission>();
-            Submission lastSubmission = null;
-            for ( Submission s : submissions ) {
-            	if ( uriAfter != null ) {
-            		if ( s.getKey().getKey().compareTo(uriAfter) <= 0 ) continue;
-            		uriAfter = null;
-            	}
-            	activeList.add(s);
-            	lastSubmission = s;
-            }
-
-        	if ( lastSubmission != null ) {
-        		websafeCursorString = Long.toString(lastSubmission.getLastUpdateDate().getTime()) +
-        		" and " + lastSubmission.getKey().getKey();
+    	if (submissionKeyParts.size() >= 2 && submissionKeyParts.get(1).getAuri() != null && numEntriesToFetch > 0) {
+        	Form form = Form.retrieveForm(submissionKeyParts.get(0).getElementName(), cc);
+        	Submission sub = Submission.fetchSubmission(submissionKeyParts, cc);
+        	FormElementModel m = form.getFormElementModel(submissionKeyParts);
+        	SubmissionElement elem = sub.resolveSubmissionKey(submissionKeyParts);
+        	List<SubmissionSet> submissions = new ArrayList<SubmissionSet>();
+        	if ( elem instanceof RepeatSubmissionType ) {
+        		RepeatSubmissionType r = (RepeatSubmissionType) elem;
+        		submissions.addAll(r.getSubmissionSets());
+        	} else if ( elem instanceof SubmissionSet ) {
+        		submissions.add((SubmissionSet) elem);
         	}
-
         	resp.setContentType("text/xml; charset=UTF-8");
         	resp.setCharacterEncoding("UTF-8");
-
         	FragmentedCsvFormatter fmt = new FragmentedCsvFormatter(form, submissionKeyParts, cc.getServerURL(), websafeCursorString, out);
-        	fmt.processSubmissions(submissions);
-        } else if( submissionKeyParts != null &&
+        	fmt.processSubmissionSet(submissions, m);
+        } else if(
         		((submissionKeyParts.size() == 2 && submissionKeyParts.get(1).getAuri() == null) ||
         		 (submissionKeyParts.size() == 1)) &&
         		numEntriesToFetch > 0) {
         	// top-level form has no parent...
         	// top-level form can be referenced either by just "form-identity" or by "form-identity/top-level-tag"
 	    	// reworked from formxmlservlet.java
-        	Form form = Form.retrieveForm(submissionKeyParts.get(0).toString(), cc);
+        	Form form = Form.retrieveForm(submissionKeyParts.get(0).getElementName(), cc);
 
             QueryByDate query = new QueryByDate(form, dateCode, false, true, true,
                     numEntriesToFetch, cc);

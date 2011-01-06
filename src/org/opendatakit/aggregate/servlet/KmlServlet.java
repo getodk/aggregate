@@ -80,8 +80,12 @@ public class KmlServlet extends ServletUtilBase {
     String titleFieldName = getParameter(req, TITLE_FIELD);
     String imageFieldName = getParameter(req, IMAGE_FIELD);
 
-    if (formId == null || geopointFieldName == null) {
+    if (formId == null ) {
       errorMissingKeyParam(resp);
+      return;
+    }
+    if ( geopointFieldName == null) {
+      errorMissingParam(resp);
       return;
     }
 

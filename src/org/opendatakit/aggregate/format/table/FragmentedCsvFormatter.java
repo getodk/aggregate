@@ -25,12 +25,14 @@ import org.kxml2.io.KXmlSerializer;
 import org.kxml2.kdom.Document;
 import org.kxml2.kdom.Element;
 import org.kxml2.kdom.Node;
+import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.format.FormatConsts;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.format.SubmissionFormatter;
-import org.opendatakit.aggregate.format.element.HtmlLinkElementFormatter;
+import org.opendatakit.aggregate.format.element.LinkElementFormatter;
+import org.opendatakit.aggregate.servlet.FragmentedCsvServlet;
 import org.opendatakit.aggregate.submission.SubmissionKeyPart;
 import org.opendatakit.aggregate.submission.SubmissionSet;
 import org.opendatakit.common.constants.BasicConsts;
@@ -45,7 +47,7 @@ import org.opendatakit.common.persistence.exception.ODKDatastoreException;
  */
 public class FragmentedCsvFormatter extends TableFormatterBase implements SubmissionFormatter {
 	private static final String PARENT_KEY_PROPERTY = "PARENT_KEY";
-	private static final String RESULT_TABLE_KEY_STRING = "KEY";
+	private static final String SELF_KEY_PROPERTY = "KEY";
 	private static final String XML_TAG_NAMESPACE = "";
 	private static final String XML_TAG_RESULT = "result";
 	private static final String XML_TAG_HEADER = "header";
@@ -59,7 +61,7 @@ public class FragmentedCsvFormatter extends TableFormatterBase implements Submis
 		super(xform, printWriter, null);
 		this.submissionParts = submissionParts;
 		this.websafeCursorString = websafeCursorString;
-	    elemFormatter = new HtmlLinkElementFormatter(webServerUrl, true, true, true);
+	    elemFormatter = new LinkElementFormatter(webServerUrl, FragmentedCsvServlet.ADDR, true, true, true);
 	}
 
 	/**
@@ -133,10 +135,31 @@ public class FragmentedCsvFormatter extends TableFormatterBase implements Submis
 		
 	    List<Row> formattedElements = new ArrayList<Row>();
 	    List<String> headers = headerFormatter.generateHeaders(form, rootGroup, propertyNames);
+	    headers.add(SELF_KEY_PROPERTY);
+	    boolean includeParentKey = false;
+	    if ( rootGroup.getParent() != null ) {
+	    	FormElementModel m = rootGroup.getParent();
+	    	while ( m != null && m.getElementType() != FormElementModel.ElementType.REPEAT ) {
+	    		m = m.getParent();
+	    	}
+	    	if ( m != null ) {
+		    	headers.add(PARENT_KEY_PROPERTY);
+		    	includeParentKey = true;
+	    	}
+	    }
 
 	    // format row elements 
 	    for (SubmissionSet sub : submissions) {
 	      Row row = sub.getFormattedValuesAsRow(propertyNames, elemFormatter, false);
+	      
+	      ((LinkElementFormatter) elemFormatter).addFormattedLink( 
+	    		  sub.constructSubmissionKey(null),
+	    		  FragmentedCsvServlet.ADDR, ServletConsts.FORM_ID, row ); // KEY
+	      if ( includeParentKey ) {
+		      ((LinkElementFormatter) elemFormatter).addFormattedLink( 
+		    		  sub.getEnclosingSet().constructSubmissionKey(null),
+		    		  FragmentedCsvServlet.ADDR, ServletConsts.FORM_ID, row ); // PARENT_KEY
+	      }
 	      formattedElements.add(row);
 	    }
 	    

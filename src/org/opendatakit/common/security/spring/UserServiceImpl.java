@@ -23,6 +23,7 @@ import java.util.logging.Logger;
 
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.security.Realm;
+import org.opendatakit.common.security.SecurityUtils;
 import org.opendatakit.common.security.User;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.security.core.Authentication;
@@ -127,14 +128,7 @@ public class UserServiceImpl implements org.opendatakit.common.security.UserServ
   public synchronized User getCurrentUser() {
 	Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 	String eMail = getAuthenticationEmail(auth);
-
-	String name = eMail;
-	if ( name != null && name.contains("@") ) {
-		name = name.substring(0,name.indexOf("@"));
-		if ( name.startsWith("mailto:") ) {
-			name = name.substring(7);
-		}
-	}
+	String name = SecurityUtils.getNickname(eMail);
 
 	Logger.getLogger(UserServiceImpl.class.getCanonicalName()).info("Logged in user: " + eMail);
 	User match = activeUsers.get(eMail);

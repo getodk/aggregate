@@ -725,6 +725,10 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 		return row;
 	}
 
+	public SubmissionSet getEnclosingSet() {
+		return enclosingSet;
+	}
+	
 	public void printSubmission(PrintWriter out) {
 
 		List<SubmissionValue> values = getSubmissionValues();

@@ -186,4 +186,7 @@ public class MultiPartFormData {
 		return Collections.unmodifiableSet(fileNameMap.entrySet());
 	}
 
+	public Set<Map.Entry<String,MultiPartFormItem>> getFieldNameEntrySet() {
+		return Collections.unmodifiableSet(fieldNameMap.entrySet());
+	}
 }

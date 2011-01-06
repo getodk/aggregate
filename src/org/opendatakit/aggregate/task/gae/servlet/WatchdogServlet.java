@@ -62,7 +62,7 @@ public class WatchdogServlet extends ServletUtilBase{
     // get parameter
     String checkIntervalString = getParameter(req, ServletConsts.CHECK_INTERVAL_PARAM);
     if (checkIntervalString == null) {
-      errorMissingKeyParam(resp);
+      errorMissingParam(resp);
       return;
     }
     long checkIntervalMilliseconds = Long.parseLong(checkIntervalString);

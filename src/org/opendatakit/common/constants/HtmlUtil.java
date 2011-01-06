@@ -35,7 +35,7 @@ import org.apache.commons.lang.StringEscapeUtils;
  */
 public class HtmlUtil {
 
-  private static final int INPUT_WIDGET_SIZE_LIMIT = 50;
+  private static final int INPUT_WIDGET_SIZE_LIMIT = 80;// same size as URI...
 
   protected static final String HREF = "href";
   protected static final String A = "a";
@@ -48,6 +48,7 @@ public class HtmlUtil {
   protected static final String ATTR_ENCTYPE = "enctype";
   protected static final String ATTR_ACTION = "action";
   protected static final String ATTR_SIZE = "size";
+  protected static final String ATTR_CHECKED = "checked";
   protected static final String ATTR_SRC = "src";
 
   public static final String createEndTag(String tag) {
@@ -117,7 +118,7 @@ public class HtmlUtil {
     return urlBuilder.toString();
   }
 
-  public static final String createInput(String type, String name, String value, int size) {
+  public static final String createInput(String type, String name, String value, boolean isChecked, int size) {
     StringBuilder html = new StringBuilder();
     html.append(HtmlConsts.BEGIN_OPEN_TAG + INPUT);
     if (type != null) {
@@ -134,12 +135,25 @@ public class HtmlUtil {
     }
     html.append(BasicConsts.SPACE);
     html.append(createAttribute(ATTR_SIZE, Integer.toString(size)));
+    
+    if ( isChecked ) {
+    	html.append(BasicConsts.SPACE);
+    	html.append(ATTR_CHECKED);
+    }
     html.append(HtmlConsts.END_SELF_CLOSING_TAG);
     return html.toString();
   }
 
+  public static final String createInput(String type, String name, String value, int size) {
+	  return createInput(type, name, value, false, size);
+  }
+
   public static final String createInput(String type, String name, String value) {
-    return HtmlUtil.createInput(type, name, value, INPUT_WIDGET_SIZE_LIMIT);
+	  return createInput(type, name, value, false, INPUT_WIDGET_SIZE_LIMIT);
+  }
+  
+  public static final String createInput(String type, String name, String value, boolean checked) {
+    return createInput(type, name, value, checked, INPUT_WIDGET_SIZE_LIMIT);
   }
   
   public static final String createRadio(String name, String value, String desc, boolean checked) {

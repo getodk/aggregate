@@ -16,6 +16,8 @@
 package org.opendatakit.common.security;
 
 /**
+ * Minimal service for accessing information about the current
+ * user and the calling context.
  * 
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
