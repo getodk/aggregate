@@ -32,6 +32,15 @@
 	</servlet-mapping>
 
 	<servlet>
+		<servlet-name>change-password</servlet-name>
+		<servlet-class>org.opendatakit.aggregate.servlet.UserPasswordServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>change-password</servlet-name>
+		<url-pattern>/ssl/user-password</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
 		<servlet-name>result</servlet-name>
 		<servlet-class>org.opendatakit.aggregate.servlet.ResultServlet</servlet-class>
 	</servlet>
@@ -342,6 +351,69 @@
 	<servlet-mapping>
 		<servlet-name>confirm</servlet-name>
 		<url-pattern>/admin/confirm</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>accessManagement</servlet-name>
+		<servlet-class>org.opendatakit.aggregate.servlet.AccessManagementServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>accessManagement</servlet-name>
+		<url-pattern>/access/access-management</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>userModifyMembership</servlet-name>
+		<servlet-class>org.opendatakit.aggregate.servlet.UserModifyMembershipsServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>userModifyMembership</servlet-name>
+		<url-pattern>/access/user-modify-membership</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>userModify</servlet-name>
+		<servlet-class>org.opendatakit.aggregate.servlet.UserModifyServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>userModify</servlet-name>
+		<url-pattern>/access/user-modify</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>userManagement</servlet-name>
+		<servlet-class>org.opendatakit.aggregate.servlet.UserManagementServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>userManagement</servlet-name>
+		<url-pattern>/access/user-management</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>groupModifyMembers</servlet-name>
+		<servlet-class>org.opendatakit.aggregate.servlet.GroupModifyMembersServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>groupModifyMembers</servlet-name>
+		<url-pattern>/access/group-modify-members</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>groupModify</servlet-name>
+		<servlet-class>org.opendatakit.aggregate.servlet.GroupModifyServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>groupModify</servlet-name>
+		<url-pattern>/access/group-modify</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>groupManagement</servlet-name>
+		<servlet-class>org.opendatakit.aggregate.servlet.GroupManagementServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>groupManagement</servlet-name>
+		<url-pattern>/access/group-management</url-pattern>
 	</servlet-mapping>
 
 	<welcome-file-list>

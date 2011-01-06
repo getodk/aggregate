@@ -23,6 +23,7 @@ import org.opendatakit.aggregate.form.Form;
 
 /**
  * Wrapper class that presents the submission-level view of a 
+ * form.
  * 
  * @author mitchellsundt@gmail.com
  * @author wbrunette@gmail.com

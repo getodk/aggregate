@@ -39,7 +39,16 @@ import org.opendatakit.common.persistence.exception.ODKDatastoreException;
  */
 public class LinkElementFormatter extends BasicElementFormatter {
   private final String baseWebServerUrl;
+  private final String repeatServlet;
+  
 
+  public LinkElementFormatter(String baseWebServerUrl, String repeatServlet,
+		  boolean separateGpsCoordinates, boolean includeGpsAltitude, boolean includeGpsAccuracy) {
+    super(separateGpsCoordinates, includeGpsAltitude, includeGpsAccuracy);
+    this.baseWebServerUrl = baseWebServerUrl;
+    this.repeatServlet = repeatServlet;
+  }
+  
   /**
    * Construct a Html Link Element Formatter
    * 
@@ -55,10 +64,18 @@ public class LinkElementFormatter extends BasicElementFormatter {
    */
   public LinkElementFormatter(String webServerUrl, boolean separateGpsCoordinates,
       boolean includeGpsAltitude, boolean includeGpsAccuracy) {
-    super(separateGpsCoordinates, includeGpsAltitude, includeGpsAccuracy);
-    baseWebServerUrl = webServerUrl;
+	  this(webServerUrl, FormMultipleValueServlet.ADDR, 
+			  separateGpsCoordinates, includeGpsAltitude, includeGpsAccuracy);
   }
 
+  public void addFormattedLink( SubmissionKey key, String servletPath, String urlParameterName, Row row ) {
+    Map<String, String> properties = new HashMap<String, String>();
+    properties.put(urlParameterName, key.toString());
+    String url = HtmlUtil.createLinkWithProperties(HtmlUtil.createUrl(baseWebServerUrl)
+        + servletPath, properties);
+    row.addFormattedValue(url);
+  }
+  
   @Override
   public void formatBinary(BlobSubmissionType blobSubmission, String propertyName, Row row)
       throws ODKDatastoreException {
@@ -67,12 +84,8 @@ public class LinkElementFormatter extends BasicElementFormatter {
       return;
     }
 
-    SubmissionKey key = blobSubmission.getValue();
-    Map<String, String> properties = new HashMap<String, String>();
-    properties.put(ServletConsts.BLOB_KEY, key.toString());
-    String url = HtmlUtil.createLinkWithProperties(HtmlUtil.createUrl(baseWebServerUrl)
-        + BinaryDataServlet.ADDR, properties);
-    row.addFormattedValue(url);
+    addFormattedLink( blobSubmission.getValue(), BinaryDataServlet.ADDR,
+			    		ServletConsts.BLOB_KEY,	row );
   }
 
   @Override
@@ -89,10 +102,7 @@ public class LinkElementFormatter extends BasicElementFormatter {
       return;
     }
 
-    Map<String, String> properties = new HashMap<String, String>();
-    properties.put(ServletConsts.FORM_ID, repeat.constructSubmissionKey().toString());
-    String url = HtmlUtil.createLinkWithProperties(HtmlUtil.createUrl(baseWebServerUrl)
-        + FormMultipleValueServlet.ADDR, properties);
-    row.addFormattedValue(url);
+    addFormattedLink( repeat.constructSubmissionKey(), repeatServlet, 
+    					ServletConsts.FORM_ID, row );
   }
 }

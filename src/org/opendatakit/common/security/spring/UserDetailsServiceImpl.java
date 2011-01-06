@@ -1,3 +1,18 @@
+/*
+ * Copyright (C) 2010 University of Washington
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
 package org.opendatakit.common.security.spring;
 
 import java.util.Set;
@@ -6,6 +21,7 @@ import java.util.UUID;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
+import org.opendatakit.common.security.SecurityUtils;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.security.UserService;
 import org.springframework.beans.factory.InitializingBean;
@@ -17,10 +33,14 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
+/**
+ * Implementation of a user details service that fetches data from the 
+ * {@link RegisteredUsersTable} to report on registered users.
+ * 
+ * @author mitchellsundt@gmail.com
+ *
+ */
 public class UserDetailsServiceImpl implements UserDetailsService, InitializingBean {
-
-	private static final String AT_SIGN = "@";
-	private static final String MAILTO_COLON = "mailto:";
 
 	enum PasswordType {
 		BasicAuth,
@@ -74,8 +94,8 @@ public class UserDetailsServiceImpl implements UserDetailsService, InitializingB
 	@Override
 	public UserDetails loadUserByUsername(String name)
 			throws UsernameNotFoundException, DataAccessException {
-		if ( !name.startsWith(MAILTO_COLON) && !name.contains(AT_SIGN)) {
-			throw new IllegalStateException("Expecting name to be resolved to " + MAILTO_COLON + "user@domain");			
+		if ( !name.startsWith(SecurityUtils.MAILTO_COLON) || !name.contains(SecurityUtils.AT_SIGN)) {
+			throw new IllegalStateException("Expecting name to be resolved to " + SecurityUtils.MAILTO_COLON + "user@domain");			
 		}
 		
 		try {
@@ -84,28 +104,33 @@ public class UserDetailsServiceImpl implements UserDetailsService, InitializingB
 			relation = RegisteredUsersTable.assertRelation(datastore, user);
 			RegisteredUsersTable t = datastore.getEntity(relation, name, user);
 			String uriUser = t.getUri();
-			String mailtoDomain = uriUser.substring(uriUser.lastIndexOf(AT_SIGN)+1);
+			String mailtoDomain = SecurityUtils.getMailtoDomain(uriUser);
+			if ( mailtoDomain == null ) mailtoDomain = "-undefined-";
 			Set<GrantedAuthority> authorities = 
 				UserGrantedAuthority.getGrantedAuthorities(uriUser, datastore, user);
 			authorities.add(new GrantedAuthorityImpl(GrantedAuthorityNames.USER_IS_REGISTERED.name()));
 			
 			String password;
+			String salt;
 			switch ( passwordType ) {
 			case BasicAuth:
 				password = t.getBasicAuthPassword();
+				salt = t.getBasicAuthSalt();
 				break;
 			case DigestAuth:
 				password = t.getDigestAuthPassword();
+				salt = UUID.randomUUID().toString();
 				break;
 			default:
 			case Random:
 				password = UUID.randomUUID().toString();
+				salt = UUID.randomUUID().toString();
 				break;
 			}
-			return new AggregateUser(uriUser, password, mailtoDomain,
+			return new AggregateUser(uriUser, password, salt, mailtoDomain,
 					t.getIsEnabled(),
-					t.getIsAccountNonExpired(), t.getIsCredentialNonExpired(),
-					t.getIsAccountNonLocked(),
+					true, t.getIsCredentialNonExpired(),
+					true,
 					authorities);
 		} catch (ODKEntityNotFoundException e) {
 			throw new UsernameNotFoundException("User " + name + " is not registered", e);

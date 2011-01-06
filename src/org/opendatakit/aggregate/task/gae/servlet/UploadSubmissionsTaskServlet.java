@@ -63,7 +63,7 @@ public class UploadSubmissionsTaskServlet extends ServletUtilBase{
     // get parameter
     String fscUri = getParameter(req, ExternalServiceConsts.FSC_URI_PARAM);
     if (fscUri == null) {
-      errorMissingKeyParam(resp);
+      errorMissingParam(resp);
       return;
     }
     System.out.println("STARTING UPLOAD SUBMISSION TASK!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");

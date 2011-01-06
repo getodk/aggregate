@@ -1,27 +1,96 @@
+/*
+ * Copyright (C) 2010 University of Washington
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
 package org.opendatakit.common.security.spring;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import org.opendatakit.common.security.SecurityUtils;
+
+/**
+ * The system-defined granted authority names.  The convention is that:
+ * <ul><li>any name beginning with ROLE_ is a primitive authority.</li>  
+ * <li>any name beginning with RUN_AS_ is a primitive run-as directive.</li>
+ * </ul>
+ * Only non-primitive names can be granted primitive authorities.
+ * 
+ * @author mitchellsundt@gmail.com
+ *
+ */
 public enum GrantedAuthorityNames {
 
-	MODE_WEBSITE,
-	MODE_DEVICE,
+	AUTH_LOCAL("any users authenticated via the locally-held (device) credential"),
+	AUTH_OPENID("any users authenticated via OpenID"),
 	
-	AUTH_DIGEST,
-	AUTH_BASIC,
-	AUTH_LDAP,
-	AUTH_OPENID,
+	USER_IS_ANONYMOUS("for unauthenticated access"),
+	USER_IS_AUTHENTICATED("for authenticated users"),
+	USER_IS_REGISTERED("for registered users of this system (a user identified " +
+				"as a registered user will always have been authenticated)"),
+	USER_IS_DAEMON("reserved for the execution of background tasks"),
 	
-	USER_IS_REGISTERED,    // user is in the registered users table
-	USER_IS_DAEMON,        // user is the daemon user
-	USER_IS_ANONYMOUS,     // user is not authenticated
-	USER_IS_AUTHENTICATED, // user is authenticated, maybe not registered
+	MAILTO_GMAIL_COM("all users with the 'gmail.com' e-mail domain"),
 	
-	ROLE_FORM_LIST, // protects fetch of xforms list to device
-	ROLE_FORM_DOWNLOAD, // protects fetch of xform definition to device
-	ROLE_SUBMISSION_UPLOAD, // protects every submission of form into Aggregate
-	ROLE_USER, 		// protects forms page, human-readable xform xml listing
-	ROLE_ANALYST,  	// protects generation of csv, kml, and viewing of submissions
-	ROLE_SERVICES_ADMIN, // protects external services configuration and change
-	ROLE_XFORMS_ADMIN, // protects uploading of new xform, changes, and deletions
-	ROLE_ACCESS_ADMIN  // protects the user and group access administration pages
+	ROLE_FORM_LIST("required to fetching the xforms list (e.g., by the device)"),
+	ROLE_FORM_DOWNLOAD("required to fetch an xform definition (e.g., by the device)"),
+	ROLE_SUBMISSION_UPLOAD("required to submit a filled-out xform"),
+	ROLE_USER("required to view the home (forms) page and the human-readable xform xml listing"),
+	ROLE_ANALYST("required to view submissions and to generate csv and kml files and download them"),
+	ROLE_SERVICES_ADMIN("required to configure external services and data publishing"),
+	ROLE_XFORMS_ADMIN("required to upload new xforms, upload modifications to existing xforms, and to delete xforms or thier data"),
+	ROLE_ACCESS_ADMIN("required for the permissions-management pages, including the registered users, group access rights, and user membership in groups"),
+	;
 	
+	private final String description;
+	
+	GrantedAuthorityNames(String description) {
+		this.description = description;
+	}
+	
+	public String getDescription() {
+		return description;
+	}
+	
+	public static final String MAILTO_PREFIX = "MAILTO_";
+	public static final String ROLE_PREFIX = "ROLE_";
+	public static final String RUN_AS_PREFIX = "RUN_AS_";
+	
+	private static final Set<String> specialNames = new HashSet<String>();
+	
+	public static final boolean permissionsCanBeAssigned(String authority) {
+		return (authority != null) && 
+			!(authority.startsWith(ROLE_PREFIX) || authority.startsWith(RUN_AS_PREFIX));
+	}
+	
+	public static final synchronized boolean isSpecialName(String authority) {
+		if ( specialNames.isEmpty() ) {
+			for ( GrantedAuthorityNames n : values() ) {
+				specialNames.add(n.name());
+			}
+		}
+		
+		return specialNames.contains(authority) ||
+				authority.startsWith(MAILTO_PREFIX) ||
+				authority.startsWith(RUN_AS_PREFIX) ||
+				authority.startsWith(ROLE_PREFIX);
+	}
+	
+	public static final String getMailtoGrantedAuthorityName(String uriUser) {
+		String mailtoDomain = SecurityUtils.getMailtoDomain(uriUser);
+		if ( mailtoDomain == null ) return null;
+		return GrantedAuthorityNames.MAILTO_PREFIX + 
+			mailtoDomain.replaceAll("[^\\p{Digit}\\p{javaUpperCase}\\p{javaLowerCase}]", "_").toUpperCase();
+	}
 }

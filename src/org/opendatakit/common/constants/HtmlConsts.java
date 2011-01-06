@@ -71,6 +71,7 @@ public final class HtmlConsts {
 	public static final String LINE_BREAK = HtmlUtil.createBeginTag(BREAK);
 	public static final String FORM_CLOSE = HtmlUtil.createEndTag(FORM);
 
+	public static final String BORDERLESS_TABLE_OPEN = BEGIN_OPEN_TAG + TABLE + END_TAG;
 	public static final String TABLE_OPEN = BEGIN_OPEN_TAG + TABLE
 			+ TABLE_BORDER_PROPERTY + END_TAG;
 	public static final String TABLE_CLOSE = HtmlUtil.createEndTag(TABLE);
@@ -85,6 +86,7 @@ public final class HtmlConsts {
 	public static final String INPUT_TYPE_SUBMIT = "submit";
 	public static final String INPUT_TYPE_FILE = "file";
 	public static final String INPUT_TYPE_TEXT = "text";
+	public static final String INPUT_TYPE_PASSWORD = "password";
 	public static final String INPUT_TYPE_HIDDEN = "hidden";
 	public static final String INPUT_TYPE_RADIO = "radio";
 
@@ -127,6 +129,7 @@ public final class HtmlConsts {
 	public static final String MULTIPART_FORM_DATA = "multipart/form-data";
 	public static final String POST = "POST";
 	public static final String GET = "GET";
+	public static final String PUT = "PUT";
 	public static final String BEGIN_PARAM = "?";
 	public static final String PARAM_DELIMITER = "&";
 	public static final String ATTACHMENT_FILENAME_TXT = "attachment; filename=\"";
