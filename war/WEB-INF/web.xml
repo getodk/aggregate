@@ -219,12 +219,21 @@
 	</servlet-mapping>
 	
 	<servlet>
-		<servlet-name>uploadapplet</servlet-name>
-		<servlet-class>org.opendatakit.aggregate.servlet.UploadAppletServlet</servlet-class>
+		<servlet-name>uploadSubmissionsApplet</servlet-name>
+		<servlet-class>org.opendatakit.aggregate.servlet.UploadSubmissionsAppletServlet</servlet-class>
 	</servlet>
 	<servlet-mapping>
-		<servlet-name>uploadapplet</servlet-name>
-		<url-pattern>/UploadApplet</url-pattern>
+		<servlet-name>uploadSubmissionsApplet</servlet-name>
+		<url-pattern>/UploadSubmissionsApplet</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>uploadXformApplet</servlet-name>
+		<servlet-class>org.opendatakit.aggregate.servlet.UploadXFormAppletServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>uploadXformApplet</servlet-name>
+		<url-pattern>/UploadXFormApplet</url-pattern>
 	</servlet-mapping>
 
 	<servlet>

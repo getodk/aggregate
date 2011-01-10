@@ -152,17 +152,20 @@ public class UploadSubmissionsWorkerImpl {
 		}
 
 		Date endDate = pFsc.getEstablishmentDateTime();
+		// submissions are queried by the lastUpdateDate, since the submissionDate
+		// marks the initiation of the upload, but it may not have completed and 
+		// been marked as uploaded until later.  This is particularly significant for
+		// debrief-uploaded data, which preserves the submissionDate, but would have 
+		// a much-later creationDate and lastUpdatedDate.
 		List<Submission> submissions = querySubmissionsDateRange(startDate,
 				endDate);
 		String lastUploadKey = pFsc.getLastUploadKey();
 		if (lastUploadKey != null && !submissions.isEmpty()) {
 			submissions = getRemainingSubmissions(lastUploadKey, submissions);
 			// check if all submissions were removed as already uploaded, if
-			// true
-			// then try to get a new batch
+			// true then try to get a new batch.
 			if (submissions.isEmpty()) {
-				startDate = submissions.get(submissions.size() - 1)
-						.getSubmittedTime();
+				startDate = submissions.get(submissions.size() - 1).getLastUpdateDate();
 				submissions = querySubmissionsDateRange(startDate, endDate);
 			}
 		}
@@ -193,11 +196,10 @@ public class UploadSubmissionsWorkerImpl {
 		if (lastStreamedKey != null && !submissions.isEmpty()) {
 			submissions = getRemainingSubmissions(lastStreamedKey, submissions);
 			// check if all submissions were removed as already uploaded, if
-			// true
-			// then try to get a new batch
+			// true then try to get a new batch.  NOTE: uses LastUpdateDate.
+			// See longer comment above.
 			if (submissions.isEmpty()) {
-				startDate = submissions.get(submissions.size() - 1)
-						.getSubmittedTime();
+				startDate = submissions.get(submissions.size() - 1).getLastUpdateDate();
 				submissions = querySubmissionsStartDate(startDate);
 			}
 		}

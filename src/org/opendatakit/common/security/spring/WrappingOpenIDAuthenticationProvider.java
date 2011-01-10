@@ -86,8 +86,11 @@ public class WrappingOpenIDAuthenticationProvider extends OpenIDAuthenticationPr
 		Set<GrantedAuthority> authorities = new HashSet<GrantedAuthority>();
 		
 		authorities.addAll(userDetails.getAuthorities());
-		// add the AUTH_OPENID granted authority and the MAILTO_... granted authority
-		authorities.add(new GrantedAuthorityImpl("AUTH_OPENID"));
+		// add the AUTH_OPENID granted authority,
+		// add the USER_IS_AUTHENTICATED granted authority,
+		// and the MAILTO_... granted authority
+		authorities.add(new GrantedAuthorityImpl(GrantedAuthorityNames.AUTH_OPENID.toString()));
+		authorities.add(new GrantedAuthorityImpl(GrantedAuthorityNames.USER_IS_AUTHENTICATED.toString()));
 		String mailtoAuthority = GrantedAuthorityNames.getMailtoGrantedAuthorityName(eMail);
 		if ( mailtoAuthority != null ) {
 			authorities.add(new GrantedAuthorityImpl(mailtoAuthority));

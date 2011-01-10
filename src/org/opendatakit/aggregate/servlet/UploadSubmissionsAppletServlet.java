@@ -28,8 +28,8 @@ import org.opendatakit.aggregate.ContextFactory;
 
 /**
  * The only purpose of this servlet is to insert Set-Cookie META tags into the
- * HEAD section of the Upload Applet page being vended.  UPLOAD_BODY is a
- * string representation of the HTML body for the Upload Applet.
+ * HEAD section of the Upload Submission Applet page being vended.  UPLOAD_BODY is a
+ * string representation of the HTML body for the Upload Submission Applet.
  * 
  * Copied from BriefcaseServlet.java with a few changes.
  * 
@@ -38,7 +38,7 @@ import org.opendatakit.aggregate.ContextFactory;
  * @author wbrunette@gmail.com
  * 
  */
-public class UploadAppletServlet extends ServletUtilBase {
+public class UploadSubmissionsAppletServlet extends ServletUtilBase {
 
 	/**
 	 * 
@@ -48,27 +48,27 @@ public class UploadAppletServlet extends ServletUtilBase {
 	/**
 	 * URI from base
 	 */
-	public static final String ADDR = "UploadApplet";
+	public static final String ADDR = "UploadSubmissionsApplet";
 
 	/**
 	 * Title for generated webpage
 	 */
-	private static final String TITLE_INFO = "ODK Upload";
+	private static final String TITLE_INFO = "ODK Upload Submissions";
 	
 	/**
 	 * Upload Applet body
 	 */
 	private static final String UPLOAD_BODY = 
-"<h1>Upload data to ODK Aggregate</h1>" +
+"<h1>Upload submissions to ODK Aggregate</h1>" +
 "\n<object type=\"application/x-java-applet\" height=\"300\" width=\"900\" >" +
-"\n  <param name=\"jnlp_href\" value=\"upload/opendatakit-upload.jnlp\" />" +
+"\n  <param name=\"jnlp_href\" value=\"upload-submissions/opendatakit-upload.jnlp\" />" +
 "\n  <param name=\"mayscript\" value=\"true\" />" +
 "\n</object>" +
 "\n<script language=\"JavaScript\"><!--" +
 "\n  document.write('<p>Cookies: '+document.cookie+'</p>')" +
 "\n  document.write('<p>Location: '+location.href+'</p>');" +
 "\n  //-->" +
-"\n</script>";
+"\n</script>" + APPLET_SIGNING_CERTIFICATE_SECTION;
 
 	/**
 	 * Handler for HTTP Get request to create blank page that is navigable

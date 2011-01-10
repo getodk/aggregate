@@ -2,9 +2,9 @@
    <jnlp href="opendatakit-briefcase.jnlp">
      <information>
        <title>ODK Briefcase</title>
-       <vendor>OpenDataKit.org</vendor>
-       <homepage href="http://www.opendatakit.org" />
-       <description kind="one-line">Downloads data from ODK Aggregate</description>
+       <vendor>Open Data Kit</vendor>
+       <homepage href="http://opendatakit.org/" />
+       <description kind="one-line">Downloads submission data from ODK Aggregate into csv and binary files</description>
        <description>Downloads data from ODK Aggregate. Creates .csv files and binary data
         files on your local filesystem.  You must already be logged into Aggregate from
         within this browser in order to access the uploaded data.
@@ -16,8 +16,16 @@
      <update check="always" policy="always" />
      <resources>
 	   <java version="1.5+" />
-       <jar href="opendatakit-briefcase.jar" main="true"/>
-       <jar href="kxml2-2.3.0.jar"/>
+	   
+<jar href="briefcase-applet-1.0.jar" main="true"/>
+<jar href="kxml2-2.3.0.jar"/>
+<jar href="httpclient-4.0.3.jar"/>
+<jar href="httpcore-4.0.1.jar"/>
+<jar href="commons-logging-1.1.1.jar"/>
+<jar href="commons-codec-1.3.jar"/>
+<jar href="httpmime-4.0.3.jar"/>
+<jar href="apache-mime4j-0.6.jar"/>
+
      </resources>
      <applet-desc 
          name="ODK Briefcase"
