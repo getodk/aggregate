@@ -49,7 +49,7 @@ public enum GrantedAuthorityNames {
 	ROLE_USER("required to view the home (forms) page and the human-readable xform xml listing"),
 	ROLE_ANALYST("required to view submissions and to generate csv and kml files and download them"),
 	ROLE_SERVICES_ADMIN("required to configure external services and data publishing"),
-	ROLE_XFORMS_ADMIN("required to upload new xforms, upload modifications to existing xforms, and to delete xforms or thier data"),
+	ROLE_FORM_ADMIN("required to upload new xforms, upload modifications to existing xforms, and to delete xforms or thier data"),
 	ROLE_ACCESS_ADMIN("required for the permissions-management pages, including the registered users, group access rights, and user membership in groups"),
 	;
 	

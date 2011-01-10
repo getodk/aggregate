@@ -31,7 +31,7 @@ import org.opendatakit.common.security.User;
  *
  */
 public final class RegisteredUsersTable extends CommonFieldsBase {
-	private static final String TABLE_NAME = "_registered__users";
+	private static final String TABLE_NAME = "_registered_users";
 	
 	private static final DataField BASIC_AUTH_PASSWORD = new DataField(
 			"BASIC_AUTH_PASSWORD", DataField.DataType.STRING, true );

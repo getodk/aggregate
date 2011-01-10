@@ -143,7 +143,7 @@ public class FormSubmissionsServlet extends ServletUtilBase {
       }
 
       if (createBack) {
-        Date firstDate = submissions.get(0).getSubmittedTime();
+        Date firstDate = submissions.get(0).getSubmissionDate();
         
         Map<String, String> properties = new HashMap<String, String>();
         properties.put(ServletConsts.FORM_ID, formId);
@@ -156,7 +156,7 @@ public class FormSubmissionsServlet extends ServletUtilBase {
       }
       resp.getWriter().print(HtmlConsts.TAB + HtmlConsts.TAB);
       if (createForward) {
-        Date lastDate = submissions.get(submissions.size()-1).getSubmittedTime();
+        Date lastDate = submissions.get(submissions.size()-1).getSubmissionDate();
         Map<String, String> properties = new HashMap<String, String>();
         properties.put(ServletConsts.FORM_ID, formId);
         properties.put(ServletConsts.BACKWARD, Boolean.FALSE.toString());

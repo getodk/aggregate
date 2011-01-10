@@ -67,8 +67,8 @@ public class BriefcaseServlet extends ServletUtilBase {
 "\n<li>Specify a download directory location (this cannot already contain downloaded data).</li>" +
 "\n<li>Choose `Download nested repeat groups.`</li>" +
 "\n<li>Choose `Download binary data and replace server URL with the local filename in the csv.` (e.g., images, audio, video).</li>" +
-"\n<li>For the `odkId`, specify a <em>form identifier</em> (shown on Aggregate's List Forms page). The odkId in an " +
-"\n<a href=\"#OdkId\">xpath-like expression</a> that can describe a specific subset of data.</li>" +
+"\n<li>For the `formId`, specify a <em>form identifier</em> (shown on Aggregate's List Forms page). The formId in an " +
+"\n<a href=\"#FormId\">xpath-like expression</a> that can describe a specific subset of data.</li>" +
 "\n<li>Choose `Retrieve`</li>" +
 "\n<li>Repeat for all form identifiers.</li>" +
 "\n</ol>" +
@@ -82,8 +82,8 @@ public class BriefcaseServlet extends ServletUtilBase {
 "\n  document.write('<p>Location: '+location.href+'</p>');" +
 "\n  //-->" +
 "\n</script>" +
-"\n<h3><a name=\"OdkId\">The xpath-like OdkId</a></h3>" +
-"\n<p>The basic structure of an odkId is:</p>" +
+"\n<h3><a name=\"FormId\">The xpath-like FormId</a></h3>" +
+"\n<p>The basic structure of an formId is:</p>" +
 "\n<pre>form-identifier/top-level-tag/repeat-group/nested-repeat-group/...</pre>" +
 "\n<p>Where:</p><ul>" +
 "\n<li><code>form-identifier</code>: the form identifier shown on the List Forms page.</li>" +
@@ -91,8 +91,12 @@ public class BriefcaseServlet extends ServletUtilBase {
 "\n<li><code>repeat-group</code>: the name of a repeating data tag within the <code>top-level-tag</code> instance.</li>" +
 "\n<li><code>nested-repeat-group</code>: the name of a repeating data tag nested within the <code>repeat-group</code>, above.</li>" +
 "\n</ul>" +
-"\n<p>An xpath-like filter condition can be applied to the last and next-to-last elements of the odkId. " +
-"\nThe only filter criteria currently supported filters on the unique key of a data record.  For example:</p>" +
+"\n<p>An xpath-like filter condition can be applied to the first two elements of the formId and to the last and next-to-last elements of the formId. " +
+"\nThe first element (the form identifier) can be filtered by a <code>[@version=N and @uiVersion=M]</code> expression." +
+"\nThe second element (the top-level group of a form can be filtered by <code>[@key=XXX]</code> to specify the unique instance id of a particular submission." +
+"\nIf a specific instance has been identified by specifying filters for the first two elements of the formId, then " +
+"\nthe system can interpret intermediate <code>[@ordinal=K]</code> filters to navigate to a particular leaf node in that submission." +
+"\nFor example:</p>" +
 "\n<ul>" +
 "\n<li><code>HouseholdSurvey1/HouseholdSurvey/ChildrenOfHousehold</code> returns all <code>ChildrenOfHousehold</code> data for all submitted <code>HouseholdSurvey1</code> forms (all children in all households).</li>" +
 "\n<li><code>HouseholdSurvey1/HouseholdSurvey/ChildrenOfHousehold[@key=\"bb\"]</code> returns the single <code>ChildrenOfHousehold</code> with the unique key \"bb\" (a specific child).</li>" +
@@ -106,9 +110,9 @@ public class BriefcaseServlet extends ServletUtilBase {
 "\nBriefcaseVersion: 1.0" +
 "\nRunDate: Aug 10, 2010" +
 "\nServerUrl: http://localhost:8888/" +
-"\nOdkId-1: HouseholdSurvey1/HouseholdSurvey/ChildrenOfHousehold" +
+"\nFormId-1: HouseholdSurvey1/HouseholdSurvey/ChildrenOfHousehold" +
 "\nCsvFileName-1: \\csvData\\ChildrenOfHousehold.HouseholdSurvey.HouseholdSurvey1.csv" +
-"\nOdkId-2: HouseholdSurvey1/HouseholdSurvey" +
+"\nFormId-2: HouseholdSurvey1/HouseholdSurvey" +
 "\nCsvFileName-2: \\csvData\\HouseholdSurvey.HouseholdSurvey1.csv" +
 "\nLastCursor-2: E9oBpgFqoAFqC29wZW5kYXRha2l0cpABCxJjCgAaI0hvdXNlaG9sZFN1cnZleTFDaGlsZHJlbk9mSG91c2Vob2xkIzAFcjYaClBBUkVOVF9LRVkgAComY2oLb3BlbmRhdGFraXRzehBIb3VzZWhvbGRTdXJ2ZXkxgAECdGQkDAsSI0hvdXNlaG9sZFN1cnZleTFDaGlsZHJlbk9mSG91c2Vob2xkGAUMggEA4AEAFA" +
 "\nLastKEY-2: http://localhost:8888/csvFragment?odkId=HouseholdSurvey1%2FHouseholdSurvey%5B%40key%3D%22agtvcGVuZGF0YWtpdHIWCxIQSG91c2Vob2xkU3VydmV5MRgCDA%22%5D" +
@@ -116,7 +120,7 @@ public class BriefcaseServlet extends ServletUtilBase {
 "\n</pre>" +
 "\n<p>To resume the fetch, simply locate the `LastCursor-x:` field (there will be only one in the file), " +
 "\ncopy its value into the `LastCursor-x:` prompt above, " +
-"\nand do the same for the corresponding `LastKEY-x:` and `OdkId-x:` fields.</p>" +
+"\nand do the same for the corresponding `LastKEY-x:` and `FormId-x:` fields.</p>" +
 "\n<p>Resumed fetches must download data to a new download directory.  While the applet ensures that " +
 "\nthe top-level form entries are never duplicated and that processing picks up where it ended, " +
 "\nthere may be duplicates in the repeated groups and binary data nested under that top-level form.</p>" +
@@ -140,18 +144,8 @@ public class BriefcaseServlet extends ServletUtilBase {
 "\n<li>Choose only `Comma` for the delimiters.</li>" +
 "\n<li>Uncheck the `Treat consecutive delimiters as one` checkbox</li>" +
 "\n<li>Hit Finish or, choose Next to define the formatting for specific columns.</li></ol>" +
-"\n<p>The data will now be loaded into Excel 2007 with UTF-8 characters properly interpreted.</p>" +
-"\n<h3><a name=\"Cert\">Import the signing certificate</a></h3>" +
-"\n<p>This applet is signed with a self-signed certificate created by the OpenDataKit team.  If you are " +
-"\naccessing this page frequently, you may want to import the certificate into your browser's certificate " +
-"\nstore to suppress the security warnings.  Note that whenever you import a certificate, you are trusting " +
-"\nthe owner of that certificate with your system security, as it will allow any software that the owner " +
-"\nsigns to be transparently executed on your system. Note further that anyone can create a self-signed " +
-"\ncertificate and claim to be the named organization. Click <a href=\"/briefcase/OpenDataKit.cer\">here</a> to " +
-"\ndownload the certificate.  Then import it to suppress the security warnings; on Windows systems, " +
-"\nthe most restricted way to import the certificate would be through <code>Control Panel/Java</code>. Go to " +
-"\nthe <code>Security</code> tab, click <code>Certificates...</code> then <code>Import</code> to import " +
-"\nthe certificate.</p>";
+"\n<p>The data will now be loaded into Excel 2007 with UTF-8 characters properly interpreted.</p>"
++ APPLET_SIGNING_CERTIFICATE_SECTION;
 
 	/**
 	 * Handler for HTTP Get request to create blank page that is navigable

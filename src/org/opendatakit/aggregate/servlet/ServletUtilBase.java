@@ -48,6 +48,17 @@ import com.google.gdata.client.authn.oauth.OAuthHmacSha1Signer;
 @SuppressWarnings("serial")
 public class ServletUtilBase extends CommonServletBase {
 	
+  protected static final String APPLET_SIGNING_CERTIFICATE_SECTION = "\n<h3><a name=\"Cert\">Import the signing certificate</a></h3>" +
+  "\n<p>This applet is signed with a self-signed certificate created by the OpenDataKit team.</p><p>If you are " +
+  "\naccessing this page frequently, you may want to import the certificate into your browser's certificate " +
+  "\nstore to suppress the security warnings.</p><p>Note that whenever you import a certificate, you are trusting " +
+  "\nthe owner of that certificate with your system security, as it will allow any software that the owner " +
+  "\nsigns to be transparently executed on your system. Note further that anyone can create a self-signed " +
+  "\ncertificate and claim to be the named organization.</p><h4>Download the Certificate</h4><p>Click <a href=\"res/OpenDataKit.cer\">here</a> to " +
+  "\ndownload the certificate.</p><h4>Import on Windows</h4><ol><li>Open <code>Control Panel/Java</code>.</li><li>Go to " +
+  "\nthe <code>Security</code> tab,</li><li>Click <code>Certificates...</code> tab.</li><li>Select <code>Import</code> to import " +
+  "\nthe certificate.</li></ol>";
+
   protected ServletUtilBase() {
     super(ServletConsts.APPLICATION_NAME);
   }
@@ -130,7 +141,11 @@ public class ServletUtilBase extends CommonServletBase {
     html.append(HtmlConsts.TAB + HtmlConsts.TAB);
     html.append(HtmlUtil.createHref(cc.getWebApplicationURL(ExternalServicesListServlet.ADDR), ServletConsts.EXTERNAL_SERVICES_LINK_TEXT));
     html.append(HtmlConsts.TAB + HtmlConsts.TAB);
-    html.append(HtmlUtil.createHref(cc.getWebApplicationURL(UploadAppletServlet.ADDR), ServletConsts.UPLOAD_APPLET_LINK_TEXT));
+    html.append(HtmlUtil.createHref(cc.getWebApplicationURL(UploadSubmissionsAppletServlet.ADDR), ServletConsts.UPLOAD_SUBMISSIONS_APPLET_LINK_TEXT));
+    html.append(HtmlConsts.TAB + HtmlConsts.TAB);
+    html.append(HtmlUtil.createHref(cc.getWebApplicationURL(BriefcaseServlet.ADDR), ServletConsts.BRIEFCASE_LINK_TEXT));
+    html.append(HtmlConsts.TAB + HtmlConsts.TAB);
+    html.append(HtmlUtil.createHref(cc.getWebApplicationURL(UploadXFormAppletServlet.ADDR), ServletConsts.UPLOAD_XFORM_APPLET_LINK_TEXT));
     html.append(HtmlConsts.TAB + HtmlConsts.TAB);
     html.append(HtmlUtil.createHref(cc.getWebApplicationURL(FormUploadServlet.ADDR), ServletConsts.UPLOAD_FORM_LINK_TEXT));
     html.append(HtmlConsts.TAB + HtmlConsts.TAB);

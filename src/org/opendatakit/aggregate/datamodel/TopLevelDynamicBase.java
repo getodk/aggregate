@@ -13,6 +13,8 @@
  */
 package org.opendatakit.aggregate.datamodel;
 
+import java.util.Date;
+
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.security.User;
 
@@ -53,9 +55,12 @@ public abstract class TopLevelDynamicBase extends DynamicCommonFieldsBase {
 	 */
 	private static final DataField IS_COMPLETE = new DataField("_IS_COMPLETE", DataField.DataType.BOOLEAN, true);
 
+	private static final DataField SUBMISSION_DATE = new DataField("_SUBMISSION_DATE", DataField.DataType.DATETIME, true);
+
 	public final DataField modelVersion;
 	public final DataField uiVersion;
 	public final DataField isComplete;
+	public final DataField submissionDate;
 
 	/**
 	 * Construct a relation prototype.
@@ -68,6 +73,7 @@ public abstract class TopLevelDynamicBase extends DynamicCommonFieldsBase {
 		fieldList.add(modelVersion=new DataField(MODEL_VERSION));
 		fieldList.add(uiVersion=new DataField(UI_VERSION));
 		fieldList.add(isComplete=new DataField(IS_COMPLETE));
+		fieldList.add(submissionDate=new DataField(SUBMISSION_DATE));
 	}
 
 	/**
@@ -81,6 +87,7 @@ public abstract class TopLevelDynamicBase extends DynamicCommonFieldsBase {
 		modelVersion = ref.modelVersion;
 		uiVersion = ref.uiVersion;
 		isComplete = ref.isComplete;
+		submissionDate = ref.submissionDate;
 	}
 
 	public final Long getModelVersion() {
@@ -105,5 +112,13 @@ public abstract class TopLevelDynamicBase extends DynamicCommonFieldsBase {
 
 	public final void setIsComplete(Boolean value) {
 		setBooleanField(isComplete, value);
+	}
+
+	public final Date getSubmissionDate() {
+		return getDateField(submissionDate);
+	}
+
+	public final void setSubmissionDate(Date value) {
+		setDateField(submissionDate, value);
 	}
 }

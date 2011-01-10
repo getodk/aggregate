@@ -133,6 +133,8 @@ public class FormUploadServlet extends ServletUtilBase {
   public void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 	CallingContext cc = ContextFactory.getCallingContext(this, ADDR, req);
 
+    resp.setContentType(HtmlConsts.RESP_TYPE_HTML);
+
 	User user = cc.getCurrentUser();
     if (user instanceof org.opendatakit.common.security.gae.UserImpl) {
       // We are in app engine
@@ -255,8 +257,13 @@ public class FormUploadServlet extends ServletUtilBase {
       resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ErrorConsts.UPLOAD_PROBLEM);
     }
 
-    if (bOk)
-      resp.sendRedirect(cc.getWebApplicationURL(FormsServlet.ADDR));
+    if (bOk) {
+      resp.setStatus(HttpServletResponse.SC_CREATED);
+      resp.setHeader("Location", cc.getServerURL());
+      if ( req.getHeader("User-Agent") != null ) {
+    	  resp.sendRedirect(cc.getWebApplicationURL(FormsServlet.ADDR));
+      }
+    }
   }
 
   private void createTitleQuestionWebpage(HttpServletResponse resp,

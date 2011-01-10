@@ -155,6 +155,10 @@ public class SubmissionServlet extends ServletUtilBase {
       }
 
       resp.setStatus(HttpServletResponse.SC_CREATED);
+      resp.setHeader("Location", cc.getServerURL());
+      if ( req.getHeader("User-Agent") != null ) {
+    	  resp.sendRedirect(cc.getWebApplicationURL(FormsServlet.ADDR));
+      }
     } catch (ODKFormNotFoundException e) {
       odkIdNotFoundError(resp);
     } catch (ODKParseException e) {

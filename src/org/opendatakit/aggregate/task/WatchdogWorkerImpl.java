@@ -116,7 +116,11 @@ public class WatchdogWorkerImpl {
     String lastSubmissionKey = null;
     if (submissions != null && submissions.size() == 1) {
       Submission lastSubmission = submissions.get(0);
-      if (lastSubmission.getSubmittedTime().compareTo(fsc.getEstablishmentDateTime()) >= 0)
+      // NOTE: using LastUpdateDate instead of SubmissionDate because the submission date
+      // marks the initiation of the upload of the submission to the server, whereas the 
+      // lastUpdateDate is likely to mark the updating of the record to isComplete = 'true'
+      // status.  We only want to stream completed uploads...
+      if (lastSubmission.getLastUpdateDate().compareTo(fsc.getEstablishmentDateTime()) >= 0)
         lastSubmissionKey = lastSubmission.getKey().getKey();
     }
     if (lastSubmissionKey != null

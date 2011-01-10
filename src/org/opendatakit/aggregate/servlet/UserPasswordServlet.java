@@ -165,7 +165,7 @@ public class UserPasswordServlet extends ServletUtilBase {
 			userDefinition = ds.getEntity(relation, username, user);
 
 			MessageDigestPasswordEncoder mde = (MessageDigestPasswordEncoder) cc.getBean(SecurityBeanDefs.BASIC_AUTH_PASSWORD_ENCODER);
-			String salt = UUID.randomUUID().toString().substring(0,4);
+			String salt = UUID.randomUUID().toString().substring(0,8);
 			String fullPass = mde.encodePassword(pwOne, salt);
 			userDefinition.setBasicAuthPassword(fullPass);
 			userDefinition.setBasicAuthSalt(salt);

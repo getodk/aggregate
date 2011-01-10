@@ -44,11 +44,6 @@ import org.opendatakit.common.security.User;
 public class Submission extends SubmissionSet {
 
 	/**
-	 * Time submission was created/received
-	 */
-	private Date submittedTime;
-
-	/**
 	 * Construct an empty submission for the given form definition
 	 * 
 	 * @param modelVersion - the version attribute of the submission
@@ -76,7 +71,7 @@ public class Submission extends SubmissionSet {
 	public Submission(Long modelVersion, Long uiVersion, String uriTopLevelGroup,
 			FormDefinition formDefinition, CallingContext cc) throws ODKDatastoreException {
 		super( modelVersion, uiVersion, uriTopLevelGroup, formDefinition, cc);
-		submittedTime = new Date();
+		((TopLevelDynamicBase) getGroupBackingObject()).setSubmissionDate(new Date());
 	}
 
 	/**
@@ -92,13 +87,11 @@ public class Submission extends SubmissionSet {
 			throws ODKDatastoreException {
 		super(null, submission, formDefinition.getTopLevelGroupElement(),
 				formDefinition, cc);
-		submittedTime = submission.getCreationDate();
 	}
 	
 	public Submission(String uri, Form form, CallingContext cc) throws ODKEntityNotFoundException, ODKDatastoreException {
 		super(null, (TopLevelDynamicBase) cc.getDatastore().getEntity(form.getTopLevelGroupElement().getFormDataModel().getBackingObjectPrototype(), uri, cc.getCurrentUser()),
 				form.getTopLevelGroupElement(), form.getFormDefinition(), cc);
-		submittedTime = super.getCreationDate();
 	}
 
 	/**
@@ -106,8 +99,8 @@ public class Submission extends SubmissionSet {
 	 * 
 	 * @return date of submission
 	 */
-	public Date getSubmittedTime() {
-		return submittedTime;
+	public Date getSubmissionDate() {
+		return ((TopLevelDynamicBase) getGroupBackingObject()).getSubmissionDate();
 	}
 
 	public Long getModelVersion() {
