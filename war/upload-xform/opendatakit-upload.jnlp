@@ -25,6 +25,6 @@
  <applet-desc 
    name="ODK XForm Upload"
    main-class="org.opendatakit.uploadform.UploadFormApplet"
-   width="700"
-   height="200" />
+   width="900"
+   height="400" />
 </jnlp>	

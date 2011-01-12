@@ -147,11 +147,7 @@ public class ServletUtilBase extends CommonServletBase {
     html.append(HtmlConsts.TAB + HtmlConsts.TAB);
     html.append(HtmlUtil.createHref(cc.getWebApplicationURL(UploadXFormAppletServlet.ADDR), ServletConsts.UPLOAD_XFORM_APPLET_LINK_TEXT));
     html.append(HtmlConsts.TAB + HtmlConsts.TAB);
-    html.append(HtmlUtil.createHref(cc.getWebApplicationURL(FormUploadServlet.ADDR), ServletConsts.UPLOAD_FORM_LINK_TEXT));
-    html.append(HtmlConsts.TAB + HtmlConsts.TAB);
     html.append(HtmlUtil.createHref(cc.getWebApplicationURL(FormDeleteServlet.ADDR), ServletConsts.DELETE_FORM_LINK_TEXT));
-    html.append(HtmlConsts.TAB + HtmlConsts.TAB);
-    html.append(HtmlUtil.createHref(cc.getWebApplicationURL(SubmissionServlet.ADDR), ServletConsts.UPLOAD_SUB_LINK_TEXT));
     html.append(HtmlConsts.TAB + HtmlConsts.TAB);
     html.append(HtmlUtil.createHref(cc.getWebApplicationURL(AccessManagementServlet.ADDR), AccessManagementServlet.TITLE_INFO));
     html.append(HtmlConsts.TAB + HtmlConsts.TAB);

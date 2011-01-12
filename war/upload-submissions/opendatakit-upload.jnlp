@@ -25,6 +25,6 @@
  <applet-desc 
    name="ODK Upload Submissions"
    main-class="org.opendatakit.uploadsubmissions.applet.UploadApplet"
-   width="700"
-   height="200" />
+   width="900"
+   height="700" />
 </jnlp>	
