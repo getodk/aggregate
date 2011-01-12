@@ -30,7 +30,7 @@
      <applet-desc 
          name="ODK Briefcase"
          main-class="org.opendatakit.briefcase.BriefcaseApplet"
-         width="700"
-         height="400">
+         width="900"
+         height="900">
      </applet-desc> 
    </jnlp>

@@ -24,6 +24,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.ContextFactory;
+import org.opendatakit.common.constants.HtmlUtil;
 
 
 /**
@@ -60,7 +61,7 @@ public class UploadXFormAppletServlet extends ServletUtilBase {
 	 */
 	private static final String UPLOAD_BODY = 
 "<h1>Upload a multimedia XForm definition to ODK Aggregate</h1>" +
-"\n<object type=\"application/x-java-applet\" height=\"300\" width=\"900\" >" +
+"\n<object type=\"application/x-java-applet\" height=\"400\" width=\"900\" >" +
 "\n  <param name=\"jnlp_href\" value=\"upload-xform/opendatakit-upload.jnlp\" />" +
 "\n  <param name=\"mayscript\" value=\"true\" />" +
 "\n</object>" +
@@ -68,7 +69,7 @@ public class UploadXFormAppletServlet extends ServletUtilBase {
 "\n  document.write('<p>Cookies: '+document.cookie+'</p>')" +
 "\n  document.write('<p>Location: '+location.href+'</p>');" +
 "\n  //-->" +
-"\n</script>" + APPLET_SIGNING_CERTIFICATE_SECTION;
+"\n</script>";
 
 	/**
 	 * Handler for HTTP Get request to create blank page that is navigable
@@ -96,6 +97,11 @@ public class UploadXFormAppletServlet extends ServletUtilBase {
 		beginBasicHtmlResponse(TITLE_INFO, headContent, resp, true, cc); // header
 	    PrintWriter out = resp.getWriter();
 	    out.write(UPLOAD_BODY);
+	    out.write("<p>Click ");
+	    out.write(HtmlUtil.createHref(cc.getWebApplicationURL(FormUploadServlet.ADDR), "here"));
+	    out.write(" for the plain html webpage.</p>");
+	    out.write(APPLET_SIGNING_CERTIFICATE_SECTION);
+
 		finishBasicHtmlResponse(resp);
 		resp.setStatus(200);
 	}

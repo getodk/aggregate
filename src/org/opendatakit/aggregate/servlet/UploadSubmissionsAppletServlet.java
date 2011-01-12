@@ -24,6 +24,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.ContextFactory;
+import org.opendatakit.common.constants.HtmlUtil;
+import org.springframework.web.util.HtmlUtils;
 
 
 /**
@@ -60,7 +62,7 @@ public class UploadSubmissionsAppletServlet extends ServletUtilBase {
 	 */
 	private static final String UPLOAD_BODY = 
 "<h1>Upload submissions to ODK Aggregate</h1>" +
-"\n<object type=\"application/x-java-applet\" height=\"300\" width=\"900\" >" +
+"\n<object type=\"application/x-java-applet\" height=\"600\" width=\"900\" >" +
 "\n  <param name=\"jnlp_href\" value=\"upload-submissions/opendatakit-upload.jnlp\" />" +
 "\n  <param name=\"mayscript\" value=\"true\" />" +
 "\n</object>" +
@@ -68,7 +70,7 @@ public class UploadSubmissionsAppletServlet extends ServletUtilBase {
 "\n  document.write('<p>Cookies: '+document.cookie+'</p>')" +
 "\n  document.write('<p>Location: '+location.href+'</p>');" +
 "\n  //-->" +
-"\n</script>" + APPLET_SIGNING_CERTIFICATE_SECTION;
+"\n</script>";
 
 	/**
 	 * Handler for HTTP Get request to create blank page that is navigable
@@ -96,6 +98,10 @@ public class UploadSubmissionsAppletServlet extends ServletUtilBase {
 		beginBasicHtmlResponse(TITLE_INFO, headContent, resp, true, cc); // header
 	    PrintWriter out = resp.getWriter();
 	    out.write(UPLOAD_BODY);
+	    out.write("<p>Click ");
+	    out.write(HtmlUtil.createHref(cc.getWebApplicationURL(SubmissionServlet.ADDR), "here"));
+	    out.write(" for the plain html webpage.</p>");
+	    out.write(APPLET_SIGNING_CERTIFICATE_SECTION);
 		finishBasicHtmlResponse(resp);
 		resp.setStatus(200);
 	}
