@@ -64,11 +64,8 @@ public final class SecurityUtils {
 	
 	public static final String getNickname( String uriUser ) {
 		String name = uriUser;
-		if ( name != null && name.contains(AT_SIGN) ) {
-			name = name.substring(0,name.indexOf(AT_SIGN));
-			if ( name.startsWith(MAILTO_COLON) ) {
-				name = name.substring(MAILTO_COLON.length());
-			}
+		if ( name.startsWith(MAILTO_COLON) ) {
+			name = name.substring(MAILTO_COLON.length());
 		}
 		return name;
 	}

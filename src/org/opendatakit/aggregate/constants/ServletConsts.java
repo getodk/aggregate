@@ -40,7 +40,7 @@ public final class ServletConsts {
   /**
    * Current version of Aggregate
    */
-  public final static String VERSION = "v1.x ALPHA TWO";
+  public final static String VERSION = "v1.0 ALPHA FIVE";
 
   // system constants
   public static final String APPLICATION_NAME = "ODK AGGREGATE";
@@ -88,14 +88,12 @@ public final class ServletConsts {
 
   // href link text
   public static final String FORMS_LINK_TEXT = "List Forms";
-  public static final String UPLOAD_SUB_LINK_TEXT = "Upload a Submission";
-  public static final String UPLOAD_FORM_LINK_TEXT = "Upload Form";
   public static final String DELETE_FORM_LINK_TEXT = "Delete Form";
-  public static final String BRIEFCASE_LINK_TEXT = "Briefcase";
-  public static final String UPLOAD_SUBMISSIONS_APPLET_LINK_TEXT = "Upload Bulk Submissons from Phone";
-  public static final String UPLOAD_XFORM_APPLET_LINK_TEXT = "Upload an XForm (including multimedia files)";
-  public static final String RESULT_FILES_LINK_TEXT = "Report Results";
-  public static final String EXTERNAL_SERVICES_LINK_TEXT = "Configured Services";
+  public static final String BRIEFCASE_LINK_TEXT = "Download Entire Dataset (Briefcase)";
+  public static final String UPLOAD_SUBMISSIONS_APPLET_LINK_TEXT = "Upload Submissons";
+  public static final String UPLOAD_XFORM_APPLET_LINK_TEXT = "Upload a Form Definition";
+  public static final String RESULT_FILES_LINK_TEXT = "Download Generated kml or csv Files";
+  public static final String EXTERNAL_SERVICES_LINK_TEXT = "View Configured Services";
 
 
   public static final String BLOB_KEY = "blobKey";

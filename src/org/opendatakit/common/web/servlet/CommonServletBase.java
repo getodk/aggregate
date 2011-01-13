@@ -32,6 +32,7 @@ import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.common.constants.BasicConsts;
 import org.opendatakit.common.constants.HtmlConsts;
 import org.opendatakit.common.constants.HtmlUtil;
+import org.opendatakit.common.security.UserService;
 
 /**
  * Base class for Servlets that contain useful utilities
@@ -41,7 +42,7 @@ import org.opendatakit.common.constants.HtmlUtil;
 public abstract class CommonServletBase extends HttpServlet {
   public static final String INSUFFIECENT_PARAMS = "Insuffiecent Parameters Received";
 
-  protected static final String LOGOUT = "Log Out from ";
+  protected static final String LOGOUT = "Log off ";
   protected static final String LOG_IN = "log in";
   protected static final String PLEASE = "Please ";
   protected static final String LOGIN_REQUIRED = "Login Required";
@@ -118,14 +119,37 @@ public abstract class CommonServletBase extends HttpServlet {
     out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.HEAD, headContent + HtmlUtil.wrapWithHtmlTags(
         HtmlConsts.TITLE, applicationName)));
     out.write(HtmlConsts.BODY_OPEN);
-    out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.H2, "<FONT COLOR=330066 size=7><img src='" + cc.getWebApplicationURL("odk_color.png") + "'/>" + HtmlConsts.SPACE + applicationName) + "</FONT>");
+    out.write(HtmlConsts.PAGE_HEADING_TABLE_OPEN);
+    out.write(HtmlConsts.TABLE_ROW_OPEN);
+	// icon
+    out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.HEADING_IMAGE_TABLE_DATA,
+    		"<img src='" + cc.getWebApplicationURL("odk_color.png") + "'/>"));
+	// title
+    out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.HEADING_RIGHT_TABLE_DATA,
+    		HtmlUtil.wrapWithHtmlTags(HtmlConsts.B, "<FONT COLOR=330066 size=7>" + applicationName + "</FONT>")));
+	// version
+    out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.HEADING_TABLE_DATA,
+    		getVersionString(cc)));
+	// logout
+    UserService userService = cc.getUserService();
+    out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.HEADING_RIGHT_TABLE_DATA,
+    		HtmlUtil.createHref(cc.getWebApplicationURL(userService.createLogoutURL()),
+    							LOGOUT + userService.getCurrentUser().getNickname())));
+
+    out.write(HtmlConsts.TABLE_ROW_CLOSE);
+    out.write(HtmlConsts.TABLE_CLOSE);
+
+    out.write(HtmlUtil.createSelfClosingTag(HtmlConsts.HEADING_HR));
     emitPageHeader(out, displayLinks, cc);
-    out.write(HtmlConsts.LINE_BREAK + HtmlConsts.LINE_BREAK);
+    out.write(HtmlUtil.createSelfClosingTag(HtmlConsts.TITLE_HR));
+    out.write(HtmlUtil.createBeginTag(HtmlConsts.CENTERING_DIV));
     out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.H1, pageName));
+    out.write(HtmlUtil.createEndTag(HtmlConsts.DIV));
   }
 
   protected abstract void emitPageHeader(PrintWriter out,  boolean displayLinks, CallingContext cc);
   
+  protected abstract String getVersionString(CallingContext cc);
   /**
    * Generate HTML footer string for web responses
    * 
