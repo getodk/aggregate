@@ -28,6 +28,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.ContextFactory;
+import org.opendatakit.aggregate.constants.ErrorConsts;
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
@@ -69,6 +70,62 @@ public class FragmentedCsvServlet extends ServletUtilBase {
 	public static final String ADDR = "view/csvFragment";
 
 	private static final int DEFAULT_NUM_ENTRIES = 1000;
+
+	private void emitInfoPage(HttpServletRequest req, HttpServletResponse resp, String errorDescription, int status, CallingContext cc) throws IOException {
+        beginBasicHtmlResponse(TITLE_INFO, resp, true, cc); // header info
+        String requestPath = HtmlUtil.createUrl(cc.getServerURL()) + ADDR;
+        
+        PrintWriter out = resp.getWriter();
+        out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.H3, errorDescription));
+        out.write(HtmlConsts.TABLE_OPEN);
+        out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.TABLE_ROW,
+        					HtmlUtil.wrapWithHtmlTags(HtmlConsts.TABLE_DATA,"Parameter")
+          					+ HtmlUtil.wrapWithHtmlTags(HtmlConsts.TABLE_DATA,"Description")
+        			)
+        		   + HtmlUtil.wrapWithHtmlTags(HtmlConsts.TABLE_ROW,
+         				    HtmlUtil.wrapWithHtmlTags(HtmlConsts.TABLE_DATA,ServletConsts.FORM_ID)
+         				    + HtmlUtil.wrapWithHtmlTags(HtmlConsts.TABLE_DATA,"Required for accessing all data associated with a form.  This is a path rooted at the Form Identity displayed in the forms list.")
+         		   )
+         		   + HtmlUtil.wrapWithHtmlTags(HtmlConsts.TABLE_ROW,
+        				    HtmlUtil.wrapWithHtmlTags(HtmlConsts.TABLE_DATA,ServletConsts.NUM_ENTRIES)
+        				    + HtmlUtil.wrapWithHtmlTags(HtmlConsts.TABLE_DATA,"Optional.  The number of rows of data to return in a result csv.  If you are having transmission issues, you may need to reduce the number of records you fetch.  The default is 1000.")
+        		   )
+          		   + HtmlUtil.wrapWithHtmlTags(HtmlConsts.TABLE_ROW,
+          				    HtmlUtil.wrapWithHtmlTags(HtmlConsts.TABLE_DATA,ServletConsts.CURSOR)
+          				    + HtmlUtil.wrapWithHtmlTags(HtmlConsts.TABLE_DATA,"Optional.  Required for accessing subsequent blocks of data.  Supplied as the <cursor> value from the previous web request.")
+          		   )
+        		   );
+        out.write(HtmlConsts.TABLE_CLOSE);
+
+        String formIdentity = "widgets";
+        out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.P, "To download a csv fragment for the non-repeating elements of a form, append the Form Identifier and the number of entries to fetch to this url, e.g., "));
+        out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.PRE, requestPath + "?" + ServletConsts.FORM_ID + "=" + formIdentity + "&" + ServletConsts.NUM_ENTRIES + "=1000" ));
+
+        out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.P, "The " + ServletConsts.FORM_ID + " parameter supports an xpath-like specification of repeat groups within a form (e.g., widgets/widgets/repeat_a) and primary key restrictions on the last or next-to-last element in the path."));
+        out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.UL, 
+        		HtmlUtil.wrapWithHtmlTags(HtmlConsts.LI,
+        				HtmlUtil.wrapWithHtmlTags(HtmlConsts.PRE, requestPath + "?" + ServletConsts.FORM_ID + "=widgets/widgets/repeat_a") 
+        				+ " returns all repeat_a rows.") +
+        		HtmlUtil.wrapWithHtmlTags(HtmlConsts.LI,
+        				HtmlUtil.wrapWithHtmlTags(HtmlConsts.PRE, requestPath + "?" + ServletConsts.FORM_ID + "=widgets/widgets[@key=\"aaaa\"]/repeat_a") 
+        				+ " returns all repeat_a rows for the widgets record identified by key \"aaaa\".") +
+        		HtmlUtil.wrapWithHtmlTags(HtmlConsts.LI,
+        				HtmlUtil.wrapWithHtmlTags(HtmlConsts.PRE, requestPath + "?" + ServletConsts.FORM_ID + "=widgets/widgets/repeat_a[@key=\"bbb\"]")
+        				+ " returns the repeat_a row identified by key \"bbb\".")));
+        out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.P, "The data returned is a text/xml document as follows:"));
+        out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.PRE,
+        				"&lt;entries&gt;\n"+
+        				"  &lt;cursor&gt;...&lt;/cursor&gt; &lt;!-- only present if additional records may be fetched --&gt;\n"+
+        				"  &lt;header&gt;...&lt;/header&gt; &lt;!-- csv -- property names --&gt;\n"+
+        				"  &lt;result&gt;...&lt;/result&gt; &lt;!-- csv -- values -- repeats 0 or more times --&gt;\n"+
+        				"&lt;/entries&gt;\n"));
+        out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.P, "The returned form data includes an additional property (as the right-most column): KEY.  The KEY value is the URL for this item on the Aggregate server."));
+        out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.P, "The returned repeated group data within a form includes two additional properties (as the next-to-right-most and right-most columns): PARENT_KEY and KEY.  The PARENT_KEY value is the URL for the parent item of this repeated group on the Aggregate server; the KEY value is the URL for this repeated group item on the Aggregate server."));
+        
+
+        resp.setStatus(status);
+        finishBasicHtmlResponse(resp);
+	}
 	
   /**
    * Handler for HTTP Get request that responds with CSV
@@ -87,7 +144,7 @@ public class FragmentedCsvServlet extends ServletUtilBase {
     // if the path has one or two entries, otherwise it is a repeat group.
 	String submissionKeyString = getParameter(req, ServletConsts.FORM_ID);
 	if ( submissionKeyString == null || submissionKeyString.length() == 0 ) {
-		errorBadParam(resp);
+		emitInfoPage(req, resp, ErrorConsts.INVALID_PARAMS, HttpServletResponse.SC_BAD_REQUEST, cc);
 		return;
 	}
     SubmissionKey submissionKey = new SubmissionKey(submissionKeyString);
@@ -106,7 +163,7 @@ public class FragmentedCsvServlet extends ServletUtilBase {
     } else {
     	int idx = websafeCursorString.indexOf(WEBSAFE_CURSOR_SEPARATOR);
     	if ( idx == -1 ) {
-    		errorBadParam(resp);
+    		emitInfoPage(req, resp, ErrorConsts.INVALID_PARAMS, HttpServletResponse.SC_BAD_REQUEST, cc);
     		return;
     	}
     	String dateString = websafeCursorString.substring(0,idx);
@@ -114,7 +171,7 @@ public class FragmentedCsvServlet extends ServletUtilBase {
     	try {
     		dateCode = new Date(Long.valueOf(dateString));
     	} catch (NumberFormatException e) {
-    		errorBadParam(resp);
+    		emitInfoPage(req, resp, ErrorConsts.INVALID_PARAMS, HttpServletResponse.SC_BAD_REQUEST, cc);
     		return;
     	}
     }
@@ -151,8 +208,11 @@ public class FragmentedCsvServlet extends ServletUtilBase {
         	} else if ( elem instanceof SubmissionSet ) {
         		submissions.add((SubmissionSet) elem);
         	}
+        	
+        	websafeCursorString = null;
         	resp.setContentType("text/xml; charset=UTF-8");
         	resp.setCharacterEncoding("UTF-8");
+        	
         	FragmentedCsvFormatter fmt = new FragmentedCsvFormatter(form, submissionKeyParts, cc.getServerURL(), websafeCursorString, out);
         	fmt.processSubmissionSet(submissions, m);
         } else if(
@@ -181,6 +241,8 @@ public class FragmentedCsvServlet extends ServletUtilBase {
             if ( lastSubmission != null ) {
         		websafeCursorString = Long.toString(lastSubmission.getLastUpdateDate().getTime()) +
         		" and " + lastSubmission.getKey().getKey();
+        	} else {
+        		websafeCursorString = null;
         	}
 
             resp.setContentType("text/xml; charset=UTF-8");
@@ -190,62 +252,16 @@ public class FragmentedCsvServlet extends ServletUtilBase {
         	fmt.processSubmissions(submissions);
         	
         } else {
-            beginBasicHtmlResponse(TITLE_INFO, resp, true, cc); // header info
-            String requestPath = HtmlUtil.createUrl(cc.getServerURL()) + ADDR;
-            out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.H3, "Parameters are not correctly specified."));
-            out.write(HtmlConsts.TABLE_OPEN);
-            out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.TABLE_ROW,
-            					HtmlUtil.wrapWithHtmlTags(HtmlConsts.TABLE_DATA,"Parameter")
-              					+ HtmlUtil.wrapWithHtmlTags(HtmlConsts.TABLE_DATA,"Description")
-            			)
-            		   + HtmlUtil.wrapWithHtmlTags(HtmlConsts.TABLE_ROW,
-             				    HtmlUtil.wrapWithHtmlTags(HtmlConsts.TABLE_DATA,ServletConsts.FORM_ID)
-             				    + HtmlUtil.wrapWithHtmlTags(HtmlConsts.TABLE_DATA,"Required for accessing all data associated with a form.  This is a path rooted at the Form Identity displayed in the forms list.")
-             		   )
-             		   + HtmlUtil.wrapWithHtmlTags(HtmlConsts.TABLE_ROW,
-            				    HtmlUtil.wrapWithHtmlTags(HtmlConsts.TABLE_DATA,ServletConsts.NUM_ENTRIES)
-            				    + HtmlUtil.wrapWithHtmlTags(HtmlConsts.TABLE_DATA,"Optional.  The number of rows of data to return in a result csv.  If you are having transmission issues, you may need to reduce the number of records you fetch.  The default is 1000.")
-            		   )
-              		   + HtmlUtil.wrapWithHtmlTags(HtmlConsts.TABLE_ROW,
-              				    HtmlUtil.wrapWithHtmlTags(HtmlConsts.TABLE_DATA,ServletConsts.CURSOR)
-              				    + HtmlUtil.wrapWithHtmlTags(HtmlConsts.TABLE_DATA,"Optional.  Required for accessing subsequent blocks of data.  Supplied as the <cursor> value from the previous web request.")
-              		   )
-            		   );
-            out.write(HtmlConsts.TABLE_CLOSE);
-
-            String formIdentity = "widgets";
-            out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.P, "To download a csv fragment for the non-repeating elements of a form, append the Form Identifier and the number of entries to fetch to this url, e.g., "));
-            out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.PRE, requestPath + "?" + ServletConsts.FORM_ID + "=" + formIdentity + "&" + ServletConsts.NUM_ENTRIES + "=1000" ));
-
-            out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.P, "The " + ServletConsts.FORM_ID + " parameter supports an xpath-like specification of repeat groups within a form (e.g., widgets/widgets/repeat_a) and primary key restrictions on the last or next-to-last element in the path."));
-            out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.UL, 
-            		HtmlUtil.wrapWithHtmlTags(HtmlConsts.LI,
-            				HtmlUtil.wrapWithHtmlTags(HtmlConsts.PRE, requestPath + "?" + ServletConsts.FORM_ID + "=widgets/widgets/repeat_a") 
-            				+ " returns all repeat_a rows.") +
-            		HtmlUtil.wrapWithHtmlTags(HtmlConsts.LI,
-            				HtmlUtil.wrapWithHtmlTags(HtmlConsts.PRE, requestPath + "?" + ServletConsts.FORM_ID + "=widgets/widgets[@key=\"aaaa\"]/repeat_a") 
-            				+ " returns all repeat_a rows for the widgets record identified by key \"aaaa\".") +
-            		HtmlUtil.wrapWithHtmlTags(HtmlConsts.LI,
-            				HtmlUtil.wrapWithHtmlTags(HtmlConsts.PRE, requestPath + "?" + ServletConsts.FORM_ID + "=widgets/widgets/repeat_a[@key=\"bbb\"]")
-            				+ " returns the repeat_a row identified by key \"bbb\".")));
-            out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.P, "The data returned is a text/xml document as follows:"));
-            out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.PRE,
-            				"&lt;entries&gt;\n"+
-            				"  &lt;cursor&gt;...&lt;/cursor&gt; &lt;!-- only present if additional records may be fetched --&gt;\n"+
-            				"  &lt;header&gt;...&lt;/header&gt; &lt;!-- csv -- property names --&gt;\n"+
-            				"  &lt;result&gt;...&lt;/result&gt; &lt;!-- csv -- values -- repeats 0 or more times --&gt;\n"+
-            				"&lt;/entries&gt;\n"));
-            out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.P, "The returned form data includes an additional property (as the right-most column): KEY.  The KEY value is the URL for this item on the Aggregate server."));
-            out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.P, "The returned repeated group data within a form includes two additional properties (as the next-to-right-most and right-most columns): PARENT_KEY and KEY.  The PARENT_KEY value is the URL for the parent item of this repeated group on the Aggregate server; the KEY value is the URL for this repeated group item on the Aggregate server."));
-            
-
-            resp.setStatus(400);
-            finishBasicHtmlResponse(resp);
+    		emitInfoPage(req, resp, "Parameters are not correctly specified.", 
+    						HttpServletResponse.SC_BAD_REQUEST, cc);
         }	
     } catch (ODKFormNotFoundException e) {
+		emitInfoPage(req, resp, e.getMessage(), 
+				HttpServletResponse.SC_BAD_REQUEST, cc);
         odkIdNotFoundError(resp);
     } catch (ODKParseException e) {
-    	errorBadParam(resp);
+		emitInfoPage(req, resp, e.getMessage(), 
+				HttpServletResponse.SC_BAD_REQUEST, cc);
 	} catch (ODKDatastoreException e) {
 		errorRetreivingData(resp);
 	}
