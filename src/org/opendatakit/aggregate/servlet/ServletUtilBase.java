@@ -33,7 +33,6 @@ import org.opendatakit.aggregate.exception.ODKExternalServiceNotAuthenticated;
 import org.opendatakit.aggregate.externalservice.OAuthToken;
 import org.opendatakit.common.constants.BasicConsts;
 import org.opendatakit.common.constants.HtmlConsts;
-import org.opendatakit.common.security.UserService;
 import org.opendatakit.common.web.servlet.CommonServletBase;
 
 import com.google.gdata.client.authn.oauth.GoogleOAuthHelper;
@@ -66,16 +65,15 @@ public class ServletUtilBase extends CommonServletBase {
   @Override
   protected void emitPageHeader(PrintWriter out, boolean displayLinks, CallingContext cc) {
     if (displayLinks) {
-      out.write(generateNavigationInfo(cc));
-      out.write(HtmlConsts.TAB + HtmlConsts.TAB);
-
-      UserService userService = cc.getUserService();
-      out.write(HtmlUtil.createHref(cc.getWebApplicationURL(userService.createLogoutURL()), LOGOUT
-          + userService.getCurrentUser().getNickname()));
-      out.write(HtmlConsts.TAB + "<FONT SIZE=1>" + ServletConsts.VERSION + "</FONT>");
+        out.write(generateNavigationInfo(cc));
     }
   }
   
+  @Override
+  protected String getVersionString(CallingContext cc) {
+	  return HtmlConsts.TAB + "<FONT SIZE=1>" + ServletConsts.VERSION + "</FONT>";
+  }
+
   /**
    * Generate error response for ODK ID not found
    * 
@@ -134,24 +132,79 @@ public class ServletUtilBase extends CommonServletBase {
    * @return a string with href links
    */
   public final String generateNavigationInfo(CallingContext cc) {
-    StringBuilder html = new StringBuilder();
-    html.append(HtmlUtil.createHref(cc.getWebApplicationURL(FormsServlet.ADDR), ServletConsts.FORMS_LINK_TEXT));
-    html.append(HtmlConsts.TAB + HtmlConsts.TAB);
-    html.append(HtmlUtil.createHref(cc.getWebApplicationURL(ResultServlet.ADDR), ServletConsts.RESULT_FILES_LINK_TEXT));
-    html.append(HtmlConsts.TAB + HtmlConsts.TAB);
-    html.append(HtmlUtil.createHref(cc.getWebApplicationURL(ExternalServicesListServlet.ADDR), ServletConsts.EXTERNAL_SERVICES_LINK_TEXT));
-    html.append(HtmlConsts.TAB + HtmlConsts.TAB);
-    html.append(HtmlUtil.createHref(cc.getWebApplicationURL(UploadSubmissionsAppletServlet.ADDR), ServletConsts.UPLOAD_SUBMISSIONS_APPLET_LINK_TEXT));
-    html.append(HtmlConsts.TAB + HtmlConsts.TAB);
-    html.append(HtmlUtil.createHref(cc.getWebApplicationURL(BriefcaseServlet.ADDR), ServletConsts.BRIEFCASE_LINK_TEXT));
-    html.append(HtmlConsts.TAB + HtmlConsts.TAB);
-    html.append(HtmlUtil.createHref(cc.getWebApplicationURL(UploadXFormAppletServlet.ADDR), ServletConsts.UPLOAD_XFORM_APPLET_LINK_TEXT));
-    html.append(HtmlConsts.TAB + HtmlConsts.TAB);
-    html.append(HtmlUtil.createHref(cc.getWebApplicationURL(FormDeleteServlet.ADDR), ServletConsts.DELETE_FORM_LINK_TEXT));
-    html.append(HtmlConsts.TAB + HtmlConsts.TAB);
-    html.append(HtmlUtil.createHref(cc.getWebApplicationURL(AccessManagementServlet.ADDR), AccessManagementServlet.TITLE_INFO));
-    html.append(HtmlConsts.TAB + HtmlConsts.TAB);
-    html.append(HtmlUtil.createHref(cc.getWebApplicationURL(UserPasswordServlet.ADDR), UserPasswordServlet.TITLE_INFO));
+	  
+	  final String listFormsHref = HtmlUtil.createHref(
+			  cc.getWebApplicationURL(FormsServlet.ADDR), 
+			  ServletConsts.FORMS_LINK_TEXT);
+	  final String configuredServicesHref = HtmlUtil.createHref(
+			  cc.getWebApplicationURL(ExternalServicesListServlet.ADDR), 
+			  ServletConsts.EXTERNAL_SERVICES_LINK_TEXT);
+	  final String uploadSubmissionsHref = HtmlUtil.createHref(
+			  cc.getWebApplicationURL(UploadSubmissionsAppletServlet.ADDR),
+			  ServletConsts.UPLOAD_SUBMISSIONS_APPLET_LINK_TEXT);
+	  final String changePasswordHref = HtmlUtil.createHref(
+			  cc.getWebApplicationURL(UserPasswordServlet.ADDR), 
+			  UserPasswordServlet.TITLE_INFO);
+	  
+	  final String resultsHref = HtmlUtil.createHref(
+			  cc.getWebApplicationURL(ResultServlet.ADDR), 
+			  ServletConsts.RESULT_FILES_LINK_TEXT);
+	  final String uploadFormHref = HtmlUtil.createHref(
+			  cc.getWebApplicationURL(UploadXFormAppletServlet.ADDR), 
+			  ServletConsts.UPLOAD_XFORM_APPLET_LINK_TEXT);
+	  final String accessManagementHref = HtmlUtil.createHref(
+			  cc.getWebApplicationURL(AccessManagementServlet.ADDR), 
+			  AccessManagementServlet.TITLE_INFO);
+	  
+	  final String briefcaseHref = HtmlUtil.createHref(
+			  cc.getWebApplicationURL(BriefcaseServlet.ADDR), 
+			  ServletConsts.BRIEFCASE_LINK_TEXT);
+	  final String deleteHref = HtmlUtil.createHref(
+			  cc.getWebApplicationURL(FormDeleteServlet.ADDR), 
+			  ServletConsts.DELETE_FORM_LINK_TEXT);
+	  
+	  StringBuilder html = new StringBuilder();
+	html.append(HtmlUtil.createBeginTag(HtmlConsts.CENTERING_DIV));
+    html.append(HtmlConsts.HEADING_TABLE_OPEN);
+    String[] headers = new String[] { "Access", "Publish", "Upload", "Manage" }; 
+	for (String header : headers) {
+		html.append(HtmlUtil.wrapWithHtmlTags(HtmlConsts.HEADING_TABLE_HEADER, header));
+    }
+	html.append(HtmlConsts.TABLE_ROW_OPEN);
+	// access
+	html.append(HtmlUtil.wrapWithHtmlTags(HtmlConsts.HEADING_TABLE_DATA,listFormsHref));
+	// publish
+	html.append(HtmlUtil.wrapWithHtmlTags(HtmlConsts.HEADING_TABLE_DATA,configuredServicesHref));
+	// upload
+	html.append(HtmlUtil.wrapWithHtmlTags(HtmlConsts.HEADING_TABLE_DATA,uploadSubmissionsHref));
+	// manage
+	html.append(HtmlUtil.wrapWithHtmlTags(HtmlConsts.HEADING_TABLE_DATA,changePasswordHref));
+	html.append(HtmlConsts.TABLE_ROW_CLOSE);
+	
+	html.append(HtmlConsts.TABLE_ROW_OPEN);
+	// access
+	html.append(HtmlUtil.wrapWithHtmlTags(HtmlConsts.HEADING_TABLE_DATA,resultsHref));
+	// publish
+	html.append(HtmlUtil.createSelfClosingTag(HtmlConsts.HEADING_TABLE_DATA));
+	// upload
+	html.append(HtmlUtil.wrapWithHtmlTags(HtmlConsts.HEADING_TABLE_DATA,uploadFormHref));
+	// manage
+	html.append(HtmlUtil.wrapWithHtmlTags(HtmlConsts.HEADING_TABLE_DATA,deleteHref));
+	html.append(HtmlConsts.TABLE_ROW_CLOSE);
+	
+	html.append(HtmlConsts.TABLE_ROW_OPEN);
+	// access
+	html.append(HtmlUtil.wrapWithHtmlTags(HtmlConsts.HEADING_TABLE_DATA,briefcaseHref));
+	// publish
+	html.append(HtmlUtil.createSelfClosingTag(HtmlConsts.HEADING_TABLE_DATA));
+	// upload
+	html.append(HtmlUtil.createSelfClosingTag(HtmlConsts.HEADING_TABLE_DATA)); // TODO: Debrief
+	// manage
+	html.append(HtmlUtil.wrapWithHtmlTags(HtmlConsts.HEADING_TABLE_DATA,accessManagementHref));
+	html.append(HtmlConsts.TABLE_ROW_CLOSE);
+
+	html.append(HtmlConsts.TABLE_CLOSE);
+	html.append(HtmlUtil.createEndTag(HtmlConsts.DIV));
     return html.toString();
   }
 

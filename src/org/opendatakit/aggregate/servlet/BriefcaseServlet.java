@@ -56,11 +56,11 @@ public class BriefcaseServlet extends ServletUtilBase {
 	 * Copy of the body of Briefcase.html (see Briefcase project)
 	 */
 	private static final String BRIEFCASE_BODY = 
-"<h1>Download data from ODK Aggregate</h1>" +
+"<h3>Download entire datasets from ODK Aggregate</h3>" +
 "\n<p>Creates .csv files and binary data files on your local filesystem.</p>" +
 "\n<p><a href=\"#Csv\">Import .csv files manually</a> to preserve non-latin text.</p>" +
 "\n<p><a href=\"#Cert\">Import the signing certificate</a> to stop the security warnings.</p>" +
-"\n<p>You must already be logged into Aggregate from within this browser in order to access the uploaded data.</p>" +
+"\n<p>You must already be logged into Aggregate from within this browser in order to access the datasets.</p>" +
 "\n<h3>Retrieving All Data</h3>" +
 "\n<p>To extract all data from Aggregate, repeat the following steps for all form identifiers:</p>" +
 "\n<ol>" +
@@ -99,7 +99,7 @@ public class BriefcaseServlet extends ServletUtilBase {
 "\nFor example:</p>" +
 "\n<ul>" +
 "\n<li><code>HouseholdSurvey1/HouseholdSurvey/ChildrenOfHousehold</code> returns all <code>ChildrenOfHousehold</code> data for all submitted <code>HouseholdSurvey1</code> forms (all children in all households).</li>" +
-"\n<li><code>HouseholdSurvey1/HouseholdSurvey/ChildrenOfHousehold[@key=\"bb\"]</code> returns the single <code>ChildrenOfHousehold</code> with the unique key \"bb\" (a specific child).</li>" +
+"\n<li><code>HouseholdSurvey1/HouseholdSurvey[@key=\"bb\"]/ChildrenOfHousehold[@ordinal=\"2\"]</code> returns the second <code>ChildrenOfHousehold</code> of the <code>HouseholdSurvey</code> with the unique key \"bb\" (a specific child).</li>" +
 "\n<li><code>HouseholdSurvey1/HouseholdSurvey[@key=\"aaa\"]/ChildrenOfHousehold</code> returns all <code>ChildrenOfHousehold</code> data that are associated with the <code>HouseholdSurvey</code> with unique key \"aaa\" (all the children of a single household).</li>" +
 "\n</ul>" +
 "\n<h3><a name=\"Resume\">Resuming a failed download attempt</a></h3>" +

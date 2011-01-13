@@ -44,6 +44,7 @@ public final class HtmlConsts {
 	public static final String HTML = "html";
 	public static final String BODY = "body";
 	public static final String BREAK = "br";
+	public static final String DIV = "div";
 	public static final String TITLE = "title";
 	public static final String FORM = "form";
 	public static final String HEAD = "head";
@@ -59,9 +60,18 @@ public final class HtmlConsts {
 	public static final String TABLE_HEADER = "th";
 	public static final String TABLE_ROW = "tr";
 	public static final String TABLE_DATA = "td";
+	public static final String CENTERING_DIV = "div align=\"CENTER\"";
+	public static final String HEADING_TABLE_HEADER = "th align=\"LEFT\"";
+	public static final String HEADING_IMAGE_TABLE_DATA = "td align=\"LEFT\" width=\"1%\"";
+	public static final String HEADING_TABLE_DATA = "td align=\"LEFT\" width=\"10%\"";
+	public static final String HEADING_RIGHT_TABLE_DATA = "td align=\"RIGHT\" width=\"10%\"";
+	public static final String HEADING_HR = "hr width=\"100%\"";
+	public static final String TITLE_HR = "hr size=\"3\" width=\"100%\"";
 
 	// html formats
 	public static final String TABLE_BORDER_PROPERTY = " border=\"1\"";
+	public static final String PAGE_HEADING_TABLE_PROPERTIES = " width=\"100%\" cellspacing=\"5\"";
+	public static final String HEADING_TABLE_PROPERTIES = " width=\"95%\" cellspacing=\"5\"";
 
 	// table html control tags
 	public static final String HTML_OPEN = HtmlUtil.createBeginTag(HTML);
@@ -71,6 +81,10 @@ public final class HtmlConsts {
 	public static final String LINE_BREAK = HtmlUtil.createBeginTag(BREAK);
 	public static final String FORM_CLOSE = HtmlUtil.createEndTag(FORM);
 
+	public static final String PAGE_HEADING_TABLE_OPEN = BEGIN_OPEN_TAG + TABLE
+	+ PAGE_HEADING_TABLE_PROPERTIES + END_TAG;
+	public static final String HEADING_TABLE_OPEN = BEGIN_OPEN_TAG + TABLE
+			+ HEADING_TABLE_PROPERTIES + END_TAG;
 	public static final String BORDERLESS_TABLE_OPEN = BEGIN_OPEN_TAG + TABLE + END_TAG;
 	public static final String TABLE_OPEN = BEGIN_OPEN_TAG + TABLE
 			+ TABLE_BORDER_PROPERTY + END_TAG;

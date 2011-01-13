@@ -60,7 +60,13 @@ public class UploadXFormAppletServlet extends ServletUtilBase {
 	 * Upload Applet body
 	 */
 	private static final String UPLOAD_BODY = 
-"<h1>Upload a multimedia XForm definition to ODK Aggregate</h1>" +
+"<h3>Upload forms into ODK Aggregate</h3><p>Media files for icons, images, audio clips, video clips and " +
+"form logos are expected to be in a folder in the same directory as the form definition file (.xml). " +
+"If the form definition file is <code>\"My Form.xml\"</code> then the media folder should be named " +
+"<code>\"My Form-media\"</code>.  The applet below will upload the form definition file and the contents " +
+"of the media folder, if present, into ODK Aggregate.</p>" +
+"<p>On ODK Collect 1.1.6 and higher, the file named <code>\"form_logo.png\"</code>, if present in the " +
+"media folder, will be displayed as the form's logo. </p>" +
 "\n<object type=\"application/x-java-applet\" height=\"400\" width=\"900\" >" +
 "\n  <param name=\"jnlp_href\" value=\"upload-xform/opendatakit-upload.jnlp\" />" +
 "\n  <param name=\"mayscript\" value=\"true\" />" +

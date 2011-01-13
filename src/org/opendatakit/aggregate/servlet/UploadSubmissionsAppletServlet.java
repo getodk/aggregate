@@ -25,7 +25,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.common.constants.HtmlUtil;
-import org.springframework.web.util.HtmlUtils;
 
 
 /**
@@ -61,7 +60,8 @@ public class UploadSubmissionsAppletServlet extends ServletUtilBase {
 	 * Upload Applet body
 	 */
 	private static final String UPLOAD_BODY = 
-"<h1>Upload submissions to ODK Aggregate</h1>" +
+"<h3>Upload submissions to ODK Aggregate</h3>" +
+"<p>If the upload is successful, the submissions will be deleted from the local drive.</p>" +
 "\n<object type=\"application/x-java-applet\" height=\"600\" width=\"900\" >" +
 "\n  <param name=\"jnlp_href\" value=\"upload-submissions/opendatakit-upload.jnlp\" />" +
 "\n  <param name=\"mayscript\" value=\"true\" />" +
