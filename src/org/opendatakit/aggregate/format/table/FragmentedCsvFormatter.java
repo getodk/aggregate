@@ -135,31 +135,32 @@ public class FragmentedCsvFormatter extends TableFormatterBase implements Submis
 		
 	    List<Row> formattedElements = new ArrayList<Row>();
 	    List<String> headers = headerFormatter.generateHeaders(form, rootGroup, propertyNames);
-	    headers.add(SELF_KEY_PROPERTY);
 	    boolean includeParentKey = false;
-	    if ( rootGroup.getParent() != null ) {
-	    	FormElementModel m = rootGroup.getParent();
+	    {
+	    	FormElementModel m = rootGroup;
 	    	while ( m != null && m.getElementType() != FormElementModel.ElementType.REPEAT ) {
 	    		m = m.getParent();
 	    	}
-	    	if ( m != null ) {
-		    	headers.add(PARENT_KEY_PROPERTY);
-		    	includeParentKey = true;
-	    	}
+	    	includeParentKey = (m != null && m.getElementType() == FormElementModel.ElementType.REPEAT);
 	    }
-
+	    
+	    if ( includeParentKey ) {
+	    	headers.add(PARENT_KEY_PROPERTY);
+	    }
+	    headers.add(SELF_KEY_PROPERTY);
+	    
 	    // format row elements 
 	    for (SubmissionSet sub : submissions) {
 	      Row row = sub.getFormattedValuesAsRow(propertyNames, elemFormatter, false);
 	      
-	      ((LinkElementFormatter) elemFormatter).addFormattedLink( 
-	    		  sub.constructSubmissionKey(null),
-	    		  FragmentedCsvServlet.ADDR, ServletConsts.FORM_ID, row ); // KEY
 	      if ( includeParentKey ) {
 		      ((LinkElementFormatter) elemFormatter).addFormattedLink( 
 		    		  sub.getEnclosingSet().constructSubmissionKey(null),
 		    		  FragmentedCsvServlet.ADDR, ServletConsts.FORM_ID, row ); // PARENT_KEY
 	      }
+	      ((LinkElementFormatter) elemFormatter).addFormattedLink( 
+	    		  sub.constructSubmissionKey(null),
+	    		  FragmentedCsvServlet.ADDR, ServletConsts.FORM_ID, row ); // KEY
 	      formattedElements.add(row);
 	    }
 	    
