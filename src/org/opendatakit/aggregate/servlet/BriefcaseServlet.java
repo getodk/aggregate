@@ -73,7 +73,7 @@ public class BriefcaseServlet extends ServletUtilBase {
 "\n<li>Repeat for all form identifiers.</li>" +
 "\n</ol>" +
 "\n<p>Should your download fail, read how to <a href=\"#Resume\">resume a failed download attempt.</a></p>" +
-"\n<object type=\"application/x-java-applet\" height=\"1200\" width=\"1000\" >" +
+"\n<object type=\"application/x-java-applet\" height=\"900\" width=\"1000\" >" +
 "\n  <param name=\"jnlp_href\" value=\"briefcase/opendatakit-briefcase.jnlp\" />" +
 "\n  <param name=\"mayscript\" value=\"true\" />" +
 "\n</object>" +

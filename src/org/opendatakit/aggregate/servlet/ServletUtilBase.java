@@ -53,8 +53,9 @@ public class ServletUtilBase extends CommonServletBase {
   "\nstore to suppress the security warnings.</p><p>Note that whenever you import a certificate, you are trusting " +
   "\nthe owner of that certificate with your system security, as it will allow any software that the owner " +
   "\nsigns to be transparently executed on your system. Note further that anyone can create a self-signed " +
-  "\ncertificate and claim to be the named organization.</p><h4>Download the Certificate</h4><p>Click <a href=\"res/OpenDataKit.cer\">here</a> to " +
-  "\ndownload the certificate.</p><h4>Import on Windows</h4><ol><li>Open <code>Control Panel/Java</code>.</li><li>Go to " +
+  "\ncertificate and claim to be the named organization.</p><h4>Download the Certificate</h4><p>Click <a href=\"res/OpenDataKit.cer\">here</a>" +
+  " to download the certificate.  <b>NOTE:</b> On Firefox, you must right-click and select `Save Link As...` in order to download the certificate file." +
+  "\n</p><h4>Import on Windows</h4><ol><li>Open <code>Control Panel/Java</code>.</li><li>Go to " +
   "\nthe <code>Security</code> tab,</li><li>Click <code>Certificates...</code> tab.</li><li>Select <code>Import</code> to import " +
   "\nthe certificate.</li></ol>";
 
