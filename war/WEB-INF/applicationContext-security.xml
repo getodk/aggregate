@@ -57,6 +57,7 @@
 		<intercept-url pattern="/formXml" access="hasRole('ROLE_FORM_DOWNLOAD')" />
 		<intercept-url pattern="/submission" access="hasRole('ROLE_SUBMISSION_UPLOAD')" />
 		<intercept-url pattern="/www/**" access="isFullyAuthenticated() and hasRole('ROLE_USER')" />
+        <intercept-url pattern="/ssl/user-manage-passwords" access="isFullyAuthenticated() and hasRole('USER_IS_REGISTERED') and hasRole('ROLE_ACCESS_ADMIN')" />
 		<intercept-url pattern="/ssl/**" access="isFullyAuthenticated() and hasRole('USER_IS_REGISTERED') and hasRole('ROLE_USER')" />
 		<intercept-url pattern="/view/csvFragment" access="hasRole('ROLE_ANALYST')" />
 		<intercept-url pattern="/view/binaryData" access="hasRole('ROLE_ANALYST')" />

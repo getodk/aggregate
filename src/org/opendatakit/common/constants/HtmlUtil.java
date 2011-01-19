@@ -118,7 +118,7 @@ public class HtmlUtil {
     return urlBuilder.toString();
   }
 
-  public static final String createInput(String type, String name, String value, boolean isChecked, int size) {
+  public static final String createInput(String type, String name, String value, boolean isChecked, int size, String extras) {
     StringBuilder html = new StringBuilder();
     html.append(HtmlConsts.BEGIN_OPEN_TAG + INPUT);
     if (type != null) {
@@ -136,6 +136,11 @@ public class HtmlUtil {
     html.append(BasicConsts.SPACE);
     html.append(createAttribute(ATTR_SIZE, Integer.toString(size)));
     
+    if ( extras != null) {
+    	html.append(BasicConsts.SPACE);
+    	html.append(extras);
+    }
+    
     if ( isChecked ) {
     	html.append(BasicConsts.SPACE);
     	html.append(ATTR_CHECKED);
@@ -145,15 +150,20 @@ public class HtmlUtil {
   }
 
   public static final String createInput(String type, String name, String value, int size) {
-	  return createInput(type, name, value, false, size);
+	  return createInput(type, name, value, false, size, null);
   }
 
   public static final String createInput(String type, String name, String value) {
-	  return createInput(type, name, value, false, INPUT_WIDGET_SIZE_LIMIT);
+	  return createInput(type, name, value, false, INPUT_WIDGET_SIZE_LIMIT, null);
+  }
+  
+  public static final String createNonSavingPasswordInput(String name) {
+	  return createInput(HtmlConsts.INPUT_TYPE_PASSWORD, name, "", 
+			  				false, INPUT_WIDGET_SIZE_LIMIT, "autocomplete=\"off\"");
   }
   
   public static final String createInput(String type, String name, String value, boolean checked) {
-    return createInput(type, name, value, checked, INPUT_WIDGET_SIZE_LIMIT);
+    return createInput(type, name, value, checked, INPUT_WIDGET_SIZE_LIMIT, null);
   }
   
   public static final String createRadio(String name, String value, String desc, boolean checked) {
