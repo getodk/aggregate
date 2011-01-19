@@ -59,10 +59,12 @@ public class UploadSubmissionsAppletServlet extends ServletUtilBase {
 	/**
 	 * Upload Applet body
 	 */
+	private static final String UPLOAD_PREAMBLE = 
+		"<h3>Upload submissions to ODK Aggregate</h3>";
 	private static final String UPLOAD_BODY = 
-"<h3>Upload submissions to ODK Aggregate</h3>" +
 "<p>If the upload is successful, the submissions will be deleted from the local drive.</p>" +
-"\n<object type=\"application/x-java-applet\" height=\"600\" width=\"900\" >" +
+"\n<p><a href=\"#Cert\">Import the signing certificate</a> to stop the security warnings.</p>" +
+"\n<object type=\"application/x-java-applet\" height=\"800\" width=\"1000\" >" +
 "\n  <param name=\"jnlp_href\" value=\"upload-submissions/opendatakit-upload.jnlp\" />" +
 "\n  <param name=\"mayscript\" value=\"true\" />" +
 "\n</object>" +
@@ -97,10 +99,11 @@ public class UploadSubmissionsAppletServlet extends ServletUtilBase {
 		String headContent = cookieSet;
 		beginBasicHtmlResponse(TITLE_INFO, headContent, resp, true, cc); // header
 	    PrintWriter out = resp.getWriter();
-	    out.write(UPLOAD_BODY);
+	    out.write(UPLOAD_PREAMBLE);
 	    out.write("<p>Click ");
 	    out.write(HtmlUtil.createHref(cc.getWebApplicationURL(SubmissionServlet.ADDR), "here"));
 	    out.write(" for the plain html webpage.</p>");
+	    out.write(UPLOAD_BODY);
 	    out.write(APPLET_SIGNING_CERTIFICATE_SECTION);
 		finishBasicHtmlResponse(resp);
 		resp.setStatus(200);

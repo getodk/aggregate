@@ -40,6 +40,15 @@
 		<url-pattern>/ssl/user-password</url-pattern>
 	</servlet-mapping>
 
+    <servlet>
+        <servlet-name>manage-passwords</servlet-name>
+        <servlet-class>org.opendatakit.aggregate.servlet.UserManagePasswordsServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>manage-passwords</servlet-name>
+        <url-pattern>/ssl/user-manage-passwords</url-pattern>
+    </servlet-mapping>
+
 	<servlet>
 		<servlet-name>result</servlet-name>
 		<servlet-class>org.opendatakit.aggregate.servlet.ResultServlet</servlet-class>

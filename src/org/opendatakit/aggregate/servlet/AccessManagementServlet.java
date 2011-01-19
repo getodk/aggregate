@@ -103,6 +103,13 @@ public class AccessManagementServlet extends ServletUtilBase {
 				"Permissions (roles) are granted to user groups.  Users possess the " +
 				"roles of the groups they belong to.  Manage group memberships to " +
 				"manage the access rights of the users."});
+		tableEntries.add(new String[] { "Change locally-maintained (device) passwords for registered users",
+				HtmlUtil.createHref(cc.getWebApplicationURL(UserManagePasswordsServlet.ADDR),
+						UserManagePasswordsServlet.TITLE_INFO),
+				"Logins from a device (e.g., ODK Collect) require a locally-maintained " +
+				"password.  Set or change that password for selected users here.  The password is stored " +
+				"as both a randomly-salted sha-1 hash and as a deterministically-salted md5 hash. " +
+				"The plaintext password is not retained."});
 		
 		out.print(HtmlConsts.TABLE_OPEN);
 		
