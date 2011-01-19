@@ -182,9 +182,9 @@ public class FormParserForJavaRosa {
 		  schemaMalformed = true;
 	  }
     }
-    
-    rootElementDefn = extractFormParameters( rootElement, schemaValue );
-    if (rootElementDefn.formId == null) {
+    try {
+    	rootElementDefn = extractFormParameters( rootElement, schemaValue );
+    } catch ( IllegalArgumentException e ) {
     	if ( schemaMalformed ) {
     		throw new ODKIncompleteSubmissionData(
 	            "xmlns attribute for the data model is not well-formed: '"
