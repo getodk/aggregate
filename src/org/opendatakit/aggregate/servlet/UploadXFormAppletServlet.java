@@ -67,7 +67,7 @@ public class UploadXFormAppletServlet extends ServletUtilBase {
 "of the media folder, if present, into ODK Aggregate.</p>" +
 "<p>On ODK Collect 1.1.6 and higher, the file named <code>\"form_logo.png\"</code>, if present in the " +
 "media folder, will be displayed as the form's logo. </p>" +
-"\n<object type=\"application/x-java-applet\" height=\"400\" width=\"900\" >" +
+"\n<object type=\"application/x-java-applet\" height=\"700\" width=\"1000\" >" +
 "\n  <param name=\"jnlp_href\" value=\"upload-xform/opendatakit-upload.jnlp\" />" +
 "\n  <param name=\"mayscript\" value=\"true\" />" +
 "\n</object>" +
