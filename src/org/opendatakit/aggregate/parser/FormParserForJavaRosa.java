@@ -794,7 +794,6 @@ public class FormParserForJavaRosa {
    * @param parent
    *          parent form element
    * 
-   * @return form element containing the needed info from the xform definition
    * @throws ODKEntityPersistException
    * @throws ODKParseException
    * 
@@ -1097,6 +1096,7 @@ public class FormParserForJavaRosa {
       // Swallow the end tag by looking to see if the prior and current
       // field names are the same.
       TreeElement prior = null;
+      int trueOrdinal = 0;
       for (int i = 0; i < treeElement.getNumChildren(); ++i) {
     	  TreeElement current = (TreeElement) treeElement.getChildAt(i);
     	  // TODO: make this pay attention to namespace of the tag...
@@ -1105,7 +1105,7 @@ public class FormParserForJavaRosa {
     		  // it is the end-group tag...
     		  prior = current;
     	  } else {
-    		  constructDataModel(opaque, k, dmList, fdm, groupURI, i + 1, tablePrefix,
+    		  constructDataModel(opaque, k, dmList, fdm, groupURI, ++trueOrdinal, tablePrefix,
     				  nrGroupPrefix, persistAsTable, current);
     		  prior = current;
     	  }
@@ -1119,6 +1119,7 @@ public class FormParserForJavaRosa {
       // Swallow the end tag by looking to see if the prior and current
       // field names are the same.
       prior = null;
+      trueOrdinal = 0;
       for (int i = 0; i < treeElement.getNumChildren(); ++i) {
     	  TreeElement current = (TreeElement) treeElement.getChildAt(i);
     	  // TODO: make this pay attention to namespace of the tag...
@@ -1127,7 +1128,7 @@ public class FormParserForJavaRosa {
     		  // it is the end-group tag...
     		  prior = current;
     	  } else {
-    		  constructDataModel(opaque, k, dmList, fdm, groupURI, i + 1, tablePrefix,
+    		  constructDataModel(opaque, k, dmList, fdm, groupURI, ++trueOrdinal, tablePrefix,
     				  "", persistAsTable, current);
     		  prior = current;
     	  }
