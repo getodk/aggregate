@@ -37,6 +37,14 @@ public final class XFormParameters implements Comparable<Object> {
 		this.modelVersion = modelVersion;
 		this.uiVersion = uiVersion;
 	}
+	
+	@Override
+	public String toString() {
+		return "XFormParameters[formId=" + formId + " and version=" +
+					(modelVersion == null ? "null" : Long.toString(modelVersion)) +
+					" and uiVersion=" +
+					(uiVersion == null ? "null" : Long.toString(uiVersion)) + "]";
+	}
 
 	@Override
 	public boolean equals(Object obj) {

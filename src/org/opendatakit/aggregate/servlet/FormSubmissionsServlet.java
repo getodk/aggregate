@@ -186,6 +186,9 @@ public class FormSubmissionsServlet extends ServletUtilBase {
       odkIdNotFoundError(resp);
     } catch (ODKDatastoreException e) {
       errorRetreivingData(resp);
+    } catch (Exception e) {
+   	  e.printStackTrace();
+      resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Unexpected error: " + e.getMessage());
     }
   }
 

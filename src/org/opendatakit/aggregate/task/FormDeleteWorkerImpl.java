@@ -264,10 +264,19 @@ public class FormDeleteWorkerImpl {
 		if ( !deleteExternalServiceTasks() ) return false;
 
 		CommonFieldsBase relation = null;
-		relation = form.getTopLevelGroupElement().getFormDataModel()
-				.getBackingObjectPrototype();
 		Datastore ds = cc.getDatastore();
 	    User user = cc.getCurrentUser();
+
+	    // it is possible to have a FormInfo entry without any information
+	    // on the backing object (no records in FormDataModel).  In that
+	    // case, the formDefinition will be null, causing getTLGE() to throw
+	    // an exception.
+	    try {
+	    	relation = form.getTopLevelGroupElement().getFormDataModel()
+	    						.getBackingObjectPrototype();
+	    } catch ( Exception e ) {
+	    	relation = null;
+	    }
 
 		if (relation != null) {
 			for (;;) {
