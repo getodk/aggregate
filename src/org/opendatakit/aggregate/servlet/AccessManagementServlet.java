@@ -58,21 +58,31 @@ public class AccessManagementServlet extends ServletUtilBase {
 
 		PrintWriter out = resp.getWriter();
 		
+		boolean secure = this.isSiteManagementSecure(cc);
+		
 		out.print("<p>By default, anyone with a gmail account can log in and " +
 				"do anything with your site.  Additionally, anyone, without logging " +
 				"in at all, can upload data to your site and download forms from " +
-				"it.  This is consistent with Aggregate 0.9.x.</p>\n<p>Your first task " +
+				"it.  This is consistent with Aggregate 0.9.x.</p>\n");
+		if ( !secure ) {
+			out.print("<font style=\"color: red;\">");
+		}
+		out.print("<h2>Securing Site Management</h2><p>Your first task " +
 				"in securing the site is to restrict access to this page and the other " +
 				"pages that enable you to control access to the site.  To do this,</p>" +
 				"<ol>" +
 				"<li>Define an 'administrators' group, granting it the ROLE_ACCESS_ADMIN permission</li>" +
 				"<li>Add yourself as a registered user of the site</li>" +
 				"<li>Add yourself to that 'administrators' group</li>" +
-				"<li>Remove the ROLE_ACCESS_ADMIN permission from all other groups</li></ol>\n" +
+				"<li>Remove the ROLE_ACCESS_ADMIN permission from all other groups</li>" +
+				"<li>Log off then log back in (to update your permissions) in order to gain the ROLE_ACCESS_ADMIN privilege</li></ol>\n" +
 				"<p>After having done this, only you can access these web pages and manage " +
 				"your site's access permissions.  You should repeat steps 2 and 3 to add " +
-				"at least one other person to the 'administrators' group.</p>\n" +
-				"<p>To further secure your site, you need to decide which permissions (roles) you want " +
+				"at least one other person to the 'administrators' group.</p>\n");
+		if ( !secure ) {
+			out.print("</font>");
+		}
+		out.print("<h2>Further Securing Site Access</h2><p>To further secure your site, you need to decide which permissions (roles) you want " +
 				"an anonymous user (someone who has not logged in) to have, which roles you " +
 				"want users that log in with a gmail.com account to have, and which roles you " +
 				"want certain specified users to have. The later is accomplished by " +

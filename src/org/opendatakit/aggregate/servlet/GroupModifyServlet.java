@@ -253,14 +253,8 @@ public class GroupModifyServlet extends ServletUtilBase {
 	}
 
 	private String fetchFullSet(String key, CallingContext cc) {
-		RoleHierarchyImpl rhi = (RoleHierarchyImpl) cc.getBean(SecurityBeanDefs.ROLE_HIERARCHY_MANAGER);
-		TreeSet<String> orderedSet = new TreeSet<String>();
-		Collection<GrantedAuthority> ga = rhi.getReachableGrantedAuthorities(Collections.singleton((GrantedAuthority) new GrantedAuthorityImpl(key)));
-		for ( GrantedAuthority a : ga ) {
-			orderedSet.add(a.getAuthority());
-		}
-		orderedSet.remove(key);
-		
+		TreeSet<String> orderedSet = fetchGrantedAuthoritySet(key, cc);
+
 		return buildList(orderedSet, cc);
 	}
 

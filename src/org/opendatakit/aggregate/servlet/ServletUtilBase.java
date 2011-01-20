@@ -19,7 +19,10 @@ package org.opendatakit.aggregate.servlet;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
+import java.util.TreeSet;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -33,7 +36,12 @@ import org.opendatakit.aggregate.exception.ODKExternalServiceNotAuthenticated;
 import org.opendatakit.aggregate.externalservice.OAuthToken;
 import org.opendatakit.common.constants.BasicConsts;
 import org.opendatakit.common.constants.HtmlConsts;
+import org.opendatakit.common.security.SecurityBeanDefs;
+import org.opendatakit.common.security.spring.GrantedAuthorityNames;
+import org.opendatakit.common.security.spring.RoleHierarchyImpl;
 import org.opendatakit.common.web.servlet.CommonServletBase;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.GrantedAuthorityImpl;
 
 import com.google.gdata.client.authn.oauth.GoogleOAuthHelper;
 import com.google.gdata.client.authn.oauth.GoogleOAuthParameters;
@@ -72,9 +80,27 @@ public class ServletUtilBase extends CommonServletBase {
   
   @Override
   protected String getVersionString(CallingContext cc) {
-	  return HtmlConsts.TAB + "<FONT SIZE=1>" + ServletConsts.VERSION + "</FONT>";
+	return HtmlConsts.TAB + "<FONT SIZE=1>" + ServletConsts.VERSION + "</FONT>";
+  }
+  
+  protected TreeSet<String> fetchGrantedAuthoritySet(String key, CallingContext cc) {
+	RoleHierarchyImpl rhi = (RoleHierarchyImpl) cc.getBean(SecurityBeanDefs.ROLE_HIERARCHY_MANAGER);
+	TreeSet<String> orderedSet = new TreeSet<String>();
+	Collection<GrantedAuthority> ga = rhi.getReachableGrantedAuthorities(Collections.singleton((GrantedAuthority) new GrantedAuthorityImpl(key)));
+	for ( GrantedAuthority a : ga ) {
+		orderedSet.add(a.getAuthority());
+	}
+	orderedSet.remove(key);
+	
+	return orderedSet;
   }
 
+  public boolean isSiteManagementSecure(CallingContext cc) {
+	TreeSet<String> grants = fetchGrantedAuthoritySet( GrantedAuthorityNames.USER_IS_ANONYMOUS.name(), cc);
+	grants.addAll(fetchGrantedAuthoritySet( GrantedAuthorityNames.USER_IS_AUTHENTICATED.name(), cc));
+	return !grants.contains( GrantedAuthorityNames.ROLE_ACCESS_ADMIN.name() );
+  }
+  
   /**
    * Generate error response for ODK ID not found
    * 
@@ -164,7 +190,17 @@ public class ServletUtilBase extends CommonServletBase {
 			  cc.getWebApplicationURL(FormDeleteServlet.ADDR), 
 			  ServletConsts.DELETE_FORM_LINK_TEXT);
 	  
+	  boolean secure = isSiteManagementSecure(cc);
+	  
 	  StringBuilder html = new StringBuilder();
+	  if ( !secure ) {
+		  html.append(HtmlUtil.createBeginTag(HtmlConsts.CENTERING_DIV));
+		  html.append("<font style=\"color: red; font-family: arial; font-size: 150%\">" +
+		  		"Site Management is NOT SECURE.  Click " +
+		  	    HtmlUtil.createHref(cc.getWebApplicationURL(AccessManagementServlet.ADDR), 
+					  "here") + " now!</font>");
+		  html.append(HtmlUtil.createEndTag(HtmlConsts.DIV));
+	  }
 	html.append(HtmlUtil.createBeginTag(HtmlConsts.CENTERING_DIV));
     html.append(HtmlConsts.HEADING_TABLE_OPEN);
     String[] headers = new String[] { "Access", "Publish", "Upload", "Manage" }; 
