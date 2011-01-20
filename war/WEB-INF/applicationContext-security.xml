@@ -133,12 +133,10 @@
 				class="org.springframework.security.web.authentication.DelegatingAuthenticationEntryPoint">
 				<beans:constructor-arg>
 					<beans:map>
-						<beans:entry key="hasHeader('User-Agent','Chrome') or hasHeader('User-Agent','Safari')" value-ref="openIdEntryPoint" />
-						<beans:entry key="hasHeader('User-Agent','Mozilla')" value-ref="openIdEntryPoint" />
-						<beans:entry key="hasHeader('User-Agent','Firefox') or hasHeader('User-Agent','MSIE') or hasHeader('User-Agent','Opera')" value-ref="openIdEntryPoint" />
+                        <beans:entry key="hasHeader('X-OpenRosa-Version','1.0')" value-ref="${security.server.deviceAuthentication}EntryPoint" />
 					</beans:map>
 				</beans:constructor-arg>
-				<beans:property name="defaultEntryPoint" ref="${security.server.deviceAuthentication}EntryPoint" />
+				<beans:property name="defaultEntryPoint" ref="openIdEntryPoint" />
 			</beans:bean>
 		</beans:property>
 	</beans:bean>
