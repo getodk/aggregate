@@ -18,6 +18,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.constants.ServletConsts;
@@ -67,6 +68,7 @@ import org.opendatakit.common.security.User;
 public class FormDefinition {
 	
 	private static final Map<XFormParameters, FormDefinition> formDefinitions = new HashMap<XFormParameters, FormDefinition>();
+	private static final Logger logger = Logger.getLogger(FormDefinition.class.getName());
 	
 	/** map from uri to FormDataModel; with navigable parent/child structure */
 	public final Map<String, FormDataModel> uriMap = new HashMap<String, FormDataModel>();
@@ -469,16 +471,21 @@ public class FormDefinition {
 				    		break;
 				    	}
 				    }
-				    if ( sa == null ) return null;
+				    if ( sa == null ) {
+				    	logger.warning("No sa record matching this formId " + p.toString());
+				    	return null;
+				    }
 				    // OK.  Found an sa record -- use it to find the fdm entries...
 				    FormDataModel fdm = FormDataModel.createRelation(cc);
 					Query query = ds.createQuery(fdm, user);
 					query.addFilter(fdm.uriSubmissionDataModel, FilterOperation.EQUAL, thisUriSubmissionDataModel);
 					fdmList = query.executeQuery(0);
 				} catch (ODKDatastoreException e) {
+			    	logger.warning("Persistence Layer failure " + e.getMessage() + " for formId " + p.toString());
 					return null;
 				}
 				if ( fdmList == null || fdmList.size() == 0 ) {
+			    	logger.warning("No FDM records for formId " + p.toString());
 					return null;
 				}
 				
@@ -506,6 +513,7 @@ public class FormDefinition {
 						
 					} catch (ODKDatastoreException e1) {
 						e1.printStackTrace();
+				    	logger.severe("Asserting relations failed for formId " + p.toString());
 						fd = null;
 					}
 	

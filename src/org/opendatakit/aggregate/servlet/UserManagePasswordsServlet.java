@@ -130,11 +130,16 @@ public class UserManagePasswordsServlet extends ServletUtilBase {
 		out.write(HtmlConsts.TABLE_ROW_CLOSE);
 		out.write(HtmlConsts.TABLE_ROW_OPEN);
 		for ( RegisteredUsersTable u : userDefinitions ) {
+			String username = u.getUriUser();
 			out.write(HtmlConsts.TABLE_ROW_OPEN);
 			out.write(HtmlUtil.createSelfClosingTag(HtmlConsts.TABLE_DATA));
+	        String display = username;
+	        if ( username != null && username.startsWith(SecurityUtils.MAILTO_COLON)) {
+	        	display = username.substring(SecurityUtils.MAILTO_COLON.length());
+	        }
 			out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.TABLE_DATA,
 					HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_CHECKBOX,
-							UserManagePasswordsServlet.USERNAME, u.getUriUser()) + u.getUriUser()));
+							UserManagePasswordsServlet.USERNAME, username) + display));
 			out.write(HtmlConsts.TABLE_ROW_CLOSE);
 		}
 		out.write(HtmlConsts.TABLE_ROW_OPEN);
