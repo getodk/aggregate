@@ -77,14 +77,49 @@
 		class="org.springframework.security.web.FilterChainProxy">
 		<filter-chain-map path-type="ant">
 			<filter-chain pattern="/local_login.html"
-				filters="securityContextPersistenceFilter,logoutFilter,anonymousFilter,${security.server.deviceAuthentication}AuthFilter,requestCacheAwareFilter,securityContextHolderAwareFilter,sessionManagerFilter,localExceptionTranslationFilter,filterSecurityInterceptor" />
+				filters="channelProcessingFilter,securityContextPersistenceFilter,logoutFilter,anonymousFilter,${security.server.deviceAuthentication}AuthFilter,requestCacheAwareFilter,securityContextHolderAwareFilter,sessionManagerFilter,localExceptionTranslationFilter,filterSecurityInterceptor" />
 			<filter-chain pattern="/*"
-				filters="securityContextPersistenceFilter,logoutFilter,anonymousFilter,${security.server.deviceAuthentication}AuthFilter,openIdFilter,requestCacheAwareFilter,securityContextHolderAwareFilter,sessionManagerFilter,exceptionTranslationFilter,filterSecurityInterceptor" />
+				filters="channelProcessingFilter,securityContextPersistenceFilter,logoutFilter,anonymousFilter,${security.server.deviceAuthentication}AuthFilter,openIdFilter,requestCacheAwareFilter,securityContextHolderAwareFilter,sessionManagerFilter,exceptionTranslationFilter,filterSecurityInterceptor" />
 			<filter-chain pattern="/**"
-				filters="securityContextPersistenceFilter,logoutFilter,anonymousFilter,${security.server.deviceAuthentication}AuthFilter,openIdFilter,requestCacheAwareFilter,securityContextHolderAwareFilter,sessionManagerFilter,exceptionTranslationFilter,filterSecurityInterceptor" />
+				filters="channelProcessingFilter,securityContextPersistenceFilter,logoutFilter,anonymousFilter,${security.server.deviceAuthentication}AuthFilter,openIdFilter,requestCacheAwareFilter,securityContextHolderAwareFilter,sessionManagerFilter,exceptionTranslationFilter,filterSecurityInterceptor" />
 		</filter-chain-map>
 	</beans:bean>
 
+	<beans:bean id="channelProcessingFilter" class="org.springframework.security.web.access.channel.ChannelProcessingFilter">
+	  <beans:property name="channelDecisionManager" ref="channelDecisionManager"/>
+	  <beans:property name="securityMetadataSource">
+	    <filter-invocation-definition-source path-type="ant">
+		    <intercept-url pattern="/index.html" access="ANY_CHANNEL"/>
+	        <intercept-url pattern="/favicon.ico" access="ANY_CHANNEL" />
+	        <intercept-url pattern="/odk_color.png" access="ANY_CHANNEL" />
+	        <intercept-url pattern="/index.html" access="REQUIRES_INSECURE_CHANNEL" />
+	        <intercept-url pattern="/logout.html" access="REQUIRES_INSECURE_CHANNEL" />
+	        <intercept-url pattern="/openid_login.html" access="ANY_CHANNEL" />
+	        <intercept-url pattern="/res/**" access="ANY_CHANNEL" />
+<!--	        ENABLING SECURE CHANNELS  -->
+<!--	        Secure channels need a server certificate, and will cause security alerts -->
+<!--	        if that certificate is self-signed.  To enable secure channels, -->
+<!--	        comment out the line below and uncomment the 3 lines after.  -->
+	        <intercept-url pattern="/**" access="ANY_CHANNEL" />
+<!--		    <intercept-url pattern="/ssl/**" access="REQUIRES_SECURE_CHANNEL"/>-->
+<!--            <intercept-url pattern="/local_login.html" access="${security.server.channelType}" />-->
+<!--		    <intercept-url pattern="/**" access="${security.server.channelType}"/>-->
+	    </filter-invocation-definition-source>                
+	  </beans:property>
+	</beans:bean>
+	    
+	<beans:bean id="channelDecisionManager" class="org.springframework.security.web.access.channel.ChannelDecisionManagerImpl">
+	  <beans:property name="channelProcessors">
+	    <beans:list>
+		    <beans:ref bean="secureChannelProcessor"/>
+		    <beans:ref bean="insecureChannelProcessor"/>
+	    </beans:list>
+	  </beans:property>
+	</beans:bean>
+	    
+	<beans:bean id="secureChannelProcessor" class="org.springframework.security.web.access.channel.SecureChannelProcessor"/>
+	<beans:bean id="insecureChannelProcessor" class="org.springframework.security.web.access.channel.InsecureChannelProcessor"/>
+	    
 	<beans:bean id="securityContextPersistenceFilter"
 		class="org.springframework.security.web.context.SecurityContextPersistenceFilter">
 		<beans:property name="securityContextRepository" ref="securityContextRepository" />
