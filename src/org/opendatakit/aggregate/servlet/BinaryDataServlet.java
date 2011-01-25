@@ -20,6 +20,7 @@ package org.opendatakit.aggregate.servlet;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
+import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -46,6 +47,10 @@ import org.opendatakit.common.persistence.exception.ODKDatastoreException;
  */
 public class BinaryDataServlet extends ServletUtilBase {
 
+  private static final String NOT_BINARY_OBJECT = "Requested element is not a binary object";
+
+  private static final Logger logger = Logger.getLogger(BinaryDataServlet.class.getName());
+  
   /**
    * Serial number for serialization
    */
@@ -98,8 +103,28 @@ public class BinaryDataServlet extends ServletUtilBase {
 	}
 	
     if ( sub != null ) {
-    	SubmissionElement v = sub.resolveSubmissionKey(parts);
-    	BlobSubmissionType b = (BlobSubmissionType) v;
+    	BlobSubmissionType b = null;
+    	
+    	try {
+    		SubmissionElement v = null;
+    		v = sub.resolveSubmissionKey(parts);
+    		if ( v instanceof BlobSubmissionType ) {
+    			b = (BlobSubmissionType) v;
+    		} else {
+        		String path = getKeyPath(parts);
+    			logger.severe(NOT_BINARY_OBJECT + ": " + path);
+    			resp.sendError(HttpServletResponse.SC_BAD_REQUEST,
+    					NOT_BINARY_OBJECT);
+    			return;
+    		}
+    	} catch ( Exception e ) {
+    		e.printStackTrace();
+    		String path = getKeyPath(parts);
+    		logger.severe("Unable to retrieve part identified by path: " + path);
+    		errorBadParam(resp);
+    		return;
+    	}
+    		
     	if ( b.getAttachmentCount() == 1 ) {
     		String version = b.getCurrentVersion(1);
     		try {
@@ -120,6 +145,7 @@ public class BinaryDataServlet extends ServletUtilBase {
     		if ((version == null) || (ordinal == null)) {
     			resp.sendError(HttpServletResponse.SC_BAD_REQUEST, 
     					"attachment request must be fully qualified");
+				return;
     		} else {
 	    		try {
 	    			imageBlob = b.getBlob(ordinal.intValue(), version);
@@ -130,6 +156,7 @@ public class BinaryDataServlet extends ServletUtilBase {
 	    			e.printStackTrace();
 	    			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
 	    							"Unable to retrieve attachment");
+					return;
 	    		}
     		}
     	}
@@ -160,6 +187,15 @@ public class BinaryDataServlet extends ServletUtilBase {
     	resp.setContentType(HtmlConsts.RESP_TYPE_PLAIN);
     	resp.getWriter().print(ErrorConsts.NO_IMAGE_EXISTS);
     }
+  }
+  
+  private final String getKeyPath(List<SubmissionKeyPart> parts) {
+	StringBuilder b = new StringBuilder();
+	for ( SubmissionKeyPart p : parts ) {
+		b.append("/");
+		b.append(p.toString());
+	}
+	return b.toString();
   }
 
 }

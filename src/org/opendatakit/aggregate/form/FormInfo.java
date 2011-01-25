@@ -228,6 +228,12 @@ public class FormInfo {
 	    }
 	}
 	
+	private static final boolean sameVersion( Long rootModel, Long rootUi, Long rootModelVersion, Long rootUiVersion) {
+    	return  ((rootModelVersion == null) ? (rootModel == null) :
+    				(rootModel != null && rootModelVersion.equals(rootModel))) &&
+	    		((rootUiVersion == null) ? (rootUi == null) :
+	    				(rootUi != null && rootUiVersion.equals(rootUi)));
+	}
 	/**
 	 * Set the Xform definition.
 	 * 
@@ -249,10 +255,7 @@ public class FormInfo {
 	    for ( SubmissionSet f : filesets ) {
 	    	Long rootModel = ((LongSubmissionType) f.getElementValue(rootElementModelVersion)).getValue();
 	    	Long rootUi = ((LongSubmissionType) f.getElementValue(rootElementUiVersion)).getValue();
-	    	if (((rootModelVersion == rootModel) || 
-	    			((rootModelVersion != null) && (rootModelVersion.equals(rootModel)))) &&
-	    		((rootUiVersion == rootUi) || 
-	    			((rootUiVersion != null) && (rootUiVersion.equals(rootUi))))) {
+	    	if (sameVersion(rootModel, rootUi, rootModelVersion, rootUiVersion)) {
 	    		matchingSet = f;
 	    	}
 	    }
@@ -307,8 +310,7 @@ public class FormInfo {
 	    for ( SubmissionSet f : filesets ) {
 	    	Long rootModel = ((LongSubmissionType) f.getElementValue(rootElementModelVersion)).getValue();
 	    	Long rootUi = ((LongSubmissionType) f.getElementValue(rootElementUiVersion)).getValue();
-	    	if (((rootModelVersion == rootModel) || ((rootModelVersion != null) && rootModelVersion.equals(rootModel))) &&
-	    		((rootUiVersion == rootUi) || ((rootUiVersion != null) && (rootUiVersion.equals(rootUi))))) {
+	    	if (sameVersion(rootModel, rootUi, rootModelVersion, rootUiVersion)) {
 	    		matchingSet = f;
 	    	}
 	    }
@@ -348,9 +350,8 @@ public class FormInfo {
 	    	String formIdStr = ((StringSubmissionType) f.getElementValue(submissionFormId)).getValue();
 	    	Long subModel = ((LongSubmissionType) f.getElementValue(submissionModelVersion)).getValue();
 	    	Long subUi = ((LongSubmissionType) f.getElementValue(submissionUiVersion)).getValue();
-	    	if ((( modelVersionValue == subModel ) || ((modelVersionValue != null) && modelVersionValue.equals(subModel))) &&
-	    		(( uiVersionValue == subUi ) || ((uiVersionValue != null) && uiVersionValue.equals(subUi))) &&
-	    		( submissionFormIdValue.equals(formIdStr)) ) {
+	    	if ( sameVersion(subModel, subUi, modelVersionValue, uiVersionValue) &&
+	    		 submissionFormIdValue.equals(formIdStr) ) {
 	    		return;
 	    	}
 	    }

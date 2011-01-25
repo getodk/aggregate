@@ -541,7 +541,7 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 			} catch ( Exception e ) {
 				throw new IllegalArgumentException("inproper use of ordinal qualifier");
 			}
-			if ( p.getOrdinalNumber() != ordinal ) {
+			if ( ordinal == null || !p.getOrdinalNumber().equals(ordinal) ) {
 				throw new IllegalArgumentException("the ordinal of this group does not match!");
 			}
 		}

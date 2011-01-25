@@ -89,12 +89,14 @@ public class ConfirmServlet extends ServletUtilBase {
       for (String paramKey : paramKeys) {
     	  keys.add(new SubmissionKey(paramKey));
       }
+      
       beginBasicHtmlResponse(TITLE_INFO, resp, false, cc); // header info
       out.print(HtmlUtil.createFormBeginTag(cc.getWebApplicationURL(ProcessServlet.ADDR),
               HtmlConsts.MULTIPART_FORM_DATA, HtmlConsts.POST));
+      
+      // copy post parameters to form as hidden values
       out.print(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_HIDDEN,
               ServletConsts.PROCESS_NUM_RECORDS, Integer.toString(keys.size())));
-            
       for (int i = 0; i < keys.size(); i++) {
         out.print(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_HIDDEN,
             ServletConsts.PROCESS_RECORD_PREFIX + i, keys.get(i).toString()));
@@ -106,15 +108,24 @@ public class ConfirmServlet extends ServletUtilBase {
 	        return;
 	      }
       
+    	  // display the submissions being deleted...
+    	  // This is a read-only display for confirmation only.  The
+    	  // hidden fields above contain the keys for each of these 
+    	  // records.
     	  Form form = Form.retrieveForm(params.getFormId(), cc);
 
 	      out.print(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_HIDDEN,
 	          ServletConsts.FORM_ID, form.getFormId()));
       
 		  QueryByKeys query = new QueryByKeys(keys, cc);
-		  SubmissionFormatter formatter = new HtmlFormatter(form, cc.getServerURL(), resp.getWriter(), null, true);
+		  SubmissionFormatter formatter = new HtmlFormatter(form, cc.getServerURL(), resp.getWriter(), null, false);
 		  formatter.processSubmissions(query.getResultSubmissions());
+		  
       } else if (params.getButtonText().equals(ProcessType.DELETE_FORM.getButtonText())) {
+    	  
+    	  // Display the forms being deleted.
+    	  // This is a read-only display for confirmation only.  The
+    	  // hidden fields above contain the form ids being removed.
 		  QueryFormList formsList = new QueryFormList(keys, true, cc);
 		  FormHtmlTable formFormatter = new FormHtmlTable(formsList, cc);
 		  out.print(formFormatter.generateHtmlFormTable(false, false));

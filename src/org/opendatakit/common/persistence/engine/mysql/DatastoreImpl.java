@@ -192,7 +192,7 @@ public class DatastoreImpl implements Datastore, InitializingBean {
 			if (num != null) {
 				maxCharLen = num.longValueExact();
 				if (type.contains(TEXT) || type.contains(CHAR)) {
-					if (maxCharLen <= MAX_ROW_SIZE) {
+					if (maxCharLen.compareTo(MAX_ROW_SIZE) <= 0) {
 						dataType = DataField.DataType.STRING;
 					} else {
 						dataType = DataField.DataType.LONG_STRING;
@@ -339,7 +339,7 @@ public class DatastoreImpl implements Datastore, InitializingBean {
 						&& d.getDataType() == DataField.DataType.STRING) {
 					d.setDataType(DataField.DataType.URI);
 					if (f.getMaxCharLen() != null
-							&& d.getMaxCharLen() < f.getMaxCharLen()) {
+							&& d.getMaxCharLen().compareTo(f.getMaxCharLen()) < 0 ) {
 						throw new IllegalStateException(
 								"column "
 										+ f.getName()

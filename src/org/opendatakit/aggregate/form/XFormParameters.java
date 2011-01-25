@@ -51,10 +51,10 @@ public final class XFormParameters implements Comparable<Object> {
 		if ( obj == null || !(obj instanceof XFormParameters) ) return false;
 		XFormParameters p = (XFormParameters) obj;
 		return formId.equals(p.formId) &&
-			((modelVersion == null && p.modelVersion == null) ||
-			 (modelVersion != null && modelVersion.equals(p.modelVersion))) &&
-			((uiVersion == null && p.uiVersion == null) ||
-			 (uiVersion != null && uiVersion.equals(p.uiVersion)));
+			((modelVersion == null) ? p.modelVersion == null : 
+				((p.modelVersion != null) && modelVersion.equals(p.modelVersion))) &&
+			((uiVersion == null) ? p.uiVersion == null :
+				((p.uiVersion != null) && uiVersion.equals(p.uiVersion)));
 	}
 
 	@Override
@@ -70,10 +70,10 @@ public final class XFormParameters implements Comparable<Object> {
 		XFormParameters p = (XFormParameters) obj;
 		int cmp = formId.compareTo(p.formId);
 		if ( cmp != 0 ) return cmp;
-		if ( (modelVersion == null && p.modelVersion == null) ||
-			 (modelVersion != null && modelVersion.equals(p.modelVersion)) ) {
-			if ((uiVersion == null && p.uiVersion == null) ||
-				(uiVersion != null && uiVersion.equals(p.uiVersion))) {
+		if ( ((modelVersion == null) ? (p.modelVersion == null) :
+				(p.modelVersion != null && modelVersion.equals(p.modelVersion))) ) {
+			if ( ((uiVersion == null) ? (p.uiVersion == null) :
+				    (p.uiVersion != null && uiVersion.equals(p.uiVersion))) ) {
 				return 0;
 			} else if ( uiVersion == null ) {
 				return 1;

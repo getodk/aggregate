@@ -149,9 +149,9 @@ public final class FormElementModel {
 			return false;
 		FormElementModel ref = (FormElementModel) obj;
 		
-		return ((fdm == ref.fdm) || ((fdm != null) && (fdm.equals(ref.fdm)))) &&
-			   (type == ref.type) &&
-			   ((parent == ref.parent)|| ((parent != null) && (parent.equals(ref.parent)))); 
+		return ((fdm == null) ? (ref.fdm == null) : ((ref.fdm != null) && fdm.equals(ref.fdm))) &&
+			   ((parent == null) ? (ref.parent == null) : ((ref.parent != null) && parent.equals(ref.parent))) && 
+			   (type == ref.type); 
 	}
 
 	public final List<FormElementModel> getChildren() {

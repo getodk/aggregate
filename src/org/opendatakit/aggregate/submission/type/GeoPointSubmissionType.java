@@ -152,7 +152,7 @@ public class GeoPointSubmissionType extends SubmissionSingleValueBase<GeoPoint> 
 
 		GeoPointSubmissionType other = (GeoPointSubmissionType) obj;
 		return (coordinates == null ? (other.coordinates == null)
-				: (coordinates.equals(other.coordinates)));
+				: (other.coordinates != null && coordinates.equals(other.coordinates)));
 	}
 
 	/**

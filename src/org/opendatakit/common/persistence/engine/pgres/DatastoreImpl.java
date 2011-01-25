@@ -198,7 +198,7 @@ public class DatastoreImpl implements Datastore, InitializingBean {
 			} else if ( num != null ) {
 				maxCharLen = num.longValueExact();
 				if ( type.contains(TEXT) || type.contains(CHAR)) {
-					if ( maxCharLen <= MAX_ROW_SIZE ) {
+					if ( maxCharLen.compareTo(MAX_ROW_SIZE) <= 0 ) {
 						dataType = DataField.DataType.STRING;
 					} else {
 						dataType = DataField.DataType.LONG_STRING;
@@ -331,7 +331,8 @@ public class DatastoreImpl implements Datastore, InitializingBean {
 				if ( f.getDataType() == DataField.DataType.URI &&
 					 d.getDataType() == DataField.DataType.STRING ) {
 					d.setDataType(DataField.DataType.URI);
-					if ( f.getMaxCharLen() != null && d.getMaxCharLen() < f.getMaxCharLen() ) {
+					if ( f.getMaxCharLen() != null && 
+							 d.getMaxCharLen().compareTo(f.getMaxCharLen()) < 0 ) {
 						throw new IllegalStateException("column " + f.getName() +
 								" in table " + relation.getSchemaName() + "." + relation.getTableName() + 
 								" stores string-valued keys but is shorter than required by Aggregate " +

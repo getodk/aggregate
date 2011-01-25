@@ -460,9 +460,10 @@ public class GoogleSpreadsheet extends AbstractExternalService implements Extern
       return false;
     }
     GoogleSpreadsheet other = (GoogleSpreadsheet) obj;
-    return (objectEntity == null ? (other.objectEntity == null) : (objectEntity
-        .equals(other.objectEntity)))
-        && (fsc == null ? (other.fsc == null) : (fsc.equals(other.fsc)));
+    return (objectEntity == null ? (other.objectEntity == null) : 
+    		(other.objectEntity != null && objectEntity.equals(other.objectEntity)))
+        && (fsc == null ? (other.fsc == null) :
+        	(other.fsc != null && fsc.equals(other.fsc)));
   }
 
   /**

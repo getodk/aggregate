@@ -133,7 +133,7 @@ final class NamingSet {
 			int len = nm.itemName.length();
 			String qualifier = nm.qualifier;
 			Integer curMax = qualMaxName.get(qualifier);
-			if ( curMax == null || curMax < len ) {
+			if ( curMax == null || curMax.compareTo(len) < 0 ) {
 				qualMaxName.put(qualifier, len);
 			}
 			if ( len > maxItemName ) {
@@ -291,7 +291,7 @@ final class NamingSet {
 				int len = col.getValue().itemName.length();
 				String qualifier = col.getValue().qualifier;
 				Integer curMax = qualMaxName.get(qualifier);
-				if ( curMax == null || curMax < len ) {
+				if ( curMax == null || curMax.compareTo(len) < 0 ) {
 					qualMaxName.put(qualifier, len);
 				}
 			}

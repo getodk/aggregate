@@ -258,9 +258,11 @@ public class FusionTable extends AbstractExternalService implements ExternalServ
       return false;
     }
     FusionTable other = (FusionTable) obj;
-    return (objectEntity == null ? (other.objectEntity == null) : (objectEntity
-        .equals(other.objectEntity)))
-        && (fsc == null ? (other.fsc == null) : (fsc.equals(other.fsc)));
+    return 
+    	(objectEntity == null ? (other.objectEntity == null) : 
+    		(other.objectEntity != null && objectEntity.equals(other.objectEntity)))
+        && (fsc == null ? (other.fsc == null) :
+    		(other.fsc != null && fsc.equals(other.fsc)));
   }
 
   /**
