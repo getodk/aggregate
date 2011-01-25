@@ -243,9 +243,10 @@ public class JsonServer extends AbstractExternalService implements ExternalServi
       return false;
     }
     JsonServer other = (JsonServer) obj;
-    return (objectEntity == null ? (other.objectEntity == null) : (objectEntity
-        .equals(other.objectEntity)))
-        && (fsc == null ? (other.fsc == null) : (fsc.equals(other.fsc)));
+    return (objectEntity == null ? (other.objectEntity == null) : 
+    			(other.objectEntity != null && objectEntity.equals(other.objectEntity)))
+        && (fsc == null ? (other.fsc == null) : 
+        		(other.fsc != null && fsc.equals(other.fsc)));
   }
 
   /**

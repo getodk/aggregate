@@ -76,7 +76,7 @@ public class BlobSubmissionType extends SubmissionFieldBase<SubmissionKey> {
 	
 	public String getCurrentVersion( int ordinal ) {
 		BinaryContent b = attachments.get(ordinal-1);
-		if ( b.getOrdinalNumber() != ordinal ) {
+		if ( !Long.valueOf(ordinal).equals(b.getOrdinalNumber()) ) {
 			// we are somehow out of sync!
 			throw new IllegalStateException("missing attachment declaration");
 		}
@@ -85,7 +85,7 @@ public class BlobSubmissionType extends SubmissionFieldBase<SubmissionKey> {
 	
 	public String getUnrootedFilename( int ordinal ) {
 		BinaryContent b = attachments.get(ordinal-1);
-		if ( b.getOrdinalNumber() != ordinal ) {
+		if ( !Long.valueOf(ordinal).equals(b.getOrdinalNumber()) ) {
 			// we are somehow out of sync!
 			throw new IllegalStateException("missing attachment declaration");
 		}
@@ -101,7 +101,7 @@ public class BlobSubmissionType extends SubmissionFieldBase<SubmissionKey> {
 	 */
 	public List<String> getBinaryVersions( int ordinal ) {
 		BinaryContent b = attachments.get(ordinal-1);
-		if ( b.getOrdinalNumber() != ordinal ) {
+		if ( !Long.valueOf(ordinal).equals(b.getOrdinalNumber()) ) {
 			// we are somehow out of sync!
 			throw new IllegalStateException("missing attachment declaration");
 		}
@@ -116,7 +116,7 @@ public class BlobSubmissionType extends SubmissionFieldBase<SubmissionKey> {
 	
 	public String getContentType( int ordinal, String version ) {
 		BinaryContent b = attachments.get(ordinal-1);
-		if ( b.getOrdinalNumber() != ordinal ) {
+		if ( !Long.valueOf(ordinal).equals(b.getOrdinalNumber()) ) {
 			// we are somehow out of sync!
 			throw new IllegalStateException("missing attachment declaration");
 		}
@@ -130,7 +130,7 @@ public class BlobSubmissionType extends SubmissionFieldBase<SubmissionKey> {
 	
 	public String getContentHash( int ordinal, String version ) {
 		BinaryContent b = attachments.get(ordinal-1);
-		if ( b.getOrdinalNumber() != ordinal ) {
+		if ( !Long.valueOf(ordinal).equals(b.getOrdinalNumber()) ) {
 			// we are somehow out of sync!
 			throw new IllegalStateException("missing attachment declaration");
 		}
@@ -144,7 +144,7 @@ public class BlobSubmissionType extends SubmissionFieldBase<SubmissionKey> {
 	
 	public Long getContentLength( int ordinal, String version ) {
 		BinaryContent b = attachments.get(ordinal-1);
-		if ( b.getOrdinalNumber() != ordinal ) {
+		if ( !Long.valueOf(ordinal).equals(b.getOrdinalNumber()) ) {
 			// we are somehow out of sync!
 			throw new IllegalStateException("missing attachment declaration");
 		}
@@ -159,7 +159,7 @@ public class BlobSubmissionType extends SubmissionFieldBase<SubmissionKey> {
 
 	public byte[] getBlob(int ordinal, String version) throws ODKDatastoreException {
 		BinaryContent b = attachments.get(ordinal-1);
-		if ( b.getOrdinalNumber() != ordinal ) {
+		if ( !Long.valueOf(ordinal).equals(b.getOrdinalNumber()) ) {
 			// we are somehow out of sync!
 			throw new IllegalStateException("missing attachment declaration");
 		}
@@ -211,7 +211,8 @@ public class BlobSubmissionType extends SubmissionFieldBase<SubmissionKey> {
 	  
 	  for ( BinaryContent bc : attachments ) {
 		  String bcFilePath = bc.getUnrootedFilePath();
-		  if ( (bcFilePath == null && unrootedFilePath == null) || (bcFilePath != null && bcFilePath.equals(unrootedFilePath))) {
+		  if ( (bcFilePath == null) ? (unrootedFilePath == null) 
+				  : (unrootedFilePath != null && bcFilePath.equals(unrootedFilePath)) ) {
 			  matchedBc = bc;
 			  existingContent = true;
 			  break;

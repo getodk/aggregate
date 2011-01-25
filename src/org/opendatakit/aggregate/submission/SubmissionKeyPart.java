@@ -126,4 +126,53 @@ public class SubmissionKeyPart {
 	public String getVersion() {
 		return version;
 	}
+	
+	public String toString() {
+		StringBuilder b = new StringBuilder();
+		b.append(elementName);
+		b.append("[");
+		boolean first = true;
+		if ( modelVersion != null ) {
+			if ( !first ) {
+				b.append(" and ");
+			}
+			b.append("modelVersion=");
+			b.append(modelVersion);
+			first = false;
+		}
+		if ( uiVersion != null ) {
+			if ( !first ) {
+				b.append(" and ");
+			}
+			b.append("uiVersion=");
+			b.append(uiVersion);
+			first = false;
+		}
+		if ( auri != null ) {
+			if ( !first ) {
+				b.append(" and ");
+			}
+			b.append("uuid=");
+			b.append(auri);
+			first = false;
+		}
+		if ( ordinal != null ) {
+			if ( !first ) {
+				b.append(" and ");
+			}
+			b.append("ordinal=");
+			b.append(ordinal);
+			first = false;
+		}
+		if ( version != null ) {
+			if ( !first ) {
+				b.append(" and ");
+			}
+			b.append("version=");
+			b.append(version);
+			first = false;
+		}
+		b.append("]");
+		return b.toString();
+	}
 }

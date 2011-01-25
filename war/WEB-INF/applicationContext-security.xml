@@ -89,21 +89,15 @@
 	  <beans:property name="channelDecisionManager" ref="channelDecisionManager"/>
 	  <beans:property name="securityMetadataSource">
 	    <filter-invocation-definition-source path-type="ant">
-		    <intercept-url pattern="/index.html" access="ANY_CHANNEL"/>
 	        <intercept-url pattern="/favicon.ico" access="ANY_CHANNEL" />
 	        <intercept-url pattern="/odk_color.png" access="ANY_CHANNEL" />
 	        <intercept-url pattern="/index.html" access="REQUIRES_INSECURE_CHANNEL" />
 	        <intercept-url pattern="/logout.html" access="REQUIRES_INSECURE_CHANNEL" />
 	        <intercept-url pattern="/openid_login.html" access="ANY_CHANNEL" />
 	        <intercept-url pattern="/res/**" access="ANY_CHANNEL" />
-<!--	        ENABLING SECURE CHANNELS  -->
-<!--	        Secure channels need a server certificate, and will cause security alerts -->
-<!--	        if that certificate is self-signed.  To enable secure channels, -->
-<!--	        comment out the line below and uncomment the 3 lines after.  -->
-	        <intercept-url pattern="/**" access="ANY_CHANNEL" />
-<!--		    <intercept-url pattern="/ssl/**" access="REQUIRES_SECURE_CHANNEL"/>-->
-<!--            <intercept-url pattern="/local_login.html" access="${security.server.channelType}" />-->
-<!--		    <intercept-url pattern="/**" access="${security.server.channelType}"/>-->
+		    <intercept-url pattern="/ssl/**" access="${security.server.secureChannelType}"/>
+            <intercept-url pattern="/local_login.html" access="${security.server.secureChannelType}" />
+		    <intercept-url pattern="/**" access="${security.server.channelType}"/>
 	    </filter-invocation-definition-source>                
 	  </beans:property>
 	</beans:bean>

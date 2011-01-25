@@ -138,8 +138,6 @@ public class ProcessServlet extends ServletUtilBase {
             	MiscTasks m = new MiscTasks(TaskType.DELETE_FORM, formToDelete, null, cc);
             	m.persist(cc);
                 formDelete.createFormDeleteTask(formToDelete, m.getSubmissionKey(), 1L, cc);
-                resp.sendRedirect(cc.getWebApplicationURL(FormsServlet.ADDR));
-                return;
               } else {
                 String errString = "Attempting to delete FormInfo table definition record!";
                 errorText.append(errString + BasicConsts.NEW_LINE);
@@ -150,6 +148,12 @@ public class ProcessServlet extends ServletUtilBase {
             errorText.append(ErrorConsts.TASK_PROBLEM + e.toString() + BasicConsts.NEW_LINE);
             // and try the remaining submissions...
           }
+        }
+        
+        // if we are successful, redirect to the forms servlet.
+        if ( errorText.length() == 0 ) {
+            resp.sendRedirect(cc.getWebApplicationURL(FormsServlet.ADDR));
+            return;
         }
       } else {
         Logger.getLogger(this.getClass().getName()).severe("UNRECOGNIZED PROCESS TYPE!");

@@ -260,9 +260,16 @@ public class FormUploadServlet extends ServletUtilBase {
     if (bOk) {
       resp.setStatus(HttpServletResponse.SC_CREATED);
       resp.setHeader("Location", cc.getServerURL());
-      if ( req.getHeader("User-Agent") != null ) {
-    	  resp.sendRedirect(cc.getWebApplicationURL(FormsServlet.ADDR));
-      }
+      resp.setContentType(HtmlConsts.RESP_TYPE_HTML);
+      resp.setCharacterEncoding(HtmlConsts.UTF8_ENCODE);
+      PrintWriter out = resp.getWriter();
+      out.write(HtmlConsts.HTML_OPEN);
+      out.write(HtmlConsts.BODY_OPEN);
+      out.write("Successful form upload.  Click ");
+      out.write(HtmlUtil.createHref(cc.getWebApplicationURL(FormsServlet.ADDR), "here"));
+      out.write(" to return to forms page.");
+      out.write(HtmlConsts.BODY_CLOSE);
+      out.write(HtmlConsts.HTML_CLOSE);
     }
   }
 

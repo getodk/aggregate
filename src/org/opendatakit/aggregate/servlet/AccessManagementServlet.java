@@ -74,9 +74,9 @@ public class AccessManagementServlet extends ServletUtilBase {
 				"<li>Define an 'administrators' group, granting it the ROLE_ACCESS_ADMIN permission</li>" +
 				"<li>Add yourself as a registered user of the site</li>" +
 				"<li>Add yourself to that 'administrators' group</li>" +
+				"<li>Log off then log back in (to update your permissions) in order to gain the ROLE_ACCESS_ADMIN privilege through the 'administrators' group</li>" +
 				"<li>Remove the ROLE_ACCESS_ADMIN permission from all other groups</li>" +
-				"<li>Log off then log back in (to update your permissions) in order to gain the ROLE_ACCESS_ADMIN privilege</li></ol>\n" +
-				"<p>After having done this, only you can access these web pages and manage " +
+				"\n</ol><p>After having done this, only you can access these web pages and manage " +
 				"your site's access permissions.  You should repeat steps 2 and 3 to add " +
 				"at least one other person to the 'administrators' group.</p>\n");
 		if ( !secure ) {

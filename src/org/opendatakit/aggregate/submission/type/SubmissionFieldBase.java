@@ -125,7 +125,8 @@ public abstract class SubmissionFieldBase<T> implements SubmissionField<T>{
     }
     
     SubmissionFieldBase<?> other = (SubmissionFieldBase<?>) obj;
-    return (element == null ? (other.element == null) : (element.equals(other.element)));    
+    return (element == null ? (other.element == null) :
+    	(other.element != null && element.equals(other.element)));    
   }
 
   /**
