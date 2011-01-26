@@ -31,7 +31,7 @@ public class AggregrateThreadExecutor {
   private static final int NUM_THREADS = 100;
   private static AggregrateThreadExecutor classInstance = null;
 
-  public static AggregrateThreadExecutor getAggregateThreadExecutor() {
+  public synchronized static AggregrateThreadExecutor getAggregateThreadExecutor() {
     if (classInstance == null) {
       classInstance = new AggregrateThreadExecutor();
     }
@@ -45,7 +45,7 @@ public class AggregrateThreadExecutor {
   }
 
   public void execute(Runnable task) {
-    exec.execute(task);
+    exec.schedule(task, 100, TimeUnit.MILLISECONDS);
   }
 
   public void schedule(Runnable task, long delayInMilliseconds) {
