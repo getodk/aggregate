@@ -26,7 +26,7 @@ package org.opendatakit.common.security;
  * 
  */
 public interface User {
-	public static final String ANONYMOUS_USER = "mailto:anonymous";
+	public static final String ANONYMOUS_USER = "anonymousUser";
 	public static final String ANONYMOUS_USER_NICKNAME = "anonymous user";
 
 	public static final String DAEMON_USER = "aggregate.opendatakit.org:web-service";
@@ -37,7 +37,7 @@ public interface User {
 	public String getNickname();
 	
 	/**
-	 * @return user id of the form mailto:user@domain.com  or mailto:anonymous
+	 * @return user id of the form mailto:user@domain.com  or ANONYMOUS_USER or DAEMON_USER
 	 */
 	public String getUriUser();
 	
