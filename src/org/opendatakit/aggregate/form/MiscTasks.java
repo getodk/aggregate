@@ -352,6 +352,7 @@ public class MiscTasks {
 
 		// TODO: rework for each task type...
 		Date limit = new Date(now.getTime() - taskType.getLockType().getLockExpirationTimeout() - 1 );
+		q.addFilter(getTaskTypeKey().getFormDataModel().getBackingKey(), FilterOperation.EQUAL, taskType.name());
 		q.addFilter(getLastActivityDateKey().getFormDataModel().getBackingKey(), FilterOperation.LESS_THAN, limit );
 		List<? extends CommonFieldsBase> l = q.executeQuery(0);
 		/*
