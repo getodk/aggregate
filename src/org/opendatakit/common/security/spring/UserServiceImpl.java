@@ -15,11 +15,11 @@
  */
 package org.opendatakit.common.security.spring;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Logger;
 
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.security.Realm;
@@ -117,29 +117,27 @@ public class UserServiceImpl implements org.opendatakit.common.security.UserServ
   }
   
   public String getAuthenticationEmail(Authentication auth) {
-		if ( isAnonymousUser(auth) ) {
-			Logger.getLogger(UserServiceImpl.class.getCanonicalName()).info("Logged in user: " + anonymous.getUriUser());
-			return anonymous.getUriUser();
-		} else {
-			return auth.getName();
-		}
+	  return auth.getName();
   }
-  
-  @Override
-  public synchronized User getCurrentUser() {
-	Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-	String eMail = getAuthenticationEmail(auth);
-	String name = SecurityUtils.getNickname(eMail);
 
-	Logger.getLogger(UserServiceImpl.class.getCanonicalName()).info("Logged in user: " + eMail);
-	User match = activeUsers.get(eMail);
+  private synchronized User internalGetUser(String uriUser, Collection<GrantedAuthority> authorities) {
+	User match = activeUsers.get(uriUser);
 	if ( match != null ) {
 		return match; 
 	} else {
-		match = new UserImpl(eMail, name, auth.getAuthorities(), datastore);
-		activeUsers.put(eMail, match);
+		String name = SecurityUtils.getNickname(uriUser);
+		match = new UserImpl(uriUser, name, authorities, datastore);
+		activeUsers.put(uriUser, match);
 		return match;
 	}
+  }
+  
+  @Override
+  public User getCurrentUser() {
+	Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+	String eMail = getAuthenticationEmail(auth);
+
+	return internalGetUser(eMail, auth.getAuthorities());
   }
 
   @Override
