@@ -87,7 +87,7 @@ public class FormInfoSubmissionTable extends DynamicBase {
 	
 	private static FormInfoSubmissionTable relation = null;
 	
-	static synchronized final FormInfoSubmissionTable createRelation(CallingContext cc) throws ODKDatastoreException {
+	static synchronized final FormInfoSubmissionTable assertRelation(CallingContext cc) throws ODKDatastoreException {
 		if ( relation == null ) {
 			FormInfoSubmissionTable relationPrototype;
 			Datastore ds = cc.getDatastore();
@@ -105,7 +105,7 @@ public class FormInfoSubmissionTable extends DynamicBase {
 			DynamicCommonFieldsBase formInfoTableRelation, 
 			CallingContext cc) throws ODKDatastoreException {
 		
-		FormInfoSubmissionTable submissionRelation = createRelation(cc);
+		FormInfoSubmissionTable submissionRelation = assertRelation(cc);
 		boolean asDaemon = cc.getAsDeamon();
 		try {
 			cc.setAsDaemon(true);

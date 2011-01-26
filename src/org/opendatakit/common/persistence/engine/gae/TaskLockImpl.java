@@ -137,7 +137,7 @@ public class TaskLockImpl implements TaskLock {
       Long timestamp = (Long) obj;
       Long current = System.currentTimeMillis();
       System.out.println("Time left on lock: " + (timestamp - current));
-      if (current > timestamp) {
+      if (current.compareTo(timestamp) > 0) {
         return true;
       }
     }

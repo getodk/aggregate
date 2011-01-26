@@ -19,6 +19,7 @@ package org.opendatakit.aggregate.servlet;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,13 +29,10 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.fileupload.FileUploadException;
 import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.ErrorConsts;
 import org.opendatakit.aggregate.constants.HtmlUtil;
-import org.opendatakit.aggregate.parser.MultiPartFormData;
-import org.opendatakit.aggregate.parser.MultiPartFormItem;
 import org.opendatakit.common.constants.HtmlConsts;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.Datastore;
@@ -74,7 +72,10 @@ public class GroupModifyMembersServlet extends ServletUtilBase {
 	/**
 	 * Parameter names...
 	 */
-	public static final String GROUPNAME = "_groupname";
+	public static final String GROUPNAME = "groupname";
+	
+	public static final String USERNAME = "username";
+	
 	public static final String SHOWALL = "_showall";
 
 	@Override
@@ -146,17 +147,17 @@ public class GroupModifyMembersServlet extends ServletUtilBase {
 
 		out.write(HtmlUtil.createFormBeginTag(cc
 				.getWebApplicationURL(GroupModifyMembersServlet.ADDR), 
-										HtmlConsts.MULTIPART_FORM_DATA,
+										null,
 										HtmlConsts.POST));
 		out.write(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_HIDDEN, 
-					GroupModifyMembersServlet.GROUPNAME, groupname));
+										GROUPNAME, groupname));
 
 		out.print(HtmlConsts.BORDERLESS_TABLE_OPEN);
 		for ( String uriUser : allUsers ) {
 			out.print(HtmlConsts.TABLE_ROW_OPEN);
 	        out.print(HtmlUtil.wrapWithHtmlTags(HtmlConsts.TABLE_DATA, 
 	        		HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_CHECKBOX, 
-	        				uriUser, uriUser,
+	        							USERNAME, uriUser,
 	        								users.contains(uriUser)) +
 	        								createUserModifyLink(uriUser, cc)));
 			out.print(HtmlConsts.TABLE_ROW_CLOSE);
@@ -186,24 +187,25 @@ public class GroupModifyMembersServlet extends ServletUtilBase {
 
 		Datastore ds = cc.getDatastore();
 		User user = cc.getCurrentUser();
-		String groupname;
+
+		// get parameter
+		String[] usernameArray = req.getParameterValues(USERNAME);
+		TreeSet<String> desiredMembers = new TreeSet<String>();
+		if ( usernameArray != null ) {
+			desiredMembers.addAll(Arrays.asList(usernameArray));
+		}
+		if (desiredMembers.isEmpty()) {
+			errorMissingParam(resp);
+			return;
+		}
+		
+		String groupname = req.getParameter(GROUPNAME);
+		if (groupname == null || groupname.length() == 0) {
+			errorMissingParam(resp);
+			return;
+		}
+
 		try {
-			MultiPartFormData mfd = new MultiPartFormData(req);
-			groupname = mfd.getFormDataByFieldName(GROUPNAME).getStream().toString();
-			if (groupname == null || groupname.length() == 0) {
-				errorMissingParam(resp);
-				return;
-			}
-			
-			// get the list of desired members
-			TreeSet<String> desiredMembers = new TreeSet<String>();
-			for ( Map.Entry<String,MultiPartFormItem> e : mfd.getFieldNameEntrySet() ) {
-				String key = e.getKey();
-				if ( GROUPNAME.equals(key) ) continue;
-				if ( groupname.equals(key) ) continue;
-				desiredMembers.add(key);
-			}
-			
 			UserGrantedAuthority relation = UserGrantedAuthority.assertRelation(ds, user);
 			
 			// get the members as currently defined for this group 
@@ -242,10 +244,6 @@ public class GroupModifyMembersServlet extends ServletUtilBase {
 			e.printStackTrace();
 			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, 
 					ErrorConsts.PERSISTENCE_LAYER_PROBLEM);
-			return;
-		} catch (FileUploadException e) {
-			e.printStackTrace();
-			errorBadParam(resp);
 			return;
 		}
 

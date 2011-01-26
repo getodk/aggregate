@@ -45,4 +45,10 @@ public interface User {
 	 * @return true if this user is the anonymous user.
 	 */
 	public boolean isAnonymous();
+	
+	/**
+	 * @return true if this user is a registered user.
+	 * @return
+	 */
+	public boolean isRegistered();
 }

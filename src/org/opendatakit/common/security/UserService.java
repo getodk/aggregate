@@ -34,6 +34,8 @@ public interface UserService {
   public User getCurrentUser();
   
   public User getDaemonAccountUser();
-  
+
+  public void reloadPermissions();
+
   public boolean isUserLoggedIn();
 }

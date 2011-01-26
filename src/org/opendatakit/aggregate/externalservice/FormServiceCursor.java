@@ -279,7 +279,7 @@ public final class FormServiceCursor extends CommonFieldsBase {
   
   private static FormServiceCursor relation = null;
 
-  private static synchronized final FormServiceCursor createRelation(CallingContext cc)
+  private static synchronized final FormServiceCursor assertRelation(CallingContext cc)
       throws ODKDatastoreException {
     if (relation == null) {
       FormServiceCursor relationPrototype;
@@ -296,7 +296,7 @@ public final class FormServiceCursor extends CommonFieldsBase {
   public static final FormServiceCursor createFormServiceCursor(Form form,
       ExternalServiceType type, CommonFieldsBase service, CallingContext cc)
       throws ODKDatastoreException {
-    FormServiceCursor relation = createRelation(cc);
+    FormServiceCursor relation = assertRelation(cc);
 
     FormServiceCursor c = cc.getDatastore().createEntityUsingRelation(relation, cc.getCurrentUser());
 
@@ -310,7 +310,7 @@ public final class FormServiceCursor extends CommonFieldsBase {
   
   public static final List<ExternalService> getExternalServicesForForm(Form form,
       CallingContext cc) throws ODKDatastoreException {
-    FormServiceCursor relation = createRelation(cc);
+    FormServiceCursor relation = assertRelation(cc);
     Query query = cc.getDatastore().createQuery(relation, cc.getCurrentUser());
     // filter on the Form's Uri. We cannot filter on the FORM_ID since it is a
     // Text field in bigtable
@@ -331,7 +331,7 @@ public final class FormServiceCursor extends CommonFieldsBase {
 
   public static final FormServiceCursor getFormServiceCursor(String uri, CallingContext cc) throws ODKEntityNotFoundException {
     try {
-      FormServiceCursor relation = createRelation(cc);
+      FormServiceCursor relation = assertRelation(cc);
       CommonFieldsBase entity = cc.getDatastore().getEntity(relation, uri, cc.getCurrentUser());
       return (FormServiceCursor) entity;
     } catch (ODKDatastoreException e) {
@@ -343,7 +343,7 @@ public final class FormServiceCursor extends CommonFieldsBase {
          CallingContext cc) throws ODKEntityNotFoundException {
       List<FormServiceCursor> fscList = new ArrayList<FormServiceCursor>();
       try {
-         FormServiceCursor relation = createRelation(cc);
+         FormServiceCursor relation = assertRelation(cc);
          Query query = cc.getDatastore().createQuery(relation, cc.getCurrentUser());
          query.addFilter(relation.lastUpdateDate, FilterOperation.LESS_THAN_OR_EQUAL,
                olderThanDate);

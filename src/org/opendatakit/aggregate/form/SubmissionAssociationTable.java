@@ -194,7 +194,7 @@ public class SubmissionAssociationTable extends CommonFieldsBase {
 
 	private static SubmissionAssociationTable relation = null;
 	
-	public static synchronized final SubmissionAssociationTable createRelation(CallingContext cc) throws ODKDatastoreException {
+	public static synchronized final SubmissionAssociationTable assertRelation(CallingContext cc) throws ODKDatastoreException {
 		if ( relation == null ) {
 			Datastore ds = cc.getDatastore();
 			User user = cc.getCurrentUser();

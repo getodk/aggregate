@@ -120,7 +120,7 @@ public class FusionTableRepeatParameterTable extends CommonFieldsBase {
 
 	  private static FusionTableRepeatParameterTable relation = null;
 
-	  public static synchronized final FusionTableRepeatParameterTable createRelation(CallingContext cc)
+	  public static synchronized final FusionTableRepeatParameterTable assertRelation(CallingContext cc)
 	      throws ODKDatastoreException {
 	    if (relation == null) {
 	    	FusionTableRepeatParameterTable relationPrototype;
@@ -137,7 +137,7 @@ public class FusionTableRepeatParameterTable extends CommonFieldsBase {
 	  public static List<FusionTableRepeatParameterTable> getRepeatGroupAssociations(EntityKey fusionTableParameterTable,
 			  												CallingContext cc) throws ODKDatastoreException {
 		  List<FusionTableRepeatParameterTable> list = new ArrayList<FusionTableRepeatParameterTable> ();
-		  FusionTableRepeatParameterTable frpt = createRelation(cc);
+		  FusionTableRepeatParameterTable frpt = assertRelation(cc);
 
 		  Query query = cc.getDatastore().createQuery(frpt, cc.getCurrentUser());
 		  query.addFilter(frpt.uriFusionTable, FilterOperation.EQUAL, fusionTableParameterTable.getKey());

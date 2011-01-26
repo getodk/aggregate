@@ -108,7 +108,7 @@ public final class FusionTableParameterTable extends CommonFieldsBase {
   
   private static FusionTableParameterTable relation = null;
 
-  public static synchronized final FusionTableParameterTable createRelation(CallingContext cc)
+  public static synchronized final FusionTableParameterTable assertRelation(CallingContext cc)
       throws ODKDatastoreException {
     if (relation == null) {
       Datastore ds = cc.getDatastore();

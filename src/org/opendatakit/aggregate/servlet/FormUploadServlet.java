@@ -42,9 +42,6 @@ import org.opendatakit.aggregate.parser.MultiPartFormItem;
 import org.opendatakit.common.constants.HtmlConsts;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
-import org.opendatakit.common.security.User;
-
-import com.google.appengine.api.oauth.OAuthRequestException;
 
 /**
  * Servlet to upload, parse, and save an XForm
@@ -135,8 +132,12 @@ public class FormUploadServlet extends ServletUtilBase {
 
     resp.setContentType(HtmlConsts.RESP_TYPE_HTML);
 
-	User user = cc.getCurrentUser();
-    if (user instanceof org.opendatakit.common.security.gae.UserImpl) {
+	/*
+	 * OAuth application-layer support for ODK Build publishing.
+	 * This is broken with spring security (which is outside the app layer).
+	 *  
+    User user = cc.getCurrentUser();
+	if (user instanceof org.opendatakit.common.security.gae.UserImpl) {
       // We are in app engine
 
       String authParam = getParameter(req, ServletConsts.AUTHENTICATION);
@@ -156,6 +157,7 @@ public class FormUploadServlet extends ServletUtilBase {
         }
       }
     }
+    */
 
     // verify request is multipart
     if (!ServletFileUpload.isMultipartContent(req)) {

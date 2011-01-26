@@ -151,7 +151,7 @@ public final class GoogleSpreadsheetParameterTable extends CommonFieldsBase {
 
 	private static GoogleSpreadsheetParameterTable relation = null;
 
-	public static synchronized final GoogleSpreadsheetParameterTable createRelation(
+	public static synchronized final GoogleSpreadsheetParameterTable assertRelation(
 			CallingContext cc) throws ODKDatastoreException {
 		if (relation == null) {
 			GoogleSpreadsheetParameterTable relationPrototype;

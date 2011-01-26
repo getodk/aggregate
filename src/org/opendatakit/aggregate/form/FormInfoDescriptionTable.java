@@ -92,7 +92,7 @@ public class FormInfoDescriptionTable extends DynamicBase {
 	
 	private static FormInfoDescriptionTable relation = null;
 	
-	static synchronized final FormInfoDescriptionTable createRelation(CallingContext cc) throws ODKDatastoreException {
+	static synchronized final FormInfoDescriptionTable assertRelation(CallingContext cc) throws ODKDatastoreException {
 		if ( relation == null ) {
 			FormInfoDescriptionTable relationPrototype;
 			Datastore ds = cc.getDatastore();
@@ -110,7 +110,7 @@ public class FormInfoDescriptionTable extends DynamicBase {
 				DynamicCommonFieldsBase formInfoTableRelation, 
 				CallingContext cc) throws ODKDatastoreException {
 		
-		FormInfoDescriptionTable descriptionRelation = createRelation(cc);
+		FormInfoDescriptionTable descriptionRelation = assertRelation(cc);
 		boolean asDaemon = cc.getAsDeamon();
 		try {
 			cc.setAsDaemon(true);

@@ -179,7 +179,7 @@ public final class FormDataModel extends CommonFieldsBase {
 	 * Constructor to create the relation prototype.
 	 * 
 	 * Note that the backing relation is not created by this constructor.
-	 * See the {@link #createRelation(Datastore, User)} method.
+	 * See the {@link #assertRelation(Datastore, User)} method.
 	 * 
 	 * @param schemaName
 	 */
@@ -452,7 +452,7 @@ public final class FormDataModel extends CommonFieldsBase {
 
 	private static FormDataModel relation = null;
 	
-	public static synchronized final FormDataModel createRelation(CallingContext cc) throws ODKDatastoreException {
+	public static synchronized final FormDataModel assertRelation(CallingContext cc) throws ODKDatastoreException {
 		if ( relation == null ) {
 			FormDataModel relationPrototype;
 			Datastore ds = cc.getDatastore();

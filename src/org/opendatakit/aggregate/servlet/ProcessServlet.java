@@ -24,20 +24,18 @@ import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.fileupload.FileUploadException;
 import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.ErrorConsts;
+import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.datamodel.TopLevelDynamicBase;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.form.MiscTasks;
 import org.opendatakit.aggregate.form.MiscTasks.TaskType;
-import org.opendatakit.aggregate.parser.MultiPartFormData;
 import org.opendatakit.aggregate.process.DeleteSubmissions;
-import org.opendatakit.aggregate.process.ProcessParams;
 import org.opendatakit.aggregate.process.ProcessType;
 import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.submission.SubmissionKeyPart;
@@ -77,34 +75,39 @@ public class ProcessServlet extends ServletUtilBase {
 	CallingContext cc = ContextFactory.getCallingContext(this, ADDR, req);
     StringBuilder errorText = new StringBuilder();
 
+    // get parameter
+	String[] recordKeyArray = req.getParameterValues(ServletConsts.RECORD_KEY);
+	List<SubmissionKey> recordKeys = new ArrayList<SubmissionKey>();
+	if ( recordKeyArray != null ) {
+		for ( String formId : recordKeyArray ) {
+			recordKeys.add(new SubmissionKey(formId));
+		}
+	}
+	if (recordKeys.isEmpty()) {
+		errorMissingParam(resp);
+		return;
+	}
+	
+	String processType = req.getParameter(ServletConsts.PROCESS_TYPE);
+	if (processType == null || processType.length() == 0) {
+		errorMissingParam(resp);
+		return;
+	}
+
     try {
-      ProcessParams params = new ProcessParams(new MultiPartFormData(req));
-      List<String> paramKeys = params.getKeys();
+      if (processType.equals(ProcessType.DELETE.getButtonText())) {
 
-      if (paramKeys == null || params.getButtonText() == null) {
-        sendErrorNotEnoughParams(resp);
-        return;
-      }
-
-      List<SubmissionKey> submissionKeys = new ArrayList<SubmissionKey>();
-      for (String paramKey : paramKeys) {
-        submissionKeys.add(new SubmissionKey(paramKey));
-      }
-
-      if (params.getButtonText().equals(ProcessType.DELETE.getButtonText())) {
-
-        String formId = params.getFormId();
-
-        if (formId == null) {
-          sendErrorNotEnoughParams(resp);
-          return;
-        }
+		String formId = req.getParameter(ServletConsts.FORM_ID);
+		if (formId == null || formId.length() == 0) {
+			errorMissingParam(resp);
+			return;
+		}
 
         Form form = Form.retrieveForm(formId, cc);
 
         // don't allow the deletion of the FormInfo submissions.
         if (!form.getFormId().equals(Form.URI_FORM_ID_VALUE_FORM_INFO)) {
-          DeleteSubmissions delete = new DeleteSubmissions(submissionKeys, cc);
+          DeleteSubmissions delete = new DeleteSubmissions(recordKeys, cc);
           delete.deleteSubmissions();
           resp.sendRedirect(cc.getWebApplicationURL(FormsServlet.ADDR));
           return;
@@ -113,10 +116,10 @@ public class ProcessServlet extends ServletUtilBase {
           errorText.append(errString);
           Logger.getLogger(this.getClass().getName()).severe(errString);
         }
-      } else if (params.getButtonText().equals(ProcessType.DELETE_FORM.getButtonText())) {
+      } else if (processType.equals(ProcessType.DELETE_FORM.getButtonText())) {
 
         FormDelete formDelete = (FormDelete) cc.getBean(BeanDefs.FORM_DELETE_BEAN);
-        for (SubmissionKey submissionKey : submissionKeys) {
+        for (SubmissionKey submissionKey : recordKeys) {
           try {
             List<SubmissionKeyPart> parts = submissionKey.splitSubmissionKey();
             if (parts.size() != 2) {
@@ -163,9 +166,6 @@ public class ProcessServlet extends ServletUtilBase {
     } catch (ODKFormNotFoundException e) {
       odkIdNotFoundError(resp);
       return;
-    } catch (FileUploadException e) {
-      e.printStackTrace();
-      errorText.append(ErrorConsts.INVALID_PARAMS);
     } catch (ODKDatastoreException e) {
       e.printStackTrace();
       errorText.append(ErrorConsts.PERSISTENCE_LAYER_PROBLEM);

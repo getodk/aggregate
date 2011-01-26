@@ -38,9 +38,9 @@ public final class FormTableConsts {
  
   // button text
   public static final String XML_BUTTON_TXT = "View XML";
-  public static final String CSV_BUTTON_TXT = "Download CSV";
+  public static final String CSV_BUTTON_TXT = "Create CSV File";
   public static final String RESULTS_BUTTON_TXT = "View Submissions";
-  public static final String EXTERNAL_SERVICE_BUTTON_TXT = "External Service Connection";
+  public static final String EXTERNAL_SERVICE_BUTTON_TXT = "Add External Service Connection";
   public static final String KML_BUTTON_TXT = "Create KML File";
   public static final String QUERY_BUTTON_TXT = "Query";
   // xml form list tags

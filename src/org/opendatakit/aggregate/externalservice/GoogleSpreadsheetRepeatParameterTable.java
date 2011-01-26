@@ -121,7 +121,7 @@ public class GoogleSpreadsheetRepeatParameterTable extends CommonFieldsBase {
 
 	  private static GoogleSpreadsheetRepeatParameterTable relation = null;
 
-	  public static synchronized final GoogleSpreadsheetRepeatParameterTable createRelation(CallingContext cc)
+	  public static synchronized final GoogleSpreadsheetRepeatParameterTable assertRelation(CallingContext cc)
 	      throws ODKDatastoreException {
 	    if (relation == null) {
 	    	GoogleSpreadsheetRepeatParameterTable relationPrototype;
@@ -138,7 +138,7 @@ public class GoogleSpreadsheetRepeatParameterTable extends CommonFieldsBase {
 	  public static List<GoogleSpreadsheetRepeatParameterTable> getRepeatGroupAssociations(EntityKey googleSpreadsheetParameterTable,
 			  												CallingContext cc) throws ODKDatastoreException {
 		  List<GoogleSpreadsheetRepeatParameterTable> list = new ArrayList<GoogleSpreadsheetRepeatParameterTable> ();
-		  GoogleSpreadsheetRepeatParameterTable frpt = createRelation(cc);
+		  GoogleSpreadsheetRepeatParameterTable frpt = assertRelation(cc);
 
 		  Datastore ds = cc.getDatastore();
 		  User user = cc.getCurrentUser();

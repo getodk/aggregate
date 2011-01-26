@@ -60,7 +60,7 @@
         <intercept-url pattern="/ssl/user-manage-passwords" access="isFullyAuthenticated() and hasRole('USER_IS_REGISTERED') and hasRole('ROLE_ACCESS_ADMIN')" />
 		<intercept-url pattern="/ssl/**" access="isFullyAuthenticated() and hasRole('USER_IS_REGISTERED') and hasRole('ROLE_USER')" />
 		<intercept-url pattern="/view/csvFragment" access="hasRole('ROLE_ANALYST')" />
-		<intercept-url pattern="/view/binaryData" access="hasRole('ROLE_ANALYST')" />
+		<intercept-url pattern="/view/binaryData" access="hasRole('ROLE_ATTACHMENT_VIEWER')" />
 		<intercept-url pattern="/view/**" access="isFullyAuthenticated() and hasRole('ROLE_ANALYST')" />
 <!--	TODO: gae should be: hasRole(USER_IS_DAEMON) -->
 		<intercept-url pattern="/gae/**" access="true" /> 

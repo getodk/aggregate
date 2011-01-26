@@ -45,9 +45,6 @@ import org.opendatakit.common.security.User;
  */
 public class SubmissionBlob {
   
-  private final CallingContext cc;
-  private final FormDefinition formDefinition;
-  private final FormDataModel versionedBinaryContentRefBlobModel;
   private List<VersionedBinaryContentRefBlob> dbBcbEntityList = new ArrayList<VersionedBinaryContentRefBlob>();
   private List<RefBlob> dbRefBlobList = new ArrayList<RefBlob>();
   
@@ -63,9 +60,6 @@ public class SubmissionBlob {
    */
   public SubmissionBlob(byte [] blob, String uriVersionedContent, FormDataModel versionedBinaryContentRefBlobModel, FormDefinition formDefinition, EntityKey colocationKey, CallingContext cc) throws ODKDatastoreException {
 
-	this.versionedBinaryContentRefBlobModel = versionedBinaryContentRefBlobModel;
-	this.cc = cc;
-	this.formDefinition = formDefinition;
 	FormDataModel blobModel = versionedBinaryContentRefBlobModel.getChildren().get(0);
     // get prototype entities...
     VersionedBinaryContentRefBlob bcbRef = (VersionedBinaryContentRefBlob) versionedBinaryContentRefBlobModel.getBackingObjectPrototype();
@@ -97,9 +91,6 @@ public class SubmissionBlob {
 
   public SubmissionBlob(String uriVersionedContent, FormDataModel versionedBinaryContentRefBlobModel, FormDefinition formDefinition, CallingContext cc) throws ODKDatastoreException {
 	  
-	this.versionedBinaryContentRefBlobModel = versionedBinaryContentRefBlobModel;
-	this.cc = cc;
-	this.formDefinition = formDefinition;
 	FormDataModel blobModel = versionedBinaryContentRefBlobModel.getChildren().get(0);
     // get prototype entities...
     VersionedBinaryContentRefBlob bcbRef = (VersionedBinaryContentRefBlob) versionedBinaryContentRefBlobModel.getBackingObjectPrototype();

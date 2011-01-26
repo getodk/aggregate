@@ -55,11 +55,9 @@ public class FragmentedCsvFormatter extends TableFormatterBase implements Submis
 	private static final String XML_TAG_ENTRIES = "entries";
 
 	private final String websafeCursorString;
-	private final List<SubmissionKeyPart> submissionParts;
 	
 	public FragmentedCsvFormatter(Form xform, List<SubmissionKeyPart> submissionParts, String webServerUrl, String websafeCursorString, PrintWriter printWriter) {
 		super(xform, printWriter, null);
-		this.submissionParts = submissionParts;
 		this.websafeCursorString = websafeCursorString;
 	    elemFormatter = new LinkElementFormatter(webServerUrl, FragmentedCsvServlet.ADDR, true, true, true);
 	}

@@ -24,7 +24,6 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.fileupload.FileUploadException;
 import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.HtmlUtil;
@@ -35,8 +34,6 @@ import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.format.SubmissionFormatter;
 import org.opendatakit.aggregate.format.form.FormHtmlTable;
 import org.opendatakit.aggregate.format.table.HtmlFormatter;
-import org.opendatakit.aggregate.parser.MultiPartFormData;
-import org.opendatakit.aggregate.process.ProcessParams;
 import org.opendatakit.aggregate.process.ProcessType;
 import org.opendatakit.aggregate.query.QueryFormList;
 import org.opendatakit.aggregate.query.submission.QueryByKeys;
@@ -74,74 +71,78 @@ public class ConfirmServlet extends ServletUtilBase {
   public void doPost(HttpServletRequest req, HttpServletResponse resp)
       throws IOException {
 	CallingContext cc = ContextFactory.getCallingContext(this, ADDR, req);
-    
+
+	// get parameter
+	String[] recordKeyArray = req.getParameterValues(ServletConsts.RECORD_KEY);
+	List<SubmissionKey> recordKeys = new ArrayList<SubmissionKey>();
+	if ( recordKeyArray != null ) {
+		for ( String formId : recordKeyArray ) {
+			recordKeys.add(new SubmissionKey(formId));
+		}
+	}
+	if (recordKeys.isEmpty()) {
+		errorMissingParam(resp);
+		return;
+	}
+	
+	String processType = req.getParameter(ServletConsts.PROCESS_TYPE);
+	if (processType == null || processType.length() == 0) {
+		errorMissingParam(resp);
+		return;
+	}
+
     try {
-      ProcessParams params = new ProcessParams(new MultiPartFormData(req));
       PrintWriter out = resp.getWriter();
-      List<String> paramKeys = params.getKeys();
-
-      if (paramKeys == null || params.getButtonText() == null) {
-        sendErrorNotEnoughParams(resp);
-        return;
-      }
-
-      List<SubmissionKey> keys = new ArrayList<SubmissionKey>();
-      for (String paramKey : paramKeys) {
-    	  keys.add(new SubmissionKey(paramKey));
-      }
       
       beginBasicHtmlResponse(TITLE_INFO, resp, false, cc); // header info
       out.print(HtmlUtil.createFormBeginTag(cc.getWebApplicationURL(ProcessServlet.ADDR),
-              HtmlConsts.MULTIPART_FORM_DATA, HtmlConsts.POST));
+              null, HtmlConsts.POST));
       
       // copy post parameters to form as hidden values
-      out.print(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_HIDDEN,
-              ServletConsts.PROCESS_NUM_RECORDS, Integer.toString(keys.size())));
-      for (int i = 0; i < keys.size(); i++) {
+      for ( SubmissionKey desiredFormId : recordKeys ) {
         out.print(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_HIDDEN,
-            ServletConsts.PROCESS_RECORD_PREFIX + i, keys.get(i).toString()));
+            ServletConsts.RECORD_KEY, desiredFormId.toString() ));
       }
 
-      if (params.getButtonText().equals(ProcessType.DELETE.getButtonText())) {
-    	  if(params.getFormId() == null) {
-	        sendErrorNotEnoughParams(resp);
-	        return;
-	      }
+      if (processType.equals(ProcessType.DELETE.getButtonText())) {
+
+    	  String formId = req.getParameter(ServletConsts.FORM_ID);
+		  if (formId == null || formId.length() == 0) {
+			errorMissingParam(resp);
+			return;
+		  }
       
     	  // display the submissions being deleted...
     	  // This is a read-only display for confirmation only.  The
     	  // hidden fields above contain the keys for each of these 
     	  // records.
-    	  Form form = Form.retrieveForm(params.getFormId(), cc);
+    	  Form form = Form.retrieveForm(formId, cc);
 
 	      out.print(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_HIDDEN,
 	          ServletConsts.FORM_ID, form.getFormId()));
       
-		  QueryByKeys query = new QueryByKeys(keys, cc);
+		  QueryByKeys query = new QueryByKeys(recordKeys, cc);
 		  SubmissionFormatter formatter = new HtmlFormatter(form, cc.getServerURL(), resp.getWriter(), null, false);
 		  formatter.processSubmissions(query.getResultSubmissions());
 		  
-      } else if (params.getButtonText().equals(ProcessType.DELETE_FORM.getButtonText())) {
+      } else if (processType.equals(ProcessType.DELETE_FORM.getButtonText())) {
     	  
     	  // Display the forms being deleted.
     	  // This is a read-only display for confirmation only.  The
     	  // hidden fields above contain the form ids being removed.
-		  QueryFormList formsList = new QueryFormList(keys, true, cc);
+		  QueryFormList formsList = new QueryFormList(recordKeys, true, cc);
 		  FormHtmlTable formFormatter = new FormHtmlTable(formsList, cc);
 		  out.print(formFormatter.generateHtmlFormTable(false, false));
       }
       
-      out.print(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_SUBMIT, ServletConsts.PROCESS_TYPE, params.getButtonText()));
+      out.print(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_SUBMIT, ServletConsts.PROCESS_TYPE, processType));
       finishBasicHtmlResponse(resp);
 
     } catch (ODKFormNotFoundException e) {
       e.printStackTrace();
     } catch (ODKIncompleteSubmissionData e) {
       e.printStackTrace();
-    } catch (FileUploadException e) {
-      e.printStackTrace();
     } catch (ODKDatastoreException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
     } 
   }

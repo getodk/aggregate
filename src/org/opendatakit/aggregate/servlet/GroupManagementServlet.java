@@ -153,10 +153,33 @@ public class GroupManagementServlet extends ServletUtilBase {
 		
 		out.write("<hr/><h2>All User Groups</h2>");
 		
+		boolean doesGoogleEarthWork = isAttachmentViewerAnonymous(cc);
+		
+		if ( !doesGoogleEarthWork) {
+			out.write("<font style=\"color: red;\"><b>");
+		}
+		out.write("<p>NOTE: ");
+		if ( !doesGoogleEarthWork) {
+			out.write("</b></font>");
+		}
+		
+		out.write("Google Earth will not display images in the information ballons " +
+				"unless the " + 
+					GrantedAuthorityNames.ROLE_ATTACHMENT_VIEWER.name() + " permission is " +
+					"granted to " + GrantedAuthorityNames.USER_IS_ANONYMOUS.name() + 
+					".</p><p>Whether or not " +
+					GrantedAuthorityNames.ROLE_ATTACHMENT_VIEWER.name() + " is assigned to " + 
+					GrantedAuthorityNames.USER_IS_ANONYMOUS.name() + ", the images remain " +
+					"accessible when the user clicks the `View` link within the information " +
+					"ballon provided the user has " +
+					"the necessary privileges to view those images (upon the first such access, " +
+					"the user may be prompted to log in).</p>");
+
 		out.write("<p>NOTE: if a user group neither inherits access rights from " +
 				"another user group nor has any directly granted access rights, it " +
 				"will not appear in this list.  To modify that group, type the name " +
 				"of the group into the 'Add or Update user Group' form, above.</p>");
+		
 		out.print(HtmlConsts.TABLE_OPEN);
 
 		String[] headers = new String[] { "", "User Group", 

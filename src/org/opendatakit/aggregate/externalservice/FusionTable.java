@@ -104,7 +104,7 @@ public class FusionTable extends AbstractExternalService implements ExternalServ
       throws ODKEntityNotFoundException, ODKDatastoreException, ODKFormNotFoundException {
     this(Form.retrieveForm(fsc.getFormId(), cc), cc);
     this.fsc = fsc;
-    FusionTableParameterTable fp = FusionTableParameterTable.createRelation(cc);
+    FusionTableParameterTable fp = FusionTableParameterTable.assertRelation(cc);
     objectEntity = cc.getDatastore().getEntity(fp, fsc.getAuriService(), cc.getCurrentUser());
     repeatElementTableIds = FusionTableRepeatParameterTable.getRepeatGroupAssociations(new EntityKey(fp, objectEntity.getUri()), cc);
   }
@@ -114,7 +114,7 @@ public class FusionTable extends AbstractExternalService implements ExternalServ
       ODKExternalServiceException {
     this(form, cc);    
 
-    objectEntity = cc.getDatastore().createEntityUsingRelation(FusionTableParameterTable.createRelation(cc), cc.getCurrentUser());
+    objectEntity = cc.getDatastore().createEntityUsingRelation(FusionTableParameterTable.assertRelation(cc), cc.getCurrentUser());
     
     fsc = FormServiceCursor.createFormServiceCursor(form, 
     		ExternalServiceType.GOOGLE_FUSIONTABLES, objectEntity, cc);
@@ -133,7 +133,7 @@ public class FusionTable extends AbstractExternalService implements ExternalServ
     // construct the list of table ids from the passed-in associations...
     repeatElementTableIds = new ArrayList<FusionTableRepeatParameterTable>();
     
-    FusionTableRepeatParameterTable frpt = FusionTableRepeatParameterTable.createRelation(cc);
+    FusionTableRepeatParameterTable frpt = FusionTableRepeatParameterTable.assertRelation(cc);
     
 	Datastore ds = cc.getDatastore();
 	User user = cc.getCurrentUser();
