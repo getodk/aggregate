@@ -139,7 +139,8 @@ public class GrantedAuthorityHierarchyTable extends CommonFieldsBase {
 		for ( GrantedAuthorityNames name : new GrantedAuthorityNames[] {
 					GrantedAuthorityNames.ROLE_FORM_DOWNLOAD,
 					GrantedAuthorityNames.ROLE_FORM_LIST,
-					GrantedAuthorityNames.ROLE_SUBMISSION_UPLOAD
+					GrantedAuthorityNames.ROLE_SUBMISSION_UPLOAD,
+					GrantedAuthorityNames.ROLE_ATTACHMENT_VIEWER // for GoogleEarth ballon images
 				} ) {
 			t = datastore.createEntityUsingRelation(tRelation, user);
 			t.setDominatingGrantedAuthority(ranon.name());

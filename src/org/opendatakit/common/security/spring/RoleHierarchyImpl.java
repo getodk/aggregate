@@ -102,6 +102,8 @@ public class RoleHierarchyImpl implements RoleHierarchy, InitializingBean {
 		Map<GrantedAuthority, Set<GrantedAuthority>> localRolesReachableInOneOrMoreStepsMap =
 			buildRolesReachableInOneOrMoreStepsMap(buildRolesReachableInOneStepMap());
 		updateRolesMap(localRolesReachableInOneOrMoreStepsMap);
+		// and wipe the user service, since permissions may have changed...
+		userService.reloadPermissions();
 	}
 	
 	/**

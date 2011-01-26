@@ -112,7 +112,7 @@ public class GoogleSpreadsheet extends AbstractExternalService implements Extern
   public GoogleSpreadsheet(FormServiceCursor fsc, CallingContext cc)
       throws ODKEntityNotFoundException, ODKDatastoreException, ODKFormNotFoundException {
     this(Form.retrieveForm(fsc.getFormId(), cc), cc);
-    GoogleSpreadsheetParameterTable gp = GoogleSpreadsheetParameterTable.createRelation(cc);
+    GoogleSpreadsheetParameterTable gp = GoogleSpreadsheetParameterTable.assertRelation(cc);
     objectEntity = cc.getDatastore().getEntity(gp, fsc.getAuriService(), cc.getCurrentUser());
     repeatElementTableIds = GoogleSpreadsheetRepeatParameterTable.getRepeatGroupAssociations(
         new EntityKey(gp, objectEntity.getUri()), cc);
@@ -125,7 +125,7 @@ public class GoogleSpreadsheet extends AbstractExternalService implements Extern
       throws ODKDatastoreException {
     this(form, cc);
     objectEntity = cc.getDatastore().createEntityUsingRelation(GoogleSpreadsheetParameterTable
-        .createRelation(cc), cc.getCurrentUser());
+        .assertRelation(cc), cc.getCurrentUser());
     fsc = FormServiceCursor.createFormServiceCursor(form, ExternalServiceType.GOOGLE_SPREADSHEET,
         objectEntity, cc);
     fsc.setExternalServiceOption(externalServiceOption);
@@ -241,7 +241,7 @@ public class GoogleSpreadsheet extends AbstractExternalService implements Extern
 
     // get relation prototype for creating repeat parameter table entries
     GoogleSpreadsheetRepeatParameterTable repeatPrototype = GoogleSpreadsheetRepeatParameterTable
-        .createRelation(cc);
+        .assertRelation(cc);
 
     // create repeat worksheets
 	Datastore ds = cc.getDatastore();

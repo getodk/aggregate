@@ -24,8 +24,8 @@ import java.util.Set;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.security.User;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.GrantedAuthorityImpl;
 
-// TODO: implement
 public class UserImpl implements org.opendatakit.common.security.User {
 
 	final String nickName;
@@ -42,7 +42,7 @@ public class UserImpl implements org.opendatakit.common.security.User {
 		this.nickName = nickName;
 		this.datastore = datastore;
 		for ( GrantedAuthority g : groupsAndGrantedAuthorities ) {
-			if ( !GrantedAuthorityNames.permissionsCanBeAssigned(g.getAuthority()) ) {
+			if ( GrantedAuthorityNames.permissionsCanBeAssigned(g.getAuthority()) ) {
 				groups.add(g);
 			}
 		}
@@ -78,5 +78,25 @@ public class UserImpl implements org.opendatakit.common.security.User {
 	@Override
 	public boolean isAnonymous() {
 		return uriUser.equals(User.ANONYMOUS_USER);
+	}
+	
+	@Override
+	public boolean isRegistered() {
+		return groups.contains(new GrantedAuthorityImpl(GrantedAuthorityNames.USER_IS_REGISTERED.name()));
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if ( obj == null || !(obj instanceof org.opendatakit.common.security.User)) {
+			return false;
+		}
+		
+		org.opendatakit.common.security.User u = (org.opendatakit.common.security.User) obj;
+		return u.getUriUser().equals(getUriUser());
+	}
+
+	@Override
+	public int hashCode() {
+		return getUriUser().hashCode();
 	}
 }

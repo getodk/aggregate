@@ -166,11 +166,9 @@ public class FormSubmissionsServlet extends ServletUtilBase {
         out.print(link);
       }
 
-      out.print(HtmlUtil.createFormBeginTag(cc.getWebApplicationURL(ConfirmServlet.ADDR), HtmlConsts.MULTIPART_FORM_DATA,
+      out.print(HtmlUtil.createFormBeginTag(cc.getWebApplicationURL(ConfirmServlet.ADDR), null,
           HtmlConsts.POST));
       out.print(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_HIDDEN, ServletConsts.FORM_ID, formId));
-      out.print(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_HIDDEN,
-          ServletConsts.PROCESS_NUM_RECORDS, Integer.toString(query.getNumRecords())));
       
       formatter.processSubmissions(submissions);
       

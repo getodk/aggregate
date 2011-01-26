@@ -62,7 +62,7 @@ public final class HtmlUtil extends org.opendatakit.common.constants.HtmlUtil {
     return html.toString();
   }
 
-  public static String wrapResultTableWithHtmlTags(boolean addCheckboxes, List<String> headers, List<Row> rows) {
+  public static String wrapResultTableWithHtmlTags(boolean addCheckboxes, String checkboxName, List<String> headers, List<Row> rows) {
     StringBuilder html = new StringBuilder();
     html.append(HtmlConsts.TABLE_OPEN);
 
@@ -79,7 +79,7 @@ public final class HtmlUtil extends org.opendatakit.common.constants.HtmlUtil {
       html.append(HtmlConsts.TABLE_ROW_OPEN);
       if (addCheckboxes) {
         html.append(wrapWithHtmlTags(HtmlConsts.TABLE_DATA, createInput(
-            HtmlConsts.INPUT_TYPE_CHECKBOX, ServletConsts.PROCESS_RECORD_PREFIX + recordNum, 
+            HtmlConsts.INPUT_TYPE_CHECKBOX, checkboxName, 
             		row.getSubmissionKey().toString())));
       }
       for (Object item : row.getFormattedValues()) {

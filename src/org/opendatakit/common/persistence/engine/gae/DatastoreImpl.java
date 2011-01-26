@@ -252,7 +252,7 @@ public class DatastoreImpl implements Datastore {
 					break;
 				case STRING:
 				case URI:
-					if ( d.getMaxCharLen() > GAE_MAX_STRING_LEN) {
+					if ( d.getMaxCharLen().compareTo(GAE_MAX_STRING_LEN) > 0) {
 						Text t = (Text) o;
 						row.setStringField(d, t.getValue());
 					} else {
@@ -329,7 +329,7 @@ public class DatastoreImpl implements Datastore {
 					break;
 				case STRING:
 				case URI:
-					if ( d.getMaxCharLen() > GAE_MAX_STRING_LEN) {
+					if ( d.getMaxCharLen().compareTo(GAE_MAX_STRING_LEN) > 0) {
 						Text t = new Text(entity.getStringField(d));
 						e.setProperty(d.getName(), t);
 					} else {

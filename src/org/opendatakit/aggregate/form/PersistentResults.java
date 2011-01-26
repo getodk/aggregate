@@ -340,7 +340,7 @@ public class PersistentResults {
 			PersistentResults result = new PersistentResults(s);
 			if ( result.getStatus() == Status.AVAILABLE ) continue;
 			if ( result.getStatus() == Status.ABANDONED ) continue;
-			if ( result.getAttemptCount() >= MAX_RETRY_ATTEMPTS ) {
+			if ( result.getAttemptCount().compareTo(MAX_RETRY_ATTEMPTS) >= 0 ) {
 				// the task is stale, and should be marked abandoned,
 				// but the worker thread must have failed.  Attempt 
 				// it here...
@@ -494,7 +494,7 @@ public class PersistentResults {
 		
 		private static PersistentResultsTable relation = null;
 		
-		static synchronized final PersistentResultsTable createRelation(CallingContext cc) throws ODKDatastoreException {
+		static synchronized final PersistentResultsTable assertRelation(CallingContext cc) throws ODKDatastoreException {
 			if ( relation == null ) {
 				PersistentResultsTable relationPrototype;
 				Datastore ds = cc.getDatastore();
@@ -518,14 +518,14 @@ public class PersistentResults {
 	static final void createForm(CallingContext cc) throws ODKDatastoreException {
 		List<FormDataModel> model = new ArrayList<FormDataModel>();
 
-		FormDataModel.createRelation(cc);
-		SubmissionAssociationTable.createRelation(cc);
+		FormDataModel.assertRelation(cc);
+		SubmissionAssociationTable.assertRelation(cc);
 		boolean asDaemon = cc.getAsDeamon();
 		try {
 			cc.setAsDaemon(true);
 			Datastore ds = cc.getDatastore();
 			User user = cc.getCurrentUser();
-			PersistentResultsTable persistentResultsRelation = PersistentResultsTable.createRelation(cc);
+			PersistentResultsTable persistentResultsRelation = PersistentResultsTable.assertRelation(cc);
 			PersistentResultsTable persistentResultsDefinition = ds.createEntityUsingRelation(persistentResultsRelation, user);
 			persistentResultsDefinition.setStringField(persistentResultsRelation.primaryKey, PersistentResultsTable.PERSISTENT_RESULT_DEFINITION_URI);
 			
@@ -602,7 +602,7 @@ public class PersistentResults {
 			Map<String, DynamicCommonFieldsBase> backingTableMap, CallingContext cc) {
 		try {
 		    DynamicCommonFieldsBase b;
-			b = PersistentResultsTable.createRelation(cc);
+			b = PersistentResultsTable.assertRelation(cc);
 			backingTableMap.put(b.getSchemaName() + "." + b.getTableName(), b);
 		} catch (ODKDatastoreException e) {
 			throw new IllegalStateException("the relations should already have been created");

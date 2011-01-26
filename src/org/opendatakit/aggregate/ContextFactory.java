@@ -95,7 +95,7 @@ public class ContextFactory {
     	}
     	
     	public void setAsDaemon(boolean asDaemon ) {
-    		this.asDaemon = true;
+    		this.asDaemon = asDaemon;
     	}
     	
     	public boolean getAsDeamon() {

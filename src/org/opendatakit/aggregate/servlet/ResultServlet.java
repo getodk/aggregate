@@ -116,7 +116,7 @@ public class ResultServlet extends ServletUtilBase {
       }
       
       // format into html table
-      out.append(HtmlUtil.wrapResultTableWithHtmlTags(false, headers, formattedElements));
+      out.append(HtmlUtil.wrapResultTableWithHtmlTags(false, null, headers, formattedElements));
       out.print(HtmlConsts.LINE_BREAK);
       out.print(HtmlConsts.LINE_BREAK);
       

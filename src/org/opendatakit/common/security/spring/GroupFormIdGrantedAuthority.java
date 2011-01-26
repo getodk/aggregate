@@ -83,7 +83,7 @@ public class GroupFormIdGrantedAuthority extends CommonFieldsBase {
 
 	private static GroupFormIdGrantedAuthority reference = null;
 
-	public static final synchronized GroupFormIdGrantedAuthority createRelation(Datastore ds, User user)
+	public static final synchronized GroupFormIdGrantedAuthority assertRelation(Datastore ds, User user)
 			throws ODKDatastoreException {
 		if (reference == null) {
 			// create the reference prototype using the schema of the form data
@@ -103,7 +103,7 @@ public class GroupFormIdGrantedAuthority extends CommonFieldsBase {
 				= new HashMap<String, Set<GrantedAuthority>>();
 		if ( !groups.isEmpty() ) {
 			try {
-				Query q = ds.createQuery(createRelation(ds, user), user);
+				Query q = ds.createQuery(assertRelation(ds, user), user);
 				List<String> groupStrings = new ArrayList<String>();
 				for ( GrantedAuthority g : groups ) {
 					groupStrings.add(g.getAuthority());

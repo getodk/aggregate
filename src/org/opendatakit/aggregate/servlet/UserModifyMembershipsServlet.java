@@ -19,6 +19,7 @@ package org.opendatakit.aggregate.servlet;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,13 +30,10 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.fileupload.FileUploadException;
 import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.ErrorConsts;
 import org.opendatakit.aggregate.constants.HtmlUtil;
-import org.opendatakit.aggregate.parser.MultiPartFormData;
-import org.opendatakit.aggregate.parser.MultiPartFormItem;
 import org.opendatakit.common.constants.HtmlConsts;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.Datastore;
@@ -72,7 +70,8 @@ public class UserModifyMembershipsServlet extends ServletUtilBase {
 	
 	public static final String TITLE_INFO = "Change Group Memberships";
 	
-	public static final String USERNAME = "_username";
+	public static final String USERNAME = "username";
+	public static final String GROUPNAME = "groupname";
 	public static final String SHOWALL = "_showall";
 
 	@Override
@@ -141,8 +140,7 @@ public class UserModifyMembershipsServlet extends ServletUtilBase {
 
 		out.write(HtmlUtil.createFormBeginTag(cc
 				.getWebApplicationURL(UserModifyMembershipsServlet.ADDR), 
-										HtmlConsts.MULTIPART_FORM_DATA,
-										HtmlConsts.POST));
+										null, HtmlConsts.POST));
 		out.write(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_HIDDEN, 
 					UserModifyMembershipsServlet.USERNAME, username));
 
@@ -151,7 +149,7 @@ public class UserModifyMembershipsServlet extends ServletUtilBase {
 			out.print(HtmlConsts.TABLE_ROW_OPEN);
 	        out.print(HtmlUtil.wrapWithHtmlTags(HtmlConsts.TABLE_DATA, 
 	        		HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_CHECKBOX, 
-	        				group, group, groups.contains(group)) +
+	        				GROUPNAME, group, groups.contains(group)) +
 	        								createGroupModifyLink(group, cc)));
 			out.print(HtmlConsts.TABLE_ROW_CLOSE);
 		}
@@ -178,27 +176,34 @@ public class UserModifyMembershipsServlet extends ServletUtilBase {
 
 		Datastore ds = cc.getDatastore();
 		User user = cc.getCurrentUser();
-		String username;
+
+		// get parameter
+		String[] groupnameArray = req.getParameterValues(GROUPNAME);
+		List<String> desiredGrants = new ArrayList<String>();
+		if ( groupnameArray != null ) {
+			desiredGrants.addAll(Arrays.asList(groupnameArray));
+		}
+		if (desiredGrants.isEmpty()) {
+			errorMissingParam(resp);
+			return;
+		}
+		
+		String username = req.getParameter(USERNAME);
+		if (username == null || username.length() == 0) {
+			errorMissingParam(resp);
+			return;
+		}
+
 		try {
-			MultiPartFormData mfd = new MultiPartFormData(req);
-			username = mfd.getFormDataByFieldName(USERNAME).getStream().toString();
-			if (username == null || username.length() == 0) {
-				errorMissingParam(resp);
-				return;
-			}
-			
 			// get the list of desired groups
 			TreeSet<String> desiredGroups = new TreeSet<String>();
-			for ( Map.Entry<String,MultiPartFormItem> e : mfd.getFieldNameEntrySet() ) {
-				String key = e.getKey();
-				if ( USERNAME.equals(key) ) continue;
-				if ( username.equals(key) ) continue;
+			for ( String grant : desiredGrants ) {
 				// don't allow an individual user to be granted a low-level role...
-				if ( !GrantedAuthorityNames.permissionsCanBeAssigned(key) ) {
+				if ( !GrantedAuthorityNames.permissionsCanBeAssigned(grant) ) {
 					errorBadParam(resp);
 					return;
 				}
-				desiredGroups.add(key);
+				desiredGroups.add(grant);
 			}
 			
 			UserGrantedAuthority relation = UserGrantedAuthority.assertRelation(ds, user);
@@ -238,10 +243,6 @@ public class UserModifyMembershipsServlet extends ServletUtilBase {
 			e.printStackTrace();
 			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, 
 					ErrorConsts.PERSISTENCE_LAYER_PROBLEM);
-			return;
-		} catch (FileUploadException e) {
-			e.printStackTrace();
-			errorBadParam(resp);
 			return;
 		}
 

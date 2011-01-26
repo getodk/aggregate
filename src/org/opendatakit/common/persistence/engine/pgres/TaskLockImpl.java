@@ -193,7 +193,7 @@ public class TaskLockImpl implements TaskLock {
 				
 			});
 		
-			relation = TaskLockTable.createRelation(datastore, user);
+			relation = TaskLockTable.assertRelation(datastore, user);
 		} catch (Exception e) {
 			throw new ODKTaskLockException(PERSISTENCE_LAYER_PROBLEM, e);
 		}
@@ -205,7 +205,7 @@ public class TaskLockImpl implements TaskLock {
 			ITaskLockType taskType) {
 		boolean result = false;
 		try {
-			TaskLockTable relation = TaskLockTable.createRelation(datastore, user);
+			TaskLockTable relation = TaskLockTable.assertRelation(datastore, user);
 			TaskLockTable entity = datastore.createEntityUsingRelation(relation, user);
 			entity.setStringField(entity.primaryKey, lockId);
 			entity.setFormId(formId);
@@ -228,7 +228,7 @@ public class TaskLockImpl implements TaskLock {
 	public boolean renewLock(String lockId, String formId, ITaskLockType taskType) {
 	    boolean result = false;
 	    try {
-		    TaskLockTable relation = TaskLockTable.createRelation(datastore, user);
+		    TaskLockTable relation = TaskLockTable.assertRelation(datastore, user);
 		    TaskLockTable entity = datastore.getEntity(relation, lockId, user);
 		    if ( !(entity.getFormId().equals(formId) && 
 		    	   entity.getTaskType().equals(taskType.getName())) ) {
@@ -257,7 +257,7 @@ public class TaskLockImpl implements TaskLock {
 			ITaskLockType taskType) {
 		boolean result = false;
 		try {
-			TaskLockTable relation = TaskLockTable.createRelation(datastore, user);
+			TaskLockTable relation = TaskLockTable.assertRelation(datastore, user);
 			datastore.deleteEntity(new EntityKey(relation, lockId), user);
 			result = true;
 		} catch (ODKDatastoreException e) {
@@ -333,7 +333,7 @@ public class TaskLockImpl implements TaskLock {
 
 		static TaskLockTable relation = null;
 
-		static synchronized final TaskLockTable createRelation(
+		static synchronized final TaskLockTable assertRelation(
 				Datastore datastore, User user) throws ODKDatastoreException {
 			if (relation == null) {
 				TaskLockTable relationPrototype;

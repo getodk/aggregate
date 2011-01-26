@@ -29,6 +29,7 @@ import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.common.constants.HtmlConsts;
+import org.opendatakit.common.security.spring.GrantedAuthorityNames;
 
 /**
  * Top-level webpage for managing permissions and users
@@ -82,6 +83,30 @@ public class AccessManagementServlet extends ServletUtilBase {
 		if ( !secure ) {
 			out.print("</font>");
 		}
+		
+		boolean doesGoogleEarthWork = isAttachmentViewerAnonymous(cc);
+		
+		if ( !doesGoogleEarthWork) {
+			out.write("<font style=\"color: red;\">");
+		}
+		out.write("<h2>Google Earth Ballon Image Display Requirements</h2>");
+		if ( !doesGoogleEarthWork) {
+			out.write("</font>");
+		}
+		
+		out.write("Google Earth will not display images in the information ballons " +
+				"unless the " + 
+					GrantedAuthorityNames.ROLE_ATTACHMENT_VIEWER.name() + " permission is " +
+					"granted to " + GrantedAuthorityNames.USER_IS_ANONYMOUS.name() + 
+					".</p><p>Whether or not " +
+					GrantedAuthorityNames.ROLE_ATTACHMENT_VIEWER.name() + " is assigned to " + 
+					GrantedAuthorityNames.USER_IS_ANONYMOUS.name() + ", the images remain " +
+					"accessible when the user clicks the `View` link within the information " +
+					"ballon provided the user has " +
+					"the necessary privileges to view those images (upon the first such access, " +
+					"the user may be prompted to log in).</p>");
+		
+
 		out.print("<h2>Further Securing Site Access</h2><p>To further secure your site, you need to decide which permissions (roles) you want " +
 				"an anonymous user (someone who has not logged in) to have, which roles you " +
 				"want users that log in with a gmail.com account to have, and which roles you " +
@@ -114,8 +139,10 @@ public class AccessManagementServlet extends ServletUtilBase {
 				"roles of the groups they belong to.  Manage group memberships to " +
 				"manage the access rights of the users."});
 		tableEntries.add(new String[] { "Change locally-maintained (device) passwords for registered users",
-				HtmlUtil.createHref(cc.getWebApplicationURL(UserManagePasswordsServlet.ADDR),
-						UserManagePasswordsServlet.TITLE_INFO),
+				cc.getCurrentUser().isRegistered() ?
+					HtmlUtil.createHref(cc.getWebApplicationURL(UserManagePasswordsServlet.ADDR),
+						UserManagePasswordsServlet.TITLE_INFO) 
+					: "<font style=\"color: red;\">must be logged in and a registered user</font>",
 				"Logins from a device (e.g., ODK Collect) require a locally-maintained " +
 				"password.  Set or change that password for selected users here.  The password is stored " +
 				"as both a randomly-salted sha-1 hash and as a deterministically-salted md5 hash. " +

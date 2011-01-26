@@ -103,9 +103,9 @@ public class FormHtmlTable {
     }
 
     if (buttons) {
-      return HtmlUtil.wrapResultTableWithHtmlTags(selectBoxes, HEADERS_W_BUTTONS, formattedFormValues);
+      return HtmlUtil.wrapResultTableWithHtmlTags(selectBoxes, ServletConsts.RECORD_KEY, HEADERS_W_BUTTONS, formattedFormValues);
     } else {
-      return HtmlUtil.wrapResultTableWithHtmlTags(selectBoxes, HEADERS_WO_BUTTONS, formattedFormValues);
+      return HtmlUtil.wrapResultTableWithHtmlTags(selectBoxes, ServletConsts.RECORD_KEY, HEADERS_WO_BUTTONS, formattedFormValues);
     }
   }
 

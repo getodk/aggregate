@@ -47,6 +47,7 @@ public enum GrantedAuthorityNames {
 	ROLE_FORM_DOWNLOAD("required to fetch an xform definition (e.g., by the device)"),
 	ROLE_SUBMISSION_UPLOAD("required to submit a filled-out xform"),
 	ROLE_USER("required to view the home (forms) page and the human-readable xform xml listing"),
+	ROLE_ATTACHMENT_VIEWER("required to view imagery, video, audio and other complex data in the form"),
 	ROLE_ANALYST("required to view submissions and to generate csv and kml files and download them"),
 	ROLE_SERVICES_ADMIN("required to configure external services and data publishing"),
 	ROLE_FORM_ADMIN("required to upload new xforms, upload modifications to existing xforms, and to delete xforms or thier data"),

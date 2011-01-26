@@ -130,11 +130,9 @@ public final class ServletConsts {
 
   public static final String KML_FILENAME_APPEND = "_results.kml";
 
-  public static final String PROCESS_RECORD_PREFIX = "record";
+  public static final String RECORD_KEY = "record";
 
   public static final String PROCESS_TYPE = "processType";
-
-  public static final String PROCESS_NUM_RECORDS = "numRecords";
 
   public static final String QUERY_VALUE_PARAM = "value";
 

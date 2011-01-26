@@ -19,6 +19,7 @@ package org.opendatakit.aggregate.servlet;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -29,13 +30,10 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.fileupload.FileUploadException;
 import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.ErrorConsts;
 import org.opendatakit.aggregate.constants.HtmlUtil;
-import org.opendatakit.aggregate.parser.MultiPartFormData;
-import org.opendatakit.aggregate.parser.MultiPartFormItem;
 import org.opendatakit.common.constants.HtmlConsts;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.Datastore;
@@ -70,7 +68,9 @@ public class GroupModifyServlet extends ServletUtilBase {
 	
 	public static final String TITLE_INFO = "Modify Permissions for: ";
 	
-	public static final String GROUPNAME = "_groupname";
+	public static final String GROUPNAME = "groupname";
+	public static final String ROLENAME = "rolename";
+	
 	/**
 	 * Handler for HTTP Get request that adds a new groupname to the user groups.
 	 * 
@@ -183,7 +183,7 @@ public class GroupModifyServlet extends ServletUtilBase {
 		out.write("<h2>Update Privileges</h2>");
 
 		out.write(HtmlUtil.createFormBeginTag(cc
-				.getWebApplicationURL(GroupModifyServlet.ADDR), HtmlConsts.MULTIPART_FORM_DATA,
+				.getWebApplicationURL(GroupModifyServlet.ADDR), null,
 				HtmlConsts.POST));
 		out.write(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_HIDDEN, GroupModifyServlet.GROUPNAME, groupname));
 
@@ -202,7 +202,7 @@ public class GroupModifyServlet extends ServletUtilBase {
 			out.print(HtmlConsts.TABLE_ROW_OPEN);
 	        out.print(HtmlUtil.wrapWithHtmlTags(HtmlConsts.TABLE_DATA, 
 	        		HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_CHECKBOX, 
-	        								inheritablegroup, inheritablegroup,
+	        								ROLENAME, inheritablegroup,
 	        								groups.contains(inheritablegroup)) +
 	        								groupNameLink(inheritablegroup,cc)));
 			out.print(HtmlUtil.wrapWithHtmlTags(HtmlConsts.TABLE_DATA, 
@@ -227,7 +227,7 @@ public class GroupModifyServlet extends ServletUtilBase {
 			out.print(HtmlConsts.TABLE_ROW_OPEN);
 	        out.print(HtmlUtil.wrapWithHtmlTags(HtmlConsts.TABLE_DATA, 
 	        		HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_CHECKBOX, 
-	        				rolename, rolename, groups.contains(rolename)) + rolename));
+	        				ROLENAME, rolename, groups.contains(rolename)) + rolename));
 			out.print(HtmlUtil.wrapWithHtmlTags(HtmlConsts.TABLE_DATA, 
 					n.getDescription()));
 			out.print(HtmlConsts.TABLE_ROW_CLOSE);
@@ -291,25 +291,33 @@ public class GroupModifyServlet extends ServletUtilBase {
 		Datastore ds = cc.getDatastore();
 		User user = cc.getCurrentUser();
 
+		// get parameter
+		String[] usernameArray = req.getParameterValues(ROLENAME);
+		List<String> desiredGrants = new ArrayList<String>();
+		if ( usernameArray != null ) {
+			desiredGrants.addAll(Arrays.asList(usernameArray));
+		}
+		if (desiredGrants.isEmpty()) {
+			errorMissingParam(resp);
+			return;
+		}
+		
+		String groupname = req.getParameter(GROUPNAME);
+		if (groupname == null || groupname.length() == 0) {
+			errorMissingParam(resp);
+			return;
+		}
+
 		try {
 			GrantedAuthorityHierarchyTable relation = GrantedAuthorityHierarchyTable.assertRelation(ds, user);
 			
-			MultiPartFormData mfd = new MultiPartFormData(req);
-			String groupname = mfd.getFormDataByFieldName(GROUPNAME).getStream().toString();
-			if (groupname == null || groupname.length() == 0) {
-				errorMissingParam(resp);
-				return;
-			}
 			TreeSet<String> groups = new TreeSet<String>();
 			TreeSet<String> roles = new TreeSet<String>();
-			for ( Map.Entry<String,MultiPartFormItem> e : mfd.getFieldNameEntrySet() ) {
-				String key = e.getKey();
-				if ( GROUPNAME.equals(key) ) continue;
-				if ( groupname.equals(key) ) continue;
-				if ( !GrantedAuthorityNames.permissionsCanBeAssigned(key) ) {
-					roles.add(key);
+			for ( String grant : desiredGrants ) {
+				if ( !GrantedAuthorityNames.permissionsCanBeAssigned(grant) ) {
+					roles.add(grant);
 				} else {
-					groups.add(key);
+					groups.add(grant);
 				}
 			}
 
@@ -358,10 +366,6 @@ public class GroupModifyServlet extends ServletUtilBase {
 			e.printStackTrace();
 			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, 
 					ErrorConsts.PERSISTENCE_LAYER_PROBLEM);
-			return;
-		} catch (FileUploadException e) {
-			e.printStackTrace();
-			errorBadParam(resp);
 			return;
 		} finally {
 			// finally, since we mucked with the group hierarchies, refresh the 

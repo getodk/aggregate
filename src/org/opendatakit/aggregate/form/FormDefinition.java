@@ -111,7 +111,7 @@ public class FormDefinition {
 													DynamicCommonFieldsBase parent,
 													Long ordinal,
 													CallingContext cc ) throws ODKDatastoreException {
-		FormDataModel fdm = FormDataModel.createRelation(cc);
+		FormDataModel fdm = FormDataModel.assertRelation(cc);
 		FormDataModel d;
 		
 		if ( topLevel == null || 
@@ -203,7 +203,7 @@ public class FormDefinition {
 			Long ordinal,
 			CallingContext cc ) throws ODKDatastoreException {
 		
-		FormDataModel fdm = FormDataModel.createRelation(cc);
+		FormDataModel fdm = FormDataModel.assertRelation(cc);
 		FormDataModel d;
 		
 		// we are making use of the fact that the PK in the 
@@ -279,7 +279,7 @@ public class FormDefinition {
 			Long ordinal,
 			CallingContext cc ) throws ODKDatastoreException {
 		
-		FormDataModel fdm = FormDataModel.createRelation(cc);
+		FormDataModel fdm = FormDataModel.assertRelation(cc);
 		FormDataModel d;
 		
 		// we are making use of the fact that the PK in the 
@@ -317,7 +317,7 @@ public class FormDefinition {
 	}
 	
 	static final void assertModel(XFormParameters p, List<FormDataModel> model, CallingContext cc) throws ODKDatastoreException {
-		FormDataModel fdm = FormDataModel.createRelation(cc);
+		FormDataModel fdm = FormDataModel.assertRelation(cc);
 		if ( model == null || model.size() == 0 ) {
 			throw new IllegalArgumentException("should never be null");
 		}
@@ -335,7 +335,7 @@ public class FormDefinition {
 		String definitionUri = model.get(0).getUriSubmissionDataModel();
 		String formUri = CommonFieldsBase.newMD5HashUri(p.formId);
 		
-		SubmissionAssociationTable saRelation = SubmissionAssociationTable.createRelation(cc);
+		SubmissionAssociationTable saRelation = SubmissionAssociationTable.assertRelation(cc);
 		SubmissionAssociationTable sa = ds.createEntityUsingRelation(saRelation, user);
 		
 		sa.setStringField(saRelation.primaryKey, definitionUri );
@@ -456,7 +456,7 @@ public class FormDefinition {
 				User user = cc.getCurrentUser();
 				try {
 					// changes here should be paralleled in the FormParserForJavaRosa
-				    SubmissionAssociationTable saRelation = SubmissionAssociationTable.createRelation(cc);
+				    SubmissionAssociationTable saRelation = SubmissionAssociationTable.assertRelation(cc);
 				    String submissionFormIdUri = CommonFieldsBase.newMD5HashUri(p.formId); // key under which submission is located...
 				    Query q = ds.createQuery(saRelation, user);
 				    q.addFilter( saRelation.uriMd5SubmissionFormId, Query.FilterOperation.EQUAL, submissionFormIdUri);
@@ -476,7 +476,7 @@ public class FormDefinition {
 				    	return null;
 				    }
 				    // OK.  Found an sa record -- use it to find the fdm entries...
-				    FormDataModel fdm = FormDataModel.createRelation(cc);
+				    FormDataModel fdm = FormDataModel.assertRelation(cc);
 					Query query = ds.createQuery(fdm, user);
 					query.addFilter(fdm.uriSubmissionDataModel, FilterOperation.EQUAL, thisUriSubmissionDataModel);
 					fdmList = query.executeQuery(0);

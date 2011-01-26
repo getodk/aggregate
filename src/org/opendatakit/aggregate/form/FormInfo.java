@@ -119,11 +119,11 @@ public class FormInfo {
 				// and update the FormInfo object so it has the canonical data fields...
 				reference = (FormInfoTable) formDefinition.getTopLevelGroup().getBackingObjectPrototype();
 				
-				formId = FormDefinition.findElement(formDefinition.getTopLevelGroupElement(), FormInfoTable.createRelation(cc).formId);
+				formId = FormDefinition.findElement(formDefinition.getTopLevelGroupElement(), FormInfoTable.assertRelation(cc).formId);
 				// FormInfoDescriptionTable element...
 				{
 					fiDescriptionTable = formDefinition.getTopLevelGroupElement().findElementByName(FormInfoDescriptionTable.TABLE_NAME);
-					FormInfoDescriptionTable f = FormInfoDescriptionTable.createRelation(cc);
+					FormInfoDescriptionTable f = FormInfoDescriptionTable.assertRelation(cc);
 					languageCode = FormDefinition.findElement(fiDescriptionTable, f.languageCode);
 					formName = FormDefinition.findElement(fiDescriptionTable, f.formName);
 					description = FormDefinition.findElement(fiDescriptionTable, f.description);
@@ -132,7 +132,7 @@ public class FormInfo {
 				// FormInfoFilesetTable element...
 				{
 					fiFilesetTable = formDefinition.getTopLevelGroupElement().findElementByName(FormInfoFilesetTable.TABLE_NAME);
-					FormInfoFilesetTable f = FormInfoFilesetTable.createRelation(cc);
+					FormInfoFilesetTable f = FormInfoFilesetTable.assertRelation(cc);
 					rootElementModelVersion = FormDefinition.findElement(fiFilesetTable, f.rootElementModelVersion);
 					rootElementUiVersion = FormDefinition.findElement(fiFilesetTable, f.rootElementUiVersion);
 					isFilesetComplete = FormDefinition.findElement(fiFilesetTable, f.isFilesetComplete);
@@ -143,7 +143,7 @@ public class FormInfo {
 				// FormInfoSubmissionTable element...
 				{
 					fiSubmissionTable = formDefinition.getTopLevelGroupElement().findElementByName(FormInfoSubmissionTable.TABLE_NAME);
-					FormInfoSubmissionTable f = FormInfoSubmissionTable.createRelation(cc);
+					FormInfoSubmissionTable f = FormInfoSubmissionTable.assertRelation(cc);
 					submissionFormId = FormDefinition.findElement(fiSubmissionTable, f.submissionFormId);
 					submissionModelVersion = FormDefinition.findElement(fiSubmissionTable, f.submissionModelVersion);
 					submissionUiVersion = FormDefinition.findElement(fiSubmissionTable, f.submissionUiVersion);
@@ -181,13 +181,13 @@ public class FormInfo {
 	public static final void populateBackingTableMap(Map<String, DynamicCommonFieldsBase> backingTableMap, CallingContext cc) {
 		try {
 		    DynamicCommonFieldsBase b;
-			b = FormInfoTable.createRelation(cc);
+			b = FormInfoTable.assertRelation(cc);
 			backingTableMap.put(b.getSchemaName() + "." + b.getTableName(), b);
-			b = FormInfoDescriptionTable.createRelation(cc);
+			b = FormInfoDescriptionTable.assertRelation(cc);
 			backingTableMap.put(b.getSchemaName() + "." + b.getTableName(), b);
-			b = FormInfoFilesetTable.createRelation(cc);
+			b = FormInfoFilesetTable.assertRelation(cc);
 			backingTableMap.put(b.getSchemaName() + "." + b.getTableName(), b);
-			b = FormInfoSubmissionTable.createRelation(cc);
+			b = FormInfoSubmissionTable.assertRelation(cc);
 			backingTableMap.put(b.getSchemaName() + "." + b.getTableName(), b);
 		} catch (ODKDatastoreException e) {
 			throw new IllegalStateException("the relations should already have been created");

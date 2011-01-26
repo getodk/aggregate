@@ -86,7 +86,7 @@ public class MiscTasks {
 			return lockType;
 		}
 		
-		public final int getMaxAttemptCount() {
+		public final long getMaxAttemptCount() {
 			return maxAttemptCount;
 		}
 	};
@@ -364,7 +364,7 @@ public class MiscTasks {
 			MiscTasks result = new MiscTasks(s);
 			if ( result.getStatus() == Status.SUCCESSFUL ) continue;
 			if ( result.getStatus() == Status.ABANDONED ) continue;
-			if ( result.getAttemptCount() >= taskType.getMaxAttemptCount() ) {
+			if ( result.getAttemptCount().compareTo(taskType.getMaxAttemptCount()) >= 0 ) {
 				// the task is stale, and should be marked abandoned,
 				// but the worker thread must have failed.  Attempt 
 				// it here...
@@ -503,7 +503,7 @@ public class MiscTasks {
 		
 		private static MiscTasksTable relation = null;
 		
-		static synchronized final MiscTasksTable createRelation(CallingContext cc) throws ODKDatastoreException {
+		static synchronized final MiscTasksTable assertRelation(CallingContext cc) throws ODKDatastoreException {
 			if ( relation == null ) {
 				MiscTasksTable relationPrototype;
 				Datastore ds = cc.getDatastore();
@@ -532,10 +532,10 @@ public class MiscTasks {
 			List<FormDataModel> model = new ArrayList<FormDataModel>();
 			Datastore ds = cc.getDatastore();
 			User user = cc.getCurrentUser();
-			FormDataModel.createRelation(cc);
-			SubmissionAssociationTable.createRelation(cc);
+			FormDataModel.assertRelation(cc);
+			SubmissionAssociationTable.assertRelation(cc);
 			
-			MiscTasksTable miscTasksRelation = MiscTasksTable.createRelation(cc);
+			MiscTasksTable miscTasksRelation = MiscTasksTable.assertRelation(cc);
 			MiscTasksTable miscTasksDefinition = ds.createEntityUsingRelation(miscTasksRelation, user);
 			miscTasksDefinition.setStringField(miscTasksRelation.primaryKey, MiscTasksTable.MISC_TASK_DEFINITION_URI);
 			
@@ -594,7 +594,7 @@ public class MiscTasks {
 			Map<String, DynamicCommonFieldsBase> backingTableMap, CallingContext cc) {
 		try {
 		    DynamicCommonFieldsBase b;
-			b = MiscTasksTable.createRelation(cc);
+			b = MiscTasksTable.assertRelation(cc);
 			backingTableMap.put(b.getSchemaName() + "." + b.getTableName(), b);
 		} catch (ODKDatastoreException e) {
 			throw new IllegalStateException("the relations should already have been created");

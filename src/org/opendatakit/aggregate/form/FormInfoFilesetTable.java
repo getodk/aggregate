@@ -116,7 +116,7 @@ public class FormInfoFilesetTable extends DynamicBase {
 	
 	private static FormInfoFilesetTable relation = null;
 	
-	static synchronized final FormInfoFilesetTable createRelation(CallingContext cc) throws ODKDatastoreException {
+	static synchronized final FormInfoFilesetTable assertRelation(CallingContext cc) throws ODKDatastoreException {
 		if ( relation == null ) {
 			FormInfoFilesetTable relationPrototype;
 			Datastore ds = cc.getDatastore();
@@ -134,7 +134,7 @@ public class FormInfoFilesetTable extends DynamicBase {
 			DynamicCommonFieldsBase formInfoTableRelation, 
 			CallingContext cc) throws ODKDatastoreException {
 		
-		FormInfoFilesetTable filesetRelation = createRelation(cc);
+		FormInfoFilesetTable filesetRelation = assertRelation(cc);
 		
 		boolean asDaemon = cc.getAsDeamon();
 		try {

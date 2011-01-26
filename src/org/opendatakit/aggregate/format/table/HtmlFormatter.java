@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.opendatakit.aggregate.constants.HtmlUtil;
+import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.format.Row;
@@ -58,7 +59,7 @@ public class HtmlFormatter extends TableFormatterBase implements SubmissionForma
     }
     
     // format into html table
-    output.append(HtmlUtil.wrapResultTableWithHtmlTags(checkboxes, headers, formattedElements));
+    output.append(HtmlUtil.wrapResultTableWithHtmlTags(checkboxes, ServletConsts.RECORD_KEY, headers, formattedElements));
     
     // TODO: consider reimplementing so we can stream out the html tags instead of writing them once.
     // TODO: consider reimplementing so there is only one loop of element formatting and table formatting

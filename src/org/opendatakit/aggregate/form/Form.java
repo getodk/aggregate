@@ -127,7 +127,7 @@ public class Form {
 	XFormParameters submissionDefn = new XFormParameters(submissionFormId, submissionModelVersion, submissionUiVersion);
 
 	try {
-		SubmissionAssociationTable saRelation = SubmissionAssociationTable.createRelation(cc);
+		SubmissionAssociationTable saRelation = SubmissionAssociationTable.assertRelation(cc);
 		Query q = cc.getDatastore().createQuery(saRelation, cc.getCurrentUser());
 		q.addFilter(saRelation.uriMd5SubmissionFormId, FilterOperation.EQUAL, CommonFieldsBase.newMD5HashUri(submissionFormId));
 		List<? extends CommonFieldsBase> l = q.executeQuery(0);
@@ -166,7 +166,7 @@ public class Form {
    * @throws ODKDatastoreException
    */
   public void deleteForm() throws ODKDatastoreException {
-	FormDataModel fdm = FormDataModel.createRelation(cc);
+	FormDataModel fdm = FormDataModel.assertRelation(cc);
     List<EntityKey> eksFormInfo = new ArrayList<EntityKey>();
 
     if ( submissionAssociations.size() > 1 ) {
@@ -507,7 +507,7 @@ public class Form {
 	  try {
 		Datastore ds = cc.getDatastore();
 		User user = cc.getCurrentUser();
-		SubmissionAssociationTable saRelation = SubmissionAssociationTable.createRelation(cc);
+		SubmissionAssociationTable saRelation = SubmissionAssociationTable.assertRelation(cc);
 		Query q = ds.createQuery(saRelation, user);
 		q.addFilter(saRelation.uriMd5SubmissionFormId, FilterOperation.EQUAL, CommonFieldsBase.newMD5HashUri(submissionFormId));
 		List<? extends CommonFieldsBase> l = q.executeQuery(0);

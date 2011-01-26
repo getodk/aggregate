@@ -332,7 +332,7 @@ public class FormParserForJavaRosa {
 
     Datastore ds = cc.getDatastore();
     User user = cc.getCurrentUser();
-    SubmissionAssociationTable saRelation = SubmissionAssociationTable.createRelation(cc);
+    SubmissionAssociationTable saRelation = SubmissionAssociationTable.assertRelation(cc);
     String submissionFormIdUri = CommonFieldsBase.newMD5HashUri(submissionElementDefn.formId); // key under which submission is located...
     Query q = ds.createQuery(saRelation, user);
     q.addFilter( saRelation.uriMd5SubmissionFormId, Query.FilterOperation.EQUAL, submissionFormIdUri);
@@ -380,7 +380,7 @@ public class FormParserForJavaRosa {
 	    //////////////////////////////////////////////////
 	    // Step 2: Now build up the parse tree for the form...
 	    //
-	    final FormDataModel fdm = FormDataModel.createRelation(cc);
+	    final FormDataModel fdm = FormDataModel.assertRelation(cc);
 	    
 	    final EntityKey k = new EntityKey( fdm, fdmSubmissionUri);
 	
@@ -503,7 +503,7 @@ public class FormParserForJavaRosa {
 		
 		      for (CommonFieldsBase tbl : badTables) {
 		        // dang. We need to create phantom tables...
-		        orderlyDivideTable(fdmList, FormDataModel.createRelation(cc), 
+		        orderlyDivideTable(fdmList, FormDataModel.assertRelation(cc), 
 		        		tbl, opaque);
 		      }
 		

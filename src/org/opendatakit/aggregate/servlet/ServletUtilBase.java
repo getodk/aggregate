@@ -100,6 +100,11 @@ public class ServletUtilBase extends CommonServletBase {
 	grants.addAll(fetchGrantedAuthoritySet( GrantedAuthorityNames.USER_IS_AUTHENTICATED.name(), cc));
 	return !grants.contains( GrantedAuthorityNames.ROLE_ACCESS_ADMIN.name() );
   }
+
+  public boolean isAttachmentViewerAnonymous(CallingContext cc) {
+	TreeSet<String> grants = fetchGrantedAuthoritySet( GrantedAuthorityNames.USER_IS_ANONYMOUS.name(), cc);
+	return grants.contains( GrantedAuthorityNames.ROLE_ATTACHMENT_VIEWER.name() );
+  }
   
   /**
    * Generate error response for ODK ID not found
@@ -169,9 +174,10 @@ public class ServletUtilBase extends CommonServletBase {
 	  final String uploadSubmissionsHref = HtmlUtil.createHref(
 			  cc.getWebApplicationURL(UploadSubmissionsAppletServlet.ADDR),
 			  ServletConsts.UPLOAD_SUBMISSIONS_APPLET_LINK_TEXT);
-	  final String changePasswordHref = HtmlUtil.createHref(
+	  final String changePasswordHref = cc.getCurrentUser().isRegistered() ?
+			  HtmlUtil.createHref(
 			  cc.getWebApplicationURL(UserPasswordServlet.ADDR), 
-			  UserPasswordServlet.TITLE_INFO);
+			  UserPasswordServlet.TITLE_INFO) : "(not a registered user)";
 	  
 	  final String resultsHref = HtmlUtil.createHref(
 			  cc.getWebApplicationURL(ResultServlet.ADDR), 

@@ -97,6 +97,7 @@ public class UserServiceImpl implements org.opendatakit.common.security.UserServ
     return realm;
   }
 
+  @Override
   public synchronized void reloadPermissions() {
 	activeUsers.clear();
 	activeUsers.put(anonymous.getUriUser(), anonymous);

@@ -74,9 +74,8 @@ public class FormDeleteServlet extends ServletUtilBase {
       FormHtmlTable formFormatter = new FormHtmlTable(formsList, cc);
 
       beginBasicHtmlResponse(TITLE_INFO, resp, true, cc); // header info
-      out.print(HtmlUtil.createFormBeginTag(cc.getWebApplicationURL(ConfirmServlet.ADDR), HtmlConsts.MULTIPART_FORM_DATA, HtmlConsts.POST));
+      out.print(HtmlUtil.createFormBeginTag(cc.getWebApplicationURL(ConfirmServlet.ADDR), null, HtmlConsts.POST));
       out.print(formFormatter.generateHtmlFormTable(false, true));
-      out.print(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_HIDDEN, ServletConsts.PROCESS_NUM_RECORDS, Integer.toString(formFormatter.getNumberForms())));
       out.print(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_SUBMIT, ServletConsts.PROCESS_TYPE, ProcessType.DELETE_FORM.getButtonText()));
       out.print(HtmlConsts.LINE_BREAK);
       out.print(HtmlConsts.FORM_CLOSE);

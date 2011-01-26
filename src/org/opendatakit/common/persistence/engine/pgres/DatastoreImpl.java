@@ -418,7 +418,7 @@ public class DatastoreImpl implements Datastore, InitializingBean {
 							int_digits = DEFAULT_INT_NUMERIC_PRECISION;
 						}
 		
-						if ( int_digits > 9 ) {
+						if ( int_digits.compareTo(9) > 0 ) {
 							b.append(" BIGINT");
 						} else {
 							b.append(" INTEGER");

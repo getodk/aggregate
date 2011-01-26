@@ -116,7 +116,7 @@ public class ExternalServicesListServlet extends ServletUtilBase {
 				}
 
 				resp.getWriter().print(
-						HtmlUtil.wrapResultTableWithHtmlTags(false, headers,
+						HtmlUtil.wrapResultTableWithHtmlTags(false, null, headers,
 								formattedFormValues));
 			}
 			finishBasicHtmlResponse(resp);

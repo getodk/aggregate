@@ -186,7 +186,7 @@ public abstract class CommonFieldsBase {
 			}
 			fieldValueMap.remove(f);
 			return true;
-		} else if ( value.length() > f.getMaxCharLen() ) {
+		} else if ( f.getMaxCharLen().compareTo(Long.valueOf(value.length())) < 0 ) {
 			if ( f.getDataType() == DataType.LONG_STRING ) {
 				throw new IllegalArgumentException("overflowing a LONG_STRING!!");
 			} else if ( f.getDataType() == DataType.URI ) {

@@ -78,7 +78,7 @@ public final class JsonServerParameterTable extends CommonFieldsBase {
 
 	private static JsonServerParameterTable relation = null;
 
-	public static synchronized final JsonServerParameterTable createRelation(CallingContext cc)
+	public static synchronized final JsonServerParameterTable assertRelation(CallingContext cc)
 			throws ODKDatastoreException {
 		if (relation == null) {
 			JsonServerParameterTable relationPrototype;
