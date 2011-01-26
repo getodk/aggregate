@@ -266,6 +266,8 @@ public class UserModifyServlet extends ServletUtilBase {
 			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, 
 					ErrorConsts.PERSISTENCE_LAYER_PROBLEM);
 			return;
+		} finally {
+			cc.getUserService().reloadPermissions();
 		}
 
 		resp.sendRedirect(cc.getWebApplicationURL(UserManagementServlet.ADDR));
