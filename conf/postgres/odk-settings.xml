@@ -38,10 +38,11 @@
 		<property name="realmString" value="${security.server.realm.realmString}" />
 		<property name="domains" value="${security.server.realm.domains}" />
 	</bean>
-
-	<bean id="user_service" class="org.opendatakit.common.security.tomcat.UserServiceImpl">
-		<property name="realm" ref="realm" />
-	</bean>
+    
+    <bean id="user_service" class="org.opendatakit.common.security.spring.UserServiceImpl">
+        <property name="datastore" ref="datastore" />
+        <property name="realm" ref="realm" />
+    </bean>
 	
 	<bean id="worksheet_creator"
 		class="org.opendatakit.aggregate.task.tomcat.WorksheetCreatorImpl" />
