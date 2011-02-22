@@ -37,7 +37,7 @@ import org.opendatakit.aggregate.externalservice.FormServiceCursor.OperationalSt
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.format.element.LinkElementFormatter;
-import org.opendatakit.aggregate.format.header.BasicHeaderFormatter;
+import org.opendatakit.aggregate.format.header.GoogleSpreadsheetHeaderFormatter;
 import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.aggregate.submission.SubmissionSet;
 import org.opendatakit.aggregate.submission.SubmissionValue;
@@ -87,8 +87,8 @@ public class GoogleSpreadsheet extends AbstractExternalService implements Extern
   private final SpreadsheetService spreadsheetService;
 
   private GoogleSpreadsheet(Form form, CallingContext cc) {
-    super(form, new LinkElementFormatter(cc.getServerURL(), true, true, true), new BasicHeaderFormatter(true, true,
-        true), cc);
+    super(form, new LinkElementFormatter(cc.getServerURL(), true, true, true),
+        new GoogleSpreadsheetHeaderFormatter(true, true, true), cc);
     spreadsheetService = new SpreadsheetService(ServletConsts.APPLICATION_NAME);
     // TODO: REMOVE after bug is fixed
     // http://code.google.com/p/gdata-java-client/issues/detail?id=103
@@ -121,15 +121,15 @@ public class GoogleSpreadsheet extends AbstractExternalService implements Extern
   }
 
   public GoogleSpreadsheet(Form form, String name, String spreadKey, OAuthToken authToken,
-      ExternalServiceOption externalServiceOption, CallingContext cc)
-      throws ODKDatastoreException {
+      ExternalServiceOption externalServiceOption, CallingContext cc) throws ODKDatastoreException {
     this(form, cc);
-    objectEntity = cc.getDatastore().createEntityUsingRelation(GoogleSpreadsheetParameterTable
-        .assertRelation(cc), cc.getCurrentUser());
+    objectEntity = cc.getDatastore().createEntityUsingRelation(
+        GoogleSpreadsheetParameterTable.assertRelation(cc), cc.getCurrentUser());
     fsc = FormServiceCursor.createFormServiceCursor(form, ExternalServiceType.GOOGLE_SPREADSHEET,
         objectEntity, cc);
     fsc.setExternalServiceOption(externalServiceOption);
-    fsc.setIsExternalServicePrepared(false); // need to perform worksheet creation...
+    fsc.setIsExternalServicePrepared(false); // need to perform worksheet
+    // creation...
     fsc.setOperationalStatus(OperationalStatus.ACTIVE);
     fsc.setEstablishmentDateTime(new Date());
     fsc.setUploadCompleted(false);
@@ -148,15 +148,15 @@ public class GoogleSpreadsheet extends AbstractExternalService implements Extern
 
   @Override
   public void abandon() throws ODKDatastoreException {
-	if ( fsc.getOperationalStatus() != OperationalStatus.COMPLETED ) {
-	  fsc.setOperationalStatus(OperationalStatus.ABANDONED);
-	  persist();  
-	}
+    if (fsc.getOperationalStatus() != OperationalStatus.COMPLETED) {
+      fsc.setOperationalStatus(OperationalStatus.ABANDONED);
+      persist();
+    }
   }
 
   public void persist() throws ODKEntityPersistException {
-	Datastore ds = cc.getDatastore();
-	User user = cc.getCurrentUser();
+    Datastore ds = cc.getDatastore();
+    User user = cc.getCurrentUser();
     ds.putEntities(repeatElementTableIds, user);
     ds.putEntity(objectEntity, user);
     ds.putEntity(fsc, user);
@@ -164,7 +164,8 @@ public class GoogleSpreadsheet extends AbstractExternalService implements Extern
 
   public void delete() throws ODKDatastoreException {
     // remove spreadsheet permission as no longer needed
-    // TODO: test that the revoke REALLY works, can be easy to miss since we ignore exception
+    // TODO: test that the revoke REALLY works, can be easy to miss since we
+    // ignore exception
     try {
       OAuthToken token = getAuthToken();
       GoogleOAuthParameters oauthParameters = new GoogleOAuthParameters();
@@ -184,8 +185,8 @@ public class GoogleSpreadsheet extends AbstractExternalService implements Extern
     for (GoogleSpreadsheetRepeatParameterTable repeat : repeatElementTableIds) {
       keys.add(new EntityKey(repeat, repeat.getUri()));
     }
-	Datastore ds = cc.getDatastore();
-	User user = cc.getCurrentUser();
+    Datastore ds = cc.getDatastore();
+    User user = cc.getCurrentUser();
     ds.deleteEntities(keys, user);
     ds.deleteEntity(new EntityKey(objectEntity, objectEntity.getUri()), user);
     ds.deleteEntity(new EntityKey(fsc, fsc.getUri()), user);
@@ -244,10 +245,9 @@ public class GoogleSpreadsheet extends AbstractExternalService implements Extern
         .assertRelation(cc);
 
     // create repeat worksheets
-	Datastore ds = cc.getDatastore();
-	User user = cc.getCurrentUser();
-    List<FormElementModel> repeatGroupElements = form.getRepeatGroupsInModel();
-    for (FormElementModel repeatGroupElement : repeatGroupElements) {
+    Datastore ds = cc.getDatastore();
+    User user = cc.getCurrentUser();
+    for (FormElementModel repeatGroupElement : form.getRepeatGroupsInModel()) {
       // create the worksheet
       headers = headerFormatter.generateHeaders(form, repeatGroupElement, null);
       WorksheetEntry repeatWorksheet = executeCreateWorksheet(entry, repeatGroupElement
@@ -255,8 +255,7 @@ public class GoogleSpreadsheet extends AbstractExternalService implements Extern
 
       // add the worksheet id to the repeat element table -- NOTE: the added
       // entry is not actually persisted here
-      GoogleSpreadsheetRepeatParameterTable t = ds.createEntityUsingRelation(repeatPrototype,
-          user);
+      GoogleSpreadsheetRepeatParameterTable t = ds.createEntityUsingRelation(repeatPrototype, user);
       t.setUriGoogleSpreadsheet(objectEntity.getUri());
       t.setFormElementKey(repeatGroupElement.constructFormElementKey(form));
       t.setWorksheetId(extractWorksheetId(repeatWorksheet));
@@ -265,7 +264,8 @@ public class GoogleSpreadsheet extends AbstractExternalService implements Extern
 
     // persist the changes we have made to the repeat element table (changes
     // from calling executeCreateWorksheet)
-    fsc.setIsExternalServicePrepared(true); // we have completed worksheet creation...
+    fsc.setIsExternalServicePrepared(true); // we have completed worksheet
+    // creation...
     persist();
   }
 
@@ -303,7 +303,6 @@ public class GoogleSpreadsheet extends AbstractExternalService implements Extern
     int index = 0;
     for (CellEntry cell : cells) {
       String header = headers.get(index);
-      header = removeUnsafeCharsFromHeader(header);
       cell.changeInputValueLocal(header);
       BatchUtils.setBatchId(cell, Integer.toString(index));
       BatchUtils.setBatchOperationType(cell, BatchOperationType.UPDATE);
@@ -329,21 +328,20 @@ public class GoogleSpreadsheet extends AbstractExternalService implements Extern
 
   @Override
   public void insertData(Submission submission) throws ODKExternalServiceException {
-    if (getReady())
-    {
+    if (getReady()) {
       try {
         // upload base submission values
-        List<String> headers = headerFormatter.generateHeaders(form, form.getTopLevelGroupElement(),
-            null);
+        List<String> headers = headerFormatter.generateHeaders(form,
+            form.getTopLevelGroupElement(), null);
         WorksheetEntry topLevelWorksheet = getWorksheet(objectEntity.getTopLevelWorksheetId());
         executeInsertData(submission, headers, topLevelWorksheet);
-  
+
         // upload repeat values
         for (GoogleSpreadsheetRepeatParameterTable tableId : repeatElementTableIds) {
           FormElementKey elementKey = tableId.getFormElementKey();
           FormElementModel element = FormElementModel.retrieveFormElementModel(form, elementKey);
           headers = headerFormatter.generateHeaders(form, element, null);
-  
+
           List<SubmissionValue> values = submission.findElementValue(element);
           for (SubmissionValue value : values) {
             if (value instanceof RepeatSubmissionType) {
@@ -355,7 +353,8 @@ public class GoogleSpreadsheet extends AbstractExternalService implements Extern
                 }
               }
             } else {
-              System.out.println("ERROR: How did a non Repeat Submission Type get in the for loop?");
+              System.out
+                  .println("ERROR: How did a non Repeat Submission Type get in the for loop?");
             }
           }
         }
@@ -365,28 +364,43 @@ public class GoogleSpreadsheet extends AbstractExternalService implements Extern
     }
   }
 
-  private void executeInsertData(SubmissionSet set, List<String> headers, WorksheetEntry worksheet)
-      throws ODKDatastoreException, IOException, ServiceException {
+  /**
+   * Inserts the data in the given submissionSet as a new entry (i.e. a new row)
+   * in the given worksheet, including only the data specified by headers.
+   * 
+   * @param submissionSet
+   *          the set of data from a single submission
+   * @param headers
+   *          a list of headers corresponding to the headers in worksheet. Only
+   *          the data in submissionSet corresponding to these headers will be
+   *          submitted.
+   * @param worksheet
+   *          the worksheet representing the worksheet in a Google Spreadsheet.
+   * @throws ODKDatastoreException
+   *           if there was a problem in the datastore
+   * @throws IOException
+   *           if there was a problem communicating over the internet with the
+   *           Google Spreadsheet
+   * @throws ServiceException
+   *           if there was a problem with the GData service
+   */
+  private void executeInsertData(SubmissionSet submissionSet, List<String> headers,
+      WorksheetEntry worksheet) throws ODKDatastoreException, IOException, ServiceException {
     ListEntry newEntry = new ListEntry();
     CustomElementCollection values = newEntry.getCustomElements();
 
-    Row row = set.getFormattedValuesAsRow(null, formatter, false);
+    Row row = submissionSet.getFormattedValuesAsRow(null, formatter, true);
     List<String> formattedValues = row.getFormattedValues();
 
+    String rowString = null;
+    String headerString = null;
     for (int colIndex = 0; colIndex < headers.size(); colIndex++) {
-      String headerString = headers.get(colIndex);
-      headerString = removeUnsafeCharsFromHeader(headerString);
-      String rowString = formattedValues.get(colIndex);
+      headerString = headers.get(colIndex);
+      rowString = formattedValues.get(colIndex);
       values.setValueLocal(headerString, (rowString == null) ? BasicConsts.SPACE : rowString);
     }
 
-    spreadsheetService.insert(worksheet.getListFeedUrl(), newEntry);
-  }
-
-  // TODO: figure out better way to handle unsafe chars.
-  private String removeUnsafeCharsFromHeader(String header) {
-    return header.replaceAll(SpreadsheetConsts.UNSUPPORTED_CHAR_CLASS,
-        SpreadsheetConsts.REPLACEMENT_CHAR);
+      spreadsheetService.insert(worksheet.getListFeedUrl(), newEntry);
   }
 
   public WorksheetEntry getWorksheet(String worksheetId) throws IOException, ServiceException {
@@ -398,8 +412,8 @@ public class GoogleSpreadsheet extends AbstractExternalService implements Extern
   }
 
   public static GoogleSpreadsheet createSpreadsheet(Form form, OAuthToken authToken,
-      String spreadsheetName, ExternalServiceOption externalServiceOption, 
-      CallingContext cc) throws ODKDatastoreException, ODKExternalServiceException {
+      String spreadsheetName, ExternalServiceOption externalServiceOption, CallingContext cc)
+      throws ODKDatastoreException, ODKExternalServiceException {
 
     // setup service
     DocsService service = new DocsService(ServletConsts.APPLICATION_NAME);
@@ -425,9 +439,9 @@ public class GoogleSpreadsheet extends AbstractExternalService implements Extern
     } catch (IOException e) {
       // try one more time
       try {
-         updatedEntry = service.insert(new URL(SpreadsheetConsts.DOC_FEED), createdEntry);
+        updatedEntry = service.insert(new URL(SpreadsheetConsts.DOC_FEED), createdEntry);
       } catch (Exception e1) {
-         throw new ODKExternalServiceException(e1);
+        throw new ODKExternalServiceException(e1);
       }
     } catch (Exception e) {
       throw new ODKExternalServiceException(e);
@@ -443,11 +457,11 @@ public class GoogleSpreadsheet extends AbstractExternalService implements Extern
   @Override
   public void setUploadCompleted() throws ODKEntityPersistException {
     fsc.setUploadCompleted(true);
-    if ( fsc.getExternalServiceOption() == ExternalServiceOption.UPLOAD_ONLY) {
-    	fsc.setOperationalStatus(OperationalStatus.COMPLETED);
+    if (fsc.getExternalServiceOption() == ExternalServiceOption.UPLOAD_ONLY) {
+      fsc.setOperationalStatus(OperationalStatus.COMPLETED);
     }
-	Datastore ds = cc.getDatastore();
-	User user = cc.getCurrentUser();
+    Datastore ds = cc.getDatastore();
+    User user = cc.getCurrentUser();
     ds.putEntity(fsc, user);
   }
 
@@ -460,10 +474,9 @@ public class GoogleSpreadsheet extends AbstractExternalService implements Extern
       return false;
     }
     GoogleSpreadsheet other = (GoogleSpreadsheet) obj;
-    return (objectEntity == null ? (other.objectEntity == null) : 
-    		(other.objectEntity != null && objectEntity.equals(other.objectEntity)))
-        && (fsc == null ? (other.fsc == null) :
-        	(other.fsc != null && fsc.equals(other.fsc)));
+    return (objectEntity == null ? (other.objectEntity == null)
+        : (other.objectEntity != null && objectEntity.equals(other.objectEntity)))
+        && (fsc == null ? (other.fsc == null) : (other.fsc != null && fsc.equals(other.fsc)));
   }
 
   /**
@@ -481,7 +494,7 @@ public class GoogleSpreadsheet extends AbstractExternalService implements Extern
 
   @Override
   public String getDescriptiveTargetString() {
-	return getSpreadsheetName();
+    return getSpreadsheetName();
   }
 
 }
