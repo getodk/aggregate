@@ -56,7 +56,7 @@ public class DatastoreImpl implements Datastore {
 
 	private static final int MAX_IDENTIFIER_LEN = 64;
 	
-	private static final Long GAE_MAX_STRING_LEN = 250L;
+	private static final Long GAE_MAX_STRING_LEN = 255L;
 	// these aren't actually used for filtering...
 	public static final Integer DEFAULT_DBL_NUMERIC_SCALE = 10;
 	public static final Integer DEFAULT_DBL_NUMERIC_PRECISION = 38;
