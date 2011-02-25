@@ -20,14 +20,15 @@ import java.util.List;
 import java.util.Map;
 
 import org.opendatakit.aggregate.CallingContext;
+import org.opendatakit.aggregate.datamodel.BinaryContentManipulator;
 import org.opendatakit.aggregate.datamodel.DynamicCommonFieldsBase;
 import org.opendatakit.aggregate.datamodel.FormDataModel;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
+import org.opendatakit.aggregate.datamodel.BinaryContentManipulator.BlobSubmissionOutcome;
 import org.opendatakit.aggregate.exception.ODKFormAlreadyExistsException;
 import org.opendatakit.aggregate.parser.MultiPartFormItem;
 import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.aggregate.submission.SubmissionSet;
-import org.opendatakit.aggregate.submission.SubmissionField.BlobSubmissionOutcome;
 import org.opendatakit.aggregate.submission.type.BlobSubmissionType;
 import org.opendatakit.aggregate.submission.type.BooleanSubmissionType;
 import org.opendatakit.aggregate.submission.type.LongSubmissionType;
@@ -279,7 +280,7 @@ public class FormInfo {
 	    BlobSubmissionType bt = (BlobSubmissionType) matchingSet.getElementValue(FormInfo.xformDefinition);
 	    if ( bt.getAttachmentCount() == 0 ) {
 	    	return bt.setValueFromByteArray(definition, "text/xml", Long.valueOf(definition.length), title + ".xml"
-	    				) == BlobSubmissionOutcome.FILE_UNCHANGED;
+	    				) == BinaryContentManipulator.BlobSubmissionOutcome.FILE_UNCHANGED;
 	    } else {
 	    	List<String> versions = bt.getBinaryVersions(1);
 	    	if ( versions.size() > 1 || bt.getAttachmentCount() > 1) throw new ODKFormAlreadyExistsException();
@@ -333,7 +334,7 @@ public class FormInfo {
     		filePath = filePath.substring(filePath.indexOf("/")+1);
     	}
 		matchingFiles = matchingFiles &&
-			(BlobSubmissionOutcome.NEW_FILE_VERSION != 
+			(BinaryContentManipulator.BlobSubmissionOutcome.NEW_FILE_VERSION != 
 				bt.setValueFromByteArray(item.getStream().toByteArray(), item.getContentType(), item.getContentLength(), filePath));
 		return matchingFiles;
 	}
