@@ -17,6 +17,7 @@
 
 package org.opendatakit.aggregate.submission;
 
+import org.opendatakit.aggregate.datamodel.BinaryContentManipulator;
 import org.opendatakit.aggregate.exception.ODKConversionException;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 
@@ -33,13 +34,7 @@ import org.opendatakit.common.persistence.exception.ODKDatastoreException;
  */
 public interface SubmissionField<T> extends SubmissionValue{
   
-	public enum BlobSubmissionOutcome {
-		FILE_UNCHANGED,
-		NEW_FILE_VERSION,
-		COMPLETELY_NEW_FILE
-	};
-	
-  /**
+	/**
    * Returns whether submission type is constructed from a binary object
    * 
    * @return
@@ -75,7 +70,7 @@ public interface SubmissionField<T> extends SubmissionValue{
    * @return outcome of storage attempt
    * @throws ODKDatastoreException
    */
-  public BlobSubmissionOutcome setValueFromByteArray(byte[] byteArray,
+  public BinaryContentManipulator.BlobSubmissionOutcome setValueFromByteArray(byte[] byteArray,
 		String contentType, Long contentLength, String unrootedFilePath)
 		throws ODKDatastoreException;
   
