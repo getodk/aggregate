@@ -55,7 +55,7 @@ public class ContextFactory {
     	final UserService userService;
     	boolean asDaemon = false;
     	
-    	CallingContextImpl(HttpServlet servlet, String unrootedPath, HttpServletRequest req) {
+    	private CallingContextImpl(HttpServlet servlet, HttpServletRequest req) {
     		// for now, only store the servlet context and the serverUrl
     		ctxt = servlet.getServletContext();
     		String path = ctxt.getContextPath();
@@ -66,6 +66,15 @@ public class ContextFactory {
     	    	serverUrl = req.getServerName() + path;
     	    }
     	    webApplicationBase = path;
+    		this.datastore = (Datastore) getBean(BeanDefs.DATASTORE_BEAN);
+    		this.userService = (UserService) getBean(BeanDefs.USER_BEAN);
+    	}
+    	
+    	private CallingContextImpl(HttpServlet servlet) {
+    		// for now, only store the servlet context and the serverUrl
+    		ctxt = servlet.getServletContext();
+    	    webApplicationBase = ctxt.getContextPath();
+    	    serverUrl = null;
     		this.datastore = (Datastore) getBean(BeanDefs.DATASTORE_BEAN);
     		this.userService = (UserService) getBean(BeanDefs.USER_BEAN);
     	}
@@ -112,7 +121,11 @@ public class ContextFactory {
      */
     private ContextFactory() {}
     
-    public static CallingContext getCallingContext(HttpServlet servlet, String unrootedPath, HttpServletRequest req) {
-    	return new CallingContextImpl(servlet, unrootedPath, req);
+    public static CallingContext getCallingContext(HttpServlet servlet, HttpServletRequest req) {
+    	return new CallingContextImpl(servlet, req);
+    }
+    
+    public static CallingContext getCallingContext(HttpServlet servlet) {
+    	return new CallingContextImpl(servlet);
     }
 }

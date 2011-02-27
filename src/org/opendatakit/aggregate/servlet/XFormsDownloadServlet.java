@@ -69,7 +69,7 @@ public class XFormsDownloadServlet extends ServletUtilBase {
   @Override
   public void doGet(HttpServletRequest req, HttpServletResponse resp)
       throws IOException {
-	CallingContext cc = ContextFactory.getCallingContext(this, ADDR, req);
+	CallingContext cc = ContextFactory.getCallingContext(this, req);
 	
     // verify parameters are present
     String keyString = getParameter(req, ServletConsts.BLOB_KEY);

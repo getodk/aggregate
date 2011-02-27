@@ -22,6 +22,18 @@
 		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
 	</listener>
 
+
+ <!-- Servlets -->
+  <servlet>
+    <servlet-name>formServiceImpl</servlet-name>
+    <servlet-class>org.opendatakit.aggregate.server.FormServiceImpl</servlet-class>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>formServiceImpl</servlet-name>
+    <url-pattern>/aggregateui/formservice</url-pattern>
+  </servlet-mapping>
+
 	<servlet>
 		<servlet-name>blank</servlet-name>
 		<servlet-class>org.opendatakit.aggregate.servlet.BlankServlet</servlet-class>

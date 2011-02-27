@@ -7,7 +7,9 @@
 
   <!-- Specify the app entry point class.                         -->
   <entry-point class='org.opendatakit.aggregate.client.AggregateUI'/>
-  
+  <servlet path="/formservice" class="org.opendatakit.aggregate.server.FormServiceImpl"/>
+   
   <source path='client'/>
+  <source path='client/form'/>
 
 </module>

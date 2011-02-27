@@ -77,7 +77,7 @@ public class SpreadsheetServlet extends ServletUtilBase {
    */
   @Override
   public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-	CallingContext cc = ContextFactory.getCallingContext(this, ADDR, req);
+	CallingContext cc = ContextFactory.getCallingContext(this, req);
 
     // collect and save all request parameters
     String spreadsheetName = getParameter(req, ExternalServiceConsts.EXT_SERV_ADDRESS);

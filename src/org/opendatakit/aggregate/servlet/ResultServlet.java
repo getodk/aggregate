@@ -74,7 +74,7 @@ public class ResultServlet extends ServletUtilBase {
   @Override
   public void doGet(HttpServletRequest req, HttpServletResponse resp)
         throws IOException {
-	CallingContext cc = ContextFactory.getCallingContext(this, ADDR, req);
+	CallingContext cc = ContextFactory.getCallingContext(this, req);
 	 
 	// get parameter
 	String formId = PersistentResults.FORM_ID_PERSISTENT_RESULT;

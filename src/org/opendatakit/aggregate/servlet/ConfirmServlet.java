@@ -70,7 +70,7 @@ public class ConfirmServlet extends ServletUtilBase {
   @Override
   public void doPost(HttpServletRequest req, HttpServletResponse resp)
       throws IOException {
-	CallingContext cc = ContextFactory.getCallingContext(this, ADDR, req);
+	CallingContext cc = ContextFactory.getCallingContext(this, req);
 
 	// get parameter
 	String[] recordKeyArray = req.getParameterValues(ServletConsts.RECORD_KEY);

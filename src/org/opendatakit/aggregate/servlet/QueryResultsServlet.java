@@ -76,7 +76,7 @@ public class QueryResultsServlet extends ServletUtilBase {
 	@Override
 	public void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws IOException {
-		CallingContext cc = ContextFactory.getCallingContext(this, ADDR, req);
+		CallingContext cc = ContextFactory.getCallingContext(this, req);
 
 		// get parameter
 		String formId = getParameter(req, ServletConsts.FORM_ID);
@@ -105,11 +105,6 @@ public class QueryResultsServlet extends ServletUtilBase {
 		
 		FormElementModel element = form.findElementByName(field);
 		CommonFieldsBase tbl = element.getParent().getFormDataModel().getBackingObjectPrototype();
-
-		if (element == null) {
-			errorRetreivingData(resp);
-			return;
-		}
 
 		Object compareValue = null;
 		switch (element.getElementType()) {

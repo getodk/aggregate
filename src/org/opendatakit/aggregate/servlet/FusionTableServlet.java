@@ -71,7 +71,7 @@ public class FusionTableServlet extends ServletUtilBase {
 
   @Override
   public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-	CallingContext cc = ContextFactory.getCallingContext(this, ADDR, req);
+	CallingContext cc = ContextFactory.getCallingContext(this, req);
 
     // get parameters
     String formId = getParameter(req, ServletConsts.FORM_ID);
