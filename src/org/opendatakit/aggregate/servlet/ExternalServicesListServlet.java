@@ -70,7 +70,7 @@ public class ExternalServicesListServlet extends ServletUtilBase {
 	@Override
 	public void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws IOException {
-		CallingContext cc = ContextFactory.getCallingContext(this, ADDR, req);
+		CallingContext cc = ContextFactory.getCallingContext(this, req);
 
 		// generate html
 		beginBasicHtmlResponse(TITLE_INFO, resp, true, cc); // header info

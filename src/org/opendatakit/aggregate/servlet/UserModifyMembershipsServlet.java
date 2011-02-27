@@ -77,7 +77,7 @@ public class UserModifyMembershipsServlet extends ServletUtilBase {
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
-		CallingContext cc = ContextFactory.getCallingContext(this, ADDR, req);
+		CallingContext cc = ContextFactory.getCallingContext(this, req);
 
 		// get parameter
 		String username = getParameter(req, USERNAME);
@@ -172,7 +172,7 @@ public class UserModifyMembershipsServlet extends ServletUtilBase {
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
 
-		CallingContext cc = ContextFactory.getCallingContext(this, ADDR, req);
+		CallingContext cc = ContextFactory.getCallingContext(this, req);
 
 		Datastore ds = cc.getDatastore();
 		User user = cc.getCurrentUser();

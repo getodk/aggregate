@@ -53,7 +53,7 @@ public class AccessManagementServlet extends ServletUtilBase {
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
-		CallingContext cc = ContextFactory.getCallingContext(this, ADDR, req);
+		CallingContext cc = ContextFactory.getCallingContext(this, req);
 
 		beginBasicHtmlResponse(TITLE_INFO, resp, true, cc); // header info
 

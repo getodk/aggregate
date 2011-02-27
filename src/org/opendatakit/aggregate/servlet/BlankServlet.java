@@ -52,7 +52,7 @@ public class BlankServlet extends ServletUtilBase {
    @Override
    public void doGet(HttpServletRequest req, HttpServletResponse resp)
          throws IOException {
-	  CallingContext cc = ContextFactory.getCallingContext(this, ADDR, req);
+	  CallingContext cc = ContextFactory.getCallingContext(this, req);
 
       beginBasicHtmlResponse(BasicConsts.EMPTY_STRING, resp, true, cc); // header info
       finishBasicHtmlResponse(resp);

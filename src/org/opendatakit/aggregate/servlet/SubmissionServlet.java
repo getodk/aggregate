@@ -83,7 +83,7 @@ public class SubmissionServlet extends ServletUtilBase {
    */
   @Override
   public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-	CallingContext cc = ContextFactory.getCallingContext(this, ADDR, req);
+	CallingContext cc = ContextFactory.getCallingContext(this, req);
 
 	PrintWriter out = resp.getWriter();
 
@@ -119,7 +119,7 @@ public class SubmissionServlet extends ServletUtilBase {
 
   @Override
   public void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-	CallingContext cc = ContextFactory.getCallingContext(this, ADDR, req);
+	CallingContext cc = ContextFactory.getCallingContext(this, req);
 
     resp.setContentType(HtmlConsts.RESP_TYPE_HTML);
 
@@ -131,11 +131,6 @@ public class SubmissionServlet extends ServletUtilBase {
         // TODO: check that it is the proper types we can deal with
         // XML received, we hope...
         submissionParser = new SubmissionParser(req.getInputStream(), cc);
-      }
-
-      if (submissionParser == null) {
-        resp.sendError(HttpServletResponse.SC_BAD_REQUEST, ErrorConsts.INPUTSTREAM_ERROR);
-        return;
       }
 
       // TODO: mitch are we assuming the submissionParser always persists?

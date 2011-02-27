@@ -72,7 +72,7 @@ public class ProcessServlet extends ServletUtilBase {
    */
   @Override
   public void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-	CallingContext cc = ContextFactory.getCallingContext(this, ADDR, req);
+	CallingContext cc = ContextFactory.getCallingContext(this, req);
     StringBuilder errorText = new StringBuilder();
 
     // get parameter
