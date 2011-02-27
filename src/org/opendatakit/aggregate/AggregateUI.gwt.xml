@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module rename-to='aggregateui'>
+  <!-- Inherit the core Web Toolkit stuff.                        -->
+  <inherits name='com.google.gwt.user.User'/>
+
+  <inherits name='com.google.gwt.user.theme.standard.StandardResources'/>
+
+  <!-- Specify the app entry point class.                         -->
+  <entry-point class='org.opendatakit.aggregate.client.AggregateUI'/>
+  
+  <source path='client'/>
+
+</module>
