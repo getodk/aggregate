@@ -42,4 +42,24 @@ public class FilterGroup implements Serializable {
 		
 	}
 	
+	/**
+	 * This should apply the filter to the data
+	 * but not impact the filter group
+	 * i.e. user is previewing a new filter
+	 * @param filter the new filter to preview
+	 */
+	public void maskAddFilter(Filter filter) {
+		
+	}
+	
+	/**
+	 * This should remove the filter to the data
+	 * but not impact the filter group
+	 * i.e. user is removing a filter to see what happens
+	 * @param filter the filter to remove and preview
+	 */
+	public void maskRemoveFilter(Filter filter) {
+		
+	}
+	
 }

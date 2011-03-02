@@ -36,4 +36,24 @@ public class FilterSet implements Serializable {
 		
 	}
 	
+	/**
+	 * This should run the filter group filters on the data
+	 * i.e. they load a filter group, press "x" to remove it
+	 * then say "oops... undo"
+	 * @param group the group the person added in
+	 */
+	public void maskAddFilterGroup(FilterGroup group) {
+		
+	}
+	
+	/**
+	 * This should remove the filter group filters from the data
+	 * This does not remove the filter group altogether
+	 * i.e. they want to "redo" their removal of a filter group
+	 * @param group the group the person removed
+	 */
+	public void maskRemoveFilterGroup(FilterGroup group) {
+		
+	}
+	
 }

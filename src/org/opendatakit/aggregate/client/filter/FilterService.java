@@ -10,4 +10,8 @@ public interface FilterService extends RemoteService{
 	FilterGroup removeFilter(Filter filter);
 	FilterSet createFilterGroup(FilterGroup group);
 	FilterSet removeFilterGroup(FilterGroup group);
+	FilterGroup maskAddFilter(Filter filter);
+	FilterGroup maskRemoveFilter(Filter filter);
+	FilterSet maskAddFilterGroup(FilterGroup group);
+	FilterSet maskRemoveFilterGroup(FilterGroup group);
 }
