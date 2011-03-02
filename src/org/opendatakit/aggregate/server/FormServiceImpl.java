@@ -25,7 +25,6 @@ public class FormServiceImpl extends RemoteServiceServlet implements
 
     CallingContext cc = ContextFactory.getCallingContext(this);
     
-
     try {
       // ensure that Form table exists...
       QueryFormList formsList = new QueryFormList(false, cc);

@@ -11,5 +11,6 @@
    
   <source path='client'/>
   <source path='client/form'/>
-
+  <source path='client/filter'/>
+  <source path='constants/common'/>
 </module>
