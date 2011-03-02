@@ -1,4 +1,4 @@
-package com.opendatakit.aggregate.client.filter;
+package org.opendatakit.aggregate.client.filter;
 
 public class Filter {
 
