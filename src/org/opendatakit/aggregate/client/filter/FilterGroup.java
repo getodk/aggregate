@@ -1,4 +1,4 @@
-package com.opendatakit.aggregate.client.filter;
+package org.opendatakit.aggregate.client.filter;
 
 import java.io.Serializable;
 import java.util.List;
