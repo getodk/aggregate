@@ -11,9 +11,9 @@ public interface FilterServiceAsync {
 			AsyncCallback<FilterGroup> callback);
 
 	void createFilterGroup(FilterGroup group,
-			AsyncCallback<FilterTable> callback);
+			AsyncCallback<FilterSet> callback);
 
 	void removeFilterGroup(FilterGroup group,
-			AsyncCallback<FilterTable> callback);
+			AsyncCallback<FilterSet> callback);
 
 }

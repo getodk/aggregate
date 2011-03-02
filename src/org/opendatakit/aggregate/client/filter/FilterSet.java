@@ -3,16 +3,16 @@ package org.opendatakit.aggregate.client.filter;
 import java.io.Serializable;
 import java.util.List;
 
-public class FilterTable implements Serializable {
+public class FilterSet implements Serializable {
 
 	private static final long serialVersionUID = -6646690488192856868L;
 	private List<FilterGroup> groups;
 	
-	public FilterTable() {
+	public FilterSet() {
 		
 	}
 	
-	public FilterTable(List<FilterGroup> allFilterGroups) {
+	public FilterSet(List<FilterGroup> allFilterGroups) {
 		this.groups = allFilterGroups;
 	}
 	

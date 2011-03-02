@@ -1,35 +1,28 @@
 package org.opendatakit.aggregate.client.filter;
 
-public class Filter {
+import org.opendatakit.aggregate.constants.common.ColumnVisibility;
+import org.opendatakit.aggregate.constants.common.FilterOperation;
 
-	public enum KeepRemove {
-		KEEP, REMOVE
-	}
-	
-	public enum Comparison {
-		LESS_THAN, LESS_THAN_OR_EQUAL_TO,
-		EQUAL_TO, GREATHER_THAN_OR_EQUAL_TO,
-		GREATHER_THAN, NOT_EQUAL_TO
-	}
-	
-	private KeepRemove kr;
+public class Filter {
+  
+	private ColumnVisibility kr;
 	private String col;
-	private Comparison comp;
+	private FilterOperation operation;
 	private String input;
 	
 	public Filter() {
 		
 	}
 	
-	public Filter (KeepRemove keepRemove, String colName, 
-			Comparison compare, String inputParam) {
+	public Filter (ColumnVisibility keepRemove, String colName, 
+	    FilterOperation compare, String inputParam) {
 		this.kr = keepRemove;
 		this.col = colName;
-		this.comp = compare;
+		this.operation = compare;
 		this.input = inputParam;
 	}
 	
-	public KeepRemove getKR() {
+	public ColumnVisibility getKR() {
 		return kr;
 	}
 	
@@ -37,8 +30,8 @@ public class Filter {
 		return col;
 	}
 	
-	public Comparison getComp() {
-		return comp;
+	public FilterOperation getOperation() {
+		return operation;
 	}
 	
 	public String getInput() {
