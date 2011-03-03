@@ -4,14 +4,16 @@ import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 
 @RemoteServiceRelativePath("filterservice")
-public interface FilterService extends RemoteService{
+public interface FilterService extends RemoteService {
 
-	FilterGroup addFilter(Filter filter);
-	FilterGroup removeFilter(Filter filter);
-	FilterSet createFilterGroup(FilterGroup group);
-	FilterSet removeFilterGroup(FilterGroup group);
-	FilterGroup maskAddFilter(Filter filter);
-	FilterGroup maskRemoveFilter(Filter filter);
-	FilterSet maskAddFilterGroup(FilterGroup group);
-	FilterSet maskRemoveFilterGroup(FilterGroup group);
+  FilterSet getFilterSet(String formId);
+  
+  Boolean updateFilterGroup(FilterGroup group);
+  Boolean deleteFilterGroup(FilterGroup group);
+
+  // TODO: implement these functions later
+  FilterGroup maskAddFilter(Filter filter);
+  FilterGroup maskRemoveFilter(Filter filter);
+  FilterSet maskAddFilterGroup(FilterGroup group);
+  FilterSet maskRemoveFilterGroup(FilterGroup group);
 }

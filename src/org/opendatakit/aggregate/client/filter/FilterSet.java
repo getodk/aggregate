@@ -24,8 +24,8 @@ public class FilterSet implements Serializable {
 	 * This should add a new filter group to the database
 	 * @param group the new group
 	 */
-	public void createFilterGroup(FilterGroup group) {
-		
+	public void addFilterGroup(FilterGroup group) {
+		groups.add(group);
 	}
 	
 	/**
