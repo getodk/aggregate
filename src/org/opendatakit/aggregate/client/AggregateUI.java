@@ -6,6 +6,7 @@ import org.opendatakit.aggregate.client.form.FormSummary;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
@@ -23,13 +24,24 @@ public class AggregateUI implements EntryPoint {
   
   private static final int REFRESH_INTERVAL = 5000; // ms
   
+  // navigation
   private TabPanel mainNav = new TabPanel();
+  private Element spacer;
+  
+  // Report tab
+  private VerticalPanel reportContent = new VerticalPanel();
+  private HorizontalPanel filtersDataHelp = new HorizontalPanel();
+  private FlexTable formAndGoalSelectionTable = new FlexTable();
+  private FlexTable uploadTable = new FlexTable();
+  
+  // Manage tab
+  private VerticalPanel manageContent = new VerticalPanel();
 
   private FormServiceAsync formSvc;
   private ListBox enabledDropDown;
   private ListBox publishDropDown;
   private ListBox exportDropDown;
-  private FlexTable formManagementTable;
+  private FlexTable listOfForms;
   
   public AggregateUI() {
     formSvc = GWT.create(FormService.class);
@@ -49,7 +61,7 @@ public class AggregateUI implements EntryPoint {
     exportDropDown.addItem("KML");
     exportDropDown.addItem("XML");
     
-    formManagementTable = new FlexTable();
+    listOfForms = new FlexTable();
     
 
     // Setup timer to refresh list automatically.
@@ -64,8 +76,6 @@ public class AggregateUI implements EntryPoint {
   }
   
   public HorizontalPanel setupFormsAndGoalsPanel() {
-    // select data to display
-    FlexTable formAndGoalSelectionTable = new FlexTable();
     // list of forms
     ListBox formsBox = new ListBox();
     formsBox.addItem("form1");
@@ -100,12 +110,12 @@ public class AggregateUI implements EntryPoint {
 
   public HorizontalPanel setupFiltersDataHelpPanel() {
     // view filters
-    HorizontalPanel filtersDataHelp = new HorizontalPanel();
     FlexTable filtersTable = new FlexTable();
     filtersTable.setWidget(0, 0, new Button("Filter1"));
     filtersTable.setWidget(0, 1, new Button("-"));
     filtersTable.setWidget(1, 0, new Button("Filter2"));
     filtersTable.setWidget(1, 1, new Button("-"));
+    filtersTable.setStyleName("filters_panel");
     filtersDataHelp.add(filtersTable);
 
     // view data
@@ -122,7 +132,6 @@ public class AggregateUI implements EntryPoint {
     }
     dataTable.getRowFormatter().addStyleName(0, "title_bar");
     dataTable.getElement().setId("data_table");
-    dataTable.setStyleName("filters_data_help_cell");
     filtersDataHelp.add(dataTable);
 
     // view help
@@ -130,7 +139,7 @@ public class AggregateUI implements EntryPoint {
     for (int i = 1; i < 5; i++) {
       helpPanel.add(new HTML("Help Content " + i));
     }
-    helpPanel.setStyleName("filters_data_help_cell");
+    helpPanel.setStyleName("help_panel");
     filtersDataHelp.add(helpPanel);
     filtersDataHelp.getElement().setId("filters_data_help");
     filtersDataHelp.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_JUSTIFY);
@@ -139,43 +148,54 @@ public class AggregateUI implements EntryPoint {
 
   public VerticalPanel setupFormManagementPanel() {
     Button uploadFormButton = new Button("Upload Form");
+    uploadTable.setWidget(0, 0, uploadFormButton);
     
-    formManagementTable.setText(0, 0, "Title");
-    formManagementTable.setText(0, 1, "Form Id");
-    formManagementTable.setText(0, 2, "User");
-    formManagementTable.setText(0, 3, "Enabled");
-    formManagementTable.setText(0, 4, "Publish");
-    formManagementTable.setText(0, 5, "Export");
-    formManagementTable.setText(0, 6, "Delete");
-    formManagementTable.getRowFormatter().addStyleName(0, "title_bar");
-    formManagementTable.getElement().setId("form_management_table");
+    listOfForms.setText(0, 0, "Title");
+    listOfForms.setText(0, 1, "Form Id");
+    listOfForms.setText(0, 2, "User");
+    listOfForms.setText(0, 3, "Enabled");
+    listOfForms.setText(0, 4, "Publish");
+    listOfForms.setText(0, 5, "Export");
+    listOfForms.setText(0, 6, "Delete");
+    listOfForms.getRowFormatter().addStyleName(0, "title_bar");
+    listOfForms.getElement().setId("form_management_table");
     
     getFormList();
 
     VerticalPanel formManagementPanel = new VerticalPanel();
-    formManagementPanel.add(uploadFormButton);
-    formManagementPanel.add(formManagementTable);
+    formManagementPanel.add(uploadTable);
+    formManagementPanel.add(listOfForms);
     return formManagementPanel;
   }
-
+  
   public void onModuleLoad() {
-    VerticalPanel reportContent = new VerticalPanel();
     reportContent.add(setupFormsAndGoalsPanel());
     reportContent.add(setupFiltersDataHelpPanel());
 
-    VerticalPanel manageContent = new VerticalPanel();
     manageContent.add(setupFormManagementPanel());
 
     mainNav.add(reportContent, "Report");
     mainNav.add(manageContent, "Manage");
     mainNav.selectTab(0);
 
-    mainNav.getTabBar().addStyleName("mainNav");
-    mainNav.getTabBar().getElement().getFirstChildElement().getFirstChildElement()
-        .getFirstChildElement().getFirstChildElement().setId("spacer_tab");
-
+    mainNav.addStyleName("mainNav");
+    mainNav.getTabBar().addStyleName("mainNavTabBar");
+    
+    spacer = mainNav.getTabBar().getElement().getFirstChildElement()
+    	.getFirstChildElement().getFirstChildElement().getFirstChildElement();
+    spacer.setId("spacer_tab");
+    
+    RootPanel.get("dynamic_content").add(new HTML("<img src=\"images/odk_aggregate.png\" id=\"odk_aggregate_logo\" />"));
     RootPanel.get("dynamic_content").add(mainNav);
+    contentLoaded();
   }
+  
+  // Let's javascript know that the GWT content has been loaded
+  // Currently calls into javascript/resize.js, if we add more javascript
+  // then that should be changed.
+  private native void contentLoaded() /*-{
+  	$wnd.gwtContentLoaded();
+  }-*/;
 
   private void getFormList() {
 
@@ -205,20 +225,19 @@ public class AggregateUI implements EntryPoint {
    * @param formSummary
    */
   private void updateFormTable(FormSummary [] forms) {
-    
     for (int i = 0; i < forms.length; i++) {
       FormSummary form = forms[i];
-      formManagementTable.setWidget(i, 0, new Anchor(form.getTitle()));
-      formManagementTable.setWidget(i, 1, new HTML(form.getId()));
-      formManagementTable.setWidget(i, 2, new HTML(form.getCreatedUser()));
+      listOfForms.setWidget(i, 0, new Anchor(form.getTitle()));
+      listOfForms.setWidget(i, 1, new HTML(form.getId()));
+      listOfForms.setWidget(i, 2, new HTML(form.getCreatedUser()));
 
-      formManagementTable.setWidget(i, 3, enabledDropDown);
-      formManagementTable.setWidget(i, 4, publishDropDown);
-      formManagementTable.setWidget(i, 5, exportDropDown);
-      formManagementTable.setWidget(i, 6, new Button("Delete"));
-      formManagementTable.getRowFormatter().addStyleName(i, "table_data");
+      listOfForms.setWidget(i, 3, enabledDropDown);
+      listOfForms.setWidget(i, 4, publishDropDown);
+      listOfForms.setWidget(i, 5, exportDropDown);
+      listOfForms.setWidget(i, 6, new Button("Delete"));
+      listOfForms.getRowFormatter().addStyleName(i, "table_data");
       if (i % 2 == 0)
-        formManagementTable.getRowFormatter().addStyleName(i, "even_table_row");
+        listOfForms.getRowFormatter().addStyleName(i, "even_table_row");
     }
   }
 }
