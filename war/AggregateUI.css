@@ -1,12 +1,37 @@
-#form_and_goals_panel {
-	border-bottom-style: solid;
-	border-bottom-width: 2px;
-	border-bottom-color: #ffcd8c;
+#filters_data_help {
+	border-top-style: solid;
+	border-top-width: 2px;
+	border-top-color: #ffcd8c;
 }
 #filters_data_help,
 #form_and_goals_panel {
-	width: 100%;
 	border-collapse: collapse;
+}
+.mainNav {
+	position: relative;
+	top: -20px;
+	left: 3px;
+}
+#odk_aggregate_logo {
+	position: relative;
+	left: 13px;
+	top: 8px;
+}
+#form_management_table,
+#data_table {
+	border-collapse: collapse;
+	border-width: 1px;
+	border-style: solid;
+	border-color: #ffcd8c;
+}
+#form_management_table td,
+#data_table td {
+	border-left-style: solid;
+	border-right-style: solid;
+	border-left-width: 1px;
+	border-right-width: 1px;
+	border-left-color: #ffcd8c;
+	border-right-color: #ffcd8c;
 }
 .title_bar td {
 	padding-left: 6px;
@@ -20,45 +45,4 @@
 }
 .even_table_row td {
 	background-color: #ffeed8;
-}
-.filters_data_help_cell {
-	margin-left: 5px;
-}
-#dynamic_content {
-	position: relative;
-	top: -20px;
-	left: 3px;
-}
-#odk_aggregate_logo {
-	position: relative;
-	left: 13px;
-	top: 8px;
-}
-#spacer_tab {
-	width: 300px;
-}
-#form_management_table,
-#data_table {
-	border-collapse: collapse;
-	border-width: 1px;
-	border-style: solid;
-	border-color: #ffcd8c;
-}
-#form_management_table {
-	margin-top: 3px;
-}
-#form_management_table td,
-#data_table td {
-	border-left-style: solid;
-	border-right-style: solid;
-	border-left-width: 1px;
-	border-right-width: 1px;
-	border-left-color: #ffcd8c;
-	border-right-color: #ffcd8c;
-}
-#filters_data_help {
-	margin-top: 3px;
-}
-.gwt-TabBarItem-selected {
-	background: #AAAAAA;
 }
