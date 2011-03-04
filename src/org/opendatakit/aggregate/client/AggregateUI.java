@@ -7,6 +7,8 @@ import org.opendatakit.aggregate.client.form.FormSummary;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.event.logical.shared.SelectionEvent;
+import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
@@ -23,6 +25,8 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 public class AggregateUI implements EntryPoint {
   
   private static final int REFRESH_INTERVAL = 5000; // ms
+  
+  private Url url;
   
   // navigation
   private TabPanel mainNav = new TabPanel();
@@ -176,7 +180,24 @@ public class AggregateUI implements EntryPoint {
 
     mainNav.add(reportContent, "Report");
     mainNav.add(manageContent, "Manage");
-    mainNav.selectTab(0);
+    mainNav.addSelectionHandler(new SelectionHandler<Integer>() {
+    	public void onSelection(SelectionEvent<Integer> event) {
+    		if (event.getSelectedItem() == 0)
+    			url.set("panel", "report");
+    		else if (event.getSelectedItem() == 1)
+    			url.set("panel", "manage");
+    	}
+    });
+    url = new Url();
+    if (!url.contains("panel")) { // default
+    	mainNav.selectTab(0);
+    } else if (url.contains("panel", "report")) {
+    	mainNav.selectTab(0);
+    } else if (url.contains("panel", "manage")) {
+    	mainNav.selectTab(1);
+    } else { // default
+    	mainNav.selectTab(0);
+    }
 
     mainNav.addStyleName("mainNav");
     mainNav.getTabBar().addStyleName("mainNavTabBar");
@@ -190,8 +211,8 @@ public class AggregateUI implements EntryPoint {
     contentLoaded();
   }
   
-  // Let's javascript know that the GWT content has been loaded
-  // Currently calls into javascript/resize.js, if we add more javascript
+  // Let's JavaScript know that the GWT content has been loaded
+  // Currently calls into javascript/resize.js, if we add more JavaScript
   // then that should be changed.
   private native void contentLoaded() /*-{
   	$wnd.gwtContentLoaded();
