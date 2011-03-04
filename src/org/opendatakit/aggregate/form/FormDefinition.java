@@ -23,6 +23,7 @@ import java.util.logging.Logger;
 import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.datamodel.BinaryContent;
+import org.opendatakit.aggregate.datamodel.BinaryContentRefBlob;
 import org.opendatakit.aggregate.datamodel.DynamicCommonFieldsBase;
 import org.opendatakit.aggregate.datamodel.FormDataModel;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
@@ -33,8 +34,6 @@ import org.opendatakit.aggregate.datamodel.RefText;
 import org.opendatakit.aggregate.datamodel.SelectChoice;
 import org.opendatakit.aggregate.datamodel.TopLevelDynamicBase;
 import org.opendatakit.aggregate.datamodel.TopLevelInstanceData;
-import org.opendatakit.aggregate.datamodel.VersionedBinaryContent;
-import org.opendatakit.aggregate.datamodel.VersionedBinaryContentRefBlob;
 import org.opendatakit.aggregate.datamodel.FormDataModel.ElementType;
 import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.aggregate.submission.SubmissionSet;
@@ -192,10 +191,8 @@ public class FormDefinition {
 			String binaryContentElementName,
 			String binaryContentUri,
 			String binaryContentTableName,
-			String versionedBinaryUri,
-			String versionedBinaryContentTableName,
-			String versionedRefBlobUri,
-			String versionedBinaryContentRefBlobTableName,
+			String binaryContentRefBlobUri,
+			String binaryContentRefBlobTableName,
 			String refBlobUri,
 			String refBlobTableName,
 			TopLevelDynamicBase topLevel, 
@@ -227,32 +224,18 @@ public class FormDefinition {
 		d.setStringField(fdm.persistAsTable, binaryContentTableName);
 		d.setStringField(fdm.persistAsSchema, fdm.getSchemaName());
 
-		// record for versioned binary content...
+		// record for binary content ref blob..
 		d = ds.createEntityUsingRelation(fdm, user);
-		d.setStringField(fdm.primaryKey, versionedBinaryUri);
+		d.setStringField(fdm.primaryKey, binaryContentRefBlobUri);
 		list.add(d);
-		final String vbcURI = d.getUri();
+		final String bcbURI = d.getUri();
 		d.setLongField(fdm.ordinalNumber, 1L);
 		d.setStringField(fdm.parentUriFormDataModel, bcURI);
 		d.setStringField(fdm.uriSubmissionDataModel, topLevelURI);
 		d.setStringField(fdm.elementName, binaryContentElementName);
-		d.setStringField(fdm.elementType, FormDataModel.ElementType.VERSIONED_BINARY.toString());
+		d.setStringField(fdm.elementType, FormDataModel.ElementType.BINARY_CONTENT_REF_BLOB.toString());
 		d.setStringField(fdm.persistAsColumn, null);
-		d.setStringField(fdm.persistAsTable, versionedBinaryContentTableName);
-		d.setStringField(fdm.persistAsSchema, fdm.getSchemaName());
-
-		// record for binary content ref blob..
-		d = ds.createEntityUsingRelation(fdm, user);
-		d.setStringField(fdm.primaryKey, versionedRefBlobUri);
-		list.add(d);
-		final String bcbURI = d.getUri();
-		d.setLongField(fdm.ordinalNumber, 1L);
-		d.setStringField(fdm.parentUriFormDataModel, vbcURI);
-		d.setStringField(fdm.uriSubmissionDataModel, topLevelURI);
-		d.setStringField(fdm.elementName, binaryContentElementName);
-		d.setStringField(fdm.elementType, FormDataModel.ElementType.VERSIONED_BINARY_CONTENT_REF_BLOB.toString());
-		d.setStringField(fdm.persistAsColumn, null);
-		d.setStringField(fdm.persistAsTable, versionedBinaryContentRefBlobTableName);
+		d.setStringField(fdm.persistAsTable, binaryContentRefBlobTableName);
 		d.setStringField(fdm.persistAsSchema, fdm.getSchemaName());
 
 		// record for ref blob...
@@ -647,12 +630,8 @@ public class FormDefinition {
 				b = new BinaryContent(m.getPersistAsSchema(),m.getPersistAsTable());
 				m.setBackingObject(b);
 				break;
-			case VERSIONED_BINARY:
-				b = new VersionedBinaryContent(m.getPersistAsSchema(),m.getPersistAsTable());
-				m.setBackingObject(b);
-				break;
-			case VERSIONED_BINARY_CONTENT_REF_BLOB:
-				b = new VersionedBinaryContentRefBlob(m.getPersistAsSchema(),m.getPersistAsTable());
+			case BINARY_CONTENT_REF_BLOB:
+				b = new BinaryContentRefBlob(m.getPersistAsSchema(),m.getPersistAsTable());
 				m.setBackingObject(b);
 				break;
 			case REF_BLOB:

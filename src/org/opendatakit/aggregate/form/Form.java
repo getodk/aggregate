@@ -380,9 +380,8 @@ public class Form {
 	  int count = bt.getAttachmentCount();
 	  // we use ordinal counting here: 1..count
 	  for ( int i = 1 ; i <= count ; ++i ) {
-		  String version = bt.getCurrentVersion(i);
-		  if ( version == null ) continue;
-		  String contentType = bt.getContentType(i, version);
+		  String contentType = bt.getContentType(i);
+		  if ( contentType == null ) continue; // incomplete form...
 		  String unrootedFileName = bt.getUnrootedFilename(i);
 		  if ( contentType.equals("text/xml") && !unrootedFileName.contains("/")) {
 			  return unrootedFileName;
@@ -409,12 +408,11 @@ public class Form {
 	  int count = bt.getAttachmentCount();
 	  // we use ordinal counting here: 1..count
 	  for ( int i = 1 ; i <= count ; ++i ) {
-		  String version = bt.getCurrentVersion(i);
-		  if ( version == null ) continue;
-		  String contentType = bt.getContentType(i, version);
+		  String contentType = bt.getContentType(i);
+		  if ( contentType == null ) continue; // incomplete form...
 		  String unrootedFileName = bt.getUnrootedFilename(i);
 		  if ( contentType.equals("text/xml") && !unrootedFileName.contains("/")) {
-			  byte[] byteArray = bt.getBlob(i, version);
+			  byte[] byteArray = bt.getBlob(i);
 			  return new String(byteArray);
 		  }
 	  }

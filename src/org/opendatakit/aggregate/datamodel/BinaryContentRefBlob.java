@@ -18,31 +18,22 @@ import org.opendatakit.common.security.User;
 
 /**
  * Binary content for a given field in a form is held in a set of tables
- * {@link BinaryContent}, {@link VersionedBinaryContent}, 
- * {@link VersionedBinaryContentRefBlob} and {@link RefBlob} for
- * each instance data field. The VersionedBinaryContentRefBlob table links
- * a particular VersionedBinaryContent with the specific sequence of the
+ * {@link BinaryContent}, {@link BinaryContentRefBlob} and {@link RefBlob} for
+ * each instance data field. The BinaryContentRefBlob table links
+ * a particular BinaryContent with the specific sequence of the
  * blobs needed to reconstruct that binary content.
  * <p>
  * The handling of parts supports massive binary objects that are too big
- * to store as a single blob.  
- * <p>
- * Versioning is unique to binary objects as it is likely that updates to 
- * the media associated with a form will occur, and that the xform 
- * definition itself my change to support revisions to the text, ordering
- * or additional language translations. 
- * <p>
- * The intent is that this is a write-once record with version history.
- * Version is recorded as a UUID (URI) in the {@link BinaryContent} and 
- * {@link VersionedBinaryContent} tables.  VersionedBinaryContent records
- * and BinaryContent records are never destroyed.  VersionedBinaryContent
- * records are never updated, but Binary Content records are.
+ * to store as a single blob.  The blob parts aren't stored in this table
+ * so that the full index of blob parts can be retrieved at once, without 
+ * also requiring that all the blob parts be in memory at the same time.
+ * This supports the future streaming of attachments.
  * 
  * @author mitchellsundt@gmail.com
  * @author wbrunette@gmail.com
  * 
  */
-public final class VersionedBinaryContentRefBlob extends DynamicAssociationBase {
+public final class BinaryContentRefBlob extends DynamicAssociationBase {
 
 	private static final DataField PART = new DataField("PART",DataField.DataType.INTEGER, false);
 	
@@ -54,7 +45,7 @@ public final class VersionedBinaryContentRefBlob extends DynamicAssociationBase 
 	 * @param databaseSchema
 	 * @param tableName
 	 */
-	public VersionedBinaryContentRefBlob(String databaseSchema, String tableName) {
+	public BinaryContentRefBlob(String databaseSchema, String tableName) {
 		super(databaseSchema, tableName);
 		fieldList.add(part = new DataField(PART));
 	}
@@ -65,15 +56,15 @@ public final class VersionedBinaryContentRefBlob extends DynamicAssociationBase 
 	 * @param ref
 	 * @param user
 	 */
-	private VersionedBinaryContentRefBlob(VersionedBinaryContentRefBlob ref, User user) {
+	private BinaryContentRefBlob(BinaryContentRefBlob ref, User user) {
 		super(ref, user);
 		part = ref.part;
 	}
 
 	// Only called from within the persistence layer.
 	@Override
-	public VersionedBinaryContentRefBlob getEmptyRow(User user) {
-		return new VersionedBinaryContentRefBlob(this, user);
+	public BinaryContentRefBlob getEmptyRow(User user) {
+		return new BinaryContentRefBlob(this, user);
 	}
 
 	public Long getPart() {

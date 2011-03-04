@@ -18,46 +18,44 @@ import org.opendatakit.common.security.User;
 
 /**
  * Binary content for a given field in a form is held in a set of tables
- * {@link BinaryContent}, {@link VersionedBinaryContent}, 
- * {@link VersionedBinaryContentRefBlob} and {@link RefBlob} for
+ * {@link BinaryContent}, 
+ * {@link BinaryContentRefBlob} and {@link RefBlob} for
  * each instance data field. The BinaryContent table enumerates the original
- * list of attachments (files) for a form and the version to be applied for that 
- * attachment.  The version may be null, in which case the original attachment
- * is no longer needed.  The ordinal, however, remains in use.  BinaryContent is 
- * extremely similar to the SelectChoice table, but always has a subordinate
- * {@link VersionedBinaryContent} table.  The BinaryContent table holds the 
- * filename for the attachment (if any), the ordinal number for that attachment
- * (to uniquely distinguish unnamed files), and the version in force for that 
- * attachment (or null if the attachment is no longer applicable).  
+ * list of attachments (files) for a form.  The table can hold multiple attachments
+ * for a given form element through the use of the ordinal number, much like the
+ * SelectChoice table.  In fact, the BinaryContent table is linked
+ * back to the form in the same way the SelectChoice table is -- through the 
+ * parent AURI and the top level AURI fields.  
  * <p>
- * The VersionedBinaryContent table holds the information about a specific version
- * of an attachment (version, content type, content length, binary data).
+ * The BinaryContent table holds the unrooted file path for the attachment, 
+ * which may be null.  If this is just a placeholder
+ * for an attachment, but the attachment has not yet been inserted into the 
+ * database, the content type, length and hash will be null.  Otherwise, these
+ * will have values describing the attachment.    
  * <p>
- * A version is generated whenever the binary object is updated.
- * <p>
- * Versioning is unique to binary objects as it is likely that updates to 
- * the media associated with a form will occur, and that the xform 
- * definition itself my change to support revisions to the text, ordering
- * or additional language translations. 
- * <p>
- * The intent is that this is a write-once record with version history.
- * Version is recorded as a UUID (URI) in the {@link BinaryContent} and 
- * {@link VersionedBinaryContent} tables.  VersionedBinaryContent records
- * and BinaryContent records are never destroyed.  VersionedBinaryContent
- * records are never updated, but Binary Content records are.
+ * The intent is that this is a write-twice record.  Written once to create the
+ * placeholder for the attachment, and written a second time to update the content
+ * information of the attachment.  See {@link BinaryContentManipulator} for 
+ * methods to manipulate and maintain this abstraction.
  * 
  * @author mitchellsundt@gmail.com
  * @author wbrunette@gmail.com
  * 
  */
 public final class BinaryContent extends DynamicBase {
-	private static final DataField VERSION = new DataField("VERSION",
-			DataField.DataType.URI, false);
 	private static final DataField UNROOTED_FILE_PATH = new DataField(
 			"UNROOTED_FILE_PATH", DataField.DataType.STRING, true, 4096L);
+	private static final DataField CONTENT_TYPE = new DataField("CONTENT_TYPE",
+			DataField.DataType.STRING, false, 80L);
+	private static final DataField CONTENT_LENGTH = new DataField("CONTENT_LENGTH",
+			DataField.DataType.INTEGER, false);
+	private static final DataField CONTENT_HASH = new DataField("CONTENT_HASH", 
+			DataField.DataType.STRING, true);
 
-	public final DataField version;
 	public final DataField unrootedFilePath;
+	public final DataField contentType;
+	public final DataField contentLength;
+	public final DataField contentHash;
 
 	/**
 	 * Construct a relation prototype.
@@ -67,8 +65,10 @@ public final class BinaryContent extends DynamicBase {
 	 */
 	public BinaryContent(String databaseSchema, String tableName) {
 		super(databaseSchema, tableName);
-		fieldList.add(version = new DataField(VERSION));
 		fieldList.add(unrootedFilePath = new DataField(UNROOTED_FILE_PATH));
+		fieldList.add(contentType = new DataField(CONTENT_TYPE));
+		fieldList.add(contentLength = new DataField(CONTENT_LENGTH));
+		fieldList.add(contentHash = new DataField(CONTENT_HASH));
 	}
 
 	/**
@@ -79,24 +79,16 @@ public final class BinaryContent extends DynamicBase {
 	 */
 	private BinaryContent(BinaryContent ref, User user) {
 		super(ref, user);
-		version = ref.version;
 		unrootedFilePath = ref.unrootedFilePath;
+		contentType = ref.contentType;
+		contentLength = ref.contentLength;
+		contentHash = ref.contentHash;
 	}
 
 	// Only called from within the persistence layer.
 	@Override
 	public BinaryContent getEmptyRow(User user) {
 		return new BinaryContent(this, user);
-	}
-
-	public String getVersion() {
-		return getStringField(version);
-	}
-
-	public void setVersion(String value) {
-		if (!setStringField(version, value)) {
-			throw new IllegalStateException("overflow on version");
-		}
 	}
 
 	public String getUnrootedFilePath() {
@@ -107,6 +99,34 @@ public final class BinaryContent extends DynamicBase {
 		// allow this to overflow
 		if (!setStringField(unrootedFilePath, value)) {
 			throw new IllegalStateException("overflow on unrootedFilePath");
+		}
+	}
+
+	public String getContentType() {
+		return getStringField(contentType);
+	}
+
+	public void setContentType(String value) {
+		if (!setStringField(contentType, value)) {
+			throw new IllegalStateException("overflow on contentType");
+		}
+	}
+
+	public Long getContentLength() {
+		return getLongField(contentLength);
+	}
+
+	public void setContentLength(Long value) {
+		setLongField(contentLength, value);
+	}
+
+	public String getContentHash() {
+		return getStringField(contentHash);
+	}
+
+	public void setContentHash(String value) {
+		if ( !setStringField(contentHash, value)) {
+			throw new IllegalStateException("overflow on contentHash");
 		}
 	}
 }

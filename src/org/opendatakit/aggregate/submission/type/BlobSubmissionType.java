@@ -24,12 +24,10 @@ import org.opendatakit.aggregate.constants.ErrorConsts;
 import org.opendatakit.aggregate.constants.format.FormatConsts;
 import org.opendatakit.aggregate.datamodel.BinaryContent;
 import org.opendatakit.aggregate.datamodel.BinaryContentManipulator;
+import org.opendatakit.aggregate.datamodel.BinaryContentRefBlob;
 import org.opendatakit.aggregate.datamodel.FormDataModel;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.datamodel.RefBlob;
-import org.opendatakit.aggregate.datamodel.VersionedBinaryContent;
-import org.opendatakit.aggregate.datamodel.VersionedBinaryContentRefBlob;
-import org.opendatakit.aggregate.datamodel.BinaryContentManipulator.BinaryDescriptor;
 import org.opendatakit.aggregate.exception.ODKConversionException;
 import org.opendatakit.aggregate.form.FormDefinition;
 import org.opendatakit.aggregate.format.Row;
@@ -60,41 +58,25 @@ public class BlobSubmissionType extends SubmissionFieldBase<SubmissionKey> {
 		return bcm.getAttachmentCount();
 	}
 
-	public String getCurrentVersion(int ordinal) {
-		return bcm.getCurrentVersion(ordinal);
-	}
-
 	public String getUnrootedFilename(int ordinal) {
 		return bcm.getUnrootedFilename(ordinal);
 	}
 
-	/**
-	 * Gets the list of all versions for this binary content. The list is
-	 * ordered from most-recent to oldest.
-	 * 
-	 * @param ordinal
-	 *            identifying the binary content
-	 * @return List<String> of the versions available.
-	 */
-	public List<String> getBinaryVersions(int ordinal) {
-		return bcm.getBinaryVersions(ordinal);
+	public String getContentType(int ordinal) {
+		return bcm.getContentType(ordinal);
 	}
 
-	public String getContentType(int ordinal, String version) {
-		return bcm.getContentType(ordinal, version);
+	public String getContentHash(int ordinal) {
+		return bcm.getContentHash(ordinal);
 	}
 
-	public String getContentHash(int ordinal, String version) {
-		return bcm.getContentHash(ordinal, version);
+	public Long getContentLength(int ordinal) {
+		return bcm.getContentLength(ordinal);
 	}
 
-	public Long getContentLength(int ordinal, String version) {
-		return bcm.getContentLength(ordinal, version);
-	}
-
-	public byte[] getBlob(int ordinal, String version)
+	public byte[] getBlob(int ordinal)
 			throws ODKDatastoreException {
-		return bcm.getBlob(ordinal, version, cc);
+		return bcm.getBlob(ordinal, cc);
 	}
 
 	/**
@@ -114,17 +96,14 @@ public class BlobSubmissionType extends SubmissionFieldBase<SubmissionKey> {
 		FormDataModel bnDataModel = element.getFormDataModel();
 		BinaryContent ctnt = (BinaryContent) bnDataModel
 				.getBackingObjectPrototype();
-		FormDataModel vbcDataModel = bnDataModel.getChildren().get(0);
-		VersionedBinaryContent vbc = (VersionedBinaryContent) vbcDataModel
+		FormDataModel ctntRefDataModel = bnDataModel.getChildren().get(0);
+		BinaryContentRefBlob ref = (BinaryContentRefBlob) ctntRefDataModel
 				.getBackingObjectPrototype();
-		FormDataModel vbcRefDataModel = vbcDataModel.getChildren().get(0);
-		VersionedBinaryContentRefBlob vref = (VersionedBinaryContentRefBlob) vbcRefDataModel
-				.getBackingObjectPrototype();
-		FormDataModel blobModel = vbcRefDataModel.getChildren().get(0);
+		FormDataModel blobModel = ctntRefDataModel.getChildren().get(0);
 		RefBlob blb = (RefBlob) blobModel.getBackingObjectPrototype();
 
 		this.bcm = new BinaryContentManipulator(parentKey, topLevelTableKey
-				.getKey(), ctnt, vbc, vref, blb);
+				.getKey(), ctnt, ref, blb);
 	}
 
 	/**
@@ -248,10 +227,6 @@ public class BlobSubmissionType extends SubmissionFieldBase<SubmissionKey> {
 				+ (value != null ? value.toString() : BasicConsts.EMPTY_STRING);
 	}
 
-	public BinaryDescriptor findMatchingBinaryContent(String parentUri) {
-		return bcm.findMatchingBinaryContent(parentUri);
-	}
-
 	public SubmissionValue resolveSubmissionKeyBeginningAt(int i,
 			List<SubmissionKeyPart> parts) {
 		// TODO: need to support qualifying the element we want.
@@ -259,8 +234,8 @@ public class BlobSubmissionType extends SubmissionFieldBase<SubmissionKey> {
 		return this;
 	}
 
-	public SubmissionKey generateSubmissionKey(int i, String currentVersion) {
+	public SubmissionKey generateSubmissionKey(int i) {
 		return new SubmissionKey(submissionKey.toString() + "[@ordinal="
-				+ Integer.toString(i) + " and @version=" + currentVersion + "]");
+				+ Integer.toString(i) + "]");
 	}
 }

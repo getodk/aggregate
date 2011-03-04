@@ -54,9 +54,7 @@ public class FormInfoFilesetTable extends DynamicBase {
 
 	private static final String FORM_INFO_XFORM_REF_BLOB = "_form_info_xform_blb";
 
-	private static final String FORM_INFO_XFORM_VERSIONED_BINARY_CONTENT_REF_BLOB = "_form_info_xform_ref";
-
-	private static final String FORM_INFO_XFORM_VERSIONED_BINARY_CONTENT = "_form_info_xform_vbn";
+	private static final String FORM_INFO_XFORM_BINARY_CONTENT_REF_BLOB = "_form_info_xform_ref";
 
 	private static final String FORM_INFO_XFORM_BINARY_CONTENT = "_form_info_xform_bin";
 
@@ -66,9 +64,7 @@ public class FormInfoFilesetTable extends DynamicBase {
 
 	private static final String FORM_INFO_MANIFEST_REF_BLOB = "_form_info_manifest_blb";
 
-	private static final String FORM_INFO_MANIFEST_VERSIONED_BINARY_CONTENT_REF_BLOB = "_form_info_manifest_ref";
-
-	private static final String FORM_INFO_MANIFEST_VERSIONED_BINARY_CONTENT = "_form_info_manifest_vbn";
+	private static final String FORM_INFO_MANIFEST_BINARY_CONTENT_REF_BLOB = "_form_info_manifest_ref";
 
 	private static final String FORM_INFO_MANIFEST_BINARY_CONTENT = "_form_info_manifest_bin";
 	
@@ -153,10 +149,8 @@ public class FormInfoFilesetTable extends DynamicBase {
 				ELEMENT_NAME_XFORM_DEFINITION, 
 				uriPrefix + FORM_INFO_XFORM_BINARY_CONTENT,
 				FORM_INFO_XFORM_BINARY_CONTENT, 
-				uriPrefix + FORM_INFO_XFORM_VERSIONED_BINARY_CONTENT, 
-				FORM_INFO_XFORM_VERSIONED_BINARY_CONTENT, 
-				uriPrefix + FORM_INFO_XFORM_VERSIONED_BINARY_CONTENT_REF_BLOB, 
-				FORM_INFO_XFORM_VERSIONED_BINARY_CONTENT_REF_BLOB, 
+				uriPrefix + FORM_INFO_XFORM_BINARY_CONTENT_REF_BLOB, 
+				FORM_INFO_XFORM_BINARY_CONTENT_REF_BLOB, 
 				uriPrefix + FORM_INFO_XFORM_REF_BLOB, 
 				FORM_INFO_XFORM_REF_BLOB, 
 				formInfoDefinitionRelation, // top level table
@@ -168,10 +162,8 @@ public class FormInfoFilesetTable extends DynamicBase {
 				ELEMENT_NAME_MANIFEST_FILESET, 
 				uriPrefix + FORM_INFO_MANIFEST_BINARY_CONTENT, 
 				FORM_INFO_MANIFEST_BINARY_CONTENT, 
-				uriPrefix + FORM_INFO_MANIFEST_VERSIONED_BINARY_CONTENT, 
-				FORM_INFO_MANIFEST_VERSIONED_BINARY_CONTENT, 
-				uriPrefix + FORM_INFO_MANIFEST_VERSIONED_BINARY_CONTENT_REF_BLOB, 
-				FORM_INFO_MANIFEST_VERSIONED_BINARY_CONTENT_REF_BLOB, 
+				uriPrefix + FORM_INFO_MANIFEST_BINARY_CONTENT_REF_BLOB, 
+				FORM_INFO_MANIFEST_BINARY_CONTENT_REF_BLOB, 
 				uriPrefix + FORM_INFO_MANIFEST_REF_BLOB, 
 				FORM_INFO_MANIFEST_REF_BLOB, 
 				formInfoDefinitionRelation, // top level table

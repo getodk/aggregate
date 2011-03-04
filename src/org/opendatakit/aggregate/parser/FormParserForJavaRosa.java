@@ -363,7 +363,7 @@ public class FormParserForJavaRosa {
     		  title, persistenceStoreFormId, formDef);
   }
   
-  enum AuxType { NONE, VBN, VBN_REF, REF_BLOB, GEO_LAT, GEO_LNG, GEO_ALT, GEO_ACC, LONG_STRING_REF, REF_TEXT };
+  enum AuxType { NONE, BC_REF, REF_BLOB, GEO_LAT, GEO_LNG, GEO_ALT, GEO_ACC, LONG_STRING_REF, REF_TEXT };
   
   private String generatePhantomKey( String uriSubmissionFormModel ) {
 	  return String.format("elem+%1$s(%2$08d-phantom:%3$08d)", uriSubmissionFormModel,
@@ -402,7 +402,10 @@ public class FormParserForJavaRosa {
     boolean sameXForm = FormInfo.setXFormDefinition( formInfo, 
     					rootElementDefn.modelVersion, rootElementDefn.uiVersion,
     					title, xmlBytes, cc );
-
+    
+    // we will have thrown an exception above if the form file already exists and
+    // the form file presented is not exactly identical to the one on record.
+    
     FormInfo.setFormDescription( formInfo, null, title, null, null, cc);
 
     Set<Map.Entry<String,MultiPartFormItem>> fileSet = uploadedFormItems.getFileNameEntrySet();
@@ -1063,38 +1066,21 @@ public class FormParserForJavaRosa {
     // and patch up the tree elements that have multiple fields...
     switch (et) {
     case BINARY:
-      // binary elements have three additional tables associated with them
-      // -- the _VBN, _REF and _BLB tables (in addition to _BIN above).
-      persistAsTable = opaque.getTableName(fdm.getSchemaName(), tablePrefix, nrGroupPrefix,
-          treeElement.getName() + "_VBN");
-
-      // record for VersionedBinaryContent..
-      d = ds.createEntityUsingRelation(fdm, user);
-	  setPrimaryKey( d, fdmSubmissionUri, AuxType.VBN );
-      dmList.add(d);
-      final String vbnURI = d.getUri();
-      d.setOrdinalNumber(1L);
-      d.setUriSubmissionDataModel(k.getKey());
-      d.setParentUriFormDataModel(groupURI);
-      d.setStringField(fdm.elementName, treeElement.getName());
-      d.setStringField(fdm.elementType, FormDataModel.ElementType.VERSIONED_BINARY.toString());
-      d.setStringField(fdm.persistAsColumn, null);
-      d.setStringField(fdm.persistAsTable, persistAsTable);
-      d.setStringField(fdm.persistAsSchema, fdm.getSchemaName());
-
+      // binary elements have two additional tables associated with them
+      // -- the _REF and _BLB tables (in addition to _BIN above).
       persistAsTable = opaque.getTableName(fdm.getSchemaName(), tablePrefix, nrGroupPrefix,
           treeElement.getName() + "_REF");
 
       // record for VersionedBinaryContentRefBlob..
       d = ds.createEntityUsingRelation(fdm, user);
-	  setPrimaryKey( d, fdmSubmissionUri, AuxType.VBN_REF );
+	  setPrimaryKey( d, fdmSubmissionUri, AuxType.BC_REF );
 	  dmList.add(d);
       final String bcbURI = d.getUri();
       d.setOrdinalNumber(1L);
       d.setUriSubmissionDataModel(k.getKey());
-      d.setParentUriFormDataModel(vbnURI);
+      d.setParentUriFormDataModel(groupURI);
       d.setStringField(fdm.elementName, treeElement.getName());
-      d.setStringField(fdm.elementType, FormDataModel.ElementType.VERSIONED_BINARY_CONTENT_REF_BLOB
+      d.setStringField(fdm.elementType, FormDataModel.ElementType.BINARY_CONTENT_REF_BLOB
           .toString());
       d.setStringField(fdm.persistAsColumn, null);
       d.setStringField(fdm.persistAsTable, persistAsTable);
