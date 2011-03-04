@@ -37,6 +37,7 @@
 <!--	they utilize.  This means that the isFullyAuthenticated() criteria cannot be used-->
 <!--	for those pages.  TODO: enforce the use of is criteria for production deployments.-->
 	<filter-security-metadata-source id="securityPolicy" use-expressions="true">
+        <intercept-url pattern="/_ah/**" access="true" /> <!-- local GAE admin console -->
 		<intercept-url pattern="/favicon.ico" access="true" />
 		<intercept-url pattern="/odk_color.png" access="true" />
 		<intercept-url pattern="/index.html" access="true" />

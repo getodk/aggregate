@@ -16,7 +16,6 @@
 package org.opendatakit.aggregate.task.tomcat;
 
 import java.net.InetAddress;
-import java.util.concurrent.TimeUnit;
 
 import javax.servlet.ServletContext;
 
@@ -36,6 +35,7 @@ import org.opendatakit.common.security.User;
 import org.opendatakit.common.security.UserService;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.SmartLifecycle;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.web.context.ServletContextAware;
 
 /**
@@ -47,8 +47,7 @@ import org.springframework.web.context.ServletContextAware;
 public class WatchdogImpl implements Watchdog, SmartLifecycle, InitializingBean, ServletContextAware {
 
 	boolean isStarted = false;
-	AggregrateThreadExecutor exec = AggregrateThreadExecutor
-			.getAggregateThreadExecutor();
+	TaskScheduler taskScheduler = null;
 	Datastore datastore = null;
 	UserService userService = null;
 	UploadSubmissions uploadSubmissions = null;
@@ -161,12 +160,14 @@ public class WatchdogImpl implements Watchdog, SmartLifecycle, InitializingBean,
 	}
 
 	public void createWatchdogTask(long checkIntervalMilliseconds) {
+		CallingContext cc = new CallingContextImpl();
+		
 		WatchdogRunner wr = new WatchdogRunner(checkIntervalMilliseconds, 
-									new CallingContextImpl());
+									cc);
 
-		exec = AggregrateThreadExecutor.getAggregateThreadExecutor();
+		AggregrateThreadExecutor exec = AggregrateThreadExecutor.getAggregateThreadExecutor();
 		System.out.println("CREATE WATCHDOG TASK IN TOMCAT");
-		exec.scheduleAtFixedRate(wr, 0, checkIntervalMilliseconds);
+		exec.scheduleAtFixedRate(wr, checkIntervalMilliseconds);
 	}
 
 	@Override
@@ -178,21 +179,14 @@ public class WatchdogImpl implements Watchdog, SmartLifecycle, InitializingBean,
 	@Override
 	public void stop(Runnable signal) {
 		System.out.println("stop(runnable) WATCHDOG TASK IN TOMCAT");
-		try {
-			exec.shutdown();
-			isStarted = false;
-			exec.awaitTermination(20, TimeUnit.SECONDS);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		} finally {
-			signal.run();
-		}
+		isStarted = false;
+		signal.run();
 	}
 
 	@Override
 	public boolean isRunning() {
 		System.out.println("isRunning WATCHDOG TASK IN TOMCAT");
-		return isStarted && !exec.isTerminated();
+		return isStarted;
 	}
 
 	@Override
@@ -205,12 +199,21 @@ public class WatchdogImpl implements Watchdog, SmartLifecycle, InitializingBean,
 	@Override
 	public void stop() {
 		System.out.println("stop WATCHDOG TASK IN TOMCAT");
-		exec.shutdown();
+		isStarted = false;
+		return;
 	}
 
 	public int getPhase() {
 		System.out.println("getPhase WATCHDOG TASK IN TOMCAT");
 		return 10;
+	}
+
+	public TaskScheduler getTaskScheduler() {
+		return taskScheduler;
+	}
+
+	public void setTaskScheduler(TaskScheduler taskScheduler) {
+		this.taskScheduler = taskScheduler;
 	}
 
 	public Datastore getDatastore() {
@@ -288,6 +291,7 @@ public class WatchdogImpl implements Watchdog, SmartLifecycle, InitializingBean,
 	@Override
 	public void afterPropertiesSet() throws Exception {
 		System.out.println("afterPropertiesSet WATCHDOG TASK IN TOMCAT");
+		if ( taskScheduler == null ) throw new IllegalStateException("no task scheduler specified");
 		if ( datastore == null ) throw new IllegalStateException("no datastore specified");
 		if ( userService == null ) throw new IllegalStateException("no user service specified");
 		if ( uploadSubmissions == null ) throw new IllegalStateException("no uploadSubmissions specified");
@@ -299,6 +303,7 @@ public class WatchdogImpl implements Watchdog, SmartLifecycle, InitializingBean,
 		if ( hostname == null || hostname.length() == 0 ) {
 			hostname = InetAddress.getLocalHost().getCanonicalHostName();
 		}
+		AggregrateThreadExecutor.initialize(taskScheduler);
 	}
 
 	@Override

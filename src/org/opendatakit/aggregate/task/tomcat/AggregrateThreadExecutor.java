@@ -15,10 +15,9 @@
  */
 package org.opendatakit.aggregate.task.tomcat;
 
-import java.util.List;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.Date;
+
+import org.springframework.scheduling.TaskScheduler;
 
 /**
  * 
@@ -28,70 +27,43 @@ import java.util.concurrent.TimeUnit;
  */
 public class AggregrateThreadExecutor {
 
-  private static final int NUM_THREADS = 100;
   private static AggregrateThreadExecutor classInstance = null;
 
+  public synchronized static void initialize( TaskScheduler taskScheduler ) {
+	  if ( classInstance != null ) throw new IllegalStateException("called after having set the task scheduler");
+	  
+	  classInstance = new AggregrateThreadExecutor(taskScheduler);
+  }
+  
   public synchronized static AggregrateThreadExecutor getAggregateThreadExecutor() {
-    if (classInstance == null) {
-      classInstance = new AggregrateThreadExecutor();
-    }
+    if ( classInstance == null ) throw new IllegalStateException("called before having initialized the task scheduler");
+    
     return classInstance;
   }
 
-  private ScheduledExecutorService exec;
+  private TaskScheduler exec;
 
-  private AggregrateThreadExecutor() {
-    exec = new ScheduledThreadPoolExecutor(NUM_THREADS);
+  private AggregrateThreadExecutor(TaskScheduler taskScheduler) {
+    exec = taskScheduler;
   }
 
   public void execute(Runnable task) {
-    exec.schedule(task, 100, TimeUnit.MILLISECONDS);
+	  exec.schedule(task, new Date(System.currentTimeMillis() + 100));
   }
-
-  public void schedule(Runnable task, long delayInMilliseconds) {
-    exec.schedule(task, delayInMilliseconds, TimeUnit.MILLISECONDS);
-  }
-
+  
   /**
-   * Creates and executes a periodic action that becomes enabled first after the
-   * given initial delay, and subsequently with the given period; that is
-   * executions will commence after initialDelay then initialDelay+period, then
-   * initialDelay + 2 * period, and so on. If any execution of the task
-   * encounters an exception, subsequent executions are suppressed. Otherwise,
-   * the task will only terminate via cancellation or termination of the
-   * executor.
+   * Creates and executes a periodic action whose executions will commence every
+   * period milliseconds.  I.e., at t, t+period, t+2*period, and so on. If any 
+   * execution of the task encounters an exception, subsequent executions are 
+   * suppressed. Otherwise, the task will only terminate via cancellation or 
+   * termination of the executor.
    * 
    * @param command
    *          - the task to execute.
-   * @param initialDelayInMilliseconds
-   *          - the time to delay first execution.
    * @param periodInMilliseconds
    *          - the period between successive executions.
    */
-  public void scheduleAtFixedRate(Runnable command, long initialDelayInMilliseconds,
-      long periodInMilliseconds) {
-    exec.scheduleAtFixedRate(command, initialDelayInMilliseconds, periodInMilliseconds,
-        TimeUnit.MILLISECONDS);
-  }
-
-  public boolean awaitTermination(long timeout, TimeUnit unit)
-		throws InterruptedException {
-	return exec.awaitTermination(timeout, unit);
-  }
-
-  public boolean isShutdown() {
-	return exec.isShutdown();
-  }
-
-  public boolean isTerminated() {
-	return exec.isTerminated();
-  }
-
-  public void shutdown() {
-	exec.shutdown();
-  }
-
-  public List<Runnable> shutdownNow() {
-	return exec.shutdownNow();
+  public void scheduleAtFixedRate( Runnable command, long periodInMilliseconds ) {
+	  exec.scheduleAtFixedRate(command, periodInMilliseconds);
   }
 }
