@@ -85,8 +85,7 @@ public class JsonElementFormatter implements ElementFormatter {
 
     byte[] imageBlob = null;
     if (blobSubmission.getAttachmentCount() == 1) {
-      String version = blobSubmission.getCurrentVersion(1);
-      imageBlob = blobSubmission.getBlob(1, version);
+      imageBlob = blobSubmission.getBlob(1);
     }
     if (imageBlob != null && imageBlob.length > 0) {
       addToJsonValueToRow(Base64.encode(imageBlob), propertyName, row);

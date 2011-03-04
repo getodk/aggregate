@@ -82,7 +82,7 @@ public class XFormsManifestXmlTable {
 
   private int generateManifestXmlEntry(Document d, Element e, int idx, BlobSubmissionType m, int i) {
 	  String filename = m.getUnrootedFilename(i);
-	  String hash = m.getContentHash(i, m.getCurrentVersion(i));
+	  String hash = m.getContentHash(i);
 
 	  int feIdx = 0;
 	  Element fileEntryElement = d.createElement(BasicConsts.EMPTY_STRING, XFormsTableConsts.MEDIA_FILE_TAG);
@@ -98,7 +98,7 @@ public class XFormsManifestXmlTable {
 	  fileEntryElement.addChild(feIdx++, Node.ELEMENT, downloadElement);
 	  {
 		Map<String, String> properties = new HashMap<String, String>();
-		SubmissionKey k = m.generateSubmissionKey(i, m.getCurrentVersion(i));
+		SubmissionKey k = m.generateSubmissionKey(i);
 	    properties.put(ServletConsts.BLOB_KEY, k.toString());
 	    properties.put(ServletConsts.AS_ATTACHMENT, "true");
 	    String urlLink = HtmlUtil.createLinkWithProperties(downloadRequestURL, properties);

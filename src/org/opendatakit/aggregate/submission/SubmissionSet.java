@@ -451,7 +451,7 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 					repeatNode.getValueFromEntity(cc);
 					elementsToValues.put(m, repeatNode);
 					break;
-				case VERSIONED_BINARY_CONTENT_REF_BLOB: // association between
+				case BINARY_CONTENT_REF_BLOB: // association between
 					// BINARY and REF_BLOB
 				case REF_BLOB: // the table of the actual byte[] data (xxxBLOB)
 				case LONG_STRING_REF_TEXT: // association between any field and

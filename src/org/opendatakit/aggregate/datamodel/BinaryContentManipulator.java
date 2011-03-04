@@ -1,12 +1,22 @@
+/**
+ * Copyright (C) 2010 University of Washington
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
+ */
 package org.opendatakit.aggregate.datamodel;
 
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.constants.ServletConsts;
@@ -20,27 +30,49 @@ import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
 import org.opendatakit.common.security.User;
 
+/**
+ * Manipulator class for handling binary attachments.  To use, create an instance
+ * of the manipulator class specifying the URI of the entity having the attachment,
+ * the URI of the top-level entity that encloses that entity (pass the URI of the
+ * parent entity if it is a top-level entity), and the 3 attachment relations
+ * that are used to store the attachment -- {@link BinaryContent},
+ * {@link BinaryContentRefBlob} and {@link RefBlob} 
+ * <p>
+ * These 3 attachment relations are able to hold multiple attachments for a given 
+ * parent URI, distinguished by ordinal number.  In general, if you have two 
+ * different attachments, you would have two separate sets of these 3 
+ * attachment relations, one for each distinct attachment.  For submissions, for 
+ * example, each binary form element gets its own set of 3 attachment relations.
+ * <p>
+ *  
+ * 
+ * @author mitchellsundt@gmail.com
+ *
+ */
 public class BinaryContentManipulator {
 
 	public static enum BlobSubmissionOutcome {
 		FILE_UNCHANGED, NEW_FILE_VERSION, COMPLETELY_NEW_FILE
 	}
 
-	private final BinaryContent ctntRelation;
-	private final VersionedBinaryContent vbcRelation;
-	private final VersionedBinaryContentRefBlob vrefRelation;
-	private final RefBlob blbRelation;
-
 	private final String parentKey;
 	private final String topLevelKey;
 
-	List<BinaryContent> attachments = new ArrayList<BinaryContent>();
-	Map<BinaryContent, List<VersionedBinaryContent>> versionedAttachments = new HashMap<BinaryContent, List<VersionedBinaryContent>>();
-	Map<VersionedBinaryContent, BlobManipulator> inMemoryAttachments = new HashMap<VersionedBinaryContent, BlobManipulator>();
+	private final BinaryContent ctntRelation;
+	private final BinaryContentRefBlob vrefRelation;
+	private final RefBlob blbRelation;
 
+	private final List<BinaryContent> attachments = new ArrayList<BinaryContent>();
+
+	/**
+	 * Manipulator class for handling an in-memory blob
+	 * 
+	 * @author mitchellsundt@gmail.com
+	 *
+	 */
 	public static class BlobManipulator {
 
-		private List<VersionedBinaryContentRefBlob> dbBcbEntityList = new ArrayList<VersionedBinaryContentRefBlob>();
+		private List<BinaryContentRefBlob> dbBcbEntityList = new ArrayList<BinaryContentRefBlob>();
 		private List<RefBlob> dbRefBlobList = new ArrayList<RefBlob>();
 
 		/**
@@ -56,7 +88,7 @@ public class BinaryContentManipulator {
 		 * @throws ODKDatastoreException
 		 */
 		public BlobManipulator(byte[] blob, String uriVersionedContent,
-				VersionedBinaryContentRefBlob bcbRef, RefBlob ref,
+				BinaryContentRefBlob bcbRef, RefBlob ref,
 				String topLevelKey, CallingContext cc)
 				throws ODKDatastoreException {
 
@@ -76,7 +108,7 @@ public class BinaryContentManipulator {
 				eBlob.setTopLevelAuri(topLevelKey);
 				eBlob.setValue(partialBlob);
 				dbRefBlobList.add(eBlob);
-				VersionedBinaryContentRefBlob bcb = ds
+				BinaryContentRefBlob bcb = ds
 						.createEntityUsingRelation(bcbRef, user);
 				bcb.setTopLevelAuri(topLevelKey);
 				bcb.setDomAuri(uriVersionedContent);
@@ -89,7 +121,7 @@ public class BinaryContentManipulator {
 		}
 
 		public BlobManipulator(String uriVersionedContent,
-				VersionedBinaryContentRefBlob bcbRef, RefBlob ref,
+				BinaryContentRefBlob bcbRef, RefBlob ref,
 				CallingContext cc) throws ODKDatastoreException {
 
 			Datastore ds = cc.getDatastore();
@@ -102,11 +134,11 @@ public class BinaryContentManipulator {
 			List<? extends CommonFieldsBase> bcbList = q
 					.executeQuery(ServletConsts.FETCH_LIMIT);
 			for (CommonFieldsBase cb : bcbList) {
-				dbBcbEntityList.add((VersionedBinaryContentRefBlob) cb);
+				dbBcbEntityList.add((BinaryContentRefBlob) cb);
 			}
 
 			// and gather the blob parts themselves...
-			for (VersionedBinaryContentRefBlob b : dbBcbEntityList) {
+			for (BinaryContentRefBlob b : dbBcbEntityList) {
 				RefBlob eBlob = ds.getEntity(ref, b.getSubAuri(), user);
 				if (eBlob == null) {
 					throw new IllegalStateException("Missing blob part!");
@@ -141,7 +173,7 @@ public class BinaryContentManipulator {
 		}
 
 		public void recursivelyAddKeys(List<EntityKey> keyList) {
-			for (VersionedBinaryContentRefBlob e : dbBcbEntityList) {
+			for (BinaryContentRefBlob e : dbBcbEntityList) {
 				keyList.add(new EntityKey(e, e.getUri()));
 			}
 			for (RefBlob r : dbRefBlobList) {
@@ -159,29 +191,23 @@ public class BinaryContentManipulator {
 	}
 
 	public BinaryContentManipulator(String parentKey, String topLevelKey,
-			BinaryContent ctnt, VersionedBinaryContent vbc,
-			VersionedBinaryContentRefBlob vref, RefBlob blb) {
+			BinaryContent ctntRelation, 
+			BinaryContentRefBlob vrefRelation, RefBlob blbRelation) {
 		this.parentKey = parentKey;
 		this.topLevelKey = topLevelKey;
-		this.ctntRelation = ctnt;
-		this.vbcRelation = vbc;
-		this.vrefRelation = vref;
-		this.blbRelation = blb;
+		this.ctntRelation = ctntRelation;
+		this.vrefRelation = vrefRelation;
+		this.blbRelation = blbRelation;
 	}
 
 	public int getAttachmentCount() {
 		return attachments.size();
 	}
 
-	public String getCurrentVersion(int ordinal) {
-		BinaryContent b = attachments.get(ordinal - 1);
-		if (!Long.valueOf(ordinal).equals(b.getOrdinalNumber())) {
-			// we are somehow out of sync!
-			throw new IllegalStateException("missing attachment declaration");
-		}
-		return b.getVersion();
-	}
-
+	/**
+	 * @param ordinal
+	 * @return the attachment's unrooted file path.
+	 */
 	public String getUnrootedFilename(int ordinal) {
 		BinaryContent b = attachments.get(ordinal - 1);
 		if (!Long.valueOf(ordinal).equals(b.getOrdinalNumber())) {
@@ -192,91 +218,59 @@ public class BinaryContentManipulator {
 	}
 
 	/**
-	 * Gets the list of all versions for this binary content. The list is
-	 * ordered from most-recent to oldest.
-	 * 
 	 * @param ordinal
-	 *            identifying the binary content
-	 * @return List<String> of the versions available.
+	 * @return the content type or null if no content is attached.
 	 */
-	public List<String> getBinaryVersions(int ordinal) {
+	public String getContentType(int ordinal) {
 		BinaryContent b = attachments.get(ordinal - 1);
 		if (!Long.valueOf(ordinal).equals(b.getOrdinalNumber())) {
 			// we are somehow out of sync!
 			throw new IllegalStateException("missing attachment declaration");
 		}
-		List<String> versionList = new ArrayList<String>();
-		for (VersionedBinaryContent vbc : versionedAttachments.get(b)) {
-			versionList.add(vbc.getVersion());
-		}
-
-		Collections.reverse(versionList);
-		return versionList;
+		return b.getContentType();
 	}
-
-	public String getContentType(int ordinal, String version) {
+	
+	public String getContentHash(int ordinal) {
 		BinaryContent b = attachments.get(ordinal - 1);
 		if (!Long.valueOf(ordinal).equals(b.getOrdinalNumber())) {
 			// we are somehow out of sync!
 			throw new IllegalStateException("missing attachment declaration");
 		}
-		for (VersionedBinaryContent vbc : versionedAttachments.get(b)) {
-			if (vbc.getVersion().equals(version)) {
-				return vbc.getContentType();
-			}
-		}
-		throw new IllegalArgumentException(
-				"Version does not match a known version");
+		return b.getContentHash();
 	}
 
-	public String getContentHash(int ordinal, String version) {
+	public Long getContentLength(int ordinal) {
 		BinaryContent b = attachments.get(ordinal - 1);
 		if (!Long.valueOf(ordinal).equals(b.getOrdinalNumber())) {
 			// we are somehow out of sync!
 			throw new IllegalStateException("missing attachment declaration");
 		}
-		for (VersionedBinaryContent vbc : versionedAttachments.get(b)) {
-			if (vbc.getVersion().equals(version)) {
-				return vbc.getContentHash();
-			}
-		}
-		throw new IllegalArgumentException(
-				"Version does not match a known version");
+		return b.getContentLength();
 	}
 
-	public Long getContentLength(int ordinal, String version) {
+	public byte[] getBlob(int ordinal, CallingContext cc)
+	throws ODKDatastoreException {
 		BinaryContent b = attachments.get(ordinal - 1);
 		if (!Long.valueOf(ordinal).equals(b.getOrdinalNumber())) {
 			// we are somehow out of sync!
 			throw new IllegalStateException("missing attachment declaration");
 		}
-		for (VersionedBinaryContent vbc : versionedAttachments.get(b)) {
-			if (vbc.getVersion().equals(version)) {
-				return vbc.getContentLength();
-			}
-		}
-		throw new IllegalArgumentException(
-				"Version does not match a known version");
+		BlobManipulator blbManipulator = new BlobManipulator(b
+				.getUri(), vrefRelation, blbRelation, cc);
+		return blbManipulator.getBlob();
 	}
 
-	public byte[] getBlob(int ordinal, String version, CallingContext cc)
-			throws ODKDatastoreException {
-		BinaryContent b = attachments.get(ordinal - 1);
-		if (!Long.valueOf(ordinal).equals(b.getOrdinalNumber())) {
-			// we are somehow out of sync!
-			throw new IllegalStateException("missing attachment declaration");
-		}
-		for (VersionedBinaryContent vbc : versionedAttachments.get(b)) {
-			if (vbc.getVersion().equals(version)) {
-				BlobManipulator blbManipulator = new BlobManipulator(vbc
-						.getUri(), vrefRelation, blbRelation, cc);
-				return blbManipulator.getBlob();
-			}
-		}
-		throw new IllegalArgumentException(
-				"Version does not match a known version");
-	}
-
+	/**
+	 * Save the attachment to the database.
+	 *  
+	 * @param byteArray
+	 * @param contentType
+	 * @param contentLength
+	 * @param unrootedFilePath
+	 * @param cc
+	 * @return COMPLETELY_NEW_FILE on successful save; FILE_UNCHANGED on hash equivalence; NEW_FILE_VERSION on save not allowed.
+	 * @throws ODKDatastoreException
+	 */
 	public BinaryContentManipulator.BlobSubmissionOutcome setValueFromByteArray(
 			byte[] byteArray, String contentType, Long contentLength,
 			String unrootedFilePath, CallingContext cc)
@@ -288,6 +282,7 @@ public class BinaryContentManipulator {
 
 		boolean existingContent = false;
 		BinaryContent matchedBc = null;
+		String currentContentHash = null;
 
 		for (BinaryContent bc : attachments) {
 			String bcFilePath = bc.getUnrootedFilePath();
@@ -295,6 +290,7 @@ public class BinaryContentManipulator {
 					: (unrootedFilePath != null && bcFilePath
 							.equals(unrootedFilePath))) {
 				matchedBc = bc;
+				currentContentHash = matchedBc.getContentHash();
 				existingContent = true;
 				break;
 			}
@@ -302,72 +298,31 @@ public class BinaryContentManipulator {
 
 		Datastore ds = cc.getDatastore();
 		User user = cc.getCurrentUser();
-		final String version = CommonFieldsBase.newUri();
-		if (matchedBc == null) {
+
+		if (matchedBc == null || currentContentHash == null) {
 			// adding a new file...
 			outcome = BinaryContentManipulator.BlobSubmissionOutcome.COMPLETELY_NEW_FILE;
-			matchedBc = (BinaryContent) ds
+			if ( matchedBc == null ) {
+				// create the record...
+				matchedBc = (BinaryContent) ds
 					.createEntityUsingRelation(ctntRelation, user);
+			}
 			matchedBc.setTopLevelAuri(topLevelKey);
 			matchedBc.setParentAuri(parentKey);
 			matchedBc.setOrdinalNumber(attachments.size() + 1L);
-			matchedBc.setVersion(version);
 			matchedBc.setUnrootedFilePath(unrootedFilePath);
+			matchedBc.setContentType(contentType);
+			matchedBc.setContentLength(contentLength);
+			matchedBc.setContentHash(md5Hash);
 			// later: attachments.add(matchedBc);
+		} else if ( currentContentHash.equals(md5Hash)) {
+			return BinaryContentManipulator.BlobSubmissionOutcome.FILE_UNCHANGED;
 		} else {
-			outcome = BinaryContentManipulator.BlobSubmissionOutcome.NEW_FILE_VERSION;
-			// updating an existing file... or a no-op if the hash value is the
-			// same...
-			List<VersionedBinaryContent> vcList = versionedAttachments
-					.get(matchedBc);
-			if (vcList != null) {
-				for (VersionedBinaryContent vc : vcList) {
-					if (vc.getContentHash().equals(md5Hash)) {
-						// found a version of this content with the same hash
-						// (same file).
-						// The content is the same, so we don't need to save the
-						// binary.
-						if (vc.getVersion().equals(matchedBc.getVersion())) {
-							// the current version is this version -- no change
-							return BinaryContentManipulator.BlobSubmissionOutcome.FILE_UNCHANGED;
-						} else {
-							// the current version is different -- update to
-							// this version.
-							matchedBc.setVersion(vc.getVersion());
-							ds.putEntity(matchedBc, user);
-							return BinaryContentManipulator.BlobSubmissionOutcome.NEW_FILE_VERSION;
-						}
-					}
-				}
-			}
-			// no version matches -- need to create a new version record and
-			// store the binary.
-			// later: matchedBc.setVersion(version);
-		}
-
-		VersionedBinaryContent vbcEntry = (VersionedBinaryContent) ds
-				.createEntityUsingRelation(vbcRelation, user);
-		vbcEntry.setTopLevelAuri(topLevelKey);
-		vbcEntry.setParentAuri(matchedBc.getUri());
-		vbcEntry.setOrdinalNumber(1L);
-		vbcEntry.setContentLength(contentLength);
-		vbcEntry.setContentType(contentType);
-		vbcEntry.setContentHash(md5Hash);
-		vbcEntry.setVersion(version);
-
-		List<VersionedBinaryContent> vcList = versionedAttachments
-				.get(matchedBc);
-		if (vcList == null) {
-			vcList = new ArrayList<VersionedBinaryContent>();
-			versionedAttachments.put(matchedBc, vcList);
+			return BinaryContentManipulator.BlobSubmissionOutcome.NEW_FILE_VERSION;
 		}
 
 		// and create the SubmissionBlob (persisting it...)
 		try {
-			// persist the version linkage
-			ds.putEntity(vbcEntry, user);
-			vcList.add(vbcEntry);
-			matchedBc.setVersion(version);
 			// persist the top level linkages...
 			ds.putEntity(matchedBc, user);
 			if (!existingContent)
@@ -375,18 +330,10 @@ public class BinaryContentManipulator {
 
 			// persist the binary data
 			BlobManipulator subBlob = new BlobManipulator(byteArray, 
-					vbcEntry.getUri(), vrefRelation, blbRelation, topLevelKey, cc);
+					matchedBc.getUri(), vrefRelation, blbRelation, topLevelKey, cc);
 
 		} catch (ODKDatastoreException e) {
 			// there may be trash in the database upon failure.
-			vcList.remove(vbcEntry);
-			try {
-				// try to clean up...
-				ds.deleteEntity(new EntityKey(vbcEntry, vbcEntry.getUri()),
-						user);
-			} catch (ODKDatastoreException ex) {
-				ex.printStackTrace();
-			}
 			throw e;
 		}
 		return outcome;
@@ -396,8 +343,6 @@ public class BinaryContentManipulator {
 			throws ODKDatastoreException {
 		// clear our mutable state.
 		attachments.clear();
-		versionedAttachments.clear();
-		inMemoryAttachments.clear();
 
 		Datastore ds = cc.getDatastore();
 		User user = cc.getCurrentUser();
@@ -410,27 +355,10 @@ public class BinaryContentManipulator {
 		for (CommonFieldsBase cb : contentHits) {
 			attachments.add((BinaryContent) cb);
 		}
-
-		for (BinaryContent c : attachments) {
-			Query qv = ds.createQuery(vbcRelation, user);
-			qv.addFilter(vbcRelation.parentAuri, FilterOperation.EQUAL, c.getUri());
-			qv.addSort(vbcRelation.creationDate, Direction.ASCENDING);
-			// sort so that the list in earliest-to-latest order...
-			List<VersionedBinaryContent> vcList = new ArrayList<VersionedBinaryContent>();
-			List<? extends CommonFieldsBase> cbList = qv.executeQuery(0);
-			for (CommonFieldsBase cb : cbList) {
-				vcList.add((VersionedBinaryContent) cb);
-			}
-			versionedAttachments.put(c, vcList);
-		}
 	}
 
 	public void persist(CallingContext cc) throws ODKEntityPersistException {
-		// the two items to store are the attachments vector.
-		// and the inMemoryAttachments map.
-		for (BlobManipulator b : inMemoryAttachments.values()) {
-			b.persist(cc);
-		}
+		// the items to store are the attachments vector.
 		cc.getDatastore().putEntities(attachments, cc.getCurrentUser());
 	}
 
@@ -470,23 +398,16 @@ public class BinaryContentManipulator {
 		// don't care about in-memory blobs -- they should be read-only
 		return (parentKey.equals(bt.parentKey)
 				&& topLevelKey.equals(bt.topLevelKey)
-				&& attachments.equals(bt.attachments) && versionedAttachments
-				.equals(bt.versionedAttachments));
+				&& attachments.equals(bt.attachments));
 	}
 
 	public void recursivelyAddEntityKeys(List<EntityKey> keyList,
 			CallingContext cc) throws ODKDatastoreException {
 
-		for (List<VersionedBinaryContent> vcList : versionedAttachments
-				.values()) {
-			for (VersionedBinaryContent vc : vcList) {
-				BlobManipulator b = new BlobManipulator(vc.getUri(), vrefRelation, blbRelation,
-						cc);
-				b.recursivelyAddKeys(keyList);
-				keyList.add(new EntityKey(vc, vc.getUri()));
-			}
-		}
 		for (BinaryContent bc : attachments) {
+			BlobManipulator b = new BlobManipulator(bc.getUri(), vrefRelation, blbRelation,
+					cc);
+			b.recursivelyAddKeys(keyList);
 			keyList.add(new EntityKey(bc, bc.getUri()));
 		}
 	}
@@ -497,32 +418,6 @@ public class BinaryContentManipulator {
 	@Override
 	public int hashCode() {
 		return super.hashCode() + parentKey.hashCode() + 3
-				* topLevelKey.hashCode() + +attachments.hashCode()
-				+ versionedAttachments.hashCode();
+				* topLevelKey.hashCode() + attachments.hashCode();
 	}
-
-	public static class BinaryDescriptor {
-		public final int ordinalNumber;
-		public final String version;
-
-		public BinaryDescriptor(int ordinalNumber, String version) {
-			this.ordinalNumber = ordinalNumber;
-			this.version = version;
-		}
-	}
-
-	public BinaryDescriptor findMatchingBinaryContent(String parentUri) {
-		for (Map.Entry<BinaryContent, List<VersionedBinaryContent>> bVcList : versionedAttachments
-				.entrySet()) {
-			for (VersionedBinaryContent vc : bVcList.getValue()) {
-				if (vc.getUri().equals(parentUri)) {
-					BinaryDescriptor bd = new BinaryDescriptor(bVcList.getKey()
-							.getOrdinalNumber().intValue(), vc.getVersion());
-					return bd;
-				}
-			}
-		}
-		return null;
-	}
-
 }

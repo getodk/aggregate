@@ -24,7 +24,6 @@ import org.opendatakit.aggregate.datamodel.BinaryContentManipulator;
 import org.opendatakit.aggregate.datamodel.DynamicCommonFieldsBase;
 import org.opendatakit.aggregate.datamodel.FormDataModel;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
-import org.opendatakit.aggregate.datamodel.BinaryContentManipulator.BlobSubmissionOutcome;
 import org.opendatakit.aggregate.exception.ODKFormAlreadyExistsException;
 import org.opendatakit.aggregate.parser.MultiPartFormItem;
 import org.opendatakit.aggregate.submission.Submission;
@@ -235,6 +234,7 @@ public class FormInfo {
 	    		((rootUiVersion == null) ? (rootUi == null) :
 	    				(rootUi != null && rootUiVersion.equals(rootUi)));
 	}
+	
 	/**
 	 * Set the Xform definition.
 	 * 
@@ -249,8 +249,11 @@ public class FormInfo {
 	 * @throws ODKDatastoreException
 	 * @throws ODKFormAlreadyExistsException 
 	 */
-	public static final boolean setXFormDefinition( Submission aFormDefinition, Long rootModelVersion, Long rootUiVersion, String title, byte[] definition, CallingContext cc ) throws ODKDatastoreException, ODKFormAlreadyExistsException {
-	    RepeatSubmissionType r = (RepeatSubmissionType) aFormDefinition.getElementValue(FormInfo.fiFilesetTable);
+	public static final boolean setXFormDefinition( Submission aFormDefinition, 
+			Long rootModelVersion, Long rootUiVersion, 
+			String title, byte[] definition, CallingContext cc ) throws ODKDatastoreException, ODKFormAlreadyExistsException {
+
+		RepeatSubmissionType r = (RepeatSubmissionType) aFormDefinition.getElementValue(FormInfo.fiFilesetTable);
 	    List<SubmissionSet> filesets = r.getSubmissionSets();
 	    SubmissionSet matchingSet = null;
 	    for ( SubmissionSet f : filesets ) {
@@ -260,13 +263,11 @@ public class FormInfo {
 	    		matchingSet = f;
 	    	}
 	    }
-	    
-	    boolean matchingFile = true;
+
 	    if ( matchingSet == null ) {	    	
 	    	// we don't support multiple file versions yet...
 	    	if ( filesets.size() != 0 ) throw new ODKFormAlreadyExistsException();
 	    	
-	    	matchingFile = false; // nothing there yet...
 	    	// create a matching set...
 			SubmissionSet sFileset = new SubmissionSet(aFormDefinition, filesets.size()+1L, fiFilesetTable, formDefinition, aFormDefinition.getKey(), cc);
 			((LongSubmissionType) sFileset.getElementValue(rootElementModelVersion)).setValueFromString(rootModelVersion == null ? null : rootModelVersion.toString());
@@ -280,11 +281,10 @@ public class FormInfo {
 	    BlobSubmissionType bt = (BlobSubmissionType) matchingSet.getElementValue(FormInfo.xformDefinition);
 	    if ( bt.getAttachmentCount() == 0 ) {
 	    	return bt.setValueFromByteArray(definition, "text/xml", Long.valueOf(definition.length), title + ".xml"
-	    				) == BinaryContentManipulator.BlobSubmissionOutcome.FILE_UNCHANGED;
+	    				) != BinaryContentManipulator.BlobSubmissionOutcome.COMPLETELY_NEW_FILE;
 	    } else {
-	    	List<String> versions = bt.getBinaryVersions(1);
-	    	if ( versions.size() > 1 || bt.getAttachmentCount() > 1) throw new ODKFormAlreadyExistsException();
-	    	String hash = bt.getContentHash(1, versions.get(0));
+	    	if ( bt.getAttachmentCount() > 1) throw new ODKFormAlreadyExistsException();
+	    	String hash = bt.getContentHash(1);
 	    	String thisHash = CommonFieldsBase.newMD5HashUri(definition);
 	    	if (! hash.equals(thisHash) ) throw new ODKFormAlreadyExistsException();
 	    	return true;

@@ -271,8 +271,7 @@ public class PersistentResults {
 		if ( bt.getAttachmentCount() > 1 ) {
 			throw new IllegalStateException("Too many results attached!");
 		}
-		String version = bt.getCurrentVersion(1);
-		return bt.getBlob(1, version);
+		return bt.getBlob(1);
 	}
 
 	public void setResultFile(byte[] byteArray, String contentType, Long contentLength,
@@ -436,9 +435,7 @@ public class PersistentResults {
 	
 		private static final String PERSISTENT_RESULT_FILE_REF_BLOB = "_persistent_result_file_blb";
 	
-		private static final String PERSISTENT_RESULT_FILE_VERSIONED_BINARY_CONTENT_REF_BLOB = "_persistent_result_file_ref";
-	
-		private static final String PERSISTENT_RESULT_FILE_VERSIONED_BINARY_CONTENT = "_persistent_result_file_vbn";
+		private static final String PERSISTENT_RESULT_FILE_BINARY_CONTENT_REF_BLOB = "_persistent_result_file_ref";
 	
 		private static final String PERSISTENT_RESULT_FILE_BINARY_CONTENT = "_persistent_result_file_bin";
 	
@@ -543,10 +540,8 @@ public class PersistentResults {
 					PersistentResultsTable.ELEMENT_NAME_RESULT_FILE_DEFINITION, 
 					uriPrefix + PersistentResultsTable.PERSISTENT_RESULT_FILE_BINARY_CONTENT, 
 					PersistentResultsTable.PERSISTENT_RESULT_FILE_BINARY_CONTENT, 
-					uriPrefix + PersistentResultsTable.PERSISTENT_RESULT_FILE_VERSIONED_BINARY_CONTENT, 
-					PersistentResultsTable.PERSISTENT_RESULT_FILE_VERSIONED_BINARY_CONTENT, 
-					uriPrefix + PersistentResultsTable.PERSISTENT_RESULT_FILE_VERSIONED_BINARY_CONTENT_REF_BLOB, 
-					PersistentResultsTable.PERSISTENT_RESULT_FILE_VERSIONED_BINARY_CONTENT_REF_BLOB, 
+					uriPrefix + PersistentResultsTable.PERSISTENT_RESULT_FILE_BINARY_CONTENT_REF_BLOB, 
+					PersistentResultsTable.PERSISTENT_RESULT_FILE_BINARY_CONTENT_REF_BLOB, 
 					uriPrefix + PersistentResultsTable.PERSISTENT_RESULT_FILE_REF_BLOB, 
 					PersistentResultsTable.PERSISTENT_RESULT_FILE_REF_BLOB, 
 					persistentResultsDefinition, // top level table
