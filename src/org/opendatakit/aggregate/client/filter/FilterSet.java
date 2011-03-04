@@ -34,7 +34,7 @@ public class FilterSet implements Serializable {
 	 * @param group the group to be removed
 	 */
 	public void removeFilterGroup(FilterGroup group) {
-		
+		groups.remove(group);
 	}
 	
 	/**
