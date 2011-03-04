@@ -28,12 +28,12 @@ import org.opendatakit.common.security.User;
  */
 public class SubmissionFilterGroup extends CommonFieldsBase {
 
-  private static final String TABLE_NAME = "_filter";
+  private static final String TABLE_NAME = "_filter_group";
 
   private static final DataField FORM_ID_PROPERTY = new DataField("FORM_ID",
-      DataField.DataType.STRING, true, 4096L);
+      DataField.DataType.STRING, true, PersistConsts.GUARANTEED_SEARCHABLE_LEN);
   private static final DataField NAME_PROPERTY = new DataField("NAME", DataField.DataType.STRING,
-      true, 4096L);
+      true, PersistConsts.GUARANTEED_SEARCHABLE_LEN);
   private static final DataField URI_USER_PROPERTY = new DataField("URI_USER",
       DataField.DataType.URI, false, PersistConsts.URI_STRING_LEN).setIndexable(IndexType.HASH);
   private static final DataField IS_PUBLIC = new DataField("IS_PUBLIC", DataField.DataType.BOOLEAN,

@@ -55,7 +55,7 @@ public class JsonServlet extends ServletUtilBase {
   public static final String ADDR = "extern/json";
 
   /**
-   * Handler for HTTP Get request to create a google spreadsheet
+   * Handler for HTTP Get request to create a json server
    * 
    * @see javax.servlet.http.HttpServlet#doGet(javax.servlet.http.HttpServletRequest,
    *      javax.servlet.http.HttpServletResponse)
