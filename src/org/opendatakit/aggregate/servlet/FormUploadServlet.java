@@ -19,6 +19,7 @@ package org.opendatakit.aggregate.servlet;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -66,6 +67,76 @@ public class FormUploadServlet extends ServletUtilBase {
    * Title for generated webpage
    */
   private static final String TITLE_INFO = "Xform Upload";
+  
+  /**
+   * Script path to include...
+   */
+  private static final String JQUERY_SCRIPT_HEADER = 
+	  "<script src=\"http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js\"></script>";
+  
+  private static final String UPLOAD_SCRIPT_RESOURCE = "res/upload_control.js";
+
+  private static final String UPLOAD_PAGE_BODY_START = 
+
+"	  <p><b>Upload one form into ODK Aggregate</b></p>" +
+"	  <p>Media files for the form's logo and the icons, images, audio clips and video clips used " +
+"     within the form (if any) are" + 
+"	  expected to be in a media folder in the same directory as the form definition file (.xml)." + 
+"	  If the form definition file is named \"<code>My Form.xml</code>\" then the media folder should" +
+"	  be named \"<code>My Form-media</code>\". Please use the form below to upload the form definition" + 
+"	  file and the contents of the media folder, if any, into ODK Aggregate.</p>" +
+"	  <p>On ODK Collect 1.1.6 and higher, the file named \"<code>form_logo.png</code>\"," + 
+"	  if present in the media folder, will be displayed as the form's logo. </p>" +
+"	  <!--[if true]><p style=\"color: red;\">For a better user experience, use Chrome, Firefox or Safari</p>" +
+"     <form id=\"ie_backward_compatible_form\"" + 
+"	                      accept-charset=\"UTF-8\" method=\"POST\" enctype=\"multipart/form-data\"" + 
+"	                      action=\"";// emit the ADDR
+  private static final String UPLOAD_PAGE_BODY_MIDDLE = "\">" +
+"	  <![endif] -->" +
+"	  <table>" +
+"	  	<tr>" +
+"	  		<td><label for=\"form_def_file\">Form definition:</label></td>" +
+"	  		<td><input id=\"form_def_file\" type=\"file\" size=\"80\"" +
+"	  			name=\"form_def_file\" /></td>" +
+"	  	</tr>" +
+"	  	<tr>" +
+"	  		<td><label for=\"mediaFiles\">Media file(s):</label></td>" +
+"	  		<td><input id=\"mediaFiles\" type=\"file\" size=\"80,20\" name=\"datafile\" multiple /><input id=\"clear_media_files\" type=\"button\" value=\"Clear\" onClick=\"clearMediaInputField('mediaFiles')\" /></td>" +
+"	  	</tr>" +
+"	  	<!--[if true]>" +
+"	      <tr>" +
+"	          <td><label for=\"mediaFiles2\">Media file #2:</label></td>" +
+"	          <td><input id=\"mediaFiles2\" type=\"file\" size=\"80\" name=\"datafile\" /><input id=\"clear_media_files2\" type=\"button\" value=\"Clear\" onClick=\"clearMediaInputField('mediaFiles2')\" /></td>" +
+"	      </tr>" +
+"	      <tr>" +
+"	          <td><label for=\"mediaFiles3\">Media file #3:</label></td>" +
+"	          <td><input id=\"mediaFiles3\" type=\"file\" size=\"80\" name=\"datafile\" /><input id=\"clear_media_files3\" type=\"button\" value=\"Clear\" onClick=\"clearMediaInputField('mediaFiles3')\" /></td>" +
+"	      </tr>" +
+"	      <tr>" +
+"	          <td><label for=\"mediaFiles4\">Media file #4:</label></td>" +
+"	          <td><input id=\"mediaFiles4\" type=\"file\" size=\"80\" name=\"datafile\" /><input id=\"clear_media_files4\" type=\"button\" value=\"Clear\" onClick=\"clearMediaInputField('mediaFiles4')\" /></td>" +
+"	      </tr>" +
+"	      <tr>" +
+"	          <td><label for=\"mediaFiles5\">Media file #5:</label></td>" +
+"	          <td><input id=\"mediaFiles5\" type=\"file\" size=\"80\" name=\"datafile\" /><input id=\"clear_media_files5\" type=\"button\" value=\"Clear\" onClick=\"clearMediaInputField('mediaFiles5')\" /></td>" +
+"	      </tr>" +
+"	      <tr>" +
+"	          <td><label for=\"mediaFiles6\">Media file #6:</label></td>" +
+"	          <td><input id=\"mediaFiles6\" type=\"file\" size=\"80\" name=\"datafile\" /><input id=\"clear_media_files6\" type=\"button\" value=\"Clear\" onClick=\"clearMediaInputField('mediaFiles6')\" /></td>" +
+"	      </tr>" +
+"	      <![endif]-->" +
+"	  	<tr>" +
+"	  		<td><input type=\"button\" name=\"button\" value=\"Upload Form\"" +
+"	  			onClick=\"submitButton(document,'";
+  private static final String UPLOAD_PAGE_BODY_REMAINDER = "','form_def_file','mediaFiles')\" /></td>" +
+"	  		<td />" +
+"	  	</tr>" +
+"	  </table>" +
+"	  <!--[if true]></form>" +
+"	  <![endif] -->" +
+"	  <br />" +
+"	  <!-- If you specify an empty progress div, it will be expanded with an upload progress region (non-IE) -->" +
+"	  <div id=\"progress\"></div>";
 
   /**
    * Title for generated webpage to obtain title
@@ -77,14 +148,7 @@ public class FormUploadServlet extends ServletUtilBase {
    */
   private static final String TITLE_OF_THE_XFORM = "Title of the Xform:";
 
-  private static final String DATAFILE = "datafile";
-
-  private static final String LOCATION_OF_XFORM_DEFINITION = "Location of Xform definition to be uploaded:";
-
-  private static final String DATA_FILES_DESCRIPTION = "Data File(s) that are Part of the Form Definition (Pictures, Video, etc):";
-
-  private static final String UPLOAD_BUTTON_TEXT = "Upload Form";
-
+  private static final Logger logger = Logger.getLogger(FormUploadServlet.class.getName());
   /**
    * Handler for HTTP Get request to create xform upload page
    * 
@@ -98,24 +162,17 @@ public class FormUploadServlet extends ServletUtilBase {
 
 	PrintWriter out = resp.getWriter();
 
-    beginBasicHtmlResponse(TITLE_INFO, resp, true, cc); // header info
-    out.write(HtmlUtil.createFormBeginTag(cc.getWebApplicationURL(ADDR), HtmlConsts.MULTIPART_FORM_DATA, HtmlConsts.POST));
-    out.write(LOCATION_OF_XFORM_DEFINITION + HtmlConsts.LINE_BREAK);
-    out.write(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_FILE, ServletConsts.FORM_DEF_PRAM, null));
-    out.write(HtmlConsts.LINE_BREAK + HtmlConsts.LINE_BREAK);
-    out.write(DATA_FILES_DESCRIPTION + HtmlConsts.LINE_BREAK);
-    out.write(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_FILE, DATAFILE, null));
-    out.write(HtmlConsts.LINE_BREAK);
-    out.write(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_FILE, DATAFILE, null));
-    out.write(HtmlConsts.LINE_BREAK);
-    out.write(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_FILE, DATAFILE, null));
-    out.write(HtmlConsts.LINE_BREAK);
-    out.write(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_FILE, DATAFILE, null));
-    out.write(HtmlConsts.LINE_BREAK);
-    out.write(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_FILE, DATAFILE, null));
-    out.write(HtmlConsts.LINE_BREAK + HtmlConsts.LINE_BREAK);
-    out.write(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_SUBMIT, null, UPLOAD_BUTTON_TEXT));
-    out.write(HtmlConsts.FORM_CLOSE);
+	StringBuilder headerString = new StringBuilder();
+	headerString.append(JQUERY_SCRIPT_HEADER);
+	headerString.append("<script src=\"");
+	headerString.append(cc.getWebApplicationURL(UPLOAD_SCRIPT_RESOURCE));
+	headerString.append("\"></script>");
+	beginBasicHtmlResponse(TITLE_INFO, headerString.toString(), resp, true, cc );// header info
+	out.write(UPLOAD_PAGE_BODY_START);
+	out.write(cc.getWebApplicationURL(ADDR));
+	out.write(UPLOAD_PAGE_BODY_MIDDLE);
+	out.write(cc.getWebApplicationURL(ADDR));
+	out.write(UPLOAD_PAGE_BODY_REMAINDER);
     finishBasicHtmlResponse(resp);
   }
 
@@ -198,7 +255,9 @@ public class FormUploadServlet extends ServletUtilBase {
         parser = new FormParserForJavaRosa(formName, formXmlData, inputXml, xmlFileName,
             uploadedFormItems, cc);
 
+        logger.info("Upload form: " + parser.getFormId());
         Form form = Form.retrieveForm(parser.getFormId(), cc);
+        String isIncompleteFlag = uploadedFormItems.getSimpleFormField(ServletConsts.TRANSFER_IS_INCOMPLETE);
         form.printDataTree(System.out);
         bOk = true;
 
