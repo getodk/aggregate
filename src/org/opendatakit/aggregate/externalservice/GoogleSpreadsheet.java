@@ -25,6 +25,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.opendatakit.aggregate.CallingContext;
+import org.opendatakit.aggregate.client.form.ExternServSummary;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.externalservice.ExternalServiceOption;
 import org.opendatakit.aggregate.constants.externalservice.ExternalServiceType;
@@ -154,6 +155,16 @@ public class GoogleSpreadsheet extends AbstractExternalService implements Extern
     }
   }
 
+  @Override
+  public ExternServSummary transform() {    
+    return new ExternServSummary(fsc.getCreatorUriUser(),
+        fsc.getOperationalStatus().toString(),
+        fsc.getEstablishmentDateTime(),
+        fsc.getExternalServiceOption().getDescriptionOfOption(),
+        fsc.getExternalServiceType().getServiceName(),
+          getDescriptiveTargetString());
+  }
+  
   public void persist() throws ODKEntityPersistException {
     Datastore ds = cc.getDatastore();
     User user = cc.getCurrentUser();

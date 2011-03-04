@@ -38,6 +38,7 @@ import oauth.signpost.exception.OAuthExpectationFailedException;
 import oauth.signpost.exception.OAuthMessageSignerException;
 
 import org.opendatakit.aggregate.CallingContext;
+import org.opendatakit.aggregate.client.form.ExternServSummary;
 import org.opendatakit.aggregate.constants.ErrorConsts;
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.ServletConsts;
@@ -213,6 +214,16 @@ public class FusionTable extends AbstractExternalService implements ExternalServ
     }
   }
 
+  @Override
+  public ExternServSummary transform() {    
+    return new ExternServSummary(fsc.getCreatorUriUser(),
+        fsc.getOperationalStatus().toString(),
+        fsc.getEstablishmentDateTime(),
+        fsc.getExternalServiceOption().getDescriptionOfOption(),
+        fsc.getExternalServiceType().getServiceName(),
+          getDescriptiveTargetString());
+  }
+  
   public void persist() throws ODKEntityPersistException {
     Datastore ds = cc.getDatastore();
     User user = cc.getCurrentUser();

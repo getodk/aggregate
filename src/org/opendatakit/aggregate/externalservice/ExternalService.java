@@ -16,6 +16,7 @@ package org.opendatakit.aggregate.externalservice;
 
 import java.util.List;
 
+import org.opendatakit.aggregate.client.form.ExternServSummary;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
 import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
@@ -69,4 +70,11 @@ public interface ExternalService {
    * @return
    */
   public String getDescriptiveTargetString();
+  
+  /**
+   * Transform to external service summary for the gwt interface
+   * 
+   * @return
+   */
+  public ExternServSummary transform();
 }
