@@ -34,6 +34,26 @@
     <url-pattern>/aggregateui/formservice</url-pattern>
   </servlet-mapping>
 
+
+  <servlet>
+    <servlet-name>filterServiceImpl</servlet-name>
+    <servlet-class>org.opendatakit.aggregate.server.FilterServiceImpl</servlet-class>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>filterServiceImpl</servlet-name>
+    <url-pattern>/aggregateui/filterservice</url-pattern>
+  </servlet-mapping>
+
+	<servlet>
+		<servlet-name>gwttest</servlet-name>
+		<servlet-class>org.opendatakit.aggregate.servlet.GwtTester</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>gwttest</servlet-name>
+		<url-pattern>/www/gwttest</url-pattern>
+	</servlet-mapping>
+
 	<servlet>
 		<servlet-name>blank</servlet-name>
 		<servlet-class>org.opendatakit.aggregate.servlet.BlankServlet</servlet-class>

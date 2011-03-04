@@ -19,29 +19,32 @@ package org.opendatakit.common.persistence;
 
 /**
  * Constant strings used to identify properties in an entity
- *  
+ * 
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
  * 
  */
 public class PersistConsts {
-  
+
   /**
-   * The length of the longest simple string we declare.
-   * These are used to hold things like the element name,
-   * form name and form id.  The user can alter table to 
-   * make this smaller if they need to.
+   * The length of the longest simple string we declare. These are used to hold
+   * things like the element name, form name and form id. The user can alter
+   * table to make this smaller if they need to.
    */
   public static final Long MAX_SIMPLE_STRING_LEN = 200L;
 
   /**
-   * The maximum length of the URI strings.
-   * An exception will be thrown if the program attempts
-   * to store anything longer than this in the URI column.
-   * The underlying storage layer must support this string
-   * length natively.   
+   * The maximum length of the URI strings. An exception will be thrown if the
+   * program attempts to store anything longer than this in the URI column. The
+   * underlying storage layer must support this string length natively.
    */
   public static final Long URI_STRING_LEN = 80L;
 
-
+  /**
+   * If you need to search a string this is the guaranteed length of a
+   * searchable string. A longer string may be searchable depending on the
+   * datastore but this value is set to be the worst searchable length.
+   * (Currently it's Google App Engine)
+   */
+  public static final Long GUARANTEED_SEARCHABLE_LEN = 249L;
 }

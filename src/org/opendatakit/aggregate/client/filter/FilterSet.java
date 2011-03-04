@@ -1,6 +1,7 @@
 package org.opendatakit.aggregate.client.filter;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 public class FilterSet implements Serializable {
@@ -9,7 +10,7 @@ public class FilterSet implements Serializable {
 	private List<FilterGroup> groups;
 	
 	public FilterSet() {
-		
+		this.groups = new ArrayList<FilterGroup>();
 	}
 	
 	public FilterSet(List<FilterGroup> allFilterGroups) {
