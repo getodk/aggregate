@@ -1,8 +1,9 @@
 package org.opendatakit.aggregate.client.form;
 
+import java.io.Serializable;
 import java.util.Date;
 
-public class ExternServSummary {
+public class ExternServSummary implements Serializable{
   
   private String user;
   private String status;
