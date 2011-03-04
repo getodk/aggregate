@@ -8,4 +8,6 @@ public interface FormService extends RemoteService {
 
   FormSummary [] getForms();
 
+  ExternServSummary [] getExternalServices(String formid);
+  
 }
