@@ -9,8 +9,7 @@ public class ExternServSummary implements Serializable{
    * Serialization identifier 
    */
   private static final long serialVersionUID = 29897237349781615L;
-  
-  
+   
   private String user;
   private String status;
   private Date established;
@@ -54,6 +53,4 @@ public class ExternServSummary implements Serializable{
   public String getName() {
     return name;
   }
-  
-  
 }

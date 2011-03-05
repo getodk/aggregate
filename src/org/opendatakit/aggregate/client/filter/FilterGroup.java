@@ -78,7 +78,7 @@ public class FilterGroup implements Serializable {
    *          the filter to be removed
    */
   public void removeFilter(Filter filter) {
-
+	  filters.remove(filter);
   }
 
   /**

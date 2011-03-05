@@ -1,5 +1,11 @@
 package org.opendatakit.aggregate.client;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.opendatakit.aggregate.client.filter.CreateNewFilterPopup;
+import org.opendatakit.aggregate.client.filter.Filter;
+import org.opendatakit.aggregate.client.filter.FilterGroup;
 import org.opendatakit.aggregate.client.form.FormService;
 import org.opendatakit.aggregate.client.form.FormServiceAsync;
 import org.opendatakit.aggregate.client.form.FormSummary;
@@ -7,9 +13,14 @@ import org.opendatakit.aggregate.client.form.FormSummary;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.CloseEvent;
+import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
@@ -17,15 +28,24 @@ import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TabPanel;
+import com.google.gwt.user.client.ui.Tree;
+import com.google.gwt.user.client.ui.TreeItem;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class AggregateUI implements EntryPoint {
   
   private static final int REFRESH_INTERVAL = 5000; // ms
   
+  private List<FilterGroup> view = new ArrayList<FilterGroup>();
+  private FlexTable dataTable; //contains the data
+  private FilterGroup def; //the default filter group
+  private HorizontalPanel filterPanel = new HorizontalPanel();
+  private CreateNewFilterPopup filterPopup = new CreateNewFilterPopup();
   private Url url;
   
   // navigation
@@ -112,18 +132,88 @@ public class AggregateUI implements EntryPoint {
     return formsAndGoalsPanel;
   }
 
-  public HorizontalPanel setupFiltersDataHelpPanel() {
-    // view filters
-    FlexTable filtersTable = new FlexTable();
-    filtersTable.setWidget(0, 0, new Button("Filter1"));
-    filtersTable.setWidget(0, 1, new Button("-"));
-    filtersTable.setWidget(1, 0, new Button("Filter2"));
-    filtersTable.setWidget(1, 1, new Button("-"));
-    filtersTable.setStyleName("filters_panel");
-    filtersDataHelp.add(filtersTable);
+  public TreeItem loadFilterGroup(final FilterGroup group) {
+	  TreeItem filterGroup = new TreeItem(
+			  new Label(group.getName()));
+	  
+	  final FlexTable filters = new FlexTable();
+	  
+	  int row = 0;
+	  for (Filter filter: group.getFilters()) {
+		  filters.setWidget(row, 0, new Label(
+				  filter.getVisibility() + filter.getCol() + 
+				  "where rows are " + filter.getOperation() + 
+				  filter.getInput()));
+		  final Button removeFilter = new Button("-");
+		  filters.setWidget(row, 1, removeFilter);
+		  removeFilter.getElement().setPropertyObject(
+				  "filter", filter);
+		  removeFilter.addClickHandler(new ClickHandler() {
+
+			@Override
+			public void onClick(ClickEvent event) {
+				Filter remove = (Filter)removeFilter.getElement()
+					.getPropertyObject("filter");
+				group.removeFilter(remove);
+				filterPanel.clear();
+				setupFiltersDataHelpPanel(view);
+			} 
+		  });
+		  row++;
+	  }
+	  filters.setStyleName("filters_panel");
+	  filterGroup.addItem(filters);
+	  filterGroup.setState(true);
+	  return filterGroup;
+  }
+  
+  public HorizontalPanel setupFiltersDataHelpPanel(
+		  List<FilterGroup> groups) {
+	  //create filter tree
+	  Tree activeFilters = new Tree();
+	  TreeItem title = new TreeItem(new Label("Active Filters"));
+	  activeFilters.addItem(title);
+	  
+	  for (FilterGroup group : groups) {
+		  TreeItem itemGroup = loadFilterGroup(group);
+		  title.addItem(itemGroup);
+		  title.setState(true);
+	  }
+	  
+	  //add new filter button
+	  Button newFilter = new Button("Create New Filter");
+	  newFilter.addClickHandler(new ClickHandler(){
+
+		@Override
+		public void onClick(ClickEvent event) {
+			filterPopup = new CreateNewFilterPopup(dataTable, def);
+			filterPopup.setPopupPositionAndShow(
+				new PopupPanel.PositionCallback() {
+					
+					@Override
+					public void setPosition(int offsetWidth, int offsetHeight) {
+						int left = (Window.getClientWidth() - offsetWidth) / 2;
+						int top = (Window.getClientHeight() - offsetHeight) / 2;
+						filterPopup.setPopupPosition(left, top);
+					}
+				});
+		  filterPopup.addCloseHandler(new CloseHandler<PopupPanel>() {
+			  
+			  @Override
+			  public void onClose(CloseEvent<PopupPanel> event) {
+				  filterPanel.clear();
+				  setupFiltersDataHelpPanel(view);
+			  }
+			
+		  });
+		}
+	  });
+	  
+	  activeFilters.add(newFilter);
+	  filtersDataHelp.add(activeFilters);
 
     // view data
-    FlexTable dataTable = new FlexTable();
+    dataTable = new FlexTable();
     for (int i = 0; i < 4; i++) {
       dataTable.setText(0, i, "Column " + i);
     }
@@ -174,7 +264,11 @@ public class AggregateUI implements EntryPoint {
   
   public void onModuleLoad() {
     reportContent.add(setupFormsAndGoalsPanel());
-    reportContent.add(setupFiltersDataHelpPanel());
+    def = new FilterGroup(
+    		"Default", "def", new ArrayList<Filter>());
+    view.add(def);
+    filterPanel = setupFiltersDataHelpPanel(view);
+    reportContent.add(filterPanel);
 
     manageContent.add(setupFormManagementPanel());
 
