@@ -24,6 +24,17 @@
 
 
  <!-- Servlets -->
+ 
+   <servlet>
+    <servlet-name>submissionServiceImpl</servlet-name>
+    <servlet-class>org.opendatakit.aggregate.server.SubmissionServiceImpl</servlet-class>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>submissionServiceImpl</servlet-name>
+    <url-pattern>/aggregateui/submissionservice</url-pattern>
+  </servlet-mapping>
+ 
   <servlet>
     <servlet-name>formServiceImpl</servlet-name>
     <servlet-class>org.opendatakit.aggregate.server.FormServiceImpl</servlet-class>
