@@ -1,5 +1,7 @@
 var MAX_SIDE_PANEL_WIDTH = 200;
 
+// Handle resizing various parts of the page based on
+// the screen size.
 function onWindowResize() {
 	var height = $(window).height();
 	var width = $(window).width();
