@@ -24,6 +24,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.DecoratedTabPanel;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
@@ -32,7 +33,6 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.RootPanel;
-import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.Tree;
 import com.google.gwt.user.client.ui.TreeItem;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -40,7 +40,12 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 public class AggregateUI implements EntryPoint {
   
   private static final int REFRESH_INTERVAL = 5000; // ms
-  
+
+  private List<FilterGroup> view = new ArrayList<FilterGroup>();
+  private FlexTable dataTable; //contains the data
+  private FilterGroup def; //the default filter group
+  private HorizontalPanel filterPanel = new HorizontalPanel();
+  private CreateNewFilterPopup filterPopup = new CreateNewFilterPopup();  
   private List<FilterGroup> view = new ArrayList<FilterGroup>();
   private FlexTable dataTable; //contains the data
   private FilterGroup def; //the default filter group
@@ -49,8 +54,7 @@ public class AggregateUI implements EntryPoint {
   private Url url;
   
   // navigation
-  private TabPanel mainNav = new TabPanel();
-  private Element spacer;
+  private DecoratedTabPanel mainNav = new DecoratedTabPanel();
   
   // Report tab
   private VerticalPanel reportContent = new VerticalPanel();
@@ -296,9 +300,19 @@ public class AggregateUI implements EntryPoint {
     mainNav.addStyleName("mainNav");
     mainNav.getTabBar().addStyleName("mainNavTabBar");
     
-    spacer = mainNav.getTabBar().getElement().getFirstChildElement()
+    Element spacer = mainNav.getTabBar().getElement().getFirstChildElement()
     	.getFirstChildElement().getFirstChildElement().getFirstChildElement();
-    spacer.setId("spacer_tab");
+    spacer.setId("main_nav_spacer_tab");
+    Element firstTab = mainNav.getTabBar().getElement().getFirstChildElement()
+    	.getFirstChildElement().getFirstChildElement().getNextSiblingElement().getFirstChildElement();
+    firstTab.addClassName("first_tab");
+    Element lastTab = mainNav.getTabBar().getElement().getFirstChildElement()
+    	.getFirstChildElement().getFirstChildElement();
+    for (int i = 0; i < mainNav.getTabBar().getTabCount(); i++) {
+    	lastTab = lastTab.getNextSiblingElement();
+    }
+    lastTab = lastTab.getFirstChildElement();
+    lastTab.addClassName("last_tab");
     
     RootPanel.get("dynamic_content").add(new HTML("<img src=\"images/odk_aggregate.png\" id=\"odk_aggregate_logo\" />"));
     RootPanel.get("dynamic_content").add(mainNav);
