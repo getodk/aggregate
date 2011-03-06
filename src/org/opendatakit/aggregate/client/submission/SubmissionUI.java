@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class SubmissionSummary implements Serializable {
+public class SubmissionUI implements Serializable {
 
   /**
    * Serialization Identifier
