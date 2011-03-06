@@ -60,32 +60,12 @@ public class AggregateUI implements EntryPoint {
   private FlexTable uploadTable = new FlexTable();
 
   private FormServiceAsync formSvc;
-  private ListBox enabledDropDown;
-  private ListBox publishDropDown;
-  private ListBox exportDropDown;
   private FlexTable listOfForms;
   
   public AggregateUI() {
     formSvc = GWT.create(FormService.class);
-    
-    enabledDropDown = new ListBox();
-    enabledDropDown.addItem("Disabled/Inactive");
-    enabledDropDown.addItem("Disabled/Active");
-    enabledDropDown.addItem("Enabled/Active");
-
-    publishDropDown = new ListBox();
-    publishDropDown.addItem("Google FusionTable");
-    publishDropDown.addItem("Google Spreadsheet");
-    publishDropDown.addItem("JSON Server");
-    
-    exportDropDown = new ListBox();
-    exportDropDown.addItem("CSV");
-    exportDropDown.addItem("KML");
-    exportDropDown.addItem("XML");
-    
     listOfForms = new FlexTable();
     
-
     // Setup timer to refresh list automatically.
     Timer refreshTimer = new Timer() {
        @Override
@@ -220,10 +200,10 @@ public class AggregateUI implements EntryPoint {
         dataTable.setText(i, j, "cell (" + i + ", " + j + ")");
       }
       if (i % 2 == 0)
-        dataTable.getRowFormatter().setStyleName(i, "even_table_row");
+        dataTable.getRowFormatter().setStyleName(i, "evenTableRow");
     }
-    dataTable.getRowFormatter().addStyleName(0, "title_bar");
-    dataTable.getElement().setId("data_table");
+    dataTable.getRowFormatter().addStyleName(0, "titleBar");
+    dataTable.addStyleName("dataTable");
     filtersDataHelp.add(dataTable);
 
     // view help
@@ -239,7 +219,8 @@ public class AggregateUI implements EntryPoint {
   }
 
   public VerticalPanel setupFormManagementPanel() {
-    Button uploadFormButton = new Button("Upload Form");
+    Button uploadFormButton = new Button();
+    uploadFormButton.setHTML("<img src=\"images/upload.png\" /> Upload Form");
     uploadTable.setWidget(0, 0, uploadFormButton);
     
     listOfForms.setText(0, 0, "Title");
@@ -249,8 +230,8 @@ public class AggregateUI implements EntryPoint {
     listOfForms.setText(0, 4, "Publish");
     listOfForms.setText(0, 5, "Export");
     listOfForms.setText(0, 6, "Delete");
-    listOfForms.getRowFormatter().addStyleName(0, "title_bar");
-    listOfForms.getElement().setId("form_management_table");
+    listOfForms.getRowFormatter().addStyleName(0, "titleBar");
+    listOfForms.addStyleName("dataTable");
     
     getFormList();
 
@@ -293,6 +274,7 @@ public class AggregateUI implements EntryPoint {
 
     mainNav.addStyleName("mainNav");
     mainNav.getTabBar().addStyleName("mainNavTabBar");
+    mainNav.getDeckPanel().getElement().setId("mainPage");
     
     TabBar tabBar = mainNav.getTabBar();
     Element firstTabElement = tabBar.getElement().getFirstChildElement().getFirstChildElement().getFirstChildElement();
@@ -334,8 +316,8 @@ public class AggregateUI implements EntryPoint {
 	  
 	  Element currentTab = firstTabElement;
 	  for (int i = 0; i < tabBar.getTabCount(); i++) {
-		  currentTab.addClassName("javascript_tab_flip");
 		  currentTab = currentTab.getNextSiblingElement();
+		  currentTab.addClassName("javascript_tab_flip");
 	  }
 	  
 	  if (!url.contains("manage_panel")) {
@@ -401,19 +383,29 @@ public class AggregateUI implements EntryPoint {
    * @param formSummary
    */
   private void updateFormTable(FormSummary [] forms) {
-    for (int i = 0; i < forms.length; i++) {
-      FormSummary form = forms[i];
-      listOfForms.setWidget(i, 0, new Anchor(form.getTitle()));
-      listOfForms.setWidget(i, 1, new HTML(form.getId()));
-      listOfForms.setWidget(i, 2, new HTML(form.getCreatedUser()));
-
-      listOfForms.setWidget(i, 3, enabledDropDown);
-      listOfForms.setWidget(i, 4, publishDropDown);
-      listOfForms.setWidget(i, 5, exportDropDown);
-      listOfForms.setWidget(i, 6, new Button("Delete"));
-      listOfForms.getRowFormatter().addStyleName(i, "table_data");
-      if (i % 2 == 0)
-        listOfForms.getRowFormatter().addStyleName(i, "even_table_row");
+    for (int j = 0; j < forms.length; j++) {
+    	int i = j + 1;
+    	FormSummary form = forms[j];
+        listOfForms.setWidget(i, 0, new Anchor(form.getTitle()));
+        listOfForms.setWidget(i, 1, new HTML(form.getId()));
+        String user = form.getCreatedUser();
+        listOfForms.setWidget(i, 2, new Anchor(user.substring(user.indexOf(":") + 1, user.indexOf("@")), user));
+        
+        ListBox enabledDropDown = new ListBox();
+        enabledDropDown.addItem("Disabled/Inactive");
+        enabledDropDown.addItem("Disabled/Active");
+        enabledDropDown.addItem("Enabled/Active");
+        
+        Button deleteButton = new Button();
+        deleteButton.setHTML("<img src=\"images/delete.png\" /> Delete");
+        deleteButton.addStyleDependentName("negative");
+        
+        listOfForms.setWidget(i, 3, enabledDropDown);
+        listOfForms.setWidget(i, 4, new HTML("publishButton"));
+        listOfForms.setWidget(i, 5, new HTML("exportButton"));
+        listOfForms.setWidget(i, 6, deleteButton);
+        if (i % 2 == 0)
+            listOfForms.getRowFormatter().addStyleName(i, "evenTableRow");
     }
   }
 }
