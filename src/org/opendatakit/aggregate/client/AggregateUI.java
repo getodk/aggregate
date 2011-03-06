@@ -33,6 +33,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.user.client.ui.TabBar;
 import com.google.gwt.user.client.ui.Tree;
 import com.google.gwt.user.client.ui.TreeItem;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -50,15 +51,13 @@ public class AggregateUI implements EntryPoint {
   
   // navigation
   private DecoratedTabPanel mainNav = new DecoratedTabPanel();
+  private DecoratedTabPanel manageNav;
   
   // Report tab
   private VerticalPanel reportContent = new VerticalPanel();
   private HorizontalPanel filtersDataHelp = new HorizontalPanel();
   private FlexTable formAndGoalSelectionTable = new FlexTable();
   private FlexTable uploadTable = new FlexTable();
-  
-  // Manage tab
-  private VerticalPanel manageContent = new VerticalPanel();
 
   private FormServiceAsync formSvc;
   private ListBox enabledDropDown;
@@ -262,6 +261,7 @@ public class AggregateUI implements EntryPoint {
   }
   
   public void onModuleLoad() {
+	url = new Url();
     reportContent.add(setupFormsAndGoalsPanel());
     def = new FilterGroup(
     		"Default", "def", new ArrayList<Filter>());
@@ -269,10 +269,10 @@ public class AggregateUI implements EntryPoint {
     filterPanel = setupFiltersDataHelpPanel(view);
     reportContent.add(filterPanel);
 
-    manageContent.add(setupFormManagementPanel());
+    manageNav = setupManageNav();
 
     mainNav.add(reportContent, "Report");
-    mainNav.add(manageContent, "Manage");
+    mainNav.add(manageNav, "Manage");
     mainNav.addSelectionHandler(new SelectionHandler<Integer>() {
     	public void onSelection(SelectionEvent<Integer> event) {
     		if (event.getSelectedItem() == 0)
@@ -281,7 +281,6 @@ public class AggregateUI implements EntryPoint {
     			url.set("panel", "manage");
     	}
     });
-    url = new Url();
     if (!url.contains("panel")) { // default
     	mainNav.selectTab(0);
     } else if (url.contains("panel", "report")) {
@@ -295,15 +294,14 @@ public class AggregateUI implements EntryPoint {
     mainNav.addStyleName("mainNav");
     mainNav.getTabBar().addStyleName("mainNavTabBar");
     
-    Element spacer = mainNav.getTabBar().getElement().getFirstChildElement()
-    	.getFirstChildElement().getFirstChildElement().getFirstChildElement();
+    TabBar tabBar = mainNav.getTabBar();
+    Element firstTabElement = tabBar.getElement().getFirstChildElement().getFirstChildElement().getFirstChildElement();
+    Element spacer = firstTabElement.getFirstChildElement();
     spacer.setId("main_nav_spacer_tab");
-    Element firstTab = mainNav.getTabBar().getElement().getFirstChildElement()
-    	.getFirstChildElement().getFirstChildElement().getNextSiblingElement().getFirstChildElement();
+    Element firstTab = firstTabElement.getNextSiblingElement().getFirstChildElement();
     firstTab.addClassName("first_tab");
-    Element lastTab = mainNav.getTabBar().getElement().getFirstChildElement()
-    	.getFirstChildElement().getFirstChildElement();
-    for (int i = 0; i < mainNav.getTabBar().getTabCount(); i++) {
+    Element lastTab = firstTabElement;
+    for (int i = 0; i < tabBar.getTabCount(); i++) {
     	lastTab = lastTab.getNextSiblingElement();
     }
     lastTab = lastTab.getFirstChildElement();
@@ -314,6 +312,61 @@ public class AggregateUI implements EntryPoint {
     contentLoaded();
   }
   
+  public DecoratedTabPanel setupManageNav() {
+	  DecoratedTabPanel nav = new DecoratedTabPanel();
+	  nav.add(setupFormManagementPanel(), "Forms");
+	  nav.add(setupExportsPanel(), "Export");
+	  nav.add(setupPermissionsPanel(), "Permissions");
+	  nav.add(setupUtilitiesPanel(), "Utilities");
+	  
+	  TabBar tabBar = nav.getTabBar();
+	  Element firstTabElement = tabBar.getElement().getFirstChildElement().getFirstChildElement().getFirstChildElement();
+	  Element spacer = firstTabElement.getFirstChildElement();
+	  spacer.setId("manage_nav_spacer_tab");
+	  Element firstTab = firstTabElement.getNextSiblingElement().getFirstChildElement();
+	  firstTab.addClassName("first_tab");
+	  Element lastTab = firstTabElement;
+	  for (int i = 0; i < tabBar.getTabCount(); i++) {
+		  lastTab = lastTab.getNextSiblingElement();
+	  }
+	  lastTab = lastTab.getFirstChildElement();
+	  lastTab.addClassName("last_tab");
+	  
+	  Element currentTab = firstTabElement;
+	  for (int i = 0; i < tabBar.getTabCount(); i++) {
+		  currentTab.addClassName("javascript_tab_flip");
+		  currentTab = currentTab.getNextSiblingElement();
+	  }
+	  
+	  if (!url.contains("manage_panel")) {
+		  nav.selectTab(0);
+	  } else if (url.contains("manage_panel", "forms")) {
+		  nav.selectTab(0);
+	  } else if (url.contains("manage_panel", "export")) {
+		  nav.selectTab(1);
+	  } else if (url.contains("manage_panel", "permissions")) {
+		  nav.selectTab(2);
+	  } else if (url.contains("manage_panel", "utilities")) {
+		  nav.selectTab(3);
+	  } else {
+		  nav.selectTab(0);
+	  }
+	  
+	  return nav;
+  }
+  
+  public FlexTable setupExportsPanel() {
+	  return new FlexTable();
+  }
+  
+  public HTML setupPermissionsPanel() {
+	  return new HTML("Content Forthcoming");
+  }
+  
+  public HTML setupUtilitiesPanel() {
+	  return new HTML("Content Forthcoming");
+  }
+  
   // Let's JavaScript know that the GWT content has been loaded
   // Currently calls into javascript/resize.js, if we add more JavaScript
   // then that should be changed.
@@ -322,7 +375,6 @@ public class AggregateUI implements EntryPoint {
   }-*/;
 
   private void getFormList() {
-
     // Initialize the service proxy.
     if (formSvc == null) {
       formSvc = GWT.create(FormService.class);
