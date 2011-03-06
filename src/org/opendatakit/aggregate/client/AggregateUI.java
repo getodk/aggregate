@@ -45,11 +45,6 @@ public class AggregateUI implements EntryPoint {
   private FlexTable dataTable; //contains the data
   private FilterGroup def; //the default filter group
   private HorizontalPanel filterPanel = new HorizontalPanel();
-  private CreateNewFilterPopup filterPopup = new CreateNewFilterPopup();  
-  private List<FilterGroup> view = new ArrayList<FilterGroup>();
-  private FlexTable dataTable; //contains the data
-  private FilterGroup def; //the default filter group
-  private HorizontalPanel filterPanel = new HorizontalPanel();
   private CreateNewFilterPopup filterPopup = new CreateNewFilterPopup();
   private Url url;
   
