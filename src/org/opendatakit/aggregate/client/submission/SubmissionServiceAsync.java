@@ -6,6 +6,6 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 
 public interface SubmissionServiceAsync {
 
-  void getSubmissions(FilterGroup filter, AsyncCallback<SubmissionSummaryBatch> callback);
+  void getSubmissions(FilterGroup filter, AsyncCallback<SubmissionUISummary> callback);
 
 }
