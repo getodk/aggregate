@@ -9,11 +9,13 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.ContextFactory;
+import org.opendatakit.aggregate.client.filter.ColumnFilter;
 import org.opendatakit.aggregate.client.filter.Filter;
 import org.opendatakit.aggregate.client.filter.FilterGroup;
 import org.opendatakit.aggregate.client.filter.FilterSet;
-import org.opendatakit.aggregate.constants.common.ColumnVisibility;
+import org.opendatakit.aggregate.client.filter.RowFilter;
 import org.opendatakit.aggregate.constants.common.FilterOperation;
+import org.opendatakit.aggregate.constants.common.Visibility;
 import org.opendatakit.aggregate.filter.SubmissionFilterGroup;
 import org.opendatakit.common.constants.BasicConsts;
 
@@ -58,8 +60,9 @@ public class GwtTester extends ServletUtilBase {
    
    if(flag.equals("create")) {
      List<Filter> filters = new ArrayList<Filter>();
-     filters.add(new Filter(ColumnVisibility.KEEP, "awesome", FilterOperation.EQUAL, "captain", new Long(99)));
-     filters.add(new Filter(ColumnVisibility.KEEP, "awesome2", FilterOperation.EQUAL, "captain1", new Long(1)));
+     filters.add(new RowFilter(Visibility.KEEP, "awesome", FilterOperation.EQUAL, "captain", new Long(99)));
+     filters.add(new ColumnFilter(Visibility.KEEP, "awesome2", new Long(5)));
+     filters.add(new RowFilter(Visibility.KEEP, "awesome2", FilterOperation.EQUAL, "captain1", new Long(1)));
      FilterGroup group = new FilterGroup("group1", formId, filters);
      try {
        SubmissionFilterGroup filterGrp = SubmissionFilterGroup.transform(group, cc);
@@ -84,7 +87,7 @@ public class GwtTester extends ServletUtilBase {
      for(FilterGroup group : filterSet.getGroups()) {
        resp.getWriter().println("GROUP: " + group.getName());
        for(Filter filter : group.getFilters()) {
-         resp.getWriter().println("   Filter: " + filter.getCol());
+         resp.getWriter().println("   Filter: " + filter.getTitle());
        }
      }
      

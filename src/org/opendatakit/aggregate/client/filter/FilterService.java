@@ -10,10 +10,4 @@ public interface FilterService extends RemoteService {
   
   Boolean updateFilterGroup(FilterGroup group);
   Boolean deleteFilterGroup(FilterGroup group);
-
-  // TODO: implement these functions later
-  FilterGroup maskAddFilter(Filter filter);
-  FilterGroup maskRemoveFilter(Filter filter);
-  FilterSet maskAddFilterGroup(FilterGroup group);
-  FilterSet maskRemoveFilterGroup(FilterGroup group);
 }

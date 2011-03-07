@@ -6,6 +6,7 @@ import java.util.List;
 import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.client.filter.Filter;
 import org.opendatakit.aggregate.client.filter.FilterGroup;
+import org.opendatakit.aggregate.constants.common.RowOrCol;
 import org.opendatakit.aggregate.datamodel.TopLevelDynamicBase;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.form.Form;
@@ -29,7 +30,9 @@ public class QueryByUIFilterGroup extends QueryBase {
     query = cc.getDatastore().createQuery(tbl, cc.getCurrentUser());
 
     for (Filter filter : filterGroup.getFilters()) {
-      addFilterToQuery(filter);
+    	if(filter.getRc() == RowOrCol.ROW) {
+    		addFilterToQuery(filter);
+    	}
     }
 
   }
@@ -37,7 +40,7 @@ public class QueryByUIFilterGroup extends QueryBase {
   private void addFilterToQuery(Filter filter) {
 
     for (DataField field : tbl.getFieldList()) {
-      if (field.getName().equals(filter.getCol())) {
+      if (field.getName().equals(filter.getTitle())) {
         // TODO: ask mitch
         query.addFilter(field, UITrans.convertFilterOperation(filter.getOperation()),
             filter.getInput());

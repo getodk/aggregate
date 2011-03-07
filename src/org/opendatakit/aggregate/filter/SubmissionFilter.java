@@ -5,7 +5,8 @@ import java.util.List;
 
 import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.client.filter.Filter;
-import org.opendatakit.aggregate.constants.common.ColumnVisibility;
+import org.opendatakit.aggregate.constants.common.RowOrCol;
+import org.opendatakit.aggregate.constants.common.Visibility;
 import org.opendatakit.aggregate.constants.common.FilterOperation;
 import org.opendatakit.aggregate.constants.common.UIConsts;
 import org.opendatakit.common.persistence.CommonFieldsBase;
@@ -31,7 +32,9 @@ public class SubmissionFilter extends CommonFieldsBase {
       DataField.DataType.URI, false, PersistConsts.URI_STRING_LEN).setIndexable(IndexType.HASH);
   private static final DataField VISIBILITY_PROPERTY = new DataField("VISIBILITY",
       DataField.DataType.STRING, true, 80L);
-  private static final DataField COLUMN_PROPERTY = new DataField("COLUMN",
+  private static final DataField ROWORCOL_PROPERTY = new DataField("ROWORCOL",
+	  DataField.DataType.STRING, true, 80L);
+  private static final DataField TITLE_PROPERTY = new DataField("TITLE",
       DataField.DataType.STRING, true, 80L); // TODO: determine length
   private static final DataField OPERATION_PROPERTY = new DataField("OPERATION",
       DataField.DataType.STRING, true, 80L);
@@ -50,7 +53,8 @@ public class SubmissionFilter extends CommonFieldsBase {
     super(schemaName, TABLE_NAME);
     fieldList.add(URI_FILTER_GROUP_PROPERTY);
     fieldList.add(VISIBILITY_PROPERTY);
-    fieldList.add(COLUMN_PROPERTY);
+    fieldList.add(ROWORCOL_PROPERTY);
+    fieldList.add(TITLE_PROPERTY);
     fieldList.add(OPERATION_PROPERTY);
     fieldList.add(CLAUSE_PROPERTY);
     fieldList.add(ORDINAL_PROPERTY);
@@ -75,13 +79,18 @@ public class SubmissionFilter extends CommonFieldsBase {
     return getStringField(URI_FILTER_GROUP_PROPERTY);
   }
 
-  public ColumnVisibility getColumnVisibility() {
+  public Visibility getColumnVisibility() {
     String visibility = getStringField(VISIBILITY_PROPERTY);
-    return ColumnVisibility.valueOf(visibility);
+    return Visibility.valueOf(visibility);
+  }
+  
+  public RowOrCol getRowOrColumn() {
+	  String roworcol = getStringField(ROWORCOL_PROPERTY);
+	  return RowOrCol.valueOf(roworcol);
   }
 
   public String getColumn() {
-    return getStringField(COLUMN_PROPERTY);
+    return getStringField(TITLE_PROPERTY);
   }
 
   public FilterOperation getFilterOperation() {
@@ -103,15 +112,21 @@ public class SubmissionFilter extends CommonFieldsBase {
     }
   }
 
-  public void setColumnVisibility(ColumnVisibility visibility) {
+  public void setColumnVisibility(Visibility visibility) {
     if (!setStringField(VISIBILITY_PROPERTY, visibility.toString())) {
       throw new IllegalArgumentException("overflow visibility");
     }
   }
+  
+  public void setRowOrColumn(RowOrCol roworcol) {
+	    if (!setStringField(ROWORCOL_PROPERTY, roworcol.toString())) {
+	        throw new IllegalArgumentException("overflow row or col");
+	      }
+  }
 
   public void setColumn(String name) {
-    if (!setStringField(COLUMN_PROPERTY, name)) {
-      throw new IllegalArgumentException("overflow column name");
+    if (!setStringField(TITLE_PROPERTY, name)) {
+      throw new IllegalArgumentException("overflow name");
     }
   }
 
@@ -135,7 +150,7 @@ public class SubmissionFilter extends CommonFieldsBase {
     Filter filter = new Filter(this.getUri());
 
     filter.setVisibility(getColumnVisibility());
-    filter.setCol(getColumn());
+    filter.setTitle(getColumn());
     filter.setOperation(getFilterOperation());
     filter.setInput(getFilterInputClause());
     filter.setOrdinal(getOrdinalNumber());
@@ -174,7 +189,7 @@ public class SubmissionFilter extends CommonFieldsBase {
     
     subFilter.setFilterGroup(filterGroup.getUri());
     subFilter.setColumnVisibility(filter.getVisibility());
-    subFilter.setColumn(filter.getCol());
+    subFilter.setColumn(filter.getTitle());
     subFilter.setFilterOperation(filter.getOperation());
     subFilter.setFilterInputClause(filter.getInput());
     subFilter.setOrdinalNumber(filter.getOrdinal());

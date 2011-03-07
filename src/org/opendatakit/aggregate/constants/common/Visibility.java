@@ -1,5 +1,5 @@
 package org.opendatakit.aggregate.constants.common;
 
-public enum ColumnVisibility {
+public enum Visibility {
   KEEP, REMOVE
 }
