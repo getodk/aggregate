@@ -61,8 +61,8 @@ public class CreateNewFilterPopup extends PopupPanel{
 		final TextBox var = new TextBox();
 		
 		//on exit
-		final Button exit = new Button("Save Filter");
-		exit.addClickHandler(new ClickHandler() {
+		final Button submit = new Button("Save Filter");
+		submit.addClickHandler(new ClickHandler() {
 
 			@Override
 			public void onClick(ClickEvent event) {
@@ -113,10 +113,19 @@ public class CreateNewFilterPopup extends PopupPanel{
 		
 		});
 		
+		Button exit = new Button("Cancel");
+		exit.addClickHandler(new ClickHandler() {
+
+			@Override
+			public void onClick(ClickEvent event) {
+				hide();
+			}
+		});
+		
 		create.setWidget(0, 0, keepRemove);
 		create.setWidget(0, 1, rowCol);
-		create.setWidget(1, 0, exit);
-		
+		create.setWidget(1, 0, submit);
+		create.setWidget(1, 1, exit);
 		rowCol.addChangeHandler(new ChangeHandler() {
 
 			@Override
