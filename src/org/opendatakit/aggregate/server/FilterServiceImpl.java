@@ -62,33 +62,4 @@ public class FilterServiceImpl extends RemoteServiceServlet implements FilterSer
       return Boolean.FALSE;
     }
   }
-  
-  
-  @Override
-  public FilterGroup maskAddFilter(Filter filter) {
-    // TODO Auto-generated method stub
-    return null;
-  }
-  
-  @Override
-  public FilterGroup maskRemoveFilter(Filter filter) {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-
-  
-  @Override
-  public FilterSet maskAddFilterGroup(FilterGroup group) {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public FilterSet maskRemoveFilterGroup(FilterGroup group) {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-
 }
