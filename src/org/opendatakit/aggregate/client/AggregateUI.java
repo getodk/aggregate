@@ -11,7 +11,6 @@ import org.opendatakit.aggregate.client.filter.RowFilter;
 import org.opendatakit.aggregate.client.form.FormService;
 import org.opendatakit.aggregate.client.form.FormServiceAsync;
 import org.opendatakit.aggregate.client.form.FormSummary;
-import org.opendatakit.aggregate.constants.common.RowOrCol;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
@@ -121,17 +120,16 @@ public class AggregateUI implements EntryPoint {
 	  
 	  int row = 0;
 	  for (Filter filter: group.getFilters()) {
-		  String titles = filter.getTitle();
 		  if(filter instanceof RowFilter) {
 		     RowFilter rowFilter = (RowFilter) filter;
 			  filters.setWidget(row, 0, new Label(
-			      rowFilter.getVisibility() + titles + 
+			      rowFilter.getVisibility() + rowFilter.getColumn().getDisplayHeader() + 
 					  "where columns are " + rowFilter.getOperation() + 
 					  rowFilter.getInput()));
 		  } else if(filter instanceof ColumnFilter){
 		    ColumnFilter columnFilter = (ColumnFilter) filter;
 			  filters.setWidget(row, 0, new Label(
-			      columnFilter.getVisibility() + titles));
+			      columnFilter.getVisibility() + "FIX ME"));
 		  }
 		  final Button removeFilter = new Button("-");
 		  filters.setWidget(row, 1, removeFilter);

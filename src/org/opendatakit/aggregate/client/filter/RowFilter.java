@@ -13,7 +13,7 @@ public class RowFilter extends Filter implements Serializable {
    * Id for serialization
    */
   private static final long serialVersionUID = -482917672621588696L;
-
+  private Column column;
   private FilterOperation operation;
   private String input;
 
@@ -22,13 +22,12 @@ public class RowFilter extends Filter implements Serializable {
   }
 
   // TODO: Kyle I am not sure why RowFilter has keep/remove?
-  // TODO: Kyle please fix the fact we should pass a column header instead of a
-  // title
-  public RowFilter(Visibility keepRemove, String title, FilterOperation compare, String inputParam,
+  public RowFilter(Visibility keepRemove, Column column, FilterOperation compare, String inputParam,
       Long ordinal) {
-    super(RowOrCol.ROW, new Column(title, ""), ordinal);
+    super(RowOrCol.ROW, ordinal);
     this.operation = compare;
     this.input = inputParam;
+    this.column = column;
   }
 
   /**
@@ -60,4 +59,13 @@ public class RowFilter extends Filter implements Serializable {
   public void setInput(String input) {
     this.input = input;
   }
+  
+  public void setColumn(Column column) {
+    this.column = column;
+  }
+  
+  public Column getColumn() {
+    return this.column;
+  }
+  
 }

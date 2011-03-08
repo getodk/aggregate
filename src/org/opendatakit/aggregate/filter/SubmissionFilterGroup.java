@@ -136,9 +136,10 @@ public class SubmissionFilterGroup extends CommonFieldsBase {
 
     ds.putEntity(this, user);
     if(filters != null) {
-      ds.putEntities(filters, user);
+      for(SubmissionFilter filter : filters) {
+        filter.persist(cc);
+      }
     }
-    
   }
   
   public void delete(CallingContext cc) throws ODKDatastoreException {
@@ -147,7 +148,7 @@ public class SubmissionFilterGroup extends CommonFieldsBase {
     
     if(filters != null) {
       for(SubmissionFilter filter : filters){
-        ds.deleteEntity(new EntityKey(filter, filter.getUri()), user);
+        filter.delete(cc);
       }
     }    
     ds.deleteEntity(new EntityKey(this, this.getUri()), user);

@@ -10,10 +10,12 @@ import javax.servlet.http.HttpServletResponse;
 import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.client.filter.ColumnFilter;
+import org.opendatakit.aggregate.client.filter.ColumnFilterHeader;
 import org.opendatakit.aggregate.client.filter.Filter;
 import org.opendatakit.aggregate.client.filter.FilterGroup;
 import org.opendatakit.aggregate.client.filter.FilterSet;
 import org.opendatakit.aggregate.client.filter.RowFilter;
+import org.opendatakit.aggregate.client.submission.Column;
 import org.opendatakit.aggregate.constants.common.FilterOperation;
 import org.opendatakit.aggregate.constants.common.Visibility;
 import org.opendatakit.aggregate.filter.SubmissionFilterGroup;
@@ -60,9 +62,15 @@ public class GwtTester extends ServletUtilBase {
    
    if(flag.equals("create")) {
      List<Filter> filters = new ArrayList<Filter>();
-     filters.add(new RowFilter(Visibility.KEEP, "awesome", FilterOperation.EQUAL, "captain", new Long(99)));
-     filters.add(new ColumnFilter(Visibility.KEEP, "awesome2", new Long(5)));
-     filters.add(new RowFilter(Visibility.KEEP, "awesome2", FilterOperation.EQUAL, "captain1", new Long(1)));
+     filters.add(new RowFilter(Visibility.KEEP, new Column("Ro1Awesome", ""), FilterOperation.EQUAL, "captain", new Long(99)));
+
+     List<ColumnFilterHeader> columns = new ArrayList<ColumnFilterHeader>();
+     columns.add(new ColumnFilterHeader("ColAwesome1", ""));
+     columns.add(new ColumnFilterHeader("ColAwesome2", ""));
+     columns.add(new ColumnFilterHeader("ColAwesome3", ""));
+     
+     filters.add(new ColumnFilter(Visibility.KEEP, columns, new Long(5)));
+     filters.add(new RowFilter(Visibility.REMOVE, new Column("Ro1Awesome", ""), FilterOperation.EQUAL, "captain1", new Long(1)));
      FilterGroup group = new FilterGroup("group1", formId, filters);
      try {
        SubmissionFilterGroup filterGrp = SubmissionFilterGroup.transform(group, cc);
@@ -87,7 +95,16 @@ public class GwtTester extends ServletUtilBase {
      for(FilterGroup group : filterSet.getGroups()) {
        resp.getWriter().println("GROUP: " + group.getName());
        for(Filter filter : group.getFilters()) {
-         resp.getWriter().println("   Filter: " + filter.getTitle());
+         if(filter instanceof RowFilter) {
+           RowFilter rf = (RowFilter) filter;
+           resp.getWriter().println("   RowFilter: " + rf.getColumn().getDisplayHeader());
+         }else if(filter instanceof ColumnFilter) {
+           ColumnFilter cf = (ColumnFilter) filter;
+           resp.getWriter().println("   ColumnFilter: ");
+           for(ColumnFilterHeader header : cf.getColumnFilterHeaders()) {
+             resp.getWriter().println("   ColumnHeader: " + header.getColumn().getDisplayHeader());
+           }
+         }
        }
      }
      

@@ -2,7 +2,6 @@ package org.opendatakit.aggregate.client.filter;
 
 import java.io.Serializable;
 
-import org.opendatakit.aggregate.client.submission.Column;
 import org.opendatakit.aggregate.constants.common.RowOrCol;
 import org.opendatakit.aggregate.constants.common.UIConsts;
 
@@ -11,17 +10,15 @@ public class Filter implements Serializable {
   private static final long serialVersionUID = -5453093733004634508L;
   private String uri; // unique identifier
   private RowOrCol rc;
-  private Column column;
   private Long ordinal; // order to display in filter group
 
   public Filter() {
 
   }
 
-  public Filter(RowOrCol rowcol, Column column, long ordinal) {
+  public Filter(RowOrCol rowcol, long ordinal) {
     this.uri = UIConsts.URI_DEFAULT;
     this.rc = rowcol;
-    this.column = column;
     this.ordinal = ordinal;
   }
 
@@ -46,23 +43,11 @@ public class Filter implements Serializable {
     this.rc = rc;
   }
 
-  public String getTitle() {
-    return column.getDisplayHeader();
-  }
-
   public Long getOrdinal() {
     return ordinal;
   }
 
   public void setOrdinal(Long ordinal) {
     this.ordinal = ordinal;
-  }
-
-  public void setColumn(Column column) {
-    this.column = column;
-  }
-  
-  public Column getColumn() {
-    return this.column;
   }
 }
