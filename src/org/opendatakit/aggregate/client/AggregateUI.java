@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.opendatakit.aggregate.client.filter.ColumnFilter;
+import org.opendatakit.aggregate.client.filter.ColumnFilterHeader;
 import org.opendatakit.aggregate.client.filter.CreateNewFilterPopup;
 import org.opendatakit.aggregate.client.filter.Filter;
 import org.opendatakit.aggregate.client.filter.FilterGroup;
@@ -138,8 +139,13 @@ public class AggregateUI implements EntryPoint {
 					  rowFilter.getInput()));
 		  } else if (filter instanceof ColumnFilter){
 			  ColumnFilter columnFilter = (ColumnFilter) filter;
+			  List<ColumnFilterHeader> columns = columnFilter.getColumnFilterHeaders();
+			  String columnNames = "";
+			  for(ColumnFilterHeader column: columns) {
+				  columnNames += " " + column.getColumn().getDisplayHeader();
+			  }
 			  filters.setWidget(row, 0, new Label(
-					  columnFilter.getVisibility() + "FIX ME"));
+					  columnFilter.getVisibility() + columnNames));
 		  }
 		  final Button removeFilter = new Button("-");
 		  filters.setWidget(row, 1, removeFilter);
@@ -420,6 +426,8 @@ public class AggregateUI implements EntryPoint {
 	    for (int j = 0; j < forms.length; j++) {
 	    	FormSummary form = forms[j];
 	    	formsBox.addItem(form.getTitle());
+	    	// TODO: Kyle - need to fix... once form is loaded then set the id
+	    	def.setFormId(form.getId());
 	    }
   }
   

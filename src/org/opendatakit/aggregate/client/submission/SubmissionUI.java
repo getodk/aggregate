@@ -13,6 +13,10 @@ public class SubmissionUI implements Serializable {
 
   private List<String> values;
   
+  public SubmissionUI() {
+	  
+  }
+  
   public SubmissionUI(List<String> values) {
     this.values = values;
   }
