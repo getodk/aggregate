@@ -13,6 +13,11 @@ body {
 a, a:visited, a:hover {
   color: #0000AA;
 }
+.gwt-PopupPanel {
+	padding: 3px;
+	border: 2px solid #777984;
+	background: url("images/mostly_opaque.png");
+}
 #filters_data_help {
 	border-top-style: solid;
 	border-top-width: 2px;
