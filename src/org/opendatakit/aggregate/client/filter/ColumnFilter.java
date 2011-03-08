@@ -21,8 +21,6 @@ public class ColumnFilter extends Filter implements Serializable {
     super();
   }
 
-  // TODO: Kyle please fix the fact we should pass a column header instead of a
-  // title
   public ColumnFilter(Visibility keepRemove, List<ColumnFilterHeader> columns, Long ordinal) {
     super(RowOrCol.COLUMN, ordinal);
     this.kr = keepRemove;

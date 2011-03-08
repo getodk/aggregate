@@ -4,14 +4,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.opendatakit.aggregate.client.submission.Column;
+import org.opendatakit.aggregate.client.submission.SubmissionService;
+import org.opendatakit.aggregate.client.submission.SubmissionServiceAsync;
+import org.opendatakit.aggregate.client.submission.SubmissionUISummary;
 import org.opendatakit.aggregate.constants.common.FilterOperation;
 import org.opendatakit.aggregate.constants.common.RowOrCol;
 import org.opendatakit.aggregate.constants.common.Visibility;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.Label;
@@ -21,13 +26,19 @@ import com.google.gwt.user.client.ui.TextBox;
 
 public class CreateNewFilterPopup extends PopupPanel{
 	
+	private SubmissionServiceAsync subSvc;
+	private FilterGroup def;
+	private List<Column> columns;
+	
 	public CreateNewFilterPopup() {
-		
+		subSvc = GWT.create(SubmissionService.class);
 	}
 	
 	public CreateNewFilterPopup(FlexTable data, 
-			final FilterGroup def) {
+			final FilterGroup def) {	
 		super(false); //do not close popup when user clicks out of it
+		this.def = def;
+		getSubmissions();
 		final FlexTable create = new FlexTable();
 		//keep or remove
 		final ListBox keepRemove = new ListBox();
@@ -71,7 +82,6 @@ public class CreateNewFilterPopup extends PopupPanel{
 
 			@Override
 			public void onClick(ClickEvent event) {
-				
 				Visibility kr;
 				FilterOperation op;
 				
@@ -85,6 +95,14 @@ public class CreateNewFilterPopup extends PopupPanel{
 				String rowcol = rowCol.getValue(rowCol.getSelectedIndex());
 				if(rowcol.compareTo(RowOrCol.ROW.toString()) == 0) {
 					String colname = col.getValue(col.getSelectedIndex());
+					String colencode = "";
+					
+					for(Column column: columns) {
+						if(colname.compareTo(column.getDisplayHeader()) == 0) {
+							colencode = column.getColumnEncoding();
+							break;
+						}
+					}
 					
 					String compare = comp.getValue(comp.getSelectedIndex());
 					if(compare.compareTo(FilterOperation.LESS_THAN.toString()) == 0) {
@@ -100,19 +118,27 @@ public class CreateNewFilterPopup extends PopupPanel{
 					}
 					
 					String variable = var.getValue();
-					Filter newFilter = new RowFilter(kr, new Column(colname, "FIX ME"), op, 
+					
+					Filter newFilter = new RowFilter(kr, new Column(colname, colencode), op, 
 							variable, (long) def.getFilters().size());
 					def.addFilter(newFilter);
 				} else {
-					String colname = "";
+					List<ColumnFilterHeader> columnfilterheaders = new ArrayList<ColumnFilterHeader>();
 					for (int i = cols.getSelectedIndex(); i < cols.getItemCount(); i++) {
+						String colname = "";
+						String colencode = "";
 						if(cols.isItemSelected(i)) {
-							colname += " " + cols.getValue(i);
+							colname = cols.getValue(i);
 						}
+						for(Column column: columns) {
+							if(colname.compareTo(column.getDisplayHeader()) == 0) {
+								colencode = column.getColumnEncoding();
+								break;
+							}
+						}
+						columnfilterheaders.add(new ColumnFilterHeader(colname, colencode));
 					}
-					List<ColumnFilterHeader> columns = new ArrayList<ColumnFilterHeader>();
-					columns.add(new ColumnFilterHeader(colname, "FIX ME"));
-					Filter newFilter = new ColumnFilter(kr, columns,(long) def.getFilters().size());
+					Filter newFilter = new ColumnFilter(kr, columnfilterheaders,(long) def.getFilters().size());
 					def.addFilter(newFilter);
 				}
 				hide();
@@ -167,6 +193,27 @@ public class CreateNewFilterPopup extends PopupPanel{
 		comp.setVisible(true);
 		var.setVisible(true);
 		setWidget(create);
-		
 	}
+	
+	private void getSubmissions() {
+	    // Initialize the service proxy.
+	    if (subSvc == null) {
+	      subSvc = GWT.create(SubmissionService.class);
+	    }
+
+	    // Set up the callback object.
+	    AsyncCallback<SubmissionUISummary> callback = new AsyncCallback<SubmissionUISummary>() {
+	      public void onFailure(Throwable caught) {
+	         // TODO: deal with error
+	      }
+
+		@Override
+		public void onSuccess(SubmissionUISummary result) {
+			columns = result.getHeaders();
+		}
+	    };
+
+	    // Make the call to the form service.
+	    subSvc.getSubmissions(def, callback);
+	  }
 }
