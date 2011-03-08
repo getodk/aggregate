@@ -13,13 +13,13 @@ public class SubmissionUISummary implements Serializable {
 
   private List<SubmissionUI> submissions = new ArrayList<SubmissionUI>();
   
-  private List<SubmissionHeader> headers;
+  private List<Column> headers;
   
   public SubmissionUISummary() {
-    headers = new ArrayList<SubmissionHeader>();
+    headers = new ArrayList<Column>();
   }
     
-  public List<SubmissionHeader> getHeaders() {
+  public List<Column> getHeaders() {
     return headers;
   }
 
@@ -32,31 +32,6 @@ public class SubmissionUISummary implements Serializable {
   }
 
   public void addSubmissionHeader(String displayHeader, String columnName) {
-    headers.add(new SubmissionHeader(displayHeader, columnName));
-  }
-  
-  public class SubmissionHeader implements Serializable {
-    /**
-     * Serialization Identifier
-     */
-    private static final long serialVersionUID = -5276405259406410364L;
-    
-    private String displayHeader;
-    private String columnName;
-    
-    public SubmissionHeader() {;}
-    
-    public SubmissionHeader(String displayHeader, String columnName) {
-      this.displayHeader = displayHeader;
-      this.columnName = columnName;
-    }
-
-    public String getDisplayHeader() {
-      return displayHeader;
-    }
-
-    public String getColumnName() {
-      return columnName;
-    }
+    headers.add(new Column(displayHeader, columnName));
   }
 }
