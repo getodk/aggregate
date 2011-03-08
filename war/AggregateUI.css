@@ -13,16 +13,6 @@ body {
 a, a:visited, a:hover {
   color: #0000AA;
 }
-.mainNav {
-	position: relative;
-	top: -22px;
-}
-#mainPage {
-  border-color: #07115A;
-  border-style: solid;
-  border-width: 2px 0px 0px 0px;
-  overflow: hidden;
-}
 #filters_data_help {
 	border-top-style: solid;
 	border-top-width: 2px;
@@ -31,9 +21,4 @@ a, a:visited, a:hover {
 #filters_data_help,
 #form_and_goals_panel {
 	border-collapse: collapse;
-}
-#odk_aggregate_logo {
-	position: relative;
-	left: 110px;
-	top: 9px;
 }
