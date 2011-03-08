@@ -31,11 +31,11 @@ public class QueryByUIFilterGroup extends QueryBase {
 
     query = cc.getDatastore().createQuery(tbl, cc.getCurrentUser());
 
-    for (Filter filter : filterGroup.getFilters()) {
-      if(filter instanceof RowFilter) {
-        addFilterToQuery((RowFilter)filter);
-      }
-    }
+//    for (Filter filter : filterGroup.getFilters()) {
+//      if(filter instanceof RowFilter) {
+//        addFilterToQuery((RowFilter)filter);
+//      }
+//    }
 
   }
 

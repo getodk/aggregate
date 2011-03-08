@@ -16,17 +16,29 @@ import org.opendatakit.aggregate.client.filter.FilterGroup;
 import org.opendatakit.aggregate.client.filter.FilterSet;
 import org.opendatakit.aggregate.client.filter.RowFilter;
 import org.opendatakit.aggregate.client.submission.Column;
+import org.opendatakit.aggregate.client.submission.SubmissionUI;
+import org.opendatakit.aggregate.client.submission.SubmissionUISummary;
 import org.opendatakit.aggregate.constants.common.FilterOperation;
 import org.opendatakit.aggregate.constants.common.Visibility;
+import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.filter.SubmissionFilterGroup;
+import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.format.Row;
+import org.opendatakit.aggregate.format.element.BasicElementFormatter;
+import org.opendatakit.aggregate.format.element.ElementFormatter;
+import org.opendatakit.aggregate.query.submission.QueryByUIFilterGroup;
+import org.opendatakit.aggregate.server.GenerateHeaderInfo;
+import org.opendatakit.aggregate.submission.Submission;
+import org.opendatakit.aggregate.submission.SubmissionSet;
 import org.opendatakit.common.constants.BasicConsts;
+import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 
 public class GwtTester extends ServletUtilBase {
   /**
    * Serial number for serialization
    */
   private static final long serialVersionUID = -150233761712061118L;
-  
+
   /**
    * URI from base
    */
@@ -36,7 +48,7 @@ public class GwtTester extends ServletUtilBase {
    * Title for generated webpage
    */
   private static final String TITLE_INFO = "Gwt Test";
-  
+
   /**
    * Handler for HTTP Get request to create a google spreadsheet
    * 
@@ -108,12 +120,46 @@ public class GwtTester extends ServletUtilBase {
        }
      }
      
+   } else if(flag.equals("query")) {
+     
+     SubmissionUISummary summary = new SubmissionUISummary();
+     try {
+
+//       Form form = Form.retrieveForm("widgets", cc);
+       Form form = Form.retrieveForm("LocationThings", cc);
+       QueryByUIFilterGroup query = new QueryByUIFilterGroup(form, null, 1000, cc);
+       List<Submission> submissions = query.getResultSubmissions();
+
+       GenerateHeaderInfo headerGenerator = new GenerateHeaderInfo(summary);
+       headerGenerator.processForHeaderInfo(form.getTopLevelGroupElement());
+       
+       ElementFormatter elemFormatter = new BasicElementFormatter(true, true, true);
+       
+       // format row elements
+       for (SubmissionSet sub : submissions) {
+         Row row = sub.getFormattedValuesAsRow(null, elemFormatter, false);
+         try {
+           SubmissionUI uiSubmission = new SubmissionUI(row.getFormattedValues());
+           summary.addSubmission(uiSubmission);
+         } catch (Exception e) {
+           // TODO Auto-generated catch block
+           e.printStackTrace();
+         }
+       }
+     } catch (ODKFormNotFoundException e) {
+       // TODO Auto-generated catch block
+       e.printStackTrace();
+     } catch (ODKDatastoreException e) {
+       // TODO Auto-generated catch block
+       e.printStackTrace();
+     }     
+     resp.getWriter().println("Done with Query");
+     
    } else {
      resp.getWriter().println("NO parameters");
    }
    
    finishBasicHtmlResponse(resp);
   }
-
 
 }

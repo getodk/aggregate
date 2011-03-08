@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.ContextFactory;
-import org.opendatakit.aggregate.client.filter.Filter;
 import org.opendatakit.aggregate.client.filter.FilterGroup;
 import org.opendatakit.aggregate.client.filter.FilterService;
 import org.opendatakit.aggregate.client.filter.FilterSet;
