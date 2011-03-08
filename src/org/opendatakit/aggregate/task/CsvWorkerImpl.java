@@ -65,7 +65,7 @@ public class CsvWorkerImpl {
 		    QueryByDate query = new QueryByDate(form, BasicConsts.EPOCH, false, ServletConsts.FETCH_LIMIT,
 		    		cc);
 		    SubmissionFormatter formatter = new CsvFormatter(form, cc.getServerURL(), pw, null);
-		    formatter.processSubmissions(query.getResultSubmissions());
+		    formatter.processSubmissions(query.getResultSubmissions(cc), cc);
 	
 		    // output file
 		    pw.close();
@@ -76,7 +76,7 @@ public class CsvWorkerImpl {
 		    if ( attemptCount.equals(r.getAttemptCount()) ) {
 				r.setResultFile(outputFile, HtmlConsts.RESP_TYPE_CSV, 
 						Long.valueOf(outputFile.length), 
-						form.getViewableFormNameSuitableAsFileName() + ServletConsts.CSV_FILENAME_APPEND);
+						form.getViewableFormNameSuitableAsFileName() + ServletConsts.CSV_FILENAME_APPEND, cc);
 				r.setStatus(Status.AVAILABLE);
 				r.setCompletionDate(new Date());
 		    }

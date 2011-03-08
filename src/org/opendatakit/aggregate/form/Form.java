@@ -76,8 +76,6 @@ public class Form {
 
   private final List<SubmissionAssociationTable> submissionAssociations = new ArrayList<SubmissionAssociationTable>();
   
-  private final CallingContext cc;
-
   // special values for bootstrapping
   public static final String URI_FORM_ID_VALUE_FORM_INFO = "aggregate.opendatakit.org:FormInfo";
  
@@ -107,12 +105,11 @@ public class Form {
   }
 
   Form(Submission submission, CallingContext cc) throws ODKDatastoreException {
-    this.cc = cc;
     objectEntity = submission;
-    formDefinition = fetchSubmissionAssociations();
+    formDefinition = fetchSubmissionAssociations(cc);
   }
 
-  private FormDefinition fetchSubmissionAssociations() {
+  private FormDefinition fetchSubmissionAssociations(CallingContext cc) {
 
 	RepeatSubmissionType r = (RepeatSubmissionType) objectEntity.getElementValue(FormInfo.fiSubmissionTable);
 	List<SubmissionSet> submissions = r.getSubmissionSets();
@@ -147,7 +144,7 @@ public class Form {
 	return FormDefinition.getFormDefinition(match.getXFormParameters(), cc);
   }
   
-  public void persist() throws ODKDatastoreException {
+  public void persist(CallingContext cc) throws ODKDatastoreException {
 	Datastore ds = cc.getDatastore();
 	User user = cc.getCurrentUser();
     ds.putEntities(submissionAssociations, user);
@@ -165,7 +162,7 @@ public class Form {
    *          Datastore
    * @throws ODKDatastoreException
    */
-  public void deleteForm() throws ODKDatastoreException {
+  public void deleteForm(CallingContext cc) throws ODKDatastoreException {
 	FormDataModel fdm = FormDataModel.assertRelation(cc);
     List<EntityKey> eksFormInfo = new ArrayList<EntityKey>();
 
@@ -182,7 +179,7 @@ public class Form {
     }
     
     // queue everything in formInfo for delete
-    objectEntity.recursivelyAddEntityKeys(eksFormInfo);
+    objectEntity.recursivelyAddEntityKeys(eksFormInfo, cc);
     Datastore ds = cc.getDatastore();
     User user = cc.getCurrentUser();
     
@@ -395,7 +392,7 @@ public class Form {
    * 
    * @return get XML definition of XForm
    */
-  public String getFormXml() throws ODKDatastoreException {
+  public String getFormXml(CallingContext cc) throws ODKDatastoreException {
 		// assume for now that there is only one fileset...
 		RepeatSubmissionType r = (RepeatSubmissionType) objectEntity.getElementValue(FormInfo.fiFilesetTable);
 		List<SubmissionSet> filesets = r.getSubmissionSets();
@@ -412,7 +409,7 @@ public class Form {
 		  if ( contentType == null ) continue; // incomplete form...
 		  String unrootedFileName = bt.getUnrootedFilename(i);
 		  if ( contentType.equals("text/xml") && !unrootedFileName.contains("/")) {
-			  byte[] byteArray = bt.getBlob(i);
+			  byte[] byteArray = bt.getBlob(i, cc);
 			  return new String(byteArray);
 		  }
 	  }
@@ -458,7 +455,7 @@ public class Form {
    * 
    * @return true if a new submission can be received, false otherwise
    */
-  public Boolean getSubmissionEnabled() {
+  public Boolean getSubmissionEnabled(CallingContext cc) {
 	// assume for now that there is only one submission...
 	RepeatSubmissionType r = (RepeatSubmissionType) objectEntity.getElementValue(FormInfo.fiSubmissionTable);
 	List<SubmissionSet> filesets = r.getSubmissionSets();
@@ -466,7 +463,7 @@ public class Form {
 		throw new IllegalStateException("Expecting only one submission record at this time!");
 	}
 	SubmissionSet submissionRecord = filesets.get(0);
-	SubmissionAssociationTable sa = findSubmission(submissionRecord);
+	SubmissionAssociationTable sa = findSubmission(submissionRecord, cc);
 	return (sa == null) ? false : sa.getIsSubmissionAllowed();
   }
 
@@ -477,7 +474,7 @@ public class Form {
    *          set to true if a new submission can be received, false otherwise
    * 
    */
-  public void setSubmissionEnabled(Boolean submissionEnabled) {
+  public void setSubmissionEnabled(Boolean submissionEnabled, CallingContext cc) {
 	// assume for now that there is only one submission...
 	RepeatSubmissionType r = (RepeatSubmissionType) objectEntity.getElementValue(FormInfo.fiSubmissionTable);
 	List<SubmissionSet> filesets = r.getSubmissionSets();
@@ -485,11 +482,11 @@ public class Form {
 		throw new IllegalStateException("Expecting only one submission record at this time!");
 	}
 	SubmissionSet submissionRecord = filesets.get(0);
-	SubmissionAssociationTable sa = findSubmission(submissionRecord);
+	SubmissionAssociationTable sa = findSubmission(submissionRecord, cc);
 	if ( sa != null ) sa.setIsSubmissionAllowed(submissionEnabled);
   }
  
-  private SubmissionAssociationTable findSubmission(SubmissionSet submissionRecord) {
+  private SubmissionAssociationTable findSubmission(SubmissionSet submissionRecord, CallingContext cc) {
 	  String submissionFormId = ((StringSubmissionType) submissionRecord.getElementValue(FormInfo.submissionFormId)).getValue();
 	  Long submissionModelVersion = ((LongSubmissionType) submissionRecord.getElementValue(FormInfo.submissionModelVersion)).getValue();
 	  Long submissionUiVersion = ((LongSubmissionType) submissionRecord.getElementValue(FormInfo.submissionUiVersion)).getValue();

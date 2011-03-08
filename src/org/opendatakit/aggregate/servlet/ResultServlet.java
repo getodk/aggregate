@@ -89,7 +89,7 @@ public class ResultServlet extends ServletUtilBase {
       QueryByDate query = new QueryByDate(form, new Date(), true,
                ServletConsts.FETCH_LIMIT, cc);
       query.addFilter(PersistentResults.getRequestingUserKey(), FilterOperation.EQUAL, cc.getCurrentUser().getUriUser());
-      List<Submission> submissions = query.getResultSubmissions();
+      List<Submission> submissions = query.getResultSubmissions(cc);
 
       List<FormElementModel> columns = new ArrayList<FormElementModel>();
       columns.add(PersistentResults.getResultTypeKey());
@@ -111,7 +111,7 @@ public class ResultServlet extends ServletUtilBase {
       
       // format row elements 
       for (SubmissionSet sub : submissions) {
-        Row row = sub.getFormattedValuesAsRow(columns, elemFormatter, false);
+        Row row = sub.getFormattedValuesAsRow(columns, elemFormatter, false, cc);
         formattedElements.add(row);
       }
       

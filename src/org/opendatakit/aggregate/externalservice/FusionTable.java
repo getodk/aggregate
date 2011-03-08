@@ -144,15 +144,15 @@ public class FusionTable extends AbstractExternalService implements ExternalServ
       t.setFusionTableId(a.getId());
       repeatElementTableIds.add(t);
     }
-    persist();
+    persist(cc);
   }
 
   @Override
-  protected void insertData(Submission submission) throws ODKExternalServiceException {
+  protected void insertData(Submission submission, CallingContext cc) throws ODKExternalServiceException {
     // upload base submission values
     List<String> headers = headerFormatter.generateHeaders(form, form.getTopLevelGroupElement(),
         null);
-    executeInsertData(objectEntity.getFusionTableId(), submission, headers);
+    executeInsertData(objectEntity.getFusionTableId(), submission, headers, cc);
 
     // upload repeat value
     for (FusionTableRepeatParameterTable tableId : repeatElementTableIds) {
@@ -166,7 +166,7 @@ public class FusionTable extends AbstractExternalService implements ExternalServ
           RepeatSubmissionType repeat = (RepeatSubmissionType) value;
           if (repeat.getElement().equals(element)) {
             for (SubmissionSet set : repeat.getSubmissionSets()) {
-              executeInsertData(tableId.getFusionTableId(), set, headers);
+              executeInsertData(tableId.getFusionTableId(), set, headers, cc);
             }
           }
         } else {
@@ -176,11 +176,11 @@ public class FusionTable extends AbstractExternalService implements ExternalServ
     }
   }
 
-  private void executeInsertData(String tableId, SubmissionSet set, List<String> headers)
+  private void executeInsertData(String tableId, SubmissionSet set, List<String> headers, CallingContext cc)
       throws ODKExternalServiceException {
 
     try {
-      Row row = set.getFormattedValuesAsRow(null, formatter, true);
+      Row row = set.getFormattedValuesAsRow(null, formatter, true, cc);
 
       String insertQuery = FusionTableConsts.INSERT_STMT + tableId
           + createCsvString(headers.iterator()) + FusionTableConsts.VALUES_STMT
@@ -195,7 +195,7 @@ public class FusionTable extends AbstractExternalService implements ExternalServ
   }
 
   @Override
-  public void setUploadCompleted() throws ODKEntityPersistException {
+  public void setUploadCompleted(CallingContext cc) throws ODKEntityPersistException {
     fsc.setUploadCompleted(true);
     if (fsc.getExternalServiceOption() == ExternalServiceOption.UPLOAD_ONLY) {
       fsc.setOperationalStatus(OperationalStatus.COMPLETED);
@@ -206,14 +206,14 @@ public class FusionTable extends AbstractExternalService implements ExternalServ
   }
 
   @Override
-  public void abandon() throws ODKDatastoreException {
+  public void abandon(CallingContext cc) throws ODKDatastoreException {
     if (fsc.getOperationalStatus() != OperationalStatus.COMPLETED) {
       fsc.setOperationalStatus(OperationalStatus.ABANDONED);
-      persist();
+      persist(cc);
     }
   }
 
-  public void persist() throws ODKEntityPersistException {
+  public void persist(CallingContext cc) throws ODKEntityPersistException {
     Datastore ds = cc.getDatastore();
     User user = cc.getCurrentUser();
     ds.putEntities(repeatElementTableIds, user);
@@ -221,7 +221,7 @@ public class FusionTable extends AbstractExternalService implements ExternalServ
     ds.putEntity(fsc, user);
   }
 
-  public void delete() throws ODKDatastoreException {
+  public void delete(CallingContext cc) throws ODKDatastoreException {
     // remove fusion table permission as no longer needed
     // TODO: test that the revoke REALLY works, can be easy to miss since we
     // ignore exception

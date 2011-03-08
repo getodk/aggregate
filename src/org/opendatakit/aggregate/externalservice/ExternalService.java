@@ -16,6 +16,7 @@ package org.opendatakit.aggregate.externalservice;
 
 import java.util.List;
 
+import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
 import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
@@ -29,32 +30,32 @@ import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
  */
 public interface ExternalService {
   
-  public void sendSubmission(Submission submission) throws ODKExternalServiceException;
+  public void sendSubmission(Submission submission, CallingContext cc) throws ODKExternalServiceException;
   
-  public void sendSubmissions(List<Submission> submissions) throws ODKExternalServiceException;
+  public void sendSubmissions(List<Submission> submissions, CallingContext cc) throws ODKExternalServiceException;
   
-  public void setUploadCompleted() throws ODKEntityPersistException;
+  public void setUploadCompleted(CallingContext cc) throws ODKEntityPersistException;
   
   /**
    * Abandon the action.  
    * 
    * @throws ODKDatastoreException
    */
-  public void abandon() throws ODKDatastoreException;
+  public void abandon(CallingContext cc) throws ODKDatastoreException;
   
   /**
    * Delete the external service connection record.
    * 
    * @throws ODKDatastoreException
    */
-  public void delete() throws ODKDatastoreException;
+  public void delete(CallingContext cc) throws ODKDatastoreException;
   
   /**
    * Persist status changes to the persistence layer.
    * 
    * @throws ODKEntityPersistException
    */
-  public void persist() throws ODKEntityPersistException;
+  public void persist(CallingContext cc) throws ODKEntityPersistException;
 
   /**
    * get the FormServiceCursor for this external service connection.

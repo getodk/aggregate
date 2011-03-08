@@ -111,7 +111,7 @@ public class XFormsDownloadServlet extends ServletUtilBase {
     	BlobSubmissionType b = (BlobSubmissionType) v;
     	if ( b.getAttachmentCount() == 1 ) {
     		try {
-				imageBlob = b.getBlob(1);
+				imageBlob = b.getBlob(1, cc);
 				unrootedFileName = b.getUnrootedFilename(1);
 				contentType = b.getContentType(1);
 				contentLength = b.getContentLength(1);
@@ -129,7 +129,7 @@ public class XFormsDownloadServlet extends ServletUtilBase {
     					"attachment request must be fully qualified");
     		} else {
 	    		try {
-	    			imageBlob = b.getBlob(ordinal.intValue());
+	    			imageBlob = b.getBlob(ordinal.intValue(), cc);
 	    			unrootedFileName = b.getUnrootedFilename(ordinal.intValue());
 	    			contentType = b.getContentType(ordinal.intValue());
 	    			contentLength = b.getContentLength(ordinal.intValue());

@@ -97,7 +97,7 @@ public class FormMultipleValueServlet extends ServletUtilBase {
 				beginBasicHtmlResponse(TITLE_INFO + b.getPropertyName(), resp, true, cc);
 
 				formatter.processSubmissionSetPublic(b.getSubmissionSets(), b
-						.getElement());
+						.getElement(), cc);
 
 				// footer info
 				finishBasicHtmlResponse(resp);

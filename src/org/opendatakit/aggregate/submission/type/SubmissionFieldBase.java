@@ -91,7 +91,7 @@ public abstract class SubmissionFieldBase<T> implements SubmissionField<T>{
    * Add submission field value to JsonObject
    * @param JSON Object to add value to
    */  
-  public abstract void formatValue(ElementFormatter elemFormatter, Row row, String ordinalValue) throws ODKDatastoreException;
+  public abstract void formatValue(ElementFormatter elemFormatter, Row row, String ordinalValue, CallingContext cc) throws ODKDatastoreException;
   
   @Override
   public final boolean isBinary() {
@@ -108,7 +108,7 @@ public abstract class SubmissionFieldBase<T> implements SubmissionField<T>{
    * @throws ODKDatastoreException 
    */ 
   @Override
-  public BinaryContentManipulator.BlobSubmissionOutcome setValueFromByteArray(byte [] byteArray, String contentType, Long contentLength, String unrootedFilePath) throws ODKDatastoreException {
+  public BinaryContentManipulator.BlobSubmissionOutcome setValueFromByteArray(byte [] byteArray, String contentType, Long contentLength, String unrootedFilePath, CallingContext cc) throws ODKDatastoreException {
     if(isBinary()) {
       throw new IllegalStateException("Should be overridden in derived class");
     } else {

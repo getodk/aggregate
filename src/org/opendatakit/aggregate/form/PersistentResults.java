@@ -26,6 +26,7 @@ import org.opendatakit.aggregate.datamodel.FormDataModel;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.datamodel.TopLevelDynamicBase;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
+import org.opendatakit.aggregate.form.FormDefinition.OrdinalSequence;
 import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.submission.type.BlobSubmissionType;
@@ -149,6 +150,7 @@ public class PersistentResults {
 
 	public Submission objectEntity;
 	
+	
 	/**
 	 * After you have a submission (e.g., from a query), create a 
 	 * PersistentResults object to wrap it 
@@ -265,22 +267,22 @@ public class PersistentResults {
 		((DateSubmissionType) objectEntity.getElementValue(completionDate)).setValueFromDate(value);
 	}
 
-	public byte[] getResultFile() throws ODKDatastoreException {
+	public byte[] getResultFile(CallingContext cc) throws ODKDatastoreException {
 		BlobSubmissionType bt = ((BlobSubmissionType) objectEntity.getElementValue(resultFile));
 		if ( bt.getAttachmentCount() == 0 ) return null;
 		if ( bt.getAttachmentCount() > 1 ) {
 			throw new IllegalStateException("Too many results attached!");
 		}
-		return bt.getBlob(1);
+		return bt.getBlob(1, cc);
 	}
 
 	public void setResultFile(byte[] byteArray, String contentType, Long contentLength,
-								String unrootedFilePath) throws ODKDatastoreException {
+								String unrootedFilePath, CallingContext cc) throws ODKDatastoreException {
 		BlobSubmissionType bt = ((BlobSubmissionType) objectEntity.getElementValue(resultFile));
 		if ( bt.getAttachmentCount() > 0 ) {
 			throw new IllegalStateException("Results are already attached!");
 		}
-		bt.setValueFromByteArray(byteArray, contentType, contentLength, unrootedFilePath);
+		bt.setValueFromByteArray(byteArray, contentType, contentLength, unrootedFilePath, cc);
 	}
 	
 	public String getFormId() {
@@ -304,7 +306,7 @@ public class PersistentResults {
 	
 	public void delete(CallingContext cc) throws ODKDatastoreException {
 		List<EntityKey> keys = new ArrayList<EntityKey>();
-		objectEntity.recursivelyAddEntityKeys(keys);
+		objectEntity.recursivelyAddEntityKeys(keys, cc);
 		keys.add(objectEntity.getKey());
 		cc.getDatastore().deleteEntities(keys, cc.getCurrentUser());
 	}
@@ -390,7 +392,7 @@ public class PersistentResults {
 
 		static final String TABLE_NAME = "_persistent_results";
 	
-		private static final String PERSISTENT_RESULT_DEFINITION_URI = "aggregate.opendatakit.org:PersistentResults-Definition";
+		private static final String PERSISTENT_RESULT_DEFINITION_URI = "aggregate.opendatakit.org:PersistentResults-def";
 		
 		private static final DataField REQUESTING_USER = new DataField("REQUESTING_USER",
 				DataField.DataType.STRING, true);
@@ -526,36 +528,33 @@ public class PersistentResults {
 			PersistentResultsTable persistentResultsDefinition = ds.createEntityUsingRelation(persistentResultsRelation, user);
 			persistentResultsDefinition.setStringField(persistentResultsRelation.primaryKey, PersistentResultsTable.PERSISTENT_RESULT_DEFINITION_URI);
 			
-			Long lastOrdinal = 0L;
+			OrdinalSequence os = new OrdinalSequence();
 			
-			lastOrdinal = FormDefinition.buildTableFormDataModel( model, 
-					persistentResultsRelation, 
+			String parentTableKey = persistentResultsDefinition.getUri();
+			
+			String groupKey = FormDefinition.buildTableFormDataModel( model, 
+					persistentResultsDefinition, 
 					persistentResultsDefinition, // top level table
-					persistentResultsDefinition, // parent table...
-					1L,
+					parentTableKey, // parent table...
+					os,
 					cc );
 	
-			String uriPrefix = FORM_ID_PERSISTENT_RESULT;
 			FormDefinition.buildBinaryContentFormDataModel(model, 
 					PersistentResultsTable.ELEMENT_NAME_RESULT_FILE_DEFINITION, 
-					uriPrefix + PersistentResultsTable.PERSISTENT_RESULT_FILE_BINARY_CONTENT, 
 					PersistentResultsTable.PERSISTENT_RESULT_FILE_BINARY_CONTENT, 
-					uriPrefix + PersistentResultsTable.PERSISTENT_RESULT_FILE_BINARY_CONTENT_REF_BLOB, 
 					PersistentResultsTable.PERSISTENT_RESULT_FILE_BINARY_CONTENT_REF_BLOB, 
-					uriPrefix + PersistentResultsTable.PERSISTENT_RESULT_FILE_REF_BLOB, 
 					PersistentResultsTable.PERSISTENT_RESULT_FILE_REF_BLOB, 
 					persistentResultsDefinition, // top level table
-					persistentResultsRelation, // parent table
-					++lastOrdinal, 
+					groupKey, // parent group (table)
+					os, 
 					cc);
 			
+			os.ordinal = 2L;
 			FormDefinition.buildLongStringFormDataModel(model, 
-					uriPrefix + PersistentResultsTable.PERSISTENT_RESULT_LONG_STRING_REF_TEXT, 
 					PersistentResultsTable.PERSISTENT_RESULT_LONG_STRING_REF_TEXT, 
-					uriPrefix + PersistentResultsTable.PERSISTENT_RESULT_REF_TEXT, 
 					PersistentResultsTable.PERSISTENT_RESULT_REF_TEXT, 
 					persistentResultsDefinition, // top level and parent table
-					2L, 
+					os, 
 					cc);
 			
 			FormDefinition.assertModel(xformPersistentResultsParameters, model, cc);

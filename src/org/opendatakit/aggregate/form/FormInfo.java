@@ -280,7 +280,7 @@ public class FormInfo {
 	    
 	    BlobSubmissionType bt = (BlobSubmissionType) matchingSet.getElementValue(FormInfo.xformDefinition);
 	    if ( bt.getAttachmentCount() == 0 ) {
-	    	return bt.setValueFromByteArray(definition, "text/xml", Long.valueOf(definition.length), title + ".xml"
+	    	return bt.setValueFromByteArray(definition, "text/xml", Long.valueOf(definition.length), title + ".xml", cc
 	    				) != BinaryContentManipulator.BlobSubmissionOutcome.COMPLETELY_NEW_FILE;
 	    } else {
 	    	if ( bt.getAttachmentCount() > 1) throw new ODKFormAlreadyExistsException();
@@ -335,7 +335,7 @@ public class FormInfo {
     	}
 		matchingFiles = matchingFiles &&
 			(BinaryContentManipulator.BlobSubmissionOutcome.NEW_FILE_VERSION != 
-				bt.setValueFromByteArray(item.getStream().toByteArray(), item.getContentType(), item.getContentLength(), filePath));
+				bt.setValueFromByteArray(item.getStream().toByteArray(), item.getContentType(), item.getContentLength(), filePath, cc));
 		return matchingFiles;
 	}
 

@@ -19,6 +19,7 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
+import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.submission.SubmissionKey;
@@ -73,7 +74,7 @@ public class BasicElementFormatter implements ElementFormatter {
     basicStringConversion(uri, row);
   }
   
-  public void formatBinary(BlobSubmissionType blobSubmission, String propertyName, Row row) throws ODKDatastoreException {
+  public void formatBinary(BlobSubmissionType blobSubmission, String propertyName, Row row, CallingContext cc) throws ODKDatastoreException {
 	  SubmissionKey key = blobSubmission.getValue();
 	  basicStringConversion(key.toString(), row);
   }
@@ -143,7 +144,7 @@ public class BasicElementFormatter implements ElementFormatter {
     basicStringConversion(string, row);
   }
 
-  public void formatRepeats(SubmissionRepeat repeat, FormElementModel repeatElement, Row row) throws ODKDatastoreException {
+  public void formatRepeats(SubmissionRepeat repeat, FormElementModel repeatElement, Row row, CallingContext cc) throws ODKDatastoreException {
     basicStringConversion(repeat.getUniqueKeyStr(), row);
   }
 

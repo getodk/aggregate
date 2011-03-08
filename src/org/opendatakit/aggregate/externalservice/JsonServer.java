@@ -102,21 +102,21 @@ public class JsonServer extends AbstractExternalService implements ExternalServi
   }
 
   @Override
-  public void abandon() throws ODKDatastoreException {
+  public void abandon(CallingContext cc) throws ODKDatastoreException {
 	if ( fsc.getOperationalStatus() != OperationalStatus.COMPLETED ) {
 	  fsc.setOperationalStatus(OperationalStatus.ABANDONED);
-	  persist();  
+	  persist(cc);  
 	}
   }
 
-  public void persist() throws ODKEntityPersistException {
+  public void persist(CallingContext cc) throws ODKEntityPersistException {
 	Datastore ds = cc.getDatastore();
 	User user = cc.getCurrentUser();
     ds.putEntity(objectEntity, user);
     ds.putEntity(fsc, user);
   }
 
-  public void delete() throws ODKDatastoreException {
+  public void delete(CallingContext cc) throws ODKDatastoreException {
 	Datastore ds = cc.getDatastore();
 	User user = cc.getCurrentUser();
     ds.deleteEntity(new EntityKey(objectEntity, objectEntity.getUri()), user);
@@ -192,15 +192,15 @@ public class JsonServer extends AbstractExternalService implements ExternalServi
   }
 
   @Override
-  public void sendSubmission(Submission submission) throws ODKExternalServiceException {
+  public void sendSubmission(Submission submission, CallingContext cc) throws ODKExternalServiceException {
     // TODO: think of more appropriate method
     List<Submission> list = new ArrayList<Submission>();
     list.add(submission);
-    sendSubmissions(list);
+    sendSubmissions(list, cc);
   }
 
   @Override
-  public void sendSubmissions(List<Submission> submissions) throws ODKExternalServiceException {
+  public void sendSubmissions(List<Submission> submissions, CallingContext cc) throws ODKExternalServiceException {
     try {
 
       URL url = new URL(getServerUrl());
@@ -215,7 +215,7 @@ public class JsonServer extends AbstractExternalService implements ExternalServi
       PrintWriter pWriter = new PrintWriter(writer);
 
       JsonFormatter formatter = new JsonFormatter(pWriter, null, form, cc);
-      formatter.processSubmissions(submissions);
+      formatter.processSubmissions(submissions, cc);
 
       writer.flush();
 
@@ -263,7 +263,7 @@ public class JsonServer extends AbstractExternalService implements ExternalServi
   }
 
   @Override
-  public void setUploadCompleted() throws ODKEntityPersistException {
+  public void setUploadCompleted(CallingContext cc) throws ODKEntityPersistException {
     fsc.setUploadCompleted(true);
     if ( fsc.getExternalServiceOption() == ExternalServiceOption.UPLOAD_ONLY) {
     	fsc.setOperationalStatus(OperationalStatus.COMPLETED);
@@ -274,8 +274,8 @@ public class JsonServer extends AbstractExternalService implements ExternalServi
   }
 
   @Override
-  protected void insertData(Submission submission) throws ODKExternalServiceException {
-    sendSubmission(submission);
+  protected void insertData(Submission submission, CallingContext cc) throws ODKExternalServiceException {
+    sendSubmission(submission, cc);
   }
 
   @Override

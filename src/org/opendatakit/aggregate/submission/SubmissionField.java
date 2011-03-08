@@ -17,6 +17,7 @@
 
 package org.opendatakit.aggregate.submission;
 
+import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.datamodel.BinaryContentManipulator;
 import org.opendatakit.aggregate.exception.ODKConversionException;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
@@ -71,7 +72,7 @@ public interface SubmissionField<T> extends SubmissionValue{
    * @throws ODKDatastoreException
    */
   public BinaryContentManipulator.BlobSubmissionOutcome setValueFromByteArray(byte[] byteArray,
-		String contentType, Long contentLength, String unrootedFilePath)
+		String contentType, Long contentLength, String unrootedFilePath, CallingContext cc)
 		throws ODKDatastoreException;
   
 }

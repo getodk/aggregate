@@ -25,6 +25,7 @@ import org.kxml2.io.KXmlSerializer;
 import org.kxml2.kdom.Document;
 import org.kxml2.kdom.Element;
 import org.kxml2.kdom.Node;
+import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.format.FormatConsts;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
@@ -129,7 +130,7 @@ public class FragmentedCsvFormatter extends TableFormatterBase implements Submis
 
 	  @Override
 	  public void processSubmissionSet(Collection<? extends SubmissionSet> submissions,
-			  FormElementModel rootGroup) throws ODKDatastoreException {
+			  FormElementModel rootGroup, CallingContext cc) throws ODKDatastoreException {
 		
 	    List<Row> formattedElements = new ArrayList<Row>();
 	    List<String> headers = headerFormatter.generateHeaders(form, rootGroup, propertyNames);
@@ -149,7 +150,7 @@ public class FragmentedCsvFormatter extends TableFormatterBase implements Submis
 	    
 	    // format row elements 
 	    for (SubmissionSet sub : submissions) {
-	      Row row = sub.getFormattedValuesAsRow(propertyNames, elemFormatter, false);
+	      Row row = sub.getFormattedValuesAsRow(propertyNames, elemFormatter, false, cc);
 	      
 	      if ( includeParentKey ) {
 		      ((LinkElementFormatter) elemFormatter).addFormattedLink( 

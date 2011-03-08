@@ -29,6 +29,7 @@ import org.opendatakit.aggregate.datamodel.FormDataModel;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.datamodel.TopLevelDynamicBase;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
+import org.opendatakit.aggregate.form.FormDefinition.OrdinalSequence;
 import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.submission.type.DateSubmissionType;
@@ -313,7 +314,7 @@ public class MiscTasks {
 	
 	public void delete(CallingContext cc) throws ODKDatastoreException {
 		List<EntityKey> keys = new ArrayList<EntityKey>();
-		objectEntity.recursivelyAddEntityKeys(keys);
+		objectEntity.recursivelyAddEntityKeys(keys, cc);
 		keys.add(objectEntity.getKey());
 		cc.getDatastore().deleteEntities(keys, cc.getCurrentUser());
 	}
@@ -413,7 +414,7 @@ public class MiscTasks {
 
 		static final String TABLE_NAME = "_misc_tasks";
 	
-		private static final String MISC_TASK_DEFINITION_URI = "aggregate.opendatakit.org:MiscTasks-Definition";
+		private static final String MISC_TASK_DEFINITION_URI = "aggregate.opendatakit.org:MiscTasks-def";
 		
 		private static final DataField FORM_ID = new DataField("FORM_ID",
 				DataField.DataType.STRING, true);
@@ -540,22 +541,23 @@ public class MiscTasks {
 			MiscTasksTable miscTasksDefinition = ds.createEntityUsingRelation(miscTasksRelation, user);
 			miscTasksDefinition.setStringField(miscTasksRelation.primaryKey, MiscTasksTable.MISC_TASK_DEFINITION_URI);
 			
+			OrdinalSequence os = new OrdinalSequence();
+			
+			String parentTableKey = miscTasksDefinition.getUri();
+			
 			FormDefinition.buildTableFormDataModel( model, 
-					miscTasksRelation, 
+					miscTasksDefinition, 
 					miscTasksDefinition, // top level table
-					miscTasksDefinition, // parent table...
-					1L,
+					parentTableKey, // parent table...
+					os,
 					cc );
 	
-			String uriPrefix = FORM_ID_MISC_TASKS;
-			
+			os.ordinal = 2L;
 			FormDefinition.buildLongStringFormDataModel(model, 
-					uriPrefix + MiscTasksTable.MISC_TASKS_LONG_STRING_REF_TEXT, 
 					MiscTasksTable.MISC_TASKS_LONG_STRING_REF_TEXT, 
-					uriPrefix + MiscTasksTable.MISC_TASKS_REF_TEXT, 
 					MiscTasksTable.MISC_TASKS_REF_TEXT, 
 					miscTasksDefinition, // top level and parent table
-					2L, 
+					os, 
 					cc);
 			
 			FormDefinition.assertModel(xformMiscTaskParameters, model, cc);

@@ -345,8 +345,7 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 						throw new IllegalStateException("Unexpectedly null backingObject");
 					}
 					submissionField = new StringSubmissionType(rowGroup, m,
-							rowGroup.getUri(),
-							formDefinition, topLevelTableKey, cc);
+							formDefinition, topLevelTableKey);
 					submissionField.getValueFromEntity(cc);
 					elementsToValues.put(m, submissionField);
 					break;
@@ -426,21 +425,21 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 				case BINARY: // identifies BinaryContent table
 					submissionField = new BlobSubmissionType(m, groupRowGroup.getUri(),
 							topLevelTableKey, formDefinition, 
-							constructSubmissionKey(m), cc);
+							constructSubmissionKey(m));
 					// pass in row we occur under (to access parentAuri)
 					submissionField.getValueFromEntity(cc);
 					elementsToValues.put(m, submissionField);
 					break;
 				case SELECT1: // identifies SelectChoice table
 					submissionField = new ChoiceSubmissionType(m, groupRowGroup.getUri(),
-							topLevelTableKey, cc); // pass
+							topLevelTableKey); // pass
 					// in row we occur under to access parentAuri
 					submissionField.getValueFromEntity(cc);
 					elementsToValues.put(m, submissionField);
 					break;
 				case SELECTN: // identifies SelectChoice table
 					submissionField = new ChoiceSubmissionType(m, groupRowGroup.getUri(),
-							topLevelTableKey, cc); // pass
+							topLevelTableKey); // pass
 					// in row we occur under to access parentAuri
 					submissionField.getValueFromEntity(cc);
 					elementsToValues.put(m, submissionField);
@@ -684,24 +683,24 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 
 	protected void populateFormattedValueInRow(Row row,
 			FormElementModel propertyName,
-			ElementFormatter elemFormatter) throws ODKDatastoreException {
+			ElementFormatter elemFormatter, CallingContext cc) throws ODKDatastoreException {
 		SubmissionValue value = elementsToValues.get(propertyName);
 		if (value != null) {
-			value.formatValue(elemFormatter, row, getOrdinalNumAsStr());
+			value.formatValue(elemFormatter, row, getOrdinalNumAsStr(), cc);
 		}
 	}
 
 	protected void populateFormattedValuesInRow(Row row,
 			List<FormElementModel> propertyNames,
-			ElementFormatter elemFormatter) throws ODKDatastoreException {
+			ElementFormatter elemFormatter, CallingContext cc) throws ODKDatastoreException {
 		if (propertyNames == null) {
 			List<SubmissionValue> values = getSubmissionValues();
 			for (SubmissionValue value : values) {
-				value.formatValue(elemFormatter, row, getOrdinalNumAsStr());
+				value.formatValue(elemFormatter, row, getOrdinalNumAsStr(), cc);
 			}
 		} else {
 			for (FormElementModel element : propertyNames) {
-				populateFormattedValueInRow(row, element, elemFormatter);
+				populateFormattedValueInRow(row, element, elemFormatter, cc);
 			}
 		}
 	}
@@ -716,12 +715,12 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 	 * @throws ODKDatastoreException
 	 */
 	public Row getFormattedValuesAsRow(List<FormElementModel> propertyNames,
-			ElementFormatter elemFormatter, boolean includeParentUid) throws ODKDatastoreException {
+			ElementFormatter elemFormatter, boolean includeParentUid, CallingContext cc) throws ODKDatastoreException {
 		Row row = new Row(constructSubmissionKey(null));
 		if(includeParentUid && !(this instanceof Submission)) {
 		  elemFormatter.formatUid(enclosingSet.getKey().getKey(), enclosingSet.getPropertyName(), row);
 		}
-		populateFormattedValuesInRow(row, propertyNames, elemFormatter);
+		populateFormattedValuesInRow(row, propertyNames, elemFormatter, cc);
 		return row;
 	}
 
@@ -737,10 +736,10 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 		}
 	}
 
-	public void recursivelyAddEntityKeys(List<EntityKey> keyList)
+	public void recursivelyAddEntityKeys(List<EntityKey> keyList, CallingContext cc)
 			throws ODKDatastoreException {
 		for (SubmissionValue value : getSubmissionValues()) {
-			value.recursivelyAddEntityKeys(keyList);
+			value.recursivelyAddEntityKeys(keyList, cc);
 		}
 		for ( DynamicCommonFieldsBase e : dbEntities.values() ) {
 			keyList.add( new EntityKey( e, e.getUri()));

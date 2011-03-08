@@ -39,21 +39,18 @@ public class DeleteSubmissions {
 
   private List<SubmissionKey> submissionKeys;
 
-  private CallingContext cc;
-  
-  public DeleteSubmissions(List<SubmissionKey> keys, CallingContext cc) {
+  public DeleteSubmissions(List<SubmissionKey> keys) {
     this.submissionKeys = keys;
-    this.cc = cc;
   }
 
-  public void deleteSubmissions() throws ODKDatastoreException{
+  public void deleteSubmissions(CallingContext cc) throws ODKDatastoreException{
     List<EntityKey> deleteKeys = new ArrayList<EntityKey>();
 
     for (SubmissionKey submissionKey : submissionKeys) {
       try {
 		List<SubmissionKeyPart> parts = submissionKey.splitSubmissionKey();
   		Submission sub = Submission.fetchSubmission(parts, cc);
-  		sub.recursivelyAddEntityKeys(deleteKeys);
+  		sub.recursivelyAddEntityKeys(deleteKeys, cc);
   		deleteKeys.add(sub.getKey());
       } catch (ODKEntityNotFoundException e) {
         // just move on

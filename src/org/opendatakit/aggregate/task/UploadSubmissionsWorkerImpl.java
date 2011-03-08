@@ -171,7 +171,7 @@ public class UploadSubmissionsWorkerImpl {
 		}
 		if (submissions.isEmpty()) {
 			// there are no submissions so uploading is complete
-			pExtService.setUploadCompleted();
+			pExtService.setUploadCompleted(cc);
 		} else {
 			sendSubmissions(submissions, false);
 		}
@@ -236,7 +236,7 @@ public class UploadSubmissionsWorkerImpl {
 		try {
 			int counter = 0;
 			for (Submission submission : submissionsToSend) {
-				pExtService.sendSubmission(submission);
+				pExtService.sendSubmission(submission, cc);
 				// See QueryByDate
 				// -- we are querying by the lastUpdateDate, not the
 				// creationDate.
@@ -274,7 +274,7 @@ public class UploadSubmissionsWorkerImpl {
 		// query for next set of submissions
 		QueryByDateRange query = new QueryByDateRange(form, MAX_QUERY_LIMIT,
 				startDate, endDate, cc);
-		List<Submission> submissions = query.getResultSubmissions();
+		List<Submission> submissions = query.getResultSubmissions(cc);
 
 		// here so we don't have to do null checks on the rest of the code in
 		// this
@@ -291,7 +291,7 @@ public class UploadSubmissionsWorkerImpl {
 		// query for next set of submissions
 		QueryByDate query = new QueryByDate(form, startDate, false,
 				MAX_QUERY_LIMIT, cc);
-		List<Submission> submissions = query.getResultSubmissions();
+		List<Submission> submissions = query.getResultSubmissions(cc);
 
 		// here so we don't have to do null checks on the rest of the code in
 		// this

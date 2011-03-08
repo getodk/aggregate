@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
@@ -48,13 +49,13 @@ public class HtmlFormatter extends TableFormatterBase implements SubmissionForma
 
   @Override
   public void processSubmissionSet(Collection<? extends SubmissionSet> submissions,
-		  FormElementModel rootGroup) throws ODKDatastoreException {
+		  FormElementModel rootGroup, CallingContext cc) throws ODKDatastoreException {
     List<Row> formattedElements = new ArrayList<Row>();
     List<String> headers = headerFormatter.generateHeaders(form, rootGroup, propertyNames);
 
     // format row elements 
     for (SubmissionSet sub : submissions) {
-      Row row = sub.getFormattedValuesAsRow(propertyNames, elemFormatter, false);
+      Row row = sub.getFormattedValuesAsRow(propertyNames, elemFormatter, false, cc);
       formattedElements.add(row);
     }
     
@@ -67,8 +68,8 @@ public class HtmlFormatter extends TableFormatterBase implements SubmissionForma
 
 
   public void processSubmissionSetPublic(Collection<? extends SubmissionSet> submissions,
-	FormElementModel formElementModel) throws ODKDatastoreException {
-	processSubmissionSet(submissions, formElementModel);
+	FormElementModel formElementModel, CallingContext cc) throws ODKDatastoreException {
+	processSubmissionSet(submissions, formElementModel, cc);
   }
 
 }

@@ -107,7 +107,7 @@ public class GeoPointSubmissionType extends SubmissionSingleValueBase<GeoPoint> 
 	 *            proper format for output
 	 */
 	@Override
-	public void formatValue(ElementFormatter elemFormatter, Row row, String ordinalValue)
+	public void formatValue(ElementFormatter elemFormatter, Row row, String ordinalValue, CallingContext cc)
 			throws ODKDatastoreException {
 		elemFormatter.formatGeoPoint(coordinates, element.getGroupQualifiedElementName() + ordinalValue, row);
 	}
@@ -174,7 +174,7 @@ public class GeoPointSubmissionType extends SubmissionSingleValueBase<GeoPoint> 
 	}
 
 	@Override
-	public void recursivelyAddEntityKeys(List<EntityKey> keyList) {
+	public void recursivelyAddEntityKeys(List<EntityKey> keyList, CallingContext cc) {
 		// geopoint storage is handled by SubmissionSet
 	}
 

@@ -17,6 +17,7 @@ package org.opendatakit.aggregate.format.element;
 
 import java.math.BigDecimal;
 
+import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.submission.SubmissionRepeat;
@@ -71,7 +72,7 @@ public class FusionTableElementFormatter extends LinkElementFormatter {
   }
   
   @Override
-  public void formatRepeats(SubmissionRepeat repeat, FormElementModel repeatElement, Row row) throws ODKDatastoreException {
+  public void formatRepeats(SubmissionRepeat repeat, FormElementModel repeatElement, Row row, CallingContext cc) throws ODKDatastoreException {
     basicStringConversion(repeat.getUniqueKeyStr(), row);
   }
   

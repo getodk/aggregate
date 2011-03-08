@@ -158,8 +158,6 @@ public class FormParserForJavaRosa {
   private final Map<String,Integer> stringLengths = new HashMap<String,Integer>();
   private final Map<FormDataModel,Integer> fieldLengths = new HashMap<FormDataModel,Integer>();
   
-  private final CallingContext cc;
-  
   private void setNodesetStringLength(String nodeset, Integer length) {
 	  stringLengths.put(nodeset, length);
   }
@@ -302,8 +300,6 @@ public class FormParserForJavaRosa {
     	}
     }
 
-    this.cc = cc;
-
     Realm rootDomain = cc.getUserService().getCurrentRealm();
     // And construct the base table prefix candidate from the submissionElementDefn.formId.
     // First, replace all slash substitutions with underscores.
@@ -360,7 +356,7 @@ public class FormParserForJavaRosa {
     title = title.replace(BasicConsts.FORWARDSLASH, BasicConsts.EMPTY_STRING);
 
     initHelper(uploadedFormItems, formXmlData, inputXml,
-    		  title, persistenceStoreFormId, formDef);
+    		  title, persistenceStoreFormId, formDef, cc);
   }
   
   enum AuxType { NONE, BC_REF, REF_BLOB, GEO_LAT, GEO_LNG, GEO_ALT, GEO_ACC, LONG_STRING_REF, REF_TEXT };
@@ -384,7 +380,7 @@ public class FormParserForJavaRosa {
   
   private void initHelper(MultiPartFormData uploadedFormItems, MultiPartFormItem xformXmlData,  
 		  String inputXml, String title, String persistenceStoreFormId, 
-		  FormDef formDef) throws ODKDatastoreException, ODKFormAlreadyExistsException, ODKParseException {
+		  FormDef formDef, CallingContext cc) throws ODKDatastoreException, ODKFormAlreadyExistsException, ODKParseException {
     
     /////////////////
     // Step 1: create or fetch the Form (FormInfo) submission
@@ -483,7 +479,7 @@ public class FormParserForJavaRosa {
 	        .getTableName(fdm.getSchemaName(), persistenceStoreFormId, "", "CORE");
 	
 	    constructDataModel(opaque, k, fdmList, fdm, k.getKey(), 1, persistenceStoreFormId, "",
-	        tableNamePlaceholder, submissionElement);
+	        tableNamePlaceholder, submissionElement, cc);
 	
 	    // emit the long string and ref text tables...
 	    ++elementCount; // to give these tables their own element #.
@@ -605,7 +601,7 @@ public class FormParserForJavaRosa {
 		      for (CommonFieldsBase tbl : badTables) {
 		        // dang. We need to create phantom tables...
 		        orderlyDivideTable(fdmList, FormDataModel.assertRelation(cc), 
-		        		tbl, opaque);
+		        		tbl, opaque, cc);
 		      }
 		
 		      if (badTables.isEmpty())
@@ -649,14 +645,14 @@ public class FormParserForJavaRosa {
     // TODO: if the above gets killed, how do we clean up?
     } catch ( ODKParseException e ) {
     	List<EntityKey> keys = new ArrayList<EntityKey>();
-    	formInfo.recursivelyAddEntityKeys(keys);
+    	formInfo.recursivelyAddEntityKeys(keys, cc);
     	keys.add(new EntityKey(sa, sa.getUri()));
     	keys.add(formInfo.getKey());
     	ds.deleteEntities(keys, user);
     	throw e;
     } catch ( ODKDatastoreException e ) {
     	List<EntityKey> keys = new ArrayList<EntityKey>();
-    	formInfo.recursivelyAddEntityKeys(keys);
+    	formInfo.recursivelyAddEntityKeys(keys, cc);
     	keys.add(new EntityKey(sa, sa.getUri()));
     	keys.add(formInfo.getKey());
     	ds.deleteEntities(keys, user);
@@ -683,7 +679,7 @@ public class FormParserForJavaRosa {
    * @param newPhantomTableName
    */
   private void orderlyDivideTable(List<FormDataModel> fdmList, FormDataModel fdmRelation,
-      CommonFieldsBase tbl, NamingSet opaque) {
+      CommonFieldsBase tbl, NamingSet opaque, CallingContext cc) {
 	  
     // Find out how many columns it has...
     int nCol = tbl.getFieldList().size() - DynamicCommonFieldsBase.WELL_KNOWN_COLUMN_COUNT;
@@ -903,7 +899,7 @@ public class FormParserForJavaRosa {
   private void constructDataModel(final NamingSet opaque, final EntityKey k,
       final List<FormDataModel> dmList, final FormDataModel fdm, 
       String parent, int ordinal, String tablePrefix, String nrGroupPrefix, String tableName,
-      TreeElement treeElement) throws ODKEntityPersistException, ODKParseException {
+      TreeElement treeElement, CallingContext cc) throws ODKEntityPersistException, ODKParseException {
     System.out.println("processing te: " + treeElement.getName() + " type: " + treeElement.dataType
         + " repeatable: " + treeElement.repeatable);
 
@@ -1198,7 +1194,7 @@ public class FormParserForJavaRosa {
     		  prior = current;
     	  } else {
     		  constructDataModel(opaque, k, dmList, fdm, groupURI, ++trueOrdinal, tablePrefix,
-    				  nrGroupPrefix, persistAsTable, current);
+    				  nrGroupPrefix, persistAsTable, current, cc);
     		  prior = current;
     	  }
       }
@@ -1221,7 +1217,7 @@ public class FormParserForJavaRosa {
     		  prior = current;
     	  } else {
     		  constructDataModel(opaque, k, dmList, fdm, groupURI, ++trueOrdinal, tablePrefix,
-    				  "", persistAsTable, current);
+    				  "", persistAsTable, current, cc);
     		  prior = current;
     	  }
       }

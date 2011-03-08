@@ -19,6 +19,7 @@ import java.io.PrintWriter;
 import java.util.Collection;
 import java.util.List;
 
+import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.format.SubmissionFormatter;
@@ -52,11 +53,11 @@ public abstract class TableFormatterBase implements SubmissionFormatter {
   }
 
   @Override
-  public void processSubmissions(List<Submission> submissions) throws ODKDatastoreException {
-    processSubmissionSet(submissions, form.getTopLevelGroupElement());
+  public void processSubmissions(List<Submission> submissions, CallingContext cc) throws ODKDatastoreException {
+    processSubmissionSet(submissions, form.getTopLevelGroupElement(), cc);
   }
 
   protected abstract void processSubmissionSet(Collection<? extends SubmissionSet> submissions,
-		  FormElementModel rootGroup) throws ODKDatastoreException;
+		  FormElementModel rootGroup, CallingContext cc) throws ODKDatastoreException;
   
 }
