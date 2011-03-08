@@ -252,11 +252,13 @@ public class DatastoreImpl implements Datastore {
 					break;
 				case STRING:
 				case URI:
-					if ( d.getMaxCharLen().compareTo(GAE_MAX_STRING_LEN) > 0) {
+					String s = (String) o;
+					o = gaeEntity.getProperty("__" + d.getName());
+					if ( o != null ) {
 						Text t = (Text) o;
 						row.setStringField(d, t.getValue());
 					} else {
-						row.setStringField(d, (String) o);
+						row.setStringField(d, s);
 					}
 					break;
 				default:
@@ -329,11 +331,14 @@ public class DatastoreImpl implements Datastore {
 					break;
 				case STRING:
 				case URI:
-					if ( d.getMaxCharLen().compareTo(GAE_MAX_STRING_LEN) > 0) {
-						Text t = new Text(entity.getStringField(d));
-						e.setProperty(d.getName(), t);
+					String s = entity.getStringField(d);
+					if ( s.length() > GAE_MAX_STRING_LEN.intValue()) {
+						Text t = new Text(s);
+						e.setProperty("__" + d.getName(), t);
+						e.setProperty(d.getName(), s.substring(0,GAE_MAX_STRING_LEN.intValue()));
 					} else {
-						e.setProperty(d.getName(), entity.getStringField(d));
+						e.removeProperty("__" + d.getName());
+						e.setProperty(d.getName(), s);
 					}
 					break;
 				default:
