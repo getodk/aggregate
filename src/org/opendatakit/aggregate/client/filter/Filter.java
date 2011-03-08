@@ -2,96 +2,67 @@ package org.opendatakit.aggregate.client.filter;
 
 import java.io.Serializable;
 
-import org.opendatakit.aggregate.constants.common.FilterOperation;
+import org.opendatakit.aggregate.client.submission.Column;
 import org.opendatakit.aggregate.constants.common.RowOrCol;
 import org.opendatakit.aggregate.constants.common.UIConsts;
-import org.opendatakit.aggregate.constants.common.Visibility;
 
 public class Filter implements Serializable {
 
-	private static final long serialVersionUID = -5453093733004634508L;
-	private String uri; // unique identifier
-	private Visibility kr;
-	private RowOrCol rc;
-	private String title;
-	private FilterOperation operation;
-	private String input;
-	private Long ordinal; // order to display in filter group
-	
-	public Filter() {
-		
-	}
-	  
-	public Filter(Visibility keepRemove, RowOrCol rowcol, String title, 
-			FilterOperation compare, String inputParam, long ordinal) {
-	    this.uri = UIConsts.URI_DEFAULT;
-	    this.kr = keepRemove;
-	    this.setRc(rowcol);
-	    this.title = title;
-	    this.operation = compare;
-	    this.input = inputParam;
-	    this.ordinal = ordinal;
-	}
+  private static final long serialVersionUID = -5453093733004634508L;
+  private String uri; // unique identifier
+  private RowOrCol rc;
+  private Column column;
+  private Long ordinal; // order to display in filter group
 
-	/**
-     * This constructor should only be used by the server
-     * 
-	 * @param uri
-	 */
-	public Filter(String uri) {
-	    this.uri = uri;
-	}
+  public Filter() {
 
-	public String getUri() {
-	    return uri;
-	}
-	
-	public Visibility getVisibility() {
-	    return kr;
-	}
+  }
 
-	public void setVisibility(Visibility kr) {
-	    this.kr = kr;
-	}
+  public Filter(RowOrCol rowcol, Column column, long ordinal) {
+    this.uri = UIConsts.URI_DEFAULT;
+    this.rc = rowcol;
+    this.column = column;
+    this.ordinal = ordinal;
+  }
 
-	public RowOrCol getRc() {
-		return rc;
-	}
-	
-	public void setRc(RowOrCol rc) {
-		this.rc = rc;
-	}
-	
-	public String getTitle() {
-		return title;
-	}
-	
-	public void setTitle(String title) {
-		this.title = title;
-	}
-	
-	public FilterOperation getOperation() {
-		return operation;
-	}
-	
-	public void setOperation(FilterOperation operation) {
-	    this.operation = operation;
-	}
-	
-	public String getInput() {
-		return input;
-	}
+  /**
+   * This constructor should only be used by the server
+   * 
+   * @param uri
+   */
+  public Filter(String uri) {
+    this.uri = uri;
+  }
 
-	public void setInput(String input) {
-		this.input = input;
-	}
+  public String getUri() {
+    return uri;
+  }
 
-	public Long getOrdinal() {
-	    return ordinal;
-	}
+  public RowOrCol getRc() {
+    return rc;
+  }
 
-	public void setOrdinal(Long ordinal) {
-	    this.ordinal = ordinal;
-	}
+  public void setRc(RowOrCol rc) {
+    this.rc = rc;
+  }
 
+  public String getTitle() {
+    return column.getDisplayHeader();
+  }
+
+  public Long getOrdinal() {
+    return ordinal;
+  }
+
+  public void setOrdinal(Long ordinal) {
+    this.ordinal = ordinal;
+  }
+
+  public void setColumn(Column column) {
+    this.column = column;
+  }
+  
+  public Column getColumn() {
+    return this.column;
+  }
 }
