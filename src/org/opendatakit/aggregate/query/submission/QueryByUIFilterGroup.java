@@ -6,14 +6,16 @@ import java.util.List;
 import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.client.filter.Filter;
 import org.opendatakit.aggregate.client.filter.FilterGroup;
-import org.opendatakit.aggregate.constants.common.RowOrCol;
+import org.opendatakit.aggregate.client.filter.RowFilter;
+import org.opendatakit.aggregate.client.submission.Column;
+import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.datamodel.TopLevelDynamicBase;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.server.UITrans;
 import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.common.persistence.CommonFieldsBase;
-import org.opendatakit.common.persistence.DataField;
+import org.opendatakit.common.persistence.Query.FilterOperation;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 
 public class QueryByUIFilterGroup extends QueryBase {
@@ -30,24 +32,18 @@ public class QueryByUIFilterGroup extends QueryBase {
     query = cc.getDatastore().createQuery(tbl, cc.getCurrentUser());
 
     for (Filter filter : filterGroup.getFilters()) {
-    	if(filter.getRc() == RowOrCol.ROW) {
-    		addFilterToQuery(filter);
-    	}
+      if(filter instanceof RowFilter) {
+        addFilterToQuery((RowFilter)filter);
+      }
     }
 
   }
 
-  private void addFilterToQuery(Filter filter) {
-
-    for (DataField field : tbl.getFieldList()) {
-      if (field.getName().equals(filter.getTitle())) {
-        // TODO: ask mitch
-        query.addFilter(field, UITrans.convertFilterOperation(filter.getOperation()),
-            filter.getInput());
-        return;
-      }
-    }
-    // if we didn't find the field give up
+  private void addFilterToQuery(RowFilter filter) {
+    Column column = filter.getColumn();
+    FormElementModel fem = form.findElementByName(column.getColumnEncoding());
+    FilterOperation op = UITrans.convertFilterOperation(filter.getOperation());
+    super.addFilter(fem, op, filter.getInput());
   }
 
   public List<Submission> getResultSubmissions() throws ODKDatastoreException {

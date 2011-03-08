@@ -4,17 +4,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.opendatakit.aggregate.CallingContext;
+import org.opendatakit.aggregate.client.filter.ColumnFilter;
 import org.opendatakit.aggregate.client.filter.Filter;
-import org.opendatakit.aggregate.constants.common.RowOrCol;
-import org.opendatakit.aggregate.constants.common.Visibility;
+import org.opendatakit.aggregate.client.filter.RowFilter;
+import org.opendatakit.aggregate.client.submission.Column;
 import org.opendatakit.aggregate.constants.common.FilterOperation;
+import org.opendatakit.aggregate.constants.common.RowOrCol;
 import org.opendatakit.aggregate.constants.common.UIConsts;
+import org.opendatakit.aggregate.constants.common.Visibility;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
-import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.persistence.DataField.IndexType;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.PersistConsts;
+import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.security.User;
 
@@ -33,9 +36,11 @@ public class SubmissionFilter extends CommonFieldsBase {
   private static final DataField VISIBILITY_PROPERTY = new DataField("VISIBILITY",
       DataField.DataType.STRING, true, 80L);
   private static final DataField ROWORCOL_PROPERTY = new DataField("ROWORCOL",
-	  DataField.DataType.STRING, true, 80L);
-  private static final DataField TITLE_PROPERTY = new DataField("TITLE",
-      DataField.DataType.STRING, true, 80L); // TODO: determine length
+      DataField.DataType.STRING, true, 80L);
+  private static final DataField COL_TITLE_PROPERTY = new DataField("COL_TITLE", DataField.DataType.STRING,
+      true, 80L); // TODO: determine length
+  private static final DataField COL_ENCODING_PROPERTY = new DataField("COL_ENCODING", DataField.DataType.STRING,
+      true, 200L); // TODO: determine length
   private static final DataField OPERATION_PROPERTY = new DataField("OPERATION",
       DataField.DataType.STRING, true, 80L);
   private static final DataField CLAUSE_PROPERTY = new DataField("INPUT_CLAUSE",
@@ -54,7 +59,8 @@ public class SubmissionFilter extends CommonFieldsBase {
     fieldList.add(URI_FILTER_GROUP_PROPERTY);
     fieldList.add(VISIBILITY_PROPERTY);
     fieldList.add(ROWORCOL_PROPERTY);
-    fieldList.add(TITLE_PROPERTY);
+    fieldList.add(COL_TITLE_PROPERTY);
+    fieldList.add(COL_ENCODING_PROPERTY);
     fieldList.add(OPERATION_PROPERTY);
     fieldList.add(CLAUSE_PROPERTY);
     fieldList.add(ORDINAL_PROPERTY);
@@ -83,16 +89,20 @@ public class SubmissionFilter extends CommonFieldsBase {
     String visibility = getStringField(VISIBILITY_PROPERTY);
     return Visibility.valueOf(visibility);
   }
-  
+
   public RowOrCol getRowOrColumn() {
-	  String roworcol = getStringField(ROWORCOL_PROPERTY);
-	  return RowOrCol.valueOf(roworcol);
+    String roworcol = getStringField(ROWORCOL_PROPERTY);
+    return RowOrCol.valueOf(roworcol);
   }
 
-  public String getColumn() {
-    return getStringField(TITLE_PROPERTY);
+  public String getColumnTitle() {
+    return getStringField(COL_TITLE_PROPERTY);
   }
 
+  public String getColumnEncoding() {
+    return getStringField(COL_ENCODING_PROPERTY);
+  }
+  
   public FilterOperation getFilterOperation() {
     String op = getStringField(OPERATION_PROPERTY);
     return FilterOperation.valueOf(op);
@@ -117,16 +127,22 @@ public class SubmissionFilter extends CommonFieldsBase {
       throw new IllegalArgumentException("overflow visibility");
     }
   }
-  
+
   public void setRowOrColumn(RowOrCol roworcol) {
-	    if (!setStringField(ROWORCOL_PROPERTY, roworcol.toString())) {
-	        throw new IllegalArgumentException("overflow row or col");
-	      }
+    if (!setStringField(ROWORCOL_PROPERTY, roworcol.toString())) {
+      throw new IllegalArgumentException("overflow row or col");
+    }
   }
 
-  public void setColumn(String name) {
-    if (!setStringField(TITLE_PROPERTY, name)) {
+  public void setColumnTitle(String name) {
+    if (!setStringField(COL_TITLE_PROPERTY, name)) {
       throw new IllegalArgumentException("overflow name");
+    }
+  }
+  
+  public void setColumnEncoding(String name) {
+    if (!setStringField(COL_ENCODING_PROPERTY, name)) {
+      throw new IllegalArgumentException("overflow column encoding");
     }
   }
 
@@ -147,17 +163,25 @@ public class SubmissionFilter extends CommonFieldsBase {
   }
 
   public Filter transform() {
-    Filter filter = new Filter(this.getUri());
-
-    filter.setVisibility(getColumnVisibility());
-    filter.setTitle(getColumn());
-    filter.setOperation(getFilterOperation());
-    filter.setInput(getFilterInputClause());
+    RowOrCol type = getRowOrColumn();
+    Filter filter;
+    if (type.equals(RowOrCol.COLUMN)) {
+      ColumnFilter columnFilter = new ColumnFilter(this.getUri());
+      columnFilter.setVisibility(getColumnVisibility());
+      filter = columnFilter;
+    } else {
+      RowFilter rowFilter = new RowFilter(this.getUri());
+      rowFilter.setOperation(getFilterOperation());
+      rowFilter.setInput(getFilterInputClause());
+      filter = rowFilter;
+    }
+    Column header = new Column(getColumnTitle(), getColumnEncoding());
+    filter.setColumn(header);
     filter.setOrdinal(getOrdinalNumber());
-    
+
     return filter;
   }
-  
+
   private static SubmissionFilter relation = null;
 
   private static synchronized final SubmissionFilter assertRelation(CallingContext cc)
@@ -186,31 +210,41 @@ public class SubmissionFilter extends CommonFieldsBase {
     } else {
       subFilter = cc.getDatastore().getEntity(relation, uri, cc.getCurrentUser());
     }
-    
+
+    Column column = filter.getColumn();
+    subFilter.setColumnTitle(column.getDisplayHeader());
+    subFilter.setColumnEncoding(column.getColumnEncoding());
     subFilter.setFilterGroup(filterGroup.getUri());
-    subFilter.setColumnVisibility(filter.getVisibility());
-    subFilter.setColumn(filter.getTitle());
-    subFilter.setFilterOperation(filter.getOperation());
-    subFilter.setFilterInputClause(filter.getInput());
     subFilter.setOrdinalNumber(filter.getOrdinal());
+    
+    if(filter instanceof ColumnFilter) {
+      ColumnFilter cf = (ColumnFilter) filter;
+      subFilter.setColumnVisibility(cf.getVisibility());
+    } else if(filter instanceof RowFilter) {
+      RowFilter rf = (RowFilter) filter;
+      subFilter.setFilterOperation(rf.getOperation());
+      subFilter.setFilterInputClause(rf.getInput());
+    }
+    
     return subFilter;
   }
-  
-  static final List<SubmissionFilter> getFilterList(String uriFilterGroup,
-      CallingContext cc) throws ODKDatastoreException {
+
+  static final List<SubmissionFilter> getFilterList(String uriFilterGroup, CallingContext cc)
+      throws ODKDatastoreException {
     SubmissionFilter relation = assertRelation(cc);
     Query query = cc.getDatastore().createQuery(relation, cc.getCurrentUser());
-    query.addFilter(SubmissionFilter.URI_FILTER_GROUP_PROPERTY, org.opendatakit.common.persistence.Query.FilterOperation.EQUAL, uriFilterGroup);
-    
+    query.addFilter(SubmissionFilter.URI_FILTER_GROUP_PROPERTY,
+        org.opendatakit.common.persistence.Query.FilterOperation.EQUAL, uriFilterGroup);
+
     List<SubmissionFilter> filterList = new ArrayList<SubmissionFilter>();
 
     List<? extends CommonFieldsBase> results = query.executeQuery(0);
     for (CommonFieldsBase cb : results) {
-      if(cb instanceof SubmissionFilter) {        
-        filterList.add((SubmissionFilter)cb);
+      if (cb instanceof SubmissionFilter) {
+        filterList.add((SubmissionFilter) cb);
       }
     }
     return filterList;
   }
-  
+
 }

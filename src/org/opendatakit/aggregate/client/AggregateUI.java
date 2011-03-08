@@ -3,9 +3,11 @@ package org.opendatakit.aggregate.client;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.opendatakit.aggregate.client.filter.ColumnFilter;
 import org.opendatakit.aggregate.client.filter.CreateNewFilterPopup;
 import org.opendatakit.aggregate.client.filter.Filter;
 import org.opendatakit.aggregate.client.filter.FilterGroup;
+import org.opendatakit.aggregate.client.filter.RowFilter;
 import org.opendatakit.aggregate.client.form.FormService;
 import org.opendatakit.aggregate.client.form.FormServiceAsync;
 import org.opendatakit.aggregate.client.form.FormSummary;
@@ -120,14 +122,16 @@ public class AggregateUI implements EntryPoint {
 	  int row = 0;
 	  for (Filter filter: group.getFilters()) {
 		  String titles = filter.getTitle();
-		  if(filter.getRc() == RowOrCol.ROW) {
+		  if(filter instanceof RowFilter) {
+		     RowFilter rowFilter = (RowFilter) filter;
 			  filters.setWidget(row, 0, new Label(
-					  filter.getVisibility() + titles + 
-					  "where columns are " + filter.getOperation() + 
-					  filter.getInput()));
-		  } else {
+			      rowFilter.getVisibility() + titles + 
+					  "where columns are " + rowFilter.getOperation() + 
+					  rowFilter.getInput()));
+		  } else if(filter instanceof ColumnFilter){
+		    ColumnFilter columnFilter = (ColumnFilter) filter;
 			  filters.setWidget(row, 0, new Label(
-					  filter.getVisibility() + titles));
+			      columnFilter.getVisibility() + titles));
 		  }
 		  final Button removeFilter = new Button("-");
 		  filters.setWidget(row, 1, removeFilter);
