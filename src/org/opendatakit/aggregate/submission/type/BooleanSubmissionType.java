@@ -95,7 +95,7 @@ public class BooleanSubmissionType extends SubmissionSingleValueBase<Boolean> {
 	 *            proper format for output
 	 */
 	@Override
-	public void formatValue(ElementFormatter elemFormatter, Row row, String ordinalValue)
+	public void formatValue(ElementFormatter elemFormatter, Row row, String ordinalValue, CallingContext cc)
 			throws ODKDatastoreException {
 		elemFormatter.formatBoolean(getValue(), element.getGroupQualifiedElementName() + ordinalValue, row);
 	}

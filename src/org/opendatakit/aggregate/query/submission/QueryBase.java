@@ -37,7 +37,6 @@ import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 public abstract class QueryBase {
 
   protected Query query;
-  protected final CallingContext cc;
   protected final Form form;
   
   private boolean moreRecords;
@@ -45,8 +44,7 @@ public abstract class QueryBase {
   
   private int numOfRecords;
   
-  protected QueryBase(Form form, int maxFetchLimit, CallingContext cc) throws ODKFormNotFoundException {
-    this.cc = cc;
+  protected QueryBase(Form form, int maxFetchLimit) throws ODKFormNotFoundException {
     fetchLimit = maxFetchLimit;
     numOfRecords = 0;
     this.form = form;
@@ -64,7 +62,7 @@ public abstract class QueryBase {
   	query.addFilter(attribute.getFormDataModel().getBackingKey(), op, value);
   }
 
-  public abstract List<Submission> getResultSubmissions() throws ODKIncompleteSubmissionData, ODKDatastoreException;
+  public abstract List<Submission> getResultSubmissions(CallingContext cc) throws ODKIncompleteSubmissionData, ODKDatastoreException;
 
   public boolean moreRecordsAvailable() {
     return moreRecords;

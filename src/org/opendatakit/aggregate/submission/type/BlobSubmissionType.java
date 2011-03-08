@@ -49,7 +49,6 @@ import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
  */
 public class BlobSubmissionType extends SubmissionFieldBase<SubmissionKey> {
 
-	private final CallingContext cc;
 	private final String parentKey;
 	private final SubmissionKey submissionKey;
 	private final BinaryContentManipulator bcm;
@@ -74,7 +73,7 @@ public class BlobSubmissionType extends SubmissionFieldBase<SubmissionKey> {
 		return bcm.getContentLength(ordinal);
 	}
 
-	public byte[] getBlob(int ordinal)
+	public byte[] getBlob(int ordinal, CallingContext cc)
 			throws ODKDatastoreException {
 		return bcm.getBlob(ordinal, cc);
 	}
@@ -87,11 +86,10 @@ public class BlobSubmissionType extends SubmissionFieldBase<SubmissionKey> {
 	 */
 	public BlobSubmissionType(FormElementModel element, String parentKey,
 			EntityKey topLevelTableKey, FormDefinition formDefinition,
-			SubmissionKey submissionKey, CallingContext cc) {
+			SubmissionKey submissionKey) {
 		super(element);
 		this.parentKey = parentKey;
 		this.submissionKey = submissionKey;
-		this.cc = cc;
 
 		FormDataModel bnDataModel = element.getFormDataModel();
 		BinaryContent ctnt = (BinaryContent) bnDataModel
@@ -125,7 +123,7 @@ public class BlobSubmissionType extends SubmissionFieldBase<SubmissionKey> {
 	@Override
 	public BinaryContentManipulator.BlobSubmissionOutcome setValueFromByteArray(
 			byte[] byteArray, String contentType, Long contentLength,
-			String unrootedFilePath) throws ODKDatastoreException {
+			String unrootedFilePath, CallingContext cc) throws ODKDatastoreException {
 
 		return bcm.setValueFromByteArray(byteArray, contentType, contentLength,
 				unrootedFilePath, cc);
@@ -173,9 +171,9 @@ public class BlobSubmissionType extends SubmissionFieldBase<SubmissionKey> {
 	 */
 	@Override
 	public void formatValue(ElementFormatter elemFormatter, Row row,
-			String ordinalValue) throws ODKDatastoreException {
+			String ordinalValue, CallingContext cc) throws ODKDatastoreException {
 		elemFormatter.formatBinary(this, element.getGroupQualifiedElementName()
-				+ ordinalValue, row);
+				+ ordinalValue, row, cc);
 	}
 
 	/**
@@ -193,12 +191,11 @@ public class BlobSubmissionType extends SubmissionFieldBase<SubmissionKey> {
 		BlobSubmissionType bt = (BlobSubmissionType) obj;
 
 		// don't care about in-memory blobs -- they should be read-only
-		return (cc.equals(bt.cc) && parentKey.equals(bt.parentKey) && bcm
-				.equals(bt.bcm));
+		return (parentKey.equals(bt.parentKey) && bcm.equals(bt.bcm));
 	}
 
 	@Override
-	public void recursivelyAddEntityKeys(List<EntityKey> keyList)
+	public void recursivelyAddEntityKeys(List<EntityKey> keyList, CallingContext cc)
 			throws ODKDatastoreException {
 		bcm.recursivelyAddEntityKeys(keyList, cc);
 	}
@@ -213,7 +210,7 @@ public class BlobSubmissionType extends SubmissionFieldBase<SubmissionKey> {
 	 */
 	@Override
 	public int hashCode() {
-		return super.hashCode() + cc.hashCode() + parentKey.hashCode()
+		return super.hashCode() + parentKey.hashCode()
 				+ bcm.hashCode();
 	}
 

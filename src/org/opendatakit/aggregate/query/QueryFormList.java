@@ -38,7 +38,6 @@ import org.opendatakit.common.persistence.exception.ODKDatastoreException;
  * 
  */
 public class QueryFormList {
-  private final CallingContext cc;
 
   private List<Form> forms;
   
@@ -49,8 +48,7 @@ public class QueryFormList {
    * @param datastore   datastore reference
    */
   
-  private QueryFormList(CallingContext cc) {
-    this.cc = cc;
+  private QueryFormList() {
     forms = new ArrayList<Form>();    
   }
 
@@ -65,7 +63,7 @@ public class QueryFormList {
  * @throws ODKIncompleteSubmissionData 
    */
   public QueryFormList(boolean checkAuthorization, CallingContext cc) throws ODKDatastoreException, ODKIncompleteSubmissionData{
-    this(cc);
+    this();
     
     Query formQuery = cc.getDatastore().createQuery(Form.getFormInfoRelation(cc), cc.getCurrentUser());
     List<? extends CommonFieldsBase> formEntities = formQuery.executeQuery(ServletConsts.FETCH_LIMIT);
@@ -74,7 +72,7 @@ public class QueryFormList {
       if ( form.getFormId().equals(MiscTasks.FORM_ID_MISC_TASKS)) continue;
       if ( form.getFormId().equals(PersistentResults.FORM_ID_PERSISTENT_RESULT)) continue;
       if ( form.getFormId().equals(Form.URI_FORM_ID_VALUE_FORM_INFO)) continue;
-      addIfAuthorized(form, checkAuthorization);
+      addIfAuthorized(form, checkAuthorization, cc);
     }
   }
   
@@ -88,7 +86,7 @@ public class QueryFormList {
  * @throws ODKDatastoreException 
    */
   public QueryFormList(List<SubmissionKey> submissionKeys, boolean checkAuthorization, CallingContext cc) throws ODKDatastoreException {
-    this(cc);
+    this();
     
     for (SubmissionKey submissionKey : submissionKeys) {
       try {
@@ -101,7 +99,7 @@ public class QueryFormList {
 		}
 
         Form form = new Form(parts.get(1).getAuri(), cc);
-        addIfAuthorized(form, checkAuthorization);
+        addIfAuthorized(form, checkAuthorization, cc);
       } catch (Exception e) {
         // TODO: determine how to better handle error
       }
@@ -122,7 +120,7 @@ public class QueryFormList {
    * @param form possible form to be included in result list
    * @param checkAuthorization true if authorization rules should be used to filter form list, false otherwise
    */
-  private void addIfAuthorized(Form form, boolean checkAuthorization) {
+  private void addIfAuthorized(Form form, boolean checkAuthorization, CallingContext cc) {
     // TODO: improve with groups management, etc
     if(form.getCreationUser().equals(cc.getCurrentUser())) {
       forms.add(form);

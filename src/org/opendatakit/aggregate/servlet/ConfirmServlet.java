@@ -121,9 +121,9 @@ public class ConfirmServlet extends ServletUtilBase {
 	      out.print(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_HIDDEN,
 	          ServletConsts.FORM_ID, form.getFormId()));
       
-		  QueryByKeys query = new QueryByKeys(recordKeys, cc);
+		  QueryByKeys query = new QueryByKeys(recordKeys);
 		  SubmissionFormatter formatter = new HtmlFormatter(form, cc.getServerURL(), resp.getWriter(), null, false);
-		  formatter.processSubmissions(query.getResultSubmissions());
+		  formatter.processSubmissions(query.getResultSubmissions(cc), cc);
 		  
       } else if (processType.equals(ProcessType.DELETE_FORM.getButtonText())) {
     	  
@@ -131,8 +131,8 @@ public class ConfirmServlet extends ServletUtilBase {
     	  // This is a read-only display for confirmation only.  The
     	  // hidden fields above contain the form ids being removed.
 		  QueryFormList formsList = new QueryFormList(recordKeys, true, cc);
-		  FormHtmlTable formFormatter = new FormHtmlTable(formsList, cc);
-		  out.print(formFormatter.generateHtmlFormTable(false, false));
+		  FormHtmlTable formFormatter = new FormHtmlTable(formsList);
+		  out.print(formFormatter.generateHtmlFormTable(false, false, cc));
       }
       
       out.print(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_SUBMIT, ServletConsts.PROCESS_TYPE, processType));

@@ -67,7 +67,7 @@ public class WatchdogImpl implements Watchdog, SmartLifecycle, InitializingBean,
 	 */
 	public class CallingContextImpl implements CallingContext {
 
-		boolean asDaemon = false;
+		boolean asDaemon = true;
 		
 		@Override
 		public boolean getAsDeamon() {

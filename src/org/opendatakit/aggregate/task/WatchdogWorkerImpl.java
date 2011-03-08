@@ -112,7 +112,7 @@ public class WatchdogWorkerImpl {
     // query for last submission submitted for the form
     QueryByDate query = new QueryByDate(form, new Date(System.currentTimeMillis()), true, 1,
         cc);
-    List<Submission> submissions = query.getResultSubmissions();
+    List<Submission> submissions = query.getResultSubmissions(cc);
     String lastSubmissionKey = null;
     if (submissions != null && submissions.size() == 1) {
       Submission lastSubmission = submissions.get(0);

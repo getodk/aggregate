@@ -106,8 +106,8 @@ public class JsonServlet extends ServletUtilBase {
     	QueryByDate query = new QueryByDate(form, BasicConsts.EPOCH, false,
                   ServletConsts.FETCH_LIMIT, cc);
 
-        List<Submission> submissions = query.getResultSubmissions();
-        jsonServer.sendSubmissions(submissions);
+        List<Submission> submissions = query.getResultSubmissions(cc);
+        jsonServer.sendSubmissions(submissions, cc);
 
       } catch (ODKFormNotFoundException e) {
         // TODO Auto-generated catch block

@@ -49,22 +49,19 @@ public class QueryRepeats {
   private final Form form;
 
   private final FormElementModel repeatGroup;
-  
-  private final CallingContext cc;
 
   private final String parentKey;
 
   public QueryRepeats(Form form, String submissionKey,
-      String submissionParentKey, CallingContext cc) throws ODKFormNotFoundException,
+      String submissionParentKey) throws ODKFormNotFoundException,
       ODKEntityNotFoundException {
-    this.cc = cc;
     this.form = form;
     this.parentKey = submissionParentKey;
     // TODO: kindId should be concatenation of enclosing element names...
     this.repeatGroup = form.getFormDefinition().getElementByName(submissionKey);
   }
 
-  public Collection<? extends SubmissionSet> getRepeatSubmissionSet() throws ODKIncompleteSubmissionData, ODKDatastoreException {
+  public Collection<? extends SubmissionSet> getRepeatSubmissionSet(CallingContext cc) throws ODKIncompleteSubmissionData, ODKDatastoreException {
     List<SubmissionSet> submissionSets = new ArrayList<SubmissionSet>();
 
     TopLevelDynamicBase topLevelRelation = (TopLevelDynamicBase) form.getTopLevelGroupElement().getFormDataModel().getBackingObjectPrototype();

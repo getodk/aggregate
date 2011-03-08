@@ -97,7 +97,7 @@ public class FormXmlServlet extends ServletUtilBase {
 
     try {
 	    if (form != null) {
-			xmlString = form.getFormXml();
+			xmlString = form.getFormXml(cc);
 	    } else {
 	      odkIdNotFoundError(resp);
 	    }

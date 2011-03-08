@@ -156,7 +156,7 @@ public class QueryResultsServlet extends ServletUtilBase {
 					cc.getServerURL(), resp.getWriter(), null, true);
 
 			beginBasicHtmlResponse(TITLE_INFO, resp, true, cc); // header info
-			formatter.processSubmissions(submissions);
+			formatter.processSubmissions(submissions, cc);
 			finishBasicHtmlResponse(resp);
 		} catch (ODKDatastoreException e) {
 			// TODO Auto-generated catch block

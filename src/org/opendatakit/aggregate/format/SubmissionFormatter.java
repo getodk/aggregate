@@ -17,6 +17,7 @@ package org.opendatakit.aggregate.format;
 
 import java.util.List;
 
+import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 
@@ -27,5 +28,5 @@ import org.opendatakit.common.persistence.exception.ODKDatastoreException;
  * 
  */
 public interface SubmissionFormatter {
-  public void processSubmissions(List<Submission> submissions) throws ODKDatastoreException;  
+  public void processSubmissions(List<Submission> submissions, CallingContext cc) throws ODKDatastoreException;  
 }

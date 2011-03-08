@@ -127,7 +127,9 @@ public class FusionTableServlet extends ServletUtilBase {
     if (!esType.equals(ExternalServiceOption.STREAM_ONLY)) {
       try {
         UploadSubmissions uploadTask = (UploadSubmissions) cc.getBean(BeanDefs.UPLOAD_TASK_BEAN);
-        uploadTask.createFormUploadTask(fusion.getFormServiceCursor(), cc);
+    	CallingContext ccDaemon = ContextFactory.getCallingContext(this, ADDR, req);
+    	ccDaemon.setAsDaemon(true);
+        uploadTask.createFormUploadTask(fusion.getFormServiceCursor(), ccDaemon);
       } catch (Exception e) {
         resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
         e.printStackTrace();

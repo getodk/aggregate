@@ -63,11 +63,9 @@ public class FormHtmlTable {
       FormTableConsts.FT_HEADER_FORM_ID, FormTableConsts.FT_HEADER_USER);
  
   private final QueryFormList forms;
-  private final CallingContext cc;
 
-  public FormHtmlTable(QueryFormList formsToFormat, CallingContext cc)  {
+  public FormHtmlTable(QueryFormList formsToFormat)  {
     forms = formsToFormat;
-    this.cc = cc;
   }
 
   public int getNumberForms() {
@@ -79,7 +77,7 @@ public class FormHtmlTable {
    * 
    * @throws UnsupportedEncodingException
    */
-  public String generateHtmlFormTable(boolean buttons, boolean selectBoxes)
+  public String generateHtmlFormTable(boolean buttons, boolean selectBoxes, CallingContext cc)
       throws UnsupportedEncodingException {
   
 
@@ -97,7 +95,7 @@ public class FormHtmlTable {
       row.addFormattedValue(form.getCreationUser());
 
       if (buttons) {
-        createButtonsHtml(form.getFormId(), row);
+        createButtonsHtml(form.getFormId(), row, cc);
       }
       formattedFormValues.add(row);
     }
@@ -115,7 +113,7 @@ public class FormHtmlTable {
    * @param row
    * @throws UnsupportedEncodingException
    */ 
-  private void createButtonsHtml(String formId, Row row) throws UnsupportedEncodingException {
+  private void createButtonsHtml(String formId, Row row, CallingContext cc) throws UnsupportedEncodingException {
 
     Map<String, String> properties = new HashMap<String, String>();
     properties.put(ServletConsts.FORM_ID, formId);

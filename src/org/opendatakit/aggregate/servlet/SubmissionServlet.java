@@ -85,6 +85,8 @@ public class SubmissionServlet extends ServletUtilBase {
 "     and zero or more associated data files for the images, audio clips, video clips, " +
 "     etc. linked with this submission.</p>" +
 "	  <!--[if true]><p style=\"color: red;\">For a better user experience, use Chrome, Firefox or Safari</p>" +
+"	  <!-- If you specify an empty progress div, it will be expanded with an upload progress region (non-IE) -->" +
+"	  <div id=\"progress\"></div><br />" +
 "     <form id=\"ie_backward_compatible_form\"" + 
 "	                      accept-charset=\"UTF-8\" method=\"POST\" enctype=\"multipart/form-data\"" + 
 "	                      action=\"";// emit the ADDR
@@ -130,10 +132,7 @@ public class SubmissionServlet extends ServletUtilBase {
 "	  	</tr>" +
 "	  </table>" +
 "	  <!--[if true]></form>" +
-"	  <![endif] -->" +
-"	  <br />" +
-"	  <!-- If you specify an empty progress div, it will be expanded with an upload progress region (non-IE) -->" +
-"	  <div id=\"progress\"></div>";
+"	  <![endif] -->";
 
   /**
    * Handler for HTTP Get request that processes a form submission
@@ -199,13 +198,11 @@ public class SubmissionServlet extends ServletUtilBase {
       // send information to remote servers that need to be notified
       List<ExternalService> tmp = FormServiceCursor.getExternalServicesForForm(form, cc);
       UploadSubmissions uploadTask = (UploadSubmissions) cc.getBean(BeanDefs.UPLOAD_TASK_BEAN);
-      try {
-    	  cc.setAsDaemon(true);
-	      for (ExternalService rs : tmp) {
-	        uploadTask.createFormUploadTask(rs.getFormServiceCursor(), cc);
-	      }
-      } finally {
-    	  cc.setAsDaemon(false);
+
+  	  CallingContext ccDaemon = ContextFactory.getCallingContext(this, ADDR, req);
+	  ccDaemon.setAsDaemon(true);
+      for (ExternalService rs : tmp) {
+        uploadTask.createFormUploadTask(rs.getFormServiceCursor(), ccDaemon);
       }
 
       resp.setStatus(HttpServletResponse.SC_CREATED);

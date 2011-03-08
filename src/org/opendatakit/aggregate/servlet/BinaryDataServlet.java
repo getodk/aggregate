@@ -127,7 +127,7 @@ public class BinaryDataServlet extends ServletUtilBase {
     		
     	if ( b.getAttachmentCount() == 1 ) {
     		try {
-				imageBlob = b.getBlob(1);
+				imageBlob = b.getBlob(1, cc);
 				unrootedFileName = b.getUnrootedFilename(1);
 				contentType = b.getContentType(1);
 				contentLength = b.getContentLength(1);
@@ -146,7 +146,7 @@ public class BinaryDataServlet extends ServletUtilBase {
 				return;
     		} else {
 	    		try {
-	    			imageBlob = b.getBlob(ordinal.intValue());
+	    			imageBlob = b.getBlob(ordinal.intValue(), cc);
 	    			unrootedFileName = b.getUnrootedFilename(ordinal.intValue());
 	    			contentType = b.getContentType(ordinal.intValue());
 	    			contentLength = b.getContentLength(ordinal.intValue());

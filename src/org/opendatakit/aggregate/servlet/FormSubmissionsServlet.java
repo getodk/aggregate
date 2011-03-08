@@ -117,7 +117,7 @@ public class FormSubmissionsServlet extends ServletUtilBase {
       QueryByDate query = new QueryByDate(form, BasicConsts.EPOCH, false,
               ServletConsts.FETCH_LIMIT, cc);
       HtmlFormatter formatter = new HtmlFormatter(form, cc.getServerURL(), resp.getWriter(), null, true);
-      List<Submission> submissions = query.getResultSubmissions();
+      List<Submission> submissions = query.getResultSubmissions(cc);
 
       boolean createBack = false;
       boolean createForward = false;
@@ -170,7 +170,7 @@ public class FormSubmissionsServlet extends ServletUtilBase {
           HtmlConsts.POST));
       out.print(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_HIDDEN, ServletConsts.FORM_ID, formId));
       
-      formatter.processSubmissions(submissions);
+      formatter.processSubmissions(submissions, cc);
       
       out.print(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_SUBMIT, ServletConsts.PROCESS_TYPE,
           ProcessType.DELETE.getButtonText()));

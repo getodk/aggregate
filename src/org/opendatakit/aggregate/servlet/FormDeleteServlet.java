@@ -71,11 +71,11 @@ public class FormDeleteServlet extends ServletUtilBase {
     try {
       
       QueryFormList formsList = new QueryFormList(true, cc);
-      FormHtmlTable formFormatter = new FormHtmlTable(formsList, cc);
+      FormHtmlTable formFormatter = new FormHtmlTable(formsList);
 
       beginBasicHtmlResponse(TITLE_INFO, resp, true, cc); // header info
       out.print(HtmlUtil.createFormBeginTag(cc.getWebApplicationURL(ConfirmServlet.ADDR), null, HtmlConsts.POST));
-      out.print(formFormatter.generateHtmlFormTable(false, true));
+      out.print(formFormatter.generateHtmlFormTable(false, true, cc));
       out.print(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_SUBMIT, ServletConsts.PROCESS_TYPE, ProcessType.DELETE_FORM.getButtonText()));
       out.print(HtmlConsts.LINE_BREAK);
       out.print(HtmlConsts.FORM_CLOSE);

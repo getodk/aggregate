@@ -88,6 +88,8 @@ public class FormUploadServlet extends ServletUtilBase {
 "	  <p>On ODK Collect 1.1.6 and higher, the file named \"<code>form_logo.png</code>\"," + 
 "	  if present in the media folder, will be displayed as the form's logo. </p>" +
 "	  <!--[if true]><p style=\"color: red;\">For a better user experience, use Chrome, Firefox or Safari</p>" +
+"	  <!-- If you specify an empty progress div, it will be expanded with an upload progress region (non-IE) -->" +
+"	  <div id=\"progress\"></div><br />" +
 "     <form id=\"ie_backward_compatible_form\"" + 
 "	                      accept-charset=\"UTF-8\" method=\"POST\" enctype=\"multipart/form-data\"" + 
 "	                      action=\"";// emit the ADDR
@@ -133,10 +135,7 @@ public class FormUploadServlet extends ServletUtilBase {
 "	  	</tr>" +
 "	  </table>" +
 "	  <!--[if true]></form>" +
-"	  <![endif] -->" +
-"	  <br />" +
-"	  <!-- If you specify an empty progress div, it will be expanded with an upload progress region (non-IE) -->" +
-"	  <div id=\"progress\"></div>";
+"	  <![endif] -->";
 
   /**
    * Title for generated webpage to obtain title

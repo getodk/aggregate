@@ -39,7 +39,7 @@ public class QueryByDateRange extends QueryBase {
 
   public QueryByDateRange(Form form, int maxFetchLimit, Date startDate, Date endDate, CallingContext cc)
       throws ODKFormNotFoundException {
-    super(form, maxFetchLimit, cc);
+    super(form, maxFetchLimit);
    
     TopLevelDynamicBase tbl = (TopLevelDynamicBase) form.getFormDefinition().getTopLevelGroup().getBackingObjectPrototype();
     
@@ -55,7 +55,7 @@ public class QueryByDateRange extends QueryBase {
   }
 
   @Override
-  public List<Submission> getResultSubmissions() throws ODKIncompleteSubmissionData,
+  public List<Submission> getResultSubmissions(CallingContext cc) throws ODKIncompleteSubmissionData,
       ODKDatastoreException {
 
     List<Submission> retrievedSubmissions = new ArrayList<Submission>();

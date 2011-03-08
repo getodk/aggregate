@@ -57,7 +57,7 @@ public interface SubmissionValue extends SubmissionElement {
    * @param keyList
  * @throws ODKDatastoreException 
    */
-  public void recursivelyAddEntityKeys(List<EntityKey> keyList) throws ODKDatastoreException;
+  public void recursivelyAddEntityKeys(List<EntityKey> keyList, CallingContext cc) throws ODKDatastoreException;
   
   /**
    * Recursively persist this submission to the datastore.
@@ -77,5 +77,5 @@ public interface SubmissionValue extends SubmissionElement {
    * @param ordinalValue expected either a blank string if top-level element(submission), or the ordinal value of the repeat 
    * @throws ODKDatastoreException thrown if something goes wrong with the data store
    */
-  public void formatValue(ElementFormatter elemFormatter, Row row, String ordinalValue) throws ODKDatastoreException;
+  public void formatValue(ElementFormatter elemFormatter, Row row, String ordinalValue, CallingContext cc) throws ODKDatastoreException;
 }

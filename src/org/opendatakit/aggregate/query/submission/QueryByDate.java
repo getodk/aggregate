@@ -41,7 +41,7 @@ public class QueryByDate extends QueryBase {
 
   public QueryByDate(Form form, Date lastDate,
       boolean backwardDirection, boolean secondaryOrderingByPrimaryKey, Boolean completionStatus, int maxFetchLimit, CallingContext cc) throws ODKFormNotFoundException {
-    super(form, maxFetchLimit, cc);
+    super(form, maxFetchLimit);
 
     backward = backwardDirection;
 
@@ -66,7 +66,8 @@ public class QueryByDate extends QueryBase {
 	  this(form, lastDate, backwardDirection, false, true, maxFetchLimit, cc);
   }
   
-  public List<Submission> getResultSubmissions() throws ODKDatastoreException {
+  @Override
+  public List<Submission> getResultSubmissions(CallingContext cc) throws ODKDatastoreException {
 
     List<Submission> retrievedSubmissions = new ArrayList<Submission>();
 

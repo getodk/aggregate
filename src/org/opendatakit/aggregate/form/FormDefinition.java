@@ -88,6 +88,16 @@ public class FormDefinition {
 	private final String qualifiedTopLevelTable;
 	private final XFormParameters xformParameters;
 	
+	public static final class OrdinalSequence {
+		Long ordinal;
+		int sequenceCounter;
+		
+		OrdinalSequence() {
+			ordinal = 1L;
+			sequenceCounter = 1;
+		}
+	}
+	
 	/**
 	 * Append to the list the FormDataModel entries needed to represent this
 	 * dynamic table.  Useful for generating the FormInfo data model from its 
@@ -101,14 +111,14 @@ public class FormDefinition {
 	 * @param ordinal
 	 * @param datastore
 	 * @param user
-	 * @return the ordinal of the last field defined.
+	 * @return the uri key for the FDM of the table.
 	 * @throws ODKDatastoreException
 	 */
-	static final Long buildTableFormDataModel( List<FormDataModel> list, 
+	static final String buildTableFormDataModel( List<FormDataModel> list, 
 													DynamicCommonFieldsBase form, 
 													DynamicCommonFieldsBase topLevel, 
-													DynamicCommonFieldsBase parent,
-													Long ordinal,
+													String parentURI,
+													OrdinalSequence os,
 													CallingContext cc ) throws ODKDatastoreException {
 		FormDataModel fdm = FormDataModel.assertRelation(cc);
 		FormDataModel d;
@@ -120,7 +130,14 @@ public class FormDefinition {
 		// we are making use of the fact that the PK in the 
 		// FormDataModel is the PK within the relation model.
 		final EntityKey k = new EntityKey( fdm, topLevel.getUri());
-		final String parentURI = (parent == null) ? null : parent.getUri();
+		int idx = parentURI.lastIndexOf('(');
+		String parentURI_minusParenPhrase = "elem+" + parentURI;
+		if ( idx != -1 ) {
+			parentURI_minusParenPhrase = parentURI.substring(0,idx);
+		}
+		
+		String groupUri = form.getUri();
+		groupUri = String.format("%1$s(%2$08d)", parentURI_minusParenPhrase, os.sequenceCounter);
 		
 		// define the table...
 		Datastore ds = cc.getDatastore();
@@ -128,13 +145,13 @@ public class FormDefinition {
 		d = ds.createEntityUsingRelation(fdm, user);
 		list.add(d);
 		// reset the PK to be the PK of the table we are representing
-		d.setStringField(fdm.primaryKey, form.getUri());
-		d.setLongField(fdm.ordinalNumber, ordinal);
+		d.setStringField(fdm.primaryKey, groupUri);
+		d.setLongField(fdm.ordinalNumber, os.ordinal);
 		d.setStringField(fdm.parentUriFormDataModel, parentURI);
 		d.setStringField(fdm.uriSubmissionDataModel, topLevel.getUri());
 		d.setStringField(fdm.elementName, form.getTableName());
 		d.setStringField(fdm.elementType,
-				(parent == topLevel) ?
+				(form == topLevel) ?
 				FormDataModel.ElementType.GROUP.toString() :
 				FormDataModel.ElementType.REPEAT.toString() );
 		d.setStringField(fdm.persistAsColumn, null);
@@ -144,17 +161,18 @@ public class FormDefinition {
 		// enforce defined ordinal positions based upon order in fieldList
 		
 		// loop through the fields...
-		Long l = 0L;
+		os.ordinal = 0L;
 		for ( DataField f : form.getFieldList() ) {
 			if ( f.getName().startsWith("_")) continue; // ignore metadata
-			++l;
+			++(os.ordinal);
 			
 			// this field should be in the fdm model...
 			d = ds.createEntityUsingRelation(fdm, user);
 			list.add(d);
-			d.setStringField(fdm.primaryKey, form.getUri() + "-" + Long.toString(l));
-			d.setLongField(fdm.ordinalNumber, l);
-			d.setStringField(fdm.parentUriFormDataModel, form.getUri());
+			String pkFormatted = String.format("%1$s(%2$08d)", parentURI_minusParenPhrase, ++(os.sequenceCounter));
+			d.setStringField(fdm.primaryKey, pkFormatted);
+			d.setLongField(fdm.ordinalNumber, os.ordinal);
+			d.setStringField(fdm.parentUriFormDataModel, groupUri);
 			d.setStringField(fdm.uriSubmissionDataModel, k.getKey());
 			d.setStringField(fdm.elementName, f.getName());
 			switch ( f.getDataType() ) {
@@ -184,20 +202,19 @@ public class FormDefinition {
 			d.setStringField(fdm.persistAsSchema, form.getSchemaName());
 		}
 		
-		return l;
+		++(os.ordinal);
+		++(os.sequenceCounter);
+		return groupUri;
 	}
 	
 	static final void buildBinaryContentFormDataModel( List<FormDataModel> list, 
 			String binaryContentElementName,
-			String binaryContentUri,
 			String binaryContentTableName,
-			String binaryContentRefBlobUri,
 			String binaryContentRefBlobTableName,
-			String refBlobUri,
 			String refBlobTableName,
 			TopLevelDynamicBase topLevel, 
-			DynamicCommonFieldsBase parent,
-			Long ordinal,
+			String parentTableKey,
+			OrdinalSequence os,
 			CallingContext cc ) throws ODKDatastoreException {
 		
 		FormDataModel fdm = FormDataModel.assertRelation(cc);
@@ -206,7 +223,21 @@ public class FormDefinition {
 		// we are making use of the fact that the PK in the 
 		// FormDataModel is the PK within the relation model.
 		final String topLevelURI = topLevel.getUri();
-		final String parentURI = parent.getUri(); // there better be a parent!!!
+		
+		int idx = parentTableKey.lastIndexOf('(');
+		String parentURI_minusParenPhrase = "elem+" + parentTableKey;
+		if ( idx != -1 ) {
+			parentURI_minusParenPhrase = parentTableKey.substring(0,idx);
+		}
+		String binaryContentUri = String.format("%1$s(%2$08d)", 
+				parentURI_minusParenPhrase,
+		  		os.sequenceCounter);
+		String binaryContentRefBlobUri = String.format("%1$s(%2$08d-%3$s)", 
+				parentURI_minusParenPhrase,
+		  		os.sequenceCounter, "bc_ref");
+		String refBlobUri = String.format("%1$s(%2$08d-%3$s)", 
+				parentURI_minusParenPhrase,
+		  		os.sequenceCounter, "ref_blob");
 		
 		Datastore ds = cc.getDatastore();
 		User user = cc.getCurrentUser();
@@ -215,8 +246,8 @@ public class FormDefinition {
 		d.setStringField(fdm.primaryKey, binaryContentUri);
 		list.add(d);
 		final String bcURI = d.getUri();
-		d.setLongField(fdm.ordinalNumber, ordinal);
-		d.setStringField(fdm.parentUriFormDataModel, parentURI);
+		d.setLongField(fdm.ordinalNumber, os.ordinal);
+		d.setStringField(fdm.parentUriFormDataModel, parentTableKey);
 		d.setStringField(fdm.uriSubmissionDataModel, topLevelURI);
 		d.setStringField(fdm.elementName, binaryContentElementName);
 		d.setStringField(fdm.elementType, FormDataModel.ElementType.BINARY.toString());
@@ -250,16 +281,17 @@ public class FormDefinition {
 		d.setStringField(fdm.persistAsColumn, null);
 		d.setStringField(fdm.persistAsTable, refBlobTableName);
 		d.setStringField(fdm.persistAsSchema, fdm.getSchemaName());
+		
+		++(os.ordinal);
+		++(os.sequenceCounter);
 	}
 	
 	
 	static final void buildLongStringFormDataModel( List<FormDataModel> list, 
-			String longStringRefTextUri,
 			String longStringRefTextTableName,
-			String refTextUri,
 			String refTextTableName,
 			TopLevelDynamicBase topLevel, 
-			Long ordinal,
+			OrdinalSequence os,
 			CallingContext cc ) throws ODKDatastoreException {
 		
 		FormDataModel fdm = FormDataModel.assertRelation(cc);
@@ -271,12 +303,24 @@ public class FormDefinition {
 		Datastore ds = cc.getDatastore();
 		User user = cc.getCurrentUser();
 		
+		int idx = topLevelURI.lastIndexOf('(');
+		String parentURI_minusParenPhrase = "elem+" + topLevelURI;
+		if ( idx != -1 ) {
+			parentURI_minusParenPhrase = topLevelURI.substring(0,idx);
+		}
+		String longStringRefTextUri = String.format("%1$s(%2$08d-%3$s)", 
+				parentURI_minusParenPhrase,
+		  		os.sequenceCounter, "long_string_ref");
+		String refTextUri = String.format("%1$s(%2$08d-%3$s)", 
+				parentURI_minusParenPhrase,
+		  		os.sequenceCounter, "ref_text");
+
 		// record for long string ref text...
 		d = ds.createEntityUsingRelation(fdm, user);
 		d.setStringField(fdm.primaryKey, longStringRefTextUri);
 		list.add(d);
 		final String lst = d.getUri();
-		d.setLongField(fdm.ordinalNumber, ordinal);
+		d.setLongField(fdm.ordinalNumber, os.ordinal);
 		d.setStringField(fdm.parentUriFormDataModel, topLevelURI);
 		d.setStringField(fdm.uriSubmissionDataModel, topLevelURI);
 		d.setStringField(fdm.elementName, null);
@@ -297,6 +341,9 @@ public class FormDefinition {
 		d.setStringField(fdm.persistAsColumn, null);
 		d.setStringField(fdm.persistAsTable, refTextTableName);
 		d.setStringField(fdm.persistAsSchema, fdm.getSchemaName());
+		
+		++(os.ordinal);
+		++(os.sequenceCounter);
 	}
 	
 	static final void assertModel(XFormParameters p, List<FormDataModel> model, CallingContext cc) throws ODKDatastoreException {
@@ -919,6 +966,9 @@ public class FormDefinition {
 	public void setLongString(String text, String parentKey, String uriFormDataModel, EntityKey topLevelTableAuri, 
 			CallingContext cc) throws ODKEntityPersistException {
 		
+		FormDataModel m = uriMap.get(uriFormDataModel);
+		m.setMayHaveExtendedStringData(true);
+		
 		long textLimit = refTextTable.value.getMaxCharLen();
 		Datastore ds = cc.getDatastore();
 		User user = cc.getCurrentUser();
@@ -943,7 +993,7 @@ public class FormDefinition {
 	    }
 	}
 
-	public String getLongString(String parentKey, String uriFormDataModel, CallingContext cc) throws ODKDatastoreException {
+	public String getLongString(String parentKey, String uriFormDataModel, EntityKey topLevelTableAuri, CallingContext cc) throws ODKDatastoreException {
 		
 		StringBuilder b = new StringBuilder();
 		
@@ -964,9 +1014,9 @@ public class FormDefinition {
 	}
 
 	public void recursivelyAddLongStringTextEntityKeys(List<EntityKey> keyList, String parentKey, String uriFormDataModel,
-			Datastore datastore, User user) throws ODKDatastoreException {
+			EntityKey topLevelTableAuri, CallingContext cc) throws ODKDatastoreException {
 
-		Query q = datastore.createQuery(longStringRefTextTable, user);
+		Query q = cc.getDatastore().createQuery(longStringRefTextTable, cc.getCurrentUser());
 		q.addFilter(longStringRefTextTable.domAuri, FilterOperation.EQUAL, parentKey);
 		q.addFilter(longStringRefTextTable.uriFormDataModel, FilterOperation.EQUAL, uriFormDataModel);
 		q.addSort(longStringRefTextTable.part, Direction.ASCENDING);
