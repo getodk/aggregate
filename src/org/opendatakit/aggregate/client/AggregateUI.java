@@ -75,6 +75,7 @@ public class AggregateUI implements EntryPoint {
 
   private FormServiceAsync formSvc;
   private FlexTable listOfForms;
+  private ListBox formsBox = new ListBox();
   
   public AggregateUI() {
     formSvc = GWT.create(FormService.class);
@@ -93,9 +94,6 @@ public class AggregateUI implements EntryPoint {
   
   public HorizontalPanel setupFormsAndGoalsPanel() {
     // list of forms
-    ListBox formsBox = new ListBox();
-    formsBox.addItem("form1");
-    formsBox.addItem("form2");
     formAndGoalSelectionTable.setWidget(0, 0, formsBox);
     // list of filters
     ListBox filtersBox = new ListBox();
@@ -410,11 +408,19 @@ public class AggregateUI implements EntryPoint {
 
       public void onSuccess(FormSummary[] forms) {
         updateFormTable(forms);
+        fillFormDropDown(forms);
       }
     };
 
     // Make the call to the form service.
     formSvc.getForms(callback);
+  }
+  
+  private void fillFormDropDown(FormSummary [] forms) {
+	    for (int j = 0; j < forms.length; j++) {
+	    	FormSummary form = forms[j];
+	    	formsBox.addItem(form.getTitle());
+	    }
   }
   
   /**
