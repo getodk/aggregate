@@ -8,7 +8,7 @@
 	line-height: 130%;
 	text-decoration: none;
 	font-weight: bold;
-	color: #565656;
+	color: #336699;
 	cursor: pointer;
 	padding: 5px 10px 6px 7px;
 }
@@ -22,7 +22,10 @@
 .gwt-Button:hover {
 	background: #DFF4FF;
 	border: 1px solid #C2E1EF;
-	color: #336699;
+}
+.gwt-Button:active {
+	background: #163CB8;
+	color: #DFF4FF;
 }
 .gwt-Button-negative {
 	color: #D12F19;
@@ -32,6 +35,10 @@
 	border: 1px solid #FBC2C4;
 	color: #D12F19;
 }
+.gwt-Button-negative:active {
+	background: #990A10;
+	color: #FBE3E4;
+}
 .gwt-Button-positive {
 	color: #529214;
 }
@@ -39,4 +46,8 @@
 	background: #E6EFC2;
 	border: 1px solid #C6D880;
 	color: #529214;
+}
+.gwt-Button-positive:active {
+	background: #21A60F;
+	color: #E6EFC2;
 }

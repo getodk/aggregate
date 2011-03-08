@@ -14,13 +14,10 @@ import org.opendatakit.aggregate.client.form.FormSummary;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
-import com.google.gwt.event.logical.shared.SelectionEvent;
-import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -35,7 +32,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.RootPanel;
-import com.google.gwt.user.client.ui.TabBar;
+import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.Tree;
 import com.google.gwt.user.client.ui.TreeItem;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -43,20 +40,35 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 public class AggregateUI implements EntryPoint {
   
   private static final int REFRESH_INTERVAL = 5000; // ms
+  
+  // Main Navigation
+  private static final String SUBMISSIONS = "submissions";
+  private static final String MANAGEMENT = "management";
+  private static final String[] MAIN_MENU = {SUBMISSIONS, MANAGEMENT};
+  // Submission Navigation
+  private static final String FILTER = "filter";
+  private static final String VISUALIZE = "visualize";
+  private static final String[] SUBMISSION_MENU = {FILTER, VISUALIZE};
+  // Management Navigation
+  private static final String FORMS = "forms";
+  private static final String EXPORT = "export";
+  private static final String PERMISSIONS = "permissions";
+  private static final String UTILITIES = "utilities";
+  private static final String[] MANAGEMENT_MENU = {FORMS, EXPORT, PERMISSIONS, UTILITIES};
 
   private List<FilterGroup> view = new ArrayList<FilterGroup>();
   private FlexTable dataTable; //contains the data
   private FilterGroup def; //the default filter group
   private HorizontalPanel filterPanel = new HorizontalPanel();
   private CreateNewFilterPopup filterPopup = new CreateNewFilterPopup();
-  private Url url;
+  private UrlHash hash;
   
   // navigation
   private DecoratedTabPanel mainNav = new DecoratedTabPanel();
-  private DecoratedTabPanel manageNav;
+  private TabPanel manageNav = new TabPanel();
+  private TabPanel submissionNav = new TabPanel();
   
   // Report tab
-  private VerticalPanel reportContent = new VerticalPanel();
   private HorizontalPanel filtersDataHelp = new HorizontalPanel();
   private FlexTable formAndGoalSelectionTable = new FlexTable();
   private FlexTable uploadTable = new FlexTable();
@@ -121,15 +133,15 @@ public class AggregateUI implements EntryPoint {
 	  int row = 0;
 	  for (Filter filter: group.getFilters()) {
 		  if(filter instanceof RowFilter) {
-		     RowFilter rowFilter = (RowFilter) filter;
+			  RowFilter rowFilter = (RowFilter) filter;
 			  filters.setWidget(row, 0, new Label(
-			      rowFilter.getVisibility() + rowFilter.getColumn().getDisplayHeader() + 
+					  rowFilter.getVisibility() + rowFilter.getColumn().getDisplayHeader() + 
 					  "where columns are " + rowFilter.getOperation() + 
 					  rowFilter.getInput()));
-		  } else if(filter instanceof ColumnFilter){
-		    ColumnFilter columnFilter = (ColumnFilter) filter;
+		  } else if (filter instanceof ColumnFilter){
+			  ColumnFilter columnFilter = (ColumnFilter) filter;
 			  filters.setWidget(row, 0, new Label(
-			      columnFilter.getVisibility() + "FIX ME"));
+					  columnFilter.getVisibility() + "FIX ME"));
 		  }
 		  final Button removeFilter = new Button("-");
 		  filters.setWidget(row, 1, removeFilter);
@@ -148,7 +160,6 @@ public class AggregateUI implements EntryPoint {
 		  });
 		  row++;
 	  }
-	  filters.setStyleName("filters_panel");
 	  filterGroup.addItem(filters);
 	  filterGroup.setState(true);
 	  return filterGroup;
@@ -223,6 +234,8 @@ public class AggregateUI implements EntryPoint {
     helpPanel.setStyleName("help_panel");
     filtersDataHelp.add(helpPanel);
     filtersDataHelp.getElement().setId("filters_data_help");
+	  filtersDataHelp.getElement().getFirstChildElement().getFirstChildElement().getFirstChildElement().setId("filters_panel");
+	  filtersDataHelp.getElement().getFirstChildElement().getFirstChildElement().getFirstChildElement().getNextSiblingElement().getNextSiblingElement().setId("help_panel");
     filtersDataHelp.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_JUSTIFY);
     return filtersDataHelp;
   }
@@ -250,100 +263,88 @@ public class AggregateUI implements EntryPoint {
     return formManagementPanel;
   }
   
+  /*
+   * Creates a click handler for a main menu tab.
+   * Defaults to the first sub-menu tab.
+   * Does nothing if we're already on the tab clicked.
+   */
+  private ClickHandler getMainMenuClickHandler(final String s) {
+	  return new ClickHandler() {
+		  @Override
+		  public void onClick(ClickEvent event) {
+			  if (hash.get(UrlHash.MAIN_MENU).equals(s))
+				  return;
+			  hash.clear();
+			  hash.set(UrlHash.MAIN_MENU, s);
+			  TabPanel panel = null;
+			  if (s.equals(SUBMISSIONS))
+				  panel = submissionNav;
+			  else if (s.equals(MANAGEMENT))
+				  panel = manageNav;
+			  panel.selectTab(0);
+			  hash.put();
+		  }
+	  };
+  }
+  
   public void onModuleLoad() {
-	url = new Url();
-    reportContent.add(setupFormsAndGoalsPanel());
-    def = new FilterGroup(
-    		"Default", "def", new ArrayList<Filter>());
-    view.add(def);
-    filterPanel = setupFiltersDataHelpPanel(view);
-    reportContent.add(filterPanel);
-
-    manageNav = setupManageNav();
-
-    mainNav.add(reportContent, "Report");
-    mainNav.add(manageNav, "Manage");
-    mainNav.addSelectionHandler(new SelectionHandler<Integer>() {
-    	public void onSelection(SelectionEvent<Integer> event) {
-    		if (event.getSelectedItem() == 0)
-    			url.set("panel", "report");
-    		else if (event.getSelectedItem() == 1)
-    			url.set("panel", "manage");
-    	}
-    });
-    if (!url.contains("panel")) { // default
-    	mainNav.selectTab(0);
-    } else if (url.contains("panel", "report")) {
-    	mainNav.selectTab(0);
-    } else if (url.contains("panel", "manage")) {
-    	mainNav.selectTab(1);
-    } else { // default
-    	mainNav.selectTab(0);
-    }
-
+	  // Get url hash.
+	hash = UrlHash.getHash();
+	hash.get();
+	
+	// Create sub menu navigation
+	setupSubmissionNav();
+	setupManageNav();
+	
+    mainNav.add(submissionNav, "Submissions");
+    mainNav.add(manageNav, "Management");
     mainNav.addStyleName("mainNav");
-    mainNav.getTabBar().addStyleName("mainNavTabBar");
-    mainNav.getDeckPanel().getElement().setId("mainPage");
     
-    TabBar tabBar = mainNav.getTabBar();
-    Element firstTabElement = tabBar.getElement().getFirstChildElement().getFirstChildElement().getFirstChildElement();
-    Element spacer = firstTabElement.getFirstChildElement();
-    spacer.setId("main_nav_spacer_tab");
-    Element firstTab = firstTabElement.getNextSiblingElement().getFirstChildElement();
-    firstTab.addClassName("first_tab");
-    Element lastTab = firstTabElement;
-    for (int i = 0; i < tabBar.getTabCount(); i++) {
-    	lastTab = lastTab.getNextSiblingElement();
-    }
-    lastTab = lastTab.getFirstChildElement();
-    lastTab.addClassName("last_tab");
+    // Select the correct menu item based on url hash.
+    int selected = 0;
+    String mainMenu = hash.get(UrlHash.MAIN_MENU);
+    for (int i = 0; i < MAIN_MENU.length; i++)
+    	if (mainMenu.equals(MAIN_MENU[i]))
+    		selected = i;
+    mainNav.selectTab(selected);
     
-    RootPanel.get("dynamic_content").add(new HTML("<img src=\"images/odk_aggregate.png\" id=\"odk_aggregate_logo\" />"));
+    // Add click handlers for each menu item
+    for (int i = 0; i < MAIN_MENU.length; i++)
+    	mainNav.getTabBar().getTab(i).addClickHandler(getMainMenuClickHandler(MAIN_MENU[i]));
+    
+    RootPanel.get("dynamic_content").add(new HTML("<img src=\"images/odk_color.png\" id=\"odk_aggregate_logo\" />"));
     RootPanel.get("dynamic_content").add(mainNav);
     contentLoaded();
   }
   
-  public DecoratedTabPanel setupManageNav() {
-	  DecoratedTabPanel nav = new DecoratedTabPanel();
-	  nav.add(setupFormManagementPanel(), "Forms");
-	  nav.add(setupExportsPanel(), "Export");
-	  nav.add(setupPermissionsPanel(), "Permissions");
-	  nav.add(setupUtilitiesPanel(), "Utilities");
+  private ClickHandler getSubMenuClickHandler(
+		  final String menu, final String subMenu) {
+	  return new ClickHandler() {
+		  @Override
+		  public void onClick(ClickEvent event) {
+			  hash.clear();
+			  hash.set(UrlHash.MAIN_MENU, menu);
+			  hash.set(UrlHash.SUB_MENU, subMenu);
+			  hash.put();
+		  }
+	  };
+  }
+  
+  public void setupManageNav() {
+	  manageNav.add(setupFormManagementPanel(), "Forms");
+	  manageNav.add(setupExportsPanel(), "Export");
+	  manageNav.add(setupPermissionsPanel(), "Permissions");
+	  manageNav.add(setupUtilitiesPanel(), "Utilities");
 	  
-	  TabBar tabBar = nav.getTabBar();
-	  Element firstTabElement = tabBar.getElement().getFirstChildElement().getFirstChildElement().getFirstChildElement();
-	  Element spacer = firstTabElement.getFirstChildElement();
-	  spacer.setId("manage_nav_spacer_tab");
-	  Element firstTab = firstTabElement.getNextSiblingElement().getFirstChildElement();
-	  firstTab.addClassName("first_tab");
-	  Element lastTab = firstTabElement;
-	  for (int i = 0; i < tabBar.getTabCount(); i++) {
-		  lastTab = lastTab.getNextSiblingElement();
-	  }
-	  lastTab = lastTab.getFirstChildElement();
-	  lastTab.addClassName("last_tab");
-	  
-	  Element currentTab = firstTabElement;
-	  for (int i = 0; i < tabBar.getTabCount(); i++) {
-		  currentTab = currentTab.getNextSiblingElement();
-		  currentTab.addClassName("javascript_tab_flip");
-	  }
-	  
-	  if (!url.contains("manage_panel")) {
-		  nav.selectTab(0);
-	  } else if (url.contains("manage_panel", "forms")) {
-		  nav.selectTab(0);
-	  } else if (url.contains("manage_panel", "export")) {
-		  nav.selectTab(1);
-	  } else if (url.contains("manage_panel", "permissions")) {
-		  nav.selectTab(2);
-	  } else if (url.contains("manage_panel", "utilities")) {
-		  nav.selectTab(3);
-	  } else {
-		  nav.selectTab(0);
-	  }
-	  
-	  return nav;
+	  int selected = 0;
+	  String subMenu = hash.get(UrlHash.SUB_MENU);
+	  for (int i = 0; i < MANAGEMENT_MENU.length; i++)
+		  if (subMenu.equals(MANAGEMENT_MENU[i]))
+			  selected = i;
+	  manageNav.selectTab(selected);
+
+	  for (int i = 0; i < MANAGEMENT_MENU.length; i++)
+		  manageNav.getTabBar().getTab(i).addClickHandler(getSubMenuClickHandler(MANAGEMENT, MANAGEMENT_MENU[i]));
   }
   
   public FlexTable setupExportsPanel() {
@@ -355,6 +356,36 @@ public class AggregateUI implements EntryPoint {
   }
   
   public HTML setupUtilitiesPanel() {
+	  return new HTML("Content Forthcoming");
+  }
+  
+  public void setupSubmissionNav() {
+	  submissionNav.add(setupSubmissionsPanel(), "Filter");
+	  submissionNav.add(setupVisualizePanel(), "Visualize");
+	  
+	  int selected = 0;
+	  String subMenu = hash.get(UrlHash.SUB_MENU);
+	  for (int i = 0; i < SUBMISSION_MENU.length; i++)
+		  if (subMenu.equals(SUBMISSION_MENU[i]))
+			  selected = i;
+	  submissionNav.selectTab(selected);
+	  
+	  for (int i = 0; i < SUBMISSION_MENU.length; i++)
+		  submissionNav.getTabBar().getTab(i).addClickHandler(getSubMenuClickHandler(SUBMISSIONS, SUBMISSION_MENU[i]));
+  }
+  
+  public VerticalPanel setupSubmissionsPanel() {
+	  	VerticalPanel reportContent = new VerticalPanel();
+	    reportContent.add(setupFormsAndGoalsPanel());
+	    def = new FilterGroup(
+	    		"Default", "def", new ArrayList<Filter>());
+	    view.add(def);
+	    filterPanel = setupFiltersDataHelpPanel(view);
+	    reportContent.add(filterPanel);
+	    return reportContent;
+  }
+  
+  public HTML setupVisualizePanel() {
 	  return new HTML("Content Forthcoming");
   }
   
