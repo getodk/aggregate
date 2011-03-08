@@ -23,7 +23,7 @@ public class SubmissionUISummary implements Serializable {
     return headers;
   }
 
-  public void addSubmission(SubmissionUI submission) throws Exception {
+  public void addSubmission(SubmissionUI submission) throws Exception {   
     if(submission.getNumberOfFields() == headers.size()) {
       submissions.add(submission);
     } else {
@@ -34,4 +34,6 @@ public class SubmissionUISummary implements Serializable {
   public void addSubmissionHeader(String displayHeader, String columnName) {
     headers.add(new Column(displayHeader, columnName));
   }
+  
+  
 }

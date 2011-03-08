@@ -5,11 +5,16 @@ import java.util.List;
 import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.client.filter.FilterGroup;
+import org.opendatakit.aggregate.client.submission.SubmissionUI;
 import org.opendatakit.aggregate.client.submission.SubmissionUISummary;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.format.Row;
+import org.opendatakit.aggregate.format.element.BasicElementFormatter;
+import org.opendatakit.aggregate.format.element.ElementFormatter;
 import org.opendatakit.aggregate.query.submission.QueryByUIFilterGroup;
 import org.opendatakit.aggregate.submission.Submission;
+import org.opendatakit.aggregate.submission.SubmissionSet;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
@@ -37,7 +42,18 @@ org.opendatakit.aggregate.client.submission.SubmissionService {
       GenerateHeaderInfo headerGenerator = new GenerateHeaderInfo(summary);
       headerGenerator.processForHeaderInfo(form.getTopLevelGroupElement());
       
-      // TODO: continue
+      ElementFormatter elemFormatter = new BasicElementFormatter(true, true, true);
+      
+      // format row elements
+      for (SubmissionSet sub : submissions) {
+        Row row = sub.getFormattedValuesAsRow(null, elemFormatter, false);
+        try {
+          summary.addSubmission(new SubmissionUI(row.getFormattedValues()));
+        } catch (Exception e) {
+          // TODO Auto-generated catch block
+          e.printStackTrace();
+        }
+      }
       
     } catch (ODKFormNotFoundException e) {
       // TODO Auto-generated catch block

@@ -1,7 +1,6 @@
 package org.opendatakit.aggregate.client.submission;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.List;
 
 
@@ -12,10 +11,19 @@ public class SubmissionUI implements Serializable {
    */
   private static final long serialVersionUID = -5614397233493602380L;
 
-  private List<String> values = new ArrayList<String>();
+  private List<String> values;
+  
+  public SubmissionUI(List<String> values) {
+    this.values = values;
+  }
   
   public int getNumberOfFields() {
     return values.size();
   }
+
+  public List<String> getValues() {
+    return values;
+  }
+  
   
 }

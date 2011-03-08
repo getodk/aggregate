@@ -53,6 +53,7 @@ public class GenerateHeaderInfo {
         addHeader(nodeName, node);
 
       }
+      break;
     case GEOPOINT:
       addHeader(nodeName + BasicConsts.COLON + GeoPoint.LATITUDE, node);
       addHeader(nodeName + BasicConsts.COLON + GeoPoint.LONGITUDE, node);
