@@ -18,6 +18,7 @@ package org.opendatakit.aggregate.query.submission;
 import java.util.List;
 
 import org.opendatakit.aggregate.CallingContext;
+import org.opendatakit.aggregate.datamodel.FormDataModel;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
@@ -62,6 +63,18 @@ public abstract class QueryBase {
   public void addFilter(FormElementModel attribute, FilterOperation op,
   						Object value) {
   	query.addFilter(attribute.getFormDataModel().getBackingKey(), op, value);
+  }
+  
+  public void addFilterGeoPoint(FormElementModel attr, long ordinal, FilterOperation op,
+      Object value) {
+
+    List<FormDataModel> geoList = attr.getFormDataModel().getChildren();
+
+    for ( FormDataModel m : geoList ) {
+       if ( m.getOrdinalNumber().equals(Long.valueOf(ordinal)) ) {
+         query.addFilter(m.getBackingKey(), op, value);
+       } 
+    }
   }
 
   public abstract List<Submission> getResultSubmissions() throws ODKIncompleteSubmissionData, ODKDatastoreException;
