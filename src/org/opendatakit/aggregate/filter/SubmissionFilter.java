@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.client.filter.ColumnFilter;
+import org.opendatakit.aggregate.client.filter.ColumnFilterHeader;
 import org.opendatakit.aggregate.client.filter.Filter;
 import org.opendatakit.aggregate.client.filter.RowFilter;
 import org.opendatakit.aggregate.client.submission.Column;
@@ -16,9 +17,11 @@ import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.DataField.IndexType;
 import org.opendatakit.common.persistence.Datastore;
+import org.opendatakit.common.persistence.EntityKey;
 import org.opendatakit.common.persistence.PersistConsts;
 import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
 import org.opendatakit.common.security.User;
 
 /**
@@ -48,6 +51,8 @@ public class SubmissionFilter extends CommonFieldsBase {
   private static final DataField ORDINAL_PROPERTY = new DataField("ORDINAL",
       DataField.DataType.INTEGER, true);
 
+  private List<SubmissionColumnFilter> colFilters;
+  
   /**
    * Construct a relation prototype.
    * 
@@ -162,23 +167,71 @@ public class SubmissionFilter extends CommonFieldsBase {
     setLongField(ORDINAL_PROPERTY, ordinal);
   }
 
+  void addColumn(SubmissionColumnFilter column) {
+    if (colFilters == null) {
+      colFilters = new ArrayList<SubmissionColumnFilter>();
+    }
+    colFilters.add(column);
+  }
+
+  void populate(CallingContext cc) throws ODKDatastoreException {
+    if(getRowOrColumn().equals(RowOrCol.COLUMN)) {
+      if (colFilters == null) {
+        colFilters = new ArrayList<SubmissionColumnFilter>();
+      }
+      colFilters = SubmissionColumnFilter.getFilterList(this.getUri(), cc);
+    }
+  }
+  
+  public void persist(CallingContext cc) throws ODKEntityPersistException {
+    Datastore ds = cc.getDatastore();
+    User user = cc.getCurrentUser();
+
+    ds.putEntity(this, user);
+    if(colFilters != null) {
+      ds.putEntities(colFilters, user);
+    }
+    
+  }
+  
+  public void delete(CallingContext cc) throws ODKDatastoreException {
+    Datastore ds = cc.getDatastore();
+    User user = cc.getCurrentUser();
+    
+    if(colFilters != null) {
+      for(SubmissionColumnFilter filter : colFilters){
+        ds.deleteEntity(new EntityKey(filter, filter.getUri()), user);
+      }
+    }    
+    ds.deleteEntity(new EntityKey(this, this.getUri()), user);
+  }
+  
   public Filter transform() {
     RowOrCol type = getRowOrColumn();
     Filter filter;
     if (type.equals(RowOrCol.COLUMN)) {
       ColumnFilter columnFilter = new ColumnFilter(this.getUri());
       columnFilter.setVisibility(getColumnVisibility());
+      
+      // populate the list of column filter headers
+      if (colFilters != null) {
+        for (SubmissionColumnFilter cols : colFilters) {
+          columnFilter.addColumnFilterHeader(cols.transform());
+        }
+      }      
       filter = columnFilter;
     } else {
       RowFilter rowFilter = new RowFilter(this.getUri());
       rowFilter.setOperation(getFilterOperation());
       rowFilter.setInput(getFilterInputClause());
+      Column header = new Column(getColumnTitle(), getColumnEncoding());
+      rowFilter.setColumn(header);
       filter = rowFilter;
     }
-    Column header = new Column(getColumnTitle(), getColumnEncoding());
-    filter.setColumn(header);
+   
     filter.setOrdinal(getOrdinalNumber());
-
+    filter.setRc(getRowOrColumn());
+    
     return filter;
   }
 
@@ -211,19 +264,27 @@ public class SubmissionFilter extends CommonFieldsBase {
       subFilter = cc.getDatastore().getEntity(relation, uri, cc.getCurrentUser());
     }
 
-    Column column = filter.getColumn();
-    subFilter.setColumnTitle(column.getDisplayHeader());
-    subFilter.setColumnEncoding(column.getColumnEncoding());
+    
+    subFilter.setRowOrColumn(filter.getRc());
     subFilter.setFilterGroup(filterGroup.getUri());
     subFilter.setOrdinalNumber(filter.getOrdinal());
     
     if(filter instanceof ColumnFilter) {
       ColumnFilter cf = (ColumnFilter) filter;
       subFilter.setColumnVisibility(cf.getVisibility());
+      
+      for(ColumnFilterHeader column : cf.getColumnFilterHeaders()) {
+        SubmissionColumnFilter columnFilter = SubmissionColumnFilter.transform(column, subFilter, cc);
+        subFilter.addColumn(columnFilter);
+      }
+      
     } else if(filter instanceof RowFilter) {
       RowFilter rf = (RowFilter) filter;
       subFilter.setFilterOperation(rf.getOperation());
       subFilter.setFilterInputClause(rf.getInput());
+      Column column = rf.getColumn();
+      subFilter.setColumnTitle(column.getDisplayHeader());
+      subFilter.setColumnEncoding(column.getColumnEncoding());
     }
     
     return subFilter;
@@ -241,7 +302,9 @@ public class SubmissionFilter extends CommonFieldsBase {
     List<? extends CommonFieldsBase> results = query.executeQuery(0);
     for (CommonFieldsBase cb : results) {
       if (cb instanceof SubmissionFilter) {
-        filterList.add((SubmissionFilter) cb);
+        SubmissionFilter filter = (SubmissionFilter) cb;
+        filter.populate(cc);
+        filterList.add(filter);
       }
     }
     return filterList;

@@ -1,5 +1,9 @@
 package org.opendatakit.aggregate.client.filter;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.opendatakit.aggregate.client.submission.Column;
 import org.opendatakit.aggregate.constants.common.FilterOperation;
 import org.opendatakit.aggregate.constants.common.RowOrCol;
 import org.opendatakit.aggregate.constants.common.Visibility;
@@ -95,7 +99,7 @@ public class CreateNewFilterPopup extends PopupPanel{
 					}
 					
 					String variable = var.getValue();
-					Filter newFilter = new RowFilter(kr, colname, op, 
+					Filter newFilter = new RowFilter(kr, new Column(colname, "FIX ME"), op, 
 							variable, (long) def.getFilters().size());
 					def.addFilter(newFilter);
 				} else {
@@ -105,7 +109,9 @@ public class CreateNewFilterPopup extends PopupPanel{
 							colname += " " + cols.getValue(i);
 						}
 					}
-					Filter newFilter = new ColumnFilter(kr, colname, (long) def.getFilters().size());
+					List<ColumnFilterHeader> columns = new ArrayList<ColumnFilterHeader>();
+					columns.add(new ColumnFilterHeader(colname, "FIX ME"));
+					Filter newFilter = new ColumnFilter(kr, columns,(long) def.getFilters().size());
 					def.addFilter(newFilter);
 				}
 				hide();
