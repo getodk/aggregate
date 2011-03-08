@@ -66,6 +66,7 @@ public class CreateNewFilterPopup extends PopupPanel{
 		
 		//on exit
 		final Button submit = new Button("Save Filter");
+		submit.addStyleDependentName("positive");
 		submit.addClickHandler(new ClickHandler() {
 
 			@Override
@@ -120,6 +121,7 @@ public class CreateNewFilterPopup extends PopupPanel{
 		});
 		
 		Button exit = new Button("Cancel");
+		exit.addStyleDependentName("negative");
 		exit.addClickHandler(new ClickHandler() {
 
 			@Override
