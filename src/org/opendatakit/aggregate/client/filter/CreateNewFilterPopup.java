@@ -76,7 +76,7 @@ public class CreateNewFilterPopup extends PopupPanel{
 		final TextBox var = new TextBox();
 		
 		//on exit
-		final Button submit = new Button("Save Filter");
+		final Button submit = new Button("<img src=\"images/green_check.png\" /> Save Filter");
 		submit.addStyleDependentName("positive");
 		submit.addClickHandler(new ClickHandler() {
 
@@ -146,7 +146,7 @@ public class CreateNewFilterPopup extends PopupPanel{
 		
 		});
 		
-		Button exit = new Button("Cancel");
+		Button exit = new Button("<img src=\"images/red_x.png\" /> Cancel");
 		exit.addStyleDependentName("negative");
 		exit.addClickHandler(new ClickHandler() {
 
