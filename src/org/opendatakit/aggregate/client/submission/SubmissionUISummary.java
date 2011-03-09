@@ -35,5 +35,8 @@ public class SubmissionUISummary implements Serializable {
     headers.add(new Column(displayHeader, columnName));
   }
   
+  public List<SubmissionUI> getSubmissions() {
+    return submissions;
+  }
   
 }

@@ -19,12 +19,16 @@ public class FilterGroup implements Serializable {
 
   }
 
-  public FilterGroup(String groupName, String formId, List<Filter> filters) {
+  public FilterGroup(String groupName, String formId, List<Filter> filtersToApply) {
     this.uri = UIConsts.URI_DEFAULT;
     this.name = groupName;
     this.formId = formId;
-    this.filters = new ArrayList<Filter>();
-    this.filters.addAll(filters);
+    
+    if(filtersToApply == null) {
+      this.filters = new ArrayList<Filter>();
+    } else {
+      this.filters = filtersToApply;
+    }
   }
 
   /**
