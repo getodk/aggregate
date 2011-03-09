@@ -7,6 +7,7 @@ import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.client.filter.FilterGroup;
 import org.opendatakit.aggregate.client.submission.SubmissionUI;
 import org.opendatakit.aggregate.client.submission.SubmissionUISummary;
+import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.format.Row;
@@ -28,25 +29,26 @@ org.opendatakit.aggregate.client.submission.SubmissionService {
   private static final long serialVersionUID = -7997978505247614945L;
 
   @Override
-  public SubmissionUISummary getSubmissions(FilterGroup filter) {
+  public SubmissionUISummary getSubmissions(FilterGroup filterGroup) {
     
     CallingContext cc = ContextFactory.getCallingContext(this);    
     
     SubmissionUISummary summary = new SubmissionUISummary();
     try {
-      String formId = filter.getFormId();
+      String formId = filterGroup.getFormId();
       Form form = Form.retrieveForm(formId, cc);
-      QueryByUIFilterGroup query = new QueryByUIFilterGroup(form, filter, 1000, cc);
+      QueryByUIFilterGroup query = new QueryByUIFilterGroup(form, filterGroup, 1000, cc);
       List<Submission> submissions = query.getResultSubmissions();
 
-      GenerateHeaderInfo headerGenerator = new GenerateHeaderInfo(summary);
+      GenerateHeaderInfo headerGenerator = new GenerateHeaderInfo(filterGroup, summary, form);
       headerGenerator.processForHeaderInfo(form.getTopLevelGroupElement());
+      List<FormElementModel> filteredElements = headerGenerator.getIncludedElements();
       
       ElementFormatter elemFormatter = new BasicElementFormatter(true, true, true);
       
       // format row elements
       for (SubmissionSet sub : submissions) {
-        Row row = sub.getFormattedValuesAsRow(null, elemFormatter, false);
+        Row row = sub.getFormattedValuesAsRow(filteredElements, elemFormatter, false);
         try {
           summary.addSubmission(new SubmissionUI(row.getFormattedValues()));
         } catch (Exception e) {
