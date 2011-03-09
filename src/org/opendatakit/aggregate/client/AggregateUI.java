@@ -183,7 +183,8 @@ public class AggregateUI implements EntryPoint {
 	  }
 	  
 	  //add new filter button
-	  Button newFilter = new Button("Create New Filter");
+	  Button newFilter = new Button();
+	  newFilter.setHTML("<img src=\"images/yellow_plus.png\" /> New Filter");
 	  newFilter.addClickHandler(new ClickHandler(){
 
 		@Override
@@ -246,7 +247,7 @@ public class AggregateUI implements EntryPoint {
 
   public VerticalPanel setupFormManagementPanel() {
     Button uploadFormButton = new Button();
-    uploadFormButton.setHTML("<img src=\"images/upload.png\" /> Upload Form");
+    uploadFormButton.setHTML("<img src=\"images/blue_up_arrow.png\" /> Upload Form");
     uploadTable.setWidget(0, 0, uploadFormButton);
     
     listOfForms.setText(0, 0, "Title");
@@ -451,7 +452,7 @@ public class AggregateUI implements EntryPoint {
         enabledDropDown.addItem("Enabled/Active");
         
         Button deleteButton = new Button();
-        deleteButton.setHTML("<img src=\"images/delete.png\" /> Delete");
+        deleteButton.setHTML("<img src=\"images/red_x.png\" /> Delete");
         deleteButton.addStyleDependentName("negative");
         
         listOfForms.setWidget(i, 3, enabledDropDown);
