@@ -1,7 +1,9 @@
 package org.opendatakit.aggregate.client;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.opendatakit.aggregate.client.filter.ColumnFilter;
 import org.opendatakit.aggregate.client.filter.ColumnFilterHeader;
@@ -109,20 +111,15 @@ public class AggregateUI implements EntryPoint {
     filtersBox.addItem("filter2");
     formAndGoalSelectionTable.setWidget(0, 1, filtersBox);
     // load form + filter
-    Button loadFormAndFilterButton = new Button("Load");
+    Button loadFormAndFilterButton = new Button("Load Filter");
     formAndGoalSelectionTable.setWidget(0, 2, loadFormAndFilterButton);
-    // create filter
-    Button createFilterButton = new Button("Create Filter");
-    formAndGoalSelectionTable.setWidget(0, 3, createFilterButton);
-    formAndGoalSelectionTable.setHTML(0, 4, "&nbsp;&nbsp;");
+    formAndGoalSelectionTable.setHTML(0, 3, "&nbsp;&nbsp;");
 
     // end goals vis, export, publish
-    Button visualizeButton = new Button("Visualize");
-    formAndGoalSelectionTable.setWidget(0, 5, visualizeButton);
-    Button exportButton = new Button("Export");
-    formAndGoalSelectionTable.setWidget(0, 6, exportButton);
-    Button publishButton = new Button("Publish");
-    formAndGoalSelectionTable.setWidget(0, 7, publishButton);
+    Button exportButton = new Button("<img src=\"images/green_right_arrow.png\" /> Export");
+    formAndGoalSelectionTable.setWidget(0, 4, exportButton);
+    Button publishButton = new Button("<img src=\"images/green_right_arrow.png\" /> Publish");
+    formAndGoalSelectionTable.setWidget(0, 5, publishButton);
 
     HorizontalPanel formsAndGoalsPanel = new HorizontalPanel();
     formsAndGoalsPanel.add(formAndGoalSelectionTable);
@@ -190,7 +187,8 @@ public class AggregateUI implements EntryPoint {
 	  }
 	  
 	  //add new filter button
-	  Button newFilter = new Button("Create New Filter");
+	  Button newFilter = new Button();
+	  newFilter.setHTML("<img src=\"images/yellow_plus.png\" /> New Filter");
 	  newFilter.addClickHandler(new ClickHandler(){
 
 		@Override
@@ -291,7 +289,7 @@ public class AggregateUI implements EntryPoint {
   
   public VerticalPanel setupFormManagementPanel() {
     Button uploadFormButton = new Button();
-    uploadFormButton.setHTML("<img src=\"images/upload.png\" /> Upload Form");
+    uploadFormButton.setHTML("<img src=\"images/blue_up_arrow.png\" /> Upload Form");
     uploadTable.setWidget(0, 0, uploadFormButton);
     
     listOfForms.setText(0, 0, "Title");
@@ -468,13 +466,20 @@ public class AggregateUI implements EntryPoint {
   }
   
   private void fillFormDropDown(FormSummary [] forms) {
-	 formsBox.clear();
-    for (int j = 0; j < forms.length; j++) {
-	    	FormSummary form = forms[j];
-	    	formsBox.addItem(form.getTitle());
-	    	// TODO: Kyle - need to fix... once form is loaded then set the id
-	    	def.setFormId(form.getId());
-	    }
+Set<String> existingForms = new HashSet<String>();
+	  for (int i = 0; i < formsBox.getItemCount(); i++) {
+		  existingForms.add(formsBox.getItemText(i));
+	  }
+	  for (int i = 0; i < forms.length; i++) {
+		  FormSummary form = forms[i];
+		  if (!existingForms.contains(form.getTitle())) {
+			  formsBox.addItem(form.getTitle());
+			  if (hash.get(UrlHash.FORM).equals(form.getTitle()))
+				  formsBox.setItemSelected(formsBox.getItemCount() - 1, true);
+		  }
+		  // TODO: Kyle - need to fix... once form is loaded then set the id
+		  def.setFormId(form.getId());
+	  }
   }
   
   /**
@@ -497,12 +502,12 @@ public class AggregateUI implements EntryPoint {
         enabledDropDown.addItem("Enabled/Active");
         
         Button deleteButton = new Button();
-        deleteButton.setHTML("<img src=\"images/delete.png\" /> Delete");
+        deleteButton.setHTML("<img src=\"images/red_x.png\" /> Delete");
         deleteButton.addStyleDependentName("negative");
         
         listOfForms.setWidget(i, 3, enabledDropDown);
-        listOfForms.setWidget(i, 4, new HTML("publishButton"));
-        listOfForms.setWidget(i, 5, new HTML("exportButton"));
+        listOfForms.setWidget(i, 4, new Button("<img src=\"images/green_right_arrow.png\" /> Publish"));
+        listOfForms.setWidget(i, 5, new Button("<img src=\"images/green_right_arrow.png\" /> Export"));
         listOfForms.setWidget(i, 6, deleteButton);
         if (i % 2 == 0)
             listOfForms.getRowFormatter().addStyleName(i, "evenTableRow");
