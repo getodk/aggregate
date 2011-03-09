@@ -123,7 +123,7 @@ public class KmlServlet extends ServletUtilBase {
       r.persist(cc);
 
       KmlGenerator generator = (KmlGenerator) cc.getBean(BeanDefs.KML_BEAN);
-  	  CallingContext ccDaemon = ContextFactory.getCallingContext(this, ADDR, req);
+  	  CallingContext ccDaemon = ContextFactory.getCallingContext(this, req);
   	  ccDaemon.setAsDaemon(true);
       generator.createKmlTask(form, r.getSubmissionKey(), 1L, ccDaemon);
 

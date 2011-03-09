@@ -199,7 +199,7 @@ public class SubmissionServlet extends ServletUtilBase {
       List<ExternalService> tmp = FormServiceCursor.getExternalServicesForForm(form, cc);
       UploadSubmissions uploadTask = (UploadSubmissions) cc.getBean(BeanDefs.UPLOAD_TASK_BEAN);
 
-  	  CallingContext ccDaemon = ContextFactory.getCallingContext(this, ADDR, req);
+  	  CallingContext ccDaemon = ContextFactory.getCallingContext(this, req);
 	  ccDaemon.setAsDaemon(true);
       for (ExternalService rs : tmp) {
         uploadTask.createFormUploadTask(rs.getFormServiceCursor(), ccDaemon);
