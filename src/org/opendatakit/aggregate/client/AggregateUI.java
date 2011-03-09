@@ -12,6 +12,11 @@ import org.opendatakit.aggregate.client.filter.RowFilter;
 import org.opendatakit.aggregate.client.form.FormService;
 import org.opendatakit.aggregate.client.form.FormServiceAsync;
 import org.opendatakit.aggregate.client.form.FormSummary;
+import org.opendatakit.aggregate.client.submission.Column;
+import org.opendatakit.aggregate.client.submission.SubmissionService;
+import org.opendatakit.aggregate.client.submission.SubmissionServiceAsync;
+import org.opendatakit.aggregate.client.submission.SubmissionUI;
+import org.opendatakit.aggregate.client.submission.SubmissionUISummary;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
@@ -75,6 +80,8 @@ public class AggregateUI implements EntryPoint {
   private FlexTable uploadTable = new FlexTable();
 
   private FormServiceAsync formSvc;
+  private SubmissionServiceAsync submissionSvc;
+  
   private FlexTable listOfForms;
   private ListBox formsBox = new ListBox();
   
@@ -214,18 +221,10 @@ public class AggregateUI implements EntryPoint {
 	  activeFilters.add(newFilter);
 	  filtersDataHelp.add(activeFilters);
 
+	  
     // view data
     dataTable = new FlexTable();
-    for (int i = 0; i < 4; i++) {
-      dataTable.setText(0, i, "Column " + i);
-    }
-    for (int i = 1; i < 6; i++) {
-      for (int j = 0; j < 4; j++) {
-        dataTable.setText(i, j, "cell (" + i + ", " + j + ")");
-      }
-      if (i % 2 == 0)
-        dataTable.getRowFormatter().setStyleName(i, "evenTableRow");
-    }
+    requestUpdatedData();
     dataTable.getRowFormatter().addStyleName(0, "titleBar");
     dataTable.addStyleName("dataTable");
     filtersDataHelp.add(dataTable);
@@ -244,6 +243,52 @@ public class AggregateUI implements EntryPoint {
     return filtersDataHelp;
   }
 
+  public void requestUpdatedData() {
+    
+    // Initialize the service proxy.
+    if (submissionSvc == null) {
+      submissionSvc = GWT.create(SubmissionService.class);
+    }
+
+    // Set up the callback object.
+    AsyncCallback<SubmissionUISummary> callback = new AsyncCallback<SubmissionUISummary>() {
+      public void onFailure(Throwable caught) {
+         // TODO: deal with error
+      }
+
+      public void onSuccess(SubmissionUISummary summary) {
+        updateDataTable(summary);
+      }
+    };
+
+    FilterGroup testFilterGroup = new FilterGroup("TESTING", "widgets", null);
+    
+    // Make the call to the form service.
+    submissionSvc.getSubmissions(testFilterGroup, callback);
+
+  }
+  
+  public void updateDataTable(SubmissionUISummary summary) {
+
+    int headerIndex = 0;
+    for(Column column : summary.getHeaders()) {
+      dataTable.setText(0, headerIndex++, column.getDisplayHeader());
+    }
+    
+    int i = 1;
+    for(SubmissionUI row : summary.getSubmissions()) {
+      int j = 0;
+      for(String values : row.getValues()) {
+        dataTable.setText(i, j++, values);
+      }
+      if (i % 2 == 0) {
+        dataTable.getRowFormatter().setStyleName(i, "evenTableRow");
+      }
+      i++;
+    }
+   
+  }
+  
   public VerticalPanel setupFormManagementPanel() {
     Button uploadFormButton = new Button();
     uploadFormButton.setHTML("<img src=\"images/upload.png\" /> Upload Form");
@@ -423,7 +468,8 @@ public class AggregateUI implements EntryPoint {
   }
   
   private void fillFormDropDown(FormSummary [] forms) {
-	    for (int j = 0; j < forms.length; j++) {
+	 formsBox.clear();
+    for (int j = 0; j < forms.length; j++) {
 	    	FormSummary form = forms[j];
 	    	formsBox.addItem(form.getTitle());
 	    	// TODO: Kyle - need to fix... once form is loaded then set the id

@@ -109,18 +109,15 @@ public class GenerateHeaderInfo {
         }
       } else {
         // we are processing this as a table element
-        processFilter(nodeName, node);
+        processFilter(nodeName, node, false);
 
       }
       break;
     case GEOPOINT:
-      processFilter(nodeName + BasicConsts.COLON + GeoPoint.LATITUDE, node);
-      processFilter(nodeName + BasicConsts.COLON + GeoPoint.LONGITUDE, node);
-      processFilter(nodeName + BasicConsts.COLON + GeoPoint.ALTITUDE, node);
-      processFilter(nodeName + BasicConsts.COLON + GeoPoint.ACCURACY, node);
+      processFilter(nodeName, node, true);
       break;
     default:
-      processFilter(node.getElementName(), node);
+      processFilter(node.getElementName(), node, false);
     }
 
     // only recurse into the elements that are not binary, geopoint,
@@ -138,33 +135,42 @@ public class GenerateHeaderInfo {
     }
   }
 
-  private void processFilter(String nodeName, FormElementModel node) {
+  private void processFilter(String nodeName, FormElementModel node, boolean geopoint) {
     
     if(includes == null) {
-      addNodeToHeader(nodeName, node);
+      addNodeToHeader(nodeName, node, geopoint);
       return;
     }
     
     // check to see node is included in filter  
     if(removes != null && keeps != null) {
       if(!keeps.contains(node) && removes.contains(node)) {
-        addNodeToHeader(nodeName, node);                
+        addNodeToHeader(nodeName, node, geopoint);                
       }
     } else if (keeps != null) {
       if(keeps.contains(node)) {
-        addNodeToHeader(nodeName, node);        
+        addNodeToHeader(nodeName, node, geopoint);        
       }      
     } else if (removes != null) {
       if(!removes.contains(node)) {
-        addNodeToHeader(nodeName, node);        
+        addNodeToHeader(nodeName, node, geopoint);        
       }
+    } else {
+      addNodeToHeader(nodeName, node, geopoint);
     }
   }
 
-  void addNodeToHeader(String nodeName, FormElementModel node) {
+  void addNodeToHeader(String nodeName, FormElementModel node, boolean geopoint) {
     FormElementKey key = node.constructFormElementKey(form);
-    summary.addSubmissionHeader(nodeName, key.toString());
     
+    if(geopoint) {
+      summary.addSubmissionHeader(nodeName + BasicConsts.COLON + GeoPoint.LATITUDE, key.toString());
+      summary.addSubmissionHeader(nodeName + BasicConsts.COLON + GeoPoint.LONGITUDE, key.toString());
+      summary.addSubmissionHeader(nodeName + BasicConsts.COLON + GeoPoint.ALTITUDE, key.toString());
+      summary.addSubmissionHeader(nodeName + BasicConsts.COLON + GeoPoint.ACCURACY, key.toString());  
+    } else {
+      summary.addSubmissionHeader(nodeName, key.toString());
+    }
     // note: if there is no filter we will get here without an includes created
     if(includes != null) {
       includes.add(node);
