@@ -72,7 +72,7 @@ public class ProcessServlet extends ServletUtilBase {
    */
   @Override
   public void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-	CallingContext cc = ContextFactory.getCallingContext(this, ADDR, req);
+	CallingContext cc = ContextFactory.getCallingContext(this, req);
     StringBuilder errorText = new StringBuilder();
 
     // get parameter
@@ -140,7 +140,7 @@ public class ProcessServlet extends ServletUtilBase {
               if (!formToDelete.getFormId().equals(Form.URI_FORM_ID_VALUE_FORM_INFO)) {
             	MiscTasks m = new MiscTasks(TaskType.DELETE_FORM, formToDelete, null, cc);
             	m.persist(cc);
-            	CallingContext ccDaemon = ContextFactory.getCallingContext(this, ADDR, req);
+            	CallingContext ccDaemon = ContextFactory.getCallingContext(this, req);
             	ccDaemon.setAsDaemon(true);
                 formDelete.createFormDeleteTask(formToDelete, m.getSubmissionKey(), 1L, ccDaemon);
               } else {

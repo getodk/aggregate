@@ -58,7 +58,7 @@ public class FormListServlet extends ServletUtilBase {
    */
   @Override
   public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-	CallingContext cc = ContextFactory.getCallingContext(this, ADDR, req);
+	CallingContext cc = ContextFactory.getCallingContext(this, req);
     
     try {
       QueryFormList formsList = new QueryFormList(false, cc);

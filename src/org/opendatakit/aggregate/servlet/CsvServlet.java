@@ -61,7 +61,7 @@ public class CsvServlet extends ServletUtilBase {
    */
   @Override
   public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-	CallingContext cc = ContextFactory.getCallingContext(this, ADDR, req);
+	CallingContext cc = ContextFactory.getCallingContext(this, req);
 
     // get parameter
     String formId = getParameter(req, ServletConsts.FORM_ID);
@@ -83,7 +83,7 @@ public class CsvServlet extends ServletUtilBase {
     try {
         PersistentResults r = new PersistentResults( ResultType.CSV, form, null, cc);
         r.persist(cc);
-    	CallingContext ccDaemon = ContextFactory.getCallingContext(this, ADDR, req);
+    	CallingContext ccDaemon = ContextFactory.getCallingContext(this, req);
     	ccDaemon.setAsDaemon(true);
 		generator.createCsvTask(form, r.getSubmissionKey(), 1L, ccDaemon);
 	} catch (ODKDatastoreException e) {
