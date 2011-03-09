@@ -8,6 +8,7 @@ import org.opendatakit.aggregate.client.filter.Filter;
 import org.opendatakit.aggregate.client.filter.FilterGroup;
 import org.opendatakit.aggregate.client.filter.RowFilter;
 import org.opendatakit.aggregate.client.submission.Column;
+import org.opendatakit.aggregate.datamodel.FormElementKey;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.datamodel.TopLevelDynamicBase;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
@@ -31,20 +32,24 @@ public class QueryByUIFilterGroup extends QueryBase {
 
     query = cc.getDatastore().createQuery(tbl, cc.getCurrentUser());
 
-//    for (Filter filter : filterGroup.getFilters()) {
-//      if(filter instanceof RowFilter) {
-//        addFilterToQuery((RowFilter)filter);
-//      }
-//    }
+    if(filterGroup == null) {
+      return;
+    }
+    
+    for (Filter filter : filterGroup.getFilters()) {
+      if(filter instanceof RowFilter) {
+        RowFilter rf = (RowFilter) filter;
+        Column column = rf.getColumn();
+        
+        FormElementKey decodeKey = new FormElementKey(column.getColumnEncoding());
+        FormElementModel fem = FormElementModel.retrieveFormElementModel(form, decodeKey);
+        FilterOperation op = UITrans.convertFilterOperation(rf.getOperation());
+        super.addFilter(fem, op, rf.getInput());
+      }
+    }
 
   }
 
-  private void addFilterToQuery(RowFilter filter) {
-    Column column = filter.getColumn();
-    FormElementModel fem = form.findElementByName(column.getColumnEncoding());
-    FilterOperation op = UITrans.convertFilterOperation(filter.getOperation());
-    super.addFilter(fem, op, filter.getInput());
-  }
 
   public List<Submission> getResultSubmissions() throws ODKDatastoreException {
 
