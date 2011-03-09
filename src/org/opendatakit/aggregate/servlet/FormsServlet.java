@@ -67,11 +67,11 @@ public class FormsServlet extends ServletUtilBase {
     try {
       // ensure that Form table exists...
       QueryFormList formsList = new QueryFormList(false, cc);
-      FormHtmlTable formFormatter = new FormHtmlTable(formsList, cc);
+      FormHtmlTable formFormatter = new FormHtmlTable(formsList);
       
       // generate html
       beginBasicHtmlResponse(TITLE_INFO, resp, true, cc); // header info
-      resp.getWriter().print(formFormatter.generateHtmlFormTable(true, false));
+      resp.getWriter().print(formFormatter.generateHtmlFormTable(true, false, cc));
       finishBasicHtmlResponse(resp);
       
     } catch (ODKDatastoreException e) {

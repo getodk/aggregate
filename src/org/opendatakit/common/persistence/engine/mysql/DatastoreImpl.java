@@ -13,7 +13,6 @@
  */
 package org.opendatakit.common.persistence.engine.mysql;
 
-import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
@@ -39,6 +38,7 @@ import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
 import org.opendatakit.common.security.User;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 
@@ -83,6 +83,7 @@ public class DatastoreImpl implements Datastore, InitializingBean {
 
 	public static final String K_CREATE_TABLE = "CREATE TABLE ";
 	public static final String K_DROP_TABLE = "DROP TABLE ";
+	public static final String K_SHOW_CREATE_TABLE = "SHOW CREATE TABLE ";
 
 	public static final String K_OPEN_PAREN = " ( ";
 	public static final String K_CLOSE_PAREN = " ) ";
@@ -108,7 +109,14 @@ public class DatastoreImpl implements Datastore, InitializingBean {
 	public static final Integer DEFAULT_DBL_NUMERIC_PRECISION = 38;
 	public static final Integer DEFAULT_INT_NUMERIC_PRECISION = 9;
 
-	private static final class TableDefinition {
+	private static RowMapper<ShowDefinition> showDef = new RowMapper<ShowDefinition>() {
+		@Override
+		public ShowDefinition mapRow(ResultSet rs, int rowNum) throws SQLException {
+			return new ShowDefinition(rs);
+		}
+	};
+
+	private static final class ShowDefinition {
 
 		public DataField.DataType getDataType() {
 			return dataType;
@@ -138,112 +146,153 @@ public class DatastoreImpl implements Datastore, InitializingBean {
 			return numericPrecision;
 		}
 
-		public static final String COLUMN_NAME = "isc.COLUMN_NAME";
-		public static final String TABLE_NAME = "isc.TABLE_NAME";
-		public static final String TABLE_SCHEMA = "isc.TABLE_SCHEMA";
-		public static final String CHARACTER_MAXIMUM_LENGTH = "isc.CHARACTER_MAXIMUM_LENGTH";
-		public static final String NUMERIC_PRECISION = "isc.NUMERIC_PRECISION";
-		public static final String NUMERIC_SCALE = "isc.NUMERIC_SCALE";
-		public static final String DATA_TYPE = "isc.DATA_TYPE";
-		public static final String IS_NULLABLE = "isc.IS_NULLABLE";
-		public static final String INFORMATION_SCHEMA_COLUMNS = "information_schema.COLUMNS isc";
-		public static final String IST_TABLE_NAME = "ist.TABLE_NAME";
-		public static final String IST_TABLE_SCHEMA = "ist.TABLE_SCHEMA";
-		public static final String INFORMATION_SCHEMA_TABLES = "information_schema.TABLES ist";
-		public static final String K_COUNT_ONE = "COUNT(1)";
-
-		public static final String TABLE_DEF_QUERY = K_SELECT + COLUMN_NAME
-				+ K_CS + IS_NULLABLE + K_CS + CHARACTER_MAXIMUM_LENGTH + K_CS
-				+ NUMERIC_PRECISION + K_CS + NUMERIC_SCALE + K_CS + DATA_TYPE
-				+ K_FROM + INFORMATION_SCHEMA_COLUMNS + K_COMMA
-				+ INFORMATION_SCHEMA_TABLES + K_WHERE + TABLE_SCHEMA + K_EQ
-				+ K_BIND_VALUE + K_AND + TABLE_NAME + K_EQ + K_BIND_VALUE
-				+ K_AND + IST_TABLE_NAME + K_EQ + TABLE_NAME + K_AND
-				+ IST_TABLE_SCHEMA + K_EQ + TABLE_SCHEMA;
-
-		public static final String TABLE_EXISTS_QUERY = K_SELECT + K_COUNT_ONE
-				+ K_FROM + INFORMATION_SCHEMA_TABLES + K_WHERE
-				+ IST_TABLE_SCHEMA + K_EQ + K_BIND_VALUE + K_AND
-				+ IST_TABLE_NAME + K_EQ + K_BIND_VALUE;
-
-		private static final String YES = "YES";
-		private static final String TEXT = "text"; // lower case!
-		private static final String CHAR = "char";
-		private static final String BLOB = "blob";
-		private static final String BYTEA = "bytea";
-		private static final String DATE = "date";
-		// private static final String DATETIME = "datetime";
-		private static final String TIME = "time";
-		private static final Long MAX_ROW_SIZE = 65000L; // to allow PK room
-
 		final private String columnName;
 		final private boolean isNullable;
 		final private Long maxCharLen;
 		final private Integer numericScale;
 		final private Integer numericPrecision;
 		private DataField.DataType dataType;
+		
+		private static final String K_SHOW = "SHOW COLUMNS FROM ";
+		private static final int IDX_COLUMN_NAME = 1;
+		private static final int IDX_COLUMN_TYPE = 2;
+		private static final int IDX_IS_NULLABLE = 3;
+		private static final String K_VARCHAR = "varchar";
+		private static final String K_BINARY = "binary";
+		private static final String K_DECIMAL = "decimal";
+		private static final String K_INT = "int";
+		private static final String K_CHAR = "char";
+		private static final String K_DATE = "date";
+		private static final String K_TIME = "time";
+		private static final String K_BLOB = "blob";
+		private static final String K_TEXT = "text";
+		private static final String K_TINY = "tiny";
+		private static final String K_MEDIUM = "medium";
+		private static final String K_LONG = "long";
+		private static final Long MAX_ROW_SIZE = 65000L;
+		
+		private static final Map<String,ShowDefinition> query(String schemaName, String tableName, JdbcTemplate db) {
+			StringBuilder b = new StringBuilder();
+			b.append(K_SHOW);
+			b.append(K_BQ);
+			b.append(schemaName);
+			b.append(K_BQ);
+			b.append(".");
+			b.append(K_BQ);
+			b.append(tableName);
+			b.append(K_BQ);
 
-		TableDefinition(ResultSet rs) throws SQLException {
-			columnName = rs.getString(COLUMN_NAME);
-			String s = rs.getString(IS_NULLABLE);
-			isNullable = YES.equalsIgnoreCase(s);
-			String type = rs.getString(DATA_TYPE);
-			BigDecimal num = rs.getBigDecimal(CHARACTER_MAXIMUM_LENGTH);
-			if (num != null) {
-				maxCharLen = num.longValueExact();
-				if (type.contains(TEXT) || type.contains(CHAR)) {
-					if (maxCharLen.compareTo(MAX_ROW_SIZE) <= 0) {
-						dataType = DataField.DataType.STRING;
-					} else {
-						dataType = DataField.DataType.LONG_STRING;
-					}
-				} else if (type.contains(BLOB) || type.contains(BYTEA)) {
-					dataType = DataField.DataType.BINARY;
-				} else {
-					throw new IllegalArgumentException(
-							"unrecognized data type in schema: " + type);
+			Map<String,ShowDefinition> defs = new HashMap<String,ShowDefinition>();
+			try {
+				List<?> columns;
+				columns = db.query( b.toString(), showDef );
+				for ( Object o : columns ) {
+					ShowDefinition sd = (ShowDefinition) o;
+					defs.put(sd.getColumnName(), sd);
 				}
-				numericScale = null;
-				numericPrecision = null;
-			} else {
-				maxCharLen = null;
-				// must be date or numeric...
-				num = rs.getBigDecimal(NUMERIC_SCALE);
-				if (num == null) {
-					// better be a date...
-					if (type.contains(DATE) || type.contains(TIME)) {
-						dataType = DataField.DataType.DATETIME;
-					} else {
-						throw new IllegalArgumentException(
-								"unrecognized data type in schema: " + type);
+			} catch ( BadSqlGrammarException e ) {
+				// we expect this if the table doesn't exist...
+			}
+			return defs;
+		}
+		
+		ShowDefinition(ResultSet rs) throws SQLException {
+			this.columnName = rs.getString(IDX_COLUMN_NAME);
+			this.isNullable = rs.getBoolean(IDX_IS_NULLABLE);
+
+			String dataType = null;
+			Integer firstTerm = null;
+			Integer secondTerm = null;
+			{
+				String columnType = rs.getString(IDX_COLUMN_TYPE);
+				dataType = columnType;
+				
+				int idx = columnType.indexOf("(");
+				if ( idx != -1 ) {
+					dataType = columnType.substring(0, idx);
+					String parenTerm = columnType.substring(idx+1,columnType.length()-1);
+					idx = parenTerm.indexOf(",");
+					if ( idx != -1 ) {
+						String part = parenTerm.substring(0,idx-1);
+						if ( part.length() != 0 ) {
+							firstTerm = Integer.valueOf(part);
+						}
+						part = parenTerm.substring(idx+1);
+						if ( part.length() != 0 ) {
+							secondTerm = Integer.valueOf(part);
+						}
+					} else if ( parenTerm.length() != 0) {
+						firstTerm = Integer.valueOf(parenTerm);
 					}
-					numericScale = null;
-					numericPrecision = null;
-				} else {
-					// discriminate between decimal and integer by looking at
-					// value...
-					// We assume that nobody is going crazy with the scale
-					// here...
-					if (BigDecimal.ZERO.equals(num)) {
-						dataType = DataField.DataType.INTEGER;
-						numericScale = 0;
-					} else {
-						numericScale = num.intValueExact();
-						dataType = DataField.DataType.DECIMAL;
-					}
-					num = rs.getBigDecimal(NUMERIC_PRECISION);
-					numericPrecision = num.intValueExact();
 				}
 			}
+			
+			if ( dataType.contains(K_VARCHAR) || dataType.contains(K_CHAR)) {
+				this.maxCharLen = Long.valueOf(firstTerm);
+				this.dataType = DataField.DataType.STRING;
+				this.numericPrecision = null;
+				this.numericScale = null;
+			} else if ( dataType.contains(K_DECIMAL)) {
+				if ( secondTerm.equals(0) ) {
+					this.dataType = DataField.DataType.INTEGER;
+					this.maxCharLen = null;
+					this.numericPrecision = firstTerm;
+					this.numericScale = null;
+				} else {
+					this.dataType = DataField.DataType.DECIMAL;
+					this.maxCharLen = null;
+					this.numericPrecision = firstTerm;
+					this.numericScale = secondTerm;
+				}
+			} else if ( dataType.contains(K_INT)) {
+				this.dataType = DataField.DataType.INTEGER;
+				this.maxCharLen = null;
+				this.numericPrecision = firstTerm;
+				this.numericScale = null;
+			} else {
+				this.numericPrecision = null;
+				this.numericScale = null;
+				
+				if ( dataType.contains(K_DATE) ||
+					 dataType.contains(K_TIME) ) {
+					this.maxCharLen = null;
+					this.dataType = DataField.DataType.DATETIME;
+				} else if ( dataType.contains(K_BINARY)) {
+					this.maxCharLen = Long.valueOf(firstTerm);
+					this.dataType = DataField.DataType.BINARY;
+				} else if ( dataType.contains(K_BLOB) ) {
+					this.dataType = DataField.DataType.BINARY;
+					if ( dataType.contains(K_TINY) ) {
+						this.maxCharLen = 255L;
+					} else if ( dataType.contains(K_MEDIUM) ) {
+						this.maxCharLen = 16777215L;
+					} else if ( dataType.contains(K_LONG) ) {
+						this.maxCharLen = 4294967295L;
+					} else {
+						this.maxCharLen = 65535L;
+					}
+				} else if ( dataType.contains(K_TEXT) ) {
+					this.dataType = DataField.DataType.LONG_STRING;
+					if ( dataType.contains(K_TINY) ) {
+						this.maxCharLen = 255L;
+					} else if ( dataType.contains(K_MEDIUM) ) {
+						this.maxCharLen = 16777215L;
+					} else if ( dataType.contains(K_LONG) ) {
+						this.maxCharLen = 4294967295L;
+					} else {
+						this.maxCharLen = 65535L;
+					}
+				} else {
+					throw new IllegalStateException("unexpected dataType: " + dataType);
+				}
+			}
+			
+			if ( this.dataType == DataField.DataType.STRING && 
+					this.maxCharLen.compareTo(MAX_ROW_SIZE) > 0 ) {
+				this.dataType = DataField.DataType.LONG_STRING;
+			}
 		}
-	};
-
-	private static RowMapper<TableDefinition> tableDef = new RowMapper<TableDefinition>() {
-		@Override
-		public TableDefinition mapRow(ResultSet rs, int rowNum) throws SQLException {
-			return new TableDefinition(rs);
-		}
-	};
+	}
 
 	public static void buildArgumentList(Object[] ol, int[] il, int idx, CommonFieldsBase entity, DataField f) {
 		switch (f.getDataType()) {
@@ -274,7 +323,7 @@ public class DatastoreImpl implements Datastore, InitializingBean {
 			break;
 		case LONG_STRING:
 			ol[idx] = entity.getStringField(f);
-			il[idx] = java.sql.Types.LONGNVARCHAR;
+			il[idx] = java.sql.Types.LONGVARCHAR;
 			break;
 
 		default:
@@ -303,26 +352,18 @@ public class DatastoreImpl implements Datastore, InitializingBean {
 
 	private final boolean updateRelation(CommonFieldsBase relation) {
 
-		String qs = TableDefinition.TABLE_DEF_QUERY;
-		List<?> columns;
-		columns = getJdbcConnection().query(
-			qs,
-			new Object[] { relation.getSchemaName(),
-					relation.getTableName() }, tableDef);
+		Map<String,ShowDefinition> defns = ShowDefinition.query( relation.getSchemaName(), 
+																 relation.getTableName(), 
+																 getJdbcConnection());
+		
+		if ( defns.size() > 0 ) {
 
-		if (columns.size() > 0) {
-			Map<String, TableDefinition> map = new HashMap<String, TableDefinition>();
-			for (Object o : columns) {
-				TableDefinition t = (TableDefinition) o;
-				map.put(t.getColumnName(), t);
-			}
-
-			// we may have gotten some results into columns -- go through the
+			// we may have gotten results into columns -- go through the
 			// fields and
 			// assemble the results... we don't care about additional columns in
 			// the map...
 			for (DataField f : relation.getFieldList()) {
-				TableDefinition d = map.get(f.getName());
+				ShowDefinition d = defns.get(f.getName());
 				if (d == null) {
 					throw new IllegalStateException(
 							"did not find expected column " + f.getName()
@@ -334,44 +375,38 @@ public class DatastoreImpl implements Datastore, InitializingBean {
 					d.setDataType(DataField.DataType.BOOLEAN);
 					// don't care about size...
 				}
+				
+				if ( d.getDataType() == DataField.DataType.STRING &&
+					 f.getMaxCharLen() != null &&
+					 f.getMaxCharLen().compareTo(d.getMaxCharLen()) > 0 ) {
+					throw new IllegalStateException("column " + f.getName() +
+							" in table " + relation.getSchemaName() + "." + relation.getTableName() +
+							" stores string-valued keys but is shorter than required by Aggregate " +
+							d.getMaxCharLen().toString() + " < " + f.getMaxCharLen().toString());
+				}
 
-				if (f.getDataType() == DataField.DataType.URI
-						&& d.getDataType() == DataField.DataType.STRING) {
-					d.setDataType(DataField.DataType.URI);
-					if (f.getMaxCharLen() != null
-							&& d.getMaxCharLen().compareTo(f.getMaxCharLen()) < 0 ) {
-						throw new IllegalStateException(
-								"column "
-										+ f.getName()
-										+ " in table "
-										+ relation.getSchemaName()
-										+ "."
-										+ relation.getTableName()
-										+ " stores string-valued keys but is shorter than required by Aggregate "
-										+ d.getMaxCharLen().toString() + " < "
-										+ f.getMaxCharLen().toString());
+				if (f.getDataType() == DataField.DataType.URI) {
+					if (d.getDataType() != DataField.DataType.STRING) {
+						throw new IllegalStateException("column " + f.getName() +
+							" in table " + relation.getSchemaName() + "." + relation.getTableName() +
+							" stores URIs but is not a string field");
 					}
+					d.setDataType(DataField.DataType.URI);
 				}
+				
 				if (d.getDataType() != f.getDataType()) {
-					throw new IllegalStateException("column " + f.getName()
-							+ " in table " + relation.getSchemaName() + "."
-							+ relation.getTableName()
-							+ " is not of the expected type "
-							+ f.getDataType().toString());
+					throw new IllegalStateException("column " + f.getName() +
+							" in table " + relation.getSchemaName() + "." + relation.getTableName() +
+							" is not of the expected type " + f.getDataType().toString());
 				}
 
-				// it is OK for the persistence layer to be more lenient with
-				// nulls than the data model
-				if (d.isNullable() && !f.getNullable()) {
-					throw new IllegalStateException(
-							"column "
-									+ f.getName()
-									+ " in table "
-									+ relation.getSchemaName()
-									+ "."
-									+ relation.getTableName()
-									+ " is defined as NOT NULL but the data model requires NULL");
+				// it is OK for the data model to be more strict than the data store.
+				if (!d.isNullable() && f.getNullable()) {
+					throw new IllegalStateException("column " + f.getName() +
+							" in table " + relation.getSchemaName() + "." + relation.getTableName() +
+							" is defined as NOT NULL but the data model requires NULL");
 				}
+
 				f.setMaxCharLen(d.getMaxCharLen());
 				f.setNumericPrecision(d.getNumericPrecision());
 				f.setNumericScale(d.getNumericScale());
@@ -521,10 +556,26 @@ public class DatastoreImpl implements Datastore, InitializingBean {
 
 	@Override
 	public boolean hasRelation(String schema, String tableName, User user) {
-		String qs = TableDefinition.TABLE_EXISTS_QUERY;
-		int count = getJdbcConnection().queryForInt(qs,
-				new Object[] { schema, tableName });
-		return (count != 0);
+		// Query for the create table string.  
+		try {
+			StringBuilder b = new StringBuilder();
+			b.setLength(0);
+			b.append(K_SHOW_CREATE_TABLE);
+			b.append(K_BQ);
+			b.append(schema);
+			b.append(K_BQ);
+			b.append(".");
+			b.append(K_BQ);
+			b.append(tableName);
+			b.append(K_BQ);
+			// this will throw an exception if the table doesn't exist...
+			getJdbcConnection().queryForObject(b.toString(), String.class);
+			// and if it does exist, we don't care about the return value...
+		} catch ( BadSqlGrammarException e ) {
+			// we expect this if the table does not exist...
+			return false;
+		}
+		return true;
 	}
 
 	@Override

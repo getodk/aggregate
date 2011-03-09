@@ -54,18 +54,18 @@ public class JsonFormatter implements SubmissionFormatter, RepeatCallbackFormatt
   }
 
   @Override
-  public void processSubmissions(List<Submission> submissions)
+  public void processSubmissions(List<Submission> submissions, CallingContext cc)
       throws ODKDatastoreException {
 
     // format row elements
     for (Submission sub : submissions) {
-      Row row = sub.getFormattedValuesAsRow(propertyNames, elemFormatter, false);
+      Row row = sub.getFormattedValuesAsRow(propertyNames, elemFormatter, false, cc);
       appendJsonObject(row.getFormattedValues().iterator());
     }
   }
   
   public void processRepeatedSubmssionSetsIntoRow(List<SubmissionSet> repeats,
-      FormElementModel repeatElement, Row row) throws ODKDatastoreException {
+      FormElementModel repeatElement, Row row, CallingContext cc) throws ODKDatastoreException {
     // TODO: check what is best way to deal with ordinal
 
     output.append(BasicConsts.LEFT_BRACE);
@@ -75,7 +75,7 @@ public class JsonFormatter implements SubmissionFormatter, RepeatCallbackFormatt
     output.append(BasicConsts.LEFT_BRACKET);
     // format row elements
     for (SubmissionSet repeat : repeats) {
-      Row repeatRow = repeat.getFormattedValuesAsRow(propertyNames, elemFormatter, false);
+      Row repeatRow = repeat.getFormattedValuesAsRow(propertyNames, elemFormatter, false, cc);
       appendJsonObject(repeatRow.getFormattedValues().iterator());
     }
     output.append(BasicConsts.RIGHT_BRACKET);

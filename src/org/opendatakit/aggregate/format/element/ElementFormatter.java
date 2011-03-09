@@ -19,6 +19,7 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
+import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.submission.SubmissionRepeat;
@@ -35,7 +36,7 @@ import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 public interface ElementFormatter {
   public void formatUid(String uri, String propertyName, Row row);
   
-  public void formatBinary(BlobSubmissionType blobSubmission, String propertyName, Row row) throws ODKDatastoreException;
+  public void formatBinary(BlobSubmissionType blobSubmission, String propertyName, Row row, CallingContext cc) throws ODKDatastoreException;
   
   public void formatBoolean(Boolean bool, String propertyName, Row row);
   
@@ -51,6 +52,6 @@ public interface ElementFormatter {
   
   public void formatString(String string, String propertyName, Row row);
   
-  public void formatRepeats(SubmissionRepeat repeat, FormElementModel repeatElement, Row row) throws ODKDatastoreException;
+  public void formatRepeats(SubmissionRepeat repeat, FormElementModel repeatElement, Row row, CallingContext cc) throws ODKDatastoreException;
   
 }

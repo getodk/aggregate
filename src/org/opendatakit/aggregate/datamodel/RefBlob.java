@@ -20,8 +20,8 @@ import org.opendatakit.common.security.User;
  * Binary objects may span multiple blobs; this class holds one 
  * blob in the sequence of blobs that comprise a binary object.
  * The class holds just the binary content.  
- * See {@link VersionedBinaryContentRefBlob} which defines the ordering
- * of Blobs within a versioned binary object.
+ * See {@link BinaryContentRefBlob} which defines the ordering
+ * of Blobs within a binary object.
  * <p>
  * The intent is that this is a write-once record with put/get
  * semantics.  Its functionality could be replaced with S3, or 

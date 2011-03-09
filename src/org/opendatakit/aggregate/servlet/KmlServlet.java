@@ -123,7 +123,9 @@ public class KmlServlet extends ServletUtilBase {
       r.persist(cc);
 
       KmlGenerator generator = (KmlGenerator) cc.getBean(BeanDefs.KML_BEAN);
-      generator.createKmlTask(form, r.getSubmissionKey(), 1L, cc);
+  	  CallingContext ccDaemon = ContextFactory.getCallingContext(this, ADDR, req);
+  	  ccDaemon.setAsDaemon(true);
+      generator.createKmlTask(form, r.getSubmissionKey(), 1L, ccDaemon);
 
     } catch (ODKFormNotFoundException e) {
       odkIdNotFoundError(resp);

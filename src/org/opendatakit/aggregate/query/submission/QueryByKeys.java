@@ -36,15 +36,12 @@ import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 public class QueryByKeys {
 
   private List<SubmissionKey> submissionKeys;
-
-  private CallingContext cc;
   
-  public QueryByKeys(List<SubmissionKey> keys, CallingContext cc) throws ODKFormNotFoundException {
-    this.cc = cc;
+  public QueryByKeys(List<SubmissionKey> keys) throws ODKFormNotFoundException {
     submissionKeys = keys;
   }
 
-  public List<Submission> getResultSubmissions() throws ODKIncompleteSubmissionData, ODKDatastoreException, ODKFormNotFoundException {
+  public List<Submission> getResultSubmissions(CallingContext cc) throws ODKIncompleteSubmissionData, ODKDatastoreException, ODKFormNotFoundException {
     List<Submission> submissions = new ArrayList<Submission>();
     
     for (SubmissionKey submissionKey : submissionKeys) {

@@ -172,7 +172,7 @@ public class ServletUtilBase extends CommonServletBase {
 			  cc.getWebApplicationURL(ExternalServicesListServlet.ADDR), 
 			  ServletConsts.EXTERNAL_SERVICES_LINK_TEXT);
 	  final String uploadSubmissionsHref = HtmlUtil.createHref(
-			  cc.getWebApplicationURL(UploadSubmissionsAppletServlet.ADDR),
+			  cc.getWebApplicationURL(SubmissionServlet.ADDR),
 			  ServletConsts.UPLOAD_SUBMISSIONS_APPLET_LINK_TEXT);
 	  final String changePasswordHref = cc.getCurrentUser().isRegistered() ?
 			  HtmlUtil.createHref(
@@ -183,7 +183,7 @@ public class ServletUtilBase extends CommonServletBase {
 			  cc.getWebApplicationURL(ResultServlet.ADDR), 
 			  ServletConsts.RESULT_FILES_LINK_TEXT);
 	  final String uploadFormHref = HtmlUtil.createHref(
-			  cc.getWebApplicationURL(UploadXFormAppletServlet.ADDR), 
+			  cc.getWebApplicationURL(FormUploadServlet.ADDR), 
 			  ServletConsts.UPLOAD_XFORM_APPLET_LINK_TEXT);
 	  final String accessManagementHref = HtmlUtil.createHref(
 			  cc.getWebApplicationURL(AccessManagementServlet.ADDR), 

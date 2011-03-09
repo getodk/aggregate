@@ -44,23 +44,22 @@ import org.opendatakit.common.security.User;
  */
 public class ChoiceSubmissionType extends SubmissionFieldBase<List<String>> {
 
+	boolean isChanged = false;
 	List<String> values = new ArrayList<String>();
 	
 	List<SelectChoice> choices = new ArrayList<SelectChoice>();
 	
 	private final String parentKey;
 	private final EntityKey topLevelTableKey;
-	private final CallingContext cc;
 	
-	public ChoiceSubmissionType(FormElementModel element, String parentKey, EntityKey topLevelTableKey, CallingContext cc) {
+	public ChoiceSubmissionType(FormElementModel element, String parentKey, EntityKey topLevelTableKey) {
 		super(element);
 		this.parentKey = parentKey;
 		this.topLevelTableKey = topLevelTableKey;
-		this.cc = cc;
 	}
 
 	@Override
-	public void formatValue(ElementFormatter elemFormatter, Row row, String ordinalValue)
+	public void formatValue(ElementFormatter elemFormatter, Row row, String ordinalValue, CallingContext cc)
 			throws ODKDatastoreException {
 		elemFormatter.formatChoices(values, element.getGroupQualifiedElementName()+ ordinalValue, row);
 	}
@@ -86,38 +85,21 @@ public class ChoiceSubmissionType extends SubmissionFieldBase<List<String>> {
 			choices.add(choice);
 			values.add(choice.getValue());
 		}
+		isChanged = false;
 	}
 
 	@Override
 	public void setValueFromString(String concatenatedValues) throws ODKConversionException, ODKDatastoreException {
-		
-		Datastore ds = cc.getDatastore();
-		User user = cc.getCurrentUser();
-		// clear the old values and underlying data records...
+		isChanged = true;
 		values.clear();
-		for ( SelectChoice c: choices ) {
-			ds.deleteEntity(new EntityKey(c, c.getUri()), user);
-		}
-		choices.clear();
-		
-		if ( concatenatedValues != null ) {
-			String[] valueArray = concatenatedValues.split(" ");
-			int i = 1;
-			for ( String v : valueArray ) {
-				SelectChoice c = (SelectChoice) ds.createEntityUsingRelation(element.getFormDataModel().getBackingObjectPrototype(), user);
-				c.setTopLevelAuri(topLevelTableKey.getKey());
-				c.setParentAuri(parentKey);
-				c.setOrdinalNumber(Long.valueOf(i++));
-				c.setValue(v);
-				choices.add(c);
-				values.add(v);
-			}
-			ds.putEntities(choices, user);
+		String[] splits = concatenatedValues.split(" ");
+		for ( String v : splits ) {
+			if ( v != null ) values.add(v);
 		}
 	}
 
 	@Override
-	public void recursivelyAddEntityKeys(List<EntityKey> keyList) {
+	public void recursivelyAddEntityKeys(List<EntityKey> keyList, CallingContext cc) {
 		for ( SelectChoice s : choices ) {
 			keyList.add( new EntityKey( s, s.getUri()));
 		}
@@ -125,7 +107,35 @@ public class ChoiceSubmissionType extends SubmissionFieldBase<List<String>> {
 	
 	@Override
 	public void persist(CallingContext cc) throws ODKEntityPersistException {
-		cc.getDatastore().putEntities(choices, cc.getCurrentUser());
+		
+		if ( isChanged ) {
+			Datastore ds = cc.getDatastore();
+			User user = cc.getCurrentUser();
+			// clear the old underlying data records...
+			List<EntityKey> keys = new ArrayList<EntityKey>();
+			for ( SelectChoice c: choices ) {
+				keys.add(new EntityKey(c, c.getUri()));
+			}
+
+			try {
+				ds.deleteEntities(keys, user);
+			} catch (ODKDatastoreException e) {
+				throw new ODKEntityPersistException("Unable to delete old choices", e);
+			}
+			choices.clear();
+		
+			int i = 1;
+			for ( String v : values ) {
+				SelectChoice c = (SelectChoice) ds.createEntityUsingRelation(element.getFormDataModel().getBackingObjectPrototype(), user);
+				c.setTopLevelAuri(topLevelTableKey.getKey());
+				c.setParentAuri(parentKey);
+				c.setOrdinalNumber(Long.valueOf(i++));
+				c.setValue(v);
+				choices.add(c);
+			}
+			ds.putEntities(choices, user);
+			isChanged = false;
+		}
 	}
 
 	public SubmissionValue resolveSubmissionKeyBeginningAt(int i,

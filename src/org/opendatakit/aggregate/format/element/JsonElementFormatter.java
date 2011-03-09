@@ -19,6 +19,7 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
+import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.constants.format.FormatConsts;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.format.Row;
@@ -76,7 +77,7 @@ public class JsonElementFormatter implements ElementFormatter {
   }
   
   @Override
-  public void formatBinary(BlobSubmissionType blobSubmission, String propertyName, Row row)
+  public void formatBinary(BlobSubmissionType blobSubmission, String propertyName, Row row, CallingContext cc)
       throws ODKDatastoreException {
     if (blobSubmission == null || (blobSubmission.getAttachmentCount() == 0)) {
       row.addFormattedValue(null);
@@ -85,8 +86,7 @@ public class JsonElementFormatter implements ElementFormatter {
 
     byte[] imageBlob = null;
     if (blobSubmission.getAttachmentCount() == 1) {
-      String version = blobSubmission.getCurrentVersion(1);
-      imageBlob = blobSubmission.getBlob(1, version);
+      imageBlob = blobSubmission.getBlob(1, cc);
     }
     if (imageBlob != null && imageBlob.length > 0) {
       addToJsonValueToRow(Base64.encode(imageBlob), propertyName, row);
@@ -168,7 +168,7 @@ public class JsonElementFormatter implements ElementFormatter {
   }
 
   @Override
-  public void formatRepeats(SubmissionRepeat repeat, FormElementModel repeatElement, Row row)
+  public void formatRepeats(SubmissionRepeat repeat, FormElementModel repeatElement, Row row, CallingContext cc)
       throws ODKDatastoreException {
     // TODO: figure out how to deal with repeat
   }

@@ -112,7 +112,7 @@ public class WatchdogWorkerImpl {
     // query for last submission submitted for the form
     QueryByDate query = new QueryByDate(form, new Date(System.currentTimeMillis()), true, 1,
         cc);
-    List<Submission> submissions = query.getResultSubmissions();
+    List<Submission> submissions = query.getResultSubmissions(cc);
     String lastSubmissionKey = null;
     if (submissions != null && submissions.size() == 1) {
       Submission lastSubmission = submissions.get(0);
@@ -134,54 +134,62 @@ public class WatchdogWorkerImpl {
 		  CsvGenerator csvGenerator, KmlGenerator kmlGenerator,
 		  CallingContext cc)
       throws ODKDatastoreException, ODKFormNotFoundException {
-    // TODO: remove
-    System.out.println("Checking persistent results");
-    List<PersistentResults> persistentResults = PersistentResults.getStalledRequests(cc);
-    for (PersistentResults persistentResult : persistentResults) {
-      // TODO: remove
-      System.out.println("Found stalled request: " + persistentResult.getSubmissionKey());
-      long attemptCount = persistentResult.getAttemptCount();
-      persistentResult.setAttemptCount(++attemptCount);
-      persistentResult.persist(cc);
-      Form form = Form.retrieveForm(persistentResult.getFormId(), cc);
-      switch (persistentResult.getResultType()) {
-      case CSV:
-        csvGenerator.createCsvTask(form, persistentResult.getSubmissionKey(), attemptCount,
-            cc);
-        break;
-      case KML:
-        kmlGenerator.createKmlTask(form, persistentResult.getSubmissionKey(), attemptCount,
-            cc);
-        break;
-      }
-    }
+	try {
+	    // TODO: remove
+	    System.out.println("Checking persistent results");
+	    List<PersistentResults> persistentResults = PersistentResults.getStalledRequests(cc);
+	    for (PersistentResults persistentResult : persistentResults) {
+	      // TODO: remove
+	      System.out.println("Found stalled request: " + persistentResult.getSubmissionKey());
+	      long attemptCount = persistentResult.getAttemptCount();
+	      persistentResult.setAttemptCount(++attemptCount);
+	      persistentResult.persist(cc);
+	      Form form = Form.retrieveForm(persistentResult.getFormId(), cc);
+	      switch (persistentResult.getResultType()) {
+	      case CSV:
+	        csvGenerator.createCsvTask(form, persistentResult.getSubmissionKey(), attemptCount,
+	            cc);
+	        break;
+	      case KML:
+	        kmlGenerator.createKmlTask(form, persistentResult.getSubmissionKey(), attemptCount,
+	            cc);
+	        break;
+	      }
+	    }
+	} finally {
+	    System.out.println("Done checking persistent results");
+	}
   }
 
 
   private void checkMiscTasks(WorksheetCreator wsCreator, FormDelete formDelete,
 		  CallingContext cc)
       throws ODKDatastoreException, ODKFormNotFoundException {
-    // TODO: remove
-    System.out.println("Checking miscellaneous tasks");
-    List<MiscTasks> miscTasks = MiscTasks.getStalledRequests(cc);
-    for (MiscTasks aTask : miscTasks) {
-      // TODO: remove
-      System.out.println("Found stalled request: " + aTask.getSubmissionKey());
-      long attemptCount = aTask.getAttemptCount();
-      aTask.setAttemptCount(++attemptCount);
-      aTask.persist(cc);
-      Form form = Form.retrieveForm(aTask.getFormId(), cc);
-      switch (aTask.getTaskType()) {
-      case WORKSHEET_CREATE:
-    	wsCreator.createWorksheetTask(form, aTask.getSubmissionKey(), attemptCount,
-            cc);
-        break;
-      case DELETE_FORM:
-        formDelete.createFormDeleteTask(form, aTask.getSubmissionKey(), attemptCount,
-            cc);
-        break;
-      }
-    }
+	try {
+	    // TODO: remove
+	    System.out.println("Checking miscellaneous tasks");
+	    List<MiscTasks> miscTasks = MiscTasks.getStalledRequests(cc);
+	    for (MiscTasks aTask : miscTasks) {
+	      // TODO: remove
+	      System.out.println("Found stalled request: " + aTask.getSubmissionKey());
+	      long attemptCount = aTask.getAttemptCount();
+	      aTask.setAttemptCount(++attemptCount);
+	      aTask.persist(cc);
+	      Form form = Form.retrieveForm(aTask.getFormId(), cc);
+	      switch (aTask.getTaskType()) {
+	      case WORKSHEET_CREATE:
+	    	wsCreator.createWorksheetTask(form, aTask.getSubmissionKey(), attemptCount,
+	            cc);
+	        break;
+	      case DELETE_FORM:
+	        formDelete.createFormDeleteTask(form, aTask.getSubmissionKey(), attemptCount,
+	            cc);
+	        break;
+	      }
+	    }
+	} finally {
+	    System.out.println("Done checking miscellaneous tasks");
+	}
   }
 
 }

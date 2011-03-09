@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.format.FormTableConsts;
@@ -67,7 +68,7 @@ public class HtmlLinkElementFormatter extends BasicElementFormatter{
 	  }
  
   @Override
-  public void formatBinary(BlobSubmissionType blobSubmission, String propertyName, Row row) throws ODKDatastoreException {
+  public void formatBinary(BlobSubmissionType blobSubmission, String propertyName, Row row, CallingContext cc) throws ODKDatastoreException {
     if(blobSubmission == null || (blobSubmission.getAttachmentCount() == 0)) {
       row.addFormattedValue(null);
       return;
@@ -95,7 +96,7 @@ public class HtmlLinkElementFormatter extends BasicElementFormatter{
 
 
   @Override
-  public void formatRepeats(SubmissionRepeat repeat, FormElementModel repeatElement, Row row) throws ODKDatastoreException {
+  public void formatRepeats(SubmissionRepeat repeat, FormElementModel repeatElement, Row row, CallingContext cc) throws ODKDatastoreException {
     if(repeat == null) {
       row.addFormattedValue(null);
       return;

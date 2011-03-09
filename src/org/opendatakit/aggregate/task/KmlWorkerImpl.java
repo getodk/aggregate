@@ -74,7 +74,7 @@ public class KmlWorkerImpl {
 	    		cc);
 	    SubmissionFormatter formatter = new KmlFormatter(form, cc.getServerURL(), geopointField,
 	        titleField, imageField, pw, null, cc);
-	    formatter.processSubmissions(query.getResultSubmissions());
+	    formatter.processSubmissions(query.getResultSubmissions(cc), cc);
 
 	    // output file
 	    pw.close();
@@ -83,7 +83,7 @@ public class KmlWorkerImpl {
 	    Submission s = Submission.fetchSubmission(persistentResultsKey.splitSubmissionKey(), cc);
 	    PersistentResults r = new PersistentResults(s);
 	    if ( attemptCount.equals(r.getAttemptCount()) ) {
-			r.setResultFile(outputFile, HtmlConsts.RESP_TYPE_PLAIN, Long.valueOf(outputFile.length), form.getViewableFormNameSuitableAsFileName() + ServletConsts.KML_FILENAME_APPEND);
+			r.setResultFile(outputFile, HtmlConsts.RESP_TYPE_PLAIN, Long.valueOf(outputFile.length), form.getViewableFormNameSuitableAsFileName() + ServletConsts.KML_FILENAME_APPEND, cc);
 			r.setStatus(Status.AVAILABLE);
 			r.setCompletionDate(new Date());
 			r.objectEntity.persist(cc);

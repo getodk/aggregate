@@ -19,9 +19,9 @@ import java.util.List;
 
 import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.datamodel.DynamicBase;
-import org.opendatakit.aggregate.datamodel.DynamicCommonFieldsBase;
 import org.opendatakit.aggregate.datamodel.FormDataModel;
 import org.opendatakit.aggregate.datamodel.TopLevelDynamicBase;
+import org.opendatakit.aggregate.form.FormDefinition.OrdinalSequence;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.PersistConsts;
@@ -105,9 +105,10 @@ public class FormInfoDescriptionTable extends DynamicBase {
 		return relation;
 	}
 	
-	static final void createFormDataModel(List<FormDataModel> model, Long ordinal,
-				TopLevelDynamicBase formInfoDefinitionRelation, 
-				DynamicCommonFieldsBase formInfoTableRelation, 
+	static final void createFormDataModel(List<FormDataModel> model, 
+				TopLevelDynamicBase formInfoDefinitionRelation,
+				String parentTableKey,
+				OrdinalSequence os,
 				CallingContext cc) throws ODKDatastoreException {
 		
 		FormInfoDescriptionTable descriptionRelation = assertRelation(cc);
@@ -117,8 +118,8 @@ public class FormInfoDescriptionTable extends DynamicBase {
 			FormDefinition.buildTableFormDataModel( model, 
 				descriptionRelation, 
 				formInfoDefinitionRelation, // top level table
-				formInfoTableRelation, // also the parent table
-				ordinal,
+				parentTableKey, // the parent table
+				os,
 				cc );
 		} finally {
 			cc.setAsDaemon(asDaemon);

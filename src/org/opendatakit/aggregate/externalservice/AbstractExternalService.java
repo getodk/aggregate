@@ -41,32 +41,29 @@ public abstract class AbstractExternalService implements ExternalService{
   
   protected ElementFormatter formatter;
   
-  protected final CallingContext cc;
-
   protected final HeaderFormatter headerFormatter;
   
   protected AbstractExternalService(Form form, ElementFormatter elemFormatter, HeaderFormatter header, CallingContext cc) {
     this.form = form;
     this.formatter = elemFormatter;
     this.headerFormatter = header;
-    this.cc = cc;
   }
   
-  public void sendSubmissions(List<Submission> submissions) throws ODKExternalServiceException {
+  public void sendSubmissions(List<Submission> submissions, CallingContext cc) throws ODKExternalServiceException {
     for(Submission submission : submissions)  {
-      insertData(submission);
+      insertData(submission, cc);
     }
   }
   
-  public void sendSubmission(Submission submission) throws ODKExternalServiceException {
-    insertData(submission);    
+  public void sendSubmission(Submission submission, CallingContext cc) throws ODKExternalServiceException {
+    insertData(submission, cc);    
   }
   
   public FormServiceCursor getFormServiceCursor() {
     return fsc;
   }
   
-  protected abstract void insertData(Submission submission) throws ODKExternalServiceException;
+  protected abstract void insertData(Submission submission, CallingContext cc) throws ODKExternalServiceException;
   
    
 }

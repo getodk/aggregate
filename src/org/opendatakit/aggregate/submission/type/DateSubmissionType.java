@@ -94,7 +94,7 @@ public class DateSubmissionType extends SubmissionSingleValueBase<Date> {
 	 *            proper format for output
 	 */
 	@Override
-	public void formatValue(ElementFormatter elemFormatter, Row row, String ordinalValue)
+	public void formatValue(ElementFormatter elemFormatter, Row row, String ordinalValue, CallingContext cc)
 			throws ODKDatastoreException {
 		elemFormatter.formatDate(getValue(), element.getGroupQualifiedElementName() + ordinalValue, row);
 	}

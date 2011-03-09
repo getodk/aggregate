@@ -20,6 +20,7 @@ import java.util.List;
 import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.datamodel.FormDataModel;
 import org.opendatakit.aggregate.datamodel.TopLevelDynamicBase;
+import org.opendatakit.aggregate.form.FormDefinition.OrdinalSequence;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.Datastore;
@@ -36,9 +37,7 @@ import org.opendatakit.common.security.User;
 public class FormInfoTable extends TopLevelDynamicBase {
 	static final String TABLE_NAME = "_form_info";
 	
-	private static final String FORM_INFO_DEFINITION_URI = "aggregate.opendatakit.org:FormInfo-Definition";
-	private static final String FORM_INFO_LONG_STRING_REF_TEXT_URI = "aggregate.opendatakit.org:FormInfoLongStringRefText";
-	private static final String FORM_INFO_REF_TEXT_URI = "aggregate.opendatakit.org:FormInfoRefText";
+	private static final String FORM_INFO_DEFINITION_URI = "aggregate.opendatakit.org:FormInfo-def";
 
 	private static final DataField FORM_ID = new DataField("FORM_ID",
 			DataField.DataType.STRING, false, PersistConsts.MAX_SIMPLE_STRING_LEN);
@@ -108,40 +107,42 @@ public class FormInfoTable extends TopLevelDynamicBase {
 			FormInfoTable formInfoDefinition = ds.createEntityUsingRelation(formInfoTableRelation, user);
 			formInfoDefinition.setStringField(formInfoTableRelation.primaryKey, FORM_INFO_DEFINITION_URI);
 			
-			Long lastOrdinal = 0L;
+			OrdinalSequence os = new OrdinalSequence();
 			
-			lastOrdinal = FormDefinition.buildTableFormDataModel( model, 
-					formInfoTableRelation, 
+			String groupKey = FormDefinition.buildTableFormDataModel( model, 
+					formInfoDefinition, 
 					formInfoDefinition, // top level table
-					formInfoDefinition, // parent table...
-					1L,
+					formInfoDefinition.getUri(), // parent table uri...
+					os,
 					cc );
 			
+			Long ordinal = os.ordinal;
 			FormInfoDescriptionTable.createFormDataModel(model, 
-					++lastOrdinal, 
 					formInfoDefinition, // top level table
-					formInfoTableRelation, 
+					groupKey,
+					os,
 					cc );
 			
+			os.ordinal = ++ordinal;
 			FormInfoFilesetTable.createFormDataModel(model, 
-					++lastOrdinal, 
 					formInfoDefinition, // top level table
-					formInfoTableRelation, 
+					groupKey,
+					os, 
 					cc );
 			
+			os.ordinal = ++ordinal;
 			FormInfoSubmissionTable.createFormDataModel(model, 
-					++lastOrdinal, 
 					formInfoDefinition, // top level table
-					formInfoTableRelation, 
+					groupKey,
+					os, 
 					cc );
 			
+			os.ordinal = 2L;
 			FormDefinition.buildLongStringFormDataModel(model, 
-					FORM_INFO_LONG_STRING_REF_TEXT_URI,
 					FORM_INFO_LONG_STRING_REF_TEXT, 
-					FORM_INFO_REF_TEXT_URI,
 					FORM_INFO_REF_TEXT, 
 					formInfoDefinition, // top level and parent table
-					2L, 
+					os, 
 					cc );
 	
 			return formInfoTableRelation.getUri();

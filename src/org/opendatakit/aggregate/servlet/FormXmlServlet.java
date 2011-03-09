@@ -84,7 +84,7 @@ public class FormXmlServlet extends ServletUtilBase {
     }
 
     // servlet has two different paths to it -- depdending upon whether it is human readable or not.
-    CallingContext cc = ContextFactory.getCallingContext(this, req);
+    CallingContext cc = ContextFactory.getCallingContext(this, humanReadable ? WWW_ADDR : ADDR, req);
 
     Form form;
     try {
@@ -97,7 +97,7 @@ public class FormXmlServlet extends ServletUtilBase {
 
     try {
 	    if (form != null) {
-			xmlString = form.getFormXml();
+			xmlString = form.getFormXml(cc);
 	    } else {
 	      odkIdNotFoundError(resp);
 	    }

@@ -88,8 +88,7 @@ public final class FormDataModel extends CommonFieldsBase {
 		GROUP,
 		// additional supporting tables
 		PHANTOM, // if a relation needs to be divided in order to fit
-		VERSIONED_BINARY, // association between BINARY and VERSIONED_BINARY_CONTENT_REF_BLOB
-		VERSIONED_BINARY_CONTENT_REF_BLOB, // association between VERSIONED_BINARY and REF_BLOB
+		BINARY_CONTENT_REF_BLOB, // association between BINARY and REF_BLOB
 		REF_BLOB, // the table of the actual byte[] data (xxxBLOB)
 		LONG_STRING_REF_TEXT, // association between any field and REF_TEXT
 		REF_TEXT, // the table of extended string values (xxxTEXT)
@@ -310,12 +309,10 @@ public final class FormDataModel extends CommonFieldsBase {
 		case SELECTN: // identifies SelectChoice table
 		case REPEAT:
 		case GROUP:
-		case VERSIONED_BINARY: // association between BINARY and VERSIONED_BINARY_CONTENT_REF_BLOB
-			// this shares the element name of the binary content record, so leave it...
 			return groupPrefix + getElementName();
 		case PHANTOM: // if a relation needs to be divided in order to fit
 			return getParent().getGroupQualifiedElementName();
-		case VERSIONED_BINARY_CONTENT_REF_BLOB: // association between VERSIONED_BINARY and REF_BLOB
+		case BINARY_CONTENT_REF_BLOB: // association between VERSIONED_BINARY and REF_BLOB
 		case REF_BLOB: // the table of the actual byte[] data (xxxBLOB)
 		case LONG_STRING_REF_TEXT: // association between any field and REF_TEXT
 		case REF_TEXT: // the table of extended string values (xxxTEXT)
