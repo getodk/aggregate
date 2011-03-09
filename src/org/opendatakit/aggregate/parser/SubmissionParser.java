@@ -85,8 +85,6 @@ public class SubmissionParser {
 	 */
 	private MultiPartFormData submissionFormItems;
 
-	private final CallingContext cc;
-
 	private EntityKey topLevelTableKey = null;
 
 	/**
@@ -109,8 +107,7 @@ public class SubmissionParser {
 		throws IOException, ODKFormNotFoundException,
 			ODKParseException, ODKIncompleteSubmissionData,
 			ODKConversionException, ODKDatastoreException {
-		this.cc = cc;
-		constructorHelper(inputStreamXML);
+		constructorHelper(inputStreamXML, cc);
 	}
 
 	/**
@@ -135,7 +132,6 @@ public class SubmissionParser {
 			ODKFormNotFoundException, ODKParseException,
 			ODKIncompleteSubmissionData, ODKConversionException,
 			ODKDatastoreException {
-		this.cc = cc;
 		if (submissionFormParser == null) {
 			// TODO: review best error handling strategy
 			throw new IOException("DID NOT GET A MULTIPARTFORMPARSER");
@@ -150,7 +146,7 @@ public class SubmissionParser {
 
 		InputStream inputStreamXML = new ByteArrayInputStream(submission.getStream().toByteArray());
 		try {
-			constructorHelper(inputStreamXML);
+			constructorHelper(inputStreamXML, cc);
 		} finally {
 			inputStreamXML.close();
 		}
@@ -171,7 +167,7 @@ public class SubmissionParser {
 	 * @throws ODKConversionException
 	 * @throws ODKDatastoreException
 	 */
-	private void constructorHelper(InputStream inputStreamXML)
+	private void constructorHelper(InputStream inputStreamXML, CallingContext cc)
 			throws IOException, ODKFormNotFoundException, ODKParseException,
 			ODKIncompleteSubmissionData, ODKConversionException,
 			ODKDatastoreException {
@@ -228,7 +224,7 @@ public class SubmissionParser {
 		topLevelTableKey = submission.getKey();
 
 		FormElementModel formRoot = form.getTopLevelGroupElement();
-		boolean uploadAllBinaries = processSubmissionElement(formRoot, root, submission);
+		boolean uploadAllBinaries = processSubmissionElement(formRoot, root, submission, cc);
 
 		// TODO: figure out if we actually have all the binary content uploaded...
 		submission.setIsComplete(true);
@@ -237,7 +233,7 @@ public class SubmissionParser {
 			submission.persist(cc);
 		} catch (Exception e) {
 			List<EntityKey> keys = new ArrayList<EntityKey>();
-			submission.recursivelyAddEntityKeys(keys);
+			submission.recursivelyAddEntityKeys(keys, cc);
 			keys.add(submission.getKey());
 			try {
 				cc.getDatastore().deleteEntities(keys, cc.getCurrentUser());
@@ -275,7 +271,7 @@ public class SubmissionParser {
 	 * @throws ODKDatastoreException
 	 */
 	private boolean processSubmissionElement(FormElementModel node,
-			Element currentSubmissionElement, SubmissionSet submissionSet)
+			Element currentSubmissionElement, SubmissionSet submissionSet, CallingContext cc)
 			throws ODKParseException, ODKIncompleteSubmissionData,
 			ODKConversionException, ODKDatastoreException {
 
@@ -315,7 +311,7 @@ public class SubmissionParser {
 				// need to recurse on these elements keeping the same
 				// submissionSet...
 				complete = complete && 
-					processSubmissionElement(m, e, submissionSet);
+					processSubmissionElement(m, e, submissionSet, cc);
 				break;
 			case REPEAT:
 				// get the field that will hold the repeats...
@@ -328,7 +324,7 @@ public class SubmissionParser {
 						topLevelTableKey, cc);
 				// populate the instance's submission set with values from e...
 				complete = complete && 
-					processSubmissionElement(m, e, repeatableSubmissionSet);
+					processSubmissionElement(m, e, repeatableSubmissionSet, cc);
 				// add the instance to the repeat group...
 				repeats.addSubmissionSet(repeatableSubmissionSet);
 				break;
@@ -355,7 +351,7 @@ public class SubmissionParser {
 				SubmissionField<?> submissionElement = ((SubmissionField<?>) submissionSet
 						.getElementValue(m));
 				complete = complete && 
-					processBinarySubmission(m, submissionElement, value);
+					processBinarySubmission(m, submissionElement, value, cc);
 				break;
 			}
 		}
@@ -363,7 +359,7 @@ public class SubmissionParser {
 	}
 
 	private boolean processBinarySubmission(FormElementModel m,
-			SubmissionField<?> submissionElement, String value)
+			SubmissionField<?> submissionElement, String value, CallingContext cc)
 			throws ODKDatastoreException {
 		
 		// check to see if we received a multipart submission
@@ -374,7 +370,7 @@ public class SubmissionParser {
 			// binary without content type, defaulting to JPG
 			submissionElement.setValueFromByteArray(receivedBytes,
 					HtmlConsts.RESP_TYPE_IMAGE_JPEG, Long
-							.valueOf(receivedBytes.length), null);
+							.valueOf(receivedBytes.length), null, cc);
 		} else {
 			// attempt to find binary data in multi-part form submission
 			// first searching by file name, then field name
@@ -393,7 +389,7 @@ public class SubmissionParser {
 				}
 				byte[] byteArray = binaryData.getStream().toByteArray();
 				submissionElement.setValueFromByteArray(byteArray, binaryData
-						.getContentType(), binaryData.getContentLength(), fileName);
+						.getContentType(), binaryData.getContentLength(), fileName, cc);
 			} else {
 				return (((BlobSubmissionType) submissionElement).getAttachmentCount() >= 1);
 			}

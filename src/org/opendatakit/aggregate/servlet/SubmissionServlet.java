@@ -56,11 +56,6 @@ import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
  * 
  */
 public class SubmissionServlet extends ServletUtilBase {
-
-  private static final String XML_FILE_DESC = "XML Submission File:";
-
-  private static final String ATTACHMENT_FILE_DESC = "Data File(s) that are Part of the Submission (Pictures, Video, etc):";
-
   /**
    * Serial number for serialization
    */
@@ -73,7 +68,71 @@ public class SubmissionServlet extends ServletUtilBase {
 
   private static final String TITLE = "Submission Upload";
 
-  private static final String DATAFILE = "datafile";
+  /**
+   * Script path to include...
+   */
+  private static final String JQUERY_SCRIPT_HEADER = 
+	  "<script src=\"http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js\"></script>";
+  
+  private static final String UPLOAD_SCRIPT_RESOURCE = "res/upload_control.js";
+
+  private static final String UPLOAD_PAGE_BODY_START = 
+
+"	  <p><b>Upload one submission into ODK Aggregate</b></p>" +
+"	  <p>Submissions are located under the <code>/odk/instances</code> directory on the phone's " +
+"     sdcard.  This directory will contain subdirectories with names of the form: <code>formID_yyyy-mm-dd_hh-MM-ss</code></p>" +
+"     <p>Within each of these subdirectories are the submission data file (named: <code>formID_yyyy-mm-dd_hh-MM-ss.xml</code>)," +
+"     and zero or more associated data files for the images, audio clips, video clips, " +
+"     etc. linked with this submission.</p>" +
+"	  <!--[if true]><p style=\"color: red;\">For a better user experience, use Chrome, Firefox or Safari</p>" +
+"	  <!-- If you specify an empty progress div, it will be expanded with an upload progress region (non-IE) -->" +
+"	  <div id=\"progress\"></div><br />" +
+"     <form id=\"ie_backward_compatible_form\"" + 
+"	                      accept-charset=\"UTF-8\" method=\"POST\" enctype=\"multipart/form-data\"" + 
+"	                      action=\"";// emit the ADDR
+  private static final String UPLOAD_PAGE_BODY_MIDDLE = "\">" +
+"	  <![endif] -->" +
+"	  <table>" +
+"	  	<tr>" +
+"	  		<td><label for=\"xml_submission_file\">Submission data file:</label></td>" +
+"	  		<td><input id=\"xml_submission_file\" type=\"file\" size=\"80\"" +
+"	  			name=\"form_def_file\" /></td>" +
+"	  	</tr>" +
+"	  	<tr>" +
+"	  		<td><label for=\"mediaFiles\">Associated data file(s):</label></td>" +
+"	  		<td><input id=\"mediaFiles\" type=\"file\" size=\"80,20\" name=\"datafile\" multiple /><input id=\"clear_media_files\" type=\"button\" value=\"Clear\" onClick=\"clearMediaInputField('mediaFiles')\" /></td>" +
+"	  	</tr>" +
+"	  	<!--[if true]>" +
+"	      <tr>" +
+"	          <td><label for=\"mediaFiles2\">Associated data file #2:</label></td>" +
+"	          <td><input id=\"mediaFiles2\" type=\"file\" size=\"80\" name=\"datafile\" /><input id=\"clear_media_files2\" type=\"button\" value=\"Clear\" onClick=\"clearMediaInputField('mediaFiles2')\" /></td>" +
+"	      </tr>" +
+"	      <tr>" +
+"	          <td><label for=\"mediaFiles3\">Associated data file #3:</label></td>" +
+"	          <td><input id=\"mediaFiles3\" type=\"file\" size=\"80\" name=\"datafile\" /><input id=\"clear_media_files3\" type=\"button\" value=\"Clear\" onClick=\"clearMediaInputField('mediaFiles3')\" /></td>" +
+"	      </tr>" +
+"	      <tr>" +
+"	          <td><label for=\"mediaFiles4\">Associated data file #4:</label></td>" +
+"	          <td><input id=\"mediaFiles4\" type=\"file\" size=\"80\" name=\"datafile\" /><input id=\"clear_media_files4\" type=\"button\" value=\"Clear\" onClick=\"clearMediaInputField('mediaFiles4')\" /></td>" +
+"	      </tr>" +
+"	      <tr>" +
+"	          <td><label for=\"mediaFiles5\">Associated data file #5:</label></td>" +
+"	          <td><input id=\"mediaFiles5\" type=\"file\" size=\"80\" name=\"datafile\" /><input id=\"clear_media_files5\" type=\"button\" value=\"Clear\" onClick=\"clearMediaInputField('mediaFiles5')\" /></td>" +
+"	      </tr>" +
+"	      <tr>" +
+"	          <td><label for=\"mediaFiles6\">Associated data file #6:</label></td>" +
+"	          <td><input id=\"mediaFiles6\" type=\"file\" size=\"80\" name=\"datafile\" /><input id=\"clear_media_files6\" type=\"button\" value=\"Clear\" onClick=\"clearMediaInputField('mediaFiles6')\" /></td>" +
+"	      </tr>" +
+"	      <![endif]-->" +
+"	  	<tr>" +
+"	  		<td><input type=\"button\" name=\"button\" value=\"Upload Form\"" +
+"	  			onClick=\"submitButton(document,'";
+  private static final String UPLOAD_PAGE_BODY_REMAINDER = "','xml_submission_file','mediaFiles')\" /></td>" +
+"	  		<td />" +
+"	  	</tr>" +
+"	  </table>" +
+"	  <!--[if true]></form>" +
+"	  <![endif] -->";
 
   /**
    * Handler for HTTP Get request that processes a form submission
@@ -87,26 +146,18 @@ public class SubmissionServlet extends ServletUtilBase {
 
 	PrintWriter out = resp.getWriter();
 
-    beginBasicHtmlResponse(TITLE, resp, true, cc); // header info
-    out.write(HtmlUtil.createFormBeginTag(cc.getWebApplicationURL(ADDR), HtmlConsts.MULTIPART_FORM_DATA, HtmlConsts.POST));
-    out.write(XML_FILE_DESC + HtmlConsts.LINE_BREAK);
-    out.write(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_FILE, ServletConsts.XML_SUBMISSION_FILE,
-        null));
-    out.write(HtmlConsts.LINE_BREAK + HtmlConsts.LINE_BREAK);
-    out.write(ATTACHMENT_FILE_DESC + HtmlConsts.LINE_BREAK);
-    out.write(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_FILE, DATAFILE, null));
-    out.write(HtmlConsts.LINE_BREAK);
-    out.write(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_FILE, DATAFILE, null));
-    out.write(HtmlConsts.LINE_BREAK);
-    out.write(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_FILE, DATAFILE, null));
-    out.write(HtmlConsts.LINE_BREAK);
-    out.write(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_FILE, DATAFILE, null));
-    out.write(HtmlConsts.LINE_BREAK + HtmlConsts.LINE_BREAK);
-    out.write(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_SUBMIT, null, "Upload"));
-    out.write(HtmlConsts.FORM_CLOSE);
-
+	StringBuilder headerString = new StringBuilder();
+	headerString.append(JQUERY_SCRIPT_HEADER);
+	headerString.append("<script src=\"");
+	headerString.append(cc.getWebApplicationURL(UPLOAD_SCRIPT_RESOURCE));
+	headerString.append("\"></script>");
+	beginBasicHtmlResponse(TITLE, headerString.toString(), resp, true, cc );// header info
+	out.write(UPLOAD_PAGE_BODY_START);
+	out.write(cc.getWebApplicationURL(ADDR));
+	out.write(UPLOAD_PAGE_BODY_MIDDLE);
+	out.write(cc.getWebApplicationURL(ADDR));
+	out.write(UPLOAD_PAGE_BODY_REMAINDER);
     finishBasicHtmlResponse(resp);
-
   }
 
   /**
@@ -126,11 +177,18 @@ public class SubmissionServlet extends ServletUtilBase {
     try {
       SubmissionParser submissionParser = null;
       if (ServletFileUpload.isMultipartContent(req)) {
-        submissionParser = new SubmissionParser(new MultiPartFormData(req), cc);
+    	MultiPartFormData uploadedSubmissionItems = new MultiPartFormData(req);
+        String isIncompleteFlag = uploadedSubmissionItems.getSimpleFormField(ServletConsts.TRANSFER_IS_INCOMPLETE);
+        submissionParser = new SubmissionParser(uploadedSubmissionItems, cc);
       } else {
         // TODO: check that it is the proper types we can deal with
         // XML received, we hope...
         submissionParser = new SubmissionParser(req.getInputStream(), cc);
+      }
+
+      if (submissionParser == null) {
+        resp.sendError(HttpServletResponse.SC_BAD_REQUEST, ErrorConsts.INPUTSTREAM_ERROR);
+        return;
       }
 
       // TODO: mitch are we assuming the submissionParser always persists?
@@ -140,13 +198,11 @@ public class SubmissionServlet extends ServletUtilBase {
       // send information to remote servers that need to be notified
       List<ExternalService> tmp = FormServiceCursor.getExternalServicesForForm(form, cc);
       UploadSubmissions uploadTask = (UploadSubmissions) cc.getBean(BeanDefs.UPLOAD_TASK_BEAN);
-      try {
-    	  cc.setAsDaemon(true);
-	      for (ExternalService rs : tmp) {
-	        uploadTask.createFormUploadTask(rs.getFormServiceCursor(), cc);
-	      }
-      } finally {
-    	  cc.setAsDaemon(false);
+
+  	  CallingContext ccDaemon = ContextFactory.getCallingContext(this, ADDR, req);
+	  ccDaemon.setAsDaemon(true);
+      for (ExternalService rs : tmp) {
+        uploadTask.createFormUploadTask(rs.getFormServiceCursor(), ccDaemon);
       }
 
       resp.setStatus(HttpServletResponse.SC_CREATED);

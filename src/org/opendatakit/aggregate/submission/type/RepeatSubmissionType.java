@@ -119,9 +119,9 @@ public class RepeatSubmissionType implements SubmissionRepeat {
 	 *            proper format for output
 	 */
 	@Override
-	public void formatValue(ElementFormatter elemFormatter, Row row, String ordinalValue)
+	public void formatValue(ElementFormatter elemFormatter, Row row, String ordinalValue, CallingContext cc)
 			throws ODKDatastoreException {
-		elemFormatter.formatRepeats(this, repeatGroup, row);
+		elemFormatter.formatRepeats(this, repeatGroup, row, cc);
 	}
 
 	@Override
@@ -185,10 +185,10 @@ public class RepeatSubmissionType implements SubmissionRepeat {
 	}
 
 	@Override
-	public void recursivelyAddEntityKeys(List<EntityKey> keyList)
+	public void recursivelyAddEntityKeys(List<EntityKey> keyList, CallingContext cc)
 			throws ODKDatastoreException {
 		for (SubmissionSet s : submissionSets) {
-			s.recursivelyAddEntityKeys(keyList);
+			s.recursivelyAddEntityKeys(keyList, cc);
 		}
 	}
 

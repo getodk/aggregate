@@ -214,7 +214,7 @@ public class FragmentedCsvServlet extends ServletUtilBase {
         	resp.setCharacterEncoding("UTF-8");
         	
         	FragmentedCsvFormatter fmt = new FragmentedCsvFormatter(form, submissionKeyParts, cc.getServerURL(), websafeCursorString, out);
-        	fmt.processSubmissionSet(submissions, m);
+        	fmt.processSubmissionSet(submissions, m, cc);
         } else if(
         		((submissionKeyParts.size() == 2 && submissionKeyParts.get(1).getAuri() == null) ||
         		 (submissionKeyParts.size() == 1)) &&
@@ -226,7 +226,7 @@ public class FragmentedCsvServlet extends ServletUtilBase {
 
             QueryByDate query = new QueryByDate(form, dateCode, false, true, true,
                     numEntriesToFetch, cc);
-            List<Submission> submissions = query.getResultSubmissions();
+            List<Submission> submissions = query.getResultSubmissions(cc);
             List<Submission> activeList = new ArrayList<Submission>();
             Submission lastSubmission = null;
             for ( Submission s : submissions ) {
@@ -249,7 +249,7 @@ public class FragmentedCsvServlet extends ServletUtilBase {
         	resp.setCharacterEncoding("UTF-8");
 
         	FragmentedCsvFormatter fmt = new FragmentedCsvFormatter(form, submissionKeyParts, cc.getServerURL(), websafeCursorString, out);
-        	fmt.processSubmissions(submissions);
+        	fmt.processSubmissions(submissions, cc);
         	
         } else {
     		emitInfoPage(req, resp, "Parameters are not correctly specified.", 

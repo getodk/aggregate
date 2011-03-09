@@ -19,9 +19,9 @@ import java.util.List;
 
 import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.datamodel.DynamicBase;
-import org.opendatakit.aggregate.datamodel.DynamicCommonFieldsBase;
 import org.opendatakit.aggregate.datamodel.FormDataModel;
 import org.opendatakit.aggregate.datamodel.TopLevelDynamicBase;
+import org.opendatakit.aggregate.form.FormDefinition.OrdinalSequence;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
@@ -54,9 +54,7 @@ public class FormInfoFilesetTable extends DynamicBase {
 
 	private static final String FORM_INFO_XFORM_REF_BLOB = "_form_info_xform_blb";
 
-	private static final String FORM_INFO_XFORM_VERSIONED_BINARY_CONTENT_REF_BLOB = "_form_info_xform_ref";
-
-	private static final String FORM_INFO_XFORM_VERSIONED_BINARY_CONTENT = "_form_info_xform_vbn";
+	private static final String FORM_INFO_XFORM_BINARY_CONTENT_REF_BLOB = "_form_info_xform_ref";
 
 	private static final String FORM_INFO_XFORM_BINARY_CONTENT = "_form_info_xform_bin";
 
@@ -66,9 +64,7 @@ public class FormInfoFilesetTable extends DynamicBase {
 
 	private static final String FORM_INFO_MANIFEST_REF_BLOB = "_form_info_manifest_blb";
 
-	private static final String FORM_INFO_MANIFEST_VERSIONED_BINARY_CONTENT_REF_BLOB = "_form_info_manifest_ref";
-
-	private static final String FORM_INFO_MANIFEST_VERSIONED_BINARY_CONTENT = "_form_info_manifest_vbn";
+	private static final String FORM_INFO_MANIFEST_BINARY_CONTENT_REF_BLOB = "_form_info_manifest_ref";
 
 	private static final String FORM_INFO_MANIFEST_BINARY_CONTENT = "_form_info_manifest_bin";
 	
@@ -129,9 +125,10 @@ public class FormInfoFilesetTable extends DynamicBase {
 		return relation;
 	}
 	
-	static final void createFormDataModel(List<FormDataModel> model, Long ordinal, 
+	static final void createFormDataModel(List<FormDataModel> model, 
 			TopLevelDynamicBase formInfoDefinitionRelation, 
-			DynamicCommonFieldsBase formInfoTableRelation, 
+			String parentTableKey,
+			OrdinalSequence os, 
 			CallingContext cc) throws ODKDatastoreException {
 		
 		FormInfoFilesetTable filesetRelation = assertRelation(cc);
@@ -139,44 +136,32 @@ public class FormInfoFilesetTable extends DynamicBase {
 		boolean asDaemon = cc.getAsDeamon();
 		try {
 			cc.setAsDaemon(true);
-			Long lastOrdinal = 0L;
 			
-			lastOrdinal = FormDefinition.buildTableFormDataModel( model, 
+			String groupKey = FormDefinition.buildTableFormDataModel( model, 
 				filesetRelation, 
 				formInfoDefinitionRelation, // top level table
-				formInfoTableRelation, // also the parent table
-				ordinal,
+				parentTableKey, // also the parent table
+				os,
 				cc );
 
-			String uriPrefix = Form.URI_FORM_ID_VALUE_FORM_INFO;
 			FormDefinition.buildBinaryContentFormDataModel(model, 
 				ELEMENT_NAME_XFORM_DEFINITION, 
-				uriPrefix + FORM_INFO_XFORM_BINARY_CONTENT,
 				FORM_INFO_XFORM_BINARY_CONTENT, 
-				uriPrefix + FORM_INFO_XFORM_VERSIONED_BINARY_CONTENT, 
-				FORM_INFO_XFORM_VERSIONED_BINARY_CONTENT, 
-				uriPrefix + FORM_INFO_XFORM_VERSIONED_BINARY_CONTENT_REF_BLOB, 
-				FORM_INFO_XFORM_VERSIONED_BINARY_CONTENT_REF_BLOB, 
-				uriPrefix + FORM_INFO_XFORM_REF_BLOB, 
+				FORM_INFO_XFORM_BINARY_CONTENT_REF_BLOB, 
 				FORM_INFO_XFORM_REF_BLOB, 
 				formInfoDefinitionRelation, // top level table
-				filesetRelation, // parent table
-				++lastOrdinal, 
+				groupKey, // parent table
+				os, 
 				cc );
 		
 			FormDefinition.buildBinaryContentFormDataModel(model, 
 				ELEMENT_NAME_MANIFEST_FILESET, 
-				uriPrefix + FORM_INFO_MANIFEST_BINARY_CONTENT, 
 				FORM_INFO_MANIFEST_BINARY_CONTENT, 
-				uriPrefix + FORM_INFO_MANIFEST_VERSIONED_BINARY_CONTENT, 
-				FORM_INFO_MANIFEST_VERSIONED_BINARY_CONTENT, 
-				uriPrefix + FORM_INFO_MANIFEST_VERSIONED_BINARY_CONTENT_REF_BLOB, 
-				FORM_INFO_MANIFEST_VERSIONED_BINARY_CONTENT_REF_BLOB, 
-				uriPrefix + FORM_INFO_MANIFEST_REF_BLOB, 
+				FORM_INFO_MANIFEST_BINARY_CONTENT_REF_BLOB, 
 				FORM_INFO_MANIFEST_REF_BLOB, 
 				formInfoDefinitionRelation, // top level table
-				filesetRelation, // parent table
-				++lastOrdinal, 
+				groupKey, // parent table
+				os, 
 				cc );
 		} finally {
 			cc.setAsDaemon(asDaemon);

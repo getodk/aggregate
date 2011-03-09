@@ -328,27 +328,34 @@ public class DatastoreImpl implements Datastore, InitializingBean {
 					// don't care about size...
 				}
 				
-				if ( f.getDataType() == DataField.DataType.URI &&
-					 d.getDataType() == DataField.DataType.STRING ) {
-					d.setDataType(DataField.DataType.URI);
-					if ( f.getMaxCharLen() != null && 
-							 d.getMaxCharLen().compareTo(f.getMaxCharLen()) < 0 ) {
-						throw new IllegalStateException("column " + f.getName() +
-								" in table " + relation.getSchemaName() + "." + relation.getTableName() + 
-								" stores string-valued keys but is shorter than required by Aggregate " +
-								d.getMaxCharLen().toString() + " < " + f.getMaxCharLen().toString());
-					}
+				if ( d.getDataType() == DataField.DataType.STRING &&
+					 f.getMaxCharLen() != null &&
+					 f.getMaxCharLen().compareTo(d.getMaxCharLen()) > 0 ) {
+					throw new IllegalStateException("column " + f.getName() +
+							" in table " + relation.getSchemaName() + "." + relation.getTableName() + 
+							" stores string-valued keys but is shorter than required by Aggregate " +
+							d.getMaxCharLen().toString() + " < " + f.getMaxCharLen().toString());
 				}
+
+				if ( f.getDataType() == DataField.DataType.URI ) {
+					if (d.getDataType() != DataField.DataType.STRING) {
+						throw new IllegalStateException("column " + f.getName() +
+							" in table " + relation.getSchemaName() + "." + relation.getTableName() +
+							" stores URIs but is not a string field");
+					}
+					d.setDataType(DataField.DataType.URI);
+				}
+
 				if ( d.getDataType() != f.getDataType() ) {
-					throw new IllegalStateException("column " +
-							f.getName() + " in table " + relation.getSchemaName() + "." + relation.getTableName() +
+					throw new IllegalStateException("column " + f.getName() +
+							" in table " + relation.getSchemaName() + "." + relation.getTableName() +
 							" is not of the expected type " + f.getDataType().toString());
 				}
 
-				// it is OK for the persistence layer to be more lenient with nulls than the data model
+				// it is OK for the data model to be more strict than the data store.
 				if ( d.isNullable() && ! f.getNullable() ) {
-					throw new IllegalStateException("column " +
-							f.getName() + " in table " + relation.getSchemaName() + "." + relation.getTableName() +
+					throw new IllegalStateException("column " + f.getName() +
+							" in table " + relation.getSchemaName() + "." + relation.getTableName() +
 							" is defined as NOT NULL but the data model requires NULL");
 				}
 				f.setMaxCharLen(d.getMaxCharLen());

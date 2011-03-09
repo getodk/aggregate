@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.constants.ServletConsts;
@@ -68,6 +69,8 @@ public class FormDeleteWorkerImpl {
 	public final void deleteForm() throws ODKDatastoreException,
 			ODKFormNotFoundException, ODKExternalServiceDependencyException {
 
+		Logger.getLogger(FormDeleteWorkerImpl.class.getName()).info("deletion task: " + miscTasksKey.toString());
+		
 		Submission s;
 		try {
 			s = Submission.fetchSubmission(miscTasksKey.splitSubmissionKey(), cc);
@@ -217,7 +220,7 @@ public class FormDeleteWorkerImpl {
 				if (taskLock.obtainLock(pLockId, uriExternalService,
 						TaskLockType.UPLOAD_SUBMISSION)) {
 					taskLock = null;
-					service.delete();
+					service.delete(cc);
 					deleted = true;
 				}
 			} catch (ODKTaskLockException e1) {
@@ -302,8 +305,8 @@ public class FormDeleteWorkerImpl {
 							topLevelGroupName, tl.getUri()));
 				}
 				DeleteSubmissions delete;
-				delete = new DeleteSubmissions(keys, cc);
-				delete.deleteSubmissions();
+				delete = new DeleteSubmissions(keys);
+				delete.deleteSubmissions(cc);
 				
 				t.setLastActivityDate(new Date());
 				t.persist(cc);
@@ -327,7 +330,7 @@ public class FormDeleteWorkerImpl {
 		if ( !deleteMiscTasks(t) ) return false;
 
 		// delete the form.
-		form.deleteForm();
+		form.deleteForm(cc);
 
 		// and mark us as completed... (don't delete for audit..).
 		t.setCompletionDate(new Date());

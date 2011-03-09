@@ -143,7 +143,7 @@ public class KmlFormatter implements SubmissionFormatter, RepeatCallbackFormatte
   }
 
   @Override
-  public void processSubmissions(List<Submission> submissions) throws ODKDatastoreException {
+  public void processSubmissions(List<Submission> submissions, CallingContext cc) throws ODKDatastoreException {
     // output preamble & placemark style
     output.write(String.format(KmlConsts.KML_PREAMBLE_TEMPLATE, form.getFormId(), form
         .getViewableName(), form.getViewableName()));
@@ -163,7 +163,7 @@ public class KmlFormatter implements SubmissionFormatter, RepeatCallbackFormatte
         String imageURL = getImageUrl(sub);
         
         GeoPoint geopoint = getGeoPoint(sub);
-        Row row = sub.getFormattedValuesAsRow(propertyNames, elemFormatter, false);
+        Row row = sub.getFormattedValuesAsRow(propertyNames, elemFormatter, false, cc);
         placemarks.append(generateFormattedPlacemark(row, StringEscapeUtils.escapeXml(id),
             StringEscapeUtils.escapeXml(title), imageURL, geopoint));
       } else {
@@ -171,7 +171,7 @@ public class KmlFormatter implements SubmissionFormatter, RepeatCallbackFormatte
         rowsForGpsInRepeats = new ArrayList<GpsRepeatRowData>();
        
         // the call back will populate rowsForGpsInRepeats
-        sub.getFormattedValuesAsRow(propertyNames, elemFormatter, false);
+        sub.getFormattedValuesAsRow(propertyNames, elemFormatter, false, cc);
         for (GpsRepeatRowData repeatData : rowsForGpsInRepeats) {
           String title = titleInGpsRepeat ? repeatData.getTitle() : getTitle(sub);
           String imageURL = imgInGpsRepeat ? repeatData.getImgUrl() : getImageUrl(sub);
@@ -232,10 +232,10 @@ public class KmlFormatter implements SubmissionFormatter, RepeatCallbackFormatte
   }
 
   public void processRepeatedSubmssionSetsIntoRow(List<SubmissionSet> repeats,
-      FormElementModel repeatElement, Row row) throws ODKDatastoreException {
+      FormElementModel repeatElement, Row row, CallingContext cc) throws ODKDatastoreException {
     
     for (SubmissionSet repeatSet : repeats) {
-      Row rowFromRepeat = repeatSet.getFormattedValuesAsRow(propertyNames, elemFormatter, false);
+      Row rowFromRepeat = repeatSet.getFormattedValuesAsRow(propertyNames, elemFormatter, false, cc);
       if (repeatElement.equals(gpsParent)) {
         Row clonedRow = Row.cloneRowValues(row);
         clonedRow.addDataFromRow(rowFromRepeat);

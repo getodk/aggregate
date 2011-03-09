@@ -110,12 +110,11 @@ public class XFormsDownloadServlet extends ServletUtilBase {
     	SubmissionElement v = sub.resolveSubmissionKey(parts);
     	BlobSubmissionType b = (BlobSubmissionType) v;
     	if ( b.getAttachmentCount() == 1 ) {
-    		String version = b.getCurrentVersion(1);
     		try {
-				imageBlob = b.getBlob(1, version);
+				imageBlob = b.getBlob(1, cc);
 				unrootedFileName = b.getUnrootedFilename(1);
-				contentType = b.getContentType(1, version);
-				contentLength = b.getContentLength(1, version);
+				contentType = b.getContentType(1);
+				contentLength = b.getContentLength(1);
 			} catch (ODKDatastoreException e) {
 				e.printStackTrace();
 				resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
@@ -124,17 +123,16 @@ public class XFormsDownloadServlet extends ServletUtilBase {
 			}
     	} else {
     		SubmissionKeyPart p = parts.get(parts.size()-1);
-    		String version = p.getVersion();
     		Long ordinal = p.getOrdinalNumber();
-    		if ((version == null) || (ordinal == null)) {
+    		if (ordinal == null) {
     			resp.sendError(HttpServletResponse.SC_BAD_REQUEST, 
     					"attachment request must be fully qualified");
     		} else {
 	    		try {
-	    			imageBlob = b.getBlob(ordinal.intValue(), version);
+	    			imageBlob = b.getBlob(ordinal.intValue(), cc);
 	    			unrootedFileName = b.getUnrootedFilename(ordinal.intValue());
-	    			contentType = b.getContentType(ordinal.intValue(), version);
-	    			contentLength = b.getContentLength(ordinal.intValue(), version);
+	    			contentType = b.getContentType(ordinal.intValue());
+	    			contentLength = b.getContentLength(ordinal.intValue());
 	    		} catch (ODKDatastoreException e) {
 	    			e.printStackTrace();
 	    			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,

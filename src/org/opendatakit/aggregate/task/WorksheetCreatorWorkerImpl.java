@@ -151,7 +151,7 @@ public class WorksheetCreatorWorkerImpl {
 
 		// generate worksheets
 		try {
-			spreadsheet.generateWorksheets();
+			spreadsheet.generateWorksheets(cc);
 		} catch (Exception e) {
 			throw new ODKExternalServiceException(e);
 		}

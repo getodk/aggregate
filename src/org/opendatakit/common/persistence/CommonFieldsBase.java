@@ -37,6 +37,9 @@ import org.opendatakit.common.security.User;
  * 
  */
 public abstract class CommonFieldsBase {
+	
+	public static final String LAST_UPDATE_DATE_COLUMN_NAME = "_LAST_UPDATE_DATE";
+
 	/** standard audit fields */
 	
 	/** creator */
@@ -46,7 +49,7 @@ public abstract class CommonFieldsBase {
 	/** last user to update record */
 	private static final DataField LAST_UPDATE_URI_USER = new DataField("_LAST_UPDATE_URI_USER", DataField.DataType.URI, true, PersistConsts.URI_STRING_LEN);
 	/** last update date */
-	private static final DataField LAST_UPDATE_DATE = new DataField("_LAST_UPDATE_DATE", DataField.DataType.DATETIME, false).setIndexable(IndexType.ORDERED);
+	private static final DataField LAST_UPDATE_DATE = new DataField(LAST_UPDATE_DATE_COLUMN_NAME, DataField.DataType.DATETIME, false).setIndexable(IndexType.ORDERED);
 
 	/** primary key for all tables */
 	private static final DataField URI = new DataField("_URI", DataField.DataType.URI, false, PersistConsts.URI_STRING_LEN).setIndexable(IndexType.HASH);

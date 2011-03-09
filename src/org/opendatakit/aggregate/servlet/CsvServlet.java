@@ -81,9 +81,11 @@ public class CsvServlet extends ServletUtilBase {
 
     CsvGenerator generator = (CsvGenerator) cc.getBean(BeanDefs.CSV_BEAN);
     try {
-      PersistentResults r = new PersistentResults( ResultType.CSV, form, null, cc);
-      r.persist(cc);
-		generator.createCsvTask(form, r.getSubmissionKey(), 1L, cc);
+        PersistentResults r = new PersistentResults( ResultType.CSV, form, null, cc);
+        r.persist(cc);
+    	CallingContext ccDaemon = ContextFactory.getCallingContext(this, ADDR, req);
+    	ccDaemon.setAsDaemon(true);
+		generator.createCsvTask(form, r.getSubmissionKey(), 1L, ccDaemon);
 	} catch (ODKDatastoreException e) {
 		e.printStackTrace();
 		resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.toString());

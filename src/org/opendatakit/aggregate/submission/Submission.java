@@ -131,7 +131,7 @@ public class Submission extends SubmissionSet {
 	 */
 	@Override
 	public Row getFormattedValuesAsRow(List<FormElementModel> propertyNames,
-			ElementFormatter elemFormatter, boolean includeParentUid) throws ODKDatastoreException {
+			ElementFormatter elemFormatter, boolean includeParentUid, CallingContext cc) throws ODKDatastoreException {
 
 		Row row = new Row(constructSubmissionKey(null));
 		if ( propertyNames == null ) {
@@ -147,7 +147,7 @@ public class Submission extends SubmissionSet {
 			// SubmissionSet handles submission-specific elements...
 			List<SubmissionValue> values = getSubmissionValues();
 			for (SubmissionValue value : values) {
-				value.formatValue(elemFormatter, row, BasicConsts.EMPTY_STRING);
+				value.formatValue(elemFormatter, row, BasicConsts.EMPTY_STRING, cc);
 			}
 		} else {
 			for (FormElementModel element : propertyNames) {
@@ -171,7 +171,7 @@ public class Submission extends SubmissionSet {
 						break;
 					}
 				} else {
-					populateFormattedValueInRow(row, element, elemFormatter);
+					populateFormattedValueInRow(row, element, elemFormatter, cc);
 				}
 			}
 		}

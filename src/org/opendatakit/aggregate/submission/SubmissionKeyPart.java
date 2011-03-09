@@ -29,7 +29,6 @@ public class SubmissionKeyPart {
 	public static final String K_OPEN_BRACKET = "[";
 	public static final String K_OPEN_BRACKET_KEY_EQUALS = "[@key=";
 	public static final String K_OPEN_BRACKET_ORDINAL_EQUALS = "[@ordinal=";
-	public static final String K_AND_VERSION_EQUALS = " and @version=";
 	public static final String K_OPEN_BRACKET_VERSION_EQUALS = "[@version=";
 	public static final String K_AND_UI_VERSION_EQUALS = " and @uiVersion=";
 	public static final String K_CLOSE_BRACKET = "]";
@@ -38,7 +37,6 @@ public class SubmissionKeyPart {
 	final Long uiVersion;  // only valid in form part!  Not propagated to nested elements.
 	final String auri;
 	final Long ordinal;
-	final String version;
 
 	SubmissionKeyPart(String part) {
 		int idx = part.indexOf(K_OPEN_BRACKET);
@@ -49,7 +47,6 @@ public class SubmissionKeyPart {
 				uiVersion = null;
 				auri = null;
 				ordinal = null;
-				version = null;
 			} else {
 				throw new IllegalArgumentException("submission key part "
 						+ part + " not well formed");
@@ -66,7 +63,6 @@ public class SubmissionKeyPart {
 				modelVersion = null;
 				uiVersion = null;
 				ordinal = null;
-				version = null;
 			} 
 			else if (remainder.startsWith(K_OPEN_BRACKET_ORDINAL_EQUALS)) {
 				if (!remainder.endsWith(K_CLOSE_BRACKET)) {
@@ -77,13 +73,6 @@ public class SubmissionKeyPart {
 				modelVersion = null;
 				uiVersion = null;
 				String ordinalStr = remainder.substring(K_OPEN_BRACKET_ORDINAL_EQUALS.length(), remainder.length() - 1);
-				if ( ordinalStr.contains(K_AND_VERSION_EQUALS) ) {
-					idx = ordinalStr.indexOf(K_AND_VERSION_EQUALS);
-					version = ordinalStr.substring(idx+K_AND_VERSION_EQUALS.length());
-					ordinalStr = ordinalStr.substring(0,idx);
-				} else {
-					version = null;
-				}
 				ordinal = Long.valueOf(ordinalStr);
 			}
 			else if (remainder.startsWith(K_OPEN_BRACKET_VERSION_EQUALS)) {
@@ -93,7 +82,6 @@ public class SubmissionKeyPart {
 				}
 				auri = null;
 				ordinal = null;
-				version = null;
 				String modelVersionStr = remainder.substring(K_OPEN_BRACKET_VERSION_EQUALS.length(), remainder.length() - 1);
 				String uiVersionStr = null;
 				if ( modelVersionStr.contains(K_AND_UI_VERSION_EQUALS) ) {
@@ -121,10 +109,6 @@ public class SubmissionKeyPart {
 	
 	public Long getOrdinalNumber() {
 		return ordinal;
-	}
-
-	public String getVersion() {
-		return version;
 	}
 	
 	public String toString() {
@@ -162,14 +146,6 @@ public class SubmissionKeyPart {
 			}
 			b.append("ordinal=");
 			b.append(ordinal);
-			first = false;
-		}
-		if ( version != null ) {
-			if ( !first ) {
-				b.append(" and ");
-			}
-			b.append("version=");
-			b.append(version);
 			first = false;
 		}
 		b.append("]");

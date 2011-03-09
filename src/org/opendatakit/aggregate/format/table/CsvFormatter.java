@@ -20,6 +20,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.constants.format.FormatConsts;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.form.Form;
@@ -48,7 +49,7 @@ public class CsvFormatter extends TableFormatterBase implements SubmissionFormat
 
   @Override
   protected void processSubmissionSet(Collection<? extends SubmissionSet> submissions,
-		  FormElementModel rootGroup) throws ODKDatastoreException {
+		  FormElementModel rootGroup, CallingContext cc) throws ODKDatastoreException {
 
     List<String> headers = headerFormatter.generateHeaders(form, rootGroup, propertyNames);
     // format headers
@@ -56,7 +57,7 @@ public class CsvFormatter extends TableFormatterBase implements SubmissionFormat
 
     // format row elements
     for (SubmissionSet sub : submissions) {
-      Row row = sub.getFormattedValuesAsRow(propertyNames, elemFormatter, false);
+      Row row = sub.getFormattedValuesAsRow(propertyNames, elemFormatter, false, cc);
       appendCsvRow(row.getFormattedValues().iterator());
     }
   }

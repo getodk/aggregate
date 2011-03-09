@@ -107,8 +107,8 @@ public class ProcessServlet extends ServletUtilBase {
 
         // don't allow the deletion of the FormInfo submissions.
         if (!form.getFormId().equals(Form.URI_FORM_ID_VALUE_FORM_INFO)) {
-          DeleteSubmissions delete = new DeleteSubmissions(recordKeys, cc);
-          delete.deleteSubmissions();
+          DeleteSubmissions delete = new DeleteSubmissions(recordKeys);
+          delete.deleteSubmissions(cc);
           resp.sendRedirect(cc.getWebApplicationURL(FormsServlet.ADDR));
           return;
         } else {
@@ -140,7 +140,9 @@ public class ProcessServlet extends ServletUtilBase {
               if (!formToDelete.getFormId().equals(Form.URI_FORM_ID_VALUE_FORM_INFO)) {
             	MiscTasks m = new MiscTasks(TaskType.DELETE_FORM, formToDelete, null, cc);
             	m.persist(cc);
-                formDelete.createFormDeleteTask(formToDelete, m.getSubmissionKey(), 1L, cc);
+            	CallingContext ccDaemon = ContextFactory.getCallingContext(this, ADDR, req);
+            	ccDaemon.setAsDaemon(true);
+                formDelete.createFormDeleteTask(formToDelete, m.getSubmissionKey(), 1L, ccDaemon);
               } else {
                 String errString = "Attempting to delete FormInfo table definition record!";
                 errorText.append(errString + BasicConsts.NEW_LINE);

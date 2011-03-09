@@ -46,13 +46,10 @@ import org.opendatakit.common.security.User;
  * <p>Each binary data field exists as a separate 
  * {@link BinaryContent}
  * table and associated 
- * {@link VersionedBinaryContentRefBlob}
+ * {@link BinaryContentRefBlob}
  *  and {@link RefBlob}
- * table.  Together, these support retaining multiple versions of 
- * binary data for a given submission.  An example is the uploading of
- * an xform with audio, video, and image prompts.  Over time, it is 
- * expected that the base xform may change (adding translations) or 
- * that the media prompts may be updated.  We support that use case.
+ * table.  Together, these support binary data attachments either as 
+ * standalone tables or for submissions. 
  * 
  * @author mitchellsundt@gmail.com
  * @author wbrunette@gmail.com

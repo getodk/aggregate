@@ -47,11 +47,13 @@ import org.opendatakit.aggregate.constants.ParserConsts;
  */
 public class MultiPartFormData {
 
-	private Map<String, MultiPartFormItem> fieldNameMap;
+	private final Map<String, String> simpleFieldNameMap;
+	
+	private final Map<String, MultiPartFormItem> fieldNameMap;
 
-	private Map<String, MultiPartFormItem> fileNameMap;
+	private final Map<String, MultiPartFormItem> fileNameMap;
 
-	private Map<String, MultiPartFormItem> fileNameWithoutExtensionNameMap;
+	private final Map<String, MultiPartFormItem> fileNameWithoutExtensionNameMap;
 
 	/**
 	 * Construct a mult-part form data container by parsing a multi part form
@@ -68,6 +70,7 @@ public class MultiPartFormData {
 	public MultiPartFormData(HttpServletRequest req)
 			throws FileUploadException, IOException {
 
+		simpleFieldNameMap = new HashMap<String, String>();
 		fieldNameMap = new HashMap<String, MultiPartFormItem>();
 		fileNameMap = new HashMap<String, MultiPartFormItem>();
 		fileNameWithoutExtensionNameMap = new HashMap<String, MultiPartFormItem>();
@@ -96,19 +99,23 @@ public class MultiPartFormData {
 				byteStream.write(nextByte);
 				nextByte = formStream.read();
 			}
-
-			MultiPartFormItem data = new MultiPartFormItem(item.getFieldName(),
-					item.getName(), item.getContentType(), byteStream);
-
-			String fieldName = item.getFieldName();
-			if (fieldName != null) {
-				fieldNameMap.put(fieldName, data);
-			}
-			String fileName = item.getName();
-			if (fileName != null && fileName.length() != 0) {
-				fileNameList.add(data);
-			}
 			formStream.close();
+
+			if ( item.isFormField() ) {
+				simpleFieldNameMap.put(item.getFieldName(), byteStream.toString());
+			} else {
+				MultiPartFormItem data = new MultiPartFormItem(item.getFieldName(),
+						item.getName(), item.getContentType(), byteStream);
+	
+				String fieldName = item.getFieldName();
+				if (fieldName != null) {
+					fieldNameMap.put(fieldName, data);
+				}
+				String fileName = item.getName();
+				if (fileName != null && fileName.length() != 0) {
+					fileNameList.add(data);
+				}
+			}
 		}
 
 		// Find the common prefix to the filenames being uploaded...
@@ -170,6 +177,10 @@ public class MultiPartFormData {
 		}
 	}
 
+	public String getSimpleFormField(String fieldName) {
+		return simpleFieldNameMap.get(fieldName);
+	}
+	
 	public MultiPartFormItem getFormDataByFieldName(String fieldName) {
 		return fieldNameMap.get(fieldName);
 	}

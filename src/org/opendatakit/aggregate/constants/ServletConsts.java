@@ -46,6 +46,11 @@ public final class ServletConsts {
   public static final String APPLICATION_NAME = "ODK AGGREGATE";
 
   /**
+   * Flag on submissions and form uploads indicating that this is 
+   * a partial submission or form upload.
+   */
+  public static final String TRANSFER_IS_INCOMPLETE = "*isIncomplete*";
+  /**
    * Name of form field that contains XML submission
    */
   public static final String XML_SUBMISSION_FILE = "xml_submission_file";

@@ -56,7 +56,7 @@ public class DatastoreImpl implements Datastore {
 
 	private static final int MAX_IDENTIFIER_LEN = 64;
 	
-	private static final Long GAE_MAX_STRING_LEN = 250L;
+	private static final Long GAE_MAX_STRING_LEN = 255L;
 	// these aren't actually used for filtering...
 	public static final Integer DEFAULT_DBL_NUMERIC_SCALE = 10;
 	public static final Integer DEFAULT_DBL_NUMERIC_PRECISION = 38;
@@ -252,11 +252,13 @@ public class DatastoreImpl implements Datastore {
 					break;
 				case STRING:
 				case URI:
-					if ( d.getMaxCharLen().compareTo(GAE_MAX_STRING_LEN) > 0) {
+					String s = (String) o;
+					o = gaeEntity.getProperty("__" + d.getName());
+					if ( o != null ) {
 						Text t = (Text) o;
 						row.setStringField(d, t.getValue());
 					} else {
-						row.setStringField(d, (String) o);
+						row.setStringField(d, s);
 					}
 					break;
 				default:
@@ -329,11 +331,14 @@ public class DatastoreImpl implements Datastore {
 					break;
 				case STRING:
 				case URI:
-					if ( d.getMaxCharLen().compareTo(GAE_MAX_STRING_LEN) > 0) {
-						Text t = new Text(entity.getStringField(d));
-						e.setProperty(d.getName(), t);
+					String s = entity.getStringField(d);
+					if ( s.length() > GAE_MAX_STRING_LEN.intValue()) {
+						Text t = new Text(s);
+						e.setProperty("__" + d.getName(), t);
+						e.setProperty(d.getName(), s.substring(0,GAE_MAX_STRING_LEN.intValue()));
 					} else {
-						e.setProperty(d.getName(), entity.getStringField(d));
+						e.removeProperty("__" + d.getName());
+						e.setProperty(d.getName(), s);
 					}
 					break;
 				default:
