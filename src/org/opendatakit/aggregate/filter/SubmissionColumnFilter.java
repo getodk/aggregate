@@ -25,7 +25,7 @@ public class SubmissionColumnFilter extends CommonFieldsBase {
   private static final DataField COL_TITLE_PROPERTY = new DataField("COL_TITLE", DataField.DataType.STRING,
       true, 80L); // TODO: determine length
   private static final DataField COL_ENCODING_PROPERTY = new DataField("COL_ENCODING", DataField.DataType.STRING,
-      true, 200L); // TODO: determine length
+      true, 500L); // TODO: determine length
   /**
    * Construct a relation prototype.
    * 

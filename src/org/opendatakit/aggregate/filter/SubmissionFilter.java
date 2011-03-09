@@ -43,7 +43,7 @@ public class SubmissionFilter extends CommonFieldsBase {
   private static final DataField COL_TITLE_PROPERTY = new DataField("COL_TITLE", DataField.DataType.STRING,
       true, 80L); // TODO: determine length
   private static final DataField COL_ENCODING_PROPERTY = new DataField("COL_ENCODING", DataField.DataType.STRING,
-      true, 200L); // TODO: determine length
+      true, 1000L); // TODO: determine length
   private static final DataField OPERATION_PROPERTY = new DataField("OPERATION",
       DataField.DataType.STRING, true, 80L);
   private static final DataField CLAUSE_PROPERTY = new DataField("INPUT_CLAUSE",

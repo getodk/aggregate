@@ -20,6 +20,7 @@ import org.opendatakit.aggregate.client.submission.SubmissionUI;
 import org.opendatakit.aggregate.client.submission.SubmissionUISummary;
 import org.opendatakit.aggregate.constants.common.FilterOperation;
 import org.opendatakit.aggregate.constants.common.Visibility;
+import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.filter.SubmissionFilterGroup;
 import org.opendatakit.aggregate.form.Form;
@@ -130,17 +131,17 @@ public class GwtTester extends ServletUtilBase {
        QueryByUIFilterGroup query = new QueryByUIFilterGroup(form, null, 1000, cc);
        List<Submission> submissions = query.getResultSubmissions();
 
-       GenerateHeaderInfo headerGenerator = new GenerateHeaderInfo(summary);
+       GenerateHeaderInfo headerGenerator = new GenerateHeaderInfo(null, summary, form);
        headerGenerator.processForHeaderInfo(form.getTopLevelGroupElement());
+       List<FormElementModel> filteredElements = headerGenerator.getIncludedElements();
        
        ElementFormatter elemFormatter = new BasicElementFormatter(true, true, true);
        
        // format row elements
        for (SubmissionSet sub : submissions) {
-         Row row = sub.getFormattedValuesAsRow(null, elemFormatter, false);
+         Row row = sub.getFormattedValuesAsRow(filteredElements, elemFormatter, false);
          try {
-           SubmissionUI uiSubmission = new SubmissionUI(row.getFormattedValues());
-           summary.addSubmission(uiSubmission);
+           summary.addSubmission(new SubmissionUI(row.getFormattedValues()));
          } catch (Exception e) {
            // TODO Auto-generated catch block
            e.printStackTrace();
