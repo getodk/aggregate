@@ -104,20 +104,15 @@ public class AggregateUI implements EntryPoint {
     filtersBox.addItem("filter2");
     formAndGoalSelectionTable.setWidget(0, 1, filtersBox);
     // load form + filter
-    Button loadFormAndFilterButton = new Button("Load");
+    Button loadFormAndFilterButton = new Button("Load Filter");
     formAndGoalSelectionTable.setWidget(0, 2, loadFormAndFilterButton);
-    // create filter
-    Button createFilterButton = new Button("Create Filter");
-    formAndGoalSelectionTable.setWidget(0, 3, createFilterButton);
-    formAndGoalSelectionTable.setHTML(0, 4, "&nbsp;&nbsp;");
+    formAndGoalSelectionTable.setHTML(0, 3, "&nbsp;&nbsp;");
 
     // end goals vis, export, publish
-    Button visualizeButton = new Button("Visualize");
-    formAndGoalSelectionTable.setWidget(0, 5, visualizeButton);
-    Button exportButton = new Button("Export");
-    formAndGoalSelectionTable.setWidget(0, 6, exportButton);
-    Button publishButton = new Button("Publish");
-    formAndGoalSelectionTable.setWidget(0, 7, publishButton);
+    Button exportButton = new Button("<img src=\"images/green_right_arrow.png\" /> Export");
+    formAndGoalSelectionTable.setWidget(0, 4, exportButton);
+    Button publishButton = new Button("<img src=\"images/green_right_arrow.png\" /> Publish");
+    formAndGoalSelectionTable.setWidget(0, 5, publishButton);
 
     HorizontalPanel formsAndGoalsPanel = new HorizontalPanel();
     formsAndGoalsPanel.add(formAndGoalSelectionTable);
@@ -466,8 +461,8 @@ public class AggregateUI implements EntryPoint {
         deleteButton.addStyleDependentName("negative");
         
         listOfForms.setWidget(i, 3, enabledDropDown);
-        listOfForms.setWidget(i, 4, new HTML("publishButton"));
-        listOfForms.setWidget(i, 5, new HTML("exportButton"));
+        listOfForms.setWidget(i, 4, new Button("<img src=\"images/green_right_arrow.png\" /> Publish"));
+        listOfForms.setWidget(i, 5, new Button("<img src=\"images/green_right_arrow.png\" /> Export"));
         listOfForms.setWidget(i, 6, deleteButton);
         if (i % 2 == 0)
             listOfForms.getRowFormatter().addStyleName(i, "evenTableRow");
