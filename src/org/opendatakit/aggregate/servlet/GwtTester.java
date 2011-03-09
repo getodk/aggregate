@@ -129,7 +129,7 @@ public class GwtTester extends ServletUtilBase {
 //       Form form = Form.retrieveForm("widgets", cc);
        Form form = Form.retrieveForm("LocationThings", cc);
        QueryByUIFilterGroup query = new QueryByUIFilterGroup(form, null, 1000, cc);
-       List<Submission> submissions = query.getResultSubmissions();
+       List<Submission> submissions = query.getResultSubmissions(cc);
 
        GenerateHeaderInfo headerGenerator = new GenerateHeaderInfo(null, summary, form);
        headerGenerator.processForHeaderInfo(form.getTopLevelGroupElement());
@@ -139,7 +139,7 @@ public class GwtTester extends ServletUtilBase {
        
        // format row elements
        for (SubmissionSet sub : submissions) {
-         Row row = sub.getFormattedValuesAsRow(filteredElements, elemFormatter, false);
+         Row row = sub.getFormattedValuesAsRow(filteredElements, elemFormatter, false, cc);
          try {
            summary.addSubmission(new SubmissionUI(row.getFormattedValues()));
          } catch (Exception e) {

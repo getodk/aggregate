@@ -25,7 +25,7 @@ public class QueryByUIFilterGroup extends QueryBase {
 
   public QueryByUIFilterGroup(Form form, FilterGroup filterGroup, int maxFetchLimit,
       CallingContext cc) throws ODKFormNotFoundException {
-    super(form, maxFetchLimit, cc);
+    super(form, maxFetchLimit);
 
     tbl = (TopLevelDynamicBase) form.getTopLevelGroupElement().getFormDataModel()
         .getBackingObjectPrototype();
@@ -51,7 +51,7 @@ public class QueryByUIFilterGroup extends QueryBase {
   }
 
 
-  public List<Submission> getResultSubmissions() throws ODKDatastoreException {
+  public List<Submission> getResultSubmissions(CallingContext cc) throws ODKDatastoreException {
 
     List<Submission> retrievedSubmissions = new ArrayList<Submission>();
 

@@ -83,7 +83,7 @@ public class CsvServlet extends ServletUtilBase {
     try {
         PersistentResults r = new PersistentResults( ResultType.CSV, form, null, cc);
         r.persist(cc);
-    	CallingContext ccDaemon = ContextFactory.getCallingContext(this, ADDR, req);
+    	CallingContext ccDaemon = ContextFactory.getCallingContext(this, req);
     	ccDaemon.setAsDaemon(true);
 		generator.createCsvTask(form, r.getSubmissionKey(), 1L, ccDaemon);
 	} catch (ODKDatastoreException e) {

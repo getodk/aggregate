@@ -155,7 +155,7 @@ public class SpreadsheetServlet extends ServletUtilBase {
       MiscTasks m = new MiscTasks(TaskType.WORKSHEET_CREATE, form, parameters, cc);
       m.persist(cc);
       
-  	  CallingContext ccDaemon = ContextFactory.getCallingContext(this, ADDR, req);
+  	  CallingContext ccDaemon = ContextFactory.getCallingContext(this, req);
 	  ccDaemon.setAsDaemon(true);
       ws.createWorksheetTask(form, m.getSubmissionKey(), 1L, ccDaemon);
     } catch (ODKExternalServiceException e) {

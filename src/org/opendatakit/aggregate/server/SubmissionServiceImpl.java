@@ -38,7 +38,7 @@ org.opendatakit.aggregate.client.submission.SubmissionService {
       String formId = filterGroup.getFormId();
       Form form = Form.retrieveForm(formId, cc);
       QueryByUIFilterGroup query = new QueryByUIFilterGroup(form, filterGroup, 1000, cc);
-      List<Submission> submissions = query.getResultSubmissions();
+      List<Submission> submissions = query.getResultSubmissions(cc);
 
       GenerateHeaderInfo headerGenerator = new GenerateHeaderInfo(filterGroup, summary, form);
       headerGenerator.processForHeaderInfo(form.getTopLevelGroupElement());
@@ -48,7 +48,7 @@ org.opendatakit.aggregate.client.submission.SubmissionService {
       
       // format row elements
       for (SubmissionSet sub : submissions) {
-        Row row = sub.getFormattedValuesAsRow(filteredElements, elemFormatter, false);
+        Row row = sub.getFormattedValuesAsRow(filteredElements, elemFormatter, false, cc);
         try {
           summary.addSubmission(new SubmissionUI(row.getFormattedValues()));
         } catch (Exception e) {
