@@ -77,7 +77,7 @@ public class SpreadsheetServlet extends ServletUtilBase {
    */
   @Override
   public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-	CallingContext cc = ContextFactory.getCallingContext(this, ADDR, req);
+	CallingContext cc = ContextFactory.getCallingContext(this, req);
 
     // collect and save all request parameters
     String spreadsheetName = getParameter(req, ExternalServiceConsts.EXT_SERV_ADDRESS);
@@ -155,7 +155,7 @@ public class SpreadsheetServlet extends ServletUtilBase {
       MiscTasks m = new MiscTasks(TaskType.WORKSHEET_CREATE, form, parameters, cc);
       m.persist(cc);
       
-  	  CallingContext ccDaemon = ContextFactory.getCallingContext(this, ADDR, req);
+  	  CallingContext ccDaemon = ContextFactory.getCallingContext(this, req);
 	  ccDaemon.setAsDaemon(true);
       ws.createWorksheetTask(form, m.getSubmissionKey(), 1L, ccDaemon);
     } catch (ODKExternalServiceException e) {

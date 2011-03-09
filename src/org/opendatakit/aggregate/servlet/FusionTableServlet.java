@@ -71,7 +71,7 @@ public class FusionTableServlet extends ServletUtilBase {
 
   @Override
   public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-	CallingContext cc = ContextFactory.getCallingContext(this, ADDR, req);
+	CallingContext cc = ContextFactory.getCallingContext(this, req);
 
     // get parameters
     String formId = getParameter(req, ServletConsts.FORM_ID);
@@ -127,7 +127,7 @@ public class FusionTableServlet extends ServletUtilBase {
     if (!esType.equals(ExternalServiceOption.STREAM_ONLY)) {
       try {
         UploadSubmissions uploadTask = (UploadSubmissions) cc.getBean(BeanDefs.UPLOAD_TASK_BEAN);
-    	CallingContext ccDaemon = ContextFactory.getCallingContext(this, ADDR, req);
+    	CallingContext ccDaemon = ContextFactory.getCallingContext(this, req);
     	ccDaemon.setAsDaemon(true);
         uploadTask.createFormUploadTask(fusion.getFormServiceCursor(), ccDaemon);
       } catch (Exception e) {

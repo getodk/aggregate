@@ -81,7 +81,7 @@ public class GroupModifyMembersServlet extends ServletUtilBase {
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
-		CallingContext cc = ContextFactory.getCallingContext(this, ADDR, req);
+		CallingContext cc = ContextFactory.getCallingContext(this, req);
 
 		// get parameter
 		String groupname = getParameter(req, GROUPNAME);
@@ -183,7 +183,7 @@ public class GroupModifyMembersServlet extends ServletUtilBase {
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
 
-		CallingContext cc = ContextFactory.getCallingContext(this, ADDR, req);
+		CallingContext cc = ContextFactory.getCallingContext(this, req);
 
 		Datastore ds = cc.getDatastore();
 		User user = cc.getCurrentUser();

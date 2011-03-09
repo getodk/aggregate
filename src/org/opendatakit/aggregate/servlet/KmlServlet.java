@@ -71,7 +71,7 @@ public class KmlServlet extends ServletUtilBase {
    */
   @Override
   public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-	CallingContext cc = ContextFactory.getCallingContext(this, ADDR, req);
+	CallingContext cc = ContextFactory.getCallingContext(this, req);
 
     // get parameter
     String formId = getParameter(req, ServletConsts.FORM_ID);
@@ -123,7 +123,7 @@ public class KmlServlet extends ServletUtilBase {
       r.persist(cc);
 
       KmlGenerator generator = (KmlGenerator) cc.getBean(BeanDefs.KML_BEAN);
-  	  CallingContext ccDaemon = ContextFactory.getCallingContext(this, ADDR, req);
+  	  CallingContext ccDaemon = ContextFactory.getCallingContext(this, req);
   	  ccDaemon.setAsDaemon(true);
       generator.createKmlTask(form, r.getSubmissionKey(), 1L, ccDaemon);
 

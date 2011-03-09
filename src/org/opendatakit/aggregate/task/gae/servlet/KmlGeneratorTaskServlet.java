@@ -59,7 +59,7 @@ public class KmlGeneratorTaskServlet extends ServletUtilBase {
   @Override
   public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
     // TODO: talk to MITCH about the fact the user will be incorrect
-	CallingContext cc = ContextFactory.getCallingContext(this, ADDR, req);
+	CallingContext cc = ContextFactory.getCallingContext(this, req);
 
     // get parameter
     String formId = getParameter(req, ServletConsts.FORM_ID);

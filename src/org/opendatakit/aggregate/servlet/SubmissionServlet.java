@@ -142,7 +142,7 @@ public class SubmissionServlet extends ServletUtilBase {
    */
   @Override
   public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-	CallingContext cc = ContextFactory.getCallingContext(this, ADDR, req);
+	CallingContext cc = ContextFactory.getCallingContext(this, req);
 
 	PrintWriter out = resp.getWriter();
 
@@ -170,7 +170,7 @@ public class SubmissionServlet extends ServletUtilBase {
 
   @Override
   public void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-	CallingContext cc = ContextFactory.getCallingContext(this, ADDR, req);
+	CallingContext cc = ContextFactory.getCallingContext(this, req);
 
     resp.setContentType(HtmlConsts.RESP_TYPE_HTML);
 
@@ -199,7 +199,7 @@ public class SubmissionServlet extends ServletUtilBase {
       List<ExternalService> tmp = FormServiceCursor.getExternalServicesForForm(form, cc);
       UploadSubmissions uploadTask = (UploadSubmissions) cc.getBean(BeanDefs.UPLOAD_TASK_BEAN);
 
-  	  CallingContext ccDaemon = ContextFactory.getCallingContext(this, ADDR, req);
+  	  CallingContext ccDaemon = ContextFactory.getCallingContext(this, req);
 	  ccDaemon.setAsDaemon(true);
       for (ExternalService rs : tmp) {
         uploadTask.createFormUploadTask(rs.getFormServiceCursor(), ccDaemon);
