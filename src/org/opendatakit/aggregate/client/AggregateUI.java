@@ -1,7 +1,9 @@
 package org.opendatakit.aggregate.client;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.opendatakit.aggregate.client.filter.ColumnFilter;
 import org.opendatakit.aggregate.client.filter.ColumnFilterHeader;
@@ -424,12 +426,20 @@ public class AggregateUI implements EntryPoint {
   }
   
   private void fillFormDropDown(FormSummary [] forms) {
-	    for (int j = 0; j < forms.length; j++) {
-	    	FormSummary form = forms[j];
-	    	formsBox.addItem(form.getTitle());
-	    	// TODO: Kyle - need to fix... once form is loaded then set the id
-	    	def.setFormId(form.getId());
-	    }
+	  Set<String> existingForms = new HashSet<String>();
+	  for (int i = 0; i < formsBox.getItemCount(); i++) {
+		  existingForms.add(formsBox.getItemText(i));
+	  }
+	  for (int i = 0; i < forms.length; i++) {
+		  FormSummary form = forms[i];
+		  if (!existingForms.contains(form.getTitle())) {
+			  formsBox.addItem(form.getTitle());
+			  if (hash.get(UrlHash.FORM).equals(form.getTitle()))
+				  formsBox.setItemSelected(formsBox.getItemCount() - 1, true);
+		  }
+		  // TODO: Kyle - need to fix... once form is loaded then set the id
+		  def.setFormId(form.getId());
+	  }
   }
   
   /**
