@@ -86,6 +86,7 @@ public class AggregateUI implements EntryPoint {
   
   private FlexTable listOfForms;
   private ListBox formsBox = new ListBox();
+  private FormSummary loadForm;
   
   public AggregateUI() {
     formSvc = GWT.create(FormService.class);
@@ -222,7 +223,6 @@ public class AggregateUI implements EntryPoint {
 	  
     // view data
     dataTable = new FlexTable();
-    requestUpdatedData();
     dataTable.getRowFormatter().addStyleName(0, "titleBar");
     dataTable.addStyleName("dataTable");
     filtersDataHelp.add(dataTable);
@@ -241,7 +241,7 @@ public class AggregateUI implements EntryPoint {
     return filtersDataHelp;
   }
 
-  public void requestUpdatedData() {
+  public void requestUpdatedData(FilterGroup filterGroup) {
     
     // Initialize the service proxy.
     if (submissionSvc == null) {
@@ -259,10 +259,8 @@ public class AggregateUI implements EntryPoint {
       }
     };
 
-    FilterGroup testFilterGroup = new FilterGroup("TESTING", "widgets", null);
-    
     // Make the call to the form service.
-    submissionSvc.getSubmissions(testFilterGroup, callback);
+    submissionSvc.getSubmissions(filterGroup, callback);
 
   }
   
@@ -340,8 +338,8 @@ public class AggregateUI implements EntryPoint {
 	hash.get();
 	
 	// Create sub menu navigation
-	setupSubmissionNav();
 	setupManageNav();
+	setupSubmissionNav();
 	
     mainNav.add(submissionNav, "Submissions");
     mainNav.add(manageNav, "Management");
@@ -425,7 +423,7 @@ public class AggregateUI implements EntryPoint {
 	  	VerticalPanel reportContent = new VerticalPanel();
 	    reportContent.add(setupFormsAndGoalsPanel());
 	    def = new FilterGroup(
-	    		"Default", "def", new ArrayList<Filter>());
+	    		"Default", "", new ArrayList<Filter>());
 	    view.add(def);
 	    filterPanel = setupFiltersDataHelpPanel(view);
 	    reportContent.add(filterPanel);
@@ -458,6 +456,9 @@ public class AggregateUI implements EntryPoint {
       public void onSuccess(FormSummary[] forms) {
         updateFormTable(forms);
         fillFormDropDown(forms);
+        if(forms.length > 0) {
+        	requestUpdatedData(view.get(0));
+        }
       }
     };
 
@@ -470,15 +471,17 @@ Set<String> existingForms = new HashSet<String>();
 	  for (int i = 0; i < formsBox.getItemCount(); i++) {
 		  existingForms.add(formsBox.getItemText(i));
 	  }
-	  for (int i = 0; i < forms.length; i++) {
-		  FormSummary form = forms[i];
-		  if (!existingForms.contains(form.getTitle())) {
-			  formsBox.addItem(form.getTitle());
-			  if (hash.get(UrlHash.FORM).equals(form.getTitle()))
-				  formsBox.setItemSelected(formsBox.getItemCount() - 1, true);
+	  if(forms.length > 0) {
+		  loadForm = forms[0];
+		  for (int i = 0; i < forms.length; i++) {
+			  FormSummary form = forms[i];
+			  if (!existingForms.contains(form.getTitle())) {
+				  formsBox.addItem(form.getTitle());
+				  if (hash.get(UrlHash.FORM).equals(form.getTitle()))
+					  formsBox.setItemSelected(formsBox.getItemCount() - 1, true);
+			  }
 		  }
-		  // TODO: Kyle - need to fix... once form is loaded then set the id
-		  def.setFormId(form.getId());
+		  def.setFormId(loadForm.getId());
 	  }
   }
   
