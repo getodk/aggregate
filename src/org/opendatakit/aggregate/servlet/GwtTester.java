@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -200,6 +201,7 @@ public class GwtTester extends ServletUtilBase {
           }
           exports[i] = summary;
           i++;
+          
         }
         resp.getWriter().println("Done with Export");
       } catch (ODKFormNotFoundException e) {
@@ -210,6 +212,8 @@ public class GwtTester extends ServletUtilBase {
 
 
     } else {
+      ServletContext test = this.getServletContext();
+      resp.getWriter().println(getServletContext().getServerInfo());
       resp.getWriter().println("NO parameters");
     }
 

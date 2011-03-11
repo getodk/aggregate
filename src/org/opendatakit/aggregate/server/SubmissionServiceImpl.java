@@ -2,6 +2,8 @@ package org.opendatakit.aggregate.server;
 
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.client.filter.FilterGroup;
@@ -30,8 +32,8 @@ org.opendatakit.aggregate.client.submission.SubmissionService {
 
   @Override
   public SubmissionUISummary getSubmissions(FilterGroup filterGroup) {
-    
-    CallingContext cc = ContextFactory.getCallingContext(this);    
+    HttpServletRequest req = this.getThreadLocalRequest();
+    CallingContext cc = ContextFactory.getCallingContext(this, req);   
     
     SubmissionUISummary summary = new SubmissionUISummary();
     try {
@@ -44,7 +46,10 @@ org.opendatakit.aggregate.client.submission.SubmissionService {
       headerGenerator.processForHeaderInfo(form.getTopLevelGroupElement());
       List<FormElementModel> filteredElements = headerGenerator.getIncludedElements();
       
+      //ElementFormatter elemFormatter = new LinkElementFormatter(cc.getServerURL(), true, true, true);
+
       ElementFormatter elemFormatter = new BasicElementFormatter(true, true, true);
+
       
       // format row elements
       for (SubmissionSet sub : submissions) {

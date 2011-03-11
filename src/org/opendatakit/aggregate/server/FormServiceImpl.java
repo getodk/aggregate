@@ -3,6 +3,8 @@ package org.opendatakit.aggregate.server;
 import java.util.Date;
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.client.form.ExportSummary;
@@ -36,7 +38,8 @@ public class FormServiceImpl extends RemoteServiceServlet implements
   @Override
   public FormSummary[] getForms() {
 
-    CallingContext cc = ContextFactory.getCallingContext(this);
+    HttpServletRequest req = this.getThreadLocalRequest();
+    CallingContext cc = ContextFactory.getCallingContext(this, req);
 
     try {
       // ensure that Form table exists...
@@ -62,8 +65,9 @@ public class FormServiceImpl extends RemoteServiceServlet implements
 
   @Override
   public ExternServSummary[] getExternalServices(String formId) {
+    HttpServletRequest req = this.getThreadLocalRequest();
+    CallingContext cc = ContextFactory.getCallingContext(this, req);
 
-    CallingContext cc = ContextFactory.getCallingContext(this);
 
     try {
       Form form = Form.retrieveForm(formId, cc);
@@ -92,7 +96,8 @@ public class FormServiceImpl extends RemoteServiceServlet implements
 
   @Override
   public ExportSummary[] getExports() {
-    CallingContext cc = ContextFactory.getCallingContext(this);
+    HttpServletRequest req = this.getThreadLocalRequest();
+    CallingContext cc = ContextFactory.getCallingContext(this, req);
 
     try {
       Form form = Form.retrieveForm(PersistentResults.FORM_ID_PERSISTENT_RESULT, cc);
