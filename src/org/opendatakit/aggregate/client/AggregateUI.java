@@ -10,6 +10,9 @@ import org.opendatakit.aggregate.client.filter.ColumnFilterHeader;
 import org.opendatakit.aggregate.client.filter.CreateNewFilterPopup;
 import org.opendatakit.aggregate.client.filter.Filter;
 import org.opendatakit.aggregate.client.filter.FilterGroup;
+import org.opendatakit.aggregate.client.filter.FilterService;
+import org.opendatakit.aggregate.client.filter.FilterServiceAsync;
+import org.opendatakit.aggregate.client.filter.FilterSet;
 import org.opendatakit.aggregate.client.filter.RowFilter;
 import org.opendatakit.aggregate.client.form.FormService;
 import org.opendatakit.aggregate.client.form.FormServiceAsync;
@@ -22,6 +25,8 @@ import org.opendatakit.aggregate.client.submission.SubmissionUISummary;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.CloseEvent;
@@ -83,9 +88,11 @@ public class AggregateUI implements EntryPoint {
 
   private FormServiceAsync formSvc;
   private SubmissionServiceAsync submissionSvc;
+  private FilterServiceAsync filterSvc;
   
   private FlexTable listOfForms;
   private ListBox formsBox = new ListBox();
+  private ListBox filtersBox = new ListBox();
   private FormSummary loadForm;
   
   public AggregateUI() {
@@ -107,9 +114,6 @@ public class AggregateUI implements EntryPoint {
     // list of forms
     formAndGoalSelectionTable.setWidget(0, 0, formsBox);
     // list of filters
-    ListBox filtersBox = new ListBox();
-    filtersBox.addItem("filter1");
-    filtersBox.addItem("filter2");
     formAndGoalSelectionTable.setWidget(0, 1, filtersBox);
     // load form + filter
     Button loadFormAndFilterButton = new Button("Load Filter");
@@ -337,6 +341,10 @@ public class AggregateUI implements EntryPoint {
 	hash = UrlHash.getHash();
 	hash.get();
 	
+    def = new FilterGroup(
+    		"Default", "", new ArrayList<Filter>());
+    view.add(def);
+	
 	// Create sub menu navigation
 	setupManageNav();
 	setupSubmissionNav();
@@ -422,9 +430,6 @@ public class AggregateUI implements EntryPoint {
   public VerticalPanel setupSubmissionsPanel() {
 	  	VerticalPanel reportContent = new VerticalPanel();
 	    reportContent.add(setupFormsAndGoalsPanel());
-	    def = new FilterGroup(
-	    		"Default", "", new ArrayList<Filter>());
-	    view.add(def);
 	    filterPanel = setupFiltersDataHelpPanel(view);
 	    reportContent.add(filterPanel);
 	    return reportContent;
@@ -456,8 +461,16 @@ public class AggregateUI implements EntryPoint {
       public void onSuccess(FormSummary[] forms) {
         updateFormTable(forms);
         fillFormDropDown(forms);
+        String formId = "";
+        for (FormSummary form : forms) {
+        	if (form.getTitle().compareTo(formsBox.getValue(formsBox.getSelectedIndex())) == 0) {
+        		formId = form.getId();
+        		break;
+        	}
+        }
+        def.setFormId(formId);
         if(forms.length > 0) {
-        	requestUpdatedData(view.get(0));
+        	requestUpdatedData(def);
         }
       }
     };
@@ -481,9 +494,48 @@ Set<String> existingForms = new HashSet<String>();
 					  formsBox.setItemSelected(formsBox.getItemCount() - 1, true);
 			  }
 		  }
-		  def.setFormId(loadForm.getId());
+	  }
+	  formsBox.addChangeHandler(new ChangeHandler() {
+
+		@Override
+		public void onChange(ChangeEvent event) {
+			getFilterList(formsBox.getValue(formsBox.getSelectedIndex()));
+		}
+		  
+	  });
+	  
+  }
+  
+  private void fillFilterDropDown(FilterSet set) {
+	  filtersBox.clear();
+	  for(FilterGroup group : set.getGroups()) {
+		  filtersBox.addItem(group.getName());
 	  }
   }
+  
+  private void getFilterList(final String id) {
+	    // Initialize the service proxy.
+	    if (filterSvc == null) {
+	      filterSvc = GWT.create(FilterService.class);
+	    }
+
+	    // Set up the callback object.
+	    AsyncCallback<FilterSet> callback = 
+	    	new AsyncCallback<FilterSet>() {
+	      public void onFailure(Throwable caught) {
+	    	  
+	      }
+
+		@Override
+		public void onSuccess(FilterSet result) {
+			fillFilterDropDown(result);
+			requestUpdatedData(def);
+		}
+	    };
+
+	    // Make the call to the form service.
+	    filterSvc.getFilterSet(id, callback);
+	  }
   
   /**
    * Update the list of forms
