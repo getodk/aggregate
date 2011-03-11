@@ -2,6 +2,8 @@ package org.opendatakit.aggregate.server;
 
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.client.filter.FilterGroup;
@@ -21,7 +23,9 @@ public class FilterServiceImpl extends RemoteServiceServlet implements FilterSer
 
   @Override
   public FilterSet getFilterSet(String formId) {
-    CallingContext cc = ContextFactory.getCallingContext(this);
+    HttpServletRequest req = this.getThreadLocalRequest();
+    CallingContext cc = ContextFactory.getCallingContext(this, req);
+    
     FilterSet filterSet = new FilterSet();
     
     try {
@@ -38,7 +42,8 @@ public class FilterServiceImpl extends RemoteServiceServlet implements FilterSer
   
   @Override
   public Boolean updateFilterGroup(FilterGroup group) {
-    CallingContext cc = ContextFactory.getCallingContext(this);
+    HttpServletRequest req = this.getThreadLocalRequest();
+    CallingContext cc = ContextFactory.getCallingContext(this, req);
     
     try {
       SubmissionFilterGroup filterGrp = SubmissionFilterGroup.transform(group, cc);
@@ -51,7 +56,8 @@ public class FilterServiceImpl extends RemoteServiceServlet implements FilterSer
 
   @Override
   public Boolean deleteFilterGroup(FilterGroup group) {
-    CallingContext cc = ContextFactory.getCallingContext(this);
+    HttpServletRequest req = this.getThreadLocalRequest();
+    CallingContext cc = ContextFactory.getCallingContext(this, req);
     
     try {
       SubmissionFilterGroup filterGrp = SubmissionFilterGroup.transform(group, cc);

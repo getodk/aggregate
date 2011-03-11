@@ -70,15 +70,6 @@ public class ContextFactory {
     		this.userService = (UserService) getBean(BeanDefs.USER_BEAN);
     	}
     	
-    	private CallingContextImpl(HttpServlet servlet) {
-    		// for now, only store the servlet context and the serverUrl
-    		ctxt = servlet.getServletContext();
-    	    webApplicationBase = ctxt.getContextPath();
-    	    serverUrl = null;
-    		this.datastore = (Datastore) getBean(BeanDefs.DATASTORE_BEAN);
-    		this.userService = (UserService) getBean(BeanDefs.USER_BEAN);
-    	}
-    	
     	public Object getBean(String beanName) {
 			return WebApplicationContextUtils.getRequiredWebApplicationContext(ctxt).getBean(beanName);
     	}
@@ -125,7 +116,4 @@ public class ContextFactory {
     	return new CallingContextImpl(servlet, req);
     }
     
-    public static CallingContext getCallingContext(HttpServlet servlet) {
-    	return new CallingContextImpl(servlet);
-    }
 }
