@@ -28,12 +28,12 @@ import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.ServletConsts;
+import org.opendatakit.aggregate.constants.common.ExportType;
 import org.opendatakit.aggregate.datamodel.FormElementKey;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.form.PersistentResults;
-import org.opendatakit.aggregate.form.PersistentResults.ResultType;
 import org.opendatakit.aggregate.task.KmlGenerator;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 
@@ -119,7 +119,7 @@ public class KmlServlet extends ServletUtilBase {
       params.put(KmlServlet.GEOPOINT_FIELD, (geopointField == null) ? null : geopointField
           .constructFormElementKey(form).toString());
 
-      PersistentResults r = new PersistentResults(ResultType.KML, form, params, cc);
+      PersistentResults r = new PersistentResults(ExportType.KML, form, params, cc);
       r.persist(cc);
 
       KmlGenerator generator = (KmlGenerator) cc.getBean(BeanDefs.KML_BEAN);

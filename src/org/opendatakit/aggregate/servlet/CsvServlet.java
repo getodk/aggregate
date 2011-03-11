@@ -26,10 +26,10 @@ import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.ServletConsts;
+import org.opendatakit.aggregate.constants.common.ExportType;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.form.PersistentResults;
-import org.opendatakit.aggregate.form.PersistentResults.ResultType;
 import org.opendatakit.aggregate.task.CsvGenerator;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 
@@ -81,7 +81,7 @@ public class CsvServlet extends ServletUtilBase {
 
     CsvGenerator generator = (CsvGenerator) cc.getBean(BeanDefs.CSV_BEAN);
     try {
-        PersistentResults r = new PersistentResults( ResultType.CSV, form, null, cc);
+        PersistentResults r = new PersistentResults( ExportType.CSV, form, null, cc);
         r.persist(cc);
     	CallingContext ccDaemon = ContextFactory.getCallingContext(this, req);
     	ccDaemon.setAsDaemon(true);
