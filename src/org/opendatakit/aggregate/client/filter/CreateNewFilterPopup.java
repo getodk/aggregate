@@ -129,14 +129,14 @@ public class CreateNewFilterPopup extends PopupPanel{
 						String colencode = "";
 						if(cols.isItemSelected(i)) {
 							colname = cols.getValue(i);
-						}
-						for(Column column: columns) {
-							if(colname.compareTo(column.getDisplayHeader()) == 0) {
-								colencode = column.getColumnEncoding();
-								break;
+							for(Column column: columns) {
+								if(colname.compareTo(column.getDisplayHeader()) == 0) {
+									colencode = column.getColumnEncoding();
+									break;
+								}
 							}
+							columnfilterheaders.add(new ColumnFilterHeader(colname, colencode));
 						}
-						columnfilterheaders.add(new ColumnFilterHeader(colname, colencode));
 					}
 					Filter newFilter = new ColumnFilter(kr, columnfilterheaders,(long) def.getFilters().size());
 					def.addFilter(newFilter);
