@@ -8,4 +8,6 @@ public interface SubmissionServiceAsync {
 
   void getSubmissions(FilterGroup filter, AsyncCallback<SubmissionUISummary> callback);
 
+  void getSubmissions(String formId, AsyncCallback<SubmissionUISummary> callback);
+
 }
