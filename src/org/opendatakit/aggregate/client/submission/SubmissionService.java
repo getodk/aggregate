@@ -8,6 +8,8 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 @RemoteServiceRelativePath("submissionservice")
 public interface SubmissionService extends RemoteService {
 
+  SubmissionUISummary getSubmissions(String formId);
+  
   SubmissionUISummary getSubmissions(FilterGroup filter);
   
 }

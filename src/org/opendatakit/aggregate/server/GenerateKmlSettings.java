@@ -45,7 +45,7 @@ public class GenerateKmlSettings {
     case GROUP:
       break; // should not be in any list
     default:
-      settings.addNode(nodeName, key.toString());
+      settings.addTitleNode(nodeName, key.toString());
     }
 
     List<FormElementModel> childDataElements = node.getChildren();

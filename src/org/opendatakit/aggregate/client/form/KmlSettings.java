@@ -13,11 +13,11 @@ public class KmlSettings implements Serializable {
   
   private List<KmlSettingOption> geopointNodes = new ArrayList<KmlSettingOption>();
   private List<KmlSettingOption> binaryNodes = new ArrayList<KmlSettingOption>();
-  private List<KmlSettingOption> nodes = new ArrayList<KmlSettingOption>();
+  private List<KmlSettingOption> titleNodes = new ArrayList<KmlSettingOption>();
   
-  public void addNode(String displayName, String elementKey) {
+  public void addTitleNode(String displayName, String elementKey) {
     KmlSettingOption node = new KmlSettingOption(displayName, elementKey);
-    nodes.add(node);
+    titleNodes.add(node);
   }
   
   public void addGeopointNode(String displayName, String elementKey) {
@@ -38,8 +38,8 @@ public class KmlSettings implements Serializable {
     return binaryNodes;
   }
 
-  public List<KmlSettingOption> getNodes() {
-    return nodes;
+  public List<KmlSettingOption> getTitleNodes() {
+    return titleNodes;
   }
 
 
