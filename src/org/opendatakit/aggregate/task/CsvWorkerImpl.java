@@ -21,9 +21,9 @@ import java.util.Date;
 
 import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.constants.ServletConsts;
+import org.opendatakit.aggregate.constants.common.ExportStatus;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.form.PersistentResults;
-import org.opendatakit.aggregate.form.PersistentResults.Status;
 import org.opendatakit.aggregate.format.SubmissionFormatter;
 import org.opendatakit.aggregate.format.table.CsvFormatter;
 import org.opendatakit.aggregate.query.submission.QueryByDate;
@@ -77,7 +77,7 @@ public class CsvWorkerImpl {
 				r.setResultFile(outputFile, HtmlConsts.RESP_TYPE_CSV, 
 						Long.valueOf(outputFile.length), 
 						form.getViewableFormNameSuitableAsFileName() + ServletConsts.CSV_FILENAME_APPEND, cc);
-				r.setStatus(Status.AVAILABLE);
+				r.setStatus(ExportStatus.AVAILABLE);
 				r.setCompletionDate(new Date());
 		    }
 			r.persist(cc);
@@ -96,7 +96,7 @@ public class CsvWorkerImpl {
 		    PersistentResults r = new PersistentResults(s);
 		    if ( attemptCount.equals(r.getAttemptCount()) ) {
 		    	r.deleteResultFile(cc);
-		    	r.setStatus(Status.FAILED);
+		    	r.setStatus(ExportStatus.FAILED);
 		    	r.persist(cc);
 		    }
 		} catch (Exception ex) {

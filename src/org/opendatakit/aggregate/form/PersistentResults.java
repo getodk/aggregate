@@ -21,6 +21,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.opendatakit.aggregate.CallingContext;
+import org.opendatakit.aggregate.constants.common.ExportStatus;
+import org.opendatakit.aggregate.constants.common.ExportType;
 import org.opendatakit.aggregate.datamodel.DynamicCommonFieldsBase;
 import org.opendatakit.aggregate.datamodel.FormDataModel;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
@@ -53,44 +55,6 @@ public class PersistentResults {
 //	public static final long RETRY_INTERVAL_MILLISECONDS = (11 * 60) * 1000;
 	public static final long RETRY_INTERVAL_MILLISECONDS = 10000;
 	public static final long MAX_RETRY_ATTEMPTS = 3;
-	
-	public enum Status {
-		GENERATION_IN_PROGRESS, // created or task is running
-		RETRY_IN_PROGRESS, // task is running
-		FAILED,    // task completed with failure; retry again later.
-		ABANDONED, // task completed with failure; no more retries should occur.
-		AVAILABLE; // task completed; results are available.
-		
-		public String toString() {
-			switch ( this ) {
-			case GENERATION_IN_PROGRESS:
-				return "Generation in progress";
-			case RETRY_IN_PROGRESS:
-				return "Retry in progress";
-			case FAILED:
-				return "Failure - will retry later";
-			case ABANDONED:
-				return "Failure - abandoned all retry attempts";
-			case AVAILABLE:
-				return "Dataset Available";
-			default:
-				throw new IllegalStateException("missing enum case");
-			}
-		}
-	};
-	
-	public enum ResultType {
-		CSV,
-		KML;
-		
-		public String toString() {
-			if ( this == CSV ) {
-				return "Csv file";
-			} else {
-				return "Kml file";
-			}
-		}
-	};
 	
 	public static final String FORM_ID_PERSISTENT_RESULT = "aggregate.opendatakit.org:PersistentResults";
 
@@ -172,7 +136,7 @@ public class PersistentResults {
 	 * @param user
 	 * @throws ODKDatastoreException
 	 */
-	public PersistentResults(ResultType type, Form form, Map<String,String> parameters, CallingContext cc) throws ODKDatastoreException {
+	public PersistentResults(ExportType type, Form form, Map<String,String> parameters, CallingContext cc) throws ODKDatastoreException {
 		Form persistentResultsForm;
 		try {
 			persistentResultsForm = Form.retrieveForm(FORM_ID_PERSISTENT_RESULT, cc);
@@ -189,7 +153,7 @@ public class PersistentResults {
 		setRequestParameters(parameters);
 		setLastRetryDate(now);
 		setAttemptCount(1L);
-		setStatus(Status.GENERATION_IN_PROGRESS);
+		setStatus(ExportStatus.GENERATION_IN_PROGRESS);
 		setResultType(type);
 		setFormId(form.getFormId());
 		
@@ -243,19 +207,19 @@ public class PersistentResults {
 		((LongSubmissionType) objectEntity.getElementValue(attemptCount)).setValue(value);
 	}
 	
-	public Status getStatus() {
-		return Status.valueOf(((StringSubmissionType) objectEntity.getElementValue(status)).getValue());
+	public ExportStatus getStatus() {
+		return ExportStatus.valueOf(((StringSubmissionType) objectEntity.getElementValue(status)).getValue());
 	}
 	
-	public void setStatus(Status value) throws ODKEntityPersistException {
+	public void setStatus(ExportStatus value) throws ODKEntityPersistException {
 		((StringSubmissionType) objectEntity.getElementValue(status)).setValueFromString(value.name());
 	}
 	
-	public ResultType getResultType() {
-		return ResultType.valueOf(((StringSubmissionType) objectEntity.getElementValue(resultType)).getValue());
+	public ExportType getResultType() {
+		return ExportType.valueOf(((StringSubmissionType) objectEntity.getElementValue(resultType)).getValue());
 	}
 	
-	public void setResultType(ResultType value) throws ODKEntityPersistException {
+	public void setResultType(ExportType value) throws ODKEntityPersistException {
 		((StringSubmissionType) objectEntity.getElementValue(resultType)).setValueFromString(value.name());
 	}
 	
@@ -339,14 +303,14 @@ public class PersistentResults {
 		for ( CommonFieldsBase b : l ) {
 			Submission s = new Submission( b.getUri(), form, cc );
 			PersistentResults result = new PersistentResults(s);
-			if ( result.getStatus() == Status.AVAILABLE ) continue;
-			if ( result.getStatus() == Status.ABANDONED ) continue;
+			if ( result.getStatus() == ExportStatus.AVAILABLE ) continue;
+			if ( result.getStatus() == ExportStatus.ABANDONED ) continue;
 			if ( result.getAttemptCount().compareTo(MAX_RETRY_ATTEMPTS) >= 0 ) {
 				// the task is stale, and should be marked abandoned,
 				// but the worker thread must have failed.  Attempt 
 				// it here...
 				result.setAttemptCount(result.getAttemptCount()+1L);
-				result.setStatus(Status.ABANDONED);
+				result.setStatus(ExportStatus.ABANDONED);
 				result.setCompletionDate(now);
 				result.objectEntity.persist(cc);
 				continue;

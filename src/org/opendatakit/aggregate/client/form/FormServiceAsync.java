@@ -8,4 +8,6 @@ public interface FormServiceAsync {
 
   void getExternalServices(String formid, AsyncCallback<ExternServSummary[]> callback);
 
+  void getExports(AsyncCallback<ExportSummary[]> callback);
+
 }

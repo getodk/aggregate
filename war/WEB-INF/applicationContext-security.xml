@@ -42,7 +42,6 @@
 		<intercept-url pattern="/aggregateui/submissionservice" access="true" />
 		<intercept-url pattern="/aggregateui/formservice" access="true" />
 		<intercept-url pattern="/aggregateui/filterservice" access="true" />
-		<intercept-url pattern="/_ah/**" access="true" />
 		<intercept-url pattern="/odk_color.png" access="true" />
 		<intercept-url pattern="/index.html" access="true" />
 		<intercept-url pattern="/logout.html" access="true" />

@@ -10,4 +10,6 @@ public interface FormService extends RemoteService {
 
   ExternServSummary [] getExternalServices(String formid);
   
+  ExportSummary [] getExports();
+  
 }
