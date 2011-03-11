@@ -10,4 +10,11 @@ public interface FormServiceAsync {
 
   void getExports(AsyncCallback<ExportSummary[]> callback);
 
+  void createCsv(String formId, AsyncCallback<Boolean> callback);
+
+  void getPossibleKmlSettings(String formId, AsyncCallback<KmlSettings> callback);
+
+  void createKml(String formId, String geopointKey, String titleKey, String binaryKey,
+      AsyncCallback<Boolean> callback);
+
 }
