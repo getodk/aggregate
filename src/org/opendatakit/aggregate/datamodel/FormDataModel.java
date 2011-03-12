@@ -102,7 +102,7 @@ public final class FormDataModel extends CommonFieldsBase {
 	
 	private static final String TABLE_NAME = "_form_data_model";
 
-	private static final DataField URI_SUBMISSION_DATA_MODEL = new DataField("URI_SUBMISSION_DATA_MODEL", DataField.DataType.STRING, false, PersistConsts.URI_STRING_LEN).setIndexable(IndexType.HASH);
+	public static final DataField URI_SUBMISSION_DATA_MODEL = new DataField("URI_SUBMISSION_DATA_MODEL", DataField.DataType.STRING, false, PersistConsts.URI_STRING_LEN).setIndexable(IndexType.HASH);
 	private static final DataField PARENT_URI_FORM_DATA_MODEL = new DataField("PARENT_URI_FORM_DATA_MODEL", DataField.DataType.STRING, false, PersistConsts.URI_STRING_LEN);
 	/** ordinal (1st, 2nd, ... ) of this item in the form element */
 	private static final DataField ORDINAL_NUMBER = new DataField("ORDINAL_NUMBER", DataField.DataType.INTEGER, false);
@@ -144,15 +144,6 @@ public final class FormDataModel extends CommonFieldsBase {
 		}
 	};
 	
-	public final DataField uriSubmissionDataModel;
-	public final DataField parentUriFormDataModel;
-	public final DataField ordinalNumber;
-	public final DataField elementType;
-	public final DataField elementName;
-	public final DataField persistAsColumn;
-	public final DataField persistAsTable;
-	public final DataField persistAsSchema;
-	
 	// linked up value...
 	private WeakReference<FormDataModel> parent = null;
 	private final List<FormDataModel> children = new ArrayList<FormDataModel>();
@@ -175,42 +166,34 @@ public final class FormDataModel extends CommonFieldsBase {
 	}
 	
 	/**
-	 * Constructor to create the relation prototype.
+	 * Constructor to create the relation prototype. Only called via {@link #assertRelation(CallingContext)}
 	 * 
 	 * Note that the backing relation is not created by this constructor.
-	 * See the {@link #assertRelation(Datastore, User)} method.
 	 * 
 	 * @param schemaName
 	 */
 	FormDataModel(String schemaName) {
 		super(schemaName, TABLE_NAME);
-		fieldList.add(uriSubmissionDataModel = new DataField(URI_SUBMISSION_DATA_MODEL));
-		fieldList.add(parentUriFormDataModel = new DataField(PARENT_URI_FORM_DATA_MODEL));
-		fieldList.add(ordinalNumber = new DataField(ORDINAL_NUMBER));
-		fieldList.add(elementType = new DataField(ELEMENT_TYPE));
-		fieldList.add(elementName = new DataField(ELEMENT_NAME));
-		fieldList.add(persistAsColumn = new DataField(PERSIST_AS_COLUMN_NAME));
-		fieldList.add(persistAsTable = new DataField(PERSIST_AS_TABLE_NAME));
-		fieldList.add(persistAsSchema = new DataField(PERSIST_AS_SCHEMA_NAME));
+		fieldList.add(URI_SUBMISSION_DATA_MODEL);
+		fieldList.add(PARENT_URI_FORM_DATA_MODEL);
+		fieldList.add(ORDINAL_NUMBER);
+		fieldList.add(ELEMENT_TYPE);
+		fieldList.add(ELEMENT_NAME);
+		fieldList.add(PERSIST_AS_COLUMN_NAME);
+		fieldList.add(PERSIST_AS_TABLE_NAME);
+		fieldList.add(PERSIST_AS_SCHEMA_NAME);
 	}
 
 	/**
 	 * Construct an empty entity.  Only called via {@link #getEmptyRow(User)}
+	 * 
+	 * Note that the backing relation is not created by this constructor.
 	 * 
 	 * @param ref
 	 * @param user
 	 */
 	private FormDataModel(FormDataModel ref, User user) {
 		super(ref, user);
-
-		uriSubmissionDataModel = ref.uriSubmissionDataModel;
-		parentUriFormDataModel = ref.parentUriFormDataModel;
-		ordinalNumber = ref.ordinalNumber;
-		elementType = ref.elementType;
-		elementName = ref.elementName;
-		persistAsColumn = ref.persistAsColumn;
-		persistAsTable = ref.persistAsTable;
-		persistAsSchema = ref.persistAsSchema;
 	}
 
 	// Only called from within the persistence layer.
@@ -224,35 +207,35 @@ public final class FormDataModel extends CommonFieldsBase {
 	}
 	
 	public final String getUriSubmissionDataModel() {
-		return getStringField(uriSubmissionDataModel);
+		return getStringField(URI_SUBMISSION_DATA_MODEL);
 	}
 	
 	public final void setUriSubmissionDataModel(String value) {
-		if ( ! setStringField(uriSubmissionDataModel, value) ) {
+		if ( ! setStringField(URI_SUBMISSION_DATA_MODEL, value) ) {
 			throw new IllegalStateException("overflow on uriSubmissionDataModel");
 		}
 	}
 	
 	public final String getParentUriFormDataModel() {
-		return getStringField(parentUriFormDataModel);
+		return getStringField(PARENT_URI_FORM_DATA_MODEL);
 	}
 	
 	public final void setParentUriFormDataModel(String value) {
-		if ( ! setStringField(parentUriFormDataModel, value) ) {
+		if ( ! setStringField(PARENT_URI_FORM_DATA_MODEL, value) ) {
 			throw new IllegalStateException("overflow on parentUriFormDataModel");
 		}
 	}
 
 	public final Long getOrdinalNumber() {
-		return getLongField(ordinalNumber);
+		return getLongField(ORDINAL_NUMBER);
 	}
 
 	public final void setOrdinalNumber(Long value) {
-		setLongField(ordinalNumber, value);
+		setLongField(ORDINAL_NUMBER, value);
 	}
 
 	public final ElementType getElementType() {
-		String type = getStringField(elementType);
+		String type = getStringField(ELEMENT_TYPE);
 		ElementType et = null;
 		try {
 			et = ElementType.valueOf(type);
@@ -263,10 +246,21 @@ public final class FormDataModel extends CommonFieldsBase {
 		return et;
 	}
 	
-	public final String getElementName() {
-		return getStringField(elementName);
+	public final void setElementType(ElementType type) {
+		if ( ! setStringField(ELEMENT_TYPE, type.toString()) ) {
+			throw new IllegalStateException("overflow on elementType");
+		}
 	}
 	
+	public final String getElementName() {
+		return getStringField(ELEMENT_NAME);
+	}
+	
+	public final void setElementName(String name) {
+		if ( ! setStringField(ELEMENT_NAME, name) ) {
+			throw new IllegalStateException("overflow on elementName");
+		}
+	}
 	/**
 	 * Constructs the colon-separate qualified name for an element.  This is the
 	 * element name prefixed with the enclosing group(s) names up until the first
@@ -322,15 +316,33 @@ public final class FormDataModel extends CommonFieldsBase {
 	}
 
 	public final String getPersistAsColumn() {
-		return getStringField(persistAsColumn);
+		return getStringField(PERSIST_AS_COLUMN_NAME);
+	}
+	
+	public final void setPersistAsColumn(String value) {
+		if ( ! setStringField(PERSIST_AS_COLUMN_NAME, value) ) {
+			throw new IllegalStateException("overflow on persistAsColumn");
+		}
 	}
 
 	public final String getPersistAsTable() {
-		return getStringField(persistAsTable);
+		return getStringField(PERSIST_AS_TABLE_NAME);
+	}
+	
+	public final void setPersistAsTable(String value) {
+		if ( ! setStringField(PERSIST_AS_TABLE_NAME, value) ) {
+			throw new IllegalStateException("overflow on persistAsTable");
+		}
 	}
 	
 	public final String getPersistAsSchema() {
-		return getStringField(persistAsSchema);
+		return getStringField(PERSIST_AS_SCHEMA_NAME);
+	}
+	
+	public final void setPersistAsSchema(String value) {
+		if ( ! setStringField(PERSIST_AS_SCHEMA_NAME, value) ) {
+			throw new IllegalStateException("overflow on persistAsSchema");
+		}
 	}
 	
 	public String getPersistAsQualifiedTableName() {
