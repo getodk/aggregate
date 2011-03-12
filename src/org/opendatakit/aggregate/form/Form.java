@@ -102,22 +102,27 @@ public class Form {
 
   Form(Submission submission, CallingContext cc) throws ODKDatastoreException {
     objectEntity = submission;
-    formDefinition = fetchSubmissionAssociations(cc);
+    formDefinition = FormDefinition.getFormDefinition(getSubmissionXFormParameters(cc), cc);
   }
 
-  private FormDefinition fetchSubmissionAssociations(CallingContext cc) {
+  public XFormParameters getSubmissionXFormParameters(CallingContext cc) {
+		RepeatSubmissionType r = (RepeatSubmissionType) objectEntity.getElementValue(FormInfo.fiSubmissionTable);
+		List<SubmissionSet> submissions = r.getSubmissionSets();
+		if ( submissions.size() != 1 ) {
+			throw new IllegalStateException("Expecting only one submission record at this time!");
+		}
+		SubmissionSet submissionRecord = submissions.get(0);
+		
+		String submissionFormId = ((StringSubmissionType) submissionRecord.getElementValue(FormInfo.submissionFormId)).getValue();
+		Long submissionModelVersion = ((LongSubmissionType) submissionRecord.getElementValue(FormInfo.submissionModelVersion)).getValue();
+		Long submissionUiVersion = ((LongSubmissionType) submissionRecord.getElementValue(FormInfo.submissionUiVersion)).getValue();
+		XFormParameters submissionDefn = new XFormParameters(submissionFormId, submissionModelVersion, submissionUiVersion);
+		return submissionDefn;
+  }
+  
+  public SubmissionAssociationTable getSubmissionAssociation(CallingContext cc) {
 
-	RepeatSubmissionType r = (RepeatSubmissionType) objectEntity.getElementValue(FormInfo.fiSubmissionTable);
-	List<SubmissionSet> submissions = r.getSubmissionSets();
-	if ( submissions.size() != 1 ) {
-		throw new IllegalStateException("Expecting only one submission record at this time!");
-	}
-	SubmissionSet submissionRecord = submissions.get(0);
-	
-	String submissionFormId = ((StringSubmissionType) submissionRecord.getElementValue(FormInfo.submissionFormId)).getValue();
-	Long submissionModelVersion = ((LongSubmissionType) submissionRecord.getElementValue(FormInfo.submissionModelVersion)).getValue();
-	Long submissionUiVersion = ((LongSubmissionType) submissionRecord.getElementValue(FormInfo.submissionUiVersion)).getValue();
-	XFormParameters submissionDefn = new XFormParameters(submissionFormId, submissionModelVersion, submissionUiVersion);
+	XFormParameters submissionDefn = getSubmissionXFormParameters(cc);
 
 	List<SubmissionAssociationTable> saList = SubmissionAssociationTable.findSubmissionAssociationsForXForm(submissionDefn,cc);
 	if ( saList.size() == 0 ) return null;
@@ -125,8 +130,7 @@ public class Form {
 		throw new IllegalStateException("Logic is not yet in place for cross-form submission sharing");
 	}
 	SubmissionAssociationTable match = saList.get(0);
-	
-	return FormDefinition.getFormDefinition(match.getXFormParameters(), cc);
+	return match;
   }
   
   public void persist(CallingContext cc) throws ODKDatastoreException {
