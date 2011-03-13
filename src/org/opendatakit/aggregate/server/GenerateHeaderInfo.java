@@ -1,7 +1,9 @@
 package org.opendatakit.aggregate.server;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.opendatakit.aggregate.client.filter.ColumnFilter;
 import org.opendatakit.aggregate.client.filter.ColumnFilterHeader;
@@ -9,6 +11,7 @@ import org.opendatakit.aggregate.client.filter.Filter;
 import org.opendatakit.aggregate.client.filter.FilterGroup;
 import org.opendatakit.aggregate.client.submission.SubmissionUISummary;
 import org.opendatakit.aggregate.constants.common.Visibility;
+import org.opendatakit.aggregate.datamodel.FormDataModel;
 import org.opendatakit.aggregate.datamodel.FormElementKey;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.datamodel.FormElementModel.ElementType;
@@ -29,47 +32,80 @@ public class GenerateHeaderInfo {
 
   private List<FormElementModel> includes;
 
+  private Map<FormElementModel, GeopointColumn> geopointFlags;
+
   public GenerateHeaderInfo(FilterGroup filterGroup, SubmissionUISummary summary, Form form) {
     this.summary = summary;
     this.form = form;
     this.filterGroup = filterGroup;
   }
-  
+
   public List<FormElementModel> getIncludedElements() {
     return includes;
   }
-  
+
+  public Map<String, GeopointHeaderIncludes> getGeopointIncludes() {
+    Map<String, GeopointHeaderIncludes> gpsIncludes = new HashMap<String, GeopointHeaderIncludes>();
+
+    if (geopointFlags != null) {
+      for (GeopointColumn gpsColumns : geopointFlags.values()) {
+        GeopointHeaderIncludes include = new GeopointHeaderIncludes(gpsColumns.getElementName(),
+            gpsColumns.includeLatitude(), gpsColumns.includeLongitude(),
+            gpsColumns.includeAltitude(), gpsColumns.includeAccuracy());
+        gpsIncludes.put(gpsColumns.getElementName(), include);
+      }
+    }
+
+    return gpsIncludes;
+  }
 
   public void processForHeaderInfo(FormElementModel node) {
-    
+
     // check if we need to apply filters
     if (filterGroup != null) {
       includes = new ArrayList<FormElementModel>();
-      
+
       // process filters
       for (Filter filter : filterGroup.getFilters()) {
         if (filter instanceof ColumnFilter) {
           ColumnFilter cf = (ColumnFilter) filter;
 
-          // processing variables
-          List<FormElementModel> columns = new ArrayList<FormElementModel>();
-          FormElementKey femKey;
-          FormElementModel retrievedElement;
-
           // convert filter to fem
           for (ColumnFilterHeader columnHeader : cf.getColumnFilterHeaders()) {
             String decodeKey = columnHeader.getColumn().getColumnEncoding();
-            femKey = new FormElementKey(decodeKey);
-            retrievedElement = FormElementModel.retrieveFormElementModel(form, femKey);
-            columns.add(retrievedElement);
+            FormElementKey femKey = new FormElementKey(decodeKey);
+            FormElementModel fem = FormElementModel.retrieveFormElementModel(form, femKey);
+
+            // add to appropriate keep or remove
+            if (cf.getVisibility().equals(Visibility.KEEP)) {
+              addKeepFormElement(fem);
+            } else {
+              addRemoveFormElement(fem);
+            }
+
+            if (fem.getElementType().equals(ElementType.GEOPOINT)) {
+              if (geopointFlags == null) {
+                geopointFlags = new HashMap<FormElementModel, GeopointColumn>();
+              }
+
+              GeopointColumn geopoint = geopointFlags.get(fem);
+              if (geopoint == null) {
+                geopoint = new GeopointColumn(fem);
+                geopointFlags.put(fem, geopoint);
+              }
+
+              Long gpsColumnIndex = columnHeader.getColumn().getGeopointColumnCode();
+
+              // add to appropriate keep or remove
+              if (cf.getVisibility().equals(Visibility.KEEP)) {
+                geopoint.keepColumn(gpsColumnIndex);
+              } else {
+                geopoint.removeColumn(gpsColumnIndex);
+              }
+
+            }
           }
 
-          // add to appropriate keep or remove
-          if (cf.getVisibility().equals(Visibility.KEEP)) {
-            addKeepFormElements(columns);
-          } else {
-            addRemoveFormElements(columns);
-          }
         }
       }
     }
@@ -109,15 +145,12 @@ public class GenerateHeaderInfo {
         }
       } else {
         // we are processing this as a table element
-        processFilter(nodeName, node, false);
+        processFilter(nodeName, node);
 
       }
       break;
-    case GEOPOINT:
-      processFilter(nodeName, node, true);
-      break;
     default:
-      processFilter(node.getElementName(), node, false);
+      processFilter(nodeName, node);
     }
 
     // only recurse into the elements that are not binary, geopoint,
@@ -135,61 +168,214 @@ public class GenerateHeaderInfo {
     }
   }
 
-  private void processFilter(String nodeName, FormElementModel node, boolean geopoint) {
-    
-    if(includes == null) {
-      addNodeToHeader(nodeName, node, geopoint);
+  private void processFilter(String nodeName, FormElementModel node) {
+
+    if (includes == null) {
+      addNodeToHeader(nodeName, node);
       return;
     }
-    
-    // check to see node is included in filter  
-    if(removes != null && keeps != null) {
-      if(keeps.contains(node) && !removes.contains(node)) {
-        addNodeToHeader(nodeName, node, geopoint);                
+
+    // check to see node is included in filter
+    if (removes != null && keeps != null) {
+      if (keeps.contains(node) && !removes.contains(node)) {
+        addNodeToHeader(nodeName, node);
+      } else if (keeps.contains(node) && node.getElementType().equals(ElementType.GEOPOINT)) {
+        addNodeToHeader(nodeName, node);
       }
     } else if (keeps != null) {
-      if(keeps.contains(node)) {
-        addNodeToHeader(nodeName, node, geopoint);        
-      }      
+      if (keeps.contains(node)) {
+        addNodeToHeader(nodeName, node);
+      }
     } else if (removes != null) {
-      if(!removes.contains(node)) {
-        addNodeToHeader(nodeName, node, geopoint);        
+      if (!removes.contains(node)) {
+        addNodeToHeader(nodeName, node);
       }
     } else {
-      addNodeToHeader(nodeName, node, geopoint);
+      addNodeToHeader(nodeName, node);
     }
   }
 
-  void addNodeToHeader(String nodeName, FormElementModel node, boolean geopoint) {
+  void addNodeToHeader(String nodeName, FormElementModel node) {
     FormElementKey key = node.constructFormElementKey(form);
-    
-    if(geopoint) {
-      summary.addSubmissionHeader(nodeName + BasicConsts.COLON + GeoPoint.LATITUDE, key.toString());
-      summary.addSubmissionHeader(nodeName + BasicConsts.COLON + GeoPoint.LONGITUDE, key.toString());
-      summary.addSubmissionHeader(nodeName + BasicConsts.COLON + GeoPoint.ALTITUDE, key.toString());
-      summary.addSubmissionHeader(nodeName + BasicConsts.COLON + GeoPoint.ACCURACY, key.toString());  
+
+    if (node.getElementType().equals(ElementType.GEOPOINT)) {
+      GeopointColumn gpsColumns = null;
+
+      if (geopointFlags != null) {
+        gpsColumns = geopointFlags.get(node);
+      }
+
+      if (gpsColumns == null) {
+        summary.addGeopointHeader(nodeName + BasicConsts.COLON + GeoPoint.LATITUDE, key.toString(),
+            Long.valueOf(FormDataModel.GEOPOINT_LATITUDE_ORDINAL_NUMBER));
+        summary.addGeopointHeader(nodeName + BasicConsts.COLON + GeoPoint.LONGITUDE,
+            key.toString(), Long.valueOf(FormDataModel.GEOPOINT_LONGITUDE_ORDINAL_NUMBER));
+        summary.addGeopointHeader(nodeName + BasicConsts.COLON + GeoPoint.ALTITUDE, key.toString(),
+            Long.valueOf(FormDataModel.GEOPOINT_ALTITUDE_ORDINAL_NUMBER));
+        summary.addGeopointHeader(nodeName + BasicConsts.COLON + GeoPoint.ACCURACY, key.toString(),
+            Long.valueOf(FormDataModel.GEOPOINT_ACCURACY_ORDINAL_NUMBER));
+      } else {
+        if (gpsColumns.includeLatitude()) {
+          summary.addGeopointHeader(nodeName + BasicConsts.COLON + GeoPoint.LATITUDE,
+              key.toString(), Long.valueOf(FormDataModel.GEOPOINT_LATITUDE_ORDINAL_NUMBER));
+        }
+        if (gpsColumns.includeLongitude()) {
+          summary.addGeopointHeader(nodeName + BasicConsts.COLON + GeoPoint.LONGITUDE,
+              key.toString(), Long.valueOf(FormDataModel.GEOPOINT_LONGITUDE_ORDINAL_NUMBER));
+        }
+        if (gpsColumns.includeAltitude()) {
+          summary.addGeopointHeader(nodeName + BasicConsts.COLON + GeoPoint.ALTITUDE,
+              key.toString(), Long.valueOf(FormDataModel.GEOPOINT_ALTITUDE_ORDINAL_NUMBER));
+        }
+        if (gpsColumns.includeAccuracy()) {
+          summary.addGeopointHeader(nodeName + BasicConsts.COLON + GeoPoint.ACCURACY,
+              key.toString(), Long.valueOf(FormDataModel.GEOPOINT_ACCURACY_ORDINAL_NUMBER));
+        }
+
+      }
     } else {
       summary.addSubmissionHeader(nodeName, key.toString());
     }
     // note: if there is no filter we will get here without an includes created
-    if(includes != null) {
+    if (includes != null) {
       includes.add(node);
     }
   }
-  
-  private void addKeepFormElements(List<FormElementModel> formElements) {
-    if(keeps == null) {
+
+  private void addKeepFormElement(FormElementModel formElement) {
+    if (keeps == null) {
       keeps = new ArrayList<FormElementModel>();
     }
-    
-    keeps.addAll(formElements);
+
+    keeps.add(formElement);
   }
-  
-  private void addRemoveFormElements(List<FormElementModel> formElements) {
-    if(removes == null) {
+
+  private void addRemoveFormElement(FormElementModel formElement) {
+    if (removes == null) {
       removes = new ArrayList<FormElementModel>();
     }
-    
-    removes.addAll(formElements);
+
+    removes.add(formElement);
+  }
+
+  public class GeopointColumn {
+    private FormElementModel fem;
+
+    private boolean keepLatFlag = false;
+    private boolean keepLongFlag = false;
+    private boolean keepAltFlag = false;
+    private boolean keepAccFlag = false;
+    private boolean removeLatFlag = false;
+    private boolean removeLongFlag = false;
+    private boolean removeAltFlag = false;
+    private boolean removeAccFlag = false;
+
+    public GeopointColumn(FormElementModel fem) {
+      this.fem = fem;
+    }
+
+    public String getElementName() {
+      return fem.getElementName();
+    }
+
+    public void removeColumn(Long columnConst) {
+      int ordinal = columnConst.intValue();
+      switch (ordinal) {
+      case FormDataModel.GEOPOINT_LATITUDE_ORDINAL_NUMBER:
+        removeLatFlag = true;
+        break;
+      case FormDataModel.GEOPOINT_LONGITUDE_ORDINAL_NUMBER:
+        removeLongFlag = true;
+        break;
+      case FormDataModel.GEOPOINT_ALTITUDE_ORDINAL_NUMBER:
+        removeAltFlag = true;
+        break;
+      case FormDataModel.GEOPOINT_ACCURACY_ORDINAL_NUMBER:
+        removeAccFlag = true;
+        break;
+      default:
+        break;
+      }
+    }
+
+    private boolean hasRemoves() {
+      return removeLatFlag || removeLongFlag || removeAltFlag || removeAccFlag;
+    }
+
+    public void keepColumn(Long columnConst) {
+      int ordinal = columnConst.intValue();
+      switch (ordinal) {
+      case FormDataModel.GEOPOINT_LATITUDE_ORDINAL_NUMBER:
+        keepLatFlag = true;
+        break;
+      case FormDataModel.GEOPOINT_LONGITUDE_ORDINAL_NUMBER:
+        keepLongFlag = true;
+        break;
+      case FormDataModel.GEOPOINT_ALTITUDE_ORDINAL_NUMBER:
+        keepAltFlag = true;
+        break;
+      case FormDataModel.GEOPOINT_ACCURACY_ORDINAL_NUMBER:
+        keepAccFlag = true;
+        break;
+      default:
+        break;
+      }
+    }
+
+    private boolean hasKeeps() {
+      return keepLatFlag || keepLongFlag || keepAltFlag || keepAccFlag;
+    }
+
+    public boolean includeLatitude() {
+      if (hasKeeps() && hasRemoves()) {
+        if (keepLatFlag && !removeLatFlag) {
+          return true;
+        }
+      } else if (hasKeeps()) {
+        return keepLatFlag;
+      } else if (hasRemoves()) {
+        return !removeLatFlag;
+      }
+      return false;
+    }
+
+    public boolean includeLongitude() {
+      if (hasKeeps() && hasRemoves()) {
+        if (keepLongFlag && !removeLongFlag) {
+          return true;
+        }
+      } else if (hasKeeps()) {
+        return keepLongFlag;
+      } else if (hasRemoves()) {
+        return !removeLongFlag;
+      }
+      return false;
+    }
+
+    public boolean includeAltitude() {
+      if (hasKeeps() && hasRemoves()) {
+        if (keepAltFlag && !removeAltFlag) {
+          return true;
+        }
+      } else if (hasKeeps()) {
+        return keepAltFlag;
+      } else if (hasRemoves()) {
+        return !removeAltFlag;
+      }
+      return false;
+    }
+
+    public boolean includeAccuracy() {
+      if (hasKeeps() && hasRemoves()) {
+        if (keepAccFlag && !removeAccFlag) {
+          return true;
+        }
+      } else if (hasKeeps()) {
+        return keepAccFlag;
+      } else if (hasRemoves()) {
+        return !removeAccFlag;
+      }
+      return false;
+    }
   }
 }

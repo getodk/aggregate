@@ -50,7 +50,9 @@ public class SubmissionFilter extends CommonFieldsBase {
       DataField.DataType.STRING, true, 4096L);
   private static final DataField ORDINAL_PROPERTY = new DataField("ORDINAL",
       DataField.DataType.INTEGER, true);
-
+  private static final DataField COL_GPS_ORD_PROPERTY = new DataField("GPS_ORD", DataField.DataType.INTEGER,
+      true); 
+  
   private List<SubmissionColumnFilter> colFilters;
   
   /**
@@ -69,6 +71,7 @@ public class SubmissionFilter extends CommonFieldsBase {
     fieldList.add(OPERATION_PROPERTY);
     fieldList.add(CLAUSE_PROPERTY);
     fieldList.add(ORDINAL_PROPERTY);
+    fieldList.add(COL_GPS_ORD_PROPERTY);
   }
 
   /**
@@ -121,6 +124,14 @@ public class SubmissionFilter extends CommonFieldsBase {
     return getLongField(ORDINAL_PROPERTY);
   }
 
+  public Long getGpsColumnCode() {
+    return getLongField(COL_GPS_ORD_PROPERTY);
+  }
+  
+  public void setGpsColumnCode(Long gpsColumnCode) {
+    setLongField(COL_GPS_ORD_PROPERTY, gpsColumnCode); 
+  }
+  
   public void setFilterGroup(String groupUri) {
     if (!setStringField(URI_FILTER_GROUP_PROPERTY, groupUri)) {
       throw new IllegalArgumentException("overflow filterGroup");
@@ -224,7 +235,7 @@ public class SubmissionFilter extends CommonFieldsBase {
       RowFilter rowFilter = new RowFilter(this.getUri());
       rowFilter.setOperation(getFilterOperation());
       rowFilter.setInput(getFilterInputClause());
-      Column header = new Column(getColumnTitle(), getColumnEncoding());
+      Column header = new Column(getColumnTitle(), getColumnEncoding(), getGpsColumnCode());
       rowFilter.setColumn(header);
       filter = rowFilter;
     }
@@ -285,6 +296,7 @@ public class SubmissionFilter extends CommonFieldsBase {
       Column column = rf.getColumn();
       subFilter.setColumnTitle(column.getDisplayHeader());
       subFilter.setColumnEncoding(column.getColumnEncoding());
+      subFilter.setGpsColumnCode(column.getGeopointColumnCode());
     }
     
     return subFilter;

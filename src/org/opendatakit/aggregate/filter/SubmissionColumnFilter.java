@@ -25,7 +25,9 @@ public class SubmissionColumnFilter extends CommonFieldsBase {
   private static final DataField COL_TITLE_PROPERTY = new DataField("COL_TITLE", DataField.DataType.STRING,
       true, 80L); // TODO: determine length
   private static final DataField COL_ENCODING_PROPERTY = new DataField("COL_ENCODING", DataField.DataType.STRING,
-      true, 500L); // TODO: determine length
+      true, 1000L); // TODO: determine length
+  private static final DataField COL_GPS_ORD_PROPERTY = new DataField("GPS_ORD", DataField.DataType.INTEGER,
+      true); 
   /**
    * Construct a relation prototype.
    * 
@@ -37,6 +39,7 @@ public class SubmissionColumnFilter extends CommonFieldsBase {
     fieldList.add(URI_PARENT_FILTER_PROPERTY);
     fieldList.add(COL_TITLE_PROPERTY);
     fieldList.add(COL_ENCODING_PROPERTY);
+    fieldList.add(COL_GPS_ORD_PROPERTY);
   }
 
   /**
@@ -66,6 +69,14 @@ public class SubmissionColumnFilter extends CommonFieldsBase {
     return getStringField(COL_ENCODING_PROPERTY);
   }
 
+  public Long getGpsColumnCode() {
+    return getLongField(COL_GPS_ORD_PROPERTY);
+  }
+  
+  public void setGpsColumnCode(Long gpsColumnCode) {
+    setLongField(COL_GPS_ORD_PROPERTY, gpsColumnCode); 
+  }
+  
   public void setParentFilterUri(String parentUri) {
     if (!setStringField(URI_PARENT_FILTER_PROPERTY, parentUri)) {
       throw new IllegalArgumentException("overflow parent uri");
@@ -85,7 +96,7 @@ public class SubmissionColumnFilter extends CommonFieldsBase {
   }
 
   public ColumnFilterHeader transform() {    
-    Column column = new Column(getColumnTitle(), getColumnEncoding());
+    Column column = new Column(getColumnTitle(), getColumnEncoding(), getGpsColumnCode());
     return  new ColumnFilterHeader(this.getUri(), column);
   }
   
@@ -121,6 +132,7 @@ public class SubmissionColumnFilter extends CommonFieldsBase {
     columnFilter.setParentFilterUri(parentFilter.getUri());
     columnFilter.setColumnTitle(column.getColumn().getDisplayHeader());
     columnFilter.setColumnEncoding(column.getColumn().getColumnEncoding());
+    columnFilter.setGpsColumnCode(column.getColumn().getGeopointColumnCode());
 
     return columnFilter;
   }

@@ -25,6 +25,10 @@ public class ColumnFilterHeader implements Serializable {
     this(new Column(displayHeader, columnName));
   }
   
+  public ColumnFilterHeader(String displayHeader, String columnName, Long geopointCode) {
+    this(new Column(displayHeader, columnName, geopointCode));
+  }
+  
   /**
    * This constructor should only be used by the server
    * 

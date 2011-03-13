@@ -61,8 +61,13 @@ public class QueryByUIFilterGroup extends QueryBase {
         case STRING:
             compareValue = value;
             break;
+        case GEOPOINT:
+            compareValue = new BigDecimal(value);
+            super.addFilterGeoPoint(fem, column.getGeopointColumnCode(), op, compareValue);          
+            continue;
         default:
-            throw new IllegalStateException("datatype not supported");
+            // can't apply a filter to this type
+            continue;
         }
         
         super.addFilter(fem, op, compareValue);
