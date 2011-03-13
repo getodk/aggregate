@@ -215,6 +215,7 @@ public class AggregateUI implements EntryPoint {
         	}
         }
         def.setFormId(formId);
+        getFilterList(formId);
         if(forms.length > 0) {
         	requestUpdatedData(def);
         }
@@ -239,8 +240,9 @@ Set<String> existingForms = new HashSet<String>();
 				  if (hash.get(UrlHash.FORM).equals(form.getTitle()))
 					  formsBox.setItemSelected(formsBox.getItemCount() - 1, true);
 			  }
-			  formsBox.addItem("none");
 		  }
+	  } else if (formsBox.getItemCount() == 0) {
+		  formsBox.addItem("none");
 	  }
 	  formsBox.addChangeHandler(new ChangeHandler() {
 
@@ -255,6 +257,7 @@ Set<String> existingForms = new HashSet<String>();
   
   private void fillFilterDropDown(FilterSet set) {
 	  filtersBox.clear();
+	  filtersBox.addItem("none");
 	  for(FilterGroup group : set.getGroups()) {
 		  filtersBox.addItem(group.getName());
 	  };
