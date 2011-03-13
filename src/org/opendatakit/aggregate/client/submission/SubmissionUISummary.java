@@ -35,6 +35,10 @@ public class SubmissionUISummary implements Serializable {
     headers.add(new Column(displayHeader, columnName));
   }
   
+  public void addGeopointHeader(String displayHeader, String columnName, Long geopointColumnCode) {
+    headers.add(new Column(displayHeader, columnName, geopointColumnCode));
+  }
+  
   public List<SubmissionUI> getSubmissions() {
     return submissions;
   }

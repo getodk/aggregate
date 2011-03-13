@@ -63,7 +63,7 @@ public abstract class QueryBase {
   	query.addFilter(attribute.getFormDataModel().getBackingKey(), op, value);
   }
   
-  public void addFilterGeoPoint(FormElementModel attr, long ordinal, FilterOperation op,
+  public void addFilterGeoPoint(FormElementModel attr, Long ordinal, FilterOperation op,
       Object value) {
 
     List<FormDataModel> geoList = attr.getFormDataModel().getChildren();

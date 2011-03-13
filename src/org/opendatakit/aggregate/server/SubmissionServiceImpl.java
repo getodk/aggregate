@@ -14,8 +14,8 @@ import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.format.Row;
-import org.opendatakit.aggregate.format.element.BasicElementFormatter;
 import org.opendatakit.aggregate.format.element.ElementFormatter;
+import org.opendatakit.aggregate.format.element.UiElementFormatter;
 import org.opendatakit.aggregate.query.submission.QueryByDate;
 import org.opendatakit.aggregate.query.submission.QueryByUIFilterGroup;
 import org.opendatakit.aggregate.submission.Submission;
@@ -67,10 +67,7 @@ org.opendatakit.aggregate.client.submission.SubmissionService {
     GenerateHeaderInfo headerGenerator = new GenerateHeaderInfo(filterGroup, summary, form);
     headerGenerator.processForHeaderInfo(form.getTopLevelGroupElement());
     List<FormElementModel> filteredElements = headerGenerator.getIncludedElements();
-    
-    //ElementFormatter elemFormatter = new LinkElementFormatter(cc.getServerURL(), true, true, true);
-
-    ElementFormatter elemFormatter = new BasicElementFormatter(true, true, true);
+    ElementFormatter elemFormatter = new UiElementFormatter(headerGenerator.getGeopointIncludes());
 
     
     // format row elements
