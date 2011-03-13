@@ -17,7 +17,6 @@ import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.persistence.Query.FilterOperation;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
-import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
 import org.opendatakit.common.security.User;
 
 /**
@@ -130,14 +129,32 @@ public class SubmissionFilterGroup extends CommonFieldsBase {
     return filterGroup;
   }
 
-  public void persist(CallingContext cc) throws ODKEntityPersistException {
+  public void persist(CallingContext cc) throws ODKDatastoreException {
     Datastore ds = cc.getDatastore();
     User user = cc.getCurrentUser();
 
+    // before we persist get a list of all the filters that existed before the persist
+    List<SubmissionFilter> oldFilters = SubmissionFilter.getFilterList(this.getUri(), cc);
+
+    // persist filter group
     ds.putEntity(this, user);
+    
     if(filters != null) {
+      // persist filters
       for(SubmissionFilter filter : filters) {
         filter.persist(cc);
+      }
+      
+      // remove all the old filters that are no longer part of the filterGroup
+      for(SubmissionFilter oldFilter : oldFilters){
+        if(!filters.contains(oldFilter)) {
+          oldFilter.delete(cc);
+        }
+      }
+    } else {
+      // no filters are in this filter group so remove all old filters
+      for(SubmissionFilter filter : oldFilters){
+        filter.delete(cc);
       }
     }
   }

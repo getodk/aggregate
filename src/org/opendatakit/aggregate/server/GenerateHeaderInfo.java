@@ -144,7 +144,7 @@ public class GenerateHeaderInfo {
     
     // check to see node is included in filter  
     if(removes != null && keeps != null) {
-      if(!keeps.contains(node) && removes.contains(node)) {
+      if(keeps.contains(node) && !removes.contains(node)) {
         addNodeToHeader(nodeName, node, geopoint);                
       }
     } else if (keeps != null) {
