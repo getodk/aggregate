@@ -146,17 +146,16 @@ public class FormDefinition {
 		list.add(d);
 		// reset the PK to be the PK of the table we are representing
 		d.setStringField(fdm.primaryKey, groupUri);
-		d.setLongField(fdm.ordinalNumber, os.ordinal);
-		d.setStringField(fdm.parentUriFormDataModel, parentURI);
-		d.setStringField(fdm.uriSubmissionDataModel, topLevel.getUri());
-		d.setStringField(fdm.elementName, form.getTableName());
-		d.setStringField(fdm.elementType,
-				(form == topLevel) ?
-				FormDataModel.ElementType.GROUP.toString() :
-				FormDataModel.ElementType.REPEAT.toString() );
-		d.setStringField(fdm.persistAsColumn, null);
-		d.setStringField(fdm.persistAsTable, form.getTableName());
-		d.setStringField(fdm.persistAsSchema, form.getSchemaName());
+		d.setOrdinalNumber(os.ordinal);
+		d.setParentUriFormDataModel(parentURI);
+		d.setUriSubmissionDataModel(topLevel.getUri());
+		d.setElementName(form.getTableName());
+		d.setElementType((form == topLevel) ?
+				FormDataModel.ElementType.GROUP :
+				FormDataModel.ElementType.REPEAT );
+		d.setPersistAsColumn(null);
+		d.setPersistAsTable(form.getTableName());
+		d.setPersistAsSchema(form.getSchemaName());
 		
 		// enforce defined ordinal positions based upon order in fieldList
 		
@@ -171,25 +170,25 @@ public class FormDefinition {
 			list.add(d);
 			String pkFormatted = String.format("%1$s(%2$08d)", parentURI_minusParenPhrase, ++(os.sequenceCounter));
 			d.setStringField(fdm.primaryKey, pkFormatted);
-			d.setLongField(fdm.ordinalNumber, os.ordinal);
-			d.setStringField(fdm.parentUriFormDataModel, groupUri);
-			d.setStringField(fdm.uriSubmissionDataModel, k.getKey());
-			d.setStringField(fdm.elementName, f.getName());
+			d.setOrdinalNumber(os.ordinal);
+			d.setParentUriFormDataModel(groupUri);
+			d.setUriSubmissionDataModel(k.getKey());
+			d.setElementName(f.getName());
 			switch ( f.getDataType() ) {
 			case STRING:
-				d.setStringField(fdm.elementType, FormDataModel.ElementType.STRING.toString());
+				d.setElementType(FormDataModel.ElementType.STRING);
 				break;
 			case INTEGER:
-				d.setStringField(fdm.elementType, FormDataModel.ElementType.INTEGER.toString());
+				d.setElementType(FormDataModel.ElementType.INTEGER);
 				break;
 			case DECIMAL:
-				d.setStringField(fdm.elementType, FormDataModel.ElementType.DECIMAL.toString());
+				d.setElementType(FormDataModel.ElementType.DECIMAL);
 				break;
 			case BOOLEAN:
-				d.setStringField(fdm.elementType, FormDataModel.ElementType.BOOLEAN.toString());
+				d.setElementType(FormDataModel.ElementType.BOOLEAN);
 				break;
 			case DATETIME:
-				d.setStringField(fdm.elementType, FormDataModel.ElementType.JRDATETIME.toString());
+				d.setElementType(FormDataModel.ElementType.JRDATETIME);
 				break;
 			case URI:
 			case BINARY: // this data type is hidden under BINARY content structure...
@@ -197,9 +196,9 @@ public class FormDefinition {
 				default:
 					throw new IllegalStateException("Unexpected DataType");
 			}
-			d.setStringField(fdm.persistAsColumn, f.getName());
-			d.setStringField(fdm.persistAsTable, form.getTableName());
-			d.setStringField(fdm.persistAsSchema, form.getSchemaName());
+			d.setPersistAsColumn(f.getName());
+			d.setPersistAsTable(form.getTableName());
+			d.setPersistAsSchema(form.getSchemaName());
 		}
 		
 		++(os.ordinal);
@@ -246,41 +245,41 @@ public class FormDefinition {
 		d.setStringField(fdm.primaryKey, binaryContentUri);
 		list.add(d);
 		final String bcURI = d.getUri();
-		d.setLongField(fdm.ordinalNumber, os.ordinal);
-		d.setStringField(fdm.parentUriFormDataModel, parentTableKey);
-		d.setStringField(fdm.uriSubmissionDataModel, topLevelURI);
-		d.setStringField(fdm.elementName, binaryContentElementName);
-		d.setStringField(fdm.elementType, FormDataModel.ElementType.BINARY.toString());
-		d.setStringField(fdm.persistAsColumn, null);
-		d.setStringField(fdm.persistAsTable, binaryContentTableName);
-		d.setStringField(fdm.persistAsSchema, fdm.getSchemaName());
+		d.setOrdinalNumber(os.ordinal);
+		d.setParentUriFormDataModel(parentTableKey);
+		d.setUriSubmissionDataModel(topLevelURI);
+		d.setElementName(binaryContentElementName);
+		d.setElementType(FormDataModel.ElementType.BINARY);
+		d.setPersistAsColumn(null);
+		d.setPersistAsTable(binaryContentTableName);
+		d.setPersistAsSchema(fdm.getSchemaName());
 
 		// record for binary content ref blob..
 		d = ds.createEntityUsingRelation(fdm, user);
 		d.setStringField(fdm.primaryKey, binaryContentRefBlobUri);
 		list.add(d);
 		final String bcbURI = d.getUri();
-		d.setLongField(fdm.ordinalNumber, 1L);
-		d.setStringField(fdm.parentUriFormDataModel, bcURI);
-		d.setStringField(fdm.uriSubmissionDataModel, topLevelURI);
-		d.setStringField(fdm.elementName, binaryContentElementName);
-		d.setStringField(fdm.elementType, FormDataModel.ElementType.BINARY_CONTENT_REF_BLOB.toString());
-		d.setStringField(fdm.persistAsColumn, null);
-		d.setStringField(fdm.persistAsTable, binaryContentRefBlobTableName);
-		d.setStringField(fdm.persistAsSchema, fdm.getSchemaName());
+		d.setOrdinalNumber(1L);
+		d.setParentUriFormDataModel(bcURI);
+		d.setUriSubmissionDataModel(topLevelURI);
+		d.setElementName(binaryContentElementName);
+		d.setElementType(FormDataModel.ElementType.BINARY_CONTENT_REF_BLOB);
+		d.setPersistAsColumn(null);
+		d.setPersistAsTable(binaryContentRefBlobTableName);
+		d.setPersistAsSchema(fdm.getSchemaName());
 
 		// record for ref blob...
 		d = ds.createEntityUsingRelation(fdm, user);
 		d.setStringField(fdm.primaryKey, refBlobUri);
 		list.add(d);
-		d.setLongField(fdm.ordinalNumber, 1L);
-		d.setStringField(fdm.parentUriFormDataModel, bcbURI);
-		d.setStringField(fdm.uriSubmissionDataModel, topLevelURI);
-		d.setStringField(fdm.elementName, binaryContentElementName);
-		d.setStringField(fdm.elementType, FormDataModel.ElementType.REF_BLOB.toString());
-		d.setStringField(fdm.persistAsColumn, null);
-		d.setStringField(fdm.persistAsTable, refBlobTableName);
-		d.setStringField(fdm.persistAsSchema, fdm.getSchemaName());
+		d.setOrdinalNumber(1L);
+		d.setParentUriFormDataModel(bcbURI);
+		d.setUriSubmissionDataModel(topLevelURI);
+		d.setElementName(binaryContentElementName);
+		d.setElementType(FormDataModel.ElementType.REF_BLOB);
+		d.setPersistAsColumn(null);
+		d.setPersistAsTable(refBlobTableName);
+		d.setPersistAsSchema(fdm.getSchemaName());
 		
 		++(os.ordinal);
 		++(os.sequenceCounter);
@@ -320,27 +319,27 @@ public class FormDefinition {
 		d.setStringField(fdm.primaryKey, longStringRefTextUri);
 		list.add(d);
 		final String lst = d.getUri();
-		d.setLongField(fdm.ordinalNumber, os.ordinal);
-		d.setStringField(fdm.parentUriFormDataModel, topLevelURI);
-		d.setStringField(fdm.uriSubmissionDataModel, topLevelURI);
-		d.setStringField(fdm.elementName, null);
-		d.setStringField(fdm.elementType, FormDataModel.ElementType.LONG_STRING_REF_TEXT.toString());
-		d.setStringField(fdm.persistAsColumn, null);
-		d.setStringField(fdm.persistAsTable, longStringRefTextTableName);
-		d.setStringField(fdm.persistAsSchema, fdm.getSchemaName());
+		d.setOrdinalNumber(os.ordinal);
+		d.setParentUriFormDataModel(topLevelURI);
+		d.setUriSubmissionDataModel(topLevelURI);
+		d.setElementName(null);
+		d.setElementType(FormDataModel.ElementType.LONG_STRING_REF_TEXT);
+		d.setPersistAsColumn(null);
+		d.setPersistAsTable(longStringRefTextTableName);
+		d.setPersistAsSchema(fdm.getSchemaName());
 
 		// record for ref text...
 		d = ds.createEntityUsingRelation(fdm, user);
 		d.setStringField(fdm.primaryKey, refTextUri);
 		list.add(d);
-		d.setLongField(fdm.ordinalNumber, 1L);
-		d.setStringField(fdm.parentUriFormDataModel, lst);
-		d.setStringField(fdm.uriSubmissionDataModel, topLevelURI);
-		d.setStringField(fdm.elementName, null);
-		d.setStringField(fdm.elementType, FormDataModel.ElementType.REF_TEXT.toString());
-		d.setStringField(fdm.persistAsColumn, null);
-		d.setStringField(fdm.persistAsTable, refTextTableName);
-		d.setStringField(fdm.persistAsSchema, fdm.getSchemaName());
+		d.setOrdinalNumber(1L);
+		d.setParentUriFormDataModel(lst);
+		d.setUriSubmissionDataModel(topLevelURI);
+		d.setElementName(null);
+		d.setElementType(FormDataModel.ElementType.REF_TEXT);
+		d.setPersistAsColumn(null);
+		d.setPersistAsTable(refTextTableName);
+		d.setPersistAsSchema(fdm.getSchemaName());
 		
 		++(os.ordinal);
 		++(os.sequenceCounter);
@@ -486,29 +485,19 @@ public class FormDefinition {
 				User user = cc.getCurrentUser();
 				try {
 					// changes here should be paralleled in the FormParserForJavaRosa
-				    SubmissionAssociationTable saRelation = SubmissionAssociationTable.assertRelation(cc);
-				    String submissionFormIdUri = CommonFieldsBase.newMD5HashUri(p.formId); // key under which submission is located...
-				    Query q = ds.createQuery(saRelation, user);
-				    q.addFilter( saRelation.uriMd5SubmissionFormId, Query.FilterOperation.EQUAL, submissionFormIdUri);
-				    List<? extends CommonFieldsBase> l = q.executeQuery(0);
-				    SubmissionAssociationTable sa = null;
-				    String thisUriSubmissionDataModel = CommonFieldsBase.newUri();
-				    for ( CommonFieldsBase b : l ) {
-				    	SubmissionAssociationTable t = (SubmissionAssociationTable) b;
-				    	if ( t.getXFormParameters().equals(p) ) {
-				    		sa = t;
-				    		thisUriSubmissionDataModel = sa.getUriSubmissionDataModel();
-				    		break;
-				    	}
-				    }
-				    if ( sa == null ) {
+				    List<SubmissionAssociationTable> saList = SubmissionAssociationTable.findSubmissionAssociationsForXForm(p, cc);
+				    if ( saList.isEmpty() ) {
 				    	logger.warning("No sa record matching this formId " + p.toString());
 				    	return null;
 				    }
+				    if (saList.size() > 1 ) {
+						throw new IllegalStateException("Logic is not yet in place for cross-form submission sharing");
+				    }
+				    String thisUriSubmissionDataModel = saList.get(0).getUriSubmissionDataModel();
 				    // OK.  Found an sa record -- use it to find the fdm entries...
 				    FormDataModel fdm = FormDataModel.assertRelation(cc);
 					Query query = ds.createQuery(fdm, user);
-					query.addFilter(fdm.uriSubmissionDataModel, FilterOperation.EQUAL, thisUriSubmissionDataModel);
+					query.addFilter(FormDataModel.URI_SUBMISSION_DATA_MODEL, FilterOperation.EQUAL, thisUriSubmissionDataModel);
 					fdmList = query.executeQuery(0);
 				} catch (ODKDatastoreException e) {
 			    	logger.warning("Persistence Layer failure " + e.getMessage() + " for formId " + p.toString());

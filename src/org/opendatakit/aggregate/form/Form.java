@@ -43,8 +43,6 @@ import org.opendatakit.aggregate.submission.type.StringSubmissionType;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.EntityKey;
-import org.opendatakit.common.persistence.Query;
-import org.opendatakit.common.persistence.Query.FilterOperation;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.security.User;
@@ -74,8 +72,6 @@ public class Form {
    * NOT persisted
    */
   private Map<String, FormElementModel> repeatElementMap;
-
-  private final List<SubmissionAssociationTable> submissionAssociations = new ArrayList<SubmissionAssociationTable>();
   
   // special values for bootstrapping
   public static final String URI_FORM_ID_VALUE_FORM_INFO = "aggregate.opendatakit.org:FormInfo";
@@ -107,48 +103,38 @@ public class Form {
 
   Form(Submission submission, CallingContext cc) throws ODKDatastoreException {
     objectEntity = submission;
-    formDefinition = fetchSubmissionAssociations(cc);
+    formDefinition = FormDefinition.getFormDefinition(getSubmissionXFormParameters(cc), cc);
   }
 
-  private FormDefinition fetchSubmissionAssociations(CallingContext cc) {
-
-	RepeatSubmissionType r = (RepeatSubmissionType) objectEntity.getElementValue(FormInfo.fiSubmissionTable);
-	List<SubmissionSet> submissions = r.getSubmissionSets();
-	if ( submissions.size() != 1 ) {
-		throw new IllegalStateException("Expecting only one submission record at this time!");
-	}
-	SubmissionSet submissionRecord = submissions.get(0);
-	
-	String submissionFormId = ((StringSubmissionType) submissionRecord.getElementValue(FormInfo.submissionFormId)).getValue();
-	Long submissionModelVersion = ((LongSubmissionType) submissionRecord.getElementValue(FormInfo.submissionModelVersion)).getValue();
-	Long submissionUiVersion = ((LongSubmissionType) submissionRecord.getElementValue(FormInfo.submissionUiVersion)).getValue();
-	XFormParameters submissionDefn = new XFormParameters(submissionFormId, submissionModelVersion, submissionUiVersion);
-
-	try {
-		SubmissionAssociationTable saRelation = SubmissionAssociationTable.assertRelation(cc);
-		Query q = cc.getDatastore().createQuery(saRelation, cc.getCurrentUser());
-		q.addFilter(saRelation.uriMd5SubmissionFormId, FilterOperation.EQUAL, CommonFieldsBase.newMD5HashUri(submissionFormId));
-		List<? extends CommonFieldsBase> l = q.executeQuery(0);
-		for ( CommonFieldsBase b : l ) {
-			SubmissionAssociationTable a = (SubmissionAssociationTable) b;
-			submissionAssociations.add(a);
+  public XFormParameters getSubmissionXFormParameters(CallingContext cc) {
+		RepeatSubmissionType r = (RepeatSubmissionType) objectEntity.getElementValue(FormInfo.fiSubmissionTable);
+		List<SubmissionSet> submissions = r.getSubmissionSets();
+		if ( submissions.size() != 1 ) {
+			throw new IllegalStateException("Expecting only one submission record at this time!");
 		}
-	} catch (ODKDatastoreException e) {
-	}
-	
-	if ( submissionAssociations.size() == 0 ) return null;
-	SubmissionAssociationTable match = submissionAssociations.get(0);
-	if ( submissionAssociations.size() > 1 ) {
+		SubmissionSet submissionRecord = submissions.get(0);
+		
+		String submissionFormId = ((StringSubmissionType) submissionRecord.getElementValue(FormInfo.submissionFormId)).getValue();
+		Long submissionModelVersion = ((LongSubmissionType) submissionRecord.getElementValue(FormInfo.submissionModelVersion)).getValue();
+		Long submissionUiVersion = ((LongSubmissionType) submissionRecord.getElementValue(FormInfo.submissionUiVersion)).getValue();
+		XFormParameters submissionDefn = new XFormParameters(submissionFormId, submissionModelVersion, submissionUiVersion);
+		return submissionDefn;
+  }
+  
+  public SubmissionAssociationTable getSubmissionAssociation(CallingContext cc) {
+
+	XFormParameters submissionDefn = getSubmissionXFormParameters(cc);
+
+	List<SubmissionAssociationTable> saList = SubmissionAssociationTable.findSubmissionAssociationsForXForm(submissionDefn,cc);
+	if ( saList.size() == 0 ) return null;
+	if ( saList.size() > 1 ) {
 		throw new IllegalStateException("Logic is not yet in place for cross-form submission sharing");
 	}
-	
-	return FormDefinition.getFormDefinition(match.getXFormParameters(), cc);
+	SubmissionAssociationTable match = saList.get(0);
+	return match;
   }
   
   public void persist(CallingContext cc) throws ODKDatastoreException {
-	Datastore ds = cc.getDatastore();
-	User user = cc.getCurrentUser();
-    ds.putEntities(submissionAssociations, user);
     objectEntity.persist(cc);
     
     // TODO: redo this further after mitch's list of key changes
@@ -166,15 +152,29 @@ public class Form {
   public void deleteForm(CallingContext cc) throws ODKDatastoreException {
 	FormDataModel fdm = FormDataModel.assertRelation(cc);
     List<EntityKey> eksFormInfo = new ArrayList<EntityKey>();
+    
+    RepeatSubmissionType r = (RepeatSubmissionType) objectEntity.getElementValue(FormInfo.fiSubmissionTable);
+	List<SubmissionSet> submissions = r.getSubmissionSets();
+	if ( submissions.size() != 1 ) {
+		throw new IllegalStateException("Expecting only one submission record at this time!");
+	}
+	SubmissionSet submissionRecord = submissions.get(0);
+	
+	String submissionFormId = ((StringSubmissionType) submissionRecord.getElementValue(FormInfo.submissionFormId)).getValue();
+	Long submissionModelVersion = ((LongSubmissionType) submissionRecord.getElementValue(FormInfo.submissionModelVersion)).getValue();
+	Long submissionUiVersion = ((LongSubmissionType) submissionRecord.getElementValue(FormInfo.submissionUiVersion)).getValue();
+	XFormParameters submissionDefn = new XFormParameters(submissionFormId, submissionModelVersion, submissionUiVersion);
 
-    if ( submissionAssociations.size() > 1 ) {
-    	throw new IllegalStateException("Logic is not in place for multiple submissions");
-    }
+    List<SubmissionAssociationTable> saList = 
+    	SubmissionAssociationTable.findSubmissionAssociationsForXForm(submissionDefn, cc);
+	if ( saList.size() > 1 ) {
+		throw new IllegalStateException("Logic is not yet in place for cross-form submission sharing");
+	}
     
     XFormParameters ref = null;
     
-    if ( submissionAssociations.size() == 1 ) {
-    	SubmissionAssociationTable a = submissionAssociations.get(0);
+    if ( saList.size() == 1 ) {
+    	SubmissionAssociationTable a = saList.get(0);
     	ref = a.getXFormParameters();
     	eksFormInfo.add(new EntityKey(a, a.getUri()));
     }
@@ -493,32 +493,14 @@ public class Form {
 	  Long submissionUiVersion = ((LongSubmissionType) submissionRecord.getElementValue(FormInfo.submissionUiVersion)).getValue();
 	  XFormParameters p = new XFormParameters(submissionFormId, submissionModelVersion, submissionUiVersion);
 	  
-	  for ( SubmissionAssociationTable a : submissionAssociations ) {
-		  if ( a.getXFormParameters().equals(p) ) {
-			  return a;
+	  List<SubmissionAssociationTable> match = SubmissionAssociationTable.findSubmissionAssociationsForXForm(p, cc);
+	  if ( !match.isEmpty() ) {
+		  if ( match.size() != 1 ) {
+			  throw new IllegalStateException("Logic is not yet in place for cross-form submission sharing");
 		  }
+		  return match.get(0);
 	  }
-	  
-	  // not found -- try to fetch it...
-	  try {
-		Datastore ds = cc.getDatastore();
-		User user = cc.getCurrentUser();
-		SubmissionAssociationTable saRelation = SubmissionAssociationTable.assertRelation(cc);
-		Query q = ds.createQuery(saRelation, user);
-		q.addFilter(saRelation.uriMd5SubmissionFormId, FilterOperation.EQUAL, CommonFieldsBase.newMD5HashUri(submissionFormId));
-		List<? extends CommonFieldsBase> l = q.executeQuery(0);
-		SubmissionAssociationTable match = null;
-		for ( CommonFieldsBase b : l ) {
-			SubmissionAssociationTable a = (SubmissionAssociationTable) b;
-			submissionAssociations.add(a);
-			if ( a.getXFormParameters().equals(p) ) {
-				match = a;
-			}
-		}
-		return match;
-	} catch (ODKDatastoreException e) {
-		return null;
-	}
+	  return null;
   }
   
   private FormElementModel findElementByNameHelper(FormElementModel current, String name) {

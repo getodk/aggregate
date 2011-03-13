@@ -62,7 +62,6 @@ import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.EntityKey;
-import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
 import org.opendatakit.common.security.Realm;
@@ -419,23 +418,26 @@ public class FormParserForJavaRosa {
 
     Datastore ds = cc.getDatastore();
     User user = cc.getCurrentUser();
-    SubmissionAssociationTable saRelation = SubmissionAssociationTable.assertRelation(cc);
-    String submissionFormIdUri = CommonFieldsBase.newMD5HashUri(submissionElementDefn.formId); // key under which submission is located...
-    Query q = ds.createQuery(saRelation, user);
-    q.addFilter( saRelation.uriMd5SubmissionFormId, Query.FilterOperation.EQUAL, submissionFormIdUri);
-    List<? extends CommonFieldsBase> l = q.executeQuery(0);
-    SubmissionAssociationTable sa = null;
-    fdmSubmissionUri = CommonFieldsBase.newUri();
-    for ( CommonFieldsBase b : l ) {
-    	SubmissionAssociationTable t = (SubmissionAssociationTable) b;
-    	if ( t.getXFormParameters().equals(submissionElementDefn)) {
-    		sa = t;
-    		fdmSubmissionUri = sa.getUriSubmissionDataModel();
-    		break;
-    	}
+    List<SubmissionAssociationTable> saList = SubmissionAssociationTable.findSubmissionAssociationsForXForm(submissionElementDefn, cc);
+    if ( saList.size() > 1 ) {
+		throw new IllegalStateException("Logic is not yet in place for cross-form submission sharing");
     }
-    
-    if ( sa == null ) {
+    SubmissionAssociationTable sa;
+    if ( !saList.isEmpty() ) {
+    	sa = saList.get(0);
+    	fdmSubmissionUri = sa.getUriSubmissionDataModel();
+    	// the entry already exists...
+    	if ( !sameXForm ) {
+    		throw new ODKFormAlreadyExistsException();
+    	}
+    	// TODO: should do a transaction around persisting the FDM we are about to generate.
+    	FormDefinition fd = FormDefinition.getFormDefinition(submissionElementDefn, cc);
+    	if ( fd != null ) return;
+    } else {
+    	fdmSubmissionUri = CommonFieldsBase.newUri();
+        String submissionFormIdUri = CommonFieldsBase.newMD5HashUri(submissionElementDefn.formId); // key under which submission is located...
+
+        SubmissionAssociationTable saRelation = SubmissionAssociationTable.assertRelation(cc);
 	    sa = ds.createEntityUsingRelation(saRelation, user);
 	    sa.setSubmissionFormId(submissionElementDefn.formId);
 	    sa.setSubmissionModelVersion(submissionElementDefn.modelVersion);
@@ -446,14 +448,6 @@ public class FormParserForJavaRosa {
 	    sa.setUriMd5SubmissionFormId(submissionFormIdUri);
 	    sa.setUriMd5FormId(formInfo.getKey().getKey());
 	    ds.putEntity(sa, user);
-    } else {
-    	// the entry already exists...
-    	if ( !sameXForm ) {
-    		throw new ODKFormAlreadyExistsException();
-    	}
-    	// TODO: should do a transaction around persisting the FDM we are about to generate.
-    	FormDefinition fd = FormDefinition.getFormDefinition(submissionElementDefn, cc);
-    	if ( fd != null ) return;
     }
     
     // so we have the formInfo record, but no data model backing it.
@@ -492,11 +486,11 @@ public class FormParserForJavaRosa {
 	    d.setOrdinalNumber(2L);
 	    d.setUriSubmissionDataModel(k.getKey());
 	    d.setParentUriFormDataModel(k.getKey());
-	    d.setStringField(fdm.elementName, null);
-	    d.setStringField(fdm.elementType, FormDataModel.ElementType.LONG_STRING_REF_TEXT.toString());
-	    d.setStringField(fdm.persistAsColumn, null);
-	    d.setStringField(fdm.persistAsTable, persistAsTable);
-	    d.setStringField(fdm.persistAsSchema, fdm.getSchemaName());
+	    d.setElementName(null);
+	    d.setElementType(FormDataModel.ElementType.LONG_STRING_REF_TEXT);
+	    d.setPersistAsColumn(null);
+	    d.setPersistAsTable(persistAsTable);
+	    d.setPersistAsSchema(fdm.getSchemaName());
 	
 	    persistAsTable = opaque.getTableName(fdm.getSchemaName(), persistenceStoreFormId, "", "STRING_TXT");
 	    // ref text record...
@@ -506,11 +500,11 @@ public class FormParserForJavaRosa {
 	    d.setOrdinalNumber(1L);
 	    d.setUriSubmissionDataModel(k.getKey());
 	    d.setParentUriFormDataModel(lstURI);
-	    d.setStringField(fdm.elementName, null);
-	    d.setStringField(fdm.elementType, FormDataModel.ElementType.REF_TEXT.toString());
-	    d.setStringField(fdm.persistAsColumn, null);
-	    d.setStringField(fdm.persistAsTable, persistAsTable);
-	    d.setStringField(fdm.persistAsSchema, fdm.getSchemaName());
+	    d.setElementName(null);
+	    d.setElementType(FormDataModel.ElementType.REF_TEXT);
+	    d.setPersistAsColumn(null);
+	    d.setPersistAsTable(persistAsTable);
+	    d.setPersistAsSchema(fdm.getSchemaName());
 	
 	    // find a good set of names...
 	    // this also ensures that the table names don't overlap existing tables
@@ -527,13 +521,9 @@ public class FormParserForJavaRosa {
 	
 	      String tableName = opaque.resolveTablePlaceholder(tablePlaceholder);
 	      String columnName = opaque.resolveColumnPlaceholder(tablePlaceholder, columnPlaceholder);
-	
-	      if (!m.setStringField(m.persistAsColumn, columnName)) {
-	        throw new IllegalArgumentException("overflow persistAsColumn");
-	      }
-	      if (!m.setStringField(m.persistAsTable, tableName)) {
-	        throw new IllegalArgumentException("overflow persistAsTable");
-	      }
+	      
+	      m.setPersistAsColumn(columnName);
+	      m.setPersistAsTable(tableName);
 	    }
 	
 	    for (FormDataModel m : fdmList) {
@@ -833,11 +823,11 @@ public class FormParserForJavaRosa {
     d.setOrdinalNumber(firstToMove.getOrdinalNumber());
     d.setUriSubmissionDataModel(fdmSubmissionUri);
     d.setParentUriFormDataModel(parentTable.getUri());
-    d.setStringField(fdmRelation.elementName, null);
-    d.setStringField(fdmRelation.elementType, FormDataModel.ElementType.PHANTOM.toString());
-    d.setStringField(fdmRelation.persistAsColumn, null);
-    d.setStringField(fdmRelation.persistAsTable, newPhantomTableName);
-    d.setStringField(fdmRelation.persistAsSchema, fdmRelation.getSchemaName());
+    d.setElementName(null);
+    d.setElementType(FormDataModel.ElementType.PHANTOM);
+    d.setPersistAsColumn(null);
+    d.setPersistAsTable(newPhantomTableName);
+    d.setPersistAsSchema(fdmRelation.getSchemaName());
 
     // OK -- update ordinals and move remaining columns...
     long ordinalNumber = 0L;
@@ -867,10 +857,8 @@ public class FormParserForJavaRosa {
   private void recursivelyReassignChildren(FormDataModel biggest, CommonFieldsBase tbl, String newPhantomTableName) {
 	  
     if (!tbl.equals(biggest.getBackingObjectPrototype())) return;
-    
-    if (!biggest.setStringField(biggest.persistAsTable, newPhantomTableName)) {
-        throw new IllegalArgumentException("overflow of persistAsTable");
-    }
+
+    biggest.setPersistAsTable(newPhantomTableName);
 
 	for (FormDataModel m : biggest.getChildren()) {
 		recursivelyReassignChildren(m, tbl, newPhantomTableName);
@@ -1045,11 +1033,11 @@ public class FormParserForJavaRosa {
     d.setOrdinalNumber(Long.valueOf(ordinal));
     d.setUriSubmissionDataModel(k.getKey());
     d.setParentUriFormDataModel(parent);
-    d.setStringField(fdm.elementName, treeElement.getName());
-    d.setStringField(fdm.elementType, et.toString());
-    d.setStringField(fdm.persistAsColumn, persistAsColumn);
-    d.setStringField(fdm.persistAsTable, persistAsTable);
-    d.setStringField(fdm.persistAsSchema, fdm.getSchemaName());
+    d.setElementName(treeElement.getName());
+    d.setElementType(et);
+    d.setPersistAsColumn(persistAsColumn);
+    d.setPersistAsTable(persistAsTable);
+    d.setPersistAsSchema(fdm.getSchemaName());
     
     if ( et.equals(ElementType.STRING) ) {
     	// track the preferred string lengths of the string fields
@@ -1075,12 +1063,11 @@ public class FormParserForJavaRosa {
       d.setOrdinalNumber(1L);
       d.setUriSubmissionDataModel(k.getKey());
       d.setParentUriFormDataModel(groupURI);
-      d.setStringField(fdm.elementName, treeElement.getName());
-      d.setStringField(fdm.elementType, FormDataModel.ElementType.BINARY_CONTENT_REF_BLOB
-          .toString());
-      d.setStringField(fdm.persistAsColumn, null);
-      d.setStringField(fdm.persistAsTable, persistAsTable);
-      d.setStringField(fdm.persistAsSchema, fdm.getSchemaName());
+      d.setElementName(treeElement.getName());
+      d.setElementType(FormDataModel.ElementType.BINARY_CONTENT_REF_BLOB);
+      d.setPersistAsColumn(null);
+      d.setPersistAsTable(persistAsTable);
+      d.setPersistAsSchema(fdm.getSchemaName());
 
       persistAsTable = opaque.getTableName(fdm.getSchemaName(), tablePrefix, nrGroupPrefix,
           treeElement.getName() + "_BLB");
@@ -1092,11 +1079,11 @@ public class FormParserForJavaRosa {
       d.setOrdinalNumber(1L);
       d.setUriSubmissionDataModel(k.getKey());
       d.setParentUriFormDataModel(bcbURI);
-      d.setStringField(fdm.elementName, treeElement.getName());
-      d.setStringField(fdm.elementType, FormDataModel.ElementType.REF_BLOB.toString());
-      d.setStringField(fdm.persistAsColumn, null);
-      d.setStringField(fdm.persistAsTable, persistAsTable);
-      d.setStringField(fdm.persistAsSchema, fdm.getSchemaName());
+	  d.setElementName(treeElement.getName());
+	  d.setElementType(FormDataModel.ElementType.REF_BLOB);
+      d.setPersistAsColumn(null);
+      d.setPersistAsTable(persistAsTable);
+      d.setPersistAsSchema(fdm.getSchemaName());
       break;
 
     case GEOPOINT:
@@ -1115,11 +1102,11 @@ public class FormParserForJavaRosa {
       d.setOrdinalNumber(Long.valueOf(FormDataModel.GEOPOINT_LATITUDE_ORDINAL_NUMBER));
       d.setUriSubmissionDataModel(k.getKey());
       d.setParentUriFormDataModel(groupURI);
-      d.setStringField(fdm.elementName, treeElement.getName());
-      d.setStringField(fdm.elementType, FormDataModel.ElementType.DECIMAL.toString());
-      d.setStringField(fdm.persistAsColumn, persistAsColumn);
-      d.setStringField(fdm.persistAsTable, persistAsTable);
-      d.setStringField(fdm.persistAsSchema, fdm.getSchemaName());
+	  d.setElementName(treeElement.getName());
+	  d.setElementType(FormDataModel.ElementType.DECIMAL);
+      d.setPersistAsColumn(persistAsColumn);
+      d.setPersistAsTable(persistAsTable);
+      d.setPersistAsSchema(fdm.getSchemaName());
 
       persistAsColumn = opaque.getColumnName(persistAsTable, nrGroupPrefix, treeElement.getName()
           + "_LNG");
@@ -1130,11 +1117,11 @@ public class FormParserForJavaRosa {
       d.setOrdinalNumber(Long.valueOf(FormDataModel.GEOPOINT_LONGITUDE_ORDINAL_NUMBER));
       d.setUriSubmissionDataModel(k.getKey());
       d.setParentUriFormDataModel(groupURI);
-      d.setStringField(fdm.elementName, treeElement.getName());
-      d.setStringField(fdm.elementType, FormDataModel.ElementType.DECIMAL.toString());
-      d.setStringField(fdm.persistAsColumn, persistAsColumn);
-      d.setStringField(fdm.persistAsTable, persistAsTable);
-      d.setStringField(fdm.persistAsSchema, fdm.getSchemaName());
+	  d.setElementName(treeElement.getName());
+	  d.setElementType(FormDataModel.ElementType.DECIMAL);
+      d.setPersistAsColumn(persistAsColumn);
+      d.setPersistAsTable(persistAsTable);
+      d.setPersistAsSchema(fdm.getSchemaName());
 
       persistAsColumn = opaque.getColumnName(persistAsTable, nrGroupPrefix, treeElement.getName()
           + "_ALT");
@@ -1145,11 +1132,11 @@ public class FormParserForJavaRosa {
       d.setOrdinalNumber(Long.valueOf(FormDataModel.GEOPOINT_ALTITUDE_ORDINAL_NUMBER));
       d.setUriSubmissionDataModel(k.getKey());
       d.setParentUriFormDataModel(groupURI);
-      d.setStringField(fdm.elementName, treeElement.getName());
-      d.setStringField(fdm.elementType, FormDataModel.ElementType.DECIMAL.toString());
-      d.setStringField(fdm.persistAsColumn, persistAsColumn);
-      d.setStringField(fdm.persistAsTable, persistAsTable);
-      d.setStringField(fdm.persistAsSchema, fdm.getSchemaName());
+	  d.setElementName(treeElement.getName());
+	  d.setElementType(FormDataModel.ElementType.DECIMAL);
+      d.setPersistAsColumn(persistAsColumn);
+      d.setPersistAsTable(persistAsTable);
+      d.setPersistAsSchema(fdm.getSchemaName());
 
       persistAsColumn = opaque.getColumnName(persistAsTable, nrGroupPrefix, treeElement.getName()
           + "_ACC");
@@ -1160,11 +1147,11 @@ public class FormParserForJavaRosa {
       d.setOrdinalNumber(Long.valueOf(FormDataModel.GEOPOINT_ACCURACY_ORDINAL_NUMBER));
       d.setUriSubmissionDataModel(k.getKey());
       d.setParentUriFormDataModel(groupURI);
-      d.setStringField(fdm.elementName, treeElement.getName());
-      d.setStringField(fdm.elementType, FormDataModel.ElementType.DECIMAL.toString());
-      d.setStringField(fdm.persistAsColumn, persistAsColumn);
-      d.setStringField(fdm.persistAsTable, persistAsTable);
-      d.setStringField(fdm.persistAsSchema, fdm.getSchemaName());
+	  d.setElementName(treeElement.getName());
+      d.setElementType(FormDataModel.ElementType.DECIMAL);
+      d.setPersistAsColumn(persistAsColumn);
+      d.setPersistAsTable(persistAsTable);
+      d.setPersistAsSchema(fdm.getSchemaName());
       break;
 
     case GROUP:
