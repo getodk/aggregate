@@ -1,5 +1,6 @@
 package org.opendatakit.aggregate.query.submission;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,7 +45,27 @@ public class QueryByUIFilterGroup extends QueryBase {
         FormElementKey decodeKey = new FormElementKey(column.getColumnEncoding());
         FormElementModel fem = FormElementModel.retrieveFormElementModel(form, decodeKey);
         FilterOperation op = UITrans.convertFilterOperation(rf.getOperation());
-        super.addFilter(fem, op, rf.getInput());
+        
+        String value = rf.getInput();
+        Object compareValue = null;
+        switch (fem.getElementType()) {
+        case BOOLEAN:
+            compareValue = Boolean.parseBoolean(value);
+            break;
+        case INTEGER:
+            compareValue = Long.valueOf(value);
+            break;
+        case DECIMAL:
+            compareValue = new BigDecimal(value);
+            break;
+        case STRING:
+            compareValue = value;
+            break;
+        default:
+            throw new IllegalStateException("datatype not supported");
+        }
+        
+        super.addFilter(fem, op, compareValue);
       }
     }
 
