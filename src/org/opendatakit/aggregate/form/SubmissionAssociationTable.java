@@ -15,11 +15,15 @@
  */
 package org.opendatakit.aggregate.form;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.PersistConsts;
+import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.persistence.DataField.IndexType;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.security.User;
@@ -30,7 +34,7 @@ import org.opendatakit.common.security.User;
  * @author mitchellsundt@gmail.com
  * 
  */
-public class SubmissionAssociationTable extends CommonFieldsBase {
+public final class SubmissionAssociationTable extends CommonFieldsBase {
 	private static final String TABLE_NAME = "_form_info_submission_association";
 
 	private static final DataField URI_MD5_SUBMISSION_FORM_ID = new DataField("URI_MD5_SUBMISSION_FORM_ID",
@@ -57,59 +61,39 @@ public class SubmissionAssociationTable extends CommonFieldsBase {
 	private static final DataField URI_SUBMISSION_DATA_MODEL = new DataField("URI_SUBMISSION_DATA_MODEL",
 			DataField.DataType.URI, true);
 
-	public final DataField uriMd5SubmissionFormId;
-	public final DataField uriMd5FormId;
-	public final DataField submissionFormId;
-	public final DataField submissionModelVersion;
-	public final DataField submissionUiVersion;
-	public final DataField isPersistenceModelComplete;
-	public final DataField isSubmissionAllowed;
-	public final DataField uriSubmissionDataModel;
-
-	public static final String URI_FORM_ID_VALUE_FORM_INFO_SUBMISSION_ASSOCIATION = "aggregate.opendatakit.org:FormInfoSubmissionAssociation";
-
 	/**
 	 * DOM_AURI (md5 of submission form_id)
 	 * SUB_AURI (URI_FORM_INFO)
 	 */
 	/**
-	 * Construct a relation prototype.
+	 * Construct a relation prototype. Only called via {@link #assertRelation(CallingContext)}
 	 * 
 	 * @param databaseSchema
 	 */
 	private SubmissionAssociationTable(String databaseSchema) {
 		super(databaseSchema, TABLE_NAME);
 
-		fieldList.add(uriMd5SubmissionFormId = new DataField(URI_MD5_SUBMISSION_FORM_ID));
-		fieldList.add(uriMd5FormId = new DataField(URI_MD5_FORM_ID));
-		fieldList.add(submissionFormId = new DataField(SUBMISSION_FORM_ID));
-		fieldList.add(submissionModelVersion = new DataField(SUBMISSION_MODEL_VERSION));
-		fieldList.add(submissionUiVersion = new DataField(SUBMISSION_UI_VERSION));
-		fieldList.add(isPersistenceModelComplete = new DataField(IS_PERSISTENCE_MODEL_COMPLETE));
-		fieldList.add(isSubmissionAllowed = new DataField(IS_SUBMISSION_ALLOWED));
-		fieldList.add(uriSubmissionDataModel = new DataField(URI_SUBMISSION_DATA_MODEL));
-		
-		fieldValueMap.put(primaryKey, SubmissionAssociationTable.URI_FORM_ID_VALUE_FORM_INFO_SUBMISSION_ASSOCIATION);
+		fieldList.add(URI_MD5_SUBMISSION_FORM_ID);
+		fieldList.add(URI_MD5_FORM_ID);
+		fieldList.add(SUBMISSION_FORM_ID);
+		fieldList.add(SUBMISSION_MODEL_VERSION);
+		fieldList.add(SUBMISSION_UI_VERSION);
+		fieldList.add(IS_PERSISTENCE_MODEL_COMPLETE);
+		fieldList.add(IS_SUBMISSION_ALLOWED);
+		fieldList.add(URI_SUBMISSION_DATA_MODEL);
 	}
 
 	/**
-	 * Construct an empty entity.
+	 * Construct an empty entity. Only called via {@link #getEmptyRow(User)}
 	 * 
 	 * @param ref
 	 * @param user
 	 */
 	private SubmissionAssociationTable(SubmissionAssociationTable ref, User user) {
 		super(ref, user);
-		uriMd5SubmissionFormId = ref.uriMd5SubmissionFormId;
-		uriMd5FormId = ref.uriMd5FormId;
-		submissionFormId = ref.submissionFormId;
-		submissionModelVersion = ref.submissionModelVersion;
-		submissionUiVersion = ref.submissionUiVersion;
-		isPersistenceModelComplete = ref.isPersistenceModelComplete;
-		isSubmissionAllowed = ref.isSubmissionAllowed;
-		uriSubmissionDataModel = ref.uriSubmissionDataModel;
 	}
 
+	// Only called from within the persistence layer.
 	@Override
 	public SubmissionAssociationTable getEmptyRow(User user) {
 		return new SubmissionAssociationTable(this, user);
@@ -121,73 +105,73 @@ public class SubmissionAssociationTable extends CommonFieldsBase {
 	}
 	
 	public String getUriMd5FormId() {
-		return getStringField(uriMd5FormId);
+		return getStringField(URI_MD5_FORM_ID);
 	}
 	
 	public void setUriMd5FormId(String value) {
-		if ( !setStringField(uriMd5FormId, value) ) {
+		if ( !setStringField(URI_MD5_FORM_ID, value) ) {
 			throw new IllegalStateException("overflow uriMd5FormId");
 		}
 	}
 	
 	public String getUriMd5SubmissionFormId() {
-		return getStringField(uriMd5SubmissionFormId);
+		return getStringField(URI_MD5_SUBMISSION_FORM_ID);
 	}
 	
 	public void setUriMd5SubmissionFormId(String value) {
-		if ( !setStringField(uriMd5SubmissionFormId, value) ) {
+		if ( !setStringField(URI_MD5_SUBMISSION_FORM_ID, value) ) {
 			throw new IllegalStateException("overflow uriMd5SubmissionFormId");
 		}
 	}
 	
 	public String getSubmissionFormId() {
-		return getStringField(submissionFormId);
+		return getStringField(SUBMISSION_FORM_ID);
 	}
 	
 	public void setSubmissionFormId(String value) {
-		if ( !setStringField(submissionFormId, value) ) {
+		if ( !setStringField(SUBMISSION_FORM_ID, value) ) {
 			throw new IllegalStateException("overflow submissionFormId");
 		}
 	}
 
 	public Long getSubmissionModelVersion() {
-		return getLongField(submissionModelVersion);
+		return getLongField(SUBMISSION_MODEL_VERSION);
 	}
 
 	public void setSubmissionModelVersion(Long value) {
-		setLongField(submissionModelVersion, value);
+		setLongField(SUBMISSION_MODEL_VERSION, value);
 	}
 
 	public Long getSubmissionUiVersion() {
-		return getLongField(submissionUiVersion);
+		return getLongField(SUBMISSION_UI_VERSION);
 	}
 
 	public void setSubmissionUiVersion(Long value) {
-		setLongField(submissionUiVersion, value);
+		setLongField(SUBMISSION_UI_VERSION, value);
 	}
 
 	public Boolean getIsPersistenceModelComplete() {
-		return getBooleanField(isPersistenceModelComplete);
+		return getBooleanField(IS_PERSISTENCE_MODEL_COMPLETE);
 	}
 
 	public void setIsPersistenceModelComplete(Boolean value) {
-		setBooleanField(isPersistenceModelComplete, value);
+		setBooleanField(IS_PERSISTENCE_MODEL_COMPLETE, value);
 	}
 
 	public Boolean getIsSubmissionAllowed() {
-		return getBooleanField(isSubmissionAllowed);
+		return getBooleanField(IS_SUBMISSION_ALLOWED);
 	}
 
 	public void setIsSubmissionAllowed(Boolean value) {
-		setBooleanField(isSubmissionAllowed, value);
+		setBooleanField(IS_SUBMISSION_ALLOWED, value);
 	}
 
 	public String getUriSubmissionDataModel() {
-		return getStringField(uriSubmissionDataModel);
+		return getStringField(URI_SUBMISSION_DATA_MODEL);
 	}
 
 	public void setUriSubmissionDataModel(String value) {
-		if ( !setStringField(uriSubmissionDataModel, value) ) {
+		if ( !setStringField(URI_SUBMISSION_DATA_MODEL, value) ) {
 			throw new IllegalStateException("overflow uriSubmissionDataModel");
 		}
 	}
@@ -205,5 +189,32 @@ public class SubmissionAssociationTable extends CommonFieldsBase {
 		    relation = relationPrototype; // set static variable only upon success...
 		}
 		return relation;
+	}
+	
+	public static final List<SubmissionAssociationTable> findSubmissionAssociationsForXForm(XFormParameters params, CallingContext cc) {
+	    List<SubmissionAssociationTable> saList = new ArrayList<SubmissionAssociationTable>();
+		try {
+			// changes here should be paralleled in the FormParserForJavaRosa
+		    SubmissionAssociationTable saRelation = SubmissionAssociationTable.assertRelation(cc);
+		    String submissionFormIdUri = CommonFieldsBase.newMD5HashUri(params.formId); // key under which submission is located...
+		    Query q = cc.getDatastore().createQuery(saRelation, cc.getCurrentUser());
+		    q.addFilter(SubmissionAssociationTable.URI_MD5_SUBMISSION_FORM_ID, Query.FilterOperation.EQUAL, submissionFormIdUri);
+		    List<? extends CommonFieldsBase> l = q.executeQuery(0);
+		    for ( CommonFieldsBase b : l ) {
+		    	SubmissionAssociationTable t = (SubmissionAssociationTable) b;
+		    	if ( t.getXFormParameters().equals(params) ) {
+		    		saList.add(t);
+		    	}
+		    }
+		    
+		    if ( saList.size() > 1 ) {
+		    	throw new IllegalStateException("Logic is not yet in place for cross-form submission sharing");
+		    }
+		    return saList;
+
+		} catch ( ODKDatastoreException e) {
+			e.printStackTrace();
+		}
+		return saList;
 	}
 }

@@ -106,6 +106,11 @@ public class QueryResultsServlet extends ServletUtilBase {
 		FormElementModel element = form.findElementByName(field);
 		CommonFieldsBase tbl = element.getParent().getFormDataModel().getBackingObjectPrototype();
 
+		if (element == null) {
+			errorRetreivingData(resp);
+			return;
+		}
+
 		Object compareValue = null;
 		switch (element.getElementType()) {
 		case BOOLEAN:

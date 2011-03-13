@@ -83,7 +83,6 @@ public class FormXmlServlet extends ServletUtilBase {
       humanReadable = Boolean.parseBoolean(readable);
     }
 
-    // servlet has two different paths to it -- depdending upon whether it is human readable or not.
     CallingContext cc = ContextFactory.getCallingContext(this, req);
 
     Form form;

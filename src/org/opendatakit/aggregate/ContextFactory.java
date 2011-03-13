@@ -55,7 +55,7 @@ public class ContextFactory {
     	final UserService userService;
     	boolean asDaemon = false;
     	
-    	private CallingContextImpl(HttpServlet servlet, HttpServletRequest req) {
+    	CallingContextImpl(HttpServlet servlet, HttpServletRequest req) {
     		// for now, only store the servlet context and the serverUrl
     		ctxt = servlet.getServletContext();
     		String path = ctxt.getContextPath();
@@ -115,5 +115,4 @@ public class ContextFactory {
     public static CallingContext getCallingContext(HttpServlet servlet, HttpServletRequest req) {
     	return new CallingContextImpl(servlet, req);
     }
-    
 }
