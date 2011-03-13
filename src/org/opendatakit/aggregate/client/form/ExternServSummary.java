@@ -3,6 +3,8 @@ package org.opendatakit.aggregate.client.form;
 import java.io.Serializable;
 import java.util.Date;
 
+import org.opendatakit.aggregate.constants.common.OperationalStatus;
+
 public class ExternServSummary implements Serializable{
   
   /**
@@ -11,7 +13,7 @@ public class ExternServSummary implements Serializable{
   private static final long serialVersionUID = 29897237349781615L;
    
   private String user;
-  private String status;
+  private OperationalStatus status;
   private Date established;
   private String action;
   private String type;
@@ -21,7 +23,7 @@ public class ExternServSummary implements Serializable{
     
   }
 
-  public ExternServSummary(String user, String status, Date established, String action, String type, String name) {
+  public ExternServSummary(String user, OperationalStatus status, Date established, String action, String type, String name) {
     this.user = user;
     this.status = status;
     this.established = established;
@@ -34,7 +36,7 @@ public class ExternServSummary implements Serializable{
     return user;
   }
 
-  public String getStatus() {
+  public OperationalStatus getStatus() {
     return status;
   }
 

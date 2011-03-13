@@ -29,6 +29,7 @@ import java.util.List;
 
 import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.client.form.ExternServSummary;
+import org.opendatakit.aggregate.constants.common.OperationalStatus;
 import org.opendatakit.aggregate.constants.externalservice.ExternalServiceOption;
 import org.opendatakit.aggregate.constants.externalservice.ExternalServiceType;
 import org.opendatakit.aggregate.constants.externalservice.JsonServerConsts;
@@ -36,7 +37,6 @@ import org.opendatakit.aggregate.constants.externalservice.JsonServerType;
 import org.opendatakit.aggregate.datamodel.FormElementModel.ElementType;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
-import org.opendatakit.aggregate.externalservice.FormServiceCursor.OperationalStatus;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.format.element.BasicElementFormatter;
 import org.opendatakit.aggregate.format.header.BasicHeaderFormatter;
@@ -113,7 +113,7 @@ public class JsonServer extends AbstractExternalService implements ExternalServi
   @Override
   public ExternServSummary transform() {    
     return new ExternServSummary(fsc.getCreatorUriUser(),
-        fsc.getOperationalStatus().toString(),
+        fsc.getOperationalStatus(),
         fsc.getEstablishmentDateTime(),
         fsc.getExternalServiceOption().getDescriptionOfOption(),
         fsc.getExternalServiceType().getServiceName(),
