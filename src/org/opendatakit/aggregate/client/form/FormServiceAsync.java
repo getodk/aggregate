@@ -17,4 +17,8 @@ public interface FormServiceAsync {
   void createKml(String formId, String geopointKey, String titleKey, String binaryKey,
       AsyncCallback<Boolean> callback);
 
+  void setFormDownloadable(String formId, Boolean downloadable, AsyncCallback<Boolean> callback);
+
+  void setFormAcceptSubmissions(String formId, Boolean acceptSubmissions, AsyncCallback<Boolean> callback);
+
 }
