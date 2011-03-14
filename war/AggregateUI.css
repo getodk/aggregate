@@ -22,3 +22,6 @@ a, a:visited, a:hover {
 #form_and_goals_panel {
 	border-collapse: collapse;
 }
+#submission_container {
+	overflow: scroll;
+}

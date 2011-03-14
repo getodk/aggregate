@@ -7,8 +7,9 @@ function onWindowResize() {
 	var sidePanelPotentialWidth = width * .15;
 	var sidePanelActualWidth = Math.min(MAX_SIDE_PANEL_WIDTH, sidePanelPotentialWidth);
 	$(".mainNav").width(width - sidePanelActualWidth);
-	
-	$("#filters_panel").width(sidePanelActualWidth);
+
 	$("#help_panel").width(sidePanelActualWidth);
-	$("#filters_data").width(width - sidePanelActualWidth);
+	$("#filters_panel").width(sidePanelActualWidth);
+	$("#submission_container").width(width - (2 * sidePanelActualWidth));
+	$("#form_management_table").width(width - sidePanelActualWidth);
 }
