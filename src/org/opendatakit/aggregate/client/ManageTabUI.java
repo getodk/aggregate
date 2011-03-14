@@ -21,9 +21,9 @@ public class ManageTabUI extends TabPanel {
 	private UrlHash hash;
 	private FlexTable listOfForms;
 	
-	public ManageTabUI(UrlHash hash, FlexTable listOfForms) {
+	public ManageTabUI(FlexTable listOfForms) {
 		super();
-		this.hash = hash;
+		this.hash = UrlHash.getHash();
 		this.listOfForms = listOfForms;
 		this.add(setupFormManagementPanel(), "Forms");
 		this.add(setupExportsPanel(), "Export");
