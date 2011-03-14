@@ -18,12 +18,7 @@ a, a:visited, a:hover {
 	border: 2px solid #777984;
 	background: url("images/mostly_opaque.png");
 }
-#filters_data_help {
-	border-top-style: solid;
-	border-top-width: 2px;
-	border-top-color: #07115A;
-}
-#filters_data_help,
+#filters_data,
 #form_and_goals_panel {
 	border-collapse: collapse;
 }

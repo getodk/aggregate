@@ -37,7 +37,7 @@ public class SubmissionTabUI extends TabPanel {
 	private HorizontalPanel filterPanel = new HorizontalPanel();
 	private FlexTable formAndGoalSelectionTable = new FlexTable();
 	private CreateNewFilterPopup filterPopup = new CreateNewFilterPopup();
-	private HorizontalPanel filtersDataHelp = new HorizontalPanel();
+	private HorizontalPanel filtersData = new HorizontalPanel();
 	private UrlHash hash;
 	private List<FilterGroup> view;
 	private ListBox formsBox;
@@ -74,7 +74,7 @@ public class SubmissionTabUI extends TabPanel {
 	public VerticalPanel setupSubmissionsPanel() {
 		VerticalPanel reportContent = new VerticalPanel();
 		reportContent.add(setupFormsAndGoalsPanel());
-		filterPanel = setupFiltersDataHelpPanel(view);
+		filterPanel = setupFiltersDataPanel(view);
 		reportContent.add(filterPanel);
 		return reportContent;
 	}
@@ -118,7 +118,7 @@ public class SubmissionTabUI extends TabPanel {
 		};
 	}
 	
-	public HorizontalPanel setupFiltersDataHelpPanel(
+	public HorizontalPanel setupFiltersDataPanel(
 			List<FilterGroup> groups) {
 		//create filter tree
 		Tree activeFilters = new Tree();
@@ -154,7 +154,7 @@ public class SubmissionTabUI extends TabPanel {
 				  @Override
 				  public void onClose(CloseEvent<PopupPanel> event) {
 					  filterPanel.clear();
-					  setupFiltersDataHelpPanel(view);
+					  setupFiltersDataPanel(view);
 				  }
 				
 			  });
@@ -162,25 +162,17 @@ public class SubmissionTabUI extends TabPanel {
 		  });
 		  
 		  activeFilters.add(newFilter);
-		  filtersDataHelp.add(activeFilters);
+		  filtersData.add(activeFilters);
 		  
 	    // view data
 	    dataTable.getRowFormatter().addStyleName(0, "titleBar");
 	    dataTable.addStyleName("dataTable");
-	    filtersDataHelp.add(dataTable);
-
-	    // view help
-	    VerticalPanel helpPanel = new VerticalPanel();
-	    for (int i = 1; i < 5; i++) {
-	      helpPanel.add(new HTML("Help Content " + i));
-	    }
-	    helpPanel.setStyleName("help_panel");
-	    filtersDataHelp.add(helpPanel);
-	    filtersDataHelp.getElement().setId("filters_data_help");
-		  filtersDataHelp.getElement().getFirstChildElement().getFirstChildElement().getFirstChildElement().setId("filters_panel");
-		  filtersDataHelp.getElement().getFirstChildElement().getFirstChildElement().getFirstChildElement().getNextSiblingElement().getNextSiblingElement().setId("help_panel");
-	    filtersDataHelp.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_JUSTIFY);
-	    return filtersDataHelp;
+	    filtersData.add(dataTable);
+	    
+	    filtersData.getElement().setId("filters_data");
+		  filtersData.getElement().getFirstChildElement().getFirstChildElement().getFirstChildElement().setId("filters_panel");
+	    filtersData.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_JUSTIFY);
+	    return filtersData;
 	  }
 	  
 	  public TreeItem loadFilterGroup(final FilterGroup group) {
@@ -219,7 +211,7 @@ public class SubmissionTabUI extends TabPanel {
 						.getPropertyObject("filter");
 					group.removeFilter(remove);
 					filterPanel.clear();
-					setupFiltersDataHelpPanel(view);
+					setupFiltersDataPanel(view);
 				} 
 			  });
 			  row++;

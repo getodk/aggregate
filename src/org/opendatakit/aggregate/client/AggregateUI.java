@@ -32,9 +32,11 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DecoratedTabPanel;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TabPanel;
+import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class AggregateUI implements EntryPoint {
   
@@ -48,6 +50,10 @@ public class AggregateUI implements EntryPoint {
   private FlexTable dataTable = new FlexTable(); //contains the data
   private FilterGroup def; //the default filter group
   private UrlHash hash;
+  
+  // layout
+  private HorizontalPanel layoutPanel = new HorizontalPanel();
+  private VerticalPanel helpPanel = new VerticalPanel();
   
   // navigation
   private DecoratedTabPanel mainNav = new DecoratedTabPanel();
@@ -75,11 +81,9 @@ public class AggregateUI implements EntryPoint {
        }
     };
     refreshTimer.scheduleRepeating(REFRESH_INTERVAL);
-    
   }
 
-  public void requestUpdatedData(FilterGroup filterGroup) {
-    
+  public void requestUpdatedSubmissionData(FilterGroup filterGroup) {
     // Initialize the service proxy.
     if (submissionSvc == null) {
       submissionSvc = GWT.create(SubmissionService.class);
@@ -98,7 +102,6 @@ public class AggregateUI implements EntryPoint {
 
     // Make the call to the form service.
     submissionSvc.getSubmissions(filterGroup, callback);
-
   }
   
   public void updateDataTable(SubmissionUISummary summary) {
@@ -167,6 +170,16 @@ public class AggregateUI implements EntryPoint {
     mainNav.add(manageNav, "Management");
     mainNav.addStyleName("mainNav");
     
+    // create help panel
+    for (int i = 1; i < 5; i++) {
+      helpPanel.add(new HTML("Help Content " + i));
+    }
+    helpPanel.setStyleName("help_panel");
+
+    // add to layout
+    layoutPanel.add(mainNav);
+    layoutPanel.add(helpPanel);
+    
     // Select the correct menu item based on url hash.
     int selected = 0;
     String mainMenu = hash.get(UrlHash.MAIN_MENU);
@@ -180,7 +193,7 @@ public class AggregateUI implements EntryPoint {
     	mainNav.getTabBar().getTab(i).addClickHandler(getMainMenuClickHandler(MAIN_MENU[i]));
     
     RootPanel.get("dynamic_content").add(new HTML("<img src=\"images/odk_color.png\" id=\"odk_aggregate_logo\" />"));
-    RootPanel.get("dynamic_content").add(mainNav);
+    RootPanel.get("dynamic_content").add(layoutPanel);
     contentLoaded();
   }
   
@@ -216,7 +229,7 @@ public class AggregateUI implements EntryPoint {
         def.setFormId(formId);
         getFilterList(formId);
         if(forms.length > 0) {
-        	requestUpdatedData(def);
+        	requestUpdatedSubmissionData(def);
         }
       }
     };
@@ -277,7 +290,7 @@ Set<String> existingForms = new HashSet<String>();
 		@Override
 		public void onSuccess(FilterSet result) {
 			fillFilterDropDown(result);
-			requestUpdatedData(def);
+			requestUpdatedSubmissionData(def);
 		}
 	    };
 
