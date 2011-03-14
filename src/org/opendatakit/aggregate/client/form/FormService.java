@@ -18,4 +18,8 @@ public interface FormService extends RemoteService {
   
   Boolean createKml(String formId, String geopointKey, String titleKey, String binaryKey);
   
+  Boolean setFormDownloadable(String formId, Boolean downloadable);
+  
+  Boolean setFormAcceptSubmissions(String formId, Boolean acceptSubmissions);
+  
 }

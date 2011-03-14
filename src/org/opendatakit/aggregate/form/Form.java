@@ -603,8 +603,11 @@ public class Form {
   }
   
   
-  public FormSummary generateFormSummary() {
-    return new FormSummary(getViewableName(), getFormId(), getCreationUser());
+  public FormSummary generateFormSummary(CallingContext cc) {
+    SubmissionAssociationTable sat = getSubmissionAssociation(cc);
+    boolean submit = sat.getIsSubmissionAllowed();    
+    boolean downloadable = getDownloadEnabled();
+    return new FormSummary(getViewableName(), getFormId(), getCreationUser(), downloadable, submit);
   }
   
   /**
