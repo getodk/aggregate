@@ -62,6 +62,7 @@ public class Form {
    */
   private final Submission objectEntity;
 
+  private SubmissionAssociationTable submissionAssociation = null;
   /**
    * Definition of what the Submission xform is.
    */
@@ -121,20 +122,25 @@ public class Form {
   }
   
   public SubmissionAssociationTable getSubmissionAssociation(CallingContext cc) {
-
-	XFormParameters submissionDefn = getSubmissionXFormParameters(cc);
-
-	List<SubmissionAssociationTable> saList = SubmissionAssociationTable.findSubmissionAssociationsForXForm(submissionDefn,cc);
-	if ( saList.size() == 0 ) return null;
-	if ( saList.size() > 1 ) {
-		throw new IllegalStateException("Logic is not yet in place for cross-form submission sharing");
-	}
-	SubmissionAssociationTable match = saList.get(0);
-	return match;
+		if ( submissionAssociation != null ) return submissionAssociation;
+		
+		XFormParameters p = getSubmissionXFormParameters(cc);
+		  
+		List<SubmissionAssociationTable> match = SubmissionAssociationTable.findSubmissionAssociationsForXForm(p, cc);
+		if ( !match.isEmpty() ) {
+			if ( match.size() != 1 ) {
+				throw new IllegalStateException("Logic is not yet in place for cross-form submission sharing");
+			}
+			submissionAssociation = match.get(0);
+		}
+		return submissionAssociation;
   }
   
   public void persist(CallingContext cc) throws ODKDatastoreException {
     objectEntity.persist(cc);
+    if ( submissionAssociation != null ) {
+    	cc.getDatastore().putEntity(submissionAssociation, cc.getCurrentUser());
+    }
     
     // TODO: redo this further after mitch's list of key changes
     
@@ -152,30 +158,13 @@ public class Form {
 	FormDataModel fdm = FormDataModel.assertRelation(cc);
     List<EntityKey> eksFormInfo = new ArrayList<EntityKey>();
     
-    RepeatSubmissionType r = (RepeatSubmissionType) objectEntity.getElementValue(FormInfo.fiSubmissionTable);
-	List<SubmissionSet> submissions = r.getSubmissionSets();
-	if ( submissions.size() != 1 ) {
-		throw new IllegalStateException("Expecting only one submission record at this time!");
-	}
-	SubmissionSet submissionRecord = submissions.get(0);
-	
-	String submissionFormId = ((StringSubmissionType) submissionRecord.getElementValue(FormInfo.submissionFormId)).getValue();
-	Long submissionModelVersion = ((LongSubmissionType) submissionRecord.getElementValue(FormInfo.submissionModelVersion)).getValue();
-	Long submissionUiVersion = ((LongSubmissionType) submissionRecord.getElementValue(FormInfo.submissionUiVersion)).getValue();
-	XFormParameters submissionDefn = new XFormParameters(submissionFormId, submissionModelVersion, submissionUiVersion);
-
-    List<SubmissionAssociationTable> saList = 
-    	SubmissionAssociationTable.findSubmissionAssociationsForXForm(submissionDefn, cc);
-	if ( saList.size() > 1 ) {
-		throw new IllegalStateException("Logic is not yet in place for cross-form submission sharing");
-	}
+    SubmissionAssociationTable sa = getSubmissionAssociation(cc);
     
     XFormParameters ref = null;
     
-    if ( saList.size() == 1 ) {
-    	SubmissionAssociationTable a = saList.get(0);
-    	ref = a.getXFormParameters();
-    	eksFormInfo.add(new EntityKey(a, a.getUri()));
+    if ( sa != null ) {
+    	ref = sa.getXFormParameters();
+    	eksFormInfo.add(new EntityKey(sa, sa.getUri()));
     }
     
     // queue everything in formInfo for delete
@@ -456,14 +445,7 @@ public class Form {
    * @return true if a new submission can be received, false otherwise
    */
   public Boolean getSubmissionEnabled(CallingContext cc) {
-	// assume for now that there is only one submission...
-	RepeatSubmissionType r = (RepeatSubmissionType) objectEntity.getElementValue(FormInfo.fiSubmissionTable);
-	List<SubmissionSet> filesets = r.getSubmissionSets();
-	if ( filesets.size() != 1 ) {
-		throw new IllegalStateException("Expecting only one submission record at this time!");
-	}
-	SubmissionSet submissionRecord = filesets.get(0);
-	SubmissionAssociationTable sa = findSubmission(submissionRecord, cc);
+	SubmissionAssociationTable sa = getSubmissionAssociation(cc);
 	return (sa == null) ? false : sa.getIsSubmissionAllowed();
   }
 
@@ -475,31 +457,8 @@ public class Form {
    * 
    */
   public void setSubmissionEnabled(Boolean submissionEnabled, CallingContext cc) {
-	// assume for now that there is only one submission...
-	RepeatSubmissionType r = (RepeatSubmissionType) objectEntity.getElementValue(FormInfo.fiSubmissionTable);
-	List<SubmissionSet> filesets = r.getSubmissionSets();
-	if ( filesets.size() != 1 ) {
-		throw new IllegalStateException("Expecting only one submission record at this time!");
-	}
-	SubmissionSet submissionRecord = filesets.get(0);
-	SubmissionAssociationTable sa = findSubmission(submissionRecord, cc);
+	SubmissionAssociationTable sa = getSubmissionAssociation(cc);
 	if ( sa != null ) sa.setIsSubmissionAllowed(submissionEnabled);
-  }
- 
-  private SubmissionAssociationTable findSubmission(SubmissionSet submissionRecord, CallingContext cc) {
-	  String submissionFormId = ((StringSubmissionType) submissionRecord.getElementValue(FormInfo.submissionFormId)).getValue();
-	  Long submissionModelVersion = ((LongSubmissionType) submissionRecord.getElementValue(FormInfo.submissionModelVersion)).getValue();
-	  Long submissionUiVersion = ((LongSubmissionType) submissionRecord.getElementValue(FormInfo.submissionUiVersion)).getValue();
-	  XFormParameters p = new XFormParameters(submissionFormId, submissionModelVersion, submissionUiVersion);
-	  
-	  List<SubmissionAssociationTable> match = SubmissionAssociationTable.findSubmissionAssociationsForXForm(p, cc);
-	  if ( !match.isEmpty() ) {
-		  if ( match.size() != 1 ) {
-			  throw new IllegalStateException("Logic is not yet in place for cross-form submission sharing");
-		  }
-		  return match.get(0);
-	  }
-	  return null;
   }
   
   private FormElementModel findElementByNameHelper(FormElementModel current, String name) {
