@@ -16,6 +16,7 @@ import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -167,7 +168,10 @@ public class SubmissionTabUI extends TabPanel {
 	    // view data
 	    dataTable.getRowFormatter().addStyleName(0, "titleBar");
 	    dataTable.addStyleName("dataTable");
-	    filtersData.add(dataTable);
+	    FlowPanel submissionContainer = new FlowPanel();
+	    submissionContainer.getElement().setId("submission_container");
+	    submissionContainer.add(dataTable);
+	    filtersData.add(submissionContainer);
 	    
 	    filtersData.getElement().setId("filters_data");
 		  filtersData.getElement().getFirstChildElement().getFirstChildElement().getFirstChildElement().setId("filters_panel");

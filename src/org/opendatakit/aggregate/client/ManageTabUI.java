@@ -57,6 +57,7 @@ public class ManageTabUI extends TabPanel {
 	    listOfForms.setText(0, 6, "Delete");
 	    listOfForms.getRowFormatter().addStyleName(0, "titleBar");
 	    listOfForms.addStyleName("dataTable");
+	    listOfForms.getElement().setId("form_management_table");
 
 	    VerticalPanel formManagementPanel = new VerticalPanel();
 	    formManagementPanel.add(uploadTable);
