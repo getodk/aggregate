@@ -62,7 +62,6 @@ public class AggregateUI implements EntryPoint {
   private FlexTable listOfForms;
   private ListBox formsBox = new ListBox();
   private ListBox filtersBox = new ListBox();
-  private FormSummary loadForm;
   
   public AggregateUI() {
     formSvc = GWT.create(FormService.class);
@@ -161,8 +160,8 @@ public class AggregateUI implements EntryPoint {
 	
 	// Create sub menu navigation
     getFormList();
-    manageNav = new ManageTabUI(hash, listOfForms);
-    submissionNav = new SubmissionTabUI(hash, view, formsBox, filtersBox, 
+    manageNav = new ManageTabUI(listOfForms);
+    submissionNav = new SubmissionTabUI(view, formsBox, filtersBox, 
     		dataTable, def);
     mainNav.add(submissionNav, "Submissions");
     mainNav.add(manageNav, "Management");
@@ -232,7 +231,6 @@ Set<String> existingForms = new HashSet<String>();
 		  existingForms.add(formsBox.getItemText(i));
 	  }
 	  if(forms.length > 0) {
-		  loadForm = forms[0];
 		  for (int i = 0; i < forms.length; i++) {
 			  FormSummary form = forms[i];
 			  if (!existingForms.contains(form.getTitle())) {

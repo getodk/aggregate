@@ -19,5 +19,5 @@
 	border-width: 1px;
 	border-style: solid;
 	border-color: #07115A;
-	width: 100%;
+	overflow: scroll;
 }

@@ -45,11 +45,11 @@ public class SubmissionTabUI extends TabPanel {
 	private FlexTable dataTable;
 	private FilterGroup def;
 	
-	public SubmissionTabUI(UrlHash hash, List<FilterGroup> view,
+	public SubmissionTabUI(List<FilterGroup> view,
 			ListBox formsBox, ListBox filtersBox, FlexTable dataTable, 
 			FilterGroup def) {
 		super();
-		this.hash = hash;
+		this.hash = UrlHash.getHash();
 		this.view = view;
 		this.formsBox = formsBox;
 		this.filtersBox = filtersBox;
