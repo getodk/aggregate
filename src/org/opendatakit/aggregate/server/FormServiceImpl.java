@@ -63,7 +63,7 @@ public class FormServiceImpl extends RemoteServiceServlet implements
 
       int index = 0;
       for (Form form : forms) {
-        formSummary[index++] = form.generateFormSummary(cc);
+        formSummary[index++] = form.generateFormSummary();
       }
       return formSummary;
 
@@ -278,15 +278,14 @@ public class FormServiceImpl extends RemoteServiceServlet implements
 
     try {
       Form form = Form.retrieveForm(formId, cc);
-      SubmissionAssociationTable sat = form.getSubmissionAssociation(cc);
-      sat.setIsSubmissionAllowed(acceptSubmissions);    
-      
-      // TODO: persist
-      
+      form.setSubmissionEnabled(acceptSubmissions);
+      form.persist(cc);
       return true;
     } catch (ODKFormNotFoundException e1) {
       return false;
-    } 
+    } catch (ODKDatastoreException e) {
+      return false;
+    }
   }
 
   @Override  
