@@ -8,6 +8,7 @@ import org.opendatakit.aggregate.client.filter.CreateNewFilterPopup;
 import org.opendatakit.aggregate.client.filter.Filter;
 import org.opendatakit.aggregate.client.filter.FilterGroup;
 import org.opendatakit.aggregate.client.filter.RowFilter;
+import org.opendatakit.aggregate.client.visualization.CreateNewVisualizationPopup;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -44,10 +45,11 @@ public class SubmissionTabUI extends TabPanel {
 	private ListBox filtersBox;
 	private FlexTable dataTable;
 	private FilterGroup def;
+	private AggregateUI parent;
 	
 	public SubmissionTabUI(List<FilterGroup> view,
 			ListBox formsBox, ListBox filtersBox, FlexTable dataTable, 
-			FilterGroup def) {
+			FilterGroup def, AggregateUI parent) {
 		super();
 		this.hash = UrlHash.getHash();
 		this.view = view;
@@ -55,6 +57,7 @@ public class SubmissionTabUI extends TabPanel {
 		this.filtersBox = filtersBox;
 		this.dataTable = dataTable;
 		this.def = def;
+		this.parent = parent;
 		this.add(setupSubmissionsPanel(), "Filter");
 		this.getElement().setId("second_level_menu");
 		
@@ -94,7 +97,23 @@ public class SubmissionTabUI extends TabPanel {
 		formAndGoalSelectionTable.setHTML(0, 3, "&nbsp;&nbsp;");
 
 		// end goals vis, export, publish
-		Button visualizeButton = new Button("<img src=\"images/blue_bar_c.png\" /> Visualize");
+		Button visualizeButton = new Button("<img src=\"images/bar_chart.png\" /> Visualize");
+		visualizeButton.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				final PopupPanel vizPopup = new CreateNewVisualizationPopup(parent.getHeaders(),
+																	  parent.getSubmissions());
+				vizPopup.setPopupPositionAndShow(new PopupPanel.PositionCallback() {
+							@Override
+							public void setPosition(int offsetWidth, int offsetHeight) {
+								int left = (Window.getClientWidth() - offsetWidth) / 2;
+								int top = (Window.getClientHeight() - offsetHeight) / 2;
+								vizPopup.setPopupPosition(left, top);
+							}
+						}
+					);
+			}
+		});
 		formAndGoalSelectionTable.setWidget(0, 4, visualizeButton);
 		Button exportButton = new Button("<img src=\"images/green_right_arrow.png\" /> Export");
 		formAndGoalSelectionTable.setWidget(0, 5, exportButton);
