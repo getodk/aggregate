@@ -85,7 +85,7 @@
 .gwt-TabBar .gwt-TabBarFirst {
 	width: 15px;
 }
-.mainNav {
+#layout_panel {
 	position: relative;
 	top: -24px;
 }
