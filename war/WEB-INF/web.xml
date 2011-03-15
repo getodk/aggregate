@@ -57,6 +57,15 @@
   </servlet-mapping>
 
 	<servlet>
+		<servlet-name>oauth</servlet-name>
+		<servlet-class>org.opendatakit.aggregate.servlet.OAuthServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>oauth</servlet-name>
+		<url-pattern>/auth/auth</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
 		<servlet-name>gwttest</servlet-name>
 		<servlet-class>org.opendatakit.aggregate.servlet.GwtTester</servlet-class>
 	</servlet>

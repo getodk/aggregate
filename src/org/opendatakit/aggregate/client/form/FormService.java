@@ -24,6 +24,10 @@ public interface FormService extends RemoteService {
   
   Boolean setFormAcceptSubmissions(String formId, Boolean acceptSubmissions);
   
-  String createFusionTable(String formId, ExternalServiceOption esType);
+  String generateOAuthUrl(String uri);
+  
+  String createFusionTable(String formId, ExternalServiceOption esOption);
+  
+  String createGoogleSpreadsheet(String formId, String name, ExternalServiceOption esOption);
   
 }

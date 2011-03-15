@@ -12,6 +12,7 @@ public class ExternServSummary implements Serializable{
    */
   private static final long serialVersionUID = 29897237349781615L;
    
+  private String uri; // NOTE: Do not display to the user, for internal service only
   private String user;
   private OperationalStatus status;
   private Date established;
@@ -23,7 +24,8 @@ public class ExternServSummary implements Serializable{
     
   }
 
-  public ExternServSummary(String user, OperationalStatus status, Date established, String action, String type, String name) {
+  public ExternServSummary(String uri, String user, OperationalStatus status, Date established, String action, String type, String name) {
+    this.uri = uri;
     this.user = user;
     this.status = status;
     this.established = established;
@@ -54,5 +56,9 @@ public class ExternServSummary implements Serializable{
 
   public String getName() {
     return name;
+  }
+
+  public String getUri() {
+    return uri;
   }
 }
