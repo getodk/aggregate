@@ -43,6 +43,8 @@ import org.opendatakit.common.security.spring.GrantedAuthorityHierarchyTable;
 import org.opendatakit.common.security.spring.GrantedAuthorityNames;
 import org.opendatakit.common.security.spring.RegisteredUsersTable;
 import org.opendatakit.common.security.spring.UserGrantedAuthority;
+import org.opendatakit.common.utils.EmailParser;
+import org.opendatakit.common.utils.EmailParser.Email;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.GrantedAuthorityImpl;
 
@@ -151,440 +153,6 @@ public class AccessConfigurationServlet extends ServletUtilBase {
 		ianonAttachmentViewerGrants.add(GrantedAuthorityNames.ROLE_ATTACHMENT_VIEWER.name());
 		anonAttachmentViewerGrants = Collections.unmodifiableList(ianonAttachmentViewerGrants);
 	}
-	
-	/**
-	 * RFC5322 section 3.2.2 production -- except it accepts an epsilon transition.
-	 * 
-	 * @param emailText
-	 * @param idx
-	 * @param len
-	 * @return
-	 */
-	private static final int advanceCFWS(String emailText, int idx, int len ) {
-		while ( idx < len ) {
-			char c = emailText.charAt(idx);
-			if ( Character.isWhitespace(c) ) {
-				++idx;
-				continue;
-			} else if ( c == K_OPEN_PAREN ) {
-				// comment
-				++idx;
-				while ( idx < len ) {
-					c = emailText.charAt(idx);
-					if ( c == K_CLOSE_PAREN ) {
-						++idx;
-						break;
-					}
-					if ( c == K_ESCAPE ) {
-						++idx;
-						++idx;
-						continue;
-					}
-					// normal character...
-					++idx;
-				}
-			} else {
-				// not whitespace -- return...
-				break;
-			}
-		}
-		return idx;
-	}
-	
-	/**
-	 * RFC 5322 production 3.2.3 -- except it accepts epsilon transition and does not consume pre/post FWS
-	 * @param emailText
-	 * @param idx
-	 * @param len
-	 * @param dotAtomAllowed
-	 * @return
-	 */
-	private static final int advanceAtomText(String emailText, int idx, int len, boolean dotAtomAllowed) {
-		boolean first = true;
-		while ( idx < len ) {
-			char c = emailText.charAt(idx);
-			if ( Character.isWhitespace(c) ) {
-				// end of atom.
-				break;
-			} else if ( K_SPECIAL_CHARS.indexOf(c) != -1) {
-				if ( dotAtomAllowed && !first && c == K_DOT ) {
-					// dot is allowed if it is embedded in the atom.
-					if ( idx+1 >= len ) {
-						// this dot is not part of a dotAtom because it is terminal.
-						break;
-					}
-					c = emailText.charAt(idx+1);
-					if ( !Character.isWhitespace(c) && K_SPECIAL_CHARS.indexOf(c) == -1 ) {
-						// ok -- the character after the dot is not a terminator
-						// so advance past the dot and this character
-						// and continue consuming characters...
-						++idx;
-						++idx;
-					} else {
-						// dot is at end of atom, so consuming it wouldn't produce a 
-						// valid dot-atom.  Leave it.
-						break;
-					}
-				} else {
-					// simple atom only or special character ending an atom.
-					break;
-				}
-			} else {
-				// ordinary character...
-				first = false;
-				++idx;
-			}
-		}
-		return idx;
-	}
-
-	/**
-	 * RFC 5322 production 3.2.4 -- except it accepts epsilon transition.
-	 * @param emailText
-	 * @param idx
-	 * @param len
-	 * @return
-	 */
-	private static final int advanceQuotedText(String emailText, int idx, int len) {
-		if ( idx >= len ) return idx;
-		char c = emailText.charAt(idx);
-		if ( c != K_DQ ) {
-			return idx;
-		}
-		if ( idx+1 >= len ) {
-			// orphan double quote -- not a valid quoted text.
-			return idx;
-		}
-
-		++idx;
-		while ( idx < len ) {
-			c = emailText.charAt(idx);
-			if ( c == K_DQ ) {
-				++idx;
-				return idx;
-			} else if ( c == K_ESCAPE ) {
-				++idx;
-				++idx;
-			} else {
-				// ordinary character
-				++idx;
-			}
-		}
-		throw new IllegalStateException("double-quoted string never ended");
-	}
-	
-	/**
-	 * RFC 5322 PHRASE production -- except it accepts epsilon transition.
-	 * @param emailText
-	 * @param idx
-	 * @param len
-	 * @return
-	 */
-	private static final int advancePhrase(String emailText, int idx, int len, boolean allowDotAtom) {
-		if ( idx >= len ) return idx;
-		char c = emailText.charAt(idx);
-		if ( c == K_DQ ) {
-			return advanceQuotedText(emailText, idx, len);
-		} else {
-			return advanceAtomText(emailText, idx, len, allowDotAtom);
-		}
-	}
-	
-	/**
-	 * Simple return value tuple.
-	 * 
-	 * @author mitchellsundt@gmail.com
-	 *
-	 */
-	private static class PositionString {
-		int idxEnd;
-		String cleanString;
-		
-		PositionString(int idx) {
-			idxEnd = idx;
-			cleanString = null;
-		}
-	}
-
-	/**
-	 * Return a normalized domain string and the index of the next parse character.
-	 * 
-	 * @param emailText
-	 * @param idx
-	 * @param len
-	 * @return
-	 */
-	private static final PositionString advanceDomain(String emailText, int idx, int len) {
-		char c = emailText.charAt(idx);
-		if ( c == K_OPEN_SQUARE ) {
-			++idx;
-			idx = advanceCFWS(emailText, idx, len);
-			int idxStart = idx;
-			int idxEnd = emailText.indexOf(K_CLOSE_SQUARE, idxStart);
-			if ( idxEnd == -1 ) {
-				throw new IllegalStateException("Expecting close square bracket");
-			}
-			int idxEscape = emailText.indexOf(K_ESCAPE, idxStart);
-			if ( idxEscape != -1 && idxEscape < idxEnd ) {
-				throw new IllegalStateException("escape sequence appears in domain expression");
-			}
-			int idxDone = idxStart;
-			while ( idxDone < len ) {
-				c = emailText.charAt(idxDone);
-				if ( Character.isWhitespace(c) || c == K_OPEN_PAREN || c == K_CLOSE_SQUARE ) {
-					break;
-				}
-				++idxDone;
-			}
-			idx = advanceCFWS(emailText, idxDone, len);
-			if ( idx != idxEnd ) {
-				throw new IllegalStateException("more than just a domain string surround by whitespace");
-			}
-			PositionString ps = new PositionString(idxEnd+1);
-			ps.cleanString = K_OPEN_SQUARE + emailText.substring(idxStart, idxDone) + K_CLOSE_SQUARE;
-			return ps;
-		} else {
-			int idxEnd = advancePhrase(emailText, idx, len, true);
-			if ( idxEnd == idx ) {
-				throw new IllegalStateException("Expected a domain name");
-			}
-			PositionString ps = new PositionString(idxEnd);
-			ps.cleanString = emailText.substring(idx, idxEnd).toLowerCase();
-			return ps;
-		}
-	}
-	
-	/**
-	 * Advance over an e-mail address specification (RFC 5322)
-	 * @param emailText
-	 * @param idx position after the email 'localpart' (had better be '@')
-	 * @param len
-	 * @param idxStart  starting position of email 'localpart' (username)
-	 * @param expectCloseAngle
-	 * @return return e-mail address string and end position.
-	 */
-	private static final PositionString advanceAddrSpec(String emailText, int idx, int len, int idxStart, boolean expectCloseAngle) {
-		// this had better get a dot-phrase
-		int idxEnd = idx;
-		if ( idxStart == idxEnd ) {
-			throw new IllegalStateException("Missing local part (username) in e-mail address");
-		}
-		if ( idxEnd >= len ) {
-			throw new IllegalStateException("Unexpected end to angle production");
-		}
-		char c = emailText.charAt(idx);
-		if ( c != K_AT ) {
-			throw new IllegalStateException("Expected '@' sign in e-mail address");
-		}
-		++idx;
-		int idxStartDomain = idx;
-		PositionString domain = advanceDomain(emailText, idx, len);
-		if ( idxStartDomain == domain.idxEnd ) {
-			throw new IllegalStateException("Missing domain in e-mail address");
-		}
-		idx = domain.idxEnd;
-		idx = advanceCFWS(emailText, idx, len);
-		if ( expectCloseAngle ) {
-			c = emailText.charAt(idx);
-			if ( c != K_CLOSE_ANGLE) {
-				throw new IllegalStateException("Expecting close angle bracket");
-			}
-			++idx;
-		}
-		PositionString ps = new PositionString(idx);
-		ps.cleanString = emailText.substring(idxStart, idxEnd) + K_AT + domain.cleanString; 
-		return ps;
-	}
-	
-	/**
-	 * Parses the &lt;user@domain.org&gt; portion of an email address per RFC 5322.
-	 *   
-	 * @param emailText
-	 * @param idx
-	 * @param len
-	 * @return the email address within the angle brackets.
-	 */
-	private static final PositionString advanceAngleAddr(String emailText, int idx, int len) {
-		char c = emailText.charAt(idx);
-		if ( c != K_OPEN_ANGLE ) {
-			throw new IllegalStateException("Expected to be at angle production");
-		}
-		// e.g., embedded spaces '< foo@bar >'
-		++idx;
-		idx = advanceCFWS(emailText, idx, len);
-		
-		boolean allowRouting = true;
-		boolean expectColon = false;
-		for (;idx < len;) {
-			c = emailText.charAt(idx);
-			if ( allowRouting && c == K_AT ) {
-				expectColon = true;
-				++idx;
-				idx = advanceCFWS(emailText, idx, len);
-				int idxDomainStart = idx;
-				PositionString pd = advanceDomain(emailText, idx, len);
-				idx = pd.idxEnd;
-				if ( idx == idxDomainStart ) {
-					throw new IllegalStateException("Unexpected missing domain in routing list");
-				}
-				idx = advanceCFWS(emailText, idx, len);
-				if ( idx >= len ) {
-					throw new IllegalStateException("Unexpected end to angle production");
-				}
-				c = emailText.charAt(idx);
-				if ( c == K_COMMA ) {
-					++idx;
-					idx = advanceCFWS(emailText, idx, len);
-					continue;
-				} else if ( c == K_COLON ) {
-					++idx;
-					idx = advanceCFWS(emailText, idx, len);
-					allowRouting = false;
-					expectColon = false;
-					continue;
-				} else {
-					throw new IllegalStateException("Unexpected character in routing list");
-				}
-			} else if ( expectColon && c == K_COLON ) {
-				++idx;
-				idx = advanceCFWS(emailText, idx, len);
-				allowRouting = false;
-				expectColon = false;
-				continue;
-			} else {
-				// this had better get a dot-phrase
-				int idxStart = idx;
-				int idxEnd = advancePhrase(emailText, idx, len, true);
-				return advanceAddrSpec(emailText, idxEnd, len, idxStart, true);
-			}
-		}
-		throw new IllegalStateException("Unexpected end to angle production");
-	}
-
-	/**
-	 * Return value tuple.  
-	 * Returns the nickname in an e-mail address
-	 * and the email address itself.
-	 *  
-	 * @author mitchellsundt@gmail.com
-	 *
-	 */
-	private static class Email {
-		String nickname;
-		String uriUser;
-	};
-	
-	/**
-	 * Trims the surrounding double qoutes from the email nickname and 
-	 * maintains a map of e-mail addresses, resolving duplicates.
-	 * 
-	 * @param eMails
-	 * @param email
-	 */
-	private static final void insertEmail( Map<String, Email> eMails, Email email ) {
-		if ( email.nickname != null && email.nickname.charAt(0) == K_DQ ) {
-			email.nickname = email.nickname.substring(1, email.nickname.length()-1);
-		}
-		
-		Email e = eMails.get(email.uriUser);
-		if ( e == null ) {
-			eMails.put(email.uriUser, email);
-		} else {
-			if ( e.nickname == null || 
-					(email.nickname != null && e.uriUser.startsWith(K_MAILTO + e.nickname)) ) {
-				// replace
-				eMails.put(email.uriUser, email);
-			}
-		}
-	}
-	
-	/**
-	 * Parses a string of e-mails or user names that are space, comma or semi-colon separated.
-	 * 
-	 * @param emailText
-	 * @param cc
-	 * @return collection of the found e-mails.
-	 */
-	private static final Collection<Email> parseEmails( String emailText, CallingContext cc ) {
-		Map<String,Email> eMails = new HashMap<String,Email>();
-		int len = emailText.length();
-		int idx = 0;
-		while ( idx < len ) {
-			idx = advanceCFWS(emailText, idx, len);
-			if ( idx >= len ) break;
-			char c = emailText.charAt(idx);
-			if ( c == K_COMMA ) {
-				++idx;
-			} else if ( c == K_SEMI ) {
-				++idx;
-			} else if ( c == K_OPEN_ANGLE ) {
-				PositionString ps = advanceAngleAddr( emailText, idx, len);
-				idx = ps.idxEnd;
-				Email email = new Email();
-				email.nickname = ps.cleanString.substring(0,ps.cleanString.indexOf(K_AT));
-				email.uriUser = K_MAILTO + ps.cleanString;
-				insertEmail(eMails, email);
-			} else if ( c == K_COLON ) {
-				// must be a group list with no name...
-				++idx;
-			} else {
-				int idxStart = idx;
-				int idxEnd = advancePhrase(emailText, idx, len, true);
-				if ( idxEnd == idxStart ) {
-					throw new IllegalStateException("Expected e-mail address");
-				}
-				if ( idxEnd >= len || emailText.charAt(idxEnd) != K_AT ) {
-					idx = advanceCFWS(emailText, idxEnd, len );
-					c = K_COMMA; // fake terminator...
-					if ( idx < len ) {
-						c = emailText.charAt(idx);
-					}
-					if ( c == K_COLON ) {
-						// this is a group -- ignore it...
-						continue;
-					} else if ( c == K_OPEN_ANGLE ) {
-						PositionString ps = advanceAngleAddr( emailText, idx, len);
-						idx = ps.idxEnd;
-						Email email = new Email();
-						email.nickname = emailText.substring(idxStart, idxEnd);
-						email.uriUser = K_MAILTO + ps.cleanString;
-						insertEmail(eMails, email);
-					} else {
-						// must just be a naked name -- 
-						Email email = new Email();
-						email.nickname = emailText.substring(idxStart, idxEnd);
-						email.uriUser = K_MAILTO + emailText.substring(idxStart, idxEnd) + K_AT + 
-									cc.getUserService().getCurrentRealm().getMailToDomain();
-						insertEmail(eMails, email);
-					}
-				}
-				else {
-					PositionString ps = advanceAddrSpec(emailText, idxEnd, len, idxStart, false);
-					
-					Email email = new Email();
-					email.nickname = ps.cleanString.substring(0,ps.cleanString.indexOf(K_AT));
-					email.uriUser = K_MAILTO + ps.cleanString;
-					insertEmail(eMails, email);
-					idx = ps.idxEnd;
-				}
-			}
-		}
-
-		return eMails.values();
-	}
-
-	/**
-	 * Construct and return the Email object for the superUser.
-	 * 
-	 * @param cc
-	 * @return
-	 */
-	private Email getSuperUserEmail( CallingContext cc ) {
-		Email e = new Email();
-		e.uriUser = cc.getUserService().getSuperUserEmail();
-		e.nickname = e.uriUser.substring(K_MAILTO.length(), e.uriUser.indexOf(K_AT));
-		return e;
-	}
 
 	/**
 	 * Retrieves and constructs the new-line-separated list of e-mails that are 
@@ -647,21 +215,21 @@ public class AccessConfigurationServlet extends ServletUtilBase {
 		RegisteredUsersTable registeredUserPrototype = RegisteredUsersTable.assertRelation(ds, user);
 		for ( Email e : emails ) {
 			try {
-				RegisteredUsersTable t = ds.getEntity(registeredUserPrototype, e.uriUser, user);
+				RegisteredUsersTable t = ds.getEntity(registeredUserPrototype, e.getUriUser(), user);
 				if ( t.getNickname() == null ) {
-					t.setNickname(e.nickname);
+					t.setNickname(e.getNickname());
 					ds.putEntity(t, user);
-				} else if ( !t.getNickname().equals(e.nickname) ) {
+				} else if ( !t.getNickname().equals(e.getNickname()) ) {
 					// user supplied a real nickname.
 					// that nickname is different from what is in the datastore
-					t.setNickname(e.nickname);
+					t.setNickname(e.getNickname());
 					ds.putEntity(t, user);
 				}
 			} catch ( ODKEntityNotFoundException err ) {
 				// new user
 				RegisteredUsersTable r = ds.createEntityUsingRelation(registeredUserPrototype, user);
-				r.setUriUser(e.uriUser);
-				r.setNickname(e.nickname);
+				r.setUriUser(e.getUriUser());
+				r.setNickname(e.getNickname());
 				r.setIsCredentialNonExpired(true);
 				r.setIsEnabled(true);
 				ds.putEntity(r, user);
@@ -671,7 +239,7 @@ public class AccessConfigurationServlet extends ServletUtilBase {
 		// build the set of uriUsers for this granted authority...
 		TreeSet<String> desiredMembers = new TreeSet<String>();
 		for ( Email e : emails ) {
-			desiredMembers.add(e.uriUser);
+			desiredMembers.add(e.getUriUser());
 		}
 		
 		// assert that the authority has exactly this set of uriUsers (no more, no less)
@@ -795,16 +363,20 @@ public class AccessConfigurationServlet extends ServletUtilBase {
 				out.print("<form method=\"POST\" action=\"" + cc.getWebApplicationURL(ADDR) + "\">" );
 				out.print("<h2>Site Access</h2>");
 				out.print("<h4>User Password</h4>");
-				out.print("<p>Authenticated submissions from ODK Collect 1.1.6 require locally-held user passwords. " +
-						"Site administrators can set or change locally-held user passwords <a href=\"" + 
+				out.print("<p>Authenticated submissions from ODK Collect 1.1.6 require the use of passwords that are " +
+						"held on this server and that are specific to this server (referred to as <em>Aggregate passwords</em>). " +
+						"Site administrators can set or change Aggregate passwords <a href=\"" + 
 						cc.getWebApplicationURL(UserManagePasswordsServlet.ADDR) + "\">here</a>.  By default," +
-						  " users are not assigned a locally-held password, and so will not be able to do " +
-						  "authenticated submissions from ODK Collect 1.1.6</p>" +
-						  "<p>Administrators can define non-gmail account users (e.g., fred@mydomain.org) but those " +
-						  "users will need to log in with their locally-held password to use the site (Aggregate can't" +
-						  " automatically authenticate against 'mydomain.org'). Thus, administrators must visit the above link " +
-						  "to set a locally-held password for non-gmail account users before they can gain access to the system.</p>");
-				out.print("<p>Users, once logged in, can reset their passwords by visiting the 'Change Password' page.</p>");
+						  " users are not assigned an Aggregate password and must log in using their <code>@" +
+						cc.getUserService().getCurrentRealm().getMailToDomain() +
+						"</code> account," +
+						  " and so will not be able to do authenticated submissions from ODK Collect 1.1.6</p>" +
+						  "<p>Administrators can define non-gmail account users (e.g., <code>fred@mydomain.org</code>) but those " +
+						  "users can only log in with their Aggregate password when using this site (Aggregate can't" +
+						  " automatically authenticate against '<code>mydomain.org</code>'). In this case, administrators must " +
+						  "visit the above link to set an Aggregate password for non-gmail account users before they " +
+						  "can gain access to the system.</p>");
+				out.print("<p>Users, once logged in, can reset their Aggregate passwords by visiting the 'Change Password' page.</p>");
 				out.print("<h4>Site Administrators</h4><p>Enter the e-mail addresses of the " +
 						"site administrators below</p><textarea name=\"" + SITE_ADMINS + "\" rows=\"10\" cols=\"60\">" +
 								getEmailsOfGrantedAuthority(siteAuth, cc) + "</textarea>");
@@ -847,6 +419,10 @@ public class AccessConfigurationServlet extends ServletUtilBase {
 			e.printStackTrace();
 	        resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
 	                ErrorConsts.PERSISTENCE_LAYER_PROBLEM);
+		} catch (Exception e) {
+			e.printStackTrace();
+			resp.sendError(HttpServletResponse.SC_BAD_REQUEST,
+					e.getMessage());
 		}
 	}
 
@@ -872,13 +448,13 @@ public class AccessConfigurationServlet extends ServletUtilBase {
 							(str.compareToIgnoreCase("yes") == 0);
 		}
 
-		Collection<Email> siteAdminEmails = parseEmails(siteAdmins, cc);
+		Collection<Email> siteAdminEmails = EmailParser.parseEmails(siteAdmins, cc);
 		{
 			// make sure that the super-user is in the site admins list...
-			Email eSuperUser = getSuperUserEmail(cc);
+			Email eSuperUser = EmailParser.getSuperUserEmail(cc);
 			boolean found = false;
 			for ( Email e : siteAdminEmails ) {
-				if ( e.uriUser.equals(eSuperUser.uriUser) ) {
+				if ( e.getUriUser().equals(eSuperUser.getUriUser()) ) {
 					found = true;
 					break;
 				}
@@ -890,8 +466,8 @@ public class AccessConfigurationServlet extends ServletUtilBase {
 				siteAdminEmails = newList;
 			}
 		}
-		Collection<Email> formAdminEmails = parseEmails(formAdmins, cc);
-		Collection<Email> submitterEmails = parseEmails(submitters, cc);
+		Collection<Email> formAdminEmails = EmailParser.parseEmails(formAdmins, cc);
+		Collection<Email> submitterEmails = EmailParser.parseEmails(submitters, cc);
 
 		List<String> anonGrants = new ArrayList<String>();
 		

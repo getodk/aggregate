@@ -150,9 +150,11 @@ public class UserModifyServlet extends ServletUtilBase {
 		out.write(HtmlUtil.createRadio(IS_ENABLED, "enable", "Recognize this account as a registered user", userDefinition.getIsEnabled()));
 		out.write(HtmlUtil.createRadio(IS_ENABLED, "disable", "Do not recognize this account as a registered user", !userDefinition.getIsEnabled()));
 		out.write(HtmlConsts.LINE_BREAK);
-		out.write(HtmlUtil.createRadio(CREDENTIALS_EXPIRED, "active", "Allow locally-authenticated (device) logins on this account", userDefinition.getIsCredentialNonExpired()));
-		out.write(HtmlUtil.createRadio(CREDENTIALS_EXPIRED, "expired", "Do not allow locally-authenticated (device) logins on this account", !userDefinition.getIsCredentialNonExpired()));
+		out.write(HtmlUtil.createRadio(CREDENTIALS_EXPIRED, "active", "Allow the use of Aggregate passwords on this account", userDefinition.getIsCredentialNonExpired()));
+		out.write(HtmlUtil.createRadio(CREDENTIALS_EXPIRED, "expired", "Do not allow the use of Aggregate passwords on this account", !userDefinition.getIsCredentialNonExpired()));
 		out.write(HtmlConsts.LINE_BREAK);
+		out.write("<p>If Aggregate passwords are not allowed, the user will not be able to perform authenticated " +
+				"submissions from a device (e.g., ODK Collect 1.1.6) to the server. ");
 		out.write(HtmlUtil.createInput("submit", null, "Update"));
 		out.write("</form>");
 		finishBasicHtmlResponse(resp);

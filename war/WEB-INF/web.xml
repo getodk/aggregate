@@ -416,6 +416,15 @@
 		<url-pattern>/access/user-modify</url-pattern>
 	</servlet-mapping>
 
+    <servlet>
+        <servlet-name>userBulkModify</servlet-name>
+        <servlet-class>org.opendatakit.aggregate.servlet.UserBulkModifyServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>userBulkModify</servlet-name>
+        <url-pattern>/access/user-bulk-modify</url-pattern>
+    </servlet-mapping>
+
 	<servlet>
 		<servlet-name>userManagement</servlet-name>
 		<servlet-class>org.opendatakit.aggregate.servlet.UserManagementServlet</servlet-class>

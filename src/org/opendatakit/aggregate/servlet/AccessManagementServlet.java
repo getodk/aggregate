@@ -61,10 +61,6 @@ public class AccessManagementServlet extends ServletUtilBase {
 		
 		boolean secure = this.isSiteManagementSecure(cc);
 		
-		out.print("<p>By default, anyone with a gmail account can log in and " +
-				"do anything with your site.  Additionally, anyone, without logging " +
-				"in at all, can upload data to your site and download forms from " +
-				"it.  This is consistent with Aggregate 0.9.x.</p>\n");
 		if ( !secure ) {
 			out.print("<font style=\"color: red;\">");
 		}
@@ -72,14 +68,14 @@ public class AccessManagementServlet extends ServletUtilBase {
 				"in securing the site is to restrict access to this page and the other " +
 				"pages that enable you to control access to the site.  To do this,</p>" +
 				"<ol>" +
-				"<li>Define an 'administrators' group, granting it the ROLE_ACCESS_ADMIN permission</li>" +
+				"<li>Define an 'siteAdmins' group, granting it the ROLE_ACCESS_ADMIN permission</li>" +
 				"<li>Add yourself as a registered user of the site</li>" +
-				"<li>Add yourself to that 'administrators' group</li>" +
-				"<li>Log off then log back in (to update your permissions) in order to gain the ROLE_ACCESS_ADMIN privilege through the 'administrators' group</li>" +
+				"<li>Add yourself to that 'siteAdmins' group</li>" +
+				"<li>Log off then log back in (to update your permissions) in order to gain the ROLE_ACCESS_ADMIN privilege through the 'siteAdmins' group</li>" +
 				"<li>Remove the ROLE_ACCESS_ADMIN permission from all other groups</li>" +
 				"\n</ol><p>After having done this, only you can access these web pages and manage " +
 				"your site's access permissions.  You should repeat steps 2 and 3 to add " +
-				"at least one other person to the 'administrators' group.</p>\n");
+				"at least one other person to the 'siteAdmins' group.</p>\n");
 		if ( !secure ) {
 			out.print("</font>");
 		}
@@ -113,7 +109,7 @@ public class AccessManagementServlet extends ServletUtilBase {
 				"want certain specified users to have. The later is accomplished by " +
 				"defining a group with the roles you want to assign, entering those specified " +
 				"users into the system as registered users, and assigning them to that group. " +
-				"</p><p>These are exactly the steps you did for the 'administrators' group, " +
+				"</p><p>These are exactly the steps you did for the 'siteAdmins' group, " +
 				"above.</p>\n" +
 				"Every registered user automatically belongs to the USER_IS_REGISTERED group;" +
 				"if you want all registered users to have a given set of roles, then you can " +
@@ -138,13 +134,14 @@ public class AccessManagementServlet extends ServletUtilBase {
 				"Permissions (roles) are granted to user groups.  Users possess the " +
 				"roles of the groups they belong to.  Manage group memberships to " +
 				"manage the access rights of the users."});
-		tableEntries.add(new String[] { "Change locally-maintained (device) passwords for registered users",
+		tableEntries.add(new String[] { "Change Aggregate passwords for registered users",
 				cc.getCurrentUser().isRegistered() ?
 					HtmlUtil.createHref(cc.getWebApplicationURL(UserManagePasswordsServlet.ADDR),
 						UserManagePasswordsServlet.TITLE_INFO) 
 					: "<font style=\"color: red;\">must be logged in and a registered user</font>",
-				"Logins from a device (e.g., ODK Collect) require a locally-maintained " +
-				"password.  Set or change that password for selected users here.  The password is stored " +
+				"Logins from a device (e.g., ODK Collect) require a password held on this server and " +
+				"specific to this server (an <em>Aggregate password</em>). " +
+				"Set or change that password for selected users here.  The password is stored " +
 				"as both a randomly-salted sha-1 hash and as a deterministically-salted md5 hash. " +
 				"The plaintext password is not retained."});
 		
