@@ -31,6 +31,7 @@ import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DecoratedTabPanel;
 import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ListBox;
@@ -178,7 +179,11 @@ public class AggregateUI implements EntryPoint {
 
     // add to layout
     layoutPanel.add(mainNav);
-    layoutPanel.add(helpPanel);
+    layoutPanel.getElement().setId("layout_panel");
+    FlowPanel helpContainer = new FlowPanel();
+    helpContainer.add(helpPanel);
+    helpContainer.getElement().setId("help_container");
+    layoutPanel.add(helpContainer);
     
     // Select the correct menu item based on url hash.
     int selected = 0;
