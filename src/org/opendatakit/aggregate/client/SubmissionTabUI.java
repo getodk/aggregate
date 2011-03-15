@@ -7,14 +7,18 @@ import org.opendatakit.aggregate.client.filter.ColumnFilterHeader;
 import org.opendatakit.aggregate.client.filter.CreateNewFilterPopup;
 import org.opendatakit.aggregate.client.filter.Filter;
 import org.opendatakit.aggregate.client.filter.FilterGroup;
+import org.opendatakit.aggregate.client.filter.FilterService;
+import org.opendatakit.aggregate.client.filter.FilterServiceAsync;
 import org.opendatakit.aggregate.client.filter.RowFilter;
 import org.opendatakit.aggregate.client.visualization.CreateNewVisualizationPopup;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -46,6 +50,7 @@ public class SubmissionTabUI extends TabPanel {
 	private FlexTable dataTable;
 	private FilterGroup def;
 	private AggregateUI parent;
+	private FilterServiceAsync filterSvc;
 	
 	public SubmissionTabUI(List<FilterGroup> view,
 			ListBox formsBox, ListBox filtersBox, FlexTable dataTable, 
@@ -203,10 +208,63 @@ public class SubmissionTabUI extends TabPanel {
 	  }
 	  
 	  public TreeItem loadFilterGroup(final FilterGroup group) {
-		  TreeItem filterGroup = new TreeItem(
-				  new Label(group.getName()));
-		  
+		  final FlexTable filterBox = new FlexTable();
+		  Label groupName = new Label(group.getName());
+		  final Button saveFilterGroup = new Button("Save");
+		  saveFilterGroup.getElement().setPropertyObject("group", group);
 		  final FlexTable filters = new FlexTable();
+		  saveFilterGroup.addClickHandler(new ClickHandler() {
+
+			@Override
+			public void onClick(ClickEvent event) {
+				if(filters.getRowCount() == 0) {
+					Window.alert(
+							"You need at least one filter to save a group.");
+				} else {
+					FilterGroup oldgroup = (FilterGroup) saveFilterGroup.getElement().getPropertyObject("group");
+					boolean filterSet = false;
+					boolean firstTime = true;
+					boolean match = false;
+					String newFilter = "";
+					while(!filterSet) {
+						if(firstTime) {
+							newFilter = 
+								Window.prompt("Please enter a name for this group", 
+									"FilterGroup" + (filtersBox.getItemCount()+1));
+						} else {
+							match = false;
+							newFilter = Window.prompt(
+									"That group already exists.  " +
+									"Please enter a new name", 
+									"FilterGroup" + 
+									(filtersBox.getItemCount()+1));
+						}
+						firstTime = false;
+						if(newFilter != null) {
+							for(int i = 0; i < filtersBox.getItemCount(); i++) {
+								if((filtersBox.getValue(i))
+										.compareTo(newFilter) == 0 &&
+										newFilter.compareTo(oldgroup.getName()) != 0) {
+									match = true;
+								}
+							}
+							if(!match) {
+								filterSet = true;
+							}
+						} else {
+						filterSet = true;
+						}
+					}
+					//Save the new filter
+					addFilterGroup(newFilter, oldgroup);
+				}
+			}
+			  
+		  });
+		  filterBox.setWidget(0, 0, groupName);
+		  filterBox.setWidget(0, 1, saveFilterGroup);
+		  
+		  TreeItem filterGroup = new TreeItem(filterBox);
 		  
 		  int row = 0;
 		  for (Filter filter: group.getFilters()) {
@@ -247,4 +305,41 @@ public class SubmissionTabUI extends TabPanel {
 		  filterGroup.setState(true);
 		  return filterGroup;
 	  }
+	  
+	  private void addFilterGroup(final String id, FilterGroup group) {
+		  // Initialize the service proxy.
+		  if (filterSvc == null) {
+			  filterSvc = GWT.create(FilterService.class);
+		  }
+		  
+		  // Set up the callback object.
+		  AsyncCallback<Boolean> callback = 
+			  new AsyncCallback<Boolean>() {
+			  public void onFailure(Throwable caught) {			
+				  
+			  }
+			  @Override
+			  public void onSuccess(Boolean result) {
+				  filterPanel.clear();
+				  setupFiltersDataPanel(view);
+			  }
+		  };
+		  FilterGroup newGroup = new FilterGroup(
+				  id, group.getFormId(), null);
+		  if(id.compareTo(group.getName()) != 0) {
+			  for(Filter filter : group.getFilters()) {
+				  newGroup.addFilter(filter);
+				  if(group.getName().compareTo(def.getName()) == 0)
+					  group.removeFilter(filter);
+				  //if def empty or all transferred then leave
+				  if(group.getFilters().size() == 0 || group.getFilters().size() == newGroup.getFilters().size())
+					  break;
+			  }
+			  view.clear();
+			  view.add(def);
+			  view.add(newGroup);
+		  }
+		  // Make the call to the form service.
+	  	  filterSvc.updateFilterGroup(newGroup, callback);
+  	 }
 }
