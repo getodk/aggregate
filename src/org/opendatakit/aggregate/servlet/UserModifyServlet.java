@@ -17,9 +17,7 @@ package org.opendatakit.aggregate.servlet;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.servlet.ServletException;
@@ -33,8 +31,6 @@ import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.common.constants.HtmlConsts;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.EntityKey;
-import org.opendatakit.common.persistence.Query;
-import org.opendatakit.common.persistence.Query.FilterOperation;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.security.SecurityUtils;
@@ -169,18 +165,7 @@ public class UserModifyServlet extends ServletUtilBase {
 		User user = cc.getCurrentUser();
 		
 		// first, delete all group memberships.
-		{
-			UserGrantedAuthority relation = UserGrantedAuthority.assertRelation(ds, user);
-			Query query = ds.createQuery(relation, user);
-			query.addFilter(relation.user, FilterOperation.EQUAL, username);
-			List<?> keys = query.executeDistinctValueForDataField(relation.primaryKey);
-			List<EntityKey> memberships = new ArrayList<EntityKey>();
-			for ( Object o : keys ) {
-				String uri = (String) o;
-				memberships.add(new EntityKey(relation, uri));
-			}
-			ds.deleteEntities(memberships, user);
-		}
+		UserGrantedAuthority.deleteGrantedAuthoritiesForUser(username, cc);
 
 		// now delete the user's entry itself...
 		try {

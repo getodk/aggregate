@@ -2,7 +2,7 @@
 <web-app xmlns="http://java.sun.com/xml/ns/javaee" version="2.5"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.0.5.xsd">
-
+ 
 	<context-param>
 		<param-name>contextConfigLocation</param-name>
 		<param-value>classpath:odk-settings.xml,/WEB-INF/applicationContext-security.xml</param-value>
@@ -370,6 +370,24 @@
 		<servlet-name>confirm</servlet-name>
 		<url-pattern>/admin/confirm</url-pattern>
 	</servlet-mapping>
+
+    <servlet>
+        <servlet-name>wwwLandingPage</servlet-name>
+        <servlet-class>org.opendatakit.aggregate.servlet.LandingPageServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>wwwLandingPage</servlet-name>
+        <url-pattern>/www/index.html</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>accessConfiguration</servlet-name>
+        <servlet-class>org.opendatakit.aggregate.servlet.AccessConfigurationServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>accessConfiguration</servlet-name>
+        <url-pattern>/access/access-configuration</url-pattern>
+    </servlet-mapping>
 
 	<servlet>
 		<servlet-name>accessManagement</servlet-name>
