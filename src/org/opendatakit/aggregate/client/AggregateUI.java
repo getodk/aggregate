@@ -90,7 +90,8 @@ public class AggregateUI implements EntryPoint {
     refreshTimer.scheduleRepeating(REFRESH_INTERVAL);
   }
 
-  public void requestUpdatedSubmissionData(FilterGroup filterGroup) {
+  public void requestUpdatedSubmissionData(List<FilterGroup> groups) {
+    
     // Initialize the service proxy.
     if (submissionSvc == null) {
       submissionSvc = GWT.create(SubmissionService.class);
@@ -107,8 +108,19 @@ public class AggregateUI implements EntryPoint {
       }
     };
 
-    // Make the call to the form service.
-    submissionSvc.getSubmissions(filterGroup, callback);
+    
+    for(FilterGroup group : groups) {
+    	boolean allEmpty = true;
+    	if(group.getFilters().size() != 0) {
+    		// Make the call to the form service.
+    		allEmpty = false;
+    		submissionSvc.getSubmissions(group, callback);
+    	}
+    	if(allEmpty) {
+    		submissionSvc.getSubmissions(def, callback);
+    	}
+    }
+
   }
   
   public void updateDataTable(SubmissionUISummary summary) {
@@ -242,7 +254,7 @@ public class AggregateUI implements EntryPoint {
         def.setFormId(formId);
         getFilterList(formId);
         if(forms.length > 0) {
-        	requestUpdatedSubmissionData(def);
+        	requestUpdatedSubmissionData(view);
         }
       }
     };
@@ -282,12 +294,40 @@ Set<String> existingForms = new HashSet<String>();
   private void fillFilterDropDown(FilterSet set) {
 	  filtersBox.clear();
 	  filtersBox.addItem("none");
+	  
+	  //if you are sick and tired of groups populating... uncomment this code to clean all of your groups
+//	  for(FilterGroup group : set.getGroups()) {
+//		  removeFilterGroup(group);
+//		  if(set.getGroups().size() == 0)
+//			  break;
+//	  }
 	  for(FilterGroup group : set.getGroups()) {
 		  filtersBox.addItem(group.getName());
 	  };
   }
   
-  private void getFilterList(final String id) {
+  private void removeFilterGroup(FilterGroup group) {
+	if (filterSvc == null) {
+		filterSvc = GWT.create(FilterService.class);
+	}
+	
+	AsyncCallback<Boolean> callback = 
+		new AsyncCallback<Boolean>() {
+		public void onFailure(Throwable caught) {
+			
+		}
+
+		@Override
+		public void onSuccess(Boolean result) {
+			// TODO Auto-generated method stub
+			
+		}
+	};
+		
+		filterSvc.deleteFilterGroup(group, callback);
+	}
+
+private void getFilterList(final String id) {
 	    // Initialize the service proxy.
 	    if (filterSvc == null) {
 	      filterSvc = GWT.create(FilterService.class);
@@ -303,7 +343,7 @@ Set<String> existingForms = new HashSet<String>();
 		@Override
 		public void onSuccess(FilterSet result) {
 			fillFilterDropDown(result);
-			requestUpdatedSubmissionData(def);
+			requestUpdatedSubmissionData(view);
 		}
 	    };
 
