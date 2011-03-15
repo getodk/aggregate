@@ -75,6 +75,7 @@ public class AggregateUI implements EntryPoint {
   private FlexTable listOfForms;
   private ListBox formsBox = new ListBox();
   private ListBox filtersBox = new ListBox();
+  private List<FilterGroup> allGroups = new ArrayList<FilterGroup>();
   
   public AggregateUI() {
     formSvc = GWT.create(FormService.class);
@@ -186,7 +187,7 @@ public class AggregateUI implements EntryPoint {
     getFormList();
     manageNav = new ManageTabUI(listOfForms);
     submissionNav = new SubmissionTabUI(view, formsBox, filtersBox, 
-    		dataTable, def, this);
+    		dataTable, def, this, allGroups);
     mainNav.add(submissionNav, "Submissions");
     mainNav.add(manageNav, "Management");
     mainNav.addStyleName("mainNav");
@@ -292,7 +293,9 @@ Set<String> existingForms = new HashSet<String>();
   }
   
   private void fillFilterDropDown(FilterSet set) {
+	  int selected = filtersBox.getSelectedIndex();
 	  filtersBox.clear();
+	  allGroups.clear();
 	  filtersBox.addItem("none");
 	  
 	  //if you are sick and tired of groups populating... uncomment this code to clean all of your groups
@@ -303,7 +306,12 @@ Set<String> existingForms = new HashSet<String>();
 //	  }
 	  for(FilterGroup group : set.getGroups()) {
 		  filtersBox.addItem(group.getName());
-	  };
+		  allGroups.add(group);
+	  }
+	  if(selected == -1)
+		  filtersBox.setSelectedIndex(0);
+	  else
+		  filtersBox.setSelectedIndex(selected);
   }
   
   private void removeFilterGroup(FilterGroup group) {

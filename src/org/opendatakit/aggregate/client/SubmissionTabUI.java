@@ -51,10 +51,12 @@ public class SubmissionTabUI extends TabPanel {
 	private FilterGroup def;
 	private AggregateUI parent;
 	private FilterServiceAsync filterSvc;
+	private List<FilterGroup> allGroups;
 	
 	public SubmissionTabUI(List<FilterGroup> view,
 			ListBox formsBox, ListBox filtersBox, FlexTable dataTable, 
-			FilterGroup def, AggregateUI parent) {
+			FilterGroup def, AggregateUI parent, 
+			List<FilterGroup> allGroups) {
 		super();
 		this.hash = UrlHash.getHash();
 		this.view = view;
@@ -63,6 +65,7 @@ public class SubmissionTabUI extends TabPanel {
 		this.dataTable = dataTable;
 		this.def = def;
 		this.parent = parent;
+		this.allGroups = allGroups;
 		this.add(setupSubmissionsPanel(), "Filter");
 		this.getElement().setId("second_level_menu");
 		
@@ -100,6 +103,23 @@ public class SubmissionTabUI extends TabPanel {
 		Button loadFormAndFilterButton = new Button("Load Filter");
 		formAndGoalSelectionTable.setWidget(0, 2, loadFormAndFilterButton);
 		formAndGoalSelectionTable.setHTML(0, 3, "&nbsp;&nbsp;");
+		loadFormAndFilterButton.addClickHandler(new ClickHandler() {
+
+			@Override
+			public void onClick(ClickEvent event) {
+				String groupName = filtersBox.getValue(filtersBox.getSelectedIndex());
+				view.clear();
+				view.add(def);
+				for(FilterGroup group : allGroups) {
+					if(groupName.compareTo(group.getName()) == 0)
+						view.add(group);
+				}
+				filterPanel.clear();
+				setupFiltersDataPanel(view);
+				
+			}
+			
+		});
 
 		// end goals vis, export, publish
 		Button visualizeButton = new Button("<img src=\"images/bar_chart.png\" /> Visualize");
@@ -107,16 +127,15 @@ public class SubmissionTabUI extends TabPanel {
 			@Override
 			public void onClick(ClickEvent event) {
 				final PopupPanel vizPopup = new CreateNewVisualizationPopup(parent.getHeaders(),
-																	  parent.getSubmissions());
+						parent.getSubmissions());
 				vizPopup.setPopupPositionAndShow(new PopupPanel.PositionCallback() {
-							@Override
-							public void setPosition(int offsetWidth, int offsetHeight) {
-								int left = (Window.getClientWidth() - offsetWidth) / 2;
-								int top = (Window.getClientHeight() - offsetHeight) / 2;
-								vizPopup.setPopupPosition(left, top);
-							}
-						}
-					);
+					@Override
+					public void setPosition(int offsetWidth, int offsetHeight) {
+						int left = (Window.getClientWidth() - offsetWidth) / 2;
+						int top = (Window.getClientHeight() - offsetHeight) / 2;
+						vizPopup.setPopupPosition(left, top);
+					}
+				});
 			}
 		});
 		formAndGoalSelectionTable.setWidget(0, 4, visualizeButton);
