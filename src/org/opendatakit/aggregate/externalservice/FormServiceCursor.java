@@ -50,9 +50,6 @@ public final class FormServiceCursor extends CommonFieldsBase {
 	  ABANDONED
   };
   
-  /*
-   * Property Names for datastore
-   */
   private static final DataField URI_MD5_FORM_ID_PROPERTY = new DataField("URI_MD5_FORM_ID",
 	      DataField.DataType.URI, false, PersistConsts.URI_STRING_LEN).setIndexable(IndexType.HASH);
   private static final DataField AURI_SERVICE_PROPERTY = new DataField("AURI_SERVICE",
@@ -82,43 +79,27 @@ public final class FormServiceCursor extends CommonFieldsBase {
   private static final DataField FORM_ID_PROPERTY = new DataField("FORM_ID",
       DataField.DataType.STRING, true, 4096L);
 
-  public final DataField uriMd5FormId;
-  public final DataField auriService;
-  public final DataField externalServiceType;
-  public final DataField externalServiceOption;
-  public final DataField isExternalServicePrepared;
-  public final DataField operationalStatus;
-  public final DataField establishmentDateTime;
-  public final DataField uploadCompleted;
-  public final DataField lastUploadCursorDate;
-  public final DataField lastUploadKey;
-  public final DataField lastStreamingCursorDate;
-  public final DataField lastStreamingKey;
-  public final DataField formId;
-
 	/**
-	 * Construct a relation prototype.
+	 * Construct a relation prototype.  Only called via {@link #assertRelation(CallingContext)}
 	 * 
 	 * @param databaseSchema
 	 * @param tableName
 	 */
   private FormServiceCursor(String schemaName) {
     super(schemaName, TABLE_NAME);
-    fieldList.add(uriMd5FormId = new DataField(URI_MD5_FORM_ID_PROPERTY));
-    fieldList.add(auriService = new DataField(AURI_SERVICE_PROPERTY));
-    fieldList.add(externalServiceType = new DataField(EXT_SERVICE_TYPE_PROPERTY));
-    fieldList.add(externalServiceOption = new DataField(EXTERNAL_SERVICE_OPTION));
-    fieldList.add(isExternalServicePrepared = new DataField(IS_EXTERNAL_SERVICE_PREPARED));
-    fieldList.add(operationalStatus = new DataField(OPERATIONAL_STATUS));
-    fieldList.add(establishmentDateTime = new DataField(ESTABLISHMENT_DATETIME));
-    fieldList.add(uploadCompleted = new DataField(UPLOAD_COMPLETED_PROPERTY));
-    fieldList.add(lastUploadCursorDate = new DataField(
-        LAST_UPLOAD_CURSOR_DATE_PROPERTY));
-    fieldList.add(lastUploadKey = new DataField(LAST_UPLOAD_KEY_PROPERTY));
-    fieldList.add(lastStreamingCursorDate = new DataField(
-        LAST_STREAMING_CURSOR_DATE_PROPERTY));
-    fieldList.add(lastStreamingKey = new DataField(LAST_STREAMING_KEY_PROPERTY));
-    fieldList.add(formId = new DataField(FORM_ID_PROPERTY));
+    fieldList.add(URI_MD5_FORM_ID_PROPERTY);
+    fieldList.add(AURI_SERVICE_PROPERTY);
+    fieldList.add(EXT_SERVICE_TYPE_PROPERTY);
+    fieldList.add(EXTERNAL_SERVICE_OPTION);
+    fieldList.add(IS_EXTERNAL_SERVICE_PREPARED);
+    fieldList.add(OPERATIONAL_STATUS);
+    fieldList.add(ESTABLISHMENT_DATETIME);
+    fieldList.add(UPLOAD_COMPLETED_PROPERTY);
+    fieldList.add(LAST_UPLOAD_CURSOR_DATE_PROPERTY);
+    fieldList.add(LAST_UPLOAD_KEY_PROPERTY);
+    fieldList.add(LAST_STREAMING_CURSOR_DATE_PROPERTY);
+    fieldList.add(LAST_STREAMING_KEY_PROPERTY);
+    fieldList.add(FORM_ID_PROPERTY);
   }
 
 	/**
@@ -129,19 +110,6 @@ public final class FormServiceCursor extends CommonFieldsBase {
 	 */
   private FormServiceCursor(FormServiceCursor ref, User user) {
     super(ref, user);
-    uriMd5FormId = ref.uriMd5FormId;
-    auriService = ref.auriService;
-    externalServiceType = ref.externalServiceType;
-    externalServiceOption = ref.externalServiceOption;
-    isExternalServicePrepared = ref.isExternalServicePrepared;
-    operationalStatus = ref.operationalStatus;
-    establishmentDateTime = ref.establishmentDateTime;
-    uploadCompleted = ref.uploadCompleted;
-    lastUploadCursorDate = ref.lastUploadCursorDate;
-    lastUploadKey = ref.lastUploadKey;
-    lastStreamingCursorDate = ref.lastStreamingCursorDate;
-    lastStreamingKey = ref.lastStreamingKey;
-    formId = ref.formId;
   }
 
   // Only called from within the persistence layer.
@@ -151,124 +119,124 @@ public final class FormServiceCursor extends CommonFieldsBase {
   }
 
   public ExternalServiceType getExternalServiceType() {
-    String type = getStringField(externalServiceType);
+    String type = getStringField(EXT_SERVICE_TYPE_PROPERTY);
     return ExternalServiceType.valueOf(type);
   }
 
   public void setServiceClassname(ExternalServiceType value) {
-    if (!setStringField(externalServiceType, value.toString())) {
+    if (!setStringField(EXT_SERVICE_TYPE_PROPERTY, value.toString())) {
       throw new IllegalArgumentException("overflow externalServiceType");
     }
   }
 
   public ExternalServiceOption getExternalServiceOption() {
-    return ExternalServiceOption.valueOf(getStringField(externalServiceOption));
+    return ExternalServiceOption.valueOf(getStringField(EXTERNAL_SERVICE_OPTION));
   }
 
   public void setExternalServiceOption(ExternalServiceOption value) {
-    if (!setStringField(externalServiceOption, value.toString())) {
+    if (!setStringField(EXTERNAL_SERVICE_OPTION, value.toString())) {
       throw new IllegalArgumentException("overflow externalServiceOption");
     }
   }
 
   public Boolean isExternalServicePrepared() {
-	  return getBooleanField(isExternalServicePrepared);
+	  return getBooleanField(IS_EXTERNAL_SERVICE_PREPARED);
   }
   
   public void setIsExternalServicePrepared(Boolean value) {
-	  setBooleanField(isExternalServicePrepared, value);
+	  setBooleanField(IS_EXTERNAL_SERVICE_PREPARED, value);
   }
   
   public OperationalStatus getOperationalStatus() {
-	  String value = getStringField(operationalStatus);
+	  String value = getStringField(OPERATIONAL_STATUS);
 	  if ( value == null ) return null;
 	  return OperationalStatus.valueOf(value);
   }
   
   public void setOperationalStatus(OperationalStatus value) {
-    if (!setStringField(operationalStatus, value.name())) {
+    if (!setStringField(OPERATIONAL_STATUS, value.name())) {
         throw new IllegalArgumentException("overflow operationalStatus");
     }
   }
   
   public Date getEstablishmentDateTime() {
-    return getDateField(establishmentDateTime);
+    return getDateField(ESTABLISHMENT_DATETIME);
   }
 
   public void setEstablishmentDateTime(Date value) {
-    setDateField(establishmentDateTime, value);
+    setDateField(ESTABLISHMENT_DATETIME, value);
   }
 
   public Boolean getUploadCompleted() {
-    return getBooleanField(uploadCompleted);
+    return getBooleanField(UPLOAD_COMPLETED_PROPERTY);
   }
 
   public void setUploadCompleted(Boolean value) {
-    setBooleanField(uploadCompleted, value);
+    setBooleanField(UPLOAD_COMPLETED_PROPERTY, value);
   }
 
   public Date getLastUploadCursorDate() {
-    return getDateField(lastUploadCursorDate);
+    return getDateField(LAST_UPLOAD_CURSOR_DATE_PROPERTY);
   }
 
   public void setLastUploadCursorDate(Date value) {
-    setDateField(lastUploadCursorDate, value);
+    setDateField(LAST_UPLOAD_CURSOR_DATE_PROPERTY, value);
   }
 
   public String getLastUploadKey() {
-    return getStringField(lastUploadKey);
+    return getStringField(LAST_UPLOAD_KEY_PROPERTY);
   }
 
   public void setLastUploadKey(String value) {
-    if (!setStringField(lastUploadKey, value)) {
+    if (!setStringField(LAST_UPLOAD_KEY_PROPERTY, value)) {
       throw new IllegalArgumentException("overflow lastUploadKey");
     }
   }
 
   public Date getLastStreamingCursorDate() {
-    return getDateField(lastStreamingCursorDate);
+    return getDateField(LAST_STREAMING_CURSOR_DATE_PROPERTY);
   }
 
   public void setLastStreamingCursorDate(Date value) {
-    setDateField(lastStreamingCursorDate, value);
+    setDateField(LAST_STREAMING_CURSOR_DATE_PROPERTY, value);
   }
 
   public String getLastStreamingKey() {
-    return getStringField(lastStreamingKey);
+    return getStringField(LAST_STREAMING_KEY_PROPERTY);
   }
 
   public void setLastStreamingKey(String value) {
-    if (!setStringField(lastStreamingKey, value)) {
+    if (!setStringField(LAST_STREAMING_KEY_PROPERTY, value)) {
       throw new IllegalArgumentException("overflow lastStreamingKey");
     }
   }
 
   public String getAuriService() {
-    return getStringField(auriService);
+    return getStringField(AURI_SERVICE_PROPERTY);
   }
 
   public void setAuriService(String value) {
-    if (!setStringField(auriService, value)) {
+    if (!setStringField(AURI_SERVICE_PROPERTY, value)) {
       throw new IllegalArgumentException("overflow auriService");
     }
   }
 
   public String getUriMd5FormId() {
-    return getStringField(uriMd5FormId);
+    return getStringField(URI_MD5_FORM_ID_PROPERTY);
   }
 
   public void setUriMd5FormId(String value) {
-    if (!setStringField(uriMd5FormId, value)) {
+    if (!setStringField(URI_MD5_FORM_ID_PROPERTY, value)) {
       throw new IllegalArgumentException("overflow uriMd5FormId");
     }
   }
 
   public String getFormId() {
-    return getStringField(formId);
+    return getStringField(FORM_ID_PROPERTY);
   }
 
   public void setFormId(String value) {
-    if (!setStringField(formId, value)) {
+    if (!setStringField(FORM_ID_PROPERTY, value)) {
       throw new IllegalArgumentException("overflow formId");
     }
   }
@@ -314,7 +282,7 @@ public final class FormServiceCursor extends CommonFieldsBase {
     Query query = cc.getDatastore().createQuery(relation, cc.getCurrentUser());
     // filter on the Form's Uri. We cannot filter on the FORM_ID since it is a
     // Text field in bigtable
-    query.addFilter(relation.uriMd5FormId, FilterOperation.EQUAL, form.getEntityKey().getKey());
+    query.addFilter(URI_MD5_FORM_ID_PROPERTY, FilterOperation.EQUAL, form.getEntityKey().getKey());
     List<ExternalService> esList = new ArrayList<ExternalService>();
 
     List<? extends CommonFieldsBase> fscList = query.executeQuery(0);

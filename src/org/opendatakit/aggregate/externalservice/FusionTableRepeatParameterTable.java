@@ -36,35 +36,28 @@ import org.opendatakit.common.security.User;
  * @author mitchellsundt@gmail.com
  * 
  */
-public class FusionTableRepeatParameterTable extends CommonFieldsBase {
+public final class FusionTableRepeatParameterTable extends CommonFieldsBase {
 
 	  private static final String TABLE_NAME = "_fusion_table_repeat";
-	  /*
-	   * Property Names for datastore
-	   */
-	  /****************************************************/
-	  private static final DataField URI_FUSION_TABLE_PROPERTY = new DataField("URI_FUSION_TABLE",
-		      DataField.DataType.URI, false, PersistConsts.URI_STRING_LEN);
-	  private static final DataField FUSION_TABLE_ID_PROPERTY = new DataField("FUSION_TABLE_ID",
-	      DataField.DataType.STRING, true, 4096L);
-	  private static final DataField FORM_ELEMENT_KEY_PROPERTY = new DataField("FORM_ELEMENT_KEY",
-	      DataField.DataType.STRING, true, 4096L);
 
-	  public final DataField uriFusionTable;
-	  public final DataField fusionTableId;
-	  public final DataField formElementKey;
+	  private static final DataField URI_FUSION_TABLE_PROPERTY = new DataField(
+			  "URI_FUSION_TABLE", DataField.DataType.URI, false, PersistConsts.URI_STRING_LEN);
+	  private static final DataField FUSION_TABLE_ID_PROPERTY = new DataField(
+			  "FUSION_TABLE_ID", DataField.DataType.STRING, true, 4096L);
+	  private static final DataField FORM_ELEMENT_KEY_PROPERTY = new DataField(
+			  "FORM_ELEMENT_KEY", DataField.DataType.STRING, true, 4096L);
 
 		/**
-		 * Construct a relation prototype.
+		 * Construct a relation prototype. Only called via {@link #assertRelation(CallingContext)}
 		 * 
 		 * @param databaseSchema
 		 * @param tableName
 		 */
 	  FusionTableRepeatParameterTable(String schemaName) {
 	    super(schemaName, TABLE_NAME);
-	    fieldList.add(uriFusionTable = new DataField(URI_FUSION_TABLE_PROPERTY));
-	    fieldList.add(fusionTableId = new DataField(FUSION_TABLE_ID_PROPERTY));
-	    fieldList.add(formElementKey = new DataField(FORM_ELEMENT_KEY_PROPERTY));
+	    fieldList.add(URI_FUSION_TABLE_PROPERTY);
+	    fieldList.add(FUSION_TABLE_ID_PROPERTY);
+	    fieldList.add(FORM_ELEMENT_KEY_PROPERTY);
 	  }
 
 	  /**
@@ -75,9 +68,6 @@ public class FusionTableRepeatParameterTable extends CommonFieldsBase {
 	   */
 	  private FusionTableRepeatParameterTable(FusionTableRepeatParameterTable ref, User user) {
 	    super(ref, user);
-	    uriFusionTable = ref.uriFusionTable;
-	    fusionTableId = ref.fusionTableId;
-	    formElementKey = ref.formElementKey;
 	  }
 
 	  // Only called from within the persistence layer.
@@ -87,33 +77,33 @@ public class FusionTableRepeatParameterTable extends CommonFieldsBase {
 	  }
 
 	  public String getUriFusionTable() {
-	    return getStringField(uriFusionTable);
+	    return getStringField(URI_FUSION_TABLE_PROPERTY);
 	  }
 
 	  public void setUriFusionTable(String value) {
-	    if (!setStringField(uriFusionTable, value)) {
+	    if (!setStringField(URI_FUSION_TABLE_PROPERTY, value)) {
 	      throw new IllegalArgumentException("overflow uriFusionTable");
 	    }
 	  }
 
 	  public String getFusionTableId() {
-	    return getStringField(fusionTableId);
+	    return getStringField(FUSION_TABLE_ID_PROPERTY);
 	  }
 
 	  public void setFusionTableId(String value) {
-	    if (!setStringField(fusionTableId, value)) {
+	    if (!setStringField(FUSION_TABLE_ID_PROPERTY, value)) {
 	      throw new IllegalArgumentException("overflow fusionTableId");
 	    }
 	  }
 
 	  public FormElementKey getFormElementKey() {
-		String key = getStringField(formElementKey);
+		String key = getStringField(FORM_ELEMENT_KEY_PROPERTY);
 		if ( key == null ) return null;
 		return new FormElementKey(key);
 	  }
 
 	  public void setFormElementKey(FormElementKey value) {
-	    if (!setStringField(formElementKey, value.toString())) {
+	    if (!setStringField(FORM_ELEMENT_KEY_PROPERTY, value.toString())) {
 	      throw new IllegalArgumentException("overflow formElementKey");
 	    }
 	  }
@@ -140,7 +130,7 @@ public class FusionTableRepeatParameterTable extends CommonFieldsBase {
 		  FusionTableRepeatParameterTable frpt = assertRelation(cc);
 
 		  Query query = cc.getDatastore().createQuery(frpt, cc.getCurrentUser());
-		  query.addFilter(frpt.uriFusionTable, FilterOperation.EQUAL, fusionTableParameterTable.getKey());
+		  query.addFilter(URI_FUSION_TABLE_PROPERTY, FilterOperation.EQUAL, fusionTableParameterTable.getKey());
 
 		  List<? extends CommonFieldsBase> results = query.executeQuery(0);
 		  for ( CommonFieldsBase b : results ) {
