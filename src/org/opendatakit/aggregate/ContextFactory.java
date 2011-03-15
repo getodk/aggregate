@@ -70,6 +70,25 @@ public class ContextFactory {
     		this.userService = (UserService) getBean(BeanDefs.USER_BEAN);
     	}
     	
+    	CallingContextImpl(CallingContext context) {
+    	  if(context instanceof CallingContextImpl) {
+    	    CallingContextImpl cc = (CallingContextImpl) context;
+          this.serverUrl = cc.serverUrl;
+          this.webApplicationBase = cc.webApplicationBase;
+          this.ctxt = cc.ctxt;
+          this.datastore = cc.datastore;
+          this.userService = cc.userService;
+          this.asDaemon = cc.asDaemon;    	    
+    	  } else {
+    	   this.serverUrl = getServerURL();
+         this.webApplicationBase = getWebApplicationURL();
+         this.ctxt = null;
+         this.datastore = getDatastore();
+         this.userService = getUserService();
+         this.asDaemon = getAsDeamon();    
+    	  }
+    	}
+    	
     	public Object getBean(String beanName) {
 			return WebApplicationContextUtils.getRequiredWebApplicationContext(ctxt).getBean(beanName);
     	}
@@ -114,5 +133,9 @@ public class ContextFactory {
     
     public static CallingContext getCallingContext(HttpServlet servlet, HttpServletRequest req) {
     	return new CallingContextImpl(servlet, req);
+    }
+    
+    public static CallingContext duplicateContext(CallingContext context) {
+      return new CallingContextImpl(context);
     }
 }

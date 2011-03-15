@@ -14,9 +14,13 @@ import org.opendatakit.aggregate.client.form.ExternServSummary;
 import org.opendatakit.aggregate.client.form.FormSummary;
 import org.opendatakit.aggregate.client.form.KmlSettings;
 import org.opendatakit.aggregate.constants.BeanDefs;
+import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.common.ExportType;
 import org.opendatakit.aggregate.constants.common.ExternalServiceOption;
+import org.opendatakit.aggregate.constants.common.UIConsts;
+import org.opendatakit.aggregate.constants.externalservice.FusionTableConsts;
+import org.opendatakit.aggregate.constants.externalservice.SpreadsheetConsts;
 import org.opendatakit.aggregate.datamodel.FormElementKey;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
@@ -24,21 +28,28 @@ import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
 import org.opendatakit.aggregate.externalservice.ExternalService;
 import org.opendatakit.aggregate.externalservice.FormServiceCursor;
 import org.opendatakit.aggregate.externalservice.FusionTable;
+import org.opendatakit.aggregate.externalservice.GoogleSpreadsheet;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.form.PersistentResults;
-import org.opendatakit.aggregate.form.SubmissionAssociationTable;
 import org.opendatakit.aggregate.query.QueryFormList;
 import org.opendatakit.aggregate.query.submission.QueryByDate;
 import org.opendatakit.aggregate.servlet.KmlServlet;
 import org.opendatakit.aggregate.servlet.KmlSettingsServlet;
+import org.opendatakit.aggregate.servlet.OAuthServlet;
 import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.submission.SubmissionValue;
 import org.opendatakit.aggregate.submission.type.BlobSubmissionType;
 import org.opendatakit.aggregate.task.CsvGenerator;
 import org.opendatakit.aggregate.task.KmlGenerator;
+import org.opendatakit.common.constants.BasicConsts;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 
+import com.google.gdata.client.authn.oauth.GoogleOAuthHelper;
+import com.google.gdata.client.authn.oauth.GoogleOAuthParameters;
+import com.google.gdata.client.authn.oauth.OAuthException;
+import com.google.gdata.client.authn.oauth.OAuthHmacSha1Signer;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
 public class FormServiceImpl extends RemoteServiceServlet implements
@@ -216,13 +227,13 @@ public class FormServiceImpl extends RemoteServiceServlet implements
         FormElementKey titleFEMKey = new FormElementKey(titleKey);
         titleField = FormElementModel.retrieveFormElementModel(form, titleFEMKey);
       }
-      
+
       FormElementModel geopointField = null;
       if (geopointKey != null) {
         FormElementKey geopointFEMKey = new FormElementKey(geopointKey);
         geopointField = FormElementModel.retrieveFormElementModel(form, geopointFEMKey);
       }
-      
+
       FormElementModel imageField = null;
       if (binaryKey != null) {
         FormElementKey imageFEMKey = new FormElementKey(binaryKey);
@@ -288,18 +299,92 @@ public class FormServiceImpl extends RemoteServiceServlet implements
     }
   }
 
-  @Override  
-  public String createFusionTable(String formId, ExternalServiceOption esType) {
+  @Override
+  public String generateOAuthUrl(String uri) {
+    HttpServletRequest req = this.getThreadLocalRequest();
+    CallingContext cc = ContextFactory.getCallingContext(this, req);
+
+    try {
+
+      String scope = null;
+      FormServiceCursor fsc = FormServiceCursor.getFormServiceCursor(uri, cc);
+      switch (fsc.getExternalServiceType()) {
+      case GOOGLE_FUSIONTABLES:
+        scope = FusionTableConsts.FUSION_SCOPE;
+        break;
+      case GOOGLE_SPREADSHEET:
+        scope = SpreadsheetConsts.DOCS_SCOPE + BasicConsts.SPACE
+            + SpreadsheetConsts.SPREADSHEETS_SCOPE;
+        break;
+      default:
+        break;
+      }
+
+      // make sure a scope was determined before proceeding
+      if (scope == null) {
+        return null;
+      }
+
+      GoogleOAuthParameters oauthParameters = new GoogleOAuthParameters();
+      oauthParameters.setOAuthConsumerKey(ServletConsts.OAUTH_CONSUMER_KEY);
+      oauthParameters.setOAuthConsumerSecret(ServletConsts.OAUTH_CONSUMER_SECRET);
+      oauthParameters.setScope(scope);
+
+      GoogleOAuthHelper oauthHelper = new GoogleOAuthHelper(new OAuthHmacSha1Signer());
+      oauthHelper.getUnauthorizedRequestToken(oauthParameters);
+      Map<String, String> params = new HashMap<String, String>();
+      params.put(UIConsts.FSC_URI_PARAM, uri);
+      params.put(ServletConsts.OAUTH_TOKEN_SECRET_PARAMETER, oauthParameters.getOAuthTokenSecret());
+      String callbackUrl = ServletConsts.HTTP
+          + HtmlUtil.createLinkWithProperties(cc.getWebApplicationURL(OAuthServlet.ADDR), params);
+
+      oauthParameters.setOAuthCallback(callbackUrl);
+      return oauthHelper.createUserAuthorizationUrl(oauthParameters);
+
+    } catch (OAuthException e) {
+      e.printStackTrace();
+    } catch (ODKEntityNotFoundException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+    return null;
+  }
+
+  @Override
+  public String createFusionTable(String formId, ExternalServiceOption esOption) {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
 
     try {
       Form form = Form.retrieveForm(formId, cc);
-    //  FusionTable fusion = FusionTable.createFusionTable(form, authToken, esType, cc);
-      return null;
-    } catch (ODKFormNotFoundException e1) {
-      return null;
-    } 
-    
+      FusionTable fusion = new FusionTable(form, esOption, cc);
+      return fusion.getFormServiceCursor().getUri();
+    } catch (ODKFormNotFoundException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    } catch (ODKDatastoreException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+    return null;
+  }
+
+  @Override
+  public String createGoogleSpreadsheet(String formId, String name, ExternalServiceOption esOption) {
+    HttpServletRequest req = this.getThreadLocalRequest();
+    CallingContext cc = ContextFactory.getCallingContext(this, req);
+
+    try {
+      Form form = Form.retrieveForm(formId, cc);
+      GoogleSpreadsheet spreadsheet = new GoogleSpreadsheet(form, name, esOption, cc);
+      return spreadsheet.getFormServiceCursor().getUri();
+    } catch (ODKFormNotFoundException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    } catch (ODKDatastoreException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+    return null;
   }
 }

@@ -23,6 +23,11 @@ public interface FormServiceAsync {
 
   void setFormAcceptSubmissions(String formId, Boolean acceptSubmissions, AsyncCallback<Boolean> callback);
 
-  void createFusionTable(String formId, ExternalServiceOption esType, AsyncCallback<String> callback);
+  void createFusionTable(String formId, ExternalServiceOption esOption, AsyncCallback<String> callback);
+
+  void generateOAuthUrl(String uri, AsyncCallback<String> callback);
+
+  void createGoogleSpreadsheet(String formId, String name, ExternalServiceOption esOption,
+      AsyncCallback<String> callback);
 
 }

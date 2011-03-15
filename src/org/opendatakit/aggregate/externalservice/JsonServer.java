@@ -102,6 +102,11 @@ public class JsonServer extends AbstractExternalService implements ExternalServi
     // createForm();
   }
 
+  public void authenticateAndCreate(OAuthToken authToken, CallingContext cc) throws ODKExternalServiceException, ODKDatastoreException {
+    // TODO: figure out if this could be useful in another context
+  }
+
+  
   @Override
   public void abandon(CallingContext cc) throws ODKDatastoreException {
 	if ( fsc.getOperationalStatus() != OperationalStatus.COMPLETED ) {
@@ -112,7 +117,8 @@ public class JsonServer extends AbstractExternalService implements ExternalServi
 
   @Override
   public ExternServSummary transform() {    
-    return new ExternServSummary(fsc.getCreatorUriUser(),
+    return new ExternServSummary(fsc.getUri(),
+        fsc.getCreatorUriUser(),
         fsc.getOperationalStatus(),
         fsc.getEstablishmentDateTime(),
         fsc.getExternalServiceOption().getDescriptionOfOption(),

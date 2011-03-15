@@ -3,9 +3,10 @@ package org.opendatakit.aggregate.servlet;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -21,11 +22,19 @@ import org.opendatakit.aggregate.client.form.ExportSummary;
 import org.opendatakit.aggregate.client.submission.Column;
 import org.opendatakit.aggregate.client.submission.SubmissionUI;
 import org.opendatakit.aggregate.client.submission.SubmissionUISummary;
+import org.opendatakit.aggregate.constants.ErrorConsts;
+import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.ServletConsts;
+import org.opendatakit.aggregate.constants.common.ExternalServiceOption;
 import org.opendatakit.aggregate.constants.common.FilterOperation;
+import org.opendatakit.aggregate.constants.common.UIConsts;
 import org.opendatakit.aggregate.constants.common.Visibility;
+import org.opendatakit.aggregate.constants.externalservice.FusionTableConsts;
+import org.opendatakit.aggregate.constants.externalservice.SpreadsheetConsts;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
+import org.opendatakit.aggregate.externalservice.FusionTable;
+import org.opendatakit.aggregate.externalservice.GoogleSpreadsheet;
 import org.opendatakit.aggregate.filter.SubmissionFilterGroup;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.form.PersistentResults;
@@ -42,6 +51,11 @@ import org.opendatakit.aggregate.submission.SubmissionValue;
 import org.opendatakit.aggregate.submission.type.BlobSubmissionType;
 import org.opendatakit.common.constants.BasicConsts;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+
+import com.google.gdata.client.authn.oauth.GoogleOAuthHelper;
+import com.google.gdata.client.authn.oauth.GoogleOAuthParameters;
+import com.google.gdata.client.authn.oauth.OAuthException;
+import com.google.gdata.client.authn.oauth.OAuthHmacSha1Signer;
 
 public class GwtTester extends ServletUtilBase {
   /**
@@ -84,18 +98,18 @@ public class GwtTester extends ServletUtilBase {
 
     if (flag.equals("create")) {
       List<Filter> filters = new ArrayList<Filter>();
-      filters.add(new RowFilter(Visibility.KEEP, new Column("Ro1Awesome", ""),
+      filters.add(new RowFilter(Visibility.KEEP, new Column("Ro1Awesome", "", new Long(1)),
           FilterOperation.EQUAL, "captain", new Long(99)));
 
       List<ColumnFilterHeader> columns = new ArrayList<ColumnFilterHeader>();
-      columns.add(new ColumnFilterHeader("ColAwesome1", ""));
-      columns.add(new ColumnFilterHeader("ColAwesome2", ""));
-      columns.add(new ColumnFilterHeader("ColAwesome3", ""));
+      columns.add(new ColumnFilterHeader("ColAwesome1", "", new Long(1)));
+      columns.add(new ColumnFilterHeader("ColAwesome2", "", new Long(1)));
+      columns.add(new ColumnFilterHeader("ColAwesome3", "", new Long(1)));
 
       filters.add(new ColumnFilter(Visibility.KEEP, columns, new Long(5)));
       filters.add(new RowFilter(Visibility.REMOVE, new Column("Ro1Awesome", ""),
           FilterOperation.EQUAL, "captain1", new Long(1)));
-      FilterGroup group = new FilterGroup("group1", formId, filters);
+      FilterGroup group = new FilterGroup("group100", formId, filters);
       try {
         SubmissionFilterGroup filterGrp = SubmissionFilterGroup.transform(group, cc);
         filterGrp.persist(cc);
@@ -210,14 +224,72 @@ public class GwtTester extends ServletUtilBase {
         e.printStackTrace();
       }
 
-
+    } else if (flag.equals("createfusion")) {
+      
+      try {
+        Form form = Form.retrieveForm("LocationThings", cc);
+        FusionTable fusion = new FusionTable(form, ExternalServiceOption.UPLOAD_N_STREAM, cc);;
+        String uri =  fusion.getFormServiceCursor().getUri(); 
+        String scope = FusionTableConsts.FUSION_SCOPE;
+        String requestUrl = generateAuthorizationUrl(resp, cc, uri, scope);            
+        resp.getWriter().println(HtmlUtil.createHref(requestUrl, "Authorize FusionTable"));
+      } catch (ODKFormNotFoundException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      } catch (ODKDatastoreException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      } 
+    } else if (flag.equals("createspreadsheet")) {
+      
+      try {
+        Form form = Form.retrieveForm("LocationThings", cc);
+        GoogleSpreadsheet spreadsheet = new GoogleSpreadsheet(form, "TESTWORKBOOK", ExternalServiceOption.UPLOAD_N_STREAM, cc);
+        String uri =  spreadsheet.getFormServiceCursor().getUri();
+        String scope = SpreadsheetConsts.DOCS_SCOPE + BasicConsts.SPACE + SpreadsheetConsts.SPREADSHEETS_SCOPE;
+        String requestUrl = generateAuthorizationUrl(resp, cc, uri, scope);            
+        resp.getWriter().println(HtmlUtil.createHref(requestUrl, "Authorize Spreadsheet"));
+      } catch (ODKFormNotFoundException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      } catch (ODKDatastoreException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      } 
     } else {
-      ServletContext test = this.getServletContext();
-      resp.getWriter().println(getServletContext().getServerInfo());
       resp.getWriter().println("NO parameters");
     }
 
     finishBasicHtmlResponse(resp);
+  }
+
+  private String generateAuthorizationUrl(HttpServletResponse resp, CallingContext cc, String uri, String scope)
+      throws IOException {
+    GoogleOAuthParameters oauthParameters = new GoogleOAuthParameters();
+    oauthParameters.setOAuthConsumerKey(ServletConsts.OAUTH_CONSUMER_KEY);
+    oauthParameters.setOAuthConsumerSecret(ServletConsts.OAUTH_CONSUMER_SECRET);
+    oauthParameters.setScope(scope);
+    
+    GoogleOAuthHelper oauthHelper = new GoogleOAuthHelper(new OAuthHmacSha1Signer());
+    try 
+    {
+       oauthHelper.getUnauthorizedRequestToken(oauthParameters);
+    } 
+    catch (OAuthException e) 
+    {
+         e.printStackTrace();
+         resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+             ErrorConsts.OAUTH_SERVER_REJECTED_ONE_TIME_USE_TOKEN);
+    }
+    Map<String, String> params = new HashMap<String, String>();
+    params.put(UIConsts.FSC_URI_PARAM, uri);
+    params.put(ServletConsts.OAUTH_TOKEN_SECRET_PARAMETER, oauthParameters.getOAuthTokenSecret());
+    String serverAddr = cc.getServerURL() + BasicConsts.FORWARDSLASH + OAuthServlet.ADDR; 
+    String callbackUrl = ServletConsts.HTTP + HtmlUtil.createLinkWithProperties(serverAddr, params);
+    
+    oauthParameters.setOAuthCallback(callbackUrl);
+    String requestUrl = oauthHelper.createUserAuthorizationUrl(oauthParameters);
+    return requestUrl;
   }
 
 }
