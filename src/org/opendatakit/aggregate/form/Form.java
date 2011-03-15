@@ -560,9 +560,8 @@ public class Form {
   }
   
   
-  public FormSummary generateFormSummary(CallingContext cc) {
-    SubmissionAssociationTable sat = getSubmissionAssociation(cc);
-    boolean submit = sat.getIsSubmissionAllowed();    
+  public FormSummary generateFormSummary() {
+    boolean submit = getSubmissionEnabled();    
     boolean downloadable = getDownloadEnabled();
     return new FormSummary(getViewableName(), getFormId(), getCreationUser(), downloadable, submit);
   }
