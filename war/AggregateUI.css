@@ -22,6 +22,16 @@ a, a:visited, a:hover {
 #form_and_goals_panel {
 	border-collapse: collapse;
 }
-#submission_container {
+#submission_container,
+#filters_container,
+#help_container {
 	overflow: scroll;
+}
+.help_panel {
+	width: 100%;
+}
+.help_panel td {
+	border: 1px solid #07115A;
+	width: 100%;
+	padding: 2px 4px 2px 4px;
 }
