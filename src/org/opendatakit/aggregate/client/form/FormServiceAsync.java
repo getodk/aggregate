@@ -1,5 +1,7 @@
 package org.opendatakit.aggregate.client.form;
 
+import org.opendatakit.aggregate.constants.common.ExternalServiceOption;
+
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
 public interface FormServiceAsync {
@@ -16,5 +18,11 @@ public interface FormServiceAsync {
 
   void createKml(String formId, String geopointKey, String titleKey, String binaryKey,
       AsyncCallback<Boolean> callback);
+
+  void setFormDownloadable(String formId, Boolean downloadable, AsyncCallback<Boolean> callback);
+
+  void setFormAcceptSubmissions(String formId, Boolean acceptSubmissions, AsyncCallback<Boolean> callback);
+
+  void createFusionTable(String formId, ExternalServiceOption esType, AsyncCallback<String> callback);
 
 }

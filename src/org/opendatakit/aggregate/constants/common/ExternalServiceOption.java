@@ -15,7 +15,7 @@
  * the License.
  */
 
-package org.opendatakit.aggregate.constants.externalservice;
+package org.opendatakit.aggregate.constants.common;
 
 /**
  * Enum of upload-only, streaming-only and upload-then-streaming
