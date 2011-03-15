@@ -66,6 +66,12 @@ public class AggregateUI implements EntryPoint {
   private SubmissionServiceAsync submissionSvc;
   private FilterServiceAsync filterSvc;
   
+  // Visualization
+  private List<Column> headers;
+  private List<SubmissionUI> submissions;
+  public List<Column> getHeaders() { return headers; }
+  public List<SubmissionUI> getSubmissions() { return submissions; }
+  
   private FlexTable listOfForms;
   private ListBox formsBox = new ListBox();
   private ListBox filtersBox = new ListBox();
@@ -106,6 +112,9 @@ public class AggregateUI implements EntryPoint {
   }
   
   public void updateDataTable(SubmissionUISummary summary) {
+	  // for viz
+	    headers = summary.getHeaders();
+	    submissions = summary.getSubmissions();
 
     int headerIndex = 0;
     dataTable.removeAllRows();
@@ -165,7 +174,7 @@ public class AggregateUI implements EntryPoint {
     getFormList();
     manageNav = new ManageTabUI(listOfForms);
     submissionNav = new SubmissionTabUI(view, formsBox, filtersBox, 
-    		dataTable, def);
+    		dataTable, def, this);
     mainNav.add(submissionNav, "Submissions");
     mainNav.add(manageNav, "Management");
     mainNav.addStyleName("mainNav");
