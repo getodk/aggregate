@@ -1,5 +1,7 @@
 package org.opendatakit.aggregate.client.form;
 
+import org.opendatakit.aggregate.constants.common.ExternalServiceOption;
+
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 
@@ -21,5 +23,7 @@ public interface FormService extends RemoteService {
   Boolean setFormDownloadable(String formId, Boolean downloadable);
   
   Boolean setFormAcceptSubmissions(String formId, Boolean acceptSubmissions);
+  
+  String createFusionTable(String formId, ExternalServiceOption esType);
   
 }
