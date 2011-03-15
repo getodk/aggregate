@@ -16,12 +16,14 @@ import org.opendatakit.aggregate.client.form.KmlSettings;
 import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.common.ExportType;
+import org.opendatakit.aggregate.constants.common.ExternalServiceOption;
 import org.opendatakit.aggregate.datamodel.FormElementKey;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
 import org.opendatakit.aggregate.externalservice.ExternalService;
 import org.opendatakit.aggregate.externalservice.FormServiceCursor;
+import org.opendatakit.aggregate.externalservice.FusionTable;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.form.PersistentResults;
 import org.opendatakit.aggregate.form.SubmissionAssociationTable;
@@ -287,4 +289,18 @@ public class FormServiceImpl extends RemoteServiceServlet implements
     } 
   }
 
+  @Override  
+  public String createFusionTable(String formId, ExternalServiceOption esType) {
+    HttpServletRequest req = this.getThreadLocalRequest();
+    CallingContext cc = ContextFactory.getCallingContext(this, req);
+
+    try {
+      Form form = Form.retrieveForm(formId, cc);
+    //  FusionTable fusion = FusionTable.createFusionTable(form, authToken, esType, cc);
+      return null;
+    } catch (ODKFormNotFoundException e1) {
+      return null;
+    } 
+    
+  }
 }

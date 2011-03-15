@@ -29,8 +29,8 @@ import java.util.List;
 
 import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.client.form.ExternServSummary;
+import org.opendatakit.aggregate.constants.common.ExternalServiceOption;
 import org.opendatakit.aggregate.constants.common.OperationalStatus;
-import org.opendatakit.aggregate.constants.externalservice.ExternalServiceOption;
 import org.opendatakit.aggregate.constants.externalservice.ExternalServiceType;
 import org.opendatakit.aggregate.constants.externalservice.JsonServerConsts;
 import org.opendatakit.aggregate.constants.externalservice.JsonServerType;
