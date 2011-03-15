@@ -32,8 +32,7 @@ public class SubmissionTabUI extends TabPanel {
 
 	// Submission Navigation
 	private static final String FILTER = "filter";
-	private static final String VISUALIZE = "visualize";
-	private static final String[] SUBMISSION_MENU = {FILTER, VISUALIZE};
+	private static final String[] SUBMISSION_MENU = {FILTER};
 	static final String SUBMISSIONS = "submissions";
 	private HorizontalPanel filterPanel = new HorizontalPanel();
 	private FlexTable formAndGoalSelectionTable = new FlexTable();
@@ -57,7 +56,6 @@ public class SubmissionTabUI extends TabPanel {
 		this.dataTable = dataTable;
 		this.def = def;
 		this.add(setupSubmissionsPanel(), "Filter");
-		this.add(setupVisualizePanel(), "Visualize");
 		this.getElement().setId("second_level_menu");
 		
 		int selected = 0;
@@ -96,10 +94,12 @@ public class SubmissionTabUI extends TabPanel {
 		formAndGoalSelectionTable.setHTML(0, 3, "&nbsp;&nbsp;");
 
 		// end goals vis, export, publish
+		Button visualizeButton = new Button("<img src=\"images/blue_bar_c.png\" /> Visualize");
+		formAndGoalSelectionTable.setWidget(0, 4, visualizeButton);
 		Button exportButton = new Button("<img src=\"images/green_right_arrow.png\" /> Export");
-		formAndGoalSelectionTable.setWidget(0, 4, exportButton);
+		formAndGoalSelectionTable.setWidget(0, 5, exportButton);
 		Button publishButton = new Button("<img src=\"images/green_right_arrow.png\" /> Publish");
-		formAndGoalSelectionTable.setWidget(0, 5, publishButton);
+		formAndGoalSelectionTable.setWidget(0, 6, publishButton);
 
 		HorizontalPanel formsAndGoalsPanel = new HorizontalPanel();
 		formsAndGoalsPanel.add(formAndGoalSelectionTable);
