@@ -29,24 +29,19 @@ import org.opendatakit.common.security.User;
 public final class JsonServerParameterTable extends CommonFieldsBase {
 
 	private static final String TABLE_NAME = "_json_server";
-	/*
-	 * Property Names for datastore
-	 */
-	/****************************************************/
+
 	private static final DataField SERVER_URL_PROPERTY = new DataField(
 			"SERVER_URL", DataField.DataType.STRING, true, 4096L);
 
-	public final DataField serverUrl;
-
 	/**
-	 * Construct a relation prototype.
+	 * Construct a relation prototype. Only called via {@link #assertRelation(CallingContext)}
 	 * 
 	 * @param databaseSchema
 	 * @param tableName
 	 */
 	JsonServerParameterTable(String schemaName) {
 		super(schemaName, TABLE_NAME);
-		fieldList.add(serverUrl = new DataField(SERVER_URL_PROPERTY));
+		fieldList.add(SERVER_URL_PROPERTY);
 	}
 
 	  /**
@@ -57,7 +52,6 @@ public final class JsonServerParameterTable extends CommonFieldsBase {
 	   */
 	private JsonServerParameterTable(JsonServerParameterTable ref, User user) {
 		super(ref, user);
-		serverUrl = ref.serverUrl;
 	}
 
 	// Only called from within the persistence layer.
@@ -67,11 +61,11 @@ public final class JsonServerParameterTable extends CommonFieldsBase {
 	}
 
 	public String getServerUrl() {
-		return getStringField(serverUrl);
+		return getStringField(SERVER_URL_PROPERTY);
 	}
 
 	public void setServerUrl(String value) {
-		if (!setStringField(serverUrl, value)) {
+		if (!setStringField(SERVER_URL_PROPERTY, value)) {
 			throw new IllegalArgumentException("overflow of serverUrl");
 		}
 	}
