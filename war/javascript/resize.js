@@ -1,4 +1,4 @@
-var MAX_SIDE_PANEL_WIDTH = 200;
+var MAX_SIDE_PANEL_WIDTH = 350;
 
 // Handle resizing various parts of the page based on
 // the screen size.
