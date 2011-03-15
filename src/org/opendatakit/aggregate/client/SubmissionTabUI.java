@@ -58,6 +58,7 @@ public class SubmissionTabUI extends TabPanel {
 		this.def = def;
 		this.add(setupSubmissionsPanel(), "Filter");
 		this.add(setupVisualizePanel(), "Visualize");
+		this.getElement().setId("second_level_menu");
 		
 		int selected = 0;
 		String subMenu = hash.get(UrlHash.SUB_MENU);
@@ -163,7 +164,10 @@ public class SubmissionTabUI extends TabPanel {
 		  });
 		  
 		  activeFilters.add(newFilter);
-		  filtersData.add(activeFilters);
+		  FlowPanel filtersContainer = new FlowPanel();
+		  filtersContainer.add(activeFilters);
+		  filtersContainer.getElement().setId("filters_container");
+		  filtersData.add(filtersContainer);
 		  
 	    // view data
 	    dataTable.getRowFormatter().addStyleName(0, "titleBar");
