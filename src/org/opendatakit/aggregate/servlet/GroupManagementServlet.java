@@ -20,10 +20,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
@@ -35,15 +32,9 @@ import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.ErrorConsts;
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.common.constants.HtmlConsts;
-import org.opendatakit.common.persistence.CommonFieldsBase;
-import org.opendatakit.common.persistence.Datastore;
-import org.opendatakit.common.persistence.Query;
-import org.opendatakit.common.persistence.Query.Direction;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
-import org.opendatakit.common.security.User;
 import org.opendatakit.common.security.spring.GrantedAuthorityHierarchyTable;
 import org.opendatakit.common.security.spring.GrantedAuthorityNames;
-import org.springframework.security.core.GrantedAuthority;
 
 /**
  * Displays all the groups defined by the system and allows users to define
@@ -82,36 +73,15 @@ public class GroupManagementServlet extends ServletUtilBase {
 			throws IOException {
 		CallingContext cc = ContextFactory.getCallingContext(this, req);
 
-		Datastore ds = cc.getDatastore();
-		User user = cc.getCurrentUser();
-		GrantedAuthorityHierarchyTable relation;
-		List<? extends CommonFieldsBase> groupsList;
+		TreeMap<String, TreeSet<String>> inheritFrom = null; 
 		try {
-			relation = GrantedAuthorityHierarchyTable.assertRelation(ds, user);
-			Query query = ds.createQuery(relation, user);
-			query.addSort(relation.dominatingGrantedAuthority, Direction.ASCENDING);
-			groupsList = query.executeQuery(0);
+			inheritFrom = GrantedAuthorityHierarchyTable.getEntireGrantedAuthorityHierarchy(
+								cc.getDatastore(), cc.getCurrentUser());
 		} catch (ODKDatastoreException e) {
 			e.printStackTrace();
 			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, 
 					ErrorConsts.PERSISTENCE_LAYER_PROBLEM);
 			return;
-		}
-
-		Map<String, Set<String>> inheritFrom = new TreeMap<String, Set<String>>();
-		for ( CommonFieldsBase b : groupsList ) {
-			GrantedAuthorityHierarchyTable group = (GrantedAuthorityHierarchyTable) b;
-			
-			GrantedAuthority dom = group.getDominatingGrantedAuthority();
-			GrantedAuthority sub = group.getSubordinateGrantedAuthority();
-			
-			if ( !GrantedAuthorityNames.permissionsCanBeAssigned(dom.toString()) ) continue;
-			Set<String> auths = inheritFrom.get(dom.getAuthority());
-			if ( auths == null ) {
-				auths = new HashSet<String>();
-				inheritFrom.put(dom.getAuthority(), auths);
-			}
-			auths.add(sub.getAuthority());
 		}
 
 		beginBasicHtmlResponse(TITLE_INFO, resp, true, cc); // header info
@@ -192,7 +162,7 @@ public class GroupManagementServlet extends ServletUtilBase {
 	    }
 		
 		int recordNum = 0;
-		for ( Map.Entry<String, Set<String>> e : inheritFrom.entrySet() ) {
+		for ( Map.Entry<String, TreeSet<String>> e : inheritFrom.entrySet() ) {
 			++recordNum;
 			out.print(HtmlConsts.TABLE_ROW_OPEN);
 			out.print(HtmlUtil.wrapWithHtmlTags(HtmlConsts.TABLE_DATA,

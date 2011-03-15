@@ -41,6 +41,8 @@
 		<intercept-url pattern="/favicon.ico" access="true" />
 		<intercept-url pattern="/odk_color.png" access="true" />
 		<intercept-url pattern="/index.html" access="true" />
+        <intercept-url pattern="/change-applied.html" access="isFullyAuthenticated()" /> <!-- Intermediate page redirecting to logout from access mgmt -->
+        <intercept-url pattern="/www/index.html" access="isFullyAuthenticated()" /> <!-- Intermediate page redirecting to access mgmt -->
 		<intercept-url pattern="/logout.html" access="true" />
 		<intercept-url pattern="/res/**" access="true" />
 		<intercept-url pattern="/openid_login.html" access="isAnonymous()" />

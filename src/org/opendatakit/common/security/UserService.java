@@ -15,6 +15,7 @@
  */
 package org.opendatakit.common.security;
 
+
 /**
  * Minimal service for accessing information about the current
  * user and the calling context.
@@ -35,7 +36,29 @@ public interface UserService {
   
   public User getDaemonAccountUser();
 
+  /**
+   * Determine if the access management system has been configured.
+   * 
+   * @return true if access management has been configured or if database unavailable
+   */
+  public boolean isAccessManagementConfigured();
+  
   public void reloadPermissions();
 
   public boolean isUserLoggedIn();
+
+  /**
+   * Get a fixed, unique string identifying the deployment of this server.
+   * This may change after each install.  The format of the string is 
+   * arbitrary.
+   * 
+   * @return unique string.
+   */
+  public String getUserServiceKey();
+
+  /**
+   * @return the configured super user email address.
+   */
+  public String getSuperUserEmail();
+
 }

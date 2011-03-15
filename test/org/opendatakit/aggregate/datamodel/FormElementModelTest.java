@@ -21,7 +21,7 @@ public class FormElementModelTest extends TestCase {
     public void testCrossMetaMappings() {
     	FormElementModel m1 = new FormElementModel(null, FormElementModel.Metadata.META_INSTANCE_ID);
     	FormDataModel fm = new FormDataModel("schema1");
-    	fm.setStringField(fm.elementType, ElementType.GROUP.toString());
+    	fm.setElementType(ElementType.GROUP);
     	FormElementModel m2 = new FormElementModel(fm, null);
     	
     	assertEquals(m1.equals(m2), false);

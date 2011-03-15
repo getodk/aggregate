@@ -35,11 +35,7 @@ import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.ErrorConsts;
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.common.constants.HtmlConsts;
-import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.Datastore;
-import org.opendatakit.common.persistence.EntityKey;
-import org.opendatakit.common.persistence.Query;
-import org.opendatakit.common.persistence.Query.FilterOperation;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.security.SecurityUtils;
 import org.opendatakit.common.security.User;
@@ -47,7 +43,6 @@ import org.opendatakit.common.security.spring.GrantedAuthorityHierarchyTable;
 import org.opendatakit.common.security.spring.GrantedAuthorityNames;
 import org.opendatakit.common.security.spring.UserGrantedAuthority;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.GrantedAuthorityImpl;
 
 /**
  * Displays the groups to which a user belongs and supports the adding
@@ -104,11 +99,8 @@ public class UserModifyMembershipsServlet extends ServletUtilBase {
 			}
 			if ( showall ) {
 				allGroups = new TreeSet<String>();
-				GrantedAuthorityHierarchyTable relation = GrantedAuthorityHierarchyTable.assertRelation(ds, user);
-				Query query = ds.createQuery(relation, user);
-				List<?> groupList = query.executeDistinctValueForDataField(relation.dominatingGrantedAuthority);
-				for ( Object u : groupList ) {
-					String group = (String) u;
+				TreeSet<String> assignables = GrantedAuthorityHierarchyTable.getAllPermissionsAssignableGrantedAuthorities(ds, user);
+				for ( String group : assignables ) {
 					// users cannot be assigned to any of the predefined groups -- that just happens
 					if ( GrantedAuthorityNames.isSpecialName(group) ) continue;
 					allGroups.add(group);
@@ -174,9 +166,6 @@ public class UserModifyMembershipsServlet extends ServletUtilBase {
 
 		CallingContext cc = ContextFactory.getCallingContext(this, req);
 
-		Datastore ds = cc.getDatastore();
-		User user = cc.getCurrentUser();
-
 		// get parameter
 		String[] groupnameArray = req.getParameterValues(GROUPNAME);
 		List<String> desiredGrants = new ArrayList<String>();
@@ -206,39 +195,7 @@ public class UserModifyMembershipsServlet extends ServletUtilBase {
 				desiredGroups.add(grant);
 			}
 			
-			UserGrantedAuthority relation = UserGrantedAuthority.assertRelation(ds, user);
-			
-			// get the members as currently defined for this group 
-			List<? extends CommonFieldsBase> groupsList;
-			Query query = ds.createQuery(relation, user);
-			query.addFilter(relation.user, FilterOperation.EQUAL, username);
-			groupsList = query.executeQuery(0);
-
-			// OK we have the desired and actual groups lists for this username.
-			// find the set of groups to remove...
-			List<EntityKey> deleted = new ArrayList<EntityKey>();
-			for ( CommonFieldsBase b : groupsList ) {
-				UserGrantedAuthority t = (UserGrantedAuthority) b;
-				String groupName = t.getGrantedAuthority().getAuthority();
-				if ( desiredGroups.contains(groupName) ) {
-					desiredGroups.remove(groupName);
-				} else {
-					deleted.add(new EntityKey(t, t.getUri()));
-				}
-			}
-			// we now have the list of desiredGroups to insert, and the list of 
-			// existing records to delete...
-			List<UserGrantedAuthority> added = new ArrayList<UserGrantedAuthority>();
-			for ( String group : desiredGroups ) {
-				UserGrantedAuthority t = ds.createEntityUsingRelation(relation, user);
-				t.setUser(username);
-				t.setGrantedAuthority(new GrantedAuthorityImpl(group));
-				added.add(t);
-			}
-
-			// we now have the list of EntityKeys to delete, and the list of records to add -- do it.
-			ds.putEntities(added, user);
-			ds.deleteEntities(deleted, user);
+			UserGrantedAuthority.assertUserGrantedAuthorities(username, desiredGroups, cc);
 		} catch (ODKDatastoreException e) {
 			e.printStackTrace();
 			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, 
