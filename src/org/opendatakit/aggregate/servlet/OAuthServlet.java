@@ -75,6 +75,6 @@ public class OAuthServlet extends ServletUtilBase {
       e.printStackTrace();
       return;
     }
-    resp.sendRedirect(cc.getWebApplicationURL(FormsServlet.ADDR));
+    resp.sendRedirect(cc.getWebApplicationURL("AggregateUI.html"));
   }
 }

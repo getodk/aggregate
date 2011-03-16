@@ -21,6 +21,7 @@ import org.opendatakit.aggregate.constants.common.ExternalServiceOption;
 import org.opendatakit.aggregate.constants.common.UIConsts;
 import org.opendatakit.aggregate.constants.externalservice.FusionTableConsts;
 import org.opendatakit.aggregate.constants.externalservice.SpreadsheetConsts;
+import org.opendatakit.aggregate.constants.format.FormTableConsts;
 import org.opendatakit.aggregate.datamodel.FormElementKey;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
@@ -33,6 +34,7 @@ import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.form.PersistentResults;
 import org.opendatakit.aggregate.query.QueryFormList;
 import org.opendatakit.aggregate.query.submission.QueryByDate;
+import org.opendatakit.aggregate.servlet.BinaryDataServlet;
 import org.opendatakit.aggregate.servlet.KmlServlet;
 import org.opendatakit.aggregate.servlet.KmlSettingsServlet;
 import org.opendatakit.aggregate.servlet.OAuthServlet;
@@ -55,6 +57,7 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 public class FormServiceImpl extends RemoteServiceServlet implements
     org.opendatakit.aggregate.client.form.FormService {
 
+  private static final String CURRENT_HOST_ADDR = "localhost:8888/";
   /**
    * Serial number for serialization
    */
@@ -152,7 +155,19 @@ public class FormServiceImpl extends RemoteServiceServlet implements
         if (blobSubmission instanceof BlobSubmissionType) {
           BlobSubmissionType blob = (BlobSubmissionType) blobSubmission;
           SubmissionKey key = blob.getValue();
-          summary.setResultFile(key.toString());
+          Map<String, String> properties = new HashMap<String, String>();
+          properties.put(ServletConsts.BLOB_KEY, key.toString());
+          properties.put(ServletConsts.AS_ATTACHMENT, "yes");
+          String addr = ServletConsts.HTTP + CURRENT_HOST_ADDR + BinaryDataServlet.ADDR;
+          String linkText = FormTableConsts.DOWNLOAD_LINK_TEXT;
+          if ( blob.getAttachmentCount() == 1 ) {
+             linkText = blob.getUnrootedFilename(1);
+             if ( linkText == null || linkText.length() == 0 ) {
+                linkText = FormTableConsts.DOWNLOAD_LINK_TEXT;
+             }
+          }
+          String url = HtmlUtil.createHrefWithProperties(addr, properties, linkText);;
+          summary.setResultFile(url);
         }
         exports[i] = summary;
         i++;
@@ -185,14 +200,14 @@ public class FormServiceImpl extends RemoteServiceServlet implements
       ccDaemon.setAsDaemon(true);
       CsvGenerator generator = (CsvGenerator) cc.getBean(BeanDefs.CSV_BEAN);
       generator.createCsvTask(form, r.getSubmissionKey(), 1L, ccDaemon);
-
+      return true;
     } catch (ODKFormNotFoundException e1) {
-      return false;
+      e1.printStackTrace();
     } catch (ODKDatastoreException e) {
       e.printStackTrace();
     }
 
-    return null;
+    return false;
   }
 
   @Override
@@ -255,14 +270,14 @@ public class FormServiceImpl extends RemoteServiceServlet implements
       CallingContext ccDaemon = ContextFactory.getCallingContext(this, req);
       ccDaemon.setAsDaemon(true);
       generator.createKmlTask(form, r.getSubmissionKey(), 1L, ccDaemon);
-
+      return true;
     } catch (ODKFormNotFoundException e) {
-      return false;
+      e.printStackTrace();
     } catch (ODKDatastoreException e) {
       e.printStackTrace();
     }
 
-    return null;
+    return false;
   }
 
   @Override
@@ -335,8 +350,9 @@ public class FormServiceImpl extends RemoteServiceServlet implements
       Map<String, String> params = new HashMap<String, String>();
       params.put(UIConsts.FSC_URI_PARAM, uri);
       params.put(ServletConsts.OAUTH_TOKEN_SECRET_PARAMETER, oauthParameters.getOAuthTokenSecret());
+      String addr = CURRENT_HOST_ADDR + OAuthServlet.ADDR;
       String callbackUrl = ServletConsts.HTTP
-          + HtmlUtil.createLinkWithProperties(cc.getWebApplicationURL(OAuthServlet.ADDR), params);
+          + HtmlUtil.createLinkWithProperties(addr, params);
 
       oauthParameters.setOAuthCallback(callbackUrl);
       return oauthHelper.createUserAuthorizationUrl(oauthParameters);

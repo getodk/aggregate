@@ -25,6 +25,25 @@
 
  <!-- Servlets -->
  
+ 	<servlet>
+		<servlet-name>uiformupload</servlet-name>
+		<servlet-class>org.opendatakit.aggregate.servlet.UIFormUploadServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>uiformupload</servlet-name>
+		<url-pattern>/ui/upload</url-pattern>
+	</servlet-mapping>
+ 
+  	<servlet>
+		<servlet-name>uisubmissionupload</servlet-name>
+		<servlet-class>org.opendatakit.aggregate.servlet.UISubmissionServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>uisubmissionupload</servlet-name>
+		<url-pattern>/ui/submission</url-pattern>
+	</servlet-mapping>
+ 
+ 
    <servlet>
     <servlet-name>submissionServiceImpl</servlet-name>
     <servlet-class>org.opendatakit.aggregate.server.SubmissionServiceImpl</servlet-class>

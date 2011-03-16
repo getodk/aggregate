@@ -50,6 +50,8 @@ public class CreateNewVisualizationPopup extends PopupPanel {
 		int secondIndex = 0;
 		String firstDataValue = firstData.getItemText(firstData.getSelectedIndex());
 		String secondDataValue = secondData.getItemText(secondData.getSelectedIndex());
+      chartUrl.append("&chtt=" + secondDataValue);
+      chartUrl.append("&chxt=x,y");
 		int index = 0;
 		for (Column c : head) {
 			if (c.getDisplayHeader().equals(firstDataValue))
@@ -66,12 +68,10 @@ public class CreateNewVisualizationPopup extends PopupPanel {
 			secondValues.append(s.getValues().get(secondIndex));
 			secondValues.append(",");
 		}
-		if (firstValues.length() > 0) {
+		if (firstValues.length() > 0)
 			firstValues.delete(firstValues.length() - 1, firstValues.length());
-		}
-		if (secondValues.length() > 0) {
+		if (secondValues.length() > 0)
 			secondValues.delete(secondValues.length() - 1, secondValues.length());
-		}
 		chartUrl.append("&chd=t:");
 		chartUrl.append(secondValues.toString());
 		chartUrl.append("&chdl=");
@@ -107,8 +107,8 @@ public class CreateNewVisualizationPopup extends PopupPanel {
 		dropDownsTable.setWidget(0, 2, secondData);
 		
 		chartType.addItem(UI_PIE_CHART);
-		/*
 		chartType.addItem(UI_BAR_GRAPH);
+      /*
 		chartType.addItem(UI_SCATTER_PLOT);
 		*/
 		chartType.addChangeHandler(new ChangeHandler() {
