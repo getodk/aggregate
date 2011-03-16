@@ -30,4 +30,6 @@ public interface FormServiceAsync {
   void createGoogleSpreadsheet(String formId, String name, ExternalServiceOption esOption,
       AsyncCallback<String> callback);
 
+  void getGpsCoordnates(String formId, AsyncCallback<KmlSettings> callback);
+
 }

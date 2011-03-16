@@ -39,3 +39,7 @@ a, a:visited, a:hover {
 	width: 600px;
 	height: 500px;
 }
+#map_area {
+	width: 800px;
+	height: 600px;
+}

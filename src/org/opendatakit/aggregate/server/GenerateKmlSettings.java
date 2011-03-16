@@ -11,10 +11,12 @@ public class GenerateKmlSettings {
 
   private KmlSettings settings;
   private Form form;
+  boolean ignoreRepeats;
   
-  public GenerateKmlSettings(Form form) {
+  public GenerateKmlSettings(Form form, boolean ignoreRepeats) {
     this.form = form;
     this.settings = new KmlSettings();
+    this.ignoreRepeats = ignoreRepeats;
   }
   
   public KmlSettings generate() {
@@ -42,6 +44,9 @@ public class GenerateKmlSettings {
       settings.addBinaryNode(nodeName, key.toString());
       break;
     case REPEAT:
+      if(ignoreRepeats) {
+        return;
+      }
     case GROUP:
       break; // should not be in any list
     default:

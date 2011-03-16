@@ -25,6 +25,10 @@ import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.maps.client.MapWidget;
+import com.google.gwt.maps.client.Maps;
+import com.google.gwt.maps.client.control.LargeMapControl;
+import com.google.gwt.maps.client.geom.LatLng;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -60,12 +64,12 @@ public class AggregateUI implements EntryPoint {
   
   // navigation
   private DecoratedTabPanel mainNav = new DecoratedTabPanel();
-  private ManageTabUI manageNav;
+  ManageTabUI manageNav;
   private SubmissionTabUI submissionNav;
   
   // Report tab
   FormServiceAsync formSvc;
-  private SubmissionServiceAsync submissionSvc;
+  SubmissionServiceAsync submissionSvc;
   private FilterServiceAsync filterSvc;
   
   // Visualization
@@ -222,6 +226,7 @@ public class AggregateUI implements EntryPoint {
     
     RootPanel.get("dynamic_content").add(new HTML("<img src=\"images/odk_color.png\" id=\"odk_aggregate_logo\" />"));
     RootPanel.get("dynamic_content").add(layoutPanel);
+    
     contentLoaded();
   }
   

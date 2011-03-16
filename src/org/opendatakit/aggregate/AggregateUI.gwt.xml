@@ -4,11 +4,13 @@
   <inherits name='com.google.gwt.user.User'/>
 
   <inherits name='com.google.gwt.user.theme.standard.StandardResources'/>
+  <inherits name='com.google.gwt.maps.GoogleMaps' />
 
   <!-- Specify the app entry point class.                         -->
   <entry-point class='org.opendatakit.aggregate.client.AggregateUI'/>
   <servlet path="/formservice" class="org.opendatakit.aggregate.server.FormServiceImpl"/>
   <servlet path="/filterservice" class="org.opendatakit.aggregate.server.FilterServiceImpl"/>
+  <servlet path="/submissionservice" class="org.opendatakit.aggregate.server.SubmissionServiceImpl"/>
    
   <source path='client'/>
   <source path='client/form'/>
