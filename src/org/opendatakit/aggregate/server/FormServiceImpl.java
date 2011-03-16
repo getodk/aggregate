@@ -217,7 +217,7 @@ public class FormServiceImpl extends RemoteServiceServlet implements
 
     try {
       Form form = Form.retrieveForm(formId, cc);
-      GenerateKmlSettings kmlSettings = new GenerateKmlSettings(form);
+      GenerateKmlSettings kmlSettings = new GenerateKmlSettings(form, false);
       return kmlSettings.generate();
 
     } catch (ODKFormNotFoundException e1) {
@@ -403,4 +403,21 @@ public class FormServiceImpl extends RemoteServiceServlet implements
     }
     return null;
   }
+
+  @Override
+  public KmlSettings getGpsCoordnates(String formId) {
+    HttpServletRequest req = this.getThreadLocalRequest();
+    CallingContext cc = ContextFactory.getCallingContext(this, req);
+
+    try {
+      Form form = Form.retrieveForm(formId, cc);
+      GenerateKmlSettings kmlSettings = new GenerateKmlSettings(form, true);
+      return kmlSettings.generate();
+
+    } catch (ODKFormNotFoundException e1) {
+      return null;
+    }
+  }
+  
+
 }

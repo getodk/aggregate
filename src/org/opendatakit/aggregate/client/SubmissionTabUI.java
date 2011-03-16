@@ -140,9 +140,53 @@ public class SubmissionTabUI extends TabPanel {
 		});
 		formAndGoalSelectionTable.setWidget(0, 4, visualizeButton);
 		Button exportButton = new Button("<img src=\"images/green_right_arrow.png\" /> Export");
+		exportButton.addClickHandler(new ClickHandler () {
+        @Override
+        public void onClick(ClickEvent event) {
+          final PopupPanel popup = new CreateNewExportPopup(def.getFormId(), parent.formSvc, parent.manageNav);
+          popup.setPopupPositionAndShow(new PopupPanel.PositionCallback() {
+            @Override
+            public void setPosition(int offsetWidth, int offsetHeight) {
+              int left = ((Window.getClientWidth() - offsetWidth) / 2);
+              int top = ((Window.getClientHeight() - offsetHeight) / 2);
+              popup.setPopupPosition(left, top);
+            }
+          });
+        }
+      });
 		formAndGoalSelectionTable.setWidget(0, 5, exportButton);
 		Button publishButton = new Button("<img src=\"images/green_right_arrow.png\" /> Publish");
+		publishButton.addClickHandler(new ClickHandler() {
+        @Override
+        public void onClick(ClickEvent event) {
+          final PopupPanel popup = new CreateNewExternalServicePopup(def.getFormId(), parent.formSvc, parent.manageNav);
+          popup.setPopupPositionAndShow(new PopupPanel.PositionCallback() {
+            @Override
+            public void setPosition(int offsetWidth, int offsetHeight) {
+              int left = ((Window.getClientWidth() - offsetWidth) / 2);
+              int top = ((Window.getClientHeight() - offsetHeight) / 2);
+              popup.setPopupPosition(left, top);
+            }
+          });
+        }
+      });
 		formAndGoalSelectionTable.setWidget(0, 6, publishButton);
+		Button mapButton = new Button("Map It");
+		mapButton.addClickHandler(new ClickHandler() {
+		  @Override
+        public void onClick(ClickEvent event) {
+           final PopupPanel mapPopup = new CreateNewMapPopup(def.getFormId(), parent.formSvc, parent.submissionSvc);
+           mapPopup.setPopupPositionAndShow(new PopupPanel.PositionCallback() {
+              @Override
+              public void setPosition(int offsetWidth, int offsetHeight) {
+                 int left = (Window.getClientWidth() - offsetWidth) / 2;
+                 int top = (Window.getClientHeight() - offsetHeight) / 2;
+                 mapPopup.setPopupPosition(left, top);
+              }
+           });
+        }
+		});
+		formAndGoalSelectionTable.setWidget(0, 7, mapButton);
 
 		HorizontalPanel formsAndGoalsPanel = new HorizontalPanel();
 		formsAndGoalsPanel.add(formAndGoalSelectionTable);

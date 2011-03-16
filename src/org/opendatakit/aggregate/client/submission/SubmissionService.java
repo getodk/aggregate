@@ -12,4 +12,6 @@ public interface SubmissionService extends RemoteService {
   
   SubmissionUISummary getSubmissions(FilterGroup filter);
   
+  UIGeoPoint [] getGeoPoints(String formId, String geopointKey);
+  
 }

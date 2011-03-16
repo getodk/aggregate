@@ -30,4 +30,6 @@ public interface FormService extends RemoteService {
   
   String createGoogleSpreadsheet(String formId, String name, ExternalServiceOption esOption);
   
+  KmlSettings getGpsCoordnates(String formId);
+  
 }

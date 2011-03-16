@@ -10,4 +10,6 @@ public interface SubmissionServiceAsync {
 
   void getSubmissions(String formId, AsyncCallback<SubmissionUISummary> callback);
 
+  void getGeoPoints(String formId, String geopointKey, AsyncCallback<UIGeoPoint[]> callback);
+
 }
