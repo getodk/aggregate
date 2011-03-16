@@ -83,6 +83,10 @@ public class UrlHash {
 		putHashToUrlBar(toString());
 	}
 	
+	public native void goTo(String url) /*-{
+	    $wnd.location = url;
+	}-*/;
+	
 	@Override
 	/*
 	 * Converts this UrlHash to a String.

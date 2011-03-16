@@ -231,7 +231,8 @@ public class GwtTester extends ServletUtilBase {
         FusionTable fusion = new FusionTable(form, ExternalServiceOption.UPLOAD_N_STREAM, cc);;
         String uri =  fusion.getFormServiceCursor().getUri(); 
         String scope = FusionTableConsts.FUSION_SCOPE;
-        String requestUrl = generateAuthorizationUrl(resp, cc, uri, scope);            
+        String requestUrl = generateAuthorizationUrl(resp, cc, uri, scope);
+        System.out.println(requestUrl);
         resp.getWriter().println(HtmlUtil.createHref(requestUrl, "Authorize FusionTable"));
       } catch (ODKFormNotFoundException e) {
         // TODO Auto-generated catch block

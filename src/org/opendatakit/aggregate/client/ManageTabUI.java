@@ -1,7 +1,15 @@
 package org.opendatakit.aggregate.client;
 
+import org.opendatakit.aggregate.client.form.ExportSummary;
+import org.opendatakit.aggregate.client.form.ExternServSummary;
+import org.opendatakit.aggregate.client.form.FormService;
+
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
@@ -13,20 +21,35 @@ public class ManageTabUI extends TabPanel {
 	// Management Navigation
 	private static final String FORMS = "forms";
 	private static final String EXPORT = "export";
+   static final String PUBLISH = "publish";
 	private static final String PERMISSIONS = "permissions";
 	private static final String UTILITIES = "utilities";
-	private static final String[] MANAGEMENT_MENU = {FORMS, EXPORT, PERMISSIONS, UTILITIES};
+	private static final String[] MANAGEMENT_MENU = {FORMS, EXPORT, PUBLISH, PERMISSIONS, UTILITIES};
 	static final String MANAGEMENT = "management";
+   UrlHash hash;
+   AggregateUI parent;
+   
+   // Forms tab
 	private FlexTable uploadTable = new FlexTable();
-	private UrlHash hash;
 	private FlexTable listOfForms;
 	
-	public ManageTabUI(FlexTable listOfForms) {
+	// Publish tab
+	private FlexTable publishTable = new FlexTable();
+	
+	// Export tab
+	private FlexTable exportTable = new FlexTable();
+	
+	public ManageTabUI(FlexTable listOfForms, AggregateUI parent) {
 		super();
 		this.hash = UrlHash.getHash();
 		this.listOfForms = listOfForms;
+		this.parent = parent;
+      setupPublishPanel();
+      setupExportPanel();
+      
 		this.add(setupFormManagementPanel(), "Forms");
-		this.add(setupExportsPanel(), "Export");
+		this.add(exportTable, "Export");
+		this.add(publishTable, "Publish");
 		this.add(setupPermissionsPanel(), "Permissions");
 		this.add(setupUtilitiesPanel(), "Utilities");
 		
@@ -44,10 +67,23 @@ public class ManageTabUI extends TabPanel {
 	}
 	
 	public VerticalPanel setupFormManagementPanel() {
-		Button uploadFormButton = new Button();
-	    uploadFormButton.setHTML("<img src=\"images/blue_up_arrow.png\" /> Upload Form");
+		Button uploadFormButton = new Button("<img src=\"images/yellow_plus.png\" /> New Form");
+		uploadFormButton.addClickHandler(new ClickHandler() {
+		  @Override
+		  public void onClick(ClickEvent event) {
+		    hash.goTo("ui/upload");
+		  }
+		});
 	    uploadTable.setWidget(0, 0, uploadFormButton);
-		    
+	    Button uploadSubmissionsButton = new Button("<img src=\"images/blue_up_arrow.png\" /> Upload Data");
+	    uploadSubmissionsButton.addClickHandler(new ClickHandler() {
+	      @Override
+	      public void onClick(ClickEvent event) {
+	        hash.goTo("ui/submission");
+	      }
+	    });
+	    uploadTable.setWidget(0, 1, uploadSubmissionsButton);
+	    
 	    listOfForms.setText(0, 0, "Title");
 	    listOfForms.setText(0, 1, "Form Id");
 	    listOfForms.setText(0, 2, "User");
@@ -68,6 +104,105 @@ public class ManageTabUI extends TabPanel {
 	public FlexTable setupExportsPanel() {
 		return new FlexTable();
 	}
+	
+	public void setupPublishPanel() {
+	  publishTable.setText(0, 0, "Created By");
+	  publishTable.setText(0, 1, "Status");
+	  publishTable.setText(0, 2, "Start Date");
+	  publishTable.setText(0, 3, "Action");
+	  publishTable.setText(0, 4, "Type");
+	  publishTable.setText(0, 5, "Name");
+	  publishTable.addStyleName("dataTable");
+	  publishTable.getRowFormatter().addStyleName(0, "titleBar");
+	  
+	  if (hash.get(UrlHash.FORM) != null && !hash.get(UrlHash.FORM).equals("")) {
+	    getExternalServicesList(hash.get(UrlHash.FORM));
+	  }
+	}
+	
+	private void updatePublishPanel(ExternServSummary[] eSS) {
+	  if (eSS == null)
+       return;
+     while (publishTable.getRowCount() > 1)
+	    publishTable.removeRow(1);
+	  for (int i = 0; i < eSS.length; i++) {
+	    ExternServSummary e = eSS[i];
+	    publishTable.setWidget(i + 1, 0, new Anchor(e.getUser()));
+	    publishTable.setText(i + 1, 1, e.getStatus().toString());
+	    publishTable.setText(i + 1, 2, e.getEstablished().toString());
+	    publishTable.setText(i + 1, 3, e.getAction());
+	    publishTable.setText(i + 1, 4, e.getType());
+	    publishTable.setWidget(i + 1, 5, new HTML(e.getName()));
+	  }
+	}
+	
+	public void getExternalServicesList(String formId) {
+	  if (parent.formSvc == null) {
+	    parent.formSvc = GWT.create(FormService.class);
+	  }
+	  
+	  AsyncCallback<ExternServSummary[] > callback = new AsyncCallback<ExternServSummary []>() {
+      @Override
+      public void onFailure(Throwable caught) {
+        // TODO Auto-generated method stub
+      }
+
+      @Override
+      public void onSuccess(ExternServSummary[] result) {
+        updatePublishPanel(result);
+      }
+	  };
+	  
+	  parent.formSvc.getExternalServices(formId, callback);
+	}
+   
+   public void setupExportPanel() {
+     exportTable.setText(0, 0, "File Type");
+     exportTable.setText(0, 1, "Status");
+     exportTable.setText(0, 2, "Time Requested");
+     exportTable.setText(0, 3, "Time Completed");
+     exportTable.setText(0, 4, "Last Retry");
+     exportTable.setText(0, 5, "Download File");
+     exportTable.addStyleName("dataTable");
+     exportTable.getRowFormatter().addStyleName(0, "titleBar");
+     getExportList();
+   }
+   
+   private void updateExportPanel(ExportSummary[] eS) {
+     if (eS == null)
+       return;
+     while (exportTable.getRowCount() > 1)
+       exportTable.removeRow(1);
+     for (int i = 0; i < eS.length; i++) {
+       ExportSummary e = eS[i];
+       exportTable.setText(i + 1, 0, e.getFileType().toString());
+       exportTable.setText(i + 1, 1, e.getStatus().toString());
+       exportTable.setText(i + 1, 2, e.getTimeRequested().toString());
+       exportTable.setText(i + 1, 3, e.getTimeCompleted().toString());
+       exportTable.setText(i + 1, 4, e.getTimeLastAction().toString());
+       exportTable.setWidget(i + 1, 5, new HTML(e.getResultFile()));
+     }
+   }
+   
+   public void getExportList() {
+     if (parent.formSvc == null) {
+       parent.formSvc = GWT.create(FormService.class);
+     }
+     
+     AsyncCallback<ExportSummary[] > callback = new AsyncCallback<ExportSummary []>() {
+      @Override
+      public void onFailure(Throwable caught) {
+        // TODO Auto-generated method stub
+      }
+
+      @Override
+      public void onSuccess(ExportSummary[] result) {
+        updateExportPanel(result);
+      }
+     };
+     
+     parent.formSvc.getExports(callback);
+   }
 	
 	public HTML setupPermissionsPanel() {
 		return new HTML("Content Forthcoming");

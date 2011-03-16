@@ -26,6 +26,7 @@ import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
@@ -35,6 +36,7 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -62,7 +64,7 @@ public class AggregateUI implements EntryPoint {
   private SubmissionTabUI submissionNav;
   
   // Report tab
-  private FormServiceAsync formSvc;
+  FormServiceAsync formSvc;
   private SubmissionServiceAsync submissionSvc;
   private FilterServiceAsync filterSvc;
   
@@ -185,7 +187,7 @@ public class AggregateUI implements EntryPoint {
 	
 	// Create sub menu navigation
     getFormList();
-    manageNav = new ManageTabUI(listOfForms);
+    manageNav = new ManageTabUI(listOfForms, this);
     submissionNav = new SubmissionTabUI(view, formsBox, filtersBox, 
     		dataTable, def, this, allGroups);
     mainNav.add(submissionNav, "Submissions");
@@ -367,7 +369,7 @@ private void getFilterList(final String id) {
   private void updateFormTable(FormSummary [] forms) {
     for (int j = 0; j < forms.length; j++) {
     	int i = j + 1;
-    	FormSummary form = forms[j];
+    	final FormSummary form = forms[j];
         listOfForms.setWidget(i, 0, new Anchor(form.getTitle()));
         listOfForms.setWidget(i, 1, new HTML(form.getId()));
         String user = form.getCreatedUser();
@@ -383,11 +385,44 @@ private void getFilterList(final String id) {
         deleteButton.addStyleDependentName("negative");
         
         listOfForms.setWidget(i, 3, enabledDropDown);
-        listOfForms.setWidget(i, 4, new Button("<img src=\"images/green_right_arrow.png\" /> Publish"));
-        listOfForms.setWidget(i, 5, new Button("<img src=\"images/green_right_arrow.png\" /> Export"));
+        Button publishButton = new Button("<img src=\"images/green_right_arrow.png\" /> Publish");
+        publishButton.addClickHandler(new ClickHandler() {
+          @Override
+          public void onClick(ClickEvent event) {
+            final PopupPanel popup = new CreateNewExternalServicePopup(form.getId(), formSvc, manageNav);
+            popup.setPopupPositionAndShow(new PopupPanel.PositionCallback() {
+              @Override
+              public void setPosition(int offsetWidth, int offsetHeight) {
+                int left = ((Window.getClientWidth() - offsetWidth) / 2);
+                int top = ((Window.getClientHeight() - offsetHeight) / 2);
+                popup.setPopupPosition(left, top);
+              }
+            });
+          }
+        });
+        listOfForms.setWidget(i, 4, publishButton);
+        
+        Button exportButton = new Button("<img src=\"images/green_right_arrow.png\" /> Export");
+        exportButton.addClickHandler(new ClickHandler () {
+          @Override
+          public void onClick(ClickEvent event) {
+            final PopupPanel popup = new CreateNewExportPopup(form.getId(), formSvc, manageNav);
+            popup.setPopupPositionAndShow(new PopupPanel.PositionCallback() {
+              @Override
+              public void setPosition(int offsetWidth, int offsetHeight) {
+                int left = ((Window.getClientWidth() - offsetWidth) / 2);
+                int top = ((Window.getClientHeight() - offsetHeight) / 2);
+                popup.setPopupPosition(left, top);
+              }
+            });
+          }
+        });
+        listOfForms.setWidget(i, 5, exportButton);
         listOfForms.setWidget(i, 6, deleteButton);
         if (i % 2 == 0)
             listOfForms.getRowFormatter().addStyleName(i, "evenTableRow");
     }
   }
+  
+  
 }
