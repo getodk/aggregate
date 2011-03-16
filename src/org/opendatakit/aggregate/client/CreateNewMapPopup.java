@@ -7,6 +7,7 @@ import org.opendatakit.aggregate.client.form.KmlSettingOption;
 import org.opendatakit.aggregate.client.form.KmlSettings;
 import org.opendatakit.aggregate.client.submission.SubmissionServiceAsync;
 import org.opendatakit.aggregate.client.submission.UIGeoPoint;
+import org.opendatakit.aggregate.constants.common.UIConsts;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -32,7 +33,7 @@ public class CreateNewMapPopup extends PopupPanel {
   public CreateNewMapPopup (final String formId, final FormServiceAsync formSvc, final SubmissionServiceAsync submissionSvc) {
     super(true);
     
-    Maps.loadMapsApi("", "2", false, new Runnable() {
+    Maps.loadMapsApi(UIConsts.GOOGLE_MAP_KEY, "2", false, new Runnable() {
       public void run() {
         mapsApiLoaded = true;
       }

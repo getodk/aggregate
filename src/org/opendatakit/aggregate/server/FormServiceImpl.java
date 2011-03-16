@@ -57,7 +57,6 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 public class FormServiceImpl extends RemoteServiceServlet implements
     org.opendatakit.aggregate.client.form.FormService {
 
-  private static final String CURRENT_HOST_ADDR = "localhost:8888/";
   /**
    * Serial number for serialization
    */
@@ -158,7 +157,7 @@ public class FormServiceImpl extends RemoteServiceServlet implements
           Map<String, String> properties = new HashMap<String, String>();
           properties.put(ServletConsts.BLOB_KEY, key.toString());
           properties.put(ServletConsts.AS_ATTACHMENT, "yes");
-          String addr = ServletConsts.HTTP + CURRENT_HOST_ADDR + BinaryDataServlet.ADDR;
+          String addr = ServletConsts.HTTP + UIConsts.CURRENT_HOST_ADDR + BinaryDataServlet.ADDR;
           String linkText = FormTableConsts.DOWNLOAD_LINK_TEXT;
           if ( blob.getAttachmentCount() == 1 ) {
              linkText = blob.getUnrootedFilename(1);
@@ -350,7 +349,7 @@ public class FormServiceImpl extends RemoteServiceServlet implements
       Map<String, String> params = new HashMap<String, String>();
       params.put(UIConsts.FSC_URI_PARAM, uri);
       params.put(ServletConsts.OAUTH_TOKEN_SECRET_PARAMETER, oauthParameters.getOAuthTokenSecret());
-      String addr = CURRENT_HOST_ADDR + OAuthServlet.ADDR;
+      String addr = UIConsts.CURRENT_HOST_ADDR + OAuthServlet.ADDR;
       String callbackUrl = ServletConsts.HTTP
           + HtmlUtil.createLinkWithProperties(addr, params);
 
