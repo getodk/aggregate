@@ -16,28 +16,19 @@
 package org.opendatakit.aggregate.servlet;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.ErrorConsts;
-import org.opendatakit.aggregate.constants.HtmlUtil;
-import org.opendatakit.common.constants.HtmlConsts;
 import org.opendatakit.common.persistence.Datastore;
-import org.opendatakit.common.persistence.EntityKey;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
-import org.opendatakit.common.security.SecurityUtils;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.security.spring.RegisteredUsersTable;
-import org.opendatakit.common.security.spring.UserGrantedAuthority;
 import org.opendatakit.common.utils.EmailParser;
 import org.opendatakit.common.utils.EmailParser.Email;
 

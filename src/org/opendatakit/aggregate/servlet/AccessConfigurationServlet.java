@@ -89,20 +89,7 @@ public class AccessConfigurationServlet extends ServletUtilBase {
 	 * E-mail parsing characters and constants
 	 */
 
-	private static final char K_OPEN_PAREN = '(';
-	private static final char K_ESCAPE = '\\';
-	private static final char K_CLOSE_PAREN = ')';
-	private static final char K_OPEN_ANGLE = '<';
-	private static final char K_CLOSE_ANGLE = '>';
-	private static final char K_OPEN_SQUARE = '[';
-	private static final char K_CLOSE_SQUARE = ']';
-	private static final char K_DOT = '.';
-	private static final char K_DQ = '\"';
-	private static final char K_COLON = ':';
-	private static final char K_COMMA = ',';
-	private static final char K_SEMI = ';';
 	private static final char K_AT = '@';
-	private static final String K_SPECIAL_CHARS = "()<>[]:;@\\,.\"";
 	private static final String K_MAILTO = "mailto:";
 	private static final String K_NEWLINE = "\n";
 
