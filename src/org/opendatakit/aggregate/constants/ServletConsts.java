@@ -40,7 +40,7 @@ public final class ServletConsts {
   /**
    * Current version of Aggregate
    */
-  public final static String VERSION = "v1.0 ALPHA FIVE";
+  public final static String VERSION = "v1.0 ALPHA SIX";
 
   // system constants
   public static final String APPLICATION_NAME = "ODK AGGREGATE";
