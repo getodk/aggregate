@@ -21,6 +21,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,6 +39,8 @@ import org.opendatakit.common.constants.HtmlConsts;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.security.spring.GrantedAuthorityHierarchyTable;
 import org.opendatakit.common.security.spring.GrantedAuthorityNames;
+import org.opendatakit.common.security.spring.UserGrantedAuthority;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.GrantedAuthorityImpl;
 
 /**
@@ -266,11 +269,8 @@ public class GroupModifyServlet extends ServletUtilBase {
 		if ( usernameArray != null ) {
 			desiredGrants.addAll(Arrays.asList(usernameArray));
 		}
-		if (desiredGrants.isEmpty()) {
-			errorMissingParam(resp);
-			return;
-		}
 		
+		// NOTE: if the desiredGrants is empty, then delete the group.
 		String groupname = req.getParameter(GROUPNAME);
 		if (groupname == null || groupname.length() == 0) {
 			errorMissingParam(resp);
@@ -278,8 +278,16 @@ public class GroupModifyServlet extends ServletUtilBase {
 		}
 
 		try {
+			GrantedAuthority grant = new GrantedAuthorityImpl(groupname);
+			
 			GrantedAuthorityHierarchyTable.assertGrantedAuthorityHierarchy( 
-					new GrantedAuthorityImpl(groupname), desiredGrants, cc );
+												grant, desiredGrants, cc );
+			
+			if ( desiredGrants.isEmpty() ) {
+				// delete all users assigned to this group...
+				List<String> empty = Collections.emptyList();
+				UserGrantedAuthority.assertGrantedAuthoryMembers(grant, empty, cc);
+			}
 		} catch (ODKDatastoreException e) {
 			e.printStackTrace();
 			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, 
