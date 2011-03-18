@@ -93,7 +93,7 @@ public class UserPasswordServlet extends ServletUtilBase {
 		PrintWriter out = resp.getWriter();
 		
 		out.write("<p>Logins from a device (e.g., ODK Collect) require a password that is " +
-				"held on this server and that is specific to this server (an <em>Aggregate password</em). " +
+				"held on this server and that is specific to this server (an <em>Aggregate password</em>).</p><p>" +
 				"Set or change that password here. The password is stored " +
 				"as both a randomly-salted sha-1 hash and as a deterministically-salted md5 hash. " +
 				"The plaintext password is not retained. </p>");
