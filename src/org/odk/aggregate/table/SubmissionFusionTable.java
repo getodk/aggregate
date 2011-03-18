@@ -17,6 +17,7 @@ import org.odk.aggregate.constants.TableConsts;
 import org.odk.aggregate.exception.ODKIncompleteSubmissionData;
 import org.odk.aggregate.form.Form;
 import org.odk.aggregate.form.remoteserver.FusionTable;
+import org.odk.aggregate.form.remoteserver.FusionTableOAuth;
 import org.odk.aggregate.servlet.FormMultipleValueServlet;
 import org.odk.aggregate.servlet.ImageViewerServlet;
 import org.odk.aggregate.submission.Submission;
@@ -90,7 +91,7 @@ public class SubmissionFusionTable extends SubmissionTable {
       List<List<String>> resultRows = results.getRows();
 
       for (List<String> row : resultRows) {
-         insertNewData(service, fusion, headers, row);
+         insertNewData(service, fusion.getTableName(), headers, row);
       }
    }
 
@@ -100,7 +101,7 @@ public class SubmissionFusionTable extends SubmissionTable {
       try {
          GoogleService service = new GoogleService("fusiontables", "fusiontables.FusionTables");
          service.setAuthSubToken(fusion.getAuthToken());
-         insertNewData(service, fusion, result.getHeader(), result.getRows().get(0));
+         insertNewData(service, fusion.getTableName(), result.getHeader(), result.getRows().get(0));
       } catch (AuthenticationException e) {
          // TODO Auto-generated catch block
          e.printStackTrace();
@@ -114,14 +115,35 @@ public class SubmissionFusionTable extends SubmissionTable {
 
    }
 
+   public void insertNewDataInSpreadsheet(Submission submission, FusionTableOAuth fusion) {
+     ResultTable result = generateSingleEntryResultTable(submission);
+
+     
+     try {
+        GoogleService service = new GoogleService("fusiontables", "fusiontables.FusionTables");
+        service.setAuthSubToken(fusion.getAuthToken());
+        insertNewData(service, fusion.getTableName(), result.getHeader(), result.getRows().get(0));
+     } catch (AuthenticationException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+     } catch (IOException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+     } catch (ServiceException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+     }
+
+  }
+   
    // TODO: integrate with new static functions 
-   private void insertNewData(GoogleService service, FusionTable fusion, List<String> headers,
+   private void insertNewData(GoogleService service, String tableId, List<String> headers,
          List<String> row) throws IOException, ServiceException {
       GDataRequest request = service.getRequestFactory().getRequest(RequestType.INSERT,
             new URL(SubmissionFusionTable.URL_STRING),
             new ContentType("application/x-www-form-urlencoded"));
       OutputStreamWriter writer = new OutputStreamWriter(request.getRequestStream());
-      String insertQuery = "INSERT INTO " + fusion.getTableName()
+      String insertQuery = "INSERT INTO " + tableId
             + createCsvString(headers.iterator(), false) + " VALUES "
             + createCsvString(row.iterator(), true);
       System.out.println(insertQuery);

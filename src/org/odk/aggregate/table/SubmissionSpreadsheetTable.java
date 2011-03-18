@@ -29,6 +29,7 @@ import org.odk.aggregate.constants.TableConsts;
 import org.odk.aggregate.exception.ODKIncompleteSubmissionData;
 import org.odk.aggregate.form.Form;
 import org.odk.aggregate.form.remoteserver.GoogleSpreadsheet;
+import org.odk.aggregate.form.remoteserver.GoogleSpreadsheetOAuth;
 import org.odk.aggregate.report.FormProperties;
 import org.odk.aggregate.submission.Submission;
 
@@ -116,6 +117,34 @@ public class SubmissionSpreadsheetTable extends SubmissionCsvTable {
     }
   }
 
+  public void insertNewDataInSpreadsheet(Submission submission, GoogleSpreadsheetOAuth spreadsheet) {
+    if (!spreadsheet.getReady()) {
+       return;
+    }
+      
+    ResultTable result = generateSingleEntryResultTable(submission);
+
+     SpreadsheetService service = new SpreadsheetService(applicationName);
+     service.setAuthSubToken(spreadsheet.getAuthToken(), null);
+
+     WorksheetEntry worksheet;
+     try {
+       worksheet = getWorksheet(service, spreadsheet.getSpreadsheetKey(), super.getOdkId());
+       insertNewData(service, worksheet, result.getHeader(), result.getRows().get(0));
+     } catch (MalformedURLException e) {
+       // TODO: determine better error handling
+       e.printStackTrace();
+     } catch (IOException e) {
+       // TODO: determine better error handling
+       e.printStackTrace();
+     } catch (ServiceException e) {
+       // TODO: determine better error handling
+       e.printStackTrace();
+     }
+
+   }
+  
+  
   public void insertNewDataInSpreadsheet(Submission submission, GoogleSpreadsheet spreadsheet) {
 	if (!spreadsheet.getReady()) {
 		return;
