@@ -55,6 +55,12 @@ public class GoogleSpreadsheetOAuth implements RemoteServer{
    */
   @Enumerated
   private String authToken;
+  
+  /**
+   * Authorization Secret for speadsheet
+   */
+  @Enumerated
+  private String tokenSecret;
 
  
   @Enumerated
@@ -71,7 +77,7 @@ public class GoogleSpreadsheetOAuth implements RemoteServer{
   }
 
   public void updateReadyValue() {
-    ready = (spreadsheetName != null) && (spreadsheetKey != null) && (authToken != null);   
+    ready = (spreadsheetName != null) && (spreadsheetKey != null) && (authToken != null) && (tokenSecret != null);   
   }
 
   public String getSpreadsheetName() {
@@ -82,12 +88,12 @@ public class GoogleSpreadsheetOAuth implements RemoteServer{
     return spreadsheetKey;
   }
 
-  public String getAuthToken() {
-    return authToken;
+  public OAuthToken getAuthToken() {
+    return new OAuthToken(authToken, tokenSecret);
   }
 
-  public void setAuthToken(String authToken) {
-    this.authToken = authToken;
+  public void setAuthToken(OAuthToken authToken) {
+    this.authToken = authToken.getToken();
   }
   
   public void sendSubmissionToRemoteServer(Form xform, String serverName, EntityManager em, String appName, Submission submission) {
@@ -110,6 +116,7 @@ public class GoogleSpreadsheetOAuth implements RemoteServer{
         && (spreadsheetName == null ? (other.spreadsheetName == null) : (spreadsheetName.equals(other.spreadsheetName)))
         && (spreadsheetKey == null ? (other.spreadsheetKey == null) : (spreadsheetKey.equals(other.spreadsheetKey)))
         && (authToken == null ? (other.authToken == null) : (authToken.equals(other.authToken)))
+        && (tokenSecret == null ? (other.tokenSecret == null) : (tokenSecret.equals(other.tokenSecret)))
         && (ready == null ? (other.ready == null) : (ready.equals(other.ready)));
   }
 
@@ -123,6 +130,7 @@ public class GoogleSpreadsheetOAuth implements RemoteServer{
     if(spreadsheetName != null) hashCode += spreadsheetName.hashCode();
     if(spreadsheetKey != null) hashCode += spreadsheetKey.hashCode();
     if(authToken != null) hashCode += authToken.hashCode();
+    if(tokenSecret != null) hashCode += tokenSecret.hashCode();
     if(ready != null) hashCode += ready.hashCode();
     return hashCode;
   }

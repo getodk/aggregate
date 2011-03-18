@@ -22,7 +22,6 @@ import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
-import java.security.GeneralSecurityException;
 import java.util.Map;
 
 import javax.servlet.http.HttpServlet;
@@ -34,13 +33,14 @@ import org.odk.aggregate.constants.ErrorConsts;
 import org.odk.aggregate.constants.HtmlConsts;
 import org.odk.aggregate.constants.HtmlUtil;
 import org.odk.aggregate.constants.ServletConsts;
-import org.odk.aggregate.exception.ODKGDataAuthenticationError;
-import org.odk.aggregate.exception.ODKGDataServiceNotAuthenticated;
+import org.odk.aggregate.form.remoteserver.OAuthToken;
 
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
-import com.google.gdata.client.http.AuthSubUtil;
-import com.google.gdata.util.AuthenticationException;
+import com.google.gdata.client.authn.oauth.GoogleOAuthHelper;
+import com.google.gdata.client.authn.oauth.GoogleOAuthParameters;
+import com.google.gdata.client.authn.oauth.OAuthException;
+import com.google.gdata.client.authn.oauth.OAuthHmacSha1Signer;
 
 /**
  * Base class for Servlets that contain useful utilities
@@ -308,78 +308,71 @@ public class ServletUtilBase extends HttpServlet {
     return serverName;
   }
 
-  protected String verifyGDataAuthorization(HttpServletRequest req, HttpServletResponse resp,
-      String scope) throws IOException, ODKGDataAuthenticationError,
-      ODKGDataServiceNotAuthenticated {
-    String query = URLDecoder.decode(req.getQueryString(), "UTF-8");
-    String onetimeUseToken = AuthSubUtil.getTokenFromReply(query);
+  protected OAuthToken verifyGDataAuthorization(HttpServletRequest req, HttpServletResponse resp) 
+  throws IOException {
+ 
+  boolean receivingToken = getParameter(req, ServletConsts.OAUTH_TOKEN_PARAMETER) != null;
+  if (receivingToken)
+  {
+     GoogleOAuthParameters oauthParameters = new GoogleOAuthParameters();
+     oauthParameters.setOAuthConsumerKey(ServletConsts.OAUTH_CONSUMER_KEY);
+     oauthParameters.setOAuthConsumerSecret(ServletConsts.OAUTH_CONSUMER_SECRET);
+     GoogleOAuthHelper oauthHelper = new GoogleOAuthHelper(new OAuthHmacSha1Signer());
+     oauthHelper.getOAuthParametersFromCallback(req.getQueryString(), oauthParameters);
+     try {
+        oauthHelper.getAccessToken(oauthParameters);
+     } catch (OAuthException e) {
+          resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+              ErrorConsts.OAUTH_SECURITY_ERROR_WHILE_RETRIEVING_SESSION_TOKEN);
+        throw new IOException();
+     }
+     
+     return new OAuthToken(oauthParameters.getOAuthToken(), oauthParameters.getOAuthTokenSecret());
+  }
+  else
+  {
+     return null;
+  }
+}
 
-    String sessionToken = null;
+  protected String generateAuthButton(String buttonText, Map<String, String> params,
+      HttpServletRequest req, HttpServletResponse resp, String... scopes) throws IOException {
 
-    if (onetimeUseToken == null) {
-      throw new ODKGDataServiceNotAuthenticated();
-    } else {
-
-      try {
-        sessionToken = AuthSubUtil.exchangeForSessionToken(onetimeUseToken, null);
-      } catch (AuthenticationException e) {
+   GoogleOAuthParameters oauthParameters = new GoogleOAuthParameters();
+   oauthParameters.setOAuthConsumerKey(ServletConsts.OAUTH_CONSUMER_KEY);
+   oauthParameters.setOAuthConsumerSecret(ServletConsts.OAUTH_CONSUMER_SECRET);
+   String scope = BasicConsts.EMPTY_STRING;
+   for (String singleScope : scopes)
+   {
+      scope += singleScope + BasicConsts.SPACE;
+   }
+   oauthParameters.setScope(scope);
+   
+   GoogleOAuthHelper oauthHelper = new GoogleOAuthHelper(new OAuthHmacSha1Signer());
+   try 
+   {
+      oauthHelper.getUnauthorizedRequestToken(oauthParameters);
+   } 
+   catch (OAuthException e) 
+   {
         e.printStackTrace();
         resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-            "Server rejected one time use token.");
-        throw new ODKGDataAuthenticationError();
+            ErrorConsts.OAUTH_SERVER_REJECTED_ONE_TIME_USE_TOKEN);
+   }
 
-      } catch (GeneralSecurityException e) {
-        resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-            "Security error while retrieving session token.");
-        throw new ODKGDataAuthenticationError();
-      }
+   params.put(ServletConsts.OAUTH_TOKEN_SECRET_PARAMETER, oauthParameters.getOAuthTokenSecret());
+   String callbackUrl = ServletConsts.HTTP
+      + HtmlUtil.createLinkWithProperties(getServerURL(req) + req.getServletPath(), params);
+   oauthParameters.setOAuthCallback(callbackUrl);
+   String requestUrl = oauthHelper.createUserAuthorizationUrl(oauthParameters);
 
-      try {
-        Map<String, String> tokenInfo = AuthSubUtil.getTokenInfo(sessionToken, null);
+    StringBuilder form = new StringBuilder();
+    form.append(HtmlConsts.LINE_BREAK);
+    form.append(HtmlUtil.createFormBeginTag(requestUrl, null, HtmlConsts.POST));
+    form.append(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_SUBMIT, null, buttonText));
+    form.append(HtmlConsts.FORM_CLOSE);
 
-        String tokenScope = tokenInfo.get("Scope");
-
-        if (!tokenScope.equals(scope)) {
-          resp.sendRedirect(generateAuthorizationURL(req, scope));
-          throw new ODKGDataServiceNotAuthenticated();
-        }
-      } catch (AuthenticationException e) {
-        resp.sendRedirect(generateAuthorizationURL(req, scope));
-        throw new ODKGDataAuthenticationError();
-      } catch (GeneralSecurityException e) {
-        resp.sendRedirect(generateAuthorizationURL(req, scope));
-        throw new ODKGDataAuthenticationError();
-      }
-    }
-
-    return sessionToken;
+    return form.toString();
   }
-
-  // TODO: see if can integrate better with helper functions in SpreadsheetServlet
-  protected String generateAuthorizationURL(HttpServletRequest req, String scope) {
-    String returnUrl =
-        "http://" + getServerURL(req) + req.getRequestURI() + ServletConsts.BEGIN_PARAM
-            + req.getQueryString();
-    String requestUrl = AuthSubUtil.getRequestUrl(returnUrl, scope, false, true);
-    return requestUrl;
-  }
-
-protected String generateAuthButton(String scope, String buttonText, Map<String, String> params,
-		HttpServletRequest req, HttpServletResponse resp) throws IOException {
-		
-		    String returnUrl =
-		        "http://"
-		            + HtmlUtil.createLinkWithProperties(getServerURL(req) + req.getRequestURI(), params);
-		
-		    String requestUrl = AuthSubUtil.getRequestUrl(returnUrl, scope, false, true);
-		
-		    StringBuilder form = new StringBuilder();
-		    form.append(HtmlConsts.LINE_BREAK);
-		    form.append(HtmlUtil.createFormBeginTag(requestUrl, null, ServletConsts.POST));
-		    form.append(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_SUBMIT, null, buttonText));
-		    form.append(HtmlConsts.FORM_CLOSE);
-		
-		    return form.toString();
-		  }
   
 }

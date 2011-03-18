@@ -18,7 +18,6 @@ package org.odk.aggregate.servlet;
 
 import java.io.IOException;
 import java.net.URL;
-import java.security.GeneralSecurityException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -30,20 +29,21 @@ import org.odk.aggregate.EMFactory;
 import org.odk.aggregate.constants.ErrorConsts;
 import org.odk.aggregate.constants.ServletConsts;
 import org.odk.aggregate.exception.ODKFormNotFoundException;
-import org.odk.aggregate.exception.ODKGDataAuthenticationError;
-import org.odk.aggregate.exception.ODKGDataServiceNotAuthenticated;
 import org.odk.aggregate.form.Form;
-import org.odk.aggregate.form.remoteserver.GoogleSpreadsheet;
+import org.odk.aggregate.form.remoteserver.GoogleSpreadsheetOAuth;
+import org.odk.aggregate.form.remoteserver.OAuthToken;
 
 import com.google.appengine.api.labs.taskqueue.Queue;
 import com.google.appengine.api.labs.taskqueue.QueueFactory;
 import com.google.appengine.api.labs.taskqueue.TaskOptions;
+import com.google.gdata.client.authn.oauth.GoogleOAuthHelper;
+import com.google.gdata.client.authn.oauth.GoogleOAuthParameters;
+import com.google.gdata.client.authn.oauth.OAuthException;
+import com.google.gdata.client.authn.oauth.OAuthHmacSha1Signer;
 import com.google.gdata.client.docs.DocsService;
-import com.google.gdata.client.http.AuthSubUtil;
 import com.google.gdata.data.PlainTextConstruct;
 import com.google.gdata.data.docs.DocumentListEntry;
 import com.google.gdata.data.docs.SpreadsheetEntry;
-import com.google.gdata.util.AuthenticationException;
 import com.google.gdata.util.ServiceException;
 
 public class SpreadsheetServlet extends ServletUtilBase {
@@ -51,7 +51,7 @@ public class SpreadsheetServlet extends ServletUtilBase {
   // TODO: change code so a delay is not required
   private static final int DELAY = 15000;
 
-  private static final String TOKEN_TYPE = "tokenType";
+  private static final String CALLBACK = "callback";
 
   /**
    * Serial number for serialization
@@ -85,16 +85,16 @@ public class SpreadsheetServlet extends ServletUtilBase {
     // get parameter
     String spreadsheetName = getParameter(req, ServletConsts.SPREADSHEET_NAME_PARAM);
     String odkIdParam = getParameter(req, ServletConsts.ODK_ID);
-    String docSessionToken = getParameter(req, ServletConsts.DOC_AUTH);
-    String spreadSessionToken = getParameter(req, ServletConsts.SPREAD_AUTH);
+    String sessionToken = getParameter(req, ServletConsts.OAUTH_TOKEN);
+    String sessionTokenSecret = getParameter(req, ServletConsts.OAUTH_TOKEN_SECRET);
     String esType = getParameter(req, ServletConsts.EXTERNAL_SERVICE_TYPE);
-    String tokenTypeString = getParameter(req, TOKEN_TYPE);
+    boolean callback = Boolean.parseBoolean(getParameter(req, CALLBACK));
 
     Map<String, String> params = new HashMap<String, String>();
     params.put(ServletConsts.SPREADSHEET_NAME_PARAM, spreadsheetName);
     params.put(ServletConsts.ODK_ID, odkIdParam);
-    params.put(ServletConsts.DOC_AUTH, docSessionToken);
-    params.put(ServletConsts.SPREAD_AUTH, spreadSessionToken);
+    params.put(ServletConsts.OAUTH_TOKEN, sessionToken);
+    params.put(ServletConsts.OAUTH_TOKEN_SECRET, sessionTokenSecret);
     params.put(ServletConsts.EXTERNAL_SERVICE_TYPE, esType);
 
     if (spreadsheetName == null || odkIdParam == null) {
@@ -102,82 +102,65 @@ public class SpreadsheetServlet extends ServletUtilBase {
       return;
     }
 
-    TokenType tokenType = TokenType.NONE;
-
-    if (tokenTypeString != null) {
-      tokenType = TokenType.valueOf(tokenTypeString);
-    }
-
-
-    try {
-
-      if (tokenType.equals(TokenType.DOC)) {
-        try {
-          docSessionToken = verifyGDataAuthorization(req, resp, ServletConsts.DOCS_SCOPE);
-          params.put(ServletConsts.DOC_AUTH, docSessionToken);
-        } catch (ODKGDataAuthenticationError e) {
-          return; // verifyGDataAuthroization function formats response
-        } catch (ODKGDataServiceNotAuthenticated e) {
-          // do nothing already set to null
-        }
-      }
-      if (tokenType.equals(TokenType.SPREAD)) {
-        try {
-          spreadSessionToken = verifyGDataAuthorization(req, resp, ServletConsts.SPREADSHEET_SCOPE);
-          params.put(ServletConsts.SPREAD_AUTH, spreadSessionToken);
-        } catch (ODKGDataAuthenticationError e) {
-          return; // verifyGDataAuthroization function formats response
-        } catch (ODKGDataServiceNotAuthenticated e) {
-          // do nothing already set to null
-        }
-      }
-
-      // still need to obtain more authorizations
-      if (docSessionToken == null || spreadSessionToken == null) {
-        beginBasicHtmlResponse(TITLE_INFO, resp, req, true); // header info
-        if (docSessionToken == null) {
-          params.put(TOKEN_TYPE, TokenType.DOC.toString());
-          String authButton =
-              generateAuthButton(ServletConsts.DOCS_SCOPE,
-                  ServletConsts.AUTHORIZE_SPREADSHEET_CREATION, params, req, resp);
-          resp.getWriter().print(authButton);
-        } else {
-          resp.getWriter().print("Completed Doc Authorization <br>");
-        }
-
-        if (spreadSessionToken == null) {
-          params.put(TOKEN_TYPE, TokenType.SPREAD.toString());
-          String authButton =
-              generateAuthButton(ServletConsts.SPREADSHEET_SCOPE,
-                  ServletConsts.AUTHORIZE_DATA_TRANSFER_BUTTON_TXT, params, req, resp);
-          resp.getWriter().print(authButton);
-        } else {
-          resp.getWriter().print("Completed Spreadsheet Authorization <br>");
-        }
-
-        finishBasicHtmlResponse(resp);
+    // 2nd step: we are receiving the callback from Google, so we need to
+    // retrieve the OAuth token
+    if (callback) {
+      try {
+        OAuthToken oauthToken = verifyGDataAuthorization(req, resp);
+        sessionToken = oauthToken.getToken();
+        sessionTokenSecret = oauthToken.getTokenSecret();
+        params.put(ServletConsts.OAUTH_TOKEN, sessionToken);
+        params.put(ServletConsts.OAUTH_TOKEN_SECRET, sessionTokenSecret);
+        params.remove(CALLBACK);
+      } catch (IOException e) {
         return;
       }
+    }
 
+    // 1st step: generate the auth button that will send the oauth request to
+    // Google and allow the user to grant us access
+    if (sessionToken == null || sessionToken.isEmpty()) {
+      beginBasicHtmlResponse(TITLE_INFO, resp, req, true); // header info
+      params.put(CALLBACK, Boolean.toString(true));
+      String authButton = generateAuthButton(ServletConsts.AUTHORIZE_SPREADSHEET_CREATION, params,
+          req, resp, ServletConsts.DOCS_SCOPE, ServletConsts.DOCS_SCOPE);
+      resp.getWriter().print(authButton);
+      finishBasicHtmlResponse(resp);
+      return;
+    } else {
+      resp.getWriter().write(ServletConsts.COMPLETED_AUTH);
+    }
 
+    // setup auth token
+    OAuthToken authToken = new OAuthToken(sessionToken, sessionTokenSecret);
 
-      // setup service
-      DocsService service =
-          new DocsService(this.getServletContext().getInitParameter("application_name"));
-      service.setAuthSubToken(docSessionToken, null);
+    // setup service
+    DocsService service = new DocsService(this.getServletContext().getInitParameter(
+        "application_name"));
+    try {
+      GoogleOAuthParameters oauthParameters = new GoogleOAuthParameters();
+      oauthParameters.setOAuthConsumerKey(ServletConsts.OAUTH_CONSUMER_KEY);
+      oauthParameters.setOAuthConsumerSecret(ServletConsts.OAUTH_CONSUMER_SECRET);
+      oauthParameters.setOAuthToken(authToken.getToken());
+      oauthParameters.setOAuthTokenSecret(authToken.getTokenSecret());
+      service.setOAuthCredentials(oauthParameters, new OAuthHmacSha1Signer());
+    } catch (OAuthException e) {
+      // TODO: handle OAuth failure
+      e.printStackTrace();
+    }
 
-      // create spreadsheet
-      DocumentListEntry createdEntry = new SpreadsheetEntry();
-      createdEntry.setTitle(new PlainTextConstruct(spreadsheetName));
+    // create spreadsheet
+    DocumentListEntry createdEntry = new SpreadsheetEntry();
+    createdEntry.setTitle(new PlainTextConstruct(spreadsheetName));
 
-      DocumentListEntry updatedEntry =
-          service.insert(new URL(ServletConsts.DOC_FEED), createdEntry);
+    DocumentListEntry updatedEntry;
+    try {
+      updatedEntry = service.insert(new URL(ServletConsts.DOC_FEED), createdEntry);
 
       // get key
       String docKey = updatedEntry.getKey();
-      String sheetKey =
-          docKey.substring(docKey.lastIndexOf(ServletConsts.DOCS_PRE_KEY)
-              + ServletConsts.DOCS_PRE_KEY.length());
+      String sheetKey = docKey.substring(docKey.lastIndexOf(ServletConsts.DOCS_PRE_KEY)
+          + ServletConsts.DOCS_PRE_KEY.length());
 
       // get form
       EntityManager em = EMFactory.get().createEntityManager();
@@ -189,10 +172,9 @@ public class SpreadsheetServlet extends ServletUtilBase {
         odkIdNotFoundError(resp);
         return;
       }
-      
+
       // create spreadsheet
-      GoogleSpreadsheet spreadsheet = new GoogleSpreadsheet(spreadsheetName, sheetKey);
-      spreadsheet.setAuthToken(spreadSessionToken);
+      GoogleSpreadsheetOAuth spreadsheet = new GoogleSpreadsheetOAuth(spreadsheetName, sheetKey);
 
       form.addGoogleSpreadsheet(spreadsheet);
       em.close();
@@ -211,28 +193,23 @@ public class SpreadsheetServlet extends ServletUtilBase {
         System.out.println("PROBLEM WITH TASK");
         e.printStackTrace();
       }
-
-      // remove docs permission no longer needed
-      try {
-        AuthSubUtil.revokeToken(docSessionToken, null);
-      } catch (GeneralSecurityException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-      }
-    
-    } catch (AuthenticationException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
     } catch (ServiceException e) {
-      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+
+    // remove docs permission no longer needed
+    try {
+      GoogleOAuthParameters oauthParameters = new GoogleOAuthParameters();
+      oauthParameters.setOAuthConsumerKey(ServletConsts.OAUTH_CONSUMER_KEY);
+      oauthParameters.setOAuthConsumerSecret(ServletConsts.OAUTH_CONSUMER_SECRET);
+      oauthParameters.setOAuthToken(authToken.getToken());
+      oauthParameters.setOAuthTokenSecret(authToken.getTokenSecret());
+      GoogleOAuthHelper oauthHelper = new GoogleOAuthHelper(new OAuthHmacSha1Signer());
+      oauthHelper.revokeToken(oauthParameters);
+    } catch (OAuthException e) {
       e.printStackTrace();
     }
 
     resp.sendRedirect(ServletConsts.WEB_ROOT);
   }
-
-  private enum TokenType {
-    NONE, DOC, SPREAD;
-  }
-
 }

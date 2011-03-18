@@ -82,4 +82,6 @@ public class ErrorConsts {
    * Error message if OAuth authentication failed.
    */
   public static final String OAUTH_ERROR = "OAuth authentication failed.";
+  public static final String OAUTH_SECURITY_ERROR_WHILE_RETRIEVING_SESSION_TOKEN = "Security error while retrieving session token.";
+  public static final String OAUTH_SERVER_REJECTED_ONE_TIME_USE_TOKEN = "Server rejected one time use token.";
 }

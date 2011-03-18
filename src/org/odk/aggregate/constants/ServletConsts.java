@@ -176,6 +176,13 @@ public class ServletConsts {
   
   public static final String AUTHENTICATION_OAUTH = "oauth";
 
+  public static final String OAUTH_CONSUMER_KEY = "anonymous";
+  
+  public static final String OAUTH_CONSUMER_SECRET = "anonymous";
+  
+  public static final String OAUTH_TOKEN_PARAMETER = "oauth_token";
+  
+  public static final String OAUTH_TOKEN_SECRET_PARAMETER = "oauth_token_secret";
 
   public static final int MAX_ENTITY_PER_PAGE = 20;
 
@@ -235,9 +242,18 @@ public class ServletConsts {
 
 
   public static final String DOCS_PRE_KEY = "spreadsheet%3A";
+  
+  /**
+   * The name of the property that specifies the session key for the doc and
+   * spreadsheets services
+   */
+  public static final String OAUTH_TOKEN = "oauthToken";
+  public static final String OAUTH_TOKEN_SECRET = "oauthTokenSecret";
 
 
   public static final String AUTHORIZE_SPREADSHEET_CREATION = "Authorize Doc Service for Spreadsheet Creation";
+  
+  public static final String COMPLETED_AUTH = "Completed Authorization <br>";
 
 
   public static final String GOOGLE_DOC_EXPLANATION = "Create Google Doc Spreadsheet for Form: ";
@@ -259,7 +275,8 @@ public class ServletConsts {
 
   
   public static final String PROCESS_TYPE = "processType";
-
+  
+  public static final String HTTP = "http://";
   
   public static final String PROCESS_NUM_RECORDS = "numRecords";
   

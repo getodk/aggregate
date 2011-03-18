@@ -33,6 +33,9 @@ import org.odk.aggregate.form.remoteserver.GoogleSpreadsheetOAuth;
 import org.odk.aggregate.report.FormProperties;
 import org.odk.aggregate.submission.Submission;
 
+import com.google.gdata.client.authn.oauth.GoogleOAuthParameters;
+import com.google.gdata.client.authn.oauth.OAuthException;
+import com.google.gdata.client.authn.oauth.OAuthHmacSha1Signer;
 import com.google.gdata.client.batch.BatchInterruptedException;
 import com.google.gdata.client.spreadsheet.CellQuery;
 import com.google.gdata.client.spreadsheet.SpreadsheetService;
@@ -125,7 +128,17 @@ public class SubmissionSpreadsheetTable extends SubmissionCsvTable {
     ResultTable result = generateSingleEntryResultTable(submission);
 
      SpreadsheetService service = new SpreadsheetService(applicationName);
-     service.setAuthSubToken(spreadsheet.getAuthToken(), null);
+     try {
+       GoogleOAuthParameters oauthParameters = new GoogleOAuthParameters();
+       oauthParameters.setOAuthConsumerKey(ServletConsts.OAUTH_CONSUMER_KEY);
+       oauthParameters.setOAuthConsumerSecret(ServletConsts.OAUTH_CONSUMER_SECRET);
+       oauthParameters.setOAuthToken(spreadsheet.getAuthToken().getToken());
+       oauthParameters.setOAuthTokenSecret(spreadsheet.getAuthToken().getTokenSecret());
+       service.setOAuthCredentials(oauthParameters, new OAuthHmacSha1Signer());
+     } catch (OAuthException e) {
+       // TODO: handle OAuth failure
+       e.printStackTrace();
+     }
 
      WorksheetEntry worksheet;
      try {
