@@ -16,6 +16,7 @@
 
 package org.odk.aggregate.constants;
 
+
 /**
  * Constant values used in ODK aggregate to aid with servlet management 
  *  
@@ -282,6 +283,10 @@ public class ServletConsts {
   
   public static final String FUSION_SCOPE = "http://tables.googlelabs.com/api/query";
   
+  public static final String FUSTABLE_ENCODE = HtmlConsts.UTF8_ENCODE;
+  
   public static final String AUTHORIZE_FUSION_CREATION = "Authorize Fusion Table Creation from Google Account";
+  
+  public static final String BEGIN_SQL = "sql=";
   
 }

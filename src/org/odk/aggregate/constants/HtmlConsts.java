@@ -84,6 +84,10 @@ public class HtmlConsts {
   public static final String CHECKBOX_HEADER = "Select";
   static final String INPUT_TYPE_CHECKBOX = "checkbox";
   static final String CHECKED = "checked";
-  public static final String POST = "POST";
   
+  public static final String POST = "POST";
+  public static final String BEGIN_PARAM = "?";
+  
+  public static final String UTF8_ENCODE = "UTF-8";
+
 }

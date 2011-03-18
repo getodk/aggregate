@@ -17,7 +17,6 @@ import org.odk.aggregate.constants.ServletConsts;
 import org.odk.aggregate.exception.ODKFormNotFoundException;
 import org.odk.aggregate.exception.ODKIncompleteSubmissionData;
 import org.odk.aggregate.form.Form;
-import org.odk.aggregate.form.remoteserver.FusionTable;
 import org.odk.aggregate.form.remoteserver.FusionTableOAuth;
 import org.odk.aggregate.form.remoteserver.OAuthToken;
 import org.odk.aggregate.report.FormProperties;
@@ -138,7 +137,7 @@ public class FusionTableServlet extends ServletUtilBase {
       // get fusion table service and create table
       FusionTableOAuth fusion = null;
       try {
-         String requestResult = FusionTable.executeInsert(service, createQuery);
+         String requestResult = FusionTableOAuth.executeInsert(service, createQuery, authToken);
          int index = requestResult.lastIndexOf(CREATE_FUSION_RESPONSE_HEADER);
          if(index > 0) {
             String tableid = requestResult.substring(index + CREATE_FUSION_RESPONSE_HEADER.length());
