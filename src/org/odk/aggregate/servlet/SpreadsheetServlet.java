@@ -36,7 +36,6 @@ import org.odk.aggregate.form.remoteserver.OAuthToken;
 import com.google.appengine.api.taskqueue.Queue;
 import com.google.appengine.api.taskqueue.QueueFactory;
 import com.google.appengine.api.taskqueue.TaskOptions;
-import com.google.gdata.client.authn.oauth.GoogleOAuthHelper;
 import com.google.gdata.client.authn.oauth.GoogleOAuthParameters;
 import com.google.gdata.client.authn.oauth.OAuthException;
 import com.google.gdata.client.authn.oauth.OAuthHmacSha1Signer;
@@ -176,6 +175,7 @@ public class SpreadsheetServlet extends ServletUtilBase {
       // create spreadsheet
       GoogleSpreadsheetOAuth spreadsheet = new GoogleSpreadsheetOAuth(spreadsheetName, sheetKey);
 
+      spreadsheet.setAuthToken(authToken);
       form.addGoogleSpreadsheet(spreadsheet);
       em.close();
 
@@ -194,19 +194,6 @@ public class SpreadsheetServlet extends ServletUtilBase {
         e.printStackTrace();
       }
     } catch (ServiceException e) {
-      e.printStackTrace();
-    }
-
-    // remove docs permission no longer needed
-    try {
-      GoogleOAuthParameters oauthParameters = new GoogleOAuthParameters();
-      oauthParameters.setOAuthConsumerKey(ServletConsts.OAUTH_CONSUMER_KEY);
-      oauthParameters.setOAuthConsumerSecret(ServletConsts.OAUTH_CONSUMER_SECRET);
-      oauthParameters.setOAuthToken(authToken.getToken());
-      oauthParameters.setOAuthTokenSecret(authToken.getTokenSecret());
-      GoogleOAuthHelper oauthHelper = new GoogleOAuthHelper(new OAuthHmacSha1Signer());
-      oauthHelper.revokeToken(oauthParameters);
-    } catch (OAuthException e) {
       e.printStackTrace();
     }
 
