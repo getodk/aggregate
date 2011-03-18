@@ -13,6 +13,7 @@ import javax.persistence.EntityManager;
 import org.odk.aggregate.constants.BasicConsts;
 import org.odk.aggregate.constants.Compatibility;
 import org.odk.aggregate.constants.HtmlUtil;
+import org.odk.aggregate.constants.ServletConsts;
 import org.odk.aggregate.constants.TableConsts;
 import org.odk.aggregate.exception.ODKIncompleteSubmissionData;
 import org.odk.aggregate.form.Form;
@@ -27,6 +28,9 @@ import com.google.appengine.api.datastore.Key;
 import com.google.gdata.client.GoogleService;
 import com.google.gdata.client.Service.GDataRequest;
 import com.google.gdata.client.Service.GDataRequest.RequestType;
+import com.google.gdata.client.authn.oauth.GoogleOAuthParameters;
+import com.google.gdata.client.authn.oauth.OAuthException;
+import com.google.gdata.client.authn.oauth.OAuthHmacSha1Signer;
 import com.google.gdata.util.AuthenticationException;
 import com.google.gdata.util.ContentType;
 import com.google.gdata.util.ServiceException;
@@ -84,7 +88,7 @@ public class SubmissionFusionTable extends SubmissionTable {
             + FormMultipleValueServlet.ADDR, properties);
    }
 
-   public void uploadSubmissionDataToSpreadsheet(GoogleService service, FusionTable fusion)
+   public void uploadSubmissionDataToSpreadsheet(GoogleService service, FusionTableOAuth fusion)
          throws ODKIncompleteSubmissionData, IOException, ServiceException {
       ResultTable results = generateResultTable(TableConsts.EPOCH, false);
       // TODO: migrate to batch uploads
@@ -121,7 +125,17 @@ public class SubmissionFusionTable extends SubmissionTable {
      
      try {
         GoogleService service = new GoogleService("fusiontables", "fusiontables.FusionTables");
-        service.setAuthSubToken(fusion.getAuthToken());
+        try {
+          GoogleOAuthParameters oauthParameters = new GoogleOAuthParameters();
+          oauthParameters.setOAuthConsumerKey(ServletConsts.OAUTH_CONSUMER_KEY);
+          oauthParameters.setOAuthConsumerSecret(ServletConsts.OAUTH_CONSUMER_SECRET);
+          oauthParameters.setOAuthToken(fusion.getAuthToken().getToken());
+          oauthParameters.setOAuthTokenSecret(fusion.getAuthToken().getTokenSecret());
+          service.setOAuthCredentials(oauthParameters, new OAuthHmacSha1Signer());
+        } catch (OAuthException e) {
+          // TODO: handle OAuth failure
+          e.printStackTrace();
+        }
         insertNewData(service, fusion.getTableName(), result.getHeader(), result.getRows().get(0));
      } catch (AuthenticationException e) {
         // TODO Auto-generated catch block

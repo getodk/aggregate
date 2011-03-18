@@ -49,18 +49,25 @@ public class FusionTableOAuth implements RemoteServer {
     */
    @Enumerated
    private String authToken;
+   
+   /**
+    * Authorization Secret for fusion table
+    */
+   @Enumerated
+   private String tokenSecret;
 
-   public FusionTableOAuth(String table, String authToken) {
+   public FusionTableOAuth(String table, OAuthToken token) {
       this.tableName = table;
-      this.authToken = authToken;
+      this.authToken = token.getToken();
+      this.tokenSecret = token.getTokenSecret();
    }
 
    public String getTableName() {
       return tableName;
    }
 
-   public String getAuthToken() {
-      return authToken;
+   public OAuthToken getAuthToken() {
+      return new OAuthToken(this.authToken, this.tokenSecret);
    }
 
    public void sendSubmissionToRemoteServer(Form xform, String serverName, EntityManager em,
@@ -82,7 +89,8 @@ public class FusionTableOAuth implements RemoteServer {
       FusionTableOAuth other = (FusionTableOAuth) obj;
       return (key == null ? (other.key == null) : (key.equals(other.key)))
             && (tableName == null ? (other.tableName == null) : (tableName.equals(other.tableName)))
-            && (authToken == null ? (other.authToken == null) : (authToken.equals(other.authToken)));
+            && (authToken == null ? (other.authToken == null) : (authToken.equals(other.authToken)))
+            && (tokenSecret == null ? (other.tokenSecret == null) : (tokenSecret.equals(other.tokenSecret)));
    }
 
    /**

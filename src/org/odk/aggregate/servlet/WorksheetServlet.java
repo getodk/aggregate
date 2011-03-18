@@ -17,7 +17,6 @@
 package org.odk.aggregate.servlet;
 
 import java.io.IOException;
-import java.security.GeneralSecurityException;
 
 import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
@@ -29,10 +28,14 @@ import org.odk.aggregate.constants.ServletConsts;
 import org.odk.aggregate.exception.ODKFormNotFoundException;
 import org.odk.aggregate.exception.ODKIncompleteSubmissionData;
 import org.odk.aggregate.form.Form;
-import org.odk.aggregate.form.remoteserver.GoogleSpreadsheet;
+import org.odk.aggregate.form.remoteserver.GoogleSpreadsheetOAuth;
+import org.odk.aggregate.form.remoteserver.OAuthToken;
 import org.odk.aggregate.table.SubmissionSpreadsheetTable;
 
-import com.google.gdata.client.http.AuthSubUtil;
+import com.google.gdata.client.authn.oauth.GoogleOAuthHelper;
+import com.google.gdata.client.authn.oauth.GoogleOAuthParameters;
+import com.google.gdata.client.authn.oauth.OAuthException;
+import com.google.gdata.client.authn.oauth.OAuthHmacSha1Signer;
 import com.google.gdata.client.spreadsheet.SpreadsheetService;
 import com.google.gdata.data.spreadsheet.WorksheetEntry;
 import com.google.gdata.util.ServiceException;
@@ -89,11 +92,11 @@ public class WorksheetServlet extends ServletUtilBase {
           return;
         }
 
-        GoogleSpreadsheet spreadsheet = form.getGoogleSpreadsheetWithName(spreadsheetName);
+        GoogleSpreadsheetOAuth spreadsheet = form.getGoogleSpreadsheetWithName(spreadsheetName);
         if(spreadsheet == null) {
           return;
         }
-        String token = spreadsheet.getAuthToken();
+        OAuthToken authToken = spreadsheet.getAuthToken();
         
         // verify form has a spreadsheet element
         if (spreadsheet == null) {
@@ -103,7 +106,17 @@ public class WorksheetServlet extends ServletUtilBase {
 
         SpreadsheetService service = new SpreadsheetService(this
             .getServletContext().getInitParameter("application_name"));
-        service.setAuthSubToken(token, null);
+        try {
+          GoogleOAuthParameters oauthParameters = new GoogleOAuthParameters();
+          oauthParameters.setOAuthConsumerKey(ServletConsts.OAUTH_CONSUMER_KEY);
+          oauthParameters.setOAuthConsumerSecret(ServletConsts.OAUTH_CONSUMER_SECRET);
+          oauthParameters.setOAuthToken(authToken.getToken());
+          oauthParameters.setOAuthTokenSecret(authToken.getTokenSecret());
+          service.setOAuthCredentials(oauthParameters, new OAuthHmacSha1Signer());
+        } catch (OAuthException e) {
+          // TODO: handle OAuth failure
+          e.printStackTrace();
+        }
 
         // TODO: REMOVE after bug is fixed
         // http://code.google.com/p/gdata-java-client/issues/detail?id=103
@@ -146,9 +159,14 @@ public class WorksheetServlet extends ServletUtilBase {
 
           // remove spreadsheet permission as no longer needed
           try {
-            AuthSubUtil.revokeToken(token, null);
-          } catch (GeneralSecurityException e) {
-            // TODO Auto-generated catch block
+            GoogleOAuthParameters oauthParameters = new GoogleOAuthParameters();
+            oauthParameters.setOAuthConsumerKey(ServletConsts.OAUTH_CONSUMER_KEY);
+            oauthParameters.setOAuthConsumerSecret(ServletConsts.OAUTH_CONSUMER_SECRET);
+            oauthParameters.setOAuthToken(authToken.getToken());
+            oauthParameters.setOAuthTokenSecret(authToken.getTokenSecret());
+            GoogleOAuthHelper oauthHelper = new GoogleOAuthHelper(new OAuthHmacSha1Signer());
+            oauthHelper.revokeToken(oauthParameters);
+          } catch (OAuthException e) {
             e.printStackTrace();
           }
 

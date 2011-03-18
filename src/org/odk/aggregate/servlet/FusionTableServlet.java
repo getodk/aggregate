@@ -1,7 +1,6 @@
 package org.odk.aggregate.servlet;
 
 import java.io.IOException;
-import java.security.GeneralSecurityException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -16,18 +15,20 @@ import org.odk.aggregate.constants.Compatibility;
 import org.odk.aggregate.constants.ExternalServiceOption;
 import org.odk.aggregate.constants.ServletConsts;
 import org.odk.aggregate.exception.ODKFormNotFoundException;
-import org.odk.aggregate.exception.ODKGDataAuthenticationError;
-import org.odk.aggregate.exception.ODKGDataServiceNotAuthenticated;
 import org.odk.aggregate.exception.ODKIncompleteSubmissionData;
 import org.odk.aggregate.form.Form;
 import org.odk.aggregate.form.remoteserver.FusionTable;
+import org.odk.aggregate.form.remoteserver.FusionTableOAuth;
+import org.odk.aggregate.form.remoteserver.OAuthToken;
 import org.odk.aggregate.report.FormProperties;
 import org.odk.aggregate.submission.SubmissionFieldType;
 import org.odk.aggregate.table.SubmissionFusionTable;
 
 import com.google.gdata.client.GoogleService;
-import com.google.gdata.client.http.AuthSubUtil;
-import com.google.gdata.util.AuthenticationException;
+import com.google.gdata.client.authn.oauth.GoogleOAuthHelper;
+import com.google.gdata.client.authn.oauth.GoogleOAuthParameters;
+import com.google.gdata.client.authn.oauth.OAuthException;
+import com.google.gdata.client.authn.oauth.OAuthHmacSha1Signer;
 import com.google.gdata.util.ServiceException;
 
 public class FusionTableServlet extends ServletUtilBase {
@@ -70,28 +71,40 @@ public class FusionTableServlet extends ServletUtilBase {
       params.put(ServletConsts.ODK_ID, odkIdParam);
       params.put(ServletConsts.EXTERNAL_SERVICE_TYPE, esTypeString);
 
-      String authToken = null;
+      OAuthToken authToken = null;
 
-      try {
-         authToken = verifyGDataAuthorization(req, resp, ServletConsts.FUSION_SCOPE);
-      } catch (ODKGDataAuthenticationError e) {
-         return; // verifyGDataAuthroization function formats response
-      } catch (ODKGDataServiceNotAuthenticated e) {
-         // do nothing already set to null
+      try
+      {
+        authToken = verifyGDataAuthorization(req, resp);
+      }
+      catch (IOException e)
+      {
+        e.printStackTrace();
+        errorRetreivingData(resp);
       }
 
       // need to obtain authorization to fusion table
       if (authToken == null) {
          beginBasicHtmlResponse(TITLE_INFO, resp, req, true); // header info
-         String authButton = generateAuthButton(ServletConsts.FUSION_SCOPE,
-               ServletConsts.AUTHORIZE_FUSION_CREATION, params, req, resp);
+         String authButton = generateAuthButton(ServletConsts.AUTHORIZE_FUSION_CREATION,
+             params, req, resp, ServletConsts.FUSION_SCOPE);
          resp.getWriter().print(authButton);
          finishBasicHtmlResponse(resp);
          return;
       }
 
       GoogleService service = new GoogleService("fusiontables", "fusiontables.FusionTables");
-      service.setAuthSubToken(authToken);
+      try {
+        GoogleOAuthParameters oauthParameters = new GoogleOAuthParameters();
+        oauthParameters.setOAuthConsumerKey(ServletConsts.OAUTH_CONSUMER_KEY);
+        oauthParameters.setOAuthConsumerSecret(ServletConsts.OAUTH_CONSUMER_SECRET);
+        oauthParameters.setOAuthToken(authToken.getToken());
+        oauthParameters.setOAuthTokenSecret(authToken.getTokenSecret());
+        service.setOAuthCredentials(oauthParameters, new OAuthHmacSha1Signer());
+      } catch (OAuthException e) {
+        // TODO: handle OAuth failure
+        e.printStackTrace();
+      }
 
       // get form
       EntityManager em = EMFactory.get().createEntityManager();
@@ -103,6 +116,8 @@ public class FusionTableServlet extends ServletUtilBase {
         odkIdNotFoundError(resp);
         return;
       }
+
+      // create query to make table
       
       FormProperties formProp = new FormProperties(form, em, false);
       Map<String, SubmissionFieldType> types = formProp.getHeaderTypes();
@@ -120,13 +135,14 @@ public class FusionTableServlet extends ServletUtilBase {
 
       createQuery += ")";
       
-      FusionTable fusion = null;
+      // get fusion table service and create table
+      FusionTableOAuth fusion = null;
       try {
          String requestResult = FusionTable.executeInsert(service, createQuery);
          int index = requestResult.lastIndexOf(CREATE_FUSION_RESPONSE_HEADER);
          if(index > 0) {
             String tableid = requestResult.substring(index + CREATE_FUSION_RESPONSE_HEADER.length());
-            fusion = new FusionTable(tableid.trim(), authToken);
+            fusion = new FusionTableOAuth(tableid.trim(), authToken);
          } else {
             throw new IOException("ERROR CREATING FUSION TABLE - DID NOT GET A TABLE NUMBER");
          }
@@ -134,6 +150,7 @@ public class FusionTableServlet extends ServletUtilBase {
          throw new IOException(e);
       }
 
+      // upload submissions
       ExternalServiceOption esType = ExternalServiceOption.valueOf(esTypeString);
 
       if (!esType.equals(ExternalServiceOption.UPLOAD_ONLY)) {
@@ -153,16 +170,17 @@ public class FusionTableServlet extends ServletUtilBase {
       }
       if (esType.equals(ExternalServiceOption.UPLOAD_ONLY)) {
          // remove fusion table permission as no longer needed
-         try {
-            AuthSubUtil.revokeToken(authToken, null);
-         } catch (GeneralSecurityException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-         } catch (AuthenticationException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-         }
-
+        try {
+          GoogleOAuthParameters oauthParameters = new GoogleOAuthParameters();
+          oauthParameters.setOAuthConsumerKey(ServletConsts.OAUTH_CONSUMER_KEY);
+          oauthParameters.setOAuthConsumerSecret(ServletConsts.OAUTH_CONSUMER_SECRET);
+          oauthParameters.setOAuthToken(authToken.getToken());
+          oauthParameters.setOAuthTokenSecret(authToken.getTokenSecret());
+          GoogleOAuthHelper oauthHelper = new GoogleOAuthHelper(new OAuthHmacSha1Signer());
+          oauthHelper.revokeToken(oauthParameters);
+        } catch (OAuthException e) {
+          e.printStackTrace();
+        }
       }
       
       em.close();
