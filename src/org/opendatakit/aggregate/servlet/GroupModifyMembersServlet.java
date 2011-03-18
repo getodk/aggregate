@@ -18,7 +18,6 @@ package org.opendatakit.aggregate.servlet;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -34,18 +33,14 @@ import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.ErrorConsts;
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.common.constants.HtmlConsts;
-import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.Datastore;
-import org.opendatakit.common.persistence.EntityKey;
 import org.opendatakit.common.persistence.Query;
-import org.opendatakit.common.persistence.Query.FilterOperation;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.security.SecurityUtils;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.security.spring.GrantedAuthorityNames;
 import org.opendatakit.common.security.spring.RegisteredUsersTable;
 import org.opendatakit.common.security.spring.UserGrantedAuthority;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.GrantedAuthorityImpl;
 
 /**
@@ -185,16 +180,13 @@ public class GroupModifyMembersServlet extends ServletUtilBase {
 
 		CallingContext cc = ContextFactory.getCallingContext(this, req);
 
-		Datastore ds = cc.getDatastore();
-		User user = cc.getCurrentUser();
-
 		// get parameter
 		String[] usernameArray = req.getParameterValues(USERNAME);
-		TreeSet<String> desiredMembers = new TreeSet<String>();
+		TreeSet<String> allDesiredMembers = new TreeSet<String>();
 		if ( usernameArray != null ) {
-			desiredMembers.addAll(Arrays.asList(usernameArray));
+			allDesiredMembers.addAll(Arrays.asList(usernameArray));
 		}
-		if (desiredMembers.isEmpty()) {
+		if (allDesiredMembers.isEmpty()) {
 			errorMissingParam(resp);
 			return;
 		}
@@ -206,47 +198,13 @@ public class GroupModifyMembersServlet extends ServletUtilBase {
 		}
 
 		try {
-			UserGrantedAuthority relation = UserGrantedAuthority.assertRelation(ds, user);
-			
-			// get the members as currently defined for this group 
-			List<? extends CommonFieldsBase> membersList;
-			Query query = ds.createQuery(relation, user);
-			query.addFilter(relation.grantedAuthority, FilterOperation.EQUAL, groupname);
-			membersList = query.executeQuery(0);
-
-			// OK we have the desired and actual members lists for this groupname.
-			// find the set of members to remove...
-			List<EntityKey> deleted = new ArrayList<EntityKey>();
-			for ( CommonFieldsBase b : membersList ) {
-				UserGrantedAuthority t = (UserGrantedAuthority) b;
-				String uriUser = t.getUser();
-				if ( desiredMembers.contains(uriUser) ) {
-					desiredMembers.remove(uriUser);
-				} else {
-					deleted.add(new EntityKey(t, t.getUri()));
-				}
-			}
-			// we now have the list of desiredMembers to insert, and the list of 
-			// existing records to delete...
-			GrantedAuthority group = new GrantedAuthorityImpl(groupname);
-			List<UserGrantedAuthority> added = new ArrayList<UserGrantedAuthority>();
-			for ( String uriUser : desiredMembers ) {
-				UserGrantedAuthority t = ds.createEntityUsingRelation(relation, user);
-				t.setUser(uriUser);
-				t.setGrantedAuthority(group);
-				added.add(t);
-			}
-
-			// we now have the list of EntityKeys to delete, and the list of records to add -- do it.
-			ds.putEntities(added, user);
-			ds.deleteEntities(deleted, user);
+			UserGrantedAuthority.assertGrantedAuthoryMembers(new GrantedAuthorityImpl(groupname),
+															allDesiredMembers, cc);
 		} catch (ODKDatastoreException e) {
 			e.printStackTrace();
 			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, 
 					ErrorConsts.PERSISTENCE_LAYER_PROBLEM);
 			return;
-		} finally {
-			cc.getUserService().reloadPermissions();
 		}
 
 		Map<String,String> properties = new HashMap<String,String>();

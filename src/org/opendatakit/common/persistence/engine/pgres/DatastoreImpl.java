@@ -271,7 +271,7 @@ public class DatastoreImpl implements Datastore, InitializingBean {
 			break;
 		case LONG_STRING:
 			ol[idx] = entity.getStringField(f);
-			il[idx] = java.sql.Types.LONGNVARCHAR;
+			il[idx] = java.sql.Types.LONGVARCHAR;
 			break;
 
 		default:

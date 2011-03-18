@@ -101,8 +101,9 @@ public class UserManagePasswordsServlet extends ServletUtilBase {
 
 		PrintWriter out = resp.getWriter();
 		
-		out.write("<p>Logins from a device (e.g., ODK Collect) require a locally-maintained " +
-				"password.  Set or change that password for a set of users here.  The password is stored " +
+		out.write("<p>Logins from a device (e.g., ODK Collect) require a password that is " +
+				"held on this server and that is specific to this server (an <em>Aggregate password</em>). " +
+				"Set or change that password for a set of users here.  The password is stored " +
 				"as both a randomly-salted sha-1 hash and as a deterministically-salted md5 hash. " +
 				"The plaintext password is not retained. </p>");
 		out.write(HtmlConsts.LINE_BREAK);

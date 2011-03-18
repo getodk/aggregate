@@ -17,7 +17,7 @@ import org.opendatakit.common.security.User;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.GrantedAuthorityImpl;
 
-public class GroupFormIdGrantedAuthority extends CommonFieldsBase {
+public final class GroupFormIdGrantedAuthority extends CommonFieldsBase {
 
 	private static final String TABLE_NAME = "_group_form_id_granted_authority";
 	
@@ -28,27 +28,16 @@ public class GroupFormIdGrantedAuthority extends CommonFieldsBase {
 	private static final DataField GRANTED_AUTHORITY = new DataField(
 			"GRANTED_AUTHORITY", DataField.DataType.URI, false );
 	
-	public final DataField group;
-	public final DataField formId;
-	public final DataField grantedAuthority;
-	/*
-	 * Property Names for datastore
-	 * 
-	 * GROUP
-	 * FORM_ID
-	 * GRANTED_AUTHORITY
-	 */
-
 	/**
-	 * Construct a relation prototype.
+	 * Construct a relation prototype. Only called via {@link #assertRelation(Datastore, User)}
 	 * 
 	 * @param schemaName
 	 */
 	GroupFormIdGrantedAuthority(String schemaName) {
 		super(schemaName, TABLE_NAME);
-		fieldList.add(group = new DataField(GROUP));
-		fieldList.add(formId = new DataField(FORM_ID));
-		fieldList.add(grantedAuthority = new DataField(GRANTED_AUTHORITY));
+		fieldList.add(GROUP);
+		fieldList.add(FORM_ID);
+		fieldList.add(GRANTED_AUTHORITY);
 	}
 	
 	/**
@@ -59,9 +48,6 @@ public class GroupFormIdGrantedAuthority extends CommonFieldsBase {
 	 */
 	private GroupFormIdGrantedAuthority(GroupFormIdGrantedAuthority ref, User user) {
 		super(ref, user);
-		group = ref.group;
-		formId = ref.formId;
-		grantedAuthority = ref.grantedAuthority;
 	}
 
 	// Only called from within the persistence layer.
@@ -71,14 +57,14 @@ public class GroupFormIdGrantedAuthority extends CommonFieldsBase {
 	}
 
 	public final String getGroup() {
-		return this.getStringField(group);
+		return this.getStringField(GROUP);
 	}
 	
 	public final String getFormId() {
-		return this.getStringField(formId);
+		return this.getStringField(FORM_ID);
 	}
 	public final GrantedAuthority getGrantedAuthority() {
-		return new GrantedAuthorityImpl(this.getStringField(grantedAuthority));
+		return new GrantedAuthorityImpl(this.getStringField(GRANTED_AUTHORITY));
 	}
 
 	private static GroupFormIdGrantedAuthority reference = null;
@@ -108,7 +94,7 @@ public class GroupFormIdGrantedAuthority extends CommonFieldsBase {
 				for ( GrantedAuthority g : groups ) {
 					groupStrings.add(g.getAuthority());
 				}
-				q.addValueSetFilter(reference.group, groupStrings);
+				q.addValueSetFilter(GROUP, groupStrings);
 				List<? extends CommonFieldsBase> values = q.executeQuery(0);
 				for ( CommonFieldsBase b : values ) {
 					GroupFormIdGrantedAuthority g = (GroupFormIdGrantedAuthority) b;

@@ -26,6 +26,8 @@
 	<bean id="user_service" class="org.opendatakit.common.security.spring.UserServiceImpl">
 		<property name="datastore" ref="datastore" />
 		<property name="realm" ref="realm" />
+		<property name="superUserEmail" value="${security.server.superUser}" />
+		<property name="userServiceKey" value="${security.server.userServiceKey}" />
 	</bean>
 
 <!--	<bean id="user_service" class="org.opendatakit.common.security.gae.UserServiceImpl">-->

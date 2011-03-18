@@ -21,6 +21,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,17 +36,12 @@ import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.ErrorConsts;
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.common.constants.HtmlConsts;
-import org.opendatakit.common.persistence.CommonFieldsBase;
-import org.opendatakit.common.persistence.Datastore;
-import org.opendatakit.common.persistence.EntityKey;
-import org.opendatakit.common.persistence.Query;
-import org.opendatakit.common.persistence.Query.FilterOperation;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
-import org.opendatakit.common.security.SecurityBeanDefs;
-import org.opendatakit.common.security.User;
 import org.opendatakit.common.security.spring.GrantedAuthorityHierarchyTable;
 import org.opendatakit.common.security.spring.GrantedAuthorityNames;
-import org.opendatakit.common.security.spring.RoleHierarchyImpl;
+import org.opendatakit.common.security.spring.UserGrantedAuthority;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.GrantedAuthorityImpl;
 
 /**
  * Displays the inheritance of a group and the roles directly granted
@@ -95,19 +91,13 @@ public class GroupModifyServlet extends ServletUtilBase {
 			return;
 		}
 		
-		Datastore ds = cc.getDatastore();
-		User user = cc.getCurrentUser();
-		GrantedAuthorityHierarchyTable relation;
-		List<? extends CommonFieldsBase> groupsList;
-		List<?> uniqueGroupsList;
+		TreeSet<String> groups = new TreeSet<String>();
+		TreeSet<String> permissionsAssignableGroups = new TreeSet<String>();
+
 		try {
-			relation = GrantedAuthorityHierarchyTable.assertRelation(ds, user);
-			Query query = ds.createQuery(relation, user);
-			query.addFilter(relation.dominatingGrantedAuthority, FilterOperation.EQUAL, groupname);
-			groupsList = query.executeQuery(0);
-			
-			query = ds.createQuery(relation, user);
-			uniqueGroupsList = query.executeDistinctValueForDataField(relation.dominatingGrantedAuthority);
+			groups = GrantedAuthorityHierarchyTable.getSubordinateGrantedAuthorities(new GrantedAuthorityImpl(groupname), cc);
+			permissionsAssignableGroups = GrantedAuthorityHierarchyTable.getAllPermissionsAssignableGrantedAuthorities(
+					cc.getDatastore(), cc.getCurrentUser());
 		} catch (ODKDatastoreException e) {
 			e.printStackTrace();
 			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, 
@@ -115,28 +105,13 @@ public class GroupModifyServlet extends ServletUtilBase {
 			return;
 		}
 
-		// construct the set of groups that this group directly inherits from
-		TreeSet<String> groups = new TreeSet<String>();
-		for ( CommonFieldsBase b : groupsList ) {
-			GrantedAuthorityHierarchyTable t = (GrantedAuthorityHierarchyTable) b;
-			groups.add(t.getSubordinateGrantedAuthority().getAuthority());
-		}
-		
 		// construct the sets of groups and roles that can be selected
-		TreeSet<String> uniqueGroups = new TreeSet<String>();
 		TreeSet<String> roles = new TreeSet<String>();
-
-		// pull groups from the defined groups list
-		for ( Object o : uniqueGroupsList ) {
-			String groupName = (String) o;
-			if ( !GrantedAuthorityNames.permissionsCanBeAssigned(groupName) ) continue;
-			uniqueGroups.add(groupName);
-		}
 		
 		// add the logged-in user's mailto domain in case it is different...
-		String mailtoAuthority = GrantedAuthorityNames.getMailtoGrantedAuthorityName(user.getUriUser());
+		String mailtoAuthority = GrantedAuthorityNames.getMailtoGrantedAuthorityName(cc.getCurrentUser().getUriUser());
 		if ( mailtoAuthority != null ) {
-			uniqueGroups.add(mailtoAuthority);
+			permissionsAssignableGroups.add(mailtoAuthority);
 		}
 		
 		// add the well-known granted authority names.
@@ -144,12 +119,12 @@ public class GroupModifyServlet extends ServletUtilBase {
 			if ( !GrantedAuthorityNames.permissionsCanBeAssigned(name.toString()) ) {
 				roles.add(name.toString());
 			} else {
-				uniqueGroups.add(name.toString());
+				permissionsAssignableGroups.add(name.toString());
 			}
 		}
 		
 		// make sure the group itself is not in the list of selectable groups...
-		uniqueGroups.remove(groupname);
+		permissionsAssignableGroups.remove(groupname);
 		
 		beginBasicHtmlResponse(TITLE_INFO + groupname, resp, true, cc); // header info
 
@@ -198,7 +173,7 @@ public class GroupModifyServlet extends ServletUtilBase {
 			out.print(HtmlUtil.wrapWithHtmlTags(HtmlConsts.TABLE_HEADER, header));
 		}
 
-		for ( String inheritablegroup : uniqueGroups ) {
+		for ( String inheritablegroup : permissionsAssignableGroups ) {
 			out.print(HtmlConsts.TABLE_ROW_OPEN);
 	        out.print(HtmlUtil.wrapWithHtmlTags(HtmlConsts.TABLE_DATA, 
 	        		HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_CHECKBOX, 
@@ -288,20 +263,14 @@ public class GroupModifyServlet extends ServletUtilBase {
 			throws ServletException, IOException {
 		CallingContext cc = ContextFactory.getCallingContext(this, req);
 
-		Datastore ds = cc.getDatastore();
-		User user = cc.getCurrentUser();
-
 		// get parameter
 		String[] usernameArray = req.getParameterValues(ROLENAME);
 		List<String> desiredGrants = new ArrayList<String>();
 		if ( usernameArray != null ) {
 			desiredGrants.addAll(Arrays.asList(usernameArray));
 		}
-		if (desiredGrants.isEmpty()) {
-			errorMissingParam(resp);
-			return;
-		}
 		
+		// NOTE: if the desiredGrants is empty, then delete the group.
 		String groupname = req.getParameter(GROUPNAME);
 		if (groupname == null || groupname.length() == 0) {
 			errorMissingParam(resp);
@@ -309,76 +278,21 @@ public class GroupModifyServlet extends ServletUtilBase {
 		}
 
 		try {
-			GrantedAuthorityHierarchyTable relation = GrantedAuthorityHierarchyTable.assertRelation(ds, user);
+			GrantedAuthority grant = new GrantedAuthorityImpl(groupname);
 			
-			TreeSet<String> groups = new TreeSet<String>();
-			TreeSet<String> roles = new TreeSet<String>();
-			for ( String grant : desiredGrants ) {
-				if ( !GrantedAuthorityNames.permissionsCanBeAssigned(grant) ) {
-					roles.add(grant);
-				} else {
-					groups.add(grant);
-				}
-			}
-
-			// get the hierarchy as currently defined for this group 
-			List<? extends CommonFieldsBase> groupsList;
-			relation = GrantedAuthorityHierarchyTable.assertRelation(ds, user);
-			Query query = ds.createQuery(relation, user);
-			query.addFilter(relation.dominatingGrantedAuthority, FilterOperation.EQUAL, groupname);
-			groupsList = query.executeQuery(0);
-
-			// OK we have the groups and roles to establish for this groupname.
-			// AND we have the groupsList of groups and roles already established for groupname.
-			List<EntityKey> deleted = new ArrayList<EntityKey>();
-			for ( CommonFieldsBase b : groupsList ) {
-				GrantedAuthorityHierarchyTable t = (GrantedAuthorityHierarchyTable) b;
-				String authority = t.getSubordinateGrantedAuthority().getAuthority();
-				if ( groups.contains(authority) ) {
-					groups.remove(authority);
-				} else if ( roles.contains(authority) ) {
-					roles.remove(authority);
-				} else {
-					deleted.add(new EntityKey(t, t.getUri()));
-				}
-			}
-			// we now have the list of groups and roles to insert, and the list of 
-			// existing records to delete...
-			List<GrantedAuthorityHierarchyTable> added = new ArrayList<GrantedAuthorityHierarchyTable>();
-			for ( String group : groups ) {
-				GrantedAuthorityHierarchyTable t = ds.createEntityUsingRelation(relation, user);
-				t.setDominatingGrantedAuthority(groupname);
-				t.setSubordinateGrantedAuthority(group);
-				added.add(t);
-			}
+			GrantedAuthorityHierarchyTable.assertGrantedAuthorityHierarchy( 
+												grant, desiredGrants, cc );
 			
-			for ( String role : roles ) {
-				GrantedAuthorityHierarchyTable t = ds.createEntityUsingRelation(relation, user);
-				t.setDominatingGrantedAuthority(groupname);
-				t.setSubordinateGrantedAuthority(role);
-				added.add(t);
+			if ( desiredGrants.isEmpty() ) {
+				// delete all users assigned to this group...
+				List<String> empty = Collections.emptyList();
+				UserGrantedAuthority.assertGrantedAuthoryMembers(grant, empty, cc);
 			}
-			
-			// we now have the list of EntityKeys to delete, and the list of records to add -- do it.
-			ds.putEntities(added, user);
-			ds.deleteEntities(deleted, user);
 		} catch (ODKDatastoreException e) {
 			e.printStackTrace();
 			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, 
 					ErrorConsts.PERSISTENCE_LAYER_PROBLEM);
 			return;
-		} finally {
-			// finally, since we mucked with the group hierarchies, refresh the 
-			// cache of those hierarchies.
-			RoleHierarchyImpl rh = (RoleHierarchyImpl) cc.getBean(SecurityBeanDefs.ROLE_HIERARCHY_MANAGER);
-			try {
-				rh.refreshReachableGrantedAuthorities();
-			} catch (ODKDatastoreException e) {
-				e.printStackTrace();
-				resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, 
-						ErrorConsts.PERSISTENCE_LAYER_PROBLEM);
-				return;
-			}
 		}
 
 		resp.sendRedirect(cc.getWebApplicationURL(GroupManagementServlet.ADDR));

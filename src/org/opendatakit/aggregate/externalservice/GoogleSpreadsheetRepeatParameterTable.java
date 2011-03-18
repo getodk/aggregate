@@ -37,13 +37,10 @@ import org.opendatakit.common.security.User;
  * @author mitchellsundt@gmail.com
  * 
  */
-public class GoogleSpreadsheetRepeatParameterTable extends CommonFieldsBase {
+public final class GoogleSpreadsheetRepeatParameterTable extends CommonFieldsBase {
 
 	  private static final String TABLE_NAME = "_google_spreadsheet_repeat";
-	  /*
-	   * Property Names for datastore
-	   */
-	  /****************************************************/
+
 	  private static final DataField URI_GOOGLE_SPREADSHEET = new DataField("URI_GOOGLE_SPREADSHEET",
 			  DataField.DataType.URI, false, PersistConsts.URI_STRING_LEN).setIndexable(IndexType.HASH);
 	  private static final DataField WORKSHEET_ID = new DataField("WORKSHEET_ID",
@@ -51,21 +48,17 @@ public class GoogleSpreadsheetRepeatParameterTable extends CommonFieldsBase {
 	  private static final DataField FORM_ELEMENT_KEY_PROPERTY = new DataField("FORM_ELEMENT_KEY",
 	      DataField.DataType.STRING, true, 4096L);
 
-	  public final DataField uriGoogleSpreadsheet;
-	  public final DataField worksheetId;
-	  public final DataField formElementKey;
-
 		/**
-		 * Construct a relation prototype.
+		 * Construct a relation prototype.  Only called via {@link #assertRelation(CallingContext)}
 		 * 
 		 * @param databaseSchema
 		 * @param tableName
 		 */
 	  GoogleSpreadsheetRepeatParameterTable(String schemaName) {
 	    super(schemaName, TABLE_NAME);
-	    fieldList.add(uriGoogleSpreadsheet = new DataField(URI_GOOGLE_SPREADSHEET));
-	    fieldList.add(worksheetId = new DataField(WORKSHEET_ID));
-	    fieldList.add(formElementKey = new DataField(FORM_ELEMENT_KEY_PROPERTY));
+	    fieldList.add(URI_GOOGLE_SPREADSHEET);
+	    fieldList.add(WORKSHEET_ID);
+	    fieldList.add(FORM_ELEMENT_KEY_PROPERTY);
 	  }
 
 	  /**
@@ -76,9 +69,6 @@ public class GoogleSpreadsheetRepeatParameterTable extends CommonFieldsBase {
 	   */
 	  private GoogleSpreadsheetRepeatParameterTable(GoogleSpreadsheetRepeatParameterTable ref, User user) {
 	    super(ref, user);
-	    uriGoogleSpreadsheet = ref.uriGoogleSpreadsheet;
-	    worksheetId = ref.worksheetId;
-	    formElementKey = ref.formElementKey;
 	  }
 
 	  // Only called from within the persistence layer.
@@ -88,33 +78,33 @@ public class GoogleSpreadsheetRepeatParameterTable extends CommonFieldsBase {
 	  }
 	  
 	  public String getUriGoogleSpreadsheet() {
-		  return getStringField(uriGoogleSpreadsheet);
+		  return getStringField(URI_GOOGLE_SPREADSHEET);
 	  }
 
 	  public void setUriGoogleSpreadsheet(String value) {
-	    if (!setStringField(uriGoogleSpreadsheet, value)) {
+	    if (!setStringField(URI_GOOGLE_SPREADSHEET, value)) {
 	      throw new IllegalArgumentException("overflow uriGoogleSpreadsheet");
 	    }
 	  }
 
 	  public String getWorksheetId() {
-	    return getStringField(worksheetId);
+	    return getStringField(WORKSHEET_ID);
 	  }
 
 	  public void setWorksheetId(String value) {
-	    if (!setStringField(worksheetId, value)) {
+	    if (!setStringField(WORKSHEET_ID, value)) {
 	      throw new IllegalArgumentException("overflow worksheetId");
 	    }
 	  }
 
 	  public FormElementKey getFormElementKey() {
-		String key = getStringField(formElementKey);
+		String key = getStringField(FORM_ELEMENT_KEY_PROPERTY);
 		if ( key == null ) return null;
 		return new FormElementKey(key);
 	  }
 
 	  public void setFormElementKey(FormElementKey value) {
-	    if (!setStringField(formElementKey, value.toString())) {
+	    if (!setStringField(FORM_ELEMENT_KEY_PROPERTY, value.toString())) {
 	      throw new IllegalArgumentException("overflow formElementKey");
 	    }
 	  }
@@ -143,7 +133,7 @@ public class GoogleSpreadsheetRepeatParameterTable extends CommonFieldsBase {
 		  Datastore ds = cc.getDatastore();
 		  User user = cc.getCurrentUser();
 		  Query query = ds.createQuery(frpt, user);
-		  query.addFilter(frpt.uriGoogleSpreadsheet, FilterOperation.EQUAL, googleSpreadsheetParameterTable.getKey());
+		  query.addFilter(URI_GOOGLE_SPREADSHEET, FilterOperation.EQUAL, googleSpreadsheetParameterTable.getKey());
 
 		  List<? extends CommonFieldsBase> results = query.executeQuery(0);
 		  for ( CommonFieldsBase b : results ) {

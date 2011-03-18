@@ -31,16 +31,5 @@
         <property name="_ORDINAL_NUMBER" direction="asc"/>
     </datastore-index>
 
-    <!-- Used 11 times in query history -->
-    <datastore-index kind="opendatakit._form_info_xform_vbn" ancestor="false" source="manual">
-        <property name="_PARENT_AURI" direction="asc"/>
-        <property name="_CREATION_DATE" direction="asc"/>
-    </datastore-index>
-
-    <!-- Used 3 times in query history -->
-    <datastore-index kind="opendatakit._form_info_manifest_vbn" ancestor="false" source="manual">
-        <property name="_PARENT_AURI" direction="asc"/>
-        <property name="_CREATION_DATE" direction="asc"/>
-    </datastore-index>
 
 </datastore-indexes>
