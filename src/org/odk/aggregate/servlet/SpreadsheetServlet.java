@@ -33,9 +33,9 @@ import org.odk.aggregate.form.Form;
 import org.odk.aggregate.form.remoteserver.GoogleSpreadsheetOAuth;
 import org.odk.aggregate.form.remoteserver.OAuthToken;
 
-import com.google.appengine.api.labs.taskqueue.Queue;
-import com.google.appengine.api.labs.taskqueue.QueueFactory;
-import com.google.appengine.api.labs.taskqueue.TaskOptions;
+import com.google.appengine.api.taskqueue.Queue;
+import com.google.appengine.api.taskqueue.QueueFactory;
+import com.google.appengine.api.taskqueue.TaskOptions;
 import com.google.gdata.client.authn.oauth.GoogleOAuthHelper;
 import com.google.gdata.client.authn.oauth.GoogleOAuthParameters;
 import com.google.gdata.client.authn.oauth.OAuthException;
@@ -179,7 +179,7 @@ public class SpreadsheetServlet extends ServletUtilBase {
       form.addGoogleSpreadsheet(spreadsheet);
       em.close();
 
-      TaskOptions task = TaskOptions.Builder.url("/" + WorksheetServlet.ADDR);
+      TaskOptions task = TaskOptions.Builder.withUrl("/" + WorksheetServlet.ADDR);
       task.method(TaskOptions.Method.GET);
       task.countdownMillis(DELAY);
       task.param(ServletConsts.SPREADSHEET_NAME_PARAM, spreadsheetName);

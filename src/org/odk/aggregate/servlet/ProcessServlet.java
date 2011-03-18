@@ -35,9 +35,9 @@ import org.odk.aggregate.process.ProcessType;
 
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
-import com.google.appengine.api.labs.taskqueue.Queue;
-import com.google.appengine.api.labs.taskqueue.QueueFactory;
-import com.google.appengine.api.labs.taskqueue.TaskOptions;
+import com.google.appengine.api.taskqueue.Queue;
+import com.google.appengine.api.taskqueue.QueueFactory;
+import com.google.appengine.api.taskqueue.TaskOptions;
 
 /**
  * Processes request from web based interface based on users button press
@@ -83,7 +83,7 @@ public class ProcessServlet extends ServletUtilBase {
             resp.sendRedirect(ServletConsts.WEB_ROOT);
          } else if (params.getButtonText().equals(ProcessType.DELETE_FORM.getButtonText())) {
             for (Key key : keys) {
-               TaskOptions task = TaskOptions.Builder.url("/" + FormDeleteTaskServlet.ADDR);
+               TaskOptions task = TaskOptions.Builder.withUrl("/" + FormDeleteTaskServlet.ADDR);
                task.method(TaskOptions.Method.GET);
                task.countdownMillis(1);
                task.param(ServletConsts.ODK_FORM_KEY, KeyFactory.keyToString(key));

@@ -52,7 +52,6 @@ public class WorksheetServlet extends ServletUtilBase {
    */
   public static final String ADDR = "worksheet";
 
- 
   /**
    * Handler for HTTP Get request to create xform upload page
    * 
@@ -61,7 +60,7 @@ public class WorksheetServlet extends ServletUtilBase {
    */
   @Override
   public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-    
+
     // get parameter
     String odkIdParam = getParameter(req, ServletConsts.ODK_ID);
     if (odkIdParam == null) {
@@ -80,100 +79,92 @@ public class WorksheetServlet extends ServletUtilBase {
       sendErrorNotEnoughParams(resp);
       return;
     }
-    
+
     try {
-        // get form
-        EntityManager em = EMFactory.get().createEntityManager();
-        Form form;
-        try {
-          form = Form.retrieveForm(em, odkIdParam);
-        } catch (ODKFormNotFoundException e) {
-          odkIdNotFoundError(resp);
+      // get form
+      EntityManager em = EMFactory.get().createEntityManager();
+      Form form;
+      try {
+        form = Form.retrieveForm(em, odkIdParam);
+      } catch (ODKFormNotFoundException e) {
+        odkIdNotFoundError(resp);
+        return;
+      }
+
+      GoogleSpreadsheetOAuth spreadsheet = form.getGoogleSpreadsheetWithName(spreadsheetName);
+      if (spreadsheet == null) {
+        errorRetreivingData(resp);
+        return;
+      }
+
+      OAuthToken authToken = spreadsheet.getAuthToken();
+      SpreadsheetService service = new SpreadsheetService(this.getServletContext()
+          .getInitParameter("application_name"));
+      try {
+        GoogleOAuthParameters oauthParameters = new GoogleOAuthParameters();
+        oauthParameters.setOAuthConsumerKey(ServletConsts.OAUTH_CONSUMER_KEY);
+        oauthParameters.setOAuthConsumerSecret(ServletConsts.OAUTH_CONSUMER_SECRET);
+        oauthParameters.setOAuthToken(authToken.getToken());
+        oauthParameters.setOAuthTokenSecret(authToken.getTokenSecret());
+        service.setOAuthCredentials(oauthParameters, new OAuthHmacSha1Signer());
+      } catch (OAuthException e) {
+        // TODO: handle OAuth failure
+        e.printStackTrace();
+      }
+
+      // TODO: REMOVE after bug is fixed
+      // http://code.google.com/p/gdata-java-client/issues/detail?id=103
+      service.setProtocolVersion(SpreadsheetService.Versions.V1);
+
+      ExternalServiceOption esType = ExternalServiceOption.valueOf(esTypeString);
+
+      try {
+        SubmissionSpreadsheetTable subResults = new SubmissionSpreadsheetTable(form,
+            req.getServerName(), em, this.getServletContext().getInitParameter("application_name"));
+
+        // TODO: make more robust (currently assuming nothing has touched the
+        // sheet)
+        // get worksheet
+        WorksheetEntry worksheet = subResults.getWorksheet(service,
+            spreadsheet.getSpreadsheetKey(), "Sheet 1");
+
+        // verify worksheet was found
+        if (worksheet == null) {
+          resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "COULD NOT FIND WORKSHEET");
           return;
+        }
+        subResults.generateWorksheet(service, worksheet);
+
+        if (!esType.equals(ExternalServiceOption.STREAM_ONLY)) {
+          subResults.uploadSubmissionDataToSpreadsheet(service, worksheet);
         }
 
-        GoogleSpreadsheetOAuth spreadsheet = form.getGoogleSpreadsheetWithName(spreadsheetName);
-        if(spreadsheet == null) {
-          return;
-        }
-        OAuthToken authToken = spreadsheet.getAuthToken();
-        
-        // verify form has a spreadsheet element
-        if (spreadsheet == null) {
-          errorRetreivingData(resp);
-          return;
-        }
+      } catch (ODKIncompleteSubmissionData e1) {
+        errorRetreivingData(resp);
+        return;
+      }
 
-        SpreadsheetService service = new SpreadsheetService(this
-            .getServletContext().getInitParameter("application_name"));
+      if (!esType.equals(ExternalServiceOption.UPLOAD_ONLY)) {
+        spreadsheet.updateReadyValue();
+      } else {
+        form.removeGoogleSpreadsheet(spreadsheet);
+
+        // remove spreadsheet permission as no longer needed
         try {
           GoogleOAuthParameters oauthParameters = new GoogleOAuthParameters();
           oauthParameters.setOAuthConsumerKey(ServletConsts.OAUTH_CONSUMER_KEY);
           oauthParameters.setOAuthConsumerSecret(ServletConsts.OAUTH_CONSUMER_SECRET);
           oauthParameters.setOAuthToken(authToken.getToken());
           oauthParameters.setOAuthTokenSecret(authToken.getTokenSecret());
-          service.setOAuthCredentials(oauthParameters, new OAuthHmacSha1Signer());
+          GoogleOAuthHelper oauthHelper = new GoogleOAuthHelper(new OAuthHmacSha1Signer());
+          oauthHelper.revokeToken(oauthParameters);
         } catch (OAuthException e) {
-          // TODO: handle OAuth failure
           e.printStackTrace();
         }
 
-        // TODO: REMOVE after bug is fixed
-        // http://code.google.com/p/gdata-java-client/issues/detail?id=103
-        service.setProtocolVersion(SpreadsheetService.Versions.V1);
+      }
 
-        ExternalServiceOption esType = ExternalServiceOption.valueOf(esTypeString);
-        
-        try {
-          SubmissionSpreadsheetTable subResults =
-              new SubmissionSpreadsheetTable(form, req.getServerName(), em, this
-                  .getServletContext().getInitParameter("application_name"));
-
-          // TODO: make more robust (currently assuming nothing has touched the
-          // sheet)
-          // get worksheet
-          WorksheetEntry worksheet =
-              subResults.getWorksheet(service, spreadsheet.getSpreadsheetKey(), "Sheet 1");
-
-          // verify worksheet was found
-          if (worksheet == null) {
-            resp
-                .sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "COULD NOT FIND WORKSHEET");
-            return;
-          }
-          subResults.generateWorksheet(service, worksheet);
-          
-          if (!esType.equals(ExternalServiceOption.STREAM_ONLY)) {
-            subResults.uploadSubmissionDataToSpreadsheet(service, worksheet);
-          }
-          
-        } catch (ODKIncompleteSubmissionData e1) {
-          errorRetreivingData(resp);
-          return;
-        }
-
-        if (!esType.equals(ExternalServiceOption.UPLOAD_ONLY)) {
-          spreadsheet.updateReadyValue();
-        } else {
-          form.removeGoogleSpreadsheet(spreadsheet);
-
-          // remove spreadsheet permission as no longer needed
-          try {
-            GoogleOAuthParameters oauthParameters = new GoogleOAuthParameters();
-            oauthParameters.setOAuthConsumerKey(ServletConsts.OAUTH_CONSUMER_KEY);
-            oauthParameters.setOAuthConsumerSecret(ServletConsts.OAUTH_CONSUMER_SECRET);
-            oauthParameters.setOAuthToken(authToken.getToken());
-            oauthParameters.setOAuthTokenSecret(authToken.getTokenSecret());
-            GoogleOAuthHelper oauthHelper = new GoogleOAuthHelper(new OAuthHmacSha1Signer());
-            oauthHelper.revokeToken(oauthParameters);
-          } catch (OAuthException e) {
-            e.printStackTrace();
-          }
-
-        }
- 
-        em.close();
-
+      em.close();
 
     } catch (ServiceException e) {
       // TODO Auto-generated catch block
