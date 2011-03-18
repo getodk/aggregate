@@ -27,6 +27,7 @@ import org.opendatakit.common.security.UserService;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.TransientDataAccessResourceException;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.GrantedAuthorityImpl;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -127,6 +128,11 @@ public class UserDetailsServiceImpl implements UserDetailsService, InitializingB
 				salt = UUID.randomUUID().toString();
 				break;
 			}
+			if ( password == null ) {
+				throw new AuthenticationCredentialsNotFoundException(
+						"User " + name + " does not have a password configured. You must close and re-open your browser to clear this error.");
+			}
+			
 			return new AggregateUser(uriUser, password, salt, mailtoDomain,
 					t.getIsEnabled(),
 					true, t.getIsCredentialNonExpired(),

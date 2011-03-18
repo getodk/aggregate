@@ -372,6 +372,15 @@
 	</servlet-mapping>
 
     <servlet>
+        <servlet-name>localLoginPage</servlet-name>
+        <servlet-class>org.opendatakit.aggregate.servlet.LocalLoginPageServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>localLoginPage</servlet-name>
+        <url-pattern>/local_login.html</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
         <servlet-name>wwwLandingPage</servlet-name>
         <servlet-class>org.opendatakit.aggregate.servlet.LandingPageServlet</servlet-class>
     </servlet>
