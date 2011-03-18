@@ -6,6 +6,8 @@
 
     <persistence-unit name="transactions-optional">
         <provider>org.datanucleus.store.appengine.jpa.DatastorePersistenceProvider</provider>
+        <class>org.odk.aggregate.form.remoteserver.GoogleSpreadsheetOAuth</class>
+        <class>org.odk.aggregate.form.remoteserver.FusionTableOAuth</class>
         <class>org.odk.aggregate.form.remoteserver.GoogleSpreadsheet</class>
         <class>org.odk.aggregate.form.remoteserver.RhizaInsight</class>
         <class>org.odk.aggregate.form.remoteserver.FusionTable</class>

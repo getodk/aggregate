@@ -37,7 +37,9 @@ import javax.persistence.Transient;
 
 import org.odk.aggregate.exception.ODKFormNotFoundException;
 import org.odk.aggregate.form.remoteserver.FusionTable;
+import org.odk.aggregate.form.remoteserver.FusionTableOAuth;
 import org.odk.aggregate.form.remoteserver.GoogleSpreadsheet;
+import org.odk.aggregate.form.remoteserver.GoogleSpreadsheetOAuth;
 import org.odk.aggregate.form.remoteserver.RemoteServer;
 import org.odk.aggregate.form.remoteserver.RhizaInsight;
 
@@ -140,7 +142,19 @@ public class Form {
 	 */
 	@OneToMany(cascade = CascadeType.ALL)
 	private List<FusionTable> fusionTableExternalRepos;
+	
+	/**
+    * A list of spreadsheets that use an OAuth Token instead of an AuthSub
+    */
+   @OneToMany(cascade = CascadeType.ALL)
+   private List<GoogleSpreadsheetOAuth> spreadsheetOAuthExternalRepos;
 
+   /**
+    * A list of fusion tables to update
+    */
+   @OneToMany(cascade = CascadeType.ALL)
+   private List<FusionTableOAuth> fusionTableOAuthExternalRepos;
+   
 	@Transient
 	private Map<String, FormElement> repeatElementMap;
 
@@ -180,24 +194,21 @@ public class Form {
 			allExternalRepos.addAll(insightExternalRepos);
 		if (fusionTableExternalRepos != null)
 			allExternalRepos.addAll(fusionTableExternalRepos);
+		if(spreadsheetOAuthExternalRepos != null)
+		   allExternalRepos.addAll(spreadsheetOAuthExternalRepos);
+		if(fusionTableOAuthExternalRepos != null)
+		   allExternalRepos.addAll(fusionTableOAuthExternalRepos);
 		return allExternalRepos;
 	}
 
-	public List<FusionTable> getFusionTableExternalRepos() {
-		return fusionTableExternalRepos;
-	}
 
-	public void removeFusionTableExternalRepos() {
-		fusionTableExternalRepos.clear();
-	}
-
-	public void addFusionExternalRepos(FusionTable fusionTableInstance) {
-		if (fusionTableExternalRepos == null) {
-			fusionTableExternalRepos = new ArrayList<FusionTable>();
-		}
-		fusionTableExternalRepos.add(fusionTableInstance);
-	}
-
+	  public void addFusionExternalRepos(FusionTableOAuth fusionTableInstance) {
+	      if (fusionTableOAuthExternalRepos == null) {
+	         fusionTableOAuthExternalRepos = new ArrayList<FusionTableOAuth>();
+	      }
+	      fusionTableOAuthExternalRepos.add(fusionTableInstance);
+	   }
+	
 	public List<RhizaInsight> getInsightExternalRepos() {
 		return insightExternalRepos;
 	}
@@ -213,19 +224,19 @@ public class Form {
 		insightExternalRepos.add(insightInstance);
 	}
 
-	public void addGoogleSpreadsheet(GoogleSpreadsheet sheet) {
-		if (spreadsheetExternalRepos == null) {
-			spreadsheetExternalRepos = new ArrayList<GoogleSpreadsheet>();
+	public void addGoogleSpreadsheet(GoogleSpreadsheetOAuth sheet) {
+		if (spreadsheetOAuthExternalRepos == null) {
+			spreadsheetOAuthExternalRepos = new ArrayList<GoogleSpreadsheetOAuth>();
 		}
-		spreadsheetExternalRepos.add(sheet);
+		spreadsheetOAuthExternalRepos.add(sheet);
 	}
 
-	public GoogleSpreadsheet getGoogleSpreadsheetWithName(String name) {
-		if (spreadsheetExternalRepos == null) {
+	public GoogleSpreadsheetOAuth getGoogleSpreadsheetWithName(String name) {
+		if (spreadsheetOAuthExternalRepos == null) {
 			return null;
 		}
 
-		for (GoogleSpreadsheet sheet : spreadsheetExternalRepos) {
+		for (GoogleSpreadsheetOAuth sheet : spreadsheetOAuthExternalRepos) {
 			if (sheet.getSpreadsheetName().equals(name)) {
 				return sheet;
 			}
@@ -233,8 +244,8 @@ public class Form {
 		return null;
 	}
 
-	public void removeGoogleSpreadsheet(GoogleSpreadsheet sheet) {
-		spreadsheetExternalRepos.remove(sheet);
+	public void removeGoogleSpreadsheet(GoogleSpreadsheetOAuth sheet) {
+		spreadsheetOAuthExternalRepos.remove(sheet);
 	}
 
 	/**
