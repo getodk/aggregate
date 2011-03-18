@@ -125,7 +125,7 @@ public class SubmissionServlet extends ServletUtilBase {
 "	      </tr>" +
 "	      <![endif]-->" +
 "	  	<tr>" +
-"	  		<td><input type=\"button\" name=\"button\" value=\"Upload Form\"" +
+"	  		<td><input type=\"button\" name=\"button\" value=\"Upload Submission\"" +
 "	  			onClick=\"submitButton(document,'";
   private static final String UPLOAD_PAGE_BODY_REMAINDER = "','xml_submission_file','mediaFiles')\" /></td>" +
 "	  		<td />" +

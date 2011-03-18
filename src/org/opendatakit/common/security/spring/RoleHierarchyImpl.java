@@ -24,12 +24,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.Datastore;
-import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.security.UserService;
@@ -38,6 +38,7 @@ import org.springframework.security.access.hierarchicalroles.CycleInRoleHierarch
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
+import org.springframework.security.core.authority.GrantedAuthorityImpl;
 
 /**
  * Much of this implementation is copied verbatim from Spring 3.0.5
@@ -241,22 +242,15 @@ public class RoleHierarchyImpl implements RoleHierarchy, InitializingBean {
      * references a set of the reachable lower roles.
      * @throws ODKDatastoreException 
      */
-    private Map<GrantedAuthority, Set<GrantedAuthority>> buildRolesReachableInOneStepMap() throws ODKDatastoreException {
+    private synchronized Map<GrantedAuthority, Set<GrantedAuthority>> buildRolesReachableInOneStepMap() throws ODKDatastoreException {
     	Map<GrantedAuthority, Set<GrantedAuthority>> rolesReachableInOneStepMap = new HashMap<GrantedAuthority, Set<GrantedAuthority>>();
 
         User user = userService.getDaemonAccountUser();
-        GrantedAuthorityHierarchyTable relation = GrantedAuthorityHierarchyTable.assertRelation(datastore, user);
-        Query query = datastore.createQuery(relation, user);
-        List<? extends CommonFieldsBase> results = query.executeQuery(0);
-        if ( results.size() == 0 ) {
-        	GrantedAuthorityHierarchyTable.bootstrap(datastore, user);
-        	query = datastore.createQuery(relation, user);
-        	results = query.executeQuery(0);
-        }
-        for ( CommonFieldsBase b : results ) {
-        	GrantedAuthorityHierarchyTable e = (GrantedAuthorityHierarchyTable) b;
-            GrantedAuthority higherRole = e.getDominatingGrantedAuthority();
-            GrantedAuthority lowerRole = e.getSubordinateGrantedAuthority();
+        TreeMap<String, TreeSet<String>> oneStepRelations = 
+        	GrantedAuthorityHierarchyTable.getEntireGrantedAuthorityHierarchy(datastore, user);
+        
+        for ( Map.Entry<String, TreeSet<String>> e : oneStepRelations.entrySet() ) {
+        	GrantedAuthority higherRole = new GrantedAuthorityImpl(e.getKey());
             Set<GrantedAuthority> rolesReachableInOneStepSet = null;
 
             if (!rolesReachableInOneStepMap.containsKey(higherRole)) {
@@ -265,10 +259,15 @@ public class RoleHierarchyImpl implements RoleHierarchy, InitializingBean {
             } else {
                 rolesReachableInOneStepSet = rolesReachableInOneStepMap.get(higherRole);
             }
-            addReachableRoles(rolesReachableInOneStepSet, lowerRole);
 
-            logger.debug("buildRolesReachableInOneStepMap() - From role "
-                    + higherRole + " one can reach role " + lowerRole + " in one step.");
+            for ( String s : e.getValue() ) {
+        		GrantedAuthority lowerRole = new GrantedAuthorityImpl(s);
+        		
+                addReachableRoles(rolesReachableInOneStepSet, lowerRole);
+
+                logger.debug("buildRolesReachableInOneStepMap() - From role "
+                        + higherRole + " one can reach role " + lowerRole + " in one step.");
+        	}
         }
         
         return rolesReachableInOneStepMap;

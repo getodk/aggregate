@@ -29,10 +29,7 @@ import org.opendatakit.common.security.User;
 public final class FusionTableParameterTable extends CommonFieldsBase {
 
   private static final String TABLE_NAME = "_fusion_table";
-  /*
-   * Property Names for datastore
-   */
-  /****************************************************/
+
   private static final DataField FUSION_TABLE_ID_PROPERTY = new DataField("FUSION_TABLE_ID",
       DataField.DataType.STRING, true, 4096L);
   private static final DataField AUTH_TOKEN_PROPERTY = new DataField("AUTH_TOKEN",
@@ -40,21 +37,17 @@ public final class FusionTableParameterTable extends CommonFieldsBase {
   private static final DataField AUTH_TOKEN_SECRET_PROPERTY = new DataField("AUTH_TOKEN_SECRET",
 		  DataField.DataType.STRING, true, 4096L);
 
-  public final DataField fusionTableId;
-  public final DataField authToken;
-  public final DataField authTokenSecret;
-
 	/**
-	 * Construct a relation prototype.
+	 * Construct a relation prototype. Only called via {@link #assertRelation(CallingContext)}
 	 * 
 	 * @param databaseSchema
 	 * @param tableName
 	 */
   FusionTableParameterTable(String schemaName) {
     super(schemaName, TABLE_NAME);
-    fieldList.add(fusionTableId = new DataField(FUSION_TABLE_ID_PROPERTY));
-    fieldList.add(authToken = new DataField(AUTH_TOKEN_PROPERTY));
-    fieldList.add(authTokenSecret = new DataField(AUTH_TOKEN_SECRET_PROPERTY));
+    fieldList.add(FUSION_TABLE_ID_PROPERTY);
+    fieldList.add(AUTH_TOKEN_PROPERTY);
+    fieldList.add(AUTH_TOKEN_SECRET_PROPERTY);
   }
 
 	/**
@@ -65,9 +58,6 @@ public final class FusionTableParameterTable extends CommonFieldsBase {
 	 */
   private FusionTableParameterTable(FusionTableParameterTable ref, User user) {
     super(ref, user);
-    fusionTableId = ref.fusionTableId;
-    authToken = ref.authToken;
-    authTokenSecret = ref.authTokenSecret;
   }
 
   // Only called from within the persistence layer.
@@ -77,31 +67,31 @@ public final class FusionTableParameterTable extends CommonFieldsBase {
   }
 
   public String getFusionTableId() {
-    return getStringField(fusionTableId);
+    return getStringField(FUSION_TABLE_ID_PROPERTY);
   }
 
   public void setFusionTableId(String value) {
-    if (!setStringField(fusionTableId, value)) {
+    if (!setStringField(FUSION_TABLE_ID_PROPERTY, value)) {
       throw new IllegalArgumentException("overflow fusionTableName");
     }
   }
 
   public String getAuthToken() {
-    return getStringField(authToken);
+    return getStringField(AUTH_TOKEN_PROPERTY);
   }
 
   public void setAuthToken(String value) {
-    if (!setStringField(authToken, value)) {
+    if (!setStringField(AUTH_TOKEN_PROPERTY, value)) {
       throw new IllegalArgumentException("overflow authToken");
     }
   }
   
   public String getAuthTokenSecret() {
-	  return getStringField(authTokenSecret);
+	  return getStringField(AUTH_TOKEN_SECRET_PROPERTY);
   }
   
   public void setAuthTokenSecret(String value) {
-	  if (!setStringField(authTokenSecret, value)) {
+	  if (!setStringField(AUTH_TOKEN_SECRET_PROPERTY, value)) {
 		  throw new IllegalArgumentException("overflow authTokenSecret");
 	  }
   }

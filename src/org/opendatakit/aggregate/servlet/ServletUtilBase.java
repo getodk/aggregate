@@ -186,8 +186,8 @@ public class ServletUtilBase extends CommonServletBase {
 			  cc.getWebApplicationURL(FormUploadServlet.ADDR), 
 			  ServletConsts.UPLOAD_XFORM_APPLET_LINK_TEXT);
 	  final String accessManagementHref = HtmlUtil.createHref(
-			  cc.getWebApplicationURL(AccessManagementServlet.ADDR), 
-			  AccessManagementServlet.TITLE_INFO);
+			  cc.getWebApplicationURL(AccessConfigurationServlet.ADDR), 
+			  AccessConfigurationServlet.TITLE_INFO);
 	  
 	  final String briefcaseHref = HtmlUtil.createHref(
 			  cc.getWebApplicationURL(BriefcaseServlet.ADDR), 

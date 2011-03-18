@@ -17,9 +17,7 @@ package org.opendatakit.aggregate.servlet;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.servlet.ServletException;
@@ -33,8 +31,6 @@ import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.common.constants.HtmlConsts;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.EntityKey;
-import org.opendatakit.common.persistence.Query;
-import org.opendatakit.common.persistence.Query.FilterOperation;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.security.SecurityUtils;
@@ -154,9 +150,11 @@ public class UserModifyServlet extends ServletUtilBase {
 		out.write(HtmlUtil.createRadio(IS_ENABLED, "enable", "Recognize this account as a registered user", userDefinition.getIsEnabled()));
 		out.write(HtmlUtil.createRadio(IS_ENABLED, "disable", "Do not recognize this account as a registered user", !userDefinition.getIsEnabled()));
 		out.write(HtmlConsts.LINE_BREAK);
-		out.write(HtmlUtil.createRadio(CREDENTIALS_EXPIRED, "active", "Allow locally-authenticated (device) logins on this account", userDefinition.getIsCredentialNonExpired()));
-		out.write(HtmlUtil.createRadio(CREDENTIALS_EXPIRED, "expired", "Do not allow locally-authenticated (device) logins on this account", !userDefinition.getIsCredentialNonExpired()));
+		out.write(HtmlUtil.createRadio(CREDENTIALS_EXPIRED, "active", "Allow the use of Aggregate passwords on this account", userDefinition.getIsCredentialNonExpired()));
+		out.write(HtmlUtil.createRadio(CREDENTIALS_EXPIRED, "expired", "Do not allow the use of Aggregate passwords on this account", !userDefinition.getIsCredentialNonExpired()));
 		out.write(HtmlConsts.LINE_BREAK);
+		out.write("<p>If Aggregate passwords are not allowed, the user will not be able to perform authenticated " +
+				"submissions from a device (e.g., ODK Collect 1.1.6) to the server. ");
 		out.write(HtmlUtil.createInput("submit", null, "Update"));
 		out.write("</form>");
 		finishBasicHtmlResponse(resp);
@@ -169,18 +167,7 @@ public class UserModifyServlet extends ServletUtilBase {
 		User user = cc.getCurrentUser();
 		
 		// first, delete all group memberships.
-		{
-			UserGrantedAuthority relation = UserGrantedAuthority.assertRelation(ds, user);
-			Query query = ds.createQuery(relation, user);
-			query.addFilter(relation.user, FilterOperation.EQUAL, username);
-			List<?> keys = query.executeDistinctValueForDataField(relation.primaryKey);
-			List<EntityKey> memberships = new ArrayList<EntityKey>();
-			for ( Object o : keys ) {
-				String uri = (String) o;
-				memberships.add(new EntityKey(relation, uri));
-			}
-			ds.deleteEntities(memberships, user);
-		}
+		UserGrantedAuthority.deleteGrantedAuthoritiesForUser(username, cc);
 
 		// now delete the user's entry itself...
 		try {

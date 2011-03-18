@@ -18,10 +18,13 @@ package org.opendatakit.common.security.spring;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.opendatakit.common.persistence.Datastore;
+import org.opendatakit.common.persistence.Query;
+import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.security.Realm;
 import org.opendatakit.common.security.SecurityUtils;
 import org.opendatakit.common.security.User;
@@ -36,9 +39,12 @@ public class UserServiceImpl implements org.opendatakit.common.security.UserServ
 	// configured by bean definition...
 	Datastore datastore;
 	Realm realm;
+	String superUserEmail;
+	String userServiceKey;
 
 	User anonymous;
 	User daemonAccount;
+
 	final Map<String, User> activeUsers = new HashMap<String, User>();
 	
 	public UserServiceImpl() {
@@ -52,6 +58,16 @@ public class UserServiceImpl implements org.opendatakit.common.security.UserServ
 		if ( datastore == null ) {
 			throw new IllegalStateException("datastore must be configured");
 		}
+		if ( superUserEmail == null ) {
+			throw new IllegalStateException("superUserEmail must be configured");
+		}
+		if ( !superUserEmail.startsWith("mailto:") || !superUserEmail.contains("@")) {
+			throw new IllegalStateException("superUserEmail is malformed. " +
+					"Must be of the form 'mailto:user@gmail.com' or other supported OpenID provider.");
+		}
+		if ( userServiceKey == null ) {
+			throw new IllegalStateException("userServiceKey must be configured");
+		}
 		Set<GrantedAuthority> anonGroups = new HashSet<GrantedAuthority>();
 		anonGroups.add(new GrantedAuthorityImpl(GrantedAuthorityNames.USER_IS_ANONYMOUS.name()));
 		anonymous = new UserImpl(User.ANONYMOUS_USER, 
@@ -64,6 +80,11 @@ public class UserServiceImpl implements org.opendatakit.common.security.UserServ
 		
 		activeUsers.put(anonymous.getUriUser(), anonymous);
 		activeUsers.put(daemonAccount.getUriUser(), daemonAccount);
+		
+		// ensure that the superuser is a registered user and is enabled
+		RegisteredUsersTable.bootstrap(superUserEmail, datastore, daemonAccount);
+		// ensure that the superuser has admin privileges
+		UserGrantedAuthority.bootstrap(superUserEmail, datastore, daemonAccount);
 	}
 
 	public Datastore getDatastore() {
@@ -82,6 +103,23 @@ public class UserServiceImpl implements org.opendatakit.common.security.UserServ
 		this.realm = realm;
 	}
 
+	public String getSuperUserEmail() {
+		return superUserEmail;
+	}
+	
+	public void setSuperUserEmail(String superUserEmail) {
+		this.superUserEmail = superUserEmail;
+	}
+
+	@Override
+	public String getUserServiceKey() {
+		return userServiceKey;
+	}
+	
+	public void setUserServiceKey(String userServiceKey) {
+		this.userServiceKey = userServiceKey;
+	}
+	
 	@Override
   public String createLoginURL() {
     return "login.html";
@@ -102,6 +140,21 @@ public class UserServiceImpl implements org.opendatakit.common.security.UserServ
 	activeUsers.clear();
 	activeUsers.put(anonymous.getUriUser(), anonymous);
 	activeUsers.put(daemonAccount.getUriUser(), daemonAccount);
+  }
+  
+  @Override
+  public boolean isAccessManagementConfigured() {
+	  try {
+	      GrantedAuthorityHierarchyTable relation = GrantedAuthorityHierarchyTable.assertRelation(datastore, daemonAccount);
+	      Query query = datastore.createQuery(relation, daemonAccount);
+	      List<?> values = query.executeQuery(0);
+	      return !values.isEmpty();
+	  } catch ( ODKDatastoreException e ) {
+		  e.printStackTrace();
+		  // The persistence layer is having problems.  
+		  // Allow the 'normal control path' to deal with it.
+		  return true;
+	  }
   }
 
   private boolean isAnonymousUser(Authentication auth) {

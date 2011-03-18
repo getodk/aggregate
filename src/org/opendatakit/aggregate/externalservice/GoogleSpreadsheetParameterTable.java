@@ -29,16 +29,13 @@ import org.opendatakit.common.security.User;
 public final class GoogleSpreadsheetParameterTable extends CommonFieldsBase {
 
 	private static final String TABLE_NAME = "_google_spreadsheet";
-	/*
-	 * Property Names for datastore
-	 */
-	/****************************************************/
+
 	private static final DataField SPREADSHEET_NAME_PROPERTY = new DataField(
 			"SPREADSHEET_NAME", DataField.DataType.STRING, true, 4096L);
 	private static final DataField SPREADSHEET_KEY_PROPERTY = new DataField(
 			"SPREADSHEET_KEY", DataField.DataType.STRING, true, 4096L);
-	private static final DataField TOP_LEVEL_WORKSHEET_ID_PROPERTY = new DataField("TOP_LEVEL_WORKSHEET_ID",
-		      DataField.DataType.STRING, true, 4096L);
+	private static final DataField TOP_LEVEL_WORKSHEET_ID_PROPERTY = new DataField(
+			"TOP_LEVEL_WORKSHEET_ID", DataField.DataType.STRING, true, 4096L);
 	private static final DataField AUTH_TOKEN_PROPERTY = new DataField(
 			"AUTH_TOKEN", DataField.DataType.STRING, true, 4096L);
 	private static final DataField AUTH_TOKEN_SECRET_PROPERTY = new DataField(
@@ -46,27 +43,20 @@ public final class GoogleSpreadsheetParameterTable extends CommonFieldsBase {
 	private static final DataField READY_PROPERTY = new DataField("READY",
 			DataField.DataType.BOOLEAN, true);
 
-	public final DataField spreadsheetName;
-	public final DataField spreadsheetKey;
-	public final DataField topLevelWorksheetId;
-	public final DataField authToken;
-	public final DataField authTokenSecret;
-	public final DataField ready;
-
 	/**
-	 * Construct a relation prototype.
+	 * Construct a relation prototype. Only called via {@link #assertRelation(CallingContext)}
 	 * 
 	 * @param databaseSchema
 	 * @param tableName
 	 */
 	GoogleSpreadsheetParameterTable(String schemaName) {
 		super(schemaName, TABLE_NAME);
-		fieldList.add(spreadsheetName = new DataField(SPREADSHEET_NAME_PROPERTY));
-		fieldList.add(spreadsheetKey = new DataField(SPREADSHEET_KEY_PROPERTY));
-		fieldList.add(topLevelWorksheetId = new DataField(TOP_LEVEL_WORKSHEET_ID_PROPERTY));
-		fieldList.add(authToken = new DataField(AUTH_TOKEN_PROPERTY));
-		fieldList.add(authTokenSecret = new DataField(AUTH_TOKEN_SECRET_PROPERTY));
-		fieldList.add(ready = new DataField(READY_PROPERTY));
+		fieldList.add(SPREADSHEET_NAME_PROPERTY);
+		fieldList.add(SPREADSHEET_KEY_PROPERTY);
+		fieldList.add(TOP_LEVEL_WORKSHEET_ID_PROPERTY);
+		fieldList.add(AUTH_TOKEN_PROPERTY);
+		fieldList.add(AUTH_TOKEN_SECRET_PROPERTY);
+		fieldList.add(READY_PROPERTY);
 	}
 
 	  /**
@@ -77,12 +67,6 @@ public final class GoogleSpreadsheetParameterTable extends CommonFieldsBase {
 	   */
 	private GoogleSpreadsheetParameterTable(GoogleSpreadsheetParameterTable ref, User user) {
 		super(ref, user);
-		spreadsheetName = ref.spreadsheetName;
-		spreadsheetKey = ref.spreadsheetKey;
-		topLevelWorksheetId = ref.topLevelWorksheetId;
-		authToken = ref.authToken;
-		authTokenSecret = ref.authTokenSecret;
-		ready = ref.ready;
 	}
 
 	// Only called from within the persistence layer.
@@ -92,61 +76,61 @@ public final class GoogleSpreadsheetParameterTable extends CommonFieldsBase {
 	}
 
 	public String getSpreadsheetName() {
-		return getStringField(spreadsheetName);
+		return getStringField(SPREADSHEET_NAME_PROPERTY);
 	}
 
 	public void setSpreadsheetName(String value) {
-		if (!setStringField(spreadsheetName, value)) {
+		if (!setStringField(SPREADSHEET_NAME_PROPERTY, value)) {
 			throw new IllegalArgumentException("overflow spreadsheetName");
 		}
 	}
 
 	public String getSpreadsheetKey() {
-		return getStringField(spreadsheetKey);
+		return getStringField(SPREADSHEET_KEY_PROPERTY);
 	}
 
 	public void setSpreadsheetKey(String value) {
-		if (!setStringField(spreadsheetKey, value)) {
+		if (!setStringField(SPREADSHEET_KEY_PROPERTY, value)) {
 			throw new IllegalArgumentException("overflow spreadsheetKey");
 		}
 	}
 	
 	public void setTopLevelWorksheetId(String value) {
-		if (!setStringField(topLevelWorksheetId, value)) {
+		if (!setStringField(TOP_LEVEL_WORKSHEET_ID_PROPERTY, value)) {
 			throw new IllegalArgumentException("overflow topLevelWorksheetId");
 		}
 	}
 	
 	public String getTopLevelWorksheetId() {
-		return getStringField(topLevelWorksheetId);
+		return getStringField(TOP_LEVEL_WORKSHEET_ID_PROPERTY);
 	}
 
 	public String getAuthToken() {
-		return getStringField(authToken);
+		return getStringField(AUTH_TOKEN_PROPERTY);
 	}
 
 	public void setAuthToken(String value) {
-		if (!setStringField(authToken, value)) {
+		if (!setStringField(AUTH_TOKEN_PROPERTY, value)) {
 			throw new IllegalArgumentException("overflow authToken");
 		}
 	}
 	
 	public String getAuthTokenSecret(){
-		return getStringField(authTokenSecret);
+		return getStringField(AUTH_TOKEN_SECRET_PROPERTY);
 	}
 	
 	public void setAuthTokenSecret(String value) {
-		if (!setStringField(authTokenSecret, value)) {
+		if (!setStringField(AUTH_TOKEN_SECRET_PROPERTY, value)) {
 			throw new IllegalArgumentException("overflow authTokenSecret");
 		}
 	}
 
 	public Boolean getReady() {
-		return getBooleanField(ready);
+		return getBooleanField(READY_PROPERTY);
 	}
 
 	public void setReady(Boolean value) {
-		setBooleanField(ready, value);
+		setBooleanField(READY_PROPERTY, value);
 	}
 
 	private static GoogleSpreadsheetParameterTable relation = null;
