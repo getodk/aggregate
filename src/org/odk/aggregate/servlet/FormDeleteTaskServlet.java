@@ -40,9 +40,9 @@ import com.google.appengine.api.datastore.FetchOptions;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Query;
-import com.google.appengine.api.labs.taskqueue.Queue;
-import com.google.appengine.api.labs.taskqueue.QueueFactory;
-import com.google.appengine.api.labs.taskqueue.TaskOptions;
+import com.google.appengine.api.taskqueue.Queue;
+import com.google.appengine.api.taskqueue.QueueFactory;
+import com.google.appengine.api.taskqueue.TaskOptions;
 
 public class FormDeleteTaskServlet extends ServletUtilBase {
  
@@ -107,7 +107,7 @@ public class FormDeleteTaskServlet extends ServletUtilBase {
         return;
       }
       delete.deleteSubmissions();
-      TaskOptions task = TaskOptions.Builder.url("/" + FormDeleteTaskServlet.ADDR);
+      TaskOptions task = TaskOptions.Builder.withUrl("/" + FormDeleteTaskServlet.ADDR);
       task.method(TaskOptions.Method.GET);
       task.countdownMillis(1);
       task.param(ServletConsts.ODK_FORM_KEY, formKeyStr);
