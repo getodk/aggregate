@@ -139,7 +139,7 @@ public class FusionTableServlet extends ServletUtilBase {
       try {
          String requestResult = FusionTableOAuth.executeInsert(service, createQuery, authToken);
          int index = requestResult.lastIndexOf(CREATE_FUSION_RESPONSE_HEADER);
-         if(index > 0) {
+         if(index >= 0) {
             String tableid = requestResult.substring(index + CREATE_FUSION_RESPONSE_HEADER.length());
             fusion = new FusionTableOAuth(tableid.trim(), authToken);
          } else {
