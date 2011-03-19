@@ -288,5 +288,4 @@ public class ServletConsts {
   public static final String AUTHORIZE_FUSION_CREATION = "Authorize Fusion Table Creation from Google Account";
   
   public static final String BEGIN_SQL = "sql=";
-  
 }
