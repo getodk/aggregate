@@ -19,6 +19,7 @@ package org.odk.aggregate.table;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -51,11 +52,10 @@ import com.google.gdata.data.spreadsheet.WorksheetEntry;
 import com.google.gdata.data.spreadsheet.WorksheetFeed;
 import com.google.gdata.util.ServiceException;
 
-
 public class SubmissionSpreadsheetTable extends SubmissionCsvTable {
 
   private static final String UNSAFE_CHAR_CLASS = "[\\*\\:\\-\\_]";
-	
+
   private String applicationName;
 
   public SubmissionSpreadsheetTable(Form xform, String serverName, EntityManager entityManager,
@@ -70,17 +70,16 @@ public class SubmissionSpreadsheetTable extends SubmissionCsvTable {
 
     // get data
     // TODO replaced the old with form properties need to make sure it will be
-    // old - ResultTable results = generateResultTable(TableConsts.EPOCH, false);
+    // old - ResultTable results = generateResultTable(TableConsts.EPOCH,
+    // false);
     FormProperties formProp = new FormProperties(form, em, true);
     List<String> headers = formProp.getHeaders();
-    
+
     // size worksheet correctly
     worksheet.setTitle(new PlainTextConstruct(super.getOdkId()));
     worksheet.setRowCount(2);
     worksheet.setColCount(headers.size());
     worksheet.update();
-
-
 
     CellQuery query = new CellQuery(worksheet.getCellFeedUrl());
     query.setMinimumRow(1);
@@ -122,48 +121,49 @@ public class SubmissionSpreadsheetTable extends SubmissionCsvTable {
 
   public void insertNewDataInSpreadsheet(Submission submission, GoogleSpreadsheetOAuth spreadsheet) {
     if (!spreadsheet.getReady()) {
-       return;
+      return;
     }
-      
+
     ResultTable result = generateSingleEntryResultTable(submission);
 
-     SpreadsheetService service = new SpreadsheetService(applicationName);
-     try {
-       GoogleOAuthParameters oauthParameters = new GoogleOAuthParameters();
-       oauthParameters.setOAuthConsumerKey(ServletConsts.OAUTH_CONSUMER_KEY);
-       oauthParameters.setOAuthConsumerSecret(ServletConsts.OAUTH_CONSUMER_SECRET);
-       oauthParameters.setOAuthToken(spreadsheet.getAuthToken().getToken());
-       oauthParameters.setOAuthTokenSecret(spreadsheet.getAuthToken().getTokenSecret());
-       service.setOAuthCredentials(oauthParameters, new OAuthHmacSha1Signer());
-     } catch (OAuthException e) {
-       // TODO: handle OAuth failure
-       e.printStackTrace();
-     }
+    SpreadsheetService service = new SpreadsheetService(applicationName);
+    try {
+      GoogleOAuthParameters oauthParameters = new GoogleOAuthParameters();
+      oauthParameters.setOAuthConsumerKey(ServletConsts.OAUTH_CONSUMER_KEY);
+      oauthParameters.setOAuthConsumerSecret(ServletConsts.OAUTH_CONSUMER_SECRET);
+      oauthParameters.setOAuthToken(spreadsheet.getAuthToken().getToken());
+      oauthParameters.setOAuthTokenSecret(spreadsheet.getAuthToken().getTokenSecret());
+      service.setOAuthCredentials(oauthParameters, new OAuthHmacSha1Signer());
+    } catch (OAuthException e) {
+      // TODO: handle OAuth failure
+      e.printStackTrace();
+    }
 
-     WorksheetEntry worksheet;
-     try {
-       worksheet = getWorksheet(service, spreadsheet.getSpreadsheetKey(), super.getOdkId());
-       insertNewData(service, worksheet, result.getHeader(), result.getRows().get(0));
-     } catch (MalformedURLException e) {
-       // TODO: determine better error handling
-       e.printStackTrace();
-     } catch (IOException e) {
-       // TODO: determine better error handling
-       e.printStackTrace();
-     } catch (ServiceException e) {
-       // TODO: determine better error handling
-       e.printStackTrace();
-     }
+    WorksheetEntry worksheet;
+    try {
+      worksheet = getWorksheetById(service, spreadsheet.getSpreadsheetKey(), spreadsheet.getWorksheetId());
+      insertNewData(service, worksheet, result.getHeader(), result.getRows().get(0));
+    } catch (MalformedURLException e) {
+      // TODO: determine better error handling
+      e.printStackTrace();
+    } catch (IOException e) {
+      // TODO: determine better error handling
+      e.printStackTrace();
+    } catch (ServiceException e) {
+      // TODO: determine better error handling
+      e.printStackTrace();
+    }
 
-   }
-  
-  
+  }
+
+
+
   public void insertNewDataInSpreadsheet(Submission submission, GoogleSpreadsheet spreadsheet) {
-	if (!spreadsheet.getReady()) {
-		return;
-	}
-	  
-	ResultTable result = generateSingleEntryResultTable(submission);
+    if (!spreadsheet.getReady()) {
+      return;
+    }
+
+    ResultTable result = generateSingleEntryResultTable(submission);
 
     SpreadsheetService service = new SpreadsheetService(applicationName);
     service.setAuthSubToken(spreadsheet.getAuthToken(), null);
@@ -197,15 +197,13 @@ public class SubmissionSpreadsheetTable extends SubmissionCsvTable {
     service.insert(worksheet.getListFeedUrl(), newEntry);
   }
 
-
   public WorksheetEntry getWorksheet(SpreadsheetService service, String spreadsheetKey,
       String worksheetTitle) throws MalformedURLException, IOException, ServiceException {
 
     // get worksheet
     WorksheetEntry worksheet = null;
-    URL worksheetFeedUrl =
-        new URL(ServletConsts.WORKSHEETS_FEED_PREFIX + spreadsheetKey
-            + ServletConsts.FEED_PERMISSIONS);
+    URL worksheetFeedUrl = new URL(ServletConsts.WORKSHEETS_FEED_PREFIX
+        + URLEncoder.encode(spreadsheetKey, "UTF-8") + ServletConsts.FEED_PERMISSIONS);
     WorksheetFeed worksheetFeed = service.getFeed(worksheetFeedUrl, WorksheetFeed.class);
     List<WorksheetEntry> worksheets = worksheetFeed.getEntries();
     for (WorksheetEntry wksheet : worksheets) {
@@ -215,4 +213,14 @@ public class SubmissionSpreadsheetTable extends SubmissionCsvTable {
     }
     return worksheet;
   }
+  
+  private WorksheetEntry getWorksheetById(SpreadsheetService service, String spreadsheetKey,
+      String worksheetId) throws IOException, ServiceException {
+    URL url = new URL(ServletConsts.WORKSHEETS_FEED_PREFIX
+        + URLEncoder.encode(spreadsheetKey, "UTF-8") + ServletConsts.FEED_PERMISSIONS
+        + URLEncoder.encode(worksheetId, "UTF-8"));
+    WorksheetEntry worksheetEntry = service.getEntry(url, WorksheetEntry.class);
+    return worksheetEntry;
+  }
+ 
 }

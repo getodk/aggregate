@@ -17,6 +17,8 @@
 package org.odk.aggregate.servlet;
 
 import java.io.IOException;
+import java.net.URL;
+import java.net.URLEncoder;
 
 import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
@@ -121,18 +123,25 @@ public class WorksheetServlet extends ServletUtilBase {
       try {
         SubmissionSpreadsheetTable subResults = new SubmissionSpreadsheetTable(form,
             req.getServerName(), em, this.getServletContext().getInitParameter("application_name"));
-
-        // TODO: make more robust (currently assuming nothing has touched the
-        // sheet)
-        // get worksheet
-        WorksheetEntry worksheet = subResults.getWorksheet(service,
-            spreadsheet.getSpreadsheetKey(), "Sheet 1");
-
+        
+        // retrieve default worksheet
+        URL url = new URL(ServletConsts.SPREADSHEETS_FEED
+            + URLEncoder.encode(spreadsheet.getSpreadsheetKey(), "UTF-8"));
+        com.google.gdata.data.spreadsheet.SpreadsheetEntry entry = service.getEntry(url,
+            com.google.gdata.data.spreadsheet.SpreadsheetEntry.class);
+        WorksheetEntry worksheet = entry.getDefaultWorksheet();
+        
         // verify worksheet was found
         if (worksheet == null) {
           resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "COULD NOT FIND WORKSHEET");
           return;
         }
+        
+        // extract and set worksheet id
+        String[] urlElements = worksheet.getSelf().getId().split("/");
+        String worksheetId = urlElements[urlElements.length - 1];
+        spreadsheet.setWorksheetId(worksheetId);
+
         subResults.generateWorksheet(service, worksheet);
 
         if (!esType.equals(ExternalServiceOption.STREAM_ONLY)) {

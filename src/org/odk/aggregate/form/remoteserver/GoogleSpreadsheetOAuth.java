@@ -49,6 +49,12 @@ public class GoogleSpreadsheetOAuth implements RemoteServer{
    */
   @Enumerated
   private String spreadsheetKey;
+  
+  /**
+   * id of worksheet
+   */
+  @Enumerated
+  private String worksheetId;
 
   /**
    * Authorization Token for speadsheet
@@ -94,6 +100,17 @@ public class GoogleSpreadsheetOAuth implements RemoteServer{
 
   public void setAuthToken(OAuthToken authToken) {
     this.authToken = authToken.getToken();
+    this.tokenSecret = authToken.getTokenSecret();
+  }
+  
+  public String getWorksheetId()
+  {
+    return this.worksheetId;
+  }
+  
+  public void setWorksheetId(String worksheetId)
+  {
+    this.worksheetId = worksheetId;
   }
   
   public void sendSubmissionToRemoteServer(Form xform, String serverName, EntityManager em, String appName, Submission submission) {

@@ -41,7 +41,6 @@ import com.google.gdata.client.authn.oauth.OAuthException;
 import com.google.gdata.client.authn.oauth.OAuthHmacSha1Signer;
 import com.google.gdata.client.docs.DocsService;
 import com.google.gdata.data.PlainTextConstruct;
-import com.google.gdata.data.docs.DocumentListEntry;
 import com.google.gdata.data.docs.SpreadsheetEntry;
 import com.google.gdata.util.ServiceException;
 
@@ -81,7 +80,7 @@ public class SpreadsheetServlet extends ServletUtilBase {
       return;
     }
 
-    // get parameter
+    // collect and save all request parameters
     String spreadsheetName = getParameter(req, ServletConsts.SPREADSHEET_NAME_PARAM);
     String odkIdParam = getParameter(req, ServletConsts.ODK_ID);
     String sessionToken = getParameter(req, ServletConsts.OAUTH_TOKEN);
@@ -122,7 +121,7 @@ public class SpreadsheetServlet extends ServletUtilBase {
       beginBasicHtmlResponse(TITLE_INFO, resp, req, true); // header info
       params.put(CALLBACK, Boolean.toString(true));
       String authButton = generateAuthButton(ServletConsts.AUTHORIZE_SPREADSHEET_CREATION, params,
-          req, resp, ServletConsts.DOCS_SCOPE, ServletConsts.DOCS_SCOPE);
+          req, resp, ServletConsts.DOCS_SCOPE, ServletConsts.SPREADSHEET_SCOPE);
       resp.getWriter().print(authButton);
       finishBasicHtmlResponse(resp);
       return;
@@ -149,17 +148,15 @@ public class SpreadsheetServlet extends ServletUtilBase {
     }
 
     // create spreadsheet
-    DocumentListEntry createdEntry = new SpreadsheetEntry();
+    com.google.gdata.data.docs.SpreadsheetEntry createdEntry = new SpreadsheetEntry();
     createdEntry.setTitle(new PlainTextConstruct(spreadsheetName));
 
-    DocumentListEntry updatedEntry;
+    com.google.gdata.data.docs.SpreadsheetEntry updatedEntry;
     try {
       updatedEntry = service.insert(new URL(ServletConsts.DOC_FEED), createdEntry);
 
       // get key
-      String docKey = updatedEntry.getKey();
-      String sheetKey = docKey.substring(docKey.lastIndexOf(ServletConsts.DOCS_PRE_KEY)
-          + ServletConsts.DOCS_PRE_KEY.length());
+      String sheetKey = updatedEntry.getDocId();
 
       // get form
       EntityManager em = EMFactory.get().createEntityManager();
@@ -172,7 +169,6 @@ public class SpreadsheetServlet extends ServletUtilBase {
         return;
       }
 
-      // create spreadsheet
       GoogleSpreadsheetOAuth spreadsheet = new GoogleSpreadsheetOAuth(spreadsheetName, sheetKey);
 
       spreadsheet.setAuthToken(authToken);
