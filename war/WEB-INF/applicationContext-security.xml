@@ -97,10 +97,10 @@
 	        <intercept-url pattern="/index.html" access="REQUIRES_INSECURE_CHANNEL" />
 	        <intercept-url pattern="/logout.html" access="REQUIRES_INSECURE_CHANNEL" />
 	        <intercept-url pattern="/openid_login.html" access="REQUIRES_INSECURE_CHANNEL" />
-            <intercept-url pattern="/www/index.html" access="REQUIRES_INSECURE_CHANNEL" />
+            <intercept-url pattern="/www/index.html" access="${security.server.channelType}" />
 	        <intercept-url pattern="/res/**" access="ANY_CHANNEL" />
 		    <intercept-url pattern="/ssl/**" access="${security.server.secureChannelType}"/>
-            <intercept-url pattern="/local_login.html" access="${security.server.secureChannelType}" />
+            <intercept-url pattern="/local_login.html" access="${security.server.channelType}" />
 		    <intercept-url pattern="/**" access="${security.server.channelType}"/>
 	    </filter-invocation-definition-source>                
 	  </beans:property>
@@ -260,7 +260,7 @@
 		class="org.springframework.security.web.authentication.www.DigestAuthenticationEntryPoint">
 		<beans:property name="realmName" value="${security.server.realm.realmString}" />
 		<beans:property name="key" value="${security.server.siteKey}" />
-		<beans:property name="nonceValiditySeconds" value="10" />
+		<beans:property name="nonceValiditySeconds" value="600" />
 	</beans:bean>
 
 	<beans:bean id="digestAuthenticationProvider"
