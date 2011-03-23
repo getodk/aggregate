@@ -43,6 +43,10 @@ public interface ElementFormatter {
   public void formatChoices(List<String> choices, String propertyName, Row row);
 
   public void formatDate(Date date, String propertyName, Row row);
+
+  public void formatDateTime(Date date, String propertyName, Row row);
+
+  public void formatTime(Date date, String propertyName, Row row);
   
   public void formatDecimal(BigDecimal dub, String propertyName, Row row);
   
