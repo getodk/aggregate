@@ -16,8 +16,11 @@
 package org.opendatakit.aggregate.format.element;
 
 import java.math.BigDecimal;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.TimeZone;
 
 import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.constants.format.FormatConsts;
@@ -119,6 +122,27 @@ public class JsonElementFormatter implements ElementFormatter {
   public void formatDate(Date date, String propertyName, Row row) {
     addToJsonValueToRow(date, propertyName, row);
 
+  }
+
+  @Override
+  public void formatDateTime(Date date, String propertyName, Row row) {
+    addToJsonValueToRow(date, propertyName, row);
+
+  }
+
+  @Override
+  public void formatTime(Date date, String propertyName, Row row) {
+    if (date != null) {
+    	GregorianCalendar g = new GregorianCalendar(TimeZone.getTimeZone("GMT"));
+    	g.setTime(date);
+    	addToJsonValueToRow(String.format(FormatConsts.TIME_FORMAT_STRING, 
+        									g.get(Calendar.HOUR_OF_DAY), 
+        									g.get(Calendar.MINUTE), 
+        									g.get(Calendar.SECOND)),
+        					propertyName, row);
+    } else {
+    	addToJsonValueToRow(null, propertyName, row);
+    }
   }
 
   @Override

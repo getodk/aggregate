@@ -25,9 +25,6 @@ import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.datamodel.DynamicCommonFieldsBase;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.exception.ODKConversionException;
-import org.opendatakit.aggregate.format.Row;
-import org.opendatakit.aggregate.format.element.ElementFormatter;
-import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 
 /**
  * Data Storage Converter for Data Type
@@ -36,14 +33,14 @@ import org.opendatakit.common.persistence.exception.ODKDatastoreException;
  * @author mitchellsundt@gmail.com
  * 
  */
-public class DateSubmissionType extends SubmissionSingleValueBase<Date> {
+public abstract class DateSubmissionType extends SubmissionSingleValueBase<Date> {
 	/**
 	 * Constructor
 	 * 
 	 * @param propertyName
 	 *            Name of submission element
 	 */
-	public DateSubmissionType(DynamicCommonFieldsBase backingObject, FormElementModel element) {
+	protected DateSubmissionType(DynamicCommonFieldsBase backingObject, FormElementModel element) {
 		super(backingObject, element);
 	}
 
@@ -84,19 +81,6 @@ public class DateSubmissionType extends SubmissionSingleValueBase<Date> {
 	public void getValueFromEntity(CallingContext cc) {
 		Date value = backingObject.getDateField(element.getFormDataModel().getBackingKey());
 		setValue(value);
-	}
-
-	/**
-	 * Format value for output
-	 * 
-	 * @param elemFormatter
-	 *            the element formatter that will convert the value to the
-	 *            proper format for output
-	 */
-	@Override
-	public void formatValue(ElementFormatter elemFormatter, Row row, String ordinalValue, CallingContext cc)
-			throws ODKDatastoreException {
-		elemFormatter.formatDate(getValue(), element.getGroupQualifiedElementName() + ordinalValue, row);
 	}
 
 	/**
