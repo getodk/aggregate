@@ -1,35 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <datastore-indexes autoGenerate="true">
 
-    <!-- Used 15 times in query history -->
-    <datastore-index kind="opendatakit._form_info_description" ancestor="false" source="manual">
-        <property name="_PARENT_AURI" direction="asc"/>
-        <property name="_ORDINAL_NUMBER" direction="asc"/>
-    </datastore-index>
-
-    <!-- Used 15 times in query history -->
-    <datastore-index kind="opendatakit._form_info_fileset" ancestor="false" source="manual">
-        <property name="_PARENT_AURI" direction="asc"/>
-        <property name="_ORDINAL_NUMBER" direction="asc"/>
-    </datastore-index>
-
-    <!-- Used 15 times in query history -->
-    <datastore-index kind="opendatakit._form_info_xform_bin" ancestor="false" source="manual">
-        <property name="_PARENT_AURI" direction="asc"/>
-        <property name="_ORDINAL_NUMBER" direction="asc"/>
-    </datastore-index>
-
-    <!-- Used 15 times in query history -->
-    <datastore-index kind="opendatakit._form_info_manifest_bin" ancestor="false" source="manual">
-        <property name="_PARENT_AURI" direction="asc"/>
-        <property name="_ORDINAL_NUMBER" direction="asc"/>
-    </datastore-index>
-
-    <!-- Used 15 times in query history -->
-    <datastore-index kind="opendatakit._form_info_submission" ancestor="false" source="manual">
-        <property name="_PARENT_AURI" direction="asc"/>
-        <property name="_ORDINAL_NUMBER" direction="asc"/>
-    </datastore-index>
-
-
 </datastore-indexes>
