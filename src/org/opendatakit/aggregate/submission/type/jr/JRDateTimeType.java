@@ -20,9 +20,13 @@ package org.opendatakit.aggregate.submission.type.jr;
 import java.util.Date;
 
 import org.javarosa.core.model.utils.DateUtils;
+import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.datamodel.DynamicCommonFieldsBase;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
+import org.opendatakit.aggregate.format.Row;
+import org.opendatakit.aggregate.format.element.ElementFormatter;
 import org.opendatakit.aggregate.submission.type.DateSubmissionType;
+import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 
 /**
  * Data Storage Converter for Java Rosa DataTime Type
@@ -54,6 +58,19 @@ public class JRDateTimeType extends DateSubmissionType {
 			Date newDate = DateUtils.parseDateTime(value);
 			setValue(newDate);
 		}
+	}
+
+	/**
+	 * Format value for output
+	 * 
+	 * @param elemFormatter
+	 *            the element formatter that will convert the value to the
+	 *            proper format for output
+	 */
+	@Override
+	public void formatValue(ElementFormatter elemFormatter, Row row, String ordinalValue, CallingContext cc)
+			throws ODKDatastoreException {
+		elemFormatter.formatDateTime(getValue(), element.getGroupQualifiedElementName() + ordinalValue, row);
 	}
 
 }
