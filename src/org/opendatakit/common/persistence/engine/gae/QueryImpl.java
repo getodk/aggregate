@@ -281,7 +281,17 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
 
 		DatastoreService ds = datastore.getDatastoreService();
 		List<com.google.appengine.api.datastore.Entity> gaeEntities = null;
-		boolean filterAndSortLocally = false;
+		/**
+		 * GAE 1.4.2 has changed the way it handles indices so that the actual
+		 * query construction (prepareQuery) no longer throws a 
+		 * DatastoreNeedIndexException, but, rather, that exception is thrown
+		 * at the point where the cursor is accessed.
+		 * 
+		 * For now, just skip all multi-value querying and do the 
+		 * filtering and sorting locally against the dataset returned
+		 * by the first filter condition. 
+		 */
+		boolean filterAndSortLocally = true;
 		try {
 			if (!filterAndSortLocally) {
 				PreparedQuery preparedQuery = ds.prepare(query);
