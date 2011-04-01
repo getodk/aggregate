@@ -70,7 +70,7 @@ public class JRDateType extends DateSubmissionType {
 	@Override
 	public void formatValue(ElementFormatter elemFormatter, Row row, String ordinalValue, CallingContext cc)
 			throws ODKDatastoreException {
-		elemFormatter.formatDate(getValue(), element.getGroupQualifiedElementName() + ordinalValue, row);
+		elemFormatter.formatDate(getValue(), element, ordinalValue, row);
 	}
 
 }

@@ -72,7 +72,7 @@ public class LongSubmissionType extends SubmissionSingleValueBase<Long> {
 	@Override
 	public void formatValue(ElementFormatter elemFormatter, Row row, String ordinalValue, CallingContext cc)
 			throws ODKDatastoreException {
-		elemFormatter.formatLong(getValue(), element.getGroupQualifiedElementName() + ordinalValue, row);
+		elemFormatter.formatLong(getValue(), element, ordinalValue, row);
 	}
 
 	/**

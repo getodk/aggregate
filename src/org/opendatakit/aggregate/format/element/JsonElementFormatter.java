@@ -80,7 +80,7 @@ public class JsonElementFormatter implements ElementFormatter {
   }
   
   @Override
-  public void formatBinary(BlobSubmissionType blobSubmission, String propertyName, Row row, CallingContext cc)
+  public void formatBinary(BlobSubmissionType blobSubmission, FormElementModel element, String ordinalValue, Row row, CallingContext cc)
       throws ODKDatastoreException {
     if (blobSubmission == null || (blobSubmission.getAttachmentCount() == 0)) {
       row.addFormattedValue(null);
@@ -92,19 +92,18 @@ public class JsonElementFormatter implements ElementFormatter {
       imageBlob = blobSubmission.getBlob(1, cc);
     }
     if (imageBlob != null && imageBlob.length > 0) {
-      addToJsonValueToRow(Base64.encode(imageBlob), propertyName, row);
+      addToJsonValueToRow(Base64.encode(imageBlob), element.getElementName(), row);
     }
 
   }
 
   @Override
-  public void formatBoolean(Boolean bool, String propertyName, Row row) {
-    addToJsonValueToRow(bool, propertyName, row);
-
+  public void formatBoolean(Boolean bool, FormElementModel element, String ordinalValue, Row row) {
+    addToJsonValueToRow(bool, element.getElementName(), row);
   }
 
   @Override
-  public void formatChoices(List<String> choices, String propertyName, Row row) {
+  public void formatChoices(List<String> choices, FormElementModel element, String ordinalValue, Row row) {
     StringBuilder b = new StringBuilder();
 
     boolean first = true;
@@ -115,23 +114,23 @@ public class JsonElementFormatter implements ElementFormatter {
       first = false;
       b.append(s);
     }
-    addToJsonValueToRow(b.toString(), propertyName, row);
+    addToJsonValueToRow(b.toString(), element.getElementName(), row);
   }
 
   @Override
-  public void formatDate(Date date, String propertyName, Row row) {
-    addToJsonValueToRow(date, propertyName, row);
-
-  }
-
-  @Override
-  public void formatDateTime(Date date, String propertyName, Row row) {
-    addToJsonValueToRow(date, propertyName, row);
+  public void formatDate(Date date, FormElementModel element, String ordinalValue, Row row) {
+    addToJsonValueToRow(date, element.getElementName(), row);
 
   }
 
   @Override
-  public void formatTime(Date date, String propertyName, Row row) {
+  public void formatDateTime(Date date, FormElementModel element, String ordinalValue, Row row) {
+    addToJsonValueToRow(date, element.getElementName(), row);
+
+  }
+
+  @Override
+  public void formatTime(Date date, FormElementModel element, String ordinalValue, Row row) {
     if (date != null) {
     	GregorianCalendar g = new GregorianCalendar(TimeZone.getTimeZone("GMT"));
     	g.setTime(date);
@@ -139,56 +138,58 @@ public class JsonElementFormatter implements ElementFormatter {
         									g.get(Calendar.HOUR_OF_DAY), 
         									g.get(Calendar.MINUTE), 
         									g.get(Calendar.SECOND)),
-        					propertyName, row);
+        									element.getElementName(), row);
     } else {
-    	addToJsonValueToRow(null, propertyName, row);
+    	addToJsonValueToRow(null, element.getElementName(), row);
     }
   }
 
   @Override
-  public void formatDecimal(BigDecimal dub, String propertyName, Row row) {
-    addToJsonValueToRow(dub, propertyName, row);
+  public void formatDecimal(BigDecimal dub, FormElementModel element, String ordinalValue, Row row) {
+    addToJsonValueToRow(dub, element.getElementName(), row);
 
   }
 
   @Override
-  public void formatGeoPoint(GeoPoint coordinate, String propertyName, Row row) {
+  public void formatGeoPoint(GeoPoint coordinate, FormElementModel element, String ordinalValue, Row row) {
     if (separateCoordinates) {
-      addToJsonValueToRow(coordinate.getLatitude(), propertyName + FormatConsts.HEADER_CONCAT
+      addToJsonValueToRow(coordinate.getLatitude(), element.getElementName() + FormatConsts.HEADER_CONCAT
           + GeoPoint.LATITUDE, row);
-      addToJsonValueToRow(coordinate.getLongitude(), propertyName + FormatConsts.HEADER_CONCAT
+      addToJsonValueToRow(coordinate.getLongitude(), element.getElementName() + FormatConsts.HEADER_CONCAT
           + GeoPoint.LONGITUDE, row);
 
       if (includeAltitude) {
-        addToJsonValueToRow(coordinate.getAltitude(), propertyName + FormatConsts.HEADER_CONCAT
+        addToJsonValueToRow(coordinate.getAltitude(), element.getElementName() + FormatConsts.HEADER_CONCAT
             + GeoPoint.ALTITUDE, row);
       }
 
       if (includeAccuracy) {
-        addToJsonValueToRow(coordinate.getAccuracy(), propertyName + FormatConsts.HEADER_CONCAT
+        addToJsonValueToRow(coordinate.getAccuracy(), element.getElementName() + FormatConsts.HEADER_CONCAT
             + GeoPoint.ACCURACY, row);
       }
     } else {
       if (coordinate.getLongitude() != null && coordinate.getLatitude() != null) {
         String coordVal = coordinate.getLatitude().toString() + BasicConsts.COMMA
             + BasicConsts.SPACE + coordinate.getLongitude().toString();
+        addToJsonValueToRow(coordVal, element.getElementName(), row);
         if (includeAltitude) {
-          coordVal += BasicConsts.COMMA + BasicConsts.SPACE + coordinate.getAltitude().toString();
+          addToJsonValueToRow(coordinate.getAltitude().toString(), element.getElementName() + FormatConsts.HEADER_CONCAT
+              + GeoPoint.ALTITUDE, row);
         }
         if (includeAccuracy) {
-          coordVal += BasicConsts.COMMA + BasicConsts.SPACE + coordinate.getAccuracy().toString();
+          addToJsonValueToRow(coordinate.getAccuracy().toString(), element.getElementName() + FormatConsts.HEADER_CONCAT
+              + GeoPoint.ACCURACY, row);
         }
-        row.addFormattedValue(coordVal);
       } else {
-        row.addFormattedValue(null);
+        addToJsonValueToRow(null, element.getElementName(), row);
       }
     }
 
   }
 
   @Override
-  public void formatLong(Long longInt, String propertyName, Row row) {
-    addToJsonValueToRow(longInt, propertyName, row);
+  public void formatLong(Long longInt, FormElementModel element, String ordinalValue, Row row) {
+    addToJsonValueToRow(longInt, element.getElementName(), row);
   }
 
   @Override
@@ -198,8 +199,8 @@ public class JsonElementFormatter implements ElementFormatter {
   }
 
   @Override
-  public void formatString(String string, String propertyName, Row row) {
-    addToJsonValueToRow(string, propertyName, row);
+  public void formatString(String string, FormElementModel element, String ordinalValue, Row row) {
+    addToJsonValueToRow(string, element.getElementName(), row);
   }
 
   private void addToJsonValueToRow(Object value, String propertyName, Row row) {

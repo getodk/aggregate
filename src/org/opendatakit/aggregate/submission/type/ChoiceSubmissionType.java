@@ -61,7 +61,7 @@ public class ChoiceSubmissionType extends SubmissionFieldBase<List<String>> {
 	@Override
 	public void formatValue(ElementFormatter elemFormatter, Row row, String ordinalValue, CallingContext cc)
 			throws ODKDatastoreException {
-		elemFormatter.formatChoices(values, element.getGroupQualifiedElementName()+ ordinalValue, row);
+		elemFormatter.formatChoices(values, element, ordinalValue, row);
 	}
 
 	@Override

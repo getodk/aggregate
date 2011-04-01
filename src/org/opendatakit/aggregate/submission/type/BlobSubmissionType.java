@@ -172,8 +172,7 @@ public class BlobSubmissionType extends SubmissionFieldBase<SubmissionKey> {
 	@Override
 	public void formatValue(ElementFormatter elemFormatter, Row row,
 			String ordinalValue, CallingContext cc) throws ODKDatastoreException {
-		elemFormatter.formatBinary(this, element.getGroupQualifiedElementName()
-				+ ordinalValue, row, cc);
+		elemFormatter.formatBinary(this, element, ordinalValue, row, cc);
 	}
 
 	/**

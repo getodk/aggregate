@@ -77,7 +77,7 @@ public class DecimalSubmissionType extends
 	@Override
 	public void formatValue(ElementFormatter elemFormatter, Row row, String ordinalValue, CallingContext cc)
 			throws ODKDatastoreException {
-		elemFormatter.formatDecimal(getValue(), element.getGroupQualifiedElementName() + ordinalValue, row);
+		elemFormatter.formatDecimal(getValue(), element, ordinalValue, row);
 	}
 
 	/**

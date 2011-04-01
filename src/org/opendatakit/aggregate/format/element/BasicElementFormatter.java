@@ -78,16 +78,16 @@ public class BasicElementFormatter implements ElementFormatter {
     basicStringConversion(uri, row);
   }
   
-  public void formatBinary(BlobSubmissionType blobSubmission, String propertyName, Row row, CallingContext cc) throws ODKDatastoreException {
+  public void formatBinary(BlobSubmissionType blobSubmission, FormElementModel element, String ordinalValue, Row row, CallingContext cc) throws ODKDatastoreException {
 	  SubmissionKey key = blobSubmission.getValue();
 	  basicStringConversion(key.toString(), row);
   }
 
-  public void formatBoolean(Boolean bool, String propertyName, Row row) {
+  public void formatBoolean(Boolean bool, FormElementModel element, String ordinalValue, Row row) {
     basicStringConversion(bool, row);
   }
 
-  public void formatChoices(List<String> choices, String propertyName, Row row) {
+  public void formatChoices(List<String> choices, FormElementModel element, String ordinalValue, Row row) {
 	StringBuilder b = new StringBuilder();
 
 	boolean first = true;
@@ -101,15 +101,15 @@ public class BasicElementFormatter implements ElementFormatter {
 	basicStringConversion(b.toString(), row);
   }
 
-  public void formatDate(Date date, String propertyName, Row row) {
+  public void formatDate(Date date, FormElementModel element, String ordinalValue, Row row) {
     basicStringConversion(date, row);
   }
 
-  public void formatDateTime(Date date, String propertyName, Row row) {
+  public void formatDateTime(Date date, FormElementModel element, String ordinalValue, Row row) {
     basicStringConversion(date, row);
   }
 
-  public void formatTime(Date date, String propertyName, Row row) {
+  public void formatTime(Date date, FormElementModel element, String ordinalValue, Row row) {
     if (date != null) {
     	GregorianCalendar g = new GregorianCalendar(TimeZone.getTimeZone("GMT"));
     	g.setTime(date);
@@ -122,11 +122,11 @@ public class BasicElementFormatter implements ElementFormatter {
     }
   }
 
-  public void formatDecimal(BigDecimal dub, String propertyName, Row row) {
+  public void formatDecimal(BigDecimal dub, FormElementModel element, String ordinalValue, Row row) {
     basicStringConversion(dub, row);
   }
 
-  public void formatGeoPoint(GeoPoint coordinate, String propertyName, Row row) {
+  public void formatGeoPoint(GeoPoint coordinate, FormElementModel element, String ordinalValue, Row row) {
     if (separateCoordinates) {
       basicStringConversion(coordinate.getLatitude(), row);
       basicStringConversion(coordinate.getLongitude(), row);
@@ -157,11 +157,11 @@ public class BasicElementFormatter implements ElementFormatter {
     }
   }
 
-  public void formatLong(Long longInt, String propertyName, Row row) {
+  public void formatLong(Long longInt, FormElementModel element, String ordinalValue, Row row) {
     basicStringConversion(longInt, row);
   }
 
-  public void formatString(String string, String propertyName, Row row) {
+  public void formatString(String string, FormElementModel element, String ordinalValue, Row row) {
     basicStringConversion(string, row);
   }
 
