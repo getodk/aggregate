@@ -2,13 +2,14 @@ package org.odk.aggregate.form.remoteserver;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLEncoder;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
@@ -18,12 +19,22 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
 import oauth.signpost.OAuthConsumer;
-import oauth.signpost.basic.DefaultOAuthConsumer;
+import oauth.signpost.commonshttp.CommonsHttpOAuthConsumer;
 import oauth.signpost.exception.OAuthCommunicationException;
 import oauth.signpost.exception.OAuthExpectationFailedException;
 import oauth.signpost.exception.OAuthMessageSignerException;
 
-import org.odk.aggregate.constants.HtmlConsts;
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.conn.ClientConnectionManager;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.HttpParams;
+import org.esxx.js.protocol.GAEConnectionManager;
 import org.odk.aggregate.constants.ServletConsts;
 import org.odk.aggregate.form.Form;
 import org.odk.aggregate.submission.Submission;
@@ -114,22 +125,30 @@ public class FusionTableOAuth implements RemoteServer {
 
   static public String executeInsert(GoogleService service, String statement, OAuthToken authToken)
       throws IOException, ServiceException, MalformedURLException, UnsupportedEncodingException {
-    OAuthConsumer consumer = new DefaultOAuthConsumer(ServletConsts.OAUTH_CONSUMER_KEY,
+    OAuthConsumer consumer = new CommonsHttpOAuthConsumer(ServletConsts.OAUTH_CONSUMER_KEY,
         ServletConsts.OAUTH_CONSUMER_SECRET);
     consumer.setTokenWithSecret(authToken.getToken(), authToken.getTokenSecret());
 
-    URL url = new URL(ServletConsts.FUSION_SCOPE + HtmlConsts.BEGIN_PARAM + ServletConsts.BEGIN_SQL
-        + URLEncoder.encode(statement, ServletConsts.FUSTABLE_ENCODE));
+    URI uri;
+	try {
+		uri = new URI(ServletConsts.FUSION_SCOPE);
+	} catch (URISyntaxException e1) {
+		e1.printStackTrace();
+		throw new MalformedURLException(e1.getMessage());
+	}
 
-    System.out.println(url.toString());
-
-    HttpURLConnection request = (HttpURLConnection) url.openConnection();
-    request.setDoOutput(true);
-    request.setDoInput(true);
-    request.setRequestMethod(HtmlConsts.POST);
-    request.setFixedLengthStreamingMode(0);
+    System.out.println(uri.toString());
+    HttpParams httpParams = new BasicHttpParams();
+    ClientConnectionManager mgr = new GAEConnectionManager();
+    HttpClient client = new DefaultHttpClient(mgr, httpParams);
+    HttpPost post = new HttpPost(uri);
+    List<NameValuePair> formParams = new ArrayList<NameValuePair>();
+    formParams.add( new BasicNameValuePair("sql", statement));
+    UrlEncodedFormEntity form = new UrlEncodedFormEntity(formParams, "UTF-8");
+    post.setEntity(form);
+    
     try {
-      consumer.sign(request);
+      consumer.sign(post);
     } catch (OAuthMessageSignerException e) {
       e.printStackTrace();
       throw new ServiceException("Failed to sign request: " + e.getMessage());
@@ -141,21 +160,19 @@ public class FusionTableOAuth implements RemoteServer {
       throw new IOException("Failed to sign request: " + e.getMessage());
     }
 
+    HttpResponse resp = client.execute(post);
     // TODO: this section of code is possibly causing 'WARNING: Going to buffer
     // response body of large or unknown size. Using getResponseBodyAsStream
     // instead is recommended.'
     // The WARNING is most likely only happening when running appengine locally,
     // but we should investigate to make sure
-    InputStream is = request.getInputStream();
-    request.connect();
-
-    BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+    BufferedReader reader = new BufferedReader(new InputStreamReader(resp.getEntity().getContent()));
     StringBuffer response = new StringBuffer();
     String responseLine;
     while ((responseLine = reader.readLine()) != null) {
       response.append(responseLine);
     }
-    if (request.getResponseCode() != HttpURLConnection.HTTP_OK) {
+    if (resp.getStatusLine().getStatusCode() != HttpURLConnection.HTTP_OK) {
       throw new ServiceException(response.toString() + statement);
     }
     return response.toString();
