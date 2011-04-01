@@ -76,7 +76,7 @@ public class KmlElementFormatter implements ElementFormatter {
   }
   
   @Override
-  public void formatBinary(BlobSubmissionType blobSubmission, String propertyName, Row row, CallingContext cc)
+  public void formatBinary(BlobSubmissionType blobSubmission, FormElementModel element, String ordinalValue, Row row, CallingContext cc)
       throws ODKDatastoreException {
     if(blobSubmission == null || (blobSubmission.getAttachmentCount() == 0)) {
       row.addFormattedValue(null);
@@ -87,16 +87,16 @@ public class KmlElementFormatter implements ElementFormatter {
     Map<String, String> properties = new HashMap<String, String>();
     properties.put(ServletConsts.BLOB_KEY, key.toString());
     String url = HtmlUtil.createHrefWithProperties(HtmlUtil.createUrl(baseWebServerUrl) + BinaryDataServlet.ADDR, properties, FormTableConsts.VIEW_LINK_TEXT);
-    generateDataElement(url, propertyName, row);
+    generateDataElement(url, element.getGroupQualifiedElementName() + ordinalValue, row);
   }
 
   @Override
-  public void formatBoolean(Boolean bool, String propertyName, Row row) {
-    generateDataElement(bool, propertyName, row);
+  public void formatBoolean(Boolean bool, FormElementModel element, String ordinalValue, Row row) {
+    generateDataElement(bool, element.getGroupQualifiedElementName() + ordinalValue, row);
   }
 
   @Override
-  public void formatChoices(List<String> choices, String propertyName, Row row) {
+  public void formatChoices(List<String> choices, FormElementModel element, String ordinalValue, Row row) {
 	StringBuilder b = new StringBuilder();
 	boolean first = true;
 	for ( String s : choices ) {
@@ -106,54 +106,53 @@ public class KmlElementFormatter implements ElementFormatter {
 		first = false;
 		b.append(s);
 	}
-    generateDataElement(b.toString(), propertyName, row);
+    generateDataElement(b.toString(), element.getGroupQualifiedElementName() + ordinalValue, row);
   }
 
   @Override
-  public void formatDate(Date date, String propertyName, Row row) {
-    generateDataElement(date, propertyName, row);
+  public void formatDate(Date date, FormElementModel element, String ordinalValue, Row row) {
+    generateDataElement(date, element.getGroupQualifiedElementName() + ordinalValue, row);
   }
 
   @Override
-  public void formatDateTime(Date date, String propertyName, Row row) {
-    generateDataElement(date, propertyName, row);
+  public void formatDateTime(Date date, FormElementModel element, String ordinalValue, Row row) {
+    generateDataElement(date, element.getGroupQualifiedElementName() + ordinalValue, row);
   }
 
   @Override
-  public void formatTime(Date date, String propertyName, Row row) {
+  public void formatTime(Date date, FormElementModel element, String ordinalValue, Row row) {
 	if ( date != null ) {
 	  GregorianCalendar g = new GregorianCalendar(TimeZone.getTimeZone("GMT"));
 	  g.setTime(date);
 	  generateDataElement(String.format(FormatConsts.TIME_FORMAT_STRING,
 			  				g.get(Calendar.HOUR_OF_DAY), 
 			  				g.get(Calendar.MINUTE),
-			  				g.get(Calendar.SECOND)), propertyName, row);
+			  				g.get(Calendar.SECOND)), element.getGroupQualifiedElementName() + ordinalValue, row);
 	} else {
-      generateDataElement(null, propertyName, row);
+      generateDataElement(null, element.getGroupQualifiedElementName() + ordinalValue, row);
 	}
   }
 
   @Override
-  public void formatDecimal(BigDecimal dub, String propertyName, Row row) {
-    generateDataElement(dub, propertyName, row);
+  public void formatDecimal(BigDecimal dub, FormElementModel element, String ordinalValue, Row row) {
+    generateDataElement(dub, element.getGroupQualifiedElementName() + ordinalValue, row);
   }
 
   @Override
-  public void formatGeoPoint(GeoPoint coordinate, String propertyName, Row row) {
-    String preName = propertyName + FormatConsts.HEADER_CONCAT;
-    generateDataElement(coordinate.getLatitude(), preName + GeoPoint.LATITUDE, row);
-    generateDataElement(coordinate.getLongitude(), preName + GeoPoint.LONGITUDE, row);
-    generateDataElement(coordinate.getAltitude(), preName + GeoPoint.ALTITUDE, row);
+  public void formatGeoPoint(GeoPoint coordinate, FormElementModel element, String ordinalValue, Row row) {
+    String preName = element + FormatConsts.HEADER_CONCAT;
+    generateDataElement(coordinate.getLatitude(), preName + GeoPoint.LATITUDE + ordinalValue, row);
+    generateDataElement(coordinate.getLongitude(), preName + GeoPoint.LONGITUDE + ordinalValue, row);
+    generateDataElement(coordinate.getAltitude(), preName + GeoPoint.ALTITUDE + ordinalValue, row);
 
     if (includeAccuracy) {
-      generateDataElement(coordinate.getAccuracy(), preName + GeoPoint.ACCURACY, row);
-    }
-    
+      generateDataElement(coordinate.getAccuracy(), preName + GeoPoint.ACCURACY + ordinalValue, row);
+    }   
   }
 
   @Override
-  public void formatLong(Long longInt, String propertyName, Row row) {
-    generateDataElement(longInt, propertyName, row);
+  public void formatLong(Long longInt, FormElementModel element, String ordinalValue, Row row) {
+    generateDataElement(longInt, element.getGroupQualifiedElementName() + ordinalValue, row);
   }
 
   @Override
@@ -163,8 +162,8 @@ public class KmlElementFormatter implements ElementFormatter {
   }
 
   @Override
-  public void formatString(String string, String propertyName, Row row) {
-    generateDataElement(string, propertyName, row);
+  public void formatString(String string, FormElementModel element, String ordinalValue, Row row) {
+    generateDataElement(string, element.getGroupQualifiedElementName() + ordinalValue, row);
   }
 
   private void generateDataElement(Object value, String name, Row row){

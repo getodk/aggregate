@@ -136,14 +136,14 @@ public class Submission extends SubmissionSet {
 		Row row = new Row(constructSubmissionKey(null));
 		if ( propertyNames == null ) {
 			// we are a Submission -- emit the creation date and id...
-			elemFormatter.formatString(getKey().getKey(),
-					FormElementModel.Metadata.META_INSTANCE_ID.toString(), row);
-			elemFormatter.formatLong(getModelVersion(), 
-					FormElementModel.Metadata.META_MODEL_VERSION.toString(), row);
-			elemFormatter.formatLong(getUiVersion(), 
-					FormElementModel.Metadata.META_UI_VERSION.toString(), row);
-			elemFormatter.formatDateTime(getCreationDate(), 
-					FormElementModel.Metadata.META_SUBMISSION_DATE.toString(), row);
+		   FormElementModel metaId = formDefinition.getElementByName(FormElementModel.Metadata.META_INSTANCE_ID.toString());
+			elemFormatter.formatString(getKey().getKey(), metaId, BasicConsts.EMPTY_STRING, row);
+			FormElementModel metaModelVersion = formDefinition.getElementByName(FormElementModel.Metadata.META_MODEL_VERSION.toString());
+			elemFormatter.formatLong(getModelVersion(), metaModelVersion, BasicConsts.EMPTY_STRING, row);
+			FormElementModel metaUIVersion = formDefinition.getElementByName(FormElementModel.Metadata.META_UI_VERSION.toString());
+			elemFormatter.formatLong(getUiVersion(), metaUIVersion, BasicConsts.EMPTY_STRING, row);
+			FormElementModel metaSubmissionDate = formDefinition.getElementByName(FormElementModel.Metadata.META_SUBMISSION_DATE.toString());
+			elemFormatter.formatDateTime(getCreationDate(), metaSubmissionDate, BasicConsts.EMPTY_STRING, row);
 			// SubmissionSet handles submission-specific elements...
 			List<SubmissionValue> values = getSubmissionValues();
 			for (SubmissionValue value : values) {
@@ -155,19 +155,19 @@ public class Submission extends SubmissionSet {
 					switch ( element.getType() ) {
 					case META_INSTANCE_ID:
 						elemFormatter.formatString(getKey().getKey(),
-								element.getElementName(), row);
+								element, BasicConsts.EMPTY_STRING, row);
 						break;
 					case META_SUBMISSION_DATE:
 						elemFormatter.formatDateTime(getCreationDate(), 
-								element.getElementName(), row);
+								element, BasicConsts.EMPTY_STRING, row);
 						break;
 					case META_UI_VERSION:
 						elemFormatter.formatLong(getUiVersion(), 
-								element.getElementName(), row);
+								element, BasicConsts.EMPTY_STRING, row);
 						break;
 					case META_MODEL_VERSION:
 						elemFormatter.formatLong(getModelVersion(), 
-								element.getElementName(), row);
+								element, BasicConsts.EMPTY_STRING, row);
 						break;
 					}
 				} else {

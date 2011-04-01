@@ -2,6 +2,7 @@ package org.opendatakit.aggregate.format.element;
 
 import java.util.Map;
 
+import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.server.GeopointHeaderIncludes;
 import org.opendatakit.aggregate.submission.type.GeoPoint;
@@ -19,11 +20,11 @@ public class UiElementFormatter extends BasicElementFormatter {
   }
 
   @Override
-  public void formatGeoPoint(GeoPoint coordinate, String propertyName, Row row) {
+  public void formatGeoPoint(GeoPoint coordinate, FormElementModel element, String ordinalValue, Row row) {
     GeopointHeaderIncludes gpsFormatter = null;
 
     if(gpsFormatters != null) {
-      gpsFormatter = gpsFormatters.get(propertyName);
+      gpsFormatter = gpsFormatters.get(element);
     }
   
     if (gpsFormatter == null) {

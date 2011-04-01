@@ -40,7 +40,7 @@ public class FusionTableElementFormatter extends LinkElementFormatter {
   }
   
   @Override
-  public void formatGeoPoint(GeoPoint gp, String propertyName, Row row) {
+  public void formatGeoPoint(GeoPoint gp, FormElementModel element, String ordinalValue, Row row) {
     if (gp != null) {
       // TODO: fix geopoint null bug... the geopoint should be null if it was never in a submission
       if (gp.getLatitude() == null && gp.getLongitude() == null && gp.getAltitude() == null) {

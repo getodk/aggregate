@@ -36,25 +36,25 @@ import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 public interface ElementFormatter {
   public void formatUid(String uri, String propertyName, Row row);
   
-  public void formatBinary(BlobSubmissionType blobSubmission, String propertyName, Row row, CallingContext cc) throws ODKDatastoreException;
+  public void formatBinary(BlobSubmissionType blobSubmission, FormElementModel element, String ordinalValue, Row row, CallingContext cc) throws ODKDatastoreException;
   
-  public void formatBoolean(Boolean bool, String propertyName, Row row);
+  public void formatBoolean(Boolean bool, FormElementModel element, String ordinalValue, Row row);
   
-  public void formatChoices(List<String> choices, String propertyName, Row row);
+  public void formatChoices(List<String> choices, FormElementModel element, String ordinalValue, Row row);
 
-  public void formatDate(Date date, String propertyName, Row row);
+  public void formatDate(Date date, FormElementModel element, String ordinalValue, Row row);
 
-  public void formatDateTime(Date date, String propertyName, Row row);
+  public void formatDateTime(Date date, FormElementModel element, String ordinalValue, Row row);
 
-  public void formatTime(Date date, String propertyName, Row row);
+  public void formatTime(Date date, FormElementModel element, String ordinalValue, Row row);
   
-  public void formatDecimal(BigDecimal dub, String propertyName, Row row);
+  public void formatDecimal(BigDecimal dub, FormElementModel element, String ordinalValue, Row row);
   
-  public void formatGeoPoint(GeoPoint coordinate, String propertyName, Row row);
+  public void formatGeoPoint(GeoPoint coordinate, FormElementModel element, String ordinalValue, Row row);
   
-  public void formatLong(Long longInt, String propertyName, Row row);
+  public void formatLong(Long longInt, FormElementModel element, String ordinalValue, Row row);
   
-  public void formatString(String string, String propertyName, Row row);
+  public void formatString(String string, FormElementModel element, String ordinalValue, Row row);
   
   public void formatRepeats(SubmissionRepeat repeat, FormElementModel repeatElement, Row row, CallingContext cc) throws ODKDatastoreException;
   
