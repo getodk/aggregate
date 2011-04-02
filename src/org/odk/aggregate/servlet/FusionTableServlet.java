@@ -3,6 +3,7 @@ package org.odk.aggregate.servlet;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import javax.persistence.EntityManager;
@@ -119,14 +120,19 @@ public class FusionTableServlet extends ServletUtilBase {
       // create query to make table
       
       FormProperties formProp = new FormProperties(form, em, false);
+      List<String> headers = formProp.getHeaders();
       Map<String, SubmissionFieldType> types = formProp.getHeaderTypes();
       String createQuery = "CREATE TABLE '" + form.getOdkId() + "' (";
-      Iterator<Map.Entry<String, SubmissionFieldType>> entries = types.entrySet().iterator();
+      Iterator<String> entries = headers.iterator();
 
       while (entries.hasNext()) {
-         Map.Entry<String, SubmissionFieldType> entry = entries.next();
-         createQuery += BasicConsts.SINGLE_QUOTE + Compatibility.removeDashes(entry.getKey()) 
-           + BasicConsts.SINGLE_QUOTE + BasicConsts.COLON + entry.getValue().getFusionType().getFusionTypeValue();
+         String entry = entries.next();
+         SubmissionFieldType subtype = types.get(entry);
+         if (subtype != null)
+         {
+           createQuery += BasicConsts.SINGLE_QUOTE + Compatibility.removeDashes(entry) 
+             + BasicConsts.SINGLE_QUOTE + BasicConsts.COLON + subtype.getFusionType().getFusionTypeValue();
+         }
          if (entries.hasNext()) {
             createQuery += BasicConsts.COMMA;
          }
