@@ -34,11 +34,11 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpParams;
-import org.esxx.js.protocol.GAEConnectionManager;
 import org.odk.aggregate.constants.ServletConsts;
 import org.odk.aggregate.form.Form;
 import org.odk.aggregate.submission.Submission;
 import org.odk.aggregate.table.SubmissionFusionTable;
+import org.opendatakit.http.conn.GaeClientConnectionManager;
 
 import com.google.appengine.api.datastore.Key;
 import com.google.gdata.client.GoogleService;
@@ -139,7 +139,8 @@ public class FusionTableOAuth implements RemoteServer {
 
     System.out.println(uri.toString());
     HttpParams httpParams = new BasicHttpParams();
-    ClientConnectionManager mgr = new GAEConnectionManager();
+    ClientConnectionManager mgr = new GaeClientConnectionManager(httpParams, 
+    									GaeClientConnectionManager.DEFAULT_SCHEME_REGISTRY);
     HttpClient client = new DefaultHttpClient(mgr, httpParams);
     HttpPost post = new HttpPost(uri);
     List<NameValuePair> formParams = new ArrayList<NameValuePair>();
