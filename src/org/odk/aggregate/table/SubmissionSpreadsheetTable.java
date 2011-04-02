@@ -54,7 +54,6 @@ import com.google.gdata.util.ServiceException;
 
 public class SubmissionSpreadsheetTable extends SubmissionCsvTable {
 
-  private static final String UNSAFE_CHAR_CLASS = "[\\*\\:\\-\\_]";
 
   private String applicationName;
 
@@ -95,7 +94,6 @@ public class SubmissionSpreadsheetTable extends SubmissionCsvTable {
     int index = 0;
     for (CellEntry cell : cells) {
       String name = headers.get(index);
-      name = name.replaceAll(UNSAFE_CHAR_CLASS, "");
       cell.changeInputValueLocal(name);
       BatchUtils.setBatchId(cell, Integer.toString(index));
       BatchUtils.setBatchOperationType(cell, BatchOperationType.UPDATE);

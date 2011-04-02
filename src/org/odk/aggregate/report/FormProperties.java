@@ -125,7 +125,7 @@ public class FormProperties {
             addToHeaders(node.getElementName() + BasicConsts.DASH + BasicConsts.LATITUDE, node.getSubmissionFieldType());
             addToHeaders(node.getElementName() + BasicConsts.DASH + BasicConsts.LONGITUDE, node.getSubmissionFieldType());
          } else {
-            addToHeaders(node.getElementName(), node.getSubmissionFieldType());
+            addToHeaders(parentName + node.getElementName(), node.getSubmissionFieldType());
          }
         addToHeaders(node.getElementName() + BasicConsts.DASH + BasicConsts.ALTITUDE, node.getSubmissionFieldType());
         addToHeaders(node.getElementName() + BasicConsts.DASH + BasicConsts.ACCURACY, node.getSubmissionFieldType());
