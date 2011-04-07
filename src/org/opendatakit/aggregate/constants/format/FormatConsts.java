@@ -35,5 +35,6 @@ public final class FormatConsts {
   public static final String JSON_VALUE_DELIMITER = BasicConsts.COMMA;
   public static final String TO_STRING_DELIMITER = BasicConsts.COLON + BasicConsts.SPACE;
   public static final String HEADER_PARENT_UID = "*parent_uid*";
+  public static final String TIME_FORMAT_STRING = "%02d:%02d:%02d";
 
 }

@@ -217,6 +217,7 @@ public class UserManagePasswordsServlet extends ServletUtilBase {
 			return;
 		}
 
-		resp.sendRedirect(cc.getWebApplicationURL(AccessManagementServlet.ADDR));
+		// redirect to landing page to force change in https status.
+		resp.sendRedirect(cc.getWebApplicationURL(LandingPageServlet.ADDR));
 	}
 }
