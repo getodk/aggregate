@@ -12,12 +12,18 @@
 	cursor: pointer;
 	padding: 5px 10px 6px 7px;
 }
+.gwt-Button-close {
+	padding: 5px 7px 6px 7px;
+}
 .gwt-Button img {
 	margin: 0px 3px -3px 0px;
 	padding: 0px;
 	border: none;
 	width: 16px;
 	height: 16px;
+}
+.gwt-Button-close img {
+	margin: 0px 0px -3px 0px;
 }
 .gwt-Button:hover {
 	background: #DFF4FF;
