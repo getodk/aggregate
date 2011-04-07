@@ -14,7 +14,9 @@ function onWindowResize() {
 	$("#filters_container").width(sidePanelActualWidth);
 	$("#submission_container").width(width - (2 * sidePanelActualWidth));
 	$("#form_management_table").width(width - sidePanelActualWidth);
-	
+
+	$("html").height(height - 24);
+	$("body").height(height - 24);
 	$("#dynamic_content").height(height - 24);
 	$("#layout_panel").height(height - $("#layout_panel").offset().top - 24);
 	$("#filters_container").height(height - $("#filters_container").offset().top);
