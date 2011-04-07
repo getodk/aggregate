@@ -16,10 +16,14 @@
 package org.opendatakit.aggregate.format.element;
 
 import java.math.BigDecimal;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.TimeZone;
 
 import org.opendatakit.aggregate.CallingContext;
+import org.opendatakit.aggregate.constants.format.FormatConsts;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.submission.SubmissionKey;
@@ -99,6 +103,23 @@ public class BasicElementFormatter implements ElementFormatter {
 
   public void formatDate(Date date, String propertyName, Row row) {
     basicStringConversion(date, row);
+  }
+
+  public void formatDateTime(Date date, String propertyName, Row row) {
+    basicStringConversion(date, row);
+  }
+
+  public void formatTime(Date date, String propertyName, Row row) {
+    if (date != null) {
+    	GregorianCalendar g = new GregorianCalendar(TimeZone.getTimeZone("GMT"));
+    	g.setTime(date);
+        row.addFormattedValue(String.format(FormatConsts.TIME_FORMAT_STRING, 
+							        		g.get(Calendar.HOUR_OF_DAY), 
+							        		g.get(Calendar.MINUTE),
+							        		g.get(Calendar.SECOND)));
+    } else {
+        row.addFormattedValue(null);
+    }
   }
 
   public void formatDecimal(BigDecimal dub, String propertyName, Row row) {

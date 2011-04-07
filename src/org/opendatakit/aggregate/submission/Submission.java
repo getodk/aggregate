@@ -142,7 +142,7 @@ public class Submission extends SubmissionSet {
 					FormElementModel.Metadata.META_MODEL_VERSION.toString(), row);
 			elemFormatter.formatLong(getUiVersion(), 
 					FormElementModel.Metadata.META_UI_VERSION.toString(), row);
-			elemFormatter.formatDate(getCreationDate(), 
+			elemFormatter.formatDateTime(getCreationDate(), 
 					FormElementModel.Metadata.META_SUBMISSION_DATE.toString(), row);
 			// SubmissionSet handles submission-specific elements...
 			List<SubmissionValue> values = getSubmissionValues();
@@ -158,7 +158,7 @@ public class Submission extends SubmissionSet {
 								element.getElementName(), row);
 						break;
 					case META_SUBMISSION_DATE:
-						elemFormatter.formatDate(getCreationDate(), 
+						elemFormatter.formatDateTime(getCreationDate(), 
 								element.getElementName(), row);
 						break;
 					case META_UI_VERSION:

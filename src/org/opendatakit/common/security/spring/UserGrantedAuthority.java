@@ -123,13 +123,24 @@ public final class UserGrantedAuthority extends CommonFieldsBase {
 		UserGrantedAuthority prototype = assertRelation(ds, user);
 
 		boolean hasAccessRole = false;
+		List<EntityKey> staleEntries = new ArrayList<EntityKey>();
 		
 		Query q = ds.createQuery(prototype, user);
-		q.addFilter(USER, FilterOperation.EQUAL, uriSuperUser);
-		List<?> values = q.executeDistinctValueForDataField(GRANTED_AUTHORITY);
-		for ( Object value : values ) {
-			String v = (String) value;
-			if ( GrantedAuthorityNames.ROLE_ACCESS_ADMIN.name().equals(v) ) hasAccessRole = true;
+		q.addFilter(GRANTED_AUTHORITY, FilterOperation.EQUAL, 
+					GrantedAuthorityNames.ROLE_ACCESS_ADMIN.name());
+		List<? extends CommonFieldsBase> values = q.executeQuery(0);
+		for ( CommonFieldsBase b : values ) {
+			UserGrantedAuthority auth = (UserGrantedAuthority) b;
+			if ( auth.getUser().equals(uriSuperUser) ) {
+				hasAccessRole = true;
+			} else {
+				staleEntries.add( new EntityKey( prototype, auth.getUri()) );
+			}
+		}
+		
+		if ( !staleEntries.isEmpty() ) {
+			// we have former superUsers defined -- remove them...
+			ds.deleteEntities(staleEntries, user);
 		}
 
 		if ( !hasAccessRole ) {
