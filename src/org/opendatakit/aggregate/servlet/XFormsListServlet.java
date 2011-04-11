@@ -59,13 +59,14 @@ public class XFormsListServlet extends ServletUtilBase {
   @Override
   public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 	CallingContext cc = ContextFactory.getCallingContext(this, req);
+    addOpenRosaHeaders(resp);
     
     try {
       QueryFormList formsList = new QueryFormList(false, cc);
       XFormsXmlTable formFormatter = new XFormsXmlTable(formsList, cc.getServerURL());
 
       resp.setContentType(HtmlConsts.RESP_TYPE_XML);
-      resp.getWriter().print(formFormatter.generateXmlListOfForms());
+      formFormatter.generateXmlListOfForms(resp.getWriter());
     } catch (ODKDatastoreException e) {
       errorRetreivingData(resp);
     } catch (ODKIncompleteSubmissionData e) {

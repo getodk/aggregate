@@ -60,6 +60,7 @@ public class XFormsManifestXmlTable {
 	d.setStandalone(true);
 	d.setEncoding(HtmlConsts.UTF8_ENCODE);
 	Element e = d.createElement(XML_TAG_NAMESPACE, XFormsTableConsts.MANIFEST_TAG);
+	e.setPrefix(null, XML_TAG_NAMESPACE);
 	d.addChild(0, Node.ELEMENT, e);
 	int idx = 0;
 	e.addChild(idx++, Node.IGNORABLE_WHITESPACE, BasicConsts.NEW_LINE);
@@ -85,15 +86,15 @@ public class XFormsManifestXmlTable {
 	  String hash = m.getContentHash(i);
 
 	  int feIdx = 0;
-	  Element fileEntryElement = d.createElement(BasicConsts.EMPTY_STRING, XFormsTableConsts.MEDIA_FILE_TAG);
+	  Element fileEntryElement = d.createElement(XML_TAG_NAMESPACE, XFormsTableConsts.MEDIA_FILE_TAG);
 	  e.addChild(idx++, Node.ELEMENT, fileEntryElement);
-	  Element fileNameElement = d.createElement(BasicConsts.EMPTY_STRING, XFormsTableConsts.FILE_NAME_TAG);
+	  Element fileNameElement = d.createElement(XML_TAG_NAMESPACE, XFormsTableConsts.FILE_NAME_TAG);
 	  fileEntryElement.addChild(feIdx++, Node.ELEMENT, fileNameElement);
 	  fileNameElement.addChild(0, Node.TEXT, filename);
-	  Element hashElement = d.createElement(BasicConsts.EMPTY_STRING, XFormsTableConsts.HASH_TAG);
+	  Element hashElement = d.createElement(XML_TAG_NAMESPACE, XFormsTableConsts.HASH_TAG);
 	  fileEntryElement.addChild(feIdx++, Node.ELEMENT, hashElement);
 	  hashElement.addChild(0, Node.TEXT, hash);
-	  Element downloadElement = d.createElement(BasicConsts.EMPTY_STRING, XFormsTableConsts.DOWNLOAD_URL_TAG);
+	  Element downloadElement = d.createElement(XML_TAG_NAMESPACE, XFormsTableConsts.DOWNLOAD_URL_TAG);
 	  fileEntryElement.addChild(feIdx++, Node.IGNORABLE_WHITESPACE, BasicConsts.NEW_LINE);
 	  fileEntryElement.addChild(feIdx++, Node.ELEMENT, downloadElement);
 	  {

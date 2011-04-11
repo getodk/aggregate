@@ -70,7 +70,8 @@ public class XFormsDownloadServlet extends ServletUtilBase {
   public void doGet(HttpServletRequest req, HttpServletResponse resp)
       throws IOException {
 	CallingContext cc = ContextFactory.getCallingContext(this, req);
-	
+	addOpenRosaHeaders(resp);
+
     // verify parameters are present
     String keyString = getParameter(req, ServletConsts.BLOB_KEY);
     String downloadAsAttachmentString = getParameter(req, ServletConsts.AS_ATTACHMENT);
