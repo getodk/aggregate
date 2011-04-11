@@ -59,7 +59,12 @@ public class ContextFactory {
     		// for now, only store the servlet context and the serverUrl
     		ctxt = servlet.getServletContext();
     		String path = ctxt.getContextPath();
-    	    if (req.getServerPort() != HtmlConsts.WEB_PORT) {
+    		boolean expectedPort = 
+    			(req.getScheme().equalsIgnoreCase("http") &&
+    					req.getServerPort() == HtmlConsts.WEB_PORT) ||
+    	    	(req.getScheme().equalsIgnoreCase("https") &&
+    	    				req.getServerPort() == HtmlConsts.SECURE_WEB_PORT);
+    		if (!expectedPort) {
     	    	serverUrl = req.getServerName() + BasicConsts.COLON + 
     	    		Integer.toString(req.getServerPort()) + path;
     	    } else {

@@ -23,12 +23,17 @@ import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.TimeZone;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.opendatakit.aggregate.CallingContext;
+import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.common.constants.BasicConsts;
 import org.opendatakit.common.constants.HtmlConsts;
 import org.opendatakit.common.constants.HtmlUtil;
@@ -145,6 +150,27 @@ public abstract class CommonServletBase extends HttpServlet {
     out.write(HtmlUtil.createBeginTag(HtmlConsts.CENTERING_DIV));
     out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.H1, pageName));
     out.write(HtmlUtil.createEndTag(HtmlConsts.DIV));
+  }
+  
+  /**
+   * Determine the OpenRosa version number on this request.
+   * @param req
+   * @return null if unspecified (1.1.5 and earlier); otherwise, e.g., "1.0"
+   */
+  protected final Double getOpenRosaVersion(HttpServletRequest req) {
+	String value = req.getHeader(ServletConsts.OPEN_ROSA_VERSION_HEADER);
+	if ( value == null || value.length() == 0 ) return null;
+	Double d = Double.valueOf(value);
+	return d;
+  }
+  
+  protected final void addOpenRosaHeaders(HttpServletResponse resp) {
+	resp.setHeader(ServletConsts.OPEN_ROSA_VERSION_HEADER, ServletConsts.OPEN_ROSA_VERSION );
+    GregorianCalendar g = new GregorianCalendar(TimeZone.getTimeZone("GMT"));
+    g.setTime(new Date());
+    SimpleDateFormat formatter = new SimpleDateFormat("E, dd MMM yyyy HH:mm:ss zz");
+    formatter.setCalendar(g);
+    resp.setHeader(ServletConsts.OPEN_ROSA_DATE_HEADER,	formatter.format(new Date()));
   }
 
   protected abstract void emitPageHeader(PrintWriter out,  boolean displayLinks, CallingContext cc);
