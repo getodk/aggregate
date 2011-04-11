@@ -20,8 +20,8 @@ package org.opendatakit.aggregate.servlet;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
+import java.util.logging.Logger;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -146,6 +146,20 @@ public class SubmissionServlet extends ServletUtilBase {
   public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 	CallingContext cc = ContextFactory.getCallingContext(this, req);
 
+	Double openRosaVersion = getOpenRosaVersion(req);
+	if ( openRosaVersion != null ) {
+		/*
+		 * If we have an OpenRosa version header, assume that this is due to a 
+		 * channel redirect (http: => https:) and that the request was originally
+		 * a HEAD request.  Reply with a response appropriate for a HEAD request.
+		 * 
+		 * It is unclear whether this is a GAE issue or a Spring Frameworks issue.
+		 */
+		Logger.getLogger(this.getClass().getName()).warning("Inside doGet -- replying as doHead");
+		doHead(req, resp);
+		return;
+	}
+
 	PrintWriter out = resp.getWriter();
 
 	StringBuilder headerString = new StringBuilder();
@@ -168,8 +182,9 @@ public class SubmissionServlet extends ServletUtilBase {
    */
   @Override
   protected void doHead(HttpServletRequest req, HttpServletResponse resp)
-			throws ServletException, IOException {
+			throws IOException {
 	CallingContext cc = ContextFactory.getCallingContext(this, req);
+	Logger.getLogger(this.getClass().getName()).info("Inside doHead");
 
 	addOpenRosaHeaders(resp);
 	String serverUrl = cc.getServerURL();
