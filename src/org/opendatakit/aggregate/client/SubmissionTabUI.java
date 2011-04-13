@@ -116,7 +116,8 @@ public class SubmissionTabUI extends TabPanel {
 				}
 				filterPanel.clear();
 				setupFiltersDataPanel(view);
-				
+				parent.getTimer().restartTimer(parent);
+				parent.update();
 			}
 			
 		});
@@ -214,7 +215,7 @@ public class SubmissionTabUI extends TabPanel {
 		newFilter.addClickHandler(new ClickHandler(){
 			@Override
 			public void onClick(ClickEvent event) {
-				filterPopup = new CreateNewFilterPopup(dataTable, def);
+				filterPopup = new CreateNewFilterPopup(dataTable, def, parent);
 				filterPopup.setPopupPositionAndShow(
 						new PopupPanel.PositionCallback() {
 							@Override
@@ -347,6 +348,8 @@ public class SubmissionTabUI extends TabPanel {
 					group.removeFilter(remove);
 					filterPanel.clear();
 					setupFiltersDataPanel(view);
+					parent.getTimer().restartTimer(parent);
+					parent.update();
 				} 
 			  });
 			  row++;

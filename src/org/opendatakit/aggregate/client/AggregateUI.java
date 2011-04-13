@@ -82,19 +82,14 @@ public class AggregateUI implements EntryPoint {
   private ListBox formsBox = new ListBox();
   private ListBox filtersBox = new ListBox();
   private List<FilterGroup> allGroups = new ArrayList<FilterGroup>();
+  private RefreshTimer timer;
   
   public AggregateUI() {
     formSvc = GWT.create(FormService.class);
     listOfForms = new FlexTable();
     
     // Setup timer to refresh list automatically.
-    Timer refreshTimer = new Timer() {
-       @Override
-       public void run() {
-         getFormList();
-       }
-    };
-    refreshTimer.scheduleRepeating(REFRESH_INTERVAL);
+    setTimer(new RefreshTimer(this));
   }
 
   public void requestUpdatedSubmissionData(List<FilterGroup> groups) {
@@ -190,6 +185,7 @@ public class AggregateUI implements EntryPoint {
     view.add(def);
 	
 	// Create sub menu navigation
+    getTimer().restartTimer(this);
     getFormList();
     manageNav = new ManageTabUI(listOfForms, this);
     submissionNav = new SubmissionTabUI(view, formsBox, filtersBox, 
@@ -429,5 +425,14 @@ private void getFilterList(final String id) {
     }
   }
   
+  public void update() {
+	  getFormList();
+  }
+public void setTimer(RefreshTimer timer) {
+	this.timer = timer;
+}
+public RefreshTimer getTimer() {
+	return timer;
+}
   
 }
