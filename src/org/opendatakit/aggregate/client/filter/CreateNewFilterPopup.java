@@ -3,6 +3,7 @@ package org.opendatakit.aggregate.client.filter;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.submission.Column;
 import org.opendatakit.aggregate.client.submission.SubmissionService;
 import org.opendatakit.aggregate.client.submission.SubmissionServiceAsync;
@@ -35,7 +36,7 @@ public class CreateNewFilterPopup extends PopupPanel{
 	}
 	
 	public CreateNewFilterPopup(FlexTable data, 
-			final FilterGroup def) {	
+			final FilterGroup def, final AggregateUI aggregateUI) {	
 		super(false); //do not close popup when user clicks out of it
 		this.def = def;
 		getSubmissions();
@@ -143,6 +144,8 @@ public class CreateNewFilterPopup extends PopupPanel{
 					Filter newFilter = new ColumnFilter(kr, columnfilterheaders,(long) def.getFilters().size());
 					def.addFilter(newFilter);
 				}
+				aggregateUI.getTimer().restartTimer(aggregateUI);
+				aggregateUI.update();
 				hide();
 			}
 		
