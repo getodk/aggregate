@@ -11,6 +11,8 @@ import org.opendatakit.aggregate.client.filter.FilterService;
 import org.opendatakit.aggregate.client.filter.FilterServiceAsync;
 import org.opendatakit.aggregate.client.filter.RowFilter;
 import org.opendatakit.aggregate.client.visualization.CreateNewVisualizationPopup;
+import org.opendatakit.aggregate.constants.common.FormOrFilter;
+import org.opendatakit.aggregate.constants.common.PageUpdates;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -117,7 +119,7 @@ public class SubmissionTabUI extends TabPanel {
 				filterPanel.clear();
 				setupFiltersDataPanel(view);
 				parent.getTimer().restartTimer(parent);
-				parent.update();
+				parent.update(FormOrFilter.FORM, PageUpdates.SUBMISSIONDATA);
 			}
 			
 		});
@@ -308,6 +310,7 @@ public class SubmissionTabUI extends TabPanel {
 					}
 					//Save the new filter
 					addFilterGroup(newFilter, oldgroup);
+					parent.update(FormOrFilter.FILTER, PageUpdates.ALL);
 				}
 			}
 			  
@@ -349,7 +352,7 @@ public class SubmissionTabUI extends TabPanel {
 					filterPanel.clear();
 					setupFiltersDataPanel(view);
 					parent.getTimer().restartTimer(parent);
-					parent.update();
+					parent.update(FormOrFilter.FORM, PageUpdates.SUBMISSIONDATA);
 				} 
 			  });
 			  row++;
