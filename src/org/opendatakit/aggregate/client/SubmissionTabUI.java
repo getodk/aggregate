@@ -44,7 +44,6 @@ public class SubmissionTabUI extends TabPanel {
 	private HorizontalPanel filterPanel = new HorizontalPanel();
 	private FlexTable formAndGoalSelectionTable = new FlexTable();
 	private CreateNewFilterPopup filterPopup = new CreateNewFilterPopup();
-	private HorizontalPanel filtersData = new HorizontalPanel();
 	private UrlHash hash;
 	private List<FilterGroup> view;
 	private ListBox formsBox;
@@ -54,6 +53,7 @@ public class SubmissionTabUI extends TabPanel {
 	private AggregateUI parent;
 	private FilterServiceAsync filterSvc;
 	private List<FilterGroup> allGroups;
+	private TreeItem title;
 	
 	public SubmissionTabUI(List<FilterGroup> view,
 			ListBox formsBox, ListBox filtersBox, FlexTable dataTable, 
@@ -87,8 +87,7 @@ public class SubmissionTabUI extends TabPanel {
 	public VerticalPanel setupSubmissionsPanel() {
 		VerticalPanel reportContent = new VerticalPanel();
 		reportContent.add(setupFormsAndGoalsPanel());
-		filterPanel = setupFiltersDataPanel(view);
-		reportContent.add(filterPanel);
+		reportContent.add(setupFiltersDataPanel(view));
 		return reportContent;
 	}
 	
@@ -116,8 +115,7 @@ public class SubmissionTabUI extends TabPanel {
 					if(groupName.compareTo(group.getName()) == 0)
 						view.add(group);
 				}
-				filterPanel.clear();
-				setupFiltersDataPanel(view);
+				updateFiltersDataPanel(view);
 				parent.getTimer().restartTimer(parent);
 				parent.update(FormOrFilter.FORM, PageUpdates.SUBMISSIONDATA);
 			}
@@ -197,11 +195,21 @@ public class SubmissionTabUI extends TabPanel {
 		};
 	}
 	
+	public HorizontalPanel updateFiltersDataPanel(List<FilterGroup> groups) {
+		title.removeItems();
+		for (FilterGroup group : groups) {
+			TreeItem itemGroup = loadFilterGroup(group);
+			title.addItem(itemGroup);
+			title.setState(true);
+		}
+		return filterPanel;
+	}
+	
 	public HorizontalPanel setupFiltersDataPanel(
 			List<FilterGroup> groups) {
 		//create filter tree
 		Tree activeFilters = new Tree();
-		TreeItem title = new TreeItem(new Label("Active Filters"));
+		title = new TreeItem(new Label("Active Filters"));
 		activeFilters.addItem(title);
 		  
 		for (FilterGroup group : groups) {
@@ -232,8 +240,7 @@ public class SubmissionTabUI extends TabPanel {
 				  
 				  @Override
 				  public void onClose(CloseEvent<PopupPanel> event) {
-					  filterPanel.clear();
-					  setupFiltersDataPanel(view);
+					  updateFiltersDataPanel(view);
 				  }
 				
 			  });
@@ -244,7 +251,7 @@ public class SubmissionTabUI extends TabPanel {
 		  FlowPanel filtersContainer = new FlowPanel();
 		  filtersContainer.add(activeFilters);
 		  filtersContainer.getElement().setId("filters_container");
-		  filtersData.add(filtersContainer);
+		  filterPanel.add(filtersContainer);
 		  
 	    // view data
 	    dataTable.getRowFormatter().addStyleName(0, "titleBar");
@@ -252,12 +259,12 @@ public class SubmissionTabUI extends TabPanel {
 	    FlowPanel submissionContainer = new FlowPanel();
 	    submissionContainer.getElement().setId("submission_container");
 	    submissionContainer.add(dataTable);
-	    filtersData.add(submissionContainer);
+	    filterPanel.add(submissionContainer);
 	    
-	    filtersData.getElement().setId("filters_data");
-		  filtersData.getElement().getFirstChildElement().getFirstChildElement().getFirstChildElement().setId("filters_panel");
-	    filtersData.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_JUSTIFY);
-	    return filtersData;
+	    filterPanel.getElement().setId("filters_data");
+		  filterPanel.getElement().getFirstChildElement().getFirstChildElement().getFirstChildElement().setId("filters_panel");
+	    filterPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_JUSTIFY);
+	    return filterPanel;
 	  }
 	  
 	  public TreeItem loadFilterGroup(final FilterGroup group) {
@@ -349,8 +356,7 @@ public class SubmissionTabUI extends TabPanel {
 					Filter remove = (Filter)removeFilter.getElement()
 						.getPropertyObject("filter");
 					group.removeFilter(remove);
-					filterPanel.clear();
-					setupFiltersDataPanel(view);
+					updateFiltersDataPanel(view);
 					parent.getTimer().restartTimer(parent);
 					parent.update(FormOrFilter.FORM, PageUpdates.SUBMISSIONDATA);
 				} 
@@ -376,8 +382,7 @@ public class SubmissionTabUI extends TabPanel {
 			  }
 			  @Override
 			  public void onSuccess(Boolean result) {
-				  filterPanel.clear();
-				  setupFiltersDataPanel(view);
+				  updateFiltersDataPanel(view);
 			  }
 		  };
 		  FilterGroup newGroup = new FilterGroup(
