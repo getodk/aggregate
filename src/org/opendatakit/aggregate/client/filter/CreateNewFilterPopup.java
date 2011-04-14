@@ -9,6 +9,8 @@ import org.opendatakit.aggregate.client.submission.SubmissionService;
 import org.opendatakit.aggregate.client.submission.SubmissionServiceAsync;
 import org.opendatakit.aggregate.client.submission.SubmissionUISummary;
 import org.opendatakit.aggregate.constants.common.FilterOperation;
+import org.opendatakit.aggregate.constants.common.FormOrFilter;
+import org.opendatakit.aggregate.constants.common.PageUpdates;
 import org.opendatakit.aggregate.constants.common.RowOrCol;
 import org.opendatakit.aggregate.constants.common.Visibility;
 
@@ -145,7 +147,7 @@ public class CreateNewFilterPopup extends PopupPanel{
 					def.addFilter(newFilter);
 				}
 				aggregateUI.getTimer().restartTimer(aggregateUI);
-				aggregateUI.update();
+				aggregateUI.update(FormOrFilter.FORM, PageUpdates.SUBMISSIONDATA);
 				hide();
 			}
 		

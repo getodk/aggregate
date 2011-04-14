@@ -1,5 +1,8 @@
 package org.opendatakit.aggregate.client;
 
+import org.opendatakit.aggregate.constants.common.FormOrFilter;
+import org.opendatakit.aggregate.constants.common.PageUpdates;
+
 import com.google.gwt.user.client.Timer;
 
 public class RefreshTimer {
@@ -17,7 +20,7 @@ public class RefreshTimer {
 	    		   this.cancel();
 	    	   } else {
 	    		   intervalsElapsed++;
-		    	   aggregateUI.update();	   
+		    	   aggregateUI.update(FormOrFilter.BOTH, PageUpdates.ALL);	   
 	    	   }
 	       }
 	    };
