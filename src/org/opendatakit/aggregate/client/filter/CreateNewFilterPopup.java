@@ -74,7 +74,7 @@ public class CreateNewFilterPopup extends PopupPanel{
 		comp.addItem(FilterOperation.LESS_THAN_OR_EQUAL.toString());
 		comp.addItem(FilterOperation.EQUAL.toString());
 		comp.addItem(FilterOperation.GREATER_THAN_OR_EQUAL.toString());
-		comp.addItem(FilterOperation.GREATER_THAN_OR_EQUAL.toString());
+		comp.addItem(FilterOperation.GREATER_THAN.toString());
 		//value input
 		final TextBox var = new TextBox();
 		

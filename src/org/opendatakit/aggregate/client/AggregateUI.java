@@ -303,9 +303,8 @@ public class AggregateUI implements EntryPoint {
 
 	private void fillFilterDropDown(FilterSet set) {
 		int selected = filtersBox.getSelectedIndex();
-		filtersBox.clear();
-		allGroups.clear();
-		filtersBox.addItem("none");
+		if(filtersBox.getItemCount() == 0)
+			filtersBox.addItem("none");
 
 		//if you are sick and tired of groups populating... uncomment this code to clean all of your groups
 		//	  for(FilterGroup group : set.getGroups()) {
@@ -314,8 +313,15 @@ public class AggregateUI implements EntryPoint {
 		//			  break;
 		//	  }
 		for(FilterGroup group : set.getGroups()) {
-			filtersBox.addItem(group.getName());
-			allGroups.add(group);
+			int i = 0;
+			for(i = 0; i < filtersBox.getItemCount(); i++) {
+				if(group.getName().compareTo(filtersBox.getItemText(i)) == 0)
+					break;
+			}
+			if(i == filtersBox.getItemCount()) {
+				filtersBox.addItem(group.getName());
+				allGroups.add(group);
+			}
 		}
 		if(selected == -1)
 			filtersBox.setSelectedIndex(0);
