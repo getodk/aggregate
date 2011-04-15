@@ -58,10 +58,12 @@
 	<bean id="worksheet_creator"
 		class="org.opendatakit.aggregate.task.tomcat.WorksheetCreatorImpl" />
 	<bean id="form_delete" class="org.opendatakit.aggregate.task.tomcat.FormDeleteImpl" />
+	<bean id="purge_submissions" class="org.opendatakit.aggregate.task.tomcat.PurgeOlderSubmissionsImpl" />
 	<bean id="upload_task"
 		class="org.opendatakit.aggregate.task.tomcat.UploadSubmissionsImpl" />
 	<bean id="kml_task" class="org.opendatakit.aggregate.task.tomcat.KmlGeneratorImpl" />
 	<bean id="csv_task" class="org.opendatakit.aggregate.task.tomcat.CsvGeneratorImpl" />
+    <bean id="http_client_factory" class="org.opendatakit.common.utils.tomcat.TomcatHttpClientFactoryImpl" />
 
 	<bean id="watchdog" class="org.opendatakit.aggregate.task.tomcat.WatchdogImpl">
 		<property name="datastore" ref="datastore" />

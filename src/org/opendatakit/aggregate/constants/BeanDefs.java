@@ -23,7 +23,9 @@ package org.opendatakit.aggregate.constants;
  */
 public class BeanDefs {
 
+  public static final String HTTP_CLIENT_FACTORY = "http_client_factory";
   public static final String FORM_DELETE_BEAN = "form_delete";
+  public static final String PURGE_OLDER_SUBMISSIONS_BEAN = "purge_submissions";
   public static final String USER_BEAN = "user_service";
   public static final String DATASTORE_BEAN = "datastore";
   public static final String UPLOAD_TASK_BEAN = "upload_task";
