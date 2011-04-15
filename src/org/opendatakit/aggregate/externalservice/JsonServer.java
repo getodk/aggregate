@@ -18,16 +18,25 @@
 package org.opendatakit.aggregate.externalservice;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-import java.net.HttpURLConnection;
-import java.net.URL;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.httpclient.params.HttpClientParams;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ByteArrayEntity;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.HttpParams;
 import org.opendatakit.aggregate.CallingContext;
+import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.externalservice.ExternalServiceOption;
 import org.opendatakit.aggregate.constants.externalservice.ExternalServiceType;
 import org.opendatakit.aggregate.constants.externalservice.JsonServerConsts;
@@ -47,6 +56,7 @@ import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
 import org.opendatakit.common.security.User;
+import org.opendatakit.common.utils.HttpClientFactory;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -127,7 +137,43 @@ public class JsonServer extends AbstractExternalService implements ExternalServi
     return objectEntity.getServerUrl();
   }
 
-  private void createForm() throws ODKExternalServiceException {
+  private void sendRequest(String uriString, byte[] postBody, CallingContext cc) throws ODKExternalServiceException {
+    try {
+        // TODO: change so not hard coded
+        URI uri = new URI(uriString);
+        
+        System.out.println(uri.toString());
+        HttpParams httpParams = new BasicHttpParams();
+        httpParams.setIntParameter( HttpClientParams.SO_TIMEOUT, 
+      		  					  JsonServerConsts.CONNECTION_TIMEOUT);
+        
+        HttpClientFactory factory = (HttpClientFactory) cc.getBean(BeanDefs.HTTP_CLIENT_FACTORY);
+        HttpClient client = factory.createHttpClient(httpParams);
+        HttpPost post = new HttpPost(uri);
+        post.setEntity(new ByteArrayEntity(postBody));
+        
+        HttpResponse resp = client.execute(post);
+
+        if (resp.getStatusLine().getStatusCode() == HttpServletResponse.SC_OK) {
+          InputStreamReader is = new InputStreamReader(resp.getEntity().getContent());
+          BufferedReader reader = new BufferedReader(is);
+
+          String responseLine = reader.readLine();
+          while (responseLine != null) {
+            System.out.print(responseLine);
+            responseLine = reader.readLine();
+          }
+          is.close();
+        } else {
+        	throw new ODKExternalServiceException(resp.getStatusLine().getReasonPhrase() + " (" + 
+        			resp.getStatusLine().getStatusCode() + ")");
+        }
+      } catch (Exception e) {
+        throw new ODKExternalServiceException(e);
+      }
+  }
+  
+  private void createForm(CallingContext cc) throws ODKExternalServiceException {
     System.out.println("BEGINNING INSERTION");
 
     JsonArray def = new JsonArray();
@@ -157,38 +203,11 @@ public class JsonServer extends AbstractExternalService implements ExternalServi
       def.add(element);
     }
 
-    System.out.println(def.toString());
+    String postBody = def.toString();
+    System.out.println(postBody);
 
-    try {
-      // TODO: change so not hard coded
-      URL url = new URL("http://floresta.rhizalabs.com/cbi/upload/createDataset");
-      HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-      connection.setDoOutput(true);
-      connection.setRequestMethod("POST");
-      connection.setConnectTimeout(JsonServerConsts.CONNECTION_TIMEOUT);
-
-      OutputStreamWriter writer = new OutputStreamWriter(connection.getOutputStream(), "UTF-8");
-      writer.write(def.toString());
-
-      writer.close();
-
-      System.out.println(connection.getResponseMessage());
-      if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
-        InputStreamReader is = new InputStreamReader(connection.getInputStream());
-        BufferedReader reader = new BufferedReader(is);
-
-        String responseLine = reader.readLine();
-        while (responseLine != null) {
-          System.out.print(responseLine);
-          responseLine = reader.readLine();
-        }
-        is.close();
-      } else {
-        System.out.println("FAILURE OF RHIZA DATA COLLECTION CREATION");
-      }
-    } catch (Exception e) {
-      throw new ODKExternalServiceException(e);
-    }
+    sendRequest("http://floresta.rhizalabs.com/cbi/upload/createDataset", 
+    			postBody.getBytes(), cc);
   }
 
   @Override
@@ -202,31 +221,20 @@ public class JsonServer extends AbstractExternalService implements ExternalServi
   @Override
   public void sendSubmissions(List<Submission> submissions, CallingContext cc) throws ODKExternalServiceException {
     try {
-
-      URL url = new URL(getServerUrl());
-      HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-      connection.setDoOutput(true);
-      connection.setRequestMethod("POST");
-      connection.setConnectTimeout(JsonServerConsts.CONNECTION_TIMEOUT);
+    
+      ByteArrayOutputStream baStream = new ByteArrayOutputStream();
+      PrintWriter pWriter = new PrintWriter(baStream);
 
       System.out.println("Sending JSON Submissions");
-
-      OutputStreamWriter writer = new OutputStreamWriter(connection.getOutputStream(), "UTF-8");
-      PrintWriter pWriter = new PrintWriter(writer);
 
       JsonFormatter formatter = new JsonFormatter(pWriter, null, form, cc);
       formatter.processSubmissions(submissions, cc);
 
-      writer.flush();
+      pWriter.flush();
 
-      // TODO: PROBLEM - NOT good for only one response code check at the
-      // end
-
-      if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
-        return; // ok
-      } else {
-        // TODO: decide what to do
-      }
+      // TODO: PROBLEM - NOT good for only one response code check at the end
+      this.sendRequest( getServerUrl(), 
+    		  			baStream.toByteArray(), cc);
 
     } catch (Exception e) {
       throw new ODKExternalServiceException(e);

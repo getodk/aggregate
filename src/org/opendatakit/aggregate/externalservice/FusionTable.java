@@ -19,11 +19,8 @@ package org.opendatakit.aggregate.externalservice;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLEncoder;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -31,13 +28,24 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletResponse;
+
 import oauth.signpost.OAuthConsumer;
-import oauth.signpost.basic.DefaultOAuthConsumer;
+import oauth.signpost.commonshttp.CommonsHttpOAuthConsumer;
 import oauth.signpost.exception.OAuthCommunicationException;
 import oauth.signpost.exception.OAuthExpectationFailedException;
 import oauth.signpost.exception.OAuthMessageSignerException;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.HttpParams;
 import org.opendatakit.aggregate.CallingContext;
+import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.ErrorConsts;
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.ServletConsts;
@@ -61,13 +69,13 @@ import org.opendatakit.aggregate.submission.SubmissionSet;
 import org.opendatakit.aggregate.submission.SubmissionValue;
 import org.opendatakit.aggregate.submission.type.RepeatSubmissionType;
 import org.opendatakit.common.constants.BasicConsts;
-import org.opendatakit.common.constants.HtmlConsts;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.EntityKey;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
 import org.opendatakit.common.security.User;
+import org.opendatakit.common.utils.HttpClientFactory;
 
 import com.google.gdata.client.GoogleService;
 import com.google.gdata.client.authn.oauth.GoogleOAuthHelper;
@@ -187,7 +195,7 @@ public class FusionTable extends AbstractExternalService implements ExternalServ
           + createCsvString(row.getFormattedValues().iterator());
       OAuthToken authToken = new OAuthToken(objectEntity.getAuthToken(), objectEntity
           .getAuthTokenSecret());
-      executeStmt(insertQuery, authToken);
+      executeStmt(insertQuery, authToken, cc);
     } catch (Exception e) {
       e.printStackTrace();
       throw new ODKExternalServiceException(e);
@@ -296,25 +304,34 @@ public class FusionTable extends AbstractExternalService implements ExternalServ
    *           if FusionTables returns a response with an HTTP response code
    *           other than 200.
    */
-  private static String executeStmt(String statement, OAuthToken authToken)
+  private static String executeStmt(String statement, OAuthToken authToken, CallingContext cc)
       throws ServiceException, IOException, ODKExternalServiceException {
-    OAuthConsumer consumer = new DefaultOAuthConsumer(ServletConsts.OAUTH_CONSUMER_KEY,
+    OAuthConsumer consumer = new CommonsHttpOAuthConsumer(ServletConsts.OAUTH_CONSUMER_KEY,
         ServletConsts.OAUTH_CONSUMER_SECRET);
     consumer.setTokenWithSecret(authToken.getToken(), authToken.getTokenSecret());
 
-    URL url = new URL(FusionTableConsts.FUSION_SCOPE + HtmlConsts.BEGIN_PARAM
-        + FusionTableConsts.BEGIN_SQL
-        + URLEncoder.encode(statement, FusionTableConsts.FUSTABLE_ENCODE));
-
-    System.out.println(url.toString());
-
-    HttpURLConnection request = (HttpURLConnection) url.openConnection();
-    request.setDoOutput(true);
-    request.setDoInput(true);
-    request.setRequestMethod(HtmlConsts.POST);
-    request.setFixedLengthStreamingMode(0);
+    URI uri;
     try {
-      consumer.sign(request);
+    	uri = new URI(FusionTableConsts.FUSION_SCOPE);
+    } catch ( Exception e ) {
+    	e.printStackTrace();
+    	throw new ODKExternalServiceException(e);
+    }
+    
+    System.out.println(uri.toString());
+    HttpParams httpParams = new BasicHttpParams();
+    
+    HttpClientFactory factory = (HttpClientFactory) cc.getBean(BeanDefs.HTTP_CLIENT_FACTORY);
+    HttpClient client = factory.createHttpClient(httpParams);
+    HttpPost post = new HttpPost(uri);
+    List<NameValuePair> formParams = new ArrayList<NameValuePair>();
+    formParams.add( new BasicNameValuePair("sql", statement));
+    UrlEncodedFormEntity form = new UrlEncodedFormEntity(formParams, 
+    				FusionTableConsts.FUSTABLE_ENCODE);
+    post.setEntity(form);
+
+    try {
+      consumer.sign(post);
     } catch (OAuthMessageSignerException e) {
       e.printStackTrace();
       throw new ServiceException("Failed to sign request: " + e.getMessage());
@@ -326,21 +343,19 @@ public class FusionTable extends AbstractExternalService implements ExternalServ
       throw new IOException("Failed to sign request: " + e.getMessage());
     }
 
+    HttpResponse resp = client.execute(post);
     // TODO: this section of code is possibly causing 'WARNING: Going to buffer
     // response body of large or unknown size. Using getResponseBodyAsStream
     // instead is recommended.'
     // The WARNING is most likely only happening when running appengine locally,
     // but we should investigate to make sure
-    InputStream is = request.getInputStream();
-    request.connect();
-
-    BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+    BufferedReader reader = new BufferedReader(new InputStreamReader(resp.getEntity().getContent()));
     StringBuffer response = new StringBuffer();
     String responseLine;
     while ((responseLine = reader.readLine()) != null) {
       response.append(responseLine);
     }
-    if (request.getResponseCode() != HttpURLConnection.HTTP_OK) {
+    if (resp.getStatusLine().getStatusCode() != HttpServletResponse.SC_OK) {
       throw new ODKExternalServiceException(response.toString() + statement);
     }
     return response.toString();
@@ -391,13 +406,13 @@ public class FusionTable extends AbstractExternalService implements ExternalServ
     FormElementModel root = form.getTopLevelGroupElement();
 
     String tableid = executeFusionTableCreation(form, fusionTableService, headerFormatter, root,
-        authToken);
+        authToken, cc);
 
     List<TableId> repeatIds = new ArrayList<TableId>();
 
     for (FormElementModel repeatGroupElement : form.getRepeatGroupsInModel()) {
       String id = executeFusionTableCreation(form, fusionTableService, headerFormatter,
-          repeatGroupElement, authToken);
+          repeatGroupElement, authToken, cc);
       TableId repeatId = new TableId(id, repeatGroupElement);
       repeatIds.add(repeatId);
     }
@@ -406,13 +421,13 @@ public class FusionTable extends AbstractExternalService implements ExternalServ
   }
 
   private static String executeFusionTableCreation(Form form, GoogleService fusionTableService,
-      HeaderFormatter headerFormatter, FormElementModel root, OAuthToken authToken)
+      HeaderFormatter headerFormatter, FormElementModel root, OAuthToken authToken, CallingContext cc)
       throws ODKExternalServiceException {
 
     String resultRequest;
     try {
       String createStmt = createFusionTableStatement(form, root, headerFormatter);
-      resultRequest = executeStmt(createStmt, authToken);
+      resultRequest = executeStmt(createStmt, authToken, cc);
     } catch (Exception e) {
       e.printStackTrace();
       throw new ODKExternalServiceException(e);

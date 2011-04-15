@@ -94,6 +94,15 @@
 		<url-pattern>/extern/externalServices</url-pattern>
 	</servlet-mapping>
 
+    <servlet>
+        <servlet-name>purgePublishedSubmissions</servlet-name>
+        <servlet-class>org.opendatakit.aggregate.servlet.ExternalServicesPurgeServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>purgePublishedSubmissions</servlet-name>
+        <url-pattern>/admin/purgePublishedSubmissions</url-pattern>
+    </servlet-mapping>
+
 	<servlet>
 		<servlet-name>forms</servlet-name>
 		<servlet-class>org.opendatakit.aggregate.servlet.FormsServlet</servlet-class>
@@ -325,6 +334,15 @@
 		<servlet-name>formDeleteTask</servlet-name>
 		<url-pattern>/gae/formDeleteTask</url-pattern>
 	</servlet-mapping>
+
+    <servlet>
+        <servlet-name>purgeOlderSubmissionsTask</servlet-name>
+        <servlet-class>org.opendatakit.aggregate.task.gae.servlet.PurgeOlderSubmissionsTaskServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>purgeOlderSubmissionsTask</servlet-name>
+        <url-pattern>/gae/purgeOlderSubmissionsTask</url-pattern>
+    </servlet-mapping>
 	
 	<servlet>
 		<servlet-name>watchdog</servlet-name>

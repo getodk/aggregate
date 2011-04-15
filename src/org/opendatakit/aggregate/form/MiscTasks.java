@@ -65,7 +65,8 @@ public class MiscTasks {
 	 */
 	public enum TaskType {
 		DELETE_FORM(TaskLockType.FORM_DELETION,10),
-		WORKSHEET_CREATE(TaskLockType.WORKSHEET_CREATION,10);
+		WORKSHEET_CREATE(TaskLockType.WORKSHEET_CREATION,10),
+		PURGE_OLDER_SUBMISSIONS(TaskLockType.PURGE_OLDER_SUBMISSIONS,10);
 		
 		private final TaskLockType lockType;
 		private final int maxAttemptCount;
@@ -78,8 +79,12 @@ public class MiscTasks {
 		public final String toString() {
 			if ( this == DELETE_FORM ) {
 				return "Delete form";
-			} else {
+			} else if ( this == WORKSHEET_CREATE ) {
 				return "Create Google Worsheet";
+			} else if ( this == PURGE_OLDER_SUBMISSIONS ) {
+				return "Purge Older Submissions";
+			} else {
+				throw new IllegalStateException("String representation not defined for TaskType " + this.name());
 			}
 		}
 		
