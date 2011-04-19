@@ -24,7 +24,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.format.FormTableConsts;
@@ -39,6 +38,7 @@ import org.opendatakit.aggregate.servlet.KmlSettingsServlet;
 import org.opendatakit.aggregate.servlet.QueryServlet;
 import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.common.constants.BasicConsts;
+import org.opendatakit.common.web.CallingContext;
 
 /**
  * Generates an html table of forms for the servlets

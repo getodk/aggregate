@@ -18,7 +18,6 @@ package org.opendatakit.aggregate.task;
 import java.util.Date;
 import java.util.List;
 
-import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
@@ -31,6 +30,7 @@ import org.opendatakit.aggregate.form.PersistentResults;
 import org.opendatakit.aggregate.query.submission.QueryByDate;
 import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+import org.opendatakit.common.web.CallingContext;
 
 /**
  * Common worker implementation for restarting stalled tasks.

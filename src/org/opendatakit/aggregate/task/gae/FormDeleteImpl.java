@@ -15,12 +15,12 @@
  */
 package org.opendatakit.aggregate.task.gae;
 
-import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.task.FormDelete;
 import org.opendatakit.aggregate.task.gae.servlet.FormDeleteTaskServlet;
+import org.opendatakit.common.web.CallingContext;
 
 import com.google.appengine.api.taskqueue.Queue;
 import com.google.appengine.api.taskqueue.QueueFactory;

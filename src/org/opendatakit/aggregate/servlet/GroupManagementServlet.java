@@ -27,7 +27,6 @@ import java.util.TreeSet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.ErrorConsts;
 import org.opendatakit.aggregate.constants.HtmlUtil;
@@ -35,6 +34,7 @@ import org.opendatakit.common.constants.HtmlConsts;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.security.spring.GrantedAuthorityHierarchyTable;
 import org.opendatakit.common.security.spring.GrantedAuthorityNames;
+import org.opendatakit.common.web.CallingContext;
 
 /**
  * Displays all the groups defined by the system and allows users to define

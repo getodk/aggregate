@@ -27,6 +27,7 @@ import org.opendatakit.common.constants.HtmlConsts;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.security.UserService;
+import org.opendatakit.common.web.CallingContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
 /**

@@ -17,7 +17,6 @@ package org.opendatakit.aggregate.form;
 
 import java.util.List;
 
-import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.datamodel.FormDataModel;
 import org.opendatakit.aggregate.datamodel.TopLevelDynamicBase;
 import org.opendatakit.aggregate.form.FormDefinition.OrdinalSequence;
@@ -27,6 +26,7 @@ import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.PersistConsts;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.security.User;
+import org.opendatakit.common.web.CallingContext;
 
 /**
  * 

@@ -25,6 +25,13 @@ package org.opendatakit.common.persistence;
  * 
  */
 public class PersistConsts {
+
+	/**
+   * The shortest interval for which all datetime values are
+   * preserved across all platforms.  MySql's TIMESTAMP
+   * only keeps time to the nearest second... .
+   */
+  public static final Long MIN_DATETIME_RESOLUTION = 1000L;
   
   /**
    * The length of the longest simple string we declare.

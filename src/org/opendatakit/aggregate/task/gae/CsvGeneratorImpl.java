@@ -15,13 +15,13 @@
  */
 package org.opendatakit.aggregate.task.gae;
 
-import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.task.CsvGenerator;
 import org.opendatakit.aggregate.task.gae.servlet.CsvGeneratorTaskServlet;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+import org.opendatakit.common.web.CallingContext;
 
 import com.google.appengine.api.taskqueue.Queue;
 import com.google.appengine.api.taskqueue.QueueFactory;

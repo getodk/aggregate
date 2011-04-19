@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.opendatakit.aggregate;
+package org.opendatakit.common.web;
 
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.security.User;
@@ -21,8 +21,9 @@ import org.opendatakit.common.security.UserService;
 
 /**
  * Context in which the call occurs.  
- * The standard implementation is {@link ContextFactory.CallingContextImpl}.
+ * The standard implementation is in ContextFactory.
  * An alternative implementation is provided for the Tomcat watchdog executor.
+ * An alternative implementation should be provided for test apparatus.
  *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
@@ -34,7 +35,7 @@ public interface CallingContext {
 	 * @param beanName
 	 * @return the bean or an exception
 	 */
-	Object getBean(String beanName);
+	public Object getBean(String beanName);
 	
 	/**
 	 * @return the datastore

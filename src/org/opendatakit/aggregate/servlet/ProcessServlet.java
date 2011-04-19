@@ -24,7 +24,6 @@ import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.ErrorConsts;
@@ -43,6 +42,7 @@ import org.opendatakit.aggregate.task.FormDelete;
 import org.opendatakit.common.constants.BasicConsts;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+import org.opendatakit.common.web.CallingContext;
 
 /**
  * Processes request from web based interface based on users button press

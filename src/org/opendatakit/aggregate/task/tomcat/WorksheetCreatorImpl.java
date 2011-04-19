@@ -17,7 +17,6 @@ package org.opendatakit.aggregate.task.tomcat;
 
 import java.util.Map;
 
-import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.externalservice.ExternalServiceConsts;
 import org.opendatakit.aggregate.constants.externalservice.ExternalServiceOption;
@@ -29,6 +28,7 @@ import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.task.WorksheetCreator;
 import org.opendatakit.aggregate.task.WorksheetCreatorWorkerImpl;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+import org.opendatakit.common.web.CallingContext;
 
 /**
  * This is a singleton bean.  It cannot have any per-request state.

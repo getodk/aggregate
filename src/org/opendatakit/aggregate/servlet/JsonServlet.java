@@ -23,7 +23,6 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.ErrorConsts;
 import org.opendatakit.aggregate.constants.ServletConsts;
@@ -37,6 +36,7 @@ import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.common.constants.BasicConsts;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
+import org.opendatakit.common.web.CallingContext;
 
 /**
  * 

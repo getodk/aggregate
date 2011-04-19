@@ -19,7 +19,6 @@ package org.opendatakit.aggregate.process;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.aggregate.submission.SubmissionKey;
@@ -27,6 +26,7 @@ import org.opendatakit.aggregate.submission.SubmissionKeyPart;
 import org.opendatakit.common.persistence.EntityKey;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
+import org.opendatakit.common.web.CallingContext;
 
 /**
  * Takes a list of submission keys and performs recursive delete on all elements

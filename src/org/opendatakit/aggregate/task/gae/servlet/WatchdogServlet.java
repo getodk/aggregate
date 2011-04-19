@@ -20,7 +20,6 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
@@ -29,6 +28,7 @@ import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
 import org.opendatakit.aggregate.servlet.ServletUtilBase;
 import org.opendatakit.aggregate.task.WatchdogWorkerImpl;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+import org.opendatakit.common.web.CallingContext;
 
 /**
  * 

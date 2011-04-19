@@ -28,7 +28,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.http.HttpStatus;
-import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.HtmlUtil;
@@ -46,6 +45,7 @@ import org.opendatakit.aggregate.submission.SubmissionKeyPart;
 import org.opendatakit.aggregate.task.PurgeOlderSubmissions;
 import org.opendatakit.common.constants.HtmlConsts;
 import org.opendatakit.common.persistence.CommonFieldsBase;
+import org.opendatakit.common.web.CallingContext;
 
 /**
  * Servlet handling the 'purge sent records' confirmation and task 

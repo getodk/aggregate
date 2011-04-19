@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.opendatakit.aggregate.datamodel;
+package org.opendatakit.common.datamodel;
 
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.PersistConsts;

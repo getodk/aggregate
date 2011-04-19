@@ -38,21 +38,25 @@ import org.opendatakit.common.security.User;
  */
 public abstract class CommonFieldsBase {
 	
+	public static final String URI_COLUMN_NAME = "_URI";
 	public static final String LAST_UPDATE_DATE_COLUMN_NAME = "_LAST_UPDATE_DATE";
+	public static final String LAST_UPDATE_URI_USER_COLUMN_NAME = "_LAST_UPDATE_URI_USER";
+	public static final String CREATION_DATE_COLUMN_NAME = "_CREATION_DATE";
+	public static final String CREATOR_URI_USER_COLUMN_NAME = "_CREATOR_URI_USER";
 
 	/** standard audit fields */
 	
 	/** creator */
-	private static final DataField CREATOR_URI_USER = new DataField("_CREATOR_URI_USER",DataField.DataType.URI, false, PersistConsts.URI_STRING_LEN);
+	private static final DataField CREATOR_URI_USER = new DataField(CREATOR_URI_USER_COLUMN_NAME,DataField.DataType.URI, false, PersistConsts.URI_STRING_LEN);
 	/** creation date */
-	private static final DataField CREATION_DATE = new DataField("_CREATION_DATE", DataField.DataType.DATETIME, false);
+	private static final DataField CREATION_DATE = new DataField(CREATION_DATE_COLUMN_NAME, DataField.DataType.DATETIME, false);
 	/** last user to update record */
-	private static final DataField LAST_UPDATE_URI_USER = new DataField("_LAST_UPDATE_URI_USER", DataField.DataType.URI, true, PersistConsts.URI_STRING_LEN);
+	private static final DataField LAST_UPDATE_URI_USER = new DataField(LAST_UPDATE_URI_USER_COLUMN_NAME, DataField.DataType.URI, true, PersistConsts.URI_STRING_LEN);
 	/** last update date */
 	private static final DataField LAST_UPDATE_DATE = new DataField(LAST_UPDATE_DATE_COLUMN_NAME, DataField.DataType.DATETIME, false).setIndexable(IndexType.ORDERED);
 
 	/** primary key for all tables */
-	private static final DataField URI = new DataField("_URI", DataField.DataType.URI, false, PersistConsts.URI_STRING_LEN).setIndexable(IndexType.HASH);
+	private static final DataField URI = new DataField(URI_COLUMN_NAME, DataField.DataType.URI, false, PersistConsts.URI_STRING_LEN).setIndexable(IndexType.HASH);
 
 	
 	/** member variables */

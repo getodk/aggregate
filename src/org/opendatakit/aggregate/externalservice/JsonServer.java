@@ -35,7 +35,6 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpParams;
-import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.externalservice.ExternalServiceOption;
 import org.opendatakit.aggregate.constants.externalservice.ExternalServiceType;
@@ -57,6 +56,7 @@ import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.utils.HttpClientFactory;
+import org.opendatakit.common.web.CallingContext;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;

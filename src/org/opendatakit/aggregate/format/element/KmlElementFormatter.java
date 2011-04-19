@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 
-import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.format.FormTableConsts;
@@ -40,6 +39,7 @@ import org.opendatakit.aggregate.submission.type.BlobSubmissionType;
 import org.opendatakit.aggregate.submission.type.GeoPoint;
 import org.opendatakit.common.constants.BasicConsts;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+import org.opendatakit.common.web.CallingContext;
 
 /**
  * 

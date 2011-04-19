@@ -21,12 +21,12 @@ package org.opendatakit.aggregate.submission;
 
 import java.util.List;
 
-import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.format.element.ElementFormatter;
 import org.opendatakit.common.persistence.EntityKey;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
+import org.opendatakit.common.web.CallingContext;
 
 /**
  * Interface for submission value that can be used to store a submission value

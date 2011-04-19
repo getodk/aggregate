@@ -19,7 +19,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
@@ -31,6 +30,7 @@ import org.opendatakit.aggregate.submission.SubmissionRepeat;
 import org.opendatakit.aggregate.submission.SubmissionSet;
 import org.opendatakit.aggregate.submission.type.BlobSubmissionType;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+import org.opendatakit.common.web.CallingContext;
 
 /**
  * 
