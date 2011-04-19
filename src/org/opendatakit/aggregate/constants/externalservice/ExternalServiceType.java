@@ -15,7 +15,6 @@
  */
 package org.opendatakit.aggregate.constants.externalservice;
 
-import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.externalservice.ExternalService;
 import org.opendatakit.aggregate.externalservice.FormServiceCursor;
 import org.opendatakit.aggregate.externalservice.FusionTable;
@@ -25,6 +24,7 @@ import org.opendatakit.aggregate.servlet.FusionTableServlet;
 import org.opendatakit.aggregate.servlet.JsonServlet;
 import org.opendatakit.aggregate.servlet.SpreadsheetServlet;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
+import org.opendatakit.common.web.CallingContext;
 
 /**
  * Enum of all the available external services. Provides UI and type mapping

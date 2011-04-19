@@ -11,15 +11,14 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.opendatakit.aggregate.datamodel;
+package org.opendatakit.common.datamodel;
 
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
-import org.opendatakit.aggregate.CallingContext;
-import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.EntityKey;
@@ -29,6 +28,7 @@ import org.opendatakit.common.persistence.Query.FilterOperation;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
 import org.opendatakit.common.security.User;
+import org.opendatakit.common.web.CallingContext;
 
 /**
  * Manipulator class for handling binary attachments.  To use, create an instance
@@ -132,7 +132,7 @@ public class BinaryContentManipulator {
 					uriVersionedContent);
 			q.addSort(bcbRef.part, Direction.ASCENDING);
 			List<? extends CommonFieldsBase> bcbList = q
-					.executeQuery(ServletConsts.FETCH_LIMIT);
+					.executeQuery(0);
 			for (CommonFieldsBase cb : bcbList) {
 				dbBcbEntityList.add((BinaryContentRefBlob) cb);
 			}
@@ -202,6 +202,58 @@ public class BinaryContentManipulator {
 
 	public int getAttachmentCount() {
 		return attachments.size();
+	}
+
+	/**
+	 * @param ordinal
+	 * @return the last update date of this attachment.
+	 */
+	public Date getLastUpdateDate(int ordinal) {
+		BinaryContent b = attachments.get(ordinal - 1);
+		if (!Long.valueOf(ordinal).equals(b.getOrdinalNumber())) {
+			// we are somehow out of sync!
+			throw new IllegalStateException("missing attachment declaration");
+		}
+		return b.getLastUpdateDate();
+	}
+
+	/**
+	 * @param ordinal
+	 * @return the uri User performing the last update of this attachment.
+	 */
+	public String getLastUpdateUriUser(int ordinal) {
+		BinaryContent b = attachments.get(ordinal - 1);
+		if (!Long.valueOf(ordinal).equals(b.getOrdinalNumber())) {
+			// we are somehow out of sync!
+			throw new IllegalStateException("missing attachment declaration");
+		}
+		return b.getLastUpdateUriUser();
+	}
+
+	/**
+	 * @param ordinal
+	 * @return the creation date of this attachment.
+	 */
+	public Date getCreationDate(int ordinal) {
+		BinaryContent b = attachments.get(ordinal - 1);
+		if (!Long.valueOf(ordinal).equals(b.getOrdinalNumber())) {
+			// we are somehow out of sync!
+			throw new IllegalStateException("missing attachment declaration");
+		}
+		return b.getCreationDate();
+	}
+
+	/**
+	 * @param ordinal
+	 * @return the uri User who created this attachment.
+	 */
+	public String getCreatorUriUser(int ordinal) {
+		BinaryContent b = attachments.get(ordinal - 1);
+		if (!Long.valueOf(ordinal).equals(b.getOrdinalNumber())) {
+			// we are somehow out of sync!
+			throw new IllegalStateException("missing attachment declaration");
+		}
+		return b.getCreatorUriUser();
 	}
 
 	/**
@@ -329,6 +381,7 @@ public class BinaryContentManipulator {
 				attachments.add(matchedBc);
 
 			// persist the binary data
+			@SuppressWarnings("unused")
 			BlobManipulator subBlob = new BlobManipulator(byteArray, 
 					matchedBc.getUri(), vrefRelation, blbRelation, topLevelKey, cc);
 
@@ -363,7 +416,7 @@ public class BinaryContentManipulator {
 	}
 
 	/**
-	 * Restore to a BlobSubmissionType with no attachments at all.
+	 * Remove this binary content from the datastore.
 	 * 
 	 * @param datastore
 	 * @param user

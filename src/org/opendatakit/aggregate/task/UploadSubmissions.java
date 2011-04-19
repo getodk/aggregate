@@ -15,9 +15,9 @@
  */
 package org.opendatakit.aggregate.task;
 
-import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
 import org.opendatakit.aggregate.externalservice.FormServiceCursor;
+import org.opendatakit.common.web.CallingContext;
 
 /**
  * API for creation of form upload (to an external service) tasks.

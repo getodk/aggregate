@@ -21,7 +21,6 @@ import java.util.Collection;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.ErrorConsts;
 import org.opendatakit.common.persistence.Datastore;
@@ -31,6 +30,7 @@ import org.opendatakit.common.security.User;
 import org.opendatakit.common.security.spring.RegisteredUsersTable;
 import org.opendatakit.common.utils.EmailParser;
 import org.opendatakit.common.utils.EmailParser.Email;
+import org.opendatakit.common.web.CallingContext;
 
 /**
  * Supports creating a set of users and setting their credential values

@@ -21,9 +21,9 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.common.constants.BasicConsts;
+import org.opendatakit.common.web.CallingContext;
 
 /**
  * 

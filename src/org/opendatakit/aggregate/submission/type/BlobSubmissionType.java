@@ -19,15 +19,10 @@ package org.opendatakit.aggregate.submission.type;
 
 import java.util.List;
 
-import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.constants.ErrorConsts;
 import org.opendatakit.aggregate.constants.format.FormatConsts;
-import org.opendatakit.aggregate.datamodel.BinaryContent;
-import org.opendatakit.aggregate.datamodel.BinaryContentManipulator;
-import org.opendatakit.aggregate.datamodel.BinaryContentRefBlob;
 import org.opendatakit.aggregate.datamodel.FormDataModel;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
-import org.opendatakit.aggregate.datamodel.RefBlob;
 import org.opendatakit.aggregate.exception.ODKConversionException;
 import org.opendatakit.aggregate.form.FormDefinition;
 import org.opendatakit.aggregate.format.Row;
@@ -36,9 +31,14 @@ import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.submission.SubmissionKeyPart;
 import org.opendatakit.aggregate.submission.SubmissionValue;
 import org.opendatakit.common.constants.BasicConsts;
+import org.opendatakit.common.datamodel.BinaryContent;
+import org.opendatakit.common.datamodel.BinaryContentManipulator;
+import org.opendatakit.common.datamodel.BinaryContentRefBlob;
+import org.opendatakit.common.datamodel.RefBlob;
 import org.opendatakit.common.persistence.EntityKey;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
+import org.opendatakit.common.web.CallingContext;
 
 /**
  * Data Storage Converter for Blob Type

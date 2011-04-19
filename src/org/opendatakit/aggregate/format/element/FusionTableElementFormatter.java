@@ -17,13 +17,13 @@ package org.opendatakit.aggregate.format.element;
 
 import java.math.BigDecimal;
 
-import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.submission.SubmissionRepeat;
 import org.opendatakit.aggregate.submission.type.GeoPoint;
 import org.opendatakit.common.constants.BasicConsts;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+import org.opendatakit.common.web.CallingContext;
 
 /**
  * 

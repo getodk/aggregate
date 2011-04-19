@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
-import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.Datastore;
@@ -27,6 +26,7 @@ import org.opendatakit.common.persistence.PersistConsts;
 import org.opendatakit.common.persistence.DataField.IndexType;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.security.User;
+import org.opendatakit.common.web.CallingContext;
 
 /**
  * This entity defines the mapping between a submission element and a 

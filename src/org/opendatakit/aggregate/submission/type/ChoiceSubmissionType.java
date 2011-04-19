@@ -18,7 +18,6 @@ package org.opendatakit.aggregate.submission.type;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.datamodel.SelectChoice;
 import org.opendatakit.aggregate.exception.ODKConversionException;
@@ -35,6 +34,7 @@ import org.opendatakit.common.persistence.Query.FilterOperation;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
 import org.opendatakit.common.security.User;
+import org.opendatakit.common.web.CallingContext;
 
 /**
  * 

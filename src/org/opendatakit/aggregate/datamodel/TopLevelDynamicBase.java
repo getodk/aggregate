@@ -15,6 +15,7 @@ package org.opendatakit.aggregate.datamodel;
 
 import java.util.Date;
 
+import org.opendatakit.common.datamodel.DynamicCommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.security.User;
 

@@ -13,12 +13,12 @@
  */
 package org.opendatakit.aggregate.externalservice;
 
-import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.security.User;
+import org.opendatakit.common.web.CallingContext;
 
 /**
  * 

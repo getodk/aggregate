@@ -17,10 +17,10 @@
 
 package org.opendatakit.aggregate.submission;
 
-import org.opendatakit.aggregate.CallingContext;
-import org.opendatakit.aggregate.datamodel.BinaryContentManipulator;
 import org.opendatakit.aggregate.exception.ODKConversionException;
+import org.opendatakit.common.datamodel.BinaryContentManipulator;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+import org.opendatakit.common.web.CallingContext;
 
 /**
  * Interface for submission field that can be used to store

@@ -21,10 +21,10 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.util.Date;
 
-import org.opendatakit.aggregate.CallingContext;
-import org.opendatakit.aggregate.datamodel.DynamicCommonFieldsBase;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.exception.ODKConversionException;
+import org.opendatakit.common.datamodel.DynamicCommonFieldsBase;
+import org.opendatakit.common.web.CallingContext;
 
 /**
  * Data Storage Converter for Data Type

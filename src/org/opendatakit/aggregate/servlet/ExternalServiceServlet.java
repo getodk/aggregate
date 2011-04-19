@@ -24,7 +24,6 @@ import java.io.UnsupportedEncodingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.ServletConsts;
@@ -34,6 +33,7 @@ import org.opendatakit.aggregate.constants.externalservice.ExternalServiceType;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.common.constants.HtmlConsts;
+import org.opendatakit.common.web.CallingContext;
 
 /**
  * Servlet to setup connection to an external repository

@@ -22,9 +22,9 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.common.constants.HtmlUtil;
+import org.opendatakit.common.web.CallingContext;
 
 
 /**

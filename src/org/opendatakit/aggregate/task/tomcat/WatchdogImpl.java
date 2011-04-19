@@ -19,7 +19,6 @@ import java.net.InetAddress;
 
 import javax.servlet.ServletContext;
 
-import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.task.CsvGenerator;
 import org.opendatakit.aggregate.task.FormDelete;
@@ -33,6 +32,7 @@ import org.opendatakit.common.constants.HtmlConsts;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.security.UserService;
+import org.opendatakit.common.web.CallingContext;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.SmartLifecycle;
 import org.springframework.scheduling.TaskScheduler;
