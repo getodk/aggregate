@@ -544,6 +544,15 @@ public class AbstractRelation implements Relation {
 				f = AbstractRelation.this.getDataField(
 						AbstractRelation.unCamelCase(fieldName));
 			}
+			if (f.getName().equals(CommonFieldsBase.CREATION_DATE_COLUMN_NAME) ||
+				f.getName().equals(CommonFieldsBase.CREATOR_URI_USER_COLUMN_NAME) ||
+				f.getName().equals(CommonFieldsBase.LAST_UPDATE_DATE_COLUMN_NAME) ||
+				f.getName().equals(CommonFieldsBase.LAST_UPDATE_URI_USER_COLUMN_NAME) ||
+				f.getName().equals(CommonFieldsBase.URI_COLUMN_NAME) ) {
+				throw new IllegalArgumentException("Cannot set the value of a metadata field: " 
+						+ f.getName());
+			}
+
 			switch ( f.getDataType() ) {
 			case INTEGER:
 				backingObject.setLongField(f, 
