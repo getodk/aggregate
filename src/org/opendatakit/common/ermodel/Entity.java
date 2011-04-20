@@ -155,6 +155,30 @@ public interface Entity {
 	public String getString(DataField fieldName);
 	
 	/**
+	 * Given a field name, and a string representation of the value, 
+	 * this interprets an UPPER_CASE name as the true field name, and
+	 * otherwise attempts to convert a camelCase name to CAMEL_CASE.
+	 * It then retrieves the DataField for that name and, based upon
+	 * the datatype of that field, parses the value to obtain the 
+	 * appropriately-typed value to store into this field.
+	 * 
+	 * @param fieldName
+	 * @param value
+	 */
+	public void setField( String fieldName, String value );
+	
+	/**
+	 * Given a field name, this interprets an UPPER_CASE name as the
+	 * true field name, and otherwise attempts to convert a camelCase
+	 * name to CAMEL_CASE. It then retrieves the value of the 
+	 * DataField for that name and converts it to a string.
+	 * 
+	 * @param fieldName
+	 * @return
+	 */
+	public String getField( String fieldName );
+	
+	/**
 	 * Save this entity into the datastore.
 	 * 
 	 * @param cc

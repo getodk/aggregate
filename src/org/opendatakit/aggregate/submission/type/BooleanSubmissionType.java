@@ -62,11 +62,14 @@ public class BooleanSubmissionType extends SubmissionSingleValueBase<Boolean> {
 	 */
 	@Override
 	public void setValueFromString(String value) {
-		Boolean b = Boolean.parseBoolean(value);
+		Boolean b = null;
 		if ( value != null ) {
+			b = Boolean.parseBoolean(value);
 			if ( value.compareToIgnoreCase("ok") == 0) {
 				b = Boolean.TRUE;
 			} else if ( value.compareToIgnoreCase("yes") == 0) {
+				b = Boolean.TRUE;
+			} else if ( value.compareToIgnoreCase("true") == 0 ) {
 				b = Boolean.TRUE;
 			} else if ( value.compareToIgnoreCase("T") == 0 ) {
 				b = Boolean.TRUE;
