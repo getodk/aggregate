@@ -17,13 +17,12 @@
 
 package org.opendatakit.aggregate.submission.type;
 
-import java.text.DateFormat;
-import java.text.ParseException;
 import java.util.Date;
 
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.exception.ODKConversionException;
 import org.opendatakit.common.datamodel.DynamicCommonFieldsBase;
+import org.opendatakit.common.utils.WebUtils;
 import org.opendatakit.common.web.CallingContext;
 
 /**
@@ -53,19 +52,13 @@ public abstract class DateSubmissionType extends SubmissionSingleValueBase<Date>
 	 */
 	@Override
 	public void setValueFromString(String value) throws ODKConversionException {
-		if ( value == null ) {
-			setValue(null);
-		} else {
-			// TODO: deal with locale information
-			DateFormat date = DateFormat.getDateInstance();
-			try {
-				Date newDate = date.parse(value);
-	
-				setValue(newDate);
-			} catch (ParseException e) {
-				throw new ODKConversionException(e);
-			}
+		Date d;
+		try {
+			d = WebUtils.parseDate(value);
+		} catch( IllegalArgumentException e ) {
+			throw new ODKConversionException(e);
 		}
+		setValue(d);
 	}
 	
 	/**

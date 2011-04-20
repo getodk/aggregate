@@ -14,8 +14,6 @@
 package org.opendatakit.common.ermodel;
 
 import java.math.BigDecimal;
-import java.text.DateFormat;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -33,6 +31,7 @@ import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
 import org.opendatakit.common.security.User;
+import org.opendatakit.common.utils.WebUtils;
 import org.opendatakit.common.web.CallingContext;
 
 /**
@@ -44,38 +43,6 @@ import org.opendatakit.common.web.CallingContext;
  *
  */
 public class AbstractRelation implements Relation {
-	
-	/**
-	 * Useful static method for constructing a persistence layer name
-	 * from a camelCase name. This inserts an underscore
-	 * before a leading capital letter and toUpper()s the
-	 * resulting string.
-	 * <ul><li>thisURL => THIS_URL</li>
-	 * <li>myFirstObject => MY_FIRST_OBJECT</li></ul>
-	 * 
-	 * @param name
-	 * @return
-	 */
-	public static final String unCamelCase(String name) {
-		StringBuilder b = new StringBuilder();
-		boolean lastCap = true;
-		for ( int i = 0 ; i < name.length() ; ++i ) {
-			char ch = name.charAt(i);
-			if ( Character.isUpperCase(ch) ) {
-				if ( !lastCap ) {
-					b.append('_');
-				}
-				lastCap = true;
-				b.append(ch);
-			} else if ( Character.isLetterOrDigit(ch) ){
-				lastCap = false;
-				b.append(Character.toUpperCase(ch));
-			} else {
-				throw new IllegalArgumentException("Argument is not a valid camelCase name: " + name);
-			}
-		}
-		return b.toString();
-	}
 	
 	/**
 	 * Standard constructor.  Use for tables your application knows about and
@@ -542,7 +509,7 @@ public class AbstractRelation implements Relation {
 				f = AbstractRelation.this.getDataField(fieldName);
 			} else {
 				f = AbstractRelation.this.getDataField(
-						AbstractRelation.unCamelCase(fieldName));
+						WebUtils.unCamelCase(fieldName));
 			}
 			if (f.getName().equals(CommonFieldsBase.CREATION_DATE_COLUMN_NAME) ||
 				f.getName().equals(CommonFieldsBase.CREATOR_URI_USER_COLUMN_NAME) ||
@@ -555,29 +522,25 @@ public class AbstractRelation implements Relation {
 
 			switch ( f.getDataType() ) {
 			case INTEGER:
-				backingObject.setLongField(f, 
+				try {
+					backingObject.setLongField(f, 
 						(value == null) ? null : Long.parseLong(value));
+				} catch ( NumberFormatException e ) {
+					throw new IllegalArgumentException("Unparsable integer value: " + value + 
+							" for field: " + f.getName());
+				}
 				break;
 			case DECIMAL:
-				backingObject.setNumericField(f, 
+				try {
+					backingObject.setNumericField(f, 
 						(value == null) ? null : new BigDecimal(value));
+				} catch ( NumberFormatException e ) {
+					throw new IllegalArgumentException("Unparsable integer value: " + value + 
+							" for field: " + f.getName());
+				}
 				break;
 			case BOOLEAN:
-				Boolean b = null;
-				if ( value != null ) {
-					b = Boolean.parseBoolean(value);
-					if ( value.compareToIgnoreCase("ok") == 0) {
-						b = Boolean.TRUE;
-					} else if ( value.compareToIgnoreCase("yes") == 0) {
-						b = Boolean.TRUE;
-					} else if ( value.compareToIgnoreCase("true") == 0 ) {
-						b = Boolean.TRUE;
-					} else if ( value.compareToIgnoreCase("T") == 0 ) {
-						b = Boolean.TRUE;
-					} else if ( value.compareToIgnoreCase("Y") == 0 ) {
-						b = Boolean.TRUE;
-					}
-				}
+				Boolean b = WebUtils.parseBoolean(value);
 				backingObject.setBooleanField(f, b);
 				break;
 			case STRING:
@@ -588,17 +551,7 @@ public class AbstractRelation implements Relation {
 				}
 				break;
 			case DATETIME:
-				Date d = null;
-				if ( value != null ) {
-					// TODO: deal with locale information
-					DateFormat date = DateFormat.getDateInstance();
-					try {
-						d = date.parse(value);
-					} catch (ParseException e) {
-						throw new IllegalArgumentException("Unparsable date: " + value +
-								" for field " + f.getName());
-					}
-				}
+				Date d = WebUtils.parseDate(value);
 				backingObject.setDateField(f, d);
 				break;
 			default:
@@ -613,7 +566,7 @@ public class AbstractRelation implements Relation {
 				f = AbstractRelation.this.getDataField(fieldName);
 			} else {
 				f = AbstractRelation.this.getDataField(
-						AbstractRelation.unCamelCase(fieldName));
+						WebUtils.unCamelCase(fieldName));
 			}
 			switch ( f.getDataType() ) {
 			case INTEGER:
@@ -633,8 +586,7 @@ public class AbstractRelation implements Relation {
 				return backingObject.getStringField(f);
 			case DATETIME:
 				Date d = backingObject.getDateField(f);
-				if ( d == null ) return null;
-				return d.toString();
+				return WebUtils.iso8601Date(d);
 			default:
 				throw new IllegalArgumentException("Invalid type for field " + f.getName());
 			}

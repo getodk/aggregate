@@ -19,6 +19,8 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.PersistConsts;
 import org.opendatakit.common.persistence.Query.FilterOperation;
@@ -32,6 +34,7 @@ import org.opendatakit.common.web.TestContextFactory;
  * @author mitchellsundt@gmail.com
  *
  */
+@RunWith(org.junit.runners.JUnit4.class)
 public class RelationTest extends TestCase {
 
 	@Override
@@ -48,7 +51,7 @@ public class RelationTest extends TestCase {
 
 	static class MyRelation extends AbstractRelation {
 
-		static final DataField fieldStr = new DataField("THIS_IS_IT", DataField.DataType.STRING, true );
+		static final DataField fieldStr = new DataField("THIS_IS_IT", DataField.DataType.STRING, true, 90L );
 		static final DataField fieldInt = new DataField("SECOND_FIELD", DataField.DataType.INTEGER, true);
 		static final DataField fieldDbl = new DataField("THIRD_FIELD", DataField.DataType.DECIMAL, true);
 		static final DataField fieldDate = new DataField("FOURTH_FIELD", DataField.DataType.DATETIME, true);
@@ -66,6 +69,7 @@ public class RelationTest extends TestCase {
 		}
 	}
 	
+	@Test
 	public void testCase1() throws ODKDatastoreException {
 		CallingContext cc = TestContextFactory.getCallingContext();
 		
@@ -104,4 +108,67 @@ public class RelationTest extends TestCase {
 		rel.dropRelation(cc);
 	}		
 	
+	@Test(expected=IllegalArgumentException.class)
+	public void testCase2() throws ODKDatastoreException {
+		CallingContext cc = TestContextFactory.getCallingContext();
+		
+		MyRelation rel = new MyRelation(cc);
+		rel = new MyRelation(cc);
+		Entity e = rel.newEntity(cc);
+		
+		e.setField("secondField", "alpha");
+	}
+	
+	@Test(expected=IllegalArgumentException.class)
+	public void testCase3() throws ODKDatastoreException {
+		CallingContext cc = TestContextFactory.getCallingContext();
+		
+		MyRelation rel = new MyRelation(cc);
+		rel = new MyRelation(cc);
+		Entity e = rel.newEntity(cc);
+		
+		e.setField("thirdField", "alpha");
+	}
+	
+	@Test(expected=IllegalArgumentException.class)
+	public void testCase4() throws ODKDatastoreException {
+		CallingContext cc = TestContextFactory.getCallingContext();
+		
+		MyRelation rel = new MyRelation(cc);
+		rel = new MyRelation(cc);
+		Entity e = rel.newEntity(cc);
+		
+		e.setField("fourthField", "alpha");
+	}
+	
+	@Test(expected=IllegalArgumentException.class)
+	public void testCase5() throws ODKDatastoreException {
+		CallingContext cc = TestContextFactory.getCallingContext();
+		
+		MyRelation rel = new MyRelation(cc);
+		rel = new MyRelation(cc);
+		Entity e = rel.newEntity(cc);
+		
+		e.setField("thisIsIt", 
+				"12345678901234567890123456789012345678901234567890" +
+				"12345678901234567890123456789012345678901234567890" );
+	}
+
+	@Test
+	public void testCase6() throws ODKDatastoreException {
+		CallingContext cc = TestContextFactory.getCallingContext();
+		
+		MyRelation rel = new MyRelation(cc);
+		rel = new MyRelation(cc);
+		Entity e = rel.newEntity(cc);
+		
+		e.setField("secondField", "5");
+		e.setField("thirdField", "5.81");
+		e.setField("fourthField", (new Date()).toString());
+		e.setField("thisIsIt", "a simple long string");
+		
+		e.persist(cc);
+		
+		rel.dropRelation(cc);
+	}
 }
