@@ -14,6 +14,8 @@
 package org.opendatakit.common.ermodel;
 
 import java.math.BigDecimal;
+import java.text.DateFormat;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -65,9 +67,11 @@ public class AbstractRelation implements Relation {
 				}
 				lastCap = true;
 				b.append(ch);
-			} else {
+			} else if ( Character.isLetterOrDigit(ch) ){
 				lastCap = false;
 				b.append(Character.toUpperCase(ch));
+			} else {
+				throw new IllegalArgumentException("Argument is not a valid camelCase name: " + name);
 			}
 		}
 		return b.toString();
@@ -531,6 +535,102 @@ public class AbstractRelation implements Relation {
 			return backingObject.getStringField(verify(fieldName));
 		}
 
+		@Override
+		public void setField(String fieldName, String value) {
+			DataField f;
+			if ( fieldName.matches(VALID_UPPER_CASE_NAME_REGEX) ) {
+				f = AbstractRelation.this.getDataField(fieldName);
+			} else {
+				f = AbstractRelation.this.getDataField(
+						AbstractRelation.unCamelCase(fieldName));
+			}
+			switch ( f.getDataType() ) {
+			case INTEGER:
+				backingObject.setLongField(f, 
+						(value == null) ? null : Long.parseLong(value));
+				break;
+			case DECIMAL:
+				backingObject.setNumericField(f, 
+						(value == null) ? null : new BigDecimal(value));
+				break;
+			case BOOLEAN:
+				Boolean b = null;
+				if ( value != null ) {
+					b = Boolean.parseBoolean(value);
+					if ( value.compareToIgnoreCase("ok") == 0) {
+						b = Boolean.TRUE;
+					} else if ( value.compareToIgnoreCase("yes") == 0) {
+						b = Boolean.TRUE;
+					} else if ( value.compareToIgnoreCase("true") == 0 ) {
+						b = Boolean.TRUE;
+					} else if ( value.compareToIgnoreCase("T") == 0 ) {
+						b = Boolean.TRUE;
+					} else if ( value.compareToIgnoreCase("Y") == 0 ) {
+						b = Boolean.TRUE;
+					}
+				}
+				backingObject.setBooleanField(f, b);
+				break;
+			case STRING:
+			case URI:
+				if ( !backingObject.setStringField(f, value) ) {
+					throw new IllegalArgumentException("Value is too long (" +
+							value.length() + ") for field " + f.getName());
+				}
+				break;
+			case DATETIME:
+				Date d = null;
+				if ( value != null ) {
+					// TODO: deal with locale information
+					DateFormat date = DateFormat.getDateInstance();
+					try {
+						d = date.parse(value);
+					} catch (ParseException e) {
+						throw new IllegalArgumentException("Unparsable date: " + value +
+								" for field " + f.getName());
+					}
+				}
+				backingObject.setDateField(f, d);
+				break;
+			default:
+				throw new IllegalArgumentException("Invalid type for field " + f.getName());
+			}
+		}
+		
+		@Override
+		public String getField( String fieldName ) {
+			DataField f;
+			if ( fieldName.matches(VALID_UPPER_CASE_NAME_REGEX) ) {
+				f = AbstractRelation.this.getDataField(fieldName);
+			} else {
+				f = AbstractRelation.this.getDataField(
+						AbstractRelation.unCamelCase(fieldName));
+			}
+			switch ( f.getDataType() ) {
+			case INTEGER:
+				Long l = backingObject.getLongField(f);
+				if ( l == null ) return null;
+				return l.toString();
+			case DECIMAL:
+				BigDecimal v = backingObject.getNumericField(f);
+				if ( v == null ) return null;
+				return v.toString();
+			case BOOLEAN:
+				Boolean b = backingObject.getBooleanField(f);
+				if ( b == null ) return null;
+				return b.toString();
+			case STRING:
+			case URI:
+				return backingObject.getStringField(f);
+			case DATETIME:
+				Date d = backingObject.getDateField(f);
+				if ( d == null ) return null;
+				return d.toString();
+			default:
+				throw new IllegalArgumentException("Invalid type for field " + f.getName());
+			}
+		}
+		
 		/**
 		 * Save this entity into the datastore.
 		 * 
