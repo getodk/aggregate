@@ -22,6 +22,7 @@ import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.format.element.ElementFormatter;
 import org.opendatakit.common.datamodel.DynamicCommonFieldsBase;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+import org.opendatakit.common.utils.WebUtils;
 import org.opendatakit.common.web.CallingContext;
 
 /**
@@ -62,21 +63,7 @@ public class BooleanSubmissionType extends SubmissionSingleValueBase<Boolean> {
 	 */
 	@Override
 	public void setValueFromString(String value) {
-		Boolean b = null;
-		if ( value != null ) {
-			b = Boolean.parseBoolean(value);
-			if ( value.compareToIgnoreCase("ok") == 0) {
-				b = Boolean.TRUE;
-			} else if ( value.compareToIgnoreCase("yes") == 0) {
-				b = Boolean.TRUE;
-			} else if ( value.compareToIgnoreCase("true") == 0 ) {
-				b = Boolean.TRUE;
-			} else if ( value.compareToIgnoreCase("T") == 0 ) {
-				b = Boolean.TRUE;
-			} else if ( value.compareToIgnoreCase("Y") == 0 ) {
-				b = Boolean.TRUE;
-			}
-		}
+		Boolean b = WebUtils.parseBoolean(value);
 		setValue(b);
 	}
 
