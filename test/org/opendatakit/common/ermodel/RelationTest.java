@@ -55,6 +55,7 @@ public class RelationTest extends TestCase {
 		static final DataField fieldInt = new DataField("SECOND_FIELD", DataField.DataType.INTEGER, true);
 		static final DataField fieldDbl = new DataField("THIRD_FIELD", DataField.DataType.DECIMAL, true);
 		static final DataField fieldDate = new DataField("FOURTH_FIELD", DataField.DataType.DATETIME, true);
+		static final DataField fieldBool = new DataField("FIFTH_FIELD", DataField.DataType.BOOLEAN, true);
 		static final List<DataField> fields;
 		static {
 			fields = new ArrayList<DataField>();
@@ -62,6 +63,7 @@ public class RelationTest extends TestCase {
 			fields.add(fieldInt);
 			fields.add(fieldDbl);
 			fields.add(fieldDate);
+			fields.add(fieldBool);
 		}
 		
 		MyRelation(CallingContext cc) throws ODKDatastoreException {
@@ -80,6 +82,7 @@ public class RelationTest extends TestCase {
 		e.setDouble(MyRelation.fieldDbl, 4.4);
 		e.setInteger(MyRelation.fieldInt, Integer.MIN_VALUE);
 		e.setDate(MyRelation.fieldDate, new Date(DATE_CONSTANT_VALUE));
+		e.setBoolean(MyRelation.fieldBool, null);
 		e.persist(cc);
 		
 		List<Entity> entities = rel.getEntities(MyRelation.fieldDbl, FilterOperation.LESS_THAN, 5.0, cc);
@@ -93,13 +96,17 @@ public class RelationTest extends TestCase {
 		Entity eKey = rel.getEntity(e.getUri(), cc);
 		assertEquals( e.getUri(), eKey.getUri());
 		assertEquals( ( e.getDate(MyRelation.fieldDate).getTime() / PersistConsts.MIN_DATETIME_RESOLUTION) * PersistConsts.MIN_DATETIME_RESOLUTION, 
-						eKey.getDate(MyRelation.fieldDate).getTime());
+					  ( eKey.getDate(MyRelation.fieldDate).getTime() / PersistConsts.MIN_DATETIME_RESOLUTION) * PersistConsts.MIN_DATETIME_RESOLUTION);
 
+		assertNull( eKey.getBoolean(MyRelation.fieldBool));
+		
 		eKey.setInteger(MyRelation.fieldInt, 40);
+		eKey.setBoolean(MyRelation.fieldBool, true);
 		rel.putEntity(eKey, cc);
 		
 		Entity eNew = rel.getEntity(e.getUri(), cc);
 		assertEquals( eNew.getInteger(MyRelation.fieldInt), Integer.valueOf(40));
+		assertTrue( eNew.getBoolean(MyRelation.fieldBool));
 		
 		e.persist(cc);
 		eKey = rel.getEntity(e.getUri(), cc);
