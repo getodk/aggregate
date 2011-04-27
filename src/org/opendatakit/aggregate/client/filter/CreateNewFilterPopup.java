@@ -30,7 +30,7 @@ import com.google.gwt.user.client.ui.TextBox;
 public class CreateNewFilterPopup extends PopupPanel{
 	
 	private SubmissionServiceAsync subSvc;
-	private FilterGroup def;
+	private FilterGroup group;
 	private List<Column> columns;
 	
 	public CreateNewFilterPopup() {
@@ -38,9 +38,9 @@ public class CreateNewFilterPopup extends PopupPanel{
 	}
 	
 	public CreateNewFilterPopup(FlexTable data, 
-			final FilterGroup def, final AggregateUI aggregateUI) {	
+			final FilterGroup group, final AggregateUI aggregateUI) {
 		super(false); //do not close popup when user clicks out of it
-		this.def = def;
+		this.group = group;
 		getSubmissions();
 		final FlexTable create = new FlexTable();
 		//keep or remove
@@ -123,8 +123,8 @@ public class CreateNewFilterPopup extends PopupPanel{
 					String variable = var.getValue();
 					
 					Filter newFilter = new RowFilter(kr, new Column(colname, colencode), op, 
-							variable, (long) def.getFilters().size());
-					def.addFilter(newFilter);
+							variable, (long) group.getFilters().size());
+					group.addFilter(newFilter);
 				} else {
 					List<ColumnFilterHeader> columnfilterheaders = new ArrayList<ColumnFilterHeader>();
 					for (int i = cols.getSelectedIndex(); i < cols.getItemCount(); i++) {
@@ -143,8 +143,8 @@ public class CreateNewFilterPopup extends PopupPanel{
 							columnfilterheaders.add(new ColumnFilterHeader(colname, colencode, colgpsIndex));
 						}
 					}
-					Filter newFilter = new ColumnFilter(kr, columnfilterheaders,(long) def.getFilters().size());
-					def.addFilter(newFilter);
+					Filter newFilter = new ColumnFilter(kr, columnfilterheaders,(long) group.getFilters().size());
+					group.addFilter(newFilter);
 				}
 				aggregateUI.getTimer().restartTimer(aggregateUI);
 				aggregateUI.update(FormOrFilter.FORM, PageUpdates.SUBMISSIONDATA);
@@ -221,6 +221,6 @@ public class CreateNewFilterPopup extends PopupPanel{
 	    };
 
 	    // Make the call to the form service.
-	    subSvc.getSubmissions(def, callback);
+	    subSvc.getSubmissions(group, callback);
 	  }
 }

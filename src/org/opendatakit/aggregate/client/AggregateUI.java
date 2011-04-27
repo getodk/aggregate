@@ -77,6 +77,7 @@ public class AggregateUI implements EntryPoint {
 	private ListBox formsBox = new ListBox();
 	private ListBox filtersBox = new ListBox();
 	private List<FilterGroup> allGroups = new ArrayList<FilterGroup>();
+	private List<FormSummary> allForms = new ArrayList<FormSummary>();
 	private RefreshTimer timer;
 	private String lastFormUsed = "";
 
@@ -185,7 +186,7 @@ public class AggregateUI implements EntryPoint {
 		update(FormOrFilter.FORM, PageUpdates.ALL);
 		manageNav = new ManageTabUI(listOfForms, this);
 		submissionNav = new SubmissionTabUI(view, formsBox, filtersBox, 
-				dataTable, def, this, allGroups);
+				dataTable, def, this, allGroups, allForms);
 		mainNav.add(submissionNav, "Submissions");
 		mainNav.add(manageNav, "Management");
 		mainNav.addStyleName("mainNav");
@@ -270,6 +271,7 @@ public class AggregateUI implements EntryPoint {
 			for (int i = 0; i < forms.length; i++) {
 				FormSummary form = forms[i];
 				if (!existingForms.contains(form.getTitle())) {
+					allForms.add(form);
 					formsBox.addItem(form.getTitle());
 					if (hash.get(UrlHash.FORM).equals(form.getTitle()))
 						formsBox.setItemSelected(formsBox.getItemCount() - 1, true);
@@ -303,6 +305,7 @@ public class AggregateUI implements EntryPoint {
 
 	private void fillFilterDropDown(FilterSet set) {
 		int selected = filtersBox.getSelectedIndex();
+		allGroups.clear();
 		if(filtersBox.getItemCount() == 0)
 			filtersBox.addItem("none");
 
@@ -315,8 +318,10 @@ public class AggregateUI implements EntryPoint {
 		for(FilterGroup group : set.getGroups()) {
 			int i = 0;
 			for(i = 0; i < filtersBox.getItemCount(); i++) {
-				if(group.getName().compareTo(filtersBox.getItemText(i)) == 0)
+				if(group.getName().compareTo(filtersBox.getItemText(i)) == 0) {
+					allGroups.add(group);
 					break;
+				}
 			}
 			if(i == filtersBox.getItemCount()) {
 				filtersBox.addItem(group.getName());
