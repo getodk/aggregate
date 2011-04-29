@@ -3,7 +3,6 @@ package org.opendatakit.aggregate.filter;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.client.filter.ColumnFilterHeader;
 import org.opendatakit.aggregate.client.submission.Column;
 import org.opendatakit.aggregate.constants.common.UIConsts;
@@ -15,6 +14,7 @@ import org.opendatakit.common.persistence.PersistConsts;
 import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.security.User;
+import org.opendatakit.common.web.CallingContext;
 
 public class SubmissionColumnFilter extends CommonFieldsBase {
 

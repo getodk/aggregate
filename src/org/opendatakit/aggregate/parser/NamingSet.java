@@ -22,9 +22,9 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Logger;
 
-import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.security.User;
+import org.opendatakit.common.web.CallingContext;
 
 /**
  * When a form is uploaded, the names for the columns and tables representing the form

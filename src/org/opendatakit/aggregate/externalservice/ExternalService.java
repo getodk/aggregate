@@ -17,11 +17,11 @@ package org.opendatakit.aggregate.externalservice;
 import java.util.List;
 
 import org.opendatakit.aggregate.client.form.ExternServSummary;
-import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
 import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
+import org.opendatakit.common.web.CallingContext;
 
 /**
  * 
