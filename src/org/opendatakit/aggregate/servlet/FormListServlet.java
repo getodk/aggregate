@@ -25,6 +25,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
 import org.opendatakit.aggregate.format.form.FormXmlTable;
+import org.opendatakit.aggregate.format.form.XFormsXmlTable;
 import org.opendatakit.aggregate.query.QueryFormList;
 import org.opendatakit.common.constants.HtmlConsts;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
@@ -59,21 +60,39 @@ public class FormListServlet extends ServletUtilBase {
   @Override
   public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 	CallingContext cc = ContextFactory.getCallingContext(this, req);
-    
-    try {
-      QueryFormList formsList = new QueryFormList(false, cc);
-      FormXmlTable formFormatter = new FormXmlTable(formsList, cc.getServerURL());
 
-      resp.setContentType(HtmlConsts.RESP_TYPE_XML);
-      resp.getWriter().print(formFormatter.generateXmlListOfForms());
-    } catch (ODKDatastoreException e) {
-      errorRetreivingData(resp);
-    } catch (ODKIncompleteSubmissionData e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
+	if ( getOpenRosaVersion(req) != null ) {
+		// OpenRosa implementation
+	  	addOpenRosaHeaders(resp);
+	    try {
+	      QueryFormList formsList = new QueryFormList(false, cc);
+	      XFormsXmlTable formFormatter = new XFormsXmlTable(formsList, cc.getServerURL());
+
+	      resp.setContentType(HtmlConsts.RESP_TYPE_XML);
+	      formFormatter.generateXmlListOfForms(resp.getWriter());
+	    } catch (ODKDatastoreException e) {
 	      errorRetreivingData(resp);
+	    } catch (ODKIncompleteSubmissionData e) {
+		  // TODO Auto-generated catch block
+		  e.printStackTrace();
+		  errorRetreivingData(resp);
+		}
+	} else {
+		// Collect 1.1.5 legacy app
+	    try {
+	      QueryFormList formsList = new QueryFormList(false, cc);
+	      FormXmlTable formFormatter = new FormXmlTable(formsList, cc.getServerURL());
+	
+	      resp.setContentType(HtmlConsts.RESP_TYPE_XML);
+	      resp.getWriter().print(formFormatter.generateXmlListOfForms());
+	    } catch (ODKDatastoreException e) {
+	      errorRetreivingData(resp);
+	    } catch (ODKIncompleteSubmissionData e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		      errorRetreivingData(resp);
+		}
 	}
-
   }
 
 }

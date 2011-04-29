@@ -106,6 +106,7 @@ public final class HtmlConsts {
 
 	public static final String HTTP = "http://";
 	public static final int WEB_PORT = 80;
+	public static final int SECURE_WEB_PORT = 443;
 	public static final String CHECKBOX_HEADER = "Select";
 	public static final String INPUT_TYPE_CHECKBOX = "checkbox";
 	public static final String CHECKED = "checked";

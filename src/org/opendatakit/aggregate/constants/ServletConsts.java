@@ -45,6 +45,11 @@ public final class ServletConsts {
   // system constants
   public static final String APPLICATION_NAME = "ODK AGGREGATE";
 
+  public static final String OPEN_ROSA_VERSION_HEADER = "X-OpenRosa-Version";
+  public static final String OPEN_ROSA_VERSION = "1.0";
+  
+  public static final String OPEN_ROSA_DATE_HEADER = "Date";
+
   /**
    * Flag on submissions and form uploads indicating that this is 
    * a partial submission or form upload.

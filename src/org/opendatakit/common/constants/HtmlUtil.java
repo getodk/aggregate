@@ -239,6 +239,40 @@ public class HtmlUtil {
   /**
    * Helper function that creates an html button with the following parameters
    * 
+   * @param httpMethod
+   *          one of GET, POST
+   * @param servletAddr
+   *          http action
+   * @param label
+   *          button's label
+   * @param properties
+   *          key/value pairs to be encoded as hidden input types to be used as
+   *          parameters
+   * @return html to generate specified button
+   * 
+   * @throws UnsupportedEncodingException
+   */
+  public static final String createHtmlButtonToHttpMethodServlet(String httpMethod, 
+		  String servletAddr, String label,
+	      Map<String, String> properties) throws UnsupportedEncodingException {
+    StringBuilder html = new StringBuilder();
+    html.append(createFormBeginTag(servletAddr, null, httpMethod));
+
+    if (properties != null) {
+      Set<Map.Entry<String, String>> propSet = properties.entrySet();
+      for (Map.Entry<String, String> property : propSet) {
+        String valueEncoded = URLEncoder.encode(property.getValue(), HtmlConsts.UTF8_ENCODE);
+        html.append(createInput(HtmlConsts.INPUT_TYPE_HIDDEN, property.getKey(), valueEncoded));
+      }
+    }
+    html.append(createInput(HtmlConsts.INPUT_TYPE_SUBMIT, null, label));
+    html.append(HtmlConsts.FORM_CLOSE);
+    return html.toString();
+  }
+
+  /**
+   * Helper function that creates an html button with the following parameters
+   * 
    * @param servletAddr
    *          http action
    * @param label
@@ -252,19 +286,14 @@ public class HtmlUtil {
    */
   public static final String createHtmlButtonToGetServlet(String servletAddr, String label,
       Map<String, String> properties) throws UnsupportedEncodingException {
-    StringBuilder html = new StringBuilder();
-    html.append(createFormBeginTag(servletAddr, null, HtmlConsts.GET));
+	return createHtmlButtonToHttpMethodServlet(HtmlConsts.GET, 
+			  servletAddr, label, properties);
+  }
 
-    if (properties != null) {
-      Set<Map.Entry<String, String>> propSet = properties.entrySet();
-      for (Map.Entry<String, String> property : propSet) {
-        String valueEncoded = URLEncoder.encode(property.getValue(), HtmlConsts.UTF8_ENCODE);
-        html.append(createInput(HtmlConsts.INPUT_TYPE_HIDDEN, property.getKey(), valueEncoded));
-      }
-    }
-    html.append(createInput(HtmlConsts.INPUT_TYPE_SUBMIT, null, label));
-    html.append(HtmlConsts.FORM_CLOSE);
-    return html.toString();
+  public static final String createHtmlButtonToPostServlet(String servletAddr, String label,
+	      Map<String, String> properties) throws UnsupportedEncodingException {
+		return createHtmlButtonToHttpMethodServlet(HtmlConsts.POST, 
+				  servletAddr, label, properties);
   }
 
   public static final String createHttpServletLink(String baseWebServerUrl, String servlet) {

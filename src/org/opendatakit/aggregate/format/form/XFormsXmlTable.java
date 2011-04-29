@@ -17,10 +17,15 @@
 
 package org.opendatakit.aggregate.format.form;
 
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.lang.StringEscapeUtils;
+import org.kxml2.io.KXmlSerializer;
+import org.kxml2.kdom.Document;
+import org.kxml2.kdom.Element;
+import org.kxml2.kdom.Node;
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.format.XFormsTableConsts;
@@ -42,7 +47,8 @@ import org.opendatakit.common.constants.HtmlConsts;
  */
 public class XFormsXmlTable {
 
-  private final String downloadRequestURL;
+  private static final String XML_TAG_NAMESPACE = "http://openrosa.org/xforms/xformsList";
+private final String downloadRequestURL;
   private final String manifestRequestURL;
 
   private QueryFormList forms;
@@ -53,77 +59,89 @@ public class XFormsXmlTable {
     this.forms = formsToFormat;
   }
 
-  public String generateXmlListOfForms() {
-    StringBuilder b = new StringBuilder();
-
-    b.append(HtmlConsts.BEGIN_OPEN_TAG);
-    b.append(XFormsTableConsts.XFORMS_TAG);
-    b.append(BasicConsts.SPACE);
-    b.append(HtmlUtil.createAttribute("xmlns", "http://openrosa.org/xforms/xformsList"));
-    b.append(HtmlConsts.END_TAG);
-    b.append(BasicConsts.NEW_LINE);
+  public void generateXmlListOfForms(PrintWriter output) throws IOException {
+    Document d = new Document();
+	d.setStandalone(true);
+	d.setEncoding(HtmlConsts.UTF8_ENCODE);
+	Element e = d.createElement(XML_TAG_NAMESPACE, XFormsTableConsts.XFORMS_TAG);
+	e.setPrefix(null, XML_TAG_NAMESPACE);
+	d.addChild(0, Node.ELEMENT, e);
+	int idx = 0;
+	e.addChild(idx++, Node.IGNORABLE_WHITESPACE, BasicConsts.NEW_LINE);
 
     // build XML table of form information
     for (Form form : forms.getForms()) {
     	if ( form.getFormId().equals(Form.URI_FORM_ID_VALUE_FORM_INFO)) continue;
     	if ( form.getFormId().equals(PersistentResults.FORM_ID_PERSISTENT_RESULT)) continue;
     	if ( form.getFormId().equals(MiscTasks.FORM_ID_MISC_TASKS)) continue;
-    	generateFormXmlEntry(b, form);
+    	idx = generateFormXmlEntry(d, e, idx, form);
     }
-    b.append(HtmlUtil.createEndTag(XFormsTableConsts.XFORMS_TAG));
-    return b.toString();
+
+	KXmlSerializer serializer = new KXmlSerializer();
+	serializer.setOutput(output);
+	// setting the response content type emits the xml header.
+	// just write the body here...
+	d.writeChildren(serializer); 
   }
 
-  private void generateFormXmlEntry(StringBuilder b, Form form) {
-	  String formName = form.getViewableName();
-	  String description = form.getDescription();
+  private int generateFormXmlEntry(Document d, Element e, int idx, Form form) {
+	  
+	  int xfIdx = 0;
+	  Element xformElement = d.createElement(XML_TAG_NAMESPACE, XFormsTableConsts.XFORM_TAG);
+	  e.addChild(idx++, Node.ELEMENT, xformElement);
+	  
+	  Element formIdElement = d.createElement(XML_TAG_NAMESPACE, XFormsTableConsts.FORM_ID_TAG);
+	  xformElement.addChild(xfIdx++, Node.ELEMENT, formIdElement);
+	  formIdElement.addChild(0, Node.TEXT, form.getFormId());
+      xformElement.addChild(xfIdx++, Node.IGNORABLE_WHITESPACE, BasicConsts.NEW_LINE);
+      
+	  Element formNameElement = d.createElement(XML_TAG_NAMESPACE, XFormsTableConsts.FORM_NAME_TAG);
+	  xformElement.addChild(xfIdx++, Node.ELEMENT, formNameElement);
+	  formNameElement.addChild(0, Node.TEXT, form.getViewableName());
+      xformElement.addChild(xfIdx++, Node.IGNORABLE_WHITESPACE, BasicConsts.NEW_LINE);
+      
+	  Element majorMinorVersionElement = d.createElement(XML_TAG_NAMESPACE, XFormsTableConsts.MAJOR_MINOR_VERSION_TAG);
+	  xformElement.addChild(xfIdx++, Node.ELEMENT, majorMinorVersionElement);
+	  majorMinorVersionElement.addChild(0, Node.TEXT, form.getMajorMinorVersionString());
+      xformElement.addChild(xfIdx++, Node.IGNORABLE_WHITESPACE, BasicConsts.NEW_LINE);
+	  
+      String description = form.getDescription();
+      if ( description != null ) {
+    	  Element descriptionElement = d.createElement(XML_TAG_NAMESPACE, XFormsTableConsts.DESCRIPTION_TEXT_TAG);
+    	  xformElement.addChild(xfIdx++, Node.ELEMENT, descriptionElement);
+    	  descriptionElement.addChild(0, Node.TEXT, description);
+          xformElement.addChild(xfIdx++, Node.IGNORABLE_WHITESPACE, BasicConsts.NEW_LINE);
+      }
 	  String descriptionUrl = form.getDescriptionUrl();
+	  if ( descriptionUrl != null ) {
+    	  Element descriptionUrlElement = d.createElement(XML_TAG_NAMESPACE, XFormsTableConsts.DESCRIPTION_URL_TAG);
+    	  xformElement.addChild(xfIdx++, Node.ELEMENT, descriptionUrlElement);
+    	  descriptionUrlElement.addChild(0, Node.TEXT, descriptionUrl);
+          xformElement.addChild(xfIdx++, Node.IGNORABLE_WHITESPACE, BasicConsts.NEW_LINE);
+	  }
+
+	  {
+		  Map<String, String> properties = new HashMap<String, String>();
+		  properties.put(ServletConsts.FORM_ID, form.getFormId());
+		  String urlLink = HtmlUtil.createLinkWithProperties(downloadRequestURL, properties);
 		  
-	b.append(HtmlUtil.createBeginTag(XFormsTableConsts.XFORM_TAG));
-    b.append(BasicConsts.NEW_LINE);
-	b.append(HtmlUtil.createBeginTag(XFormsTableConsts.FORM_ID_TAG));
-	b.append(StringEscapeUtils.escapeXml(form.getFormId()));
-	b.append(HtmlUtil.createEndTag(XFormsTableConsts.FORM_ID_TAG));
-    b.append(BasicConsts.NEW_LINE);
-	b.append(HtmlUtil.createBeginTag(XFormsTableConsts.FORM_NAME_TAG));
-	b.append(StringEscapeUtils.escapeXml(formName));
-	b.append(HtmlUtil.createEndTag(XFormsTableConsts.FORM_NAME_TAG));
-    b.append(BasicConsts.NEW_LINE);
-    b.append(HtmlUtil.createBeginTag(XFormsTableConsts.MAJOR_MINOR_VERSION_TAG));
-    b.append(form.getMajorMinorVersionString());
-    b.append(HtmlUtil.createEndTag(XFormsTableConsts.MAJOR_MINOR_VERSION_TAG));
-    b.append(BasicConsts.NEW_LINE);
-    if ( description != null ) {
-		b.append(HtmlUtil.createBeginTag(XFormsTableConsts.DESCRIPTION_TEXT_TAG));
-		b.append(StringEscapeUtils.escapeXml(description));
-		b.append(HtmlUtil.createEndTag(XFormsTableConsts.DESCRIPTION_TEXT_TAG));
-	    b.append(BasicConsts.NEW_LINE);
-    }
-    if ( descriptionUrl != null ) {
-		b.append(HtmlUtil.createBeginTag(XFormsTableConsts.DESCRIPTION_URL_TAG));
-		b.append(descriptionUrl);
-		b.append(HtmlUtil.createEndTag(XFormsTableConsts.DESCRIPTION_URL_TAG));
-	    b.append(BasicConsts.NEW_LINE);
-    }
-	b.append(HtmlUtil.createBeginTag(XFormsTableConsts.DOWNLOAD_URL_TAG));
-	{
-		Map<String, String> properties = new HashMap<String, String>();
-	    properties.put(ServletConsts.FORM_ID, form.getFormId());
-	    String urlLink = HtmlUtil.createLinkWithProperties(downloadRequestURL, properties);
-	    b.append(urlLink);
-	}
-	b.append(HtmlUtil.createEndTag(XFormsTableConsts.DOWNLOAD_URL_TAG));
-    b.append(BasicConsts.NEW_LINE);
-    if ( form.hasManifestFileset() ) {
-    	b.append(HtmlUtil.createBeginTag(XFormsTableConsts.MANIFEST_URL_TAG));
-    	Map<String, String> properties = new HashMap<String, String>();
-        properties.put(ServletConsts.FORM_ID, form.getFormId());
-        String urlLink = HtmlUtil.createLinkWithProperties(manifestRequestURL, properties);
-        b.append(urlLink);
-    	b.append(HtmlUtil.createEndTag(XFormsTableConsts.MANIFEST_URL_TAG));
-        b.append(BasicConsts.NEW_LINE);
-    }
-	b.append(HtmlUtil.createEndTag(XFormsTableConsts.XFORM_TAG));
-    b.append(BasicConsts.NEW_LINE);
+		  Element downloadUrlElement = d.createElement(XML_TAG_NAMESPACE, XFormsTableConsts.DOWNLOAD_URL_TAG);
+		  xformElement.addChild(xfIdx++, Node.ELEMENT, downloadUrlElement);
+		  downloadUrlElement.addChild(0, Node.TEXT, urlLink);
+	      xformElement.addChild(xfIdx++, Node.IGNORABLE_WHITESPACE, BasicConsts.NEW_LINE);
+	  }
+	  
+	  if ( form.hasManifestFileset() ) {
+		  Map<String, String> properties = new HashMap<String, String>();
+		  properties.put(ServletConsts.FORM_ID, form.getFormId());
+	      String urlLink = HtmlUtil.createLinkWithProperties(manifestRequestURL, properties);
+		  
+		  Element manifestUrlElement = d.createElement(XML_TAG_NAMESPACE, XFormsTableConsts.MANIFEST_URL_TAG);
+		  xformElement.addChild(xfIdx++, Node.ELEMENT, manifestUrlElement);
+		  manifestUrlElement.addChild(0, Node.TEXT, urlLink);
+	      xformElement.addChild(xfIdx++, Node.IGNORABLE_WHITESPACE, BasicConsts.NEW_LINE);
+	  }
+      e.addChild(idx++, Node.IGNORABLE_WHITESPACE, BasicConsts.NEW_LINE);
+      return idx;
   }
 }

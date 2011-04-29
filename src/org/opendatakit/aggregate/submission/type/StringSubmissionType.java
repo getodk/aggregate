@@ -89,60 +89,59 @@ public class StringSubmissionType extends SubmissionFieldBase<String> {
    */
   @Override
   public void setValueFromString(String value) throws ODKEntityPersistException {
-    isChanged = true;
-    fullValue = value;
-    // update field in the backing object
-    isLongString = !backingObject.setStringField(element.getFormDataModel().getBackingKey(), value);
-    // we'll persist the fullValue in the persist() method...
+     isChanged = true;
+     fullValue = value;
+     // update field in the backing object
+     isLongString = !backingObject.setStringField(element.getFormDataModel().getBackingKey(), value);
+     // we'll persist the fullValue in the persist() method...
   }
 
   @Override
-  public void getValueFromEntity(CallingContext cc) throws ODKDatastoreException {
-
-    String value = (String) backingObject
-        .getStringField(element.getFormDataModel().getBackingKey());
-    if (element.getFormDataModel().isPossibleLongStringField(backingObject,
-        element.getFormDataModel().getBackingKey())) {
-      String longValue = formDefinition.getLongString(backingObject.getUri(), element
-          .getFormDataModel().getUri(), topLevelTableKey, cc);
-      if (longValue != null) {
-        value = longValue;
-        isLongString = true;
-      }
-    }
-    fullValue = value;
-    isChanged = false;
+  public void getValueFromEntity(CallingContext cc)
+        throws ODKDatastoreException {
+     
+     String value = (String) backingObject.getStringField(element.getFormDataModel().getBackingKey());
+     if (element.getFormDataModel().isPossibleLongStringField(backingObject, element.getFormDataModel().getBackingKey())) {
+        String longValue = formDefinition.getLongString(backingObject.getUri(), element.getFormDataModel().getUri(), topLevelTableKey, cc);
+        if ( longValue != null ) {
+           value = longValue;
+           isLongString = true;
+        }
+     }
+     fullValue = value;
+     isChanged = false;
   }
+  
 
   /**
    * @see java.lang.Object#equals(java.lang.Object)
    */
+  */
   @Override
   public boolean equals(Object obj) {
-    if (!(obj instanceof StringSubmissionType)) {
-      return false;
-    }
-
-    StringSubmissionType t = (StringSubmissionType) obj;
-    return (super.equals(t) && (t.isChanged == isChanged) && (t.isLongString = isLongString)
-        && ((t.fullValue == null) ? (fullValue == null) : (t.fullValue.equals(fullValue))) && (t.backingObject
-        .getUri().equals(backingObject.getUri())));
+     if (!(obj instanceof StringSubmissionType)) {
+        return false;
+     }
+     
+     StringSubmissionType t = (StringSubmissionType) obj;
+     return ( super.equals(t) && 
+           (t.isChanged == isChanged ) &&
+           (t.isLongString = isLongString ) &&
+           ((t.fullValue == null) ? (fullValue == null) : (t.fullValue.equals(fullValue))) &&
+           (t.backingObject.getUri().equals(backingObject.getUri())) );
   }
 
   @Override
-  public void recursivelyAddEntityKeys(List<EntityKey> keyList, CallingContext cc)
-      throws ODKDatastoreException {
-    if (isLongString) {
-      formDefinition.recursivelyAddLongStringTextEntityKeys(keyList, backingObject.getUri(),
-          element.getFormDataModel().getUri(), topLevelTableKey, cc);
-    }
+  public void recursivelyAddEntityKeys(List<EntityKey> keyList, CallingContext cc) throws ODKDatastoreException {
+     if ( isLongString ) {
+        formDefinition.recursivelyAddLongStringTextEntityKeys(keyList, backingObject.getUri(), element.getFormDataModel().getUri(), topLevelTableKey, cc);
+     }
   }
 
   @Override
   public void persist(CallingContext cc) throws ODKEntityPersistException {
-    if (isChanged && isLongString) {
-      formDefinition.setLongString(fullValue, backingObject.getUri(), element.getFormDataModel()
-          .getUri(), topLevelTableKey, cc);
-    }
+     if ( isChanged && isLongString ) {
+        formDefinition.setLongString(fullValue, backingObject.getUri(), element.getFormDataModel().getUri(), topLevelTableKey, cc);
+     }
   }
 }

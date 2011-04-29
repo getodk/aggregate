@@ -20,6 +20,7 @@ package org.opendatakit.aggregate.servlet;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
+import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -56,7 +57,8 @@ import org.opendatakit.common.web.CallingContext;
  * 
  */
 public class SubmissionServlet extends ServletUtilBase {
-  /**
+
+/**
    * Serial number for serialization
    */
   private static final long serialVersionUID = -9115712148453543651L;
@@ -72,67 +74,67 @@ public class SubmissionServlet extends ServletUtilBase {
    * Script path to include...
    */
   private static final String JQUERY_SCRIPT_HEADER = 
-	  "<script src=\"http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js\"></script>";
+     "<script src=\"http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js\"></script>";
   
   private static final String UPLOAD_SCRIPT_RESOURCE = "res/upload_control.js";
 
   private static final String UPLOAD_PAGE_BODY_START = 
 
-"	  <p><b>Upload one submission into ODK Aggregate</b></p>" +
-"	  <p>Submissions are located under the <code>/odk/instances</code> directory on the phone's " +
+"    <p><b>Upload one submission into ODK Aggregate</b></p>" +
+"    <p>Submissions are located under the <code>/odk/instances</code> directory on the phone's " +
 "     sdcard.  This directory will contain subdirectories with names of the form: <code>formID_yyyy-mm-dd_hh-MM-ss</code></p>" +
 "     <p>Within each of these subdirectories are the submission data file (named: <code>formID_yyyy-mm-dd_hh-MM-ss.xml</code>)," +
 "     and zero or more associated data files for the images, audio clips, video clips, " +
 "     etc. linked with this submission.</p>" +
-"	  <!--[if true]><p style=\"color: red;\">For a better user experience, use Chrome, Firefox or Safari</p>" +
-"	  <!-- If you specify an empty progress div, it will be expanded with an upload progress region (non-IE) -->" +
-"	  <div id=\"progress\"></div><br />" +
+"    <!--[if true]><p style=\"color: red;\">For a better user experience, use Chrome, Firefox or Safari</p>" +
+"    <!-- If you specify an empty progress div, it will be expanded with an upload progress region (non-IE) -->" +
+"    <div id=\"progress\"></div><br />" +
 "     <form id=\"ie_backward_compatible_form\"" + 
-"	                      accept-charset=\"UTF-8\" method=\"POST\" enctype=\"multipart/form-data\"" + 
-"	                      action=\"";// emit the ADDR
+"                        accept-charset=\"UTF-8\" method=\"POST\" enctype=\"multipart/form-data\"" + 
+"                        action=\"";// emit the ADDR
   private static final String UPLOAD_PAGE_BODY_MIDDLE = "\">" +
-"	  <![endif] -->" +
-"	  <table>" +
-"	  	<tr>" +
-"	  		<td><label for=\"xml_submission_file\">Submission data file:</label></td>" +
-"	  		<td><input id=\"xml_submission_file\" type=\"file\" size=\"80\"" +
-"	  			name=\"form_def_file\" /></td>" +
-"	  	</tr>" +
-"	  	<tr>" +
-"	  		<td><label for=\"mediaFiles\">Associated data file(s):</label></td>" +
-"	  		<td><input id=\"mediaFiles\" type=\"file\" size=\"80,20\" name=\"datafile\" multiple /><input id=\"clear_media_files\" type=\"button\" value=\"Clear\" onClick=\"clearMediaInputField('mediaFiles')\" /></td>" +
-"	  	</tr>" +
-"	  	<!--[if true]>" +
-"	      <tr>" +
-"	          <td><label for=\"mediaFiles2\">Associated data file #2:</label></td>" +
-"	          <td><input id=\"mediaFiles2\" type=\"file\" size=\"80\" name=\"datafile\" /><input id=\"clear_media_files2\" type=\"button\" value=\"Clear\" onClick=\"clearMediaInputField('mediaFiles2')\" /></td>" +
-"	      </tr>" +
-"	      <tr>" +
-"	          <td><label for=\"mediaFiles3\">Associated data file #3:</label></td>" +
-"	          <td><input id=\"mediaFiles3\" type=\"file\" size=\"80\" name=\"datafile\" /><input id=\"clear_media_files3\" type=\"button\" value=\"Clear\" onClick=\"clearMediaInputField('mediaFiles3')\" /></td>" +
-"	      </tr>" +
-"	      <tr>" +
-"	          <td><label for=\"mediaFiles4\">Associated data file #4:</label></td>" +
-"	          <td><input id=\"mediaFiles4\" type=\"file\" size=\"80\" name=\"datafile\" /><input id=\"clear_media_files4\" type=\"button\" value=\"Clear\" onClick=\"clearMediaInputField('mediaFiles4')\" /></td>" +
-"	      </tr>" +
-"	      <tr>" +
-"	          <td><label for=\"mediaFiles5\">Associated data file #5:</label></td>" +
-"	          <td><input id=\"mediaFiles5\" type=\"file\" size=\"80\" name=\"datafile\" /><input id=\"clear_media_files5\" type=\"button\" value=\"Clear\" onClick=\"clearMediaInputField('mediaFiles5')\" /></td>" +
-"	      </tr>" +
-"	      <tr>" +
-"	          <td><label for=\"mediaFiles6\">Associated data file #6:</label></td>" +
-"	          <td><input id=\"mediaFiles6\" type=\"file\" size=\"80\" name=\"datafile\" /><input id=\"clear_media_files6\" type=\"button\" value=\"Clear\" onClick=\"clearMediaInputField('mediaFiles6')\" /></td>" +
-"	      </tr>" +
-"	      <![endif]-->" +
-"	  	<tr>" +
-"	  		<td><input type=\"button\" name=\"button\" value=\"Upload Submission\"" +
-"	  			onClick=\"submitButton(document,'";
+"    <![endif] -->" +
+"    <table>" +
+"     <tr>" +
+"        <td><label for=\"xml_submission_file\">Submission data file:</label></td>" +
+"        <td><input id=\"xml_submission_file\" type=\"file\" size=\"80\"" +
+"           name=\"form_def_file\" /></td>" +
+"     </tr>" +
+"     <tr>" +
+"        <td><label for=\"mediaFiles\">Associated data file(s):</label></td>" +
+"        <td><input id=\"mediaFiles\" type=\"file\" size=\"80,20\" name=\"datafile\" multiple /><input id=\"clear_media_files\" type=\"button\" value=\"Clear\" onClick=\"clearMediaInputField('mediaFiles')\" /></td>" +
+"     </tr>" +
+"     <!--[if true]>" +
+"        <tr>" +
+"            <td><label for=\"mediaFiles2\">Associated data file #2:</label></td>" +
+"            <td><input id=\"mediaFiles2\" type=\"file\" size=\"80\" name=\"datafile\" /><input id=\"clear_media_files2\" type=\"button\" value=\"Clear\" onClick=\"clearMediaInputField('mediaFiles2')\" /></td>" +
+"        </tr>" +
+"        <tr>" +
+"            <td><label for=\"mediaFiles3\">Associated data file #3:</label></td>" +
+"            <td><input id=\"mediaFiles3\" type=\"file\" size=\"80\" name=\"datafile\" /><input id=\"clear_media_files3\" type=\"button\" value=\"Clear\" onClick=\"clearMediaInputField('mediaFiles3')\" /></td>" +
+"        </tr>" +
+"        <tr>" +
+"            <td><label for=\"mediaFiles4\">Associated data file #4:</label></td>" +
+"            <td><input id=\"mediaFiles4\" type=\"file\" size=\"80\" name=\"datafile\" /><input id=\"clear_media_files4\" type=\"button\" value=\"Clear\" onClick=\"clearMediaInputField('mediaFiles4')\" /></td>" +
+"        </tr>" +
+"        <tr>" +
+"            <td><label for=\"mediaFiles5\">Associated data file #5:</label></td>" +
+"            <td><input id=\"mediaFiles5\" type=\"file\" size=\"80\" name=\"datafile\" /><input id=\"clear_media_files5\" type=\"button\" value=\"Clear\" onClick=\"clearMediaInputField('mediaFiles5')\" /></td>" +
+"        </tr>" +
+"        <tr>" +
+"            <td><label for=\"mediaFiles6\">Associated data file #6:</label></td>" +
+"            <td><input id=\"mediaFiles6\" type=\"file\" size=\"80\" name=\"datafile\" /><input id=\"clear_media_files6\" type=\"button\" value=\"Clear\" onClick=\"clearMediaInputField('mediaFiles6')\" /></td>" +
+"        </tr>" +
+"        <![endif]-->" +
+"     <tr>" +
+"        <td><input type=\"button\" name=\"button\" value=\"Upload Submission\"" +
+"           onClick=\"submitButton(document,'";
   private static final String UPLOAD_PAGE_BODY_REMAINDER = "','xml_submission_file','mediaFiles')\" /></td>" +
-"	  		<td />" +
-"	  	</tr>" +
-"	  </table>" +
-"	  <!--[if true]></form>" +
-"	  <![endif] -->";
+"        <td />" +
+"     </tr>" +
+"    </table>" +
+"    <!--[if true]></form>" +
+"    <![endif] -->";
 
   /**
    * Handler for HTTP Get request that processes a form submission
@@ -142,22 +144,81 @@ public class SubmissionServlet extends ServletUtilBase {
    */
   @Override
   public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-	CallingContext cc = ContextFactory.getCallingContext(this, req);
+   CallingContext cc = ContextFactory.getCallingContext(this, req);
 
-	PrintWriter out = resp.getWriter();
+   Double openRosaVersion = getOpenRosaVersion(req);
+   if ( openRosaVersion != null ) {
+      /*
+       * If we have an OpenRosa version header, assume that this is due to a 
+       * channel redirect (http: => https:) and that the request was originally
+       * a HEAD request.  Reply with a response appropriate for a HEAD request.
+       * 
+       * It is unclear whether this is a GAE issue or a Spring Frameworks issue.
+       */
+      Logger.getLogger(this.getClass().getName()).warning("Inside doGet -- replying as doHead");
+      doHead(req, resp);
+      return;
+   }
 
-	StringBuilder headerString = new StringBuilder();
-	headerString.append(JQUERY_SCRIPT_HEADER);
-	headerString.append("<script src=\"");
-	headerString.append(cc.getWebApplicationURL(UPLOAD_SCRIPT_RESOURCE));
-	headerString.append("\"></script>");
-	beginBasicHtmlResponse(TITLE, headerString.toString(), resp, true, cc );// header info
-	out.write(UPLOAD_PAGE_BODY_START);
-	out.write(cc.getWebApplicationURL(ADDR));
-	out.write(UPLOAD_PAGE_BODY_MIDDLE);
-	out.write(cc.getWebApplicationURL(ADDR));
-	out.write(UPLOAD_PAGE_BODY_REMAINDER);
+	Double openRosaVersion = getOpenRosaVersion(req);
+	if ( openRosaVersion != null ) {
+		/*
+		 * If we have an OpenRosa version header, assume that this is due to a 
+		 * channel redirect (http: => https:) and that the request was originally
+		 * a HEAD request.  Reply with a response appropriate for a HEAD request.
+		 * 
+		 * It is unclear whether this is a GAE issue or a Spring Frameworks issue.
+		 */
+		Logger.getLogger(this.getClass().getName()).warning("Inside doGet -- replying as doHead");
+		doHead(req, resp);
+		return;
+	}
+
+	Double openRosaVersion = getOpenRosaVersion(req);
+	if ( openRosaVersion != null ) {
+		/*
+		 * If we have an OpenRosa version header, assume that this is due to a 
+		 * channel redirect (http: => https:) and that the request was originally
+		 * a HEAD request.  Reply with a response appropriate for a HEAD request.
+		 * 
+		 * It is unclear whether this is a GAE issue or a Spring Frameworks issue.
+		 */
+		Logger.getLogger(this.getClass().getName()).warning("Inside doGet -- replying as doHead");
+		doHead(req, resp);
+		return;
+	}
+
+   PrintWriter out = resp.getWriter();
+
+   StringBuilder headerString = new StringBuilder();
+   headerString.append(JQUERY_SCRIPT_HEADER);
+   headerString.append("<script src=\"");
+   headerString.append(cc.getWebApplicationURL(UPLOAD_SCRIPT_RESOURCE));
+   headerString.append("\"></script>");
+   beginBasicHtmlResponse(TITLE, headerString.toString(), resp, true, cc );// header info
+   out.write(UPLOAD_PAGE_BODY_START);
+   out.write(cc.getWebApplicationURL(ADDR));
+   out.write(UPLOAD_PAGE_BODY_MIDDLE);
+   out.write(cc.getWebApplicationURL(ADDR));
+   out.write(UPLOAD_PAGE_BODY_REMAINDER);
     finishBasicHtmlResponse(resp);
+  }
+
+  /**
+   * Handler for HTTP head request.  This is used to verify that channel
+   * security and authentication have been properly established. 
+   */
+  @Override
+  protected void doHead(HttpServletRequest req, HttpServletResponse resp)
+         throws IOException {
+   CallingContext cc = ContextFactory.getCallingContext(this, req);
+   Logger.getLogger(this.getClass().getName()).info("Inside doHead");
+
+   addOpenRosaHeaders(resp);
+   String serverUrl = cc.getServerURL();
+   String url = req.getScheme() + "://" + serverUrl + "/" + ADDR;
+   resp.setHeader("Location", url);
+   resp.setStatus(204); // no content...
   }
 
   /**
@@ -167,18 +228,17 @@ public class SubmissionServlet extends ServletUtilBase {
    * @see javax.servlet.http.HttpServlet#doGet(javax.servlet.http.HttpServletRequest,
    *      javax.servlet.http.HttpServletResponse)
    */
-
   @Override
   public void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-	CallingContext cc = ContextFactory.getCallingContext(this, req);
+   CallingContext cc = ContextFactory.getCallingContext(this, req);
 
-    resp.setContentType(HtmlConsts.RESP_TYPE_HTML);
-
+   Double openRosaVersion = getOpenRosaVersion(req);
+   String isIncompleteFlag = null;
     try {
       SubmissionParser submissionParser = null;
       if (ServletFileUpload.isMultipartContent(req)) {
-    	MultiPartFormData uploadedSubmissionItems = new MultiPartFormData(req);
-        String isIncompleteFlag = uploadedSubmissionItems.getSimpleFormField(ServletConsts.TRANSFER_IS_INCOMPLETE);
+      MultiPartFormData uploadedSubmissionItems = new MultiPartFormData(req);
+        isIncompleteFlag = uploadedSubmissionItems.getSimpleFormField(ServletConsts.TRANSFER_IS_INCOMPLETE);
         submissionParser = new SubmissionParser(uploadedSubmissionItems, cc);
       } else {
         // TODO: check that it is the proper types we can deal with
@@ -199,25 +259,42 @@ public class SubmissionServlet extends ServletUtilBase {
       List<ExternalService> tmp = FormServiceCursor.getExternalServicesForForm(form, cc);
       UploadSubmissions uploadTask = (UploadSubmissions) cc.getBean(BeanDefs.UPLOAD_TASK_BEAN);
 
-  	  CallingContext ccDaemon = ContextFactory.getCallingContext(this, req);
-	  ccDaemon.setAsDaemon(true);
+     CallingContext ccDaemon = ContextFactory.getCallingContext(this, req);
+     ccDaemon.setAsDaemon(true);
       for (ExternalService rs : tmp) {
         uploadTask.createFormUploadTask(rs.getFormServiceCursor(), ccDaemon);
       }
 
-      resp.setStatus(HttpServletResponse.SC_CREATED);
-      resp.setHeader("Location", cc.getServerURL());
+      // form full url including scheme...
+     String serverUrl = cc.getServerURL();
+     String url = req.getScheme() + "://" + serverUrl + "/" + ADDR;
+     resp.setHeader("Location", url);
 
-      resp.setContentType(HtmlConsts.RESP_TYPE_HTML);
-      resp.setCharacterEncoding(HtmlConsts.UTF8_ENCODE);
-      PrintWriter out = resp.getWriter();
-      out.write(HtmlConsts.HTML_OPEN);
-      out.write(HtmlConsts.BODY_OPEN);
-      out.write("Successful submission upload.  Click ");
-      out.write(HtmlUtil.createHref(cc.getWebApplicationURL(FormsServlet.ADDR), "here"));
-      out.write(" to return to forms page.");
-      out.write(HtmlConsts.BODY_CLOSE);
-      out.write(HtmlConsts.HTML_CLOSE);
+     resp.setStatus(HttpServletResponse.SC_CREATED);
+      if ( openRosaVersion == null ) {
+        resp.setContentType(HtmlConsts.RESP_TYPE_HTML);
+        resp.setCharacterEncoding(HtmlConsts.UTF8_ENCODE);
+        PrintWriter out = resp.getWriter();
+        out.write(HtmlConsts.HTML_OPEN);
+        out.write(HtmlConsts.BODY_OPEN);
+        out.write("Successful submission upload.  Click ");
+        out.write(HtmlUtil.createHref(cc.getWebApplicationURL(FormsServlet.ADDR), "here"));
+        out.write(" to return to forms page.");
+        out.write(HtmlConsts.BODY_CLOSE);
+        out.write(HtmlConsts.HTML_CLOSE);
+      } else {
+        addOpenRosaHeaders(resp);
+        resp.setContentType(HtmlConsts.RESP_TYPE_XML);
+        resp.setCharacterEncoding(HtmlConsts.UTF8_ENCODE);
+        PrintWriter out = resp.getWriter();
+        out.write("<OpenRosaResponse xmlns=\"http://openrosa.org/http/response\">");
+        if ( isIncompleteFlag != null && isIncompleteFlag.compareToIgnoreCase("YES") == 0) {
+           out.write("<message>partial submission upload was successful!</message>");
+        } else {
+           out.write("<message>full submission upload was successful!</message>");
+        }
+        out.write("</OpenRosaResponse>");
+      }
     } catch (ODKFormNotFoundException e) {
       odkIdNotFoundError(resp);
     } catch (ODKParseException e) {

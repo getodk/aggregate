@@ -26,7 +26,8 @@ import org.opendatakit.common.persistence.ITaskLockType;
 public enum TaskLockType implements ITaskLockType {
   UPLOAD_SUBMISSION(60000),
   WORKSHEET_CREATION(120000),
-  FORM_DELETION(120000);
+  FORM_DELETION(120000),
+  PURGE_OLDER_SUBMISSIONS(120000);
   
   private long timeout;
 
