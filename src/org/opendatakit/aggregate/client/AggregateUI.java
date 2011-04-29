@@ -203,7 +203,7 @@ public class AggregateUI implements EntryPoint {
 		FlowPanel helpContainer = new FlowPanel();
 		helpContainer.add(helpPanel);
 		helpContainer.getElement().setId("help_container");
-		layoutPanel.add(helpContainer);
+		//layoutPanel.add(helpContainer);
 
 		// Select the correct menu item based on url hash.
 		int selected = 0;

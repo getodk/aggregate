@@ -104,7 +104,7 @@ public class SubmissionTabUI extends TabPanel {
 		// list of filters
 		formAndGoalSelectionTable.setWidget(0, 1, filtersBox);
 		// load form + filter
-		Button loadFormAndFilterButton = new Button("Load Filter");
+		Button loadFormAndFilterButton = new Button("Load Form and Filter");
 		formAndGoalSelectionTable.setWidget(0, 2, loadFormAndFilterButton);
 		formAndGoalSelectionTable.setHTML(0, 3, "&nbsp;&nbsp;");
 		loadFormAndFilterButton.addClickHandler(new ClickHandler() {

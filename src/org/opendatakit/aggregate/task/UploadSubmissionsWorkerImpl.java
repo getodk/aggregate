@@ -122,7 +122,7 @@ public class UploadSubmissionsWorkerImpl {
 					streamSubmissions();
 				}
 				break;
-			case NONE:
+			default:
 				break;
 			}
 		} catch (Exception e) {
