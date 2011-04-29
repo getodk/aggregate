@@ -59,7 +59,8 @@ public class XFormsManifestServlet extends ServletUtilBase {
    */
   @Override
   public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-	CallingContext cc = ContextFactory.getCallingContext(this, req);
+   CallingContext cc = ContextFactory.getCallingContext(this, req);
+   addOpenRosaHeaders(resp);
     
     // get parameters
     String formId = getParameter(req, ServletConsts.FORM_ID);

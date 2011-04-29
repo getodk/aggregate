@@ -263,7 +263,7 @@ public class DatastoreImpl implements Datastore, InitializingBean {
 			break;
 		case DATETIME:
 			ol[idx] = entity.getDateField(f);
-			il[idx] = java.sql.Types.DATE;
+			il[idx] = java.sql.Types.TIMESTAMP;
 			break;
 		case BINARY:
 			ol[idx] = entity.getBlobField(f);

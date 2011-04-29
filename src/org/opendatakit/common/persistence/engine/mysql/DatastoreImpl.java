@@ -213,7 +213,7 @@ public class DatastoreImpl implements Datastore, InitializingBean {
 					String parenTerm = columnType.substring(idx+1,columnType.length()-1);
 					idx = parenTerm.indexOf(",");
 					if ( idx != -1 ) {
-						String part = parenTerm.substring(0,idx-1);
+						String part = parenTerm.substring(0,idx);
 						if ( part.length() != 0 ) {
 							firstTerm = Integer.valueOf(part);
 						}
@@ -569,7 +569,7 @@ public class DatastoreImpl implements Datastore, InitializingBean {
 			b.append(tableName);
 			b.append(K_BQ);
 			// this will throw an exception if the table doesn't exist...
-			getJdbcConnection().queryForObject(b.toString(), String.class);
+			getJdbcConnection().queryForList(b.toString());
 			// and if it does exist, we don't care about the return value...
 		} catch ( BadSqlGrammarException e ) {
 			// we expect this if the table does not exist...
