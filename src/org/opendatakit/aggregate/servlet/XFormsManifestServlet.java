@@ -23,13 +23,13 @@ import java.io.PrintWriter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.format.form.XFormsManifestXmlTable;
 import org.opendatakit.common.constants.HtmlConsts;
+import org.opendatakit.common.web.CallingContext;
 
 /**
  * Servlet to generate the OpenRosa-compliant XML list of forms to be 

@@ -17,7 +17,6 @@ package org.opendatakit.aggregate.task.gae;
 
 import java.net.URLEncoder;
 
-import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.externalservice.ExternalServiceConsts;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
@@ -25,6 +24,7 @@ import org.opendatakit.aggregate.externalservice.FormServiceCursor;
 import org.opendatakit.aggregate.task.UploadSubmissions;
 import org.opendatakit.aggregate.task.gae.servlet.UploadSubmissionsTaskServlet;
 import org.opendatakit.common.constants.HtmlConsts;
+import org.opendatakit.common.web.CallingContext;
 
 import com.google.appengine.api.taskqueue.Queue;
 import com.google.appengine.api.taskqueue.QueueFactory;

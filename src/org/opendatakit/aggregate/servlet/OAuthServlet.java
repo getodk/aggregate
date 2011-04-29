@@ -5,7 +5,6 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.common.ExternalServiceOption;
@@ -16,6 +15,7 @@ import org.opendatakit.aggregate.externalservice.ExternalService;
 import org.opendatakit.aggregate.externalservice.FormServiceCursor;
 import org.opendatakit.aggregate.externalservice.OAuthToken;
 import org.opendatakit.aggregate.task.UploadSubmissions;
+import org.opendatakit.common.web.CallingContext;
 
 public class OAuthServlet extends ServletUtilBase {
 

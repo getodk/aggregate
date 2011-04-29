@@ -20,7 +20,6 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.externalservice.ExternalServiceConsts;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
@@ -30,6 +29,7 @@ import org.opendatakit.aggregate.servlet.ServletUtilBase;
 import org.opendatakit.aggregate.task.UploadSubmissionsWorkerImpl;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
+import org.opendatakit.common.web.CallingContext;
 
 /**
  * 

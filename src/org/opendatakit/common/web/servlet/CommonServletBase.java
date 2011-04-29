@@ -28,11 +28,11 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.common.constants.BasicConsts;
 import org.opendatakit.common.constants.HtmlConsts;
 import org.opendatakit.common.constants.HtmlUtil;
 import org.opendatakit.common.security.UserService;
+import org.opendatakit.common.web.CallingContext;
 
 /**
  * Base class for Servlets that contain useful utilities

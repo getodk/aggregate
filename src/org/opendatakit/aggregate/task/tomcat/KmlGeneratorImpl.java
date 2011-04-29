@@ -17,7 +17,6 @@ package org.opendatakit.aggregate.task.tomcat;
 
 import java.util.Map;
 
-import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.datamodel.FormElementKey;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
@@ -30,6 +29,7 @@ import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.task.KmlGenerator;
 import org.opendatakit.aggregate.task.KmlWorkerImpl;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+import org.opendatakit.common.web.CallingContext;
 
 /**
  * This is a singleton bean.  It cannot have any per-request state.

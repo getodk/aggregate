@@ -20,7 +20,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.opendatakit.aggregate.CallingContext;
+import org.opendatakit.common.web.CallingContext;
 
 public final class EmailParser {
 
