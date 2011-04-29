@@ -116,7 +116,6 @@ public class StringSubmissionType extends SubmissionFieldBase<String> {
   /**
    * @see java.lang.Object#equals(java.lang.Object)
    */
-  */
   @Override
   public boolean equals(Object obj) {
      if (!(obj instanceof StringSubmissionType)) {

@@ -160,34 +160,6 @@ public class SubmissionServlet extends ServletUtilBase {
       return;
    }
 
-	Double openRosaVersion = getOpenRosaVersion(req);
-	if ( openRosaVersion != null ) {
-		/*
-		 * If we have an OpenRosa version header, assume that this is due to a 
-		 * channel redirect (http: => https:) and that the request was originally
-		 * a HEAD request.  Reply with a response appropriate for a HEAD request.
-		 * 
-		 * It is unclear whether this is a GAE issue or a Spring Frameworks issue.
-		 */
-		Logger.getLogger(this.getClass().getName()).warning("Inside doGet -- replying as doHead");
-		doHead(req, resp);
-		return;
-	}
-
-	Double openRosaVersion = getOpenRosaVersion(req);
-	if ( openRosaVersion != null ) {
-		/*
-		 * If we have an OpenRosa version header, assume that this is due to a 
-		 * channel redirect (http: => https:) and that the request was originally
-		 * a HEAD request.  Reply with a response appropriate for a HEAD request.
-		 * 
-		 * It is unclear whether this is a GAE issue or a Spring Frameworks issue.
-		 */
-		Logger.getLogger(this.getClass().getName()).warning("Inside doGet -- replying as doHead");
-		doHead(req, resp);
-		return;
-	}
-
    PrintWriter out = resp.getWriter();
 
    StringBuilder headerString = new StringBuilder();
