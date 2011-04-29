@@ -18,7 +18,6 @@ package org.opendatakit.aggregate.externalservice;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.datamodel.FormElementKey;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
@@ -30,6 +29,7 @@ import org.opendatakit.common.persistence.DataField.IndexType;
 import org.opendatakit.common.persistence.Query.FilterOperation;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.security.User;
+import org.opendatakit.common.web.CallingContext;
 
 /**
  * 

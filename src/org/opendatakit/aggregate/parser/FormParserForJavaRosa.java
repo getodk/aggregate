@@ -38,10 +38,7 @@ import org.javarosa.xform.parse.XFormParser;
 import org.javarosa.xform.util.IXFormBindHandler;
 import org.javarosa.xform.util.XFormUtils;
 import org.kxml2.kdom.Element;
-import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.constants.ParserConsts;
-import org.opendatakit.aggregate.datamodel.DynamicBase;
-import org.opendatakit.aggregate.datamodel.DynamicCommonFieldsBase;
 import org.opendatakit.aggregate.datamodel.FormDataModel;
 import org.opendatakit.aggregate.datamodel.TopLevelDynamicBase;
 import org.opendatakit.aggregate.datamodel.FormDataModel.ElementType;
@@ -58,6 +55,8 @@ import org.opendatakit.aggregate.form.XFormParameters;
 import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.common.constants.BasicConsts;
 import org.opendatakit.common.constants.HtmlConsts;
+import org.opendatakit.common.datamodel.DynamicBase;
+import org.opendatakit.common.datamodel.DynamicCommonFieldsBase;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.Datastore;
@@ -66,6 +65,7 @@ import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
 import org.opendatakit.common.security.Realm;
 import org.opendatakit.common.security.User;
+import org.opendatakit.common.web.CallingContext;
 
 /**
  * Parses an XML definition of an XForm based on java rosa types

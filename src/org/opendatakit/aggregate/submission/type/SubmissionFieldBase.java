@@ -19,9 +19,7 @@ package org.opendatakit.aggregate.submission.type;
 
 
 
-import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.constants.ErrorConsts;
-import org.opendatakit.aggregate.datamodel.BinaryContentManipulator;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.datamodel.FormDataModel.ElementType;
 import org.opendatakit.aggregate.exception.ODKConversionException;
@@ -29,7 +27,9 @@ import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.format.element.ElementFormatter;
 import org.opendatakit.aggregate.submission.SubmissionField;
 import org.opendatakit.common.constants.BasicConsts;
+import org.opendatakit.common.datamodel.BinaryContentManipulator;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+import org.opendatakit.common.web.CallingContext;
 
 /**
  * 

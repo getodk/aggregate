@@ -17,7 +17,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.constants.common.ExternalServiceOption;
 import org.opendatakit.aggregate.constants.common.OperationalStatus;
 import org.opendatakit.aggregate.constants.externalservice.ExternalServiceType;
@@ -33,6 +32,7 @@ import org.opendatakit.common.persistence.Query.FilterOperation;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.security.User;
+import org.opendatakit.common.web.CallingContext;
 
 /**
  * 

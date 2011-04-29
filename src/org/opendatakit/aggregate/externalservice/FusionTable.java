@@ -37,7 +37,6 @@ import oauth.signpost.exception.OAuthCommunicationException;
 import oauth.signpost.exception.OAuthExpectationFailedException;
 import oauth.signpost.exception.OAuthMessageSignerException;
 
-import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.client.form.ExternServSummary;
 import org.opendatakit.aggregate.constants.ErrorConsts;
 import org.opendatakit.aggregate.constants.HtmlUtil;
@@ -69,6 +68,7 @@ import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
 import org.opendatakit.common.security.User;
+import org.opendatakit.common.web.CallingContext;
 
 import com.google.gdata.client.GoogleService;
 import com.google.gdata.client.authn.oauth.GoogleOAuthHelper;

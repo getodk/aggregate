@@ -4,7 +4,6 @@ import java.io.PrintWriter;
 import java.util.Iterator;
 import java.util.List;
 
-import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.format.RepeatCallbackFormatter;
@@ -15,6 +14,7 @@ import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.aggregate.submission.SubmissionSet;
 import org.opendatakit.common.constants.HtmlUtil;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+import org.opendatakit.common.web.CallingContext;
 
 public class XmlFormatter implements SubmissionFormatter, RepeatCallbackFormatter {
 
