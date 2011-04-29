@@ -27,7 +27,6 @@ package org.opendatakit.aggregate.constants.common;
  * 
  */
 public enum ExternalServiceOption {
-  NONE("SHOULD NOT APPEAR"),
   UPLOAD_ONLY("Upload Existing Submission Data ONLY"),
   STREAM_ONLY("Stream New Submission Data ONLY"),
   UPLOAD_N_STREAM("BOTH Upload Existing & Stream New Submission Data");

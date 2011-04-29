@@ -137,6 +137,7 @@ public class CreateNewFilterPopup extends PopupPanel{
 								if(colname.compareTo(column.getDisplayHeader()) == 0) {
 									colencode = column.getColumnEncoding();
 									colgpsIndex = column.getGeopointColumnCode();
+									//Waylon go here
 									break;
 								}
 							}

@@ -9,17 +9,18 @@ function onWindowResize() {
 	var sidePanelPotentialWidth = width * .2;
 	var sidePanelActualWidth = Math.min(MAX_SIDE_PANEL_WIDTH, sidePanelPotentialWidth);
 	
-	$(".mainNav").width(width - sidePanelActualWidth);
-	$("#help_container").width(sidePanelActualWidth);
+	$(".mainNav").width(width/* - sidePanelActualWidth*/);
+	//$("#help_container").width(sidePanelActualWidth);
 	$("#filters_container").width(sidePanelActualWidth);
-	$("#submission_container").width(width - (2 * sidePanelActualWidth));
-	$("#form_management_table").width(width - sidePanelActualWidth);
+	//$("#submission_container").width(width - (2 * sidePanelActualWidth));
+	$("#submission_container").width(width - sidePanelActualWidth);
+	$("#form_management_table").width(width/* - sidePanelActualWidth*/);
 
-	$("html").height(height - 24);
-	$("body").height(height - 24);
-	$("#dynamic_content").height(height - 24);
-	$("#layout_panel").height(height - $("#layout_panel").offset().top - 24);
+	$("html").height(height);
+	$("body").height(height);
+	$("#dynamic_content").height(height);
+	$("#layout_panel").height(height - $("#layout_panel").offset().top);
 	$("#filters_container").height(height - $("#filters_container").offset().top);
 	$("#submission_container").height(height - $("#submission_container").offset().top);
-	$("#help_container").height(height - $("#help_container").offset().top);
+	//$("#help_container").height(height - $("#help_container").offset().top);
 }

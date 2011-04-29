@@ -77,7 +77,7 @@ public class WatchdogWorkerImpl {
         if (fsc.getUploadCompleted())
           checkStreaming(fsc, uploadSubmissions, cc);
         break;
-      case NONE:
+      default:
         break;
       }
     }
