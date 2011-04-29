@@ -4,12 +4,12 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.client.filter.FilterGroup;
 import org.opendatakit.aggregate.client.filter.FilterService;
 import org.opendatakit.aggregate.client.filter.FilterSet;
 import org.opendatakit.aggregate.filter.SubmissionFilterGroup;
+import org.opendatakit.common.web.CallingContext;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 

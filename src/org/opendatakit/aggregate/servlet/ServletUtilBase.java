@@ -27,7 +27,6 @@ import java.util.TreeSet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.constants.ErrorConsts;
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.ServletConsts;
@@ -39,6 +38,7 @@ import org.opendatakit.common.constants.HtmlConsts;
 import org.opendatakit.common.security.SecurityBeanDefs;
 import org.opendatakit.common.security.spring.GrantedAuthorityNames;
 import org.opendatakit.common.security.spring.RoleHierarchyImpl;
+import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.servlet.CommonServletBase;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.GrantedAuthorityImpl;

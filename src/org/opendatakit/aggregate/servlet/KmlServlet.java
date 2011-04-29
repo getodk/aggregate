@@ -24,7 +24,6 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.ServletConsts;
@@ -36,6 +35,7 @@ import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.form.PersistentResults;
 import org.opendatakit.aggregate.task.KmlGenerator;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+import org.opendatakit.common.web.CallingContext;
 
 /**
  * Servlet to generate a KML file for download

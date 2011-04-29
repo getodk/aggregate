@@ -15,11 +15,11 @@
  */
 package org.opendatakit.aggregate.task.tomcat;
 
-import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
 import org.opendatakit.aggregate.externalservice.FormServiceCursor;
 import org.opendatakit.aggregate.task.UploadSubmissions;
 import org.opendatakit.aggregate.task.UploadSubmissionsWorkerImpl;
+import org.opendatakit.common.web.CallingContext;
 
 /**
  * This is a singleton bean.  It cannot have any per-request state.

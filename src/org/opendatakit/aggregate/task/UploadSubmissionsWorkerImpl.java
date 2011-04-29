@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.logging.Logger;
 
-import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.TaskLockType;
@@ -43,6 +42,7 @@ import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.security.User;
+import org.opendatakit.common.web.CallingContext;
 
 /**
  * Common worker implementation for the publishing of data to an external service.

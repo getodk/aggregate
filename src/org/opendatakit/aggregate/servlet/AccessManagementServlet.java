@@ -25,11 +25,11 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.opendatakit.aggregate.CallingContext;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.common.constants.HtmlConsts;
 import org.opendatakit.common.security.spring.GrantedAuthorityNames;
+import org.opendatakit.common.web.CallingContext;
 
 /**
  * Top-level webpage for managing permissions and users
