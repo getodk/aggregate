@@ -44,6 +44,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpParams;
+import org.opendatakit.aggregate.client.form.ExternServSummary;
 import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.ErrorConsts;
 import org.opendatakit.aggregate.constants.HtmlUtil;
@@ -74,9 +75,8 @@ import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
 import org.opendatakit.common.security.User;
+import org.opendatakit.common.utils.HttpClientFactory;
 import org.opendatakit.common.web.CallingContext;
-
-import org.opendatakit.aggregate.client.form.ExternServSummary;
 
 import com.google.gdata.client.GoogleService;
 import com.google.gdata.client.authn.oauth.GoogleOAuthHelper;
@@ -155,13 +155,13 @@ public class FusionTable extends AbstractExternalService implements ExternalServ
     FormElementModel root = form.getTopLevelGroupElement();
 
     String tableId = executeFusionTableCreation(form, fusionTableService, headerFormatter, root,
-        authToken);
+        authToken, cc);
 
     List<TableId> repeatIds = new ArrayList<TableId>();
 
     for (FormElementModel repeatGroupElement : form.getRepeatGroupsInModel()) {
       String id = executeFusionTableCreation(form, fusionTableService, headerFormatter,
-          repeatGroupElement, authToken);
+          repeatGroupElement, authToken, cc);
       TableId repeatId = new TableId(id, repeatGroupElement);
       repeatIds.add(repeatId);
     }

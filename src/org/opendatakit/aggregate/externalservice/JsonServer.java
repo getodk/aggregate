@@ -26,6 +26,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.httpclient.params.HttpClientParams;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -33,8 +35,8 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpParams;
-
 import org.opendatakit.aggregate.client.form.ExternServSummary;
+import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.common.ExternalServiceOption;
 import org.opendatakit.aggregate.constants.common.OperationalStatus;
 import org.opendatakit.aggregate.constants.externalservice.ExternalServiceType;

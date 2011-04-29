@@ -49,6 +49,13 @@ public class PersistConsts {
    * length natively.   
    */
   public static final Long URI_STRING_LEN = 80L;
-
+  
+  /**
+   * If you need to search a string this is the guaranteed length of a
+   * searchable string. A longer string may be searchable depending on the
+   * datastore but this value is set to be the worst searchable length.
+   * (Currently it's Google App Engine)
+   */
+  public static final Long GUARANTEED_SEARCHABLE_LEN = 249L;
 
 }
