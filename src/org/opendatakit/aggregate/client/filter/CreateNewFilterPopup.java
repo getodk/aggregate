@@ -99,10 +99,11 @@ public class CreateNewFilterPopup extends PopupPanel{
 				if(rowcol.compareTo(RowOrCol.ROW.toString()) == 0) {
 					String colname = col.getValue(col.getSelectedIndex());
 					String colencode = "";
-					
+               Long colgpsIndex = null;
 					for(Column column: columns) {
 						if(colname.compareTo(column.getDisplayHeader()) == 0) {
 							colencode = column.getColumnEncoding();
+							colgpsIndex = column.getGeopointColumnCode();
 							break;
 						}
 					}
@@ -122,7 +123,7 @@ public class CreateNewFilterPopup extends PopupPanel{
 					
 					String variable = var.getValue();
 					
-					Filter newFilter = new RowFilter(kr, new Column(colname, colencode), op, 
+					Filter newFilter = new RowFilter(kr, new Column(colname, colencode, colgpsIndex), op, 
 							variable, (long) group.getFilters().size());
 					group.addFilter(newFilter);
 				} else {
@@ -137,7 +138,6 @@ public class CreateNewFilterPopup extends PopupPanel{
 								if(colname.compareTo(column.getDisplayHeader()) == 0) {
 									colencode = column.getColumnEncoding();
 									colgpsIndex = column.getGeopointColumnCode();
-									//Waylon go here
 									break;
 								}
 							}
