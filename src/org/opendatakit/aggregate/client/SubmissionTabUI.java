@@ -47,6 +47,7 @@ public class SubmissionTabUI extends TabPanel {
 	private List<FilterGroup> view;
 	private ListBox formsBox;
 	private ListBox filtersBox;
+	private FlexTable navTable;
 	private FlexTable dataTable;
 	private FilterGroup def;
 	private AggregateUI parent;
@@ -88,25 +89,32 @@ public class SubmissionTabUI extends TabPanel {
 
 	public VerticalPanel setupSubmissionsPanel() {
 		VerticalPanel reportContent = new VerticalPanel();
-		reportContent.add(setupFormsAndGoalsPanel());
+		setupFormsAndGoalsPanel();
+		reportContent.add(navTable);
 		reportContent.add(setupFiltersDataPanel(view));
 		return reportContent;
+	}
+	
+	public void setTitleString(String title) {
+		navTable.setHTML(0, 1, "<h1 id=\"form_name\">" + title + "</h1>");
 	}
 
 	public HTML setupVisualizePanel() {
 		return new HTML("Content Forthcoming");
 	}
 
-	public HorizontalPanel setupFormsAndGoalsPanel() {
+	public void setupFormsAndGoalsPanel() {
+		navTable = new FlexTable();
+		navTable.getElement().setId("submission_nav_table");
+		
 		FlexTable formAndGoalSelectionTable = new FlexTable();
+		formAndGoalSelectionTable.getElement().setId("form_and_goal_selection");
 		// list of forms
 		formAndGoalSelectionTable.setWidget(0, 0, formsBox);
 		// list of filters
 		formAndGoalSelectionTable.setWidget(0, 1, filtersBox);
 		// load form + filter
 		Button loadFormAndFilterButton = new Button("Load Form and Filter");
-		formAndGoalSelectionTable.setWidget(0, 2, loadFormAndFilterButton);
-		formAndGoalSelectionTable.setHTML(0, 3, "&nbsp;&nbsp;");
 		loadFormAndFilterButton.addClickHandler(new ClickHandler() {
 
 			@Override
@@ -138,7 +146,14 @@ public class SubmissionTabUI extends TabPanel {
 			}
 
 		});
-
+		formAndGoalSelectionTable.setWidget(0, 2, loadFormAndFilterButton);
+		
+		navTable.setWidget(0, 0, formAndGoalSelectionTable);
+		navTable.setHTML(0, 1, "<h1 id=\"form_name\"></h1>");
+		navTable.getElement().getFirstChildElement().getNextSiblingElement().getFirstChildElement()
+			.getFirstChildElement().getNextSiblingElement().setId("form_title_cell");
+		
+		FlexTable actionTable = new FlexTable();
 		// end goals vis, export, publish
 		Button visualizeButton = new Button("<img src=\"images/bar_chart.png\" /> Visualize");
 		visualizeButton.addClickHandler(new ClickHandler() {
@@ -159,7 +174,7 @@ public class SubmissionTabUI extends TabPanel {
 				});
 			}
 		});
-		formAndGoalSelectionTable.setWidget(0, 4, visualizeButton);
+		actionTable.setWidget(0, 0, visualizeButton);
 		Button exportButton = new Button("<img src=\"images/green_right_arrow.png\" /> Export");
 		exportButton.addClickHandler(new ClickHandler () {
 			@Override
@@ -175,7 +190,7 @@ public class SubmissionTabUI extends TabPanel {
 				});
 			}
 		});
-		formAndGoalSelectionTable.setWidget(0, 5, exportButton);
+		actionTable.setWidget(0, 1, exportButton);
 		Button publishButton = new Button("<img src=\"images/green_right_arrow.png\" /> Publish");
 		publishButton.addClickHandler(new ClickHandler() {
 			@Override
@@ -191,12 +206,10 @@ public class SubmissionTabUI extends TabPanel {
 				});
 			}
 		});
-		formAndGoalSelectionTable.setWidget(0, 6, publishButton);
-
-		HorizontalPanel formsAndGoalsPanel = new HorizontalPanel();
-		formsAndGoalsPanel.add(formAndGoalSelectionTable);
-		formsAndGoalsPanel.getElement().setId("form_and_goals_panel");
-		return formsAndGoalsPanel;
+		actionTable.setWidget(0, 2, publishButton);
+		navTable.setWidget(0, 2, actionTable);
+		navTable.getElement().getFirstChildElement().getNextSiblingElement().getFirstChildElement()
+			.getFirstChildElement().getNextSiblingElement().getNextSiblingElement().setAttribute("align", "right");
 	}
 
 	ClickHandler getSubMenuClickHandler(
