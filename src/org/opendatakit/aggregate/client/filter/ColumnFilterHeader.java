@@ -20,10 +20,6 @@ public class ColumnFilterHeader implements Serializable {
     this.uri = UIConsts.URI_DEFAULT;
     this.column = column;
   }
-
-  public ColumnFilterHeader(String displayHeader, String columnName) {
-    this(new Column(displayHeader, columnName));
-  }
   
   public ColumnFilterHeader(String displayHeader, String columnName, Long geopointCode) {
     this(new Column(displayHeader, columnName, geopointCode));
