@@ -100,3 +100,16 @@
 	left: 20px;
 	top: 8px;
 }
+#form_title_cell {
+	text-align: center;
+}
+#form_name {
+	color: #07115A;
+	margin-top: 0px;
+	padding-top: 0px;
+	margin-bottom: 0px;
+	padding-bottom: 0px;
+}
+#submission_nav_table {
+	width: 100%;
+}

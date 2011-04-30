@@ -262,7 +262,7 @@ public class AggregateUI implements EntryPoint {
 		formSvc.getForms(callback);
 	}
 
-	private void fillFormDropDown(FormSummary [] forms) {		
+	private void fillFormDropDown(FormSummary [] forms) {
 		Set<String> existingForms = new HashSet<String>();
 		for (int i = 0; i < formsBox.getItemCount(); i++) {
 			existingForms.add(formsBox.getItemText(i));
@@ -273,13 +273,15 @@ public class AggregateUI implements EntryPoint {
 				if (!existingForms.contains(form.getTitle())) {
 					allForms.add(form);
 					formsBox.addItem(form.getTitle());
-					if (hash.get(UrlHash.FORM).equals(form.getTitle()))
+					if (hash.get(UrlHash.FORM).equals(form.getTitle())) {
 						formsBox.setItemSelected(formsBox.getItemCount() - 1, true);
+					}
 				}
 			}
 		} else if (formsBox.getItemCount() == 0) {
 			formsBox.addItem("none");
 		}
+		submissionNav.setTitleString(formsBox.getItemText(formsBox.getSelectedIndex()));
 		formsBox.addChangeHandler(new ChangeHandler() {
 
 			@Override
