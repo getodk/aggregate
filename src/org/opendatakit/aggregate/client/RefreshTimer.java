@@ -6,8 +6,8 @@ import org.opendatakit.aggregate.constants.common.PageUpdates;
 import com.google.gwt.user.client.Timer;
 
 public class RefreshTimer {
-	private static final int REFRESH_INTERVAL = 30000; // ms
-	private static final int STALL_INTERVALS = 10; // 5 min / 30 sec
+	private static final int REFRESH_INTERVAL = 10000; // ms
+	private static final int STALL_INTERVALS = 30; // 5 min / 10 sec
 	Timer refreshTimer;
 	int intervalsElapsed = 0;
 	
@@ -18,9 +18,12 @@ public class RefreshTimer {
 	       public void run() {
 	    	   if(intervalsElapsed == STALL_INTERVALS) {
 	    		   this.cancel();
-	    	   } else {
+	    	   } else if (intervalsElapsed % 3 == 0){
 	    		   intervalsElapsed++;
 		    	   aggregateUI.update(FormOrFilter.BOTH, PageUpdates.ALL);	   
+	    	   } else {
+	    		   intervalsElapsed++;
+	    		   aggregateUI.update(FormOrFilter.FORM, PageUpdates.FORMTABLE);
 	    	   }
 	       }
 	    };
