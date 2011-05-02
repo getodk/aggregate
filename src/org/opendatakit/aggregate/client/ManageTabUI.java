@@ -219,6 +219,7 @@ public class ManageTabUI extends TabPanel {
 		return new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
+				parent.getTimer().restartTimer(parent);
 				parent.update(FormOrFilter.FORM, PageUpdates.FORMTABLE);
 				hash.clear();
 				hash.set(UrlHash.MAIN_MENU, menu);
