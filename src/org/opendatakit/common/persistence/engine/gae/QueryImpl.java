@@ -134,11 +134,21 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
 				return compareObjects(eStr, vStr);
 			case INTEGER:
 				Long eLong = record.getLongField(attribute);
-				Long vLong = (value == null) ? null : (Long) value;
+				Long vLong;
+				if ( value instanceof Long ) {
+					vLong = (value == null) ? null : (Long) value;
+				} else {
+					vLong = (value == null) ? null : Long.parseLong(value.toString());
+				}
 				return compareObjects(eLong, vLong);
 			case DECIMAL:
 				BigDecimal eDec = record.getNumericField(attribute);
-				BigDecimal vDec = (value == null) ? null : (BigDecimal) value;
+				BigDecimal vDec;
+				if ( value instanceof BigDecimal ) {
+					 vDec = (value == null) ? null : (BigDecimal) value;
+				} else { 
+					 vDec = (value == null) ? null : new BigDecimal(value.toString());
+				}
 				return compareObjects(eDec, vDec);
 			case BOOLEAN:
 				Boolean eBool = record.getBooleanField(attribute);
