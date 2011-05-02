@@ -3,6 +3,8 @@ package org.opendatakit.aggregate.client;
 import org.opendatakit.aggregate.client.form.ExportSummary;
 import org.opendatakit.aggregate.client.form.ExternServSummary;
 import org.opendatakit.aggregate.client.form.FormService;
+import org.opendatakit.aggregate.constants.common.FormOrFilter;
+import org.opendatakit.aggregate.constants.common.PageUpdates;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -217,6 +219,7 @@ public class ManageTabUI extends TabPanel {
 		return new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
+				parent.update(FormOrFilter.FORM, PageUpdates.FORMTABLE);
 				hash.clear();
 				hash.set(UrlHash.MAIN_MENU, menu);
 				hash.set(UrlHash.SUB_MENU, subMenu);
