@@ -13,6 +13,7 @@
  */
 package org.opendatakit.aggregate.parser;
 
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -69,7 +70,7 @@ import java.util.regex.Pattern;
 class Naming {
 
 	// what a legal persistence naming should be...
-	private static final String utf8String = "^[\\p{Lu}_][0-9\\p{Lu}_]*$";
+	private static final String utf8String = "^[\\p{Lu}\\p{Lo}_][0-9\\p{Lu}\\p{Lo}_]*$";
 	private static final Pattern p = Pattern.compile(utf8String);
 
 	public static final boolean isValidString(final String xmlString) {
