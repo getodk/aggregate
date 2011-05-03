@@ -27,6 +27,8 @@ import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
@@ -397,12 +399,44 @@ public class AggregateUI implements EntryPoint {
 
 			CheckBox downloadableCheckBox = new CheckBox();
 			downloadableCheckBox.setValue(form.isDownloadable());
+			downloadableCheckBox.addValueChangeHandler(new ValueChangeHandler<Boolean>(){
+            @Override
+            public void onValueChange(ValueChangeEvent<Boolean> event) {
+              final String formId = form.getId();
+              formSvc.setFormDownloadable(formId, event.getValue(), new AsyncCallback<Boolean> () {
+                @Override
+                public void onFailure(Throwable caught) {
+                  // TODO Auto-generated method stub
+                }
 
+                @Override
+                public void onSuccess(Boolean result) {
+                  // TODO Auto-generated method stub
+                }}
+              );
+            }
+			});
 			listOfForms.setWidget(i, 3, downloadableCheckBox);
 			
          CheckBox acceptSubmissionCheckBox = new CheckBox();
          acceptSubmissionCheckBox.setValue(form.receiveSubmissions());
-         
+         acceptSubmissionCheckBox.addValueChangeHandler(new ValueChangeHandler<Boolean>(){
+           @Override
+           public void onValueChange(ValueChangeEvent<Boolean> event) {
+             final String formId = form.getId();
+             formSvc.setFormAcceptSubmissions(formId, event.getValue(), new AsyncCallback<Boolean> () {
+               @Override
+               public void onFailure(Throwable caught) {
+                 // TODO Auto-generated method stub
+               }
+
+               @Override
+               public void onSuccess(Boolean result) {
+                 // TODO Auto-generated method stub
+               }}
+             );
+           }
+        });
          listOfForms.setWidget(i, 4, acceptSubmissionCheckBox);
 			
 			Button publishButton = new Button("<img src=\"images/green_right_arrow.png\" /> Publish");
