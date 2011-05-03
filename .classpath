@@ -79,6 +79,6 @@
 	<classpathentry kind="lib" path="war/WEB-INF/lib/odk-httpclient-gae-1.0.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/signpost-commonshttp4-1.2.1.1.jar"/>
 	<classpathentry kind="con" path="com.google.gwt.eclipse.core.GWT_CONTAINER"/>
-	<classpathentry kind="con" path="com.google.appengine.eclipse.core.GAE_CONTAINER/App Engine"/>
+	<classpathentry kind="con" path="com.google.appengine.eclipse.core.GAE_CONTAINER"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>
