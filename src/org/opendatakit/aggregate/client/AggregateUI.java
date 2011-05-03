@@ -31,6 +31,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.DecoratedTabPanel;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -394,16 +395,16 @@ public class AggregateUI implements EntryPoint {
 			String user = form.getCreatedUser();
 			listOfForms.setWidget(i, 2, new Anchor(user.substring(user.indexOf(":") + 1, user.indexOf("@")), user));
 
-			ListBox enabledDropDown = new ListBox();
-			enabledDropDown.addItem("Disabled/Inactive");
-			enabledDropDown.addItem("Disabled/Active");
-			enabledDropDown.addItem("Enabled/Active");
+			CheckBox downloadableCheckBox = new CheckBox();
+			downloadableCheckBox.setValue(form.isDownloadable());
 
-			Button deleteButton = new Button();
-			deleteButton.setHTML("<img src=\"images/red_x.png\" /> Delete");
-			deleteButton.addStyleDependentName("negative");
-
-			listOfForms.setWidget(i, 3, enabledDropDown);
+			listOfForms.setWidget(i, 3, downloadableCheckBox);
+			
+         CheckBox acceptSubmissionCheckBox = new CheckBox();
+         acceptSubmissionCheckBox.setValue(form.receiveSubmissions());
+         
+         listOfForms.setWidget(i, 4, acceptSubmissionCheckBox);
+			
 			Button publishButton = new Button("<img src=\"images/green_right_arrow.png\" /> Publish");
 			publishButton.addClickHandler(new ClickHandler() {
 				@Override
@@ -419,7 +420,7 @@ public class AggregateUI implements EntryPoint {
 					});
 				}
 			});
-			listOfForms.setWidget(i, 4, publishButton);
+			listOfForms.setWidget(i, 5, publishButton);
 
 			Button exportButton = new Button("<img src=\"images/green_right_arrow.png\" /> Export");
 			exportButton.addClickHandler(new ClickHandler () {
@@ -436,8 +437,13 @@ public class AggregateUI implements EntryPoint {
 					});
 				}
 			});
-			listOfForms.setWidget(i, 5, exportButton);
-			listOfForms.setWidget(i, 6, deleteButton);
+			listOfForms.setWidget(i, 6, exportButton);
+
+         Button deleteButton = new Button();
+         deleteButton.setHTML("<img src=\"images/red_x.png\" /> Delete");
+         deleteButton.addStyleDependentName("negative");
+
+			listOfForms.setWidget(i, 7, deleteButton);
 			if (i % 2 == 0)
 				listOfForms.getRowFormatter().addStyleName(i, "evenTableRow");
 		}
