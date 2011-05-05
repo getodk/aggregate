@@ -1,0 +1,569 @@
+<?xml version="1.0" encoding="utf-8"?>
+<web-app xmlns="http://java.sun.com/xml/ns/javaee" version="2.5"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.0.5.xsd">
+ 
+	<context-param>
+		<param-name>contextConfigLocation</param-name>
+		<param-value>classpath:odk-settings.xml,/WEB-INF/applicationContext-security.xml</param-value>
+	</context-param>
+
+	<filter>
+		<filter-name>serverSpringSecurityFilterChain</filter-name>
+		<filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+	</filter>
+
+	<filter-mapping>
+		<filter-name>serverSpringSecurityFilterChain</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+
+	<listener>
+		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+	</listener>
+
+
+ <!-- Servlets -->
+ 
+ 	<servlet>
+		<servlet-name>uiformupload</servlet-name>
+		<servlet-class>org.opendatakit.aggregate.servlet.UIFormUploadServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>uiformupload</servlet-name>
+		<url-pattern>/ui/upload</url-pattern>
+	</servlet-mapping>
+ 
+  	<servlet>
+		<servlet-name>uisubmissionupload</servlet-name>
+		<servlet-class>org.opendatakit.aggregate.servlet.UISubmissionServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>uisubmissionupload</servlet-name>
+		<url-pattern>/ui/submission</url-pattern>
+	</servlet-mapping>
+ 
+ 
+   <servlet>
+    <servlet-name>submissionServiceImpl</servlet-name>
+    <servlet-class>org.opendatakit.aggregate.server.SubmissionServiceImpl</servlet-class>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>submissionServiceImpl</servlet-name>
+    <url-pattern>/aggregateui/submissionservice</url-pattern>
+  </servlet-mapping>
+ 
+  <servlet>
+    <servlet-name>formServiceImpl</servlet-name>
+    <servlet-class>org.opendatakit.aggregate.server.FormServiceImpl</servlet-class>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>formServiceImpl</servlet-name>
+    <url-pattern>/aggregateui/formservice</url-pattern>
+  </servlet-mapping>
+
+
+  <servlet>
+    <servlet-name>filterServiceImpl</servlet-name>
+    <servlet-class>org.opendatakit.aggregate.server.FilterServiceImpl</servlet-class>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>filterServiceImpl</servlet-name>
+    <url-pattern>/aggregateui/filterservice</url-pattern>
+  </servlet-mapping>
+
+	<servlet>
+		<servlet-name>oauth</servlet-name>
+		<servlet-class>org.opendatakit.aggregate.servlet.OAuthServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>oauth</servlet-name>
+		<url-pattern>/auth/auth</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>gwttest</servlet-name>
+		<servlet-class>org.opendatakit.aggregate.servlet.GwtTester</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>gwttest</servlet-name>
+		<url-pattern>/www/gwttest</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>blank</servlet-name>
+		<servlet-class>org.opendatakit.aggregate.servlet.BlankServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>blank</servlet-name>
+		<url-pattern>/www/blank</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>change-password</servlet-name>
+		<servlet-class>org.opendatakit.aggregate.servlet.UserPasswordServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>change-password</servlet-name>
+		<url-pattern>/ssl/user-password</url-pattern>
+	</servlet-mapping>
+
+    <servlet>
+        <servlet-name>manage-passwords</servlet-name>
+        <servlet-class>org.opendatakit.aggregate.servlet.UserManagePasswordsServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>manage-passwords</servlet-name>
+        <url-pattern>/ssl/user-manage-passwords</url-pattern>
+    </servlet-mapping>
+
+	<servlet>
+		<servlet-name>result</servlet-name>
+		<servlet-class>org.opendatakit.aggregate.servlet.ResultServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>result</servlet-name>
+		<url-pattern>/view/result</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>formDelete</servlet-name>
+		<servlet-class>org.opendatakit.aggregate.servlet.FormDeleteServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>formDelete</servlet-name>
+		<url-pattern>/admin/formDelete</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>query</servlet-name>
+		<servlet-class>org.opendatakit.aggregate.servlet.QueryServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>query</servlet-name>
+		<url-pattern>/view/query</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>queryResults</servlet-name>
+		<servlet-class>org.opendatakit.aggregate.servlet.QueryResultsServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>queryResults</servlet-name>
+		<url-pattern>/view/queryResults</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>externalServices</servlet-name>
+		<servlet-class>org.opendatakit.aggregate.servlet.ExternalServicesListServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>externalServices</servlet-name>
+		<url-pattern>/extern/externalServices</url-pattern>
+	</servlet-mapping>
+
+    <servlet>
+        <servlet-name>purgePublishedSubmissions</servlet-name>
+        <servlet-class>org.opendatakit.aggregate.servlet.ExternalServicesPurgeServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>purgePublishedSubmissions</servlet-name>
+        <url-pattern>/admin/purgePublishedSubmissions</url-pattern>
+    </servlet-mapping>
+
+	<servlet>
+		<servlet-name>forms</servlet-name>
+		<servlet-class>org.opendatakit.aggregate.servlet.FormsServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>forms</servlet-name>
+		<url-pattern>/www/forms</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>submission</servlet-name>
+		<servlet-class>org.opendatakit.aggregate.servlet.SubmissionServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>submission</servlet-name>
+		<url-pattern>/submission</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>upload</servlet-name>
+		<servlet-class>org.opendatakit.aggregate.servlet.FormUploadServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>upload</servlet-name>
+		<url-pattern>/admin/upload</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>formXml</servlet-name>
+		<servlet-class>org.opendatakit.aggregate.servlet.FormXmlServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>formXml</servlet-name>
+		<url-pattern>/formXml</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>formXml</servlet-name>
+		<url-pattern>/www/formXml</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>formList</servlet-name>
+		<servlet-class>org.opendatakit.aggregate.servlet.FormListServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>formList</servlet-name>
+		<url-pattern>/formList</url-pattern>
+	</servlet-mapping>
+
+
+	<servlet>
+		<servlet-name>xformsList</servlet-name>
+		<servlet-class>org.opendatakit.aggregate.servlet.XFormsListServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>xformsList</servlet-name>
+		<url-pattern>/xformsList</url-pattern>
+	</servlet-mapping>
+
+
+	<servlet>
+		<servlet-name>xformsManifest</servlet-name>
+		<servlet-class>org.opendatakit.aggregate.servlet.XFormsManifestServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>xformsManifest</servlet-name>
+		<url-pattern>/xformsManifest</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>xformsDownload</servlet-name>
+		<servlet-class>org.opendatakit.aggregate.servlet.XFormsDownloadServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>xformsDownload</servlet-name>
+		<url-pattern>/xformsDownload</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>binaryData</servlet-name>
+		<servlet-class>org.opendatakit.aggregate.servlet.BinaryDataServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>binaryData</servlet-name>
+		<url-pattern>/view/binaryData</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>formSubmissions</servlet-name>
+		<servlet-class>org.opendatakit.aggregate.servlet.FormSubmissionsServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>formSubmissions</servlet-name>
+		<url-pattern>/view/formSubmissions</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>formMultipleValue</servlet-name>
+		<servlet-class>org.opendatakit.aggregate.servlet.FormMultipleValueServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>formMultipleValue</servlet-name>
+		<url-pattern>/view/formMultipleValue</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>csv</servlet-name>
+		<servlet-class>org.opendatakit.aggregate.servlet.CsvServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>csv</servlet-name>
+		<url-pattern>/view/csv</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>csvFragment</servlet-name>
+		<servlet-class>org.opendatakit.aggregate.servlet.FragmentedCsvServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>csvFragment</servlet-name>
+		<url-pattern>/view/csvFragment</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>briefcase</servlet-name>
+		<servlet-class>org.opendatakit.aggregate.servlet.BriefcaseServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>briefcase</servlet-name>
+		<url-pattern>/Briefcase</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>uploadSubmissionsApplet</servlet-name>
+		<servlet-class>org.opendatakit.aggregate.servlet.UploadSubmissionsAppletServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>uploadSubmissionsApplet</servlet-name>
+		<url-pattern>/UploadSubmissionsApplet</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>uploadXformApplet</servlet-name>
+		<servlet-class>org.opendatakit.aggregate.servlet.UploadXFormAppletServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>uploadXformApplet</servlet-name>
+		<url-pattern>/UploadXFormApplet</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>externalService</servlet-name>
+		<servlet-class>org.opendatakit.aggregate.servlet.ExternalServiceServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>externalService</servlet-name>
+		<url-pattern>/extern/externalService</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>json</servlet-name>
+		<servlet-class>org.opendatakit.aggregate.servlet.JsonServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>json</servlet-name>
+		<url-pattern>/extern/json</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>fusiontables</servlet-name>
+		<servlet-class>org.opendatakit.aggregate.servlet.FusionTableServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>fusiontables</servlet-name>
+		<url-pattern>/extern/fusiontables</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>spreadsheet</servlet-name>
+		<servlet-class>org.opendatakit.aggregate.servlet.SpreadsheetServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>spreadsheet</servlet-name>
+		<url-pattern>/extern/spreadsheet</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>worksheet</servlet-name>
+		<servlet-class>org.opendatakit.aggregate.task.gae.servlet.WorksheetServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>worksheet</servlet-name>
+		<url-pattern>/gae/worksheetCreatorTask</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>kmlGeneratorTask</servlet-name>
+		<servlet-class>org.opendatakit.aggregate.task.gae.servlet.KmlGeneratorTaskServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>kmlGeneratorTask</servlet-name>
+		<url-pattern>/gae/kmlGeneratorTask</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>csvGeneratorTask</servlet-name>
+		<servlet-class>org.opendatakit.aggregate.task.gae.servlet.CsvGeneratorTaskServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>csvGeneratorTask</servlet-name>
+		<url-pattern>/gae/csvGeneratorTask</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>uploadSubmissionsTask</servlet-name>
+		<servlet-class>org.opendatakit.aggregate.task.gae.servlet.UploadSubmissionsTaskServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>uploadSubmissionsTask</servlet-name>
+		<url-pattern>/gae/uploadSubmissionsTask</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>formDeleteTask</servlet-name>
+		<servlet-class>org.opendatakit.aggregate.task.gae.servlet.FormDeleteTaskServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>formDeleteTask</servlet-name>
+		<url-pattern>/gae/formDeleteTask</url-pattern>
+	</servlet-mapping>
+
+    <servlet>
+        <servlet-name>purgeOlderSubmissionsTask</servlet-name>
+        <servlet-class>org.opendatakit.aggregate.task.gae.servlet.PurgeOlderSubmissionsTaskServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>purgeOlderSubmissionsTask</servlet-name>
+        <url-pattern>/gae/purgeOlderSubmissionsTask</url-pattern>
+    </servlet-mapping>
+	
+	<servlet>
+		<servlet-name>watchdog</servlet-name>
+		<servlet-class>org.opendatakit.aggregate.task.gae.servlet.WatchdogServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>watchdog</servlet-name>
+		<url-pattern>/gae/watchdog</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>kmlSettings</servlet-name>
+		<servlet-class>org.opendatakit.aggregate.servlet.KmlSettingsServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>kmlSettings</servlet-name>
+		<url-pattern>/view/kmlSettings</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>kml</servlet-name>
+		<servlet-class>org.opendatakit.aggregate.servlet.KmlServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>kml</servlet-name>
+		<url-pattern>/view/kml</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>process</servlet-name>
+		<servlet-class>org.opendatakit.aggregate.servlet.ProcessServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>process</servlet-name>
+		<url-pattern>/admin/process</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>confirm</servlet-name>
+		<servlet-class>org.opendatakit.aggregate.servlet.ConfirmServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>confirm</servlet-name>
+		<url-pattern>/admin/confirm</url-pattern>
+	</servlet-mapping>
+
+    <servlet>
+        <servlet-name>localLoginPage</servlet-name>
+        <servlet-class>org.opendatakit.aggregate.servlet.LocalLoginPageServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>localLoginPage</servlet-name>
+        <url-pattern>/local_login.html</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>wwwLandingPage</servlet-name>
+        <servlet-class>org.opendatakit.aggregate.servlet.LandingPageServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>wwwLandingPage</servlet-name>
+        <url-pattern>/www/index.html</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>accessConfiguration</servlet-name>
+        <servlet-class>org.opendatakit.aggregate.servlet.AccessConfigurationServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>accessConfiguration</servlet-name>
+        <url-pattern>/access/access-configuration</url-pattern>
+    </servlet-mapping>
+
+	<servlet>
+		<servlet-name>accessManagement</servlet-name>
+		<servlet-class>org.opendatakit.aggregate.servlet.AccessManagementServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>accessManagement</servlet-name>
+		<url-pattern>/access/access-management</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>userModifyMembership</servlet-name>
+		<servlet-class>org.opendatakit.aggregate.servlet.UserModifyMembershipsServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>userModifyMembership</servlet-name>
+		<url-pattern>/access/user-modify-membership</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>userModify</servlet-name>
+		<servlet-class>org.opendatakit.aggregate.servlet.UserModifyServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>userModify</servlet-name>
+		<url-pattern>/access/user-modify</url-pattern>
+	</servlet-mapping>
+
+    <servlet>
+        <servlet-name>userBulkModify</servlet-name>
+        <servlet-class>org.opendatakit.aggregate.servlet.UserBulkModifyServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>userBulkModify</servlet-name>
+        <url-pattern>/access/user-bulk-modify</url-pattern>
+    </servlet-mapping>
+
+	<servlet>
+		<servlet-name>userManagement</servlet-name>
+		<servlet-class>org.opendatakit.aggregate.servlet.UserManagementServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>userManagement</servlet-name>
+		<url-pattern>/access/user-management</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>groupModifyMembers</servlet-name>
+		<servlet-class>org.opendatakit.aggregate.servlet.GroupModifyMembersServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>groupModifyMembers</servlet-name>
+		<url-pattern>/access/group-modify-members</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>groupModify</servlet-name>
+		<servlet-class>org.opendatakit.aggregate.servlet.GroupModifyServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>groupModify</servlet-name>
+		<url-pattern>/access/group-modify</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>groupManagement</servlet-name>
+		<servlet-class>org.opendatakit.aggregate.servlet.GroupManagementServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>groupManagement</servlet-name>
+		<url-pattern>/access/group-management</url-pattern>
+	</servlet-mapping>
+
+	<welcome-file-list>
+		<welcome-file>index.html</welcome-file>
+	</welcome-file-list>
+
+	<session-config>
+		<session-timeout>30</session-timeout>
+	</session-config>
+</web-app>
