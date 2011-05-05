@@ -31,7 +31,7 @@
 			<version>1.5</version>
 			<executions>
 				<execution>
-					<id>add-gwt-source</id>
+					<id>add-java-source</id>
 				</execution>
 			</executions>
 		</plugin>
