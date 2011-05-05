@@ -172,6 +172,7 @@ public class AggregateUI implements EntryPoint {
 		};
 	}
 
+	@Override
 	public void onModuleLoad() {
 		// Get url hash.
 		hash = UrlHash.getHash();
