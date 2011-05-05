@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project-modules id="moduleCoreId" project-version="1.5.0">
+    <wb-module deploy-name="aggregate-mysql">
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/src"/>
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/test"/>
+        <wb-resource deploy-path="/" source-path="/webapp"/>
+        <wb-resource deploy-path="/aggregateui" source-path="/war/aggregateui"/>
+        <wb-resource deploy-path="/WEB-INF/deploy" source-path="/war/WEB-INF/deploy"/>
+        <dependent-module archiveName="odk-mysql-settings.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/odk-mysql-settings/odk-mysql-settings">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <property name="context-root" value="aggregate-mysql"/>
+        <property name="java-output-path" value="/aggregate-mysql/build/classes"/>
+    </wb-module>
+</project-modules>
