@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
+
+	<bean
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="locations">
+			<value>classpath:security.properties</value>
+		</property>
+	</bean>
+
+	<bean id="datastore"
+		class="org.opendatakit.common.persistence.engine.gae.DatastoreImpl" />
+
+	<!--	Website domain information	-->
+	<bean id="realm" class="org.opendatakit.common.security.Realm">
+		<property name="mailToDomain" value="${security.server.realm.mailToDomain}" />
+		<property name="rootDomain" value="${security.server.realm.rootDomain}" />
+		<property name="realmString" value="${security.server.realm.realmString}" />
+		<property name="domains" value="${security.server.realm.domains}" />
+	</bean>
+	
+	<bean id="user_service" class="org.opendatakit.common.security.spring.UserServiceImpl">
+		<property name="datastore" ref="datastore" />
+		<property name="realm" ref="realm" />
+		<property name="superUserEmail" value="${security.server.superUser}" />
+		<property name="userServiceKey" value="${security.server.userServiceKey}" />
+	</bean>
+
+<!--	<bean id="user_service" class="org.opendatakit.common.security.gae.UserServiceImpl">-->
+<!--		<property name="realm" ref="realm" />-->
+<!--	</bean>-->
+	<bean id="worksheet_creator" class="org.opendatakit.aggregate.task.gae.WorksheetCreatorImpl" />
+	<bean id="form_delete" class="org.opendatakit.aggregate.task.gae.FormDeleteImpl" />
+    <bean id="purge_submissions" class="org.opendatakit.aggregate.task.gae.PurgeOlderSubmissionsImpl" />
+	<bean id="upload_task"
+		class="org.opendatakit.aggregate.task.gae.UploadSubmissionsImpl" />
+	<bean id="kml_task" class="org.opendatakit.aggregate.task.gae.KmlGeneratorImpl" />
+	<bean id="csv_task" class="org.opendatakit.aggregate.task.gae.CsvGeneratorImpl" />
+    <bean id="http_client_factory" class="org.opendatakit.common.utils.gae.GaeHttpClientFactoryImpl" />
+
+</beans>
