@@ -22,9 +22,6 @@
 				<execution>
 					<id>add-java-source</id>
 				</execution>
-				<execution>
-					<id>add-gwt-source</id>
-				</execution>
 			</executions>
 		</plugin>
 		<plugin>
