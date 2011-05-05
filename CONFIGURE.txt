@@ -22,6 +22,7 @@ create schema odk_unit; (in odk_test database)
 
 (6) Optionally: Install MySQL
 
+(6a)
 For MySQL, run this script:
 
 UPDATE mysql.user SET Password=PASSWORD('odk_test') WHERE User='root';
@@ -31,6 +32,10 @@ CREATE DATABASE odk_test;
 GRANT ALL PRIVILEGES ON odk_test.* TO 'odk_test'@'localhost' WITH GRANT OPTION;
 CREATE DATABASE odk_unit;
 GRANT ALL PRIVILEGES ON odk_unit.* TO 'odk_test'@'localhost' WITH GRANT OPTION;
+
+(6b)
+For MySQL, download and copy the MySQL Connector J jar into the Tomcat /lib
+directory (mysql-connector-java-5.1.16.jar to apache-tomcat-6.0.26/lib).
 
 
 For Maven (3) is optional; (4), (5) and (6) are required in order
