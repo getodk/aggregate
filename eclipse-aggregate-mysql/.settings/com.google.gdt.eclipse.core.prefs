@@ -1,0 +1,7 @@
+#Thu May 05 10:11:26 PDT 2011
+eclipse.preferences.version=1
+jarsExcludedFromWebInfLib=
+lastWarOutDir=${project_loc}/build/webapp
+launchConfigExternalUrlPrefix=
+warSrcDir=war
+warSrcDirIsOutput=false
