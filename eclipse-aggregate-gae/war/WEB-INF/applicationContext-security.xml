@@ -1,0 +1,445 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans:beans xmlns="http://www.springframework.org/schema/security"
+	xmlns:beans="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.0.xsd">
+
+	<beans:import resource="classpath:odk-security-settings.xml"/>
+	
+	<!--	The Basic Authentication passwords are sha1-encoded with a salt -->
+	<beans:bean id="basicAuthenticationMessageDigestPasswordEncoder"
+			class="org.springframework.security.authentication.encoding.ShaPasswordEncoder"/>
+
+	<!--	The group and role hierarchy is maintained in the granted authority hierarchy table.  -->
+	<!--	Unauthenticated accesses possess the USER_IS_ANONYMOUS group -->
+	<!--    Authenticated accesses possess the USER_IS_AUTHENTICATED group and -->
+	<!--    will possess a group prefixed by MAILTO_ that describes their e-mail domain.  i.e., -->
+	<!-- 		gmail.com  -> MAILTO_GMAIL_COM-->
+	<!--		uw.edu  -> MAILTO_UW_EDU-->
+	<!--    If the user is registered (present in the registered users table), the user will also --> 
+	<!--  	possess the USER_IS_REGISTERED group.  -->
+	<!--    An authenticated users will also possess an AUTH_ group defining the mechanism by which -->
+	<!--    they were authenticated.  i.e., either AUTH_OPENID or AUTH_LOCAL -->
+	<!--  -->
+	<!-- 	The granted authority hierarchy table defines the mapping of these groups, and -->
+	<!-- 	other site-specific administrator-defined groups to the roles needed to access --> 
+	<!--	web pages on the site. -->
+	
+	<beans:bean id="hierarchicalRoleRelationships" class="org.opendatakit.common.security.spring.RoleHierarchyImpl">
+		<beans:property name="datastore" ref="datastore"/>
+		<beans:property name="userService" ref="user_service"/>
+	</beans:bean>
+	
+	<!--	Configure the access policy to the pages here	-->
+	<!--	You can do things like this: and hasRole('AUTH_LOCAL') -->
+	
+<!--	NOTE: for debugging applets, it is useful to allow anonymous access to the pages-->
+<!--	they utilize.  This means that the isFullyAuthenticated() criteria cannot be used-->
+<!--	for those pages.  TODO: enforce the use of is criteria for production deployments.-->
+	<filter-security-metadata-source id="securityPolicy" use-expressions="true">
+        <intercept-url pattern="/_ah/**" access="true" /> <!-- local GAE admin console -->
+        <intercept-url pattern="/auth/**" access="true" />
+        <intercept-url pattern="/Aggregate.html" access="true" />
+        <intercept-url pattern="/ui/upload" access="hasRole('ROLE_FORM_ADMIN')" />
+        <intercept-url pattern="/ui/submission" access="hasRole('ROLE_SUBMISSION_UPLOAD')"  />
+		<intercept-url pattern="/favicon.ico" access="true" />
+		<intercept-url pattern="/aggregateui/submissionservice" access="true" />
+		<intercept-url pattern="/aggregateui/formservice" access="true" />
+		<intercept-url pattern="/aggregateui/filterservice" access="true" />
+		<intercept-url pattern="/odk_color.png" access="true" />
+		<intercept-url pattern="/index.html" access="true" />
+        <intercept-url pattern="/change-applied.html" access="isFullyAuthenticated()" /> <!-- Intermediate page redirecting to logout from access mgmt -->
+        <intercept-url pattern="/www/index.html" access="isFullyAuthenticated()" /> <!-- Intermediate page redirecting to access mgmt -->
+		<intercept-url pattern="/logout.html" access="true" />
+		<intercept-url pattern="/res/**" access="true" />
+		<intercept-url pattern="/openid_login.html" access="isAnonymous()" />
+		<intercept-url pattern="/local_login.html" access="isFullyAuthenticated() and hasRole('AUTH_LOCAL')" />
+		<intercept-url pattern="/UploadSubmissionsApplet" access="isFullyAuthenticated() and hasRole('ROLE_SUBMISSION_UPLOAD')" />
+		<intercept-url pattern="/upload-submissions/**" access="isFullyAuthenticated() and hasRole('ROLE_SUBMISSION_UPLOAD')" />
+		<intercept-url pattern="/UploadXFormApplet" access="isFullyAuthenticated() and hasRole('ROLE_FORM_ADMIN')" />
+		<intercept-url pattern="/upload-xform/**" access="isFullyAuthenticated() and hasRole('ROLE_FORM_ADMIN')" />
+		<intercept-url pattern="/Briefcase" access="isFullyAuthenticated() and hasRole('ROLE_ANALYST')" />
+		<intercept-url pattern="/briefcase/**" access="isFullyAuthenticated() and hasRole('ROLE_ANALYST')" />
+		<intercept-url pattern="/xformsDownload" access="isFullyAuthenticated() and hasRole('ROLE_FORM_DOWNLOAD')" />
+		<intercept-url pattern="/xformsList" access="isFullyAuthenticated() and hasRole('ROLE_FORM_LIST')" />
+		<intercept-url pattern="/xformsManifest" access="isFullyAuthenticated() and hasRole('ROLE_FORM_LIST')" />
+		<intercept-url pattern="/formList" access="hasRole('ROLE_FORM_LIST')" />
+		<intercept-url pattern="/formXml" access="hasRole('ROLE_FORM_DOWNLOAD')" />
+		<intercept-url pattern="/submission" access="hasRole('ROLE_SUBMISSION_UPLOAD')" />
+		<intercept-url pattern="/www/**" access="isFullyAuthenticated() and hasRole('ROLE_USER')" />
+        <intercept-url pattern="/ssl/user-manage-passwords" access="isFullyAuthenticated() and hasRole('USER_IS_REGISTERED') and hasRole('ROLE_ACCESS_ADMIN')" />
+		<intercept-url pattern="/ssl/**" access="isFullyAuthenticated() and hasRole('USER_IS_REGISTERED') and hasRole('ROLE_USER')" />
+		<intercept-url pattern="/view/csvFragment" access="hasRole('ROLE_ANALYST')" />
+		<!-- <intercept-url pattern="/view/binaryData" access="hasRole('ROLE_ATTACHMENT_VIEWER')" /> -->
+		<intercept-url pattern="/view/binaryData" access="true" />
+		<intercept-url pattern="/view/**" access="isFullyAuthenticated() and hasRole('ROLE_ANALYST')" />
+<!--	TODO: gae should be: hasRole(USER_IS_DAEMON) -->
+		<intercept-url pattern="/gae/**" access="true" /> 
+		<intercept-url pattern="/extern/**" access="isFullyAuthenticated() and hasRole('ROLE_SERVICES_ADMIN')" />
+		<intercept-url pattern="/admin/upload" access="hasRole('ROLE_FORM_ADMIN')" />
+		<intercept-url pattern="/admin/**" access="isFullyAuthenticated() and hasRole('ROLE_FORM_ADMIN')" />
+		<intercept-url pattern="/access/**" access="isFullyAuthenticated() and hasRole('ROLE_ACCESS_ADMIN')" />
+		<intercept-url pattern="/**" access="isAnonymous()" />
+	</filter-security-metadata-source>
+
+	<!-- Pages being filtered and the filters applied to them (everything). -->
+	<!-- Prerequisite for the applying of the access policies above.   -->
+	<beans:bean id="serverSpringSecurityFilterChain"
+		class="org.springframework.security.web.FilterChainProxy">
+		<filter-chain-map path-type="ant">
+			<filter-chain pattern="/local_login.html"
+				filters="channelProcessingFilter,securityContextPersistenceFilter,logoutFilter,anonymousFilter,${security.server.deviceAuthentication}AuthFilter,requestCacheAwareFilter,securityContextHolderAwareFilter,sessionManagerFilter,localExceptionTranslationFilter,filterSecurityInterceptor" />
+			<filter-chain pattern="/*"
+				filters="channelProcessingFilter,securityContextPersistenceFilter,logoutFilter,anonymousFilter,${security.server.deviceAuthentication}AuthFilter,openIdFilter,requestCacheAwareFilter,securityContextHolderAwareFilter,sessionManagerFilter,exceptionTranslationFilter,filterSecurityInterceptor" />
+			<filter-chain pattern="/**"
+				filters="channelProcessingFilter,securityContextPersistenceFilter,logoutFilter,anonymousFilter,${security.server.deviceAuthentication}AuthFilter,openIdFilter,requestCacheAwareFilter,securityContextHolderAwareFilter,sessionManagerFilter,exceptionTranslationFilter,filterSecurityInterceptor" />
+		</filter-chain-map>
+	</beans:bean>
+
+	<beans:bean id="channelProcessingFilter" class="org.springframework.security.web.access.channel.ChannelProcessingFilter">
+	  <beans:property name="channelDecisionManager" ref="channelDecisionManager"/>
+	  <beans:property name="securityMetadataSource">
+	    <filter-invocation-definition-source path-type="ant">
+	        <intercept-url pattern="/favicon.ico" access="ANY_CHANNEL" />
+	        <intercept-url pattern="/odk_color.png" access="ANY_CHANNEL" />
+	        <intercept-url pattern="/index.html" access="REQUIRES_INSECURE_CHANNEL" />
+	        <intercept-url pattern="/logout.html" access="REQUIRES_INSECURE_CHANNEL" />
+	        <intercept-url pattern="/openid_login.html" access="REQUIRES_INSECURE_CHANNEL" />
+            <intercept-url pattern="/www/index.html" access="${security.server.channelType}" />
+	        <intercept-url pattern="/res/**" access="ANY_CHANNEL" />
+		    <intercept-url pattern="/ssl/**" access="${security.server.secureChannelType}"/>
+            <intercept-url pattern="/local_login.html" access="${security.server.channelType}" />
+		    <intercept-url pattern="/**" access="${security.server.channelType}"/>
+	    </filter-invocation-definition-source>                
+	  </beans:property>
+	</beans:bean>
+
+	<beans:bean id="channelDecisionManager" class="org.springframework.security.web.access.channel.ChannelDecisionManagerImpl">
+	  <beans:property name="channelProcessors">
+	    <beans:list>
+		    <beans:ref bean="secureChannelProcessor"/>
+		    <beans:ref bean="insecureChannelProcessor"/>
+	    </beans:list>
+	  </beans:property>
+	</beans:bean>
+
+	<beans:bean id="secureChannelProcessor" class="org.springframework.security.web.access.channel.SecureChannelProcessor"/>
+	<beans:bean id="insecureChannelProcessor" class="org.springframework.security.web.access.channel.InsecureChannelProcessor"/>
+	    
+	<beans:bean id="securityContextPersistenceFilter"
+		class="org.springframework.security.web.context.SecurityContextPersistenceFilter">
+		<beans:property name="securityContextRepository" ref="securityContextRepository" />
+	</beans:bean>
+
+	<beans:bean id="securityContextRepository"
+		class="org.springframework.security.web.context.HttpSessionSecurityContextRepository" />
+
+	<beans:bean id="logoutFilter"
+		class="org.springframework.security.web.authentication.logout.LogoutFilter">
+		<beans:constructor-arg value="/logout.html" />
+		<beans:constructor-arg>
+			<beans:list>
+				<beans:bean
+					class="org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler">
+					<!--
+						Basic and Digest Auth don't have server side logout (may want to
+						invalidate session to work around this).
+					-->
+					<!-- OpenID logins can be disabled through this mechanism.  -->
+					<beans:property name="invalidateHttpSession" value="true"/>
+				</beans:bean>
+			</beans:list>
+		</beans:constructor-arg>
+	</beans:bean>
+
+	<beans:bean id="requestCacheAwareFilter"
+		class="org.springframework.security.web.savedrequest.RequestCacheAwareFilter" />
+
+	<beans:bean id="securityContextHolderAwareFilter"
+		class="org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter" />
+
+	<beans:bean id="sessionManagerFilter"
+		class="org.springframework.security.web.session.SessionManagementFilter">
+		<beans:constructor-arg ref="securityContextRepository" />
+	</beans:bean>
+
+	<!--	This class determines what authentication to initiate.  It uses the -->
+	<!--	User-Agent header value to determine whether it is being accessed by a -->
+	<!--	browser or the device.  If it is not a browser, it does basic or digest auth.-->
+	<!--	Otherwise, it does openId auth.-->
+	<beans:bean id="exceptionTranslationFilter"
+		class="org.springframework.security.web.access.ExceptionTranslationFilter">
+		<beans:property name="authenticationEntryPoint">
+			<beans:bean
+				class="org.springframework.security.web.authentication.DelegatingAuthenticationEntryPoint">
+				<beans:constructor-arg>
+					<beans:map>
+                        <beans:entry key="hasHeader('X-OpenRosa-Version','1.0')" value-ref="${security.server.deviceAuthentication}EntryPoint" />
+					</beans:map>
+				</beans:constructor-arg>
+				<beans:property name="defaultEntryPoint" ref="openIdEntryPoint" />
+			</beans:bean>
+		</beans:property>
+	</beans:bean>
+
+	<!-- This forces the login to use the configured locally-held credential mechanism -->
+	<beans:bean id="localExceptionTranslationFilter"
+		class="org.springframework.security.web.access.ExceptionTranslationFilter">
+		<beans:property name="authenticationEntryPoint" ref="${security.server.deviceAuthentication}EntryPoint" />
+	</beans:bean>
+
+	<!-- 			Anonymous User -->
+
+	<beans:bean id="anonymousFilter"
+		class="org.springframework.security.web.authentication.AnonymousAuthenticationFilter">
+		<beans:property name="key" value="${security.server.siteKey}" />
+		<beans:property name="userAttribute" value="anonymousUser,USER_IS_ANONYMOUS" />
+	</beans:bean>
+	
+	<beans:bean id="anonymousProvider"
+		class="org.springframework.security.authentication.AnonymousAuthenticationProvider">
+		<beans:property name="key" value="${security.server.siteKey}" />
+	</beans:bean>
+
+	<!--			Basic Authentication -->
+	
+	<beans:bean id="basicAuthFilter"
+		class="org.springframework.security.web.authentication.www.BasicAuthenticationFilter">
+		<beans:property name="authenticationManager">
+			<beans:bean class="org.springframework.security.authentication.ProviderManager">
+				<beans:property name="providers">
+					<beans:list>
+						<beans:ref bean="basicAuthenticationProvider" />
+						<beans:ref bean="anonymousProvider" />
+					</beans:list>
+				</beans:property>
+			</beans:bean>
+		</beans:property>
+		<beans:property name="authenticationEntryPoint" ref="basicEntryPoint" />
+	</beans:bean>
+
+	<beans:bean id="basicEntryPoint"
+		class="org.springframework.security.web.authentication.www.BasicAuthenticationEntryPoint">
+		<beans:property name="realmName" value="${security.server.realm.realmString}" />
+	</beans:bean>
+
+
+	<beans:bean id="basicAuthenticationProvider"
+		class="org.springframework.security.authentication.dao.DaoAuthenticationProvider">
+        <beans:property name="passwordEncoder" ref="basicAuthenticationMessageDigestPasswordEncoder" />
+        <beans:property name="saltSource">
+        	<beans:bean class="org.opendatakit.common.security.spring.AggregateUserSaltSource"/>
+        </beans:property>
+		<beans:property name="userDetailsService" ref="basicLoginService" />
+	</beans:bean>
+
+	<beans:bean id="basicLoginService"
+		class="org.opendatakit.common.security.spring.DelegatingUserDetailsService">
+		<beans:property name="userDetailsService">
+			<!--	Known registered users are maintained in the registered users table -->
+			<!--	Passwords are stored as salted sha1 hashes-->
+			<beans:bean class="org.opendatakit.common.security.spring.UserDetailsServiceImpl">
+				<beans:property name="datastore" ref="datastore"/>
+				<beans:property name="userService" ref="user_service"/>
+				<beans:property name="passwordType" value="BasicAuth"/>
+			</beans:bean>
+		</beans:property>
+		<beans:property name="passDownUriUser" value="true" />
+		<beans:property name="mailtoDomain"	value="${security.server.realm.mailToDomain}" />
+		<beans:property name="authorities">
+			<beans:list>
+				<beans:value>AUTH_LOCAL</beans:value>
+			</beans:list>
+		</beans:property>
+	</beans:bean>
+
+	<!--
+		Digest Authentication configuration. This is used for device access.
+	-->
+
+	<beans:bean id="digestAuthFilter"
+		class="org.springframework.security.web.authentication.www.DigestAuthenticationFilter">
+		<beans:property name="passwordAlreadyEncoded" value="true" />
+		<beans:property name="userDetailsService" ref="digestLoginService" />
+		<beans:property name="authenticationEntryPoint" ref="digestEntryPoint" />
+	</beans:bean>
+
+	<beans:bean id="digestEntryPoint"
+		class="org.springframework.security.web.authentication.www.DigestAuthenticationEntryPoint">
+		<beans:property name="realmName" value="${security.server.realm.realmString}" />
+		<beans:property name="key" value="${security.server.siteKey}" />
+		<beans:property name="nonceValiditySeconds" value="600" />
+	</beans:bean>
+
+	<beans:bean id="digestAuthenticationProvider"
+		class="org.springframework.security.authentication.dao.DaoAuthenticationProvider">
+		<beans:property name="userDetailsService" ref="digestLoginService" />
+	</beans:bean>
+
+	<beans:bean id="digestLoginService"
+		class="org.opendatakit.common.security.spring.DelegatingUserDetailsService">
+		<beans:property name="userDetailsService">
+			<!--	Known registered users are maintained in the registered users table -->
+			<!--	Passwords are stored as the A1 value in the protocol (MD5 hash of username + realm string + password). -->
+			<beans:bean class="org.opendatakit.common.security.spring.UserDetailsServiceImpl">
+				<beans:property name="datastore" ref="datastore"/>
+				<beans:property name="userService" ref="user_service"/>
+				<beans:property name="passwordType" value="DigestAuth"/>
+			</beans:bean>
+		</beans:property>
+		<beans:property name="mailtoDomain"	value="${security.server.realm.mailToDomain}" />
+		<beans:property name="passDownUriUser" value="true" />
+		<beans:property name="authorities">
+			<beans:list>
+				<beans:value>AUTH_LOCAL</beans:value>
+			</beans:list>
+		</beans:property>
+	</beans:bean>
+
+	<!--		Gmail OpenID authentication mechanism	(copy for Yahoo, others) -->
+	<!--		Gmail OpenID authentication mechanism	(copy for Yahoo, others) -->
+	<!--		Gmail OpenID authentication mechanism	(copy for Yahoo, others) -->
+	<!--		Gmail OpenID authentication mechanism	(copy for Yahoo, others) -->
+	
+	<!--	There are additional settings for this to work on GoogleAppEngine. -->
+	<!--    See odk-security-settings.xml -->
+    
+	<beans:bean id="openIdFilter"
+		class="org.springframework.security.openid.OpenIDAuthenticationFilter">
+		<beans:property name="authenticationManager">
+			<beans:bean class="org.springframework.security.authentication.ProviderManager">
+				<beans:property name="providers">
+					<beans:list>
+						<beans:ref bean="openIdAuthenticationProvider" />
+						<beans:ref bean="anonymousProvider" />
+					</beans:list>
+				</beans:property>
+			</beans:bean>
+		</beans:property>
+		<beans:property name="consumer">
+			<beans:bean class="org.springframework.security.openid.OpenID4JavaConsumer">
+				<beans:constructor-arg name="attributes">
+					<beans:list>
+						<beans:bean class="org.springframework.security.openid.OpenIDAttribute">
+							<beans:constructor-arg name="name" value="email" />
+							<beans:constructor-arg name="type"
+								value="http://axschema.org/contact/email" />
+							<beans:property name="required" value="true" />
+						</beans:bean>
+					</beans:list>
+				</beans:constructor-arg>
+			</beans:bean>
+		</beans:property>
+	</beans:bean>
+
+	<beans:bean id="openIdEntryPoint"
+		class="org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint">
+		<beans:property name="loginFormUrl" value="/openid_login.html" />
+	</beans:bean>
+
+	<!--	This OpenId authentication implementation first accepts all authenticated -->
+	<!--	users (via the EmptyUserDetailsService).  If you are using more than gmail, -->
+	<!--    you just need to modify the /openid_login.html to add a button to the alternate -->
+	<!--    OpenId sites.  After accepting the authentication, this provider then -->
+	<!--	determines whether the user is a registered user, using the wrappingUserDetailsService.-->
+	<!--	Finally, it adds the AUTH_OPENID and the MAILTO_domain granted authorities to the set of -->
+	<!--	the registered user's granted authorities (which is empty if the user is not registered). -->
+	<beans:bean id="openIdAuthenticationProvider"
+		class="org.opendatakit.common.security.spring.WrappingOpenIDAuthenticationProvider">
+		<!--	Stub userDetailsService that accepts any authenticated party-->
+		<beans:property name="userDetailsService">
+			<beans:bean class="org.opendatakit.common.security.spring.EmptyUserDetailsService" />
+		</beans:property>
+		<beans:property name="wrappingUserDetailsService">
+			<!--	Known registered users are maintained in the registered users table -->
+			<!--	There is no password for OpenId-authenticated users, so it is set to a random value. -->
+			<beans:bean id="openIdUserDetailsService" class="org.opendatakit.common.security.spring.UserDetailsServiceImpl">
+				<beans:property name="datastore" ref="datastore"/>
+				<beans:property name="userService" ref="user_service"/>
+				<beans:property name="passwordType" value="Random"/>
+			</beans:bean>
+		</beans:property>
+	</beans:bean>
+
+
+	<!--		This enforces the security applied to specific URLs   -->
+
+	<beans:bean id="filterSecurityInterceptor"
+		class="org.springframework.security.web.access.intercept.FilterSecurityInterceptor">
+		<beans:property name="securityMetadataSource" ref="securityPolicy"/>
+		<beans:property name="authenticationManager" ref="authenticationManager" />
+		<beans:property name="accessDecisionManager" ref="accessDecisionManager" />
+	</beans:bean>
+
+	<beans:bean id="accessDecisionManager"
+		class="org.springframework.security.access.vote.AffirmativeBased">
+		<beans:property name="decisionVoters">
+			<beans:list>
+		        <beans:bean class="org.springframework.security.web.access.expression.WebExpressionVoter">
+		        	<beans:property name="expressionHandler">
+		        		<beans:bean	class="org.springframework.security.web.access.expression.DefaultWebSecurityExpressionHandler">
+			        		<beans:property name="roleHierarchy" ref="hierarchicalRoleRelationships"/>
+		        		</beans:bean>
+		        	</beans:property>
+		        </beans:bean>
+		        <beans:bean class="org.springframework.security.access.vote.RoleHierarchyVoter">
+		        	<beans:constructor-arg name="roleHierarchy" ref="hierarchicalRoleRelationships"/>
+		        </beans:bean>
+				<beans:bean	class="org.springframework.security.access.vote.AuthenticatedVoter" />
+			</beans:list>
+		</beans:property>
+	</beans:bean>
+	<beans:bean id="webPrivilegeEvaluator"
+		class="org.springframework.security.web.access.DefaultWebInvocationPrivilegeEvaluator">
+		<beans:constructor-arg ref="filterSecurityInterceptor" />
+	</beans:bean>
+
+	<beans:bean id="authenticationManager"
+		class="org.springframework.security.authentication.ProviderManager">
+		<beans:property name="providers">
+			<beans:list>
+				<beans:ref bean="digestAuthenticationProvider" />
+				<beans:ref bean="basicAuthenticationProvider" />
+				<beans:ref bean="openIdAuthenticationProvider" />
+				<beans:ref bean="anonymousProvider" />
+			</beans:list>
+		</beans:property>
+	</beans:bean>
+
+
+	<!--	CONFIGURATION TO APPLY ACCESS RESTRICTIONS TO BEANS    -->
+	<!--	CONFIGURATION TO APPLY ACCESS RESTRICTIONS TO BEANS    -->
+	<!--	CONFIGURATION TO APPLY ACCESS RESTRICTIONS TO BEANS    -->
+	<!--	CONFIGURATION TO APPLY ACCESS RESTRICTIONS TO BEANS    -->
+	<!--	CONFIGURATION TO APPLY ACCESS RESTRICTIONS TO BEANS    -->
+<!---->
+<!--	<beans:bean id="authorizations"-->
+<!--		class="org.springframework.security.access.intercept.aopalliance.MethodSecurityInterceptor">-->
+<!--		<beans:property name="authenticationManager" ref="authenticationManager" />-->
+<!--		<beans:property name="accessDecisionManager" ref="accessDecisionManager" />-->
+<!--		<beans:property name="afterInvocationManager" ref="afterInvocationManager" />  -->
+<!--		<beans:property name="securityMetadataSource" ref="securityMetadataSource"/>-->
+<!--	</beans:bean>-->
+<!--	-->
+	<!--	<global-method-security pre-post-annotations="enabled">-->
+	<!-- 		<expression-handler ref="expressionHandler" />-->
+	<!--	</global-method-security>-->
+<!---->
+	<!--	<beans:bean id="expressionHandler"-->
+	<!--
+		class="org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler">
+	-->
+	<!--
+		<beans:property name="permissionEvaluator"
+		ref="aggregatePermissionEvaluator" />
+	-->
+	<!--	</beans:bean>-->
+<!---->
+	<!--	<beans:bean id="aggregatePermissionEvaluator"-->
+	<!--
+		class="org.opendatakit.common.security.SecurityPermissionEvaluatorImpl">
+	-->
+	<!--	</beans:bean>-->
+<!---->
+
+</beans:beans>
