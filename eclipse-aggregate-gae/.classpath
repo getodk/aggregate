@@ -10,13 +10,9 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry excluding="org/opendatakit/common/testing/gae/" kind="src" path="test"/>
-	<classpathentry exported="true" kind="con" path="com.google.appengine.eclipse.core.GAE_CONTAINER"/>
 	<classpathentry exported="true" kind="con" path="org.eclipse.jst.j2ee.internal.module.container"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/aopalliance-1.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/apache-mime4j-0.6.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/appengine-api-1.0-sdk-1.4.2.jar"/>
-	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/appengine-api-labs-1.4.2.jar"/>
-	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/appengine-jsr107cache-1.4.2.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/aspectjrt-1.6.8.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/aspectjweaver-1.6.8.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/bonecp-0.7.1.RELEASE.jar"/>
@@ -26,9 +22,6 @@
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/commons-io-1.4.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/commons-lang-2.5.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/commons-logging-1.1.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/datanucleus-appengine-1.0.8.final.jar"/>
-	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/datanucleus-core-1.1.5.jar"/>
-	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/datanucleus-jpa-1.1.5.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/gdata-base-1.0-1.41.5.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/gdata-client-1.0-1.41.5.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/gdata-core-1.0-1.41.5.jar"/>
@@ -36,8 +29,6 @@
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/gdata-maps-2.0-1.41.5.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/gdata-media-1.0-1.41.5.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/gdata-spreadsheet-3.0-1.41.5.jar"/>
-	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/geronimo-jpa_3.0_spec-1.1.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/geronimo-jta_1.1_spec-1.1.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/gson-1.7.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/guava-r09.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/guice-2.0.jar"/>
@@ -47,9 +38,7 @@
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/icu4j-3.4.4.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/javarosa-libraries-latest.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/jcip-annotations-1.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/jdo2-api-2.3-eb.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/jdom-1.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/jsr107cache-1.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/jsr305-1.3.9.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/jug-1.1.2.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/kxml2-2.3.0.jar"/>
@@ -103,5 +92,6 @@
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/xercesImpl-2.9.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/xml-apis-1.3.04.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/odk-gae-settings-latest.jar"/>
+	<classpathentry kind="con" path="com.google.appengine.eclipse.core.GAE_CONTAINER"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>
