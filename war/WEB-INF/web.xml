@@ -44,6 +44,16 @@
 	</servlet-mapping>
  
  
+  <servlet>
+    <servlet-name>PreferenceServiceImpl</servlet-name>
+    <servlet-class>org.opendatakit.aggregate.server.PreferenceServiceImpl</servlet-class>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>PreferenceServiceImpl</servlet-name>
+    <url-pattern>/aggregateui/preferenceservice</url-pattern>
+  </servlet-mapping>
+ 
    <servlet>
     <servlet-name>submissionServiceImpl</servlet-name>
     <servlet-class>org.opendatakit.aggregate.server.SubmissionServiceImpl</servlet-class>
