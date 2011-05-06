@@ -114,7 +114,7 @@ public class SubmissionTabUI extends TabPanel {
 		// list of filters
 		formAndGoalSelectionTable.setWidget(0, 1, filtersBox);
 		// load form + filter
-		Button loadFormAndFilterButton = new Button("Load Form and Filter");
+		Button loadFormAndFilterButton = new Button("Fetch Form with Filter");
 		currentGroup = def;
 		
 		loadFormAndFilterButton.addClickHandler(new ClickHandler() {
@@ -151,7 +151,7 @@ public class SubmissionTabUI extends TabPanel {
 		formAndGoalSelectionTable.setWidget(0, 2, loadFormAndFilterButton);
 		
 		navTable.setWidget(0, 0, formAndGoalSelectionTable);
-		navTable.setHTML(0, 1, "<h1 id=\"form_name\"></h1>");
+		navTable.setHTML(0, 1, "<h2 id=\"form_name\"></h2>");
 		navTable.getElement().getFirstChildElement().getNextSiblingElement().getFirstChildElement()
 			.getFirstChildElement().getNextSiblingElement().setId("form_title_cell");
 		

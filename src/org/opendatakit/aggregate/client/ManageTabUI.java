@@ -3,6 +3,7 @@ package org.opendatakit.aggregate.client;
 import org.opendatakit.aggregate.client.form.ExportSummary;
 import org.opendatakit.aggregate.client.form.ExternServSummary;
 import org.opendatakit.aggregate.client.form.FormService;
+import org.opendatakit.aggregate.client.preferences.Preferences;
 import org.opendatakit.aggregate.constants.common.FormOrFilter;
 import org.opendatakit.aggregate.constants.common.PageUpdates;
 
@@ -15,11 +16,13 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.TabPanel;
+import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class ManageTabUI extends TabPanel {
 	
-	// Management Navigation
+	private static final String GOOGLE_MAPS_API_KEY_LABEL = "<h2>Google Maps API Key</h2> To obtain a key signup at <a href=\"http://code.google.com/apis/maps/signup.html\"> Google Maps </a>";
+  // Management Navigation
 	private static final String FORMS = "forms";
 	private static final String EXPORT = "export";
    static final String PUBLISH = "publish";
@@ -40,19 +43,20 @@ public class ManageTabUI extends TabPanel {
 	// Export tab
 	private FlexTable exportTable = new FlexTable();
 	
+	private TextBox mapsApiKey = new TextBox();
+	
 	public ManageTabUI(FlexTable listOfForms, AggregateUI parent) {
 		super();
 		this.hash = UrlHash.getHash();
 		this.listOfForms = listOfForms;
 		this.parent = parent;
-      setupPublishPanel();
-      setupExportPanel();
-      
+
 		this.add(setupFormManagementPanel(), "Forms");
 		this.add(exportTable, "Export");
 		this.add(publishTable, "Publish");
 		this.add(setupPermissionsPanel(), "Permissions");
 		this.add(setupUtilitiesPanel(), "Utilities");
+		this.add(setupPreferencesPanel(), "Preferences");
 		
 		int selected = 0;
 		String subMenu = hash.get(UrlHash.SUB_MENU);
@@ -101,6 +105,28 @@ public class ManageTabUI extends TabPanel {
 	    formManagementPanel.add(uploadTable);
 	    formManagementPanel.add(listOfForms);
 	    return formManagementPanel;
+	}
+	
+	public VerticalPanel  setupPreferencesPanel() {
+	  HTML labelMapsKey = new HTML(GOOGLE_MAPS_API_KEY_LABEL); 
+	  String key = Preferences.getGoogleMapsApiKey();
+	  mapsApiKey.setText(key);
+    
+	  Button updateMapsApiKeyButton = new Button("Update");
+	  updateMapsApiKeyButton.addClickHandler(new ClickHandler() {
+
+        @Override
+        public void onClick(ClickEvent event) {
+          Preferences.setGoogleMapsApiKey(mapsApiKey.getText());        
+        }
+	    
+	  });
+	  
+	  VerticalPanel  preferencesPanel = new VerticalPanel();
+     preferencesPanel.add(labelMapsKey);
+	  preferencesPanel.add(mapsApiKey);
+	  preferencesPanel.add(updateMapsApiKeyButton);
+	  return preferencesPanel ;
 	}
 	
 	public FlexTable setupExportsPanel() {

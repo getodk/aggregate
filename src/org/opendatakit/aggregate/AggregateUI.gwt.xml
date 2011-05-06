@@ -11,10 +11,13 @@
   <servlet path="/formservice" class="org.opendatakit.aggregate.server.FormServiceImpl"/>
   <servlet path="/filterservice" class="org.opendatakit.aggregate.server.FilterServiceImpl"/>
   <servlet path="/submissionservice" class="org.opendatakit.aggregate.server.SubmissionServiceImpl"/>
+  <servlet path="/preferenceservice" class="org.opendatakit.aggregate.server.PreferenceServiceImpl"/>
    
   <source path='client'/>
-  <source path='client/form'/>
   <source path='client/filter'/>
+  <source path='client/form'/>  
+  <source path='client/preferences'/>
   <source path='client/submission'/>
+  <source path='client/visualization'/>
   <source path='constants/common'/>
 </module>

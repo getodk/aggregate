@@ -13,6 +13,7 @@ import org.opendatakit.aggregate.client.filter.FilterSet;
 import org.opendatakit.aggregate.client.form.FormService;
 import org.opendatakit.aggregate.client.form.FormServiceAsync;
 import org.opendatakit.aggregate.client.form.FormSummary;
+import org.opendatakit.aggregate.client.preferences.Preferences;
 import org.opendatakit.aggregate.client.submission.Column;
 import org.opendatakit.aggregate.client.submission.SubmissionService;
 import org.opendatakit.aggregate.client.submission.SubmissionServiceAsync;
@@ -87,7 +88,9 @@ public class AggregateUI implements EntryPoint {
 	public AggregateUI() {
 		formSvc = GWT.create(FormService.class);
 		listOfForms = new FlexTable();
-
+		
+		Preferences.updatePreferences();
+		
 		// Setup timer to refresh list automatically.
 		setTimer(new RefreshTimer(this));
 	}
