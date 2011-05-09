@@ -76,12 +76,16 @@ public class UISubmissionServlet extends ServletUtilBase {
   
   private static final String UPLOAD_SCRIPT_RESOURCE = "res/upload_control.js";
 
+  private static final String PAGE_STYLE_RESOURCE = "stylesheets/upload.css";
+  
+  private static final String BUTTON_STYLE_RESOURCE = "stylesheets/button.css";
+
   private static final String UPLOAD_PAGE_BODY_START = 
 
-"	  <p><b>Upload one submission into ODK Aggregate</b></p>" +
+"	  <h2>Upload one submission into ODK Aggregate</h2>" +
 "	  <p>Submissions are located under the <code>/odk/instances</code> directory on the phone's " +
-"     sdcard.  This directory will contain subdirectories with names of the form: <code>formID_yyyy-mm-dd_hh-MM-ss</code></p>" +
-"     <p>Within each of these subdirectories are the submission data file (named: <code>formID_yyyy-mm-dd_hh-MM-ss.xml</code>)," +
+"     sdcard.  This directory will contain subdirectories with names of the form: <code>formID_yyyy-mm-dd_hh-MM-ss</code><br />" +
+"     Within each of these subdirectories are the submission data file (named: <code>formID_yyyy-mm-dd_hh-MM-ss.xml</code>)," +
 "     and zero or more associated data files for the images, audio clips, video clips, " +
 "     etc. linked with this submission.</p>" +
 "	  <!--[if true]><p style=\"color: red;\">For a better user experience, use Chrome, Firefox or Safari</p>" +
@@ -96,38 +100,38 @@ public class UISubmissionServlet extends ServletUtilBase {
 "	  	<tr>" +
 "	  		<td><label for=\"xml_submission_file\">Submission data file:</label></td>" +
 "	  		<td><input id=\"xml_submission_file\" type=\"file\" size=\"80\"" +
-"	  			name=\"form_def_file\" /></td>" +
+"	  			name=\"form_def_file\" class=\"gwt-Button\" /></td>" +
 "	  	</tr>" +
 "	  	<tr>" +
 "	  		<td><label for=\"mediaFiles\">Associated data file(s):</label></td>" +
-"	  		<td><input id=\"mediaFiles\" type=\"file\" size=\"80,20\" name=\"datafile\" multiple /><input id=\"clear_media_files\" type=\"button\" value=\"Clear\" onClick=\"clearMediaInputField('mediaFiles')\" /></td>" +
+"	  		<td><input id=\"mediaFiles\" type=\"file\" class=\"gwt-Button\" size=\"80,20\" name=\"datafile\" multiple /><button id=\"clear_media_files\" type=\"button\" class=\"gwt-Button gwt-Button-negative clearButton\" onClick=\"clearMediaInputField('mediaFiles')\"><img src=\"/images/red_x.png\"> Clear</button></td>" +
 "	  	</tr>" +
 "	  	<!--[if true]>" +
 "	      <tr>" +
 "	          <td><label for=\"mediaFiles2\">Associated data file #2:</label></td>" +
-"	          <td><input id=\"mediaFiles2\" type=\"file\" size=\"80\" name=\"datafile\" /><input id=\"clear_media_files2\" type=\"button\" value=\"Clear\" onClick=\"clearMediaInputField('mediaFiles2')\" /></td>" +
+"	          <td><input id=\"mediaFiles2\" type=\"file\" class=\"gwt-Button\" size=\"80\" name=\"datafile\" /><button id=\"clear_media_files2\" type=\"button\" class=\"gwt-Button gwt-Button-negative clearButton\" onClick=\"clearMediaInputField('mediaFiles2')\"><img src=\"/images/red_x.png\"> Clear</button></td>" +
 "	      </tr>" +
 "	      <tr>" +
 "	          <td><label for=\"mediaFiles3\">Associated data file #3:</label></td>" +
-"	          <td><input id=\"mediaFiles3\" type=\"file\" size=\"80\" name=\"datafile\" /><input id=\"clear_media_files3\" type=\"button\" value=\"Clear\" onClick=\"clearMediaInputField('mediaFiles3')\" /></td>" +
+"	          <td><input id=\"mediaFiles3\" type=\"file\" class=\"gwt-Button\" size=\"80\" name=\"datafile\" /><button id=\"clear_media_files3\" type=\"button\" class=\"gwt-Button gwt-Button-negative clearButton\" onClick=\"clearMediaInputField('mediaFiles3')\"><img src=\"/images/red_x.png\"> Clear</button></td>" +
 "	      </tr>" +
 "	      <tr>" +
 "	          <td><label for=\"mediaFiles4\">Associated data file #4:</label></td>" +
-"	          <td><input id=\"mediaFiles4\" type=\"file\" size=\"80\" name=\"datafile\" /><input id=\"clear_media_files4\" type=\"button\" value=\"Clear\" onClick=\"clearMediaInputField('mediaFiles4')\" /></td>" +
+"	          <td><input id=\"mediaFiles4\" type=\"file\" class=\"gwt-Button\" size=\"80\" name=\"datafile\" /><button id=\"clear_media_files4\" type=\"button\" class=\"gwt-Button gwt-Button-negative clearButton\" onClick=\"clearMediaInputField('mediaFiles4')\"><img src=\"/images/red_x.png\"> Clear</button></td>" +
 "	      </tr>" +
 "	      <tr>" +
 "	          <td><label for=\"mediaFiles5\">Associated data file #5:</label></td>" +
-"	          <td><input id=\"mediaFiles5\" type=\"file\" size=\"80\" name=\"datafile\" /><input id=\"clear_media_files5\" type=\"button\" value=\"Clear\" onClick=\"clearMediaInputField('mediaFiles5')\" /></td>" +
+"	          <td><input id=\"mediaFiles5\" type=\"file\" class=\"gwt-Button\" size=\"80\" name=\"datafile\" /><button id=\"clear_media_files5\" type=\"button\" class=\"gwt-Button gwt-Button-negative clearButton\" onClick=\"clearMediaInputField('mediaFiles5')\"><img src=\"/images/red_x.png\"> Clear</button></td>" +
 "	      </tr>" +
 "	      <tr>" +
 "	          <td><label for=\"mediaFiles6\">Associated data file #6:</label></td>" +
-"	          <td><input id=\"mediaFiles6\" type=\"file\" size=\"80\" name=\"datafile\" /><input id=\"clear_media_files6\" type=\"button\" value=\"Clear\" onClick=\"clearMediaInputField('mediaFiles6')\" /></td>" +
+"	          <td><input id=\"mediaFiles6\" type=\"file\" class=\"gwt-Button\" size=\"80\" name=\"datafile\" /><button id=\"clear_media_files6\" type=\"button\" class=\"gwt-Button gwt-Button-negative clearButton\" onClick=\"clearMediaInputField('mediaFiles6')\"><img src=\"/images/red_x.png\"> Clear</button></td>" +
 "	      </tr>" +
 "	      <![endif]-->" +
 "	  	<tr>" +
-"	  		<td><input type=\"button\" name=\"button\" value=\"Upload Form\"" +
+"	  		<td><button name=\"button\" class=\"gwt-Button\" id=\"uploadButton\"" +
 "	  			onClick=\"submitButton(document,'";
-  private static final String UPLOAD_PAGE_BODY_REMAINDER = "','xml_submission_file','mediaFiles')\" /></td>" +
+  private static final String UPLOAD_PAGE_BODY_REMAINDER = "','xml_submission_file','mediaFiles')\"><img src=\"/images/blue_up_arrow.png\"> Upload Form</button></td>" +
 "	  		<td />" +
 "	  	</tr>" +
 "	  </table>" +
@@ -149,6 +153,12 @@ public class UISubmissionServlet extends ServletUtilBase {
 	headerString.append("<script src=\"");
 	headerString.append(cc.getWebApplicationURL(UPLOAD_SCRIPT_RESOURCE));
 	headerString.append("\"></script>");
+	headerString.append("<link type=\"text/css\" rel=\"stylesheet\" href=\"");
+	headerString.append(cc.getWebApplicationURL(PAGE_STYLE_RESOURCE));
+	headerString.append("\" />");
+	headerString.append("<link type=\"text/css\" rel=\"stylesheet\" href=\"");
+	headerString.append(cc.getWebApplicationURL(BUTTON_STYLE_RESOURCE));
+	headerString.append("\" />");
 	
 	resp.addHeader(HOST_HEADER, cc.getServerURL());
    resp.setContentType(HtmlConsts.RESP_TYPE_HTML);
@@ -159,10 +169,6 @@ public class UISubmissionServlet extends ServletUtilBase {
    out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.HEAD, headerString.toString() + HtmlUtil.wrapWithHtmlTags(
        HtmlConsts.TITLE, "AGGREGATE")));
    out.write(HtmlConsts.BODY_OPEN);
-   out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.H2, "<FONT COLOR=330066> ui refactor coming soon</FONT>"));
-   out.write(HtmlUtil.createHref(cc.getWebApplicationURL("Aggregate.html"), "Return to New UI"));
-   out.write(HtmlUtil.createSelfClosingTag(HtmlConsts.BREAK));
-   out.write(HtmlUtil.createSelfClosingTag(HtmlConsts.BREAK));
    out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.H1, TITLE));
 	
 	out.write(UPLOAD_PAGE_BODY_START);
@@ -170,10 +176,6 @@ public class UISubmissionServlet extends ServletUtilBase {
 	out.write(UPLOAD_PAGE_BODY_MIDDLE);
 	out.write(cc.getWebApplicationURL(ADDR));
 	out.write(UPLOAD_PAGE_BODY_REMAINDER);
-    
-	out.write(HtmlUtil.createSelfClosingTag(HtmlConsts.BREAK));
-   out.write(HtmlUtil.createSelfClosingTag(HtmlConsts.BREAK));
-   out.write(HtmlUtil.createHref(cc.getWebApplicationURL("Aggregate.html"), "Return to New UI"));
    resp.getWriter().write(HtmlConsts.BODY_CLOSE + HtmlConsts.HTML_CLOSE);
 	
   }
