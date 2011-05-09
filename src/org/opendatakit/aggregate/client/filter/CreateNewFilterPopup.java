@@ -154,10 +154,10 @@ public class CreateNewFilterPopup extends PopupPanel{
 		
 		});
 		
-		Button exit = new Button("<img src=\"images/red_x.png\" /> Cancel");
-		exit.addStyleDependentName("negative");
-		exit.addClickHandler(new ClickHandler() {
-
+		final Button closeButton = new Button("<img src=\"images/red_x.png\" />");
+		closeButton.addStyleDependentName("close");
+		closeButton.addStyleDependentName("negative");
+		closeButton.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
 				hide();
@@ -167,7 +167,6 @@ public class CreateNewFilterPopup extends PopupPanel{
 		create.setWidget(0, 0, keepRemove);
 		create.setWidget(0, 1, rowCol);
 		create.setWidget(1, 0, submit);
-		create.setWidget(1, 1, exit);
 		rowCol.addChangeHandler(new ChangeHandler() {
 
 			@Override
@@ -194,6 +193,7 @@ public class CreateNewFilterPopup extends PopupPanel{
 		create.setWidget(0, 3, col);
 		create.setWidget(0, 4, comp);
 		create.setWidget(0, 5, var);
+		create.setWidget(0, 6, closeButton);
 		
 		col.setVisible(true);
 		cols.setVisible(false);

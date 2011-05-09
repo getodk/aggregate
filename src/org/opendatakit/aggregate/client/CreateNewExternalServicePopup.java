@@ -24,7 +24,7 @@ public class CreateNewExternalServicePopup extends PopupPanel {
   private static final String TYPE_FUSION_TABLE = "Google Fusion Table";
   
   public CreateNewExternalServicePopup(final String formId, final FormServiceAsync formSvc, final ManageTabUI parent) {
-    super(true);
+    super(false);
     this.parent = parent;
     FlexTable layout = new FlexTable();
     
@@ -125,6 +125,17 @@ public class CreateNewExternalServicePopup extends PopupPanel {
       }
     });
     layout.setWidget(0, 4, publishButton);
+	
+	Button closeButton = new Button("<img src=\"images/red_x.png\" />");
+	closeButton.addStyleDependentName("close");
+	closeButton.addStyleDependentName("negative");
+	closeButton.addClickHandler(new ClickHandler() {
+		@Override
+		public void onClick(ClickEvent event) {
+			hide();
+		}
+	});
+	layout.setWidget(0, 5, closeButton);
     
     setWidget(layout);
   }
