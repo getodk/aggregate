@@ -76,7 +76,7 @@ public class ManageTabUI extends TabPanel {
 		uploadFormButton.addClickHandler(new ClickHandler() {
 		  @Override
 		  public void onClick(ClickEvent event) {
-		    hash.goTo("ui/upload");
+		    hash.goTo("../ui/upload");
 		  }
 		});
 	    uploadTable.setWidget(0, 0, uploadFormButton);
@@ -84,7 +84,7 @@ public class ManageTabUI extends TabPanel {
 	    uploadSubmissionsButton.addClickHandler(new ClickHandler() {
 	      @Override
 	      public void onClick(ClickEvent event) {
-	        hash.goTo("ui/submission");
+	        hash.goTo("../ui/submission");
 	      }
 	    });
 	    uploadTable.setWidget(0, 1, uploadSubmissionsButton);
