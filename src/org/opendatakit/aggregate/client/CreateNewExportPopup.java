@@ -34,7 +34,7 @@ public class CreateNewExportPopup extends PopupPanel {
   }
   
   public CreateNewExportPopup(final String formId, final FormServiceAsync formSvc, final ManageTabUI parent) {
-    super(true);
+    super(false);
     this.parent = parent;
     FlexTable layout = new FlexTable();
     
@@ -56,6 +56,17 @@ public class CreateNewExportPopup extends PopupPanel {
     
     final Button exportButton = new Button("<img src=\"images/green_right_arrow.png\" /> Export");
     layout.setWidget(0, 5, exportButton);
+	
+	Button closeButton = new Button("<img src=\"images/red_x.png\" />");
+	closeButton.addStyleDependentName("close");
+	closeButton.addStyleDependentName("negative");
+	closeButton.addClickHandler(new ClickHandler() {
+		@Override
+		public void onClick(ClickEvent event) {
+			hide();
+		}
+	});
+	layout.setWidget(0, 6, closeButton);
     
     exportButton.addClickHandler(new ClickHandler () {
       @Override
