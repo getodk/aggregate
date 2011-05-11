@@ -1,3 +1,85 @@
+Configuring your Build Environment
+----------------------------------
+
+The build tree relies on Maven 3 for executing unit tests and 
+integration tests across the 3 platforms.  The source tree is
+the top level project within Maven.  The directories underneath
+are Eclipse projects and/or Maven sub-projects.  
+
+=====================
+Minimal Eclipse Setup
+---------------------
+
+For executing only in Eclipse with the bare minimum, you need the 
+odk-gae-settings project and the eclipse-aggregate-gae 
+project.  These should not require any Maven setup.
+
+Skip to the next section if you want a fully configured development environment.
+
+The steps required are:
+
+(1) Install Eclipse 3.6.2 or higher.  This workspace WILL NOT work with 
+    Eclipse 3.5.2 and earlier.
+
+(2) Install Google Eclipse Plugin with App Engine SDK and Google Web Toolkit SDK.
+
+(3) Start Eclipse.  Choose the parent directory of the clone'd repository as your workspace.
+
+Windows / Preferences:
+
+  Google / App Engine:
+  
+    Be sure there is an App Engine 1.4.2 or higher SDK defined.
+	NOTE: 1.4.3 is broken. Don't use it.
+	The default GWT version should match that in the maven 
+	pom.xml (currently 1.4.2).
+
+  Google / Web Toolkit:
+  
+    Be sure there is a WebToolkit SDK defined 2.2.0 or higher.
+	The default GWT version should match that in the maven 
+	pom.xml (currently 2.2.0).
+
+File / Import:
+
+    Choose the directory of the clone'd repository as the directory to search
+	(this is one level below the workspace directory).
+	
+	Choose ONLY the eclipse-aggregate-gae and odk-gae-settings projects.
+
+	This should refresh and build without any errors.
+	
+(4)	Edit odk-gae-settings / common / security.properties
+
+Be sure to set the security.server.superUser to yourself. Save.
+
+(5) In a command window, navigate to the odk-gae-settings directory.
+
+Run either:
+
+CreateJars.bat (Windows) or CreateJars.sh (Mac/Linux).
+Copy target\odk-gae-settings-latest.jar ..\eclipse-aggregate-gae\war\WEB-INF\lib
+
+(6) Return to Eclipse:
+
+Refresh the eclipse-aggregate-gae project (to pick up the updated jar file).
+
+(7) Running:
+
+Select eclipse-aggregate-gae project.
+
+Run As 'Web Application'
+
+Choose Aggregate.html
+
+Double-click to open the url.
+
+You may need to hit refresh once.
+
+==========================================
+Full Development Environment Configuration
+------------------------------------------
+
 (1) Install Maven 3.  This will generally set up a maven repository under
     the user's home directory:  ${HOME}/.m2/repository
 
