@@ -1,13 +1,27 @@
+/*
+ * Copyright (C) 2011 University of Washington
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+
 package org.opendatakit.aggregate.client;
 
 import org.opendatakit.aggregate.client.form.ExportSummary;
-import org.opendatakit.aggregate.client.form.ExternServSummary;
-import org.opendatakit.aggregate.client.form.FormService;
 import org.opendatakit.aggregate.client.preferences.Preferences;
+import org.opendatakit.aggregate.client.services.admin.ExternServSummary;
 import org.opendatakit.aggregate.constants.common.FormOrFilter;
 import org.opendatakit.aggregate.constants.common.PageUpdates;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -25,7 +39,7 @@ public class ManageTabUI extends TabPanel {
   // Management Navigation
 	private static final String FORMS = "forms";
 	private static final String EXPORT = "export";
-   static final String PUBLISH = "publish";
+    static final String PUBLISH = "publish";
 	private static final String PERMISSIONS = "permissions";
 	private static final String UTILITIES = "utilities";
 	private static final String[] MANAGEMENT_MENU = {FORMS, EXPORT, PUBLISH, PERMISSIONS, UTILITIES};
@@ -165,8 +179,8 @@ public class ManageTabUI extends TabPanel {
 	}
 	
 	public void getExternalServicesList(String formId) {
-	  if (parent.formSvc == null) {
-	    parent.formSvc = GWT.create(FormService.class);
+	  if (parent.servicesAdminSvc == null) {
+	    parent.servicesAdminSvc = SecureGWT.get().createServicesAdminService();
 	  }
 	  
 	  AsyncCallback<ExternServSummary[] > callback = new AsyncCallback<ExternServSummary []>() {
@@ -181,7 +195,7 @@ public class ManageTabUI extends TabPanel {
       }
 	  };
 	  
-	  parent.formSvc.getExternalServices(formId, callback);
+	  parent.servicesAdminSvc.getExternalServices(formId, callback);
 	}
    
    public void setupExportPanel() {
@@ -214,7 +228,7 @@ public class ManageTabUI extends TabPanel {
    
    public void getExportList() {
      if (parent.formSvc == null) {
-       parent.formSvc = GWT.create(FormService.class);
+       parent.formSvc = SecureGWT.get().createFormService();
      }
      
      AsyncCallback<ExportSummary[] > callback = new AsyncCallback<ExportSummary []>() {

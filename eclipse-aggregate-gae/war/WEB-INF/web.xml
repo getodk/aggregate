@@ -43,26 +43,28 @@
 		<url-pattern>/ui/submission</url-pattern>
 	</servlet-mapping>
  
+
+  <servlet>
+    <servlet-name>filterServiceImpl</servlet-name>
+    <servlet-class>org.opendatakit.aggregate.server.FilterServiceImpl</servlet-class>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>filterServiceImpl</servlet-name>
+    <url-pattern>/aggregateui/filterservice</url-pattern>
+  </servlet-mapping>
+
  
   <servlet>
-    <servlet-name>PreferenceServiceImpl</servlet-name>
-    <servlet-class>org.opendatakit.aggregate.server.PreferenceServiceImpl</servlet-class>
+    <servlet-name>formAdminServiceImpl</servlet-name>
+    <servlet-class>org.opendatakit.aggregate.server.FormAdminServiceImpl</servlet-class>
   </servlet>
 
   <servlet-mapping>
-    <servlet-name>PreferenceServiceImpl</servlet-name>
-    <url-pattern>/aggregateui/preferenceservice</url-pattern>
+    <servlet-name>formAdminServiceImpl</servlet-name>
+    <url-pattern>/aggregateui/formadminservice</url-pattern>
   </servlet-mapping>
- 
-   <servlet>
-    <servlet-name>submissionServiceImpl</servlet-name>
-    <servlet-class>org.opendatakit.aggregate.server.SubmissionServiceImpl</servlet-class>
-  </servlet>
 
-  <servlet-mapping>
-    <servlet-name>submissionServiceImpl</servlet-name>
-    <url-pattern>/aggregateui/submissionservice</url-pattern>
-  </servlet-mapping>
  
   <servlet>
     <servlet-name>formServiceImpl</servlet-name>
@@ -74,16 +76,39 @@
     <url-pattern>/aggregateui/formservice</url-pattern>
   </servlet-mapping>
 
-
+ 
   <servlet>
-    <servlet-name>filterServiceImpl</servlet-name>
-    <servlet-class>org.opendatakit.aggregate.server.FilterServiceImpl</servlet-class>
+    <servlet-name>preferenceServiceImpl</servlet-name>
+    <servlet-class>org.opendatakit.aggregate.server.PreferenceServiceImpl</servlet-class>
   </servlet>
 
   <servlet-mapping>
-    <servlet-name>filterServiceImpl</servlet-name>
-    <url-pattern>/aggregateui/filterservice</url-pattern>
+    <servlet-name>preferenceServiceImpl</servlet-name>
+    <url-pattern>/aggregateui/preferenceservice</url-pattern>
   </servlet-mapping>
+
+ 
+  <servlet>
+    <servlet-name>servicesAdminServiceImpl</servlet-name>
+    <servlet-class>org.opendatakit.aggregate.server.ServicesAdminServiceImpl</servlet-class>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>servicesAdminServiceImpl</servlet-name>
+    <url-pattern>/aggregateui/servicesadminservice</url-pattern>
+  </servlet-mapping>
+
+ 
+  <servlet>
+    <servlet-name>submissionServiceImpl</servlet-name>
+    <servlet-class>org.opendatakit.aggregate.server.SubmissionServiceImpl</servlet-class>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>submissionServiceImpl</servlet-name>
+    <url-pattern>/aggregateui/submissionservice</url-pattern>
+  </servlet-mapping>
+
 
 	<servlet>
 		<servlet-name>oauth</servlet-name>
@@ -101,6 +126,15 @@
 	<servlet-mapping>
 		<servlet-name>gwttest</servlet-name>
 		<url-pattern>/www/gwttest</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>aggregate-html</servlet-name>
+		<servlet-class>org.opendatakit.aggregate.servlet.AggregateHtmlServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>aggregate-html</servlet-name>
+		<url-pattern>Aggregate.html</url-pattern>
 	</servlet-mapping>
 
 	<servlet>

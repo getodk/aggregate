@@ -18,6 +18,8 @@ Skip to the next section if you want a fully configured development environment.
 
 The steps required are:
 
+(0) Install the latest Java 6 SDK
+
 (1) Install Eclipse 3.6.2 or higher.  This workspace WILL NOT work with 
     Eclipse 3.5.2 and earlier.
 
@@ -51,14 +53,12 @@ File / Import:
 	
 (4)	Edit odk-gae-settings / common / security.properties
 
-Be sure to set the security.server.superUser to yourself. Save.
+Be sure to set the security.server.superUser to your gmail account. Save.
 
 (5) In a command window, navigate to the odk-gae-settings directory.
 
-Run either:
-
-CreateJars.bat (Windows) or CreateJars.sh (Mac/Linux).
-Copy target\odk-gae-settings-latest.jar ..\eclipse-aggregate-gae\war\WEB-INF\lib
+Run on Windows:  UpdateGaeSettingsJar.bat
+Run on Mac/Linux: UpdateGaeSettingsJar.sh
 
 (6) Return to Eclipse:
 
@@ -70,11 +70,11 @@ Select eclipse-aggregate-gae project.
 
 Run As 'Web Application'
 
-Choose Aggregate.html
+Choose index.html
 
-Double-click to open the url.
-
-You may need to hit refresh once.
+Double-click to open the url.  After logging on, if running with 
+the debug server, you will need to hand-edit the url to restore
+the gwt-server address.
 
 ==========================================
 Full Development Environment Configuration
@@ -164,7 +164,7 @@ If bitrock is not installed, you must disable the installer modules in the pom.x
 
 ----------
 
-(9) Start Eclipse.
+(9) Start Eclipse.  Choose the parent directory of the clone'd repository as your workspace.
 
 Windows / Preferences:
 
@@ -192,4 +192,52 @@ Windows / Preferences:
       Add: Apache Tomcat 6.0 and point it to the install location 
       used in (3) earlier.  This is optional if you will not be 
 	importing or using the MySQL and Postgres builds.
+
+  File / Import:
+
+    Choose the directory of the clone'd repository as the directory to search
+	(this is one level below the workspace directory).
+	
+	Choose ONLY the eclipse-aggregate-gae and odk-gae-settings projects.
+
+	This should refresh and build without any errors.
+	
+(10)	Edit odk-gae-settings / common / security.properties
+
+Be sure to set the security.server.superUser to your gmail account. Save.
+
+(11) In a command window, navigate to the odk-gae-settings directory.
+
+Run on Windows:  UpdateGaeSettingsJar.bat
+Run on Mac/Linux: UpdateGaeSettingsJar.sh
+
+(12) Return to Eclipse:
+
+Refresh the eclipse-aggregate-gae project (to pick up the updated jar file).
+
+(13) Running:
+
+Select eclipse-aggregate-gae project.
+
+Run As 'Web Application'
+
+Choose index.html
+
+Double-click to open the url.  After logging on, if running with 
+the debug server, you will need to hand-edit the url to restore
+the gwt-server address.
+
+(14) For the non-gae projects, you will need to first build
+with maven manually.  Open a command window, browse to the 
+clone'd repository directroy. Type:
+
+mvn install
+
+This will build and install the projects, running the unit tests
+against the 3 datastores (Google BigTable, MySQL, Postgresql),
+and building the wars for the 3 platforms.
+
+(15) you can now also import the aggregate-mysql project into
+eclipse.  It can be used to export a WAR file similar to what 
+can be built with Maven.
 

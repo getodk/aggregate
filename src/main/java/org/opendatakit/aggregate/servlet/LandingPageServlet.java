@@ -52,7 +52,7 @@ public class LandingPageServlet extends ServletUtilBase {
 
 		// determine if the system has not been configured...
 		if ( cc.getUserService().isAccessManagementConfigured() ) {
-			resp.sendRedirect(cc.getWebApplicationURL(FormsServlet.ADDR));
+			resp.sendRedirect(cc.getWebApplicationURL(AggregateHtmlServlet.ADDR));
 		} else {
 			resp.sendRedirect(cc.getWebApplicationURL(AccessConfigurationServlet.ADDR));
 		}

@@ -402,10 +402,9 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
 		return keySet;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public List<?> executeDistinctValueForDataField(DataField dataField) throws ODKDatastoreException {
-		Set valueList = new HashSet();
+		Set<Object> valueList = new HashSet<Object>();
 
 		List<? extends CommonFieldsBase> entities = coreExecuteQuery(0);
 		for ( CommonFieldsBase entity : entities ) {
@@ -431,6 +430,6 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
 				break;
 			}
 		}
-		return new ArrayList(valueList);
+		return new ArrayList<Object>(valueList);
 	}
 }

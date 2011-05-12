@@ -1,6 +1,22 @@
+/*
+ * Copyright (C) 2011 University of Washington
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+
 package org.opendatakit.aggregate.client;
 
-import org.opendatakit.aggregate.client.form.FormServiceAsync;
+import org.opendatakit.aggregate.client.services.admin.ServicesAdminServiceAsync;
 import org.opendatakit.aggregate.constants.common.ExternalServiceOption;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
@@ -23,7 +39,7 @@ public class CreateNewExternalServicePopup extends PopupPanel {
   private static final String TYPE_SPREAD_SHEET = "Google Spreadsheet";
   private static final String TYPE_FUSION_TABLE = "Google Fusion Table";
   
-  public CreateNewExternalServicePopup(final String formId, final FormServiceAsync formSvc, final ManageTabUI parent) {
+  public CreateNewExternalServicePopup(final String formId, final ServicesAdminServiceAsync servicesAdminSvc, final ManageTabUI parent) {
     super(false);
     this.parent = parent;
     FlexTable layout = new FlexTable();
@@ -75,7 +91,7 @@ public class CreateNewExternalServicePopup extends PopupPanel {
         }
         String selectedService = service.getItemText(service.getSelectedIndex());
         if (selectedService.equals(TYPE_FUSION_TABLE)) {
-          formSvc.createFusionTable(formId, serviceOp, new AsyncCallback<String>() {
+          servicesAdminSvc.createFusionTable(formId, serviceOp, new AsyncCallback<String>() {
   
             @Override
             public void onFailure(Throwable caught) {
@@ -84,7 +100,7 @@ public class CreateNewExternalServicePopup extends PopupPanel {
   
             @Override
             public void onSuccess(String result) {
-              parent.parent.formSvc.generateOAuthUrl(result, new AsyncCallback<String>() {
+              parent.parent.servicesAdminSvc.generateOAuthUrl(result, new AsyncCallback<String>() {
                 @Override
                 public void onFailure(Throwable caught) {
                   // TODO Auto-generated method stub
@@ -98,7 +114,7 @@ public class CreateNewExternalServicePopup extends PopupPanel {
             }
           });
         } else { // selectedService.equals(TYPE_SPREAD_SHEET)
-          formSvc.createGoogleSpreadsheet(formId, name.getText(), serviceOp, new AsyncCallback<String> () {
+        	servicesAdminSvc.createGoogleSpreadsheet(formId, name.getText(), serviceOp, new AsyncCallback<String> () {
             @Override
             public void onFailure(Throwable caught) {
               // TODO Auto-generated method stub
@@ -107,7 +123,7 @@ public class CreateNewExternalServicePopup extends PopupPanel {
             @Override
             public void onSuccess(String result) {
               // TODO Auto-generated method stub
-              parent.parent.formSvc.generateOAuthUrl(result, new AsyncCallback<String>() {
+              parent.parent.servicesAdminSvc.generateOAuthUrl(result, new AsyncCallback<String>() {
                 @Override
                 public void onFailure(Throwable caught) {
                   // TODO Auto-generated method stub

@@ -152,11 +152,7 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 			tlg.setParentAuri(enclosingSet.getKey().getKey());
 		}
 		this.key = new EntityKey(tlg, tlg.getUri());
-		if (topLevelTableKey == null) {
-			this.topLevelTableKey = key;
-		} else {
-			this.topLevelTableKey = topLevelTableKey;
-		}
+		this.topLevelTableKey = topLevelTableKey;
 		dbEntities.put(group.getFormDataModel().getDDRelationName(), tlg);
 		recursivelyCreateEntities(group.getFormDataModel(), datastore, user);
 		buildSubmissionFields(group, cc);

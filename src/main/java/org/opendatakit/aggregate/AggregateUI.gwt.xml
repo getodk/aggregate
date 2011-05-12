@@ -5,13 +5,18 @@
 
   <inherits name='com.google.gwt.user.theme.standard.StandardResources'/>
   <inherits name='com.google.gwt.maps.GoogleMaps' />
+  
+  <!-- Our access denied exception class -->
+  <inherits name='org.opendatakit.common.security.Security'/>
 
   <!-- Specify the app entry point class.                         -->
   <entry-point class='org.opendatakit.aggregate.client.AggregateUI'/>
-  <servlet path="/formservice" class="org.opendatakit.aggregate.server.FormServiceImpl"/>
   <servlet path="/filterservice" class="org.opendatakit.aggregate.server.FilterServiceImpl"/>
-  <servlet path="/submissionservice" class="org.opendatakit.aggregate.server.SubmissionServiceImpl"/>
+  <servlet path="/formservice" class="org.opendatakit.aggregate.server.FormServiceImpl"/>
+  <servlet path="/formadminservice" class="org.opendatakit.aggregate.server.FormAdminServiceImpl"/>
   <servlet path="/preferenceservice" class="org.opendatakit.aggregate.server.PreferenceServiceImpl"/>
+  <servlet path="/servicesadminservice" class="org.opendatakit.aggregate.server.ServicesAdminServiceImpl"/>
+  <servlet path="/submissionservice" class="org.opendatakit.aggregate.server.SubmissionServiceImpl"/>
    
   <source path='client'/>
   <source path='client/filter'/>
