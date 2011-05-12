@@ -38,15 +38,18 @@
 <!--	for those pages.  TODO: enforce the use of is criteria for production deployments.-->
 	<filter-security-metadata-source id="securityPolicy" use-expressions="true">
         <intercept-url pattern="/_ah/**" access="true" /> <!-- local GAE admin console -->
-        <intercept-url pattern="/auth/**" access="true" />
-        <intercept-url pattern="/Aggregate.html" access="true" />
-        <intercept-url pattern="/ui/upload" access="hasRole('ROLE_FORM_ADMIN')" />
-        <intercept-url pattern="/ui/submission" access="hasRole('ROLE_SUBMISSION_UPLOAD')"  />
+        <!--  auth/ urls are for fusion table or Google spreadsheet authentication token acknowledgment -->
+        <intercept-url pattern="/auth/**" access="isFullyAuthenticated() and hasRole('ROLE_SERVICES_ADMIN')" />
+        <intercept-url pattern="/Aggregate.html" access="isFullyAuthenticated() and hasRole('ROLE_USER')" />
+        <intercept-url pattern="/ui/upload" access="isFullyAuthenticated() and hasRole('ROLE_FORM_ADMIN')" />
+        <intercept-url pattern="/ui/submission" access="isFullyAuthenticated() and hasRole('ROLE_SUBMISSION_UPLOAD')"  />
 		<intercept-url pattern="/favicon.ico" access="true" />
-		<intercept-url pattern="/aggregateui/submissionservice" access="true" />
-		<intercept-url pattern="/aggregateui/formservice" access="true" />
-		<intercept-url pattern="/aggregateui/filterservice" access="true" />
-		<intercept-url pattern="/aggregateui/preferenceservice" access="true" />
+		<intercept-url pattern="/aggregateui/filterservice" access="isFullyAuthenticated() and hasRole('ROLE_ANALYST')" />
+		<intercept-url pattern="/aggregateui/formservice" access="isFullyAuthenticated() and hasRole('ROLE_ANALYST')" />
+		<intercept-url pattern="/aggregateui/formadminservice" access="isFullyAuthenticated() and hasRole('ROLE_FORM_ADMIN')" />
+		<intercept-url pattern="/aggregateui/preferenceservice" access="isFullyAuthenticated() and hasRole('ROLE_USER')" />
+		<intercept-url pattern="/aggregateui/servicesadminservice" access="isFullyAuthenticated() and hasRole('ROLE_SERVICES_ADMIN')" />
+		<intercept-url pattern="/aggregateui/submissionservice" access="isFullyAuthenticated() and hasRole('ROLE_ANALYST')" />
 		<intercept-url pattern="/odk_color.png" access="true" />
 		<intercept-url pattern="/index.html" access="true" />
         <intercept-url pattern="/change-applied.html" access="isFullyAuthenticated()" /> <!-- Intermediate page redirecting to logout from access mgmt -->
@@ -179,6 +182,16 @@
 					</beans:map>
 				</beans:constructor-arg>
 				<beans:property name="defaultEntryPoint" ref="openIdEntryPoint" />
+			</beans:bean>
+		</beans:property>
+		<beans:property name="accessDeniedHandler">
+			<beans:bean class="org.opendatakit.common.security.spring.GWTAccessDeniedHandlerImpl">
+				<beans:property name="gwtHeader" value="X-opendatakit-gwt"/>
+				<beans:property name="ordinaryAccessDeniedHandler">
+					<beans:bean	class="org.springframework.security.web.access.AccessDeniedHandlerImpl">
+						<beans:property name="errorPage" value="/access-denied.html" />
+					</beans:bean>
+				</beans:property>
 			</beans:bean>
 		</beans:property>
 	</beans:bean>

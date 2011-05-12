@@ -184,7 +184,6 @@ public class QueryImpl implements Query {
 		querySortBuilder.append(directionMap.get(direction));
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public List<? extends CommonFieldsBase> executeQuery(int fetchLimit)
 			throws ODKDatastoreException {
@@ -192,7 +191,7 @@ public class QueryImpl implements Query {
 		String query = generateQuery() 
 				+ queryBindBuilder.toString()
 				+ querySortBuilder.toString() + ";";
-		RowMapper rowMapper = null;
+		RowMapper<? extends CommonFieldsBase> rowMapper = null;
 		rowMapper = new RelationRowMapper(relation, user);
 
 		try {

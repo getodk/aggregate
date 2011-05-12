@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2011 University of Washington
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+
 package org.opendatakit.aggregate.client;
 
 import java.util.ArrayList;
@@ -7,15 +23,14 @@ import java.util.Set;
 
 import org.opendatakit.aggregate.client.filter.Filter;
 import org.opendatakit.aggregate.client.filter.FilterGroup;
-import org.opendatakit.aggregate.client.filter.FilterService;
 import org.opendatakit.aggregate.client.filter.FilterServiceAsync;
 import org.opendatakit.aggregate.client.filter.FilterSet;
-import org.opendatakit.aggregate.client.form.FormService;
 import org.opendatakit.aggregate.client.form.FormServiceAsync;
 import org.opendatakit.aggregate.client.form.FormSummary;
+import org.opendatakit.aggregate.client.form.admin.FormAdminServiceAsync;
 import org.opendatakit.aggregate.client.preferences.Preferences;
+import org.opendatakit.aggregate.client.services.admin.ServicesAdminServiceAsync;
 import org.opendatakit.aggregate.client.submission.Column;
-import org.opendatakit.aggregate.client.submission.SubmissionService;
 import org.opendatakit.aggregate.client.submission.SubmissionServiceAsync;
 import org.opendatakit.aggregate.client.submission.SubmissionUI;
 import org.opendatakit.aggregate.client.submission.SubmissionUISummary;
@@ -23,7 +38,6 @@ import org.opendatakit.aggregate.constants.common.FormOrFilter;
 import org.opendatakit.aggregate.constants.common.PageUpdates;
 
 import com.google.gwt.core.client.EntryPoint;
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -68,6 +82,8 @@ public class AggregateUI implements EntryPoint {
 
 	// Report tab
 	FormServiceAsync formSvc;
+	FormAdminServiceAsync formAdminSvc;
+	ServicesAdminServiceAsync servicesAdminSvc;
 	SubmissionServiceAsync submissionSvc;
 	private FilterServiceAsync filterSvc;
 
@@ -86,7 +102,10 @@ public class AggregateUI implements EntryPoint {
 	private String lastFormUsed = "";
 
 	public AggregateUI() {
-		formSvc = GWT.create(FormService.class);
+		SecureGWT sg = SecureGWT.get();
+		formSvc = sg.createFormService();
+		formAdminSvc = sg.createFormAdminService();
+		servicesAdminSvc = sg.createServicesAdminService();
 		listOfForms = new FlexTable();
 		
 		Preferences.updatePreferences();
@@ -99,7 +118,7 @@ public class AggregateUI implements EntryPoint {
 
 		// Initialize the service proxy.
 		if (submissionSvc == null) {
-			submissionSvc = GWT.create(SubmissionService.class);
+			submissionSvc = SecureGWT.get().createSubmissionService();
 		}
 
 		// Set up the callback object.
@@ -240,7 +259,7 @@ public class AggregateUI implements EntryPoint {
 	void getFormList(final PageUpdates update) {
 		// Initialize the service proxy.
 		if (formSvc == null) {
-			formSvc = GWT.create(FormService.class);
+			formSvc = SecureGWT.get().createFormService();
 		}
 
 		// Set up the callback object.
@@ -345,7 +364,7 @@ public class AggregateUI implements EntryPoint {
 
 	private void removeFilterGroup(FilterGroup group) {
 		if (filterSvc == null) {
-			filterSvc = GWT.create(FilterService.class);
+			filterSvc = SecureGWT.get().createFilterService();
 		}
 
 		AsyncCallback<Boolean> callback = 
@@ -367,7 +386,7 @@ public class AggregateUI implements EntryPoint {
 	private void getFilterList(final String id) {
 		// Initialize the service proxy.
 		if (filterSvc == null) {
-			filterSvc = GWT.create(FilterService.class);
+			filterSvc = SecureGWT.get().createFilterService();
 		}
 
 		// Set up the callback object.
@@ -407,7 +426,7 @@ public class AggregateUI implements EntryPoint {
             @Override
             public void onValueChange(ValueChangeEvent<Boolean> event) {
               final String formId = form.getId();
-              formSvc.setFormDownloadable(formId, event.getValue(), new AsyncCallback<Boolean> () {
+              formAdminSvc.setFormDownloadable(formId, event.getValue(), new AsyncCallback<Boolean> () {
                 @Override
                 public void onFailure(Throwable caught) {
                   // TODO Auto-generated method stub
@@ -428,7 +447,7 @@ public class AggregateUI implements EntryPoint {
            @Override
            public void onValueChange(ValueChangeEvent<Boolean> event) {
              final String formId = form.getId();
-             formSvc.setFormAcceptSubmissions(formId, event.getValue(), new AsyncCallback<Boolean> () {
+             formAdminSvc.setFormAcceptSubmissions(formId, event.getValue(), new AsyncCallback<Boolean> () {
                @Override
                public void onFailure(Throwable caught) {
                  // TODO Auto-generated method stub
@@ -447,7 +466,7 @@ public class AggregateUI implements EntryPoint {
 			publishButton.addClickHandler(new ClickHandler() {
 				@Override
 				public void onClick(ClickEvent event) {
-					final PopupPanel popup = new CreateNewExternalServicePopup(form.getId(), formSvc, manageNav);
+					final PopupPanel popup = new CreateNewExternalServicePopup(form.getId(), servicesAdminSvc, manageNav);
 					popup.setPopupPositionAndShow(new PopupPanel.PositionCallback() {
 						@Override
 						public void setPosition(int offsetWidth, int offsetHeight) {

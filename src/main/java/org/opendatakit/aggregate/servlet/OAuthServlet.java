@@ -30,7 +30,7 @@ public class OAuthServlet extends ServletUtilBase {
   public static final String ADDR = "auth/auth";
 
   /**
-   * Handler for HTTP Get request to create blank page that is navigable
+   * Callback from external service acknowledging acceptable authentication token.
    * 
    * @see javax.servlet.http.HttpServlet#doGet(javax.servlet.http.HttpServletRequest,
    *      javax.servlet.http.HttpServletResponse)
@@ -60,7 +60,7 @@ public class OAuthServlet extends ServletUtilBase {
 
         es.authenticateAndCreate(authToken, cc);
 
-        // upload data to fusion table
+        // upload data to external service
         if (!esOption.equals(ExternalServiceOption.STREAM_ONLY)) {
 
           UploadSubmissions uploadTask = (UploadSubmissions) cc.getBean(BeanDefs.UPLOAD_TASK_BEAN);
@@ -75,6 +75,7 @@ public class OAuthServlet extends ServletUtilBase {
       e.printStackTrace();
       return;
     }
-    resp.sendRedirect(cc.getWebApplicationURL("Aggregate.html"));
+    
+    resp.sendRedirect(cc.getWebApplicationURL(AggregateHtmlServlet.ADDR));
   }
 }
