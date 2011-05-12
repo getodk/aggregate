@@ -78,8 +78,8 @@ public class SecureGWT {
 		return singleton;
 	}
 	
-	public <T> T create(ServiceType type) {
-		T obj = null;
+	private Object create(ServiceType type) {
+		Object obj = null;
 		switch (type) {
 		case FILTER:
 			obj = GWT.create(FilterService.class);
@@ -108,26 +108,26 @@ public class SecureGWT {
 	}
 	
 	public FilterServiceAsync createFilterService() {
-		return create(ServiceType.FILTER);
+		return (FilterServiceAsync) create(ServiceType.FILTER);
 	}
 
 	public FormServiceAsync createFormService() {
-		return create(ServiceType.FORM);
+		return (FormServiceAsync) create(ServiceType.FORM);
 	}
 
 	public FormAdminServiceAsync createFormAdminService() {
-		return create(ServiceType.FORM_ADMIN);
+		return (FormAdminServiceAsync) create(ServiceType.FORM_ADMIN);
 	}
 
 	public PreferenceServiceAsync createPreferenceService() {
-		return create(ServiceType.PREFERENCE);
+		return (PreferenceServiceAsync) create(ServiceType.PREFERENCE);
 	}
 
 	public ServicesAdminServiceAsync createServicesAdminService() {
-		return create(ServiceType.SERVICES_ADMIN);
+		return (ServicesAdminServiceAsync) create(ServiceType.SERVICES_ADMIN);
 	}
 
 	public SubmissionServiceAsync createSubmissionService() {
-		return create(ServiceType.SUBMISSION);
+		return (SubmissionServiceAsync) create(ServiceType.SUBMISSION);
 	}
 }
