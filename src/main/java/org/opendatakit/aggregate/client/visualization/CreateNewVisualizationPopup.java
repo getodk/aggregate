@@ -19,6 +19,7 @@ package org.opendatakit.aggregate.client.visualization;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.opendatakit.aggregate.client.form.FormServiceAsync;
 import org.opendatakit.aggregate.client.form.KmlSettingOption;
@@ -64,6 +65,8 @@ public class CreateNewVisualizationPopup extends PopupPanel {
 		UI_TO_GOOGLE.put(UI_SCATTER_PLOT, GOOGLE_SCATTER_PLOT);
 	}
 	
+	private static final String NUMBER_OF_OCCURANCES = "Number of Occurances";
+	
 	private final List<Column> head;
 	private final List<SubmissionUI> sub;
 	private final FlexTable dropDownsTable = new FlexTable();
@@ -94,12 +97,41 @@ public class CreateNewVisualizationPopup extends PopupPanel {
 				secondIndex = index;
 			index++;
 		}
+		Map<String, Double> aggregation = new HashMap<String, Double>();
+		boolean numOccurances = false;
+		if (secondData.getItemText(secondData.getSelectedIndex()).equals(NUMBER_OF_OCCURANCES)) {
+			numOccurances = true;
+		} else {
+			for (SubmissionUI s : sub) {
+				try {
+					double test = Double.parseDouble(s.getValues().get(secondIndex));
+				} catch (NumberFormatException e) {
+					numOccurances = true;
+					break;
+				}
+			}
+		}
+		for (SubmissionUI s : sub) {
+			String label = s.getValues().get(firstIndex);
+			if (aggregation.containsKey(label)) {
+				double addend = 1;
+				if (!numOccurances)
+					addend = Double.parseDouble(s.getValues().get(secondIndex));
+				aggregation.put(label, aggregation.get(label) + addend);
+			} else {
+				double addend = 1;
+				if (!numOccurances)
+					addend = Double.parseDouble(s.getValues().get(secondIndex));
+				aggregation.put(label, addend);
+			}
+		}
+
 		StringBuffer firstValues = new StringBuffer();
 		StringBuffer secondValues = new StringBuffer();
-		for (SubmissionUI s : sub) {
-			firstValues.append(s.getValues().get(firstIndex));
+		for (String s : aggregation.keySet()) {
+			firstValues.append(s);
 			firstValues.append("|");
-			secondValues.append(s.getValues().get(secondIndex));
+			secondValues.append(aggregation.get(s));
 			secondValues.append(",");
 		}
 		if (firstValues.length() > 0)
@@ -110,7 +142,6 @@ public class CreateNewVisualizationPopup extends PopupPanel {
 		chartUrl.append(secondValues.toString());
 		chartUrl.append("&chdl=");
 		chartUrl.append(firstValues.toString());
-		
 		
 		return chartUrl.toString();
 	}
@@ -129,6 +160,7 @@ public class CreateNewVisualizationPopup extends PopupPanel {
 		mapSpace.setVisible(false);
 		chart.setVisible(true);
 		secondData.clear();
+		secondData.addItem(NUMBER_OF_OCCURANCES);
 		for (Column c : head)
 			secondData.addItem(c.getDisplayHeader());
 	}
@@ -159,7 +191,6 @@ public class CreateNewVisualizationPopup extends PopupPanel {
 		
 		for (Column c : head) {
 			firstData.addItem(c.getDisplayHeader());
-			secondData.addItem(c.getDisplayHeader());
 		}
 		
 		final Button executeButton = new Button("<img src=\"images/pie_chart.png\" /> Pie It");
