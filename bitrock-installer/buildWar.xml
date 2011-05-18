@@ -2,11 +2,11 @@
     <shortName>ODKAggregate</shortName>
     <fullName>ODK Aggregate</fullName>
     <version>1.0</version>
-    <readmeFile></readmeFile>
     <licenseFile>files/LICENSE.txt</licenseFile>
     <htmlLicenseFile>files/LICENSE.html</htmlLicenseFile>
     <leftImage>files/leftSide.png</leftImage>
     <logoImage>files/logo.png</logoImage>
+    <splashImage>files/opendatakit.png</splashImage>
     <createUninstaller>0</createUninstaller>
     <defaultUnixOwner>${system_username}</defaultUnixOwner>
     <enableRollback>0</enableRollback>
@@ -27,26 +27,37 @@
             <file>components/configure_war.xml</file>
         </include>
     </componentList>
-	<finalPageActionList>
-		<showText>
-			<progressText>Show additional configuration steps (workaround)</progressText>
-			<text>To complete installation, follow the steps in ${installdir}${platform_path_separator}README.html</text>
-			<ruleList>
-				<platformTest><type>windows</type></platformTest>
-			</ruleList>
-		</showText>
-		<actionGroup>
-			<progressText>Show additional configuration steps</progressText>
-			<actionList>
-				<urlEncode>
-					<text>${installdir.unix}/README.html</text>
-					<variable>readme_path</variable>
-				</urlEncode>
-				<launchBrowser>
-					<url>file:///${readme_path}</url>
-				</launchBrowser>
-			</actionList>
-		</actionGroup>
-	</finalPageActionList>
+    <finalPageActionList>
+        <runProgram>
+            <program>CScript.exe</program>
+            <programArguments>/E:JScript ${installdir}${platform_path_separator}launchReadme.js</programArguments>
+            <progressText>Show additional configuration steps</progressText>
+            <useMSDOSPath>0</useMSDOSPath>
+            <workingDirectory>${installdir}</workingDirectory>
+            <ruleList>
+                <platformTest>
+                    <type>windows</type>
+                </platformTest>
+            </ruleList>
+        </runProgram>
+        <actionGroup>
+            <progressText>Show additional configuration steps</progressText>
+            <actionList>
+                <urlEncode>
+                    <text>${installdir.unix}/README.html</text>
+                    <variable>readme_path</variable>
+                </urlEncode>
+                <launchBrowser>
+                    <url>file:///${readme_path}</url>
+                </launchBrowser>
+            </actionList>
+            <ruleList>
+                <platformTest>
+                    <negate>1</negate>
+                    <type>windows</type>
+                </platformTest>
+            </ruleList>
+        </actionGroup>
+    </finalPageActionList>
 </project>
 
