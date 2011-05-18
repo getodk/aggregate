@@ -12,7 +12,7 @@
             <platforms>all</platforms>
             <distributionFileList>
 	<!-- The configuration files for aggregate -->
-				<distributionDirectory>
+	<distributionDirectory>
                     <origin>files/conf</origin>
                 </distributionDirectory>
 
@@ -37,26 +37,32 @@
                 </distributionFile>
             </distributionFileList>
         </folder>
-		<folder>
-			<description>gae scripts</description>
-			<destination>${installdir}</destination>
-			<distributionFileList>
-				<distributionFile>
-					<allowWildcards>1</allowWildcards>
-					<origin>files/gae_scripts/*</origin>
-				</distributionFile>
-				<distributionDirectory>
-					<origin>files/appengine-java-sdk</origin>
-				</distributionDirectory>
-			</distributionFileList>
-			<ruleList>
+        <folder>
+            <description>gae scripts</description>
+            <destination>${installdir}</destination>
+            <name>scripts</name>
+            <platforms>all</platforms>
+            <actionList>
+                <changePermissions files="${installdir}/*.sh" permissions="0755"/>
+                <changePermissions files="${installdir}/appengine-java-sdk/bin/*.sh" permissions="0755"/>
+            </actionList>
+            <distributionFileList>
+                <distributionFile>
+                    <allowWildcards>1</allowWildcards>
+                    <origin>files/gae_scripts/*</origin>
+                </distributionFile>
+                <distributionDirectory>
+                    <origin>files/appengine-java-sdk</origin>
+                </distributionDirectory>
+            </distributionFileList>
+            <ruleList>
                 <compareText>
                     <logic>equals</logic>
                     <text>${platform}</text>
                     <value>gae</value>
-				</compareText>
-			</ruleList>
-		</folder>
+                </compareText>
+            </ruleList>
+        </folder>
     </folderList>
     <initializationActionList>
         <createTimeStamp format="%Y-%m-%dT%h:%M:%s.%S%z" variable="creation.timestamp"/>
@@ -64,7 +70,7 @@
             <name>settings_jar</name>
             <value>${project.shortName}-settings.jar</value>
         </setInstallerVariable>
-		<setInstallerVariable>
+        <setInstallerVariable>
             <name>html_steps_begin</name>
             <value>&lt;html&gt;&lt;head&gt;&lt;title&gt;Remaining Configuration Steps&lt;/title&gt;&lt;/head&gt;&lt;body&gt;
 &lt;p&gt;To complete the installation, you need to:
@@ -78,22 +84,22 @@
             <name>html_steps_end_item</name>
             <value>&lt;/li&gt;</value>
         </setInstallerVariable>
-		<setInstallerVariable>
+        <setInstallerVariable>
             <name>html_steps_end</name>
             <value>&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</value>
         </setInstallerVariable>
-		<setInstallerVariable>
+        <setInstallerVariable>
             <name>script_ext</name>
             <value>cmd</value>
         </setInstallerVariable>
-		<setInstallerVariable>
+        <setInstallerVariable>
             <name>script_ext</name>
             <value>sh</value>
             <ruleList>
                 <platformTest>
-					<negate>1</negate>
-					<type>windows</type>
-				</platformTest>
+                    <negate>1</negate>
+                    <type>windows</type>
+                </platformTest>
             </ruleList>
         </setInstallerVariable>
     </initializationActionList>
@@ -208,17 +214,22 @@
 
                             security.server.secureChannelType=REQUIRES_SECURE_CHANNEL 
 
-                            If ${authentication_option} 1 is chosen:
+                            If ${comm_sec_option} 1 is chosen:
                             security.server.deviceAuthentication=digest
                             security.server.channelType=ANY_CHANNEL If
 
-                            If ${authentication_option} 2 is chosen:
+                            If ${comm_sec_option} 2 is chosen:
                             security.server.deviceAuthentication=digest
                             security.server.channelType=REQUIRES_SECURE_CHANNEL
 
-                            If ${authentication_option} 3 is chosen:
+                            If ${comm_sec_option} 3 is chosen:
                             security.server.deviceAuthentication=basic
                             security.server.channelType=REQUIRES_SECURE_CHANNEL
+
+                            If ${comm_sec_option} 4 is chosen:
+                            security.server.deviceAuthentication=digest
+                            security.server.secureChannelType=ANY_CHANNEL 
+                            security.server.channelType=ANY_CHANNEL
                             -->
 	<explanation>Authentication</explanation>
                     <progressText>Setting authentication choices</progressText>
@@ -270,7 +281,7 @@
                             <conditionRuleList>
                                 <compareValues>
                                     <logic>equals</logic>
-                                    <value1>${authentication_option}</value1>
+                                    <value1>${comm_sec_option}</value1>
                                     <value2>1</value2>
                                 </compareValues>
                             </conditionRuleList>
@@ -291,7 +302,7 @@
                             <conditionRuleList>
                                 <compareValues>
                                     <logic>equals</logic>
-                                    <value1>${authentication_option}</value1>
+                                    <value1>${comm_sec_option}</value1>
                                     <value2>2</value2>
                                 </compareValues>
                             </conditionRuleList>
@@ -312,8 +323,35 @@
                             <conditionRuleList>
                                 <compareValues>
                                     <logic>equals</logic>
-                                    <value1>${authentication_option}</value1>
+                                    <value1>${comm_sec_option}</value1>
                                     <value2>3</value2>
+                                </compareValues>
+                            </conditionRuleList>
+                        </if>
+                        <if>
+                            <actionList>
+	<!-- this is the case for running GAE locally -->
+	<propertiesFileSet>
+                                    <file>${temp_dir}/conf/common/security.properties</file>
+                                    <key>security.server.deviceAuthentication</key>
+                                    <value>digest</value>
+                                </propertiesFileSet>
+                                <propertiesFileSet>
+                                    <file>${temp_dir}/conf/common/security.properties</file>
+                                    <key>security.server.secureChannelType</key>
+                                    <value>ANY_CHANNEL</value>
+                                </propertiesFileSet>
+                                <propertiesFileSet>
+                                    <file>${temp_dir}/conf/common/security.properties</file>
+                                    <key>security.server.channelType</key>
+                                    <value>ANY_CHANNEL</value>
+                                </propertiesFileSet>
+                            </actionList>
+                            <conditionRuleList>
+                                <compareValues>
+                                    <logic>equals</logic>
+                                    <value1>${comm_sec_option}</value1>
+                                    <value2>4</value2>
                                 </compareValues>
                             </conditionRuleList>
                         </if>
@@ -383,6 +421,13 @@
             <element>//*[local-name()="application"]</element>
             <file>${temp_dir}/cfg-war/WEB-INF/appengine-web.xml</file>
             <value>${app_id}</value>
+            <ruleList>
+                <compareValues>
+                    <logic>does_not_equal</logic>
+                    <value1>${comm_sec_option}</value1>
+                    <value2>4</value2>
+                </compareValues>
+            </ruleList>
         </xmlFileSet>
         <xmlFileSet>
             <attribute></attribute>
@@ -438,13 +483,13 @@
         <setInstallerVariable>
             <name>host_port</name>
             <value>${hostname}</value>
-			<ruleList>
+            <ruleList>
                 <compareText>
                     <logic>equals</logic>
                     <text>${http_port}</text>
                     <value>80</value>
                 </compareText>
-			</ruleList>
+            </ruleList>
         </setInstallerVariable>
         <writeFile>
             <encoding>utf-8</encoding>
@@ -565,20 +610,48 @@ ${html_steps_end}</text>
         </writeFile>
         <writeFile>
             <encoding>utf-8</encoding>
-            <path>${installdir}/README.html</path> 
+            <path>${installdir}/README.html</path>
             <progressText>Write README</progressText>
             <text>${html_steps_begin}
 ${html_steps_begin_item}Browse to ${installdir} and execute &lt;code&gt;uploadAggregateToAppEngine.${script_ext}&lt;/code&gt; to deploy ${product_fullname} up into Google's AppEngine cloud.
 ${html_steps_end_item}${html_steps_begin_item}
 Visit &lt;a href="http://${hostname}"&gt;http://${hostname}/&lt;/a&gt; to complete configuring the
 access rights for ODK Aggregate.
-&lt;p&gt;Alternatively, if you want to run ${product_fullname} locally to test it out, execute &lt;code&gt;launchAggregateTestServer.${script_ext}&lt;/code&gt;${html_steps_end}</text>
+&lt;p&gt;Alternatively, if you want to run ${product_fullname} locally to test it out, execute &lt;code&gt;launchAggregateTestServer.${script_ext}&lt;/code&gt;  Note: the development server does not have an SSL certificate; any pages requiring encryption (https) will not be accessible.${html_steps_end}</text>
             <ruleList>
                 <compareText>
                     <logic>equals</logic>
                     <text>${platform}</text>
                     <value>gae</value>
                 </compareText>
+                <compareTextLength>
+                    <length>0</length>
+                    <logic>does_not_equal</logic>
+                    <text>${app_id}</text>
+                </compareTextLength>
+            </ruleList>
+        </writeFile>
+        <writeFile>
+            <encoding>utf-8</encoding>
+            <path>${installdir}/README.html</path>
+            <progressText>Write README</progressText>
+            <text>${html_steps_begin}
+${html_steps_begin_item}Browse to ${installdir} and execute &lt;code&gt;launchAggregateTestServer.${script_ext}&lt;/code&gt; to run ${product_fullname} on the local Google AppEngine development server.
+${html_steps_end_item}${html_steps_begin_item}
+Visit &lt;a href="http://${hostname}:8080"&gt;http://${hostname}:8080/&lt;/a&gt; to complete configuring the
+access rights for ODK Aggregate.
+&lt;p&gt;${html_steps_end}</text>
+            <ruleList>
+                <compareText>
+                    <logic>equals</logic>
+                    <text>${platform}</text>
+                    <value>gae</value>
+                </compareText>
+                <compareTextLength>
+                    <length>0</length>
+                    <logic>equals</logic>
+                    <text>${app_id}</text>
+                </compareTextLength>
             </ruleList>
         </writeFile>
         <writeFile>
@@ -586,14 +659,17 @@ access rights for ODK Aggregate.
             <path>${installdir}/launchReadme.js</path>
             <progressText>Write README launcher</progressText>
             <text>var shell = new ActiveXObject("WScript.Shell");
-shell.Run("file:///${installdir.unix}/README.html");
+shell.Run("${installdir.escape_backslashes}\\README.html");
 </text>
             <ruleList>
                 <platformTest>
-					<type>windows</type>
-				</platformTest>
+                    <type>windows</type>
+                </platformTest>
             </ruleList>
         </writeFile>
+        <deleteFile>
+            <path>${temp_dir}</path>
+        </deleteFile>
     </postInstallationActionList>
     <preInstallationActionList>
         <autodetectJava>

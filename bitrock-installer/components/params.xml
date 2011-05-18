@@ -776,10 +776,17 @@ The first time Aggregate runs, only this super-user is allowed access to the sys
 	<name>app_id</name>
             <title>Google AppEngine application ID</title>
             <description>Please enter your application id:</description>
-            <explanation>To deploy to Google's AppEngine cloud, go to https://appengine.google.com/ and create an application identifier to be used by Aggregate. If you are replacing an existing application already on appspot, the application identifier is the leftmost portion of the appspot.com URL. For example, if your application is at 'opendatakit.appspot.com' you would enter 'opendatakit' below.</explanation>
+            <explanation>Leave this blank if you want to use the local development server
+ (and not deploy to Google's cloud service).
+
+Otherwise, to deploy to Google's AppEngine cloud, go to:
+    https://appengine.google.com/ 
+and create an application identifier to be used by Aggregate. 
+
+If you are replacing an existing application already on appspot, the application identifier is the leftmost portion of the appspot.com URL. For example, if your application is at 'opendatakit.appspot.com' you would enter 'opendatakit' below.</explanation>
             <value></value>
             <default></default>
-            <allowEmptyValue>0</allowEmptyValue>
+            <allowEmptyValue>1</allowEmptyValue>
             <width>30</width>
             <ruleList>
                 <compareText>
@@ -790,8 +797,8 @@ The first time Aggregate runs, only this super-user is allowed access to the sys
             </ruleList>
         </stringParameter>
         <choiceParameter>
-	<!-- authentication_option -->
-	<name>authentication_option</name>
+	<!-- comm_sec_option -->
+	<name>comm_sec_option</name>
             <title>Communications security</title>
             <description></description>
             <explanation>Select the level of communications security you wish the Aggregate webserver to enforce.
@@ -817,6 +824,35 @@ The first time Aggregate runs, only this super-user is allowed access to the sys
                     <value>2</value>
                 </option>
             </optionList>
+            <preShowPageActionList>
+                <removeChoiceOptions>
+                    <name>comm_sec_option</name>
+                    <options>4</options>
+                </removeChoiceOptions>
+                <addChoiceOptions>
+                    <name>comm_sec_option</name>
+                    <optionList>
+                        <option>
+                            <description></description>
+                            <image></image>
+                            <text>Disable communications security (needed when running on development server)</text>
+                            <value>4</value>
+                        </option>
+                    </optionList>
+                    <ruleList>
+                        <compareText>
+                            <logic>equals</logic>
+                            <text>${platform}</text>
+                            <value>gae</value>
+                        </compareText>
+                        <compareTextLength>
+                            <length>0</length>
+                            <logic>equals</logic>
+                            <text>${app_id}</text>
+                        </compareTextLength>
+                    </ruleList>
+                </addChoiceOptions>
+            </preShowPageActionList>
             <ruleList>
                 <isTrue>
                     <value>${tomcat_authentication_should_configure}</value>
@@ -874,6 +910,27 @@ The first time Aggregate runs, only this super-user is allowed access to the sys
                     <text>${platform}</text>
                     <value>gae</value>
                 </compareText>
+                <compareTextLength>
+                    <length>0</length>
+                    <logic>does_not_equal</logic>
+                    <text>${app_id}</text>
+                </compareTextLength>
+            </ruleList>
+        </setInstallerVariable>
+        <setInstallerVariable>
+            <name>hostname</name>
+            <value>localhost</value>
+            <ruleList>
+                <compareText>
+                    <logic>equals</logic>
+                    <text>${platform}</text>
+                    <value>gae</value>
+                </compareText>
+                <compareTextLength>
+                    <length>0</length>
+                    <logic>equals</logic>
+                    <text>${app_id}</text>
+                </compareTextLength>
             </ruleList>
         </setInstallerVariable>
         <setInstallerVariable>
@@ -995,8 +1052,8 @@ The first time Aggregate runs, only this super-user is allowed access to the sys
                 </propertiesFileSet>
                 <propertiesFileSet>
                     <file>${installdir}/.options</file>
-                    <key>authentication_option</key>
-                    <value>${authentication_option}</value>
+                    <key>comm_sec_option</key>
+                    <value>${comm_sec_option}</value>
                 </propertiesFileSet>
                 <propertiesFileSet>
                     <file>${installdir}/.options</file>
