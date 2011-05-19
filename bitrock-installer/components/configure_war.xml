@@ -65,6 +65,13 @@
         </folder>
     </folderList>
     <initializationActionList>
+        <setInstallerVariable>
+            <name>temp_dir</name>
+            <value>${system_temp_directory}/${installation_guid}</value>
+        </setInstallerVariable>
+        <createDirectory>
+            <path>${temp_dir}</path>
+        </createDirectory>
         <createTimeStamp format="%Y-%m-%dT%h:%M:%s.%S%z" variable="creation.timestamp"/>
         <setInstallerVariable>
             <name>settings_jar</name>
@@ -555,7 +562,7 @@ ${html_steps_begin_item}Execute the mysql (mysql.exe) commandline client using t
 account and password, and supply the &lt;code&gt;create_db_and_user.sql&lt;/code&gt; to it.
 If you have the mysql commandline client open, type:
 &lt;pre&gt;
-source ${installdir}${platform_path_separator}README.txt
+source '${installdir}${platform_path_separator}README.txt'
 &lt;/pre&gt;
 ${html_steps_end_item}${html_steps_begin_item}
 copy the &lt;code&gt;ODKAggregate.war&lt;/code&gt; to the &lt;code&gt;${platform_path_separator}webapps&lt;/code&gt; directory of the Apache
