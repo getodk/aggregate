@@ -4,16 +4,18 @@
     <canBeEdited>1</canBeEdited>
     <selected>1</selected>
     <show>1</show>
-    <initializationActionList>
-        <setInstallerVariable>
-            <name>temp_dir</name>
-            <value>${system_temp_directory}/${installation_guid}</value>
-        </setInstallerVariable>
-        <createDirectory>
-            <path>${temp_dir}</path>
-        </createDirectory>
-    </initializationActionList>
     <parameterList>
+        <booleanParameter>
+	<!-- write_properties -->
+	<name>write_properties</name>
+            <description></description>
+            <explanation></explanation>
+            <value></value>
+            <default>${env(WRITE_OPTIONS)}</default>
+            <ask>0</ask>
+            <cliOptionText>Output a .options file that contains the configuration from running the installer.</cliOptionText>
+            <displayStyle>radiobuttons</displayStyle>
+        </booleanParameter>
         <stringParameter>
             <name>database_host_port</name>
             <description>Hidden value used to form database url for jdbc connection.</description>
@@ -467,10 +469,11 @@ Make note of any non-default values you've entered during the installation proce
             <description></description>
             <explanation>We have developed and tested against MySQL 5.1
 
-Download and install MySQL from http://www.mysql.com/
+Please complete the following tasks now:
+(1) Download and install MySQL from http://www.mysql.com/
 Make note of any non-default values you have entered during the installation process.
 
-Download the MySQL Connector/J from this same site.  
+(2) Download the MySQL Connector/J zip file from this same site.  
 Unzip or extract the contents of this file to a directory on your system.
 The top-level directory should contain a file named:
   mysql-connector-java-...-bin.jar
@@ -542,7 +545,7 @@ Copy this file into the /lib directory of your Apache Tomcat 6 installation.
                     <name>database_port</name>
                     <title>Configuration</title>
                     <description>Database port number:</description>
-                    <explanation>Do not specify a port number (leave this field blank) unless you specified a non-default port number during the installation of your database server.
+                    <explanation>Leave this field blank unless you specified a non-default port number during the installation of your database server.
 </explanation>
                     <value></value>
                     <default></default>
@@ -877,17 +880,6 @@ If you are replacing an existing application already on appspot, the application
             <mustExist>1</mustExist>
             <width>40</width>
         </directoryParameter>
-        <booleanParameter>
-	<!-- write_properties -->
-	<name>write_properties</name>
-            <description></description>
-            <explanation></explanation>
-            <value></value>
-            <default>true</default>
-            <ask>0</ask>
-            <cliOptionText>Output a .options file that contains the configuration from running the installer.</cliOptionText>
-            <displayStyle>radiobuttons</displayStyle>
-        </booleanParameter>
     </parameterList>
     <postInstallationActionList>
         <setInstallerVariable>
