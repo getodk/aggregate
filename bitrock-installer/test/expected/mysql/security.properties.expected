@@ -1,0 +1,48 @@
+# unique keys for this site -- should be an unguessable string
+security.server.siteKey=426cf7fb-0648-49f8-b2c3-5c19111ff9d9
+security.server.userServiceKey=c70da0a2-73f7-4433-ad72-9530b1ffc8c8
+# either basic or digest
+security.server.deviceAuthentication=digest
+# choose whether to secure everything with https or allow http access.
+#
+# NOTE: changes also needed to:
+# -- server.xml (Tomcat configuration file) to set up the secure channel
+#
+# should be REQUIRES_SECURE_CHANNEL but can't until security is enabled.
+security.server.secureChannelType=REQUIRES_SECURE_CHANNEL
+# either ANY_CHANNEL to secure nothing
+# or REQUIRES_SECURE_CHANNEL to secure everything
+security.server.channelType=ANY_CHANNEL
+#
+# When running under Tomcat, you need to set the hostname and port for 
+# the server so that the background tasks can generate properly-constructed
+# links in their documents and in their publications to the 
+# external services.
+#
+# TODO: configure this during install
+#
+security.server.hostname=ehaase.cs.washington.edu
+#
+# TODO: revise config to make use of these port values.
+# TODO: the only allowed pairings at the moment are 80/443 and 8080/8443.
+security.server.port=8080
+security.server.securePort=8443
+
+# e-mail of designated superuser. This must be a user that has an OpenID
+# login hosted by a remote server (i.e., this must be a gmail account).
+# this should be of the form: 'mailto:user@gmail.com'
+security.server.superUser=mailto:d@gmail.com
+
+# realm definition
+# mailToDomain -- the default domain for users on the system
+# rootDomain -- the organizations domain name
+# realmString -- what should be sent to users when BasicAuth or DigestAuth is done
+# domains -- the set of domains that share authentications with this server
+security.server.realm.mailToDomain=gmail.com
+security.server.realm.rootDomain=name
+security.server.realm.realmString=name Aggregate 1.0 realm
+security.server.realm.domains=name
+#
+#
+
+
