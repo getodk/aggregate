@@ -2,9 +2,13 @@ Configuring your Build Environment
 ----------------------------------
 
 The build tree relies on Maven 3 for executing unit tests and 
-integration tests across the 3 platforms.  The source tree is
-the top level project within Maven.  The directories underneath
-are Eclipse projects and/or Maven sub-projects.  
+integration tests across the 3 platforms (GAE, MySQL, PostgreSQL).
+The source tree is in the top level project within Maven.  The 
+directories underneath are Eclipse projects and/or Maven 
+sub-projects.  
+
+If you're a Maven expert and have suggestions about the Maven 
+project tree, please contact mitchellsundt@gmail.com
 
 =====================
 Minimal Eclipse Setup
@@ -32,15 +36,15 @@ Windows / Preferences:
   Google / App Engine:
   
     Be sure there is an App Engine 1.4.2 or higher SDK defined.
-	NOTE: 1.4.3 is broken. Don't use it.
-	The default GWT version should match that in the maven 
-	pom.xml (currently 1.4.2).
+	NOTE: 1.4.3 is broken (do not use!); 1.5.0 works.
+	If the default GWT version is not 1.4.2, you may need to 
+	tweak with the project settings to get the newer jars to be added.
 
   Google / Web Toolkit:
   
-    Be sure there is a WebToolkit SDK defined 2.2.0 or higher.
+    Be sure there is a WebToolkit SDK defined 2.3.0 or higher.
 	The default GWT version should match that in the maven 
-	pom.xml (currently 2.2.0).
+	pom.xml (currently 2.3.0).
 
 File / Import:
 
@@ -55,10 +59,9 @@ File / Import:
 
 Be sure to set the security.server.superUser to your gmail account. Save.
 
-(5) In a command window, navigate to the odk-gae-settings directory.
-
-Run on Windows:  UpdateGaeSettingsJar.bat
-Run on Mac/Linux: UpdateGaeSettingsJar.sh
+(5) Select the 'build.xml' (Ant Buildfile), right-click, and 
+choose Run As / Ant Build.  This will rebuild the configuration 
+jar and copy it into the eclipse project.
 
 (6) Return to Eclipse:
 
@@ -94,13 +97,22 @@ Full Development Environment Configuration
 
 (5) Optionally: Install Postgres
 
-For Postgres, run this script:
+For Postgres, run these commands:
 
-create database odk_test;
-somehow: create user 'odk_test' with password 'odk_test'
-somehow: grant all rights to this user on 'odk_test'
-create schema odk_test; (in odk_test database)
-create schema odk_unit; (in odk_test database)
+----postgres-script-start-----
+create database "odk_test";
+create schema "odk_test";
+create schema "odk_unit";
+create user "odk_test" with unencrypted password 'odk_test';
+grant all privileges on database "odk_test" to "odk_user";
+alter database "odk_test" owner to "odk_test";
+----postgres-script-end-------
+
+From the Postgres SQL shell (psql) commandline client,
+using the root account and password, if the above commands
+are in the file postgres.sql, you can type:
+
+\i "C:\...\postgres.sql"
 
 (6) Optionally: Install MySQL
 
@@ -154,13 +166,20 @@ A minimal file is:
   	  <properties>
 	    <gae.home>\C:\\Program Files (x86)\\Google AE\\appengine-java-sdk-1.4.2</gae.home>
 		<bitrock.home>C:\Program Files (x86)\BitRock InstallBuilder Professional 7.0.5</bitrock.home>
+		<headless.operation>no</headless.operation>
+		<mysql.client.executable>C:\\Program Files\\MySQL\\MySQL Server 5.1\\bin\\mysql.exe</mysql.client.executable>
+		<mysql.root.password>ROOTPASSWORDHERE</mysql.root.password>
+		<test.server.port>7070</test.server.port>
+		<catalina.zip>C:\\Users\\user\\.m2\\apache-tomcat-6.0.32-windows-x64.zip</catalina.zip>
 	  </properties>
   	</profile>
   </profiles>
   <activeProfiles><activeProfile>gae</activeProfile></activeProfiles>
 </settings>
 
-If bitrock is not installed, you must disable the installer modules in the pom.xml
+The installer is not hooked into the parent Maven project, but identifies that project as its
+parent.  So you can build the top-level project to build and run unit tests, integration tests, 
+etc. and do not need bitrock installed.
 
 ----------
 
@@ -171,15 +190,15 @@ Windows / Preferences:
   Google / App Engine:
   
     Be sure there is an App Engine 1.4.2 or higher SDK defined.
-	NOTE: 1.4.3 is broken. Don't use it.
+	NOTE: 1.4.3 is broken (do not use it); 1.5.0 works.
 	The default GWT version should match that in the maven 
 	pom.xml (currently 1.4.2).
 
   Google / Web Toolkit:
   
-    Be sure there is a WebToolkit SDK defined 2.2.0 or higher.
+    Be sure there is a WebToolkit SDK defined 2.3.0 or higher.
 	The default GWT version should match that in the maven 
-	pom.xml (currently 2.2.0).
+	pom.xml (currently 2.3.0).
 	
   Java / Build Path / Classpath Variables:
 
@@ -206,14 +225,11 @@ Windows / Preferences:
 
 Be sure to set the security.server.superUser to your gmail account. Save.
 
-(11) In a command window, navigate to the odk-gae-settings directory.
+(11) Select the 'build.xml' (Ant Buildfile within odk-gae-settings), right-click, and 
+choose Run As / Ant Build.  This will rebuild the configuration 
+jar and copy it into the eclipse project.
 
-Run on Windows:  UpdateGaeSettingsJar.bat
-Run on Mac/Linux: UpdateGaeSettingsJar.sh
-
-(12) Return to Eclipse:
-
-Refresh the eclipse-aggregate-gae project (to pick up the updated jar file).
+(12) Refresh the eclipse-aggregate-gae project (to pick up the updated jar file).
 
 (13) Running:
 
@@ -241,3 +257,8 @@ and building the wars for the 3 platforms.
 eclipse.  It can be used to export a WAR file similar to what 
 can be built with Maven.
 
+(16) If you have bitrock installed and licensed, you can 
+build the bitrock installer.  First, run 
+ mvn install
+in the bitrock-installer directory.  Then, open bitrock
+and open the buildWar.xml project file in this directory.
