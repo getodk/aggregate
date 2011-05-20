@@ -78,8 +78,8 @@ public class XFormsManifestServlet extends ServletUtilBase {
     }
 
     XFormsManifestXmlTable formFormatter = new XFormsManifestXmlTable(form, cc.getServerURL());
-    PrintWriter out = resp.getWriter();
     resp.setContentType(HtmlConsts.RESP_TYPE_XML);
+    PrintWriter out = resp.getWriter();
     formFormatter.generateXmlManifestList(out);
   }
 

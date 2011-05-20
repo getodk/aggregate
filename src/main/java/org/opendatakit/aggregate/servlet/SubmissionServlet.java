@@ -218,11 +218,6 @@ public class SubmissionServlet extends ServletUtilBase {
         submissionParser = new SubmissionParser(req.getInputStream(), cc);
       }
 
-      if (submissionParser == null) {
-        resp.sendError(HttpServletResponse.SC_BAD_REQUEST, ErrorConsts.INPUTSTREAM_ERROR);
-        return;
-      }
-
       // TODO: mitch are we assuming the submissionParser always persists?
       Form form = Form.retrieveForm(submissionParser.getSubmissionFormId(), cc);
       Submission submission = submissionParser.getSubmission();

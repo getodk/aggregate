@@ -101,9 +101,9 @@ public class FormXmlServlet extends ServletUtilBase {
 	      odkIdNotFoundError(resp);
 	    }
 	
-	    PrintWriter out = resp.getWriter();
-	
 	    resp.setCharacterEncoding(HtmlConsts.UTF8_ENCODE);
+
+	    PrintWriter out = resp.getWriter();
 	
 	    if (humanReadable) {
 	      Map<String, String> properties = new HashMap<String, String>();
