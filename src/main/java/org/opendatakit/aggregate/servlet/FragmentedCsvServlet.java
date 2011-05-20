@@ -182,8 +182,6 @@ public class FragmentedCsvServlet extends ServletUtilBase {
     	numEntriesStr = null;
     }
     
-    PrintWriter out = resp.getWriter();
-    
     try {
     	int numEntriesToFetch = 0;
     	try {
@@ -212,6 +210,7 @@ public class FragmentedCsvServlet extends ServletUtilBase {
         	websafeCursorString = null;
         	resp.setContentType("text/xml; charset=UTF-8");
         	resp.setCharacterEncoding("UTF-8");
+            PrintWriter out = resp.getWriter();
         	
         	FragmentedCsvFormatter fmt = new FragmentedCsvFormatter(form, submissionKeyParts, cc.getServerURL(), websafeCursorString, out);
         	fmt.processSubmissionSet(submissions, m, cc);
@@ -247,6 +246,7 @@ public class FragmentedCsvServlet extends ServletUtilBase {
 
             resp.setContentType("text/xml; charset=UTF-8");
         	resp.setCharacterEncoding("UTF-8");
+            PrintWriter out = resp.getWriter();
 
         	FragmentedCsvFormatter fmt = new FragmentedCsvFormatter(form, submissionKeyParts, cc.getServerURL(), websafeCursorString, out);
         	fmt.processSubmissions(submissions, cc);
