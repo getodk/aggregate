@@ -98,7 +98,7 @@ public class UploadSubmissionsAppletServlet extends ServletUtilBase {
 		}
 		String headContent = cookieSet;
 		beginBasicHtmlResponse(TITLE_INFO, headContent, resp, true, cc); // header
-	    PrintWriter out = resp.getWriter();
+		PrintWriter out = resp.getWriter();
 	    out.write(UPLOAD_PREAMBLE);
 	    out.write("<p>Click ");
 	    out.write(HtmlUtil.createHref(cc.getWebApplicationURL(SubmissionServlet.ADDR), "here"));

@@ -159,14 +159,13 @@ public class FormUploadServlet extends ServletUtilBase {
 
 	CallingContext cc = ContextFactory.getCallingContext(this, req);
 
-	PrintWriter out = resp.getWriter();
-
 	StringBuilder headerString = new StringBuilder();
 	headerString.append(JQUERY_SCRIPT_HEADER);
 	headerString.append("<script src=\"");
 	headerString.append(cc.getWebApplicationURL(UPLOAD_SCRIPT_RESOURCE));
 	headerString.append("\"></script>");
 	beginBasicHtmlResponse(TITLE_INFO, headerString.toString(), resp, true, cc );// header info
+	PrintWriter out = resp.getWriter();
 	out.write(UPLOAD_PAGE_BODY_START);
 	out.write(cc.getWebApplicationURL(ADDR));
 	out.write(UPLOAD_PAGE_BODY_MIDDLE);

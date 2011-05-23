@@ -92,9 +92,8 @@ public class ConfirmServlet extends ServletUtilBase {
 	}
 
     try {
-      PrintWriter out = resp.getWriter();
-      
       beginBasicHtmlResponse(TITLE_INFO, resp, false, cc); // header info
+      PrintWriter out = resp.getWriter();
       out.print(HtmlUtil.createFormBeginTag(cc.getWebApplicationURL(ProcessServlet.ADDR),
               null, HtmlConsts.POST));
       

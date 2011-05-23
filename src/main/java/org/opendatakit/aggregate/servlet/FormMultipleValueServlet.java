@@ -90,12 +90,11 @@ public class FormMultipleValueServlet extends ServletUtilBase {
 				SubmissionElement v = sub.resolveSubmissionKey(parts);
 				RepeatSubmissionType b = (RepeatSubmissionType) v;
 
-				HtmlFormatter formatter = new HtmlFormatter(form, cc.getServerURL(), resp
-						.getWriter(), null, false);
-
 				// header info
 				beginBasicHtmlResponse(TITLE_INFO + b.getPropertyName(), resp, true, cc);
 
+				HtmlFormatter formatter = new HtmlFormatter(form, cc.getServerURL(), resp
+						.getWriter(), null, false);
 				formatter.processSubmissionSetPublic(b.getSubmissionSets(), b
 						.getElement(), cc);
 
