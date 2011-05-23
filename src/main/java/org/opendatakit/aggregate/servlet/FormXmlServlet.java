@@ -103,7 +103,6 @@ public class FormXmlServlet extends ServletUtilBase {
 	
 	    resp.setCharacterEncoding(HtmlConsts.UTF8_ENCODE);
 
-	    PrintWriter out = resp.getWriter();
 	
 	    if (humanReadable) {
 	      Map<String, String> properties = new HashMap<String, String>();
@@ -113,6 +112,7 @@ public class FormXmlServlet extends ServletUtilBase {
 	          ServletConsts.DOWNLOAD_XML_BUTTON_TXT, properties);
 	
 	      beginBasicHtmlResponse(TITLE_INFO, resp, true, cc); // header info
+	      PrintWriter out = resp.getWriter();
 	      out.println("<h3>Form Name: <FONT COLOR=0000FF>" + form.getViewableName()
 	          + "</FONT></h3>");
 	      out.println("<h3>File Name: <FONT COLOR=0000FF>" + form.getFormFilename()
@@ -124,6 +124,7 @@ public class FormXmlServlet extends ServletUtilBase {
 	      finishBasicHtmlResponse(resp); // footer info
 	    } else {
 	      resp.setContentType(HtmlConsts.RESP_TYPE_XML);
+		  PrintWriter out = resp.getWriter();
 	      setDownloadFileName(resp, form.getFormFilename());
 	      out.print(xmlString);
 	    }

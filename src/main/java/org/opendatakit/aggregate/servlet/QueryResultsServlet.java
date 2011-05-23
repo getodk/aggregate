@@ -152,11 +152,11 @@ public class QueryResultsServlet extends ServletUtilBase {
 			for ( EntityKey k : keys ) {
 				submissions.add( new Submission(k.getKey(), form, cc));
 			}
+			beginBasicHtmlResponse(TITLE_INFO, resp, true, cc); // header info
 
 			SubmissionFormatter formatter = new HtmlFormatter(form,
 					cc.getServerURL(), resp.getWriter(), null, true);
 
-			beginBasicHtmlResponse(TITLE_INFO, resp, true, cc); // header info
 			formatter.processSubmissions(submissions, cc);
 			finishBasicHtmlResponse(resp);
 		} catch (ODKDatastoreException e) {

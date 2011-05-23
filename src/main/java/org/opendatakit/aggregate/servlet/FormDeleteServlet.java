@@ -65,8 +65,6 @@ public class FormDeleteServlet extends ServletUtilBase {
   @Override
   public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 	CallingContext cc = ContextFactory.getCallingContext(this, req);
-    
-    PrintWriter out = resp.getWriter();
  
     try {
       
@@ -74,6 +72,7 @@ public class FormDeleteServlet extends ServletUtilBase {
       FormHtmlTable formFormatter = new FormHtmlTable(formsList);
 
       beginBasicHtmlResponse(TITLE_INFO, resp, true, cc); // header info
+      PrintWriter out = resp.getWriter();
       out.print(HtmlUtil.createFormBeginTag(cc.getWebApplicationURL(ConfirmServlet.ADDR), null, HtmlConsts.POST));
       out.print(formFormatter.generateHtmlFormTable(false, true, cc));
       out.print(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_SUBMIT, ServletConsts.PROCESS_TYPE, ProcessType.DELETE_FORM.getButtonText()));
