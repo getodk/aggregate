@@ -18,10 +18,12 @@ package org.opendatakit.aggregate.servlet;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeSet;
 
 import javax.servlet.ServletException;
@@ -32,10 +34,10 @@ import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.ErrorConsts;
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.common.constants.HtmlConsts;
+import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
-import org.opendatakit.common.security.SecurityUtils;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.security.spring.GrantedAuthorityNames;
 import org.opendatakit.common.security.spring.RegisteredUsersTable;
@@ -103,20 +105,19 @@ public class GroupModifyMembersServlet extends ServletUtilBase {
 		Datastore ds = cc.getDatastore();
 		User user = cc.getCurrentUser();
 
-		TreeSet<String> users;
-		TreeSet<String> allUsers;
+		Set<String> uriUsers;
+		List<RegisteredUsersTable> allUsers = new ArrayList<RegisteredUsersTable>();
 		try {
-			users = UserGrantedAuthority.getUriUsers(new GrantedAuthorityImpl(groupname), ds, user);
-			if ( showall ) {
-				allUsers = new TreeSet<String>();
-				RegisteredUsersTable relation = RegisteredUsersTable.assertRelation(ds, user);
-				Query query = ds.createQuery(relation, user);
-				List<?> registeredUsers = query.executeDistinctValueForDataField(relation.primaryKey);
-				for ( Object u : registeredUsers ) {
-					allUsers.add((String) u);
+			uriUsers = UserGrantedAuthority.getUriUsers(new GrantedAuthorityImpl(groupname), ds, user);
+			
+			Query query = RegisteredUsersTable.createQuery(ds, user);
+			RegisteredUsersTable.applyNaturalOrdering(query);
+			List<? extends CommonFieldsBase> registeredUsers = query.executeQuery(0);
+			for ( CommonFieldsBase c : registeredUsers ) {
+				RegisteredUsersTable t = (RegisteredUsersTable) c;
+				if ( showall || uriUsers.contains(t.getUri()) ) {
+					allUsers.add(t);
 				}
-			} else {
-				allUsers = users;
 			}
 		} catch (ODKDatastoreException e) {
 			e.printStackTrace();
@@ -148,13 +149,13 @@ public class GroupModifyMembersServlet extends ServletUtilBase {
 										GROUPNAME, groupname));
 
 		out.print(HtmlConsts.BORDERLESS_TABLE_OPEN);
-		for ( String uriUser : allUsers ) {
+		for ( RegisteredUsersTable u : allUsers ) {
 			out.print(HtmlConsts.TABLE_ROW_OPEN);
 	        out.print(HtmlUtil.wrapWithHtmlTags(HtmlConsts.TABLE_DATA, 
 	        		HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_CHECKBOX, 
-	        							USERNAME, uriUser,
-	        								users.contains(uriUser)) +
-	        								createUserModifyLink(uriUser, cc)));
+	        							USERNAME, u.getUri(),
+	        								uriUsers.contains(u.getUri())) +
+	        								createUserModifyLink(u, cc)));
 			out.print(HtmlConsts.TABLE_ROW_CLOSE);
 		}
 		out.print(HtmlConsts.TABLE_CLOSE);
@@ -164,12 +165,10 @@ public class GroupModifyMembersServlet extends ServletUtilBase {
 		finishBasicHtmlResponse(resp);
 	}
 	
-	private final String createUserModifyLink( String uriUser, CallingContext cc ) {
-		if ( uriUser == null ) return null;
-		if ( !uriUser.startsWith(SecurityUtils.MAILTO_COLON) ) return uriUser;
-		String display = SecurityUtils.getEmailAddress(uriUser);
+	private final String createUserModifyLink( RegisteredUsersTable u, CallingContext cc ) {
+		String display = u.getDisplayName();
 		Map<String,String> properties = new HashMap<String,String>();
-		properties.put(UserModifyServlet.USERNAME, uriUser);
+		properties.put(UserModifyServlet.USERNAME, u.getUsername());
 		return HtmlUtil.createHrefWithProperties(cc.getWebApplicationURL(UserModifyServlet.ADDR), 
 						properties, display);
 	}

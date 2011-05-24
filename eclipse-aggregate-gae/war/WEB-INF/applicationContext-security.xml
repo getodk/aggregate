@@ -248,18 +248,13 @@
 	</beans:bean>
 
 	<beans:bean id="basicLoginService"
-		class="org.opendatakit.common.security.spring.DelegatingUserDetailsService">
-		<beans:property name="userDetailsService">
-			<!--	Known registered users are maintained in the registered users table -->
-			<!--	Passwords are stored as salted sha1 hashes-->
-			<beans:bean class="org.opendatakit.common.security.spring.UserDetailsServiceImpl">
-				<beans:property name="datastore" ref="datastore"/>
-				<beans:property name="userService" ref="user_service"/>
-				<beans:property name="passwordType" value="BasicAuth"/>
-			</beans:bean>
-		</beans:property>
-		<beans:property name="passDownUriUser" value="true" />
-		<beans:property name="mailtoDomain"	value="${security.server.realm.mailToDomain}" />
+		class="org.opendatakit.common.security.spring.UserDetailsServiceImpl">
+		<!--	Known registered users are maintained in the registered users table -->
+		<!--	Passwords are stored as salted sha1 hashes-->
+		<beans:property name="datastore" ref="datastore"/>
+		<beans:property name="userService" ref="user_service"/>
+		<beans:property name="passwordType" value="BasicAuth"/>
+		<beans:property name="credentialType" value="Username"/>
 		<beans:property name="authorities">
 			<beans:list>
 				<beans:value>AUTH_LOCAL</beans:value>
@@ -291,18 +286,13 @@
 	</beans:bean>
 
 	<beans:bean id="digestLoginService"
-		class="org.opendatakit.common.security.spring.DelegatingUserDetailsService">
-		<beans:property name="userDetailsService">
-			<!--	Known registered users are maintained in the registered users table -->
-			<!--	Passwords are stored as the A1 value in the protocol (MD5 hash of username + realm string + password). -->
-			<beans:bean class="org.opendatakit.common.security.spring.UserDetailsServiceImpl">
-				<beans:property name="datastore" ref="datastore"/>
-				<beans:property name="userService" ref="user_service"/>
-				<beans:property name="passwordType" value="DigestAuth"/>
-			</beans:bean>
-		</beans:property>
-		<beans:property name="mailtoDomain"	value="${security.server.realm.mailToDomain}" />
-		<beans:property name="passDownUriUser" value="true" />
+		class="org.opendatakit.common.security.spring.UserDetailsServiceImpl">
+		<!--	Known registered users are maintained in the registered users table -->
+		<!--	Passwords are stored as the A1 value in the protocol (MD5 hash of username + realm string + password). -->
+		<beans:property name="datastore" ref="datastore"/>
+		<beans:property name="userService" ref="user_service"/>
+		<beans:property name="passwordType" value="DigestAuth"/>
+		<beans:property name="credentialType" value="Username"/>
 		<beans:property name="authorities">
 			<beans:list>
 				<beans:value>AUTH_LOCAL</beans:value>
@@ -371,6 +361,7 @@
 				<beans:property name="datastore" ref="datastore"/>
 				<beans:property name="userService" ref="user_service"/>
 				<beans:property name="passwordType" value="Random"/>
+				<beans:property name="credentialType" value="Email"/>
 			</beans:bean>
 		</beans:property>
 	</beans:bean>

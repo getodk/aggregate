@@ -78,8 +78,8 @@ public class WrappingOpenIDAuthenticationProvider extends OpenIDAuthenticationPr
 		if ( eMail == null ) {
 			throw new UsernameNotFoundException("email address not supplied in OpenID attributes");
 		}
-		eMail = SecurityUtils.normalizeUsername(eMail, null);
-		String mailtoDomain = SecurityUtils.getMailtoDomain(eMail);
+		eMail = WrappingOpenIDAuthenticationProvider.normalizeMailtoAddress(eMail);
+		String mailtoDomain = WrappingOpenIDAuthenticationProvider.getMailtoDomain(eMail);
 		
 		UserDetails userDetails = rawUserDetails;
 		
@@ -91,20 +91,26 @@ public class WrappingOpenIDAuthenticationProvider extends OpenIDAuthenticationPr
 		// and the MAILTO_... granted authority
 		authorities.add(new GrantedAuthorityImpl(GrantedAuthorityNames.AUTH_OPENID.toString()));
 		authorities.add(new GrantedAuthorityImpl(GrantedAuthorityNames.USER_IS_AUTHENTICATED.toString()));
-		String mailtoAuthority = GrantedAuthorityNames.getMailtoGrantedAuthorityName(eMail);
+		String mailtoAuthority = GrantedAuthorityNames.getMailtoGrantedAuthorityName(mailtoDomain);
 		if ( mailtoAuthority != null ) {
 			authorities.add(new GrantedAuthorityImpl(mailtoAuthority));
 		}
 
+		// attempt to look user up in registered users table...
+		String username = null;
 		UserDetails partialDetails = null;
 		try {
 			partialDetails = wrappingUserDetailsService.loadUserByUsername(eMail);
+			// found the user in the table -- fold in authorizations and get uriUser.
 			authorities.addAll(partialDetails.getAuthorities());
+			username = partialDetails.getUsername();
 		} catch (Exception e) {
 			partialDetails = userDetails;
+			username = RegisteredUsersTable.generateUniqueUri(eMail);
 		}
 
-		AggregateUser trueUser = new AggregateUser(eMail, partialDetails.getPassword(),
+		AggregateUser trueUser = new AggregateUser(username, 
+													partialDetails.getPassword(),
 													UUID.randomUUID().toString(), // junk...
 													mailtoDomain,
 													partialDetails.isEnabled(),
@@ -125,5 +131,25 @@ public class WrappingOpenIDAuthenticationProvider extends OpenIDAuthenticationPr
 	public Authentication authenticate(Authentication authentication)
 			throws AuthenticationException {
 		return super.authenticate(authentication);
+	}
+
+	public static final String getMailtoDomain( String uriUser ) {
+		if ( uriUser == null ||
+			 !uriUser.startsWith(SecurityUtils.MAILTO_COLON) ||
+			 !uriUser.contains(SecurityUtils.AT_SIGN) )
+			return null;
+		return uriUser.substring(uriUser.indexOf(SecurityUtils.AT_SIGN)+1);
+	}
+
+	public static final String normalizeMailtoAddress(String emailAddress) {
+		String mailtoUsername = emailAddress;
+		if ( !emailAddress.startsWith(SecurityUtils.MAILTO_COLON) ) {
+			if ( emailAddress.contains(SecurityUtils.AT_SIGN) ) {
+				mailtoUsername = SecurityUtils.MAILTO_COLON + emailAddress;
+			} else {
+				throw new IllegalStateException("e-mail address is incomplete - it does not specify a domain!");
+			}
+		}
+		return mailtoUsername;
 	}
 }

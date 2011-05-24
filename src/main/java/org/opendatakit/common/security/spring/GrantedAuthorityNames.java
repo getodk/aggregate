@@ -18,8 +18,6 @@ package org.opendatakit.common.security.spring;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.opendatakit.common.security.SecurityUtils;
-
 /**
  * The system-defined granted authority names.  The convention is that:
  * <ul><li>any name beginning with ROLE_ is a primitive authority.</li>  
@@ -32,7 +30,7 @@ import org.opendatakit.common.security.SecurityUtils;
  */
 public enum GrantedAuthorityNames {
 
-	AUTH_LOCAL("any users authenticated via the locally-held (device) credential"),
+	AUTH_LOCAL("any users authenticated via the locally-held (<em>Aggregate password</em>) credential"),
 	AUTH_OPENID("any users authenticated via OpenID"),
 	
 	USER_IS_ANONYMOUS("for unauthenticated access"),
@@ -41,7 +39,7 @@ public enum GrantedAuthorityNames {
 				"as a registered user will always have been authenticated)"),
 	USER_IS_DAEMON("reserved for the execution of background tasks"),
 	
-	MAILTO_GMAIL_COM("all users with the 'gmail.com' e-mail domain"),
+	MAILTO_GMAIL_COM("all users logged in via OpenID with the 'gmail.com' e-mail domain"),
 	
 	ROLE_FORM_LIST("required to fetching the xforms list (e.g., by the device)"),
 	ROLE_FORM_DOWNLOAD("required to fetch an xform definition (e.g., by the device)"),
@@ -88,10 +86,9 @@ public enum GrantedAuthorityNames {
 				authority.startsWith(ROLE_PREFIX);
 	}
 	
-	public static final String getMailtoGrantedAuthorityName(String uriUser) {
-		String mailtoDomain = SecurityUtils.getMailtoDomain(uriUser);
+	public static final String getMailtoGrantedAuthorityName(String mailtoDomain) {
 		if ( mailtoDomain == null ) return null;
 		return GrantedAuthorityNames.MAILTO_PREFIX + 
-			mailtoDomain.replaceAll("[^\\p{Digit}\\p{javaUpperCase}\\p{javaLowerCase}]", "_").toUpperCase();
+			mailtoDomain.replaceAll("[^\\p{Digit}\\p{Lu}\\p{Lo}\\p{Ll}]", "_").toUpperCase();
 	}
 }

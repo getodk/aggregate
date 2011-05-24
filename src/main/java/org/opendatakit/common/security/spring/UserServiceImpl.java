@@ -25,6 +25,7 @@ import java.util.Set;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.security.Realm;
 import org.opendatakit.common.security.SecurityUtils;
 import org.opendatakit.common.security.User;
@@ -61,7 +62,7 @@ public class UserServiceImpl implements org.opendatakit.common.security.UserServ
 		if ( superUserEmail == null ) {
 			throw new IllegalStateException("superUserEmail must be configured");
 		}
-		if ( !superUserEmail.startsWith("mailto:") || !superUserEmail.contains("@")) {
+		if ( !superUserEmail.startsWith(SecurityUtils.MAILTO_COLON) || !superUserEmail.contains(SecurityUtils.AT_SIGN)) {
 			throw new IllegalStateException("superUserEmail is malformed. " +
 					"Must be of the form 'mailto:user@gmail.com' or other supported OpenID provider.");
 		}
@@ -81,8 +82,6 @@ public class UserServiceImpl implements org.opendatakit.common.security.UserServ
 		activeUsers.put(anonymous.getUriUser(), anonymous);
 		activeUsers.put(daemonAccount.getUriUser(), daemonAccount);
 		
-		// ensure that the superuser is a registered user and is enabled
-		RegisteredUsersTable.bootstrap(superUserEmail, datastore, daemonAccount);
 		// ensure that the superuser has admin privileges
 		UserGrantedAuthority.bootstrap(superUserEmail, datastore, daemonAccount);
 	}
@@ -168,18 +167,24 @@ public class UserServiceImpl implements org.opendatakit.common.security.UserServ
 			return false;
 		}
   }
-  
-  public String getAuthenticationEmail(Authentication auth) {
-	  return auth.getName();
-  }
 
   private synchronized User internalGetUser(String uriUser, Collection<GrantedAuthority> authorities) {
 	User match = activeUsers.get(uriUser);
 	if ( match != null ) {
 		return match; 
 	} else {
-		String name = SecurityUtils.getNickname(uriUser);
-		match = new UserImpl(uriUser, name, authorities, datastore);
+		try {
+			RegisteredUsersTable t = RegisteredUsersTable.getUserByUri(uriUser, datastore, daemonAccount);
+			match = new UserImpl( uriUser, t.getDisplayName(), authorities, datastore);
+		} catch (ODKEntityNotFoundException e) {
+			String name = UserServiceImpl.getNickname(uriUser);
+			match = new UserImpl(uriUser, name, authorities, datastore);
+		} catch (ODKDatastoreException e) {
+			e.printStackTrace();
+			// best guess...
+			String name = "--datastore error--";
+			match = new UserImpl(uriUser, name, authorities, datastore);
+		}
 		activeUsers.put(uriUser, match);
 		return match;
 	}
@@ -188,9 +193,8 @@ public class UserServiceImpl implements org.opendatakit.common.security.UserServ
   @Override
   public User getCurrentUser() {
 	Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-	String eMail = getAuthenticationEmail(auth);
 
-	return internalGetUser(eMail, auth.getAuthorities());
+	return internalGetUser(auth.getName(), auth.getAuthorities());
   }
 
   @Override
@@ -203,5 +207,13 @@ public class UserServiceImpl implements org.opendatakit.common.security.UserServ
   public User getDaemonAccountUser() {
 	return daemonAccount;
   }
+
+public static final String getNickname( String uriUser ) {
+	String name = uriUser;
+	if ( name.startsWith(SecurityUtils.MAILTO_COLON) ) {
+		name = name.substring(SecurityUtils.MAILTO_COLON.length());
+	}
+	return name;
+}
 
 }

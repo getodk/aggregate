@@ -108,8 +108,9 @@ public class GroupModifyServlet extends ServletUtilBase {
 		// construct the sets of groups and roles that can be selected
 		TreeSet<String> roles = new TreeSet<String>();
 		
-		// add the logged-in user's mailto domain in case it is different...
-		String mailtoAuthority = GrantedAuthorityNames.getMailtoGrantedAuthorityName(cc.getCurrentUser().getUriUser());
+		// add the current realm's mailto domain in case it is different...
+		String mailtoAuthority = GrantedAuthorityNames.getMailtoGrantedAuthorityName(
+								cc.getUserService().getCurrentRealm().getMailToDomain());
 		if ( mailtoAuthority != null ) {
 			permissionsAssignableGroups.add(mailtoAuthority);
 		}

@@ -20,7 +20,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.TreeSet;
 
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
@@ -175,8 +174,8 @@ public final class UserGrantedAuthority extends CommonFieldsBase {
 	 * @return
 	 * @throws ODKDatastoreException
 	 */
-	public static final TreeSet<String> getUriUsers(GrantedAuthority auth, Datastore ds, User user) throws ODKDatastoreException {
-		TreeSet<String> users = new TreeSet<String>();
+	public static final Set<String> getUriUsers(GrantedAuthority auth, Datastore ds, User user) throws ODKDatastoreException {
+		Set<String> users = new HashSet<String>();
 		if ( auth != null ) {
 			Query q = ds.createQuery(assertRelation(ds, user), user);
 			q.addFilter(GRANTED_AUTHORITY, FilterOperation.EQUAL, auth.getAuthority());

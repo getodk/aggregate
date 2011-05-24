@@ -20,6 +20,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.opendatakit.common.security.User;
 import org.opendatakit.common.web.CallingContext;
 
 public final class EmailParser {
@@ -363,29 +364,72 @@ public final class EmailParser {
 	 *
 	 */
 	public static class Email {
+		enum Form { EMAIL, USERNAME };
+		Form type;
+		String username;
+		String email;
 		String nickname;
-		String uriUser;
+		String uri;
 		
-		public Email(String uriUser) {
-			nickname = uriUser.substring(K_MAILTO.length(), uriUser.indexOf(K_AT));
-			this.uriUser = uriUser;
+		public Email(String name) {
+			this.type = Form.USERNAME;
+			nickname = null;
+			username = name;
+			email = null;
+			if ( username != null && username.equals(User.ANONYMOUS_USER)) {
+				throw new IllegalArgumentException("Username " + User.ANONYMOUS_USER + " is reserved.");
+			}
+			if ( username != null && username.equals(User.DAEMON_USER)) {
+				throw new IllegalArgumentException("Username " + User.DAEMON_USER + " is reserved.");
+			}
 		}
 
-		public Email(String nickname, String uriUser) {
+		public Email(String nickname, String email) {
+			this.type = Form.EMAIL;
 			this.nickname = nickname;
-			this.uriUser = uriUser;
+			this.username = email.substring(K_MAILTO.length(),email.indexOf(K_AT));
+			this.email = email;
+			if ( username != null && username.equals(User.ANONYMOUS_USER)) {
+				throw new IllegalArgumentException("Username " + User.ANONYMOUS_USER + " is reserved.");
+			}
+			if ( username != null && username.equals(User.DAEMON_USER)) {
+				throw new IllegalArgumentException("Username " + User.DAEMON_USER + " is reserved.");
+			}
+		}
+		public boolean hasDistinctNickname() {
+			return ( type == Form.EMAIL ) && (nickname != null && !nickname.equals(username));
+		}
+		
+		public String getUri() {
+			return uri;
+		}
+		
+		public void setUri(String value) {
+			uri = value;
 		}
 		
 		public String getNickname() {
 			return nickname;
 		}
 		
-		public String getUriUser() {
-			return uriUser;
+		public void setNickname(String value) {
+			nickname = value;
+		}
+		
+		public String getUsername() {
+			return username;
+		}
+		
+		public String getEmail() {
+			return email;
+		}
+		
+		public void setEmail(String value) {
+			email = value;
 		}
 		
 		public String toString() {
-			return "\"" + nickname + "\" <" + uriUser.substring(K_MAILTO.length()) + ">";
+			return "\"" + nickname + "\" <" + email.substring(K_MAILTO.length()) + ">";
 		}
 	};
 	
@@ -401,14 +445,26 @@ public final class EmailParser {
 			email.nickname = email.nickname.substring(1, email.nickname.length()-1);
 		}
 		
-		Email e = eMails.get(email.uriUser);
+		Email e = eMails.get(email.username);
 		if ( e == null ) {
-			eMails.put(email.uriUser, email);
+			eMails.put(email.username, email);
 		} else {
-			if ( e.nickname == null || 
-					(email.nickname != null && e.uriUser.startsWith(K_MAILTO + e.nickname)) ) {
-				// replace
-				eMails.put(email.uriUser, email);
+			// already in map...
+			
+			if ( e.email == null && email.email != null ) {
+				// had no e-mail; update with non-null e-mail
+				e.setEmail(email.email);
+			}
+			
+			if ( e.nickname == null && email.nickname != null ) {
+				// had no nickname; update with non-null nickname
+				e.setNickname(email.nickname); 
+			}
+			
+			if ( e.nickname != null && e.email != null && email.nickname != null &&
+					e.email.startsWith(K_MAILTO + e.nickname) ) {
+				// had e-mail user as nickname; update with newer nickname
+				e.setNickname(email.nickname);
 			}
 		}
 	}
@@ -464,9 +520,7 @@ public final class EmailParser {
 						insertEmail(eMails, email);
 					} else {
 						// must just be a naked name -- 
-						Email email = new Email(emailText.substring(idxStart, idxEnd),
-									K_MAILTO + emailText.substring(idxStart, idxEnd) + K_AT + 
-									cc.getUserService().getCurrentRealm().getMailToDomain());
+						Email email = new Email(emailText.substring(idxStart, idxEnd));
 						insertEmail(eMails, email);
 					}
 				}
@@ -491,7 +545,8 @@ public final class EmailParser {
 	 * @return
 	 */
 	public static final Email getSuperUserEmail( CallingContext cc ) {
-		return new Email(cc.getUserService().getSuperUserEmail());
+		String suEmail = cc.getUserService().getSuperUserEmail();
+		return new Email(suEmail.substring(K_MAILTO.length(), suEmail.indexOf(K_AT)), suEmail);
 	}
 
 	// this is a static class
