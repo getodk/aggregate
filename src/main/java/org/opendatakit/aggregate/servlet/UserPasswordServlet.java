@@ -64,7 +64,7 @@ public class UserPasswordServlet extends ServletUtilBase {
 	public static final String PASSWORD_2 = "password-2";
 
 	/**
-	 * Handler for HTTP Get request that adds a new username to the registered users list.
+	 * Handler for HTTP Get request that changes a user's password.
 	 * 
 	 * @see javax.servlet.http.HttpServlet#doGet(javax.servlet.http.HttpServletRequest,
 	 *      javax.servlet.http.HttpServletResponse)
@@ -78,9 +78,7 @@ public class UserPasswordServlet extends ServletUtilBase {
 		User user = cc.getCurrentUser();
 		RegisteredUsersTable userDefinition = null;
 		try {
-			RegisteredUsersTable relation = RegisteredUsersTable.assertRelation(ds, user);
-		
-			userDefinition = ds.getEntity(relation, user.getUriUser(), user);
+			userDefinition = RegisteredUsersTable.getUserByUri(user.getUriUser(), ds, user);
 		} catch ( ODKDatastoreException e ) {
 			e.printStackTrace();
 			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, 
@@ -98,26 +96,26 @@ public class UserPasswordServlet extends ServletUtilBase {
 				"as both a randomly-salted sha-1 hash and as a deterministically-salted md5 hash. " +
 				"The plaintext password is not retained. </p>");
 		out.write(HtmlConsts.LINE_BREAK);
-		out.write("<h3>" + SecurityUtils.getEmailAddress(userDefinition.getUriUser()) + "</h3>");
+		out.write("<h3>" + userDefinition.getDisplayName() + "</h3>");
 		
 		out.write(HtmlUtil.createFormBeginTag(cc
 				.getWebApplicationURL(UserPasswordServlet.ADDR), null,
 				HtmlConsts.POST));
 		
 		out.write(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_HIDDEN,
-				UserPasswordServlet.USERNAME, userDefinition.getUriUser()));
+				UserPasswordServlet.USERNAME, userDefinition.getUsername()));
 		out.write("<table>");
 		out.write(HtmlConsts.TABLE_ROW_OPEN);
 		out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.TABLE_DATA, "Password:"));
 		out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.TABLE_DATA,
 					HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_PASSWORD,
-							UserPasswordServlet.PASSWORD_1, userDefinition.getUriUser())));
+							UserPasswordServlet.PASSWORD_1, "nonsense")));
 		out.write(HtmlConsts.TABLE_ROW_CLOSE);
 		out.write(HtmlConsts.TABLE_ROW_OPEN);
 		out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.TABLE_DATA, "Password (again):"));
 		out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.TABLE_DATA,
 					HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_PASSWORD,
-							UserPasswordServlet.PASSWORD_2, userDefinition.getUriUser())));
+							UserPasswordServlet.PASSWORD_2, "rambling")));
 		out.write(HtmlConsts.TABLE_ROW_CLOSE);
 		out.write(HtmlConsts.TABLE_ROW_OPEN);
 		out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.TABLE_DATA,
@@ -140,9 +138,6 @@ public class UserPasswordServlet extends ServletUtilBase {
 			errorMissingParam(resp);
 			return;
 		}
-
-		username = SecurityUtils.normalizeUsername(username, 
-				cc.getUserService().getCurrentRealm().getMailToDomain());
 		
 		String pwOne = getParameter(req, PASSWORD_1);
 		if (pwOne == null || pwOne.length() == 0) {
@@ -166,9 +161,11 @@ public class UserPasswordServlet extends ServletUtilBase {
 		User user = cc.getCurrentUser();
 		RegisteredUsersTable userDefinition = null;
 		try {
-			RegisteredUsersTable relation = RegisteredUsersTable.assertRelation(ds, user);
-		
-			userDefinition = ds.getEntity(relation, username, user);
+			userDefinition = RegisteredUsersTable.getUserByUsername(username, cc);
+			if ( userDefinition == null ) {
+				resp.sendError(HttpServletResponse.SC_BAD_REQUEST, ErrorConsts.INVALID_PARAMS );
+				return;
+			}
 
 			MessageDigestPasswordEncoder mde = (MessageDigestPasswordEncoder) cc.getBean(SecurityBeanDefs.BASIC_AUTH_PASSWORD_ENCODER);
 			String salt = UUID.randomUUID().toString().substring(0,8);
@@ -176,7 +173,7 @@ public class UserPasswordServlet extends ServletUtilBase {
 			userDefinition.setBasicAuthPassword(fullPass);
 			userDefinition.setBasicAuthSalt(salt);
 			String fullDigestAuthPass = SecurityUtils.getDigestAuthenticationPasswordHash(
-												userDefinition.getUriUser(),
+												userDefinition.getUsername(),
 												pwOne, 
 												cc.getUserService().getCurrentRealm() );
             userDefinition.setDigestAuthPassword(fullDigestAuthPass);

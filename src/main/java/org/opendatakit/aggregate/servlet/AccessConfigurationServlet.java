@@ -24,8 +24,10 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -151,24 +153,44 @@ public class AccessConfigurationServlet extends ServletUtilBase {
 	 * @return
 	 * @throws ODKDatastoreException
 	 */
-	private String getEmailsOfGrantedAuthority(GrantedAuthority auth, CallingContext cc) throws ODKDatastoreException {
+	private String getUsernamesOrEmailsOfGrantedAuthority(GrantedAuthority auth, CallingContext cc) throws ODKDatastoreException {
 		Datastore ds = cc.getDatastore();
 		User user = cc.getCurrentUser();
-		TreeSet<String> str = UserGrantedAuthority.getUriUsers(auth, ds, user);
+		Set<String> str = UserGrantedAuthority.getUriUsers(auth, ds, user);
 		
-		RegisteredUsersTable prototype = RegisteredUsersTable.assertRelation(ds, user);
 		TreeSet<String> orderedEmails = new TreeSet<String>();
 		for ( String uriUser : str ) {
 			try {
-				RegisteredUsersTable t = ds.getEntity(prototype, uriUser, user);
-				String nickname = t.getNickname();
-				if ( nickname == null ) {
-					nickname = uriUser.substring(K_MAILTO.length(), uriUser.indexOf(K_AT));
+				if ( uriUser.equals(cc.getUserService().getSuperUserEmail())) {
+					String username = uriUser.substring(K_MAILTO.length());
+					orderedEmails.add(username);
+				} else {
+					RegisteredUsersTable t = RegisteredUsersTable.getUserByUri(uriUser, ds, user);
+					String username = t.getUsername();
+					if ( t.getEmail() != null ) {
+						String email = t.getEmail();
+						String emailUser = email.substring(K_MAILTO.length(), email.indexOf(K_AT));
+						if ( emailUser.equals(username) ) {
+							// OK email user matches username -- let's use the e-mail...
+							String nickname = t.getNickname();
+							if ( nickname == null ) {
+								nickname = emailUser;
+							}
+							username = "\"" + nickname + "\" <" +
+								t.getEmail().substring(K_MAILTO.length()) + ">";
+						}
+					}
+					if ( t.getIsRemoved() ) {
+						Logger.getLogger(AccessConfigurationServlet.class.getName()).warning(
+								"Unexpected presence of a removed user in the groups list " + uriUser);
+					} else {
+						orderedEmails.add(username);
+					}
 				}
-				orderedEmails.add( "\"" + nickname + "\" <" +
-								t.getUriUser().substring(K_MAILTO.length()) + ">");
 			} catch ( ODKEntityNotFoundException e ) {
 				e.printStackTrace();
+				Logger.getLogger(AccessConfigurationServlet.class.getName()).warning(
+						"Unable to locate registered user record for " + uriUser);
 			}
 		}
 		
@@ -195,38 +217,16 @@ public class AccessConfigurationServlet extends ServletUtilBase {
 	 * @throws ODKDatastoreException
 	 */
 	private void setEmailsOfGrantedAuthority(Collection<Email> emails, GrantedAuthority auth, CallingContext cc) throws ODKDatastoreException {
-		Datastore ds = cc.getDatastore();
-		User user = cc.getCurrentUser();
-		
 		// ensure that the user exists...
-		RegisteredUsersTable registeredUserPrototype = RegisteredUsersTable.assertRelation(ds, user);
 		for ( Email e : emails ) {
-			try {
-				RegisteredUsersTable t = ds.getEntity(registeredUserPrototype, e.getUriUser(), user);
-				if ( t.getNickname() == null ) {
-					t.setNickname(e.getNickname());
-					ds.putEntity(t, user);
-				} else if ( !t.getNickname().equals(e.getNickname()) ) {
-					// user supplied a real nickname.
-					// that nickname is different from what is in the datastore
-					t.setNickname(e.getNickname());
-					ds.putEntity(t, user);
-				}
-			} catch ( ODKEntityNotFoundException err ) {
-				// new user
-				RegisteredUsersTable r = ds.createEntityUsingRelation(registeredUserPrototype, user);
-				r.setUriUser(e.getUriUser());
-				r.setNickname(e.getNickname());
-				r.setIsCredentialNonExpired(true);
-				r.setIsEnabled(true);
-				ds.putEntity(r, user);
-			}
+			// NOTE: This also sets the Uri of the Email object.
+			RegisteredUsersTable.assertActiveUserByUsername(e, cc);
 		}
 
 		// build the set of uriUsers for this granted authority...
 		TreeSet<String> desiredMembers = new TreeSet<String>();
 		for ( Email e : emails ) {
-			desiredMembers.add(e.getUriUser());
+			desiredMembers.add(e.getUri());
 		}
 		
 		// assert that the authority has exactly this set of uriUsers (no more, no less)
@@ -334,7 +334,10 @@ public class AccessConfigurationServlet extends ServletUtilBase {
 						"uploaded submissions, or</li>" +
 						"<li>submitters - people who can download and upload forms and upload, " +
 						"view, download and publish submissions.</li></ol>" +
-						"\n<p>Users are identified by their e-mail addresses.  Individual e-mail " +
+						"\n<p>Users are identified by their ODK Aggregate usernames. " +
+						"For ease of data entry, if you cut-and-paste e-mail addresses into " +
+						"the fields below, the usernames of the email addresses will be taken to be " +
+						"the ODK Aggregate username for that individual.  Individual e-mail " +
 						"addresses should be separated by " +
 						"whitespace, commas or semicolons; in general, you should be able to " +
 						"cut-and-paste the To: line from your " +
@@ -343,36 +346,38 @@ public class AccessConfigurationServlet extends ServletUtilBase {
 						"<ul><li>mitchellsundt@gmail.com</li>" +
 						"<li>\"Mitch Sundt\" &lt;mitchellsundt@gmail.com&gt;</li></ul>" +
 						"<p>Alternatively, if you simply " +
-						"enter usernames, the system will convert them to e-mail addresses by appending <code>@" +
-						cc.getUserService().getCurrentRealm().getMailToDomain() +
-						"</code> to them.<p>" +
-						"\n<hr/>");
+						"enter usernames separated by " +
+						"whitespace, commas or semicolons, the system will create those usernames " +
+						"without any associated e-mail address.</p>" +
+						"<p>If you enter duplicate usernames or two or more e-mails that collapse to " +
+						"the same username, only one ODK Aggregate username will be created.</p>" +
+						"<hr/>");
 				out.print("<form method=\"POST\" action=\"" + cc.getWebApplicationURL(ADDR) + "\">" );
 				out.print("<h2>Site Access</h2>");
 				out.print("<h4>User Password</h4>");
-				out.print("<p>Authenticated submissions from ODK Collect 1.1.6 require the use of passwords that are " +
-						"held on this server and that are specific to this server (referred to as <em>Aggregate passwords</em>). " +
+				out.print("<p>Authenticated submissions from ODK Collect 1.1.6 (or higher) require the use " +
+						"of passwords that are held on this server and that are specific to this server " +
+						"\n(referred to as <em>Aggregate passwords</em>). " +
 						"Site administrators can set or change Aggregate passwords <a href=\"" + 
-						cc.getWebApplicationURL(UserManagePasswordsServlet.ADDR) + "\">here</a>.  By default," +
-						  " users are not assigned an Aggregate password and must log in using their <code>@" +
-						cc.getUserService().getCurrentRealm().getMailToDomain() +
-						"</code> account," +
-						  " and so will not be able to do authenticated submissions from ODK Collect 1.1.6</p>" +
-						  "<p>Administrators can define non-gmail account users (e.g., <code>fred@mydomain.org</code>) but those " +
-						  "users can only log in with their Aggregate password when using this site (Aggregate can't" +
-						  " automatically authenticate against '<code>mydomain.org</code>'). In this case, administrators must " +
-						  "visit the above link to set an Aggregate password for non-gmail account users before they " +
-						  "can gain access to the system.</p>");
+						cc.getWebApplicationURL(UserManagePasswordsServlet.ADDR) + "\">here</a>. By default, " +
+						"users are not assigned an Aggregate password " +
+						"and so will not be able to do authenticated submissions until a site administrator " +
+						"assigns them a password or until they log in and set their own password.</p>" +
+						"<p>If usernames are associated with gmail accounts, users with those accounts " +
+						"can log into the website using OpenID.  Otherwise, users can only " +
+						"log in with their Aggregate password. For those users, a site administrator must " +
+						"visit the above link to set an Aggregate password before they can gain access " +
+						"to the system.</p>");
 				out.print("<p>Users, once logged in, can reset their Aggregate passwords by visiting the 'Change Password' page.</p>");
-				out.print("<h4>Site Administrators</h4><p>Enter the e-mail addresses of the " +
+				out.print("<h4>Site Administrators</h4><p>Enter the usernames or e-mail addresses of the " +
 						"site administrators below</p><textarea name=\"" + SITE_ADMINS + "\" rows=\"10\" cols=\"60\">" +
-								getEmailsOfGrantedAuthority(siteAuth, cc) + "</textarea>");
-				out.print("<h4>Form Administrators</h4><p>Enter the e-mail addresses of the " +
+								getUsernamesOrEmailsOfGrantedAuthority(siteAuth, cc) + "</textarea>");
+				out.print("<h4>Form Administrators</h4><p>Enter the usernames or e-mail addresses of the " +
 						"form administrators below</p><textarea name=\"" + FORM_ADMINS + "\" rows=\"10\" cols=\"60\">" +
-								getEmailsOfGrantedAuthority(formAuth, cc) + "</textarea>");
-				out.print("<h4>Submitters</h4><p>Enter the e-mail addresses of the " +
+								getUsernamesOrEmailsOfGrantedAuthority(formAuth, cc) + "</textarea>");
+				out.print("<h4>Submitters</h4><p>Enter the usernames or e-mail addresses of the " +
 						"submitters below</p><textarea name=\"" + SUBMITTERS + "\" rows=\"20\" cols=\"60\">" +
-								getEmailsOfGrantedAuthority(submitterAuth, cc) + "</textarea>");
+								getUsernamesOrEmailsOfGrantedAuthority(submitterAuth, cc) + "</textarea>");
 				out.print("<br/><br/><input name=\"" + ANONYMOUS_SUBMITTERS + "\" type=\"checkbox\" value=\"yes\"" + 
 						(a.submitter ? "checked" : "") + ">Accept submissions from " +
 						"unidentified sources (e.g., from ODK Collect 1.1.5 and earlier).</input>" +
@@ -382,7 +387,7 @@ public class AccessConfigurationServlet extends ServletUtilBase {
 						"the identity of the individual submitting the data to the server.  Unchecking this box" +
 						" will prevent ODK Collect 1.1.5 and earlier from submitting data to your server.  If left unchecked, " +
 						"you will need to either:</p>" +
-						"<ol><li>use ODK Collect 1.1.6 (or greater) configured with user logins enabled or</li>" +
+						"<ol><li>use ODK Collect 1.1.6 (or higher) configured with user logins enabled or</li>" +
 						"<li>use the 'Upload Submissions' web page to manually upload the completed submissions</li></ol>");
 				out.print("<h2>Google Earth Balloon Display Compatibility</h2>" +
 						"<input name=\"" + ANONYMOUS_ATTACHMENT_VIEWERS + "\" type=\"checkbox\" value=\"yes\"" +
@@ -441,7 +446,8 @@ public class AccessConfigurationServlet extends ServletUtilBase {
 			Email eSuperUser = EmailParser.getSuperUserEmail(cc);
 			boolean found = false;
 			for ( Email e : siteAdminEmails ) {
-				if ( e.getUriUser().equals(eSuperUser.getUriUser()) ) {
+				if ( e.getEmail() != null && 
+					 e.getEmail().equals(eSuperUser.getEmail()) ) {
 					found = true;
 					break;
 				}

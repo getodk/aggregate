@@ -23,10 +23,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.ErrorConsts;
-import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
-import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
-import org.opendatakit.common.security.User;
 import org.opendatakit.common.security.spring.RegisteredUsersTable;
 import org.opendatakit.common.utils.EmailParser;
 import org.opendatakit.common.utils.EmailParser.Email;
@@ -76,23 +73,11 @@ public class UserBulkModifyServlet extends ServletUtilBase {
 		
 		Collection<Email> userEmails = EmailParser.parseEmails(usernames, cc);
 		
-		Datastore ds = cc.getDatastore();
-		User user = cc.getCurrentUser();
-		RegisteredUsersTable userDefinition = null;
 		try {
-			RegisteredUsersTable relation = RegisteredUsersTable.assertRelation(ds, user);
 		
 			for ( Email userEmail : userEmails ) {
-				try {
-					userDefinition = ds.getEntity(relation, userEmail.getUriUser(), user);
-				} catch ( ODKEntityNotFoundException e ) {
-					userDefinition = ds.createEntityUsingRelation(relation, user);
-					userDefinition.setUriUser(userEmail.getUriUser());
-					userDefinition.setNickname(userEmail.getNickname());
-					userDefinition.setIsCredentialNonExpired(true); // this refers to both passwords...
-					userDefinition.setIsEnabled(true);
-					ds.putEntity(userDefinition, user);
-				}
+				// NOTE: this also sets the Uri within the Email object...
+				RegisteredUsersTable.assertActiveUserByUsername(userEmail, cc);
 			}
 		} catch ( ODKDatastoreException e ) {
 			e.printStackTrace();

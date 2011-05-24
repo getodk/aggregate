@@ -34,9 +34,7 @@ import org.opendatakit.common.constants.HtmlConsts;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.Query;
-import org.opendatakit.common.persistence.Query.Direction;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
-import org.opendatakit.common.security.SecurityUtils;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.security.spring.GrantedAuthorityNames;
 import org.opendatakit.common.security.spring.RegisteredUsersTable;
@@ -85,12 +83,10 @@ public class UserManagementServlet extends ServletUtilBase {
 
 		Datastore ds = cc.getDatastore();
 		User user = cc.getCurrentUser();
-		RegisteredUsersTable relation;
 		List<? extends CommonFieldsBase> usersList;
 		try {
-			relation = RegisteredUsersTable.assertRelation(ds, user);
-			Query query = ds.createQuery(relation, user);
-			query.addSort(relation.primaryKey, Direction.ASCENDING);
+			Query query = RegisteredUsersTable.createQuery(ds, user);
+			RegisteredUsersTable.applyNaturalOrdering(query);
 			usersList = query.executeQuery(0);
 		} catch (ODKDatastoreException e) {
 			e.printStackTrace();
@@ -110,8 +106,10 @@ public class UserManagementServlet extends ServletUtilBase {
 		 * Add new registered user...
 		 */
 		out.write("<hr/><h2>Add or Update User</h2>");
-		out.write("<p>Users are identified by their e-mail addresses.  Individual e-mail " +
-				"addresses should be separated by " +
+		out.write("<p>Users are identified by their ODK Aggregate usernames.  To simplify data entry, " +
+				"you can cut-and-paste e-mail addresses into the box below; the username " +
+				"of the e-mail address will be used as the ODK Aggregate username. " +
+				"Individual e-mail addresses should be separated by " +
 				"whitespace, commas or semicolons; in general, you should be able to " +
 				"cut-and-paste the To: line from your " +
 				"e-mail program into the box below, and things should work fine.</p>" +
@@ -119,14 +117,17 @@ public class UserManagementServlet extends ServletUtilBase {
 				"<ul><li>mitchellsundt@gmail.com</li>" +
 				"<li>\"Mitch Sundt\" &lt;mitchellsundt@gmail.com&gt;</li></ul>" +
 				"<p>Alternatively, if you simply " +
-				"enter usernames, the system will convert them to e-mail addresses by appending <code>@" +
-				cc.getUserService().getCurrentRealm().getMailToDomain() +
-				"</code> to them.</p>");
+				"enter usernames separated by whitespace, commas or semicolons, " +
+				"the system will create those usernames without any associated e-mail " +
+				"address.</p>" +
+				"<p>If you enter duplicate usernames or two or more e-mails that collapse to " +
+				"the same username, only one ODK Aggregate username will be created.</p>" +
+				"<hr/>");
 		out.write(HtmlUtil.createFormBeginTag(cc
 				.getWebApplicationURL(UserBulkModifyServlet.ADDR), null,
 				HtmlConsts.POST));
 
-		out.write("Usernames (e-mail addresses) to add or update:" +
+		out.write("Usernames (or e-mail addresses) to add or update:" +
 				"<br/><textarea  name=\"" + UserBulkModifyServlet.EMAIL_ADDRESSES + "\" rows=\"20\" cols=\"60\"></textarea>");
 		out.write(HtmlUtil.createInput("submit", null, "Add or update"));
 		out.write("</form>");
@@ -137,19 +138,17 @@ public class UserManagementServlet extends ServletUtilBase {
 		
 		out.write("<hr/><h2>All Registered Users</h2>");
 		
-		out.print("<p>Authenticated submissions from ODK Collect 1.1.6 require the use of passwords that are " +
+		out.print("<p>Authenticated submissions from ODK Collect 1.1.6 (or higher) require the use of passwords that are " +
 				"held on this server and that are specific to this server (referred to as <em>Aggregate passwords</em>). " +
 				"Site administrators can set or change Aggregate passwords <a href=\"" + 
 				cc.getWebApplicationURL(UserManagePasswordsServlet.ADDR) + "\">here</a>.  By default," +
-				  " users are not assigned an Aggregate password and must log in using their <code>@" +
-				cc.getUserService().getCurrentRealm().getMailToDomain() +
-				"</code> account," +
-				  " and so will not be able to do authenticated submissions from ODK Collect 1.1.6</p>" +
-				  "<p>Administrators can define non-gmail account users (e.g., <code>fred@mydomain.org</code>) but those " +
-				  "users can only log in with their Aggregate password when using this site (Aggregate can't" +
-				  " automatically authenticate against '<code>mydomain.org</code>'). In this case, administrators must " +
-				  "visit the above link to set an Aggregate password for non-gmail account users before they " +
-				  "can gain access to the system.</p>");
+				" users are not assigned an Aggregate password and so will not be able to do authenticated " +
+				"submissions until a site administrator assigns them a password or until they log in using OpenID " +
+				"and set their own password. Logging in via OpenID currently requires a gmail.com account.</p>" +
+				"<p>If usernames are not associated with gmail accounts, those users can only " +
+				"log in with their Aggregate password. For those users, a site administrator must " +
+				"visit the above link to set an Aggregate password before they can gain access " +
+				"to the system.</p>");
 		out.print("<p>Users, once logged in, can reset their Aggregate passwords by visiting the 'Change Password' page.</p>");
 
 		out.print(HtmlConsts.TABLE_OPEN);
@@ -170,17 +169,17 @@ public class UserManagementServlet extends ServletUtilBase {
 			RegisteredUsersTable registeredUser = (RegisteredUsersTable) b;
 			
 			out.print(HtmlUtil.wrapWithHtmlTags(HtmlConsts.TABLE_DATA,
-						createEditButton(registeredUser.getUriUser(), cc)));
+						createEditButton(registeredUser.getUsername(), cc)));
 			
             out.print(HtmlUtil.wrapWithHtmlTags(HtmlConsts.TABLE_DATA, 
-            		userNameAndMembershipLink(registeredUser.getUriUser(), cc)));
+            		userNameAndMembershipLink(registeredUser, cc)));
             out.print(HtmlUtil.wrapWithHtmlTags(HtmlConsts.TABLE_DATA,
             		cleanBoolean(registeredUser.getIsEnabled()) ? CENTERED_YES : CENTERED_NO));
             out.print(HtmlUtil.wrapWithHtmlTags(HtmlConsts.TABLE_DATA,
             		cleanBoolean(registeredUser.getIsCredentialNonExpired()) ? CENTERED_YES : CENTERED_NO));
             try {
 				out.print(HtmlUtil.wrapWithHtmlTags(HtmlConsts.TABLE_DATA, 
-						groupMemberships(registeredUser.getUriUser(), cc)));
+						groupMemberships(registeredUser.getUri(), cc)));
 			} catch (ODKDatastoreException e) {
 				e.printStackTrace();
 				resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, 
@@ -194,13 +193,10 @@ public class UserManagementServlet extends ServletUtilBase {
 		finishBasicHtmlResponse(resp);
 	}
 	
-	private String userNameAndMembershipLink(String username, CallingContext cc) {
+	private String userNameAndMembershipLink(RegisteredUsersTable u, CallingContext cc) {
         Map<String, String> properties = new HashMap<String, String>();
-        properties.put(UserModifyMembershipsServlet.USERNAME, username);
-        String display = username;
-        if ( username != null && username.startsWith(SecurityUtils.MAILTO_COLON)) {
-        	display = username.substring(SecurityUtils.MAILTO_COLON.length());
-        }
+        properties.put(UserModifyMembershipsServlet.USERNAME, u.getUsername());
+        String display = u.getDisplayName();
         return display + "<br/>" + HtmlUtil.createHrefWithProperties(
     		cc.getWebApplicationURL(UserModifyMembershipsServlet.ADDR), properties,
         	"View or update this user's group memberships");
@@ -248,14 +244,15 @@ public class UserManagementServlet extends ServletUtilBase {
 		return b;
 	}
 	
-	public String createEditButton(String uriUser, CallingContext cc) {
+	public String createEditButton(String username, CallingContext cc) {
 		StringBuilder html = new StringBuilder();
 		html.append(HtmlConsts.LINE_BREAK);
 		html.append(HtmlUtil.createFormBeginTag(cc
 				.getWebApplicationURL(UserModifyServlet.ADDR), null,
 				HtmlConsts.GET));
 
-		html.append(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_HIDDEN, UserModifyServlet.USERNAME, uriUser));
+		html.append(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_HIDDEN, 
+					UserModifyServlet.USERNAME, username));
 		html.append(HtmlUtil.createInput("submit", null, "Edit"));
 		html.append("</form>");
 		return html.toString();

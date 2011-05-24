@@ -83,9 +83,7 @@ public class UserManagePasswordsServlet extends ServletUtilBase {
 		User user = cc.getCurrentUser();
 		List<RegisteredUsersTable> userDefinitions = new ArrayList<RegisteredUsersTable>();
 		try {
-			RegisteredUsersTable relation = RegisteredUsersTable.assertRelation(ds, user);
-		
-			Query query = ds.createQuery(relation, user);
+			Query query = RegisteredUsersTable.createQuery(ds, user);
 			List<? extends CommonFieldsBase> results = query.executeQuery(0);
 			for ( CommonFieldsBase b : results ) {
 				RegisteredUsersTable t = (RegisteredUsersTable) b;
@@ -131,13 +129,10 @@ public class UserManagePasswordsServlet extends ServletUtilBase {
 		out.write(HtmlConsts.TABLE_ROW_CLOSE);
 		out.write(HtmlConsts.TABLE_ROW_OPEN);
 		for ( RegisteredUsersTable u : userDefinitions ) {
-			String username = u.getUriUser();
+			String username = u.getUsername();
 			out.write(HtmlConsts.TABLE_ROW_OPEN);
 			out.write(HtmlUtil.createSelfClosingTag(HtmlConsts.TABLE_DATA));
-	        String display = username;
-	        if ( username != null && username.startsWith(SecurityUtils.MAILTO_COLON)) {
-	        	display = username.substring(SecurityUtils.MAILTO_COLON.length());
-	        }
+	        String display = u.getDisplayName();
 			out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.TABLE_DATA,
 					HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_CHECKBOX,
 							UserManagePasswordsServlet.USERNAME, username) + display));
@@ -191,24 +186,21 @@ public class UserManagePasswordsServlet extends ServletUtilBase {
 		User user = cc.getCurrentUser();
 		RegisteredUsersTable userDefinition = null;
 		try {
-			RegisteredUsersTable relation = RegisteredUsersTable.assertRelation(ds, user);
-		
 			for ( String u : usernames ) {
-				String username = SecurityUtils.normalizeUsername(u, 
-									cc.getUserService().getCurrentRealm().getMailToDomain());
-				userDefinition = ds.getEntity(relation, username, user);
-
-				MessageDigestPasswordEncoder mde = (MessageDigestPasswordEncoder) cc.getBean(SecurityBeanDefs.BASIC_AUTH_PASSWORD_ENCODER);
-				String salt = UUID.randomUUID().toString().substring(0,8);
-				String fullPass = mde.encodePassword(pwOne, salt);
-				userDefinition.setBasicAuthPassword(fullPass);
-				userDefinition.setBasicAuthSalt(salt);
-				String fullDigestAuthPass = SecurityUtils.getDigestAuthenticationPasswordHash(
-													userDefinition.getUriUser(),
-													pwOne, 
-													cc.getUserService().getCurrentRealm() );
-	            userDefinition.setDigestAuthPassword(fullDigestAuthPass);
-				ds.putEntity(userDefinition, user);
+				userDefinition = RegisteredUsersTable.getUserByUsername(u, cc);
+				if ( userDefinition != null ) {
+					MessageDigestPasswordEncoder mde = (MessageDigestPasswordEncoder) cc.getBean(SecurityBeanDefs.BASIC_AUTH_PASSWORD_ENCODER);
+					String salt = UUID.randomUUID().toString().substring(0,8);
+					String fullPass = mde.encodePassword(pwOne, salt);
+					userDefinition.setBasicAuthPassword(fullPass);
+					userDefinition.setBasicAuthSalt(salt);
+					String fullDigestAuthPass = SecurityUtils.getDigestAuthenticationPasswordHash(
+														userDefinition.getUsername(),
+														pwOne, 
+														cc.getUserService().getCurrentRealm() );
+		            userDefinition.setDigestAuthPassword(fullDigestAuthPass);
+					ds.putEntity(userDefinition, user);
+				}
 			}
 		} catch ( ODKDatastoreException e ) {
 			e.printStackTrace();

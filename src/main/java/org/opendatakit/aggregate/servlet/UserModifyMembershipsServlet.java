@@ -36,10 +36,10 @@ import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.common.constants.HtmlConsts;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
-import org.opendatakit.common.security.SecurityUtils;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.security.spring.GrantedAuthorityHierarchyTable;
 import org.opendatakit.common.security.spring.GrantedAuthorityNames;
+import org.opendatakit.common.security.spring.RegisteredUsersTable;
 import org.opendatakit.common.security.spring.UserGrantedAuthority;
 import org.opendatakit.common.web.CallingContext;
 import org.springframework.security.core.GrantedAuthority;
@@ -80,9 +80,6 @@ public class UserModifyMembershipsServlet extends ServletUtilBase {
 			errorMissingParam(resp);
 			return;
 		}
-
-		username = SecurityUtils.normalizeUsername(username, 
-				cc.getUserService().getCurrentRealm().getMailToDomain());
 		
 		String showallString = getParameter(req, SHOWALL);
 		boolean showall = (showallString != null && showallString.compareToIgnoreCase("true") == 0);
@@ -90,10 +87,16 @@ public class UserModifyMembershipsServlet extends ServletUtilBase {
 		Datastore ds = cc.getDatastore();
 		User user = cc.getCurrentUser();
 		
+		RegisteredUsersTable t;
 		TreeSet<String> groups = new TreeSet<String>();
 		TreeSet<String> allGroups;
 		try {
-			Set<GrantedAuthority> gas = UserGrantedAuthority.getGrantedAuthorities(username, ds, user);
+			t = RegisteredUsersTable.getUserByUsername(username, cc);
+			if ( t == null ) {
+				errorBadParam(resp);
+				return;
+			}
+			Set<GrantedAuthority> gas = UserGrantedAuthority.getGrantedAuthorities(t.getUri(), ds, user);
 			for ( GrantedAuthority ga : gas ) {
 				groups.add(ga.getAuthority());
 			}
@@ -119,7 +122,7 @@ public class UserModifyMembershipsServlet extends ServletUtilBase {
 
 		PrintWriter out = resp.getWriter();
 
-		out.write("<h3>" + SecurityUtils.getEmailAddress(username) + "</h3>");
+		out.write("<h3>" + t.getDisplayName() + "</h3>");
         
         Map<String, String> properties = new HashMap<String, String>();
         properties.put(USERNAME, username);
@@ -195,7 +198,13 @@ public class UserModifyMembershipsServlet extends ServletUtilBase {
 				desiredGroups.add(grant);
 			}
 			
-			UserGrantedAuthority.assertUserGrantedAuthorities(username, desiredGroups, cc);
+			RegisteredUsersTable t = RegisteredUsersTable.getUserByUsername(username, cc);
+			if ( t != null ) {
+				UserGrantedAuthority.assertUserGrantedAuthorities(t.getUri(), desiredGroups, cc);
+			} else {
+				errorBadParam(resp);
+				return;
+			}
 		} catch (ODKDatastoreException e) {
 			e.printStackTrace();
 			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, 

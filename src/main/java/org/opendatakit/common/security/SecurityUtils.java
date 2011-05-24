@@ -31,47 +31,8 @@ public final class SecurityUtils {
 
 	private SecurityUtils() {};
 	
-	public static final String normalizeUsername(String username, String mailtoDomain) {
-		String mailtoUsername = username;
-		if ( !username.startsWith(MAILTO_COLON) ) {
-			if ( username.contains(AT_SIGN) ) {
-				mailtoUsername = MAILTO_COLON + username;
-			} else {
-				if ( mailtoDomain == null ) {
-					throw new IllegalStateException("e-mail address is incomplete - it does not specify a domain!");
-				}
-				mailtoUsername = MAILTO_COLON + username + AT_SIGN + mailtoDomain;
-			}
-		}
-		return mailtoUsername;
-	}
-	
-	public static final String getEmailAddress( String uriUser ) {
-		String name = uriUser;
-		if ( name != null && name.startsWith(MAILTO_COLON) ) {
-			name = name.substring(MAILTO_COLON.length());
-		}
-		return name;
-	}
-	
-	public static final String getMailtoDomain( String uriUser ) {
-		if ( uriUser == null ||
-			 !uriUser.startsWith(MAILTO_COLON) ||
-			 !uriUser.contains(AT_SIGN) )
-			return null;
-		return uriUser.substring(uriUser.indexOf(AT_SIGN)+1);
-	}
-	
-	public static final String getNickname( String uriUser ) {
-		String name = uriUser;
-		if ( name.startsWith(MAILTO_COLON) ) {
-			name = name.substring(MAILTO_COLON.length());
-		}
-		return name;
-	}
-	
-	public static final String getDigestAuthenticationPasswordHash(String uriUser, String password, Realm realm) {
-		String fullDigestAuth = uriUser.substring(MAILTO_COLON.length()) + ":" + 
+	public static final String getDigestAuthenticationPasswordHash(String username, String password, Realm realm) {
+		String fullDigestAuth = username + ":" + 
 								realm.getRealmString() + ":" + password;
 	    try {
 			MessageDigest md = MessageDigest.getInstance("MD5");

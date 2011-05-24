@@ -29,13 +29,11 @@ import org.opendatakit.aggregate.constants.ErrorConsts;
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.common.constants.HtmlConsts;
 import org.opendatakit.common.persistence.Datastore;
-import org.opendatakit.common.persistence.EntityKey;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
-import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
-import org.opendatakit.common.security.SecurityUtils;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.security.spring.RegisteredUsersTable;
 import org.opendatakit.common.security.spring.UserGrantedAuthority;
+import org.opendatakit.common.utils.EmailParser.Email;
 import org.opendatakit.common.web.CallingContext;
 
 /**
@@ -86,47 +84,32 @@ public class UserModifyServlet extends ServletUtilBase {
 			return;
 		}
 		
-		username = SecurityUtils.normalizeUsername(username, 
-				cc.getUserService().getCurrentRealm().getMailToDomain());
-		
-		Datastore ds = cc.getDatastore();
-		User user = cc.getCurrentUser();
 		RegisteredUsersTable userDefinition = null;
 		try {
-			RegisteredUsersTable relation = RegisteredUsersTable.assertRelation(ds, user);
-		
-			try {
-				userDefinition = ds.getEntity(relation, username, user);
-			} catch ( ODKEntityNotFoundException e ) {
-				userDefinition = ds.createEntityUsingRelation(relation, user);
-				userDefinition.setUriUser(username);
-				userDefinition.setIsCredentialNonExpired(false); // this refers to both passwords...
-				userDefinition.setIsEnabled(true);
-				ds.putEntity(userDefinition, user);
-			}
+			Email userEmail = new Email( username );
+			// NOTE: this also sets the Uri within the Email object...
+			userDefinition = RegisteredUsersTable.assertActiveUserByUsername(userEmail, cc);
 		} catch ( ODKDatastoreException e ) {
 			e.printStackTrace();
 			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, 
 					ErrorConsts.PERSISTENCE_LAYER_PROBLEM);
+			return;
 		}
-		
 
 		beginBasicHtmlResponse(TITLE_INFO, resp, true, cc); // header info
 
 		PrintWriter out = resp.getWriter();
 
-		String eMail = SecurityUtils.getEmailAddress(userDefinition.getUriUser());
-
-		out.write("<h3>" + eMail + "</h3>");
+		out.write("<h3>" + userDefinition.getDisplayName() + "</h3>");
 
 		out.write(HtmlUtil.createFormBeginTag(cc
 				.getWebApplicationURL(UserModifyServlet.ADDR), null,
 				HtmlConsts.POST));
 		out.write(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_HIDDEN,
-				UserModifyServlet.USERNAME, userDefinition.getUriUser()));
+				UserModifyServlet.USERNAME, username));
 		out.write(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_HIDDEN,
 				UserModifyServlet.DELETE, UserModifyServlet.DELETE));
-		out.write(HtmlUtil.createInput("submit", null, "Delete " + eMail));
+		out.write(HtmlUtil.createInput("submit", null, "Delete " + username));
 		out.write("</form>");
 		
 		out.write(HtmlConsts.LINE_BREAK);
@@ -144,7 +127,7 @@ public class UserModifyServlet extends ServletUtilBase {
 				HtmlConsts.POST));
 		
 		out.write(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_HIDDEN,
-				UserModifyServlet.USERNAME, userDefinition.getUriUser()));
+				UserModifyServlet.USERNAME, username));
 		
 		out.write(HtmlConsts.LINE_BREAK);
 		out.write(HtmlUtil.createRadio(IS_ENABLED, "enable", "Recognize this account as a registered user", userDefinition.getIsEnabled()));
@@ -166,17 +149,14 @@ public class UserModifyServlet extends ServletUtilBase {
 		Datastore ds = cc.getDatastore();
 		User user = cc.getCurrentUser();
 		
-		// first, delete all group memberships.
-		UserGrantedAuthority.deleteGrantedAuthoritiesForUser(username, cc);
+		RegisteredUsersTable userDefinition = RegisteredUsersTable.getUserByUsername(username, cc);
+		if ( userDefinition != null ) {
+			// first, delete all group memberships.
+			UserGrantedAuthority.deleteGrantedAuthoritiesForUser(userDefinition.getUri(), cc);
 
-		// now delete the user's entry itself...
-		try {
-			RegisteredUsersTable relation = RegisteredUsersTable.assertRelation(ds, user);
-			RegisteredUsersTable userDefinition = ds.getEntity(relation, username, user);
-			// delete it if found...
-			ds.deleteEntity(new EntityKey(relation, userDefinition.getUriUser()), user);
-		} catch ( ODKEntityNotFoundException e ) {
-			// it is fine if it isn't there...
+			// and mark it as removed (retaining record for trace-ability)
+			userDefinition.setIsRemoved(true);
+			ds.putEntity(userDefinition, user);
 		}
 	}
 
@@ -191,9 +171,6 @@ public class UserModifyServlet extends ServletUtilBase {
 			errorMissingParam(resp);
 			return;
 		}
-
-		username = SecurityUtils.normalizeUsername(username, 
-				cc.getUserService().getCurrentRealm().getMailToDomain());
 
 		// handle delete requests...
 		String delete = getParameter(req, DELETE);
@@ -232,22 +209,13 @@ public class UserModifyServlet extends ServletUtilBase {
 		
 		Datastore ds = cc.getDatastore();
 		User user = cc.getCurrentUser();
-		RegisteredUsersTable userDefinition = null;
 		try {
-			RegisteredUsersTable relation = RegisteredUsersTable.assertRelation(ds, user);
-		
-			try {
-				userDefinition = ds.getEntity(relation, username, user);
-				userDefinition.setIsEnabled(enabled);
-				userDefinition.setIsCredentialNonExpired(!credentialExpired);
-				ds.putEntity(userDefinition, user);
-			} catch ( ODKEntityNotFoundException e ) {
-				userDefinition = ds.createEntityUsingRelation(relation, user);
-				userDefinition.setUriUser(username);
-				userDefinition.setIsCredentialNonExpired(!credentialExpired); // this refers to both passwords...
-				userDefinition.setIsEnabled(enabled);
-				ds.putEntity(userDefinition, user);
-			}
+			Email userEmail = new Email(username);
+			RegisteredUsersTable userDefinition = 
+				RegisteredUsersTable.assertActiveUserByUsername(userEmail, cc);
+			userDefinition.setIsEnabled(enabled);
+			userDefinition.setIsCredentialNonExpired(!credentialExpired);
+			ds.putEntity(userDefinition, user);
 		} catch ( ODKDatastoreException e ) {
 			e.printStackTrace();
 			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, 

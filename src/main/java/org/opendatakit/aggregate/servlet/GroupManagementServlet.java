@@ -111,10 +111,12 @@ public class GroupManagementServlet extends ServletUtilBase {
 			
 			out.write("<li>" + n.toString() + " - " + n.getDescription() + "</li>");
 		}
-		out.write("</ol><p>The system creates additional MAILTO_... groups for each distinct" +
-				" e-mail domain of all authenticated users.  These additional group names have MAILTO_ " +
-				"prepended to the all-capitalized e-mail domain name, with any" +
-				" non-alphanumeric characters (e.g., periods) replaced by underscores.</p>");
+		out.write("</ol><p>If you support OpenID logins from providers other than Gmail, the " +
+				"system will create additional MAILTO_... groups for each distinct" +
+				" e-mail domain of all OpenID-authenticated users.  These additional group " +
+				"names have MAILTO_ prepended to the all-capitalized e-mail domain name, " +
+				"with any non-alphanumeric characters (e.g., periods) replaced by " +
+				"underscores.</p>");
 		out.write("</form>");
 
 		/**
