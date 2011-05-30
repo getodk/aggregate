@@ -31,9 +31,9 @@ import org.opendatakit.common.constants.HtmlConsts;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.security.User;
+import org.opendatakit.common.security.common.EmailParser.Email;
 import org.opendatakit.common.security.spring.RegisteredUsersTable;
 import org.opendatakit.common.security.spring.UserGrantedAuthority;
-import org.opendatakit.common.utils.EmailParser.Email;
 import org.opendatakit.common.web.CallingContext;
 
 /**

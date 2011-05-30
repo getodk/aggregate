@@ -23,6 +23,11 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.opendatakit.aggregate.ContextFactory;
+import org.opendatakit.aggregate.constants.common.UIConsts;
+import org.opendatakit.common.constants.HtmlConsts;
+import org.opendatakit.common.web.CallingContext;
+
 /**
  * Stupid class to wrap the Aggregate.html page that GWT uses for 
  * all its UI presentation.  Needed so that access to the page can 
@@ -38,7 +43,7 @@ public class AggregateHtmlServlet extends ServletUtilBase {
 	 */
 	private static final long serialVersionUID = 5811797423869654357L;
 
-	public static final String ADDR = "Aggregate.html";
+	public static final String ADDR = UIConsts.HOST_PAGE_BASE_ADDR;
 	
 	public static final String PAGE_CONTENTS = 
 "<!doctype html>" +
@@ -76,10 +81,17 @@ public class AggregateHtmlServlet extends ServletUtilBase {
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
+		CallingContext cc = ContextFactory.getCallingContext(this, req);
 
-
-	    PrintWriter out = resp.getWriter();
-	    out.print(PAGE_CONTENTS);
+		// determine if the system has not been configured...
+		if ( cc.getUserService().isAccessManagementConfigured() ) {
+		    resp.setContentType(HtmlConsts.RESP_TYPE_HTML);
+		    resp.setCharacterEncoding(HtmlConsts.UTF8_ENCODE);
+		    PrintWriter out = resp.getWriter();
+		    out.print(PAGE_CONTENTS);
+		} else {
+			resp.sendRedirect(cc.getWebApplicationURL(AccessConfigurationServlet.ADDR));
+		}
 	}
 
 }

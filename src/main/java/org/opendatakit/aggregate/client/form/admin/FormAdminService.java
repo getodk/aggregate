@@ -16,7 +16,7 @@
 
 package org.opendatakit.aggregate.client.form.admin;
 
-import org.opendatakit.common.security.exception.AccessDeniedException;
+import org.opendatakit.common.security.client.exception.AccessDeniedException;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;

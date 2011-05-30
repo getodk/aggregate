@@ -36,7 +36,7 @@ import org.opendatakit.aggregate.externalservice.OAuthToken;
 import org.opendatakit.common.constants.BasicConsts;
 import org.opendatakit.common.constants.HtmlConsts;
 import org.opendatakit.common.security.SecurityBeanDefs;
-import org.opendatakit.common.security.spring.GrantedAuthorityNames;
+import org.opendatakit.common.security.common.GrantedAuthorityNames;
 import org.opendatakit.common.security.spring.RoleHierarchyImpl;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.servlet.CommonServletBase;
@@ -156,6 +156,37 @@ public class ServletUtilBase extends CommonServletBase {
   protected void errorRetreivingData(HttpServletResponse resp) throws IOException {
     resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ErrorConsts.INCOMPLETE_DATA);
   }
+  
+  // GWT required fields...
+  private static final String AGGREGATEUI_STYLE_RESOURCE = "AggregateUI.css";
+  private static final String BUTTON_STYLE_RESOURCE = "stylesheets/button.css";
+  private static final String TABLE_STYLE_RESOURCE = "stylesheets/table.css";
+  private static final String UPLOAD_STYLE_RESOURCE = "stylesheets/navigation.css";
+  
+
+  @Override
+  protected void beginBasicHtmlResponse(String pageName, HttpServletResponse resp,
+	      boolean displayLinks, CallingContext cc) throws IOException {
+	  
+	StringBuilder headerString = new StringBuilder();
+	headerString.append("<link type=\"text/css\" rel=\"stylesheet\" href=\"");
+	headerString.append(cc.getWebApplicationURL(AGGREGATEUI_STYLE_RESOURCE));
+	headerString.append("\" />");
+	headerString.append("<link type=\"text/css\" rel=\"stylesheet\" href=\"");
+	headerString.append(cc.getWebApplicationURL(BUTTON_STYLE_RESOURCE));
+	headerString.append("\" />");
+	headerString.append("<link type=\"text/css\" rel=\"stylesheet\" href=\"");
+	headerString.append(cc.getWebApplicationURL(TABLE_STYLE_RESOURCE));
+	headerString.append("\" />");
+	headerString.append("<link type=\"text/css\" rel=\"stylesheet\" href=\"");
+	headerString.append(cc.getWebApplicationURL(UPLOAD_STYLE_RESOURCE));
+	headerString.append("\" />");
+	
+	PrintWriter out = beginBasicHtmlResponsePreamble( headerString.toString(), resp, cc );
+    out.write(HtmlUtil.createBeginTag(HtmlConsts.CENTERING_DIV));
+    out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.H1, pageName));
+    out.write(HtmlUtil.createEndTag(HtmlConsts.DIV));
+}
 
   /**
    * Generate common navigation links

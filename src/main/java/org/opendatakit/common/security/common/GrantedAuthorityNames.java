@@ -13,13 +13,14 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.opendatakit.common.security.spring;
+package org.opendatakit.common.security.common;
 
-import java.util.HashSet;
-import java.util.Set;
+import com.google.gwt.user.client.rpc.IsSerializable;
+
 
 /**
- * The system-defined granted authority names.  The convention is that:
+ * Shared code between GWT Javascript and the server side.  This class 
+ * defines the system-defined granted authority names.  The convention is that:
  * <ul><li>any name beginning with ROLE_ is a primitive authority.</li>  
  * <li>any name beginning with RUN_AS_ is a primitive run-as directive.</li>
  * </ul>
@@ -28,7 +29,7 @@ import java.util.Set;
  * @author mitchellsundt@gmail.com
  *
  */
-public enum GrantedAuthorityNames {
+public enum GrantedAuthorityNames implements IsSerializable {
 
 	AUTH_LOCAL("any users authenticated via the locally-held (<em>Aggregate password</em>) credential"),
 	AUTH_OPENID("any users authenticated via OpenID"),
@@ -62,28 +63,17 @@ public enum GrantedAuthorityNames {
 		return description;
 	}
 	
+	public static final String GROUP_SUBMITTERS = "submitters";
+	public static final String GROUP_FORM_ADMINS = "formAdmins";
+	public static final String GROUP_SITE_ADMINS = "siteAdmins";
+	
 	public static final String MAILTO_PREFIX = "MAILTO_";
 	public static final String ROLE_PREFIX = "ROLE_";
 	public static final String RUN_AS_PREFIX = "RUN_AS_";
 	
-	private static final Set<String> specialNames = new HashSet<String>();
-	
 	public static final boolean permissionsCanBeAssigned(String authority) {
 		return (authority != null) && 
 			!(authority.startsWith(ROLE_PREFIX) || authority.startsWith(RUN_AS_PREFIX));
-	}
-	
-	public static final synchronized boolean isSpecialName(String authority) {
-		if ( specialNames.isEmpty() ) {
-			for ( GrantedAuthorityNames n : values() ) {
-				specialNames.add(n.name());
-			}
-		}
-		
-		return specialNames.contains(authority) ||
-				authority.startsWith(MAILTO_PREFIX) ||
-				authority.startsWith(RUN_AS_PREFIX) ||
-				authority.startsWith(ROLE_PREFIX);
 	}
 	
 	public static final String getMailtoGrantedAuthorityName(String mailtoDomain) {

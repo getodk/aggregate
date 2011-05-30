@@ -14,39 +14,40 @@
  * the License.
  */
 
-package org.opendatakit.common.security.exception;
+package org.opendatakit.common.persistence.client.exception;
 
 import java.io.Serializable;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 /**
- * Access denied exception that can be returned through GWT.
+ * Datastore failure exception that can be returned through GWT.
  * 
  * @author mitchellsundt@gmail.com
- *
+ * 
  */
-public class AccessDeniedException extends Exception implements Serializable, IsSerializable {
+public class DatastoreFailureException extends Exception implements
+		Serializable, IsSerializable {
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 3102327639058143399L;
-	
+
 	private String message;
 
 	/**
 	 * 
 	 */
-	public AccessDeniedException() {
+	public DatastoreFailureException() {
 		super();
-		message = "AccessDeniedException";
+		message = "DatastoreFailureException";
 	}
 
 	/**
 	 * @param arg0
 	 * @param arg1
 	 */
-	public AccessDeniedException(String arg0, Throwable arg1) {
+	public DatastoreFailureException(String arg0, Throwable arg1) {
 		super(arg0, arg1);
 		message = arg0 + "(" + arg1.getMessage() + ")";
 	}
@@ -54,7 +55,7 @@ public class AccessDeniedException extends Exception implements Serializable, Is
 	/**
 	 * @param arg0
 	 */
-	public AccessDeniedException(String arg0) {
+	public DatastoreFailureException(String arg0) {
 		super(arg0);
 		message = arg0;
 	}
@@ -62,9 +63,9 @@ public class AccessDeniedException extends Exception implements Serializable, Is
 	/**
 	 * @param arg0
 	 */
-	public AccessDeniedException(Throwable arg0) {
+	public DatastoreFailureException(Throwable arg0) {
 		super(arg0);
-		message = "AccessDeniedException (" + arg0.getMessage() + ")";
+		message = "DatastoreFailureException (" + arg0.getMessage() + ")";
 	}
 
 	@Override
@@ -76,5 +77,4 @@ public class AccessDeniedException extends Exception implements Serializable, Is
 	public String getMessage() {
 		return message;
 	}
-	
 }

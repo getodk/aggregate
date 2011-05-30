@@ -116,7 +116,7 @@ public class FormSubmissionsServlet extends ServletUtilBase {
 
       QueryByDate query = new QueryByDate(form, BasicConsts.EPOCH, false,
               ServletConsts.FETCH_LIMIT, cc);
-      HtmlFormatter formatter = new HtmlFormatter(form, cc.getServerURL(), resp.getWriter(), null, true);
+      HtmlFormatter formatter = new HtmlFormatter(form, cc.getServerURL(), out, null, true);
       List<Submission> submissions = query.getResultSubmissions(cc);
 
       boolean createBack = false;
@@ -154,7 +154,7 @@ public class FormSubmissionsServlet extends ServletUtilBase {
             ServletConsts.BACK_LINK_TEXT);
         out.print(link);
       }
-      resp.getWriter().print(HtmlConsts.TAB + HtmlConsts.TAB);
+      out.print(HtmlConsts.TAB + HtmlConsts.TAB);
       if (createForward) {
         Date lastDate = submissions.get(submissions.size()-1).getSubmissionDate();
         Map<String, String> properties = new HashMap<String, String>();

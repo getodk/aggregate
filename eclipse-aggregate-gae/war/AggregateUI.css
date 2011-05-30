@@ -10,6 +10,15 @@ body {
   background: white;
   direction: ltr;
 }
+.embedded_iframe {
+	margin: 2px;
+	border: 0px;
+	padding: 2px;
+}
+.embedded_iframe ul,ol li {
+	indent: 10px;
+}
+
 a, a:visited, a:hover {
   color: #0000AA;
 }
@@ -26,6 +35,10 @@ a, a:visited, a:hover {
 #filters_container,
 #help_container {
 	overflow: scroll;
+}
+.error_message {
+	color: red;
+	border: 2px solid red;
 }
 .help_panel {
 	width: 100%;

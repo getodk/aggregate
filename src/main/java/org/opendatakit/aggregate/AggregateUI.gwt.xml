@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module rename-to='aggregateui'>
+
   <!-- Inherit the core Web Toolkit stuff.                        -->
   <inherits name='com.google.gwt.user.User'/>
 
@@ -9,6 +10,12 @@
   <!-- Our access denied exception class -->
   <inherits name='org.opendatakit.common.security.Security'/>
 
+  <!-- Persistence layer exception class -->
+  <inherits name='org.opendatakit.common.persistence.Persistence'/>
+
+  <set-property name="user.agent" value="gecko1_8" />
+  <set-configuration-property name="UiBinder.useSafeHtmlTemplates" value="true" /> 
+  
   <!-- Specify the app entry point class.                         -->
   <entry-point class='org.opendatakit.aggregate.client.AggregateUI'/>
   <servlet path="/filterservice" class="org.opendatakit.aggregate.server.FilterServiceImpl"/>

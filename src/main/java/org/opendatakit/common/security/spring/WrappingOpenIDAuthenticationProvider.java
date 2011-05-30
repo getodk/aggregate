@@ -21,6 +21,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import org.opendatakit.common.security.SecurityUtils;
+import org.opendatakit.common.security.common.GrantedAuthorityNames;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
@@ -106,7 +107,7 @@ public class WrappingOpenIDAuthenticationProvider extends OpenIDAuthenticationPr
 			username = partialDetails.getUsername();
 		} catch (Exception e) {
 			partialDetails = userDetails;
-			username = RegisteredUsersTable.generateUniqueUri(eMail);
+			username = eMail;
 		}
 
 		AggregateUser trueUser = new AggregateUser(username, 

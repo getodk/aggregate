@@ -41,6 +41,7 @@ import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.form.MiscTasks;
 import org.opendatakit.aggregate.form.MiscTasks.TaskType;
 import org.opendatakit.aggregate.task.WorksheetCreator;
+import org.opendatakit.common.constants.HtmlConsts;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
 
@@ -127,6 +128,9 @@ public class SpreadsheetServlet extends ServletUtilBase {
       finishBasicHtmlResponse(resp);
       return;
     } else {
+      resp.setContentType(HtmlConsts.RESP_TYPE_HTML);
+	  resp.setCharacterEncoding(HtmlConsts.UTF8_ENCODE);
+	  // TODO: this is not a well-formed HTML document
       resp.getWriter().write(SpreadsheetConsts.COMPLETED_AUTH);
     }
 

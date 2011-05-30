@@ -23,6 +23,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.opendatakit.common.constants.HtmlConsts;
+
 /**
  * Simple servlet for the initial local login.  It is needed to get 
  * GAE to process the Spring security restrictions to the page.
@@ -44,6 +46,8 @@ public class LocalLoginPageServlet extends ServletUtilBase {
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
 
+		resp.setContentType(HtmlConsts.RESP_TYPE_HTML);
+	    resp.setCharacterEncoding(HtmlConsts.UTF8_ENCODE);
 	    PrintWriter out = resp.getWriter();
 	    out.print(
 "<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">" +
