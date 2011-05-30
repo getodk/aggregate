@@ -20,6 +20,7 @@ package org.opendatakit.aggregate.servlet;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
+import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -148,36 +149,52 @@ public class UISubmissionServlet extends ServletUtilBase {
   public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 	CallingContext cc = ContextFactory.getCallingContext(this, req);
 
-	StringBuilder headerString = new StringBuilder();
-	headerString.append(JQUERY_SCRIPT_HEADER);
-	headerString.append("<script src=\"");
-	headerString.append(cc.getWebApplicationURL(UPLOAD_SCRIPT_RESOURCE));
-	headerString.append("\"></script>");
-	headerString.append("<link type=\"text/css\" rel=\"stylesheet\" href=\"");
-	headerString.append(cc.getWebApplicationURL(PAGE_STYLE_RESOURCE));
-	headerString.append("\" />");
-	headerString.append("<link type=\"text/css\" rel=\"stylesheet\" href=\"");
-	headerString.append(cc.getWebApplicationURL(BUTTON_STYLE_RESOURCE));
-	headerString.append("\" />");
-	
-	resp.addHeader(HOST_HEADER, cc.getServerURL());
-   resp.setContentType(HtmlConsts.RESP_TYPE_HTML);
-   resp.setCharacterEncoding(HtmlConsts.UTF8_ENCODE);
+	   Double openRosaVersion = getOpenRosaVersion(req);
+	   if ( openRosaVersion != null ) {
+	      /*
+	       * If we have an OpenRosa version header, assume that this is due to a 
+	       * channel redirect (http: => https:) and that the request was originally
+	       * a HEAD request.  Reply with a response appropriate for a HEAD request.
+	       * 
+	       * It is unclear whether this is a GAE issue or a Spring Frameworks issue.
+	       */
+	      Logger.getLogger(this.getClass().getName()).warning("Inside doGet -- replying as doHead");
+	      doHead(req, resp);
+	      return;
+	   }
 
-   PrintWriter out = resp.getWriter();
-   out.write(HtmlConsts.HTML_OPEN);
-   out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.HEAD, headerString.toString() + HtmlUtil.wrapWithHtmlTags(
-       HtmlConsts.TITLE, "AGGREGATE")));
-   out.write(HtmlConsts.BODY_OPEN);
-   out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.H1, TITLE));
-	
-	out.write(UPLOAD_PAGE_BODY_START);
-	out.write(cc.getWebApplicationURL(ADDR));
-	out.write(UPLOAD_PAGE_BODY_MIDDLE);
-	out.write(cc.getWebApplicationURL(ADDR));
-	out.write(UPLOAD_PAGE_BODY_REMAINDER);
-   resp.getWriter().write(HtmlConsts.BODY_CLOSE + HtmlConsts.HTML_CLOSE);
-	
+	   StringBuilder headerString = new StringBuilder();
+	   headerString.append(JQUERY_SCRIPT_HEADER);
+	   headerString.append("<script src=\"");
+	   headerString.append(cc.getWebApplicationURL(UPLOAD_SCRIPT_RESOURCE));
+	   headerString.append("\"></script>");
+	   beginBasicHtmlResponse(TITLE, headerString.toString(), resp, true, cc );// header info
+	   PrintWriter out = resp.getWriter();
+	   out.write(UPLOAD_PAGE_BODY_START);
+	   out.write(cc.getWebApplicationURL(ADDR));
+	   out.write(UPLOAD_PAGE_BODY_MIDDLE);
+	   out.write(cc.getWebApplicationURL(ADDR));
+	   out.write(UPLOAD_PAGE_BODY_REMAINDER);
+	    finishBasicHtmlResponse(resp);
+  }
+
+  /**
+   * Handler for HTTP head request.  This is used to verify that channel
+   * security and authentication have been properly established. 
+   */
+  @Override
+  protected void doHead(HttpServletRequest req, HttpServletResponse resp)
+         throws IOException {
+   CallingContext cc = ContextFactory.getCallingContext(this, req);
+   Logger.getLogger(this.getClass().getName()).info("Inside doHead");
+
+   addOpenRosaHeaders(resp);
+   String serverUrl = cc.getServerURL();
+   String url = req.getScheme() + "://" + serverUrl + "/" + ADDR;
+   resp.setHeader("Location", url);
+   resp.setContentType(HtmlConsts.RESP_TYPE_XML);
+   resp.setCharacterEncoding(HtmlConsts.UTF8_ENCODE);
+   resp.setStatus(204); // no content...
   }
 
   /**
@@ -187,18 +204,17 @@ public class UISubmissionServlet extends ServletUtilBase {
    * @see javax.servlet.http.HttpServlet#doGet(javax.servlet.http.HttpServletRequest,
    *      javax.servlet.http.HttpServletResponse)
    */
-
   @Override
   public void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 	CallingContext cc = ContextFactory.getCallingContext(this, req);
 
-    resp.setContentType(HtmlConsts.RESP_TYPE_HTML);
-
+    Double openRosaVersion = getOpenRosaVersion(req);
+    String isIncompleteFlag = null;
     try {
       SubmissionParser submissionParser = null;
       if (ServletFileUpload.isMultipartContent(req)) {
     	MultiPartFormData uploadedSubmissionItems = new MultiPartFormData(req);
-        String isIncompleteFlag = uploadedSubmissionItems.getSimpleFormField(ServletConsts.TRANSFER_IS_INCOMPLETE);
+        isIncompleteFlag = uploadedSubmissionItems.getSimpleFormField(ServletConsts.TRANSFER_IS_INCOMPLETE);
         submissionParser = new SubmissionParser(uploadedSubmissionItems, cc);
       } else {
         // TODO: check that it is the proper types we can deal with
@@ -220,9 +236,13 @@ public class UISubmissionServlet extends ServletUtilBase {
         uploadTask.createFormUploadTask(rs.getFormServiceCursor(), ccDaemon);
       }
 
-      resp.setStatus(HttpServletResponse.SC_CREATED);
-      resp.setHeader("Location", cc.getServerURL());
+      // form full url including scheme...
+     String serverUrl = cc.getServerURL();
+     String url = req.getScheme() + "://" + serverUrl + "/" + ADDR;
+     resp.setHeader("Location", url);
 
+     resp.setStatus(HttpServletResponse.SC_CREATED);
+     if ( openRosaVersion == null ) {
       resp.setContentType(HtmlConsts.RESP_TYPE_HTML);
       resp.setCharacterEncoding(HtmlConsts.UTF8_ENCODE);
       PrintWriter out = resp.getWriter();
@@ -233,6 +253,19 @@ public class UISubmissionServlet extends ServletUtilBase {
       out.write(" to return to forms page.");
       out.write(HtmlConsts.BODY_CLOSE);
       out.write(HtmlConsts.HTML_CLOSE);
+     } else {
+         addOpenRosaHeaders(resp);
+         resp.setContentType(HtmlConsts.RESP_TYPE_XML);
+         resp.setCharacterEncoding(HtmlConsts.UTF8_ENCODE);
+         PrintWriter out = resp.getWriter();
+         out.write("<OpenRosaResponse xmlns=\"http://openrosa.org/http/response\">");
+         if ( isIncompleteFlag != null && isIncompleteFlag.compareToIgnoreCase("YES") == 0) {
+            out.write("<message>partial submission upload was successful!</message>");
+         } else {
+            out.write("<message>full submission upload was successful!</message>");
+         }
+         out.write("</OpenRosaResponse>");
+       }
     } catch (ODKFormNotFoundException e) {
       odkIdNotFoundError(resp);
     } catch (ODKParseException e) {

@@ -186,6 +186,6 @@ public class UserPasswordServlet extends ServletUtilBase {
 		}
 
 		// redirect to landing page to force change in https status.
-		resp.sendRedirect(cc.getWebApplicationURL(LandingPageServlet.ADDR));
+		resp.sendRedirect(cc.getWebApplicationURL(UserPasswordServlet.ADDR));
 	}
 }

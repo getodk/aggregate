@@ -50,6 +50,8 @@
 		<intercept-url pattern="/aggregateui/preferenceservice" access="isFullyAuthenticated() and hasRole('ROLE_USER')" />
 		<intercept-url pattern="/aggregateui/servicesadminservice" access="isFullyAuthenticated() and hasRole('ROLE_SERVICES_ADMIN')" />
 		<intercept-url pattern="/aggregateui/submissionservice" access="isFullyAuthenticated() and hasRole('ROLE_ANALYST')" />
+		<intercept-url pattern="/aggregateui/securityservice" access="hasRole('ROLE_USER')" />
+		<intercept-url pattern="/aggregateui/securityadminservice" access="isFullyAuthenticated() and hasRole('ROLE_ACCESS_ADMIN')" />
 		<intercept-url pattern="/odk_color.png" access="true" />
 		<intercept-url pattern="/index.html" access="true" />
         <intercept-url pattern="/change-applied.html" access="isFullyAuthenticated()" /> <!-- Intermediate page redirecting to logout from access mgmt -->
@@ -112,6 +114,8 @@
             <intercept-url pattern="/www/index.html" access="${security.server.channelType}" />
 	        <intercept-url pattern="/res/**" access="ANY_CHANNEL" />
 		    <intercept-url pattern="/ssl/**" access="${security.server.secureChannelType}"/>
+		    <intercept-url pattern="/aggregateui/securityservice" access="${security.server.secureChannelType}"/>
+		    <intercept-url pattern="/aggregateui/securityadminservice" access="${security.server.secureChannelType}"/>
             <intercept-url pattern="/local_login.html" access="${security.server.channelType}" />
 		    <intercept-url pattern="/**" access="${security.server.channelType}"/>
 	    </filter-invocation-definition-source>                

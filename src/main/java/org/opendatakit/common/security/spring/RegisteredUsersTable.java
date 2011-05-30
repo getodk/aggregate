@@ -28,7 +28,8 @@ import org.opendatakit.common.persistence.Query.Direction;
 import org.opendatakit.common.persistence.Query.FilterOperation;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.security.User;
-import org.opendatakit.common.utils.EmailParser.Email;
+import org.opendatakit.common.security.client.UserSecurityInfo;
+import org.opendatakit.common.security.common.EmailParser.Email;
 import org.opendatakit.common.web.CallingContext;
 
 /**
@@ -413,6 +414,49 @@ public final class RegisteredUsersTable extends CommonFieldsBase {
 			return t;
 		}
 	}
+
+	/**
+	 * If the given username is not present, this will create a record for the user, 
+	 * marking them as active (able to log in via OpenID or Aggregate password). Otherwise,
+	 * this will just update the nickname and e-mail address of the existing 
+	 * record and return it.</p><p>
+	 * NOTE: Once a user is defined, changing the active status of the user 
+	 * (their ability to log in using OpenID or their Aggregate password) must be done as
+	 * a separate step.</p><p>
+	 * NOTE: users won't be able to log in with OpenID if no e-mail address is supplied;
+	 * and they won't be able to log in with an Aggregate password until one is defined.</p>
+	 * 
+	 * @param u
+	 * @param cc
+	 * @return
+	 * @throws ODKDatastoreException
+	 */
+	public static RegisteredUsersTable assertActiveUserByUserSecurityInfo(UserSecurityInfo u,
+			CallingContext cc) throws ODKDatastoreException {
+		Datastore ds = cc.getDatastore();
+		User user = cc.getCurrentUser();
+		RegisteredUsersTable prototype = RegisteredUsersTable.assertRelation(ds, user);
+		RegisteredUsersTable t = RegisteredUsersTable.getUserByUsername(u.getUsername(), cc);
+		if ( t == null ) {
+			// new user
+			RegisteredUsersTable r = ds.createEntityUsingRelation(prototype, user);
+			String uri = generateUniqueUri(u.getUsername());
+			r.setStringField(prototype.primaryKey, uri);
+			r.setUsername(u.getUsername());
+			r.setEmail(u.getEmail());
+			r.setNickname(u.getNickname());
+			r.setIsCredentialNonExpired(true);
+			r.setIsEnabled(true);
+			r.setIsRemoved(false);
+			ds.putEntity(r, user);
+			return r;
+		} else {
+			t.setEmail(u.getEmail());
+			t.setNickname(u.getNickname());
+			ds.putEntity(t, user);
+			return t;
+		}
+	}
 	
 	public static final List<RegisteredUsersTable> getUsersByEmail(String email, Datastore datastore, User user) throws ODKDatastoreException {
 		RegisteredUsersTable prototype = assertRelation(datastore, user);
@@ -423,4 +467,5 @@ public final class RegisteredUsersTable extends CommonFieldsBase {
 		List<RegisteredUsersTable> l = (List<RegisteredUsersTable>) q.executeQuery(0);
 		return l;
 	}
+
 }

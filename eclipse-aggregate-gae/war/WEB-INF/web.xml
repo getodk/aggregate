@@ -89,6 +89,28 @@
 
  
   <servlet>
+    <servlet-name>securityAdminServiceImpl</servlet-name>
+    <servlet-class>org.opendatakit.common.security.server.SecurityAdminServiceImpl</servlet-class>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>securityAdminServiceImpl</servlet-name>
+    <url-pattern>/aggregateui/securityadminservice</url-pattern>
+  </servlet-mapping>
+
+ 
+  <servlet>
+    <servlet-name>securityServiceImpl</servlet-name>
+    <servlet-class>org.opendatakit.common.security.server.SecurityServiceImpl</servlet-class>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>securityServiceImpl</servlet-name>
+    <url-pattern>/aggregateui/securityservice</url-pattern>
+  </servlet-mapping>
+
+ 
+  <servlet>
     <servlet-name>servicesAdminServiceImpl</servlet-name>
     <servlet-class>org.opendatakit.aggregate.server.ServicesAdminServiceImpl</servlet-class>
   </servlet>

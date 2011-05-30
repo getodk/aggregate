@@ -98,6 +98,19 @@ public abstract class CommonServletBase extends HttpServlet {
           beginBasicHtmlResponse(pageName, BasicConsts.EMPTY_STRING, resp, displayLinks, cc );
   }
 
+  protected PrintWriter beginBasicHtmlResponsePreamble(String headContent, HttpServletResponse resp, CallingContext cc) throws IOException {
+	    resp.addHeader(HOST_HEADER, cc.getServerURL());
+	    resp.setContentType(HtmlConsts.RESP_TYPE_HTML);
+	    resp.setCharacterEncoding(HtmlConsts.UTF8_ENCODE);
+	    PrintWriter out = resp.getWriter();
+	    out.write(HtmlConsts.HTML_OPEN);
+	    out.write("<link rel=\"shortcut icon\" href=\"" + cc.getWebApplicationURL("favicon.ico") + "\">");
+
+	    out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.HEAD, headContent + HtmlUtil.wrapWithHtmlTags(
+	        HtmlConsts.TITLE, applicationName)));
+	    out.write(HtmlConsts.BODY_OPEN);
+	    return out;
+  }
   /**
    * Generate HTML header string for web responses. NOTE: beginBasicHtmlResponse
    * and finishBasicHtmlResponse are a paired set of functions.
@@ -114,16 +127,7 @@ public abstract class CommonServletBase extends HttpServlet {
    */
   protected void beginBasicHtmlResponse(String pageName, String headContent, HttpServletResponse resp,
               boolean displayLinks, CallingContext cc) throws IOException {
-    resp.addHeader(HOST_HEADER, cc.getServerURL());
-    resp.setContentType(HtmlConsts.RESP_TYPE_HTML);
-    resp.setCharacterEncoding(HtmlConsts.UTF8_ENCODE);
-    PrintWriter out = resp.getWriter();
-    out.write(HtmlConsts.HTML_OPEN);
-    out.write("<link rel=\"shortcut icon\" href=\"" + cc.getWebApplicationURL("favicon.ico") + "\">");
-
-    out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.HEAD, headContent + HtmlUtil.wrapWithHtmlTags(
-        HtmlConsts.TITLE, applicationName)));
-    out.write(HtmlConsts.BODY_OPEN);
+	PrintWriter out = beginBasicHtmlResponsePreamble(headContent, resp, cc);
     out.write(HtmlConsts.PAGE_HEADING_TABLE_OPEN);
     out.write(HtmlConsts.TABLE_ROW_OPEN);
    // icon

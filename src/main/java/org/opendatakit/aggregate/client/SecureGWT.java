@@ -28,6 +28,10 @@ import org.opendatakit.aggregate.client.services.admin.ServicesAdminService;
 import org.opendatakit.aggregate.client.services.admin.ServicesAdminServiceAsync;
 import org.opendatakit.aggregate.client.submission.SubmissionService;
 import org.opendatakit.aggregate.client.submission.SubmissionServiceAsync;
+import org.opendatakit.common.security.client.security.SecurityService;
+import org.opendatakit.common.security.client.security.SecurityServiceAsync;
+import org.opendatakit.common.security.client.security.admin.SecurityAdminService;
+import org.opendatakit.common.security.client.security.admin.SecurityAdminServiceAsync;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.http.client.RequestBuilder;
@@ -51,6 +55,8 @@ public class SecureGWT {
 		FORM,
 		FORM_ADMIN,
 		PREFERENCE,
+		SECURITY,
+		SECURITY_ADMIN,
 		SERVICES_ADMIN,
 		SUBMISSION
 	}
@@ -93,6 +99,12 @@ public class SecureGWT {
 		case PREFERENCE:
 			obj = GWT.create(PreferenceService.class);
 			break;
+		case SECURITY:
+			obj = GWT.create(SecurityService.class);
+			break;
+		case SECURITY_ADMIN:
+			obj = GWT.create(SecurityAdminService.class);
+			break;
 		case SERVICES_ADMIN:
 			obj = GWT.create(ServicesAdminService.class);
 			break;
@@ -121,6 +133,14 @@ public class SecureGWT {
 
 	public PreferenceServiceAsync createPreferenceService() {
 		return (PreferenceServiceAsync) create(ServiceType.PREFERENCE);
+	}
+
+	public SecurityServiceAsync createSecurityService() {
+		return (SecurityServiceAsync) create(ServiceType.SECURITY);
+	}
+
+	public SecurityAdminServiceAsync createSecurityAdminService() {
+		return (SecurityAdminServiceAsync) create(ServiceType.SECURITY_ADMIN);
 	}
 
 	public ServicesAdminServiceAsync createServicesAdminService() {

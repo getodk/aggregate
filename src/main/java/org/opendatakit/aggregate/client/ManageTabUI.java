@@ -57,6 +57,9 @@ public class ManageTabUI extends TabPanel {
 	// Export tab
 	private FlexTable exportTable = new FlexTable();
 	
+	// Permissions tab
+	private PermissionsSheet permissionsSheet = new PermissionsSheet();
+	
 	private TextBox mapsApiKey = new TextBox();
 	
 	public ManageTabUI(FlexTable listOfForms, AggregateUI parent) {
@@ -68,7 +71,7 @@ public class ManageTabUI extends TabPanel {
 		this.add(setupFormManagementPanel(), "Forms");
 		this.add(exportTable, "Export");
 		this.add(publishTable, "Publish");
-		this.add(setupPermissionsPanel(), "Permissions");
+		this.add(permissionsSheet, "Permissions");
 		this.add(setupUtilitiesPanel(), "Utilities");
 		this.add(setupPreferencesPanel(), "Preferences");
 		
@@ -90,6 +93,7 @@ public class ManageTabUI extends TabPanel {
 		uploadFormButton.addClickHandler(new ClickHandler() {
 		  @Override
 		  public void onClick(ClickEvent event) {
+			parent.clearError();
 		    hash.goTo("../ui/upload");
 		  }
 		});
@@ -98,6 +102,7 @@ public class ManageTabUI extends TabPanel {
 	    uploadSubmissionsButton.addClickHandler(new ClickHandler() {
 	      @Override
 	      public void onClick(ClickEvent event) {
+			parent.clearError();
 	        hash.goTo("../ui/submission");
 	      }
 	    });
@@ -131,13 +136,14 @@ public class ManageTabUI extends TabPanel {
 
         @Override
         public void onClick(ClickEvent event) {
-          Preferences.setGoogleMapsApiKey(mapsApiKey.getText());        
+        	parent.clearError();
+        	Preferences.setGoogleMapsApiKey(mapsApiKey.getText());        
         }
 	    
 	  });
 	  
 	  VerticalPanel  preferencesPanel = new VerticalPanel();
-     preferencesPanel.add(labelMapsKey);
+      preferencesPanel.add(labelMapsKey);
 	  preferencesPanel.add(mapsApiKey);
 	  preferencesPanel.add(updateMapsApiKeyButton);
 	  return preferencesPanel ;
@@ -186,7 +192,7 @@ public class ManageTabUI extends TabPanel {
 	  AsyncCallback<ExternServSummary[] > callback = new AsyncCallback<ExternServSummary []>() {
       @Override
       public void onFailure(Throwable caught) {
-        // TODO Auto-generated method stub
+			parent.reportError(caught);
       }
 
       @Override
@@ -247,7 +253,16 @@ public class ManageTabUI extends TabPanel {
    }
 	
 	public HTML setupPermissionsPanel() {
-		return new HTML("Content Forthcoming");
+		
+		HTML pane = new HTML("<table><tr><td>" +
+				"<a href=\"access/access-configuration\">Manage Website Access</a>" +
+				"</td></tr><tr><td>" +
+				"<a href=\"ssl/user-manage-passwords\">Manage user passwords</a>" +
+				"</td></tr><tr><td>" +
+				"<iframe src=\"access/access-configuration\" width=\"1500\" height=\"3000\" />" +
+				"</td></tr></table>");
+		pane.setStyleName("embedded_iframe");
+		return pane;
 	}
 	
 	public HTML setupUtilitiesPanel() {
@@ -259,6 +274,7 @@ public class ManageTabUI extends TabPanel {
 		return new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
+				parent.clearError();
 				parent.getTimer().restartTimer(parent);
 				parent.update(FormOrFilter.FORM, PageUpdates.FORMTABLE);
 				hash.clear();

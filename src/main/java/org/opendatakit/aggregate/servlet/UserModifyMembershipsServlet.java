@@ -37,8 +37,9 @@ import org.opendatakit.common.constants.HtmlConsts;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.security.User;
+import org.opendatakit.common.security.common.GrantedAuthorityNames;
+import org.opendatakit.common.security.server.SecurityServiceUtil;
 import org.opendatakit.common.security.spring.GrantedAuthorityHierarchyTable;
-import org.opendatakit.common.security.spring.GrantedAuthorityNames;
 import org.opendatakit.common.security.spring.RegisteredUsersTable;
 import org.opendatakit.common.security.spring.UserGrantedAuthority;
 import org.opendatakit.common.web.CallingContext;
@@ -105,7 +106,7 @@ public class UserModifyMembershipsServlet extends ServletUtilBase {
 				TreeSet<String> assignables = GrantedAuthorityHierarchyTable.getAllPermissionsAssignableGrantedAuthorities(ds, user);
 				for ( String group : assignables ) {
 					// users cannot be assigned to any of the predefined groups -- that just happens
-					if ( GrantedAuthorityNames.isSpecialName(group) ) continue;
+					if ( SecurityServiceUtil.isSpecialName(group) ) continue;
 					allGroups.add(group);
 				}
 			} else {
