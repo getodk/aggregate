@@ -77,11 +77,57 @@ public class UIFormUploadServlet extends ServletUtilBase {
   
   private static final String PAGE_STYLE_RESOURCE = "stylesheets/upload.css";
   
+  private static final String NAV_STYLE_RESOURCE = "stylesheets/navigation.css";
+  
+  private static final String AGGREGATE_STYLE_RESOURCE = "AggregateUI.css";
+  
   private static final String BUTTON_STYLE_RESOURCE = "stylesheets/button.css";
   
   private static final String UPLOAD_PAGE_BODY_START =
 
-  "	  <h2>Upload one form into ODK Aggregate</h2>"
+	  "     <div class=\"gwt-HTML\"><img src=\"../images/odk_color.png\" id=\"odk_aggregate_logo\" style=\"margin-bottom: 4px;\" /></div>" +
+	  "     <table cellspacing=\"0\" cellpadding=\"0\" id=\"layout_panel\"><tr><td>" +
+	  "	  <table cellspacing=\"0\" cellpadding=\"0\" class=\"gwt-DecoratedTabPanel mainNav\"><tr><td>" + 
+	  // Main Nav
+	  "	  <table cellspacing=\"0\" cellpadding=\"0\" class=\"gwt-DecoratedTabBar\" style=\"width: 100%;\"><tr>" +
+	  "	    <td align=\"left\" style=\"vertical-align: bottom;\" height=\"100%\" class=\"gwt-TabBarFirst-wrapper\"><div class=\"gwt-TabBarFirst\"></div></td>" +
+	  "	    <td align=\"left\" style=\"vertical-align: bottom;\" class=\"gwt-TabBarItem-wrapper gwt-TabBarItem-wrapper\">" +
+	  "	      <table cellspacing=\"0\" cellpadding=\"0\" class=\"gwt-TabBarItem gwt-TabBarItem\">" +
+	  "	        <tr class=\"tabTop\"><td class=\"tabTopLeft\"><div class=\"tabTopLeftInner\"></div></td><td class=\"tabTopCenter\"><div class=\"tabTopCenterInner\"></div></td><td class=\"tabTopRight\"><div class=\"tabTopRightInner\"></div></td></tr>" +
+	  "	        <tr class=\"tabMidle\"><td class=\"tabMiddleLeft\"><div class=\"tabMiddleLeftInner\"></div></td>" +
+	  "	          <td class=\"tabMiddleCenter\"><div class=\"tabMiddleCenterInner\" onclick=\"window.location='../Aggregate.html#submissions'\">Submissions</div></td>" +
+	  "	          <td class=\"tabMiddleRight\"><div class=\"tabMiddleRightInner\"></div></td></tr>" +
+	  "	      </table>" +
+	  "	    </td>" +
+	  "	    <td class=\"gwt-TabBarItem-wrapper gwt-TabBarItem-wrapper-selected\">" +
+	  "	      <table cellspacing=\"0\" cellpadding=\"0\" class=\"gwt-TabBarItem gwt-TabBarItem-selected\">" +
+	  "	        <tr class=\"tabTop\"><td class=\"tabTopLeft\"><div class=\"tabTopLeftInner\"></div></td><td class=\"tabTopCenter\"><div class=\"tabTopCenterInner\"></div></td><td class=\"tabTopRight\"><div class=\"tabTopRightInner\"></div></td></tr>" +
+	  "	        <tr class=\"tabMidle\"><td class=\"tabMiddleLeft\"><div class=\"tabMiddleLeftInner\"></div></td>" +
+	  "	          <td class=\"tabMiddleCenter\"><div class=\"tabMiddleCenterInner\">Management</div></td>" +
+	  "	          <td class=\"tabMiddleRight\"><div class=\"tabMiddleRightInner\"></div></td></tr>" +
+	  "	      </table>" +
+	  "	    </td>" +
+	  "	    <td align=\"left\" style=\"vertical-align: bottom;\" width=\"100%\" class=\"gwt-TabBarRest-wrapper\"><div></div></td>" +
+	  "	  </tr>" +
+	  "	  </table></td></tr>" +
+	  // Second Level Nav
+	  "	  <tr><td>" +
+	  "	    <table cellspacing=\"0\" cellpadding=\"0\" class=\"gwt-TabBar\" style=\"width: 100%;\">" +
+	  "	      <tr>" +
+	  "	        <td align=\"left\" style=\"vertical-align: bottom;\" class=\"gwt-TabBarFirst-wrapper\"><div class=\"gwt-TabBarFirst\"></div></td>" +
+	  "	        <td align=\"left\" style=\"vertical-align: bottom;\" class=\"gwt-TabBarItem-wrapper\"><div class=\"gwt-TabBarItem\" onclick=\"window.location='../Aggregate.html#management'\">Forms</div></td>" +
+	  "	        <td align=\"left\" style=\"vertical-align: bottom;\" class=\"gwt-TabBarItem-wrapper\"><div class=\"gwt-TabBarItem\" onclick=\"window.location='../Aggregate.html#managements/export'\">Export</div></td>" +
+	  "	        <td align=\"left\" style=\"vertical-align: bottom;\" class=\"gwt-TabBarItem-wrapper\"><div class=\"gwt-TabBarItem\" onclick=\"window.location='../Aggregate.html#management/publish'\">Publish</div></td>" +
+	  "	        <td align=\"left\" style=\"vertical-align: bottom;\" class=\"gwt-TabBarItem-wrapper\"><div class=\"gwt-TabBarItem\" onclick=\"window.location='../Aggregate.html#management/permissions'\">Permissions</div></td>" +
+	  "	        <td align=\"left\" style=\"vertical-align: bottom;\" class=\"gwt-TabBarItem-wrapper\"><div class=\"gwt-TabBarItem\" onclick=\"window.location='../Aggregate.html#management/utilities'\">Utilities</div></td>" +
+	  "	        <td align=\"left\" style=\"vertical-align: bottom;\" class=\"gwt-TabBarItem-wrapper\"><div class=\"gwt-TabBarItem\" onclick=\"window.location='../Aggregate.html#management/preferences'\">Preferences</div></td>" +
+	  "	        <td align=\"left\" style=\"vertical-align: bottom;\" width=\"100%\" class=\"gwt-TabBarItem gwt-TabBarItemRest-wrapper\"><div class=\"gwt-TabBarRest gwt-TabBarItem\"></div></td>" +
+	  "	      </tr>" +
+	  "	    </table></td></tr>" +
+	  // Page Content
+	  "     <tr><td>" +
+	  "     <h1>" + TITLE_INFO + "</h1>" +
+	  "	  <h2>Upload one form into ODK Aggregate</h2>"
       + "	  <p>Media files for the form's logo and the icons, images, audio clips and video clips used "
       + "     within the form (if any) are"
       + "	  expected to be in a media folder in the same directory as the form definition file (.xml)."
@@ -136,7 +182,7 @@ public class UIFormUploadServlet extends ServletUtilBase {
       + "	  	</tr>"
       + "	  </table>"
       + "	  <!--[if true]></form>"
-      + "	  <![endif] -->";
+      + "	  <![endif] --></td></tr></table></td></tr></table>";
 
   /**
    * Title for generated webpage to obtain title
@@ -169,6 +215,12 @@ public class UIFormUploadServlet extends ServletUtilBase {
 	headerString.append(cc.getWebApplicationURL(PAGE_STYLE_RESOURCE));
 	headerString.append("\" />");
 	headerString.append("<link type=\"text/css\" rel=\"stylesheet\" href=\"");
+	headerString.append(cc.getWebApplicationURL(NAV_STYLE_RESOURCE));
+	headerString.append("\" />");
+	headerString.append("<link type=\"text/css\" rel=\"stylesheet\" href=\"");
+	headerString.append(cc.getWebApplicationURL(AGGREGATE_STYLE_RESOURCE));
+	headerString.append("\" />");
+	headerString.append("<link type=\"text/css\" rel=\"stylesheet\" href=\"");
 	headerString.append(cc.getWebApplicationURL(BUTTON_STYLE_RESOURCE));
 	headerString.append("\" />");
   
@@ -181,7 +233,6 @@ public class UIFormUploadServlet extends ServletUtilBase {
     out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.HEAD, headerString.toString() + HtmlUtil.wrapWithHtmlTags(
         HtmlConsts.TITLE, "AGGREGATE")));
     out.write(HtmlConsts.BODY_OPEN);
-    out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.H1, TITLE_INFO));
 
 
     out.write(UPLOAD_PAGE_BODY_START);
