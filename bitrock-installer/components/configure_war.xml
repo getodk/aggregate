@@ -623,42 +623,14 @@ ${html_steps_end}</text>
 ${html_steps_begin_item}Browse to ${installdir} and execute &lt;code&gt;uploadAggregateToAppEngine.${script_ext}&lt;/code&gt; to deploy ${product_fullname} up into Google's AppEngine cloud.
 ${html_steps_end_item}${html_steps_begin_item}
 Visit &lt;a href="http://${hostname}"&gt;http://${hostname}/&lt;/a&gt; to complete configuring the
-access rights for ODK Aggregate.
-&lt;p&gt;Alternatively, if you want to run ${product_fullname} locally to test it out, execute &lt;code&gt;launchAggregateTestServer.${script_ext}&lt;/code&gt;  Note: the development server does not have an SSL certificate; any pages requiring encryption (https) will not be accessible.${html_steps_end}</text>
+access rights for ODK Aggregate.${html_steps_end_item}
+&lt;/ol&gt;&lt;p&gt;${html_steps_end}</text>
             <ruleList>
                 <compareText>
                     <logic>equals</logic>
                     <text>${platform}</text>
                     <value>gae</value>
                 </compareText>
-                <compareTextLength>
-                    <length>0</length>
-                    <logic>does_not_equal</logic>
-                    <text>${app_id}</text>
-                </compareTextLength>
-            </ruleList>
-        </writeFile>
-        <writeFile>
-            <encoding>utf-8</encoding>
-            <path>${installdir}/README.html</path>
-            <progressText>Write README</progressText>
-            <text>${html_steps_begin}
-${html_steps_begin_item}Browse to ${installdir} and execute &lt;code&gt;launchAggregateTestServer.${script_ext}&lt;/code&gt; to run ${product_fullname} on the local Google AppEngine development server.
-${html_steps_end_item}${html_steps_begin_item}
-Visit &lt;a href="http://${hostname}:8080"&gt;http://${hostname}:8080/&lt;/a&gt; to complete configuring the
-access rights for ODK Aggregate.
-&lt;p&gt;${html_steps_end}</text>
-            <ruleList>
-                <compareText>
-                    <logic>equals</logic>
-                    <text>${platform}</text>
-                    <value>gae</value>
-                </compareText>
-                <compareTextLength>
-                    <length>0</length>
-                    <logic>equals</logic>
-                    <text>${app_id}</text>
-                </compareTextLength>
             </ruleList>
         </writeFile>
         <writeFile>
