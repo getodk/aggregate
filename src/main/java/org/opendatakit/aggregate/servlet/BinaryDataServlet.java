@@ -26,14 +26,17 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.opendatakit.aggregate.ContextFactory;
+import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.ErrorConsts;
 import org.opendatakit.aggregate.constants.ServletConsts;
+import org.opendatakit.aggregate.constants.common.UIConsts;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.aggregate.submission.SubmissionElement;
 import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.submission.SubmissionKeyPart;
 import org.opendatakit.aggregate.submission.type.BlobSubmissionType;
+import org.opendatakit.aggregate.util.ImageUtil;
 import org.opendatakit.common.constants.HtmlConsts;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
@@ -76,11 +79,18 @@ public class BinaryDataServlet extends ServletUtilBase {
     // verify parameters are present
     String keyString = getParameter(req, ServletConsts.BLOB_KEY);
     String downloadAsAttachmentString = getParameter(req, ServletConsts.AS_ATTACHMENT);
+    String previewSizeString = getParameter(req, UIConsts.PREVIEW_PARAM);
+    
+    boolean previewSize = false;
+    if(previewSizeString != null) {
+      previewSize = Boolean.valueOf(previewSizeString);
+    }
     
     if (keyString == null) {
       sendErrorNotEnoughParams(resp);
       return;
     }
+    
     SubmissionKey key = new SubmissionKey(keyString);
 
     byte[] imageBlob = null;
@@ -178,15 +188,20 @@ public class BinaryDataServlet extends ServletUtilBase {
 	    	}
     	}
     	
-        OutputStream os = resp.getOutputStream();
-        os.write(imageBlob);
-        os.close();
+    	if(previewSize && contentType.equals(HtmlConsts.RESP_TYPE_IMAGE_JPEG)) {
+    	  ImageUtil imageUtil = (ImageUtil) cc.getBean(BeanDefs.IMAGE_UTIL);
+        imageBlob = imageUtil.resizeImage(imageBlob, 64, 128);
+    	}
+    	
+      OutputStream os = resp.getOutputStream();
+      os.write(imageBlob);
+      os.close();
     } else {
     	resp.setContentType(HtmlConsts.RESP_TYPE_PLAIN);
     	resp.getWriter().print(ErrorConsts.NO_IMAGE_EXISTS);
     }
   }
-  
+
   private final String getKeyPath(List<SubmissionKeyPart> parts) {
 	StringBuilder b = new StringBuilder();
 	for ( SubmissionKeyPart p : parts ) {

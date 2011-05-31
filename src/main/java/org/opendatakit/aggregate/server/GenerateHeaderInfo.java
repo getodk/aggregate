@@ -249,6 +249,10 @@ public class GenerateHeaderInfo {
         }
 
       }
+    } else if (node.getElementType().equals(ElementType.BINARY)) {
+      summary.addBinarySubmissionHeader(nodeName, key.toString());
+    } else if (node.getElementType().equals(ElementType.REPEAT)) {
+      summary.addRepeatSubmissionHeader(nodeName, key.toString());
     } else {
       summary.addSubmissionHeader(nodeName, key.toString());
     }

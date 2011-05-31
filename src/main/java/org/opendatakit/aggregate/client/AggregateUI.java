@@ -36,6 +36,7 @@ import org.opendatakit.aggregate.client.submission.SubmissionUI;
 import org.opendatakit.aggregate.client.submission.SubmissionUISummary;
 import org.opendatakit.aggregate.constants.common.FormOrFilter;
 import org.opendatakit.aggregate.constants.common.PageUpdates;
+import org.opendatakit.aggregate.constants.common.UIConsts;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.event.dom.client.ChangeEvent;
@@ -54,6 +55,8 @@ import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Image;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.RootPanel;
@@ -156,15 +159,38 @@ public class AggregateUI implements EntryPoint {
 		dataTable.removeAllRows();
 		dataTable.getRowFormatter().addStyleName(0, "titleBar");
 		dataTable.addStyleName("dataTable");
-		for(Column column : summary.getHeaders()) {
+		for(Column column : headers) {
 			dataTable.setText(0, headerIndex++, column.getDisplayHeader());
 		}
 
 		int i = 1;
-		for(SubmissionUI row : summary.getSubmissions()) {
+		for(SubmissionUI row : submissions) {
 			int j = 0;
-			for(String values : row.getValues()) {
-				dataTable.setText(i, j++, values);
+			for(final String values : row.getValues()) {
+			   switch (headers.get(j).getUiDisplayType()) {
+			   case BINARY:
+			      Image image = new Image(values + UIConsts.PREVIEW_SET);		
+			      image.addClickHandler(new ClickHandler() {
+		            @Override
+		            public void onClick(ClickEvent event) {
+		               final PopupPanel popup = new ImagePopup(values, servicesAdminSvc);
+		               popup.setPopupPositionAndShow(new PopupPanel.PositionCallback() {
+		                  @Override
+		                  public void setPosition(int offsetWidth, int offsetHeight) {
+		                     int left = ((Window.getClientWidth() - offsetWidth) / 2);
+		                     int top = ((Window.getClientHeight() - offsetHeight) / 2);
+		                     popup.setPopupPosition(left, top);
+		                  }
+		               });
+		            }
+		         });
+			      
+			      dataTable.setWidget(i, j, image);
+			      break;
+			   default:
+	            dataTable.setText(i, j, values);			     
+			   }
+			   j++;
 			}
 			if (i % 2 == 0) {
 				dataTable.getRowFormatter().setStyleName(i, "evenTableRow");
@@ -418,7 +444,10 @@ public class AggregateUI implements EntryPoint {
 			listOfForms.setWidget(i, 0, new Anchor(form.getTitle()));
 			listOfForms.setWidget(i, 1, new HTML(form.getId()));
 			String user = form.getCreatedUser();
-			listOfForms.setWidget(i, 2, new Anchor(user.substring(user.indexOf(":") + 1, user.indexOf("@")), user));
+			if(user.contains("@")) {
+			  user = user.substring(user.indexOf(":") + 1, user.indexOf("@"));
+			}
+			listOfForms.setWidget(i, 2, new Label(user));
 
 			CheckBox downloadableCheckBox = new CheckBox();
 			downloadableCheckBox.setValue(form.isDownloadable());

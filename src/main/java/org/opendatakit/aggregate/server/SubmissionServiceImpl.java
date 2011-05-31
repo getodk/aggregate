@@ -87,7 +87,7 @@ org.opendatakit.aggregate.client.submission.SubmissionService {
     GenerateHeaderInfo headerGenerator = new GenerateHeaderInfo(filterGroup, summary, form);
     headerGenerator.processForHeaderInfo(form.getTopLevelGroupElement());
     List<FormElementModel> filteredElements = headerGenerator.getIncludedElements();
-    ElementFormatter elemFormatter = new UiElementFormatter(headerGenerator.getGeopointIncludes());
+    ElementFormatter elemFormatter = new UiElementFormatter(cc.getServerURL(), headerGenerator.getGeopointIncludes());
 
     
     // format row elements

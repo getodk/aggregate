@@ -19,7 +19,9 @@ package org.opendatakit.aggregate.constants.common;
 public class UIConsts {
   public static final String URI_DEFAULT = "no uuid";
   public static final String FSC_URI_PARAM = "fsc";
-
+  public static final String PREVIEW_PARAM = "previewImage";
+  public static final String PREVIEW_SET = "&" + PREVIEW_PARAM + "=true";
+  
   // running locally
  // public static final String GOOGLE_MAP_KEY = "";
   
