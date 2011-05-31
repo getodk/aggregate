@@ -114,8 +114,6 @@
             <intercept-url pattern="/www/index.html" access="${security.server.channelType}" />
 	        <intercept-url pattern="/res/**" access="ANY_CHANNEL" />
 		    <intercept-url pattern="/ssl/**" access="${security.server.secureChannelType}"/>
-		    <intercept-url pattern="/aggregateui/securityservice" access="${security.server.secureChannelType}"/>
-		    <intercept-url pattern="/aggregateui/securityadminservice" access="${security.server.secureChannelType}"/>
             <intercept-url pattern="/local_login.html" access="${security.server.channelType}" />
 		    <intercept-url pattern="/**" access="${security.server.channelType}"/>
 	    </filter-invocation-definition-source>                

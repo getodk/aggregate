@@ -49,6 +49,7 @@ import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
+import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -477,7 +478,8 @@ public class AccessConfigurationSheet extends Composite implements ActionCell.De
 		
 		ArrayList<UserSecurityInfo> users = new ArrayList<UserSecurityInfo>();
 		users.addAll(dataProvider.getList());
-		service.setUsersAndGrantedAuthorities(users, anonGrants, allGroups, new AsyncCallback<Void>() {
+		service.setUsersAndGrantedAuthorities(Cookies.getCookie("JSESSIONID"), 
+									users, anonGrants, allGroups, new AsyncCallback<Void>() {
 
 			@Override
 			public void onFailure(Throwable caught) {

@@ -19,6 +19,7 @@ package org.opendatakit.common.security.client.security.admin;
 import java.util.ArrayList;
 
 import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
+import org.opendatakit.common.security.client.CredentialsInfo;
 import org.opendatakit.common.security.client.GrantedAuthorityInfo;
 import org.opendatakit.common.security.client.UserSecurityInfo;
 import org.opendatakit.common.security.client.exception.AccessDeniedException;
@@ -57,7 +58,7 @@ public interface SecurityAdminService extends RemoteService {
 
 	UserSecurityInfo getAnonymousUser() throws AccessDeniedException, DatastoreFailureException;
 	
-	void setUsersAndGrantedAuthorities( ArrayList<UserSecurityInfo> users,  ArrayList<GrantedAuthorityInfo> anonGrants, ArrayList<GrantedAuthorityInfo> allGroups ) throws AccessDeniedException, DatastoreFailureException;
+	void setUsersAndGrantedAuthorities( String xsrfString, ArrayList<UserSecurityInfo> users,  ArrayList<GrantedAuthorityInfo> anonGrants, ArrayList<GrantedAuthorityInfo> allGroups ) throws AccessDeniedException, DatastoreFailureException;
 	
-	void setUserPasswords( ArrayList<UserSecurityInfo> users, String password ) throws AccessDeniedException, DatastoreFailureException;
+	void setUserPasswords( String xsrfString, ArrayList<CredentialsInfo> credentials ) throws AccessDeniedException, DatastoreFailureException;
 }

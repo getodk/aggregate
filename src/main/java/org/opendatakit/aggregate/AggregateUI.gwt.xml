@@ -13,7 +13,7 @@
   <!-- Persistence layer exception class -->
   <inherits name='org.opendatakit.common.persistence.Persistence'/>
 
-  <set-property name="user.agent" value="gecko1_8" />
+  <!-- <set-property name="user.agent" value="gecko1_8" /> -->
   <set-configuration-property name="UiBinder.useSafeHtmlTemplates" value="true" /> 
   
   <!-- Specify the app entry point class.                         -->

@@ -17,6 +17,8 @@
 package org.opendatakit.common.security.client.security;
 
 import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
+import org.opendatakit.common.security.client.CredentialsInfo;
+import org.opendatakit.common.security.client.RealmSecurityInfo;
 import org.opendatakit.common.security.client.UserSecurityInfo;
 import org.opendatakit.common.security.client.exception.AccessDeniedException;
 
@@ -33,7 +35,7 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
  */
 @RemoteServiceRelativePath("securityservice")
 public interface SecurityService extends RemoteService {
-
+	
 	/**
 	 * @return information about the logged-in user, including the full set of groups and grants it has.
 	 * @throws AccessDeniedException
@@ -61,10 +63,18 @@ public interface SecurityService extends RemoteService {
 	boolean isAnonymousUser() throws AccessDeniedException;
 
 	/**
+	 * @param xsrfString
+	 * @return information needed for building CredentialsInfo records.
+	 * @throws AccessDeniedException
+	 */
+	RealmSecurityInfo getRealmInfo(String xsrfString) throws AccessDeniedException;
+
+	/**
 	 * Change the user's password.
-	 * @param password
+	 * @param xsrfString
+	 * @param credentials
 	 * @throws AccessDeniedException
 	 * @throws DatastoreFailureException
 	 */
-	void setUserPassword(String password) throws AccessDeniedException, DatastoreFailureException;
+	void setUserPassword(String xsrfString, CredentialsInfo credentials) throws AccessDeniedException, DatastoreFailureException;
 }

@@ -1,0 +1,311 @@
+<?xml version="1.0"?>
+<h:html xmlns="http://www.w3.org/2002/xforms" xmlns:h="http://www.w3.org/1999/xhtml" xmlns:ev="http://www.w3.org/2001/xml-events" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa">
+	<h:head>
+		<h:title>Multiwidgets Form</h:title>
+		<model>
+			<itext>
+				<translation lang="english">
+					<text id="hello">
+						<value>i speak english</value>
+					</text>
+					<text id="hint">
+						<value>menu button to change languages</value>
+					</text>
+				</translation>
+				<translation lang="italian">
+					<text id="hello">
+						<value>ci&#xE0;o</value>
+					</text>
+					<text id="hint">
+						<value>"hello" in italian</value>
+					</text>
+				</translation>
+				<translation lang="japanese">
+					<text id="hello">
+						<value>&#x3053;&#x3093;&#x306B;&#x3061;&#x306F;&#x3002;</value>
+					</text>
+					<text id="hint">
+						<value>"hello" in japanese</value>
+					</text>
+				</translation>
+				<translation lang="macedonian">
+					<text id="hello">
+						<value>&#x417;&#x434;&#x440;&#x430;&#x432;&#x43E;</value>
+					</text>
+					<text id="hint">
+						<value>"hello" in macedonian</value>
+					</text>
+				</translation>
+			</itext>
+			<instance>
+				<widgets xmlns="multiwidgets2">
+					<start/>
+					<end/>
+					<today/>
+					<deviceid/>
+					<subscriberid/>
+					<simid/>
+					<phonenumber/> 
+					<string/>
+                    <int/>
+					<int_a/>
+                    <int_b/>
+                    <int_c/>
+                    <int_d/>
+					<decimal>18.31</decimal>
+					<date>2010-06-15</date>
+					<select>a c</select>
+					<select_blood_pressure>Blood Pressure</select_blood_pressure>
+					<int_systolic/>
+					<int_diastolic/>
+					<select1>4</select1>
+					<select1_image1/>
+					<select1_image2/>
+					<select1_image3/>
+					<select1_image4/>
+					<branch>n</branch>
+					<language/>
+					<regex>test@test.com</regex>
+					<repeat_a jr:template="">
+						<item_string_a/>
+						<item_int>123456789</item_int>
+						<repeat_count>3</repeat_count>
+						<repeat_b jr:template="">
+							<item_string_b>this is a really long string where you can put lots of information to prepare a user for anything you would like.</item_string_b>
+						</repeat_b>
+						<item_decimal>1234567890.1234567890</item_decimal>
+					</repeat_a>
+					<calculate/>
+					<trigger/>
+					<output/> 
+					<geopoint/>
+					<barcode/>
+					<image/>
+					<audio/>
+					<video/>
+				</widgets>
+			</instance>   
+			<bind nodeset="/widgets/start" type="dateTime" jr:preload="timestamp" jr:preloadParams="start"/>
+			<bind nodeset="/widgets/end" type="dateTime" jr:preload="timestamp" jr:preloadParams="end"/>
+			<bind nodeset="/widgets/today" type="date" jr:preload="date" jr:preloadParams="today"/>
+			<bind nodeset="/widgets/deviceid" type="string" jr:preload="property" jr:preloadParams="deviceid"/>
+			<bind nodeset="/widgets/subscriberid" type="string" jr:preload="property" jr:preloadParams="subscriberid"/>
+			<bind nodeset="/widgets/simid" type="string" jr:preload="property" jr:preloadParams="simserial"/>
+			<bind nodeset="/widgets/phonenumber" type="string" jr:preload="property" jr:preloadParams="phonenumber"/>
+			<bind nodeset="/widgets/string" type="string"/>
+			<!--<bind nodeset="/widgets/int" type="int" constraint=". &lt; 10" jr:constraintMsg="number must be less than 10"/> -->
+            <bind nodeset="/widgets/int_a" type="int" constraint=". &gt; 10" jr:constraintMsg="must be greater than 10"/>
+            <bind nodeset="/widgets/int_b" type="int" relevant="selected(/widgets/select, 'b')" constraint=". &gt; 11" jr:constraintMsg="must be greater than 11"/>
+            <bind nodeset="/widgets/int_c" type="int" relevant="selected(/widgets/select, 'c')" constraint=". &gt; 12" jr:constraintMsg="must be greater than 12"/>
+            <bind nodeset="/widgets/int_d" type="int" relevant="selected(/widgets/select, 'd')" constraint=". &gt; 13" jr:constraintMsg="must be greater than 13"/>
+			<bind nodeset="/widgets/decimal" type="decimal" constraint=". &gt; 10.51 and . &lt; 18.39" jr:constraintMsg="number must be between 10.51 and 18.39"/>
+			<bind nodeset="/widgets/date" type="date" constraint=". &gt;= today()" jr:constraintMsg="only future dates allowed"/>
+			<bind nodeset="/widgets/select" type="select" constraint="not(selected(., 'c') and selected(., 'd'))" jr:constraintMsg="option c and d cannot be selected together"/>
+			<bind nodeset="/widgets/select_blood_pressure" type="select"/>
+			<bind nodeset="/widgets/int_systolic" type="int" relevant="selected(/widgets/select_blood_pressure, 'blood pressure')" />
+            <bind nodeset="/widgets/int_diastolic" type="int" relevant="selected(/widgets/select_blood_pressure, 'blood pressure')" />
+			<bind nodeset="/widgets/select1" type="select1"/>
+			<bind nodeset="/widgets/select1_image1" type="binary" relevant="selected(/widgets/select1, '1')"/>
+			<bind nodeset="/widgets/select1_image2" type="binary" relevant="selected(/widgets/select1, '2')"/>
+			<bind nodeset="/widgets/select1_image3" type="binary" relevant="selected(/widgets/select1, '3')"/>
+			<bind nodeset="/widgets/select1_image4" type="binary" relevant="selected(/widgets/select1, '4')"/>
+			<bind nodeset="/widgets/branch" required="true()"/>
+			<bind nodeset="/widgets/language" type="string" relevant="selected(/widgets/branch, 'n')"/>
+			<bind nodeset="/widgets/regex" type="string" required="true()" constraint="regex(., '[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4}')" jr:constraintMsg="this isn't a valid email address" relevant="selected(/widgets/branch, 'n')"/>
+			<bind nodeset="/widgets/geopoint" type="geopoint"/>
+			<bind nodeset="/widgets/barcode" type="barcode"/>
+			<bind nodeset="/widgets/image" type="binary"/>
+			<bind nodeset="/widgets/audio" type="binary"/>
+			<bind nodeset="/widgets/video" type="binary"/>                        
+			<bind nodeset="/widgets/trigger" constraint=". != ''" />
+			<bind nodeset="/widgets/calculate" calculate="if(../int &gt; '5', 'greater than five', 'less than or equal to five')"/>
+			<bind nodeset="/widgets/output" type="string" readonly="true()" relevant="selected(/widgets/branch, 'n')"/>
+			<bind nodeset="/widgets/repeat_a"/>
+			<bind nodeset="/widgets/repeat_a/item_string_a" type="string" readonly="true()"/>
+			<bind nodeset="/widgets/repeat_a/item_int" type="int"/>
+			<bind nodeset="/widgets/repeat_a/repeat_count" type="int"/>
+			<bind nodeset="/widgets/repeat_a/item_decimal" type="decimal"/>
+			<bind nodeset="/widgets/repeat_a/repeat_b/item_string_b" type="string"/>
+		</model>
+	</h:head>
+	<h:body>     
+        <group appearance="conditional-field-list">
+            <select ref="select">
+                <label>select multiple widget</label>
+                <hint>don't pick c and d together</hint>
+                <item>
+                    <label>option a</label>
+                    <value>a</value>
+                </item>
+                <item>
+                    <label>option b</label>
+                    <value>b</value>
+                </item>
+                <item>
+                    <label>option c</label>
+                    <value>c</value>
+                </item>
+                <item>
+                    <label>option d</label>
+                    <value>d</value>
+                </item>
+            </select>
+            <input ref="int_a">
+                <label>other non-dependent integer</label>
+                <hint>integer not depending upon any of the select values</hint>
+            </input>
+            <input ref="int_b">
+                <label>integer widget b</label>
+                <hint>integer for b</hint>
+            </input>
+            <input ref="int_c">
+                <label>integer widget c</label>
+                <hint>integer for c</hint>
+            </input>
+            <input ref="int_d">
+                <label>integer widget d</label>
+                <hint>integer for d</hint>
+            </input>
+        </group>
+		<group appearance="conditional-field-list">
+			<select1 ref="select1">
+				<label>select one widget</label>
+				<hint>scroll down to see default selection</hint>
+				<item>
+					<label>option 1</label>
+					<value>1</value>
+				</item>
+				<item>
+					<label>option 2</label>
+					<value>2</value>
+				</item>
+				<item>
+					<label>option 3</label>
+					<value>3</value>
+				</item>
+				<item>
+					<label>option 4</label>
+					<value>4</value>
+				</item>
+			</select1>
+			<upload ref="select1_image1" mediatype="image/*">
+				<hint>this will launch the camera</hint>
+				<label>image widget</label>
+			</upload>
+			<upload ref="select1_image2" mediatype="image/*">
+				<hint>this will launch the camera</hint>
+				<label>image widget</label>
+			</upload>
+			<upload ref="select1_image3" mediatype="image/*">
+				<hint>this will launch the camera</hint>
+				<label>image widget</label>
+			</upload>
+			<upload ref="select1_image4" mediatype="image/*">
+				<hint>this will launch the camera</hint>
+				<label>image widget</label>
+			</upload>
+		</group>
+		<group appearance="conditional-field-list">
+			<select ref="select_blood_pressure">
+                <label>blood pressure select</label>
+                <hint></hint>
+                <item>
+                    <label>blood pressure</label>
+                    <value>blood pressure</value>
+				</item>
+			</select>
+			<input ref="int_systolic">
+                <label>Systolic</label>
+			</input>
+            <input ref="int_diastolic">
+                <label>Diastolic</label>
+            </input>
+		</group>
+		<group appearance="field-list">
+			<upload ref="audio" mediatype="audio/*">
+				<hint>this will launch the audio recorder</hint>
+				<label>subject audio interview</label>
+			</upload>
+			<trigger ref="trigger">
+				<label>acknowledge widget</label>
+				<hint>push button to acknowledge video interview</hint>
+			</trigger>
+			<upload ref="video" mediatype="video/*">
+				<label>subject video interview</label>
+			</upload>
+		</group>
+
+		<select1 ref="branch">
+			<label>branch widget</label>
+			<hint>yes to skip languages, validator, sections</hint>
+			<item>
+				<label>yes</label>
+				<value>y</value>
+			</item>
+			<item>
+				<label>no</label>
+				<value>n</value>
+			</item>
+		</select1>
+<group appearance="field-list">
+		<input ref="regex">
+			<label>validate widget</label>
+			<hint>email validator</hint>
+		</input>
+		<input ref="geopoint">
+			<label>geopoint widget</label>
+			<hint>this will get gps location</hint>
+		</input>
+		<input ref="barcode">
+			<label>barcode widget</label>
+			<hint>scans multi-format 1d/2d barcodes</hint>
+		</input>
+		<upload ref="image" mediatype="image/*">
+			<hint>this will launch the camera</hint>
+			<label>image widget</label>
+		</upload>
+</group>
+		<group appearance="field-list">
+			<label>section a</label>
+			<group>
+				<label>section b</label>
+				<group>
+					<label>section c</label>
+					<input ref="language">
+						<label ref="jr:itext('hello')"/>
+						<hint ref="jr:itext('hint')"/>
+					</input>
+				</group>
+			</group>
+		</group>
+		<input ref="output">
+			<label>review widget. is your email still <output value="/widgets/regex"/>?</label>
+			<hint>long hint: there is an upcoming section.</hint>
+		</input>
+		<group>
+			<label>household</label>
+			<repeat nodeset="/widgets/repeat_a">
+				<input ref="item_int">
+					<label>household id</label>
+					<hint>largest integer (9 places)</hint>
+				</input>
+				<input ref="item_string_a">
+					<label>household description</label>
+					<hint>readonly and long string</hint>
+				</input>
+				<group>
+					<label>child</label>
+					<repeat nodeset="/widgets/repeat_a/repeat_b">
+						<input ref="item_string_b">
+							<label>child name</label>
+						</input>
+					</repeat>
+				</group>
+				<input ref="item_decimal">
+					<label>household notes</label>
+					<hint>readonly and long string</hint>
+				</input>
+			</repeat>
+		</group>
+	</h:body>
+</h:html>

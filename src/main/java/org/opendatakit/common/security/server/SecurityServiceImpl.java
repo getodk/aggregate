@@ -16,8 +16,6 @@
 
 package org.opendatakit.common.security.server;
 
-import java.util.UUID;
-
 import javax.servlet.http.HttpServletRequest;
 
 import org.opendatakit.aggregate.ContextFactory;
@@ -27,6 +25,8 @@ import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.security.SecurityBeanDefs;
 import org.opendatakit.common.security.SecurityUtils;
 import org.opendatakit.common.security.User;
+import org.opendatakit.common.security.client.CredentialsInfo;
+import org.opendatakit.common.security.client.RealmSecurityInfo;
 import org.opendatakit.common.security.client.UserSecurityInfo;
 import org.opendatakit.common.security.client.exception.AccessDeniedException;
 import org.opendatakit.common.security.common.GrantedAuthorityNames;
@@ -40,8 +40,6 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
  * GWT Server implementation for the SecurityService interface.
  * This provides privileges context to the client and is therefore
  * accessible to anyone with a ROLE_USER privilege.
- * This should be accessed over SSL to prevent eavesdropping when
- * changing personal passwords; SSL is otherwise not required.
  *  
  * @author mitchellsundt@gmail.com
  *
@@ -87,10 +85,14 @@ org.opendatakit.common.security.client.security.SecurityService {
 	}
 
 	@Override
-	public void setUserPassword(String password) throws AccessDeniedException, DatastoreFailureException {
+	public void setUserPassword(String xsrfString, CredentialsInfo credentials) throws AccessDeniedException, DatastoreFailureException {
 
 	    HttpServletRequest req = this.getThreadLocalRequest();
 	    CallingContext cc = ContextFactory.getCallingContext(this, req);
+
+	    if ( !req.getSession().getId().equals(xsrfString) ) {
+			throw new AccessDeniedException("Invalid request");
+		}
 
 	    Datastore ds = cc.getDatastore();
 	    User user = cc.getUserService().getCurrentUser();
@@ -100,17 +102,12 @@ org.opendatakit.common.security.client.security.SecurityService {
 			if ( userDefinition == null ) {
 				throw new AccessDeniedException("User is not a registered user.");
 			}
-
-			MessageDigestPasswordEncoder mde = (MessageDigestPasswordEncoder) cc.getBean(SecurityBeanDefs.BASIC_AUTH_PASSWORD_ENCODER);
-			String salt = UUID.randomUUID().toString().substring(0,8);
-			String fullPass = mde.encodePassword(password, salt);
-			userDefinition.setBasicAuthPassword(fullPass);
-			userDefinition.setBasicAuthSalt(salt);
-			String fullDigestAuthPass = SecurityUtils.getDigestAuthenticationPasswordHash(
-												userDefinition.getUsername(),
-												password, 
-												cc.getUserService().getCurrentRealm() );
-            userDefinition.setDigestAuthPassword(fullDigestAuthPass);
+			if ( !userDefinition.getUsername().equals(credentials.getUsername()) ) {
+				throw new AccessDeniedException("Username specified does not match that of the active user");
+			}
+			userDefinition.setDigestAuthPassword(credentials.getDigestAuthHash());
+			userDefinition.setBasicAuthPassword(credentials.getBasicAuthHash());
+			userDefinition.setBasicAuthSalt(credentials.getBasicAuthSalt());
 			ds.putEntity(userDefinition, user);
 		} catch ( ODKDatastoreException e ) {
 			e.printStackTrace();
@@ -157,5 +154,23 @@ org.opendatakit.common.security.client.security.SecurityService {
 			throw new DatastoreFailureException(e);
 		}
 		return info;
+	}
+
+	@Override
+	public RealmSecurityInfo getRealmInfo(String xsrfString) throws AccessDeniedException {
+
+	    HttpServletRequest req = this.getThreadLocalRequest();
+	    CallingContext cc = ContextFactory.getCallingContext(this, req);
+
+	    if ( !req.getSession().getId().equals(xsrfString) ) {
+			throw new AccessDeniedException("Invalid request");
+		}
+
+		RealmSecurityInfo r = new RealmSecurityInfo();
+		r.setRealmString(cc.getUserService().getCurrentRealm().getRealmString());
+		MessageDigestPasswordEncoder mde = 
+			(MessageDigestPasswordEncoder) cc.getBean(SecurityBeanDefs.BASIC_AUTH_PASSWORD_ENCODER);
+		r.setBasicAuthHashEncoding(mde.getAlgorithm());
+		return r;
 	}
 }

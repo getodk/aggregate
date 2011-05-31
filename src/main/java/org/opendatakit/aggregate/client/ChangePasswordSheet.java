@@ -16,6 +16,11 @@
 
 package org.opendatakit.aggregate.client;
 
+import java.security.NoSuchAlgorithmException;
+
+import org.opendatakit.common.security.client.CredentialsInfo;
+import org.opendatakit.common.security.client.RealmSecurityInfo;
+import org.opendatakit.common.security.client.UserSecurityInfo;
 import org.opendatakit.common.security.client.security.SecurityServiceAsync;
 
 import com.google.gwt.core.client.GWT;
@@ -23,6 +28,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
@@ -55,19 +61,36 @@ public class ChangePasswordSheet extends Composite {
 			if ( service == null ) {
 				this.service = SecureGWT.get().createSecurityService();
 			}
-			service.getUserDisplayName(new AsyncCallback<String>()
-				{
+			if ( userInfo == null ) {
+				service.getUserInfo(new AsyncCallback<UserSecurityInfo>() {
+	
 					@Override
 					public void onFailure(Throwable caught) {
 					}
 	
 					@Override
-					public void onSuccess(String result) {
-						usernickname.setText(result);
+					public void onSuccess(UserSecurityInfo result) {
+						userInfo = result;
+						usernickname.setText(userInfo.getNickname());
 					}
 				});
+			} else {
+				usernickname.setText(userInfo.getNickname());
+			}
 			password1.setText("unknown");
 			password2.setText("setting");
+			if ( realmInfo == null ) {
+				service.getRealmInfo(Cookies.getCookie("JSESSIONID"), 
+						new AsyncCallback<RealmSecurityInfo>() {
+							@Override
+							public void onFailure(Throwable caught) {
+							}
+		
+							@Override
+							public void onSuccess(RealmSecurityInfo result) {
+								realmInfo = result;
+						}});
+			}
 		}
 	}
 
@@ -85,25 +108,37 @@ public class ChangePasswordSheet extends Composite {
 	Button button;
 	
 	SecurityServiceAsync service;
-
+	UserSecurityInfo userInfo;
+	RealmSecurityInfo realmInfo;
+	
 	@UiHandler("button")
 	void onClick(ClickEvent e) {
 		String pw1 = password1.getText();
 		String pw2 = password2.getText();
 		if ( pw1.equals(pw2) ) {
-			service.setUserPassword(pw1, new AsyncCallback<Void>() {
-
-				@Override
-				public void onFailure(Throwable caught) {
-					Window.alert("Unable to change password: " + caught.getMessage());
+			if ( realmInfo == null || userInfo == null ) {
+				Window.alert("Unable to obtain required information from server");
+			} else {
+				try {
+					CredentialsInfo c;
+					c = CredentialsInfoBuilder.build(userInfo.getUsername(), realmInfo, pw1);
+			
+					service.setUserPassword(Cookies.getCookie("JSESSIONID"), c, new AsyncCallback<Void>() {
+		
+						@Override
+						public void onFailure(Throwable caught) {
+							Window.alert("Unable to change password: " + caught.getMessage());
+						}
+		
+						@Override
+						public void onSuccess(Void result) {
+							Window.alert("Successful password change.");
+						}
+					});
+				} catch (NoSuchAlgorithmException e1) {
+					Window.alert("Unable to create encrypted password");
 				}
-
-				@Override
-				public void onSuccess(Void result) {
-					Window.alert("Successful password change.");
-				}
-				
-			});
+			}
 		} else {
 			Window.alert("The passwords do not match. Please retype your password.");
 		}
