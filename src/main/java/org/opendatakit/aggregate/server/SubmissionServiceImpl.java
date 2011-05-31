@@ -38,9 +38,14 @@ import org.opendatakit.aggregate.format.element.UiElementFormatter;
 import org.opendatakit.aggregate.query.submission.QueryByDate;
 import org.opendatakit.aggregate.query.submission.QueryByUIFilterGroup;
 import org.opendatakit.aggregate.submission.Submission;
+import org.opendatakit.aggregate.submission.SubmissionElement;
+import org.opendatakit.aggregate.submission.SubmissionKey;
+import org.opendatakit.aggregate.submission.SubmissionKeyPart;
 import org.opendatakit.aggregate.submission.SubmissionSet;
+import org.opendatakit.aggregate.submission.type.RepeatSubmissionType;
 import org.opendatakit.common.constants.BasicConsts;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+import org.opendatakit.common.security.exception.AccessDeniedException;
 import org.opendatakit.common.web.CallingContext;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
@@ -101,6 +106,64 @@ org.opendatakit.aggregate.client.submission.SubmissionService {
       }
     }
   }
+  
+  @Override
+  public SubmissionUISummary getRepeatSubmissions(String keyString) throws AccessDeniedException {
+    HttpServletRequest req = this.getThreadLocalRequest();
+    CallingContext cc = ContextFactory.getCallingContext(this, req);   
+    
+    SubmissionUISummary summary = new SubmissionUISummary();
+    
+    if (keyString == null) {
+      return null;
+   }
+   SubmissionKey key = new SubmissionKey(keyString);
+
+   List<SubmissionKeyPart> parts = key.splitSubmissionKey();
+    try {
+      Form form = Form.retrieveForm(parts.get(0).getElementName(), cc);
+      Submission sub = Submission.fetchSubmission(parts, cc);
+
+      if (sub != null) {
+        SubmissionElement tmp = sub.resolveSubmissionKey(parts);
+        RepeatSubmissionType repeat = (RepeatSubmissionType) tmp;
+        getRepeatSubmissions(cc, summary, form, repeat.getSubmissionSets(), repeat.getElement());
+      }
+
+    } catch (ODKFormNotFoundException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+      return null;
+    } catch (ODKDatastoreException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+      return null;
+    }
+    
+    return summary;
+  }
+  
+  private void getRepeatSubmissions(CallingContext cc,
+      SubmissionUISummary summary, Form form, List<SubmissionSet> repeats, FormElementModel repeatNode)
+      throws ODKDatastoreException {
+    GenerateHeaderInfo headerGenerator = new GenerateHeaderInfo(null, summary, form);
+    headerGenerator.processForHeaderInfo(repeatNode);
+    List<FormElementModel> filteredElements = headerGenerator.getIncludedElements();
+    ElementFormatter elemFormatter = new UiElementFormatter(cc.getServerURL(), headerGenerator.getGeopointIncludes());
+
+    
+    // format row elements
+    for (SubmissionSet sub : repeats) {
+      Row row = sub.getFormattedValuesAsRow(filteredElements, elemFormatter, false, cc);
+      try {
+        summary.addSubmission(new SubmissionUI(row.getFormattedValues()));
+      } catch (Exception e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
+    }
+  }
+  
 
   @Override
   public SubmissionUISummary getSubmissions(String formId) {
@@ -182,6 +245,8 @@ org.opendatakit.aggregate.client.submission.SubmissionService {
     
     return null;
   }
+
+
 
   
   

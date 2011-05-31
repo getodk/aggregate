@@ -21,3 +21,11 @@
 	border-color: #07115A;
 	overflow: scroll;
 }
+
+.disabledTableRow td {
+	background-color: #505050;
+}
+
+.enabledTableRow td {
+	background-color: #000000;
+}

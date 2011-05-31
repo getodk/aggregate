@@ -29,6 +29,8 @@ public interface SubmissionService extends RemoteService {
   
   SubmissionUISummary getSubmissions(FilterGroup filter) throws AccessDeniedException;
   
+  SubmissionUISummary getRepeatSubmissions(String keyString) throws AccessDeniedException;
+  
   UIGeoPoint [] getGeoPoints(String formId, String geopointKey) throws AccessDeniedException;
   
 }
