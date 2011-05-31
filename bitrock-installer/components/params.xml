@@ -716,9 +716,11 @@ The installer will generate scripts that can be run on the database to create th
 	<!-- email -->
 	<name>email</name>
             <title>Super-user E-mail Address</title>
-            <explanation>This should be a valid Gmail account. The user with this account is Aggregate's super-user. They always have full permissions on the system.  
+            <explanation>This should be a valid Gmail account or Google Apps account. The user with this account is Aggregate's super-user. They always have full permissions on the system.  
 
 The first time Aggregate runs, only this super-user is allowed access to the system. Upon first logging in, they will be asked to complete the configuration of Aggregate by specifying additional users and what permissions those users have on the system.
+
+You must give a complete Email address (e.g., username@gmail.com ).
 </explanation>
             <value>your.email@gmail.com</value>
             <default></default>
@@ -779,17 +781,14 @@ The first time Aggregate runs, only this super-user is allowed access to the sys
 	<name>app_id</name>
             <title>Google AppEngine application ID</title>
             <description>Please enter your application id:</description>
-            <explanation>Leave this blank if you want to use the local development server
- (and not deploy to Google's cloud service).
-
-Otherwise, to deploy to Google's AppEngine cloud, go to:
+            <explanation>Before continuing, you should obtain an application identifier in Google's AppEngine cloud, go to:
     https://appengine.google.com/ 
 and create an application identifier to be used by Aggregate. 
 
 If you are replacing an existing application already on appspot, the application identifier is the leftmost portion of the appspot.com URL. For example, if your application is at 'opendatakit.appspot.com' you would enter 'opendatakit' below.</explanation>
             <value></value>
             <default></default>
-            <allowEmptyValue>1</allowEmptyValue>
+            <allowEmptyValue>0</allowEmptyValue>
             <width>30</width>
             <ruleList>
                 <compareText>
@@ -872,7 +871,9 @@ If you are replacing an existing application already on appspot, the application
 	<name>installdir</name>
             <title>Select an output directory</title>
             <description></description>
-            <explanation>The configured WAR file and additional configuration files, if appropriate, will be placed in this directory.</explanation>
+            <explanation>This "installer" does not actually install anything.  Instead, it will either guide you through configuring Aggregate for deployment to Google's AppEngine cloud or guide you through setting up your machine for running a webserver and a database (either Postgres or MySQL) and producing an Aggregate configured for that machine.
+
+The files need to complete the installation, together with a REAME.html with the final installation instructions, will be placed in this directory.</explanation>
             <value></value>
             <default></default>
             <allowEmptyValue>0</allowEmptyValue>
