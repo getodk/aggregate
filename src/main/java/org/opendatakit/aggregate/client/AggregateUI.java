@@ -299,7 +299,6 @@ public class AggregateUI implements EntryPoint {
 
 		RootPanel.get("dynamic_content").add(new HTML("<img src=\"images/odk_color.png\" id=\"odk_aggregate_logo\" />"));
 		RootPanel.get("dynamic_content").add(wrappingLayoutPanel);
-
 		contentLoaded();
 	}
 

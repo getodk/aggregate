@@ -18,7 +18,6 @@ package org.opendatakit.common.security.spring;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.tools.ant.util.DateUtils;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.DataField.IndexType;
@@ -30,6 +29,7 @@ import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.security.client.UserSecurityInfo;
 import org.opendatakit.common.security.common.EmailParser.Email;
+import org.opendatakit.common.utils.WebUtils;
 import org.opendatakit.common.web.CallingContext;
 
 /**
@@ -271,8 +271,7 @@ public final class RegisteredUsersTable extends CommonFieldsBase {
 	}
 	
 	public static final String generateUniqueUri( String username ) {
-		String uri = UID_PREFIX + username + "|" + 
-			DateUtils.format(new Date(), DateUtils.ISO8601_DATETIME_PATTERN);
+		String uri = UID_PREFIX + username + "|" + WebUtils.iso8601Date(new Date());
 		return uri;
 	}
 

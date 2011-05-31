@@ -252,19 +252,6 @@ public class ManageTabUI extends TabPanel {
      parent.formSvc.getExports(callback);
    }
 	
-	public HTML setupPermissionsPanel() {
-		
-		HTML pane = new HTML("<table><tr><td>" +
-				"<a href=\"access/access-configuration\">Manage Website Access</a>" +
-				"</td></tr><tr><td>" +
-				"<a href=\"ssl/user-manage-passwords\">Manage user passwords</a>" +
-				"</td></tr><tr><td>" +
-				"<iframe src=\"access/access-configuration\" width=\"1500\" height=\"3000\" />" +
-				"</td></tr></table>");
-		pane.setStyleName("embedded_iframe");
-		return pane;
-	}
-	
 	public HTML setupUtilitiesPanel() {
 		return new HTML("Content Forthcoming");
 	}

@@ -36,6 +36,7 @@ import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.security.SecurityBeanDefs;
 import org.opendatakit.common.security.SecurityUtils;
 import org.opendatakit.common.security.User;
+import org.opendatakit.common.security.client.CredentialsInfo;
 import org.opendatakit.common.security.client.GrantedAuthorityInfo;
 import org.opendatakit.common.security.client.UserSecurityInfo;
 import org.opendatakit.common.security.client.exception.AccessDeniedException;
@@ -52,8 +53,6 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
 /**
  * GWT server request handler for the SecurityAdminService interface.
- * This should be accessed only over SSL to prevent eavesdropping on 
- * the password-setting API and to prevent tampering.
  * 
  * @author mitchellsundt@gmail.com
  *
@@ -251,13 +250,18 @@ org.opendatakit.common.security.client.security.admin.SecurityAdminService {
 	}
 	
 	@Override
-	public void setUsersAndGrantedAuthorities( ArrayList<UserSecurityInfo> users,  
+	public void setUsersAndGrantedAuthorities( String xsrfString, 
+							ArrayList<UserSecurityInfo> users,  
 							ArrayList<GrantedAuthorityInfo> anonGrants, 
 							ArrayList<GrantedAuthorityInfo> allGroups)
 			throws AccessDeniedException, DatastoreFailureException {
 
 	    HttpServletRequest req = this.getThreadLocalRequest();
 	    CallingContext cc = ContextFactory.getCallingContext(this, req);
+
+	    if ( !req.getSession().getId().equals(xsrfString) ) {
+			throw new AccessDeniedException("Invalid request");
+		}
 
 		List<String> anonGrantStrings = new ArrayList<String>();
 		for ( GrantedAuthorityInfo a : anonGrants ) {
@@ -295,32 +299,29 @@ org.opendatakit.common.security.client.security.admin.SecurityAdminService {
 	}
 
 	@Override
-	public void setUserPasswords(ArrayList<UserSecurityInfo> users,
-			String password) throws AccessDeniedException, DatastoreFailureException {
+	public void setUserPasswords(String xsrfString, ArrayList<CredentialsInfo> credentials)
+			throws AccessDeniedException, DatastoreFailureException {
 
 	    HttpServletRequest req = this.getThreadLocalRequest();
 	    CallingContext cc = ContextFactory.getCallingContext(this, req);
+
+	    if ( !req.getSession().getId().equals(xsrfString) ) {
+			throw new AccessDeniedException("Invalid request");
+		}
 
 	    Datastore ds = cc.getDatastore();
 	    User user = cc.getUserService().getCurrentUser();
 		RegisteredUsersTable userDefinition = null;
 		try {
-			for ( UserSecurityInfo u : users ) {
-				userDefinition = RegisteredUsersTable.getUniqueUserByUsername(u.getUsername(), ds, user);
+			for ( CredentialsInfo credential : credentials ) {
+				userDefinition = RegisteredUsersTable.getUniqueUserByUsername(credential.getUsername(), ds, user);
 				if ( userDefinition == null ) {
 					throw new AccessDeniedException("User is not a registered user.");
 				}
 	
-				MessageDigestPasswordEncoder mde = (MessageDigestPasswordEncoder) cc.getBean(SecurityBeanDefs.BASIC_AUTH_PASSWORD_ENCODER);
-				String salt = UUID.randomUUID().toString().substring(0,8);
-				String fullPass = mde.encodePassword(password, salt);
-				userDefinition.setBasicAuthPassword(fullPass);
-				userDefinition.setBasicAuthSalt(salt);
-				String fullDigestAuthPass = SecurityUtils.getDigestAuthenticationPasswordHash(
-													userDefinition.getUsername(),
-													password, 
-													cc.getUserService().getCurrentRealm() );
-	            userDefinition.setDigestAuthPassword(fullDigestAuthPass);
+				userDefinition.setDigestAuthPassword(credential.getDigestAuthHash());
+				userDefinition.setBasicAuthPassword(credential.getBasicAuthHash());
+				userDefinition.setBasicAuthSalt(credential.getBasicAuthSalt());
 				ds.putEntity(userDefinition, user);
 			}
 		} catch ( ODKDatastoreException e ) {

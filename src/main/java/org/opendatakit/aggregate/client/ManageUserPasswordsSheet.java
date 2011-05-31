@@ -16,11 +16,15 @@
 
 package org.opendatakit.aggregate.client;
 
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.TreeSet;
 
+import org.opendatakit.common.security.client.CredentialsInfo;
+import org.opendatakit.common.security.client.RealmSecurityInfo;
 import org.opendatakit.common.security.client.UserSecurityInfo;
+import org.opendatakit.common.security.client.security.SecurityServiceAsync;
 import org.opendatakit.common.security.client.security.admin.SecurityAdminServiceAsync;
 import org.opendatakit.common.security.common.EmailParser;
 
@@ -35,6 +39,7 @@ import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
+import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
@@ -184,6 +189,10 @@ public class ManageUserPasswordsSheet extends Composite {
 			if ( service == null ) {
 				this.service = SecureGWT.get().createSecurityAdminService();
 			}
+			if ( userSecurityService == null ) {
+				this.userSecurityService = SecureGWT.get().createSecurityService();
+			}
+			
 			service.getAllUsers(false, new AsyncCallback<ArrayList<UserSecurityInfo>>() {
 
 				@Override
@@ -198,6 +207,18 @@ public class ManageUserPasswordsSheet extends Composite {
 				}
 				
 			});
+			if ( realmInfo == null ) {
+				userSecurityService.getRealmInfo(Cookies.getCookie("JSESSIONID"), new AsyncCallback<RealmSecurityInfo>(){
+
+					@Override
+					public void onFailure(Throwable caught) {
+					}
+
+					@Override
+					public void onSuccess(RealmSecurityInfo result) {
+						realmInfo = result;
+					}});
+			}
 			
 			password1.setText("unknown");
 			password2.setText("setting");
@@ -213,29 +234,43 @@ public class ManageUserPasswordsSheet extends Composite {
 	@UiField
 	Button button;
 
+	SecurityServiceAsync userSecurityService;
 	SecurityAdminServiceAsync service;
 
+	RealmSecurityInfo realmInfo;
+	
 	@UiHandler("button")
 	void onUpdateClick(ClickEvent e) {
 		String pw1 = password1.getText();
 		String pw2 = password2.getText();
 		if ( pw1.equals(pw2) ) {
-			ArrayList<UserSecurityInfo> users = new ArrayList<UserSecurityInfo>();
-			users.addAll(changePasswordSet);
-			service.setUserPasswords(users, pw1, new AsyncCallback<Void>() {
-	
-				@Override
-				public void onFailure(Throwable caught) {
-					Window.alert("Incomplete security update: " + caught.getMessage());
+			if ( realmInfo == null ) {
+				Window.alert("Unable to obtain required information from server");
+			}
+
+			ArrayList<CredentialsInfo> credentials = new ArrayList<CredentialsInfo>();
+			try {
+				for ( UserSecurityInfo user : changePasswordSet) {
+					credentials.add(CredentialsInfoBuilder.build(user.getUsername(), realmInfo, pw1));
 				}
-	
-				@Override
-				public void onSuccess(Void result) {
-					Window.alert("Successful bulk update of selected users' passwords");
-					changePasswordSet.clear();
-					dataProvider.refresh();
-				}
-			});
+				service.setUserPasswords(Cookies.getCookie("JSESSIONID"), credentials, new AsyncCallback<Void>() {
+		
+					@Override
+					public void onFailure(Throwable caught) {
+						Window.alert("Incomplete security update: " + caught.getMessage());
+					}
+		
+					@Override
+					public void onSuccess(Void result) {
+						Window.alert("Successful bulk update of selected users' passwords");
+						changePasswordSet.clear();
+						dataProvider.refresh();
+					}
+				});
+			} catch (NoSuchAlgorithmException e1) {
+				Window.alert("Unable to create encrypted password");
+			}
+			
 		} else {
 			Window.alert("The passwords do not match. Please retype the password.");
 		}
