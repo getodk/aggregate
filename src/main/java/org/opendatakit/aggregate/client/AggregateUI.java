@@ -131,7 +131,9 @@ public class AggregateUI implements EntryPoint {
 			}
 
 			public void onSuccess(SubmissionUISummary summary) {
-				updateDataTable(summary);
+			  headers = summary.getHeaders();
+			  submissions = summary.getSubmissions();
+			  updateSubmissionTable(dataTable, summary);
 			}
 		};
 
@@ -150,54 +152,81 @@ public class AggregateUI implements EntryPoint {
 
 	}
 
-	public void updateDataTable(SubmissionUISummary summary) {
-		// for viz
-		headers = summary.getHeaders();
-		submissions = summary.getSubmissions();
+	/**
+	 * NOTE: This formatting function is called by several places, should not be used to update member variables
+	 * 
+	 * NEED to refactor code so that submissionSvc comes from a global context
+	 * 
+	 * @param table
+	 * @param summary
+	 */
+	public void updateSubmissionTable(FlexTable table, SubmissionUISummary summary) {
+     List<Column> tableHeaders = summary.getHeaders();
+     List<SubmissionUI> tableSubmissions = summary.getSubmissions();
 
-		int headerIndex = 0;
-		dataTable.removeAllRows();
-		dataTable.getRowFormatter().addStyleName(0, "titleBar");
-		dataTable.addStyleName("dataTable");
-		for(Column column : headers) {
-			dataTable.setText(0, headerIndex++, column.getDisplayHeader());
-		}
+      int headerIndex = 0;
+      table.removeAllRows();
+      table.getRowFormatter().addStyleName(0, "titleBar");
+      table.addStyleName("dataTable");
+      for(Column column : tableHeaders) {
+         table.setText(0, headerIndex++, column.getDisplayHeader());
+      }
 
-		int i = 1;
-		for(SubmissionUI row : submissions) {
-			int j = 0;
-			for(final String values : row.getValues()) {
-			   switch (headers.get(j).getUiDisplayType()) {
-			   case BINARY:
-			      Image image = new Image(values + UIConsts.PREVIEW_SET);		
-			      image.addClickHandler(new ClickHandler() {
-		            @Override
-		            public void onClick(ClickEvent event) {
-		               final PopupPanel popup = new ImagePopup(values, servicesAdminSvc);
-		               popup.setPopupPositionAndShow(new PopupPanel.PositionCallback() {
-		                  @Override
-		                  public void setPosition(int offsetWidth, int offsetHeight) {
-		                     int left = ((Window.getClientWidth() - offsetWidth) / 2);
-		                     int top = ((Window.getClientHeight() - offsetHeight) / 2);
-		                     popup.setPopupPosition(left, top);
-		                  }
-		               });
-		            }
-		         });
-			      
-			      dataTable.setWidget(i, j, image);
-			      break;
-			   default:
-	            dataTable.setText(i, j, values);			     
-			   }
-			   j++;
-			}
-			if (i % 2 == 0) {
-				dataTable.getRowFormatter().setStyleName(i, "evenTableRow");
-			}
-			i++;
-		}
-	}
+      int i = 1;
+      for(SubmissionUI row : tableSubmissions) {
+         int j = 0;
+         for(final String values : row.getValues()) {
+            switch (tableHeaders.get(j).getUiDisplayType()) {
+            case BINARY:
+               Image image = new Image(values + UIConsts.PREVIEW_SET);     
+               image.addClickHandler(new ClickHandler() {
+                  @Override
+                  public void onClick(ClickEvent event) {
+                     final PopupPanel popup = new ImagePopup(values);
+                     popup.setPopupPositionAndShow(new PopupPanel.PositionCallback() {
+                        @Override
+                        public void setPosition(int offsetWidth, int offsetHeight) {
+                           int left = ((Window.getClientWidth() - offsetWidth) / 2);
+                           int top = ((Window.getClientHeight() - offsetHeight) / 2);
+                           popup.setPopupPosition(left, top);
+                        }
+                     });
+                  }
+               });
+               
+               table.setWidget(i, j, image);
+               break;
+            case REPEAT:
+              Button repeat = new Button("View");
+              final AggregateUI tmp = this; // fix after refactoring of the function and global services
+              repeat.addClickHandler(new ClickHandler() {
+                @Override
+                public void onClick(ClickEvent event) {
+                  final PopupPanel popup = new RepeatPopup(values, submissionSvc, tmp);
+                  popup.setPopupPositionAndShow(new PopupPanel.PositionCallback() {
+                    @Override
+                    public void setPosition(int offsetWidth, int offsetHeight) {
+                      int left = ((Window.getClientWidth() - offsetWidth) / 2);
+                      int top = ((Window.getClientHeight() - offsetHeight) / 2);
+                      popup.setPopupPosition(left, top);
+                      }
+                    });
+                   }
+                });
+              
+              table.setWidget(i, j, repeat);
+              break;
+            default:
+               table.setText(i, j, values);            
+            }
+            j++;
+         }
+         if (i % 2 == 0) {
+            table.getRowFormatter().setStyleName(i, "evenTableRow");
+         }
+         i++;
+      }
+   }
 
 	/*
 	 * Creates a click handler for a main menu tab.

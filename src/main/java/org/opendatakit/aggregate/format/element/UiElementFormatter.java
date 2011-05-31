@@ -1,15 +1,20 @@
 package org.opendatakit.aggregate.format.element;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.ServletConsts;
+import org.opendatakit.aggregate.constants.format.FormTableConsts;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.server.GeopointHeaderIncludes;
 import org.opendatakit.aggregate.servlet.BinaryDataServlet;
+import org.opendatakit.aggregate.servlet.FormMultipleValueServlet;
 import org.opendatakit.aggregate.submission.SubmissionKey;
+import org.opendatakit.aggregate.submission.SubmissionRepeat;
+import org.opendatakit.aggregate.submission.SubmissionSet;
 import org.opendatakit.aggregate.submission.type.BlobSubmissionType;
 import org.opendatakit.aggregate.submission.type.GeoPoint;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
@@ -76,4 +81,19 @@ public class UiElementFormatter extends BasicElementFormatter {
     row.addFormattedValue(url);    
   }
   
+  @Override
+  public void formatRepeats(SubmissionRepeat repeat, FormElementModel repeatElement, Row row, CallingContext cc) throws ODKDatastoreException {
+    if(repeat == null) {
+      row.addFormattedValue(null);
+      return;
+    }
+    
+    List<SubmissionSet> sets = repeat.getSubmissionSets();
+    if ( sets.size() == 0 ) {
+      row.addFormattedValue(null);
+      return;
+    }
+
+    row.addFormattedValue(repeat.constructSubmissionKey().toString());    
+  }
 }

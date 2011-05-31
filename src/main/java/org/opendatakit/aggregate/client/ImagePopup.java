@@ -1,7 +1,5 @@
 package org.opendatakit.aggregate.client;
 
-import org.opendatakit.aggregate.client.services.admin.ServicesAdminServiceAsync;
-
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Button;
@@ -11,7 +9,7 @@ import com.google.gwt.user.client.ui.PopupPanel;
 
 public class ImagePopup extends PopupPanel {
 
-  public ImagePopup(final String url, final ServicesAdminServiceAsync servicesAdminSvc) {
+  public ImagePopup(final String url) {
     super(false);
     FlexTable layout = new FlexTable();
 

@@ -28,4 +28,6 @@ public interface SubmissionServiceAsync {
 
   void getGeoPoints(String formId, String geopointKey, AsyncCallback<UIGeoPoint[]> callback);
 
+  void getRepeatSubmissions(String keyString, AsyncCallback<SubmissionUISummary> callback);
+
 }
