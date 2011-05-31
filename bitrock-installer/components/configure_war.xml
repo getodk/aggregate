@@ -620,7 +620,7 @@ ${html_steps_end}</text>
             <path>${installdir}/README.html</path>
             <progressText>Write README</progressText>
             <text>${html_steps_begin}
-${html_steps_begin_item}Browse to ${installdir} and execute &lt;code&gt;uploadAggregateToAppEngine.${script_ext}&lt;/code&gt; to deploy ${product_fullname} up into Google's AppEngine cloud.
+${html_steps_begin_item}Browse to ${installdir} and execute &lt;code&gt;uploadAggregateToAppEngine.${script_ext}&lt;/code&gt; to deploy ${product_fullname} up into Google's AppEngine cloud.  &lt;font color="red"/&gt;NOTE:&lt;/font&gt; this script will ask for your Google password and will erroneously display it. 
 ${html_steps_end_item}${html_steps_begin_item}
 Visit &lt;a href="http://${hostname}"&gt;http://${hostname}/&lt;/a&gt; to complete configuring the
 access rights for ODK Aggregate.${html_steps_end_item}

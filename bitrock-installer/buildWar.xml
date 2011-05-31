@@ -3,7 +3,6 @@
     <fullName>ODK Aggregate</fullName>
     <version>1.0</version>
     <licenseFile>files/LICENSE.txt</licenseFile>
-    <htmlLicenseFile>files/LICENSE.html</htmlLicenseFile>
     <leftImage>files/leftSide.png</leftImage>
     <logoImage>files/logo.png</logoImage>
     <splashImage>files/opendatakit.png</splashImage>
@@ -19,7 +18,13 @@
     <width>700</width>
     <windowsExecutableIcon>files/opendatakit.ico</windowsExecutableIcon>
     <windowsUninstallerExecutableIcon>files/opendatakit.ico</windowsUninstallerExecutableIcon>
-    <componentList>
+    <customLanguageFileList>
+		<language>
+		  <code>en</code>
+		  <file>tagfile-en.lng</file>
+		</language>
+	</customLanguageFileList>
+	<componentList>
         <include>
             <file>components/params.xml</file>
         </include>
