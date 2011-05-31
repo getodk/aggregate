@@ -18,6 +18,8 @@ package org.opendatakit.aggregate.client.submission;
 
 import java.io.Serializable;
 
+import org.opendatakit.aggregate.constants.common.UIDisplayType;
+
 public class Column implements Serializable {
   /**
    * Serialization Identifier
@@ -27,18 +29,23 @@ public class Column implements Serializable {
   private String displayHeader;
   private String columnEncoding;
   private Long geopointColumnCode;
+  private UIDisplayType uiDisplayType;
+
+  public Column() {
+	  uiDisplayType = UIDisplayType.TEXT;
+  }
   
-  public Column() {;}
-  
-  public Column(String displayHeader, String columnName) {
+  public Column(String displayHeader, String columnName, UIDisplayType displayType) {
     this.displayHeader = displayHeader;
     this.columnEncoding = columnName;
+    uiDisplayType = displayType;
   }
 
   public Column(String displayHeader, String columnName, Long geopointColumnCode) {
     this.displayHeader = displayHeader;
     this.columnEncoding = columnName;
     this.geopointColumnCode = geopointColumnCode;
+    uiDisplayType = UIDisplayType.TEXT;
   }
   
   public String getDisplayHeader() {
@@ -51,5 +58,9 @@ public class Column implements Serializable {
   
   public Long getGeopointColumnCode() {
     return geopointColumnCode;
+  }
+  
+  public UIDisplayType getUiDisplayType() {
+	return uiDisplayType;
   }
 }

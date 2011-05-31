@@ -20,6 +20,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.opendatakit.aggregate.constants.common.UIDisplayType;
+
 public class SubmissionUISummary implements Serializable {
 
   /**
@@ -48,8 +50,16 @@ public class SubmissionUISummary implements Serializable {
   }
 
   public void addSubmissionHeader(String displayHeader, String columnName) {
-    headers.add(new Column(displayHeader, columnName));
+    headers.add(new Column(displayHeader, columnName, UIDisplayType.TEXT));
   }
+  
+  public void addBinarySubmissionHeader(String displayHeader, String columnName) {
+	    headers.add(new Column(displayHeader, columnName, UIDisplayType.BINARY));
+  }
+  
+  public void addRepeatSubmissionHeader(String displayHeader, String columnName) {
+	    headers.add(new Column(displayHeader, columnName, UIDisplayType.REPEAT));
+}
   
   public void addGeopointHeader(String displayHeader, String columnName, Long geopointColumnCode) {
     headers.add(new Column(displayHeader, columnName, geopointColumnCode));
