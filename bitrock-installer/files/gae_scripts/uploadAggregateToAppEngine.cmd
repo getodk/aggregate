@@ -1,3 +1,3 @@
 echo off
-"%~dp0\appengine-java-sdk\bin\appcfg.cmd" --enable_jar_splitting update ODKAggregate
+"%~dp0\appengine-java-sdk\bin\appcfg.cmd" --passin update ODKAggregate
 pause

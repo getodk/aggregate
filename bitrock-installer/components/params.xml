@@ -68,7 +68,7 @@
 	<name>platform</name>
             <title>Choose Platform</title>
             <description></description>
-            <explanation>Choose the data storage and execution environment on which you would like Aggregate to run. If you choose MySQL or PostgreSQL, you will need to install those servers and an Apache Tomcat 6 server.</explanation>
+            <explanation>Choose the data storage and execution environment on which you would like Aggregate to run. If you choose MySQL or PostgreSQL, you will need to first install that database server and an Apache Tomcat 6 server.</explanation>
             <value></value>
             <default></default>
             <allowEmptyValue>0</allowEmptyValue>
@@ -83,13 +83,13 @@
                     <value>gae</value>
                 </option>
                 <option>
-                    <description>You must install MySQL and an Apache Tomcat 6 webserver.</description>
+                    <description>Uses a MySQL database and an Apache Tomcat 6 webserver that you install.</description>
                     <image></image>
                     <text>MySQL</text>
                     <value>mysql</value>
                 </option>
                 <option>
-                    <description>You must install PostgreSQL and an Apache Tomcat 6 webserver.</description>
+                    <description>Uses a PostgreSQL database and an Apache Tomcat 6 webserver that you install.</description>
                     <image></image>
                     <text>PostgreSQL</text>
                     <value>postgres</value>
@@ -706,7 +706,7 @@ The installer will generate scripts that can be run on the database to create th
 	<name>organization_url</name>
             <title>Organization Domain Name</title>
             <description>Please enter the domain name of your organization:</description>
-            <explanation>Your domain name will be displayed to users when they attempt to log in using their Aggregate server password.</explanation>
+            <explanation>Your domain name will be used to identify your organization to users when they log into your Aggregate instance using their Aggregate server password (which you will assign).</explanation>
             <value>opendatakit.org</value>
             <default></default>
             <allowEmptyValue>0</allowEmptyValue>
@@ -783,7 +783,7 @@ You must give a complete Email address (e.g., username@gmail.com ).
             <description>Please enter your application id:</description>
             <explanation>Before continuing, you should obtain an application identifier in Google's AppEngine cloud, go to:
     https://appengine.google.com/ 
-and create an application identifier to be used by Aggregate. 
+and create an application identifier to be used for Aggregate by clicking the 'Create Application' button on that page. 
 
 If you are replacing an existing application already on appspot, the application identifier is the leftmost portion of the appspot.com URL. For example, if your application is at 'opendatakit.appspot.com' you would enter 'opendatakit' below.</explanation>
             <value></value>
@@ -873,12 +873,14 @@ If you are replacing an existing application already on appspot, the application
             <description></description>
             <explanation>This "installer" does not actually install anything.  Instead, it will either guide you through configuring Aggregate for deployment to Google's AppEngine cloud or guide you through setting up your machine for running a webserver and a database (either Postgres or MySQL) and producing an Aggregate configured for that machine.
 
-The files need to complete the installation, together with a REAME.html with the final installation instructions, will be placed in this directory.</explanation>
+The files need to complete the installation, together with a README.html containing the final installation instructions, will be placed in this directory.
+
+Please cfeate and select this directory now.</explanation>
             <value></value>
             <default></default>
             <allowEmptyValue>0</allowEmptyValue>
-            <mustBeWritable>0</mustBeWritable>
-            <mustExist>1</mustExist>
+            <mustBeWritable>1</mustBeWritable>
+            <mustExist>0</mustExist>
             <width>40</width>
         </directoryParameter>
     </parameterList>
