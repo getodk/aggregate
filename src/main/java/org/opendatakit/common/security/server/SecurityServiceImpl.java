@@ -140,7 +140,7 @@ org.opendatakit.common.security.client.security.SecurityService {
 				}
 			} else if ( user.isAnonymous() ) {
 	    		info = new UserSecurityInfo(User.ANONYMOUS_USER, User.ANONYMOUS_USER_NICKNAME, null, 
-												UserSecurityInfo.UserType.AUTHENTICATED);
+												UserSecurityInfo.UserType.ANONYMOUS);
 	    		SecurityServiceUtil.setAuthenticationListsForSpecialUser(info, GrantedAuthorityNames.USER_IS_ANONYMOUS, cc);
 			} else {
 	    		String name = uriUser.substring(SecurityUtils.MAILTO_COLON.length());
