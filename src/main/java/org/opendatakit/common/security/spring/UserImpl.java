@@ -23,6 +23,7 @@ import java.util.Set;
 
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.security.User;
+import org.opendatakit.common.security.common.GrantedAuthorityNames;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.GrantedAuthorityImpl;
 
@@ -31,6 +32,7 @@ public class UserImpl implements org.opendatakit.common.security.User {
 	final String nickName;
 	final String uriUser;
 	final Set<GrantedAuthority> groups = new HashSet<GrantedAuthority>();
+	final Set<GrantedAuthority> directAuthorities = new HashSet<GrantedAuthority>();
 	final Datastore datastore;
 	Map<String, Set<GrantedAuthority> > formIdGrantedAuthorities = null;
 	
@@ -46,6 +48,7 @@ public class UserImpl implements org.opendatakit.common.security.User {
 				groups.add(g);
 			}
 		}
+		this.directAuthorities.addAll(groupsAndGrantedAuthorities);
 	}
 	
 	@Override
@@ -55,6 +58,10 @@ public class UserImpl implements org.opendatakit.common.security.User {
 
 	public Set<GrantedAuthority> getGroups() {
 		return Collections.unmodifiableSet(groups);
+	}
+
+	public Set<GrantedAuthority> getDirectAuthorities() {
+		return Collections.unmodifiableSet(directAuthorities);
 	}
 
 	@Override

@@ -121,7 +121,7 @@ public class ConfirmServlet extends ServletUtilBase {
 	          ServletConsts.FORM_ID, form.getFormId()));
       
 		  QueryByKeys query = new QueryByKeys(recordKeys);
-		  SubmissionFormatter formatter = new HtmlFormatter(form, cc.getServerURL(), resp.getWriter(), null, false);
+		  SubmissionFormatter formatter = new HtmlFormatter(form, cc.getServerURL(), out, null, false);
 		  formatter.processSubmissions(query.getResultSubmissions(cc), cc);
 		  
       } else if (processType.equals(ProcessType.DELETE_FORM.getButtonText())) {

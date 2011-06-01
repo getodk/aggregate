@@ -30,6 +30,7 @@ import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.persistence.Query.FilterOperation;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.security.User;
+import org.opendatakit.common.security.common.GrantedAuthorityNames;
 import org.opendatakit.common.web.CallingContext;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.GrantedAuthorityImpl;
@@ -196,7 +197,7 @@ public final class UserGrantedAuthority extends CommonFieldsBase {
 	 * @param cc
 	 * @throws ODKDatastoreException
 	 */
-	public static final void assertGrantedAuthoryMembers(GrantedAuthority group, 
+	public static final void assertGrantedAuthorityMembers(GrantedAuthority group, 
 			Collection<String> desiredMembers, CallingContext cc) throws ODKDatastoreException {
 
 		Datastore ds = cc.getDatastore();

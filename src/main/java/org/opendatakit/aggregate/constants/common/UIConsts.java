@@ -21,7 +21,8 @@ public class UIConsts {
   public static final String FSC_URI_PARAM = "fsc";
   public static final String PREVIEW_PARAM = "previewImage";
   public static final String PREVIEW_SET = "&" + PREVIEW_PARAM + "=true";
-  
+  public static final String HOST_PAGE_BASE_ADDR = "Aggregate.html";
+
   // running locally
  // public static final String GOOGLE_MAP_KEY = "";
   

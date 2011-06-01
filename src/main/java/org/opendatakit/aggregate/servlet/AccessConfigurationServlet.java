@@ -25,7 +25,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.logging.Logger;
 
@@ -40,12 +39,13 @@ import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.security.User;
+import org.opendatakit.common.security.common.EmailParser;
+import org.opendatakit.common.security.common.GrantedAuthorityNames;
+import org.opendatakit.common.security.common.EmailParser.Email;
+import org.opendatakit.common.security.server.SecurityServiceUtil;
 import org.opendatakit.common.security.spring.GrantedAuthorityHierarchyTable;
-import org.opendatakit.common.security.spring.GrantedAuthorityNames;
 import org.opendatakit.common.security.spring.RegisteredUsersTable;
 import org.opendatakit.common.security.spring.UserGrantedAuthority;
-import org.opendatakit.common.utils.EmailParser;
-import org.opendatakit.common.utils.EmailParser.Email;
 import org.opendatakit.common.web.CallingContext;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.GrantedAuthorityImpl;
@@ -77,12 +77,6 @@ public class AccessConfigurationServlet extends ServletUtilBase {
 	
 	private static final String FORCE_SIMPLE = "forceSimple";
 	
-	private static final String SITE_ADMINS = "siteAdmins";
-	
-	private static final String FORM_ADMINS = "formAdmins";
-	
-	private static final String SUBMITTERS = "submitters";
-	
 	private static final String ANONYMOUS_SUBMITTERS = "anonymousSubmitters";
 	
 	private static final String ANONYMOUS_ATTACHMENT_VIEWERS = "anonymousAttachmentViewers";
@@ -99,49 +93,11 @@ public class AccessConfigurationServlet extends ServletUtilBase {
 	 * Static immutable values for access management configuration...
 	 */
 
-	private static final GrantedAuthority siteAuth = new GrantedAuthorityImpl(SITE_ADMINS);
-	private static final GrantedAuthority formAuth = new GrantedAuthorityImpl(FORM_ADMINS);
-	private static final GrantedAuthority submitterAuth = new GrantedAuthorityImpl(SUBMITTERS);
+	private static final GrantedAuthority siteAuth = new GrantedAuthorityImpl(GrantedAuthorityNames.GROUP_SITE_ADMINS);
+	private static final GrantedAuthority formAuth = new GrantedAuthorityImpl(GrantedAuthorityNames.GROUP_FORM_ADMINS);
+	private static final GrantedAuthority submitterAuth = new GrantedAuthorityImpl(GrantedAuthorityNames.GROUP_SUBMITTERS);
 	private static final GrantedAuthority anonAuth = new GrantedAuthorityImpl(GrantedAuthorityNames.USER_IS_ANONYMOUS.name());
 
-	private static final List<String> siteGrants;
-	private static final List<String> formGrants;
-	private static final List<String> submitterGrants;
-
-	private static final List<String> anonSubmitterGrants;
-	private static final List<String> anonAttachmentViewerGrants;
-	
-	static {
-		List<String> isiteGrants = new ArrayList<String>();
-		isiteGrants.add(GrantedAuthorityNames.ROLE_ACCESS_ADMIN.name());
-		isiteGrants.add(FORM_ADMINS);
-		siteGrants = Collections.unmodifiableList(isiteGrants);
-	
-		List<String> iformGrants = new ArrayList<String>();
-		iformGrants.add(GrantedAuthorityNames.ROLE_FORM_ADMIN.name());
-		iformGrants.add(SUBMITTERS);
-		formGrants = Collections.unmodifiableList(iformGrants);
-	
-		List<String> isubmitterGrants = new ArrayList<String>();
-		isubmitterGrants.add(GrantedAuthorityNames.ROLE_ANALYST.name());
-		isubmitterGrants.add(GrantedAuthorityNames.ROLE_ATTACHMENT_VIEWER.name());
-		isubmitterGrants.add(GrantedAuthorityNames.ROLE_FORM_DOWNLOAD.name());
-		isubmitterGrants.add(GrantedAuthorityNames.ROLE_FORM_LIST.name());
-		isubmitterGrants.add(GrantedAuthorityNames.ROLE_SERVICES_ADMIN.name());
-		isubmitterGrants.add(GrantedAuthorityNames.ROLE_SUBMISSION_UPLOAD.name());
-		isubmitterGrants.add(GrantedAuthorityNames.ROLE_USER.name());
-		submitterGrants = Collections.unmodifiableList(isubmitterGrants);
-
-		List<String> ianonSubmitterGrants = new ArrayList<String>();
-		ianonSubmitterGrants.add(GrantedAuthorityNames.ROLE_FORM_DOWNLOAD.name());
-		ianonSubmitterGrants.add(GrantedAuthorityNames.ROLE_FORM_LIST.name());
-		ianonSubmitterGrants.add(GrantedAuthorityNames.ROLE_SUBMISSION_UPLOAD.name());
-		anonSubmitterGrants = Collections.unmodifiableList(ianonSubmitterGrants);
-
-		List<String> ianonAttachmentViewerGrants = new ArrayList<String>();
-		ianonAttachmentViewerGrants.add(GrantedAuthorityNames.ROLE_ATTACHMENT_VIEWER.name());
-		anonAttachmentViewerGrants = Collections.unmodifiableList(ianonAttachmentViewerGrants);
-	}
 
 	/**
 	 * Retrieves and constructs the new-line-separated list of e-mails that are 
@@ -230,51 +186,7 @@ public class AccessConfigurationServlet extends ServletUtilBase {
 		}
 		
 		// assert that the authority has exactly this set of uriUsers (no more, no less)
-		UserGrantedAuthority.assertGrantedAuthoryMembers(auth, desiredMembers, cc);
-	}
-
-	/**
-	 * Determine whether or not the configuration is a full or partially constructed
-	 * simple configuration.  If it has additional elements, we show the click-through
-	 * to custom management screen.  Otherwise, show the wizard screen.
-	 * 
-	 * @param cc
-	 * @return
-	 * @throws ODKDatastoreException
-	 */
-	private boolean isSimpleConfig( CallingContext cc ) throws ODKDatastoreException {
-		TreeMap<String, TreeSet<String>> hierarchy = 
-			GrantedAuthorityHierarchyTable.getEntireGrantedAuthorityHierarchy(cc.getDatastore(), cc.getCurrentUser());
-		
-		// check that a subset of the expected set of fields are there...
-		for ( Map.Entry<String, TreeSet<String>> e : hierarchy.entrySet() ) {
-			if ( e.getKey().equals(SITE_ADMINS) ) {
-				for ( String s : e.getValue() ) {
-					if ( siteGrants.contains(s) ) continue;
-					return false; 
-				}
-			} else if ( e.getKey().equals(FORM_ADMINS) ) {
-				for ( String s : e.getValue() ) {
-					if ( formGrants.contains(s) ) continue;
-					return false; 
-				}
-			} else if ( e.getKey().equals(SUBMITTERS) ) {
-				for ( String s : e.getValue() ) {
-					if ( submitterGrants.contains(s) ) continue;
-					return false; 
-				}
-			} else if ( e.getKey().equals(GrantedAuthorityNames.USER_IS_ANONYMOUS.name())) {
-				for ( String s : e.getValue() ) {
-					if ( anonSubmitterGrants.contains(s) ||
-							anonAttachmentViewerGrants.contains(s) ) continue;
-					return false; 
-				}
-			} else {
-				// some other name -- must be a custom set-up...
-				return false;
-			}
-		}
-		return true;
+		UserGrantedAuthority.assertGrantedAuthorityMembers(auth, desiredMembers, cc);
 	}
 	
 	private static final class AnonSettings {
@@ -289,8 +201,8 @@ public class AccessConfigurationServlet extends ServletUtilBase {
 		a.viewer = false;
 		
 		for ( String s : grants ) {
-			a.submitter = a.submitter || anonSubmitterGrants.contains(s);
-			a.viewer = a.viewer || anonAttachmentViewerGrants.contains(s);
+			a.submitter = a.submitter || SecurityServiceUtil.anonSubmitterGrants.contains(s);
+			a.viewer = a.viewer || SecurityServiceUtil.anonAttachmentViewerGrants.contains(s);
 		}
 		return a;
 	}
@@ -310,7 +222,7 @@ public class AccessConfigurationServlet extends ServletUtilBase {
 		PrintWriter out = resp.getWriter();
 		try {
 			
-			if ( forceSimple == null && !isSimpleConfig(cc) ) {
+			if ( forceSimple == null && !SecurityServiceUtil.isSimpleConfig(cc) ) {
 				Map<String,String> properties = new HashMap<String,String>();
 				properties.put(FORCE_SIMPLE, "yes");
 				String link = HtmlUtil.createHrefWithProperties( cc.getWebApplicationURL(ADDR),
@@ -358,8 +270,8 @@ public class AccessConfigurationServlet extends ServletUtilBase {
 				out.print("<p>Authenticated submissions from ODK Collect 1.1.6 (or higher) require the use " +
 						"of passwords that are held on this server and that are specific to this server " +
 						"\n(referred to as <em>Aggregate passwords</em>). " +
-						"Site administrators can set or change Aggregate passwords <a href=\"" + 
-						cc.getWebApplicationURL(UserManagePasswordsServlet.ADDR) + "\">here</a>. By default, " +
+						"Site administrators can set or change Aggregate passwords from the " +
+						"<em>Manage/Permissions/Manage User Passwords</em> tab. By default, " +
 						"users are not assigned an Aggregate password " +
 						"and so will not be able to do authenticated submissions until a site administrator " +
 						"assigns them a password or until they log in and set their own password.</p>" +
@@ -370,13 +282,13 @@ public class AccessConfigurationServlet extends ServletUtilBase {
 						"to the system.</p>");
 				out.print("<p>Users, once logged in, can reset their Aggregate passwords by visiting the 'Change Password' page.</p>");
 				out.print("<h4>Site Administrators</h4><p>Enter the usernames or e-mail addresses of the " +
-						"site administrators below</p><textarea name=\"" + SITE_ADMINS + "\" rows=\"10\" cols=\"60\">" +
+						"site administrators below</p><textarea name=\"" + GrantedAuthorityNames.GROUP_SITE_ADMINS + "\" rows=\"10\" cols=\"60\">" +
 								getUsernamesOrEmailsOfGrantedAuthority(siteAuth, cc) + "</textarea>");
 				out.print("<h4>Form Administrators</h4><p>Enter the usernames or e-mail addresses of the " +
-						"form administrators below</p><textarea name=\"" + FORM_ADMINS + "\" rows=\"10\" cols=\"60\">" +
+						"form administrators below</p><textarea name=\"" + GrantedAuthorityNames.GROUP_FORM_ADMINS + "\" rows=\"10\" cols=\"60\">" +
 								getUsernamesOrEmailsOfGrantedAuthority(formAuth, cc) + "</textarea>");
 				out.print("<h4>Submitters</h4><p>Enter the usernames or e-mail addresses of the " +
-						"submitters below</p><textarea name=\"" + SUBMITTERS + "\" rows=\"20\" cols=\"60\">" +
+						"submitters below</p><textarea name=\"" + GrantedAuthorityNames.GROUP_SUBMITTERS + "\" rows=\"20\" cols=\"60\">" +
 								getUsernamesOrEmailsOfGrantedAuthority(submitterAuth, cc) + "</textarea>");
 				out.print("<br/><br/><input name=\"" + ANONYMOUS_SUBMITTERS + "\" type=\"checkbox\" value=\"yes\"" + 
 						(a.submitter ? "checked" : "") + ">Accept submissions from " +
@@ -401,10 +313,6 @@ public class AccessConfigurationServlet extends ServletUtilBase {
 						" over who can access that data.</p>");
 				out.print("<input type=\"submit\" value=\"Submit\">");
 				out.print("</form>");
-				out.print("<p>Advanced users may wish to use the non-wizard " +
-						"configuration pages <a href=\"" + 
-						cc.getWebApplicationURL(AccessManagementServlet.ADDR) + 
-						"\">here</a> for more precise access control.</p>");
 			}
 			finishBasicHtmlResponse(resp);
 		} catch (ODKDatastoreException e) {
@@ -424,9 +332,9 @@ public class AccessConfigurationServlet extends ServletUtilBase {
 
 		CallingContext cc = ContextFactory.getCallingContext(this, req);
 		
-		String siteAdmins = req.getParameter(SITE_ADMINS);
-		String formAdmins = req.getParameter(FORM_ADMINS);
-		String submitters = req.getParameter(SUBMITTERS);
+		String siteAdmins = req.getParameter(GrantedAuthorityNames.GROUP_SITE_ADMINS);
+		String formAdmins = req.getParameter(GrantedAuthorityNames.GROUP_FORM_ADMINS);
+		String submitters = req.getParameter(GrantedAuthorityNames.GROUP_SUBMITTERS);
 		boolean anonSubmitters = false;
 		{
 			String str = req.getParameter(ANONYMOUS_SUBMITTERS);
@@ -440,10 +348,10 @@ public class AccessConfigurationServlet extends ServletUtilBase {
 							(str.compareToIgnoreCase("yes") == 0);
 		}
 
-		Collection<Email> siteAdminEmails = EmailParser.parseEmails(siteAdmins, cc);
+		Collection<Email> siteAdminEmails = EmailParser.parseEmails(siteAdmins);
 		{
 			// make sure that the super-user is in the site admins list...
-			Email eSuperUser = EmailParser.getSuperUserEmail(cc);
+			Email eSuperUser = SecurityServiceUtil.getSuperUserEmail(cc);
 			boolean found = false;
 			for ( Email e : siteAdminEmails ) {
 				if ( e.getEmail() != null && 
@@ -459,23 +367,23 @@ public class AccessConfigurationServlet extends ServletUtilBase {
 				siteAdminEmails = newList;
 			}
 		}
-		Collection<Email> formAdminEmails = EmailParser.parseEmails(formAdmins, cc);
-		Collection<Email> submitterEmails = EmailParser.parseEmails(submitters, cc);
+		Collection<Email> formAdminEmails = EmailParser.parseEmails(formAdmins);
+		Collection<Email> submitterEmails = EmailParser.parseEmails(submitters);
 
 		List<String> anonGrants = new ArrayList<String>();
 		
 		if ( anonSubmitters ) {
-			anonGrants.addAll(anonSubmitterGrants);
+			anonGrants.addAll(SecurityServiceUtil.anonSubmitterGrants);
 		}
 		
 		if ( anonAttachmentViewers ) {
-			anonGrants.addAll(anonAttachmentViewerGrants);
+			anonGrants.addAll(SecurityServiceUtil.anonAttachmentViewerGrants);
 		}
 
 		try {
-			GrantedAuthorityHierarchyTable.assertGrantedAuthorityHierarchy(siteAuth, siteGrants, cc);
-			GrantedAuthorityHierarchyTable.assertGrantedAuthorityHierarchy(formAuth, formGrants, cc);
-			GrantedAuthorityHierarchyTable.assertGrantedAuthorityHierarchy(submitterAuth, submitterGrants, cc);
+			GrantedAuthorityHierarchyTable.assertGrantedAuthorityHierarchy(siteAuth, SecurityServiceUtil.siteGrants, cc);
+			GrantedAuthorityHierarchyTable.assertGrantedAuthorityHierarchy(formAuth, SecurityServiceUtil.formGrants, cc);
+			GrantedAuthorityHierarchyTable.assertGrantedAuthorityHierarchy(submitterAuth, SecurityServiceUtil.submitterGrants, cc);
 
 			GrantedAuthorityHierarchyTable.assertGrantedAuthorityHierarchy(anonAuth, anonGrants, cc);
 			

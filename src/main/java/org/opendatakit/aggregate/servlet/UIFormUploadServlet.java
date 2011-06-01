@@ -240,7 +240,7 @@ public class UIFormUploadServlet extends ServletUtilBase {
     out.write(UPLOAD_PAGE_BODY_MIDDLE);
     out.write(cc.getWebApplicationURL(ADDR));
     out.write(UPLOAD_PAGE_BODY_REMAINDER);
-    resp.getWriter().write(HtmlConsts.BODY_CLOSE + HtmlConsts.HTML_CLOSE);
+    out.write(HtmlConsts.BODY_CLOSE + HtmlConsts.HTML_CLOSE);
   }
 
   /**
@@ -353,31 +353,37 @@ public class UIFormUploadServlet extends ServletUtilBase {
         e.printStackTrace();
         resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
             ErrorConsts.PERSISTENCE_LAYER_PROBLEM);
+        return;
       } catch (ODKDatastoreException e) {
         // TODO NEED TO FIGURE OUT PROPER ACTION FOR ERROR
         e.printStackTrace();
         resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
             ErrorConsts.PERSISTENCE_LAYER_PROBLEM);
+        return;
       } catch (ODKConversionException e) {
         // TODO Auto-generated catch block
         e.printStackTrace();
         resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ErrorConsts.PARSING_PROBLEM
             + "\n" + e.getMessage());
+        return;
       } catch (ODKFormNotFoundException e) {
         // TODO Auto-generated catch block
         e.printStackTrace();
         resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ErrorConsts.ODKID_NOT_FOUND);
+        return;
       } catch (ODKParseException e) {
         // unfortunately, the underlying javarosa utility swallows the parsing
         // error.
         e.printStackTrace();
         resp.sendError(HttpServletResponse.SC_BAD_REQUEST,
             ErrorConsts.PARSING_PROBLEM + "\n" + e.getMessage());
+        return;
       }
 
     } catch (FileUploadException e) {
       e.printStackTrace(resp.getWriter());
       resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ErrorConsts.UPLOAD_PROBLEM);
+      return;
     }
 
     if (bOk) {

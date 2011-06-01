@@ -29,6 +29,7 @@ import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.security.Realm;
 import org.opendatakit.common.security.SecurityUtils;
 import org.opendatakit.common.security.User;
+import org.opendatakit.common.security.common.GrantedAuthorityNames;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;

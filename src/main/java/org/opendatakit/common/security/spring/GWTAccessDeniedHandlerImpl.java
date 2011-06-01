@@ -39,7 +39,7 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 /**
  * An AccessDenied handler that uses the presence of a special header to identify
  * GWT requests and causes those requests to have an 
- * {@link org.opendatakit.common.security.exception.AccessDeniedException} thrown
+ * {@link org.opendatakit.common.security.client.exception.AccessDeniedException} thrown
  * within the GWT RPC mechanism.  This necessitates that all <code>GWT.create()</code>
  * requests be handled through the <code>SecureGWT</code> class.
  * 
@@ -98,7 +98,7 @@ public class GWTAccessDeniedHandlerImpl implements AccessDeniedHandler, ServletC
 				return RPC
 						.encodeResponseForFailure(
 								rpcRequest.getMethod(),
-								new org.opendatakit.common.security.exception.AccessDeniedException(
+								new org.opendatakit.common.security.client.exception.AccessDeniedException(
 										e));
 				// ******** CHANGED GWT 2.3 CODE ENDS
 			} catch (IncompatibleRemoteServiceException ex) {

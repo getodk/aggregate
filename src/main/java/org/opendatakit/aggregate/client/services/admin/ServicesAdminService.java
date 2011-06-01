@@ -17,7 +17,7 @@
 package org.opendatakit.aggregate.client.services.admin;
 
 import org.opendatakit.aggregate.constants.common.ExternalServiceOption;
-import org.opendatakit.common.security.exception.AccessDeniedException;
+import org.opendatakit.common.security.client.exception.AccessDeniedException;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;

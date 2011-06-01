@@ -37,8 +37,12 @@ import org.opendatakit.aggregate.client.submission.SubmissionUISummary;
 import org.opendatakit.aggregate.constants.common.FormOrFilter;
 import org.opendatakit.aggregate.constants.common.PageUpdates;
 import org.opendatakit.aggregate.constants.common.UIConsts;
+import org.opendatakit.common.security.client.UserSecurityInfo;
+import org.opendatakit.common.security.client.UserSecurityInfo.UserType;
+import org.opendatakit.common.security.client.security.SecurityServiceAsync;
 
 import com.google.gwt.core.client.EntryPoint;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -47,6 +51,7 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.rpc.InvocationException;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
@@ -62,18 +67,23 @@ import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.Widget;
 
 public class AggregateUI implements EntryPoint {
 	private static final int REFRESH_INTERVAL = 5000; // ms
 
+	private static final String TOGGLE_AUTHENTICATION_STATUS = "toggle-authentication-status";
 	// Main Navigation
 	private static final String[] MAIN_MENU = {
-		SubmissionTabUI.SUBMISSIONS, ManageTabUI.MANAGEMENT};
+		SubmissionTabUI.SUBMISSIONS, ManageTabUI.MANAGEMENT, TOGGLE_AUTHENTICATION_STATUS};
 	private List<FilterGroup> view = new ArrayList<FilterGroup>();
 	private FlexTable dataTable = new FlexTable(); //contains the data
 	private FilterGroup def; //the default filter group
 	private UrlHash hash;
 
+	// layout
+	private VerticalPanel wrappingLayoutPanel = new VerticalPanel();
+	private Label errorMsgLabel = new Label(); 
 	// layout
 	private HorizontalPanel layoutPanel = new HorizontalPanel();
 	private VerticalPanel helpPanel = new VerticalPanel();
@@ -83,6 +93,8 @@ public class AggregateUI implements EntryPoint {
 	ManageTabUI manageNav;
 	private SubmissionTabUI submissionNav;
 
+	// Top tab
+	SecurityServiceAsync identitySvc;
 	// Report tab
 	FormServiceAsync formSvc;
 	FormAdminServiceAsync formAdminSvc;
@@ -106,6 +118,7 @@ public class AggregateUI implements EntryPoint {
 
 	public AggregateUI() {
 		SecureGWT sg = SecureGWT.get();
+		identitySvc = sg.createSecurityService();
 		formSvc = sg.createFormService();
 		formAdminSvc = sg.createFormAdminService();
 		servicesAdminSvc = sg.createServicesAdminService();
@@ -117,6 +130,28 @@ public class AggregateUI implements EntryPoint {
 		setTimer(new RefreshTimer(this));
 	}
 
+	public void reportError(Throwable t) {
+		if ( t instanceof 
+				org.opendatakit.common.persistence.client.exception.DatastoreFailureException ) {
+			errorMsgLabel.setText("Error: " + t.getMessage());
+			errorMsgLabel.setVisible(true);
+		} else if ( t instanceof
+				org.opendatakit.common.security.client.exception.AccessDeniedException ) {
+			errorMsgLabel.setText("You do not have permission for this action.\nError: " + t.getMessage());
+			errorMsgLabel.setVisible(true);
+		} else if ( t instanceof InvocationException ) {
+			redirect( GWT.getHostPageBaseURL() + UIConsts.HOST_PAGE_BASE_ADDR);
+		} else {
+			errorMsgLabel.setText("Error: " + t.getMessage());
+			errorMsgLabel.setVisible(true);
+		}
+	}
+	
+	public void clearError() {
+		errorMsgLabel.setVisible(false);
+		errorMsgLabel.setText("");
+	}
+	
 	public void requestUpdatedSubmissionData(List<FilterGroup> groups) {
 
 		// Initialize the service proxy.
@@ -127,11 +162,11 @@ public class AggregateUI implements EntryPoint {
 		// Set up the callback object.
 		AsyncCallback<SubmissionUISummary> callback = new AsyncCallback<SubmissionUISummary>() {
 			public void onFailure(Throwable caught) {
-				// TODO: deal with error
+				reportError(caught);
 			}
 
 			public void onSuccess(SubmissionUISummary summary) {
-			  headers = summary.getHeaders();
+				clearError();
 			  submissions = summary.getSubmissions();
 			  updateSubmissionTable(dataTable, summary);
 			}
@@ -227,6 +262,52 @@ public class AggregateUI implements EntryPoint {
          i++;
       }
    }
+   
+	native void redirect(String url)
+	/*-{
+	        $wnd.location.replace(url);
+
+	}-*/;
+
+	static HTML togglePane = new HTML("<div>Selecting tab should toggle authentication status</div>");
+	static String LOGOUT_LINK = "<a href=\"j_spring_security_logout\">Log Out</a>";
+	static String LOGIN_LINK = "<a href=\"openid_login.html\">Log In</a>";
+	private int toggleTabIndex = -1;
+	private SecurityServiceAsync securityService = null;
+	private UserSecurityInfo userInfo = null;
+	
+	private synchronized void updateTogglePane() {
+		int idx = toggleTabIndex;
+		toggleTabIndex = -1;
+		if (idx != -1) {
+			mainNav.remove(idx);
+		}
+		String link = LOGIN_LINK;
+		if ( userInfo != null ) {
+			if ( userInfo.getType() != UserType.ANONYMOUS ) {
+				link = LOGOUT_LINK;
+			}
+		}
+		mainNav.add(togglePane,	link, true);
+		toggleTabIndex = mainNav.getWidgetCount()-1;
+	}
+	
+	private synchronized void updateUserSecurityInfo() {
+		if ( securityService == null ) {
+			securityService = SecureGWT.get().createSecurityService();
+		}
+		securityService.getUserInfo(new AsyncCallback<UserSecurityInfo>(){
+
+			@Override
+			public void onFailure(Throwable caught) {
+			}
+
+			@Override
+			public void onSuccess(UserSecurityInfo result) {
+				userInfo = result;
+				updateTogglePane();
+			}});
+	}
 
 	/*
 	 * Creates a click handler for a main menu tab.
@@ -237,6 +318,7 @@ public class AggregateUI implements EntryPoint {
 		return new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
+				clearError();
 				if (hash.get(UrlHash.MAIN_MENU).equals(s))
 					return;
 				hash.clear();
@@ -246,6 +328,14 @@ public class AggregateUI implements EntryPoint {
 					panel = submissionNav;
 				else if (s.equals(ManageTabUI.MANAGEMENT))
 					panel = manageNav;
+				else if (s.equals(TOGGLE_AUTHENTICATION_STATUS)) {
+					if ( userInfo != null && userInfo.getType() != UserType.ANONYMOUS ) {
+						redirect( GWT.getHostPageBaseURL() + "/j_spring_security_logout");
+					} else {
+						redirect( GWT.getHostPageBaseURL() + "/openid_login.html");
+					}
+					return;
+				}
 				panel.selectTab(0);
 				hash.put();
 			}
@@ -270,6 +360,7 @@ public class AggregateUI implements EntryPoint {
 				dataTable, def, this, allGroups, allForms);
 		mainNav.add(submissionNav, "Submissions");
 		mainNav.add(manageNav, "Management");
+		updateTogglePane();
 		mainNav.addStyleName("mainNav");
 
 		// create help panel
@@ -278,6 +369,11 @@ public class AggregateUI implements EntryPoint {
 		}
 		helpPanel.setStyleName("help_panel");
 
+		// add the error message info...
+		errorMsgLabel.setStyleName("error_message");
+		errorMsgLabel.setVisible(false);
+		wrappingLayoutPanel.add(errorMsgLabel);
+		wrappingLayoutPanel.add(layoutPanel);
 		// add to layout
 		layoutPanel.add(mainNav);
 		layoutPanel.getElement().setId("layout_panel");
@@ -299,8 +395,10 @@ public class AggregateUI implements EntryPoint {
 			mainNav.getTabBar().getTab(i).addClickHandler(getMainMenuClickHandler(MAIN_MENU[i]));
 
 		RootPanel.get("dynamic_content").add(new HTML("<img src=\"images/odk_color.png\" id=\"odk_aggregate_logo\" />"));
-		RootPanel.get("dynamic_content").add(layoutPanel);
-
+		RootPanel.get("dynamic_content").add(wrappingLayoutPanel);
+		
+		updateUserSecurityInfo();
+		
 		contentLoaded();
 	}
 
@@ -320,10 +418,11 @@ public class AggregateUI implements EntryPoint {
 		// Set up the callback object.
 		AsyncCallback<FormSummary []> callback = new AsyncCallback<FormSummary []>() {
 			public void onFailure(Throwable caught) {
-				// TODO: deal with error
+				reportError(caught);
 			}
 
 			public void onSuccess(FormSummary[] forms) {
+				clearError();
 				if(update.equals(PageUpdates.FORMDROPDOWN))
 					fillFormDropDown(forms);
 				else if(update.equals(PageUpdates.FORMTABLE))
@@ -425,13 +524,12 @@ public class AggregateUI implements EntryPoint {
 		AsyncCallback<Boolean> callback = 
 			new AsyncCallback<Boolean>() {
 			public void onFailure(Throwable caught) {
-
+				reportError(caught);
 			}
 
 			@Override
 			public void onSuccess(Boolean result) {
-				// TODO Auto-generated method stub
-
+				clearError();
 			}
 		};
 
@@ -448,11 +546,12 @@ public class AggregateUI implements EntryPoint {
 		AsyncCallback<FilterSet> callback = 
 			new AsyncCallback<FilterSet>() {
 			public void onFailure(Throwable caught) {
-
+				reportError(caught);
 			}
 
 			@Override
 			public void onSuccess(FilterSet result) {
+				clearError();
 				fillFilterDropDown(result);
 			}
 		};
@@ -473,10 +572,7 @@ public class AggregateUI implements EntryPoint {
 			listOfForms.setWidget(i, 0, new Anchor(form.getTitle()));
 			listOfForms.setWidget(i, 1, new HTML(form.getId()));
 			String user = form.getCreatedUser();
-			if(user.contains("@")) {
-			  user = user.substring(user.indexOf(":") + 1, user.indexOf("@"));
-			}
-			listOfForms.setWidget(i, 2, new Label(user));
+			listOfForms.setWidget(i, 2, new Anchor(user, user));
 
 			CheckBox downloadableCheckBox = new CheckBox();
 			downloadableCheckBox.setValue(form.isDownloadable());
@@ -487,12 +583,12 @@ public class AggregateUI implements EntryPoint {
               formAdminSvc.setFormDownloadable(formId, event.getValue(), new AsyncCallback<Boolean> () {
                 @Override
                 public void onFailure(Throwable caught) {
-                  // TODO Auto-generated method stub
+    				reportError(caught);
                 }
 
                 @Override
                 public void onSuccess(Boolean result) {
-                  // TODO Auto-generated method stub
+                	clearError();
                 }}
               );
             }
@@ -508,12 +604,12 @@ public class AggregateUI implements EntryPoint {
              formAdminSvc.setFormAcceptSubmissions(formId, event.getValue(), new AsyncCallback<Boolean> () {
                @Override
                public void onFailure(Throwable caught) {
-                 // TODO Auto-generated method stub
+            	   reportError(caught);
                }
 
                @Override
                public void onSuccess(Boolean result) {
-                 // TODO Auto-generated method stub
+            	   clearError();
                }}
              );
            }
@@ -524,6 +620,7 @@ public class AggregateUI implements EntryPoint {
 			publishButton.addClickHandler(new ClickHandler() {
 				@Override
 				public void onClick(ClickEvent event) {
+					clearError();
 					final PopupPanel popup = new CreateNewExternalServicePopup(form.getId(), servicesAdminSvc, manageNav);
 					popup.setPopupPositionAndShow(new PopupPanel.PositionCallback() {
 						@Override
@@ -541,6 +638,7 @@ public class AggregateUI implements EntryPoint {
 			exportButton.addClickHandler(new ClickHandler () {
 				@Override
 				public void onClick(ClickEvent event) {
+					clearError();
 					final PopupPanel popup = new CreateNewExportPopup(form.getId(), formSvc, manageNav);
 					popup.setPopupPositionAndShow(new PopupPanel.PositionCallback() {
 						@Override

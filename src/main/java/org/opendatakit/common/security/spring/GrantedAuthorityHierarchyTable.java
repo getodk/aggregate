@@ -32,6 +32,7 @@ import org.opendatakit.common.persistence.Query.FilterOperation;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.security.SecurityBeanDefs;
 import org.opendatakit.common.security.User;
+import org.opendatakit.common.security.common.GrantedAuthorityNames;
 import org.opendatakit.common.web.CallingContext;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.GrantedAuthorityImpl;

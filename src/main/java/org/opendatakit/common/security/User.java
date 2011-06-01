@@ -15,6 +15,10 @@
  */
 package org.opendatakit.common.security;
 
+import java.util.Set;
+
+import org.springframework.security.core.GrantedAuthority;
+
 
 /**
  * Minimal features of a user.  Note that the security permissions granted a 
@@ -37,10 +41,22 @@ public interface User {
 	public String getNickname();
 	
 	/**
-	 * @return user id of the form mailto:user@domain.com  or ANONYMOUS_USER or DAEMON_USER
+	 * @return user id of the form "uid:username|timestamp" 
+	 * 		or "mailto:user@domain.com" (authenticated but not registered)
+	 *      or ANONYMOUS_USER or DAEMON_USER
 	 */
 	public String getUriUser();
+
+	/**
+	 * @return set of groups the user belongs to.
+	 */
+	public Set<GrantedAuthority> getGroups();
 	
+	/**
+	 * @return set of directly granted authorities.
+	 */
+	public Set<GrantedAuthority> getDirectAuthorities();
+
 	/**
 	 * @return true if this user is the anonymous user.
 	 */

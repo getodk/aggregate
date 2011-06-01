@@ -23,6 +23,16 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.opendatakit.aggregate.ContextFactory;
+import org.opendatakit.aggregate.constants.common.UIConsts;
+import org.opendatakit.common.constants.HtmlConsts;
+import org.opendatakit.common.persistence.Datastore;
+import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+import org.opendatakit.common.security.User;
+import org.opendatakit.common.security.UserService;
+import org.opendatakit.common.security.spring.RegisteredUsersTable;
+import org.opendatakit.common.web.CallingContext;
+
 /**
  * Stupid class to wrap the Aggregate.html page that GWT uses for 
  * all its UI presentation.  Needed so that access to the page can 
@@ -38,7 +48,7 @@ public class AggregateHtmlServlet extends ServletUtilBase {
 	 */
 	private static final long serialVersionUID = 5811797423869654357L;
 
-	public static final String ADDR = "Aggregate.html";
+	public static final String ADDR = UIConsts.HOST_PAGE_BASE_ADDR;
 	
 	public static final String PAGE_CONTENTS = 
 "<!doctype html>" +
@@ -76,8 +86,43 @@ public class AggregateHtmlServlet extends ServletUtilBase {
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
+		CallingContext cc = ContextFactory.getCallingContext(this, req);
+		User user = cc.getCurrentUser();
+		UserService userService = cc.getUserService();
+		
+		// determine if this is the first time the system has not been accessed...
+		if ( user.getUriUser().equals(userService.getSuperUserEmail())) {
+			// this is the super-user -- examine the isEnabled 
+			// field to determine whether this is the first time
+			// visiting the site.  If it is, force a redirect to
+			// the site-configuration tab.
+			boolean directToConfigTab = false;
+			Datastore ds = cc.getDatastore();
+			try {
+				RegisteredUsersTable t = RegisteredUsersTable.getUserByUri(user.getUriUser(),
+																			ds,	user);
+				if ( !t.getIsEnabled() ) {
+					directToConfigTab = true;
+					t.setIsEnabled(true);
+					ds.putEntity(t, user);
+				}
+			} catch (ODKDatastoreException e) {
+				e.printStackTrace();
+			}
+			if ( directToConfigTab ) {
+				String query = req.getQueryString();
+				if ( query == null || query.length() == 0 ) {
+					query = "";
+				} else {
+					query = "?" + query;
+				}
+				resp.sendRedirect(cc.getWebApplicationURL(ADDR) + query + "#management/permissions/access-configuration//");
+				return;
+			}
+		}
 
-
+	    resp.setContentType(HtmlConsts.RESP_TYPE_HTML);
+	    resp.setCharacterEncoding(HtmlConsts.UTF8_ENCODE);
 	    PrintWriter out = resp.getWriter();
 	    out.print(PAGE_CONTENTS);
 	}
