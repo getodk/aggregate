@@ -14,15 +14,20 @@
  * the License.
  */
 
-package org.opendatakit.common.utils;
+package org.opendatakit.common.security.common;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.opendatakit.common.security.User;
-import org.opendatakit.common.web.CallingContext;
-
+/**
+ * Routines shared between the JavaScript GWT code and the server to parse 
+ * username and Email lists for easy set-up of the registered users of the 
+ * system.
+ * 
+ * @author mitchellsundt@gmail.com
+ *
+ */
 public final class EmailParser {
 
 	/*
@@ -41,10 +46,21 @@ public final class EmailParser {
 	private static final char K_COLON = ':';
 	private static final char K_COMMA = ',';
 	private static final char K_SEMI = ';';
-	private static final char K_AT = '@';
+	public static final char K_AT = '@';
+	private static final String K_WHITESPACE_CHARS = " \t\n\r";
 	private static final String K_SPECIAL_CHARS = "()<>[]:;@\\,.\"";
-	private static final String K_MAILTO = "mailto:";
+	public static final String K_MAILTO = "mailto:";
 
+	/**
+	 * Character.isWhitespace is not supported in GWT because GWT is not 
+	 * fully UNICODE-compliant.
+	 * 
+	 * @param c
+	 * @return true if c is a standard whitespace character
+	 */
+	private static final boolean isWhitespace(char c) {
+		return ( K_WHITESPACE_CHARS.indexOf(c) != -1);
+	}
 	
 	/**
 	 * RFC5322 section 3.2.2 production -- except it accepts an epsilon transition.
@@ -57,7 +73,7 @@ public final class EmailParser {
 	private static final int advanceCFWS(String emailText, int idx, int len ) {
 		while ( idx < len ) {
 			char c = emailText.charAt(idx);
-			if ( Character.isWhitespace(c) ) {
+			if ( isWhitespace(c) ) {
 				++idx;
 				continue;
 			} else if ( c == K_OPEN_PAREN ) {
@@ -97,7 +113,7 @@ public final class EmailParser {
 		boolean first = true;
 		while ( idx < len ) {
 			char c = emailText.charAt(idx);
-			if ( Character.isWhitespace(c) ) {
+			if ( isWhitespace(c) ) {
 				// end of atom.
 				break;
 			} else if ( K_SPECIAL_CHARS.indexOf(c) != -1) {
@@ -108,7 +124,7 @@ public final class EmailParser {
 						break;
 					}
 					c = emailText.charAt(idx+1);
-					if ( !Character.isWhitespace(c) && K_SPECIAL_CHARS.indexOf(c) == -1 ) {
+					if ( !isWhitespace(c) && K_SPECIAL_CHARS.indexOf(c) == -1 ) {
 						// ok -- the character after the dot is not a terminator
 						// so advance past the dot and this character
 						// and continue consuming characters...
@@ -225,7 +241,7 @@ public final class EmailParser {
 			int idxDone = idxStart;
 			while ( idxDone < len ) {
 				c = emailText.charAt(idxDone);
-				if ( Character.isWhitespace(c) || c == K_OPEN_PAREN || c == K_CLOSE_SQUARE ) {
+				if ( isWhitespace(c) || c == K_OPEN_PAREN || c == K_CLOSE_SQUARE ) {
 					break;
 				}
 				++idxDone;
@@ -376,12 +392,6 @@ public final class EmailParser {
 			nickname = null;
 			username = name;
 			email = null;
-			if ( username != null && username.equals(User.ANONYMOUS_USER)) {
-				throw new IllegalArgumentException("Username " + User.ANONYMOUS_USER + " is reserved.");
-			}
-			if ( username != null && username.equals(User.DAEMON_USER)) {
-				throw new IllegalArgumentException("Username " + User.DAEMON_USER + " is reserved.");
-			}
 		}
 
 		public Email(String nickname, String email) {
@@ -389,13 +399,8 @@ public final class EmailParser {
 			this.nickname = nickname;
 			this.username = email.substring(K_MAILTO.length(),email.indexOf(K_AT));
 			this.email = email;
-			if ( username != null && username.equals(User.ANONYMOUS_USER)) {
-				throw new IllegalArgumentException("Username " + User.ANONYMOUS_USER + " is reserved.");
-			}
-			if ( username != null && username.equals(User.DAEMON_USER)) {
-				throw new IllegalArgumentException("Username " + User.DAEMON_USER + " is reserved.");
-			}
 		}
+
 		public boolean hasDistinctNickname() {
 			return ( type == Form.EMAIL ) && (nickname != null && !nickname.equals(username));
 		}
@@ -473,10 +478,9 @@ public final class EmailParser {
 	 * Parses a string of e-mails or user names that are space, comma or semi-colon separated.
 	 * 
 	 * @param emailText
-	 * @param cc
 	 * @return collection of the found e-mails.
 	 */
-	public static final Collection<Email> parseEmails( String emailText, CallingContext cc ) {
+	public static final Collection<Email> parseEmails( String emailText ) {
 		Map<String,Email> eMails = new HashMap<String,Email>();
 		int len = emailText.length();
 		int idx = 0;
@@ -536,17 +540,6 @@ public final class EmailParser {
 		}
 
 		return eMails.values();
-	}
-
-	/**
-	 * Construct and return the Email object for the superUser.
-	 * 
-	 * @param cc
-	 * @return
-	 */
-	public static final Email getSuperUserEmail( CallingContext cc ) {
-		String suEmail = cc.getUserService().getSuperUserEmail();
-		return new Email(suEmail.substring(K_MAILTO.length(), suEmail.indexOf(K_AT)), suEmail);
 	}
 
 	// this is a static class

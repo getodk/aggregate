@@ -88,6 +88,7 @@ public class ExternalServicesListServlet extends ServletUtilBase {
 		// generate html
 		beginBasicHtmlResponse(TITLE_INFO, resp, true, cc); // header info
 
+		PrintWriter out = resp.getWriter();
 		try {
 			QueryFormList formsList = new QueryFormList(false, cc);
 
@@ -99,8 +100,7 @@ public class ExternalServicesListServlet extends ServletUtilBase {
 						.getExternalServicesForForm(form, cc);
 				if ( esList.size() == 0 ) continue;
 				
-				resp.getWriter().print(
-						HtmlUtil.wrapWithHtmlTags(HtmlConsts.H3, form
+				out.print(HtmlUtil.wrapWithHtmlTags(HtmlConsts.H3, form
 								.getFormId()));
 
 				List<Row> formattedFormValues = new ArrayList<Row>();
@@ -151,8 +151,7 @@ public class ExternalServicesListServlet extends ServletUtilBase {
 					formattedFormValues.add(row);
 				}
 
-				resp.getWriter().print(
-						HtmlUtil.wrapResultTableWithHtmlTags(false, null, headers,
+				out.print(HtmlUtil.wrapResultTableWithHtmlTags(false, null, headers,
 								formattedFormValues));
 			}
 			finishBasicHtmlResponse(resp);
@@ -212,8 +211,7 @@ public class ExternalServicesListServlet extends ServletUtilBase {
 									.getDescriptionOfOption());
 							row.addFormattedValue(fsc.getExternalServiceType().getServiceName());
 							formattedFormValues.add(row);
-							resp.getWriter().print(
-									HtmlUtil.wrapResultTableWithHtmlTags(false, null, headers,
+							out.print(HtmlUtil.wrapResultTableWithHtmlTags(false, null, headers,
 											formattedFormValues));
 
 							out.write("<br><h3>Confirm deletion of this external service configuration?</h3>");

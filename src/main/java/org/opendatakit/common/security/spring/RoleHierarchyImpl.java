@@ -31,8 +31,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+import org.opendatakit.common.security.SecurityBeanDefs;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.security.UserService;
+import org.opendatakit.common.security.server.SecurityServiceUtil;
+import org.opendatakit.common.web.CallingContext;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.security.access.hierarchicalroles.CycleInRoleHierarchyException;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
@@ -92,6 +95,63 @@ public class RoleHierarchyImpl implements RoleHierarchy, InitializingBean {
 		}
 		
 		refreshReachableGrantedAuthorities();
+		
+		if  ( !userService.isAccessManagementConfigured() ) {
+			// do the 
+			SecurityServiceUtil.setDefaultMinimalSecureConfig(new CallingContext() {
+					
+					@Override
+					public Object getBean(String beanName) {
+						if ( beanName.equals(SecurityBeanDefs.ROLE_HIERARCHY_MANAGER)) {
+							return RoleHierarchyImpl.this;
+						} else {
+							throw new IllegalStateException("Undefined");
+						}
+					}
+
+					@Override
+					public Datastore getDatastore() {
+						return datastore;
+					}
+
+					@Override
+					public UserService getUserService() {
+						return userService;
+					}
+
+					@Override
+					public void setAsDaemon(boolean asDaemon) {
+						throw new IllegalStateException("Invalid context");
+					}
+
+					@Override
+					public boolean getAsDeamon() {
+						return true;
+					}
+
+					@Override
+					public User getCurrentUser() {
+						return userService.getDaemonAccountUser();
+					}
+
+					@Override
+					public String getWebApplicationURL() {
+						throw new IllegalStateException("Undefined");
+					}
+
+					@Override
+					public String getWebApplicationURL(String servletAddr) {
+						throw new IllegalStateException("Undefined");
+					}
+
+					@Override
+					public String getServerURL() {
+						throw new IllegalStateException("Undefined");
+					}
+			});
+			
+			refreshReachableGrantedAuthorities();
+		}
 	}
 
 	/**

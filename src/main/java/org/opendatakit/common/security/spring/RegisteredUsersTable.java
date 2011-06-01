@@ -18,7 +18,6 @@ package org.opendatakit.common.security.spring;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.tools.ant.util.DateUtils;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.DataField.IndexType;
@@ -27,8 +26,11 @@ import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.persistence.Query.Direction;
 import org.opendatakit.common.persistence.Query.FilterOperation;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.security.User;
-import org.opendatakit.common.utils.EmailParser.Email;
+import org.opendatakit.common.security.client.UserSecurityInfo;
+import org.opendatakit.common.security.common.EmailParser.Email;
+import org.opendatakit.common.utils.WebUtils;
 import org.opendatakit.common.web.CallingContext;
 
 /**
@@ -270,8 +272,7 @@ public final class RegisteredUsersTable extends CommonFieldsBase {
 	}
 	
 	public static final String generateUniqueUri( String username ) {
-		String uri = UID_PREFIX + username + "|" + 
-			DateUtils.format(new Date(), DateUtils.ISO8601_DATETIME_PATTERN);
+		String uri = UID_PREFIX + username + "|" + WebUtils.iso8601Date(new Date());
 		return uri;
 	}
 
@@ -413,6 +414,49 @@ public final class RegisteredUsersTable extends CommonFieldsBase {
 			return t;
 		}
 	}
+
+	/**
+	 * If the given username is not present, this will create a record for the user, 
+	 * marking them as active (able to log in via OpenID or Aggregate password). Otherwise,
+	 * this will just update the nickname and e-mail address of the existing 
+	 * record and return it.</p><p>
+	 * NOTE: Once a user is defined, changing the active status of the user 
+	 * (their ability to log in using OpenID or their Aggregate password) must be done as
+	 * a separate step.</p><p>
+	 * NOTE: users won't be able to log in with OpenID if no e-mail address is supplied;
+	 * and they won't be able to log in with an Aggregate password until one is defined.</p>
+	 * 
+	 * @param u
+	 * @param cc
+	 * @return
+	 * @throws ODKDatastoreException
+	 */
+	public static RegisteredUsersTable assertActiveUserByUserSecurityInfo(UserSecurityInfo u,
+			CallingContext cc) throws ODKDatastoreException {
+		Datastore ds = cc.getDatastore();
+		User user = cc.getCurrentUser();
+		RegisteredUsersTable prototype = RegisteredUsersTable.assertRelation(ds, user);
+		RegisteredUsersTable t = RegisteredUsersTable.getUserByUsername(u.getUsername(), cc);
+		if ( t == null ) {
+			// new user
+			RegisteredUsersTable r = ds.createEntityUsingRelation(prototype, user);
+			String uri = generateUniqueUri(u.getUsername());
+			r.setStringField(prototype.primaryKey, uri);
+			r.setUsername(u.getUsername());
+			r.setEmail(u.getEmail());
+			r.setNickname(u.getNickname());
+			r.setIsCredentialNonExpired(true);
+			r.setIsEnabled(true);
+			r.setIsRemoved(false);
+			ds.putEntity(r, user);
+			return r;
+		} else {
+			t.setEmail(u.getEmail());
+			t.setNickname(u.getNickname());
+			ds.putEntity(t, user);
+			return t;
+		}
+	}
 	
 	public static final List<RegisteredUsersTable> getUsersByEmail(String email, Datastore datastore, User user) throws ODKDatastoreException {
 		RegisteredUsersTable prototype = assertRelation(datastore, user);
@@ -422,5 +466,64 @@ public final class RegisteredUsersTable extends CommonFieldsBase {
 		@SuppressWarnings("unchecked")
 		List<RegisteredUsersTable> l = (List<RegisteredUsersTable>) q.executeQuery(0);
 		return l;
+	}
+
+	/**
+	 * Attempts to find a super-user record with the PK of the registered user equal to the 
+	 * super-user e-mail address. If it can't, it then 
+	 * @param cc
+	 * @return
+	 * @throws ODKDatastoreException
+	 */
+	public static final RegisteredUsersTable assertSuperUser(CallingContext cc) throws ODKDatastoreException {
+		return assertSuperUser(cc.getUserService().getSuperUserEmail(), cc.getDatastore(), cc.getUserService().getDaemonAccountUser());
+	}
+	
+	private static synchronized final RegisteredUsersTable assertSuperUser(String superUserEmail, Datastore datastore, User user) throws ODKDatastoreException {
+		RegisteredUsersTable t = null;
+		
+		List<RegisteredUsersTable> l = getUsersByEmail(superUserEmail, datastore, user);
+		if ( l.size() == 1 ) {
+			t = l.get(0);
+			if ( !t.getIsCredentialNonExpired() || !t.getIsEnabled() ) {
+				t.setIsCredentialNonExpired(true);
+				t.setIsEnabled(true);
+				datastore.putEntity(t, user);
+			}
+			return t;
+		}
+
+		RegisteredUsersTable prototype = assertRelation(datastore, user);
+		
+		try {
+			t = datastore.getEntity(prototype, superUserEmail, user);
+		} catch ( ODKEntityNotFoundException e) {
+		}
+		
+		Email e = new Email(null, superUserEmail);
+		if ( t != null ) {
+			// must have been deleted -- resurrect it...
+			t.setIsCredentialNonExpired(true);
+			t.setIsEnabled(true);
+			t.setIsRemoved(false);
+			t.setBasicAuthPassword(null);
+			t.setBasicAuthSalt(null);
+			t.setDigestAuthPassword(null);
+			t.setUsername(e.getUsername());
+			t.setNickname(e.getNickname());
+			t.setEmail(e.getEmail());
+			datastore.putEntity(t, user);
+			return t;
+		}
+		
+		t = datastore.createEntityUsingRelation(prototype, user);
+		t.setStringField(t.primaryKey, superUserEmail);
+		t.setIsCredentialNonExpired(true);
+		t.setIsEnabled(true);
+		t.setUsername(e.getUsername());
+		t.setNickname(e.getNickname());
+		t.setEmail(e.getEmail());
+		datastore.putEntity(t, user);
+		return t;
 	}
 }

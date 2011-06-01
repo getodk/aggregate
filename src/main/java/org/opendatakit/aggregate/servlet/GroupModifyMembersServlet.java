@@ -39,7 +39,7 @@ import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.security.User;
-import org.opendatakit.common.security.spring.GrantedAuthorityNames;
+import org.opendatakit.common.security.common.GrantedAuthorityNames;
 import org.opendatakit.common.security.spring.RegisteredUsersTable;
 import org.opendatakit.common.security.spring.UserGrantedAuthority;
 import org.opendatakit.common.web.CallingContext;
@@ -197,7 +197,7 @@ public class GroupModifyMembersServlet extends ServletUtilBase {
 		}
 
 		try {
-			UserGrantedAuthority.assertGrantedAuthoryMembers(new GrantedAuthorityImpl(groupname),
+			UserGrantedAuthority.assertGrantedAuthorityMembers(new GrantedAuthorityImpl(groupname),
 															allDesiredMembers, cc);
 		} catch (ODKDatastoreException e) {
 			e.printStackTrace();

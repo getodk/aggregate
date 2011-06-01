@@ -36,8 +36,8 @@ import org.opendatakit.aggregate.constants.ErrorConsts;
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.common.constants.HtmlConsts;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+import org.opendatakit.common.security.common.GrantedAuthorityNames;
 import org.opendatakit.common.security.spring.GrantedAuthorityHierarchyTable;
-import org.opendatakit.common.security.spring.GrantedAuthorityNames;
 import org.opendatakit.common.security.spring.UserGrantedAuthority;
 import org.opendatakit.common.web.CallingContext;
 import org.springframework.security.core.GrantedAuthority;
@@ -287,7 +287,7 @@ public class GroupModifyServlet extends ServletUtilBase {
 			if ( desiredGrants.isEmpty() ) {
 				// delete all users assigned to this group...
 				List<String> empty = Collections.emptyList();
-				UserGrantedAuthority.assertGrantedAuthoryMembers(grant, empty, cc);
+				UserGrantedAuthority.assertGrantedAuthorityMembers(grant, empty, cc);
 			}
 		} catch (ODKDatastoreException e) {
 			e.printStackTrace();

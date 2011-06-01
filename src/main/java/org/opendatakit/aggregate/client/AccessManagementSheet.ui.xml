@@ -1,0 +1,80 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+	xmlns:g="urn:import:com.google.gwt.user.client.ui">
+	<ui:style>
+	</ui:style>
+	<g:HTMLPanel>
+<g:Label ui:field="insecureAlert" visible="false" 
+	styleName="error_message" text="***Site Access Management is Insecure***"/>
+<div align="CENTER"><h2>Securing Site Management</h2></div>
+<p><font color="red">NOTE:</font> The <em>Manage Website Access</em> tab and this tab are 
+incompatible.  If you update the configuration through the <em>Manage Website Access</em>,
+any custom changes made through this tab and its subordinate screens will be lost.</p>
+<p>Your first task
+in securing the site is to restrict access to this page and the other
+pages that enable you to control access to the site.  To do this,</p>
+<ol>
+<li>Define an 'siteAdmins' group, granting it the ROLE_ACCESS_ADMIN permission</li>
+<li>Add yourself as a registered user of the site</li>
+<li>Add yourself to that 'siteAdmins' group</li>
+<li>Log off then log back in (to update your permissions) in order to gain the
+ ROLE_ACCESS_ADMIN privilege through the 'siteAdmins' group</li>
+<li>Remove the ROLE_ACCESS_ADMIN permission from all other groups</li>
+</ol>
+<p>After having done this, only you can access these web pages and manage
+your site's access permissions.  You should repeat steps 2 and 3 to add
+at least one other person to the 'siteAdmins' group.</p>
+<h2><g:Label ui:field="earthHeading" text="Google Earth Ballon Image Display Requirements"/></h2>
+<p>Google Earth will not display images in the information ballons
+unless the ROLE_ATTACHMENT_VIEWER permission is 
+granted to USER_IS_ANONYMOUS.</p>
+<p>Whether or not
+ROLE_ATTACHMENT_VIEWER is assigned to
+USER_IS_ANONYMOUS, the images remain
+accessible when the user clicks the <em>View</em> link within the information
+ballon provided the user has
+the necessary privileges to view those images (upon the first such access,
+the user may be prompted to log in).</p>
+<h2>Further Securing Site Access</h2>
+<p>To further secure your site, you need 
+to decide which permissions (roles) you want
+an anonymous user (someone who has not logged in) to have, which roles you
+want users that log in with a gmail.com account to have, and which roles you
+want certain specified users to have. The later is accomplished by
+defining a group with the roles you want to assign, entering those specified
+users into the system as registered users, and assigning them to that group.
+</p>
+<p>These are exactly the steps you did for the 'siteAdmins' group,
+above.</p>
+<p>Every registered user automatically belongs to the USER_IS_REGISTERED group;
+if you want all registered users to have a given set of roles, then you can
+assign those roles to that group.</p>
+<table border="1">
+<tr><td>Add, remove or modify user groups</td>
+<td><g:Anchor ui:field="modifyGroup" text="Manage User Groups" /></td>
+<td>Permissions (roles) are granted to user groups. Restrict access 
+to your data and website by granting these roles to specific user groups.</td>
+</tr>
+<tr><td>Add, remove or modify registered users</td>
+<td><g:Anchor ui:field="modifyRegisteredUsers" text="Manage Registered Users"/></td>
+<td>Permissions can be granted to anonymous users (those not logged in),
+to all logged-in users (e.g., anyone with a gmail.com account), and to 
+groups of registered users.  Define register users to the system though this web page.</td>
+</tr>
+<tr><td>Add or remove registered users from user groups</td>
+<td>This can be done through either of the above links</td>
+<td>Permissions (roles) are granted to user groups.  Users possess the
+roles of the groups they belong to.  Manage group memberships to
+manage the access rights of the users.</td>
+</tr>
+<tr><td>Change Aggregate passwords for registered users</td>
+<td>This can be done on the <em>Management/Permissions/Manage User Passwords</em> tab</td>
+<td>Logins from a device (e.g., ODK Collect) require a password held on this server and
+specific to this server (an <em>Aggregate password</em>).
+Set or change that password for selected users here. The password is stored
+as both a randomly-salted sha-1 hash and as a deterministically-salted md5 hash.
+The plaintext password is not retained.</td>
+</tr>
+</table>		
+	</g:HTMLPanel>
+</ui:UiBinder> 

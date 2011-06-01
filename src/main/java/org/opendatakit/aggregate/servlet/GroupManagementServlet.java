@@ -32,8 +32,9 @@ import org.opendatakit.aggregate.constants.ErrorConsts;
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.common.constants.HtmlConsts;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+import org.opendatakit.common.security.common.GrantedAuthorityNames;
+import org.opendatakit.common.security.server.SecurityServiceUtil;
 import org.opendatakit.common.security.spring.GrantedAuthorityHierarchyTable;
-import org.opendatakit.common.security.spring.GrantedAuthorityNames;
 import org.opendatakit.common.web.CallingContext;
 
 /**
@@ -187,7 +188,7 @@ public class GroupManagementServlet extends ServletUtilBase {
 	}
 	
 	private String groupNameAndMembershipLink( String groupname, CallingContext cc ) {
-		if ( GrantedAuthorityNames.isSpecialName(groupname) ) {
+		if ( SecurityServiceUtil.isSpecialName(groupname) ) {
 			return groupname;
 		} else {
 	        Map<String, String> properties = new HashMap<String, String>();

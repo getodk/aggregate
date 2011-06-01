@@ -24,9 +24,9 @@ import javax.servlet.http.HttpServletResponse;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.ErrorConsts;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+import org.opendatakit.common.security.common.EmailParser;
+import org.opendatakit.common.security.common.EmailParser.Email;
 import org.opendatakit.common.security.spring.RegisteredUsersTable;
-import org.opendatakit.common.utils.EmailParser;
-import org.opendatakit.common.utils.EmailParser.Email;
 import org.opendatakit.common.web.CallingContext;
 
 /**
@@ -71,7 +71,7 @@ public class UserBulkModifyServlet extends ServletUtilBase {
 			return;
 		}
 		
-		Collection<Email> userEmails = EmailParser.parseEmails(usernames, cc);
+		Collection<Email> userEmails = EmailParser.parseEmails(usernames);
 		
 		try {
 		

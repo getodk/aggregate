@@ -23,6 +23,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.opendatakit.aggregate.ContextFactory;
+import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
+import org.opendatakit.common.security.client.exception.AccessDeniedException;
+import org.opendatakit.common.security.server.SecurityServiceUtil;
 import org.opendatakit.common.web.CallingContext;
 
 /**
@@ -49,12 +52,12 @@ public class LandingPageServlet extends ServletUtilBase {
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
 		CallingContext cc = ContextFactory.getCallingContext(this, req);
-
-		// determine if the system has not been configured...
-		if ( cc.getUserService().isAccessManagementConfigured() ) {
-			resp.sendRedirect(cc.getWebApplicationURL(AggregateHtmlServlet.ADDR));
+		String query = req.getQueryString();
+		if ( query == null || query.length() == 0 ) {
+			query = "";
 		} else {
-			resp.sendRedirect(cc.getWebApplicationURL(AccessConfigurationServlet.ADDR));
+			query = "?" + query;
 		}
+		resp.sendRedirect(cc.getWebApplicationURL(AggregateHtmlServlet.ADDR) + query);
 	}
 }

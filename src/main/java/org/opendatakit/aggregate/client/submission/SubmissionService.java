@@ -17,7 +17,7 @@
 package org.opendatakit.aggregate.client.submission;
 
 import org.opendatakit.aggregate.client.filter.FilterGroup;
-import org.opendatakit.common.security.exception.AccessDeniedException;
+import org.opendatakit.common.security.client.exception.AccessDeniedException;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;

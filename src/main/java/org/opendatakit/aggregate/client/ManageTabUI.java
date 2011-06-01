@@ -40,7 +40,7 @@ public class ManageTabUI extends TabPanel {
 	private static final String FORMS = "forms";
 	private static final String EXPORT = "export";
     static final String PUBLISH = "publish";
-	private static final String PERMISSIONS = "permissions";
+	static final String PERMISSIONS = "permissions";
 	private static final String UTILITIES = "utilities";
 	private static final String[] MANAGEMENT_MENU = {FORMS, EXPORT, PUBLISH, PERMISSIONS, UTILITIES};
 	static final String MANAGEMENT = "management";
@@ -57,6 +57,9 @@ public class ManageTabUI extends TabPanel {
 	// Export tab
 	private FlexTable exportTable = new FlexTable();
 	
+	// Permissions tab
+	private PermissionsSheet permissionsSheet;
+	
 	private TextBox mapsApiKey = new TextBox();
 	
 	public ManageTabUI(FlexTable listOfForms, AggregateUI parent) {
@@ -65,10 +68,12 @@ public class ManageTabUI extends TabPanel {
 		this.listOfForms = listOfForms;
 		this.parent = parent;
 
+		permissionsSheet = new PermissionsSheet(this);
+		
 		this.add(setupFormManagementPanel(), "Forms");
 		this.add(exportTable, "Export");
 		this.add(publishTable, "Publish");
-		this.add(setupPermissionsPanel(), "Permissions");
+		this.add(permissionsSheet, "Permissions");
 		this.add(setupUtilitiesPanel(), "Utilities");
 		this.add(setupPreferencesPanel(), "Preferences");
 		
@@ -90,6 +95,7 @@ public class ManageTabUI extends TabPanel {
 		uploadFormButton.addClickHandler(new ClickHandler() {
 		  @Override
 		  public void onClick(ClickEvent event) {
+			parent.clearError();
 		    hash.goTo("../ui/upload");
 		  }
 		});
@@ -98,6 +104,7 @@ public class ManageTabUI extends TabPanel {
 	    uploadSubmissionsButton.addClickHandler(new ClickHandler() {
 	      @Override
 	      public void onClick(ClickEvent event) {
+			parent.clearError();
 	        hash.goTo("../ui/submission");
 	      }
 	    });
@@ -131,13 +138,14 @@ public class ManageTabUI extends TabPanel {
 
         @Override
         public void onClick(ClickEvent event) {
-          Preferences.setGoogleMapsApiKey(mapsApiKey.getText());        
+        	parent.clearError();
+        	Preferences.setGoogleMapsApiKey(mapsApiKey.getText());        
         }
 	    
 	  });
 	  
 	  VerticalPanel  preferencesPanel = new VerticalPanel();
-     preferencesPanel.add(labelMapsKey);
+      preferencesPanel.add(labelMapsKey);
 	  preferencesPanel.add(mapsApiKey);
 	  preferencesPanel.add(updateMapsApiKeyButton);
 	  return preferencesPanel ;
@@ -186,7 +194,7 @@ public class ManageTabUI extends TabPanel {
 	  AsyncCallback<ExternServSummary[] > callback = new AsyncCallback<ExternServSummary []>() {
       @Override
       public void onFailure(Throwable caught) {
-        // TODO Auto-generated method stub
+			parent.reportError(caught);
       }
 
       @Override
@@ -246,10 +254,6 @@ public class ManageTabUI extends TabPanel {
      parent.formSvc.getExports(callback);
    }
 	
-	public HTML setupPermissionsPanel() {
-		return new HTML("Content Forthcoming");
-	}
-	
 	public HTML setupUtilitiesPanel() {
 		return new HTML("Content Forthcoming");
 	}
@@ -259,6 +263,7 @@ public class ManageTabUI extends TabPanel {
 		return new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
+				parent.clearError();
 				parent.getTimer().restartTimer(parent);
 				parent.update(FormOrFilter.FORM, PageUpdates.FORMTABLE);
 				hash.clear();
@@ -267,5 +272,13 @@ public class ManageTabUI extends TabPanel {
 				hash.put();
 			}
 		};
+	}
+
+	public void setSubSelection(String subMenu, String subSubMenu) {
+		hash.clear();
+		hash.set(UrlHash.MAIN_MENU, MANAGEMENT);
+		hash.set(UrlHash.SUB_MENU, subMenu);
+		hash.set(UrlHash.FORM, subSubMenu);
+		hash.put();
 	}
 }
