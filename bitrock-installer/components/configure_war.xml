@@ -45,6 +45,7 @@
             <actionList>
                 <changePermissions files="${installdir}/*.sh" permissions="0755"/>
                 <changePermissions files="${installdir}/appengine-java-sdk/bin/*.sh" permissions="0755"/>
+                <changePermissions files="${installdir}/*.app" permissions="0755"/>
             </actionList>
             <distributionFileList>
                 <distributionFile>

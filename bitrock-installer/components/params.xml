@@ -875,7 +875,7 @@ If you are replacing an existing application already on appspot, the application
 
 The files need to complete the installation, together with a README.html containing the final installation instructions, will be placed in this directory.
 
-Please cfeate and select this directory now.</explanation>
+Please create and select this directory now.</explanation>
             <value></value>
             <default></default>
             <allowEmptyValue>0</allowEmptyValue>
