@@ -37,6 +37,8 @@ import org.opendatakit.aggregate.client.submission.SubmissionUISummary;
 import org.opendatakit.aggregate.constants.common.FormOrFilter;
 import org.opendatakit.aggregate.constants.common.PageUpdates;
 import org.opendatakit.aggregate.constants.common.UIConsts;
+import org.opendatakit.common.security.client.UserSecurityInfo;
+import org.opendatakit.common.security.client.UserSecurityInfo.UserType;
 import org.opendatakit.common.security.client.security.SecurityServiceAsync;
 
 import com.google.gwt.core.client.EntryPoint;
@@ -64,14 +66,15 @@ import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.Widget;
 
 public class AggregateUI implements EntryPoint {
 	private static final int REFRESH_INTERVAL = 5000; // ms
 
-	private static final String LOGOUT = "logout";
+	private static final String TOGGLE_AUTHENTICATION_STATUS = "toggle-authentication-status";
 	// Main Navigation
 	private static final String[] MAIN_MENU = {
-		SubmissionTabUI.SUBMISSIONS, ManageTabUI.MANAGEMENT, LOGOUT};
+		SubmissionTabUI.SUBMISSIONS, ManageTabUI.MANAGEMENT, TOGGLE_AUTHENTICATION_STATUS};
 	private List<FilterGroup> view = new ArrayList<FilterGroup>();
 	private FlexTable dataTable = new FlexTable(); //contains the data
 	private FilterGroup def; //the default filter group
@@ -215,6 +218,45 @@ public class AggregateUI implements EntryPoint {
 
 	}-*/;
 
+	static HTML togglePane = new HTML("<div>Selecting tab should toggle authentication status</div>");
+	static String LOGOUT_LINK = "<a href=\"j_spring_security_logout\">Log Out</a>";
+	static String LOGIN_LINK = "<a href=\"openid_login.html\">Log In</a>";
+	private int toggleTabIndex = -1;
+	private SecurityServiceAsync securityService = null;
+	private UserSecurityInfo userInfo = null;
+	
+	private synchronized void updateTogglePane() {
+		int idx = toggleTabIndex;
+		toggleTabIndex = -1;
+		if (idx != -1) {
+			mainNav.remove(idx);
+		}
+		String link = LOGIN_LINK;
+		if ( userInfo != null ) {
+			if ( userInfo.getType() != UserType.ANONYMOUS ) {
+				link = LOGOUT_LINK;
+			}
+		}
+		mainNav.add(togglePane,	link, true);
+		toggleTabIndex = mainNav.getWidgetCount()-1;
+	}
+	
+	private synchronized void updateUserSecurityInfo() {
+		if ( securityService == null ) {
+			securityService = SecureGWT.get().createSecurityService();
+		}
+		securityService.getUserInfo(new AsyncCallback<UserSecurityInfo>(){
+
+			@Override
+			public void onFailure(Throwable caught) {
+			}
+
+			@Override
+			public void onSuccess(UserSecurityInfo result) {
+				userInfo = result;
+				updateTogglePane();
+			}});
+	}
 	/*
 	 * Creates a click handler for a main menu tab.
 	 * Defaults to the first sub-menu tab.
@@ -234,8 +276,12 @@ public class AggregateUI implements EntryPoint {
 					panel = submissionNav;
 				else if (s.equals(ManageTabUI.MANAGEMENT))
 					panel = manageNav;
-				else if (s.equals(LOGOUT)) {
-					redirect( GWT.getHostPageBaseURL() + "/j_spring_security_logout");
+				else if (s.equals(TOGGLE_AUTHENTICATION_STATUS)) {
+					if ( userInfo != null && userInfo.getType() != UserType.ANONYMOUS ) {
+						redirect( GWT.getHostPageBaseURL() + "/j_spring_security_logout");
+					} else {
+						redirect( GWT.getHostPageBaseURL() + "/openid_login.html");
+					}
 					return;
 				}
 				panel.selectTab(0);
@@ -262,8 +308,7 @@ public class AggregateUI implements EntryPoint {
 				dataTable, def, this, allGroups, allForms);
 		mainNav.add(submissionNav, "Submissions");
 		mainNav.add(manageNav, "Management");
-		mainNav.add(new HTML("<div>Selecting tab should log out</div>"),
-					"<a href=\"j_spring_security_logout\">Log Out</a>", true);
+		updateTogglePane();
 		mainNav.addStyleName("mainNav");
 
 		// create help panel
@@ -299,6 +344,9 @@ public class AggregateUI implements EntryPoint {
 
 		RootPanel.get("dynamic_content").add(new HTML("<img src=\"images/odk_color.png\" id=\"odk_aggregate_logo\" />"));
 		RootPanel.get("dynamic_content").add(wrappingLayoutPanel);
+		
+		updateUserSecurityInfo();
+		
 		contentLoaded();
 	}
 

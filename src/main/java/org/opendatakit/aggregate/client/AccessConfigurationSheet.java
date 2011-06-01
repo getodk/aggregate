@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.TreeSet;
 
 import org.opendatakit.common.security.client.GrantedAuthorityInfo;
+import org.opendatakit.common.security.client.UserClassSecurityInfo;
 import org.opendatakit.common.security.client.UserSecurityInfo;
 import org.opendatakit.common.security.client.UserSecurityInfo.UserType;
 import org.opendatakit.common.security.client.security.admin.SecurityAdminServiceAsync;
@@ -392,7 +393,7 @@ public class AccessConfigurationSheet extends Composite implements ActionCell.De
 						addedUsers.setText("");
 					}
 				});
-			service.getAnonymousUser(new AsyncCallback<UserSecurityInfo>()
+			service.getUserClassPrivileges(GrantedAuthorityNames.USER_IS_ANONYMOUS.toString(), new AsyncCallback<UserClassSecurityInfo>()
 				{
 					@Override
 					public void onFailure(Throwable caught) {
@@ -400,7 +401,7 @@ public class AccessConfigurationSheet extends Composite implements ActionCell.De
 					}
 
 					@Override
-					public void onSuccess(UserSecurityInfo result) {
+					public void onSuccess(UserClassSecurityInfo result) {
 						anonymousSubmitters.setValue( 
 								result.getGrantedAuthorities().contains( 
 										new GrantedAuthorityInfo(

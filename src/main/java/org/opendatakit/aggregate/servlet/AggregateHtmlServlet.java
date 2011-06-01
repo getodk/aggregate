@@ -26,6 +26,11 @@ import javax.servlet.http.HttpServletResponse;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.common.UIConsts;
 import org.opendatakit.common.constants.HtmlConsts;
+import org.opendatakit.common.persistence.Datastore;
+import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+import org.opendatakit.common.security.User;
+import org.opendatakit.common.security.UserService;
+import org.opendatakit.common.security.spring.RegisteredUsersTable;
 import org.opendatakit.common.web.CallingContext;
 
 /**
@@ -82,16 +87,44 @@ public class AggregateHtmlServlet extends ServletUtilBase {
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
 		CallingContext cc = ContextFactory.getCallingContext(this, req);
-
-		// determine if the system has not been configured...
-		if ( cc.getUserService().isAccessManagementConfigured() ) {
-		    resp.setContentType(HtmlConsts.RESP_TYPE_HTML);
-		    resp.setCharacterEncoding(HtmlConsts.UTF8_ENCODE);
-		    PrintWriter out = resp.getWriter();
-		    out.print(PAGE_CONTENTS);
-		} else {
-			resp.sendRedirect(cc.getWebApplicationURL(AccessConfigurationServlet.ADDR));
+		User user = cc.getCurrentUser();
+		UserService userService = cc.getUserService();
+		
+		// determine if this is the first time the system has not been accessed...
+		if ( user.getUriUser().equals(userService.getSuperUserEmail())) {
+			// this is the super-user -- examine the isEnabled 
+			// field to determine whether this is the first time
+			// visiting the site.  If it is, force a redirect to
+			// the site-configuration tab.
+			boolean directToConfigTab = false;
+			Datastore ds = cc.getDatastore();
+			try {
+				RegisteredUsersTable t = RegisteredUsersTable.getUserByUri(user.getUriUser(),
+																			ds,	user);
+				if ( !t.getIsEnabled() ) {
+					directToConfigTab = true;
+					t.setIsEnabled(true);
+					ds.putEntity(t, user);
+				}
+			} catch (ODKDatastoreException e) {
+				e.printStackTrace();
+			}
+			if ( directToConfigTab ) {
+				String query = req.getQueryString();
+				if ( query == null || query.length() == 0 ) {
+					query = "";
+				} else {
+					query = "?" + query;
+				}
+				resp.sendRedirect(cc.getWebApplicationURL(ADDR) + query + "#management/permissions/access-configuration//");
+				return;
+			}
 		}
+
+	    resp.setContentType(HtmlConsts.RESP_TYPE_HTML);
+	    resp.setCharacterEncoding(HtmlConsts.UTF8_ENCODE);
+	    PrintWriter out = resp.getWriter();
+	    out.print(PAGE_CONTENTS);
 	}
 
 }

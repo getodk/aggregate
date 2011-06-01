@@ -41,7 +41,9 @@ public interface User {
 	public String getNickname();
 	
 	/**
-	 * @return user id of the form mailto:user@domain.com  or ANONYMOUS_USER or DAEMON_USER
+	 * @return user id of the form "uid:username|timestamp" 
+	 * 		or "mailto:user@domain.com" (authenticated but not registered)
+	 *      or ANONYMOUS_USER or DAEMON_USER
 	 */
 	public String getUriUser();
 

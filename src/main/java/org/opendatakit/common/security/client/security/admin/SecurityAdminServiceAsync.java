@@ -20,6 +20,7 @@ import java.util.ArrayList;
 
 import org.opendatakit.common.security.client.CredentialsInfo;
 import org.opendatakit.common.security.client.GrantedAuthorityInfo;
+import org.opendatakit.common.security.client.UserClassSecurityInfo;
 import org.opendatakit.common.security.client.UserSecurityInfo;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -31,8 +32,6 @@ public interface SecurityAdminServiceAsync {
 	void getUsers(GrantedAuthorityInfo auth,
 			AsyncCallback<ArrayList<UserSecurityInfo>> callback);
 
-	void getAnonymousUser(AsyncCallback<UserSecurityInfo> callback);
-
 	void setUsersAndGrantedAuthorities(String xsrfString,
 			ArrayList<UserSecurityInfo> users,
 			ArrayList<GrantedAuthorityInfo> anonGrants,
@@ -43,5 +42,8 @@ public interface SecurityAdminServiceAsync {
 
 	void setUserPasswords(String xsrfString,
 			ArrayList<CredentialsInfo> credentials, AsyncCallback<Void> callback);
+
+	void getUserClassPrivileges(String userClassName,
+			AsyncCallback<UserClassSecurityInfo> callback);
 
 }

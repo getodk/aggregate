@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
 import org.opendatakit.common.security.client.CredentialsInfo;
 import org.opendatakit.common.security.client.GrantedAuthorityInfo;
+import org.opendatakit.common.security.client.UserClassSecurityInfo;
 import org.opendatakit.common.security.client.UserSecurityInfo;
 import org.opendatakit.common.security.client.exception.AccessDeniedException;
 
@@ -44,7 +45,7 @@ public interface SecurityAdminService extends RemoteService {
 	 * @throws DatastoreFailureException
 	 */
 	boolean isSimpleConfig() throws AccessDeniedException, DatastoreFailureException;
-	
+
 	/**
 	 * 
 	 * @param withAuthorities if true, populate the groups and granted authorities sets.
@@ -55,8 +56,15 @@ public interface SecurityAdminService extends RemoteService {
 	ArrayList<UserSecurityInfo> getAllUsers(boolean withAuthorities) throws AccessDeniedException, DatastoreFailureException;
 	
 	ArrayList<UserSecurityInfo> getUsers( GrantedAuthorityInfo auth ) throws AccessDeniedException, DatastoreFailureException;
-
-	UserSecurityInfo getAnonymousUser() throws AccessDeniedException, DatastoreFailureException;
+	
+	/**
+	 * 
+	 * @param userClassName
+	 * @return the privileges assigned to this class.
+	 * @throws AccessDeniedException
+	 * @throws DatastoreFailureException
+	 */
+	UserClassSecurityInfo getUserClassPrivileges(String userClassName) throws AccessDeniedException, DatastoreFailureException;
 	
 	void setUsersAndGrantedAuthorities( String xsrfString, ArrayList<UserSecurityInfo> users,  ArrayList<GrantedAuthorityInfo> anonGrants, ArrayList<GrantedAuthorityInfo> allGroups ) throws AccessDeniedException, DatastoreFailureException;
 	

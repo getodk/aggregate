@@ -37,14 +37,21 @@ import com.google.gwt.user.client.ui.Widget;
  */
 public class PermissionsSheet extends TabPanel {
 
+	private static final String MANAGE_WEBSITE_ACCESS = "Manage Website Access";
+
 	private HTML asIFrame(String url) {
 		HTML panel = new HTML(
 		"<iframe src=\"" + url + "\" width=\"1500\" height=\"3000\" />");
 		panel.setStyleName("embedded_iframe");
 		return panel;
 	}
-	
-	private static class ChangePasswordLazyPanel extends LazyPanel {
+
+	static final String CONFIGURE_ACCESS = "access-configuration";
+	static final String MANAGE_PASSWORDS = "manage-passwords";
+	static final String CHANGE_PASSWORD = "change-user-password";
+	static final String MANAGE_ACCESS = "access-management";
+		
+	private class ChangePasswordLazyPanel extends LazyPanel {
 		
 		ChangePasswordLazyPanel() {
 		}
@@ -57,18 +64,23 @@ public class PermissionsSheet extends TabPanel {
 				// trigger update of UI...
 				widget.setVisible(isVisible);
 			}
+			if ( isVisible ) {
+				managementTab.setSubSelection(ManageTabUI.PERMISSIONS, CHANGE_PASSWORD);
+			}
 		}
 		
 		@Override
 		protected Widget createWidget() {
+			// return asIFrame(ssl/user-password");
 			return new ChangePasswordSheet();
 		}
 	}
 	public LazyPanel changePassword = new ChangePasswordLazyPanel();
 	
-	private static class AccessConfigurationLazyPanel extends LazyPanel {
+	private class AccessConfigurationLazyPanel extends LazyPanel {
 		
 		AccessConfigurationLazyPanel() {
+			
 		}
 
 		@Override
@@ -78,6 +90,9 @@ public class PermissionsSheet extends TabPanel {
 			if ( widget != null ) {
 				// trigger update of UI...
 				widget.setVisible(isVisible);
+			}
+			if ( isVisible ) {
+				managementTab.setSubSelection(ManageTabUI.PERMISSIONS, CONFIGURE_ACCESS);
 			}
 		}
 		
@@ -89,7 +104,7 @@ public class PermissionsSheet extends TabPanel {
 	public LazyPanel accessConfiguration = new AccessConfigurationLazyPanel();
 	
 	
-	private static class ManageUserPasswordsLazyPanel extends LazyPanel {
+	private class ManageUserPasswordsLazyPanel extends LazyPanel {
 		
 		ManageUserPasswordsLazyPanel() {
 		}
@@ -102,19 +117,54 @@ public class PermissionsSheet extends TabPanel {
 				// trigger update of UI...
 				widget.setVisible(isVisible);
 			}
+			if ( isVisible ) {
+				managementTab.setSubSelection(ManageTabUI.PERMISSIONS, MANAGE_PASSWORDS);
+			}
 		}
 		
 		@Override
 		protected Widget createWidget() {
+			// return asIFrame("ssl/user-manage-passwords");
 			return new ManageUserPasswordsSheet();
 		}
 	}
 	public LazyPanel manageUserPasswords = new ManageUserPasswordsLazyPanel();
 
+	
+	private class ManageConfigurationLazyPanel extends LazyPanel {
+		
+		ManageConfigurationLazyPanel() {
+		}
+
+		@Override
+		public void setVisible(boolean isVisible) {
+			super.setVisible(isVisible);
+			Widget widget = getWidget();
+			if ( widget != null ) {
+				// trigger update of UI...
+				widget.setVisible(isVisible);
+			}
+			if ( isVisible ) {
+				managementTab.setSubSelection(ManageTabUI.PERMISSIONS, MANAGE_ACCESS);
+			}
+		}
+		
+		@Override
+		protected Widget createWidget() {
+			// return asIFrame("access/access-management");
+			return new AccessManagementSheet();
+		}
+	}
+	
+	public LazyPanel manageConfiguration = new ManageConfigurationLazyPanel();
+
 	public boolean isConfigured = false;
 	
-	public PermissionsSheet() {
+	ManageTabUI managementTab;
+	
+	public PermissionsSheet(ManageTabUI managementTab) {
 		super();
+		this.managementTab = managementTab;
 	}
 
 	private void lazyConfigure() {
@@ -132,18 +182,17 @@ public class PermissionsSheet extends TabPanel {
 
 				@Override
 				public void onSuccess(UserSecurityInfo result) {
-					if ( result.getType() == UserType.REGISTERED ) {
-						PermissionsSheet.this.add( changePassword, "Change AggregatePassword");
-					}
-					
 					if ( result.getGrantedAuthorities().contains(
 							new GrantedAuthorityInfo(GrantedAuthorityNames.ROLE_ACCESS_ADMIN.toString())) ) {
-						PermissionsSheet.this.add( accessConfiguration, "Manage Website Access");
+						PermissionsSheet.this.add( accessConfiguration, MANAGE_WEBSITE_ACCESS);
 						
 						PermissionsSheet.this.add( manageUserPasswords, "Manage User Passwords");
 				
-						PermissionsSheet.this.add(asIFrame("access/access-management"),
-											"Advanced Website Access Management");
+						PermissionsSheet.this.add(manageConfiguration, "Advanced Website Access Management");
+					}
+
+					if ( result.getType() == UserType.REGISTERED ) {
+						PermissionsSheet.this.add( changePassword, "Change Aggregate Password");
 					}
 					
 					if ( PermissionsSheet.this.getWidgetCount() != 0 ) {

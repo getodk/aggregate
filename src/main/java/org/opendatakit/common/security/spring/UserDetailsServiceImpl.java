@@ -110,7 +110,7 @@ public class UserDetailsServiceImpl implements UserDetailsService, InitializingB
 			}
 		}
 	}
-
+	
 	@Override
 	public void afterPropertiesSet() throws Exception {
 		if ( datastore == null ) {
@@ -194,22 +194,11 @@ public class UserDetailsServiceImpl implements UserDetailsService, InitializingB
 				salt = UUID.randomUUID().toString();
 				
 				if ( name.equals(userService.getSuperUserEmail()) ) {
-					// it is the superUser ... some values are hard-coded...
+					// it is the superUser ... values are hard-coded...
 					isEnabled = true;
 					isCredentialNonExpired = true;
 					grantedAuthorities = getGrantedAuthorities(name);
-					// and try to add more rights if we find entries for the super-user...
-					List<RegisteredUsersTable> eUser = RegisteredUsersTable.getUsersByEmail(name, datastore, user);
-					for ( RegisteredUsersTable t : eUser ) {
-						Set<GrantedAuthority> authorityAdds = getGrantedAuthorities(t.getUri());
-						grantedAuthorities.addAll(authorityAdds);
-					}
-					if ( eUser.size() == 1 ) {
-						// and uriUser can be updated to this record if it is the only one with this email address...
-						uriUser = eUser.get(0).getUri();
-					} else {
-						uriUser = RegisteredUsersTable.generateUniqueUri(name);
-					}
+					uriUser = name;
 				} else {
 					// not the super-user -- try to find user in registered users table...
 					List<RegisteredUsersTable> eUser = RegisteredUsersTable.getUsersByEmail(name, datastore, user);
