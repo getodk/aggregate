@@ -57,8 +57,15 @@ public class LocalLoginPageServlet extends ServletUtilBase {
 "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"/>" +
 "<link rel=\"shortcut icon\" href=\"favicon.ico\"/>" +
 "<title>Login successful! Redirecting to forms page</title>" +
+"<link type=\"text/css\" rel=\"stylesheet\" href=\"AggregateUI.css\">" +
+"<link type=\"text/css\" rel=\"stylesheet\" href=\"stylesheets/button.css\">" +
+"<link type=\"text/css\" rel=\"stylesheet\" href=\"stylesheets/table.css\">" +
+"<link type=\"text/css\" rel=\"stylesheet\" href=\"stylesheets/navigation.css\">" +
 "</head>" +
 "<body>" +
+"<table width=\"100%\" cellspacing=\"30\"><tr>" +
+"<td align=\"LEFT\" width=\"1%\"><img src=\"odk_color.png\" id=\"odk_aggregate_logo\" /></td>" +
+"<td align=\"LEFT\" width=\"90%\"><font size=\"7\">Successful Login</font></td></tr></table>" +
 "Please click <a href=\"www/index.html\">here</a> to enter the site." +
 "</body>" +
 "</html>");
