@@ -176,9 +176,9 @@ public class UISubmissionServlet extends ServletUtilBase {
 "	      </tr>" +
 "	      <![endif]-->" +
 "	  	<tr>" +
-"	  		<td><button name=\"button\" class=\"gwt-Button\" id=\"uploadButton\"" +
+"	  		<td><button type=\"button\" name=\"button\" class=\"gwt-Button\" id=\"uploadButton\"" +
 "	  			onClick=\"submitButton(document,'";
-  private static final String UPLOAD_PAGE_BODY_REMAINDER = "','xml_submission_file','mediaFiles')\"><img src=\"/images/blue_up_arrow.png\"> Upload Form</button></td>" +
+  private static final String UPLOAD_PAGE_BODY_REMAINDER = "','xml_submission_file','mediaFiles')\"><img src=\"/images/blue_up_arrow.png\"> Upload Data</button></td>" +
 "	  		<td />" +
 "	  	</tr>" +
 "	  </table>" +
@@ -213,21 +213,36 @@ public class UISubmissionServlet extends ServletUtilBase {
 	   headerString.append(JQUERY_SCRIPT_HEADER);
 	   headerString.append("<script src=\"");
 	   headerString.append(cc.getWebApplicationURL(UPLOAD_SCRIPT_RESOURCE));
-	   headerString.append("\"></script>");
-	   beginBasicHtmlResponse(TITLE, headerString.toString(), resp, true, cc );// header info
-	headerString.append(cc.getWebApplicationURL(NAV_STYLE_RESOURCE));
-	headerString.append("\" />");
-	headerString.append("<link type=\"text/css\" rel=\"stylesheet\" href=\"");
-	headerString.append(cc.getWebApplicationURL(AGGREGATE_STYLE_RESOURCE));
-	headerString.append("\" />");
-	headerString.append("<link type=\"text/css\" rel=\"stylesheet\" href=\"");
-	   PrintWriter out = resp.getWriter();
+	    headerString.append("\"></script>");
+		headerString.append("<link type=\"text/css\" rel=\"stylesheet\" href=\"");
+		headerString.append(cc.getWebApplicationURL(PAGE_STYLE_RESOURCE));
+		headerString.append("\" />");
+		headerString.append("<link type=\"text/css\" rel=\"stylesheet\" href=\"");
+		headerString.append(cc.getWebApplicationURL(NAV_STYLE_RESOURCE));
+		headerString.append("\" />");
+		headerString.append("<link type=\"text/css\" rel=\"stylesheet\" href=\"");
+		headerString.append(cc.getWebApplicationURL(AGGREGATE_STYLE_RESOURCE));
+		headerString.append("\" />");
+		headerString.append("<link type=\"text/css\" rel=\"stylesheet\" href=\"");
+		headerString.append(cc.getWebApplicationURL(BUTTON_STYLE_RESOURCE));
+		headerString.append("\" />");
+		  
+	    resp.addHeader(HOST_HEADER, cc.getServerURL());
+	    resp.setContentType(HtmlConsts.RESP_TYPE_HTML);
+	    resp.setCharacterEncoding(HtmlConsts.UTF8_ENCODE);
+
+	    PrintWriter out = resp.getWriter();
+	    out.write(HtmlConsts.HTML_OPEN);
+	    out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.HEAD, headerString.toString() + HtmlUtil.wrapWithHtmlTags(
+	        HtmlConsts.TITLE, "AGGREGATE")));
+	    out.write(HtmlConsts.BODY_OPEN);
+
 	   out.write(UPLOAD_PAGE_BODY_START);
 	   out.write(cc.getWebApplicationURL(ADDR));
 	   out.write(UPLOAD_PAGE_BODY_MIDDLE);
 	   out.write(cc.getWebApplicationURL(ADDR));
 	   out.write(UPLOAD_PAGE_BODY_REMAINDER);
-	    finishBasicHtmlResponse(resp);
+	   out.write(HtmlConsts.BODY_CLOSE + HtmlConsts.HTML_CLOSE);
   }
 
   /**
