@@ -45,7 +45,8 @@
             <actionList>
                 <changePermissions files="${installdir}/*.sh" permissions="0755"/>
                 <changePermissions files="${installdir}/appengine-java-sdk/bin/*.sh" permissions="0755"/>
-                <changePermissions files="${installdir}/*.app" permissions="0755"/>
+                <changePermissions files="${installdir}/*.app/Contents/MacOS/applet" permissions="0755"/>
+                <changePermissions files="${installdir}/*.app/Contents/MacOS/._applet" permissions="0755"/>
             </actionList>
             <distributionFileList>
                 <distributionFile>
@@ -632,6 +633,31 @@ access rights for ODK Aggregate.${html_steps_end_item}
                     <text>${platform}</text>
                     <value>gae</value>
                 </compareText>
+                <platformTest>
+                    <negate>1</negate>
+                    <type>osx</type>
+                </platformTest>
+            </ruleList>
+        </writeFile>
+        <writeFile>
+            <encoding>utf-8</encoding>
+            <path>${installdir}/README.html</path>
+            <progressText>Write README</progressText>
+            <text>${html_steps_begin}
+${html_steps_begin_item}Browse to ${installdir} and execute &lt;code&gt;uploadAggregateToAppEngine&lt;/code&gt; to deploy ${product_fullname} up into Google's AppEngine cloud.  &lt;font color="red"/&gt;NOTE:&lt;/font&gt; this script will ask for your Google password and will erroneously display it. 
+${html_steps_end_item}${html_steps_begin_item}
+Visit &lt;a href="http://${hostname}"&gt;http://${hostname}/&lt;/a&gt; to complete configuring the
+access rights for ODK Aggregate.${html_steps_end_item}
+&lt;/ol&gt;&lt;p&gt;${html_steps_end}</text>
+            <ruleList>
+                <compareText>
+                    <logic>equals</logic>
+                    <text>${platform}</text>
+                    <value>gae</value>
+                </compareText>
+                <platformTest>
+                    <type>osx</type>
+                </platformTest>
             </ruleList>
         </writeFile>
         <writeFile>
