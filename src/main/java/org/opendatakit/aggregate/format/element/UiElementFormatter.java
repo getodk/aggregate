@@ -6,12 +6,10 @@ import java.util.Map;
 
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.ServletConsts;
-import org.opendatakit.aggregate.constants.format.FormTableConsts;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.server.GeopointHeaderIncludes;
 import org.opendatakit.aggregate.servlet.BinaryDataServlet;
-import org.opendatakit.aggregate.servlet.FormMultipleValueServlet;
 import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.submission.SubmissionRepeat;
 import org.opendatakit.aggregate.submission.SubmissionSet;

@@ -23,9 +23,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.opendatakit.aggregate.ContextFactory;
-import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
-import org.opendatakit.common.security.client.exception.AccessDeniedException;
-import org.opendatakit.common.security.server.SecurityServiceUtil;
 import org.opendatakit.common.web.CallingContext;
 
 /**
