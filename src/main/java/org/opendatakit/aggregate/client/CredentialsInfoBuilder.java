@@ -23,8 +23,6 @@ import java.security.NoSuchAlgorithmException;
 import org.opendatakit.common.security.client.CredentialsInfo;
 import org.opendatakit.common.security.client.RealmSecurityInfo;
 
-import com.google.gwt.user.client.Random;
-
 /**
  * Handles creating the CredentialsInfo object (encrypted passwords) for a user.  These are then
  * passed in the open to the server, where they are used to directly update the credentials there. 
@@ -72,16 +70,29 @@ public class CredentialsInfoBuilder {
 		MessageDigest md = MessageDigest.getInstance("MD5");
 		String digestAuthHash = genHash(md, fullDigestAuth, 32 );
 
-		// compute the basic auth hash...
-		int rv = Random.nextInt();
-		String  basicAuthSalt = Integer.toHexString(rv);
-		// RealmSecurityInfo would need to be augmented if additional
-		// encrypted format parameters are allowed.
-		// Must match SpringSecurity BasicPasswordEncoder for constructing salted string.
-		String fullBasicAuth = rawPassword + "{" + basicAuthSalt + "}";
-		md = MessageDigest.getInstance(realmInfo.getBasicAuthHashEncoding());
-		String basicAuthHash = genHash(md, fullBasicAuth, -1 );
-//		
+		String basicAuthSalt = null;
+		String basicAuthHash = null;
+		
+		// TODO: find sha-1 library
+		// SHA-1 is used for basic auth logins.  
+		// if we have a library, the code would be:
+		
+		// verify that we can do the encoding the server is requesting.  SHA-1 for now...
+//		final String sha1Encoding = "SHA-1";
+//		if ( !sha1Encoding.equals(realmInfo.getBasicAuthHashEncoding()) ) {
+//			throw new NoSuchAlgorithmException("Encryption mechanism is not supported");
+//		}
+//		// compute the basic auth hash...
+//		int rv = Random.nextInt();
+//		String  basicAuthSalt = Integer.toHexString(rv);
+//		// RealmSecurityInfo would need to be augmented if additional
+//		// encrypted format parameters are allowed.
+//		// Must match SpringSecurity BasicPasswordEncoder for constructing salted string.
+//		String fullBasicAuth = rawPassword + "{" + basicAuthSalt + "}";
+//		md = MessageDigest.getInstance(realmInfo.getBasicAuthHashEncoding());
+//		String basicAuthHash = genHash(md, fullBasicAuth, -1 );
+
+		
 //		Original server-side code:
 //
 //		import org.opendatakit.common.security.SecurityBeanDefs;

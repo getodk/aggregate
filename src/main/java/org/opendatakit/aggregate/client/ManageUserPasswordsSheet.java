@@ -129,7 +129,7 @@ public class ManageUserPasswordsSheet extends Composite {
 				if ( email != null ) {
 					email = email.substring(EmailParser.K_MAILTO.length());
 				}
-				return object.getEmail();
+				return email;
 			}
 			
 		};
@@ -220,8 +220,8 @@ public class ManageUserPasswordsSheet extends Composite {
 					}});
 			}
 			
-			password1.setText("unknown");
-			password2.setText("setting");
+			password1.setText("");
+			password2.setText("");
 		}
 	}
 
@@ -243,7 +243,9 @@ public class ManageUserPasswordsSheet extends Composite {
 	void onUpdateClick(ClickEvent e) {
 		String pw1 = password1.getText();
 		String pw2 = password2.getText();
-		if ( pw1.equals(pw2) ) {
+		if ( pw1 == null || pw2 == null || pw1.length() == 0 ) {
+			Window.alert("Password cannot be blank");
+		} else if ( pw1.equals(pw2) ) {
 			if ( realmInfo == null ) {
 				Window.alert("Unable to obtain required information from server");
 			}

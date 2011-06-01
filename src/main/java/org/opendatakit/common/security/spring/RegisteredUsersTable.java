@@ -26,6 +26,7 @@ import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.persistence.Query.Direction;
 import org.opendatakit.common.persistence.Query.FilterOperation;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.security.client.UserSecurityInfo;
 import org.opendatakit.common.security.common.EmailParser.Email;
@@ -467,4 +468,62 @@ public final class RegisteredUsersTable extends CommonFieldsBase {
 		return l;
 	}
 
+	/**
+	 * Attempts to find a super-user record with the PK of the registered user equal to the 
+	 * super-user e-mail address. If it can't, it then 
+	 * @param cc
+	 * @return
+	 * @throws ODKDatastoreException
+	 */
+	public static final RegisteredUsersTable assertSuperUser(CallingContext cc) throws ODKDatastoreException {
+		return assertSuperUser(cc.getUserService().getSuperUserEmail(), cc.getDatastore(), cc.getUserService().getDaemonAccountUser());
+	}
+	
+	private static synchronized final RegisteredUsersTable assertSuperUser(String superUserEmail, Datastore datastore, User user) throws ODKDatastoreException {
+		RegisteredUsersTable t = null;
+		
+		List<RegisteredUsersTable> l = getUsersByEmail(superUserEmail, datastore, user);
+		if ( l.size() == 1 ) {
+			t = l.get(0);
+			if ( !t.getIsCredentialNonExpired() || !t.getIsEnabled() ) {
+				t.setIsCredentialNonExpired(true);
+				t.setIsEnabled(true);
+				datastore.putEntity(t, user);
+			}
+			return t;
+		}
+
+		RegisteredUsersTable prototype = assertRelation(datastore, user);
+		
+		try {
+			t = datastore.getEntity(prototype, superUserEmail, user);
+		} catch ( ODKEntityNotFoundException e) {
+		}
+		
+		Email e = new Email(null, superUserEmail);
+		if ( t != null ) {
+			// must have been deleted -- resurrect it...
+			t.setIsCredentialNonExpired(true);
+			t.setIsEnabled(true);
+			t.setIsRemoved(false);
+			t.setBasicAuthPassword(null);
+			t.setBasicAuthSalt(null);
+			t.setDigestAuthPassword(null);
+			t.setUsername(e.getUsername());
+			t.setNickname(e.getNickname());
+			t.setEmail(e.getEmail());
+			datastore.putEntity(t, user);
+			return t;
+		}
+		
+		t = datastore.createEntityUsingRelation(prototype, user);
+		t.setStringField(t.primaryKey, superUserEmail);
+		t.setIsCredentialNonExpired(true);
+		t.setIsEnabled(true);
+		t.setUsername(e.getUsername());
+		t.setNickname(e.getNickname());
+		t.setEmail(e.getEmail());
+		datastore.putEntity(t, user);
+		return t;
+	}
 }

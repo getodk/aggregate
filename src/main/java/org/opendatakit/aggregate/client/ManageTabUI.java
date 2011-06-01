@@ -40,7 +40,7 @@ public class ManageTabUI extends TabPanel {
 	private static final String FORMS = "forms";
 	private static final String EXPORT = "export";
     static final String PUBLISH = "publish";
-	private static final String PERMISSIONS = "permissions";
+	static final String PERMISSIONS = "permissions";
 	private static final String UTILITIES = "utilities";
 	private static final String[] MANAGEMENT_MENU = {FORMS, EXPORT, PUBLISH, PERMISSIONS, UTILITIES};
 	static final String MANAGEMENT = "management";
@@ -58,7 +58,7 @@ public class ManageTabUI extends TabPanel {
 	private FlexTable exportTable = new FlexTable();
 	
 	// Permissions tab
-	private PermissionsSheet permissionsSheet = new PermissionsSheet();
+	private PermissionsSheet permissionsSheet;
 	
 	private TextBox mapsApiKey = new TextBox();
 	
@@ -68,6 +68,8 @@ public class ManageTabUI extends TabPanel {
 		this.listOfForms = listOfForms;
 		this.parent = parent;
 
+		permissionsSheet = new PermissionsSheet(this);
+		
 		this.add(setupFormManagementPanel(), "Forms");
 		this.add(exportTable, "Export");
 		this.add(publishTable, "Publish");
@@ -270,5 +272,13 @@ public class ManageTabUI extends TabPanel {
 				hash.put();
 			}
 		};
+	}
+
+	public void setSubSelection(String subMenu, String subSubMenu) {
+		hash.clear();
+		hash.set(UrlHash.MAIN_MENU, MANAGEMENT);
+		hash.set(UrlHash.SUB_MENU, subMenu);
+		hash.set(UrlHash.FORM, subSubMenu);
+		hash.put();
 	}
 }

@@ -77,8 +77,8 @@ public class ChangePasswordSheet extends Composite {
 			} else {
 				usernickname.setText(userInfo.getNickname());
 			}
-			password1.setText("unknown");
-			password2.setText("setting");
+			password1.setText("");
+			password2.setText("");
 			if ( realmInfo == null ) {
 				service.getRealmInfo(Cookies.getCookie("JSESSIONID"), 
 						new AsyncCallback<RealmSecurityInfo>() {
@@ -115,7 +115,9 @@ public class ChangePasswordSheet extends Composite {
 	void onClick(ClickEvent e) {
 		String pw1 = password1.getText();
 		String pw2 = password2.getText();
-		if ( pw1.equals(pw2) ) {
+		if ( pw1 == null || pw2 == null || pw1.length() == 0 ) {
+			Window.alert("Password cannot be blank");
+		} else if ( pw1.equals(pw2) ) {
 			if ( realmInfo == null || userInfo == null ) {
 				Window.alert("Unable to obtain required information from server");
 			} else {
