@@ -268,9 +268,11 @@ public class AggregateUI implements EntryPoint {
 
 	}-*/;
 
-	static HTML togglePane = new HTML("<div>Selecting tab should toggle authentication status</div>");
-	static String LOGOUT_LINK = "<a href=\"j_spring_security_logout\">Log Out</a>";
-	static String LOGIN_LINK = "<a href=\"openid_login.html\">Log In</a>";
+	static final HTML togglePane = new HTML("<div>Selecting tab should toggle authentication status</div>");
+	static final String LOGOUT_URL_PATH = "j_spring_security_logout";
+	static final String LOGOUT_LINK = "<a href=\"" + LOGOUT_URL_PATH + "\">Log Out</a>";
+	static final String LOGIN_URL_PATH = "relogin.html";
+	static final String LOGIN_LINK = "<a href=\"" + LOGIN_URL_PATH + "\">Log In</a>";
 	private int toggleTabIndex = -1;
 	private SecurityServiceAsync securityService = null;
 	private UserSecurityInfo userInfo = null;
@@ -329,9 +331,9 @@ public class AggregateUI implements EntryPoint {
 					panel = manageNav;
 				else if (s.equals(TOGGLE_AUTHENTICATION_STATUS)) {
 					if ( userInfo != null && userInfo.getType() != UserType.ANONYMOUS ) {
-						redirect( GWT.getHostPageBaseURL() + "/j_spring_security_logout");
+						redirect( GWT.getHostPageBaseURL() + "/" + LOGOUT_URL_PATH);
 					} else {
-						redirect( GWT.getHostPageBaseURL() + "/openid_login.html");
+						redirect( GWT.getHostPageBaseURL() + "/" + LOGIN_URL_PATH);
 					}
 					return;
 				}

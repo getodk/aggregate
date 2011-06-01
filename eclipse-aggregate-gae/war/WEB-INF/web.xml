@@ -527,6 +527,15 @@
 	</servlet-mapping>
 
     <servlet>
+        <servlet-name>clearSessionAndLoginPage</servlet-name>
+        <servlet-class>org.opendatakit.aggregate.servlet.ClearSessionThenLoginServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>clearSessionAndLoginPage</servlet-name>
+        <url-pattern>/relogin.html</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
         <servlet-name>localLoginPage</servlet-name>
         <servlet-class>org.opendatakit.aggregate.servlet.LocalLoginPageServlet</servlet-class>
     </servlet>
