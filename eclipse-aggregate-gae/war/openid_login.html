@@ -1,17 +1,26 @@
 <html>
 <head>
 <link rel="shortcut icon" href="favicon.ico"/>
+<title>Log onto Aggregate</title>
 </head>
 <body>
-<h1>Log Into Your Account with Google OpenID</h1>
-<p>Please click the button below to log into your Google account with OpenID.</p>
-<p><font color="blue">NOTE:</font> you must allow this site to obtain your e-mail address. 
-Your e-mail address will only be used for establishing website access permissions.</p>
-<form action="j_spring_openid_security_check" method="post">
+<h1>Log onto Aggregate</h1>
+<table border="1">
+<tr><td><form action="local_login.html" method="get">
+  <input type="submit" value="Sign in with Aggregate password"/>
+</form></td><td>Click this button to log onto Aggregate using the username 
+and password that have been assigned to you by the Aggregate site administrator.</td></tr>
+
+<tr><td><form action="j_spring_openid_security_check" method="post">
   <input name="openid_identifier" size="50" maxlength="100"
          type="hidden" value="https://www.google.com/accounts/o8/id"/>
   <input type="submit" value="Sign in with Google"/>
-</form>
-<br/><p>Or, click <a href="local_login.html">here</a> to log in with your Aggregate server password.</p>
+</form></td><td>Click this button to log onto Aggregate using your Google account (via OpenID).<br/>
+<font color="blue">NOTE:</font> you must allow this site to obtain your e-mail address. 
+Your e-mail address will only be used for establishing website access permissions.</td></tr>
+<tr><td><form action="Aggregate.html" method="get">
+  <input type="submit" value="Anonymous Access"/>
+</form></td><td>Click this button to access Aggregate without logging in.</td></tr>
+</table>
 </body>
 </html>
