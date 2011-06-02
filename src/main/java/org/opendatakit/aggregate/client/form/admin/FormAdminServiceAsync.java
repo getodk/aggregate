@@ -16,6 +16,8 @@
 
 package org.opendatakit.aggregate.client.form.admin;
 
+import java.util.Date;
+
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
 public interface FormAdminServiceAsync {
@@ -25,5 +27,8 @@ public interface FormAdminServiceAsync {
 
 	void setFormDownloadable(String formId, Boolean downloadable,
 			AsyncCallback<Boolean> callback);
+
+	void purgePublishedData(String uriExternalService, Date earliest,
+			AsyncCallback<Date> callback);
 
 }

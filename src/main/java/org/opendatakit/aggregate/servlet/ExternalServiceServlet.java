@@ -27,7 +27,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.ServletConsts;
-import org.opendatakit.aggregate.constants.common.ExternalServiceOption;
+import org.opendatakit.aggregate.constants.common.ExternalServicePublicationOption;
 import org.opendatakit.aggregate.constants.externalservice.ExternalServiceConsts;
 import org.opendatakit.aggregate.constants.externalservice.ExternalServiceType;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
@@ -125,9 +125,9 @@ public class ExternalServiceServlet extends ServletUtilBase {
     }
 
     form.append(HtmlConsts.LINE_BREAK + HtmlConsts.LINE_BREAK);
-    form.append(generateRadioOption(ExternalServiceOption.UPLOAD_ONLY, true));
-    form.append(generateRadioOption(ExternalServiceOption.STREAM_ONLY, false));
-    form.append(generateRadioOption(ExternalServiceOption.UPLOAD_N_STREAM, false));
+    form.append(generateRadioOption(ExternalServicePublicationOption.UPLOAD_ONLY, true));
+    form.append(generateRadioOption(ExternalServicePublicationOption.STREAM_ONLY, false));
+    form.append(generateRadioOption(ExternalServicePublicationOption.UPLOAD_N_STREAM, false));
     form.append(HtmlConsts.LINE_BREAK);
     form.append(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_SUBMIT, null,
         ExternalServiceConsts.CREATE_EXTERNAL_SERVICE_BUTTON_LABEL));
@@ -135,7 +135,7 @@ public class ExternalServiceServlet extends ServletUtilBase {
     return form.toString();
   }
 
-  private String generateRadioOption(ExternalServiceOption option, boolean checked) {
+  private String generateRadioOption(ExternalServicePublicationOption option, boolean checked) {
     return HtmlUtil.createRadio(ServletConsts.EXTERNAL_SERVICE_TYPE, option.toString(), option
         .getDescriptionOfOption(), checked);
   }

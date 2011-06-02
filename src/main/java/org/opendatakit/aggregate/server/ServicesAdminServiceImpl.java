@@ -26,7 +26,7 @@ import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.client.services.admin.ExternServSummary;
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.ServletConsts;
-import org.opendatakit.aggregate.constants.common.ExternalServiceOption;
+import org.opendatakit.aggregate.constants.common.ExternalServicePublicationOption;
 import org.opendatakit.aggregate.constants.common.UIConsts;
 import org.opendatakit.aggregate.constants.externalservice.FusionTableConsts;
 import org.opendatakit.aggregate.constants.externalservice.SpreadsheetConsts;
@@ -142,7 +142,7 @@ public class ServicesAdminServiceImpl extends RemoteServiceServlet implements
   }
 
   @Override
-  public String createFusionTable(String formId, ExternalServiceOption esOption) {
+  public String createFusionTable(String formId, ExternalServicePublicationOption esOption) {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
 
@@ -161,7 +161,7 @@ public class ServicesAdminServiceImpl extends RemoteServiceServlet implements
   }
 
   @Override
-  public String createGoogleSpreadsheet(String formId, String name, ExternalServiceOption esOption) {
+  public String createGoogleSpreadsheet(String formId, String name, ExternalServicePublicationOption esOption) {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
 

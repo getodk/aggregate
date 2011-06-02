@@ -21,7 +21,7 @@ import java.util.UUID;
 
 import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.TaskLockType;
-import org.opendatakit.aggregate.constants.common.ExternalServiceOption;
+import org.opendatakit.aggregate.constants.common.ExternalServicePublicationOption;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
 import org.opendatakit.aggregate.externalservice.ExternalService;
 import org.opendatakit.aggregate.externalservice.FormServiceCursor;
@@ -51,13 +51,13 @@ public class WorksheetCreatorWorkerImpl {
 	private final SubmissionKey miscTasksKey;
 	private final Long attemptCount;
 	private final String spreadsheetName;
-	private final ExternalServiceOption esType;
+	private final ExternalServicePublicationOption esType;
 	private final CallingContext cc;
 	private final String pFormIdLockId;
 	
 	public WorksheetCreatorWorkerImpl(Form form, 
 			SubmissionKey miscTasksKey, long attemptCount, 
-			String spreadsheetName, ExternalServiceOption esType,
+			String spreadsheetName, ExternalServicePublicationOption esType,
 			CallingContext cc) {
 		this.form = form;
 		this.miscTasksKey = miscTasksKey;
@@ -168,7 +168,7 @@ public class WorksheetCreatorWorkerImpl {
 	    	
 			// if we need to upload submissions, start a task to do so
 	    	UploadSubmissions us = (UploadSubmissions) cc.getBean(BeanDefs.UPLOAD_TASK_BEAN);
-			if (!esType.equals(ExternalServiceOption.STREAM_ONLY)) {
+			if (!esType.equals(ExternalServicePublicationOption.STREAM_ONLY)) {
 				us.createFormUploadTask(fsc, cc);
 			}
 			

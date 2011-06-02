@@ -83,10 +83,10 @@ public class AggregateUI implements EntryPoint {
 	private UrlHash hash;
 
 	  // Publish tab
-   private FlexTable publishTable = new FlexTable();
+   private PublishSheet publishTable;
    
    // Export tab
-   private FlexTable exportTable = new FlexTable();
+   private ExportSheet exportTable = new ExportSheet();
 	
 	// layout
 	private VerticalPanel wrappingLayoutPanel = new VerticalPanel();
@@ -131,6 +131,7 @@ public class AggregateUI implements EntryPoint {
 		servicesAdminSvc = sg.createServicesAdminService();
 		listOfForms = new FlexTable();
 		
+		publishTable = new PublishSheet(this);
 		Preferences.updatePreferences();
 		
 		// Setup timer to refresh list automatically.
@@ -674,31 +675,8 @@ public class AggregateUI implements EntryPoint {
 				listOfForms.getRowFormatter().addStyleName(i, "evenTableRow");
 		}
 	}
-
-   public void updateExportPanel(ExportSummary[] eS) {
-     if (eS == null)
-       return;
-     while (exportTable.getRowCount() > 1)
-       exportTable.removeRow(1);
-     for (int i = 0; i < eS.length; i++) {
-       ExportSummary e = eS[i];
-       if( e.getFileType() != null)
-         exportTable.setText(i + 1, 0, e.getFileType().toString());
-       if( e.getStatus() != null)
-         exportTable.setText(i + 1, 1, e.getStatus().toString());
-       if( e.getTimeRequested() != null)
-         exportTable.setText(i + 1, 2, e.getTimeRequested().toString());
-       if( e.getTimeCompleted() != null)
-         exportTable.setText(i + 1, 3, e.getTimeCompleted().toString());
-       if( e.getTimeLastAction() != null)
-         exportTable.setText(i + 1, 4, e.getTimeLastAction().toString());
-       if( e.getResultFile() != null)
-         exportTable.setWidget(i + 1, 5, new HTML(e.getResultFile()));
-     }
-   }
-	
    
-   public void getExternalServicesList(String formId) {
+   public void getExternalServicesList(final String formId) {
      if (servicesAdminSvc == null) {
        servicesAdminSvc = SecureGWT.get().createServicesAdminService();
      }
@@ -711,27 +689,11 @@ public class AggregateUI implements EntryPoint {
 
       @Override
       public void onSuccess(ExternServSummary[] result) {
-        updatePublishPanel(result);
+        publishTable.updatePublishPanel(formId, result);
       }
      };
      
      servicesAdminSvc.getExternalServices(formId, callback);
-   }
-   
-   public void updatePublishPanel(ExternServSummary[] eSS) {
-     if (eSS == null)
-       return;
-     while (publishTable.getRowCount() > 1)
-       publishTable.removeRow(1);
-     for (int i = 0; i < eSS.length; i++) {
-       ExternServSummary e = eSS[i];
-       publishTable.setWidget(i + 1, 0, new Anchor(e.getUser()));
-       publishTable.setText(i + 1, 1, e.getStatus().toString());
-       publishTable.setText(i + 1, 2, e.getEstablished().toString());
-       publishTable.setText(i + 1, 3, e.getAction());
-       publishTable.setText(i + 1, 4, e.getType());
-       publishTable.setWidget(i + 1, 5, new HTML(e.getName()));
-     }
    }
    
    public void getExportList() {
@@ -747,7 +709,7 @@ public class AggregateUI implements EntryPoint {
 
       @Override
       public void onSuccess(ExportSummary[] result) {
-        updateExportPanel(result);
+    	  exportTable.updateExportPanel(result);
       }
      };
      

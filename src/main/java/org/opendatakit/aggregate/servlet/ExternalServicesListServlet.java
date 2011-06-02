@@ -32,7 +32,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.ServletConsts;
-import org.opendatakit.aggregate.constants.common.ExternalServiceOption;
+import org.opendatakit.aggregate.constants.common.ExternalServicePublicationOption;
 import org.opendatakit.aggregate.constants.common.OperationalStatus;
 import org.opendatakit.aggregate.constants.externalservice.ExternalServiceConsts;
 import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
@@ -130,7 +130,7 @@ public class ExternalServicesListServlet extends ServletUtilBase {
 					// mechanism is upload or upload-and-stream.  Don't offer it 
 					// if it is stream-only, as that leaves a gap in the data timespan.
 					String purgeButton = "";
-					if ( fsc.getExternalServiceOption() != ExternalServiceOption.STREAM_ONLY ) {
+					if ( fsc.getExternalServicePublicationOption() != ExternalServicePublicationOption.STREAM_ONLY ) {
 						purgeButton = HtmlUtil.createHtmlButtonToGetServlet(
 								cc.getWebApplicationURL(ExternalServicesPurgeServlet.ADDR),
 								"Purge published submissions", properties);
@@ -144,7 +144,7 @@ public class ExternalServicesListServlet extends ServletUtilBase {
 									.toString());
 					row.addFormattedValue(fsc.getEstablishmentDateTime()
 							.toString());
-					row.addFormattedValue(fsc.getExternalServiceOption()
+					row.addFormattedValue(fsc.getExternalServicePublicationOption()
 							.getDescriptionOfOption());
 					row.addFormattedValue(fsc.getExternalServiceType().getServiceName());
 					row.addFormattedValue(es.getDescriptiveTargetString());
@@ -207,7 +207,7 @@ public class ExternalServicesListServlet extends ServletUtilBase {
 											.toString());
 							row.addFormattedValue(fsc.getEstablishmentDateTime()
 									.toString());
-							row.addFormattedValue(fsc.getExternalServiceOption()
+							row.addFormattedValue(fsc.getExternalServicePublicationOption()
 									.getDescriptionOfOption());
 							row.addFormattedValue(fsc.getExternalServiceType().getServiceName());
 							formattedFormValues.add(row);

@@ -37,7 +37,7 @@ import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpParams;
 import org.opendatakit.aggregate.client.services.admin.ExternServSummary;
 import org.opendatakit.aggregate.constants.BeanDefs;
-import org.opendatakit.aggregate.constants.common.ExternalServiceOption;
+import org.opendatakit.aggregate.constants.common.ExternalServicePublicationOption;
 import org.opendatakit.aggregate.constants.common.OperationalStatus;
 import org.opendatakit.aggregate.constants.externalservice.ExternalServiceType;
 import org.opendatakit.aggregate.constants.externalservice.JsonServerConsts;
@@ -90,7 +90,7 @@ public class JsonServer extends AbstractExternalService implements ExternalServi
     // createForm();
   }
 
-  public JsonServer(Form form, String serverURL, ExternalServiceOption externalServiceOption,
+  public JsonServer(Form form, String serverURL, ExternalServicePublicationOption externalServiceOption,
       CallingContext cc) throws ODKDatastoreException, ODKExternalServiceException {
     this(form, cc);
 
@@ -131,9 +131,12 @@ public class JsonServer extends AbstractExternalService implements ExternalServi
         fsc.getCreatorUriUser(),
         fsc.getOperationalStatus(),
         fsc.getEstablishmentDateTime(),
-        fsc.getExternalServiceOption().getDescriptionOfOption(),
+        fsc.getExternalServicePublicationOption(),
+        fsc.getUploadCompleted(),
+        fsc.getLastUploadCursorDate(),
+        fsc.getLastStreamingCursorDate(),
         fsc.getExternalServiceType().getServiceName(),
-          getDescriptiveTargetString());
+        getDescriptiveTargetString());
   }
   
   public void persist(CallingContext cc) throws ODKEntityPersistException {
@@ -290,7 +293,7 @@ public class JsonServer extends AbstractExternalService implements ExternalServi
   @Override
   public void setUploadCompleted(CallingContext cc) throws ODKEntityPersistException {
     fsc.setUploadCompleted(true);
-    if ( fsc.getExternalServiceOption() == ExternalServiceOption.UPLOAD_ONLY) {
+    if ( fsc.getExternalServicePublicationOption() == ExternalServicePublicationOption.UPLOAD_ONLY) {
     	fsc.setOperationalStatus(OperationalStatus.COMPLETED);
     }
 	Datastore ds = cc.getDatastore();

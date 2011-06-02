@@ -25,7 +25,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.ServletConsts;
-import org.opendatakit.aggregate.constants.common.ExternalServiceOption;
+import org.opendatakit.aggregate.constants.common.ExternalServicePublicationOption;
 import org.opendatakit.aggregate.constants.externalservice.ExternalServiceConsts;
 import org.opendatakit.aggregate.constants.externalservice.FusionTableConsts;
 import org.opendatakit.aggregate.exception.ODKExternalServiceAuthenticationError;
@@ -77,7 +77,7 @@ public class FusionTableServlet extends ServletUtilBase {
     String formId = getParameter(req, ServletConsts.FORM_ID);
     String esTypeString = getParameter(req, ServletConsts.EXTERNAL_SERVICE_TYPE);
 
-    ExternalServiceOption esType = ExternalServiceOption.valueOf(esTypeString);
+    ExternalServicePublicationOption esType = ExternalServicePublicationOption.valueOf(esTypeString);
 
     // store parameters for web redirect
     Map<String, String> params = new HashMap<String, String>();
@@ -124,7 +124,7 @@ public class FusionTableServlet extends ServletUtilBase {
     }
 
     // upload data to fusion table
-    if (!esType.equals(ExternalServiceOption.STREAM_ONLY)) {
+    if (!esType.equals(ExternalServicePublicationOption.STREAM_ONLY)) {
       try {
         UploadSubmissions uploadTask = (UploadSubmissions) cc.getBean(BeanDefs.UPLOAD_TASK_BEAN);
     	CallingContext ccDaemon = ContextFactory.getCallingContext(this, req);

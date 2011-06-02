@@ -32,7 +32,7 @@ import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.ServletConsts;
-import org.opendatakit.aggregate.constants.common.ExternalServiceOption;
+import org.opendatakit.aggregate.constants.common.ExternalServicePublicationOption;
 import org.opendatakit.aggregate.constants.externalservice.ExternalServiceConsts;
 import org.opendatakit.aggregate.datamodel.TopLevelDynamicBase;
 import org.opendatakit.aggregate.externalservice.ExternalService;
@@ -118,7 +118,7 @@ public class ExternalServicesPurgeServlet extends ServletUtilBase {
 							beginBasicHtmlResponse(TITLE_INFO, resp, true, cc); // header info
 							PrintWriter out = resp.getWriter();
 							if ( earliest == null ) {
-								switch ( fsc.getExternalServiceOption() ) {
+								switch ( fsc.getExternalServicePublicationOption() ) {
 								case UPLOAD_ONLY:
 									if ( fsc.getUploadCompleted() ) {
 										earliest = fsc.getEstablishmentDateTime();
@@ -144,7 +144,7 @@ public class ExternalServicesPurgeServlet extends ServletUtilBase {
 									break;
 								}
 							}
-							if ( fsc.getExternalServiceOption() != ExternalServiceOption.UPLOAD_ONLY) {
+							if ( fsc.getExternalServicePublicationOption() != ExternalServicePublicationOption.UPLOAD_ONLY) {
 								out.write("<p><b>Note:</b> Even though the chosen publishing action involves an ongoing streaming" +
 										" of data to the external service, this purge action is a one-time event and is " +
 										"not automatically ongoing.  You will need to periodically repeat this process.</p>");

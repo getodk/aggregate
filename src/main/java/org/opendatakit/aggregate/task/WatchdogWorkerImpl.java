@@ -64,7 +64,7 @@ public class WatchdogWorkerImpl {
       if ( !fsc.isExternalServicePrepared() ) continue;
       if ( fsc.getOperationalStatus() != OperationalStatus.ACTIVE ) continue;
       
-      switch (fsc.getExternalServiceOption()) {
+      switch (fsc.getExternalServicePublicationOption()) {
       case UPLOAD_ONLY:
         checkUpload(fsc, uploadSubmissions, cc);
         break;

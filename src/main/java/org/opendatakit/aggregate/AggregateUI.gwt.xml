@@ -26,6 +26,7 @@
   <servlet path="/submissionservice" class="org.opendatakit.aggregate.server.SubmissionServiceImpl"/>
    
   <source path='client'/>
+  <source path='client/exception'>
   <source path='client/filter'/>
   <source path='client/form'/>  
   <source path='client/preferences'/>

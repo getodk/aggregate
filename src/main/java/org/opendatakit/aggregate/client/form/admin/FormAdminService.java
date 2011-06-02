@@ -16,6 +16,10 @@
 
 package org.opendatakit.aggregate.client.form.admin;
 
+import java.util.Date;
+
+import org.opendatakit.aggregate.client.exception.RequestFailureException;
+import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
 import org.opendatakit.common.security.client.exception.AccessDeniedException;
 
 import com.google.gwt.user.client.rpc.RemoteService;
@@ -36,4 +40,5 @@ public interface FormAdminService extends RemoteService {
   
   Boolean setFormAcceptSubmissions(String formId, Boolean acceptSubmissions) throws AccessDeniedException;
   
+  Date purgePublishedData(String uriExternalService, Date earliest) throws AccessDeniedException, RequestFailureException, DatastoreFailureException;
 }

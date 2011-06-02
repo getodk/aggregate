@@ -154,30 +154,14 @@ public class ManageTabUI extends TabPanel {
 	}
 	
 	public void setupPublishPanel() {
-	  publishTable.setText(0, 0, "Created By");
-	  publishTable.setText(0, 1, "Status");
-	  publishTable.setText(0, 2, "Start Date");
-	  publishTable.setText(0, 3, "Action");
-	  publishTable.setText(0, 4, "Type");
-	  publishTable.setText(0, 5, "Name");
-	  publishTable.addStyleName("dataTable");
-	  publishTable.getRowFormatter().addStyleName(0, "titleBar");
-	  
 	  if (hash.get(UrlHash.FORM) != null && !hash.get(UrlHash.FORM).equals("")) {
 	    baseUI.getExternalServicesList(hash.get(UrlHash.FORM));
 	  }
 	}
    
    public void setupExportPanel() {
-     exportTable.setText(0, 0, "File Type");
-     exportTable.setText(0, 1, "Status");
-     exportTable.setText(0, 2, "Time Requested");
-     exportTable.setText(0, 3, "Time Completed");
-     exportTable.setText(0, 4, "Last Retry");
-     exportTable.setText(0, 5, "Download File");
-     exportTable.addStyleName("dataTable");
-     exportTable.getRowFormatter().addStyleName(0, "titleBar");
-     baseUI.getExportList();
+	   // trigger its population...
+	   baseUI.getExportList();
    }
 	
 	public HTML setupUtilitiesPanel() {

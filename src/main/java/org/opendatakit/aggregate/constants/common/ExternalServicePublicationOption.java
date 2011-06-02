@@ -28,14 +28,14 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  * @author mitchellsundt@gmail.com
  * 
  */
-public enum ExternalServiceOption implements IsSerializable {
+public enum ExternalServicePublicationOption implements IsSerializable {
   UPLOAD_ONLY("Upload Existing Submission Data ONLY"),
   STREAM_ONLY("Stream New Submission Data ONLY"),
   UPLOAD_N_STREAM("BOTH Upload Existing & Stream New Submission Data");
   
   private String descriptionOfOption;
   
-  private ExternalServiceOption(String desc) {
+  private ExternalServicePublicationOption(String desc) {
     descriptionOfOption = desc;
   }
   

@@ -26,7 +26,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.ErrorConsts;
 import org.opendatakit.aggregate.constants.ServletConsts;
-import org.opendatakit.aggregate.constants.common.ExternalServiceOption;
+import org.opendatakit.aggregate.constants.common.ExternalServicePublicationOption;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.externalservice.JsonServer;
@@ -72,7 +72,7 @@ public class JsonServlet extends ServletUtilBase {
     String formId = getParameter(req, ServletConsts.FORM_ID);
     String esTypeString = getParameter(req, ServletConsts.EXTERNAL_SERVICE_TYPE);
     
-    ExternalServiceOption esType = ExternalServiceOption.valueOf(esTypeString);
+    ExternalServicePublicationOption esType = ExternalServicePublicationOption.valueOf(esTypeString);
 
     if (serverUrl == null || formId == null || esTypeString == null || esType == null) {
       resp.sendError(HttpServletResponse.SC_BAD_REQUEST, ErrorConsts.MISSING_FORM_INFO);
@@ -100,7 +100,7 @@ public class JsonServlet extends ServletUtilBase {
 		return;
 	}
 
-    if (!esType.equals(ExternalServiceOption.STREAM_ONLY)) {
+    if (!esType.equals(ExternalServicePublicationOption.STREAM_ONLY)) {
 
       try {
     	QueryByDate query = new QueryByDate(form, BasicConsts.EPOCH, false,

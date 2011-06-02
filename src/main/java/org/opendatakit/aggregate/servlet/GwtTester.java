@@ -24,7 +24,7 @@ import org.opendatakit.aggregate.client.submission.SubmissionUISummary;
 import org.opendatakit.aggregate.constants.ErrorConsts;
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.ServletConsts;
-import org.opendatakit.aggregate.constants.common.ExternalServiceOption;
+import org.opendatakit.aggregate.constants.common.ExternalServicePublicationOption;
 import org.opendatakit.aggregate.constants.common.FilterOperation;
 import org.opendatakit.aggregate.constants.common.UIConsts;
 import org.opendatakit.aggregate.constants.common.UIDisplayType;
@@ -229,7 +229,7 @@ public class GwtTester extends ServletUtilBase {
       
       try {
         Form form = Form.retrieveForm("LocationThings", cc);
-        FusionTable fusion = new FusionTable(form, ExternalServiceOption.UPLOAD_N_STREAM, cc);;
+        FusionTable fusion = new FusionTable(form, ExternalServicePublicationOption.UPLOAD_N_STREAM, cc);;
         String uri =  fusion.getFormServiceCursor().getUri(); 
         String scope = FusionTableConsts.FUSION_SCOPE;
         String requestUrl = generateAuthorizationUrl(resp, cc, uri, scope);
@@ -246,7 +246,7 @@ public class GwtTester extends ServletUtilBase {
       
       try {
         Form form = Form.retrieveForm("LocationThings", cc);
-        GoogleSpreadsheet spreadsheet = new GoogleSpreadsheet(form, "TESTWORKBOOK", ExternalServiceOption.UPLOAD_N_STREAM, cc);
+        GoogleSpreadsheet spreadsheet = new GoogleSpreadsheet(form, "TESTWORKBOOK", ExternalServicePublicationOption.UPLOAD_N_STREAM, cc);
         String uri =  spreadsheet.getFormServiceCursor().getUri();
         String scope = SpreadsheetConsts.DOCS_SCOPE + BasicConsts.SPACE + SpreadsheetConsts.SPREADSHEETS_SCOPE;
         String requestUrl = generateAuthorizationUrl(resp, cc, uri, scope);            

@@ -7,7 +7,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.BeanDefs;
-import org.opendatakit.aggregate.constants.common.ExternalServiceOption;
+import org.opendatakit.aggregate.constants.common.ExternalServicePublicationOption;
 import org.opendatakit.aggregate.constants.common.UIConsts;
 import org.opendatakit.aggregate.exception.ODKExternalServiceAuthenticationError;
 import org.opendatakit.aggregate.exception.ODKExternalServiceNotAuthenticated;
@@ -56,12 +56,12 @@ public class OAuthServlet extends ServletUtilBase {
       if (authToken != null) {
         FormServiceCursor fsc = FormServiceCursor.getFormServiceCursor(uri, cc);
         ExternalService es = fsc.getExternalService(cc);
-        ExternalServiceOption esOption = fsc.getExternalServiceOption();
+        ExternalServicePublicationOption esOption = fsc.getExternalServicePublicationOption();
 
         es.authenticateAndCreate(authToken, cc);
 
         // upload data to external service
-        if (!esOption.equals(ExternalServiceOption.STREAM_ONLY)) {
+        if (!esOption.equals(ExternalServicePublicationOption.STREAM_ONLY)) {
 
           UploadSubmissions uploadTask = (UploadSubmissions) cc.getBean(BeanDefs.UPLOAD_TASK_BEAN);
           CallingContext ccDaemon = ContextFactory.getCallingContext(this, req);

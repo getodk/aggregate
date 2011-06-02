@@ -16,7 +16,7 @@
 
 package org.opendatakit.aggregate.client.services.admin;
 
-import org.opendatakit.aggregate.constants.common.ExternalServiceOption;
+import org.opendatakit.aggregate.constants.common.ExternalServicePublicationOption;
 import org.opendatakit.common.security.client.exception.AccessDeniedException;
 
 import com.google.gwt.user.client.rpc.RemoteService;
@@ -37,7 +37,7 @@ public interface ServicesAdminService extends RemoteService {
   
   String generateOAuthUrl(String uri) throws AccessDeniedException;
   
-  String createFusionTable(String formId, ExternalServiceOption esOption) throws AccessDeniedException;
+  String createFusionTable(String formId, ExternalServicePublicationOption esOption) throws AccessDeniedException;
   
-  String createGoogleSpreadsheet(String formId, String name, ExternalServiceOption esOption) throws AccessDeniedException;
+  String createGoogleSpreadsheet(String formId, String name, ExternalServicePublicationOption esOption) throws AccessDeniedException;
 }

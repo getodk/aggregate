@@ -24,7 +24,7 @@ import java.util.logging.Logger;
 import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.TaskLockType;
-import org.opendatakit.aggregate.constants.common.ExternalServiceOption;
+import org.opendatakit.aggregate.constants.common.ExternalServicePublicationOption;
 import org.opendatakit.aggregate.constants.common.OperationalStatus;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
@@ -61,14 +61,14 @@ public class UploadSubmissionsWorkerImpl {
 	private final String lockId;
 	private final CallingContext cc;
 	private final FormServiceCursor pFsc;
-	private final ExternalServiceOption pEsOption;
+	private final ExternalServicePublicationOption pEsOption;
 	private ExternalService pExtService;
 	private Form form;
 
 	public UploadSubmissionsWorkerImpl(FormServiceCursor fsc, CallingContext cc) {
 		pFsc = fsc;
 		this.cc = cc;
-		pEsOption = fsc.getExternalServiceOption();
+		pEsOption = fsc.getExternalServicePublicationOption();
 		lockId = UUID.randomUUID().toString();
 	}
 
