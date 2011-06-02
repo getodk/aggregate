@@ -30,7 +30,7 @@ import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.client.services.admin.ExternServSummary;
 import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.ServletConsts;
-import org.opendatakit.aggregate.constants.common.ExternalServiceOption;
+import org.opendatakit.aggregate.constants.common.ExternalServicePublicationOption;
 import org.opendatakit.aggregate.constants.common.OperationalStatus;
 import org.opendatakit.aggregate.constants.externalservice.ExternalServiceConsts;
 import org.opendatakit.aggregate.constants.externalservice.ExternalServiceType;
@@ -129,7 +129,7 @@ public class GoogleSpreadsheet extends AbstractExternalService implements Extern
     constructorHelper();
   }
 
-  public GoogleSpreadsheet(Form form, String name, ExternalServiceOption externalServiceOption,
+  public GoogleSpreadsheet(Form form, String name, ExternalServicePublicationOption externalServiceOption,
       CallingContext cc) throws ODKDatastoreException {
     this(form, cc);
     objectEntity = cc.getDatastore().createEntityUsingRelation(
@@ -205,7 +205,7 @@ public class GoogleSpreadsheet extends AbstractExternalService implements Extern
       Map<String, String> parameters = new HashMap<String, String>();
 
       parameters.put(ExternalServiceConsts.EXT_SERV_ADDRESS, spreadsheetName);
-      parameters.put(ServletConsts.EXTERNAL_SERVICE_TYPE, fsc.getExternalServiceOption().toString());
+      parameters.put(ServletConsts.EXTERNAL_SERVICE_TYPE, fsc.getExternalServicePublicationOption().toString());
 
       MiscTasks m = new MiscTasks(TaskType.WORKSHEET_CREATE, form, parameters, cc);
       m.persist(cc);
@@ -220,7 +220,7 @@ public class GoogleSpreadsheet extends AbstractExternalService implements Extern
   }
 
   public GoogleSpreadsheet(Form form, String name, String spreadKey, OAuthToken authToken,
-      ExternalServiceOption externalServiceOption, CallingContext cc) throws ODKDatastoreException {
+      ExternalServicePublicationOption externalServiceOption, CallingContext cc) throws ODKDatastoreException {
     this(form, cc);
     objectEntity = cc.getDatastore().createEntityUsingRelation(
         GoogleSpreadsheetParameterTable.assertRelation(cc), cc.getCurrentUser());
@@ -255,8 +255,14 @@ public class GoogleSpreadsheet extends AbstractExternalService implements Extern
 
   @Override
   public ExternServSummary transform() {
-    return new ExternServSummary(fsc.getUri(), fsc.getCreatorUriUser(), fsc.getOperationalStatus(),
-        fsc.getEstablishmentDateTime(), fsc.getExternalServiceOption().getDescriptionOfOption(),
+    return new ExternServSummary(fsc.getUri(), 
+    	fsc.getCreatorUriUser(), 
+    	fsc.getOperationalStatus(),
+        fsc.getEstablishmentDateTime(), 
+        fsc.getExternalServicePublicationOption(),
+        fsc.getUploadCompleted(),
+        fsc.getLastUploadCursorDate(),
+        fsc.getLastStreamingCursorDate(),
         fsc.getExternalServiceType().getServiceName(), getDescriptiveTargetString());
   }
 
@@ -525,7 +531,7 @@ public class GoogleSpreadsheet extends AbstractExternalService implements Extern
   }
 
   public static GoogleSpreadsheet createSpreadsheet(Form form, OAuthToken authToken,
-      String spreadsheetName, ExternalServiceOption externalServiceOption, CallingContext cc)
+      String spreadsheetName, ExternalServicePublicationOption externalServiceOption, CallingContext cc)
       throws ODKDatastoreException, ODKExternalServiceException {
 
     // setup service
@@ -570,7 +576,7 @@ public class GoogleSpreadsheet extends AbstractExternalService implements Extern
   @Override
   public void setUploadCompleted(CallingContext cc) throws ODKEntityPersistException {
     fsc.setUploadCompleted(true);
-    if (fsc.getExternalServiceOption() == ExternalServiceOption.UPLOAD_ONLY) {
+    if (fsc.getExternalServicePublicationOption() == ExternalServicePublicationOption.UPLOAD_ONLY) {
       fsc.setOperationalStatus(OperationalStatus.COMPLETED);
     }
     Datastore ds = cc.getDatastore();

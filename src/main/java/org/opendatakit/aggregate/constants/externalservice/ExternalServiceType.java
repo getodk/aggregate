@@ -35,10 +35,15 @@ import org.opendatakit.common.web.CallingContext;
  * 
  */
 public enum ExternalServiceType {
-  GOOGLE_SPREADSHEET("Google Spreadsheet", SpreadsheetServlet.ADDR,
-      SpreadsheetConsts.SPEADSHEET_NAME_LABEL), JSON_SERVER("JSON Server",
-      JsonServlet.ADDR, "JSON Server Address"), GOOGLE_FUSIONTABLES(
-      "Google FusionTables", FusionTableServlet.ADDR, null);
+  GOOGLE_SPREADSHEET(	"Google Spreadsheet",
+		  			 	SpreadsheetServlet.ADDR,
+		  			 	SpreadsheetConsts.SPEADSHEET_NAME_LABEL),
+  JSON_SERVER(			"JSON Server",
+		  				JsonServlet.ADDR,
+		  				"JSON Server Address"), 
+  GOOGLE_FUSIONTABLES(  "Google FusionTables", 
+		  				FusionTableServlet.ADDR, 
+		  				null);
 
   private String serviceName;
 

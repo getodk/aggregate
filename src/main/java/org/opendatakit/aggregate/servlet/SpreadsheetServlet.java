@@ -28,7 +28,7 @@ import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.ErrorConsts;
 import org.opendatakit.aggregate.constants.ServletConsts;
-import org.opendatakit.aggregate.constants.common.ExternalServiceOption;
+import org.opendatakit.aggregate.constants.common.ExternalServicePublicationOption;
 import org.opendatakit.aggregate.constants.externalservice.ExternalServiceConsts;
 import org.opendatakit.aggregate.constants.externalservice.SpreadsheetConsts;
 import org.opendatakit.aggregate.exception.ODKExternalServiceAuthenticationError;
@@ -143,7 +143,7 @@ public class SpreadsheetServlet extends ServletUtilBase {
       return;
     }
 
-    ExternalServiceOption esType = ExternalServiceOption.valueOf(esTypeString);
+    ExternalServicePublicationOption esType = ExternalServicePublicationOption.valueOf(esTypeString);
 
     try {
       OAuthToken authToken = new OAuthToken(sessionToken, sessionTokenSecret);

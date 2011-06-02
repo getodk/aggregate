@@ -24,7 +24,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.ServletConsts;
-import org.opendatakit.aggregate.constants.common.ExternalServiceOption;
+import org.opendatakit.aggregate.constants.common.ExternalServicePublicationOption;
 import org.opendatakit.aggregate.constants.externalservice.ExternalServiceConsts;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.form.Form;
@@ -81,7 +81,7 @@ public class WorksheetServlet extends ServletUtilBase {
       sendErrorNotEnoughParams(resp);
       return;
     }
-    ExternalServiceOption esType = ExternalServiceOption.valueOf(esTypeString);
+    ExternalServicePublicationOption esType = ExternalServicePublicationOption.valueOf(esTypeString);
     if (esType == null) {
       resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid "
           + ServletConsts.EXTERNAL_SERVICE_TYPE);

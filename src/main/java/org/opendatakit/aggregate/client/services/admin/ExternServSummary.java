@@ -19,62 +19,87 @@ package org.opendatakit.aggregate.client.services.admin;
 import java.io.Serializable;
 import java.util.Date;
 
+import org.opendatakit.aggregate.constants.common.ExternalServicePublicationOption;
 import org.opendatakit.aggregate.constants.common.OperationalStatus;
 
-public class ExternServSummary implements Serializable{
-  
-  /**
-   * Serialization identifier 
-   */
-  private static final long serialVersionUID = 29897237349781615L;
-   
-  private String uri; // NOTE: Do not display to the user, for internal service only
-  private String user;
-  private OperationalStatus status;
-  private Date established;
-  private String action;
-  private String type;
-  private String name;
-  
-  public ExternServSummary() {
-    
-  }
+public class ExternServSummary implements Serializable {
 
-  public ExternServSummary(String uri, String user, OperationalStatus status, Date established, String action, String type, String name) {
-    this.uri = uri;
-    this.user = user;
-    this.status = status;
-    this.established = established;
-    this.action = action;
-    this.type = type;
-    this.name = name;
-  }
+	/**
+	 * Serialization identifier
+	 */
+	private static final long serialVersionUID = 29897237349781615L;
 
-  public String getUser() {
-    return user;
-  }
+	private String uri; // NOTE: Do not display to the user, for internal
+						// service only
+	private String user;
+	private OperationalStatus operationalStatus;
+	private Date timeEstablished;
+	private ExternalServicePublicationOption externalServicePublicationOption;
+	private Boolean uploadCompleted;
+	private Date timeLastUploadCursor;
+	private Date timeLastStreamingCursor;
+	private String externalServiceTypeName;
+	private String name;
 
-  public OperationalStatus getStatus() {
-    return status;
-  }
+	public ExternServSummary() {
 
-  public Date getEstablished() {
-    return established;
-  }
+	}
 
-  public String getAction() {
-    return action;
-  }
+	public ExternServSummary(String uri, String user, OperationalStatus status,
+			Date established,
+			ExternalServicePublicationOption externalServicePublicationOption,
+			Boolean uploadCompleted,
+			Date timeLastUploadCursor, Date timeLastStreamingCursor,
+			String externalServiceTypeName, String name) {
+		this.uri = uri;
+		this.user = user;
+		this.operationalStatus = status;
+		this.timeEstablished = established;
+		this.externalServicePublicationOption = externalServicePublicationOption;
+		this.uploadCompleted = uploadCompleted;
+		this.timeLastUploadCursor = timeLastUploadCursor;
+		this.timeLastStreamingCursor = timeLastStreamingCursor;
+		this.externalServiceTypeName = externalServiceTypeName;
+		this.name = name;
+	}
 
-  public String getType() {
-    return type;
-  }
+	public String getUser() {
+		return user;
+	}
 
-  public String getName() {
-    return name;
-  }
+	public OperationalStatus getStatus() {
+		return operationalStatus;
+	}
 
-  public String getUri() {
-    return uri;
-  }
+	public Date getTimeEstablished() {
+		return timeEstablished;
+	}
+
+	public ExternalServicePublicationOption getPublicationOption() {
+		return externalServicePublicationOption;
+	}
+
+	public Boolean getUploadCompleted() {
+		return uploadCompleted;
+	}
+
+	public Date getTimeLastUploadCursor() {
+		return timeLastUploadCursor;
+	}
+
+	public Date getTimeLastStreamingCursor() {
+		return timeLastStreamingCursor;
+	}
+
+	public String getExternalServiceTypeName() {
+		return externalServiceTypeName;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public String getUri() {
+		return uri;
+	}
 }

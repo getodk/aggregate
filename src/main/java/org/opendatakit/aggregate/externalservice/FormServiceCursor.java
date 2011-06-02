@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import org.opendatakit.aggregate.constants.common.ExternalServiceOption;
+import org.opendatakit.aggregate.constants.common.ExternalServicePublicationOption;
 import org.opendatakit.aggregate.constants.common.OperationalStatus;
 import org.opendatakit.aggregate.constants.externalservice.ExternalServiceType;
 import org.opendatakit.aggregate.form.Form;
@@ -123,11 +123,11 @@ public final class FormServiceCursor extends CommonFieldsBase {
     }
   }
 
-  public ExternalServiceOption getExternalServiceOption() {
-    return ExternalServiceOption.valueOf(getStringField(EXTERNAL_SERVICE_OPTION));
+  public ExternalServicePublicationOption getExternalServicePublicationOption() {
+    return ExternalServicePublicationOption.valueOf(getStringField(EXTERNAL_SERVICE_OPTION));
   }
 
-  public void setExternalServiceOption(ExternalServiceOption value) {
+  public void setExternalServiceOption(ExternalServicePublicationOption value) {
     if (!setStringField(EXTERNAL_SERVICE_OPTION, value.toString())) {
       throw new IllegalArgumentException("overflow externalServiceOption");
     }

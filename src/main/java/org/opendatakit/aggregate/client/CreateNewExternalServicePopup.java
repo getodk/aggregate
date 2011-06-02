@@ -17,7 +17,7 @@
 package org.opendatakit.aggregate.client;
 
 import org.opendatakit.aggregate.client.services.admin.ServicesAdminServiceAsync;
-import org.opendatakit.aggregate.constants.common.ExternalServiceOption;
+import org.opendatakit.aggregate.constants.common.ExternalServicePublicationOption;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
@@ -75,7 +75,7 @@ public class CreateNewExternalServicePopup extends PopupPanel {
     layout.setWidget(0, 2, name);
     
     final ListBox esOptions = new ListBox();
-    for (ExternalServiceOption eso : ExternalServiceOption.values())
+    for (ExternalServicePublicationOption eso : ExternalServicePublicationOption.values())
       esOptions.addItem(eso.toString());
     layout.setWidget(0, 3, esOptions);
     
@@ -83,9 +83,9 @@ public class CreateNewExternalServicePopup extends PopupPanel {
     publishButton.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        ExternalServiceOption serviceOp = null;
+        ExternalServicePublicationOption serviceOp = null;
         String selectedOption = esOptions.getItemText(esOptions.getSelectedIndex());
-        for (ExternalServiceOption selected : ExternalServiceOption.values()) {
+        for (ExternalServicePublicationOption selected : ExternalServicePublicationOption.values()) {
           if (selected.toString().equals(selectedOption))
             serviceOp = selected;
         }

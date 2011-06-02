@@ -49,7 +49,7 @@ import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.ErrorConsts;
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.ServletConsts;
-import org.opendatakit.aggregate.constants.common.ExternalServiceOption;
+import org.opendatakit.aggregate.constants.common.ExternalServicePublicationOption;
 import org.opendatakit.aggregate.constants.common.OperationalStatus;
 import org.opendatakit.aggregate.constants.externalservice.ExternalServiceType;
 import org.opendatakit.aggregate.constants.externalservice.FusionTableConsts;
@@ -118,7 +118,7 @@ public class FusionTable extends AbstractExternalService implements ExternalServ
         new EntityKey(fp, objectEntity.getUri()), cc);
   }
 
-  public FusionTable(Form form, ExternalServiceOption externalServiceOption, CallingContext cc)
+  public FusionTable(Form form, ExternalServicePublicationOption externalServiceOption, CallingContext cc)
       throws ODKDatastoreException {
     this(form, cc);
 
@@ -189,7 +189,7 @@ public class FusionTable extends AbstractExternalService implements ExternalServ
     persist(cc);
   }
   
-  public FusionTable(Form form, OAuthToken authToken, ExternalServiceOption externalServiceOption,
+  public FusionTable(Form form, OAuthToken authToken, ExternalServicePublicationOption externalServiceOption,
       String tableId, List<TableId> repeatElementTableIdAssociations, CallingContext cc)
       throws ODKDatastoreException, ODKExternalServiceException {
     this(form, cc);
@@ -277,7 +277,7 @@ public class FusionTable extends AbstractExternalService implements ExternalServ
   @Override
   public void setUploadCompleted(CallingContext cc) throws ODKEntityPersistException {
     fsc.setUploadCompleted(true);
-    if (fsc.getExternalServiceOption() == ExternalServiceOption.UPLOAD_ONLY) {
+    if (fsc.getExternalServicePublicationOption() == ExternalServicePublicationOption.UPLOAD_ONLY) {
       fsc.setOperationalStatus(OperationalStatus.COMPLETED);
     }
     Datastore ds = cc.getDatastore();
@@ -299,7 +299,10 @@ public class FusionTable extends AbstractExternalService implements ExternalServ
         fsc.getCreatorUriUser(),
         fsc.getOperationalStatus(),
         fsc.getEstablishmentDateTime(),
-        fsc.getExternalServiceOption().getDescriptionOfOption(),
+        fsc.getExternalServicePublicationOption(),
+        fsc.getUploadCompleted(),
+        fsc.getLastUploadCursorDate(),
+        fsc.getLastStreamingCursorDate(),
         fsc.getExternalServiceType().getServiceName(),
           getDescriptiveTargetString());
   }
@@ -470,7 +473,7 @@ public class FusionTable extends AbstractExternalService implements ExternalServ
   }
 
   public static FusionTable createFusionTable(Form form, OAuthToken authToken,
-      ExternalServiceOption externalServiceOption, CallingContext cc) throws ODKDatastoreException,
+      ExternalServicePublicationOption externalServiceOption, CallingContext cc) throws ODKDatastoreException,
       ODKExternalServiceException {
 
     GoogleService fusionTableService = new GoogleService(FusionTableConsts.FUSTABLE_SERVICE_NAME,

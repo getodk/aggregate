@@ -16,17 +16,17 @@
 
 package org.opendatakit.aggregate.client.services.admin;
 
-import org.opendatakit.aggregate.constants.common.ExternalServiceOption;
+import org.opendatakit.aggregate.constants.common.ExternalServicePublicationOption;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
 public interface ServicesAdminServiceAsync {
 
-	void createFusionTable(String formId, ExternalServiceOption esOption,
+	void createFusionTable(String formId, ExternalServicePublicationOption esOption,
 			AsyncCallback<String> callback);
 
 	void createGoogleSpreadsheet(String formId, String name,
-			ExternalServiceOption esOption, AsyncCallback<String> callback);
+			ExternalServicePublicationOption esOption, AsyncCallback<String> callback);
 
 	void generateOAuthUrl(String uri, AsyncCallback<String> callback);
 

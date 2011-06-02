@@ -18,7 +18,7 @@ package org.opendatakit.aggregate.task.tomcat;
 import java.util.Map;
 
 import org.opendatakit.aggregate.constants.ServletConsts;
-import org.opendatakit.aggregate.constants.common.ExternalServiceOption;
+import org.opendatakit.aggregate.constants.common.ExternalServicePublicationOption;
 import org.opendatakit.aggregate.constants.externalservice.ExternalServiceConsts;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.form.Form;
@@ -46,7 +46,7 @@ public class WorksheetCreatorImpl implements WorksheetCreator {
 
 		public WorksheetCreatorRunner(Form form, SubmissionKey miscTasksKey,
 				long attemptCount, 
-				String spreadsheetName, ExternalServiceOption esType,
+				String spreadsheetName, ExternalServicePublicationOption esType,
 				CallingContext cc) {
 			impl = new WorksheetCreatorWorkerImpl(form, miscTasksKey, 
 					attemptCount, 
@@ -74,7 +74,7 @@ public class WorksheetCreatorImpl implements WorksheetCreator {
 	    if (esTypeString == null) {
 	        throw new IllegalStateException("no external service type specified on create worksheet task");
 	    }
-	    ExternalServiceOption esType = ExternalServiceOption.valueOf(esTypeString);
+	    ExternalServicePublicationOption esType = ExternalServicePublicationOption.valueOf(esTypeString);
 	    if (esType == null) {
 	    	throw new IllegalStateException("external service type not recognized in create worksheet task");
 	    }
