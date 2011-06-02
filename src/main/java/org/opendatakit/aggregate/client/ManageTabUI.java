@@ -16,16 +16,12 @@
 
 package org.opendatakit.aggregate.client;
 
-import org.opendatakit.aggregate.client.form.ExportSummary;
 import org.opendatakit.aggregate.client.preferences.Preferences;
-import org.opendatakit.aggregate.client.services.admin.ExternServSummary;
 import org.opendatakit.aggregate.constants.common.FormOrFilter;
 import org.opendatakit.aggregate.constants.common.PageUpdates;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
@@ -45,29 +41,35 @@ public class ManageTabUI extends TabPanel {
 	private static final String[] MANAGEMENT_MENU = {FORMS, EXPORT, PUBLISH, PERMISSIONS, UTILITIES};
 	static final String MANAGEMENT = "management";
    UrlHash hash;
-   AggregateUI parent;
+   AggregateUI baseUI;
    
    // Forms tab
 	private FlexTable uploadTable = new FlexTable();
 	private FlexTable listOfForms;
 	
-	// Publish tab
-	private FlexTable publishTable = new FlexTable();
-	
-	// Export tab
-	private FlexTable exportTable = new FlexTable();
+   // Publish tab
+   private FlexTable publishTable;
+   
+   // Export tab
+   private FlexTable exportTable;
 	
 	// Permissions tab
 	private PermissionsSheet permissionsSheet;
 	
 	private TextBox mapsApiKey = new TextBox();
 	
-	public ManageTabUI(FlexTable listOfForms, AggregateUI parent) {
+	public ManageTabUI(FlexTable listOfForms, FlexTable publishTable, FlexTable exportTable, AggregateUI parent) {
 		super();
 		this.hash = UrlHash.getHash();
-		this.listOfForms = listOfForms;
-		this.parent = parent;
+		this.baseUI = parent;
 
+	   this.listOfForms = listOfForms;
+	   
+	   this.publishTable = publishTable;
+	   setupPublishPanel();
+	   this.exportTable = exportTable;
+	   setupExportPanel();
+		
 		permissionsSheet = new PermissionsSheet(this);
 		
 		this.add(setupFormManagementPanel(), "Forms");
@@ -95,7 +97,7 @@ public class ManageTabUI extends TabPanel {
 		uploadFormButton.addClickHandler(new ClickHandler() {
 		  @Override
 		  public void onClick(ClickEvent event) {
-			parent.clearError();
+			baseUI.clearError();
 		    hash.goTo("../ui/upload");
 		  }
 		});
@@ -104,7 +106,7 @@ public class ManageTabUI extends TabPanel {
 	    uploadSubmissionsButton.addClickHandler(new ClickHandler() {
 	      @Override
 	      public void onClick(ClickEvent event) {
-			parent.clearError();
+			baseUI.clearError();
 	        hash.goTo("../ui/submission");
 	      }
 	    });
@@ -138,7 +140,7 @@ public class ManageTabUI extends TabPanel {
 
         @Override
         public void onClick(ClickEvent event) {
-        	parent.clearError();
+        	baseUI.clearError();
         	Preferences.setGoogleMapsApiKey(mapsApiKey.getText());        
         }
 	    
@@ -149,10 +151,6 @@ public class ManageTabUI extends TabPanel {
 	  preferencesPanel.add(mapsApiKey);
 	  preferencesPanel.add(updateMapsApiKeyButton);
 	  return preferencesPanel ;
-	}
-	
-	public FlexTable setupExportsPanel() {
-		return new FlexTable();
 	}
 	
 	public void setupPublishPanel() {
@@ -166,44 +164,8 @@ public class ManageTabUI extends TabPanel {
 	  publishTable.getRowFormatter().addStyleName(0, "titleBar");
 	  
 	  if (hash.get(UrlHash.FORM) != null && !hash.get(UrlHash.FORM).equals("")) {
-	    getExternalServicesList(hash.get(UrlHash.FORM));
+	    baseUI.getExternalServicesList(hash.get(UrlHash.FORM));
 	  }
-	}
-	
-	private void updatePublishPanel(ExternServSummary[] eSS) {
-	  if (eSS == null)
-       return;
-     while (publishTable.getRowCount() > 1)
-	    publishTable.removeRow(1);
-	  for (int i = 0; i < eSS.length; i++) {
-	    ExternServSummary e = eSS[i];
-	    publishTable.setWidget(i + 1, 0, new Anchor(e.getUser()));
-	    publishTable.setText(i + 1, 1, e.getStatus().toString());
-	    publishTable.setText(i + 1, 2, e.getEstablished().toString());
-	    publishTable.setText(i + 1, 3, e.getAction());
-	    publishTable.setText(i + 1, 4, e.getType());
-	    publishTable.setWidget(i + 1, 5, new HTML(e.getName()));
-	  }
-	}
-	
-	public void getExternalServicesList(String formId) {
-	  if (parent.servicesAdminSvc == null) {
-	    parent.servicesAdminSvc = SecureGWT.get().createServicesAdminService();
-	  }
-	  
-	  AsyncCallback<ExternServSummary[] > callback = new AsyncCallback<ExternServSummary []>() {
-      @Override
-      public void onFailure(Throwable caught) {
-			parent.reportError(caught);
-      }
-
-      @Override
-      public void onSuccess(ExternServSummary[] result) {
-        updatePublishPanel(result);
-      }
-	  };
-	  
-	  parent.servicesAdminSvc.getExternalServices(formId, callback);
 	}
    
    public void setupExportPanel() {
@@ -215,43 +177,7 @@ public class ManageTabUI extends TabPanel {
      exportTable.setText(0, 5, "Download File");
      exportTable.addStyleName("dataTable");
      exportTable.getRowFormatter().addStyleName(0, "titleBar");
-     getExportList();
-   }
-   
-   private void updateExportPanel(ExportSummary[] eS) {
-     if (eS == null)
-       return;
-     while (exportTable.getRowCount() > 1)
-       exportTable.removeRow(1);
-     for (int i = 0; i < eS.length; i++) {
-       ExportSummary e = eS[i];
-       exportTable.setText(i + 1, 0, e.getFileType().toString());
-       exportTable.setText(i + 1, 1, e.getStatus().toString());
-       exportTable.setText(i + 1, 2, e.getTimeRequested().toString());
-       exportTable.setText(i + 1, 3, e.getTimeCompleted().toString());
-       exportTable.setText(i + 1, 4, e.getTimeLastAction().toString());
-       exportTable.setWidget(i + 1, 5, new HTML(e.getResultFile()));
-     }
-   }
-   
-   public void getExportList() {
-     if (parent.formSvc == null) {
-       parent.formSvc = SecureGWT.get().createFormService();
-     }
-     
-     AsyncCallback<ExportSummary[] > callback = new AsyncCallback<ExportSummary []>() {
-      @Override
-      public void onFailure(Throwable caught) {
-        // TODO Auto-generated method stub
-      }
-
-      @Override
-      public void onSuccess(ExportSummary[] result) {
-        updateExportPanel(result);
-      }
-     };
-     
-     parent.formSvc.getExports(callback);
+     baseUI.getExportList();
    }
 	
 	public HTML setupUtilitiesPanel() {
@@ -263,9 +189,9 @@ public class ManageTabUI extends TabPanel {
 		return new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
-				parent.clearError();
-				parent.getTimer().restartTimer(parent);
-				parent.update(FormOrFilter.FORM, PageUpdates.FORMTABLE);
+				baseUI.clearError();
+				baseUI.getTimer().restartTimer(baseUI);
+				baseUI.update(FormOrFilter.FORM, PageUpdates.FORMTABLE);
 				hash.clear();
 				hash.set(UrlHash.MAIN_MENU, menu);
 				hash.set(UrlHash.SUB_MENU, subMenu);

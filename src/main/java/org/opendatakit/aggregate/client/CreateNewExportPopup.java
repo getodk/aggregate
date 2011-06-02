@@ -51,7 +51,7 @@ public class CreateNewExportPopup extends PopupPanel {
   private Button exportButton;
 
   private void rePopulateExportsAndRedirect() {
-    parent.getExportList();
+    parent.baseUI.getExportList();
     parent.selectTab(1);
     hide();
   }

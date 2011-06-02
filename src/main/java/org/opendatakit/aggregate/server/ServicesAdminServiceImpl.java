@@ -61,6 +61,9 @@ public class ServicesAdminServiceImpl extends RemoteServiceServlet implements
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
 
+    if(formId.equals(BasicConsts.EMPTY_STRING))
+      return null;
+    
     try {
       Form form = Form.retrieveForm(formId, cc);
       List<ExternalService> esList = FormServiceCursor.getExternalServicesForForm(form, cc);

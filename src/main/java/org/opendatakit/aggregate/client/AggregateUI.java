@@ -25,10 +25,12 @@ import org.opendatakit.aggregate.client.filter.Filter;
 import org.opendatakit.aggregate.client.filter.FilterGroup;
 import org.opendatakit.aggregate.client.filter.FilterServiceAsync;
 import org.opendatakit.aggregate.client.filter.FilterSet;
+import org.opendatakit.aggregate.client.form.ExportSummary;
 import org.opendatakit.aggregate.client.form.FormServiceAsync;
 import org.opendatakit.aggregate.client.form.FormSummary;
 import org.opendatakit.aggregate.client.form.admin.FormAdminServiceAsync;
 import org.opendatakit.aggregate.client.preferences.Preferences;
+import org.opendatakit.aggregate.client.services.admin.ExternServSummary;
 import org.opendatakit.aggregate.client.services.admin.ServicesAdminServiceAsync;
 import org.opendatakit.aggregate.client.submission.Column;
 import org.opendatakit.aggregate.client.submission.SubmissionServiceAsync;
@@ -80,6 +82,12 @@ public class AggregateUI implements EntryPoint {
 	private FilterGroup def; //the default filter group
 	private UrlHash hash;
 
+	  // Publish tab
+   private FlexTable publishTable = new FlexTable();
+   
+   // Export tab
+   private FlexTable exportTable = new FlexTable();
+	
 	// layout
 	private VerticalPanel wrappingLayoutPanel = new VerticalPanel();
 	private Label errorMsgLabel = new Label(); 
@@ -356,7 +364,7 @@ public class AggregateUI implements EntryPoint {
 		// Create sub menu navigation
 		getTimer().restartTimer(this);
 		update(FormOrFilter.FORM, PageUpdates.ALL);
-		manageNav = new ManageTabUI(listOfForms, this);
+		manageNav = new ManageTabUI(listOfForms, publishTable, exportTable, this);
 		submissionNav = new SubmissionTabUI(view, formsBox, filtersBox, 
 				dataTable, def, this, allGroups, allForms);
 		mainNav.add(submissionNav, "Submissions");
@@ -441,6 +449,10 @@ public class AggregateUI implements EntryPoint {
 
 		// Make the call to the form service.
 		formSvc.getForms(callback);
+		
+		// TODO: refactor properly to the new update
+		//manageNav.getExportList();
+//		manageNav.getExternalServicesList(formId)
 	}
 
 	private void fillFormDropDown(FormSummary [] forms) {
@@ -663,14 +675,99 @@ public class AggregateUI implements EntryPoint {
 		}
 	}
 
+   public void updateExportPanel(ExportSummary[] eS) {
+     if (eS == null)
+       return;
+     while (exportTable.getRowCount() > 1)
+       exportTable.removeRow(1);
+     for (int i = 0; i < eS.length; i++) {
+       ExportSummary e = eS[i];
+       if( e.getFileType() != null)
+         exportTable.setText(i + 1, 0, e.getFileType().toString());
+       if( e.getStatus() != null)
+         exportTable.setText(i + 1, 1, e.getStatus().toString());
+       if( e.getTimeRequested() != null)
+         exportTable.setText(i + 1, 2, e.getTimeRequested().toString());
+       if( e.getTimeCompleted() != null)
+         exportTable.setText(i + 1, 3, e.getTimeCompleted().toString());
+       if( e.getTimeLastAction() != null)
+         exportTable.setText(i + 1, 4, e.getTimeLastAction().toString());
+       if( e.getResultFile() != null)
+         exportTable.setWidget(i + 1, 5, new HTML(e.getResultFile()));
+     }
+   }
+	
+   
+   public void getExternalServicesList(String formId) {
+     if (servicesAdminSvc == null) {
+       servicesAdminSvc = SecureGWT.get().createServicesAdminService();
+     }
+     
+     AsyncCallback<ExternServSummary[] > callback = new AsyncCallback<ExternServSummary []>() {
+      @Override
+      public void onFailure(Throwable caught) {
+         reportError(caught);
+      }
+
+      @Override
+      public void onSuccess(ExternServSummary[] result) {
+        updatePublishPanel(result);
+      }
+     };
+     
+     servicesAdminSvc.getExternalServices(formId, callback);
+   }
+   
+   public void updatePublishPanel(ExternServSummary[] eSS) {
+     if (eSS == null)
+       return;
+     while (publishTable.getRowCount() > 1)
+       publishTable.removeRow(1);
+     for (int i = 0; i < eSS.length; i++) {
+       ExternServSummary e = eSS[i];
+       publishTable.setWidget(i + 1, 0, new Anchor(e.getUser()));
+       publishTable.setText(i + 1, 1, e.getStatus().toString());
+       publishTable.setText(i + 1, 2, e.getEstablished().toString());
+       publishTable.setText(i + 1, 3, e.getAction());
+       publishTable.setText(i + 1, 4, e.getType());
+       publishTable.setWidget(i + 1, 5, new HTML(e.getName()));
+     }
+   }
+   
+   public void getExportList() {
+     if (formSvc == null) {
+       formSvc = SecureGWT.get().createFormService();
+     }
+     
+     AsyncCallback<ExportSummary[] > callback = new AsyncCallback<ExportSummary []>() {
+      @Override
+      public void onFailure(Throwable caught) {
+        // TODO Auto-generated method stub
+      }
+
+      @Override
+      public void onSuccess(ExportSummary[] result) {
+        updateExportPanel(result);
+      }
+     };
+     
+     formSvc.getExports(callback);
+   }
+   
 	public void update(FormOrFilter ff, PageUpdates update) {
-		if(ff.equals(FormOrFilter.FORM))
+		if(ff.equals(FormOrFilter.FORM)){
 			getFormList(update);
-		else if (ff.equals(FormOrFilter.FILTER))
+		   // TODO: NEEDS TO BE FIXED, a hack
+		   getExportList();
+		   getExternalServicesList(lastFormUsed);
+		} else if (ff.equals(FormOrFilter.FILTER)) {
 			getFilterList(lastFormUsed);
-		else if (ff.equals(FormOrFilter.BOTH)) { 
+		} else if (ff.equals(FormOrFilter.BOTH)) { 
 			getFormList(update);
 			getFilterList(lastFormUsed);
+         // TODO: NEEDS TO BE FIXED, a hack
+         getExportList();
+         getExternalServicesList(lastFormUsed);
 		}
 	}
 

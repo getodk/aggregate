@@ -100,7 +100,7 @@ public class CreateNewExternalServicePopup extends PopupPanel {
   
             @Override
             public void onSuccess(String result) {
-              parent.parent.servicesAdminSvc.generateOAuthUrl(result, new AsyncCallback<String>() {
+              parent.baseUI.servicesAdminSvc.generateOAuthUrl(result, new AsyncCallback<String>() {
                 @Override
                 public void onFailure(Throwable caught) {
                   // TODO Auto-generated method stub
@@ -123,7 +123,7 @@ public class CreateNewExternalServicePopup extends PopupPanel {
             @Override
             public void onSuccess(String result) {
               // TODO Auto-generated method stub
-              parent.parent.servicesAdminSvc.generateOAuthUrl(result, new AsyncCallback<String>() {
+              parent.baseUI.servicesAdminSvc.generateOAuthUrl(result, new AsyncCallback<String>() {
                 @Override
                 public void onFailure(Throwable caught) {
                   // TODO Auto-generated method stub
