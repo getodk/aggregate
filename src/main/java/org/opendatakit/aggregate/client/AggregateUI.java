@@ -54,7 +54,6 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.InvocationException;
-import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.DecoratedTabPanel;
@@ -683,6 +682,27 @@ public class AggregateUI implements EntryPoint {
          Button deleteButton = new Button();
          deleteButton.setHTML("<img src=\"images/red_x.png\" /> Delete");
          deleteButton.addStyleDependentName("negative");
+         deleteButton.addClickHandler(new ClickHandler () {
+           @Override
+           public void onClick(ClickEvent event) {
+             // Set up the callback object.
+             AsyncCallback<Boolean> callback = new AsyncCallback<Boolean>() {
+               @Override
+               public void onFailure(Throwable caught) {
+                 reportError(caught);
+               }
+
+               @Override
+               public void onSuccess(Boolean result) {
+                 clearError();
+                 update(FormOrFilter.FILTER, PageUpdates.ALL);
+               }
+             };
+             final String formId = form.getId();
+             // Make the call to the form service.
+             formAdminSvc.deleteForm(formId, callback);
+           }
+        });
 
 			listOfForms.setWidget(i, 7, deleteButton);
 			if (i % 2 == 0)
