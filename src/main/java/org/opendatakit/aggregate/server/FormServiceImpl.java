@@ -77,7 +77,7 @@ public class FormServiceImpl extends RemoteServiceServlet implements
 
       int index = 0;
       for (Form form : forms) {
-        formSummary[index++] = form.generateFormSummary();
+        formSummary[index++] = form.generateFormSummary(cc);
       }
       return formSummary;
 

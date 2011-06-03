@@ -589,7 +589,7 @@ public class AggregateUI implements EntryPoint {
 		for (int j = 0; j < forms.length; j++) {
 			int i = j + 1;
 			final FormSummary form = forms[j];
-			listOfForms.setWidget(i, 0, new Anchor(form.getTitle()));
+			listOfForms.setWidget(i, 0, new HTML(form.getViewableURL()));
 			listOfForms.setWidget(i, 1, new HTML(form.getId()));
 			String user = form.getCreatedUser();
 			String displayName;

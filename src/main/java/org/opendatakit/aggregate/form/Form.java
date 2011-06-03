@@ -25,11 +25,13 @@ import java.util.List;
 import java.util.Map;
 
 import org.opendatakit.aggregate.client.form.FormSummary;
+import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.datamodel.FormDataModel;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.datamodel.FormElementModel.ElementType;
 import org.opendatakit.aggregate.datamodel.TopLevelDynamicBase;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
+import org.opendatakit.aggregate.servlet.FormXmlServlet;
 import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.submission.SubmissionKeyPart;
@@ -39,6 +41,8 @@ import org.opendatakit.aggregate.submission.type.BooleanSubmissionType;
 import org.opendatakit.aggregate.submission.type.LongSubmissionType;
 import org.opendatakit.aggregate.submission.type.RepeatSubmissionType;
 import org.opendatakit.aggregate.submission.type.StringSubmissionType;
+import org.opendatakit.common.constants.BasicConsts;
+import org.opendatakit.common.constants.HtmlUtil;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.EntityKey;
@@ -560,10 +564,17 @@ public class Form {
   }
   
   
-  public FormSummary generateFormSummary() {
+  public FormSummary generateFormSummary(CallingContext cc) {
     boolean submit = getSubmissionEnabled();    
     boolean downloadable = getDownloadEnabled();
-    return new FormSummary(getViewableName(), getFormId(), getCreationUser(), downloadable, submit);
+    Map<String, String> xmlProperties = new HashMap<String, String>();
+    xmlProperties.put(ServletConsts.FORM_ID, getFormId());
+    xmlProperties.put(ServletConsts.HUMAN_READABLE, BasicConsts.TRUE);
+
+    String viewableURL = HtmlUtil.createHrefWithProperties(cc.getWebApplicationURL(FormXmlServlet.WWW_ADDR),
+        xmlProperties, getViewableName());
+
+    return new FormSummary(getViewableName(), getFormId(), getCreationUser(), downloadable, submit, viewableURL);
   }
   
   /**
