@@ -571,7 +571,7 @@ Then, please type:
 &lt;pre&gt;
 mysql --user root --password
 &lt;/pre&gt;
-And enter the MySQL server root password.  You will then be witnin the mysql commandline client.  You should see a 'mysql>' prompt. Type:
+And enter the MySQL server root password.  You will then be within the mysql commandline client.  You should see a 'mysql>' prompt. Type:
 &lt;pre&gt;
 source ${installdir.unix}/create_db_and_user.sql
 exit
