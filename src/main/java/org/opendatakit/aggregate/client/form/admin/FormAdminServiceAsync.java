@@ -31,4 +31,5 @@ public interface FormAdminServiceAsync {
 	void purgePublishedData(String uriExternalService, Date earliest,
 			AsyncCallback<Date> callback);
 
+	void deleteForm(String formId, AsyncCallback<Boolean> callback);
 }
