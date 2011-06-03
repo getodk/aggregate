@@ -63,30 +63,30 @@
 		<intercept-url pattern="/res/**" access="true" />
 		<intercept-url pattern="/openid_login.html" access="isAnonymous()" />
 		<intercept-url pattern="/local_login.html" access="isFullyAuthenticated() and hasRole('AUTH_LOCAL')" />
-		<intercept-url pattern="/UploadSubmissionsApplet" access="isFullyAuthenticated() and hasRole('ROLE_SUBMISSION_UPLOAD')" />
-		<intercept-url pattern="/upload-submissions/**" access="isFullyAuthenticated() and hasRole('ROLE_SUBMISSION_UPLOAD')" />
-		<intercept-url pattern="/UploadXFormApplet" access="isFullyAuthenticated() and hasRole('ROLE_FORM_ADMIN')" />
-		<intercept-url pattern="/upload-xform/**" access="isFullyAuthenticated() and hasRole('ROLE_FORM_ADMIN')" />
-		<intercept-url pattern="/Briefcase" access="isFullyAuthenticated() and hasRole('ROLE_ANALYST')" />
-		<intercept-url pattern="/briefcase/**" access="isFullyAuthenticated() and hasRole('ROLE_ANALYST')" />
-		<intercept-url pattern="/xformsDownload" access="isFullyAuthenticated() and hasRole('ROLE_FORM_DOWNLOAD')" />
-		<intercept-url pattern="/xformsList" access="isFullyAuthenticated() and hasRole('ROLE_FORM_LIST')" />
+		<intercept-url pattern="/UploadSubmissionsApplet" access="hasRole('ROLE_SUBMISSION_UPLOAD')" />
+		<intercept-url pattern="/upload-submissions/**" access="hasRole('ROLE_SUBMISSION_UPLOAD')" />
+		<intercept-url pattern="/UploadXFormApplet" access="hasRole('ROLE_FORM_ADMIN')" />
+		<intercept-url pattern="/upload-xform/**" access="hasRole('ROLE_FORM_ADMIN')" />
+		<intercept-url pattern="/Briefcase" access="hasRole('ROLE_ANALYST')" />
+		<intercept-url pattern="/briefcase/**" access="hasRole('ROLE_ANALYST')" />
+		<intercept-url pattern="/xformsDownload" access="hasRole('ROLE_FORM_DOWNLOAD')" />
+		<intercept-url pattern="/xformsList" access="hasRole('ROLE_FORM_LIST')" />
 		<intercept-url pattern="/xformsManifest" access="hasRole('ROLE_FORM_LIST')" />
 		<intercept-url pattern="/formList" access="hasRole('ROLE_FORM_LIST')" />
 		<intercept-url pattern="/formXml" access="hasRole('ROLE_FORM_DOWNLOAD')" />
 		<intercept-url pattern="/submission" access="hasRole('ROLE_SUBMISSION_UPLOAD')" />
-		<intercept-url pattern="/www/**" access="isFullyAuthenticated() and hasRole('ROLE_USER')" />
+		<intercept-url pattern="/www/**" access="hasRole('ROLE_USER')" />
         <intercept-url pattern="/ssl/user-manage-passwords" access="isFullyAuthenticated() and hasRole('USER_IS_REGISTERED') and hasRole('ROLE_ACCESS_ADMIN')" />
 		<intercept-url pattern="/ssl/**" access="isFullyAuthenticated() and hasRole('USER_IS_REGISTERED') and hasRole('ROLE_USER')" />
 		<intercept-url pattern="/view/csvFragment" access="hasRole('ROLE_ANALYST')" />
 		<intercept-url pattern="/view/binaryData" access="hasRole('ROLE_ATTACHMENT_VIEWER')" />
-		<intercept-url pattern="/view/**" access="isFullyAuthenticated() and hasRole('ROLE_ANALYST')" />
+		<intercept-url pattern="/view/**" access="hasRole('ROLE_ANALYST')" />
 <!--	TODO: gae should be: hasRole(USER_IS_DAEMON) -->
 		<intercept-url pattern="/gae/**" access="true" /> 
-		<intercept-url pattern="/extern/**" access="isFullyAuthenticated() and hasRole('ROLE_SERVICES_ADMIN')" />
+		<intercept-url pattern="/extern/**" access="hasRole('ROLE_SERVICES_ADMIN')" />
 		<intercept-url pattern="/admin/upload" access="hasRole('ROLE_FORM_ADMIN')" />
-		<intercept-url pattern="/admin/**" access="isFullyAuthenticated() and hasRole('ROLE_FORM_ADMIN')" />
-		<intercept-url pattern="/access/**" access="isFullyAuthenticated() and hasRole('ROLE_ACCESS_ADMIN')" />
+		<intercept-url pattern="/admin/**" access="hasRole('ROLE_FORM_ADMIN')" />
+		<intercept-url pattern="/access/**" access="hasRole('ROLE_ACCESS_ADMIN')" />
 		<intercept-url pattern="/**" access="isAnonymous()" />
 	</filter-security-metadata-source>
 
