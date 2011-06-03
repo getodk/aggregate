@@ -18,19 +18,25 @@ package org.opendatakit.aggregate.server;
 
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.client.exception.RequestFailureException;
 import org.opendatakit.aggregate.constants.BeanDefs;
+import org.opendatakit.aggregate.datamodel.TopLevelDynamicBase;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.externalservice.FormServiceCursor;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.form.MiscTasks;
 import org.opendatakit.aggregate.form.MiscTasks.TaskType;
+import org.opendatakit.aggregate.submission.SubmissionKeyPart;
+import org.opendatakit.aggregate.task.FormDelete;
 import org.opendatakit.aggregate.task.PurgeOlderSubmissions;
+import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
@@ -138,4 +144,43 @@ public class FormAdminServiceImpl extends RemoteServiceServlet implements
     	return earliest;
 	}
 
+	  @Override
+	  public Boolean deleteForm(String formId) throws AccessDeniedException {
+	    HttpServletRequest req = this.getThreadLocalRequest();
+	    CallingContext cc = ContextFactory.getCallingContext(this, req);
+
+	    try {
+	      FormDelete formDelete = (FormDelete) cc.getBean(BeanDefs.FORM_DELETE_BEAN);
+
+	      Form form = Form.retrieveForm(formId, cc);
+
+	      List<SubmissionKeyPart> parts = form.getSubmissionKey().splitSubmissionKey();
+
+	      CommonFieldsBase rel = cc.getDatastore().getEntity(
+	          form.getTopLevelGroupElement().getFormDataModel().getBackingObjectPrototype(),
+	          parts.get(1).getAuri(), cc.getCurrentUser());
+	      // If the FormInfo table is the target, log an error!
+	      if (rel != null) {
+	        Form formToDelete = new Form((TopLevelDynamicBase) rel, cc);
+	        if (!formToDelete.getFormId().equals(Form.URI_FORM_ID_VALUE_FORM_INFO)) {
+	          MiscTasks m = new MiscTasks(TaskType.DELETE_FORM, formToDelete, null, cc);
+	          m.persist(cc);
+	          CallingContext ccDaemon = ContextFactory.getCallingContext(this, req);
+	          ccDaemon.setAsDaemon(true);
+	          formDelete.createFormDeleteTask(formToDelete, m.getSubmissionKey(), 1L, ccDaemon);
+	        } else {
+	          String errString = "Attempting to delete FormInfo table definition record!";
+
+	          Logger.getLogger(this.getClass().getName()).severe(errString);
+	        }
+	      }
+	    } catch (Exception e) {
+	      // TODO Auto-generated catch block
+	      e.printStackTrace();
+	      return false;
+	    }
+
+	    return true;
+	  }
+	
 }
