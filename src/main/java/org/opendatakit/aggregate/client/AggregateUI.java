@@ -578,6 +578,61 @@ public class AggregateUI implements EntryPoint {
 		// Make the call to the form service.
 		filterSvc.getFilterSet(id, callback);
 	}
+	
+	private class ConfirmFormDeletePopup  extends PopupPanel implements ClickHandler {
+		final String formId;
+
+		ConfirmFormDeletePopup(String formId) {
+			super(false);
+			this.formId = formId;
+		    FlexTable layout = new FlexTable();
+		    
+		    layout.setWidget(0, 0, new HTML("Delete all data and the form definition for <b>" + formId + 
+		    		"</b>?<br/>Do you wish to delete all uploaded data and the form definition for this form?"));
+
+		    Button publishButton = new Button("<img src=\"images/green_right_arrow.png\" /> Delete Data and Form");
+		    publishButton.addClickHandler(this);
+		    layout.setWidget(0, 1, publishButton);
+			
+			Button closeButton = new Button("<img src=\"images/red_x.png\" />");
+			closeButton.addStyleDependentName("close");
+			closeButton.addStyleDependentName("negative");
+			closeButton.addClickHandler(new ClickHandler() {
+				@Override
+				public void onClick(ClickEvent event) {
+					hide();
+				}
+			});
+			layout.setWidget(0, 2, closeButton);
+		    
+		    setWidget(layout);
+		}
+
+		@Override
+		public void onClick(ClickEvent event) {
+			// OK -- we are to proceed.
+            // Set up the callback object.
+            AsyncCallback<Boolean> callback = new AsyncCallback<Boolean>() {
+              @Override
+              public void onFailure(Throwable caught) {
+                reportError(caught);
+              }
+
+              @Override
+              public void onSuccess(Boolean result) {
+                clearError();
+                Window.alert("Successfully scheduled this form's deletion.\n" +
+                		"It may take several minutes to delete all the " +
+                		"data submissions\nfor this form -- after which the " +
+                		"form definition itself will be deleted.");
+                update(FormOrFilter.FILTER, PageUpdates.ALL);
+              }
+            };
+            // Make the call to the form service.
+            formAdminSvc.deleteForm(formId, callback);
+			hide();
+		}
+	}
 
 	/**
 	 * Update the list of forms
@@ -685,22 +740,16 @@ public class AggregateUI implements EntryPoint {
          deleteButton.addClickHandler(new ClickHandler () {
            @Override
            public void onClick(ClickEvent event) {
-             // Set up the callback object.
-             AsyncCallback<Boolean> callback = new AsyncCallback<Boolean>() {
-               @Override
-               public void onFailure(Throwable caught) {
-                 reportError(caught);
-               }
-
-               @Override
-               public void onSuccess(Boolean result) {
-                 clearError();
-                 update(FormOrFilter.FILTER, PageUpdates.ALL);
-               }
-             };
-             final String formId = form.getId();
-             // Make the call to the form service.
-             formAdminSvc.deleteForm(formId, callback);
+				// TODO: display pop-up with text from b...
+				final ConfirmFormDeletePopup popup = new ConfirmFormDeletePopup(form.getId());
+				popup.setPopupPositionAndShow(new PopupPanel.PositionCallback() {
+					@Override
+					public void setPosition(int offsetWidth, int offsetHeight) {
+						int left = ((Window.getClientWidth() - offsetWidth) / 2);
+						int top = ((Window.getClientHeight() - offsetHeight) / 2);
+						popup.setPopupPosition(left, top);
+					}
+				});
            }
         });
 
