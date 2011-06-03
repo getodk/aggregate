@@ -152,16 +152,10 @@ public class FormAdminServiceImpl extends RemoteServiceServlet implements
 	    try {
 	      FormDelete formDelete = (FormDelete) cc.getBean(BeanDefs.FORM_DELETE_BEAN);
 
-	      Form form = Form.retrieveForm(formId, cc);
+	      Form formToDelete = Form.retrieveForm(formId, cc);
 
-	      List<SubmissionKeyPart> parts = form.getSubmissionKey().splitSubmissionKey();
-
-	      CommonFieldsBase rel = cc.getDatastore().getEntity(
-	          form.getTopLevelGroupElement().getFormDataModel().getBackingObjectPrototype(),
-	          parts.get(1).getAuri(), cc.getCurrentUser());
 	      // If the FormInfo table is the target, log an error!
-	      if (rel != null) {
-	        Form formToDelete = new Form((TopLevelDynamicBase) rel, cc);
+	      if (formToDelete != null) {
 	        if (!formToDelete.getFormId().equals(Form.URI_FORM_ID_VALUE_FORM_INFO)) {
 	          MiscTasks m = new MiscTasks(TaskType.DELETE_FORM, formToDelete, null, cc);
 	          m.persist(cc);
@@ -175,7 +169,6 @@ public class FormAdminServiceImpl extends RemoteServiceServlet implements
 	        }
 	      }
 	    } catch (Exception e) {
-	      // TODO Auto-generated catch block
 	      e.printStackTrace();
 	      return false;
 	    }
