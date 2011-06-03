@@ -6,9 +6,6 @@
 	<!-- Persistence layer exception class -->
   	<inherits name='org.opendatakit.common.persistence.Persistence'/>
 	
-	<servlet path="/securityservice" class="org.opendatakit.common.security.server.SecurityServiceImpl"/>
-  	<servlet path="/securityadminservice" class="org.opendatakit.common.security.server.SecurityAdminServiceImpl"/>
-	
 	<source path="client"/>
 	<source path="client/security"/>
 	<source path="client/security/admin"/>

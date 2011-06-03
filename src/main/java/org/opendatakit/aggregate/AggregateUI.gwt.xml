@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<module rename-to='aggregateui'>
+<module rename-to="aggregateui">
 
   <!-- Inherit the core Web Toolkit stuff.                        -->
   <inherits name='com.google.gwt.user.User'/>
@@ -7,7 +7,7 @@
   <inherits name='com.google.gwt.user.theme.standard.StandardResources'/>
   <inherits name='com.google.gwt.maps.GoogleMaps' />
   
-  <!-- Our access denied exception class -->
+  <!-- Our access denied exception class and security interfaces -->
   <inherits name='org.opendatakit.common.security.Security'/>
 
   <!-- Persistence layer exception class -->
@@ -18,15 +18,9 @@
   
   <!-- Specify the app entry point class.                         -->
   <entry-point class='org.opendatakit.aggregate.client.AggregateUI'/>
-  <servlet path="/filterservice" class="org.opendatakit.aggregate.server.FilterServiceImpl"/>
-  <servlet path="/formservice" class="org.opendatakit.aggregate.server.FormServiceImpl"/>
-  <servlet path="/formadminservice" class="org.opendatakit.aggregate.server.FormAdminServiceImpl"/>
-  <servlet path="/preferenceservice" class="org.opendatakit.aggregate.server.PreferenceServiceImpl"/>
-  <servlet path="/servicesadminservice" class="org.opendatakit.aggregate.server.ServicesAdminServiceImpl"/>
-  <servlet path="/submissionservice" class="org.opendatakit.aggregate.server.SubmissionServiceImpl"/>
    
   <source path='client'/>
-  <source path='client/exception'>
+  <source path='client/exception'/>
   <source path='client/filter'/>
   <source path='client/form'/>  
   <source path='client/preferences'/>
