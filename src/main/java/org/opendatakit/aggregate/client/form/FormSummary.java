@@ -26,18 +26,21 @@ public class FormSummary implements Serializable {
   private String createdUser;
   private boolean download;
   private boolean receiveSubmissions;
-
+  private String viewURL;
+  
+  
   public FormSummary() {
 
   }
 
   public FormSummary(String formTitle, String formId, String formCreateUser, boolean download,
-      boolean receiveSubmissions) {
+      boolean receiveSubmissions, String viewableURL) {
     this.title = formTitle;
     this.id = formId;
     this.createdUser = formCreateUser;
     this.download = download;
     this.receiveSubmissions = receiveSubmissions;
+    this.viewURL = viewableURL;
   }
 
   public String getTitle() {
@@ -60,6 +63,8 @@ public class FormSummary implements Serializable {
     return receiveSubmissions;
   }
 
-  
+  public String getViewableURL() {
+    return viewURL;
+  }
   
 }
