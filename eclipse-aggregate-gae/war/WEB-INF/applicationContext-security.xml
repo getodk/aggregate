@@ -71,7 +71,7 @@
 		<intercept-url pattern="/briefcase/**" access="isFullyAuthenticated() and hasRole('ROLE_ANALYST')" />
 		<intercept-url pattern="/xformsDownload" access="isFullyAuthenticated() and hasRole('ROLE_FORM_DOWNLOAD')" />
 		<intercept-url pattern="/xformsList" access="isFullyAuthenticated() and hasRole('ROLE_FORM_LIST')" />
-		<intercept-url pattern="/xformsManifest" access="isFullyAuthenticated() and hasRole('ROLE_FORM_LIST')" />
+		<intercept-url pattern="/xformsManifest" access="hasRole('ROLE_FORM_LIST')" />
 		<intercept-url pattern="/formList" access="hasRole('ROLE_FORM_LIST')" />
 		<intercept-url pattern="/formXml" access="hasRole('ROLE_FORM_DOWNLOAD')" />
 		<intercept-url pattern="/submission" access="hasRole('ROLE_SUBMISSION_UPLOAD')" />
