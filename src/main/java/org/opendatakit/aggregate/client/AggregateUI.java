@@ -476,7 +476,12 @@ public class AggregateUI implements EntryPoint {
 		} else if (formsBox.getItemCount() == 0) {
 			formsBox.addItem("none");
 		}
-		submissionNav.setTitleString(formsBox.getItemText(formsBox.getSelectedIndex()));
+		int formIdx = formsBox.getSelectedIndex();
+		if ( formIdx == -1 ) {
+			submissionNav.setTitleString("");
+		} else {
+			submissionNav.setTitleString(formsBox.getItemText(formIdx));
+		}
 		formsBox.addChangeHandler(new ChangeHandler() {
 
 			@Override
