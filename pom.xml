@@ -73,7 +73,7 @@
 		  <url>https://nexus.codehaus.org/content/repositories/snapshots/</url>
 		  <snapshots>
 			<enabled>true</enabled>
-		    <updatePolicy>always</updatePolicy>
+		    <updatePolicy>daily</updatePolicy>
 		  </snapshots>
 		  <releases>
 			<enabled>false</enabled>
@@ -92,7 +92,7 @@
 		  <url>https://nexus.codehaus.org/content/repositories/snapshots/</url>
 		  <snapshots>
 			<enabled>true</enabled>
-		    <updatePolicy>always</updatePolicy>
+		    <updatePolicy>daily</updatePolicy>
 		  </snapshots>
 		  <releases>
 			<enabled>false</enabled>

@@ -156,7 +156,7 @@
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>aggregate-html</servlet-name>
-		<url-pattern>Aggregate.html</url-pattern>
+		<url-pattern>/Aggregate.html</url-pattern>
 	</servlet-mapping>
 
 	<servlet>
