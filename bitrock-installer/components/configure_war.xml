@@ -504,9 +504,10 @@
             <encoding>utf-8</encoding>
             <path>${installdir}/create_db_and_user.sql</path>
             <progressText>Write MySQL database and user creation script</progressText>
-            <text>create database '${jdbc_database}';
+            <text>create database `${jdbc_database}`;
 create user '${jdbc_username}'@'${hostname}' identified by '${jdbc_password}';
-grant all on '${jdbc_database}'.* to '${jdbc_username}'@'${hostname}' identified by '${jdbc_password}';
+grant all on `${jdbc_database}`.* to '${jdbc_username}'@'${hostname}' identified by '${jdbc_password}';
+flush privileges;
 </text>
             <ruleList>
                 <compareText>
@@ -520,9 +521,10 @@ grant all on '${jdbc_database}'.* to '${jdbc_username}'@'${hostname}' identified
             <encoding>utf-8</encoding>
             <path>${installdir}/create_db_and_user.sql</path>
             <progressText>Write MySQL database and user creation script</progressText>
-            <text>create database '${jdbc_database}';
+            <text>create database `${jdbc_database}`;
 create user '${jdbc_username}'@'localhost' identified by '${jdbc_password}';
-grant all on '${jdbc_database}'.* to '${jdbc_username}'@'localhost' identified by '${jdbc_password}';
+grant all on `${jdbc_database}`.* to '${jdbc_username}'@'localhost' identified by '${jdbc_password}';
+flush privileges;
 </text>
             <ruleList>
                 <compareText>
@@ -562,9 +564,50 @@ alter database "${jdbc_database}" owner to "${jdbc_username}";
             <text>${html_steps_begin}
 ${html_steps_begin_item}Execute the mysql (mysql.exe) commandline client using the root 
 account and password, and supply the &lt;code&gt;create_db_and_user.sql&lt;/code&gt; to it.
-If you have the mysql commandline client open, type:
+&lt;br/&gt;
+To open the mysql commandline client, open a cmd window (Windows), terminal window (MacOS) or
+term window (Linux) and 'cd' to the directory containing the mysql client (mysql.exe on Windows).
+Then, please type:
 &lt;pre&gt;
-source '${installdir}${platform_path_separator}README.txt'
+mysql --user root --password
+&lt;/pre&gt;
+And enter the MySQL server root password.  You will then be witnin the mysql commandline client.  You should see a 'mysql>' prompt. Type:
+&lt;pre&gt;
+source ${installdir.unix}/create_db_and_user.sql
+exit
+&lt;/pre&gt;
+Here is what this looks like on Windows, with what you must type in &lt;font color="red"&gt;red&lt;/font&gt;:
+&lt;pre&gt;
+Microsoft Windows [Version 6.1.7600]
+Copyright (c) 2009 Microsoft Corporation.  All rights reserved.
+
+C:\Windows\System32>&lt;font color="red"&gt;cd "\Program Files\MySQL\MySQL Server 5.1\bin"&lt;/font&gt;
+
+C:\Program Files\MySQL\MySQL Server 5.1\bin>&lt;font color="red"&gt;mysql.exe --user root --password&lt;/font&gt;
+Enter password: &lt;font color="red"&gt;*******&lt;/font&gt;
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 13
+Server version: 5.1.47-community MySQL Community Server (GPL)
+
+Copyright (c) 2000, 2010, Oracle and/or its affiliates. All rights reserved.
+This software comes with ABSOLUTELY NO WARRANTY. This is free software,
+and you are welcome to modify and redistribute it under the GPL v2 license
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+mysql> &lt;font color="red"&gt;source C:/Users/user/workspace/gmysql-test/create_db_and_user.sql&lt;/font&gt;
+Query OK, 1 row affected (0.00 sec)
+
+Query OK, 0 rows affected (0.00 sec)
+
+Query OK, 0 rows affected (0.00 sec)
+
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> &lt;font color="red"&gt;exit&lt;/font&gt;
+Bye
+
+C:\Program Files\MySQL\MySQL Server 5.1\bin>
 &lt;/pre&gt;
 ${html_steps_end_item}${html_steps_begin_item}
 copy the &lt;code&gt;ODKAggregate.war&lt;/code&gt; to the &lt;code&gt;${platform_path_separator}webapps&lt;/code&gt; directory of the Apache
@@ -595,7 +638,7 @@ ${html_steps_begin_item}Execute the Postgres SQL shell (psql) commandline client
 root account and password, and supply the &lt;code&gt;create_db_and_user.sql&lt;/code&gt; to it.
 If you have the psql shell open, type:
 &lt;pre&gt;
-\i "${installdir}${platform_path_separator}README.txt"
+\i "${installdir}${platform_path_separator}create_db_and_user.sql"
 &lt;/pre&gt;
 ${html_steps_end_item}${html_steps_begin_item}
 copy the &lt;code&gt;ODKAggregate.war&lt;/code&gt; to the &lt;code&gt;${platform_path_separator}webapps&lt;/code&gt; directory of the Apache

@@ -606,9 +606,9 @@ Copy this file into the /lib directory of your Apache Tomcat 6 installation.
 	<!-- database_config -->
 	<name>database_config_part_1</name>
             <title>ODKAggregate database authentication settings</title>
-            <explanation>The database server must be configured with a user, database name and database schema that Aggregate will use for its data storage needs.  Username and password should be an alphanumeric string beginning with a letter (no spaces or punctuation please!).
+            <explanation>The database server must be configured with an account (username and password) that Aggregate will employ for accessing the database server.  Username and password should be alphanumeric strings beginning with a letter (no spaces or punctuation please!).
 
-The installer will generate scripts that can be run on the database to create the needed user, database name and schema.
+The installer will generate a script that can be run on the database server to establish the required configuration.
 </explanation>
             <value></value>
             <default></default>
@@ -656,9 +656,9 @@ The installer will generate scripts that can be run on the database to create th
 	<!-- database_config -->
 	<name>database_config_part_2</name>
             <title>ODKAggregate database datastore settings</title>
-            <explanation>The database server must be configured with a user, database name and database schema that Aggregate will use for its data storage needs.  The database name and schema name can be any alphanumeric strings beginning with a letter; underscores (_) are OK (no spaces or punctuation please!).
+            <explanation>The database server must be configured with a workspace identified by a database name, and, if using Postgresql, a schema name.  This workspace is where Aggregate will store uploaded forms, submissions and other information. The database name (and schema name for Postgresql) can be any alphanumeric strings beginning with a letter; underscores (_) are OK (no spaces or punctuation please!).
 
-The installer will generate scripts that can be run on the database to create the needed user, database name and schema.
+The installer will generate a script that can be run on the database server to create the workspace.
 </explanation>
             <value></value>
             <default></default>
@@ -681,6 +681,13 @@ The installer will generate scripts that can be run on the database to create th
                     <default>odk_prod</default>
                     <allowEmptyValue>0</allowEmptyValue>
                     <width>30</width>
+                    <ruleList>
+                        <compareText>
+                            <logic>equals</logic>
+                            <text>${platform}</text>
+                            <value>postgres</value>
+                        </compareText>
+                    </ruleList>
                 </stringParameter>
             </parameterList>
             <ruleList>
@@ -965,6 +972,17 @@ Please create and select this directory now.</explanation>
                     <logic>equals</logic>
                     <text>${tomcat_port_choice}</text>
                     <value>altPorts</value>
+                </compareText>
+            </ruleList>
+        </setInstallerVariable>
+        <setInstallerVariable>
+            <name>jdbc_schema</name>
+            <value>${jdbc_database}</value>
+            <ruleList>
+                <compareText>
+                    <logic>equals</logic>
+                    <text>${platform}</text>
+                    <value>mysql</value>
                 </compareText>
             </ruleList>
         </setInstallerVariable>
