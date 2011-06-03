@@ -72,6 +72,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class AggregateUI implements EntryPoint {
 	private static final int REFRESH_INTERVAL = 5000; // ms
+	private static final String K_MAILTO = "mailto:";
 
 	private static final String TOGGLE_AUTHENTICATION_STATUS = "toggle-authentication-status";
 	// Main Navigation
@@ -586,7 +587,15 @@ public class AggregateUI implements EntryPoint {
 			listOfForms.setWidget(i, 0, new Anchor(form.getTitle()));
 			listOfForms.setWidget(i, 1, new HTML(form.getId()));
 			String user = form.getCreatedUser();
-			listOfForms.setWidget(i, 2, new Anchor(user, user));
+			String displayName;
+			if ( user.startsWith(K_MAILTO) ) {
+				displayName =user.substring(K_MAILTO.length());
+			} else if ( user.startsWith("uid:") ) {
+				displayName = user.substring("uid:".length(),user.indexOf("|"));
+			} else {
+				displayName = user;
+			}
+			listOfForms.setText(i, 2, displayName);
 
 			CheckBox downloadableCheckBox = new CheckBox();
 			downloadableCheckBox.setValue(form.isDownloadable());
