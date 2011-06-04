@@ -627,8 +627,8 @@ The installer will generate a script that can be run on the database server to e
                     <name>jdbc_password</name>
                     <description>Database password:</description>
                     <explanation></explanation>
-                    <value>odk_pass</value>
-                    <default>odk_pass</default>
+                    <value></value>
+                    <default></default>
                     <allowEmptyValue>0</allowEmptyValue>
                     <descriptionRetype></descriptionRetype>
                     <width>30</width>
@@ -751,7 +751,7 @@ You must give a complete Email address (e.g., username@gmail.com ).
                             <conditionRuleList>
                                 <regExMatch>
                                     <logic>does_not_match</logic>
-                                    <pattern>\w+@gmail\.com</pattern>
+                                    <pattern>\w+@\(\w\.\)+\w</pattern>
                                     <text>${email}</text>
                                 </regExMatch>
                             </conditionRuleList>
