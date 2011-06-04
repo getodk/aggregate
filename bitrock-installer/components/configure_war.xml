@@ -11,31 +11,33 @@
             <name>temp</name>
             <platforms>all</platforms>
             <distributionFileList>
-	<!-- The configuration files for aggregate -->
-	<distributionDirectory>
-                    <origin>files/conf</origin>
-                </distributionDirectory>
-
-	<!-- Contains the compiled java class GenerateUUID
-                     which generates and prints a UUID -->
-	<distributionDirectory>
-                    <origin>files/generate_uuid</origin>
-                </distributionDirectory>
-
-	<!-- Contains the compiled java class QualifiedHostname
-	  which prints this host's fully qualified hostname -->
-	<distributionDirectory>
-                    <origin>files/qualified_hostname</origin>
-                </distributionDirectory>
-
-	<!-- the war minus the site-specific settings -->
-	<distributionFile>
-                    <origin>files/ODKAggregate.war</origin>
-                </distributionFile>
-                <distributionFile>
-                    <origin>files/appengine-web.xml</origin>
-                </distributionFile>
-            </distributionFileList>
+			<!-- as follows:
+			files/conf - configuration extracted from maven build tree.
+			files/mf - fake Manifest.mf directory structure
+			files/generate_uuid - GenerateUUID class for printing UUIDs to stdout
+			files/qualified_hostname - QualifiedHostname class for printing this host's fully qualified hostname to stdout
+			files/ODKAggregate.war - war file minus site-specific settings.
+			files/appengine-web.xml - copy of the appengine-web.xml (so we can update it)
+			-->
+			<distributionDirectory>
+				<origin>files/conf</origin>
+			</distributionDirectory>
+			<distributionDirectory>
+				<origin>files/mf</origin>
+			</distributionDirectory>
+			<distributionDirectory>
+				<origin>files/generate_uuid</origin>
+			</distributionDirectory>
+			<distributionDirectory>
+				<origin>files/qualified_hostname</origin>
+			</distributionDirectory>
+			<distributionFile>
+				<origin>files/ODKAggregate.war</origin>
+			</distributionFile>
+			<distributionFile>
+				<origin>files/appengine-web.xml</origin>
+			</distributionFile>
+		</distributionFileList>
         </folder>
         <folder>
             <description>gae scripts</description>
@@ -126,12 +128,6 @@
                 </compareTextLength>
             </ruleList>
         </setInstallerVariableFromScriptOutput>
-        <deleteFile>
-            <path>${temp_dir}/cfg-war/WEB-INF/lib</path>
-        </deleteFile>
-        <createDirectory>
-            <path>${temp_dir}/cfg-war/WEB-INF/lib</path>
-        </createDirectory>
         <actionGroup>
             <explanation>Create jdbc properties</explanation>
             <progressText>Set innocuous jdbc property for all platforms</progressText>
@@ -403,24 +399,41 @@
                 </propertiesFileSet>
             </actionList>
         </actionGroup>
-        <locate>
-            <command>jar</command>
-            <variable>jar_executable</variable>
-            <onErrorActionList>
-                <showInfo>
-                    <text>Could not find the 'jar' command on your system. Do you have a Java JDK installed?</text>
-                    <title>Configuration Failed</title>
-                </showInfo>
-            </onErrorActionList>
-        </locate>
-        <runProgram>
-            <explanation>Build configuration jar</explanation>
-            <program>${jar_executable}</program>
-            <programArguments>-cf ${temp_dir}/cfg-war/WEB-INF/lib/${settings_jar} -C ${platform} . -C common .</programArguments>
+        <deleteFile>
+			<path>${temp_dir}/cfg-war</path>
+        </deleteFile>
+		<createDirectory>
+			<path>${temp_dir}/cfg-war</path>
+        </createDirectory>
+		<unzip>
+			<destinationDirectory>${temp_dir}/cfg-war</destinationDirectory>
+			<zipFile>${temp_dir}/ODKAggregate.war</zipFile>
+            <progressText>Exploding ODKAggregate.war</progressText>
+		</unzip>
+        <deleteFile>
+			<path>${temp_dir}/jarBody</path>
+        </deleteFile>
+		<createDirectory>
+			<path>${temp_dir}/jarBody</path>
+        </createDirectory>
+		<copyFile>
+			<destination>${temp_dir}/jarBody</destination>
+			<origin>${temp_dir}/conf/common/*</origin>
+        </copyFile>
+		<copyFile>
+			<destination>${temp_dir}/jarBody</destination>
+			<origin>${temp_dir}/conf/${platform}/*</origin>
+        </copyFile>
+		<copyFile>
+			<destination>${temp_dir}/jarBody</destination>
+			<origin>${temp_dir}/mf/*</origin>
+        </copyFile>
+        <zip> <!-- create the settings jar -->
+            <baseDirectory>${temp_dir}/jarBody</baseDirectory>
+            <files>${temp_dir}/jarBody/*</files>
+            <zipFile>${temp_dir}/cfg-war/WEB-INF/lib/${settings_jar}</zipFile>
             <progressText>Building configuration jar</progressText>
-            <useMSDOSPath>0</useMSDOSPath>
-            <workingDirectory>${temp_dir}/conf/</workingDirectory>
-        </runProgram>
+        </zip>
         <copyFile>
             <destination>${temp_dir}/cfg-war/WEB-INF/appengine-web.xml</destination>
             <origin>${temp_dir}/appengine-web.xml</origin>
@@ -444,15 +457,11 @@
             <file>${temp_dir}/cfg-war/WEB-INF/appengine-web.xml</file>
             <value>1</value>
         </xmlFileSet>
-        <runProgram>
-            <program>${jar_executable}</program>
-            <programArguments>-uf ${temp_dir}/ODKAggregate.war -C ${temp_dir}/cfg-war/ .</programArguments>
-            <progressText>Insert configuration jar and appengine-web.xml into war file</progressText>
-            <workingDirectory>${temp_dir}</workingDirectory>
-        </runProgram>
-        <renameFile>
-            <destination>${installdir}/ODKAggregate.war</destination>
-            <origin>${temp_dir}/ODKAggregate.war</origin>
+		<zip>
+			<baseDirectory>${temp_dir}/cfg-war</baseDirectory>
+			<files>${temp_dir}/cfg-war/*</files>
+            <zipFile>${installdir}/ODKAggregate.war</zipFile>
+            <progressText>Reassembling ODKAggregate.war</progressText>
             <ruleList>
                 <compareText>
                     <logic>does_not_equal</logic>
@@ -460,7 +469,10 @@
                     <value>gae</value>
                 </compareText>
             </ruleList>
-        </renameFile>
+        </zip>
+        <deleteFile>
+			<path>${installdir}/ODKAggregate</path>
+        </deleteFile>
         <createDirectory>
             <path>${installdir}/ODKAggregate</path>
             <progressText>Creating war directory</progressText>
@@ -472,11 +484,10 @@
                 </compareText>
             </ruleList>
         </createDirectory>
-        <runProgram>
-            <program>${jar_executable}</program>
-            <programArguments>-xf ${temp_dir}/ODKAggregate.war</programArguments>
-            <progressText>Extract war file to war directory</progressText>
-            <workingDirectory>${installdir}/ODKAggregate</workingDirectory>
+		<copyFile>
+            <destination>${installdir}/ODKAggregate</destination>
+            <origin>${temp_dir}/cfg-war/*</origin>
+            <progressText>Copy war files to war directory</progressText>
             <ruleList>
                 <compareText>
                     <logic>equals</logic>
@@ -484,7 +495,7 @@
                     <value>gae</value>
                 </compareText>
             </ruleList>
-        </runProgram>
+        </copyFile>
         <setInstallerVariable>
             <name>host_port</name>
             <value>${hostname}:${http_port}</value>
