@@ -751,7 +751,7 @@ You must give a complete Email address (e.g., username@gmail.com ).
                             <conditionRuleList>
                                 <regExMatch>
                                     <logic>does_not_match</logic>
-                                    <pattern>\w+@\(\w\.\)+\w</pattern>
+                                    <pattern>[^@ ]+@[^@ .]+\.[^@ ]+</pattern>
                                     <text>${email}</text>
                                 </regExMatch>
                             </conditionRuleList>
