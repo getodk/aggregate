@@ -15,9 +15,6 @@ public class TableAlreadyExistsException extends ODKTablesClientException
 
     private String tableId;
     
-    /**
-     * See {@link ODKTablesClientException#ODKTablesException()}
-     */
     public TableAlreadyExistsException(String tableId)
     {
         super(String.format("Table with tableId '%s' already exists!", tableId));

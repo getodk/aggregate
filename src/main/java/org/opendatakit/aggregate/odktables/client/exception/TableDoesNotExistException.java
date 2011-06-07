@@ -10,9 +10,6 @@ public class TableDoesNotExistException extends ODKTablesClientException
 
     private String tableId;
 
-    /**
-     * See {@link ODKTablesClientException#ODKTablesException()}
-     */
     public TableDoesNotExistException(String tableId)
     {
         super(String.format("Table with tableId '%s' does not exist!", tableId));

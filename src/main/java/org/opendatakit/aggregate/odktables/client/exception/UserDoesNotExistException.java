@@ -9,9 +9,6 @@ public class UserDoesNotExistException extends ODKTablesClientException
 
     private final String userId;
 
-    /**
-     * See {@link ODKTablesClientException#ODKTablesException()}
-     */
     public UserDoesNotExistException(String userId)
     {
         super(String.format("User with userId %s does not exist!", userId));
