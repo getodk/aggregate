@@ -10,9 +10,6 @@ public class RowAlreadyExistsException extends ODKTablesClientException
     private String tableId;
     private String rowId;
 
-    /**
-     * See {@link ODKTablesClientException#ODKTablesException()}
-     */
     public RowAlreadyExistsException(String tableId, String rowId)
     {
         super(String.format("Row with rowId '%s' already exists!", rowId));
