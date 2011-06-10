@@ -45,7 +45,8 @@ import org.opendatakit.common.security.User;
 import org.opendatakit.common.web.CallingContext;
 
 /**
- * Common worker implementation for the publishing of data to an external service.
+ * Common worker implementation for the publishing of data to an external
+ * service.
  * 
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
@@ -53,252 +54,260 @@ import org.opendatakit.common.web.CallingContext;
  */
 public class UploadSubmissionsWorkerImpl {
 
-	private static final int MAX_QUERY_LIMIT = ServletConsts.FETCH_LIMIT;
-	private static final int DELAY_BETWEEN_RELEASE_RETRIES = 1000;
-	private static final int MAX_NUMBER_OF_RELEASE_RETRIES = 10;
-	private static final int SUBMISSIONS_PER_LOCK_RENEWAL = 25;
+  private static final int MAX_QUERY_LIMIT = ServletConsts.FETCH_LIMIT;
+  private static final int DELAY_BETWEEN_RELEASE_RETRIES = 1000;
+  private static final int MAX_NUMBER_OF_RELEASE_RETRIES = 10;
+  private static final int SUBMISSIONS_PER_LOCK_RENEWAL = 25;
 
-	private final String lockId;
-	private final CallingContext cc;
-	private final FormServiceCursor pFsc;
-	private final ExternalServicePublicationOption pEsOption;
-	private ExternalService pExtService;
-	private Form form;
+  private final String lockId;
+  private final CallingContext cc;
+  private final FormServiceCursor pFsc;
+  private final ExternalServicePublicationOption pEsOption;
+  private ExternalService pExtService;
+  private Form form;
 
-	public UploadSubmissionsWorkerImpl(FormServiceCursor fsc, CallingContext cc) {
-		pFsc = fsc;
-		this.cc = cc;
-		pEsOption = fsc.getExternalServicePublicationOption();
-		lockId = UUID.randomUUID().toString();
-	}
+  public UploadSubmissionsWorkerImpl(FormServiceCursor fsc, CallingContext cc) {
+    pFsc = fsc;
+    this.cc = cc;
+    pEsOption = fsc.getExternalServicePublicationOption();
+    lockId = UUID.randomUUID().toString();
+  }
 
-	public String getUploadSubmissionsTaskLockName() {
-		return pFsc.getUri();
-	}
-	
-	public void uploadAllSubmissions()
-			throws ODKEntityNotFoundException, ODKExternalServiceException,
-			ODKFormNotFoundException, ODKTaskLockException {
+  public String getUploadSubmissionsTaskLockName() {
+    return pFsc.getUri();
+  }
 
-		pExtService = pFsc.getExternalService(cc);
-		form = Form.retrieveForm(pFsc.getFormId(), cc);
+  public void uploadAllSubmissions() throws ODKEntityNotFoundException,
+      ODKExternalServiceException, ODKFormNotFoundException {
 
-		Datastore ds = cc.getDatastore();
-		User user = cc.getCurrentUser();
-		TaskLock taskLock = ds.createTaskLock(user);
-		if (!taskLock
-				.obtainLock(lockId, getUploadSubmissionsTaskLockName(), TaskLockType.UPLOAD_SUBMISSION)) {
-			return;
-			// TODO: what should happen if you can't obtain a lock
-			// TODO: come back and think about this
-			// createFormUploadTask(fsc, user);
-		}
-		taskLock = null;
+    pExtService = pFsc.getExternalService(cc);
+    form = Form.retrieveForm(pFsc.getFormId(), cc);
 
-		if ( !pFsc.isExternalServicePrepared() ) return;
-		if ( pFsc.getOperationalStatus() != OperationalStatus.ACTIVE ) return;
-		
-		try {
-			switch (pEsOption) {
-			case UPLOAD_ONLY:
-				if (pFsc.getUploadCompleted()) {
-					// leave the record so we know action has occurred.
-					Logger.getLogger(UploadSubmissionsWorkerImpl.class.getName())
-						.warning("Upload completed for UPLOAD_ONLY but formServiceCursor operational status slow to be revised");
-					// update this value here, but it should have already been set...
-					pFsc.setOperationalStatus(OperationalStatus.COMPLETED);
-					ds.putEntity(pFsc, user);
-				} else {
-					uploadSubmissions();
-				}
-				break;
-			case STREAM_ONLY:
-				streamSubmissions();
-				break;
-			case UPLOAD_N_STREAM:
-				if (!pFsc.getUploadCompleted()) {
-					uploadSubmissions();
-				} else {
-					streamSubmissions();
-				}
-				break;
-			default:
-				break;
-			}
-		} catch (Exception e) {
-			// TODO: do something smarter with exceptions
-			throw new ODKExternalServiceException(e);
-		} finally {
-			taskLock = ds.createTaskLock(user);
-			for (int i = 0; i < MAX_NUMBER_OF_RELEASE_RETRIES; i++) {
-				if (taskLock.releaseLock(lockId, getUploadSubmissionsTaskLockName(),
-						TaskLockType.UPLOAD_SUBMISSION))
-					break;
-				try {
-					Thread.sleep(DELAY_BETWEEN_RELEASE_RETRIES);
-				} catch (InterruptedException e) {
-					// just move on, this retry mechanism is to only make things
-					// nice
-				}
-			}
-		}
-	}
+    Datastore ds = cc.getDatastore();
+    User user = cc.getCurrentUser();
+    TaskLock taskLock = ds.createTaskLock(user);
 
-	private void uploadSubmissions() throws Exception {
+    boolean locked = false;
+    try {
+      if (taskLock.obtainLock(lockId, getUploadSubmissionsTaskLockName(),
+          TaskLockType.UPLOAD_SUBMISSION)) {
+        locked = true;
+      }
+      taskLock = null;
+    } catch (ODKTaskLockException e) {
+      e.printStackTrace();
+    }
 
-		Date startDate = pFsc.getLastUploadCursorDate();
-		if (startDate == null) {
-			startDate = BasicConsts.EPOCH;
-		}
+    if (!locked) {
+      return;
+    }
 
-		Date endDate = pFsc.getEstablishmentDateTime();
-		// submissions are queried by the lastUpdateDate, since the submissionDate
-		// marks the initiation of the upload, but it may not have completed and 
-		// been marked as uploaded until later.  This is particularly significant for
-		// debrief-uploaded data, which preserves the submissionDate, but would have 
-		// a much-later creationDate and lastUpdatedDate.
-		List<Submission> submissions = querySubmissionsDateRange(startDate,
-				endDate);
-		String lastUploadKey = pFsc.getLastUploadKey();
-		if (lastUploadKey != null && !submissions.isEmpty()) {
-			submissions = getRemainingSubmissions(lastUploadKey, submissions);
-			// check if all submissions were removed as already uploaded, if
-			// true then try to get a new batch.
-			if (submissions.isEmpty()) {
-				startDate = submissions.get(submissions.size() - 1).getLastUpdateDate();
-				submissions = querySubmissionsDateRange(startDate, endDate);
-			}
-		}
-		if (submissions.isEmpty()) {
-			// there are no submissions so uploading is complete
-			pExtService.setUploadCompleted(cc);
-		} else {
-			sendSubmissions(submissions, false);
-		}
+    if (!pFsc.isExternalServicePrepared())
+      return;
+    if (pFsc.getOperationalStatus() != OperationalStatus.ACTIVE)
+      return;
 
-		// create another task to either start streaming
-		// OR to delete if upload ONLY
-		UploadSubmissions uploadSubmissionsBean = (UploadSubmissions) cc.getBean(BeanDefs.UPLOAD_TASK_BEAN);
-		uploadSubmissionsBean.createFormUploadTask(pFsc, cc);
-	}
+    try {
+      switch (pEsOption) {
+      case UPLOAD_ONLY:
+        if (pFsc.getUploadCompleted()) {
+          // leave the record so we know action has occurred.
+          Logger
+              .getLogger(UploadSubmissionsWorkerImpl.class.getName())
+              .warning(
+                  "Upload completed for UPLOAD_ONLY but formServiceCursor operational status slow to be revised");
+          // update this value here, but it should have already been set...
+          pFsc.setOperationalStatus(OperationalStatus.COMPLETED);
+          ds.putEntity(pFsc, user);
+        } else {
+          uploadSubmissions();
+        }
+        break;
+      case STREAM_ONLY:
+        streamSubmissions();
+        break;
+      case UPLOAD_N_STREAM:
+        if (!pFsc.getUploadCompleted()) {
+          uploadSubmissions();
+        } else {
+          streamSubmissions();
+        }
+        break;
+      default:
+        break;
+      }
+    } catch (Exception e) {
+      // TODO: do something smarter with exceptions
+      throw new ODKExternalServiceException(e);
+    } finally {
+      taskLock = ds.createTaskLock(user);
+      try {
+        for (int i = 0; i < MAX_NUMBER_OF_RELEASE_RETRIES; i++) {
+          if (taskLock.releaseLock(lockId, getUploadSubmissionsTaskLockName(),
+              TaskLockType.UPLOAD_SUBMISSION))
+            break;
+          try {
+            Thread.sleep(DELAY_BETWEEN_RELEASE_RETRIES);
+          } catch (InterruptedException e) {
+            // just move on, this retry mechanism is to make things nice
+          }
+        }
+      } catch (ODKTaskLockException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
+    }
+  }
 
-	private void streamSubmissions() throws ODKFormNotFoundException,
-			ODKIncompleteSubmissionData, ODKDatastoreException,
-			ODKExternalServiceException {
+  private void uploadSubmissions() throws Exception {
 
-		Date startDate = pFsc.getLastStreamingCursorDate();
-		if (startDate == null) {
-			startDate = pFsc.getEstablishmentDateTime();
-		}
+    Date startDate = pFsc.getLastUploadCursorDate();
+    if (startDate == null) {
+      startDate = BasicConsts.EPOCH;
+    }
 
-		List<Submission> submissions = querySubmissionsStartDate(startDate);
-		String lastStreamedKey = pFsc.getLastStreamingKey();
-		if (lastStreamedKey != null && !submissions.isEmpty()) {
-			submissions = getRemainingSubmissions(lastStreamedKey, submissions);
-			// check if all submissions were removed as already uploaded, if
-			// true then try to get a new batch.  NOTE: uses LastUpdateDate.
-			// See longer comment above.
-			if (submissions.isEmpty()) {
-				startDate = submissions.get(submissions.size() - 1).getLastUpdateDate();
-				submissions = querySubmissionsStartDate(startDate);
-			}
-		}
-		if (!submissions.isEmpty()) {
-			sendSubmissions(submissions, true);
-		}
-	}
+    Date endDate = pFsc.getEstablishmentDateTime();
+    // submissions are queried by the lastUpdateDate, since the submissionDate
+    // marks the initiation of the upload, but it may not have completed and
+    // been marked as uploaded until later. This is particularly significant for
+    // debrief-uploaded data, which preserves the submissionDate, but would have
+    // a much-later creationDate and lastUpdatedDate.
+    List<Submission> submissions = querySubmissionsDateRange(startDate, endDate);
+    String lastUploadKey = pFsc.getLastUploadKey();
+    if (lastUploadKey != null && !submissions.isEmpty()) {
+      submissions = getRemainingSubmissions(lastUploadKey, submissions);
+      // check if all submissions were removed as already uploaded, if
+      // true then try to get a new batch.
+      if (submissions.isEmpty()) {
+        startDate = submissions.get(submissions.size() - 1).getLastUpdateDate();
+        submissions = querySubmissionsDateRange(startDate, endDate);
+      }
+    }
+    if (submissions.isEmpty()) {
+      // there are no submissions so uploading is complete
+      pExtService.setUploadCompleted(cc);
+    } else {
+      sendSubmissions(submissions, false);
+    }
 
-	private List<Submission> getRemainingSubmissions(String lastUploadKey,
-			List<Submission> submissions) {
-	  
-		// find the last submission sent, so we don't resend records
-		int indexOfLastSubmission = -1;
-		for (int i = 0; i < submissions.size(); i++) {
-			if (submissions.get(i).getKey().getKey().equals(lastUploadKey))
-				indexOfLastSubmission = i;
-		}
-		if (indexOfLastSubmission > -1) {
-			// we found the last submission that was sent, so now we can send
-			// all the submission after that one
-			return submissions.subList(indexOfLastSubmission + 1, submissions
-					.size());
-		} else {
-			return submissions;
-		}
-	}
+    // create another task to either start streaming
+    // OR to delete if upload ONLY
+    UploadSubmissions uploadSubmissionsBean = (UploadSubmissions) cc
+        .getBean(BeanDefs.UPLOAD_TASK_BEAN);
+    uploadSubmissionsBean.createFormUploadTask(pFsc, cc);
+  }
 
-	private void sendSubmissions(List<Submission> submissionsToSend,
-			boolean streaming) throws ODKExternalServiceException {
-		Date lastDateSent = null;
-		String lastKeySent = null;
-		Datastore ds = cc.getDatastore();
-		User user = cc.getCurrentUser();
-		try {
-			int counter = 0;
-			for (Submission submission : submissionsToSend) {
-				pExtService.sendSubmission(submission, cc);
-				// See QueryByDate
-				// -- we are querying by the lastUpdateDate, not the
-				// creationDate.
-				lastDateSent = submission.getLastUpdateDate();
-				lastKeySent = submission.getKey().getKey();
-				if (streaming) {
-					pFsc.setLastStreamingCursorDate(lastDateSent);
-					pFsc.setLastStreamingKey(lastKeySent);
-				} else {
-					pFsc.setLastUploadCursorDate(lastDateSent);
-					pFsc.setLastUploadKey(lastKeySent);
-				}
-				ds.putEntity(pFsc, user);
+  private void streamSubmissions() throws ODKFormNotFoundException, ODKIncompleteSubmissionData,
+      ODKDatastoreException, ODKExternalServiceException {
 
-				// after a certain amount of submissions sent renew lock
-				if (++counter >= SUBMISSIONS_PER_LOCK_RENEWAL) {
-					TaskLock taskLock = ds.createTaskLock(user);
-					// TODO: figure out what to do if this returns false
-					taskLock.renewLock(lockId, getUploadSubmissionsTaskLockName(),
-							TaskLockType.UPLOAD_SUBMISSION);
-					taskLock = null;
-					counter = 0;
-				}
-			}
-		} catch (Exception e) {
+    Date startDate = pFsc.getLastStreamingCursorDate();
+    if (startDate == null) {
+      startDate = pFsc.getEstablishmentDateTime();
+    }
 
-			throw new ODKExternalServiceException(e);
-		}
+    List<Submission> submissions = querySubmissionsStartDate(startDate);
+    String lastStreamedKey = pFsc.getLastStreamingKey();
+    if (lastStreamedKey != null && !submissions.isEmpty()) {
+      submissions = getRemainingSubmissions(lastStreamedKey, submissions);
+      // check if all submissions were removed as already uploaded, if
+      // true then try to get a new batch. NOTE: uses LastUpdateDate.
+      // See longer comment above.
+      if (submissions.isEmpty()) {
+        startDate = submissions.get(submissions.size() - 1).getLastUpdateDate();
+        submissions = querySubmissionsStartDate(startDate);
+      }
+    }
+    if (!submissions.isEmpty()) {
+      sendSubmissions(submissions, true);
+    }
+  }
 
-	}
+  private List<Submission> getRemainingSubmissions(String lastUploadKey,
+      List<Submission> submissions) {
 
-	private List<Submission> querySubmissionsDateRange(Date startDate,
-			Date endDate) throws ODKFormNotFoundException,
-			ODKIncompleteSubmissionData, ODKDatastoreException {
-		// query for next set of submissions
-		QueryByDateRange query = new QueryByDateRange(form, MAX_QUERY_LIMIT,
-				startDate, endDate, cc);
-		List<Submission> submissions = query.getResultSubmissions(cc);
+    // find the last submission sent, so we don't resend records
+    int indexOfLastSubmission = -1;
+    for (int i = 0; i < submissions.size(); i++) {
+      if (submissions.get(i).getKey().getKey().equals(lastUploadKey))
+        indexOfLastSubmission = i;
+    }
+    if (indexOfLastSubmission > -1) {
+      // we found the last submission that was sent, so now we can send
+      // all the submission after that one
+      return submissions.subList(indexOfLastSubmission + 1, submissions.size());
+    } else {
+      return submissions;
+    }
+  }
 
-		// here so we don't have to do null checks on the rest of the code in
-		// this
-		// class
-		if (submissions == null) {
-			submissions = new ArrayList<Submission>();
-		}
-		return submissions;
-	}
+  private void sendSubmissions(List<Submission> submissionsToSend, boolean streaming)
+      throws ODKExternalServiceException {
+    Date lastDateSent = null;
+    String lastKeySent = null;
+    Datastore ds = cc.getDatastore();
+    User user = cc.getCurrentUser();
+    try {
+      int counter = 0;
+      for (Submission submission : submissionsToSend) {
+        pExtService.sendSubmission(submission, cc);
+        // See QueryByDate
+        // -- we are querying by the lastUpdateDate, not the
+        // creationDate.
+        lastDateSent = submission.getLastUpdateDate();
+        lastKeySent = submission.getKey().getKey();
+        if (streaming) {
+          pFsc.setLastStreamingCursorDate(lastDateSent);
+          pFsc.setLastStreamingKey(lastKeySent);
+        } else {
+          pFsc.setLastUploadCursorDate(lastDateSent);
+          pFsc.setLastUploadKey(lastKeySent);
+        }
+        ds.putEntity(pFsc, user);
 
-	private List<Submission> querySubmissionsStartDate(Date startDate)
-			throws ODKFormNotFoundException, ODKIncompleteSubmissionData,
-			ODKDatastoreException {
-		// query for next set of submissions
-		QueryByDate query = new QueryByDate(form, startDate, false,
-				MAX_QUERY_LIMIT, cc);
-		List<Submission> submissions = query.getResultSubmissions(cc);
+        // after a certain amount of submissions sent renew lock
+        if (++counter >= SUBMISSIONS_PER_LOCK_RENEWAL) {
+          TaskLock taskLock = ds.createTaskLock(user);
+          // TODO: figure out what to do if this returns false
+          taskLock.renewLock(lockId, getUploadSubmissionsTaskLockName(),
+              TaskLockType.UPLOAD_SUBMISSION);
+          taskLock = null;
+          counter = 0;
+        }
+      }
+    } catch (Exception e) {
 
-		// here so we don't have to do null checks on the rest of the code in
-		// this
-		// class
-		if (submissions == null) {
-			submissions = new ArrayList<Submission>();
-		}
-		return submissions;
-	}
+      throw new ODKExternalServiceException(e);
+    }
+
+  }
+
+  private List<Submission> querySubmissionsDateRange(Date startDate, Date endDate)
+      throws ODKFormNotFoundException, ODKIncompleteSubmissionData, ODKDatastoreException {
+    // query for next set of submissions
+    QueryByDateRange query = new QueryByDateRange(form, MAX_QUERY_LIMIT, startDate, endDate, cc);
+    List<Submission> submissions = query.getResultSubmissions(cc);
+
+    // here so we don't have to do null checks on the rest of the code in
+    // this
+    // class
+    if (submissions == null) {
+      submissions = new ArrayList<Submission>();
+    }
+    return submissions;
+  }
+
+  private List<Submission> querySubmissionsStartDate(Date startDate)
+      throws ODKFormNotFoundException, ODKIncompleteSubmissionData, ODKDatastoreException {
+    // query for next set of submissions
+    QueryByDate query = new QueryByDate(form, startDate, false, MAX_QUERY_LIMIT, cc);
+    List<Submission> submissions = query.getResultSubmissions(cc);
+
+    // here so we don't have to do null checks on the rest of the code in
+    // this
+    // class
+    if (submissions == null) {
+      submissions = new ArrayList<Submission>();
+    }
+    return submissions;
+  }
 }
