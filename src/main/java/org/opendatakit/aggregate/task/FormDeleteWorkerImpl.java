@@ -87,34 +87,45 @@ public class FormDeleteWorkerImpl {
 	    User user = cc.getCurrentUser();
 		String lockedResourceName = t.getMiscTaskLockName();
 		TaskLock formIdTaskLock = ds.createTaskLock(user);
+		
+		boolean locked = false;
 		try {
 			if (formIdTaskLock.obtainLock(pFormIdLockId, lockedResourceName,
 					TaskLockType.FORM_DELETION)) {
-				formIdTaskLock = null;
-				doDeletion(t);
+				locked = true;
 			}
-		} catch (ODKTaskLockException e1) {
-			e1.printStackTrace();
-		} catch (Exception e2) {
-			e2.printStackTrace();
-		} finally {
-			formIdTaskLock = ds.createTaskLock(user);
-			try {
-				for (int i = 0; i < 10; i++) {
-					if (formIdTaskLock.releaseLock(pFormIdLockId, lockedResourceName,
-							TaskLockType.FORM_DELETION))
-						break;
-					try {
-						Thread.sleep(1000);
-					} catch (InterruptedException e) {
-						// just move on, this retry mechanism 
-						// is to make things nice
-					}
-				}
-			} catch (ODKTaskLockException e) {
-				e.printStackTrace();
-			}
-		}
+			formIdTaskLock = null;
+		} catch (ODKTaskLockException e) {
+		  e.printStackTrace();
+		} 
+		
+    if (!locked) {
+      return;
+    }
+    
+    try {
+      doDeletion(t);
+    } catch (Exception e) {
+      e.printStackTrace();
+    } finally {
+      formIdTaskLock = ds.createTaskLock(user);
+      try {
+        for (int i = 0; i < 10; i++) {
+          if (formIdTaskLock.releaseLock(pFormIdLockId, lockedResourceName,
+              TaskLockType.FORM_DELETION))
+            break;
+          try {
+            Thread.sleep(1000);
+          } catch (InterruptedException e) {
+            // just move on, this retry mechanism
+            // is to make things nice
+          }
+        }
+      } catch (ODKTaskLockException e) {
+        e.printStackTrace();
+      }
+    }
+    
 	}
 	
 	/**

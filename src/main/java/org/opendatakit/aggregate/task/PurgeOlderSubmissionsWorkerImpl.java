@@ -89,14 +89,24 @@ public class PurgeOlderSubmissionsWorkerImpl {
 	    User user = cc.getCurrentUser();
 		String lockedResourceName = t.getMiscTaskLockName();
 		TaskLock formIdTaskLock = ds.createTaskLock(user);
+		
+		boolean locked = false;
 		try {
 			if (formIdTaskLock.obtainLock(pFormIdLockId, lockedResourceName,
 					TaskLockType.FORM_DELETION)) {
-				formIdTaskLock = null;
-				doPurgeOlderSubmissions(t);
+			  locked = true;
 			}
+			formIdTaskLock = null;
 		} catch (ODKTaskLockException e1) {
-			e1.printStackTrace();
+			e1.printStackTrace();	
+		}
+		
+		if(!locked) {
+		  return;
+		}
+		
+		try {
+		  doPurgeOlderSubmissions(t);
 		} catch (Exception e2) {
 			e2.printStackTrace();
 		} finally {
