@@ -56,7 +56,7 @@ public class CommandConverterTest
         commandResultToJson.put(CreateUserResult.success(TestUtils.userId), "{\"userId\":\"1\",\"successful\":true}");
         commandResultToJson.put(DeleteTableResult.success(TestUtils.tableId), "{\"tableId\":\"1\",\"successful\":true}");
         commandResultToJson.put(DeleteUserResult.success(TestUtils.userId), "{\"userId\":\"1\",\"successful\":true}");
-        commandResultToJson.put(GetUserResult.success(TestUtils.userId, TestUtils.userUri, TestUtils.userName), "{\"userId\":\"1\",\"userUri\":\"4ac1471c-a4b6-4835-8814-1e99fa7c47c3\",\"successful\":true}");
+        commandResultToJson.put(GetUserResult.success(TestUtils.userId, TestUtils.userUri, TestUtils.userName), "{\"userId\":\"1\",\"userUri\":\"4ac1471c-a4b6-4835-8814-1e99fa7c47c3\",\"userName\":\"The User\",\"successful\":true}");
         commandResultToJson.put(InsertRowsResult.success(TestUtils.tableId, TestUtils.rowIds), "{\"tableId\":\"1\",\"rowIds\":[\"1\",\"2\"],\"successful\":true}");
         commandResultToJson.put(QueryForRowsResult.success(TestUtils.userUri, TestUtils.tableId, TestUtils.rows), "{\"rows\":[{\"rowId\":\"1\",\"values\":{\"weight\":\"175.25\",\"age\":\"22\",\"name\":\"john\"}},{\"rowId\":\"2\",\"values\":{\"weight\":\"164.26\",\"age\":\"36\",\"name\":\"james\"}}],\"tableId\":\"1\",\"userUri\":\"4ac1471c-a4b6-4835-8814-1e99fa7c47c3\",\"successful\":true}");
         commandResultToJson.put(QueryForTablesResult.success(TestUtils.tableList), "{\"tableList\":{\"tableEntries\":[{\"userUri\":\"4ac1471c-a4b6-4835-8814-1e99fa7c47c3\",\"userName\":\"The User\",\"tableId\":\"1\",\"tableName\":\"The Table\"}]},\"successful\":true}");
