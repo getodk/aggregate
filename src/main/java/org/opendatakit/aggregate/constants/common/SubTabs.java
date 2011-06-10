@@ -18,8 +18,11 @@ package org.opendatakit.aggregate.constants.common;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 
-public enum FormOrFilter implements IsSerializable {
-	FORM,
+public enum SubTabs implements IsSerializable {
+	EXPORT,
 	FILTER,
-	BOTH;
+	FORM,
+	PUBLISH,
+	PREFERENCES,
+	PERMISSIONS;
 };
