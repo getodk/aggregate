@@ -51,13 +51,13 @@ public class CreateNewExportPopup extends PopupPanel {
   private Button exportButton;
 
   private void rePopulateExportsAndRedirect() {
-    parent.baseUI.getExportList();
+    parent.getBase().getSubmissionNav().setupExportPanel();
     parent.selectTab(1);
     hide();
   }
 
   public CreateNewExportPopup(final String formId, final FormServiceAsync formSvc,
-      final ManageTabUI parent) {
+      final ManageTabUI parent, final AggregateUI baseUI) {
     super(false);
     this.parent = parent;
     layout = new FlexTable();
@@ -76,6 +76,7 @@ public class CreateNewExportPopup extends PopupPanel {
       @Override
       public void onClick(ClickEvent event) {
         hide();
+        baseUI.getTimer().restartTimer();
       }
     });
     layout.setWidget(0, 0, closeButton);
@@ -172,6 +173,7 @@ public class CreateNewExportPopup extends PopupPanel {
             }
           });
         }
+        baseUI.getTimer().restartTimer();
       }
     });
 

@@ -22,5 +22,7 @@ public enum PageUpdates implements IsSerializable {
 	FORMDROPDOWN,
 	FORMTABLE,
 	SUBMISSIONDATA,
+	NEWFORM,
+	SAMEFORM,
 	ALL;
 };

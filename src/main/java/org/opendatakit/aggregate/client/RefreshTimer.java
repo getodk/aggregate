@@ -16,7 +16,7 @@
 
 package org.opendatakit.aggregate.client;
 
-import org.opendatakit.aggregate.constants.common.FormOrFilter;
+import org.opendatakit.aggregate.constants.common.SubTabs;
 import org.opendatakit.aggregate.constants.common.PageUpdates;
 
 import com.google.gwt.user.client.Timer;
@@ -36,17 +36,20 @@ public class RefreshTimer {
 	    		   this.cancel();
 	    	   } else if (intervalsElapsed % 3 == 0){
 	    		   intervalsElapsed++;
-		    	   aggregateUI.update(FormOrFilter.BOTH, PageUpdates.ALL);	   
+		    	   aggregateUI.update(SubTabs.FILTER, PageUpdates.SAMEFORM);
+		    	   aggregateUI.update(SubTabs.FORM, PageUpdates.ALL);
+		    	   aggregateUI.update(SubTabs.PREFERENCES, PageUpdates.ALL);
+		    	   aggregateUI.update(SubTabs.EXPORT, PageUpdates.ALL);
 	    	   } else {
 	    		   intervalsElapsed++;
-	    		   aggregateUI.update(FormOrFilter.FORM, PageUpdates.FORMTABLE);
+	    		   aggregateUI.update(SubTabs.PUBLISH, PageUpdates.ALL);
 	    	   }
 	       }
 	    };
 	    refreshTimer.scheduleRepeating(REFRESH_INTERVAL);
 	}
 	
-	public void restartTimer(final AggregateUI aggregateUI) {
+	public void restartTimer() {
 		// Restart timer to refresh list automatically.
 		refreshTimer.cancel();
 		refreshTimer.run();

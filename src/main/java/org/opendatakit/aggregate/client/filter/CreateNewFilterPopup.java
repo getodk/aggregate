@@ -25,7 +25,7 @@ import org.opendatakit.aggregate.client.submission.Column;
 import org.opendatakit.aggregate.client.submission.SubmissionServiceAsync;
 import org.opendatakit.aggregate.client.submission.SubmissionUISummary;
 import org.opendatakit.aggregate.constants.common.FilterOperation;
-import org.opendatakit.aggregate.constants.common.FormOrFilter;
+import org.opendatakit.aggregate.constants.common.SubTabs;
 import org.opendatakit.aggregate.constants.common.PageUpdates;
 import org.opendatakit.aggregate.constants.common.RowOrCol;
 import org.opendatakit.aggregate.constants.common.Visibility;
@@ -162,8 +162,8 @@ public class CreateNewFilterPopup extends PopupPanel{
 					Filter newFilter = new ColumnFilter(kr, columnfilterheaders,(long) group.getFilters().size());
 					group.addFilter(newFilter);
 				}
-				aggregateUI.getTimer().restartTimer(aggregateUI);
-				aggregateUI.update(FormOrFilter.FORM, PageUpdates.SUBMISSIONDATA);
+				aggregateUI.getTimer().restartTimer();
+				aggregateUI.update(SubTabs.FORM, PageUpdates.SUBMISSIONDATA);
 				hide();
 			}
 		
@@ -176,6 +176,7 @@ public class CreateNewFilterPopup extends PopupPanel{
 			@Override
 			public void onClick(ClickEvent event) {
 				hide();
+				aggregateUI.getTimer().restartTimer();
 			}
 		});
 		

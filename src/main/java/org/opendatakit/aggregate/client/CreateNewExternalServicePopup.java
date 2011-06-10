@@ -34,16 +34,14 @@ import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.TextBox;
 
 public class CreateNewExternalServicePopup extends PopupPanel {
-  private ManageTabUI parent;
   
   private static final String TYPE_SPREAD_SHEET = "Google Spreadsheet";
   private static final String TYPE_FUSION_TABLE = "Google Fusion Table";
   
-  public CreateNewExternalServicePopup(final String formId, final ServicesAdminServiceAsync servicesAdminSvc, final ManageTabUI parent) {
+  public CreateNewExternalServicePopup(final String formId, final ServicesAdminServiceAsync servicesAdminSvc, final UrlHash hash,
+		  final AggregateUI baseUI) {
     super(false);
-    this.parent = parent;
     FlexTable layout = new FlexTable();
-    
     layout.setWidget(0, 0, new HTML("Form: " + formId + " "));
     
     final TextBox name = new TextBox();
@@ -100,7 +98,7 @@ public class CreateNewExternalServicePopup extends PopupPanel {
   
             @Override
             public void onSuccess(String result) {
-              parent.baseUI.servicesAdminSvc.generateOAuthUrl(result, new AsyncCallback<String>() {
+              servicesAdminSvc.generateOAuthUrl(result, new AsyncCallback<String>() {
                 @Override
                 public void onFailure(Throwable caught) {
                   // TODO Auto-generated method stub
@@ -108,7 +106,7 @@ public class CreateNewExternalServicePopup extends PopupPanel {
                 @Override
                 public void onSuccess(String result) {
                   // TODO Auto-generated method stub
-                  parent.hash.goTo(result);
+                  hash.goTo(result);
                 }
               });
             }
@@ -123,7 +121,7 @@ public class CreateNewExternalServicePopup extends PopupPanel {
             @Override
             public void onSuccess(String result) {
               // TODO Auto-generated method stub
-              parent.baseUI.servicesAdminSvc.generateOAuthUrl(result, new AsyncCallback<String>() {
+              servicesAdminSvc.generateOAuthUrl(result, new AsyncCallback<String>() {
                 @Override
                 public void onFailure(Throwable caught) {
                   // TODO Auto-generated method stub
@@ -132,12 +130,13 @@ public class CreateNewExternalServicePopup extends PopupPanel {
                 @Override
                 public void onSuccess(String result) {
                   // TODO Auto-generated method stub
-                  parent.hash.goTo(result);
+                  hash.goTo(result);
                 }
               });
             }
           });
         }
+        baseUI.getTimer().restartTimer();
       }
     });
     layout.setWidget(0, 4, publishButton);
@@ -149,6 +148,7 @@ public class CreateNewExternalServicePopup extends PopupPanel {
 		@Override
 		public void onClick(ClickEvent event) {
 			hide();
+			baseUI.getTimer().restartTimer();
 		}
 	});
 	layout.setWidget(0, 5, closeButton);

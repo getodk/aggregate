@@ -47,20 +47,20 @@ public class PublishSheet extends FlexTable {
 	private static int TYPE = 5;
 	private static int NAME = 6;
 	
-	private AggregateUI baseUI;
+	private ManageTabUI baseUI;
 	
-	public PublishSheet(AggregateUI baseUI) {
+	public PublishSheet(ManageTabUI baseUI) {
 		super();
 		this.baseUI = baseUI;
-		this.setText(0, PURGE_DATA, " ");
-		this.setText(0, CREATED_BY, "Created By");
-		this.setText(0, STATUS, "Status");
-		this.setText(0, TIME_PUBLISH_START, "Start Date");
-		this.setText(0, ACTION, "Action");
-		this.setText(0, TYPE, "Type");
-		this.setText(0, NAME, "Name");
+		this.setText(1, PURGE_DATA, " ");
+		this.setText(1, CREATED_BY, "Created By");
+		this.setText(1, STATUS, "Status");
+		this.setText(1, TIME_PUBLISH_START, "Start Date");
+		this.setText(1, ACTION, "Action");
+		this.setText(1, TYPE, "Type");
+		this.setText(1, NAME, "Name");
 		this.addStyleName("dataTable");
-		this.getRowFormatter().addStyleName(0, "titleBar");
+		this.getRowFormatter().addStyleName(1, "titleBar");
 	}
 	
 	private class ConfirmPurgePopup  extends PopupPanel implements ClickHandler {
@@ -199,12 +199,12 @@ public class PublishSheet extends FlexTable {
 			} else {
 				displayName = user;
 			}
-			this.setText(i + 1, CREATED_BY, displayName);
-			this.setText(i + 1, STATUS, e.getStatus().toString());
-			this.setText(i + 1, TIME_PUBLISH_START, e.getTimeEstablished().toString());
-			this.setText(i + 1, ACTION, e.getPublicationOption().getDescriptionOfOption());
-			this.setText(i + 1, TYPE, e.getExternalServiceTypeName());
-			this.setWidget(i + 1, NAME, new HTML(e.getName()));
+			this.setText(i + 2, CREATED_BY, displayName);
+			this.setText(i + 2, STATUS, e.getStatus().toString());
+			this.setText(i + 2, TIME_PUBLISH_START, e.getTimeEstablished().toString());
+			this.setText(i + 2, ACTION, e.getPublicationOption().getDescriptionOfOption());
+			this.setText(i + 2, TYPE, e.getExternalServiceTypeName());
+			this.setWidget(i + 2, NAME, new HTML(e.getName()));
 		}
 	}
 

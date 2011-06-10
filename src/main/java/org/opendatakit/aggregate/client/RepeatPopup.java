@@ -41,7 +41,7 @@ public class RepeatPopup extends PopupPanel {
        }
 
        public void onSuccess(SubmissionUISummary summary) {
-         parent.updateSubmissionTable(dataTable, summary);
+         parent.getSubmissionNav().updateSubmissionTable(dataTable, summary);
        }
     };
     
