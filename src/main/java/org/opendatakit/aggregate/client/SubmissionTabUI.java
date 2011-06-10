@@ -17,7 +17,9 @@
 package org.opendatakit.aggregate.client;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.opendatakit.aggregate.client.filter.ColumnFilter;
 import org.opendatakit.aggregate.client.filter.ColumnFilterHeader;
@@ -25,12 +27,22 @@ import org.opendatakit.aggregate.client.filter.CreateNewFilterPopup;
 import org.opendatakit.aggregate.client.filter.Filter;
 import org.opendatakit.aggregate.client.filter.FilterGroup;
 import org.opendatakit.aggregate.client.filter.FilterServiceAsync;
+import org.opendatakit.aggregate.client.filter.FilterSet;
 import org.opendatakit.aggregate.client.filter.RowFilter;
+import org.opendatakit.aggregate.client.form.ExportSummary;
+import org.opendatakit.aggregate.client.form.FormServiceAsync;
 import org.opendatakit.aggregate.client.form.FormSummary;
+import org.opendatakit.aggregate.client.submission.Column;
+import org.opendatakit.aggregate.client.submission.SubmissionServiceAsync;
+import org.opendatakit.aggregate.client.submission.SubmissionUI;
+import org.opendatakit.aggregate.client.submission.SubmissionUISummary;
 import org.opendatakit.aggregate.client.visualization.CreateNewVisualizationPopup;
-import org.opendatakit.aggregate.constants.common.FormOrFilter;
+import org.opendatakit.aggregate.constants.common.SubTabs;
 import org.opendatakit.aggregate.constants.common.PageUpdates;
+import org.opendatakit.aggregate.constants.common.UIConsts;
 
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.CloseEvent;
@@ -43,6 +55,7 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.PopupPanel;
@@ -52,41 +65,52 @@ import com.google.gwt.user.client.ui.TreeItem;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class SubmissionTabUI extends TabPanel {
+	//Universal
+	private UrlHash hash;
+	FormServiceAsync formSvc;
 
 	// Submission Navigation
 	private static final String FILTER = "filter";
-	private static final String[] SUBMISSION_MENU = {FILTER};
+	private static final String EXPORT = "export";
+	private static final String[] SUBMISSION_MENU = {FILTER, EXPORT};
 	static final String SUBMISSIONS = "submissions";
-	private UrlHash hash;
-	private List<FilterGroup> view;
-	private ListBox formsBox;
-	private ListBox filtersBox;
+
+	//Filter tab
+	private List<FilterGroup> view = new ArrayList<FilterGroup>();
+	private ListBox formsBox = new ListBox();
+	private ListBox filtersBox = new ListBox();
 	private FlexTable navTable;
-	private FlexTable dataTable;
-	private FilterGroup def;
-	private AggregateUI parent;
+	private FlexTable dataTable = new FlexTable(); //contains the data
+	private FilterGroup def; //the default filter group
+	private AggregateUI baseUI;
 	private FilterServiceAsync filterSvc;
-	private List<FilterGroup> allGroups;
-	private List<FormSummary> allForms;
+	private List<FilterGroup> allGroups = new ArrayList<FilterGroup>();
+	private List<FormSummary> allForms = new ArrayList<FormSummary>();
 	private TreeItem title;
 	private FilterGroup currentGroup;
+	private String lastFormUsed = "";
+	SubmissionServiceAsync submissionSvc;
+	private List<SubmissionUI> submissions;
+	public List<SubmissionUI> getSubmissions() { return submissions; }
+	private List<Column> headers;
+	public List<Column> getHeaders() { return headers; }
 
-	public SubmissionTabUI(List<FilterGroup> view,
-			ListBox formsBox, ListBox filtersBox, FlexTable dataTable, 
-			FilterGroup def, AggregateUI parent, 
-			List<FilterGroup> allGroups, List<FormSummary> allForms) {
+	//Export tab
+	private ExportSheet exportTable = new ExportSheet();
+
+	public SubmissionTabUI(AggregateUI baseUI) {
 		super();
+		SecureGWT sg = SecureGWT.get();
+		formSvc = sg.createFormService();
 		this.hash = UrlHash.getHash();
-		this.view = view;
-		this.formsBox = formsBox;
-		this.filtersBox = filtersBox;
-		this.dataTable = dataTable;
-		this.def = def;
-		this.parent = parent;
-		this.allGroups = allGroups;
-		this.allForms = allForms;
+		this.baseUI = baseUI;
+		setupExportPanel();
 		this.add(setupSubmissionsPanel(), "Filter");
+		this.add(exportTable, "Export");
 		this.getElement().setId("second_level_menu");
+
+		def = new FilterGroup("Default", "", new ArrayList<Filter>());
+		view.add(def);
 
 		int selected = 0;
 		String subMenu = hash.get(UrlHash.SUB_MENU);
@@ -108,7 +132,7 @@ public class SubmissionTabUI extends TabPanel {
 		reportContent.add(setupFiltersDataPanel(view));
 		return reportContent;
 	}
-	
+
 	public void setTitleString(String title) {
 		navTable.setHTML(0, 1, "<h1 id=\"form_name\">" + title + "</h1>");
 	}
@@ -120,7 +144,7 @@ public class SubmissionTabUI extends TabPanel {
 	public void setupFormsAndGoalsPanel() {
 		navTable = new FlexTable();
 		navTable.getElement().setId("submission_nav_table");
-		
+
 		FlexTable formAndGoalSelectionTable = new FlexTable();
 		formAndGoalSelectionTable.getElement().setId("form_and_goal_selection");
 		// list of forms
@@ -130,7 +154,7 @@ public class SubmissionTabUI extends TabPanel {
 		// load form + filter
 		Button loadFormAndFilterButton = new Button("Fetch Form with Filter");
 		currentGroup = def;
-		
+
 		loadFormAndFilterButton.addClickHandler(new ClickHandler() {
 
 			@Override
@@ -157,29 +181,30 @@ public class SubmissionTabUI extends TabPanel {
 					currentGroup = def;
 				}
 				updateFiltersDataPanel(view);
-				parent.getTimer().restartTimer(parent);
-				parent.update(FormOrFilter.FORM, PageUpdates.SUBMISSIONDATA);
+				baseUI.getTimer().restartTimer();
+				baseUI.update(SubTabs.FORM, PageUpdates.SUBMISSIONDATA);
 			}
 
 		});
 		formAndGoalSelectionTable.setWidget(0, 2, loadFormAndFilterButton);
-		
+
 		navTable.setWidget(0, 0, formAndGoalSelectionTable);
 		navTable.setHTML(0, 1, "<h2 id=\"form_name\"></h2>");
 		navTable.getElement().getFirstChildElement().getNextSiblingElement().getFirstChildElement()
-			.getFirstChildElement().getNextSiblingElement().setId("form_title_cell");
-		
+		.getFirstChildElement().getNextSiblingElement().setId("form_title_cell");
+
 		FlexTable actionTable = new FlexTable();
 		// end goals vis, export, publish
 		Button visualizeButton = new Button("<img src=\"images/bar_chart.png\" /> Visualize");
 		visualizeButton.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
-				final PopupPanel vizPopup = new CreateNewVisualizationPopup(parent.getHeaders(),
-						parent.getSubmissions(),
+				final PopupPanel vizPopup = new CreateNewVisualizationPopup(getHeaders(),
+						getSubmissions(),
 						currentGroup.getFormId(),
-						parent.formSvc,
-						parent.submissionSvc);
+						formSvc,
+						submissionSvc,
+						baseUI);
 				vizPopup.setPopupPositionAndShow(new PopupPanel.PositionCallback() {
 					@Override
 					public void setPosition(int offsetWidth, int offsetHeight) {
@@ -188,6 +213,7 @@ public class SubmissionTabUI extends TabPanel {
 						vizPopup.setPopupPosition(left, top);
 					}
 				});
+				baseUI.getTimer().restartTimer();
 			}
 		});
 		actionTable.setWidget(0, 0, visualizeButton);
@@ -195,7 +221,7 @@ public class SubmissionTabUI extends TabPanel {
 		exportButton.addClickHandler(new ClickHandler () {
 			@Override
 			public void onClick(ClickEvent event) {
-				final PopupPanel popup = new CreateNewExportPopup(currentGroup.getFormId(), parent.formSvc, parent.manageNav);
+				final PopupPanel popup = new CreateNewExportPopup(currentGroup.getFormId(), formSvc, baseUI.getManageNav(), baseUI);
 				popup.setPopupPositionAndShow(new PopupPanel.PositionCallback() {
 					@Override
 					public void setPosition(int offsetWidth, int offsetHeight) {
@@ -204,6 +230,7 @@ public class SubmissionTabUI extends TabPanel {
 						popup.setPopupPosition(left, top);
 					}
 				});
+				baseUI.getTimer().restartTimer();
 			}
 		});
 		actionTable.setWidget(0, 1, exportButton);
@@ -211,7 +238,8 @@ public class SubmissionTabUI extends TabPanel {
 		publishButton.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
-				final PopupPanel popup = new CreateNewExternalServicePopup(currentGroup.getFormId(), parent.servicesAdminSvc, parent.manageNav);
+				final PopupPanel popup = new CreateNewExternalServicePopup(currentGroup.getFormId(), 
+						baseUI.getManageNav().servicesAdminSvc, hash, baseUI);
 				popup.setPopupPositionAndShow(new PopupPanel.PositionCallback() {
 					@Override
 					public void setPosition(int offsetWidth, int offsetHeight) {
@@ -220,12 +248,13 @@ public class SubmissionTabUI extends TabPanel {
 						popup.setPopupPosition(left, top);
 					}
 				});
+				baseUI.getTimer().restartTimer();
 			}
 		});
 		actionTable.setWidget(0, 2, publishButton);
 		navTable.setWidget(0, 2, actionTable);
 		navTable.getElement().getFirstChildElement().getNextSiblingElement().getFirstChildElement()
-			.getFirstChildElement().getNextSiblingElement().getNextSiblingElement().setAttribute("align", "right");
+		.getFirstChildElement().getNextSiblingElement().getNextSiblingElement().setAttribute("align", "right");
 	}
 
 	ClickHandler getSubMenuClickHandler(
@@ -237,6 +266,7 @@ public class SubmissionTabUI extends TabPanel {
 				hash.set(UrlHash.MAIN_MENU, menu);
 				hash.set(UrlHash.SUB_MENU, subMenu);
 				hash.put();
+				baseUI.getTimer().restartTimer();
 			}
 		};
 	}
@@ -270,7 +300,7 @@ public class SubmissionTabUI extends TabPanel {
 		newFilter.addClickHandler(new ClickHandler(){
 			@Override
 			public void onClick(ClickEvent event) {
-				final CreateNewFilterPopup filterPopup = new CreateNewFilterPopup(dataTable, currentGroup, parent);
+				final CreateNewFilterPopup filterPopup = new CreateNewFilterPopup(dataTable, currentGroup, baseUI);
 				filterPopup.setPopupPositionAndShow(
 						new PopupPanel.PositionCallback() {
 							@Override
@@ -289,6 +319,7 @@ public class SubmissionTabUI extends TabPanel {
 					}
 
 				});
+				baseUI.getTimer().restartTimer();
 			}
 		});
 
@@ -324,7 +355,7 @@ public class SubmissionTabUI extends TabPanel {
 			public void onClick(ClickEvent event) {
 				if(filters.getRowCount() == 0) {
 					Window.alert(
-							"You need at least one filter to save a group.");
+					"You need at least one filter to save a group.");
 				} else {
 					boolean filterSet = false;
 					boolean firstTime = true;
@@ -362,8 +393,8 @@ public class SubmissionTabUI extends TabPanel {
 					//Save the new filter
 					addFilterGroup(newFilter, currentGroup);
 				}
+				baseUI.getTimer().restartTimer();
 			}
-
 		});
 		filterBox.setWidget(0, 0, groupName);
 		filterBox.setWidget(0, 1, saveFilterGroup);
@@ -400,8 +431,8 @@ public class SubmissionTabUI extends TabPanel {
 					Filter remove = (Filter)removeFilter.getElement().getPropertyObject("filter");
 					currentGroup.removeFilter(remove);
 					updateFiltersDataPanel(view);
-					parent.getTimer().restartTimer(parent);
-					parent.update(FormOrFilter.FORM, PageUpdates.SUBMISSIONDATA);
+					baseUI.getTimer().restartTimer();
+					baseUI.update(SubTabs.FORM, PageUpdates.SUBMISSIONDATA);
 				} 
 			});
 			row++;
@@ -425,7 +456,7 @@ public class SubmissionTabUI extends TabPanel {
 			}
 			@Override
 			public void onSuccess(Boolean result) {
-				parent.update(FormOrFilter.FILTER, PageUpdates.ALL);
+				baseUI.update(SubTabs.FILTER, PageUpdates.NEWFORM);
 				updateFiltersDataPanel(view);
 			}
 		};
@@ -433,11 +464,11 @@ public class SubmissionTabUI extends TabPanel {
 		filters.addAll(currentGroup.getFilters());
 		FilterGroup newGroup = new FilterGroup(id, group.getFormId(), filters);
 		currentGroup = enterEditMode(newGroup);
-			
+
 		// Make the call to the form service.
 		filterSvc.updateFilterGroup(newGroup, callback);
 	}
-	
+
 	//we can only edit one filter group at a time
 	//so we are making a temporary filter group
 	//that will take all of the user changes
@@ -450,5 +481,303 @@ public class SubmissionTabUI extends TabPanel {
 		FilterGroup tempGroup = new FilterGroup(group.getName(), group.getFormId(), filters);
 		view.add(tempGroup);
 		return tempGroup;
+	}
+
+	public void setupExportPanel() {
+		if (formSvc == null) {
+			formSvc = SecureGWT.get().createFormService();
+		}
+
+		AsyncCallback<ExportSummary[] > callback = new AsyncCallback<ExportSummary []>() {
+			@Override
+			public void onFailure(Throwable caught) {
+				// TODO Auto-generated method stub
+			}
+
+			@Override
+			public void onSuccess(ExportSummary[] result) {
+				exportTable.updateExportPanel(result);
+			}
+		};
+
+		formSvc.getExports(callback);
+	}
+
+	void getFormList(final PageUpdates update) {
+		// Initialize the service proxy.
+		if (formSvc == null) {
+			formSvc = SecureGWT.get().createFormService();
+		}
+
+		// Set up the callback object.
+		AsyncCallback<FormSummary []> callback = new AsyncCallback<FormSummary []>() {
+			public void onFailure(Throwable caught) {
+				baseUI.reportError(caught);
+			}
+
+			public void onSuccess(FormSummary[] forms) {
+				baseUI.clearError();
+				if(update.equals(PageUpdates.FORMDROPDOWN))
+					fillFormDropDown(forms);
+				else if(update.equals(PageUpdates.SUBMISSIONDATA) && forms.length > 0)
+					requestUpdatedSubmissionData(view);
+				else if(update.equals(PageUpdates.ALL)) {
+					fillFormDropDown(forms);
+					if(forms.length > 0)
+						requestUpdatedSubmissionData(view);
+				}
+			}
+		};
+
+		// Make the call to the form service.
+		formSvc.getForms(callback);
+
+		// TODO: refactor properly to the new update
+		//manageNav.getExportList();
+		//		manageNav.getExternalServicesList(formId)
+	}
+
+	private void fillFormDropDown(final FormSummary [] forms) {
+		Set<String> existingForms = new HashSet<String>();
+		for (int i = 0; i < formsBox.getItemCount(); i++) {
+			existingForms.add(formsBox.getItemText(i));
+		}
+		if(forms.length > 0) {
+			for (int i = 0; i < forms.length; i++) {
+				FormSummary form = forms[i];
+				if (!existingForms.contains(form.getTitle())) {
+					allForms.add(form);
+					formsBox.addItem(form.getTitle());
+					if (hash.get(UrlHash.FORM).equals(form.getTitle())) {
+						formsBox.setItemSelected(formsBox.getItemCount() - 1, true);
+					}
+				}
+			}
+		} else if (formsBox.getItemCount() == 0) {
+			formsBox.addItem("none");
+		}
+		int formIdx = formsBox.getSelectedIndex();
+		if ( formIdx == -1 ) {
+			setTitleString("");
+		} else {
+			setTitleString(formsBox.getItemText(formIdx));
+		}
+		formsBox.addChangeHandler(new ChangeHandler() {
+
+			@Override
+			public void onChange(ChangeEvent event) {
+				for (FormSummary form : forms) {
+					if (form.getTitle().compareTo(formsBox.getValue(formsBox.getSelectedIndex())) == 0) {
+						lastFormUsed = form.getId();
+						break;
+					}
+				}
+				baseUI.update(SubTabs.FILTER, PageUpdates.NEWFORM);
+			}
+		});
+
+		//Have it begin on filter list as well
+		String formId = "";
+		for (FormSummary form : forms) {
+			if (form.getTitle().compareTo(formsBox.getValue(formsBox.getSelectedIndex())) == 0) {
+				formId = form.getId();
+				break;
+			}
+		}
+		def.setFormId(formId);
+		lastFormUsed = formId;
+		baseUI.update(SubTabs.FILTER, PageUpdates.SAMEFORM);
+	}
+
+	public void requestUpdatedSubmissionData(List<FilterGroup> groups) {
+
+		// Initialize the service proxy.
+		if (submissionSvc == null) {
+			submissionSvc = SecureGWT.get().createSubmissionService();
+		}
+
+		// Set up the callback object.
+		AsyncCallback<SubmissionUISummary> callback = new AsyncCallback<SubmissionUISummary>() {
+			public void onFailure(Throwable caught) {
+				baseUI.reportError(caught);
+			}
+
+			public void onSuccess(SubmissionUISummary summary) {
+				baseUI.clearError();
+				submissions = summary.getSubmissions();
+				updateSubmissionTable(dataTable, summary);
+			}
+		};
+
+
+		for(FilterGroup group : groups) {
+			boolean allEmpty = true;
+			if(group.getFilters().size() != 0) {
+				// Make the call to the form service.
+				allEmpty = false;
+				submissionSvc.getSubmissions(group, callback);
+			}
+			if(allEmpty) {
+				submissionSvc.getSubmissions(def, callback);
+			}
+		}
+
+	}
+
+	/**
+	 * NOTE: This formatting function is called by several places, should not be used to update member variables
+	 * 
+	 * NEED to refactor code so that submissionSvc comes from a global context
+	 * 
+	 * @param table
+	 * @param summary
+	 */
+	public void updateSubmissionTable(FlexTable table, SubmissionUISummary summary) {
+		List<Column> tableHeaders = summary.getHeaders();
+		List<SubmissionUI> tableSubmissions = summary.getSubmissions();
+
+		int headerIndex = 0;
+		table.removeAllRows();
+		table.getRowFormatter().addStyleName(0, "titleBar");
+		table.addStyleName("dataTable");
+		for(Column column : tableHeaders) {
+			table.setText(0, headerIndex++, column.getDisplayHeader());
+		}
+
+		int i = 1;
+		for(SubmissionUI row : tableSubmissions) {
+			int j = 0;
+			for(final String values : row.getValues()) {
+				switch (tableHeaders.get(j).getUiDisplayType()) {
+				case BINARY:
+					Image image = new Image(values + UIConsts.PREVIEW_SET);     
+					image.addClickHandler(new ClickHandler() {
+						@Override
+						public void onClick(ClickEvent event) {
+							final PopupPanel popup = new ImagePopup(values);
+							popup.setPopupPositionAndShow(new PopupPanel.PositionCallback() {
+								@Override
+								public void setPosition(int offsetWidth, int offsetHeight) {
+									int left = ((Window.getClientWidth() - offsetWidth) / 2);
+									int top = ((Window.getClientHeight() - offsetHeight) / 2);
+									popup.setPopupPosition(left, top);
+								}
+							});
+							baseUI.getTimer().restartTimer();
+						}
+					});
+
+					table.setWidget(i, j, image);
+					break;
+				case REPEAT:
+					Button repeat = new Button("View");
+					final AggregateUI tmp = baseUI; // fix after refactoring of the function and global services
+					repeat.addClickHandler(new ClickHandler() {
+						@Override
+						public void onClick(ClickEvent event) {
+							final PopupPanel popup = new RepeatPopup(values, submissionSvc, tmp);
+							popup.setPopupPositionAndShow(new PopupPanel.PositionCallback() {
+								@Override
+								public void setPosition(int offsetWidth, int offsetHeight) {
+									int left = ((Window.getClientWidth() - offsetWidth) / 2);
+									int top = ((Window.getClientHeight() - offsetHeight) / 2);
+									popup.setPopupPosition(left, top);
+								}
+							});
+							baseUI.getTimer().restartTimer();
+						}
+					});
+
+					table.setWidget(i, j, repeat);
+					break;
+				default:
+					table.setText(i, j, values);            
+				}
+				j++;
+			}
+			if (i % 2 == 0) {
+				table.getRowFormatter().setStyleName(i, "evenTableRow");
+			}
+			i++;
+		}
+	}
+
+	private void removeFilterGroup(FilterGroup group) {
+		if (filterSvc == null) {
+			filterSvc = SecureGWT.get().createFilterService();
+		}
+
+		AsyncCallback<Boolean> callback = 
+			new AsyncCallback<Boolean>() {
+			public void onFailure(Throwable caught) {
+				baseUI.reportError(caught);
+			}
+
+			@Override
+			public void onSuccess(Boolean result) {
+				baseUI.clearError();
+			}
+		};
+
+		filterSvc.deleteFilterGroup(group, callback);
+	}
+
+	void getFilterList(final PageUpdates formChange) {
+		// Initialize the service proxy.
+		if (filterSvc == null) {
+			filterSvc = SecureGWT.get().createFilterService();
+		}
+
+		// Set up the callback object.
+		AsyncCallback<FilterSet> callback = 
+			new AsyncCallback<FilterSet>() {
+			public void onFailure(Throwable caught) {
+				baseUI.reportError(caught);
+			}
+
+			@Override
+			public void onSuccess(FilterSet result) {
+				baseUI.clearError();
+				fillFilterDropDown(result, formChange);
+			}
+		};
+
+		// Make the call to the form service.
+		filterSvc.getFilterSet(lastFormUsed, callback);
+	}
+
+	private void fillFilterDropDown(FilterSet set, PageUpdates formChange) {
+		if(formChange.equals(PageUpdates.SAMEFORM)) {
+			int selected = filtersBox.getSelectedIndex();
+			allGroups.clear();
+			if(filtersBox.getItemCount() == 0)
+				filtersBox.addItem("none");
+
+			for(FilterGroup group : set.getGroups()) {
+				int i = 0;
+				for(i = 0; i < filtersBox.getItemCount(); i++) {
+					if(group.getName().compareTo(filtersBox.getItemText(i)) == 0) {
+						allGroups.add(group);
+						break;
+					}
+				}
+				if(i == filtersBox.getItemCount()) {
+					filtersBox.addItem(group.getName());
+					allGroups.add(group);
+				}
+			}
+			if(selected == -1)
+				filtersBox.setSelectedIndex(0);
+			else
+				filtersBox.setSelectedIndex(selected);
+		} else if (formChange.equals(PageUpdates.NEWFORM)) {
+			filtersBox.clear();
+			allGroups.clear();
+			filtersBox.addItem("none");
+			for(FilterGroup group : set.getGroups()) {
+				filtersBox.addItem(group.getName());
+				allGroups.add(group);
+			}
+		}
 	}
 }

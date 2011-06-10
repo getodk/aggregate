@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.form.FormServiceAsync;
 import org.opendatakit.aggregate.client.form.KmlSettingOption;
 import org.opendatakit.aggregate.client.form.KmlSettings;
@@ -169,7 +170,8 @@ public class CreateNewVisualizationPopup extends PopupPanel {
 									   List<SubmissionUI> submissions,
 									   final String formId,
 									   final FormServiceAsync formSvc,
-									   final SubmissionServiceAsync submissionSvc) {
+									   final SubmissionServiceAsync submissionSvc,
+									   final AggregateUI baseUI) {
 		super(false);
 		this.head = headers;
 		this.sub = submissions;
@@ -242,6 +244,7 @@ public class CreateNewVisualizationPopup extends PopupPanel {
 				} else {
 					chart.setUrl(getImageUrl());
 				}
+				baseUI.getTimer().restartTimer();
 			}
 		});
 		
@@ -277,6 +280,7 @@ public class CreateNewVisualizationPopup extends PopupPanel {
 			@Override
 			public void onClick(ClickEvent event) {
 				hide();
+				baseUI.getTimer().restartTimer();
 			}
 		});
 		
