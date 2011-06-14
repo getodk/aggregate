@@ -51,7 +51,7 @@ import org.opendatakit.common.web.CallingContext;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
 public class SubmissionServiceImpl extends RemoteServiceServlet implements
-org.opendatakit.aggregate.client.submission.SubmissionService {
+    org.opendatakit.aggregate.client.submission.SubmissionService {
 
   /**
    * Serialization Identifier
@@ -61,8 +61,8 @@ org.opendatakit.aggregate.client.submission.SubmissionService {
   @Override
   public SubmissionUISummary getSubmissions(FilterGroup filterGroup) {
     HttpServletRequest req = this.getThreadLocalRequest();
-    CallingContext cc = ContextFactory.getCallingContext(this, req);   
-    
+    CallingContext cc = ContextFactory.getCallingContext(this, req);
+
     SubmissionUISummary summary = new SubmissionUISummary();
     try {
       String formId = filterGroup.getFormId();
@@ -71,7 +71,7 @@ org.opendatakit.aggregate.client.submission.SubmissionService {
       List<Submission> submissions = query.getResultSubmissions(cc);
 
       getSubmissions(filterGroup, cc, summary, form, submissions);
-      
+
     } catch (ODKFormNotFoundException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
@@ -81,8 +81,7 @@ org.opendatakit.aggregate.client.submission.SubmissionService {
       e.printStackTrace();
       return null;
     }
-    
-    
+
     return summary;
   }
 
@@ -92,9 +91,9 @@ org.opendatakit.aggregate.client.submission.SubmissionService {
     GenerateHeaderInfo headerGenerator = new GenerateHeaderInfo(filterGroup, summary, form);
     headerGenerator.processForHeaderInfo(form.getTopLevelGroupElement());
     List<FormElementModel> filteredElements = headerGenerator.getIncludedElements();
-    ElementFormatter elemFormatter = new UiElementFormatter(cc.getServerURL(), headerGenerator.getGeopointIncludes());
+    ElementFormatter elemFormatter = new UiElementFormatter(cc.getServerURL(),
+        headerGenerator.getGeopointIncludes());
 
-    
     // format row elements
     for (SubmissionSet sub : submissions) {
       Row row = sub.getFormattedValuesAsRow(filteredElements, elemFormatter, false, cc);
@@ -106,20 +105,21 @@ org.opendatakit.aggregate.client.submission.SubmissionService {
       }
     }
   }
-  
+
   @Override
   public SubmissionUISummary getRepeatSubmissions(String keyString) throws AccessDeniedException {
     HttpServletRequest req = this.getThreadLocalRequest();
-    CallingContext cc = ContextFactory.getCallingContext(this, req);   
-    
+    CallingContext cc = ContextFactory.getCallingContext(this, req);
+
     SubmissionUISummary summary = new SubmissionUISummary();
-    
+
     if (keyString == null) {
       return null;
-   }
-   SubmissionKey key = new SubmissionKey(keyString);
+    }
+   
+    SubmissionKey key = new SubmissionKey(keyString);
 
-   List<SubmissionKeyPart> parts = key.splitSubmissionKey();
+    List<SubmissionKeyPart> parts = key.splitSubmissionKey();
     try {
       Form form = Form.retrieveForm(parts.get(0).getElementName(), cc);
       Submission sub = Submission.fetchSubmission(parts, cc);
@@ -139,19 +139,18 @@ org.opendatakit.aggregate.client.submission.SubmissionService {
       e.printStackTrace();
       return null;
     }
-    
+
     return summary;
   }
-  
-  private void getRepeatSubmissions(CallingContext cc,
-      SubmissionUISummary summary, Form form, List<SubmissionSet> repeats, FormElementModel repeatNode)
-      throws ODKDatastoreException {
+
+  private void getRepeatSubmissions(CallingContext cc, SubmissionUISummary summary, Form form,
+      List<SubmissionSet> repeats, FormElementModel repeatNode) throws ODKDatastoreException {
     GenerateHeaderInfo headerGenerator = new GenerateHeaderInfo(null, summary, form);
     headerGenerator.processForHeaderInfo(repeatNode);
     List<FormElementModel> filteredElements = headerGenerator.getIncludedElements();
-    ElementFormatter elemFormatter = new UiElementFormatter(cc.getServerURL(), headerGenerator.getGeopointIncludes());
+    ElementFormatter elemFormatter = new UiElementFormatter(cc.getServerURL(),
+        headerGenerator.getGeopointIncludes());
 
-    
     // format row elements
     for (SubmissionSet sub : repeats) {
       Row row = sub.getFormattedValuesAsRow(filteredElements, elemFormatter, false, cc);
@@ -163,13 +162,12 @@ org.opendatakit.aggregate.client.submission.SubmissionService {
       }
     }
   }
-  
 
   @Override
   public SubmissionUISummary getSubmissions(String formId) {
     HttpServletRequest req = this.getThreadLocalRequest();
-    CallingContext cc = ContextFactory.getCallingContext(this, req);   
-    
+    CallingContext cc = ContextFactory.getCallingContext(this, req);
+
     SubmissionUISummary summary = new SubmissionUISummary();
     try {
       Form form = Form.retrieveForm(formId, cc);
@@ -178,7 +176,7 @@ org.opendatakit.aggregate.client.submission.SubmissionService {
       List<Submission> submissions = query.getResultSubmissions(cc);
 
       getSubmissions(null, cc, summary, form, submissions);
-      
+
     } catch (ODKFormNotFoundException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
@@ -188,22 +186,21 @@ org.opendatakit.aggregate.client.submission.SubmissionService {
       e.printStackTrace();
       return null;
     }
-    
-    
+
     return summary;
   }
 
   @Override
   public UIGeoPoint[] getGeoPoints(String formId, String geopointKey) {
     HttpServletRequest req = this.getThreadLocalRequest();
-    CallingContext cc = ContextFactory.getCallingContext(this, req);   
-    
+    CallingContext cc = ContextFactory.getCallingContext(this, req);
+
     try {
       Form form = Form.retrieveForm(formId, cc);
       QueryByDate query = new QueryByDate(form, BasicConsts.EPOCH, false,
           ServletConsts.FETCH_LIMIT, cc);
       List<Submission> submissions = query.getResultSubmissions(cc);
-      
+
       UIGeoPoint[] points = new UIGeoPoint[submissions.size()];
       FormElementModel geopointField = null;
       if (geopointKey != null) {
@@ -213,21 +210,21 @@ org.opendatakit.aggregate.client.submission.SubmissionService {
       List<FormElementModel> filteredElements = new ArrayList<FormElementModel>();
       filteredElements.add(geopointField);
       ElementFormatter elemFormatter = new BasicElementFormatter(true, false, false);
-      
+
       // format row elements
       int i = 0;
       for (SubmissionSet sub : submissions) {
         Row row = sub.getFormattedValuesAsRow(filteredElements, elemFormatter, false, cc);
-      
+
         try {
           List<String> formatted = row.getFormattedValues();
-          if(formatted.size() == 2) {
+          if (formatted.size() == 2) {
             UIGeoPoint gpsPoint = new UIGeoPoint(formatted.get(0), formatted.get(1));
             points[i] = gpsPoint;
           } else {
             System.out.println("TOO MANY VALUES TO GENERATE A GEOPOINT");
           }
-          
+
         } catch (Exception e) {
           // TODO Auto-generated catch block
           e.printStackTrace();
@@ -237,17 +234,13 @@ org.opendatakit.aggregate.client.submission.SubmissionService {
       return points;
     } catch (ODKFormNotFoundException e) {
       // TODO Auto-generated catch block
-      e.printStackTrace();     
+      e.printStackTrace();
     } catch (ODKDatastoreException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
     }
-    
+
     return null;
   }
 
-
-
-  
-  
 }

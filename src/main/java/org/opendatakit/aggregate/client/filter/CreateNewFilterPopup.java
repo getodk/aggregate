@@ -25,9 +25,9 @@ import org.opendatakit.aggregate.client.submission.Column;
 import org.opendatakit.aggregate.client.submission.SubmissionServiceAsync;
 import org.opendatakit.aggregate.client.submission.SubmissionUISummary;
 import org.opendatakit.aggregate.constants.common.FilterOperation;
-import org.opendatakit.aggregate.constants.common.SubTabs;
 import org.opendatakit.aggregate.constants.common.PageUpdates;
 import org.opendatakit.aggregate.constants.common.RowOrCol;
+import org.opendatakit.aggregate.constants.common.SubTabs;
 import org.opendatakit.aggregate.constants.common.Visibility;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
@@ -47,11 +47,7 @@ public class CreateNewFilterPopup extends PopupPanel{
 	private SubmissionServiceAsync subSvc;
 	private FilterGroup group;
 	private List<Column> columns;
-	
-	public CreateNewFilterPopup() {
-		subSvc = SecureGWT.get().createSubmissionService();
-	}
-	
+		
 	public CreateNewFilterPopup(FlexTable data, 
 			final FilterGroup group, final AggregateUI aggregateUI) {
 		super(false); //do not close popup when user clicks out of it
