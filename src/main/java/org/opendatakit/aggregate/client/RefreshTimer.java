@@ -16,8 +16,8 @@
 
 package org.opendatakit.aggregate.client;
 
-import org.opendatakit.aggregate.constants.common.SubTabs;
 import org.opendatakit.aggregate.constants.common.PageUpdates;
+import org.opendatakit.aggregate.constants.common.SubTabs;
 
 import com.google.gwt.user.client.Timer;
 

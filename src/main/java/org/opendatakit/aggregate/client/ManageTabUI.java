@@ -74,7 +74,6 @@ public class ManageTabUI extends TabPanel {
 	private ListBox formsBox = new ListBox();
 	private List<FormSummary> allForms = new ArrayList<FormSummary>();
 	private String lastFormUsed = "";
-	private FlexTable navTable = new FlexTable();
 
 	// Permissions tab
 	private PermissionsSheet permissionsSheet;
@@ -491,7 +490,6 @@ public class ManageTabUI extends TabPanel {
 		});
 
 		//Have it begin on filter list as well
-		String formId = "";
 		for (FormSummary form : forms) {
 			if (form.getTitle().compareTo(formsBox.getValue(formsBox.getSelectedIndex())) == 0) {
 				lastFormUsed = form.getId();
