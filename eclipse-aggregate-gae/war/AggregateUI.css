@@ -53,3 +53,12 @@ a, a:visited, a:hover {
 	width: 600px;
 	height: 500px;
 }
+#login_logout_link {
+	position: absolute;
+	top: 8px;
+	left: 800px;
+	margin: 0px;
+	padding: 0px;
+	width: 200px;
+	text-align: right;
+}
