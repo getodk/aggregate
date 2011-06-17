@@ -23,4 +23,5 @@ function onWindowResize() {
 	$("#filters_container").height(height - $("#filters_container").offset().top);
 	$("#submission_container").height(height - $("#submission_container").offset().top);
 	$("#login_logout_link").offset({left: width - $("#login_logout_link").width() - 10});
+	$(".error_message").width(width);
 }
