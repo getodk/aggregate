@@ -19,6 +19,11 @@ import org.opendatakit.common.web.CallingContext;
  * </p>
  * 
  * <p>
+ * TypedEntityRelation is immutable as long as subclasses follow the patterns
+ * described below and do not expose their fields or relation name.
+ * </p>
+ * 
+ * <p>
  * <b>Defining a TypedEntityRelation:</b> Changing a normal relation into a
  * TypedEntityRelation is simple. Building off of the <i>People</i> example in
  * {@link ExtendedAbstractRelation}, you would make these changes:
