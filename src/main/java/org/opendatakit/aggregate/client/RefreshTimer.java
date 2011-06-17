@@ -16,44 +16,89 @@
 
 package org.opendatakit.aggregate.client;
 
-import org.opendatakit.aggregate.constants.common.PageUpdates;
 import org.opendatakit.aggregate.constants.common.SubTabs;
 
 import com.google.gwt.user.client.Timer;
 
-public class RefreshTimer {
-	private static final int REFRESH_INTERVAL = 10000; // ms
-	private static final int STALL_INTERVALS = 30; // 5 min / 10 sec
-	Timer refreshTimer;
-	int intervalsElapsed = 0;
-	
-	public RefreshTimer(final AggregateUI aggregateUI) {
-	    // Setup timer to refresh list automatically.
-	    refreshTimer = new Timer() {
-	       @Override
-	       public void run() {
-	    	   if(intervalsElapsed == STALL_INTERVALS) {
-	    		   this.cancel();
-	    	   } else if (intervalsElapsed % 3 == 0){
-	    		   intervalsElapsed++;
-		    	   aggregateUI.update(SubTabs.FILTER, PageUpdates.SAMEFORM);
-		    	   aggregateUI.update(SubTabs.FORM, PageUpdates.ALL);
-		    	   aggregateUI.update(SubTabs.PREFERENCES, PageUpdates.ALL);
-		    	   aggregateUI.update(SubTabs.EXPORT, PageUpdates.ALL);
-	    	   } else {
-	    		   intervalsElapsed++;
-	    		   aggregateUI.update(SubTabs.PUBLISH, PageUpdates.ALL);
-	    	   }
-	       }
-	    };
-	    refreshTimer.scheduleRepeating(REFRESH_INTERVAL);
-	}
-	
-	public void restartTimer() {
-		// Restart timer to refresh list automatically.
-		refreshTimer.cancel();
-		refreshTimer.run();
-		refreshTimer.scheduleRepeating(REFRESH_INTERVAL);
-		intervalsElapsed = 0;
-	}
+public class RefreshTimer extends Timer {
+  private static final int REFRESH_INTERVAL = 1000; // ms
+
+//  private static final int REFRESH_INTERVAL = 5000; // ms
+  private static final int STALL_INTERVALS = 60; // 5 min / 5 sec
+  private int intervalsElapsed = 0;
+  private AggregateUI aggregateUI;
+
+  private SubTabs currentSubTab;
+
+  public RefreshTimer(AggregateUI ui) {
+    aggregateUI = ui;
+
+    // Setup timer to refresh list automatically.
+    scheduleRepeating(REFRESH_INTERVAL);
+  }
+
+  public void setCurrentSubTab(SubTabs subtab) {
+    currentSubTab = subtab;
+    restartTimer();
+  }
+
+  public void refreshNow() {
+    // cause an update
+    run();
+  }
+  
+  public void restartTimer() {
+    // stop the auto refresh
+    cancel();
+
+    // Restart timer to refresh list automatically.
+    scheduleRepeating(REFRESH_INTERVAL);
+    intervalsElapsed = 0;
+  }
+
+  @Override
+  public void run() {
+    if (intervalsElapsed == STALL_INTERVALS) {
+      this.cancel();
+    }
+    intervalsElapsed++;
+    
+    if(currentSubTab == null) {
+      return;
+    }
+    SubTabInterface tabPanel;
+    
+    switch (currentSubTab) {
+    case FORMS:
+      if ((intervalsElapsed % 3) == 0) {
+        tabPanel = aggregateUI.getManageNav().getSubTab(currentSubTab);
+        tabPanel.update();
+      }
+      break;
+    case FILTER:
+      if ((intervalsElapsed % 3) == 0) {
+        tabPanel = aggregateUI.getSubmissionNav().getSubTab(currentSubTab);
+        tabPanel.update();
+      }
+      break;
+    case PUBLISH:
+      tabPanel = aggregateUI.getManageNav().getSubTab(currentSubTab);
+      tabPanel.update();
+      break;
+    case EXPORT:
+      tabPanel = aggregateUI.getSubmissionNav().getSubTab(currentSubTab);
+      tabPanel.update();
+      break;
+    case PREFERENCES:
+      if ((intervalsElapsed % 6) == 0) {
+        tabPanel = aggregateUI.getManageNav().getSubTab(currentSubTab);
+        tabPanel.update();
+      }
+      break;
+    default:
+      // should not happen
+
+    }
+
+  }
 }

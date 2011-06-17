@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.opendatakit.aggregate.ContextFactory;
-import org.opendatakit.aggregate.client.services.admin.ExternServSummary;
+import org.opendatakit.aggregate.client.permissions.ExternServSummary;
 import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.common.ExternalServicePublicationOption;
