@@ -23,8 +23,11 @@
   <source path='client/exception'/>
   <source path='client/filter'/>
   <source path='client/form'/>  
+  <source path='client/permissions'/>
+  <source path='client/popups'/>
   <source path='client/preferences'/>
   <source path='client/submission'/>
-  <source path='client/visualization'/>
+  <source path='client/table'/>
+  <source path='client/widgets'/>
   <source path='constants/common'/>
 </module>

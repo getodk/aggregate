@@ -42,7 +42,7 @@ import org.opendatakit.common.web.CallingContext;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
 public class FormAdminServiceImpl extends RemoteServiceServlet implements
-		org.opendatakit.aggregate.client.form.admin.FormAdminService {
+		org.opendatakit.aggregate.client.form.FormAdminService {
 
 	/**
 	 * 

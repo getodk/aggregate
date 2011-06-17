@@ -67,4 +67,35 @@ public class FormSummary implements Serializable {
     return viewURL;
   }
   
+  /**
+   * @see java.lang.Object#equals(java.lang.Object)
+   */
+  @Override
+  public boolean equals(Object obj) {
+    if (!(obj instanceof FormSummary)) {
+      return false;
+    }
+    // super will compare value
+    if (!super.equals(obj)) {
+      return false;
+    }
+
+    FormSummary other = (FormSummary) obj;
+    return (title == null ? (other.title == null) : (title.equals(other.title)))
+        && (id == null ? (other.id == null) : (id.equals(other.id)));
+  }
+
+  /**
+   * @see java.lang.Object#hashCode()
+   */
+  @Override
+  public int hashCode() {
+    int hashCode = 101;
+    if (title != null)
+      hashCode += title.hashCode();
+    if (id != null)
+      hashCode += id.hashCode();
+    return hashCode;
+  }
+  
 }

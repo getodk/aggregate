@@ -17,14 +17,11 @@
 
 package org.opendatakit.aggregate.servlet;
 
-import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.net.URL;
 import java.util.List;
 import java.util.logging.Logger;
 
-import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 

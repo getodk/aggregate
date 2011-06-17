@@ -18,14 +18,14 @@ package org.opendatakit.aggregate.client;
 
 import org.opendatakit.aggregate.client.filter.FilterService;
 import org.opendatakit.aggregate.client.filter.FilterServiceAsync;
+import org.opendatakit.aggregate.client.form.FormAdminService;
+import org.opendatakit.aggregate.client.form.FormAdminServiceAsync;
 import org.opendatakit.aggregate.client.form.FormService;
 import org.opendatakit.aggregate.client.form.FormServiceAsync;
-import org.opendatakit.aggregate.client.form.admin.FormAdminService;
-import org.opendatakit.aggregate.client.form.admin.FormAdminServiceAsync;
+import org.opendatakit.aggregate.client.permissions.ServicesAdminService;
+import org.opendatakit.aggregate.client.permissions.ServicesAdminServiceAsync;
 import org.opendatakit.aggregate.client.preferences.PreferenceService;
 import org.opendatakit.aggregate.client.preferences.PreferenceServiceAsync;
-import org.opendatakit.aggregate.client.services.admin.ServicesAdminService;
-import org.opendatakit.aggregate.client.services.admin.ServicesAdminServiceAsync;
 import org.opendatakit.aggregate.client.submission.SubmissionService;
 import org.opendatakit.aggregate.client.submission.SubmissionServiceAsync;
 import org.opendatakit.common.security.client.security.SecurityService;

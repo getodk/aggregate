@@ -18,21 +18,17 @@ package org.opendatakit.aggregate.constants.common;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 
-public enum SubTabs implements IsSerializable {
-	EXPORT("EXPORT"),
-	FILTER("FILTER"),
-	FORMS("FORMS"),
-	PUBLISH("PUBLISH"),
-	PREFERENCES("PREFERENCES"),
-	PERMISSIONS("PERMISSIONS");
-	
-	private String tabLabel;
-	
-	private SubTabs(String label) {
-	  tabLabel = label;
-	}
-	
-	public String getTabLabel() {
-	  return tabLabel;
-	}
+public enum Tabs implements IsSerializable {
+   SUBMISSIONS("SUBMISSIONS"),
+   MANAGEMENT("MANAGEMENT");
+   
+   private String tabLabel;
+   
+   private Tabs(String label) {
+     tabLabel = label;
+   }
+   
+   public String getTabLabel() {
+     return tabLabel;
+   }
 };
