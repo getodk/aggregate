@@ -38,7 +38,10 @@ a, a:visited, a:hover {
 }
 .error_message {
 	color: red;
-	border: 2px solid red;
+	text-align: center;
+	position: absolute;
+	left: 0px;
+	top: 0px;
 }
 .help_panel {
 	width: 100%;
@@ -52,4 +55,13 @@ a, a:visited, a:hover {
 #map_area {
 	width: 600px;
 	height: 500px;
+}
+#login_logout_link {
+	position: absolute;
+	top: 8px;
+	left: 800px;
+	margin: 0px;
+	padding: 0px;
+	width: 200px;
+	text-align: right;
 }
