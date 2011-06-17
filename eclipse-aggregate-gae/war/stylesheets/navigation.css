@@ -93,10 +93,10 @@
 }
 #layout_panel {
 	position: relative;
-	top: -24px;
+	top: 16px;
 }
 #odk_aggregate_logo {
-	position: relative;
+	position: absolute;
 	left: 20px;
 	top: 8px;
 }

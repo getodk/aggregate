@@ -64,7 +64,7 @@ public class LocalLoginPageServlet extends ServletUtilBase {
 "</head>" +
 "<body>" +
 "<table width=\"100%\" cellspacing=\"30\"><tr>" +
-"<td align=\"LEFT\" width=\"1%\"><img src=\"odk_color.png\" id=\"odk_aggregate_logo\" /></td>" +
+"<td align=\"LEFT\" width=\"10%\"><img src=\"odk_color.png\" id=\"odk_aggregate_logo\" /></td>" +
 "<td align=\"LEFT\" width=\"90%\"><font size=\"7\">Successful Login</font></td></tr></table>" +
 "Please click <a href=\"www/index.html\">here</a> to enter the site." +
 "</body>" +
