@@ -38,7 +38,10 @@ a, a:visited, a:hover {
 }
 .error_message {
 	color: red;
-	border: 2px solid red;
+	text-align: center;
+	position: absolute;
+	left: 0px;
+	top: 0px;
 }
 .help_panel {
 	width: 100%;
