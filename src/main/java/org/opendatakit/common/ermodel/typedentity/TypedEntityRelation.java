@@ -2,8 +2,8 @@ package org.opendatakit.common.ermodel.typedentity;
 
 import java.util.List;
 
-import org.opendatakit.common.ermodel.ExtendedAbstractRelation;
 import org.opendatakit.common.ermodel.Entity;
+import org.opendatakit.common.ermodel.ExtendedAbstractRelation;
 import org.opendatakit.common.ermodel.TableNamespace;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.Query;
@@ -67,7 +67,7 @@ import org.opendatakit.common.web.CallingContext;
  * arbitrary methods on your entities in a clean way, and (2) when you have more
  * than one relation it makes it easier to define relationships between your
  * relations. See the org.opendatakit.aggregate.odktables.relation and
- * org.opendatakit.aggregate.odktables.entities pacakges for an example.
+ * org.opendatakit.aggregate.odktables.entities packages for an example.
  * </p>
  * 
  * <p>
@@ -80,7 +80,7 @@ import org.opendatakit.common.web.CallingContext;
  * People people = People.getInstance(cc);
  * 
  * // Create John Smith
- * Person newPerson = new Person("John Smith", cc);
+ * Person newPerson = new Person(&quot;John Smith&quot;, cc);
  * newPerson.save();
  * 
  * // Retrieve John Smith and change name
@@ -102,12 +102,18 @@ public abstract class TypedEntityRelation<T extends TypedEntity>
 
     private ExtendedAbstractRelation relation;
 
+    /**
+     * {@link ExtendedAbstractRelation#ExtendedAbstractRelation(String, List, CallingContext)}
+     */
     protected TypedEntityRelation(String tableName, List<DataField> fields,
             CallingContext cc) throws ODKDatastoreException
     {
         this.relation = new ExtendedAbstractRelation(tableName, fields, cc);
     }
 
+    /**
+     * {@link ExtendedAbstractRelation#ExtendedAbstractRelation(String, String, List, CallingContext)}
+     */
     protected TypedEntityRelation(String namespace, String tableName,
             List<DataField> fields, CallingContext cc)
             throws ODKDatastoreException
@@ -116,6 +122,9 @@ public abstract class TypedEntityRelation<T extends TypedEntity>
                 fields, cc);
     }
 
+    /**
+     * {@link ExtendedAbstractRelation#ExtendedAbstractRelation(TableNamespace, String, List, CallingContext)}
+     */
     protected TypedEntityRelation(TableNamespace type, String tableName,
             List<DataField> fields, CallingContext cc)
             throws ODKDatastoreException
@@ -124,38 +133,77 @@ public abstract class TypedEntityRelation<T extends TypedEntity>
                 cc);
     }
 
+    /**
+     * Initializes a typed entity using the given generic entity.
+     * 
+     * @param entity
+     *            a generic entity from this relation
+     * @return a typed entity based on the given generic entity
+     * @throws ODKDatastoreException
+     */
     public abstract T initialize(Entity entity) throws ODKDatastoreException;
 
+    /**
+     * Retrieve a typed entity by uri.
+     * 
+     * @param uri
+     *            the global unique identifier of an entity in this relation.
+     *            Must be a valid uri and an entity with the uri must exist in
+     *            this relation.
+     * @return the entity with the given uri
+     * @throws ODKDatastoreException
+     */
     public T get(String uri) throws ODKDatastoreException
     {
         return initialize(this.relation.getEntity(uri, getCC()));
     }
 
+    /**
+     * Creates a new empty query.
+     * 
+     * @return a new empty query over this relation, that is a query with no
+     *         filter or sort criteria.
+     */
     public TypedEntityQuery<T> query()
     {
         return new TypedEntityQuery<T>(this);
     }
 
+    /**
+     * {@link org.opendatakit.common.ermodel.Relation#newEntity(CallingContext)}
+     */
     protected Entity newEntity(CallingContext cc)
     {
         return relation.newEntity(cc);
     }
 
+    /**
+     * {@link org.opendatakit.common.ermodel.Relation#getDataField(String)}
+     */
     protected DataField getDataField(String fieldName)
     {
         return relation.getDataField(fieldName);
     }
 
+    /**
+     * @return the CallingContext this relation was retrieved with.
+     */
     protected CallingContext getCC()
     {
         return relation.getCC();
     }
 
+    /**
+     * {@link org.opendatakit.common.ermodel.ExtendedAbstractRelation#createQuery()}
+     */
     protected Query createQuery()
     {
         return relation.createQuery();
     }
 
+    /**
+     * {@link org.opendatakit.common.ermodel.ExtendedAbstractRelation#executeQuery(Query, int)}
+     */
     protected List<Entity> executeQuery(Query query, int limit)
     {
         return relation.executeQuery(query, limit);
