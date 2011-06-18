@@ -9,6 +9,7 @@ import org.opendatakit.aggregate.client.widgets.VisualizationButton;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.ListBox;
 
+
 public class FilterNavigationTable extends FlexTable{
 
   private FilterSubTab filterSubTab;
@@ -19,10 +20,15 @@ public class FilterNavigationTable extends FlexTable{
     formNFilterSelection = new FormNFilterSelectionTable(filterSubTab);
     setWidget(0, 0, formNFilterSelection);
     setHTML(0, 1, "<h2 id=\"form_name\"></h2>");
-    getElement().getFirstChildElement().getNextSiblingElement().getFirstChildElement()
-        .getFirstChildElement().getNextSiblingElement().setId("form_title_cell");
+
+    getElement()
+     .getFirstChildElement().getNextSiblingElement()
+     .getFirstChildElement()
+     .getFirstChildElement().getNextSiblingElement().setId("form_title_cell");
    
   }
+  
+
   
   public void updateNavTable(FormSummary form) {
     setHTML(0, 1, "<h2 id=\"form_name\">" + form.getTitle() + "</h2>");
@@ -40,9 +46,9 @@ public class FilterNavigationTable extends FlexTable{
     actionTable.setWidget(0, 2, publishButton);
     
     setWidget(0, 2, actionTable);
+
     getElement().getFirstChildElement().getNextSiblingElement().getFirstChildElement()
-    .getFirstChildElement().getNextSiblingElement().getNextSiblingElement()
-    .setAttribute("align", "right");
+    .getFirstChildElement().getNextSiblingElement().getNextSiblingElement().setAttribute("align", "right");
 
   }
   

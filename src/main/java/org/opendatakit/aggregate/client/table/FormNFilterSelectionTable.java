@@ -156,7 +156,7 @@ public class FormNFilterSelectionTable extends FlexTable {
 
     if (filterGroups == null || filterGroups.size() == 0) {
       filterGroups = new ArrayList<FilterGroup>();
-      filterGroups.add(new FilterGroup(NONE, null, null));
+      filterGroups.add(new FilterGroup(NONE, selectedForm.getId(), null));
     } else {
       // get the previously selected filter, and verify it matches
       int currentSelectionIndex = filtersBox.getSelectedIndex();

@@ -48,8 +48,6 @@ public class FilterPopup extends PopupPanel{
 	private final FilterGroup group;
 	private final SubmissionTable data;
 	
-   private List<Column> columns;
-	
 	public FilterPopup(SubmissionTable submissionData, FilterGroup filterGroup) {
 		super(false); //do not close popup when user clicks out of it
 		this.group = filterGroup;
@@ -114,7 +112,7 @@ public class FilterPopup extends PopupPanel{
 					String colname = col.getValue(col.getSelectedIndex());
 					String colencode = "";
                Long colgpsIndex = null;
-					for(Column column: columns) {
+					for(Column column: data.getHeaders()) {
 						if(colname.compareTo(column.getDisplayHeader()) == 0) {
 							colencode = column.getColumnEncoding();
 							colgpsIndex = column.getGeopointColumnCode();
@@ -148,7 +146,7 @@ public class FilterPopup extends PopupPanel{
 						Long colgpsIndex = null;
 						if(cols.isItemSelected(i)) {
 							colname = cols.getValue(i);
-							for(Column column: columns) {
+							for(Column column: data.getHeaders()) {
 								if(colname.compareTo(column.getDisplayHeader()) == 0) {
 									colencode = column.getColumnEncoding();
 									colgpsIndex = column.getGeopointColumnCode();
@@ -161,7 +159,7 @@ public class FilterPopup extends PopupPanel{
 					Filter newFilter = new ColumnFilter(kr, columnfilterheaders,(long) group.getFilters().size());
 					group.addFilter(newFilter);
 				}
-				AggregateUI.getUI().getTimer().restartTimer();
+				AggregateUI.getUI().getTimer().refreshNow();
 				hide();
 			}
 		

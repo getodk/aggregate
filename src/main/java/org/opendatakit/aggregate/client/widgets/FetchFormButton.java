@@ -1,5 +1,6 @@
 package org.opendatakit.aggregate.client.widgets;
 
+import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.table.FormNFilterSelectionTable;
 
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -19,6 +20,7 @@ public class FetchFormButton extends AButtonBase implements ClickHandler {
   public void onClick(ClickEvent event) {
     super.onClick(event);
     formNFilter.fetchClicked();
+    AggregateUI.getUI().getTimer().refreshNow();
   }
 
 }

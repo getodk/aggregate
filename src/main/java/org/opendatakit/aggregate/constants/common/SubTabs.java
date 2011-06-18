@@ -19,12 +19,12 @@ package org.opendatakit.aggregate.constants.common;
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 public enum SubTabs implements IsSerializable {
-	EXPORT("EXPORT"),
-	FILTER("FILTER"),
-	FORMS("FORMS"),
-	PUBLISH("PUBLISH"),
-	PREFERENCES("PREFERENCES"),
-	PERMISSIONS("PERMISSIONS");
+	EXPORT("Export"),
+	FILTER("Filter"),
+	FORMS("Forms"),
+	PUBLISH("Publish"),
+	PREFERENCES("Preferences"),
+	PERMISSIONS("Permissions");
 	
 	private String tabLabel;
 	

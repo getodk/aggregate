@@ -1,5 +1,6 @@
 package org.opendatakit.aggregate.client.table;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.opendatakit.aggregate.client.AggregateUI;
@@ -19,22 +20,36 @@ import com.google.gwt.user.client.ui.PopupPanel;
 
 public class SubmissionTable extends FlexTable {
  
+  private List<Column> tableHeaders;
+  private List<SubmissionUI> tableSubmissions;
+  
   public SubmissionTable() {
-    getRowFormatter().addStyleName(0, "titleBar");
-    addStyleName("dataTable");
+    tableHeaders = new ArrayList<Column>();
+    tableSubmissions = new ArrayList<SubmissionUI>();
   }
   
-  public void update(SubmissionUISummary summary) {
-    List<Column> tableHeaders = summary.getHeaders();
-    List<SubmissionUI> tableSubmissions = summary.getSubmissions();
+  public List<Column> getHeaders() {
+    return tableHeaders;
+  }
 
+  public List<SubmissionUI> getSubmissions() {
+    return tableSubmissions;
+  }
+
+  public void update(SubmissionUISummary summary) {
+    tableHeaders = summary.getHeaders();
+    tableSubmissions = summary.getSubmissions();
+    
     int headerIndex = 0;
     removeAllRows();
 
     for (Column column : tableHeaders) {
       setText(0, headerIndex++, column.getDisplayHeader());
     }
-
+    
+    getRowFormatter().addStyleName(0, "titleBar");
+    addStyleName("dataTable");
+    
     int i = 1;
     for (SubmissionUI row : tableSubmissions) {
       int j = 0;

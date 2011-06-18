@@ -45,6 +45,7 @@ public class RefreshTimer extends Timer {
   public void refreshNow() {
     // cause an update
     run();
+    restartTimer();
   }
   
   public void restartTimer() {
