@@ -338,8 +338,8 @@ public class SubmissionParser {
 			case SELECT1: // identifies SelectChoice table
 			case SELECTN: // identifies SelectChoice table
 				String value = getSubmissionValue(e);
-				((SubmissionField<?>) submissionSet.getElementValue(m))
-						.setValueFromString(value);
+				SubmissionField<?> subField = (SubmissionField<?>)submissionSet.getElementValue(m);
+				subField.setValueFromString(value);
 				break;
 			case GEOPOINT:
 				value = getSubmissionValue(e);
