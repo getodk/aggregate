@@ -1,5 +1,6 @@
 package org.opendatakit.aggregate.client.widgets;
 
+import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.UrlHash;
 
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -19,5 +20,6 @@ public class RedirectButton extends AButtonBase implements ClickHandler {
     super.onClick(event);
     
     UrlHash.getHash().goTo(url);
+    AggregateUI.getUI().getTimer().refreshNow();
   }
 }

@@ -31,8 +31,8 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.InvocationException;
 import com.google.gwt.user.client.ui.DecoratedTabPanel;
-import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
@@ -42,19 +42,20 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 public class AggregateUI implements EntryPoint {
 
   private static final String TOGGLE_AUTHENTICATION_STATUS = "toggle-authentication-status";
-  private static final String[] MAIN_MENU = { Tabs.SUBMISSIONS.getTabLabel(), Tabs.MANAGEMENT.getTabLabel(),
-      TOGGLE_AUTHENTICATION_STATUS };
+  private static final String[] MAIN_MENU = { Tabs.SUBMISSIONS.getTabLabel(),
+      Tabs.MANAGEMENT.getTabLabel() };
   private UrlHash hash;
   private VerticalPanel wrappingLayoutPanel;
   private Label errorMsgLabel;
   private HorizontalPanel layoutPanel;
   private VerticalPanel helpPanel;
- 
+
   private DecoratedTabPanel mainNav;
   private ManageTabUI manageNav;
   private SubmissionTabUI submissionNav;
- 
+
   private RefreshTimer timer;
+  private HTMLPanel login_logout_link = new HTMLPanel("");
 
   private static AggregateUI singleton = null;
 
@@ -72,11 +73,11 @@ public class AggregateUI implements EntryPoint {
     errorMsgLabel = new Label();
     layoutPanel = new HorizontalPanel();
     helpPanel = new VerticalPanel();
-    
+
     mainNav = new DecoratedTabPanel();
     manageNav = new ManageTabUI(this);
     submissionNav = new SubmissionTabUI(this);
-    
+
     Preferences.updatePreferences();
   }
 
@@ -107,30 +108,25 @@ public class AggregateUI implements EntryPoint {
 
   }-*/;
 
-  static final HTML togglePane = new HTML(
-      "<div>Selecting tab should toggle authentication status</div>");
   static final String LOGOUT_URL_PATH = "j_spring_security_logout";
-  static final String LOGOUT_LINK = "<a href=\"" + LOGOUT_URL_PATH + "\">Log Out</a>";
+  static final HTML LOGOUT_LINK = new HTML("<a href=\"" + LOGOUT_URL_PATH + "\">Log Out</a>");
   static final String LOGIN_URL_PATH = "relogin.html";
-  static final String LOGIN_LINK = "<a href=\"" + LOGIN_URL_PATH + "\">Log In</a>";
-  private int toggleTabIndex = -1;
+  static final HTML LOGIN_LINK = new HTML("<a href=\"" + LOGIN_URL_PATH + "\">Log In</a>");
+
   private SecurityServiceAsync securityService = null;
   private UserSecurityInfo userInfo = null;
 
   private synchronized void updateTogglePane() {
-    int idx = toggleTabIndex;
-    toggleTabIndex = -1;
-    if (idx != -1) {
-      mainNav.remove(idx);
-    }
-    String link = LOGIN_LINK;
+    login_logout_link.clear();
+    login_logout_link.add(LOGIN_LINK);
+    System.out.println("Setting login link");
     if (userInfo != null) {
       if (userInfo.getType() != UserType.ANONYMOUS) {
-        link = LOGOUT_LINK;
+        System.out.println("Setting logout link");
+        login_logout_link.clear();
+        login_logout_link.add(LOGOUT_LINK);
       }
     }
-    mainNav.add(togglePane, link, true);
-    toggleTabIndex = mainNav.getWidgetCount() - 1;
   }
 
   private synchronized void updateUserSecurityInfo() {
@@ -198,12 +194,6 @@ public class AggregateUI implements EntryPoint {
     updateTogglePane();
     mainNav.addStyleName("mainNav");
 
-    // create help panel
-    for (int i = 1; i < 5; i++) {
-      helpPanel.add(new HTML("Help Content " + i));
-    }
-    helpPanel.setStyleName("help_panel");
-
     // add the error message info...
     errorMsgLabel.setStyleName("error_message");
     errorMsgLabel.setVisible(false);
@@ -212,10 +202,7 @@ public class AggregateUI implements EntryPoint {
     // add to layout
     layoutPanel.add(mainNav);
     layoutPanel.getElement().setId("layout_panel");
-    FlowPanel helpContainer = new FlowPanel();
-    helpContainer.add(helpPanel);
-    helpContainer.getElement().setId("help_container");
-    // layoutPanel.add(helpContainer);
+    login_logout_link.getElement().setId("login_logout_link");
 
     // Select the correct menu item based on url hash.
     int selected = 0;
@@ -231,11 +218,11 @@ public class AggregateUI implements EntryPoint {
     for (int i = 0; i < MAIN_MENU.length; i++) {
       mainNav.getTabBar().getTab(i).addClickHandler(getMainMenuClickHandler(MAIN_MENU[i]));
     }
-    
-    RootPanel.get("dynamic_content").add(
-        new HTML("<img src=\"images/odk_color.png\" id=\"odk_aggregate_logo\" />"));
-    RootPanel.get("dynamic_content").add(wrappingLayoutPanel);
 
+    RootPanel.get("dynamic_content").add(wrappingLayoutPanel);
+    RootPanel.get("dynamic_content").add(login_logout_link);
+    RootPanel.get("dynamic_content").add(new HTML("<img src=\"images/odk_color.png\" id=\"odk_aggregate_logo\" />"));
+  
     updateUserSecurityInfo();
 
     contentLoaded();
@@ -247,7 +234,6 @@ public class AggregateUI implements EntryPoint {
   private native void contentLoaded() /*-{
 		$wnd.gwtContentLoaded();
   }-*/;
-
 
   public RefreshTimer getTimer() {
     return timer;
@@ -261,7 +247,6 @@ public class AggregateUI implements EntryPoint {
     return submissionNav;
   }
 
-  
   ClickHandler getSubMenuClickHandler(final Tabs menu, final SubTabs subMenu) {
     return new ClickHandler() {
       @Override
@@ -269,6 +254,7 @@ public class AggregateUI implements EntryPoint {
         clearError();
         getTimer().restartTimer();
         getTimer().setCurrentSubTab(subMenu);
+        getTimer().refreshNow();
         hash.clear();
         hash.set(UrlHash.MAIN_MENU, menu.getTabLabel());
         hash.set(UrlHash.SUB_MENU, subMenu.getTabLabel());

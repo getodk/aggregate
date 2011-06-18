@@ -16,21 +16,14 @@
 
 package org.opendatakit.aggregate.client.popups;
 
-import org.opendatakit.aggregate.client.AggregateUI;
-import org.opendatakit.aggregate.client.SecureGWT;
-import org.opendatakit.aggregate.client.UrlHash;
-import org.opendatakit.aggregate.client.permissions.ServicesAdminServiceAsync;
 import org.opendatakit.aggregate.client.widgets.ClosePopupButton;
+import org.opendatakit.aggregate.client.widgets.ExecutePublishButton;
 import org.opendatakit.aggregate.constants.common.ExternalServicePublicationOption;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.FocusEvent;
 import com.google.gwt.event.dom.client.FocusHandler;
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.ListBox;
@@ -39,25 +32,20 @@ import com.google.gwt.user.client.ui.TextBox;
 
 public class ExternalServicePopup extends PopupPanel {
 
-  private static final String TYPE_SPREAD_SHEET = "Google Spreadsheet";
-  private static final String TYPE_FUSION_TABLE = "Google Fusion Table";
+  public static final String TYPE_SPREAD_SHEET = "Google Spreadsheet";
+  public static final String TYPE_FUSION_TABLE = "Google Fusion Table";
 
-  public ExternalServicePopup(final String formId) {
+  private String formId;
+  private TextBox name;
+  private ListBox service;
+  private ListBox esOptions;
+  
+  public ExternalServicePopup(String formId) {
     super(false);
-    FlexTable layout = new FlexTable();
-    layout.setWidget(0, 0, new HTML("Form: " + formId + " "));
+    
+    this.formId = formId;
 
-    final TextBox name = new TextBox();
-    name.setText("Spreadsheet Name");
-    name.setEnabled(false);
-    name.addFocusHandler(new FocusHandler() {
-      @Override
-      public void onFocus(FocusEvent event) {
-        name.setText("");
-      }
-    });
-
-    final ListBox service = new ListBox();
+    service = new ListBox();
     service.addItem(TYPE_FUSION_TABLE);
     service.addItem(TYPE_SPREAD_SHEET);
     service.addChangeHandler(new ChangeHandler() {
@@ -72,86 +60,49 @@ public class ExternalServicePopup extends PopupPanel {
       }
     });
 
+    name = new TextBox();
+    name.setText("Spreadsheet Name");
+    name.setEnabled(false);
+    name.addFocusHandler(new FocusHandler() {
+      @Override
+      public void onFocus(FocusEvent event) {
+        name.setText("");
+      }
+    });
+    
+    esOptions = new ListBox();
+    for (ExternalServicePublicationOption eso : ExternalServicePublicationOption.values()) {
+      esOptions.addItem(eso.toString());
+    }
+    
+    FlexTable layout = new FlexTable();
+    layout.setWidget(0, 0, new HTML("Form: " + formId + " "));    
     layout.setWidget(0, 1, service);
     layout.setWidget(0, 2, name);
 
-    final ListBox esOptions = new ListBox();
-    for (ExternalServicePublicationOption eso : ExternalServicePublicationOption.values())
-      esOptions.addItem(eso.toString());
+
     layout.setWidget(0, 3, esOptions);
-
-    Button publishButton = new Button("<img src=\"images/green_right_arrow.png\" /> Publish");
-    publishButton.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        ExternalServicePublicationOption serviceOp = null;
-        String selectedOption = esOptions.getItemText(esOptions.getSelectedIndex());
-        for (ExternalServicePublicationOption selected : ExternalServicePublicationOption.values()) {
-          if (selected.toString().equals(selectedOption))
-            serviceOp = selected;
-        }
-        String selectedService = service.getItemText(service.getSelectedIndex());
-        ServicesAdminServiceAsync servicesAdminSvc = SecureGWT.get().createServicesAdminService();
-        if (selectedService.equals(TYPE_FUSION_TABLE)) {
-          servicesAdminSvc.createFusionTable(formId, serviceOp, new AsyncCallback<String>() {
-            @Override
-            public void onFailure(Throwable caught) {
-              // TODO Auto-generated method stub
-            }
-
-            @Override
-            public void onSuccess(String result) {
-              ServicesAdminServiceAsync servicesAdminSvc = SecureGWT.get()
-                  .createServicesAdminService();
-              servicesAdminSvc.generateOAuthUrl(result, new AsyncCallback<String>() {
-                @Override
-                public void onFailure(Throwable caught) {
-                  // TODO Auto-generated method stub
-                }
-
-                @Override
-                public void onSuccess(String result) {
-                  // TODO Auto-generated method stub
-                  UrlHash.getHash().goTo(result);
-                }
-              });
-            }
-          });
-        } else { // selectedService.equals(TYPE_SPREAD_SHEET)
-          servicesAdminSvc.createGoogleSpreadsheet(formId, name.getText(), serviceOp,
-              new AsyncCallback<String>() {
-                @Override
-                public void onFailure(Throwable caught) {
-                  // TODO Auto-generated method stub
-                }
-
-                @Override
-                public void onSuccess(String result) {
-                  // TODO Auto-generated method stub
-                  ServicesAdminServiceAsync servicesAdminSvc = SecureGWT.get()
-                      .createServicesAdminService();
-                  servicesAdminSvc.generateOAuthUrl(result, new AsyncCallback<String>() {
-                    @Override
-                    public void onFailure(Throwable caught) {
-                      // TODO Auto-generated method stub
-                    }
-
-                    @Override
-                    public void onSuccess(String result) {
-                      // TODO Auto-generated method stub
-                      UrlHash.getHash().goTo(result);
-                    }
-                  });
-                }
-              });
-        }
-        AggregateUI.getUI().getTimer().restartTimer();
-      }
-    });
-  
-    layout.setWidget(0, 4, publishButton);
+    layout.setWidget(0, 4, new ExecutePublishButton(this));
     layout.setWidget(0, 5, new ClosePopupButton(this));
 
     setWidget(layout);
   }
+
+  public String getFormId() {
+    return formId;
+  }
+
+  public TextBox getName() {
+    return name;
+  }
+
+  public ListBox getService() {
+    return service;
+  }
+
+  public ListBox getEsOptions() {
+    return esOptions;
+  }
+  
+  
 }
