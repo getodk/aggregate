@@ -92,9 +92,11 @@ public class ChoiceSubmissionType extends SubmissionFieldBase<List<String>> {
 	public void setValueFromString(String concatenatedValues) throws ODKConversionException, ODKDatastoreException {
 		isChanged = true;
 		values.clear();
-		String[] splits = concatenatedValues.split(" ");
-		for ( String v : splits ) {
-			if ( v != null ) values.add(v);
+		if(concatenatedValues != null) {
+		  String[] splits = concatenatedValues.split(" ");
+		  for ( String v : splits ) {
+		    if ( v != null ) values.add(v);
+		  }
 		}
 	}
 

@@ -28,7 +28,6 @@ import org.opendatakit.aggregate.externalservice.FormServiceCursor;
 import org.opendatakit.aggregate.servlet.ServletUtilBase;
 import org.opendatakit.aggregate.task.UploadSubmissionsWorkerImpl;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
-import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.web.CallingContext;
 
 /**
@@ -56,7 +55,6 @@ public class UploadSubmissionsTaskServlet extends ServletUtilBase{
    */
   @Override
   public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-    // TODO: talk to MITCH about the fact the user will be incorrect
 	CallingContext cc = ContextFactory.getCallingContext(this, req);
 	cc.setAsDaemon(true);
 
@@ -82,10 +80,6 @@ public class UploadSubmissionsTaskServlet extends ServletUtilBase{
     	UploadSubmissionsWorkerImpl worker = 
     		new UploadSubmissionsWorkerImpl(fsc, cc);
       worker.uploadAllSubmissions();
-    } catch (ODKTaskLockException e) {
-      e.printStackTrace();
-      resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.toString());
-      return;
     } catch (ODKEntityNotFoundException e) {
 	  e.printStackTrace();
 	  resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.toString());
