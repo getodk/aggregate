@@ -22,6 +22,7 @@ public class FilterSubTab extends VerticalPanel implements SubTabInterface {
   public FilterSubTab() {
     // create Nav Panel
     navTable = new FilterNavigationTable(this);
+    navTable.getElement().setId("submission_nav_table");
     add(navTable);
     
     // Create Filters ande Submissions Panel
