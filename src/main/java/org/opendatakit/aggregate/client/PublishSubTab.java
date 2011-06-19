@@ -100,7 +100,6 @@ public class PublishSubTab extends VerticalPanel implements SubTabInterface {
 
     // update the panel to display the right form
     formsBox.setItemSelected(selectedIndex, true);
-    setTitleString(formsBox.getValue(formsBox.getSelectedIndex()));
 
     // set the class state to the newly created form list
     displayedFormList = forms;
@@ -130,10 +129,6 @@ public class PublishSubTab extends VerticalPanel implements SubTabInterface {
 
   }
 
-  public void setTitleString(String title) {
-    publishTable.setHTML(0, 1, "<h1 id=\"form_name\">" + title + "</h1>");
-  }
-
   /**
    * Handler to process the change in the form drop down
    * 
@@ -148,7 +143,6 @@ public class PublishSubTab extends VerticalPanel implements SubTabInterface {
         }
       }
       updatePublishTable();
-      setTitleString(formsBox.getValue(formsBox.getSelectedIndex()));
     }
   }
 }

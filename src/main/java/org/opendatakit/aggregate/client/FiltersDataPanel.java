@@ -42,14 +42,16 @@ public class FiltersDataPanel extends FlowPanel {
     // add new filter button
     NewFilterButton newFilter = new NewFilterButton(panel);
     activeFilters.add(newFilter);
-
+    title = new TreeItem(new Label(""));
+   
+    activeFilters.addItem(title);
+        
     add(activeFilters);
     getElement().setId("filters_container");
   }
 
   public void updateFilters(FilterGroup group) {
     title = new TreeItem(new Label("Active Filters"));
-    activeFilters.addItem(title);
 
     TreeItem itemGroup = loadFilterGroup(group);
     title.addItem(itemGroup);

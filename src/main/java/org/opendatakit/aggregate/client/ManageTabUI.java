@@ -47,17 +47,20 @@ public class ManageTabUI extends TabPanel {
     
     // build the UI
     formsSubTab = new FormsSubTab(baseUI);
+    formsSubTab.update();
     this.add(formsSubTab, SubTabs.FORMS.getTabLabel());
     subTabMap.put(SubTabs.FORMS, formsSubTab);
 
     publishSubTab = new PublishSubTab(baseUI);
+    publishSubTab.update();
     this.add(publishSubTab, SubTabs.PUBLISH.getTabLabel());
     subTabMap.put(SubTabs.PUBLISH, publishSubTab);
     
     permissionsSheet = new PermissionsSheet(this);
     this.add(permissionsSheet, SubTabs.PERMISSIONS.getTabLabel());
 
-    preferencesSubTab = new PreferencesSubTab(baseUI);
+    preferencesSubTab = new PreferencesSubTab();
+    preferencesSubTab.update();
     this.add(preferencesSubTab, SubTabs.PREFERENCES.getTabLabel());
     subTabMap.put(SubTabs.PREFERENCES, preferencesSubTab);
 
@@ -69,7 +72,7 @@ public class ManageTabUI extends TabPanel {
     int selected = 0;
     String subMenu = hash.get(UrlHash.SUB_MENU);
     for (int i = 0; i < MANAGEMENT_MENU.length; i++) {
-      if (subMenu.equals(MANAGEMENT_MENU[i].getTabLabel())) {
+      if (subMenu.equals(MANAGEMENT_MENU[i].getHashString())) {
         selected = i;
       }
     }

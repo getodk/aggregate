@@ -26,49 +26,50 @@ import com.google.gwt.user.client.ui.HTML;
  */
 public class ExportTable extends FlexTable {
 
-	private int FILE_TYPE = 0;
-	private int STATUS = 1;
-	private int TIME_REQUESTED = 2;
-	private int TIME_COMPLETED = 3;
-	private int TIME_LAST_RETRY = 4;
-	private int DOWNLOAD_FILE = 5;
+  private final static int FILE_TYPE = 0;
+  private final static int STATUS = 1;
+  private final static int TIME_REQUESTED = 2;
+  private final static int TIME_COMPLETED = 3;
+  private final static int TIME_LAST_RETRY = 4;
+  private final static int DOWNLOAD_FILE = 5;
 
-	public ExportTable() {
-		super();
-		this.setText(0, FILE_TYPE, "File Type");
-		this.setText(0, STATUS, "Status");
-		this.setText(0, TIME_REQUESTED, "Time Requested");
-		this.setText(0, TIME_COMPLETED, "Time Completed");
-		this.setText(0, TIME_LAST_RETRY, "Last Retry");
-		this.setText(0, DOWNLOAD_FILE, "Download File");
-		this.addStyleName("dataTable");
-		this.getRowFormatter().addStyleName(0, "titleBar");
-	}
+  private final static int HEADER_ROW = 1;
+  private final static int STARTING_ROW = HEADER_ROW + 1;
 
-	public void updateExportPanel(ExportSummary[] eS) {
-		if (eS == null)
-			return;
-		while (this.getRowCount() > 1)
-			this.removeRow(1);
-		for (int i = 0; i < eS.length; i++) {
-			ExportSummary e = eS[i];
-			if (e.getFileType() != null)
-				this.setText(i + 1, FILE_TYPE, e.getFileType().toString());
-			if (e.getStatus() != null)
-				this.setText(i + 1, STATUS, e.getStatus().toString());
-			if (e.getTimeRequested() != null)
-				this.setText(i + 1, TIME_REQUESTED, e.getTimeRequested()
-						.toString());
-			if (e.getTimeCompleted() != null)
-				this.setText(i + 1, TIME_COMPLETED, e.getTimeCompleted()
-						.toString());
-			if (e.getTimeLastAction() != null)
-				this.setText(i + 1, TIME_LAST_RETRY, e.getTimeLastAction()
-						.toString());
-			if (e.getResultFile() != null)
-				this.setWidget(i + 1, DOWNLOAD_FILE,
-						new HTML(e.getResultFile()));
-		}
-	}
+  public ExportTable() {
+    super();
+    this.setHTML(0, 2, "<h2 id=\"form_name\">Exports</h2>"); 
+    this.setText(HEADER_ROW, FILE_TYPE, "File Type");
+    this.setText(HEADER_ROW, STATUS, "Status");
+    this.setText(HEADER_ROW, TIME_REQUESTED, "Time Requested");
+    this.setText(HEADER_ROW, TIME_COMPLETED, "Time Completed");
+    this.setText(HEADER_ROW, TIME_LAST_RETRY, "Last Retry");
+    this.setText(HEADER_ROW, DOWNLOAD_FILE, "Download File");
+    this.addStyleName("exportTable");
+    this.getRowFormatter().addStyleName(1, "titleBar");
+  }
 
+  public void updateExportPanel(ExportSummary[] eS) {
+    if (eS == null)
+      return;
+    while (this.getRowCount() > STARTING_ROW)
+      this.removeRow(STARTING_ROW);
+    for (int i = 0; i < eS.length; i++) {
+      ExportSummary e = eS[i];
+      if (e.getFileType() != null)
+        this.setText(i + STARTING_ROW, FILE_TYPE, e.getFileType().toString());
+      if (e.getStatus() != null)
+        this.setText(i + STARTING_ROW, STATUS, e.getStatus().toString());
+      if (e.getTimeRequested() != null)
+        this.setText(i + STARTING_ROW, TIME_REQUESTED, e.getTimeRequested().toString());
+      if (e.getTimeCompleted() != null)
+        this.setText(i + STARTING_ROW, TIME_COMPLETED, e.getTimeCompleted().toString());
+      if (e.getTimeLastAction() != null)
+        this.setText(i + STARTING_ROW, TIME_LAST_RETRY, e.getTimeLastAction().toString());
+      if (e.getResultFile() != null)
+        this.setWidget(i + STARTING_ROW, DOWNLOAD_FILE, new HTML(e.getResultFile()));
+    }
+  }
+
+  
 }
