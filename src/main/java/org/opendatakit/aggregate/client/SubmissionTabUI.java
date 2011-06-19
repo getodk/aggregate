@@ -42,10 +42,12 @@ public class SubmissionTabUI extends TabPanel {
     
     // build the UI
     filterSubTab = new FilterSubTab();
+    filterSubTab.update();
     add(filterSubTab, SubTabs.FILTER.getTabLabel());
     subTabMap.put(SubTabs.FILTER, filterSubTab);
     
     exportSubTab = new ExportSubTab();
+    exportSubTab.update();
     add(exportSubTab, SubTabs.EXPORT.getTabLabel());
     subTabMap.put(SubTabs.EXPORT, exportSubTab);
     
@@ -56,7 +58,7 @@ public class SubmissionTabUI extends TabPanel {
     int selected = 0;
     String subMenu = hash.get(UrlHash.SUB_MENU);
     for (int i = 0; i < SUBMISSION_MENU.length; i++) {
-      if (subMenu.equals(SUBMISSION_MENU[i].getTabLabel())) {
+      if (subMenu.equals(SUBMISSION_MENU[i].getHashString())) {
         selected = i;
       }
     }
@@ -71,9 +73,8 @@ public class SubmissionTabUI extends TabPanel {
   } 
   
   public int findSubTabIndex(SubTabs subTab) {
-    String subLabel = subTab.getTabLabel();
     for (int i = 0; i < SUBMISSION_MENU.length; i++) {
-      if (subLabel.equals(SUBMISSION_MENU[i])) {
+      if (subTab.equals(SUBMISSION_MENU[i])) {
         return i;
       }
     }

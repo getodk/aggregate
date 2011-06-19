@@ -13,6 +13,7 @@ public class ExportSubTab extends VerticalPanel implements SubTabInterface {
   
   public ExportSubTab() {
     exportTable = new ExportTable();
+    add(exportTable);
   }
   
   public void update() {

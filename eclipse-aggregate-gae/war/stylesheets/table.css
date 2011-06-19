@@ -22,6 +22,20 @@
 	overflow: scroll;
 }
 
+.exportTable td {
+	padding: 3px 10px 3px 10px;
+	text-align: center;
+	align: center;
+}
+
+.exportTable {
+	border-collapse: collapse;
+	border-width: 1px;
+	border-style: solid;
+	border-color: #07115A;
+	overflow: scroll;
+}
+
 .disabledTableRow td {
 	background-color: #505050;
 }

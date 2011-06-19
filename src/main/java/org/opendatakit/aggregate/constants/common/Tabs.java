@@ -19,16 +19,22 @@ package org.opendatakit.aggregate.constants.common;
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 public enum Tabs implements IsSerializable {
-   SUBMISSIONS("Submissions"),
-   MANAGEMENT("Management");
+   SUBMISSIONS("Submissions", "submissions"),
+   MANAGEMENT("Management", "managements");
    
    private String tabLabel;
+   private String hashString;
    
-   private Tabs(String label) {
+   private Tabs(String label, String hash) {
      tabLabel = label;
+     hashString = hash;
    }
    
    public String getTabLabel() {
      return tabLabel;
+   }
+   
+   public String getHashString() {
+     return hashString;
    }
 };

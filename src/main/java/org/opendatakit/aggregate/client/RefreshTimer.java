@@ -21,9 +21,9 @@ import org.opendatakit.aggregate.constants.common.SubTabs;
 import com.google.gwt.user.client.Timer;
 
 public class RefreshTimer extends Timer {
-  private static final int REFRESH_INTERVAL = 1000; // ms
+ // private static final int REFRESH_INTERVAL = 100000; // ms
 
-//  private static final int REFRESH_INTERVAL = 5000; // ms
+  private static final int REFRESH_INTERVAL = 5000; // ms
   private static final int STALL_INTERVALS = 60; // 5 min / 5 sec
   private int intervalsElapsed = 0;
   private AggregateUI aggregateUI;

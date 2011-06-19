@@ -75,10 +75,6 @@ public class FormSummary implements Serializable {
     if (!(obj instanceof FormSummary)) {
       return false;
     }
-    // super will compare value
-    if (!super.equals(obj)) {
-      return false;
-    }
 
     FormSummary other = (FormSummary) obj;
     return (title == null ? (other.title == null) : (title.equals(other.title)))

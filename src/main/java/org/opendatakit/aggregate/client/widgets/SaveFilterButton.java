@@ -52,8 +52,8 @@ public class SaveFilterButton extends AButtonBase implements ClickHandler {
     }
     
     group.addFilter(newFilter);
-    
     AggregateUI.getUI().getTimer().refreshNow();
+    
     popup.hide();
   }
 

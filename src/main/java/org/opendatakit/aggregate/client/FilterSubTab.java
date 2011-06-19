@@ -52,6 +52,7 @@ public class FilterSubTab extends VerticalPanel implements SubTabInterface {
 
   public void update() {
     navTable.update();
+    filtersPanel.updateFilters(currentFilterToDisplay);
     submissionPanel.update(currentFilterToDisplay);
   }
   

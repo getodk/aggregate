@@ -256,8 +256,8 @@ public class AggregateUI implements EntryPoint {
         getTimer().setCurrentSubTab(subMenu);
         getTimer().refreshNow();
         hash.clear();
-        hash.set(UrlHash.MAIN_MENU, menu.getTabLabel());
-        hash.set(UrlHash.SUB_MENU, subMenu.getTabLabel());
+        hash.set(UrlHash.MAIN_MENU, menu.getHashString());
+        hash.set(UrlHash.SUB_MENU, subMenu.getHashString());
         hash.put();
       }
     };
