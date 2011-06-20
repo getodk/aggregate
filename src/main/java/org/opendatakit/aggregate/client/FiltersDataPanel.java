@@ -8,8 +8,8 @@ import org.opendatakit.aggregate.client.filter.Filter;
 import org.opendatakit.aggregate.client.filter.FilterGroup;
 import org.opendatakit.aggregate.client.filter.FilterServiceAsync;
 import org.opendatakit.aggregate.client.filter.RowFilter;
-import org.opendatakit.aggregate.client.widgets.DeleteFilterButton;
 import org.opendatakit.aggregate.client.widgets.AddFilterButton;
+import org.opendatakit.aggregate.client.widgets.DeleteFilterButton;
 import org.opendatakit.aggregate.client.widgets.SaveFilterGroupButton;
 import org.opendatakit.aggregate.constants.common.UIConsts;
 

@@ -16,9 +16,8 @@
 
 package org.opendatakit.aggregate.client.permissions;
 
-import org.opendatakit.aggregate.client.ManageTabUI;
+import org.opendatakit.aggregate.client.PermissionsSubTab;
 import org.opendatakit.aggregate.client.SecureGWT;
-import org.opendatakit.aggregate.constants.common.SubTabs;
 import org.opendatakit.common.security.client.GrantedAuthorityInfo;
 import org.opendatakit.common.security.client.UserSecurityInfo;
 import org.opendatakit.common.security.client.UserSecurityInfo.UserType;
@@ -27,7 +26,6 @@ import org.opendatakit.common.security.common.GrantedAuthorityNames;
 
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.LazyPanel;
 import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -41,13 +39,6 @@ import com.google.gwt.user.client.ui.Widget;
 public class PermissionsSheet extends TabPanel {
 
 	private static final String MANAGE_WEBSITE_ACCESS = "Manage Website Access";
-
-	private HTML asIFrame(String url) {
-		HTML panel = new HTML(
-		"<iframe src=\"" + url + "\" width=\"1500\" height=\"3000\" />");
-		panel.setStyleName("embedded_iframe");
-		return panel;
-	}
 
 	static final String CONFIGURE_ACCESS = "access-configuration";
 	static final String MANAGE_PASSWORDS = "manage-passwords";
@@ -66,9 +57,6 @@ public class PermissionsSheet extends TabPanel {
 			if ( widget != null ) {
 				// trigger update of UI...
 				widget.setVisible(isVisible);
-			}
-			if ( isVisible ) {
-				managementTab.setSubSelection(SubTabs.PERMISSIONS.getTabLabel(), CHANGE_PASSWORD);
 			}
 		}
 		
@@ -94,9 +82,6 @@ public class PermissionsSheet extends TabPanel {
 				// trigger update of UI...
 				widget.setVisible(isVisible);
 			}
-			if ( isVisible ) {
-				managementTab.setSubSelection(SubTabs.PERMISSIONS.getTabLabel(), CONFIGURE_ACCESS);
-			}
 		}
 		
 		@Override
@@ -119,9 +104,6 @@ public class PermissionsSheet extends TabPanel {
 			if ( widget != null ) {
 				// trigger update of UI...
 				widget.setVisible(isVisible);
-			}
-			if ( isVisible ) {
-				managementTab.setSubSelection(SubTabs.PERMISSIONS.getTabLabel(), MANAGE_PASSWORDS);
 			}
 		}
 		
@@ -147,9 +129,6 @@ public class PermissionsSheet extends TabPanel {
 				// trigger update of UI...
 				widget.setVisible(isVisible);
 			}
-			if ( isVisible ) {
-				managementTab.setSubSelection(SubTabs.PERMISSIONS.getTabLabel(), MANAGE_ACCESS);
-			}
 		}
 		
 		@Override
@@ -163,11 +142,11 @@ public class PermissionsSheet extends TabPanel {
 
 	public boolean isConfigured = false;
 	
-	ManageTabUI managementTab;
+	PermissionsSubTab permissionsSubTab;
 	
-	public PermissionsSheet(ManageTabUI managementTab) {
+	public PermissionsSheet(PermissionsSubTab managementTab) {
 		super();
-		this.managementTab = managementTab;
+		this.permissionsSubTab = managementTab;
 	}
 
 	private void lazyConfigure() {

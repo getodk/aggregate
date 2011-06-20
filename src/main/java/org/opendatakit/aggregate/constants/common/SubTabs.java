@@ -24,7 +24,8 @@ public enum SubTabs implements IsSerializable {
 	FORMS("Forms List", "forms"),
 	PUBLISH("Published Services", "publish"),
 	PREFERENCES("Preferences", "preferences"),
-	PERMISSIONS("Permissions", "permissions");
+	PERMISSIONS("Permissions", "permission"),
+	HIDDEN_PERMISSIONS("", "permissions"); 
 	
    private String tabLabel;
    private String hashString;

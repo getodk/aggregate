@@ -19,7 +19,6 @@ package org.opendatakit.aggregate.client;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.opendatakit.aggregate.client.permissions.PermissionsSheet;
 import org.opendatakit.aggregate.constants.common.SubTabs;
 import org.opendatakit.aggregate.constants.common.Tabs;
 
@@ -36,8 +35,8 @@ public class ManageTabUI extends TabPanel {
   private FormsSubTab formsSubTab;
   private PublishSubTab publishSubTab;
   private PreferencesSubTab preferencesSubTab;
-  private PermissionsSheet permissionsSheet;
-
+  private PermissionsSubTab permissionsSubTab;
+  
   private Map<SubTabs, SubTabInterface> subTabMap;
   
   public ManageTabUI(AggregateUI baseUI) {
@@ -56,13 +55,16 @@ public class ManageTabUI extends TabPanel {
     this.add(publishSubTab, SubTabs.PUBLISH.getTabLabel());
     subTabMap.put(SubTabs.PUBLISH, publishSubTab);
     
-    permissionsSheet = new PermissionsSheet(this);
-    this.add(permissionsSheet, SubTabs.PERMISSIONS.getTabLabel());
+    permissionsSubTab = new PermissionsSubTab();
+    permissionsSubTab.configure();
+    this.add(permissionsSubTab, SubTabs.PERMISSIONS.getTabLabel());
+    subTabMap.put(SubTabs.PERMISSIONS, permissionsSubTab);
 
     preferencesSubTab = new PreferencesSubTab();
     preferencesSubTab.update();
     this.add(preferencesSubTab, SubTabs.PREFERENCES.getTabLabel());
     subTabMap.put(SubTabs.PREFERENCES, preferencesSubTab);
+    
 
     
     getElement().setId("second_level_menu");
@@ -84,16 +86,6 @@ public class ManageTabUI extends TabPanel {
       ClickHandler handler = baseUI.getSubMenuClickHandler(Tabs.MANAGEMENT, MANAGEMENT_MENU[i]);
       this.getTabBar().getTab(i).addClickHandler(handler);
     }
-  }
-
-  // TODO get rid of this function
-  public void setSubSelection(String subMenu, String subSubMenu) {
-    UrlHash hash = UrlHash.getHash();
-    hash.clear();
-    hash.set(UrlHash.MAIN_MENU, Tabs.MANAGEMENT.getTabLabel());
-    hash.set(UrlHash.SUB_MENU, subMenu);
-    hash.set(UrlHash.FORM, subSubMenu);
-    hash.put();
   }
 
   public SubTabInterface getSubTab(SubTabs subTab) {

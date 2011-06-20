@@ -2,7 +2,7 @@ package org.opendatakit.aggregate.client.widgets;
 
 import java.util.Date;
 
-import org.opendatakit.aggregate.client.permissions.ExternServSummary;
+import org.opendatakit.aggregate.client.externalserv.ExternServSummary;
 import org.opendatakit.aggregate.client.popups.ConfirmPurgePopup;
 import org.opendatakit.aggregate.constants.common.ExternalServicePublicationOption;
 
