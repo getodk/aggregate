@@ -124,5 +124,34 @@ public class FilterGroup implements Serializable {
 
   }
 
+  
+  /**
+   * @see java.lang.Object#equals(java.lang.Object)
+   */
+  @Override
+  public boolean equals(Object obj) {
+    if (!(obj instanceof FilterGroup)) {
+      return false;
+    }
+
+    FilterGroup other = (FilterGroup) obj;
+    return (name == null ? (other.name == null) : (name.equals(other.name)))
+        && (formId == null ? (other.formId == null) : (formId.equals(other.formId)));
+  }
+
+  /**
+   * @see java.lang.Object#hashCode()
+   */
+  @Override
+  public int hashCode() {
+    int hashCode = 101;
+    if (name != null)
+      hashCode += name.hashCode();
+    if (formId != null)
+      hashCode += formId.hashCode();
+    if (uri != null)
+      hashCode += uri.hashCode();
+    return hashCode;
+  }
 
 }

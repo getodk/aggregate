@@ -12,6 +12,7 @@ import org.opendatakit.aggregate.client.filter.FilterSet;
 import org.opendatakit.aggregate.client.form.FormServiceAsync;
 import org.opendatakit.aggregate.client.form.FormSummary;
 import org.opendatakit.aggregate.client.widgets.FetchFormButton;
+import org.opendatakit.aggregate.constants.common.UIConsts;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
@@ -22,8 +23,6 @@ import com.google.gwt.user.client.ui.ListBox;
 // TODO: address possible inconsistent states
 
 public class FormNFilterSelectionTable extends FlexTable {
-  private static final String NONE = "none";
-
   // ui elements
   private ListBox formsBox;
   private ListBox filtersBox;
@@ -82,7 +81,7 @@ public class FormNFilterSelectionTable extends FlexTable {
 
     if (forms == null || forms.length == 0) {
       forms = new FormSummary[1];
-      forms[0] = new FormSummary(NONE, null, null, false, false, null);
+      forms[0] = new FormSummary(UIConsts.FILTER_NONE, null, null, false, false, null);
     } else {
       // get the previously selected form, and verify it matches
       int currentSelectionIndex = formsBox.getSelectedIndex();
@@ -151,15 +150,16 @@ public class FormNFilterSelectionTable extends FlexTable {
   private synchronized void updateFilterDropDown(FilterSet filterSet) {
 
     FilterGroup currentFilterSelected = null;
+    FilterGroup defaultFilterGroup = new FilterGroup(UIConsts.FILTER_NONE, selectedForm.getId(), null);
+    
+    // create what should be the new filter gorup
+    List<FilterGroup> filterGroups  = new ArrayList<FilterGroup>();
+    filterGroups.add(defaultFilterGroup);
+    filterGroups.addAll(filterSet.getGroups());
 
-    List<FilterGroup> filterGroups = filterSet.getGroups();
-
-    if (filterGroups == null || filterGroups.size() == 0) {
-      filterGroups = new ArrayList<FilterGroup>();
-      filterGroups.add(new FilterGroup(NONE, selectedForm.getId(), null));
-    } else {
-      // get the previously selected filter, and verify it matches
-      int currentSelectionIndex = filtersBox.getSelectedIndex();
+    // get the previously selected filter, and verify it matches
+    int currentSelectionIndex = filtersBox.getSelectedIndex();
+    if (currentSelectionIndex >= 0) {
       String currentFilterTitle = filtersBox.getItemText(currentSelectionIndex);
       currentFilterSelected = displayedFilterList.get(currentSelectionIndex);
       if (currentFilterSelected != null) {
@@ -173,7 +173,6 @@ public class FormNFilterSelectionTable extends FlexTable {
 
     // what the selected index should be set to
     int selectedIndex = 0; // default to the top position, update if available
-
     filtersBox.clear();
     
     // populate the form box

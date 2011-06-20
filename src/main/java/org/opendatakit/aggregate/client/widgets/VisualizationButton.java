@@ -20,7 +20,7 @@ public class VisualizationButton extends AButtonBase implements ClickHandler {
   public void onClick(ClickEvent event) {
     super.onClick(event);
     
-    final PopupPanel vizPopup = new VisualizationPopup(filterSubTab.getCurrentlyDisplayedFilter());
+    final PopupPanel vizPopup = new VisualizationPopup(filterSubTab);
     vizPopup.setPopupPositionAndShow(new PopupPanel.PositionCallback() {
       @Override
       public void setPosition(int offsetWidth, int offsetHeight) {

@@ -22,8 +22,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.opendatakit.aggregate.client.AggregateUI;
+import org.opendatakit.aggregate.client.FilterSubTab;
 import org.opendatakit.aggregate.client.SecureGWT;
-import org.opendatakit.aggregate.client.filter.FilterGroup;
 import org.opendatakit.aggregate.client.form.FormServiceAsync;
 import org.opendatakit.aggregate.client.form.KmlSettingOption;
 import org.opendatakit.aggregate.client.form.KmlSettings;
@@ -31,7 +31,6 @@ import org.opendatakit.aggregate.client.preferences.Preferences;
 import org.opendatakit.aggregate.client.submission.Column;
 import org.opendatakit.aggregate.client.submission.SubmissionServiceAsync;
 import org.opendatakit.aggregate.client.submission.SubmissionUI;
-import org.opendatakit.aggregate.client.submission.SubmissionUISummary;
 import org.opendatakit.aggregate.client.submission.UIGeoPoint;
 import org.opendatakit.aggregate.client.widgets.ClosePopupButton;
 
@@ -72,8 +71,9 @@ public class VisualizationPopup extends PopupPanel {
 
   private static final String NUMBER_OF_OCCURANCES = "Number of Occurances";
 
-  private List<Column> head;
-  private List<SubmissionUI> sub;
+  private List<Column> headers;
+  private List<SubmissionUI> submissions;
+  
   private final FlexTable dropDownsTable = new FlexTable();
   private final ListBox chartType = new ListBox();
   private final ListBox firstData = new ListBox();
@@ -97,7 +97,7 @@ public class VisualizationPopup extends PopupPanel {
     chartUrl.append("&chtt=" + secondDataValue);
     chartUrl.append("&chxt=x,y");
     int index = 0;
-    for (Column c : head) {
+    for (Column c : headers) {
       if (c.getDisplayHeader().equals(firstDataValue))
         firstIndex = index;
       if (c.getDisplayHeader().equals(secondDataValue))
@@ -109,7 +109,7 @@ public class VisualizationPopup extends PopupPanel {
     if (secondData.getItemText(secondData.getSelectedIndex()).equals(NUMBER_OF_OCCURANCES)) {
       numOccurances = true;
     } else {
-      for (SubmissionUI s : sub) {
+      for (SubmissionUI s : submissions) {
         try {
           Double.parseDouble(s.getValues().get(secondIndex));
         } catch (NumberFormatException e) {
@@ -118,7 +118,7 @@ public class VisualizationPopup extends PopupPanel {
         }
       }
     }
-    for (SubmissionUI s : sub) {
+    for (SubmissionUI s : submissions) {
       String label = s.getValues().get(firstIndex);
       if (aggregation.containsKey(label)) {
         double addend = 1;
@@ -168,32 +168,16 @@ public class VisualizationPopup extends PopupPanel {
     chart.setVisible(true);
     secondData.clear();
     secondData.addItem(NUMBER_OF_OCCURANCES);
-    for (Column c : head)
+    for (Column c : headers)
       secondData.addItem(c.getDisplayHeader());
   }
 
-  public VisualizationPopup(FilterGroup filterGroup) {
+  public VisualizationPopup(FilterSubTab filterSubTab) {
     super(false);
-    this.formId = filterGroup.getFormId();
+    this.formId = filterSubTab.getDisplayedFilterGroup().getFormId();
+    this.headers = filterSubTab.getSubmissionTable().getHeaders();
+    this.submissions = filterSubTab.getSubmissionTable().getSubmissions();
 
-    SubmissionServiceAsync submissionSvc = SecureGWT.get().createSubmissionService();
-    // Set up the callback object.
-    AsyncCallback<SubmissionUISummary> callback = new AsyncCallback<SubmissionUISummary>() {
-      public void onFailure(Throwable caught) {
-
-      }
-
-      public void onSuccess(SubmissionUISummary summary) {
-          head = summary.getHeaders();
-          for (Column c : head) {
-            firstData.addItem(c.getDisplayHeader());
-          }
-          sub = summary.getSubmissions();
-      }
-    };
-
-    submissionSvc.getSubmissions(filterGroup, callback);
-    
     Maps.loadMapsApi(Preferences.getGoogleMapsApiKey(), "2", false, new Runnable() {
       public void run() {
         mapsApiLoaded = true;

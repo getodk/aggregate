@@ -84,4 +84,38 @@ public class RowFilter extends Filter implements Serializable {
     return this.column;
   }
   
+  /**
+   * @see java.lang.Object#equals(java.lang.Object)
+   */
+  @Override
+  public boolean equals(Object obj) {
+    if (!(obj instanceof RowFilter)) {
+      return false;
+    }
+    
+    if(!super.equals(obj)) {
+      return false;
+    }
+    
+    RowFilter other = (RowFilter) obj;
+    return (column == null ? (other.column == null) : (column.equals(other.column)))
+        && (input == null ? (other.input == null) : (input.equals(other.input)))
+        && (operation == null ? (other.operation == null) : (operation.equals(other.operation)));
+  }
+
+  /**
+   * @see java.lang.Object#hashCode()
+   */
+  @Override
+  public int hashCode() {
+    int hashCode = 11;
+    if (column != null)
+      hashCode += column.hashCode();
+    if(input != null)
+      hashCode += input.hashCode();
+    if (operation != null)
+      hashCode += operation.hashCode();
+    return hashCode;
+  }
+  
 }
