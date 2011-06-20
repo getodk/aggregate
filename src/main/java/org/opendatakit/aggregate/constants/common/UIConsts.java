@@ -25,6 +25,8 @@ public class UIConsts {
   public static final String PREVIEW_SET = "&" + PREVIEW_PARAM + "=true";
   public static final String HOST_PAGE_BASE_ADDR = "Aggregate.html";
 
+  public static final String FILTER_NONE = "none";
+
   // running locally
  // public static final String GOOGLE_MAP_KEY = "";
   

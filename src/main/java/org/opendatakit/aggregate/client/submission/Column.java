@@ -63,4 +63,38 @@ public class Column implements Serializable {
   public UIDisplayType getUiDisplayType() {
 	return uiDisplayType;
   }
+  
+  /**
+   * @see java.lang.Object#equals(java.lang.Object)
+   */
+  @Override
+  public boolean equals(Object obj) {
+    if (!(obj instanceof Column)) {
+      return false;
+    }
+    
+    
+    Column other = (Column) obj;
+    return (displayHeader == null ? (other.displayHeader == null) : (displayHeader.equals(other.displayHeader)))
+        && (columnEncoding == null ? (other.columnEncoding == null) : (columnEncoding.equals(other.columnEncoding)))
+        && (geopointColumnCode == null ? (other.geopointColumnCode == null) : (geopointColumnCode.equals(other.geopointColumnCode)))
+        && (uiDisplayType == null ? (other.uiDisplayType == null) : (uiDisplayType.equals(other.uiDisplayType)));
+  }
+
+  /**
+   * @see java.lang.Object#hashCode()
+   */
+  @Override
+  public int hashCode() {
+    int hashCode = 11;
+    if (displayHeader != null)
+      hashCode += displayHeader.hashCode();
+    if (columnEncoding != null)
+      hashCode += columnEncoding.hashCode();
+    if (geopointColumnCode != null)
+      hashCode += geopointColumnCode.hashCode();
+    if(uiDisplayType != null)
+      hashCode += uiDisplayType.hashCode();
+    return hashCode;
+  }
 }

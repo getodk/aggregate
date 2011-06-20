@@ -73,4 +73,35 @@ public class ColumnFilter extends Filter implements Serializable {
     this.columns.add(column);
   }
   
+  
+  /**
+   * @see java.lang.Object#equals(java.lang.Object)
+   */
+  @Override
+  public boolean equals(Object obj) {
+    if (!(obj instanceof ColumnFilter)) {
+      return false;
+    }
+    
+    if(!super.equals(obj)) {
+      return false;
+    }
+    
+    ColumnFilter other = (ColumnFilter) obj;
+    return (kr == null ? (other.kr == null) : (kr.equals(other.kr)))
+        && (columns == null ? (other.columns == null) : (columns.equals(other.columns)));
+  }
+
+  /**
+   * @see java.lang.Object#hashCode()
+   */
+  @Override
+  public int hashCode() {
+    int hashCode = 11;
+    if (kr != null)
+      hashCode += kr.hashCode();
+    if(columns != null)
+      hashCode += columns.hashCode();
+    return hashCode;
+  }
 }

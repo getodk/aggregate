@@ -16,7 +16,7 @@ public class FilterNavigationTable extends FlexTable{
   private FormNFilterSelectionTable formNFilterSelection;
   
   public FilterNavigationTable(FilterSubTab filterSubTab) {
-
+    this.filterSubTab = filterSubTab;
     formNFilterSelection = new FormNFilterSelectionTable(filterSubTab);
     setWidget(0, 0, formNFilterSelection);
     setHTML(0, 1, "<h2 id=\"form_name\"></h2>");

@@ -4,6 +4,7 @@ import org.opendatakit.aggregate.client.filter.FilterGroup;
 import org.opendatakit.aggregate.client.form.FormSummary;
 import org.opendatakit.aggregate.client.table.FilterNavigationTable;
 import org.opendatakit.aggregate.client.table.SubmissionTable;
+import org.opendatakit.aggregate.constants.common.UIConsts;
 
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -17,7 +18,7 @@ public class FilterSubTab extends VerticalPanel implements SubTabInterface {
 
   private FiltersDataPanel filtersPanel;
   private SubmissionPanel submissionPanel;
-  private FilterGroup currentFilterToDisplay;
+  private FilterGroup currentlyDisplayedFilterGroup;
   
   public FilterSubTab() {
     // create Nav Panel
@@ -41,26 +42,37 @@ public class FilterSubTab extends VerticalPanel implements SubTabInterface {
     filtersNSubmissions.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_JUSTIFY);
     
     add(filtersNSubmissions);
-    currentFilterToDisplay = new FilterGroup("Default", null, null);
+    currentlyDisplayedFilterGroup = new FilterGroup(UIConsts.FILTER_NONE, null, null);
   }
   
   public void switchForm(FormSummary form, FilterGroup filterGroup) {
     navTable.updateNavTable(form);
-    currentFilterToDisplay = filterGroup;
-    submissionPanel.update(filterGroup);
+    currentlyDisplayedFilterGroup = filterGroup;
+    filtersPanel.update(currentlyDisplayedFilterGroup);
+    submissionPanel.update(currentlyDisplayedFilterGroup);
   }
 
-  public void update() {
-    navTable.update();
-    filtersPanel.updateFilters(currentFilterToDisplay);
-    submissionPanel.update(currentFilterToDisplay);
+  public void switchFilterGroupWithinForm(FilterGroup filterGroup) {
+    // verify form remained the same, if not need to use switch form API
+    if(!currentlyDisplayedFilterGroup.getFormId().equals(filterGroup.getFormId())) {
+      return;
+    }
+    currentlyDisplayedFilterGroup = filterGroup;
+    filtersPanel.update(currentlyDisplayedFilterGroup);
+    submissionPanel.update(currentlyDisplayedFilterGroup);
   }
   
-  public FilterGroup getCurrentlyDisplayedFilter() {
-    return currentFilterToDisplay;
+  public void update() {
+    navTable.update();
+    filtersPanel.update(currentlyDisplayedFilterGroup);
+    submissionPanel.update(currentlyDisplayedFilterGroup);
+  }
+  
+  public FilterGroup getDisplayedFilterGroup() {
+    return currentlyDisplayedFilterGroup;
   }
 
-  public ListBox getCurrentFilterList() {
+  public ListBox getListOfPossibleFilterGroups() {
     return navTable.getCurrentFilterList();
   }
   

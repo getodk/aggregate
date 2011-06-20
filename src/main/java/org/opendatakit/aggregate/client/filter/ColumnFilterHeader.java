@@ -60,4 +60,31 @@ public class ColumnFilterHeader implements Serializable {
     return column;
   }
   
+  /**
+   * @see java.lang.Object#equals(java.lang.Object)
+   */
+  @Override
+  public boolean equals(Object obj) {
+    if (!(obj instanceof ColumnFilterHeader)) {
+      return false;
+    }
+    
+    
+    ColumnFilterHeader other = (ColumnFilterHeader) obj;
+    return (uri == null ? (other.uri == null) : (uri.equals(other.uri)))
+        && (column == null ? (other.column == null) : (column.equals(other.column)));
+  }
+
+  /**
+   * @see java.lang.Object#hashCode()
+   */
+  @Override
+  public int hashCode() {
+    int hashCode = 11;
+    if (uri != null)
+      hashCode += uri.hashCode();
+    if(column != null)
+      hashCode += column.hashCode();
+    return hashCode;
+  }
 }

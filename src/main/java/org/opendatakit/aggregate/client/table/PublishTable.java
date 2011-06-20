@@ -27,6 +27,9 @@ import com.google.gwt.user.client.ui.HTML;
  */
 public class PublishTable extends FlexTable {
 
+  private static final int HEADER_ROW = 0;
+  private static final int STARTING_ROW = HEADER_ROW + 1;
+  
   private static final String K_MAILTO = "mailto:";
   private static int PURGE_DATA = 0;
   private static int CREATED_BY = 1;
@@ -38,26 +41,26 @@ public class PublishTable extends FlexTable {
 
   public PublishTable() {
     super();
-    this.setText(1, PURGE_DATA, " ");
-    this.setText(1, CREATED_BY, "Created By");
-    this.setText(1, STATUS, "Status");
-    this.setText(1, TIME_PUBLISH_START, "Start Date");
-    this.setText(1, ACTION, "Action");
-    this.setText(1, TYPE, "Type");
-    this.setText(1, NAME, "Name");
-    this.addStyleName("dataTable");
-    this.getRowFormatter().addStyleName(1, "titleBar");
+    this.setText(HEADER_ROW, PURGE_DATA, " ");
+    this.setText(HEADER_ROW, CREATED_BY, "Created By");
+    this.setText(HEADER_ROW, STATUS, "Status");
+    this.setText(HEADER_ROW, TIME_PUBLISH_START, "Start Date");
+    this.setText(HEADER_ROW, ACTION, "Action");
+    this.setText(HEADER_ROW, TYPE, "Type");
+    this.setText(HEADER_ROW, NAME, "Name");
+    this.addStyleName("exportTable");
+    this.getRowFormatter().addStyleName(HEADER_ROW, "titleBar");
   }
 
   public void updatePublishPanel(String formId, ExternServSummary[] eSS) {
     if (eSS == null)
       return;
-    while (this.getRowCount() > 1)
-      this.removeRow(1);
+    while (this.getRowCount() > STARTING_ROW)
+      this.removeRow(STARTING_ROW);
     for (int i = 0; i < eSS.length; i++) {
       ExternServSummary e = eSS[i];
       PurgeButton purgeButton = new PurgeButton(formId, e);
-      this.setWidget(i + 1, PURGE_DATA, purgeButton);
+      this.setWidget(i + STARTING_ROW, PURGE_DATA, purgeButton);
       String user = e.getUser();
       String displayName;
       if (user.startsWith(K_MAILTO)) {
@@ -67,12 +70,12 @@ public class PublishTable extends FlexTable {
       } else {
         displayName = user;
       }
-      this.setText(i + 2, CREATED_BY, displayName);
-      this.setText(i + 2, STATUS, e.getStatus().toString());
-      this.setText(i + 2, TIME_PUBLISH_START, e.getTimeEstablished().toString());
-      this.setText(i + 2, ACTION, e.getPublicationOption().getDescriptionOfOption());
-      this.setText(i + 2, TYPE, e.getExternalServiceTypeName());
-      this.setWidget(i + 2, NAME, new HTML(e.getName()));
+      this.setText(i + STARTING_ROW, CREATED_BY, displayName);
+      this.setText(i + STARTING_ROW, STATUS, e.getStatus().toString());
+      this.setText(i + STARTING_ROW, TIME_PUBLISH_START, e.getTimeEstablished().toString());
+      this.setText(i + STARTING_ROW, ACTION, e.getPublicationOption().getDescriptionOfOption());
+      this.setText(i + STARTING_ROW, TYPE, e.getExternalServiceTypeName());
+      this.setWidget(i + STARTING_ROW, NAME, new HTML(e.getName()));
     }
   }
 
