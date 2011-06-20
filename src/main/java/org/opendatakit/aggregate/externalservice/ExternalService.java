@@ -16,7 +16,7 @@ package org.opendatakit.aggregate.externalservice;
 
 import java.util.List;
 
-import org.opendatakit.aggregate.client.permissions.ExternServSummary;
+import org.opendatakit.aggregate.client.externalserv.ExternServSummary;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
 import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;

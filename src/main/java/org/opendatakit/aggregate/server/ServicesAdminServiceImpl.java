@@ -23,7 +23,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 
 import org.opendatakit.aggregate.ContextFactory;
-import org.opendatakit.aggregate.client.permissions.ExternServSummary;
+import org.opendatakit.aggregate.client.externalserv.ExternServSummary;
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.common.ExternalServicePublicationOption;
@@ -49,7 +49,7 @@ import com.google.gdata.client.authn.oauth.OAuthHmacSha1Signer;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
 public class ServicesAdminServiceImpl extends RemoteServiceServlet implements
-    org.opendatakit.aggregate.client.permissions.ServicesAdminService {
+    org.opendatakit.aggregate.client.externalserv.ServicesAdminService {
 
   /**
 	 * 

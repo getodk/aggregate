@@ -16,7 +16,7 @@
 
 package org.opendatakit.aggregate.client.table;
 
-import org.opendatakit.aggregate.client.permissions.ExternServSummary;
+import org.opendatakit.aggregate.client.externalserv.ExternServSummary;
 import org.opendatakit.aggregate.client.widgets.PurgeButton;
 
 import com.google.gwt.user.client.ui.FlexTable;

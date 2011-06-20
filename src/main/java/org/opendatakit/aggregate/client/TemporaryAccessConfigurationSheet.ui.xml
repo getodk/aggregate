@@ -1,0 +1,30 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+	xmlns:g="urn:import:com.google.gwt.user.client.ui"
+	xmlns:c="urn:import:com.google.gwt.user.cellview.client">
+<g:HTMLPanel>
+<h1>Configure Site Access</h1>
+<h3>Edit Users</h3>
+	<g:CheckBox ui:field="anonymousSubmitters">Accept submissions from
+unidentified sources (e.g., from ODK Collect 1.1.5 and earlier, or people without accounts).</g:CheckBox>
+	<br/>
+	<g:CheckBox ui:field="anonymousAttachmentViewers">Allow anonymous
+retrieval of images, audio and video data (needed for GoogleEarth balloon displays)</g:CheckBox>
+	<br/>
+<g:Label ui:field="errorMessage" styleName="error_message" visible="false"/>
+<c:CellTable ui:field="userTable" />
+<br/>
+<g:Button  styleName="gwt-Button" ui:field="button" text="Update" />
+<hr/>
+<h3>Add Users</h3>
+<p>Enter the usernames or e-mail addresses to add to the
+list of users in the above table</p>
+<g:TextArea visibleLines="3" characterWidth="80" ui:field="addedUsers" />
+<br/>
+<g:Button styleName="gwt-Button" ui:field="addNow" text="Add"/>
+<br/>
+<hr/>
+<br/>
+<g:Button  styleName="gwt-Button" ui:field="gotoAdvanced" text="Advanced" />
+</g:HTMLPanel>
+</ui:UiBinder> 

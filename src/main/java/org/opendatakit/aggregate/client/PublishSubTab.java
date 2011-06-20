@@ -1,9 +1,9 @@
 package org.opendatakit.aggregate.client;
 
+import org.opendatakit.aggregate.client.externalserv.ExternServSummary;
+import org.opendatakit.aggregate.client.externalserv.ServicesAdminServiceAsync;
 import org.opendatakit.aggregate.client.form.FormServiceAsync;
 import org.opendatakit.aggregate.client.form.FormSummary;
-import org.opendatakit.aggregate.client.permissions.ExternServSummary;
-import org.opendatakit.aggregate.client.permissions.ServicesAdminServiceAsync;
 import org.opendatakit.aggregate.client.table.PublishTable;
 
 import com.google.gwt.event.dom.client.ChangeEvent;

@@ -41,7 +41,6 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class AggregateUI implements EntryPoint {
 
-  private static final String TOGGLE_AUTHENTICATION_STATUS = "toggle-authentication-status";
   private static final String[] MAIN_MENU = { Tabs.SUBMISSIONS.getTabLabel(),
       Tabs.MANAGEMENT.getTabLabel() };
   private UrlHash hash;
@@ -171,13 +170,7 @@ public class AggregateUI implements EntryPoint {
           panel.selectTab(0);
           timer.setCurrentSubTab(ManageTabUI.MANAGEMENT_MENU[0]);
           hash.put();
-        } else if (s.equals(TOGGLE_AUTHENTICATION_STATUS)) {
-          if (userInfo != null && userInfo.getType() != UserType.ANONYMOUS) {
-            redirect(GWT.getHostPageBaseURL() + "/" + LOGOUT_URL_PATH);
-          } else {
-            redirect(GWT.getHostPageBaseURL() + "/" + LOGIN_URL_PATH);
-          }
-        }
+        } 
       }
     };
   }

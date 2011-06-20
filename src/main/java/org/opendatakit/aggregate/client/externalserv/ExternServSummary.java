@@ -14,7 +14,7 @@
  * the License.
  */
 
-package org.opendatakit.aggregate.client.permissions;
+package org.opendatakit.aggregate.client.externalserv;
 
 import java.io.Serializable;
 import java.util.Date;

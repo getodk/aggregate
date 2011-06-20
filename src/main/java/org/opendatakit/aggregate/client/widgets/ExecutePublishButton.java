@@ -3,7 +3,7 @@ package org.opendatakit.aggregate.client.widgets;
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.SecureGWT;
 import org.opendatakit.aggregate.client.UrlHash;
-import org.opendatakit.aggregate.client.permissions.ServicesAdminServiceAsync;
+import org.opendatakit.aggregate.client.externalserv.ServicesAdminServiceAsync;
 import org.opendatakit.aggregate.client.popups.ExternalServicePopup;
 import org.opendatakit.aggregate.constants.common.ExternalServicePublicationOption;
 

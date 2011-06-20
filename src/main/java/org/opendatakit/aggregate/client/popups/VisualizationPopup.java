@@ -74,11 +74,11 @@ public class VisualizationPopup extends PopupPanel {
   private List<Column> headers;
   private List<SubmissionUI> submissions;
   
-  private final FlexTable dropDownsTable = new FlexTable();
-  private final ListBox chartType = new ListBox();
-  private final ListBox firstData = new ListBox();
-  private final ListBox secondData = new ListBox();
-  private final Image chart = new Image();
+  private FlexTable dropDownsTable = new FlexTable();
+  private ListBox chartType = new ListBox();
+  private ListBox firstData = new ListBox();
+  private ListBox secondData = new ListBox();
+  private Image chart = new Image();
   private FlowPanel mapSpace = new FlowPanel();
   private boolean mapsApiLoaded = false;
   private List<KmlSettingOption> geoPoints = new ArrayList<KmlSettingOption>();
@@ -184,6 +184,10 @@ public class VisualizationPopup extends PopupPanel {
       }
     });
 
+    for(Column header : headers) {
+      firstData.addItem(header.getDisplayHeader());
+    }
+    
     FormServiceAsync formSvc = SecureGWT.get().createFormService();
     formSvc.getGpsCoordnates(formId, new AsyncCallback<KmlSettings>() {
       public void onFailure(Throwable c) {

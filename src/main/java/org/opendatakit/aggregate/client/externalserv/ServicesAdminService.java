@@ -14,7 +14,7 @@
  * the License.
  */
 
-package org.opendatakit.aggregate.client.permissions;
+package org.opendatakit.aggregate.client.externalserv;
 
 import org.opendatakit.aggregate.constants.common.ExternalServicePublicationOption;
 import org.opendatakit.common.security.client.exception.AccessDeniedException;
