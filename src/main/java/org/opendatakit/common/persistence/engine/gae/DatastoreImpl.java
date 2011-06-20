@@ -243,7 +243,7 @@ public class DatastoreImpl implements Datastore {
 					row.setDateField(d, date);
 					break;
 				case DECIMAL:
-					BigDecimal bd = new BigDecimal((String) o);
+					BigDecimal bd = new BigDecimal((Double) o);
 					row.setNumericField(d, bd);
 					break;
 				case INTEGER:
@@ -324,7 +324,7 @@ public class DatastoreImpl implements Datastore {
 					break;
 				case DECIMAL:
 					BigDecimal bd = entity.getNumericField(d);
-					e.setProperty(d.getName(), bd.toString());
+					e.setProperty(d.getName(), bd.doubleValue());
 					break;
 				case INTEGER:
 					e.setProperty(d.getName(), entity.getLongField(d));

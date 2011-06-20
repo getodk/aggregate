@@ -28,17 +28,16 @@ import java.util.Set;
 
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
+import org.opendatakit.common.persistence.DataField.DataType;
 import org.opendatakit.common.persistence.EntityKey;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.security.User;
 
-import com.google.appengine.api.datastore.DatastoreNeedIndexException;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.FetchOptions;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.FilterOperator;
-import com.google.appengine.api.datastore.Query.SortDirection;
 
 /**
  * 
@@ -64,7 +63,6 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
 	private final CommonFieldsBase relation;
 	private final DatastoreImpl datastore;
 	private final User user;
-	private final com.google.appengine.api.datastore.Query query;
 	
 	/**
 	 * Track the attributes that we are querying and sorting on...
@@ -201,7 +199,19 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
 
 		@Override
 		void setFilter(com.google.appengine.api.datastore.Query q) {
-			q.addFilter(attribute.getName(), operationMap.get(op), value);
+			if ( attribute.getDataType() == DataType.DECIMAL ) {
+				Double d = null;
+				if ( value != null ) {
+					if ( value instanceof BigDecimal ) {
+						d = ((BigDecimal) value).doubleValue();
+					} else {
+						d = new BigDecimal(value.toString()).doubleValue();
+					}
+				}
+				q.addFilter(attribute.getName(), operationMap.get(op), d);
+			} else {
+				q.addFilter(attribute.getName(), operationMap.get(op), value);
+			}
 		}
 	}
 	
@@ -224,7 +234,23 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
 
 		@Override
 		void setFilter(com.google.appengine.api.datastore.Query q) {
-			q.addFilter(attribute.getName(), FilterOperator.IN, valueSet);
+			if ( attribute.getDataType() == DataType.DECIMAL ) {
+				Set<Double> dvSet = new HashSet<Double>();
+				for ( Object value : valueSet ) {
+					Double d = null;
+					if ( value != null ) {
+						if ( value instanceof BigDecimal ) {
+							d = ((BigDecimal) value).doubleValue();
+						} else {
+							d = new BigDecimal(value.toString()).doubleValue();
+						}
+					}
+					dvSet.add(d);
+				}
+				q.addFilter(attribute.getName(), FilterOperator.IN, dvSet);
+			} else {
+				q.addFilter(attribute.getName(), FilterOperator.IN, valueSet);
+			}
 		}
 	}
 	
@@ -264,29 +290,23 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
 		this.relation = relation;
 		this.datastore = datastore;
 		this.user = user;
-		query = new com.google.appengine.api.datastore.Query(
-					relation.getSchemaName() + "." + relation.getTableName());
 	}
 
 	@Override
 	public void addFilter(DataField attribute, FilterOperation op, Object value) {
-		query.addFilter(attribute.getName(), operationMap.get(op), value);
+		// do everything locally except the first one (later)...
 		filterList.add(new SimpleFilterTracker(attribute, op, value));
 	}
 
 	@Override
 	public void addValueSetFilter(DataField attribute, Collection<?> valueSet) {
-		query.addFilter(attribute.getName(), FilterOperator.IN, valueSet);
+		// do everything locally except the first one (later)...
 		filterList.add(new ValueSetFilterTracker(attribute, valueSet));
 	}
 
 	@Override
 	public void addSort(DataField attribute, Direction direction) {
-		if (direction.equals(Direction.ASCENDING)) {
-			query.addSort(attribute.getName(), SortDirection.ASCENDING);
-		} else {
-			query.addSort(attribute.getName(), SortDirection.DESCENDING);
-		}
+		// do the sort locally -- later...
 		sortList.add(new SortTracker(attribute, direction));
 	}
 
@@ -306,19 +326,6 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
 		 * by the first filter condition. 
 		 */
 		boolean filterAndSortLocally = true;
-		try {
-			if (!filterAndSortLocally) {
-				PreparedQuery preparedQuery = ds.prepare(query);
-				if ( fetchLimit == 0 ) {
-					gaeEntities = preparedQuery.asList(FetchOptions.Builder.withDefaults());
-				} else {
-					gaeEntities = preparedQuery.asList(FetchOptions.Builder.withLimit(fetchLimit));
-				}
-			}
-		} catch ( DatastoreNeedIndexException e ) {
-			 e.printStackTrace();
-			 filterAndSortLocally = true;
-		}
 		
 		if ( filterAndSortLocally) {
 			gaeEntities = null;
@@ -360,7 +367,6 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
 				}
 			}
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 			throw new ODKDatastoreException(e);
 		}
