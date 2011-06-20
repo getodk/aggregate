@@ -43,7 +43,6 @@
         <intercept-url pattern="/Aggregate.html" access="hasRole('ROLE_USER') or hasRole('ROLE_ACCESS_ADMIN')" />
         <intercept-url pattern="/ui/upload" access="hasRole('ROLE_FORM_ADMIN')" />
         <intercept-url pattern="/ui/submission" access="hasRole('ROLE_SUBMISSION_UPLOAD')"  />
-		<intercept-url pattern="/favicon.ico" access="true" />
 		<!--  secure the client interfaces -->
 		<intercept-url pattern="/aggregateui/filterservice" access="hasRole('ROLE_ANALYST')" />
 		<intercept-url pattern="/aggregateui/formservice" access="hasRole('ROLE_ANALYST')" />
@@ -55,12 +54,18 @@
 		<intercept-url pattern="/aggregateui/securityadminservice" access="hasRole('ROLE_ACCESS_ADMIN')" />
 		<!--  and the client needs to get at all their javascript which is also under the /aggregateui path -->
 		<intercept-url pattern="/aggregateui/**" access="true" />
-		<intercept-url pattern="/odk_color.png" access="true" />
-		<intercept-url pattern="/index.html" access="true" />
-        <intercept-url pattern="/change-applied.html" access="true" /> <!-- Intermediate page redirecting to logout from access mgmt -->
-        <intercept-url pattern="/www/index.html" access="true" /> <!-- Intermediate page redirecting to access mgmt -->
-		<intercept-url pattern="/logout.html" access="true" />
+		<intercept-url pattern="/images/**" access="true" />
+		<intercept-url pattern="/javascript/**" access="true" />
 		<intercept-url pattern="/res/**" access="true" />
+		<intercept-url pattern="/stylesheets/**" access="true" />
+		<intercept-url pattern="/access-denied.html" access="true" />
+		<intercept-url pattern="/AggregateUI.css" access="true" />
+        <intercept-url pattern="/change-applied.html" access="true" /> <!-- Intermediate page redirecting to logout from access mgmt -->
+		<intercept-url pattern="/favicon.ico" access="true" />
+		<intercept-url pattern="/index.html" access="true" />
+		<intercept-url pattern="/logout.html" access="true" />
+		<intercept-url pattern="/odk_color.png" access="true" />
+        <intercept-url pattern="/www/index.html" access="true" /> <!-- Intermediate page redirecting to access mgmt -->
 		<intercept-url pattern="/openid_login.html" access="isAnonymous()" />
 		<intercept-url pattern="/local_login.html" access="isFullyAuthenticated() and hasRole('AUTH_LOCAL')" />
 		<intercept-url pattern="/UploadSubmissionsApplet" access="hasRole('ROLE_SUBMISSION_UPLOAD')" />
