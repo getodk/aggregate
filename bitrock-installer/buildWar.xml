@@ -18,13 +18,7 @@
     <width>700</width>
     <windowsExecutableIcon>files/opendatakit.ico</windowsExecutableIcon>
     <windowsUninstallerExecutableIcon>files/opendatakit.ico</windowsUninstallerExecutableIcon>
-    <customLanguageFileList>
-		<language>
-		  <code>en</code>
-		  <file>tagfile-en.lng</file>
-		</language>
-	</customLanguageFileList>
-	<componentList>
+    <componentList>
         <include>
             <file>components/params.xml</file>
         </include>
@@ -32,6 +26,12 @@
             <file>components/configure_war.xml</file>
         </include>
     </componentList>
+    <customLanguageFileList>
+        <language>
+            <code>en</code>
+            <file>tagfile-en.lng</file>
+        </language>
+    </customLanguageFileList>
     <finalPageActionList>
         <runProgram>
             <program>CScript.exe</program>
