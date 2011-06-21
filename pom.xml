@@ -333,7 +333,7 @@
 		  <scope>compile</scope>
 		</dependency>
 		<dependency>
-			<!-- This library is the GaeHttpClient project in the Aggregate Components tree.
+			<!-- This library is the TomcatUtils project in the Aggregate Components tree.
 			  use "mvn install" to install it into your local repository.
 		  -->
 			<groupId>org.opendatakit</groupId>
@@ -548,12 +548,12 @@
 			<version>${gooogle.appengine.sdk.version}</version>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
+		<!-- <dependency>
 			<groupId>com.google.appengine</groupId>
 			<artifactId>appengine-local-runtime-shared</artifactId>
 			<version>${gooogle.appengine.sdk.version}</version>
 			<scope>test</scope>
-		</dependency>
+		</dependency> -->
 	    <!-- Test dependencies -->
 		<dependency>
 		  <groupId>org.seleniumhq.selenium.client-drivers</groupId>
