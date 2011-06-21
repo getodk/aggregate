@@ -33,7 +33,7 @@ import org.opendatakit.common.constants.BasicConsts;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
 
-import com.ibm.icu.text.DecimalFormat;
+import java.text.DecimalFormat;
 
 /**
  * 
