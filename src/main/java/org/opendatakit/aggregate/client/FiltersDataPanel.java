@@ -11,6 +11,7 @@ import org.opendatakit.aggregate.client.filter.RowFilter;
 import org.opendatakit.aggregate.client.widgets.AddFilterButton;
 import org.opendatakit.aggregate.client.widgets.DeleteFilterButton;
 import org.opendatakit.aggregate.client.widgets.SaveFilterGroupButton;
+import org.opendatakit.aggregate.client.widgets.CopyFilterGroupButton;
 import org.opendatakit.aggregate.constants.common.UIConsts;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -44,6 +45,10 @@ public class FiltersDataPanel extends FlowPanel {
     // clear the current filters being displayed so we don't get duplicates
     root.removeItems();
   
+    if(group.getFormId() == null) {
+      return;
+    }
+    
     // create filter header
     FlexTable filterHeader = new FlexTable();
     String filterName = group.getName();
@@ -53,6 +58,12 @@ public class FiltersDataPanel extends FlowPanel {
     
     filterHeader.setWidget(0, 0, new Label(filterName));
     filterHeader.setWidget(0, 1, new SaveFilterGroupButton(parentSubTab));
+
+    if (group.getName() != null) {
+      if (!group.getName().equals(UIConsts.FILTER_NONE)) {
+        filterHeader.setWidget(0, 2, new CopyFilterGroupButton(parentSubTab));
+      }
+    }
 
     TreeItem currentFilterGroup = new TreeItem(filterHeader);
     
