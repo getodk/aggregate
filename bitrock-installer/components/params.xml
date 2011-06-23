@@ -92,7 +92,7 @@
                     <description>Uses a PostgreSQL database and an Apache Tomcat 6 webserver that you install.</description>
                     <image></image>
                     <text>PostgreSQL</text>
-                    <value>postgres</value>
+                    <value>postgresql</value>
                 </option>
             </optionList>
         </choiceParameter>
@@ -172,25 +172,29 @@
                         <compareText>
                             <logic>equals</logic>
                             <text>${platform}</text>
-                            <value>postgres</value>
+                            <value>postgresql</value>
                         </compareText>
                     </ruleList>
                 </ruleGroup>
             </ruleList>
         </choiceParameter>
-        <labelParameter>
+        <linkParameter>
 	<!-- infoTomcat -->
 	<name>infoTomcat</name>
             <title>Pre-installation Requirements - Apache Tomcat</title>
-            <description></description>
+            <description>http://tomcat.apache.org/download-60.cgi</description>
             <explanation>Before continuing, you should download and install an Apache Tomcat 6 webserver within which you will run Aggregate (instructions on installing your chosen database will be presented later).  
 
-Apache Tomcat 6 can be downloaded from here: http://tomcat.apache.org/download-60.cgi
+Apache Tomcat 6 can be downloaded from the link below.
 
 ODK Aggregate requires that Apache Tomcat's HTTP/1.1 Connector Port be configured as either port 8080 or port 80.  By default, Apache Tomcat uses port 8080.
 </explanation>
-            <image></image>
             <insertAfter>${install_tomcat}</insertAfter>
+            <clickedActionList>
+                <launchBrowser>
+                    <url>http://tomcat.apache.org/download-60.cgi</url>
+                </launchBrowser>
+            </clickedActionList>
             <ruleList>
                 <compareText>
                     <logic>does_not_equal</logic>
@@ -198,7 +202,7 @@ ODK Aggregate requires that Apache Tomcat's HTTP/1.1 Connector Port be configure
                     <value>gae</value>
                 </compareText>
             </ruleList>
-        </labelParameter>
+        </linkParameter>
         <directoryParameter>
 	<!-- tomcat_installdir -->
 	<name>tomcat_installdir</name>
@@ -241,16 +245,33 @@ Regardless of whether or not you have an SSL certificate, logins are always hand
                 </compareText>
             </ruleList>
         </labelParameter>
-        <booleanParameter>
-	<!-- tomcat_authentication_should_configure -->
-	<name>tomcat_authentication_should_configure</name>
+        <parameterGroup>
+            <name>tomcat_authentication_should_configure_group</name>
             <title>Apache Tomcat SSL configuration</title>
-            <description>Yes, I have an SSL certificate.</description>
-            <explanation>Do you have an SSL certificate?  Please refer to the Apache Tomcat documentation for how to install the certificate on your system.</explanation>
+            <explanation>Do you have an SSL certificate?  Please refer to the Apache Tomcat documentation for how to install the certificate on your system.  Within the Tomcat 6.0 documentation, refer to the User Guide section 12: SSL.</explanation>
             <value></value>
-            <default>false</default>
-            <displayStyle>checkbox-left</displayStyle>
+            <default></default>
             <insertAfter>${tomcat_authentication_info}</insertAfter>
+            <parameterList>
+                <linkParameter>
+                    <name>ssl_how_to</name>
+                    <description>http://tomcat.apache.org/tomcat-6.0-doc/ssl-howto.html</description>
+                    <explanation></explanation>
+                    <clickedActionList>
+                        <launchBrowser>
+                            <url>http://tomcat.apache.org/tomcat-6.0-doc/ssl-howto.html</url>
+                        </launchBrowser>
+                    </clickedActionList>
+                </linkParameter>
+                <booleanParameter>
+                    <name>tomcat_authentication_should_configure</name>
+                    <description>Yes, I have an SSL certificate.</description>
+                    <explanation></explanation>
+                    <value></value>
+                    <default>false</default>
+                    <displayStyle>checkbox-left</displayStyle>
+                </booleanParameter>
+            </parameterList>
             <ruleList>
                 <compareText>
                     <logic>does_not_equal</logic>
@@ -258,7 +279,7 @@ Regardless of whether or not you have an SSL certificate, logins are always hand
                     <value>gae</value>
                 </compareText>
             </ruleList>
-        </booleanParameter>
+        </parameterGroup>
         <choiceParameter>
 	<!-- tomcat_port_choice -->
 	<name>tomcat_port_choice</name>
@@ -272,7 +293,7 @@ If an SSL certificate was installed, you must configure the HTTPS/1.1 Connector 
             <default>altPorts</default>
             <allowEmptyValue>0</allowEmptyValue>
             <displayType>radiobuttons</displayType>
-            <insertAfter>${tomcat_authentication_should_configure}</insertAfter>
+            <insertAfter>${tomcat_authentication_should_configure_group}</insertAfter>
             <ordering>default</ordering>
             <width>30</width>
             <optionList>
@@ -436,51 +457,54 @@ Leave this blank to use the fully-qualified name of this computer.</explanation>
                         <compareText>
                             <logic>equals</logic>
                             <text>${platform}</text>
-                            <value>postgres</value>
+                            <value>postgresql</value>
                         </compareText>
                     </ruleList>
                 </ruleGroup>
             </ruleList>
         </choiceParameter>
-        <labelParameter>
+        <linkParameter>
 	<!-- infoDatabase -->
 	<name>infoDatabasePostgreSQL</name>
             <title>Pre-installation Database Requirements - PostgreSQL</title>
-            <description></description>
+            <description>http://www.postgresql.org/</description>
             <explanation>We have developed and tested against PostgreSQL 9.0
 
-Download and install PostgreSQL from http://www.postgresql.org/
+Download and install PostgreSQL from the link below.
 
 Make note of any non-default values you've entered during the installation process.</explanation>
-            <image></image>
             <insertAfter>${install_db}</insertAfter>
+            <clickedActionList>
+                <launchBrowser>
+                    <url>http://www.postgresql.org</url>
+                </launchBrowser>
+            </clickedActionList>
             <ruleList>
                 <compareText>
                     <logic>equals</logic>
                     <text>${platform}</text>
-                    <value>postgres</value>
+                    <value>postgresql</value>
                 </compareText>
             </ruleList>
-        </labelParameter>
-        <labelParameter>
+        </linkParameter>
+        <linkParameter>
 	<!-- infoDatabase -->
 	<name>infoDatabaseMySQL</name>
             <title>Pre-installation Database Requirements - MySQL</title>
-            <description></description>
+            <description>http://www.mysql.com/downloads/</description>
             <explanation>We have developed and tested against MySQL 5.1
 
-Please complete the following tasks now:
-(1) Download and install MySQL from http://www.mysql.com/
-Make note of any non-default values you have entered during the installation process.
+Please download and install MySQL from the link below.
 
-(2) Download the MySQL Connector/J zip file from this same site.  
-Unzip or extract the contents of this file to a directory on your system.
-The top-level directory should contain a file named:
-  mysql-connector-java-...-bin.jar
-Copy this file into the /lib directory of your Apache Tomcat 6 installation.
+Choose the Downloads (GA) tab, and select the MySQL Community Server edition.
+Make note of any non-default values you have entered during the installation process.
 </explanation>
-            <image></image>
             <insertAfter>${install_db}</insertAfter>
+            <clickedActionList>
+                <launchBrowser>
+                    <url>http://www.mysql.com/downloads/</url>
+                </launchBrowser>
+            </clickedActionList>
             <ruleList>
                 <compareText>
                     <logic>equals</logic>
@@ -488,7 +512,36 @@ Copy this file into the /lib directory of your Apache Tomcat 6 installation.
                     <value>mysql</value>
                 </compareText>
             </ruleList>
-        </labelParameter>
+        </linkParameter>
+        <linkParameter>
+	<!-- infoDatabase -->
+	<name>infoDatabaseMySQL2</name>
+            <title>Pre-installation Database Requirements - MySQL (concluded)</title>
+            <description>http://www.mysql.com/downloads/connector/j/5.1.html</description>
+            <explanation>You also must install a MySQL library on the Apache Tomcat instance.
+Please download the MySQL Connector/J zip file from the link below.
+
+Unzip or extract the contents of this file to a directory on your system.
+The top-level directory should contain a file named:
+
+  mysql-connector-java-...-bin.jar
+  
+Copy this file into the /lib directory of your Apache Tomcat 6 installation.
+</explanation>
+            <insertAfter>${install_db}</insertAfter>
+            <clickedActionList>
+                <launchBrowser>
+                    <url>http://www.mysql.com/downloads/connector/j/5.1.html</url>
+                </launchBrowser>
+            </clickedActionList>
+            <ruleList>
+                <compareText>
+                    <logic>equals</logic>
+                    <text>${platform}</text>
+                    <value>mysql</value>
+                </compareText>
+            </ruleList>
+        </linkParameter>
         <directoryParameter>
 	<!-- database_installdir -->
 	<name>database_installdir</name>
@@ -646,7 +699,7 @@ The installer will generate a script that can be run on the database server to e
                         <compareText>
                             <logic>equals</logic>
                             <text>${platform}</text>
-                            <value>postgres</value>
+                            <value>postgresql</value>
                         </compareText>
                     </ruleList>
                 </ruleGroup>
@@ -685,7 +738,7 @@ The installer will generate a script that can be run on the database server to c
                         <compareText>
                             <logic>equals</logic>
                             <text>${platform}</text>
-                            <value>postgres</value>
+                            <value>postgresql</value>
                         </compareText>
                     </ruleList>
                 </stringParameter>
@@ -702,7 +755,7 @@ The installer will generate a script that can be run on the database server to c
                         <compareText>
                             <logic>equals</logic>
                             <text>${platform}</text>
-                            <value>postgres</value>
+                            <value>postgresql</value>
                         </compareText>
                     </ruleList>
                 </ruleGroup>
@@ -783,20 +836,35 @@ You must give a complete Email address (e.g., username@gmail.com ).
                 </passwordParameter>
             </parameterList>
         </parameterGroup>
-        <stringParameter>
-	<!--  app_id -->
-	<name>app_id</name>
+        <parameterGroup>
+            <name>app_id_group</name>
             <title>Google AppEngine application ID</title>
-            <description>Please enter your application id:</description>
-            <explanation>Before continuing, you should obtain an application identifier in Google's AppEngine cloud, go to:
-    https://appengine.google.com/ 
-and create an application identifier to be used for Aggregate by clicking the 'Create Application' button on that page. 
+            <explanation>Before continuing, you should obtain an application identifier in Google's AppEngine cloud. Click the link below and select the 'Create Application' button on that page to create an application identifier. 
 
 If you are replacing an existing application already on appspot, the application identifier is the leftmost portion of the appspot.com URL. For example, if your application is at 'opendatakit.appspot.com' you would enter 'opendatakit' below.</explanation>
             <value></value>
             <default></default>
-            <allowEmptyValue>0</allowEmptyValue>
-            <width>30</width>
+            <parameterList>
+                <linkParameter>
+                    <name>appengine_link</name>
+                    <description>https://appengine.google.com/</description>
+                    <explanation></explanation>
+                    <clickedActionList>
+                        <launchBrowser>
+                            <url>https://appengine.google.com/</url>
+                        </launchBrowser>
+                    </clickedActionList>
+                </linkParameter>
+                <stringParameter>
+                    <name>app_id</name>
+                    <description>Please enter your application id:</description>
+                    <explanation></explanation>
+                    <value></value>
+                    <default></default>
+                    <allowEmptyValue>0</allowEmptyValue>
+                    <width>30</width>
+                </stringParameter>
+            </parameterList>
             <ruleList>
                 <compareText>
                     <logic>equals</logic>
@@ -804,7 +872,7 @@ If you are replacing an existing application already on appspot, the application
                     <value>gae</value>
                 </compareText>
             </ruleList>
-        </stringParameter>
+        </parameterGroup>
         <choiceParameter>
 	<!-- comm_sec_option -->
 	<name>comm_sec_option</name>
@@ -1133,12 +1201,13 @@ Please create and select this directory now.</explanation>
     </postInstallationActionList>
     <preInstallationActionList>
         <autodetectJava>
+            <customErrorMessage>You must have a Java 1.6 JRE installed.  Go to http://www.java.com/getjava/index.jsp</customErrorMessage>
             <promptUser>0</promptUser>
             <validVersionList>
                 <validVersion>
                     <maxVersion></maxVersion>
                     <minVersion>1.6</minVersion>
-                    <requireJDK>1</requireJDK>
+                    <requireJDK>0</requireJDK>
                     <vendor></vendor>
                 </validVersion>
             </validVersionList>

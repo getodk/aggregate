@@ -39,7 +39,7 @@
 				</includes>
 			</resource>
 			<resource>
-				<targetPath>${conf.directory}/postgres</targetPath>
+				<targetPath>${conf.directory}/postgresql</targetPath> <!-- name changes to postgresql -->
 				<filtering>false</filtering>
 				<directory>${toplevel.directory}/src/main/resources/postgres/</directory>
 				<includes>

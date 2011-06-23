@@ -60,7 +60,6 @@ public class XFormsListServlet extends ServletUtilBase {
   public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
    CallingContext cc = ContextFactory.getCallingContext(this, req);
     addOpenRosaHeaders(resp);
-    addOpenRosaHeaders(resp);
     
     try {
       QueryFormList formsList = new QueryFormList(false, cc);
