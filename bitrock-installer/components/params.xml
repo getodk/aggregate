@@ -1201,12 +1201,13 @@ Please create and select this directory now.</explanation>
     </postInstallationActionList>
     <preInstallationActionList>
         <autodetectJava>
+            <customErrorMessage>You must have a Java 1.6 JRE installed.  Go to http://www.java.com/getjava/index.jsp</customErrorMessage>
             <promptUser>0</promptUser>
             <validVersionList>
                 <validVersion>
                     <maxVersion></maxVersion>
                     <minVersion>1.6</minVersion>
-                    <requireJDK>1</requireJDK>
+                    <requireJDK>0</requireJDK>
                     <vendor></vendor>
                 </validVersion>
             </validVersionList>
