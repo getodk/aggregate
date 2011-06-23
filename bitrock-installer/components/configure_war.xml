@@ -11,7 +11,7 @@
             <name>temp</name>
             <platforms>all</platforms>
             <distributionFileList>
-			<!-- as follows:
+	<!-- as follows:
 			files/conf - configuration extracted from maven build tree.
 			files/mf - fake Manifest.mf directory structure
 			files/generate_uuid - GenerateUUID class for printing UUIDs to stdout
@@ -19,25 +19,25 @@
 			files/ODKAggregate.war - war file minus site-specific settings.
 			files/appengine-web.xml - copy of the appengine-web.xml (so we can update it)
 			-->
-			<distributionDirectory>
-				<origin>files/conf</origin>
-			</distributionDirectory>
-			<distributionDirectory>
-				<origin>files/mf</origin>
-			</distributionDirectory>
-			<distributionDirectory>
-				<origin>files/generate_uuid</origin>
-			</distributionDirectory>
-			<distributionDirectory>
-				<origin>files/qualified_hostname</origin>
-			</distributionDirectory>
-			<distributionFile>
-				<origin>files/ODKAggregate.war</origin>
-			</distributionFile>
-			<distributionFile>
-				<origin>files/appengine-web.xml</origin>
-			</distributionFile>
-		</distributionFileList>
+	<distributionDirectory>
+                    <origin>files/conf</origin>
+                </distributionDirectory>
+                <distributionDirectory>
+                    <origin>files/mf</origin>
+                </distributionDirectory>
+                <distributionDirectory>
+                    <origin>files/generate_uuid</origin>
+                </distributionDirectory>
+                <distributionDirectory>
+                    <origin>files/qualified_hostname</origin>
+                </distributionDirectory>
+                <distributionFile>
+                    <origin>files/ODKAggregate.war</origin>
+                </distributionFile>
+                <distributionFile>
+                    <origin>files/appengine-web.xml</origin>
+                </distributionFile>
+            </distributionFileList>
         </folder>
         <folder>
             <description>gae scripts</description>
@@ -400,39 +400,40 @@
             </actionList>
         </actionGroup>
         <deleteFile>
-			<path>${temp_dir}/cfg-war</path>
+            <path>${temp_dir}/cfg-war</path>
         </deleteFile>
-		<createDirectory>
-			<path>${temp_dir}/cfg-war</path>
+        <createDirectory>
+            <path>${temp_dir}/cfg-war</path>
         </createDirectory>
-		<unzip>
-			<destinationDirectory>${temp_dir}/cfg-war</destinationDirectory>
-			<zipFile>${temp_dir}/ODKAggregate.war</zipFile>
+        <unzip>
+            <destinationDirectory>${temp_dir}/cfg-war</destinationDirectory>
             <progressText>Exploding ODKAggregate.war</progressText>
-		</unzip>
+            <zipFile>${temp_dir}/ODKAggregate.war</zipFile>
+        </unzip>
         <deleteFile>
-			<path>${temp_dir}/jarBody</path>
+            <path>${temp_dir}/jarBody</path>
         </deleteFile>
-		<createDirectory>
-			<path>${temp_dir}/jarBody</path>
+        <createDirectory>
+            <path>${temp_dir}/jarBody</path>
         </createDirectory>
-		<copyFile>
-			<destination>${temp_dir}/jarBody</destination>
-			<origin>${temp_dir}/conf/common/*</origin>
+        <copyFile>
+            <destination>${temp_dir}/jarBody</destination>
+            <origin>${temp_dir}/conf/common/*</origin>
         </copyFile>
-		<copyFile>
-			<destination>${temp_dir}/jarBody</destination>
-			<origin>${temp_dir}/conf/${platform}/*</origin>
+        <copyFile>
+            <destination>${temp_dir}/jarBody</destination>
+            <origin>${temp_dir}/conf/${platform}/*</origin>
         </copyFile>
-		<copyFile>
-			<destination>${temp_dir}/jarBody</destination>
-			<origin>${temp_dir}/mf/*</origin>
+        <copyFile>
+            <destination>${temp_dir}/jarBody</destination>
+            <origin>${temp_dir}/mf/*</origin>
         </copyFile>
-        <zip> <!-- create the settings jar -->
-            <baseDirectory>${temp_dir}/jarBody</baseDirectory>
+        <zip>
+	<!-- create the settings jar -->
+	<baseDirectory>${temp_dir}/jarBody</baseDirectory>
             <files>${temp_dir}/jarBody/*</files>
-            <zipFile>${temp_dir}/cfg-war/WEB-INF/lib/${settings_jar}</zipFile>
             <progressText>Building configuration jar</progressText>
+            <zipFile>${temp_dir}/cfg-war/WEB-INF/lib/${settings_jar}</zipFile>
         </zip>
         <copyFile>
             <destination>${temp_dir}/cfg-war/WEB-INF/appengine-web.xml</destination>
@@ -457,11 +458,11 @@
             <file>${temp_dir}/cfg-war/WEB-INF/appengine-web.xml</file>
             <value>1</value>
         </xmlFileSet>
-		<zip>
-			<baseDirectory>${temp_dir}/cfg-war</baseDirectory>
-			<files>${temp_dir}/cfg-war/*</files>
-            <zipFile>${installdir}/ODKAggregate.war</zipFile>
+        <zip>
+            <baseDirectory>${temp_dir}/cfg-war</baseDirectory>
+            <files>${temp_dir}/cfg-war/*</files>
             <progressText>Reassembling ODKAggregate.war</progressText>
+            <zipFile>${installdir}/ODKAggregate.war</zipFile>
             <ruleList>
                 <compareText>
                     <logic>does_not_equal</logic>
@@ -471,7 +472,7 @@
             </ruleList>
         </zip>
         <deleteFile>
-			<path>${installdir}/ODKAggregate</path>
+            <path>${installdir}/ODKAggregate</path>
         </deleteFile>
         <createDirectory>
             <path>${installdir}/ODKAggregate</path>
@@ -484,7 +485,7 @@
                 </compareText>
             </ruleList>
         </createDirectory>
-		<copyFile>
+        <copyFile>
             <destination>${installdir}/ODKAggregate</destination>
             <origin>${temp_dir}/cfg-war/*</origin>
             <progressText>Copy war files to war directory</progressText>
@@ -564,7 +565,7 @@ alter database "${jdbc_database}" owner to "${jdbc_username}";
                 <compareText>
                     <logic>equals</logic>
                     <text>${platform}</text>
-                    <value>postgres</value>
+                    <value>postgresql</value>
                 </compareText>
             </ruleList>
         </writeFile>
@@ -582,7 +583,7 @@ Then, please type:
 &lt;pre&gt;
 mysql --user root --password
 &lt;/pre&gt;
-And enter the MySQL server root password.  You will then be within the mysql commandline client.  You should see a 'mysql>' prompt. Type:
+And enter the MySQL server root password.  You will then be within the mysql commandline client.  You should see a 'mysql&gt;' prompt. Type:
 &lt;pre&gt;
 source ${installdir.unix}/create_db_and_user.sql
 exit
@@ -592,9 +593,9 @@ Here is what this looks like on Windows, with what you must type in &lt;font col
 Microsoft Windows [Version 6.1.7600]
 Copyright (c) 2009 Microsoft Corporation.  All rights reserved.
 
-C:\Windows\System32>&lt;font color="red"&gt;cd "\Program Files\MySQL\MySQL Server 5.1\bin"&lt;/font&gt;
+C:\Windows\System32&gt;&lt;font color="red"&gt;cd "\Program Files\MySQL\MySQL Server 5.1\bin"&lt;/font&gt;
 
-C:\Program Files\MySQL\MySQL Server 5.1\bin>&lt;font color="red"&gt;mysql.exe --user root --password&lt;/font&gt;
+C:\Program Files\MySQL\MySQL Server 5.1\bin&gt;&lt;font color="red"&gt;mysql.exe --user root --password&lt;/font&gt;
 Enter password: &lt;font color="red"&gt;*******&lt;/font&gt;
 Welcome to the MySQL monitor.  Commands end with ; or \g.
 Your MySQL connection id is 13
@@ -606,7 +607,7 @@ and you are welcome to modify and redistribute it under the GPL v2 license
 
 Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
 
-mysql> &lt;font color="red"&gt;source C:/Users/user/workspace/gmysql-test/create_db_and_user.sql&lt;/font&gt;
+mysql&gt; &lt;font color="red"&gt;source C:/Users/user/workspace/gmysql-test/create_db_and_user.sql&lt;/font&gt;
 Query OK, 1 row affected (0.00 sec)
 
 Query OK, 0 rows affected (0.00 sec)
@@ -615,10 +616,10 @@ Query OK, 0 rows affected (0.00 sec)
 
 Query OK, 0 rows affected (0.00 sec)
 
-mysql> &lt;font color="red"&gt;exit&lt;/font&gt;
+mysql&gt; &lt;font color="red"&gt;exit&lt;/font&gt;
 Bye
 
-C:\Program Files\MySQL\MySQL Server 5.1\bin>
+C:\Program Files\MySQL\MySQL Server 5.1\bin&gt;
 &lt;/pre&gt;
 ${html_steps_end_item}${html_steps_begin_item}
 copy the &lt;code&gt;ODKAggregate.war&lt;/code&gt; to the &lt;code&gt;${platform_path_separator}webapps&lt;/code&gt; directory of the Apache
@@ -667,7 +668,7 @@ ${html_steps_end}</text>
                 <compareText>
                     <logic>equals</logic>
                     <text>${platform}</text>
-                    <value>postgres</value>
+                    <value>postgresql</value>
                 </compareText>
             </ruleList>
         </writeFile>
@@ -720,6 +721,7 @@ access rights for ODK Aggregate.${html_steps_end_item}
             <progressText>Write README launcher</progressText>
             <text>var shell = new ActiveXObject("WScript.Shell");
 shell.Run("${installdir.escape_backslashes}\\README.html");
+WScript.Quit(0);
 </text>
             <ruleList>
                 <platformTest>
@@ -733,12 +735,13 @@ shell.Run("${installdir.escape_backslashes}\\README.html");
     </postInstallationActionList>
     <preInstallationActionList>
         <autodetectJava>
+		<customErrorMessage>You must have a Java 1.6 JRE installed.  Go to http://www.java.com/getjava/index.jsp</customErrorMessage>
             <promptUser>0</promptUser>
             <validVersionList>
                 <validVersion>
                     <maxVersion></maxVersion>
                     <minVersion>1.6</minVersion>
-                    <requireJDK>1</requireJDK>
+                    <requireJDK>0</requireJDK>
                     <vendor></vendor>
                 </validVersion>
             </validVersionList>
