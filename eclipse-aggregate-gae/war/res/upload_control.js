@@ -536,8 +536,7 @@ PostSpan.prototype.submitSpan = function() {
  */
 function setNames(status, firstFilename, lastFilename, barFraction) {
 	setStatus(status);
-	$('#progress_bar').css('width', Math.ceil(barFraction*100)+'%');
-    $('#progress_bar').css('background-color', 'blue');
+	setProgressBarPercent(Math.ceil(barFraction*100));
 	if ( firstFilename == null ) {
 		setNamesString("Uploading xml file");
 	} else if ( lastFilename == null ) {
@@ -599,6 +598,25 @@ function setStatus(status) {
 }
 
 /**
+ * Set the progress bar percentage and the color of the bar.
+ * Do this by replacing the element, as otherwise it doesn't seem to
+ * reliably refresh.
+ * 
+ * @param fraction
+ * @param color
+ */
+function setProgressBarPercent(fraction, color) {
+	if ( color == null ) {
+		color = 'blue';
+	}
+	var element = 
+		'<div id="progress_bar" ' +
+		'style="margin-top: 2px; left: 0%; background-color: ' + color +
+	    '; width: ' + fraction + '%; height: 75%;"></div>';
+	document.getElementById('progress_bar_container').innerHTML = element;
+}
+
+/**
  * Set the final (overall) upload status.  If we have transitioned to phase4,
  * then it is a success.
  *  
@@ -608,12 +626,11 @@ function setStatus(status) {
  */
 function setFinalStatus(phase, statusCode, responseFailureText) {
 	if ( phase == 4 ) {
-	    $('#progress_bar').css('width', '100%');
+		setProgressBarPercent(100);
         setNamesString("all files");
 		setStatus("success!");
 	} else {
-	    $('#progress_bar').css('width', '100%');
-	    $('#progress_bar').css('background-color', 'red');
+		setProgressBarPercent(100,'red');
 	    var failureContent;
 	    if ( responseFailureText != null && responseFailureText.length > 0 ) {
 	        var bodyStart = responseFailureText.indexOf('<body');

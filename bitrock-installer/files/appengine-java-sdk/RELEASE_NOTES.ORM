@@ -1,9 +1,26 @@
 Release Notes for the Google App Engine ORM, a DataNucleus plugin that provides
 access to the Google App Engine Datastore via JDO and JPA.
 
+VERSION 1.0.9
+- Recursive relation does not work
+http://code.google.com/p/datanucleus-appengine/issues/detail?id=80
+
+- Support polymorphic relationships
+http://code.google.com/p/datanucleus-appengine/issues/detail?id=153
+
+- Support PreparedQuery#countEntities(FetchOptions)
+http://code.google.com/p/datanucleus-appengine/issues/detail?id=225
+
+VERSION 1.0.8
+- batch get queries should return results in same order as the key params
+http://code.google.com/p/datanucleus-appengine/issues/detail?id=132
+
+- AND filter with one Key will return nothing
+http://code.google.com/p/datanucleus-appengine/issues/detail?id=217
+
 VERSION 1.0.7
-- Support @Version columns of type int, Integer, short, and Short in
-addition to long and Long
+- Support @Version columns of type int, Integer, short, and Short in addition to long and Long
+http://code.google.com/p/datanucleus-appengine/issues/detail?id=205
 
 - Fix bug in which a single eventually consistent query would cause all
 subsequent queries to be eventually consistent

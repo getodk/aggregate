@@ -40,26 +40,93 @@
             </distributionFileList>
         </folder>
         <folder>
-            <description>gae scripts</description>
+            <description>Google AppEngine SDK</description>
             <destination>${installdir}</destination>
-            <name>scripts</name>
+            <name>appengineSDK</name>
             <platforms>all</platforms>
             <actionList>
-                <changePermissions files="${installdir}/*.sh" permissions="0755"/>
                 <changePermissions files="${installdir}/appengine-java-sdk/bin/*.sh" permissions="0755"/>
+            </actionList>
+            <distributionFileList>
+                <distributionDirectory>
+                    <origin>files/appengine-java-sdk</origin>
+                </distributionDirectory>
+            </distributionFileList>
+            <ruleList>
+                <compareText>
+                    <logic>equals</logic>
+                    <text>${platform}</text>
+                    <value>gae</value>
+                </compareText>
+            </ruleList>
+        </folder>
+        <folder>
+            <description>Google AppEngine Windows HTA</description>
+            <destination>${installdir}</destination>
+            <name>windowsOnlyGaeScripts</name>
+            <platforms>all</platforms>
+            <distributionFileList>
+                <distributionFile>
+                    <allowWildcards>1</allowWildcards>
+                    <origin>files/gae_scripts/*.hta</origin>
+                </distributionFile>
+            </distributionFileList>
+            <ruleList>
+                <platformTest>
+                    <type>windows</type>
+                </platformTest>
+                <compareText>
+                    <logic>equals</logic>
+                    <text>${platform}</text>
+                    <value>gae</value>
+                </compareText>
+            </ruleList>
+        </folder>
+        <folder>
+            <description>Google AppEngine OSX AppleScript</description>
+            <destination>${installdir}</destination>
+            <name>osxOnlyGaeScripts</name>
+            <platforms>all</platforms>
+            <actionList>
                 <changePermissions files="${installdir}/*.app/Contents/MacOS/applet" permissions="0755"/>
                 <changePermissions files="${installdir}/*.app/Contents/MacOS/._applet" permissions="0755"/>
             </actionList>
             <distributionFileList>
                 <distributionFile>
                     <allowWildcards>1</allowWildcards>
-                    <origin>files/gae_scripts/*</origin>
+                    <origin>files/gae_scripts/*.app</origin>
                 </distributionFile>
-                <distributionDirectory>
-                    <origin>files/appengine-java-sdk</origin>
-                </distributionDirectory>
             </distributionFileList>
             <ruleList>
+                <platformTest>
+                    <type>osx</type>
+                </platformTest>
+                <compareText>
+                    <logic>equals</logic>
+                    <text>${platform}</text>
+                    <value>gae</value>
+                </compareText>
+            </ruleList>
+        </folder>
+        <folder>
+            <description>Google AppEngine Shell Script</description>
+            <destination>${installdir}</destination>
+            <name>nonWindowsGaeScripts</name>
+            <platforms>all</platforms>
+            <actionList>
+                <changePermissions files="${installdir}/*.sh" permissions="0755"/>
+            </actionList>
+            <distributionFileList>
+                <distributionFile>
+                    <allowWildcards>1</allowWildcards>
+                    <origin>files/gae_scripts/*.sh</origin>
+                </distributionFile>
+            </distributionFileList>
+            <ruleList>
+                <platformTest>
+                    <negate>1</negate>
+                    <type>windows</type>
+                </platformTest>
                 <compareText>
                     <logic>equals</logic>
                     <text>${platform}</text>
@@ -99,20 +166,6 @@
             <name>html_steps_end</name>
             <value>&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</value>
         </setInstallerVariable>
-        <setInstallerVariable>
-            <name>script_ext</name>
-            <value>cmd</value>
-        </setInstallerVariable>
-        <setInstallerVariable>
-            <name>script_ext</name>
-            <value>sh</value>
-            <ruleList>
-                <platformTest>
-                    <negate>1</negate>
-                    <type>windows</type>
-                </platformTest>
-            </ruleList>
-        </setInstallerVariable>
     </initializationActionList>
     <postInstallationActionList>
         <setInstallerVariableFromScriptOutput>
@@ -134,8 +187,8 @@
             <actionList>
                 <propertiesFileSet>
                     <file>${temp_dir}/conf/${platform}/jdbc.properties</file>
-                    <key>help.about</key>
-                    <value>"auto-generated on ${creation.timestamp}"</value>
+                    <key>jdbc.help.about</key>
+                    <value>auto-generated on ${creation.timestamp} for ${organization_url} ${product_fullname} ${product_version}</value>
                 </propertiesFileSet>
             </actionList>
         </actionGroup>
@@ -390,12 +443,17 @@
                 <propertiesFileSet>
                     <file>${temp_dir}/conf/common/security.properties</file>
                     <key>security.server.realm.realmString</key>
-                    <value>${organization_url} ${product_fullname} ${product_version} realm</value>
+                    <value>${organization_url} ${product_fullname} realm</value>
                 </propertiesFileSet>
                 <propertiesFileSet>
                     <file>${temp_dir}/conf/common/security.properties</file>
                     <key>security.server.realm.domains</key>
                     <value>${organization_url}</value>
+                </propertiesFileSet>
+                <propertiesFileSet>
+                    <file>${temp_dir}/conf/common/security.properties</file>
+                    <key>security.help.about</key>
+                    <value>auto-generated on ${creation.timestamp} for ${organization_url} ${product_fullname} ${product_version}</value>
                 </propertiesFileSet>
             </actionList>
         </actionGroup>
@@ -677,7 +735,7 @@ ${html_steps_end}</text>
             <path>${installdir}/README.html</path>
             <progressText>Write README</progressText>
             <text>${html_steps_begin}
-${html_steps_begin_item}Browse to ${installdir} and execute &lt;code&gt;uploadAggregateToAppEngine.${script_ext}&lt;/code&gt; to deploy ${product_fullname} up into Google's AppEngine cloud.  &lt;font color="red"/&gt;NOTE:&lt;/font&gt; this script will ask for your Google password and will erroneously display it. 
+${html_steps_begin_item}Browse to &lt;code&gt;${installdir}&lt;/code&gt; and double-click &lt;code&gt;uploadAggregateToAppEngine.hta&lt;/code&gt; to deploy ${product_fullname} up into Google's AppEngine cloud. This script will ask for the email account with the administrative rights for your appspot instance and the password for that account. 
 ${html_steps_end_item}${html_steps_begin_item}
 Visit &lt;a href="http://${hostname}"&gt;http://${hostname}/&lt;/a&gt; to complete configuring the
 access rights for ODK Aggregate.${html_steps_end_item}
@@ -689,8 +747,7 @@ access rights for ODK Aggregate.${html_steps_end_item}
                     <value>gae</value>
                 </compareText>
                 <platformTest>
-                    <negate>1</negate>
-                    <type>osx</type>
+                    <type>windows</type>
                 </platformTest>
             </ruleList>
         </writeFile>
@@ -699,7 +756,28 @@ access rights for ODK Aggregate.${html_steps_end_item}
             <path>${installdir}/README.html</path>
             <progressText>Write README</progressText>
             <text>${html_steps_begin}
-${html_steps_begin_item}Browse to ${installdir} and execute &lt;code&gt;uploadAggregateToAppEngine.app&lt;/code&gt; to deploy ${product_fullname} up into Google's AppEngine cloud.  &lt;font color="red"/&gt;NOTE:&lt;/font&gt; this script will ask for your Google password and will erroneously display it. 
+${html_steps_begin_item}If the upload script failed, please resolve any errors that caused the failure.  Then, open &lt;b&gt;Terminal&lt;/b&gt; and execute &lt;font color="blue"&gt;&lt;code&gt;${installdir}/uploadAggregateToAppEngine.sh&lt;/code&gt;&lt;/font&gt; to deploy ${product_fullname} up into Google's AppEngine cloud. This script will ask for the email account that created or that has the administrative rights for your appspot instance, and the password for that account. 
+${html_steps_end_item}${html_steps_begin_item}After the upload script completes successfully, 
+visit &lt;a href="http://${hostname}"&gt;http://${hostname}/&lt;/a&gt; to complete configuring the
+access rights for ODK Aggregate.${html_steps_end_item}
+&lt;/ol&gt;&lt;p&gt;${html_steps_end}</text>
+            <ruleList>
+                <compareText>
+                    <logic>equals</logic>
+                    <text>${platform}</text>
+                    <value>gae</value>
+                </compareText>
+                <platformTest>
+                    <type>linux</type>
+                </platformTest>
+            </ruleList>
+        </writeFile>
+        <writeFile>
+            <encoding>utf-8</encoding>
+            <path>${installdir}/README.html</path>
+            <progressText>Write README</progressText>
+            <text>${html_steps_begin}
+${html_steps_begin_item}If the upload script failed, please resolve any errors that caused the failure.  Then, open &lt;font color="blue"&gt;&lt;code&gt;${installdir}/uploadAggregateToAppEngine.app&lt;/code&gt;&lt;/font&gt; to deploy ${product_fullname} up into Google's AppEngine cloud. This script will ask for the email account with the administrative rights for your appspot instance and the password for that account.
 ${html_steps_end_item}${html_steps_begin_item}
 Visit &lt;a href="http://${hostname}"&gt;http://${hostname}/&lt;/a&gt; to complete configuring the
 access rights for ODK Aggregate.${html_steps_end_item}
@@ -712,20 +790,6 @@ access rights for ODK Aggregate.${html_steps_end_item}
                 </compareText>
                 <platformTest>
                     <type>osx</type>
-                </platformTest>
-            </ruleList>
-        </writeFile>
-        <writeFile>
-            <encoding>utf-8</encoding>
-            <path>${installdir}/launchReadme.js</path>
-            <progressText>Write README launcher</progressText>
-            <text>var shell = new ActiveXObject("WScript.Shell");
-shell.Run("${installdir.escape_backslashes}\\README.html");
-WScript.Quit(0);
-</text>
-            <ruleList>
-                <platformTest>
-                    <type>windows</type>
                 </platformTest>
             </ruleList>
         </writeFile>
@@ -735,7 +799,7 @@ WScript.Quit(0);
     </postInstallationActionList>
     <preInstallationActionList>
         <autodetectJava>
-		<customErrorMessage>You must have a Java 1.6 JRE installed.  Go to http://www.java.com/getjava/index.jsp</customErrorMessage>
+            <customErrorMessage>You must have a Java 1.6 JRE installed.  Go to http://www.java.com/getjava/index.jsp</customErrorMessage>
             <promptUser>0</promptUser>
             <validVersionList>
                 <validVersion>
