@@ -33,6 +33,8 @@ import org.opendatakit.common.constants.BasicConsts;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
 
+import java.text.DecimalFormat;
+
 /**
  * 
  * @author wbrunette@gmail.com
@@ -56,6 +58,8 @@ public class BasicElementFormatter implements ElementFormatter {
    */
   private boolean includeAccuracy;
 
+  private DecimalFormat decimalFormatter;
+  
   /**
    * Construct a Basic Element Formatter
    * 
@@ -72,6 +76,7 @@ public class BasicElementFormatter implements ElementFormatter {
     separateCoordinates = separateGpsCoordinates;
     includeAltitude = includeGpsAltitude;
     includeAccuracy = includeGpsAccuracy;
+    decimalFormatter = new DecimalFormat("########.0#######");
   }
 
   public void formatUid(String uri, String propertyName, Row row) {
@@ -123,7 +128,7 @@ public class BasicElementFormatter implements ElementFormatter {
   }
 
   public void formatDecimal(BigDecimal dub, FormElementModel element, String ordinalValue, Row row) {
-    basicStringConversion(dub, row);
+    formatBigDecimalToString(dub, row);
   }
 
   public void formatGeoPoint(GeoPoint coordinate, FormElementModel element, String ordinalValue, Row row) {
@@ -177,4 +182,12 @@ public class BasicElementFormatter implements ElementFormatter {
     }
   }
 
+  protected void formatBigDecimalToString(BigDecimal dub, Row row) {
+    if(dub == null) {
+      basicStringConversion(dub, row);
+    } else {
+      String data = decimalFormatter.format(dub.doubleValue());
+      basicStringConversion(data, row);
+    }
+  }
 }
