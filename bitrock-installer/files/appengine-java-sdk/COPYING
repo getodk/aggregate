@@ -119,3 +119,9 @@ licenses and/or has source available from other locations.
     License: MIT
     Source code availability: http://code.google.com/p/yamlbeans/
     Bundled in lib/appengine-api-tools.jar under com/google/appengine/repackaged/net/sourceforge/yamlbeans
+
+* MediaUtil
+    License: BSD
+    Copyright (C) 1999-2005 Dmitriy Rogatkin, Suresh Mahalingam.  All rights reserved.
+    Source code availability: http://mediachest.sourceforge.net/mediautil/
+    Bundled in lib/impl/appengine-api-stubs.jar under mediautil

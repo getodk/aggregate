@@ -1,3 +1,56 @@
+Copyright 2008 Google Inc.
+All rights reserved.
+
+App Engine Java SDK - Release Notes
+
+Version 1.5.1
+=============
+- The development server's datastore and testing service implementations now
+  contains logic that closely replicates the consistency guarantees of the High
+  Replication datastore. To use, run the dev_appserver with the flag 
+  -Ddatastore.default_high_rep_job_policy_unapplied_job_pct=20.
+- All user request have an X-AppEngine-Country header which contains the
+  ISO-3166-1 alpha-2 country code for the user, based on the IP address of the
+  client request.
+- The Channel API can now provide user presence, this can be configured by
+  adding channel_presence to the list of inbound services for your application.
+- The Images API now supports the WebP format.
+- You can switch the timezone for App Engine logs in the Admin Console.
+  http://code.google.com/p/googleappengine/issues/detail?id=734
+- Added javax.xml.ws.Service$Mode to the whitelist.
+  http://code.google.com/p/googleappengine/issues/detail?id=4770
+- You can configure your application to asynchronously write https session data
+  by adding <async-session-persistence enabled="true"/> to your
+  appengine-web.xml.
+  http://code.google.com/p/googleappengine/issues/detail?id=1692
+- The local task queue unit testing API now supports Deferred Tasks.
+- Fixed an issue where using reserved URLs did not cause an error in the SDK.
+- Fixed an issue where having a backends.xml configuration file caused logging
+  to stdout to fail in the SDK.
+- Fixed an issue where the Channel API didn't work with non-default versions of
+  applications using the High Replication datastore.
+- Fixed an issue where the Remote API rtok comparison was broken for some users,
+  causing appfcg download data to fail.
+- Fixed an issue with the SDK where you could not apply a transform to PNG
+  images.
+  http://code.google.com/p/googleappengine/issues/detail?id=3458
+- When displaying corrupt data in the Admin Console dataviewer, a useful error
+  will be displayed, instead of a 500.
+  http://code.google.com/p/googleappengine/issues/detail?id=4945
+- Fixed an issue with the SDK where non-string index names caused an error upon
+  upload.
+  http://code.google.com/p/googleappengine/issues/detail?id=5004
+- Datanucleus now supports polymorphic relationships.
+  http://code.google.com/p/datanucleus-appengine/issues/detail?id=153
+- Datanucleus now supports PreparedQuery#countEntities(FetchOptions).
+  http://code.google.com/p/datanucleus-appengine/issues/detail?id=225
+- Fixed an issue with datanucleus where recursive relation did not work.
+  http://code.google.com/p/datanucleus-appengine/issues/detail?id=80
+
+Version 1.5.0.1
+===============
+- Fixed a bug that caused appengine-jsr107cache-1.5.0.jar to be empty.
+
 Version 1.5.0
 =============
 - Support for Backends which allow developers to create infrastructure
