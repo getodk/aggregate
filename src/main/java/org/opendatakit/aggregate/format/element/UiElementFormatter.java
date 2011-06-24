@@ -41,25 +41,25 @@ public class UiElementFormatter extends BasicElementFormatter {
     }
   
     if (gpsFormatter == null) {
-      basicStringConversion(coordinate.getLatitude(), row);
-      basicStringConversion(coordinate.getLongitude(), row);
-      basicStringConversion(coordinate.getAltitude(), row);
-      basicStringConversion(coordinate.getAccuracy(), row);
+      formatBigDecimalToString(coordinate.getLatitude(), row);
+      formatBigDecimalToString(coordinate.getLongitude(), row);
+      formatBigDecimalToString(coordinate.getAltitude(), row);
+      formatBigDecimalToString(coordinate.getAccuracy(), row);
     } else {
       if (gpsFormatter.includeLatitude()) {
-        basicStringConversion(coordinate.getLatitude(), row);
+        formatBigDecimalToString(coordinate.getLatitude(), row);
       }
 
       if (gpsFormatter.includeLongitude()) {
-        basicStringConversion(coordinate.getLongitude(), row);
+        formatBigDecimalToString(coordinate.getLongitude(), row);
       }
 
       if (gpsFormatter.includeAltitude()) {
-        basicStringConversion(coordinate.getAltitude(), row);
+        formatBigDecimalToString(coordinate.getAltitude(), row);
       }
 
       if (gpsFormatter.includeAccuracy()) {
-        basicStringConversion(coordinate.getAccuracy(), row);
+        formatBigDecimalToString(coordinate.getAccuracy(), row);
       }
     }
   }
