@@ -357,8 +357,9 @@ public class AccessConfigurationSheet extends Composite implements ActionCell.De
 	protected void reviseCellTableColumns(ArrayList<UserSecurityInfo> allUsersList) {
 		TreeSet<GrantedAuthorityInfo> uniqueAuths = new TreeSet<GrantedAuthorityInfo>();
 		uniqueAuths.add(new GrantedAuthorityInfo(GrantedAuthorityNames.GROUP_SITE_ADMINS));
-		uniqueAuths.add(new GrantedAuthorityInfo(GrantedAuthorityNames.GROUP_FORM_ADMINS));
-		uniqueAuths.add(new GrantedAuthorityInfo(GrantedAuthorityNames.GROUP_SUBMITTERS));
+		uniqueAuths.add(new GrantedAuthorityInfo(GrantedAuthorityNames.GROUP_DATA_ADMINS));
+		uniqueAuths.add(new GrantedAuthorityInfo(GrantedAuthorityNames.GROUP_DATA_VIEWERS));
+		uniqueAuths.add(new GrantedAuthorityInfo(GrantedAuthorityNames.GROUP_DATA_COLLECTORS));
 		for ( int i = 0 ; i < allUsersList.size() ; ++i ) {
 			UserSecurityInfo u = allUsersList.get(i);
 			uniqueAuths.addAll(u.getAssignedUserGroups());
@@ -464,8 +465,9 @@ public class AccessConfigurationSheet extends Composite implements ActionCell.De
 	void onUpdateClick(ClickEvent e) {
 		ArrayList<GrantedAuthorityInfo> allGroups = new ArrayList<GrantedAuthorityInfo>();
 		allGroups.add(new GrantedAuthorityInfo(GrantedAuthorityNames.GROUP_SITE_ADMINS));
-		allGroups.add(new GrantedAuthorityInfo(GrantedAuthorityNames.GROUP_FORM_ADMINS));
-		allGroups.add(new GrantedAuthorityInfo(GrantedAuthorityNames.GROUP_SUBMITTERS));
+		allGroups.add(new GrantedAuthorityInfo(GrantedAuthorityNames.GROUP_DATA_ADMINS));
+		allGroups.add(new GrantedAuthorityInfo(GrantedAuthorityNames.GROUP_DATA_VIEWERS));
+		allGroups.add(new GrantedAuthorityInfo(GrantedAuthorityNames.GROUP_DATA_COLLECTORS));
 		allGroups.add(new GrantedAuthorityInfo(GrantedAuthorityNames.USER_IS_ANONYMOUS.toString()));
 		
 		ArrayList<GrantedAuthorityInfo> anonGrants = new ArrayList<GrantedAuthorityInfo>();

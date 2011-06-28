@@ -100,10 +100,13 @@ public class WrappingOpenIDAuthenticationProvider extends OpenIDAuthenticationPr
 		// attempt to look user up in registered users table...
 		String username = null;
 		UserDetails partialDetails = null;
+		boolean noRights = false;
 		try {
 			partialDetails = wrappingUserDetailsService.loadUserByUsername(eMail);
 			// found the user in the table -- fold in authorizations and get uriUser.
 			authorities.addAll(partialDetails.getAuthorities());
+			// users are blacklisted by registering them and giving them no rights.
+			noRights = partialDetails.getAuthorities().isEmpty();
 			username = partialDetails.getUsername();
 		} catch (Exception e) {
 			partialDetails = userDetails;
@@ -119,7 +122,7 @@ public class WrappingOpenIDAuthenticationProvider extends OpenIDAuthenticationPr
 													partialDetails.isCredentialsNonExpired(),
 													partialDetails.isAccountNonLocked(),
 													authorities);
-		if ( !( trueUser.isEnabled() && trueUser.isAccountNonExpired() &&
+		if ( noRights || !( trueUser.isEnabled() && trueUser.isAccountNonExpired() &&
 				trueUser.isAccountNonLocked() ) ) {
 			throw new UsernameNotFoundException("account is blocked");
 		}

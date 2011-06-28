@@ -116,15 +116,14 @@ public class AggregateUI implements EntryPoint {
   private UserSecurityInfo userInfo = null;
 
   private synchronized void updateTogglePane() {
-    login_logout_link.clear();
-    login_logout_link.add(LOGIN_LINK);
-    System.out.println("Setting login link");
-    if (userInfo != null) {
-      if (userInfo.getType() != UserType.ANONYMOUS) {
+    if ((userInfo != null) && (userInfo.getType() != UserType.ANONYMOUS)) {
         System.out.println("Setting logout link");
         login_logout_link.clear();
         login_logout_link.add(LOGOUT_LINK);
-      }
+    } else {
+        System.out.println("Setting login link");
+        login_logout_link.clear();
+        login_logout_link.add(LOGIN_LINK);
     }
   }
 
@@ -158,15 +157,16 @@ public class AggregateUI implements EntryPoint {
         if (hash.get(UrlHash.MAIN_MENU).equals(s))
           return;
         hash.clear();
-        hash.set(UrlHash.MAIN_MENU, s);
         TabPanel panel = null;
         if (s.equals(Tabs.SUBMISSIONS.getTabLabel())) {
           panel = submissionNav;
+          hash.set(UrlHash.MAIN_MENU, Tabs.SUBMISSIONS.getHashString());
           panel.selectTab(0);
           timer.setCurrentSubTab(SubmissionTabUI.SUBMISSION_MENU[0]);
           hash.put();
         } else if (s.equals(Tabs.MANAGEMENT.getTabLabel())) {
           panel = manageNav;
+          hash.set(UrlHash.MAIN_MENU, Tabs.MANAGEMENT.getHashString());
           panel.selectTab(0);
           timer.setCurrentSubTab(ManageTabUI.MANAGEMENT_MENU[0]);
           hash.put();

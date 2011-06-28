@@ -60,13 +60,15 @@ public class SecurityServiceUtil {
 	private static final Set<String> specialNames = new HashSet<String>();
 
 	public static final GrantedAuthority siteAuth = new GrantedAuthorityImpl(GrantedAuthorityNames.GROUP_SITE_ADMINS);
-	public static final GrantedAuthority formAuth = new GrantedAuthorityImpl(GrantedAuthorityNames.GROUP_FORM_ADMINS);
-	public static final GrantedAuthority submitterAuth = new GrantedAuthorityImpl(GrantedAuthorityNames.GROUP_SUBMITTERS);
+	public static final GrantedAuthority formAuth = new GrantedAuthorityImpl(GrantedAuthorityNames.GROUP_DATA_ADMINS);
+	public static final GrantedAuthority dataViewerAuth = new GrantedAuthorityImpl(GrantedAuthorityNames.GROUP_DATA_VIEWERS);
+	public static final GrantedAuthority submitterAuth = new GrantedAuthorityImpl(GrantedAuthorityNames.GROUP_DATA_COLLECTORS);
 	public static final GrantedAuthority authenticatedAuth = new GrantedAuthorityImpl(GrantedAuthorityNames.USER_IS_AUTHENTICATED.name());
 	public static final GrantedAuthority anonAuth = new GrantedAuthorityImpl(GrantedAuthorityNames.USER_IS_ANONYMOUS.name());
 
 	public static final List<String> siteGrants;
 	public static final List<String> formGrants;
+	public static final List<String> dataViewerGrants;
 	public static final List<String> submitterGrants;
 
 	public static final List<String> anonSubmitterGrants;
@@ -75,24 +77,29 @@ public class SecurityServiceUtil {
 	static {
 		List<String> isiteGrants = new ArrayList<String>();
 		isiteGrants.add(GrantedAuthorityNames.ROLE_ACCESS_ADMIN.name());
-		isiteGrants.add(GrantedAuthorityNames.GROUP_FORM_ADMINS);
+		isiteGrants.add(GrantedAuthorityNames.GROUP_DATA_ADMINS);
+		isiteGrants.add(GrantedAuthorityNames.GROUP_DATA_VIEWERS);
+		isiteGrants.add(GrantedAuthorityNames.GROUP_DATA_COLLECTORS);
 		siteGrants = Collections.unmodifiableList(isiteGrants);
 	
 		List<String> iformGrants = new ArrayList<String>();
 		iformGrants.add(GrantedAuthorityNames.ROLE_FORM_ADMIN.name());
-		iformGrants.add(GrantedAuthorityNames.GROUP_SUBMITTERS);
+		iformGrants.add(GrantedAuthorityNames.ROLE_SERVICES_ADMIN.name());
 		formGrants = Collections.unmodifiableList(iformGrants);
 	
+		List<String> idataViewerGrants = new ArrayList<String>();
+		idataViewerGrants.add(GrantedAuthorityNames.ROLE_ANALYST.name());
+		idataViewerGrants.add(GrantedAuthorityNames.ROLE_ATTACHMENT_VIEWER.name());
+		idataViewerGrants.add(GrantedAuthorityNames.ROLE_USER.name());
+		dataViewerGrants = Collections.unmodifiableList(idataViewerGrants);
+		
 		List<String> isubmitterGrants = new ArrayList<String>();
-		isubmitterGrants.add(GrantedAuthorityNames.ROLE_ANALYST.name());
-		isubmitterGrants.add(GrantedAuthorityNames.ROLE_ATTACHMENT_VIEWER.name());
 		isubmitterGrants.add(GrantedAuthorityNames.ROLE_FORM_DOWNLOAD.name());
 		isubmitterGrants.add(GrantedAuthorityNames.ROLE_FORM_LIST.name());
-		isubmitterGrants.add(GrantedAuthorityNames.ROLE_SERVICES_ADMIN.name());
 		isubmitterGrants.add(GrantedAuthorityNames.ROLE_SUBMISSION_UPLOAD.name());
-		isubmitterGrants.add(GrantedAuthorityNames.ROLE_USER.name());
 		submitterGrants = Collections.unmodifiableList(isubmitterGrants);
 
+		// todo: handle anon as a 'user'
 		List<String> ianonSubmitterGrants = new ArrayList<String>();
 		ianonSubmitterGrants.add(GrantedAuthorityNames.ROLE_FORM_DOWNLOAD.name());
 		ianonSubmitterGrants.add(GrantedAuthorityNames.ROLE_FORM_LIST.name());
@@ -124,12 +131,17 @@ public class SecurityServiceUtil {
 					if ( siteGrants.contains(s) ) continue;
 					return false; 
 				}
-			} else if ( e.getKey().equals(GrantedAuthorityNames.GROUP_FORM_ADMINS) ) {
+			} else if ( e.getKey().equals(GrantedAuthorityNames.GROUP_DATA_ADMINS) ) {
 				for ( String s : e.getValue() ) {
 					if ( formGrants.contains(s) ) continue;
 					return false; 
 				}
-			} else if ( e.getKey().equals(GrantedAuthorityNames.GROUP_SUBMITTERS) ) {
+			} else if ( e.getKey().equals(GrantedAuthorityNames.GROUP_DATA_VIEWERS) ) {
+				for ( String s : e.getValue() ) {
+					if ( dataViewerGrants.contains(s) ) continue;
+					return false; 
+				}
+			} else if ( e.getKey().equals(GrantedAuthorityNames.GROUP_DATA_COLLECTORS) ) {
 				for ( String s : e.getValue() ) {
 					if ( submitterGrants.contains(s) ) continue;
 					return false; 
@@ -425,6 +437,7 @@ public class SecurityServiceUtil {
 		try {
 			GrantedAuthorityHierarchyTable.assertGrantedAuthorityHierarchy(siteAuth, SecurityServiceUtil.siteGrants, cc);
 			GrantedAuthorityHierarchyTable.assertGrantedAuthorityHierarchy(formAuth, SecurityServiceUtil.formGrants, cc);
+			GrantedAuthorityHierarchyTable.assertGrantedAuthorityHierarchy(dataViewerAuth, SecurityServiceUtil.dataViewerGrants, cc);
 			GrantedAuthorityHierarchyTable.assertGrantedAuthorityHierarchy(submitterAuth, SecurityServiceUtil.submitterGrants, cc);
 			
 			GrantedAuthorityHierarchyTable.assertGrantedAuthorityHierarchy(authenticatedAuth, anonGrantStrings, cc);
@@ -433,6 +446,7 @@ public class SecurityServiceUtil {
 			TreeSet<String> authorities = GrantedAuthorityHierarchyTable.getAllPermissionsAssignableGrantedAuthorities(cc.getDatastore(), cc.getCurrentUser());
 			authorities.remove(siteAuth.getAuthority());
 			authorities.remove(formAuth.getAuthority());
+			authorities.remove(dataViewerAuth.getAuthority());
 			authorities.remove(submitterAuth.getAuthority());
 			authorities.remove(authenticatedAuth.getAuthority());
 			authorities.remove(anonAuth.getAuthority());
@@ -446,6 +460,7 @@ public class SecurityServiceUtil {
 			Map<UserSecurityInfo, String> pkMap = setUsers(users, cc);
 			setUsersOfGrantedAuthority(pkMap, siteAuth, cc);
 			setUsersOfGrantedAuthority(pkMap, formAuth, cc);
+			setUsersOfGrantedAuthority(pkMap, dataViewerAuth, cc);
 			setUsersOfGrantedAuthority(pkMap, submitterAuth, cc);
 			
 		} catch (ODKDatastoreException e) {
@@ -455,44 +470,50 @@ public class SecurityServiceUtil {
 	}
 
 	/**
-	 * Configures the server to have the minimal security configuration in order 
-	 * for the superuser to be able to be directed to the configure-site-access 
-	 * tab in the GWT user interface.
+	 * Configures the server to have the default role names and role hierarchy.
 	 * 
 	 * @param cc
 	 * @throws DatastoreFailureException
 	 * @throws AccessDeniedException
 	 */
-	public static final void setDefaultMinimalSecureConfig( 
+	public static final void setDefaultRoleNamesAndHierarchy( 
 			CallingContext cc ) throws DatastoreFailureException, AccessDeniedException {
 		
 		ArrayList<GrantedAuthorityInfo> authenticatedGrants = new ArrayList<GrantedAuthorityInfo>(); 
 		ArrayList<GrantedAuthorityInfo> anonGrants = new ArrayList<GrantedAuthorityInfo>(); 
 		ArrayList<UserSecurityInfo> users = new ArrayList<UserSecurityInfo>();  
 		ArrayList<GrantedAuthorityInfo> allGroups = new ArrayList<GrantedAuthorityInfo>();
-		
-		// get super-user user info 
-		UserSecurityInfo u = getSuperUser(cc);
-		TreeSet<GrantedAuthorityInfo> superUserGrants = new TreeSet<GrantedAuthorityInfo>();
-		superUserGrants.add(new GrantedAuthorityInfo(siteAuth.getAuthority()));
-		u.setAssignedUserGroups(superUserGrants);
-		
-		users.add(u);
-		
+
+		// NOTE: No users are defined at this point (including the superUser) see superUserBootstrap below...
 		setStandardSiteAccessConfiguration( users, authenticatedGrants, anonGrants, allGroups, cc );
+	}
+	
+	/**
+	 * Ensures that a (single) registered user record exists for the superUser,
+	 * adds that user to the list of site administrators, establishes that 
+	 * user as the sole user with permanent access to the permissions management tab,
+	 * and, if the user is new, it sets a flag to force the user to visit the
+	 * permissions tab upon first access to the site (this is done inside assertSuperUser).
+	 * 
+	 * @param cc
+	 * @throws ODKDatastoreException
+	 */
+	public static final synchronized void superUserBootstrap(CallingContext cc) throws ODKDatastoreException {
+		// assert that the superuser exists...
+		RegisteredUsersTable su = RegisteredUsersTable.assertSuperUser(cc);
 		
-		// and user the credentials-expired tag on the super-user record to indicate whether 
-		// or not to redirect to the configuration screen.
-		try {
-			RegisteredUsersTable t = RegisteredUsersTable.getUserByUri(cc.getUserService().getSuperUserEmail(),
-																		cc.getDatastore(), cc.getCurrentUser());
-			// this is ignored for super-user repurposing it...
-			t.setIsEnabled(false);
-			cc.getDatastore().putEntity(t, cc.getCurrentUser());
-		} catch (ODKDatastoreException e) {
-			e.printStackTrace();
-			throw new DatastoreFailureException(e);
-		}
+		Set<String> uriUsers;
+		
+		// add the superuser to the list of site administrators
+		uriUsers = UserGrantedAuthority.getUriUsers(siteAuth, cc.getDatastore(), cc.getCurrentUser());
+		uriUsers.add(su.getUri());
+		UserGrantedAuthority.assertGrantedAuthorityMembers(siteAuth, uriUsers, cc);
+		
+		// assert that the superuser is the only one with permanent access administration rights...
+		uriUsers.clear();
+		uriUsers.add(su.getUri());
+		UserGrantedAuthority.assertGrantedAuthorityMembers(
+				new GrantedAuthorityImpl(GrantedAuthorityNames.ROLE_ACCESS_ADMIN.name()), uriUsers, cc);
 	}
 
 }

@@ -63,9 +63,10 @@ public enum GrantedAuthorityNames implements IsSerializable {
 		return description;
 	}
 	
-	public static final String GROUP_SUBMITTERS = "submitters";
-	public static final String GROUP_FORM_ADMINS = "formAdmins";
-	public static final String GROUP_SITE_ADMINS = "siteAdmins";
+	public static final String GROUP_DATA_COLLECTORS = "Data Collector";
+	public static final String GROUP_DATA_VIEWERS = "Data Viewer";
+	public static final String GROUP_DATA_ADMINS = "Data Manager";
+	public static final String GROUP_SITE_ADMINS = "Site Administrator";
 	
 	public static final String MAILTO_PREFIX = "MAILTO_";
 	public static final String ROLE_PREFIX = "ROLE_";

@@ -18,6 +18,8 @@ package org.opendatakit.common.security.spring;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.DataField.IndexType;
@@ -26,7 +28,6 @@ import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.persistence.Query.Direction;
 import org.opendatakit.common.persistence.Query.FilterOperation;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
-import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.security.client.UserSecurityInfo;
 import org.opendatakit.common.security.common.EmailParser.Email;
@@ -62,6 +63,9 @@ import org.opendatakit.common.web.CallingContext;
  *
  */
 public final class RegisteredUsersTable extends CommonFieldsBase {
+
+	private static final Log logger = LogFactory.getLog(RegisteredUsersTable.class);
+
 	// prefix that identifies a user id
 	// user ids are of the form uid:username-yyyyMMddTHHmmSS
 	public static final String UID_PREFIX = "uid:";
@@ -469,61 +473,83 @@ public final class RegisteredUsersTable extends CommonFieldsBase {
 	}
 
 	/**
-	 * Attempts to find a super-user record with the PK of the registered user equal to the 
-	 * super-user e-mail address. If it can't, it then 
+	 * Attempts to find a user record matching the e-mail address of the super-user.
+	 * <ol>  
+	 * <li>If it finds a single such record, and that user is active, returns that user.</li>
+	 * <li>If it finds a single such record that is inactive, it reactivates it, sets a
+	 * flag to drive the super-user to the permissions page upon first login, and returns
+	 * that user.</li>
+	 * <li>If it finds multiple records, it removes them all and creates a new user, sets
+	 * a flag to drive the super-user to the permissions page upon first login, and returns 
+	 * that new user.</li>
+	 * <li>If it finds no records, it creates one and sets a flag to drive the super-user
+	 * to the permissions page upon first login.</li>
+	 * </ol>
 	 * @param cc
 	 * @return
 	 * @throws ODKDatastoreException
 	 */
 	public static final RegisteredUsersTable assertSuperUser(CallingContext cc) throws ODKDatastoreException {
-		return assertSuperUser(cc.getUserService().getSuperUserEmail(), cc.getDatastore(), cc.getUserService().getDaemonAccountUser());
+		String superUserEmail = cc.getUserService().getSuperUserEmail();
+		Datastore ds = cc.getDatastore();
+		User user = cc.getUserService().getDaemonAccountUser();
+		return assertSuperUser(superUserEmail, ds, user);
 	}
 	
-	private static synchronized final RegisteredUsersTable assertSuperUser(String superUserEmail, Datastore datastore, User user) throws ODKDatastoreException {
+	/**
+	 * Attempts to find a user record matching the e-mail address of the super-user.
+	 * <ol>  
+	 * <li>If it finds a single such record, and that user is active, returns that user.</li>
+	 * <li>If it finds a single such record that is inactive, it reactivates it, sets a
+	 * flag to drive the super-user to the permissions page upon first login, and returns
+	 * that user.</li>
+	 * <li>If it finds multiple records, it removes them all and creates a new user, sets
+	 * a flag to drive the super-user to the permissions page upon first login, and returns 
+	 * that new user.</li>
+	 * <li>If it finds no records, it creates one and sets a flag to drive the super-user
+	 * to the permissions page upon first login.</li>
+	 * </ol>
+	 * @param superUserEmail
+	 * @param datastore
+	 * @param user
+	 * @return
+	 * @throws ODKDatastoreException
+	 */
+	public static final RegisteredUsersTable assertSuperUser(String superUserEmail, Datastore datastore, User user) throws ODKDatastoreException {
+		
 		RegisteredUsersTable t = null;
 		
 		List<RegisteredUsersTable> l = getUsersByEmail(superUserEmail, datastore, user);
 		if ( l.size() == 1 ) {
 			t = l.get(0);
-			if ( !t.getIsCredentialNonExpired() || !t.getIsEnabled() ) {
-				t.setIsCredentialNonExpired(true);
-				t.setIsEnabled(true);
+			if ( !t.getIsCredentialNonExpired() ) {
+				t.setIsCredentialNonExpired(true); // reactivating a disabled user...
+				t.setIsEnabled(false); // force nav to permissions on first access...
 				datastore.putEntity(t, user);
 			}
 			return t;
 		}
+		
+		if ( l.size() > 0 ) {
+			for ( RegisteredUsersTable r : l ) {
+				logger.warn("duplicate superuser records - marking as removed: " + r.getUri());
+				r.setIsRemoved(true);
+				datastore.putEntity(r, user);
+			}
+		}
 
 		RegisteredUsersTable prototype = assertRelation(datastore, user);
 		
-		try {
-			t = datastore.getEntity(prototype, superUserEmail, user);
-		} catch ( ODKEntityNotFoundException e) {
-		}
-		
 		Email e = new Email(null, superUserEmail);
-		if ( t != null ) {
-			// must have been deleted -- resurrect it...
-			t.setIsCredentialNonExpired(true);
-			t.setIsEnabled(true);
-			t.setIsRemoved(false);
-			t.setBasicAuthPassword(null);
-			t.setBasicAuthSalt(null);
-			t.setDigestAuthPassword(null);
-			t.setUsername(e.getUsername());
-			t.setNickname(e.getNickname());
-			t.setEmail(e.getEmail());
-			datastore.putEntity(t, user);
-			return t;
-		}
 		
 		t = datastore.createEntityUsingRelation(prototype, user);
-		t.setStringField(t.primaryKey, superUserEmail);
 		t.setIsCredentialNonExpired(true);
-		t.setIsEnabled(true);
+		t.setIsEnabled(false);// on first creation of the superuser, force navigation to permissions page
 		t.setUsername(e.getUsername());
 		t.setNickname(e.getNickname());
 		t.setEmail(e.getEmail());
 		datastore.putEntity(t, user);
+		logger.warn("Created a new superuser record: " + t.getUri() + " identified by: " + t.getEmail());
 		return t;
 	}
 }

@@ -194,11 +194,12 @@ public class UserDetailsServiceImpl implements UserDetailsService, InitializingB
 				salt = UUID.randomUUID().toString();
 				
 				if ( name.equals(userService.getSuperUserEmail()) ) {
-					// it is the superUser ... values are hard-coded...
+					// it is the superUser ... cannot be disabled...
+					RegisteredUsersTable su = RegisteredUsersTable.assertSuperUser(userService.getSuperUserEmail(), datastore, user);
 					isEnabled = true;
 					isCredentialNonExpired = true;
-					grantedAuthorities = getGrantedAuthorities(name);
-					uriUser = name;
+					grantedAuthorities = getGrantedAuthorities(su.getUri());
+					uriUser = su.getUri();
 				} else {
 					// not the super-user -- try to find user in registered users table...
 					List<RegisteredUsersTable> eUser = RegisteredUsersTable.getUsersByEmail(name, datastore, user);
