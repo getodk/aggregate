@@ -113,15 +113,21 @@
 	  <beans:property name="channelDecisionManager" ref="channelDecisionManager"/>
 	  <beans:property name="securityMetadataSource">
 	    <filter-invocation-definition-source path-type="ant">
-	        <intercept-url pattern="/favicon.ico" access="ANY_CHANNEL" />
+	        <intercept-url pattern="/_ah/**" access="ANY_CHANNEL" /> <!-- local GAE admin console -->
+        	<intercept-url pattern="/favicon.ico" access="ANY_CHANNEL" />
 	        <intercept-url pattern="/odk_color.png" access="ANY_CHANNEL" />
+			<intercept-url pattern="/images/**" access="ANY_CHANNEL" />
+	        <intercept-url pattern="/res/**" access="ANY_CHANNEL" />
+			<intercept-url pattern="/stylesheets/**" access="ANY_CHANNEL" />
+			<intercept-url pattern="/AggregateUI.css" access="ANY_CHANNEL" />
+			<intercept-url pattern="/access-denied.html" access="REQUIRES_INSECURE_CHANNEL" />
+        	<intercept-url pattern="/change-applied.html" access="REQUIRES_INSECURE_CHANNEL" /> <!-- Intermediate page redirecting to logout from access mgmt -->
 	        <intercept-url pattern="/index.html" access="REQUIRES_INSECURE_CHANNEL" />
 	        <intercept-url pattern="/logout.html" access="REQUIRES_INSECURE_CHANNEL" />
 	        <intercept-url pattern="/openid_login.html" access="REQUIRES_INSECURE_CHANNEL" />
-            <intercept-url pattern="/www/index.html" access="${security.server.channelType}" />
-	        <intercept-url pattern="/res/**" access="ANY_CHANNEL" />
 		    <intercept-url pattern="/ssl/**" access="${security.server.secureChannelType}"/>
             <intercept-url pattern="/local_login.html" access="${security.server.channelType}" />
+            <intercept-url pattern="/www/index.html" access="${security.server.channelType}" />
 		    <intercept-url pattern="/**" access="${security.server.channelType}"/>
 	    </filter-invocation-definition-source>                
 	  </beans:property>
