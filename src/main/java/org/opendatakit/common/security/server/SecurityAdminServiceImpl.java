@@ -130,7 +130,9 @@ org.opendatakit.common.security.client.security.admin.SecurityAdminService {
 
 	    ArrayList<GrantedAuthorityInfo> authenticatedGrants = new ArrayList<GrantedAuthorityInfo>();
 	    SecurityServiceUtil.setStandardSiteAccessConfiguration( users,
-				authenticatedGrants, anonGrants, allGroups, cc ); 
+										authenticatedGrants, anonGrants, allGroups, cc ); 
+	    // clear the cache of saved user identities as we don't know what has changed...
+	    cc.getUserService().reloadPermissions();
 	}
 
 	@Override

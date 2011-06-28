@@ -96,62 +96,66 @@ public class RoleHierarchyImpl implements RoleHierarchy, InitializingBean {
 		
 		refreshReachableGrantedAuthorities();
 		
+		CallingContext bootstrapCc = new CallingContext() {
+			@Override
+			public Object getBean(String beanName) {
+				if ( beanName.equals(SecurityBeanDefs.ROLE_HIERARCHY_MANAGER)) {
+					return RoleHierarchyImpl.this;
+				} else {
+					throw new IllegalStateException("Undefined");
+				}
+			}
+
+			@Override
+			public Datastore getDatastore() {
+				return datastore;
+			}
+
+			@Override
+			public UserService getUserService() {
+				return userService;
+			}
+
+			@Override
+			public void setAsDaemon(boolean asDaemon) {
+				throw new IllegalStateException("Invalid context");
+			}
+
+			@Override
+			public boolean getAsDeamon() {
+				return true;
+			}
+
+			@Override
+			public User getCurrentUser() {
+				return userService.getDaemonAccountUser();
+			}
+
+			@Override
+			public String getWebApplicationURL() {
+				throw new IllegalStateException("Undefined");
+			}
+
+			@Override
+			public String getWebApplicationURL(String servletAddr) {
+				throw new IllegalStateException("Undefined");
+			}
+
+			@Override
+			public String getServerURL() {
+				throw new IllegalStateException("Undefined");
+			}
+		};
+		
 		if  ( !userService.isAccessManagementConfigured() ) {
-			// do the 
-			SecurityServiceUtil.setDefaultMinimalSecureConfig(new CallingContext() {
-					
-					@Override
-					public Object getBean(String beanName) {
-						if ( beanName.equals(SecurityBeanDefs.ROLE_HIERARCHY_MANAGER)) {
-							return RoleHierarchyImpl.this;
-						} else {
-							throw new IllegalStateException("Undefined");
-						}
-					}
+			logger.warn("Configuring with default role name and role hierarchy"); 
+			SecurityServiceUtil.setDefaultRoleNamesAndHierarchy(bootstrapCc);
 
-					@Override
-					public Datastore getDatastore() {
-						return datastore;
-					}
-
-					@Override
-					public UserService getUserService() {
-						return userService;
-					}
-
-					@Override
-					public void setAsDaemon(boolean asDaemon) {
-						throw new IllegalStateException("Invalid context");
-					}
-
-					@Override
-					public boolean getAsDeamon() {
-						return true;
-					}
-
-					@Override
-					public User getCurrentUser() {
-						return userService.getDaemonAccountUser();
-					}
-
-					@Override
-					public String getWebApplicationURL() {
-						throw new IllegalStateException("Undefined");
-					}
-
-					@Override
-					public String getWebApplicationURL(String servletAddr) {
-						throw new IllegalStateException("Undefined");
-					}
-
-					@Override
-					public String getServerURL() {
-						throw new IllegalStateException("Undefined");
-					}
-			});
-			
 			refreshReachableGrantedAuthorities();
 		}
+
+		// ensure that the superuser has admin privileges
+		SecurityServiceUtil.superUserBootstrap(bootstrapCc);
 	}
 
 	/**

@@ -94,8 +94,9 @@ public class AccessConfigurationServlet extends ServletUtilBase {
 	 */
 
 	private static final GrantedAuthority siteAuth = new GrantedAuthorityImpl(GrantedAuthorityNames.GROUP_SITE_ADMINS);
-	private static final GrantedAuthority formAuth = new GrantedAuthorityImpl(GrantedAuthorityNames.GROUP_FORM_ADMINS);
-	private static final GrantedAuthority submitterAuth = new GrantedAuthorityImpl(GrantedAuthorityNames.GROUP_SUBMITTERS);
+	private static final GrantedAuthority formAuth = new GrantedAuthorityImpl(GrantedAuthorityNames.GROUP_DATA_ADMINS);
+	private static final GrantedAuthority analystsAuth = new GrantedAuthorityImpl(GrantedAuthorityNames.GROUP_DATA_VIEWERS);
+	private static final GrantedAuthority submitterAuth = new GrantedAuthorityImpl(GrantedAuthorityNames.GROUP_DATA_COLLECTORS);
 	private static final GrantedAuthority anonAuth = new GrantedAuthorityImpl(GrantedAuthorityNames.USER_IS_ANONYMOUS.name());
 
 
@@ -285,10 +286,13 @@ public class AccessConfigurationServlet extends ServletUtilBase {
 						"site administrators below</p><textarea name=\"" + GrantedAuthorityNames.GROUP_SITE_ADMINS + "\" rows=\"10\" cols=\"60\">" +
 								getUsernamesOrEmailsOfGrantedAuthority(siteAuth, cc) + "</textarea>");
 				out.print("<h4>Form Administrators</h4><p>Enter the usernames or e-mail addresses of the " +
-						"form administrators below</p><textarea name=\"" + GrantedAuthorityNames.GROUP_FORM_ADMINS + "\" rows=\"10\" cols=\"60\">" +
+						"form administrators below</p><textarea name=\"" + GrantedAuthorityNames.GROUP_DATA_ADMINS + "\" rows=\"10\" cols=\"60\">" +
 								getUsernamesOrEmailsOfGrantedAuthority(formAuth, cc) + "</textarea>");
+				out.print("<h4>Data Viewers</h4><p>Enter the usernames or e-mail addresses of the " +
+						"data viewers below</p><textarea name=\"" + GrantedAuthorityNames.GROUP_DATA_VIEWERS + "\" rows=\"20\" cols=\"60\">" +
+								getUsernamesOrEmailsOfGrantedAuthority(analystsAuth, cc) + "</textarea>");
 				out.print("<h4>Submitters</h4><p>Enter the usernames or e-mail addresses of the " +
-						"submitters below</p><textarea name=\"" + GrantedAuthorityNames.GROUP_SUBMITTERS + "\" rows=\"20\" cols=\"60\">" +
+						"submitters below</p><textarea name=\"" + GrantedAuthorityNames.GROUP_DATA_COLLECTORS + "\" rows=\"20\" cols=\"60\">" +
 								getUsernamesOrEmailsOfGrantedAuthority(submitterAuth, cc) + "</textarea>");
 				out.print("<br/><br/><input name=\"" + ANONYMOUS_SUBMITTERS + "\" type=\"checkbox\" value=\"yes\"" + 
 						(a.submitter ? "checked" : "") + ">Accept submissions from " +
@@ -333,8 +337,9 @@ public class AccessConfigurationServlet extends ServletUtilBase {
 		CallingContext cc = ContextFactory.getCallingContext(this, req);
 		
 		String siteAdmins = req.getParameter(GrantedAuthorityNames.GROUP_SITE_ADMINS);
-		String formAdmins = req.getParameter(GrantedAuthorityNames.GROUP_FORM_ADMINS);
-		String submitters = req.getParameter(GrantedAuthorityNames.GROUP_SUBMITTERS);
+		String formAdmins = req.getParameter(GrantedAuthorityNames.GROUP_DATA_ADMINS);
+		String analysts = req.getParameter(GrantedAuthorityNames.GROUP_DATA_VIEWERS);
+		String submitters = req.getParameter(GrantedAuthorityNames.GROUP_DATA_COLLECTORS);
 		boolean anonSubmitters = false;
 		{
 			String str = req.getParameter(ANONYMOUS_SUBMITTERS);

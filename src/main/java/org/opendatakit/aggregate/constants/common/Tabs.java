@@ -20,7 +20,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 
 public enum Tabs implements IsSerializable {
    SUBMISSIONS("Submissions", "submissions"),
-   MANAGEMENT("Management", "managements");
+   MANAGEMENT("Management", "management");
    
    private String tabLabel;
    private String hashString;

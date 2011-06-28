@@ -14,7 +14,6 @@
  * the License.
  */
 
-
 package org.opendatakit.aggregate.client;
 
 import java.util.ArrayList;
@@ -25,10 +24,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
 
+import org.opendatakit.aggregate.client.popups.ChangePasswordPopup;
 import org.opendatakit.common.security.client.GrantedAuthorityInfo;
+import org.opendatakit.common.security.client.RealmSecurityInfo;
 import org.opendatakit.common.security.client.UserClassSecurityInfo;
 import org.opendatakit.common.security.client.UserSecurityInfo;
 import org.opendatakit.common.security.client.UserSecurityInfo.UserType;
+import org.opendatakit.common.security.client.security.SecurityServiceAsync;
 import org.opendatakit.common.security.client.security.admin.SecurityAdminServiceAsync;
 import org.opendatakit.common.security.common.EmailParser;
 import org.opendatakit.common.security.common.EmailParser.Email;
@@ -50,7 +52,6 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
-import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Window;
@@ -59,15 +60,21 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 
-public class TemporaryAccessConfigurationSheet extends Composite implements ActionCell.Delegate<UserSecurityInfo> {
+public class TemporaryAccessConfigurationSheet extends Composite {
 
-   private static final int STATIC_USER_TABLE_COLUMNS = 4;
+   private static final int STATIC_USER_TABLE_COLUMNS = 5;
    private static final int ERROR_MESSAGE_RETENTION_INTERVAL_MILLISECONDS = 2000;
    private static final String K_INVALID_EMAIL_CHARACTERS = " \t\n\r\",;()<>?/{}'[]";
+   private static final GrantedAuthorityInfo siteAdmins = new GrantedAuthorityInfo(GrantedAuthorityNames.GROUP_SITE_ADMINS);
+   private static final GrantedAuthorityInfo dataAdmins = new GrantedAuthorityInfo(GrantedAuthorityNames.GROUP_DATA_ADMINS);
+   private static final GrantedAuthorityInfo dataViewers = new GrantedAuthorityInfo(GrantedAuthorityNames.GROUP_DATA_VIEWERS);
+   private static final GrantedAuthorityInfo dataCollectors = new GrantedAuthorityInfo(GrantedAuthorityNames.GROUP_DATA_COLLECTORS);
+
    private static TemporaryAccessConfigurationSheetUiBinder uiBinder = GWT
          .create(TemporaryAccessConfigurationSheetUiBinder.class);
 
@@ -103,13 +110,35 @@ public class TemporaryAccessConfigurationSheet extends Composite implements Acti
          }
       }
    }
+   
+   class DeleteActionCallback implements ActionCell.Delegate<UserSecurityInfo> {
 
-   @Override
-   public void execute(UserSecurityInfo object) {
-      dataProvider.getList().remove(object);
-      // dataProvider.refresh();
-   }
+	@Override
+	public void execute(UserSecurityInfo object) {
+		dataProvider.getList().remove(object);
+	}
+   };
+   
+   DeleteActionCallback deleteAction = new DeleteActionCallback();
 
+   class ChangePasswordActionCallback implements ActionCell.Delegate<UserSecurityInfo> {
+
+	@Override
+	public void execute(UserSecurityInfo object) {
+	    final PopupPanel popup = new ChangePasswordPopup(object, realmInfo, securityAdminService);
+	    popup.setPopupPositionAndShow(new PopupPanel.PositionCallback() {
+	      @Override
+	      public void setPosition(int offsetWidth, int offsetHeight) {
+	        int left = ((Window.getClientWidth() - offsetWidth) / 2);
+	        int top = ((Window.getClientHeight() - offsetHeight) / 2);
+	        popup.setPopupPosition(left, top);
+	      }
+	    });
+	}
+   };
+   
+   ChangePasswordActionCallback changePasswordAction = new ChangePasswordActionCallback();
+   
    private static boolean hasInvalidEmailCharacters( String email ) {
       for ( int i = 0 ; i < K_INVALID_EMAIL_CHARACTERS.length(); ++i) {
          char ch = K_INVALID_EMAIL_CHARACTERS.charAt(i);
@@ -260,7 +289,7 @@ public class TemporaryAccessConfigurationSheet extends Composite implements Acti
       sinkEvents(Event.ONCHANGE | Event.ONCLICK);
 
       Column<UserSecurityInfo,UserSecurityInfo> deleteMe = new Column<UserSecurityInfo,UserSecurityInfo>
-                  (new ActionCell<UserSecurityInfo>("Remove", this){}) {
+                  (new ActionCell<UserSecurityInfo>("Remove", deleteAction){}) {
 
                      @Override
                      public UserSecurityInfo getValue(UserSecurityInfo object) {
@@ -270,14 +299,21 @@ public class TemporaryAccessConfigurationSheet extends Composite implements Acti
       userTable.addColumn(deleteMe, "");
       
       // Username
-      TextColumn<UserSecurityInfo> username = new TextColumn<UserSecurityInfo>() {
-         @Override
-         public String getValue(UserSecurityInfo object) {
-            return object.getUsername();
-         }
-         
+      Column<UserSecurityInfo,String> username = new Column<UserSecurityInfo,String>
+      			(new TextInputCell()) {
+          @Override
+          public String getValue(UserSecurityInfo object) {
+             return object.getUsername();
+          }
       };
       username.setSortable(true);
+      username.setFieldUpdater(new FieldUpdater<UserSecurityInfo,String>() {
+
+          @Override
+          public void update(int index, UserSecurityInfo object, String value) {
+             object.setUsername(value);
+             userTable.redraw();
+          }});
       userTable.addColumn(username, "Username");
       
       // Nickname
@@ -348,38 +384,76 @@ public class TemporaryAccessConfigurationSheet extends Composite implements Acti
       });
       userTable.addColumnSortHandler(columnSortHandler);
       
+      // Change Password
+      Column<UserSecurityInfo,UserSecurityInfo> changePassword = new Column<UserSecurityInfo,UserSecurityInfo>
+      (new ActionCell<UserSecurityInfo>("Change Password", changePasswordAction){}) {
+
+         @Override
+         public UserSecurityInfo getValue(UserSecurityInfo object) {
+            return object;
+         }
+      };
+      userTable.addColumn(changePassword, "");
    }
 
    protected void reviseCellTableColumns(ArrayList<UserSecurityInfo> allUsersList) {
       TreeSet<GrantedAuthorityInfo> uniqueAuths = new TreeSet<GrantedAuthorityInfo>();
-      uniqueAuths.add(new GrantedAuthorityInfo(GrantedAuthorityNames.GROUP_SITE_ADMINS));
-      uniqueAuths.add(new GrantedAuthorityInfo(GrantedAuthorityNames.GROUP_FORM_ADMINS));
-      uniqueAuths.add(new GrantedAuthorityInfo(GrantedAuthorityNames.GROUP_SUBMITTERS));
+      uniqueAuths.add(siteAdmins);
+      uniqueAuths.add(dataAdmins);
+      uniqueAuths.add(dataViewers);
+      uniqueAuths.add(dataCollectors);
       for ( int i = 0 ; i < allUsersList.size() ; ++i ) {
          UserSecurityInfo u = allUsersList.get(i);
          uniqueAuths.addAll(u.getAssignedUserGroups());
       }
+      uniqueAuths.remove(dataCollectors);
+      uniqueAuths.remove(dataViewers);
+      uniqueAuths.remove(dataAdmins);
+      uniqueAuths.remove(siteAdmins);
+      // remove any earlier columns...
       while ( userTable.getColumnCount() > STATIC_USER_TABLE_COLUMNS ) {
          userTable.removeColumn(userTable.getColumnCount()-1);
       }
+      // add our columns...
+      userTable.addColumn(new GroupMembership(dataCollectors), dataCollectors.getName());
+      userTable.addColumn(new GroupMembership(dataViewers), dataViewers.getName());
       for ( GrantedAuthorityInfo auth : uniqueAuths ) {
          userTable.addColumn(new GroupMembership(auth), auth.getName());
       }
+      userTable.addColumn(new GroupMembership(dataAdmins), dataAdmins.getName());
+      userTable.addColumn(new GroupMembership(siteAdmins), siteAdmins.getName());
    }
 
    @Override
    public void setVisible(boolean isVisible) {
       super.setVisible(isVisible);
       if ( isVisible ) {
-         if ( service == null ) {
-            this.service = SecureGWT.get().createSecurityAdminService();
+         if ( securityAdminService == null ) {
+            securityAdminService = SecureGWT.get().createSecurityAdminService();
+         }
+         if ( securityService == null ) {
+        	securityService = SecureGWT.get().createSecurityService();
          }
          clearError(); // because navigating off the page might not have sent a mouse event...
-         service.getAllUsers(true, new AsyncCallback<ArrayList<UserSecurityInfo> > () 
+         
+		 if ( realmInfo == null ) {
+			securityService.getRealmInfo(Cookies.getCookie("JSESSIONID"), 
+					new AsyncCallback<RealmSecurityInfo>() {
+						@Override
+						public void onFailure(Throwable caught) {
+						}
+	
+						@Override
+						public void onSuccess(RealmSecurityInfo result) {
+							realmInfo = result;
+					}});
+		 }
+
+         securityAdminService.getAllUsers(true, new AsyncCallback<ArrayList<UserSecurityInfo> > () 
             {
                @Override
                public void onFailure(Throwable caught) {
-                  Window.alert("Unable to access server: " + caught.getMessage());
+                  Window.alert("Unable to retrieve users from server: " + caught.getMessage());
                }
    
                @Override
@@ -390,7 +464,7 @@ public class TemporaryAccessConfigurationSheet extends Composite implements Acti
                   addedUsers.setText("");
                }
             });
-         service.getUserClassPrivileges(GrantedAuthorityNames.USER_IS_ANONYMOUS.toString(), new AsyncCallback<UserClassSecurityInfo>()
+         securityAdminService.getUserClassPrivileges(GrantedAuthorityNames.USER_IS_ANONYMOUS.toString(), new AsyncCallback<UserClassSecurityInfo>()
             {
                @Override
                public void onFailure(Throwable caught) {
@@ -429,7 +503,9 @@ public class TemporaryAccessConfigurationSheet extends Composite implements Acti
    @UiField
    Button gotoAdvanced;
    
-   SecurityAdminServiceAsync service;
+   RealmSecurityInfo realmInfo;
+   SecurityServiceAsync securityService;
+   SecurityAdminServiceAsync securityAdminService;
    
    
    @UiHandler("gotoAdvanced")
@@ -469,8 +545,9 @@ public class TemporaryAccessConfigurationSheet extends Composite implements Acti
    void onUpdateClick(ClickEvent e) {
       ArrayList<GrantedAuthorityInfo> allGroups = new ArrayList<GrantedAuthorityInfo>();
       allGroups.add(new GrantedAuthorityInfo(GrantedAuthorityNames.GROUP_SITE_ADMINS));
-      allGroups.add(new GrantedAuthorityInfo(GrantedAuthorityNames.GROUP_FORM_ADMINS));
-      allGroups.add(new GrantedAuthorityInfo(GrantedAuthorityNames.GROUP_SUBMITTERS));
+      allGroups.add(new GrantedAuthorityInfo(GrantedAuthorityNames.GROUP_DATA_ADMINS));
+      allGroups.add(new GrantedAuthorityInfo(GrantedAuthorityNames.GROUP_DATA_VIEWERS));
+      allGroups.add(new GrantedAuthorityInfo(GrantedAuthorityNames.GROUP_DATA_COLLECTORS));
       allGroups.add(new GrantedAuthorityInfo(GrantedAuthorityNames.USER_IS_ANONYMOUS.toString()));
       
       ArrayList<GrantedAuthorityInfo> anonGrants = new ArrayList<GrantedAuthorityInfo>();
@@ -485,7 +562,7 @@ public class TemporaryAccessConfigurationSheet extends Composite implements Acti
       
       ArrayList<UserSecurityInfo> users = new ArrayList<UserSecurityInfo>();
       users.addAll(dataProvider.getList());
-      service.setUsersAndGrantedAuthorities(Cookies.getCookie("JSESSIONID"), 
+      securityAdminService.setUsersAndGrantedAuthorities(Cookies.getCookie("JSESSIONID"), 
                            users, anonGrants, allGroups, new AsyncCallback<Void>() {
 
          @Override
@@ -495,7 +572,21 @@ public class TemporaryAccessConfigurationSheet extends Composite implements Acti
 
          @Override
          public void onSuccess(Void result) {
-            Window.alert("Successful update of site access configuration");
+            securityAdminService.getAllUsers(true, new AsyncCallback<ArrayList<UserSecurityInfo> > () 
+            {
+               @Override
+               public void onFailure(Throwable caught) {
+                  Window.alert("Unable to retrieve users from server: " + caught.getMessage());
+               }
+   
+               @Override
+               public void onSuccess(ArrayList<UserSecurityInfo> result) {
+                  reviseCellTableColumns(result);
+                  dataProvider.getList().clear();
+                  dataProvider.getList().addAll(result);
+                  addedUsers.setText("");
+               }
+            });
          }
       });
    }

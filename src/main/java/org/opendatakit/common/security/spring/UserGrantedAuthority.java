@@ -30,7 +30,6 @@ import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.persistence.Query.FilterOperation;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.security.User;
-import org.opendatakit.common.security.common.GrantedAuthorityNames;
 import org.opendatakit.common.web.CallingContext;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.GrantedAuthorityImpl;
@@ -117,39 +116,6 @@ public final class UserGrantedAuthority extends CommonFieldsBase {
 			reference = referencePrototype;
 		}
 		return reference;
-	}
-	
-	public static final synchronized void bootstrap( String uriSuperUser, Datastore ds, User user) throws ODKDatastoreException {
-		UserGrantedAuthority prototype = assertRelation(ds, user);
-
-		boolean hasAccessRole = false;
-		List<EntityKey> staleEntries = new ArrayList<EntityKey>();
-		
-		Query q = ds.createQuery(prototype, user);
-		q.addFilter(GRANTED_AUTHORITY, FilterOperation.EQUAL, 
-					GrantedAuthorityNames.ROLE_ACCESS_ADMIN.name());
-		List<? extends CommonFieldsBase> values = q.executeQuery(0);
-		for ( CommonFieldsBase b : values ) {
-			UserGrantedAuthority auth = (UserGrantedAuthority) b;
-			if ( auth.getUser().equals(uriSuperUser) ) {
-				hasAccessRole = true;
-			} else {
-				staleEntries.add( new EntityKey( prototype, auth.getUri()) );
-			}
-		}
-		
-		if ( !staleEntries.isEmpty() ) {
-			// we have former superUsers defined -- remove them...
-			ds.deleteEntities(staleEntries, user);
-		}
-
-		if ( !hasAccessRole ) {
-			// Superuser does not have ROLE_ACCESS_ADMIN -- add it...
-			UserGrantedAuthority entity = ds.createEntityUsingRelation(prototype, user);
-			entity.setUser(uriSuperUser);
-			entity.setGrantedAuthority(new GrantedAuthorityImpl(GrantedAuthorityNames.ROLE_ACCESS_ADMIN.name()));
-			ds.putEntity(entity, user);
-		}
 	}
 
 	public static final Set<GrantedAuthority> getGrantedAuthorities(String uriUser, Datastore ds, User user) throws ODKDatastoreException {

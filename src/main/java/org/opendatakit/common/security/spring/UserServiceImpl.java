@@ -82,9 +82,6 @@ public class UserServiceImpl implements org.opendatakit.common.security.UserServ
 		
 		activeUsers.put(anonymous.getUriUser(), anonymous);
 		activeUsers.put(daemonAccount.getUriUser(), daemonAccount);
-		
-		// ensure that the superuser has admin privileges
-		UserGrantedAuthority.bootstrap(superUserEmail, datastore, daemonAccount);
 	}
 
 	public Datastore getDatastore() {
@@ -145,6 +142,10 @@ public class UserServiceImpl implements org.opendatakit.common.security.UserServ
   @Override
   public boolean isAccessManagementConfigured() {
 	  try {
+		  /**
+		   * Any configuration in the GrantedAuthorityHierarchy table indicates that 
+		   * we have configured access management with at least a default configuration.
+		   */
 	      GrantedAuthorityHierarchyTable relation = GrantedAuthorityHierarchyTable.assertRelation(datastore, daemonAccount);
 	      Query query = datastore.createQuery(relation, daemonAccount);
 	      List<?> values = query.executeQuery(0);
