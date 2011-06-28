@@ -76,7 +76,7 @@ public class SubmissionServlet extends ServletUtilBase {
   private static final String JQUERY_SCRIPT_HEADER = 
      "<script src=\"http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js\"></script>";
   
-  private static final String UPLOAD_SCRIPT_RESOURCE = "res/upload_control.js";
+  private static final String UPLOAD_SCRIPT_RESOURCE = "javascript/upload_control.js";
 
   private static final String UPLOAD_PAGE_BODY_START = 
 
