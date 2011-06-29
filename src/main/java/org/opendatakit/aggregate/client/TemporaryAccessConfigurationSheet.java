@@ -30,8 +30,6 @@ import org.opendatakit.common.security.client.RealmSecurityInfo;
 import org.opendatakit.common.security.client.UserClassSecurityInfo;
 import org.opendatakit.common.security.client.UserSecurityInfo;
 import org.opendatakit.common.security.client.UserSecurityInfo.UserType;
-import org.opendatakit.common.security.client.security.SecurityServiceAsync;
-import org.opendatakit.common.security.client.security.admin.SecurityAdminServiceAsync;
 import org.opendatakit.common.security.common.EmailParser;
 import org.opendatakit.common.security.common.EmailParser.Email;
 import org.opendatakit.common.security.common.GrantedAuthorityNames;
@@ -125,7 +123,7 @@ public class TemporaryAccessConfigurationSheet extends Composite {
 
 	@Override
 	public void execute(UserSecurityInfo object) {
-	    final PopupPanel popup = new ChangePasswordPopup(object, realmInfo, securityAdminService);
+	    final PopupPanel popup = new ChangePasswordPopup(object, realmInfo, SecureGWT.getSecurityAdminService());
 	    popup.setPopupPositionAndShow(new PopupPanel.PositionCallback() {
 	      @Override
 	      public void setPosition(int offsetWidth, int offsetHeight) {
@@ -428,16 +426,10 @@ public class TemporaryAccessConfigurationSheet extends Composite {
    public void setVisible(boolean isVisible) {
       super.setVisible(isVisible);
       if ( isVisible ) {
-         if ( securityAdminService == null ) {
-            securityAdminService = SecureGWT.get().createSecurityAdminService();
-         }
-         if ( securityService == null ) {
-        	securityService = SecureGWT.get().createSecurityService();
-         }
          clearError(); // because navigating off the page might not have sent a mouse event...
          
 		 if ( realmInfo == null ) {
-			securityService.getRealmInfo(Cookies.getCookie("JSESSIONID"), 
+			 SecureGWT.getSecurityService().getRealmInfo(Cookies.getCookie("JSESSIONID"), 
 					new AsyncCallback<RealmSecurityInfo>() {
 						@Override
 						public void onFailure(Throwable caught) {
@@ -449,7 +441,7 @@ public class TemporaryAccessConfigurationSheet extends Composite {
 					}});
 		 }
 
-         securityAdminService.getAllUsers(true, new AsyncCallback<ArrayList<UserSecurityInfo> > () 
+		 SecureGWT.getSecurityAdminService().getAllUsers(true, new AsyncCallback<ArrayList<UserSecurityInfo> > () 
             {
                @Override
                public void onFailure(Throwable caught) {
@@ -464,7 +456,7 @@ public class TemporaryAccessConfigurationSheet extends Composite {
                   addedUsers.setText("");
                }
             });
-         securityAdminService.getUserClassPrivileges(GrantedAuthorityNames.USER_IS_ANONYMOUS.toString(), new AsyncCallback<UserClassSecurityInfo>()
+		 SecureGWT.getSecurityAdminService().getUserClassPrivileges(GrantedAuthorityNames.USER_IS_ANONYMOUS.toString(), new AsyncCallback<UserClassSecurityInfo>()
             {
                @Override
                public void onFailure(Throwable caught) {
@@ -504,9 +496,6 @@ public class TemporaryAccessConfigurationSheet extends Composite {
    Button gotoAdvanced;
    
    RealmSecurityInfo realmInfo;
-   SecurityServiceAsync securityService;
-   SecurityAdminServiceAsync securityAdminService;
-   
    
    @UiHandler("gotoAdvanced")
    void onGotoAdvancedClick(ClickEvent e) {
@@ -562,7 +551,7 @@ public class TemporaryAccessConfigurationSheet extends Composite {
       
       ArrayList<UserSecurityInfo> users = new ArrayList<UserSecurityInfo>();
       users.addAll(dataProvider.getList());
-      securityAdminService.setUsersAndGrantedAuthorities(Cookies.getCookie("JSESSIONID"), 
+      SecureGWT.getSecurityAdminService().setUsersAndGrantedAuthorities(Cookies.getCookie("JSESSIONID"), 
                            users, anonGrants, allGroups, new AsyncCallback<Void>() {
 
          @Override
@@ -572,7 +561,7 @@ public class TemporaryAccessConfigurationSheet extends Composite {
 
          @Override
          public void onSuccess(Void result) {
-            securityAdminService.getAllUsers(true, new AsyncCallback<ArrayList<UserSecurityInfo> > () 
+        	 SecureGWT.getSecurityAdminService().getAllUsers(true, new AsyncCallback<ArrayList<UserSecurityInfo> > () 
             {
                @Override
                public void onFailure(Throwable caught) {

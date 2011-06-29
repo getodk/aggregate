@@ -99,7 +99,7 @@ public class FiltersDataPanel extends FlowPanel {
   }
 
   private void removeFilterGroup(FilterGroup group) {
-    FilterServiceAsync filterSvc = SecureGWT.get().createFilterService();
+    FilterServiceAsync filterSvc = SecureGWT.getFilterService();
 
     AsyncCallback<Boolean> callback = new AsyncCallback<Boolean>() {
       public void onFailure(Throwable caught) {

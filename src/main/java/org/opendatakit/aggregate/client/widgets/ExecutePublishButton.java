@@ -3,7 +3,6 @@ package org.opendatakit.aggregate.client.widgets;
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.SecureGWT;
 import org.opendatakit.aggregate.client.UrlHash;
-import org.opendatakit.aggregate.client.externalserv.ServicesAdminServiceAsync;
 import org.opendatakit.aggregate.client.popups.ExternalServicePopup;
 import org.opendatakit.aggregate.constants.common.ExternalServicePublicationOption;
 
@@ -39,11 +38,10 @@ public class ExecutePublishButton  extends AButtonBase implements ClickHandler {
         serviceOp = selected;
     }
     String selectedService = service.getItemText(service.getSelectedIndex());
-    ServicesAdminServiceAsync servicesAdminSvc = SecureGWT.get().createServicesAdminService();
     if (selectedService.equals(ExternalServicePopup.TYPE_FUSION_TABLE)) {
-      servicesAdminSvc.createFusionTable(formId, serviceOp, new CreateFusionTablesCallback());
+    	SecureGWT.getServicesAdminService().createFusionTable(formId, serviceOp, new CreateFusionTablesCallback());
     } else { // selectedService.equals(TYPE_SPREAD_SHEET)
-      servicesAdminSvc.createGoogleSpreadsheet(formId, name.getText(), serviceOp,
+    	SecureGWT.getServicesAdminService().createGoogleSpreadsheet(formId, name.getText(), serviceOp,
           new AsyncCallback<String>() {
             @Override
             public void onFailure(Throwable caught) {
@@ -52,10 +50,7 @@ public class ExecutePublishButton  extends AButtonBase implements ClickHandler {
 
             @Override
             public void onSuccess(String result) {
-              // TODO Auto-generated method stub
-              ServicesAdminServiceAsync servicesAdminSvc = SecureGWT.get()
-                  .createServicesAdminService();
-              servicesAdminSvc.generateOAuthUrl(result, new AsyncCallback<String>() {
+              SecureGWT.getServicesAdminService().generateOAuthUrl(result, new AsyncCallback<String>() {
                 @Override
                 public void onFailure(Throwable caught) {
                   // TODO Auto-generated method stub
@@ -83,9 +78,7 @@ public class ExecutePublishButton  extends AButtonBase implements ClickHandler {
 
 
     public void onSuccess(String result) {
-      ServicesAdminServiceAsync servicesAdminSvc = SecureGWT.get()
-          .createServicesAdminService();
-      servicesAdminSvc.generateOAuthUrl(result, new AsyncCallback<String>() {
+      SecureGWT.getServicesAdminService().generateOAuthUrl(result, new AsyncCallback<String>() {
         @Override
         public void onFailure(Throwable caught) {
           // TODO Auto-generated method stub

@@ -1,7 +1,6 @@
 package org.opendatakit.aggregate.client;
 
 import org.opendatakit.aggregate.client.form.ExportSummary;
-import org.opendatakit.aggregate.client.form.FormServiceAsync;
 import org.opendatakit.aggregate.client.table.ExportTable;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -18,8 +17,6 @@ public class ExportSubTab extends VerticalPanel implements SubTabInterface {
   
   public void update() {
     
-    FormServiceAsync  formSvc = SecureGWT.get().createFormService();
-
     AsyncCallback<ExportSummary[]> callback = new AsyncCallback<ExportSummary[]>() {
       @Override
       public void onFailure(Throwable caught) {
@@ -32,7 +29,7 @@ public class ExportSubTab extends VerticalPanel implements SubTabInterface {
       }
     };
 
-    formSvc.getExports(callback);
+    SecureGWT.getFormService().getExports(callback);
   }
   
 }

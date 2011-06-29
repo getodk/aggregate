@@ -24,12 +24,10 @@ import java.util.Map;
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.FilterSubTab;
 import org.opendatakit.aggregate.client.SecureGWT;
-import org.opendatakit.aggregate.client.form.FormServiceAsync;
 import org.opendatakit.aggregate.client.form.KmlSettingOption;
 import org.opendatakit.aggregate.client.form.KmlSettings;
 import org.opendatakit.aggregate.client.preferences.Preferences;
 import org.opendatakit.aggregate.client.submission.Column;
-import org.opendatakit.aggregate.client.submission.SubmissionServiceAsync;
 import org.opendatakit.aggregate.client.submission.SubmissionUI;
 import org.opendatakit.aggregate.client.submission.UIGeoPoint;
 import org.opendatakit.aggregate.client.widgets.ClosePopupButton;
@@ -188,8 +186,7 @@ public class VisualizationPopup extends PopupPanel {
       firstData.addItem(header.getDisplayHeader());
     }
     
-    FormServiceAsync formSvc = SecureGWT.get().createFormService();
-    formSvc.getGpsCoordnates(formId, new AsyncCallback<KmlSettings>() {
+    SecureGWT.getFormService().getGpsCoordnates(formId, new AsyncCallback<KmlSettings>() {
       public void onFailure(Throwable c) {
       }
 
@@ -205,8 +202,7 @@ public class VisualizationPopup extends PopupPanel {
       @Override
       public void onClick(ClickEvent event) {
         if (chartType.getItemText(chartType.getSelectedIndex()).equals(UI_MAP)) {
-          SubmissionServiceAsync submissionSvc = SecureGWT.get().createSubmissionService();
-          submissionSvc.getGeoPoints(formId, geoPoints.get(secondData.getSelectedIndex())
+          SecureGWT.getSubmissionService().getGeoPoints(formId, geoPoints.get(secondData.getSelectedIndex())
               .getElementKey(), new AsyncCallback<UIGeoPoint[]>() {
             @Override
             public void onFailure(Throwable caught) {
@@ -302,7 +298,7 @@ public class VisualizationPopup extends PopupPanel {
     mapSpace.getElement().setId("map_area");
     disableMap();
 
-    formSvc.getGpsCoordnates(formId, new AsyncCallback<KmlSettings>() {
+    SecureGWT.getFormService().getGpsCoordnates(formId, new AsyncCallback<KmlSettings>() {
       public void onFailure(Throwable c) {
       }
 

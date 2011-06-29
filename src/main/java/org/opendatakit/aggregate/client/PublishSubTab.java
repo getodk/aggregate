@@ -1,7 +1,6 @@
 package org.opendatakit.aggregate.client;
 
 import org.opendatakit.aggregate.client.externalserv.ExternServSummary;
-import org.opendatakit.aggregate.client.externalserv.ServicesAdminServiceAsync;
 import org.opendatakit.aggregate.client.form.FormServiceAsync;
 import org.opendatakit.aggregate.client.form.FormSummary;
 import org.opendatakit.aggregate.client.table.PublishTable;
@@ -38,7 +37,7 @@ public class PublishSubTab extends VerticalPanel implements SubTabInterface {
   }
 
   public void update() {
-    FormServiceAsync formSvc = SecureGWT.get().createFormService();
+    FormServiceAsync formSvc = SecureGWT.getFormService();
 
     // Set up the callback object.
     AsyncCallback<FormSummary[]> callback = new AsyncCallback<FormSummary[]>() {
@@ -49,14 +48,13 @@ public class PublishSubTab extends VerticalPanel implements SubTabInterface {
       public void onSuccess(FormSummary[] forms) {
         baseUI.clearError();
         updateFormDropDown(forms);
+        // Make the call to get the published services
+        updatePublishTable();
       }
     };
 
     // Make the call to the form service.
     formSvc.getForms(callback);
-
-    // Make the call to get the published services
-    updatePublishTable();
   }
 
   public synchronized void updateFormDropDown(FormSummary[] formsFromService) {
@@ -106,7 +104,6 @@ public class PublishSubTab extends VerticalPanel implements SubTabInterface {
   }
 
   public synchronized void updatePublishTable() {
-    ServicesAdminServiceAsync servicesAdminSvc = SecureGWT.get().createServicesAdminService();
     AsyncCallback<ExternServSummary[]> callback = new AsyncCallback<ExternServSummary[]>() {
       @Override
       public void onFailure(Throwable caught) {
@@ -124,7 +121,7 @@ public class PublishSubTab extends VerticalPanel implements SubTabInterface {
       return;
     }
     if (selectedForm.getId() != null) {
-      servicesAdminSvc.getExternalServices(selectedForm.getId(), callback);
+    	SecureGWT.getServicesAdminService().getExternalServices(selectedForm.getId(), callback);
     }
 
   }

@@ -1,7 +1,6 @@
 package org.opendatakit.aggregate.client;
 
 import org.opendatakit.aggregate.client.filter.FilterGroup;
-import org.opendatakit.aggregate.client.submission.SubmissionServiceAsync;
 import org.opendatakit.aggregate.client.submission.SubmissionUISummary;
 import org.opendatakit.aggregate.client.table.SubmissionTable;
 
@@ -20,8 +19,6 @@ public class SubmissionPanel extends FlowPanel {
   }
 
   public void update(FilterGroup filterGroup) {
-    SubmissionServiceAsync submissionSvc = SecureGWT.get().createSubmissionService();
-
     // Set up the callback object.
     AsyncCallback<SubmissionUISummary> callback = new AsyncCallback<SubmissionUISummary>() {
       public void onFailure(Throwable caught) {
@@ -35,7 +32,7 @@ public class SubmissionPanel extends FlowPanel {
     };
 
     if(filterGroup.getFormId() != null) {
-      submissionSvc.getSubmissions(filterGroup, callback);
+    	SecureGWT.getSubmissionService().getSubmissions(filterGroup, callback);
     }
   }
   

@@ -2,7 +2,6 @@ package org.opendatakit.aggregate.client.widgets;
 
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.SecureGWT;
-import org.opendatakit.aggregate.client.form.FormAdminServiceAsync;
 
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
@@ -22,8 +21,7 @@ public class AcceptSubmissionCheckBox extends ACheckBoxBase implements ValueChan
   @Override
   public void onValueChange(ValueChangeEvent<Boolean> event) {
     super.onValueChange(event);
-    FormAdminServiceAsync formAdminSvc = SecureGWT.get().createFormAdminService();
-    formAdminSvc.setFormAcceptSubmissions(formId, event.getValue(), new AsyncCallback<Boolean>() {
+    SecureGWT.getFormAdminService().setFormAcceptSubmissions(formId, event.getValue(), new AsyncCallback<Boolean>() {
       @Override
       public void onFailure(Throwable caught) {
         AggregateUI.getUI().reportError(caught);

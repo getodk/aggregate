@@ -3,7 +3,6 @@ package org.opendatakit.aggregate.client.widgets;
 import java.util.Date;
 
 import org.opendatakit.aggregate.client.SecureGWT;
-import org.opendatakit.aggregate.client.form.FormAdminServiceAsync;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -28,8 +27,7 @@ public class ConfirmPurgeButton extends AButtonBase implements ClickHandler {
   public void onClick(ClickEvent event) {
     super.onClick(event);
     // OK -- we are to proceed.
-    FormAdminServiceAsync formAdminSvc = SecureGWT.get().createFormAdminService();
-    formAdminSvc.purgePublishedData(uri, earliest, new AsyncCallback<Date>() {
+    SecureGWT.getFormAdminService().purgePublishedData(uri, earliest, new AsyncCallback<Date>() {
 
       @Override
       public void onFailure(Throwable caught) {

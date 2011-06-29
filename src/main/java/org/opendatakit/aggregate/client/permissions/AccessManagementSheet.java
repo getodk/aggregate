@@ -18,7 +18,6 @@ package org.opendatakit.aggregate.client.permissions;
 import org.opendatakit.aggregate.client.SecureGWT;
 import org.opendatakit.common.security.client.GrantedAuthorityInfo;
 import org.opendatakit.common.security.client.UserClassSecurityInfo;
-import org.opendatakit.common.security.client.security.admin.SecurityAdminServiceAsync;
 import org.opendatakit.common.security.common.GrantedAuthorityNames;
 
 import com.google.gwt.core.client.GWT;
@@ -60,7 +59,6 @@ public class AccessManagementSheet extends Composite {
 	@UiField
 	Anchor modifyRegisteredUsers;
 	
-	SecurityAdminServiceAsync service;
 	UserClassSecurityInfo anonymous;
 	UserClassSecurityInfo authenticated;
 
@@ -68,13 +66,10 @@ public class AccessManagementSheet extends Composite {
 	public void setVisible(boolean isVisible) {
 		super.setVisible(isVisible);
 		if ( isVisible ) {
-			if ( service == null ) {
-				service = SecureGWT.get().createSecurityAdminService();
-			}
 			String baseUrl = GWT.getHostPageBaseURL();
 			modifyGroup.setHref(baseUrl + MODIFY_GROUP_URL);
 			modifyRegisteredUsers.setHref(baseUrl + MODIFY_USERS_URL);
-			service.getUserClassPrivileges(GrantedAuthorityNames.USER_IS_ANONYMOUS.toString(), new AsyncCallback<UserClassSecurityInfo>(){
+			SecureGWT.getSecurityAdminService().getUserClassPrivileges(GrantedAuthorityNames.USER_IS_ANONYMOUS.toString(), new AsyncCallback<UserClassSecurityInfo>(){
 	
 				@Override
 				public void onFailure(Throwable caught) {
@@ -88,7 +83,7 @@ public class AccessManagementSheet extends Composite {
 							new GrantedAuthorityInfo(GrantedAuthorityNames.ROLE_ATTACHMENT_VIEWER.toString())));
 				}});
 			
-			service.getUserClassPrivileges(GrantedAuthorityNames.USER_IS_AUTHENTICATED.toString(), new AsyncCallback<UserClassSecurityInfo>(){
+			SecureGWT.getSecurityAdminService().getUserClassPrivileges(GrantedAuthorityNames.USER_IS_AUTHENTICATED.toString(), new AsyncCallback<UserClassSecurityInfo>(){
 
 				@Override
 				public void onFailure(Throwable caught) {

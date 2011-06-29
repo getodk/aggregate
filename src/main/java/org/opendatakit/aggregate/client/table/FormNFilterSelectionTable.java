@@ -7,9 +7,7 @@ import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.FilterSubTab;
 import org.opendatakit.aggregate.client.SecureGWT;
 import org.opendatakit.aggregate.client.filter.FilterGroup;
-import org.opendatakit.aggregate.client.filter.FilterServiceAsync;
 import org.opendatakit.aggregate.client.filter.FilterSet;
-import org.opendatakit.aggregate.client.form.FormServiceAsync;
 import org.opendatakit.aggregate.client.form.FormSummary;
 import org.opendatakit.aggregate.client.widgets.FetchFormButton;
 import org.opendatakit.aggregate.constants.common.UIConsts;
@@ -49,8 +47,6 @@ public class FormNFilterSelectionTable extends FlexTable {
   }
 
   public void update() {
-    FormServiceAsync formSvc = SecureGWT.get().createFormService();
-
     // Set up the callback object.
     AsyncCallback<FormSummary[]> callback = new AsyncCallback<FormSummary[]>() {
       public void onFailure(Throwable caught) {
@@ -64,7 +60,7 @@ public class FormNFilterSelectionTable extends FlexTable {
     };
 
     // Make the call to the form service.
-    formSvc.getForms(callback);
+    SecureGWT.getFormService().getForms(callback);
   }
 
   public void fetchClicked() {
@@ -123,7 +119,6 @@ public class FormNFilterSelectionTable extends FlexTable {
   }
 
   private synchronized void updateFilterList() {
-    FilterServiceAsync filterSvc = SecureGWT.get().createFilterService();
     AsyncCallback<FilterSet> callback = new AsyncCallback<FilterSet>() {
       @Override
       public void onFailure(Throwable caught) {
@@ -142,7 +137,7 @@ public class FormNFilterSelectionTable extends FlexTable {
       return;
     }
     if (selectedForm.getId() != null) {
-      filterSvc.getFilterSet(selectedForm.getId(), callback);
+    	SecureGWT.getFilterService().getFilterSet(selectedForm.getId(), callback);
     }
 
   }

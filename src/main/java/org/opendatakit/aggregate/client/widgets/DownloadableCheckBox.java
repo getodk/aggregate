@@ -2,7 +2,6 @@ package org.opendatakit.aggregate.client.widgets;
 
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.SecureGWT;
-import org.opendatakit.aggregate.client.form.FormAdminServiceAsync;
 
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
@@ -23,8 +22,7 @@ public class DownloadableCheckBox extends ACheckBoxBase implements ValueChangeHa
   public void onValueChange(ValueChangeEvent<Boolean> event) {
     super.onValueChange(event);
     
-    FormAdminServiceAsync formAdminSvc = SecureGWT.get().createFormAdminService();
-    formAdminSvc.setFormDownloadable(formId, event.getValue(), new AsyncCallback<Boolean> () {
+    SecureGWT.getFormAdminService().setFormDownloadable(formId, event.getValue(), new AsyncCallback<Boolean> () {
       @Override
       public void onFailure(Throwable caught) {
         AggregateUI.getUI().reportError(caught);

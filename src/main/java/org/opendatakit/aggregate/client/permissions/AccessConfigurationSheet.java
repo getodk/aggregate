@@ -29,7 +29,6 @@ import org.opendatakit.common.security.client.GrantedAuthorityInfo;
 import org.opendatakit.common.security.client.UserClassSecurityInfo;
 import org.opendatakit.common.security.client.UserSecurityInfo;
 import org.opendatakit.common.security.client.UserSecurityInfo.UserType;
-import org.opendatakit.common.security.client.security.admin.SecurityAdminServiceAsync;
 import org.opendatakit.common.security.common.EmailParser;
 import org.opendatakit.common.security.common.EmailParser.Email;
 import org.opendatakit.common.security.common.GrantedAuthorityNames;
@@ -376,11 +375,8 @@ public class AccessConfigurationSheet extends Composite implements ActionCell.De
 	public void setVisible(boolean isVisible) {
 		super.setVisible(isVisible);
 		if ( isVisible ) {
-			if ( service == null ) {
-				this.service = SecureGWT.get().createSecurityAdminService();
-			}
 			clearError(); // because navigating off the page might not have sent a mouse event...
-			service.getAllUsers(true, new AsyncCallback<ArrayList<UserSecurityInfo> > () 
+			SecureGWT.getSecurityAdminService().getAllUsers(true, new AsyncCallback<ArrayList<UserSecurityInfo> > () 
 				{
 					@Override
 					public void onFailure(Throwable caught) {
@@ -395,7 +391,7 @@ public class AccessConfigurationSheet extends Composite implements ActionCell.De
 						addedUsers.setText("");
 					}
 				});
-			service.getUserClassPrivileges(GrantedAuthorityNames.USER_IS_ANONYMOUS.toString(), new AsyncCallback<UserClassSecurityInfo>()
+			SecureGWT.getSecurityAdminService().getUserClassPrivileges(GrantedAuthorityNames.USER_IS_ANONYMOUS.toString(), new AsyncCallback<UserClassSecurityInfo>()
 				{
 					@Override
 					public void onFailure(Throwable caught) {
@@ -431,8 +427,6 @@ public class AccessConfigurationSheet extends Composite implements ActionCell.De
 	CheckBox anonymousAttachmentViewers;
 	@UiField
 	Button button;
-
-	SecurityAdminServiceAsync service;
 	
 	@UiHandler("addNow")
 	void onAddUsersClick(ClickEvent e) {
@@ -482,7 +476,7 @@ public class AccessConfigurationSheet extends Composite implements ActionCell.De
 		
 		ArrayList<UserSecurityInfo> users = new ArrayList<UserSecurityInfo>();
 		users.addAll(dataProvider.getList());
-		service.setUsersAndGrantedAuthorities(Cookies.getCookie("JSESSIONID"), 
+		SecureGWT.getSecurityAdminService().setUsersAndGrantedAuthorities(Cookies.getCookie("JSESSIONID"), 
 									users, anonGrants, allGroups, new AsyncCallback<Void>() {
 
 			@Override
