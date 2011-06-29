@@ -19,6 +19,7 @@ package org.opendatakit.common.security.server;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -42,6 +43,7 @@ import org.opendatakit.common.security.common.EmailParser;
 import org.opendatakit.common.security.common.GrantedAuthorityNames;
 import org.opendatakit.common.security.spring.GrantedAuthorityHierarchyTable;
 import org.opendatakit.common.security.spring.RegisteredUsersTable;
+import org.opendatakit.common.security.spring.SecurityRevisionsTable;
 import org.opendatakit.common.security.spring.UserGrantedAuthority;
 import org.opendatakit.common.web.CallingContext;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
@@ -76,6 +78,7 @@ public class SecurityServiceUtil {
 	
 	static {
 		List<String> isiteGrants = new ArrayList<String>();
+		isiteGrants.add(GrantedAuthorityNames.ROLE_USER.name());
 		isiteGrants.add(GrantedAuthorityNames.ROLE_ACCESS_ADMIN.name());
 		isiteGrants.add(GrantedAuthorityNames.GROUP_DATA_ADMINS);
 		isiteGrants.add(GrantedAuthorityNames.GROUP_DATA_VIEWERS);
@@ -83,11 +86,13 @@ public class SecurityServiceUtil {
 		siteGrants = Collections.unmodifiableList(isiteGrants);
 	
 		List<String> iformGrants = new ArrayList<String>();
+		iformGrants.add(GrantedAuthorityNames.ROLE_USER.name());
 		iformGrants.add(GrantedAuthorityNames.ROLE_FORM_ADMIN.name());
 		iformGrants.add(GrantedAuthorityNames.ROLE_SERVICES_ADMIN.name());
 		formGrants = Collections.unmodifiableList(iformGrants);
 	
 		List<String> idataViewerGrants = new ArrayList<String>();
+		idataViewerGrants.add(GrantedAuthorityNames.ROLE_USER.name());
 		idataViewerGrants.add(GrantedAuthorityNames.ROLE_ANALYST.name());
 		idataViewerGrants.add(GrantedAuthorityNames.ROLE_ATTACHMENT_VIEWER.name());
 		idataViewerGrants.add(GrantedAuthorityNames.ROLE_USER.name());
@@ -336,7 +341,7 @@ public class SecurityServiceUtil {
 	 * @throws DatastoreFailureException
 	 * @throws AccessDeniedException 
 	 */
-	public static Map<UserSecurityInfo, String> setUsers( ArrayList<UserSecurityInfo> users, CallingContext cc) 
+	private static Map<UserSecurityInfo, String> setUsers( ArrayList<UserSecurityInfo> users, CallingContext cc) 
 					throws DatastoreFailureException, AccessDeniedException {
 		List<UserSecurityInfo> allUsersList = getAllUsers(false, cc);
 		
@@ -385,7 +390,7 @@ public class SecurityServiceUtil {
 	 * @param cc
 	 * @throws DatastoreFailureException 
 	 */
-	public static void setUsersOfGrantedAuthority( Map<UserSecurityInfo, String> pkMap, 
+	private static void setUsersOfGrantedAuthority( Map<UserSecurityInfo, String> pkMap, 
 								GrantedAuthority auth, CallingContext cc) throws DatastoreFailureException {
 		GrantedAuthorityInfo g = new GrantedAuthorityInfo(auth.getAuthority());
 		// build the set of uriUsers for this granted authority...
@@ -466,6 +471,19 @@ public class SecurityServiceUtil {
 		} catch (ODKDatastoreException e) {
 			e.printStackTrace();
 			throw new DatastoreFailureException("Incomplete update");
+		} finally {
+			Datastore ds = cc.getDatastore();
+			User user = cc.getCurrentUser();
+			SecurityRevisionsTable t;
+			try {
+				t = SecurityRevisionsTable.getSingletonRecord(ds, user);
+				t.setLastRegisteredUsersRevisionDate(new Date());
+				t.setLastRoleHierarchyRevisionDate(new Date());
+				ds.putEntity(t, user);
+			} catch (ODKDatastoreException e) {
+				// if it fails, use RELOAD_INTERVAL to force reload.
+				e.printStackTrace();
+			}
 		}
 	}
 

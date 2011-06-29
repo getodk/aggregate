@@ -90,8 +90,15 @@ public class AggregateHtmlServlet extends ServletUtilBase {
 		User user = cc.getCurrentUser();
 		UserService userService = cc.getUserService();
 		
+		boolean isSuperUser = false;
+		try {
+			isSuperUser = user.getUriUser().equals(userService.getSuperUserUri());
+		} catch ( ODKDatastoreException e ) {
+			e.printStackTrace();
+		}
+		
 		// determine if this is the first time the system has not been accessed...
-		if ( user.getUriUser().equals(userService.getSuperUserEmail())) {
+		if ( isSuperUser ) {
 			// this is the super-user -- examine the isEnabled 
 			// field to determine whether this is the first time
 			// visiting the site.  If it is, force a redirect to

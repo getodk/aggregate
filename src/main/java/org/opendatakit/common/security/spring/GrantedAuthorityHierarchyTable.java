@@ -17,6 +17,7 @@ package org.opendatakit.common.security.spring;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -30,7 +31,6 @@ import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.persistence.Query.Direction;
 import org.opendatakit.common.persistence.Query.FilterOperation;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
-import org.opendatakit.common.security.SecurityBeanDefs;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.security.common.GrantedAuthorityNames;
 import org.opendatakit.common.web.CallingContext;
@@ -276,10 +276,11 @@ public final class GrantedAuthorityHierarchyTable extends CommonFieldsBase {
 			ds.deleteEntities(deleted, user);
 		} finally {
 			if ( !hasNotChanged ) {
-				// finally, since we mucked with the group hierarchies, refresh the 
-				// cache of those hierarchies.
-				RoleHierarchyImpl rh = (RoleHierarchyImpl) cc.getBean(SecurityBeanDefs.ROLE_HIERARCHY_MANAGER);
-				rh.refreshReachableGrantedAuthorities();
+				// finally, since we mucked with the group hierarchies, flag that 
+				// the cache of those hierarchies has changed.
+				SecurityRevisionsTable t = SecurityRevisionsTable.getSingletonRecord(ds, user);
+				t.setLastRoleHierarchyRevisionDate(new Date());
+				ds.putEntity(t, user);
 			}
 		}
 	}
