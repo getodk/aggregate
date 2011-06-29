@@ -15,6 +15,8 @@
  */
 package org.opendatakit.common.security;
 
+import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+
 
 /**
  * Minimal service for accessing information about the current
@@ -60,5 +62,11 @@ public interface UserService {
    * @return the configured super user email address.
    */
   public String getSuperUserEmail();
+
+  /**
+   * @return the primary key for the super user's registered user entity
+   * @throws ODKDatastoreException
+   */
+  public abstract String getSuperUserUri() throws ODKDatastoreException;
 
 }

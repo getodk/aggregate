@@ -21,6 +21,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.Query;
@@ -38,6 +39,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 public class UserServiceImpl implements org.opendatakit.common.security.UserService, InitializingBean {
 
+	private static final Logger logger = Logger.getLogger(UserServiceImpl.class.getName());
+	
 	// configured by bean definition...
 	Datastore datastore;
 	Realm realm;
@@ -47,6 +50,8 @@ public class UserServiceImpl implements org.opendatakit.common.security.UserServ
 	User anonymous;
 	User daemonAccount;
 
+	String superUserUri = null;
+	
 	final Map<String, User> activeUsers = new HashMap<String, User>();
 	
 	public UserServiceImpl() {
@@ -80,8 +85,7 @@ public class UserServiceImpl implements org.opendatakit.common.security.UserServ
 		daemonAccount = new UserImpl(User.DAEMON_USER, 
 				User.DAEMON_USER_NICKNAME, daemonGroups, datastore );
 		
-		activeUsers.put(anonymous.getUriUser(), anonymous);
-		activeUsers.put(daemonAccount.getUriUser(), daemonAccount);
+		reloadPermissions();
 	}
 
 	public Datastore getDatastore() {
@@ -109,6 +113,15 @@ public class UserServiceImpl implements org.opendatakit.common.security.UserServ
 	}
 
 	@Override
+	public synchronized String getSuperUserUri() throws ODKDatastoreException {
+		if ( superUserUri == null ) {
+			RegisteredUsersTable t = RegisteredUsersTable.assertSuperUser(superUserEmail, datastore, daemonAccount);
+			superUserUri = t.getUri();
+		}
+		return superUserUri;
+	}
+	
+	@Override
 	public String getUserServiceKey() {
 		return userServiceKey;
 	}
@@ -134,6 +147,8 @@ public class UserServiceImpl implements org.opendatakit.common.security.UserServ
 
   @Override
   public synchronized void reloadPermissions() {
+	logger.info("Executing: reloadPermissions");
+	superUserUri = null;
 	activeUsers.clear();
 	activeUsers.put(anonymous.getUriUser(), anonymous);
 	activeUsers.put(daemonAccount.getUriUser(), daemonAccount);

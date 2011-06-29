@@ -55,11 +55,17 @@ import org.springframework.security.core.authority.GrantedAuthorityImpl;
 public class RoleHierarchyImpl implements RoleHierarchy, InitializingBean {
 
 	private static final Log logger = LogFactory.getLog(RoleHierarchyImpl.class);
-
+	// look for flagged changes every CHECK_INTERVAL.
+	private static final long CHECK_INTERVAL = 1000L; // 1 seconds
+	// refresh everything every UPDATE_INTERVAL.
+	private static final long UPDATE_INTERVAL = 2*60*1000L; // 2 minutes
 	/** bean to the datastore */
 	private Datastore datastore = null;
 	/** bean to the userService */
 	private UserService userService = null;
+	
+	private long lastCheckTimestamp = System.currentTimeMillis();
+	private long lastUpdateTimestamp = System.currentTimeMillis();
 
     /**
      * rolesReachableInOneOrMoreStepsMap is a Map that under the key of a specific role 
@@ -150,12 +156,12 @@ public class RoleHierarchyImpl implements RoleHierarchy, InitializingBean {
 		if  ( !userService.isAccessManagementConfigured() ) {
 			logger.warn("Configuring with default role name and role hierarchy"); 
 			SecurityServiceUtil.setDefaultRoleNamesAndHierarchy(bootstrapCc);
-
-			refreshReachableGrantedAuthorities();
 		}
 
 		// ensure that the superuser has admin privileges
 		SecurityServiceUtil.superUserBootstrap(bootstrapCc);
+
+		refreshReachableGrantedAuthorities();
 	}
 
 	/**
@@ -164,11 +170,20 @@ public class RoleHierarchyImpl implements RoleHierarchy, InitializingBean {
 	 * @throws ODKDatastoreException
 	 */
 	public void refreshReachableGrantedAuthorities() throws ODKDatastoreException {
-		Map<GrantedAuthority, Set<GrantedAuthority>> localRolesReachableInOneOrMoreStepsMap =
-			buildRolesReachableInOneOrMoreStepsMap(buildRolesReachableInOneStepMap());
-		updateRolesMap(localRolesReachableInOneOrMoreStepsMap);
-		// and wipe the user service, since permissions may have changed...
-		userService.reloadPermissions();
+		logger.info("Executing: refreshReachableGrantedAuthorities");
+		try {
+			Map<GrantedAuthority, Set<GrantedAuthority>> localRolesReachableInOneOrMoreStepsMap =
+				buildRolesReachableInOneOrMoreStepsMap(buildRolesReachableInOneStepMap());
+			updateRolesMap(localRolesReachableInOneOrMoreStepsMap);
+			// and wipe the user service, since permissions may have changed...
+			userService.reloadPermissions();
+			lastCheckTimestamp = lastUpdateTimestamp = System.currentTimeMillis();
+		} catch ( ODKDatastoreException e) {
+			logger.warn("Datastore failure: refreshReachableGrantedAuthorities -- adjusting retry time");
+			// set ourselves up to hit the database again after half a check interval
+			lastCheckTimestamp = System.currentTimeMillis()-CHECK_INTERVAL/2L;
+			throw e;
+		}
 	}
 	
 	/**
@@ -193,7 +208,38 @@ public class RoleHierarchyImpl implements RoleHierarchy, InitializingBean {
         if (authorities == null || authorities.isEmpty()) {
             return AuthorityUtils.NO_AUTHORITIES;
         }
-        Map<GrantedAuthority, Set<GrantedAuthority>> localRolesReachableInOneOrMoreStepsMap = getRolesMap();
+        long timeRequestStarts = System.currentTimeMillis();
+        if ( timeRequestStarts > lastUpdateTimestamp + UPDATE_INTERVAL ) {
+            // update the security configuration entirely every UPDATE_INTERVAL...
+        	try {
+				refreshReachableGrantedAuthorities();
+			} catch (ODKDatastoreException e) {
+				e.printStackTrace();
+			}
+        } else if ( timeRequestStarts > lastCheckTimestamp + CHECK_INTERVAL ) {
+        	// check for updates to the security configuration every CHECK_INTERVAL...
+	    	try {
+	    		SecurityRevisionsTable sr = SecurityRevisionsTable.getSingletonRecord(datastore, 
+	    												userService.getDaemonAccountUser());
+	    		long lastUsersChange = sr.getLastRegisteredUsersRevisionDate().getTime();
+	    		long lastGrantsChange = sr.getLastRoleHierarchyRevisionDate().getTime();
+	    		if ( lastGrantsChange > lastCheckTimestamp ) {
+	    			refreshReachableGrantedAuthorities();
+	    			// NOTE: Timestamp updated and user permissions have been reloaded.
+	    		} else if ( lastUsersChange > lastCheckTimestamp ) {
+	    			lastCheckTimestamp = System.currentTimeMillis();
+	    			userService.reloadPermissions();
+	    		} else {
+	    			lastCheckTimestamp = System.currentTimeMillis();
+	    			logger.debug("getReachableGrantedAuthorities -- interval check");
+	    		}
+	    	} catch (ODKDatastoreException e) {
+	    		// log it, but assume we are OK...
+	    		e.printStackTrace();
+	    	}
+    	}
+
+    	Map<GrantedAuthority, Set<GrantedAuthority>> localRolesReachableInOneOrMoreStepsMap = getRolesMap();
         
         Set<GrantedAuthority> reachableRoles = new HashSet<GrantedAuthority>();
 
