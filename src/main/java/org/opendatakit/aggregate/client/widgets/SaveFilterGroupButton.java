@@ -7,7 +7,6 @@ import org.opendatakit.aggregate.client.FilterSubTab;
 import org.opendatakit.aggregate.client.SecureGWT;
 import org.opendatakit.aggregate.client.filter.Filter;
 import org.opendatakit.aggregate.client.filter.FilterGroup;
-import org.opendatakit.aggregate.client.filter.FilterServiceAsync;
 import org.opendatakit.aggregate.constants.common.UIConsts;
 
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -67,8 +66,6 @@ public class SaveFilterGroupButton extends AButtonBase implements ClickHandler {
       filterGroup.setName(newFilterName);
     }
 
-    FilterServiceAsync filterSvc = SecureGWT.get().createFilterService();
-
     // Set up the callback object.
     AsyncCallback<Boolean> callback = new AsyncCallback<Boolean>() {
       public void onFailure(Throwable caught) {
@@ -82,7 +79,7 @@ public class SaveFilterGroupButton extends AButtonBase implements ClickHandler {
     };
     
     // Make the call to the form service.
-    filterSvc.updateFilterGroup(filterGroup, callback);
+    SecureGWT.getFilterService().updateFilterGroup(filterGroup, callback);
 
   }
 }

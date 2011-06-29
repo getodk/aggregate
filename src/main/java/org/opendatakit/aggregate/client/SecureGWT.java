@@ -74,9 +74,65 @@ public class SecureGWT {
 		
 	};
 	
-	private SecureGWT()
-	{};
+	/** any user... */
+	private PreferenceServiceAsync preferenceServiceAsync = null;
+	private SecurityServiceAsync securityServiceAsync = null;
+
+	/** data viewer... */
+	private FilterServiceAsync filterServiceAsync = null;
+	private SubmissionServiceAsync submissionServiceAsync = null;
+	private FormServiceAsync formServiceAsync = null;
 	
+	/** data manager... */
+	private FormAdminServiceAsync formAdminServiceAsync = null;
+	private ServicesAdminServiceAsync servicesAdminServiceAsync = null;
+	
+	/** site admin... */
+	private SecurityAdminServiceAsync securityAdminServiceAsync = null;
+
+	private SecureGWT() {
+		preferenceServiceAsync = (PreferenceServiceAsync) create(ServiceType.PREFERENCE);
+		securityServiceAsync = (SecurityServiceAsync) create(ServiceType.SECURITY);
+		filterServiceAsync = (FilterServiceAsync) create(ServiceType.FILTER);
+		submissionServiceAsync = (SubmissionServiceAsync) create(ServiceType.SUBMISSION);
+		formServiceAsync = (FormServiceAsync) create(ServiceType.FORM);
+		formAdminServiceAsync = (FormAdminServiceAsync) create(ServiceType.FORM_ADMIN);
+		servicesAdminServiceAsync = (ServicesAdminServiceAsync) create(ServiceType.SERVICES_ADMIN);
+		securityAdminServiceAsync = (SecurityAdminServiceAsync) create(ServiceType.SECURITY_ADMIN);
+	};
+	
+	public PreferenceServiceAsync getPreferenceServiceAsync() {
+		return preferenceServiceAsync;
+	}
+
+	public SecurityServiceAsync getSecurityServiceAsync() {
+		return securityServiceAsync;
+	}
+
+	public FilterServiceAsync getFilterServiceAsync() {
+		return filterServiceAsync;
+	}
+
+	public SubmissionServiceAsync getSubmissionServiceAsync() {
+		return submissionServiceAsync;
+	}
+
+	public FormServiceAsync getFormServiceAsync() {
+		return formServiceAsync;
+	}
+
+	public FormAdminServiceAsync getFormAdminServiceAsync() {
+		return formAdminServiceAsync;
+	}
+
+	public ServicesAdminServiceAsync getServicesAdminServiceAsync() {
+		return servicesAdminServiceAsync;
+	}
+
+	public SecurityAdminServiceAsync getSecurityAdminServiceAsync() {
+		return securityAdminServiceAsync;
+	}
+
 	public static synchronized final SecureGWT get() {
 		if ( singleton == null ) {
 			singleton = new SecureGWT();
@@ -118,36 +174,44 @@ public class SecureGWT {
 		sd.setRpcRequestBuilder(reqBuilder);
 		return obj;
 	}
-	
-	public FilterServiceAsync createFilterService() {
-		return (FilterServiceAsync) create(ServiceType.FILTER);
+
+	/** any user... */
+	public static PreferenceServiceAsync getPreferenceService() {
+		return get().getPreferenceServiceAsync();
 	}
 
-	public FormServiceAsync createFormService() {
-		return (FormServiceAsync) create(ServiceType.FORM);
+	/** any user... */
+	public static SecurityServiceAsync getSecurityService() {
+		return get().getSecurityServiceAsync();
 	}
 
-	public FormAdminServiceAsync createFormAdminService() {
-		return (FormAdminServiceAsync) create(ServiceType.FORM_ADMIN);
+	/** data viewer... */
+	public static FilterServiceAsync getFilterService() {
+		return get().getFilterServiceAsync();
 	}
 
-	public PreferenceServiceAsync createPreferenceService() {
-		return (PreferenceServiceAsync) create(ServiceType.PREFERENCE);
+	/** data viewer... */
+	public static SubmissionServiceAsync getSubmissionService() {
+		return get().getSubmissionServiceAsync();
 	}
 
-	public SecurityServiceAsync createSecurityService() {
-		return (SecurityServiceAsync) create(ServiceType.SECURITY);
+	/** data viewer... */
+	public static FormServiceAsync getFormService() {
+		return get().getFormServiceAsync();
 	}
 
-	public SecurityAdminServiceAsync createSecurityAdminService() {
-		return (SecurityAdminServiceAsync) create(ServiceType.SECURITY_ADMIN);
+	/** data manager... */
+	public static FormAdminServiceAsync getFormAdminService() {
+		return get().getFormAdminServiceAsync();
 	}
 
-	public ServicesAdminServiceAsync createServicesAdminService() {
-		return (ServicesAdminServiceAsync) create(ServiceType.SERVICES_ADMIN);
+	/** data manager... */
+	public static ServicesAdminServiceAsync getServicesAdminService() {
+		return get().getServicesAdminServiceAsync();
 	}
 
-	public SubmissionServiceAsync createSubmissionService() {
-		return (SubmissionServiceAsync) create(ServiceType.SUBMISSION);
+	/** site admin... */
+	public static SecurityAdminServiceAsync getSecurityAdminService() {
+		return get().getSecurityAdminServiceAsync();
 	}
 }

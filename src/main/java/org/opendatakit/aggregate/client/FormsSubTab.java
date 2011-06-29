@@ -51,7 +51,7 @@ public class FormsSubTab extends VerticalPanel implements SubTabInterface {
     };
 
     // Make the call to the form service.
-    SecureGWT.get().createFormService().getForms(callback);
+    SecureGWT.getFormService().getForms(callback);
 
   }
 

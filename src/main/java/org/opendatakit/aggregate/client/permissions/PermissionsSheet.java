@@ -21,7 +21,6 @@ import org.opendatakit.aggregate.client.SecureGWT;
 import org.opendatakit.common.security.client.GrantedAuthorityInfo;
 import org.opendatakit.common.security.client.UserSecurityInfo;
 import org.opendatakit.common.security.client.UserSecurityInfo.UserType;
-import org.opendatakit.common.security.client.security.SecurityServiceAsync;
 import org.opendatakit.common.security.common.GrantedAuthorityNames;
 
 import com.google.gwt.user.client.Window;
@@ -153,8 +152,7 @@ public class PermissionsSheet extends TabPanel {
 		if ( !isConfigured ) {
 			isConfigured = true;
 			
-			SecurityServiceAsync service = SecureGWT.get().createSecurityService();
-			service.getUserInfo(new AsyncCallback<UserSecurityInfo>() {
+			SecureGWT.getSecurityService().getUserInfo(new AsyncCallback<UserSecurityInfo>() {
 
 				@Override
 				public void onFailure(Throwable caught) {

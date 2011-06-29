@@ -1,7 +1,6 @@
 package org.opendatakit.aggregate.client.popups;
 
 import org.opendatakit.aggregate.client.SecureGWT;
-import org.opendatakit.aggregate.client.submission.SubmissionServiceAsync;
 import org.opendatakit.aggregate.client.submission.SubmissionUISummary;
 import org.opendatakit.aggregate.client.table.SubmissionTable;
 import org.opendatakit.aggregate.client.widgets.ClosePopupButton;
@@ -16,18 +15,11 @@ public class RepeatPopup extends PopupPanel {
 
   private FlowPanel panel;
   private SubmissionTable dataTable;
-  private SubmissionServiceAsync submissionSvc;
   
   public RepeatPopup(final String keyString) {
     super(false);
     panel = new FlowPanel();
     dataTable = new SubmissionTable(); //contains the data
-    submissionSvc = SecureGWT.get().createSubmissionService();
-    
-    // Initialize the service proxy.
-    if (submissionSvc == null) {
-       submissionSvc = SecureGWT.get().createSubmissionService();
-    }
 
     // Set up the callback object.
     AsyncCallback<SubmissionUISummary> callback = new AsyncCallback<SubmissionUISummary>() {
@@ -41,7 +33,7 @@ public class RepeatPopup extends PopupPanel {
     };
     
     // obtain repeats
-    submissionSvc.getRepeatSubmissions(keyString, callback);
+    SecureGWT.getSubmissionService().getRepeatSubmissions(keyString, callback);
     
     
     // populate the panel

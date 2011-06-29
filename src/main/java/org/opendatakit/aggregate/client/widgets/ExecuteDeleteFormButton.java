@@ -2,7 +2,6 @@ package org.opendatakit.aggregate.client.widgets;
 
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.SecureGWT;
-import org.opendatakit.aggregate.client.form.FormAdminServiceAsync;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -45,8 +44,7 @@ public class ExecuteDeleteFormButton extends AButtonBase implements ClickHandler
       }
     };
     // Make the call to the form service.
-    FormAdminServiceAsync formAdminSvc = SecureGWT.get().createFormAdminService();
-    formAdminSvc.deleteForm(formId, callback);
+    SecureGWT.getFormAdminService().deleteForm(formId, callback);
     popup.hide();
   }
 

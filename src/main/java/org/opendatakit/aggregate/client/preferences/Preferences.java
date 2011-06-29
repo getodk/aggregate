@@ -26,8 +26,7 @@ public class Preferences {
   
 
   public static void updatePreferences() {
-    PreferenceServiceAsync preferencesSvc = SecureGWT.get().createPreferenceService();
-    preferencesSvc.getGoogleMapsKey(new AsyncCallback<String>() {
+    SecureGWT.getPreferenceService().getGoogleMapsKey(new AsyncCallback<String>() {
       public void onFailure(Throwable caught) {
         // TODO: Do something with errors.
       }
@@ -47,8 +46,7 @@ public class Preferences {
   }
   
   public static void setGoogleMapsApiKey(String mapsApiKey) {
-    PreferenceServiceAsync preferencesSvc = SecureGWT.get().createPreferenceService();
-    preferencesSvc.setGoogleMapsKey(mapsApiKey, new AsyncCallback<Void>() {
+    SecureGWT.getPreferenceService().setGoogleMapsKey(mapsApiKey, new AsyncCallback<Void>() {
       public void onFailure(Throwable caught) {
         // TODO: Do something with errors.
       }

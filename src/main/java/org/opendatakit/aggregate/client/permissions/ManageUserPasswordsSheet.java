@@ -25,8 +25,6 @@ import org.opendatakit.aggregate.client.SecureGWT;
 import org.opendatakit.common.security.client.CredentialsInfo;
 import org.opendatakit.common.security.client.RealmSecurityInfo;
 import org.opendatakit.common.security.client.UserSecurityInfo;
-import org.opendatakit.common.security.client.security.SecurityServiceAsync;
-import org.opendatakit.common.security.client.security.admin.SecurityAdminServiceAsync;
 import org.opendatakit.common.security.common.EmailParser;
 
 import com.google.gwt.cell.client.CheckboxCell;
@@ -187,14 +185,7 @@ public class ManageUserPasswordsSheet extends Composite {
 	public void setVisible(boolean isVisible) {
 		super.setVisible(isVisible);
 		if ( isVisible ) {
-			if ( service == null ) {
-				this.service = SecureGWT.get().createSecurityAdminService();
-			}
-			if ( userSecurityService == null ) {
-				this.userSecurityService = SecureGWT.get().createSecurityService();
-			}
-			
-			service.getAllUsers(false, new AsyncCallback<ArrayList<UserSecurityInfo>>() {
+			SecureGWT.getSecurityAdminService().getAllUsers(false, new AsyncCallback<ArrayList<UserSecurityInfo>>() {
 
 				@Override
 				public void onFailure(Throwable caught) {
@@ -209,7 +200,7 @@ public class ManageUserPasswordsSheet extends Composite {
 				
 			});
 			if ( realmInfo == null ) {
-				userSecurityService.getRealmInfo(Cookies.getCookie("JSESSIONID"), new AsyncCallback<RealmSecurityInfo>(){
+				SecureGWT.getSecurityService().getRealmInfo(Cookies.getCookie("JSESSIONID"), new AsyncCallback<RealmSecurityInfo>(){
 
 					@Override
 					public void onFailure(Throwable caught) {
@@ -235,9 +226,6 @@ public class ManageUserPasswordsSheet extends Composite {
 	@UiField
 	Button button;
 
-	SecurityServiceAsync userSecurityService;
-	SecurityAdminServiceAsync service;
-
 	RealmSecurityInfo realmInfo;
 	
 	@UiHandler("button")
@@ -256,7 +244,7 @@ public class ManageUserPasswordsSheet extends Composite {
 				for ( UserSecurityInfo user : changePasswordSet) {
 					credentials.add(CredentialsInfoBuilder.build(user.getUsername(), realmInfo, pw1));
 				}
-				service.setUserPasswords(Cookies.getCookie("JSESSIONID"), credentials, new AsyncCallback<Void>() {
+				SecureGWT.getSecurityAdminService().setUserPasswords(Cookies.getCookie("JSESSIONID"), credentials, new AsyncCallback<Void>() {
 		
 					@Override
 					public void onFailure(Throwable caught) {

@@ -22,7 +22,6 @@ import org.opendatakit.aggregate.client.SecureGWT;
 import org.opendatakit.common.security.client.CredentialsInfo;
 import org.opendatakit.common.security.client.RealmSecurityInfo;
 import org.opendatakit.common.security.client.UserSecurityInfo;
-import org.opendatakit.common.security.client.security.SecurityServiceAsync;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -59,11 +58,8 @@ public class ChangePasswordSheet extends Composite {
 		super.setVisible(isVisible);
 		if ( isVisible ) {
 			usernickname.setText("");
-			if ( service == null ) {
-				this.service = SecureGWT.get().createSecurityService();
-			}
 			if ( userInfo == null ) {
-				service.getUserInfo(new AsyncCallback<UserSecurityInfo>() {
+				SecureGWT.getSecurityService().getUserInfo(new AsyncCallback<UserSecurityInfo>() {
 	
 					@Override
 					public void onFailure(Throwable caught) {
@@ -81,7 +77,7 @@ public class ChangePasswordSheet extends Composite {
 			password1.setText("");
 			password2.setText("");
 			if ( realmInfo == null ) {
-				service.getRealmInfo(Cookies.getCookie("JSESSIONID"), 
+				SecureGWT.getSecurityService().getRealmInfo(Cookies.getCookie("JSESSIONID"), 
 						new AsyncCallback<RealmSecurityInfo>() {
 							@Override
 							public void onFailure(Throwable caught) {
@@ -108,7 +104,6 @@ public class ChangePasswordSheet extends Composite {
 	@UiField
 	Button button;
 	
-	SecurityServiceAsync service;
 	UserSecurityInfo userInfo;
 	RealmSecurityInfo realmInfo;
 	
@@ -126,7 +121,7 @@ public class ChangePasswordSheet extends Composite {
 					CredentialsInfo c;
 					c = CredentialsInfoBuilder.build(userInfo.getUsername(), realmInfo, pw1);
 			
-					service.setUserPassword(Cookies.getCookie("JSESSIONID"), c, new AsyncCallback<Void>() {
+					SecureGWT.getSecurityService().setUserPassword(Cookies.getCookie("JSESSIONID"), c, new AsyncCallback<Void>() {
 		
 						@Override
 						public void onFailure(Throwable caught) {

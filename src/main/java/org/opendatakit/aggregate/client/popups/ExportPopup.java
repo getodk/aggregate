@@ -21,7 +21,6 @@ import java.util.List;
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.SecureGWT;
 import org.opendatakit.aggregate.client.SubmissionTabUI;
-import org.opendatakit.aggregate.client.form.FormServiceAsync;
 import org.opendatakit.aggregate.client.form.KmlSettingOption;
 import org.opendatakit.aggregate.client.form.KmlSettings;
 import org.opendatakit.aggregate.client.widgets.ClosePopupButton;
@@ -111,8 +110,7 @@ public class ExportPopup extends PopupPanel {
       }
     });
 
-    FormServiceAsync formSvc = SecureGWT.get().createFormService();
-    formSvc.getPossibleKmlSettings(formId, new AsyncCallback<KmlSettings>() {
+    SecureGWT.getFormService().getPossibleKmlSettings(formId, new AsyncCallback<KmlSettings>() {
       @Override
       public void onFailure(Throwable caught) {
         // TODO Auto-generated method stub
@@ -166,9 +164,8 @@ public class ExportPopup extends PopupPanel {
   public void createExport() {
     String selectedFileType = fileType.getItemText(fileType.getSelectedIndex());
 
-    FormServiceAsync formSvc = SecureGWT.get().createFormService();
     if (selectedFileType.equals(ExportType.CSV.toString())) {
-      formSvc.createCsv(formId, new AsyncCallback<Boolean>() {
+    	SecureGWT.getFormService().createCsv(formId, new AsyncCallback<Boolean>() {
         @Override
         public void onFailure(Throwable caught) {
           // TODO Auto-generated method stub
@@ -180,7 +177,7 @@ public class ExportPopup extends PopupPanel {
         }
       });
     } else { // .equals(ExportType.KML.toString())
-      formSvc.createKml(formId,
+    	SecureGWT.getFormService().createKml(formId,
           geoPoints.get(geoPointsDropDown.getSelectedIndex()).getElementKey(),
           titleFields.get(titleFieldsDropDown.getSelectedIndex()).getElementKey(), binaryFields
               .get(binaryFieldsDropDown.getSelectedIndex()).getElementKey(),
