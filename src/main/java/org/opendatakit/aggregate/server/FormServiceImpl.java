@@ -41,8 +41,6 @@ import org.opendatakit.aggregate.form.PersistentResults;
 import org.opendatakit.aggregate.query.QueryFormList;
 import org.opendatakit.aggregate.query.submission.QueryByDate;
 import org.opendatakit.aggregate.servlet.BinaryDataServlet;
-import org.opendatakit.aggregate.servlet.KmlServlet;
-import org.opendatakit.aggregate.servlet.KmlSettingsServlet;
 import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.submission.SubmissionValue;
@@ -228,11 +226,11 @@ public class FormServiceImpl extends RemoteServiceServlet implements
       }
 
       Map<String, String> params = new HashMap<String, String>();
-      params.put(KmlServlet.TITLE_FIELD, (titleField == null) ? null : titleField
+      params.put(KmlGenerator.TITLE_FIELD, (titleField == null) ? null : titleField
           .constructFormElementKey(form).toString());
-      params.put(KmlServlet.IMAGE_FIELD, (imageField == null) ? KmlSettingsServlet.NONE
+      params.put(KmlGenerator.IMAGE_FIELD, (imageField == null) ? KmlGenerator.NONE
           : imageField.constructFormElementKey(form).toString());
-      params.put(KmlServlet.GEOPOINT_FIELD, (geopointField == null) ? null : geopointField
+      params.put(KmlGenerator.GEOPOINT_FIELD, (geopointField == null) ? null : geopointField
           .constructFormElementKey(form).toString());
 
       PersistentResults r = new PersistentResults(ExportType.KML, form, params, cc);

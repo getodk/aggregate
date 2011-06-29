@@ -21,7 +21,6 @@ import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.form.PersistentResults;
-import org.opendatakit.aggregate.servlet.KmlServlet;
 import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.task.KmlGenerator;
@@ -58,9 +57,9 @@ public class KmlGeneratorImpl implements KmlGenerator {
     task.param(ServletConsts.FORM_ID, form.getFormId());
     task.param(ServletConsts.PERSISTENT_RESULTS_KEY, persistentResultsKey.toString());
     task.param(ServletConsts.ATTEMPT_COUNT, Long.toString(attemptCount));
-    task.param(KmlServlet.GEOPOINT_FIELD, params.get(KmlServlet.GEOPOINT_FIELD));
-    task.param(KmlServlet.TITLE_FIELD, params.get(KmlServlet.TITLE_FIELD));
-    task.param(KmlServlet.IMAGE_FIELD, params.get(KmlServlet.IMAGE_FIELD));
+    task.param(KmlGenerator.GEOPOINT_FIELD, params.get(KmlGenerator.GEOPOINT_FIELD));
+    task.param(KmlGenerator.TITLE_FIELD, params.get(KmlGenerator.TITLE_FIELD));
+    task.param(KmlGenerator.IMAGE_FIELD, params.get(KmlGenerator.IMAGE_FIELD));
     Queue queue = QueueFactory.getDefaultQueue();
     queue.add(task);
   }

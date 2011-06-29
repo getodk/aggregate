@@ -205,10 +205,6 @@ public class ServletUtilBase extends CommonServletBase {
 	  final String uploadSubmissionsHref = HtmlUtil.createHref(
 			  cc.getWebApplicationURL(SubmissionServlet.ADDR),
 			  ServletConsts.UPLOAD_SUBMISSIONS_APPLET_LINK_TEXT);
-	  final String changePasswordHref = cc.getCurrentUser().isRegistered() ?
-			  HtmlUtil.createHref(
-			  cc.getWebApplicationURL(UserPasswordServlet.ADDR), 
-			  UserPasswordServlet.TITLE_INFO) : "(not a registered user)";
 	  
 	  final String resultsHref = HtmlUtil.createHref(
 			  cc.getWebApplicationURL(ResultServlet.ADDR), 
@@ -216,9 +212,6 @@ public class ServletUtilBase extends CommonServletBase {
 	  final String uploadFormHref = HtmlUtil.createHref(
 			  cc.getWebApplicationURL(FormUploadServlet.ADDR), 
 			  ServletConsts.UPLOAD_XFORM_APPLET_LINK_TEXT);
-	  final String accessManagementHref = HtmlUtil.createHref(
-			  cc.getWebApplicationURL(AccessConfigurationServlet.ADDR), 
-			  AccessConfigurationServlet.TITLE_INFO);
 	  
 	  final String briefcaseHref = HtmlUtil.createHref(
 			  cc.getWebApplicationURL(BriefcaseServlet.ADDR), 
@@ -233,9 +226,7 @@ public class ServletUtilBase extends CommonServletBase {
 	  if ( !secure ) {
 		  html.append(HtmlUtil.createBeginTag(HtmlConsts.CENTERING_DIV));
 		  html.append("<font style=\"color: red; font-family: arial; font-size: 150%\">" +
-		  		"Site Management is NOT SECURE.  Click " +
-		  	    HtmlUtil.createHref(cc.getWebApplicationURL(AccessManagementServlet.ADDR), 
-					  "here") + " now!</font>");
+		  		"Site Management is NOT SECURE!</font>");
 		  html.append(HtmlUtil.createEndTag(HtmlConsts.DIV));
 	  }
 	html.append(HtmlUtil.createBeginTag(HtmlConsts.CENTERING_DIV));
@@ -251,8 +242,6 @@ public class ServletUtilBase extends CommonServletBase {
 	html.append(HtmlUtil.wrapWithHtmlTags(HtmlConsts.HEADING_TABLE_DATA,configuredServicesHref));
 	// upload
 	html.append(HtmlUtil.wrapWithHtmlTags(HtmlConsts.HEADING_TABLE_DATA,uploadSubmissionsHref));
-	// manage
-	html.append(HtmlUtil.wrapWithHtmlTags(HtmlConsts.HEADING_TABLE_DATA,changePasswordHref));
 	html.append(HtmlConsts.TABLE_ROW_CLOSE);
 	
 	html.append(HtmlConsts.TABLE_ROW_OPEN);
@@ -273,8 +262,6 @@ public class ServletUtilBase extends CommonServletBase {
 	html.append(HtmlUtil.createSelfClosingTag(HtmlConsts.HEADING_TABLE_DATA));
 	// upload
 	html.append(HtmlUtil.createSelfClosingTag(HtmlConsts.HEADING_TABLE_DATA)); // TODO: Debrief
-	// manage
-	html.append(HtmlUtil.wrapWithHtmlTags(HtmlConsts.HEADING_TABLE_DATA,accessManagementHref));
 	html.append(HtmlConsts.TABLE_ROW_CLOSE);
 
 	html.append(HtmlConsts.TABLE_CLOSE);

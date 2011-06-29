@@ -62,14 +62,15 @@ public class SubmissionTabUI extends TabPanel {
         selected = i;
       }
     }
-    this.selectTab(selected);
-    baseUI.getTimer().setCurrentSubTab(SUBMISSION_MENU[selected]);
 
     // register the click handlers
     for (int i = 0; i < SUBMISSION_MENU.length; i++) {
       ClickHandler handler = baseUI.getSubMenuClickHandler(Tabs.SUBMISSIONS, SUBMISSION_MENU[i]);
       this.getTabBar().getTab(i).addClickHandler(handler);
     }
+
+    this.selectTab(selected);
+    baseUI.getTimer().setCurrentSubTab(SUBMISSION_MENU[selected]);
   } 
   
   public int findSubTabIndex(SubTabs subTab) {

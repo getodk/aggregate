@@ -26,10 +26,9 @@ import org.opendatakit.aggregate.datamodel.FormElementKey;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.form.Form;
-import org.opendatakit.aggregate.servlet.KmlServlet;
-import org.opendatakit.aggregate.servlet.KmlSettingsServlet;
 import org.opendatakit.aggregate.servlet.ServletUtilBase;
 import org.opendatakit.aggregate.submission.SubmissionKey;
+import org.opendatakit.aggregate.task.KmlGenerator;
 import org.opendatakit.aggregate.task.KmlWorkerImpl;
 import org.opendatakit.common.web.CallingContext;
 
@@ -64,9 +63,9 @@ public class KmlGeneratorTaskServlet extends ServletUtilBase {
     // get parameter
     String formId = getParameter(req, ServletConsts.FORM_ID);
 
-    String geopointFieldName = getParameter(req, KmlServlet.GEOPOINT_FIELD);
-    String titleFieldName = getParameter(req, KmlServlet.TITLE_FIELD);
-    String imageFieldName = getParameter(req, KmlServlet.IMAGE_FIELD);
+    String geopointFieldName = getParameter(req, KmlGenerator.GEOPOINT_FIELD);
+    String titleFieldName = getParameter(req, KmlGenerator.TITLE_FIELD);
+    String imageFieldName = getParameter(req, KmlGenerator.IMAGE_FIELD);
     String persistentResultsString = getParameter(req, ServletConsts.PERSISTENT_RESULTS_KEY);
     if ( persistentResultsString == null ) {
     	errorBadParam(resp);
@@ -96,7 +95,7 @@ public class KmlGeneratorTaskServlet extends ServletUtilBase {
         geopointField = FormElementModel.retrieveFormElementModel(form, geopointKey);
       }
       if (imageFieldName != null) {
-        if (!imageFieldName.equals(KmlSettingsServlet.NONE)) {
+        if (!imageFieldName.equals(KmlGenerator.NONE)) {
           FormElementKey imageKey = new FormElementKey(imageFieldName);
           imageField = FormElementModel.retrieveFormElementModel(form, imageKey);
         }

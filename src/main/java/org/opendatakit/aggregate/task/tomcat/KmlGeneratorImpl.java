@@ -22,8 +22,6 @@ import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.form.PersistentResults;
-import org.opendatakit.aggregate.servlet.KmlServlet;
-import org.opendatakit.aggregate.servlet.KmlSettingsServlet;
 import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.task.KmlGenerator;
@@ -71,19 +69,19 @@ public class KmlGeneratorImpl implements KmlGenerator {
 	    FormElementModel geopointField = null;
 	    if ( params != null ) {
 	    	String field;
-	    	field = params.get(KmlServlet.TITLE_FIELD);
+	    	field = params.get(KmlGenerator.TITLE_FIELD);
 	        if (field != null) {
 	          FormElementKey titleKey = new FormElementKey(field);
 	          titleField = FormElementModel.retrieveFormElementModel(form, titleKey);
 	        }
-	        field = params.get(KmlServlet.GEOPOINT_FIELD);
+	        field = params.get(KmlGenerator.GEOPOINT_FIELD);
 	        if (field != null) {
 	          FormElementKey geopointKey = new FormElementKey(field);
 	          geopointField = FormElementModel.retrieveFormElementModel(form, geopointKey);
 	        }
-	        field = params.get(KmlServlet.IMAGE_FIELD);
+	        field = params.get(KmlGenerator.IMAGE_FIELD);
 	        if (field != null) {
-	          if (!field.equals(KmlSettingsServlet.NONE)) {
+	          if (!field.equals(KmlGenerator.NONE)) {
 	            FormElementKey imageKey = new FormElementKey(field);
 	            imageField = FormElementModel.retrieveFormElementModel(form, imageKey);
 	          }

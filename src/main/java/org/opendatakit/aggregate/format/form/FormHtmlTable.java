@@ -30,12 +30,9 @@ import org.opendatakit.aggregate.constants.format.FormTableConsts;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.query.QueryFormList;
-import org.opendatakit.aggregate.servlet.CsvServlet;
 import org.opendatakit.aggregate.servlet.ExternalServiceServlet;
 import org.opendatakit.aggregate.servlet.FormSubmissionsServlet;
 import org.opendatakit.aggregate.servlet.FormXmlServlet;
-import org.opendatakit.aggregate.servlet.KmlSettingsServlet;
-import org.opendatakit.aggregate.servlet.QueryServlet;
 import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.common.constants.BasicConsts;
 import org.opendatakit.common.web.CallingContext;
@@ -55,8 +52,7 @@ public class FormHtmlTable {
    */
   private static List<String> HEADERS_W_BUTTONS = Arrays.asList(FormTableConsts.FT_HEADER_NAME,
       FormTableConsts.FT_HEADER_FORM_ID, FormTableConsts.FT_HEADER_USER, FormTableConsts.FT_HEADER_RESULTS,
-      FormTableConsts.FT_HEADER_QUERY, FormTableConsts.FT_HEADER_CSV,
-      FormTableConsts.FT_HEADER_EXTERNAL_SERVICE, FormTableConsts.FT_HEADER_KML,
+      FormTableConsts.FT_HEADER_EXTERNAL_SERVICE, 
       FormTableConsts.FT_HEADER_XFORM);
 
   private static List<String> HEADERS_WO_BUTTONS = Arrays.asList(FormTableConsts.FT_HEADER_NAME,
@@ -121,18 +117,8 @@ public class FormHtmlTable {
     String resultButton = HtmlUtil.createHtmlButtonToGetServlet(cc.getWebApplicationURL(FormSubmissionsServlet.ADDR),
         FormTableConsts.RESULTS_BUTTON_TXT, properties);
     
-    String csvButton = HtmlUtil.createHtmlButtonToGetServlet(cc.getWebApplicationURL(CsvServlet.ADDR),
-        FormTableConsts.CSV_BUTTON_TXT, properties);
-    
     String externalServiceButton = HtmlUtil.createHtmlButtonToGetServlet(cc.getWebApplicationURL(ExternalServiceServlet.ADDR),
     		FormTableConsts.EXTERNAL_SERVICE_BUTTON_TXT, properties);
-
-    String kmlButton = HtmlUtil.createHtmlButtonToGetServlet(cc.getWebApplicationURL(KmlSettingsServlet.ADDR),
-        FormTableConsts.KML_BUTTON_TXT, properties);
-
-    String queryButton = HtmlUtil.createHtmlButtonToGetServlet(cc.getWebApplicationURL(QueryServlet.ADDR), 
-        FormTableConsts.QUERY_BUTTON_TXT, properties);
-            
     
     Map<String, String> xmlProperties = new HashMap<String, String>();
     xmlProperties.put(ServletConsts.FORM_ID, formId);
@@ -141,10 +127,7 @@ public class FormHtmlTable {
         FormTableConsts.XML_BUTTON_TXT, xmlProperties);
 
     row.addFormattedValue(resultButton);
-    row.addFormattedValue(queryButton);
-    row.addFormattedValue(csvButton);
     row.addFormattedValue(externalServiceButton);
-    row.addFormattedValue(kmlButton);
     row.addFormattedValue(xmlButton);
   }
 

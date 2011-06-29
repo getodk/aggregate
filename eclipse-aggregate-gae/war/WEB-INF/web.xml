@@ -168,15 +168,6 @@
 		<url-pattern>/www/blank</url-pattern>
 	</servlet-mapping>
 
-	<servlet>
-		<servlet-name>change-password</servlet-name>
-		<servlet-class>org.opendatakit.aggregate.servlet.UserPasswordServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>change-password</servlet-name>
-		<url-pattern>/ssl/user-password</url-pattern>
-	</servlet-mapping>
-
     <servlet>
         <servlet-name>manage-passwords</servlet-name>
         <servlet-class>org.opendatakit.aggregate.servlet.UserManagePasswordsServlet</servlet-class>
@@ -202,24 +193,6 @@
 	<servlet-mapping>
 		<servlet-name>formDelete</servlet-name>
 		<url-pattern>/admin/formDelete</url-pattern>
-	</servlet-mapping>
-
-	<servlet>
-		<servlet-name>query</servlet-name>
-		<servlet-class>org.opendatakit.aggregate.servlet.QueryServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>query</servlet-name>
-		<url-pattern>/view/query</url-pattern>
-	</servlet-mapping>
-
-	<servlet>
-		<servlet-name>queryResults</servlet-name>
-		<servlet-class>org.opendatakit.aggregate.servlet.QueryResultsServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>queryResults</servlet-name>
-		<url-pattern>/view/queryResults</url-pattern>
 	</servlet-mapping>
 
 	<servlet>
@@ -347,15 +320,6 @@
 	</servlet-mapping>
 
 	<servlet>
-		<servlet-name>csv</servlet-name>
-		<servlet-class>org.opendatakit.aggregate.servlet.CsvServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>csv</servlet-name>
-		<url-pattern>/view/csv</url-pattern>
-	</servlet-mapping>
-
-	<servlet>
 		<servlet-name>csvFragment</servlet-name>
 		<servlet-class>org.opendatakit.aggregate.servlet.FragmentedCsvServlet</servlet-class>
 	</servlet>
@@ -371,24 +335,6 @@
 	<servlet-mapping>
 		<servlet-name>briefcase</servlet-name>
 		<url-pattern>/Briefcase</url-pattern>
-	</servlet-mapping>
-	
-	<servlet>
-		<servlet-name>uploadSubmissionsApplet</servlet-name>
-		<servlet-class>org.opendatakit.aggregate.servlet.UploadSubmissionsAppletServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>uploadSubmissionsApplet</servlet-name>
-		<url-pattern>/UploadSubmissionsApplet</url-pattern>
-	</servlet-mapping>
-	
-	<servlet>
-		<servlet-name>uploadXformApplet</servlet-name>
-		<servlet-class>org.opendatakit.aggregate.servlet.UploadXFormAppletServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>uploadXformApplet</servlet-name>
-		<url-pattern>/UploadXFormApplet</url-pattern>
 	</servlet-mapping>
 
 	<servlet>
@@ -491,24 +437,6 @@
 	</servlet-mapping>
 
 	<servlet>
-		<servlet-name>kmlSettings</servlet-name>
-		<servlet-class>org.opendatakit.aggregate.servlet.KmlSettingsServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>kmlSettings</servlet-name>
-		<url-pattern>/view/kmlSettings</url-pattern>
-	</servlet-mapping>
-
-	<servlet>
-		<servlet-name>kml</servlet-name>
-		<servlet-class>org.opendatakit.aggregate.servlet.KmlServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>kml</servlet-name>
-		<url-pattern>/view/kml</url-pattern>
-	</servlet-mapping>
-
-	<servlet>
 		<servlet-name>process</servlet-name>
 		<servlet-class>org.opendatakit.aggregate.servlet.ProcessServlet</servlet-class>
 	</servlet>
@@ -552,87 +480,6 @@
         <servlet-name>wwwLandingPage</servlet-name>
         <url-pattern>/www/index.html</url-pattern>
     </servlet-mapping>
-
-    <servlet>
-        <servlet-name>accessConfiguration</servlet-name>
-        <servlet-class>org.opendatakit.aggregate.servlet.AccessConfigurationServlet</servlet-class>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>accessConfiguration</servlet-name>
-        <url-pattern>/access/access-configuration</url-pattern>
-    </servlet-mapping>
-
-	<servlet>
-		<servlet-name>accessManagement</servlet-name>
-		<servlet-class>org.opendatakit.aggregate.servlet.AccessManagementServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>accessManagement</servlet-name>
-		<url-pattern>/access/access-management</url-pattern>
-	</servlet-mapping>
-
-	<servlet>
-		<servlet-name>userModifyMembership</servlet-name>
-		<servlet-class>org.opendatakit.aggregate.servlet.UserModifyMembershipsServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>userModifyMembership</servlet-name>
-		<url-pattern>/access/user-modify-membership</url-pattern>
-	</servlet-mapping>
-
-	<servlet>
-		<servlet-name>userModify</servlet-name>
-		<servlet-class>org.opendatakit.aggregate.servlet.UserModifyServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>userModify</servlet-name>
-		<url-pattern>/access/user-modify</url-pattern>
-	</servlet-mapping>
-
-    <servlet>
-        <servlet-name>userBulkModify</servlet-name>
-        <servlet-class>org.opendatakit.aggregate.servlet.UserBulkModifyServlet</servlet-class>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>userBulkModify</servlet-name>
-        <url-pattern>/access/user-bulk-modify</url-pattern>
-    </servlet-mapping>
-
-	<servlet>
-		<servlet-name>userManagement</servlet-name>
-		<servlet-class>org.opendatakit.aggregate.servlet.UserManagementServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>userManagement</servlet-name>
-		<url-pattern>/access/user-management</url-pattern>
-	</servlet-mapping>
-
-	<servlet>
-		<servlet-name>groupModifyMembers</servlet-name>
-		<servlet-class>org.opendatakit.aggregate.servlet.GroupModifyMembersServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>groupModifyMembers</servlet-name>
-		<url-pattern>/access/group-modify-members</url-pattern>
-	</servlet-mapping>
-
-	<servlet>
-		<servlet-name>groupModify</servlet-name>
-		<servlet-class>org.opendatakit.aggregate.servlet.GroupModifyServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>groupModify</servlet-name>
-		<url-pattern>/access/group-modify</url-pattern>
-	</servlet-mapping>
-
-	<servlet>
-		<servlet-name>groupManagement</servlet-name>
-		<servlet-class>org.opendatakit.aggregate.servlet.GroupManagementServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>groupManagement</servlet-name>
-		<url-pattern>/access/group-management</url-pattern>
-	</servlet-mapping>
 
 	<welcome-file-list>
 		<welcome-file>index.html</welcome-file>
