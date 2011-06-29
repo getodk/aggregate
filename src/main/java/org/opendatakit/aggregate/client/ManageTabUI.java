@@ -78,14 +78,15 @@ public class ManageTabUI extends TabPanel {
         selected = i;
       }
     }
-    this.selectTab(selected);
-    baseUI.getTimer().setCurrentSubTab(MANAGEMENT_MENU[selected]);
 
     // creating the sub tab click handlers
     for (int i = 0; i < MANAGEMENT_MENU.length; i++) {
       ClickHandler handler = baseUI.getSubMenuClickHandler(Tabs.MANAGEMENT, MANAGEMENT_MENU[i]);
       this.getTabBar().getTab(i).addClickHandler(handler);
     }
+
+    this.selectTab(selected);
+    baseUI.getTimer().setCurrentSubTab(MANAGEMENT_MENU[selected]);
   }
 
   public SubTabInterface getSubTab(SubTabs subTab) {

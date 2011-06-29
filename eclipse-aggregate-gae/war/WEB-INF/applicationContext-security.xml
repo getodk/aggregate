@@ -42,7 +42,7 @@
         <intercept-url pattern="/auth/**" access="hasRole('ROLE_SERVICES_ADMIN')" />
         <intercept-url pattern="/Aggregate.html" access="hasRole('ROLE_USER') or hasRole('ROLE_ACCESS_ADMIN')" />
         <intercept-url pattern="/ui/upload" access="hasRole('ROLE_FORM_ADMIN')" />
-        <intercept-url pattern="/ui/submission" access="hasRole('ROLE_SUBMISSION_UPLOAD')"  />
+        <intercept-url pattern="/ui/submission" access="hasRole('ROLE_FORM_ADMIN')"  />
 		<!--  secure the client interfaces -->
 		<intercept-url pattern="/aggregateui/filterservice" access="hasRole('ROLE_ANALYST')" />
 		<intercept-url pattern="/aggregateui/formservice" access="hasRole('ROLE_ANALYST')" />
@@ -68,10 +68,6 @@
         <intercept-url pattern="/www/index.html" access="true" /> <!-- Intermediate page redirecting to access mgmt -->
 		<intercept-url pattern="/openid_login.html" access="isAnonymous()" />
 		<intercept-url pattern="/local_login.html" access="isFullyAuthenticated() and hasRole('AUTH_LOCAL')" />
-		<intercept-url pattern="/UploadSubmissionsApplet" access="hasRole('ROLE_SUBMISSION_UPLOAD')" />
-		<intercept-url pattern="/upload-submissions/**" access="hasRole('ROLE_SUBMISSION_UPLOAD')" />
-		<intercept-url pattern="/UploadXFormApplet" access="hasRole('ROLE_FORM_ADMIN')" />
-		<intercept-url pattern="/upload-xform/**" access="hasRole('ROLE_FORM_ADMIN')" />
 		<intercept-url pattern="/Briefcase" access="hasRole('ROLE_ANALYST')" />
 		<intercept-url pattern="/briefcase/**" access="hasRole('ROLE_ANALYST')" />
 		<intercept-url pattern="/xformsDownload" access="hasRole('ROLE_FORM_DOWNLOAD')" />
