@@ -126,7 +126,7 @@ public class AggregateUI implements EntryPoint {
   }
   
   private synchronized void updateUserSecurityInfo() {
-    SecureGWT.get().createSecurityService().getUserInfo(new AsyncCallback<UserSecurityInfo>() {
+    SecureGWT.getSecurityService().getUserInfo(new AsyncCallback<UserSecurityInfo>() {
 
       @Override
       public void onFailure(Throwable caught) {
