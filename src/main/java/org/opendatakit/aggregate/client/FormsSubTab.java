@@ -1,6 +1,5 @@
 package org.opendatakit.aggregate.client;
 
-import org.opendatakit.aggregate.client.form.FormServiceAsync;
 import org.opendatakit.aggregate.client.form.FormSummary;
 import org.opendatakit.aggregate.client.table.FormTable;
 import org.opendatakit.aggregate.client.widgets.RedirectButton;
@@ -12,8 +11,8 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 public class FormsSubTab extends VerticalPanel implements SubTabInterface {
 
   // servlet URLS
-  private static final String UPLOAD_SUBMISSION_URL = "../ui/submission";
-  private static final String FORM_UPLOAD_URL = "../ui/upload";
+  private static final String UPLOAD_SUBMISSION_URL = "ui/submission";
+  private static final String FORM_UPLOAD_URL = "ui/upload";
 
   // button text & styling
   private static final String UPLOAD_SUBMISSION_BUTTON_TEXT = "<img src=\"images/blue_up_arrow.png\" /> Upload Data";
@@ -39,8 +38,6 @@ public class FormsSubTab extends VerticalPanel implements SubTabInterface {
   }
 
   public void update() {
-    FormServiceAsync formSvc = SecureGWT.get().createFormService();
-
     // Set up the callback object.
     AsyncCallback<FormSummary[]> callback = new AsyncCallback<FormSummary[]>() {
       public void onFailure(Throwable caught) {
@@ -54,7 +51,7 @@ public class FormsSubTab extends VerticalPanel implements SubTabInterface {
     };
 
     // Make the call to the form service.
-    formSvc.getForms(callback);
+    SecureGWT.get().createFormService().getForms(callback);
 
   }
 
