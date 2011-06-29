@@ -22,7 +22,6 @@ import org.opendatakit.aggregate.constants.common.Tabs;
 import org.opendatakit.aggregate.constants.common.UIConsts;
 import org.opendatakit.common.security.client.UserSecurityInfo;
 import org.opendatakit.common.security.client.UserSecurityInfo.UserType;
-import org.opendatakit.common.security.client.security.SecurityServiceAsync;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
@@ -112,7 +111,6 @@ public class AggregateUI implements EntryPoint {
   static final String LOGIN_URL_PATH = "relogin.html";
   static final HTML LOGIN_LINK = new HTML("<a href=\"" + LOGIN_URL_PATH + "\">Log In</a>");
 
-  private SecurityServiceAsync securityService = null;
   private UserSecurityInfo userInfo = null;
 
   private synchronized void updateTogglePane() {
@@ -126,12 +124,9 @@ public class AggregateUI implements EntryPoint {
         login_logout_link.add(LOGIN_LINK);
     }
   }
-
+  
   private synchronized void updateUserSecurityInfo() {
-    if (securityService == null) {
-      securityService = SecureGWT.get().createSecurityService();
-    }
-    securityService.getUserInfo(new AsyncCallback<UserSecurityInfo>() {
+    SecureGWT.get().createSecurityService().getUserInfo(new AsyncCallback<UserSecurityInfo>() {
 
       @Override
       public void onFailure(Throwable caught) {
@@ -170,7 +165,10 @@ public class AggregateUI implements EntryPoint {
           panel.selectTab(0);
           timer.setCurrentSubTab(ManageTabUI.MANAGEMENT_MENU[0]);
           hash.put();
-        } 
+        } else {
+          // another UI event... let the timer know.
+          timer.restartTimer();
+        }
       }
     };
   }
@@ -245,9 +243,7 @@ public class AggregateUI implements EntryPoint {
       @Override
       public void onClick(ClickEvent event) {
         clearError();
-        getTimer().restartTimer();
         getTimer().setCurrentSubTab(subMenu);
-        getTimer().refreshNow();
         hash.clear();
         hash.set(UrlHash.MAIN_MENU, menu.getHashString());
         hash.set(UrlHash.SUB_MENU, subMenu.getHashString());
