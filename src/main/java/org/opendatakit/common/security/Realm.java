@@ -32,6 +32,10 @@ import org.springframework.beans.factory.InitializingBean;
  */
 public class Realm implements InitializingBean {
 
+	private boolean sslIsRequired = false;
+	private boolean sslIsAvailable = false;
+	private Integer port;
+	private String hostname;
 	private String realmString;
 	private String mailToDomain;
 	private String rootDomain;
@@ -62,6 +66,42 @@ public class Realm implements InitializingBean {
 		// root domain implicitly granted access
 		domainSet.add(rootDomain);
 		domainSet.add(mailToDomain);
+	}
+	
+	public void setSecureChannelType(String type) {
+		if ( type != null && type.equals("REQUIRES_SECURE_CHANNEL") ) {
+			sslIsAvailable = true;
+		}
+	}
+	
+	public boolean isSslAvailable() {
+		return sslIsAvailable;
+	}
+	
+	public void setChannelType(String type) {
+		if ( type != null && type.equals("REQUIRES_SECURE_CHANNEL") ) {
+			sslIsRequired = true;
+		}
+	}
+	
+	public boolean isSslRequired() {
+		return sslIsRequired;
+	}
+
+	public Integer getPort() {
+		return port;
+	}
+
+	public void setPort(Integer port) {
+		this.port = port;
+	}
+
+	public String getHostname() {
+		return hostname;
+	}
+
+	public void setHostname(String hostname) {
+		this.hostname = hostname;
 	}
 
 	public String getRealmString() {

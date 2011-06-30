@@ -38,6 +38,11 @@ import org.opendatakit.common.web.TestContextFactory;
 public class RelationTest extends TestCase {
 
 	@Override
+	public void tearDown() throws Exception {
+		super.tearDown();
+	}
+	
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 
