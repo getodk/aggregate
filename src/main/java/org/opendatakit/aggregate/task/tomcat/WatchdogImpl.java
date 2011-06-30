@@ -16,6 +16,7 @@
 package org.opendatakit.aggregate.task.tomcat;
 
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 import javax.servlet.ServletContext;
 
@@ -30,6 +31,7 @@ import org.opendatakit.aggregate.task.WorksheetCreator;
 import org.opendatakit.common.constants.BasicConsts;
 import org.opendatakit.common.constants.HtmlConsts;
 import org.opendatakit.common.persistence.Datastore;
+import org.opendatakit.common.security.Realm;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.security.UserService;
 import org.opendatakit.common.web.CallingContext;
@@ -56,8 +58,6 @@ public class WatchdogImpl implements Watchdog, SmartLifecycle, InitializingBean,
 	FormDelete formDelete = null;
 	WorksheetCreator worksheetCreator = null;
 	ServletContext ctxt = null;
-	String hostname = null;
-	int port = HtmlConsts.WEB_PORT;
 
 	/**
 	 * Implementation of CallingContext for use by watchdog-launched tasks.
@@ -68,6 +68,48 @@ public class WatchdogImpl implements Watchdog, SmartLifecycle, InitializingBean,
 	public class CallingContextImpl implements CallingContext {
 
 		boolean asDaemon = true;
+		String serverUrl;
+		
+		CallingContextImpl() {
+
+    		Realm realm = userService.getCurrentRealm();
+    		Integer identifiedPort = realm.getPort();
+    		String identifiedHostname = realm.getHostname();
+    		
+    		if ( identifiedPort == null || identifiedPort == 0 ) {
+    			if ( realm.isSslRequired() ) {
+    				identifiedPort = HtmlConsts.SECURE_WEB_PORT;
+    			} else {
+    				identifiedPort = HtmlConsts.WEB_PORT;
+    			}
+    		}
+    		if ( identifiedHostname == null || identifiedHostname.length() == 0 ) {
+    			try {
+					identifiedHostname = InetAddress.getLocalHost().getCanonicalHostName();
+				} catch (UnknownHostException e) {
+					identifiedHostname = "127.0.0.1";
+				}
+    		}
+    		
+    		String identifiedScheme = "http";
+    		if ( realm.isSslRequired() ) {
+    			identifiedScheme = "https";
+    		}
+    		
+    		boolean expectedPort = 
+    			(identifiedScheme.equalsIgnoreCase("http") &&
+    					identifiedPort == HtmlConsts.WEB_PORT) ||
+    	    	(identifiedScheme.equalsIgnoreCase("https") &&
+    	    			identifiedPort == HtmlConsts.SECURE_WEB_PORT);
+    		
+    		if (!expectedPort) {
+    	    	serverUrl = identifiedHostname + BasicConsts.COLON + 
+    	    		Integer.toString(identifiedPort) + ctxt.getContextPath();
+    	    } else {
+    	    	serverUrl = identifiedHostname + ctxt.getContextPath();
+    	    }
+
+		}
 		
 		@Override
 		public boolean getAsDeamon() {
@@ -116,13 +158,13 @@ public class WatchdogImpl implements Watchdog, SmartLifecycle, InitializingBean,
 
 		@Override
 		public String getServerURL() {
-			if ( port != HtmlConsts.WEB_PORT ) {
-				return hostname + BasicConsts.COLON + Integer.toString(port) + 
-						ctxt.getContextPath();
-			} else {
-				return hostname + ctxt.getContextPath();
-			}
+			return serverUrl;
 		}
+    	
+		@Override
+    	public ServletContext getServletContext() {
+    		return ctxt;
+    	}
 
 		@Override
 		public String getWebApplicationURL() {
@@ -272,22 +314,6 @@ public class WatchdogImpl implements Watchdog, SmartLifecycle, InitializingBean,
 		this.worksheetCreator = worksheetCreator;
 	}
 
-	public String getHostname() {
-		return hostname;
-	}
-
-	public void setHostname(String hostname) {
-		this.hostname = hostname;
-	}
-
-	public int getPort() {
-		return port;
-	}
-
-	public void setPort(int port) {
-		this.port = port;
-	}
-
 	@Override
 	public void afterPropertiesSet() throws Exception {
 		System.out.println("afterPropertiesSet WATCHDOG TASK IN TOMCAT");
@@ -299,10 +325,6 @@ public class WatchdogImpl implements Watchdog, SmartLifecycle, InitializingBean,
 		if ( kmlGenerator == null ) throw new IllegalStateException("no kmlGenerator specified");
 		if ( formDelete == null ) throw new IllegalStateException("no formDelete specified");
 		if ( worksheetCreator == null ) throw new IllegalStateException("no worksheetCreator specified");
-		
-		if ( hostname == null || hostname.length() == 0 ) {
-			hostname = InetAddress.getLocalHost().getCanonicalHostName();
-		}
 		AggregrateThreadExecutor.initialize(taskScheduler);
 	}
 

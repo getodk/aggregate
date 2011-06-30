@@ -1,5 +1,7 @@
 package org.opendatakit.common.web;
 
+import javax.servlet.ServletContext;
+
 import org.opendatakit.common.constants.BasicConsts;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.security.User;
@@ -43,6 +45,11 @@ public class TestContextFactory {
 	    	public UserService getUserService() {
 	    		return userService;
 	    	}
+
+			@Override
+			public ServletContext getServletContext() {
+				return null;
+			}
 	    	
 	    	public String getWebApplicationURL() {
 	    		return webApplicationBase + BasicConsts.FORWARDSLASH;

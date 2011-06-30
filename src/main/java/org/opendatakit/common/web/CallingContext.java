@@ -15,6 +15,8 @@
  */
 package org.opendatakit.common.web;
 
+import javax.servlet.ServletContext;
+
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.security.UserService;
@@ -65,6 +67,11 @@ public interface CallingContext {
     * @return the logged-in user, anonymous user, or the daemon user.
     */
    public User getCurrentUser();
+   
+   /** 
+    * @return the servlet context
+    */
+   public ServletContext getServletContext();
    
    /**
     * @return the slash-rooted path of this web application

@@ -162,7 +162,8 @@ public class RefreshTimer extends Timer {
 	      break;
 	    default:
 	      // should not happen
-	      GWT.log("currentSubTab has no defined action in RefreshTimer.run()");
+	      GWT.log("currentSubTab (" + currentSubTab.getHashString() +
+	    		  ") has no defined action in RefreshTimer.run()");
 	    }
     }
     // record last completion time...

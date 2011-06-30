@@ -27,6 +27,8 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import javax.servlet.ServletContext;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.opendatakit.common.persistence.Datastore;
@@ -135,6 +137,11 @@ public class RoleHierarchyImpl implements RoleHierarchy, InitializingBean {
 			@Override
 			public User getCurrentUser() {
 				return userService.getDaemonAccountUser();
+			}
+
+			@Override
+			public ServletContext getServletContext() {
+				throw new IllegalStateException("Undefined");
 			}
 
 			@Override

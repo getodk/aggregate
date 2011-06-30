@@ -150,11 +150,11 @@ public class AggregateUI implements EntryPoint {
 
   private void updateTogglePane() {
     if ((userInfo != null) && (userInfo.getType() != UserType.ANONYMOUS)) {
-        System.out.println("Setting logout link");
+        GWT.log("Setting logout link");
         login_logout_link.clear();
         login_logout_link.add(LOGOUT_LINK);
     } else {
-        System.out.println("Setting login link");
+        GWT.log("Setting login link");
         login_logout_link.clear();
         login_logout_link.add(LOGIN_LINK);
     }
