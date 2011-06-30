@@ -22,7 +22,7 @@ import java.util.Map;
 import org.opendatakit.aggregate.constants.common.SubTabs;
 import org.opendatakit.aggregate.constants.common.Tabs;
 
-import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.TabPanel;
 
 public class ManageTabUI extends TabPanel {
@@ -46,49 +46,41 @@ public class ManageTabUI extends TabPanel {
     
     // build the UI
     formsSubTab = new FormsSubTab(baseUI);
-    formsSubTab.update();
     this.add(formsSubTab, SubTabs.FORMS.getTabLabel());
     subTabMap.put(SubTabs.FORMS, formsSubTab);
 
     publishSubTab = new PublishSubTab(baseUI);
-    publishSubTab.update();
     this.add(publishSubTab, SubTabs.PUBLISH.getTabLabel());
     subTabMap.put(SubTabs.PUBLISH, publishSubTab);
     
     permissionsSubTab = new PermissionsSubTab();
-    permissionsSubTab.configure();
     this.add(permissionsSubTab, SubTabs.PERMISSIONS.getTabLabel());
     subTabMap.put(SubTabs.PERMISSIONS, permissionsSubTab);
 
     preferencesSubTab = new PreferencesSubTab();
-    preferencesSubTab.update();
     this.add(preferencesSubTab, SubTabs.PREFERENCES.getTabLabel());
     subTabMap.put(SubTabs.PREFERENCES, preferencesSubTab);
     
-
-    
     getElement().setId("second_level_menu");
     
-    // navigate to proper subtab on creation based on the URL
-    UrlHash hash = UrlHash.getHash();
-    int selected = 0;
-    String subMenu = hash.get(UrlHash.SUB_MENU);
-    for (int i = 0; i < MANAGEMENT_MENU.length; i++) {
-      if (subMenu.equals(MANAGEMENT_MENU[i].getHashString())) {
-        selected = i;
-      }
-    }
-
-    // creating the sub tab click handlers
-    for (int i = 0; i < MANAGEMENT_MENU.length; i++) {
-      ClickHandler handler = baseUI.getSubMenuClickHandler(Tabs.MANAGEMENT, MANAGEMENT_MENU[i]);
-      this.getTabBar().getTab(i).addClickHandler(handler);
-    }
-
-    this.selectTab(selected);
-    baseUI.getTimer().setCurrentSubTab(MANAGEMENT_MENU[selected]);
+    // register handler to manage tab selection change (and selecting our tab)
+    this.addSelectionHandler(baseUI.getSubMenuSelectionHandler(Tabs.MANAGEMENT, MANAGEMENT_MENU));
   }
 
+  public void warmUp() {
+	  // warm up any tabs that are not selected.
+	  // this is done in a timer that runs asynchronously
+	  // so that the initial page render should be fast.
+	  for ( int i = 0 ; i < MANAGEMENT_MENU.length ; ++i ) {
+		  boolean isVisible = this.isVisible();
+		  boolean isSelectedTab = this.getTabBar().getSelectedTab() == i;
+		  if ( !isVisible || !isSelectedTab ) {
+			  GWT.log("background update " + MANAGEMENT_MENU[i].getHashString());
+			  subTabMap.get(MANAGEMENT_MENU[i]).update();
+		  }
+	  }
+  }
+  
   public SubTabInterface getSubTab(SubTabs subTab) {
     return subTabMap.get(subTab);
   }

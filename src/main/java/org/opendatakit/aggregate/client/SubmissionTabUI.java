@@ -22,7 +22,7 @@ import java.util.Map;
 import org.opendatakit.aggregate.constants.common.SubTabs;
 import org.opendatakit.aggregate.constants.common.Tabs;
 
-import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.TabPanel;
 
 public class SubmissionTabUI extends TabPanel { 
@@ -42,36 +42,32 @@ public class SubmissionTabUI extends TabPanel {
     
     // build the UI
     filterSubTab = new FilterSubTab();
-    filterSubTab.update();
     add(filterSubTab, SubTabs.FILTER.getTabLabel());
     subTabMap.put(SubTabs.FILTER, filterSubTab);
     
     exportSubTab = new ExportSubTab();
-    exportSubTab.update();
     add(exportSubTab, SubTabs.EXPORT.getTabLabel());
     subTabMap.put(SubTabs.EXPORT, exportSubTab);
     
     getElement().setId("second_level_menu");
 
-    // navigate to the proper tab
-    UrlHash hash = UrlHash.getHash();
-    int selected = 0;
-    String subMenu = hash.get(UrlHash.SUB_MENU);
-    for (int i = 0; i < SUBMISSION_MENU.length; i++) {
-      if (subMenu.equals(SUBMISSION_MENU[i].getHashString())) {
-        selected = i;
-      }
-    }
-
-    // register the click handlers
-    for (int i = 0; i < SUBMISSION_MENU.length; i++) {
-      ClickHandler handler = baseUI.getSubMenuClickHandler(Tabs.SUBMISSIONS, SUBMISSION_MENU[i]);
-      this.getTabBar().getTab(i).addClickHandler(handler);
-    }
-
-    this.selectTab(selected);
-    baseUI.getTimer().setCurrentSubTab(SUBMISSION_MENU[selected]);
+    // register handler to manage tab selection change (and selecting our tab)
+    this.addSelectionHandler(baseUI.getSubMenuSelectionHandler(Tabs.SUBMISSIONS, SUBMISSION_MENU));
   } 
+  
+  public void warmUp() {
+	  // warm up any tabs that are not selected.
+	  // this is done in a timer that runs asynchronously
+	  // so that the initial page render should be fast.
+	  for ( int i = 0 ; i < SUBMISSION_MENU.length ; ++i ) {
+		  boolean isVisible = this.isVisible();
+		  boolean isSelectedTab = this.getTabBar().getSelectedTab() == i;
+		  if ( !isVisible || !isSelectedTab ) {
+			  GWT.log("background update " + SUBMISSION_MENU[i].getHashString());
+			  subTabMap.get(SUBMISSION_MENU[i]).update();
+		  }
+	  }
+  }
   
   public int findSubTabIndex(SubTabs subTab) {
     for (int i = 0; i < SUBMISSION_MENU.length; i++) {

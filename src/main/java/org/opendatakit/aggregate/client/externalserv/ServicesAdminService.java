@@ -40,4 +40,6 @@ public interface ServicesAdminService extends RemoteService {
   String createFusionTable(String formId, ExternalServicePublicationOption esOption) throws AccessDeniedException;
   
   String createGoogleSpreadsheet(String formId, String name, ExternalServicePublicationOption esOption) throws AccessDeniedException;
+  
+  Boolean deletePublisher(String uri) throws AccessDeniedException;
 }

@@ -19,6 +19,8 @@ package org.opendatakit.aggregate.client.widgets;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 
+import org.opendatakit.aggregate.client.AggregateUI;
+import org.opendatakit.aggregate.client.SecureGWT;
 import org.opendatakit.aggregate.client.permissions.CredentialsInfoBuilder;
 import org.opendatakit.aggregate.client.popups.ChangePasswordPopup;
 import org.opendatakit.common.security.client.CredentialsInfo;
@@ -49,8 +51,8 @@ public class ExecuteChangePasswordButton extends AButtonBase implements ClickHan
 	    PasswordTextBox password1 = popup.getPassword1();
 	    PasswordTextBox password2 = popup.getPassword2();
 	    UserSecurityInfo userInfo = popup.getUser();
-	    RealmSecurityInfo realmInfo = popup.getRealm();
-	    SecurityAdminServiceAsync service = popup.getSecurityAdminService();
+	    RealmSecurityInfo realmInfo = AggregateUI.getUI().getRealmInfo();
+	    SecurityAdminServiceAsync service = SecureGWT.getSecurityAdminService();
 	    
 	    
 		String pw1 = password1.getText();

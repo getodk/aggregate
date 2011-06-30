@@ -36,6 +36,7 @@ public class PublishSubTab extends VerticalPanel implements SubTabInterface {
     add(publishTable);
   }
 
+  @Override
   public void update() {
     FormServiceAsync formSvc = SecureGWT.getFormService();
 
@@ -98,6 +99,8 @@ public class PublishSubTab extends VerticalPanel implements SubTabInterface {
 
     // update the panel to display the right form
     formsBox.setItemSelected(selectedIndex, true);
+    // and tag that form as selected...
+    selectedForm = forms[selectedIndex];
 
     // set the class state to the newly created form list
     displayedFormList = forms;

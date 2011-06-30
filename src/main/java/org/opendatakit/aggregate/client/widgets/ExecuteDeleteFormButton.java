@@ -36,10 +36,14 @@ public class ExecuteDeleteFormButton extends AButtonBase implements ClickHandler
       @Override
       public void onSuccess(Boolean result) {
         AggregateUI.getUI().clearError();
-        Window.alert("Successfully scheduled this form's deletion.\n"
-            + "It may take several minutes to delete all the "
-            + "data submissions\nfor this form -- after which the "
-            + "form definition itself will be deleted.");
+        if ( result ) {
+	        Window.alert("Successfully scheduled this form's deletion.\n"
+	            + "It may take several minutes to delete all the "
+	            + "data submissions\nfor this form -- after which the "
+	            + "form definition itself will be deleted.");
+        } else {
+        	Window.alert("Error: unable to delete this form!");
+        }
         AggregateUI.getUI().getTimer().refreshNow();
       }
     };
