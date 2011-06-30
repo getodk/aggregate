@@ -16,6 +16,8 @@
 
 package org.opendatakit.aggregate.client.popups;
 
+import org.opendatakit.aggregate.client.AggregateUI;
+import org.opendatakit.aggregate.client.SecureGWT;
 import org.opendatakit.aggregate.client.widgets.ClosePopupButton;
 import org.opendatakit.aggregate.client.widgets.ExecuteChangePasswordButton;
 import org.opendatakit.common.security.client.RealmSecurityInfo;
@@ -28,18 +30,14 @@ import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.PopupPanel;
 
 public class ChangePasswordPopup extends PopupPanel {
-	UserSecurityInfo user;
-	RealmSecurityInfo realm;
-	SecurityAdminServiceAsync securityAdminService;
-	PasswordTextBox password1;
-	PasswordTextBox password2;
+	private UserSecurityInfo user;
+	private PasswordTextBox password1;
+	private PasswordTextBox password2;
 
-	public ChangePasswordPopup(UserSecurityInfo user, RealmSecurityInfo realm, SecurityAdminServiceAsync securityAdminService) {
+	public ChangePasswordPopup(UserSecurityInfo user) {
 		super(false);
 
 		this.user = user;
-		this.realm = realm;
-		this.securityAdminService = securityAdminService;
 
 		password1 = new PasswordTextBox();
 		password2 = new PasswordTextBox();
@@ -60,14 +58,6 @@ public class ChangePasswordPopup extends PopupPanel {
 	
 	public UserSecurityInfo getUser() {
 		return user;
-	}
-	
-	public RealmSecurityInfo getRealm() {
-		return realm;
-	}
-	
-	public SecurityAdminServiceAsync getSecurityAdminService() {
-		return securityAdminService;
 	}
 	
 	public PasswordTextBox getPassword1() {

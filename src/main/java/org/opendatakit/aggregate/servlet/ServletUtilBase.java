@@ -199,9 +199,6 @@ public class ServletUtilBase extends CommonServletBase {
 	  final String listFormsHref = HtmlUtil.createHref(
 			  cc.getWebApplicationURL(FormsServlet.ADDR), 
 			  ServletConsts.FORMS_LINK_TEXT);
-	  final String configuredServicesHref = HtmlUtil.createHref(
-			  cc.getWebApplicationURL(ExternalServicesListServlet.ADDR), 
-			  ServletConsts.EXTERNAL_SERVICES_LINK_TEXT);
 	  final String uploadSubmissionsHref = HtmlUtil.createHref(
 			  cc.getWebApplicationURL(SubmissionServlet.ADDR),
 			  ServletConsts.UPLOAD_SUBMISSIONS_APPLET_LINK_TEXT);
@@ -216,8 +213,8 @@ public class ServletUtilBase extends CommonServletBase {
 	  final String briefcaseHref = HtmlUtil.createHref(
 			  cc.getWebApplicationURL(BriefcaseServlet.ADDR), 
 			  ServletConsts.BRIEFCASE_LINK_TEXT);
-	  final String deleteHref = HtmlUtil.createHref(
-			  cc.getWebApplicationURL(FormDeleteServlet.ADDR), 
+	  final String managePasswordsHref = HtmlUtil.createHref(
+			  cc.getWebApplicationURL(UserManagePasswordsServlet.ADDR), 
 			  ServletConsts.DELETE_FORM_LINK_TEXT);
 	  
 	  boolean secure = isSiteManagementSecure(cc);
@@ -239,9 +236,11 @@ public class ServletUtilBase extends CommonServletBase {
 	// access
 	html.append(HtmlUtil.wrapWithHtmlTags(HtmlConsts.HEADING_TABLE_DATA,listFormsHref));
 	// publish
-	html.append(HtmlUtil.wrapWithHtmlTags(HtmlConsts.HEADING_TABLE_DATA,configuredServicesHref));
+	html.append(HtmlUtil.createSelfClosingTag(HtmlConsts.HEADING_TABLE_DATA));
 	// upload
 	html.append(HtmlUtil.wrapWithHtmlTags(HtmlConsts.HEADING_TABLE_DATA,uploadSubmissionsHref));
+	// manage
+	html.append(HtmlUtil.wrapWithHtmlTags(HtmlConsts.HEADING_TABLE_DATA,managePasswordsHref));
 	html.append(HtmlConsts.TABLE_ROW_CLOSE);
 	
 	html.append(HtmlConsts.TABLE_ROW_OPEN);
@@ -251,15 +250,12 @@ public class ServletUtilBase extends CommonServletBase {
 	html.append(HtmlUtil.createSelfClosingTag(HtmlConsts.HEADING_TABLE_DATA));
 	// upload
 	html.append(HtmlUtil.wrapWithHtmlTags(HtmlConsts.HEADING_TABLE_DATA,uploadFormHref));
-	// manage
-	html.append(HtmlUtil.wrapWithHtmlTags(HtmlConsts.HEADING_TABLE_DATA,deleteHref));
 	html.append(HtmlConsts.TABLE_ROW_CLOSE);
 	
 	html.append(HtmlConsts.TABLE_ROW_OPEN);
 	// access
 	html.append(HtmlUtil.wrapWithHtmlTags(HtmlConsts.HEADING_TABLE_DATA,briefcaseHref));
 	// publish
-	html.append(HtmlUtil.createSelfClosingTag(HtmlConsts.HEADING_TABLE_DATA));
 	// upload
 	html.append(HtmlUtil.createSelfClosingTag(HtmlConsts.HEADING_TABLE_DATA)); // TODO: Debrief
 	html.append(HtmlConsts.TABLE_ROW_CLOSE);

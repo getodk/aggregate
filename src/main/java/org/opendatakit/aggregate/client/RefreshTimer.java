@@ -32,6 +32,10 @@ import com.google.gwt.user.client.Timer;
  */
 public class RefreshTimer extends Timer {
 
+  // SECURITY_REFRESH_INTERVAL is the interval between 
+  // background reloads of the user's security credentials.
+  public static final int SECURITY_REFRESH_INTERVAL = 5*60*1000; // ms
+  
   // REFRESH_INTERVAL is the interval between callbacks.
   // Upon testing, this is the scheduling interval, not the 
   // inter-callback interval.  So if the computer on which the 
@@ -42,7 +46,7 @@ public class RefreshTimer extends Timer {
   
   // STALL_INTERVALS is the number of intervals of no UI
   // interaction after which the timer will be stopped.
-  private static final int UI_STALL_INTERVALS = 60; // 5 min / 5 sec
+  private static final int UI_STALL_INTERVALS = 60; // 5 min / 5 sec each
   
   // lastCompletionTime tracks the completion timestamp 
   // of the last timer action.  Used to detect and skip
@@ -55,6 +59,7 @@ public class RefreshTimer extends Timer {
   // isActive tracks the active/cancelled state of the timer
   // the GWT timer doesn't provide this information.
   private boolean isActive = false;
+  private boolean isInitializing = true;
   
   private AggregateUI aggregateUI;
 
@@ -62,9 +67,12 @@ public class RefreshTimer extends Timer {
 
   public RefreshTimer(AggregateUI ui) {
     aggregateUI = ui;
-    restartTimer();
   }
 
+  public void setInitialized() {
+	  isInitializing = false;
+  }
+  
   public void setCurrentSubTab(SubTabs subtab) {
     currentSubTab = subtab;
     refreshNow();
@@ -76,6 +84,11 @@ public class RefreshTimer extends Timer {
     // set the lastCompletionTime to zero
     // this bypasses the backlog check.
     lastCompletionTime = 0L;
+    // set the intervalsElapsed to -1
+    // this ensures that all less 
+    // frequent actions (those modulo N)
+    // actually run.
+    intervalsElapsed = -1;
     // trigger a run of the timer.
     run();
   }
@@ -102,8 +115,10 @@ public class RefreshTimer extends Timer {
 
   @Override
   public void run() {
+	if ( isInitializing ) return;
+	
 	long timeRefreshStart = System.currentTimeMillis();
-	if ( lastCompletionTime + REFRESH_INTERVAL > timeRefreshStart ) {
+	if ( lastCompletionTime + REFRESH_INTERVAL - (REFRESH_INTERVAL/10L) > timeRefreshStart ) {
 		// timer is backed up -- flush the queued callbacks
 		GWT.log("timer is backed up -- skipping");
 		return;

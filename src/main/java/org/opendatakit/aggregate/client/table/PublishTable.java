@@ -17,6 +17,7 @@
 package org.opendatakit.aggregate.client.table;
 
 import org.opendatakit.aggregate.client.externalserv.ExternServSummary;
+import org.opendatakit.aggregate.client.widgets.DeletePublishButton;
 import org.opendatakit.aggregate.client.widgets.PurgeButton;
 
 import com.google.gwt.user.client.ui.FlexTable;
@@ -38,6 +39,7 @@ public class PublishTable extends FlexTable {
   private static int ACTION = 4;
   private static int TYPE = 5;
   private static int NAME = 6;
+  private static int DELETE = 7;
 
   public PublishTable() {
     super();
@@ -48,15 +50,18 @@ public class PublishTable extends FlexTable {
     this.setText(HEADER_ROW, ACTION, "Action");
     this.setText(HEADER_ROW, TYPE, "Type");
     this.setText(HEADER_ROW, NAME, "Name");
+    this.setText(HEADER_ROW, DELETE, "Delete");
     this.addStyleName("exportTable");
     this.getRowFormatter().addStyleName(HEADER_ROW, "titleBar");
   }
 
   public void updatePublishPanel(String formId, ExternServSummary[] eSS) {
-    if (eSS == null)
-      return;
     while (this.getRowCount() > STARTING_ROW)
       this.removeRow(STARTING_ROW);
+    if (eSS == null) {
+    	// this happens if there is no publishing set up for this form
+        return;
+    }
     for (int i = 0; i < eSS.length; i++) {
       ExternServSummary e = eSS[i];
       PurgeButton purgeButton = new PurgeButton(formId, e);
@@ -76,6 +81,7 @@ public class PublishTable extends FlexTable {
       this.setText(i + STARTING_ROW, ACTION, e.getPublicationOption().getDescriptionOfOption());
       this.setText(i + STARTING_ROW, TYPE, e.getExternalServiceTypeName());
       this.setWidget(i + STARTING_ROW, NAME, new HTML(e.getName()));
+      this.setWidget(i + STARTING_ROW, DELETE,  new DeletePublishButton(e));
     }
   }
 

@@ -25,6 +25,5 @@ list of users in the above table</p>
 <br/>
 <hr/>
 <br/>
-<g:Button  styleName="gwt-Button" ui:field="gotoAdvanced" text="Advanced" />
 </g:HTMLPanel>
 </ui:UiBinder> 

@@ -26,7 +26,6 @@ import java.util.TreeSet;
 
 import org.opendatakit.aggregate.client.popups.ChangePasswordPopup;
 import org.opendatakit.common.security.client.GrantedAuthorityInfo;
-import org.opendatakit.common.security.client.RealmSecurityInfo;
 import org.opendatakit.common.security.client.UserClassSecurityInfo;
 import org.opendatakit.common.security.client.UserSecurityInfo;
 import org.opendatakit.common.security.client.UserSecurityInfo.UserType;
@@ -123,7 +122,7 @@ public class TemporaryAccessConfigurationSheet extends Composite {
 
 	@Override
 	public void execute(UserSecurityInfo object) {
-	    final PopupPanel popup = new ChangePasswordPopup(object, realmInfo, SecureGWT.getSecurityAdminService());
+	    final PopupPanel popup = new ChangePasswordPopup(object);
 	    popup.setPopupPositionAndShow(new PopupPanel.PositionCallback() {
 	      @Override
 	      public void setPosition(int offsetWidth, int offsetHeight) {
@@ -279,11 +278,8 @@ public class TemporaryAccessConfigurationSheet extends Composite {
       }
    };
    
-   private PermissionsSubTab permissionsTab;
-   
    public TemporaryAccessConfigurationSheet(PermissionsSubTab permissionsTab) {
-     this.permissionsTab = permissionsTab; 
-     initWidget(uiBinder.createAndBindUi(this));
+      initWidget(uiBinder.createAndBindUi(this));
       sinkEvents(Event.ONCHANGE | Event.ONCLICK);
 
       Column<UserSecurityInfo,UserSecurityInfo> deleteMe = new Column<UserSecurityInfo,UserSecurityInfo>
@@ -427,19 +423,6 @@ public class TemporaryAccessConfigurationSheet extends Composite {
       super.setVisible(isVisible);
       if ( isVisible ) {
          clearError(); // because navigating off the page might not have sent a mouse event...
-         
-		 if ( realmInfo == null ) {
-			 SecureGWT.getSecurityService().getRealmInfo(Cookies.getCookie("JSESSIONID"), 
-					new AsyncCallback<RealmSecurityInfo>() {
-						@Override
-						public void onFailure(Throwable caught) {
-						}
-	
-						@Override
-						public void onSuccess(RealmSecurityInfo result) {
-							realmInfo = result;
-					}});
-		 }
 
 		 SecureGWT.getSecurityAdminService().getAllUsers(true, new AsyncCallback<ArrayList<UserSecurityInfo> > () 
             {
@@ -492,16 +475,6 @@ public class TemporaryAccessConfigurationSheet extends Composite {
    CheckBox anonymousAttachmentViewers;
    @UiField
    Button button;
-   @UiField
-   Button gotoAdvanced;
-   
-   RealmSecurityInfo realmInfo;
-   
-   @UiHandler("gotoAdvanced")
-   void onGotoAdvancedClick(ClickEvent e) {
-     clearError();
-     permissionsTab.createAdvanced();
-   }
    
    @UiHandler("addNow")
    void onAddUsersClick(ClickEvent e) {

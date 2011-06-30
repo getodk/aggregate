@@ -20,13 +20,16 @@ import org.opendatakit.aggregate.client.preferences.Preferences;
 import org.opendatakit.aggregate.constants.common.SubTabs;
 import org.opendatakit.aggregate.constants.common.Tabs;
 import org.opendatakit.aggregate.constants.common.UIConsts;
+import org.opendatakit.common.security.client.RealmSecurityInfo;
 import org.opendatakit.common.security.client.UserSecurityInfo;
 import org.opendatakit.common.security.client.UserSecurityInfo.UserType;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.SelectionEvent;
+import com.google.gwt.event.logical.shared.SelectionHandler;
+import com.google.gwt.user.client.Cookies;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.InvocationException;
 import com.google.gwt.user.client.ui.DecoratedTabPanel;
@@ -35,13 +38,11 @@ import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
-import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class AggregateUI implements EntryPoint {
 
-  private static final String[] MAIN_MENU = { Tabs.SUBMISSIONS.getTabLabel(),
-      Tabs.MANAGEMENT.getTabLabel() };
+  private static final Tabs[] MAIN_MENU = { Tabs.SUBMISSIONS, Tabs.MANAGEMENT };
   private UrlHash hash;
   private VerticalPanel wrappingLayoutPanel;
   private Label errorMsgLabel;
@@ -59,12 +60,24 @@ public class AggregateUI implements EntryPoint {
 
   public static synchronized final AggregateUI getUI() {
     if (singleton == null) {
-      singleton = new AggregateUI();
+      // if you get here, you've put something in the AggregateUI() 
+      // constructor that should have been put in the onModuleLoad()
+      // method.
+      GWT.log("AggregateUI.getUI() called before singleton has been initialized");
     }
     return singleton;
   }
 
   private AggregateUI() {
+	  /*
+	   * CRITICAL NOTE:
+	   * Do not do **anything** in this constructor
+	   * that might cause something underneath to 
+	   * call AggregateUI.get()
+	   * 
+	   *  The singleton is not yet assigned!!!
+	   */
+	singleton = null;
     timer = new RefreshTimer(this);
 
     wrappingLayoutPanel = new VerticalPanel();
@@ -76,7 +89,26 @@ public class AggregateUI implements EntryPoint {
     manageNav = new ManageTabUI(this);
     submissionNav = new SubmissionTabUI(this);
 
-    Preferences.updatePreferences();
+    // Create sub menu navigation
+    mainNav.add(submissionNav, Tabs.SUBMISSIONS.getTabLabel());
+    mainNav.add(manageNav, Tabs.MANAGEMENT.getTabLabel());
+    mainNav.addStyleName("mainNav");
+
+    // add the error message info...
+    errorMsgLabel.setStyleName("error_message");
+    errorMsgLabel.setVisible(false);
+    wrappingLayoutPanel.add(errorMsgLabel);
+    wrappingLayoutPanel.add(layoutPanel);
+    // add to layout
+    layoutPanel.add(mainNav);
+    layoutPanel.getElement().setId("layout_panel");
+    login_logout_link.getElement().setId("login_logout_link");
+
+    RootPanel.get("dynamic_content").add(wrappingLayoutPanel);
+    RootPanel.get("dynamic_content").add(login_logout_link);
+    RootPanel.get("dynamic_content").add(new HTML("<img src=\"images/odk_color.png\" id=\"odk_aggregate_logo\" />"));
+    
+    updateTogglePane();
   }
 
   public void reportError(Throwable t) {
@@ -111,9 +143,12 @@ public class AggregateUI implements EntryPoint {
   static final String LOGIN_URL_PATH = "relogin.html";
   static final HTML LOGIN_LINK = new HTML("<a href=\"" + LOGIN_URL_PATH + "\">Log In</a>");
 
+  private long lastUserInfoUpdateAttemptTimestamp = 0L;
   private UserSecurityInfo userInfo = null;
+  private long lastRealmInfoUpdateAttemptTimestamp = 0L;
+  private RealmSecurityInfo realmInfo = null;
 
-  private synchronized void updateTogglePane() {
+  private void updateTogglePane() {
     if ((userInfo != null) && (userInfo.getType() != UserType.ANONYMOUS)) {
         System.out.println("Setting logout link");
         login_logout_link.clear();
@@ -125,52 +160,121 @@ public class AggregateUI implements EntryPoint {
     }
   }
   
-  private synchronized void updateUserSecurityInfo() {
+  public UserSecurityInfo getUserInfo() {
+	  if ( userInfo == null ) {
+		  GWT.log("AggregateUI.getUserInfo: userInfo is null");
+	  }
+	  if ( lastUserInfoUpdateAttemptTimestamp + RefreshTimer.SECURITY_REFRESH_INTERVAL 
+			  < System.currentTimeMillis() ) {
+		  // record the attempt
+		  lastUserInfoUpdateAttemptTimestamp = System.currentTimeMillis();
+		  GWT.log("AggregateUI.getUserInfo: triggering refresh of userInfo");
+		  SecureGWT.getSecurityService().getUserInfo(new AsyncCallback<UserSecurityInfo>() {
+
+		        @Override
+		        public void onFailure(Throwable caught) {
+		      	  reportError(caught);
+		        }
+
+		        @Override
+		        public void onSuccess(UserSecurityInfo result) {
+		          userInfo = result;
+		        }
+		      });
+
+	  }
+	  return userInfo;
+  }
+  
+  public RealmSecurityInfo getRealmInfo() {
+	  if ( realmInfo == null ) {
+		  GWT.log("AggregateUI.getRealmInfo: realmInfo is null");
+	  }
+	  if ( lastRealmInfoUpdateAttemptTimestamp + RefreshTimer.SECURITY_REFRESH_INTERVAL 
+			  < System.currentTimeMillis() ) {
+		  // record the attempt
+		  lastRealmInfoUpdateAttemptTimestamp = System.currentTimeMillis();
+		  GWT.log("AggregateUI.getRealmInfo: triggering refresh of realmInfo");
+		  SecureGWT.getSecurityService().getRealmInfo(Cookies.getCookie("JSESSIONID"),
+					new AsyncCallback<RealmSecurityInfo>() {
+
+			@Override
+			public void onFailure(Throwable caught) {
+				reportError(caught);
+			}
+			
+			@Override
+			public void onSuccess(RealmSecurityInfo result) {
+				realmInfo = result;
+				if ( realmInfo != null && userInfo != null ) {
+					commonUpdateCompleteAction();
+				}
+			}
+		});
+	  }
+	  return realmInfo;
+  }
+  
+  private void commonUpdateCompleteAction() {
+      updateTogglePane();
+      Preferences.updatePreferences();
+      
+      // Select the correct menu item based on url hash.
+      int selected = 0;
+      String mainMenu = hash.get(UrlHash.MAIN_MENU);
+      for (int i = 0; i < MAIN_MENU.length; i++) {
+        if (mainMenu.equals(MAIN_MENU[i].getHashString())) {
+          selected = i;
+        }
+      }
+      mainNav.selectTab(selected);
+
+      // AND schedule an async operation to 
+      // refresh the tabs that are not selected.
+      Timer t = new Timer() {
+			@Override
+			public void run() {
+		        // warm up the underlying UI tabs...
+		        manageNav.warmUp();
+		        submissionNav.warmUp();
+			}};
+		t.schedule(1000);
+  }
+  
+  private void updateSecurityInfo() {
+	  lastUserInfoUpdateAttemptTimestamp = 
+		  lastRealmInfoUpdateAttemptTimestamp = System.currentTimeMillis();
     SecureGWT.getSecurityService().getUserInfo(new AsyncCallback<UserSecurityInfo>() {
 
       @Override
       public void onFailure(Throwable caught) {
+    	  reportError(caught);
       }
 
       @Override
       public void onSuccess(UserSecurityInfo result) {
         userInfo = result;
-        updateTogglePane();
-      }
-    });
-  }
-
-  /*
-   * Creates a click handler for a main menu tab. Defaults to the first sub-menu
-   * tab. Does nothing if we're already on the tab clicked.
-   */
-  private ClickHandler getMainMenuClickHandler(final String s) {
-    return new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        clearError();
-        if (hash.get(UrlHash.MAIN_MENU).equals(s))
-          return;
-        hash.clear();
-        TabPanel panel = null;
-        if (s.equals(Tabs.SUBMISSIONS.getTabLabel())) {
-          panel = submissionNav;
-          hash.set(UrlHash.MAIN_MENU, Tabs.SUBMISSIONS.getHashString());
-          panel.selectTab(0);
-          timer.setCurrentSubTab(SubmissionTabUI.SUBMISSION_MENU[0]);
-          hash.put();
-        } else if (s.equals(Tabs.MANAGEMENT.getTabLabel())) {
-          panel = manageNav;
-          hash.set(UrlHash.MAIN_MENU, Tabs.MANAGEMENT.getHashString());
-          panel.selectTab(0);
-          timer.setCurrentSubTab(ManageTabUI.MANAGEMENT_MENU[0]);
-          hash.put();
-        } else {
-          // another UI event... let the timer know.
-          timer.restartTimer();
+        if ( realmInfo != null && userInfo != null ) {
+        	commonUpdateCompleteAction();
         }
       }
-    };
+    });
+    SecureGWT.getSecurityService().getRealmInfo(Cookies.getCookie("JSESSIONID"),
+    											new AsyncCallback<RealmSecurityInfo>() {
+
+        @Override
+        public void onFailure(Throwable caught) {
+      	  reportError(caught);
+        }
+
+        @Override
+        public void onSuccess(RealmSecurityInfo result) {
+          realmInfo = result;
+          if ( realmInfo != null && userInfo != null ) {
+          	commonUpdateCompleteAction();
+          }
+        }
+      });
   }
 
   @Override
@@ -178,44 +282,23 @@ public class AggregateUI implements EntryPoint {
     // Get url hash.
     hash = UrlHash.getHash();
     hash.get();
-
-    // Create sub menu navigation
-    mainNav.add(submissionNav, Tabs.SUBMISSIONS.getTabLabel());
-    mainNav.add(manageNav, Tabs.MANAGEMENT.getTabLabel());
-    updateTogglePane();
-    mainNav.addStyleName("mainNav");
-
-    // add the error message info...
-    errorMsgLabel.setStyleName("error_message");
     errorMsgLabel.setVisible(false);
-    wrappingLayoutPanel.add(errorMsgLabel);
-    wrappingLayoutPanel.add(layoutPanel);
-    // add to layout
-    layoutPanel.add(mainNav);
-    layoutPanel.getElement().setId("layout_panel");
-    login_logout_link.getElement().setId("login_logout_link");
+    userInfo = null;
 
-    // Select the correct menu item based on url hash.
-    int selected = 0;
-    String mainMenu = hash.get(UrlHash.MAIN_MENU);
-    for (int i = 0; i < MAIN_MENU.length; i++) {
-      if (mainMenu.equals(MAIN_MENU[i])) {
-        selected = i;
-      }
-    }
-    mainNav.selectTab(selected);
+    // assign the singleton here...
+    singleton = this;
+    
+    // start the refresh timer...
+    timer.setInitialized();
 
-    // Add click handlers for each menu item
-    for (int i = 0; i < MAIN_MENU.length; i++) {
-      mainNav.getTabBar().getTab(i).addClickHandler(getMainMenuClickHandler(MAIN_MENU[i]));
-    }
-
-    RootPanel.get("dynamic_content").add(wrappingLayoutPanel);
-    RootPanel.get("dynamic_content").add(login_logout_link);
-    RootPanel.get("dynamic_content").add(new HTML("<img src=\"images/odk_color.png\" id=\"odk_aggregate_logo\" />"));
-  
-    updateUserSecurityInfo();
-
+    // Update the user security info.
+    // This gets the identity and privileges of the 
+    // user to the UI and the realm of that user.
+    // The success callback then renders the requested
+    // page and warms up the various sub-tabs and 
+    // displays the highlighted tab.
+    updateSecurityInfo();
+    
     contentLoaded();
   }
 
@@ -237,18 +320,63 @@ public class AggregateUI implements EntryPoint {
   public SubmissionTabUI getSubmissionNav() {
     return submissionNav;
   }
+  
+  SelectionHandler<Integer> getSubMenuSelectionHandler( final Tabs menu, final SubTabs[] subMenus) {
+	  // add the mainNav selection handler for this menu...
+	  mainNav.addSelectionHandler(new SelectionHandler<Integer>() {
+			@Override
+			public void onSelection(SelectionEvent<Integer> event) {
+				if ( userInfo == null ) {
+					GWT.log("getSubMenuSelectionHandler: No userInfo - not setting selection");
+					return;
+				}
+				int selected = event.getSelectedItem();
+				String tabHash = menu.getHashString();
+				if ( tabHash.equals(MAIN_MENU[selected].getHashString())) {
+					// OK: this is the handler instance for the selected top-level tab.
+					//
+					// if we are not already on this main tab (as indicated by the hash) or if there
+					// is no hash specified for the subtab, go to subMenus[0]
+					int selectedSubTab = 0;
+					String mainHash = hash.get(UrlHash.MAIN_MENU);
+					if ( mainHash != null && mainHash.equals(MAIN_MENU[selected].getHashString()) ) {
+						// we haven't changed the hash -- see if
+						// a specific subpage is specified...
+						String subMenuHash = hash.get(UrlHash.SUB_MENU);
+						if ( subMenuHash != null ) {
+							for ( int i = 0 ; i < subMenus.length ; ++i ) {
+								if ( subMenuHash.equals(subMenus[i].getHashString()) ) {
+									// found the menu that should be selected...
+									selectedSubTab = i;
+								}
+							}
+						}
+					}
+					// and select the appropriate subtab...
+					if ( menu == Tabs.MANAGEMENT ) {
+						getManageNav().selectTab(selectedSubTab);
+					} else if ( menu == Tabs.SUBMISSIONS ) {
+						getSubmissionNav().selectTab(selectedSubTab);
+					}
+				}
+			}
+	  });
 
-  ClickHandler getSubMenuClickHandler(final Tabs menu, final SubTabs subMenu) {
-    return new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        clearError();
-        getTimer().setCurrentSubTab(subMenu);
-        hash.clear();
-        hash.set(UrlHash.MAIN_MENU, menu.getHashString());
-        hash.set(UrlHash.SUB_MENU, subMenu.getHashString());
-        hash.put();
-      }
-    };
+	  return new SelectionHandler<Integer>() {
+		@Override
+		public void onSelection(SelectionEvent<Integer> event) {
+			if ( userInfo == null ) {
+				GWT.log("getSubMenuSelectionHandler: No userInfo - not setting subMenu selection");
+				return;
+			}
+			int selected = event.getSelectedItem();
+	        clearError();
+	        hash.clear();
+	        hash.set(UrlHash.MAIN_MENU, menu.getHashString());
+	        hash.set(UrlHash.SUB_MENU, subMenus[selected].getHashString());
+	        getTimer().setCurrentSubTab(subMenus[selected]);
+	        hash.put();
+		}
+	  };
   }
 }

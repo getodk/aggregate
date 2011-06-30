@@ -40,6 +40,7 @@ import org.opendatakit.aggregate.servlet.OAuthServlet;
 import org.opendatakit.common.constants.BasicConsts;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
+import org.opendatakit.common.security.client.exception.AccessDeniedException;
 import org.opendatakit.common.web.CallingContext;
 
 import com.google.gdata.client.authn.oauth.GoogleOAuthHelper;
@@ -177,5 +178,36 @@ public class ServicesAdminServiceImpl extends RemoteServiceServlet implements
       e.printStackTrace();
     }
     return null;
+  }
+
+  @Override
+  public Boolean deletePublisher(String uri) throws AccessDeniedException {
+    HttpServletRequest req = this.getThreadLocalRequest();
+    CallingContext cc = ContextFactory.getCallingContext(this, req);
+
+	FormServiceCursor fsc = null;
+	ExternalService es = null;
+	try {
+		fsc = FormServiceCursor.getFormServiceCursor(uri, cc);
+		if ( fsc != null ) {
+			es = fsc.getExternalService(cc);
+		}
+	} catch (ODKEntityNotFoundException e) {
+		// silent failure...
+		return false;
+	}
+
+	if ( es != null ) {
+		try {
+			es.delete(cc);
+			// success!
+			return true; 
+		} catch (ODKDatastoreException e) {
+			// this one we log...
+			e.printStackTrace();
+			return false;
+		}
+	}
+	return false;
   }
 }

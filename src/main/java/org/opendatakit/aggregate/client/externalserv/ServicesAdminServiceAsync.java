@@ -16,4 +16,6 @@ public interface ServicesAdminServiceAsync {
 
   void getExternalServices(String formid, AsyncCallback<ExternServSummary[]> callback);
 
+  void deletePublisher(String uri, AsyncCallback<Boolean> callback);
+
 }
