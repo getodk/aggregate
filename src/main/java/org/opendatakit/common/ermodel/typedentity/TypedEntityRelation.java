@@ -178,6 +178,16 @@ public abstract class TypedEntityRelation<T extends TypedEntity>
     }
 
     /**
+     * @return the uri of this relation. Note that there are no mechanisms for
+     *         retrieving this relation by it's uri, it merely serves as a
+     *         unique identifier.
+     */
+    public String getUri()
+    {
+        return this.getClass().getCanonicalName();
+    }
+
+    /**
      * {@link org.opendatakit.common.ermodel.Relation#newEntity(CallingContext)}
      */
     protected Entity newEntity(CallingContext cc)

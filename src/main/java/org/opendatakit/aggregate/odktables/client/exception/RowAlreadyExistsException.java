@@ -7,27 +7,27 @@ public class RowAlreadyExistsException extends ODKTablesClientException
      */
     private static final long serialVersionUID = 360720642714410573L;
 
-    private String tableId;
-    private String rowId;
+    private String tableID;
+    private String rowID;
 
-    public RowAlreadyExistsException(String tableId, String rowId)
+    public RowAlreadyExistsException(String tableID, String rowID)
     {
-        super(String.format("Row with rowId '%s' already exists!", rowId));
+        super(String.format("Row with rowID '%s' already exists!", rowID));
 
-        this.tableId = tableId;
-        this.rowId = rowId;
+        this.tableID = tableID;
+        this.rowID = rowID;
     }
 
-    public String getTableId()
+    public String getTableID()
     {
-        return this.tableId;
+        return this.tableID;
     }
 
     /**
-     * @return the rowId of the row that already exists.
+     * @return the rowID of the row that already exists.
      */
-    public String getRowId()
+    public String getRowID()
     {
-        return this.rowId;
+        return this.rowID;
     }
 }
