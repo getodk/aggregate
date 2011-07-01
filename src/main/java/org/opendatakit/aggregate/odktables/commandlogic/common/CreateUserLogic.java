@@ -32,17 +32,18 @@ public class CreateUserLogic extends CommandLogic<CreateUser>
             throws ODKDatastoreException
     {
         Users users = Users.getInstance(cc);
-        Permissions permissions = Permissions.getInstance(cc);
-        
+
         String userID = createUser.getUserID();
         String requestingUserID = createUser.getRequestingUserID();
-        String userTableUUID = users.getClass().getCanonicalName();
-        
-        User requestUser = users.query().equal(Users.USER_ID, requestingUserID).get();
-        
-        if (requestUser.hasPerm(userTableUUID, Permissions.WRITE))
+        String userTableUUID = users.getUri();
+
+        User requestUser = users.query().equal(Users.USER_ID, requestingUserID)
+                .get();
+
+        if (!requestUser.hasPerm(userTableUUID, Permissions.WRITE))
         {
-            
+            return CreateUserResult.failure(userID,
+                    FailureReason.PERMISSION_DENIED);
         }
         if (users.query().equal(Users.USER_ID, userID).exists())
         {
