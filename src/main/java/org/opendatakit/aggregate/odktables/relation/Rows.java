@@ -3,17 +3,19 @@ package org.opendatakit.aggregate.odktables.relation;
 import java.util.Collections;
 import java.util.List;
 
-import org.opendatakit.aggregate.odktables.entities.Row;
+import org.opendatakit.aggregate.odktables.entity.Row;
 import org.opendatakit.common.ermodel.Entity;
 import org.opendatakit.common.ermodel.typedentity.TypedEntityRelation;
 import org.opendatakit.common.persistence.DataField;
+import org.opendatakit.common.persistence.DataField.DataType;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
 
 /**
  * <p>
- * Table represents a table stored in the datastore. Every Table must be indexed
- * in the TableIndex.
+ * Rows is a set of relations containing all the {@link Row} entities for all
+ * tables stored in the datastore. An instance of Rows contains all the Row
+ * entities for a specific table.
  * </p>
  * 
  * @author the.dylan.price@gmail.com
@@ -21,9 +23,20 @@ import org.opendatakit.common.web.CallingContext;
 public class Rows extends TypedEntityRelation<Row>
 {
     /**
+     * The name of the revisionTag field.
+     */
+    public static final String REVISION_TAG = "REVISION_TAG";
+
+    /**
+     * The revisionTag field.
+     */
+    private static final DataField revisionTag = new DataField(REVISION_TAG,
+            DataType.STRING, false);
+    
+    /**
      * The namespace for Rows relations.
      */
-    public static final String NAMESPACE = "ODKTABLES";
+    private static final String NAMESPACE = "ODKTABLES";
 
     private List<DataField> fields;
 
@@ -70,6 +83,7 @@ public class Rows extends TypedEntityRelation<Row>
     {
         List<DataField> tableFields = Columns.getInstance(cc).getDataFields(
                 tableUri);
+        tableFields.add(revisionTag);
         return new Rows(NAMESPACE, tableUri, tableFields, cc);
     }
 }

@@ -8,10 +8,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.opendatakit.aggregate.ContextFactory;
-import org.opendatakit.aggregate.odktables.Command;
-import org.opendatakit.aggregate.odktables.CommandConverter;
-import org.opendatakit.aggregate.odktables.CommandLogic;
-import org.opendatakit.aggregate.odktables.CommandResult;
+import org.opendatakit.aggregate.odktables.command.Command;
+import org.opendatakit.aggregate.odktables.command.CommandConverter;
+import org.opendatakit.aggregate.odktables.commandlogic.CommandLogic;
+import org.opendatakit.aggregate.odktables.commandresult.CommandResult;
 import org.opendatakit.aggregate.servlet.ServletUtilBase;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;

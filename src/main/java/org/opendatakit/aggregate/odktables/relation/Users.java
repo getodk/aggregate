@@ -3,7 +3,7 @@ package org.opendatakit.aggregate.odktables.relation;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.opendatakit.aggregate.odktables.entities.User;
+import org.opendatakit.aggregate.odktables.entity.User;
 import org.opendatakit.common.ermodel.Entity;
 import org.opendatakit.common.ermodel.typedentity.TypedEntityRelation;
 import org.opendatakit.common.persistence.DataField;
@@ -14,18 +14,9 @@ import org.opendatakit.common.web.CallingContext;
 
 /**
  * <p>
- * Users represents all the odktables API users who own tables in the Aggregate
- * datastore.
- * </p>
- * 
- * <p>
- * Users is a set of (userUri, userId, userName) tuples, aka 'entities' where
- * <ul>
- * <li>userUri = the public unique identifier of the user</li>
- * <li>userId = the private unique identifier of the user, known only to the
- * user</li>
- * <li>userName = the human readable name of the user</li>
- * </ul>
+ * Users is a relation containing all the {@link User} entities stored in
+ * the datastore. Thus Users keeps track of all the registered users of the
+ * odktables API.
  * </p>
  * 
  * @author the.dylan.price@gmail.com
@@ -34,7 +25,7 @@ public class Users extends TypedEntityRelation<User>
 {
     // Field names
     /**
-     * The name of the userId field.
+     * The name of the userID field.
      */
     public static final String USER_ID = "USER_ID";
 
@@ -49,11 +40,21 @@ public class Users extends TypedEntityRelation<User>
      */
     private static final String RELATION_NAME = "USERS";
 
+    /**
+     * The ID of the anonymous user.
+     */
+    private static final String ANON_ID = "-1";
+    
+    /**
+     * The name of the anonymous user.
+     */
+    private static final String ANON_NAME = "Anonymous User";
+    
     // The following defines the actual fields that will be in the datastore:
     /**
      * The field for the user id.
      */
-    private static final DataField userId = new DataField(USER_ID,
+    private static final DataField userID = new DataField(USER_ID,
             DataType.STRING, false);
     /**
      * The field for the user name.
@@ -64,10 +65,10 @@ public class Users extends TypedEntityRelation<User>
     private static final List<DataField> fields;
     static
     {
-        userId.setIndexable(IndexType.HASH);
+        userID.setIndexable(IndexType.HASH);
 
         fields = new ArrayList<DataField>();
-        fields.add(userId);
+        fields.add(userID);
         fields.add(userName);
     }
 
@@ -75,6 +76,11 @@ public class Users extends TypedEntityRelation<User>
      * The singleton instance of the Users.
      */
     private static Users instance;
+    
+    /**
+     * The singleton instance of the anonymous user.
+     */
+    private static User anonInstance;
 
     /**
      * Constructs an instance which can be used to manipulate the Users
@@ -97,6 +103,11 @@ public class Users extends TypedEntityRelation<User>
         return new User(entity, super.getCC());
     }
 
+    public User getAnonymousUser() throws ODKDatastoreException
+    {
+        return Users.anonInstance;
+    }
+    
     /**
      * Returns the singleton instance of the Users.
      * 
@@ -115,6 +126,19 @@ public class Users extends TypedEntityRelation<User>
         if (instance == null || instance.getCC() != cc)
         {
             instance = new Users(cc);
+        }
+        // Create anonymous user if they don't already exist
+        if (anonInstance == null)
+        {
+            try
+            {
+                anonInstance = instance.query().equal(USER_ID, ANON_ID).get();
+            }
+            catch (ODKDatastoreException e)
+            {
+               anonInstance = new User(ANON_ID, ANON_NAME, cc);
+               anonInstance.save();
+            }
         }
         return instance;
     }
