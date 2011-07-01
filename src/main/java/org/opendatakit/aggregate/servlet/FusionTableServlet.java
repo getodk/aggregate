@@ -24,6 +24,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.BeanDefs;
+import org.opendatakit.aggregate.constants.ErrorConsts;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.common.ExternalServicePublicationOption;
 import org.opendatakit.aggregate.constants.externalservice.ExternalServiceConsts;
@@ -38,6 +39,8 @@ import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.task.UploadSubmissions;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
+
+import com.google.gdata.client.authn.oauth.OAuthException;
 
 /**
  * 
@@ -97,8 +100,16 @@ public class FusionTableServlet extends ServletUtilBase {
     // need to obtain authorization to fusion table
     if (authToken == null) {
       beginBasicHtmlResponse(TITLE_INFO, resp, true, cc); // header info
-      String authButton = generateAuthButton(ExternalServiceConsts.AUTHORIZE_FUSION_CREATION,
-          params, req, resp, FusionTableConsts.FUSION_SCOPE);
+      String authButton;
+	  try {
+		authButton = generateAuthButton(ExternalServiceConsts.AUTHORIZE_FUSION_CREATION,
+		      params, cc, FusionTableConsts.FUSION_SCOPE);
+	  } catch (OAuthException e) {
+        e.printStackTrace();
+        resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+            ErrorConsts.OAUTH_SERVER_REJECTED_ONE_TIME_USE_TOKEN);
+        return;
+	  }
       resp.getWriter().print(authButton);
       finishBasicHtmlResponse(resp);
       return;

@@ -23,6 +23,7 @@
 		<property name="domains" value="${security.server.realm.domains}" />
 		<property name="hostname" value="${security.server.hostname}" />
 		<property name="port" value="${security.server.port}" />
+		<property name="securePort" value="${security.server.securePort}" />
 		<property name="channelType" value="${security.server.channelType}" />
 		<property name="secureChannelType" value="${security.server.secureChannelType}" />
 	</bean>

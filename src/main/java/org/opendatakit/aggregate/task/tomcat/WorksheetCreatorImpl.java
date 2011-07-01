@@ -17,6 +17,7 @@ package org.opendatakit.aggregate.task.tomcat;
 
 import java.util.Map;
 
+import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.common.ExternalServicePublicationOption;
 import org.opendatakit.aggregate.constants.externalservice.ExternalServiceConsts;
@@ -82,11 +83,12 @@ public class WorksheetCreatorImpl implements WorksheetCreator {
 	    if (spreadsheetName == null) {
 	    	throw new IllegalStateException("spreadsheet name is null in create worksheet task");
 	    }
-	    
+	    WatchdogImpl wd = (WatchdogImpl) cc.getBean(BeanDefs.WATCHDOG);
+		// use watchdog's calling context in runner...
 	    WorksheetCreatorRunner wr = new WorksheetCreatorRunner( form, miscTasksKey,
 	    		attemptCount, 
 				spreadsheetName, esType,
-				cc );
+				wd.getCallingContext() );
 		System.out.println("THIS IS CREATE WORKSHEET IN TOMCAT");
 		AggregrateThreadExecutor exec = AggregrateThreadExecutor
 				.getAggregateThreadExecutor();

@@ -44,8 +44,8 @@ public class FormXmlTable {
 
   private QueryFormList forms;
 
-  public FormXmlTable(QueryFormList formsToFormat, String webServerURL) {
-    this.requestURL = HtmlUtil.createUrl(webServerURL) + FormXmlServlet.ADDR;
+  public FormXmlTable(QueryFormList formsToFormat, String webServerUrl) {
+    this.requestURL = webServerUrl + BasicConsts.FORWARDSLASH + FormXmlServlet.ADDR;
     this.forms = formsToFormat;
   }
 

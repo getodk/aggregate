@@ -17,6 +17,7 @@ package org.opendatakit.aggregate.task.tomcat;
 
 import java.util.Map;
 
+import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.datamodel.FormElementKey;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
@@ -87,8 +88,10 @@ public class KmlGeneratorImpl implements KmlGenerator {
 	          }
 	        }
 	    }
+		WatchdogImpl wd = (WatchdogImpl) cc.getBean(BeanDefs.WATCHDOG);
+		// use watchdog's calling context in runner...
 		KmlRunner runner = new KmlRunner(form, persistentResultsKey, attemptCount,
-				titleField, geopointField, imageField, cc);
+				titleField, geopointField, imageField, wd.getCallingContext());
 		AggregrateThreadExecutor exec = AggregrateThreadExecutor
 				.getAggregateThreadExecutor();
 		exec.execute(runner);

@@ -35,6 +35,7 @@ public class Realm implements InitializingBean {
 	private boolean sslIsRequired = false;
 	private boolean sslIsAvailable = false;
 	private Integer port;
+	private Integer securePort;
 	private String hostname;
 	private String realmString;
 	private String mailToDomain;
@@ -94,6 +95,14 @@ public class Realm implements InitializingBean {
 
 	public void setPort(Integer port) {
 		this.port = port;
+	}
+
+	public Integer getSecurePort() {
+		return securePort;
+	}
+
+	public void setSecurePort(Integer securePort) {
+		this.securePort = securePort;
 	}
 
 	public String getHostname() {

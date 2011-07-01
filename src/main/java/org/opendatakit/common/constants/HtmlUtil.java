@@ -62,10 +62,6 @@ public class HtmlUtil {
   public static final String createSelfClosingTag(String tag) {
     return HtmlConsts.BEGIN_OPEN_TAG + tag + HtmlConsts.END_SELF_CLOSING_TAG;
   }
-  
-  public static final String createUrl(String serverName) {
-    return HtmlConsts.HTTP + serverName + BasicConsts.FORWARDSLASH;
-  }
 
   public static final String createAttribute(String name, String value) {
     return name + BasicConsts.EQUALS + BasicConsts.QUOTE + value + BasicConsts.QUOTE;
@@ -294,9 +290,5 @@ public class HtmlUtil {
 	      Map<String, String> properties) throws UnsupportedEncodingException {
 		return createHtmlButtonToHttpMethodServlet(HtmlConsts.POST, 
 				  servletAddr, label, properties);
-  }
-
-  public static final String createHttpServletLink(String baseWebServerUrl, String servlet) {
-    return "http://" + baseWebServerUrl + "/" + servlet;
   }
 }

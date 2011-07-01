@@ -158,6 +158,11 @@ public class RoleHierarchyImpl implements RoleHierarchy, InitializingBean {
 			public String getServerURL() {
 				throw new IllegalStateException("Undefined");
 			}
+
+			@Override
+			public String getSecureServerURL() {
+				throw new IllegalStateException("Undefined");
+			}
 		};
 		
 		if  ( !userService.isAccessManagementConfigured() ) {

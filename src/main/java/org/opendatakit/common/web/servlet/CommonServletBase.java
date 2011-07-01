@@ -234,30 +234,4 @@ public abstract class CommonServletBase extends HttpServlet {
   protected final String encodeParameter(String parameter) throws UnsupportedEncodingException {
     return URLEncoder.encode(parameter, HtmlConsts.UTF8_ENCODE);
   }
-
-  protected final void setDownloadFileName(HttpServletResponse resp, String filename) {
-    resp.setHeader(HtmlConsts.CONTENT_DISPOSITION, HtmlConsts.ATTACHMENT_FILENAME_TXT
-        + filename + BasicConsts.QUOTE + BasicConsts.SEMI_COLON);
-  }
-
-//  protected final String getWebApplicationURL() {
-//    return this.getServletContext().getContextPath() + BasicConsts.FORWARDSLASH;
-//  }
-//
-//  protected final String getWebApplicationURL(String servletPath) {
-//    return this.getServletContext().getContextPath() + BasicConsts.FORWARDSLASH + servletPath;
-//  }
-
-  protected final String getServerURL(HttpServletRequest req) {
-    final String serverName = req.getServerName();
-    final int port = req.getServerPort();
-    final String path = req.getContextPath();
-    
-    String fullPath = serverName;
-    if (port != HtmlConsts.WEB_PORT) {
-      fullPath += BasicConsts.COLON + Integer.toString(port);
-    }
-    fullPath += path;
-    return fullPath;
-  }
 }

@@ -87,10 +87,20 @@ public interface CallingContext {
    public String getWebApplicationURL(String servletAddr);
    
    /**
-    * Return the base of a URL for this server.  These are of the form: "localhost:8080/webApp"
+    * Return the base of a URL for this server.  
+    * These are of the form: "http:localhost:8080/webApp"
+    * Or, if ssl is required, "https:localhost:8443/webApp"
     * 
     * @return the serverURL useful for external links.  
     */
    public String getServerURL();
 
+   /**
+    * Return the base of a secure URL for this server.  
+    * If ssl is available, "https:localhost:8443/webApp"
+    * Or, if not, "http:localhost:8080/webApp"
+    * 
+    * @return the serverURL useful for external links.  
+    */
+   public String getSecureServerURL();
 }

@@ -45,6 +45,8 @@ import org.opendatakit.common.constants.HtmlConsts;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
 
+import com.google.gdata.client.authn.oauth.OAuthException;
+
 /**
  * 
  * @author wbrunette@gmail.com
@@ -122,8 +124,16 @@ public class SpreadsheetServlet extends ServletUtilBase {
     if (sessionToken == null || sessionToken.isEmpty()) {
       beginBasicHtmlResponse(TITLE_INFO, resp, true, cc); // header info
       params.put(CALLBACK, Boolean.toString(true));
-      String authButton = generateAuthButton(SpreadsheetConsts.AUTHORIZE_SPREADSHEET_CREATION,
-          params, req, resp, SpreadsheetConsts.DOCS_SCOPE, SpreadsheetConsts.SPREADSHEETS_SCOPE);
+      String authButton;
+	  try {
+		authButton = generateAuthButton(SpreadsheetConsts.AUTHORIZE_SPREADSHEET_CREATION,
+		      params, cc, SpreadsheetConsts.DOCS_SCOPE, SpreadsheetConsts.SPREADSHEETS_SCOPE);
+	  } catch (OAuthException e) {
+        e.printStackTrace();
+        resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+            ErrorConsts.OAUTH_SERVER_REJECTED_ONE_TIME_USE_TOKEN);
+        return;
+	  }
       resp.getWriter().print(authButton);
       finishBasicHtmlResponse(resp);
       return;

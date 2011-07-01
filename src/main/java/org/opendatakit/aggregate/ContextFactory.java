@@ -54,6 +54,7 @@ public class ContextFactory {
 
     public static final class CallingContextImpl implements CallingContext {
     	final String serverUrl;
+    	final String secureServerUrl;
     	final String webApplicationBase;
     	final ServletContext ctxt;
     	final Datastore datastore;
@@ -69,14 +70,14 @@ public class ContextFactory {
 
     		Realm realm = userService.getCurrentRealm();
     		Integer identifiedPort = realm.getPort();
+    		Integer identifiedSecurePort = realm.getSecurePort();
     		String identifiedHostname = realm.getHostname();
     		
-    		if ( identifiedPort == null || identifiedPort == 0 ) {
-    			identifiedPort = req.getServerPort();
-    		}
     		if ( identifiedHostname == null || identifiedHostname.length() == 0 ) {
     			identifiedHostname = req.getServerName();
-    			if ( identifiedHostname.equals("0.0.0.0") ) {
+    			if ( 	identifiedHostname == null || 
+    					identifiedHostname.length() == 0 || 
+    					identifiedHostname.equals("0.0.0.0") ) {
 	    			try {
 						identifiedHostname = InetAddress.getLocalHost().getCanonicalHostName();
 					} catch (UnknownHostException e) {
@@ -85,9 +86,20 @@ public class ContextFactory {
 				}
     		}
     		
-    		String identifiedScheme = req.getScheme();
+    		String identifiedScheme = "http";
     		if ( realm.isSslRequired() ) {
     			identifiedScheme = "https";
+    			identifiedPort = identifiedSecurePort;
+    		}
+    		
+    		if ( identifiedPort == null || identifiedPort == 0 ) {
+    			if ( req.getScheme().equals(identifiedScheme) ) {
+    				identifiedPort = req.getServerPort();
+    			} else if ( realm.isSslRequired() ) {
+    				identifiedPort = HtmlConsts.SECURE_WEB_PORT; 
+    			} else {
+    				identifiedPort = HtmlConsts.WEB_PORT;
+    			}
     		}
     		
     		boolean expectedPort = 
@@ -97,31 +109,36 @@ public class ContextFactory {
     	    			identifiedPort == HtmlConsts.SECURE_WEB_PORT);
     		
     		if (!expectedPort) {
-    	    	serverUrl = identifiedHostname + BasicConsts.COLON + 
+    	    	serverUrl = identifiedScheme + "://" + identifiedHostname + BasicConsts.COLON + 
     	    		Integer.toString(identifiedPort) + path;
     	    } else {
-    	    	serverUrl = identifiedHostname + path;
+    	    	serverUrl = identifiedScheme + "://" +identifiedHostname + path;
     	    }
+    		
+    		if ( realm.isSslRequired() ) {
+    			secureServerUrl = serverUrl;
+    		} else {
+    			if ( identifiedSecurePort != null && identifiedSecurePort != 0 &&
+    					identifiedSecurePort != HtmlConsts.SECURE_WEB_PORT ) {
+    				// explicitly name the port
+        			secureServerUrl = "https://" + identifiedHostname + BasicConsts.COLON + 
+    	    		Integer.toString(identifiedSecurePort) + path; 
+    			} else {
+    				// assume it is the default https port...
+        			secureServerUrl = "https://" + identifiedHostname + path; 
+    			}
+    		}
     	    webApplicationBase = path;
     	}
     	
         CallingContextImpl(CallingContext context) {
-	        if(context instanceof CallingContextImpl) {
-	          CallingContextImpl cc = (CallingContextImpl) context;
-		        this.serverUrl = cc.serverUrl;
-		        this.webApplicationBase = cc.webApplicationBase;
-		        this.ctxt = cc.ctxt;
-		        this.datastore = cc.datastore;
-		        this.userService = cc.userService;
-		        this.asDaemon = cc.asDaemon;              
-	        } else {
-		        this.serverUrl = getServerURL();
-		        this.webApplicationBase = getWebApplicationURL();
-		        this.ctxt = null;
-		        this.datastore = getDatastore();
-		        this.userService = getUserService();
-		        this.asDaemon = getAsDeamon();    
-	        }
+	        this.serverUrl = context.getServerURL();
+	        this.secureServerUrl = context.getSecureServerURL();
+	        this.webApplicationBase = context.getWebApplicationURL();
+	        this.ctxt = context.getServletContext();
+	        this.datastore = context.getDatastore();
+	        this.userService = context.getUserService();
+	        this.asDaemon = context.getAsDeamon();    
         }
     	
     	@Override
@@ -158,6 +175,11 @@ public class ContextFactory {
     	public String getServerURL() {
     		return serverUrl;
     	}
+
+		@Override
+		public String getSecureServerURL() {
+			return secureServerUrl;
+		}
     	
     	@Override
     	public void setAsDaemon(boolean asDaemon ) {

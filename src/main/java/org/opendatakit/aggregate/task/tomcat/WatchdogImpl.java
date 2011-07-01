@@ -69,20 +69,15 @@ public class WatchdogImpl implements Watchdog, SmartLifecycle, InitializingBean,
 
 		boolean asDaemon = true;
 		String serverUrl;
+		String secureServerUrl;
 		
 		CallingContextImpl() {
 
     		Realm realm = userService.getCurrentRealm();
     		Integer identifiedPort = realm.getPort();
+    		Integer identifiedSecurePort = realm.getSecurePort();
     		String identifiedHostname = realm.getHostname();
     		
-    		if ( identifiedPort == null || identifiedPort == 0 ) {
-    			if ( realm.isSslRequired() ) {
-    				identifiedPort = HtmlConsts.SECURE_WEB_PORT;
-    			} else {
-    				identifiedPort = HtmlConsts.WEB_PORT;
-    			}
-    		}
     		if ( identifiedHostname == null || identifiedHostname.length() == 0 ) {
     			try {
 					identifiedHostname = InetAddress.getLocalHost().getCanonicalHostName();
@@ -90,11 +85,21 @@ public class WatchdogImpl implements Watchdog, SmartLifecycle, InitializingBean,
 					identifiedHostname = "127.0.0.1";
 				}
     		}
-    		
+
     		String identifiedScheme = "http";
     		if ( realm.isSslRequired() ) {
     			identifiedScheme = "https";
+    			identifiedPort = identifiedSecurePort;
     		}
+
+    		if ( identifiedPort == null || identifiedPort == 0 ) {
+    			if ( realm.isSslRequired() ) {
+    				identifiedPort = HtmlConsts.SECURE_WEB_PORT;
+    			} else {
+    				identifiedPort = HtmlConsts.WEB_PORT;
+    			}
+    		}
+    		
     		
     		boolean expectedPort = 
     			(identifiedScheme.equalsIgnoreCase("http") &&
@@ -102,13 +107,28 @@ public class WatchdogImpl implements Watchdog, SmartLifecycle, InitializingBean,
     	    	(identifiedScheme.equalsIgnoreCase("https") &&
     	    			identifiedPort == HtmlConsts.SECURE_WEB_PORT);
     		
+    		String path = ctxt.getContextPath();
+    		
     		if (!expectedPort) {
-    	    	serverUrl = identifiedHostname + BasicConsts.COLON + 
-    	    		Integer.toString(identifiedPort) + ctxt.getContextPath();
+    	    	serverUrl = identifiedScheme + "://" + identifiedHostname + BasicConsts.COLON + 
+    	    		Integer.toString(identifiedPort) + path;
     	    } else {
-    	    	serverUrl = identifiedHostname + ctxt.getContextPath();
+    	    	serverUrl = identifiedScheme + "://" + identifiedHostname + path;
     	    }
 
+    		if ( realm.isSslRequired() ) {
+    			secureServerUrl = serverUrl;
+    		} else {
+    			if ( identifiedSecurePort != null && identifiedSecurePort != 0 &&
+    					identifiedSecurePort != HtmlConsts.SECURE_WEB_PORT ) {
+    				// explicitly name the port
+        			secureServerUrl = "https://" + identifiedHostname + BasicConsts.COLON + 
+    	    		Integer.toString(identifiedSecurePort) + path; 
+    			} else {
+    				// assume it is the default https port...
+        			secureServerUrl = "https://" + identifiedHostname + path; 
+    			}
+    		}
 		}
 		
 		@Override
@@ -161,6 +181,11 @@ public class WatchdogImpl implements Watchdog, SmartLifecycle, InitializingBean,
 			return serverUrl;
 		}
     	
+		@Override
+		public String getSecureServerURL() {
+			return secureServerUrl;
+		}
+		
 		@Override
     	public ServletContext getServletContext() {
     		return ctxt;
@@ -332,5 +357,10 @@ public class WatchdogImpl implements Watchdog, SmartLifecycle, InitializingBean,
 	public void setServletContext(ServletContext context) {
 		System.out.print("Inside setServletContext");
 		ctxt = context;
+	}
+
+	@Override
+	public CallingContext getCallingContext() {
+		return new CallingContextImpl();
 	}
 }

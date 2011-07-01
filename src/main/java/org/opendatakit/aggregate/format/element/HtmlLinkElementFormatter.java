@@ -30,6 +30,7 @@ import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.submission.SubmissionRepeat;
 import org.opendatakit.aggregate.submission.SubmissionSet;
 import org.opendatakit.aggregate.submission.type.BlobSubmissionType;
+import org.opendatakit.common.constants.BasicConsts;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
 
@@ -90,7 +91,7 @@ public class HtmlLinkElementFormatter extends BasicElementFormatter{
     } else {
     	linkText = FormTableConsts.VIEW_LINK_TEXT; 
     }
-    String url = HtmlUtil.createHrefWithProperties(HtmlUtil.createUrl(baseWebServerUrl) + BinaryDataServlet.ADDR, properties, linkText);
+    String url = HtmlUtil.createHrefWithProperties(baseWebServerUrl + BasicConsts.FORWARDSLASH + BinaryDataServlet.ADDR, properties, linkText);
     row.addFormattedValue(url);    
   }
 
@@ -111,7 +112,7 @@ public class HtmlLinkElementFormatter extends BasicElementFormatter{
     Map<String, String> properties = new HashMap<String, String>();
     properties.put(ServletConsts.FORM_ID, repeat.constructSubmissionKey().toString());
     
-    String url = HtmlUtil.createHrefWithProperties( HtmlUtil.createUrl(baseWebServerUrl) + FormMultipleValueServlet.ADDR, properties, FormTableConsts.VIEW_LINK_TEXT);
+    String url = HtmlUtil.createHrefWithProperties( baseWebServerUrl + BasicConsts.FORWARDSLASH + FormMultipleValueServlet.ADDR, properties, FormTableConsts.VIEW_LINK_TEXT);
     row.addFormattedValue(url);    
   }
 

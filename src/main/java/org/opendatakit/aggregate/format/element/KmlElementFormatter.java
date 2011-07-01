@@ -86,7 +86,7 @@ public class KmlElementFormatter implements ElementFormatter {
     SubmissionKey key = blobSubmission.getValue();
     Map<String, String> properties = new HashMap<String, String>();
     properties.put(ServletConsts.BLOB_KEY, key.toString());
-    String url = HtmlUtil.createHrefWithProperties(HtmlUtil.createUrl(baseWebServerUrl) + BinaryDataServlet.ADDR, properties, FormTableConsts.VIEW_LINK_TEXT);
+    String url = HtmlUtil.createHrefWithProperties(baseWebServerUrl + BasicConsts.FORWARDSLASH + BinaryDataServlet.ADDR, properties, FormTableConsts.VIEW_LINK_TEXT);
     generateDataElement(url, element.getGroupQualifiedElementName() + ordinalValue, row);
   }
 
