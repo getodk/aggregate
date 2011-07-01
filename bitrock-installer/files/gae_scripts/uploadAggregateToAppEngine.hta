@@ -91,7 +91,7 @@ function writeScriptingFiles(action) {
 	file.Close();
 	// create command file
     file=fso.CreateTextFile(cd + "\\action.cmd",true);
-	file.WriteLine('@(("' + cd + '\\appengine-java-sdk\\bin\\appcfg.cmd" --email=' + txtName.value + ' --passin ' + action + ' "' + cd + '\\ODKAggregate" < "' + cd + '\\userpass.txt" 2>&1 >> "' + window.logfileName + '" && echo ' + terminalGood + '>> "' + window.logfileName + '") || echo ' + terminalBad + '>> "' + window.logfileName + '")');
+	file.WriteLine('@(("' + cd + '\\appengine-java-sdk\\bin\\appcfg.cmd" --email=' + txtName.value + ' --passin ' + action + ' "' + cd + '\\ODKAggregate" < "' + cd + '\\userpass.txt" 2>&1 | find /V "assword fo" >> "' + window.logfileName + '" && echo ' + terminalGood + '>> "' + window.logfileName + '") || echo ' + terminalBad + '>> "' + window.logfileName + '")');
 	file.Close();
 	// create empty output file
 	file=fso.CreateTextFile(window.logfileName,true);

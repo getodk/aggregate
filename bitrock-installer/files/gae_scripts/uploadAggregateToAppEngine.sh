@@ -13,16 +13,12 @@ EMAIL=${REPLY}
 read -ers -p "Email account password: "
 PASSWD=${REPLY}
 echo
-# escape the backslashes
-SAFEPASSWD=${PASSWD//\\/\\\\}
-# escape the forward slashes
-SAFEPASSWD=${SAFEPASSWD//\//\\\/}
 # zero is success...
 OUTCOME=1
 # Launches AppCfg
 [ -z "${DEBUG}" ] || set -x  # trace if $DEBUG env. var. is non-zero
 UPLOAD_ROOT=`dirname $0 | sed -e "s#^\\([^/]\\)#${PWD}/\\1#"` # sed makes absolute
-( ( ( $UPLOAD_ROOT/appengine-java-sdk/bin/appcfg.sh --email=${EMAIL} --passin ${MODE} ${UPLOAD_ROOT}/ODKAggregate 2>&1 && OUTCOME=0 && echo ---END-SCRIPT_SUCCESS--- ) || echo ---END-SCRIPT-FAILURE--- ) | sed -e"/assword.*${SAFEPASSWD}/s/.*//" ) << __THE__END__
+( ( ( $UPLOAD_ROOT/appengine-java-sdk/bin/appcfg.sh --email=${EMAIL} --passin ${MODE} ${UPLOAD_ROOT}/ODKAggregate 2>&1 && OUTCOME=0 && echo ---END-SCRIPT_SUCCESS--- ) || echo ---END-SCRIPT-FAILURE--- ) | sed -e"/assword fo/s/.*//" ) << __THE__END__
 ${PASSWD}
 __THE__END__
 read -p "Press any key to close window . . ."
