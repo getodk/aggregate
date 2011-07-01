@@ -33,4 +33,5 @@ public class BeanDefs {
   public static final String CSV_BEAN = "csv_task";
   public static final String WORKSHEET_BEAN = "worksheet_creator";
   public static final String IMAGE_UTIL = "image_util";
+  public static final String WATCHDOG = "watchdog";
 }

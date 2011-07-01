@@ -22,6 +22,7 @@ public class TestContextFactory {
 
 	    public static final class CallingContextImpl implements CallingContext {
 	    	final String serverUrl;
+	    	final String secureServerUrl;
 	    	final String webApplicationBase;
 	    	final Datastore datastore;
 	    	final UserService userService;
@@ -30,18 +31,22 @@ public class TestContextFactory {
 	    	CallingContextImpl() {
 	    		webApplicationBase = "/test/stub";
 	    		serverUrl = "http://test.org" + webApplicationBase;
+	    		secureServerUrl = "https://test.org" + webApplicationBase;
 	    		datastore = (Datastore) applicationContext.getBean(DATASTORE_BEAN);
 	    		userService = (UserService) applicationContext.getBean(USER_BEAN);
 	    	}
 	    	
+			@Override
 	    	public Object getBean(String beanName) {
 				return applicationContext.getBean(beanName);
 	    	}
 	    	
+			@Override
 	    	public Datastore getDatastore() {
 	    		return datastore;
 	    	}
 	    	
+			@Override
 	    	public UserService getUserService() {
 	    		return userService;
 	    	}
@@ -51,26 +56,37 @@ public class TestContextFactory {
 				return null;
 			}
 	    	
+			@Override
 	    	public String getWebApplicationURL() {
 	    		return webApplicationBase + BasicConsts.FORWARDSLASH;
 	    	}
 	    	
+			@Override
 	    	public String getWebApplicationURL(String servletAddr) {
 	    		return webApplicationBase + BasicConsts.FORWARDSLASH + servletAddr;
 	    	}
 	    	
+			@Override
 	    	public String getServerURL() {
 	    		return serverUrl;
 	    	}
+
+			@Override
+			public String getSecureServerURL() {
+				return secureServerUrl;
+			}
 	    	
+			@Override
 	    	public void setAsDaemon(boolean asDaemon ) {
 	    		this.asDaemon = asDaemon;
 	    	}
 	    	
+			@Override
 	    	public boolean getAsDeamon() {
 	    		return asDaemon;
 	    	}
 	    	
+			@Override
 	    	public User getCurrentUser() {
 	    		return asDaemon ? userService.getDaemonAccountUser() : userService.getCurrentUser();
 	    	}

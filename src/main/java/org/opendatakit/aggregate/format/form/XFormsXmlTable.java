@@ -53,9 +53,9 @@ private final String downloadRequestURL;
 
   private QueryFormList forms;
 
-  public XFormsXmlTable(QueryFormList formsToFormat, String webServerURL) {
-    this.downloadRequestURL = HtmlUtil.createUrl(webServerURL) + FormXmlServlet.ADDR;
-    this.manifestRequestURL = HtmlUtil.createUrl(webServerURL) + XFormsManifestServlet.ADDR;
+  public XFormsXmlTable(QueryFormList formsToFormat, String webServerUrl) {
+    this.downloadRequestURL = webServerUrl + BasicConsts.FORWARDSLASH + FormXmlServlet.ADDR;
+    this.manifestRequestURL = webServerUrl + BasicConsts.FORWARDSLASH + XFormsManifestServlet.ADDR;
     this.forms = formsToFormat;
   }
 

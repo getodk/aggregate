@@ -100,11 +100,6 @@ public class ServletUtilBase extends CommonServletBase {
 	grants.addAll(fetchGrantedAuthoritySet( GrantedAuthorityNames.USER_IS_AUTHENTICATED.name(), cc));
 	return !grants.contains( GrantedAuthorityNames.ROLE_ACCESS_ADMIN.name() );
   }
-
-  public boolean isAttachmentViewerAnonymous(CallingContext cc) {
-	TreeSet<String> grants = fetchGrantedAuthoritySet( GrantedAuthorityNames.USER_IS_ANONYMOUS.name(), cc);
-	return grants.contains( GrantedAuthorityNames.ROLE_ATTACHMENT_VIEWER.name() );
-  }
   
   /**
    * Generate error response for ODK ID not found
@@ -293,7 +288,7 @@ public class ServletUtilBase extends CommonServletBase {
   }
 
   protected String generateAuthButton(String buttonText, Map<String, String> params,
-      HttpServletRequest req, HttpServletResponse resp, String... scopes) throws IOException {
+      CallingContext cc, String... scopes) throws IOException, OAuthException {
 
 	GoogleOAuthParameters oauthParameters = new GoogleOAuthParameters();
 	oauthParameters.setOAuthConsumerKey(ServletConsts.OAUTH_CONSUMER_KEY);
@@ -306,20 +301,11 @@ public class ServletUtilBase extends CommonServletBase {
 	oauthParameters.setScope(scope);
 	
 	GoogleOAuthHelper oauthHelper = new GoogleOAuthHelper(new OAuthHmacSha1Signer());
-	try 
-	{
-		oauthHelper.getUnauthorizedRequestToken(oauthParameters);
-	} 
-	catch (OAuthException e) 
-	{
-        e.printStackTrace();
-        resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-            ErrorConsts.OAUTH_SERVER_REJECTED_ONE_TIME_USE_TOKEN);
-	}
+	oauthHelper.getUnauthorizedRequestToken(oauthParameters);
 
 	params.put(ServletConsts.OAUTH_TOKEN_SECRET_PARAMETER, oauthParameters.getOAuthTokenSecret());
 	String callbackUrl = ServletConsts.HTTP
-		+ HtmlUtil.createLinkWithProperties(getServerURL(req) + req.getServletPath(), params);
+		+ HtmlUtil.createLinkWithProperties(cc.getServerURL(), params);
 	oauthParameters.setOAuthCallback(callbackUrl);
 	String requestUrl = oauthHelper.createUserAuthorizationUrl(oauthParameters);
 

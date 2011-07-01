@@ -16,13 +16,9 @@
 
 package org.opendatakit.aggregate.client.popups;
 
-import org.opendatakit.aggregate.client.AggregateUI;
-import org.opendatakit.aggregate.client.SecureGWT;
 import org.opendatakit.aggregate.client.widgets.ClosePopupButton;
 import org.opendatakit.aggregate.client.widgets.ExecuteChangePasswordButton;
-import org.opendatakit.common.security.client.RealmSecurityInfo;
 import org.opendatakit.common.security.client.UserSecurityInfo;
-import org.opendatakit.common.security.client.security.admin.SecurityAdminServiceAsync;
 
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;

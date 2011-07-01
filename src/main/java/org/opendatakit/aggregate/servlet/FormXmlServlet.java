@@ -31,6 +31,7 @@ import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.common.constants.BasicConsts;
 import org.opendatakit.common.constants.HtmlConsts;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
@@ -125,7 +126,8 @@ public class FormXmlServlet extends ServletUtilBase {
 	    } else {
 	      resp.setContentType(HtmlConsts.RESP_TYPE_XML);
 		  PrintWriter out = resp.getWriter();
-	      setDownloadFileName(resp, form.getFormFilename());
+		  resp.setHeader(HtmlConsts.CONTENT_DISPOSITION, HtmlConsts.ATTACHMENT_FILENAME_TXT
+			        + form.getFormFilename() + BasicConsts.QUOTE + BasicConsts.SEMI_COLON);
 	      out.print(xmlString);
 	    }
 	} catch (ODKDatastoreException e) {

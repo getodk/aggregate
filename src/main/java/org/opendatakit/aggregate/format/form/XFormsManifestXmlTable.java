@@ -50,8 +50,8 @@ public class XFormsManifestXmlTable {
 
   private Form form;
 
-  public XFormsManifestXmlTable(Form form, String webServerURL) {
-    this.downloadRequestURL = HtmlUtil.createUrl(webServerURL) + XFormsDownloadServlet.ADDR;
+  public XFormsManifestXmlTable(Form form, String webServerUrl) {
+    this.downloadRequestURL = webServerUrl + BasicConsts.FORWARDSLASH + XFormsDownloadServlet.ADDR;
     this.form = form;
   }
 

@@ -314,7 +314,7 @@ public class KmlFormatter implements SubmissionFormatter, RepeatCallbackFormatte
       if (value != null && value instanceof SubmissionKey) {
         SubmissionKey key = (SubmissionKey) value;
         Map<String, String> properties = createViewLinkProperties(key);
-        String url = HtmlUtil.createHttpServletLink(baseWebServerUrl, BinaryDataServlet.ADDR);
+        String url = baseWebServerUrl + BasicConsts.FORWARDSLASH + BinaryDataServlet.ADDR;
         return HtmlUtil.createLinkWithProperties(url, properties);
       }
     }

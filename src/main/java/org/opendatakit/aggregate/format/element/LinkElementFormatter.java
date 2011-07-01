@@ -29,6 +29,7 @@ import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.submission.SubmissionRepeat;
 import org.opendatakit.aggregate.submission.SubmissionSet;
 import org.opendatakit.aggregate.submission.type.BlobSubmissionType;
+import org.opendatakit.common.constants.BasicConsts;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
 
@@ -72,8 +73,7 @@ public class LinkElementFormatter extends BasicElementFormatter {
   public void addFormattedLink( SubmissionKey key, String servletPath, String urlParameterName, Row row ) {
     Map<String, String> properties = new HashMap<String, String>();
     properties.put(urlParameterName, key.toString());
-    String url = HtmlUtil.createLinkWithProperties(HtmlUtil.createUrl(baseWebServerUrl)
-        + servletPath, properties);
+    String url = HtmlUtil.createLinkWithProperties(baseWebServerUrl + BasicConsts.FORWARDSLASH + servletPath, properties);
     row.addFormattedValue(url);
   }
   

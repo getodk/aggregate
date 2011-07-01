@@ -138,8 +138,40 @@
 	  </beans:property>
 	</beans:bean>
 
-	<beans:bean id="secureChannelProcessor" class="org.springframework.security.web.access.channel.SecureChannelProcessor"/>
-	<beans:bean id="insecureChannelProcessor" class="org.springframework.security.web.access.channel.InsecureChannelProcessor"/>
+	<!-- left to its own devices, spring will try to guess at the scheme-to-port mapping.  Force the port mappings below -->
+	<beans:bean id="portMapper" class="org.springframework.security.web.PortMapperImpl">
+	  <beans:property name="portMappings">
+	  	<beans:map>
+	  		<beans:entry key="${security.server.port}" value="${security.server.securePort}"/>
+	  	</beans:map>
+	  </beans:property>
+	</beans:bean>
+	
+	<beans:bean id="portResolver" class="org.opendatakit.common.security.spring.PortResolverBySchemeImpl">
+		<beans:property name="port" value="${security.server.port}"/>
+		<beans:property name="securePort" value="${security.server.securePort}"/>
+	</beans:bean>
+	
+	<beans:bean id="secureChannelProcessor" class="org.springframework.security.web.access.channel.SecureChannelProcessor">
+	  <beans:property name="entryPoint">
+		<beans:bean class="org.opendatakit.common.security.spring.RetryWithDefinedEntryPoint">
+			<beans:constructor-arg type="java.lang.String" value="https"/>
+			<beans:constructor-arg type="int" value="${security.server.securePort}"/>
+			<beans:property name="portMapper" ref="portMapper"/>
+			<beans:property name="portResolver" ref="portResolver"/>
+		</beans:bean>
+	  </beans:property>
+	</beans:bean>
+	<beans:bean id="insecureChannelProcessor" class="org.springframework.security.web.access.channel.InsecureChannelProcessor">
+	  <beans:property name="entryPoint">
+		<beans:bean class="org.opendatakit.common.security.spring.RetryWithDefinedEntryPoint">
+			<beans:constructor-arg type="java.lang.String" value="http"/>
+			<beans:constructor-arg type="int" value="${security.server.port}"/>
+			<beans:property name="portMapper" ref="portMapper"/>
+			<beans:property name="portResolver" ref="portResolver"/>
+		</beans:bean>
+	  </beans:property>
+	</beans:bean>
 	    
 	<beans:bean id="securityContextPersistenceFilter"
 		class="org.springframework.security.web.context.SecurityContextPersistenceFilter">

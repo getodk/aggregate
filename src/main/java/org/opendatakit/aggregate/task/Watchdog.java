@@ -15,6 +15,8 @@
  */
 package org.opendatakit.aggregate.task;
 
+import org.opendatakit.common.web.CallingContext;
+
 /**
  * 
  * @author wbrunette@gmail.com
@@ -24,4 +26,9 @@ package org.opendatakit.aggregate.task;
 public interface Watchdog {
 
   public void createWatchdogTask(long checkIntervalMilliseconds);
+  
+  /**
+   * @return implemented only on Tomcat for getting CC in task context.
+   */
+  public CallingContext getCallingContext();
 }

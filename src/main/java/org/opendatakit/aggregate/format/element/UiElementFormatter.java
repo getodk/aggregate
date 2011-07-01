@@ -15,6 +15,7 @@ import org.opendatakit.aggregate.submission.SubmissionRepeat;
 import org.opendatakit.aggregate.submission.SubmissionSet;
 import org.opendatakit.aggregate.submission.type.BlobSubmissionType;
 import org.opendatakit.aggregate.submission.type.GeoPoint;
+import org.opendatakit.common.constants.BasicConsts;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
 
@@ -74,7 +75,7 @@ public class UiElementFormatter extends BasicElementFormatter {
     SubmissionKey key = blobSubmission.getValue();
     Map<String, String> properties = new HashMap<String, String>();
     properties.put(ServletConsts.BLOB_KEY, key.toString());   
-    String url = HtmlUtil.createLinkWithProperties(HtmlUtil.createUrl(baseWebServerUrl) + BinaryDataServlet.ADDR, properties);
+    String url = HtmlUtil.createLinkWithProperties(baseWebServerUrl + BasicConsts.FORWARDSLASH + BinaryDataServlet.ADDR, properties);
     //    String html = "<img style='padding:5px' height='144px' src='" + url + "'/>";
     row.addFormattedValue(url);    
   }

@@ -16,6 +16,7 @@
 package org.opendatakit.aggregate.task.gae;
 
 import org.opendatakit.aggregate.task.Watchdog;
+import org.opendatakit.common.web.CallingContext;
 
 /**
  * 
@@ -25,9 +26,15 @@ import org.opendatakit.aggregate.task.Watchdog;
  */
 public class WatchdogImpl implements Watchdog {
 
-  @Override
-  public void createWatchdogTask(long checkIntervalMilliseconds) {
-    // No op because appengine cron.xml automatically schedules and calls the task    
-	  throw new IllegalStateException("this should not be called!");
-  }
+	@Override
+	public void createWatchdogTask(long checkIntervalMilliseconds) {
+	    // No op because appengine cron.xml automatically schedules and calls the task    
+		throw new IllegalStateException("this should not be called!");
+	}
+
+	@Override
+	public CallingContext getCallingContext() {
+	    // The calling context should be obtained within the doGet() context.    
+		throw new IllegalStateException("this should not be called!");
+	}
 }

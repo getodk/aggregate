@@ -73,7 +73,7 @@ public class FragmentedCsvServlet extends ServletUtilBase {
 
 	private void emitInfoPage(HttpServletRequest req, HttpServletResponse resp, String errorDescription, int status, CallingContext cc) throws IOException {
         beginBasicHtmlResponse(TITLE_INFO, resp, true, cc); // header info
-        String requestPath = HtmlUtil.createUrl(cc.getServerURL()) + ADDR;
+        String requestPath = cc.getServerURL() + BasicConsts.FORWARDSLASH + ADDR;
         
         PrintWriter out = resp.getWriter();
         out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.H3, errorDescription));

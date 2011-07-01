@@ -17,9 +17,9 @@
 
 package org.opendatakit.aggregate.format;
 
-import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.common.constants.BasicConsts;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.security.User;
 
@@ -56,7 +56,7 @@ public abstract class SubmissionFormatBase {
    */
   protected SubmissionFormatBase(Form xform, String webServerURL, boolean separateGeopoint) {
     form = xform;
-    baseWebServerUrl = HtmlUtil.createUrl(webServerURL);
+    baseWebServerUrl = webServerURL + BasicConsts.FORWARDSLASH;
     separateCoordinates = separateGeopoint;
   }
   
