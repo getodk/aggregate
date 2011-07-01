@@ -1,8 +1,8 @@
 This directory contains the files needed to build the
-installer for Aggregate using the Bitrock InstallBuilder 7.1
+installer for Aggregate using the Bitrock InstallBuilder 7.2
 or higher.
 
-Notably, it contains a subset of the Google AppEngine SDK 1.5.0.1
+Notably, it contains a subset of the Google AppEngine SDK
 so that the GAE install facilitates an easy deployment of the 
 configured app to Google's cloud infrastructure.
 

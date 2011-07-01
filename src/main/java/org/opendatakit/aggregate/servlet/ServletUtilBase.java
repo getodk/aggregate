@@ -304,8 +304,7 @@ public class ServletUtilBase extends CommonServletBase {
 	oauthHelper.getUnauthorizedRequestToken(oauthParameters);
 
 	params.put(ServletConsts.OAUTH_TOKEN_SECRET_PARAMETER, oauthParameters.getOAuthTokenSecret());
-	String callbackUrl = ServletConsts.HTTP
-		+ HtmlUtil.createLinkWithProperties(cc.getServerURL(), params);
+	String callbackUrl = HtmlUtil.createLinkWithProperties(cc.getServerURL(), params);
 	oauthParameters.setOAuthCallback(callbackUrl);
 	String requestUrl = oauthHelper.createUserAuthorizationUrl(oauthParameters);
 

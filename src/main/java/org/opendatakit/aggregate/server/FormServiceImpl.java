@@ -126,7 +126,7 @@ public class FormServiceImpl extends RemoteServiceServlet implements
           Map<String, String> properties = new HashMap<String, String>();
           properties.put(ServletConsts.BLOB_KEY, key.toString());
           properties.put(ServletConsts.AS_ATTACHMENT, "yes");
-          String addr = ServletConsts.HTTP + cc.getServerURL() + BasicConsts.FORWARDSLASH
+          String addr = cc.getServerURL() + BasicConsts.FORWARDSLASH
               + BinaryDataServlet.ADDR;
           String linkText = FormTableConsts.DOWNLOAD_LINK_TEXT;
           if (blob.getAttachmentCount() == 1) {
