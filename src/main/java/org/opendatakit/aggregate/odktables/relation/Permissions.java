@@ -3,8 +3,7 @@ package org.opendatakit.aggregate.odktables.relation;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.opendatakit.aggregate.odktables.entities.Permission;
-import org.opendatakit.common.ermodel.AbstractRelationAdapter;
+import org.opendatakit.aggregate.odktables.entity.Permission;
 import org.opendatakit.common.ermodel.Entity;
 import org.opendatakit.common.ermodel.typedentity.TypedEntityRelation;
 import org.opendatakit.common.persistence.DataField;
@@ -14,23 +13,9 @@ import org.opendatakit.common.web.CallingContext;
 
 /**
  * <p>
- * Permissions defines the access permissions on all Tables.
- * </p>
- * 
- * <p>
- * Permissions is a set of (tableUri, userUri, read, write, delete) tuples, aka
- * 'entities' where
- * <ul>
- * <li>tableUri: the globally unique identifer of a table</li>
- * <li>userUri: the globally unique identifier of a user who should have access
- * to the table</li>
- * <li>read: true if the user with userUri should be able to read the table with
- * tableUri</li>
- * <li>write: true if the user with userUri should be able to write the table
- * with tableUri</li>
- * <li>delete: true if the user with userUri should be able to delete the table
- * with tableUri</li>
- * </ul>
+ * Permissions is a relation containing all the {@link Permission} entities
+ * stored in the datastore. Permissions keeps track of read, write, and delete
+ * permissions for all tables created through the odktables API.
  * </p>
  * 
  * @author the.dylan.price@gmail.com
@@ -39,14 +24,14 @@ public class Permissions extends TypedEntityRelation<Permission>
 {
     // Field names
     /**
-     * The name of the tableUri field.
+     * The name of the tableUUID field.
      */
-    public static final String TABLE_URI = "TABLE_URI";
+    public static final String TABLE_UUID = "TABLE_UUID";
 
     /**
-     * The name of the userUri field.
+     * The name of the userUUID field.
      */
-    public static final String USER_URI = "USER_URI";
+    public static final String USER_UUID = "USER_UUID";
 
     /**
      * The name of the read field.
@@ -71,14 +56,14 @@ public class Permissions extends TypedEntityRelation<Permission>
 
     // The following defines the actual fields that will be in the datastore:
     /**
-     * The tableUri field.
+     * The tableUUID field.
      */
-    private static final DataField tableUri = new DataField(TABLE_URI,
+    private static final DataField tableUUID = new DataField(TABLE_UUID,
             DataType.URI, false);
     /**
-     * The userUri field.
+     * The userUUID field.
      */
-    private static final DataField userUri = new DataField(USER_URI,
+    private static final DataField userUUID = new DataField(USER_UUID,
             DataType.URI, false);
     /**
      * The read field.
@@ -100,8 +85,8 @@ public class Permissions extends TypedEntityRelation<Permission>
     static
     {
         fields = new ArrayList<DataField>();
-        fields.add(tableUri);
-        fields.add(userUri);
+        fields.add(tableUUID);
+        fields.add(userUUID);
         fields.add(read);
         fields.add(write);
         fields.add(delete);
@@ -149,7 +134,7 @@ public class Permissions extends TypedEntityRelation<Permission>
     public static Permissions getInstance(CallingContext cc)
             throws ODKDatastoreException
     {
-        if (instance == null || AbstractRelationAdapter.getCC() != cc)
+        if (instance == null || instance.getCC() != cc)
         {
             instance = new Permissions(cc);
         }

@@ -3,8 +3,7 @@ package org.opendatakit.aggregate.odktables.relation;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.opendatakit.aggregate.odktables.entities.Cursor;
-import org.opendatakit.common.ermodel.AbstractRelationAdapter;
+import org.opendatakit.aggregate.odktables.entity.Cursor;
 import org.opendatakit.common.ermodel.Entity;
 import org.opendatakit.common.ermodel.typedentity.TypedEntityRelation;
 import org.opendatakit.common.persistence.DataField;
@@ -14,19 +13,9 @@ import org.opendatakit.common.web.CallingContext;
 
 /**
  * <p>
- * Cursor defines a mapping of users to the tables they are synchronized with
- * and tracks their personal identifiers for those tables.
- * </p>
- * 
- * <p>
- * Cursor is a set of (userUri, tableUri, tableId) tuples, aka 'entities' where
- * <ul>
- * <li>userUri: the globally unique identifier of a user who is using the
- * synchronized features for the table with tableUri</li>
- * <li>tableUri: the globally unique identifier of a table</li>
- * <li>tableId: the identifier which the user with userUri uses to identify the
- * table with tableUri</li>
- * </ul>
+ * Cursors is a relation containing all the {@link Cursor} entities in the
+ * datastore. Cursors defines a mapping of users to the tables they are
+ * synchronized with and tracks their personal identifiers for those tables.
  * </p>
  * 
  * @author the.dylan.price@gmail.com
@@ -35,17 +24,17 @@ public class Cursors extends TypedEntityRelation<Cursor>
 {
     // Field names
     /**
-     * The name of the userUri field.
+     * The name of the userUUID field.
      */
-    public static final String USER_URI = "USER_URI";
+    public static final String USER_UUID = "USER_UUID";
 
     /**
-     * The name of the tableUri field.
+     * The name of the tableUUID field.
      */
-    public static final String TABLE_URI = "TABLE_URI";
+    public static final String TABLE_UUID = "TABLE_UUID";
 
     /**
-     * The name of the tableId field.
+     * The name of the tableID field.
      */
     public static final String TABLE_ID = "TABLE_ID";
 
@@ -57,28 +46,28 @@ public class Cursors extends TypedEntityRelation<Cursor>
 
     // The following defines the actual fields that will be in the datastore:
     /**
-     * The userUri field.
+     * The userUUID field.
      */
-    private static final DataField userUri = new DataField(USER_URI,
+    private static final DataField userUUID = new DataField(USER_UUID,
             DataType.URI, false);
     /**
-     * The tableUri field.
+     * The tableUUID field.
      */
-    private static final DataField tableUri = new DataField(TABLE_URI,
+    private static final DataField tableUUID = new DataField(TABLE_UUID,
             DataType.URI, false);
     /**
-     * The tableId field.
+     * The tableID field.
      */
-    private static final DataField tableId = new DataField(TABLE_ID,
+    private static final DataField tableID = new DataField(TABLE_ID,
             DataType.STRING, false);
 
     private static final List<DataField> fields;
     static
     {
         fields = new ArrayList<DataField>();
-        fields.add(userUri);
-        fields.add(tableUri);
-        fields.add(tableId);
+        fields.add(userUUID);
+        fields.add(tableUUID);
+        fields.add(tableID);
     }
     /**
      * The singleton instance of the Cursor relation.
@@ -122,7 +111,7 @@ public class Cursors extends TypedEntityRelation<Cursor>
     public static Cursors getInstance(CallingContext cc)
             throws ODKDatastoreException
     {
-        if (instance == null || AbstractRelationAdapter.getCC() != cc)
+        if (instance == null || instance.getCC() != cc)
         {
             instance = new Cursors(cc);
         }

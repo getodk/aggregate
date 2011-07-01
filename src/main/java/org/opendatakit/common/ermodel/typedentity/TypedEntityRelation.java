@@ -139,7 +139,8 @@ public abstract class TypedEntityRelation<T extends TypedEntity>
     }
 
     /**
-     * Initializes a typed entity using the given generic entity.
+     * Initializes a typed entity using the given generic entity. You probably
+     * will not need to call this.
      * 
      * @param entity
      *            a generic entity from this relation
@@ -157,6 +158,8 @@ public abstract class TypedEntityRelation<T extends TypedEntity>
      *            this relation.
      * @return the entity with the given uri
      * @throws ODKDatastoreException
+     * @throws ODKEntityNotFoundException
+     *             if no such entity exists in the datastore
      */
     public T get(String uri) throws ODKDatastoreException
     {

@@ -239,6 +239,22 @@ public class TypedEntityQuery<T extends TypedEntity>
     }
 
     /**
+     * @return true if the results of executing this query are not empty
+     * @throws ODKDatastoreException
+     */
+    public boolean exists() throws ODKDatastoreException
+    {
+        List<T> results = execute();
+        if (results.isEmpty())
+        {
+            return false;
+        } else
+        {
+            return true;
+        }
+    }
+
+    /**
      * Execute the query and return a list of all results. Equivalent to calling
      * {@link #execute(int) execute(0)}.
      * 

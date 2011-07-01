@@ -3,8 +3,7 @@ package org.opendatakit.aggregate.odktables.relation;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.opendatakit.aggregate.odktables.entities.Column;
-import org.opendatakit.common.ermodel.AbstractRelationAdapter;
+import org.opendatakit.aggregate.odktables.entity.Column;
 import org.opendatakit.common.ermodel.Entity;
 import org.opendatakit.common.ermodel.typedentity.TypedEntityRelation;
 import org.opendatakit.common.persistence.DataField;
@@ -14,23 +13,10 @@ import org.opendatakit.common.web.CallingContext;
 
 /**
  * <p>
- * Columns defines the columns for all tables. That is, the set of all Columns
- * entities which have the same tableUri serves as the definition for the
- * columns of that table.
- * </p>
- * 
- * <p>
- * Columns is a set of (columnUri, tableUri, columnName, columnType, nullable)
- * tuples, aka 'entities' where
- * <ul>
- * <li>columnUri: the globally unique identifier of the column</li>
- * <li>tableUri: the globally unique identifier of the table this column belongs
- * to</li>
- * <li>columnName: the name of the column. This must consist if upper case
- * letters, numbers, and underscores, and must start with an uppercase letter.</li>
- * <li>columnType: the type of the column. This is a DataField.DataType.</li>
- * <li>nullable: whether the column is allowed to contain a null value.</li>
- * </ul>
+ * Columns is a relation containing all {@link Column} entities stored in the
+ * datastore. Columns defines the columns for all tables. That is, the set of
+ * all Columns entities which have the same tableUUID serves as the definition
+ * for the columns of that table.
  * </p>
  * 
  * @author the.dylan.price@gmail.com
@@ -39,9 +25,9 @@ public class Columns extends TypedEntityRelation<Column>
 {
     // Field names
     /**
-     * The name of the tableUri field.
+     * The name of the tableUUID field.
      */
-    public static String TABLE_URI = "TABLE_URI";
+    public static String TABLE_UUID = "TABLE_UUID";
 
     /**
      * The name of the columnName field.
@@ -66,9 +52,9 @@ public class Columns extends TypedEntityRelation<Column>
 
     // The following defines the actual fields that will be in the datastore:
     /**
-     * The tableUri field.
+     * The tableUUID field.
      */
-    private static final DataField tableUri = new DataField(TABLE_URI,
+    private static final DataField tableUUID = new DataField(TABLE_UUID,
             DataType.URI, false);
     /**
      * The columnName field.
@@ -90,7 +76,7 @@ public class Columns extends TypedEntityRelation<Column>
     static
     {
         fields = new ArrayList<DataField>();
-        fields.add(tableUri);
+        fields.add(tableUUID);
         fields.add(columnName);
         fields.add(columnType);
         fields.add(nullable);
@@ -116,10 +102,10 @@ public class Columns extends TypedEntityRelation<Column>
         super(RELATION_NAME, fields, cc);
     }
 
-    public List<DataField> getDataFields(String tableUri)
+    public List<DataField> getDataFields(String tableUUID)
             throws ODKDatastoreException
     {
-        List<Column> columns = query().equal(TABLE_URI, tableUri).execute();
+        List<Column> columns = query().equal(TABLE_UUID, tableUUID).execute();
         List<DataField> fields = new ArrayList<DataField>();
         for (Column column : columns)
         {
@@ -150,7 +136,7 @@ public class Columns extends TypedEntityRelation<Column>
     public static Columns getInstance(CallingContext cc)
             throws ODKDatastoreException
     {
-        if (instance == null || AbstractRelationAdapter.getCC() != cc)
+        if (instance == null || instance.getCC() != cc)
         {
             instance = new Columns(cc);
         }
