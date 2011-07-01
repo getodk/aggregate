@@ -7,16 +7,16 @@ public class UserDoesNotExistException extends ODKTablesClientException
      */
     private static final long serialVersionUID = -6626310799740356641L;
 
-    private final String userId;
+    private final String userID;
 
-    public UserDoesNotExistException(String userId)
+    public UserDoesNotExistException(String userID)
     {
-        super(String.format("User with userId %s does not exist!", userId));
-        this.userId = userId;
+        super(String.format("User with userID %s does not exist!", userID));
+        this.userID = userID;
     }
 
-    public String getUserId()
+    public String getUserID()
     {
-        return this.userId;
+        return this.userID;
     }
 }

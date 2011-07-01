@@ -26,13 +26,13 @@ public class CommandServlet extends ServletUtilBase
     private static final long serialVersionUID = -7810505933356321858L;
 
     // TODO: should I have GET and POST or just POST?
-//    @Override
-//    protected void doGet(HttpServletRequest req, HttpServletResponse resp)
-//            throws ServletException, IOException
-//    {
-//        // TODO: check if query, i.e. something that should be a GET
-//        executeCommandAndReturnResponse(req, resp);
-//    }
+    //    @Override
+    //    protected void doGet(HttpServletRequest req, HttpServletResponse resp)
+    //            throws ServletException, IOException
+    //    {
+    //        // TODO: check if query, i.e. something that should be a GET
+    //        executeCommandAndReturnResponse(req, resp);
+    //    }
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
@@ -69,9 +69,12 @@ public class CommandServlet extends ServletUtilBase
             CommandResult<?> result = commandLogic.execute(cc);
 
             if (result.successful())
+            {
                 resp.setStatus(HttpServletResponse.SC_OK);
-            else
+            } else
+            {
                 resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            }
 
             resp.getWriter().println(
                     CommandConverter.getInstance().serializeResult(result));
