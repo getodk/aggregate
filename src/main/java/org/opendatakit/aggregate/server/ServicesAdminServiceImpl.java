@@ -127,8 +127,7 @@ public class ServicesAdminServiceImpl extends RemoteServiceServlet implements
       params.put(UIConsts.FSC_URI_PARAM, uri);
       params.put(ServletConsts.OAUTH_TOKEN_SECRET_PARAMETER, oauthParameters.getOAuthTokenSecret());
       String addr = cc.getServerURL() + BasicConsts.FORWARDSLASH + OAuthServlet.ADDR;
-      String callbackUrl = ServletConsts.HTTP
-          + HtmlUtil.createLinkWithProperties(addr, params);
+      String callbackUrl = HtmlUtil.createLinkWithProperties(addr, params);
 
       oauthParameters.setOAuthCallback(callbackUrl);
       return oauthHelper.createUserAuthorizationUrl(oauthParameters);

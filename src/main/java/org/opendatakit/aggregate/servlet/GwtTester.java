@@ -287,7 +287,7 @@ public class GwtTester extends ServletUtilBase {
     params.put(UIConsts.FSC_URI_PARAM, uri);
     params.put(ServletConsts.OAUTH_TOKEN_SECRET_PARAMETER, oauthParameters.getOAuthTokenSecret());
     String serverAddr = cc.getServerURL() + BasicConsts.FORWARDSLASH + OAuthServlet.ADDR; 
-    String callbackUrl = ServletConsts.HTTP + HtmlUtil.createLinkWithProperties(serverAddr, params);
+    String callbackUrl = HtmlUtil.createLinkWithProperties(serverAddr, params);
     
     oauthParameters.setOAuthCallback(callbackUrl);
     String requestUrl = oauthHelper.createUserAuthorizationUrl(oauthParameters);

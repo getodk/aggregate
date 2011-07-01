@@ -173,8 +173,6 @@ public final class ServletConsts {
   public static final String ELEMENT_REFERENCE_KEY_BEGIN_STRING = "[@key=" + BasicConsts.QUOTE;
   public static final String ELEMENT_REFERENCE_KEY_END_STRING = BasicConsts.QUOTE + "]";
 
-  public static final String HTTP = "http://";
-
   public static final String AUTH_SUB_SCOPE = "Scope";
   
   public static final String CHECK_INTERVAL_PARAM = "checkIntervalMilliseconds";
