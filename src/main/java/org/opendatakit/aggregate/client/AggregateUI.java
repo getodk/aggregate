@@ -179,6 +179,9 @@ public class AggregateUI implements EntryPoint {
 		        @Override
 		        public void onSuccess(UserSecurityInfo result) {
 		          userInfo = result;
+				  if ( realmInfo != null && userInfo != null ) {
+					commonUpdateCompleteAction();
+				  }
 		        }
 		      });
 
