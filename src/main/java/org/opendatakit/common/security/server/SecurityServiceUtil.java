@@ -62,55 +62,46 @@ public class SecurityServiceUtil {
 	private static final Set<String> specialNames = new HashSet<String>();
 
 	public static final GrantedAuthority siteAuth = new GrantedAuthorityImpl(GrantedAuthorityNames.GROUP_SITE_ADMINS);
-	public static final GrantedAuthority formAuth = new GrantedAuthorityImpl(GrantedAuthorityNames.GROUP_DATA_ADMINS);
+	public static final List<String> siteAdministratorGrants;
+
+	public static final GrantedAuthority dataOwnerAuth = new GrantedAuthorityImpl(GrantedAuthorityNames.GROUP_DATA_OWNERS);
+	public static final List<String> dataOwnerGrants;
+	
 	public static final GrantedAuthority dataViewerAuth = new GrantedAuthorityImpl(GrantedAuthorityNames.GROUP_DATA_VIEWERS);
-	public static final GrantedAuthority submitterAuth = new GrantedAuthorityImpl(GrantedAuthorityNames.GROUP_DATA_COLLECTORS);
-	public static final GrantedAuthority authenticatedAuth = new GrantedAuthorityImpl(GrantedAuthorityNames.USER_IS_AUTHENTICATED.name());
-	public static final GrantedAuthority anonAuth = new GrantedAuthorityImpl(GrantedAuthorityNames.USER_IS_ANONYMOUS.name());
-
-	public static final List<String> siteGrants;
-	public static final List<String> formGrants;
 	public static final List<String> dataViewerGrants;
-	public static final List<String> submitterGrants;
+	
+	public static final GrantedAuthority dataCollectorAuth = new GrantedAuthorityImpl(GrantedAuthorityNames.GROUP_DATA_COLLECTORS);
+	public static final List<String> dataCollectorGrants;
 
-	public static final List<String> anonSubmitterGrants;
+	public static final GrantedAuthority anonAuth = new GrantedAuthorityImpl(GrantedAuthorityNames.USER_IS_ANONYMOUS.name());
+	// special grants for Google Earth work-around 
 	public static final List<String> anonAttachmentViewerGrants;
 	
 	static {
-		List<String> isiteGrants = new ArrayList<String>();
-		isiteGrants.add(GrantedAuthorityNames.ROLE_USER.name());
-		isiteGrants.add(GrantedAuthorityNames.ROLE_ACCESS_ADMIN.name());
-		isiteGrants.add(GrantedAuthorityNames.GROUP_DATA_ADMINS);
-		isiteGrants.add(GrantedAuthorityNames.GROUP_DATA_VIEWERS);
-		isiteGrants.add(GrantedAuthorityNames.GROUP_DATA_COLLECTORS);
-		siteGrants = Collections.unmodifiableList(isiteGrants);
+		List<String> isiteAdministratorGrants = new ArrayList<String>();
+		isiteAdministratorGrants.add(GrantedAuthorityNames.ROLE_USER.name());
+		isiteAdministratorGrants.add(GrantedAuthorityNames.ROLE_SITE_ACCESS_ADMIN.name());
+		isiteAdministratorGrants.add(GrantedAuthorityNames.GROUP_DATA_OWNERS);
+		isiteAdministratorGrants.add(GrantedAuthorityNames.GROUP_DATA_VIEWERS);
+		isiteAdministratorGrants.add(GrantedAuthorityNames.GROUP_DATA_COLLECTORS);
+		siteAdministratorGrants = Collections.unmodifiableList(isiteAdministratorGrants);
 	
-		List<String> iformGrants = new ArrayList<String>();
-		iformGrants.add(GrantedAuthorityNames.ROLE_USER.name());
-		iformGrants.add(GrantedAuthorityNames.ROLE_FORM_ADMIN.name());
-		iformGrants.add(GrantedAuthorityNames.ROLE_SERVICES_ADMIN.name());
-		formGrants = Collections.unmodifiableList(iformGrants);
+		List<String> idataOwnerGrants = new ArrayList<String>();
+		idataOwnerGrants.add(GrantedAuthorityNames.ROLE_USER.name());
+		idataOwnerGrants.add(GrantedAuthorityNames.ROLE_DATA_OWNER.name());
+		idataOwnerGrants.add(GrantedAuthorityNames.ROLE_DATA_VIEWER.name());
+		dataOwnerGrants = Collections.unmodifiableList(idataOwnerGrants);
 	
 		List<String> idataViewerGrants = new ArrayList<String>();
 		idataViewerGrants.add(GrantedAuthorityNames.ROLE_USER.name());
-		idataViewerGrants.add(GrantedAuthorityNames.ROLE_ANALYST.name());
-		idataViewerGrants.add(GrantedAuthorityNames.ROLE_ATTACHMENT_VIEWER.name());
-		idataViewerGrants.add(GrantedAuthorityNames.ROLE_USER.name());
+		idataViewerGrants.add(GrantedAuthorityNames.ROLE_DATA_VIEWER.name());
 		dataViewerGrants = Collections.unmodifiableList(idataViewerGrants);
 		
-		List<String> isubmitterGrants = new ArrayList<String>();
-		isubmitterGrants.add(GrantedAuthorityNames.ROLE_FORM_DOWNLOAD.name());
-		isubmitterGrants.add(GrantedAuthorityNames.ROLE_FORM_LIST.name());
-		isubmitterGrants.add(GrantedAuthorityNames.ROLE_SUBMISSION_UPLOAD.name());
-		submitterGrants = Collections.unmodifiableList(isubmitterGrants);
+		List<String> idataCollectorGrants = new ArrayList<String>();
+		idataCollectorGrants.add(GrantedAuthorityNames.ROLE_DATA_COLLECTOR.name());
+		dataCollectorGrants = Collections.unmodifiableList(idataCollectorGrants);
 
-		// todo: handle anon as a 'user'
-		List<String> ianonSubmitterGrants = new ArrayList<String>();
-		ianonSubmitterGrants.add(GrantedAuthorityNames.ROLE_FORM_DOWNLOAD.name());
-		ianonSubmitterGrants.add(GrantedAuthorityNames.ROLE_FORM_LIST.name());
-		ianonSubmitterGrants.add(GrantedAuthorityNames.ROLE_SUBMISSION_UPLOAD.name());
-		anonSubmitterGrants = Collections.unmodifiableList(ianonSubmitterGrants);
-
+		// Work-around hack for Google Earth top-level balloon image
 		List<String> ianonAttachmentViewerGrants = new ArrayList<String>();
 		ianonAttachmentViewerGrants.add(GrantedAuthorityNames.ROLE_ATTACHMENT_VIEWER.name());
 		anonAttachmentViewerGrants = Collections.unmodifiableList(ianonAttachmentViewerGrants);
@@ -133,12 +124,12 @@ public class SecurityServiceUtil {
 		for ( Map.Entry<String, TreeSet<String>> e : hierarchy.entrySet() ) {
 			if ( e.getKey().equals(GrantedAuthorityNames.GROUP_SITE_ADMINS) ) {
 				for ( String s : e.getValue() ) {
-					if ( siteGrants.contains(s) ) continue;
+					if ( siteAdministratorGrants.contains(s) ) continue;
 					return false; 
 				}
-			} else if ( e.getKey().equals(GrantedAuthorityNames.GROUP_DATA_ADMINS) ) {
+			} else if ( e.getKey().equals(GrantedAuthorityNames.GROUP_DATA_OWNERS) ) {
 				for ( String s : e.getValue() ) {
-					if ( formGrants.contains(s) ) continue;
+					if ( dataOwnerGrants.contains(s) ) continue;
 					return false; 
 				}
 			} else if ( e.getKey().equals(GrantedAuthorityNames.GROUP_DATA_VIEWERS) ) {
@@ -148,13 +139,16 @@ public class SecurityServiceUtil {
 				}
 			} else if ( e.getKey().equals(GrantedAuthorityNames.GROUP_DATA_COLLECTORS) ) {
 				for ( String s : e.getValue() ) {
-					if ( submitterGrants.contains(s) ) continue;
+					if ( dataCollectorGrants.contains(s) ) continue;
 					return false; 
 				}
 			} else if ( e.getKey().equals(GrantedAuthorityNames.USER_IS_ANONYMOUS.name())) {
 				for ( String s : e.getValue() ) {
-					if ( anonSubmitterGrants.contains(s) ||
-							anonAttachmentViewerGrants.contains(s) ) continue;
+					if ( dataOwnerGrants.contains(s) ||
+						 dataViewerGrants.contains(s) ||
+						 dataCollectorGrants.contains(s) ||
+						 anonAttachmentViewerGrants.contains(s) ) continue;
+					// anonymous users never have site admin rights.
 					return false; 
 				}
 			} else {
@@ -425,14 +419,8 @@ public class SecurityServiceUtil {
 	 * @throws AccessDeniedException
 	 */
 	public static final void setStandardSiteAccessConfiguration( ArrayList<UserSecurityInfo> users,
-			ArrayList<GrantedAuthorityInfo> authenticatedGrants,
 			ArrayList<GrantedAuthorityInfo> anonGrants,
 			ArrayList<GrantedAuthorityInfo> allGroups, CallingContext cc ) throws DatastoreFailureException, AccessDeniedException {
-		
-		List<String> authenticatedGrantStrings = new ArrayList<String>();
-		for ( GrantedAuthorityInfo a : authenticatedGrants ) {
-			authenticatedGrantStrings.add(a.getName());
-		}
 		
 		List<String> anonGrantStrings = new ArrayList<String>();
 		for ( GrantedAuthorityInfo a : anonGrants ) {
@@ -440,20 +428,18 @@ public class SecurityServiceUtil {
 		}
 
 		try {
-			GrantedAuthorityHierarchyTable.assertGrantedAuthorityHierarchy(siteAuth, SecurityServiceUtil.siteGrants, cc);
-			GrantedAuthorityHierarchyTable.assertGrantedAuthorityHierarchy(formAuth, SecurityServiceUtil.formGrants, cc);
+			GrantedAuthorityHierarchyTable.assertGrantedAuthorityHierarchy(siteAuth, SecurityServiceUtil.siteAdministratorGrants, cc);
+			GrantedAuthorityHierarchyTable.assertGrantedAuthorityHierarchy(dataOwnerAuth, SecurityServiceUtil.dataOwnerGrants, cc);
 			GrantedAuthorityHierarchyTable.assertGrantedAuthorityHierarchy(dataViewerAuth, SecurityServiceUtil.dataViewerGrants, cc);
-			GrantedAuthorityHierarchyTable.assertGrantedAuthorityHierarchy(submitterAuth, SecurityServiceUtil.submitterGrants, cc);
+			GrantedAuthorityHierarchyTable.assertGrantedAuthorityHierarchy(dataCollectorAuth, SecurityServiceUtil.dataCollectorGrants, cc);
 			
-			GrantedAuthorityHierarchyTable.assertGrantedAuthorityHierarchy(authenticatedAuth, anonGrantStrings, cc);
 			GrantedAuthorityHierarchyTable.assertGrantedAuthorityHierarchy(anonAuth, anonGrantStrings, cc);
 			
 			TreeSet<String> authorities = GrantedAuthorityHierarchyTable.getAllPermissionsAssignableGrantedAuthorities(cc.getDatastore(), cc.getCurrentUser());
 			authorities.remove(siteAuth.getAuthority());
-			authorities.remove(formAuth.getAuthority());
+			authorities.remove(dataOwnerAuth.getAuthority());
 			authorities.remove(dataViewerAuth.getAuthority());
-			authorities.remove(submitterAuth.getAuthority());
-			authorities.remove(authenticatedAuth.getAuthority());
+			authorities.remove(dataCollectorAuth.getAuthority());
 			authorities.remove(anonAuth.getAuthority());
 			
 			// remove anything else from database...
@@ -464,9 +450,9 @@ public class SecurityServiceUtil {
 			
 			Map<UserSecurityInfo, String> pkMap = setUsers(users, cc);
 			setUsersOfGrantedAuthority(pkMap, siteAuth, cc);
-			setUsersOfGrantedAuthority(pkMap, formAuth, cc);
+			setUsersOfGrantedAuthority(pkMap, dataOwnerAuth, cc);
 			setUsersOfGrantedAuthority(pkMap, dataViewerAuth, cc);
-			setUsersOfGrantedAuthority(pkMap, submitterAuth, cc);
+			setUsersOfGrantedAuthority(pkMap, dataCollectorAuth, cc);
 			
 		} catch (ODKDatastoreException e) {
 			e.printStackTrace();
@@ -497,13 +483,12 @@ public class SecurityServiceUtil {
 	public static final void setDefaultRoleNamesAndHierarchy( 
 			CallingContext cc ) throws DatastoreFailureException, AccessDeniedException {
 		
-		ArrayList<GrantedAuthorityInfo> authenticatedGrants = new ArrayList<GrantedAuthorityInfo>(); 
 		ArrayList<GrantedAuthorityInfo> anonGrants = new ArrayList<GrantedAuthorityInfo>(); 
 		ArrayList<UserSecurityInfo> users = new ArrayList<UserSecurityInfo>();  
 		ArrayList<GrantedAuthorityInfo> allGroups = new ArrayList<GrantedAuthorityInfo>();
 
 		// NOTE: No users are defined at this point (including the superUser) see superUserBootstrap below...
-		setStandardSiteAccessConfiguration( users, authenticatedGrants, anonGrants, allGroups, cc );
+		setStandardSiteAccessConfiguration( users, anonGrants, allGroups, cc );
 	}
 	
 	/**
@@ -531,7 +516,7 @@ public class SecurityServiceUtil {
 		uriUsers.clear();
 		uriUsers.add(su.getUri());
 		UserGrantedAuthority.assertGrantedAuthorityMembers(
-				new GrantedAuthorityImpl(GrantedAuthorityNames.ROLE_ACCESS_ADMIN.name()), uriUsers, cc);
+				new GrantedAuthorityImpl(GrantedAuthorityNames.ROLE_SITE_ACCESS_ADMIN.name()), uriUsers, cc);
 	}
 
 }

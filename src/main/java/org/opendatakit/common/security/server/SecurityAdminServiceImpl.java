@@ -128,9 +128,7 @@ org.opendatakit.common.security.client.security.admin.SecurityAdminService {
 			throw new AccessDeniedException("Invalid request");
 		}
 
-	    ArrayList<GrantedAuthorityInfo> authenticatedGrants = new ArrayList<GrantedAuthorityInfo>();
-	    SecurityServiceUtil.setStandardSiteAccessConfiguration( users,
-										authenticatedGrants, anonGrants, allGroups, cc ); 
+	    SecurityServiceUtil.setStandardSiteAccessConfiguration( users, anonGrants, allGroups, cc ); 
 	    // clear the cache of saved user identities as we don't know what has changed...
 	    cc.getUserService().reloadPermissions();
 	}

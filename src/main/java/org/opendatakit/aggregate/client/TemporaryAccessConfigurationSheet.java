@@ -68,7 +68,7 @@ public class TemporaryAccessConfigurationSheet extends Composite {
    private static final int ERROR_MESSAGE_RETENTION_INTERVAL_MILLISECONDS = 2000;
    private static final String K_INVALID_EMAIL_CHARACTERS = " \t\n\r\",;()<>?/{}'[]";
    private static final GrantedAuthorityInfo siteAdmins = new GrantedAuthorityInfo(GrantedAuthorityNames.GROUP_SITE_ADMINS);
-   private static final GrantedAuthorityInfo dataAdmins = new GrantedAuthorityInfo(GrantedAuthorityNames.GROUP_DATA_ADMINS);
+   private static final GrantedAuthorityInfo dataAdmins = new GrantedAuthorityInfo(GrantedAuthorityNames.GROUP_DATA_OWNERS);
    private static final GrantedAuthorityInfo dataViewers = new GrantedAuthorityInfo(GrantedAuthorityNames.GROUP_DATA_VIEWERS);
    private static final GrantedAuthorityInfo dataCollectors = new GrantedAuthorityInfo(GrantedAuthorityNames.GROUP_DATA_COLLECTORS);
 
@@ -451,7 +451,7 @@ public class TemporaryAccessConfigurationSheet extends Composite {
                   anonymousSubmitters.setValue( 
                         result.getGrantedAuthorities().contains( 
                               new GrantedAuthorityInfo(
-                                    GrantedAuthorityNames.ROLE_SUBMISSION_UPLOAD.toString())) );
+                                    GrantedAuthorityNames.ROLE_DATA_COLLECTOR.toString())) );
                   anonymousAttachmentViewers.setValue(
                         result.getGrantedAuthorities().contains(
                               new GrantedAuthorityInfo(
@@ -507,16 +507,14 @@ public class TemporaryAccessConfigurationSheet extends Composite {
    void onUpdateClick(ClickEvent e) {
       ArrayList<GrantedAuthorityInfo> allGroups = new ArrayList<GrantedAuthorityInfo>();
       allGroups.add(new GrantedAuthorityInfo(GrantedAuthorityNames.GROUP_SITE_ADMINS));
-      allGroups.add(new GrantedAuthorityInfo(GrantedAuthorityNames.GROUP_DATA_ADMINS));
+      allGroups.add(new GrantedAuthorityInfo(GrantedAuthorityNames.GROUP_DATA_OWNERS));
       allGroups.add(new GrantedAuthorityInfo(GrantedAuthorityNames.GROUP_DATA_VIEWERS));
       allGroups.add(new GrantedAuthorityInfo(GrantedAuthorityNames.GROUP_DATA_COLLECTORS));
       allGroups.add(new GrantedAuthorityInfo(GrantedAuthorityNames.USER_IS_ANONYMOUS.toString()));
       
       ArrayList<GrantedAuthorityInfo> anonGrants = new ArrayList<GrantedAuthorityInfo>();
       if ( anonymousSubmitters.getValue() ) {
-         anonGrants.add(new GrantedAuthorityInfo(GrantedAuthorityNames.ROLE_FORM_DOWNLOAD.toString()));
-         anonGrants.add(new GrantedAuthorityInfo(GrantedAuthorityNames.ROLE_FORM_LIST.toString()));
-         anonGrants.add(new GrantedAuthorityInfo(GrantedAuthorityNames.ROLE_SUBMISSION_UPLOAD.toString()));
+         anonGrants.add(new GrantedAuthorityInfo(GrantedAuthorityNames.ROLE_DATA_COLLECTOR.toString()));
       }
       if ( anonymousAttachmentViewers.getValue() ) {
          anonGrants.add(new GrantedAuthorityInfo(GrantedAuthorityNames.ROLE_ATTACHMENT_VIEWER.toString()));

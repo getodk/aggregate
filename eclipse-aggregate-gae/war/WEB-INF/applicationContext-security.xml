@@ -35,32 +35,36 @@
 	
 <!--	NOTE: for debugging applets, it is useful to allow anonymous access to the pages-->
 <!--	they utilize.  This means that the isFullyAuthenticated() criteria cannot be used-->
-<!--	for those pages.  TODO: enforce the use of is criteria for production deployments.-->
+<!--	for those pages.  -->
 	<filter-security-metadata-source id="securityPolicy" use-expressions="true">
         <intercept-url pattern="/_ah/**" access="true" /> <!-- local GAE admin console -->
-        <!--  auth/ urls are for fusion table or Google spreadsheet authentication token acknowledgment -->
-        <intercept-url pattern="/auth/**" access="hasRole('ROLE_SERVICES_ADMIN')" />
-        <intercept-url pattern="/Aggregate.html" access="hasRole('ROLE_USER') or hasRole('ROLE_ACCESS_ADMIN')" />
-        <intercept-url pattern="/ui/upload" access="hasRole('ROLE_FORM_ADMIN')" />
-        <intercept-url pattern="/ui/submission" access="hasRole('ROLE_FORM_ADMIN')"  />
-		<!--  secure the client interfaces -->
-		<intercept-url pattern="/aggregateui/filterservice" access="hasRole('ROLE_ANALYST')" />
-		<intercept-url pattern="/aggregateui/formservice" access="hasRole('ROLE_ANALYST')" />
-		<intercept-url pattern="/aggregateui/formadminservice" access="hasRole('ROLE_FORM_ADMIN')" />
+
+        <intercept-url pattern="/Aggregate.html" access="hasRole('ROLE_USER') or hasRole('ROLE_SITE_ACCESS_ADMIN')" />
+
+		<!--  secure the GWT client interfaces -->
+
 		<intercept-url pattern="/aggregateui/preferenceservice" access="hasRole('ROLE_USER')" />
-		<intercept-url pattern="/aggregateui/servicesadminservice" access="hasRole('ROLE_SERVICES_ADMIN')" />
-		<intercept-url pattern="/aggregateui/submissionservice" access="hasRole('ROLE_ANALYST')" />
-		<intercept-url pattern="/aggregateui/securityservice" access="hasRole('ROLE_USER')" />
-		<intercept-url pattern="/aggregateui/securityadminservice" access="hasRole('ROLE_ACCESS_ADMIN')" />
-		<!--  and the client needs to get at all their javascript which is also under the /aggregateui path -->
+		<intercept-url pattern="/aggregateui/securityservice" access="hasRole('ROLE_USER') or hasRole('ROLE_SITE_ACCESS_ADMIN')" />
+
+		<intercept-url pattern="/aggregateui/filterservice" access="hasRole('ROLE_DATA_VIEWER')" />
+		<intercept-url pattern="/aggregateui/submissionservice" access="hasRole('ROLE_DATA_VIEWER')" />
+		<intercept-url pattern="/aggregateui/formservice" access="hasRole('ROLE_DATA_VIEWER')" />
+
+		<intercept-url pattern="/aggregateui/formadminservice" access="hasRole('ROLE_DATA_OWNER')" />
+		<intercept-url pattern="/aggregateui/servicesadminservice" access="hasRole('ROLE_DATA_OWNER')" />
+
+		<intercept-url pattern="/aggregateui/securityadminservice" access="hasRole('ROLE_SITE_ACCESS_ADMIN')" />
+
+		<!--  grant clients access to all GWT code (/aggregateui), images, javascripts, resources, css -->
 		<intercept-url pattern="/aggregateui/**" access="true" />
 		<intercept-url pattern="/images/**" access="true" />
 		<intercept-url pattern="/javascript/**" access="true" />
 		<intercept-url pattern="/res/**" access="true" />
 		<intercept-url pattern="/stylesheets/**" access="true" />
+
+		<!-- grant access to all routing pages -->
 		<intercept-url pattern="/access-denied.html" access="true" />
 		<intercept-url pattern="/AggregateUI.css" access="true" />
-        <intercept-url pattern="/change-applied.html" access="true" /> <!-- Intermediate page redirecting to logout from access mgmt -->
 		<intercept-url pattern="/favicon.ico" access="true" />
 		<intercept-url pattern="/index.html" access="true" />
 		<intercept-url pattern="/logout.html" access="true" />
@@ -68,26 +72,33 @@
         <intercept-url pattern="/www/index.html" access="true" /> <!-- Intermediate page redirecting to access mgmt -->
 		<intercept-url pattern="/openid_login.html" access="isAnonymous()" />
 		<intercept-url pattern="/local_login.html" access="isFullyAuthenticated() and hasRole('AUTH_LOCAL')" />
-		<intercept-url pattern="/Briefcase" access="hasRole('ROLE_ANALYST')" />
-		<intercept-url pattern="/briefcase/**" access="hasRole('ROLE_ANALYST')" />
-		<intercept-url pattern="/xformsDownload" access="hasRole('ROLE_FORM_DOWNLOAD')" />
-		<intercept-url pattern="/xformsList" access="hasRole('ROLE_FORM_LIST')" />
-		<intercept-url pattern="/xformsManifest" access="hasRole('ROLE_FORM_LIST')" />
-		<intercept-url pattern="/formList" access="hasRole('ROLE_FORM_LIST')" />
-		<intercept-url pattern="/formXml" access="hasRole('ROLE_FORM_DOWNLOAD')" />
-		<intercept-url pattern="/submission" access="hasRole('ROLE_SUBMISSION_UPLOAD')" />
+
+		<!-- grant access to various servlets -->
+		<intercept-url pattern="/formList" access="hasRole('ROLE_DATA_COLLECTOR')" />
+		<intercept-url pattern="/formXml" access="hasRole('ROLE_DATA_COLLECTOR')" />
+		<intercept-url pattern="/submission" access="hasRole('ROLE_DATA_COLLECTOR')" />
+		<intercept-url pattern="/xformsDownload" access="hasRole('ROLE_DATA_COLLECTOR')" />
+		<intercept-url pattern="/xformsList" access="hasRole('ROLE_DATA_COLLECTOR')" />
+		<intercept-url pattern="/xformsManifest" access="hasRole('ROLE_DATA_COLLECTOR')" />
+
 		<intercept-url pattern="/www/**" access="hasRole('ROLE_USER')" />
-        <intercept-url pattern="/ssl/user-manage-passwords" access="isFullyAuthenticated() and hasRole('USER_IS_REGISTERED') and hasRole('ROLE_ACCESS_ADMIN')" />
-		<intercept-url pattern="/ssl/**" access="isFullyAuthenticated() and hasRole('USER_IS_REGISTERED') and hasRole('ROLE_USER')" />
-		<intercept-url pattern="/view/csvFragment" access="hasRole('ROLE_ANALYST')" />
-		<intercept-url pattern="/view/binaryData" access="hasRole('ROLE_ATTACHMENT_VIEWER')" />
-		<intercept-url pattern="/view/**" access="hasRole('ROLE_ANALYST')" />
-<!--	TODO: gae should be: hasRole(USER_IS_DAEMON) -->
+
+		<intercept-url pattern="/Briefcase" access="hasRole('ROLE_DATA_VIEWER')" />
+		<intercept-url pattern="/briefcase/**" access="hasRole('ROLE_DATA_VIEWER')" />
+		<intercept-url pattern="/view/binaryData" access="hasRole('ROLE_DATA_VIEWER') or hasRole('ROLE_ATTACHMENT_VIEWER')" />
+		<intercept-url pattern="/view/**" access="hasRole('ROLE_DATA_VIEWER')" />
+
+		<intercept-url pattern="/admin/**" access="hasRole('ROLE_DATA_OWNER')" />
+        <intercept-url pattern="/auth/**" access="hasRole('ROLE_DATA_OWNER')" />
+		<intercept-url pattern="/extern/**" access="hasRole('ROLE_DATA_OWNER')" />
+        <intercept-url pattern="/ui/**" access="hasRole('ROLE_DATA_OWNER')" />
+
+        <intercept-url pattern="/ssl/**" access="hasRole('ROLE_SITE_ACCESS_ADMIN')" />
+
+		<!--	TODO: gae should be: hasRole(USER_IS_DAEMON) -->
 		<intercept-url pattern="/gae/**" access="true" /> 
-		<intercept-url pattern="/extern/**" access="hasRole('ROLE_SERVICES_ADMIN')" />
-		<intercept-url pattern="/admin/upload" access="hasRole('ROLE_FORM_ADMIN')" />
-		<intercept-url pattern="/admin/**" access="hasRole('ROLE_FORM_ADMIN')" />
-		<intercept-url pattern="/access/**" access="hasRole('ROLE_ACCESS_ADMIN')" />
+		
+		<!-- in case we forgot to mention something... -->
 		<intercept-url pattern="/**" access="isAnonymous()" />
 	</filter-security-metadata-source>
 
@@ -117,7 +128,6 @@
 			<intercept-url pattern="/stylesheets/**" access="ANY_CHANNEL" />
 			<intercept-url pattern="/AggregateUI.css" access="ANY_CHANNEL" />
 			<intercept-url pattern="/access-denied.html" access="REQUIRES_INSECURE_CHANNEL" />
-        	<intercept-url pattern="/change-applied.html" access="REQUIRES_INSECURE_CHANNEL" /> <!-- Intermediate page redirecting to logout from access mgmt -->
 	        <intercept-url pattern="/index.html" access="REQUIRES_INSECURE_CHANNEL" />
 	        <intercept-url pattern="/logout.html" access="REQUIRES_INSECURE_CHANNEL" />
 	        <intercept-url pattern="/openid_login.html" access="REQUIRES_INSECURE_CHANNEL" />

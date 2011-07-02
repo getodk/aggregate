@@ -98,7 +98,7 @@ public class ServletUtilBase extends CommonServletBase {
   public boolean isSiteManagementSecure(CallingContext cc) {
 	TreeSet<String> grants = fetchGrantedAuthoritySet( GrantedAuthorityNames.USER_IS_ANONYMOUS.name(), cc);
 	grants.addAll(fetchGrantedAuthoritySet( GrantedAuthorityNames.USER_IS_AUTHENTICATED.name(), cc));
-	return !grants.contains( GrantedAuthorityNames.ROLE_ACCESS_ADMIN.name() );
+	return !grants.contains( GrantedAuthorityNames.ROLE_SITE_ACCESS_ADMIN.name() );
   }
   
   /**

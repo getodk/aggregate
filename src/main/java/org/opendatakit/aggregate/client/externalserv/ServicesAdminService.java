@@ -23,8 +23,8 @@ import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 
 /**
- * These are the actions requiring the ROLE_SERVICES_ADMIN privilege.  They
- * pertain to setting up and cancelling the publication of data to external
+ * These are the actions requiring the ROLE_DATA_OWNER privilege.  They
+ * pertain to setting up and canceling the publication of data to external
  * servers (e.g., Google Fusion Tables or Google Spreadsheets).
  * 
  * @author mitchellsundt@gmail.com
