@@ -90,15 +90,29 @@ public class GoogleSpreadsheet extends AbstractExternalService implements Extern
   /**
    * Datastore entity specific to this type of external service
    */
-  private GoogleSpreadsheetParameterTable objectEntity;
+  private final GoogleSpreadsheetParameterTable objectEntity;
 
-  private List<GoogleSpreadsheetRepeatParameterTable> repeatElementTableIds;
+  private final List<GoogleSpreadsheetRepeatParameterTable> repeatElementTableIds =
+  					new ArrayList<GoogleSpreadsheetRepeatParameterTable>();
   private final SpreadsheetService spreadsheetService;
-
-  private GoogleSpreadsheet(Form form, CallingContext cc) {
+  
+  private static final GoogleSpreadsheetParameterTable newGSPT(CallingContext cc) throws ODKDatastoreException {
+	  GoogleSpreadsheetParameterTable fp = GoogleSpreadsheetParameterTable.assertRelation(cc);
+	    Datastore ds = cc.getDatastore();
+	    User user = cc.getCurrentUser();
+	    return ds.createEntityUsingRelation(fp, user);
+	  }
+  private static final GoogleSpreadsheetParameterTable retrieveGSPT(FormServiceCursor fsc, CallingContext cc) throws ODKDatastoreException {
+	    GoogleSpreadsheetParameterTable gp = GoogleSpreadsheetParameterTable.assertRelation(cc);
+	    Datastore ds = cc.getDatastore();
+	    User user = cc.getCurrentUser();
+	    return ds.getEntity(gp, fsc.getAuriService(), user);
+  }
+  private GoogleSpreadsheet(Form form, GoogleSpreadsheetParameterTable gsObject, CallingContext cc) {
     super(form, new LinkElementFormatter(cc.getServerURL(), true, true, true),
         new GoogleSpreadsheetHeaderFormatter(true, true, true), cc);
     spreadsheetService = new SpreadsheetService(ServletConsts.APPLICATION_NAME);
+    objectEntity = gsObject;
     // TODO: REMOVE after bug is fixed
     // http://code.google.com/p/gdata-java-client/issues/detail?id=103
     spreadsheetService.setProtocolVersion(SpreadsheetService.Versions.V1);
@@ -120,20 +134,16 @@ public class GoogleSpreadsheet extends AbstractExternalService implements Extern
 
   public GoogleSpreadsheet(FormServiceCursor fsc, CallingContext cc)
       throws ODKEntityNotFoundException, ODKDatastoreException, ODKFormNotFoundException {
-    this(Form.retrieveForm(fsc.getFormId(), cc), cc);
-    GoogleSpreadsheetParameterTable gp = GoogleSpreadsheetParameterTable.assertRelation(cc);
-    objectEntity = cc.getDatastore().getEntity(gp, fsc.getAuriService(), cc.getCurrentUser());
-    repeatElementTableIds = GoogleSpreadsheetRepeatParameterTable.getRepeatGroupAssociations(
-        new EntityKey(gp, objectEntity.getUri()), cc);
+    this(Form.retrieveForm(fsc.getFormId(), cc), retrieveGSPT(fsc, cc), cc);
+    repeatElementTableIds.addAll(GoogleSpreadsheetRepeatParameterTable.getRepeatGroupAssociations(
+        objectEntity.getUri(), cc));
     this.fsc = fsc;
     constructorHelper();
   }
 
   public GoogleSpreadsheet(Form form, String name, ExternalServicePublicationOption externalServiceOption,
       CallingContext cc) throws ODKDatastoreException {
-    this(form, cc);
-    objectEntity = cc.getDatastore().createEntityUsingRelation(
-        GoogleSpreadsheetParameterTable.assertRelation(cc), cc.getCurrentUser());
+    this(form, newGSPT(cc), cc);
     fsc = FormServiceCursor.createFormServiceCursor(form, ExternalServiceType.GOOGLE_SPREADSHEET,
         objectEntity, cc);
     fsc.setExternalServiceOption(externalServiceOption);
@@ -143,9 +153,6 @@ public class GoogleSpreadsheet extends AbstractExternalService implements Extern
     fsc.setEstablishmentDateTime(new Date());
     fsc.setUploadCompleted(false);
     objectEntity.setSpreadsheetName(name);
-
-    // initialize repeat list; it will be filled when the worksheets are created
-    repeatElementTableIds = new ArrayList<GoogleSpreadsheetRepeatParameterTable>();
 
     persist(cc);
     constructorHelper();
@@ -221,9 +228,7 @@ public class GoogleSpreadsheet extends AbstractExternalService implements Extern
 
   public GoogleSpreadsheet(Form form, String name, String spreadKey, OAuthToken authToken,
       ExternalServicePublicationOption externalServiceOption, CallingContext cc) throws ODKDatastoreException {
-    this(form, cc);
-    objectEntity = cc.getDatastore().createEntityUsingRelation(
-        GoogleSpreadsheetParameterTable.assertRelation(cc), cc.getCurrentUser());
+    this(form, newGSPT(cc), cc);
     fsc = FormServiceCursor.createFormServiceCursor(form, ExternalServiceType.GOOGLE_SPREADSHEET,
         objectEntity, cc);
     fsc.setExternalServiceOption(externalServiceOption);
@@ -237,9 +242,6 @@ public class GoogleSpreadsheet extends AbstractExternalService implements Extern
     objectEntity.setSpreadsheetName(name);
     objectEntity.setSpreadsheetKey(spreadKey);
     updateReadyValue();
-
-    // initialize repeat list; it will be filled when the worksheets are created
-    repeatElementTableIds = new ArrayList<GoogleSpreadsheetRepeatParameterTable>();
 
     persist(cc);
     constructorHelper();
@@ -270,9 +272,7 @@ public class GoogleSpreadsheet extends AbstractExternalService implements Extern
   public void persist(CallingContext cc) throws ODKEntityPersistException {
     Datastore ds = cc.getDatastore();
     User user = cc.getCurrentUser();
-    if (repeatElementTableIds != null) {
-      ds.putEntities(repeatElementTableIds, user);
-    }
+    ds.putEntities(repeatElementTableIds, user);
     ds.putEntity(objectEntity, user);
     ds.putEntity(fsc, user);
   }
@@ -304,6 +304,7 @@ public class GoogleSpreadsheet extends AbstractExternalService implements Extern
     Datastore ds = cc.getDatastore();
     User user = cc.getCurrentUser();
     ds.deleteEntities(keys, user);
+    repeatElementTableIds.clear();
     ds.deleteEntity(new EntityKey(objectEntity, objectEntity.getUri()), user);
     ds.deleteEntity(new EntityKey(fsc, fsc.getUri()), user);
   }

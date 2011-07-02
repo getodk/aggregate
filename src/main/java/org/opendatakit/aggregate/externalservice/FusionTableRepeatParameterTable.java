@@ -22,7 +22,6 @@ import org.opendatakit.aggregate.datamodel.FormElementKey;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.Datastore;
-import org.opendatakit.common.persistence.EntityKey;
 import org.opendatakit.common.persistence.PersistConsts;
 import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.persistence.Query.FilterOperation;
@@ -124,13 +123,13 @@ public final class FusionTableRepeatParameterTable extends CommonFieldsBase {
 	    return relation;
 	  }
 	  
-	  public static List<FusionTableRepeatParameterTable> getRepeatGroupAssociations(EntityKey fusionTableParameterTable,
+	  public static List<FusionTableRepeatParameterTable> getRepeatGroupAssociations(String uri,
 			  												CallingContext cc) throws ODKDatastoreException {
 		  List<FusionTableRepeatParameterTable> list = new ArrayList<FusionTableRepeatParameterTable> ();
 		  FusionTableRepeatParameterTable frpt = assertRelation(cc);
 
 		  Query query = cc.getDatastore().createQuery(frpt, cc.getCurrentUser());
-		  query.addFilter(URI_FUSION_TABLE_PROPERTY, FilterOperation.EQUAL, fusionTableParameterTable.getKey());
+		  query.addFilter(URI_FUSION_TABLE_PROPERTY, FilterOperation.EQUAL, uri);
 
 		  List<? extends CommonFieldsBase> results = query.executeQuery(0);
 		  for ( CommonFieldsBase b : results ) {

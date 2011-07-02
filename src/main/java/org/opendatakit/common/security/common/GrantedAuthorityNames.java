@@ -40,17 +40,12 @@ public enum GrantedAuthorityNames implements IsSerializable {
 				"as a registered user will always have been authenticated)"),
 	USER_IS_DAEMON("reserved for the execution of background tasks"),
 	
-	MAILTO_GMAIL_COM("all users logged in via OpenID with the 'gmail.com' e-mail domain"),
-	
-	ROLE_FORM_LIST("required to fetching the xforms list (e.g., by the device)"),
-	ROLE_FORM_DOWNLOAD("required to fetch an xform definition (e.g., by the device)"),
-	ROLE_SUBMISSION_UPLOAD("required to submit a filled-out xform"),
 	ROLE_USER("required to view the home (forms) page and the human-readable xform xml listing"),
+	ROLE_DATA_COLLECTOR("required to fetch forms, manifests, multimedia, and upload submissions"),
 	ROLE_ATTACHMENT_VIEWER("required to view imagery, video, audio and other complex data in the form"),
-	ROLE_ANALYST("required to view submissions and to generate csv and kml files and download them"),
-	ROLE_SERVICES_ADMIN("required to configure external services and data publishing"),
-	ROLE_FORM_ADMIN("required to upload new xforms, upload modifications to existing xforms, and to delete xforms or thier data"),
-	ROLE_ACCESS_ADMIN("required for the permissions-management pages, including the registered users, group access rights, and user membership in groups"),
+	ROLE_DATA_VIEWER("required to view submissions and to generate csv and kml files and download them"),
+	ROLE_DATA_OWNER("required to upload new xforms, upload modifications to existing xforms, configure external services and data publishing, and to delete xforms or thier data"),
+	ROLE_SITE_ACCESS_ADMIN("required for the permissions-management pages, including the registered users, group access rights, and user membership in groups"),
 	;
 	
 	private final String description;
@@ -65,8 +60,8 @@ public enum GrantedAuthorityNames implements IsSerializable {
 	
 	public static final String GROUP_DATA_COLLECTORS = "Data Collector";
 	public static final String GROUP_DATA_VIEWERS = "Data Viewer";
-	public static final String GROUP_DATA_ADMINS = "Data Manager";
-	public static final String GROUP_SITE_ADMINS = "Site Administrator";
+	public static final String GROUP_DATA_OWNERS = "Data Owner";
+	public static final String GROUP_SITE_ADMINS = "Site Administration";
 	
 	public static final String MAILTO_PREFIX = "MAILTO_";
 	public static final String ROLE_PREFIX = "ROLE_";

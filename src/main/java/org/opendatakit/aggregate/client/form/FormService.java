@@ -22,9 +22,9 @@ import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 
 /**
- * These are the APIs available to users with the ROLE_ANALYST privilege.
+ * These are the APIs available to users with the ROLE_DATA_VIEWER privilege.
  * Adding forms, deleting forms, and other forms management should be 
- * handled in the FormAdminService (which requires ROLE_FORM_ADMIN privilege).
+ * handled in the FormAdminService (which requires ROLE_DATA_OWNER privilege).
  * 
  * @author wbrunette@gmail.com
  *

@@ -18,7 +18,7 @@ public class PermissionsSubTab extends VerticalPanel implements SubTabInterface 
     final PermissionsSubTab temp = this;
     
     if ( AggregateUI.getUI().getUserInfo().getGrantedAuthorities().contains(
-            new GrantedAuthorityInfo(GrantedAuthorityNames.ROLE_ACCESS_ADMIN.toString()))) {
+            new GrantedAuthorityInfo(GrantedAuthorityNames.ROLE_SITE_ACCESS_ADMIN.toString()))) {
           accessConfig = new TemporaryAccessConfigurationSheet(temp);
           accessConfig.setVisible(true);
           add(accessConfig);

@@ -23,7 +23,6 @@ import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.DataField.IndexType;
 import org.opendatakit.common.persistence.Datastore;
-import org.opendatakit.common.persistence.EntityKey;
 import org.opendatakit.common.persistence.PersistConsts;
 import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.persistence.Query.FilterOperation;
@@ -125,7 +124,7 @@ public final class GoogleSpreadsheetRepeatParameterTable extends CommonFieldsBas
 	    return relation;
 	  }
 	  
-	  public static List<GoogleSpreadsheetRepeatParameterTable> getRepeatGroupAssociations(EntityKey googleSpreadsheetParameterTable,
+	  public static List<GoogleSpreadsheetRepeatParameterTable> getRepeatGroupAssociations(String uri,
 			  												CallingContext cc) throws ODKDatastoreException {
 		  List<GoogleSpreadsheetRepeatParameterTable> list = new ArrayList<GoogleSpreadsheetRepeatParameterTable> ();
 		  GoogleSpreadsheetRepeatParameterTable frpt = assertRelation(cc);
@@ -133,7 +132,7 @@ public final class GoogleSpreadsheetRepeatParameterTable extends CommonFieldsBas
 		  Datastore ds = cc.getDatastore();
 		  User user = cc.getCurrentUser();
 		  Query query = ds.createQuery(frpt, user);
-		  query.addFilter(URI_GOOGLE_SPREADSHEET, FilterOperation.EQUAL, googleSpreadsheetParameterTable.getKey());
+		  query.addFilter(URI_GOOGLE_SPREADSHEET, FilterOperation.EQUAL, uri);
 
 		  List<? extends CommonFieldsBase> results = query.executeQuery(0);
 		  for ( CommonFieldsBase b : results ) {
