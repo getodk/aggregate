@@ -146,6 +146,7 @@ public class PersistentResults {
 		User user = cc.getCurrentUser();
 		objectEntity = new Submission(xformPersistentResultsParameters.modelVersion,
 								xformPersistentResultsParameters.uiVersion,
+								CommonFieldsBase.newUri(),
 								persistentResultsForm.getFormDefinition(), cc);
 		setRequestingUser(user.getUriUser());
 		Date now = new Date();

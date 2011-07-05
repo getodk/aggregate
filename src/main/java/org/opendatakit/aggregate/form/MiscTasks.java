@@ -212,6 +212,7 @@ public class MiscTasks {
 		User user = cc.getCurrentUser();
 		objectEntity = new Submission(xformMiscTaskParameters.modelVersion,
 								xformMiscTaskParameters.uiVersion,
+								CommonFieldsBase.newUri(),
 								form.getFormDefinition(), cc);
 		setFormId(formRequested.getFormId());
 		setRequestingUser(user.getUriUser());

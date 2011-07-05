@@ -44,6 +44,7 @@ import org.opendatakit.aggregate.submission.type.BlobSubmissionType;
 import org.opendatakit.aggregate.submission.type.RepeatSubmissionType;
 import org.opendatakit.common.constants.BasicConsts;
 import org.opendatakit.common.constants.HtmlConsts;
+import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.EntityKey;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
@@ -152,6 +153,75 @@ public class SubmissionParser {
 		}
 	}
 
+	private static final String OPEN_ROSA_NAMESPACE = "http://openrosa.org/xforms/metadata";
+	private static final String OPEN_ROSA_METADATA_TAG = "meta";
+	private static final String OPEN_ROSA_INSTANCE_ID = "instanceID";
+	
+	/**
+	 * Find the OpenRosa instanceID defined for this record, if any.
+	 * 
+	 * @return
+	 */
+	private String getOpenRosaInstanceId() {
+		Node n = findMetaTag(root);
+		if ( n != null ) {
+			NodeList nl = n.getChildNodes();
+			for ( int i = 0 ; i < nl.getLength() ; ++i ) {
+				Node cn = nl.item(i);
+				String cnUri = cn.getNamespaceURI();
+				String cnName = cn.getLocalName();
+				if ( cn.getNodeType() == Node.ELEMENT_NODE &&
+					 cnName.equals(OPEN_ROSA_INSTANCE_ID) &&
+					 (cnUri == null || cnUri.equalsIgnoreCase(OPEN_ROSA_NAMESPACE)) ) {
+					NodeList cnl = cn.getChildNodes();
+					boolean textFound = false;
+					int idxText = -1;
+					for ( int j = 0 ; j < cnl.getLength() ; ++j ) {
+						Node cnln = cnl.item(j);
+						if ( cnln.getNodeType() == Node.TEXT_NODE ) {
+							if ( textFound ) {
+								throw new IllegalStateException("Expected a single text node");
+							}
+							textFound = true;
+							idxText = j;
+						}
+					}
+					if ( textFound ) {
+						return cnl.item(idxText).getNodeValue();
+					}
+				}
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Traverse submission looking for OpenRosa metadata tag (with or without namespace).
+	 * 
+	 * @param parent
+	 * @return
+	 */
+	private Node findMetaTag(Node parent) {
+		if ( parent.getNodeType() != Node.ELEMENT_NODE ) return null;
+		@SuppressWarnings("unused")
+		String parentName = parent.getLocalName();
+		NodeList nl = parent.getChildNodes();
+		for ( int i = 0 ; i < nl.getLength() ; ++i ) {
+			Node n = nl.item(i);
+			String namespace = n.getNamespaceURI();
+			String name = n.getLocalName();
+			if ( n.getNodeType() == Node.ELEMENT_NODE && 
+				 name.equals(OPEN_ROSA_METADATA_TAG) &&
+				 (namespace == null || namespace.equalsIgnoreCase(OPEN_ROSA_NAMESPACE)) ) {
+				return n;
+			} else {
+				n = findMetaTag(n);
+				if ( n != null ) return n;
+			}
+		}
+		return null;
+	}
+	
 	/**
 	 * Helper Constructor an ODK submission by processing XML submission to
 	 * extract values
@@ -172,8 +242,11 @@ public class SubmissionParser {
 			ODKIncompleteSubmissionData, ODKConversionException,
 			ODKDatastoreException {
 		try {
-			DocumentBuilder builder = DocumentBuilderFactory.newInstance()
-					.newDocumentBuilder();
+			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+			factory.setNamespaceAware(true);
+			factory.setIgnoringComments(true);
+			factory.setCoalescing(true);
+			DocumentBuilder builder = factory.newDocumentBuilder();
 			Document doc = builder.parse(inputStreamXML);
 			root = doc.getDocumentElement();
 			printNode(root);
@@ -218,8 +291,13 @@ public class SubmissionParser {
 		if ( uiVersionString != null && uiVersionString.length() > 0 ) {
 			uiVersion = Long.valueOf(uiVersionString);
 		}
+
+		String instanceId = getOpenRosaInstanceId();
+		if ( instanceId == null ) {
+			instanceId = CommonFieldsBase.newUri();
+		}
 		
-		submission = new Submission(modelVersion, uiVersion, form.getFormDefinition(), cc);
+		submission = new Submission( modelVersion, uiVersion, instanceId, form.getFormDefinition(), cc);
 
 		topLevelTableKey = submission.getKey();
 
@@ -286,9 +364,9 @@ public class SubmissionParser {
 		}
 
 		// verify that the xml matches the node we are processing...
-		if (!currentSubmissionElement.getNodeName().equals(submissionTag)) {
+		if (!currentSubmissionElement.getLocalName().equals(submissionTag)) {
 			throw new ODKParseException(
-					"Xml document element tag: " + currentSubmissionElement.getNodeName() +
+					"Xml document element tag: " + currentSubmissionElement.getLocalName() +
 					" does not match the xform data model tag name: " + submissionTag);
 		}
 		
@@ -301,7 +379,7 @@ public class SubmissionParser {
 		// and values within the submissionSet
 		boolean complete = true;
 		for (Element e : elements) {
-			FormElementModel m = node.findElementByName(e.getNodeName());
+			FormElementModel m = node.findElementByName(e.getLocalName());
 			if (m == null) {
 				continue;
 				//throw new ODKParseException();
