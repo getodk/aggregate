@@ -44,20 +44,6 @@ import org.opendatakit.common.web.CallingContext;
 public class Submission extends SubmissionSet {
 
 	/**
-	 * Construct an empty submission for the given form definition
-	 * 
-	 * @param modelVersion - the version attribute of the submission
-	 * @param uiVersion - the uiVersion attribute of the submission
-	 * @param formDefinition - the form to base the submission on
-	 * @param cc - the CallingContext for this request
-	 * @throws ODKDatastoreException
-	 */
-	public Submission(Long modelVersion, Long uiVersion, 
-			FormDefinition formDefinition, CallingContext cc) throws ODKDatastoreException {
-		this(modelVersion, uiVersion, null, formDefinition, cc);
-	}
-
-	/**
 	 * Construct an empty submission for the given form definition.
 	 * 
 	 * @param modelVersion
