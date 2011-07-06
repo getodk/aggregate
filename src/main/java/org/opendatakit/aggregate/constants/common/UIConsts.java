@@ -27,6 +27,10 @@ public class UIConsts {
 
   public static final String FILTER_NONE = "none";
 
+  public static final String FORM_UPLOAD_SERVLET_ADDR = "formUpload";
+
+  public static final String SUBMISSION_SERVLET_ADDR = "submission";
+
   // running locally
  // public static final String GOOGLE_MAP_KEY = "";
   

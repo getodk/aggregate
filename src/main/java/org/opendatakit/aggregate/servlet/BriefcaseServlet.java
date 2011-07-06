@@ -170,7 +170,7 @@ public class BriefcaseServlet extends ServletUtilBase {
 			}
 		}
 		String headContent = cookieSet;
-		beginBasicHtmlResponse(TITLE_INFO, headContent, resp, true, cc); // header
+		beginBasicHtmlResponse(TITLE_INFO, headContent, resp, cc); // header
 	    PrintWriter out = resp.getWriter();
 	    out.write(BRIEFCASE_BODY);
 		finishBasicHtmlResponse(resp);

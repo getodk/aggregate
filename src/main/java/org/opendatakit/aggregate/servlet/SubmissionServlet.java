@@ -32,6 +32,7 @@ import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.ErrorConsts;
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.ServletConsts;
+import org.opendatakit.aggregate.constants.common.UIConsts;
 import org.opendatakit.aggregate.exception.ODKConversionException;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
@@ -58,7 +59,7 @@ import org.opendatakit.common.web.CallingContext;
  */
 public class SubmissionServlet extends ServletUtilBase {
 
-/**
+  /**
    * Serial number for serialization
    */
   private static final long serialVersionUID = -9115712148453543651L;
@@ -66,8 +67,11 @@ public class SubmissionServlet extends ServletUtilBase {
   /**
    * URI from base
    */
-  public static final String ADDR = "submission";
+  public static final String ADDR = UIConsts.SUBMISSION_SERVLET_ADDR;
 
+  /**
+   * Title for generated webpage
+   */
   private static final String TITLE = "Submission Upload";
 
   /**
@@ -165,7 +169,7 @@ public class SubmissionServlet extends ServletUtilBase {
    headerString.append("<script src=\"");
    headerString.append(cc.getWebApplicationURL(UPLOAD_SCRIPT_RESOURCE));
    headerString.append("\"></script>");
-   beginBasicHtmlResponse(TITLE, headerString.toString(), resp, true, cc );// header info
+   beginBasicHtmlResponse(TITLE, headerString.toString(), resp, cc );// header info
    PrintWriter out = resp.getWriter();
    out.write(UPLOAD_PAGE_BODY_START);
    out.write(cc.getWebApplicationURL(ADDR));
