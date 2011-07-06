@@ -15,7 +15,7 @@
  */
 package org.opendatakit.common.security.common;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
+import java.io.Serializable;
 
 
 /**
@@ -29,7 +29,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  * @author mitchellsundt@gmail.com
  *
  */
-public enum GrantedAuthorityNames implements IsSerializable {
+public enum GrantedAuthorityNames implements Serializable {
 
 	AUTH_LOCAL("any users authenticated via the locally-held (<em>Aggregate password</em>) credential"),
 	AUTH_OPENID("any users authenticated via OpenID"),

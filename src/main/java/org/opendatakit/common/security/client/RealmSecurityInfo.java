@@ -16,7 +16,7 @@
 
 package org.opendatakit.common.security.client;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
+import java.io.Serializable;
 
 /**
  * Information about the security configuration of the server.
@@ -24,9 +24,14 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  * @author mitchellsundt@gmail.com
  *
  */
-public class RealmSecurityInfo implements IsSerializable {
-
-	String basicAuthHashEncoding;
+public class RealmSecurityInfo implements Serializable {
+  
+	/**
+   * 
+   */
+  private static final long serialVersionUID = -4307350533653978280L;
+  
+  String basicAuthHashEncoding;
 	String realmString;
 	
 	public RealmSecurityInfo() {

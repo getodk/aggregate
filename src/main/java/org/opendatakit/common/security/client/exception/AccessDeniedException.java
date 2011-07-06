@@ -18,15 +18,13 @@ package org.opendatakit.common.security.client.exception;
 
 import java.io.Serializable;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
-
 /**
  * Access denied exception that can be returned through GWT.
  * 
  * @author mitchellsundt@gmail.com
  *
  */
-public class AccessDeniedException extends Exception implements Serializable, IsSerializable {
+public class AccessDeniedException extends Exception implements Serializable {
 	/**
 	 * 
 	 */

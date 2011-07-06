@@ -57,7 +57,7 @@ public class RowFilter extends Filter implements Serializable {
 
   public Visibility getVisibility() {
     // TODO: Kyle I am not sure why RowFilter has keep/remove?
-    return Visibility.KEEP;
+    return Visibility.DISPLAY;
   }
 
   public FilterOperation getOperation() {

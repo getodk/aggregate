@@ -22,7 +22,7 @@ import java.util.List;
 
 public class FilterSet implements Serializable {
 
-	private static final long serialVersionUID = -6646690488192856868L;
+	private static final long serialVersionUID = -7646690488192856868L;
 	private List<FilterGroup> groups;
 	
 	public FilterSet() {

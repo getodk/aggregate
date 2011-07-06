@@ -16,9 +16,9 @@
 
 package org.opendatakit.aggregate.constants.common;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
+import java.io.Serializable;
 
-public enum PageUpdates implements IsSerializable {
+public enum PageUpdates implements Serializable {
 	FORMDROPDOWN,
 	FORMTABLE,
 	SUBMISSIONDATA,

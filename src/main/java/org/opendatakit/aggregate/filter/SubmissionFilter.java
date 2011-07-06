@@ -95,7 +95,13 @@ public class SubmissionFilter extends CommonFieldsBase {
 
   public Visibility getColumnVisibility() {
     String visibility = getStringField(VISIBILITY_PROPERTY);
-    return Visibility.valueOf(visibility);
+    try {
+      return Visibility.valueOf(visibility);
+    } catch (IllegalArgumentException e) {
+      // try again using historical values
+      // this is to allow an upgrade when we change visibility constant names
+      return Visibility.historicalConverter(visibility);
+    }
   }
 
   public RowOrCol getRowOrColumn() {

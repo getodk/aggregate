@@ -16,7 +16,7 @@
 
 package org.opendatakit.common.security.client;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
+import java.io.Serializable;
 
 /**
  * Object sent over the GWT transport layer.
@@ -25,9 +25,14 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  * @author mitchellsundt@gmail.com
  *
  */
-public class GrantedAuthorityInfo implements IsSerializable, Comparable<GrantedAuthorityInfo> {
+public class GrantedAuthorityInfo implements Serializable, Comparable<GrantedAuthorityInfo> {
 
-	String name;
+	/**
+   * 
+   */
+  private static final long serialVersionUID = -5003306781601499567L;
+  
+  String name;
 	
 	public GrantedAuthorityInfo() {
 	}

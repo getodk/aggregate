@@ -18,8 +18,6 @@ package org.opendatakit.aggregate.client.exception;
 
 import java.io.Serializable;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
-
 /**
  * Generic request failure exception for reporting server failures up to user.
  * These would include server consistency-failures, unexpected missing forms, etc.
@@ -30,8 +28,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  * @author mitchellsundt@gmail.com
  *
  */
-public class RequestFailureException extends Exception implements
-		Serializable, IsSerializable {
+public class RequestFailureException extends Exception implements Serializable {
 
 	/**
 	 * 
