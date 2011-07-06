@@ -16,6 +16,7 @@
 
 package org.opendatakit.aggregate.client.submission;
 
+
 import java.io.Serializable;
 
 public class UIGeoPoint implements Serializable {

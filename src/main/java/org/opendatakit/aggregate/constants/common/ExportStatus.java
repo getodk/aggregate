@@ -16,9 +16,9 @@
 
 package org.opendatakit.aggregate.constants.common;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
+import java.io.Serializable;
 
-public enum ExportStatus implements IsSerializable {
+public enum ExportStatus implements Serializable {
  	GENERATION_IN_PROGRESS, // created or task is running
  	RETRY_IN_PROGRESS, // task is running
  	FAILED,    // task completed with failure; retry again later.

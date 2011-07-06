@@ -16,7 +16,7 @@
 
 package org.opendatakit.common.security.client;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
+import java.io.Serializable;
 
 /**
  * Transport object for communicating password changes between GWT client and server.
@@ -24,9 +24,13 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  * @author mitchellsundt@gmail.com
  *
  */
-public class CredentialsInfo implements IsSerializable {
+public class CredentialsInfo implements Serializable {
 
-	String username;
+	/**
+   * 
+   */
+  private static final long serialVersionUID = -8984148650618368023L;
+  String username;
 	String digestAuthHash;
 	String basicAuthHash;
 	String basicAuthSalt;

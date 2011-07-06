@@ -16,9 +16,8 @@
 
 package org.opendatakit.common.security.client;
 
+import java.io.Serializable;
 import java.util.TreeSet;
-
-import com.google.gwt.user.client.rpc.IsSerializable;
 
 /**
  * Transport object for returning the authorities assigned to a class of users.
@@ -26,8 +25,16 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  * @author mitchellsundt@gmail.com
  *
  */
-public class UserClassSecurityInfo implements Comparable<UserClassSecurityInfo>, IsSerializable {
-	String userClassName;
+public class UserClassSecurityInfo implements Comparable<UserClassSecurityInfo>, Serializable {
+	
+  
+
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 3238801089946574356L;
+  
+  String userClassName;
 	TreeSet<GrantedAuthorityInfo> assignedUserGroups = new TreeSet<GrantedAuthorityInfo>();
 	TreeSet<GrantedAuthorityInfo> assignedGrantedAuthorities = new TreeSet<GrantedAuthorityInfo>();
 	TreeSet<GrantedAuthorityInfo> grantedAuthorities = new TreeSet<GrantedAuthorityInfo>();

@@ -16,9 +16,8 @@
 
 package org.opendatakit.common.security.client;
 
+import java.io.Serializable;
 import java.util.TreeSet;
-
-import com.google.gwt.user.client.rpc.IsSerializable;
 
 /**
  * Heavy object comparable to User that is transportable across the GWT interfaces.
@@ -29,9 +28,14 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  * @author mitchellsundt@gmail.com
  *
  */
-public class UserSecurityInfo implements Comparable<UserSecurityInfo>, IsSerializable {
+public class UserSecurityInfo implements Comparable<UserSecurityInfo>, Serializable {
 
-	public enum UserType implements IsSerializable {
+	/**
+   * 
+   */
+  private static final long serialVersionUID = 7581021818962882604L;
+
+  public enum UserType implements Serializable {
 		ANONYMOUS,     // not authenticated (anonymous)
 		DAEMON,        // daemon (background) account
 		REGISTERED,    // authenticated and registered
