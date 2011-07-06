@@ -36,7 +36,6 @@ import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.common.constants.BasicConsts;
 import org.opendatakit.common.constants.HtmlConsts;
 import org.opendatakit.common.constants.HtmlUtil;
-import org.opendatakit.common.security.UserService;
 import org.opendatakit.common.web.CallingContext;
 
 /**
@@ -95,7 +94,7 @@ public abstract class CommonServletBase extends HttpServlet {
    */
   protected void beginBasicHtmlResponse(String pageName, HttpServletResponse resp,
       boolean displayLinks, CallingContext cc) throws IOException {
-          beginBasicHtmlResponse(pageName, BasicConsts.EMPTY_STRING, resp, displayLinks, cc );
+          beginBasicHtmlResponse(pageName, BasicConsts.EMPTY_STRING, resp, cc );
   }
 
   protected PrintWriter beginBasicHtmlResponsePreamble(String headContent, HttpServletResponse resp, CallingContext cc) throws IOException {
@@ -122,35 +121,11 @@ public abstract class CommonServletBase extends HttpServlet {
    * @param headContent additional head content emitted before title
    * @param resp http response to have the information appended to
    * @param req request
-   * @param displayLinks display links accross the top
    * @throws IOException
    */
   protected void beginBasicHtmlResponse(String pageName, String headContent, HttpServletResponse resp,
-              boolean displayLinks, CallingContext cc) throws IOException {
+              CallingContext cc) throws IOException {
 	PrintWriter out = beginBasicHtmlResponsePreamble(headContent, resp, cc);
-    out.write(HtmlConsts.PAGE_HEADING_TABLE_OPEN);
-    out.write(HtmlConsts.TABLE_ROW_OPEN);
-   // icon
-    out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.HEADING_IMAGE_TABLE_DATA,
-         "<img src='" + cc.getWebApplicationURL("odk_color.png") + "'/>"));
-   // title
-    out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.HEADING_RIGHT_TABLE_DATA,
-         HtmlUtil.wrapWithHtmlTags(HtmlConsts.B, "<FONT COLOR=330066 size=7>" + applicationName + "</FONT>")));
-   // version
-    out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.HEADING_TABLE_DATA,
-         getVersionString(cc)));
-   // logout
-    UserService userService = cc.getUserService();
-    out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.HEADING_RIGHT_TABLE_DATA,
-         HtmlUtil.createHref(cc.getWebApplicationURL(userService.createLogoutURL()),
-                        LOGOUT + userService.getCurrentUser().getNickname())));
-
-    out.write(HtmlConsts.TABLE_ROW_CLOSE);
-    out.write(HtmlConsts.TABLE_CLOSE);
-
-    out.write(HtmlUtil.createSelfClosingTag(HtmlConsts.HEADING_HR));
-    emitPageHeader(out, displayLinks, cc);
-    out.write(HtmlUtil.createSelfClosingTag(HtmlConsts.TITLE_HR));
     out.write(HtmlUtil.createBeginTag(HtmlConsts.CENTERING_DIV));
     out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.H1, pageName));
     out.write(HtmlUtil.createEndTag(HtmlConsts.DIV));
