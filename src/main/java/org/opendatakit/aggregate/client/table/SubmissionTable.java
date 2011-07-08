@@ -67,8 +67,8 @@ public class SubmissionTable extends FlexTable {
                 popup.setPopupPositionAndShow(new PopupPanel.PositionCallback() {
                   @Override
                   public void setPosition(int offsetWidth, int offsetHeight) {
-                    int left = ((Window.getClientWidth() - offsetWidth) / 2);
-                    int top = ((Window.getClientHeight() - offsetHeight) / 2);
+                    int left = ((Window.getScrollLeft() + Window.getClientWidth() - offsetWidth) / 2);
+                    int top = ((Window.getScrollTop() + Window.getClientHeight() - offsetHeight) / 2);
                     popup.setPopupPosition(left, top);
                   }
                 });
