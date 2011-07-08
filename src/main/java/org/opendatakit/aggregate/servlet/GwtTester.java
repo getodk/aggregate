@@ -99,7 +99,7 @@ public class GwtTester extends ServletUtilBase {
 
     if (flag.equals("create")) {
       List<Filter> filters = new ArrayList<Filter>();
-      filters.add(new RowFilter(Visibility.KEEP, new Column("Ro1Awesome", "", new Long(1)),
+      filters.add(new RowFilter(Visibility.DISPLAY, new Column("Ro1Awesome", "", new Long(1)),
           FilterOperation.EQUAL, "captain", new Long(99)));
 
       List<ColumnFilterHeader> columns = new ArrayList<ColumnFilterHeader>();
@@ -107,8 +107,8 @@ public class GwtTester extends ServletUtilBase {
       columns.add(new ColumnFilterHeader("ColAwesome2", "", new Long(1)));
       columns.add(new ColumnFilterHeader("ColAwesome3", "", new Long(1)));
 
-      filters.add(new ColumnFilter(Visibility.KEEP, columns, new Long(5)));
-      filters.add(new RowFilter(Visibility.REMOVE, new Column("Ro1Awesome", "", UIDisplayType.TEXT),
+      filters.add(new ColumnFilter(Visibility.DISPLAY, columns, new Long(5)));
+      filters.add(new RowFilter(Visibility.HIDE, new Column("Ro1Awesome", "", UIDisplayType.TEXT),
           FilterOperation.EQUAL, "captain1", new Long(1)));
       FilterGroup group = new FilterGroup("group100", formId, filters);
       try {

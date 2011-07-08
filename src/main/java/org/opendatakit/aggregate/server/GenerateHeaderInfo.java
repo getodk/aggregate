@@ -93,7 +93,7 @@ public class GenerateHeaderInfo {
             FormElementModel fem = FormElementModel.retrieveFormElementModel(form, femKey);
 
             // add to appropriate keep or remove
-            if (cf.getVisibility().equals(Visibility.KEEP)) {
+            if (cf.getVisibility().equals(Visibility.DISPLAY)) {
               addKeepFormElement(fem);
             } else {
               addRemoveFormElement(fem);
@@ -113,7 +113,7 @@ public class GenerateHeaderInfo {
               Long gpsColumnIndex = columnHeader.getColumn().getGeopointColumnCode();
 
               // add to appropriate keep or remove
-              if (cf.getVisibility().equals(Visibility.KEEP)) {
+              if (cf.getVisibility().equals(Visibility.DISPLAY)) {
                 geopoint.keepColumn(gpsColumnIndex);
               } else {
                 geopoint.removeColumn(gpsColumnIndex);

@@ -16,16 +16,15 @@
 
 package org.opendatakit.aggregate.constants.common;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
+import java.io.Serializable;
 
-public enum SubTabs implements IsSerializable {
-	EXPORT("Export List", "export"),
+public enum SubTabs implements Serializable {
+	EXPORT("Export Files", "export"),
 	FILTER("Filter Submissions", "filter"),
 	FORMS("Forms List", "forms"),
-	PUBLISH("Published Services", "publish"),
+	PUBLISH("Published Data", "publish"),
 	PREFERENCES("Preferences", "preferences"),
-	PERMISSIONS("Permissions", "permission"),
-	HIDDEN_PERMISSIONS("", "permissions"); 
+	PERMISSIONS("Permissions", "permission"); 
 	
    private String tabLabel;
    private String hashString;

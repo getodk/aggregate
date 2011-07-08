@@ -17,7 +17,7 @@
 
 package org.opendatakit.aggregate.constants.common;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
+import java.io.Serializable;
 
 /**
  * Enum of upload-only, streaming-only and upload-then-streaming
@@ -28,7 +28,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  * @author mitchellsundt@gmail.com
  * 
  */
-public enum ExternalServicePublicationOption implements IsSerializable {
+public enum ExternalServicePublicationOption implements Serializable {
   UPLOAD_ONLY("Upload Existing Submission Data ONLY"),
   STREAM_ONLY("Stream New Submission Data ONLY"),
   UPLOAD_N_STREAM("BOTH Upload Existing & Stream New Submission Data");

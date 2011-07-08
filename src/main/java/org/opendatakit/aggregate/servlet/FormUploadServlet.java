@@ -30,6 +30,7 @@ import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.ErrorConsts;
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.ServletConsts;
+import org.opendatakit.aggregate.constants.common.UIConsts;
 import org.opendatakit.aggregate.exception.ODKConversionException;
 import org.opendatakit.aggregate.exception.ODKFormAlreadyExistsException;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
@@ -61,7 +62,7 @@ public class FormUploadServlet extends ServletUtilBase {
   /**
    * URI from base
    */
-  public static final String ADDR = "admin/upload";
+  public static final String ADDR = UIConsts.FORM_UPLOAD_SERVLET_ADDR;
 
   /**
    * Title for generated webpage
@@ -164,7 +165,7 @@ public class FormUploadServlet extends ServletUtilBase {
 	headerString.append("<script src=\"");
 	headerString.append(cc.getWebApplicationURL(UPLOAD_SCRIPT_RESOURCE));
 	headerString.append("\"></script>");
-	beginBasicHtmlResponse(TITLE_INFO, headerString.toString(), resp, true, cc );// header info
+	beginBasicHtmlResponse(TITLE_INFO, headerString.toString(), resp, cc );// header info
 	PrintWriter out = resp.getWriter();
 	out.write(UPLOAD_PAGE_BODY_START);
 	out.write(cc.getWebApplicationURL(ADDR));

@@ -16,9 +16,9 @@
 
 package org.opendatakit.aggregate.constants.common;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
+import java.io.Serializable;
 
-public enum OperationalStatus implements IsSerializable {
+public enum OperationalStatus implements Serializable {
   ESTABLISHED,
   ACTIVE, 
   PAUSED, 

@@ -16,8 +16,32 @@
 
 package org.opendatakit.aggregate.constants.common;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
+import java.io.Serializable;
 
-public enum Visibility implements IsSerializable {
-  KEEP, REMOVE
+
+
+public enum Visibility implements Serializable {
+  DISPLAY("Display"), HIDE("Hide");
+  
+  private String displayText;
+  
+  private Visibility(String display) {
+    displayText = display;
+  }
+  
+  public String getDisplayText() {
+    return displayText;
+  }
+  
+  public static Visibility historicalConverter(String str) {
+    // TODO: remove after a long time after the upgrade
+    // this is to allow an upgrade when we change visibility constant names
+    if (str.equals("KEEP")) {
+      return Visibility.DISPLAY;
+    } else if (str.equals("REMOVE")) {
+      return Visibility.HIDE;
+    } else {
+      throw new IllegalArgumentException("Unable to Convert Historical Visibility Values");
+    }
+  }
 }
