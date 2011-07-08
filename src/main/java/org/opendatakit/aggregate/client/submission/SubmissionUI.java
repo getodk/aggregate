@@ -19,7 +19,6 @@ package org.opendatakit.aggregate.client.submission;
 import java.io.Serializable;
 import java.util.List;
 
-
 public class SubmissionUI implements Serializable {
 
   /**

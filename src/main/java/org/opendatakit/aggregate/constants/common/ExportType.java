@@ -16,9 +16,10 @@
 
 package org.opendatakit.aggregate.constants.common;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
+import java.io.Serializable;
 
-public enum ExportType implements IsSerializable {
+
+public enum ExportType implements Serializable {
  	CSV,
  	KML;
  	

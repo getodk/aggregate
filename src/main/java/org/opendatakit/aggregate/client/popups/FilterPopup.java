@@ -17,7 +17,9 @@
 package org.opendatakit.aggregate.client.popups;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.opendatakit.aggregate.client.filter.ColumnFilterHeader;
 import org.opendatakit.aggregate.client.filter.FilterGroup;
@@ -51,6 +53,9 @@ public class FilterPopup extends PopupPanel{
 	private final ListBox filterOp;
 	private final TextBox filterValue;
 	
+	private final Map<String, RowOrCol> rowColMapping;
+	private final Map<String, Visibility> visibilityMapping;
+	
 	public FilterPopup(SubmissionTable submissionData, FilterGroup filterGroup) {
 		super(false); //do not close popup when user clicks out of it
 		this.group = filterGroup;
@@ -60,14 +65,20 @@ public class FilterPopup extends PopupPanel{
 		
 		//keep or remove
 		keepRemove = new ListBox();
+		visibilityMapping = new HashMap<String, Visibility>();
 		for(Visibility vis : Visibility.values()) {
-		  keepRemove.addItem(vis.toString());
+		  String displayText = vis.getDisplayText();
+		  keepRemove.addItem(displayText);
+		  visibilityMapping.put(displayText, vis);
 		}
 		
 		//rows or columns
 		rowCol = new ListBox();
+		rowColMapping = new HashMap<String, RowOrCol>();
 		for(RowOrCol type : RowOrCol.values()) {
-		  rowCol.addItem(type.toString());
+		  String displayText = type.getDisplayText();
+		  rowCol.addItem(displayText);
+		  rowColMapping.put(displayText, type);
 		}
 		
 		//where columns
@@ -100,7 +111,7 @@ public class FilterPopup extends PopupPanel{
 
 			@Override
 			public void onChange(ChangeEvent event) {
-				if(rowCol.getValue(rowCol.getSelectedIndex()).compareTo(RowOrCol.ROW.toString()) == 0) {
+				if(rowCol.getValue(rowCol.getSelectedIndex()).equals(RowOrCol.ROW.getDisplayText())) {
 					table.setWidget(0, 2, whereCols);
 					columnForRowFilter.setVisible(true);
 					columnsForColumnFilter.setVisible(false);
@@ -139,12 +150,12 @@ public class FilterPopup extends PopupPanel{
 
   public Visibility getKeepRemove() {    
     String korr = keepRemove.getValue(keepRemove.getSelectedIndex());
-    return Visibility.valueOf(korr);
+    return visibilityMapping.get(korr);
   }
 
   public RowOrCol getRowCol() {
     String rowcol = rowCol.getValue(rowCol.getSelectedIndex());
-    return RowOrCol.valueOf(rowcol);
+    return rowColMapping.get(rowcol);
   }
 
   public Column getColumnForRowFilter() {

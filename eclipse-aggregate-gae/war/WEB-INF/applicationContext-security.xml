@@ -73,7 +73,9 @@
 		<!-- grant access to various servlets -->
 		<intercept-url pattern="/formList" access="hasRole('ROLE_DATA_COLLECTOR')" />
 		<intercept-url pattern="/formXml" access="hasRole('ROLE_DATA_COLLECTOR')" />
-		<intercept-url pattern="/submission" access="hasRole('ROLE_DATA_COLLECTOR')" />
+		<intercept-url pattern="/submission" access="hasRole('ROLE_DATA_COLLECTOR') or hasRole('ROLE_DATA_OWNER')" />
+		<intercept-url pattern="/formUpload" access="hasRole('ROLE_DATA_OWNER')" /> <!--  NEW form upload url -->
+		<intercept-url pattern="/upload" access="hasRole('ROLE_DATA_OWNER')" /> <!--  OLD form upload url -->
 		<intercept-url pattern="/xformsDownload" access="hasRole('ROLE_DATA_COLLECTOR')" />
 		<intercept-url pattern="/xformsList" access="hasRole('ROLE_DATA_COLLECTOR')" />
 		<intercept-url pattern="/xformsManifest" access="hasRole('ROLE_DATA_COLLECTOR')" />
@@ -88,7 +90,6 @@
 		<intercept-url pattern="/admin/**" access="hasRole('ROLE_DATA_OWNER')" />
         <intercept-url pattern="/auth/**" access="hasRole('ROLE_DATA_OWNER')" />
 		<intercept-url pattern="/extern/**" access="hasRole('ROLE_DATA_OWNER')" />
-        <intercept-url pattern="/ui/**" access="hasRole('ROLE_DATA_OWNER')" />
 
         <intercept-url pattern="/ssl/**" access="hasRole('ROLE_SITE_ACCESS_ADMIN')" />
 

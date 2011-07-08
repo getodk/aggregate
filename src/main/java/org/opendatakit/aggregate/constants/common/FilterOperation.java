@@ -16,12 +16,12 @@
 
 package org.opendatakit.aggregate.constants.common;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
+import java.io.Serializable;
 
 /**
  * This enum defines the different filter operations which the Query can have.
  */
-public enum FilterOperation implements IsSerializable {
+public enum FilterOperation implements Serializable {
  EQUAL,
  GREATER_THAN,
  GREATER_THAN_OR_EQUAL,
