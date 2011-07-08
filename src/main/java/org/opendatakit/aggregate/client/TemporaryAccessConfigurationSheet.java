@@ -25,29 +25,29 @@ import java.util.Map;
 import java.util.TreeSet;
 
 import org.opendatakit.aggregate.client.popups.ChangePasswordPopup;
-import org.opendatakit.common.security.client.GrantedAuthorityInfo;
-import org.opendatakit.common.security.client.UserClassSecurityInfo;
+import org.opendatakit.aggregate.client.popups.ConfirmUserDeletePopup;
 import org.opendatakit.common.security.client.UserSecurityInfo;
 import org.opendatakit.common.security.client.UserSecurityInfo.UserType;
 import org.opendatakit.common.security.common.EmailParser;
 import org.opendatakit.common.security.common.EmailParser.Email;
-import org.opendatakit.common.security.common.GrantedAuthorityNames;
+import org.opendatakit.common.security.common.GrantedAuthorityName;
+import org.opendatakit.common.web.client.BooleanValidationPredicate;
+import org.opendatakit.common.web.client.StringValidationPredicate;
+import org.opendatakit.common.web.client.UIEnabledActionColumn;
+import org.opendatakit.common.web.client.UIEnabledPredicate;
+import org.opendatakit.common.web.client.UIEnabledValidatingCheckboxColumn;
+import org.opendatakit.common.web.client.UIEnabledValidatingSelectionColumn;
+import org.opendatakit.common.web.client.UIEnabledValidatingTextInputColumn;
+import org.opendatakit.common.web.client.UIVisiblePredicate;
 
 import com.google.gwt.cell.client.ActionCell;
-import com.google.gwt.cell.client.CheckboxCell;
-import com.google.gwt.cell.client.FieldUpdater;
-import com.google.gwt.cell.client.TextInputCell;
-import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.Element;
-import com.google.gwt.dom.client.InputElement;
-import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.CellTable;
-import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.Event;
@@ -56,7 +56,6 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.Widget;
@@ -64,490 +63,717 @@ import com.google.gwt.view.client.ListDataProvider;
 
 public class TemporaryAccessConfigurationSheet extends Composite {
 
-   private static final int STATIC_USER_TABLE_COLUMNS = 5;
-   private static final int ERROR_MESSAGE_RETENTION_INTERVAL_MILLISECONDS = 2000;
-   private static final String K_INVALID_EMAIL_CHARACTERS = " \t\n\r\",;()<>?/{}'[]";
-   private static final GrantedAuthorityInfo siteAdmins = new GrantedAuthorityInfo(GrantedAuthorityNames.GROUP_SITE_ADMINS);
-   private static final GrantedAuthorityInfo dataAdmins = new GrantedAuthorityInfo(GrantedAuthorityNames.GROUP_DATA_OWNERS);
-   private static final GrantedAuthorityInfo dataViewers = new GrantedAuthorityInfo(GrantedAuthorityNames.GROUP_DATA_VIEWERS);
-   private static final GrantedAuthorityInfo dataCollectors = new GrantedAuthorityInfo(GrantedAuthorityNames.GROUP_DATA_COLLECTORS);
+	private static final String K_INVALID_EMAIL_CHARACTERS = " \t\n\r\",;()<>?/{}'[]";
 
-   private static TemporaryAccessConfigurationSheetUiBinder uiBinder = GWT
-         .create(TemporaryAccessConfigurationSheetUiBinder.class);
+	public static final ArrayList<String> userType;
+	public static final String ACCOUNT_TYPE_ODK = "ODK";
+	public static final String ACCOUNT_TYPE_GOOGLE = "Google";
+	static {
+		userType = new ArrayList<String>();
+		userType.add(ACCOUNT_TYPE_ODK);
+		userType.add(ACCOUNT_TYPE_GOOGLE);
+	};
 
-   interface TemporaryAccessConfigurationSheetUiBinder extends
-         UiBinder<Widget, TemporaryAccessConfigurationSheet> {
-   }
-   
-   ListDataProvider<UserSecurityInfo> dataProvider = new ListDataProvider<UserSecurityInfo>();
-   long errorTimestamp = 0;
-   
-   private class GroupMembership extends Column<UserSecurityInfo,Boolean> 
-                  implements FieldUpdater<UserSecurityInfo, Boolean> {
-      final GrantedAuthorityInfo auth;
-      
-      GroupMembership(GrantedAuthorityInfo auth) {
-         super(new CheckboxCell(true, false));
-         this.auth = auth;
-         this.setFieldUpdater(this);
-         this.setSortable(true);
-      }
+	private static TemporaryAccessConfigurationSheetUiBinder uiBinder = GWT
+			.create(TemporaryAccessConfigurationSheetUiBinder.class);
 
-      @Override
-      public Boolean getValue(UserSecurityInfo object) {
-         return object.getAssignedUserGroups().contains(auth);
-      }
+	interface TemporaryAccessConfigurationSheetUiBinder extends
+			UiBinder<Widget, TemporaryAccessConfigurationSheet> {
+	}
 
-      @Override
-      public void update(int index, UserSecurityInfo object, Boolean value) {
-         if ( value ) {
-            object.getAssignedUserGroups().add(auth);
-         } else {
-            object.getAssignedUserGroups().remove(auth);
-         }
-      }
-   }
-   
-   class DeleteActionCallback implements ActionCell.Delegate<UserSecurityInfo> {
+	final ListDataProvider<UserSecurityInfo> dataProvider = new ListDataProvider<UserSecurityInfo>();
+	final ListHandler<UserSecurityInfo> columnSortHandler = new ListHandler<UserSecurityInfo>(
+			dataProvider.getList());
+
+	boolean changesHappened = false;
+
+	public boolean isUiOutOfSyncWithServer() {
+		return changesHappened;
+	}
+
+	private void uiInSyncWithServer() {
+		changesHappened = false;
+	}
+
+	private void uiOutOfSyncWithServer() {
+		changesHappened = true;
+	}
+
+	private static final class AuthChangeValidation implements
+			BooleanValidationPredicate<UserSecurityInfo> {
+
+		final GrantedAuthorityName auth;
+
+		AuthChangeValidation(GrantedAuthorityName auth) {
+			this.auth = auth;
+		}
+
+		@Override
+		public boolean isValid(boolean prospectiveValue, UserSecurityInfo key) {
+			return (!auth.equals(GrantedAuthorityName.GROUP_DATA_COLLECTORS) || key
+					.getUsername() != null);
+		}
+	}
+
+	private static final class AuthVisiblePredicate implements
+			UIVisiblePredicate<UserSecurityInfo> {
+
+		final GrantedAuthorityName auth;
+
+		AuthVisiblePredicate(GrantedAuthorityName auth) {
+			this.auth = auth;
+		}
+
+
+		@Override
+		public boolean isVisible(UserSecurityInfo key) {
+			if ( auth != GrantedAuthorityName.GROUP_DATA_COLLECTORS ) return true;
+			// data collectors can only be ODK accounts...
+			return ( key.getUsername() != null );
+		}
+		
+	}
+	
+	private static final class AuthEnabledPredicate implements
+			UIEnabledPredicate<UserSecurityInfo> {
+
+		final GrantedAuthorityName auth;
+
+		AuthEnabledPredicate(GrantedAuthorityName auth) {
+			this.auth = auth;
+		}
+
+		@Override
+		public boolean isEnabled(UserSecurityInfo info) {
+			TreeSet<GrantedAuthorityName> assignedGroups = info
+					.getAssignedUserGroups();
+
+			switch (auth) {
+			case GROUP_DATA_COLLECTORS:
+				// data collectors must be anonymous or an ODK account type. 
+				return (info.getType() == UserType.ANONYMOUS) || (info.getUsername() != null);
+			case GROUP_DATA_VIEWERS:
+				if (assignedGroups
+						.contains(GrantedAuthorityName.GROUP_FORM_MANAGERS)
+						|| assignedGroups
+								.contains(GrantedAuthorityName.GROUP_SITE_ADMINS)) {
+					return false;
+				}
+				return true;
+			case GROUP_FORM_MANAGERS:
+				if (assignedGroups
+						.contains(GrantedAuthorityName.GROUP_SITE_ADMINS)) {
+					return false;
+				}
+				return true;
+			case GROUP_SITE_ADMINS:
+				return true;
+			default:
+				return false;
+			}
+		}
+	}
+
+	private static final class AuthComparator implements
+			Comparator<UserSecurityInfo> {
+
+		final GrantedAuthorityName auth;
+
+		AuthComparator(GrantedAuthorityName auth) {
+			this.auth = auth;
+		}
+
+		@Override
+		public int compare(UserSecurityInfo arg0, UserSecurityInfo arg1) {
+			boolean arg0Contains = arg0.getAssignedUserGroups().contains(auth);
+			boolean arg1Contains = arg1.getAssignedUserGroups().contains(auth);
+
+			if (arg0Contains == arg1Contains) {
+				// same value.  In the case where another
+				// assigned granted authority subsumes this one,
+				// we want to place the users with subsumed
+				// rights above those with no rights.
+				arg0Contains = arg0.getGrantedAuthorities().contains(auth);
+				arg1Contains = arg1.getGrantedAuthorities().contains(auth);
+				if ( arg0Contains == arg1Contains ) return 0;
+				if ( arg0Contains ) return -1;
+				return 1;
+			}
+			// checked before unchecked...
+			if (arg0Contains)
+				return -1;
+			return 1;
+		}
+	}
+
+	private class GroupMembershipColumn extends
+			UIEnabledValidatingCheckboxColumn<UserSecurityInfo> {
+		final GrantedAuthorityName auth;
+
+		GroupMembershipColumn(GrantedAuthorityName auth) {
+			super(new AuthChangeValidation(auth), new AuthVisiblePredicate(auth),
+					new AuthEnabledPredicate(auth), new AuthComparator(auth));
+			this.auth = auth;
+		}
+
+		@Override
+		public void setValue(UserSecurityInfo object, Boolean value) {
+			if (value) {
+				object.getAssignedUserGroups().add(auth);
+			} else {
+				object.getAssignedUserGroups().remove(auth);
+			}
+			if (!auth.equals(GrantedAuthorityName.GROUP_DATA_COLLECTORS)) {
+				// we may be disabling or enabling some checkboxes...
+				userTable.redraw();
+			}
+			uiOutOfSyncWithServer();
+		}
+
+		@Override
+		public Boolean getValue(UserSecurityInfo object) {
+
+			TreeSet<GrantedAuthorityName> assignedGroups = object
+					.getAssignedUserGroups();
+			switch (auth) {
+			case GROUP_DATA_COLLECTORS:
+				return assignedGroups.contains(auth);
+			case GROUP_DATA_VIEWERS:
+				return assignedGroups.contains(GrantedAuthorityName.GROUP_FORM_MANAGERS)
+						|| assignedGroups.contains(GrantedAuthorityName.GROUP_SITE_ADMINS)
+						|| assignedGroups.contains(auth);
+			case GROUP_FORM_MANAGERS:
+				return assignedGroups.contains(GrantedAuthorityName.GROUP_SITE_ADMINS)
+						|| assignedGroups.contains(auth);
+			case GROUP_SITE_ADMINS:
+				return assignedGroups.contains(auth);
+			default:
+				return false;
+			}
+		}
+	}
+
+	private static boolean hasInvalidEmailCharacters(String email) {
+		for (int i = 0; i < K_INVALID_EMAIL_CHARACTERS.length(); ++i) {
+			char ch = K_INVALID_EMAIL_CHARACTERS.charAt(i);
+			if (email.indexOf(ch) != -1) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private class UpdateUserDisplay implements
+			AsyncCallback<ArrayList<UserSecurityInfo>> {
+		@Override
+		public void onFailure(Throwable caught) {
+			Window.alert("Unable to retrieve users from server: "
+					+ caught.getMessage());
+		}
+
+		@Override
+		public void onSuccess(ArrayList<UserSecurityInfo> result) {
+			for (UserSecurityInfo i : result) {
+				if (i.getType() == UserType.ANONYMOUS) {
+					anonymousAttachmentViewers
+							.setValue(i
+									.getGrantedAuthorities()
+									.contains(
+											GrantedAuthorityName.ROLE_ATTACHMENT_VIEWER));
+					break;
+				}
+			}
+			dataProvider.getList().clear();
+			dataProvider.getList().addAll(result);
+			addedUsers.setText("");
+			uiInSyncWithServer();
+		}
+	};
+
+	public void deleteUser(UserSecurityInfo user) {
+		dataProvider.getList().remove(user);
+		updateUsersOnServer();
+	}
+
+	public void updateUsersOnServer() {
+		ArrayList<GrantedAuthorityName> allGroups = new ArrayList<GrantedAuthorityName>();
+		allGroups.add(GrantedAuthorityName.GROUP_SITE_ADMINS);
+		allGroups.add(GrantedAuthorityName.GROUP_FORM_MANAGERS);
+		allGroups.add(GrantedAuthorityName.GROUP_DATA_VIEWERS);
+		allGroups.add(GrantedAuthorityName.GROUP_DATA_COLLECTORS);
+		allGroups.add(GrantedAuthorityName.USER_IS_ANONYMOUS);
+
+		ArrayList<UserSecurityInfo> users = new ArrayList<UserSecurityInfo>();
+		users.addAll(dataProvider.getList());
+		for (UserSecurityInfo i : users) {
+			if (i.getType() == UserType.ANONYMOUS) {
+				if (anonymousAttachmentViewers.getValue()) {
+					i.getAssignedUserGroups().add(
+							GrantedAuthorityName.ROLE_ATTACHMENT_VIEWER);
+				}
+				break;
+			} else {
+				if ( i.getUsername() == null ) {
+					// don't allow Google users to be data collectors
+					i.getAssignedUserGroups().remove(GrantedAuthorityName.GROUP_DATA_COLLECTORS);
+				}
+			}
+		}
+		SecureGWT.getSecurityAdminService().setUsersAndGrantedAuthorities(
+				Cookies.getCookie("JSESSIONID"), users, allGroups,
+				new AsyncCallback<Void>() {
+
+					@Override
+					public void onFailure(Throwable caught) {
+						Window.alert("Incomplete security update: "
+								+ caught.getMessage());
+					}
+
+					@Override
+					public void onSuccess(Void result) {
+						SecureGWT.getSecurityAdminService().getAllUsers(true,
+								new UpdateUserDisplay());
+					}
+				});
+	}
+
+	private static final class VisibleNotAnonymousPredicate implements
+			UIVisiblePredicate<UserSecurityInfo> {
+
+		@Override
+		public boolean isVisible(UserSecurityInfo info) {
+			// enable only if it is not the anonymous user
+			return (info.getType() != UserType.ANONYMOUS);
+		}
+	}
+
+	private static final class EnableNotAnonymousOrSuperUserPredicate implements
+			UIEnabledPredicate<UserSecurityInfo> {
+		@Override
+		public boolean isEnabled(UserSecurityInfo info) {
+			// enable only if it is a registered user
+			if (info.getType() != UserType.REGISTERED)
+				return false;
+			// enable if the user has no email (isn't a Google account)
+			String email = info.getEmail();
+			if (email == null)
+				return true;
+			String superUserEmail = AggregateUI.getUI().getRealmInfo()
+					.getSuperUserEmail();
+			// enable only if the user is not the superuser.
+			return !email.equals(superUserEmail);
+		}
+	};
+
+	private static final class EnableNotAnonymousPredicate implements
+			UIEnabledPredicate<UserSecurityInfo> {
+		@Override
+		public boolean isEnabled(UserSecurityInfo info) {
+			// enable only if it is a registered user
+			return (info.getType() == UserType.REGISTERED);
+		}
+	};
+
+	private static final class EnableLocalAccountPredicate implements
+			UIEnabledPredicate<UserSecurityInfo> {
+		@Override
+		public boolean isEnabled(UserSecurityInfo info) {
+			return (info.getType() == UserType.REGISTERED && info.getUsername() != null);
+		}
+	};
+
+	/**
+	 * Username cannot be null or zero-length. If it is a Google account type
+	 * (an e-mail address), then it should look like an e-mail address.
+	 */
+	private final class ValidatingUsernamePredicate implements
+			StringValidationPredicate<UserSecurityInfo> {
+
+		@Override
+		public boolean isValid(String prospectiveValue, UserSecurityInfo key) {
+			if (prospectiveValue != null && prospectiveValue.length() != 0) {
+				if (prospectiveValue.trim().length() != prospectiveValue
+						.length()) {
+					Window.alert("Invalid whitespace before or after the username");
+					return false;
+				}
+
+				// don't allow an edit to convert this name into an existing
+				// one.
+				for (UserSecurityInfo i : dataProvider.getList()) {
+					if (i == key)
+						continue;
+					if (i.getCanonicalName().equals(prospectiveValue)) {
+						Window.alert("Username is already defined");
+						return false;
+					}
+				}
+				if (key.getUsername() == null) {
+					// we are setting an e-mail address... verify it...
+					if (hasInvalidEmailCharacters(prospectiveValue)) {
+						Window.alert("Invalid characters in Email address.\n"
+								+ "Email address cannot contain whitespace, quotes,\n"
+								+ "commas, semicolons or other punctuation");
+						return false;
+					} else if (prospectiveValue.indexOf(EmailParser.K_AT) == -1) {
+						Window.alert("Email address is missing the '@domain.org' portion\n"
+								+ "Email must be of the form 'username@domain.org'");
+						return false;
+					}
+				}
+			} else {
+				Window.alert("Username cannot be empty");
+				return false;
+			}
+			return true;
+		}
+
+	}
+
+	private static class UsernameComparator implements
+			Comparator<UserSecurityInfo> {
+		@Override
+		public int compare(UserSecurityInfo arg0, UserSecurityInfo arg1) {
+			if (arg0 == arg1)
+				return 0;
+
+			if (arg0 != null) {
+				return (arg1 != null) ? arg0.getCanonicalName()
+						.compareToIgnoreCase(arg1.getCanonicalName()) : 1;
+			}
+			return -1;
+		}
+	};
+
+	private final class UsernameTextColumn extends
+			UIEnabledValidatingTextInputColumn<UserSecurityInfo> {
+
+		UsernameTextColumn() {
+			super(new ValidatingUsernamePredicate(),
+					new EnableNotAnonymousOrSuperUserPredicate(),
+					new UsernameComparator());
+		}
+
+		@Override
+		public String getValue(UserSecurityInfo object) {
+			String email = object.getEmail();
+			if (email != null) {
+				return email.substring(EmailParser.K_MAILTO.length());
+			} else {
+				return object.getUsername();
+			}
+		}
+
+		@Override
+		public void setValue(UserSecurityInfo object, String value) {
+			uiOutOfSyncWithServer();
+			// validation happens in the validation predicate...
+			if (object.getUsername() == null) {
+				object.setEmail(EmailParser.K_MAILTO + value);
+			} else {
+				object.setUsername(value);
+			}
+		}
+	}
+
+	private static class FullNameComparator implements
+			Comparator<UserSecurityInfo> {
+		@Override
+		public int compare(UserSecurityInfo arg0, UserSecurityInfo arg1) {
+			if (arg0 == arg1)
+				return 0;
+
+			if (arg0 != null) {
+				return (arg1 != null) ? arg0.getFullName().compareToIgnoreCase(
+						arg1.getFullName()) : 1;
+			}
+			return -1;
+		}
+	};
+
+	private final class FullNameTextColumn extends
+			UIEnabledValidatingTextInputColumn<UserSecurityInfo> {
+
+		FullNameTextColumn() {
+			super(null, new EnableNotAnonymousPredicate(),
+					new FullNameComparator());
+		}
+
+		@Override
+		public String getValue(UserSecurityInfo object) {
+			return object.getFullName();
+		}
+
+		@Override
+		public void setValue(UserSecurityInfo object, String value) {
+			uiOutOfSyncWithServer();
+			// validation happens in the validation predicate...
+			object.setFullName(value);
+		}
+	}
+
+	/**
+	 * If a Google account type is chosen, the username should be an e-mail
+	 * address.
+	 */
+	private static final class ValidatingAccountTypePredicate implements
+			StringValidationPredicate<UserSecurityInfo> {
+
+		@Override
+		public boolean isValid(String prospectiveValue, UserSecurityInfo key) {
+			if (prospectiveValue == null || prospectiveValue.length() == 0) {
+				Window.alert("Account Type cannot be empty");
+				return false;
+			}
+
+			if (prospectiveValue.equals(ACCOUNT_TYPE_GOOGLE)
+					&& key.getEmail() == null) {
+				// must be changing to a Google account type from an ODK account
+				// verify that the username is a well-formed e-mail address...
+				String username = key.getUsername();
+				if (username == null || username.length() == 0) {
+					return false;
+				}
+				if (hasInvalidEmailCharacters(username)
+						|| username.indexOf(EmailParser.K_AT) == -1) {
+					Window.alert("Username is not a valid e-mail address");
+					return false;
+				}
+			}
+			return true;
+		}
+	}
+
+	private class AccountTypeComparator implements Comparator<UserSecurityInfo> {
+
+		@Override
+		public int compare(UserSecurityInfo arg0, UserSecurityInfo arg1) {
+			if (arg0 == arg1)
+				return 0;
+
+			if (arg0 != null) {
+				if (arg1 == null)
+					return 1;
+				if (arg0.getUsername() == null) {
+					return (arg1.getUsername() == null) ? 0 : -1;
+				} else {
+					return (arg1.getUsername() == null) ? 1 : 0;
+				}
+			}
+			return -1;
+		}
+	};
+
+	private class AccountTypeSelectionColumn extends
+			UIEnabledValidatingSelectionColumn<UserSecurityInfo> {
+
+		protected AccountTypeSelectionColumn() {
+			super(new ValidatingAccountTypePredicate(),
+					new VisibleNotAnonymousPredicate(),
+					new EnableNotAnonymousOrSuperUserPredicate(),
+					new AccountTypeComparator(), userType);
+		}
+
+		@Override
+		public String getValue(UserSecurityInfo object) {
+			if (object.getUsername() == null) {
+				return ACCOUNT_TYPE_GOOGLE;
+			} else {
+				return ACCOUNT_TYPE_ODK;
+			}
+		}
+
+		@Override
+		public void setValue(UserSecurityInfo object, String value) {
+			String email = object.getEmail();
+			String username = object.getUsername();
+			if (value.equals(ACCOUNT_TYPE_ODK)) {
+				if (username == null) {
+					object.setEmail(null);
+					object.setUsername(email.substring(EmailParser.K_MAILTO
+							.length()));
+					uiOutOfSyncWithServer();
+					userTable.redraw(); // because this changes the Change
+										// Password button...
+				}
+			} else {
+				if (email == null) {
+					object.setUsername(null);
+					object.setEmail(EmailParser.K_MAILTO + username);
+					uiOutOfSyncWithServer();
+					userTable.redraw(); // because this changes the Change
+										// Password button...
+				}
+			}
+		}
+	}
+
+	private final class DeleteActionCallback implements
+			ActionCell.Delegate<UserSecurityInfo> {
+
+		@Override
+		public void execute(UserSecurityInfo object) {
+			if (isUiOutOfSyncWithServer()) {
+				Window.alert("Unsaved changes exist.");
+			}
+
+			final ConfirmUserDeletePopup popup = new ConfirmUserDeletePopup(
+					object, TemporaryAccessConfigurationSheet.this);
+			popup.setPopupPositionAndShow(new PopupPanel.PositionCallback() {
+				@Override
+				public void setPosition(int offsetWidth, int offsetHeight) {
+					int left = ((Window.getScrollLeft() + Window.getClientWidth() - offsetWidth) / 2);
+					int top = ((Window.getScrollTop() + Window.getClientHeight() - offsetHeight) / 2);
+					popup.setPopupPosition(left, top);
+				}
+			});
+		}
+	};
+
+	private final class ChangePasswordActionCallback implements
+			ActionCell.Delegate<UserSecurityInfo> {
+
+		@Override
+		public void execute(UserSecurityInfo object) {
+			if (isUiOutOfSyncWithServer()) {
+				Window.alert("Unsaved changes exist. "
+						+ "\nPlease save changes, or reset the changes by refreshing the screen.\nThen you may change passwords.");
+				return;
+			}
+
+			final PopupPanel popup = new ChangePasswordPopup(object);
+			popup.setPopupPositionAndShow(new PopupPanel.PositionCallback() {
+				@Override
+				public void setPosition(int offsetWidth, int offsetHeight) {
+					int left = ((Window.getScrollLeft() + Window.getClientWidth() - offsetWidth) / 2);
+					int top = ((Window.getScrollTop() + Window.getClientHeight() - offsetHeight) / 2);
+					popup.setPopupPosition(left, top);
+				}
+			});
+		}
+	};
+
+	public TemporaryAccessConfigurationSheet(PermissionsSubTab permissionsTab) {
+		initWidget(uiBinder.createAndBindUi(this));
+		sinkEvents(Event.ONCHANGE | Event.ONCLICK);
+		SafeHtmlBuilder sb = new SafeHtmlBuilder();
+		sb.appendHtmlConstant("<img src=\"images/red_x.png\" />");
+		UIEnabledActionColumn<UserSecurityInfo> deleteMe = new UIEnabledActionColumn<UserSecurityInfo>(
+				sb.toSafeHtml(), null,
+				new EnableNotAnonymousOrSuperUserPredicate(),
+				new DeleteActionCallback());
+		userTable.addColumn(deleteMe, "");
+
+		// Username
+		UsernameTextColumn username = new UsernameTextColumn();
+		userTable.addColumn(username, "Username");
+
+		// Full Name
+		FullNameTextColumn fullname = new FullNameTextColumn();
+		userTable.addColumn(fullname, "Full Name");
+
+		// Change Password
+		UIEnabledActionColumn<UserSecurityInfo> changePassword = new UIEnabledActionColumn<UserSecurityInfo>(
+				"Change Password", new EnableLocalAccountPredicate(),
+				new ChangePasswordActionCallback());
+		userTable.addColumn(changePassword, "");
+
+		// Type of User
+		AccountTypeSelectionColumn type = new AccountTypeSelectionColumn();
+		userTable.addColumn(type, "Account Type");
+
+		GroupMembershipColumn dc = new GroupMembershipColumn(
+				GrantedAuthorityName.GROUP_DATA_COLLECTORS);
+		userTable.addColumn(dc,
+				GrantedAuthorityName.GROUP_DATA_COLLECTORS.getDisplayText());
+
+		GroupMembershipColumn dv = new GroupMembershipColumn(
+				GrantedAuthorityName.GROUP_DATA_VIEWERS);
+		userTable.addColumn(dv,
+				GrantedAuthorityName.GROUP_DATA_VIEWERS.getDisplayText());
+
+		GroupMembershipColumn fm = new GroupMembershipColumn(
+				GrantedAuthorityName.GROUP_FORM_MANAGERS);
+		userTable.addColumn(fm,
+				GrantedAuthorityName.GROUP_FORM_MANAGERS.getDisplayText());
+
+		GroupMembershipColumn sa = new GroupMembershipColumn(
+				GrantedAuthorityName.GROUP_SITE_ADMINS);
+		userTable.addColumn(sa,
+				GrantedAuthorityName.GROUP_SITE_ADMINS.getDisplayText());
+
+		dataProvider.addDataDisplay(userTable);
+
+		columnSortHandler.setComparator(username, username.getComparator());
+		columnSortHandler.setComparator(fullname, fullname.getComparator());
+		columnSortHandler.setComparator(type, type.getComparator());
+		columnSortHandler.setComparator(dc, dc.getComparator());
+		columnSortHandler.setComparator(dv, dv.getComparator());
+		columnSortHandler.setComparator(fm, fm.getComparator());
+		columnSortHandler.setComparator(sa, sa.getComparator());
+		userTable.addColumnSortHandler(columnSortHandler);
+	}
 
 	@Override
-	public void execute(UserSecurityInfo object) {
-		dataProvider.getList().remove(object);
+	public void setVisible(boolean isVisible) {
+		super.setVisible(isVisible);
+		if (isVisible) {
+			SecureGWT.getSecurityAdminService().getAllUsers(true,
+					new UpdateUserDisplay());
+		}
 	}
-   };
-   
-   DeleteActionCallback deleteAction = new DeleteActionCallback();
 
-   class ChangePasswordActionCallback implements ActionCell.Delegate<UserSecurityInfo> {
+	@UiField
+	TextArea addedUsers;
+	@UiField
+	Button addNow;
+	@UiField
+	CellTable<UserSecurityInfo> userTable;
+	@UiField
+	CheckBox anonymousAttachmentViewers;
+	@UiField
+	Button button;
 
-	@Override
-	public void execute(UserSecurityInfo object) {
-	    final PopupPanel popup = new ChangePasswordPopup(object);
-	    popup.setPopupPositionAndShow(new PopupPanel.PositionCallback() {
-	      @Override
-	      public void setPosition(int offsetWidth, int offsetHeight) {
-	        int left = ((Window.getClientWidth() - offsetWidth) / 2);
-	        int top = ((Window.getClientHeight() - offsetHeight) / 2);
-	        popup.setPopupPosition(left, top);
-	      }
-	    });
+	@UiHandler("addNow")
+	void onAddUsersClick(ClickEvent e) {
+		String text = addedUsers.getText();
+		Collection<Email> emails = EmailParser.parseEmails(text);
+		Map<String, UserSecurityInfo> localUsers = new HashMap<String, UserSecurityInfo>();
+		Map<String, UserSecurityInfo> googleUsers = new HashMap<String, UserSecurityInfo>();
+		List<UserSecurityInfo> list = dataProvider.getList();
+		for (UserSecurityInfo u : list) {
+			if (u.getUsername() != null) {
+				localUsers.put(u.getUsername(), u);
+			} else {
+				googleUsers.put(u.getEmail(), u);
+			}
+		}
+		int nAdded = 0;
+		int nUnchanged = 0;
+		for (Email email : emails) {
+			boolean localUser = (email.getUsername() != null);
+			UserSecurityInfo u = localUser ? localUsers
+					.get(email.getUsername()) : googleUsers.get(email
+					.getEmail());
+			if (u != null) {
+				++nUnchanged;
+			} else {
+				u = new UserSecurityInfo(email.getUsername(),
+						email.getFullName(), email.getEmail(),
+						UserType.REGISTERED);
+				list.add(u);
+				if (localUser) {
+					localUsers.put(u.getUsername(), u);
+				} else {
+					googleUsers.put(u.getEmail(), u);
+				}
+				++nAdded;
+			}
+		}
 	}
-   };
-   
-   ChangePasswordActionCallback changePasswordAction = new ChangePasswordActionCallback();
-   
-   private static boolean hasInvalidEmailCharacters( String email ) {
-      for ( int i = 0 ; i < K_INVALID_EMAIL_CHARACTERS.length(); ++i) {
-         char ch = K_INVALID_EMAIL_CHARACTERS.charAt(i);
-         if ( email.indexOf(ch) != -1 ) {
-            return true;
-         }
-      }
-      return false;
-   }
-   
-   private void setError(String error) {
-      errorMessage.setText(error);
-      errorMessage.setVisible(true);
-      errorTimestamp = System.currentTimeMillis();
-   }
-   
-   private void clearError() {
-      if ( errorTimestamp != 0 && System.currentTimeMillis() > 
-         ERROR_MESSAGE_RETENTION_INTERVAL_MILLISECONDS + errorTimestamp ) {
-         errorMessage.setVisible(false);
-         errorMessage.setText("");
-         errorTimestamp = 0;
-      }
-   }
 
-   @Override
-   public void onBrowserEvent(Event event) {
-      clearError();
-      super.onBrowserEvent(event);
-   }
-   
-   class ValidatingTextInputCell extends TextInputCell {
-      ValidatingTextInputCell() {
-         super();
-      };
-
-
-      /**
-       * Because of various scoping issues, we need to override the 
-       * onBrowserEvent method.
-       */
-      @Override
-      public void onBrowserEvent(Context context, Element parent, String value,
-            NativeEvent event, ValueUpdater<String> valueUpdater) {
-
-         // all events other than the value-change event are handled normally
-          String eventType = event.getType();
-          if (! "change".equals(eventType)) {
-               super.onBrowserEvent(context, parent, value, event, valueUpdater);
-              return;
-          }
-          
-          // Ignore events that don't target the input.
-          InputElement input = getInputElement(parent);
-          Element target = event.getEventTarget().cast();
-          if (!input.isOrHasChild(target)) {
-            super.onBrowserEvent(context, parent, value, event, valueUpdater);
-           return;
-          }
-
-          Object key = context.getKey();
-           String newValue = super.getInputElement(parent).getValue();
-
-          // Get the view data.
-          ViewData vd = super.getViewData(key);
-          if (vd == null) {
-            vd = new ViewData(value);
-            setViewData(key, vd);
-          }
-
-          String updateValue = null;
-         if ( newValue != null ) {
-            updateValue = newValue.trim();
-         }
-         
-         String errorMessage = null;
-         if ( updateValue != null && updateValue.length() != 0 ) {
-            if ( hasInvalidEmailCharacters(updateValue) ) {
-               errorMessage = "Invalid characters in Email address.\n" +
-                     "Email address cannot contain whitespace, quotes,\n" +
-                     "commas, semicolons or other punctuation";
-               updateValue = vd.getLastValue();
-            } else if ( newValue.indexOf(EmailParser.K_AT) == -1) {
-               errorMessage = "Email address is missing the '@domain.org' portion\n" +
-                     "Email must be of the form 'username@domain.org'";
-               updateValue = vd.getLastValue();
-            }
-         }
-         
-         // possibly trim the incoming value or restore it if there was an error.
-         super.getInputElement(parent).setValue(updateValue);
-         // handle the change event 'normally', perhaps restoring the value
-         super.onBrowserEvent(context, parent, updateValue, event, valueUpdater);
-         if ( errorMessage != null ) {
-            // set the error message
-            setError(errorMessage);
-         }
-      }
-
-   }
-
-   private class ValidatingTextInputColumn extends Column<UserSecurityInfo,String> {
-
-      class ValidatingFieldUpdater implements FieldUpdater<UserSecurityInfo,String> {
-
-         @Override
-         public void update(int index, UserSecurityInfo object, String value) {
-            if ( value != null ) {
-               value = value.trim();
-            }
-            
-            if ( value != null && value.length() != 0 ) {
-               if ( hasInvalidEmailCharacters(value) || value.indexOf(EmailParser.K_AT) == -1) {
-                  throw new IllegalStateException("Invalid value should have been caught earlier.");
-               } else if ( value.indexOf(EmailParser.K_AT) != -1) {
-                  object.setEmail(EmailParser.K_MAILTO + value);
-               }
-            } else {
-               object.setEmail(null);
-               userTable.redraw();
-            }
-         }
-      };
-      
-      ValidatingFieldUpdater updater = new ValidatingFieldUpdater();
-      
-      ValidatingTextInputColumn() {
-         super(new ValidatingTextInputCell());
-         setSortable(true);
-         setFieldUpdater(updater);
-      }
-
-      @Override
-      public String getValue(UserSecurityInfo object) {
-         String email = object.getEmail();
-         if ( email != null ) {
-            return email.substring(EmailParser.K_MAILTO.length());
-         }
-         return null;
-      }
-   };
-   
-   public TemporaryAccessConfigurationSheet(PermissionsSubTab permissionsTab) {
-      initWidget(uiBinder.createAndBindUi(this));
-      sinkEvents(Event.ONCHANGE | Event.ONCLICK);
-
-      Column<UserSecurityInfo,UserSecurityInfo> deleteMe = new Column<UserSecurityInfo,UserSecurityInfo>
-                  (new ActionCell<UserSecurityInfo>("Remove", deleteAction){}) {
-
-                     @Override
-                     public UserSecurityInfo getValue(UserSecurityInfo object) {
-                        return object;
-                     }
-      };
-      userTable.addColumn(deleteMe, "");
-      
-      // Username
-      Column<UserSecurityInfo,String> username = new Column<UserSecurityInfo,String>
-      			(new TextInputCell()) {
-          @Override
-          public String getValue(UserSecurityInfo object) {
-             return object.getUsername();
-          }
-      };
-      username.setSortable(true);
-      username.setFieldUpdater(new FieldUpdater<UserSecurityInfo,String>() {
-
-          @Override
-          public void update(int index, UserSecurityInfo object, String value) {
-             object.setUsername(value);
-             userTable.redraw();
-          }});
-      userTable.addColumn(username, "Username");
-      
-      // Nickname
-      Column<UserSecurityInfo,String> nickname = new Column<UserSecurityInfo,String>
-                  (new TextInputCell()) {
-         @Override
-         public String getValue(UserSecurityInfo object) {
-            return object.getNickname();
-         }
-         
-      };
-      nickname.setSortable(true);
-      nickname.setFieldUpdater(new FieldUpdater<UserSecurityInfo,String>() {
-
-         @Override
-         public void update(int index, UserSecurityInfo object, String value) {
-            object.setNickname(value);
-            userTable.redraw();
-         }});
-      userTable.addColumn(nickname, "Nickname");
-      
-      // Email
-      Column<UserSecurityInfo,String> email = new ValidatingTextInputColumn();
-      userTable.addColumn(email, "Email");
-      dataProvider.addDataDisplay(userTable);
-      
-      ListHandler<UserSecurityInfo> columnSortHandler =
-            new ListHandler<UserSecurityInfo>(dataProvider.getList());
-      
-      columnSortHandler.setComparator(username, new Comparator<UserSecurityInfo>() {
-
-         @Override
-         public int compare(UserSecurityInfo arg0, UserSecurityInfo arg1) {
-            if ( arg0 == arg1 ) return 0;
-            
-            if ( arg0 != null ) {
-               return (arg1 != null) ? 
-                     arg0.getUsername().compareToIgnoreCase(arg1.getUsername()) : 1;
-            }
-            return -1;
-         }
-      });
-      columnSortHandler.setComparator(nickname, new Comparator<UserSecurityInfo>() {
-
-         @Override
-         public int compare(UserSecurityInfo arg0, UserSecurityInfo arg1) {
-            if ( arg0 == arg1 ) return 0;
-            
-            if ( arg0 != null && arg0.getNickname() != null) {
-               return (arg1 != null && arg1.getNickname() != null) ? 
-                     arg0.getNickname().compareToIgnoreCase(arg1.getNickname()) : 1;
-            }
-            return -1;
-         }
-      });
-      columnSortHandler.setComparator(email, new Comparator<UserSecurityInfo>() {
-
-         @Override
-         public int compare(UserSecurityInfo arg0, UserSecurityInfo arg1) {
-            if ( arg0 == arg1 ) return 0;
-            
-            if ( arg0 != null && arg0.getEmail() != null ) {
-               return (arg1 != null && arg1.getEmail() != null) ? 
-                     arg0.getEmail().compareToIgnoreCase(arg1.getEmail()) : 1;
-            }
-            return -1;
-         }
-      });
-      userTable.addColumnSortHandler(columnSortHandler);
-      
-      // Change Password
-      Column<UserSecurityInfo,UserSecurityInfo> changePassword = new Column<UserSecurityInfo,UserSecurityInfo>
-      (new ActionCell<UserSecurityInfo>("Change Password", changePasswordAction){}) {
-
-         @Override
-         public UserSecurityInfo getValue(UserSecurityInfo object) {
-            return object;
-         }
-      };
-      userTable.addColumn(changePassword, "");
-   }
-
-   protected void reviseCellTableColumns(ArrayList<UserSecurityInfo> allUsersList) {
-      TreeSet<GrantedAuthorityInfo> uniqueAuths = new TreeSet<GrantedAuthorityInfo>();
-      uniqueAuths.add(siteAdmins);
-      uniqueAuths.add(dataAdmins);
-      uniqueAuths.add(dataViewers);
-      uniqueAuths.add(dataCollectors);
-      for ( int i = 0 ; i < allUsersList.size() ; ++i ) {
-         UserSecurityInfo u = allUsersList.get(i);
-         uniqueAuths.addAll(u.getAssignedUserGroups());
-      }
-      uniqueAuths.remove(dataCollectors);
-      uniqueAuths.remove(dataViewers);
-      uniqueAuths.remove(dataAdmins);
-      uniqueAuths.remove(siteAdmins);
-      // remove any earlier columns...
-      while ( userTable.getColumnCount() > STATIC_USER_TABLE_COLUMNS ) {
-         userTable.removeColumn(userTable.getColumnCount()-1);
-      }
-      // add our columns...
-      userTable.addColumn(new GroupMembership(dataCollectors), dataCollectors.getName());
-      userTable.addColumn(new GroupMembership(dataViewers), dataViewers.getName());
-      for ( GrantedAuthorityInfo auth : uniqueAuths ) {
-         userTable.addColumn(new GroupMembership(auth), auth.getName());
-      }
-      userTable.addColumn(new GroupMembership(dataAdmins), dataAdmins.getName());
-      userTable.addColumn(new GroupMembership(siteAdmins), siteAdmins.getName());
-   }
-
-   @Override
-   public void setVisible(boolean isVisible) {
-      super.setVisible(isVisible);
-      if ( isVisible ) {
-         clearError(); // because navigating off the page might not have sent a mouse event...
-
-		 SecureGWT.getSecurityAdminService().getAllUsers(true, new AsyncCallback<ArrayList<UserSecurityInfo> > () 
-            {
-               @Override
-               public void onFailure(Throwable caught) {
-                  Window.alert("Unable to retrieve users from server: " + caught.getMessage());
-               }
-   
-               @Override
-               public void onSuccess(ArrayList<UserSecurityInfo> result) {
-                  reviseCellTableColumns(result);
-                  dataProvider.getList().clear();
-                  dataProvider.getList().addAll(result);
-                  addedUsers.setText("");
-               }
-            });
-		 SecureGWT.getSecurityAdminService().getUserClassPrivileges(GrantedAuthorityNames.USER_IS_ANONYMOUS.toString(), new AsyncCallback<UserClassSecurityInfo>()
-            {
-               @Override
-               public void onFailure(Throwable caught) {
-                  Window.alert("Unable to access server: " + caught.getMessage());
-               }
-
-               @Override
-               public void onSuccess(UserClassSecurityInfo result) {
-                  anonymousSubmitters.setValue( 
-                        result.getGrantedAuthorities().contains( 
-                              new GrantedAuthorityInfo(
-                                    GrantedAuthorityNames.ROLE_DATA_COLLECTOR.toString())) );
-                  anonymousAttachmentViewers.setValue(
-                        result.getGrantedAuthorities().contains(
-                              new GrantedAuthorityInfo(
-                                    GrantedAuthorityNames.ROLE_ATTACHMENT_VIEWER.toString())));
-               }
-            });
-      }
-   }
-
-   @UiField
-   TextArea addedUsers;
-   @UiField
-   Button addNow;
-   @UiField
-   Label errorMessage;
-   @UiField
-   CellTable<UserSecurityInfo> userTable;
-   @UiField
-   CheckBox anonymousSubmitters;
-   @UiField
-   CheckBox anonymousAttachmentViewers;
-   @UiField
-   Button button;
-   
-   @UiHandler("addNow")
-   void onAddUsersClick(ClickEvent e) {
-      String text = addedUsers.getText();
-      Collection<Email> emails = EmailParser.parseEmails(text);
-      Map<String, UserSecurityInfo> users = new HashMap<String, UserSecurityInfo>();
-      List<UserSecurityInfo> list = dataProvider.getList();
-      for ( UserSecurityInfo u : list ) {
-         users.put(u.getUsername(), u);
-      }
-      int nAdded = 0;
-      int nUnchanged = 0;
-      for ( Email email : emails ) {
-         String username = email.getUsername();
-         UserSecurityInfo u = users.get(username);
-         if ( u != null ) {
-            ++nUnchanged;
-         } else {
-            u = new UserSecurityInfo(email.getUsername(), 
-                  email.getNickname(), email.getEmail(), UserType.REGISTERED);
-            list.add(u);
-            users.put(u.getUsername(), u);
-            ++nAdded;
-         }
-      }
-      Window.alert("Added " + Integer.toString(nAdded) + " users.");
-   }
-   
-   @UiHandler("button")
-   void onUpdateClick(ClickEvent e) {
-      ArrayList<GrantedAuthorityInfo> allGroups = new ArrayList<GrantedAuthorityInfo>();
-      allGroups.add(new GrantedAuthorityInfo(GrantedAuthorityNames.GROUP_SITE_ADMINS));
-      allGroups.add(new GrantedAuthorityInfo(GrantedAuthorityNames.GROUP_DATA_OWNERS));
-      allGroups.add(new GrantedAuthorityInfo(GrantedAuthorityNames.GROUP_DATA_VIEWERS));
-      allGroups.add(new GrantedAuthorityInfo(GrantedAuthorityNames.GROUP_DATA_COLLECTORS));
-      allGroups.add(new GrantedAuthorityInfo(GrantedAuthorityNames.USER_IS_ANONYMOUS.toString()));
-      
-      ArrayList<GrantedAuthorityInfo> anonGrants = new ArrayList<GrantedAuthorityInfo>();
-      if ( anonymousSubmitters.getValue() ) {
-         anonGrants.add(new GrantedAuthorityInfo(GrantedAuthorityNames.ROLE_DATA_COLLECTOR.toString()));
-      }
-      if ( anonymousAttachmentViewers.getValue() ) {
-         anonGrants.add(new GrantedAuthorityInfo(GrantedAuthorityNames.ROLE_ATTACHMENT_VIEWER.toString()));
-      }
-      
-      ArrayList<UserSecurityInfo> users = new ArrayList<UserSecurityInfo>();
-      users.addAll(dataProvider.getList());
-      SecureGWT.getSecurityAdminService().setUsersAndGrantedAuthorities(Cookies.getCookie("JSESSIONID"), 
-                           users, anonGrants, allGroups, new AsyncCallback<Void>() {
-
-         @Override
-         public void onFailure(Throwable caught) {
-            Window.alert("Incomplete security update: " + caught.getMessage());
-         }
-
-         @Override
-         public void onSuccess(Void result) {
-        	 SecureGWT.getSecurityAdminService().getAllUsers(true, new AsyncCallback<ArrayList<UserSecurityInfo> > () 
-            {
-               @Override
-               public void onFailure(Throwable caught) {
-                  Window.alert("Unable to retrieve users from server: " + caught.getMessage());
-               }
-   
-               @Override
-               public void onSuccess(ArrayList<UserSecurityInfo> result) {
-                  reviseCellTableColumns(result);
-                  dataProvider.getList().clear();
-                  dataProvider.getList().addAll(result);
-                  addedUsers.setText("");
-               }
-            });
-         }
-      });
-   }
+	@UiHandler("button")
+	void onUpdateClick(ClickEvent e) {
+		updateUsersOnServer();
+	}
 }

@@ -28,7 +28,9 @@ import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.persistence.Query.Direction;
 import org.opendatakit.common.persistence.Query.FilterOperation;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+import org.opendatakit.common.security.SecurityUtils;
 import org.opendatakit.common.security.User;
+import org.opendatakit.common.security.UserService;
 import org.opendatakit.common.security.client.UserSecurityInfo;
 import org.opendatakit.common.security.common.EmailParser.Email;
 import org.opendatakit.common.utils.WebUtils;
@@ -36,8 +38,7 @@ import org.opendatakit.common.web.CallingContext;
 
 /**
  * Table of registered users of the system.  Currently, only the 
- * password fields, the SALT and the IS_CREDENTIALS_NON_EXPIRED 
- * and IS_ENABLED fields are exposed to the user.
+ * password fields, the SALT and the FULL_NAME are exposed to the user.
  * <p>
  * The table contains 3 sets of credentials:
  * <ul>
@@ -67,20 +68,21 @@ public final class RegisteredUsersTable extends CommonFieldsBase {
 	private static final Log logger = LogFactory.getLog(RegisteredUsersTable.class);
 
 	// prefix that identifies a user id
-	// user ids are of the form uid:username-yyyyMMddTHHmmSS
+	// user ids are of the form uid:username|yyyyMMddTHHmmSS
 	public static final String UID_PREFIX = "uid:";
 
 	private static final String TABLE_NAME = "_registered_users";
 	
 	private static final DataField LOCAL_USERNAME = new DataField(
 			"LOCAL_USERNAME", DataField.DataType.STRING, true, 80L )
-				.setIndexable(IndexType.ORDERED);
+				.setIndexable(IndexType.ORDERED); // Unique key (disregarding removed) or null
 	
 	private static final DataField OPENID_EMAIL = new DataField(
-			"OPENID_EMAIL", DataField.DataType.STRING, true, 80L );
+			"OPENID_EMAIL", DataField.DataType.STRING, true, 80L )
+				.setIndexable(IndexType.ORDERED); // Unique key (disregarding removed) or null
 	
-	private static final DataField NICKNAME = new DataField(
-			"NICKNAME", DataField.DataType.STRING, true );
+	private static final DataField FULL_NAME = new DataField(
+			"FULL_NAME", DataField.DataType.STRING, true );
 	
 	private static final DataField BASIC_AUTH_PASSWORD = new DataField(
 			"BASIC_AUTH_PASSWORD", DataField.DataType.STRING, true );
@@ -90,12 +92,6 @@ public final class RegisteredUsersTable extends CommonFieldsBase {
 
 	private static final DataField DIGEST_AUTH_PASSWORD = new DataField(
 			"DIGEST_AUTH_PASSWORD", DataField.DataType.STRING, true );
-
-	private static final DataField IS_CREDENTIALS_NON_EXPIRED = new DataField(
-			"IS_CREDENTIALS_NON_EXPIRED", DataField.DataType.BOOLEAN, false );
-
-	private static final DataField IS_ENABLED = new DataField(
-			"IS_ENABLED", DataField.DataType.BOOLEAN, false );
 	
 	private static final DataField IS_REMOVED = new DataField(
 			"IS_REMOVED", DataField.DataType.BOOLEAN, false );
@@ -109,12 +105,10 @@ public final class RegisteredUsersTable extends CommonFieldsBase {
 		super(schemaName, TABLE_NAME);
 		fieldList.add(LOCAL_USERNAME);
 		fieldList.add(OPENID_EMAIL);
-		fieldList.add(NICKNAME);
+		fieldList.add(FULL_NAME);
 		fieldList.add(BASIC_AUTH_PASSWORD);
 		fieldList.add(BASIC_AUTH_SALT);
 		fieldList.add(DIGEST_AUTH_PASSWORD);
-		fieldList.add(IS_CREDENTIALS_NON_EXPIRED);
-		fieldList.add(IS_ENABLED);
 		fieldList.add(IS_REMOVED);
 	}
 	
@@ -142,8 +136,10 @@ public final class RegisteredUsersTable extends CommonFieldsBase {
 		return q;
 	}
 	
-	public static void applyNaturalOrdering(Query q) {
-		q.addSort(LOCAL_USERNAME, Direction.ASCENDING);
+	public static void applyNaturalOrdering(Query q, CallingContext cc) throws ODKDatastoreException {
+		RegisteredUsersTable prototype =
+			RegisteredUsersTable.assertRelation(cc.getDatastore(), cc.getCurrentUser());
+		q.addSort(prototype.primaryKey, Direction.ASCENDING);
 	}
 	
 	public String getUsername() {
@@ -166,12 +162,12 @@ public final class RegisteredUsersTable extends CommonFieldsBase {
 		}
 	}
 	
-	public String getNickname() {
-		return getStringField(NICKNAME);
+	public String getFullName() {
+		return getStringField(FULL_NAME);
 	}
 	
-	public void setNickname(String value) {
-		if ( !setStringField(NICKNAME, value)) {
+	public void setFullName(String value) {
+		if ( !setStringField(FULL_NAME, value)) {
 			throw new IllegalStateException("overflow nickname");
 		}
 	}
@@ -180,7 +176,7 @@ public final class RegisteredUsersTable extends CommonFieldsBase {
 		if ( getEmail() == null ) {
 			return getUsername();
 		} else {
-			return getUsername() + " [" + getEmail() + "]";
+			return getEmail();
 		}
 	}
 	
@@ -212,22 +208,6 @@ public final class RegisteredUsersTable extends CommonFieldsBase {
 		if ( !setStringField(DIGEST_AUTH_PASSWORD, value)) {
 			throw new IllegalStateException("overflow digestAuthPassword");
 		}
-	}
-
-	public Boolean getIsCredentialNonExpired() {
-		return getBooleanField(IS_CREDENTIALS_NON_EXPIRED);
-	}
-
-	public void setIsCredentialNonExpired(Boolean value) {
-		setBooleanField(IS_CREDENTIALS_NON_EXPIRED, value);
-	}
-
-	public Boolean getIsEnabled() {
-		return getBooleanField(IS_ENABLED);
-	}
-
-	public void setIsEnabled(Boolean value) {
-		setBooleanField(IS_ENABLED, value);
 	}
 
 	public Boolean getIsRemoved() {
@@ -275,8 +255,13 @@ public final class RegisteredUsersTable extends CommonFieldsBase {
 		return datastore.getEntity(prototype, uri, user);
 	}
 	
-	public static final String generateUniqueUri( String username ) {
-		String uri = UID_PREFIX + username + "|" + WebUtils.iso8601Date(new Date());
+	public static final String generateUniqueUri( String username, String email ) {
+		String uri;
+		if ( username == null ) {
+			uri = UID_PREFIX + email.substring(SecurityUtils.MAILTO_COLON.length()) + "|" + WebUtils.iso8601Date(new Date());
+		} else {
+			uri = UID_PREFIX + username + "|" + WebUtils.iso8601Date(new Date());
+		}
 		return uri;
 	}
 
@@ -319,6 +304,7 @@ public final class RegisteredUsersTable extends CommonFieldsBase {
 	 */
 	public static final RegisteredUsersTable getUserByUsername(String username, CallingContext cc) throws ODKDatastoreException {
 		Datastore datastore = cc.getDatastore();
+		UserService userService = cc.getUserService();
 		User user = cc.getCurrentUser();
 		RegisteredUsersTable prototype = assertRelation(datastore, user);
 		Query q = RegisteredUsersTable.createQuery(datastore, user);
@@ -334,10 +320,11 @@ public final class RegisteredUsersTable extends CommonFieldsBase {
 			for ( int i = 1 ; i < l.size() ; ++i ) {
 				RegisteredUsersTable tt = l.get(i);
 				// delete all the group memberships of the entity being removed...
-				UserGrantedAuthority.deleteGrantedAuthoritiesForUser(tt.getUri(), cc);
+				UserGrantedAuthority.deleteGrantedAuthoritiesForUser(tt.getUri(), userService, datastore, user);
 				// flag the duplicate as removed...
 				tt.setIsRemoved(true);
 				datastore.putEntity(tt, user);
+				logger.warn("duplicate username records for " + username + " - marking as removed: " + tt.getUri());
 			}
 			l.clear();
 			l.add(t);
@@ -350,72 +337,62 @@ public final class RegisteredUsersTable extends CommonFieldsBase {
 		}
 	}
 	
+
 	/**
-	 * If the given username is not present, this will create a record for the user, 
-	 * marking them as active (able to log in via OpenID or Aggregate password). Otherwise,
-	 * this will just selectively update the nickname and e-mail address of the existing 
-	 * record and return it.</p><p>
-	 * The nickname is updated if the supplied Email object has a revised e-mail address
-	 * or if the supplied Email object has a nickname that is different from the username
-	 * of the e-mail address.  The e-mail address is updated if it is non-null and
-	 * different from the address on file.</p><p>
-	 * NOTE: If the intent is to clear the e-mail address, this must be done in a separate
-	 * step.  Similarly, once a user is defined, changing the active status of the user 
-	 * (their ability to log in using OpenID or their Aggregate password) must be done as
-	 * a separate step.</p><p>
-	 * NOTE: users won't be able to log in with OpenID if no e-mail address is supplied;
-	 * and they won't be able to log in with an Aggregate password until one is defined.</p><p>
-	 * In all cases, the Uri of the database record is saved in the Email object
-	 * and the database record is returned to the caller.</p>
+	 * Used in the bowels of the security layer.  Others should call getUserByEmail.  
+	 * Returns null if there is not exactly one record for the specified email.
 	 * 
-	 * @param e
-	 * @param ds
+	 * @param email
+	 * @param datastore
 	 * @param user
 	 * @return
 	 * @throws ODKDatastoreException
 	 */
-	public static final RegisteredUsersTable assertActiveUserByUsername( Email e, 
-							CallingContext cc ) throws ODKDatastoreException {
-		Datastore ds = cc.getDatastore();
-		User user = cc.getCurrentUser();
-		RegisteredUsersTable prototype = RegisteredUsersTable.assertRelation(ds, user);
-		RegisteredUsersTable t = RegisteredUsersTable.getUserByUsername(e.getUsername(), cc);
-		if ( t == null ) {
-			// new user
-			RegisteredUsersTable r = ds.createEntityUsingRelation(prototype, user);
-			String uri = generateUniqueUri(e.getUsername());
-			r.setStringField(prototype.primaryKey, uri);
-			e.setUri(r.getUri());
-			r.setUsername(e.getUsername());
-			r.setEmail(e.getEmail());
-			r.setNickname(e.getNickname());
-			r.setIsCredentialNonExpired(true);
-			r.setIsEnabled(true);
-			r.setIsRemoved(false);
-			ds.putEntity(r, user);
-			return r;
+	public static final RegisteredUsersTable getUniqueUserByEmail(String email, Datastore datastore, User user) throws ODKDatastoreException {
+		RegisteredUsersTable prototype = assertRelation(datastore, user);
+		Query q = RegisteredUsersTable.createQuery(datastore, user);
+		q.addFilter(IS_REMOVED, FilterOperation.EQUAL, false);
+		q.addFilter(OPENID_EMAIL, FilterOperation.EQUAL, email);
+		q.addSort(prototype.lastUpdateDate, Direction.DESCENDING);
+		@SuppressWarnings("unchecked")
+		List<RegisteredUsersTable> l = (List<RegisteredUsersTable>) q.executeQuery(0);
+		if ( l.size() != 1 ) {
+			return null;
 		} else {
-			e.setUri(t.getUri());
-			if ( t.getEmail() == null ) {
-				// set nickname and e-mail
-				t.setNickname(e.getNickname());
-				t.setEmail(e.getEmail());
-			} else if ( e.getEmail() != null ) {
-				// update specifies an e-mail...
-				Email ref = new Email(t.getNickname(), t.getEmail());
-				if ( (!ref.hasDistinctNickname() && e.hasDistinctNickname()) ||
-						!ref.getEmail().equals(e.getEmail()) ) {
-					// Either:
-					// (1) recorded nickname is just the username of the email
-					//     and new nickname is the quoted string of the email.
-					// or
-					// (2) emails are not the same.
-					t.setNickname(e.getNickname());
-					t.setEmail(e.getEmail());
-				}
+			return l.get(0);
+		}
+	}
+
+	public static final RegisteredUsersTable getUserByEmail(String email, UserService userService, Datastore datastore) throws ODKDatastoreException {
+		User user = userService.getDaemonAccountUser();
+		RegisteredUsersTable prototype = assertRelation(datastore, user);
+		Query q = datastore.createQuery(prototype, user);
+		q.addFilter(IS_REMOVED, FilterOperation.EQUAL, false);
+		q.addFilter(OPENID_EMAIL, FilterOperation.EQUAL, email);
+		q.addSort(prototype.lastUpdateDate, Direction.DESCENDING);
+		@SuppressWarnings("unchecked")
+		List<RegisteredUsersTable> l = (List<RegisteredUsersTable>) q.executeQuery(0);
+		if ( l.size() > 1 ) {
+			// two or more active records with the same email.
+			// remove the older ones, keeping only the newest.
+			RegisteredUsersTable t = l.get(0);
+			for ( int i = 1 ; i < l.size() ; ++i ) {
+				RegisteredUsersTable tt = l.get(i);
+				// delete all the group memberships of the entity being removed...
+				UserGrantedAuthority.deleteGrantedAuthoritiesForUser(tt.getUri(), userService, datastore, user);
+				// flag the duplicate as removed...
+				tt.setIsRemoved(true);
+				datastore.putEntity(tt, user);
+				logger.warn("duplicate OpenId email records for " + email + " - marking as removed: " + tt.getUri());
 			}
-			ds.putEntity(t, user);
-			return t;
+			l.clear();
+			l.add(t);
+		}
+		
+		if ( l.size() == 0 ) {
+			return null;
+		} else {
+			return l.get(0);
 		}
 	}
 
@@ -440,48 +417,37 @@ public final class RegisteredUsersTable extends CommonFieldsBase {
 		Datastore ds = cc.getDatastore();
 		User user = cc.getCurrentUser();
 		RegisteredUsersTable prototype = RegisteredUsersTable.assertRelation(ds, user);
-		RegisteredUsersTable t = RegisteredUsersTable.getUserByUsername(u.getUsername(), cc);
+		RegisteredUsersTable t;
+		if ( u.getUsername() == null ) {
+			t = RegisteredUsersTable.getUserByEmail(u.getEmail(), cc.getUserService(), ds);
+		} else {
+			t = RegisteredUsersTable.getUserByUsername(u.getUsername(), cc);
+		}
 		if ( t == null ) {
 			// new user
 			RegisteredUsersTable r = ds.createEntityUsingRelation(prototype, user);
-			String uri = generateUniqueUri(u.getUsername());
+			String uri = generateUniqueUri(u.getUsername(), u.getEmail());
 			r.setStringField(prototype.primaryKey, uri);
 			r.setUsername(u.getUsername());
 			r.setEmail(u.getEmail());
-			r.setNickname(u.getNickname());
-			r.setIsCredentialNonExpired(true);
-			r.setIsEnabled(true);
+			r.setFullName(u.getFullName());
 			r.setIsRemoved(false);
 			ds.putEntity(r, user);
 			return r;
 		} else {
-			t.setEmail(u.getEmail());
-			t.setNickname(u.getNickname());
+			t.setFullName(u.getFullName());
 			ds.putEntity(t, user);
 			return t;
 		}
 	}
 	
-	public static final List<RegisteredUsersTable> getUsersByEmail(String email, Datastore datastore, User user) throws ODKDatastoreException {
-		RegisteredUsersTable prototype = assertRelation(datastore, user);
-		Query q = datastore.createQuery(prototype, user);
-		q.addFilter(IS_REMOVED, FilterOperation.EQUAL, false);
-		q.addFilter(OPENID_EMAIL, FilterOperation.EQUAL, email);
-		@SuppressWarnings("unchecked")
-		List<RegisteredUsersTable> l = (List<RegisteredUsersTable>) q.executeQuery(0);
-		return l;
-	}
-
 	/**
 	 * Attempts to find a user record matching the e-mail address of the super-user.
 	 * <ol>  
-	 * <li>If it finds a single such record, and that user is active, returns that user.</li>
-	 * <li>If it finds a single such record that is inactive, it reactivates it, sets a
-	 * flag to drive the super-user to the permissions page upon first login, and returns
-	 * that user.</li>
-	 * <li>If it finds multiple records, it removes them all and creates a new user, sets
-	 * a flag to drive the super-user to the permissions page upon first login, and returns 
-	 * that new user.</li>
+	 * <li>If it finds a single such record, returns that user.</li>
+	 * <li>If it finds multiple records, it removes all but the most recently created one, 
+	 * sets a flag to drive the super-user to the permissions page upon first login, 
+	 * and returns that user.</li>
 	 * <li>If it finds no records, it creates one and sets a flag to drive the super-user
 	 * to the permissions page upon first login.</li>
 	 * </ol>
@@ -489,66 +455,25 @@ public final class RegisteredUsersTable extends CommonFieldsBase {
 	 * @return
 	 * @throws ODKDatastoreException
 	 */
-	public static final RegisteredUsersTable assertSuperUser(CallingContext cc) throws ODKDatastoreException {
-		String superUserEmail = cc.getUserService().getSuperUserEmail();
-		Datastore ds = cc.getDatastore();
-		User user = cc.getUserService().getDaemonAccountUser();
-		return assertSuperUser(superUserEmail, ds, user);
-	}
-	
-	/**
-	 * Attempts to find a user record matching the e-mail address of the super-user.
-	 * <ol>  
-	 * <li>If it finds a single such record, and that user is active, returns that user.</li>
-	 * <li>If it finds a single such record that is inactive, it reactivates it, sets a
-	 * flag to drive the super-user to the permissions page upon first login, and returns
-	 * that user.</li>
-	 * <li>If it finds multiple records, it removes them all and creates a new user, sets
-	 * a flag to drive the super-user to the permissions page upon first login, and returns 
-	 * that new user.</li>
-	 * <li>If it finds no records, it creates one and sets a flag to drive the super-user
-	 * to the permissions page upon first login.</li>
-	 * </ol>
-	 * @param superUserEmail
-	 * @param datastore
-	 * @param user
-	 * @return
-	 * @throws ODKDatastoreException
-	 */
-	public static final RegisteredUsersTable assertSuperUser(String superUserEmail, Datastore datastore, User user) throws ODKDatastoreException {
-		
-		RegisteredUsersTable t = null;
-		
-		List<RegisteredUsersTable> l = getUsersByEmail(superUserEmail, datastore, user);
-		if ( l.size() == 1 ) {
-			t = l.get(0);
-			if ( !t.getIsCredentialNonExpired() ) {
-				t.setIsCredentialNonExpired(true); // reactivating a disabled user...
-				t.setIsEnabled(false); // force nav to permissions on first access...
-				datastore.putEntity(t, user);
-			}
+	public static final RegisteredUsersTable assertSuperUser(UserService userService, Datastore datastore) throws ODKDatastoreException {
+		String superUserEmail = userService.getSuperUserEmail();
+		User user = userService.getDaemonAccountUser();
+		RegisteredUsersTable t = getUserByEmail(superUserEmail, userService, datastore);
+		if ( t != null ) {
 			return t;
-		}
-		
-		if ( l.size() > 0 ) {
-			for ( RegisteredUsersTable r : l ) {
-				logger.warn("duplicate superuser records - marking as removed: " + r.getUri());
-				r.setIsRemoved(true);
-				datastore.putEntity(r, user);
-			}
 		}
 
 		RegisteredUsersTable prototype = assertRelation(datastore, user);
 		
 		Email e = new Email(null, superUserEmail);
-		
 		t = datastore.createEntityUsingRelation(prototype, user);
-		t.setIsCredentialNonExpired(true);
-		t.setIsEnabled(false);// on first creation of the superuser, force navigation to permissions page
-		t.setUsername(e.getUsername());
-		t.setNickname(e.getNickname());
+		String uri = generateUniqueUri(null, e.getEmail());
+		t.setStringField(prototype.primaryKey, uri);
+		t.setUsername(null);
+		t.setFullName(e.getFullName());
 		t.setEmail(e.getEmail());
 		datastore.putEntity(t, user);
+		SecurityRevisionsTable.setLastSuperUserIdRevisionDate(datastore, user);
 		logger.warn("Created a new superuser record: " + t.getUri() + " identified by: " + t.getEmail());
 		return t;
 	}

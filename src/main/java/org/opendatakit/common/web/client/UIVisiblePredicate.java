@@ -14,17 +14,17 @@
  * the License.
  */
 
-package org.opendatakit.common.security.client.security;
+package org.opendatakit.common.web.client;
 
-import org.opendatakit.common.security.client.RealmSecurityInfo;
-import org.opendatakit.common.security.client.UserSecurityInfo;
-
-import com.google.gwt.user.client.rpc.AsyncCallback;
-
-public interface SecurityServiceAsync {
-
-	void getUserInfo(AsyncCallback<UserSecurityInfo> callback);
-
-	void getRealmInfo(String xsrfString,
-			AsyncCallback<RealmSecurityInfo> callback);
+/**
+ * Interface passed to ValidatingTextInputCell and other classes
+ * to determine whether or not the input element should be 
+ * visible.  If the predicate returns false, the element is not visible.
+ * 
+ * @author mitchellsundt@gmail.com
+ *
+ * @param <T> type of the backing object for the row containing the cell.
+ */
+public interface UIVisiblePredicate<T> {
+	boolean isVisible(T key);
 }

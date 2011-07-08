@@ -231,13 +231,12 @@ public class RoleHierarchyImpl implements RoleHierarchy, InitializingBean {
         } else if ( timeRequestStarts > lastCheckTimestamp + CHECK_INTERVAL ) {
         	// check for updates to the security configuration every CHECK_INTERVAL...
 	    	try {
-	    		SecurityRevisionsTable sr = SecurityRevisionsTable.getSingletonRecord(datastore, 
-	    												userService.getDaemonAccountUser());
-	    		long lastUsersChange = sr.getLastRegisteredUsersRevisionDate().getTime();
-	    		long lastGrantsChange = sr.getLastRoleHierarchyRevisionDate().getTime();
+	    		User daemon = userService.getDaemonAccountUser();
+	    		long lastUsersChange = SecurityRevisionsTable.getLastRegisteredUsersRevisionDate(datastore, daemon);
+	    		long lastGrantsChange = SecurityRevisionsTable.getLastRoleHierarchyRevisionDate(datastore, daemon);
 	    		if ( lastGrantsChange > lastCheckTimestamp ) {
 	    			refreshReachableGrantedAuthorities();
-	    			// NOTE: Timestamp updated and user permissions have been reloaded.
+	    			// NOTE: Timestamps updated and user permissions have been reloaded.
 	    		} else if ( lastUsersChange > lastCheckTimestamp ) {
 	    			lastCheckTimestamp = System.currentTimeMillis();
 	    			userService.reloadPermissions();

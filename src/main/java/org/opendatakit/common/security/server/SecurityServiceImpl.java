@@ -23,13 +23,11 @@ import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.security.SecurityBeanDefs;
-import org.opendatakit.common.security.SecurityUtils;
 import org.opendatakit.common.security.User;
-import org.opendatakit.common.security.client.CredentialsInfo;
 import org.opendatakit.common.security.client.RealmSecurityInfo;
 import org.opendatakit.common.security.client.UserSecurityInfo;
 import org.opendatakit.common.security.client.exception.AccessDeniedException;
-import org.opendatakit.common.security.common.GrantedAuthorityNames;
+import org.opendatakit.common.security.common.GrantedAuthorityName;
 import org.opendatakit.common.security.spring.RegisteredUsersTable;
 import org.opendatakit.common.web.CallingContext;
 import org.springframework.security.authentication.encoding.MessageDigestPasswordEncoder;
@@ -53,69 +51,6 @@ org.opendatakit.common.security.client.security.SecurityService {
 	private static final long serialVersionUID = -7360632450727200941L;
 
 	@Override
-	public String getUserDisplayName() throws AccessDeniedException {
-
-	    HttpServletRequest req = this.getThreadLocalRequest();
-	    CallingContext cc = ContextFactory.getCallingContext(this, req);
-
-	    User user = cc.getUserService().getCurrentUser();
-		return user.getNickname();
-	}
-
-	@Override
-	public boolean isRegisteredUser() throws AccessDeniedException {
-
-	    HttpServletRequest req = this.getThreadLocalRequest();
-	    CallingContext cc = ContextFactory.getCallingContext(this, req);
-
-	    User user = cc.getUserService().getCurrentUser();
-	    
-	    return user.isRegistered();
-	}
-
-	@Override
-	public boolean isAnonymousUser() throws AccessDeniedException {
-
-	    HttpServletRequest req = this.getThreadLocalRequest();
-	    CallingContext cc = ContextFactory.getCallingContext(this, req);
-
-	    User user = cc.getUserService().getCurrentUser();
-	    
-	    return user.isAnonymous();
-	}
-
-	@Override
-	public void setUserPassword(String xsrfString, CredentialsInfo credentials) throws AccessDeniedException, DatastoreFailureException {
-
-	    HttpServletRequest req = this.getThreadLocalRequest();
-	    CallingContext cc = ContextFactory.getCallingContext(this, req);
-
-	    if ( !req.getSession().getId().equals(xsrfString) ) {
-			throw new AccessDeniedException("Invalid request");
-		}
-
-	    Datastore ds = cc.getDatastore();
-	    User user = cc.getUserService().getCurrentUser();
-		RegisteredUsersTable userDefinition = null;
-		try {
-			userDefinition = RegisteredUsersTable.getUserByUri(user.getUriUser(), ds, user);
-			if ( userDefinition == null ) {
-				throw new AccessDeniedException("User is not a registered user.");
-			}
-			if ( !userDefinition.getUsername().equals(credentials.getUsername()) ) {
-				throw new AccessDeniedException("Username specified does not match that of the active user");
-			}
-			userDefinition.setDigestAuthPassword(credentials.getDigestAuthHash());
-			userDefinition.setBasicAuthPassword(credentials.getBasicAuthHash());
-			userDefinition.setBasicAuthSalt(credentials.getBasicAuthSalt());
-			ds.putEntity(userDefinition, user);
-		} catch ( ODKDatastoreException e ) {
-			e.printStackTrace();
-			throw new DatastoreFailureException(e.getMessage());
-		}
-	}
-
-	@Override
 	public UserSecurityInfo getUserInfo() throws AccessDeniedException,
 			DatastoreFailureException {
 
@@ -132,7 +67,7 @@ org.opendatakit.common.security.client.security.SecurityService {
 		    	RegisteredUsersTable t;
 				t = RegisteredUsersTable.getUserByUri(uriUser, ds, user);
 				if ( t != null ) {
-					info = new UserSecurityInfo(t.getUsername(), t.getNickname(), t.getEmail(), 
+					info = new UserSecurityInfo(t.getUsername(), t.getFullName(), t.getEmail(), 
 																UserSecurityInfo.UserType.REGISTERED);
 					SecurityServiceUtil.setAuthenticationLists(info, t.getUri(), cc);
 				} else {
@@ -141,13 +76,10 @@ org.opendatakit.common.security.client.security.SecurityService {
 			} else if ( user.isAnonymous() ) {
 	    		info = new UserSecurityInfo(User.ANONYMOUS_USER, User.ANONYMOUS_USER_NICKNAME, null, 
 												UserSecurityInfo.UserType.ANONYMOUS);
-	    		SecurityServiceUtil.setAuthenticationListsForSpecialUser(info, GrantedAuthorityNames.USER_IS_ANONYMOUS, cc);
+	    		SecurityServiceUtil.setAuthenticationListsForSpecialUser(info, GrantedAuthorityName.USER_IS_ANONYMOUS, cc);
 			} else {
-	    		String name = uriUser.substring(SecurityUtils.MAILTO_COLON.length());
-	    		String nickname = name.substring(0,name.indexOf(SecurityUtils.AT_SIGN));
-	    		info = new UserSecurityInfo(name, nickname, name, 
-												UserSecurityInfo.UserType.AUTHENTICATED);
-	    		SecurityServiceUtil.setAuthenticationListsFromDirectAuthorities(info, user.getDirectAuthorities(), cc);
+				// should never get to this case via interactive actions...
+				throw new DatastoreFailureException("Internal error: 45443");
 	    	}
 		} catch (ODKDatastoreException e) {
 			e.printStackTrace();
@@ -171,6 +103,7 @@ org.opendatakit.common.security.client.security.SecurityService {
 		MessageDigestPasswordEncoder mde = 
 			(MessageDigestPasswordEncoder) cc.getBean(SecurityBeanDefs.BASIC_AUTH_PASSWORD_ENCODER);
 		r.setBasicAuthHashEncoding(mde.getAlgorithm());
+		r.setSuperUserEmail(cc.getUserService().getSuperUserEmail());
 		return r;
 	}
 }

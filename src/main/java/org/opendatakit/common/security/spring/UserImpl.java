@@ -23,7 +23,7 @@ import java.util.Set;
 
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.security.User;
-import org.opendatakit.common.security.common.GrantedAuthorityNames;
+import org.opendatakit.common.security.common.GrantedAuthorityName;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.GrantedAuthorityImpl;
 
@@ -44,7 +44,7 @@ public class UserImpl implements org.opendatakit.common.security.User {
 		this.nickName = nickName;
 		this.datastore = datastore;
 		for ( GrantedAuthority g : groupsAndGrantedAuthorities ) {
-			if ( GrantedAuthorityNames.permissionsCanBeAssigned(g.getAuthority()) ) {
+			if ( GrantedAuthorityName.permissionsCanBeAssigned(g.getAuthority()) ) {
 				groups.add(g);
 			}
 		}
@@ -69,19 +69,6 @@ public class UserImpl implements org.opendatakit.common.security.User {
 		return uriUser;
 	}
 
-	public Set<GrantedAuthority> getFormIdGrantedAuthorities(String formId) {
-		if ( formIdGrantedAuthorities == null ) {
-			formIdGrantedAuthorities = GroupFormIdGrantedAuthority.getAllGrantedAuthorities(groups, datastore, this);
-		}
-		
-		Set<GrantedAuthority> s = formIdGrantedAuthorities.get(formId);
-		if ( s == null ) {
-			return Collections.emptySet();
-		} else {
-			return Collections.unmodifiableSet(s);
-		}
-	}
-
 	@Override
 	public boolean isAnonymous() {
 		return uriUser.equals(User.ANONYMOUS_USER);
@@ -89,7 +76,7 @@ public class UserImpl implements org.opendatakit.common.security.User {
 	
 	@Override
 	public boolean isRegistered() {
-		return groups.contains(new GrantedAuthorityImpl(GrantedAuthorityNames.USER_IS_REGISTERED.name()));
+		return groups.contains(new GrantedAuthorityImpl(GrantedAuthorityName.USER_IS_REGISTERED.name()));
 	}
 
 	@Override

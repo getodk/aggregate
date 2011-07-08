@@ -381,28 +381,24 @@ public final class EmailParser {
 	 */
 	public static class Email {
 		enum Form { EMAIL, USERNAME };
-		Form type;
-		String username;
-		String email;
-		String nickname;
+		final Form type;
+		final String username;
+		final String email;
+		String fullname;
 		String uri;
 		
 		public Email(String name) {
 			this.type = Form.USERNAME;
-			nickname = null;
+			fullname = null;
 			username = name;
 			email = null;
 		}
 
-		public Email(String nickname, String email) {
+		public Email(String fullname, String email) {
 			this.type = Form.EMAIL;
-			this.nickname = nickname;
-			this.username = email.substring(K_MAILTO.length(),email.indexOf(K_AT));
+			this.fullname = fullname;
+			this.username = null;
 			this.email = email;
-		}
-
-		public boolean hasDistinctNickname() {
-			return ( type == Form.EMAIL ) && (nickname != null && !nickname.equals(username));
 		}
 		
 		public String getUri() {
@@ -413,12 +409,12 @@ public final class EmailParser {
 			uri = value;
 		}
 		
-		public String getNickname() {
-			return nickname;
+		public String getFullName() {
+			return fullname;
 		}
 		
-		public void setNickname(String value) {
-			nickname = value;
+		public void setFullName(String value) {
+			fullname = value;
 		}
 		
 		public String getUsername() {
@@ -427,14 +423,6 @@ public final class EmailParser {
 		
 		public String getEmail() {
 			return email;
-		}
-		
-		public void setEmail(String value) {
-			email = value;
-		}
-		
-		public String toString() {
-			return "\"" + nickname + "\" <" + email.substring(K_MAILTO.length()) + ">";
 		}
 	};
 	
@@ -446,31 +434,35 @@ public final class EmailParser {
 	 * @param email
 	 */
 	private static final void insertEmail( Map<String, Email> eMails, Email email ) {
-		if ( email.nickname != null && email.nickname.charAt(0) == K_DQ ) {
-			email.nickname = email.nickname.substring(1, email.nickname.length()-1);
+		if ( email.fullname != null && email.fullname.charAt(0) == K_DQ ) {
+			email.fullname = email.fullname.substring(1, email.fullname.length()-1);
 		}
 		
-		Email e = eMails.get(email.username);
-		if ( e == null ) {
-			eMails.put(email.username, email);
+		Email e;
+		if ( email.username != null ) {
+			e = eMails.get(email.username);
+			if ( e == null ) {
+				eMails.put(email.username, email);
+				return;
+			}
 		} else {
-			// already in map...
-			
-			if ( e.email == null && email.email != null ) {
-				// had no e-mail; update with non-null e-mail
-				e.setEmail(email.email);
+			e = eMails.get(email.email);
+			if ( e == null ) {
+				eMails.put(email.email, email);
+				return;
 			}
-			
-			if ( e.nickname == null && email.nickname != null ) {
-				// had no nickname; update with non-null nickname
-				e.setNickname(email.nickname); 
-			}
-			
-			if ( e.nickname != null && e.email != null && email.nickname != null &&
-					e.email.startsWith(K_MAILTO + e.nickname) ) {
-				// had e-mail user as nickname; update with newer nickname
-				e.setNickname(email.nickname);
-			}
+		}
+		
+		// already in map...
+		if ( e.fullname == null && email.fullname != null ) {
+			// had no nickname; update with non-null nickname
+			e.setFullName(email.fullname); 
+		}
+		
+		if ( e.fullname != null && e.email != null && email.fullname != null &&
+				e.email.startsWith(K_MAILTO + e.fullname) ) {
+			// had e-mail user as nickname; update with newer nickname
+			e.setFullName(email.fullname);
 		}
 	}
 	

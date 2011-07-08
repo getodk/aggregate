@@ -1,7 +1,6 @@
 package org.opendatakit.aggregate.client;
 
-import org.opendatakit.common.security.client.GrantedAuthorityInfo;
-import org.opendatakit.common.security.common.GrantedAuthorityNames;
+import org.opendatakit.common.security.common.GrantedAuthorityName;
 
 import com.google.gwt.user.client.ui.VerticalPanel;
 
@@ -15,18 +14,14 @@ public class PermissionsSubTab extends VerticalPanel implements SubTabInterface 
   @Override
   public void update() {
 
-    final PermissionsSubTab temp = this;
-    
-    if ( AggregateUI.getUI().getUserInfo().getGrantedAuthorities().contains(
-            new GrantedAuthorityInfo(GrantedAuthorityNames.ROLE_SITE_ACCESS_ADMIN.toString()))) {
-          accessConfig = new TemporaryAccessConfigurationSheet(temp);
-          accessConfig.setVisible(true);
-          add(accessConfig);
+    if ( AggregateUI.getUI().getUserInfo().getGrantedAuthorities().contains(GrantedAuthorityName.ROLE_SITE_ACCESS_ADMIN)) {
+		if ( accessConfig == null ) {
+			accessConfig = new TemporaryAccessConfigurationSheet(this);
+			add(accessConfig);
+		}
+		accessConfig.setVisible(true);
     } else {
-    	if ( accessConfig != null ) {
-    		remove(accessConfig);
-    		accessConfig = null;
-    	}
+    	accessConfig.setVisible(false);
     }
   }
 }

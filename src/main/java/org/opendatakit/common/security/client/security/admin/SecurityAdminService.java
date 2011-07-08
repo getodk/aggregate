@@ -20,10 +20,9 @@ import java.util.ArrayList;
 
 import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
 import org.opendatakit.common.security.client.CredentialsInfo;
-import org.opendatakit.common.security.client.GrantedAuthorityInfo;
-import org.opendatakit.common.security.client.UserClassSecurityInfo;
 import org.opendatakit.common.security.client.UserSecurityInfo;
 import org.opendatakit.common.security.client.exception.AccessDeniedException;
+import org.opendatakit.common.security.common.GrantedAuthorityName;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
@@ -40,33 +39,15 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 public interface SecurityAdminService extends RemoteService {
 
 	/**
-	 * @return true if the security configuration is a simple (non-custom) configuration.
-	 * @throws AccessDeniedException
-	 * @throws DatastoreFailureException
-	 */
-	boolean isSimpleConfig() throws AccessDeniedException, DatastoreFailureException;
-
-	/**
 	 * 
 	 * @param withAuthorities if true, populate the groups and granted authorities sets.
-	 * @return all users.
+	 * @return all registered users and the Anonymous user.
 	 * @throws AccessDeniedException
 	 * @throws DatastoreFailureException
 	 */
 	ArrayList<UserSecurityInfo> getAllUsers(boolean withAuthorities) throws AccessDeniedException, DatastoreFailureException;
 	
-	ArrayList<UserSecurityInfo> getUsers( GrantedAuthorityInfo auth ) throws AccessDeniedException, DatastoreFailureException;
-	
-	/**
-	 * 
-	 * @param userClassName
-	 * @return the privileges assigned to this class.
-	 * @throws AccessDeniedException
-	 * @throws DatastoreFailureException
-	 */
-	UserClassSecurityInfo getUserClassPrivileges(String userClassName) throws AccessDeniedException, DatastoreFailureException;
-	
-	void setUsersAndGrantedAuthorities( String xsrfString, ArrayList<UserSecurityInfo> users,  ArrayList<GrantedAuthorityInfo> anonGrants, ArrayList<GrantedAuthorityInfo> allGroups ) throws AccessDeniedException, DatastoreFailureException;
+	void setUsersAndGrantedAuthorities( String xsrfString, ArrayList<UserSecurityInfo> users, ArrayList<GrantedAuthorityName> allGroups ) throws AccessDeniedException, DatastoreFailureException;
 	
 	void setUserPasswords( String xsrfString, ArrayList<CredentialsInfo> credentials ) throws AccessDeniedException, DatastoreFailureException;
 }

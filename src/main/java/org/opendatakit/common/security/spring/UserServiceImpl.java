@@ -30,7 +30,7 @@ import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.security.Realm;
 import org.opendatakit.common.security.SecurityUtils;
 import org.opendatakit.common.security.User;
-import org.opendatakit.common.security.common.GrantedAuthorityNames;
+import org.opendatakit.common.security.common.GrantedAuthorityName;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -76,12 +76,12 @@ public class UserServiceImpl implements org.opendatakit.common.security.UserServ
 			throw new IllegalStateException("userServiceKey must be configured");
 		}
 		Set<GrantedAuthority> anonGroups = new HashSet<GrantedAuthority>();
-		anonGroups.add(new GrantedAuthorityImpl(GrantedAuthorityNames.USER_IS_ANONYMOUS.name()));
+		anonGroups.add(new GrantedAuthorityImpl(GrantedAuthorityName.USER_IS_ANONYMOUS.name()));
 		anonymous = new UserImpl(User.ANONYMOUS_USER, 
 				User.ANONYMOUS_USER_NICKNAME, anonGroups, datastore );
 		Set<GrantedAuthority> daemonGroups = new HashSet<GrantedAuthority>();
 		daemonGroups = new HashSet<GrantedAuthority>();
-		daemonGroups.add(new GrantedAuthorityImpl(GrantedAuthorityNames.USER_IS_DAEMON.name()));
+		daemonGroups.add(new GrantedAuthorityImpl(GrantedAuthorityName.USER_IS_DAEMON.name()));
 		daemonAccount = new UserImpl(User.DAEMON_USER, 
 				User.DAEMON_USER_NICKNAME, daemonGroups, datastore );
 		
@@ -115,7 +115,7 @@ public class UserServiceImpl implements org.opendatakit.common.security.UserServ
 	@Override
 	public synchronized String getSuperUserUri() throws ODKDatastoreException {
 		if ( superUserUri == null ) {
-			RegisteredUsersTable t = RegisteredUsersTable.assertSuperUser(superUserEmail, datastore, daemonAccount);
+			RegisteredUsersTable t = RegisteredUsersTable.assertSuperUser(this, datastore);
 			superUserUri = t.getUri();
 		}
 		return superUserUri;

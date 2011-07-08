@@ -13,9 +13,6 @@
 	<!--	The group and role hierarchy is maintained in the granted authority hierarchy table.  -->
 	<!--	Unauthenticated accesses possess the USER_IS_ANONYMOUS group -->
 	<!--    Authenticated accesses possess the USER_IS_AUTHENTICATED group and -->
-	<!--    will possess a group prefixed by MAILTO_ that describes their e-mail domain.  i.e., -->
-	<!-- 		gmail.com  -> MAILTO_GMAIL_COM-->
-	<!--		uw.edu  -> MAILTO_UW_EDU-->
 	<!--    If the user is registered (present in the registered users table), the user will also --> 
 	<!--  	possess the USER_IS_REGISTERED group.  -->
 	<!--    An authenticated users will also possess an AUTH_ group defining the mechanism by which -->
@@ -399,7 +396,7 @@
 	<!--    you just need to modify the /openid_login.html to add a button to the alternate -->
 	<!--    OpenId sites.  After accepting the authentication, this provider then -->
 	<!--	determines whether the user is a registered user, using the wrappingUserDetailsService.-->
-	<!--	Finally, it adds the AUTH_OPENID and the MAILTO_domain granted authorities to the set of -->
+	<!--	Finally, it adds the AUTH_OPENID granted authority to the set of -->
 	<!--	the registered user's granted authorities (which is empty if the user is not registered). -->
 	<beans:bean id="openIdAuthenticationProvider"
 		class="org.opendatakit.common.security.spring.WrappingOpenIDAuthenticationProvider">

@@ -6,13 +6,12 @@ import org.opendatakit.aggregate.client.widgets.DeleteFormButton;
 import org.opendatakit.aggregate.client.widgets.DownloadableCheckBox;
 import org.opendatakit.aggregate.client.widgets.ExportButton;
 import org.opendatakit.aggregate.client.widgets.PublishButton;
+import org.opendatakit.common.security.client.UserSecurityInfo;
 
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
 
 public class FormTable extends FlexTable {
-
-  private static final String K_MAILTO = "mailto:";
    
   public FormTable() {
     
@@ -44,14 +43,7 @@ public class FormTable extends FlexTable {
       setWidget(i, 0, new HTML(form.getViewableURL()));
       setWidget(i, 1, new HTML(form.getId()));
       String user = form.getCreatedUser();
-      String displayName;
-      if (user.startsWith(K_MAILTO)) {
-        displayName = user.substring(K_MAILTO.length());
-      } else if (user.startsWith("uid:")) {
-        displayName = user.substring("uid:".length(), user.indexOf("|"));
-      } else {
-        displayName = user;
-      }
+      String displayName = UserSecurityInfo.getDisplayName(user);
       setText(i, 2, displayName);
       setWidget(i, 3, 
           new DownloadableCheckBox(form.getId(), form.isDownloadable()));
