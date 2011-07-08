@@ -17,27 +17,20 @@
 package org.opendatakit.common.security.server;
 
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 
 import org.opendatakit.aggregate.ContextFactory;
-import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.Datastore;
-import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.security.client.CredentialsInfo;
-import org.opendatakit.common.security.client.GrantedAuthorityInfo;
-import org.opendatakit.common.security.client.UserClassSecurityInfo;
 import org.opendatakit.common.security.client.UserSecurityInfo;
 import org.opendatakit.common.security.client.exception.AccessDeniedException;
+import org.opendatakit.common.security.common.GrantedAuthorityName;
 import org.opendatakit.common.security.spring.RegisteredUsersTable;
-import org.opendatakit.common.security.spring.UserGrantedAuthority;
 import org.opendatakit.common.web.CallingContext;
-import org.springframework.security.core.authority.GrantedAuthorityImpl;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
@@ -63,62 +56,11 @@ org.opendatakit.common.security.client.security.admin.SecurityAdminService {
 
 	    return SecurityServiceUtil.getAllUsers(withAuthorities, cc);
 	}
-
-	@Override
-	public ArrayList<UserSecurityInfo> getUsers(GrantedAuthorityInfo auth)
-			throws AccessDeniedException, DatastoreFailureException {
-
-	    HttpServletRequest req = this.getThreadLocalRequest();
-	    CallingContext cc = ContextFactory.getCallingContext(this, req);
-
-	    ArrayList<UserSecurityInfo> users = new ArrayList<UserSecurityInfo>();
-	    try {
-		    Set<String> uriUsers = 
-		    	UserGrantedAuthority.getUriUsers(new GrantedAuthorityImpl(auth.getName()),
-		    			cc.getDatastore(), cc.getCurrentUser());
-
-		    Query q = RegisteredUsersTable.createQuery(cc.getDatastore(), cc.getCurrentUser());
-			RegisteredUsersTable.applyNaturalOrdering(q);
-			
-			List<? extends CommonFieldsBase> l = q.executeQuery(0);
-			
-			for ( CommonFieldsBase cb : l ) {
-				RegisteredUsersTable t = (RegisteredUsersTable) cb;
-				if ( uriUsers.contains(t.getUri()) ) {
-					UserSecurityInfo i = new UserSecurityInfo(t.getUsername(), t.getNickname(), t.getEmail(),
-											UserSecurityInfo.UserType.REGISTERED);
-					SecurityServiceUtil.setAuthenticationLists(i, t.getUri(), cc);
-					users.add(i);
-				}
-			}
-		} catch (ODKDatastoreException e) {
-			e.printStackTrace();
-			throw new DatastoreFailureException(e);
-		}
-		// the natural ordering (above) produces a sorted list...
-		return users;
-	}
-
-	@Override
-	public boolean isSimpleConfig() throws AccessDeniedException,
-			DatastoreFailureException {
-
-	    HttpServletRequest req = this.getThreadLocalRequest();
-	    CallingContext cc = ContextFactory.getCallingContext(this, req);
-
-	    try {
-			return SecurityServiceUtil.isSimpleConfig(cc);
-		} catch (ODKDatastoreException e) {
-			e.printStackTrace();
-			throw new DatastoreFailureException(e);
-		}
-	}
 	
 	@Override
 	public void setUsersAndGrantedAuthorities( String xsrfString, 
 							ArrayList<UserSecurityInfo> users,  
-							ArrayList<GrantedAuthorityInfo> anonGrants, 
-							ArrayList<GrantedAuthorityInfo> allGroups)
+							ArrayList<GrantedAuthorityName> allGroups)
 			throws AccessDeniedException, DatastoreFailureException {
 
 	    HttpServletRequest req = this.getThreadLocalRequest();
@@ -128,7 +70,7 @@ org.opendatakit.common.security.client.security.admin.SecurityAdminService {
 			throw new AccessDeniedException("Invalid request");
 		}
 
-	    SecurityServiceUtil.setStandardSiteAccessConfiguration( users, anonGrants, allGroups, cc ); 
+	    SecurityServiceUtil.setStandardSiteAccessConfiguration( users, allGroups, cc ); 
 	    // clear the cache of saved user identities as we don't know what has changed...
 	    cc.getUserService().reloadPermissions();
 	}
@@ -149,7 +91,7 @@ org.opendatakit.common.security.client.security.admin.SecurityAdminService {
 		RegisteredUsersTable userDefinition = null;
 		try {
 			for ( CredentialsInfo credential : credentials ) {
-				userDefinition = RegisteredUsersTable.getUniqueUserByUsername(credential.getUsername(), ds, user);
+				userDefinition = RegisteredUsersTable.getUserByUsername(credential.getUsername(), cc);
 				if ( userDefinition == null ) {
 					throw new AccessDeniedException("User is not a registered user.");
 				}
@@ -164,18 +106,4 @@ org.opendatakit.common.security.client.security.admin.SecurityAdminService {
 			throw new DatastoreFailureException(e.getMessage());
 		}
 	}
-
-	@Override
-	public UserClassSecurityInfo getUserClassPrivileges(String userClassName)
-			throws AccessDeniedException, DatastoreFailureException {
-
-	    HttpServletRequest req = this.getThreadLocalRequest();
-	    CallingContext cc = ContextFactory.getCallingContext(this, req);
-
-	    UserClassSecurityInfo i = new UserClassSecurityInfo(userClassName);
-	    
-		SecurityServiceUtil.setAuthenticationListsForUserClass(i, cc);
-		return i;
-	}
-
 }

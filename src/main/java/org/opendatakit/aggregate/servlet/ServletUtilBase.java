@@ -36,7 +36,6 @@ import org.opendatakit.aggregate.externalservice.OAuthToken;
 import org.opendatakit.common.constants.BasicConsts;
 import org.opendatakit.common.constants.HtmlConsts;
 import org.opendatakit.common.security.SecurityBeanDefs;
-import org.opendatakit.common.security.common.GrantedAuthorityNames;
 import org.opendatakit.common.security.spring.RoleHierarchyImpl;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.servlet.CommonServletBase;
@@ -93,12 +92,6 @@ public class ServletUtilBase extends CommonServletBase {
 	orderedSet.remove(key);
 	
 	return orderedSet;
-  }
-
-  public boolean isSiteManagementSecure(CallingContext cc) {
-	TreeSet<String> grants = fetchGrantedAuthoritySet( GrantedAuthorityNames.USER_IS_ANONYMOUS.name(), cc);
-	grants.addAll(fetchGrantedAuthoritySet( GrantedAuthorityNames.USER_IS_AUTHENTICATED.name(), cc));
-	return !grants.contains( GrantedAuthorityNames.ROLE_SITE_ACCESS_ADMIN.name() );
   }
   
   /**
@@ -212,15 +205,7 @@ public class ServletUtilBase extends CommonServletBase {
 			  cc.getWebApplicationURL(UserManagePasswordsServlet.ADDR), 
 			  ServletConsts.DELETE_FORM_LINK_TEXT);
 	  
-	  boolean secure = isSiteManagementSecure(cc);
-	  
 	  StringBuilder html = new StringBuilder();
-	  if ( !secure ) {
-		  html.append(HtmlUtil.createBeginTag(HtmlConsts.CENTERING_DIV));
-		  html.append("<font style=\"color: red; font-family: arial; font-size: 150%\">" +
-		  		"Site Management is NOT SECURE!</font>");
-		  html.append(HtmlUtil.createEndTag(HtmlConsts.DIV));
-	  }
 	html.append(HtmlUtil.createBeginTag(HtmlConsts.CENTERING_DIV));
     html.append(HtmlConsts.HEADING_TABLE_OPEN);
     String[] headers = new String[] { "Access", "Publish", "Upload", "Manage" }; 

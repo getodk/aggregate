@@ -28,6 +28,7 @@ public class RealmSecurityInfo implements IsSerializable {
 
 	String basicAuthHashEncoding;
 	String realmString;
+	String superUserEmail;
 	
 	public RealmSecurityInfo() {
 	}
@@ -38,6 +39,14 @@ public class RealmSecurityInfo implements IsSerializable {
 
 	public void setBasicAuthHashEncoding(String basicAuthHashEncoding) {
 		this.basicAuthHashEncoding = basicAuthHashEncoding;
+	}
+	
+	public String getSuperUserEmail() {
+		return superUserEmail;
+	}
+	
+	public void setSuperUserEmail(String superUserEmail) {
+		this.superUserEmail = superUserEmail;
 	}
 
 	public String getRealmString() {

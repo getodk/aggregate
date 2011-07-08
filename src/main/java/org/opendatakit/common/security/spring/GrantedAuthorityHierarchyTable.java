@@ -17,7 +17,6 @@ package org.opendatakit.common.security.spring;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -32,7 +31,7 @@ import org.opendatakit.common.persistence.Query.Direction;
 import org.opendatakit.common.persistence.Query.FilterOperation;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.security.User;
-import org.opendatakit.common.security.common.GrantedAuthorityNames;
+import org.opendatakit.common.security.common.GrantedAuthorityName;
 import org.opendatakit.common.web.CallingContext;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.GrantedAuthorityImpl;
@@ -157,7 +156,7 @@ public final class GrantedAuthorityHierarchyTable extends CommonFieldsBase {
 	
 			for ( Object o : domGroupsList ) {
 				String groupName = (String) o;
-				if ( !GrantedAuthorityNames.permissionsCanBeAssigned(groupName) ) continue;
+				if ( !GrantedAuthorityName.permissionsCanBeAssigned(groupName) ) continue;
 				assignableGroups.add(groupName);
 			}
 		}
@@ -170,7 +169,7 @@ public final class GrantedAuthorityHierarchyTable extends CommonFieldsBase {
 			
 			for ( Object o : subGroupsList ) {
 				String groupName = (String) o;
-				if ( !GrantedAuthorityNames.permissionsCanBeAssigned(groupName) ) continue;
+				if ( !GrantedAuthorityName.permissionsCanBeAssigned(groupName) ) continue;
 				assignableGroups.add(groupName);
 			}
 		}
@@ -194,7 +193,7 @@ public final class GrantedAuthorityHierarchyTable extends CommonFieldsBase {
 			GrantedAuthority dom = group.getDominatingGrantedAuthority();
 			GrantedAuthority sub = group.getSubordinateGrantedAuthority();
 			
-			if ( !GrantedAuthorityNames.permissionsCanBeAssigned(dom.toString()) ) continue;
+			if ( !GrantedAuthorityName.permissionsCanBeAssigned(dom.toString()) ) continue;
 			TreeSet<String> auths = inheritFrom.get(dom.getAuthority());
 			if ( auths == null ) {
 				auths = new TreeSet<String>();
@@ -209,7 +208,7 @@ public final class GrantedAuthorityHierarchyTable extends CommonFieldsBase {
 	public static final void assertGrantedAuthorityHierarchy( GrantedAuthority dominantGrant, 
 						Collection<String> desiredGrants, CallingContext cc ) throws ODKDatastoreException {
 		
-		if ( !GrantedAuthorityNames.permissionsCanBeAssigned(dominantGrant.getAuthority()) ) {
+		if ( !GrantedAuthorityName.permissionsCanBeAssigned(dominantGrant.getAuthority()) ) {
 			throw new IllegalArgumentException("Dominant grant must be permissions-assignable!");
 		}
 
@@ -224,7 +223,7 @@ public final class GrantedAuthorityHierarchyTable extends CommonFieldsBase {
 			TreeSet<String> groups = new TreeSet<String>();
 			TreeSet<String> roles = new TreeSet<String>();
 			for ( String grant : desiredGrants ) {
-				if ( !GrantedAuthorityNames.permissionsCanBeAssigned(grant) ) {
+				if ( !GrantedAuthorityName.permissionsCanBeAssigned(grant) ) {
 					roles.add(grant);
 				} else {
 					groups.add(grant);
@@ -278,9 +277,7 @@ public final class GrantedAuthorityHierarchyTable extends CommonFieldsBase {
 			if ( !hasNotChanged ) {
 				// finally, since we mucked with the group hierarchies, flag that 
 				// the cache of those hierarchies has changed.
-				SecurityRevisionsTable t = SecurityRevisionsTable.getSingletonRecord(ds, user);
-				t.setLastRoleHierarchyRevisionDate(new Date());
-				ds.putEntity(t, user);
+				SecurityRevisionsTable.setLastRoleHierarchyRevisionDate(ds, user);
 			}
 		}
 	}

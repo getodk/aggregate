@@ -17,7 +17,6 @@
 package org.opendatakit.common.security.client.security;
 
 import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
-import org.opendatakit.common.security.client.CredentialsInfo;
 import org.opendatakit.common.security.client.RealmSecurityInfo;
 import org.opendatakit.common.security.client.UserSecurityInfo;
 import org.opendatakit.common.security.client.exception.AccessDeniedException;
@@ -42,39 +41,11 @@ public interface SecurityService extends RemoteService {
 	 * @throws DatastoreFailureException
 	 */
 	UserSecurityInfo getUserInfo() throws AccessDeniedException, DatastoreFailureException;
-	
-	/**
-	 * @return the display name of the logged-in user.
-	 * @throws AccessDeniedException
-	 */
-	String getUserDisplayName() throws AccessDeniedException;
-	
-	/**
-	 * @return whether the user is a registered user
-	 *  (vs. anonymous or authenticated through OpenId but not registered).
-	 * @throws AccessDeniedException
-	 */
-	boolean isRegisteredUser() throws AccessDeniedException;
-	
-	/**
-	 * @return whether the user is the anonymous user
-	 * @throws AccessDeniedException
-	 */
-	boolean isAnonymousUser() throws AccessDeniedException;
 
 	/**
 	 * @param xsrfString
-	 * @return information needed for building CredentialsInfo records.
+	 * @return information needed for building CredentialsInfo records and URLs.
 	 * @throws AccessDeniedException
 	 */
 	RealmSecurityInfo getRealmInfo(String xsrfString) throws AccessDeniedException;
-
-	/**
-	 * Change the user's password.
-	 * @param xsrfString
-	 * @param credentials
-	 * @throws AccessDeniedException
-	 * @throws DatastoreFailureException
-	 */
-	void setUserPassword(String xsrfString, CredentialsInfo credentials) throws AccessDeniedException, DatastoreFailureException;
 }

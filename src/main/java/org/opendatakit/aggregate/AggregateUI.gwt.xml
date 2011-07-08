@@ -7,6 +7,9 @@
   <inherits name='com.google.gwt.user.theme.standard.StandardResources'/>
   <inherits name='com.google.gwt.maps.GoogleMaps' />
   
+  <!-- Generic extended widget classes -->
+  <inherits name='org.opendatakit.common.web.Web'/>
+  
   <!-- Our access denied exception class and security interfaces -->
   <inherits name='org.opendatakit.common.security.Security'/>
 

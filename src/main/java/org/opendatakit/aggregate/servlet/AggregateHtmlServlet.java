@@ -30,7 +30,7 @@ import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.security.UserService;
-import org.opendatakit.common.security.spring.RegisteredUsersTable;
+import org.opendatakit.common.security.spring.SecurityRevisionsTable;
 import org.opendatakit.common.web.CallingContext;
 
 /**
@@ -82,7 +82,7 @@ public class AggregateHtmlServlet extends ServletUtilBase {
 "	<div id=\"dynamic_content\"></div>" +
 "  </body>" +
 "</html>";
-
+	
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
@@ -106,12 +106,12 @@ public class AggregateHtmlServlet extends ServletUtilBase {
 			boolean directToConfigTab = false;
 			Datastore ds = cc.getDatastore();
 			try {
-				RegisteredUsersTable t = RegisteredUsersTable.getUserByUri(user.getUriUser(),
-																			ds,	user);
-				if ( !t.getIsEnabled() ) {
+				long changeTimestamp = SecurityRevisionsTable.getLastSuperUserIdRevisionDate(ds, user);
+				long reviewStamp = SecurityRevisionsTable.getLastPermissionsViewRevisionDate(ds, user);
+				
+				if ( reviewStamp < changeTimestamp ) {
+					SecurityRevisionsTable.setLastPermissionsViewRevisionDate(ds, user);
 					directToConfigTab = true;
-					t.setIsEnabled(true);
-					ds.putEntity(t, user);
 				}
 			} catch (ODKDatastoreException e) {
 				e.printStackTrace();

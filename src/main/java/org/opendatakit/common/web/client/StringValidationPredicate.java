@@ -14,17 +14,18 @@
  * the License.
  */
 
-package org.opendatakit.common.security.client.security;
+package org.opendatakit.common.web.client;
 
-import org.opendatakit.common.security.client.RealmSecurityInfo;
-import org.opendatakit.common.security.client.UserSecurityInfo;
-
-import com.google.gwt.user.client.rpc.AsyncCallback;
-
-public interface SecurityServiceAsync {
-
-	void getUserInfo(AsyncCallback<UserSecurityInfo> callback);
-
-	void getRealmInfo(String xsrfString,
-			AsyncCallback<RealmSecurityInfo> callback);
+/**
+ * Interface passed to ValidatingTextInputCell and other classes
+ * to validate the prospective value before allowing the UI to 
+ * update to that value.  If the predicate returns false, no
+ * value change occurs.
+ * 
+ * @author mitchellsundt@gmail.com
+ *
+ * @param <T> type of the backing object for the row containing the cell.
+ */
+public interface StringValidationPredicate<T> {
+	public boolean isValid(String prospectiveValue, T key);
 }

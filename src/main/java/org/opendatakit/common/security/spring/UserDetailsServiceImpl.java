@@ -24,7 +24,7 @@ import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.security.UserService;
-import org.opendatakit.common.security.common.GrantedAuthorityNames;
+import org.opendatakit.common.security.common.GrantedAuthorityName;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.TransientDataAccessResourceException;
@@ -125,7 +125,7 @@ public class UserDetailsServiceImpl implements UserDetailsService, InitializingB
 		User user = userService.getDaemonAccountUser();
 		Set<GrantedAuthority> grantedAuthorities = 
 			UserGrantedAuthority.getGrantedAuthorities(uriUser, datastore, user);
-		grantedAuthorities.add(new GrantedAuthorityImpl(GrantedAuthorityNames.USER_IS_REGISTERED.name()));
+		grantedAuthorities.add(new GrantedAuthorityImpl(GrantedAuthorityName.USER_IS_REGISTERED.name()));
 		grantedAuthorities.addAll(authorities);
 		return grantedAuthorities;
 	}
@@ -143,8 +143,8 @@ public class UserDetailsServiceImpl implements UserDetailsService, InitializingB
 		final String password;
 		final String salt;
 		final Set<GrantedAuthority> grantedAuthorities;
-		final boolean isEnabled;
-		final boolean isCredentialNonExpired;
+		final boolean isEnabled = true;
+		final boolean isCredentialNonExpired = true;
 		try {
 			if ( credentialType == CredentialType.Username ) {
 				RegisteredUsersTable t;
@@ -162,8 +162,6 @@ public class UserDetailsServiceImpl implements UserDetailsService, InitializingB
 					}
 				}
 				uriUser = t.getUri();
-				isEnabled = t.getIsEnabled();
-				isCredentialNonExpired = t.getIsCredentialNonExpired();
 				switch ( passwordType ) {
 				case BasicAuth:
 					password = t.getBasicAuthPassword();
@@ -195,22 +193,15 @@ public class UserDetailsServiceImpl implements UserDetailsService, InitializingB
 				
 				if ( name.equals(userService.getSuperUserEmail()) ) {
 					// it is the superUser ... cannot be disabled...
-					RegisteredUsersTable su = RegisteredUsersTable.assertSuperUser(userService.getSuperUserEmail(), datastore, user);
-					isEnabled = true;
-					isCredentialNonExpired = true;
+					RegisteredUsersTable su = RegisteredUsersTable.assertSuperUser(userService, datastore);
 					grantedAuthorities = getGrantedAuthorities(su.getUri());
 					uriUser = su.getUri();
 				} else {
 					// not the super-user -- try to find user in registered users table...
-					List<RegisteredUsersTable> eUser = RegisteredUsersTable.getUsersByEmail(name, datastore, user);
-					if ( eUser.size() == 1 ) {
-						RegisteredUsersTable t = eUser.get(0);
-						uriUser = t.getUri();
-						isEnabled = t.getIsEnabled();
-						isCredentialNonExpired = t.getIsCredentialNonExpired();
-						grantedAuthorities = getGrantedAuthorities(t.getUri());
-					} else if ( eUser.size() > 1 ) {
-						throw new UsernameNotFoundException("User " + name + " is ambiguous - has multiple registered identities");
+					RegisteredUsersTable eUser = RegisteredUsersTable.getUniqueUserByEmail(name, datastore, user);
+					if ( eUser != null ) {
+						uriUser = eUser.getUri();
+						grantedAuthorities = getGrantedAuthorities(eUser.getUri());
 					} else {
 						throw new UsernameNotFoundException("User " + name + " is not registered");
 					}

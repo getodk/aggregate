@@ -30,6 +30,7 @@ import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.persistence.Query.FilterOperation;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.security.User;
+import org.opendatakit.common.security.UserService;
 import org.opendatakit.common.web.CallingContext;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.GrantedAuthorityImpl;
@@ -268,14 +269,11 @@ public final class UserGrantedAuthority extends CommonFieldsBase {
 		}
 	}
 	
-	public static final void deleteGrantedAuthoritiesForUser(String uriUser, CallingContext cc) throws ODKDatastoreException {
+	public static final void deleteGrantedAuthoritiesForUser(String uriUser, UserService userService, Datastore datastore, User user) throws ODKDatastoreException {
 
-		Datastore ds = cc.getDatastore();
-		User user = cc.getCurrentUser();
-		
 		try {
-			UserGrantedAuthority relation = UserGrantedAuthority.assertRelation(ds, user);
-			Query query = ds.createQuery(relation, user);
+			UserGrantedAuthority relation = UserGrantedAuthority.assertRelation(datastore, user);
+			Query query = datastore.createQuery(relation, user);
 			query.addFilter(UserGrantedAuthority.USER, FilterOperation.EQUAL, uriUser);
 			List<?> keys = query.executeDistinctValueForDataField(relation.primaryKey);
 			List<EntityKey> memberships = new ArrayList<EntityKey>();
@@ -283,9 +281,9 @@ public final class UserGrantedAuthority extends CommonFieldsBase {
 				String uri = (String) o;
 				memberships.add(new EntityKey(relation, uri));
 			}
-			ds.deleteEntities(memberships, user);
+			datastore.deleteEntities(memberships, user);
 		} finally {
-			cc.getUserService().reloadPermissions();
+			userService.reloadPermissions();
 		}
 	}
 }

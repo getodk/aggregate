@@ -19,6 +19,7 @@ package org.opendatakit.aggregate.client.table;
 import org.opendatakit.aggregate.client.externalserv.ExternServSummary;
 import org.opendatakit.aggregate.client.widgets.DeletePublishButton;
 import org.opendatakit.aggregate.client.widgets.PurgeButton;
+import org.opendatakit.common.security.client.UserSecurityInfo;
 
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
@@ -31,7 +32,6 @@ public class PublishTable extends FlexTable {
   private static final int HEADER_ROW = 0;
   private static final int STARTING_ROW = HEADER_ROW + 1;
   
-  private static final String K_MAILTO = "mailto:";
   private static int PURGE_DATA = 0;
   private static int CREATED_BY = 1;
   private static int STATUS = 2;
@@ -67,14 +67,7 @@ public class PublishTable extends FlexTable {
       PurgeButton purgeButton = new PurgeButton(formId, e);
       this.setWidget(i + STARTING_ROW, PURGE_DATA, purgeButton);
       String user = e.getUser();
-      String displayName;
-      if (user.startsWith(K_MAILTO)) {
-        displayName = user.substring(K_MAILTO.length());
-      } else if (user.startsWith("uid:")) {
-        displayName = user.substring("uid:".length(), user.indexOf("|"));
-      } else {
-        displayName = user;
-      }
+      String displayName = UserSecurityInfo.getDisplayName(user);
       this.setText(i + STARTING_ROW, CREATED_BY, displayName);
       this.setText(i + STARTING_ROW, STATUS, e.getStatus().toString());
       this.setText(i + STARTING_ROW, TIME_PUBLISH_START, e.getTimeEstablished().toString());

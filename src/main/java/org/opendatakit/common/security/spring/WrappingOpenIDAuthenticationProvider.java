@@ -21,7 +21,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import org.opendatakit.common.security.SecurityUtils;
-import org.opendatakit.common.security.common.GrantedAuthorityNames;
+import org.opendatakit.common.security.common.GrantedAuthorityName;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
@@ -36,8 +36,7 @@ import org.springframework.security.openid.OpenIDAuthenticationToken;
 /**
  * Ensures that the UserDetails returned from the openID authentication process
  * have a username that is the e-mail address of the user that was authenticated
- * and that the granted authorities include the AUTH_OPENID and MAILTO_... 
- * authorities.
+ * and that the granted authorities include the AUTH_OPENID authority.
  * 
  * @author mitchellsundt@gmail.com
  *
@@ -88,14 +87,7 @@ public class WrappingOpenIDAuthenticationProvider extends OpenIDAuthenticationPr
 		
 		authorities.addAll(userDetails.getAuthorities());
 		// add the AUTH_OPENID granted authority,
-		// add the USER_IS_AUTHENTICATED granted authority,
-		// and the MAILTO_... granted authority
-		authorities.add(new GrantedAuthorityImpl(GrantedAuthorityNames.AUTH_OPENID.toString()));
-		authorities.add(new GrantedAuthorityImpl(GrantedAuthorityNames.USER_IS_AUTHENTICATED.toString()));
-		String mailtoAuthority = GrantedAuthorityNames.getMailtoGrantedAuthorityName(mailtoDomain);
-		if ( mailtoAuthority != null ) {
-			authorities.add(new GrantedAuthorityImpl(mailtoAuthority));
-		}
+		authorities.add(new GrantedAuthorityImpl(GrantedAuthorityName.AUTH_OPENID.toString()));
 
 		// attempt to look user up in registered users table...
 		String username = null;
@@ -109,8 +101,7 @@ public class WrappingOpenIDAuthenticationProvider extends OpenIDAuthenticationPr
 			noRights = partialDetails.getAuthorities().isEmpty();
 			username = partialDetails.getUsername();
 		} catch (Exception e) {
-			partialDetails = userDetails;
-			username = eMail;
+			throw new UsernameNotFoundException("account not recognized");
 		}
 
 		AggregateUser trueUser = new AggregateUser(username, 
