@@ -30,6 +30,8 @@ public class ConfirmPurgePopup extends PopupPanel{
 
   public ConfirmPurgePopup(ExternServSummary e, Date earliest, String bodyText) {
     super(false);   
+    setModal(true);
+
     FlexTable layout = new FlexTable();
     layout.setWidget(0, 0, new HTML(bodyText));
     layout.setWidget(0, 1, new ConfirmPurgeButton(e.getUri(), earliest, this));

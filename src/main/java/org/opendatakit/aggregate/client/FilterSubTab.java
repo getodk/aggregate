@@ -62,6 +62,13 @@ public class FilterSubTab extends VerticalPanel implements SubTabInterface {
     submissionPanel.update(currentlyDisplayedFilterGroup);
   }
   
+
+  @Override
+  public boolean canLeave() {
+	  return true;
+  }
+  
+  @Override
   public void update() {
     navTable.update();
     filtersPanel.update(currentlyDisplayedFilterGroup);

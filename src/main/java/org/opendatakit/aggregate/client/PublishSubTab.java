@@ -36,6 +36,12 @@ public class PublishSubTab extends VerticalPanel implements SubTabInterface {
     add(publishTable);
   }
 
+
+  @Override
+  public boolean canLeave() {
+	  return true;
+  }
+  
   @Override
   public void update() {
     FormServiceAsync formSvc = SecureGWT.getFormService();

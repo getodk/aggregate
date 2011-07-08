@@ -26,6 +26,8 @@ import org.opendatakit.common.security.client.UserSecurityInfo.UserType;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.logical.shared.BeforeSelectionEvent;
+import com.google.gwt.event.logical.shared.BeforeSelectionHandler;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.user.client.Cookies;
@@ -38,6 +40,7 @@ import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class AggregateUI implements EntryPoint {
@@ -318,7 +321,7 @@ public class AggregateUI implements EntryPoint {
     return submissionNav;
   }
   
-  SelectionHandler<Integer> getSubMenuSelectionHandler( final Tabs menu, final SubTabs[] subMenus) {
+  void setSubMenuSelectionHandler( final TabPanel menuTab, final Tabs menu, final SubTabs[] subMenus) {
 	  // add the mainNav selection handler for this menu...
 	  mainNav.addSelectionHandler(new SelectionHandler<Integer>() {
 			@Override
@@ -359,7 +362,20 @@ public class AggregateUI implements EntryPoint {
 			}
 	  });
 
-	  return new SelectionHandler<Integer>() {
+	  menuTab.addBeforeSelectionHandler(new BeforeSelectionHandler<Integer>() {
+
+		@Override
+		public void onBeforeSelection(BeforeSelectionEvent<Integer> event) {
+			// allow the currently-selected SubTab to refuse the tab selection.
+			// refusal should only occur after user confirmation.
+			if ( !getTimer().canLeaveCurrentSubTab() ) {
+				event.cancel();
+			}
+		}
+		  
+	  });
+	  
+	  menuTab.addSelectionHandler(new SelectionHandler<Integer>() {
 		@Override
 		public void onSelection(SelectionEvent<Integer> event) {
 			if ( userInfo == null ) {
@@ -374,6 +390,6 @@ public class AggregateUI implements EntryPoint {
 	        getTimer().setCurrentSubTab(subMenus[selected]);
 	        hash.put();
 		}
-	  };
+	  });
   }
 }

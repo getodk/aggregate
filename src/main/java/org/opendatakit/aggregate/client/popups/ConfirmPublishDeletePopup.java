@@ -35,6 +35,7 @@ public class ConfirmPublishDeletePopup extends PopupPanel {
 
   public ConfirmPublishDeletePopup(ExternServSummary publisher) {
     super(false);
+    setModal(true);
 
     FlexTable layout = new FlexTable();
     

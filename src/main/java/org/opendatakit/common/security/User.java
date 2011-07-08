@@ -31,10 +31,10 @@ import org.springframework.security.core.GrantedAuthority;
  */
 public interface User {
 	public static final String ANONYMOUS_USER = "anonymousUser";
-	public static final String ANONYMOUS_USER_NICKNAME = "anonymous user";
+	public static final String ANONYMOUS_USER_NICKNAME = "Anonymous Access";
 
 	public static final String DAEMON_USER = "aggregate.opendatakit.org:web-service";
-	public static final String DAEMON_USER_NICKNAME = "daemon account";
+	public static final String DAEMON_USER_NICKNAME = "Background Task Account";
 	/**
 	 * @return User-friendly name.
 	 */

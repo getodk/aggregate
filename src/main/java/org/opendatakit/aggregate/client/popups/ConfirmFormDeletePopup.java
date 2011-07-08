@@ -27,7 +27,7 @@ public class ConfirmFormDeletePopup extends PopupPanel {
 
   public ConfirmFormDeletePopup(String formId) {
     super(false);
-
+    setModal(true);
     FlexTable layout = new FlexTable();
    
     HTML message = new HTML(
