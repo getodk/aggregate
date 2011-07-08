@@ -73,6 +73,40 @@ public class RefreshTimer extends Timer {
 	  isInitializing = false;
   }
   
+  public boolean canLeaveCurrentSubTab() {
+	  if(currentSubTab != null) {
+		    SubTabInterface tabPanel = null;
+		    switch (currentSubTab) {
+		    case FORMS:
+		    	tabPanel = aggregateUI.getManageNav().getSubTab(currentSubTab);
+		    	break;
+		    case FILTER:
+		        tabPanel = aggregateUI.getSubmissionNav().getSubTab(currentSubTab);
+		        break;
+		    case PUBLISH:
+		    	tabPanel = aggregateUI.getManageNav().getSubTab(currentSubTab);
+		    	break;
+		    case EXPORT:
+		    	tabPanel = aggregateUI.getSubmissionNav().getSubTab(currentSubTab);
+		    	break;
+		    case PREFERENCES:
+		        tabPanel = aggregateUI.getManageNav().getSubTab(currentSubTab);
+		        break;
+		    case PERMISSIONS:
+		    	tabPanel = aggregateUI.getManageNav().getSubTab(currentSubTab);
+		    	break;
+		    default:
+			      // should not happen
+			      GWT.log("currentSubTab (" + currentSubTab.getHashString() +
+			    		  ") has no defined action in RefreshTimer.run()");
+		    }
+		    if ( tabPanel != null ) {
+			    return tabPanel.canLeave();
+		    }
+	  }
+	  return true;
+  }
+  
   public void setCurrentSubTab(SubTabs subtab) {
     currentSubTab = subtab;
     refreshNow();

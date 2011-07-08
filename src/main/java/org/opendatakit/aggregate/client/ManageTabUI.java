@@ -64,7 +64,7 @@ public class ManageTabUI extends TabPanel {
     getElement().setId("second_level_menu");
     
     // register handler to manage tab selection change (and selecting our tab)
-    this.addSelectionHandler(baseUI.getSubMenuSelectionHandler(Tabs.MANAGEMENT, MANAGEMENT_MENU));
+    baseUI.setSubMenuSelectionHandler(this, Tabs.MANAGEMENT, MANAGEMENT_MENU);
   }
 
   public void warmUp() {

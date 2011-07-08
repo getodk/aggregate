@@ -29,23 +29,26 @@ public class ConfirmUserDeletePopup extends PopupPanel {
 
   public ConfirmUserDeletePopup(UserSecurityInfo userToDelete, TemporaryAccessConfigurationSheet sheet) {
     super(false);
+    setModal(true);
 
     FlexTable layout = new FlexTable();
    
     HTML message;
     if ( sheet.isUiOutOfSyncWithServer() ) {
-    	message = new HTML("Apply pending permissions changes and delete user <b>"
+    	message = new HTML("Unsaved changes exist.<br/>"
+						+ "<p>Proceeding will save all pending changes and<br/>permanently delete user <b>"
         + userToDelete.getCanonicalName()
-        + "</b>?<br/>Do you wish to apply all pending changes and permanently delete this user?");
+        + "</b> on the server.</p>"
+        + "<p>Do you wish to apply all pending changes and <br/>permanently delete this user?</p>");
     } else {
     	message = new HTML(
-            "Delete user <b>"
+            "<p>Proceeding will permanently delete user <b>"
             + userToDelete.getCanonicalName()
-            + "</b>?<br/>Do you wish to permanently delete this user?");
+            + "</b> on the server.</p><p>Do you wish to permanently delete this user?</p>");
     }
     layout.setWidget(0, 0, message);
-    layout.setWidget(0, 1, new ExecuteDeleteUserButton(userToDelete, sheet, this));
-    layout.setWidget(0, 2, new ClosePopupButton(this));
+    layout.setWidget(2, 0, new ExecuteDeleteUserButton(userToDelete, sheet, this));
+    layout.setWidget(2, 1, new ClosePopupButton(this));
 
     setWidget(layout);
   }

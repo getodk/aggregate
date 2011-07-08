@@ -52,7 +52,7 @@ public class SubmissionTabUI extends TabPanel {
     getElement().setId("second_level_menu");
 
     // register handler to manage tab selection change (and selecting our tab)
-    this.addSelectionHandler(baseUI.getSubMenuSelectionHandler(Tabs.SUBMISSIONS, SUBMISSION_MENU));
+    baseUI.setSubMenuSelectionHandler(this, Tabs.SUBMISSIONS, SUBMISSION_MENU);
   } 
   
   public void warmUp() {

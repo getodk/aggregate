@@ -65,9 +65,16 @@ public class TemporaryAccessConfigurationSheet extends Composite {
 
 	private static final String K_INVALID_EMAIL_CHARACTERS = " \t\n\r\",;()<>?/{}'[]";
 
-	public static final ArrayList<String> userType;
-	public static final String ACCOUNT_TYPE_ODK = "ODK";
-	public static final String ACCOUNT_TYPE_GOOGLE = "Google";
+	private static final String NOT_VALID_EMAIL = 
+			"Username is not a valid Email address.\n\n" +
+			"Usernames for Google accounts must be\n" +
+			"Email addresses that Google OpenID can\n" +
+			"authenticate.";
+	
+	private static final ArrayList<String> userType;
+	private static final String ACCOUNT_TYPE_ODK = "ODK";
+	private static final String ACCOUNT_TYPE_GOOGLE = "Google";
+	
 	static {
 		userType = new ArrayList<String>();
 		userType.add(ACCOUNT_TYPE_ODK);
@@ -81,11 +88,11 @@ public class TemporaryAccessConfigurationSheet extends Composite {
 			UiBinder<Widget, TemporaryAccessConfigurationSheet> {
 	}
 
-	final ListDataProvider<UserSecurityInfo> dataProvider = new ListDataProvider<UserSecurityInfo>();
-	final ListHandler<UserSecurityInfo> columnSortHandler = new ListHandler<UserSecurityInfo>(
+	private final ListDataProvider<UserSecurityInfo> dataProvider = new ListDataProvider<UserSecurityInfo>();
+	private final ListHandler<UserSecurityInfo> columnSortHandler = new ListHandler<UserSecurityInfo>(
 			dataProvider.getList());
 
-	boolean changesHappened = false;
+	private boolean changesHappened = false;
 
 	public boolean isUiOutOfSyncWithServer() {
 		return changesHappened;
@@ -536,7 +543,7 @@ public class TemporaryAccessConfigurationSheet extends Composite {
 				}
 				if (hasInvalidEmailCharacters(username)
 						|| username.indexOf(EmailParser.K_AT) == -1) {
-					Window.alert("Username is not a valid e-mail address");
+					Window.alert(NOT_VALID_EMAIL);
 					return false;
 				}
 			}
@@ -613,10 +620,6 @@ public class TemporaryAccessConfigurationSheet extends Composite {
 
 		@Override
 		public void execute(UserSecurityInfo object) {
-			if (isUiOutOfSyncWithServer()) {
-				Window.alert("Unsaved changes exist.");
-			}
-
 			final ConfirmUserDeletePopup popup = new ConfirmUserDeletePopup(
 					object, TemporaryAccessConfigurationSheet.this);
 			popup.setPopupPositionAndShow(new PopupPanel.PositionCallback() {

@@ -22,6 +22,13 @@ public class PreferencesSubTab extends VerticalPanel implements SubTabInterface{
     add(new UpdateGMapsKeyButton(mapsApiKey));
   }
 
+
+  @Override
+  public boolean canLeave() {
+	  return true;
+  }
+  
+  @Override
   public void update() {
     mapsApiKey.setText(Preferences.getGoogleMapsApiKey());
   }

@@ -36,6 +36,13 @@ public class FormsSubTab extends VerticalPanel implements SubTabInterface {
     add(listOfForms);
   }
 
+
+  @Override
+  public boolean canLeave() {
+	  return true;
+  }
+  
+  @Override
   public void update() {
     // Set up the callback object.
     AsyncCallback<FormSummary[]> callback = new AsyncCallback<FormSummary[]>() {
