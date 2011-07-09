@@ -14,11 +14,15 @@ public class ViewServletPopup extends PopupPanel {
     super(false);
     setTitle(buttonText);
     
+    // so we can play with the dimensions...
+    int innerWidth = Window.getClientWidth()*2 / 3;
+    int innerHeight = Window.getClientHeight()*2 /3;
+    
     Frame frame = new Frame(url);
-    frame.setPixelSize((Window.getClientWidth()*2 / 3),(Window.getClientHeight() / 2)); 
+    frame.setPixelSize(innerWidth,innerHeight); 
 
     DockLayoutPanel panel = new DockLayoutPanel(Unit.EM);
-    panel.setPixelSize((Window.getClientWidth()*2 / 3)+6,(Window.getClientHeight() / 2)+30);
+    panel.setPixelSize(innerWidth+6,innerHeight+30);
     panel.addNorth(new ClosePopupButton(this), 2);   
     panel.add(frame);      
     setWidget(panel);
