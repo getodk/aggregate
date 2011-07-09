@@ -21,15 +21,10 @@ import java.util.ArrayList;
 import javax.servlet.http.HttpServletRequest;
 
 import org.opendatakit.aggregate.ContextFactory;
-import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
-import org.opendatakit.common.persistence.exception.ODKDatastoreException;
-import org.opendatakit.common.security.User;
-import org.opendatakit.common.security.client.CredentialsInfo;
 import org.opendatakit.common.security.client.UserSecurityInfo;
 import org.opendatakit.common.security.client.exception.AccessDeniedException;
 import org.opendatakit.common.security.common.GrantedAuthorityName;
-import org.opendatakit.common.security.spring.RegisteredUsersTable;
 import org.opendatakit.common.web.CallingContext;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
@@ -73,37 +68,5 @@ org.opendatakit.common.security.client.security.admin.SecurityAdminService {
 	    SecurityServiceUtil.setStandardSiteAccessConfiguration( users, allGroups, cc ); 
 	    // clear the cache of saved user identities as we don't know what has changed...
 	    cc.getUserService().reloadPermissions();
-	}
-
-	@Override
-	public void setUserPasswords(String xsrfString, ArrayList<CredentialsInfo> credentials)
-			throws AccessDeniedException, DatastoreFailureException {
-
-	    HttpServletRequest req = this.getThreadLocalRequest();
-	    CallingContext cc = ContextFactory.getCallingContext(this, req);
-
-	    if ( !req.getSession().getId().equals(xsrfString) ) {
-			throw new AccessDeniedException("Invalid request");
-		}
-
-	    Datastore ds = cc.getDatastore();
-	    User user = cc.getUserService().getCurrentUser();
-		RegisteredUsersTable userDefinition = null;
-		try {
-			for ( CredentialsInfo credential : credentials ) {
-				userDefinition = RegisteredUsersTable.getUserByUsername(credential.getUsername(), cc);
-				if ( userDefinition == null ) {
-					throw new AccessDeniedException("User is not a registered user.");
-				}
-	
-				userDefinition.setDigestAuthPassword(credential.getDigestAuthHash());
-				userDefinition.setBasicAuthPassword(credential.getBasicAuthHash());
-				userDefinition.setBasicAuthSalt(credential.getBasicAuthSalt());
-				ds.putEntity(userDefinition, user);
-			}
-		} catch ( ODKDatastoreException e ) {
-			e.printStackTrace();
-			throw new DatastoreFailureException(e.getMessage());
-		}
 	}
 }

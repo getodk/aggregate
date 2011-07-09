@@ -20,9 +20,6 @@ import org.opendatakit.aggregate.externalservice.FormServiceCursor;
 import org.opendatakit.aggregate.externalservice.FusionTable;
 import org.opendatakit.aggregate.externalservice.GoogleSpreadsheet;
 import org.opendatakit.aggregate.externalservice.JsonServer;
-import org.opendatakit.aggregate.servlet.FusionTableServlet;
-import org.opendatakit.aggregate.servlet.JsonServlet;
-import org.opendatakit.aggregate.servlet.SpreadsheetServlet;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.web.CallingContext;
 
@@ -36,29 +33,19 @@ import org.opendatakit.common.web.CallingContext;
  */
 public enum ExternalServiceType {
   GOOGLE_SPREADSHEET(	"Google Spreadsheet",
-		  			 	SpreadsheetServlet.ADDR,
 		  			 	SpreadsheetConsts.SPEADSHEET_NAME_LABEL),
   JSON_SERVER(			"JSON Server",
-		  				JsonServlet.ADDR,
 		  				"JSON Server Address"), 
   GOOGLE_FUSIONTABLES(  "Google FusionTables", 
-		  				FusionTableServlet.ADDR, 
 		  				null);
 
   private String serviceName;
 
-  private String addr;
-
   private String descriptionOfParam;
 
-  private ExternalServiceType(String name, String servletAddr, String desc) {
+  private ExternalServiceType(String name, String desc) {
     serviceName = name;
-    addr = servletAddr;
     descriptionOfParam = desc;
-  }
-
-  public String getAddr() {
-    return addr;
   }
 
   public String getDescriptionOfParam() {

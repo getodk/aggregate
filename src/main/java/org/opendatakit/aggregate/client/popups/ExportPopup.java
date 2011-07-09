@@ -113,12 +113,11 @@ public class ExportPopup extends PopupPanel {
     SecureGWT.getFormService().getPossibleKmlSettings(formId, new AsyncCallback<KmlSettings>() {
       @Override
       public void onFailure(Throwable caught) {
-        // TODO Auto-generated method stub
+          AggregateUI.getUI().reportError(caught);
       }
 
       @Override
       public void onSuccess(KmlSettings result) {
-        // TODO Auto-generated method stub
         gotKmlOptions = true;
         geoPoints = result.getGeopointNodes();
         titleFields = result.getTitleNodes();
@@ -168,7 +167,7 @@ public class ExportPopup extends PopupPanel {
     	SecureGWT.getFormService().createCsv(formId, new AsyncCallback<Boolean>() {
         @Override
         public void onFailure(Throwable caught) {
-          // TODO Auto-generated method stub
+            AggregateUI.getUI().reportError(caught);
         }
 
         @Override
@@ -184,7 +183,7 @@ public class ExportPopup extends PopupPanel {
           new AsyncCallback<Boolean>() {
             @Override
             public void onFailure(Throwable caught) {
-              // TODO Auto-generated method stub
+                AggregateUI.getUI().reportError(caught);
             }
 
             @Override

@@ -36,6 +36,7 @@ import org.opendatakit.aggregate.constants.common.UIConsts;
 import org.opendatakit.aggregate.exception.ODKConversionException;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
+import org.opendatakit.aggregate.exception.ODKFormSubmissionsDisabledException;
 import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
 import org.opendatakit.aggregate.exception.ODKParseException;
 import org.opendatakit.aggregate.externalservice.ExternalService;
@@ -248,7 +249,7 @@ public class SubmissionServlet extends ServletUtilBase {
         out.write(HtmlConsts.HTML_OPEN);
         out.write(HtmlConsts.BODY_OPEN);
         out.write("Successful submission upload.  Click ");
-        out.write(HtmlUtil.createHref(cc.getWebApplicationURL(FormsServlet.ADDR), "here"));
+        out.write(HtmlUtil.createHref(cc.getWebApplicationURL(AggregateHtmlServlet.ADDR), "here"));
         out.write(" to return to forms page.");
         out.write(HtmlConsts.BODY_CLOSE);
         out.write(HtmlConsts.HTML_CLOSE);
@@ -275,21 +276,20 @@ public class SubmissionServlet extends ServletUtilBase {
     } catch (ODKExternalServiceException e) {
       e.printStackTrace();
     } catch (ODKIncompleteSubmissionData e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
       resp.sendError(HttpServletResponse.SC_BAD_REQUEST, ErrorConsts.PARSING_PROBLEM);
     } catch (ODKConversionException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
       resp.sendError(HttpServletResponse.SC_BAD_REQUEST, ErrorConsts.PARSING_PROBLEM);
     } catch (ODKDatastoreException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
       resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ErrorConsts.PARSING_PROBLEM);
     } catch (FileUploadException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
       resp.sendError(HttpServletResponse.SC_BAD_REQUEST, ErrorConsts.PARSING_PROBLEM);
-    }
+    } catch (ODKFormSubmissionsDisabledException e) {
+	  e.printStackTrace();
+      resp.sendError(HttpServletResponse.SC_BAD_REQUEST, ErrorConsts.FORM_DOES_NOT_ALLOW_SUBMISSIONS);
+	}
   }
 }

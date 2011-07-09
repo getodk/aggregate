@@ -153,7 +153,7 @@ public class UploadSubmissionsWorkerImpl {
           }
         }
       } catch (ODKTaskLockException e) {
-        // TODO Auto-generated catch block
+    	// if release fails, it will eventually be cleared...
         e.printStackTrace();
       }
     }

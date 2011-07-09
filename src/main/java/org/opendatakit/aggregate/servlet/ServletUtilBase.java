@@ -183,63 +183,34 @@ public class ServletUtilBase extends CommonServletBase {
    * @return a string with href links
    */
   public final String generateNavigationInfo(CallingContext cc) {
-	  
-	  final String listFormsHref = HtmlUtil.createHref(
-			  cc.getWebApplicationURL(FormsServlet.ADDR), 
-			  ServletConsts.FORMS_LINK_TEXT);
 	  final String uploadSubmissionsHref = HtmlUtil.createHref(
 			  cc.getWebApplicationURL(SubmissionServlet.ADDR),
-			  ServletConsts.UPLOAD_SUBMISSIONS_APPLET_LINK_TEXT);
+			  ServletConsts.UPLOAD_SUBMISSIONS_LINK_TEXT);
 	  
-	  final String resultsHref = HtmlUtil.createHref(
-			  cc.getWebApplicationURL(ResultServlet.ADDR), 
-			  ServletConsts.RESULT_FILES_LINK_TEXT);
 	  final String uploadFormHref = HtmlUtil.createHref(
 			  cc.getWebApplicationURL(FormUploadServlet.ADDR), 
-			  ServletConsts.UPLOAD_XFORM_APPLET_LINK_TEXT);
+			  ServletConsts.UPLOAD_XFORM_LINK_TEXT);
 	  
 	  final String briefcaseHref = HtmlUtil.createHref(
 			  cc.getWebApplicationURL(BriefcaseServlet.ADDR), 
 			  ServletConsts.BRIEFCASE_LINK_TEXT);
-	  final String managePasswordsHref = HtmlUtil.createHref(
-			  cc.getWebApplicationURL(UserManagePasswordsServlet.ADDR), 
-			  ServletConsts.DELETE_FORM_LINK_TEXT);
 	  
 	  StringBuilder html = new StringBuilder();
 	html.append(HtmlUtil.createBeginTag(HtmlConsts.CENTERING_DIV));
     html.append(HtmlConsts.HEADING_TABLE_OPEN);
-    String[] headers = new String[] { "Access", "Publish", "Upload", "Manage" }; 
+    String[] headers = new String[] { "Access", "Submit", "Define", "Manage" }; 
 	for (String header : headers) {
 		html.append(HtmlUtil.wrapWithHtmlTags(HtmlConsts.HEADING_TABLE_HEADER, header));
     }
 	html.append(HtmlConsts.TABLE_ROW_OPEN);
-	// access
-	html.append(HtmlUtil.wrapWithHtmlTags(HtmlConsts.HEADING_TABLE_DATA,listFormsHref));
-	// publish
-	html.append(HtmlUtil.createSelfClosingTag(HtmlConsts.HEADING_TABLE_DATA));
-	// upload
+	// briefcase
+	html.append(HtmlUtil.wrapWithHtmlTags(HtmlConsts.HEADING_TABLE_DATA,briefcaseHref));
+	// upload submissions
 	html.append(HtmlUtil.wrapWithHtmlTags(HtmlConsts.HEADING_TABLE_DATA,uploadSubmissionsHref));
-	// manage
-	html.append(HtmlUtil.wrapWithHtmlTags(HtmlConsts.HEADING_TABLE_DATA,managePasswordsHref));
-	html.append(HtmlConsts.TABLE_ROW_CLOSE);
-	
-	html.append(HtmlConsts.TABLE_ROW_OPEN);
-	// access
-	html.append(HtmlUtil.wrapWithHtmlTags(HtmlConsts.HEADING_TABLE_DATA,resultsHref));
-	// publish
-	html.append(HtmlUtil.createSelfClosingTag(HtmlConsts.HEADING_TABLE_DATA));
-	// upload
+	// upload forms
 	html.append(HtmlUtil.wrapWithHtmlTags(HtmlConsts.HEADING_TABLE_DATA,uploadFormHref));
 	html.append(HtmlConsts.TABLE_ROW_CLOSE);
 	
-	html.append(HtmlConsts.TABLE_ROW_OPEN);
-	// access
-	html.append(HtmlUtil.wrapWithHtmlTags(HtmlConsts.HEADING_TABLE_DATA,briefcaseHref));
-	// publish
-	// upload
-	html.append(HtmlUtil.createSelfClosingTag(HtmlConsts.HEADING_TABLE_DATA)); // TODO: Debrief
-	html.append(HtmlConsts.TABLE_ROW_CLOSE);
-
 	html.append(HtmlConsts.TABLE_CLOSE);
 	html.append(HtmlUtil.createEndTag(HtmlConsts.DIV));
     return html.toString();

@@ -17,12 +17,12 @@ package org.opendatakit.aggregate.task.gae;
 
 import java.net.URLEncoder;
 
-import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.externalservice.ExternalServiceConsts;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
 import org.opendatakit.aggregate.externalservice.FormServiceCursor;
 import org.opendatakit.aggregate.task.UploadSubmissions;
 import org.opendatakit.aggregate.task.gae.servlet.UploadSubmissionsTaskServlet;
+import org.opendatakit.common.constants.BasicConsts;
 import org.opendatakit.common.constants.HtmlConsts;
 import org.opendatakit.common.web.CallingContext;
 
@@ -51,7 +51,7 @@ public class UploadSubmissionsImpl implements UploadSubmissions {
       System.out.println("Creating " + fsc.getExternalServicePublicationOption().toString().toLowerCase() + " upload task: " + fsc.getExternalServiceType());
       String fscUri = URLEncoder.encode(fsc.getUri(), HtmlConsts.UTF8_ENCODE);
 
-      TaskOptions task = TaskOptions.Builder.withUrl(ServletConsts.WEB_ROOT + UploadSubmissionsTaskServlet.ADDR);
+      TaskOptions task = TaskOptions.Builder.withUrl(BasicConsts.FORWARDSLASH + UploadSubmissionsTaskServlet.ADDR);
       task.countdownMillis(1);
       task.method(TaskOptions.Method.GET);
       task.param(ExternalServiceConsts.FSC_URI_PARAM, fscUri);

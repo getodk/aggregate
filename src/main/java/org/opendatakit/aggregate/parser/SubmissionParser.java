@@ -31,8 +31,10 @@ import org.apache.commons.codec.binary.Base64;
 import org.opendatakit.aggregate.constants.ParserConsts;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
+import org.opendatakit.aggregate.datamodel.TopLevelInstanceData;
 import org.opendatakit.aggregate.exception.ODKConversionException;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
+import org.opendatakit.aggregate.exception.ODKFormSubmissionsDisabledException;
 import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
 import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData.Reason;
 import org.opendatakit.aggregate.exception.ODKParseException;
@@ -45,8 +47,11 @@ import org.opendatakit.aggregate.submission.type.RepeatSubmissionType;
 import org.opendatakit.common.constants.BasicConsts;
 import org.opendatakit.common.constants.HtmlConsts;
 import org.opendatakit.common.persistence.CommonFieldsBase;
+import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.EntityKey;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
+import org.opendatakit.common.security.User;
 import org.opendatakit.common.web.CallingContext;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -103,11 +108,12 @@ public class SubmissionParser {
 	 * @throws ODKIncompleteSubmissionData
 	 * @throws ODKConversionException
 	 * @throws ODKDatastoreException
+	 * @throws ODKFormSubmissionsDisabledException 
 	 */
 	public SubmissionParser(InputStream inputStreamXML, CallingContext cc)
 		throws IOException, ODKFormNotFoundException,
 			ODKParseException, ODKIncompleteSubmissionData,
-			ODKConversionException, ODKDatastoreException {
+			ODKConversionException, ODKDatastoreException, ODKFormSubmissionsDisabledException {
 		constructorHelper(inputStreamXML, cc);
 	}
 
@@ -127,12 +133,13 @@ public class SubmissionParser {
 	 * @throws ODKIncompleteSubmissionData
 	 * @throws ODKConversionException
 	 * @throws ODKDatastoreException
+	 * @throws ODKFormSubmissionsDisabledException 
 	 */
 	public SubmissionParser(MultiPartFormData submissionFormParser,
 			CallingContext cc) throws IOException,
 			ODKFormNotFoundException, ODKParseException,
 			ODKIncompleteSubmissionData, ODKConversionException,
-			ODKDatastoreException {
+			ODKDatastoreException, ODKFormSubmissionsDisabledException {
 		if (submissionFormParser == null) {
 			// TODO: review best error handling strategy
 			throw new IOException("DID NOT GET A MULTIPARTFORMPARSER");
@@ -236,11 +243,12 @@ public class SubmissionParser {
 	 * @throws ODKIncompleteSubmissionData
 	 * @throws ODKConversionException
 	 * @throws ODKDatastoreException
+	 * @throws ODKFormSubmissionsDisabledException 
 	 */
 	private void constructorHelper(InputStream inputStreamXML, CallingContext cc)
 			throws IOException, ODKFormNotFoundException, ODKParseException,
 			ODKIncompleteSubmissionData, ODKConversionException,
-			ODKDatastoreException {
+			ODKDatastoreException, ODKFormSubmissionsDisabledException {
 		try {
 			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 			factory.setNamespaceAware(true);
@@ -280,6 +288,9 @@ public class SubmissionParser {
 		String fullyQualifiedId = Form.extractWellFormedFormId(formId);
 
 		form = Form.retrieveForm(fullyQualifiedId, cc);
+		if ( !form.getSubmissionEnabled() ) {
+			throw new ODKFormSubmissionsDisabledException();
+		}
 		
 		String modelVersionString = root.getAttribute(ParserConsts.MODEL_VERSION_ATTRIBUTE_NAME);
 		String uiVersionString = root.getAttribute(ParserConsts.UI_VERSION_ATTRIBUTE_NAME);
@@ -296,16 +307,29 @@ public class SubmissionParser {
 		if ( instanceId == null ) {
 			instanceId = CommonFieldsBase.newUri();
 		}
-		
-		submission = new Submission( modelVersion, uiVersion, instanceId, form.getFormDefinition(), cc);
+
+		// retrieve the record with this instanceId from the database or
+		// create a new one.  This supports submissions having more than 
+		// 10MB of attachments.  In that case, ODK Collect will post the 
+		// submission in multiple parts and Aggregate needs to be able to 
+		// merge the parts together.  This SHOULD NOT be used to 'update'
+		// an existing submission, only to attach additional binary content
+		// to an already-uploaded submission.
+		try {
+			Datastore ds = cc.getDatastore();
+			User user = cc.getCurrentUser();
+			TopLevelInstanceData fi = (TopLevelInstanceData) ds.getEntity(form.getTopLevelGroupElement().getFormDataModel().getBackingObjectPrototype(), instanceId, user);
+			submission = new Submission(fi, form.getFormDefinition(), cc);
+		} catch ( ODKEntityNotFoundException e ) {
+			submission = new Submission( modelVersion, uiVersion, instanceId, form.getFormDefinition(), cc);
+	    }
 
 		topLevelTableKey = submission.getKey();
 
 		FormElementModel formRoot = form.getTopLevelGroupElement();
 		boolean uploadAllBinaries = processSubmissionElement(formRoot, root, submission, cc);
-
-		// TODO: figure out if we actually have all the binary content uploaded...
-		submission.setIsComplete(true);
+		// TODO: verify that we actually have all the binary content uploaded...
+		submission.setIsComplete(uploadAllBinaries);
 		// save the elements inserted into the top-level submission
 		try {
 			submission.persist(cc);

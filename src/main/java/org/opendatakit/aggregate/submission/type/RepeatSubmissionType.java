@@ -215,7 +215,6 @@ public class RepeatSubmissionType implements SubmissionRepeat {
 	}
 
 	public List<SubmissionValue> findElementValue(FormElementModel element) {
-		// TODO Auto-generated method stub
 		List<SubmissionValue> values = new ArrayList<SubmissionValue>();
 
 		for (SubmissionSet s : submissionSets) {

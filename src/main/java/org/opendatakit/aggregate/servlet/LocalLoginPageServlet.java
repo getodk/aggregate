@@ -53,7 +53,7 @@ public class LocalLoginPageServlet extends ServletUtilBase {
 "<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">" +
 "<html>" +
 "<head>" +
-"<meta http-equiv=\"Refresh\" content=\"1; URL=www/index.html\"/>" +
+"<meta http-equiv=\"Refresh\" content=\"1; URL=www/Aggregate.html\"/>" +
 "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"/>" +
 "<link rel=\"shortcut icon\" href=\"favicon.ico\"/>" +
 "<title>Login successful! Redirecting to forms page</title>" +
@@ -66,7 +66,7 @@ public class LocalLoginPageServlet extends ServletUtilBase {
 "<table width=\"100%\" cellspacing=\"30\"><tr>" +
 "<td align=\"LEFT\" width=\"10%\"><img src=\"odk_color.png\" id=\"odk_aggregate_logo\" /></td>" +
 "<td align=\"LEFT\" width=\"90%\"><font size=\"7\">Successful Login</font></td></tr></table>" +
-"Please click <a href=\"www/index.html\">here</a> to enter the site." +
+"Please click <a href=\"www/Aggregate.html\">here</a> to enter the site." +
 "</body>" +
 "</html>");
 	}

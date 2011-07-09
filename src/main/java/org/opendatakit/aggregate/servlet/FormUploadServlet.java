@@ -257,6 +257,11 @@ public class FormUploadServlet extends ServletUtilBase {
         logger.info("Upload form: " + parser.getFormId());
         Form form = Form.retrieveForm(parser.getFormId(), cc);
         String isIncompleteFlag = uploadedFormItems.getSimpleFormField(ServletConsts.TRANSFER_IS_INCOMPLETE);
+        if ( isIncompleteFlag != null && isIncompleteFlag.trim().length() != 0 ) {
+        	// not complete yet...
+        	form.setDownloadEnabled(false);
+        	form.persist(cc);
+        }
         form.printDataTree(System.out);
         bOk = true;
 
@@ -291,22 +296,18 @@ public class FormUploadServlet extends ServletUtilBase {
         resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
             ErrorConsts.PERSISTENCE_LAYER_PROBLEM);
       } catch (ODKDatastoreException e) {
-        // TODO NEED TO FIGURE OUT PROPER ACTION FOR ERROR
         e.printStackTrace();
         resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
             ErrorConsts.PERSISTENCE_LAYER_PROBLEM);
       } catch (ODKConversionException e) {
-        // TODO Auto-generated catch block
         e.printStackTrace();
         resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ErrorConsts.PARSING_PROBLEM
             + "\n" + e.getMessage());
       } catch (ODKFormNotFoundException e) {
-        // TODO Auto-generated catch block
         e.printStackTrace();
         resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ErrorConsts.ODKID_NOT_FOUND);
       } catch (ODKParseException e) {
-        // unfortunately, the underlying javarosa utility swallows the parsing
-        // error.
+        // unfortunately, the underlying javarosa utility swallows the parsing error.
         e.printStackTrace();
         resp.sendError(HttpServletResponse.SC_BAD_REQUEST, ErrorConsts.PARSING_PROBLEM + "\n"
             + e.getMessage());
@@ -326,7 +327,7 @@ public class FormUploadServlet extends ServletUtilBase {
       out.write(HtmlConsts.HTML_OPEN);
       out.write(HtmlConsts.BODY_OPEN);
       out.write("Successful form upload.  Click ");
-      out.write(HtmlUtil.createHref(cc.getWebApplicationURL(FormsServlet.ADDR), "here"));
+      out.write(HtmlUtil.createHref(cc.getWebApplicationURL(AggregateHtmlServlet.ADDR), "here"));
       out.write(" to return to forms page.");
       out.write(HtmlConsts.BODY_CLOSE);
       out.write(HtmlConsts.HTML_CLOSE);

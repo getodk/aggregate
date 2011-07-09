@@ -16,6 +16,7 @@
 
 package org.opendatakit.aggregate.client.popups;
 
+import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.SecureGWT;
 import org.opendatakit.aggregate.client.submission.SubmissionUISummary;
 import org.opendatakit.aggregate.client.table.SubmissionTable;
@@ -40,7 +41,7 @@ public class RepeatPopup extends PopupPanel {
     // Set up the callback object.
     AsyncCallback<SubmissionUISummary> callback = new AsyncCallback<SubmissionUISummary>() {
        public void onFailure(Throwable caught) {
-          // TODO: deal with error
+           AggregateUI.getUI().reportError(caught);
        }
 
        public void onSuccess(SubmissionUISummary summary) {
