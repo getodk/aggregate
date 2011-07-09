@@ -17,9 +17,7 @@
 package org.opendatakit.aggregate.client.popups;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.opendatakit.aggregate.client.filter.ColumnFilterHeader;
 import org.opendatakit.aggregate.client.filter.FilterGroup;
@@ -45,16 +43,13 @@ public class FilterPopup extends PopupPanel{
 	private final SubmissionTable data;
 	private final FlexTable table;
 	
-	private final ListBox keepRemove;
+	private final ListBox visibility;
 	private final ListBox rowCol;
 	
 	private final ListBox columnForRowFilter;
 	private final ListBox columnsForColumnFilter;
 	private final ListBox filterOp;
 	private final TextBox filterValue;
-	
-	private final Map<String, RowOrCol> rowColMapping;
-	private final Map<String, Visibility> visibilityMapping;
 	
 	public FilterPopup(SubmissionTable submissionData, FilterGroup filterGroup) {
 		super(false); //do not close popup when user clicks out of it
@@ -64,21 +59,15 @@ public class FilterPopup extends PopupPanel{
 		table = new FlexTable();
 		
 		//keep or remove
-		keepRemove = new ListBox();
-		visibilityMapping = new HashMap<String, Visibility>();
+		visibility = new ListBox();
 		for(Visibility vis : Visibility.values()) {
-		  String displayText = vis.getDisplayText();
-		  keepRemove.addItem(displayText);
-		  visibilityMapping.put(displayText, vis);
+		  visibility.addItem(vis.getDisplayText(), vis.name());
 		}
 		
 		//rows or columns
 		rowCol = new ListBox();
-		rowColMapping = new HashMap<String, RowOrCol>();
 		for(RowOrCol type : RowOrCol.values()) {
-		  String displayText = type.getDisplayText();
-		  rowCol.addItem(displayText);
-		  rowColMapping.put(displayText, type);
+		  rowCol.addItem(type.getDisplayText(), type.name());
 		}
 		
 		//where columns
@@ -105,7 +94,7 @@ public class FilterPopup extends PopupPanel{
 		//value input
 		filterValue = new TextBox();
 				
-		table.setWidget(0, 0, keepRemove);
+		table.setWidget(0, 0, visibility);
 		table.setWidget(0, 1, rowCol);
 		rowCol.addChangeHandler(new ChangeHandler() {
 
@@ -149,13 +138,13 @@ public class FilterPopup extends PopupPanel{
   }
 
   public Visibility getKeepRemove() {    
-    String korr = keepRemove.getValue(keepRemove.getSelectedIndex());
-    return visibilityMapping.get(korr);
+    String korr = visibility.getValue(visibility.getSelectedIndex());
+    return Visibility.valueOf(korr);
   }
 
   public RowOrCol getRowCol() {
     String rowcol = rowCol.getValue(rowCol.getSelectedIndex());
-    return rowColMapping.get(rowcol);
+    return RowOrCol.valueOf(rowcol);
   }
 
   public Column getColumnForRowFilter() {

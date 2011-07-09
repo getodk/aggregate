@@ -9,10 +9,8 @@ import org.opendatakit.aggregate.constants.common.ExternalServicePublicationOpti
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.ListBox;
-import com.google.gwt.user.client.ui.TextBox;
 
-public class ExecutePublishButton  extends AButtonBase implements ClickHandler {
+public class ExecutePublishButton extends AButtonBase implements ClickHandler {
  
   private ExternalServicePopup popup;
   
@@ -27,55 +25,25 @@ public class ExecutePublishButton  extends AButtonBase implements ClickHandler {
     super.onClick(event);
     
     String formId = popup.getFormId(); 
-    TextBox name = popup.getName();
-    ListBox service = popup.getService();
-    ListBox esOptions = popup.getEsOptions();
+    String name = popup.getName();
+    String selectedService = popup.getService();
+    ExternalServicePublicationOption serviceOp = popup.getEsOptions();
     
-    ExternalServicePublicationOption serviceOp = null;
-    String selectedOption = esOptions.getItemText(esOptions.getSelectedIndex());
-    for (ExternalServicePublicationOption selected : ExternalServicePublicationOption.values()) {
-      if (selected.toString().equals(selectedOption))
-        serviceOp = selected;
-    }
-    String selectedService = service.getItemText(service.getSelectedIndex());
     if (selectedService.equals(ExternalServicePopup.TYPE_FUSION_TABLE)) {
-    	SecureGWT.getServicesAdminService().createFusionTable(formId, serviceOp, new CreateFusionTablesCallback());
+    	SecureGWT.getServicesAdminService().createFusionTable(formId, serviceOp, new OAuthCallback());
     } else { // selectedService.equals(TYPE_SPREAD_SHEET)
-    	SecureGWT.getServicesAdminService().createGoogleSpreadsheet(formId, name.getText(), serviceOp,
-          new AsyncCallback<String>() {
-            @Override
-            public void onFailure(Throwable caught) {
-              // TODO Auto-generated method stub
-            }
-
-            @Override
-            public void onSuccess(String result) {
-              SecureGWT.getServicesAdminService().generateOAuthUrl(result, new AsyncCallback<String>() {
-                @Override
-                public void onFailure(Throwable caught) {
-                  // TODO Auto-generated method stub
-                }
-
-                @Override
-                public void onSuccess(String result) {
-                  // TODO Auto-generated method stub
-                  UrlHash.getHash().goTo(result);
-                }
-              });
-            }
-          });
+    	SecureGWT.getServicesAdminService().createGoogleSpreadsheet(formId, name, serviceOp, new OAuthCallback());
     }
     
     AggregateUI.getUI().getTimer().restartTimer();
     popup.hide();
   }
 
-  private class CreateFusionTablesCallback implements AsyncCallback<String> {
+  private class OAuthCallback implements AsyncCallback<String> {
         
     public void onFailure(Throwable caught) {
       // TODO Auto-generated method stub
     }
-
 
     public void onSuccess(String result) {
       SecureGWT.getServicesAdminService().generateOAuthUrl(result, new AsyncCallback<String>() {

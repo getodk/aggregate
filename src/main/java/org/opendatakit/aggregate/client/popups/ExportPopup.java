@@ -16,8 +16,6 @@
 
 package org.opendatakit.aggregate.client.popups;
 
-import java.util.List;
-
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.SecureGWT;
 import org.opendatakit.aggregate.client.SubmissionTabUI;
@@ -37,10 +35,6 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.PopupPanel;
 
 public class ExportPopup extends PopupPanel {
-
-  private List<KmlSettingOption> geoPoints = null;
-  private List<KmlSettingOption> titleFields = null;
-  private List<KmlSettingOption> binaryFields = null;
 
   private boolean gotKmlOptions = false;
   private FlexTable layout;
@@ -81,7 +75,7 @@ public class ExportPopup extends PopupPanel {
     layout.setWidget(0, 2, new HTML(formId));
 
     for (ExportType eT : ExportType.values()) {
-      fileType.addItem(eT.toString());
+      fileType.addItem(eT.getDisplayText(), eT.name());
     }
 
     updateUIOptions();
@@ -120,20 +114,18 @@ public class ExportPopup extends PopupPanel {
       public void onSuccess(KmlSettings result) {
         // TODO Auto-generated method stub
         gotKmlOptions = true;
-        geoPoints = result.getGeopointNodes();
-        titleFields = result.getTitleNodes();
-        binaryFields = result.getBinaryNodes();
-        if (fileType.getItemText(fileType.getSelectedIndex()).equals(ExportType.KML.toString())) {
+        ExportType type = ExportType.valueOf(fileType.getValue(fileType.getSelectedIndex()));
+        if (type.equals(ExportType.KML)) {
           geoPointsDropDown.setEnabled(true);
           titleFieldsDropDown.setEnabled(true);
           binaryFieldsDropDown.setEnabled(true);
         }
-        for (KmlSettingOption kSO : geoPoints)
-          geoPointsDropDown.addItem(kSO.getDisplayName());
-        for (KmlSettingOption kSO : titleFields)
-          titleFieldsDropDown.addItem(kSO.getDisplayName());
-        for (KmlSettingOption kSO : binaryFields)
-          binaryFieldsDropDown.addItem(kSO.getDisplayName());
+        for (KmlSettingOption kSO : result.getGeopointNodes())
+          geoPointsDropDown.addItem(kSO.getDisplayName(), kSO.getElementKey());
+        for (KmlSettingOption kSO : result.getTitleNodes())
+          titleFieldsDropDown.addItem(kSO.getDisplayName(), kSO.getElementKey());
+        for (KmlSettingOption kSO : result.getBinaryNodes())
+          binaryFieldsDropDown.addItem(kSO.getDisplayName(), kSO.getElementKey());
       }
     });
 
@@ -141,8 +133,8 @@ public class ExportPopup extends PopupPanel {
   }
 
   private void updateUIOptions() {
-    String selectedFileType = fileType.getItemText(fileType.getSelectedIndex());
-    if (selectedFileType.equals(ExportType.KML.toString())) {
+    ExportType type = ExportType.valueOf(fileType.getValue(fileType.getSelectedIndex()));
+    if (type.equals(ExportType.KML)) {
       if (gotKmlOptions) {
         exportButton.setEnabled(true);
       } else {
@@ -162,9 +154,9 @@ public class ExportPopup extends PopupPanel {
   }
 
   public void createExport() {
-    String selectedFileType = fileType.getItemText(fileType.getSelectedIndex());
-
-    if (selectedFileType.equals(ExportType.CSV.toString())) {
+    ExportType type = ExportType.valueOf(fileType.getValue(fileType.getSelectedIndex()));
+    
+    if (type.equals(ExportType.CSV)) {
     	SecureGWT.getFormService().createCsv(formId, new AsyncCallback<Boolean>() {
         @Override
         public void onFailure(Throwable caught) {
@@ -177,10 +169,10 @@ public class ExportPopup extends PopupPanel {
         }
       });
     } else { // .equals(ExportType.KML.toString())
-    	SecureGWT.getFormService().createKml(formId,
-          geoPoints.get(geoPointsDropDown.getSelectedIndex()).getElementKey(),
-          titleFields.get(titleFieldsDropDown.getSelectedIndex()).getElementKey(), binaryFields
-              .get(binaryFieldsDropDown.getSelectedIndex()).getElementKey(),
+    	SecureGWT.getFormService().createKml(formId, 
+    	    geoPointsDropDown.getValue(geoPointsDropDown.getSelectedIndex()),
+          titleFieldsDropDown.getValue(titleFieldsDropDown.getSelectedIndex()),
+          binaryFieldsDropDown.getValue(binaryFieldsDropDown.getSelectedIndex()),
           new AsyncCallback<Boolean>() {
             @Override
             public void onFailure(Throwable caught) {

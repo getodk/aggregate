@@ -20,14 +20,16 @@ import java.io.Serializable;
 
 
 public enum ExportType implements Serializable {
- 	CSV,
- 	KML;
+ 	CSV("CSV file"),
+ 	KML("KML file");
  	
- 	public String toString() {
- 		if ( this == CSV ) {
- 			return "Csv file";
- 		} else {
- 			return "Kml file";
- 		}
+ 	private String displayText;
+ 	
+ 	private ExportType(String display) {
+ 	  displayText = display;
+ 	}
+ 	
+ 	public String getDisplayText() {
+ 	  return displayText;
  	}
  }
