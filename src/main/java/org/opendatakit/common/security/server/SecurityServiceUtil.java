@@ -33,6 +33,7 @@ import org.opendatakit.common.persistence.client.exception.DatastoreFailureExcep
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.security.SecurityUtils;
 import org.opendatakit.common.security.User;
+import org.opendatakit.common.security.client.CredentialsInfo;
 import org.opendatakit.common.security.client.UserSecurityInfo;
 import org.opendatakit.common.security.client.UserSecurityInfo.UserType;
 import org.opendatakit.common.security.client.exception.AccessDeniedException;
@@ -456,6 +457,26 @@ public class SecurityServiceUtil {
 				// if it fails, use RELOAD_INTERVAL to force reload.
 				e.printStackTrace();
 			}
+		}
+	}
+
+	public static final void setUserCredentials(CredentialsInfo credential, CallingContext cc)
+			throws AccessDeniedException, DatastoreFailureException {
+	    Datastore ds = cc.getDatastore();
+	    User user = cc.getUserService().getCurrentUser();
+		RegisteredUsersTable userDefinition = null;
+		try {
+			userDefinition = RegisteredUsersTable.getUserByUsername(credential.getUsername(), cc);
+			if ( userDefinition == null ) {
+				throw new AccessDeniedException("User is not a registered user.");
+			}
+			userDefinition.setDigestAuthPassword(credential.getDigestAuthHash());
+			userDefinition.setBasicAuthPassword(credential.getBasicAuthHash());
+			userDefinition.setBasicAuthSalt(credential.getBasicAuthSalt());
+			ds.putEntity(userDefinition, user);
+		} catch ( ODKDatastoreException e ) {
+			e.printStackTrace();
+			throw new DatastoreFailureException(e.getMessage());
 		}
 	}
 

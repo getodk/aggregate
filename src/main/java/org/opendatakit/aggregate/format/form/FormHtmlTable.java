@@ -30,8 +30,6 @@ import org.opendatakit.aggregate.constants.format.FormTableConsts;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.query.QueryFormList;
-import org.opendatakit.aggregate.servlet.ExternalServiceServlet;
-import org.opendatakit.aggregate.servlet.FormSubmissionsServlet;
 import org.opendatakit.aggregate.servlet.FormXmlServlet;
 import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.common.constants.BasicConsts;
@@ -51,8 +49,7 @@ public class FormHtmlTable {
    * Array containing the table header names
    */
   private static List<String> HEADERS_W_BUTTONS = Arrays.asList(FormTableConsts.FT_HEADER_NAME,
-      FormTableConsts.FT_HEADER_FORM_ID, FormTableConsts.FT_HEADER_USER, FormTableConsts.FT_HEADER_RESULTS,
-      FormTableConsts.FT_HEADER_EXTERNAL_SERVICE, 
+      FormTableConsts.FT_HEADER_FORM_ID, FormTableConsts.FT_HEADER_USER,
       FormTableConsts.FT_HEADER_XFORM);
 
   private static List<String> HEADERS_WO_BUTTONS = Arrays.asList(FormTableConsts.FT_HEADER_NAME,
@@ -113,12 +110,6 @@ public class FormHtmlTable {
 
     Map<String, String> properties = new HashMap<String, String>();
     properties.put(ServletConsts.FORM_ID, formId);
-
-    String resultButton = HtmlUtil.createHtmlButtonToGetServlet(cc.getWebApplicationURL(FormSubmissionsServlet.ADDR),
-        FormTableConsts.RESULTS_BUTTON_TXT, properties);
-    
-    String externalServiceButton = HtmlUtil.createHtmlButtonToGetServlet(cc.getWebApplicationURL(ExternalServiceServlet.ADDR),
-    		FormTableConsts.EXTERNAL_SERVICE_BUTTON_TXT, properties);
     
     Map<String, String> xmlProperties = new HashMap<String, String>();
     xmlProperties.put(ServletConsts.FORM_ID, formId);
@@ -126,8 +117,6 @@ public class FormHtmlTable {
     String xmlButton = HtmlUtil.createHtmlButtonToGetServlet(cc.getWebApplicationURL(FormXmlServlet.WWW_ADDR),
         FormTableConsts.XML_BUTTON_TXT, xmlProperties);
 
-    row.addFormattedValue(resultButton);
-    row.addFormattedValue(externalServiceButton);
     row.addFormattedValue(xmlButton);
   }
 

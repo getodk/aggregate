@@ -16,11 +16,7 @@
 package org.opendatakit.aggregate.servlet;
 
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
+import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -28,21 +24,16 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.ErrorConsts;
-import org.opendatakit.aggregate.constants.HtmlUtil;
-import org.opendatakit.common.constants.HtmlConsts;
-import org.opendatakit.common.persistence.CommonFieldsBase;
-import org.opendatakit.common.persistence.Datastore;
-import org.opendatakit.common.persistence.Query;
-import org.opendatakit.common.persistence.exception.ODKDatastoreException;
-import org.opendatakit.common.security.SecurityBeanDefs;
-import org.opendatakit.common.security.SecurityUtils;
-import org.opendatakit.common.security.User;
-import org.opendatakit.common.security.spring.RegisteredUsersTable;
+import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
+import org.opendatakit.common.security.client.CredentialsInfo;
+import org.opendatakit.common.security.client.exception.AccessDeniedException;
+import org.opendatakit.common.security.server.SecurityServiceUtil;
 import org.opendatakit.common.web.CallingContext;
-import org.springframework.security.authentication.encoding.MessageDigestPasswordEncoder;
 
 /**
- * Allows the logged-in user to reset many user passwords.
+ * Used by the GWT layer to send change password requests over
+ * https if https is available, regardless of whether the GWT
+ * layer itself is running under http.
  * 
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
@@ -60,156 +51,40 @@ public class UserManagePasswordsServlet extends ServletUtilBase {
 	 */
 	public static final String ADDR = "ssl/user-manage-passwords";
 	
-	public static final String TITLE_INFO = "Change User(s) Password";
-	
 	public static final String USERNAME = "username";
-
-	public static final String PASSWORD_1 = "password-1a";
-	
-	public static final String PASSWORD_2 = "password-2a";
-
-	/**
-	 * Handler for HTTP Get request that adds a new username to the registered users list.
-	 * 
-	 * @see javax.servlet.http.HttpServlet#doGet(javax.servlet.http.HttpServletRequest,
-	 *      javax.servlet.http.HttpServletResponse)
-	 */
-	@Override
-	public void doGet(HttpServletRequest req, HttpServletResponse resp)
-			throws IOException {
-		CallingContext cc = ContextFactory.getCallingContext(this, req);
-
-		Datastore ds = cc.getDatastore();
-		User user = cc.getCurrentUser();
-		List<RegisteredUsersTable> userDefinitions = new ArrayList<RegisteredUsersTable>();
-		try {
-			Query query = RegisteredUsersTable.createQuery(ds, user);
-			List<? extends CommonFieldsBase> results = query.executeQuery(0);
-			for ( CommonFieldsBase b : results ) {
-				RegisteredUsersTable t = (RegisteredUsersTable) b;
-				userDefinitions.add(t);
-			}
-		} catch ( ODKDatastoreException e ) {
-			e.printStackTrace();
-			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, 
-					ErrorConsts.PERSISTENCE_LAYER_PROBLEM);
-		}
-
-		beginBasicHtmlResponse(TITLE_INFO, resp, true, cc); // header info
-
-		PrintWriter out = resp.getWriter();
-		
-		out.write("<p>Logins from a device (e.g., ODK Collect) require a password that is " +
-				"held on this server and that is specific to this server (an <em>Aggregate password</em>). " +
-				"Set or change that password for a set of users here.  The password is stored " +
-				"as both a randomly-salted sha-1 hash and as a deterministically-salted md5 hash. " +
-				"The plaintext password is not retained. </p>");
-		out.write(HtmlConsts.LINE_BREAK);
-		
-		out.write(HtmlUtil.createFormBeginTag(cc
-				.getWebApplicationURL(UserManagePasswordsServlet.ADDR), null,
-				HtmlConsts.POST));
-		
-		out.write("<table>");
-		out.write(HtmlConsts.TABLE_ROW_OPEN);
-		out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.TABLE_DATA, "Password:"));
-		out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.TABLE_DATA,
-					HtmlUtil.createNonSavingPasswordInput(
-							UserManagePasswordsServlet.PASSWORD_1)));
-		out.write(HtmlConsts.TABLE_ROW_CLOSE);
-		out.write(HtmlConsts.TABLE_ROW_OPEN);
-		out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.TABLE_DATA, "Password (again):"));
-		out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.TABLE_DATA,
-					HtmlUtil.createNonSavingPasswordInput(
-							UserManagePasswordsServlet.PASSWORD_2)));
-		out.write(HtmlConsts.TABLE_ROW_CLOSE);
-		out.write(HtmlConsts.TABLE_ROW_OPEN);
-		out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.TABLE_DATA, "<hr/>Choose the user<br/>accounts to reset:"));
-		out.write(HtmlUtil.createSelfClosingTag(HtmlConsts.TABLE_DATA));
-		out.write(HtmlConsts.TABLE_ROW_CLOSE);
-		out.write(HtmlConsts.TABLE_ROW_OPEN);
-		for ( RegisteredUsersTable u : userDefinitions ) {
-			String username = u.getUsername();
-			out.write(HtmlConsts.TABLE_ROW_OPEN);
-			out.write(HtmlUtil.createSelfClosingTag(HtmlConsts.TABLE_DATA));
-	        String display = u.getDisplayName();
-			out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.TABLE_DATA,
-					HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_CHECKBOX,
-							UserManagePasswordsServlet.USERNAME, username) + display));
-			out.write(HtmlConsts.TABLE_ROW_CLOSE);
-		}
-		out.write(HtmlConsts.TABLE_ROW_OPEN);
-		out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.TABLE_DATA,
-					HtmlUtil.createInput("submit", null, "Update")));
-		out.write("</td>");
-		out.write(HtmlConsts.TABLE_ROW_CLOSE);
-		out.write(HtmlConsts.TABLE_CLOSE);
-		out.write("</form>");
-		finishBasicHtmlResponse(resp);
-	}
+	public static final String DIGEST_AUTH_HASH = "digestAuthHash";
+	public static final String BASIC_AUTH_HASH = "basicAuthHash";
+	public static final String BASIC_AUTH_SALT = "basicAuthSalt";
 
 	@Override
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
+		if ( req.getScheme().equals("http")) {
+			Logger.getLogger(UserManagePasswordsServlet.class.getName()).warning("Setting user passwords over http");
+		}
 		CallingContext cc = ContextFactory.getCallingContext(this, req);
 
-		// get parameter
-		String[] usernameArray = req.getParameterValues(USERNAME);
-		List<String> usernames = new ArrayList<String>();
-		if ( usernameArray != null ) {
-			usernames.addAll(Arrays.asList(usernameArray));
-		}
-		if (usernames == null || usernames.isEmpty()) {
-			errorMissingParam(resp);
-			return;
-		}
+		String username = req.getParameter(USERNAME);
+		String digestAuthHash = req.getParameter(DIGEST_AUTH_HASH);
+		String basicAuthHash = req.getParameter(BASIC_AUTH_HASH);
+		String basicAuthSalt = req.getParameter(BASIC_AUTH_SALT);
 		
-		String pwOne = getParameter(req, PASSWORD_1);
-		if (pwOne == null || pwOne.length() == 0) {
-			errorMissingParam(resp);
-			return;
-		}
+		CredentialsInfo credential = new CredentialsInfo();
+		credential.setUsername(username);
+		credential.setDigestAuthHash(digestAuthHash);
+		credential.setBasicAuthHash(basicAuthHash);
+		credential.setBasicAuthSalt(basicAuthSalt);
 		
-		String pwTwo = getParameter(req, PASSWORD_2);
-		if (pwTwo == null || pwTwo.length() == 0) {
-			errorMissingParam(resp);
-			return;
-		}
-		
-		if ( !pwOne.equals(pwTwo) ) {
-			resp.sendError(HttpServletResponse.SC_BAD_REQUEST, 
-					"Entered password strings are not the same!!");
-			return;
-		}
-		
-		Datastore ds = cc.getDatastore();
-		User user = cc.getCurrentUser();
-		RegisteredUsersTable userDefinition = null;
 		try {
-			for ( String u : usernames ) {
-				userDefinition = RegisteredUsersTable.getUserByUsername(u, cc);
-				if ( userDefinition != null ) {
-					MessageDigestPasswordEncoder mde = (MessageDigestPasswordEncoder) cc.getBean(SecurityBeanDefs.BASIC_AUTH_PASSWORD_ENCODER);
-					String salt = UUID.randomUUID().toString().substring(0,8);
-					String fullPass = mde.encodePassword(pwOne, salt);
-					userDefinition.setBasicAuthPassword(fullPass);
-					userDefinition.setBasicAuthSalt(salt);
-					String fullDigestAuthPass = SecurityUtils.getDigestAuthenticationPasswordHash(
-														userDefinition.getUsername(),
-														pwOne, 
-														cc.getUserService().getCurrentRealm() );
-		            userDefinition.setDigestAuthPassword(fullDigestAuthPass);
-					ds.putEntity(userDefinition, user);
-				}
-			}
-		} catch ( ODKDatastoreException e ) {
-			e.printStackTrace();
+			SecurityServiceUtil.setUserCredentials(credential, cc);
+		} catch (AccessDeniedException e1) {
+			resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Bad username");
+			return;
+		} catch (DatastoreFailureException e1) {
 			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, 
 					ErrorConsts.PERSISTENCE_LAYER_PROBLEM);
 			return;
 		}
-
-		// redirect to landing page to force change in https status.
-		resp.sendRedirect(cc.getWebApplicationURL(UserManagePasswordsServlet.ADDR));
+		resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
 	}
 }

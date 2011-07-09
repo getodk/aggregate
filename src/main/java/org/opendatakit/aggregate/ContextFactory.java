@@ -115,7 +115,7 @@ public class ContextFactory {
     	    	serverUrl = identifiedScheme + "://" +identifiedHostname + path;
     	    }
     		
-    		if ( realm.isSslRequired() ) {
+    		if ( realm.isSslRequired() || !realm.isSslAvailable() ) {
     			secureServerUrl = serverUrl;
     		} else {
     			if ( identifiedSecurePort != null && identifiedSecurePort != 0 &&

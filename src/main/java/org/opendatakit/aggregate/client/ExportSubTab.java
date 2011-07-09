@@ -26,7 +26,7 @@ public class ExportSubTab extends VerticalPanel implements SubTabInterface {
     AsyncCallback<ExportSummary[]> callback = new AsyncCallback<ExportSummary[]>() {
       @Override
       public void onFailure(Throwable caught) {
-        // TODO Auto-generated method stub
+          AggregateUI.getUI().reportError(caught);
       }
 
       @Override

@@ -74,6 +74,8 @@ private final String downloadRequestURL;
     	if ( form.getFormId().equals(Form.URI_FORM_ID_VALUE_FORM_INFO)) continue;
     	if ( form.getFormId().equals(PersistentResults.FORM_ID_PERSISTENT_RESULT)) continue;
     	if ( form.getFormId().equals(MiscTasks.FORM_ID_MISC_TASKS)) continue;
+    	if ( !form.getDownloadEnabled() ) continue;
+
     	idx = generateFormXmlEntry(d, e, idx, form);
     }
 

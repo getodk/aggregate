@@ -187,7 +187,8 @@ public class VisualizationPopup extends PopupPanel {
     }
     
     SecureGWT.getFormService().getGpsCoordnates(formId, new AsyncCallback<KmlSettings>() {
-      public void onFailure(Throwable c) {
+      public void onFailure(Throwable caught) {
+          AggregateUI.getUI().reportError(caught);
       }
 
       public void onSuccess(KmlSettings result) {
@@ -206,6 +207,7 @@ public class VisualizationPopup extends PopupPanel {
               .getElementKey(), new AsyncCallback<UIGeoPoint[]>() {
             @Override
             public void onFailure(Throwable caught) {
+                AggregateUI.getUI().reportError(caught);
             }
 
             @Override
@@ -299,7 +301,8 @@ public class VisualizationPopup extends PopupPanel {
     disableMap();
 
     SecureGWT.getFormService().getGpsCoordnates(formId, new AsyncCallback<KmlSettings>() {
-      public void onFailure(Throwable c) {
+      public void onFailure(Throwable caught) {
+          AggregateUI.getUI().reportError(caught);
       }
 
       public void onSuccess(KmlSettings result) {

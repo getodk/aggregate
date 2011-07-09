@@ -27,6 +27,7 @@ import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.task.WorksheetCreator;
 import org.opendatakit.aggregate.task.gae.servlet.WorksheetServlet;
+import org.opendatakit.common.constants.BasicConsts;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
 
@@ -54,7 +55,7 @@ public class WorksheetCreatorImpl implements WorksheetCreator {
     MiscTasks r = new MiscTasks(s);
     Map<String, String> params = r.getRequestParameters();
 
-    TaskOptions task = TaskOptions.Builder.withUrl(ServletConsts.WEB_ROOT + WorksheetServlet.ADDR);
+    TaskOptions task = TaskOptions.Builder.withUrl(BasicConsts.FORWARDSLASH + WorksheetServlet.ADDR);
     task.method(TaskOptions.Method.GET);
     task.countdownMillis(SpreadsheetConsts.WORKSHEET_CREATION_DELAY);
     task.param(ServletConsts.FORM_ID, form.getFormId());

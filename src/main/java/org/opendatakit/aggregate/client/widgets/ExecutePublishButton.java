@@ -61,7 +61,7 @@ public class ExecutePublishButton  extends AButtonBase implements ClickHandler {
           new AsyncCallback<String>() {
             @Override
             public void onFailure(Throwable caught) {
-              // TODO Auto-generated method stub
+                AggregateUI.getUI().reportError(caught);
             }
 
             @Override
@@ -69,12 +69,11 @@ public class ExecutePublishButton  extends AButtonBase implements ClickHandler {
               SecureGWT.getServicesAdminService().generateOAuthUrl(result, new AsyncCallback<String>() {
                 @Override
                 public void onFailure(Throwable caught) {
-                  // TODO Auto-generated method stub
+                    AggregateUI.getUI().reportError(caught);
                 }
 
                 @Override
                 public void onSuccess(String result) {
-                  // TODO Auto-generated method stub
                   UrlHash.getHash().goTo(result);
                 }
               });
@@ -89,7 +88,7 @@ public class ExecutePublishButton  extends AButtonBase implements ClickHandler {
   private class CreateFusionTablesCallback implements AsyncCallback<String> {
         
     public void onFailure(Throwable caught) {
-      // TODO Auto-generated method stub
+        AggregateUI.getUI().reportError(caught);
     }
 
 
@@ -97,12 +96,11 @@ public class ExecutePublishButton  extends AButtonBase implements ClickHandler {
       SecureGWT.getServicesAdminService().generateOAuthUrl(result, new AsyncCallback<String>() {
         @Override
         public void onFailure(Throwable caught) {
-          // TODO Auto-generated method stub
+            AggregateUI.getUI().reportError(caught);
         }
 
         @Override
         public void onSuccess(String result) {
-          // TODO Auto-generated method stub
           UrlHash.getHash().goTo(result);
         }
       });

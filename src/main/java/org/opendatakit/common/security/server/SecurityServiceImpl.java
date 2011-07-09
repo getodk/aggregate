@@ -19,6 +19,8 @@ package org.opendatakit.common.security.server;
 import javax.servlet.http.HttpServletRequest;
 
 import org.opendatakit.aggregate.ContextFactory;
+import org.opendatakit.aggregate.servlet.UserManagePasswordsServlet;
+import org.opendatakit.common.constants.BasicConsts;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
@@ -104,6 +106,8 @@ org.opendatakit.common.security.client.security.SecurityService {
 			(MessageDigestPasswordEncoder) cc.getBean(SecurityBeanDefs.BASIC_AUTH_PASSWORD_ENCODER);
 		r.setBasicAuthHashEncoding(mde.getAlgorithm());
 		r.setSuperUserEmail(cc.getUserService().getSuperUserEmail());
+		// User interface layer uses this URL to submit password changes securely
+		r.setChangeUserPasswordURL(cc.getSecureServerURL() + BasicConsts.FORWARDSLASH + UserManagePasswordsServlet.ADDR);
 		return r;
 	}
 }

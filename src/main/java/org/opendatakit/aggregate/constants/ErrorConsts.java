@@ -59,6 +59,7 @@ public final class ErrorConsts {
    */
   public static final String BINARY_ERROR = "System should have dispatched to a proper binary conversion method";
   public static final String PARSING_PROBLEM = "Problem parsing submission XML";
+  public static final String FORM_DOES_NOT_ALLOW_SUBMISSIONS = "Submissions have been disallowed on this form";
   /**
    * Constant used to log error if string array does not match column size
    */

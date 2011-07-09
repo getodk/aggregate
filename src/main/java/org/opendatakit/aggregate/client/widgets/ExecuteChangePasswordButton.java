@@ -17,24 +17,34 @@
 package org.opendatakit.aggregate.client.widgets;
 
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
 
 import org.opendatakit.aggregate.client.AggregateUI;
-import org.opendatakit.aggregate.client.SecureGWT;
 import org.opendatakit.aggregate.client.permissions.CredentialsInfoBuilder;
 import org.opendatakit.aggregate.client.popups.ChangePasswordPopup;
 import org.opendatakit.common.security.client.CredentialsInfo;
 import org.opendatakit.common.security.client.RealmSecurityInfo;
 import org.opendatakit.common.security.client.UserSecurityInfo;
-import org.opendatakit.common.security.client.security.admin.SecurityAdminServiceAsync;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.Cookies;
+import com.google.gwt.http.client.Request;
+import com.google.gwt.http.client.RequestBuilder;
+import com.google.gwt.http.client.RequestCallback;
+import com.google.gwt.http.client.RequestException;
+import com.google.gwt.http.client.Response;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.PasswordTextBox;
 
+/**
+ * Uses whatever the secure channel is (https: if available; http: if not) and
+ * GWT RequestBuilder to POST back to ODK Aggregate to change a user's password.
+ * The password is sent as a hash back to the server, so even if it is sent over
+ * http: (which happens if the server does not have SSL configured), it would 
+ * take a while to compromise the password.  
+ * 
+ * @author mitchellsundt@gmail.com
+ *
+ */
 public class ExecuteChangePasswordButton extends AButtonBase implements ClickHandler {
 
 	private ChangePasswordPopup popup;
@@ -52,8 +62,6 @@ public class ExecuteChangePasswordButton extends AButtonBase implements ClickHan
 	    PasswordTextBox password2 = popup.getPassword2();
 	    UserSecurityInfo userInfo = popup.getUser();
 	    RealmSecurityInfo realmInfo = AggregateUI.getUI().getRealmInfo();
-	    SecurityAdminServiceAsync service = SecureGWT.getSecurityAdminService();
-	    
 	    
 		String pw1 = password1.getText();
 		String pw2 = password2.getText();
@@ -64,23 +72,46 @@ public class ExecuteChangePasswordButton extends AButtonBase implements ClickHan
 				Window.alert("Unable to obtain required information from server");
 			} else {
 				try {
-					ArrayList<CredentialsInfo> credentials = new ArrayList<CredentialsInfo>();
-					credentials.add(CredentialsInfoBuilder.build(userInfo.getUsername(), realmInfo, pw1));
-					// TODO: change to an https post 
-					service.setUserPasswords(Cookies.getCookie("JSESSIONID"), credentials , new AsyncCallback<Void>() {
-							
-							@Override
-							public void onFailure(Throwable caught) {
-								Window.alert("Incomplete password update: " + caught.getMessage());
-							}
-				
-							@Override
-							public void onSuccess(Void result) {
+					CredentialsInfo credential = CredentialsInfoBuilder.build(userInfo.getUsername(), realmInfo, pw1);
+					
+					String url = realmInfo.getChangeUserPasswordURL();
+					String postData = credential.getPostBody();
+					
+					RequestBuilder builder = new RequestBuilder(RequestBuilder.POST, url);
+					builder.setHeader("Content-type", "application/x-www-form-urlencoded");
+					builder.setRequestData(postData);
+					builder.setCallback(new RequestCallback() {
+
+						@Override
+						public void onResponseReceived(Request request,
+								Response response) {
+							int status = response.getStatusCode();
+							if ( status != 204 /* NO_CONTENT */ ) {
+								String error = response.getStatusText();
+								if ( error == null || error.length() == 0 ) {
+									error = "Server request failed";
+								}
+								Window.alert("Incomplete password update (bad response received): " + error);
+							} else {
 								popup.hide();
 							}
-						});
+						}
+
+						@Override
+						public void onError(Request request, Throwable exception) {
+							Window.alert("Incomplete password update (request error): " + exception.getMessage());
+						}
+						
+					});
+					try {
+						builder.send();
+					} catch (RequestException e) {
+						Window.alert("Incomplete password update (send exception): " + e.getMessage());
+						popup.hide();
+					} 
 				} catch (NoSuchAlgorithmException e1) {
 					Window.alert("Unable to create encrypted password");
+					popup.hide();
 				}
 			}
 		} else {

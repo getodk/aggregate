@@ -159,24 +159,6 @@
     </servlet-mapping>
 
 	<servlet>
-		<servlet-name>result</servlet-name>
-		<servlet-class>org.opendatakit.aggregate.servlet.ResultServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>result</servlet-name>
-		<url-pattern>/view/result</url-pattern>
-	</servlet-mapping>
-
-	<servlet>
-		<servlet-name>forms</servlet-name>
-		<servlet-class>org.opendatakit.aggregate.servlet.FormsServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>forms</servlet-name>
-		<url-pattern>/www/forms</url-pattern>
-	</servlet-mapping>
-
-	<servlet>
 		<servlet-name>submission</servlet-name>
 		<servlet-class>org.opendatakit.aggregate.servlet.SubmissionServlet</servlet-class>
 	</servlet>
@@ -260,15 +242,6 @@
 	</servlet-mapping>
 
 	<servlet>
-		<servlet-name>formSubmissions</servlet-name>
-		<servlet-class>org.opendatakit.aggregate.servlet.FormSubmissionsServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>formSubmissions</servlet-name>
-		<url-pattern>/view/formSubmissions</url-pattern>
-	</servlet-mapping>
-
-	<servlet>
 		<servlet-name>formMultipleValue</servlet-name>
 		<servlet-class>org.opendatakit.aggregate.servlet.FormMultipleValueServlet</servlet-class>
 	</servlet>
@@ -293,42 +266,6 @@
 	<servlet-mapping>
 		<servlet-name>briefcase</servlet-name>
 		<url-pattern>/Briefcase</url-pattern>
-	</servlet-mapping>
-
-	<servlet>
-		<servlet-name>externalService</servlet-name>
-		<servlet-class>org.opendatakit.aggregate.servlet.ExternalServiceServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>externalService</servlet-name>
-		<url-pattern>/extern/externalService</url-pattern>
-	</servlet-mapping>
-
-	<servlet>
-		<servlet-name>json</servlet-name>
-		<servlet-class>org.opendatakit.aggregate.servlet.JsonServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>json</servlet-name>
-		<url-pattern>/extern/json</url-pattern>
-	</servlet-mapping>
-
-	<servlet>
-		<servlet-name>fusiontables</servlet-name>
-		<servlet-class>org.opendatakit.aggregate.servlet.FusionTableServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>fusiontables</servlet-name>
-		<url-pattern>/extern/fusiontables</url-pattern>
-	</servlet-mapping>
-
-	<servlet>
-		<servlet-name>spreadsheet</servlet-name>
-		<servlet-class>org.opendatakit.aggregate.servlet.SpreadsheetServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>spreadsheet</servlet-name>
-		<url-pattern>/extern/spreadsheet</url-pattern>
 	</servlet-mapping>
 
 	<servlet>
@@ -394,24 +331,6 @@
 		<url-pattern>/gae/watchdog</url-pattern>
 	</servlet-mapping>
 
-	<servlet>
-		<servlet-name>process</servlet-name>
-		<servlet-class>org.opendatakit.aggregate.servlet.ProcessServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>process</servlet-name>
-		<url-pattern>/admin/process</url-pattern>
-	</servlet-mapping>
-
-	<servlet>
-		<servlet-name>confirm</servlet-name>
-		<servlet-class>org.opendatakit.aggregate.servlet.ConfirmServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>confirm</servlet-name>
-		<url-pattern>/admin/confirm</url-pattern>
-	</servlet-mapping>
-
     <servlet>
         <servlet-name>clearSessionAndLoginPage</servlet-name>
         <servlet-class>org.opendatakit.aggregate.servlet.ClearSessionThenLoginServlet</servlet-class>
@@ -428,15 +347,6 @@
     <servlet-mapping>
         <servlet-name>localLoginPage</servlet-name>
         <url-pattern>/local_login.html</url-pattern>
-    </servlet-mapping>
-
-    <servlet>
-        <servlet-name>wwwLandingPage</servlet-name>
-        <servlet-class>org.opendatakit.aggregate.servlet.LandingPageServlet</servlet-class>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>wwwLandingPage</servlet-name>
-        <url-pattern>/www/index.html</url-pattern>
     </servlet-mapping>
 
 	<welcome-file-list>

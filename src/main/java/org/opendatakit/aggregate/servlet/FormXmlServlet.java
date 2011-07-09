@@ -131,9 +131,8 @@ public class FormXmlServlet extends ServletUtilBase {
 	      out.print(xmlString);
 	    }
 	} catch (ODKDatastoreException e) {
-		// TODO Auto-generated catch block
 		e.printStackTrace();
-	      odkIdNotFoundError(resp);
+		odkIdNotFoundError(resp);
 	}
   }
 }

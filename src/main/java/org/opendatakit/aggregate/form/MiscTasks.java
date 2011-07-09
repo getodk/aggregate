@@ -341,7 +341,7 @@ public class MiscTasks {
 		Collections.sort(taskList, new Comparator<MiscTasks>() {
 			@Override
 			public int compare(MiscTasks o1, MiscTasks o2) {
-				return o1.getLastActivityDate().compareTo(o2.getLastActivityDate());// TODO Auto-generated method stub
+				return o1.getLastActivityDate().compareTo(o2.getLastActivityDate());
 			}			
 		});
 		return taskList;

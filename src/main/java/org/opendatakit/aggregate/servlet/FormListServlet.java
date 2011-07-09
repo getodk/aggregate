@@ -71,9 +71,9 @@ public class FormListServlet extends ServletUtilBase {
 	      resp.setContentType(HtmlConsts.RESP_TYPE_XML);
 	      formFormatter.generateXmlListOfForms(resp.getWriter());
 	    } catch (ODKDatastoreException e) {
+		  e.printStackTrace();
 	      errorRetreivingData(resp);
 	    } catch (ODKIncompleteSubmissionData e) {
-		  // TODO Auto-generated catch block
 		  e.printStackTrace();
 		  errorRetreivingData(resp);
 		}
@@ -86,11 +86,11 @@ public class FormListServlet extends ServletUtilBase {
 	      resp.setContentType(HtmlConsts.RESP_TYPE_XML);
 	      resp.getWriter().print(formFormatter.generateXmlListOfForms());
 	    } catch (ODKDatastoreException e) {
+		  e.printStackTrace();
 	      errorRetreivingData(resp);
 	    } catch (ODKIncompleteSubmissionData e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		      errorRetreivingData(resp);
+	      e.printStackTrace();
+	      errorRetreivingData(resp);
 		}
 	}
   }

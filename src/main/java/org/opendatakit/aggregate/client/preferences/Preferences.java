@@ -16,6 +16,7 @@
 
 package org.opendatakit.aggregate.client.preferences;
 
+import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.SecureGWT;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -28,7 +29,7 @@ public class Preferences {
   public static void updatePreferences() {
     SecureGWT.getPreferenceService().getGoogleMapsKey(new AsyncCallback<String>() {
       public void onFailure(Throwable caught) {
-        // TODO: Do something with errors.
+          AggregateUI.getUI().reportError(caught);
       }
 
       public void onSuccess(String key) {
@@ -48,7 +49,7 @@ public class Preferences {
   public static void setGoogleMapsApiKey(String mapsApiKey) {
     SecureGWT.getPreferenceService().setGoogleMapsKey(mapsApiKey, new AsyncCallback<Void>() {
       public void onFailure(Throwable caught) {
-        // TODO: Do something with errors.
+          AggregateUI.getUI().reportError(caught);
       }
 
       public void onSuccess(Void void1) {

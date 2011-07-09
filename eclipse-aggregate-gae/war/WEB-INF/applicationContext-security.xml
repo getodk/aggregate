@@ -66,7 +66,6 @@
 		<intercept-url pattern="/index.html" access="true" />
 		<intercept-url pattern="/logout.html" access="true" />
 		<intercept-url pattern="/odk_color.png" access="true" />
-        <intercept-url pattern="/www/index.html" access="true" /> <!-- Intermediate page redirecting to access mgmt -->
 		<intercept-url pattern="/openid_login.html" access="isAnonymous()" />
 		<intercept-url pattern="/local_login.html" access="isFullyAuthenticated() and hasRole('AUTH_LOCAL')" />
 
@@ -87,9 +86,7 @@
 		<intercept-url pattern="/view/binaryData" access="hasRole('ROLE_DATA_VIEWER') or hasRole('ROLE_ATTACHMENT_VIEWER')" />
 		<intercept-url pattern="/view/**" access="hasRole('ROLE_DATA_VIEWER')" />
 
-		<intercept-url pattern="/admin/**" access="hasRole('ROLE_DATA_OWNER')" />
         <intercept-url pattern="/auth/**" access="hasRole('ROLE_DATA_OWNER')" />
-		<intercept-url pattern="/extern/**" access="hasRole('ROLE_DATA_OWNER')" />
 
         <intercept-url pattern="/ssl/**" access="hasRole('ROLE_SITE_ACCESS_ADMIN')" />
 
@@ -131,7 +128,6 @@
 	        <intercept-url pattern="/openid_login.html" access="REQUIRES_INSECURE_CHANNEL" />
 		    <intercept-url pattern="/ssl/**" access="${security.server.secureChannelType}"/>
             <intercept-url pattern="/local_login.html" access="${security.server.channelType}" />
-            <intercept-url pattern="/www/index.html" access="${security.server.channelType}" />
 		    <intercept-url pattern="/**" access="${security.server.channelType}"/>
 	    </filter-invocation-definition-source>                
 	  </beans:property>

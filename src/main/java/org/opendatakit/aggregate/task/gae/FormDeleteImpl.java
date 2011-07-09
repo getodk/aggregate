@@ -20,6 +20,7 @@ import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.task.FormDelete;
 import org.opendatakit.aggregate.task.gae.servlet.FormDeleteTaskServlet;
+import org.opendatakit.common.constants.BasicConsts;
 import org.opendatakit.common.web.CallingContext;
 
 import com.google.appengine.api.taskqueue.Queue;
@@ -41,7 +42,7 @@ public class FormDeleteImpl implements FormDelete {
   @Override
   public final void createFormDeleteTask(Form form, SubmissionKey miscTasksKey, long attemptCount,
 	      CallingContext cc) {
-    TaskOptions task = TaskOptions.Builder.withUrl(ServletConsts.WEB_ROOT + FormDeleteTaskServlet.ADDR);
+    TaskOptions task = TaskOptions.Builder.withUrl(BasicConsts.FORWARDSLASH + FormDeleteTaskServlet.ADDR);
     task.method(TaskOptions.Method.GET);
     task.countdownMillis(1);
     task.param(ServletConsts.FORM_ID, form.getFormId());

@@ -25,6 +25,7 @@ import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.task.KmlGenerator;
 import org.opendatakit.aggregate.task.gae.servlet.KmlGeneratorTaskServlet;
+import org.opendatakit.common.constants.BasicConsts;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
 
@@ -50,8 +51,7 @@ public class KmlGeneratorImpl implements KmlGenerator {
     Submission s = Submission.fetchSubmission(persistentResultsKey.splitSubmissionKey(), cc);
     PersistentResults r = new PersistentResults(s);
     Map<String, String> params = r.getRequestParameters();
-    TaskOptions task = TaskOptions.Builder.withUrl(ServletConsts.WEB_ROOT
-        + KmlGeneratorTaskServlet.ADDR);
+    TaskOptions task = TaskOptions.Builder.withUrl(BasicConsts.FORWARDSLASH + KmlGeneratorTaskServlet.ADDR);
     task.method(TaskOptions.Method.GET);
     task.countdownMillis(1);
     task.param(ServletConsts.FORM_ID, form.getFormId());

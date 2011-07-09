@@ -17,8 +17,6 @@
 
 package org.opendatakit.aggregate.constants;
 
-import org.opendatakit.common.constants.BasicConsts;
-import org.opendatakit.common.constants.HtmlConsts;
 
 /**
  * Constant values used in ODK aggregate to aid with servlet management
@@ -93,30 +91,15 @@ public final class ServletConsts {
    * external service
    */
   public static final String EXTERNAL_SERVICE_TYPE = "externalServiceType";
-  // web addresses
-  public static final String WEB_ROOT = "/";
 
   // href link text
-  public static final String FORMS_LINK_TEXT = "List Forms";
-  public static final String DELETE_FORM_LINK_TEXT = "Delete Form";
   public static final String BRIEFCASE_LINK_TEXT = "Download Entire Dataset (Briefcase)";
-  public static final String UPLOAD_SUBMISSIONS_APPLET_LINK_TEXT = "Upload Submissons";
-  public static final String UPLOAD_XFORM_APPLET_LINK_TEXT = "Upload a Form Definition";
-  public static final String RESULT_FILES_LINK_TEXT = "Download Generated kml or csv Files";
-  public static final String EXTERNAL_SERVICES_LINK_TEXT = "View Configured Services";
-
+  public static final String UPLOAD_SUBMISSIONS_LINK_TEXT = "Upload Submissons";
+  public static final String UPLOAD_XFORM_LINK_TEXT = "Upload a Form Definition";
 
   public static final String BLOB_KEY = "blobKey";
 
   public static final String AS_ATTACHMENT = "as_attachment";
-
-  public static final String INDEX = "index";
-
-  public static final String BACKWARD = "backward";
-
-  public static final String AUTHENTICATION = "auth";
-  
-  public static final String AUTHENTICATION_OAUTH = "oauth";
 
   public static final String OAUTH_CONSUMER_KEY = "anonymous";
   
@@ -125,14 +108,6 @@ public final class ServletConsts {
   public static final String OAUTH_TOKEN_PARAMETER = "oauth_token";
   
   public static final String OAUTH_TOKEN_SECRET_PARAMETER = "oauth_token_secret";
-  
-  public static final int MAX_ENTITY_PER_PAGE = 20;
-
-  public static final String NEXT_LINK_TEXT = " (Next " + MAX_ENTITY_PER_PAGE + " Results) NEXT"
-      + HtmlConsts.GREATER_THAN + HtmlConsts.GREATER_THAN;
-
-  public static final String BACK_LINK_TEXT = HtmlConsts.LESS_THAN + HtmlConsts.LESS_THAN
-      + "BACK (Previous " + MAX_ENTITY_PER_PAGE + " Results)";
 
   public static final String DOWNLOAD_XML_BUTTON_TXT = "Download XML";
 
@@ -141,14 +116,6 @@ public final class ServletConsts {
   public static final String KML_FILENAME_APPEND = "_results.kml";
 
   public static final String RECORD_KEY = "record";
-
-  public static final String PROCESS_TYPE = "processType";
-
-  public static final String QUERY_VALUE_PARAM = "value";
-
-  public static final String QUERY_OP_PARAM = "operation";
-
-  public static final String QUERY_FIELD_PARAM = "field";
 
   public static final int FORM_DELETE_RECORD_QUERY_LIMIT = 20;
 
@@ -165,15 +132,6 @@ public final class ServletConsts {
    * cursor (fragmented Csv servlet).
    */
   public static final String NUM_ENTRIES = "numEntries";
-
-  /**
-   * When constructing up an odkId, allow xpath-style restrictions on 'key'
-   * attribute of the form identity and repeating elements.
-   */
-  public static final String ELEMENT_REFERENCE_KEY_BEGIN_STRING = "[@key=" + BasicConsts.QUOTE;
-  public static final String ELEMENT_REFERENCE_KEY_END_STRING = BasicConsts.QUOTE + "]";
-
-  public static final String AUTH_SUB_SCOPE = "Scope";
   
   public static final String CHECK_INTERVAL_PARAM = "checkIntervalMilliseconds";
   

@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Logger;
 
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
@@ -211,7 +212,6 @@ public class DatastoreImpl implements Datastore {
 
 	@Override
 	public Query createQuery(CommonFieldsBase table, User user) {
-		// TODO Auto-generated method stub
 		Query query = new QueryImpl(table, this, user);
 		return query;
 	}
@@ -381,8 +381,9 @@ public class DatastoreImpl implements Datastore {
 	public void deleteEntity(EntityKey key, User user)
 			throws ODKDatastoreException {
 		Key dsKey = constructGaeKey(key.getRelation(), key.getKey());
-		// TODO: log deletion
 		try {
+			Logger.getLogger(this.getClass().getName()).info(
+					"Executing delete " + constructGaeKind(key.getRelation()) + " with key " + key.getKey() + " by user " + user.getUriUser());
 			ds.delete(dsKey);
 		} catch ( Exception ex ) {
 			throw new ODKDatastoreException(ex);
@@ -401,8 +402,9 @@ public class DatastoreImpl implements Datastore {
 		for (EntityKey entityKey : keys) {
 			datastoreKeys.add(constructGaeKey(entityKey.getRelation(),
 					entityKey.getKey()));
+			Logger.getLogger(this.getClass().getName()).info(
+					"Executing delete " + constructGaeKind(entityKey.getRelation()) + " with key " + entityKey.getKey() + " by user " + user.getUriUser());
 		}
-		// TODO: log deletion
 		try {
 			ds.delete(datastoreKeys);
 		} catch ( Exception ex ) {

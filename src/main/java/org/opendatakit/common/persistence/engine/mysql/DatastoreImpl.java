@@ -784,7 +784,6 @@ public class DatastoreImpl implements Datastore, InitializingBean {
 			b.append(K_EQ);
 			b.append(K_BIND_VALUE);
 
-			// TODO: log deletion
 			Logger.getLogger(this.getClass().getName()).info(
 					"Executing " + b.toString() + " with key " + key.getKey() + " by user " + user.getUriUser());
 			getJdbcConnection().update(b.toString(),
