@@ -129,11 +129,6 @@ public class SecurityServiceUtil {
 	public static ArrayList<UserSecurityInfo> getAllUsers(boolean withAuthorities, CallingContext cc ) throws AccessDeniedException, DatastoreFailureException {
 
 	    ArrayList<UserSecurityInfo> users = new ArrayList<UserSecurityInfo>();
-	    UserSecurityInfo anonymous = new UserSecurityInfo(User.ANONYMOUS_USER, User.ANONYMOUS_USER_NICKNAME, null, UserSecurityInfo.UserType.ANONYMOUS);
-	    if ( withAuthorities ) {
-    		SecurityServiceUtil.setAuthenticationListsForSpecialUser(anonymous, GrantedAuthorityName.USER_IS_ANONYMOUS, cc);
-	    }
-	    users.add(anonymous);
 	    try {
 			Query q = RegisteredUsersTable.createQuery(cc.getDatastore(), cc.getCurrentUser());
 			RegisteredUsersTable.applyNaturalOrdering(q, cc);
@@ -149,6 +144,12 @@ public class SecurityServiceUtil {
 				}
 				users.add(i);
 			}
+			// TODO: why doesn't this work?
+		    UserSecurityInfo anonymous = new UserSecurityInfo(User.ANONYMOUS_USER, User.ANONYMOUS_USER_NICKNAME, null, UserSecurityInfo.UserType.ANONYMOUS);
+		    if ( withAuthorities ) {
+	    		SecurityServiceUtil.setAuthenticationListsForSpecialUser(anonymous, GrantedAuthorityName.USER_IS_ANONYMOUS, cc);
+		    }
+		    users.add(anonymous);
 		} catch (ODKDatastoreException e) {
 			e.printStackTrace();
 			throw new DatastoreFailureException(e);

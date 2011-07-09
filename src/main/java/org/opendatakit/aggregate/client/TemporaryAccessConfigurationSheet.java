@@ -43,6 +43,7 @@ import org.opendatakit.common.web.client.UIVisiblePredicate;
 import com.google.gwt.cell.client.ActionCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -280,19 +281,17 @@ public class TemporaryAccessConfigurationSheet extends Composite {
 
 		@Override
 		public void onSuccess(ArrayList<UserSecurityInfo> result) {
-			for (UserSecurityInfo i : result) {
-				if (i.getType() == UserType.ANONYMOUS) {
-					anonymousAttachmentViewers
-							.setValue(i
-									.getGrantedAuthorities()
-									.contains(
-											GrantedAuthorityName.ROLE_ATTACHMENT_VIEWER));
-					break;
-				}
-			}
 			dataProvider.getList().clear();
 			dataProvider.getList().addAll(result);
 			addedUsers.setText("");
+			for (UserSecurityInfo i : result) {
+				if (i.getType() == UserType.ANONYMOUS) {
+					TreeSet<GrantedAuthorityName> authSet = i.getGrantedAuthorities();
+					boolean hasAV = authSet.contains(GrantedAuthorityName.ROLE_ATTACHMENT_VIEWER);
+					anonymousAttachmentViewers.setValue(hasAV);
+					break;
+				}
+			}
 			uiInSyncWithServer();
 		}
 	};
@@ -737,6 +736,11 @@ public class TemporaryAccessConfigurationSheet extends Composite {
 	@UiField
 	Button button;
 
+	@UiHandler("anonymousAttachmentViewers")
+	void onAnonAttachmentViewerChange(ValueChangeEvent<Boolean> event) {
+		uiOutOfSyncWithServer();
+	}
+	
 	@UiHandler("addNow")
 	void onAddUsersClick(ClickEvent e) {
 		String text = addedUsers.getText();
@@ -772,6 +776,9 @@ public class TemporaryAccessConfigurationSheet extends Composite {
 				}
 				++nAdded;
 			}
+		}
+		if ( nAdded != 0 ) {
+			uiOutOfSyncWithServer();
 		}
 	}
 
