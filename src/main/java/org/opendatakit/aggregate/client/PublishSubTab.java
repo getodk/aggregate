@@ -12,8 +12,7 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class PublishSubTab extends VerticalPanel implements SubTabInterface {
-  private static final String NO_FORM = "none";
-
+ 
   private AggregateUI baseUI;
 
   // ui elements
@@ -54,7 +53,13 @@ public class PublishSubTab extends VerticalPanel implements SubTabInterface {
 
       public void onSuccess(FormSummary[] forms) {
         baseUI.clearError();
-        updateFormDropDown(forms);
+        
+        // update the class state with the updated form list
+        displayedFormList = UIUtils.updateFormDropDown(formsBox, displayedFormList, forms);
+        
+        // setup the display with the latest updates
+        selectedForm = UIUtils.getFormFromSelection(formsBox, displayedFormList);
+        
         // Make the call to get the published services
         updatePublishTable();
       }
@@ -62,54 +67,6 @@ public class PublishSubTab extends VerticalPanel implements SubTabInterface {
 
     // Make the call to the form service.
     formSvc.getForms(callback);
-  }
-
-  public synchronized void updateFormDropDown(FormSummary[] formsFromService) {
-
-    FormSummary currentFormSelected = null;
-
-    FormSummary[] forms = formsFromService;
-
-    if (forms == null || forms.length == 0) {
-      forms = new FormSummary[1];
-      forms[0] = new FormSummary(NO_FORM, null, null, false, false, null);
-    } else {
-      // get the previously selected form, and verify it matches
-      int currentSelectionIndex = formsBox.getSelectedIndex();
-      if (currentSelectionIndex >= 0) {
-        String currentFormTitle = formsBox.getItemText(currentSelectionIndex);
-        currentFormSelected = displayedFormList[currentSelectionIndex];
-        if (currentFormSelected != null) {
-          // double check that the titles match,
-          // otherwise this would be a not fun bug to track down
-          if (!currentFormTitle.equals(currentFormSelected.getTitle())) {
-            currentFormSelected = null;
-          }
-        }
-      }
-    }
-
-    // what the selected index should be set to
-    int selectedIndex = 0; // default to the top position, update if available
-
-    formsBox.clear();
-    
-    // populate the form box
-    for (int i = 0; i < forms.length; i++) {
-      FormSummary form = forms[i];
-      formsBox.insertItem(form.getTitle(), i);
-      if (form.equals(currentFormSelected)) {
-        selectedIndex = i;
-      }
-    }
-
-    // update the panel to display the right form
-    formsBox.setItemSelected(selectedIndex, true);
-    // and tag that form as selected...
-    selectedForm = forms[selectedIndex];
-
-    // set the class state to the newly created form list
-    displayedFormList = forms;
   }
 
   public synchronized void updatePublishTable() {
@@ -125,10 +82,11 @@ public class PublishSubTab extends VerticalPanel implements SubTabInterface {
       }
     };
 
-    // request the update
     if (selectedForm == null) {
       return;
     }
+    
+    // request the update if form is not the "none" form (ie id will equal null)
     if (selectedForm.getId() != null) {
     	SecureGWT.getServicesAdminService().getExternalServices(selectedForm.getId(), callback);
     }
@@ -142,11 +100,9 @@ public class PublishSubTab extends VerticalPanel implements SubTabInterface {
   private class ChangeDropDownHandler implements ChangeHandler {
     @Override
     public void onChange(ChangeEvent event) {
-      for (FormSummary form : displayedFormList) {
-        if (form.getTitle().compareTo(formsBox.getValue(formsBox.getSelectedIndex())) == 0) {
-          selectedForm = form;
-          break;
-        }
+      FormSummary form = UIUtils.getFormFromSelection(formsBox, displayedFormList);
+      if(form != null) {
+        selectedForm = form;
       }
       updatePublishTable();
     }

@@ -92,16 +92,21 @@ public class ExternalServicePopup extends PopupPanel {
     return formId;
   }
 
-  public TextBox getName() {
-    return name;
+  public String getName() {
+    return name.getText();
   }
 
-  public ListBox getService() {
-    return service;
+  public String getService() {
+    return service.getItemText(service.getSelectedIndex());
   }
 
-  public ListBox getEsOptions() {
-    return esOptions;
+  public ExternalServicePublicationOption getEsOptions() {
+    String selectedOption = esOptions.getItemText(esOptions.getSelectedIndex());
+    for (ExternalServicePublicationOption selected : ExternalServicePublicationOption.values()) {
+      if (selected.toString().equals(selectedOption))
+        return selected;
+    }
+    return null;
   }
   
   
