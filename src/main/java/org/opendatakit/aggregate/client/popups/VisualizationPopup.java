@@ -31,6 +31,7 @@ import org.opendatakit.aggregate.client.submission.Column;
 import org.opendatakit.aggregate.client.submission.SubmissionUI;
 import org.opendatakit.aggregate.client.submission.UIGeoPoint;
 import org.opendatakit.aggregate.client.widgets.ClosePopupButton;
+import org.opendatakit.aggregate.constants.common.ChartType;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
@@ -51,21 +52,6 @@ import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class VisualizationPopup extends PopupPanel {
-  private static final String UI_PIE_CHART = "Pie Chart";
-  private static final String UI_BAR_GRAPH = "Bar Graph";
-  private static final String UI_SCATTER_PLOT = "Scatter Plot";
-  private static final String UI_MAP = "Map";
-
-  private static final String GOOGLE_PIE_CHART = "p3";
-  private static final String GOOGLE_BAR_GRAPH = "bvg";
-  private static final String GOOGLE_SCATTER_PLOT = "s";
-
-  private static final HashMap<String, String> UI_TO_GOOGLE = new HashMap<String, String>();
-  static {
-    UI_TO_GOOGLE.put(UI_PIE_CHART, GOOGLE_PIE_CHART);
-    UI_TO_GOOGLE.put(UI_BAR_GRAPH, GOOGLE_BAR_GRAPH);
-    UI_TO_GOOGLE.put(UI_SCATTER_PLOT, GOOGLE_SCATTER_PLOT);
-  }
 
   private static final String NUMBER_OF_OCCURANCES = "Number of Occurances";
 
@@ -85,7 +71,8 @@ public class VisualizationPopup extends PopupPanel {
   
   private String getImageUrl() {
     StringBuffer chartUrl = new StringBuffer("https://chart.googleapis.com/chart?cht=");
-    chartUrl.append(UI_TO_GOOGLE.get(chartType.getItemText(chartType.getSelectedIndex())));
+    ChartType type = ChartType.valueOf(chartType.getValue(chartType.getSelectedIndex()));
+    chartUrl.append(type.getOptionText());
     chartUrl.append("&chs=600x500");
 
     int firstIndex = 0;
@@ -104,7 +91,7 @@ public class VisualizationPopup extends PopupPanel {
     }
     Map<String, Double> aggregation = new HashMap<String, Double>();
     boolean numOccurances = false;
-    if (secondData.getItemText(secondData.getSelectedIndex()).equals(NUMBER_OF_OCCURANCES)) {
+    if (secondDataValue.equals(NUMBER_OF_OCCURANCES)) {
       numOccurances = true;
     } else {
       for (SubmissionUI s : submissions) {
@@ -157,7 +144,7 @@ public class VisualizationPopup extends PopupPanel {
     mapSpace.setVisible(true);
     secondData.clear();
     for (KmlSettingOption kSO : geoPoints)
-      secondData.addItem(kSO.getDisplayName());
+      secondData.addItem(kSO.getDisplayName(), kSO.getElementKey());
   }
 
   public void disableMap() {
@@ -202,7 +189,8 @@ public class VisualizationPopup extends PopupPanel {
     executeButton.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        if (chartType.getItemText(chartType.getSelectedIndex()).equals(UI_MAP)) {
+        ChartType type = ChartType.valueOf(chartType.getValue(chartType.getSelectedIndex()));
+        if (type.equals(ChartType.MAP)) {
           SecureGWT.getSubmissionService().getGeoPoints(formId, geoPoints.get(secondData.getSelectedIndex())
               .getElementKey(), new AsyncCallback<UIGeoPoint[]>() {
             @Override
@@ -257,22 +245,22 @@ public class VisualizationPopup extends PopupPanel {
       }
     });
 
-    chartType.addItem(UI_PIE_CHART);
-    chartType.addItem(UI_BAR_GRAPH);
-    chartType.addItem(UI_MAP);
+    chartType.addItem(ChartType.PIE_CHART.getDisplayText(), ChartType.PIE_CHART.name());
+    chartType.addItem(ChartType.BAR_GRAPH.getDisplayText(), ChartType.BAR_GRAPH.name());
+    chartType.addItem(ChartType.MAP.getDisplayText(), ChartType.MAP.name());
     // chartType.addItem(UI_SCATTER_PLOT);
 
     chartType.addChangeHandler(new ChangeHandler() {
       @Override
       public void onChange(ChangeEvent event) {
-        String selected = chartType.getValue(chartType.getSelectedIndex());
-        if (selected.equals(UI_MAP)) {
+        ChartType selected = ChartType.valueOf(chartType.getValue(chartType.getSelectedIndex()));
+        if (selected.equals(ChartType.MAP)) {
           executeButton.setHTML("<img src=\"images/map.png\" /> Map It");
           enableMap();
         } else {
-          if (selected.equals(UI_PIE_CHART)) {
+          if (selected.equals(ChartType.PIE_CHART)) {
             executeButton.setHTML("<img src=\"images/pie_chart.png\" /> Pie It");
-          } else if (selected.equals(UI_BAR_GRAPH)) {
+          } else if (selected.equals(ChartType.BAR_GRAPH)) {
             executeButton.setHTML("<img src=\"images/bar_chart.png\" /> Bar It");
           } else { // selected.equals(UI_SCATTER_PLOT)
             executeButton.setHTML("<img src=\"scatter_plot.png\" /> Plot It");
