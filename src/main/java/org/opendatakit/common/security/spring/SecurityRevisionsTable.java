@@ -92,6 +92,7 @@ public class SecurityRevisionsTable extends CommonFieldsBase {
 			record = datastore.getEntity(prototype, uri, user);
 		} catch ( ODKEntityNotFoundException e ) {
 			record = datastore.createEntityUsingRelation(prototype, user);
+			record.setStringField(prototype.primaryKey, uri);
 			record.setLastRevisionDate(new Date());
 			datastore.putEntity(record, user);
 		}
