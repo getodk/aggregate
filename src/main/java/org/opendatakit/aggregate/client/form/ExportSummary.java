@@ -22,7 +22,7 @@ import java.util.Date;
 import org.opendatakit.aggregate.constants.common.ExportStatus;
 import org.opendatakit.aggregate.constants.common.ExportType;
 
-public class ExportSummary implements Serializable {
+public final class ExportSummary implements Serializable {
   /**
    * Serialization Version ID
    */

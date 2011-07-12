@@ -22,7 +22,7 @@ import java.util.List;
 
 import org.opendatakit.aggregate.constants.common.UIConsts;
 
-public class FilterGroup implements Serializable {
+public final class FilterGroup implements Serializable {
 
   private static final long serialVersionUID = 3317433416889397657L;
 
