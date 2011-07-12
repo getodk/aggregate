@@ -20,7 +20,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class KmlSettings implements Serializable {
+public final class KmlSettings implements Serializable {
 
   /**
    * Serialization Version Identifier
