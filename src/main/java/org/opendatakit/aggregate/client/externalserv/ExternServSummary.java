@@ -22,7 +22,7 @@ import java.util.Date;
 import org.opendatakit.aggregate.constants.common.ExternalServicePublicationOption;
 import org.opendatakit.aggregate.constants.common.OperationalStatus;
 
-public class ExternServSummary implements Serializable {
+public final class ExternServSummary implements Serializable {
 
 	/**
 	 * Serialization identifier

@@ -18,7 +18,7 @@ package org.opendatakit.aggregate.client.form;
 
 import java.io.Serializable;
 
-public class FormSummary implements Serializable {
+public final class FormSummary implements Serializable {
 
   private static final long serialVersionUID = 5320217439717436812L;
   private String title;
