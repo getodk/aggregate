@@ -37,7 +37,7 @@ public class CredentialsInfo implements Serializable {
 	String basicAuthHash;
 	String basicAuthSalt;
 	
-	public String getPostBody() {
+	public String getRequestParameters() {
 		StringBuilder postData = new StringBuilder();
 		// note param pairs are separated by a '&'
 		// and each key-value pair is separated by a '='

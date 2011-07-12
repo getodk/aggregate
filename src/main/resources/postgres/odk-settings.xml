@@ -40,10 +40,7 @@
 
 	<!--	Website domain information	-->
 	<bean id="realm" class="org.opendatakit.common.security.Realm">
-		<property name="mailToDomain" value="${security.server.realm.mailToDomain}" />
-		<property name="rootDomain" value="${security.server.realm.rootDomain}" />
 		<property name="realmString" value="${security.server.realm.realmString}" />
-		<property name="domains" value="${security.server.realm.domains}" />
 		<property name="hostname" value="${security.server.hostname}" />
 		<property name="port" value="${security.server.port}" />
 		<property name="securePort" value="${security.server.securePort}" />
