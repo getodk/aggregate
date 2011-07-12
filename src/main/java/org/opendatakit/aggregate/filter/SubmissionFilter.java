@@ -145,13 +145,13 @@ public class SubmissionFilter extends CommonFieldsBase {
   }
 
   public void setColumnVisibility(Visibility visibility) {
-    if (!setStringField(VISIBILITY_PROPERTY, visibility.toString())) {
+    if (!setStringField(VISIBILITY_PROPERTY, visibility.name())) {
       throw new IllegalArgumentException("overflow visibility");
     }
   }
 
   public void setRowOrColumn(RowOrCol roworcol) {
-    if (!setStringField(ROWORCOL_PROPERTY, roworcol.toString())) {
+    if (!setStringField(ROWORCOL_PROPERTY, roworcol.name())) {
       throw new IllegalArgumentException("overflow row or col");
     }
   }
@@ -169,7 +169,7 @@ public class SubmissionFilter extends CommonFieldsBase {
   }
 
   public void setFilterOperation(FilterOperation op) {
-    if (!setStringField(OPERATION_PROPERTY, op.toString())) {
+    if (!setStringField(OPERATION_PROPERTY, op.name())) {
       throw new IllegalArgumentException("overflow filter operation");
     }
   }

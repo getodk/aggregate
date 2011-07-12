@@ -58,111 +58,37 @@ public class VisualizationPopup extends PopupPanel {
   private List<Column> headers;
   private List<SubmissionUI> submissions;
   
-  private FlexTable dropDownsTable = new FlexTable();
-  private ListBox chartType = new ListBox();
-  private ListBox firstData = new ListBox();
-  private ListBox secondData = new ListBox();
-  private Image chart = new Image();
-  private FlowPanel mapSpace = new FlowPanel();
-  private boolean mapsApiLoaded = false;
-  private List<KmlSettingOption> geoPoints = new ArrayList<KmlSettingOption>();
+  private FlexTable dropDownsTable;
+  private ListBox chartType;
+  private ListBox firstData;
+  private ListBox secondData;
+  private Image chart;
+  private FlowPanel mapSpace;
+  
+  private boolean mapsApiLoaded;
+  
+  private List<KmlSettingOption> geoPoints ;
 
   private final String formId;
   
-  private String getImageUrl() {
-    StringBuffer chartUrl = new StringBuffer("https://chart.googleapis.com/chart?cht=");
-    ChartType type = ChartType.valueOf(chartType.getValue(chartType.getSelectedIndex()));
-    chartUrl.append(type.getOptionText());
-    chartUrl.append("&chs=600x500");
-
-    int firstIndex = 0;
-    int secondIndex = 0;
-    String firstDataValue = firstData.getItemText(firstData.getSelectedIndex());
-    String secondDataValue = secondData.getItemText(secondData.getSelectedIndex());
-    chartUrl.append("&chtt=" + secondDataValue);
-    chartUrl.append("&chxt=x,y");
-    int index = 0;
-    for (Column c : headers) {
-      if (c.getDisplayHeader().equals(firstDataValue))
-        firstIndex = index;
-      if (c.getDisplayHeader().equals(secondDataValue))
-        secondIndex = index;
-      index++;
-    }
-    Map<String, Double> aggregation = new HashMap<String, Double>();
-    boolean numOccurances = false;
-    if (secondDataValue.equals(NUMBER_OF_OCCURANCES)) {
-      numOccurances = true;
-    } else {
-      for (SubmissionUI s : submissions) {
-        try {
-          Double.parseDouble(s.getValues().get(secondIndex));
-        } catch (NumberFormatException e) {
-          numOccurances = true;
-          break;
-        }
-      }
-    }
-    for (SubmissionUI s : submissions) {
-      String label = s.getValues().get(firstIndex);
-      if (aggregation.containsKey(label)) {
-        double addend = 1;
-        if (!numOccurances)
-          addend = Double.parseDouble(s.getValues().get(secondIndex));
-        aggregation.put(label, aggregation.get(label) + addend);
-      } else {
-        double addend = 1;
-        if (!numOccurances)
-          addend = Double.parseDouble(s.getValues().get(secondIndex));
-        aggregation.put(label, addend);
-      }
-    }
-
-    StringBuffer firstValues = new StringBuffer();
-    StringBuffer secondValues = new StringBuffer();
-    for (String s : aggregation.keySet()) {
-      firstValues.append(s);
-      firstValues.append("|");
-      secondValues.append(aggregation.get(s));
-      secondValues.append(",");
-    }
-    if (firstValues.length() > 0)
-      firstValues.delete(firstValues.length() - 1, firstValues.length());
-    if (secondValues.length() > 0)
-      secondValues.delete(secondValues.length() - 1, secondValues.length());
-    chartUrl.append("&chd=t:");
-    chartUrl.append(secondValues.toString());
-    chartUrl.append("&chdl=");
-    chartUrl.append(firstValues.toString());
-
-    return chartUrl.toString();
-  }
-
-  public void enableMap() {
-    firstData.setEnabled(false);
-    chart.setVisible(false);
-    mapSpace.setVisible(true);
-    secondData.clear();
-    for (KmlSettingOption kSO : geoPoints)
-      secondData.addItem(kSO.getDisplayName(), kSO.getElementKey());
-  }
-
-  public void disableMap() {
-    firstData.setEnabled(true);
-    mapSpace.setVisible(false);
-    chart.setVisible(true);
-    secondData.clear();
-    secondData.addItem(NUMBER_OF_OCCURANCES);
-    for (Column c : headers)
-      secondData.addItem(c.getDisplayHeader());
-  }
-
   public VisualizationPopup(FilterSubTab filterSubTab) {
     super(false);
+    this.dropDownsTable = new FlexTable();
+    this.chartType = new ListBox();
+    this.firstData = new ListBox();
+    this.secondData = new ListBox();
+    
+    this.chart = new Image();
+    this.mapSpace = new FlowPanel();
+    
     this.formId = filterSubTab.getDisplayedFilterGroup().getFormId();
     this.headers = filterSubTab.getSubmissionTable().getHeaders();
     this.submissions = filterSubTab.getSubmissionTable().getSubmissions();
-
+    
+    this.geoPoints = new ArrayList<KmlSettingOption>();
+    
+    this.mapsApiLoaded = false;
+    
     Maps.loadMapsApi(Preferences.getGoogleMapsApiKey(), "2", false, new Runnable() {
       public void run() {
         mapsApiLoaded = true;
@@ -299,5 +225,93 @@ public class VisualizationPopup extends PopupPanel {
     });
 
     setWidget(layoutPanel);
+  }
+  
+  private String getImageUrl() {
+    StringBuffer chartUrl = new StringBuffer("https://chart.googleapis.com/chart?cht=");
+    ChartType type = ChartType.valueOf(chartType.getValue(chartType.getSelectedIndex()));
+    chartUrl.append(type.getOptionText());
+    chartUrl.append("&chs=600x500");
+
+    int firstIndex = 0;
+    int secondIndex = 0;
+    String firstDataValue = firstData.getItemText(firstData.getSelectedIndex());
+    String secondDataValue = secondData.getItemText(secondData.getSelectedIndex());
+    chartUrl.append("&chtt=" + secondDataValue);
+    chartUrl.append("&chxt=x,y");
+    int index = 0;
+    for (Column c : headers) {
+      if (c.getDisplayHeader().equals(firstDataValue))
+        firstIndex = index;
+      if (c.getDisplayHeader().equals(secondDataValue))
+        secondIndex = index;
+      index++;
+    }
+    Map<String, Double> aggregation = new HashMap<String, Double>();
+    boolean numOccurances = false;
+    if (secondDataValue.equals(NUMBER_OF_OCCURANCES)) {
+      numOccurances = true;
+    } else {
+      for (SubmissionUI s : submissions) {
+        try {
+          Double.parseDouble(s.getValues().get(secondIndex));
+        } catch (NumberFormatException e) {
+          numOccurances = true;
+          break;
+        }
+      }
+    }
+    for (SubmissionUI s : submissions) {
+      String label = s.getValues().get(firstIndex);
+      if (aggregation.containsKey(label)) {
+        double addend = 1;
+        if (!numOccurances)
+          addend = Double.parseDouble(s.getValues().get(secondIndex));
+        aggregation.put(label, aggregation.get(label) + addend);
+      } else {
+        double addend = 1;
+        if (!numOccurances)
+          addend = Double.parseDouble(s.getValues().get(secondIndex));
+        aggregation.put(label, addend);
+      }
+    }
+
+    StringBuffer firstValues = new StringBuffer();
+    StringBuffer secondValues = new StringBuffer();
+    for (String s : aggregation.keySet()) {
+      firstValues.append(s);
+      firstValues.append("|");
+      secondValues.append(aggregation.get(s));
+      secondValues.append(",");
+    }
+    if (firstValues.length() > 0)
+      firstValues.delete(firstValues.length() - 1, firstValues.length());
+    if (secondValues.length() > 0)
+      secondValues.delete(secondValues.length() - 1, secondValues.length());
+    chartUrl.append("&chd=t:");
+    chartUrl.append(secondValues.toString());
+    chartUrl.append("&chdl=");
+    chartUrl.append(firstValues.toString());
+
+    return chartUrl.toString();
+  }
+
+  public void enableMap() {
+    firstData.setEnabled(false);
+    chart.setVisible(false);
+    mapSpace.setVisible(true);
+    secondData.clear();
+    for (KmlSettingOption kSO : geoPoints)
+      secondData.addItem(kSO.getDisplayName(), kSO.getElementKey());
+  }
+
+  public void disableMap() {
+    firstData.setEnabled(true);
+    mapSpace.setVisible(false);
+    chart.setVisible(true);
+    secondData.clear();
+    secondData.addItem(NUMBER_OF_OCCURANCES);
+    for (Column c : headers)
+      secondData.addItem(c.getDisplayHeader());
   }
 }

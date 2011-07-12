@@ -28,7 +28,7 @@ import org.opendatakit.common.persistence.Query;
  * @author wbrunette@gmail.com
  *
  */
-public class UITrans {
+public final class UITrans {
 
   private static Map<Query.FilterOperation, FilterOperation> toClient = new HashMap<Query.FilterOperation, FilterOperation>();
   private static Map<FilterOperation, Query.FilterOperation> toPersistence = new HashMap<FilterOperation, Query.FilterOperation>();
@@ -47,11 +47,11 @@ public class UITrans {
     toPersistence.put(FilterOperation.LESS_THAN_OR_EQUAL, Query.FilterOperation.LESS_THAN_OR_EQUAL);
   }
   
-  public static Query.FilterOperation convertFilterOperation(FilterOperation op) {
+  public static final Query.FilterOperation convertFilterOperation(FilterOperation op) {
     return toPersistence.get(op);
   }
   
-  public static FilterOperation convertFilterOperation(Query.FilterOperation op) {
+  public static final FilterOperation convertFilterOperation(Query.FilterOperation op) {
     return toClient.get(op);
   }
 }

@@ -23,7 +23,7 @@ import java.util.List;
 import org.opendatakit.aggregate.constants.common.RowOrCol;
 import org.opendatakit.aggregate.constants.common.Visibility;
 
-public class ColumnFilter extends Filter implements Serializable {
+public final class ColumnFilter extends Filter implements Serializable {
 
   /**
    * Id for Serialization

@@ -420,7 +420,7 @@ public class FormParserForJavaRosa {
 	    sa.setSubmissionModelVersion(submissionElementDefn.modelVersion);
 	    sa.setSubmissionUiVersion(submissionElementDefn.uiVersion);
 	    sa.setIsPersistenceModelComplete(false);
-	    sa.setIsSubmissionAllowed(false);
+	    sa.setIsSubmissionAllowed(true);
 	    sa.setUriSubmissionDataModel(fdmSubmissionUri);
 	    sa.setUriMd5SubmissionFormId(submissionFormIdUri);
 	    sa.setUriMd5FormId(formInfo.getKey().getKey());
