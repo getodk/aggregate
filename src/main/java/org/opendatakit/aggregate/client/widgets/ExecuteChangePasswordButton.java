@@ -25,11 +25,8 @@ import org.opendatakit.common.security.client.CredentialsInfo;
 import org.opendatakit.common.security.client.RealmSecurityInfo;
 import org.opendatakit.common.security.client.UserSecurityInfo;
 
-import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.json.client.JSONString;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.PasswordTextBox;
 
@@ -94,16 +91,11 @@ public class ExecuteChangePasswordButton extends AButtonBase implements
 		}
 	}
 
-	public void handleJsonResponse(JavaScriptObject jso) {
-		if (jso == null) {
+	public void handleJsonResponse(String username, String status) {
+		if (username == null) {
 			Window.alert("JSON change-password request to " + baseUrl + " failed");
 		} else {
 			// process response...
-			JSONObject jsonValue = new JSONObject(jso);
-			JSONString uvalue = jsonValue.get("username").isString();
-			JSONString svalue = jsonValue.get("status").isString();
-			String username = (uvalue != null) ? uvalue.stringValue() : null;
-			String status = (svalue != null) ? svalue.stringValue() : null;
 			if ( !( status != null && "OK".equals(status) ) ) {
 				Window.alert("Change password request " + 
 						((username == null) ? "" : ("for " + username + " ")) + "failed.\n" +
@@ -128,14 +120,14 @@ public class ExecuteChangePasswordButton extends AButtonBase implements
 
 		window[callback] = function(jsonObj) {
 			window[callback + "done"] = true;
-			handler.@org.opendatakit.aggregate.client.widgets.ExecuteChangePasswordButton::handleJsonResponse(Lcom/google/gwt/core/client/JavaScriptObject;)(jsonObj);
+			handler.@org.opendatakit.aggregate.client.widgets.ExecuteChangePasswordButton::handleJsonResponse(Ljava/lang/String;Ljava/lang/String;)(jsonObj.username, jsonObj.status);
 		}
 
 		// JSON change password has 1-second timeout
 		setTimeout(
 				function() {
 					if (!window[callback + "done"]) {
-						handler.@org.opendatakit.aggregate.client.widgets.ExecuteChangePasswordButton::handleJsonResponse(Lcom/google/gwt/core/client/JavaScriptObject;)(null);
+						handler.@org.opendatakit.aggregate.client.widgets.ExecuteChangePasswordButton::handleJsonResponse(Ljava/lang/String;Ljava/lang/String;)(null, null);
 					}
 
 					// cleanup
