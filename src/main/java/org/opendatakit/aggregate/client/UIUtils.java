@@ -49,7 +49,16 @@ public class UIUtils {
     if (selectedIndex > -1 && forms != null) {
       String formId = formsListBox.getValue(selectedIndex);
       for (FormSummary form : forms) {
-        if (form.getId().equals(formId)) {
+        String formIdToMatch = form.getId();
+        // check if we have a form id
+        if(formIdToMatch == null) {
+          // if there is no formId this should be the 'NO_FORM' form
+          if(form.getTitle() != null && form.getTitle().equals(NO_FORM) && formId.equals("")) {
+            return null;
+          } else {
+            throw new IllegalStateException("Some how a form that is not the 'NO_FORM' had a formId of null");
+          }
+        } else if(formIdToMatch.equals(formId)) { // check if the formId from listbox matches the form
           return form;
         }
       }

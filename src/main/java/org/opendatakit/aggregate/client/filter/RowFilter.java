@@ -23,7 +23,7 @@ import org.opendatakit.aggregate.constants.common.FilterOperation;
 import org.opendatakit.aggregate.constants.common.RowOrCol;
 import org.opendatakit.aggregate.constants.common.Visibility;
 
-public class RowFilter extends Filter implements Serializable {
+public final class RowFilter extends Filter implements Serializable {
 
   /**
    * Id for serialization

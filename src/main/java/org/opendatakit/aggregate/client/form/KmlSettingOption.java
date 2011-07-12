@@ -18,7 +18,7 @@ package org.opendatakit.aggregate.client.form;
 
 import java.io.Serializable;
 
-public class KmlSettingOption implements Serializable {
+public final class KmlSettingOption implements Serializable {
 
   /**
    * Serialization Version Identifier

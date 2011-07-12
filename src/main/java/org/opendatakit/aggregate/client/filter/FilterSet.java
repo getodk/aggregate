@@ -20,7 +20,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FilterSet implements Serializable {
+public final class FilterSet implements Serializable {
 
 	private static final long serialVersionUID = -7646690488192856868L;
 	private List<FilterGroup> groups;
