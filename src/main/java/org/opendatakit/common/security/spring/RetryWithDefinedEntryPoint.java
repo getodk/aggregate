@@ -30,7 +30,7 @@ public class RetryWithDefinedEntryPoint extends AbstractRetryEntryPoint {
 	int port;
 	
     public RetryWithDefinedEntryPoint(String scheme, int port) {
-        super(scheme, port);
+        super(scheme, (scheme.contains("s") ? 443 : 80)); // standard port...
         this.scheme = scheme;
         this.port = port;
     }

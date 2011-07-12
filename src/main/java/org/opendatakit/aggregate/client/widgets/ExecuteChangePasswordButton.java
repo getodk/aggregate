@@ -25,13 +25,11 @@ import org.opendatakit.common.security.client.CredentialsInfo;
 import org.opendatakit.common.security.client.RealmSecurityInfo;
 import org.opendatakit.common.security.client.UserSecurityInfo;
 
+import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.http.client.Request;
-import com.google.gwt.http.client.RequestBuilder;
-import com.google.gwt.http.client.RequestCallback;
-import com.google.gwt.http.client.RequestException;
-import com.google.gwt.http.client.Response;
+import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONString;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.PasswordTextBox;
 
@@ -39,84 +37,113 @@ import com.google.gwt.user.client.ui.PasswordTextBox;
  * Uses whatever the secure channel is (https: if available; http: if not) and
  * GWT RequestBuilder to POST back to ODK Aggregate to change a user's password.
  * The password is sent as a hash back to the server, so even if it is sent over
- * http: (which happens if the server does not have SSL configured), it would 
- * take a while to compromise the password.  
+ * http: (which happens if the server does not have SSL configured), it would
+ * take a while to compromise the password.
  * 
  * @author mitchellsundt@gmail.com
- *
+ * 
  */
-public class ExecuteChangePasswordButton extends AButtonBase implements ClickHandler {
+public class ExecuteChangePasswordButton extends AButtonBase implements
+		ClickHandler {
+
+	private static int jsonRequestId = 0;
 
 	private ChangePasswordPopup popup;
-	  
-	  public ExecuteChangePasswordButton(ChangePasswordPopup popup) {
-	    super("<img src=\"images/green_right_arrow.png\" /> Change Password");
-	    this.popup = popup;
-	    addClickHandler(this);
-	  }
-	  
-	  @Override
-	  public void onClick(ClickEvent event) {
-	    super.onClick(event);
-	    PasswordTextBox password1 = popup.getPassword1();
-	    PasswordTextBox password2 = popup.getPassword2();
-	    UserSecurityInfo userInfo = popup.getUser();
-	    RealmSecurityInfo realmInfo = AggregateUI.getUI().getRealmInfo();
-	    
+	private String baseUrl;
+
+	public ExecuteChangePasswordButton(ChangePasswordPopup popup) {
+		super("<img src=\"images/green_right_arrow.png\" /> Change Password");
+		this.popup = popup;
+		addClickHandler(this);
+	}
+
+	@Override
+	public void onClick(ClickEvent event) {
+		super.onClick(event);
+		PasswordTextBox password1 = popup.getPassword1();
+		PasswordTextBox password2 = popup.getPassword2();
+		UserSecurityInfo userInfo = popup.getUser();
+		RealmSecurityInfo realmInfo = AggregateUI.getUI().getRealmInfo();
+
 		String pw1 = password1.getText();
 		String pw2 = password2.getText();
-		if ( pw1 == null || pw2 == null || pw1.length() == 0 ) {
+		if (pw1 == null || pw2 == null || pw1.length() == 0) {
 			Window.alert("Password cannot be blank");
-		} else if ( pw1.equals(pw2) ) {
-			if ( realmInfo == null || userInfo == null ) {
+		} else if (pw1.equals(pw2)) {
+			if (realmInfo == null || userInfo == null) {
 				Window.alert("Unable to obtain required information from server");
 			} else {
+				CredentialsInfo credential;
 				try {
-					CredentialsInfo credential = CredentialsInfoBuilder.build(userInfo.getUsername(), realmInfo, pw1);
-					
-					String url = realmInfo.getChangeUserPasswordURL();
-					String postData = credential.getPostBody();
-					
-					RequestBuilder builder = new RequestBuilder(RequestBuilder.POST, url);
-					builder.setHeader("Content-type", "application/x-www-form-urlencoded");
-					builder.setRequestData(postData);
-					builder.setCallback(new RequestCallback() {
-
-						@Override
-						public void onResponseReceived(Request request,
-								Response response) {
-							int status = response.getStatusCode();
-							if ( status != 204 /* NO_CONTENT */ ) {
-								String error = response.getStatusText();
-								if ( error == null || error.length() == 0 ) {
-									error = "Server request failed";
-								}
-								Window.alert("Incomplete password update (bad response received): " + error);
-							} else {
-								popup.hide();
-							}
-						}
-
-						@Override
-						public void onError(Request request, Throwable exception) {
-							Window.alert("Incomplete password update (request error): " + exception.getMessage());
-						}
-						
-					});
-					try {
-						builder.send();
-					} catch (RequestException e) {
-						Window.alert("Incomplete password update (send exception): " + e.getMessage());
-						popup.hide();
-					} 
-				} catch (NoSuchAlgorithmException e1) {
-					Window.alert("Unable to create encrypted password");
-					popup.hide();
+					credential = CredentialsInfoBuilder.build(
+							userInfo.getUsername(), realmInfo, pw1);
+				} catch (NoSuchAlgorithmException e) {
+					Window.alert("Unable to build credentials hash");
+					return;
 				}
+
+				baseUrl = realmInfo.getChangeUserPasswordURL();
+
+				// Construct a JSOP request
+				String parameters = credential.getRequestParameters();
+				String url = baseUrl + "?" + parameters + "&callback=";
+				getJson(jsonRequestId++, url, this);
 			}
 		} else {
 			Window.alert("The passwords do not match. Please retype the password.");
 		}
+	}
 
-	  }
+	public void handleJsonResponse(JavaScriptObject jso) {
+		if (jso == null) {
+			Window.alert("JSON change-password request to " + baseUrl + " failed");
+		} else {
+			// process response...
+			JSONObject jsonValue = new JSONObject(jso);
+			JSONString uvalue = jsonValue.get("username").isString();
+			JSONString svalue = jsonValue.get("status").isString();
+			String username = (uvalue != null) ? uvalue.stringValue() : null;
+			String status = (svalue != null) ? svalue.stringValue() : null;
+			if ( !( status != null && "OK".equals(status) ) ) {
+				Window.alert("Change password request " + 
+						((username == null) ? "" : ("for " + username + " ")) + "failed.\n" +
+						"JSON change-password request to\n   " + baseUrl + "\nreturned: " + status);
+			}
+		}
+		popup.hide();
+	}
+
+	public void onError(String echo, String error) {
+		Window.alert("Unable to change passwored for " + echo + " error: "
+				+ error);
+	}
+
+	public native static void getJson(int requestId, String url,
+			ExecuteChangePasswordButton handler) /*-{
+		var callback = "callback" + requestId;
+
+		var script = document.createElement("script");
+		script.setAttribute("src", url + callback);
+		script.setAttribute("type", "text/javascript");
+
+		window[callback] = function(jsonObj) {
+			window[callback + "done"] = true;
+			handler.@org.opendatakit.aggregate.client.widgets.ExecuteChangePasswordButton::handleJsonResponse(Lcom/google/gwt/core/client/JavaScriptObject;)(jsonObj);
+		}
+
+		// JSON change password has 1-second timeout
+		setTimeout(
+				function() {
+					if (!window[callback + "done"]) {
+						handler.@org.opendatakit.aggregate.client.widgets.ExecuteChangePasswordButton::handleJsonResponse(Lcom/google/gwt/core/client/JavaScriptObject;)(null);
+					}
+
+					// cleanup
+					document.body.removeChild(script);
+					delete window[callback];
+					delete window[callback + "done"];
+				}, 1000);
+
+		document.body.appendChild(script);
+	}-*/;
 }

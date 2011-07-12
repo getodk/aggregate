@@ -12,7 +12,6 @@
 
 	<!--	The group and role hierarchy is maintained in the granted authority hierarchy table.  -->
 	<!--	Unauthenticated accesses possess the USER_IS_ANONYMOUS group -->
-	<!--    Authenticated accesses possess the USER_IS_AUTHENTICATED group and -->
 	<!--    If the user is registered (present in the registered users table), the user will also --> 
 	<!--  	possess the USER_IS_REGISTERED group.  -->
 	<!--    An authenticated users will also possess an AUTH_ group defining the mechanism by which -->
@@ -159,7 +158,7 @@
 	<beans:bean id="secureChannelProcessor" class="org.springframework.security.web.access.channel.SecureChannelProcessor">
 	  <beans:property name="entryPoint">
 		<beans:bean class="org.opendatakit.common.security.spring.RetryWithDefinedEntryPoint">
-			<beans:constructor-arg type="java.lang.String" value="https"/>
+			<beans:constructor-arg type="java.lang.String" value="https://"/>
 			<beans:constructor-arg type="int" value="${security.server.securePort}"/>
 			<beans:property name="portMapper" ref="portMapper"/>
 			<beans:property name="portResolver" ref="portResolver"/>
@@ -169,7 +168,7 @@
 	<beans:bean id="insecureChannelProcessor" class="org.springframework.security.web.access.channel.InsecureChannelProcessor">
 	  <beans:property name="entryPoint">
 		<beans:bean class="org.opendatakit.common.security.spring.RetryWithDefinedEntryPoint">
-			<beans:constructor-arg type="java.lang.String" value="http"/>
+			<beans:constructor-arg type="java.lang.String" value="http://"/>
 			<beans:constructor-arg type="int" value="${security.server.port}"/>
 			<beans:property name="portMapper" ref="portMapper"/>
 			<beans:property name="portResolver" ref="portResolver"/>
@@ -324,7 +323,7 @@
 		class="org.springframework.security.web.authentication.www.DigestAuthenticationEntryPoint">
 		<beans:property name="realmName" value="${security.server.realm.realmString}" />
 		<beans:property name="key" value="${security.server.siteKey}" />
-		<beans:property name="nonceValiditySeconds" value="600" />
+		<beans:property name="nonceValiditySeconds" value="1800" />
 	</beans:bean>
 
 	<beans:bean id="digestAuthenticationProvider"

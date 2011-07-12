@@ -40,6 +40,7 @@ import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.parser.FormParserForJavaRosa;
 import org.opendatakit.aggregate.parser.MultiPartFormData;
 import org.opendatakit.aggregate.parser.MultiPartFormItem;
+import org.opendatakit.common.constants.BasicConsts;
 import org.opendatakit.common.constants.HtmlConsts;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
@@ -320,7 +321,7 @@ public class FormUploadServlet extends ServletUtilBase {
 
     if (bOk) {
       resp.setStatus(HttpServletResponse.SC_CREATED);
-      resp.setHeader("Location", cc.getServerURL());
+      resp.setHeader("Location", cc.getServerURL() + BasicConsts.FORWARDSLASH + ADDR);
       resp.setContentType(HtmlConsts.RESP_TYPE_HTML);
       resp.setCharacterEncoding(HtmlConsts.UTF8_ENCODE);
       PrintWriter out = resp.getWriter();

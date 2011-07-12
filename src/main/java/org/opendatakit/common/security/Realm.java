@@ -15,10 +15,6 @@
  */
 package org.opendatakit.common.security;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-
 import org.springframework.beans.factory.InitializingBean;
 
 /**
@@ -38,35 +34,15 @@ public class Realm implements InitializingBean {
 	private Integer securePort;
 	private String hostname;
 	private String realmString;
-	private String mailToDomain;
-	private String rootDomain;
-	private String domains;
-	private Set<String> domainSet = new HashSet<String>();
 	
 	public Realm() {
 	}
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		if ( mailToDomain == null ) {
-			throw new IllegalStateException("mailToDomain (e.g., mydomain.org) must be specified");
-		}
 		if ( realmString == null ) {
-			realmString = mailToDomain;
+			throw new IllegalStateException("realmString (e.g., mydomain.org ODK Aggregate 1.0) must be specified");
 		}
-		if ( rootDomain == null ) {
-			rootDomain = mailToDomain;
-		}
-		if ( domains == null ) { 
-			domains = rootDomain;
-		}
-		String[] elems = domains.split("[, ]");
-		for ( String e : elems ) {
-			domainSet.add(e);
-		}
-		// root domain implicitly granted access
-		domainSet.add(rootDomain);
-		domainSet.add(mailToDomain);
 	}
 	
 	public void setSecureChannelType(String type) {
@@ -119,34 +95,5 @@ public class Realm implements InitializingBean {
 
 	public void setRealmString(String realmString) {
 		this.realmString = realmString;
-	}
-
-	public String getMailToDomain() {
-		return mailToDomain;
-	}
-
-	public void setMailToDomain(String mailToDomain) {
-		this.mailToDomain = mailToDomain;
-	}
-
-	public String getRootDomain() {
-		return rootDomain;
-	}
-
-	public void setRootDomain(String rootDomain) {
-		this.rootDomain = rootDomain;
-	}
-
-	public void setDomains(String domains) {
-		this.domains = domains;
-	}
-	
-	public Set<String> getDomainSet() {
-		return Collections.unmodifiableSet(domainSet);
-	}
-
-	public void setDomainSet(Set<String> domains) {
-		this.domainSet.clear();
-		this.domainSet.addAll(domains);
 	}
 }

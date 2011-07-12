@@ -46,6 +46,7 @@ import org.opendatakit.aggregate.parser.MultiPartFormData;
 import org.opendatakit.aggregate.parser.SubmissionParser;
 import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.aggregate.task.UploadSubmissions;
+import org.opendatakit.common.constants.BasicConsts;
 import org.opendatakit.common.constants.HtmlConsts;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
@@ -192,7 +193,7 @@ public class SubmissionServlet extends ServletUtilBase {
 
    addOpenRosaHeaders(resp);
    String serverUrl = cc.getServerURL();
-   String url = req.getScheme() + "://" + serverUrl + "/" + ADDR;
+   String url = serverUrl +  BasicConsts.FORWARDSLASH + ADDR;
    resp.setHeader("Location", url);
    resp.setStatus(204); // no content...
   }
@@ -238,7 +239,7 @@ public class SubmissionServlet extends ServletUtilBase {
 
       // form full url including scheme...
      String serverUrl = cc.getServerURL();
-     String url = req.getScheme() + "://" + serverUrl + "/" + ADDR;
+     String url = serverUrl +  BasicConsts.FORWARDSLASH + ADDR;
      resp.setHeader("Location", url);
 
      resp.setStatus(HttpServletResponse.SC_CREATED);

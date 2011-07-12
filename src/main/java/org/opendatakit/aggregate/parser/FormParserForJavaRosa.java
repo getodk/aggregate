@@ -63,7 +63,6 @@ import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.EntityKey;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
-import org.opendatakit.common.security.Realm;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.web.CallingContext;
 
@@ -299,48 +298,26 @@ public class FormParserForJavaRosa {
     	}
     }
 
-    Realm rootDomain = cc.getUserService().getCurrentRealm();
-    // And construct the base table prefix candidate from the submissionElementDefn.formId.
+    // Construct the base table prefix candidate from the submissionElementDefn.formId.
+    String persistenceStoreFormId = submissionElementDefn.formId;
+    if ( persistenceStoreFormId.indexOf(':') != -1 ) {
+    	// this is likely an xmlns-style URI (http://..../)
+    	// remove the scheme://domain.org/ from this name, as it is likely
+    	// to be common across all forms. Use the remainder as the base table
+    	// prefix candidate.
+        persistenceStoreFormId = submissionElementDefn.formId.substring(submissionElementDefn.formId.indexOf(':') + 1);
+        int idxSlashAfterDomain = persistenceStoreFormId.indexOf('/',2);
+        if ( idxSlashAfterDomain != -1) {
+        	// remove the domain from the xmlns -- we'll use the string after the domain for the tablespace.
+            persistenceStoreFormId = persistenceStoreFormId.substring(idxSlashAfterDomain+1);
+        }
+    }
     // First, replace all slash substitutions with underscores.
     // Then replace all non-alphanumerics with underscores.
-    String persistenceStoreFormId = submissionElementDefn.formId.substring(submissionElementDefn.formId.indexOf(':') + 1);
+    // Then trim any leading underscores.
     persistenceStoreFormId = persistenceStoreFormId.replace(ParserConsts.FORWARD_SLASH_SUBSTITUTION, "_");
-    persistenceStoreFormId = persistenceStoreFormId.replaceAll("[^\\p{Digit}\\p{javaUpperCase}\\p{javaLowerCase}]", "_");
+    persistenceStoreFormId = persistenceStoreFormId.replaceAll("[^\\p{Digit}\\p{Lu}\\p{Ll}\\p{Lo}]", "_");
     persistenceStoreFormId = persistenceStoreFormId.replaceAll("^_*","");
-    // and then try to remove the realm prefix...
-    {
-    	List<String> alternates = new ArrayList<String>();
-    	alternates.addAll(rootDomain.getDomainSet());
-    	alternates.add(rootDomain.getRootDomain());
-    	// make sure the collection is sorted in longest-string-first order.
-    	// we want the longest domain name to 
-    	Collections.sort(alternates, new Comparator<String>() {
-
-			@Override
-			public int compare(String o1, String o2) {
-				if ( o1.length() > o2.length() ) {
-					return -1;
-				} else if ( o1.length() < o2.length() ) {
-					return 1;
-				} else {
-					return o1.compareTo(o2);
-				}
-			}
-    	});
-
-    	for ( String domain : alternates ) {
-    		String mungedDomainName = domain.replaceAll("[^\\p{Digit}\\p{javaUpperCase}\\p{javaLowerCase}]", "_");
-    	    if ( persistenceStoreFormId.startsWith(mungedDomainName) ) {
-    	    	persistenceStoreFormId = persistenceStoreFormId.substring(mungedDomainName.length());
-    	        persistenceStoreFormId = persistenceStoreFormId.replaceAll("^_*","");
-    	        break;
-    	    }
-    	}
-    }
-    
-    // OK -- we removed the organization's domain from what will be the 
-    // database the table name prefix.  
-    //
     
     // obtain form title either from the xform itself or from user entry
     String title = formDef.getTitle();

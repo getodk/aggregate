@@ -5,7 +5,8 @@
   <inherits name='com.google.gwt.user.User'/>
 
   <inherits name='com.google.gwt.user.theme.standard.StandardResources'/>
-  <!-- include HTTP RequestBuilder (for changing passwords) -->
+  <!-- include JSON and HTTP RequestBuilder (for changing passwords) -->
+  <inherits name="com.google.gwt.json.JSON" />
   <inherits name="com.google.gwt.http.HTTP"/>
   <inherits name='com.google.gwt.maps.GoogleMaps' />
   
