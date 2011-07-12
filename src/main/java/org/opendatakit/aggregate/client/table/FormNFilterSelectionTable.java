@@ -48,6 +48,12 @@ public class FormNFilterSelectionTable extends FlexTable {
   public void fetchClicked() {
     FormSummary form = UIUtils.getFormFromSelection(formsBox, displayedFormList);
     FilterGroup filterGroup = UIUtils.getFilterFromSelection(filtersBox, displayedFilterList);
+  
+    // verify a form and filter group exist
+    if(form == null || filterGroup == null) {
+      return;
+    }    
+  
     filterSubTab.switchForm(form, filterGroup);
   }
 

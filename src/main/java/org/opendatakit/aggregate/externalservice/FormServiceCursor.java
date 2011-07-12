@@ -118,7 +118,7 @@ public final class FormServiceCursor extends CommonFieldsBase {
   }
 
   public void setServiceClassname(ExternalServiceType value) {
-    if (!setStringField(EXT_SERVICE_TYPE_PROPERTY, value.toString())) {
+    if (!setStringField(EXT_SERVICE_TYPE_PROPERTY, value.name())) {
       throw new IllegalArgumentException("overflow externalServiceType");
     }
   }
@@ -128,7 +128,7 @@ public final class FormServiceCursor extends CommonFieldsBase {
   }
 
   public void setExternalServiceOption(ExternalServicePublicationOption value) {
-    if (!setStringField(EXTERNAL_SERVICE_OPTION, value.toString())) {
+    if (!setStringField(EXTERNAL_SERVICE_OPTION, value.name())) {
       throw new IllegalArgumentException("overflow externalServiceOption");
     }
   }
