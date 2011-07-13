@@ -14,6 +14,7 @@ import java.util.List;
 import org.apache.http.client.ClientProtocolException;
 import org.junit.Before;
 import org.junit.Test;
+import org.opendatakit.aggregate.odktables.client.api.SimpleAPI;
 import org.opendatakit.aggregate.odktables.client.exception.ODKTablesClientException;
 import org.opendatakit.aggregate.odktables.client.exception.RowAlreadyExistsException;
 import org.opendatakit.aggregate.odktables.client.exception.TableAlreadyExistsException;
@@ -35,7 +36,7 @@ import org.opendatakit.common.persistence.DataField.DataType;
 public class AggregateConnectionTest
 {
 
-    private AggregateConnection conn;
+    private SimpleAPI conn;
     private String userId;
     private String userName;
     private String tableId;
@@ -45,7 +46,7 @@ public class AggregateConnectionTest
     @Before
     public void setUp() throws URISyntaxException
     {
-        conn = new AggregateConnection(new URI("http://the-dylan-price.appspot.com/"));
+        conn = new SimpleAPI(new URI("http://the-dylan-price.appspot.com/"));
         userId = "user1";
         userName = "Dylan Price";
         tableId = "table1";

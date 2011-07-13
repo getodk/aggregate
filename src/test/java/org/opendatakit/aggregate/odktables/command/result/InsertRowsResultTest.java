@@ -8,9 +8,10 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendatakit.aggregate.odktables.CommandResultTest;
-import org.opendatakit.aggregate.odktables.CommandResult.FailureReason;
 import org.opendatakit.aggregate.odktables.client.exception.ODKTablesClientException;
 import org.opendatakit.aggregate.odktables.client.exception.RowAlreadyExistsException;
+import org.opendatakit.aggregate.odktables.commandresult.CommandResult.FailureReason;
+import org.opendatakit.aggregate.odktables.commandresult.simple.InsertRowsResult;
 
 public class InsertRowsResultTest extends CommandResultTest<InsertRowsResult>
 {

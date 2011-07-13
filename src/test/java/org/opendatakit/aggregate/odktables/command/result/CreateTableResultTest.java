@@ -4,10 +4,11 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.opendatakit.aggregate.odktables.CommandResult.FailureReason;
 import org.opendatakit.aggregate.odktables.CommandResultTest;
 import org.opendatakit.aggregate.odktables.client.exception.TableAlreadyExistsException;
 import org.opendatakit.aggregate.odktables.client.exception.UserDoesNotExistException;
+import org.opendatakit.aggregate.odktables.commandresult.CommandResult.FailureReason;
+import org.opendatakit.aggregate.odktables.commandresult.simple.CreateTableResult;
 
 public class CreateTableResultTest extends CommandResultTest<CreateTableResult>
 {

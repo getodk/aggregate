@@ -31,7 +31,7 @@ public class SynchronizedAPI extends CommonAPI
      */
     public SynchronizedAPI(URI aggregateURI, String userID)
     {
-        super(aggregateURI);
+        super(aggregateURI)
         throw new NotImplementedException();
     }
 
@@ -42,7 +42,10 @@ public class SynchronizedAPI extends CommonAPI
      * @return the initial Modification of the newly created table (calling getRows() on the Modification will return an empty list).
      * @throws TableAlreadyExistsException if the caller has already created a synchronized table with the given tableID.
      */
-    public Modification createSynchronizedTable(String tableID);
+    public Modification createSynchronizedTable(String tableID)
+    {
+        throw new NotImplementedException();
+    }
 
     /**
      * Clones an existing synchronized table.
@@ -54,7 +57,10 @@ public class SynchronizedAPI extends CommonAPI
      * @throws TableDoesNotExistException if no table with UUID tableUUID exists
      * @throws PermissionDeniedException if the userID used to make the API call does not have read permission on the table 
      */
-    public Modification cloneSynchronizedTable(String tableUUID, String tableID);
+    public Modification cloneSynchronizedTable(String tableUUID, String tableID)
+    {
+        throw new NotImplementedException();
+    }
 
     /**
      * Removes the caller from synchronization with a table. The caller must call {@link #cloneSynchronizedTable} to interact with the table again.
@@ -62,7 +68,10 @@ public class SynchronizedAPI extends CommonAPI
      * @param tableID the caller's identifier for the table
      * @throws TableDoesNotExistException if the caller does not have a table registered with tableID
      */
-    public void removeTableSynchronization(String tableID);
+    public void removeTableSynchronization(String tableID)
+    {
+        throw new NotImplementedException();
+    }
 
     /**
      * Completely deletes a synchronized table from Aggregate. All future requests for the table will error for all users.
@@ -71,7 +80,10 @@ public class SynchronizedAPI extends CommonAPI
      * @throws TableDoesNotExistException if no such table with tableUUID exists
      * @throws PermissionDeniedException if the userID used to make the API call does not have delete permission on the table
      */
-    public void deleteSynchronizedTable(String tableUUID);
+    public void deleteSynchronizedTable(String tableUUID)
+    {
+        throw new NotImplementedException();
+    }
 
     /**
      * Inserts new rows into a synchronized table. This is a valid call only if the caller's table is up to date with the latest Modification of the table in Aggregate.
@@ -84,7 +96,10 @@ public class SynchronizedAPI extends CommonAPI
      * @throws TableDoesNotExistException if the caller has no table with tableID registered for synchronization
      * @throws PermissionDeniedException if the userID used to make the API call does not have write permission on the table
      */
-    public Modification insertSynchronizedRows(String tableID, int modificationNumber, List<Row> newRows);
+    public Modification insertSynchronizedRows(String tableID, int modificationNumber, List<Row> newRows)
+    {
+        throw new NotImplementedException();
+    }
 
     /**
      * Updates existing rows of a synchronized table in Aggregate. This is a valid call only if the client is up to date with the latest Modification of the table in Aggregate.
@@ -97,7 +112,10 @@ public class SynchronizedAPI extends CommonAPI
      * @throws TableDoesNotExistException if the caller has no table with tableID registered for synchronization
      * @throws PermissionDeniedException if the userID used to make the API call does not have write permission on the table
      */
-    public Modification updateSynchronizedRows(String tableID, int modificationNumber, List<SynchronizedRow> changedRows);
+    public Modification updateSynchronizedRows(String tableID, int modificationNumber, List<SynchronizedRow> changedRows)
+    {
+        throw new NotImplementedException();
+    }
 
     /**
      * Retrieves the latest data from a table so that the caller can stay synchronized with Aggregate's copy of the table.
@@ -108,5 +126,8 @@ public class SynchronizedAPI extends CommonAPI
      * @throws TableDoesNotExistException if the caller has no table with tableID registered for synchronization
      * @throws PermissionDeniedException if the userID used to make the API call does not have read permission on the table
      */
-    public Modification synchronize(String tableID, int modificationNumber);
+    public Modification synchronize(String tableID, int modificationNumber)
+    {
+        throw new NotImplementedException();
+    }
 }

@@ -6,23 +6,23 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.opendatakit.aggregate.odktables.client.Column;
-import org.opendatakit.aggregate.odktables.client.Row;
-import org.opendatakit.aggregate.odktables.client.TableList;
+import org.opendatakit.aggregate.odktables.client.entity.Column;
+import org.opendatakit.aggregate.odktables.client.entity.Row;
+import org.opendatakit.aggregate.odktables.client.entity.TableList;
 import org.opendatakit.aggregate.odktables.client.exception.UserAlreadyExistsException;
-import org.opendatakit.aggregate.odktables.command.CreateTable;
-import org.opendatakit.aggregate.odktables.command.CreateUser;
-import org.opendatakit.aggregate.odktables.command.DeleteTable;
-import org.opendatakit.aggregate.odktables.command.DeleteUser;
-import org.opendatakit.aggregate.odktables.command.GetUser;
-import org.opendatakit.aggregate.odktables.command.InsertRows;
-import org.opendatakit.aggregate.odktables.command.QueryForRows;
-import org.opendatakit.aggregate.odktables.command.QueryForTables;
-import org.opendatakit.aggregate.odktables.command.logic.CreateUserLogic;
-import org.opendatakit.aggregate.odktables.command.logic.DeleteTableLogic;
-import org.opendatakit.aggregate.odktables.command.logic.DeleteUserLogic;
-import org.opendatakit.aggregate.odktables.command.result.CreateUserResult;
-import org.opendatakit.aggregate.odktables.command.result.DeleteUserResult;
+import org.opendatakit.aggregate.odktables.command.common.CreateUser;
+import org.opendatakit.aggregate.odktables.command.common.DeleteUser;
+import org.opendatakit.aggregate.odktables.command.common.GetUserByID;
+import org.opendatakit.aggregate.odktables.command.simple.CreateTable;
+import org.opendatakit.aggregate.odktables.command.simple.DeleteTable;
+import org.opendatakit.aggregate.odktables.command.simple.InsertRows;
+import org.opendatakit.aggregate.odktables.command.simple.QueryForRows;
+import org.opendatakit.aggregate.odktables.command.simple.QueryForTables;
+import org.opendatakit.aggregate.odktables.commandlogic.common.CreateUserLogic;
+import org.opendatakit.aggregate.odktables.commandlogic.common.DeleteUserLogic;
+import org.opendatakit.aggregate.odktables.commandlogic.simple.DeleteTableLogic;
+import org.opendatakit.aggregate.odktables.commandresult.common.CreateUserResult;
+import org.opendatakit.aggregate.odktables.commandresult.common.DeleteUserResult;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.DataField.DataType;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
@@ -83,7 +83,7 @@ public class TestUtils
     public static final DeleteTable deleteTable = new DeleteTable(userId,
             tableId);
     public static final DeleteUser deleteUser = new DeleteUser(userId);
-    public static final GetUser getUserUri = new GetUser(userId);
+    public static final GetUserByID getUserUri = new GetUserByID(userId);
     public static final InsertRows insertRows = new InsertRows(userId, tableId,
             rows);
     public static final QueryForRows queryForRows = new QueryForRows(userUri,
