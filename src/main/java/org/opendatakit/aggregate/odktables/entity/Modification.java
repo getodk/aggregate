@@ -58,14 +58,7 @@ public class Modification extends TypedEntity
         return super.getEntity().getInteger(modificationNumField);
     }
 
-    public void incrementModificationNumber()
-    {
-        int modificationNumber = getModificationNumber();
-        modificationNumber++;
-        setModificationNumber(modificationNumber);
-    }
-
-    private void setModificationNumber(int modificationNumber)
+    public void setModificationNumber(int modificationNumber)
     {
         DataField modificationNumField = getDataField(Modifications.MODIFICATION_NUMBER);
         super.getEntity().setInteger(modificationNumField, modificationNumber);
