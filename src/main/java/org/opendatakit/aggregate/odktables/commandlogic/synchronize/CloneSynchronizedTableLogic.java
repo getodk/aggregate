@@ -28,6 +28,6 @@ public class CloneSynchronizedTableLogic extends CommandLogic<CloneSynchronizedT
     public CloneSynchronizedTableResult execute(CallingContext cc)
             throws ODKDatastoreException
     {
-        throw new RuntimeException("Not implemented");
+        
     }
 }
