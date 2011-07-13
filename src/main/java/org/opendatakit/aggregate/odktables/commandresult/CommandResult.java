@@ -72,6 +72,7 @@ public abstract class CommandResult<T extends Command>
         USER_ALREADY_EXISTS,
         USER_DOES_NOT_EXIST,
         PERMISSION_DENIED,
+        CANNOT_DELETE;
     }
 
     private final boolean successful;

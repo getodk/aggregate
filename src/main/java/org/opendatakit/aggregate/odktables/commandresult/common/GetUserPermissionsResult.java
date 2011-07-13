@@ -3,19 +3,20 @@ package org.opendatakit.aggregate.odktables.commandresult.common;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.opendatakit.aggregate.odktables.client.exception.CannotDeleteException;
+import org.opendatakit.aggregate.odktables.client.entity.Permission;
 import org.opendatakit.aggregate.odktables.client.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.client.exception.UserDoesNotExistException;
-import org.opendatakit.aggregate.odktables.command.common.DeleteUser;
+import org.opendatakit.aggregate.odktables.command.common.GetUserPermissions;
 import org.opendatakit.aggregate.odktables.commandresult.CommandResult;
 import org.opendatakit.common.utils.Check;
 
 /**
- * A DeleteUserResult represents the result of executing a DeleteUser command.
+ * A GetUserPermissionsResult represents the result of executing a
+ * GetUserPermissions command.
  * 
  * @author the.dylan.price@gmail.com
  */
-public class DeleteUserResult extends CommandResult<DeleteUser>
+public class GetUserPermissionsResult extends CommandResult<GetUserPermissions>
 {
     private static final List<FailureReason> possibleFailureReasons;
     static
@@ -23,69 +24,70 @@ public class DeleteUserResult extends CommandResult<DeleteUser>
         possibleFailureReasons = new ArrayList<FailureReason>();
         possibleFailureReasons.add(FailureReason.USER_DOES_NOT_EXIST);
         possibleFailureReasons.add(FailureReason.PERMISSION_DENIED);
-        possibleFailureReasons.add(FailureReason.CANNOT_DELETE);
     }
 
+    private final List<Permission> permissions;
     private final String userUUID;
 
-    private DeleteUserResult()
+    private GetUserPermissionsResult()
     {
         super(true, null);
+        this.permissions = null;
         this.userUUID = null;
     }
 
     /**
      * The success constructor. See {@link #success} for param info.
      */
-    private DeleteUserResult(String userUUID)
+    private GetUserPermissionsResult(List<Permission> permissions)
     {
         super(true, null);
 
-        Check.notNullOrEmpty(userUUID, "userUUID");
+        Check.notNull(permissions, "permissions");
 
-        this.userUUID = userUUID;
+        this.permissions = permissions;
+        this.userUUID = null;
     }
 
     /**
      * The failure constructor. See {@link #failure} for param info.
      */
-    private DeleteUserResult(String userUUID, FailureReason reason)
+    private GetUserPermissionsResult(String userUUID, FailureReason reason)
     {
         super(false, reason);
 
         Check.notNullOrEmpty(userUUID, "userUUID");
+
         if (!possibleFailureReasons.contains(reason))
             throw new IllegalArgumentException(
                     String.format(
-                            "Failure reason %s not a valid failure reason for DeleteUser.",
+                            "Failure reason %s not a valid failure reason for GetUserPermissions.",
                             reason));
 
+        this.permissions = null;
         this.userUUID = userUUID;
     }
 
     /**
-     * Retrieve the results from the DeleteUser command.
+     * Retrieve the results from the GetUserPermissions command.
      * 
-     * @return the UUID of the successfully deleted user
+     * @throws UserDoesNotExistException
      * @throws PermissionDeniedException
-     * @throws UserDoesNotExistException 
-     * @throws CannotDeleteException 
      */
-    public String getDeletedUserUUID() throws PermissionDeniedException, UserDoesNotExistException, CannotDeleteException
+    public List<Permission> getPermissions() throws PermissionDeniedException,
+            UserDoesNotExistException
     {
         if (successful())
         {
-            return this.userUUID;
+            return this.permissions;
         } else
         {
             switch (getReason())
             {
             case USER_DOES_NOT_EXIST:
-                throw new UserDoesNotExistException(null, this.userUUID);
+                throw new UserDoesNotExistException(null, userUUID);
             case PERMISSION_DENIED:
                 throw new PermissionDeniedException();
-            case CANNOT_DELETE:
-                throw new CannotDeleteException(this.userUUID);
             default:
                 throw new RuntimeException("An unknown error occured.");
             }
@@ -98,7 +100,9 @@ public class DeleteUserResult extends CommandResult<DeleteUser>
     @Override
     public String toString()
     {
-        return String.format("DeleteUserResult [userUUID=%s]", userUUID);
+        return String.format(
+                "GetUserPermissionsResult [permissions=%s, userUUID=%s]",
+                permissions, userUUID);
     }
 
     /* (non-Javadoc)
@@ -109,6 +113,8 @@ public class DeleteUserResult extends CommandResult<DeleteUser>
     {
         final int prime = 31;
         int result = super.hashCode();
+        result = prime * result
+                + ((permissions == null) ? 0 : permissions.hashCode());
         result = prime * result
                 + ((userUUID == null) ? 0 : userUUID.hashCode());
         return result;
@@ -124,9 +130,15 @@ public class DeleteUserResult extends CommandResult<DeleteUser>
             return true;
         if (!super.equals(obj))
             return false;
-        if (!(obj instanceof DeleteUserResult))
+        if (!(obj instanceof GetUserPermissionsResult))
             return false;
-        DeleteUserResult other = (DeleteUserResult) obj;
+        GetUserPermissionsResult other = (GetUserPermissionsResult) obj;
+        if (permissions == null)
+        {
+            if (other.permissions != null)
+                return false;
+        } else if (!permissions.equals(other.permissions))
+            return false;
         if (userUUID == null)
         {
             if (other.userUUID != null)
@@ -137,26 +149,29 @@ public class DeleteUserResult extends CommandResult<DeleteUser>
     }
 
     /**
-     * @param userUUID
-     *            the UUID of the successfully deleted user
-     * @return a new DeleteUserResult representing the successful deletion of
-     *         the user
+     * @param permissions
+     *            the permissions retrieved
+     * @return a new GetUserPermissionsResult representing the successful
+     *         completion of a GetUserPermissions command.
+     * 
      */
-    public static DeleteUserResult success(String userUUID)
+    public static GetUserPermissionsResult success(List<Permission> permissions)
     {
-        return new DeleteUserResult(userUUID);
+        return new GetUserPermissionsResult(permissions);
     }
 
     /**
      * @param userUUID
-     *            the UUID of the unsuccessfully deleted user
+     *            the UUID of the user involved in the command
      * @param reason
-     *            the reason the user was unable to be deleted
-     * @return a new DeleteUserResult representing the failed deletion of the
-     *         user
+     *            the reason the command failed. Must be either
+     *            USER_DOES_NOT_EXIST or PERMISSION_DENIED.
+     * @return a new GetUserPermissionsResult representing the failed
+     *         completiong of a GetUserPermissions command.
      */
-    public static DeleteUserResult failure(String userUUID, FailureReason reason)
+    public static GetUserPermissionsResult failure(String userUUID,
+            FailureReason reason)
     {
-        return new DeleteUserResult(userUUID, reason);
+        return new GetUserPermissionsResult(userUUID, reason);
     }
 }

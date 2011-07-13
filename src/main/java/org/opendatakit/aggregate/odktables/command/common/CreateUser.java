@@ -4,86 +4,80 @@ import org.opendatakit.aggregate.odktables.command.Command;
 import org.opendatakit.common.utils.Check;
 
 /**
- * CreateUser is a Command to create a new user in ODK Aggregate. CreateUser is
- * immutable.
- * 
+ * CreateUser is immutable.
+ *
  * @author the.dylan.price@gmail.com
- * 
  */
 public class CreateUser implements Command
 {
-    private static final String path = "/odktables/createUser";
-
+    private static final String path = "/odktables/common/createUser";
+    
+    private final String userName;
     private final String requestingUserID;
     private final String userID;
-    private final String userName;
+    
 
     /**
-     * For serialization by Gson.
+     * For serialization by Gson
      */
     @SuppressWarnings("unused")
     private CreateUser()
     {
-        this.requestingUserID = null;
-        this.userID = null;
-        this.userName = null;
+       this.userName = null;
+       this.requestingUserID = null;
+       this.userID = null;
+       
     }
 
     /**
      * Constructs a new CreateUser.
-     * 
-     * @param requestingUserID
-     *            the userID of the user making the API call
-     * @param userID
-     *            the unique identifier the user will have.
-     * @param userName
-     *            the human readable name of the user. Must not be empty or
-     *            null.
      */
-    public CreateUser(String requestingUserID, String userID, String userName)
+    public CreateUser(String userName, String requestingUserID, String userID)
     {
-        Check.notNullOrEmpty(requestingUserID, "requestingUserID");
-        Check.notNullOrEmpty(userID, "userID");
+        
         Check.notNullOrEmpty(userName, "userName");
-
+        Check.notNullOrEmpty(requestingUserID, "requestingUserID");
+        Check.notNullOrEmpty(userID, "userID"); 
+        
+        this.userName = userName;
         this.requestingUserID = requestingUserID;
         this.userID = userID;
-        this.userName = userName;
     }
 
-    /**
-     * @return the requestingUserID
-     */
-    public String getRequestingUserID()
-    {
-        return requestingUserID;
-    }
-
-    /**
-     * @return the userID
-     */
-    public String getUserID()
-    {
-        return userID;
-    }
-
+    
     /**
      * @return the userName
      */
     public String getUserName()
     {
-        return userName;
+        return this.userName;
     }
-
-    /* (non-Javadoc)
-     * @see java.lang.Object#toString()
+    
+    /**
+     * @return the requestingUserID
      */
+    public String getRequestingUserID()
+    {
+        return this.requestingUserID;
+    }
+    
+    /**
+     * @return the userID
+     */
+    public String getUserID()
+    {
+        return this.userID;
+    }
+    
+
     @Override
     public String toString()
     {
-        return String.format(
-                "CreateUser [requestingUserID=%s, userID=%s, userName=%s]",
-                requestingUserID, userID, userName);
+        return String.format("CreateUser: " +
+                "userName=%s " +
+                "requestingUserID=%s " +
+                "userID=%s " +
+                "", userName, requestingUserID, userID);
     }
 
     /* (non-Javadoc)
@@ -154,3 +148,4 @@ public class CreateUser implements Command
         return path;
     }
 }
+

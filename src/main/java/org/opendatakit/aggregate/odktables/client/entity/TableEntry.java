@@ -20,7 +20,7 @@ package org.opendatakit.aggregate.odktables.client.entity;
  */
 public class TableEntry
 {
-    private final String userUUID;
+    private final User user;
     private final String tableID;
     private final String tableName;
 
@@ -30,7 +30,7 @@ public class TableEntry
     @SuppressWarnings("unused")
     private TableEntry()
     {
-        this.userUUID = null;
+        this.user = null;
         this.tableID = null;
         this.tableName = null;
     }
@@ -38,29 +38,27 @@ public class TableEntry
     /**
      * Constructs a new TableEntry.
      * 
-     * @param userUUID
-     *            the UUID of the user who owns the table
-     * @param userName
-     *            the human readable name of the user who owns the table
+     * @param user
+     *            the user who owns the table
      * @param tableID
      *            the id of the table
      * @param tableName
      *            the human readable name of the table
      */
-    public TableEntry(String userUUID, String tableID,
+    public TableEntry(User user, String tableID,
             String tableName)
     {
-        this.userUUID = userUUID;
+        this.user = user;
         this.tableID = tableID;
         this.tableName = tableName;
     }
     
     /**
-     * @return the UUID of the user who owns the table
+     * @return the user who owns the table
      */
-    public String getUserUUID()
+    public User getUser()
     {
-        return this.userUUID;
+        return this.user;
     }
 
     /**
@@ -79,14 +77,19 @@ public class TableEntry
         return tableName;
     }
 
+    /* (non-Javadoc)
+     * @see java.lang.Object#toString()
+     */
     @Override
     public String toString()
     {
-        return String
-                .format("TableEntry [userUUID=%s tableID=%s, tableName=%s]",
-                       userUUID, tableID, tableName);
+        return String.format("TableEntry [user=%s, tableID=%s, tableName=%s]",
+                user, tableID, tableName);
     }
 
+    /* (non-Javadoc)
+     * @see java.lang.Object#hashCode()
+     */
     @Override
     public int hashCode()
     {
@@ -95,11 +98,13 @@ public class TableEntry
         result = prime * result + ((tableID == null) ? 0 : tableID.hashCode());
         result = prime * result
                 + ((tableName == null) ? 0 : tableName.hashCode());
-        result = prime * result
-                + ((userUUID == null) ? 0 : userUUID.hashCode());
+        result = prime * result + ((user == null) ? 0 : user.hashCode());
         return result;
     }
 
+    /* (non-Javadoc)
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
     @Override
     public boolean equals(Object obj)
     {
@@ -107,7 +112,7 @@ public class TableEntry
             return true;
         if (obj == null)
             return false;
-        if (getClass() != obj.getClass())
+        if (!(obj instanceof TableEntry))
             return false;
         TableEntry other = (TableEntry) obj;
         if (tableID == null)
@@ -122,11 +127,11 @@ public class TableEntry
                 return false;
         } else if (!tableName.equals(other.tableName))
             return false;
-        if (userUUID == null)
+        if (user == null)
         {
-            if (other.userUUID != null)
+            if (other.user != null)
                 return false;
-        } else if (!userUUID.equals(other.userUUID))
+        } else if (!user.equals(other.user))
             return false;
         return true;
     }

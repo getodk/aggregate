@@ -15,46 +15,39 @@ public class QueryForRows implements Command
 
     private static final String path = "/odktables/queryForRows";
 
-    private final String userUri;
-    private final String tableId;
+    private final String requestingUserID;
+    private final String tableUUID;
 
     @SuppressWarnings("unused")
     private QueryForRows()
     {
-        this.userUri = null;
-        this.tableId = null;
+        this.requestingUserID = null;
+        this.tableUUID = null;
     }
 
     /**
      * Constructs a new QueryForRows.
-     * 
-     * @param userUri
-     *            the public unique identifier of the user who owns the table
-     *            with the given tableId
-     * @param tableId
-     *            the unique identifier of the table owned by the user with uri
-     *            userUri
      */
-    public QueryForRows(String userUri, String tableId)
+    public QueryForRows(String requestingUserID, String tableUUID)
     {
-        this.userUri = userUri;
-        this.tableId = tableId;
+        this.requestingUserID = requestingUserID;
+        this.tableUUID = tableUUID;
     }
 
     /**
-     * @return the userUri
+     * @return the requestingUserID
      */
-    public String getUserUri()
+    public String getRequestingUserID()
     {
-        return userUri;
+        return requestingUserID;
     }
 
     /**
-     * @return the tableId
+     * @return the tableUUID
      */
-    public String getTableId()
+    public String getTableUUID()
     {
-        return tableId;
+        return tableUUID;
     }
 
     /* (non-Javadoc)
@@ -63,8 +56,8 @@ public class QueryForRows implements Command
     @Override
     public String toString()
     {
-        return String.format("QueryForRows [userUri=%s, tableId=%s]", userUri,
-                tableId);
+        return String.format("QueryForRows [requestingUserID=%s, tableUUID=%s]", requestingUserID,
+                tableUUID);
     }
 
     /* (non-Javadoc)
@@ -75,8 +68,8 @@ public class QueryForRows implements Command
     {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((tableId == null) ? 0 : tableId.hashCode());
-        result = prime * result + ((userUri == null) ? 0 : userUri.hashCode());
+        result = prime * result + ((tableUUID == null) ? 0 : tableUUID.hashCode());
+        result = prime * result + ((requestingUserID == null) ? 0 : requestingUserID.hashCode());
         return result;
     }
 
@@ -93,17 +86,17 @@ public class QueryForRows implements Command
         if (!(obj instanceof QueryForRows))
             return false;
         QueryForRows other = (QueryForRows) obj;
-        if (tableId == null)
+        if (tableUUID == null)
         {
-            if (other.tableId != null)
+            if (other.tableUUID != null)
                 return false;
-        } else if (!tableId.equals(other.tableId))
+        } else if (!tableUUID.equals(other.tableUUID))
             return false;
-        if (userUri == null)
+        if (requestingUserID == null)
         {
-            if (other.userUri != null)
+            if (other.requestingUserID != null)
                 return false;
-        } else if (!userUri.equals(other.userUri))
+        } else if (!requestingUserID.equals(other.requestingUserID))
             return false;
         return true;
     }

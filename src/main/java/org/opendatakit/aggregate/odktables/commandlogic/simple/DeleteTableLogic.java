@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.opendatakit.aggregate.odktables.command.simple.DeleteTable;
 import org.opendatakit.aggregate.odktables.commandlogic.CommandLogic;
+import org.opendatakit.aggregate.odktables.commandresult.CommandResult.FailureReason;
 import org.opendatakit.aggregate.odktables.commandresult.simple.DeleteTableResult;
 import org.opendatakit.aggregate.odktables.entity.Column;
 import org.opendatakit.aggregate.odktables.entity.Cursor;
@@ -11,6 +12,7 @@ import org.opendatakit.aggregate.odktables.entity.TableEntry;
 import org.opendatakit.aggregate.odktables.entity.User;
 import org.opendatakit.aggregate.odktables.relation.Columns;
 import org.opendatakit.aggregate.odktables.relation.Cursors;
+import org.opendatakit.aggregate.odktables.relation.Permissions;
 import org.opendatakit.aggregate.odktables.relation.TableEntries;
 import org.opendatakit.aggregate.odktables.relation.Users;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
@@ -41,26 +43,33 @@ public class DeleteTableLogic extends CommandLogic<DeleteTable>
         Cursors cursors = Cursors.getInstance(cc);
         Columns columns = Columns.getInstance(cc);
 
-        String tableId = this.deleteTable.getTableId();
-        String userId = this.deleteTable.getUserId();
+        String tableUUID = this.deleteTable.getTableUUID();
+        String requestingUserID = this.deleteTable.getRequestingUserID();
+
+        User requestingUser = users.query()
+                .equal(Users.USER_ID, requestingUserID).get();
+
+        if (!requestingUser.hasPerm(tableUUID, Permissions.DELETE))
+        {
+            return DeleteTableResult.failure(tableUUID,
+                    FailureReason.PERMISSION_DENIED);
+        }
 
         try
         {
-            User user = users.query().equal(Users.USER_ID, userId).get();
-            String userUri = user.getUri();
+            String userUUID = requestingUser.getUUID();
 
-            Cursor cursor = cursors.query().equal(Cursors.USER_UUID, userUri)
-                    .equal(Cursors.TABLE_ID, tableId).get();
-            String tableUri = cursor.getTableUUID();
+            Cursor cursor = cursors.query().equal(Cursors.USER_UUID, userUUID)
+                    .equal(Cursors.TABLE_UUID, tableUUID).get();
 
-            TableEntry table = tables.get(tableUri);
+            TableEntry entry = tables.get(tableUUID);
             List<Column> tableColumns = columns.query()
-                    .equal(Columns.TABLE_UUID, tableUri).execute();
+                    .equal(Columns.TABLE_UUID, tableUUID).execute();
 
             try
             {
                 cursor.delete();
-                table.delete();
+                entry.delete();
                 for (Column column : tableColumns)
                     column.delete();
             } catch (ODKDatastoreException e)
@@ -69,9 +78,10 @@ public class DeleteTableLogic extends CommandLogic<DeleteTable>
             }
         } catch (ODKDatastoreException e)
         {
-            // TODO: what if user, cursor, or table do not exist?
+            return DeleteTableResult.failure(tableUUID,
+                    FailureReason.TABLE_DOES_NOT_EXIST);
         }
 
-        return DeleteTableResult.success(deleteTable.getTableId());
+        return DeleteTableResult.success();
     }
 }

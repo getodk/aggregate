@@ -3,17 +3,17 @@ package org.opendatakit.aggregate.odktables.commandlogic.simple;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.opendatakit.aggregate.odktables.client.entity.Row;
 import org.opendatakit.aggregate.odktables.command.simple.QueryForRows;
 import org.opendatakit.aggregate.odktables.commandlogic.CommandLogic;
 import org.opendatakit.aggregate.odktables.commandresult.CommandResult.FailureReason;
 import org.opendatakit.aggregate.odktables.commandresult.simple.QueryForRowsResult;
+import org.opendatakit.aggregate.odktables.entity.Row;
+import org.opendatakit.aggregate.odktables.entity.User;
+import org.opendatakit.aggregate.odktables.relation.Columns;
+import org.opendatakit.aggregate.odktables.relation.Permissions;
 import org.opendatakit.aggregate.odktables.relation.Rows;
 import org.opendatakit.aggregate.odktables.relation.TableEntries;
 import org.opendatakit.aggregate.odktables.relation.Users;
-import org.opendatakit.common.ermodel.AbstractRelationAdapter;
-import org.opendatakit.common.ermodel.Entity;
-import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
 
@@ -37,44 +37,50 @@ public class QueryForRowsLogic extends CommandLogic<QueryForRows>
     public QueryForRowsResult execute(CallingContext cc)
             throws ODKDatastoreException
     {
-        TableEntries index = TableEntries.getInstance(cc);
-        AbstractRelationAdapter users = Users.getInstance(cc);
+        TableEntries entries = TableEntries.getInstance(cc);
+        Users users = Users.getInstance(cc);
+        Columns columns = Columns.getInstance(cc);
 
-        String userUri = queryForRows.getUserUri();
-        String tableId = queryForRows.getTableId();
-        String convertedTableId = convertTableId(tableId);
+        String requestingUserID = queryForRows.getRequestingUserID();
+        String tableUUID = queryForRows.getTableUUID();
 
-        if (!users.containsEntity(userUri, cc))
+        User requestingUser = users.query()
+                .equal(Users.USER_ID, requestingUserID).get();
+
+        if (!requestingUser.hasPerm(tableUUID, Permissions.READ))
         {
-            return QueryForRowsResult.failure(userUri, tableId,
-                    FailureReason.USER_DOES_NOT_EXIST);
+            return QueryForRowsResult.failure(tableUUID,
+                    FailureReason.PERMISSION_DENIED);
         }
-        Entity user = users.getEntity(userUri, cc);
-        String convertedUserId = user.getField(AbstractRelationAdapter.USER_ID);
 
-        if (!index.tableExists(convertedUserId, convertedTableId))
+        try
         {
-            return QueryForRowsResult.failure(userUri, tableId,
+            entries.get(tableUUID);
+        } catch (ODKDatastoreException e)
+        {
+            return QueryForRowsResult.failure(tableUUID,
                     FailureReason.TABLE_DOES_NOT_EXIST);
         }
 
-        Rows table = index.getTable(convertedUserId, convertedTableId);
-        List<DataField> fields = table.getDataFields();
-        List<Entity> entities = table.getAllEntities(cc);
-        List<Row> rows = new ArrayList<Row>();
+        Rows table = Rows.getInstance(tableUUID, cc);
+        List<Row> rows = table.query().execute();
 
-        for (Entity entity : entities)
+        List<String> columnNames = (List<String>) columns.query()
+                .equal(Columns.TABLE_UUID, tableUUID)
+                .getDistinct(Columns.COLUMN_NAME);
+        List<org.opendatakit.aggregate.odktables.client.entity.Row> clientRows = new ArrayList<org.opendatakit.aggregate.odktables.client.entity.Row>();
+
+        for (Row row : rows)
         {
-            Row row = new Row(getRowId(entity.getUri()));
-            for (DataField field : fields)
+            org.opendatakit.aggregate.odktables.client.entity.Row clientRow = new org.opendatakit.aggregate.odktables.client.entity.Row();
+            clientRow.setRowUUID(row.getUUID());
+            for (String columnName : columnNames)
             {
-                String column = field.getName();
-                String value = entity.getField(column);
-                row.setColumn(column, value);
+                clientRow.setValue(columnName, row.getValue(columnName));
             }
-            rows.add(row);
+            clientRows.add(clientRow);
         }
 
-        return QueryForRowsResult.success(userUri, tableId, rows);
+        return QueryForRowsResult.success(tableUUID, clientRows);
     }
 }

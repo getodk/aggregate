@@ -84,7 +84,7 @@ public abstract class TypedEntity
     /**
      * {@link org.opendatakit.common.ermodel.Entity#getUri()}
      */
-    public String getUri()
+    public String getUUID()
     {
         return this.entity.getUri();
     }

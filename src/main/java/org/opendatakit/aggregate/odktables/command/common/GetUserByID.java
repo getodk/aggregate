@@ -4,50 +4,42 @@ import org.opendatakit.aggregate.odktables.command.Command;
 import org.opendatakit.common.utils.Check;
 
 /**
- * DeleteUser is immutable.
+ * GetUserByID is immutable.
  *
  * @author the.dylan.price@gmail.com
  */
-public class DeleteUser implements Command
+public class GetUserByID implements Command
 {
-    private static final String path = "/odktables/common/deleteUser";
+    private static final String path = "/odktables/common/getUserByID";
     
-    private final String userUUID;
     private final String requestingUserID;
+    private final String userID;
     
 
     /**
      * For serialization by Gson
      */
     @SuppressWarnings("unused")
-    private DeleteUser()
+    private GetUserByID()
     {
-       this.userUUID = null;
        this.requestingUserID = null;
+       this.userID = null;
        
     }
 
     /**
-     * Constructs a new DeleteUser.
+     * Constructs a new GetUserByID.
      */
-    public DeleteUser(String userUUID, String requestingUserID)
+    public GetUserByID(String requestingUserID, String userID)
     {
         
-        Check.notNullOrEmpty(userUUID, "userUUID");
-        Check.notNullOrEmpty(requestingUserID, "requestingUserID"); 
+        Check.notNullOrEmpty(requestingUserID, "requestingUserID");
+        Check.notNullOrEmpty(userID, "userID"); 
         
-        this.userUUID = userUUID;
         this.requestingUserID = requestingUserID;
+        this.userID = userID;
     }
 
-    
-    /**
-     * @return the userUUID
-     */
-    public String getUserUUID()
-    {
-        return this.userUUID;
-    }
     
     /**
      * @return the requestingUserID
@@ -57,14 +49,22 @@ public class DeleteUser implements Command
         return this.requestingUserID;
     }
     
+    /**
+     * @return the userID
+     */
+    public String getUserID()
+    {
+        return this.userID;
+    }
+    
 
     @Override
     public String toString()
     {
-        return String.format("DeleteUser: " +
-                "userUUID=%s " +
+        return String.format("GetUserByID: " +
                 "requestingUserID=%s " +
-                "", userUUID, requestingUserID);
+                "userID=%s " +
+                "", requestingUserID, userID);
     }
 
     /* (non-Javadoc)
@@ -78,8 +78,7 @@ public class DeleteUser implements Command
         result = prime
                 * result
                 + ((requestingUserID == null) ? 0 : requestingUserID.hashCode());
-        result = prime * result
-                + ((userUUID == null) ? 0 : userUUID.hashCode());
+        result = prime * result + ((userID == null) ? 0 : userID.hashCode());
         return result;
     }
 
@@ -93,20 +92,20 @@ public class DeleteUser implements Command
             return true;
         if (obj == null)
             return false;
-        if (!(obj instanceof DeleteUser))
+        if (!(obj instanceof GetUserByID))
             return false;
-        DeleteUser other = (DeleteUser) obj;
+        GetUserByID other = (GetUserByID) obj;
         if (requestingUserID == null)
         {
             if (other.requestingUserID != null)
                 return false;
         } else if (!requestingUserID.equals(other.requestingUserID))
             return false;
-        if (userUUID == null)
+        if (userID == null)
         {
-            if (other.userUUID != null)
+            if (other.userID != null)
                 return false;
-        } else if (!userUUID.equals(other.userUUID))
+        } else if (!userID.equals(other.userID))
             return false;
         return true;
     }

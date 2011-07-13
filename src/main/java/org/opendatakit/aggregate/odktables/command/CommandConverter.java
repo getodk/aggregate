@@ -7,7 +7,7 @@ import java.util.Map;
 import org.opendatakit.aggregate.odktables.command.CommandConverter;
 import org.opendatakit.aggregate.odktables.command.common.CreateUser;
 import org.opendatakit.aggregate.odktables.command.common.DeleteUser;
-import org.opendatakit.aggregate.odktables.command.common.GetUser;
+import org.opendatakit.aggregate.odktables.command.common.GetUserByID;
 import org.opendatakit.aggregate.odktables.command.simple.CreateTable;
 import org.opendatakit.aggregate.odktables.command.simple.DeleteTable;
 import org.opendatakit.aggregate.odktables.command.simple.InsertRows;
@@ -54,7 +54,7 @@ public class CommandConverter
         commandMap.put(DeleteTable.methodPath(), DeleteTable.class);
         commandMap.put(CreateUser.methodPath(), CreateUser.class);
         commandMap.put(DeleteUser.methodPath(), DeleteUser.class);
-        commandMap.put(GetUser.methodPath(), GetUser.class);
+        commandMap.put(GetUserByID.methodPath(), GetUserByID.class);
         commandMap.put(QueryForTables.methodPath(), QueryForTables.class);
         commandMap.put(QueryForRows.methodPath(), QueryForRows.class);
 

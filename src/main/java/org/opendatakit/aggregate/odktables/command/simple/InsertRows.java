@@ -1,116 +1,137 @@
 package org.opendatakit.aggregate.odktables.command.simple;
 
-import java.util.Collections;
 import java.util.List;
 
 import org.opendatakit.aggregate.odktables.client.entity.Row;
 import org.opendatakit.aggregate.odktables.command.Command;
+import org.opendatakit.common.utils.Check;
 
 /**
- * InsertRows is a Command to insert rows into a table in ODK Aggregate.
  * InsertRows is immutable.
- * 
+ *
  * @author the.dylan.price@gmail.com
- * 
  */
 public class InsertRows implements Command
 {
-    private static final String path = "/odktables/insertRows";
-
-    private final String userId;
-    private final String tableId;
+    private static final String path = "/odktables/simple/insertRows";
+    
     private final List<Row> rows;
+    private final String requestingUserID;
+    private final String tableUUID;
+    
 
     /**
-     * So that Gson can serialize this class.
+     * For serialization by Gson
      */
     @SuppressWarnings("unused")
     private InsertRows()
     {
-        this.userId = null;
-        this.tableId = null;
-        this.rows = null;
+       this.rows = null;
+       this.requestingUserID = null;
+       this.tableUUID = null;
+       
     }
 
     /**
-     * Creates a new InsertRows command.
-     * 
-     * @param userId
-     *            the unique identifier of the user who owns the table. Must not
-     *            be empty or null.
-     * @param tableId
-     *            the unique identifier of the table to insert rows into. Must
-     *            not be null or empty.
-     * @param rows
-     *            a list of rows to insert into the table. Must not be null or
-     *            empty, and each row must be a new row in the table (i.e. no
-     *            row with a matching rowId can exist).
+     * Constructs a new InsertRows.
      */
-    public InsertRows(String userId, String tableId, List<Row> rows)
+    public InsertRows(List<Row> rows, String requestingUserID, String tableUUID)
     {
-
-        if (userId == null || userId.length() == 0)
-            throw new IllegalArgumentException("userId '" + userId
-                    + "' was null or empty");
-        if (tableId == null || tableId.length() == 0)
-            throw new IllegalArgumentException("tableId '" + tableId
-                    + "' was null or empty");
-        if (rows == null || rows.isEmpty())
-            throw new IllegalArgumentException("rows was null or empty");
-
-        this.userId = userId;
-        this.tableId = tableId;
+        
+        Check.notNull(rows, "rows");
+        Check.notNullOrEmpty(requestingUserID, "requestingUserID");
+        Check.notNullOrEmpty(tableUUID, "tableUUID"); 
+        
         this.rows = rows;
+        this.requestingUserID = requestingUserID;
+        this.tableUUID = tableUUID;
     }
 
-    /**
-     * @return the userId
-     */
-    public String getUserId()
-    {
-        return this.userId;
-    }
-
-    /**
-     * @return the tableId
-     */
-    public String getTableId()
-    {
-        return tableId;
-    }
-
+    
     /**
      * @return the rows
      */
     public List<Row> getRows()
     {
-        return Collections.unmodifiableList(this.rows);
+        return this.rows;
     }
+    
+    /**
+     * @return the requestingUserID
+     */
+    public String getRequestingUserID()
+    {
+        return this.requestingUserID;
+    }
+    
+    /**
+     * @return the tableUUID
+     */
+    public String getTableUUID()
+    {
+        return this.tableUUID;
+    }
+    
 
     @Override
     public String toString()
     {
-        return String.format("{User Id = %s, Table Id = %s, Rows = %s}",
-                this.userId, this.tableId, this.rows);
+        return String.format("InsertRows: " +
+                "rows=%s " +
+                "requestingUserID=%s " +
+                "tableUUID=%s " +
+                "", rows, requestingUserID, tableUUID);
     }
 
-    @Override
-    public boolean equals(Object obj)
-    {
-        if (!(obj instanceof InsertRows))
-            return false;
-        InsertRows o = (InsertRows) obj;
-        boolean userIdsEqual = o.userId.equals(this.userId);
-        boolean tableIdsEqual = o.tableId.equals(this.tableId);
-        boolean rowsEqual = o.rows.equals(this.rows);
-        return userIdsEqual && tableIdsEqual && rowsEqual;
-    }
-
+    /* (non-Javadoc)
+     * @see java.lang.Object#hashCode()
+     */
     @Override
     public int hashCode()
     {
-        return 27 * this.userId.hashCode() + 78 * this.tableId.hashCode() + 24
-                * this.rows.hashCode();
+        final int prime = 31;
+        int result = 1;
+        result = prime
+                * result
+                + ((requestingUserID == null) ? 0 : requestingUserID.hashCode());
+        result = prime * result + ((rows == null) ? 0 : rows.hashCode());
+        result = prime * result
+                + ((tableUUID == null) ? 0 : tableUUID.hashCode());
+        return result;
+    }
+
+    /* (non-Javadoc)
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(Object obj)
+    {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (!(obj instanceof InsertRows))
+            return false;
+        InsertRows other = (InsertRows) obj;
+        if (requestingUserID == null)
+        {
+            if (other.requestingUserID != null)
+                return false;
+        } else if (!requestingUserID.equals(other.requestingUserID))
+            return false;
+        if (rows == null)
+        {
+            if (other.rows != null)
+                return false;
+        } else if (!rows.equals(other.rows))
+            return false;
+        if (tableUUID == null)
+        {
+            if (other.tableUUID != null)
+                return false;
+        } else if (!tableUUID.equals(other.tableUUID))
+            return false;
+        return true;
     }
 
     @Override
@@ -130,3 +151,4 @@ public class InsertRows implements Command
         return path;
     }
 }
+

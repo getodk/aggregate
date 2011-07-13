@@ -50,6 +50,7 @@ public class CommandServlet extends ServletUtilBase
         try
         {
             String methodName = req.getRequestURI();
+            req.getContextPath();
 
             Class<? extends Command> commandClass = CommandConverter
                     .getInstance().getCommandClass(methodName);

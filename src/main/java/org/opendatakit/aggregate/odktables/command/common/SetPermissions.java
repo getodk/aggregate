@@ -4,42 +4,82 @@ import org.opendatakit.aggregate.odktables.command.Command;
 import org.opendatakit.common.utils.Check;
 
 /**
- * DeleteUser is immutable.
+ * SetPermissions is immutable.
  *
  * @author the.dylan.price@gmail.com
  */
-public class DeleteUser implements Command
+public class SetPermissions implements Command
 {
-    private static final String path = "/odktables/common/deleteUser";
+    private static final String path = "/odktables/common/setPermissions";
     
+    private final boolean read;
+    private final String tableUUID;
+    private final boolean write;
     private final String userUUID;
     private final String requestingUserID;
+    private final boolean delete;
     
 
     /**
      * For serialization by Gson
      */
     @SuppressWarnings("unused")
-    private DeleteUser()
+    private SetPermissions()
     {
+       this.read = false;
+       this.tableUUID = null;
+       this.write = false;
        this.userUUID = null;
        this.requestingUserID = null;
+       this.delete = false;
        
     }
 
     /**
-     * Constructs a new DeleteUser.
+     * Constructs a new SetPermissions.
      */
-    public DeleteUser(String userUUID, String requestingUserID)
+    public SetPermissions(boolean read, String tableUUID, boolean write, String userUUID, String requestingUserID, boolean delete)
     {
         
+        Check.notNull(read, "read");
+        Check.notNullOrEmpty(tableUUID, "tableUUID");
+        Check.notNull(write, "write");
         Check.notNullOrEmpty(userUUID, "userUUID");
-        Check.notNullOrEmpty(requestingUserID, "requestingUserID"); 
+        Check.notNullOrEmpty(requestingUserID, "requestingUserID");
+        Check.notNull(delete, "delete"); 
         
+        this.read = read;
+        this.tableUUID = tableUUID;
+        this.write = write;
         this.userUUID = userUUID;
         this.requestingUserID = requestingUserID;
+        this.delete = delete;
     }
 
+    
+    /**
+     * @return the read
+     */
+    public boolean getRead()
+    {
+        return this.read;
+    }
+    
+    /**
+     * @return the tableUUID
+     */
+    public String getTableUUID()
+    {
+        return this.tableUUID;
+    }
+    
+    /**
+     * @return the write
+     */
+    public boolean getWrite()
+    {
+        return this.write;
+    }
     
     /**
      * @return the userUUID
@@ -57,14 +97,26 @@ public class DeleteUser implements Command
         return this.requestingUserID;
     }
     
+    /**
+     * @return the delete
+     */
+    public boolean getDelete()
+    {
+        return this.delete;
+    }
+    
 
     @Override
     public String toString()
     {
-        return String.format("DeleteUser: " +
+        return String.format("SetPermissions: " +
+                "read=%s " +
+                "tableUUID=%s " +
+                "write=%s " +
                 "userUUID=%s " +
                 "requestingUserID=%s " +
-                "", userUUID, requestingUserID);
+                "delete=%s " +
+                "", read, tableUUID, write, userUUID, requestingUserID, delete);
     }
 
     /* (non-Javadoc)
@@ -75,11 +127,16 @@ public class DeleteUser implements Command
     {
         final int prime = 31;
         int result = 1;
+        result = prime * result + (delete ? 1231 : 1237);
+        result = prime * result + (read ? 1231 : 1237);
         result = prime
                 * result
                 + ((requestingUserID == null) ? 0 : requestingUserID.hashCode());
         result = prime * result
+                + ((tableUUID == null) ? 0 : tableUUID.hashCode());
+        result = prime * result
                 + ((userUUID == null) ? 0 : userUUID.hashCode());
+        result = prime * result + (write ? 1231 : 1237);
         return result;
     }
 
@@ -93,20 +150,32 @@ public class DeleteUser implements Command
             return true;
         if (obj == null)
             return false;
-        if (!(obj instanceof DeleteUser))
+        if (!(obj instanceof SetPermissions))
             return false;
-        DeleteUser other = (DeleteUser) obj;
+        SetPermissions other = (SetPermissions) obj;
+        if (delete != other.delete)
+            return false;
+        if (read != other.read)
+            return false;
         if (requestingUserID == null)
         {
             if (other.requestingUserID != null)
                 return false;
         } else if (!requestingUserID.equals(other.requestingUserID))
             return false;
+        if (tableUUID == null)
+        {
+            if (other.tableUUID != null)
+                return false;
+        } else if (!tableUUID.equals(other.tableUUID))
+            return false;
         if (userUUID == null)
         {
             if (other.userUUID != null)
                 return false;
         } else if (!userUUID.equals(other.userUUID))
+            return false;
+        if (write != other.write)
             return false;
         return true;
     }

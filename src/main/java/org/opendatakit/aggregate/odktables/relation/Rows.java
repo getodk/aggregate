@@ -46,7 +46,7 @@ public class Rows extends TypedEntityRelation<Row>
      * 
      * @param namespace
      *            the namespace the table should be created under.
-     * @param tableUri
+     * @param tableUUID
      *            the globally unique identifier of the Table.
      * @param tableFields
      *            a list of DataFields representing the fields of the Table
@@ -56,11 +56,11 @@ public class Rows extends TypedEntityRelation<Row>
      *             if there was a problem during communication with the
      *             datastore
      */
-    private Rows(String namespace, String tableUri,
+    private Rows(String namespace, String tableUUID,
             List<DataField> tableFields, CallingContext cc)
             throws ODKDatastoreException
     {
-        super(namespace, tableUri, tableFields, cc);
+        super(namespace, tableUUID, tableFields, cc);
         this.fields = tableFields;
     }
 
@@ -78,12 +78,12 @@ public class Rows extends TypedEntityRelation<Row>
         return Collections.unmodifiableList(this.fields);
     }
 
-    public static Rows getInstance(String tableUri, CallingContext cc)
+    public static Rows getInstance(String tableUUID, CallingContext cc)
             throws ODKDatastoreException
     {
         List<DataField> tableFields = Columns.getInstance(cc).getDataFields(
-                tableUri);
+                tableUUID);
         tableFields.add(revisionTag);
-        return new Rows(NAMESPACE, tableUri, tableFields, cc);
+        return new Rows(NAMESPACE, tableUUID, tableFields, cc);
     }
 }

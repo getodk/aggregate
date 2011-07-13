@@ -5,9 +5,9 @@ import java.util.List;
 
 import org.opendatakit.aggregate.odktables.client.exception.TableAlreadyExistsException;
 import org.opendatakit.aggregate.odktables.client.exception.UserDoesNotExistException;
-import org.opendatakit.aggregate.odktables.command.result.CreateTableResult;
 import org.opendatakit.aggregate.odktables.command.simple.CreateTable;
 import org.opendatakit.aggregate.odktables.commandresult.CommandResult;
+import org.opendatakit.common.utils.Check;
 
 /**
  * A CreateTableResult represents the result of executing a CreateTable command.
@@ -21,11 +21,9 @@ public class CreateTableResult extends CommandResult<CreateTable>
     {
         possibleFailureReasons = new ArrayList<FailureReason>();
         possibleFailureReasons.add(FailureReason.TABLE_ALREADY_EXISTS);
-        possibleFailureReasons.add(FailureReason.USER_DOES_NOT_EXIST);
     }
 
-    private final String userId;
-    private final String tableId;
+    private final String tableID;
 
     /**
      * For serialization by Gson we need a no-arg constructor.
@@ -33,18 +31,16 @@ public class CreateTableResult extends CommandResult<CreateTable>
     private CreateTableResult()
     {
         super(true, null);
-        this.userId = null;
-        this.tableId = null;
+        this.tableID = null;
     }
 
     /**
      * The success constructor. See {@link #success(String)} for param info.
      */
-    private CreateTableResult(String userId, String tableId)
+    private CreateTableResult(String tableID)
     {
         super(true, null);
-        this.userId = userId;
-        this.tableId = tableId;
+        this.tableID = tableID;
     }
 
     /**
@@ -52,34 +48,28 @@ public class CreateTableResult extends CommandResult<CreateTable>
      * {@link #failure(String, org.opendatakit.aggregate.odktables.commandresult.CommandResult.FailureReason)}
      * for param info.
      */
-    private CreateTableResult(String userId, String tableId,
-            FailureReason reason)
+    private CreateTableResult(String tableID, FailureReason reason)
     {
         super(false, reason);
 
-        if (tableId == null || tableId.length() == 0)
-            throw new IllegalArgumentException("tableId '" + tableId
-                    + "' was null or empty");
+        Check.notNullOrEmpty(tableID, "tableID");
+
         if (!possibleFailureReasons.contains(getReason()))
         {
             throw new IllegalArgumentException("Not a valid FailureReason: "
                     + getReason());
         }
 
-        this.userId = userId;
-        this.tableId = tableId;
+        this.tableID = tableID;
     }
 
     /**
      * Retrieve the results from the createTable Command.
      * 
-     * @return the tableId of the table that was successfully created
+     * @return the tableID of the table that was successfully created
      * @throws TableAlreadyExistsException
      *             if the table that the createTable Command tried to create
      *             already existed.
-     * @throws UserDoesNotExistException
-     *             if the user that would have owned the new table does not
-     *             exist
      */
     public String getCreatedTableId() throws TableAlreadyExistsException,
             UserDoesNotExistException
@@ -93,8 +83,6 @@ public class CreateTableResult extends CommandResult<CreateTable>
             {
             case TABLE_ALREADY_EXISTS:
                 throw new TableAlreadyExistsException(getTableId());
-            case USER_DOES_NOT_EXIST:
-                throw new UserDoesNotExistException(getUserId());
             default:
                 throw new RuntimeException("An unknown error occured.");
             }
@@ -103,19 +91,11 @@ public class CreateTableResult extends CommandResult<CreateTable>
     }
 
     /**
-     * @return the tableId associated with this result.
+     * @return the tableID associated with this result.
      */
     public String getTableId()
     {
-        return this.tableId;
-    }
-
-    /**
-     * @return the userId associated with this result.
-     */
-    public String getUserId()
-    {
-        return this.userId;
+        return this.tableID;
     }
 
     /* (non-Javadoc)
@@ -124,8 +104,7 @@ public class CreateTableResult extends CommandResult<CreateTable>
     @Override
     public String toString()
     {
-        return String.format("CreateTableResult [userId=%s, tableId=%s]",
-                userId, tableId);
+        return String.format("CreateTableResult [tableID=%s]", tableID);
     }
 
     /* (non-Javadoc)
@@ -136,8 +115,7 @@ public class CreateTableResult extends CommandResult<CreateTable>
     {
         final int prime = 31;
         int result = super.hashCode();
-        result = prime * result + ((tableId == null) ? 0 : tableId.hashCode());
-        result = prime * result + ((userId == null) ? 0 : userId.hashCode());
+        result = prime * result + ((tableID == null) ? 0 : tableID.hashCode());
         return result;
     }
 
@@ -154,50 +132,37 @@ public class CreateTableResult extends CommandResult<CreateTable>
         if (!(obj instanceof CreateTableResult))
             return false;
         CreateTableResult other = (CreateTableResult) obj;
-        if (tableId == null)
+        if (tableID == null)
         {
-            if (other.tableId != null)
+            if (other.tableID != null)
                 return false;
-        } else if (!tableId.equals(other.tableId))
-            return false;
-        if (userId == null)
-        {
-            if (other.userId != null)
-                return false;
-        } else if (!userId.equals(other.userId))
+        } else if (!tableID.equals(other.tableID))
             return false;
         return true;
     }
 
     /**
-     * @param userId
-     *            the private unique identifier of the user who owns the table
-     *            which was successfully created.
-     * @param tableId
+     * @param tableID
      *            the id of the table that was successfully created.
      * @return a new CreateTableResult representing the successful creation of a
      *         table.
      */
-    public static CreateTableResult success(String userId, String tableId)
+    public static CreateTableResult success(String tableID)
     {
-        return new CreateTableResult(userId, tableId);
+        return new CreateTableResult(tableID);
     }
 
     /**
-     * @param userId
-     *            the private unique identifier of the user who owns the table
-     *            which was successfully created
-     * @param tableId
+     * @param tableID
      *            the id of the table that was not created.
      * @param reason
-     *            the reason the table was not created. Must be one of the
-     *            following: TABLE_ALREADY_EXISTS
+     *            the reason the table was not created. Must be
+     *            TABLE_ALREADY_EXISTS.
      * @return a new CreateTableResult representing the failed creation of a
      *         table.
      */
-    public static CreateTableResult failure(String userId, String tableId,
-            FailureReason reason)
+    public static CreateTableResult failure(String tableID, FailureReason reason)
     {
-        return new CreateTableResult(userId, tableId, reason);
+        return new CreateTableResult(tableID, reason);
     }
 }

@@ -150,20 +150,20 @@ public abstract class TypedEntityRelation<T extends TypedEntity>
     public abstract T initialize(Entity entity) throws ODKDatastoreException;
 
     /**
-     * Retrieve a typed entity by uri.
+     * Retrieve a typed entity by UUID.
      * 
-     * @param uri
+     * @param UUID
      *            the global unique identifier of an entity in this relation.
-     *            Must be a valid uri and an entity with the uri must exist in
+     *            Must be a valid UUID and an entity with the UUID must exist in
      *            this relation.
-     * @return the entity with the given uri
+     * @return the entity with the given UUID
      * @throws ODKDatastoreException
      * @throws ODKEntityNotFoundException
      *             if no such entity exists in the datastore
      */
-    public T get(String uri) throws ODKDatastoreException
+    public T get(String UUID) throws ODKDatastoreException
     {
-        return initialize(this.relation.getEntity(uri, getCC()));
+        return initialize(this.relation.getEntity(UUID, getCC()));
     }
 
     /**
@@ -178,11 +178,11 @@ public abstract class TypedEntityRelation<T extends TypedEntity>
     }
 
     /**
-     * @return the uri of this relation. Note that there are no mechanisms for
-     *         retrieving this relation by it's uri, it merely serves as a
+     * @return the UUID of this relation. Note that there are no mechanisms for
+     *         retrieving this relation by it's UUID, it merely serves as a
      *         unique identifier.
      */
-    public String getUri()
+    public String getUUID()
     {
         return this.getClass().getCanonicalName();
     }

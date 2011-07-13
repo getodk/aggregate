@@ -1,9 +1,12 @@
 package org.opendatakit.aggregate.odktables.commandresult.simple;
 
-import org.opendatakit.aggregate.odktables.client.entity.TableList;
-import org.opendatakit.aggregate.odktables.command.result.QueryForTablesResult;
+import java.util.List;
+
+import org.opendatakit.aggregate.odktables.client.entity.TableEntry;
+import org.opendatakit.aggregate.odktables.client.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.command.simple.QueryForTables;
 import org.opendatakit.aggregate.odktables.commandresult.CommandResult;
+import org.opendatakit.common.utils.Check;
 
 /**
  * A QueryForTablesResult represents the result of executing a QueryForTables
@@ -13,8 +16,7 @@ import org.opendatakit.aggregate.odktables.commandresult.CommandResult;
  */
 public class QueryForTablesResult extends CommandResult<QueryForTables>
 {
-
-    private final TableList tableList;
+    private final List<TableEntry> entries;
 
     /**
      * Need a no-arg constructor for serialization by Gson.
@@ -22,28 +24,27 @@ public class QueryForTablesResult extends CommandResult<QueryForTables>
     private QueryForTablesResult()
     {
         super(true, null);
-        this.tableList = null;
+        this.entries = null;
     }
 
     /**
      * The success constructor. See {@link #success} for param info.
      */
-    private QueryForTablesResult(TableList tableList)
+    private QueryForTablesResult(List<TableEntry> entries)
     {
         super(true, null);
-        if (tableList == null)
-            throw new IllegalArgumentException("tableList was null");
-
-        this.tableList = tableList;
+        Check.notNull(entries, "entries");
+        this.entries = entries;
     }
 
     /**
-     * @return the TableList representing the results of the QueryForTables
-     *         command.
+     * @return the list of table entries representing the results of the
+     *         QueryForTables command.
+     * @throws PermissionDeniedException
      */
-    public TableList getTableList()
+    public List<TableEntry> getEntries() throws PermissionDeniedException
     {
-        return this.tableList;
+        return this.entries;
     }
 
     /* (non-Javadoc)
@@ -52,7 +53,7 @@ public class QueryForTablesResult extends CommandResult<QueryForTables>
     @Override
     public String toString()
     {
-        return String.format("QueryForTablesResult [tableList=%s]", tableList);
+        return String.format("QueryForTablesResult [entries=%s]", entries);
     }
 
     /* (non-Javadoc)
@@ -63,8 +64,7 @@ public class QueryForTablesResult extends CommandResult<QueryForTables>
     {
         final int prime = 31;
         int result = super.hashCode();
-        result = prime * result
-                + ((tableList == null) ? 0 : tableList.hashCode());
+        result = prime * result + ((entries == null) ? 0 : entries.hashCode());
         return result;
     }
 
@@ -81,24 +81,24 @@ public class QueryForTablesResult extends CommandResult<QueryForTables>
         if (!(obj instanceof QueryForTablesResult))
             return false;
         QueryForTablesResult other = (QueryForTablesResult) obj;
-        if (tableList == null)
+        if (entries == null)
         {
-            if (other.tableList != null)
+            if (other.entries != null)
                 return false;
-        } else if (!tableList.equals(other.tableList))
+        } else if (!entries.equals(other.entries))
             return false;
         return true;
     }
 
     /**
-     * @param tableList
-     *            a TableList containing an entry for each table in the results
-     *            of the QueryForTables command.
+     * @param entries
+     *            a list of TableEntries containing an entry for each table in
+     *            the results of the QueryForTables command.
      * @return a new QueryForTablesResult representing the successful completion
      *         of a QueryForTables command.
      */
-    public static QueryForTablesResult success(TableList tableList)
+    public static QueryForTablesResult success(List<TableEntry> entries)
     {
-        return new QueryForTablesResult(tableList);
+        return new QueryForTablesResult(entries);
     }
 }
