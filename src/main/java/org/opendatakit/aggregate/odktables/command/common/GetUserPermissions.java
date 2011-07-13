@@ -4,13 +4,13 @@ import org.opendatakit.aggregate.odktables.command.Command;
 import org.opendatakit.common.utils.Check;
 
 /**
- * DeleteUser is immutable.
+ * GetUserPermissions is immutable.
  *
  * @author the.dylan.price@gmail.com
  */
-public class DeleteUser implements Command
+public class GetUserPermissions implements Command
 {
-    private static final String path = "/odktables/common/deleteUser";
+    private static final String path = "/odktables/common/getUserPermissions";
     
     private final String userUUID;
     private final String requestingUserID;
@@ -20,7 +20,7 @@ public class DeleteUser implements Command
      * For serialization by Gson
      */
     @SuppressWarnings("unused")
-    private DeleteUser()
+    private GetUserPermissions()
     {
        this.userUUID = null;
        this.requestingUserID = null;
@@ -28,9 +28,9 @@ public class DeleteUser implements Command
     }
 
     /**
-     * Constructs a new DeleteUser.
+     * Constructs a new GetUserPermissions.
      */
-    public DeleteUser(String userUUID, String requestingUserID)
+    public GetUserPermissions(String userUUID, String requestingUserID)
     {
         
         Check.notNullOrEmpty(userUUID, "userUUID");
@@ -61,7 +61,7 @@ public class DeleteUser implements Command
     @Override
     public String toString()
     {
-        return String.format("DeleteUser: " +
+        return String.format("GetUserPermissions: " +
                 "userUUID=%s " +
                 "requestingUserID=%s " +
                 "", userUUID, requestingUserID);
@@ -93,9 +93,9 @@ public class DeleteUser implements Command
             return true;
         if (obj == null)
             return false;
-        if (!(obj instanceof DeleteUser))
+        if (!(obj instanceof GetUserPermissions))
             return false;
-        DeleteUser other = (DeleteUser) obj;
+        GetUserPermissions other = (GetUserPermissions) obj;
         if (requestingUserID == null)
         {
             if (other.requestingUserID != null)

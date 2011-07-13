@@ -2,12 +2,13 @@ package org.opendatakit.aggregate.odktables.commandresult.simple;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
-import org.opendatakit.aggregate.odktables.client.exception.RowAlreadyExistsException;
+import org.opendatakit.aggregate.odktables.client.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.client.exception.TableDoesNotExistException;
-import org.opendatakit.aggregate.odktables.command.result.InsertRowsResult;
 import org.opendatakit.aggregate.odktables.command.simple.InsertRows;
 import org.opendatakit.aggregate.odktables.commandresult.CommandResult;
+import org.opendatakit.common.utils.Check;
 
 /**
  * An InsertRowsResult represents the result of executing and insertRows
@@ -22,13 +23,12 @@ public class InsertRowsResult extends CommandResult<InsertRows>
     static
     {
         possibleFailureReasons = new ArrayList<FailureReason>();
-        possibleFailureReasons.add(FailureReason.ROW_ALREADY_EXISTS);
         possibleFailureReasons.add(FailureReason.TABLE_DOES_NOT_EXIST);
+        possibleFailureReasons.add(FailureReason.PERMISSION_DENIED);
     }
 
-    private final String tableId;
-    private final List<String> rowIds;
-    private final String failedRowId;
+    private final String tableUUID;
+    private final Map<String, String> rowIDTorowUUID;
 
     /**
      * For serialization by Gson we need a no-arg constructor
@@ -36,32 +36,21 @@ public class InsertRowsResult extends CommandResult<InsertRows>
     private InsertRowsResult()
     {
         super(true, null);
-        tableId = "0";
-        rowIds = null;
-        failedRowId = null;
+        this.tableUUID = null;
+        this.rowIDTorowUUID = null;
     }
 
     /**
      * The success constructor. Constructs a successful InsertRowsResult. See
      * {@link #success(String, List)} for param info.
      */
-    private InsertRowsResult(String tableId, List<String> rowIds)
+    private InsertRowsResult(Map<String, String> rowIDTorowUUID)
     {
         super(true, null);
-        if (rowIds == null || rowIds.size() == 0)
-        {
-            throw new IllegalArgumentException(
-                    "rowIds can not be null or empty");
-        }
-        if (tableId == null || tableId.length() == 0)
-        {
-            throw new IllegalArgumentException(
-                    "Cant not have a null or empty tableId");
-        }
+        Check.notNull(rowIDTorowUUID, "rowIDtorowUUID");
 
-        this.tableId = tableId;
-        this.rowIds = rowIds;
-        this.failedRowId = null;
+        this.tableUUID = null;
+        this.rowIDTorowUUID = rowIDTorowUUID;
     }
 
     /**
@@ -69,156 +58,133 @@ public class InsertRowsResult extends CommandResult<InsertRows>
      * {@link #failure(String)} and {@link #failure(String, String)} for param
      * info.
      */
-    private InsertRowsResult(String tableId, String failedRowId,
-            FailureReason reason)
+    private InsertRowsResult(String tableUUID, FailureReason reason)
     {
         super(false, reason);
+        Check.notNullOrEmpty(tableUUID, "tableUUID");
         if (!possibleFailureReasons.contains(getReason()))
         {
             throw new IllegalArgumentException("Not a valid FailureReason: "
                     + getReason());
         }
-        if (tableId == null || tableId.length() == 0)
-        {
-            throw new IllegalArgumentException(
-                    "Cant not have a null or empty tableId");
-        }
 
-        this.tableId = tableId;
-        this.rowIds = null;
-        this.failedRowId = failedRowId;
+        this.tableUUID = tableUUID;
+        this.rowIDTorowUUID = null;
     }
 
     /**
      * Retrieve the results from the insertRows command.
      * 
-     * @return a list of rowIds that represent the successfully inserted rows
-     * @throws RowAlreadyExistsException
-     *             if one of the rows that the insertRows command tried to
-     *             insert already existed
+     * @return a map of rowIDs to rowUUIDs for the successfully inserted rows
      * @throws TableDoesNotExistException
      *             if the table that the insertRows command tried to insert to
      *             did not exist
+     * @throws PermissionDeniedException
      */
-    public List<String> getInsertedRowIds() throws RowAlreadyExistsException,
-            TableDoesNotExistException
+    public Map<String, String> getMapOfInsertedRowIDsToRowUUIDs()
+            throws TableDoesNotExistException, PermissionDeniedException
     {
         if (successful())
         {
-            return this.rowIds;
+            return this.rowIDTorowUUID;
         } else
         {
             switch (getReason())
             {
-            case ROW_ALREADY_EXISTS:
-                throw new RowAlreadyExistsException(getTableId(),
-                        this.failedRowId);
             case TABLE_DOES_NOT_EXIST:
-                throw new TableDoesNotExistException(getTableId());
+                throw new TableDoesNotExistException(null, tableUUID);
+            case PERMISSION_DENIED:
+                throw new PermissionDeniedException();
             default:
                 throw new RuntimeException("An unknown error occured.");
             }
         }
     }
 
-    /**
-     * @return the tableId associated with this result.
+    /* (non-Javadoc)
+     * @see java.lang.Object#toString()
      */
-    public String getTableId()
-    {
-        return this.tableId;
-    }
-
     @Override
     public String toString()
     {
         return String.format(
-                "{%s, tableId = %s, rowIds = %s, failedRowIds = %s",
-                super.toString(), this.tableId, this.rowIds, this.failedRowId);
+                "InsertRowsResult [tableUUID=%s, rowIDTorowUUID=%s]",
+                tableUUID, rowIDTorowUUID);
     }
 
+    /* (non-Javadoc)
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
     @Override
     public boolean equals(Object obj)
     {
-        if (!(obj instanceof InsertRowsResult))
-            return false;
+        if (this == obj)
+            return true;
         if (!super.equals(obj))
             return false;
-
-        InsertRowsResult o = (InsertRowsResult) obj;
-        boolean tableIdsEqual = o.tableId.equals(this.tableId);
-        boolean rowIdsEqual = (o.rowIds == null && this.rowIds == null)
-                || o.rowIds.equals(this.rowIds);
-        boolean failedRowIdsEqual = (o.failedRowId == null && this.failedRowId == null)
-                || o.failedRowId.equals(this.failedRowId);
-        return tableIdsEqual && rowIdsEqual && failedRowIdsEqual;
+        if (!(obj instanceof InsertRowsResult))
+            return false;
+        InsertRowsResult other = (InsertRowsResult) obj;
+        if (rowIDTorowUUID == null)
+        {
+            if (other.rowIDTorowUUID != null)
+                return false;
+        } else if (!rowIDTorowUUID.equals(other.rowIDTorowUUID))
+            return false;
+        if (tableUUID == null)
+        {
+            if (other.tableUUID != null)
+                return false;
+        } else if (!tableUUID.equals(other.tableUUID))
+            return false;
+        return true;
     }
 
+    /* (non-Javadoc)
+     * @see java.lang.Object#hashCode()
+     */
     @Override
     public int hashCode()
     {
-        int rowIdsHash = (this.rowIds == null) ? 1 : this.rowIds.hashCode();
-        int failedRowIdHash = (this.failedRowId == null) ? 1 : this.failedRowId
-                .hashCode();
-        return super.hashCode() + 69 * this.tableId.hashCode() + 37
-                * rowIdsHash + 22 * failedRowIdHash;
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result
+                + ((rowIDTorowUUID == null) ? 0 : rowIDTorowUUID.hashCode());
+        result = prime * result
+                + ((tableUUID == null) ? 0 : tableUUID.hashCode());
+        return result;
     }
 
     /**
      * Returns a new, successful InsertRowsResult.
      * 
-     * @param tableId
-     *            the unique identifier of the table that the insertRows command
-     *            dealt with. Must not be null or empty.
-     * @param rowIds
-     *            a list of the rowIds corresponding to the rows that were
-     *            successfully inserted. Must not be null or empty.
+     * @param rowIDstorowUUIDs
+     *            a map of successfully inserted rowIDs to their corresponding
+     *            rowUUIDs.
      * 
      * @return a new InsertRowsResult which represents the successful outcome of
      *         an insertRows command.
      */
-    public static InsertRowsResult success(String tableId, List<String> rowIds)
+    public static InsertRowsResult success(Map<String, String> rowIDstorowUUIDs)
     {
-        return new InsertRowsResult(tableId, rowIds);
+        return new InsertRowsResult(rowIDstorowUUIDs);
     }
 
     /**
-     * Returns a new, failed InsertRowsResult which failed because a row already
-     * exists.
+     * Returns a new, failed InsertRowsResult
      * 
-     * @param tableId
+     * @param tableUUID
      *            the unique identifier of the table that the insertRows command
      *            dealt with. Must not be null or empty.
-     * @param failedRowId
-     *            the rowId of the row that failed to be inserted. Must not be
-     *            null or empty.
+     * @param reason
+     *            the reason the command failed. Must be either
+     *            TABLE_DOES_NOT_EXIST or PERMISSION_DENIED.
      * @return a new InsertRowsResult which represents the failed outcome of an
      *         insertRows command.
      */
-    public static InsertRowsResult failure(String tableId, String failedRowId)
+    public static InsertRowsResult failure(String tableUUID,
+            FailureReason reason)
     {
-        if (failedRowId == null || failedRowId.length() == 0)
-        {
-            throw new IllegalArgumentException(
-                    "failedRowId can not be null or empty");
-        }
-        return new InsertRowsResult(tableId, failedRowId,
-                FailureReason.ROW_ALREADY_EXISTS);
-    }
-
-    /**
-     * Returns a new, failed InsertRowsResult which failed because the table
-     * does not exist.
-     * 
-     * @param tableId
-     *            the unique identifier of the table the did not exist. Must not
-     *            be null or empty.
-     * @return a new InsertRowsResult which represents the failed outcome of an
-     *         insertRows command.
-     */
-    public static InsertRowsResult failure(String tableId)
-    {
-        return new InsertRowsResult(tableId, null,
-                FailureReason.TABLE_DOES_NOT_EXIST);
+        return new InsertRowsResult(tableUUID, reason);
     }
 }

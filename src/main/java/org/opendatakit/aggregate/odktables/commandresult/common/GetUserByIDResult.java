@@ -5,30 +5,30 @@ import java.util.List;
 
 import org.opendatakit.aggregate.odktables.client.entity.User;
 import org.opendatakit.aggregate.odktables.client.exception.PermissionDeniedException;
-import org.opendatakit.aggregate.odktables.client.exception.UserAlreadyExistsException;
-import org.opendatakit.aggregate.odktables.command.common.CreateUser;
+import org.opendatakit.aggregate.odktables.client.exception.UserDoesNotExistException;
+import org.opendatakit.aggregate.odktables.command.common.GetUserByID;
 import org.opendatakit.aggregate.odktables.commandresult.CommandResult;
 import org.opendatakit.common.utils.Check;
 
 /**
- * A CreateUserResult represents the result of executing a CreateUser command.
+ * A GetUserByIDResult represents the result of executing a GetUserByID command.
  * 
  * @author the.dylan.price@gmail.com
  */
-public class CreateUserResult extends CommandResult<CreateUser>
+public class GetUserByIDResult extends CommandResult<GetUserByID>
 {
     private static final List<FailureReason> possibleFailureReasons;
     static
     {
         possibleFailureReasons = new ArrayList<FailureReason>();
-        possibleFailureReasons.add(FailureReason.USER_ALREADY_EXISTS);
+        possibleFailureReasons.add(FailureReason.USER_DOES_NOT_EXIST);
         possibleFailureReasons.add(FailureReason.PERMISSION_DENIED);
     }
 
     private final User user;
     private final String userID;
 
-    private CreateUserResult()
+    private GetUserByIDResult()
     {
         super(true, null);
         this.user = null;
@@ -38,7 +38,7 @@ public class CreateUserResult extends CommandResult<CreateUser>
     /**
      * The success constructor. See {@link #success} for param info.
      */
-    private CreateUserResult(User user)
+    private GetUserByIDResult(User user)
     {
         super(true, null);
         Check.notNull(user, "user");
@@ -49,27 +49,31 @@ public class CreateUserResult extends CommandResult<CreateUser>
     /**
      * The failure constructor. See {@link #failure} for param info.
      */
-    private CreateUserResult(String userID, FailureReason reason)
+    private GetUserByIDResult(String userID, FailureReason reason)
     {
         super(false, reason);
+
         Check.notNullOrEmpty(userID, "userID");
+        Check.notNull(reason, "reason");
+
+        if (!possibleFailureReasons.contains(reason))
+        {
+            throw new IllegalArgumentException(
+                    String.format(
+                            "Failure reason %s not a valid failure reason for GetUserByID.",
+                            reason));
+        }
         this.user = null;
         this.userID = userID;
     }
 
     /**
-     * Retrieve the results from the CreateUser command.
+     * Retrieve the results from the GetUserByID command.
      * 
-     * @return the successfully created User
-     * @throws UserAlreadyExistsException
-     *             if the user with the userUUID given to the CreateUser command
-     *             already existed.
-     * @throws PermissionDeniedException
-     *             if the request user who made the call did not have write
-     *             permission on the Users table.
+     * @return the user requested
+     * @throws UserDoesNotExistException 
      */
-    public User getCreatedUser() throws UserAlreadyExistsException,
-            PermissionDeniedException
+    public User getUser() throws PermissionDeniedException, UserDoesNotExistException
     {
         if (successful())
         {
@@ -78,8 +82,8 @@ public class CreateUserResult extends CommandResult<CreateUser>
         {
             switch (getReason())
             {
-            case USER_ALREADY_EXISTS:
-                throw new UserAlreadyExistsException(this.userID);
+            case USER_DOES_NOT_EXIST:
+                throw new UserDoesNotExistException(this.userID, null);
             case PERMISSION_DENIED:
                 throw new PermissionDeniedException();
             default:
@@ -94,7 +98,7 @@ public class CreateUserResult extends CommandResult<CreateUser>
     @Override
     public String toString()
     {
-        return String.format("CreateUserResult [user=%s, userID=%s]", user,
+        return String.format("GetUserByIDResult [user=%s, userID=%s]", user,
                 userID);
     }
 
@@ -121,9 +125,9 @@ public class CreateUserResult extends CommandResult<CreateUser>
             return true;
         if (!super.equals(obj))
             return false;
-        if (!(obj instanceof CreateUserResult))
+        if (!(obj instanceof GetUserByIDResult))
             return false;
-        CreateUserResult other = (CreateUserResult) obj;
+        GetUserByIDResult other = (GetUserByIDResult) obj;
         if (user == null)
         {
             if (other.user != null)
@@ -141,26 +145,26 @@ public class CreateUserResult extends CommandResult<CreateUser>
 
     /**
      * @param user
-     *            the user who was successfully created.
-     * @return a new CreateUserResult representing the successful creation of a
-     *         new user.
+     *            the user retrieved
+     * @return a new GetUserByIDResult representing the successful completion of
+     *         a GetUserByID command.
+     * 
      */
-    public static CreateUserResult success(User user)
+    public static GetUserByIDResult success(User user)
     {
-        return new CreateUserResult(user);
+        return new GetUserByIDResult(user);
     }
 
     /**
-     * @param user
-     *            the userID of the user who failed to be created
+     * @param userID
+     *            the userID of the user who failed to be retrieved
      * @param reason
-     *            the reason that the user could not be created. This can be
-     *            either USER_ALREADY_EXISTS or PERMISSION_DENIED.
-     * @return a new CreateUserResult representing the failed creation of a new
-     *         user.
+     *            the reason the command failed. Must be either
+     *            USER_DOES_NOT_EXIST or PERMISSION_DENIED.
+     * @return a new GetUserByIDResult representing the failed GetUserByID command.
      */
-    public static CreateUserResult failure(String userID, FailureReason reason)
+    public static GetUserByIDResult failure(String userID, FailureReason reason)
     {
-        return new CreateUserResult(userID, reason);
+        return new GetUserByIDResult(userID, reason);
     }
 }

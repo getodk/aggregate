@@ -1,20 +1,22 @@
-package org.opendatakit.aggregate.odktables.commandresult.simple;
+package org.opendatakit.aggregate.odktables.commandresult.common;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import org.opendatakit.aggregate.odktables.client.entity.Permission;
 import org.opendatakit.aggregate.odktables.client.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.client.exception.TableDoesNotExistException;
-import org.opendatakit.aggregate.odktables.command.simple.DeleteTable;
+import org.opendatakit.aggregate.odktables.command.common.GetTablePermissions;
 import org.opendatakit.aggregate.odktables.commandresult.CommandResult;
 import org.opendatakit.common.utils.Check;
 
 /**
- * A DeleteTableResult represents the result of executing a DeleteTable command.
+ * A GetTablePermissonsResult represents the result of executing a
+ * GetTablePermissons command.
  * 
  * @author the.dylan.price@gmail.com
  */
-public class DeleteTableResult extends CommandResult<DeleteTable>
+public class GetTablePermissionsResult extends CommandResult<GetTablePermissions>
 {
     private static final List<FailureReason> possibleFailureReasons;
     static
@@ -24,46 +26,61 @@ public class DeleteTableResult extends CommandResult<DeleteTable>
         possibleFailureReasons.add(FailureReason.PERMISSION_DENIED);
     }
 
+    private final List<Permission> permissions;
     private final String tableUUID;
+
+    private GetTablePermissionsResult()
+    {
+        super(true, null);
+        this.permissions = null;
+        this.tableUUID = null;
+    }
 
     /**
      * The success constructor. See {@link #success} for param info.
      */
-    private DeleteTableResult()
+    private GetTablePermissionsResult(List<Permission> permissions)
     {
         super(true, null);
+
+        Check.notNull(permissions, "permissions");
+
+        this.permissions = permissions;
         this.tableUUID = null;
     }
 
     /**
      * The failure constructor. See {@link #failure} for param info.
      */
-    private DeleteTableResult(String tableUUID, FailureReason reason)
+    private GetTablePermissionsResult(String tableUUID, FailureReason reason)
     {
         super(false, reason);
 
-        Check.notNullOrEmpty(tableUUID, "tableUUID");
+        Check.notNullOrEmpty(tableUUID, "tableID");
+
         if (!possibleFailureReasons.contains(reason))
-        {
             throw new IllegalArgumentException(
                     String.format(
-                            "Failure reason %s not a valid failure reason for DeleteTable.",
+                            "Failure reason %s not a valid failure reason for GetTablePermissons.",
                             reason));
-        }
 
+        this.permissions = null;
         this.tableUUID = tableUUID;
     }
 
     /**
-     * Retrieve the results from the DeleteTable command.
+     * Retrieve the results from the GetTablePermissons command.
      * 
      * @throws TableDoesNotExistException
      * @throws PermissionDeniedException
      */
-    public void checkResults() throws PermissionDeniedException,
+    public List<Permission> getPermissions() throws PermissionDeniedException,
             TableDoesNotExistException
     {
-        if (!successful())
+        if (successful())
+        {
+            return this.permissions;
+        } else
         {
             switch (getReason())
             {
@@ -83,7 +100,9 @@ public class DeleteTableResult extends CommandResult<DeleteTable>
     @Override
     public String toString()
     {
-        return String.format("DeleteTableResult [tableUUID=%s]", tableUUID);
+        return String.format(
+                "GetTablePermissonsResult [permissions=%s, tableID=%s]",
+                permissions, tableUUID);
     }
 
     /* (non-Javadoc)
@@ -95,7 +114,8 @@ public class DeleteTableResult extends CommandResult<DeleteTable>
         final int prime = 31;
         int result = super.hashCode();
         result = prime * result
-                + ((tableUUID == null) ? 0 : tableUUID.hashCode());
+                + ((permissions == null) ? 0 : permissions.hashCode());
+        result = prime * result + ((tableUUID == null) ? 0 : tableUUID.hashCode());
         return result;
     }
 
@@ -109,9 +129,15 @@ public class DeleteTableResult extends CommandResult<DeleteTable>
             return true;
         if (!super.equals(obj))
             return false;
-        if (!(obj instanceof DeleteTableResult))
+        if (!(obj instanceof GetTablePermissionsResult))
             return false;
-        DeleteTableResult other = (DeleteTableResult) obj;
+        GetTablePermissionsResult other = (GetTablePermissionsResult) obj;
+        if (permissions == null)
+        {
+            if (other.permissions != null)
+                return false;
+        } else if (!permissions.equals(other.permissions))
+            return false;
         if (tableUUID == null)
         {
             if (other.tableUUID != null)
@@ -122,26 +148,29 @@ public class DeleteTableResult extends CommandResult<DeleteTable>
     }
 
     /**
-     * @return a new DeleteTableResult representing the successful completion of
-     *         a DeleteTable command.
+     * @param permissions
+     *            the requested permissions
+     * @return a new GetTablePermissonsResult representing the successful
+     *         completion of a GetTablePermissions command.
+     * 
      */
-    public static DeleteTableResult success()
+    public static GetTablePermissionsResult success(List<Permission> permissions)
     {
-        return new DeleteTableResult();
+        return new GetTablePermissionsResult(permissions);
     }
 
     /**
      * @param tableUUID
-     *            the UUID of the table involved in the command
+     *            the ID of the table which was involved in the command
      * @param reason
      *            the reason the command failed. Must be either
-     *            TABLE_DOES_NOT_EXIST or PERMISSION_DENIED.
-     * @return a new DeleteTableResult representing the failed completion of a
-     *         DeleteTable command.
+     *            TABLE_DOES_NOT_EXIST or PERMISSION_DENIED
+     * @return a new GetTablePermissonsResult representing the failed completion
+     *         of a GetTablePermissions command.
      */
-    public static DeleteTableResult failure(String tableUUID,
+    public static GetTablePermissionsResult failure(String tableUUID,
             FailureReason reason)
     {
-        return new DeleteTableResult(tableUUID, reason);
+        return new GetTablePermissionsResult(tableUUID, reason);
     }
 }

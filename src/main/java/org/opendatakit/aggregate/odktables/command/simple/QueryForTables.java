@@ -13,14 +13,24 @@ import org.opendatakit.aggregate.odktables.command.Command;
 public class QueryForTables implements Command
 {
     private static final String path = "/odktables/queryForTables";
+    
+    private final String requestingUserID;
 
     /**
      * Construct a new QueryForTables which will initially query for all tables
      * stored in Aggregate.
      */
-    public QueryForTables()
+    public QueryForTables(String requestingUserID)
     {
+        this.requestingUserID = requestingUserID;
+    }
 
+    /**
+     * @return the requestingUserID
+     */
+    public String getRequestingUserID()
+    {
+        return requestingUserID;
     }
 
     /* (non-Javadoc)
@@ -29,16 +39,28 @@ public class QueryForTables implements Command
     @Override
     public String toString()
     {
-        return String.format("QueryForTables []");
+        return String.format("QueryForTables [requestingUserID=%s]",
+                requestingUserID);
     }
 
     /* (non-Javadoc)
-     * @see java.lang.Object#equals()
+     * @see java.lang.Object#equals(java.lang.Object)
      */
     @Override
-    public boolean equals(Object other)
+    public boolean equals(Object obj)
     {
-        if (!(other instanceof QueryForTables))
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (!(obj instanceof QueryForTables))
+            return false;
+        QueryForTables other = (QueryForTables) obj;
+        if (requestingUserID == null)
+        {
+            if (other.requestingUserID != null)
+                return false;
+        } else if (!requestingUserID.equals(other.requestingUserID))
             return false;
         return true;
     }
@@ -49,7 +71,12 @@ public class QueryForTables implements Command
     @Override
     public int hashCode()
     {
-        return 31;
+        final int prime = 31;
+        int result = 1;
+        result = prime
+                * result
+                + ((requestingUserID == null) ? 0 : requestingUserID.hashCode());
+        return result;
     }
 
     @Override

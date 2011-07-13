@@ -1,138 +1,157 @@
 package org.opendatakit.aggregate.odktables.command.simple;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import org.opendatakit.aggregate.odktables.client.entity.Column;
 import org.opendatakit.aggregate.odktables.command.Command;
+import org.opendatakit.common.utils.Check;
 
 /**
- * CreateTable is a Command to create a new table in ODK Aggregate. CreateTable
- * is immutable.
- * 
+ * CreateTable is immutable.
+ *
  * @author the.dylan.price@gmail.com
  */
 public class CreateTable implements Command
 {
-    private static final String path = "/odktables/createTable";
-
-    private final String userId;
-    private final String tableId;
+    private static final String path = "/odktables/simple/createTable";
+    
     private final String tableName;
+    private final String requestingUserID;
+    private final String tableID;
     private final List<Column> columns;
+    
 
     /**
-     * So that Gson can serialize this class.
+     * For serialization by Gson
      */
     @SuppressWarnings("unused")
     private CreateTable()
     {
-        this.userId = null;
-        this.tableId = null;
-        this.tableName = null;
-        this.columns = null;
+       this.tableName = null;
+       this.requestingUserID = null;
+       this.tableID = null;
+       this.columns = null;
+       
     }
 
     /**
-     * Constructs a new CreateTable command.
-     * 
-     * @param userId
-     *            the unique identifier of the user who will own the table. Must
-     *            not be null or empty.
-     * @param tableId
-     *            the unique identifier of the table to create. This must
-     *            consist of only letters, numbers, and underscores. Must not be
-     *            null or empty.
-     * @param tableName
-     *            the name of the table to create. The only restrictions are
-     *            that it must not be empty or null.
-     * @param columns
-     *            a list of the columns the new table will have. Must not be
-     *            empty or null.
+     * Constructs a new CreateTable.
      */
-    public CreateTable(String userId, String tableId, String tableName,
-            List<Column> columns)
+    public CreateTable(String tableName, String requestingUserID, String tableID, List<Column> columns)
     {
-        if (userId == null || userId.length() == 0)
-            throw new IllegalArgumentException("userId '" + userId
-                    + "' was null or empty");
-        if (tableId == null || tableId.length() == 0)
-            throw new IllegalArgumentException("tableId '" + tableId
-                    + "' was null or empty");
-        if (tableName == null || tableName.length() == 0)
-            throw new IllegalArgumentException("tableName '" + tableName
-                    + "' was null or empty");
-        if (columns == null || columns.size() == 0)
-            throw new IllegalArgumentException("columns '" + columns
-                    + "' was null or empty");
-
-        this.userId = userId;
-        this.tableId = tableId;
+        
+        Check.notNullOrEmpty(tableName, "tableName");
+        Check.notNullOrEmpty(requestingUserID, "requestingUserID");
+        Check.notNullOrEmpty(tableID, "tableID");
+        Check.notNull(columns, "columns"); 
+        
         this.tableName = tableName;
-        this.columns = new ArrayList<Column>(columns);
+        this.requestingUserID = requestingUserID;
+        this.tableID = tableID;
+        this.columns = columns;
     }
 
-    /**
-     * @return the userId
-     */
-    public String getUserId()
-    {
-        return this.userId;
-    }
-
-    /**
-     * @return the tableId
-     */
-    public String getTableId()
-    {
-        return this.tableId;
-    }
-
+    
     /**
      * @return the tableName
      */
     public String getTableName()
     {
-        return tableName;
+        return this.tableName;
     }
-
+    
     /**
-     * @return the columns as an unmodifiable list
+     * @return the requestingUserID
+     */
+    public String getRequestingUserID()
+    {
+        return this.requestingUserID;
+    }
+    
+    /**
+     * @return the tableID
+     */
+    public String getTableID()
+    {
+        return this.tableID;
+    }
+    
+    /**
+     * @return the columns
      */
     public List<Column> getColumns()
     {
-        return Collections.unmodifiableList(columns);
+        return this.columns;
     }
+    
 
-    /* (non-Javadoc)
-     * @see java.lang.Object#toString()
-     */
     @Override
     public String toString()
     {
-        return "CreateTable [userId=" + userId + ", tableId=" + tableId
-                + ", tableName=" + tableName + ", columns=" + columns + "]";
+        return String.format("CreateTable: " +
+                "tableName=%s " +
+                "requestingUserID=%s " +
+                "tableID=%s " +
+                "columns=%s " +
+                "", tableName, requestingUserID, tableID, columns);
     }
 
-    @Override
-    public boolean equals(Object other)
-    {
-        if (!(other instanceof CreateTable))
-            return false;
-        CreateTable o = (CreateTable) other;
-        boolean userIdEquals = o.userId.equals(this.userId);
-        boolean tableIdEquals = o.tableId.equals(this.tableId);
-        boolean tableNameEquals = o.tableName.equals(this.tableName);
-        boolean columnsEqual = o.columns.equals(this.columns);
-        return userIdEquals && tableIdEquals && tableNameEquals && columnsEqual;
-    }
-
+    /* (non-Javadoc)
+     * @see java.lang.Object#hashCode()
+     */
     @Override
     public int hashCode()
     {
-        return 6 * this.userId.hashCode() + 3 * this.tableId.hashCode() + 32
-                * this.tableName.hashCode() + 5 * this.columns.hashCode();
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((columns == null) ? 0 : columns.hashCode());
+        result = prime
+                * result
+                + ((requestingUserID == null) ? 0 : requestingUserID.hashCode());
+        result = prime * result + ((tableID == null) ? 0 : tableID.hashCode());
+        result = prime * result
+                + ((tableName == null) ? 0 : tableName.hashCode());
+        return result;
+    }
+
+    /* (non-Javadoc)
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(Object obj)
+    {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (!(obj instanceof CreateTable))
+            return false;
+        CreateTable other = (CreateTable) obj;
+        if (columns == null)
+        {
+            if (other.columns != null)
+                return false;
+        } else if (!columns.equals(other.columns))
+            return false;
+        if (requestingUserID == null)
+        {
+            if (other.requestingUserID != null)
+                return false;
+        } else if (!requestingUserID.equals(other.requestingUserID))
+            return false;
+        if (tableID == null)
+        {
+            if (other.tableID != null)
+                return false;
+        } else if (!tableID.equals(other.tableID))
+            return false;
+        if (tableName == null)
+        {
+            if (other.tableName != null)
+                return false;
+        } else if (!tableName.equals(other.tableName))
+            return false;
+        return true;
     }
 
     @Override
@@ -152,3 +171,4 @@ public class CreateTable implements Command
         return path;
     }
 }
+

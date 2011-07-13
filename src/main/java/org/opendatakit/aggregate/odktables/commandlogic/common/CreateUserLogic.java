@@ -35,7 +35,7 @@ public class CreateUserLogic extends CommandLogic<CreateUser>
 
         String userID = createUser.getUserID();
         String requestingUserID = createUser.getRequestingUserID();
-        String userTableUUID = users.getUri();
+        String userTableUUID = users.getUUID();
 
         User requestUser = users.query().equal(Users.USER_ID, requestingUserID)
                 .get();
@@ -52,7 +52,11 @@ public class CreateUserLogic extends CommandLogic<CreateUser>
         }
         User newUser = new User(userID, createUser.getUserName(), cc);
         newUser.save();
-        return CreateUserResult.success(userID);
+        
+        org.opendatakit.aggregate.odktables.client.entity.User user = 
+                new org.opendatakit.aggregate.odktables.client.entity.User(
+                newUser.getID(), newUser.getUUID(), newUser.getName());
+        
+        return CreateUserResult.success(user);
     }
-
 }

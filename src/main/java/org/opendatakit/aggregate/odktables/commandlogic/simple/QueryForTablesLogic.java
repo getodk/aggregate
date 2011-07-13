@@ -1,8 +1,8 @@
 package org.opendatakit.aggregate.odktables.commandlogic.simple;
 
+import java.util.ArrayList;
 import java.util.List;
 
-import org.opendatakit.aggregate.odktables.client.entity.TableList;
 import org.opendatakit.aggregate.odktables.command.simple.QueryForTables;
 import org.opendatakit.aggregate.odktables.commandlogic.CommandLogic;
 import org.opendatakit.aggregate.odktables.commandresult.simple.QueryForTablesResult;
@@ -10,6 +10,7 @@ import org.opendatakit.aggregate.odktables.entity.Cursor;
 import org.opendatakit.aggregate.odktables.entity.TableEntry;
 import org.opendatakit.aggregate.odktables.entity.User;
 import org.opendatakit.aggregate.odktables.relation.Cursors;
+import org.opendatakit.aggregate.odktables.relation.Permissions;
 import org.opendatakit.aggregate.odktables.relation.TableEntries;
 import org.opendatakit.aggregate.odktables.relation.Users;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
@@ -34,26 +35,45 @@ public class QueryForTablesLogic extends CommandLogic<QueryForTables>
     public QueryForTablesResult execute(CallingContext cc)
             throws ODKDatastoreException
     {
-        TableEntries tables = TableEntries.getInstance(cc);
+        TableEntries entries = TableEntries.getInstance(cc);
         Users users = Users.getInstance(cc);
+        Permissions permissions = Permissions.getInstance(cc);
         Cursors cursors = Cursors.getInstance(cc);
 
-        List<TableEntry> allEntries = tables.query().execute();
+        String requestingUserID = queryForTables.getRequestingUserID();
 
-        TableList tableList = new TableList();
+        User requestingUser = users.query()
+                .equal(Users.USER_ID, requestingUserID).get();
+        String userUUID = requestingUser.getUUID();
+        List<String> tableUUIDs = (List<String>) permissions.query()
+                .equal(Permissions.USER_UUID, userUUID)
+                .equal(Permissions.READ, true)
+                .getDistinct(Permissions.TABLE_UUID);
+
+        List<TableEntry> allEntries = new ArrayList<TableEntry>();
+        for (String tableUUID : tableUUIDs)
+        {
+            allEntries.add(entries.get(tableUUID));
+        }
+
+        List<org.opendatakit.aggregate.odktables.client.entity.TableEntry> clientEntries = new ArrayList<org.opendatakit.aggregate.odktables.client.entity.TableEntry>();
         for (TableEntry entry : allEntries)
         {
-            String userUUID = entry.getOwnerUUID();
+            String ownerUUID = entry.getOwnerUUID();
             String tableName = entry.getName();
-            User user = users.get(userUUID);
-            String userName = user.getName();
+            User user = users.get(ownerUUID);
             Cursor cursor = cursors.query().equal(Cursors.USER_UUID, userUUID)
-                    .equal(Cursors.TABLE_UUID, entry.getUri()).get();
-            String tableId = cursor.getTableID();
-            
-            tableList.addEntry(userUUID, userName, tableId, tableName);
+                    .equal(Cursors.TABLE_UUID, entry.getUUID()).get();
+            String tableID = cursor.getTableID();
+            org.opendatakit.aggregate.odktables.client.entity.User clientUser = new org.opendatakit.aggregate.odktables.client.entity.User(
+                    user.getID(), user.getUUID(), user.getName());
+
+            org.opendatakit.aggregate.odktables.client.entity.TableEntry clientEntry = new org.opendatakit.aggregate.odktables.client.entity.TableEntry(
+                    clientUser, tableID, tableName);
+            clientEntries.add(clientEntry);
         }
-        return QueryForTablesResult.success(tableList);
+
+        return QueryForTablesResult.success(clientEntries);
     }
 
 }

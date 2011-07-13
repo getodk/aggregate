@@ -1,88 +1,70 @@
 package org.opendatakit.aggregate.odktables.command.simple;
 
 import org.opendatakit.aggregate.odktables.command.Command;
-
+import org.opendatakit.common.utils.Check;
 
 /**
- * DeleteTable is a Command to delete a table from ODK Aggregate. DeleteTable is immutable.
- * 
+ * DeleteTable is immutable.
+ *
  * @author the.dylan.price@gmail.com
  */
 public class DeleteTable implements Command
 {
-    private static final String path = "/odktables/deleteTable";
-
-    private final String userId;
-    private final String tableId;
+    private static final String path = "/odktables/simple/deleteTable";
+    
+    private final String requestingUserID;
+    private final String tableUUID;
+    
 
     /**
-     * So that Gson can serialize this class.
+     * For serialization by Gson
      */
     @SuppressWarnings("unused")
     private DeleteTable()
     {
-        this.userId = null;
-        this.tableId = null;
+       this.requestingUserID = null;
+       this.tableUUID = null;
+       
     }
 
     /**
-     * Constructs a new DeleteTable command.
-     * 
-     * @param userId
-     *            the unique identifier of the user who owns the table. Must not
-     *            be empty or null.
-     * @param tableId
-     *            the unique identifier of the table to delete. Must be non-null
-     *            and non-empty.
+     * Constructs a new DeleteTable.
      */
-    public DeleteTable(String userId, String tableId)
+    public DeleteTable(String requestingUserID, String tableUUID)
     {
-        if (userId == null || userId.length() == 0)
-            throw new IllegalArgumentException("userId '" + userId
-                    + "' was null or empty");
-        if (tableId == null || tableId.length() == 0)
-            throw new IllegalArgumentException("tableId '" + tableId
-                    + "' was null or empty");
-
-        this.userId = userId;
-        this.tableId = tableId;
+        
+        Check.notNullOrEmpty(requestingUserID, "requestingUserID");
+        Check.notNullOrEmpty(tableUUID, "tableUUID"); 
+        
+        this.requestingUserID = requestingUserID;
+        this.tableUUID = tableUUID;
     }
 
+    
     /**
-     * @return the userId
+     * @return the requestingUserID
      */
-    public String getUserId()
+    public String getRequestingUserID()
     {
-        return this.userId;
+        return this.requestingUserID;
     }
-
+    
     /**
-     * @return the tableId
+     * @return the tableUUID
      */
-    public String getTableId()
+    public String getTableUUID()
     {
-        return this.tableId;
+        return this.tableUUID;
     }
+    
 
     @Override
     public String toString()
     {
-        return String.format("{User Id = %s, Table Id = %s}", userId, tableId);
-    }
-
-    @Override
-    public boolean equals(Object obj)
-    {
-        if (!(obj instanceof DeleteTable))
-            return false;
-        DeleteTable o = (DeleteTable) obj;
-        return o.userId.equals(this.userId) && o.tableId.equals(this.tableId);
-    }
-
-    @Override
-    public int hashCode()
-    {
-        return 242 * this.userId.hashCode() + 365 * this.tableId.hashCode();
+        return String.format("DeleteTable: " +
+                "requestingUserID=%s " +
+                "tableUUID=%s " +
+                "", requestingUserID, tableUUID);
     }
 
     @Override
@@ -102,3 +84,4 @@ public class DeleteTable implements Command
         return path;
     }
 }
+
