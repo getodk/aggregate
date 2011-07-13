@@ -15,8 +15,21 @@ import org.opendatakit.aggregate.odktables.client.exception.TableDoesNotExistExc
 import org.opendatakit.aggregate.odktables.client.exception.UserDoesNotExistException;
 
 /**
+ * <p>
  * SynchronizedAPI contains API calls for using Aggregate as a synchronization
  * service for tables.
+ * </p>
+ *
+ * <p>
+ * Clients are required to store the following information in order to use the api:
+ * </p>
+ * <p>
+ * For each table: the client's tableID, Aggregate's corresponding tableUUID, and the modificationNumber from the last synchronization with Aggregate.
+ * </p>
+ * <p>
+ * For each row of a table: Aggregate's rowUUID, the revisionNumber from the last synchronization with Aggregate, and the data that is contained in the row.
+ * </p>
+ *
  */
 public class SynchronizeAPI extends CommonAPI
 {
