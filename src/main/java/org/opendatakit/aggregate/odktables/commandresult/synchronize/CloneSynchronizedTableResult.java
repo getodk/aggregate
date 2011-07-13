@@ -15,18 +15,20 @@ public class CloneSynchronizedTableResult extends CommandResult<CloneSynchronize
     static
     {
         possibleFailureReasons = new ArrayList<FailureReason>();
+        possibleFailureReasons.add(FailureReason.TABLE_ALREADY_EXISTS);
+        possibleFailureReasons.add(FailureReason.TABLE_DOES_NOT_EXIST);
+        possibleFailureReasons.add(FailureReason.PERMISSION_DENIED);
     }
 
-    
+    private final Modification modification;
     private final String tableID;
-    private final String requestingUserID;
     private final String tableUUID;
 
     private CloneSynchronizedTableResult()
     {
        super(true, null);
+       this.modification = null;
        this.tableID = null;
-       this.requestingUserID = null;
        this.tableUUID = null;
        
     }
@@ -34,52 +36,51 @@ public class CloneSynchronizedTableResult extends CommandResult<CloneSynchronize
     /**
      * The success constructor. See {@link #success} for param info.
      */
-    private CloneSynchronizedTableResult(String tableID, String requestingUserID, String tableUUID)
+    private CloneSynchronizedTableResult(Modification modification)
     {
         super(true, null);
-
         
-        Check.notNullOrEmpty(tableID, "tableID");
-        Check.notNullOrEmpty(requestingUserID, "requestingUserID");
-        Check.notNullOrEmpty(tableUUID, "tableUUID"); 
+        Check.notNull(modification);
         
-        this.tableID = tableID;
-        this.requestingUserID = requestingUserID;
-        this.tableUUID = tableUUID;
+        this.modification = modification;
+        this.tableID = null;
+        this.tableUUID = null;
     }
 
     /**
      * The failure constructor. See {@link #failure} for param info.
      */
-    private CloneSynchronizedTableResult(String tableID, String requestingUserID, String tableUUID, FailureReason reason)
+    private CloneSynchronizedTableResult(String tableID, String tableUUID, FailureReason reason)
     {
         super(false, reason);
-
         
         Check.notNullOrEmpty(tableID, "tableID");
-        Check.notNullOrEmpty(requestingUserID, "requestingUserID");
         Check.notNullOrEmpty(tableUUID, "tableUUID"); 
-        if (!this.possibleFailureReasons.contains(reason))
+        if (!possibleFailureReasons.contains(reason))
             throw new IllegalArgumentException(String.format("Failure reason %s not a valid failure reason for CloneSynchronizedTable.", reason));
         
+        this.modification = null;
         this.tableID = tableID;
-        this.requestingUserID = requestingUserID;
         this.tableUUID = tableUUID;
     }
 
     /**
      * Retrieve the results from the CloneSynchronizedTable command.
      */
-    public void get() throws 
+    public Modification getModification() throws 
             PermissionDeniedException
     {
         if (successful())
         {
-            throw new RuntimeException("not implemented");
+            return this.modification;
         } else
         {
             switch (getReason())
             {
+            case TABLE_ALREADY_EXISTS:
+                throw new TableAlreadyExistsException(tableID, null);
+            case TABLE_DOES_NOT_EXIST:
+                throw new TableDoesNotExistException(null, tableUUID);
             case PERMISSION_DENIED:
                 throw new PermissionDeniedException();
             default:
@@ -88,36 +89,24 @@ public class CloneSynchronizedTableResult extends CommandResult<CloneSynchronize
         }
     }
 
-    /* (non-Javadoc)
-     * @see java.lang.Object#toString()
-     */
-    @Override
-    public String toString()
-    {
-        return String.format("CloneSynchronizedTableResult: " +
-                "tableID=%s " +
-                "requestingUserID=%s " +
-                "tableUUID=%s " +
-                "", tableID, requestingUserID, tableUUID);
-    }
-
-
     /**
-     * TODO
-     * @return a new CloneSynchronizedTableResult representing the successful 
+     * @param modification the latest modification of the table, with a a list of all the rows in the table
+     * @return a new CloneSynchronizedTableResult representing the successful completion of a CloneSynchronizedTable command.
      * 
      */
-    public static CloneSynchronizedTableResult success()
+    public static CloneSynchronizedTableResult success(Modification modification)
     {
-        return new CloneSynchronizedTableResult();
+        return new CloneSynchronizedTableResult(modification);
     }
 
     /**
-     * TODO
-     * @return a new CloneSynchronizedTableResult representing the failed      
+     * @param tableID the tableID which was involved in the command
+     * @param tableUUID the UUID which was involved in the command
+     * @param reason the reason the command failed. Must be one of TABLE_ALREADY_EXISTS, TABLE_DOES_NOT_EXIST, PERMISSION_DENIED.
+     * @return a new CloneSynchronizedTableResult representing the failed completion of a CloneSynchronizedTable command.
      */
-    public static CloneSynchronizedTableResult failure(FailureReason reason)
+    public static CloneSynchronizedTableResult failure(String tableID, String tableUUID, FailureReason reason)
     {
-        return new CloneSynchronizedTableResult(reason);
+        return new CloneSynchronizedTableResult(tableID, tableUUID, reason);
     }
 }
