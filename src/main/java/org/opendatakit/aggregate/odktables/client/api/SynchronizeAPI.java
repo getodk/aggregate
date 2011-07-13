@@ -54,6 +54,9 @@ public class SynchronizeAPI extends CommonAPI
      * @throws TableAlreadyExistsException
      *             if the caller has already created a synchronized table with
      *             the given tableID.
+     * @throws AggregateInternalErrorException if Aggregate encounters an
+     * internal error that causes the call to fail
+     * @throws IOException if there is a problem communicating with the Aggregate server
      */
     public Modification createSynchronizedTable(String tableID)
     {
@@ -81,6 +84,9 @@ public class SynchronizeAPI extends CommonAPI
      * @throws PermissionDeniedException
      *             if the userID used to make the API call does not have read
      *             permission on the table
+     * @throws AggregateInternalErrorException if Aggregate encounters an
+     * internal error that causes the call to fail
+     * @throws IOException if there is a problem communicating with the Aggregate server
      */
     public Modification cloneSynchronizedTable(String tableUUID, String tableID)
     {
@@ -95,6 +101,9 @@ public class SynchronizeAPI extends CommonAPI
      *            the caller's identifier for the table
      * @throws TableDoesNotExistException
      *             if the caller does not have a table registered with tableID
+     * @throws AggregateInternalErrorException if Aggregate encounters an
+     * internal error that causes the call to fail
+     * @throws IOException if there is a problem communicating with the Aggregate server
      */
     public void removeTableSynchronization(String tableID)
     {
@@ -112,6 +121,9 @@ public class SynchronizeAPI extends CommonAPI
      * @throws PermissionDeniedException
      *             if the userID used to make the API call does not have delete
      *             permission on the table
+     * @throws AggregateInternalErrorException if Aggregate encounters an
+     * internal error that causes the call to fail
+     * @throws IOException if there is a problem communicating with the Aggregate server
      */
     public void deleteSynchronizedTable(String tableUUID)
     {
@@ -149,6 +161,9 @@ public class SynchronizeAPI extends CommonAPI
      * @throws PermissionDeniedException
      *             if the userID used to make the API call does not have write
      *             permission on the table
+     * @throws AggregateInternalErrorException if Aggregate encounters an
+     * internal error that causes the call to fail
+     * @throws IOException if there is a problem communicating with the Aggregate server
      */
     public Modification insertSynchronizedRows(String tableID, int modificationNumber, List<Row> newRows)
     {
@@ -187,6 +202,9 @@ public class SynchronizeAPI extends CommonAPI
      * @throws PermissionDeniedException
      *             if the userID used to make the API call does not have write
      *             permission on the table
+     * @throws AggregateInternalErrorException if Aggregate encounters an
+     * internal error that causes the call to fail
+     * @throws IOException if there is a problem communicating with the Aggregate server
      */
     public Modification updateSynchronizedRows(String tableID, int modificationNumber, List<SynchronizedRow> changedRows)
     {
@@ -216,6 +234,9 @@ public class SynchronizeAPI extends CommonAPI
      * @throws PermissionDeniedException
      *             if the userID used to make the API call does not have read
      *             permission on the table
+     * @throws AggregateInternalErrorException if Aggregate encounters an
+     * internal error that causes the call to fail
+     * @throws IOException if there is a problem communicating with the Aggregate server
      */
     public Modification synchronize(String tableID, int modificationNumber)
     {
