@@ -24,7 +24,7 @@ import java.util.Map;
  * 
  * @author the.dylan.price@gmail.com
  */
-public final class Row
+public class Row
 {
 
     private String rowID;
