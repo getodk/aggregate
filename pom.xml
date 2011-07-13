@@ -17,7 +17,7 @@
     	<itFormsDirectory>${project.basedir}/../src/it/testfiles/forms</itFormsDirectory>
     	<itSubmissionsDirectory>${project.basedir}/../src/it/testfiles/submissions</itSubmissionsDirectory>
     	<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<gooogle.appengine.sdk.version>1.4.2</gooogle.appengine.sdk.version>
+		<gooogle.appengine.sdk.version>1.5.0</gooogle.appengine.sdk.version>
 		<google.gdata.version>1.41.5</google.gdata.version>
 		<google.gwt.version>2.3.0</google.gwt.version>
 		<gwt.maven.plugin.version>2.3.0-SNAPSHOT</gwt.maven.plugin.version>
@@ -535,12 +535,6 @@
 		<dependency>
 			<groupId>com.google.appengine</groupId>
 			<artifactId>appengine-testing</artifactId>
-			<version>${gooogle.appengine.sdk.version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.google.appengine</groupId>
-			<artifactId>appengine-local-runtime-shared</artifactId>
 			<version>${gooogle.appengine.sdk.version}</version>
 			<scope>test</scope>
 		</dependency>

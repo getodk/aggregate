@@ -9,7 +9,8 @@ import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.opendatakit.aggregate.odktables.client.Column;
+import org.opendatakit.aggregate.odktables.client.entity.Column;
+import org.opendatakit.aggregate.odktables.command.simple.CreateTable;
 import org.opendatakit.common.persistence.DataField.DataType;
 
 public class CreateTableTest

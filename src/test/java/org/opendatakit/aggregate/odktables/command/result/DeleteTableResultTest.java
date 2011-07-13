@@ -6,6 +6,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.opendatakit.aggregate.odktables.CommandResultTest;
 import org.opendatakit.aggregate.odktables.client.exception.TableAlreadyExistsException;
+import org.opendatakit.aggregate.odktables.commandresult.simple.DeleteTableResult;
 
 public class DeleteTableResultTest extends CommandResultTest<DeleteTableResult>
 {
