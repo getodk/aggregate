@@ -47,9 +47,6 @@ public class UserServiceImpl implements org.opendatakit.common.security.UserServ
 	String superUserEmail;
 	String userServiceKey;
 
-	User anonymous;
-	User daemonAccount;
-
 	String superUserUri = null;
 	
 	final Map<String, User> activeUsers = new HashMap<String, User>();
@@ -75,16 +72,6 @@ public class UserServiceImpl implements org.opendatakit.common.security.UserServ
 		if ( userServiceKey == null ) {
 			throw new IllegalStateException("userServiceKey must be configured");
 		}
-		Set<GrantedAuthority> anonGroups = new HashSet<GrantedAuthority>();
-		anonGroups.add(new GrantedAuthorityImpl(GrantedAuthorityName.USER_IS_ANONYMOUS.name()));
-		anonymous = new UserImpl(User.ANONYMOUS_USER, 
-				User.ANONYMOUS_USER_NICKNAME, anonGroups, datastore );
-		Set<GrantedAuthority> daemonGroups = new HashSet<GrantedAuthority>();
-		daemonGroups = new HashSet<GrantedAuthority>();
-		daemonGroups.add(new GrantedAuthorityImpl(GrantedAuthorityName.USER_IS_DAEMON.name()));
-		daemonAccount = new UserImpl(User.DAEMON_USER, 
-				User.DAEMON_USER_NICKNAME, daemonGroups, datastore );
-		
 		reloadPermissions();
 	}
 
@@ -150,8 +137,6 @@ public class UserServiceImpl implements org.opendatakit.common.security.UserServ
 	logger.info("Executing: reloadPermissions");
 	superUserUri = null;
 	activeUsers.clear();
-	activeUsers.put(anonymous.getUriUser(), anonymous);
-	activeUsers.put(daemonAccount.getUriUser(), daemonAccount);
   }
   
   @Override
@@ -161,8 +146,8 @@ public class UserServiceImpl implements org.opendatakit.common.security.UserServ
 		   * Any configuration in the GrantedAuthorityHierarchy table indicates that 
 		   * we have configured access management with at least a default configuration.
 		   */
-	      GrantedAuthorityHierarchyTable relation = GrantedAuthorityHierarchyTable.assertRelation(datastore, daemonAccount);
-	      Query query = datastore.createQuery(relation, daemonAccount);
+	      GrantedAuthorityHierarchyTable relation = GrantedAuthorityHierarchyTable.assertRelation(datastore, getDaemonAccountUser());
+	      Query query = datastore.createQuery(relation, getDaemonAccountUser());
 	      List<?> values = query.executeQuery(0);
 	      return !values.isEmpty();
 	  } catch ( ODKDatastoreException e ) {
@@ -189,9 +174,26 @@ public class UserServiceImpl implements org.opendatakit.common.security.UserServ
 	User match = activeUsers.get(uriUser);
 	if ( match != null ) {
 		return match; 
+	} else if ( User.ANONYMOUS_USER.equals(uriUser) ) {
+		// ignored passed-in authorities
+		Set<GrantedAuthority> anonGroups = new HashSet<GrantedAuthority>();
+		anonGroups.add(new GrantedAuthorityImpl(GrantedAuthorityName.USER_IS_ANONYMOUS.name()));
+		match = new UserImpl(User.ANONYMOUS_USER, 
+				User.ANONYMOUS_USER_NICKNAME, anonGroups, datastore );
+		activeUsers.put(uriUser, match);
+		return match;
+	} else if ( User.DAEMON_USER.equals(uriUser) ) {
+		// ignored passed-in authorities
+		Set<GrantedAuthority> daemonGroups = new HashSet<GrantedAuthority>();
+		daemonGroups = new HashSet<GrantedAuthority>();
+		daemonGroups.add(new GrantedAuthorityImpl(GrantedAuthorityName.USER_IS_DAEMON.name()));
+		match = new UserImpl(User.DAEMON_USER, 
+				User.DAEMON_USER_NICKNAME, daemonGroups, datastore );
+		activeUsers.put(uriUser, match);
+		return match;
 	} else {
 		try {
-			RegisteredUsersTable t = RegisteredUsersTable.getUserByUri(uriUser, datastore, daemonAccount);
+			RegisteredUsersTable t = RegisteredUsersTable.getUserByUri(uriUser, datastore, getDaemonAccountUser());
 			match = new UserImpl( uriUser, t.getDisplayName(), authorities, datastore);
 		} catch (ODKEntityNotFoundException e) {
 			String name = UserServiceImpl.getNickname(uriUser);
@@ -222,7 +224,7 @@ public class UserServiceImpl implements org.opendatakit.common.security.UserServ
 
   @Override
   public User getDaemonAccountUser() {
-	return daemonAccount;
+	return internalGetUser(User.DAEMON_USER, null);
   }
 
 public static final String getNickname( String uriUser ) {

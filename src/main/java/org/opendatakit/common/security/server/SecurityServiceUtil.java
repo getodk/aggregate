@@ -247,7 +247,7 @@ public class SecurityServiceUtil {
 		groups.add(name);
 		TreeSet<GrantedAuthorityName> authorities = new TreeSet<GrantedAuthorityName>();
 		ArrayList<GrantedAuthority> grants = new ArrayList<GrantedAuthority>();
-		grants.add(new GrantedAuthorityImpl(name.toString()));
+		grants.add(new GrantedAuthorityImpl(name.name()));
 		Collection<GrantedAuthority> auths = hierarchy.getReachableGrantedAuthorities(grants);
 		for ( GrantedAuthority auth : auths ) {
 			GrantedAuthorityName grant = mapName(auth, badGrants);
