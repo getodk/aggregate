@@ -45,6 +45,7 @@ import org.opendatakit.aggregate.form.MiscTasks.TaskType;
 import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.format.element.LinkElementFormatter;
 import org.opendatakit.aggregate.format.header.GoogleSpreadsheetHeaderFormatter;
+import org.opendatakit.aggregate.servlet.FormMultipleValueServlet;
 import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.aggregate.submission.SubmissionSet;
 import org.opendatakit.aggregate.submission.SubmissionValue;
@@ -109,7 +110,7 @@ public class GoogleSpreadsheet extends AbstractExternalService implements Extern
 	    return ds.getEntity(gp, fsc.getAuriService(), user);
   }
   private GoogleSpreadsheet(Form form, GoogleSpreadsheetParameterTable gsObject, CallingContext cc) {
-    super(form, new LinkElementFormatter(cc.getServerURL(), true, true, true),
+    super(form, new LinkElementFormatter(cc.getServerURL(), FormMultipleValueServlet.ADDR, true, true, true),
         new GoogleSpreadsheetHeaderFormatter(true, true, true), cc);
     spreadsheetService = new SpreadsheetService(ServletConsts.APPLICATION_NAME);
     objectEntity = gsObject;

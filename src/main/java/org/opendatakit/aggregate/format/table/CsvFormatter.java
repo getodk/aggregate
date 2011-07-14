@@ -27,6 +27,7 @@ import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.format.SubmissionFormatter;
 import org.opendatakit.aggregate.format.element.LinkElementFormatter;
 import org.opendatakit.aggregate.format.header.BasicHeaderFormatter;
+import org.opendatakit.aggregate.servlet.FormMultipleValueServlet;
 import org.opendatakit.aggregate.submission.SubmissionSet;
 import org.opendatakit.common.constants.BasicConsts;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
@@ -43,7 +44,7 @@ public class CsvFormatter extends TableFormatterBase implements SubmissionFormat
   public CsvFormatter(Form xform, String webServerUrl, PrintWriter printWriter,
       List<FormElementModel> selectedColumnNames) {
     super(xform, printWriter, selectedColumnNames);
-    elemFormatter = new LinkElementFormatter(webServerUrl, true, true, true);
+    elemFormatter = new LinkElementFormatter(webServerUrl, FormMultipleValueServlet.ADDR, true, true, true);
     headerFormatter = new BasicHeaderFormatter(true, true, true);
   }
 
