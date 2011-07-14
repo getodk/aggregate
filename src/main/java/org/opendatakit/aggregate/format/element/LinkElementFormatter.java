@@ -24,7 +24,6 @@ import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.servlet.BinaryDataServlet;
-import org.opendatakit.aggregate.servlet.FormMultipleValueServlet;
 import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.submission.SubmissionRepeat;
 import org.opendatakit.aggregate.submission.SubmissionSet;
@@ -44,18 +43,14 @@ public class LinkElementFormatter extends BasicElementFormatter {
   private final String repeatServlet;
   
 
-  public LinkElementFormatter(String baseWebServerUrl, String repeatServlet,
-		  boolean separateGpsCoordinates, boolean includeGpsAltitude, boolean includeGpsAccuracy) {
-    super(separateGpsCoordinates, includeGpsAltitude, includeGpsAccuracy);
-    this.baseWebServerUrl = baseWebServerUrl;
-    this.repeatServlet = repeatServlet;
-  }
   
   /**
    * Construct a Html Link Element Formatter
    * 
-   * @param webServerUrl
-   *          base url for the web app (e.g., localhost:8080/ODKAggregatePlatform)
+   * @param baseWebServerUrl
+   *          base url for the web app (e.g., http://localhost:8080/ODKAggregatePlatform)
+   * @param repeatServlet
+   * 		  name of the repeat servlet for repeat data.
    * @param separateGpsCoordinates
    *          separate the GPS coordinates of latitude and longitude into
    *          columns
@@ -64,10 +59,11 @@ public class LinkElementFormatter extends BasicElementFormatter {
    * @param includeGpsAccuracy
    *          include GPS accuracy data
    */
-  public LinkElementFormatter(String webServerUrl, boolean separateGpsCoordinates,
-      boolean includeGpsAltitude, boolean includeGpsAccuracy) {
-	  this(webServerUrl, FormMultipleValueServlet.ADDR, 
-			  separateGpsCoordinates, includeGpsAltitude, includeGpsAccuracy);
+  public LinkElementFormatter(String baseWebServerUrl, String repeatServlet,
+		  boolean separateGpsCoordinates, boolean includeGpsAltitude, boolean includeGpsAccuracy) {
+    super(separateGpsCoordinates, includeGpsAltitude, includeGpsAccuracy);
+    this.baseWebServerUrl = baseWebServerUrl;
+    this.repeatServlet = repeatServlet;
   }
 
   public void addFormattedLink( SubmissionKey key, String servletPath, String urlParameterName, Row row ) {

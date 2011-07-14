@@ -87,7 +87,7 @@ public class FormUploadServlet extends ServletUtilBase {
 "	  If the form definition file is named \"<code>My Form.xml</code>\" then the media folder should" +
 "	  be named \"<code>My Form-media</code>\". Please use the form below to upload the form definition" + 
 "	  file and the contents of the media folder, if any, into ODK Aggregate.</p>" +
-"	  <p>On ODK Collect 1.1.6 and higher, the file named \"<code>form_logo.png</code>\"," + 
+"	  <p>On ODK Collect 1.1.7 and higher, the file named \"<code>form_logo.png</code>\"," + 
 "	  if present in the media folder, will be displayed as the form's logo. </p>" +
 "	  <!--[if true]><p style=\"color: red;\">For a better user experience, use Chrome, Firefox or Safari</p>" +
 "	  <!-- If you specify an empty progress div, it will be expanded with an upload progress region (non-IE) -->" +

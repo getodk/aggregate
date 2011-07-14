@@ -19,6 +19,7 @@ import java.math.BigDecimal;
 
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.format.Row;
+import org.opendatakit.aggregate.servlet.FormMultipleValueServlet;
 import org.opendatakit.aggregate.submission.SubmissionRepeat;
 import org.opendatakit.aggregate.submission.type.GeoPoint;
 import org.opendatakit.common.constants.BasicConsts;
@@ -36,7 +37,7 @@ public class FusionTableElementFormatter extends LinkElementFormatter {
   private static final String FT_PLACEMARK_POINT_TEMPLATE = "<Point><coordinates>%s</coordinates></Point>";
   
   public FusionTableElementFormatter(String webServerUrl) {
-    super(webServerUrl, true, true, true);
+    super(webServerUrl, FormMultipleValueServlet.ADDR, true, true, true);
   }
   
   @Override
