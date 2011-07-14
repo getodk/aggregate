@@ -86,7 +86,6 @@ public class SecurityServiceUtil {
 		List<String> idataOwnerGrants = new ArrayList<String>();
 		idataOwnerGrants.add(GrantedAuthorityName.ROLE_USER.name());
 		idataOwnerGrants.add(GrantedAuthorityName.ROLE_DATA_OWNER.name());
-		idataOwnerGrants.add(GrantedAuthorityName.ROLE_DATA_VIEWER.name());
 		idataOwnerGrants.add(GrantedAuthorityName.GROUP_DATA_VIEWERS.name());
 		dataOwnerGrants = Collections.unmodifiableList(idataOwnerGrants);
 	
@@ -213,46 +212,36 @@ public class SecurityServiceUtil {
 		removeBadGrantedAuthorities(badGrants, cc);
 	}
 
-	static void setAuthenticationListsFromDirectAuthorities(UserSecurityInfo userInfo, Collection<GrantedAuthority> grants, CallingContext cc) throws ODKDatastoreException {
+	static void setAuthenticationListsForSpecialUser(UserSecurityInfo userInfo, GrantedAuthorityName specialGroup, CallingContext cc) {
 		RoleHierarchy hierarchy = (RoleHierarchy) cc.getBean("hierarchicalRoleRelationships");
 		Set<GrantedAuthority> badGrants = new TreeSet<GrantedAuthority>();
+		// The assigned groups are the specialGroup that this user defines
+		// (i.e., anonymous or daemon) plus all directly-assigned assignable
+		// permissions. 
 		TreeSet<GrantedAuthorityName> groups = new TreeSet<GrantedAuthorityName>();
 		TreeSet<GrantedAuthorityName> authorities = new TreeSet<GrantedAuthorityName>();
-		for ( GrantedAuthority grant : grants ) {
-			GrantedAuthorityName name = mapName(grant, badGrants);
-			if ( name != null ) {
-				if ( GrantedAuthorityName.permissionsCanBeAssigned(grant.getAuthority()) ) {
-					groups.add(name);
-				} else {
-					authorities.add(name);
+		groups.add(specialGroup);
+		GrantedAuthority specialAuth = new GrantedAuthorityImpl(specialGroup.name());
+		try {
+			TreeSet<GrantedAuthority> auths = GrantedAuthorityHierarchyTable.getSubordinateGrantedAuthorities(specialAuth, cc);
+			for ( GrantedAuthority auth : auths ) {
+				GrantedAuthorityName name = mapName(auth, badGrants);
+				if ( name != null ) {
+					if ( GrantedAuthorityName.permissionsCanBeAssigned(auth.getAuthority()) ) {
+						groups.add(name);
+					} else {
+						authorities.add(name);
+					}
 				}
 			}
+		} catch (ODKDatastoreException e) {
+			e.printStackTrace();
 		}
-		Collection<GrantedAuthority> auths = hierarchy.getReachableGrantedAuthorities(grants);
+		Collection<GrantedAuthority> auths = hierarchy.getReachableGrantedAuthorities(Collections.singletonList(specialAuth));
 		for ( GrantedAuthority auth : auths ) {
 			GrantedAuthorityName name = mapName(auth, badGrants);
 			if ( name != null && !GrantedAuthorityName.permissionsCanBeAssigned(auth.getAuthority()) ) {
-				authorities.add(name);
-			}
-		}
-		userInfo.setAssignedUserGroups(groups);
-		userInfo.setGrantedAuthorities(authorities);
-		removeBadGrantedAuthorities(badGrants, cc);
-	}
-
-	static void setAuthenticationListsForSpecialUser(UserSecurityInfo userInfo, GrantedAuthorityName name, CallingContext cc) {
-		RoleHierarchy hierarchy = (RoleHierarchy) cc.getBean("hierarchicalRoleRelationships");
-		Set<GrantedAuthority> badGrants = new TreeSet<GrantedAuthority>();
-		TreeSet<GrantedAuthorityName> groups = new TreeSet<GrantedAuthorityName>();
-		groups.add(name);
-		TreeSet<GrantedAuthorityName> authorities = new TreeSet<GrantedAuthorityName>();
-		ArrayList<GrantedAuthority> grants = new ArrayList<GrantedAuthority>();
-		grants.add(new GrantedAuthorityImpl(name.name()));
-		Collection<GrantedAuthority> auths = hierarchy.getReachableGrantedAuthorities(grants);
-		for ( GrantedAuthority auth : auths ) {
-			GrantedAuthorityName grant = mapName(auth, badGrants);
-			if ( grant != null && !GrantedAuthorityName.permissionsCanBeAssigned(auth.getAuthority()) ) {
-				authorities.add(grant);
+					authorities.add(name);
 			}
 		}
 		userInfo.setAssignedUserGroups(groups);

@@ -116,7 +116,7 @@ public final class GrantedAuthorityHierarchyTable extends CommonFieldsBase {
 		return reference;
 	}
 	
-	public static final TreeSet<String> getSubordinateGrantedAuthorities( 
+	public static final TreeSet<GrantedAuthority> getSubordinateGrantedAuthorities( 
 											GrantedAuthority dominantGrant, CallingContext cc ) throws ODKDatastoreException {
 		
 		Datastore ds = cc.getDatastore();
@@ -130,10 +130,10 @@ public final class GrantedAuthorityHierarchyTable extends CommonFieldsBase {
 		groupsList = query.executeQuery(0);
 
 		// construct the set of groups that this group directly inherits from
-		TreeSet<String> groups = new TreeSet<String>();
+		TreeSet<GrantedAuthority> groups = new TreeSet<GrantedAuthority>();
 		for ( CommonFieldsBase b : groupsList ) {
 			GrantedAuthorityHierarchyTable t = (GrantedAuthorityHierarchyTable) b;
-			groups.add(t.getSubordinateGrantedAuthority().getAuthority());
+			groups.add(t.getSubordinateGrantedAuthority());
 		}
 		
 		return groups;
