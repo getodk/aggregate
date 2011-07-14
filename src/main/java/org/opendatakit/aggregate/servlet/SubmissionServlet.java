@@ -61,6 +61,7 @@ import org.opendatakit.common.web.CallingContext;
  */
 public class SubmissionServlet extends ServletUtilBase {
 
+	private static final Logger logger = Logger.getLogger(SubmissionServlet.class.getName());
   /**
    * Serial number for serialization
    */
@@ -161,7 +162,7 @@ public class SubmissionServlet extends ServletUtilBase {
        * 
        * It is unclear whether this is a GAE issue or a Spring Frameworks issue.
        */
-      Logger.getLogger(this.getClass().getName()).warning("Inside doGet -- replying as doHead");
+	  logger.warning("Inside doGet -- replying as doHead");
       doHead(req, resp);
       return;
    }
@@ -189,7 +190,7 @@ public class SubmissionServlet extends ServletUtilBase {
   protected void doHead(HttpServletRequest req, HttpServletResponse resp)
          throws IOException {
    CallingContext cc = ContextFactory.getCallingContext(this, req);
-   Logger.getLogger(this.getClass().getName()).info("Inside doHead");
+   logger.info("Inside doHead");
 
    addOpenRosaHeaders(resp);
    String serverUrl = cc.getServerURL();
@@ -231,12 +232,18 @@ public class SubmissionServlet extends ServletUtilBase {
       List<ExternalService> tmp = FormServiceCursor.getExternalServicesForForm(form, cc);
       UploadSubmissions uploadTask = (UploadSubmissions) cc.getBean(BeanDefs.UPLOAD_TASK_BEAN);
 
-     CallingContext ccDaemon = ContextFactory.getCallingContext(this, req);
-     ccDaemon.setAsDaemon(true);
-      for (ExternalService rs : tmp) {
-        uploadTask.createFormUploadTask(rs.getFormServiceCursor(), ccDaemon);
+      // publication failures should not fail the submission...
+      try {
+	     CallingContext ccDaemon = ContextFactory.getCallingContext(this, req);
+	     ccDaemon.setAsDaemon(true);
+	     for (ExternalService rs : tmp) {
+	        uploadTask.createFormUploadTask(rs.getFormServiceCursor(), ccDaemon);
+	     }
+      } catch (ODKExternalServiceException e) {
+          logger.info("Publishing enqueue failure (this is recoverable) - " + e.getMessage());
+          e.printStackTrace();
       }
-
+      
       // form full url including scheme...
      String serverUrl = cc.getServerURL();
      String url = serverUrl +  BasicConsts.FORWARDSLASH + ADDR;
@@ -244,6 +251,8 @@ public class SubmissionServlet extends ServletUtilBase {
 
      resp.setStatus(HttpServletResponse.SC_CREATED);
       if ( openRosaVersion == null ) {
+    	logger.info("Successful non-OpenRosa submission");
+
         resp.setContentType(HtmlConsts.RESP_TYPE_HTML);
         resp.setCharacterEncoding(HtmlConsts.UTF8_ENCODE);
         PrintWriter out = resp.getWriter();
@@ -255,7 +264,9 @@ public class SubmissionServlet extends ServletUtilBase {
         out.write(HtmlConsts.BODY_CLOSE);
         out.write(HtmlConsts.HTML_CLOSE);
       } else {
-        addOpenRosaHeaders(resp);
+    	logger.info("Successful OpenRosa submission");
+
+  	    addOpenRosaHeaders(resp);
         resp.setContentType(HtmlConsts.RESP_TYPE_XML);
         resp.setCharacterEncoding(HtmlConsts.UTF8_ENCODE);
         PrintWriter out = resp.getWriter();
@@ -268,29 +279,41 @@ public class SubmissionServlet extends ServletUtilBase {
         out.write("</OpenRosaResponse>");
       }
     } catch (ODKFormNotFoundException e) {
+      e.printStackTrace();
+      logger.warning("Form not found - " + e.getMessage());
       odkIdNotFoundError(resp);
     } catch (ODKParseException e) {
+      logger.warning("Parsing failure - " + e.getMessage());
+      e.printStackTrace();
       resp.sendError(HttpServletResponse.SC_BAD_REQUEST, ErrorConsts.PARSING_PROBLEM);
     } catch (ODKEntityPersistException e) {
+      logger.severe("Persist failure - " + e.getMessage());
       e.printStackTrace();
       resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ErrorConsts.PARSING_PROBLEM);
-    } catch (ODKExternalServiceException e) {
-      e.printStackTrace();
-    } catch (ODKIncompleteSubmissionData e) {
+   } catch (ODKIncompleteSubmissionData e) {
+      logger.warning("Incomplete submission failure - " + e.getMessage());
       e.printStackTrace();
       resp.sendError(HttpServletResponse.SC_BAD_REQUEST, ErrorConsts.PARSING_PROBLEM);
     } catch (ODKConversionException e) {
+      logger.warning("Datatype casting failure - " + e.getMessage());
       e.printStackTrace();
       resp.sendError(HttpServletResponse.SC_BAD_REQUEST, ErrorConsts.PARSING_PROBLEM);
     } catch (ODKDatastoreException e) {
+      logger.severe("Datastore failure - " + e.getMessage());
       e.printStackTrace();
       resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ErrorConsts.PARSING_PROBLEM);
     } catch (FileUploadException e) {
+      logger.warning("Attachments parsing failure - " + e.getMessage());
       e.printStackTrace();
       resp.sendError(HttpServletResponse.SC_BAD_REQUEST, ErrorConsts.PARSING_PROBLEM);
     } catch (ODKFormSubmissionsDisabledException e) {
+      logger.warning("Form submission disabled - " + e.getMessage());
 	  e.printStackTrace();
       resp.sendError(HttpServletResponse.SC_BAD_REQUEST, ErrorConsts.FORM_DOES_NOT_ALLOW_SUBMISSIONS);
+	} catch (Exception e) {
+	  logger.severe("Unexpected exception: " + e.getMessage());
+	  e.printStackTrace();
+	  resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Unexpected exception");
 	}
   }
 }
