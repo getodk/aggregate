@@ -212,7 +212,7 @@ public class SecurityServiceUtil {
 		removeBadGrantedAuthorities(badGrants, cc);
 	}
 
-	static void setAuthenticationListsForSpecialUser(UserSecurityInfo userInfo, GrantedAuthorityName specialGroup, CallingContext cc) {
+	static void setAuthenticationListsForSpecialUser(UserSecurityInfo userInfo, GrantedAuthorityName specialGroup, CallingContext cc) throws DatastoreFailureException {
 		RoleHierarchy hierarchy = (RoleHierarchy) cc.getBean("hierarchicalRoleRelationships");
 		Set<GrantedAuthority> badGrants = new TreeSet<GrantedAuthority>();
 		// The assigned groups are the specialGroup that this user defines
@@ -236,7 +236,9 @@ public class SecurityServiceUtil {
 			}
 		} catch (ODKDatastoreException e) {
 			e.printStackTrace();
+			throw new DatastoreFailureException("Unable to retrieve granted authorities of " + specialGroup.name());
 		}
+		
 		Collection<GrantedAuthority> auths = hierarchy.getReachableGrantedAuthorities(Collections.singletonList(specialAuth));
 		for ( GrantedAuthority auth : auths ) {
 			GrantedAuthorityName name = mapName(auth, badGrants);
