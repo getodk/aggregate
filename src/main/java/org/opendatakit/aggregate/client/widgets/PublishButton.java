@@ -16,7 +16,9 @@
 
 package org.opendatakit.aggregate.client.widgets;
 
+import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.popups.ExternalServicePopup;
+import org.opendatakit.common.security.common.GrantedAuthorityName;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -29,6 +31,9 @@ public class PublishButton extends AButtonBase implements ClickHandler {
   public PublishButton(String formId) {
     super("<img src=\"images/green_right_arrow.png\" /> Publish");
     this.formId = formId;
+    boolean enabled = AggregateUI.getUI().getUserInfo()
+		.getGrantedAuthorities().contains(GrantedAuthorityName.ROLE_DATA_OWNER);
+    setEnabled(enabled);
     addClickHandler(this);
   }
 

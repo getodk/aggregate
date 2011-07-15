@@ -118,8 +118,13 @@ public class TemporaryAccessConfigurationSheet extends Composite {
 
 		@Override
 		public boolean isValid(boolean prospectiveValue, UserSecurityInfo key) {
-			return (!auth.equals(GrantedAuthorityName.GROUP_DATA_COLLECTORS) || key
-					.getUsername() != null);
+			// data collector must be an ODK account
+			boolean badCollector = auth.equals(GrantedAuthorityName.GROUP_DATA_COLLECTORS) &&
+					key.getUsername() == null;
+			// site admin must not be the anonymous user
+			boolean badSiteAdmin = auth.equals(GrantedAuthorityName.GROUP_SITE_ADMINS) &&
+					(key.getType() == UserType.ANONYMOUS);
+			return !(badCollector || badSiteAdmin);
 		}
 	}
 
@@ -135,9 +140,16 @@ public class TemporaryAccessConfigurationSheet extends Composite {
 
 		@Override
 		public boolean isVisible(UserSecurityInfo key) {
-			if ( auth != GrantedAuthorityName.GROUP_DATA_COLLECTORS ) return true;
-			// data collectors can only be ODK accounts...
-			return ( key.getUsername() != null );
+			if ( auth == GrantedAuthorityName.GROUP_SITE_ADMINS ) {
+				// anonymous user should not be able to be a site admin
+				return ( key.getType() != UserType.ANONYMOUS );
+			}
+			
+			if ( auth == GrantedAuthorityName.GROUP_DATA_COLLECTORS ) {
+				// data collectors can only be ODK accounts...
+				return ( key.getUsername() != null );
+			}
+			return true;
 		}
 		
 	}

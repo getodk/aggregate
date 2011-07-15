@@ -16,7 +16,9 @@
 
 package org.opendatakit.aggregate.client.widgets;
 
+import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.popups.ConfirmFormDeletePopup;
+import org.opendatakit.common.security.common.GrantedAuthorityName;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -31,6 +33,9 @@ public class DeleteFormButton extends AButtonBase implements ClickHandler {
     super("<img src=\"images/red_x.png\" /> Delete");
     this.formId = formId;
     addStyleDependentName("negative");
+    boolean enabled = AggregateUI.getUI().getUserInfo()
+	.getGrantedAuthorities().contains(GrantedAuthorityName.ROLE_DATA_OWNER);
+    setEnabled(enabled);
     addClickHandler(this);
   }
 

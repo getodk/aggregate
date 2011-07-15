@@ -223,15 +223,11 @@ public class SecurityServiceUtil {
 		groups.add(specialGroup);
 		GrantedAuthority specialAuth = new GrantedAuthorityImpl(specialGroup.name());
 		try {
-			TreeSet<GrantedAuthority> auths = GrantedAuthorityHierarchyTable.getSubordinateGrantedAuthorities(specialAuth, cc);
+			Set<GrantedAuthority> auths = GrantedAuthorityHierarchyTable.getSubordinateGrantedAuthorities(specialAuth, cc);
 			for ( GrantedAuthority auth : auths ) {
 				GrantedAuthorityName name = mapName(auth, badGrants);
 				if ( name != null ) {
-					if ( GrantedAuthorityName.permissionsCanBeAssigned(auth.getAuthority()) ) {
-						groups.add(name);
-					} else {
-						authorities.add(name);
-					}
+					groups.add(name);
 				}
 			}
 		} catch (ODKDatastoreException e) {
