@@ -102,7 +102,8 @@ public class UIUtils {
     if (selectedIndex > -1 && filters != null) {
       String filterName = filterListBox.getValue(selectedIndex);
       for (FilterGroup filterGroup : filters) {
-        if (filterGroup.getName().equals(filterName)) {
+        String filterNameToMatch = filterGroup.getName();
+        if (filterNameToMatch != null && filterNameToMatch.equals(filterName)) {
           return filterGroup;
         }
       }
