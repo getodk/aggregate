@@ -262,6 +262,9 @@ public class FormUploadServlet extends ServletUtilBase {
         	// not complete yet...
         	form.setDownloadEnabled(false);
         	form.persist(cc);
+        } else {
+        	form.setDownloadEnabled(true);
+        	form.persist(cc);
         }
         form.printDataTree(System.out);
         bOk = true;

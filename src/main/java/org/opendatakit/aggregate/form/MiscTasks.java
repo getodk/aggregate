@@ -19,10 +19,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.opendatakit.aggregate.constants.TaskLockType;
+import org.opendatakit.aggregate.constants.common.FormActionStatus;
+import org.opendatakit.aggregate.constants.common.FormActionStatusTimestamp;
 import org.opendatakit.aggregate.datamodel.FormDataModel;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.datamodel.TopLevelDynamicBase;
@@ -97,41 +100,13 @@ public class MiscTasks {
 		}
 	};
 	
-	/**
-	 * Status of a task in the miscTasks table.
-	 * 
-	 * @author mitchellsundt@gmail.com
-	 *
-	 */
-	public enum Status {
-		IN_PROGRESS, // created or task is running
-		RETRY_IN_PROGRESS, // task is running
-		FAILED,    // task completed with failure; retry again later.
-		ABANDONED, // task completed with failure; no more retries should occur.
-		SUCCESSFUL; // task completed successfully.
-		
-		public String toString() {
-			switch ( this ) {
-			case IN_PROGRESS:
-				return "Operation in progress";
-			case RETRY_IN_PROGRESS:
-				return "Retry in progress";
-			case FAILED:
-				return "Failure - will retry later";
-			case ABANDONED:
-				return "Failure - abandoned all retry attempts";
-			case SUCCESSFUL:
-				return "Operation completed successfully";
-			default:
-				throw new IllegalStateException("missing enum case");
-			}
-		}
-	};
-	
 	public static final String FORM_ID_MISC_TASKS = "aggregate.opendatakit.org:MiscTasks";
 
 	public static final XFormParameters xformMiscTaskParameters = 
 		new XFormParameters( FORM_ID_MISC_TASKS, 1L, 0L);
+
+	// delete any successful or abandoned misc tasks older than 30 days
+	private static final long MANY_DAYS_AGO = 30*24*60*60*1000L;
 
 	private static FormElementModel formId;
 	private static FormElementModel requestingUser;
@@ -221,7 +196,7 @@ public class MiscTasks {
 		setRequestParameters(parameters);
 		setLastActivityDate(now);
 		setAttemptCount(1L);
-		setStatus(Status.IN_PROGRESS);
+		setStatus(FormActionStatus.IN_PROGRESS);
 		setTaskType(type);
 		
 		objectEntity.setIsComplete(true); // indicate that the data should be visible on queries
@@ -286,11 +261,11 @@ public class MiscTasks {
 		((LongSubmissionType) objectEntity.getElementValue(attemptCount)).setValue(value);
 	}
 	
-	public Status getStatus() {
-		return Status.valueOf(((StringSubmissionType) objectEntity.getElementValue(status)).getValue());
+	public FormActionStatus getStatus() {
+		return FormActionStatus.valueOf(((StringSubmissionType) objectEntity.getElementValue(status)).getValue());
 	}
 	
-	public void setStatus(Status value) throws ODKEntityPersistException {
+	public void setStatus(FormActionStatus value) throws ODKEntityPersistException {
 		((StringSubmissionType) objectEntity.getElementValue(status)).setValueFromString(value.name());
 	}
 	
@@ -356,7 +331,7 @@ public class MiscTasks {
 		}
 		Query q = cc.getDatastore().createQuery(form.getTopLevelGroupElement().getFormDataModel().getBackingObjectPrototype(), cc.getCurrentUser());
 		Date now = new Date();
-
+		Date ancientTimes = new Date(now.getTime() - MANY_DAYS_AGO);
 		// TODO: rework for each task type...
 		Date limit = new Date(now.getTime() - taskType.getLockType().getLockExpirationTimeout() - 1 );
 		q.addFilter(getTaskTypeKey().getFormDataModel().getBackingKey(), FilterOperation.EQUAL, taskType.name());
@@ -367,17 +342,23 @@ public class MiscTasks {
 		 * fired at a lastActivityDate older than the retry interval, which
 		 * should be longer than the allowed Task lifetime.
 		 */
+		List<MiscTasks> ancientHistory = new ArrayList<MiscTasks>();
 		for ( CommonFieldsBase b : l ) {
 			Submission s = new Submission( b.getUri(), form, cc );
 			MiscTasks result = new MiscTasks(s);
-			if ( result.getStatus() == Status.SUCCESSFUL ) continue;
-			if ( result.getStatus() == Status.ABANDONED ) continue;
+			if ( !result.getStatus().isActiveRequest() ) {
+				if ( result.getCompletionDate().before(ancientTimes) ) {
+					ancientHistory.add(result);
+				}
+				continue;
+			}
+			
 			if ( result.getAttemptCount().compareTo(taskType.getMaxAttemptCount()) >= 0 ) {
 				// the task is stale, and should be marked abandoned,
 				// but the worker thread must have failed.  Attempt 
 				// it here...
 				result.setAttemptCount(result.getAttemptCount()+1L);
-				result.setStatus(Status.ABANDONED);
+				result.setStatus(FormActionStatus.ABANDONED);
 				result.setCompletionDate(now);
 				result.objectEntity.persist(cc);
 				continue;
@@ -386,6 +367,11 @@ public class MiscTasks {
 			// more than the retry interval ago and the task is eligible
 			// to be restarted.
 			taskList.add(result);
+		}
+		
+		// purge the ancient history...
+		for ( MiscTasks t : ancientHistory ) {
+			t.delete(cc);
 		}
 	}
 
@@ -408,6 +394,93 @@ public class MiscTasks {
 			taskList.add(result);
 		}
 		return taskList;
+	}
+	
+	private static void updateStatusTimestampMap( Map<String,FormActionStatusTimestamp> statusSet, String formId, FormActionStatusTimestamp candidate ) {
+		FormActionStatusTimestamp existing = statusSet.get(formId);
+		if ( existing == null ) {
+			// no existing -- use candidate
+			statusSet.put(formId, candidate);
+		} else if ( candidate.getStatus().isActiveRequest() ) {
+			if ( existing.getStatus().isActiveRequest() ) {
+				// figure out which is most current
+				if ( existing.getTimestamp().before(candidate.getTimestamp()) ) {
+					// if there are multiple actions scheduled, this can bounce between them...
+					statusSet.put(formId, candidate);
+				}
+			} else {
+				// existing is a finished request -- replace
+				statusSet.put(formId, candidate);
+			}
+			
+		} else if ( !existing.getStatus().isActiveRequest() ) {
+			if ( existing.getTimestamp().before(candidate.getTimestamp()) ) {
+				// existing is older than candidate -- replace
+				statusSet.put(formId, candidate);
+			}
+		} /* ELSE existing is active and candidate is not -- keep existing */
+	}
+	
+	public static Map<String,FormActionStatusTimestamp> getFormDeletionStatusTimestampOfAllFormIds(CallingContext cc) throws ODKDatastoreException {
+		Map<String,FormActionStatusTimestamp> statusSet = new HashMap<String,FormActionStatusTimestamp>();
+		Form miscTasksForm;
+		try {
+			miscTasksForm = Form.retrieveForm(FORM_ID_MISC_TASKS, cc);
+		} catch ( ODKFormNotFoundException e) {
+			throw new ODKDatastoreException(e);
+		}
+		User user = cc.getCurrentUser();
+		Query q = cc.getDatastore().createQuery(miscTasksForm.getTopLevelGroupElement().getFormDataModel().getBackingObjectPrototype(), user);
+		q.addFilter(getTaskTypeKey().getFormDataModel().getBackingKey(), FilterOperation.EQUAL, TaskType.DELETE_FORM.name());
+		// collect all Deletion tasks that are in progress or being retried...
+		List<? extends CommonFieldsBase> l = q.executeQuery(0);
+		for ( CommonFieldsBase b : l ) {
+			Submission s = new Submission( b.getUri(), miscTasksForm, cc );
+			MiscTasks result = new MiscTasks(s);
+			// determine the time of the status setting...
+			Date lastUpdate = result.getCompletionDate();
+			if ( lastUpdate == null ) {
+				lastUpdate = result.getLastActivityDate();// not completed -- try active
+			}
+			if ( lastUpdate == null ) {
+				lastUpdate = result.getRequestDate(); // not yet active -- try requested
+			}
+			// form the candidate and get the existing value
+			FormActionStatusTimestamp candidate = new FormActionStatusTimestamp(result.getStatus(), lastUpdate);
+			updateStatusTimestampMap( statusSet, result.getFormId(), candidate);
+		}
+		return statusSet;
+	}
+	
+	public static Map<String,FormActionStatusTimestamp> getPurgeSubmissionsStatusTimestampOfAllFormIds(CallingContext cc) throws ODKDatastoreException {
+		Map<String,FormActionStatusTimestamp> statusSet = new HashMap<String,FormActionStatusTimestamp>();
+		Form miscTasksForm;
+		try {
+			miscTasksForm = Form.retrieveForm(FORM_ID_MISC_TASKS, cc);
+		} catch ( ODKFormNotFoundException e) {
+			throw new ODKDatastoreException(e);
+		}
+		User user = cc.getCurrentUser();
+		Query q = cc.getDatastore().createQuery(miscTasksForm.getTopLevelGroupElement().getFormDataModel().getBackingObjectPrototype(), user);
+		q.addFilter(getTaskTypeKey().getFormDataModel().getBackingKey(), FilterOperation.EQUAL, TaskType.PURGE_OLDER_SUBMISSIONS.name());
+		// collect all Deletion tasks that are in progress or being retried...
+		List<? extends CommonFieldsBase> l = q.executeQuery(0);
+		for ( CommonFieldsBase b : l ) {
+			Submission s = new Submission( b.getUri(), miscTasksForm, cc );
+			MiscTasks result = new MiscTasks(s);
+			// determine the time of the status setting...
+			Date lastUpdate = result.getCompletionDate();
+			if ( lastUpdate == null ) {
+				lastUpdate = result.getLastActivityDate();// not completed -- try active
+			}
+			if ( lastUpdate == null ) {
+				lastUpdate = result.getRequestDate(); // not yet active -- try requested
+			}
+			// form the candidate and get the existing value
+			FormActionStatusTimestamp candidate = new FormActionStatusTimestamp(result.getStatus(), lastUpdate);
+			updateStatusTimestampMap( statusSet, result.getFormId(), candidate);
+		}
+		return statusSet;
 	}
 	
 	/**
@@ -568,6 +641,12 @@ public class MiscTasks {
 			
 			FormDefinition.assertModel(xformMiscTaskParameters, model, cc);
 	
+			String miscTasksUri = miscTasksRelation.getUri();
+			
+			// Create a record in the FormInfo table for the MiscTasks table itself...
+			FormDefinition.assertFormInfoRecord(xformMiscTaskParameters, "Miscellaneous Tasks", "Miscellaneous tasks run in the background and managed by Aggregate", miscTasksUri, cc);
+	
+			// we've defined the form -- now fetch the bits of it...
 			FormDefinition formDefinition = FormDefinition.getFormDefinition(xformMiscTaskParameters, cc);
 			
 			if ( MiscTasksTable.relation != (MiscTasksTable) formDefinition.getTopLevelGroup().getBackingObjectPrototype() ) {
@@ -584,10 +663,6 @@ public class MiscTasks {
 			status = FormDefinition.findElement(formDefinition.getTopLevelGroupElement(), MiscTasksTable.relation.status);
 			taskType = FormDefinition.findElement(formDefinition.getTopLevelGroupElement(), MiscTasksTable.relation.taskType);
 			completionDate = FormDefinition.findElement(formDefinition.getTopLevelGroupElement(), MiscTasksTable.relation.completionDate);
-	
-			String persistentResultsUri = miscTasksRelation.getUri();
-			
-			FormDefinition.assertFormInfoRecord(xformMiscTaskParameters, "Miscellaneous Tasks", "Miscellaneous tasks run in the background and managed by Aggregate", persistentResultsUri, cc);
 		} finally {
 			cc.setAsDaemon(asDaemon);
 		}

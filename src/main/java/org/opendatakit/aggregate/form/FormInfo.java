@@ -69,7 +69,6 @@ public class FormInfo {
 	static FormElementModel fiFilesetTable = null;
 	static FormElementModel rootElementModelVersion = null;
 	static FormElementModel rootElementUiVersion = null;
-	static FormElementModel isFilesetComplete = null;
 	static FormElementModel isDownloadAllowed = null;
 	static FormElementModel xformDefinition = null;
 	static FormElementModel manifestFileset = null;
@@ -135,7 +134,6 @@ public class FormInfo {
 					FormInfoFilesetTable f = FormInfoFilesetTable.assertRelation(cc);
 					rootElementModelVersion = FormDefinition.findElement(fiFilesetTable, f.rootElementModelVersion);
 					rootElementUiVersion = FormDefinition.findElement(fiFilesetTable, f.rootElementUiVersion);
-					isFilesetComplete = FormDefinition.findElement(fiFilesetTable, f.isFilesetComplete);
 					isDownloadAllowed = FormDefinition.findElement(fiFilesetTable, f.isDownloadAllowed);
 					xformDefinition = fiFilesetTable.findElementByName(FormInfoFilesetTable.ELEMENT_NAME_XFORM_DEFINITION);
 					manifestFileset = fiFilesetTable.findElementByName(FormInfoFilesetTable.ELEMENT_NAME_MANIFEST_FILESET);
@@ -272,7 +270,6 @@ public class FormInfo {
 			SubmissionSet sFileset = new SubmissionSet(aFormDefinition, filesets.size()+1L, fiFilesetTable, formDefinition, aFormDefinition.getKey(), cc);
 			((LongSubmissionType) sFileset.getElementValue(rootElementModelVersion)).setValueFromString(rootModelVersion == null ? null : rootModelVersion.toString());
 			((LongSubmissionType) sFileset.getElementValue(rootElementUiVersion)).setValueFromString(rootUiVersion == null ? null : rootUiVersion.toString());
-			((BooleanSubmissionType) sFileset.getElementValue(isFilesetComplete)).setValueFromString("yes");
 			((BooleanSubmissionType) sFileset.getElementValue(isDownloadAllowed)).setValueFromString("yes");
 			r.addSubmissionSet(sFileset);
 			matchingSet = sFileset;
@@ -321,7 +318,6 @@ public class FormInfo {
 			SubmissionSet sFileset = new SubmissionSet(aFormDefinition, filesets.size()+1L, fiFilesetTable, formDefinition, aFormDefinition.getKey(), cc);
 			((LongSubmissionType) sFileset.getElementValue(rootElementModelVersion)).setValueFromString(rootModelVersion == null ? null : rootModelVersion.toString());
 			((LongSubmissionType) sFileset.getElementValue(rootElementUiVersion)).setValueFromString(rootUiVersion == null ? null : rootUiVersion.toString());
-			((BooleanSubmissionType) sFileset.getElementValue(isFilesetComplete)).setValueFromString("yes");
 			((BooleanSubmissionType) sFileset.getElementValue(isDownloadAllowed)).setValueFromString("yes");
 			r.addSubmissionSet(sFileset);
 			matchingSet = sFileset;

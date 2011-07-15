@@ -24,12 +24,12 @@ import java.util.logging.Logger;
 
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.TaskLockType;
+import org.opendatakit.aggregate.constants.common.FormActionStatus;
 import org.opendatakit.aggregate.exception.ODKExternalServiceDependencyException;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.form.MiscTasks;
-import org.opendatakit.aggregate.form.MiscTasks.Status;
 import org.opendatakit.aggregate.process.DeleteSubmissions;
 import org.opendatakit.aggregate.query.submission.QueryByDateRange;
 import org.opendatakit.aggregate.submission.Submission;
@@ -39,6 +39,7 @@ import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.TaskLock;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.web.CallingContext;
@@ -106,7 +107,13 @@ public class PurgeOlderSubmissionsWorkerImpl {
 		}
 		
 		try {
-		  doPurgeOlderSubmissions(t);
+		  if ( t.getRequestDate().before(form.getCreationDate())) {
+			  // form is newer, so the task must not refer to this form definition...
+			  doMarkAsComplete(t);
+		  } else {
+			  // purge request should have been created after the form...
+			  doPurgeOlderSubmissions(t);
+		  }
 		} catch (Exception e2) {
 			e2.printStackTrace();
 		} finally {
@@ -145,6 +152,13 @@ public class PurgeOlderSubmissionsWorkerImpl {
 		return submissions;
 	}
 	
+	private void doMarkAsComplete(MiscTasks t) throws ODKEntityPersistException {
+		// and mark us as completed... (don't delete for audit..).
+		t.setCompletionDate(new Date());
+		t.setStatus(FormActionStatus.SUCCESSFUL);
+		t.persist(cc);
+	}
+	
 	/**
 	 * we have gained a lock on the form.  Now go through and 
 	 * try to delete all submissions older than the given 
@@ -154,7 +168,7 @@ public class PurgeOlderSubmissionsWorkerImpl {
 	 * @throws ODKTaskLockException 
 	 */
 	private boolean doPurgeOlderSubmissions(MiscTasks t) throws Exception {
-
+		
 		CommonFieldsBase relation = null;
 		Datastore ds = cc.getDatastore();
 	    User user = cc.getCurrentUser();
@@ -205,11 +219,7 @@ public class PurgeOlderSubmissionsWorkerImpl {
 				taskLock = null;
 			}
 		}
-
-		// and mark us as completed... (don't delete for audit..).
-		t.setCompletionDate(new Date());
-		t.setStatus(Status.SUCCESSFUL);
-		t.persist(cc);
+		doMarkAsComplete(t);
 		return true;
 	}
 }
