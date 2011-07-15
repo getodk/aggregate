@@ -54,10 +54,14 @@ import org.opendatakit.common.security.User;
 import org.opendatakit.common.web.CallingContext;
 
 /**
- * Describes everything about the structure of a given xform as extracted
- * by javarosa during parsing of the xform and as backed by the FormDataModel
- * within the persistence layer.
- * Note that the metadata associated with the xform will be stored
+ * Describes everything about the database representation of a given xform as
+ * extracted by javarosa during parsing of the xform and as backed by the 
+ * FormDataModel within the persistence layer.  The form definition begins
+ * with the SubmissionAssocationTable record that maps a particular 
+ * (form id, model version, ui version) to a particular database representation.
+ * That table also contains flags for the state of the database representation
+ * and whether or not submissions are accepted into that representation.
+ * All other flags and metadata associated with the xform will be stored
  * separately in the form information table.
  * 
  * @author mitchellsundt@gmail.com
@@ -66,11 +70,19 @@ import org.opendatakit.common.web.CallingContext;
  */
 public class FormDefinition {
 	
-	private static final Map<XFormParameters, FormDefinition> formDefinitions = new HashMap<XFormParameters, FormDefinition>();
 	private static final Logger logger = Logger.getLogger(FormDefinition.class.getName());
+
+	/**
+	 * Map from the uriSubmissionDataModel key (uuid) to the FormDefinition.
+	 * If forms are deleted and reloaded, they get a different key each time.
+	 * The key is defined in the SubmissionAssociationTable.
+	 */
+	private static final Map<String, FormDefinition> formDefinitions = new HashMap<String, FormDefinition>();
 	
+	/** the entity that defines the mapping of the form id to this data model */
+	private final SubmissionAssociationTable submissionAssociation;
 	/** map from uri to FormDataModel; with navigable parent/child structure */
-	public final Map<String, FormDataModel> uriMap = new HashMap<String, FormDataModel>();
+	private final Map<String, FormDataModel> uriMap = new HashMap<String, FormDataModel>();
 	/** list of all tables (form, repeat group and auxillary) */
 	private final List<FormDataModel> tableList = new ArrayList<FormDataModel>();
 	/** list of non-repeat groups in xform */
@@ -435,7 +447,6 @@ public class FormDefinition {
 					SubmissionSet sFileset = new SubmissionSet(formInfo, 1L, FormInfo.fiFilesetTable, formInfoDefinition, formInfo.getKey(), cc);
 					((LongSubmissionType) sFileset.getElementValue(FormInfo.rootElementModelVersion)).setValueFromString(thisFormVersion.modelVersion.toString());
 					((LongSubmissionType) sFileset.getElementValue(FormInfo.rootElementUiVersion)).setValueFromString(thisFormVersion.uiVersion.toString());
-					((BooleanSubmissionType) sFileset.getElementValue(FormInfo.isFilesetComplete)).setValueFromString("yes");
 					((BooleanSubmissionType) sFileset.getElementValue(FormInfo.isDownloadAllowed)).setValueFromString("yes");
 					r.addSubmissionSet(sFileset);
 				}
@@ -469,48 +480,60 @@ public class FormDefinition {
 		return null;
 	}
 
-	public static final FormDefinition getFormDefinition(XFormParameters p, CallingContext cc) {
+	/**
+	 * 
+	 * @param xformParameters  -- the form id, version and ui version of a form definition.
+	 * @param uriSubmissionDataModel -- the uri of the definition specification.
+	 * @param cc
+	 * @return The definition.  The uriSubmissionDataModel is used to ensure that the 
+	 * 			currently valid definition of a form is being used (should the form be
+	 * 			deleted then reloaded).
+	 */
+	public static final FormDefinition getFormDefinition(XFormParameters xformParameters, CallingContext cc) {
 
-		if ( p.formId.indexOf('/') != -1 ) {
-			throw new IllegalArgumentException("formId is not well formed: " + p.formId);
+		if ( xformParameters.formId.indexOf('/') != -1 ) {
+			throw new IllegalArgumentException("formId is not well formed: " + xformParameters.formId);
 		}
-		
-		FormDefinition fd = formDefinitions.get(p);
-		if ( fd == null ) {
-			boolean asDaemon = cc.getAsDeamon();
+
+		// always look at SubmissionAssociationTable to retrieve the proper variant
+		boolean asDaemon = cc.getAsDeamon();
+		try {
+			cc.setAsDaemon(true);
+			List<? extends CommonFieldsBase> fdmList = null;
+			Datastore ds = cc.getDatastore();
+			User user = cc.getCurrentUser();
 			try {
-				cc.setAsDaemon(true);
-				List<? extends CommonFieldsBase> fdmList = null;
-				Datastore ds = cc.getDatastore();
-				User user = cc.getCurrentUser();
-				try {
-					// changes here should be paralleled in the FormParserForJavaRosa
-				    List<SubmissionAssociationTable> saList = SubmissionAssociationTable.findSubmissionAssociationsForXForm(p, cc);
-				    if ( saList.isEmpty() ) {
-				    	logger.warning("No sa record matching this formId " + p.toString());
-				    	return null;
-				    }
-				    if (saList.size() > 1 ) {
-						throw new IllegalStateException("Logic is not yet in place for cross-form submission sharing");
-				    }
-				    String thisUriSubmissionDataModel = saList.get(0).getUriSubmissionDataModel();
-				    // OK.  Found an sa record -- use it to find the fdm entries...
+			    List<SubmissionAssociationTable> saList = SubmissionAssociationTable.findSubmissionAssociationsForXForm(xformParameters, cc);
+			    if ( saList.isEmpty() ) {
+			    	logger.warning("No sa record matching this formId " + xformParameters.toString());
+			    	return null;
+			    }
+			    if (saList.size() > 1 ) {
+					throw new IllegalStateException("Logic is not yet in place for cross-form submission sharing");
+			    }
+			    String uriSubmissionDataModel = saList.get(0).getUriSubmissionDataModel();
+
+			    // try to retrieve based upon this uri...
+			    FormDefinition fd = formDefinitions.get(uriSubmissionDataModel);
+			    if ( fd != null ) { 
+			    	// found it...
+			    	return fd;
+			    } else {
+			    	// retrieve it...
 				    FormDataModel fdm = FormDataModel.assertRelation(cc);
 					Query query = ds.createQuery(fdm, user);
-					query.addFilter(FormDataModel.URI_SUBMISSION_DATA_MODEL, FilterOperation.EQUAL, thisUriSubmissionDataModel);
+					query.addFilter(FormDataModel.URI_SUBMISSION_DATA_MODEL, FilterOperation.EQUAL, uriSubmissionDataModel);
 					fdmList = query.executeQuery(0);
-				} catch (ODKDatastoreException e) {
-			    	logger.warning("Persistence Layer failure " + e.getMessage() + " for formId " + p.toString());
-					return null;
-				}
-				if ( fdmList == null || fdmList.size() == 0 ) {
-			    	logger.warning("No FDM records for formId " + p.toString());
-					return null;
-				}
-				
-				fd = new FormDefinition(p, fdmList, cc);
-				
-				if ( fd != null ) {
+					
+					if ( fdmList == null || fdmList.size() == 0 ) {
+				    	logger.warning("No FDM records for formId " + xformParameters.toString());
+						return null;
+					}
+					
+					// try to construct the fd...
+					fd = new FormDefinition(saList.get(0), xformParameters, fdmList, cc);
+
+					// and synchronize field sizes to those defined in the database...
 					try {
 						// update the form data model with the actual dimensions
 						// of its columns -- or create the tables from scratch...
@@ -532,28 +555,33 @@ public class FormDefinition {
 						
 					} catch (ODKDatastoreException e1) {
 						e1.printStackTrace();
-				    	logger.severe("Asserting relations failed for formId " + p.toString());
+				    	logger.severe("Asserting relations failed for formId " + xformParameters.toString());
 						fd = null;
 					}
-	
-					// errors might have cleared the fd...
+
+					// errors might have not cleared the fd...
 					if ( fd != null ) {
 						// remember details about this form
-						formDefinitions.put(p, fd);
+						formDefinitions.put(uriSubmissionDataModel, fd);
+						return fd;
 					}
 				}
-			} finally {
-				cc.setAsDaemon(asDaemon);
+			} catch (ODKDatastoreException e) {
+		    	logger.warning("Persistence Layer failure " + e.getMessage() + " for formId " + xformParameters.toString());
+				return null;
 			}
+		} finally {
+			cc.setAsDaemon(asDaemon);
 		}
-		return fd;
+		return null;
 	}
 
-    static final void forgetFormId(XFormParameters p) {
-		formDefinitions.remove(p);
+    static final void forget(String uriSubmissionDataModel) {
+		formDefinitions.remove(uriSubmissionDataModel);
 	}
 
-	public FormDefinition(XFormParameters xformParameters, List<?> formDataModelList, CallingContext cc) {
+	public FormDefinition(SubmissionAssociationTable sa, XFormParameters xformParameters, List<?> formDataModelList, CallingContext cc) {
+		this.submissionAssociation = sa;
 		this.xformParameters = xformParameters;
 		
 		// map of tableName to map of columnName, FDM record
@@ -867,6 +895,50 @@ public class FormDefinition {
 		topLevelGroupElement = FormElementModel.buildFormElementModelTree(topLevelGroup);
 	}
 	
+	public final void deleteDataModel(CallingContext cc) throws ODKDatastoreException {
+		User user = cc.getCurrentUser();
+		Datastore ds = cc.getDatastore();
+
+		// delete the SA table linking to the model (orphans the model)...
+		ds.deleteEntity(new EntityKey(submissionAssociation, submissionAssociation.getUri()), user);
+		// forget us in the local cache (optimization...)
+	    forget(submissionAssociation.getUriSubmissionDataModel());
+
+	    FormDataModel fdm = FormDataModel.assertRelation(cc);
+		List<EntityKey> eks = new ArrayList<EntityKey>();
+		// queue everything in the formDataModel for delete
+	    for ( FormDataModel m : uriMap.values() ) {
+			eks.add(new EntityKey(fdm, m.getUri()));
+	    }
+	    // delete everything out of FDM
+	    ds.deleteEntities(eks, user);
+
+	    // drop the tables...
+	    for ( CommonFieldsBase b : getBackingTableSet()) {
+	    	try {
+	    		ds.dropRelation(b, user);
+	    	} catch ( ODKDatastoreException e ) {
+	    		e.printStackTrace();
+	    	}
+	    }
+	}
+	
+	public void persistSubmissionAssociation(CallingContext cc) throws ODKEntityPersistException {
+		// the only mutable part of the form definition is the 
+		// submission association table's flags...
+		User user = cc.getCurrentUser();
+		Datastore ds = cc.getDatastore();
+		ds.putEntity(submissionAssociation, user);
+	}
+	
+	public boolean getIsSubmissionAllowed() {
+		return submissionAssociation.getIsSubmissionAllowed();
+	}
+	
+	public void setIsSubmissionAllowed(Boolean value) {
+		submissionAssociation.setIsSubmissionAllowed(value);
+	}
+	
 	/**
 	 * Get the top-level group for this form.
 	 * 
@@ -929,6 +1001,10 @@ public class FormDefinition {
 		return longStringRefTextTable;
 	}
 
+	public SubmissionAssociationTable getSubmissionAssociation() {
+		return submissionAssociation;
+	}
+	
 	public String getFormId() {
 		return xformParameters.formId;
 	}

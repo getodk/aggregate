@@ -23,6 +23,7 @@ import java.util.logging.Logger;
 
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.TaskLockType;
+import org.opendatakit.aggregate.constants.common.FormActionStatus;
 import org.opendatakit.aggregate.datamodel.TopLevelDynamicBase;
 import org.opendatakit.aggregate.exception.ODKExternalServiceDependencyException;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
@@ -30,7 +31,6 @@ import org.opendatakit.aggregate.externalservice.ExternalService;
 import org.opendatakit.aggregate.externalservice.FormServiceCursor;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.form.MiscTasks;
-import org.opendatakit.aggregate.form.MiscTasks.Status;
 import org.opendatakit.aggregate.form.PersistentResults;
 import org.opendatakit.aggregate.process.DeleteSubmissions;
 import org.opendatakit.aggregate.submission.Submission;
@@ -40,6 +40,7 @@ import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.persistence.TaskLock;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.web.CallingContext;
@@ -104,7 +105,13 @@ public class FormDeleteWorkerImpl {
     }
     
     try {
-      doDeletion(t);
+	  if ( t.getRequestDate().before(form.getCreationDate())) {
+		  // form is newer, so the task must not refer to this form definition...
+		  doMarkAsComplete(t);
+	  } else {
+		  // deletion request should have been created after the form...
+		  doDeletion(t);
+	  }
     } catch (Exception e) {
       e.printStackTrace();
     } finally {
@@ -262,6 +269,13 @@ public class FormDeleteWorkerImpl {
 		return allDeleted;
 	}
 	
+	private void doMarkAsComplete(MiscTasks t) throws ODKEntityPersistException {
+		// and mark us as completed... (don't delete for audit..).
+		t.setCompletionDate(new Date());
+		t.setStatus(FormActionStatus.SUCCESSFUL);
+		t.persist(cc);
+	}
+	
 	/**
 	 * we have gained a lock on the form.  Now go through and 
 	 * try to delete all other MTs and external services related
@@ -271,6 +285,7 @@ public class FormDeleteWorkerImpl {
 	 * @throws ODKTaskLockException 
 	 */
 	private boolean doDeletion(MiscTasks t) throws ODKDatastoreException, ODKTaskLockException {
+		
 		if ( !deleteMiscTasks(t) ) return false;
 		
 		deletePersistentResultTasks();
@@ -343,10 +358,7 @@ public class FormDeleteWorkerImpl {
 		// delete the form.
 		form.deleteForm(cc);
 
-		// and mark us as completed... (don't delete for audit..).
-		t.setCompletionDate(new Date());
-		t.setStatus(Status.SUCCESSFUL);
-		t.persist(cc);
+		doMarkAsComplete(t);
 		return true;
 	}
 }

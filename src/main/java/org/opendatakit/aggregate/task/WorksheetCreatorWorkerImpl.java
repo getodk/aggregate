@@ -22,18 +22,19 @@ import java.util.UUID;
 import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.TaskLockType;
 import org.opendatakit.aggregate.constants.common.ExternalServicePublicationOption;
+import org.opendatakit.aggregate.constants.common.FormActionStatus;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
 import org.opendatakit.aggregate.externalservice.ExternalService;
 import org.opendatakit.aggregate.externalservice.FormServiceCursor;
 import org.opendatakit.aggregate.externalservice.GoogleSpreadsheet;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.form.MiscTasks;
-import org.opendatakit.aggregate.form.MiscTasks.Status;
 import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.TaskLock;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.web.CallingContext;
@@ -125,7 +126,13 @@ public class WorksheetCreatorWorkerImpl {
 		}
 		
 		try {
-		  doWorksheetCreator();
+		  if ( t.getRequestDate().before(form.getCreationDate())) {
+			  // form is newer, so the task must not refer to this form definition...
+			  doMarkAsComplete(t);
+		  } else {
+			  // worksheet creation request should have been created after the form...
+			  doWorksheetCreator();
+		  }
 		} catch (Exception e2) {
 		  // some other unexpected exception...
 		  e2.printStackTrace();
@@ -147,6 +154,13 @@ public class WorksheetCreatorWorkerImpl {
 				e.printStackTrace();
 			}
 		}
+	}
+	
+	public void doMarkAsComplete(MiscTasks t) throws ODKEntityPersistException {
+		// and mark us as completed... (don't delete for audit..).
+		t.setCompletionDate(new Date());
+		t.setStatus(FormActionStatus.SUCCESSFUL);
+		t.objectEntity.persist(cc);
 	}
 	
 	public final void doWorksheetCreator() {
@@ -182,10 +196,7 @@ public class WorksheetCreatorWorkerImpl {
 				us.createFormUploadTask(fsc, cc);
 			}
 			
-			// and mark us as completing successfully
-	    	r.setStatus(Status.SUCCESSFUL);
-			r.setCompletionDate(new Date());
-			r.objectEntity.persist(cc);
+			doMarkAsComplete(r);
 	    }
 	  } catch (Exception e ) {
 		  failureRecovery(e);
@@ -201,7 +212,7 @@ public class WorksheetCreatorWorkerImpl {
 		s = Submission.fetchSubmission(miscTasksKey.splitSubmissionKey(), cc);
 		MiscTasks r = new MiscTasks(s);
 	    if ( attemptCount.equals(r.getAttemptCount()) ) {
-	    	r.setStatus(Status.FAILED);
+	    	r.setStatus(FormActionStatus.FAILED);
 	    	r.objectEntity.persist(cc);
 	    }
 	} catch (Exception ex) {

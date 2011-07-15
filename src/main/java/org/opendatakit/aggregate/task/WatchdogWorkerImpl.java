@@ -48,9 +48,10 @@ public class WatchdogWorkerImpl {
 	KmlGenerator kmlGenerator = (KmlGenerator) cc.getBean(BeanDefs.KML_BEAN);
 	WorksheetCreator worksheetCreator = (WorksheetCreator) cc.getBean(BeanDefs.WORKSHEET_BEAN);
 	FormDelete formDelete = (FormDelete) cc.getBean(BeanDefs.FORM_DELETE_BEAN);
+	PurgeOlderSubmissions purgeSubmissions = (PurgeOlderSubmissions) cc.getBean(BeanDefs.PURGE_OLDER_SUBMISSIONS_BEAN);
 	checkFormServiceCursors(checkIntervalMilliseconds, uploadSubmissions, cc);
     checkPersistentResults(csvGenerator, kmlGenerator, cc);
-    checkMiscTasks(worksheetCreator, formDelete, cc);
+    checkMiscTasks(worksheetCreator, formDelete, purgeSubmissions, cc);
   }
 
   private void checkFormServiceCursors(long checkIntervalMilliseconds, 
@@ -163,6 +164,7 @@ public class WatchdogWorkerImpl {
 
 
   private void checkMiscTasks(WorksheetCreator wsCreator, FormDelete formDelete,
+		  PurgeOlderSubmissions purgeSubmissions,
 		  CallingContext cc)
       throws ODKDatastoreException, ODKFormNotFoundException {
 	try {
@@ -185,6 +187,10 @@ public class WatchdogWorkerImpl {
 	        formDelete.createFormDeleteTask(form, aTask.getSubmissionKey(), attemptCount,
 	            cc);
 	        break;
+	      case PURGE_OLDER_SUBMISSIONS:
+	    	  purgeSubmissions.createPurgeOlderSubmissionsTask(form, aTask.getSubmissionKey(),
+	    			  attemptCount, cc);
+	    	  break;
 	      }
 	    }
 	} finally {

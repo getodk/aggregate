@@ -17,30 +17,43 @@
 package org.opendatakit.aggregate.client.form;
 
 import java.io.Serializable;
+import java.util.Date;
+
+import org.opendatakit.aggregate.constants.common.FormActionStatusTimestamp;
 
 public final class FormSummary implements Serializable {
 
   private static final long serialVersionUID = 5320217439717436812L;
   private String title;
   private String id;
+  // creation date is the date the form was uploaded to Aggregate...
+  private Date creationDate;
   private String createdUser;
   private boolean download;
   private boolean receiveSubmissions;
   private String viewURL;
+  // number of media files associated with this form
+  private int mediaFileCount = 0;
+  // if the form is marked for deletion
+  private FormActionStatusTimestamp mostRecentDeletionRequestStatus = null;
+  // if the form has a purge-submissions action in progress.
+  private FormActionStatusTimestamp mostRecentPurgeSubmissionsRequestStatus = null; 
   
   
   public FormSummary() {
 
   }
 
-  public FormSummary(String formTitle, String formId, String formCreateUser, boolean download,
-      boolean receiveSubmissions, String viewableURL) {
+  public FormSummary(String formTitle, String formId, Date creationDate, String formCreateUser,
+		  boolean download, boolean receiveSubmissions, String viewableURL, int mediaFileCount) {
     this.title = formTitle;
     this.id = formId;
+    this.creationDate = creationDate;
     this.createdUser = formCreateUser;
     this.download = download;
     this.receiveSubmissions = receiveSubmissions;
     this.viewURL = viewableURL;
+    this.mediaFileCount = mediaFileCount;
   }
 
   public String getTitle() {
@@ -51,6 +64,10 @@ public final class FormSummary implements Serializable {
     return id;
   }
 
+  public Date getCreationDate() {
+	  return creationDate;
+  }
+  
   public String getCreatedUser() {
     return createdUser;
   }
@@ -67,7 +84,29 @@ public final class FormSummary implements Serializable {
     return viewURL;
   }
   
-  /**
+  public int getMediaFileCount() {
+	return mediaFileCount;
+}
+
+public FormActionStatusTimestamp getMostRecentDeletionRequestStatus() {
+	return mostRecentDeletionRequestStatus;
+}
+
+public void setMostRecentDeletionRequestStatus(
+		FormActionStatusTimestamp mostRecentDeletionRequestStatus) {
+	this.mostRecentDeletionRequestStatus = mostRecentDeletionRequestStatus;
+}
+
+public FormActionStatusTimestamp getMostRecentPurgeSubmissionsRequestStatus() {
+	return mostRecentPurgeSubmissionsRequestStatus;
+}
+
+public void setMostRecentPurgeSubmissionsRequestStatus(
+		FormActionStatusTimestamp mostRecentPurgeSubmissionsRequestStatus) {
+	this.mostRecentPurgeSubmissionsRequestStatus = mostRecentPurgeSubmissionsRequestStatus;
+}
+
+/**
    * @see java.lang.Object#equals(java.lang.Object)
    */
   @Override

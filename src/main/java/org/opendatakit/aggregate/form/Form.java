@@ -26,7 +26,6 @@ import java.util.Map;
 
 import org.opendatakit.aggregate.client.form.FormSummary;
 import org.opendatakit.aggregate.constants.ServletConsts;
-import org.opendatakit.aggregate.datamodel.FormDataModel;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.datamodel.FormElementModel.ElementType;
 import org.opendatakit.aggregate.datamodel.TopLevelDynamicBase;
@@ -63,17 +62,15 @@ import org.opendatakit.common.web.CallingContext;
 public class Form {
 
   /**
-   * Submission entity
+   * The FormInfo description of this form.  This is the Submission 
+   * for the predefined form: 
+   *  ( FormInfoTable + FormInfoDescriptionTable + 
+   * 	FormInfoFilesetTable + FormInfoSubmissionTable) 
+   * that defines forms.
    */
   private final Submission objectEntity;
-
   /**
-   * SubmissionAssociation that identifies the form data model of the
-   * tables that hold this form's submissions.  
-   */
-  private final SubmissionAssociationTable submissionAssociation;
-  /**
-   * Definition of what the Submission xform is.
+   * Definition of the database representation of the form submission.
    */
   private final FormDefinition formDefinition;
 
@@ -113,17 +110,8 @@ public class Form {
   Form(Submission submission, CallingContext cc) throws ODKDatastoreException {
     objectEntity = submission;
 	XFormParameters p = getSubmissionXFormParameters(cc);
-	  
-	List<SubmissionAssociationTable> match = SubmissionAssociationTable.findSubmissionAssociationsForXForm(p, cc);
-	if ( !match.isEmpty() ) {
-		if ( match.size() != 1 ) {
-			throw new IllegalStateException("Logic is not yet in place for cross-form submission sharing");
-		}
-		submissionAssociation = match.get(0);
-	} else {
-		throw new IllegalStateException("No SubmissionAssociation record for form");
-	}
-    formDefinition = FormDefinition.getFormDefinition(p, cc);
+
+	formDefinition = FormDefinition.getFormDefinition(p, cc);
   }
   
   public XFormParameters getSubmissionXFormParameters(CallingContext cc) {
@@ -141,13 +129,11 @@ public class Form {
 	return submissionDefn;
   }
   
-  public SubmissionAssociationTable getSubmissionAssociation() {
-    return submissionAssociation;
-  }
-  
   public void persist(CallingContext cc) throws ODKDatastoreException {
     objectEntity.persist(cc);
-	cc.getDatastore().putEntity(submissionAssociation, cc.getCurrentUser());
+    if ( formDefinition != null ) {
+    	formDefinition.persistSubmissionAssociation(cc);
+    }
     
     // TODO: redo this further after mitch's list of key changes
     
@@ -162,44 +148,18 @@ public class Form {
    * @throws ODKDatastoreException
    */
   public void deleteForm(CallingContext cc) throws ODKDatastoreException {
-	FormDataModel fdm = FormDataModel.assertRelation(cc);
     List<EntityKey> eksFormInfo = new ArrayList<EntityKey>();
-    
-    XFormParameters ref = null;
-    
-    if ( submissionAssociation != null ) {
-    	ref = submissionAssociation.getXFormParameters();
-    	eksFormInfo.add(new EntityKey(submissionAssociation, submissionAssociation.getUri()));
-    }
     
     // queue everything in formInfo for delete
     objectEntity.recursivelyAddEntityKeys(eksFormInfo, cc);
-    Datastore ds = cc.getDatastore();
-    User user = cc.getCurrentUser();
     
 	if ( formDefinition != null ) {
-		List<EntityKey> eks = new ArrayList<EntityKey>();
-
-		// queue everything in the formDataModel for delete
-	    for ( FormDataModel m : formDefinition.uriMap.values() ) {
-	    	
-			eks.add(new EntityKey(fdm, m.getUri()));
-	    }
-	    // delete everything out of FDM
-	    ds.deleteEntities(eks, user);
-	    // drop the tables...
-	    for ( CommonFieldsBase b : formDefinition.getBackingTableSet()) {
-	    	try {
-	    		ds.dropRelation(b, user);
-	    	} catch ( ODKDatastoreException e ) {
-	    		e.printStackTrace();
-	    	}
-	    }
+		// delete the data model
+		formDefinition.deleteDataModel(cc);
 	}
 
-	// tell FormDefinition to forget me...
-    FormDefinition.forgetFormId(ref);
-
+    Datastore ds = cc.getDatastore();
+    User user = cc.getCurrentUser();
     // delete everything in formInfo
     ds.deleteEntities(eksFormInfo, user);
   }
@@ -449,7 +409,7 @@ public class Form {
    * @return true if a new submission can be received, false otherwise
    */
   public Boolean getSubmissionEnabled() {
-	return submissionAssociation.getIsSubmissionAllowed();
+	return formDefinition.getIsSubmissionAllowed();
   }
 
   /**
@@ -460,7 +420,7 @@ public class Form {
    * 
    */
   public void setSubmissionEnabled(Boolean submissionEnabled) {
-	submissionAssociation.setIsSubmissionAllowed(submissionEnabled);
+	  formDefinition.setIsSubmissionAllowed(submissionEnabled);
   }
   
   private FormElementModel findElementByNameHelper(FormElementModel current, String name) {
@@ -572,8 +532,8 @@ public class Form {
 
     String viewableURL = HtmlUtil.createHrefWithProperties(cc.getWebApplicationURL(FormXmlServlet.WWW_ADDR),
         xmlProperties, getViewableName());
-
-    return new FormSummary(getViewableName(), getFormId(), getCreationUser(), downloadable, submit, viewableURL);
+    int mediaFileCount = getManifestFileset().getAttachmentCount();
+    return new FormSummary(getViewableName(), getFormId(), getCreationDate(), getCreationUser(), downloadable, submit, viewableURL, mediaFileCount);
   }
   
   /**

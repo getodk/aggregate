@@ -31,12 +31,14 @@ import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.common.ExportType;
+import org.opendatakit.aggregate.constants.common.FormActionStatusTimestamp;
 import org.opendatakit.aggregate.constants.format.FormTableConsts;
 import org.opendatakit.aggregate.datamodel.FormElementKey;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
 import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.form.MiscTasks;
 import org.opendatakit.aggregate.form.PersistentResults;
 import org.opendatakit.aggregate.query.QueryFormList;
 import org.opendatakit.aggregate.query.submission.QueryByDate;
@@ -73,9 +75,32 @@ public class FormServiceImpl extends RemoteServiceServlet implements
       List<Form> forms = formsList.getForms();
       FormSummary[] formSummary = new FormSummary[forms.size()];
 
+      // get most recent form-deletion statuses
+      Map<String,FormActionStatusTimestamp> formDeletionStatuses = 
+    	  MiscTasks.getFormDeletionStatusTimestampOfAllFormIds(cc);
+
+      // get most recent purge-submissions statuses
+      Map<String,FormActionStatusTimestamp> submissionPurgeStatuses = 
+    	  MiscTasks.getPurgeSubmissionsStatusTimestampOfAllFormIds(cc);
+      
       int index = 0;
       for (Form form : forms) {
-        formSummary[index++] = form.generateFormSummary(cc);
+        formSummary[index] = form.generateFormSummary(cc);
+        Date formLoadDate = formSummary[index].getCreationDate();
+        
+        // the form could have been deleted and reloaded...
+        // make sure that the action is after the creation date for 
+        // this instance of this form id.
+        FormActionStatusTimestamp t;
+        t = formDeletionStatuses.get(form.getFormId());
+        if ( t != null && t.getTimestamp().after(formLoadDate) ) {
+        	formSummary[index].setMostRecentDeletionRequestStatus(t);
+        }
+        t = submissionPurgeStatuses.get(form.getFormId());
+        if ( t != null && t.getTimestamp().after(formLoadDate) ) {
+        	formSummary[index].setMostRecentPurgeSubmissionsRequestStatus(t);
+        }
+        ++index;
       }
       return formSummary;
 

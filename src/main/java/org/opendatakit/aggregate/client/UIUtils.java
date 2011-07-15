@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2011 University of Washington
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+
 package org.opendatakit.aggregate.client;
 
 import java.util.ArrayList;
@@ -6,6 +22,7 @@ import java.util.List;
 import org.opendatakit.aggregate.client.filter.FilterGroup;
 import org.opendatakit.aggregate.client.filter.FilterSet;
 import org.opendatakit.aggregate.client.form.FormSummary;
+import org.opendatakit.aggregate.constants.common.FormActionStatusTimestamp;
 import org.opendatakit.aggregate.constants.common.UIConsts;
 
 import com.google.gwt.user.client.ui.ListBox;
@@ -23,7 +40,7 @@ public class UIUtils {
     
     if (newFormsToDisplay == null || newFormsToDisplay.length == 0) {
       newFormsToDisplay = new FormSummary[1];
-      newFormsToDisplay[0] = new FormSummary(NO_FORM, null, null, false, false, null);
+      newFormsToDisplay[0] = new FormSummary(NO_FORM, null, null, null, false, false, null, 0);
     } 
 
     formsBox.clear();
@@ -31,9 +48,13 @@ public class UIUtils {
     // populate the form box
     for (int i = 0; i < newFormsToDisplay.length; i++) {
       FormSummary form = newFormsToDisplay[i];
+      // don't show forms marked for deletion...
+      FormActionStatusTimestamp deletionStatus = form.getMostRecentDeletionRequestStatus();
+      if ( deletionStatus != null && deletionStatus.getStatus().isActiveRequest()) continue;
+      
       formsBox.addItem(form.getTitle(), form.getId());
       if (form.equals(currentFormSelected)) {
-        selectedIndex = i;
+        selectedIndex = formsBox.getItemCount()-1;
       }
     }
 
