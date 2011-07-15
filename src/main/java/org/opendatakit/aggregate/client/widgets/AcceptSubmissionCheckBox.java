@@ -18,6 +18,7 @@ package org.opendatakit.aggregate.client.widgets;
 
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.SecureGWT;
+import org.opendatakit.common.security.common.GrantedAuthorityName;
 
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
@@ -31,6 +32,9 @@ public class AcceptSubmissionCheckBox extends ACheckBoxBase implements ValueChan
     super();
     this.formId = formId;
     setValue(accept);
+    boolean enabled = AggregateUI.getUI().getUserInfo()
+	.getGrantedAuthorities().contains(GrantedAuthorityName.ROLE_DATA_OWNER);
+    setEnabled(enabled);
     addValueChangeHandler(this);
   }
 

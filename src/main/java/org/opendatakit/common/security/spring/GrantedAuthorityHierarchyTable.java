@@ -17,7 +17,9 @@ package org.opendatakit.common.security.spring;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
@@ -116,7 +118,7 @@ public final class GrantedAuthorityHierarchyTable extends CommonFieldsBase {
 		return reference;
 	}
 	
-	public static final TreeSet<GrantedAuthority> getSubordinateGrantedAuthorities( 
+	public static final Set<GrantedAuthority> getSubordinateGrantedAuthorities( 
 											GrantedAuthority dominantGrant, CallingContext cc ) throws ODKDatastoreException {
 		
 		Datastore ds = cc.getDatastore();
@@ -130,7 +132,7 @@ public final class GrantedAuthorityHierarchyTable extends CommonFieldsBase {
 		groupsList = query.executeQuery(0);
 
 		// construct the set of groups that this group directly inherits from
-		TreeSet<GrantedAuthority> groups = new TreeSet<GrantedAuthority>();
+		Set<GrantedAuthority> groups = new HashSet<GrantedAuthority>();
 		for ( CommonFieldsBase b : groupsList ) {
 			GrantedAuthorityHierarchyTable t = (GrantedAuthorityHierarchyTable) b;
 			groups.add(t.getSubordinateGrantedAuthority());
