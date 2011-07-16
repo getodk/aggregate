@@ -14,7 +14,7 @@
  * the License.
  */
 
-package org.opendatakit.aggregate.client;
+package org.opendatakit.aggregate.client.permissions;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -24,6 +24,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
 
+import org.opendatakit.aggregate.client.AggregateUI;
+import org.opendatakit.aggregate.client.PermissionsSubTab;
+import org.opendatakit.aggregate.client.SecureGWT;
 import org.opendatakit.aggregate.client.popups.ChangePasswordPopup;
 import org.opendatakit.aggregate.client.popups.ConfirmUserDeletePopup;
 import org.opendatakit.common.security.client.UserSecurityInfo;
@@ -62,7 +65,7 @@ import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 
-public class TemporaryAccessConfigurationSheet extends Composite {
+public class AccessConfigurationSheet extends Composite {
 
 	private static final String K_INVALID_EMAIL_CHARACTERS = " \t\n\r\",;()<>?/{}'[]";
 
@@ -86,12 +89,14 @@ public class TemporaryAccessConfigurationSheet extends Composite {
 			.create(TemporaryAccessConfigurationSheetUiBinder.class);
 
 	interface TemporaryAccessConfigurationSheetUiBinder extends
-			UiBinder<Widget, TemporaryAccessConfigurationSheet> {
+			UiBinder<Widget, AccessConfigurationSheet> {
 	}
 
 	private final ListDataProvider<UserSecurityInfo> dataProvider = new ListDataProvider<UserSecurityInfo>();
 	private final ListHandler<UserSecurityInfo> columnSortHandler = new ListHandler<UserSecurityInfo>(
 			dataProvider.getList());
+	
+	private boolean anonymousAttachmentBoolean = false;
 
 	private boolean changesHappened = false;
 
@@ -246,6 +251,16 @@ public class TemporaryAccessConfigurationSheet extends Composite {
 			if (!auth.equals(GrantedAuthorityName.GROUP_DATA_COLLECTORS)) {
 				// we may be disabling or enabling some checkboxes...
 				userTable.redraw();
+				if ( object.getType() == UserType.ANONYMOUS ) { 
+					boolean isGDV = object.getAssignedUserGroups().contains(GrantedAuthorityName.GROUP_DATA_VIEWERS); 
+					if ( isGDV ) {
+						anonymousAttachmentViewers.setValue(true, false);
+					} else {
+						// restore original value to checkbox...
+						anonymousAttachmentViewers.setValue(anonymousAttachmentBoolean, false);
+					}
+					anonymousAttachmentViewers.setEnabled(!isGDV );
+				}
 			}
 			uiOutOfSyncWithServer();
 		}
@@ -294,16 +309,19 @@ public class TemporaryAccessConfigurationSheet extends Composite {
 		@Override
 		public void onSuccess(ArrayList<UserSecurityInfo> result) {
 			dataProvider.getList().clear();
-			dataProvider.getList().addAll(result);
 			addedUsers.setText("");
 			for (UserSecurityInfo i : result) {
 				if (i.getType() == UserType.ANONYMOUS) {
-					TreeSet<GrantedAuthorityName> authSet = i.getGrantedAuthorities();
-					boolean hasAV = authSet.contains(GrantedAuthorityName.ROLE_ATTACHMENT_VIEWER);
-					anonymousAttachmentViewers.setValue(hasAV);
+					TreeSet<GrantedAuthorityName> assignedSet = i.getAssignedUserGroups();
+					boolean hasAV = assignedSet.contains(GrantedAuthorityName.ROLE_ATTACHMENT_VIEWER);
+					anonymousAttachmentBoolean = hasAV;
+					boolean isGDV = i.getAssignedUserGroups().contains(GrantedAuthorityName.GROUP_DATA_VIEWERS);
+					anonymousAttachmentViewers.setValue(anonymousAttachmentBoolean || isGDV, false);
+					anonymousAttachmentViewers.setEnabled(!isGDV );
 					break;
 				}
 			}
+			dataProvider.getList().addAll(result);
 			uiInSyncWithServer();
 		}
 	};
@@ -325,8 +343,11 @@ public class TemporaryAccessConfigurationSheet extends Composite {
 		users.addAll(dataProvider.getList());
 		for (UserSecurityInfo i : users) {
 			if (i.getType() == UserType.ANONYMOUS) {
-				if (anonymousAttachmentViewers.getValue()) {
+				if (anonymousAttachmentBoolean) {
 					i.getAssignedUserGroups().add(
+							GrantedAuthorityName.ROLE_ATTACHMENT_VIEWER);
+				} else {
+					i.getAssignedUserGroups().remove(
 							GrantedAuthorityName.ROLE_ATTACHMENT_VIEWER);
 				}
 				break;
@@ -632,7 +653,7 @@ public class TemporaryAccessConfigurationSheet extends Composite {
 		@Override
 		public void execute(UserSecurityInfo object) {
 			final ConfirmUserDeletePopup popup = new ConfirmUserDeletePopup(
-					object, TemporaryAccessConfigurationSheet.this);
+					object, AccessConfigurationSheet.this);
 			popup.setPopupPositionAndShow(new PopupPanel.PositionCallback() {
 				@Override
 				public void setPosition(int offsetWidth, int offsetHeight) {
@@ -667,7 +688,7 @@ public class TemporaryAccessConfigurationSheet extends Composite {
 		}
 	};
 
-	public TemporaryAccessConfigurationSheet(PermissionsSubTab permissionsTab) {
+	public AccessConfigurationSheet(PermissionsSubTab permissionsTab) {
 		initWidget(uiBinder.createAndBindUi(this));
 		sinkEvents(Event.ONCHANGE | Event.ONCLICK);
 		SafeHtmlBuilder sb = new SafeHtmlBuilder();
@@ -750,6 +771,7 @@ public class TemporaryAccessConfigurationSheet extends Composite {
 
 	@UiHandler("anonymousAttachmentViewers")
 	void onAnonAttachmentViewerChange(ValueChangeEvent<Boolean> event) {
+		anonymousAttachmentBoolean = event.getValue();
 		uiOutOfSyncWithServer();
 	}
 	

@@ -16,7 +16,7 @@
 
 package org.opendatakit.aggregate.client.popups;
 
-import org.opendatakit.aggregate.client.TemporaryAccessConfigurationSheet;
+import org.opendatakit.aggregate.client.permissions.AccessConfigurationSheet;
 import org.opendatakit.aggregate.client.widgets.ClosePopupButton;
 import org.opendatakit.aggregate.client.widgets.ExecuteDeleteUserButton;
 import org.opendatakit.common.security.client.UserSecurityInfo;
@@ -27,7 +27,7 @@ import com.google.gwt.user.client.ui.PopupPanel;
 
 public class ConfirmUserDeletePopup extends PopupPanel {
 
-  public ConfirmUserDeletePopup(UserSecurityInfo userToDelete, TemporaryAccessConfigurationSheet sheet) {
+  public ConfirmUserDeletePopup(UserSecurityInfo userToDelete, AccessConfigurationSheet sheet) {
     super(false);
     setModal(true);
 
