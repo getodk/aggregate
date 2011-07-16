@@ -192,7 +192,14 @@ public class AccessConfigurationSheet extends Composite {
 				}
 				return true;
 			case GROUP_SITE_ADMINS:
-				return true;
+				String email = info.getEmail();
+				if (email == null)
+					return true;
+				// don't let the designated super-user un-check their 
+				// site admin privileges.
+				String superUserEmail = AggregateUI.getUI().getRealmInfo()
+						.getSuperUserEmail();
+				return !superUserEmail.equals(email);
 			default:
 				return false;
 			}
