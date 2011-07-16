@@ -1,3 +1,3 @@
-drop schema "odk_test";
-drop database "odk_test";
-drop user "odk_test";
+drop schema "odk_unit";
+drop database "odk_unit";
+drop user "odk_unit";

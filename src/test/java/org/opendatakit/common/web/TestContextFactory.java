@@ -2,6 +2,7 @@ package org.opendatakit.common.web;
 
 import javax.servlet.ServletContext;
 
+import org.junit.Ignore;
 import org.opendatakit.common.constants.BasicConsts;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.security.User;
@@ -9,6 +10,7 @@ import org.opendatakit.common.security.UserService;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
+@Ignore("not a test")
 public class TestContextFactory {
 
 	  public static final String USER_BEAN = "user_service";
@@ -20,6 +22,7 @@ public class TestContextFactory {
 	    private static final String APP_CONTEXT_PATH = "odk-settings.xml";
 	    private static final ApplicationContext applicationContext = new ClassPathXmlApplicationContext(APP_CONTEXT_PATH);
 
+	    @Ignore("not a test")
 	    public static final class CallingContextImpl implements CallingContext {
 	    	final String serverUrl;
 	    	final String secureServerUrl;

@@ -1,2 +1,2 @@
-drop database odk_test;
-drop user 'odk_test'@'localhost';
+drop database `odk_unit`;
+drop user 'odk_unit'@'localhost';

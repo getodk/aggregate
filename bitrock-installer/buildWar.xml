@@ -1,7 +1,7 @@
 <project>
     <shortName>ODKAggregate</shortName>
     <fullName>ODK Aggregate</fullName>
-    <version>1.0 Beta rev. 3</version>
+    <version>1.0 Beta rev. 3 01</version>
     <licenseFile>files/LICENSE.txt</licenseFile>
     <leftImage>files/leftSide.png</leftImage>
     <logoImage>files/logo.png</logoImage>
@@ -34,9 +34,9 @@
     </customLanguageFileList>
     <finalPageActionList>
         <runProgram>
-            <program>cmd.exe</program>
-            <programArguments>/c "start /b ${installdir}\uploadAggregateToAppEngine.hta"</programArguments>
-            <progressText>Launch upload script</progressText>
+            <program>cmd</program>
+            <programArguments>/S /C start /D "${installdir}" /B .${platform_path_separator}uploadAggregateToAppEngine.hta</programArguments>
+            <progressText>Launch installation script (3-10 minutes).</progressText>
             <useMSDOSPath>0</useMSDOSPath>
             <workingDirectory>${installdir}</workingDirectory>
             <ruleList>
@@ -52,7 +52,7 @@
         </runProgram>
         <runProgram>
             <program>osascript</program>
-            <programArguments>${installdir}/uploadAggregateToAppEngine.app</programArguments>
+            <programArguments>'${installdir}/uploadAggregateToAppEngine.app'</programArguments>
             <progressText>Launch upload script</progressText>
             <workingDirectory>${installdir}</workingDirectory>
             <ruleList>
@@ -68,8 +68,8 @@
         </runProgram>
         <runProgram>
             <program>xterm</program>
-            <programArguments>-e bash -c ${installdir}/uploadAggregateToAppEngine.sh</programArguments>
-            <progressText>Launch upload script</progressText>
+            <programArguments>-e bash -c '${installdir}/uploadAggregateToAppEngine.sh'</programArguments>
+            <progressText>Launch install script</progressText>
             <workingDirectory>${installdir}</workingDirectory>
             <ruleList>
                 <compareText>
@@ -83,8 +83,8 @@
             </ruleList>
         </runProgram>
         <runProgram>
-            <program>cmd.exe</program>
-            <programArguments>/c "start /b ${installdir}\README.html"</programArguments>
+            <program>cmd</program>
+            <programArguments>/S /C start /D "${installdir}" /B .${platform_path_separator}README.html</programArguments>
             <progressText>Show additional deployment and configuration steps</progressText>
             <useMSDOSPath>0</useMSDOSPath>
             <workingDirectory>${installdir}</workingDirectory>
