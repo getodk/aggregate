@@ -25,14 +25,34 @@
 .gwt-Button-close img {
 	margin: 0px 0px -3px 0px;
 }
+
+.gwt-Button[disabled] {
+	opacity: 0.5;
+	filter: alpha(opacity = 50);
+	border: 1px solid #4E4E4E;
+}
+
 .gwt-Button:hover {
 	background: #DFF4FF;
 	border: 1px solid #C2E1EF;
 }
+
+.gwt-Button[disabled]:hover {
+	background: #F5F5F5;
+	border: 1px solid #4E4E4E;
+}
+
 .gwt-Button:active {
 	background: #163CB8;
 	color: #DFF4FF;
 }
+
+.gwt-Button[disabled]:active {
+	background: #F5F5F5;
+	color: #336699;
+	border: 1px solid #4E4E4E;
+}
+
 .gwt-Button-negative {
 	color: #D12F19;
 }
@@ -41,10 +61,22 @@
 	border: 1px solid #FBC2C4;
 	color: #D12F19;
 }
+
+.gwt-Button-negative[disabled]:hover {
+	background: #F5F5F5;
+	border: 1px solid #4E4E4E;
+}
+
 .gwt-Button-negative:active {
 	background: #990A10;
 	color: #FBE3E4;
 }
+
+.gwt-Button-negative[disabled]:active {
+	background: #F5F5F5;
+	color: #D12F19;
+}
+
 .gwt-Button-positive {
 	color: #529214;
 }
@@ -53,7 +85,19 @@
 	border: 1px solid #C6D880;
 	color: #529214;
 }
+
+.gwt-Button-positive[disabled]:hover {
+	background: #F5F5F5;
+	color: #529214;
+	border: 1px solid #4E4E4E;
+}
+
 .gwt-Button-positive:active {
 	background: #21A60F;
 	color: #E6EFC2;
+}
+
+.gwt-Button-positive[disabled]:active {
+	background: #F5F5F5;
+	color: #529214;
 }
