@@ -16,7 +16,7 @@
 
 package org.opendatakit.aggregate.client.widgets;
 
-import org.opendatakit.aggregate.client.TemporaryAccessConfigurationSheet;
+import org.opendatakit.aggregate.client.permissions.AccessConfigurationSheet;
 import org.opendatakit.common.security.client.UserSecurityInfo;
 
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -26,10 +26,10 @@ import com.google.gwt.user.client.ui.PopupPanel;
 public class ExecuteDeleteUserButton extends AButtonBase implements ClickHandler {
  
   private UserSecurityInfo user;
-  private TemporaryAccessConfigurationSheet sheet;
+  private AccessConfigurationSheet sheet;
   private PopupPanel popup;
   
-  public ExecuteDeleteUserButton(UserSecurityInfo user, TemporaryAccessConfigurationSheet sheet, PopupPanel popup) {
+  public ExecuteDeleteUserButton(UserSecurityInfo user, AccessConfigurationSheet sheet, PopupPanel popup) {
     super("<img src=\"images/green_right_arrow.png\" /> Delete User");
     this.user = user;
     this.sheet = sheet;
