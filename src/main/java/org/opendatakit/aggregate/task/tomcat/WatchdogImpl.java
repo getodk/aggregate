@@ -107,7 +107,10 @@ public class WatchdogImpl implements Watchdog, SmartLifecycle, InitializingBean,
     	    	(identifiedScheme.equalsIgnoreCase("https") &&
     	    			identifiedPort == HtmlConsts.SECURE_WEB_PORT);
     		
-    		String path = ctxt.getContextPath();
+    		String path = "";
+    		if ( ctxt != null ) {
+    			path = ctxt.getContextPath();
+    		}
     		
     		if (!expectedPort) {
     	    	serverUrl = identifiedScheme + "://" + identifiedHostname + BasicConsts.COLON + 

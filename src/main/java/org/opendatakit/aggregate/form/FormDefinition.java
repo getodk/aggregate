@@ -750,7 +750,7 @@ public class FormDefinition {
 			DynamicCommonFieldsBase b = backingTableMap.get(tableName);
 			if ( b == null ) {
 				if ( isWellKnownForm ) {
-					throw new IllegalStateException("Well-known forms expect all backing tables to be defined");
+					throw new IllegalStateException("Well-known form: " + xformParameters.formId + " expects all backing tables to be defined");
 				}
 				/*
 				 * Determine if the given group is equivalent to the top level group.  This
@@ -803,7 +803,7 @@ public class FormDefinition {
 			DynamicCommonFieldsBase b = backingTableMap.get(tableName);
 			if ( b == null ) {
 				if ( isWellKnownForm ) {
-					throw new IllegalStateException("Well-known forms expect all backing tables to be defined");
+					throw new IllegalStateException("Well-known form: " + xformParameters.formId + " expects all backing tables to be defined");
 				}
 				b = new InstanceData(m.getPersistAsSchema(), m.getPersistAsTable());
 				backingTableMap.put(tableName, b);
@@ -860,7 +860,7 @@ public class FormDefinition {
 						}
 					}
 					if ( dfd == null ) {
-						throw new IllegalStateException("Unable to locate data field in a well-known form");
+						throw new IllegalStateException("Unable to locate data field in a well-known form: " + xformParameters.formId);
 					}
 					if ( !dfd.getDataType().equals(dataType) ) {
 						throw new IllegalStateException("Data type of data field " + dfd.getName() + " is different than expected");
