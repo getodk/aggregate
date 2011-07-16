@@ -633,18 +633,6 @@
 								</sources>
 							</configuration>
 						</execution>
-						<execution>
-						  <id>add-integration-test-sources</id>
-						  <phase>generate-sources</phase>
-						  <goals>
-							<goal>add-test-source</goal>
-						  </goals>
-						  <configuration>
-							<sources>
-							  <source>${project.parent.basedir}/src/it/java</source>
-							</sources>
-						  </configuration>
-						</execution>
 					</executions>
 				</plugin>
 				<plugin>
@@ -812,7 +800,7 @@
 							<configuration>
 							  <target>
 								<exec executable="${mysql.client.executable}" failonerror="false">
-								  <arg line="-u root -p'${mysql.root.password}'" />
+								  <arg line="-u root -p${mysql.root.password}" />
 								  <redirector input="${scriptSourceDirectory}/mysql_teardown.sql" />
 								</exec>
 							  </target>
@@ -820,16 +808,15 @@
 						</execution>
 						<execution>
 							<!--  Makes sure we start with a clean postgres (no pre-existing database that we want to create) -->
-							<id>pre-postgres-teardown</id>
+							<id>pre-postgresql-teardown</id>
 							<goals>
 							  <goal>run</goal>
 							</goals>
 							<configuration>
 							  <target>
-								<exec executable="${postgres.client.executable}" failonerror="false">
+								<exec executable="${postgres.client.executable}" inputstring="${postgres.root.password}\n\0" failonerror="false">
 								  <arg value="--username=postgres" />
 								  <arg value="--file=${scriptSourceDirectory}/postgres_teardown.sql" />
-								  <inputstring value="${postgres.root.password}\n" />
 								</exec>
 							  </target>
 							</configuration>
@@ -843,7 +830,7 @@
 							<configuration>
 							  <target>
 								<exec executable="${mysql.client.executable}" failonerror="true">
-								  <arg line="-u root -p'${mysql.root.password}'" />
+								  <arg line="-u root -p${mysql.root.password}" />
 								  <redirector input="${scriptSourceDirectory}/mysql_setup.sql" />
 								</exec>
 							  </target>
@@ -851,16 +838,15 @@
 						</execution>
 						<execution>
 							<!--  Sets up the postgres database for use in integration testing -->
-							<id>postgres-setup</id>
+							<id>postgresql-setup</id>
 							<goals>
 							  <goal>run</goal>
 							</goals>
 							<configuration>
 							  <target>
-								<exec executable="${postgres.client.executable}" failonerror="true">
+								<exec executable="${postgres.client.executable}" inputstring="${postgres.root.password}\n\0" failonerror="true">
 								  <arg value="--username=postgres" />
 								  <arg value="--file=${scriptSourceDirectory}/postgres_setup.sql" />
-								  <inputstring value="${postgres.root.password}\n" />
 								</exec>
 							  </target>
 							</configuration>
@@ -874,7 +860,7 @@
 							<configuration>
 							  <target>
 								<exec executable="${mysql.client.executable}" failonerror="true">
-								  <arg line="-u root -p'${mysql.root.password}'" />
+								  <arg line="-u root -p${mysql.root.password}" />
 								  <redirector input="${scriptSourceDirectory}/mysql_teardown.sql" />
 								</exec>
 							  </target>
@@ -882,16 +868,15 @@
 						</execution>
 						<execution>
 							<!--  Tears down whatever we set up in the postgres-setup execution -->
-							<id>postgres-teardown</id>
+							<id>postgresql-teardown</id>
 							<goals>
 							  <goal>run</goal>
 							</goals>
 							<configuration>
 							  <target>
-								<exec executable="${postgres.client.executable}" failonerror="true">
+								<exec executable="${postgres.client.executable}" inputstring="${postgres.root.password}\n\0" failonerror="true">
 								  <arg value="--username=postgres" />
 								  <arg value="--file=${scriptSourceDirectory}/postgres_teardown.sql" />
-								  <inputstring value="${postgres.root.password}\n" />
 								</exec>
 							  </target>
 							</configuration>
@@ -1057,22 +1042,6 @@
 			</plugins>
 		</pluginManagement>
 	</build>
-	<reporting>
-		<plugins>
-		  <plugin>
-			<groupId>org.sonatype.maven.plugin</groupId>
-			<artifactId>emma-maven-plugin</artifactId>
-			<version>1.2</version>
-			<inherited>true</inherited>
-		  </plugin>
-		  <plugin>
-			<groupId>org.apache.maven.plugins</groupId>
-			<artifactId>maven-surefire-report-plugin</artifactId>
-			<version>2.6</version>
-			<inherited>true</inherited>
-		  </plugin>
-		</plugins>
-	</reporting>
 	<ciManagement>
 		<system>hudson</system>
 		<url>opendatakit.cs.washington.edu/jenkins</url>

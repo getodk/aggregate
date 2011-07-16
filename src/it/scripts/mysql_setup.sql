@@ -1,3 +1,4 @@
-create database odk_test;
-create user 'odk_test'@'localhost' identified by 'odk_test';
-grant all on odk_test.* to 'odk_test'@'localhost' identified by 'odk_test';
+create database `odk_unit`;
+create user 'odk_unit'@'localhost' identified by 'odk_unit';
+grant all on `odk_unit`.* to 'odk_unit'@'localhost' identified by 'odk_unit';
+flush privileges;

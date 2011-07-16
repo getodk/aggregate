@@ -188,7 +188,7 @@
                 <propertiesFileSet>
                     <file>${temp_dir}/conf/${platform}/jdbc.properties</file>
                     <key>jdbc.help.about</key>
-                    <value>auto-generated on ${creation.timestamp} for ${organization_url} ${product_fullname} ${product_version}</value>
+                    <value>auto-generated on ${creation.timestamp} for ${instance_display_name} ${product_fullname} ${product_version}</value>
                 </propertiesFileSet>
             </actionList>
         </actionGroup>
@@ -268,30 +268,57 @@
 
                          Actions are as follows:                                                        
 
-                            If the checkbox ${tomcat_authentication_should_configure} was checked, set: 
-
-                            security.server.secureChannelType=REQUIRES_SECURE_CHANNEL 
-
-                            If ${comm_sec_option} 1 is chosen:
+                            If the checkbox ${tomcat_authentication_should_configure} was not checked
+							and ${platform} is not gae, then set:
+							
                             security.server.deviceAuthentication=digest
-                            security.server.channelType=ANY_CHANNEL If
+							security.server.channelType=ANY_CHANNEL 
+							security.server.secureChannelType=ANY_CHANNEL 
 
-                            If ${comm_sec_option} 2 is chosen:
+							else 
                             security.server.deviceAuthentication=digest
-                            security.server.channelType=REQUIRES_SECURE_CHANNEL
-
-                            If ${comm_sec_option} 3 is chosen:
-                            security.server.deviceAuthentication=basic
-                            security.server.channelType=REQUIRES_SECURE_CHANNEL
-
-                            If ${comm_sec_option} 4 is chosen:
-                            security.server.deviceAuthentication=digest
-                            security.server.secureChannelType=ANY_CHANNEL 
-                            security.server.channelType=ANY_CHANNEL
-                            -->
-	<explanation>Authentication</explanation>
+							security.server.channelType=REQUIRES_SECURE_CHANNEL 
+							security.server.secureChannelType=REQUIRES_SECURE_CHANNEL 
+                    -->
+					<explanation>Authentication</explanation>
                     <progressText>Setting authentication choices</progressText>
                     <actionList>
+						<propertiesFileSet>
+							<file>${temp_dir}/conf/common/security.properties</file>
+							<key>security.server.deviceAuthentication</key>
+							<value>digest</value>
+						</propertiesFileSet>
+                        <propertiesFileSet>
+                            <file>${temp_dir}/conf/common/security.properties</file>
+                            <key>security.server.channelType</key>
+                            <ruleEvaluationLogic>or</ruleEvaluationLogic>
+                            <value>REQUIRES_SECURE_CHANNEL</value>
+                            <ruleList>
+                                <isTrue>
+                                    <value>${tomcat_authentication_should_configure}</value>
+                                </isTrue>
+                                <compareText>
+                                    <logic>equals</logic>
+                                    <text>gae</text>
+                                    <value>${platform}</value>
+                                </compareText>
+                            </ruleList>
+                        </propertiesFileSet>
+                        <propertiesFileSet>
+                            <file>${temp_dir}/conf/common/security.properties</file>
+                            <key>security.server.channelType</key>
+                            <value>ANY_CHANNEL</value>
+                            <ruleList>
+                                <isFalse>
+                                    <value>${tomcat_authentication_should_configure}</value>
+                                </isFalse>
+                                <compareText>
+                                    <logic>does_not_equal</logic>
+                                    <text>gae</text>
+                                    <value>${platform}</value>
+                                </compareText>
+                            </ruleList>
+                        </propertiesFileSet>
                         <propertiesFileSet>
                             <file>${temp_dir}/conf/common/security.properties</file>
                             <key>security.server.secureChannelType</key>
@@ -323,96 +350,6 @@
                                 </compareText>
                             </ruleList>
                         </propertiesFileSet>
-                        <if>
-                            <actionList>
-                                <propertiesFileSet>
-                                    <file>${temp_dir}/conf/common/security.properties</file>
-                                    <key>security.server.deviceAuthentication</key>
-                                    <value>digest</value>
-                                </propertiesFileSet>
-                                <propertiesFileSet>
-                                    <file>${temp_dir}/conf/common/security.properties</file>
-                                    <key>security.server.channelType</key>
-                                    <value>ANY_CHANNEL</value>
-                                </propertiesFileSet>
-                            </actionList>
-                            <conditionRuleList>
-                                <compareValues>
-                                    <logic>equals</logic>
-                                    <value1>${comm_sec_option}</value1>
-                                    <value2>1</value2>
-                                </compareValues>
-                            </conditionRuleList>
-                        </if>
-                        <if>
-                            <actionList>
-                                <propertiesFileSet>
-                                    <file>${temp_dir}/conf/common/security.properties</file>
-                                    <key>security.server.deviceAuthentication</key>
-                                    <value>digest</value>
-                                </propertiesFileSet>
-                                <propertiesFileSet>
-                                    <file>${temp_dir}/conf/common/security.properties</file>
-                                    <key>security.server.channelType</key>
-                                    <value>REQUIRES_SECURE_CHANNEL</value>
-                                </propertiesFileSet>
-                            </actionList>
-                            <conditionRuleList>
-                                <compareValues>
-                                    <logic>equals</logic>
-                                    <value1>${comm_sec_option}</value1>
-                                    <value2>2</value2>
-                                </compareValues>
-                            </conditionRuleList>
-                        </if>
-                        <if>
-                            <actionList>
-                                <propertiesFileSet>
-                                    <file>${temp_dir}/conf/common/security.properties</file>
-                                    <key>security.server.deviceAuthentication</key>
-                                    <value>basic</value>
-                                </propertiesFileSet>
-                                <propertiesFileSet>
-                                    <file>${temp_dir}/conf/common/security.properties</file>
-                                    <key>security.server.channelType</key>
-                                    <value>REQUIRES_SECURE_CHANNEL</value>
-                                </propertiesFileSet>
-                            </actionList>
-                            <conditionRuleList>
-                                <compareValues>
-                                    <logic>equals</logic>
-                                    <value1>${comm_sec_option}</value1>
-                                    <value2>3</value2>
-                                </compareValues>
-                            </conditionRuleList>
-                        </if>
-                        <if>
-                            <actionList>
-	<!-- this is the case for running GAE locally -->
-	<propertiesFileSet>
-                                    <file>${temp_dir}/conf/common/security.properties</file>
-                                    <key>security.server.deviceAuthentication</key>
-                                    <value>digest</value>
-                                </propertiesFileSet>
-                                <propertiesFileSet>
-                                    <file>${temp_dir}/conf/common/security.properties</file>
-                                    <key>security.server.secureChannelType</key>
-                                    <value>ANY_CHANNEL</value>
-                                </propertiesFileSet>
-                                <propertiesFileSet>
-                                    <file>${temp_dir}/conf/common/security.properties</file>
-                                    <key>security.server.channelType</key>
-                                    <value>ANY_CHANNEL</value>
-                                </propertiesFileSet>
-                            </actionList>
-                            <conditionRuleList>
-                                <compareValues>
-                                    <logic>equals</logic>
-                                    <value1>${comm_sec_option}</value1>
-                                    <value2>4</value2>
-                                </compareValues>
-                            </conditionRuleList>
-                        </if>
                     </actionList>
                 </actionGroup>
                 <propertiesFileSet>
@@ -438,12 +375,12 @@
                 <propertiesFileSet>
                     <file>${temp_dir}/conf/common/security.properties</file>
                     <key>security.server.realm.realmString</key>
-                    <value>${organization_url} ${product_fullname} realm</value>
+                    <value>${instance_display_name} ${product_fullname} realm</value>
                 </propertiesFileSet>
                 <propertiesFileSet>
                     <file>${temp_dir}/conf/common/security.properties</file>
                     <key>security.help.about</key>
-                    <value>auto-generated on ${creation.timestamp} for ${organization_url} ${product_fullname} ${product_version}</value>
+                    <value>auto-generated on ${creation.timestamp} for ${instance_display_name} ${product_fullname} ${product_version}</value>
                 </propertiesFileSet>
             </actionList>
         </actionGroup>
@@ -492,13 +429,6 @@
             <element>//*[local-name()="application"]</element>
             <file>${temp_dir}/cfg-war/WEB-INF/appengine-web.xml</file>
             <value>${app_id}</value>
-            <ruleList>
-                <compareValues>
-                    <logic>does_not_equal</logic>
-                    <value1>${comm_sec_option}</value1>
-                    <value2>4</value2>
-                </compareValues>
-            </ruleList>
         </xmlFileSet>
         <xmlFileSet>
             <attribute></attribute>
