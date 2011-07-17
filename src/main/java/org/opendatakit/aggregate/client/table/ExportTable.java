@@ -17,6 +17,7 @@
 package org.opendatakit.aggregate.client.table;
 
 import org.opendatakit.aggregate.client.form.ExportSummary;
+import org.opendatakit.aggregate.constants.common.ExportStatus;
 
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
@@ -38,7 +39,7 @@ public class ExportTable extends FlexTable {
 
   public ExportTable() {
     super();
-    this.setHTML(0, 2, "<h2 id=\"form_name\">Exports</h2>"); 
+    this.setHTML(0, 2, "<h2 id=\"form_name\">Exported Files</h2>"); 
     this.setText(HEADER_ROW, FILE_TYPE, "File Type");
     this.setText(HEADER_ROW, STATUS, "Status");
     this.setText(HEADER_ROW, TIME_REQUESTED, "Time Requested");
@@ -52,22 +53,29 @@ public class ExportTable extends FlexTable {
   public void updateExportPanel(ExportSummary[] eS) {
     if (eS == null)
       return;
-    while (this.getRowCount() > STARTING_ROW)
+    while (this.getRowCount() > HEADER_ROW + 1) // need to add one because of the zero index
       this.removeRow(STARTING_ROW);
     for (int i = 0; i < eS.length; i++) {
       ExportSummary e = eS[i];
-      if (e.getFileType() != null)
-        this.setText(i + STARTING_ROW, FILE_TYPE, e.getFileType().toString());
-      if (e.getStatus() != null)
-        this.setText(i + STARTING_ROW, STATUS, e.getStatus().toString());
-      if (e.getTimeRequested() != null)
+      if (e.getFileType() != null) {
+        this.setText(i + STARTING_ROW, FILE_TYPE, e.getFileType().getDisplayText());
+      }
+      if (e.getTimeRequested() != null) {
         this.setText(i + STARTING_ROW, TIME_REQUESTED, e.getTimeRequested().toString());
-      if (e.getTimeCompleted() != null)
+      }
+      if (e.getTimeCompleted() != null) {
         this.setText(i + STARTING_ROW, TIME_COMPLETED, e.getTimeCompleted().toString());
-      if (e.getTimeLastAction() != null)
+      }
+      if (e.getTimeLastAction() != null) {
         this.setText(i + STARTING_ROW, TIME_LAST_RETRY, e.getTimeLastAction().toString());
-      if (e.getResultFile() != null)
-        this.setWidget(i + STARTING_ROW, DOWNLOAD_FILE, new HTML(e.getResultFile()));
+      }
+      
+      if (e.getStatus() != null) {
+        this.setText(i + STARTING_ROW, STATUS, e.getStatus().toString());
+        if (e.getResultFile() != null && e.getStatus() == ExportStatus.AVAILABLE) {
+          this.setWidget(i + STARTING_ROW, DOWNLOAD_FILE, new HTML(e.getResultFile()));
+        }
+      }
     }
   }
 
