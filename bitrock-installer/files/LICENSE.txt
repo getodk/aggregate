@@ -20,9 +20,9 @@ http://aopalliance.sourceforge.net		/Public domain/
 http://apache.org/		/Apache 2.0/
 	apache-mime4j-0.6.1.jar
 http://code.google.com/appengine/		/Apache 2.0/
-	appengine-api-1.0-sdk-1.4.2.jar
-	appengine-api-labs-1.4.2.jar
-	appengine-jsr107cache-1.4.2.jar
+	appengine-api-1.0-sdk-1.5.1.jar
+	appengine-api-labs-1.5.1.jar
+	appengine-jsr107cache-1.5.1.jar
 http://www.eclipse.org/aspectj			/Eclipse Public License - v 1.0/
 	aspectjrt-1.6.8.jar
 	aspectjweaver-1.6.8.jar
