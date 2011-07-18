@@ -25,12 +25,6 @@
                 <distributionDirectory>
                     <origin>files/mf</origin>
                 </distributionDirectory>
-                <distributionDirectory>
-                    <origin>files/generate_uuid</origin>
-                </distributionDirectory>
-                <distributionDirectory>
-                    <origin>files/qualified_hostname</origin>
-                </distributionDirectory>
                 <distributionFile>
                     <origin>files/ODKAggregate.war</origin>
                 </distributionFile>
@@ -143,7 +137,7 @@
         <createDirectory>
             <path>${temp_dir}</path>
         </createDirectory>
-        <createTimeStamp format="%Y-%m-%dT%h:%M:%s.%S%z" variable="creation.timestamp"/>
+        <createTimeStamp format="%Y-%m-%dT%H:%M:%S%z" variable="creation.timestamp"/>
         <setInstallerVariable>
             <name>settings_jar</name>
             <value>${project.shortName}-settings.jar</value>
@@ -167,20 +161,12 @@
             <value>&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</value>
         </setInstallerVariable>
     </initializationActionList>
+    <installationAbortedActionList>
+        <deleteFile>
+            <path>${temp_dir}</path>
+        </deleteFile>
+    </installationAbortedActionList>
     <postInstallationActionList>
-        <setInstallerVariableFromScriptOutput>
-            <exec>${java_executable}</exec>
-            <execArgs>QualifiedHostname</execArgs>
-            <name>hostname</name>
-            <workingDirectory>${temp_dir}/qualified_hostname</workingDirectory>
-            <ruleList>
-                <compareTextLength>
-                    <length>0</length>
-                    <logic>equals</logic>
-                    <text>${hostname}</text>
-                </compareTextLength>
-            </ruleList>
-        </setInstallerVariableFromScriptOutput>
         <actionGroup>
             <explanation>Create jdbc properties</explanation>
             <progressText>Set innocuous jdbc property for all platforms</progressText>
@@ -228,32 +214,19 @@
         </actionGroup>
         <actionGroup>
 	<!-- Sets the security properties in security.properties
-                 based on previous user input, also generates some of
-                 the information such as UUIDs -->
+                 based on previous user input -->
 	<explanation>Set security properties</explanation>
             <progressText>Setting up security properties</progressText>
             <actionList>
                 <actionGroup>
-                    <explanation>Generate the UUID keys</explanation>
-                    <progressText>Generating UUID keys</progressText>
+                    <explanation>Setting security keys</explanation>
+                    <progressText>Setting security keys</progressText>
                     <actionList>
-                        <setInstallerVariableFromScriptOutput>
-                            <exec>${java_executable}</exec>
-                            <execArgs>GenerateUUID</execArgs>
-                            <name>security_server_siteKey</name>
-                            <workingDirectory>${temp_dir}/generate_uuid</workingDirectory>
-                        </setInstallerVariableFromScriptOutput>
                         <propertiesFileSet>
                             <file>${temp_dir}/conf/common/security.properties</file>
                             <key>security.server.siteKey</key>
                             <value>${security_server_siteKey}</value>
                         </propertiesFileSet>
-                        <setInstallerVariableFromScriptOutput>
-                            <exec>${java_executable}</exec>
-                            <execArgs>GenerateUUID</execArgs>
-                            <name>security_server_userServiceKey</name>
-                            <workingDirectory>${temp_dir}/generate_uuid</workingDirectory>
-                        </setInstallerVariableFromScriptOutput>
                         <propertiesFileSet>
                             <file>${temp_dir}/conf/common/security.properties</file>
                             <key>security.server.userServiceKey</key>
@@ -280,14 +253,14 @@
 							security.server.channelType=REQUIRES_SECURE_CHANNEL 
 							security.server.secureChannelType=REQUIRES_SECURE_CHANNEL 
                     -->
-					<explanation>Authentication</explanation>
+	<explanation>Authentication</explanation>
                     <progressText>Setting authentication choices</progressText>
                     <actionList>
-						<propertiesFileSet>
-							<file>${temp_dir}/conf/common/security.properties</file>
-							<key>security.server.deviceAuthentication</key>
-							<value>digest</value>
-						</propertiesFileSet>
+                        <propertiesFileSet>
+                            <file>${temp_dir}/conf/common/security.properties</file>
+                            <key>security.server.deviceAuthentication</key>
+                            <value>digest</value>
+                        </propertiesFileSet>
                         <propertiesFileSet>
                             <file>${temp_dir}/conf/common/security.properties</file>
                             <key>security.server.channelType</key>
@@ -375,7 +348,7 @@
                 <propertiesFileSet>
                     <file>${temp_dir}/conf/common/security.properties</file>
                     <key>security.server.realm.realmString</key>
-                    <value>${instance_display_name} ${product_fullname} realm</value>
+                    <value>${instance_display_name} ${product_fullname}</value>
                 </propertiesFileSet>
                 <propertiesFileSet>
                     <file>${temp_dir}/conf/common/security.properties</file>
@@ -587,7 +560,7 @@ and you are welcome to modify and redistribute it under the GPL v2 license
 
 Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
 
-mysql&gt; &lt;font color="red"&gt;source C:/Users/user/workspace/gmysql-test/create_db_and_user.sql&lt;/font&gt;
+mysql&gt; &lt;font color="red"&gt;source ${installdir.unix}/create_db_and_user.sql&lt;/font&gt;
 Query OK, 1 row affected (0.00 sec)
 
 Query OK, 0 rows affected (0.00 sec)
@@ -719,18 +692,4 @@ access rights for ODK Aggregate.${html_steps_end_item}
             <path>${temp_dir}</path>
         </deleteFile>
     </postInstallationActionList>
-    <preInstallationActionList>
-        <autodetectJava>
-            <customErrorMessage>You must have a Java 1.6 JRE installed.  Go to http://www.java.com/getjava/index.jsp</customErrorMessage>
-            <promptUser>0</promptUser>
-            <validVersionList>
-                <validVersion>
-                    <maxVersion></maxVersion>
-                    <minVersion>1.6</minVersion>
-                    <requireJDK>0</requireJDK>
-                    <vendor></vendor>
-                </validVersion>
-            </validVersionList>
-        </autodetectJava>
-    </preInstallationActionList>
 </component>

@@ -4,18 +4,104 @@
     <canBeEdited>1</canBeEdited>
     <selected>1</selected>
     <show>1</show>
+    <folderList>
+        <folder>
+            <description>temp</description>
+            <destination>${temp_param_dir}</destination>
+            <name>temp_jars</name>
+            <platforms>all</platforms>
+            <distributionFileList>
+                <distributionDirectory>
+                    <origin>files/qualified_hostname</origin>
+                </distributionDirectory>
+                <distributionDirectory>
+                    <origin>files/generate_uuid</origin>
+                </distributionDirectory>
+            </distributionFileList>
+        </folder>
+    </folderList>
+    <installationAbortedActionList>
+        <deleteFile>
+            <path>${temp_param_dir}</path>
+        </deleteFile>
+    </installationAbortedActionList>
     <parameterList>
         <booleanParameter>
-	<!-- write_properties -->
-	<name>write_properties</name>
-            <description></description>
-            <explanation></explanation>
+            <name>write_properties</name>
+            <description>Hidden value to hold whether or not to emit a .options file.</description>
+            <explanation>If the WRITE_OPTIONS environment variable is defined, we'll write option values to a .options file.</explanation>
             <value></value>
             <default>${env(WRITE_OPTIONS)}</default>
             <ask>0</ask>
             <cliOptionText>Output a .options file that contains the configuration from running the installer.</cliOptionText>
             <displayStyle>radiobuttons</displayStyle>
         </booleanParameter>
+        <stringParameter>
+            <name>security_server_siteKey</name>
+            <description>Hidden value used to hold security_server_siteKey UUID.</description>
+            <explanation></explanation>
+            <value>${gen_security_server_siteKey}</value>
+            <default>${gen_security_server_siteKey}</default>
+            <allowEmptyValue>0</allowEmptyValue>
+            <ask>0</ask>
+            <insertBefore>${parent_installdir}</insertBefore>
+            <width>40</width>
+        </stringParameter>
+        <stringParameter>
+            <name>security_server_userServiceKey</name>
+            <description>Hidden value used to hold security_server_userServiceKey UUID.</description>
+            <explanation></explanation>
+            <value>${gen_security_server_userServiceKey}</value>
+            <default>${gen_security_server_userServiceKey}</default>
+            <allowEmptyValue>0</allowEmptyValue>
+            <ask>0</ask>
+            <insertBefore>${parent_installdir}</insertBefore>
+            <width>40</width>
+        </stringParameter>
+        <stringParameter>
+            <name>hostname</name>
+            <description>Hidden value used to hold resolved fully-qualfied hostname.</description>
+            <explanation></explanation>
+            <value></value>
+            <default></default>
+            <allowEmptyValue>1</allowEmptyValue>
+            <ask>0</ask>
+            <insertBefore>${parent_installdir}</insertBefore>
+            <width>40</width>
+        </stringParameter>
+        <stringParameter>
+            <name>http_port</name>
+            <description>Hidden value used to hold resolved http_port</description>
+            <explanation></explanation>
+            <value></value>
+            <default></default>
+            <allowEmptyValue>1</allowEmptyValue>
+            <ask>0</ask>
+            <insertBefore>${parent_installdir}</insertBefore>
+            <width>40</width>
+        </stringParameter>
+        <stringParameter>
+            <name>https_port</name>
+            <description>Hidden value used to hold resolved https_port</description>
+            <explanation></explanation>
+            <value></value>
+            <default></default>
+            <allowEmptyValue>1</allowEmptyValue>
+            <ask>0</ask>
+            <insertBefore>${parent_installdir}</insertBefore>
+            <width>40</width>
+        </stringParameter>
+        <stringParameter>
+            <name>default_database_port</name>
+            <description>Hidden value used to identify the default database port.</description>
+            <explanation></explanation>
+            <value></value>
+            <default></default>
+            <allowEmptyValue>1</allowEmptyValue>
+            <ask>0</ask>
+            <insertAfter>${parent_installdir}</insertAfter>
+            <width>5</width>
+        </stringParameter>
         <stringParameter>
             <name>database_host_port</name>
             <description>Hidden value used to form database url for jdbc connection.</description>
@@ -24,7 +110,7 @@
             <default></default>
             <allowEmptyValue>1</allowEmptyValue>
             <ask>0</ask>
-            <insertAfter>${platform}</insertAfter>
+            <insertAfter>${parent_installdir}</insertAfter>
             <width>50</width>
         </stringParameter>
         <stringParameter>
@@ -35,70 +121,23 @@
             <default></default>
             <allowEmptyValue>0</allowEmptyValue>
             <ask>0</ask>
-            <insertAfter>${platform}</insertAfter>
+            <insertBefore>${parent_installdir}</insertBefore>
             <width>50</width>
-        </stringParameter>
-        <directoryParameter>
-            <name>installdir</name>
-            <description>Hidden value defining the (parent_installdir + aggregate_dir) in which to install files.</description>
-            <explanation></explanation>
-            <value>${parent_installdir}${platform_path_separator}${aggregate_dir}</value>
-            <default></default>
-            <allowEmptyValue>0</allowEmptyValue>
-            <ask>0</ask>
-            <insertAfter>${platform}</insertAfter>
-            <width>50</width>
-        </directoryParameter>
-        <stringParameter>
-	<!-- hostname -->
-	<name>hostname</name>
-            <description>Hidden value used to hold resolved fully-qualfied hostname.</description>
-            <explanation></explanation>
-            <value></value>
-            <default></default>
-            <allowEmptyValue>1</allowEmptyValue>
-            <ask>0</ask>
-            <insertBefore>${platform}</insertBefore>
-            <width>40</width>
-        </stringParameter>
-        <stringParameter>
-	<!-- http_port -->
-	<name>http_port</name>
-            <description>Hidden value used to hold resolved http_port</description>
-            <explanation></explanation>
-            <value></value>
-            <default></default>
-            <allowEmptyValue>1</allowEmptyValue>
-            <ask>0</ask>
-            <insertBefore>${platform}</insertBefore>
-            <width>40</width>
-        </stringParameter>
-        <stringParameter>
-	<!-- https_port -->
-	<name>https_port</name>
-            <description>Hidden value used to hold resolved https_port</description>
-            <explanation></explanation>
-            <value></value>
-            <default></default>
-            <allowEmptyValue>1</allowEmptyValue>
-            <ask>0</ask>
-            <insertBefore>${platform}</insertBefore>
-            <width>40</width>
         </stringParameter>
         <directoryParameter>
 	<!--  parent_installdir -->
 	<name>parent_installdir</name>
             <title>Select an output parent directory</title>
             <description></description>
-            <explanation>This "installer" does not actually install anything.  Instead, it guides you through configuring ODK Aggregate.  As the last step of the installer, it will launch the install script for uploading to Google's AppEngine cloud services or open a README.html containing the final installation instructions.
+            <explanation>This "installer" does not actually install anything.  Instead, it guides you through configuring ODK Aggregate.  As the last step of the installer, it will either launch the install script for uploading to Google's AppEngine cloud services or open a README.html containing the final installation instructions for MySQL or PostgreSQL deployments.
 
 Please select the parent directory under which an 'ODK Aggregate' directory will be created to contain the configured software.</explanation>
             <value></value>
             <default></default>
             <allowEmptyValue>0</allowEmptyValue>
+            <insertBefore>${installdir}</insertBefore>
             <mustBeWritable>1</mustBeWritable>
             <mustExist>0</mustExist>
-			<insertBefore>${platform}</insertBefore>
             <width>40</width>
             <validationActionList>
                 <throwError>
@@ -111,12 +150,25 @@ Please select the parent directory under which an 'ODK Aggregate' directory will
                 </throwError>
             </validationActionList>
         </directoryParameter>
+        <directoryParameter>
+            <name>installdir</name>
+            <description>Hidden value defining the (parent_installdir + aggregate_dir) in which to install files.</description>
+            <explanation></explanation>
+            <value>${parent_installdir}${platform_path_separator}${aggregate_dir}</value>
+            <default></default>
+            <allowEmptyValue>0</allowEmptyValue>
+            <ask>0</ask>
+            <insertAfter>${platform}</insertAfter>
+            <mustBeWritable>0</mustBeWritable>
+            <mustExist>0</mustExist>
+            <width>50</width>
+        </directoryParameter>
         <choiceParameter>
 	<!--  platform -->
 	<name>platform</name>
             <title>Choose Platform</title>
             <description></description>
-            <explanation>Choose the data storage and execution environment on which you would like ODK Aggregate to run. If you choose MySQL or PostgreSQL, you will need to first install that database server and an Apache Tomcat 6 server.</explanation>
+            <explanation>Choose the data storage and execution environment on which you would like ODK Aggregate to run. If you choose MySQL or PostgreSQL, you will need to first install that database server and an Apache Tomcat 6 webserver.</explanation>
             <value></value>
             <default></default>
             <allowEmptyValue>0</allowEmptyValue>
@@ -153,8 +205,7 @@ Please select the parent directory under which an 'ODK Aggregate' directory will
 
 Apache Tomcat 6 can be downloaded from the link below.
 
-ODK Aggregate requires that Apache Tomcat's HTTP/1.1 Connector Port be configured as either port 8080 or port 80.  By default, Apache Tomcat uses port 8080.
-</explanation>
+If you modify any of the Apache Tomcat defaults, please make note of them.</explanation>
             <insertAfter>${platform}</insertAfter>
             <clickedActionList>
                 <launchBrowser>
@@ -169,34 +220,14 @@ ODK Aggregate requires that Apache Tomcat's HTTP/1.1 Connector Port be configure
                 </compareText>
             </ruleList>
         </linkParameter>
-        <labelParameter>
-	<!-- tomcat_authentication_info -->
-	<name>tomcat_authentication_info</name>
-            <title>Apache Tomcat SSL configuration</title>
-            <description></description>
-            <explanation>Communications with an Apache Tomcat webserver cannot be encrypted unless the server is configured with an SSL certificate.  SSL certificates are generally issued by Verisign or another issuing authority.  When used, they allow a client to verify the identity of the webserver and to establish secured (encrypted) communications with that server.
-
-Changing passwords, submitting data or viewing data using unencrypted communications can reveal that data to eavesdroppers.  This is particularly likely if these activities are done over unsecured WiFi hotspots.
-
-Regardless of whether or not you have an SSL certificate, logins are always handled securely (i.e., during login, passwords are never exposed to an eavesdropper).
-</explanation>
-            <image></image>
-            <insertAfter>${platform}</insertAfter>
-            <ruleList>
-                <compareText>
-                    <logic>does_not_equal</logic>
-                    <text>${platform}</text>
-                    <value>gae</value>
-                </compareText>
-            </ruleList>
-        </labelParameter>
         <parameterGroup>
-            <name>tomcat_authentication_should_configure_group</name>
+            <name>tomcat_authentication_info</name>
             <title>Apache Tomcat SSL configuration</title>
-            <explanation>Do you have an SSL certificate?  Please refer to the Apache Tomcat documentation for how to install the certificate on your system.  Within the Tomcat 6.0 documentation, refer to the User Guide section 12: SSL.</explanation>
+            <explanation>SSL certificates allow a client to verify the identity of a webserver and to establish secured (encrypted) communications with that webserver (https:). SSL certificates are typically purchased from Verisign or another issuing authority; that process can take weeks to complete.  
+
+If you do have an SSL certificate, please refer to the Apache Tomcat documentation for how to install the certificate on your system.  Within the Tomcat 6.0 documentation, refer to the User Guide section 12: SSL.</explanation>
             <value></value>
             <default></default>
-            <insertAfter>${tomcat_authentication_info}</insertAfter>
             <parameterList>
                 <linkParameter>
                     <name>ssl_how_to</name>
@@ -208,14 +239,6 @@ Regardless of whether or not you have an SSL certificate, logins are always hand
                         </launchBrowser>
                     </clickedActionList>
                 </linkParameter>
-                <booleanParameter>
-                    <name>tomcat_authentication_should_configure</name>
-                    <description>Yes, I have an SSL certificate.</description>
-                    <explanation></explanation>
-                    <value></value>
-                    <default>false</default>
-                    <displayStyle>checkbox-left</displayStyle>
-                </booleanParameter>
             </parameterList>
             <ruleList>
                 <compareText>
@@ -225,57 +248,47 @@ Regardless of whether or not you have an SSL certificate, logins are always hand
                 </compareText>
             </ruleList>
         </parameterGroup>
-        <choiceParameter>
-	<!-- tomcat_port_choice -->
-	<name>tomcat_port_choice</name>
-            <title>Apache Tomcat Port Configuration</title>
-            <description></description>
-            <explanation>Choose the HTTP/1.1 Connector Port you specified during the Apache Tomcat install process.  By default, Apache Tomcat uses port 8080.
-
-If an SSL certificate was installed, you must configure the HTTPS/1.1 Connector Port to be as shown below.
-</explanation>
-            <value>altPorts</value>
-            <default>altPorts</default>
-            <allowEmptyValue>0</allowEmptyValue>
-            <displayType>radiobuttons</displayType>
-            <insertAfter>${tomcat_authentication_should_configure_group}</insertAfter>
-            <ordering>default</ordering>
-            <width>30</width>
-            <optionList>
-                <option>
-                    <description></description>
-                    <image></image>
-                    <text>HTTP/1.1 Connector Port 8080 (HTTPS/1.1 Connector Port 8443)</text>
-                    <value>altPorts</value>
-                </option>
-                <option>
-                    <description></description>
-                    <image></image>
-                    <text>HTTP/1.1 Connector Port 80 (HTTPS/1.1. Connector Port 443)</text>
-                    <value>stdPorts</value>
-                </option>
-            </optionList>
-            <ruleList>
-                <compareText>
-                    <logic>does_not_equal</logic>
-                    <text>${platform}</text>
-                    <value>gae</value>
-                </compareText>
-            </ruleList>
-        </choiceParameter>
-        <stringParameter>
-	<!--  raw_hostname -->
-	<name>raw_hostname</name>
-            <title>Apache Tomcat webserver name</title>
-            <description>Please enter the fully-qualified name of your webserver:</description>
-            <explanation>For the webserver to construct links back to its content when publishing or exporting data files, it needs to know the fully-qualified name by which it can be reached.  If your machine's hostname is 'pc101' and your organization is 'opendatakit.org', then 'pc101.opendatakit.org' is likely the fully-qualified name for your webserver.
-			
-Leave this blank to use the fully-qualified name of this computer.</explanation>
+        <parameterGroup>
+            <name>tomcat_authentication_should_configure_group</name>
+            <title>Apache Tomcat SSL configuration</title>
+            <explanation>Do you have an SSL certificate?</explanation>
             <value></value>
             <default></default>
-            <allowEmptyValue>1</allowEmptyValue>
-            <insertAfter>${tomcat_port_choice}</insertAfter>
-            <width>50</width>
+            <insertAfter>${tomcat_authentication_info}</insertAfter>
+            <parameterList>
+                <choiceParameter>
+                    <name>tomcat_authentication_should_configure</name>
+                    <description></description>
+                    <explanation></explanation>
+                    <value></value>
+                    <default>0</default>
+                    <allowEmptyValue>0</allowEmptyValue>
+                    <displayType>radiobuttons</displayType>
+                    <ordering>default</ordering>
+                    <width>40</width>
+                    <optionList>
+                        <option>
+                            <description> - User logins ARE secure.
+ - Submitting and/or viewing form data IS secure.
+ - Changing passwords IS secure.
+</description>
+                            <image></image>
+                            <text>Yes, I have an SSL certificate</text>
+                            <value>1</value>
+                        </option>
+                        <option>
+                            <description> - User logins ARE secure.
+ - Submitting and/or viewing form data MAY NOT BE secure.
+ - Changing passwords MAY NOT BE secure. 
+
+Security breaches are particularly likely over unsecured WiFi hotspots.</description>
+                            <image></image>
+                            <text>No, I do not have an SSL certificate</text>
+                            <value>0</value>
+                        </option>
+                    </optionList>
+                </choiceParameter>
+            </parameterList>
             <ruleList>
                 <compareText>
                     <logic>does_not_equal</logic>
@@ -283,7 +296,86 @@ Leave this blank to use the fully-qualified name of this computer.</explanation>
                     <value>gae</value>
                 </compareText>
             </ruleList>
-        </stringParameter>
+        </parameterGroup>
+        <parameterGroup>
+            <name>tomcat_port_choice</name>
+            <title>Apache Tomcat Port Configuration</title>
+            <explanation>For ODK Aggregate to construct links back to its content when publishing or exporting data files, it needs to know the fully-qualified name and port numbers through which it can be reached.  If your machine's hostname is 'pc101' and your organization is 'opendatakit.org', then 'pc101.opendatakit.org' is likely the fully-qualified name for your webserver.
+</explanation>
+            <value></value>
+            <default></default>
+            <insertAfter>${tomcat_authentication_should_configure_group}</insertAfter>
+            <parameterList>
+                <stringParameter>
+                    <name>tomcat_http_port</name>
+                    <description>HTTP/1.1. Connector Port:</description>
+                    <explanation></explanation>
+                    <value>8080</value>
+                    <default>8080</default>
+                    <allowEmptyValue>0</allowEmptyValue>
+                    <width>5</width>
+                </stringParameter>
+                <stringParameter>
+                    <name>tomcat_https_port</name>
+                    <description>HTTPS/1.1. Connector Port:</description>
+                    <explanation></explanation>
+                    <value>8443</value>
+                    <default>8443</default>
+                    <allowEmptyValue>0</allowEmptyValue>
+                    <width>5</width>
+                </stringParameter>
+                <stringParameter>
+                    <name>raw_hostname</name>
+                    <description>Fully-qualified name of your webserver:</description>
+                    <explanation></explanation>
+                    <value>${default_hostname}</value>
+                    <default>${default_hostname}</default>
+                    <allowEmptyValue>0</allowEmptyValue>
+                    <width>50</width>
+                </stringParameter>
+            </parameterList>
+            <ruleList>
+                <compareText>
+                    <logic>does_not_equal</logic>
+                    <text>${platform}</text>
+                    <value>gae</value>
+                </compareText>
+            </ruleList>
+            <validationActionList>
+                <throwError text="The HTTP/1.1 Connector Port is invalid">
+                    <ruleList>
+                        <regExMatch>
+                            <logic>does_not_match</logic>
+                            <pattern>^(|[1-9][0-9]{1,3})$</pattern>
+                            <text>${tomcat_http_port}</text>
+                        </regExMatch>
+                    </ruleList>
+                </throwError>
+                <throwError text="The HTTPS/1.1 Connector Port is invalid">
+                    <ruleList>
+                        <regExMatch>
+                            <logic>does_not_match</logic>
+                            <pattern>^(|[1-9][0-9]{1,3})$</pattern>
+                            <text>${tomcat_https_port}</text>
+                        </regExMatch>
+                    </ruleList>
+                </throwError>
+                <throwError text="The Connector Ports must be different">
+                    <ruleList>
+                        <compareTextLength>
+                            <length>0</length>
+                            <logic>greater</logic>
+                            <text>${tomcat_http_port}</text>
+                        </compareTextLength>
+                        <compareText>
+                            <logic>equals</logic>
+                            <text>${tomcat_http_port}</text>
+                            <value>${tomcat_https_port}</value>
+                        </compareText>
+                    </ruleList>
+                </throwError>
+            </validationActionList>
+        </parameterGroup>
         <linkParameter>
 	<!-- infoDatabase -->
 	<name>infoDatabasePostgreSQL</name>
@@ -300,6 +392,16 @@ Make note of any non-default values you've entered during the installation proce
                     <url>http://www.postgresql.org</url>
                 </launchBrowser>
             </clickedActionList>
+            <postShowPageActionList>
+                <setInstallerVariable>
+                    <name>default_database_port</name>
+                    <value>5432</value>
+                </setInstallerVariable>
+                <setInstallerVariable>
+                    <name>database_port</name>
+                    <value>5432</value>
+                </setInstallerVariable>
+            </postShowPageActionList>
             <ruleList>
                 <compareText>
                     <logic>equals</logic>
@@ -326,6 +428,16 @@ Make note of any non-default values you have entered during the installation pro
                     <url>http://www.mysql.com/downloads/</url>
                 </launchBrowser>
             </clickedActionList>
+            <postShowPageActionList>
+                <setInstallerVariable>
+                    <name>default_database_port</name>
+                    <value>3306</value>
+                </setInstallerVariable>
+                <setInstallerVariable>
+                    <name>database_port</name>
+                    <value>3306</value>
+                </setInstallerVariable>
+            </postShowPageActionList>
             <ruleList>
                 <compareText>
                     <logic>equals</logic>
@@ -367,7 +479,9 @@ Copy this file into the /lib directory of your Apache Tomcat 6 installation.
 	<!-- database_server_config -->
 	<name>database_server_config</name>
             <title>Database server settings</title>
-            <explanation>Specify the host and port number used to communicate with the database server.</explanation>
+            <explanation>Specify the host and port number used to communicate with the database server.
+
+If the database server is on the same host as the webserver, enter '127.0.0.1'</explanation>
             <value></value>
             <default></default>
             <insertAfter>${platform}</insertAfter>
@@ -376,18 +490,17 @@ Copy this file into the /lib directory of your Apache Tomcat 6 installation.
                     <name>database_port</name>
                     <title>Configuration</title>
                     <description>Database port number:</description>
-                    <explanation>Leave this field blank unless you specified a non-default port number during the installation of your database server.
-</explanation>
+                    <explanation></explanation>
                     <value></value>
-                    <default></default>
-                    <allowEmptyValue>1</allowEmptyValue>
-                    <width>30</width>
+                    <default>${default_database_port}</default>
+                    <allowEmptyValue>0</allowEmptyValue>
+                    <width>5</width>
                 </stringParameter>
                 <stringParameter>
                     <name>database_hostname</name>
                     <title>Configuration</title>
                     <description>Database server hostname:</description>
-                    <explanation>If the database server is on the same host as the webserver, enter '127.0.0.1'</explanation>
+                    <explanation></explanation>
                     <value></value>
                     <default>127.0.0.1</default>
                     <allowEmptyValue>0</allowEmptyValue>
@@ -399,22 +512,22 @@ Copy this file into the /lib directory of your Apache Tomcat 6 installation.
                     <name>database_host_port</name>
                     <value>${database_hostname}</value>
                     <ruleList>
-                        <compareTextLength>
-                            <length>0</length>
+                        <compareText>
                             <logic>equals</logic>
                             <text>${database_port}</text>
-                        </compareTextLength>
+                            <value>${default_database_port}</value>
+                        </compareText>
                     </ruleList>
                 </setInstallerVariable>
                 <setInstallerVariable>
                     <name>database_host_port</name>
                     <value>${database_hostname}:${database_port}</value>
                     <ruleList>
-                        <compareTextLength>
-                            <length>0</length>
+                        <compareText>
                             <logic>does_not_equal</logic>
                             <text>${database_port}</text>
-                        </compareTextLength>
+                            <value>${default_database_port}</value>
+                        </compareText>
                     </ruleList>
                 </setInstallerVariable>
             </postShowPageActionList>
@@ -430,10 +543,9 @@ Copy this file into the /lib directory of your Apache Tomcat 6 installation.
 	<!-- database_config -->
 	<name>database_config_part_1</name>
             <title>ODK Aggregate database authentication settings</title>
-            <explanation>The database server must be configured with an account (username and password) that ODK Aggregate will employ for accessing the database server.  Username and password should be alphanumeric strings beginning with a letter (no spaces or punctuation please!).
+            <explanation>The database server must be configured with an account (username and password) that ODK Aggregate will employ for accessing the database server.  This is not an account that you will give to anyone; it is only for use by the ODK Aggregate webserver. Username and password should be alphanumeric strings beginning with a letter (no spaces or punctuation please!).
 
-The installer will generate a script that can be run on the database server to establish the required configuration.
-</explanation>
+The installer will generate a script that can be run on the database server to establish the required configuration.</explanation>
             <value></value>
             <default></default>
             <insertAfter>${database_server_config}</insertAfter>
@@ -454,7 +566,7 @@ The installer will generate a script that can be run on the database server to e
                     <value></value>
                     <default></default>
                     <allowEmptyValue>0</allowEmptyValue>
-                    <descriptionRetype></descriptionRetype>
+                    <descriptionRetype>Retype password:</descriptionRetype>
                     <width>30</width>
                 </passwordParameter>
             </parameterList>
@@ -537,53 +649,44 @@ The installer will generate a script that can be run on the database server to c
 	<name>instance_display_name</name>
             <title>ODK Aggregate Instance Name</title>
             <description>Please enter the name of your instance:</description>
-            <explanation>The ODK Aggregate instance name will be displayed to your users when they log into ODK Aggregate using their ODK Aggregate username and password. Including the name of your organization in the instance name can help users confirm that they have contacted the correct website.</explanation>
+            <explanation>The ODK Aggregate instance name will be displayed to your users when they log into ODK Aggregate using their ODK Aggregate username and password. Including the name of your organization in the instance name can help users confirm that they have contacted the correct website.
+
+NOTE: During subsequent upgrades, any changes to this text will invalidate all the ODK Aggregate passwords configured on your webserver.  To prevent disruptions during upgrades, please make a record of the name you have chosen.</explanation>
             <value></value>
             <default></default>
             <allowEmptyValue>0</allowEmptyValue>
             <width>30</width>
         </stringParameter>
-        <parameterGroup>
-	<!-- email -->
-	<name>email</name>
+        <stringParameter>
+            <name>email</name>
             <title>Super-user E-mail Address</title>
-            <explanation>This should be a valid Gmail account or Google Apps account. The user with this account will always have full permissions on the system.  
+            <description>Please enter a valid Gmail account or Google Apps account:</description>
+            <explanation>The user with this account will always have full permissions on the system.  
 
 The first time ODK Aggregate runs, only this user is allowed access to the system. Upon first logging in, they will be asked to complete the configuration of ODK Aggregate by specifying additional users and what permissions those users have on the system.
-
-You must give a complete Email address (e.g., username@gmail.com ).
 </explanation>
-            <value>your.email@gmail.com</value>
+            <value></value>
             <default></default>
-            <parameterList>
-                <stringParameter>
-                    <name>email</name>
-                    <title>Configuration</title>
-                    <description>Please enter your gmail.com e-mail address:</description>
-                    <explanation></explanation>
-                    <value></value>
-                    <default></default>
-                    <allowEmptyValue>0</allowEmptyValue>
-                    <width>30</width>
-                    <validationActionList>
-                        <if>
-                            <actionList>
-                                <throwError>
-                                    <text>Bad email address: ${email}. Please enter a gmail email.com address, make sure to include '@gmail.com' on the end.</text>
-                                </throwError>
-                            </actionList>
-                            <conditionRuleList>
-                                <regExMatch>
-                                    <logic>does_not_match</logic>
-                                    <pattern>[^@ ]+@[^@ .]+\.[^@ ]+</pattern>
-                                    <text>${email}</text>
-                                </regExMatch>
-                            </conditionRuleList>
-                        </if>
-                    </validationActionList>
-                </stringParameter>
-            </parameterList>
-        </parameterGroup>
+            <allowEmptyValue>0</allowEmptyValue>
+            <width>30</width>
+            <validationActionList>
+                <if>
+                    <actionList>
+                        <throwError>
+                            <text>Bad email address: ${email}.
+Please enter a complete Email address (e.g., username@gmail.com).</text>
+                        </throwError>
+                    </actionList>
+                    <conditionRuleList>
+                        <regExMatch>
+                            <logic>does_not_match</logic>
+                            <pattern>[^@ ]+@[^@ .]+\.[^@ ]+</pattern>
+                            <text>${email}</text>
+                        </regExMatch>
+                    </conditionRuleList>
+                </if>
+            </validationActionList>
+        </stringParameter>
         <parameterGroup>
             <name>app_id_group</name>
             <title>Google AppEngine application ID</title>
@@ -643,27 +746,6 @@ If you are replacing an existing application already on appspot, the application
                     <text>${platform}</text>
                     <value>gae</value>
                 </compareText>
-                <compareTextLength>
-                    <length>0</length>
-                    <logic>does_not_equal</logic>
-                    <text>${app_id}</text>
-                </compareTextLength>
-            </ruleList>
-        </setInstallerVariable>
-        <setInstallerVariable>
-            <name>hostname</name>
-            <value>localhost</value>
-            <ruleList>
-                <compareText>
-                    <logic>equals</logic>
-                    <text>${platform}</text>
-                    <value>gae</value>
-                </compareText>
-                <compareTextLength>
-                    <length>0</length>
-                    <logic>equals</logic>
-                    <text>${app_id}</text>
-                </compareTextLength>
             </ruleList>
         </setInstallerVariable>
         <setInstallerVariable>
@@ -672,17 +754,12 @@ If you are replacing an existing application already on appspot, the application
         </setInstallerVariable>
         <setInstallerVariable>
             <name>http_port</name>
-            <value>8080</value>
+            <value>${tomcat_http_port}</value>
             <ruleList>
                 <compareText>
                     <logic>does_not_equal</logic>
                     <text>${platform}</text>
                     <value>gae</value>
-                </compareText>
-                <compareText>
-                    <logic>equals</logic>
-                    <text>${tomcat_port_choice}</text>
-                    <value>altPorts</value>
                 </compareText>
             </ruleList>
         </setInstallerVariable>
@@ -692,17 +769,12 @@ If you are replacing an existing application already on appspot, the application
         </setInstallerVariable>
         <setInstallerVariable>
             <name>https_port</name>
-            <value>8443</value>
+            <value>${tomcat_https_port}</value>
             <ruleList>
                 <compareText>
                     <logic>does_not_equal</logic>
                     <text>${platform}</text>
                     <value>gae</value>
-                </compareText>
-                <compareText>
-                    <logic>equals</logic>
-                    <text>${tomcat_port_choice}</text>
-                    <value>altPorts</value>
                 </compareText>
             </ruleList>
         </setInstallerVariable>
@@ -719,7 +791,6 @@ If you are replacing an existing application already on appspot, the application
         </setInstallerVariable>
         <createDirectory>
             <path>${installdir}</path>
-			<abortOnError>1</abortOnError>
         </createDirectory>
         <if>
             <actionList>
@@ -785,18 +856,18 @@ If you are replacing an existing application already on appspot, the application
                 </propertiesFileSet>
                 <propertiesFileSet>
                     <file>${installdir}/.options</file>
-                    <key>raw_hostname</key>
-                    <value>${raw_hostname}</value>
+                    <key>security_server_siteKey</key>
+                    <value>${security_server_siteKey}</value>
+                </propertiesFileSet>
+                <propertiesFileSet>
+                    <file>${installdir}/.options</file>
+                    <key>security_server_userServiceKey</key>
+                    <value>${security_server_userServiceKey}</value>
                 </propertiesFileSet>
                 <propertiesFileSet>
                     <file>${installdir}/.options</file>
                     <key>hostname</key>
                     <value>${hostname}</value>
-                </propertiesFileSet>
-                <propertiesFileSet>
-                    <file>${installdir}/.options</file>
-                    <key>tomcat_port_choice</key>
-                    <value>${tomcat_port_choice}</value>
                 </propertiesFileSet>
                 <propertiesFileSet>
                     <file>${installdir}/.options</file>
@@ -825,6 +896,9 @@ If you are replacing an existing application already on appspot, the application
                 </isTrue>
             </ruleList>
         </if>
+        <deleteFile>
+            <path>${temp_param_dir}</path>
+        </deleteFile>
     </postInstallationActionList>
     <preInstallationActionList>
         <autodetectJava>
@@ -839,5 +913,42 @@ If you are replacing an existing application already on appspot, the application
                 </validVersion>
             </validVersionList>
         </autodetectJava>
+        <setInstallerVariable>
+            <name>temp_param_dir</name>
+            <value>${system_temp_directory}/ODK-${installation_guid}</value>
+        </setInstallerVariable>
+        <createDirectory>
+            <path>${temp_param_dir}</path>
+        </createDirectory>
+        <unpackDirectory>
+            <component>gather_params</component>
+            <destination>${temp_param_dir}</destination>
+            <folder>temp_jars</folder>
+            <origin>qualified_hostname</origin>
+        </unpackDirectory>
+        <setInstallerVariableFromScriptOutput>
+            <exec>${java_executable}</exec>
+            <execArgs>QualifiedHostname</execArgs>
+            <name>default_hostname</name>
+            <workingDirectory>${temp_param_dir}/qualified_hostname</workingDirectory>
+        </setInstallerVariableFromScriptOutput>
+        <unpackDirectory>
+            <component>gather_params</component>
+            <destination>${temp_param_dir}</destination>
+            <folder>temp_jars</folder>
+            <origin>generate_uuid</origin>
+        </unpackDirectory>
+        <setInstallerVariableFromScriptOutput>
+            <exec>${java_executable}</exec>
+            <execArgs>GenerateUUID</execArgs>
+            <name>gen_security_server_siteKey</name>
+            <workingDirectory>${temp_param_dir}/generate_uuid</workingDirectory>
+        </setInstallerVariableFromScriptOutput>
+        <setInstallerVariableFromScriptOutput>
+            <exec>${java_executable}</exec>
+            <execArgs>GenerateUUID</execArgs>
+            <name>gen_security_server_userServiceKey</name>
+            <workingDirectory>${temp_param_dir}/generate_uuid</workingDirectory>
+        </setInstallerVariableFromScriptOutput>
     </preInstallationActionList>
 </component>
