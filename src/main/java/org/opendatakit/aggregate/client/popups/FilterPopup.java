@@ -24,7 +24,7 @@ import org.opendatakit.aggregate.client.filter.FilterGroup;
 import org.opendatakit.aggregate.client.submission.Column;
 import org.opendatakit.aggregate.client.table.SubmissionTable;
 import org.opendatakit.aggregate.client.widgets.ClosePopupButton;
-import org.opendatakit.aggregate.client.widgets.SaveFilterButton;
+import org.opendatakit.aggregate.client.widgets.ApplyFilterButton;
 import org.opendatakit.aggregate.constants.common.FilterOperation;
 import org.opendatakit.aggregate.constants.common.RowOrCol;
 import org.opendatakit.aggregate.constants.common.Visibility;
@@ -100,7 +100,7 @@ public class FilterPopup extends PopupPanel{
 
 			@Override
 			public void onChange(ChangeEvent event) {
-				if(rowCol.getValue(rowCol.getSelectedIndex()).equals(RowOrCol.ROW.getDisplayText())) {
+				if(rowCol.getValue(rowCol.getSelectedIndex()).equals(RowOrCol.ROW.name())) {
 					table.setWidget(0, 2, whereCols);
 					columnForRowFilter.setVisible(true);
 					columnsForColumnFilter.setVisible(false);
@@ -123,7 +123,7 @@ public class FilterPopup extends PopupPanel{
 		table.setWidget(0, 4, filterOp);
 		table.setWidget(0, 5, filterValue);
 		table.setWidget(0, 6, new ClosePopupButton(this));
-	   table.setWidget(1, 0, new SaveFilterButton(this));
+	   table.setWidget(1, 0, new ApplyFilterButton(this));
 		
 		columnForRowFilter.setVisible(true);
 		columnsForColumnFilter.setVisible(false);

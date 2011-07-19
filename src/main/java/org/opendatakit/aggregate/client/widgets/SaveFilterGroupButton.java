@@ -33,8 +33,9 @@ import com.google.gwt.user.client.ui.ListBox;
 
 public class SaveFilterGroupButton extends AButtonBase implements ClickHandler {
 
-  private static final String DEFAULT_SUGGESTION = "FilterGroup";
+  private static final String EMPTY_STRING = "";
   private static final String ERROR_NO_FILTERS = "You need at least one filter to save a group.";
+  private static final String ERROR_NO_NAME = "You need to provide a name for this filter group to continue";
   private static final String PROMPT_FOR_NAME_TXT = "Please enter a name for this group";
   private static final String REPROMPT_FOR_NAME_TXT = "That group already exists. Please enter a new name";
 
@@ -59,22 +60,26 @@ public class SaveFilterGroupButton extends AButtonBase implements ClickHandler {
       return;
     }
 
-    // TODO insert a cancel so that this while loop can stop
+    // if default filter group, prompt user for name
     if (UIConsts.FILTER_NONE.equals(filterGroup.getName())) {
       boolean match = false;
-      String newFilterName = Window.prompt(PROMPT_FOR_NAME_TXT, DEFAULT_SUGGESTION);
+      String newFilterName = Window.prompt(PROMPT_FOR_NAME_TXT, EMPTY_STRING);
       while (true) {
         ListBox filtersBox = parentSubTab.getListOfPossibleFilterGroups();
-        if (newFilterName != null) {
+        if (newFilterName != null ) {
           for (int i = 0; i < filtersBox.getItemCount(); i++) {
-            if ((filtersBox.getValue(i)).compareTo(newFilterName) == 0) {
+            if ((filtersBox.getValue(i)).equals(newFilterName)) {
               match = true;
             }
           }
         }
-        if (match) {
+        if(newFilterName == null) { // cancel was pressed
+          return; // exit 
+        } else if (match) {
           match = false;
-          newFilterName = Window.prompt(REPROMPT_FOR_NAME_TXT, DEFAULT_SUGGESTION);
+          newFilterName = Window.prompt(REPROMPT_FOR_NAME_TXT, EMPTY_STRING);
+        } else if(newFilterName.equals(EMPTY_STRING)) {
+          newFilterName = Window.prompt(ERROR_NO_NAME, EMPTY_STRING);
         } else {
           break;
         }
@@ -94,7 +99,7 @@ public class SaveFilterGroupButton extends AButtonBase implements ClickHandler {
       }
     };
     
-    // Make the call to the form service.
+    // Save the filter on the server
     SecureGWT.getFilterService().updateFilterGroup(filterGroup, callback);
 
   }

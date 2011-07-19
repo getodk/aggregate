@@ -37,9 +37,11 @@
 }
 
 .disabledTableRow td {
-	background-color: #505050;
+	color: #B0B0B0;
+	background-color: #F8F8F8;
 }
 
 .enabledTableRow td {
-	background-color: #000000;
+	color: #000000;
+	background-color: #ffffff;
 }
