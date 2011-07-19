@@ -259,8 +259,8 @@ public class SubmissionServlet extends ServletUtilBase {
         out.write(HtmlConsts.HTML_OPEN);
         out.write(HtmlConsts.BODY_OPEN);
         out.write("Successful submission upload.  Click ");
-        out.write(HtmlUtil.createHref(cc.getWebApplicationURL(AggregateHtmlServlet.ADDR), "here"));
-        out.write(" to return to forms page.");
+        out.write(HtmlUtil.createHref(cc.getWebApplicationURL(ADDR), "here"));
+        out.write(" to return to upload submissions page.");
         out.write(HtmlConsts.BODY_CLOSE);
         out.write(HtmlConsts.HTML_CLOSE);
       } else {
