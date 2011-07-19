@@ -269,22 +269,22 @@ If you do have an SSL certificate, please refer to the Apache Tomcat documentati
                     <optionList>
                         <option>
                             <description> - User logins ARE secure.
+ - Submitting and/or viewing form data MAY NOT BE secure.
+ - Changing passwords MAY NOT BE secure. 
+Security breaches are particularly likely over unsecured WiFi hotspots.
+</description>
+                            <image></image>
+                            <text>No, I do not have an SSL certificate</text>
+                            <value>0</value>
+                        </option>
+                        <option>
+                            <description> - User logins ARE secure.
  - Submitting and/or viewing form data IS secure.
  - Changing passwords IS secure.
 </description>
                             <image></image>
                             <text>Yes, I have an SSL certificate</text>
                             <value>1</value>
-                        </option>
-                        <option>
-                            <description> - User logins ARE secure.
- - Submitting and/or viewing form data MAY NOT BE secure.
- - Changing passwords MAY NOT BE secure. 
-
-Security breaches are particularly likely over unsecured WiFi hotspots.</description>
-                            <image></image>
-                            <text>No, I do not have an SSL certificate</text>
-                            <value>0</value>
                         </option>
                     </optionList>
                 </choiceParameter>
@@ -300,7 +300,7 @@ Security breaches are particularly likely over unsecured WiFi hotspots.</descrip
         <parameterGroup>
             <name>tomcat_port_choice</name>
             <title>Apache Tomcat Port Configuration</title>
-            <explanation>For ODK Aggregate to construct links back to its content when publishing or exporting data files, it needs to know the fully-qualified name and port numbers through which it can be reached.  If your machine's hostname is 'pc101' and your organization is 'opendatakit.org', then 'pc101.opendatakit.org' is likely the fully-qualified name for your webserver.
+            <explanation>ODK Aggregate needs to know the fully-qualified hostname and port numbers through which it can be reached in order to construct links back to its content when publishing or exporting data files.  If the hostname of the machine running Apache Tomcat is 'pc101' and your organization is 'opendatakit.org', then 'pc101.opendatakit.org' is likely the fully-qualified hostname for that machine.
 </explanation>
             <value></value>
             <default></default>
@@ -323,10 +323,17 @@ Security breaches are particularly likely over unsecured WiFi hotspots.</descrip
                     <default>8443</default>
                     <allowEmptyValue>0</allowEmptyValue>
                     <width>5</width>
+                    <ruleList>
+                        <compareText>
+                            <logic>equals</logic>
+                            <text>${tomcat_authentication_should_configure}</text>
+                            <value>1</value>
+                        </compareText>
+                    </ruleList>
                 </stringParameter>
                 <stringParameter>
                     <name>raw_hostname</name>
-                    <description>Fully-qualified name of your webserver:</description>
+                    <description>Fully-qualified hostname:</description>
                     <explanation></explanation>
                     <value>${default_hostname}</value>
                     <default>${default_hostname}</default>
@@ -353,6 +360,11 @@ Security breaches are particularly likely over unsecured WiFi hotspots.</descrip
                 </throwError>
                 <throwError text="The HTTPS/1.1 Connector Port is invalid">
                     <ruleList>
+                        <compareText>
+                            <logic>equals</logic>
+                            <text>${tomcat_authentication_should_configure}</text>
+                            <value>1</value>
+                        </compareText>
                         <regExMatch>
                             <logic>does_not_match</logic>
                             <pattern>^(|[1-9][0-9]{1,3})$</pattern>
@@ -362,11 +374,11 @@ Security breaches are particularly likely over unsecured WiFi hotspots.</descrip
                 </throwError>
                 <throwError text="The Connector Ports must be different">
                     <ruleList>
-                        <compareTextLength>
-                            <length>0</length>
-                            <logic>greater</logic>
-                            <text>${tomcat_http_port}</text>
-                        </compareTextLength>
+                        <compareText>
+                            <logic>equals</logic>
+                            <text>${tomcat_authentication_should_configure}</text>
+                            <value>1</value>
+                        </compareText>
                         <compareText>
                             <logic>equals</logic>
                             <text>${tomcat_http_port}</text>
