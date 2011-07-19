@@ -427,7 +427,7 @@ Make note of any non-default values you've entered during the installation proce
 	<name>infoDatabaseMySQL</name>
             <title>Pre-installation Database Requirements - MySQL</title>
             <description>http://www.mysql.com/downloads/</description>
-            <explanation>We have developed and tested against MySQL 5.1
+            <explanation>We have developed and tested against MySQL 5.1 and 5.5
 
 Please download, install and configure MySQL from the link below.
 
@@ -473,7 +473,7 @@ The top-level directory should contain a file named:
   
 Copy this file into the /lib directory of your Apache Tomcat 6 installation.  On Windows, the default location for this is 'C:\Program Files\Apache Software Foundation\Tomcat 6.0\lib'
 
-Restart your Apache webserver.
+Stop and restart your Apache webserver (so it can discover this new library).
 </explanation>
             <insertAfter>${platform}</insertAfter>
             <clickedActionList>
