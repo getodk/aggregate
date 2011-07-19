@@ -429,10 +429,10 @@ Make note of any non-default values you've entered during the installation proce
             <description>http://www.mysql.com/downloads/</description>
             <explanation>We have developed and tested against MySQL 5.1
 
-Please download and install MySQL from the link below.
+Please download, install and configure MySQL from the link below.
 
 Choose the Downloads (GA) tab, and select the MySQL Community Server edition.
-Make note of any non-default values you have entered during the installation process.
+When running the MySQL Server Instance Configuration Wizard, please make note of your root password and any non-default values you have entered during the installation process.
 </explanation>
             <insertAfter>${platform}</insertAfter>
             <clickedActionList>
@@ -471,7 +471,9 @@ The top-level directory should contain a file named:
 
   mysql-connector-java-...-bin.jar
   
-Copy this file into the /lib directory of your Apache Tomcat 6 installation.
+Copy this file into the /lib directory of your Apache Tomcat 6 installation.  On Windows, the default location for this is 'C:\Program Files\Apache Software Foundation\Tomcat 6.0\lib'
+
+Restart your Apache webserver.
 </explanation>
             <insertAfter>${platform}</insertAfter>
             <clickedActionList>
