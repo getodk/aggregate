@@ -528,7 +528,7 @@ grant all privileges on schema "${jdbc_schema}" to "${jdbc_username}";
             <progressText>Write README</progressText>
             <text>${html_steps_begin}
 ${html_steps_begin_item}Execute the mysql (mysql.exe) commandline client using the root 
-account and password, and supply the &lt;code&gt;create_db_and_user.sql&lt;/code&gt; to it.
+account and password (the password you chose during the installation of the database), and supply the &lt;code&gt;create_db_and_user.sql&lt;/code&gt; to it.
 &lt;br/&gt;
 To open the mysql commandline client, open a cmd window (Windows), terminal window (MacOS) or
 term window (Linux) and 'cd' to the directory containing the mysql client (mysql.exe on Windows).
@@ -580,8 +580,7 @@ Tomcat installation.
 ${html_steps_end_item}${html_steps_begin_item}
 start Apache (if not already started)
 ${html_steps_end_item}${html_steps_begin_item}
-visit &lt;a href="http://${host_port}/ODKAggregate/"&gt;http://${host_port}/ODKAggregate/&lt;/a&gt; to complete configuring the
-access rights for ODK Aggregate.
+visit &lt;a href="http://${host_port}/ODKAggregate/"&gt;http://${host_port}/ODKAggregate/&lt;/a&gt; and go to the Management / Permissions tab to complete configuring the access rights for ODK Aggregate. NOTE: It may take a few moments for the Apache Tomcat server to detect the ODKAggregate.war; if you get a 404 error, wait a few moments then refresh your browser.
 ${html_steps_end_item}&lt;/ol&gt;&lt;p&gt;
 If you want ODKAggregate to be reached at just &lt;code&gt;http://${host_port}/&lt;/code&gt;, you can
 rename it to ROOT.war before copying it to the &lt;code&gt;${platform_path_separator}webapps&lt;/code&gt; directory.
@@ -600,10 +599,48 @@ ${html_steps_end}</text>
             <progressText>Write README</progressText>
             <text>${html_steps_begin}
 ${html_steps_begin_item}Execute the Postgres SQL shell (psql) commandline client using the
-root account and password, and supply the &lt;code&gt;create_db_and_user.sql&lt;/code&gt; to it.
-If you have the psql shell open, type:
+postgres username and password (the password you chose during the installation of the database), and supply the &lt;code&gt;create_db_and_user.sql&lt;/code&gt; to it.
+To open the psql commandline client, open a cmd window (Windows), terminal window (MacOS) or
+term window (Linux) and 'cd' to the directory containing the psql client (psql.exe on Windows).
+Then, please type:
 &lt;pre&gt;
-\i "${installdir}${platform_path_separator}create_db_and_user.sql"
+psql --username postgres
+&lt;/pre&gt;
+And enter the PostgreSQL server password.  You will then be within the psql commandline client.  You should see a 'postgres=#' prompt. Type:
+&lt;pre&gt;
+\cd ${installdir.dos.unix}
+\i create_db_and_user.sql
+\q
+&lt;/pre&gt;
+Here is what this looks like on Windows, with what you must type in &lt;font color="red"&gt;red&lt;/font&gt;:
+&lt;pre&gt;
+Microsoft Windows [Version 6.1.7600]
+Copyright (c) 2009 Microsoft Corporation.  All rights reserved.
+
+C:\Windows\System32&gt;&lt;font color="red"&gt;cd "\Program Files\PostgreSQL\9.0\bin"&lt;/font&gt;
+
+C:\Program Files\PostgreSQL\9.0\bin&gt;&lt;font color="red"&gt;psql.exe --username postgres&lt;/font&gt;
+Password for user postgres:&lt;font color="red"&gt;*******&lt;/font&gt;
+psql (9.0.4)
+WARNING: Console code page (437) differs from Windows code page (1252)
+         8-bit characters might no work correctly. See psql reference
+		 page "Notes for Windows users" for details.
+Type "help" for help.
+
+postgres=# &lt;font color="red"&gt;\cd ${installdir.dos.unix}&lt;/font&gt;
+postgres=# &lt;font color="red"&gt;\i create_db_and_user.sql&lt;/font&gt;
+CREATE DATABASE
+CREATE ROLE
+GRANT
+ALTER DATABASE
+WARNING: Console code page (437) differs from Windows code page (1252)
+         8-bit characters might no work correctly. See psql reference
+		 page "Notes for Windows users" for details.
+You are now connected to database "odk_prod".
+CREATE SCHEMA
+GRANT
+odk_prod=# &lt;font color="red"&gt;\q&lt;/font&gt;
+C:\Program Files\PostgreSQL\9.0\bin&gt;
 &lt;/pre&gt;
 ${html_steps_end_item}${html_steps_begin_item}
 copy the &lt;code&gt;ODKAggregate.war&lt;/code&gt; to the &lt;code&gt;${platform_path_separator}webapps&lt;/code&gt; directory of the Apache
@@ -611,8 +648,7 @@ Tomcat installation.
 ${html_steps_end_item}${html_steps_begin_item}
 start Apache (if not already started)
 ${html_steps_end_item}${html_steps_begin_item}
-visit &lt;a href="http://${host_port}/ODKAggregate/"&gt;http://${host_port}/ODKAggregate/&lt;/a&gt; to complete configuring the
-access rights for ODK Aggregate.
+visit &lt;a href="http://${host_port}/ODKAggregate/"&gt;http://${host_port}/ODKAggregate/&lt;/a&gt; and go to the Management / Permissions tab to complete configuring the access rights for ODK Aggregate. NOTE: It may take a few moments for the Apache Tomcat server to detect the ODKAggregate.war; if you get a 404 error, wait a few moments then refresh your browser.
 ${html_steps_end_item}&lt;/ol&gt;&lt;p&gt;
 If you want ODKAggregate to be reached at just &lt;code&gt;http://${host_port}/&lt;/code&gt;, you can
 rename it to ROOT.war before copying it to the &lt;code&gt;${platform_path_separator}webapps&lt;/code&gt; directory.
