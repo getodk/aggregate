@@ -24,16 +24,19 @@ import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.task.CsvGenerator;
 import org.opendatakit.aggregate.task.FormDelete;
 import org.opendatakit.aggregate.task.KmlGenerator;
+import org.opendatakit.aggregate.task.PurgeOlderSubmissions;
 import org.opendatakit.aggregate.task.UploadSubmissions;
 import org.opendatakit.aggregate.task.Watchdog;
 import org.opendatakit.aggregate.task.WatchdogWorkerImpl;
 import org.opendatakit.aggregate.task.WorksheetCreator;
+import org.opendatakit.aggregate.util.ImageUtil;
 import org.opendatakit.common.constants.BasicConsts;
 import org.opendatakit.common.constants.HtmlConsts;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.security.Realm;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.security.UserService;
+import org.opendatakit.common.utils.HttpClientFactory;
 import org.opendatakit.common.web.CallingContext;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.SmartLifecycle;
@@ -55,9 +58,12 @@ public class WatchdogImpl implements Watchdog, SmartLifecycle, InitializingBean,
 	UploadSubmissions uploadSubmissions = null;
 	CsvGenerator csvGenerator = null;
 	KmlGenerator kmlGenerator = null;
+	PurgeOlderSubmissions purgeSubmissions = null;
 	FormDelete formDelete = null;
 	WorksheetCreator worksheetCreator = null;
 	ServletContext ctxt = null;
+	HttpClientFactory httpClientFactory = null;
+	ImageUtil imageUtil = null;
 
 	/**
 	 * Implementation of CallingContext for use by watchdog-launched tasks.
@@ -147,6 +153,8 @@ public class WatchdogImpl implements Watchdog, SmartLifecycle, InitializingBean,
 				return datastore;
 			} else if ( BeanDefs.FORM_DELETE_BEAN.equals(beanName)) {
 				return formDelete;
+			} else if ( BeanDefs.PURGE_OLDER_SUBMISSIONS_BEAN.equals(beanName)) {
+				return purgeSubmissions;
 			} else if ( BeanDefs.KML_BEAN.equals(beanName)) {
 				return kmlGenerator;
 			} else if ( BeanDefs.UPLOAD_TASK_BEAN.equals(beanName)) {
@@ -155,6 +163,10 @@ public class WatchdogImpl implements Watchdog, SmartLifecycle, InitializingBean,
 				return userService;
 			} else if ( BeanDefs.WORKSHEET_BEAN.equals(beanName)) {
 				return worksheetCreator;
+			} else if ( BeanDefs.HTTP_CLIENT_FACTORY.equals(beanName)) {
+				return httpClientFactory;
+			} else if ( BeanDefs.IMAGE_UTIL.equals(beanName)) {
+				return imageUtil;
 			} 
 			throw new IllegalStateException("unable to locate bean");
 		}
@@ -334,12 +346,36 @@ public class WatchdogImpl implements Watchdog, SmartLifecycle, InitializingBean,
 		this.formDelete = formDelete;
 	}
 
+	public PurgeOlderSubmissions getPurgeSubmissions() {
+		return purgeSubmissions;
+	}
+
+	public void setPurgeSubmissions(PurgeOlderSubmissions purgeSubmissions) {
+		this.purgeSubmissions = purgeSubmissions;
+	}
+
 	public WorksheetCreator getWorksheetCreator() {
 		return worksheetCreator;
 	}
 
 	public void setWorksheetCreator(WorksheetCreator worksheetCreator) {
 		this.worksheetCreator = worksheetCreator;
+	}
+
+	public HttpClientFactory HttpClientFactory() {
+		return httpClientFactory;
+	}
+
+	public void setHttpClientFactory(HttpClientFactory httpClientFactory) {
+		this.httpClientFactory = httpClientFactory;
+	}
+
+	public ImageUtil getImageUtil() {
+		return imageUtil;
+	}
+
+	public void setImageUtil(ImageUtil imageUtil) {
+		this.imageUtil = imageUtil;
 	}
 
 	@Override
@@ -352,7 +388,10 @@ public class WatchdogImpl implements Watchdog, SmartLifecycle, InitializingBean,
 		if ( csvGenerator == null ) throw new IllegalStateException("no csvGenerator specified");
 		if ( kmlGenerator == null ) throw new IllegalStateException("no kmlGenerator specified");
 		if ( formDelete == null ) throw new IllegalStateException("no formDelete specified");
+		if ( purgeSubmissions == null ) throw new IllegalStateException("no purgeSubmissions specified");
 		if ( worksheetCreator == null ) throw new IllegalStateException("no worksheetCreator specified");
+		if ( httpClientFactory == null ) throw new IllegalStateException("no httpClientFactory specified");
+		if ( imageUtil == null ) throw new IllegalStateException("no imageUtil specified");
 		AggregrateThreadExecutor.initialize(taskScheduler);
 	}
 

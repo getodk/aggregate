@@ -73,10 +73,13 @@
 		<property name="userService" ref="user_service" />
 		<property name="taskScheduler" ref="task_scheduler" />
 		<property name="worksheetCreator" ref="worksheet_creator" />
+		<property name="purgeSubmissions" ref="purge_submissions" />
 		<property name="formDelete" ref="form_delete" />
 		<property name="uploadSubmissions" ref="upload_task" />
 		<property name="kmlGenerator" ref="kml_task" />
 		<property name="csvGenerator" ref="csv_task" />
+		<property name="httpClientFactory" ref="http_client_factory" />
+		<property name="imageUtil" ref="image_util" />
 	</bean>
 
 </beans>
