@@ -331,8 +331,8 @@ public class FormUploadServlet extends ServletUtilBase {
       out.write(HtmlConsts.HTML_OPEN);
       out.write(HtmlConsts.BODY_OPEN);
       out.write("Successful form upload.  Click ");
-      out.write(HtmlUtil.createHref(cc.getWebApplicationURL(AggregateHtmlServlet.ADDR), "here"));
-      out.write(" to return to forms page.");
+      out.write(HtmlUtil.createHref(cc.getWebApplicationURL(ADDR), "here"));
+      out.write(" to return to add new form page.");
       out.write(HtmlConsts.BODY_CLOSE);
       out.write(HtmlConsts.HTML_CLOSE);
     }
