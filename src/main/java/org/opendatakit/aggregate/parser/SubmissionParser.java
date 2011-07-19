@@ -257,7 +257,7 @@ public class SubmissionParser {
 			DocumentBuilder builder = factory.newDocumentBuilder();
 			Document doc = builder.parse(inputStreamXML);
 			root = doc.getDocumentElement();
-			printNode(root);
+			// if debugging: printNode(root);
 
 			// check for odk id
 			formId = root.getAttribute(ParserConsts.FORM_ID_ATTRIBUTE_NAME);
@@ -549,6 +549,7 @@ public class SubmissionParser {
 	 * @param node
 	 *            xml node to be recursively printed
 	 */
+	@SuppressWarnings("unused")
 	private void printNode(Element node) {
 		System.out.println(ParserConsts.NODE_FORMATTED + node.getTagName());
 		if (node.hasAttributes()) {

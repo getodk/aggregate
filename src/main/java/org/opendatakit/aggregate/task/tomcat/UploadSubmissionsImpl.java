@@ -57,7 +57,7 @@ public class UploadSubmissionsImpl implements UploadSubmissions {
 	WatchdogImpl wd = (WatchdogImpl) cc.getBean(BeanDefs.WATCHDOG);
 	// use watchdog's calling context in runner...
 	UploadSubmissionsRunner ur = new UploadSubmissionsRunner(fsc, wd.getCallingContext());
-    System.out.println("THIS IS UPLOAD TASK IN TOMCAT");
+    System.out.println("UPLOAD TASK IN TOMCAT");
     AggregrateThreadExecutor exec = AggregrateThreadExecutor.getAggregateThreadExecutor();
     exec.execute(ur);
   }

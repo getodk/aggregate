@@ -501,10 +501,6 @@ public class FormParserForJavaRosa {
 	      m.setPersistAsTable(tableName);
 	    }
 	
-	    for (FormDataModel m : fdmList) {
-	      m.print(System.out);
-	    }
-	
 	    /////////////////////////////////////////////
 	    // Step 3: create the backing tables...
 	    //
@@ -845,6 +841,12 @@ public class FormParserForJavaRosa {
 
   }
 
+  @SuppressWarnings("unused")
+  private void printTreeElementInfo(TreeElement treeElement) {
+	    System.out.println("processing te: " + treeElement.getName() + " type: " + treeElement.dataType
+	            + " repeatable: " + treeElement.repeatable);
+  }
+  
   /**
    * Used to recursively process the xform definition tree to create the form
    * data model.
@@ -867,8 +869,8 @@ public class FormParserForJavaRosa {
       final List<FormDataModel> dmList, final FormDataModel fdm, 
       String parent, int ordinal, String tablePrefix, String nrGroupPrefix, String tableName,
       TreeElement treeElement, CallingContext cc) throws ODKEntityPersistException, ODKParseException {
-    System.out.println("processing te: " + treeElement.getName() + " type: " + treeElement.dataType
-        + " repeatable: " + treeElement.repeatable);
+
+	// for debugging: printTreeElementInfo(treeElement);
 
     FormDataModel d;
 

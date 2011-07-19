@@ -178,7 +178,7 @@ public class TaskLockImpl implements TaskLock {
 						conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
 						Statement stmt = conn.createStatement();
 						for ( String s : stmts ) {
-							Logger.getLogger(TaskLockImpl.class.getName()).info(s);
+							// for debugging: Logger.getLogger(TaskLockImpl.class.getName()).info(s);
 							stmt.execute(s);
 						}
 						conn.commit();
