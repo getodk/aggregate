@@ -105,7 +105,7 @@ public class SubmissionServlet extends ServletUtilBase {
 "     <tr>" +
 "        <td><label for=\"xml_submission_file\">Submission data file:</label></td>" +
 "        <td><input id=\"xml_submission_file\" type=\"file\" size=\"80\"" +
-"           name=\"form_def_file\" /></td>" +
+"           name=\"xml_submission_file\" /></td>" +
 "     </tr>" +
 "     <tr>" +
 "        <td><label for=\"mediaFiles\">Associated data file(s):</label></td>" +
