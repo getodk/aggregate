@@ -48,21 +48,11 @@ public class ExportPopup extends PopupPanel {
 
   private CreateExportButton exportButton;
 
-  public void redirectToExport() {
-    SubmissionTabUI subUI = AggregateUI.getUI().getSubmissionNav();
-    int tabIndex = subUI.findSubTabIndex(SubTabs.EXPORT);
-    subUI.selectTab(tabIndex);
-    hide();
-  }
-
-  // FormServiceAsync formSvc
-
   public ExportPopup(String formid) {
     super(false);
     this.formId = formid;
 
     layout = new FlexTable();
-    fileType = new ListBox();
 
     geoPointsDropDown = new ListBox();
     titleFieldsDropDown = new ListBox();
@@ -70,18 +60,27 @@ public class ExportPopup extends PopupPanel {
 
     exportButton = new CreateExportButton(this);
 
-    layout.setWidget(0, 0, new ClosePopupButton(this));
-    layout.setWidget(0, 1, new HTML("<h3>Form:<h3>"));
-    layout.setWidget(0, 2, new HTML(formId));
+    fileType = new ListBox();
+    fileType.addChangeHandler(new ChangeHandler() {
+      @Override
+      public void onChange(ChangeEvent event) {
+        updateUIOptions();
+      }
+    });
 
     for (ExportType eT : ExportType.values()) {
       fileType.addItem(eT.getDisplayText(), eT.name());
     }
 
-    updateUIOptions();
+    SecureGWT.getFormService().getPossibleKmlSettings(formId, new KmlSettingsCallback());
+
+    layout.setWidget(0, 0, new ClosePopupButton(this));
+    layout.setWidget(0, 1, new HTML("<h3>Form:<h3>"));
+    layout.setWidget(0, 2, new HTML(formId));
 
     layout.setWidget(0, 3, new HTML("<h3>Type:<h3>"));
     layout.setWidget(0, 4, fileType);
+    layout.setWidget(0, 6, exportButton);
 
     layout.setWidget(1, 1, new HTML("<h4>Geopoint:<h4>"));
     layout.setWidget(1, 2, geoPointsDropDown);
@@ -91,44 +90,24 @@ public class ExportPopup extends PopupPanel {
 
     layout.setWidget(1, 5, new HTML("<h4>Picture:<h4>"));
     layout.setWidget(1, 6, binaryFieldsDropDown);
-    // geoPointsDropDown.setEnabled(false);
-    // titleFieldsDropDown.setEnabled(false);
-    // binaryFieldsDropDown.setEnabled(false);
 
-    layout.setWidget(0, 6, exportButton);
-
-    fileType.addChangeHandler(new ChangeHandler() {
-      @Override
-      public void onChange(ChangeEvent event) {
-        updateUIOptions();
-      }
-    });
-
-    SecureGWT.getFormService().getPossibleKmlSettings(formId, new AsyncCallback<KmlSettings>() {
-      @Override
-      public void onFailure(Throwable caught) {
-          AggregateUI.getUI().reportError(caught);
-      }
-
-      @Override
-      public void onSuccess(KmlSettings result) {
-        gotKmlOptions = true;
-        ExportType type = ExportType.valueOf(fileType.getValue(fileType.getSelectedIndex()));
-        if (type.equals(ExportType.KML)) {
-          geoPointsDropDown.setEnabled(true);
-          titleFieldsDropDown.setEnabled(true);
-          binaryFieldsDropDown.setEnabled(true);
-        }
-        for (KmlSettingOption kSO : result.getGeopointNodes())
-          geoPointsDropDown.addItem(kSO.getDisplayName(), kSO.getElementKey());
-        for (KmlSettingOption kSO : result.getTitleNodes())
-          titleFieldsDropDown.addItem(kSO.getDisplayName(), kSO.getElementKey());
-        for (KmlSettingOption kSO : result.getBinaryNodes())
-          binaryFieldsDropDown.addItem(kSO.getDisplayName(), kSO.getElementKey());
-      }
-    });
+    updateUIOptions();
 
     setWidget(layout);
+  }
+
+  private void enableKmlOptions() {
+    geoPointsDropDown.setEnabled(true);
+    titleFieldsDropDown.setEnabled(true);
+    binaryFieldsDropDown.setEnabled(true);
+    layout.getRowFormatter().setStyleName(1, "enabledTableRow");
+  }
+
+  private void disableKmlOptions() {
+    geoPointsDropDown.setEnabled(false);
+    titleFieldsDropDown.setEnabled(false);
+    binaryFieldsDropDown.setEnabled(false);
+    layout.getRowFormatter().setStyleName(1, "disabledTableRow");
   }
 
   private void updateUIOptions() {
@@ -139,51 +118,59 @@ public class ExportPopup extends PopupPanel {
       } else {
         exportButton.setEnabled(false);
       }
-      geoPointsDropDown.setEnabled(true);
-      titleFieldsDropDown.setEnabled(true);
-      binaryFieldsDropDown.setEnabled(true);
-      layout.getRowFormatter().setStyleName(1, "enabledTableRow");
+      enableKmlOptions();
+
     } else {
       exportButton.setEnabled(true);
-      geoPointsDropDown.setEnabled(false);
-      titleFieldsDropDown.setEnabled(false);
-      binaryFieldsDropDown.setEnabled(false);
-      layout.getRowFormatter().setStyleName(1, "disabledTableRow");
+      disableKmlOptions();
     }
   }
 
   public void createExport() {
     ExportType type = ExportType.valueOf(fileType.getValue(fileType.getSelectedIndex()));
-    
-    if (type.equals(ExportType.CSV)) {
-    	SecureGWT.getFormService().createCsv(formId, new AsyncCallback<Boolean>() {
-        @Override
-        public void onFailure(Throwable caught) {
-            AggregateUI.getUI().reportError(caught);
-        }
 
-        @Override
-        public void onSuccess(Boolean result) {
-          redirectToExport();
-        }
-      });
+    if (type.equals(ExportType.CSV)) {
+      SecureGWT.getFormService().createCsv(formId, new CreateExportCallback());
     } else { // .equals(ExportType.KML.toString())
-    	SecureGWT.getFormService().createKml(formId, 
-    	    geoPointsDropDown.getValue(geoPointsDropDown.getSelectedIndex()),
+      SecureGWT.getFormService().createKml(formId,
+          geoPointsDropDown.getValue(geoPointsDropDown.getSelectedIndex()),
           titleFieldsDropDown.getValue(titleFieldsDropDown.getSelectedIndex()),
           binaryFieldsDropDown.getValue(binaryFieldsDropDown.getSelectedIndex()),
-          new AsyncCallback<Boolean>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                AggregateUI.getUI().reportError(caught);
-            }
+          new CreateExportCallback());
+    }
+  }
+  
+  private class CreateExportCallback implements AsyncCallback<Boolean> {
+    @Override
+    public void onFailure(Throwable caught) {
+      AggregateUI.getUI().reportError(caught);
+    }
 
-            @Override
-            public void onSuccess(Boolean result) {
-              redirectToExport();
-            }
-          });
+    @Override
+    public void onSuccess(Boolean result) {
+        SubmissionTabUI subUI = AggregateUI.getUI().getSubmissionNav();
+        int tabIndex = subUI.findSubTabIndex(SubTabs.EXPORT);
+        subUI.selectTab(tabIndex);
+        hide();
     }
   }
 
+  private class KmlSettingsCallback implements AsyncCallback<KmlSettings> {
+    @Override
+    public void onFailure(Throwable caught) {
+      AggregateUI.getUI().reportError(caught);
+    }
+
+    @Override
+    public void onSuccess(KmlSettings result) {
+      gotKmlOptions = true;
+      for (KmlSettingOption kSO : result.getGeopointNodes())
+        geoPointsDropDown.addItem(kSO.getDisplayName(), kSO.getElementKey());
+      for (KmlSettingOption kSO : result.getTitleNodes())
+        titleFieldsDropDown.addItem(kSO.getDisplayName(), kSO.getElementKey());
+      for (KmlSettingOption kSO : result.getBinaryNodes())
+        binaryFieldsDropDown.addItem(kSO.getDisplayName(), kSO.getElementKey());
+    }
+  }
+  
 }
