@@ -147,7 +147,9 @@ public class WatchdogImpl implements Watchdog, SmartLifecycle, InitializingBean,
 
 		@Override
 		public Object getBean(String beanName) {
-			if ( BeanDefs.CSV_BEAN.equals(beanName) ) {
+			if ( BeanDefs.WATCHDOG.equals(beanName) ) {
+				return WatchdogImpl.this;
+			} else if ( BeanDefs.CSV_BEAN.equals(beanName) ) {
 				return csvGenerator;
 			} else if ( BeanDefs.DATASTORE_BEAN.equals(beanName)) {
 				return datastore;
