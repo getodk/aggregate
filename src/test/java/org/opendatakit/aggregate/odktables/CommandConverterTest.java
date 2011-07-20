@@ -8,23 +8,26 @@ import java.util.Map.Entry;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.opendatakit.aggregate.odktables.CommandResult.FailureReason;
-import org.opendatakit.aggregate.odktables.command.CreateTable;
-import org.opendatakit.aggregate.odktables.command.CreateUser;
-import org.opendatakit.aggregate.odktables.command.DeleteTable;
-import org.opendatakit.aggregate.odktables.command.DeleteUser;
-import org.opendatakit.aggregate.odktables.command.GetUser;
-import org.opendatakit.aggregate.odktables.command.InsertRows;
-import org.opendatakit.aggregate.odktables.command.QueryForRows;
-import org.opendatakit.aggregate.odktables.command.QueryForTables;
-import org.opendatakit.aggregate.odktables.command.result.CreateTableResult;
-import org.opendatakit.aggregate.odktables.command.result.CreateUserResult;
-import org.opendatakit.aggregate.odktables.command.result.DeleteTableResult;
-import org.opendatakit.aggregate.odktables.command.result.DeleteUserResult;
-import org.opendatakit.aggregate.odktables.command.result.GetUserResult;
-import org.opendatakit.aggregate.odktables.command.result.InsertRowsResult;
-import org.opendatakit.aggregate.odktables.command.result.QueryForRowsResult;
-import org.opendatakit.aggregate.odktables.command.result.QueryForTablesResult;
+import org.opendatakit.aggregate.odktables.command.Command;
+import org.opendatakit.aggregate.odktables.command.CommandConverter;
+import org.opendatakit.aggregate.odktables.command.common.CreateUser;
+import org.opendatakit.aggregate.odktables.command.common.DeleteUser;
+import org.opendatakit.aggregate.odktables.command.common.GetUserByID;
+import org.opendatakit.aggregate.odktables.command.simple.CreateTable;
+import org.opendatakit.aggregate.odktables.command.simple.DeleteTable;
+import org.opendatakit.aggregate.odktables.command.simple.InsertRows;
+import org.opendatakit.aggregate.odktables.command.simple.QueryForRows;
+import org.opendatakit.aggregate.odktables.command.simple.QueryForTables;
+import org.opendatakit.aggregate.odktables.commandresult.CommandResult;
+import org.opendatakit.aggregate.odktables.commandresult.CommandResult.FailureReason;
+import org.opendatakit.aggregate.odktables.commandresult.common.CreateUserResult;
+import org.opendatakit.aggregate.odktables.commandresult.common.DeleteUserResult;
+import org.opendatakit.aggregate.odktables.commandresult.common.GetUserResult;
+import org.opendatakit.aggregate.odktables.commandresult.common.QueryForTablesResult;
+import org.opendatakit.aggregate.odktables.commandresult.simple.CreateTableResult;
+import org.opendatakit.aggregate.odktables.commandresult.simple.DeleteTableResult;
+import org.opendatakit.aggregate.odktables.commandresult.simple.InsertRowsResult;
+import org.opendatakit.aggregate.odktables.commandresult.simple.QueryForRowsResult;
 
 public class CommandConverterTest
 {
@@ -73,7 +76,7 @@ public class CommandConverterTest
         commandClassToMethodPath.put(CreateUser.class, CreateUser.methodPath());
         commandClassToMethodPath.put(DeleteTable.class, DeleteTable.methodPath());
         commandClassToMethodPath.put(DeleteUser.class, DeleteUser.methodPath());
-        commandClassToMethodPath.put(GetUser.class, GetUser.methodPath());
+        commandClassToMethodPath.put(GetUserByID.class, GetUserByID.methodPath());
         commandClassToMethodPath.put(InsertRows.class, InsertRows.methodPath());
         commandClassToMethodPath.put(QueryForRows.class, QueryForRows.methodPath());
         commandClassToMethodPath.put(QueryForTables.class, QueryForTables.methodPath());

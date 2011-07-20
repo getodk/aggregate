@@ -7,6 +7,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
+import org.opendatakit.aggregate.odktables.commandresult.CommandResult;
 
 public abstract class CommandResultTest<T extends CommandResult<?>>
 {

@@ -10,22 +10,22 @@ import org.opendatakit.common.persistence.DataField.DataType;
 public class ColumnTest
 {
 
-    private Column eq;
-    private Column eqSameData;
-    private Column eqDiffCaseName;
-    private Column notEqDiffName;
-    private Column notEqDiffType;
-    private Column notEqDiffNullable;
+    private InternalColumn eq;
+    private InternalColumn eqSameData;
+    private InternalColumn eqDiffCaseName;
+    private InternalColumn notEqDiffName;
+    private InternalColumn notEqDiffType;
+    private InternalColumn notEqDiffNullable;
 
     @Before
     public void setUp()
     {
-        eq = new Column("col1", DataType.STRING, false);
-        eqSameData = new Column("col1", DataType.STRING, false);
-        eqDiffCaseName = new Column("COL1", DataType.STRING, false);
-        notEqDiffName = new Column("differentname", DataType.STRING, false);
-        notEqDiffType = new Column("COL1", DataType.INTEGER, false);
-        notEqDiffNullable = new Column("COL1", DataType.STRING, true);
+        eq = new InternalColumn("col1", DataType.STRING, false);
+        eqSameData = new InternalColumn("col1", DataType.STRING, false);
+        eqDiffCaseName = new InternalColumn("COL1", DataType.STRING, false);
+        notEqDiffName = new InternalColumn("differentname", DataType.STRING, false);
+        notEqDiffType = new InternalColumn("COL1", DataType.INTEGER, false);
+        notEqDiffNullable = new InternalColumn("COL1", DataType.STRING, true);
     }
 
     @Test

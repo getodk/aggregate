@@ -8,16 +8,16 @@ public class TableDoesNotExistException extends ODKTablesClientException
      */
     private static final long serialVersionUID = 4499968035606050096L;
 
-    private String tableId;
+    private String tableID;
 
-    public TableDoesNotExistException(String tableId)
+    public TableDoesNotExistException(String tableID)
     {
-        super(String.format("Table with tableId '%s' does not exist!", tableId));
-        this.tableId = tableId;
+        super(String.format("Table with ID %s does not exist!", tableID));
+        this.tableID = tableID;
     }
 
-    public String getTableId()
+    public String getTableID()
     {
-        return this.tableId;
+        return this.tableID;
     }
 }
