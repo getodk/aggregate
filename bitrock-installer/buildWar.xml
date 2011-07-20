@@ -68,7 +68,7 @@
         </runProgram>
         <runProgram>
             <program>xterm</program>
-            <programArguments>-e bash -c '${installdir}/uploadAggregateToAppEngine.sh'</programArguments>
+            <programArguments>-e bash -c '"${installdir}/uploadAggregateToAppEngine.sh"'</programArguments>
             <progressText>Launch installation script (3-10 minutes).</progressText>
             <workingDirectory>${installdir}</workingDirectory>
             <ruleList>
@@ -85,7 +85,8 @@
         <runProgram>
             <program>cmd</program>
             <programArguments>/S /C start /D "${installdir}" /B .${platform_path_separator}README.html</programArguments>
-            <progressText>Show additional deployment and configuration steps (5-10 minutes).</progressText>
+            <progressText>Show additional deployment and
+configuration steps (5-10 minutes).</progressText>
             <useMSDOSPath>0</useMSDOSPath>
             <workingDirectory>${installdir}</workingDirectory>
             <ruleList>
@@ -100,14 +101,11 @@
             </ruleList>
         </runProgram>
         <actionGroup>
-            <progressText>Show additional deployment and configuration steps (5-10 minutes).</progressText>
+            <progressText>Show additional deployment and
+configuration steps (5-10 minutes).</progressText>
             <actionList>
-                <urlEncode>
-                    <text>${installdir.unix}/README.html</text>
-                    <variable>readme_path</variable>
-                </urlEncode>
                 <launchBrowser>
-                    <url>file:///${readme_path}</url>
+                    <url>file:///${installdir}/README.html</url>
                 </launchBrowser>
             </actionList>
             <ruleList>

@@ -17,8 +17,9 @@ echo
 OUTCOME=1
 # Launches AppCfg
 [ -z "${DEBUG}" ] || set -x  # trace if $DEBUG env. var. is non-zero
-UPLOAD_ROOT=`dirname $0 | sed -e "s#^\\([^/]\\)#${PWD}/\\1#"` # sed makes absolute
-( ( ( $UPLOAD_ROOT/appengine-java-sdk/bin/appcfg.sh --email=${EMAIL} --passin ${MODE} ${UPLOAD_ROOT}/ODKAggregate 2>&1 && OUTCOME=0 && echo ---END-SCRIPT_SUCCESS--- ) || echo ---END-SCRIPT-FAILURE--- ) | sed -e"/assword fo/s/.*//" ) << __THE__END__
+UPLOAD_ROOT=`dirname "$0" | sed -e "s#^\\([^/]\\)#${PWD}/\\1#"` # sed makes absolute
+cd "$UPLOAD_ROOT"
+( ( ( "$UPLOAD_ROOT/appengine-java-sdk/bin/appcfg.sh" --email=${EMAIL} --passin ${MODE} ODKAggregate 2>&1 && OUTCOME=0 && echo ---END-SCRIPT_SUCCESS--- ) || echo ---END-SCRIPT-FAILURE--- ) | sed -e"/assword fo/s/.*//" ) << __THE__END__
 ${PASSWD}
 __THE__END__
 read -p "Press any key to close window . . ."
@@ -27,10 +28,10 @@ read -p "Press any key to close window . . ."
 GNPATH=`which gnome-open`
 if (( ${#GNPATH}==0 )); then
 # osx
-nohup open ${UPLOAD_ROOT}/README.html 2>&1 > /dev/null
+nohup open "${UPLOAD_ROOT}/README.html" 2>&1 > /dev/null
 else
 # linux
-nohup gnome-open ${UPLOAD_ROOT}/README.html 2>&1 > /dev/null
+nohup gnome-open "${UPLOAD_ROOT}/README.html" 2>&1 > /dev/null
 fi
 # give time for launch to happen before dropping Terminal window...
 sleep 1
