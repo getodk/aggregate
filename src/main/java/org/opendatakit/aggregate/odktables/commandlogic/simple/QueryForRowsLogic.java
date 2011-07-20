@@ -8,6 +8,7 @@ import org.opendatakit.aggregate.odktables.command.simple.QueryForRows;
 import org.opendatakit.aggregate.odktables.commandlogic.CommandLogic;
 import org.opendatakit.aggregate.odktables.commandresult.CommandResult.FailureReason;
 import org.opendatakit.aggregate.odktables.commandresult.simple.QueryForRowsResult;
+import org.opendatakit.aggregate.odktables.entity.InternalColumn;
 import org.opendatakit.aggregate.odktables.entity.InternalRow;
 import org.opendatakit.aggregate.odktables.entity.InternalUser;
 import org.opendatakit.aggregate.odktables.entity.InternalUserTableMapping;
@@ -60,7 +61,7 @@ public class QueryForRowsLogic extends CommandLogic<QueryForRows>
                 .equal(UserTableMappings.AGGREGATE_USER_IDENTIFIER,
                         aggregateRequestingUserIdentifier).get();
 
-        String aggregateTableIdentifier = mapping.getAggregateIdentifier();
+        String aggregateTableIdentifier = mapping.getAggregateTableIdentifier();
 
         if (!requestingUser.hasPerm(aggregateTableIdentifier, Permissions.READ))
         {
@@ -93,7 +94,13 @@ public class QueryForRowsLogic extends CommandLogic<QueryForRows>
             clientRow.setAggregateRowIdentifier(row.getAggregateIdentifier());
             for (String columnName : columnNames)
             {
-                clientRow.setValue(columnName, row.getValue(columnName));
+                InternalColumn column = columns
+                        .query()
+                        .equal(Columns.AGGREGATE_TABLE_IDENTIFIER,
+                                aggregateTableIdentifier)
+                        .equal(Columns.COLUMN_NAME, columnName).get();
+                clientRow.setValue(columnName,
+                        row.getValue(column.getAggregateIdentifier()));
             }
             clientRows.add(clientRow);
         }

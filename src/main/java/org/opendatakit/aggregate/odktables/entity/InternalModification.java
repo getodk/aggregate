@@ -9,13 +9,14 @@ import org.opendatakit.common.web.CallingContext;
 
 /**
  * <p>
- * A Modification is a (aggregateTableIdentifier, modificationNumber, aggregateRowIdentifier) tuple, where
+ * A Modification is a (aggregateTableIdentifier, modificationNumber,
+ * aggregateRowIdentifier) tuple, where
  * <ul>
  * <li>aggregateTableIdentifier = the universally unique identifier of a table</li>
  * <li>modificationNumber = the number for this modification. modifiationNumbers
  * are incremental with each modification to a table.</li>
- * <li>aggregateRowIdentifier = the universally unique identifier of a row that was inserted or
- * updated in this modification</li>
+ * <li>aggregateRowIdentifier = the universally unique identifier of a row that
+ * was inserted or updated in this modification</li>
  * </ul>
  * </p>
  * 
@@ -25,8 +26,9 @@ import org.opendatakit.common.web.CallingContext;
 public class InternalModification extends TypedEntity
 {
 
-    public InternalModification(String aggregateTableIdentifier, int modificationNumber,
-            String aggregateRowIdentifier, CallingContext cc) throws ODKDatastoreException
+    public InternalModification(String aggregateTableIdentifier,
+            int modificationNumber, String aggregateRowIdentifier,
+            CallingContext cc) throws ODKDatastoreException
     {
         super(Modifications.getInstance(cc));
         setAggregateTableIdentifier(aggregateTableIdentifier);
@@ -48,7 +50,8 @@ public class InternalModification extends TypedEntity
 
     public void setAggregateTableIdentifier(String aggregateTableIdentifier)
     {
-        super.getEntity().setField(Modifications.AGGREGATE_TABLE_IDENTIFIER, aggregateTableIdentifier);
+        super.getEntity().setField(Modifications.AGGREGATE_TABLE_IDENTIFIER,
+                aggregateTableIdentifier);
     }
 
     public int getModificationNumber()
@@ -71,6 +74,16 @@ public class InternalModification extends TypedEntity
 
     public void setAggregateRowIdentifier(String aggregateRowIdentifier)
     {
-        super.getEntity().setField(Modifications.AGGREGATE_ROW_IDENTIFIER, aggregateRowIdentifier);
+        super.getEntity().setField(Modifications.AGGREGATE_ROW_IDENTIFIER,
+                aggregateRowIdentifier);
+    }
+
+    @Override
+    public String toString()
+    {
+        return String
+                .format("InternalModification[aggregateTableIdentifier=%s, modificationNumber=%s, aggregateRowIdentifier=%s",
+                        getAggregateTableIdentifier(), getModificationNumber(),
+                        getAggregateRowIdentifier());
     }
 }

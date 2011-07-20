@@ -12,11 +12,13 @@ import org.opendatakit.aggregate.odktables.commandlogic.CommandLogic;
 import org.opendatakit.aggregate.odktables.commandlogic.CommandLogicFunctions;
 import org.opendatakit.aggregate.odktables.commandresult.CommandResult.FailureReason;
 import org.opendatakit.aggregate.odktables.commandresult.synchronize.UpdateSynchronizedRowsResult;
+import org.opendatakit.aggregate.odktables.entity.InternalColumn;
 import org.opendatakit.aggregate.odktables.entity.InternalModification;
 import org.opendatakit.aggregate.odktables.entity.InternalRow;
 import org.opendatakit.aggregate.odktables.entity.InternalTableEntry;
 import org.opendatakit.aggregate.odktables.entity.InternalUser;
 import org.opendatakit.aggregate.odktables.entity.InternalUserTableMapping;
+import org.opendatakit.aggregate.odktables.relation.Columns;
 import org.opendatakit.aggregate.odktables.relation.Permissions;
 import org.opendatakit.aggregate.odktables.relation.Table;
 import org.opendatakit.aggregate.odktables.relation.TableEntries;
@@ -52,6 +54,7 @@ public class UpdateSynchronizedRowsLogic extends
         Users users = Users.getInstance(cc);
         TableEntries entries = TableEntries.getInstance(cc);
         UserTableMappings mappings = UserTableMappings.getInstance(cc);
+        Columns columns = Columns.getInstance(cc);
 
         String requestingUserID = updateSynchronizedRows.getRequestingUserID();
         String tableID = updateSynchronizedRows.getTableID();
@@ -102,7 +105,8 @@ public class UpdateSynchronizedRowsLogic extends
         try
         {
             clientModification = updateChangedRows(changedRows,
-                    aggregateTableIdentifier, newModificationNumber, cc);
+                    aggregateTableIdentifier, newModificationNumber, columns,
+                    cc);
         } catch (RowOutOfSynchException e)
         {
             return UpdateSynchronizedRowsResult.failure(
@@ -115,7 +119,7 @@ public class UpdateSynchronizedRowsLogic extends
 
     private Modification updateChangedRows(List<SynchronizedRow> changedRows,
             String aggregateTableIdentifier, int newModificationNumber,
-            CallingContext cc) throws ODKDatastoreException,
+            Columns columns, CallingContext cc) throws ODKDatastoreException,
             RowOutOfSynchException
     {
         List<SynchronizedRow> updatedRows = new ArrayList<SynchronizedRow>();
@@ -133,7 +137,12 @@ public class UpdateSynchronizedRowsLogic extends
             for (Entry<String, String> rowEntry : clientRow
                     .getColumnValuePairs().entrySet())
             {
-                row.setValue(rowEntry.getKey(), rowEntry.getValue());
+                InternalColumn col = columns
+                        .query()
+                        .equal(Columns.AGGREGATE_TABLE_IDENTIFIER,
+                                aggregateTableIdentifier)
+                        .equal(Columns.COLUMN_NAME, rowEntry.getKey()).get();
+                row.setValue(col.getAggregateIdentifier(), rowEntry.getValue());
             }
             row.updateRevisionTag();
             row.save();

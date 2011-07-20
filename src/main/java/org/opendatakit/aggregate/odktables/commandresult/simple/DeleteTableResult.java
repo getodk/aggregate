@@ -42,7 +42,6 @@ public class DeleteTableResult extends CommandResult<DeleteTable>
     {
         super(false, reason);
 
-        Check.notNullOrEmpty(aggregateTableIdentifier, "aggregateTableIdentifier");
         if (!possibleFailureReasons.contains(reason))
         {
             throw new IllegalArgumentException(

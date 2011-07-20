@@ -109,7 +109,7 @@ public class Permissions extends TypedEntityRelation<InternalPermission>
      */
     private Permissions(CallingContext cc) throws ODKDatastoreException
     {
-        super(RELATION_NAME, fields, cc);
+        super(Table.NAMESPACE, RELATION_NAME, fields, cc);
     }
 
     @Override

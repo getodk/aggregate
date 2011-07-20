@@ -42,7 +42,7 @@ public class UserTableMappings extends TypedEntityRelation<InternalUserTableMapp
     /**
      * The name of the Cursor relation.
      */
-    private static final String RELATION_NAME = "CURSOR";
+    private static final String RELATION_NAME = "USER_TABLE_MAPPINGS";
 
     // The following defines the actual fields that will be in the datastore:
     /**
@@ -87,7 +87,7 @@ public class UserTableMappings extends TypedEntityRelation<InternalUserTableMapp
      */
     private UserTableMappings(CallingContext cc) throws ODKDatastoreException
     {
-        super(RELATION_NAME, fields, cc);
+        super(Table.NAMESPACE, RELATION_NAME, fields, cc);
     }
 
     @Override

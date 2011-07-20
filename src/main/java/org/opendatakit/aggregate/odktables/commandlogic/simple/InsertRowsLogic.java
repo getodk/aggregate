@@ -5,13 +5,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.opendatakit.aggregate.odktables.client.entity.Row;
 import org.opendatakit.aggregate.odktables.command.simple.InsertRows;
 import org.opendatakit.aggregate.odktables.commandlogic.CommandLogic;
 import org.opendatakit.aggregate.odktables.commandresult.CommandResult.FailureReason;
 import org.opendatakit.aggregate.odktables.commandresult.simple.InsertRowsResult;
+import org.opendatakit.aggregate.odktables.entity.InternalColumn;
 import org.opendatakit.aggregate.odktables.entity.InternalRow;
 import org.opendatakit.aggregate.odktables.entity.InternalUser;
 import org.opendatakit.aggregate.odktables.entity.InternalUserTableMapping;
+import org.opendatakit.aggregate.odktables.relation.Columns;
 import org.opendatakit.aggregate.odktables.relation.Permissions;
 import org.opendatakit.aggregate.odktables.relation.TableEntries;
 import org.opendatakit.aggregate.odktables.relation.UserTableMappings;
@@ -42,6 +45,7 @@ public class InsertRowsLogic extends CommandLogic<InsertRows>
         TableEntries entries = TableEntries.getInstance(cc);
         Users users = Users.getInstance(cc);
         UserTableMappings mappings = UserTableMappings.getInstance(cc);
+        Columns columns = Columns.getInstance(cc);
 
         String requestingUserID = insertRows.getRequestingUserID();
         String tableID = insertRows.getTableID();
@@ -58,7 +62,7 @@ public class InsertRowsLogic extends CommandLogic<InsertRows>
                 .equal(UserTableMappings.AGGREGATE_USER_IDENTIFIER,
                         aggregateRequestingUserIdentifier).get();
 
-        String aggregateTableIdentifier = mapping.getAggregateIdentifier();
+        String aggregateTableIdentifier = mapping.getAggregateTableIdentifier();
 
         if (!requestingUser
                 .hasPerm(aggregateTableIdentifier, Permissions.WRITE))
@@ -76,16 +80,20 @@ public class InsertRowsLogic extends CommandLogic<InsertRows>
                     FailureReason.TABLE_DOES_NOT_EXIST);
         }
 
-        List<org.opendatakit.aggregate.odktables.client.entity.Row> clientRows = insertRows
-                .getRows();
+        List<Row> clientRows = insertRows.getRows();
         Map<String, String> rowIDstoaggregateRowIdentifiers = new HashMap<String, String>();
-        for (org.opendatakit.aggregate.odktables.client.entity.Row clientRow : clientRows)
+        for (Row clientRow : clientRows)
         {
             InternalRow row = new InternalRow(aggregateTableIdentifier, cc);
             for (Entry<String, String> entry : clientRow.getColumnValuePairs()
                     .entrySet())
             {
-                row.setValue(entry.getKey(), entry.getValue());
+                InternalColumn col = columns
+                        .query()
+                        .equal(Columns.AGGREGATE_TABLE_IDENTIFIER,
+                                aggregateTableIdentifier)
+                        .equal(Columns.COLUMN_NAME, entry.getKey()).get();
+                row.setValue(col.getAggregateIdentifier(), entry.getValue());
             }
             row.save();
             rowIDstoaggregateRowIdentifiers.put(clientRow.getRowID(),

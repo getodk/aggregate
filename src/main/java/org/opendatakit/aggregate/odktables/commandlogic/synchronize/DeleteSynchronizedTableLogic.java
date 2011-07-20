@@ -7,6 +7,7 @@ import org.opendatakit.aggregate.odktables.commandlogic.CommandLogic;
 import org.opendatakit.aggregate.odktables.commandresult.CommandResult.FailureReason;
 import org.opendatakit.aggregate.odktables.commandresult.synchronize.DeleteSynchronizedTableResult;
 import org.opendatakit.aggregate.odktables.entity.InternalColumn;
+import org.opendatakit.aggregate.odktables.entity.InternalPermission;
 import org.opendatakit.aggregate.odktables.entity.InternalRow;
 import org.opendatakit.aggregate.odktables.entity.InternalTableEntry;
 import org.opendatakit.aggregate.odktables.entity.InternalUser;
@@ -47,6 +48,7 @@ public class DeleteSynchronizedTableLogic extends
         UserTableMappings mappings = UserTableMappings.getInstance(cc);
         TableEntries entries = TableEntries.getInstance(cc);
         Columns columns = Columns.getInstance(cc);
+        Permissions permissions = Permissions.getInstance(cc);
 
         String requestingUserID = deleteSynchronizedTable.getRequestingUserID();
         String tableID = deleteSynchronizedTable.getTableID();
@@ -84,6 +86,10 @@ public class DeleteSynchronizedTableLogic extends
                 .query()
                 .equal(UserTableMappings.AGGREGATE_TABLE_IDENTIFIER,
                         aggregateTableIdentifier).execute();
+        List<InternalPermission> perms = permissions
+                .query()
+                .equal(Permissions.AGGREGATE_TABLE_IDENTIFIER,
+                        aggregateTableIdentifier).execute();
         InternalTableEntry entry = entries.get(aggregateTableIdentifier);
 
         for (InternalRow row : rows)
@@ -92,7 +98,10 @@ public class DeleteSynchronizedTableLogic extends
             column.delete();
         for (InternalUserTableMapping map : maps)
             map.delete();
+        for (InternalPermission perm : perms)
+            perm.delete();
         entry.delete();
+        table.dropRelation();
 
         return DeleteSynchronizedTableResult.success();
     }

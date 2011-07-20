@@ -74,7 +74,7 @@ public class SynchronizeAPI extends CommonAPI
      */
     public SynchronizeAPI(URI aggregateURI, String userID)
             throws ClientProtocolException, UserDoesNotExistException,
-            IOException
+            IOException, AggregateInternalErrorException
     {
         super(aggregateURI, userID);
     }
@@ -104,7 +104,7 @@ public class SynchronizeAPI extends CommonAPI
     public Modification createSynchronizedTable(String tableID,
             String tableName, List<Column> columns)
             throws ClientProtocolException, IOException,
-            PermissionDeniedException, TableAlreadyExistsException
+            PermissionDeniedException, TableAlreadyExistsException, AggregateInternalErrorException
     {
         CreateSynchronizedTable command = new CreateSynchronizedTable(
                 requestingUserID, tableName, tableID, columns);
@@ -145,7 +145,7 @@ public class SynchronizeAPI extends CommonAPI
     public Modification cloneSynchronizedTable(String aggregateTableIdentifier,
             String tableID) throws ClientProtocolException, IOException,
             PermissionDeniedException, TableDoesNotExistException,
-            TableAlreadyExistsException
+            TableAlreadyExistsException, AggregateInternalErrorException
     {
         CloneSynchronizedTable command = new CloneSynchronizedTable(
                 requestingUserID, tableID, aggregateTableIdentifier);
@@ -171,7 +171,7 @@ public class SynchronizeAPI extends CommonAPI
      */
     public void removeTableSynchronization(String tableID)
             throws ClientProtocolException, IOException,
-            TableDoesNotExistException
+            TableDoesNotExistException, AggregateInternalErrorException
     {
         RemoveTableSynchronization command = new RemoveTableSynchronization(
                 requestingUserID, tableID);
@@ -200,7 +200,7 @@ public class SynchronizeAPI extends CommonAPI
      */
     public void deleteSynchronizedTable(String tableID)
             throws ClientProtocolException, IOException,
-            PermissionDeniedException, TableDoesNotExistException
+            PermissionDeniedException, TableDoesNotExistException, AggregateInternalErrorException
     {
         DeleteSynchronizedTable command = new DeleteSynchronizedTable(
                 requestingUserID, tableID);
@@ -251,7 +251,7 @@ public class SynchronizeAPI extends CommonAPI
     public Modification insertSynchronizedRows(String tableID,
             int modificationNumber, List<SynchronizedRow> newRows)
             throws ClientProtocolException, IOException, OutOfSynchException,
-            TableDoesNotExistException, PermissionDeniedException
+            TableDoesNotExistException, PermissionDeniedException, AggregateInternalErrorException
     {
         InsertSynchronizedRows command = new InsertSynchronizedRows(
                 requestingUserID, tableID, modificationNumber, newRows);
@@ -304,7 +304,7 @@ public class SynchronizeAPI extends CommonAPI
             int modificationNumber, List<SynchronizedRow> changedRows)
             throws ClientProtocolException, IOException,
             PermissionDeniedException, OutOfSynchException,
-            TableDoesNotExistException, RowOutOfSynchException
+            TableDoesNotExistException, RowOutOfSynchException, AggregateInternalErrorException
     {
         UpdateSynchronizedRows command = new UpdateSynchronizedRows(
                 requestingUserID, changedRows, tableID, modificationNumber);
@@ -346,7 +346,8 @@ public class SynchronizeAPI extends CommonAPI
      */
     public Modification synchronize(String tableID, int modificationNumber)
             throws ClientProtocolException, IOException,
-            PermissionDeniedException, TableDoesNotExistException
+            PermissionDeniedException, TableDoesNotExistException,
+            AggregateInternalErrorException
     {
         Synchronize command = new Synchronize(requestingUserID, tableID,
                 modificationNumber);

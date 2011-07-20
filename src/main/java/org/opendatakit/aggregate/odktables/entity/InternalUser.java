@@ -33,7 +33,8 @@ public class InternalUser extends TypedEntity
         setName(userName);
     }
 
-    public InternalUser(Entity entity, CallingContext cc) throws ODKDatastoreException
+    public InternalUser(Entity entity, CallingContext cc)
+            throws ODKDatastoreException
     {
         super(Users.getInstance(cc), entity);
     }
@@ -63,8 +64,19 @@ public class InternalUser extends TypedEntity
     public boolean hasPerm(String aggregateTableIdentifier, String permission)
             throws ODKDatastoreException
     {
-        return Permissions.getInstance(getCC()).query()
-                .equal(Permissions.AGGREGATE_TABLE_IDENTIFIER, aggregateTableIdentifier).equal(permission, true)
+        return Permissions
+                .getInstance(getCC())
+                .query()
+                .equal(Permissions.AGGREGATE_TABLE_IDENTIFIER,
+                        aggregateTableIdentifier).equal(permission, true)
                 .exists();
+    }
+
+    @Override
+    public String toString()
+    {
+        return String.format(
+                "InternalUser[aggregateIdentifier=%s, userID=%s, name=%s",
+                getAggregateIdentifier(), getID(), getName());
     }
 }

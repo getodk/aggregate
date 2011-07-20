@@ -34,9 +34,13 @@ public class Table extends TypedEntityRelation<InternalRow>
             DataType.STRING, false);
     
     /**
-     * The namespace for Rows relations.
+     * The namespace for all relations.
      */
-    private static final String NAMESPACE = "ODKTABLES";
+    public static final String NAMESPACE = "ODKTABLES";
+    /**
+     * The namespace for Table relations
+     */
+    private static final String TABLE_NAMESPACE = NAMESPACE + "_TABLE";
 
     private List<DataField> fields;
 
@@ -84,6 +88,12 @@ public class Table extends TypedEntityRelation<InternalRow>
         List<DataField> tableFields = Columns.getInstance(cc).getDataFields(
                 aggregateTableIdentifier);
         tableFields.add(revisionTag);
-        return new Table(NAMESPACE, aggregateTableIdentifier, tableFields, cc);
+        String tableName = convertIdentifier(aggregateTableIdentifier);
+        return new Table(TABLE_NAMESPACE, tableName, tableFields, cc);
+    }
+    
+    public static String convertIdentifier(String aggregateIdentifier)
+    {
+       return aggregateIdentifier.replace('-', '_').replace(':', '_').toUpperCase(); 
     }
 }

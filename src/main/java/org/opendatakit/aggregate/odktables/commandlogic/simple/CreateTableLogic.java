@@ -5,6 +5,7 @@ import org.opendatakit.aggregate.odktables.commandlogic.CommandLogic;
 import org.opendatakit.aggregate.odktables.commandresult.CommandResult.FailureReason;
 import org.opendatakit.aggregate.odktables.commandresult.simple.CreateTableResult;
 import org.opendatakit.aggregate.odktables.entity.InternalColumn;
+import org.opendatakit.aggregate.odktables.entity.InternalPermission;
 import org.opendatakit.aggregate.odktables.entity.InternalUserTableMapping;
 import org.opendatakit.aggregate.odktables.entity.InternalTableEntry;
 import org.opendatakit.aggregate.odktables.entity.InternalUser;
@@ -56,24 +57,31 @@ public class CreateTableLogic extends CommandLogic<CreateTable>
             return CreateTableResult.failure(tableID,
                     FailureReason.TABLE_ALREADY_EXISTS);
         }
-        // Create table in Tables, Columns, and Cursors.
+        // Create table
         try
         {
-            InternalTableEntry entry = new InternalTableEntry(aggregateUserIdentifier,
-                    createTable.getTableName(), cc);
+            InternalTableEntry entry = new InternalTableEntry(
+                    aggregateUserIdentifier, createTable.getTableName(), false,
+                    cc);
             entry.save();
             for (org.opendatakit.aggregate.odktables.client.entity.Column clientColumn : createTable
                     .getColumns())
             {
-                InternalColumn column = new InternalColumn(entry.getAggregateIdentifier(),
-                        clientColumn.getName(), clientColumn.getType(),
-                        clientColumn.isNullable(), cc);
+                InternalColumn column = new InternalColumn(
+                        entry.getAggregateIdentifier(), clientColumn.getName(),
+                        clientColumn.getType(), clientColumn.isNullable(), cc);
                 column.save();
             }
-            InternalUserTableMapping cursor = new InternalUserTableMapping(
+            InternalUserTableMapping mapping = new InternalUserTableMapping(
                     aggregateUserIdentifier, entry.getAggregateIdentifier(),
                     tableID, cc);
-            cursor.save();
+            mapping.save();
+
+            // Add creation user's full permissions
+            InternalPermission perm = new InternalPermission(
+                    entry.getAggregateIdentifier(), aggregateUserIdentifier,
+                    true, true, true, cc);
+            perm.save();
         } catch (ODKEntityPersistException e)
         {
             // TODO: query to see what got created and delete it

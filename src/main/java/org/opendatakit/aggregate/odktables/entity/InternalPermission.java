@@ -107,4 +107,14 @@ public class InternalPermission extends TypedEntity
         DataField deleteField = getDataField(Permissions.DELETE);
         super.getEntity().setBoolean(deleteField, delete);
     }
+
+    @Override
+    public String toString()
+    {
+        return String
+                .format("InternalPermission[aggregateTableIdentifier=%s, aggregateUserIdentifier=%s, read=%s, write=%s, delete=%s",
+                        getAggregateTableIdentifier(),
+                        getAggregateUserIdentifier(), getRead(), getWrite(),
+                        getDelete());
+    }
 }

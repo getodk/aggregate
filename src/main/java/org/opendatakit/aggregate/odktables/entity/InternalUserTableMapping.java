@@ -8,10 +8,11 @@ import org.opendatakit.common.web.CallingContext;
 
 /**
  * <p>
- * A Cursor is a (aggregateUserIdentifier, aggregateTableIdentifier, tableID) tuple, where
+ * A Cursor is a (aggregateUserIdentifier, aggregateTableIdentifier, tableID)
+ * tuple, where
  * <ul>
- * <li>aggregateUserIdentifier: the globally unique identifier of a user who is using the table
- * with aggregateTableIdentifier</li>
+ * <li>aggregateUserIdentifier: the globally unique identifier of a user who is
+ * using the table with aggregateTableIdentifier</li>
  * <li>aggregateTableIdentifier: the globally unique identifier of a table</li>
  * <li>tableID: the identifier which the user uses to identify the table. This
  * is unique only to that user.</li>
@@ -24,8 +25,9 @@ import org.opendatakit.common.web.CallingContext;
 public class InternalUserTableMapping extends TypedEntity
 {
 
-    public InternalUserTableMapping(String aggregateUserIdentifier, String aggregateTableIdentifier, String tableID,
-            CallingContext cc) throws ODKDatastoreException
+    public InternalUserTableMapping(String aggregateUserIdentifier,
+            String aggregateTableIdentifier, String tableID, CallingContext cc)
+            throws ODKDatastoreException
     {
         super(UserTableMappings.getInstance(cc));
         setUser(aggregateUserIdentifier);
@@ -41,22 +43,27 @@ public class InternalUserTableMapping extends TypedEntity
 
     public String getUser()
     {
-        return super.getEntity().getField(UserTableMappings.AGGREGATE_USER_IDENTIFIER);
+        return super.getEntity().getField(
+                UserTableMappings.AGGREGATE_USER_IDENTIFIER);
     }
 
     public void setUser(String aggregateUserIdentifier)
     {
-        super.getEntity().setField(UserTableMappings.AGGREGATE_USER_IDENTIFIER, aggregateUserIdentifier);
+        super.getEntity().setField(UserTableMappings.AGGREGATE_USER_IDENTIFIER,
+                aggregateUserIdentifier);
     }
 
     public String getAggregateTableIdentifier()
     {
-        return super.getEntity().getField(UserTableMappings.AGGREGATE_TABLE_IDENTIFIER);
+        return super.getEntity().getField(
+                UserTableMappings.AGGREGATE_TABLE_IDENTIFIER);
     }
 
     public void setAggregateTableIdentifier(String aggregateTableIdentifier)
     {
-        super.getEntity().setField(UserTableMappings.AGGREGATE_TABLE_IDENTIFIER, aggregateTableIdentifier);
+        super.getEntity().setField(
+                UserTableMappings.AGGREGATE_TABLE_IDENTIFIER,
+                aggregateTableIdentifier);
     }
 
     public String getTableID()
@@ -67,5 +74,13 @@ public class InternalUserTableMapping extends TypedEntity
     public void setTableID(String tableID)
     {
         super.getEntity().setField(UserTableMappings.TABLE_ID, tableID);
+    }
+
+    @Override
+    public String toString()
+    {
+        return String
+                .format("InternalUserTableMapping[aggregateUserIdentifier=%s, aggregateTableIdentifier=%s, tableID=%s",
+                        getUser(), getAggregateTableIdentifier(), getTableID());
     }
 }

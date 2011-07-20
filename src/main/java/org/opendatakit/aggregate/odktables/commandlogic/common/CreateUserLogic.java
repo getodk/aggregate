@@ -33,6 +33,9 @@ public class CreateUserLogic extends CommandLogic<CreateUser>
             throws ODKDatastoreException
     {
         Users users = Users.getInstance(cc);
+        
+        // TODO: this is kind of hacky, but we need to ensure the admin user exists
+        users.getAdminUser();
 
         String userID = createUser.getUserID();
         String requestingUserID = createUser.getRequestingUserID();

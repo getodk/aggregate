@@ -7,9 +7,8 @@ public class AggregateInternalErrorException extends ODKTablesClientException
      */
     private static final long serialVersionUID = 4499968035606050096L;
 
-    public AggregateInternalErrorException()
+    public AggregateInternalErrorException(String message)
     {
-        super(
-                "Aggregate encountered an internal server error, please try again later.");
+        super(message);
     }
 }

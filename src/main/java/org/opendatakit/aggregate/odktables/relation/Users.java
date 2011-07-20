@@ -3,6 +3,7 @@ package org.opendatakit.aggregate.odktables.relation;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.opendatakit.aggregate.odktables.entity.InternalPermission;
 import org.opendatakit.aggregate.odktables.entity.InternalUser;
 import org.opendatakit.common.ermodel.Entity;
 import org.opendatakit.common.ermodel.typedentity.TypedEntityRelation;
@@ -100,7 +101,7 @@ public class Users extends TypedEntityRelation<InternalUser>
      */
     private Users(CallingContext cc) throws ODKDatastoreException
     {
-        super(RELATION_NAME, fields, cc);
+        super(Table.NAMESPACE, RELATION_NAME, fields, cc);
     }
 
     public InternalUser initialize(Entity entity) throws ODKDatastoreException
@@ -110,6 +111,22 @@ public class Users extends TypedEntityRelation<InternalUser>
 
     public InternalUser getAdminUser() throws ODKDatastoreException
     {
+        if (adminInstance == null)
+        {
+            try
+            {
+                adminInstance = instance.query().equal(USER_ID, ADMIN_ID).get();
+            } catch (ODKDatastoreException e)
+            {
+                adminInstance = new InternalUser(ADMIN_ID, ADMIN_NAME, getCC());
+                adminInstance.save();
+                InternalPermission adminPerm = new InternalPermission(
+                        getAggregateIdentifier(),
+                        adminInstance.getAggregateIdentifier(), true, true,
+                        true, getCC());
+                adminPerm.save();
+            }
+        }
         return Users.adminInstance;
     }
 
@@ -137,18 +154,7 @@ public class Users extends TypedEntityRelation<InternalUser>
         {
             instance = new Users(cc);
         }
-        // Create admin user if they don't already exist
-        if (adminInstance == null)
-        {
-            try
-            {
-                adminInstance = instance.query().equal(USER_ID, ADMIN_ID).get();
-            } catch (ODKDatastoreException e)
-            {
-                adminInstance = new InternalUser(ADMIN_ID, ADMIN_NAME, cc);
-                adminInstance.save();
-            }
-        }
+
         return instance;
     }
 }

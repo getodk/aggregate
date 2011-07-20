@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.StatusLine;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
@@ -72,7 +73,7 @@ public class CommonAPI
      */
     public CommonAPI(URI aggregateURI, String userID)
             throws ClientProtocolException, IOException,
-            UserDoesNotExistException
+            UserDoesNotExistException, AggregateInternalErrorException
     {
         this.aggregateURI = aggregateURI;
         this.requestingUserID = userID;
@@ -109,7 +110,8 @@ public class CommonAPI
      */
     public User createUser(String userID, String userName)
             throws ClientProtocolException, IOException,
-            UserAlreadyExistsException, PermissionDeniedException
+            UserAlreadyExistsException, PermissionDeniedException,
+            AggregateInternalErrorException
     {
         CreateUser createUser = new CreateUser(requestingUserID, userName,
                 userID);
@@ -137,7 +139,8 @@ public class CommonAPI
      *             if there is a problem communicating with the Aggregate server
      */
     public User getUserByID(String userID) throws ClientProtocolException,
-            IOException, PermissionDeniedException, UserDoesNotExistException
+            IOException, PermissionDeniedException, UserDoesNotExistException,
+            AggregateInternalErrorException
     {
         GetUserByID getUserByID = new GetUserByID(requestingUserID, userID);
         GetUserByIDResult result = sendCommand(getUserByID,
@@ -167,7 +170,8 @@ public class CommonAPI
      */
     public User getUserByAggregateIdentifier(String aggregateUserIdentifier)
             throws ClientProtocolException, IOException,
-            PermissionDeniedException, UserDoesNotExistException
+            PermissionDeniedException, UserDoesNotExistException,
+            AggregateInternalErrorException
     {
         GetUserByAggregateIdentifier getUserByAggregateIdentifier = new GetUserByAggregateIdentifier(
                 requestingUserID, aggregateUserIdentifier);
@@ -202,7 +206,8 @@ public class CommonAPI
      */
     public void deleteUser(String aggregateUserIdentifier)
             throws PermissionDeniedException, UserDoesNotExistException,
-            CannotDeleteException, ClientProtocolException, IOException
+            CannotDeleteException, ClientProtocolException, IOException,
+            AggregateInternalErrorException
     {
         DeleteUser deleteUser = new DeleteUser(requestingUserID,
                 aggregateUserIdentifier);
@@ -243,7 +248,7 @@ public class CommonAPI
             String aggregateTableIdentifier, boolean read, boolean write,
             boolean delete) throws ClientProtocolException, IOException,
             PermissionDeniedException, UserDoesNotExistException,
-            TableDoesNotExistException
+            TableDoesNotExistException, AggregateInternalErrorException
     {
         SetTablePermissions setTablePermissions = new SetTablePermissions(
                 requestingUserID, aggregateTableIdentifier,
@@ -276,7 +281,8 @@ public class CommonAPI
      */
     public void setUserManagementPermissions(String aggregateUserIdentifier,
             boolean allowed) throws ClientProtocolException, IOException,
-            PermissionDeniedException, UserDoesNotExistException
+            PermissionDeniedException, UserDoesNotExistException,
+            AggregateInternalErrorException
     {
         SetUserManagementPermissions command = new SetUserManagementPermissions(
                 requestingUserID, aggregateUserIdentifier, allowed);
@@ -296,7 +302,7 @@ public class CommonAPI
      *             if there is a problem communicating with the Aggregate server
      */
     public List<TableEntry> listAllTables() throws ClientProtocolException,
-            IOException
+            IOException, AggregateInternalErrorException
     {
         QueryForTables command = new QueryForTables(requestingUserID);
         QueryForTablesResult result = sendCommand(command,
@@ -313,10 +319,11 @@ public class CommonAPI
      * @return the result from the command.
      * @throws ClientProtocolException
      * @throws IOException
+     * @throws AggregateInternalErrorException
      */
     protected <T extends CommandResult<?>> T sendCommand(Command command,
             Class<T> commandResultClass) throws ClientProtocolException,
-            IOException
+            IOException, AggregateInternalErrorException
     {
         URI uri = aggregateURI.resolve(command.getMethodPath());
         String json = CommandConverter.getInstance().serializeCommand(command);
@@ -324,6 +331,12 @@ public class CommonAPI
         HttpEntity entity = new StringEntity(json);
         post.setEntity(entity);
         HttpResponse response = client.execute(post);
+        StatusLine status = response.getStatusLine();
+        if (status.getStatusCode() / 100 == 5)
+        {
+            response.getEntity().consumeContent();
+            throw new AggregateInternalErrorException(status.getReasonPhrase());
+        }
         Reader reader = new InputStreamReader(response.getEntity().getContent());
         T result = CommandConverter.getInstance().deserializeResult(reader,
                 commandResultClass);
