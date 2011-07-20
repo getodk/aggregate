@@ -13,17 +13,17 @@ public class TableAlreadyExistsException extends ODKTablesClientException
      */
     private static final long serialVersionUID = -9027773843183177346L;
 
-    private String tableId;
+    private String tableID;
     
-    public TableAlreadyExistsException(String tableId)
+    public TableAlreadyExistsException(String tableID)
     {
-        super(String.format("Table with tableId '%s' already exists!", tableId));
+        super(String.format("Table with tableID '%s' already exists!", tableID));
 
-        this.tableId = tableId;
+        this.tableID = tableID;
     }
     
-    public String getTableId()
+    public String getTableID()
     {
-        return this.tableId;
+        return this.tableID;
     }
 }
