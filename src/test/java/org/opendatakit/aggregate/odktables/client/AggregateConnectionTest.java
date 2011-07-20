@@ -41,7 +41,7 @@ public class AggregateConnectionTest
     private String userName;
     private String tableId;
     private List<String> rowIds;
-    private List<Row> rows;
+    private List<InternalRow> rows;
 
     @Before
     public void setUp() throws URISyntaxException
@@ -52,12 +52,12 @@ public class AggregateConnectionTest
         tableId = "table1";
 
         rowIds = new ArrayList<String>();
-        rows = new ArrayList<Row>();
-        Row row1 = new Row("1");
+        rows = new ArrayList<InternalRow>();
+        InternalRow row1 = new InternalRow("1");
         rowIds.add("1");
         row1.setColumn("COL_1", "value1");
         rows.add(row1);
-        Row row2 = new Row("2");
+        InternalRow row2 = new InternalRow("2");
         rowIds.add("2");
         row2.setColumn("COL_1", "value2");
         rows.add(row2);
@@ -68,8 +68,8 @@ public class AggregateConnectionTest
             throws ClientProtocolException, TableAlreadyExistsException,
             UserDoesNotExistException, IOException
     {
-        List<Column> columns = new ArrayList<Column>();
-        columns.add(new Column("COL_1", DataType.STRING, true));
+        List<InternalColumn> columns = new ArrayList<InternalColumn>();
+        columns.add(new InternalColumn("COL_1", DataType.STRING, true));
         conn.createTable(userId, tableId, "Table 1", columns);
     }
 
@@ -93,8 +93,8 @@ public class AggregateConnectionTest
     public void testCreateTable() throws ClientProtocolException, IOException,
             TableAlreadyExistsException, UserDoesNotExistException
     {
-        List<Column> columns = new ArrayList<Column>();
-        columns.add(new Column("COL_1", DataType.STRING, true));
+        List<InternalColumn> columns = new ArrayList<InternalColumn>();
+        columns.add(new InternalColumn("COL_1", DataType.STRING, true));
         String createdTableId = conn.createTable(userId, tableId, "Table 1",
                 columns);
         assertEquals(tableId, createdTableId);
@@ -105,8 +105,8 @@ public class AggregateConnectionTest
             throws ClientProtocolException, TableAlreadyExistsException,
             UserDoesNotExistException, IOException
     {
-        List<Column> columns = new ArrayList<Column>();
-        columns.add(new Column("COL_1", DataType.STRING, true));
+        List<InternalColumn> columns = new ArrayList<InternalColumn>();
+        columns.add(new InternalColumn("COL_1", DataType.STRING, true));
         conn.createTable(userId, tableId, "Table 1", columns);
     }
 
@@ -129,7 +129,7 @@ public class AggregateConnectionTest
     public void testGetUser() throws ClientProtocolException,
             UserDoesNotExistException, IOException
     {
-        User user = conn.getUser(userId);
+        InternalUser user = conn.getUser(userId);
         assertEquals(userId, user.getUserId());
         assertEquals(userName, user.getUserName());
         String userUri = user.getUserUri();
@@ -151,7 +151,7 @@ public class AggregateConnectionTest
     {
         TableList tableList = conn.listTables();
         assertEquals(1, tableList.size());
-        for (TableEntry entry : tableList)
+        for (InternalTableEntry entry : tableList)
         {
             assertTrue(tableId.equalsIgnoreCase(entry.getTableId()));
             assertEquals("Dylan Price", entry.getUserName());
@@ -163,7 +163,7 @@ public class AggregateConnectionTest
             UserDoesNotExistException, IOException, TableDoesNotExistException
     {
         String userUri = conn.getUser(userId).getUserUri();
-        List<Row> rows = conn.getRows(userUri, tableId);
+        List<InternalRow> rows = conn.getRows(userUri, tableId);
         assertEquals(this.rows, rows);
     }
 

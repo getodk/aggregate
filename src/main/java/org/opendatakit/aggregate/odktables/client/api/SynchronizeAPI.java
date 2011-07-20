@@ -5,10 +5,11 @@ import java.net.URI;
 import java.util.List;
 
 import org.apache.commons.lang.NotImplementedException;
+import org.opendatakit.aggregate.odktables.client.entity.Column;
 import org.opendatakit.aggregate.odktables.client.entity.Modification;
-import org.opendatakit.aggregate.odktables.client.entity.Row;
 import org.opendatakit.aggregate.odktables.client.entity.SynchronizedRow;
 import org.opendatakit.aggregate.odktables.client.exception.AggregateInternalErrorException;
+import org.opendatakit.aggregate.odktables.client.exception.OutOfSynchException;
 import org.opendatakit.aggregate.odktables.client.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.client.exception.TableAlreadyExistsException;
 import org.opendatakit.aggregate.odktables.client.exception.TableDoesNotExistException;
@@ -19,17 +20,21 @@ import org.opendatakit.aggregate.odktables.client.exception.UserDoesNotExistExce
  * SynchronizedAPI contains API calls for using Aggregate as a synchronization
  * service for tables.
  * </p>
- *
+ * 
  * <p>
- * Clients are required to store the following information in order to use the api:
+ * Clients are required to store the following information in order to use the
+ * api:
  * </p>
  * <p>
- * For each table: the client's tableID, Aggregate's corresponding tableUUID, and the modificationNumber from the last synchronization with Aggregate.
+ * For each table: the client's tableID and the modificationNumber from the last
+ * synchronization with Aggregate.
  * </p>
  * <p>
- * For each row of a table: Aggregate's rowUUID, the revisionNumber from the last synchronization with Aggregate, and the data that is contained in the row.
+ * For each row of a table: Aggregate's aggregateRowIdentifier, the
+ * revisionNumber from the last synchronization with Aggregate, and the data
+ * that is contained in the row.
  * </p>
- *
+ * 
  */
 public class SynchronizeAPI extends CommonAPI
 {
@@ -62,16 +67,22 @@ public class SynchronizeAPI extends CommonAPI
      * 
      * @param tableID
      *            the client's unique identifier for the table
+     * @param tableName
+     *            the human readable name of the table
+     * @param columns
+     *            a list of columns defining the columns the table should have
      * @return the initial Modification of the newly created table (calling
      *         getRows() on the Modification will return an empty list).
      * @throws TableAlreadyExistsException
      *             if the caller has already created a synchronized table with
      *             the given tableID.
-     * @throws AggregateInternalErrorException if Aggregate encounters an
-     * internal error that causes the call to fail
-     * @throws IOException if there is a problem communicating with the Aggregate server
+     * @throws AggregateInternalErrorException
+     *             if Aggregate encounters an internal error that causes the
+     *             call to fail
+     * @throws IOException
+     *             if there is a problem communicating with the Aggregate server
      */
-    public Modification createSynchronizedTable(String tableID)
+    public Modification createSynchronizedTable(String tableID, String tableName, List<Column> columns)
     {
         throw new NotImplementedException();
     }
@@ -79,29 +90,33 @@ public class SynchronizeAPI extends CommonAPI
     /**
      * Clones an existing synchronized table.
      * 
-     * @param tableUUID
+     * @param aggregateTableIdentifier
      *            the universally unique identifier of the table
      * @param tableID
      *            the unique identifier that the caller will use to identify the
      *            table
      * @return the current Modification of the table. The list returned by
-     *         getRows() will be populated with rowUUID, revisionNumber, and
-     *         data for the row. Make sure that all of this data is stored as it
-     *         will be required for other API calls (see {@link SynchronizedAPI
-     *         the top of this file} for a summary of client requirements for
-     *         synchronized API usage).
+     *         getRows() will be populated with aggregateRowIdentifier,
+     *         revisionNumber, and data for the row. Make sure that all of this
+     *         data is stored as it will be required for other API calls (see
+     *         {@link SynchronizedAPI the top of this file} for a summary of
+     *         client requirements for synchronized API usage).
      * @throws TableAlreadyExistsException
      *             if the caller has already registered a table with tableID
      * @throws TableDoesNotExistException
-     *             if no table with UUID tableUUID exists
+     *             if no table with Aggregate Identifier
+     *             aggregateTableIdentifier exists
      * @throws PermissionDeniedException
      *             if the userID used to make the API call does not have read
      *             permission on the table
-     * @throws AggregateInternalErrorException if Aggregate encounters an
-     * internal error that causes the call to fail
-     * @throws IOException if there is a problem communicating with the Aggregate server
+     * @throws AggregateInternalErrorException
+     *             if Aggregate encounters an internal error that causes the
+     *             call to fail
+     * @throws IOException
+     *             if there is a problem communicating with the Aggregate server
      */
-    public Modification cloneSynchronizedTable(String tableUUID, String tableID)
+    public Modification cloneSynchronizedTable(String aggregateTableIdentifier,
+            String tableID)
     {
         throw new NotImplementedException();
     }
@@ -114,9 +129,11 @@ public class SynchronizeAPI extends CommonAPI
      *            the caller's identifier for the table
      * @throws TableDoesNotExistException
      *             if the caller does not have a table registered with tableID
-     * @throws AggregateInternalErrorException if Aggregate encounters an
-     * internal error that causes the call to fail
-     * @throws IOException if there is a problem communicating with the Aggregate server
+     * @throws AggregateInternalErrorException
+     *             if Aggregate encounters an internal error that causes the
+     *             call to fail
+     * @throws IOException
+     *             if there is a problem communicating with the Aggregate server
      */
     public void removeTableSynchronization(String tableID)
     {
@@ -127,18 +144,20 @@ public class SynchronizeAPI extends CommonAPI
      * Completely deletes a synchronized table from Aggregate. All future
      * requests for the table will error for all users.
      * 
-     * @param tableUUID
-     *            the universally unique identifier of the table
+     * @param tableID
+     *            the client's identifier for the table
      * @throws TableDoesNotExistException
-     *             if no such table with tableUUID exists
+     *             if no such table with tableID exists
      * @throws PermissionDeniedException
      *             if the userID used to make the API call does not have delete
      *             permission on the table
-     * @throws AggregateInternalErrorException if Aggregate encounters an
-     * internal error that causes the call to fail
-     * @throws IOException if there is a problem communicating with the Aggregate server
+     * @throws AggregateInternalErrorException
+     *             if Aggregate encounters an internal error that causes the
+     *             call to fail
+     * @throws IOException
+     *             if there is a problem communicating with the Aggregate server
      */
-    public void deleteSynchronizedTable(String tableUUID)
+    public void deleteSynchronizedTable(String tableID)
     {
         throw new NotImplementedException();
     }
@@ -159,10 +178,11 @@ public class SynchronizeAPI extends CommonAPI
      * @return a Modification whose modificationNumber represents the latest
      *         modification of the table in Aggregate. Calling getRows() on the
      *         Modification will return a list of rows where each row is
-     *         populated with rowID, rowUUID, and revisionNumber. Make sure that
-     *         all of this data is stored as it will be required for other API
-     *         calls (see {@link SynchronizedAPI the top of this file} for a
-     *         summary of client requirements for synchronized API usage).
+     *         populated with rowID, aggregateRowIdentifier, and revisionNumber.
+     *         Make sure that all of this data is stored as it will be required
+     *         for other API calls (see {@link SynchronizedAPI the top of this
+     *         file} for a summary of client requirements for synchronized API
+     *         usage).
      * @throws OutOfSynchException
      *             if the given modificationNumber does not match the
      *             modificationNumber of the table in Aggregate. In this case
@@ -174,11 +194,14 @@ public class SynchronizeAPI extends CommonAPI
      * @throws PermissionDeniedException
      *             if the userID used to make the API call does not have write
      *             permission on the table
-     * @throws AggregateInternalErrorException if Aggregate encounters an
-     * internal error that causes the call to fail
-     * @throws IOException if there is a problem communicating with the Aggregate server
+     * @throws AggregateInternalErrorException
+     *             if Aggregate encounters an internal error that causes the
+     *             call to fail
+     * @throws IOException
+     *             if there is a problem communicating with the Aggregate server
      */
-    public Modification insertSynchronizedRows(String tableID, int modificationNumber, List<Row> newRows)
+    public Modification insertSynchronizedRows(String tableID,
+            int modificationNumber, List<SynchronizedRow> newRows)
     {
         throw new NotImplementedException();
     }
@@ -194,16 +217,16 @@ public class SynchronizeAPI extends CommonAPI
      *            the current modificationNumber of the caller's copy of the
      *            table
      * @param changedRows
-     *            a list of synchronized rows which are populated rowUUIDs,
-     *            revisionNumbers,and data. These rows must already exist in
-     *            Aggregate's copy of the table
+     *            a list of synchronized rows which are populated
+     *            aggregateRowIdentifiers, revisionNumbers,and data. These rows
+     *            must already exist in Aggregate's copy of the table
      * @return a Modificaton whose modificationNumber represents the latest
      *         modification of the table in Aggregate. Calling getRows() on the
      *         Modification will return a list of rows where each row is
-     *         populated with rowUUID and revisionNumber. Make sure that all of
-     *         this data is stored as it will be required for other API calls
-     *         (see {@link SynchronizedAPI the top of this file} for a summary
-     *         of client requirements for synchronized API usage).
+     *         populated with aggregateRowIdentifier and revisionNumber. Make
+     *         sure that all of this data is stored as it will be required for
+     *         other API calls (see {@link SynchronizedAPI the top of this file}
+     *         for a summary of client requirements for synchronized API usage).
      * @throws OutOfSynchException
      *             if the given modificationNumber does not match the
      *             modificationNumber of the table in Aggregate. In this case
@@ -215,11 +238,14 @@ public class SynchronizeAPI extends CommonAPI
      * @throws PermissionDeniedException
      *             if the userID used to make the API call does not have write
      *             permission on the table
-     * @throws AggregateInternalErrorException if Aggregate encounters an
-     * internal error that causes the call to fail
-     * @throws IOException if there is a problem communicating with the Aggregate server
+     * @throws AggregateInternalErrorException
+     *             if Aggregate encounters an internal error that causes the
+     *             call to fail
+     * @throws IOException
+     *             if there is a problem communicating with the Aggregate server
      */
-    public Modification updateSynchronizedRows(String tableID, int modificationNumber, List<SynchronizedRow> changedRows)
+    public Modification updateSynchronizedRows(String tableID,
+            int modificationNumber, List<SynchronizedRow> changedRows)
     {
         throw new NotImplementedException();
     }
@@ -237,19 +263,22 @@ public class SynchronizeAPI extends CommonAPI
      * @return a Modification whose modificationNumber represents the latest
      *         modification of the table in Aggregate. Calling getRows() on the
      *         Modification will return a list of rows where each row is
-     *         populated with rowUUID, revisionNumber, and data. Make sure that
-     *         all of this data is stored as it will be required for other API
-     *         calls (see {@link SynchronizedAPI the top of this file} for a
-     *         summary of client requirements for synchronized API usage).
+     *         populated with aggregateRowIdentifier, revisionNumber, and data.
+     *         Make sure that all of this data is stored as it will be required
+     *         for other API calls (see {@link SynchronizedAPI the top of this
+     *         file} for a summary of client requirements for synchronized API
+     *         usage).
      * @throws TableDoesNotExistException
      *             if the caller has no table with tableID registered for
      *             synchronization
      * @throws PermissionDeniedException
      *             if the userID used to make the API call does not have read
      *             permission on the table
-     * @throws AggregateInternalErrorException if Aggregate encounters an
-     * internal error that causes the call to fail
-     * @throws IOException if there is a problem communicating with the Aggregate server
+     * @throws AggregateInternalErrorException
+     *             if Aggregate encounters an internal error that causes the
+     *             call to fail
+     * @throws IOException
+     *             if there is a problem communicating with the Aggregate server
      */
     public Modification synchronize(String tableID, int modificationNumber)
     {

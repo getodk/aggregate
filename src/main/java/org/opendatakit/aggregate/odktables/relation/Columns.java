@@ -3,7 +3,7 @@ package org.opendatakit.aggregate.odktables.relation;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.opendatakit.aggregate.odktables.entity.Column;
+import org.opendatakit.aggregate.odktables.entity.InternalColumn;
 import org.opendatakit.common.ermodel.Entity;
 import org.opendatakit.common.ermodel.typedentity.TypedEntityRelation;
 import org.opendatakit.common.persistence.DataField;
@@ -13,21 +13,21 @@ import org.opendatakit.common.web.CallingContext;
 
 /**
  * <p>
- * Columns is a relation containing all {@link Column} entities stored in the
+ * Columns is a relation containing all {@link InternalColumn} entities stored in the
  * datastore. Columns defines the columns for all tables. That is, the set of
- * all Columns entities which have the same tableUUID serves as the definition
+ * all Columns entities which have the same aggregateTableIdentifier serves as the definition
  * for the columns of that table.
  * </p>
  * 
  * @author the.dylan.price@gmail.com
  */
-public class Columns extends TypedEntityRelation<Column>
+public class Columns extends TypedEntityRelation<InternalColumn>
 {
     // Field names
     /**
-     * The name of the tableUUID field.
+     * The name of the aggregateTableIdentifier field.
      */
-    public static String TABLE_UUID = "TABLE_UUID";
+    public static String AGGREGATE_TABLE_IDENTIFIER = "AGGREGATE_TABLE_IDENTIFIER";
 
     /**
      * The name of the columnName field.
@@ -52,9 +52,9 @@ public class Columns extends TypedEntityRelation<Column>
 
     // The following defines the actual fields that will be in the datastore:
     /**
-     * The tableUUID field.
+     * The aggregateTableIdentifier field.
      */
-    private static final DataField tableUUID = new DataField(TABLE_UUID,
+    private static final DataField aggregateTableIdentifier = new DataField(AGGREGATE_TABLE_IDENTIFIER,
             DataType.URI, false);
     /**
      * The columnName field.
@@ -76,7 +76,7 @@ public class Columns extends TypedEntityRelation<Column>
     static
     {
         fields = new ArrayList<DataField>();
-        fields.add(tableUUID);
+        fields.add(aggregateTableIdentifier);
         fields.add(columnName);
         fields.add(columnType);
         fields.add(nullable);
@@ -102,12 +102,12 @@ public class Columns extends TypedEntityRelation<Column>
         super(RELATION_NAME, fields, cc);
     }
 
-    public List<DataField> getDataFields(String tableUUID)
+    public List<DataField> getDataFields(String aggregateTableIdentifier)
             throws ODKDatastoreException
     {
-        List<Column> columns = query().equal(TABLE_UUID, tableUUID).execute();
+        List<InternalColumn> columns = query().equal(AGGREGATE_TABLE_IDENTIFIER, aggregateTableIdentifier).execute();
         List<DataField> fields = new ArrayList<DataField>();
-        for (Column column : columns)
+        for (InternalColumn column : columns)
         {
             DataField field = column.toDataField();
             fields.add(field);
@@ -116,9 +116,9 @@ public class Columns extends TypedEntityRelation<Column>
     }
 
     @Override
-    public Column initialize(Entity entity) throws ODKDatastoreException
+    public InternalColumn initialize(Entity entity) throws ODKDatastoreException
     {
-        return new Column(entity, getCC());
+        return new InternalColumn(entity, getCC());
     }
 
     /**

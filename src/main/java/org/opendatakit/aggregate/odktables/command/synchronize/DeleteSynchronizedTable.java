@@ -13,7 +13,7 @@ public class DeleteSynchronizedTable implements Command
     private static final String path = "/odktables/synchronize/deleteSynchronizedTable";
     
     private final String requestingUserID;
-    private final String tableUUID;
+    private final String aggregateTableIdentifier;
     
 
     /**
@@ -23,21 +23,21 @@ public class DeleteSynchronizedTable implements Command
     private DeleteSynchronizedTable()
     {
        this.requestingUserID = null;
-       this.tableUUID = null;
+       this.aggregateTableIdentifier = null;
        
     }
 
     /**
      * Constructs a new DeleteSynchronizedTable.
      */
-    public DeleteSynchronizedTable(String requestingUserID, String tableUUID)
+    public DeleteSynchronizedTable(String requestingUserID, String aggregateTableIdentifier)
     {
         
         Check.notNullOrEmpty(requestingUserID, "requestingUserID");
-        Check.notNullOrEmpty(tableUUID, "tableUUID"); 
+        Check.notNullOrEmpty(aggregateTableIdentifier, "aggregateTableIdentifier"); 
         
         this.requestingUserID = requestingUserID;
-        this.tableUUID = tableUUID;
+        this.aggregateTableIdentifier = aggregateTableIdentifier;
     }
 
     
@@ -50,11 +50,11 @@ public class DeleteSynchronizedTable implements Command
     }
     
     /**
-     * @return the tableUUID
+     * @return the aggregateTableIdentifier
      */
-    public String getTableUUID()
+    public String getAggregateTableIdentifier()
     {
-        return this.tableUUID;
+        return this.aggregateTableIdentifier;
     }
     
 
@@ -63,8 +63,8 @@ public class DeleteSynchronizedTable implements Command
     {
         return String.format("DeleteSynchronizedTable: " +
                 "requestingUserID=%s " +
-                "tableUUID=%s " +
-                "", requestingUserID, tableUUID);
+                "aggregateTableIdentifier=%s " +
+                "", requestingUserID, aggregateTableIdentifier);
     }
 
     @Override

@@ -28,7 +28,7 @@ public class QueryForRowsResult extends CommandResult<QueryForRows>
     }
 
     private final List<Row> rows;
-    private final String tableUUID;
+    private final String tableID;
 
     /**
      * Need a no-arg constructor for serialization by Gson.
@@ -37,7 +37,7 @@ public class QueryForRowsResult extends CommandResult<QueryForRows>
     {
         super(true, null);
         this.rows = null;
-        this.tableUUID = null;
+        this.tableID = null;
     }
 
     /**
@@ -48,23 +48,23 @@ public class QueryForRowsResult extends CommandResult<QueryForRows>
         super(true, null);
         Check.notNull(rows, "rows");
         this.rows = rows;
-        this.tableUUID = null;
+        this.tableID = null;
     }
 
     /**
      * The failure constructor. See {@link #failure} for param info.
      */
-    private QueryForRowsResult(String tableUUID, FailureReason reason)
+    private QueryForRowsResult(String tableID, FailureReason reason)
     {
         super(false, reason);
-        Check.notNullOrEmpty(tableUUID, "tableUUID");
+        Check.notNullOrEmpty(tableID, "tableID");
         if (!possibleFailureReasons.contains(getReason()))
         {
             throw new IllegalArgumentException("Not a valid FailureReason: "
                     + getReason());
         }
         this.rows = null;
-        this.tableUUID = tableUUID;
+        this.tableID = tableID;
     }
 
     /**
@@ -87,7 +87,7 @@ public class QueryForRowsResult extends CommandResult<QueryForRows>
             switch (getReason())
             {
             case TABLE_DOES_NOT_EXIST:
-                throw new TableDoesNotExistException(null, tableUUID);
+                throw new TableDoesNotExistException(tableID);
             case PERMISSION_DENIED:
                 throw new PermissionDeniedException();
             default:
@@ -97,11 +97,11 @@ public class QueryForRowsResult extends CommandResult<QueryForRows>
     }
 
     /**
-     * @return the tableUUID
+     * @return the aggregateTableIdentifier
      */
-    public String getTableUUID()
+    public String getAggregateTableIdentifier()
     {
-        return tableUUID;
+        return tableID;
     }
 
     /* (non-Javadoc)
@@ -110,8 +110,8 @@ public class QueryForRowsResult extends CommandResult<QueryForRows>
     @Override
     public String toString()
     {
-        return String.format("QueryForRowsResult [rows=%s, tableUUID=%s]",
-                rows, tableUUID);
+        return String.format("QueryForRowsResult [rows=%s, tableID=%s]",
+                rows, tableID);
     }
 
     /* (non-Javadoc)
@@ -124,7 +124,7 @@ public class QueryForRowsResult extends CommandResult<QueryForRows>
         int result = super.hashCode();
         result = prime * result + ((rows == null) ? 0 : rows.hashCode());
         result = prime * result
-                + ((tableUUID == null) ? 0 : tableUUID.hashCode());
+                + ((tableID == null) ? 0 : tableID.hashCode());
         return result;
     }
 
@@ -147,41 +147,38 @@ public class QueryForRowsResult extends CommandResult<QueryForRows>
                 return false;
         } else if (!rows.equals(other.rows))
             return false;
-        if (tableUUID == null)
+        if (tableID == null)
         {
-            if (other.tableUUID != null)
+            if (other.tableID != null)
                 return false;
-        } else if (!tableUUID.equals(other.tableUUID))
+        } else if (!tableID.equals(other.tableID))
             return false;
         return true;
     }
 
     /**
-     * @param tableUUID
-     *            the unique identifier of the table which was successfully
-     *            queried
      * @param rows
      *            the list of populated rows which are the result of the query
      * @return a new QueryForRowsResult representing the successful execution of
      *         a QueryForRows command.
      */
-    public static QueryForRowsResult success(String tableUUID, List<Row> rows)
+    public static QueryForRowsResult success(List<Row> rows)
     {
         return new QueryForRowsResult(rows);
     }
 
     /**
-     * @param tableUUID
-     *            the unique identifier of the table which failed to be queried
+     * @param tableID
+     *            the client's identifier for the table which failed to be queried
      * @param reason
      *            the reason that the query failed. Must be either
      *            TABLE_DOES_NOT_EXIST, or PERMISSION_DENIED.
      * @return a new QueryForRowsResult representing the failed execution of a
      *         QueryForRows command.
      */
-    public static QueryForRowsResult failure(String tableUUID,
+    public static QueryForRowsResult failure(String tableID,
             FailureReason reason)
     {
-        return new QueryForRowsResult(tableUUID, reason);
+        return new QueryForRowsResult(tableID, reason);
     }
 }

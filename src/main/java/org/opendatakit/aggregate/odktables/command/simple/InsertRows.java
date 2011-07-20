@@ -8,17 +8,16 @@ import org.opendatakit.common.utils.Check;
 
 /**
  * InsertRows is immutable.
- *
+ * 
  * @author the.dylan.price@gmail.com
  */
 public class InsertRows implements Command
 {
     private static final String path = "/odktables/simple/insertRows";
-    
+
     private final List<Row> rows;
     private final String requestingUserID;
-    private final String tableUUID;
-    
+    private final String tableID;
 
     /**
      * For serialization by Gson
@@ -26,28 +25,27 @@ public class InsertRows implements Command
     @SuppressWarnings("unused")
     private InsertRows()
     {
-       this.rows = null;
-       this.requestingUserID = null;
-       this.tableUUID = null;
-       
+        this.rows = null;
+        this.requestingUserID = null;
+        this.tableID = null;
+
     }
 
     /**
      * Constructs a new InsertRows.
      */
-    public InsertRows(List<Row> rows, String requestingUserID, String tableUUID)
+    public InsertRows(List<Row> rows, String requestingUserID, String tableID)
     {
-        
+
         Check.notNull(rows, "rows");
         Check.notNullOrEmpty(requestingUserID, "requestingUserID");
-        Check.notNullOrEmpty(tableUUID, "tableUUID"); 
-        
+        Check.notNullOrEmpty(tableID, "tableID");
+
         this.rows = rows;
         this.requestingUserID = requestingUserID;
-        this.tableUUID = tableUUID;
+        this.tableID = tableID;
     }
 
-    
     /**
      * @return the rows
      */
@@ -55,7 +53,7 @@ public class InsertRows implements Command
     {
         return this.rows;
     }
-    
+
     /**
      * @return the requestingUserID
      */
@@ -63,75 +61,21 @@ public class InsertRows implements Command
     {
         return this.requestingUserID;
     }
-    
+
     /**
-     * @return the tableUUID
+     * @return the tableID
      */
-    public String getTableUUID()
+    public String getTableID()
     {
-        return this.tableUUID;
+        return this.tableID;
     }
-    
 
     @Override
     public String toString()
     {
-        return String.format("InsertRows: " +
-                "rows=%s " +
-                "requestingUserID=%s " +
-                "tableUUID=%s " +
-                "", rows, requestingUserID, tableUUID);
-    }
-
-    /* (non-Javadoc)
-     * @see java.lang.Object#hashCode()
-     */
-    @Override
-    public int hashCode()
-    {
-        final int prime = 31;
-        int result = 1;
-        result = prime
-                * result
-                + ((requestingUserID == null) ? 0 : requestingUserID.hashCode());
-        result = prime * result + ((rows == null) ? 0 : rows.hashCode());
-        result = prime * result
-                + ((tableUUID == null) ? 0 : tableUUID.hashCode());
-        return result;
-    }
-
-    /* (non-Javadoc)
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
-    @Override
-    public boolean equals(Object obj)
-    {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (!(obj instanceof InsertRows))
-            return false;
-        InsertRows other = (InsertRows) obj;
-        if (requestingUserID == null)
-        {
-            if (other.requestingUserID != null)
-                return false;
-        } else if (!requestingUserID.equals(other.requestingUserID))
-            return false;
-        if (rows == null)
-        {
-            if (other.rows != null)
-                return false;
-        } else if (!rows.equals(other.rows))
-            return false;
-        if (tableUUID == null)
-        {
-            if (other.tableUUID != null)
-                return false;
-        } else if (!tableUUID.equals(other.tableUUID))
-            return false;
-        return true;
+        return String.format("InsertRows: " + "rows=%s "
+                + "requestingUserID=%s " + "tableID=%s " + "", rows,
+                requestingUserID, tableID);
     }
 
     @Override
@@ -151,4 +95,3 @@ public class InsertRows implements Command
         return path;
     }
 }
-

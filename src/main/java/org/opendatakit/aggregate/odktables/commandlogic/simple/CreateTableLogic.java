@@ -4,11 +4,11 @@ import org.opendatakit.aggregate.odktables.command.simple.CreateTable;
 import org.opendatakit.aggregate.odktables.commandlogic.CommandLogic;
 import org.opendatakit.aggregate.odktables.commandresult.CommandResult.FailureReason;
 import org.opendatakit.aggregate.odktables.commandresult.simple.CreateTableResult;
-import org.opendatakit.aggregate.odktables.entity.Column;
-import org.opendatakit.aggregate.odktables.entity.Cursor;
-import org.opendatakit.aggregate.odktables.entity.TableEntry;
-import org.opendatakit.aggregate.odktables.entity.User;
-import org.opendatakit.aggregate.odktables.relation.Cursors;
+import org.opendatakit.aggregate.odktables.entity.InternalColumn;
+import org.opendatakit.aggregate.odktables.entity.InternalUserTableMapping;
+import org.opendatakit.aggregate.odktables.entity.InternalTableEntry;
+import org.opendatakit.aggregate.odktables.entity.InternalUser;
+import org.opendatakit.aggregate.odktables.relation.UserTableMappings;
 import org.opendatakit.aggregate.odktables.relation.Users;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
@@ -35,18 +35,23 @@ public class CreateTableLogic extends CommandLogic<CreateTable>
             throws ODKDatastoreException
     {
         Users users = Users.getInstance(cc);
-        Cursors cursors = Cursors.getInstance(cc);
+        UserTableMappings cursors = UserTableMappings.getInstance(cc);
 
         String tableID = createTable.getTableID();
         String requestingUserID = createTable.getRequestingUserID();
-        
-        User requestingUser = users.query().equal(Users.USER_ID, requestingUserID).get();
-        String userUUID = requestingUser.getUUID();
+
+        InternalUser requestingUser = users.query()
+                .equal(Users.USER_ID, requestingUserID).get();
+        String aggregateUserIdentifier = requestingUser
+                .getAggregateIdentifier();
 
         // Check if table exists in Cursor
         // If table exists, return failure
-        if (cursors.query().equal(Cursors.USER_UUID, userUUID)
-                .equal(Cursors.TABLE_ID, tableID).exists())
+        if (cursors
+                .query()
+                .equal(UserTableMappings.AGGREGATE_USER_IDENTIFIER,
+                        aggregateUserIdentifier)
+                .equal(UserTableMappings.TABLE_ID, tableID).exists())
         {
             return CreateTableResult.failure(tableID,
                     FailureReason.TABLE_ALREADY_EXISTS);
@@ -54,17 +59,22 @@ public class CreateTableLogic extends CommandLogic<CreateTable>
         // Create table in Tables, Columns, and Cursors.
         try
         {
-            TableEntry entry = new TableEntry(userUUID, createTable.getTableName(), cc);
+            InternalTableEntry entry = new InternalTableEntry(aggregateUserIdentifier,
+                    createTable.getTableName(), cc);
             entry.save();
-            for (org.opendatakit.aggregate.odktables.client.entity.Column clientColumn : createTable.getColumns())
+            for (org.opendatakit.aggregate.odktables.client.entity.Column clientColumn : createTable
+                    .getColumns())
             {
-                Column column = new Column(entry.getUUID(), clientColumn.getName(), clientColumn.getType(), clientColumn.isNullable(), cc);
+                InternalColumn column = new InternalColumn(entry.getAggregateIdentifier(),
+                        clientColumn.getName(), clientColumn.getType(),
+                        clientColumn.isNullable(), cc);
                 column.save();
             }
-            Cursor cursor = new Cursor(userUUID, entry.getUUID(), tableID, cc);
+            InternalUserTableMapping cursor = new InternalUserTableMapping(
+                    aggregateUserIdentifier, entry.getAggregateIdentifier(),
+                    tableID, cc);
             cursor.save();
-        }
-        catch (ODKEntityPersistException e)
+        } catch (ODKEntityPersistException e)
         {
             // TODO: query to see what got created and delete it
             // TODO: add an internal error failure reason

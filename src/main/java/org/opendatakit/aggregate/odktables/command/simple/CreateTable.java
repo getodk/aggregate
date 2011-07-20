@@ -96,64 +96,6 @@ public class CreateTable implements Command
                 "", tableName, requestingUserID, tableID, columns);
     }
 
-    /* (non-Javadoc)
-     * @see java.lang.Object#hashCode()
-     */
-    @Override
-    public int hashCode()
-    {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((columns == null) ? 0 : columns.hashCode());
-        result = prime
-                * result
-                + ((requestingUserID == null) ? 0 : requestingUserID.hashCode());
-        result = prime * result + ((tableID == null) ? 0 : tableID.hashCode());
-        result = prime * result
-                + ((tableName == null) ? 0 : tableName.hashCode());
-        return result;
-    }
-
-    /* (non-Javadoc)
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
-    @Override
-    public boolean equals(Object obj)
-    {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (!(obj instanceof CreateTable))
-            return false;
-        CreateTable other = (CreateTable) obj;
-        if (columns == null)
-        {
-            if (other.columns != null)
-                return false;
-        } else if (!columns.equals(other.columns))
-            return false;
-        if (requestingUserID == null)
-        {
-            if (other.requestingUserID != null)
-                return false;
-        } else if (!requestingUserID.equals(other.requestingUserID))
-            return false;
-        if (tableID == null)
-        {
-            if (other.tableID != null)
-                return false;
-        } else if (!tableID.equals(other.tableID))
-            return false;
-        if (tableName == null)
-        {
-            if (other.tableName != null)
-                return false;
-        } else if (!tableName.equals(other.tableName))
-            return false;
-        return true;
-    }
-
     @Override
     public String getMethodPath()
     {

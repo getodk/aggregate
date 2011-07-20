@@ -10,7 +10,7 @@ package org.opendatakit.aggregate.odktables.client.entity;
  * <ul>
  * <li>userID: the private unique identifier of the user which is known only to
  * the user it represents</li>
- * <li>userUUID: the public unique identifier of the user</li>
+ * <li>aggregateUserIdentifier: the public unique identifier of the user</li>
  * <li>userName: a human readable name for the user</li>
  * </ul>
  * </p>
@@ -26,7 +26,7 @@ public class User
 {
 
     private final String userID;
-    private final String userUUID;
+    private final String aggregateUserIdentifier;
     private final String userName;
 
     /**
@@ -35,22 +35,22 @@ public class User
      * @param userID
      *            the private identifier of the user which is known only to the
      *            user whom it represents
-     * @param userUUID
+     * @param aggregateUserIdentifier
      *            the public unique identifier of the user
      * @param userName
      *            the human readable name of the user
      */
-    public User(String userID, String userUUID, String userName)
+    public User(String userID, String aggregateUserIdentifier, String userName)
     {
         if (userID == null || userID.length() == 0)
             throw new IllegalArgumentException("userID was null or empty");
-        if (userUUID == null || userUUID.length() == 0)
-            throw new IllegalArgumentException("userUUID was null or empty");
+        if (aggregateUserIdentifier == null || aggregateUserIdentifier.length() == 0)
+            throw new IllegalArgumentException("aggregateUserIdentifier was null or empty");
         if (userName == null || userName.length() == 0)
             throw new IllegalArgumentException("userName was null or empty");
 
         this.userID = userID;
-        this.userUUID = userUUID;
+        this.aggregateUserIdentifier = aggregateUserIdentifier;
         this.userName = userName;
     }
 
@@ -63,11 +63,11 @@ public class User
     }
 
     /**
-     * @return the userUUID
+     * @return the aggregateUserIdentifier
      */
-    public String getUserUUID()
+    public String getAggregateUserIdentifier()
     {
-        return userUUID;
+        return aggregateUserIdentifier;
     }
 
     /**
@@ -84,8 +84,8 @@ public class User
     @Override
     public String toString()
     {
-        return String.format("User [userID=%s, userUUID=%s, userName=%s]",
-                userID, userUUID, userName);
+        return String.format("User [userID=%s, aggregateUserIdentifier=%s, userName=%s]",
+                userID, aggregateUserIdentifier, userName);
     }
 
     /* (non-Javadoc)
@@ -99,7 +99,7 @@ public class User
         result = prime * result + ((userID == null) ? 0 : userID.hashCode());
         result = prime * result
                 + ((userName == null) ? 0 : userName.hashCode());
-        result = prime * result + ((userUUID == null) ? 0 : userUUID.hashCode());
+        result = prime * result + ((aggregateUserIdentifier == null) ? 0 : aggregateUserIdentifier.hashCode());
         return result;
     }
 
@@ -128,11 +128,11 @@ public class User
                 return false;
         } else if (!userName.equals(other.userName))
             return false;
-        if (userUUID == null)
+        if (aggregateUserIdentifier == null)
         {
-            if (other.userUUID != null)
+            if (other.aggregateUserIdentifier != null)
                 return false;
-        } else if (!userUUID.equals(other.userUUID))
+        } else if (!aggregateUserIdentifier.equals(other.aggregateUserIdentifier))
             return false;
         return true;
     }

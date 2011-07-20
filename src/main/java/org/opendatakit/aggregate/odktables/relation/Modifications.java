@@ -1,34 +1,32 @@
-
 package org.opendatakit.aggregate.odktables.relation;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.opendatakit.aggregate.odktables.entity.User;
+import org.opendatakit.aggregate.odktables.entity.InternalModification;
 import org.opendatakit.common.ermodel.Entity;
 import org.opendatakit.common.ermodel.typedentity.TypedEntityRelation;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.DataField.DataType;
-import org.opendatakit.common.persistence.DataField.IndexType;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
 
 /**
  * <p>
- * Modifications is a relation containing all the {@link Modification} entities stored in the
- * datastore. Thus Modifications keeps track of all the registered users of the
- * odktables API.
+ * Modifications is a relation containing all the {@link InternalModification} entities
+ * stored in the datastore. Thus Modifications keeps track of all the registered
+ * users of the odktables API.
  * </p>
  * 
  * @author the.dylan.price@gmail.com
  */
-public class Modifications extends TypedEntityRelation<Modification>
+public class Modifications extends TypedEntityRelation<InternalModification>
 {
     // Field names
     /**
-     * The name of the tableUUID field.
+     * The name of the aggregateTableIdentifier field.
      */
-    public static final String TABLE_UUID = "TABLE_UUID";
+    public static final String AGGREGATE_TABLE_IDENTIFIER = "AGGREGATE_TABLE_IDENTIFIER";
 
     /**
      * The name of the modificationNumber field.
@@ -36,9 +34,9 @@ public class Modifications extends TypedEntityRelation<Modification>
     public static final String MODIFICATION_NUMBER = "MODIFICATION_NUMBER";
 
     /**
-     * The name of the rowUUID field.
+     * The name of the aggregateRowIdentifier field.
      */
-    public static final String ROW_UUID = "ROW_UUID";
+    public static final String AGGREGATE_ROW_IDENTIFIER = "AGGREGATE_ROW_IDENTIFIER";
 
     // Relation name
     /**
@@ -48,28 +46,26 @@ public class Modifications extends TypedEntityRelation<Modification>
 
     // The following defines the actual fields that will be in the datastore:
     /**
-     * The field for the tableUUID.
+     * The field for the aggregateTableIdentifier.
      */
-    private static final DataField tableUUID = new DataField(tableUUID,
+    private static final DataField aggregateTableIdentifier = new DataField(AGGREGATE_TABLE_IDENTIFIER,
             DataType.URI, false);
     /**
      * The field for the modificationNumber.
      */
-    private static final DataField modificationNumber = new DataField(MODIFICATION_NUMBER,
-            DataType.INTEGER, false);
+    private static final DataField modificationNumber = new DataField(
+            MODIFICATION_NUMBER, DataType.INTEGER, false);
 
-    private static final DataField rowUUID = new DataField(ROW_UUID,
+    private static final DataField aggregateRowIdentifier = new DataField(AGGREGATE_ROW_IDENTIFIER,
             DataType.URI, false);
 
     private static final List<DataField> fields;
     static
     {
-        userID.setIndexable(IndexType.HASH);
-
         fields = new ArrayList<DataField>();
-        fields.add(tableUUID);
+        fields.add(aggregateTableIdentifier);
         fields.add(modificationNumber);
-        fields.add(rowUUID);
+        fields.add(aggregateRowIdentifier);
     }
 
     /**
@@ -79,8 +75,8 @@ public class Modifications extends TypedEntityRelation<Modification>
 
     /**
      * Constructs an instance which can be used to manipulate the Modifications
-     * relation. If the Modifications relation does not already exist in the datastore
-     * it will be created.
+     * relation. If the Modifications relation does not already exist in the
+     * datastore it will be created.
      * 
      * @param cc
      *            the CallingContext of this Aggregate instance
@@ -93,9 +89,9 @@ public class Modifications extends TypedEntityRelation<Modification>
         super(RELATION_NAME, fields, cc);
     }
 
-    public Modification initialize(Entity entity) throws ODKDatastoreException
+    public InternalModification initialize(Entity entity) throws ODKDatastoreException
     {
-        return new Modification(entity, super.getCC());
+        return new InternalModification(entity, super.getCC());
     }
 
     /**
@@ -104,8 +100,8 @@ public class Modifications extends TypedEntityRelation<Modification>
      * @param cc
      *            the CallingContext of this Aggregate instance. Must not be
      *            null.
-     * @return the singleton instance of this Modifications. If the instance does not
-     *         exist or if the CallingContext has changed since it was
+     * @return the singleton instance of this Modifications. If the instance
+     *         does not exist or if the CallingContext has changed since it was
      *         constructed, then constructs and returns a new instance.
      * @throws ODKDatastoreException
      *             if there is a problem communicating with the datastore

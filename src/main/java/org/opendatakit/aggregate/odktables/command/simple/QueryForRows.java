@@ -1,104 +1,70 @@
 package org.opendatakit.aggregate.odktables.command.simple;
 
 import org.opendatakit.aggregate.odktables.command.Command;
-
+import org.opendatakit.common.utils.Check;
 
 /**
- * QueryForRows is a Command to query ODK Aggregate for rows in a specific
- * table. QueryForRows is immutable.
- * 
- * @author dylan-price
- * 
+ * QueryForRows is immutable.
+ *
+ * @author the.dylan.price@gmail.com
  */
 public class QueryForRows implements Command
 {
-
-    private static final String path = "/odktables/queryForRows";
-
+    private static final String path = "/odktables/simple/getAllRows";
+    
     private final String requestingUserID;
-    private final String tableUUID;
+    private final String tableID;
+    
 
+    /**
+     * For serialization by Gson
+     */
     @SuppressWarnings("unused")
     private QueryForRows()
     {
-        this.requestingUserID = null;
-        this.tableUUID = null;
+       this.requestingUserID = null;
+       this.tableID = null;
+       
     }
 
     /**
      * Constructs a new QueryForRows.
      */
-    public QueryForRows(String requestingUserID, String tableUUID)
+    public QueryForRows(String requestingUserID, String tableID)
     {
+        
+        Check.notNullOrEmpty(requestingUserID, "requestingUserID");
+        Check.notNullOrEmpty(tableID, "tableID"); 
+        
         this.requestingUserID = requestingUserID;
-        this.tableUUID = tableUUID;
+        this.tableID = tableID;
     }
 
+    
     /**
      * @return the requestingUserID
      */
     public String getRequestingUserID()
     {
-        return requestingUserID;
+        return this.requestingUserID;
     }
-
+    
     /**
-     * @return the tableUUID
+     * @return the tableID
      */
-    public String getTableUUID()
+    public String getTableID()
     {
-        return tableUUID;
+        return this.tableID;
     }
+    
 
-    /* (non-Javadoc)
-     * @see java.lang.Object#toString()
-     */
     @Override
     public String toString()
     {
-        return String.format("QueryForRows [requestingUserID=%s, tableUUID=%s]", requestingUserID,
-                tableUUID);
-    }
-
-    /* (non-Javadoc)
-     * @see java.lang.Object#hashCode()
-     */
-    @Override
-    public int hashCode()
-    {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((tableUUID == null) ? 0 : tableUUID.hashCode());
-        result = prime * result + ((requestingUserID == null) ? 0 : requestingUserID.hashCode());
-        return result;
-    }
-
-    /* (non-Javadoc)
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
-    @Override
-    public boolean equals(Object obj)
-    {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (!(obj instanceof QueryForRows))
-            return false;
-        QueryForRows other = (QueryForRows) obj;
-        if (tableUUID == null)
-        {
-            if (other.tableUUID != null)
-                return false;
-        } else if (!tableUUID.equals(other.tableUUID))
-            return false;
-        if (requestingUserID == null)
-        {
-            if (other.requestingUserID != null)
-                return false;
-        } else if (!requestingUserID.equals(other.requestingUserID))
-            return false;
-        return true;
+        return String.format("QueryForRows: " +
+                "requestingUserID=%s " +
+                "tableID=%s " +
+                "", requestingUserID, tableID);
     }
 
     @Override
@@ -118,3 +84,4 @@ public class QueryForRows implements Command
         return path;
     }
 }
+

@@ -27,8 +27,8 @@ public class InsertRowsResult extends CommandResult<InsertRows>
         possibleFailureReasons.add(FailureReason.PERMISSION_DENIED);
     }
 
-    private final String tableUUID;
-    private final Map<String, String> rowIDTorowUUID;
+    private final String tableID;
+    private final Map<String, String> rowIDToaggregateRowIdentifier;
 
     /**
      * For serialization by Gson we need a no-arg constructor
@@ -36,21 +36,22 @@ public class InsertRowsResult extends CommandResult<InsertRows>
     private InsertRowsResult()
     {
         super(true, null);
-        this.tableUUID = null;
-        this.rowIDTorowUUID = null;
+        this.tableID = null;
+        this.rowIDToaggregateRowIdentifier = null;
     }
 
     /**
      * The success constructor. Constructs a successful InsertRowsResult. See
      * {@link #success(String, List)} for param info.
      */
-    private InsertRowsResult(Map<String, String> rowIDTorowUUID)
+    private InsertRowsResult(Map<String, String> rowIDToaggregateRowIdentifier)
     {
         super(true, null);
-        Check.notNull(rowIDTorowUUID, "rowIDtorowUUID");
+        Check.notNull(rowIDToaggregateRowIdentifier,
+                "rowIDtoaggregateRowIdentifier");
 
-        this.tableUUID = null;
-        this.rowIDTorowUUID = rowIDTorowUUID;
+        this.tableID = null;
+        this.rowIDToaggregateRowIdentifier = rowIDToaggregateRowIdentifier;
     }
 
     /**
@@ -58,41 +59,44 @@ public class InsertRowsResult extends CommandResult<InsertRows>
      * {@link #failure(String)} and {@link #failure(String, String)} for param
      * info.
      */
-    private InsertRowsResult(String tableUUID, FailureReason reason)
+    private InsertRowsResult(String tableID,
+            FailureReason reason)
     {
         super(false, reason);
-        Check.notNullOrEmpty(tableUUID, "tableUUID");
+        Check.notNullOrEmpty(tableID,
+                "tableID");
         if (!possibleFailureReasons.contains(getReason()))
         {
             throw new IllegalArgumentException("Not a valid FailureReason: "
                     + getReason());
         }
 
-        this.tableUUID = tableUUID;
-        this.rowIDTorowUUID = null;
+        this.tableID = tableID;
+        this.rowIDToaggregateRowIdentifier = null;
     }
 
     /**
      * Retrieve the results from the insertRows command.
      * 
-     * @return a map of rowIDs to rowUUIDs for the successfully inserted rows
+     * @return a map of rowIDs to aggregateRowIdentifiers for the successfully
+     *         inserted rows
      * @throws TableDoesNotExistException
      *             if the table that the insertRows command tried to insert to
      *             did not exist
      * @throws PermissionDeniedException
      */
-    public Map<String, String> getMapOfInsertedRowIDsToRowUUIDs()
+    public Map<String, String> getMapOfInsertedRowIDsToAggregateRowIdentifiers()
             throws TableDoesNotExistException, PermissionDeniedException
     {
         if (successful())
         {
-            return this.rowIDTorowUUID;
+            return this.rowIDToaggregateRowIdentifier;
         } else
         {
             switch (getReason())
             {
             case TABLE_DOES_NOT_EXIST:
-                throw new TableDoesNotExistException(null, tableUUID);
+                throw new TableDoesNotExistException(tableID);
             case PERMISSION_DENIED:
                 throw new PermissionDeniedException();
             default:
@@ -107,9 +111,9 @@ public class InsertRowsResult extends CommandResult<InsertRows>
     @Override
     public String toString()
     {
-        return String.format(
-                "InsertRowsResult [tableUUID=%s, rowIDTorowUUID=%s]",
-                tableUUID, rowIDTorowUUID);
+        return String
+                .format("InsertRowsResult [tableID=%s, rowIDToaggregateRowIdentifier=%s]",
+                        tableID, rowIDToaggregateRowIdentifier);
     }
 
     /* (non-Javadoc)
@@ -125,17 +129,19 @@ public class InsertRowsResult extends CommandResult<InsertRows>
         if (!(obj instanceof InsertRowsResult))
             return false;
         InsertRowsResult other = (InsertRowsResult) obj;
-        if (rowIDTorowUUID == null)
+        if (rowIDToaggregateRowIdentifier == null)
         {
-            if (other.rowIDTorowUUID != null)
+            if (other.rowIDToaggregateRowIdentifier != null)
                 return false;
-        } else if (!rowIDTorowUUID.equals(other.rowIDTorowUUID))
+        } else if (!rowIDToaggregateRowIdentifier
+                .equals(other.rowIDToaggregateRowIdentifier))
             return false;
-        if (tableUUID == null)
+        if (tableID == null)
         {
-            if (other.tableUUID != null)
+            if (other.tableID != null)
                 return false;
-        } else if (!tableUUID.equals(other.tableUUID))
+        } else if (!tableID
+                .equals(other.tableID))
             return false;
         return true;
     }
@@ -148,33 +154,38 @@ public class InsertRowsResult extends CommandResult<InsertRows>
     {
         final int prime = 31;
         int result = super.hashCode();
-        result = prime * result
-                + ((rowIDTorowUUID == null) ? 0 : rowIDTorowUUID.hashCode());
-        result = prime * result
-                + ((tableUUID == null) ? 0 : tableUUID.hashCode());
+        result = prime
+                * result
+                + ((rowIDToaggregateRowIdentifier == null) ? 0
+                        : rowIDToaggregateRowIdentifier.hashCode());
+        result = prime
+                * result
+                + ((tableID == null) ? 0
+                        : tableID.hashCode());
         return result;
     }
 
     /**
      * Returns a new, successful InsertRowsResult.
      * 
-     * @param rowIDstorowUUIDs
+     * @param rowIDstoaggregateRowIdentifiers
      *            a map of successfully inserted rowIDs to their corresponding
-     *            rowUUIDs.
+     *            aggregateRowIdentifiers.
      * 
      * @return a new InsertRowsResult which represents the successful outcome of
      *         an insertRows command.
      */
-    public static InsertRowsResult success(Map<String, String> rowIDstorowUUIDs)
+    public static InsertRowsResult success(
+            Map<String, String> rowIDstoaggregateRowIdentifiers)
     {
-        return new InsertRowsResult(rowIDstorowUUIDs);
+        return new InsertRowsResult(rowIDstoaggregateRowIdentifiers);
     }
 
     /**
      * Returns a new, failed InsertRowsResult
      * 
-     * @param tableUUID
-     *            the unique identifier of the table that the insertRows command
+     * @param tableID
+     *            the client's identifier for the table that the insertRows command
      *            dealt with. Must not be null or empty.
      * @param reason
      *            the reason the command failed. Must be either
@@ -182,9 +193,9 @@ public class InsertRowsResult extends CommandResult<InsertRows>
      * @return a new InsertRowsResult which represents the failed outcome of an
      *         insertRows command.
      */
-    public static InsertRowsResult failure(String tableUUID,
+    public static InsertRowsResult failure(String tableID,
             FailureReason reason)
     {
-        return new InsertRowsResult(tableUUID, reason);
+        return new InsertRowsResult(tableID, reason);
     }
 }

@@ -26,13 +26,13 @@ public class GetUserByIDResult extends CommandResult<GetUserByID>
     }
 
     private final User user;
-    private final String userID;
+    private final String aggregateUserIdentifier;
 
     private GetUserByIDResult()
     {
         super(true, null);
         this.user = null;
-        this.userID = null;
+        this.aggregateUserIdentifier = null;
     }
 
     /**
@@ -43,17 +43,17 @@ public class GetUserByIDResult extends CommandResult<GetUserByID>
         super(true, null);
         Check.notNull(user, "user");
         this.user = user;
-        this.userID = null;
+        this.aggregateUserIdentifier = null;
     }
 
     /**
      * The failure constructor. See {@link #failure} for param info.
      */
-    private GetUserByIDResult(String userID, FailureReason reason)
+    private GetUserByIDResult(String aggregateUserIdentifier, FailureReason reason)
     {
         super(false, reason);
 
-        Check.notNullOrEmpty(userID, "userID");
+        Check.notNullOrEmpty(aggregateUserIdentifier, "aggregateUserIdentifier");
         Check.notNull(reason, "reason");
 
         if (!possibleFailureReasons.contains(reason))
@@ -64,7 +64,7 @@ public class GetUserByIDResult extends CommandResult<GetUserByID>
                             reason));
         }
         this.user = null;
-        this.userID = userID;
+        this.aggregateUserIdentifier = aggregateUserIdentifier;
     }
 
     /**
@@ -83,7 +83,7 @@ public class GetUserByIDResult extends CommandResult<GetUserByID>
             switch (getReason())
             {
             case USER_DOES_NOT_EXIST:
-                throw new UserDoesNotExistException(this.userID, null);
+                throw new UserDoesNotExistException(this.aggregateUserIdentifier);
             case PERMISSION_DENIED:
                 throw new PermissionDeniedException();
             default:
@@ -99,7 +99,7 @@ public class GetUserByIDResult extends CommandResult<GetUserByID>
     public String toString()
     {
         return String.format("GetUserByIDResult [user=%s, userID=%s]", user,
-                userID);
+                aggregateUserIdentifier);
     }
 
     /* (non-Javadoc)
@@ -111,7 +111,7 @@ public class GetUserByIDResult extends CommandResult<GetUserByID>
         final int prime = 31;
         int result = super.hashCode();
         result = prime * result + ((user == null) ? 0 : user.hashCode());
-        result = prime * result + ((userID == null) ? 0 : userID.hashCode());
+        result = prime * result + ((aggregateUserIdentifier == null) ? 0 : aggregateUserIdentifier.hashCode());
         return result;
     }
 
@@ -134,11 +134,11 @@ public class GetUserByIDResult extends CommandResult<GetUserByID>
                 return false;
         } else if (!user.equals(other.user))
             return false;
-        if (userID == null)
+        if (aggregateUserIdentifier == null)
         {
-            if (other.userID != null)
+            if (other.aggregateUserIdentifier != null)
                 return false;
-        } else if (!userID.equals(other.userID))
+        } else if (!aggregateUserIdentifier.equals(other.aggregateUserIdentifier))
             return false;
         return true;
     }
@@ -156,15 +156,15 @@ public class GetUserByIDResult extends CommandResult<GetUserByID>
     }
 
     /**
-     * @param userID
-     *            the userID of the user who failed to be retrieved
+     * @param aggregateUserIdentifier
+     *            the aggregate identifier of the user who failed to be retrieved
      * @param reason
      *            the reason the command failed. Must be either
      *            USER_DOES_NOT_EXIST or PERMISSION_DENIED.
      * @return a new GetUserByIDResult representing the failed GetUserByID command.
      */
-    public static GetUserByIDResult failure(String userID, FailureReason reason)
+    public static GetUserByIDResult failure(String aggregateUserIdentifier, FailureReason reason)
     {
-        return new GetUserByIDResult(userID, reason);
+        return new GetUserByIDResult(aggregateUserIdentifier, reason);
     }
 }

@@ -7,8 +7,8 @@
  * <p>
  * The following diagrams present an overview of the relations and their fields. 
  * (URI) in parentheses means that the field is represented by the default Uri 
- * generated for each entity. See the respective entity (e.g. {@link Column}, 
- * {@link Cursor}, etc.) for definitions of the fields.
+ * generated for each entity. See the respective entity (e.g. {@link InternalColumn}, 
+ * {@link InternalUserTableMapping}, etc.) for definitions of the fields.
  * <center>
  * <table>
  * <tr>

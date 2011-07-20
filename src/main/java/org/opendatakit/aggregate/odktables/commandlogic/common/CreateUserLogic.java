@@ -1,10 +1,11 @@
 package org.opendatakit.aggregate.odktables.commandlogic.common;
 
+import org.opendatakit.aggregate.odktables.client.entity.User;
 import org.opendatakit.aggregate.odktables.command.common.CreateUser;
 import org.opendatakit.aggregate.odktables.commandlogic.CommandLogic;
 import org.opendatakit.aggregate.odktables.commandresult.CommandResult.FailureReason;
 import org.opendatakit.aggregate.odktables.commandresult.common.CreateUserResult;
-import org.opendatakit.aggregate.odktables.entity.User;
+import org.opendatakit.aggregate.odktables.entity.InternalUser;
 import org.opendatakit.aggregate.odktables.relation.Permissions;
 import org.opendatakit.aggregate.odktables.relation.Users;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
@@ -35,12 +36,12 @@ public class CreateUserLogic extends CommandLogic<CreateUser>
 
         String userID = createUser.getUserID();
         String requestingUserID = createUser.getRequestingUserID();
-        String userTableUUID = users.getUUID();
+        String aggregateUsersIdentifier = users.getAggregateIdentifier();
 
-        User requestUser = users.query().equal(Users.USER_ID, requestingUserID)
-                .get();
+        InternalUser requestUser = users.query()
+                .equal(Users.USER_ID, requestingUserID).get();
 
-        if (!requestUser.hasPerm(userTableUUID, Permissions.WRITE))
+        if (!requestUser.hasPerm(aggregateUsersIdentifier, Permissions.WRITE))
         {
             return CreateUserResult.failure(userID,
                     FailureReason.PERMISSION_DENIED);
@@ -50,13 +51,13 @@ public class CreateUserLogic extends CommandLogic<CreateUser>
             return CreateUserResult.failure(userID,
                     FailureReason.USER_ALREADY_EXISTS);
         }
-        User newUser = new User(userID, createUser.getUserName(), cc);
+        InternalUser newUser = new InternalUser(userID,
+                createUser.getUserName(), cc);
         newUser.save();
-        
-        org.opendatakit.aggregate.odktables.client.entity.User user = 
-                new org.opendatakit.aggregate.odktables.client.entity.User(
-                newUser.getID(), newUser.getUUID(), newUser.getName());
-        
+
+        User user = new User(newUser.getID(), newUser.getAggregateIdentifier(),
+                newUser.getName());
+
         return CreateUserResult.success(user);
     }
 }

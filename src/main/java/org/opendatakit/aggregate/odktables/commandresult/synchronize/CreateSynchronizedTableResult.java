@@ -1,15 +1,23 @@
 package org.opendatakit.aggregate.odktables.commandresult.synchronize;
 
-import org.opendatakit.aggregate.odktables.command.common.CreateSynchronizedTable;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.opendatakit.aggregate.odktables.client.entity.Modification;
+import org.opendatakit.aggregate.odktables.client.exception.PermissionDeniedException;
+import org.opendatakit.aggregate.odktables.client.exception.TableAlreadyExistsException;
+import org.opendatakit.aggregate.odktables.command.synchronize.CreateSynchronizedTable;
 import org.opendatakit.aggregate.odktables.commandresult.CommandResult;
 import org.opendatakit.common.utils.Check;
 
 /**
- * A CreateSynchronizedTableResult represents the result of executing a CreateSynchronizedTable command.
+ * A CreateSynchronizedTableResult represents the result of executing a
+ * CreateSynchronizedTable command.
  * 
  * @author the.dylan.price@gmail.com
  */
-public class CreateSynchronizedTableResult extends CommandResult<CreateSynchronizedTable>
+public class CreateSynchronizedTableResult extends
+        CommandResult<CreateSynchronizedTable>
 {
     private static final List<FailureReason> possibleFailureReasons;
     static
@@ -23,10 +31,10 @@ public class CreateSynchronizedTableResult extends CommandResult<CreateSynchroni
 
     private CreateSynchronizedTableResult()
     {
-       super(true, null);
-       this.modification = null;
-       this.tableID = null;
-       
+        super(true, null);
+        this.modification = null;
+        this.tableID = null;
+
     }
 
     /**
@@ -37,7 +45,7 @@ public class CreateSynchronizedTableResult extends CommandResult<CreateSynchroni
         super(true, null);
 
         Check.notNull(modification, "modification");
-        
+
         this.modification = modification;
         this.tableID = null;
     }
@@ -49,20 +57,24 @@ public class CreateSynchronizedTableResult extends CommandResult<CreateSynchroni
     {
         super(false, reason);
 
-        
-        Check.notNullOrEmpty(tableID, "tableID"); 
+        Check.notNullOrEmpty(tableID, "tableID");
         if (!possibleFailureReasons.contains(reason))
-            throw new IllegalArgumentException(String.format("Failure reason %s not a valid failure reason for CreateSynchronizedTable.", reason));
-        
+            throw new IllegalArgumentException(
+                    String.format(
+                            "Failure reason %s not a valid failure reason for CreateSynchronizedTable.",
+                            reason));
+
         this.modification = null;
         this.tableID = tableID;
     }
 
     /**
      * Retrieve the results from the CreateSynchronizedTable command.
+     * 
+     * @throws TableAlreadyExistsException
      */
-    public Modification getModification() throws 
-            PermissionDeniedException
+    public Modification getModification() throws PermissionDeniedException,
+            TableAlreadyExistsException
     {
         if (successful())
         {
@@ -72,30 +84,36 @@ public class CreateSynchronizedTableResult extends CommandResult<CreateSynchroni
             switch (getReason())
             {
             case TABLE_ALREADY_EXISTS:
-                throw new TableAlreadyExistsException(tableID, null);
+                throw new TableAlreadyExistsException(tableID);
             default:
                 throw new RuntimeException("An unknown error occured.");
             }
         }
     }
 
-
     /**
-     * @param modification the initial modification of the table
-     * @return a new CreateSynchronizedTableResult representing the successful completion of a CreateSynchronizedTable command.
+     * @param modification
+     *            the initial modification of the table
+     * @return a new CreateSynchronizedTableResult representing the successful
+     *         completion of a CreateSynchronizedTable command.
      * 
      */
-    public static CreateSynchronizedTableResult success(Modification modification)
+    public static CreateSynchronizedTableResult success(
+            Modification modification)
     {
         return new CreateSynchronizedTableResult(modification);
     }
 
     /**
-     * @param tableID the caller's ID for the table which failed to be created
-     * @param reason the reason the command failed. Must be TABLE_ALREADY_EXISTS.
-     * @return a new CreateSynchronizedTableResult representing the failed completion of a CreateSynchronizedTable command.
+     * @param tableID
+     *            the caller's ID for the table which failed to be created
+     * @param reason
+     *            the reason the command failed. Must be TABLE_ALREADY_EXISTS.
+     * @return a new CreateSynchronizedTableResult representing the failed
+     *         completion of a CreateSynchronizedTable command.
      */
-    public static CreateSynchronizedTableResult failure(String tableID, FailureReason reason)
+    public static CreateSynchronizedTableResult failure(String tableID,
+            FailureReason reason)
     {
         return new CreateSynchronizedTableResult(tableID, reason);
     }

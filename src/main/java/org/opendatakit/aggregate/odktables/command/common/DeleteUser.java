@@ -5,16 +5,15 @@ import org.opendatakit.common.utils.Check;
 
 /**
  * DeleteUser is immutable.
- *
+ * 
  * @author the.dylan.price@gmail.com
  */
 public class DeleteUser implements Command
 {
     private static final String path = "/odktables/common/deleteUser";
-    
-    private final String userUUID;
+
     private final String requestingUserID;
-    
+    private final String aggregateUserIdentifier;
 
     /**
      * For serialization by Gson
@@ -22,33 +21,24 @@ public class DeleteUser implements Command
     @SuppressWarnings("unused")
     private DeleteUser()
     {
-       this.userUUID = null;
-       this.requestingUserID = null;
-       
+        this.requestingUserID = null;
+        this.aggregateUserIdentifier = null;
+
     }
 
     /**
      * Constructs a new DeleteUser.
      */
-    public DeleteUser(String userUUID, String requestingUserID)
+    public DeleteUser(String requestingUserID, String aggregateUserIdentifier)
     {
-        
-        Check.notNullOrEmpty(userUUID, "userUUID");
-        Check.notNullOrEmpty(requestingUserID, "requestingUserID"); 
-        
-        this.userUUID = userUUID;
+
+        Check.notNullOrEmpty(requestingUserID, "requestingUserID");
+        Check.notNullOrEmpty(aggregateUserIdentifier, "aggregateUserIdentifier");
+
         this.requestingUserID = requestingUserID;
+        this.aggregateUserIdentifier = aggregateUserIdentifier;
     }
 
-    
-    /**
-     * @return the userUUID
-     */
-    public String getUserUUID()
-    {
-        return this.userUUID;
-    }
-    
     /**
      * @return the requestingUserID
      */
@@ -56,59 +46,21 @@ public class DeleteUser implements Command
     {
         return this.requestingUserID;
     }
-    
+
+    /**
+     * @return the aggregateUserIdentifier
+     */
+    public String getAggregateUserIdentifier()
+    {
+        return this.aggregateUserIdentifier;
+    }
 
     @Override
     public String toString()
     {
-        return String.format("DeleteUser: " +
-                "userUUID=%s " +
-                "requestingUserID=%s " +
-                "", userUUID, requestingUserID);
-    }
-
-    /* (non-Javadoc)
-     * @see java.lang.Object#hashCode()
-     */
-    @Override
-    public int hashCode()
-    {
-        final int prime = 31;
-        int result = 1;
-        result = prime
-                * result
-                + ((requestingUserID == null) ? 0 : requestingUserID.hashCode());
-        result = prime * result
-                + ((userUUID == null) ? 0 : userUUID.hashCode());
-        return result;
-    }
-
-    /* (non-Javadoc)
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
-    @Override
-    public boolean equals(Object obj)
-    {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (!(obj instanceof DeleteUser))
-            return false;
-        DeleteUser other = (DeleteUser) obj;
-        if (requestingUserID == null)
-        {
-            if (other.requestingUserID != null)
-                return false;
-        } else if (!requestingUserID.equals(other.requestingUserID))
-            return false;
-        if (userUUID == null)
-        {
-            if (other.userUUID != null)
-                return false;
-        } else if (!userUUID.equals(other.userUUID))
-            return false;
-        return true;
+        return String.format("DeleteUser: " + "requestingUserID=%s "
+                + "aggregateUserIdentifier=%s " + "", requestingUserID,
+                aggregateUserIdentifier);
     }
 
     @Override
@@ -128,4 +80,3 @@ public class DeleteUser implements Command
         return path;
     }
 }
-
