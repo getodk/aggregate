@@ -1,0 +1,6 @@
+relre:^[^/]*/src/main/webapp/.*$
+relre:^[^/]*/target/.*$
+relre:^[^/]*/build/classes/.*$
+relre:^eclipse-aggregate-gae/war/WEB-INF/deploy/.*$
+relre:^eclipse-aggregate-gae/war/WEB-INF/classes/.*$
+relre:^eclipse-aggregate-gae/war/aggregateui/.*$

@@ -1,0 +1,26 @@
+@CHARSET "ISO-8859-1";
+
+* {
+	margin: 0px;
+	padding: 0px;
+}
+
+body {
+	margin-left: 15px;
+}
+h1 {
+	color: #07115A;
+	margin-top: 15px;
+}
+h2 {
+	color: #777984;
+}
+p {
+	margin-top: 10px;
+}
+#uploadButton {
+	margin-top: 12px;
+}
+.clearButton {
+	margin-left: 10px;
+}
