@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.opendatakit.aggregate.odktables.command.Command;
 import org.opendatakit.aggregate.odktables.command.CommandConverter;
+import org.opendatakit.aggregate.odktables.command.common.CheckUserExists;
 import org.opendatakit.aggregate.odktables.command.common.CreateUser;
 import org.opendatakit.aggregate.odktables.command.common.DeleteUser;
 import org.opendatakit.aggregate.odktables.command.common.GetUserByAggregateIdentifier;
@@ -23,6 +24,7 @@ import org.opendatakit.aggregate.odktables.command.synchronize.InsertSynchronize
 import org.opendatakit.aggregate.odktables.command.synchronize.RemoveTableSynchronization;
 import org.opendatakit.aggregate.odktables.command.synchronize.Synchronize;
 import org.opendatakit.aggregate.odktables.command.synchronize.UpdateSynchronizedRows;
+import org.opendatakit.aggregate.odktables.commandlogic.common.CheckUserExistsLogic;
 import org.opendatakit.aggregate.odktables.commandlogic.common.CreateUserLogic;
 import org.opendatakit.aggregate.odktables.commandlogic.common.DeleteUserLogic;
 import org.opendatakit.aggregate.odktables.commandlogic.common.GetUserByAggregateIdentifierLogic;
@@ -103,6 +105,7 @@ public abstract class CommandLogic<T extends Command>
     private enum CommandType
     {
         // Common
+        CHECK_USER_EXISTS,
         CREATE_USER,
         DELETE_USER,
         GET_USER_BY_ID,
@@ -137,6 +140,7 @@ public abstract class CommandLogic<T extends Command>
         commandClassMap = new HashMap<Class<? extends Command>, CommandType>();
 
         // Common
+        commandClassMap.put(CheckUserExists.class, CommandType.CHECK_USER_EXISTS);
         commandClassMap.put(CreateUser.class, CommandType.CREATE_USER);
         commandClassMap.put(DeleteUser.class, CommandType.DELETE_USER);
         commandClassMap.put(GetUserByID.class, CommandType.GET_USER_BY_ID);
@@ -189,6 +193,8 @@ public abstract class CommandLogic<T extends Command>
         switch (commandType)
         {
         // Common
+        case CHECK_USER_EXISTS:
+            return new CheckUserExistsLogic((CheckUserExists) command);
         case CREATE_USER:
             return new CreateUserLogic((CreateUser) command);
         case DELETE_USER:

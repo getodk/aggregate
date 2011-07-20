@@ -3,7 +3,6 @@ package org.opendatakit.aggregate.odktables.commandresult.synchronize;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.opendatakit.aggregate.odktables.client.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.client.exception.TableDoesNotExistException;
 import org.opendatakit.aggregate.odktables.command.synchronize.RemoveTableSynchronization;
 import org.opendatakit.aggregate.odktables.commandresult.CommandResult;
@@ -59,8 +58,7 @@ public class RemoveTableSynchronizationResult extends
      * 
      * @throws TableDoesNotExistException
      */
-    public void checkResults() throws PermissionDeniedException,
-            TableDoesNotExistException
+    public void checkResults() throws TableDoesNotExistException
     {
         if (!successful())
         {

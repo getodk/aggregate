@@ -4,59 +4,33 @@ import org.opendatakit.aggregate.odktables.command.Command;
 import org.opendatakit.common.utils.Check;
 
 /**
- * CreateUser is immutable.
+ * CheckUserExists is immutable.
  * 
  * @author the.dylan.price@gmail.com
  */
-public class CreateUser implements Command
+public class CheckUserExists implements Command
 {
-    private static final String path = "/odktables/common/createUser";
+    private static final String path = "/odktables/common/checkUserExists";
 
-    private final String userName;
-    private final String requestingUserID;
     private final String userID;
 
     /**
      * For serialization by Gson
      */
     @SuppressWarnings("unused")
-    private CreateUser()
+    private CheckUserExists()
     {
-        this.userName = null;
-        this.requestingUserID = null;
         this.userID = null;
 
     }
 
     /**
-     * Constructs a new CreateUser.
+     * Constructs a new CheckUserExists.
      */
-    public CreateUser(String requestingUserID, String userName, String userID)
+    public CheckUserExists(String userID)
     {
-
-        Check.notNullOrEmpty(userName, "userName");
-        Check.notNullOrEmpty(requestingUserID, "requestingUserID");
         Check.notNullOrEmpty(userID, "userID");
-
-        this.userName = userName;
-        this.requestingUserID = requestingUserID;
         this.userID = userID;
-    }
-
-    /**
-     * @return the userName
-     */
-    public String getUserName()
-    {
-        return this.userName;
-    }
-
-    /**
-     * @return the requestingUserID
-     */
-    public String getRequestingUserID()
-    {
-        return this.requestingUserID;
     }
 
     /**
@@ -70,9 +44,7 @@ public class CreateUser implements Command
     @Override
     public String toString()
     {
-        return String.format("CreateUser: " + "userName=%s "
-                + "requestingUserID=%s " + "userID=%s " + "", userName,
-                requestingUserID, userID);
+        return String.format("CheckUserExists: " + "userID=%s ", userID);
     }
 
     @Override

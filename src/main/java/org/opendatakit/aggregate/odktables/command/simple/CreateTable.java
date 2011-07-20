@@ -37,7 +37,7 @@ public class CreateTable implements Command
     /**
      * Constructs a new CreateTable.
      */
-    public CreateTable(String tableName, String requestingUserID, String tableID, List<Column> columns)
+    public CreateTable(String requestingUserID, String tableName, String tableID, List<Column> columns)
     {
         
         Check.notNullOrEmpty(tableName, "tableName");

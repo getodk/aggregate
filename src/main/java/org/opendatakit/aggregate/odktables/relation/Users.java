@@ -14,14 +14,14 @@ import org.opendatakit.common.web.CallingContext;
 
 /**
  * <p>
- * Users is a relation containing all the {@link InternalUser} entities stored in the
- * datastore. Thus Users keeps track of all the registered users of the
+ * Users is a relation containing all the {@link InternalUser} entities stored
+ * in the datastore. Thus Users keeps track of all the registered users of the
  * odktables API.
  * </p>
  * 
  * <p>
- * Users automatically starts out with one user--the anonymous user. You can
- * retrieve this user through the {@link #getAnonymousUser} method.
+ * Users automatically starts out with one user--the admin user. You can
+ * retrieve this user through the {@link #getAdminUser} method.
  * </p>
  * 
  * @author the.dylan.price@gmail.com
@@ -46,14 +46,14 @@ public class Users extends TypedEntityRelation<InternalUser>
     private static final String RELATION_NAME = "USERS";
 
     /**
-     * The ID of the anonymous user.
+     * The ID of the admin user.
      */
-    private static final String ANON_ID = "-1";
+    private static final String ADMIN_ID = "-1";
 
     /**
-     * The name of the anonymous user.
+     * The name of the admin user.
      */
-    private static final String ANON_NAME = "Anonymous User";
+    private static final String ADMIN_NAME = "Admin User";
 
     // The following defines the actual fields that will be in the datastore:
     /**
@@ -85,7 +85,7 @@ public class Users extends TypedEntityRelation<InternalUser>
     /**
      * The singleton instance of the anonymous user.
      */
-    private static InternalUser anonInstance;
+    private static InternalUser adminInstance;
 
     /**
      * Constructs an instance which can be used to manipulate the Users
@@ -108,11 +108,11 @@ public class Users extends TypedEntityRelation<InternalUser>
         return new InternalUser(entity, super.getCC());
     }
 
-    public InternalUser getAnonymousUser() throws ODKDatastoreException
+    public InternalUser getAdminUser() throws ODKDatastoreException
     {
-        return Users.anonInstance;
+        return Users.adminInstance;
     }
-    
+
     public InternalUser getByID(String userID) throws ODKDatastoreException
     {
         return query().equal(USER_ID, userID).get();
@@ -137,16 +137,16 @@ public class Users extends TypedEntityRelation<InternalUser>
         {
             instance = new Users(cc);
         }
-        // Create anonymous user if they don't already exist
-        if (anonInstance == null)
+        // Create admin user if they don't already exist
+        if (adminInstance == null)
         {
             try
             {
-                anonInstance = instance.query().equal(USER_ID, ANON_ID).get();
+                adminInstance = instance.query().equal(USER_ID, ADMIN_ID).get();
             } catch (ODKDatastoreException e)
             {
-                anonInstance = new InternalUser(ANON_ID, ANON_NAME, cc);
-                anonInstance.save();
+                adminInstance = new InternalUser(ADMIN_ID, ADMIN_NAME, cc);
+                adminInstance.save();
             }
         }
         return instance;

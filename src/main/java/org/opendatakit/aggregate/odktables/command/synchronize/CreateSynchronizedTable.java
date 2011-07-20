@@ -37,7 +37,7 @@ public class CreateSynchronizedTable implements Command
     /**
      * Constructs a new CreateSynchronizedTable.
      */
-    public CreateSynchronizedTable(String tableName, String requestingUserID, String tableID, List<Column> columns)
+    public CreateSynchronizedTable(String requestingUserID, String tableName, String tableID, List<Column> columns)
     {
         
         Check.notNullOrEmpty(tableName, "tableName");

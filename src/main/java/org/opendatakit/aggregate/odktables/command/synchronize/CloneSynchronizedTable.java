@@ -32,7 +32,7 @@ public class CloneSynchronizedTable implements Command
     /**
      * Constructs a new CloneSynchronizedTable.
      */
-    public CloneSynchronizedTable(String tableID, String requestingUserID, String aggregateTableIdentifier)
+    public CloneSynchronizedTable(String requestingUserID, String tableID, String aggregateTableIdentifier)
     {
         
         Check.notNullOrEmpty(tableID, "tableID");
