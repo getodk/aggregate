@@ -27,6 +27,7 @@ public class InternalRow extends TypedEntity
             throws ODKDatastoreException
     {
         super(Table.getInstance(aggregateTableIdentifier, cc));
+        updateRevisionTag();
     }
 
     public InternalRow(Table rows, Entity entity)

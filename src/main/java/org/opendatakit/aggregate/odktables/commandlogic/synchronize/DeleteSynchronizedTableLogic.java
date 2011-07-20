@@ -7,12 +7,14 @@ import org.opendatakit.aggregate.odktables.commandlogic.CommandLogic;
 import org.opendatakit.aggregate.odktables.commandresult.CommandResult.FailureReason;
 import org.opendatakit.aggregate.odktables.commandresult.synchronize.DeleteSynchronizedTableResult;
 import org.opendatakit.aggregate.odktables.entity.InternalColumn;
+import org.opendatakit.aggregate.odktables.entity.InternalModification;
 import org.opendatakit.aggregate.odktables.entity.InternalPermission;
 import org.opendatakit.aggregate.odktables.entity.InternalRow;
 import org.opendatakit.aggregate.odktables.entity.InternalTableEntry;
 import org.opendatakit.aggregate.odktables.entity.InternalUser;
 import org.opendatakit.aggregate.odktables.entity.InternalUserTableMapping;
 import org.opendatakit.aggregate.odktables.relation.Columns;
+import org.opendatakit.aggregate.odktables.relation.Modifications;
 import org.opendatakit.aggregate.odktables.relation.Permissions;
 import org.opendatakit.aggregate.odktables.relation.Table;
 import org.opendatakit.aggregate.odktables.relation.TableEntries;
@@ -49,6 +51,7 @@ public class DeleteSynchronizedTableLogic extends
         TableEntries entries = TableEntries.getInstance(cc);
         Columns columns = Columns.getInstance(cc);
         Permissions permissions = Permissions.getInstance(cc);
+        Modifications modifications = Modifications.getInstance(cc);
 
         String requestingUserID = deleteSynchronizedTable.getRequestingUserID();
         String tableID = deleteSynchronizedTable.getTableID();
@@ -90,6 +93,10 @@ public class DeleteSynchronizedTableLogic extends
                 .query()
                 .equal(Permissions.AGGREGATE_TABLE_IDENTIFIER,
                         aggregateTableIdentifier).execute();
+        List<InternalModification> mods = modifications
+                .query()
+                .equal(Modifications.AGGREGATE_TABLE_IDENTIFIER,
+                        aggregateTableIdentifier).execute();
         InternalTableEntry entry = entries.get(aggregateTableIdentifier);
 
         for (InternalRow row : rows)
@@ -100,6 +107,8 @@ public class DeleteSynchronizedTableLogic extends
             map.delete();
         for (InternalPermission perm : perms)
             perm.delete();
+        for (InternalModification mod : mods)
+            mod.delete();
         entry.delete();
         table.dropRelation();
 

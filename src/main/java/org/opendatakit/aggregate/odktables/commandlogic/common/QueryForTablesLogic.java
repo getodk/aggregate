@@ -40,7 +40,7 @@ public class QueryForTablesLogic extends CommandLogic<QueryForTables>
         TableEntries entries = TableEntries.getInstance(cc);
         Users users = Users.getInstance(cc);
         Permissions permissions = Permissions.getInstance(cc);
-        UserTableMappings cursors = UserTableMappings.getInstance(cc);
+        UserTableMappings mappings = UserTableMappings.getInstance(cc);
 
         String requestingUserID = queryForTables.getRequestingUserID();
 
@@ -68,18 +68,28 @@ public class QueryForTablesLogic extends CommandLogic<QueryForTables>
             String tableName = entry.getName();
             boolean isSynchronized = entry.isSynchronized();
             InternalUser user = users.get(aggregateOwnerIdentifier);
-            InternalUserTableMapping cursor = cursors
-                    .query()
-                    .equal(UserTableMappings.AGGREGATE_USER_IDENTIFIER,
-                            aggregateUserIdentifier)
-                    .equal(UserTableMappings.AGGREGATE_TABLE_IDENTIFIER,
-                            entry.getAggregateIdentifier()).get();
-            String tableID = cursor.getTableID();
+            String tableID = null;
+            try
+            {
+                InternalUserTableMapping mapping = mappings
+                        .query()
+                        .equal(UserTableMappings.AGGREGATE_USER_IDENTIFIER,
+                                aggregateUserIdentifier)
+                        .equal(UserTableMappings.AGGREGATE_TABLE_IDENTIFIER,
+                                entry.getAggregateIdentifier()).get();
+                tableID = mapping.getTableID();
+            }
+            catch (ODKDatastoreException e)
+            {
+               // Do nothing, this just means the user is not registered with this table right now. 
+               // TODO: is there a better way to do this without using exceptions for normal behavior?
+            }
             User clientUser = new User(user.getID(),
                     user.getAggregateIdentifier(), user.getName());
 
-            TableEntry clientEntry = new TableEntry(clientUser, tableID,
-                    tableName, isSynchronized);
+            TableEntry clientEntry = new TableEntry(clientUser,
+                    entry.getAggregateIdentifier(), tableID, tableName,
+                    isSynchronized);
             clientEntries.add(clientEntry);
         }
 
