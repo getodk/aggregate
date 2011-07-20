@@ -11,11 +11,13 @@ import org.opendatakit.aggregate.odktables.commandlogic.CommandLogic;
 import org.opendatakit.aggregate.odktables.commandlogic.CommandLogicFunctions;
 import org.opendatakit.aggregate.odktables.commandresult.CommandResult.FailureReason;
 import org.opendatakit.aggregate.odktables.commandresult.synchronize.InsertSynchronizedRowsResult;
+import org.opendatakit.aggregate.odktables.entity.InternalColumn;
 import org.opendatakit.aggregate.odktables.entity.InternalModification;
 import org.opendatakit.aggregate.odktables.entity.InternalRow;
 import org.opendatakit.aggregate.odktables.entity.InternalTableEntry;
 import org.opendatakit.aggregate.odktables.entity.InternalUser;
 import org.opendatakit.aggregate.odktables.entity.InternalUserTableMapping;
+import org.opendatakit.aggregate.odktables.relation.Columns;
 import org.opendatakit.aggregate.odktables.relation.Permissions;
 import org.opendatakit.aggregate.odktables.relation.TableEntries;
 import org.opendatakit.aggregate.odktables.relation.UserTableMappings;
@@ -50,6 +52,7 @@ public class InsertSynchronizedRowsLogic extends
         Users users = Users.getInstance(cc);
         TableEntries entries = TableEntries.getInstance(cc);
         UserTableMappings mappings = UserTableMappings.getInstance(cc);
+        Columns columns = Columns.getInstance(cc);
 
         String requestingUserID = insertSynchronizedRows.getRequestingUserID();
         String tableID = insertSynchronizedRows.getTableID();
@@ -96,14 +99,14 @@ public class InsertSynchronizedRowsLogic extends
 
         // Insert new rows and create modification
         Modification clientModification = insertNewRows(newRows,
-                aggregateTableIdentifier, newModificationNumber, cc);
+                aggregateTableIdentifier, newModificationNumber, columns, cc);
 
         return InsertSynchronizedRowsResult.success(clientModification);
     }
 
     private Modification insertNewRows(List<SynchronizedRow> newRows,
             String aggregateTableIdentifier, int newModificationNumber,
-            CallingContext cc) throws ODKDatastoreException
+            Columns columns, CallingContext cc) throws ODKDatastoreException
     {
         List<SynchronizedRow> insertedRows = new ArrayList<SynchronizedRow>();
         for (SynchronizedRow clientRow : newRows)
@@ -113,7 +116,12 @@ public class InsertSynchronizedRowsLogic extends
             for (Entry<String, String> rowEntry : clientRow
                     .getColumnValuePairs().entrySet())
             {
-                row.setValue(rowEntry.getKey(), rowEntry.getValue());
+                InternalColumn col = columns
+                        .query()
+                        .equal(Columns.AGGREGATE_TABLE_IDENTIFIER,
+                                aggregateTableIdentifier)
+                        .equal(Columns.COLUMN_NAME, rowEntry.getKey()).get();
+                row.setValue(col.getAggregateIdentifier(), rowEntry.getValue());
             }
             row.save();
 

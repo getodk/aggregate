@@ -49,7 +49,7 @@ public class SimpleAPI extends CommonAPI
      */
     public SimpleAPI(URI aggregateURI, String userID)
             throws ClientProtocolException, UserDoesNotExistException,
-            IOException
+            IOException, AggregateInternalErrorException
     {
         super(aggregateURI, userID);
     }
@@ -80,7 +80,8 @@ public class SimpleAPI extends CommonAPI
      */
     public String createTable(String tableID, String tableName,
             List<Column> columns) throws ClientProtocolException, IOException,
-            TableAlreadyExistsException, UserDoesNotExistException
+            TableAlreadyExistsException, UserDoesNotExistException,
+            AggregateInternalErrorException
     {
         CreateTable command = new CreateTable(requestingUserID, tableName,
                 tableID, columns);
@@ -106,7 +107,8 @@ public class SimpleAPI extends CommonAPI
      *             if there is a problem communicating with the Aggregate server
      */
     public void deleteTable(String tableID) throws ClientProtocolException,
-            IOException, PermissionDeniedException, TableDoesNotExistException
+            IOException, PermissionDeniedException, TableDoesNotExistException,
+            AggregateInternalErrorException
     {
         DeleteTable command = new DeleteTable(requestingUserID, tableID);
         DeleteTableResult result = sendCommand(command, DeleteTableResult.class);
@@ -130,7 +132,7 @@ public class SimpleAPI extends CommonAPI
      */
     public List<Row> getAllRows(String tableID) throws ClientProtocolException,
             IOException, TableDoesNotExistException, UserDoesNotExistException,
-            PermissionDeniedException
+            PermissionDeniedException, AggregateInternalErrorException
     {
         QueryForRows command = new QueryForRows(requestingUserID, tableID);
         QueryForRowsResult result = sendCommand(command,
@@ -164,7 +166,8 @@ public class SimpleAPI extends CommonAPI
      */
     public Map<String, String> insertRows(String tableID, List<Row> rows)
             throws ClientProtocolException, IOException,
-            TableDoesNotExistException, PermissionDeniedException
+            TableDoesNotExistException, PermissionDeniedException,
+            AggregateInternalErrorException
     {
         InsertRows command = new InsertRows(requestingUserID, rows, tableID);
         InsertRowsResult result = sendCommand(command, InsertRowsResult.class);

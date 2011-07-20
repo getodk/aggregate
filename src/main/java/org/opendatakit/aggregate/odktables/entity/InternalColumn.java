@@ -1,6 +1,7 @@
 package org.opendatakit.aggregate.odktables.entity;
 
 import org.opendatakit.aggregate.odktables.relation.Columns;
+import org.opendatakit.aggregate.odktables.relation.Table;
 import org.opendatakit.common.ermodel.Entity;
 import org.opendatakit.common.ermodel.typedentity.TypedEntity;
 import org.opendatakit.common.persistence.DataField;
@@ -10,12 +11,12 @@ import org.opendatakit.common.web.CallingContext;
 
 /**
  * <p>
- * A Column is a (columnAggregate Identifier, aggregateTableIdentifier, columnName, columnType, nullable) tuple,
- * where
+ * A Column is a (columnAggregate Identifier, aggregateTableIdentifier,
+ * columnName, columnType, nullable) tuple, where
  * <ul>
  * <li>columnAggregate Identifier: the globally unique identifier of the column</li>
- * <li>aggregateTableIdentifier: the globally unique identifier of the table this column belongs
- * to</li>
+ * <li>aggregateTableIdentifier: the globally unique identifier of the table
+ * this column belongs to</li>
  * <li>columnName: the name of the column. This must consist if upper case
  * letters, numbers, and underscores, and must start with an uppercase letter.</li>
  * <li>columnType: the type of the column. This is a DataField.DataType.</li>
@@ -29,8 +30,9 @@ import org.opendatakit.common.web.CallingContext;
 public class InternalColumn extends TypedEntity
 {
 
-    public InternalColumn(String aggregateTableIdentifier, String columnName, DataType columnType,
-            boolean nullable, CallingContext cc) throws ODKDatastoreException
+    public InternalColumn(String aggregateTableIdentifier, String columnName,
+            DataType columnType, boolean nullable, CallingContext cc)
+            throws ODKDatastoreException
     {
         super(Columns.getInstance(cc));
         setAggregateTableIdentifier(aggregateTableIdentifier);
@@ -52,7 +54,8 @@ public class InternalColumn extends TypedEntity
 
     public void setAggregateTableIdentifier(String aggregateTableIdentifier)
     {
-        super.getEntity().setField(Columns.AGGREGATE_TABLE_IDENTIFIER, aggregateTableIdentifier);
+        super.getEntity().setField(Columns.AGGREGATE_TABLE_IDENTIFIER,
+                aggregateTableIdentifier);
     }
 
     public String getName()
@@ -90,6 +93,14 @@ public class InternalColumn extends TypedEntity
 
     public DataField toDataField()
     {
-        return new DataField(getName(), getType(), getNullable());
+        return new DataField(Table.convertIdentifier(getAggregateIdentifier()),
+                getType(), getNullable());
+    }
+
+    @Override
+    public String toString()
+    {
+        return String.format("InternalColumn[name=%s, type=%s, nullable=%s",
+                getName(), getType(), getNullable());
     }
 }

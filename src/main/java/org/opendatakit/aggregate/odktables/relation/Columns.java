@@ -99,7 +99,7 @@ public class Columns extends TypedEntityRelation<InternalColumn>
      */
     private Columns(CallingContext cc) throws ODKDatastoreException
     {
-        super(RELATION_NAME, fields, cc);
+        super(Table.NAMESPACE, RELATION_NAME, fields, cc);
     }
 
     public List<DataField> getDataFields(String aggregateTableIdentifier)

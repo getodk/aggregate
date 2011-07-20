@@ -23,7 +23,8 @@ import org.opendatakit.common.web.CallingContext;
 public class InternalRow extends TypedEntity
 {
 
-    public InternalRow(String aggregateTableIdentifier, CallingContext cc) throws ODKDatastoreException
+    public InternalRow(String aggregateTableIdentifier, CallingContext cc)
+            throws ODKDatastoreException
     {
         super(Table.getInstance(aggregateTableIdentifier, cc));
     }
@@ -44,13 +45,23 @@ public class InternalRow extends TypedEntity
                 UUID.randomUUID().toString());
     }
 
-    public String getValue(String fieldName)
+    public String getValue(String aggregateFieldIdentifier)
     {
-        return super.getEntity().getField(fieldName);
+        return super.getEntity().getField(
+                Table.convertIdentifier(aggregateFieldIdentifier));
     }
 
-    public void setValue(String fieldName, String value)
+    public void setValue(String aggregateFieldIdentifier, String value)
     {
-        super.getEntity().setField(fieldName, value);
+        super.getEntity().setField(
+                Table.convertIdentifier(aggregateFieldIdentifier), value);
+    }
+
+    @Override
+    public String toString()
+    {
+        return String.format(
+                "InternalRow[aggregateRowIdentifier=%s, revisionTag=%s",
+                getAggregateIdentifier(), getRevisionTag());
     }
 }

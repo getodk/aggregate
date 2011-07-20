@@ -49,7 +49,7 @@ public class TableEntries
     /**
      * The name of the TableEntries relation.
      */
-    private static final String RELATION_NAME = "TABLES";
+    private static final String RELATION_NAME = "TABLE_ENTRIES";
 
     // The following defines the actual fields that will be in the datastore:
     // The aggregateTableIdentifier field is the entity Aggregate Identifier, so is created automatically
@@ -102,7 +102,7 @@ public class TableEntries
      */
     private TableEntries(CallingContext cc) throws ODKDatastoreException
     {
-        super(RELATION_NAME, fields, cc);
+        super(Table.NAMESPACE, RELATION_NAME, fields, cc);
     }
 
     @Override

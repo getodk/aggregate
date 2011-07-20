@@ -86,7 +86,7 @@ public class Modifications extends TypedEntityRelation<InternalModification>
      */
     private Modifications(CallingContext cc) throws ODKDatastoreException
     {
-        super(RELATION_NAME, fields, cc);
+        super(Table.NAMESPACE, RELATION_NAME, fields, cc);
     }
 
     public InternalModification initialize(Entity entity) throws ODKDatastoreException

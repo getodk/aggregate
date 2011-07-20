@@ -8,6 +8,7 @@ import org.opendatakit.aggregate.odktables.commandlogic.CommandLogic;
 import org.opendatakit.aggregate.odktables.commandresult.CommandResult.FailureReason;
 import org.opendatakit.aggregate.odktables.commandresult.synchronize.CreateSynchronizedTableResult;
 import org.opendatakit.aggregate.odktables.entity.InternalColumn;
+import org.opendatakit.aggregate.odktables.entity.InternalPermission;
 import org.opendatakit.aggregate.odktables.entity.InternalTableEntry;
 import org.opendatakit.aggregate.odktables.entity.InternalUser;
 import org.opendatakit.aggregate.odktables.entity.InternalUserTableMapping;
@@ -62,11 +63,11 @@ public class CreateSynchronizedTableLogic extends
             return CreateSynchronizedTableResult.failure(tableID,
                     FailureReason.TABLE_ALREADY_EXISTS);
         }
-        // Create table in Tables, Columns, and Cursors.
+        // Create table
         try
         {
             InternalTableEntry entry = new InternalTableEntry(aggregateUserIdentifier,
-                    createSynchronizedTable.getTableName(), cc);
+                    createSynchronizedTable.getTableName(), true, cc);
             entry.save();
             for (org.opendatakit.aggregate.odktables.client.entity.Column clientColumn : createSynchronizedTable
                     .getColumns())
@@ -80,6 +81,12 @@ public class CreateSynchronizedTableLogic extends
                     aggregateUserIdentifier, entry.getAggregateIdentifier(),
                     tableID, cc);
             mapping.save();
+            
+            // Add creation user's full permissions
+            InternalPermission perm = new InternalPermission(
+                    entry.getAggregateIdentifier(), aggregateUserIdentifier,
+                    true, true, true, cc);
+            perm.save();
         } catch (ODKEntityPersistException e)
         {
             // TODO: query to see what got created and delete it

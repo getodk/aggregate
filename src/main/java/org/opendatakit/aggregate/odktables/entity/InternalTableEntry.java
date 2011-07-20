@@ -28,13 +28,15 @@ import org.opendatakit.common.web.CallingContext;
 public class InternalTableEntry extends TypedEntity
 {
 
-    public InternalTableEntry(String aggregateOwnerIdentifier, String tableName,
-            CallingContext cc) throws ODKDatastoreException
+    public InternalTableEntry(String aggregateOwnerIdentifier,
+            String tableName, boolean isSynchronized, CallingContext cc)
+            throws ODKDatastoreException
     {
         super(TableEntries.getInstance(cc));
         setAggregateOwnerIdentifier(aggregateOwnerIdentifier);
         setName(tableName);
         setModificationNumber(0);
+        setSynchronized(isSynchronized);
     }
 
     public InternalTableEntry(Entity entity, CallingContext cc)
@@ -96,5 +98,15 @@ public class InternalTableEntry extends TypedEntity
         DataField modificationNumberField = getDataField(TableEntries.MODIFICATION_NUMBER);
         super.getEntity().setInteger(modificationNumberField,
                 modificationNumber);
+    }
+
+    @Override
+    public String toString()
+    {
+        return String
+                .format("InternalTableEntry[aggregateIdentifier=%s, aggregateOwnerIdentifier=%s, name=%s, modificationNumber=%s, isSynchronized=%s",
+                        getAggregateIdentifier(),
+                        getAggregateOwnerIdentifier(), getName(),
+                        getModificationNumber(), isSynchronized());
     }
 }

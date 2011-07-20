@@ -186,6 +186,14 @@ public abstract class TypedEntityRelation<T extends TypedEntity>
     {
         return this.getClass().getCanonicalName();
     }
+    
+    /**
+     * {@link org.opendatakit.common.ermodel.Relation#dropRelation}
+     */
+    public void dropRelation() throws ODKDatastoreException
+    {
+        this.relation.dropRelation(getCC());
+    }
 
     /**
      * {@link org.opendatakit.common.ermodel.Relation#newEntity(CallingContext)}
