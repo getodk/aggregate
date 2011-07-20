@@ -49,8 +49,7 @@ public class DeleteSynchronizedTableLogic extends
         Columns columns = Columns.getInstance(cc);
 
         String requestingUserID = deleteSynchronizedTable.getRequestingUserID();
-        String aggregateTableIdentifier = deleteSynchronizedTable
-                .getAggregateTableIdentifier();
+        String tableID = deleteSynchronizedTable.getTableID();
 
         InternalUser requestUser = users.query()
                 .equal(Users.USER_ID, requestingUserID).get();
@@ -59,8 +58,7 @@ public class DeleteSynchronizedTableLogic extends
         {
             mapping = mappings
                     .query()
-                    .equal(UserTableMappings.AGGREGATE_TABLE_IDENTIFIER,
-                            aggregateTableIdentifier)
+                    .equal(UserTableMappings.TABLE_ID, tableID)
                     .equal(UserTableMappings.AGGREGATE_USER_IDENTIFIER,
                             requestUser.getAggregateIdentifier()).get();
         } catch (ODKDatastoreException e)
@@ -69,6 +67,7 @@ public class DeleteSynchronizedTableLogic extends
                     FailureReason.TABLE_DOES_NOT_EXIST);
         }
 
+        String aggregateTableIdentifier = mapping.getAggregateTableIdentifier();
         if (!requestUser.hasPerm(aggregateTableIdentifier, Permissions.DELETE))
         {
             return DeleteSynchronizedTableResult.failure(mapping.getTableID(),

@@ -40,9 +40,8 @@ public class QueryForTablesResult extends CommandResult<QueryForTables>
     /**
      * @return the list of table entries representing the results of the
      *         QueryForTables command.
-     * @throws PermissionDeniedException
      */
-    public List<TableEntry> getEntries() throws PermissionDeniedException
+    public List<TableEntry> getEntries()
     {
         return this.entries;
     }

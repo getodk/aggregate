@@ -37,9 +37,9 @@ public class SetTablePermissions implements Command
     /**
      * Constructs a new SetTablePermissions.
      */
-    public SetTablePermissions(String aggregateTableIdentifier,
-            String aggregateUserIdentifier, boolean read, boolean write,
-            String requestingUserID, boolean delete)
+    public SetTablePermissions(String requestingUserID,
+            String aggregateTableIdentifier, String aggregateUserIdentifier,
+            boolean read, boolean write, boolean delete)
     {
 
         Check.notNullOrEmpty(aggregateTableIdentifier,

@@ -34,7 +34,7 @@ public class InsertRows implements Command
     /**
      * Constructs a new InsertRows.
      */
-    public InsertRows(List<Row> rows, String requestingUserID, String tableID)
+    public InsertRows(String requestingUserID, List<Row> rows, String tableID)
     {
 
         Check.notNull(rows, "rows");

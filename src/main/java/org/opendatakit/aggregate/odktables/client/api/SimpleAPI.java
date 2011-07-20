@@ -5,7 +5,7 @@ import java.net.URI;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang.NotImplementedException;
+import org.apache.http.client.ClientProtocolException;
 import org.opendatakit.aggregate.odktables.client.entity.Column;
 import org.opendatakit.aggregate.odktables.client.entity.Row;
 import org.opendatakit.aggregate.odktables.client.exception.AggregateInternalErrorException;
@@ -13,6 +13,14 @@ import org.opendatakit.aggregate.odktables.client.exception.PermissionDeniedExce
 import org.opendatakit.aggregate.odktables.client.exception.TableAlreadyExistsException;
 import org.opendatakit.aggregate.odktables.client.exception.TableDoesNotExistException;
 import org.opendatakit.aggregate.odktables.client.exception.UserDoesNotExistException;
+import org.opendatakit.aggregate.odktables.command.simple.CreateTable;
+import org.opendatakit.aggregate.odktables.command.simple.DeleteTable;
+import org.opendatakit.aggregate.odktables.command.simple.InsertRows;
+import org.opendatakit.aggregate.odktables.command.simple.QueryForRows;
+import org.opendatakit.aggregate.odktables.commandresult.simple.CreateTableResult;
+import org.opendatakit.aggregate.odktables.commandresult.simple.DeleteTableResult;
+import org.opendatakit.aggregate.odktables.commandresult.simple.InsertRowsResult;
+import org.opendatakit.aggregate.odktables.commandresult.simple.QueryForRowsResult;
 
 /**
  * SimpleAPI contains API calls for using Aggregate as a simple table storage
@@ -29,6 +37,7 @@ public class SimpleAPI extends CommonAPI
      *            the URI of a running ODK Aggregate instance
      * @param userID
      *            the ID of the user to use for API calls
+     * @throws ClientProtocolException
      * @throws IOException
      *             if there is a problem communicating with the Aggregate server
      *             or if it does not exist
@@ -39,9 +48,10 @@ public class SimpleAPI extends CommonAPI
      *             initial communication to fail
      */
     public SimpleAPI(URI aggregateURI, String userID)
+            throws ClientProtocolException, UserDoesNotExistException,
+            IOException
     {
-        super(aggregateURI);
-        throw new NotImplementedException();
+        super(aggregateURI, userID);
     }
 
     /**
@@ -58,6 +68,7 @@ public class SimpleAPI extends CommonAPI
      *            a list of columns defining the columns the table should have
      * @return the aggregateTableIdentifier of the table, which is universally
      *         unique.
+     * @throws ClientProtocolException
      * @throws TableAlreadyExistsException
      *             if you have already created a table with tableID
      * @throws AggregateInternalErrorException
@@ -65,10 +76,16 @@ public class SimpleAPI extends CommonAPI
      *             call to fail
      * @throws IOException
      *             if there is a problem communicating with the Aggregate server
+     * @throws UserDoesNotExistException
      */
-    public String createTable(String tableID, String tableName, List<Column> columns)
+    public String createTable(String tableID, String tableName,
+            List<Column> columns) throws ClientProtocolException, IOException,
+            TableAlreadyExistsException, UserDoesNotExistException
     {
-        throw new NotImplementedException();
+        CreateTable command = new CreateTable(requestingUserID, tableName,
+                tableID, columns);
+        CreateTableResult result = sendCommand(command, CreateTableResult.class);
+        return result.getCreatedTableId();
     }
 
     /**
@@ -76,6 +93,7 @@ public class SimpleAPI extends CommonAPI
      * 
      * @param tableID
      *            the caller's identifier for the table
+     * @throws ClientProtocolException
      * @throws TableDoesNotExistException
      *             if the table does not exist
      * @throws PermissionDeniedException
@@ -87,16 +105,20 @@ public class SimpleAPI extends CommonAPI
      * @throws IOException
      *             if there is a problem communicating with the Aggregate server
      */
-    public void deleteTable(String tableID)
+    public void deleteTable(String tableID) throws ClientProtocolException,
+            IOException, PermissionDeniedException, TableDoesNotExistException
     {
-        throw new NotImplementedException();
+        DeleteTable command = new DeleteTable(requestingUserID, tableID);
+        DeleteTableResult result = sendCommand(command, DeleteTableResult.class);
+        result.checkResults();
     }
 
     /**
      * @return a list of all rows in the table with tableID
+     * @throws ClientProtocolException
      * @throws TableDoesNotExistException
      *             if no table with tableID exists
-     * @throws PermissonDeniedException
+     * @throws PermissionDeniedException
      *             if the userID used to make the API call does not have read
      *             permission on the table
      * @throws AggregateInternalErrorException
@@ -104,10 +126,16 @@ public class SimpleAPI extends CommonAPI
      *             call to fail
      * @throws IOException
      *             if there is a problem communicating with the Aggregate server
+     * @throws UserDoesNotExistException
      */
-    public List<Row> getAllRows(String tableID)
+    public List<Row> getAllRows(String tableID) throws ClientProtocolException,
+            IOException, TableDoesNotExistException, UserDoesNotExistException,
+            PermissionDeniedException
     {
-        throw new NotImplementedException();
+        QueryForRows command = new QueryForRows(requestingUserID, tableID);
+        QueryForRowsResult result = sendCommand(command,
+                QueryForRowsResult.class);
+        return result.getRows();
     }
 
     /**
@@ -122,6 +150,7 @@ public class SimpleAPI extends CommonAPI
      *         generated by Aggregate. You must store these
      *         aggregateRowIdentifiers in order to identify the rows to
      *         Aggregate in the future.
+     * @throws ClientProtocolException
      * @throws TableDoesNotExistException
      *             if no table with tableID exists
      * @throws PermissionDeniedException
@@ -134,7 +163,11 @@ public class SimpleAPI extends CommonAPI
      *             if there is a problem communicating with the Aggregate server
      */
     public Map<String, String> insertRows(String tableID, List<Row> rows)
+            throws ClientProtocolException, IOException,
+            TableDoesNotExistException, PermissionDeniedException
     {
-        throw new NotImplementedException();
+        InsertRows command = new InsertRows(requestingUserID, rows, tableID);
+        InsertRowsResult result = sendCommand(command, InsertRowsResult.class);
+        return result.getMapOfInsertedRowIDsToAggregateRowIdentifiers();
     }
 }

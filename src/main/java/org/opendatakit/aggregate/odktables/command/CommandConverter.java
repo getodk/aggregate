@@ -4,6 +4,7 @@ import java.io.Reader;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.opendatakit.aggregate.odktables.command.common.CheckUserExists;
 import org.opendatakit.aggregate.odktables.command.common.CreateUser;
 import org.opendatakit.aggregate.odktables.command.common.DeleteUser;
 import org.opendatakit.aggregate.odktables.command.common.GetUserByAggregateIdentifier;
@@ -60,6 +61,7 @@ public class CommandConverter
         commandMap = new HashMap<String, Class<? extends Command>>();
         
         // Common
+        commandMap.put(CheckUserExists.methodPath(), CheckUserExists.class);
         commandMap.put(CreateUser.methodPath(), CreateUser.class);
         commandMap.put(DeleteUser.methodPath(), DeleteUser.class);
         commandMap.put(GetUserByAggregateIdentifier.methodPath(), GetUserByAggregateIdentifier.class);

@@ -8,18 +8,17 @@ import org.opendatakit.common.utils.Check;
 
 /**
  * UpdateSynchronizedRows is immutable.
- *
+ * 
  * @author the.dylan.price@gmail.com
  */
 public class UpdateSynchronizedRows implements Command
 {
     private static final String path = "/odktables/synchronize/updateSynchronizedRows";
-    
+
     private final List<SynchronizedRow> changedRows;
     private final String requestingUserID;
     private final String tableID;
     private final int modificationNumber;
-    
 
     /**
      * For serialization by Gson
@@ -27,31 +26,32 @@ public class UpdateSynchronizedRows implements Command
     @SuppressWarnings("unused")
     private UpdateSynchronizedRows()
     {
-       this.changedRows = null;
-       this.requestingUserID = null;
-       this.tableID = null;
-       this.modificationNumber = 0;
-       
+        this.changedRows = null;
+        this.requestingUserID = null;
+        this.tableID = null;
+        this.modificationNumber = 0;
+
     }
 
     /**
      * Constructs a new UpdateSynchronizedRows.
      */
-    public UpdateSynchronizedRows(List<SynchronizedRow> changedRows, String requestingUserID, String tableID, int modificationNumber)
+    public UpdateSynchronizedRows(String requestingUserID,
+            List<SynchronizedRow> changedRows, String tableID,
+            int modificationNumber)
     {
-        
+
         Check.notNull(changedRows, "changedRows");
         Check.notNullOrEmpty(requestingUserID, "requestingUserID");
         Check.notNullOrEmpty(tableID, "tableID");
-        Check.notNull(modificationNumber, "modificationNumber"); 
-        
+        Check.notNull(modificationNumber, "modificationNumber");
+
         this.changedRows = changedRows;
         this.requestingUserID = requestingUserID;
         this.tableID = tableID;
         this.modificationNumber = modificationNumber;
     }
 
-    
     /**
      * @return the changedRows
      */
@@ -59,7 +59,7 @@ public class UpdateSynchronizedRows implements Command
     {
         return this.changedRows;
     }
-    
+
     /**
      * @return the requestingUserID
      */
@@ -67,7 +67,7 @@ public class UpdateSynchronizedRows implements Command
     {
         return this.requestingUserID;
     }
-    
+
     /**
      * @return the tableID
      */
@@ -75,7 +75,7 @@ public class UpdateSynchronizedRows implements Command
     {
         return this.tableID;
     }
-    
+
     /**
      * @return the modificationNumber
      */
@@ -83,17 +83,14 @@ public class UpdateSynchronizedRows implements Command
     {
         return this.modificationNumber;
     }
-    
 
     @Override
     public String toString()
     {
-        return String.format("UpdateSynchronizedRows: " +
-                "changedRows=%s " +
-                "requestingUserID=%s " +
-                "tableID=%s " +
-                "modificationNumber=%s " +
-                "", changedRows, requestingUserID, tableID, modificationNumber);
+        return String.format("UpdateSynchronizedRows: " + "changedRows=%s "
+                + "requestingUserID=%s " + "tableID=%s "
+                + "modificationNumber=%s " + "", changedRows, requestingUserID,
+                tableID, modificationNumber);
     }
 
     @Override
@@ -113,4 +110,3 @@ public class UpdateSynchronizedRows implements Command
         return path;
     }
 }
-
