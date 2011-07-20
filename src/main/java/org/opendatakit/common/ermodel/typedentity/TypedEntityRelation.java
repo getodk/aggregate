@@ -150,20 +150,20 @@ public abstract class TypedEntityRelation<T extends TypedEntity>
     public abstract T initialize(Entity entity) throws ODKDatastoreException;
 
     /**
-     * Retrieve a typed entity by UUID.
+     * Retrieve a typed entity by it's aggregate identifier.
      * 
-     * @param UUID
+     * @param aggregateIdentifier
      *            the global unique identifier of an entity in this relation.
-     *            Must be a valid UUID and an entity with the UUID must exist in
-     *            this relation.
-     * @return the entity with the given UUID
+     *            Must be a valid aggregate identifier and an entity with the
+     *            identifier must exist in this relation.
+     * @return the entity with the given aggregate identifier
      * @throws ODKDatastoreException
      * @throws ODKEntityNotFoundException
      *             if no such entity exists in the datastore
      */
-    public T get(String UUID) throws ODKDatastoreException
+    public T get(String aggregateIdentifier) throws ODKDatastoreException
     {
-        return initialize(this.relation.getEntity(UUID, getCC()));
+        return initialize(this.relation.getEntity(aggregateIdentifier, getCC()));
     }
 
     /**
@@ -178,11 +178,11 @@ public abstract class TypedEntityRelation<T extends TypedEntity>
     }
 
     /**
-     * @return the UUID of this relation. Note that there are no mechanisms for
-     *         retrieving this relation by it's UUID, it merely serves as a
-     *         unique identifier.
+     * @return the aggregate identifier of this relation. Note that there are no
+     *         mechanisms for retrieving this relation by it's aggregate
+     *         identifier, it merely serves as a unique identifier.
      */
-    public String getUUID()
+    public String getAggregateIdentifier()
     {
         return this.getClass().getCanonicalName();
     }

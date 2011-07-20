@@ -13,7 +13,7 @@ public class DeleteTable implements Command
     private static final String path = "/odktables/simple/deleteTable";
     
     private final String requestingUserID;
-    private final String tableUUID;
+    private final String tableID;
     
 
     /**
@@ -23,21 +23,21 @@ public class DeleteTable implements Command
     private DeleteTable()
     {
        this.requestingUserID = null;
-       this.tableUUID = null;
+       this.tableID = null;
        
     }
 
     /**
      * Constructs a new DeleteTable.
      */
-    public DeleteTable(String requestingUserID, String tableUUID)
+    public DeleteTable(String requestingUserID, String tableID)
     {
         
         Check.notNullOrEmpty(requestingUserID, "requestingUserID");
-        Check.notNullOrEmpty(tableUUID, "tableUUID"); 
+        Check.notNullOrEmpty(tableID, "tableID"); 
         
         this.requestingUserID = requestingUserID;
-        this.tableUUID = tableUUID;
+        this.tableID = tableID;
     }
 
     
@@ -50,11 +50,11 @@ public class DeleteTable implements Command
     }
     
     /**
-     * @return the tableUUID
+     * @return the tableID
      */
-    public String getTableUUID()
+    public String getTableID()
     {
-        return this.tableUUID;
+        return this.tableID;
     }
     
 
@@ -63,8 +63,8 @@ public class DeleteTable implements Command
     {
         return String.format("DeleteTable: " +
                 "requestingUserID=%s " +
-                "tableUUID=%s " +
-                "", requestingUserID, tableUUID);
+                "tableID=%s " +
+                "", requestingUserID, tableID);
     }
 
     @Override

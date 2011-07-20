@@ -24,7 +24,7 @@ public class DeleteTableResult extends CommandResult<DeleteTable>
         possibleFailureReasons.add(FailureReason.PERMISSION_DENIED);
     }
 
-    private final String tableUUID;
+    private final String aggregateTableIdentifier;
 
     /**
      * The success constructor. See {@link #success} for param info.
@@ -32,17 +32,17 @@ public class DeleteTableResult extends CommandResult<DeleteTable>
     private DeleteTableResult()
     {
         super(true, null);
-        this.tableUUID = null;
+        this.aggregateTableIdentifier = null;
     }
 
     /**
      * The failure constructor. See {@link #failure} for param info.
      */
-    private DeleteTableResult(String tableUUID, FailureReason reason)
+    private DeleteTableResult(String aggregateTableIdentifier, FailureReason reason)
     {
         super(false, reason);
 
-        Check.notNullOrEmpty(tableUUID, "tableUUID");
+        Check.notNullOrEmpty(aggregateTableIdentifier, "aggregateTableIdentifier");
         if (!possibleFailureReasons.contains(reason))
         {
             throw new IllegalArgumentException(
@@ -51,7 +51,7 @@ public class DeleteTableResult extends CommandResult<DeleteTable>
                             reason));
         }
 
-        this.tableUUID = tableUUID;
+        this.aggregateTableIdentifier = aggregateTableIdentifier;
     }
 
     /**
@@ -68,7 +68,7 @@ public class DeleteTableResult extends CommandResult<DeleteTable>
             switch (getReason())
             {
             case TABLE_DOES_NOT_EXIST:
-                throw new TableDoesNotExistException(null, tableUUID);
+                throw new TableDoesNotExistException(aggregateTableIdentifier);
             case PERMISSION_DENIED:
                 throw new PermissionDeniedException();
             default:
@@ -83,7 +83,7 @@ public class DeleteTableResult extends CommandResult<DeleteTable>
     @Override
     public String toString()
     {
-        return String.format("DeleteTableResult [tableUUID=%s]", tableUUID);
+        return String.format("DeleteTableResult [aggregateTableIdentifier=%s]", aggregateTableIdentifier);
     }
 
     /* (non-Javadoc)
@@ -95,7 +95,7 @@ public class DeleteTableResult extends CommandResult<DeleteTable>
         final int prime = 31;
         int result = super.hashCode();
         result = prime * result
-                + ((tableUUID == null) ? 0 : tableUUID.hashCode());
+                + ((aggregateTableIdentifier == null) ? 0 : aggregateTableIdentifier.hashCode());
         return result;
     }
 
@@ -112,11 +112,11 @@ public class DeleteTableResult extends CommandResult<DeleteTable>
         if (!(obj instanceof DeleteTableResult))
             return false;
         DeleteTableResult other = (DeleteTableResult) obj;
-        if (tableUUID == null)
+        if (aggregateTableIdentifier == null)
         {
-            if (other.tableUUID != null)
+            if (other.aggregateTableIdentifier != null)
                 return false;
-        } else if (!tableUUID.equals(other.tableUUID))
+        } else if (!aggregateTableIdentifier.equals(other.aggregateTableIdentifier))
             return false;
         return true;
     }
@@ -131,17 +131,17 @@ public class DeleteTableResult extends CommandResult<DeleteTable>
     }
 
     /**
-     * @param tableUUID
-     *            the UUID of the table involved in the command
+     * @param aggregateTableIdentifier
+     *            the Aggregate Identifier of the table involved in the command
      * @param reason
      *            the reason the command failed. Must be either
      *            TABLE_DOES_NOT_EXIST or PERMISSION_DENIED.
      * @return a new DeleteTableResult representing the failed completion of a
      *         DeleteTable command.
      */
-    public static DeleteTableResult failure(String tableUUID,
+    public static DeleteTableResult failure(String aggregateTableIdentifier,
             FailureReason reason)
     {
-        return new DeleteTableResult(tableUUID, reason);
+        return new DeleteTableResult(aggregateTableIdentifier, reason);
     }
 }

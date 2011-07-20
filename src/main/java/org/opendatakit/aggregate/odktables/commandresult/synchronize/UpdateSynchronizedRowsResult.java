@@ -1,91 +1,106 @@
 package org.opendatakit.aggregate.odktables.commandresult.synchronize;
 
-import org.opendatakit.aggregate.odktables.command.common.UpdateSynchronizedRows;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.opendatakit.aggregate.odktables.client.entity.Modification;
+import org.opendatakit.aggregate.odktables.client.exception.OutOfSynchException;
+import org.opendatakit.aggregate.odktables.client.exception.PermissionDeniedException;
+import org.opendatakit.aggregate.odktables.client.exception.RowOutOfSynchException;
+import org.opendatakit.aggregate.odktables.client.exception.TableDoesNotExistException;
+import org.opendatakit.aggregate.odktables.command.synchronize.UpdateSynchronizedRows;
 import org.opendatakit.aggregate.odktables.commandresult.CommandResult;
 import org.opendatakit.common.utils.Check;
 
 /**
- * A UpdateSynchronizedRowsResult represents the result of executing a UpdateSynchronizedRows command.
+ * A UpdateSynchronizedRowsResult represents the result of executing a
+ * UpdateSynchronizedRows command.
  * 
  * @author the.dylan.price@gmail.com
  */
-public class UpdateSynchronizedRowsResult extends CommandResult<UpdateSynchronizedRows>
+public class UpdateSynchronizedRowsResult extends
+        CommandResult<UpdateSynchronizedRows>
 {
     private static final List<FailureReason> possibleFailureReasons;
     static
     {
         possibleFailureReasons = new ArrayList<FailureReason>();
+        possibleFailureReasons.add(FailureReason.TABLE_DOES_NOT_EXIST);
+        possibleFailureReasons.add(FailureReason.PERMISSION_DENIED);
+        possibleFailureReasons.add(FailureReason.OUT_OF_SYNCH);
+        possibleFailureReasons.add(FailureReason.ROW_OUT_OF_SYNCH);
     }
 
-    
-    private final List<SynchronizedRow> changedRows;
-    private final String requestingUserID;
+    private final Modification modification;
     private final String tableID;
-    private final int modificationNumber;
+    private final String aggregateRowIdentifier;
 
     private UpdateSynchronizedRowsResult()
     {
-       super(true, null);
-       this.changedRows = null;
-       this.requestingUserID = null;
-       this.tableID = null;
-       this.modificationNumber = null;
-       
+        super(true, null);
+        this.modification = null;
+        this.tableID = null;
+        this.aggregateRowIdentifier = null;
     }
 
     /**
      * The success constructor. See {@link #success} for param info.
      */
-    private UpdateSynchronizedRowsResult(List<SynchronizedRow> changedRows, String requestingUserID, String tableID, int modificationNumber)
+    private UpdateSynchronizedRowsResult(Modification modification)
     {
         super(true, null);
 
-        
-        Check.notNull(changedRows, "changedRows");
-        Check.notNullOrEmpty(requestingUserID, "requestingUserID");
-        Check.notNullOrEmpty(tableID, "tableID");
-        Check.notNull(modificationNumber, "modificationNumber"); 
-        
-        this.changedRows = changedRows;
-        this.requestingUserID = requestingUserID;
-        this.tableID = tableID;
-        this.modificationNumber = modificationNumber;
+        Check.notNull(modification, "modification");
+
+        this.modification = modification;
+        this.tableID = null;
+        this.aggregateRowIdentifier = null;
     }
 
     /**
      * The failure constructor. See {@link #failure} for param info.
      */
-    private UpdateSynchronizedRowsResult(List<SynchronizedRow> changedRows, String requestingUserID, String tableID, int modificationNumber, FailureReason reason)
+    private UpdateSynchronizedRowsResult(String aggregateRowIdentifier,
+            String tableID, FailureReason reason)
     {
         super(false, reason);
 
-        
-        Check.notNull(changedRows, "changedRows");
-        Check.notNullOrEmpty(requestingUserID, "requestingUserID");
         Check.notNullOrEmpty(tableID, "tableID");
-        Check.notNull(modificationNumber, "modificationNumber"); 
-        if (!this.possibleFailureReasons.contains(reason))
-            throw new IllegalArgumentException(String.format("Failure reason %s not a valid failure reason for UpdateSynchronizedRows.", reason));
-        
-        this.changedRows = changedRows;
-        this.requestingUserID = requestingUserID;
+        if (!possibleFailureReasons.contains(reason))
+            throw new IllegalArgumentException(
+                    String.format(
+                            "Failure reason %s not a valid failure reason for UpdateSynchronizedRows.",
+                            reason));
+
+        this.modification = null;
         this.tableID = tableID;
-        this.modificationNumber = modificationNumber;
+        this.aggregateRowIdentifier = aggregateRowIdentifier;
     }
 
     /**
      * Retrieve the results from the UpdateSynchronizedRows command.
+     * 
+     * @throws OutOfSynchException
+     * @throws TableDoesNotExistException
+     * @throws RowOutOfSynchException
      */
-    public void get() throws 
-            PermissionDeniedException
+    public Modification getModification() throws PermissionDeniedException,
+            OutOfSynchException, TableDoesNotExistException,
+            RowOutOfSynchException
     {
         if (successful())
         {
-            throw new RuntimeException("not implemented");
+            return modification;
         } else
         {
             switch (getReason())
             {
+            case ROW_OUT_OF_SYNCH:
+                throw new RowOutOfSynchException(aggregateRowIdentifier);
+            case OUT_OF_SYNCH:
+                throw new OutOfSynchException();
+            case TABLE_DOES_NOT_EXIST:
+                throw new TableDoesNotExistException(tableID);
             case PERMISSION_DENIED:
                 throw new PermissionDeniedException();
             default:
@@ -100,31 +115,29 @@ public class UpdateSynchronizedRowsResult extends CommandResult<UpdateSynchroniz
     @Override
     public String toString()
     {
-        return String.format("UpdateSynchronizedRowsResult: " +
-                "changedRows=%s " +
-                "requestingUserID=%s " +
-                "tableID=%s " +
-                "modificationNumber=%s " +
-                "", changedRows, requestingUserID, tableID, modificationNumber);
+        return String.format(
+                "UpdateSynchronizedRowsResult [modification=%s, tableID=%s]",
+                modification, tableID);
     }
 
-
     /**
-     * TODO
-     * @return a new UpdateSynchronizedRowsResult representing the successful 
+     * @return a new UpdateSynchronizedRowsResult representing the successful
+     *         completion of an UpdateSynchronizedRows command.
      * 
      */
-    public static UpdateSynchronizedRowsResult success()
+    public static UpdateSynchronizedRowsResult success(Modification modification)
     {
-        return new UpdateSynchronizedRowsResult();
+        return new UpdateSynchronizedRowsResult(modification);
     }
 
     /**
-     * TODO
-     * @return a new UpdateSynchronizedRowsResult representing the failed      
+     * @return a new UpdateSynchronizedRowsResult representing the failed
+     *         completion of an UpdateSynchronizedRows command.
      */
-    public static UpdateSynchronizedRowsResult failure(FailureReason reason)
+    public static UpdateSynchronizedRowsResult failure(
+            String aggregateRowIdentifier, String tableID, FailureReason reason)
     {
-        return new UpdateSynchronizedRowsResult(reason);
+        return new UpdateSynchronizedRowsResult(aggregateRowIdentifier,
+                tableID, reason);
     }
 }

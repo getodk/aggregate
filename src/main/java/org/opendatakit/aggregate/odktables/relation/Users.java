@@ -3,7 +3,7 @@ package org.opendatakit.aggregate.odktables.relation;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.opendatakit.aggregate.odktables.entity.User;
+import org.opendatakit.aggregate.odktables.entity.InternalUser;
 import org.opendatakit.common.ermodel.Entity;
 import org.opendatakit.common.ermodel.typedentity.TypedEntityRelation;
 import org.opendatakit.common.persistence.DataField;
@@ -14,7 +14,7 @@ import org.opendatakit.common.web.CallingContext;
 
 /**
  * <p>
- * Users is a relation containing all the {@link User} entities stored in the
+ * Users is a relation containing all the {@link InternalUser} entities stored in the
  * datastore. Thus Users keeps track of all the registered users of the
  * odktables API.
  * </p>
@@ -26,7 +26,7 @@ import org.opendatakit.common.web.CallingContext;
  * 
  * @author the.dylan.price@gmail.com
  */
-public class Users extends TypedEntityRelation<User>
+public class Users extends TypedEntityRelation<InternalUser>
 {
     // Field names
     /**
@@ -85,7 +85,7 @@ public class Users extends TypedEntityRelation<User>
     /**
      * The singleton instance of the anonymous user.
      */
-    private static User anonInstance;
+    private static InternalUser anonInstance;
 
     /**
      * Constructs an instance which can be used to manipulate the Users
@@ -103,14 +103,19 @@ public class Users extends TypedEntityRelation<User>
         super(RELATION_NAME, fields, cc);
     }
 
-    public User initialize(Entity entity) throws ODKDatastoreException
+    public InternalUser initialize(Entity entity) throws ODKDatastoreException
     {
-        return new User(entity, super.getCC());
+        return new InternalUser(entity, super.getCC());
     }
 
-    public User getAnonymousUser() throws ODKDatastoreException
+    public InternalUser getAnonymousUser() throws ODKDatastoreException
     {
         return Users.anonInstance;
+    }
+    
+    public InternalUser getByID(String userID) throws ODKDatastoreException
+    {
+        return query().equal(USER_ID, userID).get();
     }
 
     /**
@@ -140,7 +145,7 @@ public class Users extends TypedEntityRelation<User>
                 anonInstance = instance.query().equal(USER_ID, ANON_ID).get();
             } catch (ODKDatastoreException e)
             {
-                anonInstance = new User(ANON_ID, ANON_NAME, cc);
+                anonInstance = new InternalUser(ANON_ID, ANON_NAME, cc);
                 anonInstance.save();
             }
         }

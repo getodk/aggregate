@@ -1,6 +1,13 @@
 package org.opendatakit.aggregate.odktables.commandresult.synchronize;
 
-import org.opendatakit.aggregate.odktables.command.common.CloneSynchronizedTable;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.opendatakit.aggregate.odktables.client.entity.Modification;
+import org.opendatakit.aggregate.odktables.client.exception.PermissionDeniedException;
+import org.opendatakit.aggregate.odktables.client.exception.TableAlreadyExistsException;
+import org.opendatakit.aggregate.odktables.client.exception.TableDoesNotExistException;
+import org.opendatakit.aggregate.odktables.command.synchronize.CloneSynchronizedTable;
 import org.opendatakit.aggregate.odktables.commandresult.CommandResult;
 import org.opendatakit.common.utils.Check;
 
@@ -22,14 +29,14 @@ public class CloneSynchronizedTableResult extends CommandResult<CloneSynchronize
 
     private final Modification modification;
     private final String tableID;
-    private final String tableUUID;
+    private final String aggregateTableIdentifier;
 
     private CloneSynchronizedTableResult()
     {
        super(true, null);
        this.modification = null;
        this.tableID = null;
-       this.tableUUID = null;
+       this.aggregateTableIdentifier = null;
        
     }
 
@@ -40,35 +47,37 @@ public class CloneSynchronizedTableResult extends CommandResult<CloneSynchronize
     {
         super(true, null);
         
-        Check.notNull(modification);
+        Check.notNull(modification, "modification");
         
         this.modification = modification;
         this.tableID = null;
-        this.tableUUID = null;
+        this.aggregateTableIdentifier = null;
     }
 
     /**
      * The failure constructor. See {@link #failure} for param info.
      */
-    private CloneSynchronizedTableResult(String tableID, String tableUUID, FailureReason reason)
+    private CloneSynchronizedTableResult(String tableID, String aggregateTableIdentifier, FailureReason reason)
     {
         super(false, reason);
         
         Check.notNullOrEmpty(tableID, "tableID");
-        Check.notNullOrEmpty(tableUUID, "tableUUID"); 
+        Check.notNullOrEmpty(aggregateTableIdentifier, "aggregateTableIdentifier"); 
         if (!possibleFailureReasons.contains(reason))
             throw new IllegalArgumentException(String.format("Failure reason %s not a valid failure reason for CloneSynchronizedTable.", reason));
         
         this.modification = null;
         this.tableID = tableID;
-        this.tableUUID = tableUUID;
+        this.aggregateTableIdentifier = aggregateTableIdentifier;
     }
 
     /**
      * Retrieve the results from the CloneSynchronizedTable command.
+     * @throws TableDoesNotExistException 
+     * @throws TableAlreadyExistsException 
      */
     public Modification getModification() throws 
-            PermissionDeniedException
+            PermissionDeniedException, TableDoesNotExistException, TableAlreadyExistsException
     {
         if (successful())
         {
@@ -78,9 +87,9 @@ public class CloneSynchronizedTableResult extends CommandResult<CloneSynchronize
             switch (getReason())
             {
             case TABLE_ALREADY_EXISTS:
-                throw new TableAlreadyExistsException(tableID, null);
+                throw new TableAlreadyExistsException(tableID);
             case TABLE_DOES_NOT_EXIST:
-                throw new TableDoesNotExistException(null, tableUUID);
+                throw new TableDoesNotExistException(null);
             case PERMISSION_DENIED:
                 throw new PermissionDeniedException();
             default:
@@ -101,12 +110,12 @@ public class CloneSynchronizedTableResult extends CommandResult<CloneSynchronize
 
     /**
      * @param tableID the tableID which was involved in the command
-     * @param tableUUID the UUID which was involved in the command
+     * @param aggregateTableIdentifier the Aggregate Identifier which was involved in the command
      * @param reason the reason the command failed. Must be one of TABLE_ALREADY_EXISTS, TABLE_DOES_NOT_EXIST, PERMISSION_DENIED.
      * @return a new CloneSynchronizedTableResult representing the failed completion of a CloneSynchronizedTable command.
      */
-    public static CloneSynchronizedTableResult failure(String tableID, String tableUUID, FailureReason reason)
+    public static CloneSynchronizedTableResult failure(String tableID, String aggregateTableIdentifier, FailureReason reason)
     {
-        return new CloneSynchronizedTableResult(tableID, tableUUID, reason);
+        return new CloneSynchronizedTableResult(tableID, aggregateTableIdentifier, reason);
     }
 }

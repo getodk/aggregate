@@ -13,38 +13,38 @@ import org.junit.Test;
 public class RowTest
 {
 
-    private Row eq;
-    private Row eqSameData;
-    private Row notEqDiffRowId;
-    private Row notEqDiffValues;
-    private Row notEqDiffColumns;
+    private InternalRow eq;
+    private InternalRow eqSameData;
+    private InternalRow notEqDiffRowId;
+    private InternalRow notEqDiffValues;
+    private InternalRow notEqDiffColumns;
 
     @Before
     public void setUp()
     {
-        eq = new Row("1");
+        eq = new InternalRow("1");
         eq.setColumn("col1", "value1");
 
-        eqSameData = new Row("1");
+        eqSameData = new InternalRow("1");
         eqSameData.setColumn("col1", "value1");
 
-        notEqDiffRowId = new Row("2");
+        notEqDiffRowId = new InternalRow("2");
         notEqDiffRowId.setColumn("col1", "value1");
 
-        notEqDiffValues = new Row("1");
+        notEqDiffValues = new InternalRow("1");
         notEqDiffValues.setColumn("col1", "value2");
 
-        notEqDiffColumns = new Row("1");
+        notEqDiffColumns = new InternalRow("1");
         notEqDiffColumns.setColumn("col2", "value1");
     }
 
     @Test
     public void testCtr()
     {
-        Row row = null;
+        InternalRow row = null;
         try
         {
-            row = new Row("1");
+            row = new InternalRow("1");
         } catch (Exception e)
         {
             fail("Constructor threw an exception!.");

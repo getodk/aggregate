@@ -1,6 +1,12 @@
 package org.opendatakit.aggregate.odktables.commandresult.synchronize;
 
-import org.opendatakit.aggregate.odktables.command.common.Synchronize;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.opendatakit.aggregate.odktables.client.entity.Modification;
+import org.opendatakit.aggregate.odktables.client.exception.PermissionDeniedException;
+import org.opendatakit.aggregate.odktables.client.exception.TableDoesNotExistException;
+import org.opendatakit.aggregate.odktables.command.synchronize.Synchronize;
 import org.opendatakit.aggregate.odktables.commandresult.CommandResult;
 import org.opendatakit.common.utils.Check;
 
@@ -15,71 +21,66 @@ public class SynchronizeResult extends CommandResult<Synchronize>
     static
     {
         possibleFailureReasons = new ArrayList<FailureReason>();
+        possibleFailureReasons.add(FailureReason.TABLE_DOES_NOT_EXIST);
+        possibleFailureReasons.add(FailureReason.PERMISSION_DENIED);
     }
 
-    
-    private final String requestingUserID;
+    private final Modification modification;
     private final String tableID;
-    private final int modificationNumber;
 
     private SynchronizeResult()
     {
-       super(true, null);
-       this.requestingUserID = null;
-       this.tableID = null;
-       this.modificationNumber = null;
-       
+        super(true, null);
+        this.modification = null;
+        this.tableID = null;
     }
 
     /**
      * The success constructor. See {@link #success} for param info.
      */
-    private SynchronizeResult(String requestingUserID, String tableID, int modificationNumber)
+    private SynchronizeResult(Modification modification)
     {
         super(true, null);
-
-        
-        Check.notNullOrEmpty(requestingUserID, "requestingUserID");
-        Check.notNullOrEmpty(tableID, "tableID");
-        Check.notNull(modificationNumber, "modificationNumber"); 
-        
-        this.requestingUserID = requestingUserID;
-        this.tableID = tableID;
-        this.modificationNumber = modificationNumber;
+        Check.notNull(modification, "modification");
+        this.modification = modification;
+        this.tableID = null;
     }
 
     /**
      * The failure constructor. See {@link #failure} for param info.
      */
-    private SynchronizeResult(String requestingUserID, String tableID, int modificationNumber, FailureReason reason)
+    private SynchronizeResult(String tableID, FailureReason reason)
     {
         super(false, reason);
 
-        
-        Check.notNullOrEmpty(requestingUserID, "requestingUserID");
         Check.notNullOrEmpty(tableID, "tableID");
-        Check.notNull(modificationNumber, "modificationNumber"); 
-        if (!this.possibleFailureReasons.contains(reason))
-            throw new IllegalArgumentException(String.format("Failure reason %s not a valid failure reason for Synchronize.", reason));
-        
-        this.requestingUserID = requestingUserID;
+        if (!possibleFailureReasons.contains(reason))
+            throw new IllegalArgumentException(
+                    String.format(
+                            "Failure reason %s not a valid failure reason for Synchronize.",
+                            reason));
+
+        this.modification = null;
         this.tableID = tableID;
-        this.modificationNumber = modificationNumber;
     }
 
     /**
      * Retrieve the results from the Synchronize command.
+     * 
+     * @throws TableDoesNotExistException
      */
-    public void get() throws 
-            PermissionDeniedException
+    public Modification getModification() throws PermissionDeniedException,
+            TableDoesNotExistException
     {
         if (successful())
         {
-            throw new RuntimeException("not implemented");
+            return modification;
         } else
         {
             switch (getReason())
             {
+            case TABLE_DOES_NOT_EXIST:
+                throw new TableDoesNotExistException(tableID);
             case PERMISSION_DENIED:
                 throw new PermissionDeniedException();
             default:
@@ -94,30 +95,26 @@ public class SynchronizeResult extends CommandResult<Synchronize>
     @Override
     public String toString()
     {
-        return String.format("SynchronizeResult: " +
-                "requestingUserID=%s " +
-                "tableID=%s " +
-                "modificationNumber=%s " +
-                "", requestingUserID, tableID, modificationNumber);
+        return String.format("SynchronizeResult [modification=%s, tableID=%s]",
+                modification, tableID);
     }
 
-
     /**
-     * TODO
-     * @return a new SynchronizeResult representing the successful 
+     * @return a new SynchronizeResult representing the successful completion of
+     *         a Synchronize command.
      * 
      */
-    public static SynchronizeResult success()
+    public static SynchronizeResult success(Modification modification)
     {
-        return new SynchronizeResult();
+        return new SynchronizeResult(modification);
     }
 
     /**
-     * TODO
-     * @return a new SynchronizeResult representing the failed      
+     * @return a new SynchronizeResult representing the failed completion of a
+     *         Synchronize command.
      */
-    public static SynchronizeResult failure(FailureReason reason)
+    public static SynchronizeResult failure(String tableID, FailureReason reason)
     {
-        return new SynchronizeResult(reason);
+        return new SynchronizeResult(tableID, reason);
     }
 }

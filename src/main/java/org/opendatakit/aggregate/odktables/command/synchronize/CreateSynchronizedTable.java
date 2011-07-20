@@ -1,5 +1,8 @@
 package org.opendatakit.aggregate.odktables.command.synchronize;
 
+import java.util.List;
+
+import org.opendatakit.aggregate.odktables.client.entity.Column;
 import org.opendatakit.aggregate.odktables.command.Command;
 import org.opendatakit.common.utils.Check;
 
@@ -12,8 +15,10 @@ public class CreateSynchronizedTable implements Command
 {
     private static final String path = "/odktables/synchronize/createSynchronizedTable";
     
+    private final String tableName;
     private final String requestingUserID;
     private final String tableID;
+    private final List<Column> columns;
     
 
     /**
@@ -22,24 +27,38 @@ public class CreateSynchronizedTable implements Command
     @SuppressWarnings("unused")
     private CreateSynchronizedTable()
     {
+       this.tableName = null;
        this.requestingUserID = null;
        this.tableID = null;
+       this.columns = null;
        
     }
 
     /**
      * Constructs a new CreateSynchronizedTable.
      */
-    public CreateSynchronizedTable(String requestingUserID, String tableID)
+    public CreateSynchronizedTable(String tableName, String requestingUserID, String tableID, List<Column> columns)
     {
         
+        Check.notNullOrEmpty(tableName, "tableName");
         Check.notNullOrEmpty(requestingUserID, "requestingUserID");
-        Check.notNullOrEmpty(tableID, "tableID"); 
+        Check.notNullOrEmpty(tableID, "tableID");
+        Check.notNull(columns, "columns"); 
         
+        this.tableName = tableName;
         this.requestingUserID = requestingUserID;
         this.tableID = tableID;
+        this.columns = columns;
     }
 
+    
+    /**
+     * @return the tableName
+     */
+    public String getTableName()
+    {
+        return this.tableName;
+    }
     
     /**
      * @return the requestingUserID
@@ -57,14 +76,24 @@ public class CreateSynchronizedTable implements Command
         return this.tableID;
     }
     
+    /**
+     * @return the columns
+     */
+    public List<Column> getColumns()
+    {
+        return this.columns;
+    }
+    
 
     @Override
     public String toString()
     {
         return String.format("CreateSynchronizedTable: " +
+                "tableName=%s " +
                 "requestingUserID=%s " +
                 "tableID=%s " +
-                "", requestingUserID, tableID);
+                "columns=%s " +
+                "", tableName, requestingUserID, tableID, columns);
     }
 
     @Override

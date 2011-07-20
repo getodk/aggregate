@@ -8,6 +8,7 @@ package org.opendatakit.aggregate.odktables.client.entity;
  * <li>user: the User who owns the table</li>
  * <li>tableID: the client's unique identifier for the table.</li>
  * <li>tableName: the human readable name of the table</li>
+ * <li>isSynchronized: true if the table is a synchronized table</li>
  * </ul>
  * </p>
  * 
@@ -23,6 +24,7 @@ public class TableEntry
     private final User user;
     private final String tableID;
     private final String tableName;
+    private final boolean isSynchronized;
 
     /**
      * For Gson deserialization.
@@ -33,6 +35,7 @@ public class TableEntry
         this.user = null;
         this.tableID = null;
         this.tableName = null;
+        this.isSynchronized = false;
     }
 
     /**
@@ -45,14 +48,15 @@ public class TableEntry
      * @param tableName
      *            the human readable name of the table
      */
-    public TableEntry(User user, String tableID,
-            String tableName)
+    public TableEntry(User user, String tableID, String tableName,
+            boolean isSynchronized)
     {
         this.user = user;
         this.tableID = tableID;
         this.tableName = tableName;
+        this.isSynchronized = isSynchronized;
     }
-    
+
     /**
      * @return the user who owns the table
      */
@@ -77,14 +81,23 @@ public class TableEntry
         return tableName;
     }
 
+    /**
+     * @return the isSynchronized
+     */
+    public boolean isSynchronized()
+    {
+        return isSynchronized;
+    }
+
     /* (non-Javadoc)
      * @see java.lang.Object#toString()
      */
     @Override
     public String toString()
     {
-        return String.format("TableEntry [user=%s, tableID=%s, tableName=%s]",
-                user, tableID, tableName);
+        return String
+                .format("TableEntry [user=%s, tableID=%s, tableName=%s, isSynchronized=%s]",
+                        user, tableID, tableName, isSynchronized);
     }
 
     /* (non-Javadoc)
@@ -95,6 +108,7 @@ public class TableEntry
     {
         final int prime = 31;
         int result = 1;
+        result = prime * result + (isSynchronized ? 1231 : 1237);
         result = prime * result + ((tableID == null) ? 0 : tableID.hashCode());
         result = prime * result
                 + ((tableName == null) ? 0 : tableName.hashCode());
@@ -115,6 +129,8 @@ public class TableEntry
         if (!(obj instanceof TableEntry))
             return false;
         TableEntry other = (TableEntry) obj;
+        if (isSynchronized != other.isSynchronized)
+            return false;
         if (tableID == null)
         {
             if (other.tableID != null)

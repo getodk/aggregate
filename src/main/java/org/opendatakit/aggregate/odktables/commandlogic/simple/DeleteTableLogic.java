@@ -6,12 +6,12 @@ import org.opendatakit.aggregate.odktables.command.simple.DeleteTable;
 import org.opendatakit.aggregate.odktables.commandlogic.CommandLogic;
 import org.opendatakit.aggregate.odktables.commandresult.CommandResult.FailureReason;
 import org.opendatakit.aggregate.odktables.commandresult.simple.DeleteTableResult;
-import org.opendatakit.aggregate.odktables.entity.Column;
-import org.opendatakit.aggregate.odktables.entity.Cursor;
-import org.opendatakit.aggregate.odktables.entity.TableEntry;
-import org.opendatakit.aggregate.odktables.entity.User;
+import org.opendatakit.aggregate.odktables.entity.InternalColumn;
+import org.opendatakit.aggregate.odktables.entity.InternalUserTableMapping;
+import org.opendatakit.aggregate.odktables.entity.InternalTableEntry;
+import org.opendatakit.aggregate.odktables.entity.InternalUser;
 import org.opendatakit.aggregate.odktables.relation.Columns;
-import org.opendatakit.aggregate.odktables.relation.Cursors;
+import org.opendatakit.aggregate.odktables.relation.UserTableMappings;
 import org.opendatakit.aggregate.odktables.relation.Permissions;
 import org.opendatakit.aggregate.odktables.relation.TableEntries;
 import org.opendatakit.aggregate.odktables.relation.Users;
@@ -40,37 +40,56 @@ public class DeleteTableLogic extends CommandLogic<DeleteTable>
     {
         TableEntries tables = TableEntries.getInstance(cc);
         Users users = Users.getInstance(cc);
-        Cursors cursors = Cursors.getInstance(cc);
+        UserTableMappings mappings = UserTableMappings.getInstance(cc);
         Columns columns = Columns.getInstance(cc);
 
-        String tableUUID = this.deleteTable.getTableUUID();
+        String tableID = this.deleteTable.getTableID();
         String requestingUserID = this.deleteTable.getRequestingUserID();
 
-        User requestingUser = users.query()
+        InternalUser requestingUser = users.query()
                 .equal(Users.USER_ID, requestingUserID).get();
+        
+        String aggregateRequestingUserIdentifier = requestingUser
+                .getAggregateIdentifier();
 
-        if (!requestingUser.hasPerm(tableUUID, Permissions.DELETE))
+        InternalUserTableMapping mapping = mappings
+                .query()
+                .equal(UserTableMappings.TABLE_ID, tableID)
+                .equal(UserTableMappings.AGGREGATE_USER_IDENTIFIER,
+                        aggregateRequestingUserIdentifier).get();
+
+        String aggregateTableIdentifier = mapping.getAggregateIdentifier();
+
+        if (!requestingUser.hasPerm(aggregateTableIdentifier,
+                Permissions.DELETE))
         {
-            return DeleteTableResult.failure(tableUUID,
+            return DeleteTableResult.failure(aggregateTableIdentifier,
                     FailureReason.PERMISSION_DENIED);
         }
 
         try
         {
-            String userUUID = requestingUser.getUUID();
+            String aggregateUserIdentifier = requestingUser
+                    .getAggregateIdentifier();
 
-            Cursor cursor = cursors.query().equal(Cursors.USER_UUID, userUUID)
-                    .equal(Cursors.TABLE_UUID, tableUUID).get();
+            InternalUserTableMapping cursor = mappings
+                    .query()
+                    .equal(UserTableMappings.AGGREGATE_USER_IDENTIFIER,
+                            aggregateUserIdentifier)
+                    .equal(UserTableMappings.AGGREGATE_TABLE_IDENTIFIER,
+                            aggregateTableIdentifier).get();
 
-            TableEntry entry = tables.get(tableUUID);
-            List<Column> tableColumns = columns.query()
-                    .equal(Columns.TABLE_UUID, tableUUID).execute();
+            InternalTableEntry entry = tables.get(aggregateTableIdentifier);
+            List<InternalColumn> tableColumns = columns
+                    .query()
+                    .equal(Columns.AGGREGATE_TABLE_IDENTIFIER,
+                            aggregateTableIdentifier).execute();
 
             try
             {
                 cursor.delete();
                 entry.delete();
-                for (Column column : tableColumns)
+                for (InternalColumn column : tableColumns)
                     column.delete();
             } catch (ODKDatastoreException e)
             {
@@ -78,7 +97,7 @@ public class DeleteTableLogic extends CommandLogic<DeleteTable>
             }
         } catch (ODKDatastoreException e)
         {
-            return DeleteTableResult.failure(tableUUID,
+            return DeleteTableResult.failure(aggregateTableIdentifier,
                     FailureReason.TABLE_DOES_NOT_EXIST);
         }
 

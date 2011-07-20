@@ -2,22 +2,22 @@ package org.opendatakit.aggregate.odktables.client.entity;
 
 public class SynchronizedRow extends Row
 {
-    private final String revisionNumber;
+    private String revisionTag;
 
     public SynchronizedRow()
     {
         super();
-        this.revisionNumber = null;
+        this.revisionTag = null;
     }
 
-    public String getRevisionNumber()
+    public String getRevisionTag()
     {
-        return this.revisionNumber;
+        return this.revisionTag;
     }
 
-    public void setRevisionNumber(String revisionNumber)
+    public void setRevisionTag(String revisionTag)
     {
-        this.revisionNumber = revisionNumber;
+        this.revisionTag = revisionTag;
     }
 
 }

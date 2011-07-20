@@ -3,16 +3,19 @@ package org.opendatakit.aggregate.odktables.commandlogic.simple;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.opendatakit.aggregate.odktables.client.entity.Row;
 import org.opendatakit.aggregate.odktables.command.simple.QueryForRows;
 import org.opendatakit.aggregate.odktables.commandlogic.CommandLogic;
 import org.opendatakit.aggregate.odktables.commandresult.CommandResult.FailureReason;
 import org.opendatakit.aggregate.odktables.commandresult.simple.QueryForRowsResult;
-import org.opendatakit.aggregate.odktables.entity.Row;
-import org.opendatakit.aggregate.odktables.entity.User;
+import org.opendatakit.aggregate.odktables.entity.InternalRow;
+import org.opendatakit.aggregate.odktables.entity.InternalUser;
+import org.opendatakit.aggregate.odktables.entity.InternalUserTableMapping;
 import org.opendatakit.aggregate.odktables.relation.Columns;
 import org.opendatakit.aggregate.odktables.relation.Permissions;
-import org.opendatakit.aggregate.odktables.relation.Rows;
+import org.opendatakit.aggregate.odktables.relation.Table;
 import org.opendatakit.aggregate.odktables.relation.TableEntries;
+import org.opendatakit.aggregate.odktables.relation.UserTableMappings;
 import org.opendatakit.aggregate.odktables.relation.Users;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
@@ -40,40 +43,54 @@ public class QueryForRowsLogic extends CommandLogic<QueryForRows>
         TableEntries entries = TableEntries.getInstance(cc);
         Users users = Users.getInstance(cc);
         Columns columns = Columns.getInstance(cc);
+        UserTableMappings mappings = UserTableMappings.getInstance(cc);
 
         String requestingUserID = queryForRows.getRequestingUserID();
-        String tableUUID = queryForRows.getTableUUID();
+        String tableID = queryForRows.getTableID();
 
-        User requestingUser = users.query()
+        InternalUser requestingUser = users.query()
                 .equal(Users.USER_ID, requestingUserID).get();
 
-        if (!requestingUser.hasPerm(tableUUID, Permissions.READ))
+        String aggregateRequestingUserIdentifier = requestingUser
+                .getAggregateIdentifier();
+
+        InternalUserTableMapping mapping = mappings
+                .query()
+                .equal(UserTableMappings.TABLE_ID, tableID)
+                .equal(UserTableMappings.AGGREGATE_USER_IDENTIFIER,
+                        aggregateRequestingUserIdentifier).get();
+
+        String aggregateTableIdentifier = mapping.getAggregateIdentifier();
+
+        if (!requestingUser.hasPerm(aggregateTableIdentifier, Permissions.READ))
         {
-            return QueryForRowsResult.failure(tableUUID,
+            return QueryForRowsResult.failure(tableID,
                     FailureReason.PERMISSION_DENIED);
         }
 
         try
         {
-            entries.get(tableUUID);
+            entries.get(aggregateTableIdentifier);
         } catch (ODKDatastoreException e)
         {
-            return QueryForRowsResult.failure(tableUUID,
+            return QueryForRowsResult.failure(tableID,
                     FailureReason.TABLE_DOES_NOT_EXIST);
         }
 
-        Rows table = Rows.getInstance(tableUUID, cc);
-        List<Row> rows = table.query().execute();
+        Table table = Table.getInstance(aggregateTableIdentifier, cc);
+        List<InternalRow> rows = table.query().execute();
 
-        List<String> columnNames = (List<String>) columns.query()
-                .equal(Columns.TABLE_UUID, tableUUID)
+        List<String> columnNames = (List<String>) columns
+                .query()
+                .equal(Columns.AGGREGATE_TABLE_IDENTIFIER,
+                        aggregateTableIdentifier)
                 .getDistinct(Columns.COLUMN_NAME);
-        List<org.opendatakit.aggregate.odktables.client.entity.Row> clientRows = new ArrayList<org.opendatakit.aggregate.odktables.client.entity.Row>();
+        List<Row> clientRows = new ArrayList<Row>();
 
-        for (Row row : rows)
+        for (InternalRow row : rows)
         {
-            org.opendatakit.aggregate.odktables.client.entity.Row clientRow = new org.opendatakit.aggregate.odktables.client.entity.Row();
-            clientRow.setRowUUID(row.getUUID());
+            Row clientRow = new Row();
+            clientRow.setAggregateRowIdentifier(row.getAggregateIdentifier());
             for (String columnName : columnNames)
             {
                 clientRow.setValue(columnName, row.getValue(columnName));
@@ -81,6 +98,6 @@ public class QueryForRowsLogic extends CommandLogic<QueryForRows>
             clientRows.add(clientRow);
         }
 
-        return QueryForRowsResult.success(tableUUID, clientRows);
+        return QueryForRowsResult.success(clientRows);
     }
 }

@@ -26,66 +26,69 @@ public class DeleteUserResult extends CommandResult<DeleteUser>
         possibleFailureReasons.add(FailureReason.CANNOT_DELETE);
     }
 
-    private final String userUUID;
+    private final String aggregateUserIdentifier;
 
     private DeleteUserResult()
     {
         super(true, null);
-        this.userUUID = null;
+        this.aggregateUserIdentifier = null;
     }
 
     /**
      * The success constructor. See {@link #success} for param info.
      */
-    private DeleteUserResult(String userUUID)
+    private DeleteUserResult(String aggregateUserIdentifier)
     {
         super(true, null);
 
-        Check.notNullOrEmpty(userUUID, "userUUID");
+        Check.notNullOrEmpty(aggregateUserIdentifier, "aggregateUserIdentifier");
 
-        this.userUUID = userUUID;
+        this.aggregateUserIdentifier = aggregateUserIdentifier;
     }
 
     /**
      * The failure constructor. See {@link #failure} for param info.
      */
-    private DeleteUserResult(String userUUID, FailureReason reason)
+    private DeleteUserResult(String aggregateUserIdentifier,
+            FailureReason reason)
     {
         super(false, reason);
 
-        Check.notNullOrEmpty(userUUID, "userUUID");
+        Check.notNullOrEmpty(aggregateUserIdentifier, "aggregateUserIdentifier");
         if (!possibleFailureReasons.contains(reason))
             throw new IllegalArgumentException(
                     String.format(
                             "Failure reason %s not a valid failure reason for DeleteUser.",
                             reason));
 
-        this.userUUID = userUUID;
+        this.aggregateUserIdentifier = aggregateUserIdentifier;
     }
 
     /**
      * Retrieve the results from the DeleteUser command.
      * 
-     * @return the UUID of the successfully deleted user
+     * @return the Aggregate Identifier of the successfully deleted user
      * @throws PermissionDeniedException
-     * @throws UserDoesNotExistException 
-     * @throws CannotDeleteException 
+     * @throws UserDoesNotExistException
+     * @throws CannotDeleteException
      */
-    public String getDeletedUserUUID() throws PermissionDeniedException, UserDoesNotExistException, CannotDeleteException
+    public String getDeletedAggregateUserIdentifier()
+            throws PermissionDeniedException, UserDoesNotExistException,
+            CannotDeleteException
     {
         if (successful())
         {
-            return this.userUUID;
+            return this.aggregateUserIdentifier;
         } else
         {
             switch (getReason())
             {
             case USER_DOES_NOT_EXIST:
-                throw new UserDoesNotExistException(null, this.userUUID);
+                throw new UserDoesNotExistException(this.aggregateUserIdentifier);
             case PERMISSION_DENIED:
                 throw new PermissionDeniedException();
             case CANNOT_DELETE:
-                throw new CannotDeleteException(this.userUUID);
+                throw new CannotDeleteException(this.aggregateUserIdentifier);
             default:
                 throw new RuntimeException("An unknown error occured.");
             }
@@ -98,7 +101,8 @@ public class DeleteUserResult extends CommandResult<DeleteUser>
     @Override
     public String toString()
     {
-        return String.format("DeleteUserResult [userUUID=%s]", userUUID);
+        return String.format("DeleteUserResult [aggregateUserIdentifier=%s]",
+                aggregateUserIdentifier);
     }
 
     /* (non-Javadoc)
@@ -109,8 +113,10 @@ public class DeleteUserResult extends CommandResult<DeleteUser>
     {
         final int prime = 31;
         int result = super.hashCode();
-        result = prime * result
-                + ((userUUID == null) ? 0 : userUUID.hashCode());
+        result = prime
+                * result
+                + ((aggregateUserIdentifier == null) ? 0
+                        : aggregateUserIdentifier.hashCode());
         return result;
     }
 
@@ -127,36 +133,38 @@ public class DeleteUserResult extends CommandResult<DeleteUser>
         if (!(obj instanceof DeleteUserResult))
             return false;
         DeleteUserResult other = (DeleteUserResult) obj;
-        if (userUUID == null)
+        if (aggregateUserIdentifier == null)
         {
-            if (other.userUUID != null)
+            if (other.aggregateUserIdentifier != null)
                 return false;
-        } else if (!userUUID.equals(other.userUUID))
+        } else if (!aggregateUserIdentifier
+                .equals(other.aggregateUserIdentifier))
             return false;
         return true;
     }
 
     /**
-     * @param userUUID
-     *            the UUID of the successfully deleted user
+     * @param aggregateUserIdentifier
+     *            the Aggregate Identifier of the successfully deleted user
      * @return a new DeleteUserResult representing the successful deletion of
      *         the user
      */
-    public static DeleteUserResult success(String userUUID)
+    public static DeleteUserResult success(String aggregateUserIdentifier)
     {
-        return new DeleteUserResult(userUUID);
+        return new DeleteUserResult(aggregateUserIdentifier);
     }
 
     /**
-     * @param userUUID
-     *            the UUID of the unsuccessfully deleted user
+     * @param aggregateUserIdentifier
+     *            the Aggregate Identifier of the unsuccessfully deleted user
      * @param reason
      *            the reason the user was unable to be deleted
      * @return a new DeleteUserResult representing the failed deletion of the
      *         user
      */
-    public static DeleteUserResult failure(String userUUID, FailureReason reason)
+    public static DeleteUserResult failure(String aggregateUserIdentifier,
+            FailureReason reason)
     {
-        return new DeleteUserResult(userUUID, reason);
+        return new DeleteUserResult(aggregateUserIdentifier, reason);
     }
 }

@@ -2,7 +2,7 @@ package org.opendatakit.aggregate.odktables.command.synchronize;
 
 import java.util.List;
 
-import org.opendatakit.aggregate.odktables.client.entity.Row;
+import org.opendatakit.aggregate.odktables.client.entity.SynchronizedRow;
 import org.opendatakit.aggregate.odktables.command.Command;
 import org.opendatakit.common.utils.Check;
 
@@ -18,7 +18,7 @@ public class InsertSynchronizedRows implements Command
     private final String requestingUserID;
     private final String tableID;
     private final int modificationNumber;
-    private final List<Row> newRows;
+    private final List<SynchronizedRow> newRows;
     
 
     /**
@@ -37,7 +37,7 @@ public class InsertSynchronizedRows implements Command
     /**
      * Constructs a new InsertSynchronizedRows.
      */
-    public InsertSynchronizedRows(String requestingUserID, String tableID, int modificationNumber, List<Row> newRows)
+    public InsertSynchronizedRows(String requestingUserID, String tableID, int modificationNumber, List<SynchronizedRow> newRows)
     {
         
         Check.notNullOrEmpty(requestingUserID, "requestingUserID");
@@ -79,7 +79,7 @@ public class InsertSynchronizedRows implements Command
     /**
      * @return the newRows
      */
-    public List<Row> getNewRows()
+    public List<SynchronizedRow> getNewRows()
     {
         return this.newRows;
     }

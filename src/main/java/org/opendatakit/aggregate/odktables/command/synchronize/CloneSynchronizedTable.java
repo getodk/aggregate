@@ -14,7 +14,7 @@ public class CloneSynchronizedTable implements Command
     
     private final String tableID;
     private final String requestingUserID;
-    private final String tableUUID;
+    private final String aggregateTableIdentifier;
     
 
     /**
@@ -25,23 +25,23 @@ public class CloneSynchronizedTable implements Command
     {
        this.tableID = null;
        this.requestingUserID = null;
-       this.tableUUID = null;
+       this.aggregateTableIdentifier = null;
        
     }
 
     /**
      * Constructs a new CloneSynchronizedTable.
      */
-    public CloneSynchronizedTable(String tableID, String requestingUserID, String tableUUID)
+    public CloneSynchronizedTable(String tableID, String requestingUserID, String aggregateTableIdentifier)
     {
         
         Check.notNullOrEmpty(tableID, "tableID");
         Check.notNullOrEmpty(requestingUserID, "requestingUserID");
-        Check.notNullOrEmpty(tableUUID, "tableUUID"); 
+        Check.notNullOrEmpty(aggregateTableIdentifier, "aggregateTableIdentifier"); 
         
         this.tableID = tableID;
         this.requestingUserID = requestingUserID;
-        this.tableUUID = tableUUID;
+        this.aggregateTableIdentifier = aggregateTableIdentifier;
     }
 
     
@@ -62,11 +62,11 @@ public class CloneSynchronizedTable implements Command
     }
     
     /**
-     * @return the tableUUID
+     * @return the aggregateTableIdentifier
      */
-    public String getTableUUID()
+    public String getAggregateTableIdentifier()
     {
-        return this.tableUUID;
+        return this.aggregateTableIdentifier;
     }
     
 
@@ -76,8 +76,8 @@ public class CloneSynchronizedTable implements Command
         return String.format("CloneSynchronizedTable: " +
                 "tableID=%s " +
                 "requestingUserID=%s " +
-                "tableUUID=%s " +
-                "", tableID, requestingUserID, tableUUID);
+                "aggregateTableIdentifier=%s " +
+                "", tableID, requestingUserID, aggregateTableIdentifier);
     }
 
     @Override

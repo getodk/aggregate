@@ -7,21 +7,21 @@ public class CannotDeleteException extends ODKTablesClientException
      */
     private static final long serialVersionUID = -5845676307084428955L;
     
-    private String userUUID;
+    private String aggregateUserIdentifier;
 
-    public CannotDeleteException(String userUUID)
+    public CannotDeleteException(String aggregateUserIdentifier)
     {
         super(
                 String.format(
-                        "Can not delete user with userUUID: %s because they still own or are tracking one or more tables",
-                        userUUID));
+                        "Can not delete user with aggregateUserIdentifier: %s because they still own or are tracking one or more tables",
+                        aggregateUserIdentifier));
     }
     
     /**
-     * @return the userUUID
+     * @return the aggregateUserIdentifier
      */
-    public String getUserUUID()
+    public String getAggregateUserIdentifier()
     {
-        return this.userUUID;
+        return this.aggregateUserIdentifier;
     }
 }

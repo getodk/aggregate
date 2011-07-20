@@ -1,5 +1,8 @@
 package org.opendatakit.aggregate.odktables.client.entity;
 
+import java.util.Collections;
+import java.util.List;
+
 public class Modification
 {
     private final int modificationNumber;
@@ -18,6 +21,6 @@ public class Modification
 
     public List<SynchronizedRow> getRows()
     {
-        return Collectiions.unmodifiableList(rows);
+        return Collections.unmodifiableList(this.rows);
     }
 }

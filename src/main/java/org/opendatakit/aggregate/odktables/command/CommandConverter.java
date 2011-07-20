@@ -4,15 +4,24 @@ import java.io.Reader;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.opendatakit.aggregate.odktables.command.CommandConverter;
 import org.opendatakit.aggregate.odktables.command.common.CreateUser;
 import org.opendatakit.aggregate.odktables.command.common.DeleteUser;
+import org.opendatakit.aggregate.odktables.command.common.GetUserByAggregateIdentifier;
 import org.opendatakit.aggregate.odktables.command.common.GetUserByID;
+import org.opendatakit.aggregate.odktables.command.common.QueryForTables;
+import org.opendatakit.aggregate.odktables.command.common.SetTablePermissions;
+import org.opendatakit.aggregate.odktables.command.common.SetUserManagementPermissions;
 import org.opendatakit.aggregate.odktables.command.simple.CreateTable;
 import org.opendatakit.aggregate.odktables.command.simple.DeleteTable;
 import org.opendatakit.aggregate.odktables.command.simple.InsertRows;
 import org.opendatakit.aggregate.odktables.command.simple.QueryForRows;
-import org.opendatakit.aggregate.odktables.command.simple.QueryForTables;
+import org.opendatakit.aggregate.odktables.command.synchronize.CloneSynchronizedTable;
+import org.opendatakit.aggregate.odktables.command.synchronize.CreateSynchronizedTable;
+import org.opendatakit.aggregate.odktables.command.synchronize.DeleteSynchronizedTable;
+import org.opendatakit.aggregate.odktables.command.synchronize.InsertSynchronizedRows;
+import org.opendatakit.aggregate.odktables.command.synchronize.RemoveTableSynchronization;
+import org.opendatakit.aggregate.odktables.command.synchronize.Synchronize;
+import org.opendatakit.aggregate.odktables.command.synchronize.UpdateSynchronizedRows;
 import org.opendatakit.aggregate.odktables.commandresult.CommandResult;
 
 import com.google.gson.Gson;
@@ -49,15 +58,32 @@ public class CommandConverter
     private CommandConverter()
     {
         commandMap = new HashMap<String, Class<? extends Command>>();
-        commandMap.put(CreateTable.methodPath(), CreateTable.class);
-        commandMap.put(InsertRows.methodPath(), InsertRows.class);
-        commandMap.put(DeleteTable.methodPath(), DeleteTable.class);
+        
+        // Common
         commandMap.put(CreateUser.methodPath(), CreateUser.class);
         commandMap.put(DeleteUser.methodPath(), DeleteUser.class);
+        commandMap.put(GetUserByAggregateIdentifier.methodPath(), GetUserByAggregateIdentifier.class);
         commandMap.put(GetUserByID.methodPath(), GetUserByID.class);
         commandMap.put(QueryForTables.methodPath(), QueryForTables.class);
+        commandMap.put(SetTablePermissions.methodPath(), SetTablePermissions.class);
+        commandMap.put(SetUserManagementPermissions.methodPath(), SetUserManagementPermissions.class);
+        
+        // Simple
+        commandMap.put(CreateTable.methodPath(), CreateTable.class);
+        commandMap.put(DeleteTable.methodPath(), DeleteTable.class);
+        commandMap.put(InsertRows.methodPath(), InsertRows.class);
         commandMap.put(QueryForRows.methodPath(), QueryForRows.class);
+        
+        // Synchronized
+        commandMap.put(CloneSynchronizedTable.methodPath(), CloneSynchronizedTable.class);
+        commandMap.put(CreateSynchronizedTable.methodPath(), CreateSynchronizedTable.class);
+        commandMap.put(DeleteSynchronizedTable.methodPath(), DeleteSynchronizedTable.class);
+        commandMap.put(InsertSynchronizedRows.methodPath(), InsertSynchronizedRows.class);
+        commandMap.put(RemoveTableSynchronization.methodPath(), RemoveTableSynchronization.class);
+        commandMap.put(Synchronize.methodPath(), Synchronize.class);
+        commandMap.put(UpdateSynchronizedRows.methodPath(), UpdateSynchronizedRows.class);
 
+        
         GsonBuilder builder = new GsonBuilder();
         gson = builder.create();
     }

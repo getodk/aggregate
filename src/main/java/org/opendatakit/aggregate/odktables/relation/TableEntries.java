@@ -3,7 +3,7 @@ package org.opendatakit.aggregate.odktables.relation;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.opendatakit.aggregate.odktables.entity.TableEntry;
+import org.opendatakit.aggregate.odktables.entity.InternalTableEntry;
 import org.opendatakit.common.ermodel.Entity;
 import org.opendatakit.common.ermodel.typedentity.TypedEntityRelation;
 import org.opendatakit.common.persistence.DataField;
@@ -13,7 +13,7 @@ import org.opendatakit.common.web.CallingContext;
 
 /**
  * <p>
- * TableEntries is a relation containing all the {@link TableEntry} entities
+ * TableEntries is a relation containing all the {@link InternalTableEntry} entities
  * stored in the datastore. TableEntries keeps track of all the tables created
  * through the odktables API.
  * </p>
@@ -22,13 +22,13 @@ import org.opendatakit.common.web.CallingContext;
  */
 public class TableEntries
         extends
-        TypedEntityRelation<org.opendatakit.aggregate.odktables.entity.TableEntry>
+        TypedEntityRelation<org.opendatakit.aggregate.odktables.entity.InternalTableEntry>
 {
     // Field names
     /**
-     * The name of the ownerUUID field.
+     * The name of the ownerAggregate Identifier field.
      */
-    public static final String OWNER_UUID = "OWNER_UUID";
+    public static final String AGGREGATE_OWNER_IDENTIFIER = "AGGREGATE_OWNER_IDENTIFIER";
 
     /**
      * The name of the tableName field.
@@ -40,6 +40,11 @@ public class TableEntries
      */
     public static final String MODIFICATION_NUMBER = "MODIFICATION_NUMBER";
 
+    /**
+     * The name of the isSynchronized field.
+     */
+    public static final String IS_SYNCHRONIZED = "IS_SYNCHRONIZED";
+
     // Relation name:
     /**
      * The name of the TableEntries relation.
@@ -47,12 +52,12 @@ public class TableEntries
     private static final String RELATION_NAME = "TABLES";
 
     // The following defines the actual fields that will be in the datastore:
-    // The tableUUID field is the entity UUID, so is created automatically
+    // The aggregateTableIdentifier field is the entity Aggregate Identifier, so is created automatically
     /**
-     * The ownerUUID field.
+     * The ownerAggregate Identifier field.
      */
-    private static final DataField ownerUUID = new DataField(OWNER_UUID,
-            DataType.URI, false);
+    private static final DataField aggregateOwnerIdentifier = new DataField(
+            AGGREGATE_OWNER_IDENTIFIER, DataType.URI, false);
     /**
      * The tableName field.
      */
@@ -64,13 +69,20 @@ public class TableEntries
     private static final DataField modificationNumber = new DataField(
             MODIFICATION_NUMBER, DataType.INTEGER, false);
 
+    /**
+     * The isSynchronized field.
+     */
+    private static final DataField isSynchronized = new DataField(
+            IS_SYNCHRONIZED, DataType.BOOLEAN, false);
+
     private static final List<DataField> fields;
     static
     {
         fields = new ArrayList<DataField>();
-        fields.add(ownerUUID);
+        fields.add(aggregateOwnerIdentifier);
         fields.add(tableName);
         fields.add(modificationNumber);
+        fields.add(isSynchronized);
     }
     /**
      * The singleton instance of the TableEntries.
@@ -94,9 +106,9 @@ public class TableEntries
     }
 
     @Override
-    public TableEntry initialize(Entity entity) throws ODKDatastoreException
+    public InternalTableEntry initialize(Entity entity) throws ODKDatastoreException
     {
-        return new TableEntry(entity, getCC());
+        return new InternalTableEntry(entity, getCC());
     }
 
     /**

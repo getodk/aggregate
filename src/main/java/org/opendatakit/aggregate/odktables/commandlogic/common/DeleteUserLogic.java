@@ -6,8 +6,8 @@ import org.opendatakit.aggregate.odktables.command.common.DeleteUser;
 import org.opendatakit.aggregate.odktables.commandlogic.CommandLogic;
 import org.opendatakit.aggregate.odktables.commandresult.CommandResult.FailureReason;
 import org.opendatakit.aggregate.odktables.commandresult.common.DeleteUserResult;
-import org.opendatakit.aggregate.odktables.entity.Permission;
-import org.opendatakit.aggregate.odktables.entity.User;
+import org.opendatakit.aggregate.odktables.entity.InternalPermission;
+import org.opendatakit.aggregate.odktables.entity.InternalUser;
 import org.opendatakit.aggregate.odktables.relation.Permissions;
 import org.opendatakit.aggregate.odktables.relation.TableEntries;
 import org.opendatakit.aggregate.odktables.relation.Users;
@@ -38,41 +38,41 @@ public class DeleteUserLogic extends CommandLogic<DeleteUser>
         TableEntries tables = TableEntries.getInstance(cc);
         Permissions permissions = Permissions.getInstance(cc);
 
-        String userUUID = this.deleteUser.getUserUUID();
+        String aggregateUserIdentifier = this.deleteUser.getAggregateUserIdentifier();
         String requestingUserID = this.deleteUser.getRequestingUserID();
-        String userTableUUID = users.getUUID();
+        String usersTable = users.getAggregateIdentifier();
 
-        User requestingUser = users.query()
+        InternalUser requestingUser = users.query()
                 .equal(Users.USER_ID, requestingUserID).get();
-        if (!requestingUser.hasPerm(userTableUUID, Permissions.DELETE))
+        if (!requestingUser.hasPerm(usersTable, Permissions.DELETE))
         {
-            return DeleteUserResult.failure(userUUID,
+            return DeleteUserResult.failure(aggregateUserIdentifier,
                     FailureReason.PERMISSION_DENIED);
         }
 
-        User user = null;
+        InternalUser user = null;
         try
         {
-            user = users.get(userUUID);
+            user = users.get(aggregateUserIdentifier);
         } catch (ODKDatastoreException e)
         {
             // user does not exist
-            return DeleteUserResult.failure(userUUID,
+            return DeleteUserResult.failure(aggregateUserIdentifier,
                     FailureReason.USER_DOES_NOT_EXIST);
         }
 
-        if (tables.query().equal(TableEntries.OWNER_UUID, userUUID).exists())
+        if (tables.query().equal(TableEntries.AGGREGATE_OWNER_IDENTIFIER, aggregateUserIdentifier).exists())
         {
             // user still has some tables
-            return DeleteUserResult.failure(userUUID,
+            return DeleteUserResult.failure(aggregateUserIdentifier,
                     FailureReason.CANNOT_DELETE);
         }
 
         try
         {
-            List<Permission> perms = permissions.query()
-                    .equal(Permissions.USER_UUID, userUUID).execute();
-            for (Permission perm : perms)
+            List<InternalPermission> perms = permissions.query()
+                    .equal(Permissions.AGGREGATE_USER_IDENTIFIER, aggregateUserIdentifier).execute();
+            for (InternalPermission perm : perms)
             {
                 perm.delete();
             }
@@ -82,6 +82,6 @@ public class DeleteUserLogic extends CommandLogic<DeleteUser>
             // TODO: retry delete?
         }
 
-        return DeleteUserResult.success(userUUID);
+        return DeleteUserResult.success(aggregateUserIdentifier);
     }
 }

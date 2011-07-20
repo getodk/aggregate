@@ -14,6 +14,7 @@ import org.opendatakit.aggregate.odktables.commandlogic.CommandLogic;
 import org.opendatakit.aggregate.odktables.commandresult.CommandResult;
 import org.opendatakit.aggregate.servlet.ServletUtilBase;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.web.CallingContext;
 
 import com.google.gson.JsonParseException;
@@ -91,6 +92,10 @@ public class CommandServlet extends ServletUtilBase
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
                     "Could not complete request. Please try again later.");
             return;
+        } catch (ODKTaskLockException e)
+        {
+            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                    "Could not complete the request. Please try again later");
         }
     }
 }

@@ -9,8 +9,8 @@ package org.opendatakit.aggregate.odktables.client.entity;
  * <p>
  * A Permission has the following attributes:
  * <ul>
- * <li>userUUID: the UUID of the user who the permission is for</li>
- * <li>tableUUID: the UUID of the table who the permission is on</li>
+ * <li>aggregateUserIdentifier: the Aggregate Identifier of the user who the permission is for</li>
+ * <li>aggregateTableIdentifier: the Aggregate Identifier of the table who the permission is on</li>
  * <li>read: true if the user is allowed to read from the table</li>
  * <li>write: true if the user is allowed to write to the table</li>
  * <li>delete: true if the user is allowed to delete from or delete the table</li>
@@ -24,8 +24,8 @@ package org.opendatakit.aggregate.odktables.client.entity;
  */
 public class Permission
 {
-    private String userUUID;
-    private String tableUUID;
+    private String aggregateUserIdentifier;
+    private String aggregateTableIdentifier;
     private boolean read;
     private boolean write;
     private boolean delete;
@@ -36,20 +36,20 @@ public class Permission
     @SuppressWarnings("unused")
     private Permission()
     {
-        this.userUUID = null;
-        this.tableUUID = null;
+        this.aggregateUserIdentifier = null;
+        this.aggregateTableIdentifier = null;
         this.read = false;
         this.write = false;
         this.delete = false;
     }
 
     /**
-     * @param userUUID
-     *            the UUID of the user who the permission is for
-     * @param tableUUID
-     *            the UUID of the table
-     * @param tableUUID
-     *            the UUID of the table who the permission is on
+     * @param aggregateUserIdentifier
+     *            the Aggregate Identifier of the user who the permission is for
+     * @param aggregateTableIdentifier
+     *            the Aggregate Identifier of the table
+     * @param aggregateTableIdentifier
+     *            the Aggregate Identifier of the table who the permission is on
      * @param read
      *            true if the user is allowed to read from the table
      * @param write
@@ -57,30 +57,30 @@ public class Permission
      * @param delete
      *            true if the user is allowed to delete from or delete the table
      */
-    public Permission(String userUUID, String tableUUID, boolean read,
+    public Permission(String aggregateUserIdentifier, String aggregateTableIdentifier, boolean read,
             boolean write, boolean delete)
     {
-        this.userUUID = userUUID;
-        this.tableUUID = tableUUID;
+        this.aggregateUserIdentifier = aggregateUserIdentifier;
+        this.aggregateTableIdentifier = aggregateTableIdentifier;
         this.read = read;
         this.write = write;
         this.delete = delete;
     }
 
     /**
-     * @return the userUUID
+     * @return the aggregateUserIdentifier
      */
-    public String getUserUUID()
+    public String getAggregateUserIdentifier()
     {
-        return userUUID;
+        return aggregateUserIdentifier;
     }
 
     /**
-     * @return the tableUUID
+     * @return the aggregateTableIdentifier
      */
-    public String getTableUUID()
+    public String getAggregateTableIdentifier()
     {
-        return tableUUID;
+        return aggregateTableIdentifier;
     }
 
     /**
@@ -114,8 +114,8 @@ public class Permission
     public String toString()
     {
         return String
-                .format("Permission [userUUID=%s, tableUUID=%s, read=%s, write=%s, delete=%s]",
-                        userUUID, tableUUID, read, write, delete);
+                .format("Permission [aggregateUserIdentifier=%s, aggregateTableIdentifier=%s, read=%s, write=%s, delete=%s]",
+                        aggregateUserIdentifier, aggregateTableIdentifier, read, write, delete);
     }
 
     /* (non-Javadoc)
@@ -129,9 +129,9 @@ public class Permission
         result = prime * result + (delete ? 1231 : 1237);
         result = prime * result + (read ? 1231 : 1237);
         result = prime * result
-                + ((tableUUID == null) ? 0 : tableUUID.hashCode());
+                + ((aggregateTableIdentifier == null) ? 0 : aggregateTableIdentifier.hashCode());
         result = prime * result
-                + ((userUUID == null) ? 0 : userUUID.hashCode());
+                + ((aggregateUserIdentifier == null) ? 0 : aggregateUserIdentifier.hashCode());
         result = prime * result + (write ? 1231 : 1237);
         return result;
     }
@@ -153,17 +153,17 @@ public class Permission
             return false;
         if (read != other.read)
             return false;
-        if (tableUUID == null)
+        if (aggregateTableIdentifier == null)
         {
-            if (other.tableUUID != null)
+            if (other.aggregateTableIdentifier != null)
                 return false;
-        } else if (!tableUUID.equals(other.tableUUID))
+        } else if (!aggregateTableIdentifier.equals(other.aggregateTableIdentifier))
             return false;
-        if (userUUID == null)
+        if (aggregateUserIdentifier == null)
         {
-            if (other.userUUID != null)
+            if (other.aggregateUserIdentifier != null)
                 return false;
-        } else if (!userUUID.equals(other.userUUID))
+        } else if (!aggregateUserIdentifier.equals(other.aggregateUserIdentifier))
             return false;
         if (write != other.write)
             return false;

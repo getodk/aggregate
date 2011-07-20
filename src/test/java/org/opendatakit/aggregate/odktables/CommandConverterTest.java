@@ -23,11 +23,11 @@ import org.opendatakit.aggregate.odktables.commandresult.CommandResult.FailureRe
 import org.opendatakit.aggregate.odktables.commandresult.common.CreateUserResult;
 import org.opendatakit.aggregate.odktables.commandresult.common.DeleteUserResult;
 import org.opendatakit.aggregate.odktables.commandresult.common.GetUserResult;
+import org.opendatakit.aggregate.odktables.commandresult.common.QueryForTablesResult;
 import org.opendatakit.aggregate.odktables.commandresult.simple.CreateTableResult;
 import org.opendatakit.aggregate.odktables.commandresult.simple.DeleteTableResult;
 import org.opendatakit.aggregate.odktables.commandresult.simple.InsertRowsResult;
 import org.opendatakit.aggregate.odktables.commandresult.simple.QueryForRowsResult;
-import org.opendatakit.aggregate.odktables.commandresult.simple.QueryForTablesResult;
 
 public class CommandConverterTest
 {

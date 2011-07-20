@@ -62,7 +62,7 @@ public class CreateUserResult extends CommandResult<CreateUser>
      * 
      * @return the successfully created User
      * @throws UserAlreadyExistsException
-     *             if the user with the userUUID given to the CreateUser command
+     *             if the user with the aggregateUserIdentifier given to the CreateUser command
      *             already existed.
      * @throws PermissionDeniedException
      *             if the request user who made the call did not have write

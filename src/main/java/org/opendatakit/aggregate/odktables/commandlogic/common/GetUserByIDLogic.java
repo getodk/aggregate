@@ -1,10 +1,11 @@
 package org.opendatakit.aggregate.odktables.commandlogic.common;
 
+import org.opendatakit.aggregate.odktables.client.entity.User;
 import org.opendatakit.aggregate.odktables.command.common.GetUserByID;
 import org.opendatakit.aggregate.odktables.commandlogic.CommandLogic;
 import org.opendatakit.aggregate.odktables.commandresult.CommandResult.FailureReason;
 import org.opendatakit.aggregate.odktables.commandresult.common.GetUserByIDResult;
-import org.opendatakit.aggregate.odktables.entity.User;
+import org.opendatakit.aggregate.odktables.entity.InternalUser;
 import org.opendatakit.aggregate.odktables.relation.Permissions;
 import org.opendatakit.aggregate.odktables.relation.Users;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
@@ -35,17 +36,18 @@ public class GetUserByIDLogic extends CommandLogic<GetUserByID>
 
         String userID = this.getUserByID.getUserID();
         String requestingUserID = this.getUserByID.getRequestingUserID();
-        String userTableUUID = users.getUUID();
+        String usersTable = users.getAggregateIdentifier();
 
-        User requestUser = users.query().equal(Users.USER_ID, requestingUserID)
-                .get();
-        if (!requestUser.hasPerm(userTableUUID, Permissions.READ))
+        InternalUser requestUser = users.query()
+                .equal(Users.USER_ID, requestingUserID).get();
+        if (!requestUser.hasPerm(usersTable, Permissions.READ))
         {
-            return GetUserByIDResult.failure(userID,
+            return GetUserByIDResult.failure(
+                    requestUser.getAggregateIdentifier(),
                     FailureReason.PERMISSION_DENIED);
         }
 
-        User user = null;
+        InternalUser user = null;
         try
         {
             user = users.query().equal(Users.USER_ID, userID).get();
@@ -55,8 +57,8 @@ public class GetUserByIDLogic extends CommandLogic<GetUserByID>
                     FailureReason.USER_DOES_NOT_EXIST);
         }
 
-        org.opendatakit.aggregate.odktables.client.entity.User retrievedUser = new org.opendatakit.aggregate.odktables.client.entity.User(
-                userID, user.getUUID(), user.getName());
+        User retrievedUser = new User(userID, user.getAggregateIdentifier(),
+                user.getName());
 
         return GetUserByIDResult.success(retrievedUser);
     }

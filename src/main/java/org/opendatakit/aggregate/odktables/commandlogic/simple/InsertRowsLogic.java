@@ -9,10 +9,12 @@ import org.opendatakit.aggregate.odktables.command.simple.InsertRows;
 import org.opendatakit.aggregate.odktables.commandlogic.CommandLogic;
 import org.opendatakit.aggregate.odktables.commandresult.CommandResult.FailureReason;
 import org.opendatakit.aggregate.odktables.commandresult.simple.InsertRowsResult;
-import org.opendatakit.aggregate.odktables.entity.Row;
-import org.opendatakit.aggregate.odktables.entity.User;
+import org.opendatakit.aggregate.odktables.entity.InternalRow;
+import org.opendatakit.aggregate.odktables.entity.InternalUser;
+import org.opendatakit.aggregate.odktables.entity.InternalUserTableMapping;
 import org.opendatakit.aggregate.odktables.relation.Permissions;
 import org.opendatakit.aggregate.odktables.relation.TableEntries;
+import org.opendatakit.aggregate.odktables.relation.UserTableMappings;
 import org.opendatakit.aggregate.odktables.relation.Users;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
@@ -39,42 +41,56 @@ public class InsertRowsLogic extends CommandLogic<InsertRows>
     {
         TableEntries entries = TableEntries.getInstance(cc);
         Users users = Users.getInstance(cc);
+        UserTableMappings mappings = UserTableMappings.getInstance(cc);
 
         String requestingUserID = insertRows.getRequestingUserID();
-        String tableUUID = insertRows.getTableUUID();
+        String tableID = insertRows.getTableID();
 
-        User requestingUser = users.query()
+        InternalUser requestingUser = users.query()
                 .equal(Users.USER_ID, requestingUserID).get();
 
-        if (!requestingUser.hasPerm(tableUUID, Permissions.WRITE))
+        String aggregateRequestingUserIdentifier = requestingUser
+                .getAggregateIdentifier();
+
+        InternalUserTableMapping mapping = mappings
+                .query()
+                .equal(UserTableMappings.TABLE_ID, tableID)
+                .equal(UserTableMappings.AGGREGATE_USER_IDENTIFIER,
+                        aggregateRequestingUserIdentifier).get();
+
+        String aggregateTableIdentifier = mapping.getAggregateIdentifier();
+
+        if (!requestingUser
+                .hasPerm(aggregateTableIdentifier, Permissions.WRITE))
         {
-            return InsertRowsResult.failure(tableUUID,
+            return InsertRowsResult.failure(tableID,
                     FailureReason.PERMISSION_DENIED);
         }
 
         try
         {
-            entries.get(tableUUID);
+            entries.get(aggregateTableIdentifier);
         } catch (ODKDatastoreException e)
         {
-            return InsertRowsResult.failure(tableUUID,
+            return InsertRowsResult.failure(tableID,
                     FailureReason.TABLE_DOES_NOT_EXIST);
         }
 
         List<org.opendatakit.aggregate.odktables.client.entity.Row> clientRows = insertRows
                 .getRows();
-        Map<String, String> rowIDstorowUUIDs = new HashMap<String, String>();
+        Map<String, String> rowIDstoaggregateRowIdentifiers = new HashMap<String, String>();
         for (org.opendatakit.aggregate.odktables.client.entity.Row clientRow : clientRows)
         {
-            Row row = new Row(tableUUID, cc);
+            InternalRow row = new InternalRow(aggregateTableIdentifier, cc);
             for (Entry<String, String> entry : clientRow.getColumnValuePairs()
                     .entrySet())
             {
                 row.setValue(entry.getKey(), entry.getValue());
             }
             row.save();
-            rowIDstorowUUIDs.put(clientRow.getRowID(), row.getUUID());
+            rowIDstoaggregateRowIdentifiers.put(clientRow.getRowID(),
+                    row.getAggregateIdentifier());
         }
-        return InsertRowsResult.success(rowIDstorowUUIDs);
+        return InsertRowsResult.success(rowIDstoaggregateRowIdentifiers);
     }
 }
