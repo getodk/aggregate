@@ -6,6 +6,7 @@ package org.opendatakit.aggregate.odktables.client.entity;
  * Aggregate. This consists of:
  * <ul>
  * <li>user: the User who owns the table</li>
+ * <li>aggregateTableIdentifier: aggregate's identifier for the table</li>
  * <li>tableID: the client's unique identifier for the table.</li>
  * <li>tableName: the human readable name of the table</li>
  * <li>isSynchronized: true if the table is a synchronized table</li>
@@ -22,6 +23,7 @@ package org.opendatakit.aggregate.odktables.client.entity;
 public class TableEntry
 {
     private final User user;
+    private final String aggregateTableIdentifier;
     private final String tableID;
     private final String tableName;
     private final boolean isSynchronized;
@@ -32,6 +34,7 @@ public class TableEntry
     @SuppressWarnings("unused")
     private TableEntry()
     {
+        this.aggregateTableIdentifier = null;
         this.user = null;
         this.tableID = null;
         this.tableName = null;
@@ -48,10 +51,11 @@ public class TableEntry
      * @param tableName
      *            the human readable name of the table
      */
-    public TableEntry(User user, String tableID, String tableName,
-            boolean isSynchronized)
+    public TableEntry(User user, String aggregateTableIdentifier,
+            String tableID, String tableName, boolean isSynchronized)
     {
         this.user = user;
+        this.aggregateTableIdentifier = aggregateTableIdentifier;
         this.tableID = tableID;
         this.tableName = tableName;
         this.isSynchronized = isSynchronized;
@@ -71,6 +75,14 @@ public class TableEntry
     public String getTableID()
     {
         return tableID;
+    }
+
+    /**
+     * @return the aggregateTableIdentifier
+     */
+    public String getAggregateTableIdentifier()
+    {
+        return aggregateTableIdentifier;
     }
 
     /**

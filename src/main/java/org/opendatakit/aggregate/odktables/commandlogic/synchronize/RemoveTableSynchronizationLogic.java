@@ -43,19 +43,21 @@ public class RemoveTableSynchronizationLogic extends
 
         InternalUser requestUser = users.query()
                 .equal(Users.USER_ID, requestingUserID).get();
+
+        InternalUserTableMapping mapping;
         try
         {
-            InternalUserTableMapping mapping = mappings
+            mapping = mappings
                     .query()
                     .equal(UserTableMappings.AGGREGATE_USER_IDENTIFIER,
                             requestUser.getAggregateIdentifier())
                     .equal(UserTableMappings.TABLE_ID, tableID).get();
-            mapping.delete();
         } catch (ODKDatastoreException e)
         {
             return RemoveTableSynchronizationResult.failure(tableID,
                     FailureReason.TABLE_DOES_NOT_EXIST);
         }
+        mapping.delete();
 
         return RemoveTableSynchronizationResult.success();
     }

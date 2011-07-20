@@ -10,7 +10,7 @@ import org.opendatakit.common.utils.Check;
  */
 public class GetUserByAggregateIdentifier implements Command
 {
-    private static final String path = "/odktables/common/getUserByAggregate Identifier";
+    private static final String path = "/odktables/common/getUserByAggregateIdentifier";
 
     private final String requestingUserID;
     private final String aggregateUserIdentifier;

@@ -114,9 +114,8 @@ public class SynchronizeLogic extends CommandLogic<Synchronize>
             latestRow.setRevisionTag(row.getRevisionTag());
             for (InternalColumn col : cols)
             {
-                String name = col.getName();
-                String value = row.getValue(name);
-                latestRow.setValue(name, value);
+                String value = row.getValue(col.getAggregateIdentifier());
+                latestRow.setValue(col.getName(), value);
             }
             latestRows.add(latestRow);
         }

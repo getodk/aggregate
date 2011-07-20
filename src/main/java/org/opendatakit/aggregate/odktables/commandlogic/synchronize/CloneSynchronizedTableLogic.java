@@ -112,7 +112,7 @@ public class CloneSynchronizedTableLogic extends
             clientRow.setRevisionTag(row.getRevisionTag());
             for (InternalColumn column : cols)
             {
-                String value = row.getValue(column.getName());
+                String value = row.getValue(column.getAggregateIdentifier());
                 clientRow.setValue(column.getName(), value);
             }
             clientRows.add(clientRow);

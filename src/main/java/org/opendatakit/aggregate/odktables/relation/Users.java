@@ -2,6 +2,7 @@ package org.opendatakit.aggregate.odktables.relation;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import org.opendatakit.aggregate.odktables.entity.InternalPermission;
 import org.opendatakit.aggregate.odktables.entity.InternalUser;
@@ -49,7 +50,7 @@ public class Users extends TypedEntityRelation<InternalUser>
     /**
      * The ID of the admin user.
      */
-    private static final String ADMIN_ID = "-1";
+    private static final String ADMIN_ID = UUID.randomUUID().toString();
 
     /**
      * The name of the admin user.
