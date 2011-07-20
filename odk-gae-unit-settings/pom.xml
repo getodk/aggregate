@@ -15,7 +15,6 @@
   <build>
 	<resources>
 		<resource>
-			<targetPath></targetPath>
 			<filtering>false</filtering>
 			<directory>${toplevel.directory}/src/main/resources/common/</directory>
 			<includes>
@@ -23,7 +22,6 @@
 			</includes>
 		</resource>
 		<resource>
-			<targetPath></targetPath>
 			<filtering>false</filtering>
 			<directory>${toplevel.directory}/src/main/resources/gae-unit/</directory>
 			<includes>
