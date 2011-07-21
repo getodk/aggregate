@@ -13,6 +13,21 @@ public class Entity
         this.entity = entity;
     }
 
+    public String getAggregateIdentifier()
+    {
+        return this.entity.getUri();
+    }
+
+    public Date getLastUpdateDate()
+    {
+        return this.entity.getLastUpdateDate();
+    }
+
+    public Date getCreationDate()
+    {
+        return this.entity.getCreationDate()
+    }
+
 	public void setBoolean(String attributeName, Boolean value)
     {
         Check.notNullOrEmpty(attributeName, "attributeName");
@@ -111,7 +126,17 @@ public class Entity
         return this.entity.getString(field);
     }
 
-    protected Entity fromEntity(ExtendedAbstractRelation relation, org.opendatakit.common.ermodel.Entity entity)
+    public void save()
+    {
+        this.entity.persist(this.relation.getCC());
+    }
+
+    public void delete()
+    {
+        this.entity.remove(this.relation.getCC());
+    }
+
+    protected static Entity fromEntity(ExtendedAbstractRelation relation, org.opendatakit.common.ermodel.Entity entity)
     {
         return new Entity(relation, entity);
     }

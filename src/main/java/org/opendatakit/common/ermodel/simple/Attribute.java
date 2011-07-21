@@ -30,5 +30,10 @@ public class Attribute
     {
         return this.nullable;
     }
+
+    protected DataField toDataField()
+    {
+        return new DataField(this.name, DataType.valueOf(this.type.name()), this.nullable);
+    }
 }
 
