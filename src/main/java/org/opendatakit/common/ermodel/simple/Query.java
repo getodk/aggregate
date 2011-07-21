@@ -1,5 +1,17 @@
 package org.opendatakit.common.ermodel.simple;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+
+import org.opendatakit.common.ermodel.ExtendedAbstractRelation;
+import org.opendatakit.common.persistence.DataField;
+import org.opendatakit.common.persistence.Query.Direction;
+import org.opendatakit.common.persistence.Query.FilterOperation;
+import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+import org.opendatakit.common.utils.Check;
+
 public class Query
 {
 
@@ -13,7 +25,7 @@ public class Query
      */
     private org.opendatakit.common.persistence.Query query;
 
-    private Query(ExtendedAbstractRelation relation)
+    protected Query(ExtendedAbstractRelation relation)
     {
         Check.notNull(relation, "relation");
         this.relation = relation;
@@ -26,8 +38,8 @@ public class Query
      * @param attributeName
      *            the name of an attribute in the relation.
      * @param value
-     *            the value the given attribute should be equal to. This must be of
-     *            the correct type for the corresponding attribute.
+     *            the value the given attribute should be equal to. This must be
+     *            of the correct type for the corresponding attribute.
      * @return this Query, with the equal filter added.
      */
     public Query equal(String attributeName, Object value)
@@ -41,8 +53,8 @@ public class Query
      * @param attributeName
      *            the name of an attribute in the relation.
      * @param value
-     *            the value the given attribute should greater than. This must be of
-     *            the correct type for the corresponding attribute.
+     *            the value the given attribute should greater than. This must
+     *            be of the correct type for the corresponding attribute.
      * @return this Query, with the greater than filter added.
      */
     public Query greaterThan(String attributeName, Object value)
@@ -57,9 +69,9 @@ public class Query
      *            the name of an attribute in the relation.
      * @param value
      *            the value the given attribute should greater than or equal to.
-     *            This must be of the correct type for the corresponding attribute.
-     * @return this Query, with the greater than or equal filter
-     *         added.
+     *            This must be of the correct type for the corresponding
+     *            attribute.
+     * @return this Query, with the greater than or equal filter added.
      */
     public Query greaterThanOrEqual(String attributeName, Object value)
     {
@@ -73,8 +85,8 @@ public class Query
      * @param attributeName
      *            the name of an attribute in the relation.
      * @param value
-     *            the value the given attribute should less than. This must be of
-     *            the correct type for the corresponding attribute.
+     *            the value the given attribute should less than. This must be
+     *            of the correct type for the corresponding attribute.
      * @return this Query, with the less than filter added.
      */
     public Query lessThan(String attributeName, Object value)
@@ -88,13 +100,15 @@ public class Query
      * @param attributeName
      *            the name of an attribute in the relation.
      * @param value
-     *            the value the given attribute should less than or equal to. This
-     *            must be of the correct type for the corresponding attribute.
+     *            the value the given attribute should less than or equal to.
+     *            This must be of the correct type for the corresponding
+     *            attribute.
      * @return this Query, with the less than or equal filter added.
      */
     public Query lessThanOrEqual(String attributeName, Object value)
     {
-        return addFilter(attributeName, FilterOperation.LESS_THAN_OR_EQUAL, value);
+        return addFilter(attributeName, FilterOperation.LESS_THAN_OR_EQUAL,
+                value);
     }
 
     /**
@@ -123,8 +137,8 @@ public class Query
      * Adds an ascending sort to the query.
      * 
      * @param attributeName
-     *            the name of the attribute to sort by. This attribute must be an attribute
-     *            in the relation of this query.
+     *            the name of the attribute to sort by. This attribute must be
+     *            an attribute in the relation of this query.
      * @return this Query, with the ascending sort added.
      */
     public Query sortAscending(String attributeName)
@@ -136,8 +150,8 @@ public class Query
      * Adds a descending sort to the query.
      * 
      * @param attributeName
-     *            the name of the attribute to sort by. This attribute must be an attribute
-     *            in the relation of this query.
+     *            the name of the attribute to sort by. This attribute must be
+     *            an attribute in the relation of this query.
      * @return this Query, with the descending sort added.
      */
     public Query sortDescending(String attributeName)
@@ -149,8 +163,8 @@ public class Query
      * Adds a sort to the query.
      * 
      * @param attributeName
-     *            the name of the attribute to sort by. This attribute must be an attribute
-     *            in the relation of this query.
+     *            the name of the attribute to sort by. This attribute must be
+     *            an attribute in the relation of this query.
      * @param direction
      *            the direction to sort by.
      * @return this Query, with the given sort added.
@@ -158,7 +172,7 @@ public class Query
     private Query addSort(String attributeName, Direction direction)
     {
         Check.notNullOrEmpty(attributeName, "attributeName");
-        Check.notNull(direction);
+        Check.notNull(direction, "direction");
         DataField attribute = relation.getDataField(attributeName);
         query.addSort(attribute, direction);
         return this;
@@ -169,14 +183,14 @@ public class Query
      * the given attributeName is in values.
      * 
      * @param attributeName
-     *            the name of the attribute to filter with. This must be an attribute in
-     *            the relation of this query.
+     *            the name of the attribute to filter with. This must be an
+     *            attribute in the relation of this query.
      * @param values
      *            the values to filter by. This collection must be of the
-     *            correct type for the attribute identified by attributeName. Must not be null or empty.
-     * @return this Query, with the include filter added. All
-     *         entities with values not in values will be excluded from the
-     *         query.
+     *            correct type for the attribute identified by attributeName.
+     *            Must not be null or empty.
+     * @return this Query, with the include filter added. All entities with
+     *         values not in values will be excluded from the query.
      */
     public Query include(String attributeName, Collection<?> values)
     {
@@ -195,7 +209,7 @@ public class Query
      *             if the query contains no entities or greater than one entity,
      *             or if there is a problem communicating with the datastore.
      */
-    public T get() throws ODKDatastoreException
+    public Entity get() throws ODKDatastoreException
     {
         List<Entity> results = execute(1);
         if (results.isEmpty())
@@ -250,11 +264,12 @@ public class Query
      */
     public List<Entity> execute(int limit) throws ODKDatastoreException
     {
-        List<Entity> genericEntities = relation.executeQuery(this.query, limit);
+        List<org.opendatakit.common.ermodel.Entity> genericEntities = relation
+                .executeQuery(this.query, limit);
         List<Entity> relationEntities = new ArrayList<Entity>();
-        for (Entity genericEntity : genericEntities)
+        for (org.opendatakit.common.ermodel.Entity genericEntity : genericEntities)
         {
-            T relationEntity = relation.initialize(genericEntity);
+            Entity relationEntity = Entity.fromEntity(relation, genericEntity);
             relationEntities.add(relationEntity);
         }
         return relationEntities;
@@ -266,8 +281,8 @@ public class Query
      * 
      * @param attributeName
      *            the name of the attribute to retrieve distinct values for.
-     * @return a list of distinct values for the given attribute, narrowed by any
-     *         existing filter and sort criteria.
+     * @return a list of distinct values for the given attribute, narrowed by
+     *         any existing filter and sort criteria.
      */
     public List<?> getDistinct(String attributeName)
     {
@@ -282,5 +297,3 @@ public class Query
         }
     }
 }
-}
-
