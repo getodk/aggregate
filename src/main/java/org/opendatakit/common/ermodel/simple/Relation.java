@@ -76,6 +76,7 @@ public class Relation
 
     public Query query()
     {
+        return new Query(this.relation);
     }
 
     public Entity newEntity()
