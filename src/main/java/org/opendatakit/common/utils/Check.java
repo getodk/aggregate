@@ -1,5 +1,7 @@
 package org.opendatakit.common.utils;
 
+import java.util.Collection;
+
 /**
  * Class for checking preconditions on method arguments.
  * 
@@ -44,14 +46,18 @@ public final class Check
     }
 
     /**
-     * @param variable the variable to check
-     * @param name the name of the variable
-     * @throws IllegalArgumentException if variable is null or empty
+     * @param variable
+     *            the variable to check
+     * @param name
+     *            the name of the variable
+     * @throws IllegalArgumentException
+     *             if variable is null or empty
      */
     public static void notNullOrEmpty(Collection<?> variable, String name)
     {
         Check.notNull(variable, name);
         if (variable.size() == 0)
-            throw new IllegalArgumentException(String.format("%s was empty", name));
+            throw new IllegalArgumentException(String.format("%s was empty",
+                    name));
     }
 }
