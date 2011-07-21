@@ -12,5 +12,6 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="con" path="org.eclipse.jst.j2ee.internal.module.container"/>
+	<classpathentry kind="lib" path="/home/dylan/.m2/repository/org/opendatakit/odk-mysql-unit-settings/latest/odk-mysql-unit-settings-latest.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

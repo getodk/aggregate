@@ -50,6 +50,7 @@ public class Users extends TypedEntityRelation<InternalUser>
     /**
      * The ID of the admin user.
      */
+    // TODO: this will generate a new admin user every time the server is restarted
     private static final String ADMIN_ID = UUID.randomUUID().toString();
 
     /**

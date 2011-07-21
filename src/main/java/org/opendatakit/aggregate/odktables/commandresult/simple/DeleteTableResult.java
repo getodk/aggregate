@@ -7,7 +7,6 @@ import org.opendatakit.aggregate.odktables.client.exception.PermissionDeniedExce
 import org.opendatakit.aggregate.odktables.client.exception.TableDoesNotExistException;
 import org.opendatakit.aggregate.odktables.command.simple.DeleteTable;
 import org.opendatakit.aggregate.odktables.commandresult.CommandResult;
-import org.opendatakit.common.utils.Check;
 
 /**
  * A DeleteTableResult represents the result of executing a DeleteTable command.
