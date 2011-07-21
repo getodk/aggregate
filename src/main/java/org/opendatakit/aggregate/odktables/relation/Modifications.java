@@ -4,18 +4,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.opendatakit.aggregate.odktables.entity.InternalModification;
-import org.opendatakit.common.ermodel.Entity;
-import org.opendatakit.common.ermodel.typedentity.TypedEntityRelation;
-import org.opendatakit.common.persistence.DataField;
-import org.opendatakit.common.persistence.DataField.DataType;
+import org.opendatakit.common.ermodel.simple.Entity;
+import org.opendatakit.common.ermodel.simple.Attribute;
+import org.opendatakit.common.ermodel.simple.AttributeType;
+import org.opendatakit.common.ermodel.simple.typedentity.TypedEntityRelation;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
 
 /**
  * <p>
- * Modifications is a relation containing all the {@link InternalModification} entities
- * stored in the datastore. Thus Modifications keeps track of all the registered
- * users of the odktables API.
+ * Modifications is a relation containing all the {@link InternalModification}
+ * entities stored in the datastore. Thus Modifications keeps track of all the
+ * registered users of the odktables API.
  * </p>
  * 
  * @author the.dylan.price@gmail.com
@@ -44,28 +44,28 @@ public class Modifications extends TypedEntityRelation<InternalModification>
      */
     private static final String RELATION_NAME = "MODIFICATIONS";
 
-    // The following defines the actual fields that will be in the datastore:
+    // The following defines the actual attributes that will be in the datastore:
     /**
      * The field for the aggregateTableIdentifier.
      */
-    private static final DataField aggregateTableIdentifier = new DataField(AGGREGATE_TABLE_IDENTIFIER,
-            DataType.URI, false);
+    private static final Attribute aggregateTableIdentifier = new Attribute(
+            AGGREGATE_TABLE_IDENTIFIER, AttributeType.URI, false);
     /**
      * The field for the modificationNumber.
      */
-    private static final DataField modificationNumber = new DataField(
-            MODIFICATION_NUMBER, DataType.INTEGER, false);
+    private static final Attribute modificationNumber = new Attribute(
+            MODIFICATION_NUMBER, AttributeType.INTEGER, false);
 
-    private static final DataField aggregateRowIdentifier = new DataField(AGGREGATE_ROW_IDENTIFIER,
-            DataType.URI, false);
+    private static final Attribute aggregateRowIdentifier = new Attribute(
+            AGGREGATE_ROW_IDENTIFIER, AttributeType.URI, false);
 
-    private static final List<DataField> fields;
+    private static final List<Attribute> attributes;
     static
     {
-        fields = new ArrayList<DataField>();
-        fields.add(aggregateTableIdentifier);
-        fields.add(modificationNumber);
-        fields.add(aggregateRowIdentifier);
+        attributes = new ArrayList<Attribute>();
+        attributes.add(aggregateTableIdentifier);
+        attributes.add(modificationNumber);
+        attributes.add(aggregateRowIdentifier);
     }
 
     /**
@@ -86,12 +86,13 @@ public class Modifications extends TypedEntityRelation<InternalModification>
      */
     private Modifications(CallingContext cc) throws ODKDatastoreException
     {
-        super(Table.NAMESPACE, RELATION_NAME, fields, cc);
+        super(Table.NAMESPACE, RELATION_NAME, attributes, cc);
     }
 
-    public InternalModification initialize(Entity entity) throws ODKDatastoreException
+    public InternalModification initialize(Entity entity)
+            throws ODKDatastoreException
     {
-        return new InternalModification(entity, super.getCC());
+        return InternalModification.fromEntity(entity);
     }
 
     /**

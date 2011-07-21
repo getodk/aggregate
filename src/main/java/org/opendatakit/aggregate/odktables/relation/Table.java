@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.opendatakit.aggregate.odktables.entity.InternalRow;
 import org.opendatakit.common.ermodel.Entity;
-import org.opendatakit.common.ermodel.typedentity.TypedEntityRelation;
+import org.opendatakit.common.ermodel.simple.typedentity.TypedEntityRelation;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.DataField.DataType;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
