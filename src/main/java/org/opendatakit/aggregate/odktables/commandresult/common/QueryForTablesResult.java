@@ -3,7 +3,6 @@ package org.opendatakit.aggregate.odktables.commandresult.common;
 import java.util.List;
 
 import org.opendatakit.aggregate.odktables.client.entity.TableEntry;
-import org.opendatakit.aggregate.odktables.client.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.command.common.QueryForTables;
 import org.opendatakit.aggregate.odktables.commandresult.CommandResult;
 import org.opendatakit.common.utils.Check;

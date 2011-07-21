@@ -8,8 +8,6 @@ import java.util.List;
 import java.util.Scanner;
 
 import org.apache.http.client.ClientProtocolException;
-import org.junit.Before;
-import org.junit.Test;
 import org.opendatakit.aggregate.odktables.client.api.CommonAPI;
 import org.opendatakit.aggregate.odktables.client.api.SimpleAPI;
 import org.opendatakit.aggregate.odktables.client.api.SynchronizeAPI;
@@ -31,12 +29,8 @@ import org.opendatakit.aggregate.odktables.client.exception.UserDoesNotExistExce
 import org.opendatakit.common.persistence.DataField.DataType;
 
 /**
- * Test case for AggregateConnection, but not really a unit test. Only works
- * when you have a running Aggregate instance at localhost:8888, and assumes you
- * start with an empty datastore.
- * 
- * Also, some tests are dependent on state created by previous tests, so the
- * order of the tests must be kept the same.
+ * Integration test for SimpleAPI. Only works when you have a running Aggregate
+ * instance at localhost:8888, and assumes you start with an empty datastore.
  * 
  * @author the.dylan.price@gmail.com
  */
@@ -51,7 +45,6 @@ public class AggregateConnectionTest
     private List<String> rowIds;
     private List<Row> rows;
 
-    @Before
     public void setUp()
     {
         userID = "user1";
@@ -75,7 +68,6 @@ public class AggregateConnectionTest
         rows.add(row2);
     }
 
-    @Test
     public void test() throws URISyntaxException, ClientProtocolException,
             UserDoesNotExistException, IOException, UserAlreadyExistsException,
             PermissionDeniedException, TableAlreadyExistsException,
