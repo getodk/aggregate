@@ -186,6 +186,11 @@ public class Relation
                     "Relation does not exist in datastore.", e);
         }
     }
+    
+    public CallingContext getCC()
+    {
+        return getCC();
+    }
 
     public static Relation getRelation(String namespace, String name,
             CallingContext cc) throws ODKDatastoreException
