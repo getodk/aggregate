@@ -1,9 +1,7 @@
 package org.opendatakit.aggregate.odktables.entity;
 
 import org.opendatakit.aggregate.odktables.relation.Modifications;
-import org.opendatakit.common.ermodel.Entity;
-import org.opendatakit.common.ermodel.typedentity.TypedEntity;
-import org.opendatakit.common.persistence.DataField;
+import org.opendatakit.common.ermodel.simple.Entity;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
 
@@ -23,59 +21,54 @@ import org.opendatakit.common.web.CallingContext;
  * @author the.dylan.price@gmail.com
  * 
  */
-public class InternalModification extends TypedEntity
+public class InternalModification
 {
+
+    private Entity entity;
 
     public InternalModification(String aggregateTableIdentifier,
             int modificationNumber, String aggregateRowIdentifier,
             CallingContext cc) throws ODKDatastoreException
     {
-        super(Modifications.getInstance(cc));
+        this.entity = Modifications.getInstance(cc).newEntity();
         setAggregateTableIdentifier(aggregateTableIdentifier);
         setModificationNumber(modificationNumber);
         setAggregateRowIdentifier(aggregateRowIdentifier);
     }
 
-    public InternalModification(Entity entity, CallingContext cc)
-            throws ODKDatastoreException
+    private InternalModification(Entity entity)
     {
-        super(Modifications.getInstance(cc), entity);
+        this.entity = entity;
     }
 
     public String getAggregateTableIdentifier()
     {
-        DataField aggregateTableIdentifierField = getDataField(Modifications.AGGREGATE_TABLE_IDENTIFIER);
-        return super.getEntity().getString(aggregateTableIdentifierField);
+        return entity.getString(Modifications.AGGREGATE_TABLE_IDENTIFIER);
     }
 
-    public void setAggregateTableIdentifier(String aggregateTableIdentifier)
+    public void setAggregateTableIdentifier(String value)
     {
-        super.getEntity().setField(Modifications.AGGREGATE_TABLE_IDENTIFIER,
-                aggregateTableIdentifier);
+        entity.setString(Modifications.AGGREGATE_TABLE_IDENTIFIER, value);
     }
 
     public int getModificationNumber()
     {
-        DataField modificationNumField = getDataField(Modifications.MODIFICATION_NUMBER);
-        return super.getEntity().getInteger(modificationNumField);
+        return entity.getInteger(Modifications.MODIFICATION_NUMBER);
     }
 
-    public void setModificationNumber(int modificationNumber)
+    public void setModificationNumber(int value)
     {
-        DataField modificationNumField = getDataField(Modifications.MODIFICATION_NUMBER);
-        super.getEntity().setInteger(modificationNumField, modificationNumber);
+        entity.setInteger(Modifications.MODIFICATION_NUMBER, value);
     }
 
     public String getAggregateRowIdentifier()
     {
-        DataField aggregateRowIdentifierField = getDataField(Modifications.AGGREGATE_ROW_IDENTIFIER);
-        return super.getEntity().getString(aggregateRowIdentifierField);
+        return entity.getString(Modifications.AGGREGATE_ROW_IDENTIFIER);
     }
 
-    public void setAggregateRowIdentifier(String aggregateRowIdentifier)
+    public void setAggregateRowIdentifier(String value)
     {
-        super.getEntity().setField(Modifications.AGGREGATE_ROW_IDENTIFIER,
-                aggregateRowIdentifier);
+        entity.setString(Modifications.AGGREGATE_ROW_IDENTIFIER, value);
     }
 
     @Override
@@ -85,5 +78,10 @@ public class InternalModification extends TypedEntity
                 .format("InternalModification[aggregateTableIdentifier=%s, modificationNumber=%s, aggregateRowIdentifier=%s",
                         getAggregateTableIdentifier(), getModificationNumber(),
                         getAggregateRowIdentifier());
+    }
+
+    public static InternalModification fromEntity(Entity entity)
+    {
+        return new InternalModification(entity);
     }
 }

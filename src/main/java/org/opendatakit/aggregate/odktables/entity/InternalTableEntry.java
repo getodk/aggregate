@@ -2,7 +2,7 @@ package org.opendatakit.aggregate.odktables.entity;
 
 import org.opendatakit.aggregate.odktables.relation.TableEntries;
 import org.opendatakit.common.ermodel.Entity;
-import org.opendatakit.common.ermodel.typedentity.TypedEntity;
+import org.opendatakit.common.ermodel.simple.typedentity.TypedEntity;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
