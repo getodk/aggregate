@@ -71,7 +71,6 @@ public class Relation
                         .getInstance(namespace, cc);
                 Entity attrEntity = attributeRelation.newEntity();
 
-                attrEntity.set(AttributeRelation.RELATION_NAMESPACE, namespace);
                 attrEntity.set(AttributeRelation.RELATION_NAME, name);
                 attrEntity.set(AttributeRelation.NAME, attribute.getName());
                 attrEntity.set(AttributeRelation.TYPE, attribute.getType()
@@ -182,7 +181,6 @@ public class Relation
         AttributeRelation attributeRelation = AttributeRelation.getInstance(
                 namespace, cc);
         List<Entity> attrEntities = attributeRelation.query()
-                .equal(AttributeRelation.RELATION_NAMESPACE, namespace)
                 .equal(AttributeRelation.RELATION_NAME, name).execute();
         return attrEntities;
     }
