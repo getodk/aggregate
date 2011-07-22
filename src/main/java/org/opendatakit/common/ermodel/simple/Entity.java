@@ -9,6 +9,12 @@ import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
 import org.opendatakit.common.utils.Check;
 
+/**
+ * Entity represents an entity in a Relation. Think of it like a row in a table.
+ * 
+ * @author the.dylan.price@gmail.com
+ * 
+ */
 public class Entity
 {
     private ExtendedAbstractRelation relation;
@@ -23,16 +29,26 @@ public class Entity
         this.entity = entity;
     }
 
+    /**
+     * @return the unique identifier of this Entity. You can later retrieve this
+     *         Entity using {@link Relation#getEntity(String)}.
+     */
     public String getAggregateIdentifier()
     {
         return this.entity.getUri();
     }
 
+    /**
+     * @return the Date of the last time this Entity was saved to the datastore.
+     */
     public Date getLastUpdateDate()
     {
         return this.entity.getLastUpdateDate();
     }
 
+    /**
+     * @return the Date that this Entity was first saved to the datastore.
+     */
     public Date getCreationDate()
     {
         return this.entity.getCreationDate();
@@ -51,7 +67,6 @@ public class Entity
         DataField field = relation.getDataField(attributeName);
         return this.entity.getDate(field);
     }
-    
 
     public Double getDouble(String attributeName)
     {
@@ -87,21 +102,21 @@ public class Entity
         DataField field = relation.getDataField(attributeName);
         return this.entity.getString(field);
     }
-    
+
     public void set(String attributeName, Boolean value)
     {
         Check.notNullOrEmpty(attributeName, "attributeName");
         DataField field = relation.getDataField(attributeName);
         this.entity.setBoolean(field, value);
     }
-    
+
     public void set(String attributeName, Date value)
     {
         Check.notNullOrEmpty(attributeName, "attributeName");
         DataField field = relation.getDataField(attributeName);
         this.entity.setDate(field, value);
     }
-    
+
     public void set(String attributeName, Double value)
     {
         Check.notNullOrEmpty(attributeName, "attributeName");
@@ -115,7 +130,7 @@ public class Entity
         DataField field = relation.getDataField(attributeName);
         this.entity.setNumeric(field, value);
     }
-    
+
     public void set(String attributeName, Integer value)
     {
         Check.notNullOrEmpty(attributeName, "attributeName");
@@ -137,16 +152,31 @@ public class Entity
         this.entity.setString(field, value);
     }
 
+    /**
+     * Saves this Entity to the datastore.
+     * 
+     * @throws ODKEntityPersistException
+     *             if there was a problem saving the Entity.
+     */
     public void save() throws ODKEntityPersistException
     {
         this.entity.persist(this.relation.getCC());
     }
 
+    /**
+     * Deletes this Entity from the datastore.
+     * 
+     * @throws ODKDatastoreException
+     *             if there was a problem deleting this Entity.
+     */
     public void delete() throws ODKDatastoreException
     {
         this.entity.remove(this.relation.getCC());
     }
 
+    /**
+     * Creates an Entity from an org.opendatakit.common.ermodel.Entity
+     */
     protected static Entity fromEntity(ExtendedAbstractRelation relation,
             org.opendatakit.common.ermodel.Entity entity)
     {

@@ -4,12 +4,43 @@ import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.DataField.DataType;
 import org.opendatakit.common.utils.Check;
 
+/**
+ * <p>
+ * An Attribute represents an attribute on a Relation. Think of it like the
+ * column of a table.
+ * </p>
+ * 
+ * <p>
+ * Attributes are immutable.
+ * </p>
+ * 
+ * @author the.dylan.price@gmail.com
+ */
 public class Attribute
 {
     private final String name;
     private final AttributeType type;
     private final boolean nullable;
 
+    /**
+     * <p>
+     * Constructs a new Attribute.
+     * </p>
+     * 
+     * <p>
+     * The constraints on Attribute names are the same as those of namespaces
+     * and names. See
+     * {@link Relation#Relation(String, String, java.util.List, org.opendatakit.common.web.CallingContext)
+     * Relation's constructor} for more info.
+     * </p>
+     * 
+     * @param name
+     *            the name of the Attribute. Must not be emtpy or null.
+     * @param type
+     *            the type of the Attribute. Must not be null.
+     * @param nullable
+     *            true if the Attribute is allowed to be null.
+     */
     public Attribute(String name, AttributeType type, boolean nullable)
     {
         Check.notNullOrEmpty(name, "name");
@@ -20,21 +51,33 @@ public class Attribute
         this.nullable = nullable;
     }
 
+    /**
+     * @return the name of this Attribute.
+     */
     public String getName()
     {
         return this.name;
     }
 
+    /**
+     * @return the type of this Attribute.
+     */
     public AttributeType getType()
     {
         return this.type;
     }
 
+    /**
+     * @return true if this Attribute is allowed to be null.
+     */
     public boolean isNullable()
     {
         return this.nullable;
     }
 
+    /**
+     * @return this Attribute converted to a DataField.
+     */
     protected DataField toDataField()
     {
         return new DataField(this.name, DataType.valueOf(this.type.name()),
@@ -90,12 +133,15 @@ public class Attribute
             return false;
         return true;
     }
-    
+
+    /**
+     * @return a new Attribute which is converted from the given DataField.
+     */
     protected static Attribute fromDataField(DataField field)
     {
-       String name = field.getName();
-       AttributeType type = AttributeType.valueOf(field.getDataType().name());
-       boolean nullable = field.getNullable();
-       return new Attribute(name, type, nullable);
+        String name = field.getName();
+        AttributeType type = AttributeType.valueOf(field.getDataType().name());
+        boolean nullable = field.getNullable();
+        return new Attribute(name, type, nullable);
     }
 }
