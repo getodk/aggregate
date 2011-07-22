@@ -57,7 +57,7 @@ public class QueryForTablesLogic extends CommandLogic<QueryForTables>
         List<InternalTableEntry> allEntries = new ArrayList<InternalTableEntry>();
         for (String aggregateTableIdentifier : aggregateTableIdentifiers)
         {
-            allEntries.add(entries.get(aggregateTableIdentifier));
+            allEntries.add(entries.getEntity(aggregateTableIdentifier));
         }
 
         List<TableEntry> clientEntries = new ArrayList<TableEntry>();
@@ -67,7 +67,7 @@ public class QueryForTablesLogic extends CommandLogic<QueryForTables>
                     .getAggregateOwnerIdentifier();
             String tableName = entry.getName();
             boolean isSynchronized = entry.isSynchronized();
-            InternalUser user = users.get(aggregateOwnerIdentifier);
+            InternalUser user = users.getEntity(aggregateOwnerIdentifier);
             String tableID = null;
             try
             {

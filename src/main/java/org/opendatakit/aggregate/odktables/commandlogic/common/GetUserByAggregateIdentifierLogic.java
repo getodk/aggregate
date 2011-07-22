@@ -53,7 +53,7 @@ public class GetUserByAggregateIdentifierLogic extends
         InternalUser user = null;
         try
         {
-            user = users.get(aggregateUserIdentifier);
+            user = users.getEntity(aggregateUserIdentifier);
         } catch (ODKDatastoreException e)
         {
             return GetUserByAggregateIdentifierResult.failure(

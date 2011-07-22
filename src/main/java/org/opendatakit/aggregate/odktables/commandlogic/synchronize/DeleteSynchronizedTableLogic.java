@@ -97,7 +97,7 @@ public class DeleteSynchronizedTableLogic extends
                 .query()
                 .equal(Modifications.AGGREGATE_TABLE_IDENTIFIER,
                         aggregateTableIdentifier).execute();
-        InternalTableEntry entry = entries.get(aggregateTableIdentifier);
+        InternalTableEntry entry = entries.getEntity(aggregateTableIdentifier);
 
         for (InternalRow row : rows)
             row.delete();

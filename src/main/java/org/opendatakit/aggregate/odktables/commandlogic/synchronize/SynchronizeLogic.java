@@ -81,7 +81,7 @@ public class SynchronizeLogic extends CommandLogic<Synchronize>
         }
 
         // Get current modification number 
-        InternalTableEntry entry = entries.get(aggregateTableIdentifier);
+        InternalTableEntry entry = entries.getEntity(aggregateTableIdentifier);
         int currentModificationNumber = entry.getModificationNumber();
 
         // Get latest modifications
@@ -108,7 +108,7 @@ public class SynchronizeLogic extends CommandLogic<Synchronize>
         List<SynchronizedRow> latestRows = new ArrayList<SynchronizedRow>();
         for (String aggregateRowIdentifier : aggregateRowIdentifiers)
         {
-            InternalRow row = table.get(aggregateRowIdentifier);
+            InternalRow row = table.getEntity(aggregateRowIdentifier);
             SynchronizedRow latestRow = new SynchronizedRow();
             latestRow.setAggregateRowIdentifier(aggregateRowIdentifier);
             latestRow.setRevisionTag(row.getRevisionTag());

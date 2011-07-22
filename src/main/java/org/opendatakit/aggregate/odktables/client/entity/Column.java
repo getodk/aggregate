@@ -1,6 +1,6 @@
 package org.opendatakit.aggregate.odktables.client.entity;
 
-import org.opendatakit.common.persistence.DataField.DataType;
+import org.opendatakit.common.ermodel.simple.AttributeType;
 
 /**
  * Column represents a simple column in a table. A Column has three attributes:
@@ -18,7 +18,7 @@ public final class Column
 {
 
     private final String name;
-    private final DataType type;
+    private final AttributeType type;
     private final boolean nullable;
 
     /**
@@ -42,7 +42,7 @@ public final class Column
      * @param nullable
      *            whether the values in this column are allowed to be null
      */
-    public Column(String name, DataType type, boolean nullable)
+    public Column(String name, AttributeType type, boolean nullable)
     {
         if (name == null || name.length() == 0)
         {
@@ -64,7 +64,7 @@ public final class Column
     /**
      * @return the type
      */
-    public DataType getType()
+    public AttributeType getType()
     {
         return type;
     }

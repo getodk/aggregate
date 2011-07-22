@@ -45,8 +45,8 @@ public class SetTablePermissionsLogic extends CommandLogic<SetTablePermissions>
         boolean delete = setTablePermissions.getDelete();
         String requestingUserID = setTablePermissions.getRequestingUserID();
 
-        InternalUser requestUser = users.query().equal(Users.USER_ID, requestingUserID)
-                .get();
+        InternalUser requestUser = users.query()
+                .equal(Users.USER_ID, requestingUserID).get();
         if (!requestUser.hasPerm(aggregateTableIdentifier, Permissions.WRITE))
         {
             return SetTablePermissionsResult.failure(null,
@@ -55,7 +55,7 @@ public class SetTablePermissionsLogic extends CommandLogic<SetTablePermissions>
 
         try
         {
-            users.get(aggregateUserIdentifier);
+            users.getEntity(aggregateUserIdentifier);
         } catch (ODKDatastoreException e)
         {
             return SetTablePermissionsResult.failure(aggregateTableIdentifier,
@@ -64,7 +64,7 @@ public class SetTablePermissionsLogic extends CommandLogic<SetTablePermissions>
 
         try
         {
-            tableEntries.get(aggregateTableIdentifier);
+            tableEntries.getEntity(aggregateTableIdentifier);
         } catch (ODKDatastoreException e)
         {
             return SetTablePermissionsResult
@@ -72,8 +72,9 @@ public class SetTablePermissionsLogic extends CommandLogic<SetTablePermissions>
                             FailureReason.TABLE_DOES_NOT_EXIST);
         }
 
-        InternalPermission perm = new InternalPermission(aggregateTableIdentifier,
-                aggregateUserIdentifier, read, write, delete, cc);
+        InternalPermission perm = new InternalPermission(
+                aggregateTableIdentifier, aggregateUserIdentifier, read, write,
+                delete, cc);
         perm.save();
         // TODO: try-catch error handling for above?
 

@@ -73,7 +73,7 @@ public class InsertRowsLogic extends CommandLogic<InsertRows>
 
         try
         {
-            entries.get(aggregateTableIdentifier);
+            entries.getEntity(aggregateTableIdentifier);
         } catch (ODKDatastoreException e)
         {
             return InsertRowsResult.failure(tableID,

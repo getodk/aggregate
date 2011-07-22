@@ -87,7 +87,7 @@ public class UpdateSynchronizedRowsLogic extends
                     FailureReason.PERMISSION_DENIED);
         }
 
-        InternalTableEntry entry = entries.get(aggregateTableIdentifier);
+        InternalTableEntry entry = entries.getEntity(aggregateTableIdentifier);
 
         if (entry.getModificationNumber() != clientModificationNumber)
         {
@@ -127,7 +127,7 @@ public class UpdateSynchronizedRowsLogic extends
         for (SynchronizedRow clientRow : changedRows)
         {
             // Get original row and make sure revisionTags match
-            InternalRow row = table.get(clientRow.getAggregateRowIdentifier());
+            InternalRow row = table.getEntity(clientRow.getAggregateRowIdentifier());
             if (!row.getRevisionTag().equals(clientRow.getRevisionTag()))
             {
                 throw new RowOutOfSynchException(row.getAggregateIdentifier());
