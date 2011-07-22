@@ -26,7 +26,7 @@ import org.opendatakit.aggregate.odktables.client.exception.TableAlreadyExistsEx
 import org.opendatakit.aggregate.odktables.client.exception.TableDoesNotExistException;
 import org.opendatakit.aggregate.odktables.client.exception.UserAlreadyExistsException;
 import org.opendatakit.aggregate.odktables.client.exception.UserDoesNotExistException;
-import org.opendatakit.common.persistence.DataField.DataType;
+import org.opendatakit.common.ermodel.simple.AttributeType;
 
 /**
  * Integration test for SimpleAPI. Only works when you have a running Aggregate
@@ -45,7 +45,13 @@ public class AggregateConnectionTest
     private List<String> rowIds;
     private List<Row> rows;
 
-    public void setUp()
+    public static void main(String[] args) throws ClientProtocolException, UserDoesNotExistException, UserAlreadyExistsException, PermissionDeniedException, TableAlreadyExistsException, TableDoesNotExistException, CannotDeleteException, AggregateInternalErrorException, OutOfSynchException, RowOutOfSynchException, URISyntaxException, IOException
+    {
+        AggregateConnectionTest test = new AggregateConnectionTest();
+        test.test();
+    }
+    
+    public AggregateConnectionTest()
     {
         userID = "user1";
 
@@ -63,7 +69,7 @@ public class AggregateConnectionTest
         Row row2 = new Row();
         rowIds.add("2");
         row2.setRowID("2");
-        row1.setValue("column1", "value2");
+        row2.setValue("column1", "value2");
         row2.setValue("column2", "value2");
         rows.add(row2);
     }
@@ -90,8 +96,8 @@ public class AggregateConnectionTest
         conn = new SimpleAPI(aggregateURI, userID);
 
         List<Column> columns = new ArrayList<Column>();
-        Column column1 = new Column("column1", DataType.STRING, false);
-        Column column2 = new Column("column2", DataType.STRING, false);
+        Column column1 = new Column("column1", AttributeType.STRING, false);
+        Column column2 = new Column("column2", AttributeType.STRING, false);
         columns.add(column1);
         columns.add(column2);
 
