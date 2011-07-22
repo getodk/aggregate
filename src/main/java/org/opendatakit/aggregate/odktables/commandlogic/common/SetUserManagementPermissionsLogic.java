@@ -48,7 +48,7 @@ public class SetUserManagementPermissionsLogic extends CommandLogic<SetUserManag
 
         try
         {
-            users.get(aggregateUserIdentifier);
+            users.getEntity(aggregateUserIdentifier);
         } catch (ODKDatastoreException e)
         {
             return SetUserManagementPermissionsResult.failure(aggregateUserIdentifier,

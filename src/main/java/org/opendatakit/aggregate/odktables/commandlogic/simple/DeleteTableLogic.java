@@ -90,7 +90,7 @@ public class DeleteTableLogic extends CommandLogic<DeleteTable>
                 .equal(UserTableMappings.AGGREGATE_TABLE_IDENTIFIER,
                         aggregateTableIdentifier).get();
 
-        InternalTableEntry entry = tables.get(aggregateTableIdentifier);
+        InternalTableEntry entry = tables.getEntity(aggregateTableIdentifier);
         List<InternalColumn> tableColumns = columns
                 .query()
                 .equal(Columns.AGGREGATE_TABLE_IDENTIFIER,

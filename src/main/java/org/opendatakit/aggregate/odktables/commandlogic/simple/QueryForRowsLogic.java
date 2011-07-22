@@ -71,7 +71,7 @@ public class QueryForRowsLogic extends CommandLogic<QueryForRows>
 
         try
         {
-            entries.get(aggregateTableIdentifier);
+            entries.getEntity(aggregateTableIdentifier);
         } catch (ODKDatastoreException e)
         {
             return QueryForRowsResult.failure(tableID,

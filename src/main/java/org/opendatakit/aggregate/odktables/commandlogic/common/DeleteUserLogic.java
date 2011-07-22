@@ -53,7 +53,7 @@ public class DeleteUserLogic extends CommandLogic<DeleteUser>
         InternalUser user = null;
         try
         {
-            user = users.get(aggregateUserIdentifier);
+            user = users.getEntity(aggregateUserIdentifier);
         } catch (ODKDatastoreException e)
         {
             // user does not exist

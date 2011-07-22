@@ -84,7 +84,7 @@ public class InsertSynchronizedRowsLogic extends
                     FailureReason.PERMISSION_DENIED);
         }
 
-        InternalTableEntry entry = entries.get(aggregateTableIdentifier);
+        InternalTableEntry entry = entries.getEntity(aggregateTableIdentifier);
 
         if (entry.getModificationNumber() != clientModificationNumber)
         {

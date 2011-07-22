@@ -80,7 +80,7 @@ public class CloneSynchronizedTableLogic extends
         InternalTableEntry entry;
         try
         {
-            entry = entries.get(aggregateTableIdentifier);
+            entry = entries.getEntity(aggregateTableIdentifier);
         } catch (ODKDatastoreException e)
         {
             return CloneSynchronizedTableResult.failure(tableID,
