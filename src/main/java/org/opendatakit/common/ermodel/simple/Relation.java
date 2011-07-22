@@ -338,7 +338,7 @@ public class Relation
      */
     public CallingContext getCC()
     {
-        return getCC();
+        return relation.getCC();
     }
 
     /**
