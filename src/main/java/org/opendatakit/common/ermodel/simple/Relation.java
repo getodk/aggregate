@@ -74,11 +74,14 @@ public class Relation
      * <p>
      * Rules for namespaces and names:
      * <ul>
-     * <li>It must not be null or empty.</li>
-     * <li>It must start with a capital letter, and</li>
+     * <li>They must not be null or empty.</li>
+     * <li>They must start with a capital letter, and</li>
      * <li>The rest of the characters may be numbers, underscores or capital
      * letters.</li>
      * </ul>
+     * </p>
+     *
+     * <p>
      * For example: 'TABLE' and 'MY_5TH_TABLE' are fine, but 'table' and
      * '5TH_TABLE' are not.
      * </p>
