@@ -153,6 +153,25 @@ public class Entity
     }
 
     /**
+     * Retrieves the value of the given attribute and returns the value as a
+     * String.
+     */
+    public String getAsString(String attributeName)
+    {
+        return this.entity.getField(attributeName);
+    }
+
+    /**
+     * Attempts to parse 'value' to the correct type for the given attribute and
+     * then set it on this entity.
+     */
+    public void setAsString(String attributeName, String value)
+    {
+        Check.notNullOrEmpty(attributeName, "attributeName");
+        this.entity.setField(attributeName, value);
+    }
+
+    /**
      * Saves this Entity to the datastore.
      * 
      * @throws ODKEntityPersistException
