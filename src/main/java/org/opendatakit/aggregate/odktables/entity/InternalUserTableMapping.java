@@ -1,15 +1,15 @@
 package org.opendatakit.aggregate.odktables.entity;
 
 import org.opendatakit.aggregate.odktables.relation.UserTableMappings;
-import org.opendatakit.common.ermodel.Entity;
+import org.opendatakit.common.ermodel.simple.Entity;
 import org.opendatakit.common.ermodel.simple.typedentity.TypedEntity;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
 
 /**
  * <p>
- * A Cursor is a (aggregateUserIdentifier, aggregateTableIdentifier, tableID)
- * tuple, where
+ * A UserTableMapping is a (aggregateUserIdentifier, aggregateTableIdentifier,
+ * tableID) tuple, where
  * <ul>
  * <li>aggregateUserIdentifier: the globally unique identifier of a user who is
  * using the table with aggregateTableIdentifier</li>
@@ -29,51 +29,45 @@ public class InternalUserTableMapping extends TypedEntity
             String aggregateTableIdentifier, String tableID, CallingContext cc)
             throws ODKDatastoreException
     {
-        super(UserTableMappings.getInstance(cc));
+        super(UserTableMappings.getInstance(cc).newEntity());
         setUser(aggregateUserIdentifier);
         setAggregateTableIdentifier(aggregateTableIdentifier);
         setTableID(tableID);
     }
 
-    public InternalUserTableMapping(Entity entity, CallingContext cc)
-            throws ODKDatastoreException
+    public InternalUserTableMapping(Entity entity) throws ODKDatastoreException
     {
-        super(UserTableMappings.getInstance(cc), entity);
+        super(entity);
     }
 
     public String getUser()
     {
-        return super.getEntity().getField(
-                UserTableMappings.AGGREGATE_USER_IDENTIFIER);
+        return entity.getString(UserTableMappings.AGGREGATE_USER_IDENTIFIER);
     }
 
-    public void setUser(String aggregateUserIdentifier)
+    public void setUser(String value)
     {
-        super.getEntity().setField(UserTableMappings.AGGREGATE_USER_IDENTIFIER,
-                aggregateUserIdentifier);
+        entity.set(UserTableMappings.AGGREGATE_USER_IDENTIFIER, value);
     }
 
     public String getAggregateTableIdentifier()
     {
-        return super.getEntity().getField(
-                UserTableMappings.AGGREGATE_TABLE_IDENTIFIER);
+        return entity.getString(UserTableMappings.AGGREGATE_TABLE_IDENTIFIER);
     }
 
-    public void setAggregateTableIdentifier(String aggregateTableIdentifier)
+    public void setAggregateTableIdentifier(String value)
     {
-        super.getEntity().setField(
-                UserTableMappings.AGGREGATE_TABLE_IDENTIFIER,
-                aggregateTableIdentifier);
+        entity.set(UserTableMappings.AGGREGATE_TABLE_IDENTIFIER, value);
     }
 
     public String getTableID()
     {
-        return super.getEntity().getField(UserTableMappings.TABLE_ID);
+        return entity.getString(UserTableMappings.TABLE_ID);
     }
 
-    public void setTableID(String tableID)
+    public void setTableID(String value)
     {
-        super.getEntity().setField(UserTableMappings.TABLE_ID, tableID);
+        entity.set(UserTableMappings.TABLE_ID, value);
     }
 
     @Override
@@ -82,5 +76,11 @@ public class InternalUserTableMapping extends TypedEntity
         return String
                 .format("InternalUserTableMapping[aggregateUserIdentifier=%s, aggregateTableIdentifier=%s, tableID=%s",
                         getUser(), getAggregateTableIdentifier(), getTableID());
+    }
+
+    public static InternalUserTableMapping fromEntity(Entity entity)
+            throws ODKDatastoreException
+    {
+        return new InternalUserTableMapping(entity);
     }
 }

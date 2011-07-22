@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.opendatakit.aggregate.odktables.entity.InternalPermission;
-import org.opendatakit.common.ermodel.Entity;
+import org.opendatakit.common.ermodel.simple.Entity;
+import org.opendatakit.common.ermodel.simple.Attribute;
+import org.opendatakit.common.ermodel.simple.AttributeType;
 import org.opendatakit.common.ermodel.simple.typedentity.TypedEntityRelation;
-import org.opendatakit.common.persistence.Attribute;
-import org.opendatakit.common.persistence.Attribute.AttributeType;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
 
@@ -59,12 +59,12 @@ public class Permissions extends TypedEntityRelation<InternalPermission>
      * The aggregateTableIdentifier field.
      */
     private static final Attribute aggregateTableIdentifier = new Attribute(AGGREGATE_TABLE_IDENTIFIER,
-            AttributeType.URI, false);
+            AttributeType.STRING, false);
     /**
      * The aggregateUserIdentifier field.
      */
     private static final Attribute aggregateUserIdentifier = new Attribute(AGGREGATE_USER_IDENTIFIER,
-            AttributeType.URI, false);
+            AttributeType.STRING, false);
     /**
      * The read field.
      */

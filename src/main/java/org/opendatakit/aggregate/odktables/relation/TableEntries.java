@@ -4,18 +4,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.opendatakit.aggregate.odktables.entity.InternalTableEntry;
-import org.opendatakit.common.ermodel.Entity;
+import org.opendatakit.common.ermodel.simple.Attribute;
+import org.opendatakit.common.ermodel.simple.AttributeType;
+import org.opendatakit.common.ermodel.simple.Entity;
 import org.opendatakit.common.ermodel.simple.typedentity.TypedEntityRelation;
-import org.opendatakit.common.persistence.Attribute;
-import org.opendatakit.common.persistence.Attribute.Attribute;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
 
 /**
  * <p>
- * TableEntries is a relation containing all the {@link InternalTableEntry} entities
- * stored in the datastore. TableEntries keeps track of all the tables created
- * through the odktables API.
+ * TableEntries is a relation containing all the {@link InternalTableEntry}
+ * entities stored in the datastore. TableEntries keeps track of all the tables
+ * created through the odktables API.
  * </p>
  * 
  * @author the.dylan.price@gmail.com
@@ -57,23 +57,23 @@ public class TableEntries
      * The ownerAggregate Identifier field.
      */
     private static final Attribute aggregateOwnerIdentifier = new Attribute(
-            AGGREGATE_OWNER_IDENTIFIER, Attribute.URI, false);
+            AGGREGATE_OWNER_IDENTIFIER, AttributeType.STRING, false);
     /**
      * The tableName field.
      */
     private static final Attribute tableName = new Attribute(TABLE_NAME,
-            Attribute.STRING, false);
+            AttributeType.STRING, false);
     /**
      * The modificationNumber field.
      */
     private static final Attribute modificationNumber = new Attribute(
-            MODIFICATION_NUMBER, Attribute.INTEGER, false);
+            MODIFICATION_NUMBER, AttributeType.INTEGER, false);
 
     /**
      * The isSynchronized field.
      */
     private static final Attribute isSynchronized = new Attribute(
-            IS_SYNCHRONIZED, Attribute.BOOLEAN, false);
+            IS_SYNCHRONIZED, AttributeType.BOOLEAN, false);
 
     private static final List<Attribute> attributes;
     static
@@ -106,7 +106,8 @@ public class TableEntries
     }
 
     @Override
-    public InternalTableEntry initialize(Entity entity) throws ODKDatastoreException
+    public InternalTableEntry initialize(Entity entity)
+            throws ODKDatastoreException
     {
         return InternalTableEntry.fromEntity(entity);
     }

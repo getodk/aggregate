@@ -49,7 +49,7 @@ public class Modifications extends TypedEntityRelation<InternalModification>
      * The field for the aggregateTableIdentifier.
      */
     private static final Attribute aggregateTableIdentifier = new Attribute(
-            AGGREGATE_TABLE_IDENTIFIER, AttributeType.URI, false);
+            AGGREGATE_TABLE_IDENTIFIER, AttributeType.STRING, false);
     /**
      * The field for the modificationNumber.
      */
@@ -57,7 +57,7 @@ public class Modifications extends TypedEntityRelation<InternalModification>
             MODIFICATION_NUMBER, AttributeType.INTEGER, false);
 
     private static final Attribute aggregateRowIdentifier = new Attribute(
-            AGGREGATE_ROW_IDENTIFIER, AttributeType.URI, false);
+            AGGREGATE_ROW_IDENTIFIER, AttributeType.STRING, false);
 
     private static final List<Attribute> attributes;
     static
@@ -86,14 +86,7 @@ public class Modifications extends TypedEntityRelation<InternalModification>
      */
     private Modifications(CallingContext cc) throws ODKDatastoreException
     {
-        try
-        {
-            super(Table.NAMESPACE, RELATION_NAME, cc);
-        }
-        catch (ODKDatastoreException e)
-        {
-            super(Table.NAMESPACE, RELATION_NAME, attributes, cc);
-        }
+        super(Table.NAMESPACE, RELATION_NAME, attributes, cc);
     }
 
     public InternalModification initialize(Entity entity)

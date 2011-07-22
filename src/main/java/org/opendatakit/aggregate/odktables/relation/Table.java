@@ -1,21 +1,23 @@
 package org.opendatakit.aggregate.odktables.relation;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.opendatakit.aggregate.odktables.entity.InternalColumn;
 import org.opendatakit.aggregate.odktables.entity.InternalRow;
-import org.opendatakit.common.ermodel.Entity;
+import org.opendatakit.common.ermodel.simple.Attribute;
+import org.opendatakit.common.ermodel.simple.AttributeType;
+import org.opendatakit.common.ermodel.simple.Entity;
 import org.opendatakit.common.ermodel.simple.typedentity.TypedEntityRelation;
-import org.opendatakit.common.persistence.Attribute;
-import org.opendatakit.common.persistence.Attribute.Attribute;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
 
 /**
  * <p>
- * Rows is a set of relations containing all the {@link InternalRow} entities for all
- * tables stored in the datastore. An instance of Rows contains all the Row
- * entities for a specific table.
+ * Rows is a set of relations containing all the {@link InternalRow} entities
+ * for all tables stored in the datastore. An instance of Rows contains all the
+ * Row entities for a specific table.
  * </p>
  * 
  * @author the.dylan.price@gmail.com
@@ -31,8 +33,8 @@ public class Table extends TypedEntityRelation<InternalRow>
      * The revisionTag field.
      */
     private static final Attribute revisionTag = new Attribute(REVISION_TAG,
-            Attribute.STRING, false);
-    
+            AttributeType.STRING, false);
+
     /**
      * The namespace for all relations.
      */
@@ -52,7 +54,7 @@ public class Table extends TypedEntityRelation<InternalRow>
      *            the namespace the table should be created under.
      * @param aggregateTableIdentifier
      *            the globally unique identifier of the Table.
-     * @param tableFields
+     * @param attributes
      *            a list of Attributes representing the attributes of the Table
      * @param cc
      *            the CallingContext of this Aggregate instance
@@ -61,11 +63,11 @@ public class Table extends TypedEntityRelation<InternalRow>
      *             datastore
      */
     private Table(String namespace, String aggregateTableIdentifier,
-            List<Attribute> tableFields, CallingContext cc)
+            List<Attribute> attributes, CallingContext cc)
             throws ODKDatastoreException
     {
-        super(namespace, aggregateTableIdentifier, tableFields, cc);
-        this.attributes = tableFields;
+        super(namespace, aggregateTableIdentifier, attributes, cc);
+        this.attributes = attributes;
     }
 
     @Override
@@ -82,18 +84,28 @@ public class Table extends TypedEntityRelation<InternalRow>
         return Collections.unmodifiableList(this.attributes);
     }
 
-    public static Table getInstance(String aggregateTableIdentifier, CallingContext cc)
-            throws ODKDatastoreException
+    public static Table getInstance(String aggregateTableIdentifier,
+            CallingContext cc) throws ODKDatastoreException
     {
-        List<Attribute> tableFields = Columns.getInstance(cc).getAttributes(
-                aggregateTableIdentifier);
-        tableFields.add(revisionTag);
+        List<InternalColumn> columns = Columns
+                .getInstance(cc)
+                .query()
+                .equal(Columns.AGGREGATE_TABLE_IDENTIFIER,
+                        aggregateTableIdentifier).execute();
+        List<Attribute> attributes = new ArrayList<Attribute>();
+
+        for (InternalColumn column : columns)
+            attributes.add(column.toAttribute());
+
+        attributes.add(revisionTag);
         String tableName = convertIdentifier(aggregateTableIdentifier);
-        return new Table(TABLE_NAMESPACE, tableName, tableFields, cc);
+
+        return new Table(TABLE_NAMESPACE, tableName, attributes, cc);
     }
-    
+
     public static String convertIdentifier(String aggregateIdentifier)
     {
-       return aggregateIdentifier.replace('-', '_').replace(':', '_').toUpperCase(); 
+        return aggregateIdentifier.replace('-', '_').replace(':', '_')
+                .toUpperCase();
     }
 }

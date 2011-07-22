@@ -2,6 +2,7 @@ package org.opendatakit.aggregate.odktables.entity;
 
 import org.opendatakit.aggregate.odktables.relation.Modifications;
 import org.opendatakit.common.ermodel.simple.Entity;
+import org.opendatakit.common.ermodel.simple.typedentity.TypedEntity;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
 
@@ -21,16 +22,14 @@ import org.opendatakit.common.web.CallingContext;
  * @author the.dylan.price@gmail.com
  * 
  */
-public class InternalModification
+public class InternalModification extends TypedEntity
 {
-
-    private Entity entity;
 
     public InternalModification(String aggregateTableIdentifier,
             int modificationNumber, String aggregateRowIdentifier,
             CallingContext cc) throws ODKDatastoreException
     {
-        this.entity = Modifications.getInstance(cc).newEntity();
+        super(Modifications.getInstance(cc).newEntity());
         setAggregateTableIdentifier(aggregateTableIdentifier);
         setModificationNumber(modificationNumber);
         setAggregateRowIdentifier(aggregateRowIdentifier);
@@ -38,7 +37,7 @@ public class InternalModification
 
     private InternalModification(Entity entity)
     {
-        this.entity = entity;
+        super(entity);
     }
 
     public String getAggregateTableIdentifier()
@@ -48,7 +47,7 @@ public class InternalModification
 
     public void setAggregateTableIdentifier(String value)
     {
-        entity.setString(Modifications.AGGREGATE_TABLE_IDENTIFIER, value);
+        entity.set(Modifications.AGGREGATE_TABLE_IDENTIFIER, value);
     }
 
     public int getModificationNumber()
@@ -58,7 +57,7 @@ public class InternalModification
 
     public void setModificationNumber(int value)
     {
-        entity.setInteger(Modifications.MODIFICATION_NUMBER, value);
+        entity.set(Modifications.MODIFICATION_NUMBER, value);
     }
 
     public String getAggregateRowIdentifier()
@@ -68,7 +67,7 @@ public class InternalModification
 
     public void setAggregateRowIdentifier(String value)
     {
-        entity.setString(Modifications.AGGREGATE_ROW_IDENTIFIER, value);
+        entity.set(Modifications.AGGREGATE_ROW_IDENTIFIER, value);
     }
 
     @Override

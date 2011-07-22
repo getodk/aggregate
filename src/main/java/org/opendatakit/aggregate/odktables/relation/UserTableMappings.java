@@ -4,23 +4,25 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.opendatakit.aggregate.odktables.entity.InternalUserTableMapping;
-import org.opendatakit.common.ermodel.Entity;
+import org.opendatakit.common.ermodel.simple.Attribute;
+import org.opendatakit.common.ermodel.simple.AttributeType;
+import org.opendatakit.common.ermodel.simple.Entity;
 import org.opendatakit.common.ermodel.simple.typedentity.TypedEntityRelation;
-import org.opendatakit.common.persistence.Attribute;
-import org.opendatakit.common.persistence.Attribute.Attribute;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
 
 /**
  * <p>
- * Cursors is a relation containing all the {@link InternalUserTableMapping} entities in
- * the datastore. Cursors defines a mapping of users to the tables they are
- * synchronized with and tracks their personal identifiers for those tables.
+ * Cursors is a relation containing all the {@link InternalUserTableMapping}
+ * entities in the datastore. Cursors defines a mapping of users to the tables
+ * they are synchronized with and tracks their personal identifiers for those
+ * tables.
  * </p>
  * 
  * @author the.dylan.price@gmail.com
  */
-public class UserTableMappings extends TypedEntityRelation<InternalUserTableMapping>
+public class UserTableMappings extends
+        TypedEntityRelation<InternalUserTableMapping>
 {
     // Field names
     /**
@@ -49,17 +51,17 @@ public class UserTableMappings extends TypedEntityRelation<InternalUserTableMapp
      * The aggregateUserIdentifier field.
      */
     private static final Attribute aggregateUserIdentifier = new Attribute(
-            AGGREGATE_USER_IDENTIFIER, Attribute.URI, false);
+            AGGREGATE_USER_IDENTIFIER, AttributeType.STRING, false);
     /**
      * The aggregateTableIdentifier field.
      */
     private static final Attribute aggregateTableIdentifier = new Attribute(
-            AGGREGATE_TABLE_IDENTIFIER, Attribute.URI, false);
+            AGGREGATE_TABLE_IDENTIFIER, AttributeType.STRING, false);
     /**
      * The tableID field.
      */
     private static final Attribute tableID = new Attribute(TABLE_ID,
-            Attribute.STRING, false);
+            AttributeType.STRING, false);
 
     private static final List<Attribute> attributes;
     static
