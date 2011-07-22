@@ -10,7 +10,7 @@ import org.opendatakit.common.utils.Check;
  */
 public class QueryForRows implements Command
 {
-    private static final String path = "/odktables/simple/getAllRows";
+    private static final String path = "/simple/getAllRows";
     
     private final String requestingUserID;
     private final String tableID;

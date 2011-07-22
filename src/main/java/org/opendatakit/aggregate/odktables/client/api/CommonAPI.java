@@ -18,6 +18,7 @@ import org.opendatakit.aggregate.odktables.client.entity.TableEntry;
 import org.opendatakit.aggregate.odktables.client.entity.User;
 import org.opendatakit.aggregate.odktables.client.exception.AggregateInternalErrorException;
 import org.opendatakit.aggregate.odktables.client.exception.CannotDeleteException;
+import org.opendatakit.aggregate.odktables.client.exception.Http404Exception;
 import org.opendatakit.aggregate.odktables.client.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.client.exception.TableDoesNotExistException;
 import org.opendatakit.aggregate.odktables.client.exception.UserAlreadyExistsException;
@@ -84,7 +85,7 @@ public class CommonAPI
         CheckUserExistsResult result = sendCommand(checkUserExists,
                 CheckUserExistsResult.class);
         if (!result.getUserExists())
-            throw new UserDoesNotExistException(null);
+            throw new UserDoesNotExistException("null and userID " + userID);
     }
 
     /**
@@ -249,6 +250,7 @@ public class CommonAPI
             boolean delete) throws ClientProtocolException, IOException,
             PermissionDeniedException, UserDoesNotExistException,
             TableDoesNotExistException, AggregateInternalErrorException
+
     {
         SetTablePermissions setTablePermissions = new SetTablePermissions(
                 requestingUserID, aggregateTableIdentifier,
@@ -325,7 +327,7 @@ public class CommonAPI
             Class<T> commandResultClass) throws ClientProtocolException,
             IOException, AggregateInternalErrorException
     {
-        URI uri = aggregateURI.resolve(command.getMethodPath());
+        URI uri = aggregateURI.resolve("/odktables" + command.getMethodPath());
         String json = CommandConverter.getInstance().serializeCommand(command);
         HttpPost post = new HttpPost(uri);
         HttpEntity entity = new StringEntity(json);
@@ -336,6 +338,11 @@ public class CommonAPI
         {
             response.getEntity().consumeContent();
             throw new AggregateInternalErrorException(status.getReasonPhrase());
+        }
+        if (status.getStatusCode() == 404)
+        {
+            response.getEntity().consumeContent();
+            throw new Http404Exception(status.getReasonPhrase());
         }
         Reader reader = new InputStreamReader(response.getEntity().getContent());
         T result = CommandConverter.getInstance().deserializeResult(reader,

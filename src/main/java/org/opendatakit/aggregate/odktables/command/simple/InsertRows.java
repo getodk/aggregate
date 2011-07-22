@@ -13,7 +13,7 @@ import org.opendatakit.common.utils.Check;
  */
 public class InsertRows implements Command
 {
-    private static final String path = "/odktables/simple/insertRows";
+    private static final String path = "/simple/insertRows";
 
     private final List<Row> rows;
     private final String requestingUserID;

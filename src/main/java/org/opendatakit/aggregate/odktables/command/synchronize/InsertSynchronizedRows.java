@@ -13,7 +13,7 @@ import org.opendatakit.common.utils.Check;
  */
 public class InsertSynchronizedRows implements Command
 {
-    private static final String path = "/odktables/synchronize/insertSynchronizedRows";
+    private static final String path = "/synchronize/insertSynchronizedRows";
     
     private final String requestingUserID;
     private final String tableID;

@@ -10,7 +10,7 @@ import org.opendatakit.common.utils.Check;
  */
 public class DeleteSynchronizedTable implements Command
 {
-    private static final String path = "/odktables/synchronize/deleteSynchronizedTable";
+    private static final String path = "/synchronize/deleteSynchronizedTable";
     
     private final String requestingUserID;
     private final String tableID;

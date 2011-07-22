@@ -50,8 +50,7 @@ public class CommandServlet extends ServletUtilBase
         InputStreamReader reader = new InputStreamReader(req.getInputStream());
         try
         {
-            String methodName = req.getRequestURI();
-            req.getContextPath();
+            String methodName = req.getPathInfo();
 
             Class<? extends Command> commandClass = CommandConverter
                     .getInstance().getCommandClass(methodName);

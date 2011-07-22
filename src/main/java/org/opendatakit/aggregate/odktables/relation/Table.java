@@ -95,7 +95,13 @@ public class Table extends TypedEntityRelation<InternalRow>
         List<Attribute> attributes = new ArrayList<Attribute>();
 
         for (InternalColumn column : columns)
-            attributes.add(column.toAttribute());
+        {
+            String name = convertIdentifier(column.getAggregateIdentifier());
+            AttributeType type = column.getType();
+            boolean nullable = column.getNullable();
+            Attribute attribute = new Attribute(name, type, nullable);
+            attributes.add(attribute);
+        }
 
         attributes.add(revisionTag);
         String tableName = convertIdentifier(aggregateTableIdentifier);

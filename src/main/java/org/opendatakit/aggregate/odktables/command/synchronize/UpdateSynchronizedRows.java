@@ -13,7 +13,7 @@ import org.opendatakit.common.utils.Check;
  */
 public class UpdateSynchronizedRows implements Command
 {
-    private static final String path = "/odktables/synchronize/updateSynchronizedRows";
+    private static final String path = "/synchronize/updateSynchronizedRows";
 
     private final List<SynchronizedRow> changedRows;
     private final String requestingUserID;

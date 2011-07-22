@@ -10,7 +10,7 @@ import org.opendatakit.common.utils.Check;
  */
 public class Synchronize implements Command
 {
-    private static final String path = "/odktables/synchronize/synchronize";
+    private static final String path = "/synchronize/synchronize";
     
     private final String requestingUserID;
     private final String tableID;

@@ -42,8 +42,7 @@ public class User
      */
     public User(String userID, String aggregateUserIdentifier, String userName)
     {
-        if (userID == null || userID.length() == 0)
-            throw new IllegalArgumentException("userID was null or empty");
+        // userID may be null (we may not want the to know what it is)
         if (aggregateUserIdentifier == null || aggregateUserIdentifier.length() == 0)
             throw new IllegalArgumentException("aggregateUserIdentifier was null or empty");
         if (userName == null || userName.length() == 0)

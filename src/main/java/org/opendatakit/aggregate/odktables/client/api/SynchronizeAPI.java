@@ -46,7 +46,7 @@ import org.opendatakit.aggregate.odktables.commandresult.synchronize.UpdateSynch
  * </p>
  * <p>
  * For each row of a table: Aggregate's aggregateRowIdentifier, the
- * revisionNumber from the last synchronization with Aggregate, and the data
+ * revisionTag from the last synchronization with Aggregate, and the data
  * that is contained in the row.
  * </p>
  * 
@@ -123,7 +123,7 @@ public class SynchronizeAPI extends CommonAPI
      *            table
      * @return the current Modification of the table. The list returned by
      *         getRows() will be populated with aggregateRowIdentifier,
-     *         revisionNumber, and data for the row. Make sure that all of this
+     *         revisionTag, and data for the row. Make sure that all of this
      *         data is stored as it will be required for other API calls (see
      *         {@link SynchronizedAPI the top of this file} for a summary of
      *         client requirements for synchronized API usage).
@@ -225,7 +225,7 @@ public class SynchronizeAPI extends CommonAPI
      * @return a Modification whose modificationNumber represents the latest
      *         modification of the table in Aggregate. Calling getRows() on the
      *         Modification will return a list of rows where each row is
-     *         populated with rowID, aggregateRowIdentifier, and revisionNumber.
+     *         populated with rowID, aggregateRowIdentifier, and revisionTag.
      *         Make sure that all of this data is stored as it will be required
      *         for other API calls (see {@link SynchronizedAPI the top of this
      *         file} for a summary of client requirements for synchronized API
@@ -272,12 +272,12 @@ public class SynchronizeAPI extends CommonAPI
      *            table
      * @param changedRows
      *            a list of synchronized rows which are populated
-     *            aggregateRowIdentifiers, revisionNumbers,and data. These rows
+     *            aggregateRowIdentifiers, revisionTags,and data. These rows
      *            must already exist in Aggregate's copy of the table
      * @return a Modificaton whose modificationNumber represents the latest
      *         modification of the table in Aggregate. Calling getRows() on the
      *         Modification will return a list of rows where each row is
-     *         populated with aggregateRowIdentifier and revisionNumber. Make
+     *         populated with aggregateRowIdentifier and revisionTag. Make
      *         sure that all of this data is stored as it will be required for
      *         other API calls (see {@link SynchronizedAPI the top of this file}
      *         for a summary of client requirements for synchronized API usage).
@@ -326,7 +326,7 @@ public class SynchronizeAPI extends CommonAPI
      * @return a Modification whose modificationNumber represents the latest
      *         modification of the table in Aggregate. Calling getRows() on the
      *         Modification will return a list of rows where each row is
-     *         populated with aggregateRowIdentifier, revisionNumber, and data.
+     *         populated with aggregateRowIdentifier, revisionTag, and data.
      *         Make sure that all of this data is stored as it will be required
      *         for other API calls (see {@link SynchronizedAPI the top of this
      *         file} for a summary of client requirements for synchronized API

@@ -82,9 +82,9 @@ public class QueryForTablesLogic extends CommandLogic<QueryForTables>
             catch (ODKDatastoreException e)
             {
                // Do nothing, this just means the user is not registered with this table right now. 
-               // TODO: is there a better way to do this without using exceptions for normal behavior?
             }
-            User clientUser = new User(user.getID(),
+            // send null for userID because we don't want people finding out what it is
+            User clientUser = new User(null,
                     user.getAggregateIdentifier(), user.getName());
 
             TableEntry clientEntry = new TableEntry(clientUser,

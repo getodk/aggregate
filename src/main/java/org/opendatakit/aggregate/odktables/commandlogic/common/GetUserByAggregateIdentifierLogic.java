@@ -60,7 +60,8 @@ public class GetUserByAggregateIdentifierLogic extends
                     aggregateUserIdentifier, FailureReason.USER_DOES_NOT_EXIST);
         }
 
-        User retrievedUser = new User(user.getID(),
+        // set userID to null since we don't want people finding it out
+        User retrievedUser = new User(null,
                 user.getAggregateIdentifier(), user.getName());
 
         return GetUserByAggregateIdentifierResult.success(retrievedUser);

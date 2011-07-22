@@ -20,4 +20,15 @@ public class SynchronizedRow extends Row
         this.revisionTag = revisionTag;
     }
 
+    /* (non-Javadoc)
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString()
+    {
+        return String
+                .format("SynchronizedRow [rowID=%s, aggregateRowIdentifier=%s, revisionTag=%s]",
+                        getRowID(), getAggregateRowIdentifier(), revisionTag);
+    }
+
 }
