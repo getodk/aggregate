@@ -6,11 +6,10 @@ import java.util.UUID;
 
 import org.opendatakit.aggregate.odktables.entity.InternalPermission;
 import org.opendatakit.aggregate.odktables.entity.InternalUser;
-import org.opendatakit.common.ermodel.Entity;
+import org.opendatakit.common.ermodel.simple.Attribute;
+import org.opendatakit.common.ermodel.simple.AttributeType;
+import org.opendatakit.common.ermodel.simple.Entity;
 import org.opendatakit.common.ermodel.simple.typedentity.TypedEntityRelation;
-import org.opendatakit.common.persistence.Attribute;
-import org.opendatakit.common.persistence.Attribute.Attribute;
-import org.opendatakit.common.persistence.Attribute.IndexType;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
 
@@ -63,18 +62,16 @@ public class Users extends TypedEntityRelation<InternalUser>
      * The field for the user id.
      */
     private static final Attribute userID = new Attribute(USER_ID,
-            Attribute.STRING, false);
+            AttributeType.STRING, false);
     /**
      * The field for the user name.
      */
     private static final Attribute userName = new Attribute(USER_NAME,
-            Attribute.STRING, false);
+            AttributeType.STRING, false);
 
     private static final List<Attribute> attributes;
     static
     {
-        userID.setIndexable(IndexType.HASH);
-
         attributes = new ArrayList<Attribute>();
         attributes.add(userID);
         attributes.add(userName);
@@ -108,7 +105,7 @@ public class Users extends TypedEntityRelation<InternalUser>
 
     public InternalUser initialize(Entity entity) throws ODKDatastoreException
     {
-        return InternalUser.fromEntity(entity);
+        return InternalUser.fromEntity(entity, getCC());
     }
 
     public InternalUser getAdminUser() throws ODKDatastoreException
@@ -123,7 +120,7 @@ public class Users extends TypedEntityRelation<InternalUser>
                 adminInstance = new InternalUser(ADMIN_ID, ADMIN_NAME, getCC());
                 adminInstance.save();
                 InternalPermission adminPerm = new InternalPermission(
-                        getAggregateIdentifier(),
+                        RELATION_NAME,
                         adminInstance.getAggregateIdentifier(), true, true,
                         true, getCC());
                 adminPerm.save();
@@ -137,6 +134,11 @@ public class Users extends TypedEntityRelation<InternalUser>
         return query().equal(USER_ID, userID).get();
     }
 
+    public String getAggregateIdentifier()
+    {
+        return RELATION_NAME;
+    }
+    
     /**
      * Returns the singleton instance of the Users.
      * 
@@ -159,4 +161,5 @@ public class Users extends TypedEntityRelation<InternalUser>
 
         return instance;
     }
+
 }

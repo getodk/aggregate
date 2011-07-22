@@ -1,9 +1,8 @@
 package org.opendatakit.aggregate.odktables.entity;
 
 import org.opendatakit.aggregate.odktables.relation.Permissions;
-import org.opendatakit.common.ermodel.Entity;
+import org.opendatakit.common.ermodel.simple.Entity;
 import org.opendatakit.common.ermodel.simple.typedentity.TypedEntity;
-import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
 
@@ -34,7 +33,7 @@ public class InternalPermission extends TypedEntity
             String aggregateUserIdentifier, boolean read, boolean write,
             boolean delete, CallingContext cc) throws ODKDatastoreException
     {
-        super(Permissions.getInstance(cc));
+        super(Permissions.getInstance(cc).newEntity());
         setAggregateTableIdentifier(aggregateTableIdentifier);
         setAggregateUserIdentifier(aggregateUserIdentifier);
         setRead(read);
@@ -42,70 +41,59 @@ public class InternalPermission extends TypedEntity
         setDelete(delete);
     }
 
-    public InternalPermission(Entity entity, CallingContext cc)
-            throws ODKDatastoreException
+    public InternalPermission(Entity entity) throws ODKDatastoreException
     {
-        super(Permissions.getInstance(cc), entity);
+        super(entity);
     }
 
     public String getAggregateTableIdentifier()
     {
-        return super.getEntity().getField(
-                Permissions.AGGREGATE_TABLE_IDENTIFIER);
+        return entity.getString(Permissions.AGGREGATE_TABLE_IDENTIFIER);
     }
 
-    public void setAggregateTableIdentifier(String aggregateTableIdentifier)
+    public void setAggregateTableIdentifier(String value)
     {
-        super.getEntity().setField(Permissions.AGGREGATE_TABLE_IDENTIFIER,
-                aggregateTableIdentifier);
+        entity.set(Permissions.AGGREGATE_TABLE_IDENTIFIER, value);
     }
 
     public String getAggregateUserIdentifier()
     {
-        return super.getEntity()
-                .getField(Permissions.AGGREGATE_USER_IDENTIFIER);
+        return entity.getString(Permissions.AGGREGATE_USER_IDENTIFIER);
     }
 
-    public void setAggregateUserIdentifier(String aggregateUserIdentifier)
+    public void setAggregateUserIdentifier(String value)
     {
-        super.getEntity().setField(Permissions.AGGREGATE_USER_IDENTIFIER,
-                aggregateUserIdentifier);
+        entity.set(Permissions.AGGREGATE_USER_IDENTIFIER, value);
     }
 
     public boolean getRead()
     {
-        DataField readField = getDataField(Permissions.READ);
-        return super.getEntity().getBoolean(readField);
+        return entity.getBoolean(Permissions.READ);
     }
 
-    public void setRead(boolean read)
+    public void setRead(boolean value)
     {
-        DataField readField = getDataField(Permissions.READ);
-        super.getEntity().setBoolean(readField, read);
+        entity.set(Permissions.READ, value);
     }
 
     public boolean getWrite()
     {
-        DataField writeField = getDataField(Permissions.WRITE);
-        return super.getEntity().getBoolean(writeField);
+        return entity.getBoolean(Permissions.WRITE);
     }
 
-    public void setWrite(boolean write)
+    public void setWrite(boolean value)
     {
-        DataField writeField = getDataField(Permissions.WRITE);
-        super.getEntity().setBoolean(writeField, write);
+        entity.set(Permissions.WRITE, value);
     }
 
     public boolean getDelete()
     {
-        DataField deleteField = getDataField(Permissions.DELETE);
-        return super.getEntity().getBoolean(deleteField);
+        return entity.getBoolean(Permissions.DELETE);
     }
 
-    public void setDelete(boolean delete)
+    public void setDelete(boolean value)
     {
-        DataField deleteField = getDataField(Permissions.DELETE);
-        super.getEntity().setBoolean(deleteField, delete);
+        entity.set(Permissions.DELETE, value);
     }
 
     @Override
@@ -116,5 +104,11 @@ public class InternalPermission extends TypedEntity
                         getAggregateTableIdentifier(),
                         getAggregateUserIdentifier(), getRead(), getWrite(),
                         getDelete());
+    }
+
+    public static InternalPermission fromEntity(Entity entity)
+            throws ODKDatastoreException
+    {
+        return new InternalPermission(entity);
     }
 }

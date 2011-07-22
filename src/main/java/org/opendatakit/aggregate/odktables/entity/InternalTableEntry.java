@@ -1,9 +1,8 @@
 package org.opendatakit.aggregate.odktables.entity;
 
 import org.opendatakit.aggregate.odktables.relation.TableEntries;
-import org.opendatakit.common.ermodel.Entity;
+import org.opendatakit.common.ermodel.simple.Entity;
 import org.opendatakit.common.ermodel.simple.typedentity.TypedEntity;
-import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
 
@@ -32,45 +31,41 @@ public class InternalTableEntry extends TypedEntity
             String tableName, boolean isSynchronized, CallingContext cc)
             throws ODKDatastoreException
     {
-        super(TableEntries.getInstance(cc));
+        super(TableEntries.getInstance(cc).newEntity());
         setAggregateOwnerIdentifier(aggregateOwnerIdentifier);
         setName(tableName);
         setModificationNumber(0);
         setSynchronized(isSynchronized);
     }
 
-    public InternalTableEntry(Entity entity, CallingContext cc)
-            throws ODKDatastoreException
+    public InternalTableEntry(Entity entity) throws ODKDatastoreException
     {
-        super(TableEntries.getInstance(cc), entity);
+        super(entity);
     }
 
     public String getAggregateOwnerIdentifier()
     {
-        return super.getEntity().getField(
-                TableEntries.AGGREGATE_OWNER_IDENTIFIER);
+        return entity.getString(TableEntries.AGGREGATE_OWNER_IDENTIFIER);
     }
 
-    public void setAggregateOwnerIdentifier(String aggregateOwnerIdentifier)
+    public void setAggregateOwnerIdentifier(String value)
     {
-        super.getEntity().setField(TableEntries.AGGREGATE_OWNER_IDENTIFIER,
-                aggregateOwnerIdentifier);
+        entity.set(TableEntries.AGGREGATE_OWNER_IDENTIFIER, value);
     }
 
     public String getName()
     {
-        return super.getEntity().getField(TableEntries.TABLE_NAME);
+        return entity.getString(TableEntries.TABLE_NAME);
     }
 
-    public void setName(String name)
+    public void setName(String value)
     {
-        super.getEntity().setField(TableEntries.TABLE_NAME, name);
+        entity.set(TableEntries.TABLE_NAME, value);
     }
 
     public int getModificationNumber()
     {
-        DataField modificationNumberField = getDataField(TableEntries.MODIFICATION_NUMBER);
-        return super.getEntity().getInteger(modificationNumberField);
+        return entity.getInteger(TableEntries.MODIFICATION_NUMBER);
     }
 
     public int incrementModificationNumber()
@@ -83,21 +78,17 @@ public class InternalTableEntry extends TypedEntity
 
     public boolean isSynchronized()
     {
-        DataField isSynchronizedField = getDataField(TableEntries.IS_SYNCHRONIZED);
-        return super.getEntity().getBoolean(isSynchronizedField);
+        return entity.getBoolean(TableEntries.IS_SYNCHRONIZED);
     }
 
-    public void setSynchronized(boolean isSynchronized)
+    private void setModificationNumber(int value)
     {
-        DataField isSynchronizedField = getDataField(TableEntries.IS_SYNCHRONIZED);
-        super.getEntity().setBoolean(isSynchronizedField, isSynchronized);
+        entity.set(TableEntries.MODIFICATION_NUMBER, value);
     }
 
-    private void setModificationNumber(int modificationNumber)
+    public void setSynchronized(boolean value)
     {
-        DataField modificationNumberField = getDataField(TableEntries.MODIFICATION_NUMBER);
-        super.getEntity().setInteger(modificationNumberField,
-                modificationNumber);
+        entity.set(TableEntries.IS_SYNCHRONIZED, value);
     }
 
     @Override
@@ -108,5 +99,11 @@ public class InternalTableEntry extends TypedEntity
                         getAggregateIdentifier(),
                         getAggregateOwnerIdentifier(), getName(),
                         getModificationNumber(), isSynchronized());
+    }
+
+    public static InternalTableEntry fromEntity(Entity entity)
+            throws ODKDatastoreException
+    {
+        return new InternalTableEntry(entity);
     }
 }
