@@ -13,37 +13,37 @@ import org.opendatakit.common.web.CallingContext;
 /**
  * <pre>
  * CallingContext cc;
- *
+ * 
  * // create attributes
  * List<Attribute> attributes = new ArrayList<Attribute>();
- *
+ * 
  * Attribute name = new Attribute("NAME", AttributeType.STRING, false);
  * Attribute age = new Attribute("AGE", AttributeType.INTEGER, false);
- *
+ * 
  * attributes.add(name);
  * attributes.add(age);
- *
+ * 
  * // create a relation
  * Relation person = new Relation("MY_NAMESPACE", "PERSON", attributes, cc);
- *
+ * 
  * // create and save an entity
  * Entity john = person.newEntity();
  * john.setString("NAME", "John");
  * john.setInteger("AGE", 50);
  * john.save();
  * String johnsIdentifier = john.getAggregateIdentifier();
- *
+ * 
  * // retrieve the relation later
  * person = Relation.getRelation("MY_NAMESPACE", "PERSON", cc);
- *
+ * 
  * // retrieve the entity later 
  * john = person.getEntity(johnsIdentifier);
- *
+ * 
  * // query for entities
  * john = person.query().equal("NAME", "John").get();
  * List<Entity> = person.query().lessThanOrEqual("AGE", 50).execute();
  * </pre>
- *
+ * 
  * @author the.dylan.price@gmail.com
  */
 public class Relation
@@ -71,14 +71,12 @@ public class Relation
                         .getInstance(namespace, cc);
                 Entity attrEntity = attributeRelation.newEntity();
 
-                attrEntity.setString(AttributeRelation.RELATION_NAMESPACE,
-                        namespace);
-                attrEntity.setString(AttributeRelation.RELATION_NAME, name);
-                attrEntity.setString(AttributeRelation.NAME,
-                        attribute.getName());
-                attrEntity.setString(AttributeRelation.TYPE, attribute
-                        .getType().name());
-                attrEntity.setBoolean(AttributeRelation.NULLABLE,
+                attrEntity.set(AttributeRelation.RELATION_NAMESPACE, namespace);
+                attrEntity.set(AttributeRelation.RELATION_NAME, name);
+                attrEntity.set(AttributeRelation.NAME, attribute.getName());
+                attrEntity.set(AttributeRelation.TYPE, attribute.getType()
+                        .name());
+                attrEntity.set(AttributeRelation.NULLABLE,
                         attribute.isNullable());
 
                 attrEntity.save();
@@ -135,6 +133,11 @@ public class Relation
     public String getName()
     {
         return name;
+    }
+
+    public Attribute getAttribute(String attributeName)
+    {
+        return Attribute.fromDataField(relation.getDataField(attributeName));
     }
 
     public List<Attribute> getAttributes() throws ODKDatastoreException
@@ -219,7 +222,7 @@ public class Relation
                     "Relation does not exist in datastore.", e);
         }
     }
-    
+
     public CallingContext getCC()
     {
         return getCC();

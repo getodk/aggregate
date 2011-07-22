@@ -90,4 +90,12 @@ public class Attribute
             return false;
         return true;
     }
+    
+    protected static Attribute fromDataField(DataField field)
+    {
+       String name = field.getName();
+       AttributeType type = AttributeType.valueOf(field.getDataType().name());
+       boolean nullable = field.getNullable();
+       return new Attribute(name, type, nullable);
+    }
 }
