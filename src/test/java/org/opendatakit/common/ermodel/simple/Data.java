@@ -1,6 +1,7 @@
 package org.opendatakit.common.ermodel.simple;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
@@ -25,7 +26,9 @@ public class Data
     public String joesName;
     public int joesAge;
     public String joesIdentifier;
-    
+
+    public Comparator<Attribute> attrComparator;
+
     public Data() throws ODKDatastoreException
     {
         attrName = "NAME";
@@ -50,20 +53,29 @@ public class Data
         johnsAge = 50;
 
         Entity john = relation.newEntity();
-        john.setString(attrName, johnsName);
-        john.setInteger(attrAge, johnsAge);
+        john.set(attrName, johnsName);
+        john.set(attrAge, johnsAge);
         john.save();
 
         johnsIdentifier = john.getAggregateIdentifier();
-        
+
         joesName = "Joe Doe";
         joesAge = 50;
 
         Entity joe = relation.newEntity();
-        joe.setString(attrName, joesName);
-        joe.setInteger(attrAge, joesAge);
+        joe.set(attrName, joesName);
+        joe.set(attrAge, joesAge);
         joe.save();
 
         joesIdentifier = joe.getAggregateIdentifier();
+
+        attrComparator = new Comparator<Attribute>()
+        {
+            public int compare(Attribute o1, Attribute o2)
+            {
+                return o1.getName().compareTo(o2.getName());
+            }
+
+        };
     }
 }
