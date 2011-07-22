@@ -10,7 +10,7 @@ import org.opendatakit.common.utils.Check;
  */
 public class DeleteUser implements Command
 {
-    private static final String path = "/odktables/common/deleteUser";
+    private static final String path = "/common/deleteUser";
 
     private final String requestingUserID;
     private final String aggregateUserIdentifier;

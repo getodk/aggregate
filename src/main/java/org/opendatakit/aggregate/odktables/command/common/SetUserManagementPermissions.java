@@ -10,7 +10,7 @@ import org.opendatakit.common.utils.Check;
  */
 public class SetUserManagementPermissions implements Command
 {
-    private static final String path = "/odktables/common/setUserManagementPermissions";
+    private static final String path = "/common/setUserManagementPermissions";
 
     private final String requestingUserID;
     private final String aggregateUserIdentifier;

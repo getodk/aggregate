@@ -108,8 +108,9 @@ public class TableEntry
     public String toString()
     {
         return String
-                .format("TableEntry [user=%s, tableID=%s, tableName=%s, isSynchronized=%s]",
-                        user, tableID, tableName, isSynchronized);
+                .format("TableEntry [user=%s, aggregateTableIdentifier=%s, tableID=%s, tableName=%s, isSynchronized=%s]",
+                        user, getAggregateTableIdentifier(), tableID,
+                        tableName, isSynchronized);
     }
 
     /* (non-Javadoc)

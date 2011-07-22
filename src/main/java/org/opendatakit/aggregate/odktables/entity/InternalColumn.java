@@ -92,12 +92,6 @@ public class InternalColumn extends TypedEntity
                 getName(), getType(), getNullable());
     }
 
-    public Attribute toAttribute()
-    {
-        Attribute attribute = new Attribute(getName(), getType(), getNullable());
-        return attribute;
-    }
-
     public static InternalColumn fromEntity(Entity entity)
             throws ODKDatastoreException
     {

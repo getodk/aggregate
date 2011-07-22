@@ -10,7 +10,7 @@ import org.opendatakit.common.utils.Check;
  */
 public class QueryForTables implements Command
 {
-    private static final String path = "/odktables/common/listAllTables";
+    private static final String path = "/common/listAllTables";
 
     private final String requestingUserID;
 

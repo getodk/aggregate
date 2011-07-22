@@ -13,7 +13,7 @@ import org.opendatakit.common.utils.Check;
  */
 public class CreateTable implements Command
 {
-    private static final String path = "/odktables/simple/createTable";
+    private static final String path = "/simple/createTable";
     
     private final String tableName;
     private final String requestingUserID;

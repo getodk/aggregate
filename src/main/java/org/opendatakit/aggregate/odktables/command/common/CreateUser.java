@@ -10,7 +10,7 @@ import org.opendatakit.common.utils.Check;
  */
 public class CreateUser implements Command
 {
-    private static final String path = "/odktables/common/createUser";
+    private static final String path = "/common/createUser";
 
     private final String userName;
     private final String requestingUserID;

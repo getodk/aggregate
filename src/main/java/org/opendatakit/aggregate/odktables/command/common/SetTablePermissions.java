@@ -10,7 +10,7 @@ import org.opendatakit.common.utils.Check;
  */
 public class SetTablePermissions implements Command
 {
-    private static final String path = "/odktables/common/setTablePermissions";
+    private static final String path = "/common/setTablePermissions";
 
     private final String aggregateTableIdentifier;
     private final String aggregateUserIdentifier;

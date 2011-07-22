@@ -10,7 +10,7 @@ import org.opendatakit.common.utils.Check;
  */
 public class CloneSynchronizedTable implements Command
 {
-    private static final String path = "/odktables/synchronize/cloneSynchronizedTable";
+    private static final String path = "/synchronize/cloneSynchronizedTable";
     
     private final String tableID;
     private final String requestingUserID;

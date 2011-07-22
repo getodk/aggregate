@@ -13,7 +13,7 @@ import org.opendatakit.common.utils.Check;
  */
 public class CreateSynchronizedTable implements Command
 {
-    private static final String path = "/odktables/synchronize/createSynchronizedTable";
+    private static final String path = "/synchronize/createSynchronizedTable";
     
     private final String tableName;
     private final String requestingUserID;

@@ -2,6 +2,8 @@ package org.opendatakit.aggregate.odktables.commandlogic.synchronize;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 import org.opendatakit.aggregate.odktables.client.entity.Modification;
 import org.opendatakit.aggregate.odktables.client.entity.SynchronizedRow;
@@ -91,7 +93,7 @@ public class SynchronizeLogic extends CommandLogic<Synchronize>
                         aggregateTableIdentifier)
                 .greaterThan(Modifications.MODIFICATION_NUMBER,
                         clientModificationNumber).execute();
-        List<String> aggregateRowIdentifiers = new ArrayList<String>();
+        Set<String> aggregateRowIdentifiers = new TreeSet<String>();
 
         // Get rows that need to be updated
         for (InternalModification mod : latestModifications)

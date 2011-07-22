@@ -10,7 +10,7 @@ import org.opendatakit.common.utils.Check;
  */
 public class GetUserByID implements Command
 {
-    private static final String path = "/odktables/common/getUserByID";
+    private static final String path = "/common/getUserByID";
 
     private final String requestingUserID;
     private final String userID;

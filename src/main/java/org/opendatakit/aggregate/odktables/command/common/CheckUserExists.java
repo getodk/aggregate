@@ -10,7 +10,7 @@ import org.opendatakit.common.utils.Check;
  */
 public class CheckUserExists implements Command
 {
-    private static final String path = "/odktables/common/checkUserExists";
+    private static final String path = "/common/checkUserExists";
 
     private final String userID;
 

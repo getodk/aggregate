@@ -10,7 +10,7 @@ import org.opendatakit.common.utils.Check;
  */
 public class RemoveTableSynchronization implements Command
 {
-    private static final String path = "/odktables/synchronize/removeTableSynchronization";
+    private static final String path = "/synchronize/removeTableSynchronization";
     
     private final String requestingUserID;
     private final String tableID;

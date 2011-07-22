@@ -49,13 +49,12 @@ public class Users extends TypedEntityRelation<InternalUser>
     /**
      * The ID of the admin user.
      */
-    // TODO: this will generate a new admin user every time the server is restarted
-    private static final String ADMIN_ID = UUID.randomUUID().toString();
+    private static String ADMIN_ID;
 
     /**
      * The name of the admin user.
      */
-    private static final String ADMIN_NAME = "Admin User";
+    private static final String ADMIN_NAME = "55534804-daea-4ae0-a796-a92560c2f184"; 
 
     // The following defines the actual attributes that will be in the datastore:
     /**
@@ -114,9 +113,10 @@ public class Users extends TypedEntityRelation<InternalUser>
         {
             try
             {
-                adminInstance = instance.query().equal(USER_ID, ADMIN_ID).get();
+                adminInstance = instance.query().equal(USER_NAME, ADMIN_NAME).get();
             } catch (ODKDatastoreException e)
             {
+                ADMIN_ID = UUID.randomUUID().toString();
                 adminInstance = new InternalUser(ADMIN_ID, ADMIN_NAME, getCC());
                 adminInstance.save();
                 InternalPermission adminPerm = new InternalPermission(
