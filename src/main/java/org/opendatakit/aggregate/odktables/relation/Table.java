@@ -6,8 +6,8 @@ import java.util.List;
 import org.opendatakit.aggregate.odktables.entity.InternalRow;
 import org.opendatakit.common.ermodel.Entity;
 import org.opendatakit.common.ermodel.simple.typedentity.TypedEntityRelation;
-import org.opendatakit.common.persistence.DataField;
-import org.opendatakit.common.persistence.DataField.DataType;
+import org.opendatakit.common.persistence.Attribute;
+import org.opendatakit.common.persistence.Attribute.Attribute;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
 
@@ -30,8 +30,8 @@ public class Table extends TypedEntityRelation<InternalRow>
     /**
      * The revisionTag field.
      */
-    private static final DataField revisionTag = new DataField(REVISION_TAG,
-            DataType.STRING, false);
+    private static final Attribute revisionTag = new Attribute(REVISION_TAG,
+            Attribute.STRING, false);
     
     /**
      * The namespace for all relations.
@@ -42,7 +42,7 @@ public class Table extends TypedEntityRelation<InternalRow>
      */
     private static final String TABLE_NAMESPACE = NAMESPACE + "_TABLE";
 
-    private List<DataField> fields;
+    private List<Attribute> attributes;
 
     /**
      * Constructs a Table. If the constructed Table does not already exist in
@@ -53,7 +53,7 @@ public class Table extends TypedEntityRelation<InternalRow>
      * @param aggregateTableIdentifier
      *            the globally unique identifier of the Table.
      * @param tableFields
-     *            a list of DataFields representing the fields of the Table
+     *            a list of Attributes representing the attributes of the Table
      * @param cc
      *            the CallingContext of this Aggregate instance
      * @throws ODKDatastoreException
@@ -61,31 +61,31 @@ public class Table extends TypedEntityRelation<InternalRow>
      *             datastore
      */
     private Table(String namespace, String aggregateTableIdentifier,
-            List<DataField> tableFields, CallingContext cc)
+            List<Attribute> tableFields, CallingContext cc)
             throws ODKDatastoreException
     {
         super(namespace, aggregateTableIdentifier, tableFields, cc);
-        this.fields = tableFields;
+        this.attributes = tableFields;
     }
 
     @Override
     public InternalRow initialize(Entity entity) throws ODKDatastoreException
     {
-        return new InternalRow(this, entity);
+        return InternalRow.fromEntity(entity);
     }
 
     /**
-     * @return a list of DataFields representing the columns of this table.
+     * @return a list of Attributes representing the columns of this table.
      */
-    public List<DataField> getDataFields()
+    public List<Attribute> getAttributes()
     {
-        return Collections.unmodifiableList(this.fields);
+        return Collections.unmodifiableList(this.attributes);
     }
 
     public static Table getInstance(String aggregateTableIdentifier, CallingContext cc)
             throws ODKDatastoreException
     {
-        List<DataField> tableFields = Columns.getInstance(cc).getDataFields(
+        List<Attribute> tableFields = Columns.getInstance(cc).getAttributes(
                 aggregateTableIdentifier);
         tableFields.add(revisionTag);
         String tableName = convertIdentifier(aggregateTableIdentifier);

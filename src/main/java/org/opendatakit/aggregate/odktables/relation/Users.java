@@ -8,9 +8,9 @@ import org.opendatakit.aggregate.odktables.entity.InternalPermission;
 import org.opendatakit.aggregate.odktables.entity.InternalUser;
 import org.opendatakit.common.ermodel.Entity;
 import org.opendatakit.common.ermodel.simple.typedentity.TypedEntityRelation;
-import org.opendatakit.common.persistence.DataField;
-import org.opendatakit.common.persistence.DataField.DataType;
-import org.opendatakit.common.persistence.DataField.IndexType;
+import org.opendatakit.common.persistence.Attribute;
+import org.opendatakit.common.persistence.Attribute.Attribute;
+import org.opendatakit.common.persistence.Attribute.IndexType;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
 
@@ -58,26 +58,26 @@ public class Users extends TypedEntityRelation<InternalUser>
      */
     private static final String ADMIN_NAME = "Admin User";
 
-    // The following defines the actual fields that will be in the datastore:
+    // The following defines the actual attributes that will be in the datastore:
     /**
      * The field for the user id.
      */
-    private static final DataField userID = new DataField(USER_ID,
-            DataType.STRING, false);
+    private static final Attribute userID = new Attribute(USER_ID,
+            Attribute.STRING, false);
     /**
      * The field for the user name.
      */
-    private static final DataField userName = new DataField(USER_NAME,
-            DataType.STRING, false);
+    private static final Attribute userName = new Attribute(USER_NAME,
+            Attribute.STRING, false);
 
-    private static final List<DataField> fields;
+    private static final List<Attribute> attributes;
     static
     {
         userID.setIndexable(IndexType.HASH);
 
-        fields = new ArrayList<DataField>();
-        fields.add(userID);
-        fields.add(userName);
+        attributes = new ArrayList<Attribute>();
+        attributes.add(userID);
+        attributes.add(userName);
     }
 
     /**
@@ -103,12 +103,12 @@ public class Users extends TypedEntityRelation<InternalUser>
      */
     private Users(CallingContext cc) throws ODKDatastoreException
     {
-        super(Table.NAMESPACE, RELATION_NAME, fields, cc);
+        super(Table.NAMESPACE, RELATION_NAME, attributes, cc);
     }
 
     public InternalUser initialize(Entity entity) throws ODKDatastoreException
     {
-        return new InternalUser(entity, super.getCC());
+        return InternalUser.fromEntity(entity);
     }
 
     public InternalUser getAdminUser() throws ODKDatastoreException

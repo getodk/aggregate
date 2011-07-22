@@ -6,8 +6,8 @@ import java.util.List;
 import org.opendatakit.aggregate.odktables.entity.InternalTableEntry;
 import org.opendatakit.common.ermodel.Entity;
 import org.opendatakit.common.ermodel.simple.typedentity.TypedEntityRelation;
-import org.opendatakit.common.persistence.DataField;
-import org.opendatakit.common.persistence.DataField.DataType;
+import org.opendatakit.common.persistence.Attribute;
+import org.opendatakit.common.persistence.Attribute.Attribute;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
 
@@ -51,38 +51,38 @@ public class TableEntries
      */
     private static final String RELATION_NAME = "TABLE_ENTRIES";
 
-    // The following defines the actual fields that will be in the datastore:
+    // The following defines the actual attributes that will be in the datastore:
     // The aggregateTableIdentifier field is the entity Aggregate Identifier, so is created automatically
     /**
      * The ownerAggregate Identifier field.
      */
-    private static final DataField aggregateOwnerIdentifier = new DataField(
-            AGGREGATE_OWNER_IDENTIFIER, DataType.URI, false);
+    private static final Attribute aggregateOwnerIdentifier = new Attribute(
+            AGGREGATE_OWNER_IDENTIFIER, Attribute.URI, false);
     /**
      * The tableName field.
      */
-    private static final DataField tableName = new DataField(TABLE_NAME,
-            DataType.STRING, false);
+    private static final Attribute tableName = new Attribute(TABLE_NAME,
+            Attribute.STRING, false);
     /**
      * The modificationNumber field.
      */
-    private static final DataField modificationNumber = new DataField(
-            MODIFICATION_NUMBER, DataType.INTEGER, false);
+    private static final Attribute modificationNumber = new Attribute(
+            MODIFICATION_NUMBER, Attribute.INTEGER, false);
 
     /**
      * The isSynchronized field.
      */
-    private static final DataField isSynchronized = new DataField(
-            IS_SYNCHRONIZED, DataType.BOOLEAN, false);
+    private static final Attribute isSynchronized = new Attribute(
+            IS_SYNCHRONIZED, Attribute.BOOLEAN, false);
 
-    private static final List<DataField> fields;
+    private static final List<Attribute> attributes;
     static
     {
-        fields = new ArrayList<DataField>();
-        fields.add(aggregateOwnerIdentifier);
-        fields.add(tableName);
-        fields.add(modificationNumber);
-        fields.add(isSynchronized);
+        attributes = new ArrayList<Attribute>();
+        attributes.add(aggregateOwnerIdentifier);
+        attributes.add(tableName);
+        attributes.add(modificationNumber);
+        attributes.add(isSynchronized);
     }
     /**
      * The singleton instance of the TableEntries.
@@ -102,13 +102,13 @@ public class TableEntries
      */
     private TableEntries(CallingContext cc) throws ODKDatastoreException
     {
-        super(Table.NAMESPACE, RELATION_NAME, fields, cc);
+        super(Table.NAMESPACE, RELATION_NAME, attributes, cc);
     }
 
     @Override
     public InternalTableEntry initialize(Entity entity) throws ODKDatastoreException
     {
-        return new InternalTableEntry(entity, getCC());
+        return InternalTableEntry.fromEntity(entity);
     }
 
     /**

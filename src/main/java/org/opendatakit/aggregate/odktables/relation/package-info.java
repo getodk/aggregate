@@ -5,10 +5,10 @@
  * </p>
  * 
  * <p>
- * The following diagrams present an overview of the relations and their fields. 
+ * The following diagrams present an overview of the relations and their attributes. 
  * (URI) in parentheses means that the field is represented by the default Uri 
  * generated for each entity. See the respective entity (e.g. {@link InternalColumn}, 
- * {@link InternalUserTableMapping}, etc.) for definitions of the fields.
+ * {@link InternalUserTableMapping}, etc.) for definitions of the attributes.
  * <center>
  * <table>
  * <tr>

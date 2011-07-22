@@ -6,8 +6,8 @@ import java.util.List;
 import org.opendatakit.aggregate.odktables.entity.InternalPermission;
 import org.opendatakit.common.ermodel.Entity;
 import org.opendatakit.common.ermodel.simple.typedentity.TypedEntityRelation;
-import org.opendatakit.common.persistence.DataField;
-import org.opendatakit.common.persistence.DataField.DataType;
+import org.opendatakit.common.persistence.Attribute;
+import org.opendatakit.common.persistence.Attribute.AttributeType;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
 
@@ -54,42 +54,42 @@ public class Permissions extends TypedEntityRelation<InternalPermission>
      */
     private static final String RELATION_NAME = "PERMISSIONS";
 
-    // The following defines the actual fields that will be in the datastore:
+    // The following defines the actual attributes that will be in the datastore:
     /**
      * The aggregateTableIdentifier field.
      */
-    private static final DataField aggregateTableIdentifier = new DataField(AGGREGATE_TABLE_IDENTIFIER,
-            DataType.URI, false);
+    private static final Attribute aggregateTableIdentifier = new Attribute(AGGREGATE_TABLE_IDENTIFIER,
+            AttributeType.URI, false);
     /**
      * The aggregateUserIdentifier field.
      */
-    private static final DataField aggregateUserIdentifier = new DataField(AGGREGATE_USER_IDENTIFIER,
-            DataType.URI, false);
+    private static final Attribute aggregateUserIdentifier = new Attribute(AGGREGATE_USER_IDENTIFIER,
+            AttributeType.URI, false);
     /**
      * The read field.
      */
-    private static final DataField read = new DataField(READ, DataType.BOOLEAN,
+    private static final Attribute read = new Attribute(READ, AttributeType.BOOLEAN,
             false);
     /**
      * The write field.
      */
-    private static final DataField write = new DataField(WRITE,
-            DataType.BOOLEAN, false);
+    private static final Attribute write = new Attribute(WRITE,
+            AttributeType.BOOLEAN, false);
     /**
      * The delete field.
      */
-    private static final DataField delete = new DataField(DELETE,
-            DataType.BOOLEAN, false);
+    private static final Attribute delete = new Attribute(DELETE,
+            AttributeType.BOOLEAN, false);
 
-    private static final List<DataField> fields;
+    private static final List<Attribute> attributes;
     static
     {
-        fields = new ArrayList<DataField>();
-        fields.add(aggregateTableIdentifier);
-        fields.add(aggregateUserIdentifier);
-        fields.add(read);
-        fields.add(write);
-        fields.add(delete);
+        attributes = new ArrayList<Attribute>();
+        attributes.add(aggregateTableIdentifier);
+        attributes.add(aggregateUserIdentifier);
+        attributes.add(read);
+        attributes.add(write);
+        attributes.add(delete);
     }
     /**
      * The singleton instance of the Permissions relation.
@@ -109,13 +109,13 @@ public class Permissions extends TypedEntityRelation<InternalPermission>
      */
     private Permissions(CallingContext cc) throws ODKDatastoreException
     {
-        super(Table.NAMESPACE, RELATION_NAME, fields, cc);
+        super(Table.NAMESPACE, RELATION_NAME, attributes, cc);
     }
 
     @Override
     public InternalPermission initialize(Entity entity) throws ODKDatastoreException
     {
-        return new InternalPermission(entity, getCC());
+        return InternalPermission.fromEntity(entity);
     }
 
     /**
