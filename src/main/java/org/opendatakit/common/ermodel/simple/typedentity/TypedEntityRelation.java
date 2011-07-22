@@ -15,7 +15,7 @@ import org.opendatakit.common.web.CallingContext;
  * @param <T>
  *            the type of entity which will be stored in this relation.
  */
-public abstract class TypedEntityRelation<T>
+public abstract class TypedEntityRelation<T extends TypedEntity>
 {
 
     private Relation relation;

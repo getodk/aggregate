@@ -23,7 +23,7 @@ import org.opendatakit.common.persistence.exception.ODKDatastoreException;
  * @author the.dylan.price@gmail.com
  * 
  */
-public class TypedEntityQuery<T>
+public class TypedEntityQuery<T extends TypedEntity>
 {
 
     /**
