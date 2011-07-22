@@ -60,7 +60,7 @@ public class EntityTest
             ODKEntityPersistException
     {
         Entity john = d.relation.getEntity(d.johnsIdentifier);
-        john.setInteger(d.attrAge, 60);
+        john.set(d.attrAge, 60);
         john.save();
 
         john = null;

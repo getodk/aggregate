@@ -3,8 +3,8 @@ package org.opendatakit.common.ermodel.simple;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import org.junit.After;
@@ -20,6 +20,7 @@ public class RelationTest
     public void setUp() throws ODKDatastoreException
     {
         d = new Data();
+
     }
 
     @After
@@ -68,19 +69,24 @@ public class RelationTest
     }
 
     @Test
+    public void testGetAttribute()
+    {
+        Attribute name = d.relation.getAttribute(d.attrName);
+        Attribute age = d.relation.getAttribute(d.attrAge);
+        List<Attribute> attributes = new ArrayList<Attribute>();
+        attributes.add(name);
+        attributes.add(age);
+        Collections.sort(attributes, d.attrComparator);
+        Collections.sort(d.attributes, d.attrComparator);
+
+    }
+
+    @Test
     public void testGetAttributes() throws ODKDatastoreException
     {
         List<Attribute> actualAttributes = d.relation.getAttributes();
-        Comparator<Attribute> attrComparator = new Comparator<Attribute>()
-        {
-            public int compare(Attribute o1, Attribute o2)
-            {
-                return o1.getName().compareTo(o2.getName());
-            }
-
-        };
-        Collections.sort(d.attributes, attrComparator);
-        Collections.sort(actualAttributes, attrComparator);
+        Collections.sort(d.attributes, d.attrComparator);
+        Collections.sort(actualAttributes, d.attrComparator);
         assertEquals(d.attributes, actualAttributes);
     }
 

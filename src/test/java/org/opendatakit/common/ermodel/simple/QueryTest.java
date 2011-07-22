@@ -1,6 +1,7 @@
 package org.opendatakit.common.ermodel.simple;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
 import java.util.List;
@@ -80,12 +81,54 @@ public class QueryTest
     }
 
     @Test
-    public void testSort() throws ODKDatastoreException
+    public void testGreaterThan() throws ODKDatastoreException
+    {
+        List<Entity> people = d.relation.query().greaterThan("AGE", 50)
+                .execute();
+        assertTrue(people.isEmpty());
+    }
+
+    @Test
+    public void testGreaterThanOrEqual() throws ODKDatastoreException
+    {
+        List<Entity> people = d.relation.query().greaterThanOrEqual("AGE", 50)
+                .execute();
+        assertEquals(2, people.size());
+    }
+
+    @Test
+    public void testLessThan() throws ODKDatastoreException
+    {
+        List<Entity> people = d.relation.query().lessThan("AGE", 50).execute();
+        assertTrue(people.isEmpty());
+    }
+
+    @Test
+    public void testLessThanOrEqual() throws ODKDatastoreException
+    {
+        List<Entity> people = d.relation.query().lessThanOrEqual("AGE", 50)
+                .execute();
+        assertEquals(2, people.size());
+    }
+
+    @Test
+    public void testSortAscending() throws ODKDatastoreException
     {
         List<Entity> people = d.relation.query().sortAscending(d.attrName)
                 .execute();
         Entity joe = people.get(0);
         Entity john = people.get(1);
+        assertEquals(d.joesName, joe.getString(d.attrName));
+        assertEquals(d.johnsName, john.getString(d.attrName));
+    }
+
+    @Test
+    public void testSortDescending() throws ODKDatastoreException
+    {
+        List<Entity> people = d.relation.query().sortDescending(d.attrName)
+                .execute();
+        Entity john = people.get(0);
+        Entity joe = people.get(1);
         assertEquals(d.joesName, joe.getString(d.attrName));
         assertEquals(d.johnsName, john.getString(d.attrName));
     }
