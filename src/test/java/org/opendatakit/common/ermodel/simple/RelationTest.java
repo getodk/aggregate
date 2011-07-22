@@ -43,6 +43,14 @@ public class RelationTest
     }
 
     @Test
+    public void testCreateRelationAlreadyExists() throws ODKDatastoreException
+    {
+        d.relation = new Relation(d.namespace, d.personRelationName,
+                d.attributes, d.cc);
+        assertEquals(2, d.relation.getAttributes().size());
+    }
+
+    @Test
     public void testGetRelation() throws ODKDatastoreException
     {
         Relation.getRelation(d.namespace, d.personRelationName, d.cc);
