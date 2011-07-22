@@ -11,6 +11,18 @@ import org.opendatakit.common.utils.Check;
 import org.opendatakit.common.web.CallingContext;
 
 /**
+ * <p>
+ * A Relation represents a relation stored in Aggregate. Think of it like a
+ * table.
+ * </p>
+ * 
+ * <p>
+ * You can create a new Relation using the constructor and retrieve an existing
+ * Relation using {@link Relation#getRelation}.
+ * </p>
+ * 
+ * Here's a 'quick start' on using Relations:
+ * 
  * <pre>
  * CallingContext cc;
  * 
@@ -28,8 +40,8 @@ import org.opendatakit.common.web.CallingContext;
  * 
  * // create and save an entity
  * Entity john = person.newEntity();
- * john.setString("NAME", "John");
- * john.setInteger("AGE", 50);
+ * john.set("NAME", "John");
+ * john.set("AGE", 50);
  * john.save();
  * String johnsIdentifier = john.getAggregateIdentifier();
  * 
@@ -53,6 +65,38 @@ public class Relation
     private final String namespace;
     private final String name;
 
+    /**
+     * <p>
+     * Creates a new Relation or, if the Relation already exists, retrieves it
+     * from the datastore.
+     * </p>
+     * 
+     * <p>
+     * Rules for namespaces and names:
+     * <ul>
+     * <li>It must not be null or empty.</li>
+     * <li>It must start with a capital letter, and</li>
+     * <li>The rest of the characters may be numbers, underscores or capital
+     * letters.</li>
+     * </ul>
+     * For example: 'TABLE' and 'MY_5TH_TABLE' are fine, but 'table' and
+     * '5TH_TABLE' are not.
+     * </p>
+     * 
+     * @param namespace
+     *            the namespace the relation should live under. See above for
+     *            the constraints on namespaces.
+     * @param name
+     *            the name of the relation. See above for the constraints on
+     *            names.
+     * @param attributes
+     *            the attributes the relation will have. Must not be null or
+     *            empty.
+     * @param cc
+     *            the context. Must not be null.
+     * @throws ODKDatastoreException
+     *             if there is a problem communicating with the datastore
+     */
     public Relation(String namespace, String name, List<Attribute> attributes,
             CallingContext cc) throws ODKDatastoreException
     {
@@ -62,23 +106,30 @@ public class Relation
         Check.notNull(cc, "cc");
 
         // Add attributes to AttributeRelation
-        // Of course, if we are constructing the AttributeRelation itself then we skip this
+        // if we are constructing the AttributeRelation itself
+        // or if this Relation already exists, then we skip this
         if (!name.equals(AttributeRelation.name()))
         {
-            for (Attribute attribute : attributes)
+            AttributeRelation attributeRelation = AttributeRelation
+                    .getInstance(namespace, cc);
+            boolean relationExists = attributeRelation.query()
+                    .equal(AttributeRelation.RELATION_NAME, name).exists();
+
+            if (!relationExists)
             {
-                AttributeRelation attributeRelation = AttributeRelation
-                        .getInstance(namespace, cc);
-                Entity attrEntity = attributeRelation.newEntity();
+                for (Attribute attribute : attributes)
+                {
+                    Entity attrEntity = attributeRelation.newEntity();
 
-                attrEntity.set(AttributeRelation.RELATION_NAME, name);
-                attrEntity.set(AttributeRelation.NAME, attribute.getName());
-                attrEntity.set(AttributeRelation.TYPE, attribute.getType()
-                        .name());
-                attrEntity.set(AttributeRelation.NULLABLE,
-                        attribute.isNullable());
+                    attrEntity.set(AttributeRelation.RELATION_NAME, name);
+                    attrEntity.set(AttributeRelation.NAME, attribute.getName());
+                    attrEntity.set(AttributeRelation.TYPE, attribute.getType()
+                            .name());
+                    attrEntity.set(AttributeRelation.NULLABLE,
+                            attribute.isNullable());
 
-                attrEntity.save();
+                    attrEntity.save();
+                }
             }
         }
 
@@ -96,6 +147,18 @@ public class Relation
         this.name = name;
     }
 
+    /**
+     * Retrieves the Relation with the given namespace and name. See
+     * {@link #Relation(String, String, List, CallingContext) the other
+     * constructor} for constraints on namespaces and names.
+     * 
+     * @param namespace
+     *            the namespace of the Relation. Must not be null or empty.
+     * @param name
+     *            the name of the Relation. Must not be null or empty.
+     * @param cc
+     * @throws ODKDatastoreException
+     */
     protected Relation(String namespace, String name, CallingContext cc)
             throws ODKDatastoreException
     {
@@ -124,26 +187,47 @@ public class Relation
         this.name = name;
     }
 
+    /**
+     * @return the namespace of this Relation.
+     */
     public String getNamespace()
     {
         return namespace;
     }
 
+    /**
+     * @return the name of this Relation.
+     */
     public String getName()
     {
         return name;
     }
 
+    /**
+     * @param attributeName
+     *            the valid name of an Attribute on this Relation. Must not be
+     *            null or empty.
+     * @return
+     */
     public Attribute getAttribute(String attributeName)
     {
+        Check.notNullOrEmpty(attributeName, "attributeName");
         return Attribute.fromDataField(relation.getDataField(attributeName));
     }
 
+    /**
+     * @return a list of all Attributes on this Relation.
+     * @throws ODKDatastoreException
+     *             if there is a problem communicating with the datastore.
+     */
     public List<Attribute> getAttributes() throws ODKDatastoreException
     {
         return getAttributes(namespace, name, relation.getCC());
     }
 
+    /**
+     * Retrieves a list of all Attributes on a relation.
+     */
     private List<Attribute> getAttributes(String namespace, String name,
             CallingContext cc) throws ODKDatastoreException
     {
@@ -175,6 +259,10 @@ public class Relation
         return attributes;
     }
 
+    /**
+     * Retrieves a list of all entities in the AttributeRelation which are
+     * defined for the given namespace and name.
+     */
     private List<Entity> getAttributeEntities(String namespace, String name,
             CallingContext cc) throws ODKDatastoreException
     {
@@ -185,6 +273,17 @@ public class Relation
         return attrEntities;
     }
 
+    /**
+     * Retrieves an Entity in this Relation.
+     * 
+     * @param aggregateIdentifier
+     *            the identifier of the entity (you can get this by calling
+     *            {@link Entity#getAggregateIdentifier()}).
+     * @return the Entity
+     * @throws ODKEntityNotFoundException
+     *             if there is no Entity with the given identifier stored in
+     *             this Relation.
+     */
     public Entity getEntity(String aggregateIdentifier)
             throws ODKEntityNotFoundException
     {
@@ -193,17 +292,30 @@ public class Relation
                 relation.getEntity(aggregateIdentifier, relation.getCC()));
     }
 
+    /**
+     * Constructs a new Query over this Relation.
+     */
     public Query query()
     {
         return new Query(this.relation);
     }
 
+    /**
+     * @return a new Entity for this Relation.
+     */
     public Entity newEntity()
     {
         return Entity
                 .fromEntity(relation, relation.newEntity(relation.getCC()));
     }
 
+    /**
+     * Completely removes this Relation and all of its Entities from the
+     * datastore.
+     * 
+     * @throws ODKDatastoreException
+     *             if there was a problem communicating with the datastore.
+     */
     public void dropRelation() throws ODKDatastoreException
     {
         for (Entity attribute : getAttributeEntities(namespace, name,
@@ -221,11 +333,30 @@ public class Relation
         }
     }
 
+    /**
+     * @return the CallingContext this Relation was constructed with.
+     */
     public CallingContext getCC()
     {
         return getCC();
     }
 
+    /**
+     * Retrieves an existing Relation from the datastore. See
+     * {@link #Relation(String, String, List, CallingContext) Relation}
+     * regarding constraints on namespaces and names.
+     * 
+     * @param namespace
+     *            the namespace of the Relation.
+     * @param name
+     *            the name of the Relation.
+     * @param cc
+     *            the context.
+     * @return the Relation specified by namespace and name.
+     * @throws ODKDatastoreException
+     *             if no such Relation exists or there is an unknown error
+     *             communicating with the datastore.
+     */
     public static Relation getRelation(String namespace, String name,
             CallingContext cc) throws ODKDatastoreException
     {
