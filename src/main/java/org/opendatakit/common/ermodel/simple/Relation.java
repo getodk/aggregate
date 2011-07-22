@@ -11,6 +11,39 @@ import org.opendatakit.common.utils.Check;
 import org.opendatakit.common.web.CallingContext;
 
 /**
+ * <pre>
+ * CallingContext cc;
+ *
+ * // create attributes
+ * List<Attribute> attributes = new ArrayList<Attribute>();
+ *
+ * Attribute name = new Attribute("NAME", AttributeType.STRING, false);
+ * Attribute age = new Attribute("AGE", AttributeType.INTEGER, false);
+ *
+ * attributes.add(name);
+ * attributes.add(age);
+ *
+ * // create a relation
+ * Relation person = new Relation("MY_NAMESPACE", "PERSON", attributes, cc);
+ *
+ * // create and save an entity
+ * Entity john = person.newEntity();
+ * john.setString("NAME", "John");
+ * john.setInteger("AGE", 50);
+ * john.save();
+ * String johnsIdentifier = john.getAggregateIdentifier();
+ *
+ * // retrieve the relation later
+ * person = Relation.getRelation("MY_NAMESPACE", "PERSON", cc);
+ *
+ * // retrieve the entity later 
+ * john = person.getEntity(johnsIdentifier);
+ *
+ * // query for entities
+ * john = person.query().equal("NAME", "John").get();
+ * List<Entity> = person.query().lessThanOrEqual("AGE", 50).execute();
+ * </pre>
+ *
  * @author the.dylan.price@gmail.com
  */
 public class Relation
@@ -66,7 +99,7 @@ public class Relation
         this.name = name;
     }
 
-    private Relation(String namespace, String name, CallingContext cc)
+    protected Relation(String namespace, String name, CallingContext cc)
             throws ODKDatastoreException
     {
         Check.notNullOrEmpty(namespace, "namespace");
