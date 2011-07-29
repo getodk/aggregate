@@ -95,6 +95,9 @@ public class RefreshTimer extends Timer {
       case PERMISSIONS:
         tabPanel = aggregateUI.getManageNav().getSubTab(currentSubTab);
         break;
+      case TABLES:
+        tabPanel = aggregateUI.getManageNav().getSubTab(currentSubTab);
+        break;
       default:
         // should not happen
         GWT.log("currentSubTab (" + currentSubTab.getHashString()
@@ -202,6 +205,12 @@ public class RefreshTimer extends Timer {
         if (lastCompletionTime == 0L) {
           // update this ONLY if we are forcing a refreshNow().
           // otherwise, let the entries be stale w.r.t. server.
+          tabPanel.update();
+        }
+        break;
+      case TABLES:
+        if ((intervalsElapsed % 3) == 0) {
+          tabPanel = aggregateUI.getManageNav().getSubTab(currentSubTab);
           tabPanel.update();
         }
         break;

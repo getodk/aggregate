@@ -288,8 +288,7 @@ public class UploadSubmissionsWorkerImpl {
     List<Submission> submissions = query.getResultSubmissions(cc);
 
     // here so we don't have to do null checks on the rest of the code in
-    // this
-    // class
+    // this class
     if (submissions == null) {
       submissions = new ArrayList<Submission>();
     }
@@ -303,8 +302,7 @@ public class UploadSubmissionsWorkerImpl {
     List<Submission> submissions = query.getResultSubmissions(cc);
 
     // here so we don't have to do null checks on the rest of the code in
-    // this
-    // class
+    // this class
     if (submissions == null) {
       submissions = new ArrayList<Submission>();
     }
