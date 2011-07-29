@@ -24,6 +24,8 @@ import org.opendatakit.aggregate.client.form.FormAdminService;
 import org.opendatakit.aggregate.client.form.FormAdminServiceAsync;
 import org.opendatakit.aggregate.client.form.FormService;
 import org.opendatakit.aggregate.client.form.FormServiceAsync;
+import org.opendatakit.aggregate.client.preferences.OdkTablesAdminService;
+import org.opendatakit.aggregate.client.preferences.OdkTablesAdminServiceAsync;
 import org.opendatakit.aggregate.client.preferences.PreferenceService;
 import org.opendatakit.aggregate.client.preferences.PreferenceServiceAsync;
 import org.opendatakit.aggregate.client.submission.SubmissionService;
@@ -40,178 +42,186 @@ import com.google.gwt.user.client.rpc.ServiceDefTarget;
 
 /**
  * This class wraps GWT.create() so that a ODK-specific header can be set on all
- * GWT requests to identify those requests as gwt requests.  This allows ODK's 
- * GWTAccessDeniedHandlerImpl to detect requests failing the declarative security
- * model in WEB-INF/applicationContext-security.xml and throw an 
- * AccessDeniedException back up through the GWT RPC mechanism.  Without the header,
- * the failed requests would be redirected to an access-denied.html static page.
+ * GWT requests to identify those requests as gwt requests. This allows ODK's
+ * GWTAccessDeniedHandlerImpl to detect requests failing the declarative
+ * security model in WEB-INF/applicationContext-security.xml and throw an
+ * AccessDeniedException back up through the GWT RPC mechanism. Without the
+ * header, the failed requests would be redirected to an access-denied.html
+ * static page.
  * 
  * @author mitchellsundt@gmail.com
- *
+ * 
  */
 public class SecureGWT {
-	public enum ServiceType {
-		FILTER,
-		FORM,
-		FORM_ADMIN,
-		PREFERENCE,
-		SECURITY,
-		SECURITY_ADMIN,
-		SERVICES_ADMIN,
-		SUBMISSION
-	}
-	
-	private static SecureGWT singleton = null;
-	
-	private static final RpcRequestBuilder reqBuilder = new RpcRequestBuilder() {
+  public enum ServiceType {
+    FILTER, FORM, FORM_ADMIN, PREFERENCE, SECURITY, SECURITY_ADMIN, SERVICES_ADMIN, SUBMISSION, ODK_TABLES_ADMIN
+  }
 
-		@Override
-		protected RequestBuilder doCreate(String serviceEntryPoint) {
-		    RequestBuilder rb = super.doCreate(serviceEntryPoint);
-		    rb.setHeader("X-opendatakit-gwt", "yes");
-		    return rb;
-		}
-		
-	};
-	
-	/** any user... */
-	private PreferenceServiceAsync preferenceServiceAsync = null;
-	private SecurityServiceAsync securityServiceAsync = null;
+  private static SecureGWT singleton = null;
 
-	/** data viewer... */
-	private FilterServiceAsync filterServiceAsync = null;
-	private SubmissionServiceAsync submissionServiceAsync = null;
-	private FormServiceAsync formServiceAsync = null;
-	
-	/** data manager... */
-	private FormAdminServiceAsync formAdminServiceAsync = null;
-	private ServicesAdminServiceAsync servicesAdminServiceAsync = null;
-	
-	/** site admin... */
-	private SecurityAdminServiceAsync securityAdminServiceAsync = null;
+  private static final RpcRequestBuilder reqBuilder = new RpcRequestBuilder() {
 
-	private SecureGWT() {
-		preferenceServiceAsync = (PreferenceServiceAsync) create(ServiceType.PREFERENCE);
-		securityServiceAsync = (SecurityServiceAsync) create(ServiceType.SECURITY);
-		filterServiceAsync = (FilterServiceAsync) create(ServiceType.FILTER);
-		submissionServiceAsync = (SubmissionServiceAsync) create(ServiceType.SUBMISSION);
-		formServiceAsync = (FormServiceAsync) create(ServiceType.FORM);
-		formAdminServiceAsync = (FormAdminServiceAsync) create(ServiceType.FORM_ADMIN);
-		servicesAdminServiceAsync = (ServicesAdminServiceAsync) create(ServiceType.SERVICES_ADMIN);
-		securityAdminServiceAsync = (SecurityAdminServiceAsync) create(ServiceType.SECURITY_ADMIN);
-	};
-	
-	public PreferenceServiceAsync getPreferenceServiceAsync() {
-		return preferenceServiceAsync;
-	}
+    @Override
+    protected RequestBuilder doCreate(String serviceEntryPoint) {
+      RequestBuilder rb = super.doCreate(serviceEntryPoint);
+      rb.setHeader("X-opendatakit-gwt", "yes");
+      return rb;
+    }
 
-	public SecurityServiceAsync getSecurityServiceAsync() {
-		return securityServiceAsync;
-	}
+  };
 
-	public FilterServiceAsync getFilterServiceAsync() {
-		return filterServiceAsync;
-	}
+  /** any user... */
+  private PreferenceServiceAsync preferenceServiceAsync = null;
+  private SecurityServiceAsync securityServiceAsync = null;
 
-	public SubmissionServiceAsync getSubmissionServiceAsync() {
-		return submissionServiceAsync;
-	}
+  /** data viewer... */
+  private FilterServiceAsync filterServiceAsync = null;
+  private SubmissionServiceAsync submissionServiceAsync = null;
+  private FormServiceAsync formServiceAsync = null;
 
-	public FormServiceAsync getFormServiceAsync() {
-		return formServiceAsync;
-	}
+  /** data manager... */
+  private FormAdminServiceAsync formAdminServiceAsync = null;
+  private ServicesAdminServiceAsync servicesAdminServiceAsync = null;
 
-	public FormAdminServiceAsync getFormAdminServiceAsync() {
-		return formAdminServiceAsync;
-	}
+  /** site admin... */
+  private SecurityAdminServiceAsync securityAdminServiceAsync = null;
+  private OdkTablesAdminServiceAsync odkTablesAdminServiceAsync = null;
 
-	public ServicesAdminServiceAsync getServicesAdminServiceAsync() {
-		return servicesAdminServiceAsync;
-	}
+  private SecureGWT() {
+    preferenceServiceAsync = (PreferenceServiceAsync) create(ServiceType.PREFERENCE);
+    securityServiceAsync = (SecurityServiceAsync) create(ServiceType.SECURITY);
+    filterServiceAsync = (FilterServiceAsync) create(ServiceType.FILTER);
+    submissionServiceAsync = (SubmissionServiceAsync) create(ServiceType.SUBMISSION);
+    formServiceAsync = (FormServiceAsync) create(ServiceType.FORM);
+    formAdminServiceAsync = (FormAdminServiceAsync) create(ServiceType.FORM_ADMIN);
+    servicesAdminServiceAsync = (ServicesAdminServiceAsync) create(ServiceType.SERVICES_ADMIN);
+    securityAdminServiceAsync = (SecurityAdminServiceAsync) create(ServiceType.SECURITY_ADMIN);
+    odkTablesAdminServiceAsync = (OdkTablesAdminServiceAsync) create(ServiceType.ODK_TABLES_ADMIN);
+  };
 
-	public SecurityAdminServiceAsync getSecurityAdminServiceAsync() {
-		return securityAdminServiceAsync;
-	}
+  public PreferenceServiceAsync getPreferenceServiceAsync() {
+    return preferenceServiceAsync;
+  }
 
-	public static synchronized final SecureGWT get() {
-		if ( singleton == null ) {
-			singleton = new SecureGWT();
-		}
-		return singleton;
-	}
-	
-	private Object create(ServiceType type) {
-		Object obj = null;
-		switch (type) {
-		case FILTER:
-			obj = GWT.create(FilterService.class);
-			break;
-		case FORM:
-			obj = GWT.create(FormService.class);
-			break;
-		case FORM_ADMIN:
-			obj = GWT.create(FormAdminService.class);
-			break;
-		case PREFERENCE:
-			obj = GWT.create(PreferenceService.class);
-			break;
-		case SECURITY:
-			obj = GWT.create(SecurityService.class);
-			break;
-		case SECURITY_ADMIN:
-			obj = GWT.create(SecurityAdminService.class);
-			break;
-		case SERVICES_ADMIN:
-			obj = GWT.create(ServicesAdminService.class);
-			break;
-		case SUBMISSION:
-			obj = GWT.create(SubmissionService.class);
-			break;
-		default:
-			throw new IllegalStateException("Unrecognized type " + type.toString());
-		}
-		ServiceDefTarget sd = (ServiceDefTarget) obj;
-		sd.setRpcRequestBuilder(reqBuilder);
-		return obj;
-	}
+  public SecurityServiceAsync getSecurityServiceAsync() {
+    return securityServiceAsync;
+  }
 
-	/** any user... */
-	public static PreferenceServiceAsync getPreferenceService() {
-		return get().getPreferenceServiceAsync();
-	}
+  public FilterServiceAsync getFilterServiceAsync() {
+    return filterServiceAsync;
+  }
 
-	/** any user... */
-	public static SecurityServiceAsync getSecurityService() {
-		return get().getSecurityServiceAsync();
-	}
+  public SubmissionServiceAsync getSubmissionServiceAsync() {
+    return submissionServiceAsync;
+  }
 
-	/** data viewer... */
-	public static FilterServiceAsync getFilterService() {
-		return get().getFilterServiceAsync();
-	}
+  public FormServiceAsync getFormServiceAsync() {
+    return formServiceAsync;
+  }
 
-	/** data viewer... */
-	public static SubmissionServiceAsync getSubmissionService() {
-		return get().getSubmissionServiceAsync();
-	}
+  public FormAdminServiceAsync getFormAdminServiceAsync() {
+    return formAdminServiceAsync;
+  }
 
-	/** data viewer... */
-	public static FormServiceAsync getFormService() {
-		return get().getFormServiceAsync();
-	}
+  public ServicesAdminServiceAsync getServicesAdminServiceAsync() {
+    return servicesAdminServiceAsync;
+  }
 
-	/** data manager... */
-	public static FormAdminServiceAsync getFormAdminService() {
-		return get().getFormAdminServiceAsync();
-	}
+  public SecurityAdminServiceAsync getSecurityAdminServiceAsync() {
+    return securityAdminServiceAsync;
+  }
 
-	/** data manager... */
-	public static ServicesAdminServiceAsync getServicesAdminService() {
-		return get().getServicesAdminServiceAsync();
-	}
+  public OdkTablesAdminServiceAsync getOdkTablesAdminServiceAsync() {
+    return odkTablesAdminServiceAsync;
+  }
 
-	/** site admin... */
-	public static SecurityAdminServiceAsync getSecurityAdminService() {
-		return get().getSecurityAdminServiceAsync();
-	}
+  public static synchronized final SecureGWT get() {
+    if (singleton == null) {
+      singleton = new SecureGWT();
+    }
+    return singleton;
+  }
+
+  private Object create(ServiceType type) {
+    Object obj = null;
+    switch (type) {
+    case FILTER:
+      obj = GWT.create(FilterService.class);
+      break;
+    case FORM:
+      obj = GWT.create(FormService.class);
+      break;
+    case FORM_ADMIN:
+      obj = GWT.create(FormAdminService.class);
+      break;
+    case PREFERENCE:
+      obj = GWT.create(PreferenceService.class);
+      break;
+    case SECURITY:
+      obj = GWT.create(SecurityService.class);
+      break;
+    case SECURITY_ADMIN:
+      obj = GWT.create(SecurityAdminService.class);
+      break;
+    case SERVICES_ADMIN:
+      obj = GWT.create(ServicesAdminService.class);
+      break;
+    case SUBMISSION:
+      obj = GWT.create(SubmissionService.class);
+      break;
+    case ODK_TABLES_ADMIN:
+      obj = GWT.create(OdkTablesAdminService.class);
+      break;
+    default:
+      throw new IllegalStateException("Unrecognized type " + type.toString());
+    }
+    ServiceDefTarget sd = (ServiceDefTarget) obj;
+    sd.setRpcRequestBuilder(reqBuilder);
+    return obj;
+  }
+
+  /** any user... */
+  public static PreferenceServiceAsync getPreferenceService() {
+    return get().getPreferenceServiceAsync();
+  }
+
+  /** any user... */
+  public static SecurityServiceAsync getSecurityService() {
+    return get().getSecurityServiceAsync();
+  }
+
+  /** data viewer... */
+  public static FilterServiceAsync getFilterService() {
+    return get().getFilterServiceAsync();
+  }
+
+  /** data viewer... */
+  public static SubmissionServiceAsync getSubmissionService() {
+    return get().getSubmissionServiceAsync();
+  }
+
+  /** data viewer... */
+  public static FormServiceAsync getFormService() {
+    return get().getFormServiceAsync();
+  }
+
+  /** data manager... */
+  public static FormAdminServiceAsync getFormAdminService() {
+    return get().getFormAdminServiceAsync();
+  }
+
+  /** data manager... */
+  public static ServicesAdminServiceAsync getServicesAdminService() {
+    return get().getServicesAdminServiceAsync();
+  }
+
+  /** site admin... */
+  public static SecurityAdminServiceAsync getSecurityAdminService() {
+    return get().getSecurityAdminServiceAsync();
+  }
+
+  /** site admin... */
+  public static OdkTablesAdminServiceAsync getOdkTablesAdminService() {
+    return get().getOdkTablesAdminServiceAsync();
+  }
 }

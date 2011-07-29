@@ -24,7 +24,8 @@ public enum SubTabs implements Serializable {
 	FORMS("Forms List", "forms"),
 	PUBLISH("Published Data", "publish"),
 	PREFERENCES("Preferences", "preferences"),
-	PERMISSIONS("Permissions", "permission"); 
+	PERMISSIONS("Permissions", "permission"),
+	TABLES("ODK Tables Admin", "tablesadmin"); 
 	
    private String tabLabel;
    private String hashString;

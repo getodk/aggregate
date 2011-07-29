@@ -68,6 +68,16 @@
     <url-pattern>/aggregateui/preferenceservice</url-pattern>
   </servlet-mapping>
 
+  <servlet>
+    <servlet-name>odkTablesAdminServiceImpl</servlet-name>
+    <servlet-class>org.opendatakit.aggregate.server.OdkTablesAdminServiceImpl</servlet-class>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>odkTablesAdminServiceImpl</servlet-name>
+    <url-pattern>/aggregateui/odktablesadmin</url-pattern>
+  </servlet-mapping>
+
  
   <servlet>
     <servlet-name>securityAdminServiceImpl</servlet-name>
