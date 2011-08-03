@@ -8,12 +8,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.opendatakit.aggregate.ContextFactory;
-import org.opendatakit.aggregate.odktables.Command;
-import org.opendatakit.aggregate.odktables.CommandConverter;
-import org.opendatakit.aggregate.odktables.CommandLogic;
-import org.opendatakit.aggregate.odktables.CommandResult;
+import org.opendatakit.aggregate.odktables.command.Command;
+import org.opendatakit.aggregate.odktables.command.CommandConverter;
+import org.opendatakit.aggregate.odktables.commandlogic.CommandLogic;
+import org.opendatakit.aggregate.odktables.commandresult.CommandResult;
 import org.opendatakit.aggregate.servlet.ServletUtilBase;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.web.CallingContext;
 
 import com.google.gson.JsonParseException;
@@ -26,13 +27,13 @@ public class CommandServlet extends ServletUtilBase
     private static final long serialVersionUID = -7810505933356321858L;
 
     // TODO: should I have GET and POST or just POST?
-//    @Override
-//    protected void doGet(HttpServletRequest req, HttpServletResponse resp)
-//            throws ServletException, IOException
-//    {
-//        // TODO: check if query, i.e. something that should be a GET
-//        executeCommandAndReturnResponse(req, resp);
-//    }
+    //    @Override
+    //    protected void doGet(HttpServletRequest req, HttpServletResponse resp)
+    //            throws ServletException, IOException
+    //    {
+    //        // TODO: check if query, i.e. something that should be a GET
+    //        executeCommandAndReturnResponse(req, resp);
+    //    }
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
@@ -49,7 +50,7 @@ public class CommandServlet extends ServletUtilBase
         InputStreamReader reader = new InputStreamReader(req.getInputStream());
         try
         {
-            String methodName = req.getRequestURI();
+            String methodName = req.getPathInfo();
 
             Class<? extends Command> commandClass = CommandConverter
                     .getInstance().getCommandClass(methodName);
@@ -69,9 +70,12 @@ public class CommandServlet extends ServletUtilBase
             CommandResult<?> result = commandLogic.execute(cc);
 
             if (result.successful())
+            {
                 resp.setStatus(HttpServletResponse.SC_OK);
-            else
+            } else
+            {
                 resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            }
 
             resp.getWriter().println(
                     CommandConverter.getInstance().serializeResult(result));
@@ -87,6 +91,10 @@ public class CommandServlet extends ServletUtilBase
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
                     "Could not complete request. Please try again later.");
             return;
+        } catch (ODKTaskLockException e)
+        {
+            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                    "Could not complete the request. Please try again later");
         }
     }
 }

@@ -358,6 +358,15 @@
         <servlet-name>localLoginPage</servlet-name>
         <url-pattern>/local_login.html</url-pattern>
     </servlet-mapping>
+    
+    <servlet>
+    	<servlet-name>odktables</servlet-name>
+    	<servlet-class>org.opendatakit.aggregate.odktables.servlet.CommandServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+    	<servlet-name>odktables</servlet-name>
+    	<url-pattern>/odktables/*</url-pattern>
+    </servlet-mapping>
 
 	<welcome-file-list>
 		<welcome-file>index.html</welcome-file>
