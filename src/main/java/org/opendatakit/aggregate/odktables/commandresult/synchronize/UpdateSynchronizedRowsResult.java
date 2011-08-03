@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.opendatakit.aggregate.odktables.client.entity.Modification;
+import org.opendatakit.aggregate.odktables.client.exception.ColumnDoesNotExistException;
 import org.opendatakit.aggregate.odktables.client.exception.OutOfSynchException;
 import org.opendatakit.aggregate.odktables.client.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.client.exception.RowOutOfSynchException;
@@ -29,18 +30,28 @@ public class UpdateSynchronizedRowsResult extends
         possibleFailureReasons.add(FailureReason.PERMISSION_DENIED);
         possibleFailureReasons.add(FailureReason.OUT_OF_SYNCH);
         possibleFailureReasons.add(FailureReason.ROW_OUT_OF_SYNCH);
+        possibleFailureReasons.add(FailureReason.COLUMN_DOES_NOT_EXIST);
     }
 
     private final Modification modification;
     private final String tableID;
     private final String aggregateRowIdentifier;
+    private final String badColumnName;
+
+    private UpdateSynchronizedRowsResult(boolean successful,
+            FailureReason reason, Modification modification, String tableID,
+            String aggregateRowIdentifier, String badColumnName)
+    {
+        super(successful, reason);
+        this.modification = modification;
+        this.tableID = tableID;
+        this.aggregateRowIdentifier = aggregateRowIdentifier;
+        this.badColumnName = badColumnName;
+    }
 
     private UpdateSynchronizedRowsResult()
     {
-        super(true, null);
-        this.modification = null;
-        this.tableID = null;
-        this.aggregateRowIdentifier = null;
+        this(true, null, null, null, null, null);
     }
 
     /**
@@ -48,33 +59,24 @@ public class UpdateSynchronizedRowsResult extends
      */
     private UpdateSynchronizedRowsResult(Modification modification)
     {
-        super(true, null);
-
+        this(true, null, modification, null, null, null);
         Check.notNull(modification, "modification");
-
-        this.modification = modification;
-        this.tableID = null;
-        this.aggregateRowIdentifier = null;
     }
 
     /**
      * The failure constructor. See {@link #failure} for param info.
      */
     private UpdateSynchronizedRowsResult(String aggregateRowIdentifier,
-            String tableID, FailureReason reason)
+            String tableID, String badColumnName, FailureReason reason)
     {
-        super(false, reason);
-
+        this(false, reason, null, aggregateRowIdentifier, tableID,
+                badColumnName);
         Check.notNullOrEmpty(tableID, "tableID");
         if (!possibleFailureReasons.contains(reason))
             throw new IllegalArgumentException(
                     String.format(
                             "Failure reason %s not a valid failure reason for UpdateSynchronizedRows.",
                             reason));
-
-        this.modification = null;
-        this.tableID = tableID;
-        this.aggregateRowIdentifier = aggregateRowIdentifier;
     }
 
     /**
@@ -83,10 +85,11 @@ public class UpdateSynchronizedRowsResult extends
      * @throws OutOfSynchException
      * @throws TableDoesNotExistException
      * @throws RowOutOfSynchException
+     * @throws ColumnDoesNotExistException
      */
     public Modification getModification() throws PermissionDeniedException,
             OutOfSynchException, TableDoesNotExistException,
-            RowOutOfSynchException
+            RowOutOfSynchException, ColumnDoesNotExistException
     {
         if (successful())
         {
@@ -103,6 +106,8 @@ public class UpdateSynchronizedRowsResult extends
                 throw new TableDoesNotExistException(tableID);
             case PERMISSION_DENIED:
                 throw new PermissionDeniedException();
+            case COLUMN_DOES_NOT_EXIST:
+                throw new ColumnDoesNotExistException(tableID, badColumnName);
             default:
                 throw new RuntimeException("An unknown error occured.");
             }
@@ -135,9 +140,10 @@ public class UpdateSynchronizedRowsResult extends
      *         completion of an UpdateSynchronizedRows command.
      */
     public static UpdateSynchronizedRowsResult failure(
-            String aggregateRowIdentifier, String tableID, FailureReason reason)
+            String aggregateRowIdentifier, String tableID,
+            String badColumnName, FailureReason reason)
     {
         return new UpdateSynchronizedRowsResult(aggregateRowIdentifier,
-                tableID, reason);
+                tableID, badColumnName, reason);
     }
 }

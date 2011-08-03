@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.opendatakit.aggregate.odktables.client.exception.ColumnDoesNotExistException;
 import org.opendatakit.aggregate.odktables.client.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.client.exception.TableDoesNotExistException;
 import org.opendatakit.aggregate.odktables.command.simple.InsertRows;
@@ -25,19 +26,32 @@ public class InsertRowsResult extends CommandResult<InsertRows>
         possibleFailureReasons = new ArrayList<FailureReason>();
         possibleFailureReasons.add(FailureReason.TABLE_DOES_NOT_EXIST);
         possibleFailureReasons.add(FailureReason.PERMISSION_DENIED);
+        possibleFailureReasons.add(FailureReason.COLUMN_DOES_NOT_EXIST);
     }
 
     private final String tableID;
     private final Map<String, String> rowIDToaggregateRowIdentifier;
+    private final String badColumnName;
+
+    /**
+     * Base constructor
+     */
+    private InsertRowsResult(boolean successful, FailureReason reason,
+            Map<String, String> rowIDToaggregateRowIdentifier, String tableID,
+            String badColumnName)
+    {
+        super(successful, reason);
+        this.rowIDToaggregateRowIdentifier = rowIDToaggregateRowIdentifier;
+        this.tableID = tableID;
+        this.badColumnName = badColumnName;
+    }
 
     /**
      * For serialization by Gson we need a no-arg constructor
      */
     private InsertRowsResult()
     {
-        super(true, null);
-        this.tableID = null;
-        this.rowIDToaggregateRowIdentifier = null;
+        this(true, null, null, null, null);
     }
 
     /**
@@ -46,33 +60,26 @@ public class InsertRowsResult extends CommandResult<InsertRows>
      */
     private InsertRowsResult(Map<String, String> rowIDToaggregateRowIdentifier)
     {
-        super(true, null);
+        this(true, null, rowIDToaggregateRowIdentifier, null, null);
         Check.notNull(rowIDToaggregateRowIdentifier,
                 "rowIDtoaggregateRowIdentifier");
-
-        this.tableID = null;
-        this.rowIDToaggregateRowIdentifier = rowIDToaggregateRowIdentifier;
     }
 
     /**
      * The failure constructor. Constructs a failure InsertRowsResult. See
-     * {@link #failure(String)} and {@link #failure(String, String)} for param
-     * info.
+     * {@link #failure(String, FailureReason)} and
+     * {@link #failure(String, String)} for param info.
      */
-    private InsertRowsResult(String tableID,
+    private InsertRowsResult(String tableID, String badColumnName,
             FailureReason reason)
     {
-        super(false, reason);
-        Check.notNullOrEmpty(tableID,
-                "tableID");
+        this(false, reason, null, tableID, badColumnName);
+        Check.notNullOrEmpty(tableID, "tableID");
         if (!possibleFailureReasons.contains(getReason()))
         {
             throw new IllegalArgumentException("Not a valid FailureReason: "
                     + getReason());
         }
-
-        this.tableID = tableID;
-        this.rowIDToaggregateRowIdentifier = null;
     }
 
     /**
@@ -84,9 +91,11 @@ public class InsertRowsResult extends CommandResult<InsertRows>
      *             if the table that the insertRows command tried to insert to
      *             did not exist
      * @throws PermissionDeniedException
+     * @throws ColumnDoesNotExistException
      */
     public Map<String, String> getMapOfInsertedRowIDsToAggregateRowIdentifiers()
-            throws TableDoesNotExistException, PermissionDeniedException
+            throws TableDoesNotExistException, PermissionDeniedException,
+            ColumnDoesNotExistException
     {
         if (successful())
         {
@@ -99,6 +108,8 @@ public class InsertRowsResult extends CommandResult<InsertRows>
                 throw new TableDoesNotExistException(tableID);
             case PERMISSION_DENIED:
                 throw new PermissionDeniedException();
+            case COLUMN_DOES_NOT_EXIST:
+                throw new ColumnDoesNotExistException(tableID, badColumnName);
             default:
                 throw new RuntimeException("An unknown error occured.");
             }
@@ -140,8 +151,7 @@ public class InsertRowsResult extends CommandResult<InsertRows>
         {
             if (other.tableID != null)
                 return false;
-        } else if (!tableID
-                .equals(other.tableID))
+        } else if (!tableID.equals(other.tableID))
             return false;
         return true;
     }
@@ -158,10 +168,7 @@ public class InsertRowsResult extends CommandResult<InsertRows>
                 * result
                 + ((rowIDToaggregateRowIdentifier == null) ? 0
                         : rowIDToaggregateRowIdentifier.hashCode());
-        result = prime
-                * result
-                + ((tableID == null) ? 0
-                        : tableID.hashCode());
+        result = prime * result + ((tableID == null) ? 0 : tableID.hashCode());
         return result;
     }
 
@@ -185,17 +192,34 @@ public class InsertRowsResult extends CommandResult<InsertRows>
      * Returns a new, failed InsertRowsResult
      * 
      * @param tableID
-     *            the client's identifier for the table that the insertRows command
-     *            dealt with. Must not be null or empty.
+     *            the client's identifier for the table that the insertRows
+     *            command dealt with. Must not be null or empty.
      * @param reason
      *            the reason the command failed. Must be either
      *            TABLE_DOES_NOT_EXIST or PERMISSION_DENIED.
      * @return a new InsertRowsResult which represents the failed outcome of an
      *         insertRows command.
      */
-    public static InsertRowsResult failure(String tableID,
-            FailureReason reason)
+    public static InsertRowsResult failure(String tableID, FailureReason reason)
     {
-        return new InsertRowsResult(tableID, reason);
+        return new InsertRowsResult(tableID, null, reason);
+    }
+
+    /**
+     * Returns a new, failed InsertRowsResult which failed because the client
+     * tried to set a column which did not exist.
+     * 
+     * @param tableID
+     *            the client's identifier of the table that the insertRows
+     *            command deal with. Must not be null or empty.
+     * @param badColumnName
+     *            the name of the column which does not exist in the table
+     * @return a new InsertRowsResult which represents the failed outcome of an
+     *         insertRows command.
+     */
+    public static InsertRowsResult failure(String tableID, String badColumnName)
+    {
+        return new InsertRowsResult(tableID, badColumnName,
+                FailureReason.COLUMN_DOES_NOT_EXIST);
     }
 }

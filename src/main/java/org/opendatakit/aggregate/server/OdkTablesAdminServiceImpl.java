@@ -60,12 +60,16 @@ public class OdkTablesAdminServiceImpl extends RemoteServiceServlet implements
             List<OdkTablesAdmin> admins = new ArrayList<OdkTablesAdmin>();
             for (InternalPermission perm : perms)
             {
+                InternalUser internalAdmin = users.getAdminUser();
                 InternalUser adminUser = users.getEntity(perm
                         .getAggregateUserIdentifier());
-                OdkTablesAdmin admin = new OdkTablesAdmin(
-                        adminUser.getAggregateIdentifier(),
-                        adminUser.getName(), adminUser.getID());
-                admins.add(admin);
+                if (!adminUser.getAggregateIdentifier().equals(internalAdmin.getAggregateIdentifier()))
+                {
+                    OdkTablesAdmin admin = new OdkTablesAdmin(
+                            adminUser.getAggregateIdentifier(),
+                            adminUser.getName(), adminUser.getID());
+                    admins.add(admin);
+                }
             }
 
             return admins.toArray(new OdkTablesAdmin[] {});

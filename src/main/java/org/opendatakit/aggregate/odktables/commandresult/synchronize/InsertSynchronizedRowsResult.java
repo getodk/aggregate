@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.opendatakit.aggregate.odktables.client.entity.Modification;
+import org.opendatakit.aggregate.odktables.client.exception.ColumnDoesNotExistException;
 import org.opendatakit.aggregate.odktables.client.exception.OutOfSynchException;
 import org.opendatakit.aggregate.odktables.client.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.client.exception.TableDoesNotExistException;
@@ -27,16 +28,26 @@ public class InsertSynchronizedRowsResult extends
         possibleFailureReasons.add(FailureReason.TABLE_DOES_NOT_EXIST);
         possibleFailureReasons.add(FailureReason.PERMISSION_DENIED);
         possibleFailureReasons.add(FailureReason.OUT_OF_SYNCH);
+        possibleFailureReasons.add(FailureReason.COLUMN_DOES_NOT_EXIST);
     }
 
     private final Modification modification;
     private final String tableID;
+    private final String badColumnName;
+
+    private InsertSynchronizedRowsResult(boolean successful,
+            FailureReason reason, Modification modification, String tableID,
+            String badColumnName)
+    {
+        super(successful, reason);
+        this.modification = modification;
+        this.tableID = tableID;
+        this.badColumnName = badColumnName;
+    }
 
     private InsertSynchronizedRowsResult()
     {
-        super(true, null);
-        this.tableID = null;
-        this.modification = null;
+        this(true, null, null, null, null);
     }
 
     /**
@@ -44,30 +55,23 @@ public class InsertSynchronizedRowsResult extends
      */
     private InsertSynchronizedRowsResult(Modification modification)
     {
-        super(true, null);
-
+        this(true, null, modification, null, null);
         Check.notNull(modification, "modfication");
-
-        this.modification = modification;
-        this.tableID = null;
     }
 
     /**
      * The failure constructor. See {@link #failure} for param info.
      */
-    private InsertSynchronizedRowsResult(String tableID, FailureReason reason)
+    private InsertSynchronizedRowsResult(String tableID, String badColumnName,
+            FailureReason reason)
     {
-        super(false, reason);
-
+        this(false, reason, null, tableID, badColumnName);
         Check.notNullOrEmpty(tableID, "tableID");
         if (!possibleFailureReasons.contains(reason))
             throw new IllegalArgumentException(
                     String.format(
                             "Failure reason %s not a valid failure reason for InsertSynchronizedRows.",
                             reason));
-
-        this.tableID = tableID;
-        this.modification = null;
     }
 
     /**
@@ -76,9 +80,11 @@ public class InsertSynchronizedRowsResult extends
      * @throws OutOfSynchException
      * @throws TableDoesNotExistException
      * @throws PermissionDeniedException
+     * @throws ColumnDoesNotExistException
      */
     public Modification getModification() throws OutOfSynchException,
-            TableDoesNotExistException, PermissionDeniedException
+            TableDoesNotExistException, PermissionDeniedException,
+            ColumnDoesNotExistException
     {
         if (successful())
         {
@@ -93,6 +99,8 @@ public class InsertSynchronizedRowsResult extends
                 throw new TableDoesNotExistException(tableID);
             case PERMISSION_DENIED:
                 throw new PermissionDeniedException();
+            case COLUMN_DOES_NOT_EXIST:
+                throw new ColumnDoesNotExistException(tableID, badColumnName);
             default:
                 throw new RuntimeException("An unknown error occured.");
             }
@@ -129,6 +137,13 @@ public class InsertSynchronizedRowsResult extends
     public static InsertSynchronizedRowsResult failure(String tableID,
             FailureReason reason)
     {
-        return new InsertSynchronizedRowsResult(tableID, reason);
+        return new InsertSynchronizedRowsResult(tableID, null, reason);
+    }
+
+    public static InsertSynchronizedRowsResult failure(String tableID,
+            String badColumnName)
+    {
+        return new InsertSynchronizedRowsResult(tableID, badColumnName,
+                FailureReason.COLUMN_DOES_NOT_EXIST);
     }
 }
