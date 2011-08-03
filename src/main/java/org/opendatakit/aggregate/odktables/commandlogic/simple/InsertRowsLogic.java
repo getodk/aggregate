@@ -88,12 +88,20 @@ public class InsertRowsLogic extends CommandLogic<InsertRows>
             for (Entry<String, String> entry : clientRow.getColumnValuePairs()
                     .entrySet())
             {
-                InternalColumn col = columns
-                        .query()
-                        .equal(Columns.AGGREGATE_TABLE_IDENTIFIER,
-                                aggregateTableIdentifier)
-                        .equal(Columns.COLUMN_NAME, entry.getKey()).get();
-                row.setValue(col.getAggregateIdentifier(), entry.getValue());
+                String columnName = entry.getKey();
+                try
+                {
+                    InternalColumn col = columns
+                            .query()
+                            .equal(Columns.AGGREGATE_TABLE_IDENTIFIER,
+                                    aggregateTableIdentifier)
+                            .equal(Columns.COLUMN_NAME, columnName).get();
+                    row.setValue(col.getAggregateIdentifier(), entry.getValue());
+                }
+                catch (ODKDatastoreException e)
+                {
+                   return InsertRowsResult.failure(tableID, columnName); 
+                }
             }
             row.save();
             rowIDstoaggregateRowIdentifiers.put(clientRow.getRowID(),

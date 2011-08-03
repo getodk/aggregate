@@ -9,6 +9,7 @@ import org.opendatakit.aggregate.odktables.client.entity.Column;
 import org.opendatakit.aggregate.odktables.client.entity.Modification;
 import org.opendatakit.aggregate.odktables.client.entity.SynchronizedRow;
 import org.opendatakit.aggregate.odktables.client.exception.AggregateInternalErrorException;
+import org.opendatakit.aggregate.odktables.client.exception.ColumnDoesNotExistException;
 import org.opendatakit.aggregate.odktables.client.exception.OutOfSynchException;
 import org.opendatakit.aggregate.odktables.client.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.client.exception.RowOutOfSynchException;
@@ -45,9 +46,9 @@ import org.opendatakit.aggregate.odktables.commandresult.synchronize.UpdateSynch
  * synchronization with Aggregate.
  * </p>
  * <p>
- * For each row of a table: Aggregate's aggregateRowIdentifier, the
- * revisionTag from the last synchronization with Aggregate, and the data
- * that is contained in the row.
+ * For each row of a table: Aggregate's aggregateRowIdentifier, the revisionTag
+ * from the last synchronization with Aggregate, and the data that is contained
+ * in the row.
  * </p>
  * 
  */
@@ -104,7 +105,8 @@ public class SynchronizeAPI extends CommonAPI
     public Modification createSynchronizedTable(String tableID,
             String tableName, List<Column> columns)
             throws ClientProtocolException, IOException,
-            PermissionDeniedException, TableAlreadyExistsException, AggregateInternalErrorException
+            PermissionDeniedException, TableAlreadyExistsException,
+            AggregateInternalErrorException
     {
         CreateSynchronizedTable command = new CreateSynchronizedTable(
                 requestingUserID, tableName, tableID, columns);
@@ -200,7 +202,8 @@ public class SynchronizeAPI extends CommonAPI
      */
     public void deleteSynchronizedTable(String tableID)
             throws ClientProtocolException, IOException,
-            PermissionDeniedException, TableDoesNotExistException, AggregateInternalErrorException
+            PermissionDeniedException, TableDoesNotExistException,
+            AggregateInternalErrorException
     {
         DeleteSynchronizedTable command = new DeleteSynchronizedTable(
                 requestingUserID, tableID);
@@ -247,11 +250,15 @@ public class SynchronizeAPI extends CommonAPI
      *             call to fail
      * @throws IOException
      *             if there is a problem communicating with the Aggregate server
+     * @throws ColumnDoesNotExistException
+     *             if one of the column names in one of the newRows does not
+     *             exist in the table
      */
     public Modification insertSynchronizedRows(String tableID,
             int modificationNumber, List<SynchronizedRow> newRows)
             throws ClientProtocolException, IOException, OutOfSynchException,
-            TableDoesNotExistException, PermissionDeniedException, AggregateInternalErrorException
+            TableDoesNotExistException, PermissionDeniedException,
+            AggregateInternalErrorException, ColumnDoesNotExistException
     {
         InsertSynchronizedRows command = new InsertSynchronizedRows(
                 requestingUserID, tableID, modificationNumber, newRows);
@@ -277,10 +284,10 @@ public class SynchronizeAPI extends CommonAPI
      * @return a Modificaton whose modificationNumber represents the latest
      *         modification of the table in Aggregate. Calling getRows() on the
      *         Modification will return a list of rows where each row is
-     *         populated with aggregateRowIdentifier and revisionTag. Make
-     *         sure that all of this data is stored as it will be required for
-     *         other API calls (see {@link SynchronizedAPI the top of this file}
-     *         for a summary of client requirements for synchronized API usage).
+     *         populated with aggregateRowIdentifier and revisionTag. Make sure
+     *         that all of this data is stored as it will be required for other
+     *         API calls (see {@link SynchronizedAPI the top of this file} for a
+     *         summary of client requirements for synchronized API usage).
      * @throws ClientProtocolException
      * @throws OutOfSynchException
      *             if the given modificationNumber does not match the
@@ -299,12 +306,16 @@ public class SynchronizeAPI extends CommonAPI
      * @throws IOException
      *             if there is a problem communicating with the Aggregate server
      * @throws RowOutOfSynchException
+     * @throws ColumnDoesNotExistException
+     *             if one of the column names in one of the changedRows does not
+     *             exist in the table
      */
     public Modification updateSynchronizedRows(String tableID,
             int modificationNumber, List<SynchronizedRow> changedRows)
             throws ClientProtocolException, IOException,
             PermissionDeniedException, OutOfSynchException,
-            TableDoesNotExistException, RowOutOfSynchException, AggregateInternalErrorException
+            TableDoesNotExistException, RowOutOfSynchException,
+            AggregateInternalErrorException, ColumnDoesNotExistException
     {
         UpdateSynchronizedRows command = new UpdateSynchronizedRows(
                 requestingUserID, changedRows, tableID, modificationNumber);

@@ -6,6 +6,7 @@ import java.util.Map.Entry;
 
 import org.opendatakit.aggregate.odktables.client.entity.Modification;
 import org.opendatakit.aggregate.odktables.client.entity.SynchronizedRow;
+import org.opendatakit.aggregate.odktables.client.exception.ColumnDoesNotExistException;
 import org.opendatakit.aggregate.odktables.command.synchronize.InsertSynchronizedRows;
 import org.opendatakit.aggregate.odktables.commandlogic.CommandLogic;
 import org.opendatakit.aggregate.odktables.commandlogic.CommandLogicFunctions;
@@ -98,15 +99,25 @@ public class InsertSynchronizedRowsLogic extends
                         cc);
 
         // Insert new rows and create modification
-        Modification clientModification = insertNewRows(newRows,
-                aggregateTableIdentifier, newModificationNumber, columns, cc);
+        Modification clientModification;
+        try
+        {
+            clientModification = insertNewRows(newRows,
+                    aggregateTableIdentifier, newModificationNumber, columns,
+                    cc);
+        } catch (ColumnDoesNotExistException e)
+        {
+            return InsertSynchronizedRowsResult.failure(tableID,
+                    e.getBadColumnName());
+        }
 
         return InsertSynchronizedRowsResult.success(clientModification);
     }
 
     private Modification insertNewRows(List<SynchronizedRow> newRows,
             String aggregateTableIdentifier, int newModificationNumber,
-            Columns columns, CallingContext cc) throws ODKDatastoreException
+            Columns columns, CallingContext cc) throws ODKDatastoreException,
+            ColumnDoesNotExistException
     {
         List<SynchronizedRow> insertedRows = new ArrayList<SynchronizedRow>();
         for (SynchronizedRow clientRow : newRows)
@@ -116,11 +127,20 @@ public class InsertSynchronizedRowsLogic extends
             for (Entry<String, String> rowEntry : clientRow
                     .getColumnValuePairs().entrySet())
             {
-                InternalColumn col = columns
-                        .query()
-                        .equal(Columns.AGGREGATE_TABLE_IDENTIFIER,
-                                aggregateTableIdentifier)
-                        .equal(Columns.COLUMN_NAME, rowEntry.getKey()).get();
+                InternalColumn col;
+                try
+                {
+                    col = columns
+                            .query()
+                            .equal(Columns.AGGREGATE_TABLE_IDENTIFIER,
+                                    aggregateTableIdentifier)
+                            .equal(Columns.COLUMN_NAME, rowEntry.getKey())
+                            .get();
+                } catch (ODKDatastoreException e)
+                {
+                    throw new ColumnDoesNotExistException(null,
+                            rowEntry.getKey());
+                }
                 row.setValue(col.getAggregateIdentifier(), rowEntry.getValue());
             }
             row.save();

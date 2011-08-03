@@ -9,6 +9,7 @@ import org.apache.http.client.ClientProtocolException;
 import org.opendatakit.aggregate.odktables.client.entity.Column;
 import org.opendatakit.aggregate.odktables.client.entity.Row;
 import org.opendatakit.aggregate.odktables.client.exception.AggregateInternalErrorException;
+import org.opendatakit.aggregate.odktables.client.exception.ColumnDoesNotExistException;
 import org.opendatakit.aggregate.odktables.client.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.client.exception.TableAlreadyExistsException;
 import org.opendatakit.aggregate.odktables.client.exception.TableDoesNotExistException;
@@ -163,11 +164,14 @@ public class SimpleAPI extends CommonAPI
      *             call to fail
      * @throws IOException
      *             if there is a problem communicating with the Aggregate server
+     * @throws ColumnDoesNotExistException
+     *             if one of the column names in one of the rows does not exist
+     *             in the table
      */
     public Map<String, String> insertRows(String tableID, List<Row> rows)
             throws ClientProtocolException, IOException,
             TableDoesNotExistException, PermissionDeniedException,
-            AggregateInternalErrorException
+            AggregateInternalErrorException, ColumnDoesNotExistException
     {
         InsertRows command = new InsertRows(requestingUserID, rows, tableID);
         InsertRowsResult result = sendCommand(command, InsertRowsResult.class);

@@ -40,6 +40,7 @@ public class GetUserByIDLogic extends CommandLogic<GetUserByID>
 
         InternalUser requestUser = users.query()
                 .equal(Users.USER_ID, requestingUserID).get();
+
         if (!requestUser.hasPerm(usersTable, Permissions.READ))
         {
             return GetUserByIDResult.failure(

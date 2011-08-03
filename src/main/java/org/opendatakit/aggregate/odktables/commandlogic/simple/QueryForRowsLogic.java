@@ -55,11 +55,19 @@ public class QueryForRowsLogic extends CommandLogic<QueryForRows>
         String aggregateRequestingUserIdentifier = requestingUser
                 .getAggregateIdentifier();
 
-        InternalUserTableMapping mapping = mappings
-                .query()
-                .equal(UserTableMappings.TABLE_ID, tableID)
-                .equal(UserTableMappings.AGGREGATE_USER_IDENTIFIER,
-                        aggregateRequestingUserIdentifier).get();
+        InternalUserTableMapping mapping;
+        try
+        {
+            mapping = mappings
+                    .query()
+                    .equal(UserTableMappings.TABLE_ID, tableID)
+                    .equal(UserTableMappings.AGGREGATE_USER_IDENTIFIER,
+                            aggregateRequestingUserIdentifier).get();
+        } catch (ODKDatastoreException e)
+        {
+            return QueryForRowsResult.failure(tableID,
+                    FailureReason.TABLE_DOES_NOT_EXIST);
+        }
 
         String aggregateTableIdentifier = mapping.getAggregateTableIdentifier();
 
@@ -69,14 +77,7 @@ public class QueryForRowsLogic extends CommandLogic<QueryForRows>
                     FailureReason.PERMISSION_DENIED);
         }
 
-        try
-        {
-            entries.getEntity(aggregateTableIdentifier);
-        } catch (ODKDatastoreException e)
-        {
-            return QueryForRowsResult.failure(tableID,
-                    FailureReason.TABLE_DOES_NOT_EXIST);
-        }
+        entries.getEntity(aggregateTableIdentifier);
 
         Table table = Table.getInstance(aggregateTableIdentifier, cc);
         List<InternalRow> rows = table.query().execute();

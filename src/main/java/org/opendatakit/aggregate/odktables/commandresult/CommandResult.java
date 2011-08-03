@@ -69,6 +69,7 @@ public abstract class CommandResult<T extends Command>
         TABLE_ALREADY_EXISTS,
         TABLE_DOES_NOT_EXIST,
         ROW_ALREADY_EXISTS,
+        COLUMN_DOES_NOT_EXIST,
         USER_ALREADY_EXISTS,
         USER_DOES_NOT_EXIST,
         PERMISSION_DENIED,

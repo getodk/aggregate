@@ -10,12 +10,16 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
 import org.apache.http.client.ClientProtocolException;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opendatakit.aggregate.odktables.client.api.SimpleAPI;
 import org.opendatakit.aggregate.odktables.client.entity.Column;
@@ -41,6 +45,26 @@ import org.opendatakit.common.ermodel.simple.AttributeType;
  */
 public class AggregateConnectionTest
 {
+    
+    private static final Comparator<Row> rowComparator = new Comparator<Row>()
+            {
+                @Override
+                public int compare(Row row1, Row row2)
+                {
+                    if (row1.getRowID() != null && row2.getRowID() != null)
+                        return row1.getRowID().compareTo(row2.getRowID());
+                    else if (row1.getAggregateRowIdentifier() != null && row2.getAggregateRowIdentifier() != null)
+                        return row1.getAggregateRowIdentifier().compareTo(row2.getAggregateRowIdentifier());
+                    else
+                        return 0;
+                }
+        
+            };
+
+    private static String adminID;
+
+    private static final String requestUserID = "user1";
+    private static final String requestUserName = "Dylan Price";
 
     private SimpleAPI conn;
     private String userID;
@@ -48,6 +72,49 @@ public class AggregateConnectionTest
     private String tableID;
     private List<String> rowIds;
     private List<Row> rows;
+    private String column1Name;
+    private String column2Name;
+
+    @BeforeClass
+    public static void beforeClass() throws ClientProtocolException,
+            UserDoesNotExistException, AggregateInternalErrorException,
+            IOException, UserAlreadyExistsException, PermissionDeniedException,
+            URISyntaxException
+    {
+        URI aggregateURI = new URI("http://localhost:8888/");
+
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Enter userID of an admin: ");
+        adminID = scanner.nextLine();
+
+        SimpleAPI conn = new SimpleAPI(aggregateURI, adminID);
+        try
+        {
+            conn.createUser(requestUserID, requestUserName);
+        } catch (UserAlreadyExistsException e)
+        {
+
+        }
+    }
+
+    @AfterClass
+    public static void afterClass() throws ClientProtocolException,
+            UserDoesNotExistException, AggregateInternalErrorException,
+            IOException, PermissionDeniedException, CannotDeleteException,
+            URISyntaxException
+    {
+        URI aggregateURI = new URI("http://localhost:8888/");
+
+        SimpleAPI conn = new SimpleAPI(aggregateURI, adminID);
+        try
+        {
+            User user = conn.getUserByID(requestUserID);
+            conn.deleteUser(user.getAggregateUserIdentifier());
+        } catch (UserDoesNotExistException e)
+        {
+
+        }
+    }
 
     @Before
     public void setUp() throws ClientProtocolException,
@@ -57,36 +124,33 @@ public class AggregateConnectionTest
     {
         URI aggregateURI = new URI("http://localhost:8888/");
 
-        Scanner scanner = new Scanner(System.in);
-        System.out.println("Enter admin aggregateUserIdentifier: ");
-        String aggregateUserIdentifier = scanner.nextLine();
+        conn = new SimpleAPI(aggregateURI, requestUserID);
+        
+        userID = requestUserID + "diff";
+        userName = requestUserName + "diff";
 
-        conn = new SimpleAPI(aggregateURI, aggregateUserIdentifier);
-        conn.createUser(userID, userName);
-
-        conn = new SimpleAPI(aggregateURI, userID);
-
-        userID = "user1";
-
-        userName = "Dylan Price";
         tableID = "table1";
 
         rowIds = new ArrayList<String>();
         rows = new ArrayList<Row>();
 
+        column1Name = "column 1";
+        column2Name = "column 2";
+
         Row row1 = new Row();
         rowIds.add("1");
         row1.setRowID("1");
-        row1.setValue("column1", "value1");
-        row1.setValue("column2", "value1");
+        row1.setValue(column1Name, "value1");
+        row1.setValue(column2Name, "value1");
         rows.add(row1);
 
         Row row2 = new Row();
         rowIds.add("2");
         row2.setRowID("2");
-        row2.setValue("column1", "value2");
-        row2.setValue("column2", "value2");
+        row2.setValue(column1Name, "value2");
+        row2.setValue(column2Name, "value2");
         rows.add(row2);
+
     }
 
     @Test
@@ -94,10 +158,10 @@ public class AggregateConnectionTest
             ClientProtocolException, IOException, PermissionDeniedException,
             AggregateInternalErrorException
     {
-        String userID = this.userID + "diff";
-        String userName = this.userName + "diff";
-        User user = conn.createUser(userID, userName);
-        assertEquals(userID, user.getUserID());
+        String diffUserID = userID;
+        String diffUserName = userName;
+        User user = conn.createUser(diffUserID, diffUserName);
+        assertEquals(diffUserID, user.getUserID());
         assertNotNull(user.getAggregateUserIdentifier());
     }
 
@@ -115,7 +179,8 @@ public class AggregateConnectionTest
             AggregateInternalErrorException
     {
         List<Column> columns = new ArrayList<Column>();
-        columns.add(new Column("column 1", AttributeType.STRING, true));
+        columns.add(new Column(column1Name, AttributeType.STRING, false));
+        columns.add(new Column(column2Name, AttributeType.STRING, false));
         conn.createTable(tableID, "Table 1", columns);
     }
 
@@ -126,7 +191,8 @@ public class AggregateConnectionTest
             AggregateInternalErrorException
     {
         List<Column> columns = new ArrayList<Column>();
-        columns.add(new Column("column 1", AttributeType.STRING, true));
+        columns.add(new Column(column1Name, AttributeType.STRING, true));
+        columns.add(new Column(column2Name, AttributeType.STRING, false));
         conn.createTable(tableID, "Table 1", columns);
     }
 
@@ -135,7 +201,11 @@ public class AggregateConnectionTest
             RowAlreadyExistsException, ODKTablesClientException
     {
         Map<String, String> rowIDtoIdentifier = conn.insertRows(tableID, rows);
-        assertEquals(rowIds, rowIDtoIdentifier.keySet());
+        List<String> actualRowIds = new ArrayList<String>(
+                rowIDtoIdentifier.keySet());
+        Collections.sort(rowIds);
+        Collections.sort(actualRowIds);
+        assertEquals(rowIds, actualRowIds);
     }
 
     @Test
@@ -143,9 +213,9 @@ public class AggregateConnectionTest
             UserDoesNotExistException, IOException, PermissionDeniedException,
             AggregateInternalErrorException
     {
-        User user = conn.getUserByID(userID);
-        assertEquals(userID, user.getUserID());
-        assertEquals(userName, user.getUserName());
+        User user = conn.getUserByID(requestUserID);
+        assertEquals(requestUserID, user.getUserID());
+        assertEquals(requestUserName, user.getUserName());
         String aggregateUserIdentifier = user.getAggregateUserIdentifier();
         assertNotNull(aggregateUserIdentifier);
         assertFalse(aggregateUserIdentifier.equals(""));
@@ -168,7 +238,7 @@ public class AggregateConnectionTest
         for (TableEntry entry : entries)
         {
             assertTrue(tableID.equalsIgnoreCase(entry.getTableID()));
-            assertEquals(userName, entry.getUser().getUserName());
+            assertEquals(requestUserName, entry.getUser().getUserName());
         }
     }
 
@@ -178,7 +248,16 @@ public class AggregateConnectionTest
             PermissionDeniedException, AggregateInternalErrorException
     {
         List<Row> rows = conn.getAllRows(tableID);
-        assertEquals(this.rows, rows);
+        assertEquals(2, rows.size());
+        Collections.sort(rows, rowComparator);
+        Collections.sort(this.rows, rowComparator);
+        for (int i = 0; i < rows.size(); i++)
+        {
+            Row expected = this.rows.get(i);
+            Row actual = rows.get(i);
+            assertEquals(expected.getColumnValuePairs(),
+                    actual.getColumnValuePairs());
+        }
     }
 
     @Test(expected = TableDoesNotExistException.class)
@@ -212,12 +291,13 @@ public class AggregateConnectionTest
     {
         User user = conn.getUserByID(userID);
         conn.deleteUser(user.getAggregateUserIdentifier());
-        try
-        {
-            conn.getUserByID(userID);
-            fail("User should not exist!");
-        } catch (UserDoesNotExistException e)
-        {
-        }
+        //        try
+        //        {
+        // TODO: if you delete yourself this invalidates the connection.
+        // conn.getUserByID(userID);
+        //fail("User should not exist!");
+        //} catch (UserDoesNotExistException e)
+        //        {
+        //        }
     }
 }
