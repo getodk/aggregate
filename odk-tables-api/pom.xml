@@ -34,13 +34,13 @@
           <artifactId>maven-jar-plugin</artifactId>
           <configuration>
             <includes>
-              <include>**/odktables/Command.class</include>
-              <include>**/odktables/CommandConverter.class</include>
-              <include>**/odktables/CommandResult*.class</include>
+              <include>**/odktables/command/Command.class</include>
+              <include>**/odktables/command/CommandConverter.class</include>
+              <include>**/odktables/commandresult/CommandResult*.class</include>
               <include>**/odktables/client/**</include>
-              <include>**/odktables/command/*.class</include>
-              <include>**/odktables/command/result/*.class</include>
-              <include>org/opendatakit/common/persistence/DataField*.class</include>
+              <include>**/odktables/command/**</include>
+              <include>**/odktables/commandresult/**</include>
+              <include>org/opendatakit/common/ermodel/simple/AttributeType.class</include>
             </includes>
           </configuration>
         </plugin>
