@@ -89,8 +89,8 @@ public class OdkTablesAdminServiceImpl extends RemoteServiceServlet implements
 
         try
         {
-            InternalUser admin = Users.getInstance(cc).getAdminUser();
-            DeleteUser command = new DeleteUser(admin.getID(), aggregateUid);
+            InternalUser internalAdmin = Users.getInstance(cc).getAdminUser();
+            DeleteUser command = new DeleteUser(internalAdmin.getID(), aggregateUid);
             CommandLogic<? extends Command> commandLogic = CommandLogic
                     .newInstance(command);
             DeleteUserResult result = (DeleteUserResult) commandLogic
@@ -104,10 +104,10 @@ public class OdkTablesAdminServiceImpl extends RemoteServiceServlet implements
 
             } catch (PermissionDeniedException e)
             {
-                // this is bad since admin should have all permissions
+                // should not happen since internalAdmin should have all permissions
             } catch (UserDoesNotExistException e)
             {
-                // this is bad since we shouldn't have listed this user in listAdmin()
+                // should not happen since we shouldn't have listed this user in listAdmin()
             } catch (CannotDeleteException e)
             {
                 // this is possible since the user may still own some tables
