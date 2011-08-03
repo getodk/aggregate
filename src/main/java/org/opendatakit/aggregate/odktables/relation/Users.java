@@ -2,83 +2,89 @@ package org.opendatakit.aggregate.odktables.relation;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
-import org.opendatakit.common.ermodel.AbstractRelationAdapter;
-import org.opendatakit.common.ermodel.Entity;
-import org.opendatakit.common.ermodel.Relation;
-import org.opendatakit.common.persistence.DataField;
-import org.opendatakit.common.persistence.DataField.DataType;
-import org.opendatakit.common.persistence.DataField.IndexType;
-import org.opendatakit.common.persistence.Query.FilterOperation;
+import org.opendatakit.aggregate.odktables.entity.InternalPermission;
+import org.opendatakit.aggregate.odktables.entity.InternalUser;
+import org.opendatakit.common.ermodel.simple.Attribute;
+import org.opendatakit.common.ermodel.simple.AttributeType;
+import org.opendatakit.common.ermodel.simple.Entity;
+import org.opendatakit.common.ermodel.simple.typedentity.TypedEntityRelation;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
 
 /**
  * <p>
- * Users is a set of (userUri, userId, userName) tuples, aka 'entities' where
- * <ul>
- * <li>userUri = the public unique identifier of the user</li>
- * <li>userId = the private unique identifier of the user, known only to the
- * user</li>
- * <li>userName = the human readable name of the user</li>
- * </ul>
+ * Users is a relation containing all the {@link InternalUser} entities stored
+ * in the datastore. Thus Users keeps track of all the registered users of the
+ * odktables API.
  * </p>
  * 
  * <p>
- * Thus Users represents all the odktables users who own tables in the Aggregate
- * datastore.
+ * Users automatically starts out with one user--the admin user. You can
+ * retrieve this user through the {@link #getAdminUser} method.
  * </p>
  * 
  * @author the.dylan.price@gmail.com
  */
-public class Users extends AbstractRelationAdapter
+public class Users extends TypedEntityRelation<InternalUser>
 {
-    // Field names:
+    // Field names
     /**
-     * The name of the user id field.
+     * The name of the userID field.
      */
     public static final String USER_ID = "USER_ID";
+
     /**
-     * The name of the user name field.
+     * The name of the userName field.
      */
     public static final String USER_NAME = "USER_NAME";
 
-    // Relation name and User namespace:
+    // Relation name
     /**
      * The name of the Users relation.
      */
     private static final String RELATION_NAME = "USERS";
 
-    // The following defines the actual fields that will be in the datastore:
+    /**
+     * The ID of the admin user.
+     */
+    private static String ADMIN_ID;
+
+    /**
+     * The name of the admin user.
+     */
+    private static final String ADMIN_NAME = "55534804-daea-4ae0-a796-a92560c2f184"; 
+
+    // The following defines the actual attributes that will be in the datastore:
     /**
      * The field for the user id.
      */
-    private static final DataField userId = new DataField(USER_ID,
-            DataType.STRING, false);
+    private static final Attribute userID = new Attribute(USER_ID,
+            AttributeType.STRING, false);
     /**
      * The field for the user name.
      */
-    private static final DataField userName = new DataField(USER_NAME,
-            DataType.STRING, false);
+    private static final Attribute userName = new Attribute(USER_NAME,
+            AttributeType.STRING, false);
 
-    private static final List<DataField> fields;
+    private static final List<Attribute> attributes;
     static
     {
-        userId.setIndexable(IndexType.HASH);
-
-        fields = new ArrayList<DataField>();
-        fields.add(userId);
-        fields.add(userName);
+        attributes = new ArrayList<Attribute>();
+        attributes.add(userID);
+        attributes.add(userName);
     }
 
     /**
      * The singleton instance of the Users.
      */
     private static Users instance;
+
     /**
-     * The CallingContext of the Aggregate instance.
+     * The singleton instance of the anonymous user.
      */
-    private static CallingContext cc;
+    private static InternalUser adminInstance;
 
     /**
      * Constructs an instance which can be used to manipulate the Users
@@ -93,145 +99,46 @@ public class Users extends AbstractRelationAdapter
      */
     private Users(CallingContext cc) throws ODKDatastoreException
     {
-        super(RELATION_NAME, fields, cc);
-        Users.cc = cc;
+        super(Table.NAMESPACE, RELATION_NAME, attributes, cc);
     }
 
-    /**
-     * Creates a User with the given userId and userName.
-     * 
-     * @param userId
-     *            the unique identifier for the user. It must consist of only
-     *            uppercase letters, numbers, and underscores and must start
-     *            with an uppercase letter. There must not be another user with
-     *            this userId. Must be non-null and non-empty.
-     * @param userName
-     *            the name for the User. The userName does not have to be
-     *            unique. Must be non-null and non-empty.
-     * @throws ODKDatastoreException
-     *             if there was a problem communicating with the datastore
-     * @throws IllegalArgumentException
-     *             if any arguments are null or empty of if the userId is badly
-     *             formed
-     * @throws RuntimeException
-     *             if a User with the given userId already exists
-     */
-    public void createUser(String userId, String userName)
-            throws ODKDatastoreException
+    public InternalUser initialize(Entity entity) throws ODKDatastoreException
     {
-        if (userId == null || userId.isEmpty() || userName == null
-                || userName.isEmpty())
-        {
-            throw new IllegalArgumentException(
-                    "received null or empty argument");
-        }
-        if (!userId.matches(Relation.VALID_UPPER_CASE_NAME_REGEX))
-        {
-            throw new IllegalArgumentException("badly formed userId '" + userId
-                    + "'. Check that it consists of only uppercase "
-                    + "letters, numbers, and underscores and that "
-                    + "it starts with an uppercase letter.");
-        }
-
-        Entity user = retrieveEntity(userId);
-        if (user != null)
-        {
-            throw new RuntimeException("User with userId: '" + userId
-                    + "' already exists!");
-        }
-
-        // Add user to index
-        Entity entry = newEntity(cc);
-        entry.setField(USER_ID, userId);
-        entry.setField(USER_NAME, userName);
-        entry.persist(cc);
+        return InternalUser.fromEntity(entity, getCC());
     }
 
-    /**
-     * Retrieves the user entity of the user with the given userId.
-     * 
-     * @param userId
-     *            the unique identifier of the user. Must be non-null and
-     *            non-empty.
-     * @return the entity with the given userId
-     * @throws ODKDatastoreException
-     */
-    public Entity getEntity(String userId) throws ODKDatastoreException
+    public InternalUser getAdminUser() throws ODKDatastoreException
     {
-        Entity user = retrieveEntity(userId);
-        if (user == null)
-            throw new IllegalArgumentException("No user with userId '" + userId
-                    + "' exists!");
-        return user;
-    }
-
-    /**
-     * @param userId
-     *            the unique identifier of the user to test for. Must be
-     *            non-null and non-empty.
-     * @return true if a User with the given userId exists in the datastore,
-     *         false otherwise.
-     * @throws ODKDatastoreException
-     *             if there is a problem communicating with the datastore
-     */
-    public boolean userExists(String userId) throws ODKDatastoreException
-    {
-        return retrieveEntity(userId) != null;
-    }
-
-    /**
-     * Deletes the User with the given userId. This user must previously have
-     * been created through {@link #createUser}.
-     * 
-     * @param userId
-     *            the unique identifier of the user to delete. Must be non-null
-     *            and non-empty. If no user with this userId exists, then
-     *            calling this method does nothing.
-     * @throws ODKDatastoreException
-     *             if there is a problem communicating with the datastore
-     */
-    public void deleteUser(String userId) throws ODKDatastoreException
-    {
-        Entity user = retrieveEntity(userId);
-        if (user == null)
-            return;
-        user.remove(cc);
-    }
-
-    /**
-     * Retrieves the entity with the given userId from the datastore.
-     * 
-     * @param userId
-     *            the value of the userId field of the desired Entity.
-     * @return the Entity with the given userId, or null if no such Entity
-     *         exists.
-     * @throws ODKDatastoreException
-     *             if there is a problem communicating with the datastore.
-     */
-    private Entity retrieveEntity(String userId) throws ODKDatastoreException
-    {
-        if (userId == null || userId.isEmpty())
+        if (adminInstance == null)
         {
-            throw new IllegalArgumentException(
-                    "received null or empty argument");
+            try
+            {
+                adminInstance = instance.query().equal(USER_NAME, ADMIN_NAME).get();
+            } catch (ODKDatastoreException e)
+            {
+                ADMIN_ID = UUID.randomUUID().toString();
+                adminInstance = new InternalUser(ADMIN_ID, ADMIN_NAME, getCC());
+                adminInstance.save();
+                InternalPermission adminPerm = new InternalPermission(
+                        RELATION_NAME,
+                        adminInstance.getAggregateIdentifier(), true, true,
+                        true, getCC());
+                adminPerm.save();
+            }
         }
-
-        List<Entity> entities = getEntities(USER_ID, FilterOperation.EQUAL,
-                userId, cc);
-        if (entities == null || entities.isEmpty())
-        {
-            return null;
-        }
-        if (entities.size() > 1)
-        {
-            throw new RuntimeException(
-                    "More than one entry for the given userId '" + userId + "'");
-        }
-
-        Entity entity = entities.get(0);
-        return entity;
+        return Users.adminInstance;
     }
 
+    public InternalUser getByID(String userID) throws ODKDatastoreException
+    {
+        return query().equal(USER_ID, userID).get();
+    }
+
+    public String getAggregateIdentifier()
+    {
+        return RELATION_NAME;
+    }
+    
     /**
      * Returns the singleton instance of the Users.
      * 
@@ -247,10 +154,12 @@ public class Users extends AbstractRelationAdapter
     public static Users getInstance(CallingContext cc)
             throws ODKDatastoreException
     {
-        if (instance == null || Users.cc != cc)
+        if (instance == null || instance.getCC() != cc)
         {
             instance = new Users(cc);
         }
+
         return instance;
     }
+
 }

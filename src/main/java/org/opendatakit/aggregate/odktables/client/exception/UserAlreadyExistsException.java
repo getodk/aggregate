@@ -7,16 +7,16 @@ public class UserAlreadyExistsException extends ODKTablesClientException
      */
     private static final long serialVersionUID = -6626310799740356641L;
     
-    private final String userId;
+    private final String aggregateUserIdentifier;
 
-    public UserAlreadyExistsException(String userId)
+    public UserAlreadyExistsException(String aggregateUserIdentifier)
     {
-        super(String.format("User with userId %s already exists!", userId));
-        this.userId = userId;
+        super(String.format("User with aggregateUserIdentifier %s already exists!", aggregateUserIdentifier));
+        this.aggregateUserIdentifier = aggregateUserIdentifier;
     }
 
-    public String getUserId()
+    public String getAggregateUserIdentifier()
     {
-        return this.userId;
+        return this.aggregateUserIdentifier;
     }
 }
