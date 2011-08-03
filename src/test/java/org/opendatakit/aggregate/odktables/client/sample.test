@@ -1,0 +1,24 @@
+createClient client1
+createClient client2
+
+createSynchronizedTable client1 people
+    name STRING false
+    age INTEGER false
+    weight DECIMAL false
+
+insertSynchronizedRows client1 people 
+    row1
+        name Dylan
+        age 22
+        weight 175
+    row2
+        name John
+        age 50
+        weight 200
+
+updateSynchronizedRows client1 people
+    row1
+        name DylanUpdate
+        age 23
+        weight 175
+
