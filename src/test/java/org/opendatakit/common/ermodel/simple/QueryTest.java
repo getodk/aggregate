@@ -12,6 +12,12 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 
+/**
+ * Test for Query.
+ * 
+ * @author the.dylan.price@gmail.com
+ *
+ */
 public class QueryTest
 {
     private Data d;

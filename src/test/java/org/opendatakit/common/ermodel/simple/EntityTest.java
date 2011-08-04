@@ -10,6 +10,12 @@ import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
 
+/**
+ * Test for Entity
+ * 
+ * @author the.dylan.price@gmail.com
+ *
+ */
 public class EntityTest
 {
 
