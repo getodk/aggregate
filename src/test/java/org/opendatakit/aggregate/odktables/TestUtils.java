@@ -8,7 +8,6 @@ import java.net.URISyntaxException;
 import java.util.Comparator;
 import java.util.Properties;
 
-import org.opendatakit.aggregate.odktables.client.ScriptFileTests;
 import org.opendatakit.aggregate.odktables.client.entity.Row;
 
 /**
@@ -48,10 +47,10 @@ public class TestUtils
         try
         {
             String className = ODKTablesTestSuite.class.getSimpleName();
-            File myDirectory = new File(ScriptFileTests.class.getResource(
+            File myDirectory = new File(ODKTablesTestSuite.class.getResource(
                     className + ".class").toURI()).getParentFile();
             String propertiesFile = myDirectory.getAbsolutePath()
-                    + File.pathSeparator + className + ".properties";
+                    + File.separator + className + ".properties";
             Reader reader = new FileReader(propertiesFile);
             props.load(reader);
         } catch (IOException e)
