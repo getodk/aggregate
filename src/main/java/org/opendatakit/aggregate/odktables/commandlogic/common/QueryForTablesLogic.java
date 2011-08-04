@@ -3,14 +3,17 @@ package org.opendatakit.aggregate.odktables.commandlogic.common;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.opendatakit.aggregate.odktables.client.entity.Column;
 import org.opendatakit.aggregate.odktables.client.entity.TableEntry;
 import org.opendatakit.aggregate.odktables.client.entity.User;
 import org.opendatakit.aggregate.odktables.command.common.QueryForTables;
 import org.opendatakit.aggregate.odktables.commandlogic.CommandLogic;
 import org.opendatakit.aggregate.odktables.commandresult.common.QueryForTablesResult;
+import org.opendatakit.aggregate.odktables.entity.InternalColumn;
 import org.opendatakit.aggregate.odktables.entity.InternalTableEntry;
 import org.opendatakit.aggregate.odktables.entity.InternalUser;
 import org.opendatakit.aggregate.odktables.entity.InternalUserTableMapping;
+import org.opendatakit.aggregate.odktables.relation.Columns;
 import org.opendatakit.aggregate.odktables.relation.Permissions;
 import org.opendatakit.aggregate.odktables.relation.TableEntries;
 import org.opendatakit.aggregate.odktables.relation.UserTableMappings;
@@ -41,6 +44,7 @@ public class QueryForTablesLogic extends CommandLogic<QueryForTables>
         Users users = Users.getInstance(cc);
         Permissions permissions = Permissions.getInstance(cc);
         UserTableMappings mappings = UserTableMappings.getInstance(cc);
+        Columns columns = Columns.getInstance(cc);
 
         String requestingUserID = queryForTables.getRequestingUserID();
 
@@ -48,12 +52,12 @@ public class QueryForTablesLogic extends CommandLogic<QueryForTables>
                 .equal(Users.USER_ID, requestingUserID).get();
         String aggregateUserIdentifier = requestingUser
                 .getAggregateIdentifier();
-        List<String> aggregateTableIdentifiers = (List<String>) permissions
-                .query()
-                .equal(Permissions.AGGREGATE_USER_IDENTIFIER,
-                        aggregateUserIdentifier).equal(Permissions.READ, true)
+        @SuppressWarnings("unchecked")
+        List<String> aggregateTableIdentifiers = (List<String>) permissions.query()
+                .equal(Permissions.AGGREGATE_USER_IDENTIFIER, aggregateUserIdentifier)
+                .equal(Permissions.READ, true)
                 .getDistinct(Permissions.AGGREGATE_TABLE_IDENTIFIER);
-
+        
         List<InternalTableEntry> allEntries = new ArrayList<InternalTableEntry>();
         for (String aggregateTableIdentifier : aggregateTableIdentifiers)
         {
@@ -65,6 +69,7 @@ public class QueryForTablesLogic extends CommandLogic<QueryForTables>
         {
             String aggregateOwnerIdentifier = entry
                     .getAggregateOwnerIdentifier();
+            String aggregateTableIdentifier = entry.getAggregateIdentifier();
             String tableName = entry.getName();
             boolean isSynchronized = entry.isSynchronized();
             InternalUser user = users.getEntity(aggregateOwnerIdentifier);
@@ -78,18 +83,29 @@ public class QueryForTablesLogic extends CommandLogic<QueryForTables>
                         .equal(UserTableMappings.AGGREGATE_TABLE_IDENTIFIER,
                                 entry.getAggregateIdentifier()).get();
                 tableID = mapping.getTableID();
-            }
-            catch (ODKDatastoreException e)
+            } catch (ODKDatastoreException e)
             {
-               // Do nothing, this just means the user is not registered with this table right now. 
+                // Do nothing, this just means the user is not registered with this table right now. 
             }
             // send null for userID because we don't want people finding out what it is
-            User clientUser = new User(null,
-                    user.getAggregateIdentifier(), user.getName());
+            User clientUser = new User(null, user.getAggregateIdentifier(),
+                    user.getName());
+
+            List<InternalColumn> internalColumns = columns
+                    .query()
+                    .equal(Columns.AGGREGATE_TABLE_IDENTIFIER,
+                            aggregateTableIdentifier).execute();
+            List<Column> clientColumns = new ArrayList<Column>();
+            for (InternalColumn internalColumn : internalColumns)
+            {
+                Column clientColumn = new Column(internalColumn.getName(),
+                        internalColumn.getType(), internalColumn.getNullable());
+                clientColumns.add(clientColumn);
+            }
 
             TableEntry clientEntry = new TableEntry(clientUser,
                     entry.getAggregateIdentifier(), tableID, tableName,
-                    isSynchronized);
+                    clientColumns, isSynchronized);
             clientEntries.add(clientEntry);
         }
 
