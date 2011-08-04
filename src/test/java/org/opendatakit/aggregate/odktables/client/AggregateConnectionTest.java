@@ -69,7 +69,7 @@ public class AggregateConnectionTest
         Properties props = TestUtils.getTestProperties();
         URI aggregateURI = new URI(props.getProperty("aggregateURI",
                 "http://localhost:8888/"));
-        String adminID = props.getProperty("adminUserID", "bob");
+        adminID = props.getProperty("adminUserID", "bob");
 
         SimpleAPI conn = new SimpleAPI(aggregateURI, adminID);
         try
@@ -233,15 +233,14 @@ public class AggregateConnectionTest
     {
         List<Row> rows = conn.getAllRows(tableID);
         assertEquals(2, rows.size());
-        Collections.sort(rows, TestUtils.rowComparator);
-        Collections.sort(this.rows, TestUtils.rowComparator);
-        for (int i = 0; i < rows.size(); i++)
-        {
-            Row expected = this.rows.get(i);
-            Row actual = rows.get(i);
-            assertEquals(expected.getColumnValuePairs(),
-                    actual.getColumnValuePairs());
-        }
+        Row expected = this.rows.get(0);
+        Row actual = rows.get(0);
+        if (!expected.getColumnValuePairs()
+                .equals(actual.getColumnValuePairs()))
+            actual = rows.get(1);
+
+        assertEquals(expected.getColumnValuePairs(),
+                actual.getColumnValuePairs());
     }
 
     @Test(expected = TableDoesNotExistException.class)
