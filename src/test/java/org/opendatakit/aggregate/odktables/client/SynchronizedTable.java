@@ -12,6 +12,7 @@ import org.opendatakit.aggregate.odktables.client.entity.TableEntry;
 public class SynchronizedTable
 {
     private TableEntry entry;
+    private int modificationNumber;
     private List<Column> columns;
     private List<SynchronizedRow> rows;
 
@@ -43,6 +44,16 @@ public class SynchronizedTable
                 entry.getTableName(), entry.isSynchronized());
     }
 
+    public void getModificationNumber()
+    {
+        return this.modificationNumber;
+    }
+
+    public void setModificationNumber(int modificationNumber)
+    {
+        this.modificationNumber = modificationNumber;
+    }
+
     public void insertRow(SynchronizedRow row)
     {
         int index = indexOf(rows, row);
@@ -70,6 +81,24 @@ public class SynchronizedTable
         }
     }
     
+    public SynchronizedRow getRow(String rowID)
+    {
+        SynchronizedRow row = new SynchronizedRow();
+        row.setRowID(rowID);
+
+        int index = indexOf(rows, row);
+        if (index == -1)
+        {
+            throw new IllegalArgumentException(String.format(
+                    "Row with rowID: %s does not exist in this table",
+                    row.getRowID()));
+        }
+        else
+        {
+            return rows.get(index);
+        }
+    }
+
     public List<SynchronizedRow> getUnsynchronizedRows()
     {
        List<SynchronizedRow> unsynchedRows = new ArrayList<SynchronizedRow>();

@@ -7,22 +7,28 @@ public class SynchronizedClient
 {
     
     private String clientName;
-    private List<SynchronizedTable> tables;
+    // tableID to SynchronizedTable
+    private Map<String, SynchronizedTable> tables;
     
     public SynchronizedClient(String clientName)
     {
         this.clientName = clientName;
-        tables = new ArrayList<SynchronizedTable>();
+        tables = new HashMap<String, SynchronizedTable>();
     }
     
     public void addTable(SynchronizedTable table)
     {
-       tables.add(table); 
+       tables.put(table.getTableID(), table);
+    }
+
+    public void getTable(String tableID)
+    {
+        return tables.get(tableID);
     }
     
     public List<SynchronizedTable> getTables()
     {
-        return tables;
+        return tables.valueSet();
     }
 
 }
