@@ -11,16 +11,16 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.Scanner;
+import java.util.Properties;
 
 import org.apache.http.client.ClientProtocolException;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.opendatakit.aggregate.odktables.TestUtils;
 import org.opendatakit.aggregate.odktables.client.api.SimpleAPI;
 import org.opendatakit.aggregate.odktables.client.entity.Column;
 import org.opendatakit.aggregate.odktables.client.entity.Row;
@@ -39,27 +39,12 @@ import org.opendatakit.common.ermodel.simple.AttributeType;
 
 /**
  * Integration test for SimpleAPI. Only works when you have a running Aggregate
- * instance at localhost:8888, and assumes you start with an empty datastore.
+ * instance and assumes you start with an empty datastore.
  * 
  * @author the.dylan.price@gmail.com
  */
 public class AggregateConnectionTest
 {
-    
-    private static final Comparator<Row> rowComparator = new Comparator<Row>()
-            {
-                @Override
-                public int compare(Row row1, Row row2)
-                {
-                    if (row1.getRowID() != null && row2.getRowID() != null)
-                        return row1.getRowID().compareTo(row2.getRowID());
-                    else if (row1.getAggregateRowIdentifier() != null && row2.getAggregateRowIdentifier() != null)
-                        return row1.getAggregateRowIdentifier().compareTo(row2.getAggregateRowIdentifier());
-                    else
-                        return 0;
-                }
-        
-            };
 
     private static String adminID;
 
@@ -81,11 +66,10 @@ public class AggregateConnectionTest
             IOException, UserAlreadyExistsException, PermissionDeniedException,
             URISyntaxException
     {
-        URI aggregateURI = new URI("http://localhost:8888/");
-
-        Scanner scanner = new Scanner(System.in);
-        System.out.println("Enter userID of an admin: ");
-        adminID = scanner.nextLine();
+        Properties props = TestUtils.getTestProperties();
+        URI aggregateURI = new URI(props.getProperty("aggregateURI",
+                "http://localhost:8888/"));
+        adminID = props.getProperty("adminUserID", "bob");
 
         SimpleAPI conn = new SimpleAPI(aggregateURI, adminID);
         try
@@ -125,7 +109,7 @@ public class AggregateConnectionTest
         URI aggregateURI = new URI("http://localhost:8888/");
 
         conn = new SimpleAPI(aggregateURI, requestUserID);
-        
+
         userID = requestUserID + "diff";
         userName = requestUserName + "diff";
 
@@ -249,15 +233,14 @@ public class AggregateConnectionTest
     {
         List<Row> rows = conn.getAllRows(tableID);
         assertEquals(2, rows.size());
-        Collections.sort(rows, rowComparator);
-        Collections.sort(this.rows, rowComparator);
-        for (int i = 0; i < rows.size(); i++)
-        {
-            Row expected = this.rows.get(i);
-            Row actual = rows.get(i);
-            assertEquals(expected.getColumnValuePairs(),
-                    actual.getColumnValuePairs());
-        }
+        Row expected = this.rows.get(0);
+        Row actual = rows.get(0);
+        if (!expected.getColumnValuePairs()
+                .equals(actual.getColumnValuePairs()))
+            actual = rows.get(1);
+
+        assertEquals(expected.getColumnValuePairs(),
+                actual.getColumnValuePairs());
     }
 
     @Test(expected = TableDoesNotExistException.class)

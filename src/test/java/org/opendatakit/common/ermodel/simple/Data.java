@@ -8,6 +8,12 @@ import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.TestContextFactory;
 
+/**
+ * Common data used by org.opendatakit.common.ermodel.simple unit tests.
+ * 
+ * @author the.dylan.price@gmail.com
+ * 
+ */
 public class Data
 {
     public String attrName;
