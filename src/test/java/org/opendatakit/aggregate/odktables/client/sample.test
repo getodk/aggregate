@@ -1,12 +1,12 @@
-createClient client1
-createClient client2
+createUser user1
+createUser user2
 
-createSynchronizedTable client1 people
+createSynchronizedTable user1 people
     name STRING false
     age INTEGER false
     weight DECIMAL false
 
-insertSynchronizedRows client1 people 
+insertSynchronizedRows user1 people 
     row1
         name Dylan
         age 22
@@ -16,9 +16,20 @@ insertSynchronizedRows client1 people
         age 50
         weight 200
 
-updateSynchronizedRows client1 people
+updateSynchronizedRows user1 people
     row1
         name DylanUpdate
         age 23
         weight 175
+
+setTablePermissions user1 people user2 true true true
+
+listAllTables user2
+
+# TODO: make sure that user2 gets same rowIDs as user1 (owner of people)
+cloneSynchronizedTable user2 people
+
+updateSynchronizedRows user2 people
+    row1
+        
 
