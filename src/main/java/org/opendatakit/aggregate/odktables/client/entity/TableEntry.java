@@ -1,5 +1,9 @@
 package org.opendatakit.aggregate.odktables.client.entity;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 /**
  * <p>
  * A TableEntry represents the metadata associated with a table stored in ODK
@@ -26,6 +30,7 @@ public class TableEntry
     private final String aggregateTableIdentifier;
     private final String tableID;
     private final String tableName;
+    private final List<Column> columns;
     private final boolean isSynchronized;
 
     /**
@@ -38,6 +43,7 @@ public class TableEntry
         this.user = null;
         this.tableID = null;
         this.tableName = null;
+        this.columns = null;
         this.isSynchronized = false;
     }
 
@@ -52,12 +58,14 @@ public class TableEntry
      *            the human readable name of the table
      */
     public TableEntry(User user, String aggregateTableIdentifier,
-            String tableID, String tableName, boolean isSynchronized)
+            String tableID, String tableName, List<Column> columns,
+            boolean isSynchronized)
     {
         this.user = user;
         this.aggregateTableIdentifier = aggregateTableIdentifier;
         this.tableID = tableID;
         this.tableName = tableName;
+        this.columns = new ArrayList<Column>(columns);
         this.isSynchronized = isSynchronized;
     }
 
@@ -93,6 +101,11 @@ public class TableEntry
         return tableName;
     }
 
+    public List<Column> getColumns()
+    {
+        return Collections.unmodifiableList(this.columns);
+    }
+
     /**
      * @return the isSynchronized
      */
@@ -121,6 +134,11 @@ public class TableEntry
     {
         final int prime = 31;
         int result = 1;
+        result = prime
+                * result
+                + ((aggregateTableIdentifier == null) ? 0
+                        : aggregateTableIdentifier.hashCode());
+        result = prime * result + ((columns == null) ? 0 : columns.hashCode());
         result = prime * result + (isSynchronized ? 1231 : 1237);
         result = prime * result + ((tableID == null) ? 0 : tableID.hashCode());
         result = prime * result
@@ -142,6 +160,19 @@ public class TableEntry
         if (!(obj instanceof TableEntry))
             return false;
         TableEntry other = (TableEntry) obj;
+        if (aggregateTableIdentifier == null)
+        {
+            if (other.aggregateTableIdentifier != null)
+                return false;
+        } else if (!aggregateTableIdentifier
+                .equals(other.aggregateTableIdentifier))
+            return false;
+        if (columns == null)
+        {
+            if (other.columns != null)
+                return false;
+        } else if (!columns.equals(other.columns))
+            return false;
         if (isSynchronized != other.isSynchronized)
             return false;
         if (tableID == null)

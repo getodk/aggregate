@@ -42,6 +42,7 @@ import org.opendatakit.aggregate.odktables.commandresult.common.GetUserByIDResul
 import org.opendatakit.aggregate.odktables.commandresult.common.QueryForTablesResult;
 import org.opendatakit.aggregate.odktables.commandresult.common.SetTablePermissionsResult;
 import org.opendatakit.aggregate.odktables.commandresult.common.SetUserManagementPermissionsResult;
+import org.opendatakit.common.utils.Check;
 
 /**
  * CommonAPI contains API calls that are common to both SimpleAPI and
@@ -50,7 +51,7 @@ import org.opendatakit.aggregate.odktables.commandresult.common.SetUserManagemen
 public class CommonAPI
 {
 
-    protected final String requestingUserID;
+    protected String requestingUserID;
     private final URI aggregateURI;
     private final HttpClient client;
 
@@ -76,11 +77,42 @@ public class CommonAPI
             throws ClientProtocolException, IOException,
             UserDoesNotExistException, AggregateInternalErrorException
     {
+        Check.notNull(aggregateURI, "aggregateURI");
+        Check.notNullOrEmpty(userID, "userID");
+        
         this.aggregateURI = aggregateURI;
         this.requestingUserID = userID;
         this.client = new DefaultHttpClient();
+        
+        checkUserExists(userID);
+    }
 
-        // check that user exists
+    /**
+     * Sets the userID to use for API calls
+     * 
+     * @param userID
+     *            the ID of the user to use for API calls
+     * @throws UserDoesNotExistException
+     *             if no user with userID exists in Aggregate
+     * @throws AggregateInternalErrorException
+     *             if Aggregate encounters an internal error that causes the
+     *             call to fail
+     * @throws IOException
+     *             if there is a problem communicating with the Aggregate server
+     * @throws ClientProtocolException
+     */
+    public void setUserID(String userID) throws ClientProtocolException,
+            AggregateInternalErrorException, UserDoesNotExistException,
+            IOException
+    {
+        checkUserExists(userID);
+        this.requestingUserID = userID;
+    }
+
+    private void checkUserExists(String userID) throws ClientProtocolException,
+            AggregateInternalErrorException, IOException,
+            UserDoesNotExistException
+    {
         CheckUserExists checkUserExists = new CheckUserExists(userID);
         CheckUserExistsResult result = sendCommand(checkUserExists,
                 CheckUserExistsResult.class);
