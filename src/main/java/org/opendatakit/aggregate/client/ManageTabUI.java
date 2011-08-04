@@ -29,14 +29,11 @@ public class ManageTabUI extends TabPanel {
 
   // Management Navigation
   public static final SubTabs[] MANAGEMENT_MENU = { SubTabs.FORMS,
-      SubTabs.PUBLISH, SubTabs.PERMISSIONS, SubTabs.PREFERENCES, SubTabs.TABLES};
+      SubTabs.PUBLISH};
 
   // Sub tabs
   private FormsSubTab formsSubTab;
   private PublishSubTab publishSubTab;
-  private PreferencesSubTab preferencesSubTab;
-  private PermissionsSubTab permissionsSubTab;
-  private OdkTablesAdminSubTab odkTablesSubTab;
   
   private Map<SubTabs, SubTabInterface> subTabMap;
   
@@ -53,18 +50,6 @@ public class ManageTabUI extends TabPanel {
     publishSubTab = new PublishSubTab(baseUI);
     this.add(publishSubTab, SubTabs.PUBLISH.getTabLabel());
     subTabMap.put(SubTabs.PUBLISH, publishSubTab);
-    
-    permissionsSubTab = new PermissionsSubTab();
-    this.add(permissionsSubTab, SubTabs.PERMISSIONS.getTabLabel());
-    subTabMap.put(SubTabs.PERMISSIONS, permissionsSubTab);
-
-    preferencesSubTab = new PreferencesSubTab();
-    this.add(preferencesSubTab, SubTabs.PREFERENCES.getTabLabel());
-    subTabMap.put(SubTabs.PREFERENCES, preferencesSubTab);
-    
-    odkTablesSubTab = new OdkTablesAdminSubTab();
-    this.add(odkTablesSubTab, SubTabs.TABLES.getTabLabel());
-    subTabMap.put(SubTabs.TABLES, odkTablesSubTab);
     
     getElement().setId("second_level_menu");
     

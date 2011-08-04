@@ -90,13 +90,13 @@ public class RefreshTimer extends Timer {
         tabPanel = aggregateUI.getSubmissionNav().getSubTab(currentSubTab);
         break;
       case PREFERENCES:
-        tabPanel = aggregateUI.getManageNav().getSubTab(currentSubTab);
+        tabPanel = aggregateUI.getAdminNav().getSubTab(currentSubTab);
         break;
       case PERMISSIONS:
-        tabPanel = aggregateUI.getManageNav().getSubTab(currentSubTab);
+        tabPanel = aggregateUI.getAdminNav().getSubTab(currentSubTab);
         break;
       case TABLES:
-        tabPanel = aggregateUI.getManageNav().getSubTab(currentSubTab);
+        tabPanel = aggregateUI.getAdminNav().getSubTab(currentSubTab);
         break;
       default:
         // should not happen
@@ -196,12 +196,12 @@ public class RefreshTimer extends Timer {
         break;
       case PREFERENCES:
         if ((intervalsElapsed % 6) == 0) {
-          tabPanel = aggregateUI.getManageNav().getSubTab(currentSubTab);
+          tabPanel = aggregateUI.getAdminNav().getSubTab(currentSubTab);
           tabPanel.update();
         }
         break;
       case PERMISSIONS:
-        tabPanel = aggregateUI.getManageNav().getSubTab(currentSubTab);
+        tabPanel = aggregateUI.getAdminNav().getSubTab(currentSubTab);
         if (lastCompletionTime == 0L) {
           // update this ONLY if we are forcing a refreshNow().
           // otherwise, let the entries be stale w.r.t. server.
@@ -210,7 +210,7 @@ public class RefreshTimer extends Timer {
         break;
       case TABLES:
         if ((intervalsElapsed % 3) == 0) {
-          tabPanel = aggregateUI.getManageNav().getSubTab(currentSubTab);
+          tabPanel = aggregateUI.getAdminNav().getSubTab(currentSubTab);
           tabPanel.update();
         }
         break;
