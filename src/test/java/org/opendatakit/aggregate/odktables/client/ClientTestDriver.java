@@ -3,35 +3,110 @@ package org.opendatakit.aggregate.odktables.client;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.Writer;
+import java.net.URI;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
+import java.util.Map.Entry;
 import java.util.Scanner;
 import java.util.StringTokenizer;
+import java.util.TreeMap;
 
+import org.apache.http.client.ClientProtocolException;
+import org.opendatakit.aggregate.odktables.TestUtils;
+import org.opendatakit.aggregate.odktables.client.api.SynchronizeAPI;
 import org.opendatakit.aggregate.odktables.client.entity.Column;
+import org.opendatakit.aggregate.odktables.client.entity.Modification;
 import org.opendatakit.aggregate.odktables.client.entity.SynchronizedRow;
+import org.opendatakit.aggregate.odktables.client.entity.TableEntry;
+import org.opendatakit.aggregate.odktables.client.entity.User;
+import org.opendatakit.aggregate.odktables.client.exception.AggregateInternalErrorException;
+import org.opendatakit.aggregate.odktables.client.exception.CannotDeleteException;
+import org.opendatakit.aggregate.odktables.client.exception.ColumnDoesNotExistException;
+import org.opendatakit.aggregate.odktables.client.exception.OutOfSynchException;
+import org.opendatakit.aggregate.odktables.client.exception.PermissionDeniedException;
+import org.opendatakit.aggregate.odktables.client.exception.RowOutOfSynchException;
+import org.opendatakit.aggregate.odktables.client.exception.TableAlreadyExistsException;
+import org.opendatakit.aggregate.odktables.client.exception.TableDoesNotExistException;
+import org.opendatakit.aggregate.odktables.client.exception.UserAlreadyExistsException;
+import org.opendatakit.aggregate.odktables.client.exception.UserDoesNotExistException;
 import org.opendatakit.common.ermodel.simple.AttributeType;
 
+/**
+ * <p>
+ * Test driver which reads in a test script, runs the API commands against
+ * Aggregate, and outputs the results.
+ * </p>
+ * 
+ * <pre>
+ * The commands are:
+ * TODO: document script file
+ * 
+ * <i>createUser (userName)</i>
+ * 
+ * <i>deleteUser (userName)</i>
+ *
+ * <i>setTablePermissions (requestingUserName) (userName) (tableName) (read) (write) (delete)</i>
+ *
+ * <i>listAllTables (userName)</i>
+ *
+ * <i>createSynchronizedTable (userName) (tableName)
+ *        (columnName) (columnType) (nullable)
+ *        ...</i>
+ *
+ * <i>cloneSynchronizedTable (userName) (tableName)</i>
+ * 
+ * <i>removeTableSynchronization (userName) (tableName)</i>
+ * 
+ * <i>deleteSynchronizedTable (userName) (tableName)</i>
+ *
+ * <i>insertSynchronizedRows (userName) (tableName)
+ *        (rowID)
+ *            (columnName) (value)
+ *            ...
+ *        ...</i>
+ * 
+ * <i>updateSynchronizedRows (userName) (tableName)
+ *        (rowID)
+ *            (columnName) (value)
+ *            ...
+ *        ...</i>
+ * 
+ * <i>synchronize (userName) (tableName)</i>
+ * 
+ * <i>printTable (userName) (tableName)</i>
+ * </pre>
+ * 
+ * @author the.dylan.price@gmail.com
+ * 
+ */
 public class ClientTestDriver
 {
 
-    private SynchronizedAPI conn;
+    private String adminUserID;
+    private SynchronizeAPI conn;
+    // Map from userID to the client
     private Map<String, SynchronizedClient> clients;
+    // Map from userID to a list of Aggregate tables that they are allowed to read
+    private Map<String, List<TableEntry>> aggregateTables;
     private Scanner input;
     private PrintWriter output;
 
-    public ClientTestDriver(SynchronizedAPI conn, Reader r, Writer w)
+    public ClientTestDriver(URI aggregateURI, String adminUserID, Reader r,
+            Writer w) throws ClientProtocolException,
+            UserDoesNotExistException, AggregateInternalErrorException,
+            IOException
     {
-        this.conn = conn;
+        this.adminUserID = adminUserID;
+        conn = new SynchronizeAPI(aggregateURI, adminUserID);
         clients = new HashMap<String, SynchronizedClient>();
+        aggregateTables = new HashMap<String, List<TableEntry>>();
         input = new Scanner(r);
         input.useDelimiter("");
         output = new PrintWriter(w);
@@ -42,11 +117,8 @@ public class ClientTestDriver
         while (input.hasNextLine())
         {
             String line = input.nextLine();
-            if (line.length() == 0 || line.charAt(0) == '#')
-            {
-                // echo blank and comment lines
-                output.println(line);
-            } else
+            output.println(line);
+            if (line.length() != 0 && line.charAt(0) != '#')
             {
                 StringTokenizer st = new StringTokenizer(line);
                 String command = st.nextToken();
@@ -68,15 +140,36 @@ public class ClientTestDriver
             if (command.equals("createUser"))
             {
                 createUser(arguments);
+            } else if (command.equals("deleteUser"))
+            {
+                deleteUser(arguments);
+            } else if (command.equals("setTablePermissions"))
+            {
+                setTablePermissions(arguments);
+            } else if (command.equals("listAllTables"))
+            {
+                listAllTables(arguments);
             } else if (command.equals("createSynchronizedTable"))
             {
                 createSynchronizedTable(arguments);
+            } else if (command.equals("cloneSynchronizedTable"))
+            {
+                cloneSynchronizedTable(arguments);
+            } else if (command.equals("removeTableSynchronization"))
+            {
+                removeTableSynchronization(arguments);
+            } else if (command.equals("deleteSynchronizedTable"))
+            {
+                deleteSynchronizedTable(arguments);
             } else if (command.equals("insertSynchronizedRows"))
             {
                 insertSynchronizedRows(arguments);
             } else if (command.equals("updateSynchronizedRows"))
             {
                 updateSynchronizedRows(arguments);
+            } else if (command.equals("synchronize"))
+            {
+                synchronize(arguments);
             } else if (command.equals("printTable"))
             {
                 printTable(arguments);
@@ -88,6 +181,9 @@ public class ClientTestDriver
     }
 
     private void createUser(List<String> arguments)
+            throws ClientProtocolException, UserAlreadyExistsException,
+            PermissionDeniedException, AggregateInternalErrorException,
+            IOException, UserDoesNotExistException
     {
         if (arguments.size() != 1)
             throw new RuntimeException("Bad arguments to createUser: "
@@ -97,14 +193,109 @@ public class ClientTestDriver
         createUser(clientName);
     }
 
-    private void createUser(String clientName)
+    private void createUser(String clientName) throws ClientProtocolException,
+            UserAlreadyExistsException, PermissionDeniedException,
+            AggregateInternalErrorException, IOException,
+            UserDoesNotExistException
     {
         SynchronizedClient client = new SynchronizedClient(clientName);
         clients.put(clientName, client);
-        // conn.createUser
+        conn.setUserID(adminUserID);
+        User user = conn.createUser(clientName, clientName);
+        client.setAggregateUserIdentifier(user.getAggregateUserIdentifier());
+    }
+
+    private void deleteUser(List<String> arguments)
+            throws PermissionDeniedException, UserDoesNotExistException,
+            CannotDeleteException, ClientProtocolException,
+            AggregateInternalErrorException, IOException
+    {
+        if (arguments.size() != 1)
+            throw new IllegalArgumentException("Bad arguments to deleteUser: "
+                    + arguments);
+
+        String clientName = arguments.get(0);
+        deleteUser(clientName);
+    }
+
+    private void deleteUser(String clientName)
+            throws PermissionDeniedException, UserDoesNotExistException,
+            CannotDeleteException, ClientProtocolException,
+            AggregateInternalErrorException, IOException
+    {
+        conn.setUserID(adminUserID);
+        SynchronizedClient client = clients.get(clientName);
+        conn.deleteUser(client.getAggregateUserIdentifier());
+    }
+
+    private void setTablePermissions(List<String> arguments)
+            throws ClientProtocolException, AggregateInternalErrorException,
+            UserDoesNotExistException, PermissionDeniedException,
+            TableDoesNotExistException, IOException
+    {
+        if (arguments.size() != 6)
+            throw new IllegalArgumentException(
+                    "Bad arguments to setTablePermissions: " + arguments);
+
+        String clientName = arguments.get(0);
+        String userName = arguments.get(1);
+        String tableName = arguments.get(2);
+        boolean read = Boolean.parseBoolean(arguments.get(3));
+        boolean write = Boolean.parseBoolean(arguments.get(4));
+        boolean delete = Boolean.parseBoolean(arguments.get(5));
+
+        setTablePermissions(clientName, userName, tableName, read, write,
+                delete);
+    }
+
+    private void setTablePermissions(String clientName, String userName,
+            String tableName, boolean read, boolean write, boolean delete)
+            throws ClientProtocolException, AggregateInternalErrorException,
+            UserDoesNotExistException, IOException, PermissionDeniedException,
+            TableDoesNotExistException
+    {
+        String aggregateTableIdentifier = null;
+        updateTables(clientName);
+        TableEntry table = getTableEntry(clientName, tableName);
+        aggregateTableIdentifier = table.getAggregateTableIdentifier();
+
+        conn.setUserID(clientName);
+        String aggregateUserIdentifier = clients.get(userName)
+                .getAggregateUserIdentifier();
+        conn.setTablePermissions(aggregateUserIdentifier,
+                aggregateTableIdentifier, read, write, delete);
+    }
+
+    private void listAllTables(List<String> arguments)
+            throws ClientProtocolException, AggregateInternalErrorException,
+            UserDoesNotExistException, IOException
+    {
+        if (arguments.size() != 1)
+            throw new IllegalArgumentException(
+                    "Bad arguments to listAllTables: " + arguments);
+
+        String clientName = arguments.get(0);
+
+        listAllTables(clientName);
+    }
+
+    private void listAllTables(String clientName)
+            throws ClientProtocolException, AggregateInternalErrorException,
+            UserDoesNotExistException, IOException
+    {
+        conn.setUserID(clientName);
+        List<TableEntry> entries = conn.listAllTables();
+        for (TableEntry entry : entries)
+        {
+            output.println(String.format("tableName: %s, userName: %s",
+                    entry.getTableName(), entry.getUser().getUserName()));
+        }
     }
 
     private void createSynchronizedTable(List<String> arguments)
+            throws ClientProtocolException, PermissionDeniedException,
+            TableAlreadyExistsException, AggregateInternalErrorException,
+            IOException, UserDoesNotExistException
     {
         if (arguments.size() != 2)
             throw new RuntimeException(
@@ -114,7 +305,8 @@ public class ClientTestDriver
         String tableName = arguments.get(1);
         List<Column> columns = new ArrayList<Column>();
         String inputLine;
-        while((inputLine = input.findInLine("    \\w+ [A-Z_]+ (false)|(true) *")) != null)
+        while ((inputLine = input
+                .findInLine("    \\w+ [A-Z_]+ (false)|(true) *")) != null)
         {
             StringTokenizer st = new StringTokenizer(inputLine);
 
@@ -124,7 +316,7 @@ public class ClientTestDriver
 
             Column column = new Column(name, type, nullable);
             columns.add(column);
-            
+
             // advance scanner
             input.nextLine();
         }
@@ -132,20 +324,123 @@ public class ClientTestDriver
     }
 
     private void createSynchronizedTable(String clientName, String tableName,
-            List<Column> columns)
+            List<Column> columns) throws ClientProtocolException,
+            PermissionDeniedException, TableAlreadyExistsException,
+            AggregateInternalErrorException, IOException,
+            UserDoesNotExistException
     {
         SynchronizedTable table = new SynchronizedTable(tableName, tableName,
                 columns);
         SynchronizedClient client = clients.get(clientName);
         client.addTable(table);
-        // Modification modification = conn.createSynchronizedTable
-        table.setModificationNumber(modification.getModificationNumber);
+        conn.setUserID(clientName);
+        Modification modification = conn.createSynchronizedTable(tableName,
+                tableName, columns);
+        table.setModificationNumber(modification.getModificationNumber());
+    }
+
+    private void cloneSynchronizedTable(List<String> arguments)
+            throws ClientProtocolException, AggregateInternalErrorException,
+            UserDoesNotExistException, TableDoesNotExistException,
+            PermissionDeniedException, TableAlreadyExistsException, IOException
+    {
+        if (arguments.size() != 2)
+            throw new RuntimeException(
+                    "Bad arguments to cloneSynchronizedTable: " + arguments);
+
+        String clientName = arguments.get(0);
+        String tableName = arguments.get(1);
+        cloneSynchronizedTable(clientName, tableName);
+    }
+
+    private void cloneSynchronizedTable(String clientName, String tableName)
+            throws ClientProtocolException, AggregateInternalErrorException,
+            UserDoesNotExistException, IOException, TableDoesNotExistException,
+            PermissionDeniedException, TableAlreadyExistsException
+    {
+        updateTables(clientName);
+        TableEntry table = getTableEntry(clientName, tableName);
+        SynchronizedTable ownerTable = getOwnerTable(table);
+
+        conn.setUserID(clientName);
+        Modification mod = conn.cloneSynchronizedTable(
+                table.getAggregateTableIdentifier(), tableName);
+
+        SynchronizedClient client = clients.get(clientName);
+        SynchronizedTable clientTable = new SynchronizedTable(
+                table.getTableName(), table.getTableID(), table.getColumns());
+        clientTable.setModificationNumber(mod.getModificationNumber());
+
+        List<SynchronizedRow> rows = mod.getRows();
+        for (SynchronizedRow row : rows)
+        {
+            SynchronizedRow ownerRow = ownerTable.getRowByIdentifier(row
+                    .getAggregateRowIdentifier());
+            row.setRowID(ownerRow.getRowID());
+            clientTable.insertRow(row);
+        }
+        client.addTable(clientTable);
+    }
+
+    private void removeTableSynchronization(List<String> arguments)
+            throws ClientProtocolException, AggregateInternalErrorException,
+            UserDoesNotExistException, TableDoesNotExistException, IOException
+    {
+        if (arguments.size() != 2)
+            throw new IllegalArgumentException(
+                    "Bad arguments to removeTableSynchronization: " + arguments);
+
+        String clientName = arguments.get(0);
+        String tableName = arguments.get(1);
+        removeTableSynchronization(clientName, tableName);
+    }
+
+    private void removeTableSynchronization(String clientName, String tableName)
+            throws ClientProtocolException, AggregateInternalErrorException,
+            UserDoesNotExistException, IOException, TableDoesNotExistException
+    {
+        conn.setUserID(clientName);
+        conn.removeTableSynchronization(tableName);
+
+        SynchronizedClient client = clients.get(clientName);
+        client.removeTable(tableName);
+    }
+
+    private void deleteSynchronizedTable(List<String> arguments)
+            throws ClientProtocolException, PermissionDeniedException,
+            TableDoesNotExistException, AggregateInternalErrorException,
+            UserDoesNotExistException, IOException
+    {
+        if (arguments.size() != 2)
+            throw new IllegalArgumentException(
+                    "Bad arguments to deleteSynchronizedTable: " + arguments);
+
+        String clientName = arguments.get(0);
+        String tableName = arguments.get(1);
+        deleteSynchronizedTable(clientName, tableName);
+    }
+
+    private void deleteSynchronizedTable(String clientName, String tableName)
+            throws ClientProtocolException, PermissionDeniedException,
+            TableDoesNotExistException, AggregateInternalErrorException,
+            IOException, UserDoesNotExistException
+    {
+        conn.setUserID(clientName);
+        conn.deleteSynchronizedTable(tableName);
+
+        SynchronizedClient client = clients.get(clientName);
+        client.removeTable(tableName);
     }
 
     private void insertSynchronizedRows(List<String> arguments)
+            throws ClientProtocolException, OutOfSynchException,
+            TableDoesNotExistException, PermissionDeniedException,
+            AggregateInternalErrorException, ColumnDoesNotExistException,
+            IOException, UserDoesNotExistException
     {
         if (arguments.size() != 2)
-            throw new RuntimeException("Bad arguments to insertSynchronizedRows: " + arguments);
+            throw new RuntimeException(
+                    "Bad arguments to insertSynchronizedRows: " + arguments);
 
         String clientName = arguments.get(0);
         String tableName = arguments.get(1);
@@ -154,108 +449,150 @@ public class ClientTestDriver
     }
 
     private void insertSynchronizedRows(String clientName, String tableName,
-            Map<String, SynchronizedRow> rows)
+            Map<String, SynchronizedRow> rows) throws ClientProtocolException,
+            OutOfSynchException, TableDoesNotExistException,
+            PermissionDeniedException, AggregateInternalErrorException,
+            ColumnDoesNotExistException, IOException, UserDoesNotExistException
     {
         SynchronizedClient client = clients.get(clientName);
-        SynchronizedTable table = client.getTables(tableName);
-        // Modification mod = client.insertSynchronizedRows(
+        SynchronizedTable table = client.getTable(tableName);
+        conn.setUserID(clientName);
+        Modification mod = conn.insertSynchronizedRows(table.getTableID(),
+                table.getModificationNumber(), new ArrayList<SynchronizedRow>(
+                        rows.values()));
+        table.setModificationNumber(mod.getModificationNumber());
         for (SynchronizedRow updatedRow : mod.getRows())
         {
             SynchronizedRow row = rows.get(updatedRow.getRowID());
 
-            String aggregateRowIdentifier = updatedRow.getAggregateRowIdentifier();
+            String aggregateRowIdentifier = updatedRow
+                    .getAggregateRowIdentifier();
             String revisionTag = updatedRow.getRevisionTag();
 
             row.setAggregateRowIdentifier(aggregateRowIdentifier);
             row.setRevisionTag(revisionTag);
-            
+
             table.insertRow(row);
         }
     }
 
     private void updateSynchronizedRows(List<String> arguments)
+            throws ClientProtocolException, PermissionDeniedException,
+            OutOfSynchException, TableDoesNotExistException,
+            RowOutOfSynchException, AggregateInternalErrorException,
+            ColumnDoesNotExistException, IOException, UserDoesNotExistException
     {
         if (arguments.size() != 2)
-            throw new RuntimeException("Bad arguments to insertSynchronizedRows: " + arguments);
+            throw new RuntimeException(
+                    "Bad arguments to insertSynchronizedRows: " + arguments);
 
         String clientName = arguments.get(0);
         String tableName = arguments.get(1);
         Map<String, SynchronizedRow> rows = parseRows();
         updateSynchronizedRows(clientName, tableName, rows);
-
     }
 
     private void updateSynchronizedRows(String clientName, String tableName,
-            Map<String, SynchronizedRow> rows)
+            Map<String, SynchronizedRow> rows) throws ClientProtocolException,
+            PermissionDeniedException, OutOfSynchException,
+            TableDoesNotExistException, RowOutOfSynchException,
+            AggregateInternalErrorException, ColumnDoesNotExistException,
+            IOException, UserDoesNotExistException
     {
         SynchronizedClient client = clients.get(clientName);
-        SynchronizedTable table = client.getTables(tableName);
+        SynchronizedTable table = client.getTable(tableName);
 
-        List<SynchronizedRow> existingRows = table.getRows(rowMap.keySet());
+        List<SynchronizedRow> existingRows = table.getRows(rows.keySet());
         for (SynchronizedRow existingRow : existingRows)
         {
-           SynchronizedRow row = rows.get(existingRow.getRowID());
-           row.setAggregateRowIdentifier(existingRow.getAggregateRowIdentifier());
-           row.setRevisionTag(existingRow.getRevisionTag());
+            SynchronizedRow row = rows.get(existingRow.getRowID());
+            row.setAggregateRowIdentifier(existingRow
+                    .getAggregateRowIdentifier());
+            row.setRevisionTag(existingRow.getRevisionTag());
         }
-        // Modification mod = client.updateSynchronizedRows(
+        conn.setUserID(clientName);
+        Modification mod = conn.updateSynchronizedRows(table.getTableName(),
+                table.getModificationNumber(), new ArrayList<SynchronizedRow>(
+                        rows.values()));
+        table.setModificationNumber(mod.getModificationNumber());
         for (SynchronizedRow updatedRow : mod.getRows())
         {
-            SynchronizedRow row = rows.get(updatedRow.getRowID());
+            SynchronizedRow row = null;
+            String aggregateRowIdentifier = updatedRow
+                    .getAggregateRowIdentifier();
+            for (SynchronizedRow testRow : rows.values())
+            {
+                if (testRow.getAggregateRowIdentifier().equals(
+                        aggregateRowIdentifier))
+                    row = testRow;
+            }
+            if (row == null)
+                throw new RuntimeException(
+                        "Could not find row with aggregateRowIdentifier: "
+                                + aggregateRowIdentifier);
+
             row.setRevisionTag(updatedRow.getRevisionTag());
             table.updateRow(row);
         }
     }
 
-    /**
-     * this.input should be sitting on the beginning of the line with the first row.
-     * e.g.
-     * <pre>
-     *  updateSynchronizedRows user1 people
-     * # this.input points at the first space
-     * # |
-     * # V
-     *      row1
-     *          name DylanUpdate
-     *          age 23
-     *          weight 175
-     * </pre>
-     *
-     * @return a map from rowIDs to rows.
-     */
-    private Map<String, SynchronizedRow> parseRows()
+    private void synchronize(List<String> arguments)
+            throws ClientProtocolException, PermissionDeniedException,
+            TableDoesNotExistException, AggregateInternalErrorException,
+            UserDoesNotExistException, IOException
     {
-        Map<String, SynchronizedRow> rows = new HashMap<String, SynchronizedRow>();
-        String inputLine;
-        while((inputLine = input.findInLine("    \\w+ *")) != null)
+        if (arguments.size() != 2)
+            throw new IllegalArgumentException("Bad arguments to synchronize: "
+                    + arguments);
+
+        String clientName = arguments.get(0);
+        String tableName = arguments.get(1);
+        synchronize(clientName, tableName);
+    }
+
+    private void synchronize(String clientName, String tableName)
+            throws ClientProtocolException, PermissionDeniedException,
+            TableDoesNotExistException, AggregateInternalErrorException,
+            IOException, UserDoesNotExistException
+    {
+        SynchronizedClient client = clients.get(clientName);
+        SynchronizedTable table = client.getTable(tableName);
+
+        updateTables(clientName);
+        TableEntry entry = getTableEntry(clientName, tableName);
+        SynchronizedTable ownerTable = getOwnerTable(entry);
+
+        conn.setUserID(clientName);
+        Modification mod = conn.synchronize(tableName,
+                table.getModificationNumber());
+
+        table.setModificationNumber(mod.getModificationNumber());
+        for (SynchronizedRow row : mod.getRows())
         {
-            StringTokenizer st = new StringTokenizer(inputLine);
-
-            String rowID = st.nextToken();
-            SynchronizedRow row = new SynchronizedRow();
-            row.setRowID(rowID);
-            input.nextLine();
-
-            String inputLine2;
-            while((inputLine2 = input.findInLine("    \\w+ \\w+ *")) != null);
+            String aggregateRowIdentifier = row.getAggregateRowIdentifier();
+            if (table.hasRowByIdentifier(aggregateRowIdentifier))
             {
-                StringTokenizer st = new StringTokenizer(inputLine2);
-
-                String column = st.nextToken();
-                String value = st.nextToken();
-                row.setValue(column, value);
-
-                input.nextLine();
-            } 
-            rows.put(rowID, row);
+                // existing row
+                SynchronizedRow existingRow = table
+                        .getRowByIdentifier(aggregateRowIdentifier);
+                row.setRowID(existingRow.getRowID());
+                table.updateRow(row);
+            } else
+            {
+                // new row
+                SynchronizedRow ownerRow = ownerTable
+                        .getRowByIdentifier(aggregateRowIdentifier);
+                row.setRowID(ownerRow.getRowID());
+                table.insertRow(row);
+            }
         }
-        return rows;
     }
 
     private void printTable(List<String> arguments)
     {
         if (arguments.size() != 2)
-            throw new RuntimeException("Bad arguments to printTable: " + arguments);
+            throw new RuntimeException("Bad arguments to printTable: "
+                    + arguments);
 
         String clientName = arguments.get(0);
         String tableName = arguments.get(1);
@@ -267,15 +604,107 @@ public class ClientTestDriver
     {
         SynchronizedClient client = clients.get(clientName);
         SynchronizedTable table = client.getTable(tableName);
-        output.println(String.format("%s %s\n%s %s", clientName, tableName, table.getAggregateTableIdentifier(), table.getModificationNumber()));
-        for (SynchronizedRow row : table.getRows())
+        output.println(String.format("modification: %s",
+                table.getModificationNumber()));
+        List<SynchronizedRow> rows = new ArrayList<SynchronizedRow>(
+                table.getRows());
+        Collections.sort(rows, TestUtils.rowComparator);
+        for (SynchronizedRow row : rows)
         {
             output.println(String.format("    %s", row.getRowID()));
-            for (Entry<String, String> entry : row.getColumnValuePairs().entrySet())
+            Map<String, String> columnValuePairs = new TreeMap<String, String>(
+                    row.getColumnValuePairs());
+            for (Entry<String, String> entry : columnValuePairs.entrySet())
             {
-                output.println(String.format("        %s %s", entry.getKey(), entry.getValue()));
+                output.println(String.format("        %s %s", entry.getKey(),
+                        entry.getValue()));
             }
         }
+    }
+
+    /**
+     * this.input should be sitting on the beginning of the line with the first
+     * row. e.g.
+     * 
+     * <pre>
+     *  updateSynchronizedRows user1 people
+     * # this.input points at the first space
+     * # |
+     * # V
+     *      row1
+     *          name DylanUpdate
+     *          age 23
+     *          weight 175
+     * </pre>
+     * 
+     * @return a map from rowIDs to rows.
+     */
+    private Map<String, SynchronizedRow> parseRows()
+    {
+        Map<String, SynchronizedRow> rows = new HashMap<String, SynchronizedRow>();
+        String inputLine;
+        while ((inputLine = input.findInLine("    \\w+ *")) != null)
+        {
+            StringTokenizer st = new StringTokenizer(inputLine);
+
+            String rowID = st.nextToken();
+            SynchronizedRow row = new SynchronizedRow();
+            row.setRowID(rowID);
+            input.nextLine();
+
+            String inputLine2;
+            while ((inputLine2 = input.findInLine("    \\w+ \\w+ *")) != null)
+            {
+                StringTokenizer st2 = new StringTokenizer(inputLine2);
+
+                String column = st2.nextToken();
+                String value = st2.nextToken();
+                row.setValue(column, value);
+
+                input.nextLine();
+            }
+            rows.put(rowID, row);
+        }
+        return rows;
+    }
+
+    /**
+     * Updates this.tables.get(clientName) to be the latest list of table
+     * entries that the client has permission to read.
+     */
+    private void updateTables(String clientName)
+            throws ClientProtocolException, AggregateInternalErrorException,
+            UserDoesNotExistException, IOException
+    {
+        conn.setUserID(clientName);
+        List<TableEntry> entries = conn.listAllTables();
+        aggregateTables.put(clientName, entries);
+    }
+
+    private TableEntry getTableEntry(String clientName, String tableName)
+            throws TableDoesNotExistException
+    {
+        TableEntry table = null;
+        for (TableEntry entry : this.aggregateTables.get(clientName))
+        {
+            String entryName = entry.getTableName();
+            if (entryName.equals(tableName))
+                table = entry;
+        }
+        if (table == null)
+            throw new TableDoesNotExistException(tableName);
+
+        return table;
+    }
+
+    private SynchronizedTable getOwnerTable(TableEntry table)
+            throws TableDoesNotExistException
+    {
+        User owner = table.getUser();
+        SynchronizedClient ownerClient = clients.get(owner.getUserName());
+        SynchronizedTable ownerTable = ownerClient.getTable(table
+                .getTableName());
+        return ownerTable;
     }
 
     public static void main(String args[])
@@ -286,22 +715,21 @@ public class ClientTestDriver
             {
                 printUsage();
                 return;
-            }
-            else
+            } else
             {
                 ClientTestDriver td;
 
                 URI aggregateURI = new URI(args[0]);
                 String userID = args[1];
-                SynchronizedAPI conn = new SynchronizedAPI(aggregateURI, userID);
 
                 String fileName = args[2];
                 File tests = new File(fileName);
 
                 if (tests.exists() || tests.canRead())
                 {
-                    td = new ClientTestDriver(conn, new FileReader(tests),
-                            new OutputStreamWriter(System.out));
+                    td = new ClientTestDriver(aggregateURI, userID,
+                            new FileReader(tests), new OutputStreamWriter(
+                                    System.out));
                 } else
                 {
                     System.err.println("Cannot read from " + tests.toString());
@@ -312,8 +740,7 @@ public class ClientTestDriver
                 td.runTests();
             }
 
-
-        } catch (IOException e)
+        } catch (Exception e)
         {
             System.err.println(e.toString());
             e.printStackTrace(System.err);
