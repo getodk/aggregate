@@ -51,21 +51,21 @@ import org.opendatakit.common.ermodel.simple.AttributeType;
  * <i>createUser (userName)</i>
  * 
  * <i>deleteUser (userName)</i>
- *
+ * 
  * <i>setTablePermissions (requestingUserName) (userName) (tableName) (read) (write) (delete)</i>
- *
+ * 
  * <i>listAllTables (userName)</i>
- *
+ * 
  * <i>createSynchronizedTable (userName) (tableName)
  *        (columnName) (columnType) (nullable)
  *        ...</i>
- *
+ * 
  * <i>cloneSynchronizedTable (userName) (tableName)</i>
  * 
  * <i>removeTableSynchronization (userName) (tableName)</i>
  * 
  * <i>deleteSynchronizedTable (userName) (tableName)</i>
- *
+ * 
  * <i>insertSynchronizedRows (userName) (tableName)
  *        (rowID)
  *            (columnName) (value)
@@ -100,35 +100,57 @@ public class ClientTestDriver
 
     public ClientTestDriver(URI aggregateURI, String adminUserID, Reader r,
             Writer w) throws ClientProtocolException,
-            UserDoesNotExistException, AggregateInternalErrorException,
-            IOException
+            AggregateInternalErrorException, IOException
     {
         this.adminUserID = adminUserID;
-        conn = new SynchronizeAPI(aggregateURI, adminUserID);
         clients = new HashMap<String, SynchronizedClient>();
         aggregateTables = new HashMap<String, List<TableEntry>>();
         input = new Scanner(r);
         input.useDelimiter("");
         output = new PrintWriter(w);
+
+        try
+        {
+            conn = new SynchronizeAPI(aggregateURI, adminUserID);
+        } catch (UserDoesNotExistException e)
+        {
+            output.println(String
+                    .format("User with userID '%s' does not exist. Please go to "
+                            + "the 'ODK Tables Admin' tab in Aggregate and create "
+                            + "the admin user.", adminUserID));
+            output.flush();
+            System.exit(1);
+        } catch (Exception e)
+        {
+            output.println("Exception: " + e.toString());
+            output.flush();
+            System.exit(1);
+        }
     }
 
     public void runTests()
     {
-        while (input.hasNextLine())
+        try
         {
-            String line = input.nextLine();
-            output.println(line);
-            if (line.length() != 0 && line.charAt(0) != '#')
+            while (input.hasNextLine())
             {
-                StringTokenizer st = new StringTokenizer(line);
-                String command = st.nextToken();
-                List<String> lineArguments = new ArrayList<String>();
-                while (st.hasMoreTokens())
+                String line = input.nextLine();
+                output.println(line);
+                if (line.length() != 0 && !line.matches("^(\\s|\\t|#).*"))
                 {
-                    lineArguments.add(st.nextToken());
+                    StringTokenizer st = new StringTokenizer(line);
+                    String command = st.nextToken();
+                    List<String> lineArguments = new ArrayList<String>();
+                    while (st.hasMoreTokens())
+                    {
+                        lineArguments.add(st.nextToken());
+                    }
+                    executeCommand(command, lineArguments);
                 }
-                executeCommand(command, lineArguments);
             }
+        } catch (Exception e)
+        {
+            output.println(String.format("Exception: %s", e.toString()));
         }
         output.flush();
     }
