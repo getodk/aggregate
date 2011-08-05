@@ -1,0 +1,15 @@
+# Test that we can create a new table
+createUser user1
+
+createSynchronizedTable user1 people
+    name STRING false
+    age INTEGER false
+    weight DECIMAL false
+
+printTable user1 people
+
+# Test that we can't create a table that already exists
+createSynchronizedTable user1 people
+    name STRING false
+    age INTEGER false
+    weight DECIMAL false

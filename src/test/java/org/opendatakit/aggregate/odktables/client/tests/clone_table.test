@@ -1,0 +1,25 @@
+# Set up
+createUser user1
+createUser user2
+
+createSynchronizedTable user1 people
+    name STRING false
+    age INTEGER false
+    weight DECIMAL false
+
+
+# Test that user can clone a table he has read permission on
+
+setTablePermissions user1 user2 people true false false
+cloneSynchronizedTable user2 people
+
+
+# Test that user can't clone a table more than once
+cloneSynchronizedTable user2 people
+
+
+# Test that user can't clone a table that doesn't exist
+cloneSynchronizedTable user2 nonexistenttable
+
+
+# Test that user can't clone a table that he doesn't have read permission on
