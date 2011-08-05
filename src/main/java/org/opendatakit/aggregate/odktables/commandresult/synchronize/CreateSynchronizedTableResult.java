@@ -73,8 +73,7 @@ public class CreateSynchronizedTableResult extends
      * 
      * @throws TableAlreadyExistsException
      */
-    public Modification getModification() throws PermissionDeniedException,
-            TableAlreadyExistsException
+    public Modification getModification() throws TableAlreadyExistsException
     {
         if (successful())
         {
