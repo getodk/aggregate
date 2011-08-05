@@ -9,7 +9,7 @@ import org.opendatakit.common.web.CallingContext;
 
 /**
  * <p>
- * A User is a (aggregateUserIdentifier, userID, userName) tuple, where
+ * An InternalUser is a (aggregateUserIdentifier, userID, userName) tuple, where
  * <ul>
  * <li>aggregateUserIdentifier = the public unique identifier of a user</li>
  * <li>userID = the private unique identifier of the user, known only to the

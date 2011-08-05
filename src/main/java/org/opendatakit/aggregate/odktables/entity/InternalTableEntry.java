@@ -8,7 +8,7 @@ import org.opendatakit.common.web.CallingContext;
 
 /**
  * <p>
- * A TableEntry is a (aggregateTableIdentifier, ownerAggregate Identifier,
+ * An InternalTableEntry is a (aggregateTableIdentifier, ownerAggregate Identifier,
  * tableName, modificationNumber, isSynchronized) tuple, where
  * <ul>
  * <li>aggregateTableIdentifier: the globally unique identifer of a table</li>

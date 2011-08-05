@@ -8,7 +8,7 @@ import org.opendatakit.common.web.CallingContext;
 
 /**
  * <p>
- * A Modification is a (aggregateTableIdentifier, modificationNumber,
+ * An InternalModification is a (aggregateTableIdentifier, modificationNumber,
  * aggregateRowIdentifier) tuple, where
  * <ul>
  * <li>aggregateTableIdentifier = the universally unique identifier of a table</li>

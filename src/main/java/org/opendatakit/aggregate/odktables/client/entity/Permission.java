@@ -17,7 +17,9 @@ package org.opendatakit.aggregate.odktables.client.entity;
  * </ul>
  * </p>
  * 
+ * <p>
  * Permission is immutable.
+ * </p>
  * 
  * @author the.dylan.price@gmail.com
  * 

@@ -26,7 +26,7 @@ public class TableEntries
 {
     // Field names
     /**
-     * The name of the ownerAggregate Identifier field.
+     * The name of the aggregateOwnerIdentifier field.
      */
     public static final String AGGREGATE_OWNER_IDENTIFIER = "AGGREGATE_OWNER_IDENTIFIER";
 

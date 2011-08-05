@@ -8,8 +8,8 @@ import org.opendatakit.common.web.CallingContext;
 
 /**
  * <p>
- * A Permission is a (tableAggregate Identifier, userAggregate Identifier, read,
- * write, delete) tuple, where
+ * An InternalPermission is a (aggregateTableIdentifier,
+ * aggregateUserIdentifier, read, write, delete) tuple, where
  * <ul>
  * <li>aggregateTableIdentifier: the globally unique identifer of a table</li>
  * <li>aggregateUserIdentifier: the globally unique identifier of a user who

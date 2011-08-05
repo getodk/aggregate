@@ -31,7 +31,7 @@ import com.google.gson.GsonBuilder;
 /**
  * CommandConverter handles the serialization and deserialization of Command and
  * CommandResult objects. It also provides a way to retrieve the class of a
- * command implementation given its method name (e.g. '/odktables/createTable').
+ * command implementation given its method name (e.g. '/simple/createTable').
  * 
  * @author the.dylan.price@gmail.com
  */

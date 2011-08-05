@@ -1,5 +1,28 @@
 package org.opendatakit.aggregate.odktables.client.entity;
 
+/**
+ * <p>
+ * A SynchronizedRow is a row in a synchronized table, that is, a table created
+ * using the SynchronizeAPI.
+ * </p>
+ * 
+ * <p>
+ * A SynchronizedRow is the same as a normal Row, except that in addition to the
+ * attributes of a Row it has:
+ * <ul>
+ * <li>revisionTag: a random tag that is updated every time the row is changed.
+ * This is used to ensure the client is able to keep their row in synch with
+ * Aggregate's</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>
+ * SynchronizedRow is mutable and currently not threadsafe.
+ * </p>
+ * 
+ * @author the.dylan.price@gmail.com
+ * 
+ */
 public class SynchronizedRow extends Row
 {
     private String revisionTag;

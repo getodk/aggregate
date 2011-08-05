@@ -1,7 +1,6 @@
 package org.opendatakit.aggregate.odktables.entity;
 
 import org.opendatakit.aggregate.odktables.relation.Columns;
-import org.opendatakit.common.ermodel.simple.Attribute;
 import org.opendatakit.common.ermodel.simple.AttributeType;
 import org.opendatakit.common.ermodel.simple.Entity;
 import org.opendatakit.common.ermodel.simple.typedentity.TypedEntity;
@@ -10,10 +9,9 @@ import org.opendatakit.common.web.CallingContext;
 
 /**
  * <p>
- * A Column is a (columnAggregate Identifier, aggregateTableIdentifier,
- * columnName, columnType, nullable) tuple, where
+ * An InternalColumn is a (aggregateTableIdentifier, columnName, columnType,
+ * nullable) tuple, where
  * <ul>
- * <li>columnAggregate Identifier: the globally unique identifier of the column</li>
  * <li>aggregateTableIdentifier: the globally unique identifier of the table
  * this column belongs to</li>
  * <li>columnName: the name of the column. This must consist if upper case

@@ -82,6 +82,7 @@ public class QueryForRowsLogic extends CommandLogic<QueryForRows>
         Table table = Table.getInstance(aggregateTableIdentifier, cc);
         List<InternalRow> rows = table.query().execute();
 
+        @SuppressWarnings("unchecked")
         List<String> columnNames = (List<String>) columns
                 .query()
                 .equal(Columns.AGGREGATE_TABLE_IDENTIFIER,
