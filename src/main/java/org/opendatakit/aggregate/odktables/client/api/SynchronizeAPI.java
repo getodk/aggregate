@@ -100,12 +100,11 @@ public class SynchronizeAPI extends CommonAPI
      *             call to fail
      * @throws IOException
      *             if there is a problem communicating with the Aggregate server
-     * @throws PermissionDeniedException
      */
     public Modification createSynchronizedTable(String tableID,
             String tableName, List<Column> columns)
             throws ClientProtocolException, IOException,
-            PermissionDeniedException, TableAlreadyExistsException,
+            TableAlreadyExistsException,
             AggregateInternalErrorException
     {
         CreateSynchronizedTable command = new CreateSynchronizedTable(
