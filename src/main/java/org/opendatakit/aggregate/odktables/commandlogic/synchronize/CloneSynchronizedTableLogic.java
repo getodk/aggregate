@@ -62,7 +62,7 @@ public class CloneSynchronizedTableLogic extends
         if (!user.hasPerm(users.getAggregateIdentifier(), Permissions.READ))
         {
             return CloneSynchronizedTableResult.failure(tableID,
-                    aggregateTableIdentifier, FailureReason.PERMISSION_DENIED);
+                    FailureReason.PERMISSION_DENIED);
         }
 
         boolean mappingExists = mappings
@@ -73,7 +73,6 @@ public class CloneSynchronizedTableLogic extends
         if (mappingExists)
         {
             return CloneSynchronizedTableResult.failure(tableID,
-                    aggregateTableIdentifier,
                     FailureReason.TABLE_ALREADY_EXISTS);
         }
 
@@ -84,7 +83,6 @@ public class CloneSynchronizedTableLogic extends
         } catch (ODKDatastoreException e)
         {
             return CloneSynchronizedTableResult.failure(tableID,
-                    aggregateTableIdentifier,
                     FailureReason.TABLE_DOES_NOT_EXIST);
         }
 

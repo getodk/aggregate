@@ -8,8 +8,8 @@ import org.opendatakit.common.web.CallingContext;
 
 /**
  * <p>
- * A UserTableMapping is a (aggregateUserIdentifier, aggregateTableIdentifier,
- * tableID) tuple, where
+ * An InternalUserTableMapping is a (aggregateUserIdentifier,
+ * aggregateTableIdentifier, tableID) tuple, where
  * <ul>
  * <li>aggregateUserIdentifier: the globally unique identifier of a user who is
  * using the table with aggregateTableIdentifier</li>

@@ -51,8 +51,7 @@ import org.opendatakit.common.web.CallingContext;
 /**
  * <p>
  * CommandLogic encapsulates the logic associated with a specific Command. That
- * is, CommandLogic implements the logic necessary to validate and execute a
- * Command.
+ * is, CommandLogic actually 'does' the command.
  * </p>
  * 
  * <p>
@@ -90,16 +89,14 @@ public abstract class CommandLogic<T extends Command>
      * @throws ODKDatastoreException
      *             if there was an exception from the datastore which this
      *             CommandLogic could not handle
-     * @throws E
-     *             if there was a problem executing the Command
-     * @return the result of successfully executing the command
+     * @return the result of executing the command
      */
     public abstract CommandResult<T> execute(CallingContext cc)
             throws ODKDatastoreException, ODKTaskLockException;
 
     /**
      * There should be one CommandType for each implementation of the Command
-     * interface. This is just to support fast switching in
+     * interface. This is just to support switching in
      * {@link CommandConverter#newCommandLogic(Command)}.
      */
     private enum CommandType
@@ -140,7 +137,8 @@ public abstract class CommandLogic<T extends Command>
         commandClassMap = new HashMap<Class<? extends Command>, CommandType>();
 
         // Common
-        commandClassMap.put(CheckUserExists.class, CommandType.CHECK_USER_EXISTS);
+        commandClassMap.put(CheckUserExists.class,
+                CommandType.CHECK_USER_EXISTS);
         commandClassMap.put(CreateUser.class, CommandType.CREATE_USER);
         commandClassMap.put(DeleteUser.class, CommandType.DELETE_USER);
         commandClassMap.put(GetUserByID.class, CommandType.GET_USER_BY_ID);
@@ -243,7 +241,7 @@ public abstract class CommandLogic<T extends Command>
         case UPDATE_SYNCHRONIZED_ROWS:
             return new UpdateSynchronizedRowsLogic(
                     (UpdateSynchronizedRows) command);
-            
+
         default:
             throw new IllegalArgumentException("No such command: " + command);
         }

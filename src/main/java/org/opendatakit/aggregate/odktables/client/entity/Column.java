@@ -3,14 +3,18 @@ package org.opendatakit.aggregate.odktables.client.entity;
 import org.opendatakit.common.ermodel.simple.AttributeType;
 
 /**
+ * <p>
  * Column represents a simple column in a table. A Column has three attributes:
  * <ul>
  * <li>name: a String which is the name of the column</li>
  * <li>type: the type of data that will be put in the column</li>
  * <li>nullable: true if values in the column are allowed to be null</li>
  * </ul>
+ * </p>
  * 
- * Column is immutable and therefore threadsafe.
+ * <p>
+ * Column is immutable.
+ * </p>
  * 
  * @author the.dylan.price@gmail.com
  */

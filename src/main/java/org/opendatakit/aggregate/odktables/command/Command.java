@@ -30,10 +30,8 @@ package org.opendatakit.aggregate.odktables.command;
  * getMethodPath() you should implement a static counterpart called
  * <i>methodPath()</i>. This returns the exact same information as
  * getMethodPath(), it's purpose is to make the method path available statically
- * and to instances of the Command interface. Currently, only requests to
- * '/odktables/*' get mapped to the CommandServlet, so you should start your
- * method path with '/odktables/'. Also, try to implement toString, equals, and
- * hashCode.</li>
+ * and to instances of the Command interface. Also, try to implement toString,
+ * equals, and hashCode.</li>
  * <li>Write the CommandResult object. This is a subclass of CommandResult,
  * please read the documentation in that class for details on subclassing it.</li>
  * <li>Write the CommandLogic object. This is a subclass of the CommandLogic
@@ -46,10 +44,9 @@ package org.opendatakit.aggregate.odktables.command;
  * other cases.</li>
  * <li>In CommandConverter's constructor, add your Command to the commandMap.</li>
  * <li>You're done! When you run an Aggregate instance, your command will be
- * available at whatever your getMethodPath() and <i>methodPath()</i> return.
- * The current web.xml maps all /odktables/* requests to the CommandServlet, so
- * your method path will need to start with /odktables/ unless you want to add
- * more mappings to the web.xml.</li>
+ * available at /odktables/&lt;whatever your getMethodPath() returns&gt;. The
+ * current web.xml maps all /odktables/* requests to the CommandServlet, then
+ * from there it gets routed based on the method paths.</li>
  * </ol>
  * </p>
  * 

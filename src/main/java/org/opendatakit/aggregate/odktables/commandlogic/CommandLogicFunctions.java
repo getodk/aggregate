@@ -11,6 +11,12 @@ import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.web.CallingContext;
 
+/**
+ * Common utility functions for CommandLogic implementations.
+ * 
+ * @author the.dylan.price@gmail.com
+ * 
+ */
 public class CommandLogicFunctions
 {
     public static int incrementModificationNumber(InternalTableEntry entry,

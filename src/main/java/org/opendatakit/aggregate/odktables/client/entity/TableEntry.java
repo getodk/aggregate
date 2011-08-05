@@ -14,6 +14,7 @@ import java.util.List;
  * <li>tableID: the client's unique identifier for the table.</li>
  * <li>tableName: the human readable name of the table</li>
  * <li>isSynchronized: true if the table is a synchronized table</li>
+ * <li>columns: a list of the Columns defined for the table</li>
  * </ul>
  * </p>
  * 

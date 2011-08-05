@@ -12,11 +12,13 @@ import org.opendatakit.aggregate.odktables.commandresult.CommandResult;
 import org.opendatakit.common.utils.Check;
 
 /**
- * A CloneSynchronizedTableResult represents the result of executing a CloneSynchronizedTable command.
+ * A CloneSynchronizedTableResult represents the result of executing a
+ * CloneSynchronizedTable command.
  * 
  * @author the.dylan.price@gmail.com
  */
-public class CloneSynchronizedTableResult extends CommandResult<CloneSynchronizedTable>
+public class CloneSynchronizedTableResult extends
+        CommandResult<CloneSynchronizedTable>
 {
     private static final List<FailureReason> possibleFailureReasons;
     static
@@ -29,15 +31,12 @@ public class CloneSynchronizedTableResult extends CommandResult<CloneSynchronize
 
     private final Modification modification;
     private final String tableID;
-    private final String aggregateTableIdentifier;
 
     private CloneSynchronizedTableResult()
     {
-       super(true, null);
-       this.modification = null;
-       this.tableID = null;
-       this.aggregateTableIdentifier = null;
-       
+        super(true, null);
+        this.modification = null;
+        this.tableID = null;
     }
 
     /**
@@ -46,38 +45,39 @@ public class CloneSynchronizedTableResult extends CommandResult<CloneSynchronize
     private CloneSynchronizedTableResult(Modification modification)
     {
         super(true, null);
-        
+
         Check.notNull(modification, "modification");
-        
+
         this.modification = modification;
         this.tableID = null;
-        this.aggregateTableIdentifier = null;
     }
 
     /**
      * The failure constructor. See {@link #failure} for param info.
      */
-    private CloneSynchronizedTableResult(String tableID, String aggregateTableIdentifier, FailureReason reason)
+    private CloneSynchronizedTableResult(String tableID, FailureReason reason)
     {
         super(false, reason);
-        
+
         Check.notNullOrEmpty(tableID, "tableID");
-        Check.notNullOrEmpty(aggregateTableIdentifier, "aggregateTableIdentifier"); 
         if (!possibleFailureReasons.contains(reason))
-            throw new IllegalArgumentException(String.format("Failure reason %s not a valid failure reason for CloneSynchronizedTable.", reason));
-        
+            throw new IllegalArgumentException(
+                    String.format(
+                            "Failure reason %s not a valid failure reason for CloneSynchronizedTable.",
+                            reason));
+
         this.modification = null;
         this.tableID = tableID;
-        this.aggregateTableIdentifier = aggregateTableIdentifier;
     }
 
     /**
      * Retrieve the results from the CloneSynchronizedTable command.
-     * @throws TableDoesNotExistException 
-     * @throws TableAlreadyExistsException 
+     * 
+     * @throws TableDoesNotExistException
+     * @throws TableAlreadyExistsException
      */
-    public Modification getModification() throws 
-            PermissionDeniedException, TableDoesNotExistException, TableAlreadyExistsException
+    public Modification getModification() throws PermissionDeniedException,
+            TableDoesNotExistException, TableAlreadyExistsException
     {
         if (successful())
         {
@@ -89,7 +89,7 @@ public class CloneSynchronizedTableResult extends CommandResult<CloneSynchronize
             case TABLE_ALREADY_EXISTS:
                 throw new TableAlreadyExistsException(tableID);
             case TABLE_DOES_NOT_EXIST:
-                throw new TableDoesNotExistException(null);
+                throw new TableDoesNotExistException(tableID);
             case PERMISSION_DENIED:
                 throw new PermissionDeniedException();
             default:
@@ -99,8 +99,11 @@ public class CloneSynchronizedTableResult extends CommandResult<CloneSynchronize
     }
 
     /**
-     * @param modification the latest modification of the table, with a a list of all the rows in the table
-     * @return a new CloneSynchronizedTableResult representing the successful completion of a CloneSynchronizedTable command.
+     * @param modification
+     *            the latest modification of the table, with a a list of all the
+     *            rows in the table
+     * @return a new CloneSynchronizedTableResult representing the successful
+     *         completion of a CloneSynchronizedTable command.
      * 
      */
     public static CloneSynchronizedTableResult success(Modification modification)
@@ -109,13 +112,19 @@ public class CloneSynchronizedTableResult extends CommandResult<CloneSynchronize
     }
 
     /**
-     * @param tableID the tableID which was involved in the command
-     * @param aggregateTableIdentifier the Aggregate Identifier which was involved in the command
-     * @param reason the reason the command failed. Must be one of TABLE_ALREADY_EXISTS, TABLE_DOES_NOT_EXIST, PERMISSION_DENIED.
-     * @return a new CloneSynchronizedTableResult representing the failed completion of a CloneSynchronizedTable command.
+     * @param tableID
+     *            the tableID which was involved in the command
+     * @param aggregateTableIdentifier
+     *            the Aggregate Identifier which was involved in the command
+     * @param reason
+     *            the reason the command failed. Must be one of
+     *            TABLE_ALREADY_EXISTS, TABLE_DOES_NOT_EXIST, PERMISSION_DENIED.
+     * @return a new CloneSynchronizedTableResult representing the failed
+     *         completion of a CloneSynchronizedTable command.
      */
-    public static CloneSynchronizedTableResult failure(String tableID, String aggregateTableIdentifier, FailureReason reason)
+    public static CloneSynchronizedTableResult failure(String tableID,
+            FailureReason reason)
     {
-        return new CloneSynchronizedTableResult(tableID, aggregateTableIdentifier, reason);
+        return new CloneSynchronizedTableResult(tableID, reason);
     }
 }

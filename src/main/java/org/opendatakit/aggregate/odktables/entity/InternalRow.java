@@ -10,7 +10,8 @@ import org.opendatakit.common.web.CallingContext;
 
 /**
  * <p>
- * A Row is a set of values pertaining to the fields of a specific table.
+ * An InternalRow is a set of values pertaining to the fields of a specific
+ * table.
  * </p>
  * 
  * <p>

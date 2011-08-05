@@ -47,7 +47,7 @@ public class SetUserManagementPermissionsResult extends
 
         Check.notNullOrEmpty(aggregateUserIdentifier, "aggregateUserIdentifier");
 
-        if (!this.possibleFailureReasons.contains(reason))
+        if (!possibleFailureReasons.contains(reason))
             throw new IllegalArgumentException(
                     String.format(
                             "Failure reason %s not a valid failure reason for SetUsersPermissions.",
@@ -70,7 +70,8 @@ public class SetUserManagementPermissionsResult extends
             switch (getReason())
             {
             case USER_DOES_NOT_EXIST:
-                throw new UserDoesNotExistException(this.aggregateUserIdentifier);
+                throw new UserDoesNotExistException(
+                        this.aggregateUserIdentifier);
             case PERMISSION_DENIED:
                 throw new PermissionDeniedException();
             default:
