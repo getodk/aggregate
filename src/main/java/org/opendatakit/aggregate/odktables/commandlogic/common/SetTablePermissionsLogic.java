@@ -35,6 +35,7 @@ public class SetTablePermissionsLogic extends CommandLogic<SetTablePermissions>
     {
         Users users = Users.getInstance(cc);
         TableEntries tableEntries = TableEntries.getInstance(cc);
+        Permissions permissions = Permissions.getInstance(cc);
 
         String aggregateUserIdentifier = setTablePermissions
                 .getAggregateUserIdentifier();
@@ -72,11 +73,26 @@ public class SetTablePermissionsLogic extends CommandLogic<SetTablePermissions>
                             FailureReason.TABLE_DOES_NOT_EXIST);
         }
 
-        InternalPermission perm = new InternalPermission(
-                aggregateTableIdentifier, aggregateUserIdentifier, read, write,
-                delete, cc);
+        // see if permission exists, if not create it
+        InternalPermission perm;
+        try
+        {
+            perm = permissions
+                    .query()
+                    .equal(Permissions.AGGREGATE_TABLE_IDENTIFIER,
+                            aggregateTableIdentifier)
+                    .equal(Permissions.AGGREGATE_USER_IDENTIFIER,
+                            aggregateUserIdentifier).get();
+            perm.setRead(read);
+            perm.setWrite(write);
+            perm.setDelete(delete);
+        } catch (ODKDatastoreException e)
+        {
+            perm = new InternalPermission(aggregateTableIdentifier,
+                    aggregateUserIdentifier, read, write, delete, cc);
+        }
+
         perm.save();
-        // TODO: try-catch error handling for above?
 
         return SetTablePermissionsResult.success();
     }
