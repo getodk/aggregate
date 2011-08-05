@@ -78,6 +78,8 @@ public class ScriptFileTests
             // getParentFile() cannot be null: ScriptFileTests has a package
             File myDirectory = new File(ScriptFileTests.class.getResource(
                     "ScriptFileTests.class").toURI()).getParentFile();
+            String testsPath = myDirectory.getAbsolutePath() + File.separator + "tests";
+            myDirectory = new File(testsPath);
             for (File f : myDirectory.listFiles(ScriptFileTests.testFileFilter))
             {
                 testScriptNames.add(f.getName());
