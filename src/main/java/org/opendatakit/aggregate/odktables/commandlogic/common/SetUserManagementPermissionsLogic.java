@@ -18,12 +18,14 @@ import org.opendatakit.common.web.CallingContext;
  * @author the.dylan.price@gmail.com
  * 
  */
-public class SetUserManagementPermissionsLogic extends CommandLogic<SetUserManagementPermissions>
+public class SetUserManagementPermissionsLogic extends
+        CommandLogic<SetUserManagementPermissions>
 {
 
     private final SetUserManagementPermissions setUsersPermissions;
 
-    public SetUserManagementPermissionsLogic(SetUserManagementPermissions setUsersPermissions)
+    public SetUserManagementPermissionsLogic(
+            SetUserManagementPermissions setUsersPermissions)
     {
         this.setUsersPermissions = setUsersPermissions;
     }
@@ -33,17 +35,20 @@ public class SetUserManagementPermissionsLogic extends CommandLogic<SetUserManag
             throws ODKDatastoreException
     {
         Users users = Users.getInstance(cc);
+        Permissions permissions = Permissions.getInstance(cc);
 
         String requestingUserID = this.setUsersPermissions
                 .getRequestingUserID();
-        String aggregateUserIdentifier = this.setUsersPermissions.getAggregateUserIdentifier();
+        String aggregateUserIdentifier = this.setUsersPermissions
+                .getAggregateUserIdentifier();
 
         InternalUser requestingUser = users.query()
                 .equal(Users.USER_ID, requestingUserID).get();
-        if (!requestingUser.hasPerm(users.getAggregateIdentifier(), Permissions.WRITE))
+        if (!requestingUser.hasPerm(users.getAggregateIdentifier(),
+                Permissions.WRITE))
         {
-            return SetUserManagementPermissionsResult.failure(aggregateUserIdentifier,
-                    FailureReason.PERMISSION_DENIED);
+            return SetUserManagementPermissionsResult.failure(
+                    aggregateUserIdentifier, FailureReason.PERMISSION_DENIED);
         }
 
         try
@@ -51,15 +56,33 @@ public class SetUserManagementPermissionsLogic extends CommandLogic<SetUserManag
             users.getEntity(aggregateUserIdentifier);
         } catch (ODKDatastoreException e)
         {
-            return SetUserManagementPermissionsResult.failure(aggregateUserIdentifier,
-                    FailureReason.USER_DOES_NOT_EXIST);
+            return SetUserManagementPermissionsResult.failure(
+                    aggregateUserIdentifier, FailureReason.USER_DOES_NOT_EXIST);
+        }
+        
+        // see if permission exists, if not create it
+        InternalPermission perm;
+        try
+        {
+            perm = permissions
+                    .query()
+                    .equal(Permissions.AGGREGATE_TABLE_IDENTIFIER,
+                            users.getAggregateIdentifier())
+                    .equal(Permissions.AGGREGATE_USER_IDENTIFIER,
+                            aggregateUserIdentifier).get();
+            perm.setRead(setUsersPermissions.getAllowed());
+            perm.setWrite(setUsersPermissions.getAllowed());
+            perm.setDelete(setUsersPermissions.getAllowed());
+        } catch (ODKDatastoreException e)
+        {
+            perm = new InternalPermission(users.getAggregateIdentifier(),
+                    aggregateUserIdentifier, setUsersPermissions.getAllowed(),
+                    setUsersPermissions.getAllowed(),
+                    setUsersPermissions.getAllowed(), cc);
         }
 
-        InternalPermission perm = new InternalPermission(users.getAggregateIdentifier(), aggregateUserIdentifier,
-                setUsersPermissions.getAllowed(), setUsersPermissions.getAllowed(),
-                setUsersPermissions.getAllowed(), cc);
         perm.save();
-        
+
         return SetUserManagementPermissionsResult.success();
     }
 }
