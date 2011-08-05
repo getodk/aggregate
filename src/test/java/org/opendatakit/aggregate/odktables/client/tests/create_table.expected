@@ -3,15 +3,10 @@ createUser user1
 
 # Test that we can create a new table
 createSynchronizedTable user1 people
-    name STRING false
-    age INTEGER false
-    weight DECIMAL false
 
 # Test that we can't create a table that already exists
 createSynchronizedTable user1 people
-    name STRING false
-    age INTEGER false
-    weight DECIMAL false
+Exception: org.opendatakit.aggregate.odktables.client.exception.TableAlreadyExistsException: Table with tableID 'people' already exists!
     
 # Clean up
 deleteSynchronizedTable user1 people
