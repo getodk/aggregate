@@ -6,9 +6,8 @@ import org.opendatakit.aggregate.client.widgets.AddTablesAdmin;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.VerticalPanel;
 
-public class OdkTablesAdminSubTab extends VerticalPanel implements SubTabInterface {
+public class OdkTablesAdminSubTab extends AggregateSubTabBase {
 
   private OdkAdminListTable listOfAdmins;
   private FlexTable nav;

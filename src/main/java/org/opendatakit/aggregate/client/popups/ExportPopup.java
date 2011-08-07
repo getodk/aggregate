@@ -148,10 +148,8 @@ public class ExportPopup extends PopupPanel {
 
     @Override
     public void onSuccess(Boolean result) {
-        SubmissionTabUI subUI = AggregateUI.getUI().getSubmissionNav();
-        int tabIndex = subUI.findSubTabIndex(SubTabs.EXPORT);
-        subUI.selectTab(tabIndex);
-        hide();
+      AggregateUI.getUI().redirectToSubTab(SubTabs.EXPORT);
+      hide();
     }
   }
 

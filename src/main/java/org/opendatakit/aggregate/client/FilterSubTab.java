@@ -25,9 +25,8 @@ import org.opendatakit.aggregate.constants.common.UIConsts;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ListBox;
-import com.google.gwt.user.client.ui.VerticalPanel;
 
-public class FilterSubTab extends VerticalPanel implements SubTabInterface {
+public class FilterSubTab extends AggregateSubTabBase {
  
   private FilterNavigationTable navTable;
   private HorizontalPanel filtersNSubmissions;
@@ -102,4 +101,5 @@ public class FilterSubTab extends VerticalPanel implements SubTabInterface {
   public SubmissionTable getSubmissionTable() {
     return submissionPanel.getSubmissionTable();
   }
+  
 }

@@ -16,69 +16,20 @@
 
 package org.opendatakit.aggregate.client;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.opendatakit.aggregate.constants.common.SubTabs;
 import org.opendatakit.aggregate.constants.common.Tabs;
 
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.user.client.ui.TabPanel;
-
-public class SubmissionTabUI extends TabPanel { 
-  // Submission Navigation
-  public static final SubTabs[] SUBMISSION_MENU = { SubTabs.FILTER, SubTabs.EXPORT};
-  
-  // Sub tabs
-  private FilterSubTab filterSubTab;
-  private ExportSubTab exportSubTab;
-
-  private Map<SubTabs, SubTabInterface> subTabMap;
+public class SubmissionTabUI extends AggregateTabBase { 
   
   public SubmissionTabUI(AggregateUI baseUI) {
     super();
- 
-    subTabMap = new HashMap<SubTabs,SubTabInterface>();
     
-    // build the UI
-    filterSubTab = new FilterSubTab();
-    add(filterSubTab, SubTabs.FILTER.getTabLabel());
-    subTabMap.put(SubTabs.FILTER, filterSubTab);
-    
-    exportSubTab = new ExportSubTab();
-    add(exportSubTab, SubTabs.EXPORT.getTabLabel());
-    subTabMap.put(SubTabs.EXPORT, exportSubTab);
-    
-    getElement().setId("second_level_menu");
-
+    // build the UI    
+    addSubTab(new FilterSubTab(), SubTabs.FILTER);
+    addSubTab(new ExportSubTab(), SubTabs.EXPORT);
+   
     // register handler to manage tab selection change (and selecting our tab)
-    baseUI.setSubMenuSelectionHandler(this, Tabs.SUBMISSIONS, SUBMISSION_MENU);
-  } 
-  
-  public void warmUp() {
-	  // warm up any tabs that are not selected.
-	  // this is done in a timer that runs asynchronously
-	  // so that the initial page render should be fast.
-	  for ( int i = 0 ; i < SUBMISSION_MENU.length ; ++i ) {
-		  boolean isVisible = this.isVisible();
-		  boolean isSelectedTab = this.getTabBar().getSelectedTab() == i;
-		  if ( !isVisible || !isSelectedTab ) {
-			  GWT.log("background update " + SUBMISSION_MENU[i].getHashString());
-			  subTabMap.get(SUBMISSION_MENU[i]).update();
-		  }
-	  }
+    registerClickHandlers(Tabs.SUBMISSIONS, baseUI);
   }
   
-  public int findSubTabIndex(SubTabs subTab) {
-    for (int i = 0; i < SUBMISSION_MENU.length; i++) {
-      if (subTab.equals(SUBMISSION_MENU[i])) {
-        return i;
-      }
-    }
-    return 0;
-  }
-  
-  public SubTabInterface getSubTab(SubTabs subTab) {
-    return subTabMap.get(subTab);
-  }
 }

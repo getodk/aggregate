@@ -20,9 +20,8 @@ import org.opendatakit.aggregate.client.permissions.AccessConfigurationSheet;
 import org.opendatakit.common.security.common.GrantedAuthorityName;
 
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.VerticalPanel;
 
-public class PermissionsSubTab extends VerticalPanel implements SubTabInterface {
+public class PermissionsSubTab extends AggregateSubTabBase {
 
   private AccessConfigurationSheet accessConfig;
   
