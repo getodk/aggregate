@@ -52,7 +52,7 @@ public class SaveFilterGroupButton extends AButtonBase implements ClickHandler {
   public void onClick(ClickEvent event) {
     super.onClick(event);
 
-    FilterGroup filterGroup = parentSubTab.getDisplayedFilterGroup();
+    final FilterGroup filterGroup = parentSubTab.getDisplayedFilterGroup();
     List<Filter> filters = filterGroup.getFilters();
 
     if (filters == null || filters.size() <= 0) {
@@ -88,13 +88,16 @@ public class SaveFilterGroupButton extends AButtonBase implements ClickHandler {
     }
 
     // Set up the callback object.
-    AsyncCallback<Boolean> callback = new AsyncCallback<Boolean>() {
+    AsyncCallback<String> callback = new AsyncCallback<String>() {
       public void onFailure(Throwable caught) {
         AggregateUI.getUI().reportError(caught);
       }
 
       @Override
-      public void onSuccess(Boolean result) {
+      public void onSuccess(String uri) {
+        if(uri != null) {
+          filterGroup.setUri(uri);
+        }
         parentSubTab.update();
       }
     };

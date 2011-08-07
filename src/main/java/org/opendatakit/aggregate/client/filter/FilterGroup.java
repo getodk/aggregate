@@ -81,6 +81,9 @@ public final class FilterGroup implements Serializable {
     return uri;
   }
 
+  public void setUri(String uri) {
+    this.uri = uri;
+  }
   
   /**
    * This should add the filter to the group

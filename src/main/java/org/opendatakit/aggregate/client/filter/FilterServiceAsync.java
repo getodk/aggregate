@@ -21,7 +21,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 public interface FilterServiceAsync {
 
 	void updateFilterGroup(FilterGroup group,
-			AsyncCallback<Boolean> callback);
+			AsyncCallback<String> callback);
 
 	void deleteFilterGroup(FilterGroup group,
 			AsyncCallback<Boolean> callback);
