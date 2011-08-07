@@ -19,7 +19,7 @@ package org.opendatakit.aggregate.constants.common;
 import java.io.Serializable;
 
 public enum SubTabs implements Serializable {
-	EXPORT("Export Files", "export"),
+	EXPORT("Exported Submissions", "export"),
 	FILTER("Filter Submissions", "filter"),
 	FORMS("Forms List", "forms"),
 	PUBLISH("Published Data", "publish"),
