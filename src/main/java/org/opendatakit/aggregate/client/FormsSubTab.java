@@ -24,9 +24,8 @@ import org.opendatakit.common.security.common.GrantedAuthorityName;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.VerticalPanel;
 
-public class FormsSubTab extends VerticalPanel implements SubTabInterface {
+public class FormsSubTab extends AggregateSubTabBase {
   // button text & styling
   private static final String SUBMISSION_TXT = "Upload Data";
   private static final String NEW_FORM_TXT = "New Form";

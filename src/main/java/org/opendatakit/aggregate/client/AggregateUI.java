@@ -16,6 +16,11 @@
 
 package org.opendatakit.aggregate.client;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.opendatakit.aggregate.client.preferences.Preferences;
 import org.opendatakit.aggregate.constants.common.ExportConsts;
 import org.opendatakit.aggregate.constants.common.FilterConsts;
@@ -52,7 +57,6 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class AggregateUI implements EntryPoint {
 
-  private static final Tabs[] MAIN_MENU = { Tabs.SUBMISSIONS, Tabs.MANAGEMENT, Tabs.ADMIN };
   private UrlHash hash;
   private VerticalPanel wrappingLayoutPanel;
   private Label errorMsgLabel;
@@ -62,15 +66,20 @@ public class AggregateUI implements EntryPoint {
   private TreeItem rootItem;
 
   private DecoratedTabPanel mainNav;
-  private ManageTabUI manageNav;
-  private SubmissionTabUI submissionNav;
-  private AdminTabUI adminNav;
 
+  // tab datastructures
+  private Map<Tabs, AggregateTabBase> tabMap;
+  private List<Tabs> tabPosition;
+  
   private RefreshTimer timer;
   private HTMLPanel login_logout_link = new HTMLPanel("");
 
   private static AggregateUI singleton = null;
 
+  /***********************************
+   *****   SINGLETON FETCHING   ******
+   ***********************************/
+  
   public static synchronized final AggregateUI getUI() {
     if (singleton == null) {
       // if you get here, you've put something in the AggregateUI()
@@ -81,6 +90,14 @@ public class AggregateUI implements EntryPoint {
     return singleton;
   }
 
+  public RefreshTimer getTimer() {
+    return timer;
+  }
+
+  /***********************************
+   *****     INITIALIZATION     ******
+   ***********************************/
+  
   private AggregateUI() {
     /*
      * CRITICAL NOTE: Do not do **anything** in this constructor that might
@@ -91,15 +108,24 @@ public class AggregateUI implements EntryPoint {
     singleton = null;
     timer = new RefreshTimer(this);
 
+    // create tab datastructures
+    tabMap = new HashMap<Tabs, AggregateTabBase>();
+    tabPosition = new ArrayList<Tabs>();
+    
     wrappingLayoutPanel = new VerticalPanel();
     errorMsgLabel = new Label();
     layoutPanel = new HorizontalPanel();
     helpPanel = new ScrollPanel();
 
     mainNav = new DecoratedTabPanel();
-    manageNav = new ManageTabUI(this);
-    submissionNav = new SubmissionTabUI(this);
-    adminNav = new AdminTabUI(this);
+    mainNav.addStyleName("mainNav");
+
+    addTabToDatastructures(new SubmissionTabUI(this), Tabs.SUBMISSIONS);
+    addTabToDatastructures(new ManageTabUI(this), Tabs.MANAGEMENT);
+    addTabToDatastructures(new AdminTabUI(this), Tabs.ADMIN);
+    
+    // Create the only tab that ALL users can see sub menu navigation
+    mainNav.add(tabMap.get(Tabs.SUBMISSIONS), Tabs.SUBMISSIONS.getTabLabel());
 
     // Create help panel
     helpTree = new Tree();
@@ -109,12 +135,6 @@ public class AggregateUI implements EntryPoint {
     helpPanel.add(helpTree);
     helpPanel.setHeight("250px");
     helpPanel.setAlwaysShowScrollBars(true);
-
-    // Create sub menu navigation
-    mainNav.add(submissionNav, Tabs.SUBMISSIONS.getTabLabel());
-    mainNav.add(manageNav, Tabs.MANAGEMENT.getTabLabel());
-    mainNav.add(adminNav, Tabs.ADMIN.getTabLabel());
-    mainNav.addStyleName("mainNav");
 
     // add the error message info...
     errorMsgLabel.setStyleName("error_message");
@@ -136,100 +156,225 @@ public class AggregateUI implements EntryPoint {
     updateTogglePane();
   }
 
-  private void changeHelpPanel(String subMenu) {
-    // change root item
-    rootItem.setText(subMenu + " Help");
-    rootItem.removeItems();
-
-    if (subMenu.equals(SubTabs.EXPORT.getTabLabel())) {
-      ExportConsts[] helpVals = ExportConsts.values();
-      // add new information
-      for (int i = 0; i < helpVals.length; i++) {
-        TreeItem helpItem = new TreeItem(helpVals[i].getTitle());
-        TreeItem content = new TreeItem(helpVals[i].getContent());
-        helpItem.setSelected(false);
-        content.setSelected(false);
-        helpItem.addItem(content);
-        rootItem.addItem(helpItem);
-      }
-    }
-
-    else if (subMenu.equals(SubTabs.FILTER.getTabLabel())) {
-      FilterConsts[] helpVals = FilterConsts.values();
-      // add new information
-      for (int i = 0; i < helpVals.length; i++) {
-        TreeItem helpItem = new TreeItem(helpVals[i].getTitle());
-        TreeItem content = new TreeItem(helpVals[i].getContent());
-        helpItem.setSelected(false);
-        content.setSelected(false);
-        helpItem.addItem(content);
-        rootItem.addItem(helpItem);
-      }
-    }
-
-    else if (subMenu.equals(SubTabs.FORMS.getTabLabel())) {
-      FormConsts[] helpVals = FormConsts.values();
-      // add new information
-      for (int i = 0; i < helpVals.length; i++) {
-        TreeItem helpItem = new TreeItem(helpVals[i].getTitle());
-        TreeItem content = new TreeItem(helpVals[i].getContent());
-        helpItem.setSelected(false);
-        content.setSelected(false);
-        helpItem.addItem(content);
-        rootItem.addItem(helpItem);
-      }
-    }
-
-    else if (subMenu.equals(SubTabs.PUBLISH.getTabLabel())) {
-      PublishConsts[] helpVals = PublishConsts.values();
-      // add new information
-      for (int i = 0; i < helpVals.length; i++) {
-        TreeItem helpItem = new TreeItem(helpVals[i].getTitle());
-        TreeItem content = new TreeItem(helpVals[i].getContent());
-        helpItem.setSelected(false);
-        content.setSelected(false);
-        helpItem.addItem(content);
-        rootItem.addItem(helpItem);
-      }
-    }
+  private void addTabToDatastructures(AggregateTabBase tabPanel, Tabs tab) {
+    int insertIndex = tabPosition.size();
+    
+    // add tabPanel into position
+    tabPosition.add(insertIndex, tab);
+    tabMap.put(tab, tabPanel);
   }
 
-  public void reportError(Throwable t) {
-    if (t instanceof org.opendatakit.common.persistence.client.exception.DatastoreFailureException) {
-      errorMsgLabel.setText("Error: " + t.getMessage());
-      errorMsgLabel.setVisible(true);
-    } else if (t instanceof org.opendatakit.common.security.client.exception.AccessDeniedException) {
-      errorMsgLabel
-          .setText("You do not have permission for this action.\nError: " + t.getMessage());
-      errorMsgLabel.setVisible(true);
-    } else if (t instanceof InvocationException) {
-      redirect(GWT.getHostPageBaseURL() + UIConsts.HOST_PAGE_BASE_ADDR);
-    } else {
-      errorMsgLabel.setText("Error: " + t.getMessage());
-      errorMsgLabel.setVisible(true);
-    }
-  }
-
-  public void clearError() {
+  @Override
+  public void onModuleLoad() {
+    // Get url hash.
+    hash = UrlHash.getHash();
+    hash.get();
     errorMsgLabel.setVisible(false);
-    errorMsgLabel.setText("");
+    userInfo = null;
+
+    // assign the singleton here...
+    singleton = this;
+
+    // start the refresh timer...
+    timer.setInitialized();
+
+    // Update the user security info.
+    // This gets the identity and privileges of the
+    // user to the UI and the realm of that user.
+    // The success callback then renders the requested
+    // page and warms up the various sub-tabs and
+    // displays the highlighted tab.
+    updateSecurityInfo();
+
+    contentLoaded();
+  }
+  
+
+
+  private void commonUpdateCompleteAction() {
+    updateTogglePane();
+    Preferences.updatePreferences();
+
+    mainNav.add(tabMap.get(Tabs.MANAGEMENT), Tabs.MANAGEMENT.getTabLabel());
+    mainNav.add(tabMap.get(Tabs.ADMIN), Tabs.ADMIN.getTabLabel());
+
+    // Select the correct menu item based on url hash.
+    int selected = 0;
+    String mainMenu = hash.get(UrlHash.MAIN_MENU);
+    for (int i = 0; i < tabPosition.size(); i++) {
+      if (mainMenu.equals(tabPosition.get(i).getHashString())) {
+        selected = i;
+      }
+    }
+    mainNav.selectTab(selected);
+
+    // AND schedule an async operation to
+    // refresh the tabs that are not selected.
+    Timer t = new Timer() {
+      @Override
+      public void run() {
+        // warm up the underlying UI tabs...
+        for(AggregateTabBase tab : tabMap.values()) {
+          tab.warmUp();
+        }
+      }
+    };
+    t.schedule(1000);
   }
 
-  native void redirect(String url)
-  /*-{
-		$wnd.location.replace(url);
+  private void updateSecurityInfo() {
+    lastUserInfoUpdateAttemptTimestamp = lastRealmInfoUpdateAttemptTimestamp = System
+        .currentTimeMillis();
+    SecureGWT.getSecurityService().getUserInfo(new AsyncCallback<UserSecurityInfo>() {
 
+      @Override
+      public void onFailure(Throwable caught) {
+        reportError(caught);
+      }
+
+      @Override
+      public void onSuccess(UserSecurityInfo result) {
+        userInfo = result;
+        if (realmInfo != null && userInfo != null) {
+          commonUpdateCompleteAction();
+        }
+      }
+    });
+    SecureGWT.getSecurityService().getRealmInfo(Cookies.getCookie("JSESSIONID"),
+        new AsyncCallback<RealmSecurityInfo>() {
+
+          @Override
+          public void onFailure(Throwable caught) {
+            reportError(caught);
+          }
+
+          @Override
+          public void onSuccess(RealmSecurityInfo result) {
+            realmInfo = result;
+            if (realmInfo != null && userInfo != null) {
+              commonUpdateCompleteAction();
+            }
+          }
+        });
+  }
+
+ 
+
+  // Let's JavaScript know that the GWT content has been loaded
+  // Currently calls into javascript/resize.js, if we add more JavaScript
+  // then that should be changed.
+  private native void contentLoaded() /*-{
+		$wnd.gwtContentLoaded();
   }-*/;
 
+
+ 
+  /***********************************
+   ******     NAVIGATION        ******
+   ***********************************/
+
+  public void redirectToSubTab(SubTabs subTab) {
+    for (Tabs tab : tabPosition) {
+      
+      AggregateTabBase tabObj = tabMap.get(tab);
+      if(tabObj == null) {
+        continue;
+      }
+      
+      SubTabInterface subTabObj = tabObj.getSubTab(subTab);
+      if (subTabObj != null) {
+        // found the tab
+        int index = tabPosition.indexOf(tab);
+        mainNav.selectTab(index);
+        tabObj.selectTab(tabObj.findSubTabIndex(subTab));
+        
+      }
+    }
+  }
+  
+  public SubTabInterface getSubTab(SubTabs subTabType) {
+    SubTabInterface subTab = null;
+
+    for (AggregateTabBase tab : tabMap.values()) {
+      subTab = tab.getSubTab(subTabType);
+      if (subTab != null) {
+        return subTab;
+      }
+    }
+
+    return subTab;
+  }
+
+  void setSubMenuSelectionHandler(final TabPanel menuTab, final Tabs menu, final SubTabs[] subMenus) {
+    // add the mainNav selection handler for this menu...
+    mainNav.addSelectionHandler(new SelectionHandler<Integer>() {
+      @Override
+      public void onSelection(SelectionEvent<Integer> event) {
+        if (userInfo == null) {
+          GWT.log("getSubMenuSelectionHandler: No userInfo - not setting selection");
+          return;
+        }
+        int selected = event.getSelectedItem();
+        String tabHash = menu.getHashString();
+
+        if (tabHash.equals(tabPosition.get(selected).getHashString())) {
+
+          // and select the appropriate subtab...
+          AggregateTabBase tab = tabMap.get(menu);
+          if (tab != null) {
+            tab.selectTab(tab.findSubTabIndexFromHash(hash));
+          }
+        }
+      }
+    });
+
+    menuTab.addBeforeSelectionHandler(new BeforeSelectionHandler<Integer>() {
+
+      @Override
+      public void onBeforeSelection(BeforeSelectionEvent<Integer> event) {
+        // allow the currently-selected SubTab to refuse the tab selection.
+        // refusal should only occur after user confirmation.
+        if (!getTimer().canLeaveCurrentSubTab()) {
+          event.cancel();
+        }
+      }
+
+    });
+
+    menuTab.addSelectionHandler(new SelectionHandler<Integer>() {
+      @Override
+      public void onSelection(SelectionEvent<Integer> event) {
+        if (userInfo == null) {
+          GWT.log("getSubMenuSelectionHandler: No userInfo - not setting subMenu selection");
+          return;
+        }
+        int selected = event.getSelectedItem();
+        clearError();
+        hash.clear();
+        hash.set(UrlHash.MAIN_MENU, menu.getHashString());
+        hash.set(UrlHash.SUB_MENU, subMenus[selected].getHashString());
+        getTimer().setCurrentSubTab(subMenus[selected]);
+        hash.put();
+        changeHelpPanel(subMenus[selected]);
+      }
+    });
+  }
+  
+  native void redirect(String url)
+  /*-{
+      $wnd.location.replace(url);
+
+  }-*/;
+  
+  /***********************************
+   ******      SECURITY         ******
+   ***********************************/
+  
   static final String LOGOUT_URL_PATH = "j_spring_security_logout";
   static final HTML LOGOUT_LINK = new HTML("<a href=\"" + LOGOUT_URL_PATH + "\">Log Out</a>");
   static final String LOGIN_URL_PATH = "relogin.html";
   static final HTML LOGIN_LINK = new HTML("<a href=\"" + LOGIN_URL_PATH + "\">Log In</a>");
 
-  private long lastUserInfoUpdateAttemptTimestamp = 0L;
-  private UserSecurityInfo userInfo = null;
-  private long lastRealmInfoUpdateAttemptTimestamp = 0L;
-  private RealmSecurityInfo realmInfo = null;
 
   private void updateTogglePane() {
     if ((userInfo != null) && (userInfo.getType() != UserType.ANONYMOUS)) {
@@ -242,6 +387,12 @@ public class AggregateUI implements EntryPoint {
       login_logout_link.add(LOGIN_LINK);
     }
   }
+
+  
+  private long lastUserInfoUpdateAttemptTimestamp = 0L;
+  private UserSecurityInfo userInfo = null;
+  private long lastRealmInfoUpdateAttemptTimestamp = 0L;
+  private RealmSecurityInfo realmInfo = null;
 
   public UserSecurityInfo getUserInfo() {
     if (userInfo == null) {
@@ -294,192 +445,91 @@ public class AggregateUI implements EntryPoint {
     }
     return realmInfo;
   }
+  
+  /***********************************
+   ******     HELP STUFF        ******
+   ***********************************/
 
-  private void commonUpdateCompleteAction() {
-    updateTogglePane();
-    Preferences.updatePreferences();
+  private void changeHelpPanel(SubTabs subMenu) {
+    // change root item
+    rootItem.setText(subMenu + " Help");
+    rootItem.removeItems();
 
-    // Select the correct menu item based on url hash.
-    int selected = 0;
-    String mainMenu = hash.get(UrlHash.MAIN_MENU);
-    for (int i = 0; i < MAIN_MENU.length; i++) {
-      if (mainMenu.equals(MAIN_MENU[i].getHashString())) {
-        selected = i;
+    if (subMenu.equals(SubTabs.EXPORT)) {
+      ExportConsts[] helpVals = ExportConsts.values();
+      // add new information
+      for (int i = 0; i < helpVals.length; i++) {
+        TreeItem helpItem = new TreeItem(helpVals[i].getTitle());
+        TreeItem content = new TreeItem(helpVals[i].getContent());
+        helpItem.setSelected(false);
+        content.setSelected(false);
+        helpItem.addItem(content);
+        rootItem.addItem(helpItem);
       }
     }
-    mainNav.selectTab(selected);
 
-    // AND schedule an async operation to
-    // refresh the tabs that are not selected.
-    Timer t = new Timer() {
-      @Override
-      public void run() {
-        // warm up the underlying UI tabs...
-        manageNav.warmUp();
-        submissionNav.warmUp();
-        adminNav.warmUp();
+    else if (subMenu.equals(SubTabs.FILTER)) {
+      FilterConsts[] helpVals = FilterConsts.values();
+      // add new information
+      for (int i = 0; i < helpVals.length; i++) {
+        TreeItem helpItem = new TreeItem(helpVals[i].getTitle());
+        TreeItem content = new TreeItem(helpVals[i].getContent());
+        helpItem.setSelected(false);
+        content.setSelected(false);
+        helpItem.addItem(content);
+        rootItem.addItem(helpItem);
       }
-    };
-    t.schedule(1000);
+    }
+
+    else if (subMenu.equals(SubTabs.FORMS)) {
+      FormConsts[] helpVals = FormConsts.values();
+      // add new information
+      for (int i = 0; i < helpVals.length; i++) {
+        TreeItem helpItem = new TreeItem(helpVals[i].getTitle());
+        TreeItem content = new TreeItem(helpVals[i].getContent());
+        helpItem.setSelected(false);
+        content.setSelected(false);
+        helpItem.addItem(content);
+        rootItem.addItem(helpItem);
+      }
+    }
+
+    else if (subMenu.equals(SubTabs.PUBLISH)) {
+      PublishConsts[] helpVals = PublishConsts.values();
+      // add new information
+      for (int i = 0; i < helpVals.length; i++) {
+        TreeItem helpItem = new TreeItem(helpVals[i].getTitle());
+        TreeItem content = new TreeItem(helpVals[i].getContent());
+        helpItem.setSelected(false);
+        content.setSelected(false);
+        helpItem.addItem(content);
+        rootItem.addItem(helpItem);
+      }
+    }
   }
 
-  private void updateSecurityInfo() {
-    lastUserInfoUpdateAttemptTimestamp = lastRealmInfoUpdateAttemptTimestamp = System
-        .currentTimeMillis();
-    SecureGWT.getSecurityService().getUserInfo(new AsyncCallback<UserSecurityInfo>() {
-
-      @Override
-      public void onFailure(Throwable caught) {
-        reportError(caught);
-      }
-
-      @Override
-      public void onSuccess(UserSecurityInfo result) {
-        userInfo = result;
-        if (realmInfo != null && userInfo != null) {
-          commonUpdateCompleteAction();
-        }
-      }
-    });
-    SecureGWT.getSecurityService().getRealmInfo(Cookies.getCookie("JSESSIONID"),
-        new AsyncCallback<RealmSecurityInfo>() {
-
-          @Override
-          public void onFailure(Throwable caught) {
-            reportError(caught);
-          }
-
-          @Override
-          public void onSuccess(RealmSecurityInfo result) {
-            realmInfo = result;
-            if (realmInfo != null && userInfo != null) {
-              commonUpdateCompleteAction();
-            }
-          }
-        });
+  /***********************************
+   ******     ERROR STUFF       ******
+   ***********************************/
+  public void reportError(Throwable t) {
+    if (t instanceof org.opendatakit.common.persistence.client.exception.DatastoreFailureException) {
+      errorMsgLabel.setText("Error: " + t.getMessage());
+      errorMsgLabel.setVisible(true);
+    } else if (t instanceof org.opendatakit.common.security.client.exception.AccessDeniedException) {
+      errorMsgLabel
+          .setText("You do not have permission for this action.\nError: " + t.getMessage());
+      errorMsgLabel.setVisible(true);
+    } else if (t instanceof InvocationException) {
+      redirect(GWT.getHostPageBaseURL() + UIConsts.HOST_PAGE_BASE_ADDR);
+    } else {
+      errorMsgLabel.setText("Error: " + t.getMessage());
+      errorMsgLabel.setVisible(true);
+    }
   }
 
-  @Override
-  public void onModuleLoad() {
-    // Get url hash.
-    hash = UrlHash.getHash();
-    hash.get();
+  public void clearError() {
     errorMsgLabel.setVisible(false);
-    userInfo = null;
-
-    // assign the singleton here...
-    singleton = this;
-
-    // start the refresh timer...
-    timer.setInitialized();
-
-    // Update the user security info.
-    // This gets the identity and privileges of the
-    // user to the UI and the realm of that user.
-    // The success callback then renders the requested
-    // page and warms up the various sub-tabs and
-    // displays the highlighted tab.
-    updateSecurityInfo();
-
-    contentLoaded();
+    errorMsgLabel.setText("");
   }
 
-  // Let's JavaScript know that the GWT content has been loaded
-  // Currently calls into javascript/resize.js, if we add more JavaScript
-  // then that should be changed.
-  private native void contentLoaded() /*-{
-		$wnd.gwtContentLoaded();
-  }-*/;
-
-  public RefreshTimer getTimer() {
-    return timer;
-  }
-
-  public ManageTabUI getManageNav() {
-    return manageNav;
-  }
-
-  public SubmissionTabUI getSubmissionNav() {
-    return submissionNav;
-  }
-
-  public AdminTabUI getAdminNav() {
-    return adminNav;
-  }
-
-  void setSubMenuSelectionHandler(final TabPanel menuTab, final Tabs menu, final SubTabs[] subMenus) {
-    // add the mainNav selection handler for this menu...
-    mainNav.addSelectionHandler(new SelectionHandler<Integer>() {
-      @Override
-      public void onSelection(SelectionEvent<Integer> event) {
-        if (userInfo == null) {
-          GWT.log("getSubMenuSelectionHandler: No userInfo - not setting selection");
-          return;
-        }
-        int selected = event.getSelectedItem();
-        String tabHash = menu.getHashString();
-        if (tabHash.equals(MAIN_MENU[selected].getHashString())) {
-          // OK: this is the handler instance for the selected top-level tab.
-          //
-          // if we are not already on this main tab (as indicated by the hash)
-          // or if there
-          // is no hash specified for the subtab, go to subMenus[0]
-          int selectedSubTab = 0;
-          String mainHash = hash.get(UrlHash.MAIN_MENU);
-          if (mainHash != null && mainHash.equals(MAIN_MENU[selected].getHashString())) {
-            // we haven't changed the hash -- see if
-            // a specific subpage is specified...
-            String subMenuHash = hash.get(UrlHash.SUB_MENU);
-            if (subMenuHash != null) {
-              for (int i = 0; i < subMenus.length; ++i) {
-                if (subMenuHash.equals(subMenus[i].getHashString())) {
-                  // found the menu that should be selected...
-                  selectedSubTab = i;
-                }
-              }
-            }
-          }
-          // and select the appropriate subtab...
-          if (menu == Tabs.MANAGEMENT) {
-            getManageNav().selectTab(selectedSubTab);
-          } else if (menu == Tabs.SUBMISSIONS) {
-            getSubmissionNav().selectTab(selectedSubTab);
-          } else if (menu == Tabs.ADMIN) {
-            getAdminNav().selectTab(selectedSubTab);
-          }
-        }
-      }
-    });
-
-    menuTab.addBeforeSelectionHandler(new BeforeSelectionHandler<Integer>() {
-
-      @Override
-      public void onBeforeSelection(BeforeSelectionEvent<Integer> event) {
-        // allow the currently-selected SubTab to refuse the tab selection.
-        // refusal should only occur after user confirmation.
-        if (!getTimer().canLeaveCurrentSubTab()) {
-          event.cancel();
-        }
-      }
-
-    });
-
-    menuTab.addSelectionHandler(new SelectionHandler<Integer>() {
-      @Override
-      public void onSelection(SelectionEvent<Integer> event) {
-        if (userInfo == null) {
-          GWT.log("getSubMenuSelectionHandler: No userInfo - not setting subMenu selection");
-          return;
-        }
-        int selected = event.getSelectedItem();
-        clearError();
-        hash.clear();
-        hash.set(UrlHash.MAIN_MENU, menu.getHashString());
-        hash.set(UrlHash.SUB_MENU, subMenus[selected].getHashString());
-        getTimer().setCurrentSubTab(subMenus[selected]);
-        hash.put();
-        changeHelpPanel(subMenus[selected].getTabLabel());
-      }
-    });
-  }
 }

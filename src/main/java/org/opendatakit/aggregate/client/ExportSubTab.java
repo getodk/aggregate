@@ -20,9 +20,8 @@ import org.opendatakit.aggregate.client.form.ExportSummary;
 import org.opendatakit.aggregate.client.table.ExportTable;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.VerticalPanel;
 
-public class ExportSubTab extends VerticalPanel implements SubTabInterface {
+public class ExportSubTab extends AggregateSubTabBase {
 
   private ExportTable exportTable;
   

@@ -16,62 +16,19 @@
 
 package org.opendatakit.aggregate.client;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.opendatakit.aggregate.constants.common.SubTabs;
 import org.opendatakit.aggregate.constants.common.Tabs;
 
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.user.client.ui.TabPanel;
+public class ManageTabUI extends AggregateTabBase {
 
-public class ManageTabUI extends TabPanel {
-
-  // Management Navigation
-  public static final SubTabs[] MANAGEMENT_MENU = { SubTabs.FORMS,
-      SubTabs.PUBLISH};
-
-  // Sub tabs
-  private FormsSubTab formsSubTab;
-  private PublishSubTab publishSubTab;
-  
-  private Map<SubTabs, SubTabInterface> subTabMap;
-  
   public ManageTabUI(AggregateUI baseUI) {
     super();
-
-    subTabMap = new HashMap<SubTabs,SubTabInterface>();
     
-    // build the UI
-    formsSubTab = new FormsSubTab(baseUI);
-    this.add(formsSubTab, SubTabs.FORMS.getTabLabel());
-    subTabMap.put(SubTabs.FORMS, formsSubTab);
-
-    publishSubTab = new PublishSubTab(baseUI);
-    this.add(publishSubTab, SubTabs.PUBLISH.getTabLabel());
-    subTabMap.put(SubTabs.PUBLISH, publishSubTab);
-    
-    getElement().setId("second_level_menu");
-    
+    // build the UI    
+    addSubTab(new FormsSubTab(baseUI), SubTabs.FORMS);
+    addSubTab(new PublishSubTab(baseUI), SubTabs.PUBLISH);
+   
     // register handler to manage tab selection change (and selecting our tab)
-    baseUI.setSubMenuSelectionHandler(this, Tabs.MANAGEMENT, MANAGEMENT_MENU);
-  }
-
-  public void warmUp() {
-	  // warm up any tabs that are not selected.
-	  // this is done in a timer that runs asynchronously
-	  // so that the initial page render should be fast.
-	  for ( int i = 0 ; i < MANAGEMENT_MENU.length ; ++i ) {
-		  boolean isVisible = this.isVisible();
-		  boolean isSelectedTab = this.getTabBar().getSelectedTab() == i;
-		  if ( !isVisible || !isSelectedTab ) {
-			  GWT.log("background update " + MANAGEMENT_MENU[i].getHashString());
-			  subTabMap.get(MANAGEMENT_MENU[i]).update();
-		  }
-	  }
-  }
-  
-  public SubTabInterface getSubTab(SubTabs subTab) {
-    return subTabMap.get(subTab);
+    registerClickHandlers(Tabs.MANAGEMENT, baseUI);
   }
 }
