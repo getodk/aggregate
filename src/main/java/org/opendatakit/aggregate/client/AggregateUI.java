@@ -32,6 +32,7 @@ import org.opendatakit.aggregate.constants.common.UIConsts;
 import org.opendatakit.common.security.client.RealmSecurityInfo;
 import org.opendatakit.common.security.client.UserSecurityInfo;
 import org.opendatakit.common.security.client.UserSecurityInfo.UserType;
+import org.opendatakit.common.security.common.GrantedAuthorityName;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
@@ -70,16 +71,16 @@ public class AggregateUI implements EntryPoint {
   // tab datastructures
   private Map<Tabs, AggregateTabBase> tabMap;
   private List<Tabs> tabPosition;
-  
+
   private RefreshTimer timer;
   private HTMLPanel login_logout_link = new HTMLPanel("");
 
   private static AggregateUI singleton = null;
 
   /***********************************
-   *****   SINGLETON FETCHING   ******
+   ***** SINGLETON FETCHING ******
    ***********************************/
-  
+
   public static synchronized final AggregateUI getUI() {
     if (singleton == null) {
       // if you get here, you've put something in the AggregateUI()
@@ -95,9 +96,9 @@ public class AggregateUI implements EntryPoint {
   }
 
   /***********************************
-   *****     INITIALIZATION     ******
+   ***** INITIALIZATION ******
    ***********************************/
-  
+
   private AggregateUI() {
     /*
      * CRITICAL NOTE: Do not do **anything** in this constructor that might
@@ -111,7 +112,7 @@ public class AggregateUI implements EntryPoint {
     // create tab datastructures
     tabMap = new HashMap<Tabs, AggregateTabBase>();
     tabPosition = new ArrayList<Tabs>();
-    
+
     wrappingLayoutPanel = new VerticalPanel();
     errorMsgLabel = new Label();
     layoutPanel = new HorizontalPanel();
@@ -119,13 +120,6 @@ public class AggregateUI implements EntryPoint {
 
     mainNav = new DecoratedTabPanel();
     mainNav.addStyleName("mainNav");
-
-    addTabToDatastructures(new SubmissionTabUI(this), Tabs.SUBMISSIONS);
-    addTabToDatastructures(new ManageTabUI(this), Tabs.MANAGEMENT);
-    addTabToDatastructures(new AdminTabUI(this), Tabs.ADMIN);
-    
-    // Create the only tab that ALL users can see sub menu navigation
-    mainNav.add(tabMap.get(Tabs.SUBMISSIONS), Tabs.SUBMISSIONS.getTabLabel());
 
     // Create help panel
     helpTree = new Tree();
@@ -158,7 +152,7 @@ public class AggregateUI implements EntryPoint {
 
   private void addTabToDatastructures(AggregateTabBase tabPanel, Tabs tab) {
     int insertIndex = tabPosition.size();
-    
+
     // add tabPanel into position
     tabPosition.add(insertIndex, tab);
     tabMap.put(tab, tabPanel);
@@ -185,41 +179,6 @@ public class AggregateUI implements EntryPoint {
     // page and warms up the various sub-tabs and
     // displays the highlighted tab.
     updateSecurityInfo();
-
-    contentLoaded();
-  }
-  
-
-
-  private void commonUpdateCompleteAction() {
-    updateTogglePane();
-    Preferences.updatePreferences();
-
-    mainNav.add(tabMap.get(Tabs.MANAGEMENT), Tabs.MANAGEMENT.getTabLabel());
-    mainNav.add(tabMap.get(Tabs.ADMIN), Tabs.ADMIN.getTabLabel());
-
-    // Select the correct menu item based on url hash.
-    int selected = 0;
-    String mainMenu = hash.get(UrlHash.MAIN_MENU);
-    for (int i = 0; i < tabPosition.size(); i++) {
-      if (mainMenu.equals(tabPosition.get(i).getHashString())) {
-        selected = i;
-      }
-    }
-    mainNav.selectTab(selected);
-
-    // AND schedule an async operation to
-    // refresh the tabs that are not selected.
-    Timer t = new Timer() {
-      @Override
-      public void run() {
-        // warm up the underlying UI tabs...
-        for(AggregateTabBase tab : tabMap.values()) {
-          tab.warmUp();
-        }
-      }
-    };
-    t.schedule(1000);
   }
 
   private void updateSecurityInfo() {
@@ -236,7 +195,7 @@ public class AggregateUI implements EntryPoint {
       public void onSuccess(UserSecurityInfo result) {
         userInfo = result;
         if (realmInfo != null && userInfo != null) {
-          commonUpdateCompleteAction();
+          commonUserInfoUpdateCompleteAction();
         }
       }
     });
@@ -252,13 +211,65 @@ public class AggregateUI implements EntryPoint {
           public void onSuccess(RealmSecurityInfo result) {
             realmInfo = result;
             if (realmInfo != null && userInfo != null) {
-              commonUpdateCompleteAction();
+              commonUserInfoUpdateCompleteAction();
             }
           }
         });
   }
 
- 
+  private void commonUserInfoUpdateCompleteAction() {
+    updateTogglePane();
+    Preferences.updatePreferences();
+
+    SubmissionTabUI submissions = new SubmissionTabUI(this);
+    addTabToDatastructures(submissions, Tabs.SUBMISSIONS);
+
+    ManageTabUI management = new ManageTabUI(this);
+    addTabToDatastructures(management, Tabs.MANAGEMENT);
+
+    AdminTabUI admin = new AdminTabUI(this);
+    addTabToDatastructures(admin, Tabs.ADMIN);
+
+    // Create the only tab that ALL users can see sub menu navigation
+    mainNav.add(submissions, Tabs.SUBMISSIONS.getTabLabel());
+
+    if (userInfo != null) {
+
+      if (authorizedForTab(Tabs.MANAGEMENT)) {
+        mainNav.add(management, Tabs.MANAGEMENT.getTabLabel());
+      }
+
+      if (authorizedForTab(Tabs.ADMIN)) {
+        mainNav.add(admin, Tabs.ADMIN.getTabLabel());
+      }
+
+      // Select the correct menu item based on url hash.
+      int selected = 0;
+      String mainMenu = hash.get(UrlHash.MAIN_MENU);
+      for (int i = 0; i < tabPosition.size(); i++) {
+        if (mainMenu.equals(tabPosition.get(i).getHashString())) {
+          selected = i;
+        }
+      }
+      mainNav.selectTab(selected);
+
+    }
+
+    // AND schedule an async operation to
+    // refresh the tabs that are not selected.
+    Timer t = new Timer() {
+      @Override
+      public void run() {
+        // warm up the underlying UI tabs...
+        for (AggregateTabBase tab : tabMap.values()) {
+          tab.warmUp();
+        }
+      }
+    };
+    t.schedule(1000);
+
+    contentLoaded();
+  }
 
   // Let's JavaScript know that the GWT content has been loaded
   // Currently calls into javascript/resize.js, if we add more JavaScript
@@ -267,31 +278,29 @@ public class AggregateUI implements EntryPoint {
 		$wnd.gwtContentLoaded();
   }-*/;
 
-
- 
   /***********************************
-   ******     NAVIGATION        ******
+   ****** NAVIGATION ******
    ***********************************/
 
   public void redirectToSubTab(SubTabs subTab) {
     for (Tabs tab : tabPosition) {
-      
+
       AggregateTabBase tabObj = tabMap.get(tab);
-      if(tabObj == null) {
+      if (tabObj == null) {
         continue;
       }
-      
+
       SubTabInterface subTabObj = tabObj.getSubTab(subTab);
       if (subTabObj != null) {
         // found the tab
         int index = tabPosition.indexOf(tab);
         mainNav.selectTab(index);
         tabObj.selectTab(tabObj.findSubTabIndex(subTab));
-        
+
       }
     }
   }
-  
+
   public SubTabInterface getSubTab(SubTabs subTabType) {
     SubTabInterface subTab = null;
 
@@ -314,15 +323,26 @@ public class AggregateUI implements EntryPoint {
           GWT.log("getSubMenuSelectionHandler: No userInfo - not setting selection");
           return;
         }
+
         int selected = event.getSelectedItem();
         String tabHash = menu.getHashString();
 
-        if (tabHash.equals(tabPosition.get(selected).getHashString())) {
+        Tabs tab = tabPosition.get(selected);
+
+        if (tab == null) {
+          return;
+        }
+
+        if (tabHash.equals(tab.getHashString())) {
+
+          if (!authorizedForTab(tab)) {
+            return;
+          }
 
           // and select the appropriate subtab...
-          AggregateTabBase tab = tabMap.get(menu);
-          if (tab != null) {
-            tab.selectTab(tab.findSubTabIndexFromHash(hash));
+          AggregateTabBase tabObj = tabMap.get(menu);
+          if (tabObj != null) {
+            tabObj.selectTab(tabObj.findSubTabIndexFromHash(hash));
           }
         }
       }
@@ -359,22 +379,34 @@ public class AggregateUI implements EntryPoint {
       }
     });
   }
-  
+
   native void redirect(String url)
   /*-{
-      $wnd.location.replace(url);
+		$wnd.location.replace(url);
 
   }-*/;
-  
+
   /***********************************
-   ******      SECURITY         ******
+   ****** SECURITY ******
    ***********************************/
-  
+
+  private boolean authorizedForTab(Tabs tab) {
+    switch (tab) {
+    case SUBMISSIONS:
+      return true;
+    case MANAGEMENT:
+      return userInfo.getGrantedAuthorities().contains(GrantedAuthorityName.ROLE_DATA_OWNER);
+    case ADMIN:
+      return userInfo.getGrantedAuthorities().contains(GrantedAuthorityName.ROLE_SITE_ACCESS_ADMIN);
+    default:
+      return false;
+    }
+  }
+
   static final String LOGOUT_URL_PATH = "j_spring_security_logout";
   static final HTML LOGOUT_LINK = new HTML("<a href=\"" + LOGOUT_URL_PATH + "\">Log Out</a>");
   static final String LOGIN_URL_PATH = "relogin.html";
   static final HTML LOGIN_LINK = new HTML("<a href=\"" + LOGIN_URL_PATH + "\">Log In</a>");
-
 
   private void updateTogglePane() {
     if ((userInfo != null) && (userInfo.getType() != UserType.ANONYMOUS)) {
@@ -388,7 +420,6 @@ public class AggregateUI implements EntryPoint {
     }
   }
 
-  
   private long lastUserInfoUpdateAttemptTimestamp = 0L;
   private UserSecurityInfo userInfo = null;
   private long lastRealmInfoUpdateAttemptTimestamp = 0L;
@@ -445,9 +476,9 @@ public class AggregateUI implements EntryPoint {
     }
     return realmInfo;
   }
-  
+
   /***********************************
-   ******     HELP STUFF        ******
+   ****** HELP STUFF ******
    ***********************************/
 
   private void changeHelpPanel(SubTabs subMenu) {
@@ -509,7 +540,7 @@ public class AggregateUI implements EntryPoint {
   }
 
   /***********************************
-   ******     ERROR STUFF       ******
+   ****** ERROR STUFF ******
    ***********************************/
   public void reportError(Throwable t) {
     if (t instanceof org.opendatakit.common.persistence.client.exception.DatastoreFailureException) {
