@@ -34,6 +34,7 @@ import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.common.constants.BasicConsts;
 import org.opendatakit.common.constants.HtmlConsts;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+import org.opendatakit.common.utils.WebUtils;
 import org.opendatakit.common.web.CallingContext;
 
 /**
@@ -101,9 +102,8 @@ public class FormXmlServlet extends ServletUtilBase {
 	    } else {
 	      odkIdNotFoundError(resp);
 	    }
-	
-	    resp.setCharacterEncoding(HtmlConsts.UTF8_ENCODE);
 
+	    // Debug: String debugDisplay = WebUtils.escapeUTF8String(xmlString);
 	
 	    if (humanReadable) {
 	      Map<String, String> properties = new HashMap<String, String>();
@@ -124,6 +124,7 @@ public class FormXmlServlet extends ServletUtilBase {
 	      out.println("</PRE>");
 	      finishBasicHtmlResponse(resp); // footer info
 	    } else {
+	      resp.setCharacterEncoding(HtmlConsts.UTF8_ENCODE);
 	      resp.setContentType(HtmlConsts.RESP_TYPE_XML);
 		  PrintWriter out = resp.getWriter();
 		  resp.setHeader(HtmlConsts.CONTENT_DISPOSITION, HtmlConsts.ATTACHMENT_FILENAME_TXT
