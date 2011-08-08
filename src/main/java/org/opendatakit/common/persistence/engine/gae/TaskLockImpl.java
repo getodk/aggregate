@@ -194,6 +194,9 @@ public class TaskLockImpl implements TaskLock {
   private void lockVerification(String lockId, String formId, ITaskLockType taskType)
       throws ODKTaskLockException {
     Entity verificationEntity = queryForLock(formId, taskType);
+    if ( verificationEntity == null ) {
+    	throw new ODKTaskLockException("UNABLE TO LOCATE LOCK: " + lockId + " For: " + formId + " Task: " + taskType.getName());
+    }
     Object value = verificationEntity.getProperty(LOCK_ID_PROPERTY);
     if (value instanceof String) {
       String retrievedLockId = (String) value;
