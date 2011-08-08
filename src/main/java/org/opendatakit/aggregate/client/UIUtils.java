@@ -58,8 +58,10 @@ public class UIUtils {
       }
     }
 
-    // update the panel to display the right form
-    formsBox.setItemSelected(selectedIndex, true);
+    if ( formsBox.getItemCount() > 0 ) {
+	    // update the panel to display the right form
+	    formsBox.setItemSelected(selectedIndex, true);
+    }
     
     // return the new populated form list used to update the formsBox
     return newFormsToDisplay;

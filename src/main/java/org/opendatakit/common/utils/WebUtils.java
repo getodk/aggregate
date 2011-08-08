@@ -133,4 +133,28 @@ public class WebUtils {
 		if ( d == null ) return null;
 		return iso8601.format(d);
 	}
+
+	/**
+	 * Return a string with utf-8 characters replaced with backslash-uxxxx codes.
+	 * Useful for debugging.
+	 * 
+	 * @param str
+	 * @return printable rendition of non-ASCII utf-8 characters.
+	 */
+	public static final String escapeUTF8String(String str) {
+		StringBuilder b = new StringBuilder();
+		for ( int i = 0 ; i < str.length() ; ++i ) {
+			int code = str.codePointAt(i);
+			if ( code < 127 ) {
+				b.append(str.charAt(i));
+			} else {
+				String val = Integer.toHexString(code);
+				while ( val.length() < 4 ) {
+					val = '0' + val;
+				}
+				b.append("\\u" + val);
+			}
+		}
+		return b.toString();
+	}
 }
