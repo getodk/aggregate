@@ -18,6 +18,7 @@
 package org.opendatakit.aggregate.form;
 
 import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -333,9 +334,7 @@ public class Form {
 		  String contentType = bt.getContentType(i);
 		  if ( contentType == null ) continue; // incomplete form...
 		  String unrootedFileName = bt.getUnrootedFilename(i);
-		  if ( contentType.equals("text/xml") && !unrootedFileName.contains("/")) {
-			  return unrootedFileName;
-		  }
+		  return unrootedFileName;
 	  }
 	  throw new IllegalStateException("unable to locate the form definition");
   }
@@ -360,10 +359,12 @@ public class Form {
 	  for ( int i = 1 ; i <= count ; ++i ) {
 		  String contentType = bt.getContentType(i);
 		  if ( contentType == null ) continue; // incomplete form...
-		  String unrootedFileName = bt.getUnrootedFilename(i);
-		  if ( contentType.equals("text/xml") && !unrootedFileName.contains("/")) {
-			  byte[] byteArray = bt.getBlob(i, cc);
-			  return new String(byteArray);
+		  byte[] byteArray = bt.getBlob(i, cc);
+		  try {
+			  return new String(byteArray, "UTF-8");
+		  } catch ( UnsupportedEncodingException e ) {
+			  e.printStackTrace();
+			  throw new IllegalStateException("UTF-8 charset not supported!");
 		  }
 	  }
 	  throw new IllegalStateException("unable to locate the form definition");

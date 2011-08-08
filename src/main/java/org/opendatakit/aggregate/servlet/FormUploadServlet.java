@@ -73,9 +73,6 @@ public class FormUploadServlet extends ServletUtilBase {
   /**
    * Script path to include...
    */
-  private static final String JQUERY_SCRIPT_HEADER = 
-	  "<script src=\"http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js\"></script>";
-  
   private static final String UPLOAD_SCRIPT_RESOURCE = "javascript/upload_control.js";
 
   private static final String UPLOAD_PAGE_BODY_START = 
@@ -90,13 +87,11 @@ public class FormUploadServlet extends ServletUtilBase {
 "	  <p>On ODK Collect 1.1.7 and higher, the file named \"<code>form_logo.png</code>\"," + 
 "	  if present in the media folder, will be displayed as the form's logo. </p>" +
 "	  <!--[if true]><p style=\"color: red;\">For a better user experience, use Chrome, Firefox or Safari</p>" +
-"	  <!-- If you specify an empty progress div, it will be expanded with an upload progress region (non-IE) -->" +
-"	  <div id=\"progress\"></div><br />" +
+"	  <![endif] -->" +
 "     <form id=\"ie_backward_compatible_form\"" + 
-"	                      accept-charset=\"UTF-8\" method=\"POST\" enctype=\"multipart/form-data\"" + 
+"	                      accept-charset=\"UTF-8\" method=\"POST\" encoding=\"multipart/form-data\" enctype=\"multipart/form-data\"" + 
 "	                      action=\"";// emit the ADDR
   private static final String UPLOAD_PAGE_BODY_MIDDLE = "\">" +
-"	  <![endif] -->" +
 "	  <table>" +
 "	  	<tr>" +
 "	  		<td><label for=\"form_def_file\">Form definition:</label></td>" +
@@ -130,14 +125,11 @@ public class FormUploadServlet extends ServletUtilBase {
 "	      </tr>" +
 "	      <![endif]-->" +
 "	  	<tr>" +
-"	  		<td><input type=\"button\" name=\"button\" value=\"Upload Form\"" +
-"	  			onClick=\"submitButton(document,'";
-  private static final String UPLOAD_PAGE_BODY_REMAINDER = "','form_def_file','mediaFiles')\" /></td>" +
+"	  		<td><input type=\"submit\" name=\"button\" value=\"Upload Form\" /></td>" +
 "	  		<td />" +
 "	  	</tr>" +
 "	  </table>" +
-"	  <!--[if true]></form>" +
-"	  <![endif] -->";
+"	  </form>";
 
   /**
    * Title for generated webpage to obtain title
@@ -162,8 +154,7 @@ public class FormUploadServlet extends ServletUtilBase {
 	CallingContext cc = ContextFactory.getCallingContext(this, req);
 
 	StringBuilder headerString = new StringBuilder();
-	headerString.append(JQUERY_SCRIPT_HEADER);
-	headerString.append("<script src=\"");
+	headerString.append("<script type=\"application/javascript\" src=\"");
 	headerString.append(cc.getWebApplicationURL(UPLOAD_SCRIPT_RESOURCE));
 	headerString.append("\"></script>");
 	beginBasicHtmlResponse(TITLE_INFO, headerString.toString(), resp, cc );// header info
@@ -171,8 +162,6 @@ public class FormUploadServlet extends ServletUtilBase {
 	out.write(UPLOAD_PAGE_BODY_START);
 	out.write(cc.getWebApplicationURL(ADDR));
 	out.write(UPLOAD_PAGE_BODY_MIDDLE);
-	out.write(cc.getWebApplicationURL(ADDR));
-	out.write(UPLOAD_PAGE_BODY_REMAINDER);
     finishBasicHtmlResponse(resp);
   }
 
