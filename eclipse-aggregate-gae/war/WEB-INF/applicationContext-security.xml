@@ -69,7 +69,7 @@
 		<intercept-url pattern="/local_login.html" access="isFullyAuthenticated() and hasRole('AUTH_LOCAL')" />
 
 		<!-- grant access to various servlets -->
-		<intercept-url pattern="/formList" access="hasRole('ROLE_DATA_COLLECTOR')" />
+		<intercept-url pattern="/formList" access="hasRole('ROLE_DATA_COLLECTOR') or hasRole('ROLE_DATA_VIEWER')" />
 		<intercept-url pattern="/formXml" access="hasRole('ROLE_DATA_COLLECTOR') or hasRole('ROLE_DATA_VIEWER')" />
 		<intercept-url pattern="/submission" access="hasRole('ROLE_DATA_COLLECTOR') or hasRole('ROLE_DATA_OWNER')" />
 		<intercept-url pattern="/formUpload" access="hasRole('ROLE_DATA_OWNER')" /> <!--  NEW form upload url -->

@@ -335,6 +335,15 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
 				 if ( filterList.size() > 0 ) {
 					 Tracker t = filterList.get(0);
 					 t.setFilter(hack);
+					 // add any additional conditions on this same DataField
+					 // e.g., for "between x and y" types of queries.
+					 DataField f = t.getAttribute();
+					 for ( int i = 1 ; i < filterList.size() ; ++i ) {
+						 t = filterList.get(i);
+						 if ( f.equals(t.getAttribute()) ) {
+							 t.setFilter(hack);
+						 }
+					 }
 				 }
 				 PreparedQuery preparedHack = ds.prepare(hack);
 				 gaeEntities = preparedHack.asList(FetchOptions.Builder.withDefaults());

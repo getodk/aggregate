@@ -15,6 +15,8 @@
  */
 package org.opendatakit.common.security;
 
+import java.util.logging.Logger;
+
 import org.springframework.beans.factory.InitializingBean;
 
 /**
@@ -43,6 +45,14 @@ public class Realm implements InitializingBean {
 		if ( realmString == null ) {
 			throw new IllegalStateException("realmString (e.g., mydomain.org ODK Aggregate 1.0) must be specified");
 		}
+		
+		Logger log = Logger.getLogger(Realm.class.getName());
+		log.info("Hostname: " + hostname);
+		log.info("Port: " + Integer.toString(port));
+		log.info("SecurePort: " + Integer.toString(securePort));
+		log.info("SslIsRequired: " + (sslIsRequired ? "yes" : "no") );
+		log.info("SslIsAvailable: " + (sslIsAvailable ? "yes" : "no") );
+		log.info("RealmString: " + realmString);
 	}
 	
 	public void setSecureChannelType(String type) {
