@@ -80,9 +80,6 @@ public class SubmissionServlet extends ServletUtilBase {
   /**
    * Script path to include...
    */
-  private static final String JQUERY_SCRIPT_HEADER = 
-     "<script src=\"http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js\"></script>";
-  
   private static final String UPLOAD_SCRIPT_RESOURCE = "javascript/upload_control.js";
 
   private static final String UPLOAD_PAGE_BODY_START = 
@@ -94,13 +91,11 @@ public class SubmissionServlet extends ServletUtilBase {
 "     and zero or more associated data files for the images, audio clips, video clips, " +
 "     etc. linked with this submission.</p>" +
 "    <!--[if true]><p style=\"color: red;\">For a better user experience, use Chrome, Firefox or Safari</p>" +
-"    <!-- If you specify an empty progress div, it will be expanded with an upload progress region (non-IE) -->" +
-"    <div id=\"progress\"></div><br />" +
+"	  <![endif] -->" +
 "     <form id=\"ie_backward_compatible_form\"" + 
-"                        accept-charset=\"UTF-8\" method=\"POST\" enctype=\"multipart/form-data\"" + 
+"                        accept-charset=\"UTF-8\" method=\"POST\" encoding=\"multipart/form-data\" enctype=\"multipart/form-data\"" + 
 "                        action=\"";// emit the ADDR
   private static final String UPLOAD_PAGE_BODY_MIDDLE = "\">" +
-"    <![endif] -->" +
 "    <table>" +
 "     <tr>" +
 "        <td><label for=\"xml_submission_file\">Submission data file:</label></td>" +
@@ -134,14 +129,11 @@ public class SubmissionServlet extends ServletUtilBase {
 "        </tr>" +
 "        <![endif]-->" +
 "     <tr>" +
-"        <td><input type=\"button\" name=\"button\" value=\"Upload Submission\"" +
-"           onClick=\"submitButton(document,'";
-  private static final String UPLOAD_PAGE_BODY_REMAINDER = "','xml_submission_file','mediaFiles')\" /></td>" +
+"        <td><input type=\"submit\" name=\"button\" value=\"Upload Submission\" /></td>" +
 "        <td />" +
 "     </tr>" +
 "    </table>" +
-"    <!--[if true]></form>" +
-"    <![endif] -->";
+"    </form>";
 
   /**
    * Handler for HTTP Get request that processes a form submission
@@ -168,8 +160,7 @@ public class SubmissionServlet extends ServletUtilBase {
    }
 
    StringBuilder headerString = new StringBuilder();
-   headerString.append(JQUERY_SCRIPT_HEADER);
-   headerString.append("<script src=\"");
+   headerString.append("<script type=\"application/javascript\" src=\"");
    headerString.append(cc.getWebApplicationURL(UPLOAD_SCRIPT_RESOURCE));
    headerString.append("\"></script>");
    beginBasicHtmlResponse(TITLE, headerString.toString(), resp, cc );// header info
@@ -177,9 +168,7 @@ public class SubmissionServlet extends ServletUtilBase {
    out.write(UPLOAD_PAGE_BODY_START);
    out.write(cc.getWebApplicationURL(ADDR));
    out.write(UPLOAD_PAGE_BODY_MIDDLE);
-   out.write(cc.getWebApplicationURL(ADDR));
-   out.write(UPLOAD_PAGE_BODY_REMAINDER);
-    finishBasicHtmlResponse(resp);
+   finishBasicHtmlResponse(resp);
   }
 
   /**
