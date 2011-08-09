@@ -43,7 +43,7 @@ import org.opendatakit.common.ermodel.simple.AttributeType;
  * 
  * @author the.dylan.price@gmail.com
  */
-public class AggregateConnectionTest
+public class SimpleAPITest
 {
 
     private static String adminID;
