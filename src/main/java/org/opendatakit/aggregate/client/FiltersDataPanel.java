@@ -32,12 +32,12 @@ import org.opendatakit.aggregate.constants.common.UIConsts;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Tree;
 import com.google.gwt.user.client.ui.TreeItem;
 
-public class FiltersDataPanel extends FlowPanel {
+public class FiltersDataPanel extends ScrollPanel {
 
   private Tree filtersTree;
   private TreeItem root;

@@ -21,9 +21,9 @@ import org.opendatakit.aggregate.client.submission.SubmissionUISummary;
 import org.opendatakit.aggregate.client.table.SubmissionTable;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.ScrollPanel;
 
-public class SubmissionPanel extends FlowPanel {
+public class SubmissionPanel extends ScrollPanel {
 
   private SubmissionTable submissionTable;
 
