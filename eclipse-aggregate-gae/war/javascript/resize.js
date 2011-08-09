@@ -19,9 +19,9 @@ function onWindowResize() {
 	$("html").height(height);
 	$("body").height(height);
 	$("#dynamic_content").height(height);
-	$("#layout_panel").height(height - $("#layout_panel").offset().top);
-	$("#filters_container").height(height - $("#filters_container").offset().top);
-	$("#submission_container").height(height - $("#submission_container").offset().top);
+	$("#layout_panel").height(height - $("#layout_panel").offset().top - $("#help_panel").height());
+	$("#filters_container").height($("#layout_panel").height() - $("#filter_sub_tab").height());
+	$("#submission_container").height($("#filters_container").height());
 	$("#login_logout_link").offset({left: width - $("#login_logout_link").width() - 10});
 	$(".error_message").width(width);
 }

@@ -36,6 +36,7 @@ public class FilterSubTab extends AggregateSubTabBase {
   private FilterGroup currentlyDisplayedFilterGroup;
   
   public FilterSubTab() {
+	getElement().setId("filter_sub_tab");
     // create Nav Panel
     navTable = new FilterNavigationTable(this);
     navTable.getElement().setId("submission_nav_table");
