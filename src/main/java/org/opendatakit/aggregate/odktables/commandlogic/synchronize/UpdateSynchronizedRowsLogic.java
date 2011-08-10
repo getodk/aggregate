@@ -25,6 +25,7 @@ import org.opendatakit.aggregate.odktables.relation.Table;
 import org.opendatakit.aggregate.odktables.relation.TableEntries;
 import org.opendatakit.aggregate.odktables.relation.UserTableMappings;
 import org.opendatakit.aggregate.odktables.relation.Users;
+import org.opendatakit.common.ermodel.simple.typedentity.TypedEntity;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.web.CallingContext;
@@ -52,11 +53,13 @@ public class UpdateSynchronizedRowsLogic extends
     public UpdateSynchronizedRowsResult execute(CallingContext cc)
             throws ODKDatastoreException, ODKTaskLockException
     {
+        // get relation instances
         Users users = Users.getInstance(cc);
         TableEntries entries = TableEntries.getInstance(cc);
         UserTableMappings mappings = UserTableMappings.getInstance(cc);
         Columns columns = Columns.getInstance(cc);
 
+        // get request data
         String requestingUserID = updateSynchronizedRows.getRequestingUserID();
         String tableID = updateSynchronizedRows.getTableID();
         int clientModificationNumber = updateSynchronizedRows
@@ -64,8 +67,10 @@ public class UpdateSynchronizedRowsLogic extends
         List<SynchronizedRow> changedRows = updateSynchronizedRows
                 .getChangedRows();
 
+        // retrieve request user
         InternalUser requestUser = users.getByID(requestingUserID);
 
+        // retrieve mapping from user's tableID to aggregateTableIdentifier
         InternalUserTableMapping mapping;
         try
         {
@@ -82,6 +87,7 @@ public class UpdateSynchronizedRowsLogic extends
 
         String aggregateTableIdentifier = mapping.getAggregateTableIdentifier();
 
+        // in order to update rows of a table the user must have write permission
         if (!requestUser.hasPerm(aggregateTableIdentifier, Permissions.WRITE))
         {
             return UpdateSynchronizedRowsResult.failure(null, tableID, null,
@@ -90,16 +96,17 @@ public class UpdateSynchronizedRowsLogic extends
 
         InternalTableEntry entry = entries.getEntity(aggregateTableIdentifier);
 
+        // check if the modification number of the user's table is up to date with the latest in aggregate
         if (entry.getModificationNumber() != clientModificationNumber)
         {
             return UpdateSynchronizedRowsResult.failure(null, tableID, null,
                     FailureReason.OUT_OF_SYNCH);
         }
 
-        // Get new modification number
-        int newModificationNumber = CommandLogicFunctions
-                .incrementModificationNumber(entry, aggregateTableIdentifier,
-                        cc);
+        // set new modification number
+        int newModificationNumber = clientModificationNumber + 1;
+        CommandLogicFunctions.updateModificationNumber(entry,
+                aggregateTableIdentifier, newModificationNumber, cc);
 
         // Update changed rows and create modification
         Modification clientModification;
@@ -115,6 +122,9 @@ public class UpdateSynchronizedRowsLogic extends
                     FailureReason.ROW_OUT_OF_SYNCH);
         } catch (ColumnDoesNotExistException e)
         {
+            // revert modification number and return failure
+            CommandLogicFunctions.updateModificationNumber(entry,
+                    aggregateTableIdentifier, clientModificationNumber, cc);
             return UpdateSynchronizedRowsResult.failure(null, tableID,
                     e.getBadColumnName(), FailureReason.COLUMN_DOES_NOT_EXIST);
         }
@@ -129,6 +139,7 @@ public class UpdateSynchronizedRowsLogic extends
     {
         List<SynchronizedRow> updatedRows = new ArrayList<SynchronizedRow>();
         Table table = Table.getInstance(aggregateTableIdentifier, cc);
+        List<TypedEntity> entitiesToSave = new ArrayList<TypedEntity>();
         for (SynchronizedRow clientRow : changedRows)
         {
             // Get original row and make sure revisionTags match
@@ -160,14 +171,14 @@ public class UpdateSynchronizedRowsLogic extends
                 row.setValue(col.getAggregateIdentifier(), rowEntry.getValue());
             }
             row.updateRevisionTag();
-            row.save();
+            entitiesToSave.add(row);
 
             // Add row to this modification
             String aggregateRowIdentifier = row.getAggregateIdentifier();
             InternalModification modification = new InternalModification(
                     aggregateTableIdentifier, newModificationNumber,
                     aggregateRowIdentifier, cc);
-            modification.save();
+            entitiesToSave.add(modification);
 
             // Create the row that will be sent back to the client
             SynchronizedRow updatedRow = new SynchronizedRow();
@@ -177,6 +188,10 @@ public class UpdateSynchronizedRowsLogic extends
         }
         Modification clientModification = new Modification(
                 newModificationNumber, updatedRows);
+        
+        // save entities
+        for (TypedEntity entity : entitiesToSave)
+            entity.save();
 
         return clientModification;
     }

@@ -69,12 +69,16 @@ public class InternalUser extends TypedEntity
     public boolean hasPerm(String aggregateTableIdentifier, String permission)
             throws ODKDatastoreException
     {
-        return Permissions
+        boolean hasPerm = Permissions
                 .getInstance(cc)
                 .query()
                 .equal(Permissions.AGGREGATE_TABLE_IDENTIFIER,
-                        aggregateTableIdentifier).equal(permission, true)
+                        aggregateTableIdentifier)
+                .equal(Permissions.AGGREGATE_USER_IDENTIFIER,
+                        getAggregateIdentifier())
+                .equal(permission, true)
                 .exists();
+        return hasPerm;
     }
 
     @Override

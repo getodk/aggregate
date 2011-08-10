@@ -38,12 +38,12 @@ import org.opendatakit.aggregate.odktables.client.exception.UserDoesNotExistExce
 import org.opendatakit.common.ermodel.simple.AttributeType;
 
 /**
- * Integration test for SimpleAPI. Only works when you have a running Aggregate
- * instance and assumes you start with an empty datastore.
+ * Integration test for SimpleAPI and CommonAPI. Only works when you have a
+ * running Aggregate instance and assumes you start with an empty datastore.
  * 
  * @author the.dylan.price@gmail.com
  */
-public class AggregateConnectionTest
+public class SimpleAPITest
 {
 
     private static String adminID;
@@ -193,7 +193,7 @@ public class AggregateConnectionTest
     }
 
     @Test
-    public void testGetUser() throws ClientProtocolException,
+    public void testGetUserByID() throws ClientProtocolException,
             UserDoesNotExistException, IOException, PermissionDeniedException,
             AggregateInternalErrorException
     {
@@ -206,11 +206,35 @@ public class AggregateConnectionTest
     }
 
     @Test(expected = UserDoesNotExistException.class)
-    public void testGetUserBadUser() throws ClientProtocolException,
+    public void testGetUserByIDBadUser() throws ClientProtocolException,
             UserDoesNotExistException, IOException, PermissionDeniedException,
             AggregateInternalErrorException
     {
         conn.getUserByID(userID + "diff");
+    }
+
+    @Test
+    public void testGetUserByAggregateUserIdentifer()
+            throws ClientProtocolException, PermissionDeniedException,
+            UserDoesNotExistException, AggregateInternalErrorException,
+            IOException
+    {
+        User user = conn.getUserByID(requestUserID);
+        String aggregateUserIdentifier = user.getAggregateUserIdentifier();
+        User sameUser = conn
+                .getUserByAggregateIdentifier(aggregateUserIdentifier);
+        assertEquals(user.getAggregateUserIdentifier(),
+                sameUser.getAggregateUserIdentifier());
+        assertEquals(user.getUserName(), sameUser.getUserName());
+    }
+
+    @Test(expected = UserDoesNotExistException.class)
+    public void testGetUserByAggregateIdentifierBadUser()
+            throws ClientProtocolException, PermissionDeniedException,
+            UserDoesNotExistException, AggregateInternalErrorException,
+            IOException
+    {
+        conn.getUserByAggregateIdentifier("nosuchuser");
     }
 
     @Test
@@ -249,6 +273,29 @@ public class AggregateConnectionTest
             PermissionDeniedException, AggregateInternalErrorException
     {
         conn.getAllRows(tableID + "diff");
+    }
+
+    @Test(expected = PermissionDeniedException.class)
+    public void testSetUserManagementPermissionsNoPermission()
+            throws ClientProtocolException, PermissionDeniedException,
+            UserDoesNotExistException, AggregateInternalErrorException,
+            IOException
+    {
+        conn.setUserID(userID);
+        User user = conn.getUserByID(userID);
+        conn.setUserManagementPermissions(user.getAggregateUserIdentifier(),
+                true);
+    }
+
+    @Test
+    public void testSetUserManagementPermissions()
+            throws ClientProtocolException, AggregateInternalErrorException,
+            UserDoesNotExistException, IOException, PermissionDeniedException
+    {
+        conn.setUserID(adminID);
+        User user = conn.getUserByID(userID);
+        conn.setUserManagementPermissions(user.getAggregateUserIdentifier(),
+                true);
     }
 
     @Test

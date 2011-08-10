@@ -23,6 +23,7 @@ import org.opendatakit.aggregate.odktables.relation.Permissions;
 import org.opendatakit.aggregate.odktables.relation.TableEntries;
 import org.opendatakit.aggregate.odktables.relation.UserTableMappings;
 import org.opendatakit.aggregate.odktables.relation.Users;
+import org.opendatakit.common.ermodel.simple.typedentity.TypedEntity;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.web.CallingContext;
@@ -50,19 +51,23 @@ public class InsertSynchronizedRowsLogic extends
     public InsertSynchronizedRowsResult execute(CallingContext cc)
             throws ODKDatastoreException, ODKTaskLockException
     {
+        // get relation instances
         Users users = Users.getInstance(cc);
         TableEntries entries = TableEntries.getInstance(cc);
         UserTableMappings mappings = UserTableMappings.getInstance(cc);
         Columns columns = Columns.getInstance(cc);
 
+        // get request data
         String requestingUserID = insertSynchronizedRows.getRequestingUserID();
         String tableID = insertSynchronizedRows.getTableID();
         int clientModificationNumber = insertSynchronizedRows
                 .getModificationNumber();
         List<SynchronizedRow> newRows = insertSynchronizedRows.getNewRows();
 
+        // retrieve request user
         InternalUser requestUser = users.getByID(requestingUserID);
 
+        // retrieve mapping from user's tableID to aggregateTableIdentifier
         InternalUserTableMapping mapping;
         try
         {
@@ -79,6 +84,7 @@ public class InsertSynchronizedRowsLogic extends
 
         String aggregateTableIdentifier = mapping.getAggregateTableIdentifier();
 
+        // in order to insert rows the user must have write permission on the table
         if (!requestUser.hasPerm(aggregateTableIdentifier, Permissions.WRITE))
         {
             return InsertSynchronizedRowsResult.failure(tableID,
@@ -87,16 +93,17 @@ public class InsertSynchronizedRowsLogic extends
 
         InternalTableEntry entry = entries.getEntity(aggregateTableIdentifier);
 
+        // make sure that the modification number of the user's table is up to date with aggregate
         if (entry.getModificationNumber() != clientModificationNumber)
         {
             return InsertSynchronizedRowsResult.failure(tableID,
                     FailureReason.OUT_OF_SYNCH);
         }
 
-        // Get new modification number
-        int newModificationNumber = CommandLogicFunctions
-                .incrementModificationNumber(entry, aggregateTableIdentifier,
-                        cc);
+        // set new modification number
+        int newModificationNumber = clientModificationNumber + 1;
+        CommandLogicFunctions.updateModificationNumber(entry,
+                aggregateTableIdentifier, newModificationNumber, cc);
 
         // Insert new rows and create modification
         Modification clientModification;
@@ -107,6 +114,9 @@ public class InsertSynchronizedRowsLogic extends
                     cc);
         } catch (ColumnDoesNotExistException e)
         {
+            // revert modification number and return failure
+            CommandLogicFunctions.updateModificationNumber(entry,
+                    aggregateTableIdentifier, clientModificationNumber, cc);
             return InsertSynchronizedRowsResult.failure(tableID,
                     e.getBadColumnName());
         }
@@ -120,6 +130,7 @@ public class InsertSynchronizedRowsLogic extends
             ColumnDoesNotExistException
     {
         List<SynchronizedRow> insertedRows = new ArrayList<SynchronizedRow>();
+        List<TypedEntity> entitiesToSave = new ArrayList<TypedEntity>();
         for (SynchronizedRow clientRow : newRows)
         {
             // Convert client's row into an internal row and save to datastore
@@ -143,14 +154,14 @@ public class InsertSynchronizedRowsLogic extends
                 }
                 row.setValue(col.getAggregateIdentifier(), rowEntry.getValue());
             }
-            row.save();
+            entitiesToSave.add(row);
 
             // Add row to this modification
             String aggregateRowIdentifier = row.getAggregateIdentifier();
             InternalModification modification = new InternalModification(
                     aggregateTableIdentifier, newModificationNumber,
                     aggregateRowIdentifier, cc);
-            modification.save();
+            entitiesToSave.add(modification);
 
             // Create the row that will be sent back to the client
             SynchronizedRow insertedRow = new SynchronizedRow();
@@ -161,6 +172,10 @@ public class InsertSynchronizedRowsLogic extends
         }
         Modification clientModification = new Modification(
                 newModificationNumber, insertedRows);
+
+        // save entities
+        for (TypedEntity entity : entitiesToSave)
+            entity.save();
 
         return clientModification;
     }
