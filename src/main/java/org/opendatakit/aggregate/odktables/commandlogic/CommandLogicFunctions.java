@@ -19,13 +19,11 @@ import org.opendatakit.common.web.CallingContext;
  */
 public class CommandLogicFunctions
 {
-    public static int incrementModificationNumber(InternalTableEntry entry,
-            String aggregateTableIdentifier, CallingContext cc)
-            throws ODKTaskLockException, ODKEntityPersistException
+    public static int updateModificationNumber(InternalTableEntry entry,
+            String aggregateTableIdentifier, int newModificationNumber,
+            CallingContext cc) throws ODKTaskLockException,
+            ODKEntityPersistException
     {
-        int modificationNumber = entry.getModificationNumber();
-        int newModificationNumber = modificationNumber;
-
         Datastore ds = cc.getDatastore();
         User user = cc.getCurrentUser();
         TaskLock taskLock = ds.createTaskLock(user);
@@ -36,7 +34,7 @@ public class CommandLogicFunctions
                     ODKTablesTaskLockType.INCREMENT_MODIFICATION_NUMBER))
             {
                 taskLock = null;
-                newModificationNumber = entry.incrementModificationNumber();
+                entry.setModificationNumber(newModificationNumber);
                 entry.save();
             }
         } finally

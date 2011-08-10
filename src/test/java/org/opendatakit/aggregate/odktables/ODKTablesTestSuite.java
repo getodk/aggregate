@@ -3,7 +3,7 @@ package org.opendatakit.aggregate.odktables;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
-import org.opendatakit.aggregate.odktables.client.AggregateConnectionTest;
+import org.opendatakit.aggregate.odktables.client.SimpleAPITest;
 import org.opendatakit.aggregate.odktables.client.ScriptFileTests;
 
 /**
@@ -14,7 +14,7 @@ import org.opendatakit.aggregate.odktables.client.ScriptFileTests;
  */
 
 @RunWith(Suite.class)
-@SuiteClasses({ AggregateConnectionTest.class, ScriptFileTests.class })
+@SuiteClasses({ SimpleAPITest.class, ScriptFileTests.class })
 public class ODKTablesTestSuite
 {
 

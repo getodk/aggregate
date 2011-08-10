@@ -48,18 +48,23 @@ public class SynchronizeLogic extends CommandLogic<Synchronize>
     public SynchronizeResult execute(CallingContext cc)
             throws ODKDatastoreException
     {
+        // get relation instances
         Users users = Users.getInstance(cc);
         UserTableMappings mappings = UserTableMappings.getInstance(cc);
         TableEntries entries = TableEntries.getInstance(cc);
         Modifications modifications = Modifications.getInstance(cc);
         Columns columns = Columns.getInstance(cc);
 
+        // get request data
         String requestingUserID = synchronize.getRequestingUserID();
         String tableID = synchronize.getTableID();
         int clientModificationNumber = synchronize.getModificationNumber();
 
+        // retrieve request user
         InternalUser requestUser = users.query()
                 .equal(Users.USER_ID, requestingUserID).get();
+        
+        // retrieve mapping from user's tableID to aggregateTableIdentifer
         InternalUserTableMapping mapping;
         try
         {
@@ -76,6 +81,7 @@ public class SynchronizeLogic extends CommandLogic<Synchronize>
 
         String aggregateTableIdentifier = mapping.getAggregateTableIdentifier();
 
+        // in order to get the latest rows the user must have read permission on the table
         if (!requestUser.hasPerm(aggregateTableIdentifier, Permissions.READ))
         {
             return SynchronizeResult.failure(tableID,
