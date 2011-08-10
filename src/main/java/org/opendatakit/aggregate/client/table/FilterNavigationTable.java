@@ -42,6 +42,7 @@ public class FilterNavigationTable extends FlexTable{
      .getFirstChildElement()
      .getFirstChildElement().getNextSiblingElement().setId("form_title_cell");
    
+    this.getElement().setId("filter_nav_table");
   }
   
 
