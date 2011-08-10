@@ -7,6 +7,7 @@ import org.opendatakit.aggregate.odktables.commandresult.common.SetUserManagemen
 import org.opendatakit.aggregate.odktables.entity.InternalPermission;
 import org.opendatakit.aggregate.odktables.entity.InternalUser;
 import org.opendatakit.aggregate.odktables.relation.Permissions;
+import org.opendatakit.aggregate.odktables.relation.TableEntries;
 import org.opendatakit.aggregate.odktables.relation.Users;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
@@ -34,16 +35,22 @@ public class SetUserManagementPermissionsLogic extends
     public SetUserManagementPermissionsResult execute(CallingContext cc)
             throws ODKDatastoreException
     {
+        // get relation instances
         Users users = Users.getInstance(cc);
         Permissions permissions = Permissions.getInstance(cc);
+        TableEntries entries = TableEntries.getInstance(cc);
 
+        // get request data
         String requestingUserID = this.setUsersPermissions
                 .getRequestingUserID();
         String aggregateUserIdentifier = this.setUsersPermissions
                 .getAggregateUserIdentifier();
 
+        // retrieve request user
         InternalUser requestingUser = users.query()
                 .equal(Users.USER_ID, requestingUserID).get();
+        
+        // To set user management permissions the user must have write permission on the users table
         if (!requestingUser.hasPerm(users.getAggregateIdentifier(),
                 Permissions.WRITE))
         {
@@ -51,6 +58,7 @@ public class SetUserManagementPermissionsLogic extends
                     aggregateUserIdentifier, FailureReason.PERMISSION_DENIED);
         }
 
+        // check if the user we are setting permissions for exists
         try
         {
             users.getEntity(aggregateUserIdentifier);
@@ -80,7 +88,6 @@ public class SetUserManagementPermissionsLogic extends
                     setUsersPermissions.getAllowed(),
                     setUsersPermissions.getAllowed(), cc);
         }
-
         perm.save();
 
         return SetUserManagementPermissionsResult.success();
