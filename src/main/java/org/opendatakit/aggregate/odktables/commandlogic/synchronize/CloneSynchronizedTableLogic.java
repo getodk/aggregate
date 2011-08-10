@@ -46,25 +46,30 @@ public class CloneSynchronizedTableLogic extends
     public CloneSynchronizedTableResult execute(CallingContext cc)
             throws ODKDatastoreException
     {
+        // Get relation instances
         TableEntries entries = TableEntries.getInstance(cc);
         UserTableMappings mappings = UserTableMappings.getInstance(cc);
         Users users = Users.getInstance(cc);
         Columns columns = Columns.getInstance(cc);
 
+        // Get data from request
         String tableID = cloneSynchronizedTable.getTableID();
         String aggregateTableIdentifier = cloneSynchronizedTable
                 .getAggregateTableIdentifier();
         String requestingUserID = cloneSynchronizedTable.getRequestingUserID();
 
+        // Get request user
         InternalUser user = users.query()
                 .equal(Users.USER_ID, requestingUserID).get();
 
-        if (!user.hasPerm(users.getAggregateIdentifier(), Permissions.READ))
+        // Check if user is allowed to read the table they want to clone
+        if (!user.hasPerm(aggregateTableIdentifier, Permissions.READ))
         {
             return CloneSynchronizedTableResult.failure(tableID,
                     FailureReason.PERMISSION_DENIED);
         }
 
+        // Check if the user is already using the tableID
         boolean mappingExists = mappings
                 .query()
                 .equal(UserTableMappings.AGGREGATE_USER_IDENTIFIER,
@@ -76,6 +81,7 @@ public class CloneSynchronizedTableLogic extends
                     FailureReason.TABLE_ALREADY_EXISTS);
         }
 
+        // Retrieve the table entry for the table that is to be cloned
         InternalTableEntry entry;
         try
         {
@@ -92,7 +98,7 @@ public class CloneSynchronizedTableLogic extends
                 tableID, cc);
         mapping.save();
 
-        // create modification of all latest rows
+        // create modification of all the latest rows
         Table table = Table.getInstance(aggregateTableIdentifier, cc);
         List<InternalColumn> cols = columns
                 .query()
@@ -118,6 +124,7 @@ public class CloneSynchronizedTableLogic extends
 
         Modification clientModification = new Modification(modificationNumber,
                 clientRows);
+        
         return CloneSynchronizedTableResult.success(clientModification);
     }
 }

@@ -68,22 +68,14 @@ public class InternalTableEntry extends TypedEntity
         return entity.getInteger(TableEntries.MODIFICATION_NUMBER);
     }
 
-    public int incrementModificationNumber()
+    public void setModificationNumber(int value)
     {
-        int modificationNumber = getModificationNumber();
-        modificationNumber++;
-        setModificationNumber(modificationNumber);
-        return modificationNumber;
+        entity.set(TableEntries.MODIFICATION_NUMBER, value);
     }
-
+    
     public boolean isSynchronized()
     {
         return entity.getBoolean(TableEntries.IS_SYNCHRONIZED);
-    }
-
-    private void setModificationNumber(int value)
-    {
-        entity.set(TableEntries.MODIFICATION_NUMBER, value);
     }
 
     public void setSynchronized(boolean value)
