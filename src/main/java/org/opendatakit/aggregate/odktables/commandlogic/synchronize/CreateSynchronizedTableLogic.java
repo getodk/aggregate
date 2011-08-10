@@ -41,18 +41,21 @@ public class CreateSynchronizedTableLogic extends
     public CreateSynchronizedTableResult execute(CallingContext cc)
             throws ODKDatastoreException
     {
+        // get relation instances
         Users users = Users.getInstance(cc);
         UserTableMappings mappings = UserTableMappings.getInstance(cc);
 
+        // get request data
         String tableID = createSynchronizedTable.getTableID();
         String requestingUserID = createSynchronizedTable.getRequestingUserID();
 
+        // retrieve request user
         InternalUser requestingUser = users.query()
                 .equal(Users.USER_ID, requestingUserID).get();
         String aggregateUserIdentifier = requestingUser
                 .getAggregateIdentifier();
 
-        // Check if table exists in Cursor
+        // Check if user already has a mapping using the tableID
         // If table exists, return failure
         if (mappings
                 .query()
@@ -63,12 +66,14 @@ public class CreateSynchronizedTableLogic extends
             return CreateSynchronizedTableResult.failure(tableID,
                     FailureReason.TABLE_ALREADY_EXISTS);
         }
-        // Create table
+        // Create the table
         try
         {
+            // create the table entry
             InternalTableEntry entry = new InternalTableEntry(aggregateUserIdentifier,
                     createSynchronizedTable.getTableName(), true, cc);
             entry.save();
+            // create the columns
             for (org.opendatakit.aggregate.odktables.client.entity.Column clientColumn : createSynchronizedTable
                     .getColumns())
             {
@@ -77,23 +82,25 @@ public class CreateSynchronizedTableLogic extends
                         clientColumn.isNullable(), cc);
                 column.save();
             }
+            // create the mapping from aggregateTableIdentifier to user's tableID
             InternalUserTableMapping mapping = new InternalUserTableMapping(
                     aggregateUserIdentifier, entry.getAggregateIdentifier(),
                     tableID, cc);
             mapping.save();
             
-            // Add creation user's full permissions
+            // make sure the user has full permissions on their own table
             InternalPermission perm = new InternalPermission(
                     entry.getAggregateIdentifier(), aggregateUserIdentifier,
                     true, true, true, cc);
             perm.save();
         } catch (ODKEntityPersistException e)
         {
-            // TODO: query to see what got created and delete it
+            // TODO: query to see what got created and delete it?
         }
+        // create initial empty modification
         org.opendatakit.aggregate.odktables.client.entity.Modification clientModification = new org.opendatakit.aggregate.odktables.client.entity.Modification(
                 0, Collections.<SynchronizedRow> emptyList());
+        
         return CreateSynchronizedTableResult.success(clientModification);
-
     }
 }

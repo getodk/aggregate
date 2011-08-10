@@ -34,16 +34,20 @@ public class RemoveTableSynchronizationLogic extends
     public RemoveTableSynchronizationResult execute(CallingContext cc)
             throws ODKDatastoreException
     {
+        // get relation instances
         Users users = Users.getInstance(cc);
         UserTableMappings mappings = UserTableMappings.getInstance(cc);
 
+        // get request data
         String requestingUserID = removeTableSynchronization
                 .getRequestingUserID();
         String tableID = removeTableSynchronization.getTableID();
 
+        // retrieve request user
         InternalUser requestUser = users.query()
                 .equal(Users.USER_ID, requestingUserID).get();
 
+        // get mapping from user's tableID to the aggregateTableIdentifier
         InternalUserTableMapping mapping;
         try
         {
@@ -57,6 +61,8 @@ public class RemoveTableSynchronizationLogic extends
             return RemoveTableSynchronizationResult.failure(tableID,
                     FailureReason.TABLE_DOES_NOT_EXIST);
         }
+        
+        // delete the mapping
         mapping.delete();
 
         return RemoveTableSynchronizationResult.success();

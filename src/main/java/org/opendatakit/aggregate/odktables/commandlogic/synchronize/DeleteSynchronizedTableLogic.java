@@ -46,6 +46,7 @@ public class DeleteSynchronizedTableLogic extends
     public DeleteSynchronizedTableResult execute(CallingContext cc)
             throws ODKDatastoreException
     {
+        // get relation instances
         Users users = Users.getInstance(cc);
         UserTableMappings mappings = UserTableMappings.getInstance(cc);
         TableEntries entries = TableEntries.getInstance(cc);
@@ -53,11 +54,15 @@ public class DeleteSynchronizedTableLogic extends
         Permissions permissions = Permissions.getInstance(cc);
         Modifications modifications = Modifications.getInstance(cc);
 
+        // get request data
         String requestingUserID = deleteSynchronizedTable.getRequestingUserID();
         String tableID = deleteSynchronizedTable.getTableID();
 
+        // retrieve request user
         InternalUser requestUser = users.query()
                 .equal(Users.USER_ID, requestingUserID).get();
+        
+        // retrieve mapping from user's tableID to aggregateTableIdentifier
         InternalUserTableMapping mapping;
         try
         {
@@ -72,6 +77,7 @@ public class DeleteSynchronizedTableLogic extends
                     FailureReason.TABLE_DOES_NOT_EXIST);
         }
 
+        // in order to delete the table the user must have delete permission on the table
         String aggregateTableIdentifier = mapping.getAggregateTableIdentifier();
         if (!requestUser.hasPerm(aggregateTableIdentifier, Permissions.DELETE))
         {
@@ -79,6 +85,7 @@ public class DeleteSynchronizedTableLogic extends
                     FailureReason.PERMISSION_DENIED);
         }
 
+        // retrieve all entities that make up a table
         Table table = Table.getInstance(aggregateTableIdentifier, cc);
         List<InternalRow> rows = table.query().execute();
         List<InternalColumn> cols = columns
@@ -99,6 +106,7 @@ public class DeleteSynchronizedTableLogic extends
                         aggregateTableIdentifier).execute();
         InternalTableEntry entry = entries.getEntity(aggregateTableIdentifier);
 
+        // delete all the retrieved entities
         for (InternalRow row : rows)
             row.delete();
         for (InternalColumn column : cols)

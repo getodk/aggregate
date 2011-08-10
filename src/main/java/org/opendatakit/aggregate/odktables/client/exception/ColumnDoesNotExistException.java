@@ -10,7 +10,7 @@ public class ColumnDoesNotExistException extends ODKTablesClientException
     public ColumnDoesNotExistException(String tableID, String badColumnName)
     {
         super(String.format(
-                "Column with name %s does not exist in table with tableID: %s",
+                "Column with name %s does not exist in table with tableID %s",
                 badColumnName, tableID));
         this.tableID = tableID;
         this.badColumnName = badColumnName;
