@@ -160,8 +160,9 @@ public class SimpleAPITest
     }
 
     @Test
-    public void testListTablesEmptyExceptForUsersTable() throws ClientProtocolException,
-            IOException, AggregateInternalErrorException
+    public void testListTablesEmptyExceptForUsersTable()
+            throws ClientProtocolException, IOException,
+            AggregateInternalErrorException
     {
         List<TableEntry> entries = conn.listAllTables();
         assertEquals(1, entries.size());
@@ -222,6 +223,15 @@ public class SimpleAPITest
             AggregateInternalErrorException
     {
         conn.getUserByID(userID + "diff");
+    }
+
+    @Test(expected = PermissionDeniedException.class)
+    public void testGetUserByIDNoPermission() throws ClientProtocolException,
+            PermissionDeniedException, UserDoesNotExistException,
+            AggregateInternalErrorException, IOException
+    {
+        conn.setUserID(userID);
+        conn.getUserByID(requestUserID);
     }
 
     @Test
