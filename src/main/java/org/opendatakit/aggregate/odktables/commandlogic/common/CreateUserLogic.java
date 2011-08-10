@@ -34,9 +34,6 @@ public class CreateUserLogic extends CommandLogic<CreateUser>
     {
         Users users = Users.getInstance(cc);
         
-        // TODO: this is kind of hacky, but we need to ensure the admin user exists
-        users.getAdminUser();
-
         String userID = createUser.getUserID();
         String requestingUserID = createUser.getRequestingUserID();
         String aggregateUsersIdentifier = users.getAggregateIdentifier();

@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.opendatakit.aggregate.odktables.entity.InternalPermission;
+import org.opendatakit.aggregate.odktables.entity.InternalTableEntry;
 import org.opendatakit.aggregate.odktables.entity.InternalUser;
 import org.opendatakit.common.ermodel.simple.Attribute;
 import org.opendatakit.common.ermodel.simple.AttributeType;
@@ -54,7 +55,7 @@ public class Users extends TypedEntityRelation<InternalUser>
     /**
      * The name of the admin user.
      */
-    private static final String ADMIN_NAME = "55534804-daea-4ae0-a796-a92560c2f184"; 
+    private static final String ADMIN_NAME = "55534804-daea-4ae0-a796-a92560c2f184";
 
     // The following defines the actual attributes that will be in the datastore:
     /**
@@ -113,20 +114,37 @@ public class Users extends TypedEntityRelation<InternalUser>
         {
             try
             {
-                adminInstance = instance.query().equal(USER_NAME, ADMIN_NAME).get();
+                adminInstance = instance.query().equal(USER_NAME, ADMIN_NAME)
+                        .get();
+                ADMIN_ID = adminInstance.getID();
             } catch (ODKDatastoreException e)
             {
                 ADMIN_ID = UUID.randomUUID().toString();
                 adminInstance = new InternalUser(ADMIN_ID, ADMIN_NAME, getCC());
                 adminInstance.save();
                 InternalPermission adminPerm = new InternalPermission(
-                        RELATION_NAME,
-                        adminInstance.getAggregateIdentifier(), true, true,
-                        true, getCC());
+                        RELATION_NAME, adminInstance.getAggregateIdentifier(),
+                        true, true, true, getCC());
                 adminPerm.save();
             }
         }
         return Users.adminInstance;
+    }
+
+    public InternalTableEntry getTableEntry() throws ODKDatastoreException
+    {
+        TableEntries entries = TableEntries.getInstance(getCC());
+        InternalTableEntry entry;
+        try
+        {
+            entry = entries.getEntity(getAggregateIdentifier());
+        } catch (ODKDatastoreException e)
+        {
+            entry = new InternalTableEntry(getAdminUser().getID(), this
+                    .getClass().getSimpleName(), false, getCC());
+            entry.save();
+        }
+        return entry;
     }
 
     public InternalUser getByID(String userID) throws ODKDatastoreException
@@ -138,7 +156,7 @@ public class Users extends TypedEntityRelation<InternalUser>
     {
         return RELATION_NAME;
     }
-    
+
     /**
      * Returns the singleton instance of the Users.
      * 
@@ -157,6 +175,8 @@ public class Users extends TypedEntityRelation<InternalUser>
         if (instance == null || instance.getCC() != cc)
         {
             instance = new Users(cc);
+            instance.getAdminUser();
+            instance.getTableEntry();
         }
 
         return instance;

@@ -30,9 +30,6 @@ public class CheckUserExistsLogic extends CommandLogic<CheckUserExists>
     {
         Users users = Users.getInstance(cc);
         
-        // TODO: this is kind of hacky, but we need to ensure the admin user exists
-        users.getAdminUser();
-        
         String userID = checkUserExists.getUserID();
         boolean userExists = users.query().equal(Users.USER_ID, userID)
                 .exists();
