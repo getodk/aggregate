@@ -79,6 +79,9 @@ public class SimpleAPITest
         {
 
         }
+        User user = conn.getUserByID(requestUserID);
+        conn.setUserManagementPermissions(user.getAggregateUserIdentifier(),
+                true);
     }
 
     @AfterClass
@@ -142,19 +145,27 @@ public class SimpleAPITest
             ClientProtocolException, IOException, PermissionDeniedException,
             AggregateInternalErrorException
     {
-        String diffUserID = userID;
-        String diffUserName = userName;
-        User user = conn.createUser(diffUserID, diffUserName);
-        assertEquals(diffUserID, user.getUserID());
+        User user = conn.createUser(userID, userName);
+        assertEquals(userID, user.getUserID());
         assertNotNull(user.getAggregateUserIdentifier());
     }
 
+    @Test(expected = PermissionDeniedException.class)
+    public void testCreateUserNoPermission() throws ClientProtocolException,
+            AggregateInternalErrorException, UserDoesNotExistException,
+            IOException, UserAlreadyExistsException, PermissionDeniedException
+    {
+        conn.setUserID(userID);
+        conn.createUser(userID + "2", userName + "2");
+    }
+
     @Test
-    public void testListTablesEmpty() throws ClientProtocolException,
+    public void testListTablesEmptyExceptForUsersTable() throws ClientProtocolException,
             IOException, AggregateInternalErrorException
     {
         List<TableEntry> entries = conn.listAllTables();
-        assertEquals(0, entries.size());
+        assertEquals(1, entries.size());
+        System.out.println(entries);
     }
 
     @Test
@@ -242,12 +253,17 @@ public class SimpleAPITest
             AggregateInternalErrorException
     {
         List<TableEntry> entries = conn.listAllTables();
-        assertEquals(1, entries.size());
+        assertEquals(2, entries.size());
+        boolean containedTable = false;
         for (TableEntry entry : entries)
         {
-            assertTrue(tableID.equalsIgnoreCase(entry.getTableID()));
-            assertEquals(requestUserName, entry.getUser().getUserName());
+            if (entry.getUser().getUserName().equals(requestUserName))
+            {
+                assertTrue(tableID.equalsIgnoreCase(entry.getTableID()));
+                containedTable = true;
+            }
         }
+        assertTrue(containedTable);
     }
 
     @Test
