@@ -41,7 +41,7 @@ import org.opendatakit.common.ermodel.simple.AttributeType;
 /**
  * <p>
  * Test driver which reads in a test script, runs the API commands against
- * Aggregate, and outputs the results.
+ * Aggregate, and outputs the results. Used for testing the SynchronizeAPI.
  * </p>
  * 
  * <pre>
@@ -195,6 +195,10 @@ public class ClientTestDriver
             } else if (command.equals("printTable"))
             {
                 printTable(arguments);
+            } else
+            {
+                throw new IllegalArgumentException("Unrecognized command: "
+                        + command);
             }
         } catch (Exception e)
         {
@@ -246,8 +250,8 @@ public class ClientTestDriver
             AggregateInternalErrorException, IOException
     {
         conn.setUserID(adminUserID);
-        SynchronizedClient client = clients.get(clientName);
-        conn.deleteUser(client.getAggregateUserIdentifier());
+        User user = conn.getUserByID(clientName);
+        conn.deleteUser(user.getAggregateUserIdentifier());
     }
 
     private void setTablePermissions(List<String> arguments)
@@ -390,7 +394,7 @@ public class ClientTestDriver
 
         SynchronizedClient client = clients.get(clientName);
         SynchronizedTable clientTable = new SynchronizedTable(
-                table.getTableName(), table.getTableID(), table.getColumns());
+                table.getTableName(), table.getTableName(), table.getColumns());
         clientTable.setModificationNumber(mod.getModificationNumber());
 
         List<SynchronizedRow> rows = mod.getRows();
@@ -479,9 +483,17 @@ public class ClientTestDriver
         SynchronizedClient client = clients.get(clientName);
         SynchronizedTable table = client.getTable(tableName);
         conn.setUserID(clientName);
-        Modification mod = conn.insertSynchronizedRows(table.getTableID(),
-                table.getModificationNumber(), new ArrayList<SynchronizedRow>(
-                        rows.values()));
+        Modification mod;
+        if (table != null)
+        {
+            mod = conn.insertSynchronizedRows(table.getTableID(),
+                    table.getModificationNumber(),
+                    new ArrayList<SynchronizedRow>(rows.values()));
+        } else
+        {
+            mod = conn.insertSynchronizedRows(tableName, 0,
+                    new ArrayList<SynchronizedRow>());
+        }
         table.setModificationNumber(mod.getModificationNumber());
         for (SynchronizedRow updatedRow : mod.getRows())
         {
@@ -523,6 +535,13 @@ public class ClientTestDriver
     {
         SynchronizedClient client = clients.get(clientName);
         SynchronizedTable table = client.getTable(tableName);
+
+        // special case to test updating non-existent table
+        if (table == null)
+        {
+            conn.updateSynchronizedRows(tableName, 0,
+                    new ArrayList<SynchronizedRow>());
+        }
 
         List<SynchronizedRow> existingRows = table.getRows(rows.keySet());
         for (SynchronizedRow existingRow : existingRows)
