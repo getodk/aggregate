@@ -19,11 +19,13 @@ import java.util.List;
 
 import org.opendatakit.aggregate.datamodel.FormDataModel;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
+import org.opendatakit.aggregate.datamodel.TopLevelDynamicBase;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.common.persistence.CommonFieldsBase;
+import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.persistence.Query.FilterOperation;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
@@ -60,7 +62,32 @@ public abstract class QueryBase {
    */
   public void addFilter(FormElementModel attribute, FilterOperation op,
   						Object value) {
-  	query.addFilter(attribute.getFormDataModel().getBackingKey(), op, value);
+	if ( attribute.isMetadata() ) {
+		DataField metaField;
+		TopLevelDynamicBase tlb = ((TopLevelDynamicBase) form.getTopLevelGroupElement().getFormDataModel().getBackingObjectPrototype());
+		switch ( attribute.getType() ) {
+		case META_INSTANCE_ID:
+			metaField = tlb.primaryKey;
+			break;
+		case META_IS_COMPLETE:
+			metaField = tlb.isComplete;
+			break;
+		case META_MODEL_VERSION:
+			metaField = tlb.modelVersion;
+			break;
+		case META_SUBMISSION_DATE:
+			metaField = tlb.submissionDate;
+			break;
+		case META_UI_VERSION:
+			metaField = tlb.uiVersion;
+			break;
+		default:
+			throw new IllegalStateException("unknown Metadata type");
+		}
+		query.addFilter(metaField, op, value);
+	} else {
+		query.addFilter(attribute.getFormDataModel().getBackingKey(), op, value);
+	}
   }
   
   public void addFilterGeoPoint(FormElementModel attr, Long ordinal, FilterOperation op,

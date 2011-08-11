@@ -29,6 +29,7 @@ public class WebUtils {
 
 	private static final String PATTERN_DATE_TOSTRING = "EEE MMM dd HH:mm:ss zzz yyyy";
 	private static final String PATTERN_ISO8601 = "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
+	private static final String PATTERN_YYYY_MM_DD_DATE_ONLY_NO_TIME_DASH = "yyyy-MM-dd";
 	private static final String PATTERN_NO_DATE_TIME_ONLY = "HH:mm:ss.SSS";
 	private static final SimpleDateFormat iso8601 = new SimpleDateFormat(PATTERN_ISO8601);
 
@@ -81,7 +82,8 @@ public class WebUtils {
 									   DateUtils.PATTERN_ASCTIME,
 									   PATTERN_ISO8601,
 									   PATTERN_DATE_TOSTRING,
-									   PATTERN_NO_DATE_TIME_ONLY} );
+									   PATTERN_NO_DATE_TIME_ONLY,
+									   PATTERN_YYYY_MM_DD_DATE_ONLY_NO_TIME_DASH} );
 			} catch ( DateParseException e) {
 				throw new IllegalArgumentException("Unparsable date: " + value, e);
 			}

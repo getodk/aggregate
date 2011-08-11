@@ -20,6 +20,7 @@ import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.persistence.Query.FilterOperation;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+import org.opendatakit.common.utils.WebUtils;
 import org.opendatakit.common.web.CallingContext;
 
 public class QueryByUIFilterGroup extends QueryBase {
@@ -54,14 +55,24 @@ public class QueryByUIFilterGroup extends QueryBase {
         Object compareValue = null;
         switch (fem.getElementType()) {
         case BOOLEAN:
-            compareValue = Boolean.parseBoolean(value);
+            compareValue = WebUtils.parseBoolean(value);
             break;
+		case JRDATETIME:
+			compareValue = WebUtils.parseDate(value);
+			break;
+		case JRDATE:
+			compareValue = WebUtils.parseDate(value);
+			break;
+		case JRTIME:
+			compareValue = WebUtils.parseDate(value);
+			break;
         case INTEGER:
             compareValue = Long.valueOf(value);
             break;
         case DECIMAL:
             compareValue = new BigDecimal(value);
             break;
+        case SELECT1:
         case STRING:
             compareValue = value;
             break;
@@ -70,6 +81,7 @@ public class QueryByUIFilterGroup extends QueryBase {
             super.addFilterGeoPoint(fem, column.getGeopointColumnCode(), op, compareValue);          
             continue;
         default:
+        	// e.g., SELECTN
             // can't apply a filter to this type
             continue;
         }

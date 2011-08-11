@@ -541,18 +541,6 @@ public class FormDefinition {
 							
 							ds.assertRelation(e.getValue(), user);
 						}
-						
-						// and compute the set of element URIs that 
-						// have text within the longStringText table.
-						
-						// this should be a small number, so we should be able to cache
-						// it effectively.  It will simplify the follow-on query construction.
-						LongStringRefText lsr = fd.getLongStringRefTextTable();
-						
-						Query queryLsr = ds.createQuery(lsr, user);
-						List<?> fdmsWithLongStrings = queryLsr.executeDistinctValueForDataField( lsr.uriFormDataModel );
-						fd.tagLongStringElements(fdmsWithLongStrings);
-						
 					} catch (ODKDatastoreException e1) {
 						e1.printStackTrace();
 				    	logger.severe("Asserting relations failed for formId " + xformParameters.toString());
@@ -1016,23 +1004,9 @@ public class FormDefinition {
 	public Long getUiVersion() {
 		return xformParameters.uiVersion;
 	}
-	
-	public void tagLongStringElements(List<?> fdmsWithLongStrings) {
-		for ( Object o : fdmsWithLongStrings ) {
-			String uri = (String) o;
-			FormDataModel m = uriMap.get(uri);
-			if ( m == null ) {
-				throw new IllegalArgumentException("Unexpected failure to map uri to column set: " + uri);
-			}
-			m.setMayHaveExtendedStringData(true);
-		}
-	}
 
 	public void setLongString(String text, String parentKey, String uriFormDataModel, EntityKey topLevelTableAuri, 
 			CallingContext cc) throws ODKEntityPersistException {
-		
-		FormDataModel m = uriMap.get(uriFormDataModel);
-		m.setMayHaveExtendedStringData(true);
 		
 		long textLimit = refTextTable.value.getMaxCharLen();
 		Datastore ds = cc.getDatastore();

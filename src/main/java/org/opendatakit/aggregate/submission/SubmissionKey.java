@@ -18,6 +18,8 @@ package org.opendatakit.aggregate.submission;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.opendatakit.common.constants.BasicConsts;
+
 /**
  * The submission key represents an XPath-style identification of a particular data element
  * on the server.  The base 
@@ -65,7 +67,7 @@ public class SubmissionKey {
 
 	public final List<SubmissionKeyPart> splitSubmissionKey() {
 		List<SubmissionKeyPart> parts = new ArrayList<SubmissionKeyPart>();
-		String[] stringParts = this.toString().split(Submission.K_SL);
+		String[] stringParts = this.toString().split(BasicConsts.FORWARDSLASH);
 		for ( String s : stringParts ) {
 			parts.add( new SubmissionKeyPart(s));
 		}

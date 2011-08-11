@@ -26,6 +26,8 @@ import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.TaskLockType;
 import org.opendatakit.aggregate.constants.common.ExternalServicePublicationOption;
 import org.opendatakit.aggregate.constants.common.OperationalStatus;
+import org.opendatakit.aggregate.datamodel.FormElementModel;
+import org.opendatakit.aggregate.datamodel.TopLevelDynamicBase;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
@@ -37,6 +39,8 @@ import org.opendatakit.aggregate.query.submission.QueryByDateRange;
 import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.common.constants.BasicConsts;
 import org.opendatakit.common.persistence.Datastore;
+import org.opendatakit.common.persistence.PersistConsts;
+import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.persistence.TaskLock;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
@@ -288,8 +292,7 @@ public class UploadSubmissionsWorkerImpl {
     List<Submission> submissions = query.getResultSubmissions(cc);
 
     // here so we don't have to do null checks on the rest of the code in
-    // this
-    // class
+    // this class
     if (submissions == null) {
       submissions = new ArrayList<Submission>();
     }
@@ -300,11 +303,15 @@ public class UploadSubmissionsWorkerImpl {
       throws ODKFormNotFoundException, ODKIncompleteSubmissionData, ODKDatastoreException {
     // query for next set of submissions
     QueryByDate query = new QueryByDate(form, startDate, false, MAX_QUERY_LIMIT, cc);
+    // and don't fetch data within the settle time of the data store + drift of 
+    // server clock time vs. that of data store server (MAX_SETTLE_MILLISECONDS).
+    Date settleTime = new Date(System.currentTimeMillis() - PersistConsts.MAX_SETTLE_MILLISECONDS);
+    FormElementModel metaSubmissionDate = form.getFormDefinition().getElementByName(FormElementModel.Metadata.META_SUBMISSION_DATE.toString());
+    query.addFilter(metaSubmissionDate, Query.FilterOperation.LESS_THAN, settleTime);
     List<Submission> submissions = query.getResultSubmissions(cc);
 
     // here so we don't have to do null checks on the rest of the code in
-    // this
-    // class
+    // this class
     if (submissions == null) {
       submissions = new ArrayList<Submission>();
     }
