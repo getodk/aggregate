@@ -122,14 +122,16 @@ public class Submission extends SubmissionSet {
 		Row row = new Row(constructSubmissionKey(null));
 		if ( propertyNames == null ) {
 			// we are a Submission -- emit the creation date and id...
-		   FormElementModel metaId = formDefinition.getElementByName(FormElementModel.Metadata.META_INSTANCE_ID.toString());
+		   FormElementModel metaId = getFormDefinition().getElementByName(FormElementModel.Metadata.META_INSTANCE_ID.toString());
 			elemFormatter.formatString(getKey().getKey(), metaId, BasicConsts.EMPTY_STRING, row);
-			FormElementModel metaModelVersion = formDefinition.getElementByName(FormElementModel.Metadata.META_MODEL_VERSION.toString());
+			FormElementModel metaModelVersion = getFormDefinition().getElementByName(FormElementModel.Metadata.META_MODEL_VERSION.toString());
 			elemFormatter.formatLong(getModelVersion(), metaModelVersion, BasicConsts.EMPTY_STRING, row);
-			FormElementModel metaUIVersion = formDefinition.getElementByName(FormElementModel.Metadata.META_UI_VERSION.toString());
+			FormElementModel metaUIVersion = getFormDefinition().getElementByName(FormElementModel.Metadata.META_UI_VERSION.toString());
 			elemFormatter.formatLong(getUiVersion(), metaUIVersion, BasicConsts.EMPTY_STRING, row);
-			FormElementModel metaSubmissionDate = formDefinition.getElementByName(FormElementModel.Metadata.META_SUBMISSION_DATE.toString());
-			elemFormatter.formatDateTime(getCreationDate(), metaSubmissionDate, BasicConsts.EMPTY_STRING, row);
+			FormElementModel metaSubmissionDate = getFormDefinition().getElementByName(FormElementModel.Metadata.META_SUBMISSION_DATE.toString());
+			elemFormatter.formatDateTime(getSubmissionDate(), metaSubmissionDate, BasicConsts.EMPTY_STRING, row);
+			FormElementModel metaIsComplete = getFormDefinition().getElementByName(FormElementModel.Metadata.META_IS_COMPLETE.toString());
+			elemFormatter.formatBoolean(isComplete(), metaIsComplete, BasicConsts.EMPTY_STRING, row);
 			// SubmissionSet handles submission-specific elements...
 			List<SubmissionValue> values = getSubmissionValues();
 			for (SubmissionValue value : values) {
@@ -143,16 +145,20 @@ public class Submission extends SubmissionSet {
 						elemFormatter.formatString(getKey().getKey(),
 								element, BasicConsts.EMPTY_STRING, row);
 						break;
-					case META_SUBMISSION_DATE:
-						elemFormatter.formatDateTime(getCreationDate(), 
-								element, BasicConsts.EMPTY_STRING, row);
-						break;
 					case META_UI_VERSION:
 						elemFormatter.formatLong(getUiVersion(), 
 								element, BasicConsts.EMPTY_STRING, row);
 						break;
 					case META_MODEL_VERSION:
 						elemFormatter.formatLong(getModelVersion(), 
+								element, BasicConsts.EMPTY_STRING, row);
+						break;
+					case META_SUBMISSION_DATE:
+						elemFormatter.formatDateTime(getSubmissionDate(), 
+								element, BasicConsts.EMPTY_STRING, row);
+						break;
+					case META_IS_COMPLETE:
+						elemFormatter.formatBoolean(isComplete(), 
 								element, BasicConsts.EMPTY_STRING, row);
 						break;
 					}
@@ -170,7 +176,7 @@ public class Submission extends SubmissionSet {
 			throw new IllegalArgumentException("submission key is empty");
 		}
 
-		if ( !parts.get(0).getElementName().equals(formDefinition.getFormId())) {
+		if ( !parts.get(0).getElementName().equals(getFormDefinition().getFormId())) {
 			throw new IllegalArgumentException(
 					"formId of submissionKey does not match FormId");
 		}

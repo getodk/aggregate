@@ -54,7 +54,8 @@ public final class FormElementModel {
 		META_MODEL_VERSION,
 		META_UI_VERSION,
 		META_INSTANCE_ID,
-		META_SUBMISSION_DATE;
+		META_SUBMISSION_DATE,
+		META_IS_COMPLETE;
 		
 		public String toString() {
 			return "*" + this.name().toLowerCase().replaceAll("_", "-") + "*";
@@ -80,11 +81,13 @@ public final class FormElementModel {
 		this.parent = parent;
 		this.type = null;
 		if ( parent == null ) {
-			// add the meta data...
+			// add the instance meta data...
+			// the form meta data is not part of the submission form element model...
 			children.add(new FormElementModel(this, Metadata.META_INSTANCE_ID));
 			children.add(new FormElementModel(this, Metadata.META_MODEL_VERSION));
 			children.add(new FormElementModel(this, Metadata.META_UI_VERSION));
 			children.add(new FormElementModel(this, Metadata.META_SUBMISSION_DATE));
+			children.add(new FormElementModel(this, Metadata.META_IS_COMPLETE));
 		}
 		
 		switch ( fdm.getElementType() ) {
@@ -196,6 +199,8 @@ public final class FormElementModel {
 				return ElementType.INTEGER;
 			case META_MODEL_VERSION:
 				return ElementType.INTEGER;
+			case META_IS_COMPLETE:
+				return ElementType.BOOLEAN;
 			}
 		}
 		switch ( fdm.getElementType() ) {

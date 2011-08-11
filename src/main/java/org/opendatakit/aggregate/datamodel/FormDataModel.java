@@ -149,7 +149,6 @@ public final class FormDataModel extends CommonFieldsBase {
 	private final List<FormDataModel> children = new ArrayList<FormDataModel>();
 	private CommonFieldsBase backingObject = null;
 	private DataField backingKey = null;
-	private boolean mayHaveExtendedStringData = false;
 
 	/**
 	 * Reset the linked up values so FormDefinition can construct a new model.
@@ -162,7 +161,6 @@ public final class FormDataModel extends CommonFieldsBase {
 		children.clear();
 		backingObject = null;
 		backingKey = null;
-		mayHaveExtendedStringData = false;
 	}
 	
 	/**
@@ -422,41 +420,6 @@ public final class FormDataModel extends CommonFieldsBase {
 
 	public final void setBackingKey(DataField backingKey) {
 		this.backingKey = backingKey;
-	}
-	public boolean isMayHaveExtendedStringData() {
-		return mayHaveExtendedStringData;
-	}
-	public void setMayHaveExtendedStringData(boolean mayHaveExtendedStringData) {
-		this.mayHaveExtendedStringData = mayHaveExtendedStringData;
-	}
-	
-	/**
-	 * Determine whether the given field is possibly a long string field.
-	 * String values are assumed to be stored as individual characters
-	 * and are expected to fit up to f.getMaxCharLen() characters regardless
-	 * of the UTF-8 multi-byte content of the string.  So a long string is
-	 * identified as a string field that contains a value that is exactly 
-	 * the length of the storage area.
-	 *  
-	 * @param entity
-	 * @param f
-	 * @return
-	 */
-	public final boolean isPossibleLongStringField(CommonFieldsBase entity, DataField f) {
-		String value = entity.getStringField(f);
-		if ( value != null && isMayHaveExtendedStringData() ) {
-			int outcome = f.getMaxCharLen().compareTo(Long.valueOf(value.length()));
-			if ( outcome == 0 ) {
-				// this may be extended...
-				return true;
-			} else if ( outcome < 0 ) {
-				throw new IllegalStateException("Unexpected -- stored value is longer than max char len! " +
-						getPersistAsSchema() + " " + getPersistAsTable() + " " + f.getName());
-			} else {
-				return false;
-			}
-		}
-		return false;
 	}
 
 	private static FormDataModel relation = null;
