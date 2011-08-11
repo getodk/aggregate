@@ -279,6 +279,24 @@
 	</servlet-mapping>
 
 	<servlet>
+		<servlet-name>downloadSubmissionList</servlet-name>
+		<servlet-class>org.opendatakit.aggregate.servlet.SubmissionDownloadListServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>downloadSubmissionList</servlet-name>
+		<url-pattern>/view/downloadSubmissionList</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+	<servlet-name>downloadSubmission</servlet-name>
+		<servlet-class>org.opendatakit.aggregate.servlet.SubmissionDownloadServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>downloadSubmission</servlet-name>
+		<url-pattern>/view/downloadSubmission</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
 		<servlet-name>briefcase</servlet-name>
 		<servlet-class>org.opendatakit.aggregate.servlet.BriefcaseServlet</servlet-class>
 	</servlet>

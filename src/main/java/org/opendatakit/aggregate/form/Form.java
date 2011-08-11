@@ -369,6 +369,22 @@ public class Form {
 	  }
 	  throw new IllegalStateException("unable to locate the form definition");
   }
+  
+  /**
+   * Gets whether the form is encrypted
+   * 
+   * @return true if form is encrypted, false otherwise
+   */
+  public Boolean isEncryptedForm() {
+	// assume for now that there is only one fileset...
+	RepeatSubmissionType r = (RepeatSubmissionType) objectEntity.getElementValue(FormInfo.fiFilesetTable);
+	List<SubmissionSet> filesets = r.getSubmissionSets();
+	if ( filesets.size() != 1 ) {
+		throw new IllegalStateException("Expecting only one fileset record at this time!");
+	}
+	SubmissionSet filesetRecord = filesets.get(0);
+    return ((BooleanSubmissionType) filesetRecord.getElementValue(FormInfo.isEncryptedForm)).getValue();
+  }
 
   /**
    * Gets whether the form can be downloaded

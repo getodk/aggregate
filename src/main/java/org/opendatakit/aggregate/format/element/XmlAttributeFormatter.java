@@ -26,36 +26,51 @@ import org.apache.commons.lang.StringEscapeUtils;
 import org.opendatakit.aggregate.constants.format.FormatConsts;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.format.Row;
-import org.opendatakit.aggregate.format.structure.XmlFormatter;
 import org.opendatakit.aggregate.submission.SubmissionRepeat;
 import org.opendatakit.aggregate.submission.type.BlobSubmissionType;
 import org.opendatakit.aggregate.submission.type.GeoPoint;
 import org.opendatakit.common.constants.BasicConsts;
-import org.opendatakit.common.constants.HtmlUtil;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
 
 /**
- * Formats xml tags <name>value</name> with proper escaping for 
- * reconstructing the submission xml that Collect may have used
- * when submitting data.
+ * Emits attribute=\"value\" string for a list of properties.
+ * Escapes value but does not handle non-XML-compliant attribute names.
+ * Used for metadata fields.
  * 
- * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
  * 
  */
-public class XmlElementFormatter implements ElementFormatter {
-	XmlFormatter xmlFormatter;
-  
+public class XmlAttributeFormatter implements ElementFormatter {
+
   /**
    * Construct a XML Element Formatter
- * @param xmlFormatter 
    * 
    */
-  public XmlElementFormatter(XmlFormatter xmlFormatter) {
-	  this.xmlFormatter = xmlFormatter;
+  public XmlAttributeFormatter() {
   }
 
+  private String asAttributeName(FormElementModel m) {
+	if ( m.isMetadata() ) {
+		switch( m.getType()) {
+		case META_MODEL_VERSION:
+			return "version";
+		case META_UI_VERSION:
+			return "uiVersion";
+		case META_INSTANCE_ID:
+			return "instanceID";
+		case META_SUBMISSION_DATE:
+			return "submissionDate";
+		case META_IS_COMPLETE:
+			return "isComplete";
+		default:
+			throw new IllegalStateException("Unrecognized metadata");
+		}
+	} else {
+		return m.getElementName();
+	}
+  }
+  
   @Override
   public void formatUid(String uri, String propertyName, Row row) {
     // unneeded so unimplemented
@@ -64,12 +79,12 @@ public class XmlElementFormatter implements ElementFormatter {
   @Override
   public void formatBinary(BlobSubmissionType blobSubmission, FormElementModel element, String ordinalValue,
       Row row, CallingContext cc) throws ODKDatastoreException {
-	addToXmlValueToRow(blobSubmission.getUnrootedFilename(1), element.getElementName(), row);
+	addToXmlValueToRow(blobSubmission.getUnrootedFilename(0), asAttributeName(element), row);
   }
 
   @Override
   public void formatBoolean(Boolean bool, FormElementModel element, String ordinalValue, Row row) {
-    addToXmlValueToRow(bool, element.getElementName(), row);
+    addToXmlValueToRow(bool, asAttributeName(element), row);
 
   }
 
@@ -85,23 +100,18 @@ public class XmlElementFormatter implements ElementFormatter {
       first = false;
       b.append(s);
     }
-    String str = b.toString();
-    if ( str.length() > 0 ) {
-    	addToXmlValueToRow(str, element.getElementName(), row);
-    } else {
-    	addToXmlValueToRow(null, element.getElementName(), row);
-    }
+    addToXmlValueToRow(b.toString(), asAttributeName(element), row);
   }
 
   @Override
   public void formatDate(Date date, FormElementModel element, String ordinalValue, Row row) {
-    addToXmlValueToRow(date, element.getElementName(), row);
+    addToXmlValueToRow(date, asAttributeName(element), row);
 
   }
 
   @Override
   public void formatDateTime(Date date, FormElementModel element, String ordinalValue, Row row) {
-    addToXmlValueToRow(date, element.getElementName(), row);
+    addToXmlValueToRow(date, asAttributeName(element), row);
 
   }
 
@@ -112,16 +122,15 @@ public class XmlElementFormatter implements ElementFormatter {
       g.setTime(date);
       addToXmlValueToRow(
           String.format(FormatConsts.TIME_FORMAT_STRING, g.get(Calendar.HOUR_OF_DAY),
-              g.get(Calendar.MINUTE), g.get(Calendar.SECOND)), element.getElementName(), row);
+              g.get(Calendar.MINUTE), g.get(Calendar.SECOND)), asAttributeName(element), row);
     } else {
-      addToXmlValueToRow(null, element.getElementName(), row);
+      addToXmlValueToRow(null, asAttributeName(element), row);
     }
   }
 
   @Override
   public void formatDecimal(BigDecimal dub, FormElementModel element, String ordinalValue, Row row) {
-    addToXmlValueToRow(dub, element.getElementName(), row);
-
+    addToXmlValueToRow(dub, asAttributeName(element), row);
   }
 
   @Override
@@ -139,35 +148,31 @@ public class XmlElementFormatter implements ElementFormatter {
       } else {
         coordVal += BasicConsts.SPACE + "0.0";
       }
-      addToXmlValueToRow(coordVal, element.getElementName(), row);
+      addToXmlValueToRow(coordVal, asAttributeName(element), row);
     } else {
-      addToXmlValueToRow(null, element.getElementName(), row);
+      addToXmlValueToRow(null, asAttributeName(element), row);
     }
-
   }
 
   @Override
   public void formatLong(Long longInt, FormElementModel element, String ordinalValue, Row row) {
-    addToXmlValueToRow(longInt, element.getElementName(), row);
+    addToXmlValueToRow(longInt, asAttributeName(element), row);
   }
 
   @Override
   public void formatRepeats(SubmissionRepeat repeat, FormElementModel repeatElement, Row row,
       CallingContext cc) throws ODKDatastoreException {
-	  xmlFormatter.processRepeatedSubmssionSetsIntoRow(repeat.getSubmissionSets(), repeatElement, row, cc);
+    throw new IllegalStateException("unimplemented");
   }
 
   @Override
   public void formatString(String string, FormElementModel element, String ordinalValue, Row row) {
-    addToXmlValueToRow(string, element.getElementName(), row);
+    addToXmlValueToRow(string, asAttributeName(element), row);
   }
 
   private void addToXmlValueToRow(Object value, String propertyName, Row row) {
-    
     if (value != null) {
-      String xmlString = HtmlUtil.createBeginTag(propertyName);
-      xmlString += StringEscapeUtils.escapeXml(value.toString());
-      xmlString += HtmlUtil.createEndTag(propertyName);
+      String xmlString = propertyName + "=\"" + StringEscapeUtils.escapeXml(value.toString()) + "\"";
       row.addFormattedValue(xmlString);
     }
   }

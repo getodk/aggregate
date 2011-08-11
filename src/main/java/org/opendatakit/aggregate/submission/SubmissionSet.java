@@ -68,7 +68,6 @@ import org.opendatakit.common.web.CallingContext;
  * 
  */
 public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionElement {
-	protected static final String K_SL = "/";
 
 	/**
 	 * Submission set fields may be split across multiple backing tables due to
@@ -91,17 +90,17 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 	 * set in which this set is contained.
 	 */
 
-	protected final SubmissionSet enclosingSet;
+	private final SubmissionSet enclosingSet;
 
 	/**
 	 * key that uniquely identifies the submission
 	 */
-	protected final EntityKey key;
+	private final EntityKey key;
 
 	/**
 	 * The definition of this form (for access to lst).
 	 */
-	protected final FormDefinition formDefinition;
+	private final FormDefinition formDefinition;
 
 	/**
 	 * Identifier for this submission set (all other entries in dbEntities are
@@ -114,14 +113,14 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 	 * 
 	 * TODO: does this have special treatment if a repeat group?
 	 */
-	protected final EntityKey topLevelTableKey;
+	private final EntityKey topLevelTableKey;
 
 	/**
 	 * Map of propteryName to submission values that make up the data contained
 	 * in this submission set. OrdinalNumbering is determined by the
 	 * FormDataModel.getChildren() list.
 	 */
-	protected final Map<FormElementModel, SubmissionValue> elementsToValues = 
+	private final Map<FormElementModel, SubmissionValue> elementsToValues = 
 					new HashMap<FormElementModel, SubmissionValue>();
 
 	/**
@@ -475,7 +474,7 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 			b.append(" and @uiVersion=");
 			b.append(((TopLevelDynamicBase) getGroupBackingObject()).getUiVersion());
 			b.append("]");
-			b.append(K_SL);
+			b.append(BasicConsts.FORWARDSLASH);
 			b.append(group.getElementName());
 			b.append("[@key=");
 			b.append(getGroupBackingObject().getUri());
@@ -484,7 +483,7 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 			// it is derived from DynamicBase...
 			DynamicBase entity = (DynamicBase) getGroupBackingObject();
 			b.append(enclosingSet.getFullyQualifiedElementName(null));
-			b.append(K_SL);
+			b.append(BasicConsts.FORWARDSLASH);
 			b.append(group.getElementName());
 			b.append("[@ordinal=");
 			b.append(entity.getOrdinalNumber());
@@ -492,7 +491,7 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 		}
 
 		if (element != null) {
-			b.append(K_SL);
+			b.append(BasicConsts.FORWARDSLASH);
 			b.append(element.getGroupQualifiedElementName());
 		}
 
