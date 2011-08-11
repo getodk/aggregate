@@ -464,6 +464,12 @@ public class SubmissionParser {
 			SubmissionField<?> submissionElement, String value, CallingContext cc)
 			throws ODKDatastoreException {
 		
+		// value will either be a byte array (if not a multipart/form-data submission)
+		// or the filename of the attached media file
+		// or the name of the filed holding the media file contents.
+		// It will be null only if there is no associated file.
+		if ( value == null ) return true;
+		
 		// check to see if we received a multipart submission
 		if (submissionFormItems == null) {
 			// TODO: problem, only accept a base64 encoded in a direct XML post
