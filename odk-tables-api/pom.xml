@@ -9,7 +9,7 @@
   </parent>
   <groupId>org.opendatakit</groupId>
   <artifactId>odk-tables-api</artifactId>
-  <version>0.8</version>
+  <version>1.0</version>
   <packaging>jar</packaging>
   <name>API Jar for ODK Tables</name>
   <dependencies>
