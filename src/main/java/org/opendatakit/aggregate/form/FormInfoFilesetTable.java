@@ -42,7 +42,7 @@ public class FormInfoFilesetTable extends DynamicBase {
 	private static final DataField ROOT_ELEMENT_UI_VERSION = new DataField("ROOT_ELEMENT_UI_VERSION",
 			DataField.DataType.INTEGER, true);
 
-	private static final DataField IS_FILESET_COMPLETE = new DataField("IS_FILESET_COMPLETE",
+	private static final DataField IS_ENCRYPTED_FORM = new DataField("IS_ENCRYPTED_FORM",
 				DataField.DataType.BOOLEAN, true);
 
 	private static final DataField IS_DOWNLOAD_ALLOWED = new DataField("IS_DOWNLOAD_ALLOWED",
@@ -71,7 +71,7 @@ public class FormInfoFilesetTable extends DynamicBase {
 	// the relation fields...
 	public final DataField rootElementModelVersion;
 	public final DataField rootElementUiVersion;
-	public final DataField isFilesetComplete;
+	public final DataField isEncryptedForm;
  	public final DataField isDownloadAllowed;
 
 	public static final String URI_FORM_ID_VALUE_FORM_INFO_FILESET = "aggregate.opendatakit.org:FormInfoFileset";
@@ -85,7 +85,7 @@ public class FormInfoFilesetTable extends DynamicBase {
 		super(databaseSchema, TABLE_NAME);
 		fieldList.add(rootElementModelVersion = new DataField(ROOT_ELEMENT_MODEL_VERSION));
 		fieldList.add(rootElementUiVersion = new DataField(ROOT_ELEMENT_UI_VERSION));
-		fieldList.add(isFilesetComplete = new DataField(IS_FILESET_COMPLETE)); // not used...
+		fieldList.add(isEncryptedForm = new DataField(IS_ENCRYPTED_FORM));
 		fieldList.add(isDownloadAllowed = new DataField(IS_DOWNLOAD_ALLOWED));
 		
 		fieldValueMap.put(primaryKey, FormInfoFilesetTable.URI_FORM_ID_VALUE_FORM_INFO_FILESET);
@@ -101,7 +101,7 @@ public class FormInfoFilesetTable extends DynamicBase {
 		super(ref, user);
 		rootElementModelVersion = ref.rootElementModelVersion;
 		rootElementUiVersion = ref.rootElementUiVersion;
-		isFilesetComplete = ref.isFilesetComplete;
+		isEncryptedForm = ref.isEncryptedForm;
 		isDownloadAllowed = ref.isDownloadAllowed;
 	}
 

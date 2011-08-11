@@ -70,6 +70,7 @@ public class FormInfo {
 	static FormElementModel rootElementModelVersion = null;
 	static FormElementModel rootElementUiVersion = null;
 	static FormElementModel isDownloadAllowed = null;
+	static FormElementModel isEncryptedForm = null;
 	static FormElementModel xformDefinition = null;
 	static FormElementModel manifestFileset = null;
 	// FormInfoSubmissionTable element...
@@ -135,6 +136,7 @@ public class FormInfo {
 					rootElementModelVersion = FormDefinition.findElement(fiFilesetTable, f.rootElementModelVersion);
 					rootElementUiVersion = FormDefinition.findElement(fiFilesetTable, f.rootElementUiVersion);
 					isDownloadAllowed = FormDefinition.findElement(fiFilesetTable, f.isDownloadAllowed);
+					isEncryptedForm = FormDefinition.findElement(fiFilesetTable, f.isEncryptedForm);
 					xformDefinition = fiFilesetTable.findElementByName(FormInfoFilesetTable.ELEMENT_NAME_XFORM_DEFINITION);
 					manifestFileset = fiFilesetTable.findElementByName(FormInfoFilesetTable.ELEMENT_NAME_MANIFEST_FILESET);
 				}
@@ -248,7 +250,7 @@ public class FormInfo {
 	 * @throws ODKFormAlreadyExistsException 
 	 */
 	public static final boolean setXFormDefinition( Submission aFormDefinition, 
-			Long rootModelVersion, Long rootUiVersion, 
+			Long rootModelVersion, Long rootUiVersion, boolean isEncrypted,
 			String title, byte[] definition, CallingContext cc ) throws ODKDatastoreException, ODKFormAlreadyExistsException {
 
 		RepeatSubmissionType r = (RepeatSubmissionType) aFormDefinition.getElementValue(FormInfo.fiFilesetTable);
@@ -271,6 +273,7 @@ public class FormInfo {
 			((LongSubmissionType) sFileset.getElementValue(rootElementModelVersion)).setValueFromString(rootModelVersion == null ? null : rootModelVersion.toString());
 			((LongSubmissionType) sFileset.getElementValue(rootElementUiVersion)).setValueFromString(rootUiVersion == null ? null : rootUiVersion.toString());
 			((BooleanSubmissionType) sFileset.getElementValue(isDownloadAllowed)).setValueFromString("yes");
+			((BooleanSubmissionType) sFileset.getElementValue(isEncryptedForm)).setValueFromString(isEncrypted ? "yes" : "no");
 			r.addSubmissionSet(sFileset);
 			matchingSet = sFileset;
 	    }
@@ -314,13 +317,7 @@ public class FormInfo {
 	    }
 	    
 	    if ( matchingSet == null ) {
-	    	// create a matching set...
-			SubmissionSet sFileset = new SubmissionSet(aFormDefinition, filesets.size()+1L, fiFilesetTable, formDefinition, aFormDefinition.getKey(), cc);
-			((LongSubmissionType) sFileset.getElementValue(rootElementModelVersion)).setValueFromString(rootModelVersion == null ? null : rootModelVersion.toString());
-			((LongSubmissionType) sFileset.getElementValue(rootElementUiVersion)).setValueFromString(rootUiVersion == null ? null : rootUiVersion.toString());
-			((BooleanSubmissionType) sFileset.getElementValue(isDownloadAllowed)).setValueFromString("yes");
-			r.addSubmissionSet(sFileset);
-			matchingSet = sFileset;
+	    	throw new ODKDatastoreException("did not find matching FileSet for media file");
 	    }
 
 	    boolean matchingFiles = true;

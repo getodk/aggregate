@@ -17,9 +17,12 @@
 
 package org.opendatakit.aggregate.submission;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
+import org.opendatakit.aggregate.constants.common.FormElementNamespace;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.datamodel.TopLevelDynamicBase;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
@@ -109,8 +112,8 @@ public class Submission extends SubmissionSet {
 	 * Format the submission set for output
 	 * 
 	 * @param propertyNames
-	 *            if null includes all properties, otherwise will only include
-	 *            property listed
+	 *            if null includes all properties (METADATA then VALUES), otherwise will only include
+	 *            the properties listed
 	 * @param elemFormatter
 	 *            formatter to use to properly format the values
 	 * @throws ODKDatastoreException
@@ -118,18 +121,75 @@ public class Submission extends SubmissionSet {
 	@Override
 	public Row getFormattedValuesAsRow(List<FormElementModel> propertyNames,
 			ElementFormatter elemFormatter, boolean includeParentUid, CallingContext cc) throws ODKDatastoreException {
-
 		Row row = new Row(constructSubmissionKey(null));
 		if ( propertyNames == null ) {
-			// we are a Submission -- emit the creation date and id...
-		   FormElementModel metaId = formDefinition.getElementByName(FormElementModel.Metadata.META_INSTANCE_ID.toString());
-			elemFormatter.formatString(getKey().getKey(), metaId, BasicConsts.EMPTY_STRING, row);
-			FormElementModel metaModelVersion = formDefinition.getElementByName(FormElementModel.Metadata.META_MODEL_VERSION.toString());
-			elemFormatter.formatLong(getModelVersion(), metaModelVersion, BasicConsts.EMPTY_STRING, row);
-			FormElementModel metaUIVersion = formDefinition.getElementByName(FormElementModel.Metadata.META_UI_VERSION.toString());
-			elemFormatter.formatLong(getUiVersion(), metaUIVersion, BasicConsts.EMPTY_STRING, row);
-			FormElementModel metaSubmissionDate = formDefinition.getElementByName(FormElementModel.Metadata.META_SUBMISSION_DATE.toString());
-			elemFormatter.formatDateTime(getCreationDate(), metaSubmissionDate, BasicConsts.EMPTY_STRING, row);
+			List<FormElementNamespace> namespaces = new ArrayList<FormElementNamespace>();
+			namespaces.add(FormElementNamespace.METADATA);
+			namespaces.add(FormElementNamespace.VALUES);
+			getFormattedNamespaceValuesForRow(row, namespaces, elemFormatter, includeParentUid, cc);
+		} else {
+			getFormattedValuesForRow(row, propertyNames, elemFormatter, includeParentUid, cc);
+		}
+		return row;
+	}
+
+	/**
+	 * This has 2 modes of operation.
+	 * (1) If propertyNames is null, then the types list of FormElementNamespace values is 
+	 * used to render the output.
+	 * (2) Otherwise, this works as a two-stage filter. The types list of FormElementNamespace
+	 * values is a filter against the list of propertyNames specified.  So if you have an 
+	 * arbitrary list of elements and want only the metadata elements to be reported, you
+	 * would pass [ METADATA ] in the types list.  The resulting subset is then rendered
+	 * (and the resulting row might have no columns).
+	 *  
+	 * @param types -- list of e.g., (METADATA, VALUES) to be rendered.
+	 * @param propertyNames -- joint subset of property names to be rendered.
+	 * @param elemFormatter 
+	 * @param includeParentUid
+	 * @param cc
+	 * @return rendered Row object
+	 * @throws ODKDatastoreException
+	 */
+	public Row getFormattedValuesAsRow(List<FormElementNamespace> types, List<FormElementModel> propertyNames,
+			ElementFormatter elemFormatter, boolean includeParentUid, CallingContext cc) throws ODKDatastoreException {
+
+		if ( propertyNames == null ) {
+			Row row = new Row(constructSubmissionKey(null));
+			getFormattedNamespaceValuesForRow(row, types, elemFormatter, includeParentUid, cc);
+			return row;
+		}
+		
+		// otherwise, apply filtering...
+		boolean hasMeta = false;
+		boolean hasValues = false;
+		for ( FormElementNamespace type : types ) {
+			if ( type == FormElementNamespace.METADATA ) {
+				hasMeta = true;
+			} else if ( type == FormElementNamespace.VALUES ) {
+				hasValues = true;
+			} else {
+				throw new IllegalStateException("unexpected FormElementNamespace value " + type.toString());
+			}
+		}
+		
+		List<FormElementModel> reducedProperties = new ArrayList<FormElementModel>();
+		for ( FormElementModel m : propertyNames ) {
+			if ( m.isMetadata() && hasMeta ) {
+				reducedProperties.add(m);
+			} else if ( !m.isMetadata() && hasValues ) {
+				reducedProperties.add(m);
+			}
+		}
+		
+		return getFormattedValuesAsRow(reducedProperties,	elemFormatter, includeParentUid, cc);
+	}
+	
+	private void getFormattedValuesForRow(Row row, List<FormElementModel> propertyNames,
+			ElementFormatter elemFormatter, boolean includeParentUid, CallingContext cc) throws ODKDatastoreException {
+		if ( propertyNames == null ) {
+			throw new IllegalStateException("propertyNames cannot be null");
+		} else if ( propertyNames.size() == 1 && propertyNames.get(0).equals(group) ) {
 			// SubmissionSet handles submission-specific elements...
 			List<SubmissionValue> values = getSubmissionValues();
 			for (SubmissionValue value : values) {
@@ -143,10 +203,6 @@ public class Submission extends SubmissionSet {
 						elemFormatter.formatString(getKey().getKey(),
 								element, BasicConsts.EMPTY_STRING, row);
 						break;
-					case META_SUBMISSION_DATE:
-						elemFormatter.formatDateTime(getCreationDate(), 
-								element, BasicConsts.EMPTY_STRING, row);
-						break;
 					case META_UI_VERSION:
 						elemFormatter.formatLong(getUiVersion(), 
 								element, BasicConsts.EMPTY_STRING, row);
@@ -155,13 +211,57 @@ public class Submission extends SubmissionSet {
 						elemFormatter.formatLong(getModelVersion(), 
 								element, BasicConsts.EMPTY_STRING, row);
 						break;
+					case META_SUBMISSION_DATE:
+						elemFormatter.formatDateTime(getSubmissionDate(), 
+								element, BasicConsts.EMPTY_STRING, row);
+						break;
+					case META_IS_COMPLETE:
+						elemFormatter.formatBoolean(isComplete(), 
+								element, BasicConsts.EMPTY_STRING, row);
+						break;
 					}
 				} else {
-					populateFormattedValueInRow(row, element, elemFormatter, cc);
+					SubmissionValue value = getElementValue(element);
+					if (value != null) {
+						value.formatValue(elemFormatter, row, BasicConsts.EMPTY_STRING, cc);
+					}
 				}
 			}
 		}
-		return row;
+	}
+	
+	/**
+	 * Given the list of FormElementNamespaces to render, this renders the namespaces in the order given.
+	 * 
+	 * @param row
+	 * @param types
+	 * @param elemFormatter
+	 * @param includeParentUid
+	 * @param cc
+	 * @throws ODKDatastoreException
+	 */
+	public void getFormattedNamespaceValuesForRow(Row row, List<FormElementNamespace> types,
+			ElementFormatter elemFormatter, boolean includeParentUid, CallingContext cc) throws ODKDatastoreException {
+		List<FormElementModel> elementList = new ArrayList<FormElementModel>();
+		for ( FormElementNamespace type : types ) {
+			if ( type == FormElementNamespace.METADATA ) {
+				// we are a Submission -- emit the creation date and id...
+				FormElementModel metaId = getFormDefinition().getElementByName(FormElementModel.Metadata.META_INSTANCE_ID.toString());
+				elementList.add(metaId);
+				FormElementModel metaModelVersion = getFormDefinition().getElementByName(FormElementModel.Metadata.META_MODEL_VERSION.toString());
+				elementList.add(metaModelVersion);
+				FormElementModel metaUIVersion = getFormDefinition().getElementByName(FormElementModel.Metadata.META_UI_VERSION.toString());
+				elementList.add(metaUIVersion);
+				FormElementModel metaSubmissionDate = getFormDefinition().getElementByName(FormElementModel.Metadata.META_SUBMISSION_DATE.toString());
+				elementList.add(metaSubmissionDate);
+				FormElementModel metaIsComplete = getFormDefinition().getElementByName(FormElementModel.Metadata.META_IS_COMPLETE.toString());
+				elementList.add(metaIsComplete);
+			} else if ( type == FormElementNamespace.VALUES ) {
+				// this singleton value is treated specially above...
+				elementList.add(group);
+			}
+		}
+		getFormattedValuesForRow(row, elementList, elemFormatter, includeParentUid, cc);
 	}
 
 	public SubmissionElement resolveSubmissionKey(List<SubmissionKeyPart> parts) {
@@ -170,7 +270,7 @@ public class Submission extends SubmissionSet {
 			throw new IllegalArgumentException("submission key is empty");
 		}
 
-		if ( !parts.get(0).getElementName().equals(formDefinition.getFormId())) {
+		if ( !parts.get(0).getElementName().equals(getFormDefinition().getFormId())) {
 			throw new IllegalArgumentException(
 					"formId of submissionKey does not match FormId");
 		}

@@ -78,7 +78,43 @@ public class FormParserForJavaRosa {
   private static final String NAMESPACE_ODK = "http://www.opendatakit.org/xforms";
   
   static Logger log = Logger.getLogger(FormParserForJavaRosa.class.getName());
-	
+  private static final String BASE64_RSA_PUBLIC_KEY = "base64RsaPublicKey";
+  private static final String ENCRYPTED_FORM_DEFINITION = "<?xml version=\"1.0\"?>" +
+  	"<h:html xmlns=\"http://www.w3.org/2002/xforms\" xmlns:h=\"http://www.w3.org/1999/xhtml\" xmlns:ev=\"http://www.w3.org/2001/xml-events\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:jr=\"http://openrosa.org/javarosa\">" +
+  	"<h:head>" +
+		"<h:title>Encrypted Form</h:title>" +
+		"<model>" +
+			"<instance>" +
+				"<data id=\"encrypted\" >" +
+					"<meta>" +
+						"<timeStart/>" +
+						"<timeEnd/>" +
+						"<instanceID/>" +
+					"</meta>" +
+					"<encryptedXmlFile/>" +
+					"<media>" +
+						"<file/>" +
+					"</media>" +
+				"</data>" +
+			"</instance>" +
+			"<bind nodeset=\"/data/meta/timeStart\" type=\"datetime\"/>" +
+			"<bind nodeset=\"/data/meta/timeEnd\" type=\"datetime\"/>" +
+			"<bind nodeset=\"/data/meta/instanceID\" type=\"string\"/>" +
+			"<bind nodeset=\"/data/encryptedXmlFile\" type=\"binary\"/>" +
+			"<bind nodeset=\"/data/media/file\" type=\"binary\"/>" +
+		"</model>" +
+	"</h:head>" +
+	"<h:body>" +
+		"<input ref=\"meta/timeStart\"><label>start</label></input>" +
+		"<input ref=\"meta/timeEnd\"><label>end</label></input>" +
+		"<input ref=\"meta/instanceID\"><label>InstanceID</label></input>" +
+		"<upload ref=\"encryptedXmlFile\" mediatype=\"image/*\"><label>submission</label></upload>" +
+		"<repeat nodeset=\"/data/media\">" +
+			"<upload ref=\"file\" mediatype=\"image/*\"><label>media file</label></upload>" +
+		"</repeat>" +
+	"</h:body>" +
+	"</h:html>";
+  
   private static class XFormBindHandler implements IXFormBindHandler {
 
 	private FormParserForJavaRosa active = null;
@@ -122,13 +158,12 @@ public class FormParserForJavaRosa {
   }
 
   private static synchronized final FormDef parseFormDefinition(String xml, FormParserForJavaRosa parser) throws ODKIncompleteSubmissionData {
-	    String strippedXML = JRHelperUtil.removeNonJavaRosaCompliantTags(xml);
 
 	    handler.setFormParserForJavaRosa(parser);
 	    
 	    FormDef formDef = null;
 	    try {
-	      formDef = XFormUtils.getFormFromInputStream(new ByteArrayInputStream(strippedXML.getBytes()));
+	      formDef = XFormUtils.getFormFromInputStream(new ByteArrayInputStream(xml.getBytes()));
 	    } catch (Exception e) {
 	      throw new ODKIncompleteSubmissionData(e, Reason.BAD_JR_PARSE);
 	    } finally {
@@ -281,21 +316,72 @@ public class FormParserForJavaRosa {
 	            Reason.ID_MISSING);
     	}
     }
+    
+    // obtain form title either from the xform itself or from user entry
+    String title = formDef.getTitle();
+    if (title == null) {
+      if (formName == null) {
+        throw new ODKIncompleteSubmissionData(Reason.TITLE_MISSING);
+      } else {
+        title = formName;
+      }
+    }
+    // clean illegal characters from title
+    title = title.replace(BasicConsts.FORWARDSLASH, BasicConsts.EMPTY_STRING);
 
+    TreeElement trueSubmissionElement;
+    boolean isEncryptedForm = false;
+    boolean isNotUploadableForm = false;
     // Determine the information about the submission...
     SubmissionProfile p = formDef.getSubmissionProfile();
     if ( p == null || p.getRef() == null ) {
-    	submissionElement = rootElement;
+    	trueSubmissionElement = rootElement;
     	submissionElementDefn = rootElementDefn;
     } else {
-    	submissionElement = formDef.getInstance().resolveReference(p.getRef());
+    	trueSubmissionElement = formDef.getInstance().resolveReference(p.getRef());
     	try {
-    		submissionElementDefn = extractFormParameters( submissionElement, null );
+    		submissionElementDefn = extractFormParameters( trueSubmissionElement, null );
     	} catch ( Exception e ) {
     		throw new ODKIncompleteSubmissionData(
     	            "The non-root submission element in the data model does not have an id attribute.  Add an id=\"your.domain.org:formId\" attribute to the submission element of your form.",
     	            Reason.ID_MISSING);
     	}
+    }
+
+    if ( p != null ) {
+        String altUrl = p.getAction();
+        isNotUploadableForm = ( altUrl == null || !altUrl.startsWith("http") 
+        		|| p.getMethod() == null || !p.getMethod().equals("form-data-post"));
+    }
+
+    if ( isNotUploadableForm ) {
+    	log.info("Form " + submissionElementDefn.formId + 
+    	" is not uploadable (submission method is not form-data-post or does not have an http: or https: url. ");
+    }
+    
+    String publicKey = null;
+    if ( p != null ) {
+    	// publicKey = p.getAttribute(BASE64_RSA_PUBLIC_KEY);
+    }
+    
+    // now see if we are encrypted -- if so, fake the submission element to be 
+    // the parsing of the ENCRYPTED_FORM_DEFINITION
+    if ( publicKey == null || publicKey.length() == 0 ) {
+    	// not encrypted...
+    	submissionElement = trueSubmissionElement;
+    } else {
+    	isEncryptedForm = true;
+    	// encrypted -- use the encrypted form template (above) to define the storage for this form.
+        formDef = parseFormDefinition(ENCRYPTED_FORM_DEFINITION, this);
+
+        if (formDef == null) {
+            throw new ODKIncompleteSubmissionData("Javarosa failed to construct Encrypted FormDef!", Reason.BAD_JR_PARSE);
+        }
+        dataModel = formDef.getInstance();
+        if ( dataModel == null ) {
+        	throw new ODKIncompleteSubmissionData("Javarosa failed to construct Encrypted FormInstance!", Reason.BAD_JR_PARSE);
+        }
+        submissionElement = dataModel.getRoot();
     }
 
     // Construct the base table prefix candidate from the submissionElementDefn.formId.
@@ -318,21 +404,9 @@ public class FormParserForJavaRosa {
     persistenceStoreFormId = persistenceStoreFormId.replace(ParserConsts.FORWARD_SLASH_SUBSTITUTION, "_");
     persistenceStoreFormId = persistenceStoreFormId.replaceAll("[^\\p{Digit}\\p{Lu}\\p{Ll}\\p{Lo}]", "_");
     persistenceStoreFormId = persistenceStoreFormId.replaceAll("^_*","");
-    
-    // obtain form title either from the xform itself or from user entry
-    String title = formDef.getTitle();
-    if (title == null) {
-      if (formName == null) {
-        throw new ODKIncompleteSubmissionData(Reason.TITLE_MISSING);
-      } else {
-        title = formName;
-      }
-    }
-    // clean illegal characters from title
-    title = title.replace(BasicConsts.FORWARDSLASH, BasicConsts.EMPTY_STRING);
 
     initHelper(uploadedFormItems, formXmlData, inputXml,
-    		  title, persistenceStoreFormId, formDef, cc);
+    		  title, persistenceStoreFormId, isEncryptedForm, formDef, cc);
   }
   
   enum AuxType { NONE, BC_REF, REF_BLOB, GEO_LAT, GEO_LNG, GEO_ALT, GEO_ACC, LONG_STRING_REF, REF_TEXT };
@@ -355,7 +429,7 @@ public class FormParserForJavaRosa {
   }
   
   private void initHelper(MultiPartFormData uploadedFormItems, MultiPartFormItem xformXmlData,  
-		  String inputXml, String title, String persistenceStoreFormId, 
+		  String inputXml, String title, String persistenceStoreFormId, boolean isEncryptedForm, 
 		  FormDef formDef, CallingContext cc) throws ODKDatastoreException, ODKFormAlreadyExistsException, ODKParseException {
     
     /////////////////
@@ -372,7 +446,7 @@ public class FormParserForJavaRosa {
 		throw new IllegalStateException("not reachable");
 	}
     boolean sameXForm = FormInfo.setXFormDefinition( formInfo, 
-    					rootElementDefn.modelVersion, rootElementDefn.uiVersion,
+    					rootElementDefn.modelVersion, rootElementDefn.uiVersion, isEncryptedForm,
     					title, xmlBytes, cc );
     
     // we will have thrown an exception above if the form file already exists and
@@ -1192,7 +1266,7 @@ public class FormParserForJavaRosa {
       break;
     }
   }
-
+  
   public String getTreeElementPath(TreeElement e) {
 	  if ( e ==  null ) return null;
 	  String s = getTreeElementPath(e.getParent());

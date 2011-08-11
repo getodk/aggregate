@@ -26,6 +26,17 @@ package org.opendatakit.common.persistence;
  */
 public class PersistConsts {
 
+	/**
+	 * This is the delay needed in streaming and briefcase applications
+	 * to ensure that we get all data forwarded to the remote server.
+	 * It is the maximum drift of the various webserver clocks relative
+	 * to each other and the database server plus the time it takes the 
+	 * datastore to reach global consistency.  We cannot stream records
+	 * younger than this many seconds and ensure that all data will be 
+	 * discovered and reported.  
+	 */
+  public static final long MAX_SETTLE_MILLISECONDS = 3000L; // 3 seconds...
+
    /**
    * The shortest interval for which all datetime values are
    * preserved across all platforms.  MySql's TIMESTAMP

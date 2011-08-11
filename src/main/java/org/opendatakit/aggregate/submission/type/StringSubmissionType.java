@@ -17,13 +17,16 @@
 
 package org.opendatakit.aggregate.submission.type;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import org.opendatakit.aggregate.datamodel.FormDataModel;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.form.FormDefinition;
 import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.format.element.ElementFormatter;
 import org.opendatakit.common.datamodel.DynamicCommonFieldsBase;
+import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.EntityKey;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
@@ -45,6 +48,7 @@ public class StringSubmissionType extends SubmissionFieldBase<String> {
 
   private boolean isChanged = false;
   private boolean isLongString = false;
+  private boolean wasLongString = false;
   private String fullValue = null;
   private final FormDefinition formDefinition;
   private final EntityKey topLevelTableKey;
@@ -92,6 +96,7 @@ public class StringSubmissionType extends SubmissionFieldBase<String> {
      isChanged = true;
      fullValue = value;
      // update field in the backing object
+     wasLongString = isLongString;
      isLongString = !backingObject.setStringField(element.getFormDataModel().getBackingKey(), value);
      // we'll persist the fullValue in the persist() method...
   }
@@ -100,15 +105,24 @@ public class StringSubmissionType extends SubmissionFieldBase<String> {
   public void getValueFromEntity(CallingContext cc)
         throws ODKDatastoreException {
      
-     String value = (String) backingObject.getStringField(element.getFormDataModel().getBackingKey());
-     if (element.getFormDataModel().isPossibleLongStringField(backingObject, element.getFormDataModel().getBackingKey())) {
-        String longValue = formDefinition.getLongString(backingObject.getUri(), element.getFormDataModel().getUri(), topLevelTableKey, cc);
-        if ( longValue != null ) {
-           value = longValue;
-           isLongString = true;
-        }
-     }
-     fullValue = value;
+	 FormDataModel model = element.getFormDataModel();
+	 DataField f = model.getBackingKey();
+     String value = backingObject.getStringField(f);
+	 if ( value != null ) {
+		int outcome = f.getMaxCharLen().compareTo(Long.valueOf(value.length()));
+		if ( outcome == 0 ) {
+			// this may be extended...
+	        String longValue = formDefinition.getLongString(backingObject.getUri(), model.getUri(), topLevelTableKey, cc);
+	        if ( longValue != null && longValue.length() != 0 ) {
+	           value = longValue;
+	           isLongString = true;
+	        }
+		} else if ( outcome < 0 ) {
+			throw new IllegalStateException("Unexpected -- stored value is longer than max char len! " +
+					model.getPersistAsSchema() + " " + model.getPersistAsTable() + " " + f.getName());
+		}
+	}
+     this.fullValue = value;
      isChanged = false;
   }
   
@@ -132,15 +146,24 @@ public class StringSubmissionType extends SubmissionFieldBase<String> {
 
   @Override
   public void recursivelyAddEntityKeys(List<EntityKey> keyList, CallingContext cc) throws ODKDatastoreException {
-     if ( isLongString ) {
+     if ( isLongString || wasLongString ) {
         formDefinition.recursivelyAddLongStringTextEntityKeys(keyList, backingObject.getUri(), element.getFormDataModel().getUri(), topLevelTableKey, cc);
      }
   }
 
   @Override
   public void persist(CallingContext cc) throws ODKEntityPersistException {
-     if ( isChanged && isLongString ) {
+     if ( isChanged && (isLongString || wasLongString) ) {
+    	 List<EntityKey> keyList = new ArrayList<EntityKey>();
+    	 try {
+			recursivelyAddEntityKeys( keyList, cc);
+			cc.getDatastore().deleteEntities(keyList, cc.getCurrentUser());
+			wasLongString = false;
+		} catch (ODKDatastoreException e) {
+			throw new ODKEntityPersistException(e);
+		}
         formDefinition.setLongString(fullValue, backingObject.getUri(), element.getFormDataModel().getUri(), topLevelTableKey, cc);
      }
+     isChanged = false;
   }
 }
