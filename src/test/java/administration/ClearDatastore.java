@@ -22,6 +22,10 @@ import com.google.appengine.tools.remoteapi.RemoteApiOptions;
  * 
  * As far as I can tell you have to re-deploy the app after you run this.
  * 
+ * To make the compile errors go away add a reference to
+ * src/main/libs/appengine-remote-api.jar. This could probably be added to the
+ * pom.xml eventually, but I didn't want to break everyone.
+ * 
  * @author the.dylan.price@gmail.com
  * 
  */
@@ -90,8 +94,7 @@ public class ClearDatastore
                         if (kind.startsWith("__"))
                         {
                             offset++;
-                        }
-                        else
+                        } else
                         {
                             keys.add(entity.getKey());
                         }
