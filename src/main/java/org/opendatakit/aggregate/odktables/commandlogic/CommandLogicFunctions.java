@@ -1,11 +1,16 @@
 package org.opendatakit.aggregate.odktables.commandlogic;
 
+import java.util.Collection;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import org.opendatakit.aggregate.odktables.command.ODKTablesTaskLockType;
 import org.opendatakit.aggregate.odktables.entity.InternalTableEntry;
+import org.opendatakit.common.ermodel.simple.typedentity.TypedEntity;
+import org.opendatakit.common.ermodel.simple.typedentity.TypedEntityRelation;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.TaskLock;
+import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.security.User;
@@ -31,7 +36,7 @@ public class CommandLogicFunctions
         try
         {
             if (taskLock.obtainLock(lockId, aggregateTableIdentifier,
-                    ODKTablesTaskLockType.INCREMENT_MODIFICATION_NUMBER))
+                    ODKTablesTaskLockType.UPDATE_MODIFICATION_NUMBER))
             {
                 taskLock = null;
                 entry.setModificationNumber(newModificationNumber);
@@ -43,7 +48,7 @@ public class CommandLogicFunctions
             for (int i = 0; i < 10; i++)
             {
                 if (taskLock.releaseLock(lockId, aggregateTableIdentifier,
-                        ODKTablesTaskLockType.INCREMENT_MODIFICATION_NUMBER))
+                        ODKTablesTaskLockType.UPDATE_MODIFICATION_NUMBER))
                     break;
                 try
                 {
@@ -56,5 +61,99 @@ public class CommandLogicFunctions
             }
         }
         return newModificationNumber;
+    }
+
+    public static boolean deleteEntitiesAndRelation(
+            Collection<TypedEntity> entities,
+            TypedEntityRelation<? extends TypedEntity> relation)
+    {
+        boolean deletedEntities = deleteEntities(entities);
+        if (deletedEntities)
+        {
+            try
+            {
+                relation.dropRelation();
+            } catch (ODKDatastoreException e)
+            {
+                try
+                {
+                    // try again
+                    relation.dropRelation();
+                } catch (ODKDatastoreException e1)
+                {
+                    Logger.getLogger(
+                            CommandLogicFunctions.class.getSimpleName())
+                            .severe("Was not able to drop relation: "
+                                    + relation);
+                    return false;
+                }
+            }
+            return true;
+        } else
+        {
+            return false;
+        }
+    }
+
+    public static boolean deleteEntities(Collection<TypedEntity> entities)
+    {
+        for (TypedEntity entity : entities)
+        {
+            if (!deleteEntity(entity))
+                return false;
+        }
+        return true;
+    }
+
+    private static boolean deleteEntity(TypedEntity entity)
+    {
+        try
+        {
+            entity.delete();
+        } catch (ODKDatastoreException e)
+        {
+            try
+            {
+                // try again
+                entity.delete();
+            } catch (ODKDatastoreException e2)
+            {
+                Logger.getLogger(CommandLogicFunctions.class.getSimpleName())
+                        .severe("Was not able to delete entity: " + entity);
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public static boolean saveEntities(Collection<TypedEntity> entities)
+    {
+        for (TypedEntity entity : entities)
+        {
+            if (!saveEntity(entity))
+                return false;
+        }
+        return true;
+    }
+
+    private static boolean saveEntity(TypedEntity entity)
+    {
+        try
+        {
+            entity.save();
+        } catch (ODKEntityPersistException e)
+        {
+            try
+            {
+                // try again
+                entity.save();
+            } catch (ODKEntityPersistException e1)
+            {
+                Logger.getLogger(CommandLogicFunctions.class.getSimpleName())
+                        .severe("Was not able to save entity: " + entity);
+                return false;
+            }
+        }
+        return true;
     }
 }

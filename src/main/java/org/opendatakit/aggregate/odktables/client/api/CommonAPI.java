@@ -79,11 +79,11 @@ public class CommonAPI
     {
         Check.notNull(aggregateURI, "aggregateURI");
         Check.notNullOrEmpty(userID, "userID");
-        
+
         this.aggregateURI = aggregateURI;
         this.requestingUserID = userID;
         this.client = new DefaultHttpClient();
-        
+
         checkUserExists(userID);
     }
 
@@ -254,8 +254,8 @@ public class CommonAPI
      * 
      * @param aggregateUserIdentifier
      *            the unique public identifier of the user
-     * @param aggregateTableIdentifier
-     *            the unique identifier of the table
+     * @param tableID
+     *            the caller's identifier for the table
      * @param read
      *            true if the user is allowed to read from the table
      * @param write
@@ -278,15 +278,16 @@ public class CommonAPI
      *             if there is a problem communicating with the Aggregate server
      */
     public void setTablePermissions(String aggregateUserIdentifier,
-            String aggregateTableIdentifier, boolean read, boolean write,
+            String tableID, boolean read, boolean write,
+
             boolean delete) throws ClientProtocolException, IOException,
             PermissionDeniedException, UserDoesNotExistException,
             TableDoesNotExistException, AggregateInternalErrorException
 
     {
         SetTablePermissions setTablePermissions = new SetTablePermissions(
-                requestingUserID, aggregateTableIdentifier,
-                aggregateUserIdentifier, read, write, delete);
+                requestingUserID, tableID, aggregateUserIdentifier, read,
+                write, delete);
         SetTablePermissionsResult result = sendCommand(setTablePermissions,
                 SetTablePermissionsResult.class);
         result.checkResult();

@@ -1,5 +1,6 @@
 package org.opendatakit.aggregate.odktables.commandlogic.common;
 
+import org.opendatakit.aggregate.odktables.client.exception.AggregateInternalErrorException;
 import org.opendatakit.aggregate.odktables.command.common.CheckUserExists;
 import org.opendatakit.aggregate.odktables.commandlogic.CommandLogic;
 import org.opendatakit.aggregate.odktables.commandresult.common.CheckUserExistsResult;
@@ -26,13 +27,21 @@ public class CheckUserExistsLogic extends CommandLogic<CheckUserExists>
 
     @Override
     public CheckUserExistsResult execute(CallingContext cc)
-            throws ODKDatastoreException
+            throws AggregateInternalErrorException
     {
-        Users users = Users.getInstance(cc);
-        
-        String userID = checkUserExists.getUserID();
-        boolean userExists = users.query().equal(Users.USER_ID, userID)
-                .exists();
+        boolean userExists; 
+        try
+        {
+            Users users = Users.getInstance(cc);
+            
+            String userID = checkUserExists.getUserID();
+            userExists = users.query().equal(Users.USER_ID, userID)
+                    .exists();
+        }
+        catch (ODKDatastoreException e)
+        {
+            throw new AggregateInternalErrorException(e.getMessage());
+        }
 
         return CheckUserExistsResult.success(userExists);
     }

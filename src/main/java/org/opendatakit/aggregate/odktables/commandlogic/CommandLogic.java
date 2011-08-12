@@ -3,8 +3,8 @@ package org.opendatakit.aggregate.odktables.commandlogic;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.opendatakit.aggregate.odktables.client.exception.AggregateInternalErrorException;
 import org.opendatakit.aggregate.odktables.command.Command;
-import org.opendatakit.aggregate.odktables.command.CommandConverter;
 import org.opendatakit.aggregate.odktables.command.common.CheckUserExists;
 import org.opendatakit.aggregate.odktables.command.common.CreateUser;
 import org.opendatakit.aggregate.odktables.command.common.DeleteUser;
@@ -44,8 +44,7 @@ import org.opendatakit.aggregate.odktables.commandlogic.synchronize.RemoveTableS
 import org.opendatakit.aggregate.odktables.commandlogic.synchronize.SynchronizeLogic;
 import org.opendatakit.aggregate.odktables.commandlogic.synchronize.UpdateSynchronizedRowsLogic;
 import org.opendatakit.aggregate.odktables.commandresult.CommandResult;
-import org.opendatakit.common.persistence.exception.ODKDatastoreException;
-import org.opendatakit.common.persistence.exception.ODKTaskLockException;
+import org.opendatakit.aggregate.odktables.exception.SnafuException;
 import org.opendatakit.common.web.CallingContext;
 
 /**
@@ -86,13 +85,17 @@ public abstract class CommandLogic<T extends Command>
      * 
      * @param cc
      *            the CallingContext of this Aggregate instance
-     * @throws ODKDatastoreException
-     *             if there was an exception from the datastore which this
-     *             CommandLogic could not handle
+     * @throws AggregateInternalErrorException
+     *             if there was an internal error which the CommandLogic could
+     *             not handle, but should generally be recoverable on the client
+     *             side.
+     * @throws SnafuException
+     *             if there was an unrecoverable error which likely left the
+     *             datastore in a corrupted state.
      * @return the result of executing the command
      */
     public abstract CommandResult<T> execute(CallingContext cc)
-            throws ODKDatastoreException, ODKTaskLockException;
+            throws AggregateInternalErrorException, SnafuException;
 
     /**
      * There should be one CommandType for each implementation of the Command

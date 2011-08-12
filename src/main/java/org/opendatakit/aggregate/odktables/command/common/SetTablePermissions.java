@@ -12,7 +12,7 @@ public class SetTablePermissions implements Command
 {
     private static final String path = "/common/setTablePermissions";
 
-    private final String aggregateTableIdentifier;
+    private final String tableID;
     private final String aggregateUserIdentifier;
     private final boolean read;
     private final boolean write;
@@ -25,7 +25,7 @@ public class SetTablePermissions implements Command
     @SuppressWarnings("unused")
     private SetTablePermissions()
     {
-        this.aggregateTableIdentifier = null;
+        this.tableID = null;
         this.aggregateUserIdentifier = null;
         this.read = false;
         this.write = false;
@@ -38,19 +38,19 @@ public class SetTablePermissions implements Command
      * Constructs a new SetTablePermissions.
      */
     public SetTablePermissions(String requestingUserID,
-            String aggregateTableIdentifier, String aggregateUserIdentifier,
+            String tableID, String aggregateUserIdentifier,
             boolean read, boolean write, boolean delete)
     {
 
-        Check.notNullOrEmpty(aggregateTableIdentifier,
-                "aggregateTableIdentifier");
+        Check.notNullOrEmpty(tableID,
+                "tableID");
         Check.notNullOrEmpty(aggregateUserIdentifier, "aggregateUserIdentifier");
         Check.notNull(read, "read");
         Check.notNull(write, "write");
         Check.notNullOrEmpty(requestingUserID, "requestingUserID");
         Check.notNull(delete, "delete");
 
-        this.aggregateTableIdentifier = aggregateTableIdentifier;
+        this.tableID = tableID;
         this.aggregateUserIdentifier = aggregateUserIdentifier;
         this.read = read;
         this.write = write;
@@ -59,11 +59,11 @@ public class SetTablePermissions implements Command
     }
 
     /**
-     * @return the aggregateTableIdentifier
+     * @return the tableID
      */
-    public String getAggregateTableIdentifier()
+    public String getTableID()
     {
-        return this.aggregateTableIdentifier;
+        return this.tableID;
     }
 
     /**
@@ -110,10 +110,10 @@ public class SetTablePermissions implements Command
     public String toString()
     {
         return String.format("SetTablePermissions: "
-                + "aggregateTableIdentifier=%s "
+                + "tableID=%s "
                 + "aggregateUserIdentifier=%s " + "read=%s " + "write=%s "
                 + "requestingUserID=%s " + "delete=%s " + "",
-                aggregateTableIdentifier, aggregateUserIdentifier, read, write,
+                tableID, aggregateUserIdentifier, read, write,
                 requestingUserID, delete);
     }
 
