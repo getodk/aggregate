@@ -50,7 +50,7 @@ public class SetTablePermissionsLogic extends CommandLogic<SetTablePermissions>
                 .equal(Users.USER_ID, requestingUserID).get();
         if (!requestUser.hasPerm(aggregateTableIdentifier, Permissions.WRITE))
         {
-            return SetTablePermissionsResult.failure(null,
+            return SetTablePermissionsResult.failure("\"no tableID\"",
                     aggregateUserIdentifier, FailureReason.PERMISSION_DENIED);
         }
 

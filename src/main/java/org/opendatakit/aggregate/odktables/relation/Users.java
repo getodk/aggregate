@@ -3,9 +3,9 @@ package org.opendatakit.aggregate.odktables.relation;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import org.opendatakit.aggregate.odktables.entity.InternalPermission;
-import org.opendatakit.aggregate.odktables.entity.InternalTableEntry;
 import org.opendatakit.aggregate.odktables.entity.InternalUser;
 import org.opendatakit.common.ermodel.simple.Attribute;
 import org.opendatakit.common.ermodel.simple.AttributeType;
@@ -119,6 +119,7 @@ public class Users extends TypedEntityRelation<InternalUser>
                 ADMIN_ID = adminInstance.getID();
             } catch (ODKDatastoreException e)
             {
+                Logger.getAnonymousLogger().warning(e.toString());
                 ADMIN_ID = UUID.randomUUID().toString();
                 adminInstance = new InternalUser(ADMIN_ID, ADMIN_NAME, getCC());
                 adminInstance.save();
@@ -129,22 +130,6 @@ public class Users extends TypedEntityRelation<InternalUser>
             }
         }
         return Users.adminInstance;
-    }
-
-    public InternalTableEntry getTableEntry() throws ODKDatastoreException
-    {
-        TableEntries entries = TableEntries.getInstance(getCC());
-        InternalTableEntry entry;
-        try
-        {
-            entry = entries.getEntity(getAggregateIdentifier());
-        } catch (ODKDatastoreException e)
-        {
-            entry = new InternalTableEntry(getAdminUser().getID(), this
-                    .getClass().getSimpleName(), false, getCC());
-            entry.save();
-        }
-        return entry;
     }
 
     public InternalUser getByID(String userID) throws ODKDatastoreException
@@ -176,7 +161,6 @@ public class Users extends TypedEntityRelation<InternalUser>
         {
             instance = new Users(cc);
             instance.getAdminUser();
-            instance.getTableEntry();
         }
 
         return instance;
