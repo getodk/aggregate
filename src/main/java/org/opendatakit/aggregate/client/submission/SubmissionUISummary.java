@@ -18,7 +18,6 @@ package org.opendatakit.aggregate.client.submission;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.List;
 
 import org.opendatakit.aggregate.constants.common.UIDisplayType;
 
@@ -29,15 +28,15 @@ public class SubmissionUISummary implements Serializable {
    */
   private static final long serialVersionUID = 4067244808385366754L;
 
-  private List<SubmissionUI> submissions = new ArrayList<SubmissionUI>();
+  private ArrayList<SubmissionUI> submissions = new ArrayList<SubmissionUI>();
   
-  private List<Column> headers;
+  private ArrayList<Column> headers;
   
   public SubmissionUISummary() {
     headers = new ArrayList<Column>();
   }
     
-  public List<Column> getHeaders() {
+  public ArrayList<Column> getHeaders() {
     return headers;
   }
 
@@ -65,7 +64,7 @@ public class SubmissionUISummary implements Serializable {
     headers.add(new Column(displayHeader, columnName, geopointColumnCode));
   }
   
-  public List<SubmissionUI> getSubmissions() {
+  public ArrayList<SubmissionUI> getSubmissions() {
     return submissions;
   }
   

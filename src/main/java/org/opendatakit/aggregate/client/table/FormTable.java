@@ -16,6 +16,8 @@
 
 package org.opendatakit.aggregate.client.table;
 
+import java.util.ArrayList;
+
 import org.opendatakit.aggregate.client.form.FormSummary;
 import org.opendatakit.aggregate.client.widgets.AcceptSubmissionCheckBox;
 import org.opendatakit.aggregate.client.widgets.DeleteFormButton;
@@ -73,10 +75,10 @@ public class FormTable extends FlexTable {
    * 
    * @param formSummary
    */
-  public void updateFormTable(FormSummary[] forms) {
+  public void updateFormTable(ArrayList<FormSummary> forms) {
 	int i = 0;
-    for (int j = 0; j < forms.length; j++) {
-      FormSummary form = forms[j];
+    for (int j = 0; j < forms.size(); j++) {
+      FormSummary form = forms.get(j);
       // don't show form if it has an active deletion request...
       FormActionStatusTimestamp t = form.getMostRecentDeletionRequestStatus();
       if ( t != null && t.getStatus().isActiveRequest()) continue;

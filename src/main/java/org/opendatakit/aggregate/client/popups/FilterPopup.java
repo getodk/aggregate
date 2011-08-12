@@ -17,14 +17,13 @@
 package org.opendatakit.aggregate.client.popups;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import org.opendatakit.aggregate.client.filter.ColumnFilterHeader;
 import org.opendatakit.aggregate.client.filter.FilterGroup;
 import org.opendatakit.aggregate.client.submission.Column;
 import org.opendatakit.aggregate.client.table.SubmissionTable;
-import org.opendatakit.aggregate.client.widgets.ClosePopupButton;
 import org.opendatakit.aggregate.client.widgets.ApplyFilterButton;
+import org.opendatakit.aggregate.client.widgets.ClosePopupButton;
 import org.opendatakit.aggregate.constants.common.FilterOperation;
 import org.opendatakit.aggregate.constants.common.RowOrCol;
 import org.opendatakit.aggregate.constants.common.Visibility;
@@ -50,7 +49,7 @@ public class FilterPopup extends PopupPanel{
 	private final ListBox filterOp;
 	private final TextBox filterValue;
 	
-	private final List<Column> headers;
+	private final ArrayList<Column> headers;
 	
 	public FilterPopup(SubmissionTable submissionData, FilterGroup filterGroup) {
 		super(false); //do not close popup when user clicks out of it
@@ -162,8 +161,8 @@ public class FilterPopup extends PopupPanel{
     return new Column(colname, colencode, colgpsIndex);
   }
 
-  public List<ColumnFilterHeader> getColumnsForColumnFilter() { 
-    List<ColumnFilterHeader> columnfilterheaders = new ArrayList<ColumnFilterHeader>();
+  public ArrayList<ColumnFilterHeader> getColumnsForColumnFilter() { 
+	  ArrayList<ColumnFilterHeader> columnfilterheaders = new ArrayList<ColumnFilterHeader>();
     for (int i = columnsForColumnFilter.getSelectedIndex(); i < columnsForColumnFilter.getItemCount(); i++) {
        String colname = "";
        String colencode = "";

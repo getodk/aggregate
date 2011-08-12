@@ -437,6 +437,10 @@ public class MiscTasks {
 		for ( CommonFieldsBase b : l ) {
 			Submission s = new Submission( b.getUri(), miscTasksForm, cc );
 			MiscTasks result = new MiscTasks(s);
+			// ignore abandoned or successful deletion requests...
+			if ( result.getStatus() == FormActionStatus.SUCCESSFUL ||
+				 result.getStatus() == FormActionStatus.ABANDONED ) continue;
+			
 			// determine the time of the status setting...
 			Date lastUpdate = result.getCompletionDate();
 			if ( lastUpdate == null ) {
@@ -468,6 +472,10 @@ public class MiscTasks {
 		for ( CommonFieldsBase b : l ) {
 			Submission s = new Submission( b.getUri(), miscTasksForm, cc );
 			MiscTasks result = new MiscTasks(s);
+			// ignore abandoned or successful deletion requests...
+			if ( result.getStatus() == FormActionStatus.SUCCESSFUL ||
+				 result.getStatus() == FormActionStatus.ABANDONED ) continue;
+
 			// determine the time of the status setting...
 			Date lastUpdate = result.getCompletionDate();
 			if ( lastUpdate == null ) {

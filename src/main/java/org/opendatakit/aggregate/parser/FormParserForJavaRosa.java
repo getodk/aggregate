@@ -39,6 +39,7 @@ import org.javarosa.xform.util.IXFormBindHandler;
 import org.javarosa.xform.util.XFormUtils;
 import org.kxml2.kdom.Element;
 import org.opendatakit.aggregate.constants.ParserConsts;
+import org.opendatakit.aggregate.constants.common.FormActionStatusTimestamp;
 import org.opendatakit.aggregate.datamodel.FormDataModel;
 import org.opendatakit.aggregate.datamodel.FormDataModel.ElementType;
 import org.opendatakit.aggregate.datamodel.TopLevelDynamicBase;
@@ -50,6 +51,7 @@ import org.opendatakit.aggregate.exception.ODKParseException;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.form.FormDefinition;
 import org.opendatakit.aggregate.form.FormInfo;
+import org.opendatakit.aggregate.form.MiscTasks;
 import org.opendatakit.aggregate.form.SubmissionAssociationTable;
 import org.opendatakit.aggregate.form.XFormParameters;
 import org.opendatakit.aggregate.submission.Submission;
@@ -244,16 +246,15 @@ public class FormParserForJavaRosa {
 
   /**
    * Constructor that parses and xform from the input stream supplied and
-   * creates the proper ODK Aggregate Form definition in the gae datastore.
+   * creates the proper ODK Aggregate Form definition.
    * 
-   * @param formName - title of the form
-   * @param formXmlData - Multipart form element defining the xml form...
-   * @param inputXml - string containing the Xform definition
-   * @param fileName - file name used for a file that specifies the form's XML definition
-   * @param uploadedFormItems - Multipart form elements
-   * @param datastore
-   * @param user
-   * @param rootDomain
+   * @param formName
+   * @param formXmlData
+   * @param inputXml
+   * @param fileName
+   * @param uploadedFormItems
+   * @param warnings -- the builder that will hold all the non-fatal form-creation warnings
+   * @param cc
    * @throws ODKFormAlreadyExistsException
    * @throws ODKIncompleteSubmissionData
    * @throws ODKConversionException
@@ -261,7 +262,7 @@ public class FormParserForJavaRosa {
    * @throws ODKParseException
    */
   public FormParserForJavaRosa(String formName, MultiPartFormItem formXmlData, String inputXml, String fileName,
-	  MultiPartFormData uploadedFormItems,
+	  MultiPartFormData uploadedFormItems, StringBuilder warnings,
       CallingContext cc) throws ODKFormAlreadyExistsException,
       ODKIncompleteSubmissionData, ODKConversionException, ODKDatastoreException,
       ODKParseException {
@@ -406,7 +407,7 @@ public class FormParserForJavaRosa {
     persistenceStoreFormId = persistenceStoreFormId.replaceAll("^_*","");
 
     initHelper(uploadedFormItems, formXmlData, inputXml,
-    		  title, persistenceStoreFormId, isEncryptedForm, formDef, cc);
+    		  title, persistenceStoreFormId, isEncryptedForm, formDef, warnings, cc);
   }
   
   enum AuxType { NONE, BC_REF, REF_BLOB, GEO_LAT, GEO_LNG, GEO_ALT, GEO_ACC, LONG_STRING_REF, REF_TEXT };
@@ -430,7 +431,19 @@ public class FormParserForJavaRosa {
   
   private void initHelper(MultiPartFormData uploadedFormItems, MultiPartFormItem xformXmlData,  
 		  String inputXml, String title, String persistenceStoreFormId, boolean isEncryptedForm, 
-		  FormDef formDef, CallingContext cc) throws ODKDatastoreException, ODKFormAlreadyExistsException, ODKParseException {
+		  FormDef formDef, StringBuilder warnings, CallingContext cc) throws ODKDatastoreException, ODKFormAlreadyExistsException, ODKParseException {
+    
+    Map<String,FormActionStatusTimestamp> formDeletionStatuses = 
+  	  MiscTasks.getFormDeletionStatusTimestampOfAllFormIds(cc);
+
+    // we can't create or update a FormInfo record if there is a pending deletion for this same id.
+    if ( formDeletionStatuses.get(rootElementDefn.formId) != null ) {
+		throw new ODKFormAlreadyExistsException("This form and its data have not yet been fully deleted from the server. Please wait a few minutes and retry.");
+    }
+    
+    if ( formDeletionStatuses.get(submissionElementDefn.formId) != null ) {
+		throw new ODKFormAlreadyExistsException("This form and its data have not yet been fully deleted from the server. Please wait a few minutes and retry.");
+    }
     
     /////////////////
     // Step 1: create or fetch the Form (FormInfo) submission
@@ -472,6 +485,7 @@ public class FormParserForJavaRosa {
     
     FormDefinition fdDefined = FormDefinition.getFormDefinition(submissionElementDefn, cc);
     if ( fdDefined != null ) {
+        // get most recent form-deletion statuses
     	if ( !sameXForm ) {
     		throw new ODKFormAlreadyExistsException("Internal error: Completely new file has pre-existing form definition");
     	}
@@ -522,7 +536,7 @@ public class FormParserForJavaRosa {
 	        .getTableName(fdm.getSchemaName(), persistenceStoreFormId, "", "CORE");
 	
 	    constructDataModel(opaque, k, fdmList, fdm, k.getKey(), 1, persistenceStoreFormId, "",
-	        tableNamePlaceholder, submissionElement, cc);
+	        tableNamePlaceholder, submissionElement, warnings, cc);
 	
 	    // emit the long string and ref text tables...
 	    ++elementCount; // to give these tables their own element #.
@@ -942,7 +956,7 @@ public class FormParserForJavaRosa {
   private void constructDataModel(final NamingSet opaque, final EntityKey k,
       final List<FormDataModel> dmList, final FormDataModel fdm, 
       String parent, int ordinal, String tablePrefix, String nrGroupPrefix, String tableName,
-      TreeElement treeElement, CallingContext cc) throws ODKEntityPersistException, ODKParseException {
+      TreeElement treeElement, StringBuilder warnings, CallingContext cc) throws ODKEntityPersistException, ODKParseException {
 
 	// for debugging: printTreeElementInfo(treeElement);
 
@@ -1061,11 +1075,11 @@ public class FormParserForJavaRosa {
         et = FormDataModel.ElementType.STRING;
         Logger.getLogger(FormParserForJavaRosa.class.getCanonicalName()).warning(
             "Element " + getTreeElementPath(treeElement) + " does not have a type");
-        throw new ODKParseException(
-            "Field name: "
-                + getTreeElementPath(treeElement)
-                + " appears to be a value field (it has no fields nested within it) but does not have a type.");
-      } else /* one or more children -- this is a non-repeating group */{
+        warnings.append("<tr><td>");
+        warnings.append(getTreeElementPath(treeElement));
+        warnings.append("</td></tr>");
+      } else {
+    	/* one or more children -- this is a non-repeating group */
         persistAsColumn = null;
         opaque.removeColumnName(persistAsTable, persistAsColumn);
         et = FormDataModel.ElementType.GROUP;
@@ -1236,7 +1250,7 @@ public class FormParserForJavaRosa {
     		  prior = current;
     	  } else {
     		  constructDataModel(opaque, k, dmList, fdm, groupURI, ++trueOrdinal, tablePrefix,
-    				  nrGroupPrefix, persistAsTable, current, cc);
+    				  nrGroupPrefix, persistAsTable, current, warnings, cc);
     		  prior = current;
     	  }
       }
@@ -1259,7 +1273,7 @@ public class FormParserForJavaRosa {
     		  prior = current;
     	  } else {
     		  constructDataModel(opaque, k, dmList, fdm, groupURI, ++trueOrdinal, tablePrefix,
-    				  "", persistAsTable, current, cc);
+    				  "", persistAsTable, current, warnings, cc);
     		  prior = current;
     	  }
       }

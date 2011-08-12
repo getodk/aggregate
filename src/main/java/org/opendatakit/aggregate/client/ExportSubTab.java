@@ -16,6 +16,8 @@
 
 package org.opendatakit.aggregate.client;
 
+import java.util.ArrayList;
+
 import org.opendatakit.aggregate.client.form.ExportSummary;
 import org.opendatakit.aggregate.client.table.ExportTable;
 
@@ -38,14 +40,14 @@ public class ExportSubTab extends AggregateSubTabBase {
   @Override
   public void update() {
     
-    AsyncCallback<ExportSummary[]> callback = new AsyncCallback<ExportSummary[]>() {
+    AsyncCallback<ArrayList<ExportSummary>> callback = new AsyncCallback<ArrayList<ExportSummary>>() {
       @Override
       public void onFailure(Throwable caught) {
           AggregateUI.getUI().reportError(caught);
       }
 
       @Override
-      public void onSuccess(ExportSummary[] result) {
+      public void onSuccess(ArrayList<ExportSummary> result) {
         exportTable.updateExportPanel(result);
       }
     };

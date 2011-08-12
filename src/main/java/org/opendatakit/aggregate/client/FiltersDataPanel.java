@@ -16,7 +16,7 @@
 
 package org.opendatakit.aggregate.client;
 
-import java.util.List;
+import java.util.ArrayList;
 
 import org.opendatakit.aggregate.client.filter.ColumnFilter;
 import org.opendatakit.aggregate.client.filter.ColumnFilterHeader;
@@ -94,7 +94,7 @@ public class FiltersDataPanel extends ScrollPanel {
                 + "where columns are " + rowFilter.getOperation() + rowFilter.getInput()));
       } else if (filter instanceof ColumnFilter) {
         ColumnFilter columnFilter = (ColumnFilter) filter;
-        List<ColumnFilterHeader> columns = columnFilter.getColumnFilterHeaders();
+        ArrayList<ColumnFilterHeader> columns = columnFilter.getColumnFilterHeaders();
         String columnNames = "";
         for (ColumnFilterHeader column : columns) {
           columnNames += " " + column.getColumn().getDisplayHeader();

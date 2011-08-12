@@ -16,7 +16,7 @@
 
 package org.opendatakit.aggregate.client.widgets;
 
-import java.util.List;
+import java.util.ArrayList;
 
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.filter.ColumnFilter;
@@ -63,7 +63,7 @@ public class ApplyFilterButton extends AButtonBase implements ClickHandler {
       String value = popup.getFilterValue();
       newFilter = new RowFilter(kr, column, op, value, (long) group.getFilters().size()); 
     } else {
-      List<ColumnFilterHeader> columnfilterheaders = popup.getColumnsForColumnFilter();
+      ArrayList<ColumnFilterHeader> columnfilterheaders = popup.getColumnsForColumnFilter();
       newFilter = new ColumnFilter(kr, columnfilterheaders, (long) group.getFilters().size());
     }
     

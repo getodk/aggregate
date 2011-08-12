@@ -98,11 +98,11 @@ public class GwtTester extends ServletUtilBase {
     beginBasicHtmlResponse(TITLE_INFO, resp, true, cc); // header info
 
     if (flag.equals("create")) {
-      List<Filter> filters = new ArrayList<Filter>();
+      ArrayList<Filter> filters = new ArrayList<Filter>();
       filters.add(new RowFilter(Visibility.DISPLAY, new Column("Ro1Awesome", "", new Long(1)),
           FilterOperation.EQUAL, "captain", new Long(99)));
 
-      List<ColumnFilterHeader> columns = new ArrayList<ColumnFilterHeader>();
+      ArrayList<ColumnFilterHeader> columns = new ArrayList<ColumnFilterHeader>();
       columns.add(new ColumnFilterHeader("ColAwesome1", "", new Long(1)));
       columns.add(new ColumnFilterHeader("ColAwesome2", "", new Long(1)));
       columns.add(new ColumnFilterHeader("ColAwesome3", "", new Long(1)));

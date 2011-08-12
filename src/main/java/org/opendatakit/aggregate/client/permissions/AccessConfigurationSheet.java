@@ -21,7 +21,6 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.TreeSet;
 
 import org.opendatakit.aggregate.client.AggregateUI;
@@ -786,8 +785,8 @@ public class AccessConfigurationSheet extends Composite {
 	void onAddUsersClick(ClickEvent e) {
 		String text = addedUsers.getText();
 		Collection<Email> emails = EmailParser.parseEmails(text);
-		Map<String, UserSecurityInfo> localUsers = new HashMap<String, UserSecurityInfo>();
-		Map<String, UserSecurityInfo> googleUsers = new HashMap<String, UserSecurityInfo>();
+		HashMap<String, UserSecurityInfo> localUsers = new HashMap<String, UserSecurityInfo>();
+		HashMap<String, UserSecurityInfo> googleUsers = new HashMap<String, UserSecurityInfo>();
 		List<UserSecurityInfo> list = dataProvider.getList();
 		for (UserSecurityInfo u : list) {
 			if (u.getUsername() != null) {

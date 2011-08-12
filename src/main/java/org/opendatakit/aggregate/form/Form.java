@@ -426,6 +426,10 @@ public class Form {
    * @return true if a new submission can be received, false otherwise
    */
   public Boolean getSubmissionEnabled() {
+	// if the form definition doesn't exist, we can't accept submissions
+	// this is a transient condition when in the midst of deleting a form or uploading one
+	// and another user attempts to list the available forms.
+	if ( formDefinition == null ) return false;
 	return formDefinition.getIsSubmissionAllowed();
   }
 

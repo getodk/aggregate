@@ -18,7 +18,6 @@
 package org.opendatakit.aggregate.submission;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 

@@ -16,6 +16,8 @@
 
 package org.opendatakit.aggregate.client;
 
+import java.util.ArrayList;
+
 import org.opendatakit.aggregate.client.externalserv.ExternServSummary;
 import org.opendatakit.aggregate.client.form.FormServiceAsync;
 import org.opendatakit.aggregate.client.form.FormSummary;
@@ -36,7 +38,7 @@ public class PublishSubTab extends AggregateSubTabBase {
   private ListBox formsBox;
 
   // state
-  private FormSummary[] displayedFormList;
+  private ArrayList<FormSummary> displayedFormList;
   private FormSummary selectedForm;
 
   public PublishSubTab(AggregateUI baseUI) {
@@ -57,12 +59,12 @@ public class PublishSubTab extends AggregateSubTabBase {
 	  return true;
   }
 
-  private class UpdateAction implements AsyncCallback<FormSummary[]> {
+  private class UpdateAction implements AsyncCallback<ArrayList<FormSummary>> {
     public void onFailure(Throwable caught) {
       baseUI.reportError(caught);
     }
 
-    public void onSuccess(FormSummary[] forms) {
+    public void onSuccess(ArrayList<FormSummary> forms) {
       baseUI.clearError();
       
       // update the class state with the updated form list

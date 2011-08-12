@@ -16,6 +16,8 @@
 
 package org.opendatakit.aggregate.client;
 
+import java.util.ArrayList;
+
 import org.opendatakit.aggregate.client.form.FormSummary;
 import org.opendatakit.aggregate.client.table.FormTable;
 import org.opendatakit.aggregate.client.widgets.ServletPopupButton;
@@ -73,12 +75,12 @@ public class FormsSubTab extends AggregateSubTabBase {
     uploadSubmission.setEnabled(enabled);
     
     // Set up the callback object.
-    AsyncCallback<FormSummary[]> callback = new AsyncCallback<FormSummary[]>() {
+    AsyncCallback<ArrayList<FormSummary>> callback = new AsyncCallback<ArrayList<FormSummary>>() {
       public void onFailure(Throwable caught) {
         AggregateUI.getUI().reportError(caught);
       }
 
-      public void onSuccess(FormSummary[] forms) {
+      public void onSuccess(ArrayList<FormSummary> forms) {
         AggregateUI.getUI().clearError();
         listOfForms.updateFormTable(forms);
       }
