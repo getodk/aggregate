@@ -18,22 +18,21 @@ package org.opendatakit.aggregate.client.filter;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.List;
 
 public final class FilterSet implements Serializable {
 
 	private static final long serialVersionUID = -7646690488192856868L;
-	private List<FilterGroup> groups;
+	private ArrayList<FilterGroup> groups;
 	
 	public FilterSet() {
 		this.groups = new ArrayList<FilterGroup>();
 	}
 	
-	public FilterSet(List<FilterGroup> allFilterGroups) {
+	public FilterSet(ArrayList<FilterGroup> allFilterGroups) {
 		this.groups = allFilterGroups;
 	}
 	
-	public List<FilterGroup> getGroups() {
+	public ArrayList<FilterGroup> getGroups() {
 		return groups;
 	}
 	

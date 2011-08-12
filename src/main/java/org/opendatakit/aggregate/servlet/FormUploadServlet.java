@@ -212,6 +212,7 @@ public class FormUploadServlet extends ServletUtilBase {
     }
 
     boolean bOk = false;
+    StringBuilder warnings = new StringBuilder();
     // TODO Add in form title process so it will update the changes in the XML
     // of form
 
@@ -242,7 +243,7 @@ public class FormUploadServlet extends ServletUtilBase {
 
       try {
         parser = new FormParserForJavaRosa(formName, formXmlData, inputXml, xmlFileName,
-            uploadedFormItems, cc);
+            uploadedFormItems, warnings, cc);
 
         logger.info("Upload form: " + parser.getFormId());
         Form form = Form.retrieveForm(parser.getFormId(), cc);
@@ -319,9 +320,26 @@ public class FormUploadServlet extends ServletUtilBase {
       PrintWriter out = resp.getWriter();
       out.write(HtmlConsts.HTML_OPEN);
       out.write(HtmlConsts.BODY_OPEN);
-      out.write("Successful form upload.  Click ");
+      if ( warnings.length() != 0 ) {
+    	  out.write("<p>Form uploaded with warnings. There are value fields in the form that do not " +
+    	  		"have <code>&gt;bind/&lt;</code> declarations or those <code>&gt;bind/&lt;</code> " +
+    	  		"declarations do not have a <code>type</code> attribute that " +
+    	  		"identifies the data type of that field (e.g., boolean, int, decimal, date, dateTime, time, string, " +
+    	  		"select1, select, barcode, geopoint or binary).</p>" +
+    	  		"<p><b>All these value fields have been declared as string values.</b></p>" +
+        	  	"<p>If these value fields hold date, dateTime, time or numeric data (e.g., decimal or int), then ODK Aggregate will " +
+    	  		"produce erroneous sortings and filtering results against those value fields.  It will use " +
+    	  		"lexical ordering on those fields.  I.e., the value 100 will be considered less than 11.</p>" +
+    	  		"<table><th><td>Field Name</td></th>");
+    	  out.write(warnings.toString());
+    	  out.write("</table>");
+      } else {
+    	  out.write("<p>Successful form upload.</p>");
+      }
+      out.write("<p>Click ");
+    	  
       out.write(HtmlUtil.createHref(cc.getWebApplicationURL(ADDR), "here"));
-      out.write(" to return to add new form page.");
+      out.write(" to return to add new form page.</p>");
       out.write(HtmlConsts.BODY_CLOSE);
       out.write(HtmlConsts.HTML_CLOSE);
     }

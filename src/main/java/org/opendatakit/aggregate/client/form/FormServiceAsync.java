@@ -16,13 +16,15 @@
 
 package org.opendatakit.aggregate.client.form;
 
+import java.util.ArrayList;
+
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
 public interface FormServiceAsync {
 
-  void getForms(AsyncCallback<FormSummary[]> callback);
+  void getForms(AsyncCallback<ArrayList<FormSummary>> callback);
 
-  void getExports(AsyncCallback<ExportSummary[]> callback);
+  void getExports(AsyncCallback<ArrayList<ExportSummary>> callback);
 
   void createCsv(String formId, AsyncCallback<Boolean> callback);
 

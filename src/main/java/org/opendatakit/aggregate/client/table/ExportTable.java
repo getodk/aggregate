@@ -16,6 +16,8 @@
 
 package org.opendatakit.aggregate.client.table;
 
+import java.util.ArrayList;
+
 import org.opendatakit.aggregate.client.form.ExportSummary;
 import org.opendatakit.aggregate.constants.common.ExportStatus;
 
@@ -46,13 +48,13 @@ public class ExportTable extends FlexTable {
     this.getRowFormatter().addStyleName(1, "titleBar");
   }
 
-  public void updateExportPanel(ExportSummary[] eS) {
+  public void updateExportPanel(ArrayList<ExportSummary> eS) {
     if (eS == null)
       return;
     while (this.getRowCount() > HEADER_ROW + 1) // need to add one because of the zero index
       this.removeRow(STARTING_ROW);
-    for (int i = 0; i < eS.length; i++) {
-      ExportSummary e = eS[i];
+    for (int i = 0; i < eS.size(); i++) {
+      ExportSummary e = eS.get(i);
       if (e.getFileType() != null) {
         this.setText(i + STARTING_ROW, FILE_TYPE, e.getFileType().getDisplayText());
       }

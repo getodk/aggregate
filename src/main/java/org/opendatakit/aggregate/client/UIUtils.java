@@ -17,7 +17,6 @@
 package org.opendatakit.aggregate.client;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import org.opendatakit.aggregate.client.filter.FilterGroup;
 import org.opendatakit.aggregate.client.filter.FilterSet;
@@ -31,23 +30,23 @@ public class UIUtils {
   
   private static final String NO_FORM = "none";
   
-  public static FormSummary [] updateFormDropDown(ListBox formsBox, FormSummary[] previouslyDisplayedForms, FormSummary[] newFormsToDisplay ) {
+  public static ArrayList<FormSummary> updateFormDropDown(ListBox formsBox, ArrayList<FormSummary> previouslyDisplayedForms, ArrayList<FormSummary> forms ) {
     
     FormSummary currentFormSelected = UIUtils.getFormFromSelection(formsBox, previouslyDisplayedForms);
     
     // what the selected index should be set to
     int selectedIndex = 0; // default to the top position, update if available
     
-    if (newFormsToDisplay == null || newFormsToDisplay.length == 0) {
-      newFormsToDisplay = new FormSummary[1];
-      newFormsToDisplay[0] = new FormSummary(NO_FORM, null, null, null, false, false, null, 0);
+    if (forms == null || forms.size() == 0) {
+      forms = new ArrayList<FormSummary>();
+      forms.add(new FormSummary(NO_FORM, null, null, null, false, false, null, 0));
     } 
 
     formsBox.clear();
     
     // populate the form box
-    for (int i = 0; i < newFormsToDisplay.length; i++) {
-      FormSummary form = newFormsToDisplay[i];
+    for (int i = 0; i < forms.size(); i++) {
+      FormSummary form = forms.get(i);
       // don't show forms marked for deletion...
       FormActionStatusTimestamp deletionStatus = form.getMostRecentDeletionRequestStatus();
       if ( deletionStatus != null && deletionStatus.getStatus().isActiveRequest()) continue;
@@ -64,14 +63,14 @@ public class UIUtils {
     }
     
     // return the new populated form list used to update the formsBox
-    return newFormsToDisplay;
+    return forms;
   }
   
-  public static FormSummary getFormFromSelection(ListBox formsListBox, FormSummary [] forms) {
+  public static FormSummary getFormFromSelection(ListBox formsListBox, ArrayList<FormSummary> displayedFormList) {
     int selectedIndex = formsListBox.getSelectedIndex();
-    if (selectedIndex > -1 && forms != null) {
+    if (selectedIndex > -1 && displayedFormList != null) {
       String formId = formsListBox.getValue(selectedIndex);
-      for (FormSummary form : forms) {
+      for (FormSummary form : displayedFormList) {
         String formIdToMatch = form.getId();
         // check if we have a form id
         if(formIdToMatch == null) {
@@ -90,7 +89,7 @@ public class UIUtils {
     return null;
   }
    
-  public static List<FilterGroup> updateFilterDropDown(ListBox filtersBox, FormSummary selectedForm, List<FilterGroup> previouslyDisplayedFilter, FilterSet filterSet) {
+  public static ArrayList<FilterGroup> updateFilterDropDown(ListBox filtersBox, FormSummary selectedForm, ArrayList<FilterGroup> previouslyDisplayedFilter, FilterSet filterSet) {
     FilterGroup currentFilterSelected = getFilterFromSelection(filtersBox, previouslyDisplayedFilter);
     FilterGroup defaultFilterGroup = new FilterGroup(UIConsts.FILTER_NONE, selectedForm.getId(), null);
     
@@ -98,7 +97,7 @@ public class UIUtils {
     int selectedIndex = 0; // default to the top position, update if available
     
     // create what should be the new filter group
-    List<FilterGroup> filterGroups  = new ArrayList<FilterGroup>();
+    ArrayList<FilterGroup> filterGroups  = new ArrayList<FilterGroup>();
     filterGroups.add(defaultFilterGroup);
     filterGroups.addAll(filterSet.getGroups());
 
@@ -120,7 +119,7 @@ public class UIUtils {
     return filterGroups;
   }
   
-  public static FilterGroup getFilterFromSelection(ListBox filterListBox, List<FilterGroup> filters) {
+  public static FilterGroup getFilterFromSelection(ListBox filterListBox, ArrayList<FilterGroup> filters) {
     int selectedIndex = filterListBox.getSelectedIndex();
     if (selectedIndex > -1 && filters != null) {
       String filterName = filterListBox.getValue(selectedIndex);

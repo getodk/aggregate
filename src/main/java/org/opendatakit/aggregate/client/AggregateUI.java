@@ -18,8 +18,6 @@ package org.opendatakit.aggregate.client;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import org.opendatakit.aggregate.client.preferences.Preferences;
 import org.opendatakit.aggregate.constants.common.ExportConsts;
 import org.opendatakit.aggregate.constants.common.FilterConsts;
@@ -68,8 +66,8 @@ public class AggregateUI implements EntryPoint {
 	private DecoratedTabPanel mainNav;
 
 	// tab datastructures
-	private Map<Tabs, AggregateTabBase> tabMap;
-	private List<Tabs> tabPosition;
+	private HashMap<Tabs, AggregateTabBase> tabMap;
+	private ArrayList<Tabs> tabPosition;
 
 	private RefreshTimer timer;
 	private HTMLPanel login_logout_link = new HTMLPanel("");

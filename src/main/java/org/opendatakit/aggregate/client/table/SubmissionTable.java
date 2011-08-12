@@ -16,7 +16,7 @@
 
 package org.opendatakit.aggregate.client.table;
 
-import java.util.List;
+import java.util.ArrayList;
 
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.popups.BinaryPopup;
@@ -36,8 +36,8 @@ import com.google.gwt.user.client.ui.PopupPanel;
 
 public class SubmissionTable extends FlexTable {
  
-  private List<Column> tableHeaders;
-  private List<SubmissionUI> tableSubmissions;
+  private ArrayList<Column> tableHeaders;
+  private ArrayList<SubmissionUI> tableSubmissions;
   
   public SubmissionTable(SubmissionUISummary summary) {
     tableHeaders = summary.getHeaders();
@@ -106,12 +106,11 @@ public class SubmissionTable extends FlexTable {
     }
   }
   
-  public List<Column> getHeaders() {
+  public ArrayList<Column> getHeaders() {
     return tableHeaders;
   }
 
-  public List<SubmissionUI> getSubmissions() {
+  public ArrayList<SubmissionUI> getSubmissions() {
     return tableSubmissions;
   }
-
 }

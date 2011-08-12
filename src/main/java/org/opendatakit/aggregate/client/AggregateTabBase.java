@@ -2,8 +2,6 @@ package org.opendatakit.aggregate.client;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import org.opendatakit.aggregate.constants.common.SubTabs;
 import org.opendatakit.aggregate.constants.common.Tabs;
@@ -14,9 +12,9 @@ import com.google.gwt.user.client.ui.TabPanel;
 public class AggregateTabBase extends TabPanel {
   
   // Navigation
-  private List<SubTabs> subTabPosition;
+  private ArrayList<SubTabs> subTabPosition;
   
-  protected Map<SubTabs, SubTabInterface> subTabMap;
+  protected HashMap<SubTabs, SubTabInterface> subTabMap;
   
   public AggregateTabBase() {
     super();

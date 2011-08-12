@@ -16,7 +16,6 @@
 package org.opendatakit.aggregate.format;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import org.opendatakit.aggregate.submission.SubmissionKey;
 
@@ -41,7 +40,7 @@ public class Row {
     formattedValues.add(formattedValue);
   }
   
-  public List<String> getFormattedValues() {
+  public ArrayList<String> getFormattedValues() {
     return formattedValues;
   }
 

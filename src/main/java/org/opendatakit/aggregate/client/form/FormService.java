@@ -16,6 +16,8 @@
 
 package org.opendatakit.aggregate.client.form;
 
+import java.util.ArrayList;
+
 import org.opendatakit.common.security.client.exception.AccessDeniedException;
 
 import com.google.gwt.user.client.rpc.RemoteService;
@@ -32,9 +34,9 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 @RemoteServiceRelativePath("formservice")
 public interface FormService extends RemoteService {
 
-  FormSummary [] getForms() throws AccessDeniedException;
+  ArrayList<FormSummary> getForms() throws AccessDeniedException;
   
-  ExportSummary [] getExports() throws AccessDeniedException;
+  ArrayList<ExportSummary> getExports() throws AccessDeniedException;
  
   Boolean createCsv(String formId) throws AccessDeniedException;
   
