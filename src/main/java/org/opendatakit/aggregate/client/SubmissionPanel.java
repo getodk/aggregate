@@ -29,8 +29,6 @@ public class SubmissionPanel extends ScrollPanel {
 
   public SubmissionPanel() {
     super();
-    submissionTable = new SubmissionTable();
-    add(submissionTable);
     getElement().setId("submission_container");
   }
 
@@ -42,8 +40,9 @@ public class SubmissionPanel extends ScrollPanel {
       }
 
       public void onSuccess(SubmissionUISummary summary) {
-        AggregateUI.getUI().clearError();
-        submissionTable.update(summary);
+        AggregateUI.getUI().clearError();        
+        submissionTable = new SubmissionTable(summary);
+        setWidget(submissionTable);
       }
     };
 
