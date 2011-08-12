@@ -16,7 +16,6 @@
 
 package org.opendatakit.aggregate.client.table;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.opendatakit.aggregate.client.AggregateUI;
@@ -31,6 +30,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.HTMLTable;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.PopupPanel;
 
@@ -39,33 +39,24 @@ public class SubmissionTable extends FlexTable {
   private List<Column> tableHeaders;
   private List<SubmissionUI> tableSubmissions;
   
-  public SubmissionTable() {
-    tableHeaders = new ArrayList<Column>();
-    tableSubmissions = new ArrayList<SubmissionUI>();
-  }
-  
-  public List<Column> getHeaders() {
-    return tableHeaders;
-  }
-
-  public List<SubmissionUI> getSubmissions() {
-    return tableSubmissions;
-  }
-
-  public void update(SubmissionUISummary summary) {
+  public SubmissionTable(SubmissionUISummary summary) {
     tableHeaders = summary.getHeaders();
     tableSubmissions = summary.getSubmissions();
-    
-    int headerIndex = 0;
-    removeAllRows();
 
+    addStyleName("dataTable");
+
+    // setup header
+    int headerIndex = 0;
     for (Column column : tableHeaders) {
       setText(0, headerIndex++, column.getDisplayHeader());
     }
+    setHTML(0, headerIndex, " ");
+    setColumnFormatter(new HTMLTable.ColumnFormatter());
+    getColumnFormatter().addStyleName(headerIndex, "blank-submission-column");
     
     getRowFormatter().addStyleName(0, "titleBar");
-    addStyleName("dataTable");
     
+    // create rows
     int i = 1;
     for (SubmissionUI row : tableSubmissions) {
       int j = 0;
@@ -107,10 +98,20 @@ public class SubmissionTable extends FlexTable {
         }
         j++;
       }
+      setHTML(i, j, " ");
       if (i % 2 == 0) {
         getRowFormatter().setStyleName(i, "evenTableRow");
       }
       i++;
     }
   }
+  
+  public List<Column> getHeaders() {
+    return tableHeaders;
+  }
+
+  public List<SubmissionUI> getSubmissions() {
+    return tableSubmissions;
+  }
+
 }
