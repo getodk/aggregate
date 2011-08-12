@@ -47,6 +47,7 @@ public class SimpleAPITest
 {
 
     private static String adminID;
+    private static URI aggregateURI;
 
     private static final String requestUserID = "user1";
     private static final String requestUserName = "Dylan Price";
@@ -67,7 +68,7 @@ public class SimpleAPITest
             URISyntaxException
     {
         Properties props = TestUtils.getTestProperties();
-        URI aggregateURI = new URI(props.getProperty("aggregateURI",
+        aggregateURI = new URI(props.getProperty("aggregateURI",
                 "http://localhost:8888/"));
         adminID = props.getProperty("adminUserID", "bob");
 
@@ -90,8 +91,6 @@ public class SimpleAPITest
             IOException, PermissionDeniedException, CannotDeleteException,
             URISyntaxException
     {
-        URI aggregateURI = new URI("http://localhost:8888/");
-
         SimpleAPI conn = new SimpleAPI(aggregateURI, adminID);
         try
         {
@@ -109,8 +108,6 @@ public class SimpleAPITest
             IOException, URISyntaxException, UserAlreadyExistsException,
             PermissionDeniedException
     {
-        URI aggregateURI = new URI("http://localhost:8888/");
-
         conn = new SimpleAPI(aggregateURI, requestUserID);
 
         userID = requestUserID + "diff";
@@ -166,7 +163,6 @@ public class SimpleAPITest
     {
         List<TableEntry> entries = conn.listAllTables();
         assertEquals(1, entries.size());
-        System.out.println(entries);
     }
 
     @Test
@@ -267,7 +263,7 @@ public class SimpleAPITest
         boolean containedTable = false;
         for (TableEntry entry : entries)
         {
-            if (entry.getUser().getUserName().equals(requestUserName))
+            if (entry.getUser() != null)
             {
                 assertTrue(tableID.equalsIgnoreCase(entry.getTableID()));
                 containedTable = true;

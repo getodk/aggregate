@@ -280,16 +280,13 @@ public class ClientTestDriver
             UserDoesNotExistException, IOException, PermissionDeniedException,
             TableDoesNotExistException
     {
-        String aggregateTableIdentifier = null;
         updateTables(clientName);
-        TableEntry table = getTableEntry(clientName, tableName);
-        aggregateTableIdentifier = table.getAggregateTableIdentifier();
 
         conn.setUserID(clientName);
         String aggregateUserIdentifier = clients.get(userName)
                 .getAggregateUserIdentifier();
-        conn.setTablePermissions(aggregateUserIdentifier,
-                aggregateTableIdentifier, read, write, delete);
+        conn.setTablePermissions(aggregateUserIdentifier, tableName, read,
+                write, delete);
     }
 
     private void listAllTables(List<String> arguments)
