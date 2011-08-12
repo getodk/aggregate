@@ -2,19 +2,20 @@ package org.opendatakit.aggregate.odktables.servlet;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.opendatakit.aggregate.ContextFactory;
+import org.opendatakit.aggregate.odktables.client.exception.AggregateInternalErrorException;
 import org.opendatakit.aggregate.odktables.command.Command;
 import org.opendatakit.aggregate.odktables.command.CommandConverter;
 import org.opendatakit.aggregate.odktables.commandlogic.CommandLogic;
 import org.opendatakit.aggregate.odktables.commandresult.CommandResult;
+import org.opendatakit.aggregate.odktables.exception.SnafuException;
 import org.opendatakit.aggregate.servlet.ServletUtilBase;
-import org.opendatakit.common.persistence.exception.ODKDatastoreException;
-import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.web.CallingContext;
 
 import com.google.gson.JsonParseException;
@@ -86,15 +87,22 @@ public class CommandServlet extends ServletUtilBase
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST,
                     "Malformed json syntax: " + e.getMessage());
             return;
-        } catch (ODKDatastoreException e)
+        } catch (AggregateInternalErrorException e)
         {
+            Logger.getLogger(CommandServlet.class.getSimpleName()).warning(
+                    e.toString());
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
                     "Could not complete request. Please try again later.");
             return;
-        } catch (ODKTaskLockException e)
+        } catch (SnafuException e)
         {
-            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-                    "Could not complete the request. Please try again later");
+            Logger.getLogger(CommandServlet.class.getSimpleName()).severe(
+                    e.toString());
+            resp.sendError(
+                    HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                    "Aggregate suffered an unrecoverable error that likely left the "
+                            + "datastore in a corrupted state. Please contact the Aggregate "
+                            + "administrator about this issue.");
         }
     }
 }

@@ -1,6 +1,8 @@
 package org.opendatakit.aggregate.odktables.commandlogic.common;
 
 import org.opendatakit.aggregate.odktables.client.entity.User;
+import org.opendatakit.aggregate.odktables.client.exception.AggregateInternalErrorException;
+import org.opendatakit.aggregate.odktables.client.exception.UserAlreadyExistsException;
 import org.opendatakit.aggregate.odktables.command.common.CreateUser;
 import org.opendatakit.aggregate.odktables.commandlogic.CommandLogic;
 import org.opendatakit.aggregate.odktables.commandresult.CommandResult.FailureReason;
@@ -29,35 +31,59 @@ public class CreateUserLogic extends CommandLogic<CreateUser>
     }
 
     @Override
-    public CreateUserResult execute(CallingContext cc)
-            throws ODKDatastoreException
+    public CreateUserResult execute(CallingContext cc) throws AggregateInternalErrorException
     {
-        Users users = Users.getInstance(cc);
-        
-        String userID = createUser.getUserID();
-        String requestingUserID = createUser.getRequestingUserID();
-        String aggregateUsersIdentifier = users.getAggregateIdentifier();
-
-        InternalUser requestUser = users.query()
-                .equal(Users.USER_ID, requestingUserID).get();
-
-        if (!requestUser.hasPerm(aggregateUsersIdentifier, Permissions.WRITE))
+        User user;
+        try
         {
-            return CreateUserResult.failure(userID,
-                    FailureReason.PERMISSION_DENIED);
+            Users users = Users.getInstance(cc);
+            
+            String userID = createUser.getUserID();
+            String userName = createUser.getUserName();
+            String requestingUserID = createUser.getRequestingUserID();
+            String aggregateUsersIdentifier = users.getAggregateIdentifier();
+    
+            InternalUser requestUser = users.query()
+                    .equal(Users.USER_ID, requestingUserID).get();
+    
+            if (!requestUser.hasPerm(aggregateUsersIdentifier, Permissions.WRITE))
+            {
+                return CreateUserResult.failure(userID,
+                        FailureReason.PERMISSION_DENIED);
+            }
+    
+            try
+            {
+                user = createUser(users, userID, userName);
+            }
+            catch (UserAlreadyExistsException e)
+            {
+                return CreateUserResult.failure(userID,
+                        FailureReason.USER_ALREADY_EXISTS);
+            }
         }
+        catch (ODKDatastoreException e)
+        {
+            throw new AggregateInternalErrorException(e.getMessage());
+        }
+
+        return CreateUserResult.success(user);
+    }
+    
+    public static User createUser(Users users, String userID, String userName) throws UserAlreadyExistsException, ODKDatastoreException
+    {
         if (users.query().equal(Users.USER_ID, userID).exists())
         {
-            return CreateUserResult.failure(userID,
-                    FailureReason.USER_ALREADY_EXISTS);
+            throw new UserAlreadyExistsException(null);
         }
         InternalUser newUser = new InternalUser(userID,
-                createUser.getUserName(), cc);
+                userName, users.getCC());
+        
         newUser.save();
 
         User user = new User(newUser.getID(), newUser.getAggregateIdentifier(),
                 newUser.getName());
-
-        return CreateUserResult.success(user);
+        
+        return user;
     }
 }

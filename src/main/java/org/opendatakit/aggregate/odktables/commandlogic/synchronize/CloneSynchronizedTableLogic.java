@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.opendatakit.aggregate.odktables.client.entity.Modification;
 import org.opendatakit.aggregate.odktables.client.entity.SynchronizedRow;
+import org.opendatakit.aggregate.odktables.client.exception.AggregateInternalErrorException;
 import org.opendatakit.aggregate.odktables.command.synchronize.CloneSynchronizedTable;
 import org.opendatakit.aggregate.odktables.commandlogic.CommandLogic;
 import org.opendatakit.aggregate.odktables.commandresult.CommandResult.FailureReason;
@@ -44,87 +45,97 @@ public class CloneSynchronizedTableLogic extends
 
     @Override
     public CloneSynchronizedTableResult execute(CallingContext cc)
-            throws ODKDatastoreException
+            throws AggregateInternalErrorException
     {
-        // Get relation instances
-        TableEntries entries = TableEntries.getInstance(cc);
-        UserTableMappings mappings = UserTableMappings.getInstance(cc);
-        Users users = Users.getInstance(cc);
-        Columns columns = Columns.getInstance(cc);
-
-        // Get data from request
-        String tableID = cloneSynchronizedTable.getTableID();
-        String aggregateTableIdentifier = cloneSynchronizedTable
-                .getAggregateTableIdentifier();
-        String requestingUserID = cloneSynchronizedTable.getRequestingUserID();
-
-        // Get request user
-        InternalUser user = users.query()
-                .equal(Users.USER_ID, requestingUserID).get();
-
-        // Check if user is allowed to read the table they want to clone
-        if (!user.hasPerm(aggregateTableIdentifier, Permissions.READ))
-        {
-            return CloneSynchronizedTableResult.failure(tableID,
-                    FailureReason.PERMISSION_DENIED);
-        }
-
-        // Check if the user is already using the tableID
-        boolean mappingExists = mappings
-                .query()
-                .equal(UserTableMappings.AGGREGATE_USER_IDENTIFIER,
-                        user.getAggregateIdentifier())
-                .equal(UserTableMappings.TABLE_ID, tableID).exists();
-        if (mappingExists)
-        {
-            return CloneSynchronizedTableResult.failure(tableID,
-                    FailureReason.TABLE_ALREADY_EXISTS);
-        }
-
-        // Retrieve the table entry for the table that is to be cloned
-        InternalTableEntry entry;
+        Modification clientModification;
         try
         {
-            entry = entries.getEntity(aggregateTableIdentifier);
+            // Get relation instances
+            TableEntries entries = TableEntries.getInstance(cc);
+            UserTableMappings mappings = UserTableMappings.getInstance(cc);
+            Users users = Users.getInstance(cc);
+            Columns columns = Columns.getInstance(cc);
+
+            // Get data from request
+            String tableID = cloneSynchronizedTable.getTableID();
+            String aggregateTableIdentifier = cloneSynchronizedTable
+                    .getAggregateTableIdentifier();
+            String requestingUserID = cloneSynchronizedTable
+                    .getRequestingUserID();
+
+            // Get request user
+            InternalUser user = users.query()
+                    .equal(Users.USER_ID, requestingUserID).get();
+
+            // Check if user is allowed to read the table they want to clone
+            if (!user.hasPerm(aggregateTableIdentifier, Permissions.READ))
+            {
+                return CloneSynchronizedTableResult.failure(tableID,
+                        FailureReason.PERMISSION_DENIED);
+            }
+
+            // Check if the user is already using the tableID
+            boolean mappingExists = mappings
+                    .query()
+                    .equal(UserTableMappings.AGGREGATE_USER_IDENTIFIER,
+                            user.getAggregateIdentifier())
+                    .equal(UserTableMappings.TABLE_ID, tableID).exists();
+            if (mappingExists)
+            {
+                return CloneSynchronizedTableResult.failure(tableID,
+                        FailureReason.TABLE_ALREADY_EXISTS);
+            }
+
+            // Retrieve the table entry for the table that is to be cloned
+            InternalTableEntry entry;
+            try
+            {
+                entry = entries.getEntity(aggregateTableIdentifier);
+            } catch (ODKDatastoreException e)
+            {
+                return CloneSynchronizedTableResult.failure(tableID,
+                        FailureReason.TABLE_DOES_NOT_EXIST);
+            }
+
+            // add entry to user table mapping
+            InternalUserTableMapping mapping = new InternalUserTableMapping(
+                    user.getAggregateIdentifier(), aggregateTableIdentifier,
+                    tableID, cc);
+            mapping.save();
+
+            // create modification of all the latest rows
+            Table table = Table.getInstance(aggregateTableIdentifier, cc);
+            List<InternalColumn> cols = columns
+                    .query()
+                    .equal(Columns.AGGREGATE_TABLE_IDENTIFIER,
+                            aggregateTableIdentifier).execute();
+
+            int modificationNumber = entry.getModificationNumber();
+
+            List<InternalRow> rows = table.query().execute();
+            List<SynchronizedRow> clientRows = new ArrayList<SynchronizedRow>();
+            for (InternalRow row : rows)
+            {
+                SynchronizedRow clientRow = new SynchronizedRow();
+                clientRow.setAggregateRowIdentifier(row
+                        .getAggregateIdentifier());
+                clientRow.setRevisionTag(row.getRevisionTag());
+                for (InternalColumn column : cols)
+                {
+                    String value = row
+                            .getValue(column.getAggregateIdentifier());
+                    clientRow.setValue(column.getName(), value);
+                }
+                clientRows.add(clientRow);
+            }
+
+            clientModification = new Modification(modificationNumber,
+                    clientRows);
         } catch (ODKDatastoreException e)
         {
-            return CloneSynchronizedTableResult.failure(tableID,
-                    FailureReason.TABLE_DOES_NOT_EXIST);
+            throw new AggregateInternalErrorException(e.getMessage());
         }
 
-        // add entry to user table mapping
-        InternalUserTableMapping mapping = new InternalUserTableMapping(
-                user.getAggregateIdentifier(), aggregateTableIdentifier,
-                tableID, cc);
-        mapping.save();
-
-        // create modification of all the latest rows
-        Table table = Table.getInstance(aggregateTableIdentifier, cc);
-        List<InternalColumn> cols = columns
-                .query()
-                .equal(Columns.AGGREGATE_TABLE_IDENTIFIER,
-                        aggregateTableIdentifier).execute();
-
-        int modificationNumber = entry.getModificationNumber();
-
-        List<InternalRow> rows = table.query().execute();
-        List<SynchronizedRow> clientRows = new ArrayList<SynchronizedRow>();
-        for (InternalRow row : rows)
-        {
-            SynchronizedRow clientRow = new SynchronizedRow();
-            clientRow.setAggregateRowIdentifier(row.getAggregateIdentifier());
-            clientRow.setRevisionTag(row.getRevisionTag());
-            for (InternalColumn column : cols)
-            {
-                String value = row.getValue(column.getAggregateIdentifier());
-                clientRow.setValue(column.getName(), value);
-            }
-            clientRows.add(clientRow);
-        }
-
-        Modification clientModification = new Modification(modificationNumber,
-                clientRows);
-        
         return CloneSynchronizedTableResult.success(clientModification);
     }
 }

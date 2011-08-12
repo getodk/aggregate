@@ -6,6 +6,7 @@ import java.util.List;
 import org.opendatakit.aggregate.odktables.client.entity.Column;
 import org.opendatakit.aggregate.odktables.client.entity.TableEntry;
 import org.opendatakit.aggregate.odktables.client.entity.User;
+import org.opendatakit.aggregate.odktables.client.exception.AggregateInternalErrorException;
 import org.opendatakit.aggregate.odktables.command.common.QueryForTables;
 import org.opendatakit.aggregate.odktables.commandlogic.CommandLogic;
 import org.opendatakit.aggregate.odktables.commandresult.common.QueryForTablesResult;
@@ -39,121 +40,124 @@ public class QueryForTablesLogic extends CommandLogic<QueryForTables>
 
     @Override
     public QueryForTablesResult execute(CallingContext cc)
-            throws ODKDatastoreException
+            throws AggregateInternalErrorException
     {
-        // get relation instances
-        TableEntries entries = TableEntries.getInstance(cc);
-        Users users = Users.getInstance(cc);
-        Permissions permissions = Permissions.getInstance(cc);
-        UserTableMappings mappings = UserTableMappings.getInstance(cc);
-        Columns columns = Columns.getInstance(cc);
-
-        // get request data
-        String requestingUserID = queryForTables.getRequestingUserID();
-
-        // retrieve request user
-        InternalUser requestingUser = users.query()
-                .equal(Users.USER_ID, requestingUserID).get();
-        String aggregateUserIdentifier = requestingUser
-                .getAggregateIdentifier();
-
-        // get aggregateTableIdentifiers for which this user has read permissions
-        @SuppressWarnings("unchecked")
-        List<String> aggregateTableIdentifiers = (List<String>) permissions
-                .query()
-                .equal(Permissions.AGGREGATE_USER_IDENTIFIER,
-                        aggregateUserIdentifier).equal(Permissions.READ, true)
-                .getDistinct(Permissions.AGGREGATE_TABLE_IDENTIFIER);
-
-        // retrieve all entries corresponding to the identifiers
-        boolean includesUsersTable = false;
-        List<InternalTableEntry> allEntries = new ArrayList<InternalTableEntry>();
-        for (String aggregateTableIdentifier : aggregateTableIdentifiers)
+        List<TableEntry> clientEntries;
+        try
         {
-            if (!aggregateTableIdentifier
-                    .equals(users.getAggregateIdentifier()))
-            {
-                allEntries.add(entries.getEntity(aggregateTableIdentifier));
-            } else
-            {
-                // special case Users table
-                includesUsersTable = true;
-            }
-        }
-
-        // create a TableEntry to send back to client for each entry in table
-        List<TableEntry> clientEntries = new ArrayList<TableEntry>();
-        for (InternalTableEntry entry : allEntries)
-        {
-            String aggregateOwnerIdentifier = entry
-                    .getAggregateOwnerIdentifier();
-            String aggregateTableIdentifier = entry.getAggregateIdentifier();
-            String tableName = entry.getName();
-            boolean isSynchronized = entry.isSynchronized();
-            InternalUser user = users.getEntity(aggregateOwnerIdentifier);
-            String tableID = null;
-            // if the user is registered with the table then set the tableID they are using
-            try
-            {
-                InternalUserTableMapping mapping = mappings
-                        .query()
-                        .equal(UserTableMappings.AGGREGATE_USER_IDENTIFIER,
-                                aggregateUserIdentifier)
-                        .equal(UserTableMappings.AGGREGATE_TABLE_IDENTIFIER,
-                                entry.getAggregateIdentifier()).get();
-                tableID = mapping.getTableID();
-            } catch (ODKDatastoreException e)
-            {
-                // Do nothing, this just means the user is not registered with this table right now. 
-            }
-
-            // send null for userID because we don't want people finding out what it is
-            User clientUser = new User(null, user.getAggregateIdentifier(),
-                    user.getName());
-
-            // retrieve the columns for the table
-            List<InternalColumn> internalColumns = columns
+            // get relation instances
+            TableEntries entries = TableEntries.getInstance(cc);
+            Users users = Users.getInstance(cc);
+            Permissions permissions = Permissions.getInstance(cc);
+            UserTableMappings mappings = UserTableMappings.getInstance(cc);
+            Columns columns = Columns.getInstance(cc);
+    
+            // get request data
+            String requestingUserID = queryForTables.getRequestingUserID();
+    
+            // retrieve request user
+            InternalUser requestingUser = users.query()
+                    .equal(Users.USER_ID, requestingUserID).get();
+            String aggregateUserIdentifier = requestingUser
+                    .getAggregateIdentifier();
+    
+            // get aggregateTableIdentifiers for which this user has read permissions
+            @SuppressWarnings("unchecked")
+            List<String> aggregateTableIdentifiers = (List<String>) permissions
                     .query()
-                    .equal(Columns.AGGREGATE_TABLE_IDENTIFIER,
-                            aggregateTableIdentifier).execute();
-            List<Column> clientColumns = new ArrayList<Column>();
-            for (InternalColumn internalColumn : internalColumns)
+                    .equal(Permissions.AGGREGATE_USER_IDENTIFIER,
+                            aggregateUserIdentifier).equal(Permissions.READ, true)
+                    .getDistinct(Permissions.AGGREGATE_TABLE_IDENTIFIER);
+    
+            // retrieve all entries corresponding to the identifiers
+            boolean includesUsersTable = false;
+            List<InternalTableEntry> allEntries = new ArrayList<InternalTableEntry>();
+            for (String aggregateTableIdentifier : aggregateTableIdentifiers)
             {
-                Column clientColumn = new Column(internalColumn.getName(),
-                        internalColumn.getType(), internalColumn.getNullable());
-                clientColumns.add(clientColumn);
+                if (!aggregateTableIdentifier
+                        .equals(users.getAggregateIdentifier()))
+                {
+                    allEntries.add(entries.getEntity(aggregateTableIdentifier));
+                } else
+                {
+                    // special case Users table
+                    includesUsersTable = true;
+                }
             }
-
-            // create the TableEntry
-            TableEntry clientEntry = new TableEntry(clientUser,
-                    entry.getAggregateIdentifier(), tableID, tableName,
-                    clientColumns, isSynchronized);
-            clientEntries.add(clientEntry);
+    
+            // create a TableEntry to send back to client for each entry in table
+            clientEntries = new ArrayList<TableEntry>();
+            for (InternalTableEntry entry : allEntries)
+            {
+                String aggregateOwnerIdentifier = entry
+                        .getAggregateOwnerIdentifier();
+                String aggregateTableIdentifier = entry.getAggregateIdentifier();
+                String tableName = entry.getName();
+                boolean isSynchronized = entry.isSynchronized();
+                InternalUser user = users.getEntity(aggregateOwnerIdentifier);
+                String tableID = null;
+                // if the user is registered with the table then set the tableID they are using
+                try
+                {
+                    InternalUserTableMapping mapping = mappings
+                            .query()
+                            .equal(UserTableMappings.AGGREGATE_USER_IDENTIFIER,
+                                    aggregateUserIdentifier)
+                            .equal(UserTableMappings.AGGREGATE_TABLE_IDENTIFIER,
+                                    entry.getAggregateIdentifier()).get();
+                    tableID = mapping.getTableID();
+                } catch (ODKDatastoreException e)
+                {
+                    // Do nothing, this just means the user is not registered with this table right now. 
+                }
+    
+                // send null for userID because we don't want people finding out what it is
+                User clientUser = new User(null, user.getAggregateIdentifier(),
+                        user.getName());
+    
+                // retrieve the columns for the table
+                List<InternalColumn> internalColumns = columns
+                        .query()
+                        .equal(Columns.AGGREGATE_TABLE_IDENTIFIER,
+                                aggregateTableIdentifier).execute();
+                List<Column> clientColumns = new ArrayList<Column>();
+                for (InternalColumn internalColumn : internalColumns)
+                {
+                    Column clientColumn = new Column(internalColumn.getName(),
+                            internalColumn.getType(), internalColumn.getNullable());
+                    clientColumns.add(clientColumn);
+                }
+    
+                // create the TableEntry
+                TableEntry clientEntry = new TableEntry(clientUser,
+                        entry.getAggregateIdentifier(), tableID, tableName,
+                        clientColumns, isSynchronized);
+                clientEntries.add(clientEntry);
+            }
+    
+            // special case Users table
+            if (includesUsersTable)
+            {
+                String aggregateIdentifier = users.getAggregateIdentifier();
+                String tableID = null;
+                String tableName = users.getName();
+                List<Attribute> attributes = users.getAttributes();
+                List<Column> clientColumns = new ArrayList<Column>();
+                for (Attribute attribute : attributes)
+                {
+                    Column column = new Column(attribute.getName(),
+                            attribute.getType(), attribute.isNullable());
+                    clientColumns.add(column);
+                }
+                boolean isSynchronized = false;
+                TableEntry clientEntry = new TableEntry(null, aggregateIdentifier,
+                        tableID, tableName, clientColumns, isSynchronized);
+                clientEntries.add(clientEntry);
+            }
         }
-
-        // special case Users table
-        if (includesUsersTable)
+        catch (ODKDatastoreException e)
         {
-            InternalUser user = users.getAdminUser();
-            // send null for userID because we don't want people finding out what it is
-            User clientUser = new User(null, user.getAggregateIdentifier(),
-                    user.getName());
-            String aggregateIdentifier = users.getAggregateIdentifier();
-            String tableID = null;
-            String tableName = users.getName();
-            List<Attribute> attributes = users.getAttributes();
-            List<Column> clientColumns = new ArrayList<Column>();
-            for (Attribute attribute : attributes)
-            {
-                Column column = new Column(attribute.getName(),
-                        attribute.getType(), attribute.isNullable());
-                clientColumns.add(column);
-            }
-            boolean isSynchronized = false;
-            TableEntry clientEntry = new TableEntry(clientUser,
-                    aggregateIdentifier, tableID, tableName, clientColumns,
-                    isSynchronized);
-            clientEntries.add(clientEntry);
+            throw new AggregateInternalErrorException(e.getMessage());
         }
 
         return QueryForTablesResult.success(clientEntries);

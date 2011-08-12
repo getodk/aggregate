@@ -1,6 +1,7 @@
 package org.opendatakit.aggregate.odktables.commandlogic.common;
 
 import org.opendatakit.aggregate.odktables.client.entity.User;
+import org.opendatakit.aggregate.odktables.client.exception.AggregateInternalErrorException;
 import org.opendatakit.aggregate.odktables.command.common.GetUserByID;
 import org.opendatakit.aggregate.odktables.commandlogic.CommandLogic;
 import org.opendatakit.aggregate.odktables.commandresult.CommandResult.FailureReason;
@@ -30,36 +31,44 @@ public class GetUserByIDLogic extends CommandLogic<GetUserByID>
 
     @Override
     public GetUserByIDResult execute(CallingContext cc)
-            throws ODKDatastoreException
+            throws AggregateInternalErrorException
     {
-        Users users = Users.getInstance(cc);
-
-        String userID = this.getUserByID.getUserID();
-        String requestingUserID = this.getUserByID.getRequestingUserID();
-        String usersTable = users.getAggregateIdentifier();
-
-        InternalUser requestUser = users.query()
-                .equal(Users.USER_ID, requestingUserID).get();
-
-        if (!requestUser.hasPerm(usersTable, Permissions.READ))
-        {
-            return GetUserByIDResult.failure(
-                    requestUser.getAggregateIdentifier(),
-                    FailureReason.PERMISSION_DENIED);
-        }
-
-        InternalUser user = null;
+        User retrievedUser; 
         try
         {
-            user = users.query().equal(Users.USER_ID, userID).get();
-        } catch (ODKDatastoreException e)
-        {
-            return GetUserByIDResult.failure(userID,
-                    FailureReason.USER_DOES_NOT_EXIST);
+            Users users = Users.getInstance(cc);
+    
+            String userID = this.getUserByID.getUserID();
+            String requestingUserID = this.getUserByID.getRequestingUserID();
+            String usersTable = users.getAggregateIdentifier();
+    
+            InternalUser requestUser = users.query()
+                    .equal(Users.USER_ID, requestingUserID).get();
+    
+            if (!requestUser.hasPerm(usersTable, Permissions.READ))
+            {
+                return GetUserByIDResult.failure(
+                        requestUser.getAggregateIdentifier(),
+                        FailureReason.PERMISSION_DENIED);
+            }
+    
+            InternalUser user = null;
+            try
+            {
+                user = users.query().equal(Users.USER_ID, userID).get();
+            } catch (ODKDatastoreException e)
+            {
+                return GetUserByIDResult.failure(userID,
+                        FailureReason.USER_DOES_NOT_EXIST);
+            }
+    
+            retrievedUser = new User(userID, user.getAggregateIdentifier(),
+                    user.getName());
         }
-
-        User retrievedUser = new User(userID, user.getAggregateIdentifier(),
-                user.getName());
+        catch (ODKDatastoreException e)
+        {
+            throw new AggregateInternalErrorException(e.getMessage());
+        }
 
         return GetUserByIDResult.success(retrievedUser);
     }

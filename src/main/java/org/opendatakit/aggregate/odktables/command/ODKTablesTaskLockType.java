@@ -4,7 +4,7 @@ import org.opendatakit.common.persistence.ITaskLockType;
 
 public enum ODKTablesTaskLockType implements ITaskLockType
 {
-  INCREMENT_MODIFICATION_NUMBER(120000);
+  UPDATE_MODIFICATION_NUMBER(120000);
   
   private long timeout;
 

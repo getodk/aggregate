@@ -1,5 +1,6 @@
 package org.opendatakit.aggregate.odktables.commandlogic.synchronize;
 
+import org.opendatakit.aggregate.odktables.client.exception.AggregateInternalErrorException;
 import org.opendatakit.aggregate.odktables.command.synchronize.RemoveTableSynchronization;
 import org.opendatakit.aggregate.odktables.commandlogic.CommandLogic;
 import org.opendatakit.aggregate.odktables.commandresult.CommandResult.FailureReason;
@@ -32,38 +33,44 @@ public class RemoveTableSynchronizationLogic extends
 
     @Override
     public RemoveTableSynchronizationResult execute(CallingContext cc)
-            throws ODKDatastoreException
+            throws AggregateInternalErrorException
     {
-        // get relation instances
-        Users users = Users.getInstance(cc);
-        UserTableMappings mappings = UserTableMappings.getInstance(cc);
-
-        // get request data
-        String requestingUserID = removeTableSynchronization
-                .getRequestingUserID();
-        String tableID = removeTableSynchronization.getTableID();
-
-        // retrieve request user
-        InternalUser requestUser = users.query()
-                .equal(Users.USER_ID, requestingUserID).get();
-
-        // get mapping from user's tableID to the aggregateTableIdentifier
-        InternalUserTableMapping mapping;
         try
         {
-            mapping = mappings
-                    .query()
-                    .equal(UserTableMappings.AGGREGATE_USER_IDENTIFIER,
-                            requestUser.getAggregateIdentifier())
-                    .equal(UserTableMappings.TABLE_ID, tableID).get();
+            // get relation instances
+            Users users = Users.getInstance(cc);
+            UserTableMappings mappings = UserTableMappings.getInstance(cc);
+
+            // get request data
+            String requestingUserID = removeTableSynchronization
+                    .getRequestingUserID();
+            String tableID = removeTableSynchronization.getTableID();
+
+            // retrieve request user
+            InternalUser requestUser = users.query()
+                    .equal(Users.USER_ID, requestingUserID).get();
+
+            // get mapping from user's tableID to the aggregateTableIdentifier
+            InternalUserTableMapping mapping;
+            try
+            {
+                mapping = mappings
+                        .query()
+                        .equal(UserTableMappings.AGGREGATE_USER_IDENTIFIER,
+                                requestUser.getAggregateIdentifier())
+                        .equal(UserTableMappings.TABLE_ID, tableID).get();
+            } catch (ODKDatastoreException e)
+            {
+                return RemoveTableSynchronizationResult.failure(tableID,
+                        FailureReason.TABLE_DOES_NOT_EXIST);
+            }
+
+            // delete the mapping
+            mapping.delete();
         } catch (ODKDatastoreException e)
         {
-            return RemoveTableSynchronizationResult.failure(tableID,
-                    FailureReason.TABLE_DOES_NOT_EXIST);
+            throw new AggregateInternalErrorException(e.getMessage());
         }
-        
-        // delete the mapping
-        mapping.delete();
 
         return RemoveTableSynchronizationResult.success();
     }

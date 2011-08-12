@@ -6,6 +6,7 @@ import java.util.Map.Entry;
 
 import org.opendatakit.aggregate.odktables.client.entity.Modification;
 import org.opendatakit.aggregate.odktables.client.entity.SynchronizedRow;
+import org.opendatakit.aggregate.odktables.client.exception.AggregateInternalErrorException;
 import org.opendatakit.aggregate.odktables.client.exception.ColumnDoesNotExistException;
 import org.opendatakit.aggregate.odktables.client.exception.RowOutOfSynchException;
 import org.opendatakit.aggregate.odktables.command.synchronize.UpdateSynchronizedRows;
@@ -19,6 +20,7 @@ import org.opendatakit.aggregate.odktables.entity.InternalRow;
 import org.opendatakit.aggregate.odktables.entity.InternalTableEntry;
 import org.opendatakit.aggregate.odktables.entity.InternalUser;
 import org.opendatakit.aggregate.odktables.entity.InternalUserTableMapping;
+import org.opendatakit.aggregate.odktables.exception.SnafuException;
 import org.opendatakit.aggregate.odktables.relation.Columns;
 import org.opendatakit.aggregate.odktables.relation.Permissions;
 import org.opendatakit.aggregate.odktables.relation.Table;
@@ -51,82 +53,96 @@ public class UpdateSynchronizedRowsLogic extends
 
     @Override
     public UpdateSynchronizedRowsResult execute(CallingContext cc)
-            throws ODKDatastoreException, ODKTaskLockException
+            throws AggregateInternalErrorException
     {
-        // get relation instances
-        Users users = Users.getInstance(cc);
-        TableEntries entries = TableEntries.getInstance(cc);
-        UserTableMappings mappings = UserTableMappings.getInstance(cc);
-        Columns columns = Columns.getInstance(cc);
-
-        // get request data
-        String requestingUserID = updateSynchronizedRows.getRequestingUserID();
-        String tableID = updateSynchronizedRows.getTableID();
-        int clientModificationNumber = updateSynchronizedRows
-                .getModificationNumber();
-        List<SynchronizedRow> changedRows = updateSynchronizedRows
-                .getChangedRows();
-
-        // retrieve request user
-        InternalUser requestUser = users.getByID(requestingUserID);
-
-        // retrieve mapping from user's tableID to aggregateTableIdentifier
-        InternalUserTableMapping mapping;
-        try
-        {
-            mapping = mappings
-                    .query()
-                    .equal(UserTableMappings.AGGREGATE_USER_IDENTIFIER,
-                            requestUser.getAggregateIdentifier())
-                    .equal(UserTableMappings.TABLE_ID, tableID).get();
-        } catch (ODKDatastoreException e)
-        {
-            return UpdateSynchronizedRowsResult.failure(null, tableID, null,
-                    FailureReason.TABLE_DOES_NOT_EXIST);
-        }
-
-        String aggregateTableIdentifier = mapping.getAggregateTableIdentifier();
-
-        // in order to update rows of a table the user must have write permission
-        if (!requestUser.hasPerm(aggregateTableIdentifier, Permissions.WRITE))
-        {
-            return UpdateSynchronizedRowsResult.failure(null, tableID, null,
-                    FailureReason.PERMISSION_DENIED);
-        }
-
-        InternalTableEntry entry = entries.getEntity(aggregateTableIdentifier);
-
-        // check if the modification number of the user's table is up to date with the latest in aggregate
-        if (entry.getModificationNumber() != clientModificationNumber)
-        {
-            return UpdateSynchronizedRowsResult.failure(null, tableID, null,
-                    FailureReason.OUT_OF_SYNCH);
-        }
-
-        // set new modification number
-        int newModificationNumber = clientModificationNumber + 1;
-        CommandLogicFunctions.updateModificationNumber(entry,
-                aggregateTableIdentifier, newModificationNumber, cc);
-
-        // Update changed rows and create modification
         Modification clientModification;
         try
         {
-            clientModification = updateChangedRows(changedRows,
-                    aggregateTableIdentifier, newModificationNumber, columns,
-                    cc);
-        } catch (RowOutOfSynchException e)
-        {
-            return UpdateSynchronizedRowsResult.failure(
-                    e.getAggregateRowIdentifier(), tableID, null,
-                    FailureReason.ROW_OUT_OF_SYNCH);
-        } catch (ColumnDoesNotExistException e)
-        {
-            // revert modification number and return failure
+            // get relation instances
+            Users users = Users.getInstance(cc);
+            TableEntries entries = TableEntries.getInstance(cc);
+            UserTableMappings mappings = UserTableMappings.getInstance(cc);
+            Columns columns = Columns.getInstance(cc);
+
+            // get request data
+            String requestingUserID = updateSynchronizedRows
+                    .getRequestingUserID();
+            String tableID = updateSynchronizedRows.getTableID();
+            int clientModificationNumber = updateSynchronizedRows
+                    .getModificationNumber();
+            List<SynchronizedRow> changedRows = updateSynchronizedRows
+                    .getChangedRows();
+
+            // retrieve request user
+            InternalUser requestUser = users.getByID(requestingUserID);
+
+            // retrieve mapping from user's tableID to aggregateTableIdentifier
+            InternalUserTableMapping mapping;
+            try
+            {
+                mapping = mappings
+                        .query()
+                        .equal(UserTableMappings.AGGREGATE_USER_IDENTIFIER,
+                                requestUser.getAggregateIdentifier())
+                        .equal(UserTableMappings.TABLE_ID, tableID).get();
+            } catch (ODKDatastoreException e)
+            {
+                return UpdateSynchronizedRowsResult.failure(null, tableID,
+                        null, FailureReason.TABLE_DOES_NOT_EXIST);
+            }
+
+            String aggregateTableIdentifier = mapping
+                    .getAggregateTableIdentifier();
+
+            // in order to update rows of a table the user must have write permission
+            if (!requestUser.hasPerm(aggregateTableIdentifier,
+                    Permissions.WRITE))
+            {
+                return UpdateSynchronizedRowsResult.failure(null, tableID,
+                        null, FailureReason.PERMISSION_DENIED);
+            }
+
+            InternalTableEntry entry = entries
+                    .getEntity(aggregateTableIdentifier);
+
+            // check if the modification number of the user's table is up to date with the latest in aggregate
+            if (entry.getModificationNumber() != clientModificationNumber)
+            {
+                return UpdateSynchronizedRowsResult.failure(null, tableID,
+                        null, FailureReason.OUT_OF_SYNCH);
+            }
+
+            // set new modification number
+            int newModificationNumber = clientModificationNumber + 1;
             CommandLogicFunctions.updateModificationNumber(entry,
-                    aggregateTableIdentifier, clientModificationNumber, cc);
-            return UpdateSynchronizedRowsResult.failure(null, tableID,
-                    e.getBadColumnName(), FailureReason.COLUMN_DOES_NOT_EXIST);
+                    aggregateTableIdentifier, newModificationNumber, cc);
+
+            // Update changed rows and create modification
+            try
+            {
+                clientModification = updateChangedRows(changedRows,
+                        aggregateTableIdentifier, newModificationNumber,
+                        columns, cc);
+            } catch (RowOutOfSynchException e)
+            {
+                return UpdateSynchronizedRowsResult.failure(
+                        e.getAggregateRowIdentifier(), tableID, null,
+                        FailureReason.ROW_OUT_OF_SYNCH);
+            } catch (ColumnDoesNotExistException e)
+            {
+                // revert modification number and return failure
+                CommandLogicFunctions.updateModificationNumber(entry,
+                        aggregateTableIdentifier, clientModificationNumber, cc);
+                return UpdateSynchronizedRowsResult.failure(null, tableID,
+                        e.getBadColumnName(),
+                        FailureReason.COLUMN_DOES_NOT_EXIST);
+            }
+        } catch (ODKDatastoreException e)
+        {
+            throw new AggregateInternalErrorException(e.getMessage());
+        } catch (ODKTaskLockException e)
+        {
+            throw new AggregateInternalErrorException(e.getMessage());
         }
 
         return UpdateSynchronizedRowsResult.success(clientModification);
@@ -188,10 +204,12 @@ public class UpdateSynchronizedRowsLogic extends
         }
         Modification clientModification = new Modification(
                 newModificationNumber, updatedRows);
-        
+
         // save entities
-        for (TypedEntity entity : entitiesToSave)
-            entity.save();
+        boolean success = CommandLogicFunctions.saveEntities(entitiesToSave);
+        if (!success)
+            throw new SnafuException("Could not save entities: "
+                    + entitiesToSave);
 
         return clientModification;
     }

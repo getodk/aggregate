@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.opendatakit.aggregate.odktables.client.entity.Row;
+import org.opendatakit.aggregate.odktables.client.exception.AggregateInternalErrorException;
 import org.opendatakit.aggregate.odktables.command.simple.QueryForRows;
 import org.opendatakit.aggregate.odktables.commandlogic.CommandLogic;
 import org.opendatakit.aggregate.odktables.commandresult.CommandResult.FailureReason;
@@ -39,8 +40,11 @@ public class QueryForRowsLogic extends CommandLogic<QueryForRows>
 
     @Override
     public QueryForRowsResult execute(CallingContext cc)
-            throws ODKDatastoreException
+            throws AggregateInternalErrorException
     {
+        List<Row> clientRows;
+        try
+        {
         TableEntries entries = TableEntries.getInstance(cc);
         Users users = Users.getInstance(cc);
         Columns columns = Columns.getInstance(cc);
@@ -88,7 +92,7 @@ public class QueryForRowsLogic extends CommandLogic<QueryForRows>
                 .equal(Columns.AGGREGATE_TABLE_IDENTIFIER,
                         aggregateTableIdentifier)
                 .getDistinct(Columns.COLUMN_NAME);
-        List<Row> clientRows = new ArrayList<Row>();
+        clientRows = new ArrayList<Row>();
 
         for (InternalRow row : rows)
         {
@@ -105,6 +109,11 @@ public class QueryForRowsLogic extends CommandLogic<QueryForRows>
                         row.getValue(column.getAggregateIdentifier()));
             }
             clientRows.add(clientRow);
+        }
+        }
+        catch (ODKDatastoreException e)
+        {
+            throw new AggregateInternalErrorException(e.getMessage());
         }
 
         return QueryForRowsResult.success(clientRows);
