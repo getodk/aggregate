@@ -16,14 +16,7 @@ public class OdkAdminListTable extends FlexTable {
   private static String ID_HEADING = "Phone ID";
 
   public OdkAdminListTable() {
-
-    // create table headers
-    setText(0, DELETE_COLUMN, DELETE_HEADING);
-    setText(0, USER_COLUMN, USER_HEADING);
-    setText(0, ID_COLUMN, ID_HEADING);
-
     // add styling
-    getRowFormatter().addStyleName(0, "titleBar");
     addStyleName("dataTable");
     getElement().setId("form_management_table");
   }
@@ -34,27 +27,26 @@ public class OdkAdminListTable extends FlexTable {
    * @param adminList
    */
   public void updateAdmin(OdkTablesAdmin[] adminList) {
-    if(adminList == null) {
+    if (adminList == null) {
       return;
     }
     
-    int i = 0;
-    
-    for (int j = 0; j < adminList.length; j++) {
-      OdkTablesAdmin admin = adminList[j];
-      setWidget(i, DELETE_COLUMN, new TablesAdminDelete(admin.getAggregateUid()));
-      setWidget(i, USER_COLUMN, new HTML(admin.getName()));
-      setWidget(i, ID_COLUMN, new HTML(admin.getExternalUid()));
+    removeAllRows();
+    // create table headers
+    setText(0, DELETE_COLUMN, DELETE_HEADING);
+    setText(0, USER_COLUMN, USER_HEADING);
+    setText(0, ID_COLUMN, ID_HEADING);
+    getRowFormatter().addStyleName(0, "titleBar");
 
-      if (i % 2 == 0)
-        getRowFormatter().addStyleName(i, "evenTableRow");
-    }
+    for (int i = 0; i < adminList.length; i++) {
+      OdkTablesAdmin admin = adminList[i];
+      int j = i + 1;
+      setWidget(j, DELETE_COLUMN, new TablesAdminDelete(admin.getAggregateUid()));
+      setWidget(j, USER_COLUMN, new HTML(admin.getName()));
+      setWidget(j, ID_COLUMN, new HTML(admin.getExternalUid()));
 
-    // remove any trailing rows...
-    ++i; // to get number or rows in actual table...
-    while (getRowCount() > i) {
-      removeRow(getRowCount() - 1);
+      if (j % 2 == 0)
+        getRowFormatter().addStyleName(j, "evenTableRow");
     }
   }
-
 }
