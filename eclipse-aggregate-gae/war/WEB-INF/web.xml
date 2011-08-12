@@ -16,6 +16,15 @@
             <role-name>admin</role-name>
         </auth-constraint>
     </security-constraint>
+    
+   	<security-constraint>
+        <web-resource-collection>
+            <url-pattern>/remote_api</url-pattern>
+        </web-resource-collection>
+        <auth-constraint>
+            <role-name>admin</role-name>
+        </auth-constraint>
+    </security-constraint>
 
 	<filter>
 		<filter-name>serverSpringSecurityFilterChain</filter-name>
@@ -394,6 +403,17 @@
     	<servlet-name>odktables</servlet-name>
     	<url-pattern>/odktables/*</url-pattern>
     </servlet-mapping>
+    
+    <servlet>
+    	<servlet-name>RemoteApi</servlet-name>
+	    <servlet-class>com.google.apphosting.utils.remoteapi.RemoteApiServlet</servlet-class>
+	</servlet>
+	
+	<servlet-mapping>
+	    <servlet-name>RemoteApi</servlet-name>
+	    <url-pattern>/remote_api</url-pattern>
+	</servlet-mapping>
+    
 
 	<welcome-file-list>
 		<welcome-file>index.html</welcome-file>
