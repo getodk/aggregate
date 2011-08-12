@@ -89,8 +89,10 @@
 
         <intercept-url pattern="/ssl/**" access="hasRole('ROLE_SITE_ACCESS_ADMIN')" />
 
-		<!--	TODO: gae should be: hasRole(USER_IS_DAEMON) -->
+		<!--	GAE access is controlled in web.xml -->
 		<intercept-url pattern="/gae/**" access="true" /> 
+		<!--	RemoteAPI access is controlled in web.xml -->
+		<intercept-url pattern="/remote_api" access="true" /> 
 		
 		<!-- in case we forgot to mention something... -->
 		<intercept-url pattern="/**" access="isAnonymous()" />
