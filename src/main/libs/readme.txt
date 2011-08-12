@@ -22,3 +22,4 @@ mvn install:install-file -Dfile=gwt-maps-1.1.0.jar -DgroupId=com.google.gwt.goog
 
 mvn install:install-file -Dfile=odk-tomcatutil.jar -DgroupId=org.opendatakit -DartifactId=odk-tomcatutil -Dversion=1.0 -Dpackaging=jar
 
+mvn install:install-file -Dfile=appengine-remote-api.jar -DgroupId=com.google.appengine -DartifactId=appengine-remote-api -Dversion=1.5.1 -Dpackaging=jar
