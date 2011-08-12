@@ -16,8 +16,10 @@
 package org.opendatakit.aggregate.datamodel;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
+import org.opendatakit.aggregate.constants.common.FormElementNamespace;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.form.Form;
 
@@ -155,6 +157,47 @@ public final class FormElementModel {
 		return ((fdm == null) ? (ref.fdm == null) : ((ref.fdm != null) && fdm.equals(ref.fdm))) &&
 			   ((parent == null) ? (ref.parent == null) : ((ref.parent != null) && parent.equals(ref.parent))) && 
 			   (type == ref.type); 
+	}
+
+	/**
+	 * Returns the list of children that are in the specified form element namespaces.
+	 * 
+	 * @param namespaces -- collection of form element namespaces to filter against.
+	 * @return list of children contained in the collection of namespaces.
+	 */
+	public final List<FormElementModel> getChildren(Collection<FormElementNamespace> namespaces) {
+		List<FormElementModel> subset = new ArrayList<FormElementModel>();
+		boolean hasMetadata = false;
+		boolean hasValues = false;
+		
+		if ( namespaces == null ) {
+			// no restriction -- return everything
+			return children;
+		}
+		
+		for ( FormElementNamespace ns : namespaces) {
+			hasMetadata = hasMetadata || ( ns == FormElementNamespace.METADATA );
+			hasValues = hasValues || ( ns == FormElementNamespace.VALUES );
+		}
+		
+		if ( hasValues && hasMetadata ) {
+			// want both -- return everything
+			return children;
+		}
+		
+		if ( !hasValues && !hasMetadata ) {
+			return subset; // empty subset...
+		}
+		
+		// do the hard work...
+		for ( FormElementModel child : children ) {
+			if ( child.isMetadata() && hasMetadata ) {
+				subset.add(child);
+			} else if ( !child.isMetadata() && hasValues ) {
+				subset.add(child);
+			}
+		}
+		return subset;
 	}
 
 	public final List<FormElementModel> getChildren() {
