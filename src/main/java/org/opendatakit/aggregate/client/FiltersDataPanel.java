@@ -22,15 +22,14 @@ import org.opendatakit.aggregate.client.filter.ColumnFilter;
 import org.opendatakit.aggregate.client.filter.ColumnFilterHeader;
 import org.opendatakit.aggregate.client.filter.Filter;
 import org.opendatakit.aggregate.client.filter.FilterGroup;
-import org.opendatakit.aggregate.client.filter.FilterServiceAsync;
 import org.opendatakit.aggregate.client.filter.RowFilter;
 import org.opendatakit.aggregate.client.widgets.AddFilterButton;
 import org.opendatakit.aggregate.client.widgets.CopyFilterGroupButton;
 import org.opendatakit.aggregate.client.widgets.DeleteFilterButton;
+import org.opendatakit.aggregate.client.widgets.RemoveFilterGroupButton;
 import org.opendatakit.aggregate.client.widgets.SaveFilterGroupButton;
 import org.opendatakit.aggregate.constants.common.UIConsts;
 
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ScrollPanel;
@@ -39,95 +38,81 @@ import com.google.gwt.user.client.ui.TreeItem;
 
 public class FiltersDataPanel extends ScrollPanel {
 
-  private Tree filtersTree;
-  private TreeItem root;
+	private Tree filtersTree;
+	private TreeItem root;
+	private FilterSubTab parentSubTab;
+	private AddFilterButton addFilter;
 
-  private FilterSubTab parentSubTab;
+	public FiltersDataPanel(FilterSubTab panel) {
+		this.parentSubTab = panel;
+		getElement().setId("filters_container");
 
-  public FiltersDataPanel(FilterSubTab panel) {
-    this.parentSubTab = panel;
-    getElement().setId("filters_container");
-    
-    // create tree
-    filtersTree = new Tree();
-    add(filtersTree);
-    
-    // create the root as the new filter button
-    root = new TreeItem(new AddFilterButton(panel));   
-    filtersTree.addItem(root);
-  }
+		// create tree
+		filtersTree = new Tree();
+		add(filtersTree);
 
-  public void update(FilterGroup group) {
-    // clear the current filters being displayed so we don't get duplicates
-    root.removeItems();
-  
-    if(group.getFormId() == null) {
-      return;
-    }
-    
-    // create filter header
-    FlexTable filterHeader = new FlexTable();
-    String filterName = group.getName();
-    if(filterName.equals(UIConsts.FILTER_NONE)) {
-      filterName = ""; // avoid displaying none word, better as empty string
-    }
-    
-    filterHeader.setWidget(0, 0, new Label(filterName));
-    filterHeader.setWidget(0, 1, new SaveFilterGroupButton(parentSubTab));
+		// create the root as the new filter button
+		addFilter = new AddFilterButton(panel);   
+		root = new TreeItem("No Filter Group");
+		filtersTree.addItem(root);
 
-    if (group.getName() != null) {
-      if (!group.getName().equals(UIConsts.FILTER_NONE)) {
-        filterHeader.setWidget(0, 2, new CopyFilterGroupButton(parentSubTab));
-      }
-    }
+	}
 
-    TreeItem currentFilterGroup = new TreeItem(filterHeader);
-    
-    // recreate filter list
-    FlexTable filters = new FlexTable();
-    int row = 0;
-    for (Filter filter : group.getFilters()) {
-      if (filter instanceof RowFilter) {
-        RowFilter rowFilter = (RowFilter) filter;
-        filters.setWidget(row, 0,
-            new Label(rowFilter.getVisibility() + rowFilter.getColumn().getDisplayHeader()
-                + "where columns are " + rowFilter.getOperation() + rowFilter.getInput()));
-      } else if (filter instanceof ColumnFilter) {
-        ColumnFilter columnFilter = (ColumnFilter) filter;
-        ArrayList<ColumnFilterHeader> columns = columnFilter.getColumnFilterHeaders();
-        String columnNames = "";
-        for (ColumnFilterHeader column : columns) {
-          columnNames += " " + column.getColumn().getDisplayHeader();
-        }
-        filters.setWidget(row, 0, new Label(columnFilter.getVisibility() + columnNames));
-      }
+	public void update(FilterGroup group) {
+		// clear the current filters being displayed so we don't get duplicates
+		root.removeItems();
 
-      DeleteFilterButton removeFilter = new DeleteFilterButton(filter, parentSubTab);
-      filters.setWidget(row, 1, removeFilter);
-      row++;
-    }
-    currentFilterGroup.addItem(filters);
-    currentFilterGroup.setState(true);
-    
-    // set system auto drops the information under root
-    root.addItem(currentFilterGroup);
-    root.setState(true);
-  }
+		// create filter header
+		FlexTable filterHeader = new FlexTable();
+		String filterName = group.getName();
+		if(filterName.equals(UIConsts.FILTER_NONE)) {
+			filterName = "No Filter Group";
+		}
+		root.setText(filterName);
 
-  private void removeFilterGroup(FilterGroup group) {
-    FilterServiceAsync filterSvc = SecureGWT.getFilterService();
+		if(group.getFormId() == null) {
+			return;
+		}
 
-    AsyncCallback<Boolean> callback = new AsyncCallback<Boolean>() {
-      public void onFailure(Throwable caught) {
-        AggregateUI.getUI().reportError(caught);
-      }
+		filterHeader.setWidget(0, 0, new SaveFilterGroupButton(parentSubTab));
 
-      @Override
-      public void onSuccess(Boolean result) {
-        AggregateUI.getUI().clearError();
-      }
-    };
+		if (group.getName() != null) {
+			if (!group.getName().equals(UIConsts.FILTER_NONE)) {
+				filterHeader.setWidget(0, 1, new CopyFilterGroupButton(parentSubTab));
+				filterHeader.setWidget(0, 2, new RemoveFilterGroupButton(parentSubTab));
+			}
+		}
 
-    filterSvc.deleteFilterGroup(group, callback);
-  }
+		TreeItem currentFilterGroup = new TreeItem(filterHeader);
+
+		// recreate filter list
+		FlexTable filters = new FlexTable();
+		int row = 0;
+		for (Filter filter : group.getFilters()) {
+			DeleteFilterButton removeFilter = new DeleteFilterButton(filter, parentSubTab);
+			filters.setWidget(row, 0, removeFilter);
+			if (filter instanceof RowFilter) {
+				RowFilter rowFilter = (RowFilter) filter;
+				filters.setWidget(row, 1,
+						new Label(rowFilter.getVisibility() + rowFilter.getColumn().getDisplayHeader()));
+				filters.setWidget(++row, 1, 
+						new Label("where columns are " + rowFilter.getOperation() + rowFilter.getInput()));
+			} else if (filter instanceof ColumnFilter) {
+				ColumnFilter columnFilter = (ColumnFilter) filter;
+				ArrayList<ColumnFilterHeader> columns = columnFilter.getColumnFilterHeaders();
+				filters.setWidget(row, 1, new Label(""+columnFilter.getVisibility()));
+				for (ColumnFilterHeader column : columns) {
+					filters.setWidget(++row, 1, new Label(column.getColumn().getDisplayHeader()));
+				}
+			}
+			row++;
+		}
+		currentFilterGroup.addItem(filters);
+		currentFilterGroup.addItem(addFilter);
+		currentFilterGroup.setState(true);
+
+		// set system auto drops the information under root
+		root.addItem(currentFilterGroup);
+		root.setState(true);
+	}
 }
