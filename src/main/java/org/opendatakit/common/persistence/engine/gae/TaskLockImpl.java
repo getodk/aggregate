@@ -67,8 +67,7 @@ public class TaskLockImpl implements TaskLock {
         result = true;
       } else if (checkForExpiration(gaeEntity)) {
         // note don't delete as there is no guarantee that the lock is in the
-        // same
-        // entity group (only one entity group per transaction)
+        // same entity group (only one entity group per transaction)
         updateValuesNpersist(transaction, lockId, formId, taskType, gaeEntity);
         result = true;
       }
@@ -227,7 +226,19 @@ public class TaskLockImpl implements TaskLock {
       query.addFilter(FORM_ID_PROPERTY, Query.FilterOperator.EQUAL, formId);
       query.addFilter(TASK_TYPE_PROPERTY, Query.FilterOperator.EQUAL, taskType.getName());
       PreparedQuery pquery = ds.prepare(query);
-      return pquery.asSingleEntity();
+      Iterable<Entity> entities = pquery.asIterable();
+      // There may be expired locks in the database.  
+      // Skip over those and find the active lock. 
+      Entity active = null;
+      for ( Entity e : entities ) {
+    	  if ( !checkForExpiration(e) ) {
+    		  if ( active != null ) {
+    			  throw new ODKTaskLockException(MULTIPLE_RESULTS_ERROR);
+    		  }
+    		  active = e;
+    	  }
+      }
+      return active;
     } catch (TooManyResultsException e) {
       throw new ODKTaskLockException(MULTIPLE_RESULTS_ERROR, e);
     } catch (IllegalStateException e) {
