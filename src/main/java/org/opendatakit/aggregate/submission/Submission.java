@@ -29,7 +29,6 @@ import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.form.FormDefinition;
 import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.format.element.ElementFormatter;
-import org.opendatakit.common.constants.BasicConsts;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
@@ -106,31 +105,6 @@ public class Submission extends SubmissionSet {
 	public Boolean isComplete() {
 		return ((TopLevelDynamicBase) getGroupBackingObject()).getIsComplete();
 	}
-	
-	/**
-	 * Format the submission set for output
-	 * 
-	 * @param propertyNames
-	 *            if null includes all properties (METADATA then VALUES), otherwise will only include
-	 *            the properties listed
-	 * @param elemFormatter
-	 *            formatter to use to properly format the values
-	 * @throws ODKDatastoreException
-	 */
-	@Override
-	public Row getFormattedValuesAsRow(List<FormElementModel> propertyNames,
-			ElementFormatter elemFormatter, boolean includeParentUid, CallingContext cc) throws ODKDatastoreException {
-		Row row = new Row(constructSubmissionKey(null));
-		if ( propertyNames == null ) {
-			List<FormElementNamespace> namespaces = new ArrayList<FormElementNamespace>();
-			namespaces.add(FormElementNamespace.METADATA);
-			namespaces.add(FormElementNamespace.VALUES);
-			getFormattedNamespaceValuesForRow(row, namespaces, elemFormatter, includeParentUid, cc);
-		} else {
-			getFormattedValuesForRow(row, propertyNames, elemFormatter, includeParentUid, cc);
-		}
-		return row;
-	}
 
 	/**
 	 * This has 2 modes of operation.
@@ -184,51 +158,6 @@ public class Submission extends SubmissionSet {
 		return getFormattedValuesAsRow(reducedProperties,	elemFormatter, includeParentUid, cc);
 	}
 	
-	private void getFormattedValuesForRow(Row row, List<FormElementModel> propertyNames,
-			ElementFormatter elemFormatter, boolean includeParentUid, CallingContext cc) throws ODKDatastoreException {
-		if ( propertyNames == null ) {
-			throw new IllegalStateException("propertyNames cannot be null");
-		} else if ( propertyNames.size() == 1 && propertyNames.get(0).equals(group) ) {
-			// SubmissionSet handles submission-specific elements...
-			List<SubmissionValue> values = getSubmissionValues();
-			for (SubmissionValue value : values) {
-				value.formatValue(elemFormatter, row, BasicConsts.EMPTY_STRING, cc);
-			}
-		} else {
-			for (FormElementModel element : propertyNames) {
-				if ( element.isMetadata() ) {
-					switch ( element.getType() ) {
-					case META_INSTANCE_ID:
-						elemFormatter.formatString(getKey().getKey(),
-								element, BasicConsts.EMPTY_STRING, row);
-						break;
-					case META_UI_VERSION:
-						elemFormatter.formatLong(getUiVersion(), 
-								element, BasicConsts.EMPTY_STRING, row);
-						break;
-					case META_MODEL_VERSION:
-						elemFormatter.formatLong(getModelVersion(), 
-								element, BasicConsts.EMPTY_STRING, row);
-						break;
-					case META_SUBMISSION_DATE:
-						elemFormatter.formatDateTime(getSubmissionDate(), 
-								element, BasicConsts.EMPTY_STRING, row);
-						break;
-					case META_IS_COMPLETE:
-						elemFormatter.formatBoolean(isComplete(), 
-								element, BasicConsts.EMPTY_STRING, row);
-						break;
-					}
-				} else {
-					SubmissionValue value = getElementValue(element);
-					if (value != null) {
-						value.formatValue(elemFormatter, row, BasicConsts.EMPTY_STRING, cc);
-					}
-				}
-			}
-		}
-	}
-	
 	/**
 	 * Given the list of FormElementNamespaces to render, this renders the namespaces in the order given.
 	 * 
@@ -242,25 +171,25 @@ public class Submission extends SubmissionSet {
 	public void getFormattedNamespaceValuesForRow(Row row, List<FormElementNamespace> types,
 			ElementFormatter elemFormatter, boolean includeParentUid, CallingContext cc) throws ODKDatastoreException {
 		List<FormElementModel> elementList = new ArrayList<FormElementModel>();
+		// get the in-order list of all flattened elements within this submission set...
+		List<FormElementModel> allElements = getFormElements();
+		// and now place them in the proper ordering according to the sequence of types in the types list.
 		for ( FormElementNamespace type : types ) {
 			if ( type == FormElementNamespace.METADATA ) {
-				// we are a Submission -- emit the creation date and id...
-				FormElementModel metaId = getFormDefinition().getElementByName(FormElementModel.Metadata.META_INSTANCE_ID.toString());
-				elementList.add(metaId);
-				FormElementModel metaModelVersion = getFormDefinition().getElementByName(FormElementModel.Metadata.META_MODEL_VERSION.toString());
-				elementList.add(metaModelVersion);
-				FormElementModel metaUIVersion = getFormDefinition().getElementByName(FormElementModel.Metadata.META_UI_VERSION.toString());
-				elementList.add(metaUIVersion);
-				FormElementModel metaSubmissionDate = getFormDefinition().getElementByName(FormElementModel.Metadata.META_SUBMISSION_DATE.toString());
-				elementList.add(metaSubmissionDate);
-				FormElementModel metaIsComplete = getFormDefinition().getElementByName(FormElementModel.Metadata.META_IS_COMPLETE.toString());
-				elementList.add(metaIsComplete);
+				for ( FormElementModel m : allElements ) {
+					if ( m.isMetadata() ) {
+						elementList.add(m);
+					}
+				}
 			} else if ( type == FormElementNamespace.VALUES ) {
-				// this singleton value is treated specially above...
-				elementList.add(group);
+				for ( FormElementModel m : allElements ) {
+					if ( !m.isMetadata() ) {
+						elementList.add(m);
+					}
+				}
 			}
 		}
-		getFormattedValuesForRow(row, elementList, elemFormatter, includeParentUid, cc);
+		populateFormattedValuesInRow(row, elementList, elemFormatter, cc);
 	}
 
 	public SubmissionElement resolveSubmissionKey(List<SubmissionKeyPart> parts) {
