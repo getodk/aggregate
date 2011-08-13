@@ -32,7 +32,7 @@ public class CopyFilterGroupButton extends AButtonBase implements ClickHandler {
   private FilterSubTab parentSubTab;
   
   public CopyFilterGroupButton(FilterSubTab parentSubTab) {
-    super("Copy");
+    super("Save As");
     this.parentSubTab = parentSubTab;
     addClickHandler(this);
   }
