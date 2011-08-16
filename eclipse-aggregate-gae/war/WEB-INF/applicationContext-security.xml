@@ -65,7 +65,7 @@
 		<intercept-url pattern="/index.html" access="true" />
 		<intercept-url pattern="/logout.html" access="true" />
 		<intercept-url pattern="/odk_color.png" access="true" />
-		<intercept-url pattern="/openid_login.html" access="isAnonymous()" />
+		<intercept-url pattern="/openid_login.html" access="true" />
 		<intercept-url pattern="/local_login.html" access="isFullyAuthenticated() and hasRole('AUTH_LOCAL')" />
 
 		<!-- grant access to various servlets -->
