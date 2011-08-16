@@ -31,6 +31,8 @@ import org.opendatakit.aggregate.constants.ErrorConsts;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.common.UIConsts;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
+import org.opendatakit.aggregate.form.PersistentResults;
+import org.opendatakit.aggregate.form.PersistentResults.ResultFileInfo;
 import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.aggregate.submission.SubmissionElement;
 import org.opendatakit.aggregate.submission.SubmissionKey;
@@ -99,75 +101,98 @@ public class BinaryDataServlet extends ServletUtilBase {
     Long contentLength = null;
     
     List<SubmissionKeyPart> parts = key.splitSubmissionKey();
-    Submission sub = null;
-	try {
-		sub = Submission.fetchSubmission(parts, cc);
-	} catch (ODKFormNotFoundException e1) {
-		odkIdNotFoundError(resp);
-		return;
-	} catch (ODKDatastoreException e) {
-		e.printStackTrace();
-		resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-						"Unable to retrieve attachment");
-		return;
-	}
-	
-    if ( sub != null ) {
-    	BlobSubmissionType b = null;
-    	
+    if ( parts.get(0).getElementName().equals(PersistentResults.FORM_ID_PERSISTENT_RESULT) ) {
+    	// special handling for persistent results data...
     	try {
-    		SubmissionElement v = null;
-    		v = sub.resolveSubmissionKey(parts);
-    		if ( v instanceof BlobSubmissionType ) {
-    			b = (BlobSubmissionType) v;
-    		} else {
-        		String path = getKeyPath(parts);
-    			logger.severe(NOT_BINARY_OBJECT + ": " + path);
-    			resp.sendError(HttpServletResponse.SC_BAD_REQUEST,
-    					NOT_BINARY_OBJECT);
-    			return;
-    		}
-    	} catch ( Exception e ) {
-    		e.printStackTrace();
-    		String path = getKeyPath(parts);
-    		logger.severe("Unable to retrieve part identified by path: " + path);
-    		errorBadParam(resp);
-    		return;
-    	}
-    		
-    	if ( b.getAttachmentCount() == 1 ) {
-    		try {
-				imageBlob = b.getBlob(1, cc);
-				unrootedFileName = b.getUnrootedFilename(1);
-				contentType = b.getContentType(1);
-				contentLength = b.getContentLength(1);
-			} catch (ODKDatastoreException e) {
-				e.printStackTrace();
+			PersistentResults p = new PersistentResults(key, cc);
+			ResultFileInfo info = p.getResultFileInfo(cc);
+			if ( info == null ) {
 				resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-								"Unable to retrieve attachment");
+						"Unable to retrieve attachment");
 				return;
 			}
-    	} else {
-    		SubmissionKeyPart p = parts.get(parts.size()-1);
-    		Long ordinal = p.getOrdinalNumber();
-    		if (ordinal == null) {
-    			resp.sendError(HttpServletResponse.SC_BAD_REQUEST, 
-    					"attachment request must be fully qualified");
-				return;
-    		} else {
-	    		try {
-	    			imageBlob = b.getBlob(ordinal.intValue(), cc);
-	    			unrootedFileName = b.getUnrootedFilename(ordinal.intValue());
-	    			contentType = b.getContentType(ordinal.intValue());
-	    			contentLength = b.getContentLength(ordinal.intValue());
-	    		} catch (ODKDatastoreException e) {
-	    			e.printStackTrace();
-	    			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-	    							"Unable to retrieve attachment");
-					return;
+			unrootedFileName = info.unrootedFilename;
+			contentType = info.contentType;
+			contentLength = info.contentLength;
+			imageBlob = p.getResultFileContents(cc);
+		} catch (ODKDatastoreException e) {
+			e.printStackTrace();
+			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+				"Unable to retrieve attachment");
+			return;
+		}
+    	
+    } else {
+	    Submission sub = null;
+		try {
+			sub = Submission.fetchSubmission(parts, cc);
+		} catch (ODKFormNotFoundException e1) {
+			odkIdNotFoundError(resp);
+			return;
+		} catch (ODKDatastoreException e) {
+			e.printStackTrace();
+			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+							"Unable to retrieve attachment");
+			return;
+		}
+		
+	    if ( sub != null ) {
+	    	BlobSubmissionType b = null;
+	    	
+	    	try {
+	    		SubmissionElement v = null;
+	    		v = sub.resolveSubmissionKey(parts);
+	    		if ( v instanceof BlobSubmissionType ) {
+	    			b = (BlobSubmissionType) v;
+	    		} else {
+	        		String path = getKeyPath(parts);
+	    			logger.severe(NOT_BINARY_OBJECT + ": " + path);
+	    			resp.sendError(HttpServletResponse.SC_BAD_REQUEST,
+	    					NOT_BINARY_OBJECT);
+	    			return;
 	    		}
-    		}
-    	}
+	    	} catch ( Exception e ) {
+	    		e.printStackTrace();
+	    		String path = getKeyPath(parts);
+	    		logger.severe("Unable to retrieve part identified by path: " + path);
+	    		errorBadParam(resp);
+	    		return;
+	    	}
+	    		
+	    	if ( b.getAttachmentCount() == 1 ) {
+	    		try {
+					imageBlob = b.getBlob(1, cc);
+					unrootedFileName = b.getUnrootedFilename(1);
+					contentType = b.getContentType(1);
+					contentLength = b.getContentLength(1);
+				} catch (ODKDatastoreException e) {
+					e.printStackTrace();
+					resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+									"Unable to retrieve attachment");
+					return;
+				}
+	    	} else {
+	    		SubmissionKeyPart p = parts.get(parts.size()-1);
+	    		Long ordinal = p.getOrdinalNumber();
+	    		if (ordinal == null) {
+	    			resp.sendError(HttpServletResponse.SC_BAD_REQUEST, 
+	    					"attachment request must be fully qualified");
+					return;
+	    		} else {
+		    		try {
+		    			imageBlob = b.getBlob(ordinal.intValue(), cc);
+		    			unrootedFileName = b.getUnrootedFilename(ordinal.intValue());
+		    			contentType = b.getContentType(ordinal.intValue());
+		    			contentLength = b.getContentLength(ordinal.intValue());
+		    		} catch (ODKDatastoreException e) {
+		    			e.printStackTrace();
+		    			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+		    							"Unable to retrieve attachment");
+						return;
+		    		}
+	    		}
+	    	}
+	    }
     }
     
     if ( imageBlob != null ) {

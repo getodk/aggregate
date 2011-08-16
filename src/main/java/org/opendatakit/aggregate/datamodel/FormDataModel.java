@@ -70,6 +70,8 @@ import org.opendatakit.common.web.CallingContext;
  */
 public final class FormDataModel extends CommonFieldsBase {
 
+	private static final Logger logger = Logger.getLogger(FormDataModel.class.getName());
+	
 	/* xform element types */
 	public static enum ElementType {
 		// xform tag types
@@ -210,7 +212,10 @@ public final class FormDataModel extends CommonFieldsBase {
 	
 	public final void setUriSubmissionDataModel(String value) {
 		if ( ! setStringField(URI_SUBMISSION_DATA_MODEL, value) ) {
-			throw new IllegalStateException("overflow on uriSubmissionDataModel");
+			String str = "overflow on uriSubmissionDataModel";
+			logger.severe(str);
+			print(System.err);
+			throw new IllegalStateException(str);
 		}
 	}
 	
@@ -220,7 +225,10 @@ public final class FormDataModel extends CommonFieldsBase {
 	
 	public final void setParentUriFormDataModel(String value) {
 		if ( ! setStringField(PARENT_URI_FORM_DATA_MODEL, value) ) {
-			throw new IllegalStateException("overflow on parentUriFormDataModel");
+			String str = "overflow on parentUriFormDataModel";
+			logger.severe(str);
+			print(System.err);
+			throw new IllegalStateException(str);
 		}
 	}
 
@@ -238,7 +246,8 @@ public final class FormDataModel extends CommonFieldsBase {
 		try {
 			et = ElementType.valueOf(type);
 		} catch ( Exception e ) {
-			Logger.getLogger(FormDataModel.class.getName()).severe("Unrecognized element type: " + type);
+			logger.severe("Unrecognized element type: " + type);
+			print(System.err);
 			e.printStackTrace();
 		}
 		return et;
@@ -246,7 +255,10 @@ public final class FormDataModel extends CommonFieldsBase {
 	
 	public final void setElementType(ElementType type) {
 		if ( ! setStringField(ELEMENT_TYPE, type.toString()) ) {
-			throw new IllegalStateException("overflow on elementType");
+			String str = "overflow on elementType";
+			logger.severe(str);
+			print(System.err);
+			throw new IllegalStateException(str);
 		}
 	}
 	
@@ -256,7 +268,10 @@ public final class FormDataModel extends CommonFieldsBase {
 	
 	public final void setElementName(String name) {
 		if ( ! setStringField(ELEMENT_NAME, name) ) {
-			throw new IllegalStateException("overflow on elementName");
+			String str = "overflow on elementName";
+			logger.severe(str);
+			print(System.err);
+			throw new IllegalStateException(str);
 		}
 	}
 	/**
@@ -319,7 +334,10 @@ public final class FormDataModel extends CommonFieldsBase {
 	
 	public final void setPersistAsColumn(String value) {
 		if ( ! setStringField(PERSIST_AS_COLUMN_NAME, value) ) {
-			throw new IllegalStateException("overflow on persistAsColumn");
+			String str = "overflow on persistAsColumn";
+			logger.severe(str);
+			print(System.err);
+			throw new IllegalStateException(str);
 		}
 	}
 
@@ -329,7 +347,10 @@ public final class FormDataModel extends CommonFieldsBase {
 	
 	public final void setPersistAsTable(String value) {
 		if ( ! setStringField(PERSIST_AS_TABLE_NAME, value) ) {
-			throw new IllegalStateException("overflow on persistAsTable");
+			String str = "overflow on persistAsTable";
+			logger.severe(str);
+			print(System.err);
+			throw new IllegalStateException(str);
 		}
 	}
 	
@@ -339,7 +360,10 @@ public final class FormDataModel extends CommonFieldsBase {
 	
 	public final void setPersistAsSchema(String value) {
 		if ( ! setStringField(PERSIST_AS_SCHEMA_NAME, value) ) {
-			throw new IllegalStateException("overflow on persistAsSchema");
+			String str = "overflow on persistAsSchema";
+			logger.severe(str);
+			print(System.err);
+			throw new IllegalStateException(str);
 		}
 	}
 	
@@ -386,7 +410,10 @@ public final class FormDataModel extends CommonFieldsBase {
 		// test that we aren't overwriting the ordinal
 		FormDataModel c = children.get(i);
 		if ( c != null ) {
-			throw new IllegalStateException("Form id " + getUri() + " Child already defined for ordinal " + ordinal.toString());
+			String str = "Form id " + getUri() + " Child already defined for ordinal " + ordinal.toString();
+			logger.severe(str);
+			print(System.err);
+			throw new IllegalStateException(str);
 		}
 		// save child...
 		children.set(i, child);
@@ -396,7 +423,10 @@ public final class FormDataModel extends CommonFieldsBase {
 		int i = 1;
 		for ( FormDataModel m : children ) {
 			if ( m == null ) {
-				throw new IllegalStateException("missing ordinal position " + Integer.toString(i));
+				String str = "missing ordinal position " + Integer.toString(i);
+				logger.severe(str);
+				print(System.err);
+				throw new IllegalStateException(str);
 			}
 			++i;
 		}
@@ -444,12 +474,7 @@ public final class FormDataModel extends CommonFieldsBase {
 		}
 		out.format("FDM(%d,%s)  fdmSubmissionUri %s\n",
 				getOrdinalNumber().intValue(), ppk, getUriSubmissionDataModel());
-		String tpk = getUriSubmissionDataModel();
-		if ( tpk == null ) {
-			tpk = "";
-		}
-		out.format("            PK=%s  topLevelAuri=%s\n",
-				getUri(), tpk);
+		out.format("            PK=%s\n", getUri());
 		String en = getElementName();
 		if ( en == null ) {
 			en = "";

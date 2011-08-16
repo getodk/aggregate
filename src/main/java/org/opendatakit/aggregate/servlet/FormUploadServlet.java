@@ -33,10 +33,8 @@ import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.common.UIConsts;
 import org.opendatakit.aggregate.exception.ODKConversionException;
 import org.opendatakit.aggregate.exception.ODKFormAlreadyExistsException;
-import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
 import org.opendatakit.aggregate.exception.ODKParseException;
-import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.parser.FormParserForJavaRosa;
 import org.opendatakit.aggregate.parser.MultiPartFormData;
 import org.opendatakit.aggregate.parser.MultiPartFormItem;
@@ -243,24 +241,14 @@ public class FormUploadServlet extends ServletUtilBase {
 
       try {
         parser = new FormParserForJavaRosa(formName, formXmlData, inputXml, xmlFileName,
-            uploadedFormItems, warnings, cc);
-
+        									uploadedFormItems, warnings, cc);
         logger.info("Upload form: " + parser.getFormId());
-        Form form = Form.retrieveForm(parser.getFormId(), cc);
-        String isIncompleteFlag = uploadedFormItems.getSimpleFormField(ServletConsts.TRANSFER_IS_INCOMPLETE);
-        if ( isIncompleteFlag != null && isIncompleteFlag.trim().length() != 0 ) {
-        	// not complete yet...
-        	form.setDownloadEnabled(false);
-        	form.persist(cc);
-        } else {
-        	form.setDownloadEnabled(true);
-        	form.persist(cc);
-        }
-        form.printDataTree(System.out);
+        // GAE requires some settle time before these entries will be
+        // accurately retrieved. Do not re-fetch the form after it has been uploaded.
         bOk = true;
 
       } catch (ODKFormAlreadyExistsException e) {
-        resp.sendError(HttpServletResponse.SC_CONFLICT, ErrorConsts.FORM_WITH_ODKID_EXISTS);
+        resp.sendError(HttpServletResponse.SC_CONFLICT, ErrorConsts.FORM_WITH_ODKID_EXISTS + "\n" + e.getMessage());
         return;
       } catch (ODKIncompleteSubmissionData e) {
         switch (e.getReason()) {
@@ -269,7 +257,7 @@ public class FormUploadServlet extends ServletUtilBase {
           return;
         case ID_MALFORMED:
           resp.sendError(HttpServletResponse.SC_BAD_REQUEST, ErrorConsts.JAVA_ROSA_PARSING_PROBLEM
-              + e.getMessage());
+        		  + "\n" + e.getMessage());
           return;
         case ID_MISSING:
           resp.sendError(HttpServletResponse.SC_BAD_REQUEST, ErrorConsts.MISSING_FORM_ID);
@@ -279,7 +267,7 @@ public class FormUploadServlet extends ServletUtilBase {
           return;
         case BAD_JR_PARSE:
           resp.sendError(HttpServletResponse.SC_BAD_REQUEST, ErrorConsts.JAVA_ROSA_PARSING_PROBLEM
-              + e.getMessage());
+        		  + "\n" + e.getMessage());
           return;
         default:
           // just move on
@@ -288,18 +276,15 @@ public class FormUploadServlet extends ServletUtilBase {
         // TODO NEED TO FIGURE OUT PROPER ACTION FOR ERROR
         e.printStackTrace();
         resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-            ErrorConsts.PERSISTENCE_LAYER_PROBLEM);
+            ErrorConsts.PERSISTENCE_LAYER_PROBLEM + "\n" + e.getMessage());
       } catch (ODKDatastoreException e) {
         e.printStackTrace();
         resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-            ErrorConsts.PERSISTENCE_LAYER_PROBLEM);
+            ErrorConsts.PERSISTENCE_LAYER_PROBLEM + "\n" + e.getMessage());
       } catch (ODKConversionException e) {
         e.printStackTrace();
         resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ErrorConsts.PARSING_PROBLEM
             + "\n" + e.getMessage());
-      } catch (ODKFormNotFoundException e) {
-        e.printStackTrace();
-        resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ErrorConsts.ODKID_NOT_FOUND);
       } catch (ODKParseException e) {
         // unfortunately, the underlying javarosa utility swallows the parsing error.
         e.printStackTrace();
@@ -322,14 +307,14 @@ public class FormUploadServlet extends ServletUtilBase {
       out.write(HtmlConsts.BODY_OPEN);
       if ( warnings.length() != 0 ) {
     	  out.write("<p>Form uploaded with warnings. There are value fields in the form that do not " +
-    	  		"have <code>&gt;bind/&lt;</code> declarations or those <code>&gt;bind/&lt;</code> " +
+    	  		"have <code>&lt;bind/&gt;</code> declarations or those <code>&lt;bind/&gt;</code> " +
     	  		"declarations do not have a <code>type</code> attribute that " +
     	  		"identifies the data type of that field (e.g., boolean, int, decimal, date, dateTime, time, string, " +
     	  		"select1, select, barcode, geopoint or binary).</p>" +
-    	  		"<p><b>All these value fields have been declared as string values.</b></p>" +
-        	  	"<p>If these value fields hold date, dateTime, time or numeric data (e.g., decimal or int), then ODK Aggregate will " +
-    	  		"produce erroneous sortings and filtering results against those value fields.  It will use " +
-    	  		"lexical ordering on those fields.  I.e., the value 100 will be considered less than 11.</p>" +
+    	  		"<p><b>All these value fields have been declared as string values.</b> It will use " +
+    	  		"lexical ordering on those fields.  E.g., the value 100 will be considered less than 11.</p>" +
+        	  	"<p><font color=\"red\">If these value fields hold date, dateTime, time or numeric data (e.g., decimal or int), then " +
+        	  	"ODK Aggregate will produce erroneous sortings and erroneous filtering results against those value fields.</font></p>" +
     	  		"<table><th><td>Field Name</td></th>");
     	  out.write(warnings.toString());
     	  out.write("</table>");

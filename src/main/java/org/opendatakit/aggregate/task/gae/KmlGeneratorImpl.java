@@ -21,11 +21,11 @@ import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.form.PersistentResults;
-import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.task.KmlGenerator;
 import org.opendatakit.aggregate.task.gae.servlet.KmlGeneratorTaskServlet;
 import org.opendatakit.common.constants.BasicConsts;
+import org.opendatakit.common.persistence.PersistConsts;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
 
@@ -48,12 +48,11 @@ public class KmlGeneratorImpl implements KmlGenerator {
   public void createKmlTask(Form form, SubmissionKey persistentResultsKey, long attemptCount,
       CallingContext cc) throws ODKDatastoreException,
       ODKFormNotFoundException {
-    Submission s = Submission.fetchSubmission(persistentResultsKey.splitSubmissionKey(), cc);
-    PersistentResults r = new PersistentResults(s);
+    PersistentResults r = new PersistentResults(persistentResultsKey, cc);
     Map<String, String> params = r.getRequestParameters();
     TaskOptions task = TaskOptions.Builder.withUrl(BasicConsts.FORWARDSLASH + KmlGeneratorTaskServlet.ADDR);
     task.method(TaskOptions.Method.GET);
-    task.countdownMillis(1);
+    task.countdownMillis(PersistConsts.MIN_SETTLE_MILLISECONDS);
     task.param(ServletConsts.FORM_ID, form.getFormId());
     task.param(ServletConsts.PERSISTENT_RESULTS_KEY, persistentResultsKey.toString());
     task.param(ServletConsts.ATTEMPT_COUNT, Long.toString(attemptCount));

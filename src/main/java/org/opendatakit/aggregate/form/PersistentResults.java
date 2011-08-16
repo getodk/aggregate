@@ -17,23 +17,23 @@ package org.opendatakit.aggregate.form;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.opendatakit.aggregate.constants.HtmlUtil;
+import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.common.ExportStatus;
 import org.opendatakit.aggregate.constants.common.ExportType;
-import org.opendatakit.aggregate.datamodel.FormDataModel;
-import org.opendatakit.aggregate.datamodel.FormElementModel;
-import org.opendatakit.aggregate.datamodel.TopLevelDynamicBase;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
-import org.opendatakit.aggregate.form.FormDefinition.OrdinalSequence;
-import org.opendatakit.aggregate.submission.Submission;
+import org.opendatakit.aggregate.servlet.BinaryDataServlet;
 import org.opendatakit.aggregate.submission.SubmissionKey;
-import org.opendatakit.aggregate.submission.type.BlobSubmissionType;
-import org.opendatakit.aggregate.submission.type.DateSubmissionType;
-import org.opendatakit.aggregate.submission.type.LongSubmissionType;
-import org.opendatakit.aggregate.submission.type.StringSubmissionType;
-import org.opendatakit.common.datamodel.DynamicCommonFieldsBase;
+import org.opendatakit.aggregate.submission.SubmissionKeyPart;
+import org.opendatakit.common.constants.BasicConsts;
+import org.opendatakit.common.datamodel.BinaryContent;
+import org.opendatakit.common.datamodel.BinaryContentManipulator;
+import org.opendatakit.common.datamodel.BinaryContentRefBlob;
+import org.opendatakit.common.datamodel.RefBlob;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.Datastore;
@@ -58,72 +58,50 @@ public class PersistentResults {
 	
 	public static final String FORM_ID_PERSISTENT_RESULT = "aggregate.opendatakit.org:PersistentResults";
 
-	public static final XFormParameters xformPersistentResultsParameters = 
-		new XFormParameters( FORM_ID_PERSISTENT_RESULT, 1L, 0L);
-
-	private static FormElementModel requestingUser;
-	private static FormElementModel requestDate;
-	private static FormElementModel requestParameters;
-	private static FormElementModel lastRetryDate;
-	private static FormElementModel attemptCount;
-	private static FormElementModel status;
-	private static FormElementModel resultType;
-	private static FormElementModel completionDate;
-	private static FormElementModel resultFile;
-	private static FormElementModel formId;
-
-	public static FormElementModel getRequestingUserKey() {
-		return requestingUser;
-	}
-
-	public static FormElementModel getRequestDateKey() {
-		return requestDate;
-	}
-
-	public static FormElementModel getRequestParametersKey() {
-		return requestParameters;
-	}
+	private final PersistentResultsTable row;
 	
-	public static FormElementModel getLastRetryDateKey() {
-		return lastRetryDate;
-	}
+	private final BinaryContentManipulator bcm;
 	
-	public static FormElementModel getAttemptCountKey() {
-		return attemptCount;
+	private PersistentResults(PersistentResultsTable row, CallingContext cc) throws ODKDatastoreException {
+		this.row = row;
+		this.bcm = PersistentResultsTable.assertManipulator(row.getUri(), cc);
 	}
-
-	public static FormElementModel getStatusKey() {
-		return status;
-	}
-
-	public static FormElementModel getResultTypeKey() {
-		return resultType;
-	}
-
-	public static FormElementModel getCompletionDateKey() {
-		return completionDate;
-	}
-
-	public static FormElementModel getResultFileKey() {
-		return resultFile;
-	}
-	
-	public static FormElementModel getFormIdKey() {
-	  return formId;
-	}
-
-	public Submission objectEntity;
-	
 	
 	/**
-	 * After you have a submission (e.g., from a query), create a 
-	 * PersistentResults object to wrap it 
-	 * and make access to values easier.
+	 * Constructor when retrieving a PersistentResults entry from the datastore.
 	 * 
-	 * @param s
+	 * @param persistentResult -- submission key of the persistent result to retrieve.
+	 * @param cc
+	 * @throws ODKDatastoreException
 	 */
-	public PersistentResults(Submission s) {
-		objectEntity = s;
+	public PersistentResults( SubmissionKey persistentResult, CallingContext cc ) throws ODKDatastoreException {
+		List<SubmissionKeyPart> parts = persistentResult.splitSubmissionKey();
+		if (parts == null || parts.size() == 0 ) {
+			throw new IllegalArgumentException("submission key is empty");
+		}
+		if ( !parts.get(0).getElementName().equals(FORM_ID_PERSISTENT_RESULT)) {
+			throw new IllegalArgumentException("unrecognized form id");
+		}
+		if (parts.size() < 2) {
+			throw new IllegalArgumentException(
+					"submission key does not have a top level group");
+		}
+		SubmissionKeyPart tlg = parts.get(1);
+		if (!tlg.getElementName().equals(PersistentResultsTable.TABLE_NAME)) {
+			throw new IllegalArgumentException("top level group name: " 
+					+ tlg.getElementName()
+					+ " is not as expected: "
+					+ PersistentResultsTable.TABLE_NAME);
+		}
+		if ( tlg.getAuri() == null ) {
+			throw new IllegalArgumentException("submission key does not have top level auri");
+		}
+		
+		Datastore ds = cc.getDatastore();
+		User user = cc.getCurrentUser();
+		PersistentResultsTable relation = PersistentResultsTable.assertRelation(cc);
+		row = ds.getEntity(relation, tlg.getAuri(), user);
+		this.bcm = PersistentResultsTable.assertManipulator(row.getUri(), cc);
 	}
 
 	/**
@@ -137,17 +115,10 @@ public class PersistentResults {
 	 * @throws ODKDatastoreException
 	 */
 	public PersistentResults(ExportType type, Form form, Map<String,String> parameters, CallingContext cc) throws ODKDatastoreException {
-		Form persistentResultsForm;
-		try {
-			persistentResultsForm = Form.retrieveForm(FORM_ID_PERSISTENT_RESULT, cc);
-		} catch ( ODKFormNotFoundException e) {
-			throw new ODKDatastoreException(e);
-		}
+		Datastore ds = cc.getDatastore();
 		User user = cc.getCurrentUser();
-		objectEntity = new Submission(xformPersistentResultsParameters.modelVersion,
-								xformPersistentResultsParameters.uiVersion,
-								CommonFieldsBase.newUri(),
-								persistentResultsForm.getFormDefinition(), cc);
+		PersistentResultsTable relation = PersistentResultsTable.assertRelation(cc);
+		row = ds.createEntityUsingRelation(relation, user);
 		setRequestingUser(user.getUriUser());
 		Date now = new Date();
 		setRequestDate(now);
@@ -157,29 +128,31 @@ public class PersistentResults {
 		setStatus(ExportStatus.GENERATION_IN_PROGRESS);
 		setResultType(type);
 		setFormId(form.getFormId());
+		this.bcm = PersistentResultsTable.assertManipulator(row.getUri(), cc);
 		
-		objectEntity.setIsComplete(true); // indicate that the data should be visible on queries
 		// NOTE: the entity is not yet persisted! 
 	}
 	
 	public String getRequestingUser() {
-		return ((StringSubmissionType) objectEntity.getElementValue(requestingUser)).getValue();
+		return row.getStringField(PersistentResultsTable.REQUESTING_USER);
 	}
 	
 	public void setRequestingUser(String value) throws ODKEntityPersistException {
-		((StringSubmissionType) objectEntity.getElementValue(requestingUser)).setValueFromString(value);
+		if ( !row.setStringField(PersistentResultsTable.REQUESTING_USER, value)) {
+			throw new IllegalStateException("overflow requestingUser");
+		}
 	}
 
 	public Date getRequestDate() {
-		return ((DateSubmissionType) objectEntity.getElementValue(requestDate)).getValue();
+		return row.getDateField(PersistentResultsTable.REQUEST_DATE);
 	}
 
 	public void setRequestDate(Date value) {
-		((DateSubmissionType) objectEntity.getElementValue(requestDate)).setValueFromDate(value);
+		row.setDateField(PersistentResultsTable.REQUEST_DATE, value);
 	}
 
 	public Map<String,String> getRequestParameters() throws ODKDatastoreException {
-		String parameterDocument = ((StringSubmissionType) objectEntity.getElementValue(requestParameters)).getValue();
+		String parameterDocument = row.getStringField(PersistentResultsTable.REQUEST_PARAMETERS);
 		try {
 			return PropertyMapSerializer.deserializeRequestParameters(parameterDocument);
 		} catch ( Exception e ) {
@@ -188,112 +161,172 @@ public class PersistentResults {
 	}
 
 	public void setRequestParameters(Map<String,String> value) throws ODKEntityPersistException {
-		((StringSubmissionType) objectEntity.getElementValue(requestParameters)).setValueFromString(
-					PropertyMapSerializer.serializeRequestParameters(value));
+		if ( !row.setStringField(PersistentResultsTable.REQUEST_PARAMETERS, 
+					PropertyMapSerializer.serializeRequestParameters(value))) {
+			throw new IllegalStateException("overflow requestParameters");
+		}
 	}
 
 	public Date getLastRetryDate() {
-		return ((DateSubmissionType) objectEntity.getElementValue(lastRetryDate)).getValue();
+		return row.getDateField(PersistentResultsTable.LAST_RETRY_DATE);
 	}
 
 	public void setLastRetryDate(Date value) {
-		((DateSubmissionType) objectEntity.getElementValue(lastRetryDate)).setValueFromDate(value);
+		row.setDateField(PersistentResultsTable.LAST_RETRY_DATE, value);
 	}
 	
 	public Long getAttemptCount() {
-		return ((LongSubmissionType) objectEntity.getElementValue(attemptCount)).getValue();
+		return row.getLongField(PersistentResultsTable.ATTEMPT_COUNT);
 	}
 	
 	public void setAttemptCount(Long value) {
-		((LongSubmissionType) objectEntity.getElementValue(attemptCount)).setValue(value);
+		row.setLongField(PersistentResultsTable.ATTEMPT_COUNT, value);
 	}
 	
 	public ExportStatus getStatus() {
-		return ExportStatus.valueOf(((StringSubmissionType) objectEntity.getElementValue(status)).getValue());
+		return ExportStatus.valueOf(row.getStringField(PersistentResultsTable.STATUS));
 	}
 	
 	public void setStatus(ExportStatus value) throws ODKEntityPersistException {
-		((StringSubmissionType) objectEntity.getElementValue(status)).setValueFromString(value.name());
+		if ( !row.setStringField(PersistentResultsTable.STATUS, value.name())) {
+			throw new IllegalStateException("overflow status");
+		}
 	}
 	
 	public ExportType getResultType() {
-		return ExportType.valueOf(((StringSubmissionType) objectEntity.getElementValue(resultType)).getValue());
+		return ExportType.valueOf(row.getStringField(PersistentResultsTable.RESULT_TYPE));
 	}
 	
 	public void setResultType(ExportType value) throws ODKEntityPersistException {
-		((StringSubmissionType) objectEntity.getElementValue(resultType)).setValueFromString(value.name());
+		if ( !row.setStringField(PersistentResultsTable.RESULT_TYPE, value.name())) {
+			throw new IllegalStateException("overflow resultType");
+		}
 	}
 	
 	public Date getCompletionDate() {
-		return ((DateSubmissionType) objectEntity.getElementValue(completionDate)).getValue();
+		return row.getDateField(PersistentResultsTable.COMPLETION_DATE);
 	}
 	
 	public void setCompletionDate(Date value) {
-		((DateSubmissionType) objectEntity.getElementValue(completionDate)).setValueFromDate(value);
+		row.setDateField(PersistentResultsTable.COMPLETION_DATE, value);
 	}
-
-	public byte[] getResultFile(CallingContext cc) throws ODKDatastoreException {
-		BlobSubmissionType bt = ((BlobSubmissionType) objectEntity.getElementValue(resultFile));
-		if ( bt.getAttachmentCount() == 0 ) return null;
-		if ( bt.getAttachmentCount() > 1 ) {
+	
+	public class ResultFileInfo {
+		public final String unrootedFilename;
+		public final String downloadUrl;
+		public final String contentType;
+		public final Long contentLength;
+		
+		ResultFileInfo(String unrootedFilename, String downloadUrl, String contentType, Long contentLength) {
+			this.unrootedFilename = unrootedFilename;
+			this.downloadUrl = downloadUrl;
+			this.contentType = contentType;
+			this.contentLength = contentLength;
+		}
+	}
+	
+	public ResultFileInfo getResultFileInfo(CallingContext cc) throws ODKDatastoreException {
+		
+		bcm.refreshFromDatabase(cc);
+		if ( bcm.getAttachmentCount() == 0 ) return null;
+		if ( bcm.getAttachmentCount() > 1 ) {
 			throw new IllegalStateException("Too many results attached!");
 		}
-		return bt.getBlob(1, cc);
+		String unrootedFilename = bcm.getUnrootedFilename(1);
+        SubmissionKey key = getSubmissionKey();
+        Map<String, String> properties = new HashMap<String, String>();
+        properties.put(ServletConsts.BLOB_KEY, key.toString());
+        properties.put(ServletConsts.AS_ATTACHMENT, "yes");
+        String addr = cc.getServerURL() + BasicConsts.FORWARDSLASH
+              + BinaryDataServlet.ADDR;
+        String url = HtmlUtil.createLinkWithProperties(addr, properties);
+        return new ResultFileInfo( unrootedFilename, url, bcm.getContentType(1), bcm.getContentLength(1));
+	}
+	
+	public byte[] getResultFileContents(CallingContext cc) throws ODKDatastoreException {
+		bcm.refreshFromDatabase(cc);
+		if ( bcm.getAttachmentCount() == 0 ) return null;
+		if ( bcm.getAttachmentCount() > 1 ) {
+			throw new IllegalStateException("Too many results attached!");
+		}
+		return bcm.getBlob(1, cc);
 	}
 
 	public void setResultFile(byte[] byteArray, String contentType, Long contentLength,
 								String unrootedFilePath, CallingContext cc) throws ODKDatastoreException {
-		BlobSubmissionType bt = ((BlobSubmissionType) objectEntity.getElementValue(resultFile));
-		if ( bt.getAttachmentCount() > 0 ) {
+		bcm.refreshFromDatabase(cc);
+		if ( bcm.getAttachmentCount() > 0 ) {
 			throw new IllegalStateException("Results are already attached!");
 		}
-		bt.setValueFromByteArray(byteArray, contentType, contentLength, unrootedFilePath, cc);
+		bcm.setValueFromByteArray(byteArray, contentType, contentLength, unrootedFilePath, cc);
 	}
 	
 	public String getFormId() {
-	  return ((StringSubmissionType) objectEntity.getElementValue(formId)).getValue();
+		return row.getStringField(PersistentResultsTable.FORM_ID);
 	}
 	
 	public void setFormId(String value) throws ODKEntityPersistException {
-	  ((StringSubmissionType) objectEntity.getElementValue(PersistentResults.formId)).setValueFromString(value);
+		if ( !row.setStringField(PersistentResultsTable.FORM_ID, value)) {
+			throw new IllegalStateException("overflow formId");
+		}
 	}
 
 	public void deleteResultFile(CallingContext cc) throws ODKDatastoreException {
-		BlobSubmissionType bt = ((BlobSubmissionType) objectEntity.getElementValue(resultFile));
-		if ( bt.getAttachmentCount() > 0 ) {
-			bt.deleteAll(cc);
-		}
+		bcm.refreshFromDatabase(cc);
+		bcm.deleteAll(cc);
 	}
 	
 	public void persist(CallingContext cc) throws ODKEntityPersistException {
-		objectEntity.persist(cc);
+		Datastore ds = cc.getDatastore();
+		User user = cc.getCurrentUser();
+		bcm.persist(cc);
+		ds.putEntity(row, user);
 	}
 	
 	public void delete(CallingContext cc) throws ODKDatastoreException {
-		List<EntityKey> keys = new ArrayList<EntityKey>();
-		objectEntity.recursivelyAddEntityKeys(keys, cc);
-		keys.add(objectEntity.getKey());
-		cc.getDatastore().deleteEntities(keys, cc.getCurrentUser());
+		deleteResultFile(cc);
+		Datastore ds = cc.getDatastore();
+		User user = cc.getCurrentUser();
+		ds.deleteEntity(new EntityKey(row, row.getUri()), user);
 	}
 	
 	public SubmissionKey getSubmissionKey() {
-		return objectEntity.constructSubmissionKey(null);
+		return new SubmissionKey(FORM_ID_PERSISTENT_RESULT + "[@version=null and @uiVersion=null]/" + PersistentResultsTable.TABLE_NAME + "[@key=" + row.getUri() + "]");
+	}
+	
+	public static final List<PersistentResults> getAvailablePersistentResults(CallingContext cc) throws ODKFormNotFoundException, ODKDatastoreException {
+		Datastore ds = cc.getDatastore();
+		User user = cc.getCurrentUser();
+		PersistentResultsTable relation = PersistentResultsTable.assertRelation(cc);
+		Query query = ds.createQuery(relation, user);
+
+		Date lastDate = new Date();
+		query.addSort(relation.lastUpdateDate, Query.Direction.DESCENDING);
+    	query.addFilter(relation.lastUpdateDate, Query.FilterOperation.LESS_THAN, lastDate);
+        // query.addFilter(PersistentResults.getRequestingUserKey(),
+	    // FilterOperation.EQUAL, cc.getCurrentUser().getUriUser());
+
+		List<? extends CommonFieldsBase> l = query.executeQuery(0);
+
+	    List<PersistentResults> results = new ArrayList<PersistentResults>();
+	    for (CommonFieldsBase cb : l) {
+	    	PersistentResultsTable p = (PersistentResultsTable) cb;
+	    	PersistentResults export = new PersistentResults(p, cc);
+	    	results.add(export);
+	    }
+
+	    return results;
 	}
 	
 	public static final List<PersistentResults> getStalledRequests(CallingContext cc) throws ODKDatastoreException {
-		Form form;
-		try {
-			form = Form.retrieveForm(FORM_ID_PERSISTENT_RESULT, cc);
-		} catch ( ODKFormNotFoundException e) {
-			throw new ODKDatastoreException(e);
-		}
 		Datastore ds = cc.getDatastore();
 		User user = cc.getCurrentUser();
-		Query q = ds.createQuery(form.getTopLevelGroupElement().getFormDataModel().getBackingObjectPrototype(), user);
+		PersistentResultsTable relation = PersistentResultsTable.assertRelation(cc);
+		Query q = ds.createQuery(relation, user);
 		Date now = new Date();
 	
 		Date limit = new Date(now.getTime() - RETRY_INTERVAL_MILLISECONDS );
-		q.addFilter(getLastRetryDateKey().getFormDataModel().getBackingKey(), FilterOperation.LESS_THAN, limit );
+		q.addFilter(PersistentResultsTable.LAST_RETRY_DATE, FilterOperation.LESS_THAN, limit );
 		List<? extends CommonFieldsBase> l = q.executeQuery(0);
 		/*
 		 * The list of objects consists only of those that were last 
@@ -302,8 +335,8 @@ public class PersistentResults {
 		 */
 		List<PersistentResults> r = new ArrayList<PersistentResults>();
 		for ( CommonFieldsBase b : l ) {
-			Submission s = new Submission( b.getUri(), form, cc );
-			PersistentResults result = new PersistentResults(s);
+			PersistentResultsTable p = (PersistentResultsTable) b;
+			PersistentResults result = new PersistentResults(p, cc);
 			if ( result.getStatus() == ExportStatus.AVAILABLE ) continue;
 			if ( result.getStatus() == ExportStatus.ABANDONED ) continue;
 			if ( result.getAttemptCount().compareTo(MAX_RETRY_ATTEMPTS) >= 0 ) {
@@ -313,7 +346,7 @@ public class PersistentResults {
 				result.setAttemptCount(result.getAttemptCount()+1L);
 				result.setStatus(ExportStatus.ABANDONED);
 				result.setCompletionDate(now);
-				result.objectEntity.persist(cc);
+				result.persist(cc);
 				continue;
 			}
 			// OK.  If we are here, a task was last fired for this request
@@ -324,24 +357,19 @@ public class PersistentResults {
 		return r;
 	}
 
-	public static List<PersistentResults> getAllTasksForForm(Form theForm,
+	public static final List<PersistentResults> getAllTasksForForm(Form theForm,
 			CallingContext cc) throws ODKDatastoreException {
-		Form form;
-		try {
-			form = Form.retrieveForm(FORM_ID_PERSISTENT_RESULT, cc);
-		} catch ( ODKFormNotFoundException e) {
-			throw new ODKDatastoreException(e);
-		}
 		User user = cc.getCurrentUser();
 		Datastore ds = cc.getDatastore();
-		Query q = ds.createQuery(form.getTopLevelGroupElement().getFormDataModel().getBackingObjectPrototype(), user);
-		q.addFilter(PersistentResults.getFormIdKey().getFormDataModel().getBackingKey(), FilterOperation.EQUAL, theForm.getFormId());
+		PersistentResultsTable relation = PersistentResultsTable.assertRelation(cc);
+		Query q = ds.createQuery(relation, user);
+		q.addFilter(PersistentResultsTable.FORM_ID, FilterOperation.EQUAL, theForm.getFormId());
 		List<? extends CommonFieldsBase> l = q.executeQuery(0);
 		
 		List<PersistentResults> r = new ArrayList<PersistentResults>();
 		for ( CommonFieldsBase b : l ) {
-			Submission s = new Submission( b.getUri(), form, cc );
-			PersistentResults result = new PersistentResults(s);
+			PersistentResultsTable p = (PersistentResultsTable) b;
+			PersistentResults result = new PersistentResults(p, cc);
 			r.add(result);
 		}
 		return r;
@@ -353,11 +381,12 @@ public class PersistentResults {
 	 * @author mitchellsundt@gmail.com
 	 *
 	 */
-	private static final class PersistentResultsTable extends TopLevelDynamicBase {
+	private static final class PersistentResultsTable extends CommonFieldsBase {
 
 		static final String TABLE_NAME = "_persistent_results";
-	
-		private static final String PERSISTENT_RESULT_DEFINITION_URI = "aggregate.opendatakit.org:PersistentResults-def";
+		private static final String PERSISTENT_RESULT_FILE_REF_BLOB = "_persistent_result_file_blb";
+		private static final String PERSISTENT_RESULT_FILE_BINARY_CONTENT_REF_BLOB = "_persistent_result_file_ref";
+		private static final String PERSISTENT_RESULT_FILE_BINARY_CONTENT = "_persistent_result_file_bin";
 		
 		private static final DataField REQUESTING_USER = new DataField("REQUESTING_USER",
 				DataField.DataType.STRING, true);
@@ -366,7 +395,7 @@ public class PersistentResults {
 				DataField.DataType.DATETIME, true);
 		
 		private static final DataField REQUEST_PARAMETERS = new DataField("REQUEST_PARAMETERS",
-				DataField.DataType.STRING, true, 4096L);
+				DataField.DataType.STRING, true, 8192L);
 
 		private static final DataField LAST_RETRY_DATE = new DataField("LAST_RETRY_DATE",
 				DataField.DataType.DATETIME, true);
@@ -384,33 +413,7 @@ public class PersistentResults {
 				DataField.DataType.DATETIME, true);
 		
 		private static final DataField FORM_ID = new DataField("FORM_ID_KEY",
-		      DataField.DataType.STRING, true);
-	
-		public final DataField requestingUser;
-		public final DataField requestDate;
-		public final DataField requestParameters;
-		public final DataField lastRetryDate;
-		public final DataField attemptCount;
-		public final DataField status;
-		public final DataField resultType;
-		public final DataField completionDate;
-		public final DataField formId;
-	
-		// additional virtual DataField -- binary content
-		
-		static final String ELEMENT_NAME_RESULT_FILE_DEFINITION = "resultFile";
-	
-		private static final String PERSISTENT_RESULT_FILE_REF_BLOB = "_persistent_result_file_blb";
-	
-		private static final String PERSISTENT_RESULT_FILE_BINARY_CONTENT_REF_BLOB = "_persistent_result_file_ref";
-	
-		private static final String PERSISTENT_RESULT_FILE_BINARY_CONTENT = "_persistent_result_file_bin";
-	
-		// additional virtual DataField -- long string text
-		
-		private static final String PERSISTENT_RESULT_REF_TEXT = "_persistent_result_string_txt";
-	
-		private static final String PERSISTENT_RESULT_LONG_STRING_REF_TEXT = "_persistent_result_string_ref";
+		      DataField.DataType.STRING, true, 4096L);
 	
 		/**
 		 * Construct a relation prototype.
@@ -419,17 +422,15 @@ public class PersistentResults {
 		 */
 		private PersistentResultsTable(String databaseSchema) {
 			super(databaseSchema, TABLE_NAME);
-			fieldList.add(requestingUser = new DataField(REQUESTING_USER));
-			fieldList.add(requestDate = new DataField(REQUEST_DATE));
-			fieldList.add(requestParameters = new DataField(REQUEST_PARAMETERS));
-			fieldList.add(lastRetryDate = new DataField(LAST_RETRY_DATE));
-			fieldList.add(attemptCount = new DataField(ATTEMPT_COUNT));
-			fieldList.add(status = new DataField(STATUS));
-			fieldList.add(resultType = new DataField(RESULT_TYPE));
-			fieldList.add(completionDate = new DataField(COMPLETION_DATE));
-			fieldList.add(formId = new DataField(FORM_ID));
-	
-			fieldValueMap.put(primaryKey, CommonFieldsBase.newMD5HashUri(FORM_ID_PERSISTENT_RESULT));
+			fieldList.add(REQUESTING_USER);
+			fieldList.add(REQUEST_DATE);
+			fieldList.add(REQUEST_PARAMETERS);
+			fieldList.add(LAST_RETRY_DATE);
+			fieldList.add(ATTEMPT_COUNT);
+			fieldList.add(STATUS);
+			fieldList.add(RESULT_TYPE);
+			fieldList.add(COMPLETION_DATE);
+			fieldList.add(FORM_ID);
 		}
 	
 		/**
@@ -440,15 +441,6 @@ public class PersistentResults {
 		 */
 		private PersistentResultsTable(PersistentResultsTable ref, User user) {
 			super(ref, user);
-			requestingUser = ref.requestingUser;
-			requestDate = ref.requestDate;
-			requestParameters = ref.requestParameters;
-			lastRetryDate = ref.lastRetryDate;
-			attemptCount = ref.attemptCount;
-			status = ref.status;
-			resultType = ref.resultType;
-			completionDate = ref.completionDate;
-			formId = ref.formId;
 		}
 	
 		@Override
@@ -457,6 +449,9 @@ public class PersistentResults {
 		}
 		
 		private static PersistentResultsTable relation = null;
+		private static BinaryContent binaryRelation = null;
+		private static BinaryContentRefBlob binaryRefBlobRelation = null;
+		private static RefBlob refBlobRelation = null;
 		
 		static synchronized final PersistentResultsTable assertRelation(CallingContext cc) throws ODKDatastoreException {
 			if ( relation == null ) {
@@ -466,107 +461,25 @@ public class PersistentResults {
 				relationPrototype = new PersistentResultsTable(ds.getDefaultSchemaName());
 			    ds.assertRelation(relationPrototype, user); // may throw exception...
 			    // at this point, the prototype has become fully populated
+			    BinaryContent bc = new BinaryContent(ds.getDefaultSchemaName(), PERSISTENT_RESULT_FILE_BINARY_CONTENT);
+			    ds.assertRelation(bc, user);
+			    BinaryContentRefBlob bref = new BinaryContentRefBlob(ds.getDefaultSchemaName(), PERSISTENT_RESULT_FILE_BINARY_CONTENT_REF_BLOB);
+			    ds.assertRelation(bref, user);
+			    RefBlob ref = new RefBlob(ds.getDefaultSchemaName(), PERSISTENT_RESULT_FILE_REF_BLOB);
+			    ds.assertRelation(ref, user);
+			    // everything is now fully populated
+			    binaryRelation = bc;
+			    binaryRefBlobRelation = bref;
+			    refBlobRelation = ref;
 			    relation = relationPrototype; // set static variable only upon success...
 			}
 			return relation;
 		}
-	}
-	
-	/**
-	 * Called by the form definition framework to define the Persistent Results form.
-	 * 
-	 * @param datastore
-	 * @param user
-	 * @throws ODKDatastoreException
-	 */
-	static final void createForm(CallingContext cc) throws ODKDatastoreException {
-		List<FormDataModel> model = new ArrayList<FormDataModel>();
-
-		FormDataModel.assertRelation(cc);
-		SubmissionAssociationTable.assertRelation(cc);
-		boolean asDaemon = cc.getAsDeamon();
-		try {
-			cc.setAsDaemon(true);
-			Datastore ds = cc.getDatastore();
-			User user = cc.getCurrentUser();
-			PersistentResultsTable persistentResultsRelation = PersistentResultsTable.assertRelation(cc);
-			PersistentResultsTable persistentResultsDefinition = ds.createEntityUsingRelation(persistentResultsRelation, user);
-			persistentResultsDefinition.setStringField(persistentResultsRelation.primaryKey, PersistentResultsTable.PERSISTENT_RESULT_DEFINITION_URI);
-			
-			OrdinalSequence os = new OrdinalSequence();
-			
-			String parentTableKey = persistentResultsDefinition.getUri();
-			
-			String groupKey = FormDefinition.buildTableFormDataModel( model, 
-					persistentResultsDefinition, 
-					persistentResultsDefinition, // top level table
-					parentTableKey, // parent table...
-					os,
-					cc );
-	
-			FormDefinition.buildBinaryContentFormDataModel(model, 
-					PersistentResultsTable.ELEMENT_NAME_RESULT_FILE_DEFINITION, 
-					PersistentResultsTable.PERSISTENT_RESULT_FILE_BINARY_CONTENT, 
-					PersistentResultsTable.PERSISTENT_RESULT_FILE_BINARY_CONTENT_REF_BLOB, 
-					PersistentResultsTable.PERSISTENT_RESULT_FILE_REF_BLOB, 
-					persistentResultsDefinition, // top level table
-					groupKey, // parent group (table)
-					os, 
-					cc);
-			
-			os.ordinal = 2L;
-			FormDefinition.buildLongStringFormDataModel(model, 
-					PersistentResultsTable.PERSISTENT_RESULT_LONG_STRING_REF_TEXT, 
-					PersistentResultsTable.PERSISTENT_RESULT_REF_TEXT, 
-					persistentResultsDefinition, // top level and parent table
-					os, 
-					cc);
-			
-			FormDefinition.assertModel(xformPersistentResultsParameters, model, cc);
-			
-			String persistentResultsUri = persistentResultsRelation.getUri();
-			
-			// Create a record in the FormInfo table for the PersistentResults table itself...
-			FormDefinition.assertFormInfoRecord(xformPersistentResultsParameters, "Result Files", "Result files generated by Aggregate.", persistentResultsUri, cc);
-
-			// we've defined the form -- now fetch the bits of it...
-			FormDefinition formDefinition = FormDefinition.getFormDefinition(xformPersistentResultsParameters, cc);
-			
-			if ( PersistentResultsTable.relation != (PersistentResultsTable) formDefinition.getTopLevelGroup().getBackingObjectPrototype() ) {
-				throw new IllegalStateException("PersistentResults form is not the canonical relation");
-			}
-	
-			// and discover the form element model values for submissions of this type.
-			requestingUser = FormDefinition.findElement(formDefinition.getTopLevelGroupElement(), PersistentResultsTable.relation.requestingUser);
-			requestDate = FormDefinition.findElement(formDefinition.getTopLevelGroupElement(), PersistentResultsTable.relation.requestDate);
-			requestParameters = FormDefinition.findElement(formDefinition.getTopLevelGroupElement(), PersistentResultsTable.relation.requestParameters);
-			lastRetryDate = FormDefinition.findElement(formDefinition.getTopLevelGroupElement(), PersistentResultsTable.relation.lastRetryDate);
-			attemptCount = FormDefinition.findElement(formDefinition.getTopLevelGroupElement(), PersistentResultsTable.relation.attemptCount);
-			status = FormDefinition.findElement(formDefinition.getTopLevelGroupElement(), PersistentResultsTable.relation.status);
-			resultType = FormDefinition.findElement(formDefinition.getTopLevelGroupElement(), PersistentResultsTable.relation.resultType);
-			completionDate = FormDefinition.findElement(formDefinition.getTopLevelGroupElement(), PersistentResultsTable.relation.completionDate);
-			resultFile = formDefinition.getTopLevelGroupElement().findElementByName(PersistentResultsTable.ELEMENT_NAME_RESULT_FILE_DEFINITION);
-			formId = FormDefinition.findElement(formDefinition.getTopLevelGroupElement(), PersistentResultsTable.relation.formId);
-			
-		} finally {
-			cc.setAsDaemon(asDaemon);
-		}
-	}
-
-	/**
-	 * Called by the form definition framework to link the form elements back to the
-	 * underlying PersistentResultsTable.
-	 * 
-	 * @param backingTableMap
-	 */
-	static void populateBackingTableMap(
-			Map<String, DynamicCommonFieldsBase> backingTableMap, CallingContext cc) {
-		try {
-		    DynamicCommonFieldsBase b;
-			b = PersistentResultsTable.assertRelation(cc);
-			backingTableMap.put(b.getSchemaName() + "." + b.getTableName(), b);
-		} catch (ODKDatastoreException e) {
-			throw new IllegalStateException("the relations should already have been created");
+		
+		static final BinaryContentManipulator assertManipulator(String uri, CallingContext cc) throws ODKDatastoreException {
+			// make sure the relations are defined...
+			assertRelation(cc);
+			return new BinaryContentManipulator(uri, uri, binaryRelation, binaryRefBlobRelation, refBlobRelation);
 		}
 	}
 }

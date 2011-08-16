@@ -22,6 +22,7 @@ import java.util.Map;
 import org.opendatakit.aggregate.datamodel.FormDataModel;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.exception.ODKFormAlreadyExistsException;
+import org.opendatakit.aggregate.form.FormDefinition.OrdinalSequence;
 import org.opendatakit.aggregate.parser.MultiPartFormItem;
 import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.aggregate.submission.SubmissionSet;
@@ -33,7 +34,10 @@ import org.opendatakit.aggregate.submission.type.StringSubmissionType;
 import org.opendatakit.common.datamodel.BinaryContentManipulator;
 import org.opendatakit.common.datamodel.DynamicCommonFieldsBase;
 import org.opendatakit.common.persistence.CommonFieldsBase;
+import org.opendatakit.common.persistence.Datastore;
+import org.opendatakit.common.persistence.PersistConsts;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+import org.opendatakit.common.security.User;
 import org.opendatakit.common.web.CallingContext;
 
 /**
@@ -102,13 +106,8 @@ public class FormInfo {
 			    
 			    if ( formDefinition == null ) {
 					// doesn't have the form definition tables defined ...
-					// need to insert definition records into the fdm table...
-					
-					List<FormDataModel> idDefn = new ArrayList<FormDataModel>();
-					FormInfoTable.createFormDataModel(idDefn, cc);
-					FormDefinition.assertModel(formInfoXFormParameters, idDefn, cc);
-					
-				    formDefinition = FormDefinition.getFormDefinition(formInfoXFormParameters, cc);
+					// need to insert definition records into the sa and fdm tables...
+			    	createForm(cc);
 					
 					if ( formDefinition == null ) {
 						throw new IllegalStateException("Unable to create form definition definition!");
@@ -155,19 +154,84 @@ public class FormInfo {
 						formInfoUri, cc);
 				
 				formInfoForm = new Form(formInfo, cc);
-	
-				try {
-					// and we can create other well-known forms here 
-					PersistentResults.createForm(cc);
-					MiscTasks.createForm(cc);
-				} catch ( ODKDatastoreException e ) {
-					// we have an error...
-					formDefinition = null;
-					formInfoForm = null;
-					throw e;
-				}
 			}
 			return formDefinition;
+		} finally {
+			cc.setAsDaemon(asDaemon);
+		}
+	}
+	
+	static final void createForm(CallingContext cc) throws ODKDatastoreException {
+		List<FormDataModel> model = new ArrayList<FormDataModel>();
+
+		boolean asDaemon = cc.getAsDeamon();
+		try {
+			cc.setAsDaemon(true);
+			Datastore ds = cc.getDatastore();
+			User user = cc.getCurrentUser();
+			FormInfoTable formInfoRelation = FormInfoTable.assertRelation(cc);
+			
+			SubmissionAssociationTable sa = SubmissionAssociationTable.assertSubmissionAssociation(
+					FormInfoTable.FORM_INFO_DEFINITION_URI,	formInfoXFormParameters, cc);
+			String definitionUri = sa.getUriSubmissionDataModel();
+
+			FormInfoTable formInfoDefinition = ds.createEntityUsingRelation(formInfoRelation, user);
+			formInfoDefinition.setStringField(formInfoRelation.primaryKey, definitionUri);
+			
+			OrdinalSequence os = new OrdinalSequence();
+			
+			String groupKey = FormDefinition.buildTableFormDataModel( model, 
+					formInfoDefinition, 
+					formInfoDefinition, // top level table
+					formInfoDefinition.getUri(), // parent table uri...
+					os,
+					cc );
+			
+			Long ordinal = os.ordinal;
+			FormInfoDescriptionTable.createFormDataModel(model, 
+					formInfoDefinition, // top level table
+					groupKey,
+					os,
+					cc );
+			
+			os.ordinal = ++ordinal;
+			FormInfoFilesetTable.createFormDataModel(model, 
+					formInfoDefinition, // top level table
+					groupKey,
+					os, 
+					cc );
+			
+			os.ordinal = ++ordinal;
+			FormInfoSubmissionTable.createFormDataModel(model, 
+					formInfoDefinition, // top level table
+					groupKey,
+					os, 
+					cc );
+			
+			os.ordinal = 2L;
+			FormDefinition.buildLongStringFormDataModel(model, 
+					FormInfoTable.FORM_INFO_LONG_STRING_REF_TEXT, 
+					FormInfoTable.FORM_INFO_REF_TEXT, 
+					formInfoDefinition, // top level and parent table
+					os, 
+					cc );
+			
+			FormDefinition.assertModel(formInfoXFormParameters, model, cc);
+			
+			// and enable the data model for retrieval...
+			sa.setIsPersistenceModelComplete(true);
+			ds.putEntity(sa, user);
+			
+			// wait for GAE to settle before continuing...
+			try {
+				Thread.sleep(PersistConsts.MAX_SETTLE_MILLISECONDS);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			// get the data model for a form...
+		    formDefinition = FormDefinition.getFormDefinition(formInfoXFormParameters, cc);
+			
+		    // stop here, as the caller will update everything else...
 		} finally {
 			cc.setAsDaemon(asDaemon);
 		}
@@ -251,7 +315,7 @@ public class FormInfo {
 	 */
 	public static final boolean setXFormDefinition( Submission aFormDefinition, 
 			Long rootModelVersion, Long rootUiVersion, boolean isEncrypted,
-			String title, byte[] definition, CallingContext cc ) throws ODKDatastoreException, ODKFormAlreadyExistsException {
+			String title, byte[] definition, boolean isDownloadEnabled, CallingContext cc ) throws ODKDatastoreException, ODKFormAlreadyExistsException {
 
 		RepeatSubmissionType r = (RepeatSubmissionType) aFormDefinition.getElementValue(FormInfo.fiFilesetTable);
 	    List<SubmissionSet> filesets = r.getSubmissionSets();
@@ -272,7 +336,7 @@ public class FormInfo {
 			SubmissionSet sFileset = new SubmissionSet(aFormDefinition, filesets.size()+1L, fiFilesetTable, formDefinition, aFormDefinition.getKey(), cc);
 			((LongSubmissionType) sFileset.getElementValue(rootElementModelVersion)).setValueFromString(rootModelVersion == null ? null : rootModelVersion.toString());
 			((LongSubmissionType) sFileset.getElementValue(rootElementUiVersion)).setValueFromString(rootUiVersion == null ? null : rootUiVersion.toString());
-			((BooleanSubmissionType) sFileset.getElementValue(isDownloadAllowed)).setValueFromString("yes");
+			((BooleanSubmissionType) sFileset.getElementValue(isDownloadAllowed)).setValueFromString(isDownloadEnabled ? "yes" : "no");
 			((BooleanSubmissionType) sFileset.getElementValue(isEncryptedForm)).setValueFromString(isEncrypted ? "yes" : "no");
 			r.addSubmissionSet(sFileset);
 			matchingSet = sFileset;

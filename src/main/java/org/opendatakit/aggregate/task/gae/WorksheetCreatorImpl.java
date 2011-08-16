@@ -23,7 +23,6 @@ import org.opendatakit.aggregate.constants.externalservice.SpreadsheetConsts;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.form.MiscTasks;
-import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.task.WorksheetCreator;
 import org.opendatakit.aggregate.task.gae.servlet.WorksheetServlet;
@@ -51,8 +50,7 @@ public class WorksheetCreatorImpl implements WorksheetCreator {
 			SubmissionKey miscTasksKey, long attemptCount,
 			CallingContext cc)
       throws ODKFormNotFoundException, ODKDatastoreException {
-    Submission s = Submission.fetchSubmission(miscTasksKey.splitSubmissionKey(), cc);
-    MiscTasks r = new MiscTasks(s);
+    MiscTasks r = new MiscTasks(miscTasksKey, cc);
     Map<String, String> params = r.getRequestParameters();
 
     TaskOptions task = TaskOptions.Builder.withUrl(BasicConsts.FORWARDSLASH + WorksheetServlet.ADDR);

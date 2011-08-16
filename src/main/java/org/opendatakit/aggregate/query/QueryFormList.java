@@ -22,8 +22,6 @@ import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.datamodel.TopLevelDynamicBase;
 import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
 import org.opendatakit.aggregate.form.Form;
-import org.opendatakit.aggregate.form.MiscTasks;
-import org.opendatakit.aggregate.form.PersistentResults;
 import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.submission.SubmissionKeyPart;
 import org.opendatakit.common.persistence.CommonFieldsBase;
@@ -69,8 +67,6 @@ public class QueryFormList {
     List<? extends CommonFieldsBase> formEntities = formQuery.executeQuery(ServletConsts.FETCH_LIMIT);
     for (CommonFieldsBase formEntity : formEntities) {
       Form form = new Form((TopLevelDynamicBase) formEntity, cc);
-      if ( form.getFormId().equals(MiscTasks.FORM_ID_MISC_TASKS)) continue;
-      if ( form.getFormId().equals(PersistentResults.FORM_ID_PERSISTENT_RESULT)) continue;
       if ( form.getFormId().equals(Form.URI_FORM_ID_VALUE_FORM_INFO)) continue;
       addIfAuthorized(form, checkAuthorization, cc);
     }

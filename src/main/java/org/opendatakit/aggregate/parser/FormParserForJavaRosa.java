@@ -39,6 +39,7 @@ import org.javarosa.xform.util.IXFormBindHandler;
 import org.javarosa.xform.util.XFormUtils;
 import org.kxml2.kdom.Element;
 import org.opendatakit.aggregate.constants.ParserConsts;
+import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.common.FormActionStatusTimestamp;
 import org.opendatakit.aggregate.datamodel.FormDataModel;
 import org.opendatakit.aggregate.datamodel.FormDataModel.ElementType;
@@ -433,17 +434,18 @@ public class FormParserForJavaRosa {
 		  String inputXml, String title, String persistenceStoreFormId, boolean isEncryptedForm, 
 		  FormDef formDef, StringBuilder warnings, CallingContext cc) throws ODKDatastoreException, ODKFormAlreadyExistsException, ODKParseException {
     
-    Map<String,FormActionStatusTimestamp> formDeletionStatuses = 
-  	  MiscTasks.getFormDeletionStatusTimestampOfAllFormIds(cc);
-
     // we can't create or update a FormInfo record if there is a pending deletion for this same id.
-    if ( formDeletionStatuses.get(rootElementDefn.formId) != null ) {
+	FormActionStatusTimestamp formDeletionStatus;
+	formDeletionStatus = MiscTasks.getFormDeletionStatusTimestampOfFormId(rootElementDefn.formId, cc);
+	if ( formDeletionStatus != null ) {
 		throw new ODKFormAlreadyExistsException("This form and its data have not yet been fully deleted from the server. Please wait a few minutes and retry.");
     }
-    
-    if ( formDeletionStatuses.get(submissionElementDefn.formId) != null ) {
-		throw new ODKFormAlreadyExistsException("This form and its data have not yet been fully deleted from the server. Please wait a few minutes and retry.");
-    }
+	if ( !submissionElementDefn.formId.equals(rootElementDefn.formId)) {
+		formDeletionStatus = MiscTasks.getFormDeletionStatusTimestampOfFormId(submissionElementDefn.formId, cc);
+		if ( formDeletionStatus != null ) {
+			throw new ODKFormAlreadyExistsException("This form and its data have not yet been fully deleted from the server. Please wait a few minutes and retry.");
+		}
+	}
     
     /////////////////
     // Step 1: create or fetch the Form (FormInfo) submission
@@ -458,9 +460,14 @@ public class FormParserForJavaRosa {
 	} catch (UnsupportedEncodingException e) {
 		throw new IllegalStateException("not reachable");
 	}
+	
+	// form downloads are immediately enabled unless the upload specifies that they shouldn't be. 
+    String isIncompleteFlag = uploadedFormItems.getSimpleFormField(ServletConsts.TRANSFER_IS_INCOMPLETE);
+    boolean isDownloadEnabled = ( isIncompleteFlag == null || isIncompleteFlag.trim().length() == 0 );
+
     boolean sameXForm = FormInfo.setXFormDefinition( formInfo, 
     					rootElementDefn.modelVersion, rootElementDefn.uiVersion, isEncryptedForm,
-    					title, xmlBytes, cc );
+    					title, xmlBytes, isDownloadEnabled, cc );
     
     // we will have thrown an exception above if the form file already exists and
     // the form file presented is not exactly identical to the one on record.
@@ -495,23 +502,9 @@ public class FormParserForJavaRosa {
     // we don't have an existing form definition
     // -- create a submission association table entry mapping to what will be the model.
     // -- then create the model and iterate on manifesting it in the database.
-    SubmissionAssociationTable sa;
-    {
-    	fdmSubmissionUri = CommonFieldsBase.newUri();
-        String submissionFormIdUri = CommonFieldsBase.newMD5HashUri(submissionElementDefn.formId); // key under which submission is located...
-
-        SubmissionAssociationTable saRelation = SubmissionAssociationTable.assertRelation(cc);
-	    sa = ds.createEntityUsingRelation(saRelation, user);
-	    sa.setSubmissionFormId(submissionElementDefn.formId);
-	    sa.setSubmissionModelVersion(submissionElementDefn.modelVersion);
-	    sa.setSubmissionUiVersion(submissionElementDefn.uiVersion);
-	    sa.setIsPersistenceModelComplete(false);
-	    sa.setIsSubmissionAllowed(true);
-	    sa.setUriSubmissionDataModel(fdmSubmissionUri);
-	    sa.setUriMd5SubmissionFormId(submissionFormIdUri);
-	    sa.setUriMd5FormId(formInfo.getKey().getKey());
-	    ds.putEntity(sa, user);
-    }
+    SubmissionAssociationTable sa = 
+    	SubmissionAssociationTable.assertSubmissionAssociation(formInfo.getKey().getKey(), submissionElementDefn, cc);
+    fdmSubmissionUri = sa.getUriSubmissionDataModel();
     
     // so we have the formInfo record, but no data model backing it.
     // Find the submission associated with this form...
@@ -573,6 +566,11 @@ public class FormParserForJavaRosa {
 	    // this also ensures that the table names don't overlap existing tables
 	    // in the datastore.
 	    opaque.resolveNames(ds, user);
+	    
+	    // debug output
+	    for ( FormDataModel m : fdmList ) {
+	    	m.print(System.err);
+	    }
 	
 	    // and revise the data model with those names...
 	    for (FormDataModel m : fdmList) {
@@ -1064,13 +1062,15 @@ public class FormParserForJavaRosa {
                                                            * unknown
                                                            */
       if (treeElement.repeatable) {
-        persistAsColumn = null;
+    	// repeatable group...
         opaque.removeColumnName(persistAsTable, persistAsColumn);
+        persistAsColumn = null;
         et = FormDataModel.ElementType.REPEAT;
         persistAsTable = opaque.getTableName(fdm.getSchemaName(), tablePrefix, nrGroupPrefix,
             treeElement.getName());
-      } else if (treeElement.getNumChildren() == 0) {
+      } else if (treeElement.getNumChildren() == 0 && dmList.size() != 0) {
         // assume fields that don't have children are string fields.
+    	// but exclude the top-level group, as somebody might define an empty form.
         // the developer likely has not set a type for the field.
         et = FormDataModel.ElementType.STRING;
         Logger.getLogger(FormParserForJavaRosa.class.getCanonicalName()).warning(
@@ -1080,8 +1080,8 @@ public class FormParserForJavaRosa {
         warnings.append("</td></tr>");
       } else {
     	/* one or more children -- this is a non-repeating group */
-        persistAsColumn = null;
         opaque.removeColumnName(persistAsTable, persistAsColumn);
+        persistAsColumn = null;
         et = FormDataModel.ElementType.GROUP;
       }
       break;
@@ -1246,7 +1246,8 @@ public class FormParserForJavaRosa {
     	  // TODO: make this pay attention to namespace of the tag...
     	  if ( (prior != null) && 
     		   (prior.getName().equals(current.getName())) ) {
-    		  // it is the end-group tag...
+    		  // it is the end-group tag... seems to happen with two adjacent repeat groups
+    		  log.info("repeating tag at " + i + " skipping " + current.getName());
     		  prior = current;
     	  } else {
     		  constructDataModel(opaque, k, dmList, fdm, groupURI, ++trueOrdinal, tablePrefix,
@@ -1269,7 +1270,8 @@ public class FormParserForJavaRosa {
     	  // TODO: make this pay attention to namespace of the tag...
     	  if ( (prior != null) && 
     		   (prior.getName().equals(current.getName())) ) {
-    		  // it is the end-group tag...
+    		  // it is the end-group tag... seems to happen with two adjacent repeat groups
+    		  log.info("repeating tag at " + i + " skipping " + current.getName());
     		  prior = current;
     	  } else {
     		  constructDataModel(opaque, k, dmList, fdm, groupURI, ++trueOrdinal, tablePrefix,

@@ -27,6 +27,7 @@ import org.opendatakit.aggregate.client.externalserv.ExternServSummary;
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.common.ExternalServicePublicationOption;
+import org.opendatakit.aggregate.constants.common.FormActionStatusTimestamp;
 import org.opendatakit.aggregate.constants.common.UIConsts;
 import org.opendatakit.aggregate.constants.externalservice.FusionTableConsts;
 import org.opendatakit.aggregate.constants.externalservice.SpreadsheetConsts;
@@ -36,6 +37,7 @@ import org.opendatakit.aggregate.externalservice.FormServiceCursor;
 import org.opendatakit.aggregate.externalservice.FusionTable;
 import org.opendatakit.aggregate.externalservice.GoogleSpreadsheet;
 import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.form.MiscTasks;
 import org.opendatakit.aggregate.servlet.OAuthServlet;
 import org.opendatakit.common.constants.BasicConsts;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
@@ -147,6 +149,9 @@ public class ServicesAdminServiceImpl extends RemoteServiceServlet implements
     CallingContext cc = ContextFactory.getCallingContext(this, req);
 
     try {
+      FormActionStatusTimestamp deletionTimestamp = MiscTasks.getFormDeletionStatusTimestampOfFormId(formId, cc);
+      // TODO: better error reporting -- form is being deleted. Disallow creation of publishers.
+      if ( deletionTimestamp != null ) return null;
       Form form = Form.retrieveForm(formId, cc);
       FusionTable fusion = new FusionTable(form, esOption, cc);
       return fusion.getFormServiceCursor().getUri();
@@ -166,6 +171,9 @@ public class ServicesAdminServiceImpl extends RemoteServiceServlet implements
     CallingContext cc = ContextFactory.getCallingContext(this, req);
 
     try {
+      FormActionStatusTimestamp deletionTimestamp = MiscTasks.getFormDeletionStatusTimestampOfFormId(formId, cc);
+      // TODO: better error reporting -- form is being deleted. Disallow creation of publishers.
+      if ( deletionTimestamp != null ) return null;
       Form form = Form.retrieveForm(formId, cc);
       GoogleSpreadsheet spreadsheet = new GoogleSpreadsheet(form, name, esOption, cc);
       return spreadsheet.getFormServiceCursor().getUri();

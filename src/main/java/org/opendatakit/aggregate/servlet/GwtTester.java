@@ -2,7 +2,6 @@ package org.opendatakit.aggregate.servlet;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,17 +37,14 @@ import org.opendatakit.aggregate.externalservice.GoogleSpreadsheet;
 import org.opendatakit.aggregate.filter.SubmissionFilterGroup;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.form.PersistentResults;
+import org.opendatakit.aggregate.form.PersistentResults.ResultFileInfo;
 import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.format.element.BasicElementFormatter;
 import org.opendatakit.aggregate.format.element.ElementFormatter;
-import org.opendatakit.aggregate.query.submission.QueryByDate;
 import org.opendatakit.aggregate.query.submission.QueryByUIFilterGroup;
 import org.opendatakit.aggregate.server.GenerateHeaderInfo;
 import org.opendatakit.aggregate.submission.Submission;
-import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.submission.SubmissionSet;
-import org.opendatakit.aggregate.submission.SubmissionValue;
-import org.opendatakit.aggregate.submission.type.BlobSubmissionType;
 import org.opendatakit.common.constants.BasicConsts;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
@@ -186,20 +182,12 @@ public class GwtTester extends ServletUtilBase {
     } else if (flag.equals("export")) {
 
       try {
-        Form form = Form.retrieveForm(PersistentResults.FORM_ID_PERSISTENT_RESULT, cc);
+    	List<PersistentResults> results = PersistentResults.getAvailablePersistentResults(cc);
 
-        QueryByDate query = new QueryByDate(form, new Date(), true, ServletConsts.FETCH_LIMIT, cc);
-
-        // query.addFilter(PersistentResults.getRequestingUserKey(),
-        // FilterOperation.EQUAL, cc.getCurrentUser().getUriUser());
-
-        List<Submission> submissions = query.getResultSubmissions(cc);
-
-        ExportSummary[] exports = new ExportSummary[submissions.size()];
+        ExportSummary[] exports = new ExportSummary[results.size()];
 
         int i = 0;
-        for (Submission sub : submissions) {
-          PersistentResults export = new PersistentResults(sub);
+        for (PersistentResults export : results) {
           ExportSummary summary = new ExportSummary();
 
           summary.setFileType(export.getResultType());
@@ -207,12 +195,9 @@ public class GwtTester extends ServletUtilBase {
           summary.setStatus(export.getStatus());
           summary.setTimeLastAction(export.getLastRetryDate());
           summary.setTimeCompleted(export.getCompletionDate());
-          SubmissionValue blobSubmission = sub
-              .getElementValue(PersistentResults.getResultFileKey());
-          if (blobSubmission instanceof BlobSubmissionType) {
-            BlobSubmissionType blob = (BlobSubmissionType) blobSubmission;
-            SubmissionKey key = blob.getValue();
-            summary.setResultFile(key.toString());
+          ResultFileInfo info = export.getResultFileInfo(cc);
+          if (info != null) {
+        	  summary.setResultFile(HtmlUtil.createHref(info.downloadUrl, "Download"));
           }
           exports[i] = summary;
           i++;
