@@ -15,11 +15,7 @@
  */
 package org.opendatakit.aggregate.form;
 
-import java.util.List;
-
-import org.opendatakit.aggregate.datamodel.FormDataModel;
 import org.opendatakit.aggregate.datamodel.TopLevelDynamicBase;
-import org.opendatakit.aggregate.form.FormDefinition.OrdinalSequence;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.Datastore;
@@ -37,7 +33,7 @@ import org.opendatakit.common.web.CallingContext;
 public class FormInfoTable extends TopLevelDynamicBase {
 	static final String TABLE_NAME = "_form_info";
 	
-	private static final String FORM_INFO_DEFINITION_URI = "aggregate.opendatakit.org:FormInfo-def";
+	public static final String FORM_INFO_DEFINITION_URI = "aggregate.opendatakit.org:FormInfo-def";
 
 	private static final DataField FORM_ID = new DataField("FORM_ID",
 			DataField.DataType.STRING, false, PersistConsts.MAX_SIMPLE_STRING_LEN);
@@ -46,9 +42,9 @@ public class FormInfoTable extends TopLevelDynamicBase {
 
 	// additional virtual DataField -- long string text
 	
-	private static final String FORM_INFO_REF_TEXT = "_form_info_string_txt";
+	static final String FORM_INFO_REF_TEXT = "_form_info_string_txt";
 
-	private static final String FORM_INFO_LONG_STRING_REF_TEXT = "_form_info_string_ref";
+	static final String FORM_INFO_LONG_STRING_REF_TEXT = "_form_info_string_ref";
 
 	/**
 	 * Construct a relation prototype.
@@ -92,62 +88,5 @@ public class FormInfoTable extends TopLevelDynamicBase {
 		    relation = relationPrototype; // set static variable only upon success...
 		}
 		return relation;
-	}
-	
-	static synchronized final String createFormDataModel(List<FormDataModel> model, CallingContext cc) throws ODKDatastoreException {
-
-		FormDataModel.assertRelation(cc);
-		FormInfoTable formInfoTableRelation = assertRelation(cc);
-		
-		boolean asDaemon = cc.getAsDeamon();
-		try {
-			cc.setAsDaemon(true);
-			Datastore ds = cc.getDatastore();
-			User user = cc.getUserService().getDaemonAccountUser();
-			FormInfoTable formInfoDefinition = ds.createEntityUsingRelation(formInfoTableRelation, user);
-			formInfoDefinition.setStringField(formInfoTableRelation.primaryKey, FORM_INFO_DEFINITION_URI);
-			
-			OrdinalSequence os = new OrdinalSequence();
-			
-			String groupKey = FormDefinition.buildTableFormDataModel( model, 
-					formInfoDefinition, 
-					formInfoDefinition, // top level table
-					formInfoDefinition.getUri(), // parent table uri...
-					os,
-					cc );
-			
-			Long ordinal = os.ordinal;
-			FormInfoDescriptionTable.createFormDataModel(model, 
-					formInfoDefinition, // top level table
-					groupKey,
-					os,
-					cc );
-			
-			os.ordinal = ++ordinal;
-			FormInfoFilesetTable.createFormDataModel(model, 
-					formInfoDefinition, // top level table
-					groupKey,
-					os, 
-					cc );
-			
-			os.ordinal = ++ordinal;
-			FormInfoSubmissionTable.createFormDataModel(model, 
-					formInfoDefinition, // top level table
-					groupKey,
-					os, 
-					cc );
-			
-			os.ordinal = 2L;
-			FormDefinition.buildLongStringFormDataModel(model, 
-					FORM_INFO_LONG_STRING_REF_TEXT, 
-					FORM_INFO_REF_TEXT, 
-					formInfoDefinition, // top level and parent table
-					os, 
-					cc );
-	
-			return formInfoTableRelation.getUri();
-		} finally {
-			cc.setAsDaemon(asDaemon);
-		}
 	}
 }

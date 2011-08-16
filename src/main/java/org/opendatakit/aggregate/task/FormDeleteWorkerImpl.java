@@ -33,7 +33,6 @@ import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.form.MiscTasks;
 import org.opendatakit.aggregate.form.PersistentResults;
 import org.opendatakit.aggregate.process.DeleteSubmissions;
-import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.Datastore;
@@ -72,13 +71,12 @@ public class FormDeleteWorkerImpl {
 
 		Logger.getLogger(FormDeleteWorkerImpl.class.getName()).info("deletion task: " + miscTasksKey.toString());
 		
-		Submission s;
+		MiscTasks t;
 		try {
-			s = Submission.fetchSubmission(miscTasksKey.splitSubmissionKey(), cc);
-		} catch (Exception e) {
+			t = new MiscTasks(miscTasksKey, cc);
+		} catch ( Exception e ) {
 			return;
 		}
-	    MiscTasks t = new MiscTasks(s);
 		// gain lock on the formId itself...
 		// the locked resource should be the formId, but for testing
 		// it is useful to have the external services collide using 

@@ -74,13 +74,12 @@ public class PurgeOlderSubmissionsWorkerImpl {
 
 		Logger.getLogger(PurgeOlderSubmissionsWorkerImpl.class.getName()).info("deletion task: " + miscTasksKey.toString());
 		
-		Submission s;
+		MiscTasks t;
 		try {
-			s = Submission.fetchSubmission(miscTasksKey.splitSubmissionKey(), cc);
+		    t = new MiscTasks(miscTasksKey, cc);
 		} catch (Exception e) {
 			return;
 		}
-	    MiscTasks t = new MiscTasks(s);
 		// gain lock on the formId itself...
 		// the locked resource should be the formId, but for testing
 		// it is useful to have the external services collide using 

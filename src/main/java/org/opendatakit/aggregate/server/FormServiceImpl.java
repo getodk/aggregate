@@ -30,7 +30,6 @@ import org.opendatakit.aggregate.client.form.FormSummary;
 import org.opendatakit.aggregate.client.form.KmlSettings;
 import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.HtmlUtil;
-import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.common.ExportType;
 import org.opendatakit.aggregate.constants.common.FormActionStatusTimestamp;
 import org.opendatakit.aggregate.constants.format.FormTableConsts;
@@ -41,16 +40,10 @@ import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.form.MiscTasks;
 import org.opendatakit.aggregate.form.PersistentResults;
+import org.opendatakit.aggregate.form.PersistentResults.ResultFileInfo;
 import org.opendatakit.aggregate.query.QueryFormList;
-import org.opendatakit.aggregate.query.submission.QueryByDate;
-import org.opendatakit.aggregate.servlet.BinaryDataServlet;
-import org.opendatakit.aggregate.submission.Submission;
-import org.opendatakit.aggregate.submission.SubmissionKey;
-import org.opendatakit.aggregate.submission.SubmissionValue;
-import org.opendatakit.aggregate.submission.type.BlobSubmissionType;
 import org.opendatakit.aggregate.task.CsvGenerator;
 import org.opendatakit.aggregate.task.KmlGenerator;
-import org.opendatakit.common.constants.BasicConsts;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
 
@@ -122,17 +115,8 @@ public class FormServiceImpl extends RemoteServiceServlet implements
 
     ArrayList<ExportSummary> exports = new ArrayList<ExportSummary>();
     try {
-      Form form = Form.retrieveForm(PersistentResults.FORM_ID_PERSISTENT_RESULT, cc);
-
-      QueryByDate query = new QueryByDate(form, new Date(), true, ServletConsts.FETCH_LIMIT, cc);
-
-      // query.addFilter(PersistentResults.getRequestingUserKey(),
-      // FilterOperation.EQUAL, cc.getCurrentUser().getUriUser());
-
-      List<Submission> submissions = query.getResultSubmissions(cc);
-
-      for (Submission sub : submissions) {
-        PersistentResults export = new PersistentResults(sub);
+      List<PersistentResults> results = PersistentResults.getAvailablePersistentResults(cc);
+      for (PersistentResults export : results) {
         ExportSummary summary = new ExportSummary();
 
         summary.setFileType(export.getResultType());
@@ -141,27 +125,16 @@ public class FormServiceImpl extends RemoteServiceServlet implements
         summary.setTimeLastAction(export.getLastRetryDate());
         summary.setTimeCompleted(export.getCompletionDate());
 
-        // TODO: fix this as it seems bad to switch the type of interaction
-        // midstream
-        SubmissionValue blobSubmission = sub.getElementValue(PersistentResults.getResultFileKey());
-        if (blobSubmission instanceof BlobSubmissionType) {
-          BlobSubmissionType blob = (BlobSubmissionType) blobSubmission;
-          SubmissionKey key = blob.getValue();
-          Map<String, String> properties = new HashMap<String, String>();
-          properties.put(ServletConsts.BLOB_KEY, key.toString());
-          properties.put(ServletConsts.AS_ATTACHMENT, "yes");
-          String addr = cc.getServerURL() + BasicConsts.FORWARDSLASH
-              + BinaryDataServlet.ADDR;
-          String linkText = FormTableConsts.DOWNLOAD_LINK_TEXT;
-          if (blob.getAttachmentCount() == 1) {
-            linkText = blob.getUnrootedFilename(1);
-            if (linkText == null || linkText.length() == 0) {
-              linkText = FormTableConsts.DOWNLOAD_LINK_TEXT;
-            }
-          }
-          String url = HtmlUtil.createHrefWithProperties(addr, properties, linkText);
-          ;
-          summary.setResultFile(url);
+        // get info about the downloadable file.
+        // null if no file yet.... 
+        ResultFileInfo info = export.getResultFileInfo(cc);
+        if ( info != null ) {
+        	String linkText = info.unrootedFilename;
+        	if ( linkText == null || linkText.length() == 0) {
+        		linkText = FormTableConsts.DOWNLOAD_LINK_TEXT;
+        	}
+        	String url = HtmlUtil.createHref(info.downloadUrl, linkText);
+        	summary.setResultFile(url);
         }
         exports.add(summary);
       }
@@ -183,6 +156,9 @@ public class FormServiceImpl extends RemoteServiceServlet implements
     CallingContext cc = ContextFactory.getCallingContext(this, req);
 
     try {
+      FormActionStatusTimestamp deletionTimestamp = MiscTasks.getFormDeletionStatusTimestampOfFormId(formId, cc);
+      // TODO: better error reporting -- form is being deleted. Disallow exports.
+      if ( deletionTimestamp != null ) return null;
       // create csv job
       Form form = Form.retrieveForm(formId, cc);
       PersistentResults r = new PersistentResults(ExportType.CSV, form, null, cc);
@@ -228,6 +204,10 @@ public class FormServiceImpl extends RemoteServiceServlet implements
     }
 
     try {
+      FormActionStatusTimestamp deletionTimestamp = MiscTasks.getFormDeletionStatusTimestampOfFormId(formId, cc);
+      // TODO: better error reporting -- form is being deleted. Disallow exports.
+      if ( deletionTimestamp != null ) return null;
+      
       Form form = Form.retrieveForm(formId, cc);
 
       FormElementModel titleField = null;

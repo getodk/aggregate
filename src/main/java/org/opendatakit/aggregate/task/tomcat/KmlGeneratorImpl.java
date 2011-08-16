@@ -23,7 +23,6 @@ import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.form.PersistentResults;
-import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.task.KmlGenerator;
 import org.opendatakit.aggregate.task.KmlWorkerImpl;
@@ -62,8 +61,7 @@ public class KmlGeneratorImpl implements KmlGenerator {
 	@Override
 	public void createKmlTask(Form form, SubmissionKey persistentResultsKey, long attemptCount,
 			CallingContext cc) throws ODKDatastoreException, ODKFormNotFoundException {
-		Submission s = Submission.fetchSubmission(persistentResultsKey.splitSubmissionKey(), cc);
-	    PersistentResults r = new PersistentResults(s);
+	    PersistentResults r = new PersistentResults(persistentResultsKey, cc);
 	    Map<String,String> params = r.getRequestParameters();
 	    FormElementModel titleField = null;
 	    FormElementModel imageField = null;

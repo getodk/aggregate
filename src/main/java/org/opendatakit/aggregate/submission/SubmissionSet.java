@@ -650,7 +650,10 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 	private void recursivelyGetSubmissionValues(FormElementModel group,
 			List<SubmissionValue> valueList) {
 		for (FormElementModel m : group.getChildren()) {
-			if ( !m.isMetadata() ) {
+			if ( m.isMetadata() ) {
+				SubmissionValue v = elementsToValues.get(m);
+				valueList.add(v);
+			} else {
 				if (isPhantomOfSubmissionSet(m.getFormDataModel())) {
 					if ( m.getFormDataModel().getElementType() != ElementType.GEOPOINT ) {
 						recursivelyGetSubmissionValues(m, valueList);

@@ -178,7 +178,7 @@ public final class SubmissionAssociationTable extends CommonFieldsBase {
 
 	private static SubmissionAssociationTable relation = null;
 	
-	public static synchronized final SubmissionAssociationTable assertRelation(CallingContext cc) throws ODKDatastoreException {
+	private static synchronized final SubmissionAssociationTable assertRelation(CallingContext cc) throws ODKDatastoreException {
 		if ( relation == null ) {
 			Datastore ds = cc.getDatastore();
 			User user = cc.getCurrentUser();
@@ -189,6 +189,30 @@ public final class SubmissionAssociationTable extends CommonFieldsBase {
 		    relation = relationPrototype; // set static variable only upon success...
 		}
 		return relation;
+	}
+	
+	public static final SubmissionAssociationTable assertSubmissionAssociation(String uriMd5FormId, XFormParameters submissionElementDefn, CallingContext cc) throws ODKDatastoreException {
+		Datastore ds = cc.getDatastore();
+		User user = cc.getCurrentUser();
+		
+	    SubmissionAssociationTable sa;
+	    {
+	    	String fdmSubmissionUri = CommonFieldsBase.newUri();
+	        String submissionFormIdUri = CommonFieldsBase.newMD5HashUri(submissionElementDefn.formId); // key under which submission is located...
+
+	        SubmissionAssociationTable saRelation = SubmissionAssociationTable.assertRelation(cc);
+		    sa = ds.createEntityUsingRelation(saRelation, user);
+		    sa.setSubmissionFormId(submissionElementDefn.formId);
+		    sa.setSubmissionModelVersion(submissionElementDefn.modelVersion);
+		    sa.setSubmissionUiVersion(submissionElementDefn.uiVersion);
+		    sa.setIsPersistenceModelComplete(false);
+		    sa.setIsSubmissionAllowed(true);
+		    sa.setUriSubmissionDataModel(fdmSubmissionUri);
+		    sa.setUriMd5SubmissionFormId(submissionFormIdUri);
+		    sa.setUriMd5FormId(uriMd5FormId);
+		    ds.putEntity(sa, user);
+	    }
+	    return sa;
 	}
 	
 	public static final List<SubmissionAssociationTable> findSubmissionAssociationsForXForm(XFormParameters params, CallingContext cc) {
@@ -206,12 +230,6 @@ public final class SubmissionAssociationTable extends CommonFieldsBase {
 		    		saList.add(t);
 		    	}
 		    }
-		    
-		    if ( saList.size() > 1 ) {
-		    	throw new IllegalStateException("Logic is not yet in place for cross-form submission sharing");
-		    }
-		    return saList;
-
 		} catch ( ODKDatastoreException e) {
 			e.printStackTrace();
 		}

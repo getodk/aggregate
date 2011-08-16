@@ -26,7 +26,6 @@ import org.opendatakit.aggregate.form.PersistentResults;
 import org.opendatakit.aggregate.format.SubmissionFormatter;
 import org.opendatakit.aggregate.format.table.CsvFormatter;
 import org.opendatakit.aggregate.query.submission.QueryByDate;
-import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.common.constants.BasicConsts;
 import org.opendatakit.common.constants.HtmlConsts;
@@ -71,8 +70,7 @@ public class CsvWorkerImpl {
 		    pw.close();
 		    byte[] outputFile = stream.toByteArray();
 	
-		    Submission s = Submission.fetchSubmission(persistentResultsKey.splitSubmissionKey(), cc);
-		    PersistentResults r = new PersistentResults(s);
+		    PersistentResults r = new PersistentResults(persistentResultsKey, cc);
 		    if ( attemptCount.equals(r.getAttemptCount()) ) {
 				r.setResultFile(outputFile, HtmlConsts.RESP_TYPE_CSV, 
 						Long.valueOf(outputFile.length), 
@@ -90,10 +88,8 @@ public class CsvWorkerImpl {
 		// four possible exceptions:
 		// ODKFormNotFoundException, ODKDatastoreException, ODKIncompleteSubmissionData, Exception
 		e.printStackTrace();
-	    Submission s;
 		try {
-			s = Submission.fetchSubmission(persistentResultsKey.splitSubmissionKey(), cc);
-		    PersistentResults r = new PersistentResults(s);
+		    PersistentResults r = new PersistentResults(persistentResultsKey, cc);
 		    if ( attemptCount.equals(r.getAttemptCount()) ) {
 		    	r.deleteResultFile(cc);
 		    	r.setStatus(ExportStatus.FAILED);
