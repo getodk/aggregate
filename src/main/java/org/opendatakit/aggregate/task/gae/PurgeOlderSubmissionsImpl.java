@@ -21,6 +21,7 @@ import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.task.PurgeOlderSubmissions;
 import org.opendatakit.aggregate.task.gae.servlet.PurgeOlderSubmissionsTaskServlet;
 import org.opendatakit.common.constants.BasicConsts;
+import org.opendatakit.common.persistence.PersistConsts;
 import org.opendatakit.common.web.CallingContext;
 
 import com.google.appengine.api.taskqueue.Queue;
@@ -44,7 +45,7 @@ public class PurgeOlderSubmissionsImpl implements PurgeOlderSubmissions {
 	      CallingContext cc) {
     TaskOptions task = TaskOptions.Builder.withUrl(BasicConsts.FORWARDSLASH + PurgeOlderSubmissionsTaskServlet.ADDR);
     task.method(TaskOptions.Method.GET);
-    task.countdownMillis(1);
+    task.countdownMillis(PersistConsts.MIN_SETTLE_MILLISECONDS);
     task.param(ServletConsts.FORM_ID, form.getFormId());
     task.param(ServletConsts.MISC_TASKS_KEY, miscTasksKey.toString());
     task.param(ServletConsts.ATTEMPT_COUNT, Long.toString(attemptCount));

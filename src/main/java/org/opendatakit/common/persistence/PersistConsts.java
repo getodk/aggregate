@@ -37,6 +37,15 @@ public class PersistConsts {
 	 */
   public static final long MAX_SETTLE_MILLISECONDS = 3000L; // 3 seconds...
 
+  	/**
+  	 * This is the delay used when launching a background task to execute
+  	 * a MiscTasks or PersistentResults action.  The background task will
+  	 * fail if the GAE infrastructure hasn't settled after propagating the 
+  	 * data record with the details of the request.  This is most significant
+  	 * on the development server.
+  	 */
+  public static final long MIN_SETTLE_MILLISECONDS = 1000L;
+
    /**
    * The shortest interval for which all datetime values are
    * preserved across all platforms.  MySql's TIMESTAMP
