@@ -394,6 +394,15 @@
         <servlet-name>localLoginPage</servlet-name>
         <url-pattern>/local_login.html</url-pattern>
     </servlet-mapping>
+
+    <servlet>
+        <servlet-name>openIdLoginPage</servlet-name>
+        <servlet-class>org.opendatakit.aggregate.servlet.OpenIdLoginPageServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>openIdLoginPage</servlet-name>
+        <url-pattern>/openid_login.html</url-pattern>
+    </servlet-mapping>
     
     <servlet>
     	<servlet-name>odktables</servlet-name>
