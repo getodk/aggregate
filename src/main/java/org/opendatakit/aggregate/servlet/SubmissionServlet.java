@@ -84,15 +84,11 @@ public class SubmissionServlet extends ServletUtilBase {
 
   private static final String UPLOAD_PAGE_BODY_START = 
 
-"    <p><b>Upload one submission into ODK Aggregate</b></p>" +
-"    <p>Submissions are located under the <code>/odk/instances</code> directory on the phone's " +
-"     sdcard.  This directory will contain subdirectories with names of the form: <code>formID_yyyy-mm-dd_hh-MM-ss</code></p>" +
-"     <p>Within each of these subdirectories are the submission data file (named: <code>formID_yyyy-mm-dd_hh-MM-ss.xml</code>)," +
-"     and zero or more associated data files for the images, audio clips, video clips, " +
-"     etc. linked with this submission.</p>" +
-"    <!--[if true]><p style=\"color: red;\">For a better user experience, use Chrome, Firefox or Safari</p>" +
-"	  <![endif] -->" +
-"     <form id=\"ie_backward_compatible_form\"" + 
+"<div style=\"overflow: auto;\">" +
+"<p><b>Upload one submission into ODK Aggregate</b></p>" +
+"<!--[if true]><p style=\"color: red;\">For a better user experience, use Chrome, Firefox or Safari</p>" +
+"<![endif] -->" +
+"<form id=\"ie_backward_compatible_form\"" + 
 "                        accept-charset=\"UTF-8\" method=\"POST\" encoding=\"multipart/form-data\" enctype=\"multipart/form-data\"" + 
 "                        action=\"";// emit the ADDR
   private static final String UPLOAD_PAGE_BODY_MIDDLE = "\">" +
@@ -133,7 +129,13 @@ public class SubmissionServlet extends ServletUtilBase {
 "        <td />" +
 "     </tr>" +
 "    </table>" +
-"    </form>";
+"    </form>" +
+"<p>Submissions are located under the <code>/odk/instances</code> directory on the phone's " +
+"sdcard.  This directory will contain subdirectories with names of the form: <code>formID_yyyy-mm-dd_hh-MM-ss</code></p>" +
+"<p>Within each of these subdirectories are the submission data file (named: <code>formID_yyyy-mm-dd_hh-MM-ss.xml</code>)," +
+"and zero or more associated data files for the images, audio clips, video clips, " +
+"etc. linked with this submission.</p>" +
+"</div>";
 
   /**
    * Handler for HTTP Get request that processes a form submission
