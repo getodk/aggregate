@@ -25,6 +25,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.client.externalserv.ExternServSummary;
@@ -87,6 +88,7 @@ import com.google.gdata.util.ServiceException;
  * 
  */
 public class GoogleSpreadsheet extends AbstractExternalService implements ExternalService {
+  private static final Logger logger = Logger.getLogger(GoogleSpreadsheet.class.getName());
 
   /**
    * Datastore entity specific to this type of external service
@@ -176,8 +178,11 @@ public class GoogleSpreadsheet extends AbstractExternalService implements Extern
       oauthParameters.setOAuthTokenSecret(authToken.getTokenSecret());
       service.setOAuthCredentials(oauthParameters, new OAuthHmacSha1Signer());
     } catch (OAuthException e) {
+      String str = "Unable to set credentials in fusion table service record";
+      logger.severe(str + "\nReason: " + e.getMessage());
       // TODO: handle OAuth failure
       e.printStackTrace();
+      throw new ODKExternalServiceException(str, e);
     }
 
     // create spreadsheet
