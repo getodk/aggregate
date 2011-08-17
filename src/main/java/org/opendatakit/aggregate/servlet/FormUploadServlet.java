@@ -75,27 +75,19 @@ public class FormUploadServlet extends ServletUtilBase {
 
   private static final String UPLOAD_PAGE_BODY_START = 
 
-"	  <p><b>Upload one form into ODK Aggregate</b></p>" +
-"	  <p>Media files for the form's logo and the icons, images, audio clips and video clips used " +
-"     within the form (if any) are" + 
-"	  expected to be in a media folder in the same directory as the form definition file (.xml)." + 
-"	  If the form definition file is named \"<code>My Form.xml</code>\" then the media folder should" +
-"	  be named \"<code>My Form-media</code>\". Please use the form below to upload the form definition" + 
-"	  file and the contents of the media folder, if any, into ODK Aggregate.</p>" +
-"	  <p>On ODK Collect 1.1.7 and higher, the file named \"<code>form_logo.png</code>\"," + 
-"	  if present in the media folder, will be displayed as the form's logo. </p>" +
-"	  <!--[if true]><p style=\"color: red;\">For a better user experience, use Chrome, Firefox or Safari</p>" +
-"	  <![endif] -->" +
-"     <form id=\"ie_backward_compatible_form\"" + 
-"	                      accept-charset=\"UTF-8\" method=\"POST\" encoding=\"multipart/form-data\" enctype=\"multipart/form-data\"" + 
-"	                      action=\"";// emit the ADDR
+"<div style=\"overflow: auto;\"><p><b>Upload one form into ODK Aggregate</b></p>" +
+"<!--[if true]><p style=\"color: red;\">For a better user experience, use Chrome, Firefox or Safari</p>" +
+"<![endif] -->" +
+"<form id=\"ie_backward_compatible_form\"" + 
+" accept-charset=\"UTF-8\" method=\"POST\" encoding=\"multipart/form-data\" enctype=\"multipart/form-data\"" + 
+" action=\"";// emit the ADDR
   private static final String UPLOAD_PAGE_BODY_MIDDLE = "\">" +
 "	  <table>" +
 "	  	<tr>" +
 "	  		<td><label for=\"form_def_file\">Form definition:</label></td>" +
 "	  		<td><input id=\"form_def_file\" type=\"file\" size=\"80\"" +
 "	  			name=\"form_def_file\" /></td>" +
-"	  	</tr>" +
+"	  	</tr>\n" +
 "	  	<tr>" +
 "	  		<td><label for=\"mediaFiles\">Media file(s):</label></td>" +
 "	  		<td><input id=\"mediaFiles\" type=\"file\" size=\"80,20\" name=\"datafile\" multiple /><input id=\"clear_media_files\" type=\"button\" value=\"Clear\" onClick=\"clearMediaInputField('mediaFiles')\" /></td>" +
@@ -121,13 +113,18 @@ public class FormUploadServlet extends ServletUtilBase {
 "	          <td><label for=\"mediaFiles6\">Media file #6:</label></td>" +
 "	          <td><input id=\"mediaFiles6\" type=\"file\" size=\"80\" name=\"datafile\" /><input id=\"clear_media_files6\" type=\"button\" value=\"Clear\" onClick=\"clearMediaInputField('mediaFiles6')\" /></td>" +
 "	      </tr>" +
-"	      <![endif]-->" +
+"	      <![endif]-->\n" +
 "	  	<tr>" +
 "	  		<td><input type=\"submit\" name=\"button\" value=\"Upload Form\" /></td>" +
 "	  		<td />" +
 "	  	</tr>" +
-"	  </table>" +
-"	  </form>";
+"	  </table>\n" +
+"	  </form>" +
+"<p>Media files for the form's logo, images, audio clips and video clips " +
+"(if any) should be in a single directory without subdirectories.</p>" +
+"<p>On ODK Collect 1.1.7 and higher, the file named \"<code>form_logo.png</code>\"," + 
+"if present in the media folder, will be displayed as the form's logo. </p>" +
+"</div>\n";
 
   /**
    * Title for generated webpage to obtain title
