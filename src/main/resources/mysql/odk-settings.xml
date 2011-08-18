@@ -67,6 +67,7 @@
 	<bean id="csv_task" class="org.opendatakit.aggregate.task.tomcat.CsvGeneratorImpl" />
     <bean id="http_client_factory" class="org.opendatakit.common.utils.tomcat.TomcatHttpClientFactoryImpl" />
     <bean id="image_util" class="org.opendatakit.aggregate.util.tomcat.ImageUtilImpl" />
+	<bean id="startup" class="org.opendatakit.aggregate.AggregateStartupImpl" />
 
 	<bean id="watchdog" class="org.opendatakit.aggregate.task.tomcat.WatchdogImpl">
 		<property name="datastore" ref="datastore" />
