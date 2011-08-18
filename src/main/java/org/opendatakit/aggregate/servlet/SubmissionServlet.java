@@ -20,13 +20,14 @@ package org.opendatakit.aggregate.servlet;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
-import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.ErrorConsts;
@@ -61,7 +62,7 @@ import org.opendatakit.common.web.CallingContext;
  */
 public class SubmissionServlet extends ServletUtilBase {
 
-	private static final Logger logger = Logger.getLogger(SubmissionServlet.class.getName());
+	private static final Log logger = LogFactory.getLog(SubmissionServlet.class);
   /**
    * Serial number for serialization
    */
@@ -156,7 +157,7 @@ public class SubmissionServlet extends ServletUtilBase {
        * 
        * It is unclear whether this is a GAE issue or a Spring Frameworks issue.
        */
-	  logger.warning("Inside doGet -- replying as doHead");
+	  logger.warn("Inside doGet -- replying as doHead");
       doHead(req, resp);
       return;
    }
@@ -271,38 +272,38 @@ public class SubmissionServlet extends ServletUtilBase {
       }
     } catch (ODKFormNotFoundException e) {
       e.printStackTrace();
-      logger.warning("Form not found - " + e.getMessage());
+      logger.warn("Form not found - " + e.getMessage());
       odkIdNotFoundError(resp);
     } catch (ODKParseException e) {
-      logger.warning("Parsing failure - " + e.getMessage());
+      logger.warn("Parsing failure - " + e.getMessage());
       e.printStackTrace();
       resp.sendError(HttpServletResponse.SC_BAD_REQUEST, ErrorConsts.PARSING_PROBLEM);
     } catch (ODKEntityPersistException e) {
-      logger.severe("Persist failure - " + e.getMessage());
+      logger.error("Persist failure - " + e.getMessage());
       e.printStackTrace();
       resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ErrorConsts.PARSING_PROBLEM);
    } catch (ODKIncompleteSubmissionData e) {
-      logger.warning("Incomplete submission failure - " + e.getMessage());
+      logger.warn("Incomplete submission failure - " + e.getMessage());
       e.printStackTrace();
       resp.sendError(HttpServletResponse.SC_BAD_REQUEST, ErrorConsts.PARSING_PROBLEM);
     } catch (ODKConversionException e) {
-      logger.warning("Datatype casting failure - " + e.getMessage());
+      logger.warn("Datatype casting failure - " + e.getMessage());
       e.printStackTrace();
       resp.sendError(HttpServletResponse.SC_BAD_REQUEST, ErrorConsts.PARSING_PROBLEM);
     } catch (ODKDatastoreException e) {
-      logger.severe("Datastore failure - " + e.getMessage());
+      logger.error("Datastore failure - " + e.getMessage());
       e.printStackTrace();
       resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ErrorConsts.PARSING_PROBLEM);
     } catch (FileUploadException e) {
-      logger.warning("Attachments parsing failure - " + e.getMessage());
+      logger.warn("Attachments parsing failure - " + e.getMessage());
       e.printStackTrace();
       resp.sendError(HttpServletResponse.SC_BAD_REQUEST, ErrorConsts.PARSING_PROBLEM);
     } catch (ODKFormSubmissionsDisabledException e) {
-      logger.warning("Form submission disabled - " + e.getMessage());
+      logger.warn("Form submission disabled - " + e.getMessage());
 	  e.printStackTrace();
       resp.sendError(HttpServletResponse.SC_BAD_REQUEST, ErrorConsts.FORM_DOES_NOT_ALLOW_SUBMISSIONS);
 	} catch (Exception e) {
-	  logger.severe("Unexpected exception: " + e.getMessage());
+	  logger.error("Unexpected exception: " + e.getMessage());
 	  e.printStackTrace();
 	  resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Unexpected exception");
 	}

@@ -2,8 +2,9 @@ package org.opendatakit.aggregate.odktables.commandlogic;
 
 import java.util.Collection;
 import java.util.UUID;
-import java.util.logging.Logger;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.odktables.command.ODKTablesTaskLockType;
 import org.opendatakit.aggregate.odktables.entity.InternalTableEntry;
 import org.opendatakit.common.ermodel.simple.typedentity.TypedEntity;
@@ -24,6 +25,8 @@ import org.opendatakit.common.web.CallingContext;
  */
 public class CommandLogicFunctions
 {
+	private static Log logger = LogFactory.getLog(CommandLogicFunctions.class);
+	
     public static int updateModificationNumber(InternalTableEntry entry,
             String aggregateTableIdentifier, int newModificationNumber,
             CallingContext cc) throws ODKTaskLockException,
@@ -81,9 +84,7 @@ public class CommandLogicFunctions
                     relation.dropRelation();
                 } catch (ODKDatastoreException e1)
                 {
-                    Logger.getLogger(
-                            CommandLogicFunctions.class.getSimpleName())
-                            .severe("Was not able to drop relation: "
+                	logger.error("Was not able to drop relation: "
                                     + relation);
                     return false;
                 }
@@ -118,8 +119,7 @@ public class CommandLogicFunctions
                 entity.delete();
             } catch (ODKDatastoreException e2)
             {
-                Logger.getLogger(CommandLogicFunctions.class.getSimpleName())
-                        .severe("Was not able to delete entity: " + entity);
+            	logger.error("Was not able to delete entity: " + entity);
                 return false;
             }
         }
@@ -149,8 +149,7 @@ public class CommandLogicFunctions
                 entity.save();
             } catch (ODKEntityPersistException e1)
             {
-                Logger.getLogger(CommandLogicFunctions.class.getSimpleName())
-                        .severe("Was not able to save entity: " + entity);
+            	logger.error("Was not able to save entity: " + entity);
                 return false;
             }
         }

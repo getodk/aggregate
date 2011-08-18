@@ -19,13 +19,14 @@ package org.opendatakit.aggregate.servlet;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.ErrorConsts;
 import org.opendatakit.aggregate.constants.HtmlUtil;
@@ -136,7 +137,7 @@ public class FormUploadServlet extends ServletUtilBase {
    */
   private static final String TITLE_OF_THE_XFORM = "Title of the Xform:";
 
-  private static final Logger logger = Logger.getLogger(FormUploadServlet.class.getName());
+  private static final Log logger = LogFactory.getLog(FormUploadServlet.class);
   /**
    * Handler for HTTP Get request to create xform upload page
    * 

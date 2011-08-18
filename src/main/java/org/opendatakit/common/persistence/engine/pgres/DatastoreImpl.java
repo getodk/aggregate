@@ -21,10 +21,10 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
 
 import javax.sql.DataSource;
 
+import org.apache.commons.logging.LogFactory;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.DataField.IndexType;
@@ -559,7 +559,7 @@ public class DatastoreImpl implements Datastore, InitializingBean {
 			b.append(relation.getTableName());
 			b.append(K_BQ);
 			
-			Logger.getLogger(this.getClass().getName()).info(
+			LogFactory.getLog(DatastoreImpl.class).info(
 					"Executing " + b.toString() + " by user " + user.getUriUser());
 			getJdbcConnection().execute(b.toString());
 		} catch ( Exception e ) {
@@ -749,7 +749,7 @@ public class DatastoreImpl implements Datastore, InitializingBean {
 			b.append(K_EQ);
 			b.append(K_BIND_VALUE);
 	
-			Logger.getLogger(this.getClass().getName()).info(
+			LogFactory.getLog(DatastoreImpl.class).info(
 					"Executing " + b.toString() + " with key " + key.getKey() + " by user " + user.getUriUser());
 			getJdbcConnection().update(b.toString(), new Object[] {key.getKey()});
 		} catch (Exception e) {

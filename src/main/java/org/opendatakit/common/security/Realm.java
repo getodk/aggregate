@@ -15,8 +15,8 @@
  */
 package org.opendatakit.common.security;
 
-import java.util.logging.Logger;
-
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
 
 /**
@@ -46,7 +46,7 @@ public class Realm implements InitializingBean {
 			throw new IllegalStateException("realmString (e.g., mydomain.org ODK Aggregate 1.0) must be specified");
 		}
 		
-		Logger log = Logger.getLogger(Realm.class.getName());
+		Log log = LogFactory.getLog(Realm.class);
 		log.info("Hostname: " + hostname);
 		log.info("Port: " + Integer.toString(port));
 		log.info("SecurePort: " + Integer.toString(securePort));

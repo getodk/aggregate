@@ -21,8 +21,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Logger;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
@@ -39,7 +40,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 public class UserServiceImpl implements org.opendatakit.common.security.UserService, InitializingBean {
 
-	private static final Logger logger = Logger.getLogger(UserServiceImpl.class.getName());
+	private static final Log logger = LogFactory.getLog(UserServiceImpl.class);
 	
 	// configured by bean definition...
 	Datastore datastore;

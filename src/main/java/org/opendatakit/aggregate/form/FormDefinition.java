@@ -18,8 +18,9 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.datamodel.FormDataModel;
 import org.opendatakit.aggregate.datamodel.FormDataModel.ElementType;
@@ -70,7 +71,7 @@ import org.opendatakit.common.web.CallingContext;
  */
 public class FormDefinition {
 	
-	private static final Logger logger = Logger.getLogger(FormDefinition.class.getName());
+	private static final Log logger = LogFactory.getLog(FormDefinition.class.getName());
 
 	/**
 	 * Map from the uriSubmissionDataModel key (uuid) to the FormDefinition.
@@ -485,7 +486,7 @@ public class FormDefinition {
 				    List<SubmissionAssociationTable> saList = SubmissionAssociationTable.findSubmissionAssociationsForXForm(xformParameters, cc);
 				    if ( saList.isEmpty() ) {
 				    	// may be in the process of being defined, or in a partially defined state.
-				    	logger.warning("No sa record matching this formId " + xformParameters.toString());
+				    	logger.warn("No sa record matching this formId " + xformParameters.toString());
 				    	return null;
 				    }
 				    for ( SubmissionAssociationTable st : saList ) {
@@ -494,7 +495,7 @@ public class FormDefinition {
 				    			// We have two or more identical entries.  Use the more recent one.
 				    			// Presently, can have a duplicate of our main tables because of timing windows.
 				    			// Eventually, can have two or more forms with the same submission structure.
-						    	logger.warning("Two or more sa records matching this formId " + xformParameters.toString());
+						    	logger.warn("Two or more sa records matching this formId " + xformParameters.toString());
 				    			if ( sa.getCreationDate().compareTo(st.getCreationDate()) == -1 ) {
 				    				// use the more recent data model...
 				    				sa = st;
@@ -506,7 +507,7 @@ public class FormDefinition {
 				}
 			    if ( sa == null ) {
 			    	// must be in a partially defined state.
-			    	logger.warning("No complete persistence model for sa record matching this formId " + xformParameters.toString());
+			    	logger.warn("No complete persistence model for sa record matching this formId " + xformParameters.toString());
 			    	return null;
 			    }
 			    String uriSubmissionDataModel = sa.getUriSubmissionDataModel();
@@ -524,7 +525,7 @@ public class FormDefinition {
 					fdmList = query.executeQuery(0);
 					
 					if ( fdmList == null || fdmList.size() == 0 ) {
-				    	logger.warning("No FDM records for formId " + xformParameters.toString());
+				    	logger.warn("No FDM records for formId " + xformParameters.toString());
 						return null;
 					}
 					
@@ -541,7 +542,7 @@ public class FormDefinition {
 						}
 					} catch (ODKDatastoreException e1) {
 						e1.printStackTrace();
-				    	logger.severe("Asserting relations failed for formId " + xformParameters.toString());
+				    	logger.error("Asserting relations failed for formId " + xformParameters.toString());
 						fd = null;
 					}
 
@@ -553,7 +554,7 @@ public class FormDefinition {
 					}
 				}
 			} catch (ODKDatastoreException e) {
-		    	logger.warning("Persistence Layer failure " + e.getMessage() + " for formId " + xformParameters.toString());
+		    	logger.warn("Persistence Layer failure " + e.getMessage() + " for formId " + xformParameters.toString());
 				return null;
 			}
 		} finally {
@@ -635,7 +636,7 @@ public class FormDefinition {
 			String uriParent = m.getParentUriFormDataModel();
 			if ( uriParent == null ) {
 				String str = "Every record in FormDataModel should have a parent key";
-				logger.severe(str);
+				logger.error(str);
 				m.print(System.err);
 				throw new IllegalStateException(str);
 			}
@@ -647,13 +648,13 @@ public class FormDefinition {
 			} else if ( m.getElementType() != ElementType.LONG_STRING_REF_TEXT ) {
 				if ( m.getElementType() != ElementType.GROUP ) {
 					String str = "Expected upward references only from GROUP elements";
-					logger.severe(str);
+					logger.error(str);
 					m.print(System.err);
 					throw new IllegalStateException(str);
 				}
 				if ( ++nullParentCount > 1 ) {
 					String str = "Expected at most one top level group";
-					logger.severe(str);
+					logger.error(str);
 					m.print(System.err);
 					throw new IllegalStateException(str);
 				}

@@ -21,9 +21,9 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.logging.Logger;
 
 import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.logging.LogFactory;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.Datastore;
@@ -189,7 +189,7 @@ public class TaskLockImpl implements TaskLock {
 						conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
 						Statement stmt = conn.createStatement();
 						for ( String s : stmts ) {
-							// for debugging: Logger.getLogger(TaskLockImpl.class.getName()).info(s);
+							// for debugging: LogFactory.getLog(TaskLockImpl.class).info(s);
 							stmt.execute(s);
 						}
 						conn.commit();
@@ -198,7 +198,7 @@ public class TaskLockImpl implements TaskLock {
 						conn.rollback();
 					} finally {
 						Statement stmt = conn.createStatement();
-						Logger.getLogger(TaskLockImpl.class.getName()).info("UNLOCK TABLES");
+						LogFactory.getLog(TaskLockImpl.class).info("UNLOCK TABLES");
 						stmt.execute("UNLOCK TABLES");
 						conn.commit();
 					}
@@ -277,7 +277,7 @@ public class TaskLockImpl implements TaskLock {
 			result = true;
 		} catch (ODKDatastoreException e) {
 			// if we see a lot of these, we are running too long between renewals
-			Logger.getLogger(TaskLockImpl.class.getName()).info("delete of taskLock threw exception!");
+			LogFactory.getLog(TaskLockImpl.class).info("delete of taskLock threw exception!");
 			e.printStackTrace();
 		}
 		return result;

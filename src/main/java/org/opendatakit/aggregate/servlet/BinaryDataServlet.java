@@ -20,11 +20,12 @@ package org.opendatakit.aggregate.servlet;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
-import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.ErrorConsts;
@@ -54,7 +55,7 @@ public class BinaryDataServlet extends ServletUtilBase {
   
   private static final String NOT_BINARY_OBJECT = "Requested element is not a binary object";
 
-  private static final Logger logger = Logger.getLogger(BinaryDataServlet.class.getName());
+  private static final Log logger = LogFactory.getLog(BinaryDataServlet.class);
   
   /**
    * Serial number for serialization
@@ -146,7 +147,7 @@ public class BinaryDataServlet extends ServletUtilBase {
 	    			b = (BlobSubmissionType) v;
 	    		} else {
 	        		String path = getKeyPath(parts);
-	    			logger.severe(NOT_BINARY_OBJECT + ": " + path);
+	    			logger.error(NOT_BINARY_OBJECT + ": " + path);
 	    			resp.sendError(HttpServletResponse.SC_BAD_REQUEST,
 	    					NOT_BINARY_OBJECT);
 	    			return;
@@ -154,7 +155,7 @@ public class BinaryDataServlet extends ServletUtilBase {
 	    	} catch ( Exception e ) {
 	    		e.printStackTrace();
 	    		String path = getKeyPath(parts);
-	    		logger.severe("Unable to retrieve part identified by path: " + path);
+	    		logger.error("Unable to retrieve part identified by path: " + path);
 	    		errorBadParam(resp);
 	    		return;
 	    	}
