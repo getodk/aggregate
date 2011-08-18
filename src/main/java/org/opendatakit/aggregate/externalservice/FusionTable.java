@@ -96,7 +96,8 @@ import com.google.gdata.util.ServiceException;
 public class FusionTable extends AbstractExternalService implements ExternalService {
   private static final Logger logger = Logger.getLogger(FusionTable.class.getName());
 
-private static final int FUSION_TABLE_SERVICE_TIMEOUT_MILLISECONDS = 3000;
+  private static final int FUSION_TABLE_SOCKET_ESTABLISHMENT_TIMEOUT_MILLISECONDS = 2000;
+  private static final int FUSION_TABLE_SERVICE_TIMEOUT_MILLISECONDS = 15000;
 
   /**
    * Datastore entity specific to this type of external service
@@ -438,7 +439,7 @@ private static final int FUSION_TABLE_SERVICE_TIMEOUT_MILLISECONDS = 3000;
     System.out.println(uri.toString());
     HttpParams httpParams = new BasicHttpParams();
     HttpConnectionParams.setConnectionTimeout(httpParams, FUSION_TABLE_SERVICE_TIMEOUT_MILLISECONDS);
-    HttpConnectionParams.setSoTimeout(httpParams, FUSION_TABLE_SERVICE_TIMEOUT_MILLISECONDS);
+    HttpConnectionParams.setSoTimeout(httpParams, FUSION_TABLE_SOCKET_ESTABLISHMENT_TIMEOUT_MILLISECONDS);
     
     
     HttpClientFactory factory = (HttpClientFactory) cc.getBean(BeanDefs.HTTP_CLIENT_FACTORY);

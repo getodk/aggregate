@@ -34,6 +34,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.opendatakit.aggregate.client.externalserv.ExternServSummary;
 import org.opendatakit.aggregate.constants.BeanDefs;
@@ -164,8 +165,8 @@ public class JsonServer extends AbstractExternalService implements ExternalServi
         
         System.out.println(uri.toString());
         HttpParams httpParams = new BasicHttpParams();
-        httpParams.setIntParameter( HttpClientParams.SO_TIMEOUT, 
-      		  					  JsonServerConsts.CONNECTION_TIMEOUT);
+        HttpConnectionParams.setConnectionTimeout(httpParams, JsonServerConsts.CONNECTION_TIMEOUT);
+        HttpConnectionParams.setSoTimeout(httpParams, JsonServerConsts.CONNECTION_TIMEOUT);
         
         HttpClientFactory factory = (HttpClientFactory) cc.getBean(BeanDefs.HTTP_CLIENT_FACTORY);
         HttpClient client = factory.createHttpClient(httpParams);
