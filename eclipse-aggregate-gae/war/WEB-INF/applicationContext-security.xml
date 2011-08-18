@@ -24,6 +24,7 @@
 	<beans:bean id="hierarchicalRoleRelationships" class="org.opendatakit.common.security.spring.RoleHierarchyImpl">
 		<beans:property name="datastore" ref="datastore"/>
 		<beans:property name="userService" ref="user_service"/>
+		<beans:property name="startupAction" ref="startup" />
 	</beans:bean>
 	
 	<!--	Configure the access policy to the pages here	-->

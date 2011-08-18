@@ -171,8 +171,9 @@ public class FormInfo {
 			User user = cc.getCurrentUser();
 			FormInfoTable formInfoRelation = FormInfoTable.assertRelation(cc);
 			
-			SubmissionAssociationTable sa = SubmissionAssociationTable.assertSubmissionAssociation(
-					FormInfoTable.FORM_INFO_DEFINITION_URI,	formInfoXFormParameters, cc);
+			String formInfoUri = CommonFieldsBase.newMD5HashUri(formInfoXFormParameters.formId);
+		    SubmissionAssociationTable sa = SubmissionAssociationTable.assertSubmissionAssociation(
+		    													formInfoUri, formInfoXFormParameters, cc);
 			String definitionUri = sa.getUriSubmissionDataModel();
 
 			FormInfoTable formInfoDefinition = ds.createEntityUsingRelation(formInfoRelation, user);
@@ -217,6 +218,13 @@ public class FormInfo {
 					cc );
 			
 			FormDefinition.assertModel(formInfoXFormParameters, model, cc);
+			
+			// wait for GAE to settle before continuing...
+			try {
+				Thread.sleep(PersistConsts.MAX_SETTLE_MILLISECONDS);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 			
 			// and enable the data model for retrieval...
 			sa.setIsPersistenceModelComplete(true);
