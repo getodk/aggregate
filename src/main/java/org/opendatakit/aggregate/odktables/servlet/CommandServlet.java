@@ -2,12 +2,13 @@ package org.opendatakit.aggregate.odktables.servlet;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.odktables.client.exception.AggregateInternalErrorException;
 import org.opendatakit.aggregate.odktables.command.Command;
@@ -22,6 +23,7 @@ import com.google.gson.JsonParseException;
 
 public class CommandServlet extends ServletUtilBase
 {
+	private static Log logger = LogFactory.getLog(CommandServlet.class);
     /**
      * Serial number for serialization.
      */
@@ -89,15 +91,13 @@ public class CommandServlet extends ServletUtilBase
             return;
         } catch (AggregateInternalErrorException e)
         {
-            Logger.getLogger(CommandServlet.class.getSimpleName()).warning(
-                    e.toString());
+        	logger.warn(e.toString());
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
                     "Could not complete request. Please try again later.");
             return;
         } catch (SnafuException e)
         {
-            Logger.getLogger(CommandServlet.class.getSimpleName()).severe(
-                    e.toString());
+            logger.error(e.toString());
             resp.sendError(
                     HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
                     "Aggregate suffered an unrecoverable error that likely left the "

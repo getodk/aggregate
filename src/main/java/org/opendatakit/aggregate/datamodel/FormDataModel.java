@@ -17,8 +17,9 @@ import java.io.PrintStream;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Logger;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.DataField.IndexType;
@@ -70,7 +71,7 @@ import org.opendatakit.common.web.CallingContext;
  */
 public final class FormDataModel extends CommonFieldsBase {
 
-	private static final Logger logger = Logger.getLogger(FormDataModel.class.getName());
+	private static final Log logger = LogFactory.getLog(FormDataModel.class.getName());
 	
 	/* xform element types */
 	public static enum ElementType {
@@ -213,7 +214,7 @@ public final class FormDataModel extends CommonFieldsBase {
 	public final void setUriSubmissionDataModel(String value) {
 		if ( ! setStringField(URI_SUBMISSION_DATA_MODEL, value) ) {
 			String str = "overflow on uriSubmissionDataModel";
-			logger.severe(str);
+			logger.error(str);
 			print(System.err);
 			throw new IllegalStateException(str);
 		}
@@ -226,7 +227,7 @@ public final class FormDataModel extends CommonFieldsBase {
 	public final void setParentUriFormDataModel(String value) {
 		if ( ! setStringField(PARENT_URI_FORM_DATA_MODEL, value) ) {
 			String str = "overflow on parentUriFormDataModel";
-			logger.severe(str);
+			logger.error(str);
 			print(System.err);
 			throw new IllegalStateException(str);
 		}
@@ -246,7 +247,7 @@ public final class FormDataModel extends CommonFieldsBase {
 		try {
 			et = ElementType.valueOf(type);
 		} catch ( Exception e ) {
-			logger.severe("Unrecognized element type: " + type);
+			logger.error("Unrecognized element type: " + type);
 			print(System.err);
 			e.printStackTrace();
 		}
@@ -256,7 +257,7 @@ public final class FormDataModel extends CommonFieldsBase {
 	public final void setElementType(ElementType type) {
 		if ( ! setStringField(ELEMENT_TYPE, type.toString()) ) {
 			String str = "overflow on elementType";
-			logger.severe(str);
+			logger.error(str);
 			print(System.err);
 			throw new IllegalStateException(str);
 		}
@@ -269,7 +270,7 @@ public final class FormDataModel extends CommonFieldsBase {
 	public final void setElementName(String name) {
 		if ( ! setStringField(ELEMENT_NAME, name) ) {
 			String str = "overflow on elementName";
-			logger.severe(str);
+			logger.error(str);
 			print(System.err);
 			throw new IllegalStateException(str);
 		}
@@ -335,7 +336,7 @@ public final class FormDataModel extends CommonFieldsBase {
 	public final void setPersistAsColumn(String value) {
 		if ( ! setStringField(PERSIST_AS_COLUMN_NAME, value) ) {
 			String str = "overflow on persistAsColumn";
-			logger.severe(str);
+			logger.error(str);
 			print(System.err);
 			throw new IllegalStateException(str);
 		}
@@ -348,7 +349,7 @@ public final class FormDataModel extends CommonFieldsBase {
 	public final void setPersistAsTable(String value) {
 		if ( ! setStringField(PERSIST_AS_TABLE_NAME, value) ) {
 			String str = "overflow on persistAsTable";
-			logger.severe(str);
+			logger.error(str);
 			print(System.err);
 			throw new IllegalStateException(str);
 		}
@@ -361,7 +362,7 @@ public final class FormDataModel extends CommonFieldsBase {
 	public final void setPersistAsSchema(String value) {
 		if ( ! setStringField(PERSIST_AS_SCHEMA_NAME, value) ) {
 			String str = "overflow on persistAsSchema";
-			logger.severe(str);
+			logger.error(str);
 			print(System.err);
 			throw new IllegalStateException(str);
 		}
@@ -411,7 +412,7 @@ public final class FormDataModel extends CommonFieldsBase {
 		FormDataModel c = children.get(i);
 		if ( c != null ) {
 			String str = "Form id " + getUri() + " Child already defined for ordinal " + ordinal.toString();
-			logger.severe(str);
+			logger.error(str);
 			print(System.err);
 			throw new IllegalStateException(str);
 		}
@@ -424,7 +425,7 @@ public final class FormDataModel extends CommonFieldsBase {
 		for ( FormDataModel m : children ) {
 			if ( m == null ) {
 				String str = "missing ordinal position " + Integer.toString(i);
-				logger.severe(str);
+				logger.error(str);
 				print(System.err);
 				throw new IllegalStateException(str);
 			}

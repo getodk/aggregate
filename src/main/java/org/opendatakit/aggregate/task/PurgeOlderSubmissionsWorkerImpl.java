@@ -20,8 +20,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.logging.Logger;
 
+import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.TaskLockType;
 import org.opendatakit.aggregate.constants.common.FormActionStatus;
@@ -72,7 +72,7 @@ public class PurgeOlderSubmissionsWorkerImpl {
 	public final void purgeOlderSubmissions() throws ODKDatastoreException,
 			ODKFormNotFoundException, ODKExternalServiceDependencyException {
 
-		Logger.getLogger(PurgeOlderSubmissionsWorkerImpl.class.getName()).info("deletion task: " + miscTasksKey.toString());
+		LogFactory.getLog(PurgeOlderSubmissionsWorkerImpl.class).info("deletion task: " + miscTasksKey.toString());
 		
 		MiscTasks t;
 		try {

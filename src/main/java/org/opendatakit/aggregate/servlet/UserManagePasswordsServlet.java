@@ -17,12 +17,12 @@ package org.opendatakit.aggregate.servlet;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.ErrorConsts;
 import org.opendatakit.common.constants.BasicConsts;
@@ -80,7 +80,7 @@ public class UserManagePasswordsServlet extends ServletUtilBase {
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
 		if ( req.getScheme().equals("http")) {
-			Logger.getLogger(UserManagePasswordsServlet.class.getName()).warning("Setting user passwords over http");
+			LogFactory.getLog(UserManagePasswordsServlet.class).warn("Setting user passwords over http");
 		}
 		CallingContext cc = ContextFactory.getCallingContext(this, req);
 

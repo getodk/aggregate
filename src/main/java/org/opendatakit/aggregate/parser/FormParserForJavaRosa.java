@@ -27,8 +27,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Logger;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.javarosa.core.model.DataBinding;
 import org.javarosa.core.model.FormDef;
 import org.javarosa.core.model.SubmissionProfile;
@@ -80,7 +81,7 @@ public class FormParserForJavaRosa {
 	
   private static final String NAMESPACE_ODK = "http://www.opendatakit.org/xforms";
   
-  static Logger log = Logger.getLogger(FormParserForJavaRosa.class.getName());
+  static Log log = LogFactory.getLog(FormParserForJavaRosa.class.getName());
   private static final String BASE64_RSA_PUBLIC_KEY = "base64RsaPublicKey";
   private static final String ENCRYPTED_FORM_DEFINITION = "<?xml version=\"1.0\"?>" +
   	"<h:html xmlns=\"http://www.w3.org/2002/xforms\" xmlns:h=\"http://www.w3.org/1999/xhtml\" xmlns:ev=\"http://www.w3.org/2001/xml-events\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:jr=\"http://openrosa.org/javarosa\">" +
@@ -628,8 +629,7 @@ public class FormParserForJavaRosa {
 		        	createdRelations.add(tbl);
 		        } catch (Exception e1) {
 		          // assume it is because the table is too wide...
-		          Logger.getLogger(FormParserForJavaRosa.class.getName()).warning(
-		              "Create failed -- assuming phantom table required " + tbl.getSchemaName() + "."
+		          log.warn("Create failed -- assuming phantom table required " + tbl.getSchemaName() + "."
 		                  + tbl.getTableName());
 		          try {
 		            ds.dropRelation(tbl, user);
@@ -672,12 +672,10 @@ public class FormParserForJavaRosa {
 		    	  }
 		      }
 		      if ( !createdRelations.isEmpty()) {
-		    	  Logger.getLogger(FormParserForJavaRosa.class.getName()).severe(
-		    			  "createdRelations not fully unwound!");
+		    	  log.error("createdRelations not fully unwound!");
 		    	  for (CommonFieldsBase tbl : createdRelations ) {
 			    	  try {
-				    	  Logger.getLogger(FormParserForJavaRosa.class.getName()).severe(
-		    			  "--dropping " + tbl.getSchemaName() + "." + tbl.getTableName());
+			    		  log.error("--dropping " + tbl.getSchemaName() + "." + tbl.getTableName());
 			    		  ds.dropRelation(tbl, user);
 			    		  createdRelations.remove(tbl);
 			    	  } catch ( Exception e3 ) {
@@ -1073,8 +1071,7 @@ public class FormParserForJavaRosa {
     	// but exclude the top-level group, as somebody might define an empty form.
         // the developer likely has not set a type for the field.
         et = FormDataModel.ElementType.STRING;
-        Logger.getLogger(FormParserForJavaRosa.class.getCanonicalName()).warning(
-            "Element " + getTreeElementPath(treeElement) + " does not have a type");
+        log.warn("Element " + getTreeElementPath(treeElement) + " does not have a type");
         warnings.append("<tr><td>");
         warnings.append(getTreeElementPath(treeElement));
         warnings.append("</td></tr>");
