@@ -137,6 +137,4 @@ public final class ServletConsts {
 
   public static final String START_DATE = "startDate";
   
-  public static final String END_DATE = "endDate";
-  
 }

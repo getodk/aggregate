@@ -18,6 +18,8 @@ import java.util.Date;
 
 import org.apache.http.impl.cookie.DateParseException;
 import org.apache.http.impl.cookie.DateUtils;
+import org.opendatakit.aggregate.constants.ErrorConsts;
+import org.opendatakit.common.constants.BasicConsts;
 
 /**
  * Useful methods for parsing boolean and date values and formatting dates.
@@ -33,6 +35,8 @@ public class WebUtils {
 	private static final String PATTERN_NO_DATE_TIME_ONLY = "HH:mm:ss.SSS";
 	private static final SimpleDateFormat iso8601 = new SimpleDateFormat(PATTERN_ISO8601);
 
+	private static final String WEBSAFE_CURSOR_SEPARATOR = " and ";
+	
 	private WebUtils(){};
 	
 	/**
@@ -159,4 +163,50 @@ public class WebUtils {
 		}
 		return b.toString();
 	}
+	
+	public static final class Cursor {
+		private final Date startDate;
+		private final String uriAfter;
+		
+		public Cursor(Date startDate, String uriAfter ) {
+			this.startDate = startDate;
+			this.uriAfter = uriAfter;
+		}
+
+		public Date getStartDate() {
+			return startDate;
+		}
+
+		public String getUriAfter() {
+			return uriAfter;
+		}
+		
+		public String asWebsafeCursorString() {
+			return WebUtils.iso8601Date(startDate) + WEBSAFE_CURSOR_SEPARATOR +
+					((uriAfter == null) ? "" : uriAfter);
+		}
+	}
+	
+	public static final Cursor parseCursorParameter(String websafeCursorString) {
+	    // cursor -- tracks where we resume our record fetch (if missing, we start over)
+	    Date dateCode = BasicConsts.EPOCH;
+	    String uriAfter = null;
+	    if ( websafeCursorString != null ) {
+		    websafeCursorString = websafeCursorString.trim();
+		    if ( websafeCursorString.length() != 0 ) {
+		    	int idx = websafeCursorString.indexOf(WEBSAFE_CURSOR_SEPARATOR);
+		    	if ( idx == -1 ) {
+		    		throw new IllegalArgumentException(ErrorConsts.INVALID_PARAMS);
+		    	}
+		    	String dateString = websafeCursorString.substring(0,idx);
+		    	uriAfter = websafeCursorString.substring(idx + WEBSAFE_CURSOR_SEPARATOR.length());
+	    		dateCode = parseDate(dateString);
+	    		if ( uriAfter.length() == 0 ) {
+	    			uriAfter = null;
+	    		}
+		    }
+	    }
+	    return new Cursor(dateCode, uriAfter);
+	}
+
 }

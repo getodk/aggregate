@@ -293,7 +293,7 @@
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>downloadSubmissionList</servlet-name>
-		<url-pattern>/view/downloadSubmissionList</url-pattern>
+		<url-pattern>/view/submissionList</url-pattern>
 	</servlet-mapping>
 
 	<servlet>
