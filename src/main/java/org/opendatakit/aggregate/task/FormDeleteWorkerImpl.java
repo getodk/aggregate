@@ -31,11 +31,13 @@ import org.opendatakit.aggregate.externalservice.ExternalService;
 import org.opendatakit.aggregate.externalservice.FormServiceCursor;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.form.MiscTasks;
+import org.opendatakit.aggregate.form.MiscTasks.TaskType;
 import org.opendatakit.aggregate.form.PersistentResults;
 import org.opendatakit.aggregate.process.DeleteSubmissions;
 import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.Datastore;
+import org.opendatakit.common.persistence.PersistConsts;
 import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.persistence.TaskLock;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
@@ -146,19 +148,33 @@ public class FormDeleteWorkerImpl {
 	    User user = cc.getCurrentUser();
 		List<MiscTasks> tasks = MiscTasks.getAllTasksForForm(form, cc);
 		for (MiscTasks task : tasks ) {
-			if ( task.getUri().equals(self.getUri())) continue; // us!
-			String lockedResourceName = task.getMiscTaskLockName();
-			if ( lockedResourceName.equals(self.getMiscTaskLockName()) ) {
+			if ( task.getUri().equals(self.getUri())) {
+				continue; // us!
+			}
+			
+			if ( task.getStatus() == FormActionStatus.ABANDONED ||
+				 task.getStatus() == FormActionStatus.SUCCESSFUL ) {
+				// already complete -- just delete it.
+				task.delete(cc);
+				continue;
+			}
+			
+			TaskType otherType = task.getTaskType();
+			if ( otherType.equals(self.getTaskType()) ) {
+				// we have already matched on the resource name...
 				// we hold this lock already!
 				// delete the task...
 				task.delete(cc);
-			} else {
-				// otherwise, gain the lock on the task 
+				continue;
+			}
+			
+			// gain the lock and delete the task 
+			{
 				TaskLock taskLock = ds.createTaskLock(user);
 				String pLockId = UUID.randomUUID().toString();
 				boolean deleted = false;
 				try {
-					if (taskLock.obtainLock(pLockId, lockedResourceName,
+					if (taskLock.obtainLock(pLockId, task.getMiscTaskLockName(),
 							task.getTaskType().getLockType())) {
 						taskLock = null;
 						// delete the task...
@@ -177,11 +193,11 @@ public class FormDeleteWorkerImpl {
 				taskLock = ds.createTaskLock(user);
 				try {
 					for (int i = 0; i < 10; i++) {
-						if (taskLock.releaseLock(pLockId, lockedResourceName,
+						if (taskLock.releaseLock(pLockId, task.getMiscTaskLockName(),
 								task.getTaskType().getLockType()))
 							break;
 						try {
-							Thread.sleep(1000);
+							Thread.sleep(PersistConsts.MIN_SETTLE_MILLISECONDS);
 						} catch (InterruptedException e) {
 							// just move on, this retry mechanism is to only
 							// make things
@@ -253,7 +269,7 @@ public class FormDeleteWorkerImpl {
 							TaskLockType.UPLOAD_SUBMISSION))
 						break;
 					try {
-						Thread.sleep(1000);
+						Thread.sleep(PersistConsts.MIN_SETTLE_MILLISECONDS);
 					} catch (InterruptedException e) {
 						// just move on, this retry mechanism is to only
 						// make things
