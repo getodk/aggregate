@@ -302,7 +302,7 @@ public class UploadSubmissionsWorkerImpl {
   private List<Submission> querySubmissionsStartDate(Date startDate)
       throws ODKFormNotFoundException, ODKIncompleteSubmissionData, ODKDatastoreException {
     // query for next set of submissions
-    QueryByDate query = new QueryByDate(form, startDate, false, MAX_QUERY_LIMIT, cc);
+    QueryByDate query = new QueryByDate(form, startDate, false, true, true, MAX_QUERY_LIMIT, cc);
     // and don't fetch data within the settle time of the data store + drift of 
     // server clock time vs. that of data store server (MAX_SETTLE_MILLISECONDS).
     Date settleTime = new Date(System.currentTimeMillis() - PersistConsts.MAX_SETTLE_MILLISECONDS);

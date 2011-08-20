@@ -79,7 +79,13 @@ public class XmlAttributeFormatter implements ElementFormatter {
   @Override
   public void formatBinary(BlobSubmissionType blobSubmission, FormElementModel element, String ordinalValue,
       Row row, CallingContext cc) throws ODKDatastoreException {
-	addToXmlValueToRow(blobSubmission.getUnrootedFilename(0), asAttributeName(element), row);
+    if( blobSubmission == null || 
+    	(blobSubmission.getAttachmentCount() == 0) ||
+    	(blobSubmission.getContentHash(1) == null) ) {
+    	addToXmlValueToRow(null, asAttributeName(element), row);
+    } else {
+    	addToXmlValueToRow(blobSubmission.getUnrootedFilename(1), asAttributeName(element), row);
+    }
   }
 
   @Override

@@ -485,9 +485,10 @@ public class BinaryContentManipulator {
          CallingContext cc) throws ODKDatastoreException {
 
       for (BinaryContent bc : attachments) {
-         BlobManipulator b = new BlobManipulator(bc.getUri(), vrefRelation, blbRelation,
-               cc);
-         b.recursivelyAddKeys(keyList);
+    	 if ( bc.getContentHash() != null ) {
+    		 BlobManipulator b = new BlobManipulator(bc.getUri(), vrefRelation, blbRelation, cc);
+    		 b.recursivelyAddKeys(keyList);
+    	 }
          keyList.add(new EntityKey(bc, bc.getUri()));
       }
    }
