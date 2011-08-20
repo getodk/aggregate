@@ -68,15 +68,26 @@ public class TaskLockImpl implements TaskLock {
 	        PreparedQuery pquery = ds.prepare(query);
 	        Iterable<Entity> entities = pquery.asIterable();
 	        List<Key> keysToDelete = new ArrayList<Key>();
-	//        long oldestTimestamp = System.currentTimeMillis();
+	        
 	        for (Entity entity : entities) {
+	          boolean shouldDelete = false;
+	          // see if deadline is more than a day in the past.
+	          // if so, remove lock from table.
+	          Long timestamp = getTimestamp(entity);
+	          if ( timestamp + 24L*3600L*1000L < System.currentTimeMillis() ) {
+	        	  shouldDelete = true;
+	          }
+	          // see if lock id matches that of the one supplied.
+	          // if so, remove lock from table.
 	          Object value = entity.getProperty(LOCK_ID_PROPERTY);
 	          if (value instanceof String) {
 	            String retrievedLockId = (String) value;
 	            if (lockId.equals(retrievedLockId)) {
-	              keysToDelete.add(entity.getKey());
+	            	shouldDelete = true;
 	            }
-	//            oldestTimestamp = Math.min(oldestTimestamp, Long.parseLong((String) entity.getProperty(TIMESTAMP_PROPERTY)));
+	          }
+	          if ( shouldDelete ) {
+	        	  keysToDelete.add(entity.getKey());
 	          }
 	        }
 	        ds.delete(deleteTransaction, keysToDelete);
@@ -106,14 +117,9 @@ public class TaskLockImpl implements TaskLock {
 	
 	    try {
 	      Entity gaeEntity = queryForLock(formId, taskType);
-	      System.out.println("Trying to get lock : " + lockId);
+	      System.out.println("Trying to get lock : " + lockId + " " + formId + " " + taskType.getName());
 	      if (gaeEntity == null) {
 	        gaeEntity = new Entity(KIND);
-	        updateValuesNpersist(transaction, lockId, formId, taskType, gaeEntity);
-	        result = true;
-	      } else if (checkForExpiration(gaeEntity)) {
-	        // note don't delete as there is no guarantee that the lock is in the
-	        // same entity group (only one entity group per transaction)
 	        updateValuesNpersist(transaction, lockId, formId, taskType, gaeEntity);
 	        result = true;
 	      }
@@ -152,18 +158,27 @@ public class TaskLockImpl implements TaskLock {
     return result;
   }
 
-  private boolean checkForExpiration(Entity entity) {
+  private Long getTimestamp(Entity entity) {
     if (entity == null) {
-      return false;
+      return 0L;
     }
     Object obj = entity.getProperty(TIMESTAMP_PROPERTY);
     if (obj instanceof Long) {
       Long timestamp = (Long) obj;
-      Long current = System.currentTimeMillis();
-      System.out.println("Time left on lock: " + Long.toString(timestamp - current));
-      if (current.compareTo(timestamp) > 0) {
-        return true;
-      }
+      return timestamp;
+    }
+    return 0L;
+  }
+
+  private boolean checkForExpiration(Entity entity) {
+    if (entity == null) {
+      return false;
+    }
+    Long timestamp = getTimestamp(entity);
+    Long current = System.currentTimeMillis();
+    System.out.println("Time left on lock: " + Long.toString(timestamp - current));
+    if (current.compareTo(timestamp) > 0) {
+      return true;
     }
     return false;
   }
@@ -217,6 +232,7 @@ public class TaskLockImpl implements TaskLock {
 
 
   public boolean releaseLock(String lockId, String formId, ITaskLockType taskType) throws ODKTaskLockException {
+    System.out.println("Releasing lock : " + lockId + " " + formId + " " + taskType.getName());
     boolean result = false;
     Transaction transaction = ds.beginTransaction();
     try {
@@ -265,7 +281,8 @@ public class TaskLockImpl implements TaskLock {
 
   private void updateValuesNpersist(Transaction transaction, String lockId, String formId,
 		  ITaskLockType taskType, Entity gaeEntity) throws ODKTaskLockException {
-    System.out.println("Persisting lock: " + lockId);
+    System.out.println("Persisting lock : " + lockId + " " + formId + " " + taskType.getName());
+    
     try {
       Long timestamp = System.currentTimeMillis() + taskType.getLockExpirationTimeout();
       gaeEntity.setProperty(TIMESTAMP_PROPERTY, timestamp);
@@ -294,9 +311,20 @@ public class TaskLockImpl implements TaskLock {
       for ( Entity e : entities ) {
     	  if ( !checkForExpiration(e) ) {
     		  if ( active != null ) {
-    			  throw new ODKTaskLockException(MULTIPLE_RESULTS_ERROR);
+    			  Long timestamp1 = getTimestamp(active);
+    			  Long timestamp2 = getTimestamp(e);
+    			  // can't tell who won if we are within the settle interval.
+    			  if ( Math.abs(timestamp1-timestamp2) < PersistConsts.MIN_SETTLE_MILLISECONDS) {
+    				  throw new ODKTaskLockException(MULTIPLE_RESULTS_ERROR);
+    			  }
+    			  // otherwise, whichever holder held the lock first wins
+    			  int cmp = timestamp1.compareTo(timestamp2);
+    			  if ( cmp > 0 ) {
+    				  active = e;
+    			  }
+    		  } else {
+    			  active = e;
     		  }
-    		  active = e;
     	  }
       }
       return active;
