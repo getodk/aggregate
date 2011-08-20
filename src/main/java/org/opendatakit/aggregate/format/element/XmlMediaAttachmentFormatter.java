@@ -61,6 +61,12 @@ public class XmlMediaAttachmentFormatter implements ElementFormatter {
   @Override
   public void formatBinary(BlobSubmissionType blobSubmission, FormElementModel element, String ordinalValue,
       Row row, CallingContext cc) throws ODKDatastoreException {
+
+    if( blobSubmission == null || 
+    	(blobSubmission.getAttachmentCount() == 0) ||
+    	(blobSubmission.getContentHash(1) == null) ) {
+    	return;
+    }
 	
 	String urlLink;
 	{

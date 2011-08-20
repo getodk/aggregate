@@ -40,7 +40,7 @@ public class QueryByDate extends QueryBase {
   private boolean backward;
 
   public QueryByDate(Form form, Date lastDate,
-      boolean backwardDirection, boolean secondaryOrderingByPrimaryKey, Boolean completionStatus, int maxFetchLimit, CallingContext cc) throws ODKFormNotFoundException {
+      boolean backwardDirection, boolean secondaryOrderingByPrimaryKey, Boolean onlyCompleteSubmissions, int maxFetchLimit, CallingContext cc) throws ODKFormNotFoundException {
     super(form, maxFetchLimit);
 
     backward = backwardDirection;
@@ -58,12 +58,14 @@ public class QueryByDate extends QueryBase {
     if (secondaryOrderingByPrimaryKey) {
     	query.addSort(tbl.primaryKey, Query.Direction.ASCENDING);
     }
-	query.addFilter(tbl.isComplete, FilterOperation.EQUAL, completionStatus);
+    if ( onlyCompleteSubmissions ) {
+    	query.addFilter(tbl.isComplete, FilterOperation.EQUAL, true);
+    }
   }
 
   public QueryByDate(Form form, Date lastDate,
       boolean backwardDirection, int maxFetchLimit, CallingContext cc) throws ODKFormNotFoundException {
-	  this(form, lastDate, backwardDirection, false, true, maxFetchLimit, cc);
+	  this(form, lastDate, backwardDirection, false, false, maxFetchLimit, cc);
   }
   
   @Override
