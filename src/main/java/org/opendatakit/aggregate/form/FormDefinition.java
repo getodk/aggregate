@@ -15,6 +15,7 @@ package org.opendatakit.aggregate.form;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -409,7 +410,7 @@ public class FormDefinition {
 				// we must have failed before persisting a FormInfo record
 				// or this must be our first time through...
 				Submission formInfo = new Submission(thisFormVersion.modelVersion, thisFormVersion.uiVersion,
-						thisFormIdMd5Uri, formInfoDefinition, cc);
+						thisFormIdMd5Uri, formInfoDefinition, new Date(), cc);
 				((StringSubmissionType) formInfo.getElementValue(FormInfo.formId)).setValueFromString(thisFormVersion.formId);
 				// default description...
 				{

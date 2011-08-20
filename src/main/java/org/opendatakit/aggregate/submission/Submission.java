@@ -51,14 +51,14 @@ public class Submission extends SubmissionSet {
 	 * @param uiVersion
 	 * @param uriTopLevelGroup -- override the primary key for the top level table. 
 	 * @param formDefinition
-	 * @param datastore
-	 * @param user
+	 * @param submissionDate
+	 * @param cc
 	 * @throws ODKDatastoreException
 	 */
 	public Submission(Long modelVersion, Long uiVersion, String uriTopLevelGroup,
-			FormDefinition formDefinition, CallingContext cc) throws ODKDatastoreException {
+			FormDefinition formDefinition, Date submissionDate, CallingContext cc) throws ODKDatastoreException {
 		super( modelVersion, uiVersion, uriTopLevelGroup, formDefinition, cc);
-		((TopLevelDynamicBase) getGroupBackingObject()).setSubmissionDate(new Date());
+		((TopLevelDynamicBase) getGroupBackingObject()).setSubmissionDate(submissionDate);
 	}
 
 	/**

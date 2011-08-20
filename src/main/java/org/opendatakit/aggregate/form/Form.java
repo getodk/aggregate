@@ -731,7 +731,7 @@ public class Form {
 			FormInfoTable fi = (FormInfoTable) ds.getEntity(formInfoForm.getTopLevelGroupElement().getFormDataModel().getBackingObjectPrototype(), formUri, user);
 	    	formInfo = new Submission(fi, formInfoForm.getFormDefinition(), cc);
 		} catch ( ODKEntityNotFoundException e ) {
-			formInfo = new Submission(1L, 0L, formUri, formInfoForm.getFormDefinition(), cc);
+			formInfo = new Submission(1L, 0L, formUri, formInfoForm.getFormDefinition(), new Date(), cc);
 
 	    	((StringSubmissionType) formInfo.getElementValue(FormInfo.formId)).setValueFromString(formId);
 	    }

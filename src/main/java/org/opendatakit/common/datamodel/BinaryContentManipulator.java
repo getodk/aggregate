@@ -313,7 +313,8 @@ public class BinaryContentManipulator {
    }
 
    /**
-    * Save the attachment to the database.
+    * Save the attachment to the database.  This can be called in two ways.  
+    * Everything non-null or unrootedFilePath non-null and everything else null.
     *  
     * @param byteArray
     * @param contentType
@@ -330,9 +331,9 @@ public class BinaryContentManipulator {
 
       BinaryContentManipulator.BlobSubmissionOutcome outcome = BinaryContentManipulator.BlobSubmissionOutcome.FILE_UNCHANGED;
 
-      String md5Hash = CommonFieldsBase.newMD5HashUri(byteArray);
-
       boolean existingContent = false;
+      
+      // search for a matching entry for unrootedFilePath
       BinaryContent matchedBc = null;
       String currentContentHash = null;
 
@@ -347,47 +348,73 @@ public class BinaryContentManipulator {
             break;
          }
       }
-
+  	
       Datastore ds = cc.getDatastore();
       User user = cc.getCurrentUser();
 
-      if (matchedBc == null || currentContentHash == null) {
-         // adding a new file...
-         outcome = BinaryContentManipulator.BlobSubmissionOutcome.COMPLETELY_NEW_FILE;
-         if ( matchedBc == null ) {
-            // create the record...
-            matchedBc = (BinaryContent) ds
-               .createEntityUsingRelation(ctntRelation, user);
-         }
-         matchedBc.setTopLevelAuri(topLevelKey);
-         matchedBc.setParentAuri(parentKey);
-         matchedBc.setOrdinalNumber(attachments.size() + 1L);
-         matchedBc.setUnrootedFilePath(unrootedFilePath);
-         matchedBc.setContentType(contentType);
-         matchedBc.setContentLength(contentLength);
-         matchedBc.setContentHash(md5Hash);
-         // later: attachments.add(matchedBc);
-      } else if ( currentContentHash.equals(md5Hash)) {
-         return BinaryContentManipulator.BlobSubmissionOutcome.FILE_UNCHANGED;
-      } else {
-         return BinaryContentManipulator.BlobSubmissionOutcome.NEW_FILE_VERSION;
-      }
-
-      // and create the SubmissionBlob (persisting it...)
-      try {
-         // persist the top level linkages...
-         ds.putEntity(matchedBc, user);
-         if (!existingContent)
-            attachments.add(matchedBc);
-
-         // persist the binary data
-         @SuppressWarnings("unused")
-         BlobManipulator subBlob = new BlobManipulator(byteArray, 
-               matchedBc.getUri(), vrefRelation, blbRelation, topLevelKey, cc);
-
-      } catch (ODKDatastoreException e) {
-         // there may be trash in the database upon failure.
-         throw e;
+      if ( byteArray == null && contentType == null && contentLength == null && unrootedFilePath != null ) {
+    	  if (matchedBc == null) {
+ 	         // adding a new file...
+ 	         outcome = BinaryContentManipulator.BlobSubmissionOutcome.COMPLETELY_NEW_FILE;
+ 	         // create the record...
+ 	         matchedBc = (BinaryContent) ds.createEntityUsingRelation(ctntRelation, user);
+ 	         matchedBc.setTopLevelAuri(topLevelKey);
+ 	         matchedBc.setParentAuri(parentKey);
+ 	         matchedBc.setOrdinalNumber(attachments.size() + 1L);
+ 	         matchedBc.setUnrootedFilePath(unrootedFilePath);
+	    	 try {
+		         // persist the top level linkages...
+		         ds.putEntity(matchedBc, user);
+ 	             attachments.add(matchedBc);
+		
+		     } catch (ODKDatastoreException e) {
+		         // there may be trash in the database upon failure.
+		         throw e;
+		     }
+	      }
+    	  return outcome;
+      } else if ( byteArray != null && contentType != null && contentLength != null && unrootedFilePath != null ) {
+    	  
+	      String md5Hash = CommonFieldsBase.newMD5HashUri(byteArray);
+	
+	      if (matchedBc == null || currentContentHash == null) {
+	         // adding a new file...
+	         outcome = BinaryContentManipulator.BlobSubmissionOutcome.COMPLETELY_NEW_FILE;
+	         if ( matchedBc == null ) {
+	            // create the record...
+	            matchedBc = (BinaryContent) ds.createEntityUsingRelation(ctntRelation, user);
+		        matchedBc.setOrdinalNumber(attachments.size() + 1L);
+	         }
+	         matchedBc.setTopLevelAuri(topLevelKey);
+	         matchedBc.setParentAuri(parentKey);
+	         matchedBc.setUnrootedFilePath(unrootedFilePath);
+	         matchedBc.setContentType(contentType);
+	         matchedBc.setContentLength(contentLength);
+	         matchedBc.setContentHash(md5Hash);
+	         // later: attachments.add(matchedBc);
+	      } else if ( currentContentHash.equals(md5Hash)) {
+	         return BinaryContentManipulator.BlobSubmissionOutcome.FILE_UNCHANGED;
+	      } else {
+	         return BinaryContentManipulator.BlobSubmissionOutcome.NEW_FILE_VERSION;
+	      }
+	
+	      // and create the SubmissionBlob (persisting it...)
+	      try {
+	         // persist the top level linkages...
+	         ds.putEntity(matchedBc, user);
+	         if (!existingContent) {
+	            attachments.add(matchedBc);
+	         }
+	
+	         // persist the binary data
+	         @SuppressWarnings("unused")
+	         BlobManipulator subBlob = new BlobManipulator(byteArray, 
+	               matchedBc.getUri(), vrefRelation, blbRelation, topLevelKey, cc);
+	
+	      } catch (ODKDatastoreException e) {
+	         // there may be trash in the database upon failure.
+	         throw e;
+	      }
       }
       return outcome;
    }

@@ -99,16 +99,18 @@ public class XmlFormatter implements SubmissionFormatter, RepeatCallbackFormatte
   public void processRepeatedSubmssionSetsIntoRow(List<SubmissionSet> repeats,
       FormElementModel repeatElement, Row row, CallingContext cc) throws ODKDatastoreException {
 
+	StringBuilder b = new StringBuilder();
     // format repeat row elements
     for (SubmissionSet repeat : repeats) {
-      output.append(HtmlUtil.createBeginTag(repeatElement.getElementName()));
+      b.append(HtmlUtil.createBeginTag(repeatElement.getElementName()));
       Row repeatRow = repeat.getFormattedValuesAsRow(propertyNames, elemFormatter, false, cc);
       Iterator<String> itr = repeatRow.getFormattedValues().iterator();
       while (itr.hasNext()) {
-        output.append(itr.next());
+        b.append(itr.next());
       }
-      output.append(HtmlUtil.createEndTag(repeatElement.getElementName()));
+      b.append(HtmlUtil.createEndTag(repeatElement.getElementName()));
     }
+    row.addFormattedValue(b.toString());
   }
     
 }

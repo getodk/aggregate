@@ -46,9 +46,9 @@ public final class BinaryContent extends DynamicBase {
 	private static final DataField UNROOTED_FILE_PATH = new DataField(
 			"UNROOTED_FILE_PATH", DataField.DataType.STRING, true, 4096L);
 	private static final DataField CONTENT_TYPE = new DataField("CONTENT_TYPE",
-			DataField.DataType.STRING, false, 80L);
+			DataField.DataType.STRING, true, 80L);
 	private static final DataField CONTENT_LENGTH = new DataField("CONTENT_LENGTH",
-			DataField.DataType.INTEGER, false);
+			DataField.DataType.INTEGER, true);
 	private static final DataField CONTENT_HASH = new DataField("CONTENT_HASH", 
 			DataField.DataType.STRING, true);
 
