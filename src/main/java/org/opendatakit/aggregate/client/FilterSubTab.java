@@ -88,7 +88,6 @@ public class FilterSubTab extends AggregateSubTabBase {
 		submissionPanel.update(currentlyDisplayedFilterGroup);
 	}
 
-
 	@Override
 	public boolean canLeave() {
 		return true;
