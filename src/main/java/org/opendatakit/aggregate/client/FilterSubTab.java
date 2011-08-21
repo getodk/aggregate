@@ -59,7 +59,7 @@ public class FilterSubTab extends AggregateSubTabBase {
 		filtersNSubmissions.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_JUSTIFY);
 
 		add(filtersNSubmissions);
-		currentlyDisplayedFilterGroup = new FilterGroup(UIConsts.FILTER_NONE, null, null);
+		currentlyDisplayedFilterGroup = new FilterGroup(UIConsts.FILTER_NONE, null, null, false);
 	}
 
 	public void switchForm(FormSummary formSwitch, FilterGroup filterGroup) {
@@ -81,7 +81,7 @@ public class FilterSubTab extends AggregateSubTabBase {
 	}
 
 	public void removeFilterGroupWithinForm() {
-		currentlyDisplayedFilterGroup = new FilterGroup(UIConsts.FILTER_NONE, form.getId(), null);
+		currentlyDisplayedFilterGroup = new FilterGroup(UIConsts.FILTER_NONE, form.getId(), null, currentlyDisplayedFilterGroup.getIncludeMetadata());
 		navTable.updateNavTable(form, currentlyDisplayedFilterGroup);
 		navTable.update();
 		filtersPanel.update(currentlyDisplayedFilterGroup);

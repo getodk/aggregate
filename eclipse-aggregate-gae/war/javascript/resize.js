@@ -22,6 +22,6 @@ function onWindowResize() {
 	$("#layout_panel").height(height - $("#layout_panel").offset().top - $("#help_panel").height());
 	$("#filters_container").height($("#layout_panel").height() - $("#filter_sub_tab").height());
 	$("#submission_container").height($("#filters_container").height());
-	$("#login_logout_link").offset({left: width - $("#login_logout_link").width() - 10});
+	$("#nav_bar_help_login").offset({left: width - $("#nav_bar_help_login").width() - 32});
 	$(".error_message").width(width);
 }
