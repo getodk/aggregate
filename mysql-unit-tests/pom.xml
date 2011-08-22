@@ -25,6 +25,15 @@
 	</dependency>
   </dependencies>
   <build>
+    <testResources>
+		<testResource>
+			<directory>${toplevel.directory}/src/test/java</directory>
+			<filtering>true</filtering>
+			<includes>
+				<include>**/*.properties</include>
+			</includes>
+		</testResource>
+	</testResources>
 	<testSourceDirectory>${toplevel.directory}/src/test/java</testSourceDirectory>
 	<plugins>
 		<plugin>
