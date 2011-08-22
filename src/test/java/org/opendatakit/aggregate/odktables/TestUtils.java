@@ -8,6 +8,7 @@ import java.net.URISyntaxException;
 import java.util.Comparator;
 import java.util.Properties;
 
+import org.junit.Ignore;
 import org.opendatakit.aggregate.odktables.client.entity.Row;
 
 /**
@@ -16,13 +17,16 @@ import org.opendatakit.aggregate.odktables.client.entity.Row;
  * @author the.dylan.price@gmail.com
  * 
  */
+@Ignore("not a test")
 public class TestUtils
 {
-    public static final Comparator<Row> rowComparator = new Comparator<Row>()
-    {
-        @Override
-        public int compare(Row row1, Row row2)
-        {
+	private TestUtils() {}
+
+	@Ignore("not a test")
+	public static class RowComparator implements Comparator<Row> {
+
+		@Override
+		public int compare(Row row1, Row row2) {
             if (row1.getRowID() != null && row2.getRowID() != null)
                 return row1.getRowID().compareTo(row2.getRowID());
             else if (row1.getAggregateRowIdentifier() != null
@@ -31,9 +35,10 @@ public class TestUtils
                         row2.getAggregateRowIdentifier());
             else
                 return 0;
-        }
-
-    };
+		}
+	}
+	
+	public static final Comparator<Row> rowComparator = new RowComparator();
 
     /**
      * Retrieves the properties found in ODKTablesTestSuite.properties in the
@@ -59,7 +64,10 @@ public class TestUtils
         } catch (URISyntaxException e)
         {
             e.printStackTrace();
-        }
+	    } catch (Exception e)
+	    {
+	        e.printStackTrace();
+	    }
         return props;
     }
 }

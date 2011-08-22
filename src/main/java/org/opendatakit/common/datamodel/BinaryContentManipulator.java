@@ -352,7 +352,7 @@ public class BinaryContentManipulator {
       Datastore ds = cc.getDatastore();
       User user = cc.getCurrentUser();
 
-      if ( byteArray == null && contentType == null && contentLength == null && unrootedFilePath != null ) {
+      if ( byteArray == null && contentType == null && contentLength == null ) {
     	  if (matchedBc == null) {
  	         // adding a new file...
  	         outcome = BinaryContentManipulator.BlobSubmissionOutcome.COMPLETELY_NEW_FILE;
@@ -373,7 +373,7 @@ public class BinaryContentManipulator {
 		     }
 	      }
     	  return outcome;
-      } else if ( byteArray != null && contentType != null && contentLength != null && unrootedFilePath != null ) {
+      } else if ( byteArray != null && contentType != null && contentLength != null ) {
     	  
 	      String md5Hash = CommonFieldsBase.newMD5HashUri(byteArray);
 	
@@ -415,6 +415,8 @@ public class BinaryContentManipulator {
 	         // there may be trash in the database upon failure.
 	         throw e;
 	      }
+      } else {
+    	  throw new IllegalArgumentException("unexpected null values passed into method");
       }
       return outcome;
    }

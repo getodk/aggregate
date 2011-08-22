@@ -244,7 +244,10 @@ public class TaskLockImpl implements TaskLock {
     Transaction transaction = ds.beginTransaction();
     try {
       Entity gaeEntity = queryForLock(formId, taskType);
-      if (gaeEntity != null && gaeEntity.getProperty(LOCK_ID_PROPERTY).equals(lockId)) {
+      if ( gaeEntity == null ) {
+    	  // might have been deleted in an earlier sweep...
+    	  result = true;
+      } else if ( gaeEntity.getProperty(LOCK_ID_PROPERTY).equals(lockId)) {
         ds.delete(transaction, gaeEntity.getKey());
         result = true;
       }
