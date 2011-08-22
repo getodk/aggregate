@@ -540,7 +540,10 @@ public class SubmissionParser {
 			} else {
 				// Assume the value is the filename...
 				submissionElement.setValueFromByteArray(null, null, null, value, cc);
-				return false;
+				
+				// and if we already have the content loaded, the content hash will be non-null
+				BlobSubmissionType blob = (BlobSubmissionType) submissionElement;
+				return (blob.getContentHash(1) != null);
 			}
 		}
 		return true;
