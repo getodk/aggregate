@@ -21,6 +21,8 @@ import java.util.ArrayList;
 import org.opendatakit.aggregate.client.form.FormSummary;
 import org.opendatakit.aggregate.client.table.FormTable;
 import org.opendatakit.aggregate.client.widgets.ServletPopupButton;
+import org.opendatakit.aggregate.constants.common.FormConsts;
+import org.opendatakit.aggregate.constants.common.HelpSliderConsts;
 import org.opendatakit.aggregate.constants.common.UIConsts;
 import org.opendatakit.common.security.common.GrantedAuthorityName;
 
@@ -89,6 +91,11 @@ public class FormsSubTab extends AggregateSubTabBase {
     // Make the call to the form service.
     SecureGWT.getFormService().getForms(callback);
 
+  }
+
+  @Override
+  public HelpSliderConsts[] getHelpSliderContent() {
+    return FormConsts.values();
   }
 
 }

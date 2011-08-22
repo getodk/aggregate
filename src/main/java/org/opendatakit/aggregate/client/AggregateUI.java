@@ -20,10 +20,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.opendatakit.aggregate.client.preferences.Preferences;
-import org.opendatakit.aggregate.constants.common.ExportConsts;
-import org.opendatakit.aggregate.constants.common.FilterConsts;
-import org.opendatakit.aggregate.constants.common.FormConsts;
-import org.opendatakit.aggregate.constants.common.PublishConsts;
+import org.opendatakit.aggregate.constants.common.HelpSliderConsts;
 import org.opendatakit.aggregate.constants.common.SubTabs;
 import org.opendatakit.aggregate.constants.common.Tabs;
 import org.opendatakit.aggregate.constants.common.UIConsts;
@@ -469,57 +466,18 @@ public class AggregateUI implements EntryPoint {
 		rootItem.setText(subMenu + " Help");
 		rootItem.removeItems();
 
-		if (subMenu.equals(SubTabs.EXPORT)) {
-			ExportConsts[] helpVals = ExportConsts.values();
-			// add new information
-			for (int i = 0; i < helpVals.length; i++) {
-				TreeItem helpItem = new TreeItem(helpVals[i].getTitle());
-				TreeItem content = new TreeItem(helpVals[i].getContent());
-				helpItem.setSelected(false);
-				content.setSelected(false);
-				helpItem.addItem(content);
-				rootItem.addItem(helpItem);
-			}
-		}
-
-		else if (subMenu.equals(SubTabs.FILTER)) {
-			FilterConsts[] helpVals = FilterConsts.values();
-			// add new information
-			for (int i = 0; i < helpVals.length; i++) {
-				TreeItem helpItem = new TreeItem(helpVals[i].getTitle());
-				TreeItem content = new TreeItem(helpVals[i].getContent());
-				helpItem.setSelected(false);
-				content.setSelected(false);
-				helpItem.addItem(content);
-				rootItem.addItem(helpItem);
-			}
-		}
-
-		else if (subMenu.equals(SubTabs.FORMS)) {
-			FormConsts[] helpVals = FormConsts.values();
-			// add new information
-			for (int i = 0; i < helpVals.length; i++) {
-				TreeItem helpItem = new TreeItem(helpVals[i].getTitle());
-				TreeItem content = new TreeItem(helpVals[i].getContent());
-				helpItem.setSelected(false);
-				content.setSelected(false);
-				helpItem.addItem(content);
-				rootItem.addItem(helpItem);
-			}
-		}
-
-		else if (subMenu.equals(SubTabs.PUBLISH)) {
-			PublishConsts[] helpVals = PublishConsts.values();
-			// add new information
-			for (int i = 0; i < helpVals.length; i++) {
-				TreeItem helpItem = new TreeItem(helpVals[i].getTitle());
-				TreeItem content = new TreeItem(helpVals[i].getContent());
-				helpItem.setSelected(false);
-				content.setSelected(false);
-				helpItem.addItem(content);
-				rootItem.addItem(helpItem);
-			}
-		}
+		SubTabInterface subTabObj = getSubTab(subMenu);
+      if (subTabObj != null) {
+        HelpSliderConsts[] helpVals = subTabObj.getHelpSliderContent();
+        for (int i = 0; i < helpVals.length; i++) {
+          TreeItem helpItem = new TreeItem(helpVals[i].getTitle());
+          TreeItem content = new TreeItem(helpVals[i].getContent());
+          helpItem.setSelected(false);
+          content.setSelected(false);
+          helpItem.addItem(content);
+          rootItem.addItem(helpItem);
+       }
+      }
 	}
 
 	/***********************************
