@@ -27,7 +27,6 @@ import org.opendatakit.aggregate.constants.TaskLockType;
 import org.opendatakit.aggregate.constants.common.ExternalServicePublicationOption;
 import org.opendatakit.aggregate.constants.common.OperationalStatus;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
-import org.opendatakit.aggregate.datamodel.TopLevelDynamicBase;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
@@ -292,7 +291,8 @@ public class UploadSubmissionsWorkerImpl {
     List<Submission> submissions = query.getResultSubmissions(cc);
 
     // here so we don't have to do null checks on the rest of the code in
-    // this class
+    // this
+    // class
     if (submissions == null) {
       submissions = new ArrayList<Submission>();
     }
@@ -302,7 +302,7 @@ public class UploadSubmissionsWorkerImpl {
   private List<Submission> querySubmissionsStartDate(Date startDate)
       throws ODKFormNotFoundException, ODKIncompleteSubmissionData, ODKDatastoreException {
     // query for next set of submissions
-    QueryByDate query = new QueryByDate(form, startDate, false, MAX_QUERY_LIMIT, cc);
+    QueryByDate query = new QueryByDate(form, startDate, false, true, true, MAX_QUERY_LIMIT, cc);
     // and don't fetch data within the settle time of the data store + drift of 
     // server clock time vs. that of data store server (MAX_SETTLE_MILLISECONDS).
     Date settleTime = new Date(System.currentTimeMillis() - PersistConsts.MAX_SETTLE_MILLISECONDS);
@@ -311,7 +311,8 @@ public class UploadSubmissionsWorkerImpl {
     List<Submission> submissions = query.getResultSubmissions(cc);
 
     // here so we don't have to do null checks on the rest of the code in
-    // this class
+    // this
+    // class
     if (submissions == null) {
       submissions = new ArrayList<Submission>();
     }

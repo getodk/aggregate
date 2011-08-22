@@ -70,7 +70,9 @@ public class HtmlLinkElementFormatter extends BasicElementFormatter{
  
   @Override
   public void formatBinary(BlobSubmissionType blobSubmission, FormElementModel element, String ordinalValue, Row row, CallingContext cc) throws ODKDatastoreException {
-    if(blobSubmission == null || (blobSubmission.getAttachmentCount() == 0)) {
+    if( blobSubmission == null || 
+    	(blobSubmission.getAttachmentCount() == 0) ||
+    	(blobSubmission.getContentHash(1) == null) ) {
       row.addFormattedValue(null);
       return;
     }

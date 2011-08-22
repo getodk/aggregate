@@ -34,6 +34,10 @@ public final class ParserConsts {
 
   public static final String UI_VERSION_ATTRIBUTE_NAME = "uiVersion";
 
+  public static final String INSTANCE_ID = "instanceID";
+  
+  public static final String SUBMISSION_DATE = "submissionDate";
+
   public static final String NAMESPACE_ATTRIBUTE = "xmlns";
 
   public static final String FORWARD_SLASH = "/";

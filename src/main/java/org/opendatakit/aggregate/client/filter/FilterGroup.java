@@ -18,7 +18,6 @@ package org.opendatakit.aggregate.client.filter;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.List;
 
 import org.opendatakit.aggregate.constants.common.UIConsts;
 
@@ -29,16 +28,19 @@ public final class FilterGroup implements Serializable {
   private String uri; // unique identifier
   private String name;
   private String formId;
-  private List<Filter> filters;
+  private ArrayList<Filter> filters;
 
+  private Boolean includeMetadata;
+  
   public FilterGroup() {
 
   }
 
-  public FilterGroup(String groupName, String formId, List<Filter> filtersToApply) {
+  public FilterGroup(String groupName, String formId, ArrayList<Filter> filtersToApply, Boolean includeMetadata) {
     this.uri = UIConsts.URI_DEFAULT;
     this.name = groupName;
     this.formId = formId;
+    this.includeMetadata = includeMetadata;
     
     if(filtersToApply == null) {
       this.filters = new ArrayList<Filter>();
@@ -73,7 +75,15 @@ public final class FilterGroup implements Serializable {
     this.name = name;
   }
 
-  public List<Filter> getFilters() {
+  public Boolean getIncludeMetadata() {
+    return includeMetadata;
+  }
+
+  public void setIncludeMetadata(Boolean metadata) {
+    this.includeMetadata = metadata;
+  }
+
+  public ArrayList<Filter> getFilters() {
     return filters;
   }
 
@@ -81,6 +91,9 @@ public final class FilterGroup implements Serializable {
     return uri;
   }
 
+  public void setUri(String uri) {
+    this.uri = uri;
+  }
   
   /**
    * This should add the filter to the group

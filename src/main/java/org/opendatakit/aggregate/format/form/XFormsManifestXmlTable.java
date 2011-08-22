@@ -85,6 +85,9 @@ public class XFormsManifestXmlTable {
 	  String filename = m.getUnrootedFilename(i);
 	  String hash = m.getContentHash(i);
 
+	  // if we don't have the file (hash==null), then don't emit anything.
+	  if ( hash == null ) return idx;
+	  
 	  int feIdx = 0;
 	  Element fileEntryElement = d.createElement(XML_TAG_NAMESPACE, XFormsTableConsts.MEDIA_FILE_TAG);
 	  e.addChild(idx++, Node.ELEMENT, fileEntryElement);

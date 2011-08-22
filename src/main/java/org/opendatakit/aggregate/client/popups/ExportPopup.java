@@ -18,7 +18,6 @@ package org.opendatakit.aggregate.client.popups;
 
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.SecureGWT;
-import org.opendatakit.aggregate.client.SubmissionTabUI;
 import org.opendatakit.aggregate.client.form.KmlSettingOption;
 import org.opendatakit.aggregate.client.form.KmlSettings;
 import org.opendatakit.aggregate.client.widgets.ClosePopupButton;
@@ -28,6 +27,7 @@ import org.opendatakit.aggregate.constants.common.SubTabs;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
@@ -132,11 +132,32 @@ public class ExportPopup extends PopupPanel {
     if (type.equals(ExportType.CSV)) {
       SecureGWT.getFormService().createCsv(formId, new CreateExportCallback());
     } else { // .equals(ExportType.KML.toString())
-      SecureGWT.getFormService().createKml(formId,
-          geoPointsDropDown.getValue(geoPointsDropDown.getSelectedIndex()),
-          titleFieldsDropDown.getValue(titleFieldsDropDown.getSelectedIndex()),
-          binaryFieldsDropDown.getValue(binaryFieldsDropDown.getSelectedIndex()),
-          new CreateExportCallback());
+      
+      int geoPointIndex = geoPointsDropDown.getSelectedIndex();
+      int titleIndex = titleFieldsDropDown.getSelectedIndex();
+      int binaryIndex = binaryFieldsDropDown.getSelectedIndex();
+
+      int geoPointSize = geoPointsDropDown.getItemCount();
+      int titleSize = titleFieldsDropDown.getItemCount();
+      int binarySize = binaryFieldsDropDown.getItemCount();
+      
+      String geoPointValue = null;
+      if(geoPointSize > geoPointIndex && geoPointSize > 0) {
+        geoPointValue = geoPointsDropDown.getValue(geoPointIndex);
+      }
+      
+      String titleValue = null;
+      if(titleSize > titleIndex  && titleSize > 0) {
+        titleValue = titleFieldsDropDown.getValue(titleIndex);
+      }
+      
+      String binaryValue = null;
+      if(binarySize > binaryIndex && binarySize > 0) {
+        binaryFieldsDropDown.getValue(binaryIndex);
+      }
+      
+      SecureGWT.getFormService().createKml(formId, geoPointValue,
+          titleValue, binaryValue, new CreateExportCallback());
     }
   }
   
@@ -148,10 +169,13 @@ public class ExportPopup extends PopupPanel {
 
     @Override
     public void onSuccess(Boolean result) {
-        SubmissionTabUI subUI = AggregateUI.getUI().getSubmissionNav();
-        int tabIndex = subUI.findSubTabIndex(SubTabs.EXPORT);
-        subUI.selectTab(tabIndex);
-        hide();
+      if(result) {      
+        AggregateUI.getUI().redirectToSubTab(SubTabs.EXPORT);
+      } else {
+        Window.alert("Either the Geopoint field or your Title field were invalid");
+      }
+      
+      hide();
     }
   }
 

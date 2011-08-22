@@ -26,17 +26,23 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.UUID;
 
 import javax.servlet.ServletContext;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.opendatakit.aggregate.constants.TaskLockType;
 import org.opendatakit.common.persistence.Datastore;
+import org.opendatakit.common.persistence.PersistConsts;
+import org.opendatakit.common.persistence.TaskLock;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.security.SecurityBeanDefs;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.security.UserService;
 import org.opendatakit.common.security.server.SecurityServiceUtil;
+import org.opendatakit.common.utils.WebStartup;
 import org.opendatakit.common.web.CallingContext;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.security.access.hierarchicalroles.CycleInRoleHierarchyException;
@@ -65,6 +71,8 @@ public class RoleHierarchyImpl implements RoleHierarchy, InitializingBean {
 	private Datastore datastore = null;
 	/** bean to the userService */
 	private UserService userService = null;
+	/** bean to the startup action */
+	private WebStartup startupAction = null;
 	
 	private long lastCheckTimestamp = System.currentTimeMillis();
 	private long lastUpdateTimestamp = System.currentTimeMillis();
@@ -91,6 +99,14 @@ public class RoleHierarchyImpl implements RoleHierarchy, InitializingBean {
 
 	public void setUserService(UserService userService) {
 		this.userService = userService;
+	}
+
+	public WebStartup getStartupAction() {
+		return startupAction;
+	}
+
+	public void setStartupAction(WebStartup startupAction) {
+		this.startupAction = startupAction;
 	}
 
 	@Override
@@ -126,7 +142,9 @@ public class RoleHierarchyImpl implements RoleHierarchy, InitializingBean {
 
 			@Override
 			public void setAsDaemon(boolean asDaemon) {
-				throw new IllegalStateException("Invalid context");
+				if ( asDaemon != true ) {
+					throw new IllegalStateException("Invalid context");
+				}
 			}
 
 			@Override
@@ -165,15 +183,78 @@ public class RoleHierarchyImpl implements RoleHierarchy, InitializingBean {
 			}
 		};
 		
-		if  ( !userService.isAccessManagementConfigured() ) {
-			logger.warn("Configuring with default role name and role hierarchy"); 
-			SecurityServiceUtil.setDefaultRoleNamesAndHierarchy(bootstrapCc);
+		Datastore ds = bootstrapCc.getDatastore();
+		User user = bootstrapCc.getCurrentUser();
+		
+		// gain single-access lock record in database...
+		String lockedResourceName = "---startup-serialization-lock---";
+		String startupLockId = UUID.randomUUID().toString();
+		
+		int i = 0;
+		boolean locked = false;
+		while ( !locked ) {
+			if ( (++i) % 10 == 0 ) {
+			  logger.warn("excessive wait count for startup serialization lock. Count: " + i);
+	          try {
+	            Thread.sleep(PersistConsts.MIN_SETTLE_MILLISECONDS);
+	          } catch (InterruptedException e) {
+	            // we remain in the loop even if we get kicked out.
+	          }
+			} else if ( i != 1 ) {
+	          try {
+	            Thread.sleep(PersistConsts.MIN_SETTLE_MILLISECONDS);
+	          } catch (InterruptedException e) {
+	            // we remain in the loop even if we get kicked out.
+	          }
+			}
+			try {
+				TaskLock startupTaskLock = ds.createTaskLock(user);
+				if (startupTaskLock.obtainLock(startupLockId, lockedResourceName,
+						TaskLockType.STARTUP_SERIALIZATION)) {
+					locked = true;
+				}
+				startupTaskLock = null;
+			} catch (ODKTaskLockException e) {
+			  e.printStackTrace();
+			}
 		}
-
-		// ensure that the superuser has admin privileges
-		SecurityServiceUtil.superUserBootstrap(bootstrapCc);
-
-		refreshReachableGrantedAuthorities();
+		
+		// we hold the lock while we initialize stuff here...
+		try {
+			if  ( !userService.isAccessManagementConfigured() ) {
+				logger.warn("Configuring with default role name and role hierarchy"); 
+				SecurityServiceUtil.setDefaultRoleNamesAndHierarchy(bootstrapCc);
+			}
+	
+			// ensure that the superuser has admin privileges
+			SecurityServiceUtil.superUserBootstrap(bootstrapCc);
+	
+			refreshReachableGrantedAuthorities();
+			
+			if ( startupAction != null ) {
+				startupAction.doStartupAction(bootstrapCc);
+			}
+		} finally {
+		  // release the startup serialization lock
+	      try {
+	        for (i = 0; i < 10; i++) {
+	          TaskLock startupTaskLock = ds.createTaskLock(user);
+	          if (startupTaskLock.releaseLock(startupLockId, lockedResourceName,
+	              TaskLockType.STARTUP_SERIALIZATION)) {
+	            break;
+	          }
+	          startupTaskLock = null;
+	          try {
+	            Thread.sleep(PersistConsts.MIN_SETTLE_MILLISECONDS);
+	          } catch (InterruptedException e) {
+	            // just move on, this retry mechanism
+	            // is to make things nice
+	          }
+	        }
+	      } catch (ODKTaskLockException e) {
+	        e.printStackTrace();
+	      }
+		}
 	}
 
 	/**

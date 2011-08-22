@@ -21,7 +21,10 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -52,6 +55,7 @@ import org.opendatakit.common.persistence.EntityKey;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.security.User;
+import org.opendatakit.common.utils.WebUtils;
 import org.opendatakit.common.web.CallingContext;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -305,9 +309,18 @@ public class SubmissionParser {
 
 		String instanceId = getOpenRosaInstanceId();
 		if ( instanceId == null ) {
-			instanceId = CommonFieldsBase.newUri();
+			instanceId = root.getAttribute(ParserConsts.INSTANCE_ID);
+			if ( instanceId == null || instanceId.length() == 0 ) {
+				instanceId = CommonFieldsBase.newUri();
+			}
 		}
 
+		Date submissionDate = new Date();
+		String submissionDateString = root.getAttribute(ParserConsts.SUBMISSION_DATE);
+		if ( submissionDateString != null && submissionDateString.length() != 0 ) {
+			submissionDate = WebUtils.parseDate(submissionDateString);
+		}
+		
 		// retrieve the record with this instanceId from the database or
 		// create a new one.  This supports submissions having more than 
 		// 10MB of attachments.  In that case, ODK Collect will post the 
@@ -321,13 +334,14 @@ public class SubmissionParser {
 			TopLevelInstanceData fi = (TopLevelInstanceData) ds.getEntity(form.getTopLevelGroupElement().getFormDataModel().getBackingObjectPrototype(), instanceId, user);
 			submission = new Submission(fi, form.getFormDefinition(), cc);
 		} catch ( ODKEntityNotFoundException e ) {
-			submission = new Submission( modelVersion, uiVersion, instanceId, form.getFormDefinition(), cc);
+			submission = new Submission( modelVersion, uiVersion, instanceId, form.getFormDefinition(), submissionDate, cc);
 	    }
 
 		topLevelTableKey = submission.getKey();
 
+		Map<String,Integer> repeatGroupIndices = new HashMap<String,Integer>();
 		FormElementModel formRoot = form.getTopLevelGroupElement();
-		boolean uploadAllBinaries = processSubmissionElement(formRoot, root, submission, cc);
+		boolean uploadAllBinaries = processSubmissionElement(formRoot, root, submission, repeatGroupIndices, cc);
 		// TODO: verify that we actually have all the binary content uploaded...
 		submission.setIsComplete(uploadAllBinaries);
 		// save the elements inserted into the top-level submission
@@ -367,13 +381,15 @@ public class SubmissionParser {
 	 *            xml document element that marks the start of this submission set.
 	 * @param submissionSet
 	 *            the submission set to add the submission values to.
+	 * @param repeatGroupIndicies
+	 *            tracks the ordinal number of the last stored repeat group of this name.
 	 * @throws ODKParseException
 	 * @throws ODKIncompleteSubmissionData
 	 * @throws ODKConversionException
 	 * @throws ODKDatastoreException
 	 */
 	private boolean processSubmissionElement(FormElementModel node,
-			Element currentSubmissionElement, SubmissionSet submissionSet, CallingContext cc)
+			Element currentSubmissionElement, SubmissionSet submissionSet, Map<String,Integer> repeatGroupIndicies, CallingContext cc)
 			throws ODKParseException, ODKIncompleteSubmissionData,
 			ODKConversionException, ODKDatastoreException {
 
@@ -412,23 +428,46 @@ public class SubmissionParser {
 			case GROUP:
 				// need to recurse on these elements keeping the same
 				// submissionSet...
-				complete = complete && 
-					processSubmissionElement(m, e, submissionSet, cc);
+				complete = complete & 
+					processSubmissionElement(m, e, submissionSet, repeatGroupIndicies, cc);
 				break;
 			case REPEAT:
 				// get the field that will hold the repeats...
-				RepeatSubmissionType repeats = 
-					(RepeatSubmissionType) submissionSet.getElementValue(m);
-				// Create a submission set for a new instance...
-				long l = repeats.getNumberRepeats()+1L;
-				SubmissionSet repeatableSubmissionSet = new SubmissionSet(
-						submissionSet, l, m, form.getFormDefinition(),
-						topLevelTableKey, cc);
+				// get the repeat group...
+				RepeatSubmissionType repeats = (RepeatSubmissionType) submissionSet.getElementValue(m);
+				
+				// determine the ordinal of the repeat group element we are processing.
+				// do this by constructing the submission key for the repeat group and
+				// seeing if that key is in the repeatGroupIndicies table.  If not, the
+				// ordinal is 1L.  Otherwise, it is the value in the table plus 1L.
+				String fullName = repeats.constructSubmissionKey().toString();
+				Integer idx = repeatGroupIndicies.get(fullName);
+				if ( idx == null ) {
+					idx = 1; // base case -- not yet in repeatGroupIndicies map
+				} else {
+					++idx;
+				}
+				// save the updated index
+				repeatGroupIndicies.put(fullName, idx);
+
+				// get or create the instance's submission set for this ordinal
+				SubmissionSet repeatableSubmissionSet;
+				if ( repeats.getNumberRepeats() >= idx ) {
+					// we already have this set defined
+					repeatableSubmissionSet = repeats.getSubmissionSets().get(idx-1);
+				} else if ( repeats.getNumberRepeats() == idx-1 ){
+					// Create a submission set for a new instance...
+					long l = repeats.getNumberRepeats()+1L;
+					repeatableSubmissionSet = new SubmissionSet(
+							submissionSet, l, m, form.getFormDefinition(),
+							topLevelTableKey, cc);
+					repeats.addSubmissionSet(repeatableSubmissionSet);
+				} else {
+					throw new IllegalStateException("incrementing repeats by more than one!");
+				}
 				// populate the instance's submission set with values from e...
-				complete = complete && 
-					processSubmissionElement(m, e, repeatableSubmissionSet, cc);
-				// add the instance to the repeat group...
-				repeats.addSubmissionSet(repeatableSubmissionSet);
+				complete = complete & 
+					processSubmissionElement(m, e, repeatableSubmissionSet, repeatGroupIndicies, cc);
 				break;
 			case STRING:
 			case JRDATETIME:
@@ -452,7 +491,7 @@ public class SubmissionParser {
 				value = getSubmissionValue(e);
 				SubmissionField<?> submissionElement = ((SubmissionField<?>) submissionSet
 						.getElementValue(m));
-				complete = complete && 
+				complete = complete & 
 					processBinarySubmission(m, submissionElement, value, cc);
 				break;
 			}
@@ -499,7 +538,12 @@ public class SubmissionParser {
 				submissionElement.setValueFromByteArray(byteArray, binaryData
 						.getContentType(), binaryData.getContentLength(), fileName, cc);
 			} else {
-				return (((BlobSubmissionType) submissionElement).getAttachmentCount() >= 1);
+				// Assume the value is the filename...
+				submissionElement.setValueFromByteArray(null, null, null, value, cc);
+				
+				// and if we already have the content loaded, the content hash will be non-null
+				BlobSubmissionType blob = (BlobSubmissionType) submissionElement;
+				return (blob.getContentHash(1) != null);
 			}
 		}
 		return true;

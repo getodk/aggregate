@@ -16,6 +16,8 @@
 
 package org.opendatakit.aggregate.client;
 
+import java.util.ArrayList;
+
 import org.opendatakit.aggregate.client.form.FormSummary;
 import org.opendatakit.aggregate.client.table.FormTable;
 import org.opendatakit.aggregate.client.widgets.ServletPopupButton;
@@ -24,9 +26,8 @@ import org.opendatakit.common.security.common.GrantedAuthorityName;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.VerticalPanel;
 
-public class FormsSubTab extends VerticalPanel implements SubTabInterface {
+public class FormsSubTab extends AggregateSubTabBase {
   // button text & styling
   private static final String SUBMISSION_TXT = "Upload Data";
   private static final String NEW_FORM_TXT = "New Form";
@@ -74,12 +75,12 @@ public class FormsSubTab extends VerticalPanel implements SubTabInterface {
     uploadSubmission.setEnabled(enabled);
     
     // Set up the callback object.
-    AsyncCallback<FormSummary[]> callback = new AsyncCallback<FormSummary[]>() {
+    AsyncCallback<ArrayList<FormSummary>> callback = new AsyncCallback<ArrayList<FormSummary>>() {
       public void onFailure(Throwable caught) {
         AggregateUI.getUI().reportError(caught);
       }
 
-      public void onSuccess(FormSummary[] forms) {
+      public void onSuccess(ArrayList<FormSummary> forms) {
         AggregateUI.getUI().clearError();
         listOfForms.updateFormTable(forms);
       }

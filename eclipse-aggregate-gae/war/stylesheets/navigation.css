@@ -41,7 +41,7 @@
 .gwt-DecoratedTabBar .gwt-TabBarItem-selected .tabTopCenter,
 .gwt-DecoratedTabBar .gwt-TabBarItem-selected .tabMiddleCenter {
 	background: #07115A;
-	color: #a1abff;
+	color: #f5bb30;
 }
 * html .gwt-DecoratedTabBar .tabTopLeftInner,
 * html .gwt-DecoratedTabBar .tabTopRightInner {
@@ -80,7 +80,7 @@
 	padding-bottom: 5px;
 }
 .gwt-TabBarItem-selected {
-	color: #a1abff;
+	color: #f5bb30;
 }
 .gwt-TabBar .gwt-TabBarFirst {
 	width: 15px;
@@ -91,6 +91,9 @@
 .popup_close_cell {
 	text-align: right;
 }
+
+
+	
 #layout_panel {
 	position: relative;
 	top: 16px;
@@ -112,9 +115,14 @@
 }
 #submission_nav_table {
 	width: 100%;
+	border-bottom: 1px solid #07115A;
 }
 
 .gwt-AccessConfigurationSheet {
 	margin-left: 20px;
 	margin-right: 20px;	
+}
+
+#filters_container {
+	border-right: 1px solid #07115A;
 }

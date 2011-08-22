@@ -375,7 +375,7 @@ public class AbstractRelation implements Relation {
 	 * @author mitchellsundt@gmail.com
 	 *
 	 */
-	private static class RelationImpl extends CommonFieldsBase {
+	static class RelationImpl extends CommonFieldsBase {
 
 		RelationImpl(String schemaName, String tableName, List<DataField> definedFields) {
 			super(schemaName, tableName);

@@ -31,12 +31,11 @@ import com.google.gwt.user.client.ui.ScrollPanel;
 public class RepeatPopup extends PopupPanel {
 
   private FlowPanel panel;
-  private SubmissionTable dataTable;
   
   public RepeatPopup(final String keyString) {
     super(false);
     panel = new FlowPanel();
-    dataTable = new SubmissionTable(); //contains the data
+   
 
     // Set up the callback object.
     AsyncCallback<SubmissionUISummary> callback = new AsyncCallback<SubmissionUISummary>() {
@@ -45,7 +44,7 @@ public class RepeatPopup extends PopupPanel {
        }
 
        public void onSuccess(SubmissionUISummary summary) {
-         dataTable.update(summary);
+         panel.add(new SubmissionTable(summary)); //contains the data
        }
     };
     
@@ -55,7 +54,6 @@ public class RepeatPopup extends PopupPanel {
     
     // populate the panel
     panel.add(new ClosePopupButton(this));
-    panel.add(dataTable);
     
     ScrollPanel scroll = new ScrollPanel(panel);
     scroll.setPixelSize((Window.getClientWidth() / 2),(Window.getClientHeight() / 2));

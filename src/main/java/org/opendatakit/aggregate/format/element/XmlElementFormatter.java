@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 University of Washington
+ * Copyright (C) 2011 University of Washington
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -22,9 +22,11 @@ import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.TimeZone;
 
+import org.apache.commons.lang.StringEscapeUtils;
 import org.opendatakit.aggregate.constants.format.FormatConsts;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.format.Row;
+import org.opendatakit.aggregate.format.structure.XmlFormatter;
 import org.opendatakit.aggregate.submission.SubmissionRepeat;
 import org.opendatakit.aggregate.submission.type.BlobSubmissionType;
 import org.opendatakit.aggregate.submission.type.GeoPoint;
@@ -34,17 +36,24 @@ import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
 
 /**
+ * Formats xml tags <name>value</name> with proper escaping for 
+ * reconstructing the submission xml that Collect may have used
+ * when submitting data.
  * 
  * @author wbrunette@gmail.com
+ * @author mitchellsundt@gmail.com
  * 
  */
 public class XmlElementFormatter implements ElementFormatter {
-
+	XmlFormatter xmlFormatter;
+  
   /**
    * Construct a XML Element Formatter
+ * @param xmlFormatter 
    * 
    */
-  public XmlElementFormatter() {
+  public XmlElementFormatter(XmlFormatter xmlFormatter) {
+	  this.xmlFormatter = xmlFormatter;
   }
 
   @Override
@@ -55,7 +64,13 @@ public class XmlElementFormatter implements ElementFormatter {
   @Override
   public void formatBinary(BlobSubmissionType blobSubmission, FormElementModel element, String ordinalValue,
       Row row, CallingContext cc) throws ODKDatastoreException {
-
+    if( blobSubmission == null || 
+    	(blobSubmission.getAttachmentCount() == 0) ||
+    	(blobSubmission.getContentHash(1) == null) ) {
+   	    addToXmlValueToRow(null, element.getElementName(), row);
+	} else {
+		addToXmlValueToRow(blobSubmission.getUnrootedFilename(1), element.getElementName(), row);
+	}
   }
 
   @Override
@@ -76,7 +91,12 @@ public class XmlElementFormatter implements ElementFormatter {
       first = false;
       b.append(s);
     }
-    addToXmlValueToRow(b.toString(), element.getElementName(), row);
+    String str = b.toString();
+    if ( str.length() > 0 ) {
+    	addToXmlValueToRow(str, element.getElementName(), row);
+    } else {
+    	addToXmlValueToRow(null, element.getElementName(), row);
+    }
   }
 
   @Override
@@ -113,17 +133,17 @@ public class XmlElementFormatter implements ElementFormatter {
   @Override
   public void formatGeoPoint(GeoPoint coordinate, FormElementModel element, String ordinalValue, Row row) {
     if (coordinate.getLongitude() != null && coordinate.getLatitude() != null) {
-      String coordVal = coordinate.getLatitude().toString() + BasicConsts.COMMA + BasicConsts.SPACE
+      String coordVal = coordinate.getLatitude().toString() + BasicConsts.SPACE
           + coordinate.getLongitude().toString();
       if (coordinate.getAltitude() != null) {
-        coordVal += BasicConsts.COMMA + BasicConsts.SPACE + coordinate.getAltitude().toString();
+        coordVal += BasicConsts.SPACE + coordinate.getAltitude().toString();
       } else {
-        coordVal += BasicConsts.COMMA + BasicConsts.SPACE + "0.0";
+        coordVal += BasicConsts.SPACE + "0.0";
       }
       if (coordinate.getAccuracy() != null) {
-        coordVal += BasicConsts.COMMA + BasicConsts.SPACE + coordinate.getAccuracy().toString();
+        coordVal += BasicConsts.SPACE + coordinate.getAccuracy().toString();
       } else {
-        coordVal += BasicConsts.COMMA + BasicConsts.SPACE + "0.0";
+        coordVal += BasicConsts.SPACE + "0.0";
       }
       addToXmlValueToRow(coordVal, element.getElementName(), row);
     } else {
@@ -140,7 +160,7 @@ public class XmlElementFormatter implements ElementFormatter {
   @Override
   public void formatRepeats(SubmissionRepeat repeat, FormElementModel repeatElement, Row row,
       CallingContext cc) throws ODKDatastoreException {
-    // TODO: figure out how to deal with repeat
+	  xmlFormatter.processRepeatedSubmssionSetsIntoRow(repeat.getSubmissionSets(), repeatElement, row, cc);
   }
 
   @Override
@@ -149,16 +169,13 @@ public class XmlElementFormatter implements ElementFormatter {
   }
 
   private void addToXmlValueToRow(Object value, String propertyName, Row row) {
-    String xmlString = HtmlUtil.createBeginTag(propertyName);
     
     if (value != null) {
-      xmlString += value.toString();
-    } else {
-      xmlString += BasicConsts.EMPTY_STRING;
+      String xmlString = HtmlUtil.createBeginTag(propertyName);
+      xmlString += StringEscapeUtils.escapeXml(value.toString());
+      xmlString += HtmlUtil.createEndTag(propertyName);
+      row.addFormattedValue(xmlString);
     }
-    xmlString += HtmlUtil.createEndTag(propertyName);
-    
-    row.addFormattedValue(xmlString);
   }
 
 }

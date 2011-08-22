@@ -24,7 +24,6 @@ import org.opendatakit.aggregate.constants.externalservice.ExternalServiceConsts
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.form.MiscTasks;
-import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.task.WorksheetCreator;
 import org.opendatakit.aggregate.task.WorksheetCreatorWorkerImpl;
@@ -68,8 +67,7 @@ public class WorksheetCreatorImpl implements WorksheetCreator {
 	@Override
 	public final void createWorksheetTask(Form form, SubmissionKey miscTasksKey, long attemptCount,
 			CallingContext cc) throws ODKDatastoreException, ODKFormNotFoundException {
-		Submission s = Submission.fetchSubmission(miscTasksKey.splitSubmissionKey(), cc);
-	    MiscTasks r = new MiscTasks(s);
+	    MiscTasks r = new MiscTasks(miscTasksKey, cc);
 	    Map<String,String> params = r.getRequestParameters();
 	    String esTypeString = params.get(ServletConsts.EXTERNAL_SERVICE_TYPE);
 	    if (esTypeString == null) {

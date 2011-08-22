@@ -16,6 +16,8 @@
 
 package org.opendatakit.aggregate.client;
 
+import java.util.ArrayList;
+
 import org.opendatakit.aggregate.client.externalserv.ExternServSummary;
 import org.opendatakit.aggregate.client.form.FormServiceAsync;
 import org.opendatakit.aggregate.client.form.FormSummary;
@@ -26,9 +28,8 @@ import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.ListBox;
-import com.google.gwt.user.client.ui.VerticalPanel;
 
-public class PublishSubTab extends VerticalPanel implements SubTabInterface {
+public class PublishSubTab extends AggregateSubTabBase {
  
   private AggregateUI baseUI;
 
@@ -37,7 +38,7 @@ public class PublishSubTab extends VerticalPanel implements SubTabInterface {
   private ListBox formsBox;
 
   // state
-  private FormSummary[] displayedFormList;
+  private ArrayList<FormSummary> displayedFormList;
   private FormSummary selectedForm;
 
   public PublishSubTab(AggregateUI baseUI) {
@@ -58,12 +59,12 @@ public class PublishSubTab extends VerticalPanel implements SubTabInterface {
 	  return true;
   }
 
-  private class UpdateAction implements AsyncCallback<FormSummary[]> {
+  private class UpdateAction implements AsyncCallback<ArrayList<FormSummary>> {
     public void onFailure(Throwable caught) {
       baseUI.reportError(caught);
     }
 
-    public void onSuccess(FormSummary[] forms) {
+    public void onSuccess(ArrayList<FormSummary> forms) {
       baseUI.clearError();
       
       // update the class state with the updated form list

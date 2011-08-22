@@ -76,10 +76,8 @@ public class Filter implements Serializable {
       return false;
     }
     
-    
     Filter other = (Filter) obj;
-    return (uri == null ? (other.uri == null) : (uri.equals(other.uri)))
-        && (rc == null ? (other.rc == null) : (rc.equals(other.rc)))
+    return (rc == null ? (other.rc == null) : (rc.equals(other.rc)))
         && (ordinal == null ? (other.ordinal == null) : (ordinal.equals(other.ordinal)));
   }
 
@@ -89,8 +87,6 @@ public class Filter implements Serializable {
   @Override
   public int hashCode() {
     int hashCode = 131;
-    if (uri != null)
-      hashCode += uri.hashCode();
     if(rc != null)
       hashCode += rc.hashCode();
     if (ordinal != null)

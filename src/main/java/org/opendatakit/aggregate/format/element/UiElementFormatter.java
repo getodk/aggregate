@@ -67,9 +67,11 @@ public class UiElementFormatter extends BasicElementFormatter {
   
   @Override
   public void formatBinary(BlobSubmissionType blobSubmission, FormElementModel element, String ordinalValue, Row row, CallingContext cc) throws ODKDatastoreException {
-    if(blobSubmission == null || (blobSubmission.getAttachmentCount() == 0)) {
-      row.addFormattedValue(null);
-      return;
+    if( blobSubmission == null || 
+    	(blobSubmission.getAttachmentCount() == 0) ||
+    	(blobSubmission.getContentHash(1) == null) ) {
+          row.addFormattedValue(null);
+          return;
     }
     
     SubmissionKey key = blobSubmission.getValue();

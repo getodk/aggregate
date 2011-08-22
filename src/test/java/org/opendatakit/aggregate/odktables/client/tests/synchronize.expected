@@ -1,0 +1,45 @@
+# Set up
+createUser user1
+createUser user2
+
+createSynchronizedTable user1 people
+    
+# Test that user2 can synchronize
+setTablePermissions user1 user2 people true true false
+cloneSynchronizedTable user2 people
+
+insertSynchronizedRows user1 people
+        
+updateSynchronizedRows user2 people
+Exception: org.opendatakit.aggregate.odktables.client.exception.OutOfSynchException: Table out of synch with Aggregate!.
+        
+synchronize user2 people
+
+updateSynchronizedRows user2 people
+        
+        
+# Test that user1 can synchronize
+insertSynchronizedRows user1 people
+Exception: org.opendatakit.aggregate.odktables.client.exception.OutOfSynchException: Table out of synch with Aggregate!.
+        
+synchronize user1 people
+
+insertSynchronizedRows user1 people
+        
+# Test that can't synchronize with non-existent table
+synchronize user1 nonexistenttable
+Exception: org.opendatakit.aggregate.odktables.client.exception.TableDoesNotExistException: Table with ID nonexistenttable does not exist!
+
+# Test that can't synchronize without permission
+insertSynchronizedRows user1 people
+        
+setTablePermissions user1 user2 people false false false
+
+synchronize user2 people
+Exception: org.opendatakit.aggregate.odktables.client.exception.TableDoesNotExistException: Table with ID people does not exist!
+
+
+# clean up
+deleteSynchronizedTable user1 people
+deleteUser user1
+deleteUser user2

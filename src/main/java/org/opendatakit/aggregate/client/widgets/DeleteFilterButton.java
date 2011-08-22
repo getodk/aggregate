@@ -16,7 +16,6 @@
 
 package org.opendatakit.aggregate.client.widgets;
 
-import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.FilterSubTab;
 import org.opendatakit.aggregate.client.filter.Filter;
 
@@ -40,7 +39,7 @@ public class DeleteFilterButton extends AButtonBase implements ClickHandler {
   public void onClick(ClickEvent event) {
     super.onClick(event);
     parentSubTab.getDisplayedFilterGroup().removeFilter(remove);
-    AggregateUI.getUI().getTimer().refreshNow();
+    parentSubTab.update();
   }
 
 }

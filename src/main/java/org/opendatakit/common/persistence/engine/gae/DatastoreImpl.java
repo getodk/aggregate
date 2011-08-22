@@ -18,8 +18,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
-import java.util.logging.Logger;
 
+import org.apache.commons.logging.LogFactory;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.Datastore;
@@ -382,7 +382,7 @@ public class DatastoreImpl implements Datastore {
 			throws ODKDatastoreException {
 		Key dsKey = constructGaeKey(key.getRelation(), key.getKey());
 		try {
-			Logger.getLogger(this.getClass().getName()).info(
+			LogFactory.getLog(DatastoreImpl.class).info(
 					"Executing delete " + constructGaeKind(key.getRelation()) + " with key " + key.getKey() + " by user " + user.getUriUser());
 			ds.delete(dsKey);
 		} catch ( Exception ex ) {
@@ -402,7 +402,7 @@ public class DatastoreImpl implements Datastore {
 		for (EntityKey entityKey : keys) {
 			datastoreKeys.add(constructGaeKey(entityKey.getRelation(),
 					entityKey.getKey()));
-			Logger.getLogger(this.getClass().getName()).info(
+			LogFactory.getLog(DatastoreImpl.class).info(
 					"Executing delete " + constructGaeKind(entityKey.getRelation()) + " with key " + entityKey.getKey() + " by user " + user.getUriUser());
 		}
 		try {

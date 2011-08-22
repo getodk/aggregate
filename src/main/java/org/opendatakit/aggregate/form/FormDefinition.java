@@ -15,11 +15,13 @@ package org.opendatakit.aggregate.form;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.datamodel.FormDataModel;
 import org.opendatakit.aggregate.datamodel.FormDataModel.ElementType;
@@ -70,7 +72,7 @@ import org.opendatakit.common.web.CallingContext;
  */
 public class FormDefinition {
 	
-	private static final Logger logger = Logger.getLogger(FormDefinition.class.getName());
+	private static final Log logger = LogFactory.getLog(FormDefinition.class.getName());
 
 	/**
 	 * Map from the uriSubmissionDataModel key (uuid) to the FormDefinition.
@@ -81,8 +83,8 @@ public class FormDefinition {
 	
 	/** the entity that defines the mapping of the form id to this data model */
 	private final SubmissionAssociationTable submissionAssociation;
-	/** map from uri to FormDataModel; with navigable parent/child structure */
-	private final Map<String, FormDataModel> uriMap = new HashMap<String, FormDataModel>();
+	/** list of all the elements in this submission definition */
+	private final List<FormDataModel> elementList = new ArrayList<FormDataModel>();
 	/** list of all tables (form, repeat group and auxillary) */
 	private final List<FormDataModel> tableList = new ArrayList<FormDataModel>();
 	/** list of non-repeat groups in xform */
@@ -371,29 +373,6 @@ public class FormDefinition {
 				ds.putEntity(m, user);
 			}
 		}
-		
-		// and if the model is all stored, then...
-		String definitionUri = model.get(0).getUriSubmissionDataModel();
-		String formUri = CommonFieldsBase.newMD5HashUri(p.formId);
-		
-		SubmissionAssociationTable saRelation = SubmissionAssociationTable.assertRelation(cc);
-		SubmissionAssociationTable sa = ds.createEntityUsingRelation(saRelation, user);
-		
-		sa.setStringField(saRelation.primaryKey, definitionUri );
-		sa.setUriMd5SubmissionFormId(formUri); // md5 of submissionFormId
-		sa.setUriMd5FormId(formUri); // md5 of rootElementFormId
-		sa.setSubmissionFormId(p.formId);
-		sa.setSubmissionModelVersion(p.modelVersion);
-		sa.setSubmissionUiVersion(p.uiVersion);
-		sa.setIsPersistenceModelComplete(true);
-		sa.setIsSubmissionAllowed(true);
-		sa.setUriSubmissionDataModel(definitionUri); // in general, this is arbitrary.  Fixed for FormInfo...
-		
-		try {
-			ds.getEntity(saRelation, definitionUri, user);
-		} catch ( ODKEntityNotFoundException e ) {
-			ds.putEntity(sa, user);
-		}
 	}
 	
 	static final Submission assertFormInfoRecord(XFormParameters thisFormVersion, String thisFormName, String thisFormDescription, String formIdMd5Uri, CallingContext cc) throws ODKDatastoreException {
@@ -431,7 +410,7 @@ public class FormDefinition {
 				// we must have failed before persisting a FormInfo record
 				// or this must be our first time through...
 				Submission formInfo = new Submission(thisFormVersion.modelVersion, thisFormVersion.uiVersion,
-						thisFormIdMd5Uri, formInfoDefinition, cc);
+						thisFormIdMd5Uri, formInfoDefinition, new Date(), cc);
 				((StringSubmissionType) formInfo.getElementValue(FormInfo.formId)).setValueFromString(thisFormVersion.formId);
 				// default description...
 				{
@@ -503,15 +482,36 @@ public class FormDefinition {
 			Datastore ds = cc.getDatastore();
 			User user = cc.getCurrentUser();
 			try {
-			    List<SubmissionAssociationTable> saList = SubmissionAssociationTable.findSubmissionAssociationsForXForm(xformParameters, cc);
-			    if ( saList.isEmpty() ) {
-			    	logger.warning("No sa record matching this formId " + xformParameters.toString());
+				SubmissionAssociationTable sa = null;
+				{
+				    List<SubmissionAssociationTable> saList = SubmissionAssociationTable.findSubmissionAssociationsForXForm(xformParameters, cc);
+				    if ( saList.isEmpty() ) {
+				    	// may be in the process of being defined, or in a partially defined state.
+				    	logger.warn("No sa record matching this formId " + xformParameters.toString());
+				    	return null;
+				    }
+				    for ( SubmissionAssociationTable st : saList ) {
+				    	if ( st.getIsPersistenceModelComplete() ) {
+				    		if ( sa != null ) {
+				    			// We have two or more identical entries.  Use the more recent one.
+				    			// Presently, can have a duplicate of our main tables because of timing windows.
+				    			// Eventually, can have two or more forms with the same submission structure.
+						    	logger.warn("Two or more sa records matching this formId " + xformParameters.toString());
+				    			if ( sa.getCreationDate().compareTo(st.getCreationDate()) == -1 ) {
+				    				// use the more recent data model...
+				    				sa = st;
+				    			}
+						    }
+				    		sa = st;
+				    	}
+				    }
+				}
+			    if ( sa == null ) {
+			    	// must be in a partially defined state.
+			    	logger.warn("No complete persistence model for sa record matching this formId " + xformParameters.toString());
 			    	return null;
 			    }
-			    if (saList.size() > 1 ) {
-					throw new IllegalStateException("Logic is not yet in place for cross-form submission sharing");
-			    }
-			    String uriSubmissionDataModel = saList.get(0).getUriSubmissionDataModel();
+			    String uriSubmissionDataModel = sa.getUriSubmissionDataModel();
 
 			    // try to retrieve based upon this uri...
 			    FormDefinition fd = formDefinitions.get(uriSubmissionDataModel);
@@ -526,12 +526,12 @@ public class FormDefinition {
 					fdmList = query.executeQuery(0);
 					
 					if ( fdmList == null || fdmList.size() == 0 ) {
-				    	logger.warning("No FDM records for formId " + xformParameters.toString());
+				    	logger.warn("No FDM records for formId " + xformParameters.toString());
 						return null;
 					}
 					
 					// try to construct the fd...
-					fd = new FormDefinition(saList.get(0), xformParameters, fdmList, cc);
+					fd = new FormDefinition(sa, xformParameters, fdmList, cc);
 
 					// and synchronize field sizes to those defined in the database...
 					try {
@@ -543,7 +543,7 @@ public class FormDefinition {
 						}
 					} catch (ODKDatastoreException e1) {
 						e1.printStackTrace();
-				    	logger.severe("Asserting relations failed for formId " + xformParameters.toString());
+				    	logger.error("Asserting relations failed for formId " + xformParameters.toString());
 						fd = null;
 					}
 
@@ -555,7 +555,7 @@ public class FormDefinition {
 					}
 				}
 			} catch (ODKDatastoreException e) {
-		    	logger.warning("Persistence Layer failure " + e.getMessage() + " for formId " + xformParameters.toString());
+		    	logger.warn("Persistence Layer failure " + e.getMessage() + " for formId " + xformParameters.toString());
 				return null;
 			}
 		} finally {
@@ -574,9 +574,11 @@ public class FormDefinition {
 		
 		// map of tableName to map of columnName, FDM record
 		Map<String, Map<String, FormDataModel >> eeMap = new HashMap< String, Map<String, FormDataModel>>();
-			
+
+		Map<String, FormDataModel> uriMap = new HashMap<String, FormDataModel>();
 		for ( Object o : formDataModelList ) {
 			FormDataModel m = (FormDataModel) o;
+			elementList.add(m);
 			uriMap.put(m.getUri(), m);
 			String table = m.getPersistAsQualifiedTableName();
 			String column = m.getPersistAsColumn();
@@ -631,10 +633,13 @@ public class FormDefinition {
 		// long string text ref tables, which refer to the 
 		// key into the form_info table...
 		int nullParentCount = 0;
-		for ( FormDataModel m : uriMap.values() ) {
+		for ( FormDataModel m : elementList ) {
 			String uriParent = m.getParentUriFormDataModel();
 			if ( uriParent == null ) {
-				throw new IllegalStateException("Every record in FormDataModel should have a parent key");
+				String str = "Every record in FormDataModel should have a parent key";
+				logger.error(str);
+				m.print(System.err);
+				throw new IllegalStateException(str);
 			}
 			
 			FormDataModel p = uriMap.get(uriParent);
@@ -643,10 +648,16 @@ public class FormDefinition {
 				p.setChild(m.getOrdinalNumber(), m);
 			} else if ( m.getElementType() != ElementType.LONG_STRING_REF_TEXT ) {
 				if ( m.getElementType() != ElementType.GROUP ) {
-					throw new IllegalStateException("Expected upward references only from GROUP elements");
+					String str = "Expected upward references only from GROUP elements";
+					logger.error(str);
+					m.print(System.err);
+					throw new IllegalStateException(str);
 				}
 				if ( ++nullParentCount > 1 ) {
-					throw new IllegalStateException("Expected at most one top level group");
+					String str = "Expected at most one top level group";
+					logger.error(str);
+					m.print(System.err);
+					throw new IllegalStateException(str);
 				}
 				topLevelGroup = m;
 			}
@@ -654,7 +665,7 @@ public class FormDefinition {
 
 		// ensure there are no nulls in the children array.
 		// nulls would indicate a skipped ordinal position.
-		for ( FormDataModel m : uriMap.values() ) {
+		for ( FormDataModel m : elementList ) {
 			m.validateChildren();
 		}
 		
@@ -719,14 +730,6 @@ public class FormDefinition {
 			// it is the FormInfo table -- pre-populate the backingTableMap
 			// with the table relations we know...
 			FormInfo.populateBackingTableMap(backingTableMap, cc);
-			isWellKnownForm = true;
-		} else if ( xformParameters.formId.equals(PersistentResults.FORM_ID_PERSISTENT_RESULT)) {
-			// it is the PersistentResults table - pre-populate the backingTableMap
-			PersistentResults.populateBackingTableMap(backingTableMap, cc);
-			isWellKnownForm = true;
-		} else if ( xformParameters.formId.equals(MiscTasks.FORM_ID_MISC_TASKS)) {
-			// it is the PersistentResults table - pre-populate the backingTableMap
-			MiscTasks.populateBackingTableMap(backingTableMap, cc);
 			isWellKnownForm = true;
 		}
 		
@@ -895,7 +898,7 @@ public class FormDefinition {
 	    FormDataModel fdm = FormDataModel.assertRelation(cc);
 		List<EntityKey> eks = new ArrayList<EntityKey>();
 		// queue everything in the formDataModel for delete
-	    for ( FormDataModel m : uriMap.values() ) {
+	    for ( FormDataModel m : elementList ) {
 			eks.add(new EntityKey(fdm, m.getUri()));
 	    }
 	    // delete everything out of FDM

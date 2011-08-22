@@ -24,6 +24,7 @@ import org.opendatakit.aggregate.task.UploadSubmissions;
 import org.opendatakit.aggregate.task.gae.servlet.UploadSubmissionsTaskServlet;
 import org.opendatakit.common.constants.BasicConsts;
 import org.opendatakit.common.constants.HtmlConsts;
+import org.opendatakit.common.persistence.PersistConsts;
 import org.opendatakit.common.web.CallingContext;
 
 import com.google.appengine.api.taskqueue.Queue;
@@ -52,7 +53,7 @@ public class UploadSubmissionsImpl implements UploadSubmissions {
       String fscUri = URLEncoder.encode(fsc.getUri(), HtmlConsts.UTF8_ENCODE);
 
       TaskOptions task = TaskOptions.Builder.withUrl(BasicConsts.FORWARDSLASH + UploadSubmissionsTaskServlet.ADDR);
-      task.countdownMillis(1);
+      task.countdownMillis(PersistConsts.MIN_SETTLE_MILLISECONDS);
       task.method(TaskOptions.Method.GET);
       task.param(ExternalServiceConsts.FSC_URI_PARAM, fscUri);
       

@@ -134,5 +134,7 @@ public final class ServletConsts {
   public static final String NUM_ENTRIES = "numEntries";
   
   public static final String CHECK_INTERVAL_PARAM = "checkIntervalMilliseconds";
+
+  public static final String START_DATE = "startDate";
   
 }

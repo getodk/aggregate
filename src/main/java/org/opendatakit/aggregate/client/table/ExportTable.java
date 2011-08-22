@@ -16,6 +16,8 @@
 
 package org.opendatakit.aggregate.client.table;
 
+import java.util.ArrayList;
+
 import org.opendatakit.aggregate.client.form.ExportSummary;
 import org.opendatakit.aggregate.constants.common.ExportStatus;
 
@@ -29,10 +31,8 @@ public class ExportTable extends FlexTable {
 
   private final static int FILE_TYPE = 0;
   private final static int STATUS = 1;
-  private final static int TIME_REQUESTED = 2;
-  private final static int TIME_COMPLETED = 3;
-  private final static int TIME_LAST_RETRY = 4;
-  private final static int DOWNLOAD_FILE = 5;
+  private final static int TIME_COMPLETED = 2;
+  private final static int DOWNLOAD_FILE = 3;
 
   private final static int HEADER_ROW = 1;
   private final static int STARTING_ROW = HEADER_ROW + 1;
@@ -42,32 +42,24 @@ public class ExportTable extends FlexTable {
     this.setHTML(0, 2, "<h2 id=\"form_name\">Exported Files</h2>"); 
     this.setText(HEADER_ROW, FILE_TYPE, "File Type");
     this.setText(HEADER_ROW, STATUS, "Status");
-    this.setText(HEADER_ROW, TIME_REQUESTED, "Time Requested");
     this.setText(HEADER_ROW, TIME_COMPLETED, "Time Completed");
-    this.setText(HEADER_ROW, TIME_LAST_RETRY, "Last Retry");
     this.setText(HEADER_ROW, DOWNLOAD_FILE, "Download File");
     this.addStyleName("exportTable");
     this.getRowFormatter().addStyleName(1, "titleBar");
   }
 
-  public void updateExportPanel(ExportSummary[] eS) {
+  public void updateExportPanel(ArrayList<ExportSummary> eS) {
     if (eS == null)
       return;
     while (this.getRowCount() > HEADER_ROW + 1) // need to add one because of the zero index
       this.removeRow(STARTING_ROW);
-    for (int i = 0; i < eS.length; i++) {
-      ExportSummary e = eS[i];
+    for (int i = 0; i < eS.size(); i++) {
+      ExportSummary e = eS.get(i);
       if (e.getFileType() != null) {
         this.setText(i + STARTING_ROW, FILE_TYPE, e.getFileType().getDisplayText());
       }
-      if (e.getTimeRequested() != null) {
-        this.setText(i + STARTING_ROW, TIME_REQUESTED, e.getTimeRequested().toString());
-      }
       if (e.getTimeCompleted() != null) {
         this.setText(i + STARTING_ROW, TIME_COMPLETED, e.getTimeCompleted().toString());
-      }
-      if (e.getTimeLastAction() != null) {
-        this.setText(i + STARTING_ROW, TIME_LAST_RETRY, e.getTimeLastAction().toString());
       }
       
       if (e.getStatus() != null) {
