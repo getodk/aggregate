@@ -1,0 +1,39 @@
+# Set up
+createUser user1
+createUser user2
+
+createSynchronizedTable user1 people
+
+
+# Test that user can clone a table he has read permission on
+setTablePermissions user1 user2 people true false false
+cloneSynchronizedTable user2 people
+
+
+# Test that user can't clone a table more than once
+cloneSynchronizedTable user2 people
+Exception: org.opendatakit.aggregate.odktables.client.exception.TableAlreadyExistsException: Table with tableID 'people' already exists!
+
+
+# Test that user can't clone a table that doesn't exist
+cloneSynchronizedTable user2 nonexistenttable
+Exception: org.opendatakit.aggregate.odktables.client.exception.TableDoesNotExistException: Table with ID nonexistenttable does not exist!
+
+
+# Test that user can't clone a table that he doesn't have read permission on
+listAllTables user2
+tableName: people, userName: user1
+
+removeTableSynchronization user2 people
+setTablePermissions user1 user2 people false false false
+
+listAllTables user2
+
+cloneSynchronizedTable user2 people
+Exception: org.opendatakit.aggregate.odktables.client.exception.TableDoesNotExistException: Table with ID people does not exist!
+
+
+# Clean up
+deleteSynchronizedTable user1 people
+deleteUser user1
+deleteUser user2

@@ -36,6 +36,8 @@ import oauth.signpost.exception.OAuthCommunicationException;
 import oauth.signpost.exception.OAuthExpectationFailedException;
 import oauth.signpost.exception.OAuthMessageSignerException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
@@ -43,6 +45,7 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.opendatakit.aggregate.client.externalserv.ExternServSummary;
 import org.opendatakit.aggregate.constants.BeanDefs;
@@ -92,6 +95,11 @@ import com.google.gdata.util.ServiceException;
  * 
  */
 public class FusionTable extends AbstractExternalService implements ExternalService {
+  private static final Log logger = LogFactory.getLog(FusionTable.class.getName());
+
+  private static final int FUSION_TABLE_SOCKET_ESTABLISHMENT_TIMEOUT_MILLISECONDS = 2000;
+  private static final int FUSION_TABLE_SERVICE_TIMEOUT_MILLISECONDS = 15000;
+
   /**
    * Datastore entity specific to this type of external service
    */
@@ -178,8 +186,11 @@ public class FusionTable extends AbstractExternalService implements ExternalServ
       oauthParameters.setOAuthTokenSecret(authToken.getTokenSecret());
       fusionTableService.setOAuthCredentials(oauthParameters, new OAuthHmacSha1Signer());
     } catch (OAuthException e) {
+      String str = "Unable to set credentials in fusion table service record";
+      logger.error(str + "\nReason: " + e.getMessage());
       // TODO: handle OAuth failure
       e.printStackTrace();
+      throw new ODKExternalServiceException(str, e);
     }
 
     HeaderFormatter headerFormatter = new FusionTableHeaderFormatter();
@@ -428,6 +439,9 @@ public class FusionTable extends AbstractExternalService implements ExternalServ
     
     System.out.println(uri.toString());
     HttpParams httpParams = new BasicHttpParams();
+    HttpConnectionParams.setConnectionTimeout(httpParams, FUSION_TABLE_SERVICE_TIMEOUT_MILLISECONDS);
+    HttpConnectionParams.setSoTimeout(httpParams, FUSION_TABLE_SOCKET_ESTABLISHMENT_TIMEOUT_MILLISECONDS);
+    
     
     HttpClientFactory factory = (HttpClientFactory) cc.getBean(BeanDefs.HTTP_CLIENT_FACTORY);
     HttpClient client = factory.createHttpClient(httpParams);
@@ -537,6 +551,7 @@ public class FusionTable extends AbstractExternalService implements ExternalServ
       String createStmt = createFusionTableStatement(form, root, headerFormatter);
       resultRequest = executeStmt(createStmt, authToken, cc);
     } catch (Exception e) {
+      logger.error("Failed to create fusion table");
       e.printStackTrace();
       throw new ODKExternalServiceException(e);
     }

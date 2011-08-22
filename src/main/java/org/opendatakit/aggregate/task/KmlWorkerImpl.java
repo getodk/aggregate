@@ -27,7 +27,6 @@ import org.opendatakit.aggregate.form.PersistentResults;
 import org.opendatakit.aggregate.format.SubmissionFormatter;
 import org.opendatakit.aggregate.format.structure.KmlFormatter;
 import org.opendatakit.aggregate.query.submission.QueryByDate;
-import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.common.constants.BasicConsts;
 import org.opendatakit.common.constants.HtmlConsts;
@@ -80,13 +79,12 @@ public class KmlWorkerImpl {
 	    pw.close();
 	    byte[] outputFile = stream.toByteArray();
 
-	    Submission s = Submission.fetchSubmission(persistentResultsKey.splitSubmissionKey(), cc);
-	    PersistentResults r = new PersistentResults(s);
+	    PersistentResults r = new PersistentResults(persistentResultsKey, cc);
 	    if ( attemptCount.equals(r.getAttemptCount()) ) {
 			r.setResultFile(outputFile, HtmlConsts.RESP_TYPE_PLAIN, Long.valueOf(outputFile.length), form.getViewableFormNameSuitableAsFileName() + ServletConsts.KML_FILENAME_APPEND, cc);
 			r.setStatus(ExportStatus.AVAILABLE);
 			r.setCompletionDate(new Date());
-			r.objectEntity.persist(cc);
+			r.persist(cc);
 	    }
 	  } catch (Exception e ) {
 		  failureRecovery(e);
@@ -97,14 +95,12 @@ public class KmlWorkerImpl {
 		// three exceptions possible: 
 		// ODKFormNotFoundException, ODKDatastoreException, Exception
 		e.printStackTrace();
-	    Submission s;
 		try {
-			s = Submission.fetchSubmission(persistentResultsKey.splitSubmissionKey(), cc);
-		    PersistentResults r = new PersistentResults(s);
+		    PersistentResults r = new PersistentResults(persistentResultsKey, cc);
 		    if ( attemptCount.equals(r.getAttemptCount()) ) {
 		    	r.deleteResultFile(cc);
 		    	r.setStatus(ExportStatus.FAILED);
-		    	r.objectEntity.persist(cc);
+		    	r.persist(cc);
 		    }
 		} catch (Exception ex) {
 			// something is hosed -- don't attempt to continue.

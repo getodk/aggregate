@@ -57,16 +57,16 @@ public class FilterServiceImpl extends RemoteServiceServlet implements FilterSer
   }
   
   @Override
-  public Boolean updateFilterGroup(FilterGroup group) {
+  public String updateFilterGroup(FilterGroup group) {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     
     try {
       SubmissionFilterGroup filterGrp = SubmissionFilterGroup.transform(group, cc);
       filterGrp.persist(cc);      
-      return Boolean.TRUE;
+      return filterGrp.getUri();
     } catch (Exception e) {
-      return Boolean.FALSE;
+      return null;
     }
   }
 

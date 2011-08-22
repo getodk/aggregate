@@ -36,12 +36,16 @@ import org.opendatakit.aggregate.form.FormDefinition;
 import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.format.element.ElementFormatter;
 import org.opendatakit.aggregate.submission.type.BlobSubmissionType;
+import org.opendatakit.aggregate.submission.type.BooleanMetadataType;
 import org.opendatakit.aggregate.submission.type.BooleanSubmissionType;
 import org.opendatakit.aggregate.submission.type.ChoiceSubmissionType;
+import org.opendatakit.aggregate.submission.type.DateTimeMetadataType;
 import org.opendatakit.aggregate.submission.type.DecimalSubmissionType;
 import org.opendatakit.aggregate.submission.type.GeoPointSubmissionType;
+import org.opendatakit.aggregate.submission.type.LongMetadataType;
 import org.opendatakit.aggregate.submission.type.LongSubmissionType;
 import org.opendatakit.aggregate.submission.type.RepeatSubmissionType;
+import org.opendatakit.aggregate.submission.type.StringMetadataType;
 import org.opendatakit.aggregate.submission.type.StringSubmissionType;
 import org.opendatakit.aggregate.submission.type.jr.JRDateTimeType;
 import org.opendatakit.aggregate.submission.type.jr.JRDateType;
@@ -332,7 +336,39 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 		DynamicCommonFieldsBase groupRowGroup = getGroupBackingObject();
 		for (FormElementModel m : group.getChildren()) {
 			SubmissionField<?> submissionField;
-			if ( !m.isMetadata() ) {
+			if ( m.isMetadata() ) {
+				// all metadata is at the top-level (submission) level...
+				TopLevelDynamicBase tl = (TopLevelDynamicBase) groupRowGroup;
+				switch ( m.getType() ) {
+				case META_INSTANCE_ID:
+					submissionField = new StringMetadataType(groupRowGroup, m,
+															tl.primaryKey);
+					elementsToValues.put(m, submissionField);
+					break;
+				case META_UI_VERSION:
+					submissionField = new LongMetadataType(groupRowGroup, m,
+															tl.uiVersion);
+					elementsToValues.put(m, submissionField);
+					break;
+				case META_MODEL_VERSION:
+					submissionField = new LongMetadataType(groupRowGroup, m,
+															tl.modelVersion);
+					elementsToValues.put(m, submissionField);
+					break;
+				case META_SUBMISSION_DATE:
+					submissionField = new DateTimeMetadataType(groupRowGroup, m,
+															tl.submissionDate);
+					elementsToValues.put(m, submissionField);
+					break;
+				case META_IS_COMPLETE:
+					submissionField = new BooleanMetadataType(groupRowGroup, m,
+															tl.isComplete);
+					elementsToValues.put(m, submissionField);
+					break;
+				default:
+					throw new IllegalStateException("unhandled metadata type");
+				}
+			} else {
 				DynamicCommonFieldsBase rowGroup = getGroupBackingObject(m);
 				switch (m.getFormDataModel().getElementType()) {
 				case STRING:
@@ -614,7 +650,10 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 	private void recursivelyGetSubmissionValues(FormElementModel group,
 			List<SubmissionValue> valueList) {
 		for (FormElementModel m : group.getChildren()) {
-			if ( !m.isMetadata() ) {
+			if ( m.isMetadata() ) {
+				SubmissionValue v = elementsToValues.get(m);
+				valueList.add(v);
+			} else {
 				if (isPhantomOfSubmissionSet(m.getFormDataModel())) {
 					if ( m.getFormDataModel().getElementType() != ElementType.GEOPOINT ) {
 						recursivelyGetSubmissionValues(m, valueList);
@@ -625,6 +664,32 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 				} else {
 					SubmissionValue v = elementsToValues.get(m);
 					valueList.add(v);
+				}
+			}
+		}
+	}
+
+	public List<FormElementModel> getFormElements() {
+		List<FormElementModel> keyList = new ArrayList<FormElementModel>();
+		recursivelyGetFormElements(group, keyList);
+		return keyList;
+	}
+
+
+	private void recursivelyGetFormElements(FormElementModel group,
+			List<FormElementModel> keyList) {
+		for (FormElementModel m : group.getChildren()) {
+			if ( m.isMetadata() ) {
+				keyList.add(m);
+			} else {
+				if (isPhantomOfSubmissionSet(m.getFormDataModel())) {
+					if ( m.getFormDataModel().getElementType() != ElementType.GEOPOINT ) {
+						recursivelyGetFormElements(m, keyList);
+					} else {
+						keyList.add(m); // geopoints are structured fields
+					}
+				} else {
+					keyList.add(m);
 				}
 			}
 		}

@@ -26,6 +26,16 @@ public interface FilterService extends RemoteService {
 
   FilterSet getFilterSet(String formId) throws AccessDeniedException;
   
-  Boolean updateFilterGroup(FilterGroup group) throws AccessDeniedException;
+  /**
+   * Saves the supplied filter group in the database
+   * 
+   * @param group the filter group to be saved in the DB
+   * 
+   * @return uid of the filter group on success, null on failure
+   * 
+   * @throws AccessDeniedException
+   */
+  String updateFilterGroup(FilterGroup group) throws AccessDeniedException;
+  
   Boolean deleteFilterGroup(FilterGroup group) throws AccessDeniedException;
 }

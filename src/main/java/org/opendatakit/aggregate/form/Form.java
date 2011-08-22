@@ -369,6 +369,22 @@ public class Form {
 	  }
 	  throw new IllegalStateException("unable to locate the form definition");
   }
+  
+  /**
+   * Gets whether the form is encrypted
+   * 
+   * @return true if form is encrypted, false otherwise
+   */
+  public Boolean isEncryptedForm() {
+	// assume for now that there is only one fileset...
+	RepeatSubmissionType r = (RepeatSubmissionType) objectEntity.getElementValue(FormInfo.fiFilesetTable);
+	List<SubmissionSet> filesets = r.getSubmissionSets();
+	if ( filesets.size() != 1 ) {
+		throw new IllegalStateException("Expecting only one fileset record at this time!");
+	}
+	SubmissionSet filesetRecord = filesets.get(0);
+    return ((BooleanSubmissionType) filesetRecord.getElementValue(FormInfo.isEncryptedForm)).getValue();
+  }
 
   /**
    * Gets whether the form can be downloaded
@@ -410,6 +426,10 @@ public class Form {
    * @return true if a new submission can be received, false otherwise
    */
   public Boolean getSubmissionEnabled() {
+	// if the form definition doesn't exist, we can't accept submissions
+	// this is a transient condition when in the midst of deleting a form or uploading one
+	// and another user attempts to list the available forms.
+	if ( formDefinition == null ) return false;
 	return formDefinition.getIsSubmissionAllowed();
   }
 
@@ -711,7 +731,7 @@ public class Form {
 			FormInfoTable fi = (FormInfoTable) ds.getEntity(formInfoForm.getTopLevelGroupElement().getFormDataModel().getBackingObjectPrototype(), formUri, user);
 	    	formInfo = new Submission(fi, formInfoForm.getFormDefinition(), cc);
 		} catch ( ODKEntityNotFoundException e ) {
-			formInfo = new Submission(1L, 0L, formUri, formInfoForm.getFormDefinition(), cc);
+			formInfo = new Submission(1L, 0L, formUri, formInfoForm.getFormDefinition(), new Date(), cc);
 
 	    	((StringSubmissionType) formInfo.getElementValue(FormInfo.formId)).setValueFromString(formId);
 	    }

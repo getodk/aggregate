@@ -16,8 +16,10 @@
 package org.opendatakit.aggregate.datamodel;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
+import org.opendatakit.aggregate.constants.common.FormElementNamespace;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.form.Form;
 
@@ -51,9 +53,13 @@ public final class FormElementModel {
 	};
 	
 	public static enum Metadata {
+		/**
+		 * NOTE: the order here is the order in which these are listed.
+		 * DO NOT CHANGE!!! 
+		 */
+		META_INSTANCE_ID,
 		META_MODEL_VERSION,
 		META_UI_VERSION,
-		META_INSTANCE_ID,
 		META_SUBMISSION_DATE,
 		META_IS_COMPLETE;
 		
@@ -83,11 +89,9 @@ public final class FormElementModel {
 		if ( parent == null ) {
 			// add the instance meta data...
 			// the form meta data is not part of the submission form element model...
-			children.add(new FormElementModel(this, Metadata.META_INSTANCE_ID));
-			children.add(new FormElementModel(this, Metadata.META_MODEL_VERSION));
-			children.add(new FormElementModel(this, Metadata.META_UI_VERSION));
-			children.add(new FormElementModel(this, Metadata.META_SUBMISSION_DATE));
-			children.add(new FormElementModel(this, Metadata.META_IS_COMPLETE));
+			for ( Metadata m : Metadata.values() ) {
+				children.add(new FormElementModel(this, m));
+			}
 		}
 		
 		switch ( fdm.getElementType() ) {
@@ -157,6 +161,47 @@ public final class FormElementModel {
 			   (type == ref.type); 
 	}
 
+	/**
+	 * Returns the list of children that are in the specified form element namespaces.
+	 * 
+	 * @param namespaces -- collection of form element namespaces to filter against.
+	 * @return list of children contained in the collection of namespaces.
+	 */
+	public final List<FormElementModel> getChildren(Collection<FormElementNamespace> namespaces) {
+		List<FormElementModel> subset = new ArrayList<FormElementModel>();
+		boolean hasMetadata = false;
+		boolean hasValues = false;
+		
+		if ( namespaces == null ) {
+			// no restriction -- return everything
+			return children;
+		}
+		
+		for ( FormElementNamespace ns : namespaces) {
+			hasMetadata = hasMetadata || ( ns == FormElementNamespace.METADATA );
+			hasValues = hasValues || ( ns == FormElementNamespace.VALUES );
+		}
+		
+		if ( hasValues && hasMetadata ) {
+			// want both -- return everything
+			return children;
+		}
+		
+		if ( !hasValues && !hasMetadata ) {
+			return subset; // empty subset...
+		}
+		
+		// do the hard work...
+		for ( FormElementModel child : children ) {
+			if ( child.isMetadata() && hasMetadata ) {
+				subset.add(child);
+			} else if ( !child.isMetadata() && hasValues ) {
+				subset.add(child);
+			}
+		}
+		return subset;
+	}
+
 	public final List<FormElementModel> getChildren() {
 		return children;
 	}
@@ -201,6 +246,8 @@ public final class FormElementModel {
 				return ElementType.INTEGER;
 			case META_IS_COMPLETE:
 				return ElementType.BOOLEAN;
+			default:
+				throw new IllegalStateException("unhandled metadata type");
 			}
 		}
 		switch ( fdm.getElementType() ) {

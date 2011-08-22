@@ -17,14 +17,13 @@
 package org.opendatakit.aggregate.client.popups;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import org.opendatakit.aggregate.client.filter.ColumnFilterHeader;
 import org.opendatakit.aggregate.client.filter.FilterGroup;
 import org.opendatakit.aggregate.client.submission.Column;
 import org.opendatakit.aggregate.client.table.SubmissionTable;
-import org.opendatakit.aggregate.client.widgets.ClosePopupButton;
 import org.opendatakit.aggregate.client.widgets.ApplyFilterButton;
+import org.opendatakit.aggregate.client.widgets.ClosePopupButton;
 import org.opendatakit.aggregate.constants.common.FilterOperation;
 import org.opendatakit.aggregate.constants.common.RowOrCol;
 import org.opendatakit.aggregate.constants.common.Visibility;
@@ -40,7 +39,6 @@ import com.google.gwt.user.client.ui.TextBox;
 public class FilterPopup extends PopupPanel{
 	
 	private final FilterGroup group;
-	private final SubmissionTable data;
 	private final FlexTable table;
 	
 	private final ListBox visibility;
@@ -51,10 +49,12 @@ public class FilterPopup extends PopupPanel{
 	private final ListBox filterOp;
 	private final TextBox filterValue;
 	
+	private final ArrayList<Column> headers;
+	
 	public FilterPopup(SubmissionTable submissionData, FilterGroup filterGroup) {
 		super(false); //do not close popup when user clicks out of it
 		this.group = filterGroup;
-		this.data = submissionData;
+		this.headers = submissionData.getHeaders();
 		
 		table = new FlexTable();
 		
@@ -75,14 +75,14 @@ public class FilterPopup extends PopupPanel{
 		
 		//column selection - for row filter
 		columnForRowFilter = new ListBox();
-		for(int i = 0; i < data.getCellCount(0); i++) {
-			columnForRowFilter.addItem(data.getText(0, i));
+		for(Column header : headers) {
+			columnForRowFilter.addItem(header.getDisplayHeader());
 		}
 		
 		//columns selection - for column filter
 		columnsForColumnFilter = new ListBox(true);
-		for(int i = 0; i < data.getCellCount(0); i++) {
-			columnsForColumnFilter.addItem(data.getText(0, i));
+		for(Column header : headers) {
+			columnsForColumnFilter.addItem(header.getDisplayHeader());
 		}
 		
 		//comparison operator
@@ -151,7 +151,7 @@ public class FilterPopup extends PopupPanel{
     String colname = columnForRowFilter.getValue(columnForRowFilter.getSelectedIndex());
     String colencode = "";
     Long colgpsIndex = null;
-    for(Column column: data.getHeaders()) {
+    for(Column column: headers) {
        if(colname.compareTo(column.getDisplayHeader()) == 0) {
           colencode = column.getColumnEncoding();
           colgpsIndex = column.getGeopointColumnCode();
@@ -161,15 +161,15 @@ public class FilterPopup extends PopupPanel{
     return new Column(colname, colencode, colgpsIndex);
   }
 
-  public List<ColumnFilterHeader> getColumnsForColumnFilter() { 
-    List<ColumnFilterHeader> columnfilterheaders = new ArrayList<ColumnFilterHeader>();
+  public ArrayList<ColumnFilterHeader> getColumnsForColumnFilter() { 
+	  ArrayList<ColumnFilterHeader> columnfilterheaders = new ArrayList<ColumnFilterHeader>();
     for (int i = columnsForColumnFilter.getSelectedIndex(); i < columnsForColumnFilter.getItemCount(); i++) {
        String colname = "";
        String colencode = "";
        Long colgpsIndex = null;
        if(columnsForColumnFilter.isItemSelected(i)) {
           colname = columnsForColumnFilter.getValue(i);
-          for(Column column: data.getHeaders()) {
+          for(Column column: headers) {
              if(colname.compareTo(column.getDisplayHeader()) == 0) {
                 colencode = column.getColumnEncoding();
                 colgpsIndex = column.getGeopointColumnCode();

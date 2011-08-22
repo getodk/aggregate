@@ -17,6 +17,15 @@
         </auth-constraint>
     </security-constraint>
 
+   	<security-constraint>
+        <web-resource-collection>
+            <url-pattern>/remote_api</url-pattern>
+        </web-resource-collection>
+        <auth-constraint>
+            <role-name>admin</role-name>
+        </auth-constraint>
+    </security-constraint>
+
 	<filter>
 		<filter-name>serverSpringSecurityFilterChain</filter-name>
 		<filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
@@ -30,6 +39,7 @@
 	<listener>
 		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
 	</listener>
+
 
  <!-- Servlets -->
   
@@ -74,6 +84,16 @@
   <servlet-mapping>
     <servlet-name>preferenceServiceImpl</servlet-name>
     <url-pattern>/aggregateui/preferenceservice</url-pattern>
+  </servlet-mapping>
+
+  <servlet>
+    <servlet-name>odkTablesAdminServiceImpl</servlet-name>
+    <servlet-class>org.opendatakit.aggregate.server.OdkTablesAdminServiceImpl</servlet-class>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>odkTablesAdminServiceImpl</servlet-name>
+    <url-pattern>/aggregateui/odktablesadmin</url-pattern>
   </servlet-mapping>
 
  
@@ -268,6 +288,24 @@
 	</servlet-mapping>
 
 	<servlet>
+		<servlet-name>downloadSubmissionList</servlet-name>
+		<servlet-class>org.opendatakit.aggregate.servlet.SubmissionDownloadListServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>downloadSubmissionList</servlet-name>
+		<url-pattern>/view/submissionList</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+	<servlet-name>downloadSubmission</servlet-name>
+		<servlet-class>org.opendatakit.aggregate.servlet.SubmissionDownloadServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>downloadSubmission</servlet-name>
+		<url-pattern>/view/downloadSubmission</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
 		<servlet-name>briefcase</servlet-name>
 		<servlet-class>org.opendatakit.aggregate.servlet.BriefcaseServlet</servlet-class>
 	</servlet>
@@ -356,6 +394,35 @@
         <servlet-name>localLoginPage</servlet-name>
         <url-pattern>/local_login.html</url-pattern>
     </servlet-mapping>
+
+    <servlet>
+        <servlet-name>openIdLoginPage</servlet-name>
+        <servlet-class>org.opendatakit.aggregate.servlet.OpenIdLoginPageServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>openIdLoginPage</servlet-name>
+        <url-pattern>/openid_login.html</url-pattern>
+    </servlet-mapping>
+    
+    <servlet>
+    	<servlet-name>odktables</servlet-name>
+    	<servlet-class>org.opendatakit.aggregate.odktables.servlet.CommandServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+    	<servlet-name>odktables</servlet-name>
+    	<url-pattern>/odktables/*</url-pattern>
+    </servlet-mapping>
+    
+    <servlet>
+    	<servlet-name>RemoteApi</servlet-name>
+	    <servlet-class>com.google.apphosting.utils.remoteapi.RemoteApiServlet</servlet-class>
+	</servlet>
+	
+	<servlet-mapping>
+	    <servlet-name>RemoteApi</servlet-name>
+	    <url-pattern>/remote_api</url-pattern>
+	</servlet-mapping>
+    
 
 	<welcome-file-list>
 		<welcome-file>index.html</welcome-file>

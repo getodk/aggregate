@@ -16,7 +16,7 @@
 
 package org.opendatakit.aggregate.client.table;
 
-import java.util.List;
+import java.util.ArrayList;
 
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.FilterSubTab;
@@ -42,9 +42,9 @@ public class FormNFilterSelectionTable extends FlexTable {
   private FilterSubTab filterSubTab;
 
   // state
-  private FormSummary[] displayedFormList;
+  private ArrayList<FormSummary> displayedFormList;
   private FormSummary selectedForm;
-  private List<FilterGroup> displayedFilterList;
+  private ArrayList<FilterGroup> displayedFilterList;
 
   public FormNFilterSelectionTable(FilterSubTab filterSubTab) {
     this.filterSubTab = filterSubTab;
@@ -83,12 +83,12 @@ public class FormNFilterSelectionTable extends FlexTable {
   
   public void update() {
     // Set up the callback object.
-    AsyncCallback<FormSummary[]> callback = new AsyncCallback<FormSummary[]>() {
+    AsyncCallback<ArrayList<FormSummary>> callback = new AsyncCallback<ArrayList<FormSummary>>() {
       public void onFailure(Throwable caught) {
         AggregateUI.getUI().reportError(caught);
       }
 
-      public void onSuccess(FormSummary[] formsFromService) {
+      public void onSuccess(ArrayList<FormSummary> formsFromService) {
         AggregateUI.getUI().clearError();
         
         // setup the display with the latest updates

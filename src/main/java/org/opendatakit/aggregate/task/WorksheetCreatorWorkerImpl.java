@@ -29,7 +29,6 @@ import org.opendatakit.aggregate.externalservice.FormServiceCursor;
 import org.opendatakit.aggregate.externalservice.GoogleSpreadsheet;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.form.MiscTasks;
-import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.TaskLock;
@@ -93,13 +92,12 @@ public class WorksheetCreatorWorkerImpl {
 	}
 
 	public final void worksheetCreator() {
-		Submission s;
+		MiscTasks t;
 		try {
-			s = Submission.fetchSubmission(miscTasksKey.splitSubmissionKey(), cc);
+		    t = new MiscTasks(miscTasksKey, cc);
 		} catch (Exception e) {
 			return;
 		}
-	    MiscTasks t = new MiscTasks(s);
 		// gain lock on the formId itself...
 		// the locked resource should be the formId, but for testing
 		// it is useful to have the external services collide using 
@@ -160,7 +158,7 @@ public class WorksheetCreatorWorkerImpl {
 		// and mark us as completed... (don't delete for audit..).
 		t.setCompletionDate(new Date());
 		t.setStatus(FormActionStatus.SUCCESSFUL);
-		t.objectEntity.persist(cc);
+		t.persist(cc);
 	}
 	
 	public final void doWorksheetCreator() {
@@ -181,8 +179,7 @@ public class WorksheetCreatorWorkerImpl {
 		}
 
 		// the above may have taken a while -- re-fetch the data to see if it has changed...
-	    Submission s = Submission.fetchSubmission(miscTasksKey.splitSubmissionKey(), cc);
-	    MiscTasks r = new MiscTasks(s);
+	    MiscTasks r = new MiscTasks(miscTasksKey, cc);
 	    if ( attemptCount.equals(r.getAttemptCount()) ) {
 	    	
 	    	// inform the form service cursor that it can start uploading or streaming
@@ -207,13 +204,12 @@ public class WorksheetCreatorWorkerImpl {
 	// three exceptions possible: 
 	// ODKFormNotFoundException, ODKDatastoreException, ODKExternalServiceException, Exception
 	e.printStackTrace();
-    Submission s;
+	MiscTasks r;
 	try {
-		s = Submission.fetchSubmission(miscTasksKey.splitSubmissionKey(), cc);
-		MiscTasks r = new MiscTasks(s);
+		r = new MiscTasks(miscTasksKey, cc);
 	    if ( attemptCount.equals(r.getAttemptCount()) ) {
 	    	r.setStatus(FormActionStatus.FAILED);
-	    	r.objectEntity.persist(cc);
+	    	r.persist(cc);
 	    }
 	} catch (Exception ex) {
 		// something is hosed -- don't attempt to continue.

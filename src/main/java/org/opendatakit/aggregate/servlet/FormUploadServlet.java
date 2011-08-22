@@ -19,13 +19,14 @@ package org.opendatakit.aggregate.servlet;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.ErrorConsts;
 import org.opendatakit.aggregate.constants.HtmlUtil;
@@ -33,10 +34,8 @@ import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.common.UIConsts;
 import org.opendatakit.aggregate.exception.ODKConversionException;
 import org.opendatakit.aggregate.exception.ODKFormAlreadyExistsException;
-import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
 import org.opendatakit.aggregate.exception.ODKParseException;
-import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.parser.FormParserForJavaRosa;
 import org.opendatakit.aggregate.parser.MultiPartFormData;
 import org.opendatakit.aggregate.parser.MultiPartFormItem;
@@ -77,27 +76,19 @@ public class FormUploadServlet extends ServletUtilBase {
 
   private static final String UPLOAD_PAGE_BODY_START = 
 
-"	  <p><b>Upload one form into ODK Aggregate</b></p>" +
-"	  <p>Media files for the form's logo and the icons, images, audio clips and video clips used " +
-"     within the form (if any) are" + 
-"	  expected to be in a media folder in the same directory as the form definition file (.xml)." + 
-"	  If the form definition file is named \"<code>My Form.xml</code>\" then the media folder should" +
-"	  be named \"<code>My Form-media</code>\". Please use the form below to upload the form definition" + 
-"	  file and the contents of the media folder, if any, into ODK Aggregate.</p>" +
-"	  <p>On ODK Collect 1.1.7 and higher, the file named \"<code>form_logo.png</code>\"," + 
-"	  if present in the media folder, will be displayed as the form's logo. </p>" +
-"	  <!--[if true]><p style=\"color: red;\">For a better user experience, use Chrome, Firefox or Safari</p>" +
-"	  <![endif] -->" +
-"     <form id=\"ie_backward_compatible_form\"" + 
-"	                      accept-charset=\"UTF-8\" method=\"POST\" encoding=\"multipart/form-data\" enctype=\"multipart/form-data\"" + 
-"	                      action=\"";// emit the ADDR
+"<div style=\"overflow: auto;\"><p><b>Upload one form into ODK Aggregate</b></p>" +
+"<!--[if true]><p style=\"color: red;\">For a better user experience, use Chrome, Firefox or Safari</p>" +
+"<![endif] -->" +
+"<form id=\"ie_backward_compatible_form\"" + 
+" accept-charset=\"UTF-8\" method=\"POST\" encoding=\"multipart/form-data\" enctype=\"multipart/form-data\"" + 
+" action=\"";// emit the ADDR
   private static final String UPLOAD_PAGE_BODY_MIDDLE = "\">" +
 "	  <table>" +
 "	  	<tr>" +
 "	  		<td><label for=\"form_def_file\">Form definition:</label></td>" +
 "	  		<td><input id=\"form_def_file\" type=\"file\" size=\"80\"" +
 "	  			name=\"form_def_file\" /></td>" +
-"	  	</tr>" +
+"	  	</tr>\n" +
 "	  	<tr>" +
 "	  		<td><label for=\"mediaFiles\">Media file(s):</label></td>" +
 "	  		<td><input id=\"mediaFiles\" type=\"file\" size=\"80,20\" name=\"datafile\" multiple /><input id=\"clear_media_files\" type=\"button\" value=\"Clear\" onClick=\"clearMediaInputField('mediaFiles')\" /></td>" +
@@ -123,13 +114,18 @@ public class FormUploadServlet extends ServletUtilBase {
 "	          <td><label for=\"mediaFiles6\">Media file #6:</label></td>" +
 "	          <td><input id=\"mediaFiles6\" type=\"file\" size=\"80\" name=\"datafile\" /><input id=\"clear_media_files6\" type=\"button\" value=\"Clear\" onClick=\"clearMediaInputField('mediaFiles6')\" /></td>" +
 "	      </tr>" +
-"	      <![endif]-->" +
+"	      <![endif]-->\n" +
 "	  	<tr>" +
 "	  		<td><input type=\"submit\" name=\"button\" value=\"Upload Form\" /></td>" +
 "	  		<td />" +
 "	  	</tr>" +
-"	  </table>" +
-"	  </form>";
+"	  </table>\n" +
+"	  </form>" +
+"<p>Media files for the form's logo, images, audio clips and video clips " +
+"(if any) should be in a single directory without subdirectories.</p>" +
+"<p>On ODK Collect 1.1.7 and higher, the file named \"<code>form_logo.png</code>\"," + 
+"if present in the media folder, will be displayed as the form's logo. </p>" +
+"</div>\n";
 
   /**
    * Title for generated webpage to obtain title
@@ -141,7 +137,7 @@ public class FormUploadServlet extends ServletUtilBase {
    */
   private static final String TITLE_OF_THE_XFORM = "Title of the Xform:";
 
-  private static final Logger logger = Logger.getLogger(FormUploadServlet.class.getName());
+  private static final Log logger = LogFactory.getLog(FormUploadServlet.class);
   /**
    * Handler for HTTP Get request to create xform upload page
    * 
@@ -212,6 +208,7 @@ public class FormUploadServlet extends ServletUtilBase {
     }
 
     boolean bOk = false;
+    StringBuilder warnings = new StringBuilder();
     // TODO Add in form title process so it will update the changes in the XML
     // of form
 
@@ -242,24 +239,14 @@ public class FormUploadServlet extends ServletUtilBase {
 
       try {
         parser = new FormParserForJavaRosa(formName, formXmlData, inputXml, xmlFileName,
-            uploadedFormItems, cc);
-
+        									uploadedFormItems, warnings, cc);
         logger.info("Upload form: " + parser.getFormId());
-        Form form = Form.retrieveForm(parser.getFormId(), cc);
-        String isIncompleteFlag = uploadedFormItems.getSimpleFormField(ServletConsts.TRANSFER_IS_INCOMPLETE);
-        if ( isIncompleteFlag != null && isIncompleteFlag.trim().length() != 0 ) {
-        	// not complete yet...
-        	form.setDownloadEnabled(false);
-        	form.persist(cc);
-        } else {
-        	form.setDownloadEnabled(true);
-        	form.persist(cc);
-        }
-        form.printDataTree(System.out);
+        // GAE requires some settle time before these entries will be
+        // accurately retrieved. Do not re-fetch the form after it has been uploaded.
         bOk = true;
 
       } catch (ODKFormAlreadyExistsException e) {
-        resp.sendError(HttpServletResponse.SC_CONFLICT, ErrorConsts.FORM_WITH_ODKID_EXISTS);
+        resp.sendError(HttpServletResponse.SC_CONFLICT, ErrorConsts.FORM_WITH_ODKID_EXISTS + "\n" + e.getMessage());
         return;
       } catch (ODKIncompleteSubmissionData e) {
         switch (e.getReason()) {
@@ -268,7 +255,7 @@ public class FormUploadServlet extends ServletUtilBase {
           return;
         case ID_MALFORMED:
           resp.sendError(HttpServletResponse.SC_BAD_REQUEST, ErrorConsts.JAVA_ROSA_PARSING_PROBLEM
-              + e.getMessage());
+        		  + "\n" + e.getMessage());
           return;
         case ID_MISSING:
           resp.sendError(HttpServletResponse.SC_BAD_REQUEST, ErrorConsts.MISSING_FORM_ID);
@@ -278,7 +265,7 @@ public class FormUploadServlet extends ServletUtilBase {
           return;
         case BAD_JR_PARSE:
           resp.sendError(HttpServletResponse.SC_BAD_REQUEST, ErrorConsts.JAVA_ROSA_PARSING_PROBLEM
-              + e.getMessage());
+        		  + "\n" + e.getMessage());
           return;
         default:
           // just move on
@@ -287,18 +274,15 @@ public class FormUploadServlet extends ServletUtilBase {
         // TODO NEED TO FIGURE OUT PROPER ACTION FOR ERROR
         e.printStackTrace();
         resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-            ErrorConsts.PERSISTENCE_LAYER_PROBLEM);
+            ErrorConsts.PERSISTENCE_LAYER_PROBLEM + "\n" + e.getMessage());
       } catch (ODKDatastoreException e) {
         e.printStackTrace();
         resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-            ErrorConsts.PERSISTENCE_LAYER_PROBLEM);
+            ErrorConsts.PERSISTENCE_LAYER_PROBLEM + "\n" + e.getMessage());
       } catch (ODKConversionException e) {
         e.printStackTrace();
         resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ErrorConsts.PARSING_PROBLEM
             + "\n" + e.getMessage());
-      } catch (ODKFormNotFoundException e) {
-        e.printStackTrace();
-        resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ErrorConsts.ODKID_NOT_FOUND);
       } catch (ODKParseException e) {
         // unfortunately, the underlying javarosa utility swallows the parsing error.
         e.printStackTrace();
@@ -319,9 +303,26 @@ public class FormUploadServlet extends ServletUtilBase {
       PrintWriter out = resp.getWriter();
       out.write(HtmlConsts.HTML_OPEN);
       out.write(HtmlConsts.BODY_OPEN);
-      out.write("Successful form upload.  Click ");
+      if ( warnings.length() != 0 ) {
+    	  out.write("<p>Form uploaded with warnings. There are value fields in the form that do not " +
+    	  		"have <code>&lt;bind/&gt;</code> declarations or those <code>&lt;bind/&gt;</code> " +
+    	  		"declarations do not have a <code>type</code> attribute that " +
+    	  		"identifies the data type of that field (e.g., boolean, int, decimal, date, dateTime, time, string, " +
+    	  		"select1, select, barcode, geopoint or binary).</p>" +
+    	  		"<p><b>All these value fields have been declared as string values.</b> It will use " +
+    	  		"lexical ordering on those fields.  E.g., the value 100 will be considered less than 11.</p>" +
+        	  	"<p><font color=\"red\">If these value fields hold date, dateTime, time or numeric data (e.g., decimal or int), then " +
+        	  	"ODK Aggregate will produce erroneous sortings and erroneous filtering results against those value fields.</font></p>" +
+    	  		"<table><th><td>Field Name</td></th>");
+    	  out.write(warnings.toString());
+    	  out.write("</table>");
+      } else {
+    	  out.write("<p>Successful form upload.</p>");
+      }
+      out.write("<p>Click ");
+    	  
       out.write(HtmlUtil.createHref(cc.getWebApplicationURL(ADDR), "here"));
-      out.write(" to return to add new form page.");
+      out.write(" to return to add new form page.</p>");
       out.write(HtmlConsts.BODY_CLOSE);
       out.write(HtmlConsts.HTML_CLOSE);
     }

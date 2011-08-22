@@ -18,8 +18,6 @@ package org.opendatakit.aggregate.client.popups;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.FilterSubTab;
@@ -55,8 +53,8 @@ public class VisualizationPopup extends PopupPanel {
 
   private static final String NUMBER_OF_OCCURANCES = "Number of Occurances";
 
-  private List<Column> headers;
-  private List<SubmissionUI> submissions;
+  private ArrayList<Column> headers;
+  private ArrayList<SubmissionUI> submissions;
   
   private FlexTable dropDownsTable;
   private ListBox chartType;
@@ -67,7 +65,7 @@ public class VisualizationPopup extends PopupPanel {
   
   private boolean mapsApiLoaded;
   
-  private List<KmlSettingOption> geoPoints ;
+  private ArrayList<KmlSettingOption> geoPoints ;
 
   private final String formId;
   
@@ -247,7 +245,7 @@ public class VisualizationPopup extends PopupPanel {
         secondIndex = index;
       index++;
     }
-    Map<String, Double> aggregation = new HashMap<String, Double>();
+    HashMap<String, Double> aggregation = new HashMap<String, Double>();
     boolean numOccurances = false;
     if (secondDataValue.equals(NUMBER_OF_OCCURANCES)) {
       numOccurances = true;

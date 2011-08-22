@@ -20,6 +20,7 @@
 	border-style: solid;
 	border-color: #07115A;
 	overflow: scroll;
+	height: 100%;
 }
 
 .exportTable td {
@@ -44,4 +45,8 @@
 .enabledTableRow td {
 	color: #000000;
 	background-color: #ffffff;
+}
+
+#spacer_cell {
+	
 }

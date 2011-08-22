@@ -20,8 +20,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.logging.Logger;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.web.CallingContext;
@@ -43,6 +44,7 @@ import org.opendatakit.common.web.CallingContext;
  */
 final class NamingSet {
 	private static final String DROP_CHARS = "AEIOUY";
+	private static final Log logger = LogFactory.getLog(NamingSet.class);
 
 	private final Map<String,Name> tablePlaceholders = new HashMap<String,Name>();
 	private final Map<String,Map<String,Name>> columnPlaceholders = new HashMap<String,Map<String,Name>>();
@@ -216,7 +218,7 @@ final class NamingSet {
 			nm.resolvedName += nm.mungedItemName;
 
 			if ( nm.resolvedName.length() > maxLenTableName ) {
-				Logger.getLogger(Naming.class.getName()).severe("Munged resolved name still too long: " +
+				logger.error("Munged resolved name still too long: " +
 						nm.resolvedName);
 				nm.resolvedName = trimName(nm.resolvedName, maxLenTableName);
 			}
@@ -330,7 +332,7 @@ final class NamingSet {
 				}
 				
 				if ( nm.resolvedName.length() > maxLenColumnName ) {
-					Logger.getLogger(Naming.class.getName()).severe("Munged resolved name still too long: " +
+					logger.error("Munged resolved name still too long: " +
 							nm.resolvedName);
 					nm.resolvedName = trimName(nm.resolvedName, maxLenColumnName);
 				}

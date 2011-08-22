@@ -75,33 +75,13 @@ public class RefreshTimer extends Timer {
 
   public boolean canLeaveCurrentSubTab() {
     if (currentSubTab != null) {
-      SubTabInterface tabPanel = null;
-      switch (currentSubTab) {
-      case FORMS:
-        tabPanel = aggregateUI.getManageNav().getSubTab(currentSubTab);
-        break;
-      case FILTER:
-        tabPanel = aggregateUI.getSubmissionNav().getSubTab(currentSubTab);
-        break;
-      case PUBLISH:
-        tabPanel = aggregateUI.getManageNav().getSubTab(currentSubTab);
-        break;
-      case EXPORT:
-        tabPanel = aggregateUI.getSubmissionNav().getSubTab(currentSubTab);
-        break;
-      case PREFERENCES:
-        tabPanel = aggregateUI.getManageNav().getSubTab(currentSubTab);
-        break;
-      case PERMISSIONS:
-        tabPanel = aggregateUI.getManageNav().getSubTab(currentSubTab);
-        break;
-      default:
-        // should not happen
-        GWT.log("currentSubTab (" + currentSubTab.getHashString()
-            + ") has no defined action in RefreshTimer.run()");
-      }
+      SubTabInterface tabPanel = aggregateUI.getSubTab(currentSubTab);
       if (tabPanel != null) {
         return tabPanel.canLeave();
+      } else {
+        // should not happen
+        GWT.log("currentSubTab (" + currentSubTab.getHashString()
+            + ") could not be found in RefreshTimer.canLeaveCurrentSubTab()");
       }
     }
     return true;
@@ -166,39 +146,33 @@ public class RefreshTimer extends Timer {
       cancel();
     }
     intervalsElapsed++;
-
-    SubTabInterface tabPanel;
-
+    
     if (currentSubTab != null) {
+      SubTabInterface tabPanel = aggregateUI.getSubTab(currentSubTab);
+      if (tabPanel == null) {
+        // should not happen
+        GWT.log("currentSubTab (" + currentSubTab.getHashString()
+            + ")could not be found in RefreshTimer.run()");
+      }
+      
       switch (currentSubTab) {
       case FORMS:
-        if ((intervalsElapsed % 3) == 0) {
-          tabPanel = aggregateUI.getManageNav().getSubTab(currentSubTab);
-          tabPanel.update();
-        }
-        break;
       case FILTER:
+      case TABLES:
         if ((intervalsElapsed % 3) == 0) {
-          tabPanel = aggregateUI.getSubmissionNav().getSubTab(currentSubTab);
           tabPanel.update();
         }
-        break;
-      case PUBLISH:
-        tabPanel = aggregateUI.getManageNav().getSubTab(currentSubTab);
-        tabPanel.update();
         break;
       case EXPORT:
-        tabPanel = aggregateUI.getSubmissionNav().getSubTab(currentSubTab);
+      case PUBLISH:
         tabPanel.update();
         break;
       case PREFERENCES:
         if ((intervalsElapsed % 6) == 0) {
-          tabPanel = aggregateUI.getManageNav().getSubTab(currentSubTab);
           tabPanel.update();
         }
         break;
       case PERMISSIONS:
-        tabPanel = aggregateUI.getManageNav().getSubTab(currentSubTab);
         if (lastCompletionTime == 0L) {
           // update this ONLY if we are forcing a refreshNow().
           // otherwise, let the entries be stale w.r.t. server.

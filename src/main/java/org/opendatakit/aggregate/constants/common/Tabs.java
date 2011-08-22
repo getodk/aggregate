@@ -20,7 +20,8 @@ import java.io.Serializable;
 
 public enum Tabs implements Serializable {
    SUBMISSIONS("Submissions", "submissions"),
-   MANAGEMENT("Management", "management");
+   MANAGEMENT("Form Management", "management"),
+   ADMIN("Site Admin", "admin");
    
    private String tabLabel;
    private String hashString;

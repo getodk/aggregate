@@ -21,6 +21,7 @@ import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.task.CsvGenerator;
 import org.opendatakit.aggregate.task.gae.servlet.CsvGeneratorTaskServlet;
 import org.opendatakit.common.constants.BasicConsts;
+import org.opendatakit.common.persistence.PersistConsts;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
 
@@ -43,7 +44,7 @@ public class CsvGeneratorImpl implements CsvGenerator {
   public void createCsvTask(Form form, SubmissionKey persistentResultsKey, long attemptCount, CallingContext cc) throws ODKDatastoreException {
     TaskOptions task = TaskOptions.Builder.withUrl(BasicConsts.FORWARDSLASH + CsvGeneratorTaskServlet.ADDR);
     task.method(TaskOptions.Method.GET);
-    task.countdownMillis(1);
+    task.countdownMillis(PersistConsts.MIN_SETTLE_MILLISECONDS);
     task.param(ServletConsts.FORM_ID, form.getFormId());
     task.param(ServletConsts.PERSISTENT_RESULTS_KEY, persistentResultsKey.toString());
     task.param(ServletConsts.ATTEMPT_COUNT, Long.toString(attemptCount));

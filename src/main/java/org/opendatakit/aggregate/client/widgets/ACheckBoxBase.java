@@ -28,6 +28,10 @@ public class ACheckBoxBase extends CheckBox implements ValueChangeHandler<Boolea
     super();
   }
   
+  public ACheckBoxBase(String label) {
+    super(label);
+  }
+  
   @Override
   public void onValueChange(ValueChangeEvent<Boolean> event) {
     AggregateUI baseUI = AggregateUI.getUI();

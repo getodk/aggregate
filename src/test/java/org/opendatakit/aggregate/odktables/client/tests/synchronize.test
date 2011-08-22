@@ -1,0 +1,72 @@
+# Set up
+createUser user1
+createUser user2
+
+createSynchronizedTable user1 people
+    name STRING false
+    age INTEGER false
+    weight DECIMAL false
+    
+# Test that user2 can synchronize
+setTablePermissions user1 user2 people true true false
+cloneSynchronizedTable user2 people
+
+insertSynchronizedRows user1 people
+    row1
+        name Dylan
+        age 500
+        weight 2.0
+    row2
+        name John
+        age 1000
+        weight 0.567
+        
+updateSynchronizedRows user2 people
+    row2
+        name Rick
+        age 999
+        weight 42
+        
+synchronize user2 people
+
+updateSynchronizedRows user2 people
+    row2
+        name Rick
+        age 999
+        weight 42
+        
+        
+# Test that user1 can synchronize
+insertSynchronizedRows user1 people
+    row3
+        name James
+        age 12
+        weight 12.4
+        
+synchronize user1 people
+
+insertSynchronizedRows user1 people
+    row3
+        name James
+        age 12
+        weight 12.4
+        
+# Test that can't synchronize with non-existent table
+synchronize user1 nonexistenttable
+
+# Test that can't synchronize without permission
+insertSynchronizedRows user1 people
+    row4
+        name William
+        age 5
+        weight 899.5
+        
+setTablePermissions user1 user2 people false false false
+
+synchronize user2 people
+
+
+# clean up
+deleteSynchronizedTable user1 people
+deleteUser user1
+deleteUser user2

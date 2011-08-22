@@ -19,10 +19,10 @@ package org.opendatakit.aggregate.server;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.client.exception.RequestFailureException;
 import org.opendatakit.aggregate.constants.BeanDefs;
@@ -161,7 +161,7 @@ public class FormAdminServiceImpl extends RemoteServiceServlet implements
 	        } else {
 	          String errString = "Attempting to delete FormInfo table definition record!";
 
-	          Logger.getLogger(this.getClass().getName()).severe(errString);
+	          LogFactory.getLog(this.getClass()).error(errString);
 	        }
 	      }
 	    } catch (Exception e) {

@@ -21,16 +21,14 @@ import org.opendatakit.aggregate.client.submission.SubmissionUISummary;
 import org.opendatakit.aggregate.client.table.SubmissionTable;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.ScrollPanel;
 
-public class SubmissionPanel extends FlowPanel {
+public class SubmissionPanel extends ScrollPanel {
 
   private SubmissionTable submissionTable;
 
   public SubmissionPanel() {
     super();
-    submissionTable = new SubmissionTable();
-    add(submissionTable);
     getElement().setId("submission_container");
   }
 
@@ -42,8 +40,9 @@ public class SubmissionPanel extends FlowPanel {
       }
 
       public void onSuccess(SubmissionUISummary summary) {
-        AggregateUI.getUI().clearError();
-        submissionTable.update(summary);
+        AggregateUI.getUI().clearError();        
+        submissionTable = new SubmissionTable(summary);
+        setWidget(submissionTable);
       }
     };
 

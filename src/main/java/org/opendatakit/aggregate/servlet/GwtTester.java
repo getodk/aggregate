@@ -2,7 +2,6 @@ package org.opendatakit.aggregate.servlet;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,17 +37,14 @@ import org.opendatakit.aggregate.externalservice.GoogleSpreadsheet;
 import org.opendatakit.aggregate.filter.SubmissionFilterGroup;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.form.PersistentResults;
+import org.opendatakit.aggregate.form.PersistentResults.ResultFileInfo;
 import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.format.element.BasicElementFormatter;
 import org.opendatakit.aggregate.format.element.ElementFormatter;
-import org.opendatakit.aggregate.query.submission.QueryByDate;
 import org.opendatakit.aggregate.query.submission.QueryByUIFilterGroup;
 import org.opendatakit.aggregate.server.GenerateHeaderInfo;
 import org.opendatakit.aggregate.submission.Submission;
-import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.submission.SubmissionSet;
-import org.opendatakit.aggregate.submission.SubmissionValue;
-import org.opendatakit.aggregate.submission.type.BlobSubmissionType;
 import org.opendatakit.common.constants.BasicConsts;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
@@ -98,11 +94,11 @@ public class GwtTester extends ServletUtilBase {
     beginBasicHtmlResponse(TITLE_INFO, resp, true, cc); // header info
 
     if (flag.equals("create")) {
-      List<Filter> filters = new ArrayList<Filter>();
+      ArrayList<Filter> filters = new ArrayList<Filter>();
       filters.add(new RowFilter(Visibility.DISPLAY, new Column("Ro1Awesome", "", new Long(1)),
           FilterOperation.EQUAL, "captain", new Long(99)));
 
-      List<ColumnFilterHeader> columns = new ArrayList<ColumnFilterHeader>();
+      ArrayList<ColumnFilterHeader> columns = new ArrayList<ColumnFilterHeader>();
       columns.add(new ColumnFilterHeader("ColAwesome1", "", new Long(1)));
       columns.add(new ColumnFilterHeader("ColAwesome2", "", new Long(1)));
       columns.add(new ColumnFilterHeader("ColAwesome3", "", new Long(1)));
@@ -110,7 +106,7 @@ public class GwtTester extends ServletUtilBase {
       filters.add(new ColumnFilter(Visibility.DISPLAY, columns, new Long(5)));
       filters.add(new RowFilter(Visibility.HIDE, new Column("Ro1Awesome", "", UIDisplayType.TEXT),
           FilterOperation.EQUAL, "captain1", new Long(1)));
-      FilterGroup group = new FilterGroup("group100", formId, filters);
+      FilterGroup group = new FilterGroup("group100", formId, filters, true);
       try {
         SubmissionFilterGroup filterGrp = SubmissionFilterGroup.transform(group, cc);
         filterGrp.persist(cc);
@@ -186,20 +182,12 @@ public class GwtTester extends ServletUtilBase {
     } else if (flag.equals("export")) {
 
       try {
-        Form form = Form.retrieveForm(PersistentResults.FORM_ID_PERSISTENT_RESULT, cc);
+    	List<PersistentResults> results = PersistentResults.getAvailablePersistentResults(cc);
 
-        QueryByDate query = new QueryByDate(form, new Date(), true, ServletConsts.FETCH_LIMIT, cc);
-
-        // query.addFilter(PersistentResults.getRequestingUserKey(),
-        // FilterOperation.EQUAL, cc.getCurrentUser().getUriUser());
-
-        List<Submission> submissions = query.getResultSubmissions(cc);
-
-        ExportSummary[] exports = new ExportSummary[submissions.size()];
+        ExportSummary[] exports = new ExportSummary[results.size()];
 
         int i = 0;
-        for (Submission sub : submissions) {
-          PersistentResults export = new PersistentResults(sub);
+        for (PersistentResults export : results) {
           ExportSummary summary = new ExportSummary();
 
           summary.setFileType(export.getResultType());
@@ -207,12 +195,9 @@ public class GwtTester extends ServletUtilBase {
           summary.setStatus(export.getStatus());
           summary.setTimeLastAction(export.getLastRetryDate());
           summary.setTimeCompleted(export.getCompletionDate());
-          SubmissionValue blobSubmission = sub
-              .getElementValue(PersistentResults.getResultFileKey());
-          if (blobSubmission instanceof BlobSubmissionType) {
-            BlobSubmissionType blob = (BlobSubmissionType) blobSubmission;
-            SubmissionKey key = blob.getValue();
-            summary.setResultFile(key.toString());
+          ResultFileInfo info = export.getResultFileInfo(cc);
+          if (info != null) {
+        	  summary.setResultFile(HtmlUtil.createHref(info.downloadUrl, "Download"));
           }
           exports[i] = summary;
           i++;
