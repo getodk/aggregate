@@ -56,12 +56,17 @@ a, a:visited, a:hover {
 	width: 600px;
 	height: 500px;
 }
-#login_logout_link {
+#nav_bar_help_login {
 	position: absolute;
 	top: 8px;
 	left: 800px;
 	margin: 0px;
 	padding: 0px;
-	width: 200px;
 	text-align: right;
+	float: left;
+}
+
+#nav_bar_help_login_item {
+	padding: 2px 2px 2px 2px;
+	float: left;
 }
