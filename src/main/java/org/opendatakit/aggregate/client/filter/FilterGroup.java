@@ -30,14 +30,17 @@ public final class FilterGroup implements Serializable {
   private String formId;
   private ArrayList<Filter> filters;
 
+  private Boolean includeMetadata;
+  
   public FilterGroup() {
 
   }
 
-  public FilterGroup(String groupName, String formId, ArrayList<Filter> filtersToApply) {
+  public FilterGroup(String groupName, String formId, ArrayList<Filter> filtersToApply, Boolean includeMetadata) {
     this.uri = UIConsts.URI_DEFAULT;
     this.name = groupName;
     this.formId = formId;
+    this.includeMetadata = includeMetadata;
     
     if(filtersToApply == null) {
       this.filters = new ArrayList<Filter>();
@@ -70,6 +73,14 @@ public final class FilterGroup implements Serializable {
 
   public void setName(String name) {
     this.name = name;
+  }
+
+  public Boolean getIncludeMetadata() {
+    return includeMetadata;
+  }
+
+  public void setIncludeMetadata(Boolean metadata) {
+    this.includeMetadata = metadata;
   }
 
   public ArrayList<Filter> getFilters() {

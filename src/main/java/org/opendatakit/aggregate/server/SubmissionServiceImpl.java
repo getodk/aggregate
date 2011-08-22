@@ -90,6 +90,7 @@ public class SubmissionServiceImpl extends RemoteServiceServlet implements
       throws ODKDatastoreException {
     GenerateHeaderInfo headerGenerator = new GenerateHeaderInfo(filterGroup, summary, form);
     headerGenerator.processForHeaderInfo(form.getTopLevelGroupElement());
+   
     List<FormElementModel> filteredElements = headerGenerator.getIncludedElements();
     ElementFormatter elemFormatter = new UiElementFormatter(cc.getServerURL(),
         headerGenerator.getGeopointIncludes());

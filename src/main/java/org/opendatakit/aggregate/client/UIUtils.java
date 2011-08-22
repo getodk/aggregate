@@ -91,7 +91,7 @@ public class UIUtils {
    
   public static ArrayList<FilterGroup> updateFilterDropDown(ListBox filtersBox, FormSummary selectedForm, ArrayList<FilterGroup> previouslyDisplayedFilter, FilterSet filterSet) {
     FilterGroup currentFilterSelected = getFilterFromSelection(filtersBox, previouslyDisplayedFilter);
-    FilterGroup defaultFilterGroup = new FilterGroup(UIConsts.FILTER_NONE, selectedForm.getId(), null);
+    FilterGroup defaultFilterGroup = new FilterGroup(UIConsts.FILTER_NONE, selectedForm.getId(), null, false);
     
     // what the selected index should be set to
     int selectedIndex = 0; // default to the top position, update if available

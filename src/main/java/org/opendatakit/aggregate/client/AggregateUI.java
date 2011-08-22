@@ -18,6 +18,7 @@ package org.opendatakit.aggregate.client;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+
 import org.opendatakit.aggregate.client.preferences.Preferences;
 import org.opendatakit.aggregate.constants.common.ExportConsts;
 import org.opendatakit.aggregate.constants.common.FilterConsts;
@@ -28,7 +29,6 @@ import org.opendatakit.aggregate.constants.common.Tabs;
 import org.opendatakit.aggregate.constants.common.UIConsts;
 import org.opendatakit.common.security.client.RealmSecurityInfo;
 import org.opendatakit.common.security.client.UserSecurityInfo;
-import org.opendatakit.common.security.client.UserSecurityInfo.UserType;
 import org.opendatakit.common.security.common.GrantedAuthorityName;
 
 import com.google.gwt.core.client.EntryPoint;
@@ -44,7 +44,6 @@ import com.google.gwt.user.client.rpc.InvocationException;
 import com.google.gwt.user.client.ui.DecoratedTabPanel;
 import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
@@ -56,21 +55,23 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 public class AggregateUI implements EntryPoint {
 
 	private UrlHash hash;
-	private VerticalPanel wrappingLayoutPanel;
 	private Label errorMsgLabel;
+	
+   private VerticalPanel wrappingLayoutPanel;	
 	private HorizontalPanel layoutPanel;
 	private DisclosurePanel helpPanel;
 	private Tree helpTree;
 	private TreeItem rootItem;
 
-	private DecoratedTabPanel mainNav;
+	private NavLinkBar settingsBar;
+	
+   private DecoratedTabPanel mainNav;
 
-	// tab datastructures
+	// tab datastructures	
 	private HashMap<Tabs, AggregateTabBase> tabMap;
 	private ArrayList<Tabs> tabPosition;
 
 	private RefreshTimer timer;
-	private HTMLPanel login_logout_link = new HTMLPanel("");
 
 	private static AggregateUI singleton = null;
 
@@ -119,6 +120,8 @@ public class AggregateUI implements EntryPoint {
 		mainNav = new DecoratedTabPanel();
 		mainNav.addStyleName("mainNav");
 
+		settingsBar = new NavLinkBar();
+		
 		// Create help panel
 		helpTree = new Tree();
 		rootItem = new TreeItem();
@@ -137,14 +140,11 @@ public class AggregateUI implements EntryPoint {
 		// add to layout
 		layoutPanel.add(mainNav);
 		layoutPanel.getElement().setId("layout_panel");
-		login_logout_link.getElement().setId("login_logout_link");
 
 		RootPanel.get("dynamic_content").add(wrappingLayoutPanel);
-		RootPanel.get("dynamic_content").add(login_logout_link);
+		RootPanel.get("dynamic_content").add(settingsBar);
 		RootPanel.get("dynamic_content").add(
 				new HTML("<img src=\"images/odk_color.png\" id=\"odk_aggregate_logo\" />"));
-
-		updateTogglePane();
 	}
 
 	private void addTabToDatastructures(AggregateTabBase tabPanel, Tabs tab) {
@@ -218,7 +218,7 @@ public class AggregateUI implements EntryPoint {
 	}
 
 	private void commonUserInfoUpdateCompleteAction() {
-		updateTogglePane();
+	   settingsBar.update();
 		Preferences.updatePreferences();
 
 		SubmissionTabUI submissions = new SubmissionTabUI(this);
@@ -274,7 +274,7 @@ public class AggregateUI implements EntryPoint {
 	// Let's JavaScript know that the GWT content has been loaded
 	// Currently calls into javascript/resize.js, if we add more JavaScript
 	// then that should be changed.
-	private native void contentLoaded() /*-{
+	public native void contentLoaded() /*-{
 		$wnd.gwtContentLoaded();
   }-*/;
 
@@ -393,30 +393,13 @@ public class AggregateUI implements EntryPoint {
 	private boolean authorizedForTab(Tabs tab) {
 		switch (tab) {
 		case SUBMISSIONS:
-			return true;
+			return userInfo.getGrantedAuthorities().contains(GrantedAuthorityName.ROLE_DATA_VIEWER);
 		case MANAGEMENT:
 			return userInfo.getGrantedAuthorities().contains(GrantedAuthorityName.ROLE_DATA_OWNER);
 		case ADMIN:
 			return userInfo.getGrantedAuthorities().contains(GrantedAuthorityName.ROLE_SITE_ACCESS_ADMIN);
 		default:
 			return false;
-		}
-	}
-
-	static final String LOGOUT_URL_PATH = "j_spring_security_logout";
-	static final HTML LOGOUT_LINK = new HTML("<a href=\"" + LOGOUT_URL_PATH + "\">Log Out</a>");
-	static final String LOGIN_URL_PATH = "relogin.html";
-	static final HTML LOGIN_LINK = new HTML("<a href=\"" + LOGIN_URL_PATH + "\">Log In</a>");
-
-	private void updateTogglePane() {
-		if ((userInfo != null) && (userInfo.getType() != UserType.ANONYMOUS)) {
-			GWT.log("Setting logout link");
-			login_logout_link.clear();
-			login_logout_link.add(LOGOUT_LINK);
-		} else {
-			GWT.log("Setting login link");
-			login_logout_link.clear();
-			login_logout_link.add(LOGIN_LINK);
 		}
 	}
 
