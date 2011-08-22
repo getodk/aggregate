@@ -16,6 +16,8 @@
 
 package org.opendatakit.aggregate.client;
 
+import org.opendatakit.aggregate.constants.common.HelpSliderConsts;
+
 public interface SubTabInterface {
 	/**
 	 * The canLeave predicate returns true if the focus of the app can move
@@ -28,4 +30,6 @@ public interface SubTabInterface {
 	public boolean canLeave();
 	
 	public void update();
+	
+	public HelpSliderConsts[] getHelpSliderContent();
 }
