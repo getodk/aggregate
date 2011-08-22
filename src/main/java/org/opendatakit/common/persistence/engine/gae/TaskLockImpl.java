@@ -122,6 +122,13 @@ public class TaskLockImpl implements TaskLock {
 	        gaeEntity = new Entity(KIND);
 	        updateValuesNpersist(transaction, lockId, formId, taskType, gaeEntity);
 	        result = true;
+	      } else {
+	    	// see if the lock is ours (may be slow appearing due to GAE delays)
+    	    Object value = gaeEntity.getProperty(LOCK_ID_PROPERTY);
+    	    if (value instanceof String) {
+    	      String retrievedLockId = (String) value;
+    	      result = lockId.equals(retrievedLockId);
+    	    }
 	      }
 	      // else you did not get the lock
 	    } catch (ODKTaskLockException e) {
