@@ -1,6 +1,6 @@
 package org.opendatakit.aggregate.constants.common;
 
-public enum PublishConsts {
+public enum PublishConsts implements HelpSliderConsts  {
 	PUBLISH("This is a view of the published data you have created for a particular form.",
 	"Select the form corresponding to the published data."),
 	TABLE("Understanding the table:",

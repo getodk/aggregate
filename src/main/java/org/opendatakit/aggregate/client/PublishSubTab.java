@@ -22,6 +22,8 @@ import org.opendatakit.aggregate.client.externalserv.ExternServSummary;
 import org.opendatakit.aggregate.client.form.FormServiceAsync;
 import org.opendatakit.aggregate.client.form.FormSummary;
 import org.opendatakit.aggregate.client.table.PublishTable;
+import org.opendatakit.aggregate.constants.common.HelpSliderConsts;
+import org.opendatakit.aggregate.constants.common.PublishConsts;
 import org.opendatakit.common.security.common.GrantedAuthorityName;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
@@ -131,5 +133,10 @@ public class PublishSubTab extends AggregateSubTabBase {
       }
       updatePublishTable();
     }
+  }
+  
+  @Override
+  public HelpSliderConsts[] getHelpSliderContent() {
+    return PublishConsts.values();
   }
 }

@@ -20,13 +20,15 @@ import java.util.ArrayList;
 
 import org.opendatakit.aggregate.client.form.ExportSummary;
 import org.opendatakit.aggregate.client.table.ExportTable;
+import org.opendatakit.aggregate.constants.common.ExportConsts;
+import org.opendatakit.aggregate.constants.common.HelpSliderConsts;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
 public class ExportSubTab extends AggregateSubTabBase {
 
   private ExportTable exportTable;
-  
+
   public ExportSubTab() {
     exportTable = new ExportTable();
     add(exportTable);
@@ -34,16 +36,16 @@ public class ExportSubTab extends AggregateSubTabBase {
 
   @Override
   public boolean canLeave() {
-	  return true;
+    return true;
   }
-  
+
   @Override
   public void update() {
-    
+
     AsyncCallback<ArrayList<ExportSummary>> callback = new AsyncCallback<ArrayList<ExportSummary>>() {
       @Override
       public void onFailure(Throwable caught) {
-          AggregateUI.getUI().reportError(caught);
+        AggregateUI.getUI().reportError(caught);
       }
 
       @Override
@@ -54,5 +56,10 @@ public class ExportSubTab extends AggregateSubTabBase {
 
     SecureGWT.getFormService().getExports(callback);
   }
-  
+
+  @Override
+  public HelpSliderConsts[] getHelpSliderContent() {
+    return ExportConsts.values();
+  }
+
 }

@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.opendatakit.aggregate.odktables.entity.InternalModification;
-import org.opendatakit.common.ermodel.simple.Entity;
 import org.opendatakit.common.ermodel.simple.Attribute;
 import org.opendatakit.common.ermodel.simple.AttributeType;
+import org.opendatakit.common.ermodel.simple.Entity;
 import org.opendatakit.common.ermodel.simple.typedentity.TypedEntityRelation;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
