@@ -111,6 +111,14 @@ public class SubmissionKeyPart {
 		return ordinal;
 	}
 	
+	public Long getModelVersion() {
+		return modelVersion;
+	}
+	
+	public Long getUiVersion() {
+		return uiVersion;
+	}
+	
 	public String toString() {
 		StringBuilder b = new StringBuilder();
 		b.append(elementName);

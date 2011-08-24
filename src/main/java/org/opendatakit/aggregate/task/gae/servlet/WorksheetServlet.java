@@ -103,7 +103,7 @@ public class WorksheetServlet extends ServletUtilBase {
     // get form
     Form form;
     try {
-      form = Form.retrieveForm(formId, cc);
+      form = Form.retrieveFormByFormId(formId, cc);
     } catch (ODKFormNotFoundException e) {
       odkIdNotFoundError(resp);
       return;

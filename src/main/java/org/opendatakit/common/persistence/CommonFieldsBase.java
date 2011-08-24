@@ -38,6 +38,8 @@ import org.opendatakit.common.security.User;
  */
 public abstract class CommonFieldsBase {
 	
+	public static final int AUDIT_COLUMN_COUNT = 4;
+	
 	public static final String URI_COLUMN_NAME = "_URI";
 	public static final String LAST_UPDATE_DATE_COLUMN_NAME = "_LAST_UPDATE_DATE";
 	public static final String LAST_UPDATE_URI_USER_COLUMN_NAME = "_LAST_UPDATE_URI_USER";

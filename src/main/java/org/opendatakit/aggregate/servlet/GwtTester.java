@@ -150,7 +150,7 @@ public class GwtTester extends ServletUtilBase {
       try {
 
         // Form form = Form.retrieveForm("widgets", cc);
-        Form form = Form.retrieveForm("LocationThings", cc);
+        Form form = Form.retrieveFormByFormId("LocationThings", cc);
         QueryByUIFilterGroup query = new QueryByUIFilterGroup(form, null, 1000, cc);
         List<Submission> submissions = query.getResultSubmissions(cc);
 
@@ -213,7 +213,7 @@ public class GwtTester extends ServletUtilBase {
     } else if (flag.equals("createfusion")) {
       
       try {
-        Form form = Form.retrieveForm("LocationThings", cc);
+        Form form = Form.retrieveFormByFormId("LocationThings", cc);
         FusionTable fusion = new FusionTable(form, ExternalServicePublicationOption.UPLOAD_N_STREAM, cc);;
         String uri =  fusion.getFormServiceCursor().getUri(); 
         String scope = FusionTableConsts.FUSION_SCOPE;
@@ -230,7 +230,7 @@ public class GwtTester extends ServletUtilBase {
     } else if (flag.equals("createspreadsheet")) {
       
       try {
-        Form form = Form.retrieveForm("LocationThings", cc);
+        Form form = Form.retrieveFormByFormId("LocationThings", cc);
         GoogleSpreadsheet spreadsheet = new GoogleSpreadsheet(form, "TESTWORKBOOK", ExternalServicePublicationOption.UPLOAD_N_STREAM, cc);
         String uri =  spreadsheet.getFormServiceCursor().getUri();
         String scope = SpreadsheetConsts.DOCS_SCOPE + BasicConsts.SPACE + SpreadsheetConsts.SPREADSHEETS_SCOPE;

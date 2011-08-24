@@ -30,11 +30,12 @@ import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.format.XFormsTableConsts;
 import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.form.FormInfo;
 import org.opendatakit.aggregate.servlet.XFormsDownloadServlet;
 import org.opendatakit.aggregate.submission.SubmissionKey;
-import org.opendatakit.aggregate.submission.type.BlobSubmissionType;
 import org.opendatakit.common.constants.BasicConsts;
 import org.opendatakit.common.constants.HtmlConsts;
+import org.opendatakit.common.datamodel.BinaryContentManipulator;
 
 /**
  * Generates an OpenRosa-compliant xml description of forms for the servlet
@@ -66,11 +67,11 @@ public class XFormsManifestXmlTable {
 	e.addChild(idx++, Node.IGNORABLE_WHITESPACE, BasicConsts.NEW_LINE);
 
     // build XML table of form information
-    BlobSubmissionType manifest = form.getManifestFileset();
+    BinaryContentManipulator manifest = form.getManifestFileset();
     if ( manifest != null ) {
     	int fileCount = manifest.getAttachmentCount();
     	for ( int i = 1 ; i <= fileCount ; ++i ) {
-	      idx = generateManifestXmlEntry(d, e, idx, manifest, i);
+	      idx = generateManifestXmlEntry(d, e, idx, form.getUri(), manifest, i);
     	}
     }
 
@@ -81,7 +82,7 @@ public class XFormsManifestXmlTable {
 	d.writeChildren(serializer); 
   }
 
-  private int generateManifestXmlEntry(Document d, Element e, int idx, BlobSubmissionType m, int i) {
+  private int generateManifestXmlEntry(Document d, Element e, int idx, String uri, BinaryContentManipulator m, int i) {
 	  String filename = m.getUnrootedFilename(i);
 	  String hash = m.getContentHash(i);
 
@@ -102,7 +103,7 @@ public class XFormsManifestXmlTable {
 	  fileEntryElement.addChild(feIdx++, Node.ELEMENT, downloadElement);
 	  {
 		Map<String, String> properties = new HashMap<String, String>();
-		SubmissionKey k = m.generateSubmissionKey(i);
+		SubmissionKey k = FormInfo.getManifestSubmissionKey(uri, i);
 	    properties.put(ServletConsts.BLOB_KEY, k.toString());
 	    properties.put(ServletConsts.AS_ATTACHMENT, "true");
 	    String urlLink = HtmlUtil.createLinkWithProperties(downloadRequestURL, properties);

@@ -61,7 +61,8 @@ public final class FormElementModel {
 		META_MODEL_VERSION,
 		META_UI_VERSION,
 		META_SUBMISSION_DATE,
-		META_IS_COMPLETE;
+		META_IS_COMPLETE,
+		META_DATE_MARKED_AS_COMPLETE;
 		
 		public String toString() {
 			return "*" + this.name().toLowerCase().replaceAll("_", "-") + "*";
@@ -246,6 +247,8 @@ public final class FormElementModel {
 				return ElementType.INTEGER;
 			case META_IS_COMPLETE:
 				return ElementType.BOOLEAN;
+			case META_DATE_MARKED_AS_COMPLETE:
+				return ElementType.JRDATETIME;
 			default:
 				throw new IllegalStateException("unhandled metadata type");
 			}

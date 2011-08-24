@@ -66,7 +66,7 @@ public class SubmissionServiceImpl extends RemoteServiceServlet implements
     SubmissionUISummary summary = new SubmissionUISummary();
     try {
       String formId = filterGroup.getFormId();
-      Form form = Form.retrieveForm(formId, cc);
+      Form form = Form.retrieveFormByFormId(formId, cc);
       QueryByUIFilterGroup query = new QueryByUIFilterGroup(form, filterGroup, 1000, cc);
       List<Submission> submissions = query.getResultSubmissions(cc);
 
@@ -149,7 +149,7 @@ public class SubmissionServiceImpl extends RemoteServiceServlet implements
 
     List<SubmissionKeyPart> parts = key.splitSubmissionKey();
     try {
-      Form form = Form.retrieveForm(parts.get(0).getElementName(), cc);
+      Form form = Form.retrieveFormByFormId(parts.get(0).getElementName(), cc);
       Submission sub = Submission.fetchSubmission(parts, cc);
 
       if (sub != null) {
@@ -198,7 +198,7 @@ public class SubmissionServiceImpl extends RemoteServiceServlet implements
 
     SubmissionUISummary summary = new SubmissionUISummary();
     try {
-      Form form = Form.retrieveForm(formId, cc);
+      Form form = Form.retrieveFormByFormId(formId, cc);
       QueryByDate query = new QueryByDate(form, BasicConsts.EPOCH, false,
           ServletConsts.FETCH_LIMIT, cc);
       List<Submission> submissions = query.getResultSubmissions(cc);
@@ -224,7 +224,7 @@ public class SubmissionServiceImpl extends RemoteServiceServlet implements
     CallingContext cc = ContextFactory.getCallingContext(this, req);
 
     try {
-      Form form = Form.retrieveForm(formId, cc);
+      Form form = Form.retrieveFormByFormId(formId, cc);
       QueryByDate query = new QueryByDate(form, BasicConsts.EPOCH, false,
           ServletConsts.FETCH_LIMIT, cc);
       List<Submission> submissions = query.getResultSubmissions(cc);

@@ -13,6 +13,7 @@
  */
 package org.opendatakit.common.datamodel;
 
+import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.DataField.IndexType;
 import org.opendatakit.common.persistence.PersistConsts;
@@ -38,14 +39,12 @@ import org.opendatakit.common.security.User;
 public abstract class DynamicBase extends DynamicCommonFieldsBase {
 
 	/* dynamic */
+	public static final int ADDITIONAL_COLUMN_COUNT = 3 + CommonFieldsBase.AUDIT_COLUMN_COUNT;
 	
 	/** key into the dynamic table that is our parent container */
 	private static final DataField PARENT_AURI = new DataField("_PARENT_AURI", DataField.DataType.URI, true, PersistConsts.URI_STRING_LEN).setIndexable(IndexType.HASH);
 	/** ordinal (1st, 2nd, ... ) of this item in the form element */
 	private static final DataField ORDINAL_NUMBER = new DataField("_ORDINAL_NUMBER", DataField.DataType.INTEGER, false);
-
-	/* dynamic and dynamic association tables */
-	
 	/** key into the top level dynamic table that is our ancestor */
 	private static final DataField TOP_LEVEL_AURI = new DataField("_TOP_LEVEL_AURI", DataField.DataType.URI, true, PersistConsts.URI_STRING_LEN);
 

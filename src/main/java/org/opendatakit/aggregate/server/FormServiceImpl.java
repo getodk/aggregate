@@ -36,12 +36,10 @@ import org.opendatakit.aggregate.constants.format.FormTableConsts;
 import org.opendatakit.aggregate.datamodel.FormElementKey;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
-import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.form.MiscTasks;
 import org.opendatakit.aggregate.form.PersistentResults;
 import org.opendatakit.aggregate.form.PersistentResults.ResultFileInfo;
-import org.opendatakit.aggregate.query.QueryFormList;
 import org.opendatakit.aggregate.task.CsvGenerator;
 import org.opendatakit.aggregate.task.KmlGenerator;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
@@ -66,8 +64,7 @@ public class FormServiceImpl extends RemoteServiceServlet implements
 
     try {
       // ensure that Form table exists...
-      QueryFormList formsList = new QueryFormList(false, cc);
-      List<Form> forms = formsList.getForms();
+      List<Form> forms = Form.getForms(false, cc);
       if ( forms.size() == 0 ) return formSummaries;
 
       // get most recent form-deletion statuses
@@ -99,9 +96,6 @@ public class FormServiceImpl extends RemoteServiceServlet implements
       return formSummaries;
 
     } catch (ODKDatastoreException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    } catch (ODKIncompleteSubmissionData e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
     }
@@ -160,7 +154,7 @@ public class FormServiceImpl extends RemoteServiceServlet implements
       // TODO: better error reporting -- form is being deleted. Disallow exports.
       if ( deletionTimestamp != null ) return null;
       // create csv job
-      Form form = Form.retrieveForm(formId, cc);
+      Form form = Form.retrieveFormByFormId(formId, cc);
       PersistentResults r = new PersistentResults(ExportType.CSV, form, null, cc);
       r.persist(cc);
 
@@ -185,7 +179,7 @@ public class FormServiceImpl extends RemoteServiceServlet implements
     CallingContext cc = ContextFactory.getCallingContext(this, req);
 
     try {
-      Form form = Form.retrieveForm(formId, cc);
+      Form form = Form.retrieveFormByFormId(formId, cc);
       GenerateKmlSettings kmlSettings = new GenerateKmlSettings(form, false);
       return kmlSettings.generate();
 
@@ -208,7 +202,7 @@ public class FormServiceImpl extends RemoteServiceServlet implements
       // TODO: better error reporting -- form is being deleted. Disallow exports.
       if ( deletionTimestamp != null ) return null;
       
-      Form form = Form.retrieveForm(formId, cc);
+      Form form = Form.retrieveFormByFormId(formId, cc);
 
       FormElementModel titleField = null;
       if (titleKey != null) {
@@ -259,7 +253,7 @@ public class FormServiceImpl extends RemoteServiceServlet implements
     CallingContext cc = ContextFactory.getCallingContext(this, req);
 
     try {
-      Form form = Form.retrieveForm(formId, cc);
+      Form form = Form.retrieveFormByFormId(formId, cc);
       GenerateKmlSettings kmlSettings = new GenerateKmlSettings(form, true);
       return kmlSettings.generate();
 

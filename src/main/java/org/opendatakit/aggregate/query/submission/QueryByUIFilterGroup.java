@@ -15,7 +15,6 @@ import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.server.UITrans;
 import org.opendatakit.aggregate.submission.Submission;
-import org.opendatakit.common.constants.BasicConsts;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.persistence.Query.FilterOperation;
@@ -36,7 +35,6 @@ public class QueryByUIFilterGroup extends QueryBase {
 
     query = cc.getDatastore().createQuery(tbl, cc.getCurrentUser());
     query.addSort(tbl.lastUpdateDate, Query.Direction.ASCENDING);
-    query.addFilter(tbl.lastUpdateDate, Query.FilterOperation.GREATER_THAN, BasicConsts.EPOCH);
     
     if(filterGroup == null) {
       return;

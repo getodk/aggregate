@@ -66,6 +66,10 @@ jar and copy it into the eclipse project.
 
 Refresh the eclipse-aggregate-gae project (to pick up the updated jar file).
 
+Select eclipse-aggregate-gae project.
+
+Click on the red toolbox (GWT compile) to compile the GWT Java code into javascript.
+
 (7) Running:
 
 Select eclipse-aggregate-gae project.
@@ -77,6 +81,56 @@ Choose index.html
 Double-click to open the url.  After logging on, if running with 
 the debug server, you will need to hand-edit the url to restore
 the gwt-server address.
+
+==========================================
+Troubleshooting Debugging/Running 
+------------------------------------------
+
+(1) Javascript refresh loop 
+
+If the database schema has changed, the browser may flash
+and be stuck in a javascript refresh loop.  To remedy,
+delete your local datastore (instructions below)
+
+(2) Odd behaviors under Eclipse
+
+The Eclipse GWT plugin does not normally keep the compiled
+client-side javascript up to date with the debug-enabled
+GWT Java client code.  This can cause a number of inconsistencies
+when the ?gwt.codesvr=127.0.0.1:9997 query string is dropped 
+off the URL during redirects when logging in, etc.
+
+First, verify that if you are running under debug, you have
+the ?gwt.codesvr=127.0.0.1:9997 query string on your URLs.
+
+Second, periodically, when stopped, click on the red toolbox
+to compile the javascript.
+
+Third, periodically clear your browser cache to force a complete
+re-loading of the clientside javascript.
+
+Fourth, if you have moved or changed client interfaces, you 
+may need to manually browse to the war diretory and delete 
+the contents of the war/aggregateui and war/WEB-INF/deploy
+directories.  
+
+(3) Odd errors about locking scopes.
+
+If you are debugging code within a transaction
+region (these are presently isolated to TaskLockImpl.java),
+the datastore can get confused about the transaction scopes
+that are active.  You may need to close eclipse, re-open, 
+and delete the datastore to clear this problem.
+
+-----------------------
+Clearing your Datastore
+-----------------------
+
+To delete the local datastore:
+
+(1) In Eclipse, browse to war/WEB-INF/appengine-generated
+(2) Hit Refresh
+(3) delete "local_db.bin"
 
 ==========================================
 Full Development Environment Configuration
@@ -232,6 +286,10 @@ choose Run As / Ant Build.  This will rebuild the configuration
 jar and copy it into the eclipse project.
 
 (12) Refresh the eclipse-aggregate-gae project (to pick up the updated jar file).
+
+Select eclipse-aggregate-gae project.
+
+Click on the red toolbox (GWT compile) to compile the GWT Java code into javascript.
 
 (13) Running:
 

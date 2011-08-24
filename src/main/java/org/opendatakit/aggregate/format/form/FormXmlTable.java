@@ -18,13 +18,14 @@
 package org.opendatakit.aggregate.format.form;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.format.FormTableConsts;
 import org.opendatakit.aggregate.form.Form;
-import org.opendatakit.aggregate.query.QueryFormList;
+import org.opendatakit.aggregate.form.FormInfo;
 import org.opendatakit.aggregate.servlet.FormXmlServlet;
 import org.opendatakit.common.constants.BasicConsts;
 import org.opendatakit.common.constants.HtmlConsts;
@@ -40,9 +41,9 @@ public class FormXmlTable {
 
   private String requestURL;
 
-  private QueryFormList forms;
+  private List<Form> forms;
 
-  public FormXmlTable(QueryFormList formsToFormat, String webServerUrl) {
+  public FormXmlTable(List<Form> formsToFormat, String webServerUrl) {
     this.requestURL = webServerUrl + BasicConsts.FORWARDSLASH + FormXmlServlet.ADDR;
     this.forms = formsToFormat;
   }
@@ -51,8 +52,8 @@ public class FormXmlTable {
     String xml = FormTableConsts.BEGIN_FORMS_TAG + BasicConsts.NEW_LINE;
 
     // build XML table of form information
-    for (Form form : forms.getForms()) {
-    	if ( form.getFormId().equals(Form.URI_FORM_ID_VALUE_FORM_INFO)) continue;
+    for (Form form : forms) {
+    	if ( FormInfo.isFormInfoForm(form.getFormId())) continue;
     	if ( !form.getDownloadEnabled() ) continue;
 
       xml += generateFormXmlEntry(form.getFormId(), form.getViewableName()) + BasicConsts.NEW_LINE;

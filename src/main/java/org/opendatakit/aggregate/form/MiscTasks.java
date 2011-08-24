@@ -484,7 +484,7 @@ public class MiscTasks {
 		static final String TABLE_NAME = "_misc_tasks";
 	
 		private static final DataField FORM_ID = new DataField("FORM_ID",
-				DataField.DataType.STRING, true, 4096L);
+				DataField.DataType.STRING, true, Form.MAX_FORM_ID_LENGTH);
 		
 		private static final DataField REQUESTING_USER = new DataField("REQUESTING_USER",
 				DataField.DataType.STRING, true);

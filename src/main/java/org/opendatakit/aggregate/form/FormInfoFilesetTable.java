@@ -15,14 +15,14 @@
  */
 package org.opendatakit.aggregate.form;
 
-import java.util.List;
-
-import org.opendatakit.aggregate.datamodel.FormDataModel;
-import org.opendatakit.aggregate.datamodel.TopLevelDynamicBase;
-import org.opendatakit.aggregate.form.FormDefinition.OrdinalSequence;
+import org.opendatakit.common.datamodel.BinaryContent;
+import org.opendatakit.common.datamodel.BinaryContentManipulator;
+import org.opendatakit.common.datamodel.BinaryContentRefBlob;
 import org.opendatakit.common.datamodel.DynamicBase;
+import org.opendatakit.common.datamodel.RefBlob;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.Datastore;
+import org.opendatakit.common.persistence.PersistConsts;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.web.CallingContext;
@@ -36,6 +36,24 @@ import org.opendatakit.common.web.CallingContext;
 public class FormInfoFilesetTable extends DynamicBase {
 	static final String TABLE_NAME = "_form_info_fileset";
 
+	// Additional DataField -- the xform fileset (single-value binary content)
+
+	private static final String FORM_INFO_XFORM_REF_BLOB = "_form_info_xform_blb";
+
+	private static final String FORM_INFO_XFORM_BINARY_CONTENT_REF_BLOB = "_form_info_xform_ref";
+
+	private static final String FORM_INFO_XFORM_BINARY_CONTENT = "_form_info_xform_bin";
+
+	// Additional DataField -- the manifest fileset (multivalued binary content)
+
+	private static final String FORM_INFO_MANIFEST_REF_BLOB = "_form_info_manifest_blb";
+
+	private static final String FORM_INFO_MANIFEST_BINARY_CONTENT_REF_BLOB = "_form_info_manifest_ref";
+
+	private static final String FORM_INFO_MANIFEST_BINARY_CONTENT = "_form_info_manifest_bin";
+
+	// DataFields in the fileset table
+	
 	private static final DataField ROOT_ELEMENT_MODEL_VERSION = new DataField("ROOT_ELEMENT_MODEL_VERSION",
 			DataField.DataType.INTEGER, true);
 
@@ -48,31 +66,27 @@ public class FormInfoFilesetTable extends DynamicBase {
 	private static final DataField IS_DOWNLOAD_ALLOWED = new DataField("IS_DOWNLOAD_ALLOWED",
 			DataField.DataType.BOOLEAN, true);
 
-	// Additional DataField -- the xformDefinition (binary content)
-	
-	static final String ELEMENT_NAME_XFORM_DEFINITION = "xformDefinition";
+	private static final DataField LANGUAGE_CODE = new DataField("LANGUAGE_CODE",
+			DataField.DataType.STRING, true, 8L);
 
-	private static final String FORM_INFO_XFORM_REF_BLOB = "_form_info_xform_blb";
+	private static final DataField FORM_NAME = new DataField("FORM_NAME",
+			DataField.DataType.STRING, true, PersistConsts.GUARANTEED_SEARCHABLE_LEN);
 
-	private static final String FORM_INFO_XFORM_BINARY_CONTENT_REF_BLOB = "_form_info_xform_ref";
+	private static final DataField DESCRIPTION = new DataField("DESCRIPTION",
+			DataField.DataType.STRING, true, 8192L);
 
-	private static final String FORM_INFO_XFORM_BINARY_CONTENT = "_form_info_xform_bin";
+	private static final DataField DESCRIPTION_URL = new DataField("DESCRIPTION_URL",
+			DataField.DataType.STRING, true, 2048L);
 
-	// Additional DataField -- the manifest fileset (multivalued binary content)
-	
-	static final String ELEMENT_NAME_MANIFEST_FILESET = "manifestFileset";
-
-	private static final String FORM_INFO_MANIFEST_REF_BLOB = "_form_info_manifest_blb";
-
-	private static final String FORM_INFO_MANIFEST_BINARY_CONTENT_REF_BLOB = "_form_info_manifest_ref";
-
-	private static final String FORM_INFO_MANIFEST_BINARY_CONTENT = "_form_info_manifest_bin";
-	
 	// the relation fields...
 	public final DataField rootElementModelVersion;
 	public final DataField rootElementUiVersion;
 	public final DataField isEncryptedForm;
  	public final DataField isDownloadAllowed;
+	public final DataField languageCode;
+	public final DataField formName;
+	public final DataField description;
+	public final DataField descriptionUrl;
 
 	public static final String URI_FORM_ID_VALUE_FORM_INFO_FILESET = "aggregate.opendatakit.org:FormInfoFileset";
 
@@ -87,7 +101,11 @@ public class FormInfoFilesetTable extends DynamicBase {
 		fieldList.add(rootElementUiVersion = new DataField(ROOT_ELEMENT_UI_VERSION));
 		fieldList.add(isEncryptedForm = new DataField(IS_ENCRYPTED_FORM));
 		fieldList.add(isDownloadAllowed = new DataField(IS_DOWNLOAD_ALLOWED));
-		
+		fieldList.add(languageCode = new DataField(LANGUAGE_CODE));
+		fieldList.add(formName = new DataField(FORM_NAME));
+		fieldList.add(description = new DataField(DESCRIPTION));
+		fieldList.add(descriptionUrl = new DataField(DESCRIPTION_URL));
+
 		fieldValueMap.put(primaryKey, FormInfoFilesetTable.URI_FORM_ID_VALUE_FORM_INFO_FILESET);
 	}
 
@@ -103,6 +121,10 @@ public class FormInfoFilesetTable extends DynamicBase {
 		rootElementUiVersion = ref.rootElementUiVersion;
 		isEncryptedForm = ref.isEncryptedForm;
 		isDownloadAllowed = ref.isDownloadAllowed;
+		languageCode = ref.languageCode;
+		formName = ref.formName;
+		description = ref.description;
+		descriptionUrl = ref.descriptionUrl;
 	}
 
 	@Override
@@ -111,6 +133,14 @@ public class FormInfoFilesetTable extends DynamicBase {
 	}
 	
 	private static FormInfoFilesetTable relation = null;
+
+	private static BinaryContent xformBinaryRelation = null;
+	private static BinaryContentRefBlob xformBinaryRefBlobRelation = null;
+	private static RefBlob xformRefBlobRelation = null;
+
+	private static BinaryContent manifestBinaryRelation = null;
+	private static BinaryContentRefBlob manifestBinaryRefBlobRelation = null;
+	private static RefBlob manifestRefBlobRelation = null;
 	
 	static synchronized final FormInfoFilesetTable assertRelation(CallingContext cc) throws ODKDatastoreException {
 		if ( relation == null ) {
@@ -120,52 +150,43 @@ public class FormInfoFilesetTable extends DynamicBase {
 			relationPrototype = new FormInfoFilesetTable(ds.getDefaultSchemaName());
 		    ds.assertRelation(relationPrototype, user); // may throw exception...
 		    // at this point, the prototype has become fully populated
+		    BinaryContent xformBc = new BinaryContent(ds.getDefaultSchemaName(), FORM_INFO_XFORM_BINARY_CONTENT);
+		    ds.assertRelation(xformBc, user);
+		    BinaryContentRefBlob xformBref = new BinaryContentRefBlob(ds.getDefaultSchemaName(), FORM_INFO_XFORM_BINARY_CONTENT_REF_BLOB);
+		    ds.assertRelation(xformBref, user);
+		    RefBlob xformRef = new RefBlob(ds.getDefaultSchemaName(), FORM_INFO_XFORM_REF_BLOB);
+		    ds.assertRelation(xformRef, user);
+
+		    BinaryContent manifestBc = new BinaryContent(ds.getDefaultSchemaName(), FORM_INFO_MANIFEST_BINARY_CONTENT);
+		    ds.assertRelation(manifestBc, user);
+		    BinaryContentRefBlob manifestBref = new BinaryContentRefBlob(ds.getDefaultSchemaName(), FORM_INFO_MANIFEST_BINARY_CONTENT_REF_BLOB);
+		    ds.assertRelation(manifestBref, user);
+		    RefBlob manifestRef = new RefBlob(ds.getDefaultSchemaName(), FORM_INFO_MANIFEST_REF_BLOB);
+		    ds.assertRelation(manifestRef, user);
+		    
+		    // at this point, the prototype has become fully populated
 		    relation = relationPrototype; // set static variable only upon success...
+			xformBinaryRelation = xformBc;
+			xformBinaryRefBlobRelation = xformBref;
+			xformRefBlobRelation = xformRef;
+
+			manifestBinaryRelation = manifestBc;
+			manifestBinaryRefBlobRelation = manifestBref;
+			manifestRefBlobRelation = manifestRef;
 		}
 		return relation;
 	}
-	
-	static final void createFormDataModel(List<FormDataModel> model, 
-			TopLevelDynamicBase formInfoDefinitionRelation, 
-			String parentTableKey,
-			OrdinalSequence os, 
-			CallingContext cc) throws ODKDatastoreException {
-		
-		FormInfoFilesetTable filesetRelation = assertRelation(cc);
-		
-		boolean asDaemon = cc.getAsDeamon();
-		try {
-			cc.setAsDaemon(true);
-			
-			String groupKey = FormDefinition.buildTableFormDataModel( model, 
-				filesetRelation, 
-				formInfoDefinitionRelation, // top level table
-				parentTableKey, // also the parent table
-				os,
-				cc );
 
-			FormDefinition.buildBinaryContentFormDataModel(model, 
-				ELEMENT_NAME_XFORM_DEFINITION, 
-				FORM_INFO_XFORM_BINARY_CONTENT, 
-				FORM_INFO_XFORM_BINARY_CONTENT_REF_BLOB, 
-				FORM_INFO_XFORM_REF_BLOB, 
-				formInfoDefinitionRelation, // top level table
-				groupKey, // parent table
-				os, 
-				cc );
-		
-			FormDefinition.buildBinaryContentFormDataModel(model, 
-				ELEMENT_NAME_MANIFEST_FILESET, 
-				FORM_INFO_MANIFEST_BINARY_CONTENT, 
-				FORM_INFO_MANIFEST_BINARY_CONTENT_REF_BLOB, 
-				FORM_INFO_MANIFEST_REF_BLOB, 
-				formInfoDefinitionRelation, // top level table
-				groupKey, // parent table
-				os, 
-				cc );
-		} finally {
-			cc.setAsDaemon(asDaemon);
-		}
-		
+	static final BinaryContentManipulator assertXformManipulator(String topLevelAuri, String uri, CallingContext cc) throws ODKDatastoreException {
+		// make sure the relations are defined...
+		assertRelation(cc);
+		return new BinaryContentManipulator(uri, topLevelAuri, xformBinaryRelation, xformBinaryRefBlobRelation, xformRefBlobRelation);
 	}
+
+	static final BinaryContentManipulator assertManifestManipulator(String topLevelAuri, String uri, CallingContext cc) throws ODKDatastoreException {
+		// make sure the relations are defined...
+		assertRelation(cc);
+		return new BinaryContentManipulator(uri, topLevelAuri, manifestBinaryRelation, manifestBinaryRefBlobRelation, manifestRefBlobRelation);
+	}
+
 }

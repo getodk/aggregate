@@ -68,7 +68,7 @@ public class ServicesAdminServiceImpl extends RemoteServiceServlet implements
       return null;
     
     try {
-      Form form = Form.retrieveForm(formId, cc);
+      Form form = Form.retrieveFormByFormId(formId, cc);
       List<ExternalService> esList = FormServiceCursor.getExternalServicesForForm(form, cc);
 
       ExternServSummary[] externServices;
@@ -152,7 +152,7 @@ public class ServicesAdminServiceImpl extends RemoteServiceServlet implements
       FormActionStatusTimestamp deletionTimestamp = MiscTasks.getFormDeletionStatusTimestampOfFormId(formId, cc);
       // TODO: better error reporting -- form is being deleted. Disallow creation of publishers.
       if ( deletionTimestamp != null ) return null;
-      Form form = Form.retrieveForm(formId, cc);
+      Form form = Form.retrieveFormByFormId(formId, cc);
       FusionTable fusion = new FusionTable(form, esOption, cc);
       return fusion.getFormServiceCursor().getUri();
     } catch (ODKFormNotFoundException e) {
@@ -174,7 +174,7 @@ public class ServicesAdminServiceImpl extends RemoteServiceServlet implements
       FormActionStatusTimestamp deletionTimestamp = MiscTasks.getFormDeletionStatusTimestampOfFormId(formId, cc);
       // TODO: better error reporting -- form is being deleted. Disallow creation of publishers.
       if ( deletionTimestamp != null ) return null;
-      Form form = Form.retrieveForm(formId, cc);
+      Form form = Form.retrieveFormByFormId(formId, cc);
       GoogleSpreadsheet spreadsheet = new GoogleSpreadsheet(form, name, esOption, cc);
       return spreadsheet.getFormServiceCursor().getUri();
     } catch (ODKFormNotFoundException e) {

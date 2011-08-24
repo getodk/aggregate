@@ -45,7 +45,6 @@ import org.opendatakit.aggregate.externalservice.FormServiceCursor;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.parser.MultiPartFormData;
 import org.opendatakit.aggregate.parser.SubmissionParser;
-import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.aggregate.task.UploadSubmissions;
 import org.opendatakit.common.constants.BasicConsts;
 import org.opendatakit.common.constants.HtmlConsts;
@@ -203,22 +202,21 @@ public class SubmissionServlet extends ServletUtilBase {
    CallingContext cc = ContextFactory.getCallingContext(this, req);
 
    Double openRosaVersion = getOpenRosaVersion(req);
-   String isIncompleteFlag = null;
+   boolean isIncomplete = false;
     try {
       SubmissionParser submissionParser = null;
       if (ServletFileUpload.isMultipartContent(req)) {
-      MultiPartFormData uploadedSubmissionItems = new MultiPartFormData(req);
-        isIncompleteFlag = uploadedSubmissionItems.getSimpleFormField(ServletConsts.TRANSFER_IS_INCOMPLETE);
-        submissionParser = new SubmissionParser(uploadedSubmissionItems, cc);
+        MultiPartFormData uploadedSubmissionItems = new MultiPartFormData(req);
+        String isIncompleteFlag = uploadedSubmissionItems.getSimpleFormField(ServletConsts.TRANSFER_IS_INCOMPLETE);
+        isIncomplete = (isIncompleteFlag != null && isIncompleteFlag.compareToIgnoreCase("YES") == 0);
+        submissionParser = new SubmissionParser(uploadedSubmissionItems, isIncomplete, cc);
       } else {
         // TODO: check that it is the proper types we can deal with
         // XML received, we hope...
         submissionParser = new SubmissionParser(req.getInputStream(), cc);
       }
 
-      // TODO: mitch are we assuming the submissionParser always persists?
-      Form form = Form.retrieveForm(submissionParser.getSubmissionFormId(), cc);
-      Submission submission = submissionParser.getSubmission();
+      Form form = submissionParser.getForm();
 
       // send information to remote servers that need to be notified
       List<ExternalService> tmp = FormServiceCursor.getExternalServicesForForm(form, cc);
@@ -263,7 +261,7 @@ public class SubmissionServlet extends ServletUtilBase {
         resp.setCharacterEncoding(HtmlConsts.UTF8_ENCODE);
         PrintWriter out = resp.getWriter();
         out.write("<OpenRosaResponse xmlns=\"http://openrosa.org/http/response\">");
-        if ( isIncompleteFlag != null && isIncompleteFlag.compareToIgnoreCase("YES") == 0) {
+        if ( isIncomplete ) {
            out.write("<message>partial submission upload was successful!</message>");
         } else {
            out.write("<message>full submission upload was successful!</message>");

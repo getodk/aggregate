@@ -32,7 +32,7 @@ public class AggregateStartupImpl implements WebStartup {
 		// additional logic is required to detect whether this 
 		// is the first webserver instance.  We don't care.
 		try {
-			Form.getFormInfoRelation(bootstrapCc);
+			Form.initialize(bootstrapCc);
 		} catch (ODKDatastoreException e) {
 			e.printStackTrace();
 		}

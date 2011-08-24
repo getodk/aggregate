@@ -15,6 +15,7 @@
  */
 package org.opendatakit.common.datamodel;
 
+import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.PersistConsts;
 import org.opendatakit.common.security.User;
@@ -28,7 +29,8 @@ import org.opendatakit.common.security.User;
 public abstract class DynamicDocumentBase extends DynamicCommonFieldsBase {
 
 	/* dynamic and dynamic association tables */
-	
+	public static final int ADDITIONAL_COLUMN_COUNT = 1 + CommonFieldsBase.AUDIT_COLUMN_COUNT;
+
 	/** key into the top level dynamic table that is our ancestor */
 	private static final DataField TOP_LEVEL_AURI = new DataField("_TOP_LEVEL_AURI", DataField.DataType.URI, true, PersistConsts.URI_STRING_LEN);
 

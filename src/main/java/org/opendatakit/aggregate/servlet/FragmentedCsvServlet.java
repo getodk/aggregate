@@ -195,7 +195,7 @@ public class FragmentedCsvServlet extends ServletUtilBase {
     	}
     	
     	if (submissionKeyParts.size() >= 2 && submissionKeyParts.get(1).getAuri() != null && numEntriesToFetch > 0) {
-        	Form form = Form.retrieveForm(submissionKeyParts.get(0).getElementName(), cc);
+        	Form form = Form.retrieveFormByFormId(submissionKeyParts.get(0).getElementName(), cc);
         	Submission sub = Submission.fetchSubmission(submissionKeyParts, cc);
         	FormElementModel m = form.getFormElementModel(submissionKeyParts);
         	SubmissionElement elem = sub.resolveSubmissionKey(submissionKeyParts);
@@ -221,7 +221,7 @@ public class FragmentedCsvServlet extends ServletUtilBase {
         	// top-level form has no parent...
         	// top-level form can be referenced either by just "form-identity" or by "form-identity/top-level-tag"
 	    	// reworked from formxmlservlet.java
-        	Form form = Form.retrieveForm(submissionKeyParts.get(0).getElementName(), cc);
+        	Form form = Form.retrieveFormByFormId(submissionKeyParts.get(0).getElementName(), cc);
 
             QueryByDate query = new QueryByDate(form, dateCode, false, true, true,
                     numEntriesToFetch, cc);
