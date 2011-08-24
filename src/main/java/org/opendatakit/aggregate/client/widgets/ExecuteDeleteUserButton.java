@@ -17,24 +17,26 @@
 package org.opendatakit.aggregate.client.widgets;
 
 import org.opendatakit.aggregate.client.permissions.AccessConfigurationSheet;
+import org.opendatakit.aggregate.constants.common.UIConsts;
 import org.opendatakit.common.security.client.UserSecurityInfo;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.PopupPanel;
 
-public class ExecuteDeleteUserButton extends AButtonBase implements ClickHandler {
+public class ExecuteDeleteUserButton extends AbstractButtonBase implements ClickHandler {
  
+  private static final String TOOLTIP_TEXT = UIConsts.EMPTY_STRING;
+  
   private UserSecurityInfo user;
   private AccessConfigurationSheet sheet;
   private PopupPanel popup;
   
   public ExecuteDeleteUserButton(UserSecurityInfo user, AccessConfigurationSheet sheet, PopupPanel popup) {
-    super("<img src=\"images/green_right_arrow.png\" /> Delete User");
+    super("<img src=\"images/green_right_arrow.png\" /> Delete User", TOOLTIP_TEXT);
     this.user = user;
     this.sheet = sheet;
     this.popup = popup;
-    addClickHandler(this);
   }
 
   @Override
@@ -43,6 +45,5 @@ public class ExecuteDeleteUserButton extends AButtonBase implements ClickHandler
     
     sheet.deleteUser(user);
     popup.hide();
-  }
-
+  }  
 }

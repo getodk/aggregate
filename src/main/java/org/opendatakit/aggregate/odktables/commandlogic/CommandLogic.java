@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.opendatakit.aggregate.odktables.client.exception.AggregateInternalErrorException;
 import org.opendatakit.aggregate.odktables.command.Command;
+import org.opendatakit.aggregate.odktables.command.CommandConverter;
 import org.opendatakit.aggregate.odktables.command.common.CheckUserExists;
 import org.opendatakit.aggregate.odktables.command.common.CreateUser;
 import org.opendatakit.aggregate.odktables.command.common.DeleteUser;

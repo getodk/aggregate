@@ -18,6 +18,7 @@ package org.opendatakit.aggregate.client.widgets;
 
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.SecureGWT;
+import org.opendatakit.aggregate.constants.common.UIConsts;
 import org.opendatakit.common.security.common.GrantedAuthorityName;
 
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -25,17 +26,19 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
 
-public class DownloadableCheckBox extends ACheckBoxBase implements ValueChangeHandler<Boolean> {
+public class DownloadableCheckBox extends AbstractCheckBoxBase implements ValueChangeHandler<Boolean> {
+  
+  private static final String TOOLTIP_TEXT = UIConsts.EMPTY_STRING;
+  
   private String formId;
   
   public DownloadableCheckBox(String formId, Boolean downloadable) {
-    super();
+    super(TOOLTIP_TEXT);
     this.formId = formId;
     setValue(downloadable);
     boolean enabled = AggregateUI.getUI().getUserInfo()
         	.getGrantedAuthorities().contains(GrantedAuthorityName.ROLE_DATA_OWNER);
     setEnabled(enabled);
-    addValueChangeHandler(this);
   }
 
   @Override

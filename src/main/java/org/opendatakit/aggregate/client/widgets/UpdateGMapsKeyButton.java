@@ -17,18 +17,21 @@
 package org.opendatakit.aggregate.client.widgets;
 
 import org.opendatakit.aggregate.client.preferences.Preferences;
+import org.opendatakit.aggregate.constants.common.UIConsts;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.TextBox;
 
-public class UpdateGMapsKeyButton extends AButtonBase implements ClickHandler {
+public class UpdateGMapsKeyButton extends AbstractButtonBase implements ClickHandler {
+  
+  private static final String TOOLTIP_TEXT = UIConsts.EMPTY_STRING;
+  
   private TextBox mapsApiKey;
 
   public UpdateGMapsKeyButton(TextBox mapsApiKey) {
-    super("<img src=\"images/green_right_arrow.png\" /> Update");
+    super("<img src=\"images/green_right_arrow.png\" /> Update", TOOLTIP_TEXT);
     this.mapsApiKey = mapsApiKey;
-    addClickHandler(this);
   }
 
   @Override

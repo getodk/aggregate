@@ -1,17 +1,19 @@
 package org.opendatakit.aggregate.client.widgets;
 
 import org.opendatakit.aggregate.client.popups.NewTablesAdminPopup;
+import org.opendatakit.aggregate.constants.common.UIConsts;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.PopupPanel;
 
-public class AddTablesAdmin extends AButtonBase implements ClickHandler {
+public class AddTablesAdmin extends AbstractButtonBase implements ClickHandler {
  
+  private static final String TOOLTIP_TEXT = UIConsts.EMPTY_STRING;
+  
   public AddTablesAdmin() {
-    super("<img src=\"images/green_right_arrow.png\" /> Add User");
-    addClickHandler(this);
+    super("<img src=\"images/green_right_arrow.png\" /> Add User", TOOLTIP_TEXT);
   }
 
   @Override
