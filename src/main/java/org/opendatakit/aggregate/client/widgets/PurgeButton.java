@@ -27,15 +27,17 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.PopupPanel;
 
-public class PurgeButton extends AButtonBase implements ClickHandler {
+public class PurgeButton extends AbstractButtonBase implements ClickHandler {
+
+  private static final String TOOLTIP_TEXT = "Clear the published data";
+  
   private String formId;
   private ExternServSummary externServ;
 
   public PurgeButton(String formId, ExternServSummary externalService) {
-    super("Purge Published Data");
+    super("Purge Published Data", TOOLTIP_TEXT);
     this.formId = formId;
     this.externServ = externalService;
-    addClickHandler(this);
   }
 
   @Override

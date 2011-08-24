@@ -21,14 +21,15 @@ import org.opendatakit.aggregate.client.popups.ExternalServicePopup;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 
-public class ExecutePublishButton extends AButtonBase implements ClickHandler {
+public class ExecutePublishButton extends AbstractButtonBase implements ClickHandler {
  
+  private static final String TOOLTIP_TEXT = "Publish the data";
+  
   private ExternalServicePopup popup;
   
   public ExecutePublishButton(ExternalServicePopup popup) {
-    super("<img src=\"images/green_right_arrow.png\" /> Publish");
+    super("<img src=\"images/green_right_arrow.png\" /> Publish", TOOLTIP_TEXT);
     this.popup = popup;
-    addClickHandler(this);
   }
 
   @Override
@@ -37,8 +38,7 @@ public class ExecutePublishButton extends AButtonBase implements ClickHandler {
     
     popup.createExternalService();
     popup.hide();
-  }
-
+  } 
 }
    
   

@@ -27,8 +27,10 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.PopupPanel;
 
-public class ExecuteDeletePublishButton extends AButtonBase implements ClickHandler {
+public class ExecuteDeletePublishButton extends AbstractButtonBase implements ClickHandler {
  
+  private static final String TOOLTIP_TEXT = "Remove this publisher";
+  
   private ExternServSummary publisher;
   private PopupPanel popup;
   
@@ -36,10 +38,9 @@ public class ExecuteDeletePublishButton extends AButtonBase implements ClickHand
     super("<img src=\"images/green_right_arrow.png\" /> " +
     		(((publisher.getStatus() == OperationalStatus.COMPLETED) ||
     		  (publisher.getStatus() == OperationalStatus.ABANDONED)) ?
-    				 "Remove" : "Cancel and Remove") + " Publisher");
+    				 "Remove" : "Cancel and Remove") + " Publisher", TOOLTIP_TEXT);
     this.publisher = publisher;
     this.popup = popup;
-    addClickHandler(this);
   }
 
   @Override
@@ -70,6 +71,5 @@ public class ExecuteDeletePublishButton extends AButtonBase implements ClickHand
     // Make the call to the services service.
     SecureGWT.getServicesAdminService().deletePublisher(publisher.getUri(), callback);
     popup.hide();
-  }
-
+  }  
 }

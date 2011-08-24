@@ -27,14 +27,15 @@ import org.opendatakit.aggregate.constants.common.UIConsts;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 
-public class CopyFilterGroupButton extends AButtonBase implements ClickHandler {
+public class CopyFilterGroupButton extends AbstractButtonBase implements ClickHandler {
 
+  private static final String TOOLTIP_TEXT = "Save as new filter group";
+  
   private FilterSubTab parentSubTab;
   
   public CopyFilterGroupButton(FilterSubTab parentSubTab) {
-    super("Save As");
+    super("Save As", TOOLTIP_TEXT);
     this.parentSubTab = parentSubTab;
-    addClickHandler(this);
   }
 
   @Override

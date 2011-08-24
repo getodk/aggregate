@@ -35,6 +35,7 @@ import org.opendatakit.aggregate.constants.common.UIConsts;
 
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
@@ -51,7 +52,7 @@ public class FiltersDataPanel extends ScrollPanel {
 
   private SimplePanel metadataPanel;
   private FlexTable filterGroupButtons;
-  private SimplePanel filterHeader;
+  private FlowPanel filterHeader;
   
   private FilterGroup previousGroup;
 
@@ -68,7 +69,7 @@ public class FiltersDataPanel extends ScrollPanel {
     filterGroupButtons = new FlexTable();
     panel.add(filterGroupButtons);
 
-    filterHeader = new SimplePanel();
+    filterHeader = new FlowPanel();
     panel.add(filterHeader);
     
     // create tree
@@ -110,6 +111,10 @@ public class FiltersDataPanel extends ScrollPanel {
       filterGroupButtons.setWidget(0, 1, copyButton);
       filterGroupButtons.setWidget(0, 2, removeButton);
 
+      HTML filterText = new HTML("<h3>Filters Applied</h3>");
+      filterText.getElement().setId("filter_desc_title");
+      filterHeader.add(filterText);
+      
       if (group.getName() != null) {
         if (!group.getName().equals(UIConsts.FILTER_NONE)) {
           copyButton.setEnabled(true);

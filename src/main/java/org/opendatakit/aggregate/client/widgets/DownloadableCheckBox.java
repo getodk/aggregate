@@ -25,17 +25,19 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
 
-public class DownloadableCheckBox extends ACheckBoxBase implements ValueChangeHandler<Boolean> {
+public class DownloadableCheckBox extends AbstractCheckBoxBase implements ValueChangeHandler<Boolean> {
+  
+  private static final String TOOLTIP_TEXT = "Allow or disallow form to be downloaded";
+  
   private String formId;
   
   public DownloadableCheckBox(String formId, Boolean downloadable) {
-    super();
+    super(TOOLTIP_TEXT);
     this.formId = formId;
     setValue(downloadable);
     boolean enabled = AggregateUI.getUI().getUserInfo()
         	.getGrantedAuthorities().contains(GrantedAuthorityName.ROLE_DATA_OWNER);
     setEnabled(enabled);
-    addValueChangeHandler(this);
   }
 
   @Override

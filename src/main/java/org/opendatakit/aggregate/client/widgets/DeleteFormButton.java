@@ -25,18 +25,19 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.PopupPanel;
 
-public class DeleteFormButton extends AButtonBase implements ClickHandler {
- 
+public class DeleteFormButton extends AbstractButtonBase implements ClickHandler {
+
+  private static final String TOOLTIP_TEXT = "Remove the form";
+  
   private String formId;
 
   public DeleteFormButton(String formId) {
-    super("<img src=\"images/red_x.png\" /> Delete");
+    super("<img src=\"images/red_x.png\" /> Delete", TOOLTIP_TEXT);
     this.formId = formId;
     addStyleDependentName("negative");
     boolean enabled = AggregateUI.getUI().getUserInfo()
 	.getGrantedAuthorities().contains(GrantedAuthorityName.ROLE_DATA_OWNER);
     setEnabled(enabled);
-    addClickHandler(this);
   }
 
   @Override
@@ -54,5 +55,4 @@ public class DeleteFormButton extends AButtonBase implements ClickHandler {
         }
      });
   }
-
 }

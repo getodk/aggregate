@@ -7,11 +7,12 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.PopupPanel;
 
-public class AddTablesAdmin extends AButtonBase implements ClickHandler {
+public class AddTablesAdmin extends AbstractButtonBase implements ClickHandler {
  
+  private static final String TOOLTIP_TEXT = "Add administrative user";
+  
   public AddTablesAdmin() {
-    super("<img src=\"images/green_right_arrow.png\" /> Add User");
-    addClickHandler(this);
+    super("<img src=\"images/green_right_arrow.png\" /> Add User", TOOLTIP_TEXT);
   }
 
   @Override

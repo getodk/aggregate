@@ -21,14 +21,15 @@ import org.opendatakit.aggregate.client.popups.ExportPopup;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 
-public class CreateExportButton extends AButtonBase implements ClickHandler {
+public class CreateExportButton extends AbstractButtonBase implements ClickHandler {
 
+  private static final String TOOLTIP_TEXT = "Create export file";
+  
   private ExportPopup popup;
 
   public CreateExportButton(ExportPopup exportPopup) {
-    super("<img src=\"images/green_right_arrow.png\" /> Export");
+    super("<img src=\"images/green_right_arrow.png\" /> Export", TOOLTIP_TEXT);
     this.popup = exportPopup;
-    addClickHandler(this);
   }
 
   @Override

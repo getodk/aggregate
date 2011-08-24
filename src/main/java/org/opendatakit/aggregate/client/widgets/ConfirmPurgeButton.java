@@ -26,17 +26,19 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.PopupPanel;
 
-public class ConfirmPurgeButton extends AButtonBase implements ClickHandler {
+public class ConfirmPurgeButton extends AbstractButtonBase implements ClickHandler {
+  
+  private static final String TOOLTIP_TEXT = "Delete published data";
+  
   private String uri;
   private PopupPanel popup;
   private Date earliest;
 
   public ConfirmPurgeButton(String uri, Date earliest, PopupPanel popup) {
-    super("<img src=\"images/green_right_arrow.png\" /> Purge Data");
+    super("<img src=\"images/green_right_arrow.png\" /> Purge Data", TOOLTIP_TEXT);
     this.uri = uri;
     this.popup = popup;
     this.earliest = earliest;
-    addClickHandler(this);
   }
 
   @Override
@@ -59,5 +61,4 @@ public class ConfirmPurgeButton extends AButtonBase implements ClickHandler {
     });
     popup.hide();
   }
-
 }

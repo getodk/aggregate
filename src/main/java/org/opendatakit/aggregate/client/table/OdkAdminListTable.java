@@ -1,7 +1,7 @@
 package org.opendatakit.aggregate.client.table;
 
 import org.opendatakit.aggregate.client.preferences.OdkTablesAdmin;
-import org.opendatakit.aggregate.client.widgets.TablesAdminDelete;
+import org.opendatakit.aggregate.client.widgets.TablesAdminDeleteButton;
 
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
@@ -41,7 +41,7 @@ public class OdkAdminListTable extends FlexTable {
     for (int i = 0; i < adminList.length; i++) {
       OdkTablesAdmin admin = adminList[i];
       int j = i + 1;
-      setWidget(j, DELETE_COLUMN, new TablesAdminDelete(admin.getAggregateUid()));
+      setWidget(j, DELETE_COLUMN, new TablesAdminDeleteButton(admin.getAggregateUid()));
       setWidget(j, USER_COLUMN, new HTML(admin.getName()));
       setWidget(j, ID_COLUMN, new HTML(admin.getExternalUid()));
 

@@ -22,14 +22,15 @@ import org.opendatakit.aggregate.client.table.FormNFilterSelectionTable;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 
-public class FetchFormButton extends AButtonBase implements ClickHandler {
+public class FetchFormButton extends AbstractButtonBase implements ClickHandler {
+
+  private static final String TOOLTIP_TEXT = "Display the form and filter";
+  
   private FormNFilterSelectionTable formNFilter;
 
   public FetchFormButton(FormNFilterSelectionTable formNFilter) {
-    super("Fetch Form with Filter");
+    super("Fetch Form with Filter", TOOLTIP_TEXT);
     this.formNFilter = formNFilter;
-    
-    addClickHandler(this);
   }
 
   @Override
@@ -38,5 +39,4 @@ public class FetchFormButton extends AButtonBase implements ClickHandler {
     formNFilter.fetchClicked();
     AggregateUI.getUI().getTimer().refreshNow();
   }
-
 }
