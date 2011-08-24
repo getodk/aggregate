@@ -19,8 +19,8 @@ package org.opendatakit.common.web.client;
 import java.util.ArrayList;
 import java.util.Comparator;
 
-import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.cell.client.Cell.Context;
+import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.user.cellview.client.Column;

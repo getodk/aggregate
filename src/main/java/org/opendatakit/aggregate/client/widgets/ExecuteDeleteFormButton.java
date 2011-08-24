@@ -25,16 +25,17 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.PopupPanel;
 
-public class ExecuteDeleteFormButton extends AButtonBase implements ClickHandler {
+public class ExecuteDeleteFormButton extends AbstractButtonBase implements ClickHandler {
  
+  private static final String TOOLTIP_TEXT = "Delete data and form";
+  
   private String formId;
   private PopupPanel popup;
   
   public ExecuteDeleteFormButton(String formId, PopupPanel popup) {
-    super("<img src=\"images/green_right_arrow.png\" /> Delete Data and Form");
+    super("<img src=\"images/green_right_arrow.png\" /> Delete Data and Form", TOOLTIP_TEXT);
     this.formId = formId;
     this.popup = popup;
-    addClickHandler(this);
   }
 
   @Override
@@ -66,6 +67,5 @@ public class ExecuteDeleteFormButton extends AButtonBase implements ClickHandler
     // Make the call to the form service.
     SecureGWT.getFormAdminService().deleteForm(formId, callback);
     popup.hide();
-  }
-
+  }  
 }

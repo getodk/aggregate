@@ -10,14 +10,15 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
-public class ExecuteNewTablesUser extends AButtonBase implements ClickHandler {
+public class ExecuteNewTablesUser extends AbstractButtonBase implements ClickHandler {
 
+  private static final String TOOLTIP_TEXT = "Create a new user";
+  
   private NewTablesAdminPopup popup;
 
   public ExecuteNewTablesUser(NewTablesAdminPopup popup) {
-    super("<img src=\"images/green_right_arrow.png\" /> Create User");
+    super("<img src=\"images/green_right_arrow.png\" /> Create User", TOOLTIP_TEXT);
     this.popup = popup;
-    addClickHandler(this);
   }
 
   @Override
@@ -48,6 +49,5 @@ public class ExecuteNewTablesUser extends AButtonBase implements ClickHandler {
     OdkTablesAdmin admin = new OdkTablesAdmin(popup.getName(), popup.getExternalUid());
     SecureGWT.getOdkTablesAdminService().addAdmin(admin, callback);
     popup.hide();
-  }
-
+  } 
 }

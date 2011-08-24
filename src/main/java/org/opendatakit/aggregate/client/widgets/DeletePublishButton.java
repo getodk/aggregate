@@ -30,15 +30,16 @@ import com.google.gwt.user.client.ui.PopupPanel;
  * @author mitchellsundt@gmail.com
  *
  */
-public class DeletePublishButton extends AButtonBase implements ClickHandler {
+public class DeletePublishButton extends AbstractButtonBase implements ClickHandler {
  
+  private static final String TOOLTIP_TEXT = "Remove published data";
+  
   private ExternServSummary publisher;
 
   public DeletePublishButton(ExternServSummary publisher) {
-    super("<img src=\"images/red_x.png\" /> Delete");
+    super("<img src=\"images/red_x.png\" /> Delete", TOOLTIP_TEXT);
     this.publisher = publisher;
     addStyleDependentName("negative");
-    addClickHandler(this);
   }
 
   @Override
@@ -56,5 +57,4 @@ public class DeletePublishButton extends AButtonBase implements ClickHandler {
         }
      });
   }
-
 }

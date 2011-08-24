@@ -24,18 +24,18 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
-public class AcceptSubmissionCheckBox extends ACheckBoxBase implements ValueChangeHandler<Boolean> {
+public class AcceptSubmissionCheckBox extends AbstractCheckBoxBase implements ValueChangeHandler<Boolean> {
   
   private String formId;
+  private static final String TOOLTIP_TEXT = "Allow or disallow form to accept submissions";
 
   public AcceptSubmissionCheckBox(String formId, Boolean accept) {
-    super();
+    super(TOOLTIP_TEXT);
     this.formId = formId;
     setValue(accept);
     boolean enabled = AggregateUI.getUI().getUserInfo()
 	.getGrantedAuthorities().contains(GrantedAuthorityName.ROLE_DATA_OWNER);
     setEnabled(enabled);
-    addValueChangeHandler(this);
   }
 
   @Override

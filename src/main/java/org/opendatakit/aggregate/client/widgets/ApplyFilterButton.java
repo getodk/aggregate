@@ -33,15 +33,16 @@ import org.opendatakit.aggregate.constants.common.Visibility;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 
-public class ApplyFilterButton extends AButtonBase implements ClickHandler {
+public class ApplyFilterButton extends AbstractButtonBase implements ClickHandler {
 
+  private static final String TOOLTIP_TEXT = "Use the created filter";
+  
   private FilterPopup popup;
 
   public ApplyFilterButton(FilterPopup popup) {
-    super("<img src=\"images/green_check.png\" /> Apply Filter");
+    super("<img src=\"images/green_check.png\" /> Apply Filter", TOOLTIP_TEXT);
     this.popup = popup;
     addStyleDependentName("positive");
-    addClickHandler(this);
   }
 
   @Override
@@ -72,5 +73,4 @@ public class ApplyFilterButton extends AButtonBase implements ClickHandler {
     
     popup.hide();
   }
-
 }

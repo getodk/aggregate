@@ -24,13 +24,15 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.PopupPanel;
 
-public class VisualizationButton extends AButtonBase implements ClickHandler {
+public class VisualizationButton extends AbstractButtonBase implements ClickHandler {
+  
+  private static final String TOOLTIP_TEXT = "Visualize the data";
+  
   private FilterSubTab filterSubTab;
   
   public VisualizationButton(FilterSubTab filterSubTab) {
-    super("<img src=\"images/bar_chart.png\" /> Visualize");
+    super("<img src=\"images/bar_chart.png\" /> Visualize", TOOLTIP_TEXT);
     this.filterSubTab = filterSubTab;
-    addClickHandler(this);
   }
 
   public void onClick(ClickEvent event) {

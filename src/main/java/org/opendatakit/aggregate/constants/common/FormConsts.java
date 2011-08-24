@@ -1,8 +1,7 @@
 package org.opendatakit.aggregate.constants.common;
 
-import java.io.Serializable;
 
-public enum FormConsts implements Serializable {
+public enum FormConsts implements HelpSliderConsts{
 	NEW("New Form", 
 			"1.  Form Definition - required.  Please choose the .xml file that will be used.<br>" +
 	"2.  Media File(s) - optional.  Choose the appropriate media files for the form."),

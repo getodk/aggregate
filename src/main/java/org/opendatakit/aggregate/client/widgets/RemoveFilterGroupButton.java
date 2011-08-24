@@ -25,38 +25,39 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
-public class RemoveFilterGroupButton extends AButtonBase implements ClickHandler {
+public class RemoveFilterGroupButton extends AbstractButtonBase implements ClickHandler {
 
-	private FilterSubTab parentSubTab;
+  private static final String TOOLTIP_TEXT = "Delete filter group";
 
-	public RemoveFilterGroupButton(FilterSubTab parentSubTab) {
-		super("Delete");
-		this.parentSubTab = parentSubTab;
-		addStyleDependentName("negative");
-		addClickHandler(this);
-	}
+  private FilterSubTab parentSubTab;
 
-	@Override
-	public void onClick(ClickEvent event) {
-		super.onClick(event);
+  public RemoveFilterGroupButton(FilterSubTab parentSubTab) {
+    super("Delete", TOOLTIP_TEXT);
+    this.parentSubTab = parentSubTab;
+    addStyleDependentName("negative");
+  }
 
-		final FilterGroup filterGroup = parentSubTab.getDisplayedFilterGroup();
+  @Override
+  public void onClick(ClickEvent event) {
+    super.onClick(event);
 
-		// Set up the callback object.
-		AsyncCallback<Boolean> callback = new AsyncCallback<Boolean>() {
-			public void onFailure(Throwable caught) {
-				AggregateUI.getUI().reportError(caught);
-			}
+    final FilterGroup filterGroup = parentSubTab.getDisplayedFilterGroup();
 
-			@Override
-			public void onSuccess(Boolean result) {
-				AggregateUI.getUI().clearError();
-				parentSubTab.removeFilterGroupWithinForm();
-			}
-		};
+    // Set up the callback object.
+    AsyncCallback<Boolean> callback = new AsyncCallback<Boolean>() {
+      public void onFailure(Throwable caught) {
+        AggregateUI.getUI().reportError(caught);
+      }
 
-		// Save the filter on the server
-		SecureGWT.getFilterService().deleteFilterGroup(filterGroup, callback);
+      @Override
+      public void onSuccess(Boolean result) {
+        AggregateUI.getUI().clearError();
+        parentSubTab.removeFilterGroupWithinForm();
+      }
+    };
 
-	}
+    // Save the filter on the server
+    SecureGWT.getFilterService().deleteFilterGroup(filterGroup, callback);
+
+  }
 }

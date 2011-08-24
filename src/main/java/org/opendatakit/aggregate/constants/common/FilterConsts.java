@@ -1,8 +1,7 @@
 package org.opendatakit.aggregate.constants.common;
 
-import java.io.Serializable;
 
-public enum FilterConsts implements Serializable {
+public enum FilterConsts implements HelpSliderConsts {
 	FETCH("Fetch Form with Filter", "This allows you to view the data for a form, " +
 			"or the part of the data you wish to view using a filter.<br>" +
 			"1.  Use the left drop down list to select a form.<br>" +
