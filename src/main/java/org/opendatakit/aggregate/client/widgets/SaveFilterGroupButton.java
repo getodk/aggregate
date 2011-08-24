@@ -31,7 +31,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.ListBox;
 
-public class SaveFilterGroupButton extends AButtonBase implements ClickHandler {
+public class SaveFilterGroupButton extends AbstractButtonBase implements ClickHandler {
 
   private static final String EMPTY_STRING = "";
   private static final String ERROR_NO_FILTERS = "You need at least one filter to save a group.";
@@ -39,13 +39,15 @@ public class SaveFilterGroupButton extends AButtonBase implements ClickHandler {
   private static final String PROMPT_FOR_NAME_TXT = "Please enter a name for this group";
   private static final String REPROMPT_FOR_NAME_TXT = "That group already exists. Please enter a new name";
 
+  
+  private static final String TOOLTIP_TEXT = UIConsts.EMPTY_STRING;
+  
   private FilterSubTab parentSubTab;
 
   public SaveFilterGroupButton(FilterSubTab parentSubTab) {
-    super("Save");
+    super("Save", TOOLTIP_TEXT);
     this.parentSubTab = parentSubTab;
     addStyleDependentName("positive");
-    addClickHandler(this);
   }
 
   @Override

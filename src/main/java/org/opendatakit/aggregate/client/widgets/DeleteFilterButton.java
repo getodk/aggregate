@@ -18,21 +18,23 @@ package org.opendatakit.aggregate.client.widgets;
 
 import org.opendatakit.aggregate.client.FilterSubTab;
 import org.opendatakit.aggregate.client.filter.Filter;
+import org.opendatakit.aggregate.constants.common.UIConsts;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 
-public class DeleteFilterButton extends AButtonBase implements ClickHandler {
+public class DeleteFilterButton extends AbstractButtonBase implements ClickHandler {
 
+  private static final String TOOLTIP_TEXT = UIConsts.EMPTY_STRING;
+  
   private FilterSubTab parentSubTab;
   private Filter remove;
 
   public DeleteFilterButton(Filter remove, FilterSubTab parentSubTab) {
-    super("<img src=\"images/red_x.png\" />");
+    super("<img src=\"images/red_x.png\" />", TOOLTIP_TEXT);
     this.remove = remove;
     this.parentSubTab = parentSubTab;
     addStyleDependentName("negative");
-    addClickHandler(this);
   }
 
   @Override
@@ -41,5 +43,4 @@ public class DeleteFilterButton extends AButtonBase implements ClickHandler {
     parentSubTab.getDisplayedFilterGroup().removeFilter(remove);
     parentSubTab.update();
   }
-
 }

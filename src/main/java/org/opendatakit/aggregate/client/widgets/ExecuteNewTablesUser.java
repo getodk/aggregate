@@ -4,20 +4,22 @@ import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.SecureGWT;
 import org.opendatakit.aggregate.client.popups.NewTablesAdminPopup;
 import org.opendatakit.aggregate.client.preferences.OdkTablesAdmin;
+import org.opendatakit.aggregate.constants.common.UIConsts;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
-public class ExecuteNewTablesUser extends AButtonBase implements ClickHandler {
+public class ExecuteNewTablesUser extends AbstractButtonBase implements ClickHandler {
 
+  private static final String TOOLTIP_TEXT = UIConsts.EMPTY_STRING;
+  
   private NewTablesAdminPopup popup;
 
   public ExecuteNewTablesUser(NewTablesAdminPopup popup) {
-    super("<img src=\"images/green_right_arrow.png\" /> Create User");
+    super("<img src=\"images/green_right_arrow.png\" /> Create User", TOOLTIP_TEXT);
     this.popup = popup;
-    addClickHandler(this);
   }
 
   @Override
@@ -48,6 +50,5 @@ public class ExecuteNewTablesUser extends AButtonBase implements ClickHandler {
     OdkTablesAdmin admin = new OdkTablesAdmin(popup.getName(), popup.getExternalUid());
     SecureGWT.getOdkTablesAdminService().addAdmin(admin, callback);
     popup.hide();
-  }
-
+  } 
 }

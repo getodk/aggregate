@@ -21,6 +21,7 @@ import java.security.NoSuchAlgorithmException;
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.permissions.CredentialsInfoBuilder;
 import org.opendatakit.aggregate.client.popups.ChangePasswordPopup;
+import org.opendatakit.aggregate.constants.common.UIConsts;
 import org.opendatakit.common.security.client.CredentialsInfo;
 import org.opendatakit.common.security.client.RealmSecurityInfo;
 import org.opendatakit.common.security.client.UserSecurityInfo;
@@ -40,78 +41,75 @@ import com.google.gwt.user.client.ui.PasswordTextBox;
  * @author mitchellsundt@gmail.com
  * 
  */
-public class ExecuteChangePasswordButton extends AButtonBase implements
-		ClickHandler {
+public class ExecuteChangePasswordButton extends AbstractButtonBase implements ClickHandler {
 
-	private static int jsonRequestId = 0;
+  private static final String TOOLTIP_TEXT = UIConsts.EMPTY_STRING;
 
-	private ChangePasswordPopup popup;
-	private String baseUrl;
+  private static int jsonRequestId = 0;
 
-	public ExecuteChangePasswordButton(ChangePasswordPopup popup) {
-		super("<img src=\"images/green_right_arrow.png\" /> Change Password");
-		this.popup = popup;
-		addClickHandler(this);
-	}
+  private ChangePasswordPopup popup;
+  private String baseUrl;
 
-	@Override
-	public void onClick(ClickEvent event) {
-		super.onClick(event);
-		PasswordTextBox password1 = popup.getPassword1();
-		PasswordTextBox password2 = popup.getPassword2();
-		UserSecurityInfo userInfo = popup.getUser();
-		RealmSecurityInfo realmInfo = AggregateUI.getUI().getRealmInfo();
+  public ExecuteChangePasswordButton(ChangePasswordPopup popup) {
+    super("<img src=\"images/green_right_arrow.png\" /> Change Password", TOOLTIP_TEXT);
+    this.popup = popup;
+  }
 
-		String pw1 = password1.getText();
-		String pw2 = password2.getText();
-		if (pw1 == null || pw2 == null || pw1.length() == 0) {
-			Window.alert("Password cannot be blank");
-		} else if (pw1.equals(pw2)) {
-			if (realmInfo == null || userInfo == null) {
-				Window.alert("Unable to obtain required information from server");
-			} else {
-				CredentialsInfo credential;
-				try {
-					credential = CredentialsInfoBuilder.build(
-							userInfo.getUsername(), realmInfo, pw1);
-				} catch (NoSuchAlgorithmException e) {
-					Window.alert("Unable to build credentials hash");
-					return;
-				}
+  @Override
+  public void onClick(ClickEvent event) {
+    super.onClick(event);
+    PasswordTextBox password1 = popup.getPassword1();
+    PasswordTextBox password2 = popup.getPassword2();
+    UserSecurityInfo userInfo = popup.getUser();
+    RealmSecurityInfo realmInfo = AggregateUI.getUI().getRealmInfo();
 
-				baseUrl = realmInfo.getChangeUserPasswordURL();
+    String pw1 = password1.getText();
+    String pw2 = password2.getText();
+    if (pw1 == null || pw2 == null || pw1.length() == 0) {
+      Window.alert("Password cannot be blank");
+    } else if (pw1.equals(pw2)) {
+      if (realmInfo == null || userInfo == null) {
+        Window.alert("Unable to obtain required information from server");
+      } else {
+        CredentialsInfo credential;
+        try {
+          credential = CredentialsInfoBuilder.build(userInfo.getUsername(), realmInfo, pw1);
+        } catch (NoSuchAlgorithmException e) {
+          Window.alert("Unable to build credentials hash");
+          return;
+        }
 
-				// Construct a JSOP request
-				String parameters = credential.getRequestParameters();
-				String url = baseUrl + "?" + parameters + "&callback=";
-				getJson(jsonRequestId++, url, this);
-			}
-		} else {
-			Window.alert("The passwords do not match. Please retype the password.");
-		}
-	}
+        baseUrl = realmInfo.getChangeUserPasswordURL();
 
-	public void handleJsonResponse(String username, String status) {
-		if (username == null) {
-			Window.alert("JSON change-password request to " + baseUrl + " failed");
-		} else {
-			// process response...
-			if ( !( status != null && "OK".equals(status) ) ) {
-				Window.alert("Change password request " + 
-						((username == null) ? "" : ("for " + username + " ")) + "failed.\n" +
-						"JSON change-password request to\n   " + baseUrl + "\nreturned: " + status);
-			}
-		}
-		popup.hide();
-	}
+        // Construct a JSOP request
+        String parameters = credential.getRequestParameters();
+        String url = baseUrl + "?" + parameters + "&callback=";
+        getJson(jsonRequestId++, url, this);
+      }
+    } else {
+      Window.alert("The passwords do not match. Please retype the password.");
+    }
+  }
 
-	public void onError(String echo, String error) {
-		Window.alert("Unable to change passwored for " + echo + " error: "
-				+ error);
-	}
+  public void handleJsonResponse(String username, String status) {
+    if (username == null) {
+      Window.alert("JSON change-password request to " + baseUrl + " failed");
+    } else {
+      // process response...
+      if (!(status != null && "OK".equals(status))) {
+        Window.alert("Change password request "
+            + ((username == null) ? "" : ("for " + username + " ")) + "failed.\n"
+            + "JSON change-password request to\n   " + baseUrl + "\nreturned: " + status);
+      }
+    }
+    popup.hide();
+  }
 
-	public native static void getJson(int requestId, String url,
-			ExecuteChangePasswordButton handler) /*-{
+  public void onError(String echo, String error) {
+    Window.alert("Unable to change passwored for " + echo + " error: " + error);
+  }
+
+  public native static void getJson(int requestId, String url, ExecuteChangePasswordButton handler) /*-{
 		var callback = "callback" + requestId;
 
 		var script = document.createElement("script");
@@ -137,5 +135,5 @@ public class ExecuteChangePasswordButton extends AButtonBase implements
 				}, 1000);
 
 		document.body.appendChild(script);
-	}-*/;
+  }-*/;
 }

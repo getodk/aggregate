@@ -2,6 +2,7 @@ package org.opendatakit.aggregate.client.widgets;
 
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.SecureGWT;
+import org.opendatakit.aggregate.constants.common.UIConsts;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -9,16 +10,17 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.PopupPanel;
 
-public class ExecuteDeleteTablesAdmin extends AButtonBase implements ClickHandler {
+public class ExecuteDeleteTablesAdmin extends AbstractButtonBase implements ClickHandler {
  
+  private static final String TOOLTIP_TEXT = UIConsts.EMPTY_STRING;
+  
   private String aggregateUid;
   private PopupPanel popup;
   
   public ExecuteDeleteTablesAdmin(String aggregateUid, PopupPanel popup) {
-    super("<img src=\"images/green_right_arrow.png\" /> Delete User");
+    super("<img src=\"images/green_right_arrow.png\" /> Delete User", TOOLTIP_TEXT);
     this.aggregateUid = aggregateUid;
     this.popup = popup;
-    addClickHandler(this);
   }
 
   @Override
@@ -48,5 +50,4 @@ public class ExecuteDeleteTablesAdmin extends AButtonBase implements ClickHandle
     SecureGWT.getOdkTablesAdminService().deleteAdmin(aggregateUid, callback);
     popup.hide();
   }
-
 }
