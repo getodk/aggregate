@@ -39,7 +39,6 @@ import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.InvocationException;
 import com.google.gwt.user.client.ui.DecoratedTabPanel;
-import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -56,8 +55,7 @@ public class AggregateUI implements EntryPoint {
 	
    private VerticalPanel wrappingLayoutPanel;	
 	private HorizontalPanel layoutPanel;
-	private DisclosurePanel helpPanel;
-	private Tree helpTree;
+	private VerticalPanel helpPanel;
 	private TreeItem rootItem;
 
 	private NavLinkBar settingsBar;
@@ -111,8 +109,7 @@ public class AggregateUI implements EntryPoint {
 		wrappingLayoutPanel = new VerticalPanel();
 		errorMsgLabel = new Label();
 		layoutPanel = new HorizontalPanel();
-		helpPanel = new DisclosurePanel("Help");
-		helpPanel.setOpen(false);
+		helpPanel = new VerticalPanel();
 
 		mainNav = new DecoratedTabPanel();
 		mainNav.addStyleName("mainNav");
@@ -120,7 +117,7 @@ public class AggregateUI implements EntryPoint {
 		settingsBar = new NavLinkBar();
 		
 		// Create help panel
-		helpTree = new Tree();
+		Tree helpTree = new Tree();
 		rootItem = new TreeItem();
 		helpTree.addItem(rootItem);
 
@@ -132,7 +129,7 @@ public class AggregateUI implements EntryPoint {
 		errorMsgLabel.setVisible(false);
 		wrappingLayoutPanel.add(errorMsgLabel);
 		wrappingLayoutPanel.add(layoutPanel);
-		wrappingLayoutPanel.add(helpPanel);
+
 
 		// add to layout
 		layoutPanel.add(mainNav);
@@ -146,9 +143,6 @@ public class AggregateUI implements EntryPoint {
 
 	private void addTabToDatastructures(AggregateTabBase tabPanel, Tabs tab) {
 		int insertIndex = tabPosition.size();
-		// close help panel
-		helpPanel.setOpen(false);
-
 
 		// add tabPanel into position
 		tabPosition.add(insertIndex, tab);
@@ -243,12 +237,12 @@ public class AggregateUI implements EntryPoint {
 			// Select the correct menu item based on url hash.
 			int selected = 0;
 			String mainMenu = hash.get(UrlHash.MAIN_MENU);
-			for (int i = 0; i < tabPosition.size(); i++) {
+			for (int i = 0; i < tabPosition.size() && i < mainNav.getWidgetCount() ; i++) {
 				if (mainMenu.equals(tabPosition.get(i).getHashString())) {
 					selected = i;
 				}
 			}
-			mainNav.selectTab(selected);
+			mainNav.selectTab(selected); 
 
 		}
 
@@ -479,6 +473,21 @@ public class AggregateUI implements EntryPoint {
        }
       }
 	}
+	
+	  public void displayHelpPanel() {
+	    wrappingLayoutPanel.add(helpPanel);
+	    contentLoaded();
+	  }
+
+	  public void hideHelpPanel() {
+	    wrappingLayoutPanel.remove(helpPanel);
+	    contentLoaded();
+	  }
+	  
+	  public Boolean displayingHelpBalloons() {
+	    return settingsBar.showHelpBalloons();
+	  }
+	
 
 	/***********************************
 	 ****** ERROR STUFF ******

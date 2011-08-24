@@ -21,21 +21,24 @@ import java.util.Date;
 import org.opendatakit.aggregate.client.externalserv.ExternServSummary;
 import org.opendatakit.aggregate.client.popups.ConfirmPurgePopup;
 import org.opendatakit.aggregate.constants.common.ExternalServicePublicationOption;
+import org.opendatakit.aggregate.constants.common.UIConsts;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.PopupPanel;
 
-public class PurgeButton extends AButtonBase implements ClickHandler {
+public class PurgeButton extends AbstractButtonBase implements ClickHandler {
+
+  private static final String TOOLTIP_TEXT = UIConsts.EMPTY_STRING;
+  
   private String formId;
   private ExternServSummary externServ;
 
   public PurgeButton(String formId, ExternServSummary externalService) {
-    super("Purge Published Data");
+    super("Purge Published Data", TOOLTIP_TEXT);
     this.formId = formId;
     this.externServ = externalService;
-    addClickHandler(this);
   }
 
   @Override

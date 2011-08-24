@@ -2,23 +2,25 @@ package org.opendatakit.aggregate.client.widgets;
 
 import org.opendatakit.aggregate.client.FilterSubTab;
 import org.opendatakit.aggregate.client.filter.FilterGroup;
+import org.opendatakit.aggregate.constants.common.UIConsts;
 
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 
-public class MetadataCheckBox extends ACheckBoxBase implements ValueChangeHandler<Boolean> {
+public class MetadataCheckBox extends AbstractCheckBoxBase implements ValueChangeHandler<Boolean> {
+  
+  private static final String TOOLTIP_TEXT = UIConsts.EMPTY_STRING;
   
   private FilterSubTab filterSubTab;
   
   public MetadataCheckBox(FilterSubTab filterSubTab) {
-    super("Display Metadata");
+    super("Display Metadata", TOOLTIP_TEXT);
     this.filterSubTab = filterSubTab;
     
     FilterGroup filterGroup = filterSubTab.getDisplayedFilterGroup();
     
     setValue(filterGroup.getIncludeMetadata());
     setEnabled(true);
-    addValueChangeHandler(this);
   }
 
   @Override

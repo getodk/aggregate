@@ -26,17 +26,17 @@ import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.PopupPanel;
 
-public class ServletPopupButton extends AButtonBase implements ClickHandler {
+public class ServletPopupButton extends AbstractButtonBase implements ClickHandler {
+  
   private String url;
   private String title;
   private FormsSubTab basePanel;
 
-  public ServletPopupButton(String buttonText, String title, String url, FormsSubTab basePanel) {
-    super(buttonText);
+  public ServletPopupButton(String buttonText, String title, String url, FormsSubTab basePanel, String tooltipText) {
+    super(buttonText, tooltipText);
     this.title = title;
     this.url = url;
     this.basePanel = basePanel;
-    addClickHandler(this);
   }
 
   @Override

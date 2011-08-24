@@ -18,6 +18,7 @@ package org.opendatakit.aggregate.client.widgets;
 
 import org.opendatakit.aggregate.client.externalserv.ExternServSummary;
 import org.opendatakit.aggregate.client.popups.ConfirmPublishDeletePopup;
+import org.opendatakit.aggregate.constants.common.UIConsts;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -30,15 +31,16 @@ import com.google.gwt.user.client.ui.PopupPanel;
  * @author mitchellsundt@gmail.com
  *
  */
-public class DeletePublishButton extends AButtonBase implements ClickHandler {
+public class DeletePublishButton extends AbstractButtonBase implements ClickHandler {
  
+  private static final String TOOLTIP_TEXT = UIConsts.EMPTY_STRING;
+  
   private ExternServSummary publisher;
 
   public DeletePublishButton(ExternServSummary publisher) {
-    super("<img src=\"images/red_x.png\" /> Delete");
+    super("<img src=\"images/red_x.png\" /> Delete", TOOLTIP_TEXT);
     this.publisher = publisher;
     addStyleDependentName("negative");
-    addClickHandler(this);
   }
 
   @Override
@@ -56,5 +58,4 @@ public class DeletePublishButton extends AButtonBase implements ClickHandler {
         }
      });
   }
-
 }

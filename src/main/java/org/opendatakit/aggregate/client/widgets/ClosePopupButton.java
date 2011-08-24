@@ -20,15 +20,17 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.PopupPanel;
 
-public class ClosePopupButton extends AButtonBase implements ClickHandler {
+public class ClosePopupButton extends AbstractButtonBase implements ClickHandler {
+
+  private static final String TOOLTIP_TEXT = "Close";
+  
   private PopupPanel popup;
 
   public ClosePopupButton(PopupPanel popup) {
-    super("<img src=\"images/red_x.png\" />");
+    super("<img src=\"images/red_x.png\" />", TOOLTIP_TEXT);
     this.popup = popup;
     addStyleDependentName("close");
     addStyleDependentName("negative");
-    addClickHandler(this);
   }
 
   @Override
@@ -36,5 +38,4 @@ public class ClosePopupButton extends AButtonBase implements ClickHandler {
     super.onClick(event);
     popup.hide();
   }
-
 }
