@@ -84,7 +84,7 @@ public class KmlGeneratorTaskServlet extends ServletUtilBase {
     FormElementModel geopointField = null;
     FormElementModel imageField = null;
     try {
-      form = Form.retrieveForm(formId, cc);
+      form = Form.retrieveFormByFormId(formId, cc);
 
       if (titleFieldName != null) {
         FormElementKey titleKey = new FormElementKey(titleFieldName);

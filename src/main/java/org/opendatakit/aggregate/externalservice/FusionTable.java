@@ -155,7 +155,7 @@ public class FusionTable extends AbstractExternalService implements ExternalServ
 
   public FusionTable(FormServiceCursor fsc, CallingContext cc) throws ODKEntityNotFoundException,
       ODKDatastoreException, ODKFormNotFoundException {
-    this(Form.retrieveForm(fsc.getFormId(), cc), retrieveFTPT(fsc, cc), cc);
+    this(Form.retrieveFormByFormId(fsc.getFormId(), cc), retrieveFTPT(fsc, cc), cc);
     this.fsc = fsc;
     repeatElementTableIds.addAll(FusionTableRepeatParameterTable.getRepeatGroupAssociations(
     								objectEntity.getUri(), cc));

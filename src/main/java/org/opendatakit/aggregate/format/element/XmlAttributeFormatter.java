@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.TimeZone;
 
 import org.apache.commons.lang.StringEscapeUtils;
+import org.opendatakit.aggregate.constants.ParserConsts;
 import org.opendatakit.aggregate.constants.format.FormatConsts;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.format.Row;
@@ -54,15 +55,17 @@ public class XmlAttributeFormatter implements ElementFormatter {
 	if ( m.isMetadata() ) {
 		switch( m.getType()) {
 		case META_MODEL_VERSION:
-			return "version";
+			return ParserConsts.MODEL_VERSION_ATTRIBUTE_NAME;
 		case META_UI_VERSION:
-			return "uiVersion";
+			return ParserConsts.UI_VERSION_ATTRIBUTE_NAME;
 		case META_INSTANCE_ID:
-			return "instanceID";
+			return ParserConsts.INSTANCE_ID_ATTRIBUTE_NAME;
 		case META_SUBMISSION_DATE:
-			return "submissionDate";
+			return ParserConsts.SUBMISSION_DATE_ATTRIBUTE_NAME;
 		case META_IS_COMPLETE:
-			return "isComplete";
+			return ParserConsts.IS_COMPLETE_ATTRIBUTE_NAME;
+		case META_DATE_MARKED_AS_COMPLETE:
+			return ParserConsts.MARKED_AS_COMPLETE_DATE_ATTRIBUTE_NAME;
 		default:
 			throw new IllegalStateException("Unrecognized metadata");
 		}

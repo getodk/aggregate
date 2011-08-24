@@ -22,6 +22,8 @@ import java.util.List;
 import org.opendatakit.aggregate.client.filter.Filter;
 import org.opendatakit.aggregate.client.filter.FilterGroup;
 import org.opendatakit.aggregate.constants.common.UIConsts;
+import org.opendatakit.aggregate.datamodel.FormDataModel;
+import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.DataField.IndexType;
@@ -46,9 +48,9 @@ public class SubmissionFilterGroup extends CommonFieldsBase {
   private static final String TABLE_NAME = "_filter_group";
 
   private static final DataField FORM_ID_PROPERTY = new DataField("FORM_ID",
-      DataField.DataType.STRING, true, PersistConsts.GUARANTEED_SEARCHABLE_LEN);
+      DataField.DataType.STRING, true, Form.MAX_FORM_ID_LENGTH);
   private static final DataField NAME_PROPERTY = new DataField("NAME", DataField.DataType.STRING,
-      true, PersistConsts.GUARANTEED_SEARCHABLE_LEN);
+      true, FormDataModel.MAX_ELEMENT_NAME_LENGTH);
   private static final DataField URI_USER_PROPERTY = new DataField("URI_USER",
       DataField.DataType.URI, false, PersistConsts.URI_STRING_LEN).setIndexable(IndexType.HASH);
   private static final DataField IS_PUBLIC = new DataField("IS_PUBLIC", DataField.DataType.BOOLEAN,

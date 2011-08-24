@@ -82,7 +82,7 @@ public class JsonServer extends AbstractExternalService implements ExternalServi
 
   public JsonServer(FormServiceCursor fsc, CallingContext cc)
       throws ODKEntityNotFoundException, ODKDatastoreException, ODKFormNotFoundException {
-    this(Form.retrieveForm(fsc.getFormId(), cc), cc);
+    this(Form.retrieveFormByFormId(fsc.getFormId(), cc), cc);
 
     objectEntity = cc.getDatastore().getEntity(JsonServerParameterTable.assertRelation(cc),
         fsc.getAuriService(), cc.getCurrentUser());

@@ -109,7 +109,7 @@ public class WatchdogWorkerImpl {
     System.out.println("Checking streaming for " + fsc.getExternalServiceType());
     // get the last submission sent to the external service
     String lastStreamingKey = fsc.getLastStreamingKey();
-    Form form = Form.retrieveForm(fsc.getFormId(), cc);
+    Form form = Form.retrieveFormByFormId(fsc.getFormId(), cc);
     // query for last submission submitted for the form
     QueryByDate query = new QueryByDate(form, new Date(System.currentTimeMillis()), true, 1,
         cc);
@@ -145,7 +145,7 @@ public class WatchdogWorkerImpl {
 	      long attemptCount = persistentResult.getAttemptCount();
 	      persistentResult.setAttemptCount(++attemptCount);
 	      persistentResult.persist(cc);
-	      Form form = Form.retrieveForm(persistentResult.getFormId(), cc);
+	      Form form = Form.retrieveFormByFormId(persistentResult.getFormId(), cc);
 	      switch (persistentResult.getResultType()) {
 	      case CSV:
 	        csvGenerator.createCsvTask(form, persistentResult.getSubmissionKey(), attemptCount,
@@ -177,7 +177,7 @@ public class WatchdogWorkerImpl {
 	      long attemptCount = aTask.getAttemptCount();
 	      aTask.setAttemptCount(++attemptCount);
 	      aTask.persist(cc);
-	      Form form = Form.retrieveForm(aTask.getFormId(), cc);
+	      Form form = Form.retrieveFormByFormId(aTask.getFormId(), cc);
 	      switch (aTask.getTaskType()) {
 	      case WORKSHEET_CREATE:
 	    	wsCreator.createWorksheetTask(form, aTask.getSubmissionKey(), attemptCount,

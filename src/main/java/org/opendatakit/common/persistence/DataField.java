@@ -34,7 +34,7 @@ public final class DataField {
 	
 	public static enum DataType {
 		BINARY /** blobs -- see BinaryContentManipulator */,
-		LONG_STRING /** text -- only used in Aggregate */,
+		LONG_STRING /** text -- i.e., utf-8 blob */,
 		STRING, INTEGER, DECIMAL, BOOLEAN, DATETIME,
 		URI /** URI is a string of length 80 characters */
 	}

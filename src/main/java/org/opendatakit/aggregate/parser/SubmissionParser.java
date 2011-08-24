@@ -98,6 +98,24 @@ public class SubmissionParser {
 	private EntityKey topLevelTableKey = null;
 
 	/**
+	 * Get submission object from parse
+	 * 
+	 * @return submission
+	 */
+	public Submission getSubmission() {
+		return submission;
+	}
+	
+	/**
+	 * Get the form corresponding to the parsed submission.
+	 * 
+	 * @return
+	 */
+	public Form getForm() {
+		return form;
+	}
+
+	/**
 	 * Construct an ODK submission by processing XML submission to extract
 	 * values.  The submission is persisted to the database before returning.
 	 * 
@@ -118,7 +136,7 @@ public class SubmissionParser {
 		throws IOException, ODKFormNotFoundException,
 			ODKParseException, ODKIncompleteSubmissionData,
 			ODKConversionException, ODKDatastoreException, ODKFormSubmissionsDisabledException {
-		constructorHelper(inputStreamXML, cc);
+		constructorHelper(inputStreamXML, false, cc);
 	}
 
 	/**
@@ -128,6 +146,7 @@ public class SubmissionParser {
 	 * @param submissionFormParser
 	 *            multipart data submission that includes XML submission &
 	 *            possibly other data
+	 * @param isIncomplete 
 	 * @param cc
 	 *            the CallingContext of this request
 	 * @throws IOException
@@ -140,7 +159,7 @@ public class SubmissionParser {
 	 * @throws ODKFormSubmissionsDisabledException 
 	 */
 	public SubmissionParser(MultiPartFormData submissionFormParser,
-			CallingContext cc) throws IOException,
+			boolean isIncomplete, CallingContext cc) throws IOException,
 			ODKFormNotFoundException, ODKParseException,
 			ODKIncompleteSubmissionData, ODKConversionException,
 			ODKDatastoreException, ODKFormSubmissionsDisabledException {
@@ -158,7 +177,7 @@ public class SubmissionParser {
 
 		InputStream inputStreamXML = new ByteArrayInputStream(submission.getStream().toByteArray());
 		try {
-			constructorHelper(inputStreamXML, cc);
+			constructorHelper(inputStreamXML, isIncomplete, cc);
 		} finally {
 			inputStreamXML.close();
 		}
@@ -239,6 +258,7 @@ public class SubmissionParser {
 	 * 
 	 * @param inputStreamXML
 	 *            xml submission input stream
+	 * @param isIncomplete 
 	 * 
 	 * @throws IOException
 	 * @throws ODKFormNotFoundException
@@ -249,7 +269,7 @@ public class SubmissionParser {
 	 * @throws ODKDatastoreException
 	 * @throws ODKFormSubmissionsDisabledException 
 	 */
-	private void constructorHelper(InputStream inputStreamXML, CallingContext cc)
+	private void constructorHelper(InputStream inputStreamXML, boolean isIncomplete, CallingContext cc)
 			throws IOException, ODKFormNotFoundException, ODKParseException,
 			ODKIncompleteSubmissionData, ODKConversionException,
 			ODKDatastoreException, ODKFormSubmissionsDisabledException {
@@ -291,7 +311,7 @@ public class SubmissionParser {
 		
 		String fullyQualifiedId = Form.extractWellFormedFormId(formId);
 
-		form = Form.retrieveForm(fullyQualifiedId, cc);
+		form = Form.retrieveFormByFormId(fullyQualifiedId, cc);
 		if ( !form.getSubmissionEnabled() ) {
 			throw new ODKFormSubmissionsDisabledException();
 		}
@@ -309,16 +329,22 @@ public class SubmissionParser {
 
 		String instanceId = getOpenRosaInstanceId();
 		if ( instanceId == null ) {
-			instanceId = root.getAttribute(ParserConsts.INSTANCE_ID);
+			instanceId = root.getAttribute(ParserConsts.INSTANCE_ID_ATTRIBUTE_NAME);
 			if ( instanceId == null || instanceId.length() == 0 ) {
 				instanceId = CommonFieldsBase.newUri();
 			}
 		}
 
 		Date submissionDate = new Date();
-		String submissionDateString = root.getAttribute(ParserConsts.SUBMISSION_DATE);
+		String submissionDateString = root.getAttribute(ParserConsts.SUBMISSION_DATE_ATTRIBUTE_NAME);
 		if ( submissionDateString != null && submissionDateString.length() != 0 ) {
 			submissionDate = WebUtils.parseDate(submissionDateString);
+		}
+		
+		Date markedAsCompleteDate = new Date();
+		String markedAsCompleteDateString = root.getAttribute(ParserConsts.MARKED_AS_COMPLETE_DATE_ATTRIBUTE_NAME);
+		if ( markedAsCompleteDateString != null && markedAsCompleteDateString.length() != 0 ) {
+			markedAsCompleteDate = WebUtils.parseDate(markedAsCompleteDateString);
 		}
 		
 		// retrieve the record with this instanceId from the database or
@@ -342,8 +368,10 @@ public class SubmissionParser {
 		Map<String,Integer> repeatGroupIndices = new HashMap<String,Integer>();
 		FormElementModel formRoot = form.getTopLevelGroupElement();
 		boolean uploadAllBinaries = processSubmissionElement(formRoot, root, submission, repeatGroupIndices, cc);
-		// TODO: verify that we actually have all the binary content uploaded...
 		submission.setIsComplete(uploadAllBinaries);
+		if ( uploadAllBinaries ) {
+			submission.setMarkedAsCompleteDate(markedAsCompleteDate);
+		}
 		// save the elements inserted into the top-level submission
 		try {
 			submission.persist(cc);
@@ -358,15 +386,6 @@ public class SubmissionParser {
 			}
 			throw new ODKDatastoreException("Unable to persist data", e);
 		}
-	}
-
-	/**
-	 * Get submission object from parse
-	 * 
-	 * @return submission
-	 */
-	public Submission getSubmission() {
-		return submission;
 	}
 
 	/**
@@ -627,18 +646,5 @@ public class SubmissionParser {
 			}
 		}
 
-	}
-
-	/**
-	 * Get the form Id of submission
-	 * 
-	 * @return form Id
-	 */
-	public String getSubmissionFormId() {
-		return formId;
-	}
-
-	public Form getForm() {
-		return form;
 	}
 }

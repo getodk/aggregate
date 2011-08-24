@@ -18,14 +18,14 @@
 package org.opendatakit.aggregate.servlet;
 
 import java.io.IOException;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.opendatakit.aggregate.ContextFactory;
-import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
+import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.format.form.XFormsXmlTable;
-import org.opendatakit.aggregate.query.QueryFormList;
 import org.opendatakit.common.constants.HtmlConsts;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
@@ -62,18 +62,15 @@ public class XFormsListServlet extends ServletUtilBase {
     addOpenRosaHeaders(resp);
     
     try {
-      QueryFormList formsList = new QueryFormList(false, cc);
-      XFormsXmlTable formFormatter = new XFormsXmlTable(formsList, cc.getServerURL());
+      List<Form> formsList = Form.getForms(false, cc);
+	  XFormsXmlTable formFormatter = new XFormsXmlTable(formsList, cc.getServerURL());
 
       resp.setContentType(HtmlConsts.RESP_TYPE_XML);
       formFormatter.generateXmlListOfForms(resp.getWriter());
     } catch (ODKDatastoreException e) {
       e.printStackTrace();
       errorRetreivingData(resp);
-    } catch (ODKIncompleteSubmissionData e) {
-      e.printStackTrace();
-      errorRetreivingData(resp);
-   }
+    }
 
   }
 

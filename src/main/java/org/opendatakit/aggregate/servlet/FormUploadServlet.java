@@ -41,6 +41,7 @@ import org.opendatakit.aggregate.parser.MultiPartFormData;
 import org.opendatakit.aggregate.parser.MultiPartFormItem;
 import org.opendatakit.common.constants.BasicConsts;
 import org.opendatakit.common.constants.HtmlConsts;
+import org.opendatakit.common.persistence.PersistConsts;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
 import org.opendatakit.common.web.CallingContext;
@@ -121,6 +122,8 @@ public class FormUploadServlet extends ServletUtilBase {
 "	  	</tr>" +
 "	  </table>\n" +
 "	  </form>" +
+"<p><b><font color=\"red\">NOTE:</font> String form data will be truncated to " + Long.toString(PersistConsts.DEFAULT_MAX_STRING_LENGTH) +
+" characters.</b>  See ODK Aggregate 1.0 documentation for how to increase (or decrease) this size.</p>" +
 "<p>Media files for the form's logo, images, audio clips and video clips " +
 "(if any) should be in a single directory without subdirectories.</p>" +
 "<p>On ODK Collect 1.1.7 and higher, the file named \"<code>form_logo.png</code>\"," + 

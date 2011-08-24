@@ -29,6 +29,7 @@ import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.externalservice.FormServiceCursor;
 import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.form.FormInfo;
 import org.opendatakit.aggregate.form.MiscTasks;
 import org.opendatakit.aggregate.form.MiscTasks.TaskType;
 import org.opendatakit.aggregate.task.FormDelete;
@@ -55,7 +56,7 @@ public class FormAdminServiceImpl extends RemoteServiceServlet implements
 		CallingContext cc = ContextFactory.getCallingContext(this, req);
 
 		try {
-			Form form = Form.retrieveForm(formId, cc);
+			Form form = Form.retrieveFormByFormId(formId, cc);
 			form.setDownloadEnabled(downloadable);
 			form.persist(cc);
 			return true;
@@ -73,7 +74,7 @@ public class FormAdminServiceImpl extends RemoteServiceServlet implements
 		CallingContext cc = ContextFactory.getCallingContext(this, req);
 
 		try {
-			Form form = Form.retrieveForm(formId, cc);
+			Form form = Form.retrieveFormByFormId(formId, cc);
 			form.setSubmissionEnabled(acceptSubmissions);
 			form.persist(cc);
 			return true;
@@ -112,7 +113,7 @@ public class FormAdminServiceImpl extends RemoteServiceServlet implements
 						PurgeOlderSubmissions.PURGE_DATE_FORMAT.format(earliest));
 		Form form;
 		try {
-			form = Form.retrieveForm(fsc.getFormId(), cc);
+			form = Form.retrieveFormByFormId(fsc.getFormId(), cc);
 		} catch (ODKFormNotFoundException e) {
 			e.printStackTrace();
         	throw new RequestFailureException("Unable to retrieve form " + fsc.getFormId());
@@ -148,11 +149,11 @@ public class FormAdminServiceImpl extends RemoteServiceServlet implements
 	    try {
 	      FormDelete formDelete = (FormDelete) cc.getBean(BeanDefs.FORM_DELETE_BEAN);
 
-	      Form formToDelete = Form.retrieveForm(formId, cc);
+	      Form formToDelete = Form.retrieveFormByFormId(formId, cc);
 
 	      // If the FormInfo table is the target, log an error!
 	      if (formToDelete != null) {
-	        if (!formToDelete.getFormId().equals(Form.URI_FORM_ID_VALUE_FORM_INFO)) {
+	        if (!FormInfo.isFormInfoForm(formToDelete.getFormId())) {
 	          MiscTasks m = new MiscTasks(TaskType.DELETE_FORM, formToDelete, null, cc);
 	          m.persist(cc);
 	          CallingContext ccDaemon = ContextFactory.getCallingContext(this, req);

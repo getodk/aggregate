@@ -138,7 +138,7 @@ public class GoogleSpreadsheet extends AbstractExternalService implements Extern
 
   public GoogleSpreadsheet(FormServiceCursor fsc, CallingContext cc)
       throws ODKEntityNotFoundException, ODKDatastoreException, ODKFormNotFoundException {
-    this(Form.retrieveForm(fsc.getFormId(), cc), retrieveGSPT(fsc, cc), cc);
+    this(Form.retrieveFormByFormId(fsc.getFormId(), cc), retrieveGSPT(fsc, cc), cc);
     repeatElementTableIds.addAll(GoogleSpreadsheetRepeatParameterTable.getRepeatGroupAssociations(
         objectEntity.getUri(), cc));
     this.fsc = fsc;

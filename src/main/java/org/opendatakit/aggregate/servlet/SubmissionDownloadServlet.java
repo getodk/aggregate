@@ -81,7 +81,7 @@ public class SubmissionDownloadServlet extends ServletUtilBase {
 		List<SubmissionKeyPart> parts = key.splitSubmissionKey();
 		Submission sub = null;
 		try {
-			Form form = Form.retrieveForm(parts.get(0).getElementName(), cc);
+			Form form = Form.retrieveFormByFormId(parts.get(0).getElementName(), cc);
 			sub = Submission.fetchSubmission(parts, cc);
 
 			if (sub != null) {

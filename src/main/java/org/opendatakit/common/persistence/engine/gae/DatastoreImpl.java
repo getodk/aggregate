@@ -24,6 +24,7 @@ import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.EntityKey;
+import org.opendatakit.common.persistence.PersistConsts;
 import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.persistence.TaskLock;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
@@ -105,7 +106,7 @@ public class DatastoreImpl implements Datastore {
 			case STRING:
 			case URI:
 				if ( d.getMaxCharLen() == null ) {
-					d.setMaxCharLen(GAE_MAX_STRING_LEN);
+					d.setMaxCharLen(PersistConsts.DEFAULT_MAX_STRING_LENGTH);
 				}
 				nBytes += d.getMaxCharLen();
 				++nColumns;
