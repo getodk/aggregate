@@ -40,7 +40,7 @@ public class SaveFilterGroupButton extends AbstractButtonBase implements ClickHa
   private static final String REPROMPT_FOR_NAME_TXT = "That group already exists. Please enter a new name";
 
   
-  private static final String TOOLTIP_TEXT = UIConsts.EMPTY_STRING;
+  private static final String TOOLTIP_TEXT = "Save a new filter group";
   
   private FilterSubTab parentSubTab;
 
