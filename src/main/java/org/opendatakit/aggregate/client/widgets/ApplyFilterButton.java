@@ -28,7 +28,6 @@ import org.opendatakit.aggregate.client.popups.FilterPopup;
 import org.opendatakit.aggregate.client.submission.Column;
 import org.opendatakit.aggregate.constants.common.FilterOperation;
 import org.opendatakit.aggregate.constants.common.RowOrCol;
-import org.opendatakit.aggregate.constants.common.UIConsts;
 import org.opendatakit.aggregate.constants.common.Visibility;
 
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -36,7 +35,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 
 public class ApplyFilterButton extends AbstractButtonBase implements ClickHandler {
 
-  private static final String TOOLTIP_TEXT = UIConsts.EMPTY_STRING;
+  private static final String TOOLTIP_TEXT = "Use the created filter";
   
   private FilterPopup popup;
 

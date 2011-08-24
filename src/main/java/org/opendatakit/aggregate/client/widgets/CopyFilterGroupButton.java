@@ -29,7 +29,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 
 public class CopyFilterGroupButton extends AbstractButtonBase implements ClickHandler {
 
-  private static final String TOOLTIP_TEXT = UIConsts.EMPTY_STRING;
+  private static final String TOOLTIP_TEXT = "Save as new filter group";
   
   private FilterSubTab parentSubTab;
   

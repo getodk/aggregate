@@ -83,8 +83,8 @@
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/step2-common-1-20110415.014953-11.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/step2-consumer-1-20110415.015028-11.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/odk-tomcatutil.jar"/>
-	<classpathentry kind="con" path="com.google.appengine.eclipse.core.GAE_CONTAINER"/>
 	<classpathentry kind="con" path="com.google.gwt.eclipse.core.GWT_CONTAINER"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/odk-gae-settings-latest.jar"/>
+	<classpathentry kind="con" path="com.google.appengine.eclipse.core.GAE_CONTAINER/App Engine"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>

@@ -21,7 +21,6 @@ import java.security.NoSuchAlgorithmException;
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.permissions.CredentialsInfoBuilder;
 import org.opendatakit.aggregate.client.popups.ChangePasswordPopup;
-import org.opendatakit.aggregate.constants.common.UIConsts;
 import org.opendatakit.common.security.client.CredentialsInfo;
 import org.opendatakit.common.security.client.RealmSecurityInfo;
 import org.opendatakit.common.security.client.UserSecurityInfo;
@@ -43,7 +42,7 @@ import com.google.gwt.user.client.ui.PasswordTextBox;
  */
 public class ExecuteChangePasswordButton extends AbstractButtonBase implements ClickHandler {
 
-  private static final String TOOLTIP_TEXT = UIConsts.EMPTY_STRING;
+  private static final String TOOLTIP_TEXT = "Change the user's password";
 
   private static int jsonRequestId = 0;
 

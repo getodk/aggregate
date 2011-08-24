@@ -4,7 +4,6 @@ import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.SecureGWT;
 import org.opendatakit.aggregate.client.popups.NewTablesAdminPopup;
 import org.opendatakit.aggregate.client.preferences.OdkTablesAdmin;
-import org.opendatakit.aggregate.constants.common.UIConsts;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -13,7 +12,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 
 public class ExecuteNewTablesUser extends AbstractButtonBase implements ClickHandler {
 
-  private static final String TOOLTIP_TEXT = UIConsts.EMPTY_STRING;
+  private static final String TOOLTIP_TEXT = "Create a new user";
   
   private NewTablesAdminPopup popup;
 

@@ -17,14 +17,13 @@
 package org.opendatakit.aggregate.client.widgets;
 
 import org.opendatakit.aggregate.client.popups.ExternalServicePopup;
-import org.opendatakit.aggregate.constants.common.UIConsts;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 
 public class ExecutePublishButton extends AbstractButtonBase implements ClickHandler {
  
-  private static final String TOOLTIP_TEXT = UIConsts.EMPTY_STRING;
+  private static final String TOOLTIP_TEXT = "Publish the data";
   
   private ExternalServicePopup popup;
   
