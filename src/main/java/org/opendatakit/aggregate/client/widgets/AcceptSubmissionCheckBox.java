@@ -18,7 +18,6 @@ package org.opendatakit.aggregate.client.widgets;
 
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.SecureGWT;
-import org.opendatakit.aggregate.constants.common.UIConsts;
 import org.opendatakit.common.security.common.GrantedAuthorityName;
 
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -28,9 +27,10 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 public class AcceptSubmissionCheckBox extends AbstractCheckBoxBase implements ValueChangeHandler<Boolean> {
   
   private String formId;
+  private static final String TOOLTIP_TEXT = "Allow or disallow form to accept submissions";
 
   public AcceptSubmissionCheckBox(String formId, Boolean accept) {
-    super(UIConsts.EMPTY_STRING);
+    super(TOOLTIP_TEXT);
     this.formId = formId;
     setValue(accept);
     boolean enabled = AggregateUI.getUI().getUserInfo()
