@@ -21,8 +21,9 @@ public class AggregateTabBase extends TabPanel {
  
     subTabPosition = new ArrayList<SubTabs>();
     subTabMap = new HashMap<SubTabs,SubTabInterface>();
-        
-    getElement().setId("second_level_menu");
+       
+    getElement().addClassName("second_level_menu");
+    getElement().getFirstChildElement().getFirstChildElement().addClassName("tab_measure_2");
 
   } 
   

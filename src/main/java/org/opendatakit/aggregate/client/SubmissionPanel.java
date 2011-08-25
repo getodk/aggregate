@@ -43,6 +43,7 @@ public class SubmissionPanel extends ScrollPanel {
         AggregateUI.getUI().clearError();        
         submissionTable = new SubmissionTable(summary);
         setWidget(submissionTable);
+        AggregateUI.resize();
       }
     };
 
