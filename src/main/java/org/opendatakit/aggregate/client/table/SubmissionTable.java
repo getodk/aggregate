@@ -47,6 +47,7 @@ public class SubmissionTable extends FlexTable {
     tableSubmissions = summary.getSubmissions();
 
     addStyleName("dataTable");
+    getElement().setId("submission_table");
 
     boolean addDeleteButton = AggregateUI.getUI().getUserInfo().getGrantedAuthorities()
         .contains(GrantedAuthorityName.ROLE_DATA_OWNER);

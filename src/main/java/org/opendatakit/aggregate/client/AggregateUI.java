@@ -19,6 +19,9 @@ package org.opendatakit.aggregate.client;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import org.opendatakit.aggregate.client.handlers.RefreshCloseHandler;
+import org.opendatakit.aggregate.client.handlers.RefreshOpenHandler;
+import org.opendatakit.aggregate.client.handlers.RefreshSelectionHandler;
 import org.opendatakit.aggregate.client.preferences.Preferences;
 import org.opendatakit.aggregate.constants.common.HelpSliderConsts;
 import org.opendatakit.aggregate.constants.common.SubTabs;
@@ -43,6 +46,7 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.Tree;
 import com.google.gwt.user.client.ui.TreeItem;
@@ -55,7 +59,7 @@ public class AggregateUI implements EntryPoint {
 	
    private VerticalPanel wrappingLayoutPanel;	
 	private HorizontalPanel layoutPanel;
-	private VerticalPanel helpPanel;
+	private ScrollPanel helpPanel;
 	private TreeItem rootItem;
 
 	private NavLinkBar settingsBar;
@@ -109,10 +113,11 @@ public class AggregateUI implements EntryPoint {
 		wrappingLayoutPanel = new VerticalPanel();
 		errorMsgLabel = new Label();
 		layoutPanel = new HorizontalPanel();
-		helpPanel = new VerticalPanel();
+		helpPanel = new ScrollPanel();
 
 		mainNav = new DecoratedTabPanel();
-		mainNav.addStyleName("mainNav");
+		mainNav.getElement().setId("mainNav");
+		mainNav.addSelectionHandler(new RefreshSelectionHandler<Integer>());
 
 		settingsBar = new NavLinkBar();
 		
@@ -120,6 +125,9 @@ public class AggregateUI implements EntryPoint {
 		Tree helpTree = new Tree();
 		rootItem = new TreeItem();
 		helpTree.addItem(rootItem);
+		helpTree.addOpenHandler(new RefreshOpenHandler<TreeItem>());
+		helpTree.addCloseHandler(new RefreshCloseHandler<TreeItem>());
+		helpTree.getElement().setId("help_tree");
 
 		helpPanel.add(helpTree);
 		helpPanel.getElement().setId("help_panel");
@@ -259,6 +267,7 @@ public class AggregateUI implements EntryPoint {
 
 		// Create the only tab that ALL users can see sub menu navigation
 		mainNav.add(submissions, Tabs.SUBMISSIONS.getTabLabel());
+		mainNav.getElement().getFirstChildElement().getFirstChildElement().addClassName("tab_measure_1");
 
 		if (userInfo != null) {
 
@@ -303,7 +312,11 @@ public class AggregateUI implements EntryPoint {
 	// then that should be changed.
 	public native void contentLoaded() /*-{
 		$wnd.gwtContentLoaded();
-  }-*/;
+    }-*/;
+	
+	public native static void resize() /*-{
+	    $wnd.onWindowResize();
+	}-*/;
 
 	/***********************************
 	 ****** NAVIGATION ******
@@ -326,6 +339,7 @@ public class AggregateUI implements EntryPoint {
 
 			}
 		}
+		resize();
 	}
 
 	public SubTabInterface getSubTab(SubTabs subTabType) {
