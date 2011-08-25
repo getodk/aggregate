@@ -175,35 +175,71 @@ public class AggregateUI implements EntryPoint {
 	private void updateSecurityInfo() {
 		lastUserInfoUpdateAttemptTimestamp = lastRealmInfoUpdateAttemptTimestamp = System
 		.currentTimeMillis();
-		SecureGWT.getSecurityService().getUserInfo(new AsyncCallback<UserSecurityInfo>() {
-
-			@Override
-			public void onFailure(Throwable caught) {
-				reportError(caught);
-			}
-
-			@Override
-			public void onSuccess(UserSecurityInfo result) {
-				userInfo = result;
-				if (realmInfo != null && userInfo != null) {
-					commonUserInfoUpdateCompleteAction();
-				}
-			}
-		});
+		// the first realm request will often fail because the cookie
+		// should/could be null (e.g., for anonymous users).
 		SecureGWT.getSecurityService().getRealmInfo(Cookies.getCookie("JSESSIONID"),
 				new AsyncCallback<RealmSecurityInfo>() {
 
 			@Override
 			public void onFailure(Throwable caught) {
-				reportError(caught);
+				
+				// OK.  So it failed.  If it did, just try doing everything 
+				// again.  We should have a valid session cookie after the 
+				// first failure, so these should all then work.
+				
+				SecureGWT.getSecurityService().getUserInfo(new AsyncCallback<UserSecurityInfo>() {
+
+					@Override
+					public void onFailure(Throwable caught) {
+						reportError(caught);
+					}
+
+					@Override
+					public void onSuccess(UserSecurityInfo result) {
+						userInfo = result;
+						if (realmInfo != null && userInfo != null) {
+							commonUserInfoUpdateCompleteAction();
+						}
+					}
+				});
+				
+				SecureGWT.getSecurityService().getRealmInfo(Cookies.getCookie("JSESSIONID"),
+						new AsyncCallback<RealmSecurityInfo>() {
+
+					@Override
+					public void onFailure(Throwable caught) {
+						reportError(caught);
+					}
+
+					@Override
+					public void onSuccess(RealmSecurityInfo result) {
+						realmInfo = result;
+						if (realmInfo != null && userInfo != null) {
+							commonUserInfoUpdateCompleteAction();
+						}
+					}
+				});
 			}
 
 			@Override
 			public void onSuccess(RealmSecurityInfo result) {
 				realmInfo = result;
-				if (realmInfo != null && userInfo != null) {
-					commonUserInfoUpdateCompleteAction();
-				}
+				// it worked the first time! Now do the user info request.
+				SecureGWT.getSecurityService().getUserInfo(new AsyncCallback<UserSecurityInfo>() {
+
+					@Override
+					public void onFailure(Throwable caught) {
+						reportError(caught);
+					}
+
+					@Override
+					public void onSuccess(UserSecurityInfo result) {
+						userInfo = result;
+						if (realmInfo != null && userInfo != null) {
+							commonUserInfoUpdateCompleteAction();
+						}
+					}
+				});
 			}
 		});
 	}

@@ -123,7 +123,7 @@ public class AggregateHtmlServlet extends ServletUtilBase {
 				} else {
 					query = "?" + query;
 				}
-				resp.sendRedirect(cc.getWebApplicationURL(ADDR) + query + "#management/permission///");
+				resp.sendRedirect(cc.getWebApplicationURL(ADDR) + query + "#admin/permission///");
 				return;
 			}
 		}
