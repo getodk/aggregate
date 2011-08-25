@@ -44,6 +44,7 @@ import org.opendatakit.aggregate.format.element.ElementFormatter;
 import org.opendatakit.aggregate.query.submission.QueryByUIFilterGroup;
 import org.opendatakit.aggregate.server.GenerateHeaderInfo;
 import org.opendatakit.aggregate.submission.Submission;
+import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.submission.SubmissionSet;
 import org.opendatakit.common.constants.BasicConsts;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
@@ -164,7 +165,8 @@ public class GwtTester extends ServletUtilBase {
         for (SubmissionSet sub : submissions) {
           Row row = sub.getFormattedValuesAsRow(filteredElements, elemFormatter, false, cc);
           try {
-            summary.addSubmission(new SubmissionUI(row.getFormattedValues()));
+            SubmissionKey subKey = sub.constructSubmissionKey(form.getTopLevelGroupElement());
+            summary.addSubmission(new SubmissionUI(row.getFormattedValues(), subKey.toString()));
           } catch (Exception e) {
             // TODO Auto-generated catch block
             e.printStackTrace();

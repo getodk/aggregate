@@ -16,8 +16,10 @@
 
 package org.opendatakit.aggregate.server;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -32,6 +34,8 @@ import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.form.FormInfo;
 import org.opendatakit.aggregate.form.MiscTasks;
 import org.opendatakit.aggregate.form.MiscTasks.TaskType;
+import org.opendatakit.aggregate.process.DeleteSubmissions;
+import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.task.FormDelete;
 import org.opendatakit.aggregate.task.PurgeOlderSubmissions;
 import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
@@ -172,5 +176,26 @@ public class FormAdminServiceImpl extends RemoteServiceServlet implements
 
 	    return true;
 	  }
+
+    @Override
+    public Boolean deleteSubmission(String submissionKeyAsString) throws AccessDeniedException {
+      HttpServletRequest req = this.getThreadLocalRequest();
+      CallingContext cc = ContextFactory.getCallingContext(this, req);
+      
+      // create a list because the submission deleter require a list
+      SubmissionKey subKey = new SubmissionKey(submissionKeyAsString);
+      List<SubmissionKey> keyList = new ArrayList<SubmissionKey>();
+      keyList.add(subKey);
+      
+      // delete the submission
+      try {
+        DeleteSubmissions deleter = new DeleteSubmissions(keyList);
+        deleter.deleteSubmissions(cc);
+      } catch (ODKDatastoreException e) {
+        return Boolean.FALSE;
+      }
+      
+      return Boolean.TRUE;
+    }
 	
 }

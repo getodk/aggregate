@@ -125,8 +125,11 @@ public class SubmissionServiceImpl extends RemoteServiceServlet implements
     // format row elements
     for (Submission sub : submissions) {
       Row row = sub.getFormattedValuesAsRow(filteredElements, elemFormatter, false, cc);
+      
+     // Row row = sub.getFormattedNamespaceValuesAsRow(filteredElements, headerGenerator.includedFormElementNamespaces(), elemFormatter, false, cc);
       try {
-        summary.addSubmission(new SubmissionUI(row.getFormattedValues()));
+        SubmissionKey subKey = sub.constructSubmissionKey(form.getTopLevelGroupElement());
+        summary.addSubmission(new SubmissionUI(row.getFormattedValues(), subKey.toString()));
       } catch (Exception e) {
         // TODO Auto-generated catch block
         e.printStackTrace();
@@ -183,7 +186,7 @@ public class SubmissionServiceImpl extends RemoteServiceServlet implements
     for (SubmissionSet sub : repeats) {
       Row row = sub.getFormattedValuesAsRow(filteredElements, elemFormatter, false, cc);
       try {
-        summary.addSubmission(new SubmissionUI(row.getFormattedValues()));
+        summary.addSubmission(new SubmissionUI(row.getFormattedValues(), null));
       } catch (Exception e) {
         // TODO Auto-generated catch block
         e.printStackTrace();

@@ -44,7 +44,7 @@ import org.opendatakit.common.ermodel.simple.AttributeType;
  * 
  * @author the.dylan.price@gmail.com
  */
-@Ignore("not a unit test -- integration test")
+//@Ignore("not a unit test -- integration test")
 public class SimpleAPITest
 {
 
