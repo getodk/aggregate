@@ -31,4 +31,6 @@ public interface FormAdminServiceAsync {
 
   void setFormDownloadable(String formId, Boolean downloadable, AsyncCallback<Boolean> callback);
 
+  void deleteSubmission(String submissionKeyAsString, AsyncCallback<Boolean> callback);
+
 }

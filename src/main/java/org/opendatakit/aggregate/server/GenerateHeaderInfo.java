@@ -26,6 +26,7 @@ import org.opendatakit.aggregate.client.filter.ColumnFilterHeader;
 import org.opendatakit.aggregate.client.filter.Filter;
 import org.opendatakit.aggregate.client.filter.FilterGroup;
 import org.opendatakit.aggregate.client.submission.SubmissionUISummary;
+import org.opendatakit.aggregate.constants.common.FormElementNamespace;
 import org.opendatakit.aggregate.constants.common.Visibility;
 import org.opendatakit.aggregate.datamodel.FormDataModel;
 import org.opendatakit.aggregate.datamodel.FormElementKey;
@@ -56,6 +57,16 @@ public class GenerateHeaderInfo {
     this.filterGroup = filterGroup;
   }
 
+  public List<FormElementNamespace> includedFormElementNamespaces() {
+    List<FormElementNamespace> namespaces = new ArrayList<FormElementNamespace>();
+    namespaces.add(FormElementNamespace.VALUES);
+    if(filterGroup.getIncludeMetadata()) {
+      namespaces.add(FormElementNamespace.METADATA);
+    }
+    
+    return namespaces;
+  }
+  
   public List<FormElementModel> getIncludedElements() {
     return includes;
   }

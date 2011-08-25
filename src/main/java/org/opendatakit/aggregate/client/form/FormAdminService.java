@@ -43,4 +43,7 @@ public interface FormAdminService extends RemoteService {
   Date purgePublishedData(String uriExternalService, Date earliest) throws AccessDeniedException, RequestFailureException, DatastoreFailureException;
   
   Boolean deleteForm(String formId) throws AccessDeniedException;
+  
+  Boolean deleteSubmission(String submissionKeyAsString) throws AccessDeniedException;
+  
 }
