@@ -33,6 +33,7 @@ import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.odk.aggregate.constants.ServletConsts;
 import org.odk.aggregate.form.Form;
@@ -47,7 +48,11 @@ import com.google.gdata.util.ServiceException;
 @Entity
 public class FusionTableOAuth implements RemoteServer {
 
-  /**
+  private static final int FUSION_TABLE_SERVICE_TIMEOUT_MILLISECONDS = 30000;
+
+  private static final int FUSION_TABLE_SOCKET_ESTABLISHMENT_TIMEOUT_MILLISECONDS = 30000;
+
+/**
    * GAE datastore key that uniquely identifies the form element
    */
   @Id
@@ -139,6 +144,9 @@ public class FusionTableOAuth implements RemoteServer {
 
     System.out.println(uri.toString());
     HttpParams httpParams = new BasicHttpParams();
+    HttpConnectionParams.setConnectionTimeout(httpParams, FUSION_TABLE_SERVICE_TIMEOUT_MILLISECONDS);
+    HttpConnectionParams.setSoTimeout(httpParams, FUSION_TABLE_SOCKET_ESTABLISHMENT_TIMEOUT_MILLISECONDS);
+
     ClientConnectionManager mgr = new GaeClientConnectionManager(httpParams, 
     									GaeClientConnectionManager.DEFAULT_SCHEME_REGISTRY);
     HttpClient client = new DefaultHttpClient(mgr, httpParams);
