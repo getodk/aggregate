@@ -38,8 +38,12 @@ public class FilterSubTab extends AggregateSubTabBase {
   private FilterGroup currentlyDisplayedFilterGroup;
   private FormSummary form;
 
+  private Boolean displayMetaData;
+
   public FilterSubTab() {
+    displayMetaData = false;
     getElement().setId("filter_sub_tab");
+
     // create Nav Panel
     navTable = new FilterNavigationTable(this);
     navTable.getElement().setId("submission_nav_table");
@@ -61,34 +65,51 @@ public class FilterSubTab extends AggregateSubTabBase {
     filtersNSubmissions.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_JUSTIFY);
 
     add(filtersNSubmissions);
-    currentlyDisplayedFilterGroup = new FilterGroup(UIConsts.FILTER_NONE, null, null, false);
   }
 
+  private void setCurrentlyDisplayedFilterGroup(FilterGroup newFilterGroup) {
+    currentlyDisplayedFilterGroup = newFilterGroup;
+    currentlyDisplayedFilterGroup.setIncludeMetadata(displayMetaData);
+  }
+  
+  public FilterGroup getDisplayedFilterGroup() {
+    if(currentlyDisplayedFilterGroup == null) {
+      return new FilterGroup(UIConsts.FILTER_NONE, null, null);
+    }
+    return currentlyDisplayedFilterGroup;
+  }
+  
+  private void updateFilterNSubmissionPanels() {
+    FilterGroup filterGroup = getDisplayedFilterGroup();
+    filtersPanel.update(filterGroup);
+    submissionPanel.update(filterGroup);
+  }
+  
+  
   public void switchForm(FormSummary formSwitch, FilterGroup filterGroup) {
     form = formSwitch;
     navTable.updateNavTable(form, filterGroup);
-    currentlyDisplayedFilterGroup = filterGroup;
-    filtersPanel.update(currentlyDisplayedFilterGroup);
-    submissionPanel.update(currentlyDisplayedFilterGroup);
+    
+    setCurrentlyDisplayedFilterGroup(filterGroup);
+    updateFilterNSubmissionPanels();
   }
 
   public void switchFilterGroupWithinForm(FilterGroup filterGroup) {
     // verify form remained the same, if not need to use switch form API
-    if (!currentlyDisplayedFilterGroup.getFormId().equals(filterGroup.getFormId())) {
+    if (!getDisplayedFilterGroup().getFormId().equals(filterGroup.getFormId())) {
       return;
     }
-    currentlyDisplayedFilterGroup = filterGroup;
-    filtersPanel.update(currentlyDisplayedFilterGroup);
-    submissionPanel.update(currentlyDisplayedFilterGroup);
+    setCurrentlyDisplayedFilterGroup(filterGroup);
+    updateFilterNSubmissionPanels();
   }
 
   public void removeFilterGroupWithinForm() {
-    currentlyDisplayedFilterGroup = new FilterGroup(UIConsts.FILTER_NONE, form.getId(), null,
-        currentlyDisplayedFilterGroup.getIncludeMetadata());
-    navTable.updateNavTable(form, currentlyDisplayedFilterGroup);
+    FilterGroup blankFilterGroup = new FilterGroup(UIConsts.FILTER_NONE, form.getId(), null);
+    setCurrentlyDisplayedFilterGroup(blankFilterGroup);
+    
+    navTable.updateNavTable(form, getDisplayedFilterGroup());
     navTable.update();
-    filtersPanel.update(currentlyDisplayedFilterGroup);
-    submissionPanel.update(currentlyDisplayedFilterGroup);
+    updateFilterNSubmissionPanels();
   }
 
   @Override
@@ -100,14 +121,9 @@ public class FilterSubTab extends AggregateSubTabBase {
   public void update() {
     navTable.update();
     if (form != null) {
-      navTable.updateNavTable(form, currentlyDisplayedFilterGroup);
+      navTable.updateNavTable(form, getDisplayedFilterGroup());
     }
-    filtersPanel.update(currentlyDisplayedFilterGroup);
-    submissionPanel.update(currentlyDisplayedFilterGroup);
-  }
-
-  public FilterGroup getDisplayedFilterGroup() {
-    return currentlyDisplayedFilterGroup;
+    updateFilterNSubmissionPanels();
   }
 
   public ListBox getListOfPossibleFilterGroups() {
@@ -118,6 +134,14 @@ public class FilterSubTab extends AggregateSubTabBase {
     return submissionPanel.getSubmissionTable();
   }
 
+  public Boolean getDisplayMetaData() {
+    return displayMetaData;
+  }
+
+  public void setDisplayMetaData(Boolean displayMetaData) {
+    this.displayMetaData = displayMetaData;
+  }
+  
   @Override
   public HelpSliderConsts[] getHelpSliderContent() {
     return FilterConsts.values();

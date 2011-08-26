@@ -1,7 +1,6 @@
 package org.opendatakit.aggregate.client.widgets;
 
 import org.opendatakit.aggregate.client.FilterSubTab;
-import org.opendatakit.aggregate.client.filter.FilterGroup;
 
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
@@ -16,9 +15,9 @@ public class MetadataCheckBox extends AbstractCheckBoxBase implements ValueChang
     super("Display Metadata", TOOLTIP_TEXT);
     this.filterSubTab = filterSubTab;
     
-    FilterGroup filterGroup = filterSubTab.getDisplayedFilterGroup();
+    Boolean inlcudeMetaData = filterSubTab.getDisplayMetaData();
     
-    setValue(filterGroup.getIncludeMetadata());
+    setValue(inlcudeMetaData);
     setEnabled(true);
   }
 
@@ -26,8 +25,7 @@ public class MetadataCheckBox extends AbstractCheckBoxBase implements ValueChang
   public void onValueChange(ValueChangeEvent<Boolean> event) {
     super.onValueChange(event);
     
-    FilterGroup filterGroup = filterSubTab.getDisplayedFilterGroup();
-    filterGroup.setIncludeMetadata(event.getValue());
+    filterSubTab.setDisplayMetaData(event.getValue());
     filterSubTab.update();
   }
 

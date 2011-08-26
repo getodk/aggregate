@@ -39,7 +39,7 @@ public class UIUtils {
     
     if (forms == null || forms.size() == 0) {
       forms = new ArrayList<FormSummary>();
-      forms.add(new FormSummary(NO_FORM, null, null, null, false, false, null, 0));
+      forms.add(new FormSummary(NO_FORM, UIConsts.EMPTY_STRING, null, null, false, false, null, 0));
     } 
 
     formsBox.clear();
@@ -75,7 +75,7 @@ public class UIUtils {
         // check if we have a form id
         if(formIdToMatch == null) {
           // if there is no formId this should be the 'NO_FORM' form
-          if(form.getTitle() != null && form.getTitle().equals(NO_FORM) && formId.equals("")) {
+          if(form.getTitle() != null && form.getTitle().equals(NO_FORM) && formId.equals(UIConsts.EMPTY_STRING)) {
             return null;
           } else {
             throw new IllegalStateException("Some how a form that is not the 'NO_FORM' had a formId of null");
@@ -91,7 +91,7 @@ public class UIUtils {
    
   public static ArrayList<FilterGroup> updateFilterDropDown(ListBox filtersBox, FormSummary selectedForm, ArrayList<FilterGroup> previouslyDisplayedFilter, FilterSet filterSet) {
     FilterGroup currentFilterSelected = getFilterFromSelection(filtersBox, previouslyDisplayedFilter);
-    FilterGroup defaultFilterGroup = new FilterGroup(UIConsts.FILTER_NONE, selectedForm.getId(), null, false);
+    FilterGroup defaultFilterGroup = new FilterGroup(UIConsts.FILTER_NONE, selectedForm.getId(), null);
     
     // what the selected index should be set to
     int selectedIndex = 0; // default to the top position, update if available
