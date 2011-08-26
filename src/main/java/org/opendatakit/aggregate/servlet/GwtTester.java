@@ -107,7 +107,7 @@ public class GwtTester extends ServletUtilBase {
       filters.add(new ColumnFilter(Visibility.DISPLAY, columns, new Long(5)));
       filters.add(new RowFilter(Visibility.HIDE, new Column("Ro1Awesome", "", UIDisplayType.TEXT),
           FilterOperation.EQUAL, "captain1", new Long(1)));
-      FilterGroup group = new FilterGroup("group100", formId, filters, true);
+      FilterGroup group = new FilterGroup("group100", formId, filters);
       try {
         SubmissionFilterGroup filterGrp = SubmissionFilterGroup.transform(group, cc);
         filterGrp.persist(cc);

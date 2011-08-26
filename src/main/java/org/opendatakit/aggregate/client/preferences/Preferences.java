@@ -19,10 +19,13 @@ package org.opendatakit.aggregate.client.preferences;
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.SecureGWT;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
 public class Preferences {
   
+  private static final String NULL_PREFERENCES_ERROR = "ERROR: somehow got a null preference summary";
+
   private static String googleMapsApiKey;
   
   private static Boolean odkTablesEnabled;
@@ -34,6 +37,11 @@ public class Preferences {
       }
 
       public void onSuccess(PreferenceSummary summary) {
+        if(summary == null) {
+          GWT.log(NULL_PREFERENCES_ERROR);
+          AggregateUI.getUI().reportError(new Throwable(NULL_PREFERENCES_ERROR));
+        }
+        
         googleMapsApiKey = summary.getGoogleMapsApiKey();
         odkTablesEnabled = summary.getOdkTablesEnabled();
       }
