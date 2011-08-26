@@ -25,18 +25,20 @@ public class Preferences {
   
   private static String googleMapsApiKey;
   
+  private static Boolean odkTablesEnabled;
 
   public static void updatePreferences() {
-    SecureGWT.getPreferenceService().getGoogleMapsKey(new AsyncCallback<String>() {
+    SecureGWT.getPreferenceService().getPreferences(new AsyncCallback<PreferenceSummary>() {
       public void onFailure(Throwable caught) {
           AggregateUI.getUI().reportError(caught);
       }
 
-      public void onSuccess(String key) {
-        googleMapsApiKey = key;
+      public void onSuccess(PreferenceSummary summary) {
+        googleMapsApiKey = summary.getGoogleMapsApiKey();
+        odkTablesEnabled = summary.getOdkTablesEnabled();
       }
     });
-
+    
   }
   
   public static String getGoogleMapsApiKey() {
@@ -44,6 +46,26 @@ public class Preferences {
       return googleMapsApiKey;
     }
     return "";
+  }
+
+  public static Boolean getOdkTablesEnabled() {
+    if(odkTablesEnabled != null) {
+      return odkTablesEnabled;
+    }
+    return Boolean.FALSE;
+  }
+  
+  public static void setOdkTablesBoolean(Boolean enabled) {
+    SecureGWT.getPreferenceService().setOdkTablesEnabled(enabled, new AsyncCallback<Void>() {
+      public void onFailure(Throwable caught) {
+          AggregateUI.getUI().reportError(caught);
+      }
+
+      public void onSuccess(Void void1) {
+        // do nothing
+      }
+    });
+    odkTablesEnabled = enabled;    
   }
   
   public static void setGoogleMapsApiKey(String mapsApiKey) {

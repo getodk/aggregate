@@ -17,8 +17,10 @@
 package org.opendatakit.aggregate.client;
 
 import org.opendatakit.aggregate.client.preferences.Preferences;
+import org.opendatakit.aggregate.client.widgets.EnableOdkTablesCheckbox;
 import org.opendatakit.aggregate.client.widgets.UpdateGMapsKeyButton;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.TextBox;
 
@@ -26,15 +28,27 @@ public class PreferencesSubTab extends AggregateSubTabBase {
 
   // Preferences tab
   private static final String GOOGLE_MAPS_API_KEY_LABEL = "<h2>Google Maps API Key</h2> To obtain a key signup at <a href=\"http://code.google.com/apis/maps/signup.html\"> Google Maps </a>";
-  private TextBox mapsApiKey = new TextBox();
+  private static final String FEATURES_LABEL = "<h2>Aggregate Features</h2>";
+  
+  
+  private TextBox mapsApiKey;
+  private EnableOdkTablesCheckbox odkTablesEnable;
+  
   
   public PreferencesSubTab() {
     HTML labelMapsKey = new HTML(GOOGLE_MAPS_API_KEY_LABEL);
-    mapsApiKey.setText(Preferences.getGoogleMapsApiKey());
-
     add(labelMapsKey);
+    
+    mapsApiKey = new TextBox();
+    mapsApiKey.setText(Preferences.getGoogleMapsApiKey());
     add(mapsApiKey);
     add(new UpdateGMapsKeyButton(mapsApiKey));
+    
+    HTML features = new HTML(FEATURES_LABEL);
+    add(features);
+    
+    odkTablesEnable = new EnableOdkTablesCheckbox(Preferences.getOdkTablesEnabled());
+    add(odkTablesEnable);
   }
 
 
@@ -45,7 +59,10 @@ public class PreferencesSubTab extends AggregateSubTabBase {
   
   @Override
   public void update() {
+    GWT.log("PREFERENCES SUB TAB UPDATE CALLED");
+    Preferences.updatePreferences();    
     mapsApiKey.setText(Preferences.getGoogleMapsApiKey());
+    odkTablesEnable.updateValue(Preferences.getOdkTablesEnabled());
   }
   
 }

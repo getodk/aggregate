@@ -95,38 +95,10 @@ public class SubmissionServiceImpl extends RemoteServiceServlet implements
     ElementFormatter elemFormatter = new UiElementFormatter(cc.getServerURL(),
         headerGenerator.getGeopointIncludes());
 
-	/* TODO: expose and allow selection of the list of namespace types using this API:
-	 * 
-	 * This has 2 modes of operation.
-	 * (1) If propertyNames is null, then the types list of FormElementNamespace values is 
-	 * used to render the output.
-	 * (2) Otherwise, this works as a two-stage filter. The types list of FormElementNamespace
-	 * values is a filter against the list of propertyNames specified.  So if you have an 
-	 * arbitrary list of elements and want only the metadata elements to be reported, you
-	 * would pass [ METADATA ] in the types list.  The resulting subset is then rendered
-	 * (and the resulting row might have no columns).
-	 *  
-	 * @param types -- list of e.g., (METADATA, VALUES) to be rendered.
-	 * @param propertyNames -- joint subset of property names to be rendered.
-	 * @param elemFormatter 
-	 * @param includeParentUid
-	 * @param cc
-	 * @return rendered Row object
-	 * @throws ODKDatastoreException
-	 *
-	 * Example equivalent to what is below:
-	 List<FormElementNamespace> types = new ArrayList<FormElementNamespace>();
-	 types.add(FormElementNamespace.METADATA); // we want metadata
-	 types.add(FormElementNamespace.VALUES); // we want values
-	 Row row = sub.getFormattedValuesAsRow(types, filteredElements,
-			elemFormatter, false, cc);
-	 */
-
     // format row elements
     for (Submission sub : submissions) {
-      Row row = sub.getFormattedValuesAsRow(filteredElements, elemFormatter, false, cc);
+      Row row = sub.getFormattedValuesAsRow(headerGenerator.includedFormElementNamespaces(), filteredElements, elemFormatter, false, cc);
       
-     // Row row = sub.getFormattedNamespaceValuesAsRow(filteredElements, headerGenerator.includedFormElementNamespaces(), elemFormatter, false, cc);
       try {
         SubmissionKey subKey = sub.constructSubmissionKey(form.getTopLevelGroupElement());
         summary.addSubmission(new SubmissionUI(row.getFormattedValues(), subKey.toString()));

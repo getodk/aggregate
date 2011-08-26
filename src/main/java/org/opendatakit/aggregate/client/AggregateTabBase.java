@@ -36,6 +36,15 @@ public class AggregateTabBase extends TabPanel {
     subTabMap.put(subTab, panel);
   }
   
+  protected void hideSubTab(AggregateSubTabBase panel){    
+    remove(panel);
+  }
+  
+  protected void showSubTab(AggregateSubTabBase panel, SubTabs subTab) {
+    int insertIndex = findSubTabIndex(subTab);
+    insert(panel, subTab.getTabLabel(), insertIndex);
+  }
+  
   /**
    * register handler to manage tab selection change (and selecting our tab)
    * 

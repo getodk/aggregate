@@ -52,7 +52,7 @@ public class NavLinkBar extends FlowPanel {
         loginLogoutLink.setHref(LOGIN_URL_PATH);
         loginLogoutLink.setText("Log In");
      }
-     AggregateUI.getUI().contentLoaded();
+    AggregateUI.resize();
   }
   
   public Boolean showHelpBalloons() {

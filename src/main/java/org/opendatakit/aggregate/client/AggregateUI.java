@@ -54,513 +54,520 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class AggregateUI implements EntryPoint {
 
-	private UrlHash hash;
-	private Label errorMsgLabel;
-	
-   private VerticalPanel wrappingLayoutPanel;	
-	private HorizontalPanel layoutPanel;
-	private ScrollPanel helpPanel;
-	private TreeItem rootItem;
+  private UrlHash hash;
+  private Label errorMsgLabel;
 
-	private NavLinkBar settingsBar;
-	
-   private DecoratedTabPanel mainNav;
+  private VerticalPanel wrappingLayoutPanel;
+  private HorizontalPanel layoutPanel;
+  private ScrollPanel helpPanel;
+  private TreeItem rootItem;
 
-	// tab datastructures	
-	private HashMap<Tabs, AggregateTabBase> tabMap;
-	private ArrayList<Tabs> tabPosition;
+  private NavLinkBar settingsBar;
 
-	private RefreshTimer timer;
+  private DecoratedTabPanel mainNav;
 
-	private static AggregateUI singleton = null;
+  // tab datastructures
+  private HashMap<Tabs, AggregateTabBase> tabMap;
+  private ArrayList<Tabs> tabPosition;
 
-	/***********************************
-	 ***** SINGLETON FETCHING ******
-	 ***********************************/
+  private RefreshTimer timer;
 
-	public static synchronized final AggregateUI getUI() {
-		if (singleton == null) {
-			// if you get here, you've put something in the AggregateUI()
-			// constructor that should have been put in the onModuleLoad()
-			// method.
-			GWT.log("AggregateUI.getUI() called before singleton has been initialized");
-		}
-		return singleton;
-	}
+  private static AggregateUI singleton = null;
 
-	public RefreshTimer getTimer() {
-		return timer;
-	}
+  /***********************************
+   ***** SINGLETON FETCHING ******
+   ***********************************/
 
-	/***********************************
-	 ***** INITIALIZATION ******
-	 ***********************************/
+  public static synchronized final AggregateUI getUI() {
+    if (singleton == null) {
+      // if you get here, you've put something in the AggregateUI()
+      // constructor that should have been put in the onModuleLoad()
+      // method.
+      GWT.log("AggregateUI.getUI() called before singleton has been initialized");
+    }
+    return singleton;
+  }
 
-	private AggregateUI() {
-		/*
-		 * CRITICAL NOTE: Do not do **anything** in this constructor that might
-		 * cause something underneath to call AggregateUI.get()
-		 * 
-		 * The singleton is not yet assigned!!!
-		 */
-		singleton = null;
-		timer = new RefreshTimer(this);
+  public RefreshTimer getTimer() {
+    return timer;
+  }
 
-		// create tab datastructures
-		tabMap = new HashMap<Tabs, AggregateTabBase>();
-		tabPosition = new ArrayList<Tabs>();
+  /***********************************
+   ***** INITIALIZATION ******
+   ***********************************/
 
-		wrappingLayoutPanel = new VerticalPanel();
-		errorMsgLabel = new Label();
-		layoutPanel = new HorizontalPanel();
-		helpPanel = new ScrollPanel();
+  private AggregateUI() {
+    /*
+     * CRITICAL NOTE: Do not do **anything** in this constructor that might
+     * cause something underneath to call AggregateUI.get()
+     * 
+     * The singleton is not yet assigned!!!
+     */
+    singleton = null;
+    timer = new RefreshTimer(this);
 
-		mainNav = new DecoratedTabPanel();
-		mainNav.getElement().setId("mainNav");
-		mainNav.addSelectionHandler(new RefreshSelectionHandler<Integer>());
+    // create tab datastructures
+    tabMap = new HashMap<Tabs, AggregateTabBase>();
+    tabPosition = new ArrayList<Tabs>();
 
-		settingsBar = new NavLinkBar();
-		
-		// Create help panel
-		Tree helpTree = new Tree();
-		rootItem = new TreeItem();
-		helpTree.addItem(rootItem);
-		helpTree.addOpenHandler(new RefreshOpenHandler<TreeItem>());
-		helpTree.addCloseHandler(new RefreshCloseHandler<TreeItem>());
-		helpTree.getElement().setId("help_tree");
+    wrappingLayoutPanel = new VerticalPanel();
+    errorMsgLabel = new Label();
+    layoutPanel = new HorizontalPanel();
+    helpPanel = new ScrollPanel();
 
-		helpPanel.add(helpTree);
-		helpPanel.getElement().setId("help_panel");
+    mainNav = new DecoratedTabPanel();
+    mainNav.getElement().setId("mainNav");
+    mainNav.addSelectionHandler(new RefreshSelectionHandler<Integer>());
 
-		// add the error message info...
-		errorMsgLabel.setStyleName("error_message");
-		errorMsgLabel.setVisible(false);
-		wrappingLayoutPanel.add(errorMsgLabel);
-		wrappingLayoutPanel.add(layoutPanel);
+    settingsBar = new NavLinkBar();
 
+    // Create help panel
+    Tree helpTree = new Tree();
+    rootItem = new TreeItem();
+    helpTree.addItem(rootItem);
+    helpTree.addOpenHandler(new RefreshOpenHandler<TreeItem>());
+    helpTree.addCloseHandler(new RefreshCloseHandler<TreeItem>());
+    helpTree.getElement().setId("help_tree");
 
-		// add to layout
-		layoutPanel.add(mainNav);
-		layoutPanel.getElement().setId("layout_panel");
+    helpPanel.add(helpTree);
+    helpPanel.getElement().setId("help_panel");
 
-		RootPanel.get("dynamic_content").add(wrappingLayoutPanel);
-		RootPanel.get("dynamic_content").add(settingsBar);
-		RootPanel.get("dynamic_content").add(
-				new HTML("<img src=\"images/odk_color.png\" id=\"odk_aggregate_logo\" />"));
-	}
+    // add the error message info...
+    errorMsgLabel.setStyleName("error_message");
+    errorMsgLabel.setVisible(false);
+    wrappingLayoutPanel.add(errorMsgLabel);
+    wrappingLayoutPanel.add(layoutPanel);
 
-	private void addTabToDatastructures(AggregateTabBase tabPanel, Tabs tab) {
-		int insertIndex = tabPosition.size();
+    // add to layout
+    layoutPanel.add(mainNav);
+    layoutPanel.getElement().setId("layout_panel");
 
-		// add tabPanel into position
-		tabPosition.add(insertIndex, tab);
-		tabMap.put(tab, tabPanel);
-	}
+    RootPanel.get("dynamic_content").add(wrappingLayoutPanel);
+    RootPanel.get("dynamic_content").add(settingsBar);
+    RootPanel.get("dynamic_content").add(
+        new HTML("<img src=\"images/odk_color.png\" id=\"odk_aggregate_logo\" />"));
+  }
 
-	@Override
-	public void onModuleLoad() {
-		// Get url hash.
-		hash = UrlHash.getHash();
-		hash.get();
-		errorMsgLabel.setVisible(false);
-		userInfo = null;
+  private void addTabToDatastructures(AggregateTabBase tabPanel, Tabs tab) {
+    int insertIndex = tabPosition.size();
 
-		// assign the singleton here...
-		singleton = this;
+    // add tabPanel into position
+    tabPosition.add(insertIndex, tab);
+    tabMap.put(tab, tabPanel);
+  }
 
-		// start the refresh timer...
-		timer.setInitialized();
+  @Override
+  public void onModuleLoad() {
+    // Get url hash.
+    hash = UrlHash.getHash();
+    hash.get();
+    errorMsgLabel.setVisible(false);
+    userInfo = null;
 
-		// Update the user security info.
-		// This gets the identity and privileges of the
-		// user to the UI and the realm of that user.
-		// The success callback then renders the requested
-		// page and warms up the various sub-tabs and
-		// displays the highlighted tab.
-		updateSecurityInfo();
-	}
+    // assign the singleton here...
+    singleton = this;
 
-	private void updateSecurityInfo() {
-		lastUserInfoUpdateAttemptTimestamp = lastRealmInfoUpdateAttemptTimestamp = System
-		.currentTimeMillis();
-		// the first realm request will often fail because the cookie
-		// should/could be null (e.g., for anonymous users).
-		SecureGWT.getSecurityService().getRealmInfo(Cookies.getCookie("JSESSIONID"),
-				new AsyncCallback<RealmSecurityInfo>() {
+    // start the refresh timer...
+    timer.setInitialized();
 
-			@Override
-			public void onFailure(Throwable caught) {
-				
-				// OK.  So it failed.  If it did, just try doing everything 
-				// again.  We should have a valid session cookie after the 
-				// first failure, so these should all then work.
-				
-				SecureGWT.getSecurityService().getUserInfo(new AsyncCallback<UserSecurityInfo>() {
+    // Update the user security info.
+    // This gets the identity and privileges of the
+    // user to the UI and the realm of that user.
+    // The success callback then renders the requested
+    // page and warms up the various sub-tabs and
+    // displays the highlighted tab.
+    initializeUserAndPreferences();
+  }
 
-					@Override
-					public void onFailure(Throwable caught) {
-						reportError(caught);
-					}
+  private void initializeUserAndPreferences() {
+    lastUserInfoUpdateAttemptTimestamp = lastRealmInfoUpdateAttemptTimestamp = System
+        .currentTimeMillis();
+   
+    
+    // the first realm request will often fail because the cookie
+    // should/could be null (e.g., for anonymous users).
+    SecureGWT.getSecurityService().getRealmInfo(Cookies.getCookie("JSESSIONID"),
+        new AsyncCallback<RealmSecurityInfo>() {
 
-					@Override
-					public void onSuccess(UserSecurityInfo result) {
-						userInfo = result;
-						if (realmInfo != null && userInfo != null) {
-							commonUserInfoUpdateCompleteAction();
-						}
-					}
-				});
-				
-				SecureGWT.getSecurityService().getRealmInfo(Cookies.getCookie("JSESSIONID"),
-						new AsyncCallback<RealmSecurityInfo>() {
+          @Override
+          public void onFailure(Throwable caught) {
 
-					@Override
-					public void onFailure(Throwable caught) {
-						reportError(caught);
-					}
+            // OK. So it failed. If it did, just try doing everything
+            // again. We should have a valid session cookie after the
+            // first failure, so these should all then work.
+            Preferences.updatePreferences();
+            SecureGWT.getSecurityService().getUserInfo(new AsyncCallback<UserSecurityInfo>() {
 
-					@Override
-					public void onSuccess(RealmSecurityInfo result) {
-						realmInfo = result;
-						if (realmInfo != null && userInfo != null) {
-							commonUserInfoUpdateCompleteAction();
-						}
-					}
-				});
-			}
+              @Override
+              public void onFailure(Throwable caught) {
+                reportError(caught);
+              }
 
-			@Override
-			public void onSuccess(RealmSecurityInfo result) {
-				realmInfo = result;
-				// it worked the first time! Now do the user info request.
-				SecureGWT.getSecurityService().getUserInfo(new AsyncCallback<UserSecurityInfo>() {
+              @Override
+              public void onSuccess(UserSecurityInfo result) {
+                userInfo = result;
+                if (realmInfo != null && userInfo != null) {
+                  commonUserInfoUpdateCompleteAction();
+                }
+              }
+            });
 
-					@Override
-					public void onFailure(Throwable caught) {
-						reportError(caught);
-					}
+            SecureGWT.getSecurityService().getRealmInfo(Cookies.getCookie("JSESSIONID"),
+                new AsyncCallback<RealmSecurityInfo>() {
 
-					@Override
-					public void onSuccess(UserSecurityInfo result) {
-						userInfo = result;
-						if (realmInfo != null && userInfo != null) {
-							commonUserInfoUpdateCompleteAction();
-						}
-					}
-				});
-			}
-		});
-	}
+                  @Override
+                  public void onFailure(Throwable caught) {
+                    reportError(caught);
+                  }
 
-	private void commonUserInfoUpdateCompleteAction() {
-	   settingsBar.update();
-		Preferences.updatePreferences();
+                  @Override
+                  public void onSuccess(RealmSecurityInfo result) {
+                    realmInfo = result;
+                    if (realmInfo != null && userInfo != null) {
+                      commonUserInfoUpdateCompleteAction();
+                    }
+                  }
+                });
+          }
 
-		SubmissionTabUI submissions = new SubmissionTabUI(this);
-		addTabToDatastructures(submissions, Tabs.SUBMISSIONS);
+          @Override
+          public void onSuccess(RealmSecurityInfo result) {
+            Preferences.updatePreferences();
+            realmInfo = result;
+            // it worked the first time! Now do the user info request.
+            SecureGWT.getSecurityService().getUserInfo(new AsyncCallback<UserSecurityInfo>() {
 
-		ManageTabUI management = new ManageTabUI(this);
-		addTabToDatastructures(management, Tabs.MANAGEMENT);
+              @Override
+              public void onFailure(Throwable caught) {
+                reportError(caught);
+              }
 
-		AdminTabUI admin = new AdminTabUI(this);
-		addTabToDatastructures(admin, Tabs.ADMIN);
+              @Override
+              public void onSuccess(UserSecurityInfo result) {
+                userInfo = result;
+                if (realmInfo != null && userInfo != null) {
+                  commonUserInfoUpdateCompleteAction();
+                }
+              }
+            });
+          }
+        });
+  }
 
-		// Create the only tab that ALL users can see sub menu navigation
-		mainNav.add(submissions, Tabs.SUBMISSIONS.getTabLabel());
-		mainNav.getElement().getFirstChildElement().getFirstChildElement().addClassName("tab_measure_1");
+  private void commonUserInfoUpdateCompleteAction() {
+    settingsBar.update();
 
-		if (userInfo != null) {
+    SubmissionTabUI submissions = new SubmissionTabUI(this);
+    addTabToDatastructures(submissions, Tabs.SUBMISSIONS);
 
-			if (authorizedForTab(Tabs.MANAGEMENT)) {
-				mainNav.add(management, Tabs.MANAGEMENT.getTabLabel());
-			}
+    ManageTabUI management = new ManageTabUI(this);
+    addTabToDatastructures(management, Tabs.MANAGEMENT);
 
-			if (authorizedForTab(Tabs.ADMIN)) {
-				mainNav.add(admin, Tabs.ADMIN.getTabLabel());
-			}
+    AdminTabUI admin = new AdminTabUI(this);
+    addTabToDatastructures(admin, Tabs.ADMIN);
 
-			// Select the correct menu item based on url hash.
-			int selected = 0;
-			String mainMenu = hash.get(UrlHash.MAIN_MENU);
-			for (int i = 0; i < tabPosition.size() && i < mainNav.getWidgetCount() ; i++) {
-				if (mainMenu.equals(tabPosition.get(i).getHashString())) {
-					selected = i;
-				}
-			}
-			mainNav.selectTab(selected); 
+    // Create the only tab that ALL users can see sub menu navigation
+    mainNav.add(submissions, Tabs.SUBMISSIONS.getTabLabel());
+    mainNav.getElement().getFirstChildElement().getFirstChildElement()
+        .addClassName("tab_measure_1");
 
-		}
+    if (userInfo != null) {
 
-		// AND schedule an async operation to
-		// refresh the tabs that are not selected.
-		Timer t = new Timer() {
-			@Override
-			public void run() {
-				// warm up the underlying UI tabs...
-				for (AggregateTabBase tab : tabMap.values()) {
-					tab.warmUp();
-				}
-			}
-		};
-		t.schedule(1000);
+      if (authorizedForTab(Tabs.MANAGEMENT)) {
+        mainNav.add(management, Tabs.MANAGEMENT.getTabLabel());
+      }
 
-		contentLoaded();
-	}
+      if (authorizedForTab(Tabs.ADMIN)) {
+        mainNav.add(admin, Tabs.ADMIN.getTabLabel());
+      }
 
-	// Let's JavaScript know that the GWT content has been loaded
-	// Currently calls into javascript/resize.js, if we add more JavaScript
-	// then that should be changed.
-	public native void contentLoaded() /*-{
+      // Select the correct menu item based on url hash.
+      int selected = 0;
+      String mainMenu = hash.get(UrlHash.MAIN_MENU);
+      for (int i = 0; i < tabPosition.size() && i < mainNav.getWidgetCount(); i++) {
+        if (mainMenu.equals(tabPosition.get(i).getHashString())) {
+          selected = i;
+        }
+      }
+      mainNav.selectTab(selected);
+
+    }
+
+    // AND schedule an async operation to
+    // refresh the tabs that are not selected.
+    Timer t = new Timer() {
+      @Override
+      public void run() {
+        // warm up the underlying UI tabs...
+        for (AggregateTabBase tab : tabMap.values()) {
+          tab.warmUp();
+        }
+      }
+    };
+    t.schedule(1000);
+
+    contentLoaded();
+  }
+
+  // Let's JavaScript know that the GWT content has been loaded
+  // Currently calls into javascript/resize.js, if we add more JavaScript
+  // then that should be changed.
+  public native void contentLoaded() /*-{
 		$wnd.gwtContentLoaded();
-    }-*/;
-	
-	public native static void resize() /*-{
-	    $wnd.onWindowResize();
-	}-*/;
+  }-*/;
 
-	/***********************************
-	 ****** NAVIGATION ******
-	 ***********************************/
+  public native static void resize() /*-{
+		$wnd.onWindowResize();
+  }-*/;
 
-	public void redirectToSubTab(SubTabs subTab) {
-		for (Tabs tab : tabPosition) {
+  /***********************************
+   ****** NAVIGATION ******
+   ***********************************/
 
-			AggregateTabBase tabObj = tabMap.get(tab);
-			if (tabObj == null) {
-				continue;
-			}
+  public void redirectToSubTab(SubTabs subTab) {
+    for (Tabs tab : tabPosition) {
 
-			SubTabInterface subTabObj = tabObj.getSubTab(subTab);
-			if (subTabObj != null) {
-				// found the tab
-				int index = tabPosition.indexOf(tab);
-				mainNav.selectTab(index);
-				tabObj.selectTab(tabObj.findSubTabIndex(subTab));
+      AggregateTabBase tabObj = tabMap.get(tab);
+      if (tabObj == null) {
+        continue;
+      }
 
-			}
-		}
-		resize();
-	}
+      SubTabInterface subTabObj = tabObj.getSubTab(subTab);
+      if (subTabObj != null) {
+        // found the tab
+        int index = tabPosition.indexOf(tab);
+        mainNav.selectTab(index);
+        tabObj.selectTab(tabObj.findSubTabIndex(subTab));
 
-	public SubTabInterface getSubTab(SubTabs subTabType) {
-		SubTabInterface subTab = null;
+      }
+    }
+    resize();
+  }
 
-		for (AggregateTabBase tab : tabMap.values()) {
-			subTab = tab.getSubTab(subTabType);
-			if (subTab != null) {
-				return subTab;
-			}
-		}
+  public SubTabInterface getSubTab(SubTabs subTabType) {
+    SubTabInterface subTab = null;
 
-		return subTab;
-	}
+    for (AggregateTabBase tab : tabMap.values()) {
+      subTab = tab.getSubTab(subTabType);
+      if (subTab != null) {
+        return subTab;
+      }
+    }
 
-	void setSubMenuSelectionHandler(final TabPanel menuTab, final Tabs menu, final SubTabs[] subMenus) {
-		// add the mainNav selection handler for this menu...
-		mainNav.addSelectionHandler(new SelectionHandler<Integer>() {
-			@Override
-			public void onSelection(SelectionEvent<Integer> event) {
-				if (userInfo == null) {
-					GWT.log("getSubMenuSelectionHandler: No userInfo - not setting selection");
-					return;
-				}
+    return subTab;
+  }
+  
+  public AggregateTabBase getTab(Tabs tabType) {
+    return tabMap.get(tabType);
+  }
 
-				int selected = event.getSelectedItem();
-				String tabHash = menu.getHashString();
+  void setSubMenuSelectionHandler(final TabPanel menuTab, final Tabs menu, final SubTabs[] subMenus) {
+    // add the mainNav selection handler for this menu...
+    mainNav.addSelectionHandler(new SelectionHandler<Integer>() {
+      @Override
+      public void onSelection(SelectionEvent<Integer> event) {
+        if (userInfo == null) {
+          GWT.log("getSubMenuSelectionHandler: No userInfo - not setting selection");
+          return;
+        }
 
-				Tabs tab = tabPosition.get(selected);
+        int selected = event.getSelectedItem();
+        String tabHash = menu.getHashString();
 
-				if (tab == null) {
-					return;
-				}
+        Tabs tab = tabPosition.get(selected);
 
-				if (tabHash.equals(tab.getHashString())) {
+        if (tab == null) {
+          return;
+        }
 
-					if (!authorizedForTab(tab)) {
-						return;
-					}
+        if (tabHash.equals(tab.getHashString())) {
 
-					// and select the appropriate subtab...
-					AggregateTabBase tabObj = tabMap.get(menu);
-					if (tabObj != null) {
-						tabObj.selectTab(tabObj.findSubTabIndexFromHash(hash));
-					}
-				}
-			}
-		});
+          if (!authorizedForTab(tab)) {
+            return;
+          }
 
-		menuTab.addBeforeSelectionHandler(new BeforeSelectionHandler<Integer>() {
+          // and select the appropriate subtab...
+          AggregateTabBase tabObj = tabMap.get(menu);
+          if (tabObj != null) {
+            tabObj.selectTab(tabObj.findSubTabIndexFromHash(hash));
+          }
+        }
+      }
+    });
 
-			@Override
-			public void onBeforeSelection(BeforeSelectionEvent<Integer> event) {
-				// allow the currently-selected SubTab to refuse the tab selection.
-				// refusal should only occur after user confirmation.
-				if (!getTimer().canLeaveCurrentSubTab()) {
-					event.cancel();
-				}
-			}
+    menuTab.addBeforeSelectionHandler(new BeforeSelectionHandler<Integer>() {
 
-		});
+      @Override
+      public void onBeforeSelection(BeforeSelectionEvent<Integer> event) {
+        // allow the currently-selected SubTab to refuse the tab selection.
+        // refusal should only occur after user confirmation.
+        if (!getTimer().canLeaveCurrentSubTab()) {
+          event.cancel();
+        }
+      }
 
-		menuTab.addSelectionHandler(new SelectionHandler<Integer>() {
-			@Override
-			public void onSelection(SelectionEvent<Integer> event) {
-				if (userInfo == null) {
-					GWT.log("getSubMenuSelectionHandler: No userInfo - not setting subMenu selection");
-					return;
-				}
-				int selected = event.getSelectedItem();
-				clearError();
-				hash.clear();
-				hash.set(UrlHash.MAIN_MENU, menu.getHashString());
-				hash.set(UrlHash.SUB_MENU, subMenus[selected].getHashString());
-				getTimer().setCurrentSubTab(subMenus[selected]);
-				hash.put();
-				changeHelpPanel(subMenus[selected]);
-			}
-		});
-	}
+    });
 
-	native void redirect(String url)
-	/*-{
+    menuTab.addSelectionHandler(new SelectionHandler<Integer>() {
+      @Override
+      public void onSelection(SelectionEvent<Integer> event) {
+        if (userInfo == null) {
+          GWT.log("getSubMenuSelectionHandler: No userInfo - not setting subMenu selection");
+          return;
+        }
+        int selected = event.getSelectedItem();
+        clearError();
+        hash.clear();
+        hash.set(UrlHash.MAIN_MENU, menu.getHashString());
+        hash.set(UrlHash.SUB_MENU, subMenus[selected].getHashString());
+        getTimer().setCurrentSubTab(subMenus[selected]);
+        hash.put();
+        changeHelpPanel(subMenus[selected]);
+      }
+    });
+  }
+
+  native void redirect(String url)
+  /*-{
 		$wnd.location.replace(url);
 
   }-*/;
 
-	/***********************************
-	 ****** SECURITY ******
-	 ***********************************/
+  /***********************************
+   ****** SECURITY ******
+   ***********************************/
 
-	private boolean authorizedForTab(Tabs tab) {
-		switch (tab) {
-		case SUBMISSIONS:
-			return userInfo.getGrantedAuthorities().contains(GrantedAuthorityName.ROLE_DATA_VIEWER);
-		case MANAGEMENT:
-			return userInfo.getGrantedAuthorities().contains(GrantedAuthorityName.ROLE_DATA_OWNER);
-		case ADMIN:
-			return userInfo.getGrantedAuthorities().contains(GrantedAuthorityName.ROLE_SITE_ACCESS_ADMIN);
-		default:
-			return false;
-		}
-	}
+  private boolean authorizedForTab(Tabs tab) {
+    switch (tab) {
+    case SUBMISSIONS:
+      return userInfo.getGrantedAuthorities().contains(GrantedAuthorityName.ROLE_DATA_VIEWER);
+    case MANAGEMENT:
+      return userInfo.getGrantedAuthorities().contains(GrantedAuthorityName.ROLE_DATA_OWNER);
+    case ADMIN:
+      return userInfo.getGrantedAuthorities().contains(GrantedAuthorityName.ROLE_SITE_ACCESS_ADMIN);
+    default:
+      return false;
+    }
+  }
 
-	private long lastUserInfoUpdateAttemptTimestamp = 0L;
-	private UserSecurityInfo userInfo = null;
-	private long lastRealmInfoUpdateAttemptTimestamp = 0L;
-	private RealmSecurityInfo realmInfo = null;
+  private long lastUserInfoUpdateAttemptTimestamp = 0L;
+  private UserSecurityInfo userInfo = null;
+  private long lastRealmInfoUpdateAttemptTimestamp = 0L;
+  private RealmSecurityInfo realmInfo = null;
 
-	public UserSecurityInfo getUserInfo() {
-		if (userInfo == null) {
-			GWT.log("AggregateUI.getUserInfo: userInfo is null");
-		}
-		if (lastUserInfoUpdateAttemptTimestamp + RefreshTimer.SECURITY_REFRESH_INTERVAL < System
-				.currentTimeMillis()) {
-			// record the attempt
-			lastUserInfoUpdateAttemptTimestamp = System.currentTimeMillis();
-			GWT.log("AggregateUI.getUserInfo: triggering refresh of userInfo");
-			SecureGWT.getSecurityService().getUserInfo(new AsyncCallback<UserSecurityInfo>() {
+  public UserSecurityInfo getUserInfo() {
+    if (userInfo == null) {
+      GWT.log("AggregateUI.getUserInfo: userInfo is null");
+    }
+    if (lastUserInfoUpdateAttemptTimestamp + RefreshTimer.SECURITY_REFRESH_INTERVAL < System
+        .currentTimeMillis()) {
+      // record the attempt
+      lastUserInfoUpdateAttemptTimestamp = System.currentTimeMillis();
+      GWT.log("AggregateUI.getUserInfo: triggering refresh of userInfo");
+      SecureGWT.getSecurityService().getUserInfo(new AsyncCallback<UserSecurityInfo>() {
 
-				@Override
-				public void onFailure(Throwable caught) {
-					reportError(caught);
-				}
+        @Override
+        public void onFailure(Throwable caught) {
+          reportError(caught);
+        }
 
-				@Override
-				public void onSuccess(UserSecurityInfo result) {
-					userInfo = result;
-				}
-			});
+        @Override
+        public void onSuccess(UserSecurityInfo result) {
+          userInfo = result;
+        }
+      });
 
-		}
-		return userInfo;
-	}
+    }
+    return userInfo;
+  }
 
-	public RealmSecurityInfo getRealmInfo() {
-		if (realmInfo == null) {
-			GWT.log("AggregateUI.getRealmInfo: realmInfo is null");
-		}
-		if (lastRealmInfoUpdateAttemptTimestamp + RefreshTimer.SECURITY_REFRESH_INTERVAL < System
-				.currentTimeMillis()) {
-			// record the attempt
-			lastRealmInfoUpdateAttemptTimestamp = System.currentTimeMillis();
-			GWT.log("AggregateUI.getRealmInfo: triggering refresh of realmInfo");
-			SecureGWT.getSecurityService().getRealmInfo(Cookies.getCookie("JSESSIONID"),
-					new AsyncCallback<RealmSecurityInfo>() {
+  public RealmSecurityInfo getRealmInfo() {
+    if (realmInfo == null) {
+      GWT.log("AggregateUI.getRealmInfo: realmInfo is null");
+    }
+    if (lastRealmInfoUpdateAttemptTimestamp + RefreshTimer.SECURITY_REFRESH_INTERVAL < System
+        .currentTimeMillis()) {
+      // record the attempt
+      lastRealmInfoUpdateAttemptTimestamp = System.currentTimeMillis();
+      GWT.log("AggregateUI.getRealmInfo: triggering refresh of realmInfo");
+      SecureGWT.getSecurityService().getRealmInfo(Cookies.getCookie("JSESSIONID"),
+          new AsyncCallback<RealmSecurityInfo>() {
 
-				@Override
-				public void onFailure(Throwable caught) {
-					reportError(caught);
-				}
+            @Override
+            public void onFailure(Throwable caught) {
+              reportError(caught);
+            }
 
-				@Override
-				public void onSuccess(RealmSecurityInfo result) {
-					realmInfo = result;
-				}
-			});
-		}
-		return realmInfo;
-	}
+            @Override
+            public void onSuccess(RealmSecurityInfo result) {
+              realmInfo = result;
+            }
+          });
+    }
+    return realmInfo;
+  }
 
-	/***********************************
-	 ****** HELP STUFF ******
-	 ***********************************/
+  /***********************************
+   ****** HELP STUFF ******
+   ***********************************/
 
-	private void changeHelpPanel(SubTabs subMenu) {
-		// change root item
-		rootItem.setText(subMenu + " Help");
-		rootItem.removeItems();
-
-		SubTabInterface subTabObj = getSubTab(subMenu);
-      if (subTabObj != null) {
-        HelpSliderConsts[] helpVals = subTabObj.getHelpSliderContent();
+  private void changeHelpPanel(SubTabs subMenu) {
+    // change root item
+    rootItem.setText(subMenu + " Help");
+    rootItem.removeItems();
+    SubTabInterface subTabObj = getSubTab(subMenu);
+    if (subTabObj != null) {
+      HelpSliderConsts[] helpVals = subTabObj.getHelpSliderContent();
+      if (helpVals != null) {
         for (int i = 0; i < helpVals.length; i++) {
           TreeItem helpItem = new TreeItem(helpVals[i].getTitle());
           TreeItem content = new TreeItem(helpVals[i].getContent());
-          helpItem.setSelected(false);
-          content.setSelected(false);
+          helpItem.setState(false);
           helpItem.addItem(content);
           rootItem.addItem(helpItem);
-       }
+        }
       }
-	}
-	
-	  public void displayHelpPanel() {
-	    wrappingLayoutPanel.add(helpPanel);
-	    contentLoaded();
-	  }
+    }
+    rootItem.setState(true);
+    resize();
+  }
 
-	  public void hideHelpPanel() {
-	    wrappingLayoutPanel.remove(helpPanel);
-	    contentLoaded();
-	  }
-	  
-	  public Boolean displayingHelpBalloons() {
-	    return settingsBar.showHelpBalloons();
-	  }
-	
+  public void displayHelpPanel() {
+    wrappingLayoutPanel.add(helpPanel);
+    resize();
+  }
 
-	/***********************************
-	 ****** ERROR STUFF ******
-	 ***********************************/
-	public void reportError(Throwable t) {
-		if (t instanceof org.opendatakit.common.persistence.client.exception.DatastoreFailureException) {
-			errorMsgLabel.setText("Error: " + t.getMessage());
-			errorMsgLabel.setVisible(true);
-		} else if (t instanceof org.opendatakit.common.security.client.exception.AccessDeniedException) {
-			errorMsgLabel
-			.setText("You do not have permission for this action.\nError: " + t.getMessage());
-			errorMsgLabel.setVisible(true);
-		} else if (t instanceof InvocationException) {
-			redirect(GWT.getHostPageBaseURL() + UIConsts.HOST_PAGE_BASE_ADDR);
-		} else {
-			errorMsgLabel.setText("Error: " + t.getMessage());
-			errorMsgLabel.setVisible(true);
-		}
-	}
+  public void hideHelpPanel() {
+    wrappingLayoutPanel.remove(helpPanel);
+    resize();
+  }
 
-	public void clearError() {
-		errorMsgLabel.setVisible(false);
-		errorMsgLabel.setText("");
-	}
+  public Boolean displayingHelpBalloons() {
+    return settingsBar.showHelpBalloons();
+  }
+
+  /***********************************
+   ****** ERROR STUFF ******
+   ***********************************/
+  public void reportError(Throwable t) {
+    if (t instanceof org.opendatakit.common.persistence.client.exception.DatastoreFailureException) {
+      errorMsgLabel.setText("Error: " + t.getMessage());
+      errorMsgLabel.setVisible(true);
+    } else if (t instanceof org.opendatakit.common.security.client.exception.AccessDeniedException) {
+      errorMsgLabel
+          .setText("You do not have permission for this action.\nError: " + t.getMessage());
+      errorMsgLabel.setVisible(true);
+    } else if (t instanceof InvocationException) {
+      redirect(GWT.getHostPageBaseURL() + UIConsts.HOST_PAGE_BASE_ADDR);
+    } else {
+      errorMsgLabel.setText("Error: " + t.getMessage());
+      errorMsgLabel.setVisible(true);
+    }
+  }
+
+  public void clearError() {
+    errorMsgLabel.setVisible(false);
+    errorMsgLabel.setText("");
+  }
 
 }
