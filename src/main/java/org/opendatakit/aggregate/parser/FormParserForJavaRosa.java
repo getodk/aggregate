@@ -469,7 +469,7 @@ public class FormParserForJavaRosa {
 
     Form formInfo = Form.createOrFetchFormId(rootElementDefn, isEncryptedForm,
     					title, xmlBytes, isDownloadEnabled, cc);
-    boolean sameXForm = formInfo.isNewlyCreated();
+    boolean newlyCreatedXForm = formInfo.isNewlyCreated();
 
     Set<Map.Entry<String,MultiPartFormItem>> fileSet = uploadedFormItems.getFileNameEntrySet();
     for ( Map.Entry<String,MultiPartFormItem> itm : fileSet) {
@@ -488,7 +488,7 @@ public class FormParserForJavaRosa {
     FormDefinition fdDefined = FormDefinition.getFormDefinition(submissionElementDefn, cc);
     if ( fdDefined != null ) {
         // get most recent form-deletion statuses
-    	if ( !sameXForm ) {
+    	if ( newlyCreatedXForm ) {
     		throw new ODKFormAlreadyExistsException("Internal error: Completely new file has pre-existing form definition");
     	}
     	return;
