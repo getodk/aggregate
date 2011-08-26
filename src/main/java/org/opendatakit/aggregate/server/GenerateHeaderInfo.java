@@ -102,7 +102,11 @@ public class GenerateHeaderInfo {
             String decodeKey = columnHeader.getColumn().getColumnEncoding();
             FormElementKey femKey = new FormElementKey(decodeKey);
             FormElementModel fem = FormElementModel.retrieveFormElementModel(form, femKey);
-
+            
+            if(!filterGroup.getIncludeMetadata() && fem.isMetadata()) {
+              continue;
+            }
+            
             // add to appropriate keep or remove
             if (cf.getVisibility().equals(Visibility.DISPLAY)) {
               addKeepFormElement(fem);
@@ -197,6 +201,10 @@ public class GenerateHeaderInfo {
 
   private void processFilter(String nodeName, FormElementModel node) {
 
+    if(!filterGroup.getIncludeMetadata() && node.isMetadata()) {
+      return;
+    }
+    
     if (includes == null) {
       addNodeToHeader(nodeName, node);
       return;
