@@ -17,7 +17,6 @@
 package org.opendatakit.aggregate.client;
 
 import org.opendatakit.aggregate.client.filter.FilterGroup;
-import org.opendatakit.aggregate.client.form.FormSummary;
 import org.opendatakit.aggregate.client.table.FilterNavigationTable;
 import org.opendatakit.aggregate.client.table.SubmissionTable;
 import org.opendatakit.aggregate.constants.common.FilterConsts;
@@ -31,13 +30,12 @@ import com.google.gwt.user.client.ui.ListBox;
 public class FilterSubTab extends AggregateSubTabBase {
 
   private FilterNavigationTable navTable;
+  
   private HorizontalPanel filtersNSubmissions;
-
   private FiltersDataPanel filtersPanel;
   private SubmissionPanel submissionPanel;
+  
   private FilterGroup currentlyDisplayedFilterGroup;
-  private FormSummary form;
-
   private Boolean displayMetaData;
 
   public FilterSubTab() {
@@ -70,6 +68,7 @@ public class FilterSubTab extends AggregateSubTabBase {
   private void setCurrentlyDisplayedFilterGroup(FilterGroup newFilterGroup) {
     currentlyDisplayedFilterGroup = newFilterGroup;
     currentlyDisplayedFilterGroup.setIncludeMetadata(displayMetaData);
+    navTable.updateNavTable(newFilterGroup);
   }
   
   public FilterGroup getDisplayedFilterGroup() {
@@ -78,38 +77,21 @@ public class FilterSubTab extends AggregateSubTabBase {
     }
     return currentlyDisplayedFilterGroup;
   }
-  
-  private void updateFilterNSubmissionPanels() {
-    FilterGroup filterGroup = getDisplayedFilterGroup();
-    filtersPanel.update(filterGroup);
-    submissionPanel.update(filterGroup);
-  }
-  
-  
-  public void switchForm(FormSummary formSwitch, FilterGroup filterGroup) {
-    form = formSwitch;
-    navTable.updateNavTable(form, filterGroup);
     
-    setCurrentlyDisplayedFilterGroup(filterGroup);
-    updateFilterNSubmissionPanels();
-  }
-
-  public void switchFilterGroupWithinForm(FilterGroup filterGroup) {
-    // verify form remained the same, if not need to use switch form API
-    if (!getDisplayedFilterGroup().getFormId().equals(filterGroup.getFormId())) {
+  public void switchFilterGroup(FilterGroup filterGroup) {
+    // check if filter group is changed, if the same no need to do anything
+    if(getDisplayedFilterGroup().equals(filterGroup)) {
       return;
     }
     setCurrentlyDisplayedFilterGroup(filterGroup);
-    updateFilterNSubmissionPanels();
+    update();
   }
 
   public void removeFilterGroupWithinForm() {
-    FilterGroup blankFilterGroup = new FilterGroup(UIConsts.FILTER_NONE, form.getId(), null);
-    setCurrentlyDisplayedFilterGroup(blankFilterGroup);
-    
-    navTable.updateNavTable(form, getDisplayedFilterGroup());
-    navTable.update();
-    updateFilterNSubmissionPanels();
+    String formId = getDisplayedFilterGroup().getFormId();
+    FilterGroup blankFilterGroup = new FilterGroup(UIConsts.FILTER_NONE, formId, null);
+    setCurrentlyDisplayedFilterGroup(blankFilterGroup);    
+    update();
   }
 
   @Override
@@ -120,10 +102,10 @@ public class FilterSubTab extends AggregateSubTabBase {
   @Override
   public void update() {
     navTable.update();
-    if (form != null) {
-      navTable.updateNavTable(form, getDisplayedFilterGroup());
-    }
-    updateFilterNSubmissionPanels();
+
+    FilterGroup filterGroup = getDisplayedFilterGroup();
+    filtersPanel.update(filterGroup);
+    submissionPanel.update(filterGroup);
   }
 
   public ListBox getListOfPossibleFilterGroups() {

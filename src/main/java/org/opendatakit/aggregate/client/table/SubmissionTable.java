@@ -26,7 +26,6 @@ import org.opendatakit.aggregate.client.submission.SubmissionUISummary;
 import org.opendatakit.aggregate.client.widgets.DeleteSubmissionButton;
 import org.opendatakit.aggregate.client.widgets.RepeatViewButton;
 import org.opendatakit.aggregate.constants.common.UIConsts;
-import org.opendatakit.common.security.common.GrantedAuthorityName;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -42,16 +41,13 @@ public class SubmissionTable extends FlexTable {
   private ArrayList<Column> tableHeaders;
   private ArrayList<SubmissionUI> tableSubmissions;
 
-  public SubmissionTable(SubmissionUISummary summary) {
+  public SubmissionTable(SubmissionUISummary summary, boolean addDeleteButton) {
     tableHeaders = summary.getHeaders();
     tableSubmissions = summary.getSubmissions();
 
     addStyleName("dataTable");
     getElement().setId("submission_table");
-
-    boolean addDeleteButton = AggregateUI.getUI().getUserInfo().getGrantedAuthorities()
-        .contains(GrantedAuthorityName.ROLE_DATA_OWNER);
-
+    
     // setup header
     int headerIndex = 0;
     if (addDeleteButton) {

@@ -49,7 +49,7 @@ public class CopyFilterGroupButton extends AbstractButtonBase implements ClickHa
     FilterGroup newGroup = new FilterGroup(UIConsts.FILTER_NONE, filterGroup.getFormId(), newFilterGroupfilters);
 
     // set the displaying filters to the newly saved filter group
-    parentSubTab.switchFilterGroupWithinForm(newGroup);
+    parentSubTab.switchFilterGroup(newGroup);
     AggregateUI.getUI().getTimer().refreshNow();
   }
 }
