@@ -3,11 +3,65 @@ All rights reserved.
 
 App Engine Java SDK - Release Notes
 
+Version 1.5.3
+=============
+- We've removed the limit on the size of blob uploads using the Blobstore API.
+- You can now send emails with any attachment extension that is not included on
+  the email attachment extension blacklist.
+- Added a getIndexes() method to the DatastoreService to retrieve an
+  application's indexes and their corresponding states.
+- The development server has been updated to understand the reduced index
+  requirements of the 1.5.2 datastore query planner changes.
+- The Datastore Admin functionality can now be enabled directly in the Admin
+  Console.
+- You can now use Remote API to access the services of one App Engine
+  application from a different App Engine application.
+- The Java Testing APIs now default to UTC if no timezone is specified.
+- AppCfg now supports download_app, which will download all files that were
+  uploaded from your war directory.
+- AppCfg now supports the -V (version) and -A (application) flags.
+- Added app_identity api with methods to work with service accounts for
+  asserting identity on outbound HTTP calls.
+    http://code.google.com/appengine/docs/java/appidentity/overview.html
+- Added an improved HRD migration tool that requires a read-only period relative
+  to your datastore write rate (as opposed to your datastore size, which is how
+  the current version behaves). The tool is not yet generally available.  If you
+  are interested in being an early adopter please fill out this form:
+  http://goo.gl/3jrXu
+- Fixed an issue in the Channel API where jsapi was not served with the correct
+  mime type.
+- Fixed an issue where blobs could not be uploaded using HTTPS.
+- Fixed an issue where GQL didn't allow querying for valid kind names
+  containing '.', '-', and ':' by supporting quoted identifiers.
+    http://code.google.com/p/googleappengine/issues/detail?id=2584
+
+Version 1.5.2
+=============
+- You can now specify the minimum pending latency for instances and the maximum
+  number of idle instances for your application in the Admin Console.
+- The datastore now never requires an exploding index.
+    http://code.google.com/appengine/docs/python/datastore/queries.html#Big_Entities_and_Exploding_Indexes
+- The SDK will now never suggest indexes with the same property repeated, as
+  such indexes are likely to be exploding indexes.
+- Datastore stats are now available on a per-namespace basis.
+- The queue details page in the Admin Console now contains request header
+  details, previous run information, and a task payload viewer.
+- You can modify the lease on a task leased from a pull queue using the
+  modifyTaskLease() method.
+- Pull Task maximum size has been increased to 1MB.
+- You can now update the number of available backend instances without needing
+  to first stop the backend using the "backend configure" appcfg directive.
+- You can now set the "References" and "In-Reply-To" headers with the Mail API.
+    http://code.google.com/p/googleappengine/issues/detail?id=2802
+- The whitelist has been updated to include support for JSR 105.
+- When the SDK throws a DatastoreNeedIndexException for a missing index
+  definition, the exception can now be caught.
+
 Version 1.5.1
 =============
 - The development server's datastore and testing service implementations now
   contains logic that closely replicates the consistency guarantees of the High
-  Replication datastore. To use, run the dev_appserver with the flag 
+  Replication datastore. To use, run the dev_appserver with the flag
   -Ddatastore.default_high_rep_job_policy_unapplied_job_pct=20.
 - All user request have an X-AppEngine-Country header which contains the
   ISO-3166-1 alpha-2 country code for the user, based on the IP address of the
@@ -241,7 +295,7 @@ Version 1.4.0
 - The total size of Memcache batch operations is increased to 32 MB. The 1 MB
   limit on individual Memcache objects still applies.
 - The attachment size for outgoing emails has been increased from 1 MB to 10 MB.
-  The size limit for incoming emails is still 10 MB. 
+  The size limit for incoming emails is still 10 MB.
 - Size and quantity limits on datastore batch get/put/delete operations have
   been removed. Individual entities are still limited to 1 MB, but your app may
   batch as many entities together for get/put/delete calls as the overall
@@ -443,7 +497,7 @@ Version 1.3.1
       http://code.google.com/p/googleappengine/issues/detail?id=2255
   - Fixed issue with QuotaService.getCpuTimeInMegaCycles() returning 0
       http://code.google.com/p/googleappengine/issues/detail?id=2639
-  - Fixed issue where JSP exceptions will be incorrectly cast causing a 
+  - Fixed issue where JSP exceptions will be incorrectly cast causing a
     ClassCastException
       http://code.google.com/p/googleappengine/issues/detail?id=1438
 
@@ -474,7 +528,7 @@ Version 1.2.8
   - Java Dev Appserver now automatically executes tasks.  If you prefer the
     old behavior where tasks do not automatically execute you can use the
     following flag when starting the server:
-      -Dtask_queue.disable_auto_task_execution 
+      -Dtask_queue.disable_auto_task_execution
   - Additional file extensions permitted when sending mail.
     - http://code.google.com/p/googleappengine/issues/detail?id=494
   - Fixed issue with Java mail handler not processing multipart messages
