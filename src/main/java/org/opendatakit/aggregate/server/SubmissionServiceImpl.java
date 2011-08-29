@@ -22,6 +22,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
 import org.opendatakit.aggregate.ContextFactory;
+import org.opendatakit.aggregate.client.exception.FormNotAvailableException;
 import org.opendatakit.aggregate.client.filter.FilterGroup;
 import org.opendatakit.aggregate.client.submission.SubmissionUI;
 import org.opendatakit.aggregate.client.submission.SubmissionUISummary;
@@ -59,7 +60,7 @@ public class SubmissionServiceImpl extends RemoteServiceServlet implements
   private static final long serialVersionUID = -7997978505247614945L;
 
   @Override
-  public SubmissionUISummary getSubmissions(FilterGroup filterGroup) {
+  public SubmissionUISummary getSubmissions(FilterGroup filterGroup) throws FormNotAvailableException {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
 
@@ -73,9 +74,7 @@ public class SubmissionServiceImpl extends RemoteServiceServlet implements
       getSubmissions(filterGroup, cc, summary, form, submissions);
 
     } catch (ODKFormNotFoundException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-      return null;
+      throw new FormNotAvailableException(e);
     } catch (ODKDatastoreException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
@@ -110,7 +109,7 @@ public class SubmissionServiceImpl extends RemoteServiceServlet implements
   }
 
   @Override
-  public SubmissionUISummary getRepeatSubmissions(String keyString) throws AccessDeniedException {
+  public SubmissionUISummary getRepeatSubmissions(String keyString) throws AccessDeniedException, FormNotAvailableException {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
 
@@ -134,9 +133,7 @@ public class SubmissionServiceImpl extends RemoteServiceServlet implements
       }
 
     } catch (ODKFormNotFoundException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-      return null;
+      throw new FormNotAvailableException(e);
     } catch (ODKDatastoreException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
@@ -167,34 +164,7 @@ public class SubmissionServiceImpl extends RemoteServiceServlet implements
   }
 
   @Override
-  public SubmissionUISummary getSubmissions(String formId) {
-    HttpServletRequest req = this.getThreadLocalRequest();
-    CallingContext cc = ContextFactory.getCallingContext(this, req);
-
-    SubmissionUISummary summary = new SubmissionUISummary();
-    try {
-      Form form = Form.retrieveFormByFormId(formId, cc);
-      QueryByDate query = new QueryByDate(form, BasicConsts.EPOCH, false,
-          ServletConsts.FETCH_LIMIT, cc);
-      List<Submission> submissions = query.getResultSubmissions(cc);
-
-      getSubmissions(null, cc, summary, form, submissions);
-
-    } catch (ODKFormNotFoundException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-      return null;
-    } catch (ODKDatastoreException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-      return null;
-    }
-
-    return summary;
-  }
-
-  @Override
-  public UIGeoPoint[] getGeoPoints(String formId, String geopointKey) {
+  public UIGeoPoint[] getGeoPoints(String formId, String geopointKey) throws FormNotAvailableException {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
 
@@ -236,8 +206,7 @@ public class SubmissionServiceImpl extends RemoteServiceServlet implements
       }
       return points;
     } catch (ODKFormNotFoundException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
+      throw new FormNotAvailableException(e);
     } catch (ODKDatastoreException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();

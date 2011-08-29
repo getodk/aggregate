@@ -60,8 +60,10 @@ public class GenerateHeaderInfo {
   public List<FormElementNamespace> includedFormElementNamespaces() {
     List<FormElementNamespace> namespaces = new ArrayList<FormElementNamespace>();
     namespaces.add(FormElementNamespace.VALUES);
-    if(filterGroup.getIncludeMetadata()) {
-      namespaces.add(FormElementNamespace.METADATA);
+    if (filterGroup != null) {
+      if(filterGroup.getIncludeMetadata()) {
+        namespaces.add(FormElementNamespace.METADATA);
+      }
     }
     
     return namespaces;
@@ -201,8 +203,10 @@ public class GenerateHeaderInfo {
 
   private void processFilter(String nodeName, FormElementModel node) {
 
-    if(!filterGroup.getIncludeMetadata() && node.isMetadata()) {
-      return;
+    if(filterGroup != null) {
+      if(!filterGroup.getIncludeMetadata() && node.isMetadata()) {
+        return;
+      }
     }
     
     if (includes == null) {

@@ -20,12 +20,10 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 
 public interface FilterServiceAsync {
 
-	void updateFilterGroup(FilterGroup group,
-			AsyncCallback<String> callback);
+  void updateFilterGroup(FilterGroup group, AsyncCallback<String> callback);
 
-	void deleteFilterGroup(FilterGroup group,
-			AsyncCallback<Boolean> callback);
+  void deleteFilterGroup(FilterGroup group, AsyncCallback<Boolean> callback);
 
-    void getFilterSet(String formId, AsyncCallback<FilterSet> callback);
+  void getFilterSet(String formId, AsyncCallback<FilterSet> callback);
 
 }

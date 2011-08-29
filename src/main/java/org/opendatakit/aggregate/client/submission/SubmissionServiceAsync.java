@@ -24,8 +24,6 @@ public interface SubmissionServiceAsync {
 
   void getSubmissions(FilterGroup filter, AsyncCallback<SubmissionUISummary> callback);
 
-  void getSubmissions(String formId, AsyncCallback<SubmissionUISummary> callback);
-
   void getGeoPoints(String formId, String geopointKey, AsyncCallback<UIGeoPoint[]> callback);
 
   void getRepeatSubmissions(String keyString, AsyncCallback<SubmissionUISummary> callback);
