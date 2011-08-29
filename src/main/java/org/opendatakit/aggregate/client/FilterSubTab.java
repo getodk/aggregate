@@ -122,6 +122,9 @@ public class FilterSubTab extends AggregateSubTabBase {
 
   public void setDisplayMetaData(Boolean displayMetaData) {
     this.displayMetaData = displayMetaData;
+    
+    // cause a refresh of filter group
+    setCurrentlyDisplayedFilterGroup(getDisplayedFilterGroup());
   }
   
   @Override
