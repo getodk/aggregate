@@ -16,6 +16,7 @@
 
 package org.opendatakit.aggregate.client.widgets;
 
+import org.opendatakit.aggregate.client.popups.HelpBalloon;
 import org.opendatakit.aggregate.client.popups.RepeatPopup;
 
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -27,11 +28,15 @@ public class RepeatViewButton extends AbstractButtonBase implements ClickHandler
 
   private static final String TOOLTIP_TEXT = "View the items";
 
+private static final String HELP_BALLOON_TXT = "This will open up a smaller popup table with the items" +
+		"you are requesting to view.";
+
   private String url;
 
   public RepeatViewButton(String url) {
     super("View", TOOLTIP_TEXT);
     this.url = url;
+    helpBalloon = new HelpBalloon(this, HELP_BALLOON_TXT);
   }
 
   @Override

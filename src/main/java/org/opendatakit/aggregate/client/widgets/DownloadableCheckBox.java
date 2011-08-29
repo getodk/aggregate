@@ -18,6 +18,7 @@ package org.opendatakit.aggregate.client.widgets;
 
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.SecureGWT;
+import org.opendatakit.aggregate.client.popups.HelpBalloon;
 import org.opendatakit.common.security.common.GrantedAuthorityName;
 
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -26,34 +27,37 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 
 
 public class DownloadableCheckBox extends AbstractCheckBoxBase implements ValueChangeHandler<Boolean> {
-  
-  private static final String TOOLTIP_TEXT = "Allow or disallow form to be downloaded";
-  
-  private String formId;
-  
-  public DownloadableCheckBox(String formId, Boolean downloadable) {
-    super(TOOLTIP_TEXT);
-    this.formId = formId;
-    setValue(downloadable);
-    boolean enabled = AggregateUI.getUI().getUserInfo()
-        	.getGrantedAuthorities().contains(GrantedAuthorityName.ROLE_DATA_OWNER);
-    setEnabled(enabled);
-  }
 
-  @Override
-  public void onValueChange(ValueChangeEvent<Boolean> event) {
-    super.onValueChange(event);
-    SecureGWT.getFormAdminService().setFormDownloadable(formId, event.getValue(), new AsyncCallback<Boolean> () {
-      @Override
-      public void onFailure(Throwable caught) {
-        AggregateUI.getUI().reportError(caught);
-      }
+	private static final String TOOLTIP_TEXT = "Allow or disallow form to be downloaded";
+	private static final String HELP_BALLOON_TXT = "Check this box if you want your form to be " +
+			"downloadable.  Otherwise leave unchecked.";
 
-      @Override
-      public void onSuccess(Boolean result) {
-        AggregateUI.getUI().clearError();
-      }
-    });
-  }
-  
+	private String formId;
+
+	public DownloadableCheckBox(String formId, Boolean downloadable) {
+		super(TOOLTIP_TEXT);
+		this.formId = formId;
+		setValue(downloadable);
+		boolean enabled = AggregateUI.getUI().getUserInfo()
+		.getGrantedAuthorities().contains(GrantedAuthorityName.ROLE_DATA_OWNER);
+		setEnabled(enabled);
+		helpBalloon = new HelpBalloon(this, HELP_BALLOON_TXT);
+	}
+
+	@Override
+	public void onValueChange(ValueChangeEvent<Boolean> event) {
+		super.onValueChange(event);
+		SecureGWT.getFormAdminService().setFormDownloadable(formId, event.getValue(), new AsyncCallback<Boolean> () {
+			@Override
+			public void onFailure(Throwable caught) {
+				AggregateUI.getUI().reportError(caught);
+			}
+
+			@Override
+			public void onSuccess(Boolean result) {
+				AggregateUI.getUI().clearError();
+			}
+		});
+	}
+
 }

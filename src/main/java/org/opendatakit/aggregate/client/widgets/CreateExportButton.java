@@ -17,26 +17,30 @@
 package org.opendatakit.aggregate.client.widgets;
 
 import org.opendatakit.aggregate.client.popups.ExportPopup;
+import org.opendatakit.aggregate.client.popups.HelpBalloon;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 
 public class CreateExportButton extends AbstractButtonBase implements ClickHandler {
 
-  private static final String TOOLTIP_TEXT = "Create export file";
-  
-  private ExportPopup popup;
+	private static final String TOOLTIP_TEXT = "Create export file";
 
-  public CreateExportButton(ExportPopup exportPopup) {
-    super("<img src=\"images/green_right_arrow.png\" /> Export", TOOLTIP_TEXT);
-    this.popup = exportPopup;
-  }
+	private static final String HELP_BALLOON_TXT = "This creates either a CSV or KML file of your data.";
 
-  @Override
-  public void onClick(ClickEvent event) {
-    super.onClick(event);
+	private ExportPopup popup;
 
-    popup.createExport();
+	public CreateExportButton(ExportPopup exportPopup) {
+		super("<img src=\"images/green_right_arrow.png\" /> Export", TOOLTIP_TEXT);
+		this.popup = exportPopup;
+		helpBalloon = new HelpBalloon(this, HELP_BALLOON_TXT);
+	}
 
-  }
+	@Override
+	public void onClick(ClickEvent event) {
+		super.onClick(event);
+
+		popup.createExport();
+
+	}
 }
