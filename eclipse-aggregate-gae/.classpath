@@ -85,6 +85,6 @@
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/odk-tomcatutil.jar"/>
 	<classpathentry kind="con" path="com.google.gwt.eclipse.core.GWT_CONTAINER"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/odk-gae-settings-latest.jar"/>
-	<classpathentry kind="con" path="com.google.appengine.eclipse.core.GAE_CONTAINER/App Engine"/>
+	<classpathentry kind="con" path="com.google.appengine.eclipse.core.GAE_CONTAINER"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>
