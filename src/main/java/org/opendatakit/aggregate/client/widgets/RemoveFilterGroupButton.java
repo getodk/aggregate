@@ -20,6 +20,7 @@ import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.FilterSubTab;
 import org.opendatakit.aggregate.client.SecureGWT;
 import org.opendatakit.aggregate.client.filter.FilterGroup;
+import org.opendatakit.aggregate.client.popups.HelpBalloon;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -27,37 +28,40 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 
 public class RemoveFilterGroupButton extends AbstractButtonBase implements ClickHandler {
 
-  private static final String TOOLTIP_TEXT = "Delete filter group";
+	private static final String TOOLTIP_TEXT = "Delete filter group";
 
-  private FilterSubTab parentSubTab;
+	private static final String HELP_BALLOON_TXT = "This will delete the filter group from the database.";
 
-  public RemoveFilterGroupButton(FilterSubTab parentSubTab) {
-    super("Delete", TOOLTIP_TEXT);
-    this.parentSubTab = parentSubTab;
-    addStyleDependentName("negative");
-  }
+	private FilterSubTab parentSubTab;
 
-  @Override
-  public void onClick(ClickEvent event) {
-    super.onClick(event);
+	public RemoveFilterGroupButton(FilterSubTab parentSubTab) {
+		super("Delete", TOOLTIP_TEXT);
+		this.parentSubTab = parentSubTab;
+		addStyleDependentName("negative");
+		helpBalloon = new HelpBalloon(this, HELP_BALLOON_TXT);
+	}
 
-    final FilterGroup filterGroup = parentSubTab.getDisplayedFilterGroup();
+	@Override
+	public void onClick(ClickEvent event) {
+		super.onClick(event);
 
-    // Set up the callback object.
-    AsyncCallback<Boolean> callback = new AsyncCallback<Boolean>() {
-      public void onFailure(Throwable caught) {
-        AggregateUI.getUI().reportError(caught);
-      }
+		final FilterGroup filterGroup = parentSubTab.getDisplayedFilterGroup();
 
-      @Override
-      public void onSuccess(Boolean result) {
-        AggregateUI.getUI().clearError();
-        parentSubTab.removeFilterGroupWithinForm();
-      }
-    };
+		// Set up the callback object.
+		AsyncCallback<Boolean> callback = new AsyncCallback<Boolean>() {
+			public void onFailure(Throwable caught) {
+				AggregateUI.getUI().reportError(caught);
+			}
 
-    // Save the filter on the server
-    SecureGWT.getFilterService().deleteFilterGroup(filterGroup, callback);
+			@Override
+			public void onSuccess(Boolean result) {
+				AggregateUI.getUI().clearError();
+				parentSubTab.removeFilterGroupWithinForm();
+			}
+		};
 
-  }
+		// Save the filter on the server
+		SecureGWT.getFilterService().deleteFilterGroup(filterGroup, callback);
+
+	}
 }

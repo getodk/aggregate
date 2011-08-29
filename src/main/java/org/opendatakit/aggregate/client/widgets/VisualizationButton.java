@@ -17,6 +17,7 @@
 package org.opendatakit.aggregate.client.widgets;
 
 import org.opendatakit.aggregate.client.FilterSubTab;
+import org.opendatakit.aggregate.client.popups.HelpBalloon;
 import org.opendatakit.aggregate.client.popups.VisualizationPopup;
 
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -25,27 +26,31 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.PopupPanel;
 
 public class VisualizationButton extends AbstractButtonBase implements ClickHandler {
-  
-  private static final String TOOLTIP_TEXT = "Visualize the data";
-  
-  private FilterSubTab filterSubTab;
-  
-  public VisualizationButton(FilterSubTab filterSubTab) {
-    super("<img src=\"images/bar_chart.png\" /> Visualize", TOOLTIP_TEXT);
-    this.filterSubTab = filterSubTab;
-  }
 
-  public void onClick(ClickEvent event) {
-    super.onClick(event);
-    
-    final PopupPanel vizPopup = new VisualizationPopup(filterSubTab);
-    vizPopup.setPopupPositionAndShow(new PopupPanel.PositionCallback() {
-      @Override
-      public void setPosition(int offsetWidth, int offsetHeight) {
-          int left = ((Window.getScrollLeft() + Window.getClientWidth() - offsetWidth) / 2);
-          int top = ((Window.getScrollTop() + Window.getClientHeight() - offsetHeight) / 2);
-          vizPopup.setPopupPosition(left, top);
-      }
-    });
-  }
+	private static final String TOOLTIP_TEXT = "Visualize the data";
+
+	private static final String HELP_BALLOON_TXT = "This will open a new popup which will allow you to " +
+			"visualize data using a bar chart, pie chart, or Google Map.";
+
+	private FilterSubTab filterSubTab;
+
+	public VisualizationButton(FilterSubTab filterSubTab) {
+		super("<img src=\"images/bar_chart.png\" /> Visualize", TOOLTIP_TEXT);
+		this.filterSubTab = filterSubTab;
+		helpBalloon = new HelpBalloon(this, HELP_BALLOON_TXT);
+	}
+
+	public void onClick(ClickEvent event) {
+		super.onClick(event);
+
+		final PopupPanel vizPopup = new VisualizationPopup(filterSubTab);
+		vizPopup.setPopupPositionAndShow(new PopupPanel.PositionCallback() {
+			@Override
+			public void setPosition(int offsetWidth, int offsetHeight) {
+				int left = ((Window.getScrollLeft() + Window.getClientWidth() - offsetWidth) / 2);
+				int top = ((Window.getScrollTop() + Window.getClientHeight() - offsetHeight) / 2);
+				vizPopup.setPopupPosition(left, top);
+			}
+		});
+	}
 }

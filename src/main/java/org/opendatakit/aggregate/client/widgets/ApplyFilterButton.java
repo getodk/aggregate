@@ -25,6 +25,7 @@ import org.opendatakit.aggregate.client.filter.Filter;
 import org.opendatakit.aggregate.client.filter.FilterGroup;
 import org.opendatakit.aggregate.client.filter.RowFilter;
 import org.opendatakit.aggregate.client.popups.FilterPopup;
+import org.opendatakit.aggregate.client.popups.HelpBalloon;
 import org.opendatakit.aggregate.client.submission.Column;
 import org.opendatakit.aggregate.constants.common.FilterOperation;
 import org.opendatakit.aggregate.constants.common.RowOrCol;
@@ -35,42 +36,46 @@ import com.google.gwt.event.dom.client.ClickHandler;
 
 public class ApplyFilterButton extends AbstractButtonBase implements ClickHandler {
 
-  private static final String TOOLTIP_TEXT = "Use the created filter";
-  
-  private FilterPopup popup;
+	private static final String TOOLTIP_TEXT = "Use the created filter";
 
-  public ApplyFilterButton(FilterPopup popup) {
-    super("<img src=\"images/green_check.png\" /> Apply Filter", TOOLTIP_TEXT);
-    this.popup = popup;
-    addStyleDependentName("positive");
-  }
+	private static final String HELP_BALLOON_TXT = "This will apply the filter specified.  This will" +
+			" need to be saved in order to use it at a later time.";
 
-  @Override
-  public void onClick(ClickEvent event) {
-    super.onClick(event);
+	private FilterPopup popup;
 
-    Visibility kr = popup.getKeepRemove();
-    RowOrCol rowcol = popup.getRowCol();
-    FilterGroup group = popup.getGroup();
+	public ApplyFilterButton(FilterPopup popup) {
+		super("<img src=\"images/green_check.png\" /> Apply Filter", TOOLTIP_TEXT);
+		this.popup = popup;
+		addStyleDependentName("positive");
+		helpBalloon = new HelpBalloon(this, HELP_BALLOON_TXT);
+	}
 
-    if(group == null) {
-      return;
-    }
-    
-    Filter newFilter;
-    if (rowcol.equals(RowOrCol.ROW)) {
-      Column column = popup.getColumnForRowFilter();
-      FilterOperation op = popup.getFilterOp();
-      String value = popup.getFilterValue();
-      newFilter = new RowFilter(kr, column, op, value, (long) group.getFilters().size()); 
-    } else {
-      ArrayList<ColumnFilterHeader> columnfilterheaders = popup.getColumnsForColumnFilter();
-      newFilter = new ColumnFilter(kr, columnfilterheaders, (long) group.getFilters().size());
-    }
-    
-    group.addFilter(newFilter);
-    AggregateUI.getUI().getTimer().refreshNow();
-    
-    popup.hide();
-  }
+	@Override
+	public void onClick(ClickEvent event) {
+		super.onClick(event);
+
+		Visibility kr = popup.getKeepRemove();
+		RowOrCol rowcol = popup.getRowCol();
+		FilterGroup group = popup.getGroup();
+
+		if(group == null) {
+			return;
+		}
+
+		Filter newFilter;
+		if (rowcol.equals(RowOrCol.ROW)) {
+			Column column = popup.getColumnForRowFilter();
+			FilterOperation op = popup.getFilterOp();
+			String value = popup.getFilterValue();
+			newFilter = new RowFilter(kr, column, op, value, (long) group.getFilters().size()); 
+		} else {
+			ArrayList<ColumnFilterHeader> columnfilterheaders = popup.getColumnsForColumnFilter();
+			newFilter = new ColumnFilter(kr, columnfilterheaders, (long) group.getFilters().size());
+		}
+
+		group.addFilter(newFilter);
+		AggregateUI.getUI().getTimer().refreshNow();
+
+		popup.hide();
+	}
 }

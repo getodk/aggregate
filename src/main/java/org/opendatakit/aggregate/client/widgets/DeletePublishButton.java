@@ -18,6 +18,7 @@ package org.opendatakit.aggregate.client.widgets;
 
 import org.opendatakit.aggregate.client.externalserv.ExternServSummary;
 import org.opendatakit.aggregate.client.popups.ConfirmPublishDeletePopup;
+import org.opendatakit.aggregate.client.popups.HelpBalloon;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -31,30 +32,34 @@ import com.google.gwt.user.client.ui.PopupPanel;
  *
  */
 public class DeletePublishButton extends AbstractButtonBase implements ClickHandler {
- 
-  private static final String TOOLTIP_TEXT = "Remove published data";
-  
-  private ExternServSummary publisher;
 
-  public DeletePublishButton(ExternServSummary publisher) {
-    super("<img src=\"images/red_x.png\" /> Delete", TOOLTIP_TEXT);
-    this.publisher = publisher;
-    addStyleDependentName("negative");
-  }
+	private static final String TOOLTIP_TEXT = "Remove published data";
 
-  @Override
-  public void onClick(ClickEvent event) {
-    super.onClick(event);
-    
-     // TODO: display pop-up with text from b...
-     final ConfirmPublishDeletePopup popup = new ConfirmPublishDeletePopup(publisher);
-     popup.setPopupPositionAndShow(new PopupPanel.PositionCallback() {
-        @Override
-        public void setPosition(int offsetWidth, int offsetHeight) {
-            int left = ((Window.getScrollLeft() + Window.getClientWidth() - offsetWidth) / 2);
-            int top = ((Window.getScrollTop() + Window.getClientHeight() - offsetHeight) / 2);
-            popup.setPopupPosition(left, top);
-        }
-     });
-  }
+	private static final String HELP_BALLOON_TXT = "This confirms that you want to delete the published " +
+			"data.";
+
+	private ExternServSummary publisher;
+
+	public DeletePublishButton(ExternServSummary publisher) {
+		super("<img src=\"images/red_x.png\" /> Delete", TOOLTIP_TEXT);
+		this.publisher = publisher;
+		addStyleDependentName("negative");
+		helpBalloon = new HelpBalloon(this, HELP_BALLOON_TXT);
+	}
+
+	@Override
+	public void onClick(ClickEvent event) {
+		super.onClick(event);
+
+		// TODO: display pop-up with text from b...
+		final ConfirmPublishDeletePopup popup = new ConfirmPublishDeletePopup(publisher);
+		popup.setPopupPositionAndShow(new PopupPanel.PositionCallback() {
+			@Override
+			public void setPosition(int offsetWidth, int offsetHeight) {
+				int left = ((Window.getScrollLeft() + Window.getClientWidth() - offsetWidth) / 2);
+				int top = ((Window.getScrollTop() + Window.getClientHeight() - offsetHeight) / 2);
+				popup.setPopupPosition(left, top);
+			}
+		});
+	}
 }
