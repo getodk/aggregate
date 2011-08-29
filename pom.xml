@@ -17,7 +17,7 @@
     	<itFormsDirectory>${project.basedir}/../src/it/testfiles/forms</itFormsDirectory>
     	<itSubmissionsDirectory>${project.basedir}/../src/it/testfiles/submissions</itSubmissionsDirectory>
     	<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<gooogle.appengine.sdk.version>1.5.2</gooogle.appengine.sdk.version>
+		<gooogle.appengine.sdk.version>1.5.3</gooogle.appengine.sdk.version>
 		<google.gdata.version>1.41.5</google.gdata.version>
 		<google.gwt.version>2.3.0</google.gwt.version>
 		<gwt.maven.plugin.version>2.3.0-1</gwt.maven.plugin.version>
