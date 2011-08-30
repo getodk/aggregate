@@ -124,7 +124,12 @@ public class SubmissionDownloadListServlet extends ServletUtilBase {
       odkIdNotFoundError(resp);
       return;
     }
- 
+    
+    if ( form.getFormDefinition() == null ) {
+		errorRetreivingData(resp);
+		return; // ill-formed definition
+    }
+
 	addOpenRosaHeaders(resp);
     try {
         TopLevelDynamicBase tbl = (TopLevelDynamicBase) form.getFormDefinition().getTopLevelGroup().getBackingObjectPrototype();

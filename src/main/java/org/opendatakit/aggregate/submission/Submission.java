@@ -222,6 +222,10 @@ public class Submission extends SubmissionSet {
 			throw new IllegalArgumentException("submission key is empty");
 		}
 		Form form = Form.retrieveFormByFormId(parts.get(0).getElementName(), cc);
+	    if ( form.getFormDefinition() == null ) {
+	    	throw new IllegalArgumentException("Form definition is ill-formed"); // ill-formed definition
+	    }
+
 		if (parts.size() < 2) {
 			throw new IllegalArgumentException(
 					"submission key does not have a top level group");

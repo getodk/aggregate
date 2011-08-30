@@ -153,6 +153,7 @@ public class ServicesAdminServiceImpl extends RemoteServiceServlet implements
       // TODO: better error reporting -- form is being deleted. Disallow creation of publishers.
       if ( deletionTimestamp != null ) return null;
       Form form = Form.retrieveFormByFormId(formId, cc);
+	  if ( form.getFormDefinition() == null ) return null; // ill-formed definition
       FusionTable fusion = new FusionTable(form, esOption, cc);
       return fusion.getFormServiceCursor().getUri();
     } catch (ODKFormNotFoundException e) {
@@ -175,6 +176,7 @@ public class ServicesAdminServiceImpl extends RemoteServiceServlet implements
       // TODO: better error reporting -- form is being deleted. Disallow creation of publishers.
       if ( deletionTimestamp != null ) return null;
       Form form = Form.retrieveFormByFormId(formId, cc);
+	  if ( form.getFormDefinition() == null ) return null; // ill-formed definition
       GoogleSpreadsheet spreadsheet = new GoogleSpreadsheet(form, name, esOption, cc);
       return spreadsheet.getFormServiceCursor().getUri();
     } catch (ODKFormNotFoundException e) {

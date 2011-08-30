@@ -110,6 +110,10 @@ public class WatchdogWorkerImpl {
     // get the last submission sent to the external service
     String lastStreamingKey = fsc.getLastStreamingKey();
     Form form = Form.retrieveFormByFormId(fsc.getFormId(), cc);
+    if ( form.getFormDefinition() == null ) {
+        System.out.println("Form definition was ill-formed while checking for streaming for " + fsc.getExternalServiceType());
+    	return;
+    }
     // query for last submission submitted for the form
     QueryByDate query = new QueryByDate(form, new Date(System.currentTimeMillis()), true, 1,
         cc);
@@ -146,6 +150,10 @@ public class WatchdogWorkerImpl {
 	      persistentResult.setAttemptCount(++attemptCount);
 	      persistentResult.persist(cc);
 	      Form form = Form.retrieveFormByFormId(persistentResult.getFormId(), cc);
+	      if ( form.getFormDefinition() == null ) {
+	    	  System.out.println("Form of stalled task is ill-formed");
+	    	  return;
+	      }
 	      switch (persistentResult.getResultType()) {
 	      case CSV:
 	        csvGenerator.createCsvTask(form, persistentResult.getSubmissionKey(), attemptCount,
@@ -178,19 +186,26 @@ public class WatchdogWorkerImpl {
 	      aTask.setAttemptCount(++attemptCount);
 	      aTask.persist(cc);
 	      Form form = Form.retrieveFormByFormId(aTask.getFormId(), cc);
+	      if ( form.getFormDefinition() == null ) {
+	    	  System.out.println("Form definition is ill-formed while checking stalled request: " + aTask.getSubmissionKey());
+	      }
 	      switch (aTask.getTaskType()) {
 	      case WORKSHEET_CREATE:
-	    	wsCreator.createWorksheetTask(form, aTask.getSubmissionKey(), attemptCount,
-	            cc);
+	    	if ( form.getFormDefinition() != null ) {
+		    	wsCreator.createWorksheetTask(form, aTask.getSubmissionKey(), attemptCount,
+			            cc);
+	    	}
 	        break;
 	      case DELETE_FORM:
 	        formDelete.createFormDeleteTask(form, aTask.getSubmissionKey(), attemptCount,
 	            cc);
 	        break;
 	      case PURGE_OLDER_SUBMISSIONS:
+	    	if ( form.getFormDefinition() != null ) {
 	    	  purgeSubmissions.createPurgeOlderSubmissionsTask(form, aTask.getSubmissionKey(),
 	    			  attemptCount, cc);
-	    	  break;
+	    	}
+	    	break;
 	      }
 	    }
 	} finally {

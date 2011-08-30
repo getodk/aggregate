@@ -211,8 +211,16 @@ public class Form {
 	 */
 	public void deleteForm(CallingContext cc) throws ODKDatastoreException {
 		if (formDefinition != null) {
-			// delete the data model
+			// delete the data model normally
 			formDefinition.deleteDataModel(cc);
+		} else {
+
+			XFormParameters p = new XFormParameters(
+						infoRow.getStringField(infoRow.formId),
+						filesetRow.getLongField(filesetRow.rootElementModelVersion),
+						filesetRow.getLongField(filesetRow.rootElementUiVersion) );
+
+			FormDefinition.deleteAbnormalModel(p, cc);
 		}
 
 		Datastore ds = cc.getDatastore();

@@ -310,6 +310,33 @@ public class FormDefinition {
 		return null;
 	}
 
+	private static final SubmissionAssociationTable getSubmissionAssociation(XFormParameters xformParameters, boolean canBeIncomplete, CallingContext cc ) {
+		SubmissionAssociationTable sa = null;
+		{
+		    List<SubmissionAssociationTable> saList = SubmissionAssociationTable.findSubmissionAssociationsForXForm(xformParameters, cc);
+		    if ( saList.isEmpty() ) {
+		    	// may be in the process of being defined, or in a partially defined state.
+		    	logger.warn("No sa record matching this formId " + xformParameters.toString());
+		    	return null;
+		    }
+		    for ( SubmissionAssociationTable st : saList ) {
+		    	if ( canBeIncomplete || st.getIsPersistenceModelComplete() ) {
+		    		if ( sa != null ) {
+		    			// We have two or more identical entries.  Use the more recent one.
+		    			// Presently, can have a duplicate of our main tables because of timing windows.
+		    			// Eventually, can have two or more forms with the same submission structure.
+				    	logger.warn("Two or more sa records matching this formId " + xformParameters.toString());
+		    			if ( sa.getCreationDate().compareTo(st.getCreationDate()) == -1 ) {
+		    				// use the more recent data model...
+		    				sa = st;
+		    			}
+				    }
+		    		sa = st;
+		    	}
+		    }
+		}
+	    return sa;
+	}
 	/**
 	 * 
 	 * @param xformParameters  -- the form id, version and ui version of a form definition.
@@ -333,30 +360,7 @@ public class FormDefinition {
 			Datastore ds = cc.getDatastore();
 			User user = cc.getCurrentUser();
 			try {
-				SubmissionAssociationTable sa = null;
-				{
-				    List<SubmissionAssociationTable> saList = SubmissionAssociationTable.findSubmissionAssociationsForXForm(xformParameters, cc);
-				    if ( saList.isEmpty() ) {
-				    	// may be in the process of being defined, or in a partially defined state.
-				    	logger.warn("No sa record matching this formId " + xformParameters.toString());
-				    	return null;
-				    }
-				    for ( SubmissionAssociationTable st : saList ) {
-				    	if ( st.getIsPersistenceModelComplete() ) {
-				    		if ( sa != null ) {
-				    			// We have two or more identical entries.  Use the more recent one.
-				    			// Presently, can have a duplicate of our main tables because of timing windows.
-				    			// Eventually, can have two or more forms with the same submission structure.
-						    	logger.warn("Two or more sa records matching this formId " + xformParameters.toString());
-				    			if ( sa.getCreationDate().compareTo(st.getCreationDate()) == -1 ) {
-				    				// use the more recent data model...
-				    				sa = st;
-				    			}
-						    }
-				    		sa = st;
-				    	}
-				    }
-				}
+				SubmissionAssociationTable sa = getSubmissionAssociation( xformParameters, false, cc );
 			    if ( sa == null ) {
 			    	// must be in a partially defined state.
 			    	logger.warn("No complete persistence model for sa record matching this formId " + xformParameters.toString());
@@ -382,7 +386,13 @@ public class FormDefinition {
 					}
 					
 					// try to construct the fd...
-					fd = new FormDefinition(sa, xformParameters, fdmList, cc);
+					try {
+						fd = new FormDefinition(sa, xformParameters, fdmList, cc);
+					} catch ( IllegalStateException e) {
+						e.printStackTrace();
+						logger.error("Form definition is not interpretable for formId " + xformParameters.toString());
+						return null;
+					}
 
 					// and synchronize field sizes to those defined in the database...
 					try {
@@ -682,14 +692,71 @@ public class FormDefinition {
 		
 		topLevelGroupElement = FormElementModel.buildFormElementModelTree(topLevelGroup);
 	}
+
+	public static void deleteAbnormalModel(XFormParameters xformParameters, CallingContext cc) {
+		boolean asDaemon = cc.getAsDeamon();
+		try {
+			cc.setAsDaemon(true);
+			List<? extends CommonFieldsBase> fdmList = null;
+			Datastore ds = cc.getDatastore();
+			User user = cc.getCurrentUser();
+			try {
+				SubmissionAssociationTable sa = getSubmissionAssociation( xformParameters, true, cc );
+				while ( sa != null ) {
+					// prevent the form definition from being used...
+					sa.setIsPersistenceModelComplete(false);
+					sa.setIsSubmissionAllowed(false);
+					ds.putEntity(sa, user);
+					// forget us in the local cache...
+				    forget(sa.getUriSubmissionDataModel());
+				    
+				    String uriSubmissionDataModel = sa.getUriSubmissionDataModel();
+				    
+			    	// retrieve it...
+				    FormDataModel fdm = FormDataModel.assertRelation(cc);
+					Query query = ds.createQuery(fdm, user);
+					query.addFilter(FormDataModel.URI_SUBMISSION_DATA_MODEL, FilterOperation.EQUAL, uriSubmissionDataModel);
+					fdmList = query.executeQuery(0);
+						
+					if ( fdmList == null || fdmList.size() == 0 ) {
+						return;
+					}
 	
+					// delete the form data model...
+					List<EntityKey> eks = new ArrayList<EntityKey>();
+				    for ( CommonFieldsBase m : fdmList ) {
+						eks.add(new EntityKey(m, m.getUri()));
+				    }
+				    ds.deleteEntities(eks, user);
+				    
+				    // and delete the SA record
+				    ds.deleteEntity(new EntityKey(sa, sa.getUri()), user);
+				    // just in case...
+				    forget(uriSubmissionDataModel);
+				    
+				    // and see if we have anything more to clean up...
+				    sa = getSubmissionAssociation( xformParameters, true, cc );
+				}
+			    
+			    // we don't delete the data tables -- the user may want to manually recover the data
+			    
+			} catch (ODKDatastoreException e) {
+		    	logger.warn("Persistence Layer failure deleting abnormal form definition " + e.getMessage() + " for formId " + xformParameters.toString());
+			}
+		} finally {
+			cc.setAsDaemon(asDaemon);
+		}
+	}
+
 	public final void deleteDataModel(CallingContext cc) throws ODKDatastoreException {
 		User user = cc.getCurrentUser();
 		Datastore ds = cc.getDatastore();
 
-		// delete the SA table linking to the model (orphans the model)...
-		ds.deleteEntity(new EntityKey(submissionAssociation, submissionAssociation.getUri()), user);
-		// forget us in the local cache (optimization...)
+		// prevent the form definition from being used...
+		submissionAssociation.setIsPersistenceModelComplete(false);
+		submissionAssociation.setIsSubmissionAllowed(false);
+		ds.putEntity(submissionAssociation, user);
+		// forget us in the local cache...
 	    forget(submissionAssociation.getUriSubmissionDataModel());
 
 	    FormDataModel fdm = FormDataModel.assertRelation(cc);
@@ -709,6 +776,11 @@ public class FormDefinition {
 	    		e.printStackTrace();
 	    	}
 	    }
+		
+		// delete the SA table linking to the model (orphans the model)...
+		ds.deleteEntity(new EntityKey(submissionAssociation, submissionAssociation.getUri()), user);
+		// forget us in the local cache (optimization...)
+	    forget(submissionAssociation.getUriSubmissionDataModel());
 	}
 	
 	public void persistSubmissionAssociation(CallingContext cc) throws ODKEntityPersistException {
