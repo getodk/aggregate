@@ -85,6 +85,13 @@ public class UploadSubmissionsWorkerImpl {
 
     pExtService = pFsc.getExternalService(cc);
     form = Form.retrieveFormByFormId(pFsc.getFormId(), cc);
+    if ( form.getFormDefinition() == null ) {
+        Logger
+        .getLogger(UploadSubmissionsWorkerImpl.class.getName())
+        .severe(
+            "Upload not performed -- ill-formed form definition.");
+        return;
+    }
 
     Datastore ds = cc.getDatastore();
     User user = cc.getCurrentUser();

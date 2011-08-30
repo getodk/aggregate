@@ -152,9 +152,10 @@ public class FormServiceImpl extends RemoteServiceServlet implements
     try {
       FormActionStatusTimestamp deletionTimestamp = MiscTasks.getFormDeletionStatusTimestampOfFormId(formId, cc);
       // TODO: better error reporting -- form is being deleted. Disallow exports.
-      if ( deletionTimestamp != null ) return null;
+      if ( deletionTimestamp != null ) return false;
       // create csv job
       Form form = Form.retrieveFormByFormId(formId, cc);
+	  if ( form.getFormDefinition() == null ) return false; // ill-formed definition
       PersistentResults r = new PersistentResults(ExportType.CSV, form, null, cc);
       r.persist(cc);
 
@@ -180,6 +181,7 @@ public class FormServiceImpl extends RemoteServiceServlet implements
 
     try {
       Form form = Form.retrieveFormByFormId(formId, cc);
+	  if ( form.getFormDefinition() == null ) return null; // ill-formed definition
       GenerateKmlSettings kmlSettings = new GenerateKmlSettings(form, false);
       return kmlSettings.generate();
 
@@ -200,9 +202,10 @@ public class FormServiceImpl extends RemoteServiceServlet implements
     try {
       FormActionStatusTimestamp deletionTimestamp = MiscTasks.getFormDeletionStatusTimestampOfFormId(formId, cc);
       // TODO: better error reporting -- form is being deleted. Disallow exports.
-      if ( deletionTimestamp != null ) return null;
+      if ( deletionTimestamp != null ) return false;
       
       Form form = Form.retrieveFormByFormId(formId, cc);
+	  if ( form.getFormDefinition() == null ) return false; // ill-formed definition
 
       FormElementModel titleField = null;
       if (titleKey != null) {
@@ -254,6 +257,8 @@ public class FormServiceImpl extends RemoteServiceServlet implements
 
     try {
       Form form = Form.retrieveFormByFormId(formId, cc);
+	  if ( form.getFormDefinition() == null ) return null; // ill-formed definition
+
       GenerateKmlSettings kmlSettings = new GenerateKmlSettings(form, true);
       return kmlSettings.generate();
 
