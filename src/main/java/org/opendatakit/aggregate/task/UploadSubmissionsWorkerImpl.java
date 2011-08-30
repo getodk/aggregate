@@ -84,7 +84,7 @@ public class UploadSubmissionsWorkerImpl {
       ODKExternalServiceException, ODKFormNotFoundException {
 
     pExtService = pFsc.getExternalService(cc);
-    form = Form.retrieveForm(pFsc.getFormId(), cc);
+    form = Form.retrieveFormByFormId(pFsc.getFormId(), cc);
 
     Datastore ds = cc.getDatastore();
     User user = cc.getCurrentUser();

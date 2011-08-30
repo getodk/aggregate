@@ -105,7 +105,6 @@ public class DatastoreImpl implements Datastore, InitializingBean {
 	public static final String K_SET = " SET ";
 	public static final String K_DELETE_FROM = "DELETE FROM ";
 
-	public static final Long DEFAULT_MAX_STRING_SIZE = 255L;
 	public static final Integer DEFAULT_DBL_NUMERIC_SCALE = 10;
 	public static final Integer DEFAULT_DBL_NUMERIC_PRECISION = 38;
 	public static final Integer DEFAULT_INT_NUMERIC_PRECISION = 9;
@@ -410,7 +409,7 @@ public class DatastoreImpl implements Datastore, InitializingBean {
 						b.append(" VARCHAR(");
 						Long len = f.getMaxCharLen();
 						if ( len == null ) {
-							len = DEFAULT_MAX_STRING_SIZE;
+							len = PersistConsts.DEFAULT_MAX_STRING_LENGTH;
 						}
 						b.append(len.toString());
 						b.append(K_CLOSE_PAREN);

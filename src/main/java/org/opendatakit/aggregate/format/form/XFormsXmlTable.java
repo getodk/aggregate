@@ -20,6 +20,7 @@ package org.opendatakit.aggregate.format.form;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.kxml2.io.KXmlSerializer;
@@ -30,7 +31,7 @@ import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.format.XFormsTableConsts;
 import org.opendatakit.aggregate.form.Form;
-import org.opendatakit.aggregate.query.QueryFormList;
+import org.opendatakit.aggregate.form.FormInfo;
 import org.opendatakit.aggregate.servlet.FormXmlServlet;
 import org.opendatakit.aggregate.servlet.XFormsManifestServlet;
 import org.opendatakit.common.constants.BasicConsts;
@@ -49,9 +50,9 @@ public class XFormsXmlTable {
 private final String downloadRequestURL;
   private final String manifestRequestURL;
 
-  private QueryFormList forms;
+  private List<Form> forms;
 
-  public XFormsXmlTable(QueryFormList formsToFormat, String webServerUrl) {
+  public XFormsXmlTable(List<Form> formsToFormat, String webServerUrl) {
     this.downloadRequestURL = webServerUrl + BasicConsts.FORWARDSLASH + FormXmlServlet.ADDR;
     this.manifestRequestURL = webServerUrl + BasicConsts.FORWARDSLASH + XFormsManifestServlet.ADDR;
     this.forms = formsToFormat;
@@ -68,8 +69,8 @@ private final String downloadRequestURL;
 	e.addChild(idx++, Node.IGNORABLE_WHITESPACE, BasicConsts.NEW_LINE);
 
     // build XML table of form information
-    for (Form form : forms.getForms()) {
-    	if ( form.getFormId().equals(Form.URI_FORM_ID_VALUE_FORM_INFO)) continue;
+    for (Form form : forms) {
+    	if ( FormInfo.isFormInfoForm(form.getFormId())) continue;
     	if ( !form.getDownloadEnabled() ) continue;
 
     	idx = generateFormXmlEntry(d, e, idx, form);

@@ -16,6 +16,7 @@
 
 package org.opendatakit.aggregate.client.submission;
 
+import org.opendatakit.aggregate.client.exception.FormNotAvailableException;
 import org.opendatakit.aggregate.client.filter.FilterGroup;
 import org.opendatakit.common.security.client.exception.AccessDeniedException;
 
@@ -24,13 +25,11 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 
 @RemoteServiceRelativePath("submissionservice")
 public interface SubmissionService extends RemoteService {
-
-  SubmissionUISummary getSubmissions(String formId) throws AccessDeniedException;
   
-  SubmissionUISummary getSubmissions(FilterGroup filter) throws AccessDeniedException;
+  SubmissionUISummary getSubmissions(FilterGroup filter) throws AccessDeniedException, FormNotAvailableException;
   
-  SubmissionUISummary getRepeatSubmissions(String keyString) throws AccessDeniedException;
+  SubmissionUISummary getRepeatSubmissions(String keyString) throws AccessDeniedException, FormNotAvailableException;
   
-  UIGeoPoint [] getGeoPoints(String formId, String geopointKey) throws AccessDeniedException;
+  UIGeoPoint [] getGeoPoints(String formId, String geopointKey) throws AccessDeniedException, FormNotAvailableException;
   
 }

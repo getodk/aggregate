@@ -57,54 +57,59 @@ public class TaskLockImpl implements TaskLock {
   }
 
   private void deleteLock(String lockId, String formId, ITaskLockType taskType) {
-      boolean deleteResult = false;
       try {
-	      // The lock state in the db is bad, so delete bad locks
-	      Transaction deleteTransaction = ds.beginTransaction();
-	      try {
-	        Query query = new Query(KIND);
-	        query.addFilter(FORM_ID_PROPERTY, Query.FilterOperator.EQUAL, formId);
-	        query.addFilter(TASK_TYPE_PROPERTY, Query.FilterOperator.EQUAL, taskType.getName());
-	        PreparedQuery pquery = ds.prepare(query);
-	        Iterable<Entity> entities = pquery.asIterable();
-	        List<Key> keysToDelete = new ArrayList<Key>();
-	        
-	        for (Entity entity : entities) {
-	          boolean shouldDelete = false;
-	          // see if deadline is more than a day in the past.
-	          // if so, remove lock from table.
-	          Long timestamp = getTimestamp(entity);
-	          if ( timestamp + 24L*3600L*1000L < System.currentTimeMillis() ) {
-	        	  shouldDelete = true;
-	          }
-	          // see if lock id matches that of the one supplied.
-	          // if so, remove lock from table.
-	          Object value = entity.getProperty(LOCK_ID_PROPERTY);
-	          if (value instanceof String) {
-	            String retrievedLockId = (String) value;
-	            if (lockId.equals(retrievedLockId)) {
-	            	shouldDelete = true;
-	            }
-	          }
-	          if ( shouldDelete ) {
-	        	  keysToDelete.add(entity.getKey());
-	          }
+        Query query = new Query(KIND);
+        query.addFilter(FORM_ID_PROPERTY, Query.FilterOperator.EQUAL, formId);
+        query.addFilter(TASK_TYPE_PROPERTY, Query.FilterOperator.EQUAL, taskType.getName());
+        PreparedQuery pquery = ds.prepare(query);
+        Iterable<Entity> entities = pquery.asIterable();
+        List<Key> keysToDelete = new ArrayList<Key>();
+        
+        for (Entity entity : entities) {
+          boolean shouldDelete = false;
+          // see if deadline is more than a day in the past.
+          // if so, remove lock from table.
+          Long timestamp = getTimestamp(entity);
+          if ( timestamp + 24L*3600L*1000L < System.currentTimeMillis() ) {
+        	  shouldDelete = true;
+          }
+          // see if lock id matches that of the one supplied.
+          // if so, remove lock from table.
+          Object value = entity.getProperty(LOCK_ID_PROPERTY);
+          if (value instanceof String) {
+            String retrievedLockId = (String) value;
+            if (lockId.equals(retrievedLockId)) {
+            	shouldDelete = true;
+            }
+          }
+          if ( shouldDelete ) {
+        	  keysToDelete.add(entity.getKey());
+          }
+        }
+        
+        // we have the list of candidate records
+        // now gain a transactional lock for each and 
+        // delete it.
+        for ( Key key : keysToDelete ) {
+	        // The lock state in the db is bad, so delete bad locks
+            boolean deleteResult = false;
+	        Transaction deleteTransaction = ds.beginTransaction();
+	        try {
+	        	ds.delete(deleteTransaction, key);
+	        	deleteResult = true;
+	        } catch ( Exception e1 ) {
+	        	e1.printStackTrace();
+	        	deleteResult = false;
+	        } finally {
+	        	if ( deleteResult ) {
+	        		deleteTransaction.commit();
+	        	} else {
+	        		deleteTransaction.rollback();
+	        	}
 	        }
-	        ds.delete(deleteTransaction, keysToDelete);
-	        deleteResult = true;
-	      } catch (Exception e1) {
-	        deleteResult = false;
-	        e1.printStackTrace();
-	      }
-	      finally {
-	        if (deleteResult) {
-	          deleteTransaction.commit();
-	        } else {
-	          deleteTransaction.rollback();
-	        }
-	      }
+        }
       } catch ( Exception e) { // primarily datastore exceptions
-    	  e.printStackTrace();
+   	    e.printStackTrace();
       }
   }
   

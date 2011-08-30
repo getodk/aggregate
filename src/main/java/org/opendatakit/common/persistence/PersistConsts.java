@@ -52,14 +52,6 @@ public class PersistConsts {
    * only keeps time to the nearest second... .
    */
   public static final Long MIN_DATETIME_RESOLUTION = 1000L;
-  
-  /**
-   * The length of the longest simple string we declare.
-   * These are used to hold things like the element name,
-   * form name and form id.  The user can alter table to 
-   * make this smaller if they need to.
-   */
-  public static final Long MAX_SIMPLE_STRING_LEN = 200L;
 
   /**
    * The maximum length of the URI strings.
@@ -77,5 +69,12 @@ public class PersistConsts {
    * (Currently it's Google App Engine)
    */
   public static final Long GUARANTEED_SEARCHABLE_LEN = 249L;
+
+  /**
+   * Default string length for fields that do not specify an 
+   * explicit string length.  Note that GAE has the stronger
+   * restriction on this length.  See GAE_
+   */
+  public static final Long DEFAULT_MAX_STRING_LENGTH = 255L;
 
 }

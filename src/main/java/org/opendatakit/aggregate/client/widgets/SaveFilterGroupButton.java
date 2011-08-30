@@ -23,6 +23,7 @@ import org.opendatakit.aggregate.client.FilterSubTab;
 import org.opendatakit.aggregate.client.SecureGWT;
 import org.opendatakit.aggregate.client.filter.Filter;
 import org.opendatakit.aggregate.client.filter.FilterGroup;
+import org.opendatakit.aggregate.client.popups.HelpBalloon;
 import org.opendatakit.aggregate.constants.common.UIConsts;
 
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -31,79 +32,83 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.ListBox;
 
-public class SaveFilterGroupButton extends AButtonBase implements ClickHandler {
+public class SaveFilterGroupButton extends AbstractButtonBase implements ClickHandler {
 
-  private static final String EMPTY_STRING = "";
-  private static final String ERROR_NO_FILTERS = "You need at least one filter to save a group.";
-  private static final String ERROR_NO_NAME = "You need to provide a name for this filter group to continue";
-  private static final String PROMPT_FOR_NAME_TXT = "Please enter a name for this group";
-  private static final String REPROMPT_FOR_NAME_TXT = "That group already exists. Please enter a new name";
+	private static final String EMPTY_STRING = "";
+	private static final String ERROR_NO_FILTERS = "You need at least one filter to save a group.";
+	private static final String ERROR_NO_NAME = "You need to provide a name for this filter group to continue";
+	private static final String PROMPT_FOR_NAME_TXT = "Please enter a name for this group";
+	private static final String REPROMPT_FOR_NAME_TXT = "That group already exists. Please enter a new name";
 
-  private FilterSubTab parentSubTab;
 
-  public SaveFilterGroupButton(FilterSubTab parentSubTab) {
-    super("Save");
-    this.parentSubTab = parentSubTab;
-    addStyleDependentName("positive");
-    addClickHandler(this);
-  }
+	private static final String TOOLTIP_TEXT = "Save a new filter group";
+	private static final String HELP_BALLOON_TXT = "Save the current filters applied as a filter group.";
 
-  @Override
-  public void onClick(ClickEvent event) {
-    super.onClick(event);
+	private FilterSubTab parentSubTab;
 
-    final FilterGroup filterGroup = parentSubTab.getDisplayedFilterGroup();
-    List<Filter> filters = filterGroup.getFilters();
+	public SaveFilterGroupButton(FilterSubTab parentSubTab) {
+		super("Save", TOOLTIP_TEXT);
+		this.parentSubTab = parentSubTab;
+		addStyleDependentName("positive");
+		helpBalloon = new HelpBalloon(this, HELP_BALLOON_TXT);
+	}
 
-    if (filters == null || filters.size() <= 0) {
-      Window.alert(ERROR_NO_FILTERS);
-      return;
-    }
+	@Override
+	public void onClick(ClickEvent event) {
+		super.onClick(event);
 
-    // if default filter group, prompt user for name
-    if (UIConsts.FILTER_NONE.equals(filterGroup.getName())) {
-      boolean match = false;
-      String newFilterName = Window.prompt(PROMPT_FOR_NAME_TXT, EMPTY_STRING);
-      while (true) {
-        ListBox filtersBox = parentSubTab.getListOfPossibleFilterGroups();
-        if (newFilterName != null ) {
-          for (int i = 0; i < filtersBox.getItemCount(); i++) {
-            if ((filtersBox.getValue(i)).equals(newFilterName)) {
-              match = true;
-            }
-          }
-        }
-        if(newFilterName == null) { // cancel was pressed
-          return; // exit 
-        } else if (match) {
-          match = false;
-          newFilterName = Window.prompt(REPROMPT_FOR_NAME_TXT, EMPTY_STRING);
-        } else if(newFilterName.equals(EMPTY_STRING)) {
-          newFilterName = Window.prompt(ERROR_NO_NAME, EMPTY_STRING);
-        } else {
-          break;
-        }
-      }
-      filterGroup.setName(newFilterName);
-    }
+		final FilterGroup filterGroup = parentSubTab.getDisplayedFilterGroup();
+		List<Filter> filters = filterGroup.getFilters();
 
-    // Set up the callback object.
-    AsyncCallback<String> callback = new AsyncCallback<String>() {
-      public void onFailure(Throwable caught) {
-        AggregateUI.getUI().reportError(caught);
-      }
+		if (filters == null || filters.size() <= 0) {
+			Window.alert(ERROR_NO_FILTERS);
+			return;
+		}
 
-      @Override
-      public void onSuccess(String uri) {
-        if(uri != null) {
-          filterGroup.setUri(uri);
-        }
-        parentSubTab.update();
-      }
-    };
-    
-    // Save the filter on the server
-    SecureGWT.getFilterService().updateFilterGroup(filterGroup, callback);
+		// if default filter group, prompt user for name
+		if (UIConsts.FILTER_NONE.equals(filterGroup.getName())) {
+			boolean match = false;
+			String newFilterName = Window.prompt(PROMPT_FOR_NAME_TXT, EMPTY_STRING);
+			while (true) {
+				ListBox filtersBox = parentSubTab.getListOfPossibleFilterGroups();
+				if (newFilterName != null ) {
+					for (int i = 0; i < filtersBox.getItemCount(); i++) {
+						if ((filtersBox.getValue(i)).equals(newFilterName)) {
+							match = true;
+						}
+					}
+				}
+				if(newFilterName == null) { // cancel was pressed
+					return; // exit 
+				} else if (match) {
+					match = false;
+					newFilterName = Window.prompt(REPROMPT_FOR_NAME_TXT, EMPTY_STRING);
+				} else if(newFilterName.equals(EMPTY_STRING)) {
+					newFilterName = Window.prompt(ERROR_NO_NAME, EMPTY_STRING);
+				} else {
+					break;
+				}
+			}
+			filterGroup.setName(newFilterName);
+		}
 
-  }
+		// Set up the callback object.
+		AsyncCallback<String> callback = new AsyncCallback<String>() {
+			public void onFailure(Throwable caught) {
+				AggregateUI.getUI().reportError(caught);
+			}
+
+			@Override
+			public void onSuccess(String uri) {
+				if(uri != null) {
+					filterGroup.setUri(uri);
+				}
+				parentSubTab.update();
+			}
+		};
+
+		// Save the filter on the server
+		SecureGWT.getFilterService().updateFilterGroup(filterGroup, callback);
+
+	}
 }

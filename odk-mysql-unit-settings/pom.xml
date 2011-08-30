@@ -7,7 +7,6 @@
     <version>1.0</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
-  <groupId>org.opendatakit</groupId>
   <artifactId>odk-mysql-unit-settings</artifactId>
   <version>latest</version>
   <packaging>jar</packaging>

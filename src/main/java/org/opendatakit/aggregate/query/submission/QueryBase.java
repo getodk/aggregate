@@ -81,6 +81,8 @@ public abstract class QueryBase {
 		case META_UI_VERSION:
 			metaField = tlb.uiVersion;
 			break;
+		case META_DATE_MARKED_AS_COMPLETE:
+			metaField = tlb.markedAsCompleteDate;
 		default:
 			throw new IllegalStateException("unknown Metadata type");
 		}

@@ -97,8 +97,8 @@ import com.google.gdata.util.ServiceException;
 public class FusionTable extends AbstractExternalService implements ExternalService {
   private static final Log logger = LogFactory.getLog(FusionTable.class.getName());
 
-  private static final int FUSION_TABLE_SOCKET_ESTABLISHMENT_TIMEOUT_MILLISECONDS = 2000;
-  private static final int FUSION_TABLE_SERVICE_TIMEOUT_MILLISECONDS = 15000;
+  private static final int FUSION_TABLE_SOCKET_ESTABLISHMENT_TIMEOUT_MILLISECONDS = 30000;
+  private static final int FUSION_TABLE_SERVICE_TIMEOUT_MILLISECONDS = 30000;
 
   /**
    * Datastore entity specific to this type of external service
@@ -155,7 +155,7 @@ public class FusionTable extends AbstractExternalService implements ExternalServ
 
   public FusionTable(FormServiceCursor fsc, CallingContext cc) throws ODKEntityNotFoundException,
       ODKDatastoreException, ODKFormNotFoundException {
-    this(Form.retrieveForm(fsc.getFormId(), cc), retrieveFTPT(fsc, cc), cc);
+    this(Form.retrieveFormByFormId(fsc.getFormId(), cc), retrieveFTPT(fsc, cc), cc);
     this.fsc = fsc;
     repeatElementTableIds.addAll(FusionTableRepeatParameterTable.getRepeatGroupAssociations(
     								objectEntity.getUri(), cc));

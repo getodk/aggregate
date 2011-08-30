@@ -21,8 +21,9 @@ public class AggregateTabBase extends TabPanel {
  
     subTabPosition = new ArrayList<SubTabs>();
     subTabMap = new HashMap<SubTabs,SubTabInterface>();
-        
-    getElement().setId("second_level_menu");
+       
+    getElement().addClassName("second_level_menu");
+    getElement().getFirstChildElement().getFirstChildElement().addClassName("tab_measure_2");
 
   } 
   
@@ -33,6 +34,15 @@ public class AggregateTabBase extends TabPanel {
     subTabPosition.add(insertIndex, subTab);
     insert(panel, subTab.getTabLabel(), insertIndex);
     subTabMap.put(subTab, panel);
+  }
+  
+  protected void hideSubTab(AggregateSubTabBase panel){    
+    remove(panel);
+  }
+  
+  protected void showSubTab(AggregateSubTabBase panel, SubTabs subTab) {
+    int insertIndex = findSubTabIndex(subTab);
+    insert(panel, subTab.getTabLabel(), insertIndex);
   }
   
   /**

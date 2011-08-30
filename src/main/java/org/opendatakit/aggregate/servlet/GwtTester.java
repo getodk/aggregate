@@ -44,6 +44,7 @@ import org.opendatakit.aggregate.format.element.ElementFormatter;
 import org.opendatakit.aggregate.query.submission.QueryByUIFilterGroup;
 import org.opendatakit.aggregate.server.GenerateHeaderInfo;
 import org.opendatakit.aggregate.submission.Submission;
+import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.submission.SubmissionSet;
 import org.opendatakit.common.constants.BasicConsts;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
@@ -106,7 +107,7 @@ public class GwtTester extends ServletUtilBase {
       filters.add(new ColumnFilter(Visibility.DISPLAY, columns, new Long(5)));
       filters.add(new RowFilter(Visibility.HIDE, new Column("Ro1Awesome", "", UIDisplayType.TEXT),
           FilterOperation.EQUAL, "captain1", new Long(1)));
-      FilterGroup group = new FilterGroup("group100", formId, filters, true);
+      FilterGroup group = new FilterGroup("group100", formId, filters);
       try {
         SubmissionFilterGroup filterGrp = SubmissionFilterGroup.transform(group, cc);
         filterGrp.persist(cc);
@@ -150,7 +151,7 @@ public class GwtTester extends ServletUtilBase {
       try {
 
         // Form form = Form.retrieveForm("widgets", cc);
-        Form form = Form.retrieveForm("LocationThings", cc);
+        Form form = Form.retrieveFormByFormId("LocationThings", cc);
         QueryByUIFilterGroup query = new QueryByUIFilterGroup(form, null, 1000, cc);
         List<Submission> submissions = query.getResultSubmissions(cc);
 
@@ -164,7 +165,8 @@ public class GwtTester extends ServletUtilBase {
         for (SubmissionSet sub : submissions) {
           Row row = sub.getFormattedValuesAsRow(filteredElements, elemFormatter, false, cc);
           try {
-            summary.addSubmission(new SubmissionUI(row.getFormattedValues()));
+            SubmissionKey subKey = sub.constructSubmissionKey(form.getTopLevelGroupElement());
+            summary.addSubmission(new SubmissionUI(row.getFormattedValues(), subKey.toString()));
           } catch (Exception e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -213,7 +215,7 @@ public class GwtTester extends ServletUtilBase {
     } else if (flag.equals("createfusion")) {
       
       try {
-        Form form = Form.retrieveForm("LocationThings", cc);
+        Form form = Form.retrieveFormByFormId("LocationThings", cc);
         FusionTable fusion = new FusionTable(form, ExternalServicePublicationOption.UPLOAD_N_STREAM, cc);;
         String uri =  fusion.getFormServiceCursor().getUri(); 
         String scope = FusionTableConsts.FUSION_SCOPE;
@@ -230,7 +232,7 @@ public class GwtTester extends ServletUtilBase {
     } else if (flag.equals("createspreadsheet")) {
       
       try {
-        Form form = Form.retrieveForm("LocationThings", cc);
+        Form form = Form.retrieveFormByFormId("LocationThings", cc);
         GoogleSpreadsheet spreadsheet = new GoogleSpreadsheet(form, "TESTWORKBOOK", ExternalServicePublicationOption.UPLOAD_N_STREAM, cc);
         String uri =  spreadsheet.getFormServiceCursor().getUri();
         String scope = SpreadsheetConsts.DOCS_SCOPE + BasicConsts.SPACE + SpreadsheetConsts.SPREADSHEETS_SCOPE;

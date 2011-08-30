@@ -23,6 +23,7 @@ import org.opendatakit.aggregate.client.popups.BinaryPopup;
 import org.opendatakit.aggregate.client.submission.Column;
 import org.opendatakit.aggregate.client.submission.SubmissionUI;
 import org.opendatakit.aggregate.client.submission.SubmissionUISummary;
+import org.opendatakit.aggregate.client.widgets.DeleteSubmissionButton;
 import org.opendatakit.aggregate.client.widgets.RepeatViewButton;
 import org.opendatakit.aggregate.constants.common.UIConsts;
 
@@ -35,36 +36,51 @@ import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.PopupPanel;
 
 public class SubmissionTable extends FlexTable {
- 
+
+  private static final String BLANK_VALUE = " ";
   private ArrayList<Column> tableHeaders;
   private ArrayList<SubmissionUI> tableSubmissions;
-  
-  public SubmissionTable(SubmissionUISummary summary) {
+
+  public SubmissionTable(SubmissionUISummary summary, boolean addDeleteButton) {
     tableHeaders = summary.getHeaders();
     tableSubmissions = summary.getSubmissions();
 
     addStyleName("dataTable");
-
+    getElement().setId("submission_table");
+    
     // setup header
     int headerIndex = 0;
+    if (addDeleteButton) {
+      setHTML(0, headerIndex++, BLANK_VALUE);
+    }
     for (Column column : tableHeaders) {
       setText(0, headerIndex++, column.getDisplayHeader());
     }
-    setHTML(0, headerIndex, " ");
+    setHTML(0, headerIndex, BLANK_VALUE);
     setColumnFormatter(new HTMLTable.ColumnFormatter());
     getColumnFormatter().addStyleName(headerIndex, "blank-submission-column");
-    
+
     getRowFormatter().addStyleName(0, "titleBar");
-    
+
     // create rows
-    int i = 1;
+    int rowPosition = 1;
     for (SubmissionUI row : tableSubmissions) {
-      int j = 0;
+      int valueIndex = 0; // index matches to column headers
+      int columnPosition = 0; // position matches to position in table
+   
+      // if authorized add delete button
+      if (addDeleteButton) {
+        DeleteSubmissionButton delete = new DeleteSubmissionButton(row.getSubmissionKeyAsString());
+        setWidget(rowPosition, columnPosition, delete);
+        columnPosition++;
+      }
+   
+      // generate row
       for (final String value : row.getValues()) {
-        switch (tableHeaders.get(j).getUiDisplayType()) {
+        switch (tableHeaders.get(valueIndex++).getUiDisplayType()) {
         case BINARY:
           if (value == null) {
-            setText(i, j, UIConsts.EMPTY_STRING);
+            setText(rowPosition, columnPosition, UIConsts.EMPTY_STRING);
           } else {
             Image image = new Image(value + UIConsts.PREVIEW_SET);
             image.addClickHandler(new ClickHandler() {
@@ -82,30 +98,30 @@ public class SubmissionTable extends FlexTable {
                 AggregateUI.getUI().getTimer().restartTimer();
               }
             });
-            setWidget(i, j, image);
+            setWidget(rowPosition, columnPosition, image);
           }
           break;
         case REPEAT:
           if (value == null) {
-            setText(i, j, UIConsts.EMPTY_STRING);
+            setText(rowPosition, columnPosition, UIConsts.EMPTY_STRING);
           } else {
             RepeatViewButton repeat = new RepeatViewButton(value);
-            setWidget(i, j, repeat);
+            setWidget(rowPosition, columnPosition, repeat);
           }
           break;
         default:
-          setText(i, j, value);
+          setText(rowPosition, columnPosition, value);
         }
-        j++;
+        columnPosition++;
       }
-      setHTML(i, j, " ");
-      if (i % 2 == 0) {
-        getRowFormatter().setStyleName(i, "evenTableRow");
+      setHTML(rowPosition, columnPosition, BLANK_VALUE);
+      if (rowPosition % 2 == 0) {
+        getRowFormatter().setStyleName(rowPosition, "evenTableRow");
       }
-      i++;
+      rowPosition++;
     }
   }
-  
+
   public ArrayList<Column> getHeaders() {
     return tableHeaders;
   }

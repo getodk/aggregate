@@ -16,8 +16,10 @@
 
 package org.opendatakit.aggregate.server;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -29,8 +31,11 @@ import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.externalservice.FormServiceCursor;
 import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.form.FormInfo;
 import org.opendatakit.aggregate.form.MiscTasks;
 import org.opendatakit.aggregate.form.MiscTasks.TaskType;
+import org.opendatakit.aggregate.process.DeleteSubmissions;
+import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.task.FormDelete;
 import org.opendatakit.aggregate.task.PurgeOlderSubmissions;
 import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
@@ -55,7 +60,7 @@ public class FormAdminServiceImpl extends RemoteServiceServlet implements
 		CallingContext cc = ContextFactory.getCallingContext(this, req);
 
 		try {
-			Form form = Form.retrieveForm(formId, cc);
+			Form form = Form.retrieveFormByFormId(formId, cc);
 			form.setDownloadEnabled(downloadable);
 			form.persist(cc);
 			return true;
@@ -73,7 +78,7 @@ public class FormAdminServiceImpl extends RemoteServiceServlet implements
 		CallingContext cc = ContextFactory.getCallingContext(this, req);
 
 		try {
-			Form form = Form.retrieveForm(formId, cc);
+			Form form = Form.retrieveFormByFormId(formId, cc);
 			form.setSubmissionEnabled(acceptSubmissions);
 			form.persist(cc);
 			return true;
@@ -112,7 +117,7 @@ public class FormAdminServiceImpl extends RemoteServiceServlet implements
 						PurgeOlderSubmissions.PURGE_DATE_FORMAT.format(earliest));
 		Form form;
 		try {
-			form = Form.retrieveForm(fsc.getFormId(), cc);
+			form = Form.retrieveFormByFormId(fsc.getFormId(), cc);
 		} catch (ODKFormNotFoundException e) {
 			e.printStackTrace();
         	throw new RequestFailureException("Unable to retrieve form " + fsc.getFormId());
@@ -148,11 +153,11 @@ public class FormAdminServiceImpl extends RemoteServiceServlet implements
 	    try {
 	      FormDelete formDelete = (FormDelete) cc.getBean(BeanDefs.FORM_DELETE_BEAN);
 
-	      Form formToDelete = Form.retrieveForm(formId, cc);
+	      Form formToDelete = Form.retrieveFormByFormId(formId, cc);
 
 	      // If the FormInfo table is the target, log an error!
 	      if (formToDelete != null) {
-	        if (!formToDelete.getFormId().equals(Form.URI_FORM_ID_VALUE_FORM_INFO)) {
+	        if (!FormInfo.isFormInfoForm(formToDelete.getFormId())) {
 	          MiscTasks m = new MiscTasks(TaskType.DELETE_FORM, formToDelete, null, cc);
 	          m.persist(cc);
 	          CallingContext ccDaemon = ContextFactory.getCallingContext(this, req);
@@ -171,5 +176,26 @@ public class FormAdminServiceImpl extends RemoteServiceServlet implements
 
 	    return true;
 	  }
+
+    @Override
+    public Boolean deleteSubmission(String submissionKeyAsString) throws AccessDeniedException {
+      HttpServletRequest req = this.getThreadLocalRequest();
+      CallingContext cc = ContextFactory.getCallingContext(this, req);
+      
+      // create a list because the submission deleter require a list
+      SubmissionKey subKey = new SubmissionKey(submissionKeyAsString);
+      List<SubmissionKey> keyList = new ArrayList<SubmissionKey>();
+      keyList.add(subKey);
+      
+      // delete the submission
+      try {
+        DeleteSubmissions deleter = new DeleteSubmissions(keyList);
+        deleter.deleteSubmissions(cc);
+      } catch (ODKDatastoreException e) {
+        return Boolean.FALSE;
+      }
+      
+      return Boolean.TRUE;
+    }
 	
 }

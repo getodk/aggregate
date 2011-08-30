@@ -49,11 +49,11 @@ public class QueryByDate extends QueryBase {
     
     query = cc.getDatastore().createQuery(tbl, cc.getCurrentUser());
     if (backward) {
-    	query.addSort(tbl.lastUpdateDate, Query.Direction.DESCENDING);
-    	query.addFilter(tbl.lastUpdateDate, Query.FilterOperation.LESS_THAN, lastDate);
+    	query.addSort(tbl.markedAsCompleteDate, Query.Direction.DESCENDING);
+    	query.addFilter(tbl.markedAsCompleteDate, Query.FilterOperation.LESS_THAN, lastDate);
     } else {
-    	query.addSort(tbl.lastUpdateDate, Query.Direction.ASCENDING);
-    	query.addFilter(tbl.lastUpdateDate, Query.FilterOperation.GREATER_THAN, lastDate);
+    	query.addSort(tbl.markedAsCompleteDate, Query.Direction.ASCENDING);
+    	query.addFilter(tbl.markedAsCompleteDate, Query.FilterOperation.GREATER_THAN, lastDate);
     }
     if (secondaryOrderingByPrimaryKey) {
     	query.addSort(tbl.primaryKey, Query.Direction.ASCENDING);
@@ -65,7 +65,7 @@ public class QueryByDate extends QueryBase {
 
   public QueryByDate(Form form, Date lastDate,
       boolean backwardDirection, int maxFetchLimit, CallingContext cc) throws ODKFormNotFoundException {
-	  this(form, lastDate, backwardDirection, false, false, maxFetchLimit, cc);
+	  this(form, lastDate, backwardDirection, true, true, maxFetchLimit, cc);
   }
   
   @Override

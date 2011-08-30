@@ -21,6 +21,7 @@ import java.io.PrintWriter;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -49,7 +50,10 @@ public class OpenIdLoginPageServlet extends ServletUtilBase {
 
 		logger.info("Invalidating login session " + req.getSession().getId());
 		// Invalidate session.
-		req.getSession().invalidate();
+		HttpSession s = req.getSession();
+		if ( s != null ) {
+			s.invalidate();
+		}
 		// Display page.
 		resp.setContentType(HtmlConsts.RESP_TYPE_HTML);
 	    resp.setCharacterEncoding(HtmlConsts.UTF8_ENCODE);

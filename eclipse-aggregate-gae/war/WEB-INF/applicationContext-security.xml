@@ -67,6 +67,7 @@
 		<intercept-url pattern="/logout.html" access="true" />
 		<intercept-url pattern="/odk_color.png" access="true" />
 		<intercept-url pattern="/openid_login.html" access="true" />
+		<intercept-url pattern="/relogin.html" access="true" />
 		<intercept-url pattern="/local_login.html" access="isFullyAuthenticated() and hasRole('AUTH_LOCAL')" />
 
 		<!-- grant access to various servlets -->
@@ -124,10 +125,11 @@
 	        <intercept-url pattern="/res/**" access="ANY_CHANNEL" />
 			<intercept-url pattern="/stylesheets/**" access="ANY_CHANNEL" />
 			<intercept-url pattern="/AggregateUI.css" access="ANY_CHANNEL" />
-			<intercept-url pattern="/access-denied.html" access="REQUIRES_INSECURE_CHANNEL" />
-	        <intercept-url pattern="/index.html" access="REQUIRES_INSECURE_CHANNEL" />
-	        <intercept-url pattern="/logout.html" access="REQUIRES_INSECURE_CHANNEL" />
-	        <intercept-url pattern="/openid_login.html" access="REQUIRES_INSECURE_CHANNEL" />
+			<intercept-url pattern="/access-denied.html" access="${security.server.channelType}" />
+	        <intercept-url pattern="/index.html" access="${security.server.channelType}" />
+	        <intercept-url pattern="/logout.html" access="${security.server.channelType}" />
+	        <intercept-url pattern="/openid_login.html" access="${security.server.channelType}" />
+	        <intercept-url pattern="/relogin.html" access="${security.server.channelType}" />
 		    <intercept-url pattern="/ssl/**" access="${security.server.secureChannelType}"/>
             <intercept-url pattern="/local_login.html" access="${security.server.channelType}" />
 		    <intercept-url pattern="/**" access="${security.server.channelType}"/>

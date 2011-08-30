@@ -17,9 +17,10 @@
 package org.opendatakit.aggregate.client;
 
 import org.opendatakit.aggregate.client.filter.FilterGroup;
-import org.opendatakit.aggregate.client.form.FormSummary;
 import org.opendatakit.aggregate.client.table.FilterNavigationTable;
 import org.opendatakit.aggregate.client.table.SubmissionTable;
+import org.opendatakit.aggregate.constants.common.FilterConsts;
+import org.opendatakit.aggregate.constants.common.HelpSliderConsts;
 import org.opendatakit.aggregate.constants.common.UIConsts;
 
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
@@ -28,91 +29,106 @@ import com.google.gwt.user.client.ui.ListBox;
 
 public class FilterSubTab extends AggregateSubTabBase {
 
-	private FilterNavigationTable navTable;
-	private HorizontalPanel filtersNSubmissions;
+  private FilterNavigationTable navTable;
+  
+  private HorizontalPanel filtersNSubmissions;
+  private FiltersDataPanel filtersPanel;
+  private SubmissionPanel submissionPanel;
+  
+  private FilterGroup currentlyDisplayedFilterGroup;
+  private Boolean displayMetaData;
 
-	private FiltersDataPanel filtersPanel;
-	private SubmissionPanel submissionPanel;
-	private FilterGroup currentlyDisplayedFilterGroup;
-	private FormSummary form;
+  public FilterSubTab() {
+    displayMetaData = false;
+    getElement().setId("filter_sub_tab");
 
-	public FilterSubTab() {
-		getElement().setId("filter_sub_tab");
-		// create Nav Panel
-		navTable = new FilterNavigationTable(this);
-		navTable.getElement().setId("submission_nav_table");
-		add(navTable);
+    // create Nav Panel
+    navTable = new FilterNavigationTable(this);
+    navTable.getElement().setId("submission_nav_table");
+    add(navTable);
 
-		// Create Filters ande Submissions Panel
-		filtersNSubmissions = new HorizontalPanel();
+    // Create Filters ande Submissions Panel
+    filtersNSubmissions = new HorizontalPanel();
 
-		filtersPanel = new FiltersDataPanel(this);
-		filtersNSubmissions.add(filtersPanel);
+    filtersPanel = new FiltersDataPanel(this);
+    filtersNSubmissions.add(filtersPanel);
 
-		submissionPanel = new SubmissionPanel();
-		filtersNSubmissions.add(submissionPanel);
+    submissionPanel = new SubmissionPanel();
+    filtersNSubmissions.add(submissionPanel);
 
-		filtersNSubmissions.getElement().setId("filters_data");
-		filtersNSubmissions.getElement().getFirstChildElement().getFirstChildElement().getFirstChildElement()
-		.setId("filters_panel");
+    filtersNSubmissions.getElement().setId("filters_data");
+    filtersNSubmissions.getElement().getFirstChildElement().getFirstChildElement()
+        .getFirstChildElement().setId("filters_panel");
 
-		filtersNSubmissions.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_JUSTIFY);
+    filtersNSubmissions.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_JUSTIFY);
 
-		add(filtersNSubmissions);
-		currentlyDisplayedFilterGroup = new FilterGroup(UIConsts.FILTER_NONE, null, null, false);
-	}
+    add(filtersNSubmissions);
+  }
 
-	public void switchForm(FormSummary formSwitch, FilterGroup filterGroup) {
-		form = formSwitch;
-		navTable.updateNavTable(form, filterGroup);
-		currentlyDisplayedFilterGroup = filterGroup;
-		filtersPanel.update(currentlyDisplayedFilterGroup);
-		submissionPanel.update(currentlyDisplayedFilterGroup);
-	}
+  private void setCurrentlyDisplayedFilterGroup(FilterGroup newFilterGroup) {
+    currentlyDisplayedFilterGroup = newFilterGroup;
+    currentlyDisplayedFilterGroup.setIncludeMetadata(displayMetaData);
+    navTable.updateNavTable(newFilterGroup);
+  }
+  
+  public FilterGroup getDisplayedFilterGroup() {
+    if(currentlyDisplayedFilterGroup == null) {
+      return new FilterGroup(UIConsts.FILTER_NONE, null, null);
+    }
+    return currentlyDisplayedFilterGroup;
+  }
+    
+  public void switchFilterGroup(FilterGroup filterGroup) {
+    // check if filter group is changed, if the same no need to do anything
+    if(getDisplayedFilterGroup().equals(filterGroup)) {
+      return;
+    }
+    setCurrentlyDisplayedFilterGroup(filterGroup);
+    update();
+  }
 
-	public void switchFilterGroupWithinForm(FilterGroup filterGroup) {
-		// verify form remained the same, if not need to use switch form API
-		if(!currentlyDisplayedFilterGroup.getFormId().equals(filterGroup.getFormId())) {
-			return;
-		}
-		currentlyDisplayedFilterGroup = filterGroup;
-		filtersPanel.update(currentlyDisplayedFilterGroup);
-		submissionPanel.update(currentlyDisplayedFilterGroup);
-	}
+  public void removeFilterGroupWithinForm() {
+    String formId = getDisplayedFilterGroup().getFormId();
+    FilterGroup blankFilterGroup = new FilterGroup(UIConsts.FILTER_NONE, formId, null);
+    setCurrentlyDisplayedFilterGroup(blankFilterGroup);    
+    update();
+  }
 
-	public void removeFilterGroupWithinForm() {
-		currentlyDisplayedFilterGroup = new FilterGroup(UIConsts.FILTER_NONE, form.getId(), null, currentlyDisplayedFilterGroup.getIncludeMetadata());
-		navTable.updateNavTable(form, currentlyDisplayedFilterGroup);
-		navTable.update();
-		filtersPanel.update(currentlyDisplayedFilterGroup);
-		submissionPanel.update(currentlyDisplayedFilterGroup);
-	}
+  @Override
+  public boolean canLeave() {
+    return true;
+  }
 
-	@Override
-	public boolean canLeave() {
-		return true;
-	}
+  @Override
+  public void update() {
+    navTable.update();
 
-	@Override
-	public void update() {
-		navTable.update();
-		if(form != null) {
-			navTable.updateNavTable(form, currentlyDisplayedFilterGroup);
-		}
-		filtersPanel.update(currentlyDisplayedFilterGroup);
-		submissionPanel.update(currentlyDisplayedFilterGroup);
-	}
+    FilterGroup filterGroup = getDisplayedFilterGroup();
+    filtersPanel.update(filterGroup);
+    submissionPanel.update(filterGroup);
+  }
 
-	public FilterGroup getDisplayedFilterGroup() {
-		return currentlyDisplayedFilterGroup;
-	}
+  public ListBox getListOfPossibleFilterGroups() {
+    return navTable.getCurrentFilterList();
+  }
 
-	public ListBox getListOfPossibleFilterGroups() {
-		return navTable.getCurrentFilterList();
-	}
+  public SubmissionTable getSubmissionTable() {
+    return submissionPanel.getSubmissionTable();
+  }
 
-	public SubmissionTable getSubmissionTable() {
-		return submissionPanel.getSubmissionTable();
-	}
+  public Boolean getDisplayMetaData() {
+    return displayMetaData;
+  }
 
+  public void setDisplayMetaData(Boolean displayMetaData) {
+    this.displayMetaData = displayMetaData;
+    
+    // cause a refresh of filter group
+    setCurrentlyDisplayedFilterGroup(getDisplayedFilterGroup());
+  }
+  
+  @Override
+  public HelpSliderConsts[] getHelpSliderContent() {
+    return FilterConsts.values();
+  }
 }

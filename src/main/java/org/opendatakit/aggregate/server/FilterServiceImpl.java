@@ -21,10 +21,13 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
 import org.opendatakit.aggregate.ContextFactory;
+import org.opendatakit.aggregate.client.exception.FormNotAvailableException;
 import org.opendatakit.aggregate.client.filter.FilterGroup;
 import org.opendatakit.aggregate.client.filter.FilterService;
 import org.opendatakit.aggregate.client.filter.FilterSet;
+import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.filter.SubmissionFilterGroup;
+import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.common.web.CallingContext;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
@@ -38,9 +41,16 @@ public class FilterServiceImpl extends RemoteServiceServlet implements FilterSer
  
 
   @Override
-  public FilterSet getFilterSet(String formId) {
+  public FilterSet getFilterSet(String formId) throws FormNotAvailableException {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
+    
+    try {
+      // verify form is still available
+      Form.retrieveFormByFormId(formId, cc);
+    } catch (ODKFormNotFoundException e1) {
+      throw new FormNotAvailableException(e1);
+    }
     
     FilterSet filterSet = new FilterSet();
     

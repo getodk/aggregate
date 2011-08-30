@@ -21,6 +21,7 @@ import java.security.NoSuchAlgorithmException;
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.permissions.CredentialsInfoBuilder;
 import org.opendatakit.aggregate.client.popups.ChangePasswordPopup;
+import org.opendatakit.aggregate.client.popups.HelpBalloon;
 import org.opendatakit.common.security.client.CredentialsInfo;
 import org.opendatakit.common.security.client.RealmSecurityInfo;
 import org.opendatakit.common.security.client.UserSecurityInfo;
@@ -40,8 +41,12 @@ import com.google.gwt.user.client.ui.PasswordTextBox;
  * @author mitchellsundt@gmail.com
  * 
  */
-public class ExecuteChangePasswordButton extends AButtonBase implements
-		ClickHandler {
+public class ExecuteChangePasswordButton extends AbstractButtonBase implements ClickHandler {
+
+	private static final String TOOLTIP_TEXT = "Change the user's password";
+
+	private static final String HELP_BALLOON_TXT = "Change the user's password when logging into " +
+			"Aggregate.";
 
 	private static int jsonRequestId = 0;
 
@@ -49,9 +54,9 @@ public class ExecuteChangePasswordButton extends AButtonBase implements
 	private String baseUrl;
 
 	public ExecuteChangePasswordButton(ChangePasswordPopup popup) {
-		super("<img src=\"images/green_right_arrow.png\" /> Change Password");
+		super("<img src=\"images/green_right_arrow.png\" /> Change Password", TOOLTIP_TEXT);
 		this.popup = popup;
-		addClickHandler(this);
+		helpBalloon = new HelpBalloon(this, HELP_BALLOON_TXT);
 	}
 
 	@Override
@@ -72,8 +77,7 @@ public class ExecuteChangePasswordButton extends AButtonBase implements
 			} else {
 				CredentialsInfo credential;
 				try {
-					credential = CredentialsInfoBuilder.build(
-							userInfo.getUsername(), realmInfo, pw1);
+					credential = CredentialsInfoBuilder.build(userInfo.getUsername(), realmInfo, pw1);
 				} catch (NoSuchAlgorithmException e) {
 					Window.alert("Unable to build credentials hash");
 					return;
@@ -96,22 +100,20 @@ public class ExecuteChangePasswordButton extends AButtonBase implements
 			Window.alert("JSON change-password request to " + baseUrl + " failed");
 		} else {
 			// process response...
-			if ( !( status != null && "OK".equals(status) ) ) {
-				Window.alert("Change password request " + 
-						((username == null) ? "" : ("for " + username + " ")) + "failed.\n" +
-						"JSON change-password request to\n   " + baseUrl + "\nreturned: " + status);
+			if (!(status != null && "OK".equals(status))) {
+				Window.alert("Change password request "
+						+ ((username == null) ? "" : ("for " + username + " ")) + "failed.\n"
+						+ "JSON change-password request to\n   " + baseUrl + "\nreturned: " + status);
 			}
 		}
 		popup.hide();
 	}
 
 	public void onError(String echo, String error) {
-		Window.alert("Unable to change passwored for " + echo + " error: "
-				+ error);
+		Window.alert("Unable to change passwored for " + echo + " error: " + error);
 	}
 
-	public native static void getJson(int requestId, String url,
-			ExecuteChangePasswordButton handler) /*-{
+	public native static void getJson(int requestId, String url, ExecuteChangePasswordButton handler) /*-{
 		var callback = "callback" + requestId;
 
 		var script = document.createElement("script");
@@ -137,5 +139,5 @@ public class ExecuteChangePasswordButton extends AButtonBase implements
 				}, 1000);
 
 		document.body.appendChild(script);
-	}-*/;
+  }-*/;
 }

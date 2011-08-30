@@ -44,7 +44,7 @@ public class RepeatPopup extends PopupPanel {
        }
 
        public void onSuccess(SubmissionUISummary summary) {
-         panel.add(new SubmissionTable(summary)); //contains the data
+         panel.add(new SubmissionTable(summary, false)); //contains the data
        }
     };
     

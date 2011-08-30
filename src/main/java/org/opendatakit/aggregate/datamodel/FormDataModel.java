@@ -73,6 +73,7 @@ public final class FormDataModel extends CommonFieldsBase {
 
 	private static final Log logger = LogFactory.getLog(FormDataModel.class.getName());
 	
+	public static final Long MAX_ELEMENT_NAME_LENGTH = PersistConsts.GUARANTEED_SEARCHABLE_LEN;
 	/* xform element types */
 	public static enum ElementType {
 		// xform tag types
@@ -93,8 +94,6 @@ public final class FormDataModel extends CommonFieldsBase {
 		PHANTOM, // if a relation needs to be divided in order to fit
 		BINARY_CONTENT_REF_BLOB, // association between BINARY and REF_BLOB
 		REF_BLOB, // the table of the actual byte[] data (xxxBLOB)
-		LONG_STRING_REF_TEXT, // association between any field and REF_TEXT
-		REF_TEXT, // the table of extended string values (xxxTEXT)
 	};
 	
 	// GEOPOINT structured field has the following ordinal interpretations...
@@ -110,7 +109,7 @@ public final class FormDataModel extends CommonFieldsBase {
 	/** ordinal (1st, 2nd, ... ) of this item in the form element */
 	private static final DataField ORDINAL_NUMBER = new DataField("ORDINAL_NUMBER", DataField.DataType.INTEGER, false);
 	private static final DataField ELEMENT_TYPE = new DataField("ELEMENT_TYPE", DataField.DataType.STRING, false, PersistConsts.URI_STRING_LEN);
-	private static final DataField ELEMENT_NAME = new DataField("ELEMENT_NAME", DataField.DataType.STRING, true, PersistConsts.MAX_SIMPLE_STRING_LEN);
+	private static final DataField ELEMENT_NAME = new DataField("ELEMENT_NAME", DataField.DataType.STRING, true, MAX_ELEMENT_NAME_LENGTH);
 	private static final DataField PERSIST_AS_COLUMN_NAME = new DataField("PERSIST_AS_COLUMN_NAME", DataField.DataType.STRING, true, PersistConsts.URI_STRING_LEN);
 	private static final DataField PERSIST_AS_TABLE_NAME = new DataField("PERSIST_AS_TABLE_NAME", DataField.DataType.STRING, true, PersistConsts.URI_STRING_LEN);
 	private static final DataField PERSIST_AS_SCHEMA_NAME = new DataField("PERSIST_AS_SCHEMA_NAME", DataField.DataType.STRING, true, PersistConsts.URI_STRING_LEN);
@@ -322,8 +321,6 @@ public final class FormDataModel extends CommonFieldsBase {
 			return getParent().getGroupQualifiedElementName();
 		case BINARY_CONTENT_REF_BLOB: // association between VERSIONED_BINARY and REF_BLOB
 		case REF_BLOB: // the table of the actual byte[] data (xxxBLOB)
-		case LONG_STRING_REF_TEXT: // association between any field and REF_TEXT
-		case REF_TEXT: // the table of extended string values (xxxTEXT)
 		default:
 			throw new IllegalStateException("unexpected request for unreferencable element type");
 		}
