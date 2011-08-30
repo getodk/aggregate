@@ -53,7 +53,7 @@ public class UploadSubmissionsImpl implements UploadSubmissions {
       String fscUri = URLEncoder.encode(fsc.getUri(), HtmlConsts.UTF8_ENCODE);
 
       TaskOptions task = TaskOptions.Builder.withUrl(BasicConsts.FORWARDSLASH + UploadSubmissionsTaskServlet.ADDR);
-      task.countdownMillis(PersistConsts.MIN_SETTLE_MILLISECONDS);
+      task.countdownMillis(500 + PersistConsts.MAX_SETTLE_MILLISECONDS);
       task.method(TaskOptions.Method.GET);
       task.param(ExternalServiceConsts.FSC_URI_PARAM, fscUri);
       

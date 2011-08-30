@@ -15,29 +15,19 @@ package org.opendatakit.aggregate.form;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.datamodel.FormDataModel;
 import org.opendatakit.aggregate.datamodel.FormDataModel.ElementType;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.datamodel.InstanceData;
-import org.opendatakit.aggregate.datamodel.LongStringRefText;
-import org.opendatakit.aggregate.datamodel.RefText;
 import org.opendatakit.aggregate.datamodel.SelectChoice;
 import org.opendatakit.aggregate.datamodel.TopLevelDynamicBase;
 import org.opendatakit.aggregate.datamodel.TopLevelInstanceData;
-import org.opendatakit.aggregate.submission.Submission;
-import org.opendatakit.aggregate.submission.SubmissionSet;
-import org.opendatakit.aggregate.submission.type.BooleanSubmissionType;
-import org.opendatakit.aggregate.submission.type.LongSubmissionType;
-import org.opendatakit.aggregate.submission.type.RepeatSubmissionType;
-import org.opendatakit.aggregate.submission.type.StringSubmissionType;
 import org.opendatakit.common.datamodel.BinaryContent;
 import org.opendatakit.common.datamodel.BinaryContentRefBlob;
 import org.opendatakit.common.datamodel.DynamicCommonFieldsBase;
@@ -47,7 +37,6 @@ import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.EntityKey;
 import org.opendatakit.common.persistence.Query;
-import org.opendatakit.common.persistence.Query.Direction;
 import org.opendatakit.common.persistence.Query.FilterOperation;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
@@ -94,8 +83,6 @@ public class FormDefinition {
 	/** map from fully qualified tableName to CFB definition */
 	private final Map<String, DynamicCommonFieldsBase> backingTableMap;
 
-	private LongStringRefText longStringRefTextTable = null;
-	private RefText refTextTable = null;
 	private FormDataModel topLevelGroup = null;
 	private FormElementModel topLevelGroupElement = null;
 	
@@ -206,7 +193,6 @@ public class FormDefinition {
 				break;
 			case URI:
 			case BINARY: // this data type is hidden under BINARY content structure...
-			case LONG_STRING: // this data type does not appear in model...
 				default:
 					throw new IllegalStateException("Unexpected DataType");
 			}
@@ -299,66 +285,6 @@ public class FormDefinition {
 		++(os.sequenceCounter);
 	}
 	
-	
-	static final void buildLongStringFormDataModel( List<FormDataModel> list, 
-			String longStringRefTextTableName,
-			String refTextTableName,
-			TopLevelDynamicBase topLevel, 
-			OrdinalSequence os,
-			CallingContext cc ) throws ODKDatastoreException {
-		
-		FormDataModel fdm = FormDataModel.assertRelation(cc);
-		FormDataModel d;
-		
-		// we are making use of the fact that the PK in the 
-		// FormDataModel is the PK within the relation model.
-		final String topLevelURI = topLevel.getUri();
-		Datastore ds = cc.getDatastore();
-		User user = cc.getCurrentUser();
-		
-		int idx = topLevelURI.lastIndexOf('(');
-		String parentURI_minusParenPhrase = "elem+" + topLevelURI;
-		if ( idx != -1 ) {
-			parentURI_minusParenPhrase = topLevelURI.substring(0,idx);
-		}
-		String longStringRefTextUri = String.format("%1$s(%2$08d-%3$s)", 
-				parentURI_minusParenPhrase,
-		  		os.sequenceCounter, "long_string_ref");
-		String refTextUri = String.format("%1$s(%2$08d-%3$s)", 
-				parentURI_minusParenPhrase,
-		  		os.sequenceCounter, "ref_text");
-
-		// record for long string ref text...
-		d = ds.createEntityUsingRelation(fdm, user);
-		d.setStringField(fdm.primaryKey, longStringRefTextUri);
-		list.add(d);
-		final String lst = d.getUri();
-		d.setOrdinalNumber(os.ordinal);
-		d.setParentUriFormDataModel(topLevelURI);
-		d.setUriSubmissionDataModel(topLevelURI);
-		d.setElementName(null);
-		d.setElementType(FormDataModel.ElementType.LONG_STRING_REF_TEXT);
-		d.setPersistAsColumn(null);
-		d.setPersistAsTable(longStringRefTextTableName);
-		d.setPersistAsSchema(fdm.getSchemaName());
-
-		// record for ref text...
-		d = ds.createEntityUsingRelation(fdm, user);
-		d.setStringField(fdm.primaryKey, refTextUri);
-		list.add(d);
-		d.setOrdinalNumber(1L);
-		d.setParentUriFormDataModel(lst);
-		d.setUriSubmissionDataModel(topLevelURI);
-		d.setElementName(null);
-		d.setElementType(FormDataModel.ElementType.REF_TEXT);
-		d.setPersistAsColumn(null);
-		d.setPersistAsTable(refTextTableName);
-		d.setPersistAsSchema(fdm.getSchemaName());
-		
-		++(os.ordinal);
-		++(os.sequenceCounter);
-	}
-	
 	static final void assertModel(XFormParameters p, List<FormDataModel> model, CallingContext cc) throws ODKDatastoreException {
 		FormDataModel fdm = FormDataModel.assertRelation(cc);
 		if ( model == null || model.size() == 0 ) {
@@ -367,87 +293,12 @@ public class FormDefinition {
 		Datastore ds = cc.getDatastore();
 		User user = cc.getCurrentUser();
 		for ( FormDataModel m : model ) {
+			m.print(System.out);
 			try {
 				ds.getEntity(fdm, m.getUri(), user);
 			} catch ( ODKEntityNotFoundException e ) {
 				ds.putEntity(m, user);
 			}
-		}
-	}
-	
-	static final Submission assertFormInfoRecord(XFormParameters thisFormVersion, String thisFormName, String thisFormDescription, String formIdMd5Uri, CallingContext cc) throws ODKDatastoreException {
-		FormInfoTable fiRelation = Form.getFormInfoRelation(cc);
-		FormDefinition formInfoDefinition = Form.getFormInfoDefinition(cc);
-		return assertFormInfoRecord(fiRelation, formInfoDefinition, thisFormVersion, thisFormName, thisFormDescription, formIdMd5Uri, cc); 
-	}
-
-	/**
-	 * Use the variant of this method without the first two arguments for every form definition
-	 * except the FormInfo table itself.  This variant is provided to support bootstrapping only.
-	 * 
-	 * @param fiRelation
-	 * @param formInfoDefinition
-	 * @param thisFormVersion
-	 * @param thisFormName
-	 * @param thisFormDescription
-	 * @param thisFormIdMd5Uri
-	 * @param datastore
-	 * @param user
-	 * @return
-	 * @throws ODKDatastoreException
-	 */
-	static final Submission assertFormInfoRecord(FormInfoTable fiRelation, FormDefinition formInfoDefinition, XFormParameters thisFormVersion, String thisFormName, String thisFormDescription, String thisFormIdMd5Uri, CallingContext cc) throws ODKDatastoreException {
-		boolean oldAsDaemon = cc.getAsDeamon();
-		try {
-			cc.setAsDaemon(true);
-			Datastore ds = cc.getDatastore();
-			User user = cc.getCurrentUser();
-			// Now create a record in the FormInfo table for the PersistentResults table itself...
-			TopLevelDynamicBase fi = null;
-			try {
-				fi = ds.getEntity(fiRelation, thisFormIdMd5Uri, user);
-			} catch ( ODKEntityNotFoundException e ) {
-				// we must have failed before persisting a FormInfo record
-				// or this must be our first time through...
-				Submission formInfo = new Submission(thisFormVersion.modelVersion, thisFormVersion.uiVersion,
-						thisFormIdMd5Uri, formInfoDefinition, new Date(), cc);
-				((StringSubmissionType) formInfo.getElementValue(FormInfo.formId)).setValueFromString(thisFormVersion.formId);
-				// default description...
-				{
-					RepeatSubmissionType r = (RepeatSubmissionType) formInfo.getElementValue(FormInfo.fiDescriptionTable);
-					SubmissionSet sDescription = new SubmissionSet(formInfo, 1L, FormInfo.fiDescriptionTable, formInfoDefinition, formInfo.getKey(), cc);
-					((StringSubmissionType) sDescription.getElementValue(FormInfo.formName)).setValueFromString(thisFormName);
-					((StringSubmissionType) sDescription.getElementValue(FormInfo.description)).setValueFromString(thisFormDescription);
-					r.addSubmissionSet(sDescription);
-				}
-				// fileset...
-				{
-					RepeatSubmissionType r = (RepeatSubmissionType) formInfo.getElementValue(FormInfo.fiFilesetTable);
-					SubmissionSet sFileset = new SubmissionSet(formInfo, 1L, FormInfo.fiFilesetTable, formInfoDefinition, formInfo.getKey(), cc);
-					((LongSubmissionType) sFileset.getElementValue(FormInfo.rootElementModelVersion)).setValueFromString(thisFormVersion.modelVersion.toString());
-					((LongSubmissionType) sFileset.getElementValue(FormInfo.rootElementUiVersion)).setValueFromString(thisFormVersion.uiVersion.toString());
-					((BooleanSubmissionType) sFileset.getElementValue(FormInfo.isDownloadAllowed)).setValueFromString("yes");
-					r.addSubmissionSet(sFileset);
-				}
-				// submission...
-				{
-					RepeatSubmissionType r = (RepeatSubmissionType) formInfo.getElementValue(FormInfo.fiSubmissionTable);
-					SubmissionSet sSubmission = new SubmissionSet(formInfo, 1L, FormInfo.fiSubmissionTable, formInfoDefinition, formInfo.getKey(), cc);
-					((StringSubmissionType) sSubmission.getElementValue(FormInfo.submissionFormId)).setValueFromString(thisFormVersion.formId);
-					((LongSubmissionType) sSubmission.getElementValue(FormInfo.submissionModelVersion)).setValueFromString(thisFormVersion.modelVersion.toString());
-					((LongSubmissionType) sSubmission.getElementValue(FormInfo.submissionUiVersion)).setValueFromString(thisFormVersion.uiVersion.toString());
-					r.addSubmissionSet(sSubmission);
-				}
-				formInfo.persist(cc);
-				
-				fi = ds.getEntity(fiRelation, thisFormIdMd5Uri, user);
-			}
-			
-			// and retrieve cleanly... 
-		    Submission formInfo = new Submission(fi, formInfoDefinition, cc);
-		    return formInfo;
-		} finally {
-			cc.setAsDaemon(oldAsDaemon);
 		}
 	}
 
@@ -646,7 +497,7 @@ public class FormDefinition {
 			if ( p != null ) {
 				m.setParent(p);
 				p.setChild(m.getOrdinalNumber(), m);
-			} else if ( m.getElementType() != ElementType.LONG_STRING_REF_TEXT ) {
+			} else {
 				if ( m.getElementType() != ElementType.GROUP ) {
 					String str = "Expected upward references only from GROUP elements";
 					logger.error(str);
@@ -701,22 +552,6 @@ public class FormDefinition {
 				b = new RefBlob(m.getPersistAsSchema(),m.getPersistAsTable());
 				m.setBackingObject(b);
 				break;
-			case LONG_STRING_REF_TEXT:
-				if ( longStringRefTextTable != null ) {
-					throw new IllegalStateException("multiple long string ref text tables defined!");
-				}
-				longStringRefTextTable = new LongStringRefText(m.getPersistAsSchema(),m.getPersistAsTable());
-				b = longStringRefTextTable;
-				m.setBackingObject(b);
-				break;
-			case REF_TEXT:
-				if ( refTextTable != null ) {
-					throw new IllegalStateException("multiple ref text tables defined!");
-				}
-				refTextTable = new RefText(m.getPersistAsSchema(),m.getPersistAsTable());
-				b = refTextTable;
-				m.setBackingObject(b);
-				break;
 			default:
 				throw new IllegalStateException("Unexpectedly no column but has table for type " + m.getElementType().toString());
 			}
@@ -724,15 +559,6 @@ public class FormDefinition {
 		}
 		
 
-		boolean isWellKnownForm = false;
-		// set the backing objects for the tables identified in the groupList
-		if ( xformParameters.formId.equals(Form.URI_FORM_ID_VALUE_FORM_INFO) ) {
-			// it is the FormInfo table -- pre-populate the backingTableMap
-			// with the table relations we know...
-			FormInfo.populateBackingTableMap(backingTableMap, cc);
-			isWellKnownForm = true;
-		}
-		
 		for ( FormDataModel m : groupList ) {
 			if ( m.getPersistAsTable() == null ) {
 				throw new IllegalStateException("groups, phantoms and repeats should identify their backing table");
@@ -740,9 +566,6 @@ public class FormDefinition {
 			String tableName = m.getPersistAsQualifiedTableName();
 			DynamicCommonFieldsBase b = backingTableMap.get(tableName);
 			if ( b == null ) {
-				if ( isWellKnownForm ) {
-					throw new IllegalStateException("Well-known form: " + xformParameters.formId + " expects all backing tables to be defined");
-				}
 				/*
 				 * Determine if the given group is equivalent to the top level group.  This
 				 * occurs when a given group's elements can be collapsed into the top level group
@@ -793,9 +616,6 @@ public class FormDefinition {
 			String tableName = m.getPersistAsQualifiedTableName();
 			DynamicCommonFieldsBase b = backingTableMap.get(tableName);
 			if ( b == null ) {
-				if ( isWellKnownForm ) {
-					throw new IllegalStateException("Well-known form: " + xformParameters.formId + " expects all backing tables to be defined");
-				}
 				b = new InstanceData(m.getPersistAsSchema(), m.getPersistAsTable());
 				backingTableMap.put(tableName, b);
 			}
@@ -843,23 +663,8 @@ public class FormDefinition {
 				}
 				
 				DataField dfd = null;
-				if ( isWellKnownForm ) {
-					for ( DataField f : b.getFieldList() ) {
-						if ( m.getPersistAsColumn().equals(f.getName())) {
-							dfd = f;
-							break;
-						}
-					}
-					if ( dfd == null ) {
-						throw new IllegalStateException("Unable to locate data field in a well-known form: " + xformParameters.formId);
-					}
-					if ( !dfd.getDataType().equals(dataType) ) {
-						throw new IllegalStateException("Data type of data field " + dfd.getName() + " is different than expected");
-					}
-				} else {
-					dfd = new DataField(m.getPersistAsColumn(), dataType, true);
-					b.addDataField(dfd);
-				}
+				dfd = new DataField(m.getPersistAsColumn(), dataType, true);
+				b.addDataField(dfd);
 				m.setBackingKey(dfd);
 				m.setBackingObject(b);
 			}
@@ -874,14 +679,6 @@ public class FormDefinition {
 		}
 
 		qualifiedTopLevelTable = topLevelGroup.getPersistAsQualifiedTableName();
-		
-		if ( refTextTable == null ) {
-			throw new IllegalStateException("No ref text table declared!");
-		}
-
-		if ( longStringRefTextTable == null ) {
-			throw new IllegalStateException("No long string ref text table declared!");
-		}
 		
 		topLevelGroupElement = FormElementModel.buildFormElementModelTree(topLevelGroup);
 	}
@@ -984,14 +781,6 @@ public class FormDefinition {
 		return backingTableMap.values();
 	}
 
-	public RefText getRefTextTable() {
-		return refTextTable;
-	}
-	
-	public LongStringRefText getLongStringRefTextTable() {
-		return longStringRefTextTable;
-	}
-
 	public SubmissionAssociationTable getSubmissionAssociation() {
 		return submissionAssociation;
 	}
@@ -1006,69 +795,6 @@ public class FormDefinition {
 	
 	public Long getUiVersion() {
 		return xformParameters.uiVersion;
-	}
-
-	public void setLongString(String text, String parentKey, String uriFormDataModel, EntityKey topLevelTableAuri, 
-			CallingContext cc) throws ODKEntityPersistException {
-		
-		long textLimit = refTextTable.value.getMaxCharLen();
-		Datastore ds = cc.getDatastore();
-		User user = cc.getCurrentUser();
-		long i = 1;
-	    for(long index = 0; index < text.length(); index = index + textLimit) {
-	    	long endCopy = index + textLimit;
-	    	if ( endCopy > text.length() ) endCopy = text.length();
-	    	String subString = text.substring((int) index, (int) endCopy);
-	        RefText eElem = ds.createEntityUsingRelation(refTextTable, user);
-	        eElem.setTopLevelAuri(topLevelTableAuri.getKey());
-	        eElem.setValue(subString);
-	        
-			LongStringRefText t = ds.createEntityUsingRelation(longStringRefTextTable, user);
-			t.setTopLevelAuri(topLevelTableAuri.getKey());
-			t.setDomAuri(parentKey);
-			t.setSubAuri(eElem.getUri());
-			t.setPart(i++);
-			t.setUriFormDataModel(uriFormDataModel);
-			
-			ds.putEntity(eElem, user);
-			ds.putEntity(t, user);
-	    }
-	}
-
-	public String getLongString(String parentKey, String uriFormDataModel, EntityKey topLevelTableAuri, CallingContext cc) throws ODKDatastoreException {
-		
-		StringBuilder b = new StringBuilder();
-		
-		Datastore ds = cc.getDatastore();
-		User user = cc.getCurrentUser();
-		Query q = ds.createQuery(longStringRefTextTable, user);
-		q.addFilter(longStringRefTextTable.domAuri, FilterOperation.EQUAL, parentKey);
-		q.addFilter(longStringRefTextTable.uriFormDataModel, FilterOperation.EQUAL, uriFormDataModel);
-		q.addSort(longStringRefTextTable.part, Direction.ASCENDING);
-		
-		List<? extends CommonFieldsBase> elements = q.executeQuery(ServletConsts.FETCH_LIMIT);
-		for (CommonFieldsBase cb : elements ) {
-			LongStringRefText e = (LongStringRefText) cb;
-			RefText eElem = ds.getEntity(refTextTable, e.getSubAuri(), user);
-			b.append(eElem.getValue());
-		}
-		return b.toString();
-	}
-
-	public void recursivelyAddLongStringTextEntityKeys(List<EntityKey> keyList, String parentKey, String uriFormDataModel,
-			EntityKey topLevelTableAuri, CallingContext cc) throws ODKDatastoreException {
-
-		Query q = cc.getDatastore().createQuery(longStringRefTextTable, cc.getCurrentUser());
-		q.addFilter(longStringRefTextTable.domAuri, FilterOperation.EQUAL, parentKey);
-		q.addFilter(longStringRefTextTable.uriFormDataModel, FilterOperation.EQUAL, uriFormDataModel);
-		q.addSort(longStringRefTextTable.part, Direction.ASCENDING);
-		
-		List<? extends CommonFieldsBase> elements = q.executeQuery(ServletConsts.FETCH_LIMIT);
-		for (CommonFieldsBase cb : elements ) {
-			LongStringRefText e = (LongStringRefText) cb;
-			keyList.add(new EntityKey(e, e.getUri()));
-			keyList.add(new EntityKey(refTextTable, e.getSubAuri()));
-		}
 	}
 
 	public String getElementKey(String keyString) {

@@ -17,34 +17,39 @@
 package org.opendatakit.aggregate.client.widgets;
 
 import org.opendatakit.aggregate.client.popups.ExportPopup;
+import org.opendatakit.aggregate.client.popups.HelpBalloon;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.PopupPanel;
 
-public class ExportButton extends AButtonBase implements ClickHandler {
-  private String formId;
+public class ExportButton extends AbstractButtonBase implements ClickHandler {
 
-  public ExportButton(String formId) {
-    super("<img src=\"images/green_right_arrow.png\" /> Export");
-    this.formId = formId;
-    addClickHandler(this);
-  }
+	private static final String TOOLTIP_TEXT = "Export the data";
 
-  @Override
-  public void onClick(ClickEvent event) {
-    super.onClick(event);
-    
-    final PopupPanel popup = new ExportPopup(formId);
-    popup.setPopupPositionAndShow(new PopupPanel.PositionCallback() {
-      @Override
-      public void setPosition(int offsetWidth, int offsetHeight) {
-          int left = ((Window.getScrollLeft() + Window.getClientWidth() - offsetWidth) / 2);
-          int top = ((Window.getScrollTop() + Window.getClientHeight() - offsetHeight) / 2);
-          popup.setPopupPosition(left, top);
-      }
-    });
-  }
+	private static final String HELP_BALLOON_TXT = "Export the data to a CSV or KML file.";
 
+	private String formId;
+
+	public ExportButton(String formId) {
+		super("<img src=\"images/green_right_arrow.png\" /> Export", TOOLTIP_TEXT);
+		this.formId = formId;
+		helpBalloon = new HelpBalloon(this, HELP_BALLOON_TXT);
+	}
+
+	@Override
+	public void onClick(ClickEvent event) {
+		super.onClick(event);
+
+		final PopupPanel popup = new ExportPopup(formId);
+		popup.setPopupPositionAndShow(new PopupPanel.PositionCallback() {
+			@Override
+			public void setPosition(int offsetWidth, int offsetHeight) {
+				int left = ((Window.getScrollLeft() + Window.getClientWidth() - offsetWidth) / 2);
+				int top = ((Window.getScrollTop() + Window.getClientHeight() - offsetHeight) / 2);
+				popup.setPopupPosition(left, top);
+			}
+		});
+	}
 }

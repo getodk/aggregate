@@ -106,6 +106,15 @@ public class Submission extends SubmissionSet {
 		return ((TopLevelDynamicBase) getGroupBackingObject()).getIsComplete();
 	}
 
+	public void setMarkedAsCompleteDate(Date value) {
+		((TopLevelDynamicBase) getGroupBackingObject()).setMarkedAsCompleteDate(value);
+	}
+
+	public Date getMarkedAsCompleteDate() {
+		return ((TopLevelDynamicBase) getGroupBackingObject()).getMarkedAsCompleteDate();
+	}
+
+
 	/**
 	 * This has 2 modes of operation.
 	 * (1) If propertyNames is null, then the types list of FormElementNamespace values is 
@@ -212,7 +221,7 @@ public class Submission extends SubmissionSet {
 		if (parts == null || parts.size() == 0 ) {
 			throw new IllegalArgumentException("submission key is empty");
 		}
-		Form form = Form.retrieveForm(parts.get(0).getElementName(), cc);
+		Form form = Form.retrieveFormByFormId(parts.get(0).getElementName(), cc);
 		if (parts.size() < 2) {
 			throw new IllegalArgumentException(
 					"submission key does not have a top level group");

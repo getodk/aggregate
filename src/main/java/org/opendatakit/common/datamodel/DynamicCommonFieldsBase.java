@@ -30,9 +30,6 @@ import org.opendatakit.common.security.User;
  */
 public abstract class DynamicCommonFieldsBase extends CommonFieldsBase {
 
-	// rough estimate... 
-	public static final int WELL_KNOWN_COLUMN_COUNT = 7;
-
 	/**
 	 * Construct a relation prototype.
 	 * 

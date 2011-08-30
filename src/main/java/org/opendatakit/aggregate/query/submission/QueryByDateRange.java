@@ -48,9 +48,9 @@ public class QueryByDateRange extends QueryBase {
     // are fully uploaded.  We want the query to be aware of that and to not 
     // report anything that is not yet fully loaded.
     query = cc.getDatastore().createQuery(tbl, cc.getCurrentUser());
-    query.addSort(tbl.lastUpdateDate, Query.Direction.ASCENDING);
-    query.addFilter(tbl.lastUpdateDate, Query.FilterOperation.LESS_THAN, endDate);
-    query.addFilter(tbl.lastUpdateDate, Query.FilterOperation.GREATER_THAN, startDate);
+    query.addSort(tbl.markedAsCompleteDate, Query.Direction.ASCENDING);
+    query.addFilter(tbl.markedAsCompleteDate, Query.FilterOperation.LESS_THAN, endDate);
+    query.addFilter(tbl.markedAsCompleteDate, Query.FilterOperation.GREATER_THAN, startDate);
     query.addFilter(tbl.isComplete, Query.FilterOperation.EQUAL, Boolean.TRUE);
   }
 

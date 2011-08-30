@@ -365,6 +365,11 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 															tl.isComplete);
 					elementsToValues.put(m, submissionField);
 					break;
+				case META_DATE_MARKED_AS_COMPLETE:
+					submissionField = new DateTimeMetadataType(groupRowGroup, m,
+															tl.markedAsCompleteDate);
+					elementsToValues.put(m, submissionField);
+					break;
 				default:
 					throw new IllegalStateException("unhandled metadata type");
 				}
@@ -375,8 +380,7 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 					if ( rowGroup == null ) {
 						throw new IllegalStateException("Unexpectedly null backingObject");
 					}
-					submissionField = new StringSubmissionType(rowGroup, m,
-							formDefinition, topLevelTableKey);
+					submissionField = new StringSubmissionType(rowGroup, m);
 					submissionField.getValueFromEntity(cc);
 					elementsToValues.put(m, submissionField);
 					break;
@@ -484,9 +488,6 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 				case BINARY_CONTENT_REF_BLOB: // association between
 					// BINARY and REF_BLOB
 				case REF_BLOB: // the table of the actual byte[] data (xxxBLOB)
-				case LONG_STRING_REF_TEXT: // association between any field and
-					// REF_TEXT
-				case REF_TEXT: // the table of extended string values (xxxTEXT)
 				default:
 					throw new IllegalStateException(
 							"Traversed element type is unexpected: "

@@ -27,13 +27,16 @@ public class SubmissionUI implements Serializable {
   private static final long serialVersionUID = -5614397233493602380L;
 
   private ArrayList<String> values;
+
+  private String submissionKeyAsString;
   
   public SubmissionUI() {
 	  
   }
   
-  public SubmissionUI(ArrayList<String> values) {
+  public SubmissionUI(ArrayList<String> values, String submissionKeyAsString) {
     this.values = values;
+    this.submissionKeyAsString = submissionKeyAsString;
   }
   
   public int getNumberOfFields() {
@@ -44,5 +47,8 @@ public class SubmissionUI implements Serializable {
     return values;
   }
   
+  public String getSubmissionKeyAsString() {
+    return submissionKeyAsString;
+  }
   
 }

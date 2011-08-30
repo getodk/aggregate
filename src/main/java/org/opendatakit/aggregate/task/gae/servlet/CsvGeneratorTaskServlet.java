@@ -80,7 +80,7 @@ public class CsvGeneratorTaskServlet extends ServletUtilBase {
 
     Form form = null;
     try {
-      form = Form.retrieveForm(formId, cc);
+      form = Form.retrieveFormByFormId(formId, cc);
     } catch (ODKFormNotFoundException e1) {
       odkIdNotFoundError(resp);
       return;

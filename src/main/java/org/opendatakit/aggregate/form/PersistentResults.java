@@ -413,7 +413,7 @@ public class PersistentResults {
 				DataField.DataType.DATETIME, true);
 		
 		private static final DataField FORM_ID = new DataField("FORM_ID_KEY",
-		      DataField.DataType.STRING, true, 4096L);
+		      DataField.DataType.STRING, true, Form.MAX_FORM_ID_LENGTH);
 	
 		/**
 		 * Construct a relation prototype.

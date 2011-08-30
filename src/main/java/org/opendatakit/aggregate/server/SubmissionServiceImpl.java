@@ -22,6 +22,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
 import org.opendatakit.aggregate.ContextFactory;
+import org.opendatakit.aggregate.client.exception.FormNotAvailableException;
 import org.opendatakit.aggregate.client.filter.FilterGroup;
 import org.opendatakit.aggregate.client.submission.SubmissionUI;
 import org.opendatakit.aggregate.client.submission.SubmissionUISummary;
@@ -59,23 +60,21 @@ public class SubmissionServiceImpl extends RemoteServiceServlet implements
   private static final long serialVersionUID = -7997978505247614945L;
 
   @Override
-  public SubmissionUISummary getSubmissions(FilterGroup filterGroup) {
+  public SubmissionUISummary getSubmissions(FilterGroup filterGroup) throws FormNotAvailableException {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
 
     SubmissionUISummary summary = new SubmissionUISummary();
     try {
       String formId = filterGroup.getFormId();
-      Form form = Form.retrieveForm(formId, cc);
+      Form form = Form.retrieveFormByFormId(formId, cc);
       QueryByUIFilterGroup query = new QueryByUIFilterGroup(form, filterGroup, 1000, cc);
       List<Submission> submissions = query.getResultSubmissions(cc);
 
       getSubmissions(filterGroup, cc, summary, form, submissions);
 
     } catch (ODKFormNotFoundException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-      return null;
+      throw new FormNotAvailableException(e);
     } catch (ODKDatastoreException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
@@ -95,38 +94,13 @@ public class SubmissionServiceImpl extends RemoteServiceServlet implements
     ElementFormatter elemFormatter = new UiElementFormatter(cc.getServerURL(),
         headerGenerator.getGeopointIncludes());
 
-	/* TODO: expose and allow selection of the list of namespace types using this API:
-	 * 
-	 * This has 2 modes of operation.
-	 * (1) If propertyNames is null, then the types list of FormElementNamespace values is 
-	 * used to render the output.
-	 * (2) Otherwise, this works as a two-stage filter. The types list of FormElementNamespace
-	 * values is a filter against the list of propertyNames specified.  So if you have an 
-	 * arbitrary list of elements and want only the metadata elements to be reported, you
-	 * would pass [ METADATA ] in the types list.  The resulting subset is then rendered
-	 * (and the resulting row might have no columns).
-	 *  
-	 * @param types -- list of e.g., (METADATA, VALUES) to be rendered.
-	 * @param propertyNames -- joint subset of property names to be rendered.
-	 * @param elemFormatter 
-	 * @param includeParentUid
-	 * @param cc
-	 * @return rendered Row object
-	 * @throws ODKDatastoreException
-	 *
-	 * Example equivalent to what is below:
-	 List<FormElementNamespace> types = new ArrayList<FormElementNamespace>();
-	 types.add(FormElementNamespace.METADATA); // we want metadata
-	 types.add(FormElementNamespace.VALUES); // we want values
-	 Row row = sub.getFormattedValuesAsRow(types, filteredElements,
-			elemFormatter, false, cc);
-	 */
-
     // format row elements
     for (Submission sub : submissions) {
-      Row row = sub.getFormattedValuesAsRow(filteredElements, elemFormatter, false, cc);
+      Row row = sub.getFormattedValuesAsRow(headerGenerator.includedFormElementNamespaces(), filteredElements, elemFormatter, false, cc);
+      
       try {
-        summary.addSubmission(new SubmissionUI(row.getFormattedValues()));
+        SubmissionKey subKey = sub.constructSubmissionKey(form.getTopLevelGroupElement());
+        summary.addSubmission(new SubmissionUI(row.getFormattedValues(), subKey.toString()));
       } catch (Exception e) {
         // TODO Auto-generated catch block
         e.printStackTrace();
@@ -135,7 +109,7 @@ public class SubmissionServiceImpl extends RemoteServiceServlet implements
   }
 
   @Override
-  public SubmissionUISummary getRepeatSubmissions(String keyString) throws AccessDeniedException {
+  public SubmissionUISummary getRepeatSubmissions(String keyString) throws AccessDeniedException, FormNotAvailableException {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
 
@@ -149,7 +123,7 @@ public class SubmissionServiceImpl extends RemoteServiceServlet implements
 
     List<SubmissionKeyPart> parts = key.splitSubmissionKey();
     try {
-      Form form = Form.retrieveForm(parts.get(0).getElementName(), cc);
+      Form form = Form.retrieveFormByFormId(parts.get(0).getElementName(), cc);
       Submission sub = Submission.fetchSubmission(parts, cc);
 
       if (sub != null) {
@@ -159,9 +133,7 @@ public class SubmissionServiceImpl extends RemoteServiceServlet implements
       }
 
     } catch (ODKFormNotFoundException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-      return null;
+      throw new FormNotAvailableException(e);
     } catch (ODKDatastoreException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
@@ -183,7 +155,7 @@ public class SubmissionServiceImpl extends RemoteServiceServlet implements
     for (SubmissionSet sub : repeats) {
       Row row = sub.getFormattedValuesAsRow(filteredElements, elemFormatter, false, cc);
       try {
-        summary.addSubmission(new SubmissionUI(row.getFormattedValues()));
+        summary.addSubmission(new SubmissionUI(row.getFormattedValues(), null));
       } catch (Exception e) {
         // TODO Auto-generated catch block
         e.printStackTrace();
@@ -192,39 +164,12 @@ public class SubmissionServiceImpl extends RemoteServiceServlet implements
   }
 
   @Override
-  public SubmissionUISummary getSubmissions(String formId) {
-    HttpServletRequest req = this.getThreadLocalRequest();
-    CallingContext cc = ContextFactory.getCallingContext(this, req);
-
-    SubmissionUISummary summary = new SubmissionUISummary();
-    try {
-      Form form = Form.retrieveForm(formId, cc);
-      QueryByDate query = new QueryByDate(form, BasicConsts.EPOCH, false,
-          ServletConsts.FETCH_LIMIT, cc);
-      List<Submission> submissions = query.getResultSubmissions(cc);
-
-      getSubmissions(null, cc, summary, form, submissions);
-
-    } catch (ODKFormNotFoundException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-      return null;
-    } catch (ODKDatastoreException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-      return null;
-    }
-
-    return summary;
-  }
-
-  @Override
-  public UIGeoPoint[] getGeoPoints(String formId, String geopointKey) {
+  public UIGeoPoint[] getGeoPoints(String formId, String geopointKey) throws FormNotAvailableException {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
 
     try {
-      Form form = Form.retrieveForm(formId, cc);
+      Form form = Form.retrieveFormByFormId(formId, cc);
       QueryByDate query = new QueryByDate(form, BasicConsts.EPOCH, false,
           ServletConsts.FETCH_LIMIT, cc);
       List<Submission> submissions = query.getResultSubmissions(cc);
@@ -261,8 +206,7 @@ public class SubmissionServiceImpl extends RemoteServiceServlet implements
       }
       return points;
     } catch (ODKFormNotFoundException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
+      throw new FormNotAvailableException(e);
     } catch (ODKDatastoreException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();

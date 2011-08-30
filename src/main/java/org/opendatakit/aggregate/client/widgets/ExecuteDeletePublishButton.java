@@ -19,6 +19,7 @@ package org.opendatakit.aggregate.client.widgets;
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.SecureGWT;
 import org.opendatakit.aggregate.client.externalserv.ExternServSummary;
+import org.opendatakit.aggregate.client.popups.HelpBalloon;
 import org.opendatakit.aggregate.constants.common.OperationalStatus;
 
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -27,49 +28,53 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.PopupPanel;
 
-public class ExecuteDeletePublishButton extends AButtonBase implements ClickHandler {
- 
-  private ExternServSummary publisher;
-  private PopupPanel popup;
-  
-  public ExecuteDeletePublishButton(ExternServSummary publisher, PopupPanel popup) {
-    super("<img src=\"images/green_right_arrow.png\" /> " +
-    		(((publisher.getStatus() == OperationalStatus.COMPLETED) ||
-    		  (publisher.getStatus() == OperationalStatus.ABANDONED)) ?
-    				 "Remove" : "Cancel and Remove") + " Publisher");
-    this.publisher = publisher;
-    this.popup = popup;
-    addClickHandler(this);
-  }
+public class ExecuteDeletePublishButton extends AbstractButtonBase implements ClickHandler {
 
-  @Override
-  public void onClick(ClickEvent event) {
-    super.onClick(event);
-    final String action = ((publisher.getStatus() == OperationalStatus.COMPLETED) ||
-			 		 (publisher.getStatus() == OperationalStatus.ABANDONED)) ?
-					 "remove" : "cancel and remove";
+	private static final String TOOLTIP_TEXT = "Remove this publisher";
 
-    // OK -- we are to proceed.
-    // Set up the callback object.
-    AsyncCallback<Boolean> callback = new AsyncCallback<Boolean>() {
-      @Override
-      public void onFailure(Throwable caught) {
-        AggregateUI.getUI().reportError(caught);
-      }
+	private static final String HELP_BALLOON_TXT = "This will remove the publisher.  You will no longer " +
+			"be able to upload or stream data.";
 
-      @Override
-      public void onSuccess(Boolean result) {
-        AggregateUI.getUI().clearError();
-        if ( !result ) {
-        	// we failed -- display alert
-        	Window.alert("Error: Unable to " + action + " this publisher");
-        }
-        AggregateUI.getUI().getTimer().refreshNow();
-      }
-    };
-    // Make the call to the services service.
-    SecureGWT.getServicesAdminService().deletePublisher(publisher.getUri(), callback);
-    popup.hide();
-  }
+	private ExternServSummary publisher;
+	private PopupPanel popup;
 
+	public ExecuteDeletePublishButton(ExternServSummary publisher, PopupPanel popup) {
+		super("<img src=\"images/green_right_arrow.png\" /> " +
+				(((publisher.getStatus() == OperationalStatus.COMPLETED) ||
+						(publisher.getStatus() == OperationalStatus.ABANDONED)) ?
+								"Remove" : "Cancel and Remove") + " Publisher", TOOLTIP_TEXT);
+		this.publisher = publisher;
+		this.popup = popup;
+		helpBalloon = new HelpBalloon(this, HELP_BALLOON_TXT);
+	}
+
+	@Override
+	public void onClick(ClickEvent event) {
+		super.onClick(event);
+		final String action = ((publisher.getStatus() == OperationalStatus.COMPLETED) ||
+				(publisher.getStatus() == OperationalStatus.ABANDONED)) ?
+						"remove" : "cancel and remove";
+
+		// OK -- we are to proceed.
+		// Set up the callback object.
+		AsyncCallback<Boolean> callback = new AsyncCallback<Boolean>() {
+			@Override
+			public void onFailure(Throwable caught) {
+				AggregateUI.getUI().reportError(caught);
+			}
+
+			@Override
+			public void onSuccess(Boolean result) {
+				AggregateUI.getUI().clearError();
+				if ( !result ) {
+					// we failed -- display alert
+					Window.alert("Error: Unable to " + action + " this publisher");
+				}
+				AggregateUI.getUI().getTimer().refreshNow();
+			}
+		};
+		// Make the call to the services service.
+		SecureGWT.getServicesAdminService().deletePublisher(publisher.getUri(), callback);
+		popup.hide();
+	}  
 }

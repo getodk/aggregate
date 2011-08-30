@@ -16,9 +16,12 @@
 
 package org.opendatakit.aggregate.client;
 
+import org.opendatakit.aggregate.client.exception.FormNotAvailableException;
 import org.opendatakit.aggregate.client.filter.FilterGroup;
 import org.opendatakit.aggregate.client.submission.SubmissionUISummary;
 import org.opendatakit.aggregate.client.table.SubmissionTable;
+import org.opendatakit.aggregate.constants.common.SubTabs;
+import org.opendatakit.common.security.common.GrantedAuthorityName;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.ScrollPanel;
@@ -36,13 +39,24 @@ public class SubmissionPanel extends ScrollPanel {
     // Set up the callback object.
     AsyncCallback<SubmissionUISummary> callback = new AsyncCallback<SubmissionUISummary>() {
       public void onFailure(Throwable caught) {
-        AggregateUI.getUI().reportError(caught);
+        if(caught instanceof FormNotAvailableException) {
+          // the form was not available, force an update of the panel to try to fix things
+          SubTabInterface filterTab = AggregateUI.getUI().getSubTab(SubTabs.FILTER);
+          if(filterTab != null) {
+            filterTab.update();
+          }
+        } else {
+          AggregateUI.getUI().reportError(caught);
+        }
       }
 
       public void onSuccess(SubmissionUISummary summary) {
         AggregateUI.getUI().clearError();        
-        submissionTable = new SubmissionTable(summary);
+        boolean addDeleteButton = AggregateUI.getUI().getUserInfo().getGrantedAuthorities()
+        .contains(GrantedAuthorityName.ROLE_DATA_OWNER);
+        submissionTable = new SubmissionTable(summary, addDeleteButton);
         setWidget(submissionTable);
+        AggregateUI.resize();
       }
     };
 

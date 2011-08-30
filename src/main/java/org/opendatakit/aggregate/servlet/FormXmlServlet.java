@@ -88,7 +88,7 @@ public class FormXmlServlet extends ServletUtilBase {
 
     Form form;
     try {
-      form = Form.retrieveForm(formId, cc);
+      form = Form.retrieveFormByFormId(formId, cc);
     } catch (ODKFormNotFoundException e) {
       odkIdNotFoundError(resp);
       return;
@@ -115,8 +115,10 @@ public class FormXmlServlet extends ServletUtilBase {
 	      PrintWriter out = resp.getWriter();
 	      out.println("<h3>Form Name: <FONT COLOR=0000FF>" + form.getViewableName()
 	          + "</FONT></h3>");
-	      out.println("<h3>File Name: <FONT COLOR=0000FF>" + form.getFormFilename()
-	          + "</FONT></h3>");
+	      if ( form.getFormFilename() != null ) {
+	    	  out.println("<h3>File Name: <FONT COLOR=0000FF>" + form.getFormFilename()
+	    			  + "</FONT></h3>");
+	      }
 	      out.println(downloadXmlButton); // download button
 	      out.println("<PRE>");
 	      StringEscapeUtils.escapeHtml(out, xmlString);// form xml
@@ -126,8 +128,10 @@ public class FormXmlServlet extends ServletUtilBase {
 	      resp.setCharacterEncoding(HtmlConsts.UTF8_ENCODE);
 	      resp.setContentType(HtmlConsts.RESP_TYPE_XML);
 		  PrintWriter out = resp.getWriter();
-		  resp.setHeader(HtmlConsts.CONTENT_DISPOSITION, HtmlConsts.ATTACHMENT_FILENAME_TXT
+		  if ( form.getFormFilename() != null ) {
+			  resp.setHeader(HtmlConsts.CONTENT_DISPOSITION, HtmlConsts.ATTACHMENT_FILENAME_TXT
 			        + form.getFormFilename() + BasicConsts.QUOTE + BasicConsts.SEMI_COLON);
+		  }
 	      out.print(xmlString);
 	    }
 	} catch (ODKDatastoreException e) {

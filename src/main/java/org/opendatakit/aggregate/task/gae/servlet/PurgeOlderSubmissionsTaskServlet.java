@@ -87,7 +87,7 @@ public class PurgeOlderSubmissionsTaskServlet extends ServletUtilBase {
 
     Form form;
     try {
-      form = Form.retrieveForm(formId, cc);
+      form = Form.retrieveFormByFormId(formId, cc);
     } catch (ODKFormNotFoundException e) {
       odkIdNotFoundError(resp);
       return;

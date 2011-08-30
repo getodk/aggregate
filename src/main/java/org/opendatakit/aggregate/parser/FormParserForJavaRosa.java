@@ -52,15 +52,12 @@ import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData.Reason;
 import org.opendatakit.aggregate.exception.ODKParseException;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.form.FormDefinition;
-import org.opendatakit.aggregate.form.FormInfo;
 import org.opendatakit.aggregate.form.MiscTasks;
 import org.opendatakit.aggregate.form.SubmissionAssociationTable;
 import org.opendatakit.aggregate.form.XFormParameters;
-import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.common.constants.BasicConsts;
 import org.opendatakit.common.constants.HtmlConsts;
 import org.opendatakit.common.datamodel.DynamicBase;
-import org.opendatakit.common.datamodel.DynamicCommonFieldsBase;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.Datastore;
@@ -362,6 +359,12 @@ public class FormParserForJavaRosa {
     	" is not uploadable (submission method is not form-data-post or does not have an http: or https: url. ");
     }
     
+    // insist that the submission element and root element have the same 
+    // formId, modelVersion and uiVersion.
+    if ( !submissionElementDefn.equals(rootElementDefn) ) {
+    	throw new ODKIncompleteSubmissionData("submission element and root element differ in their values for: formId, version or uiVersion.");
+    }
+    
     String publicKey = null;
     if ( p != null ) {
     	// publicKey = p.getAttribute(BASE64_RSA_PUBLIC_KEY);
@@ -433,7 +436,7 @@ public class FormParserForJavaRosa {
   
   private void initHelper(MultiPartFormData uploadedFormItems, MultiPartFormItem xformXmlData,  
 		  String inputXml, String title, String persistenceStoreFormId, boolean isEncryptedForm, 
-		  FormDef formDef, StringBuilder warnings, CallingContext cc) throws ODKDatastoreException, ODKFormAlreadyExistsException, ODKParseException {
+		  FormDef formDef, StringBuilder warnings, CallingContext cc) throws ODKDatastoreException, ODKFormAlreadyExistsException, ODKParseException, ODKConversionException {
     
     // we can't create or update a FormInfo record if there is a pending deletion for this same id.
 	FormActionStatusTimestamp formDeletionStatus;
@@ -452,8 +455,6 @@ public class FormParserForJavaRosa {
     // Step 1: create or fetch the Form (FormInfo) submission
     //
     // This allows us to delete the form if upload goes bad...
-    // create an empty submission then set values in it...
-    Submission formInfo = Form.createOrFetchFormId(rootElementDefn.formId, cc);
 	// TODO: the following function throws an exception unless new or identical inputXml
     byte[] xmlBytes;
     try {
@@ -466,25 +467,18 @@ public class FormParserForJavaRosa {
     String isIncompleteFlag = uploadedFormItems.getSimpleFormField(ServletConsts.TRANSFER_IS_INCOMPLETE);
     boolean isDownloadEnabled = ( isIncompleteFlag == null || isIncompleteFlag.trim().length() == 0 );
 
-    boolean sameXForm = FormInfo.setXFormDefinition( formInfo, 
-    					rootElementDefn.modelVersion, rootElementDefn.uiVersion, isEncryptedForm,
-    					title, xmlBytes, isDownloadEnabled, cc );
-    
-    // we will have thrown an exception above if the form file already exists and
-    // the form file presented is not exactly identical to the one on record.
-    
-    FormInfo.setFormDescription( formInfo, null, title, null, null, cc);
+    Form formInfo = Form.createOrFetchFormId(rootElementDefn, isEncryptedForm,
+    					title, xmlBytes, isDownloadEnabled, cc);
+    boolean newlyCreatedXForm = formInfo.isNewlyCreated();
 
     Set<Map.Entry<String,MultiPartFormItem>> fileSet = uploadedFormItems.getFileNameEntrySet();
     for ( Map.Entry<String,MultiPartFormItem> itm : fileSet) {
     	if ( itm.getValue() == xformXmlData ) continue;// ignore the xform -- stored above.
-    	FormInfo.setXFormMediaFile(formInfo,
+    	formInfo.setXFormMediaFile(
     			rootElementDefn.modelVersion, rootElementDefn.uiVersion,
 				itm.getValue(), cc);
     }
     // Determine the information about the submission...
-	FormInfo.setFormSubmission( formInfo, submissionElementDefn.formId, 
-			submissionElementDefn.modelVersion, submissionElementDefn.uiVersion, cc );
 	formInfo.setIsComplete(true);
     formInfo.persist(cc);
 
@@ -494,7 +488,7 @@ public class FormParserForJavaRosa {
     FormDefinition fdDefined = FormDefinition.getFormDefinition(submissionElementDefn, cc);
     if ( fdDefined != null ) {
         // get most recent form-deletion statuses
-    	if ( !sameXForm ) {
+    	if ( newlyCreatedXForm ) {
     		throw new ODKFormAlreadyExistsException("Internal error: Completely new file has pre-existing form definition");
     	}
     	return;
@@ -532,46 +526,15 @@ public class FormParserForJavaRosa {
 	    constructDataModel(opaque, k, fdmList, fdm, k.getKey(), 1, persistenceStoreFormId, "",
 	        tableNamePlaceholder, submissionElement, warnings, cc);
 	
-	    // emit the long string and ref text tables...
-	    ++elementCount; // to give these tables their own element #.
-	    String persistAsTable = opaque.getTableName(fdm.getSchemaName(), persistenceStoreFormId, "", "STRING_REF");
-	    // long string ref text record...
-	    FormDataModel d = ds.createEntityUsingRelation(fdm, user);
-	    setPrimaryKey( d, fdmSubmissionUri, AuxType.LONG_STRING_REF );
-	    fdmList.add(d);
-	    final String lstURI = d.getUri();
-	    d.setOrdinalNumber(2L);
-	    d.setUriSubmissionDataModel(k.getKey());
-	    d.setParentUriFormDataModel(k.getKey());
-	    d.setElementName(null);
-	    d.setElementType(FormDataModel.ElementType.LONG_STRING_REF_TEXT);
-	    d.setPersistAsColumn(null);
-	    d.setPersistAsTable(persistAsTable);
-	    d.setPersistAsSchema(fdm.getSchemaName());
-	
-	    persistAsTable = opaque.getTableName(fdm.getSchemaName(), persistenceStoreFormId, "", "STRING_TXT");
-	    // ref text record...
-	    d = ds.createEntityUsingRelation(fdm, user);
-	    setPrimaryKey( d, fdmSubmissionUri, AuxType.REF_TEXT );
-	    fdmList.add(d);
-	    d.setOrdinalNumber(1L);
-	    d.setUriSubmissionDataModel(k.getKey());
-	    d.setParentUriFormDataModel(lstURI);
-	    d.setElementName(null);
-	    d.setElementType(FormDataModel.ElementType.REF_TEXT);
-	    d.setPersistAsColumn(null);
-	    d.setPersistAsTable(persistAsTable);
-	    d.setPersistAsSchema(fdm.getSchemaName());
-	
 	    // find a good set of names...
 	    // this also ensures that the table names don't overlap existing tables
 	    // in the datastore.
 	    opaque.resolveNames(ds, user);
 	    
 	    // debug output
-	    for ( FormDataModel m : fdmList ) {
-	    	m.print(System.err);
-	    }
+	    // for ( FormDataModel m : fdmList ) {
+	    // 	m.print(System.out);
+	    // }
 	
 	    // and revise the data model with those names...
 	    for (FormDataModel m : fdmList) {
@@ -606,9 +569,6 @@ public class FormParserForJavaRosa {
 	    try {
 		    for (;;) {
 		      FormDefinition fd = new FormDefinition(sa, submissionElementDefn, fdmList, cc);
-		
-		      createdRelations.add(fd.getLongStringRefTextTable());
-		      createdRelations.add(fd.getRefTextTable());
 		      
 		      List<CommonFieldsBase> badTables = new ArrayList<CommonFieldsBase>();
 		
@@ -689,18 +649,10 @@ public class FormParserForJavaRosa {
     
     // TODO: if the above gets killed, how do we clean up?
     } catch ( ODKParseException e ) {
-    	List<EntityKey> keys = new ArrayList<EntityKey>();
-    	formInfo.recursivelyAddEntityKeys(keys, cc);
-    	keys.add(new EntityKey(sa, sa.getUri()));
-    	keys.add(formInfo.getKey());
-    	ds.deleteEntities(keys, user);
+    	formInfo.deleteForm(cc);
     	throw e;
     } catch ( ODKDatastoreException e ) {
-    	List<EntityKey> keys = new ArrayList<EntityKey>();
-    	formInfo.recursivelyAddEntityKeys(keys, cc);
-    	keys.add(new EntityKey(sa, sa.getUri()));
-    	keys.add(formInfo.getKey());
-    	ds.deleteEntities(keys, user);
+    	formInfo.deleteForm(cc);
     	throw e;
     }
 
@@ -731,7 +683,12 @@ public class FormParserForJavaRosa {
       CommonFieldsBase tbl, NamingSet opaque, CallingContext cc) {
 	  
     // Find out how many columns it has...
-    int nCol = tbl.getFieldList().size() - DynamicCommonFieldsBase.WELL_KNOWN_COLUMN_COUNT;
+	int nCol = tbl.getFieldList().size();
+	if ( tbl instanceof TopLevelDynamicBase ) {
+		nCol = nCol - TopLevelDynamicBase.ADDITIONAL_COLUMN_COUNT - 1;
+	} else if ( tbl instanceof DynamicBase ) {
+		nCol = nCol - DynamicBase.ADDITIONAL_COLUMN_COUNT - 1;
+	}
 
     if (nCol < 2) {
       throw new IllegalStateException("Unable to subdivide instance table! " + tbl.getSchemaName()

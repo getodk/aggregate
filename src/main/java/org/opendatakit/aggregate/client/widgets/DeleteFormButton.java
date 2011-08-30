@@ -18,6 +18,7 @@ package org.opendatakit.aggregate.client.widgets;
 
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.popups.ConfirmFormDeletePopup;
+import org.opendatakit.aggregate.client.popups.HelpBalloon;
 import org.opendatakit.common.security.common.GrantedAuthorityName;
 
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -25,34 +26,37 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.PopupPanel;
 
-public class DeleteFormButton extends AButtonBase implements ClickHandler {
- 
-  private String formId;
+public class DeleteFormButton extends AbstractButtonBase implements ClickHandler {
 
-  public DeleteFormButton(String formId) {
-    super("<img src=\"images/red_x.png\" /> Delete");
-    this.formId = formId;
-    addStyleDependentName("negative");
-    boolean enabled = AggregateUI.getUI().getUserInfo()
-	.getGrantedAuthorities().contains(GrantedAuthorityName.ROLE_DATA_OWNER);
-    setEnabled(enabled);
-    addClickHandler(this);
-  }
+	private static final String TOOLTIP_TEXT = "Remove the form";
 
-  @Override
-  public void onClick(ClickEvent event) {
-    super.onClick(event);
-    
-     // TODO: display pop-up with text from b...
-     final ConfirmFormDeletePopup popup = new ConfirmFormDeletePopup(formId);
-     popup.setPopupPositionAndShow(new PopupPanel.PositionCallback() {
-        @Override
-        public void setPosition(int offsetWidth, int offsetHeight) {
-            int left = ((Window.getScrollLeft() + Window.getClientWidth() - offsetWidth) / 2);
-            int top = ((Window.getScrollTop() + Window.getClientHeight() - offsetHeight) / 2);
-            popup.setPopupPosition(left, top);
-        }
-     });
-  }
+	private static final String HELP_BALLOON_TXT = "Delete this form from Aggregate.";
 
+	private String formId;
+
+	public DeleteFormButton(String formId) {
+		super("<img src=\"images/red_x.png\" /> Delete", TOOLTIP_TEXT);
+		this.formId = formId;
+		addStyleDependentName("negative");
+		boolean enabled = AggregateUI.getUI().getUserInfo()
+		.getGrantedAuthorities().contains(GrantedAuthorityName.ROLE_DATA_OWNER);
+		setEnabled(enabled);
+		helpBalloon = new HelpBalloon(this, HELP_BALLOON_TXT);
+	}
+
+	@Override
+	public void onClick(ClickEvent event) {
+		super.onClick(event);
+
+		// TODO: display pop-up with text from b...
+		final ConfirmFormDeletePopup popup = new ConfirmFormDeletePopup(formId);
+		popup.setPopupPositionAndShow(new PopupPanel.PositionCallback() {
+			@Override
+			public void setPosition(int offsetWidth, int offsetHeight) {
+				int left = ((Window.getScrollLeft() + Window.getClientWidth() - offsetWidth) / 2);
+				int top = ((Window.getScrollTop() + Window.getClientHeight() - offsetHeight) / 2);
+				popup.setPopupPosition(left, top);
+			}
+		});
+	}
 }

@@ -70,3 +70,7 @@ a, a:visited, a:hover {
 	padding: 2px 2px 2px 2px;
 	float: left;
 }
+
+#filter_desc_title {
+	text-align: left;
+}

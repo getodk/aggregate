@@ -16,25 +16,31 @@
 
 package org.opendatakit.aggregate.client.widgets;
 
+import org.opendatakit.aggregate.client.popups.HelpBalloon;
+
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.PopupPanel;
 
-public class ClosePopupButton extends AButtonBase implements ClickHandler {
-  private PopupPanel popup;
+public class ClosePopupButton extends AbstractButtonBase implements ClickHandler {
 
-  public ClosePopupButton(PopupPanel popup) {
-    super("<img src=\"images/red_x.png\" />");
-    this.popup = popup;
-    addStyleDependentName("close");
-    addStyleDependentName("negative");
-    addClickHandler(this);
-  }
+	private static final String TOOLTIP_TEXT = "Close";
 
-  @Override
-  public void onClick(ClickEvent event) {
-    super.onClick(event);
-    popup.hide();
-  }
+	private static final String HELP_BALLOON_TXT = "Close the window";
 
+	private PopupPanel popup;
+
+	public ClosePopupButton(PopupPanel popup) {
+		super("<img src=\"images/red_x.png\" />", TOOLTIP_TEXT);
+		this.popup = popup;
+		addStyleDependentName("close");
+		addStyleDependentName("negative");
+		helpBalloon = new HelpBalloon(this, HELP_BALLOON_TXT);
+	}
+
+	@Override
+	public void onClick(ClickEvent event) {
+		super.onClick(event);
+		popup.hide();
+	}
 }

@@ -26,6 +26,7 @@ import org.opendatakit.aggregate.client.filter.ColumnFilterHeader;
 import org.opendatakit.aggregate.client.filter.Filter;
 import org.opendatakit.aggregate.client.filter.FilterGroup;
 import org.opendatakit.aggregate.client.submission.SubmissionUISummary;
+import org.opendatakit.aggregate.constants.common.FormElementNamespace;
 import org.opendatakit.aggregate.constants.common.Visibility;
 import org.opendatakit.aggregate.datamodel.FormDataModel;
 import org.opendatakit.aggregate.datamodel.FormElementKey;
@@ -56,6 +57,18 @@ public class GenerateHeaderInfo {
     this.filterGroup = filterGroup;
   }
 
+  public List<FormElementNamespace> includedFormElementNamespaces() {
+    List<FormElementNamespace> namespaces = new ArrayList<FormElementNamespace>();
+    namespaces.add(FormElementNamespace.VALUES);
+    if (filterGroup != null) {
+      if(filterGroup.getIncludeMetadata()) {
+        namespaces.add(FormElementNamespace.METADATA);
+      }
+    }
+    
+    return namespaces;
+  }
+  
   public List<FormElementModel> getIncludedElements() {
     return includes;
   }
@@ -91,7 +104,11 @@ public class GenerateHeaderInfo {
             String decodeKey = columnHeader.getColumn().getColumnEncoding();
             FormElementKey femKey = new FormElementKey(decodeKey);
             FormElementModel fem = FormElementModel.retrieveFormElementModel(form, femKey);
-
+            
+            if(!filterGroup.getIncludeMetadata() && fem.isMetadata()) {
+              continue;
+            }
+            
             // add to appropriate keep or remove
             if (cf.getVisibility().equals(Visibility.DISPLAY)) {
               addKeepFormElement(fem);
@@ -186,6 +203,12 @@ public class GenerateHeaderInfo {
 
   private void processFilter(String nodeName, FormElementModel node) {
 
+    if(filterGroup != null) {
+      if(!filterGroup.getIncludeMetadata() && node.isMetadata()) {
+        return;
+      }
+    }
+    
     if (includes == null) {
       addNodeToHeader(nodeName, node);
       return;

@@ -16,7 +16,9 @@ package org.opendatakit.aggregate.datamodel;
 import java.util.Date;
 
 import org.opendatakit.common.datamodel.DynamicCommonFieldsBase;
+import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
+import org.opendatakit.common.persistence.DataField.IndexType;
 import org.opendatakit.common.security.User;
 
 
@@ -39,7 +41,8 @@ import org.opendatakit.common.security.User;
 public abstract class TopLevelDynamicBase extends DynamicCommonFieldsBase {
 
 	/* top level dynamic */
-
+	public static final int ADDITIONAL_COLUMN_COUNT = 5 + CommonFieldsBase.AUDIT_COLUMN_COUNT;
+	
 	/** (data model) version from submission */
 	private static final DataField MODEL_VERSION = new DataField("_MODEL_VERSION", DataField.DataType.INTEGER, true);
 	/** uiVersion from submission */
@@ -56,11 +59,14 @@ public abstract class TopLevelDynamicBase extends DynamicCommonFieldsBase {
 	 */
 	private static final DataField IS_COMPLETE = new DataField("_IS_COMPLETE", DataField.DataType.BOOLEAN, true);
 
+	private static final DataField MARKED_AS_COMPLETE_DATE = new DataField("_MARKED_AS_COMPLETE_DATE", DataField.DataType.DATETIME, true).setIndexable(IndexType.ORDERED);
+
 	private static final DataField SUBMISSION_DATE = new DataField("_SUBMISSION_DATE", DataField.DataType.DATETIME, true);
 
 	public final DataField modelVersion;
 	public final DataField uiVersion;
 	public final DataField isComplete;
+	public final DataField markedAsCompleteDate;
 	public final DataField submissionDate;
 
 	/**
@@ -75,6 +81,7 @@ public abstract class TopLevelDynamicBase extends DynamicCommonFieldsBase {
 		fieldList.add(uiVersion=new DataField(UI_VERSION));
 		fieldList.add(isComplete=new DataField(IS_COMPLETE));
 		fieldList.add(submissionDate=new DataField(SUBMISSION_DATE));
+		fieldList.add(markedAsCompleteDate=new DataField(MARKED_AS_COMPLETE_DATE));
 	}
 
 	/**
@@ -89,6 +96,7 @@ public abstract class TopLevelDynamicBase extends DynamicCommonFieldsBase {
 		uiVersion = ref.uiVersion;
 		isComplete = ref.isComplete;
 		submissionDate = ref.submissionDate;
+		markedAsCompleteDate = ref.markedAsCompleteDate;
 	}
 
 	public final Long getModelVersion() {
@@ -121,5 +129,13 @@ public abstract class TopLevelDynamicBase extends DynamicCommonFieldsBase {
 
 	public final void setSubmissionDate(Date value) {
 		setDateField(submissionDate, value);
+	}
+
+	public final Date getMarkedAsCompleteDate() {
+		return getDateField(markedAsCompleteDate);
+	}
+
+	public final void setMarkedAsCompleteDate(Date value) {
+		setDateField(markedAsCompleteDate, value);
 	}
 }

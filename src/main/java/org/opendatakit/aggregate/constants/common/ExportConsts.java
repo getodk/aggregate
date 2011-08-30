@@ -1,8 +1,7 @@
 package org.opendatakit.aggregate.constants.common;
 
-import java.io.Serializable;
 
-public enum ExportConsts implements Serializable {
+public enum ExportConsts implements HelpSliderConsts {
 	EXPORT("After running \"Export\" on Submissions -> Filter Submissions, you should have a list of files you have exported.",
 			"Understanding the table:<br>" +
 			"1.  File Type - CSV or KML file.<br>" +

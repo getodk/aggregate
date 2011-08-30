@@ -30,7 +30,9 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
  */
 @RemoteServiceRelativePath("preferenceservice")
 public interface PreferenceService extends RemoteService {
-  String getGoogleMapsKey() throws AccessDeniedException;
+  PreferenceSummary getPreferences() throws AccessDeniedException;
   
   void setGoogleMapsKey(String key) throws AccessDeniedException;
+  
+  void setOdkTablesEnabled(Boolean enabled) throws AccessDeniedException;
 }

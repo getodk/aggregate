@@ -25,27 +25,29 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.client.form.FormSummary;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.datamodel.FormElementModel.ElementType;
-import org.opendatakit.aggregate.datamodel.TopLevelDynamicBase;
+import org.opendatakit.aggregate.exception.ODKConversionException;
+import org.opendatakit.aggregate.exception.ODKFormAlreadyExistsException;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
+import org.opendatakit.aggregate.parser.MultiPartFormItem;
 import org.opendatakit.aggregate.servlet.FormXmlServlet;
-import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.submission.SubmissionKeyPart;
-import org.opendatakit.aggregate.submission.SubmissionSet;
-import org.opendatakit.aggregate.submission.type.BlobSubmissionType;
-import org.opendatakit.aggregate.submission.type.BooleanSubmissionType;
-import org.opendatakit.aggregate.submission.type.LongSubmissionType;
-import org.opendatakit.aggregate.submission.type.RepeatSubmissionType;
-import org.opendatakit.aggregate.submission.type.StringSubmissionType;
 import org.opendatakit.common.constants.BasicConsts;
 import org.opendatakit.common.constants.HtmlUtil;
+import org.opendatakit.common.datamodel.BinaryContentManipulator;
+import org.opendatakit.common.datamodel.BinaryContentManipulator.BlobSubmissionOutcome;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.EntityKey;
+import org.opendatakit.common.persistence.PersistConsts;
+import org.opendatakit.common.persistence.Query;
+import org.opendatakit.common.persistence.Query.FilterOperation;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.security.User;
@@ -62,422 +64,407 @@ import org.opendatakit.common.web.CallingContext;
  */
 public class Form {
 
-  /**
-   * The FormInfo description of this form.  This is the Submission 
-   * for the predefined form: 
-   *  ( FormInfoTable + FormInfoDescriptionTable + 
-   * 	FormInfoFilesetTable + FormInfoSubmissionTable) 
-   * that defines forms.
-   */
-  private final Submission objectEntity;
-  /**
-   * Definition of the database representation of the form submission.
-   */
-  private final FormDefinition formDefinition;
+	private static final Log logger = LogFactory.getLog(Form.class);
 
-  /**
-   * NOT persisted
-   */
-  private Map<String, FormElementModel> repeatElementMap;
-  
-  // special values for bootstrapping
-  public static final String URI_FORM_ID_VALUE_FORM_INFO = "aggregate.opendatakit.org:FormInfo";
- 
-  public Form(TopLevelDynamicBase formEntity, CallingContext cc) throws ODKEntityNotFoundException, ODKDatastoreException {
-		this( new Submission(
-				formEntity,
-				FormInfo.getFormDefinition(cc), 
-				cc),
-				cc);
-	  }
-
-  /**
-   * Retrieve a form definition from the database.
-   * 
-   * @param topLevelAuri
-   * @param datastore
-   * @param user
-   * @throws ODKEntityNotFoundException
-   * @throws ODKDatastoreException
-   */
-  public Form(String topLevelAuri, CallingContext cc) throws ODKEntityNotFoundException, ODKDatastoreException {
-	this( new Submission(
-			(FormInfoTable) cc.getDatastore().getEntity(FormInfo.getFormDefinition(cc).getTopLevelGroup().getBackingObjectPrototype(), topLevelAuri, cc.getCurrentUser()),
-			FormInfo.getFormDefinition(cc), 
-			cc),
-			cc);
-  }
-
-  Form(Submission submission, CallingContext cc) throws ODKDatastoreException {
-    objectEntity = submission;
-	XFormParameters p = getSubmissionXFormParameters(cc);
-
-	formDefinition = FormDefinition.getFormDefinition(p, cc);
-  }
-  
-  public XFormParameters getSubmissionXFormParameters(CallingContext cc) {
-	RepeatSubmissionType r = (RepeatSubmissionType) objectEntity.getElementValue(FormInfo.fiSubmissionTable);
-	List<SubmissionSet> submissions = r.getSubmissionSets();
-	if ( submissions.size() != 1 ) {
-		throw new IllegalStateException("Expecting only one submission record at this time!");
-	}
-	SubmissionSet submissionRecord = submissions.get(0);
+	public static final Long MAX_FORM_ID_LENGTH = PersistConsts.GUARANTEED_SEARCHABLE_LEN;
+	/*
+	 * Following public fields are valid after the first successful call to
+	 * getFormDefinition()
+	 */
 	
-	String submissionFormId = ((StringSubmissionType) submissionRecord.getElementValue(FormInfo.submissionFormId)).getValue();
-	Long submissionModelVersion = ((LongSubmissionType) submissionRecord.getElementValue(FormInfo.submissionModelVersion)).getValue();
-	Long submissionUiVersion = ((LongSubmissionType) submissionRecord.getElementValue(FormInfo.submissionUiVersion)).getValue();
-	XFormParameters submissionDefn = new XFormParameters(submissionFormId, submissionModelVersion, submissionUiVersion);
-	return submissionDefn;
-  }
-  
-  public void persist(CallingContext cc) throws ODKDatastoreException {
-    objectEntity.persist(cc);
-    if ( formDefinition != null ) {
-    	formDefinition.persistSubmissionAssociation(cc);
-    }
-    
-    // TODO: redo this further after mitch's list of key changes
-    
-    // Should remoteServers ever be persisted?
-  }
+	private boolean newObject;
+	
+	private final FormInfoTable infoRow;
+	
+	private final FormInfoFilesetTable filesetRow;
+	
+	private final BinaryContentManipulator xform;
+	
+	private final BinaryContentManipulator manifest;
+	
+	/**
+	 * Definition of the database representation of the form submission.
+	 */
+	private final FormDefinition formDefinition;
 
-  /**
-   * Deletes the Form including FormElements and Remote Services
-   * 
-   * @param ds
-   *          Datastore
-   * @throws ODKDatastoreException
-   */
-  public void deleteForm(CallingContext cc) throws ODKDatastoreException {
-    List<EntityKey> eksFormInfo = new ArrayList<EntityKey>();
-    
-    // queue everything in formInfo for delete
-    objectEntity.recursivelyAddEntityKeys(eksFormInfo, cc);
-    
-	if ( formDefinition != null ) {
-		// delete the data model
-		formDefinition.deleteDataModel(cc);
-	}
+	/**
+	 * NOT persisted
+	 */
+	private Map<String, FormElementModel> repeatElementMap;
 
-    Datastore ds = cc.getDatastore();
-    User user = cc.getCurrentUser();
-    // delete everything in formInfo
-    ds.deleteEntities(eksFormInfo, user);
-  }
+	private Form(String topLevelAuri, CallingContext cc) throws ODKDatastoreException {
+		Datastore ds = cc.getDatastore();
+		User user = cc.getCurrentUser();
+		
+		FormInfoTable infoRelation = FormInfoTable.assertRelation(cc);
+		
+		infoRow = ds.getEntity(infoRelation, topLevelAuri, user);
 
-  /**
-   * Get the datastore key that uniquely identifies the form entity
-   * 
-   * @return datastore key
-   */
-  public EntityKey getEntityKey() {
-	  return objectEntity.getKey();
-  }
-  
-  public SubmissionKey getSubmissionKey() {
-  	return objectEntity.constructSubmissionKey(null);
-  }
+		newObject = false;
 
-  public FormElementModel getTopLevelGroupElement(){
-		  return formDefinition.getTopLevelGroupElement();
-  }
-  
-  public String getMajorMinorVersionString() {
-	  RepeatSubmissionType r = (RepeatSubmissionType) objectEntity.getElementValue(FormInfo.fiFilesetTable);
-	  if ( r.getNumberRepeats() != 1 ) {
-		  throw new IllegalStateException("Expecting exactly one fileset at this time");
-	  }
-	  SubmissionSet s = r.getSubmissionSets().get(0);
-	  
-	  Long modelVersion = ((LongSubmissionType) s.getElementValue(FormInfo.rootElementModelVersion)).getValue();
-	  Long uiVersion = ((LongSubmissionType) s.getElementValue(FormInfo.rootElementUiVersion)).getValue();
-	  StringBuilder b = new StringBuilder();
-	  if ( modelVersion != null ) {
-		  b.append(modelVersion.toString());
-	  }
-	  if ( uiVersion != null ) {
-		  b.append(".");
-		  b.append(uiVersion.toString());
-	  }
-	  return b.toString();
-  }
-  
-  public FormDefinition getFormDefinition() {
-	  return formDefinition;
-  }
-  
-  /**
-   * Get the ODK identifier that identifies the form
-   * 
-   * @return odk identifier
-   */
-  public String getFormId() {
-    StringSubmissionType formId = (StringSubmissionType) objectEntity.getElementValue(FormInfo.formId);
-    return formId.getValue();
-  }
+		Query q;
+		List<? extends CommonFieldsBase> rows;
 
-  public boolean hasManifestFileset() {
-	  // TODO: deal with version...
-		RepeatSubmissionType r = (RepeatSubmissionType) objectEntity.getElementValue(FormInfo.fiFilesetTable);
-		for ( SubmissionSet filesetRecord : r.getSubmissionSets()) {
-			BlobSubmissionType bt = (BlobSubmissionType) filesetRecord.getElementValue(FormInfo.manifestFileset);
-			return ( bt.getAttachmentCount() != 0 );
-		}
-		return false;
-  }
-
-  public BlobSubmissionType getManifestFileset() {
-	  // TODO: deal with version...
-		RepeatSubmissionType r = (RepeatSubmissionType) objectEntity.getElementValue(FormInfo.fiFilesetTable);
-		for ( SubmissionSet filesetRecord : r.getSubmissionSets()) {
-			BlobSubmissionType bt = (BlobSubmissionType) filesetRecord.getElementValue(FormInfo.manifestFileset);
-			return bt;
-		}
-		return null;
-  }
-  
-  private String getDescriptionTableFieldValue(String languageCode, FormElementModel field) {
-		RepeatSubmissionType r = (RepeatSubmissionType) objectEntity.getElementValue(FormInfo.fiDescriptionTable);
-		String preferredViewableName = null;
-		String defaultViewableName = null;
-		for ( SubmissionSet descriptionRecord : r.getSubmissionSets()) {
-			String value = ((StringSubmissionType) descriptionRecord.getElementValue(field)).getValue();
-			String lc = ((StringSubmissionType) descriptionRecord.getElementValue(FormInfo.languageCode)).getValue();
-			if ( lc == null ) {
-				defaultViewableName = value;
-			} else if ( lc.equals(languageCode) ) {
-				preferredViewableName = value;
+		{
+			// get fileset (for now, zero or one record)
+			FormInfoFilesetTable filesetRelation = FormInfoFilesetTable.assertRelation(cc);
+			q = ds.createQuery(filesetRelation, user);
+			q.addFilter(filesetRelation.topLevelAuri, FilterOperation.EQUAL, topLevelAuri);
+			
+			rows = q.executeQuery(0);
+			if ( rows.size() == 0 ) {
+				filesetRow = ds.createEntityUsingRelation(filesetRelation, user);
+				filesetRow.setTopLevelAuri(topLevelAuri);
+				filesetRow.setParentAuri(topLevelAuri);
+				filesetRow.setOrdinalNumber(1L);
+			} else if ( rows.size() == 1 ) {
+				filesetRow = (FormInfoFilesetTable) rows.get(0);
+			} else {
+				throw new IllegalStateException("more than one fileset!");
 			}
 		}
-		return ( preferredViewableName == null ) ? defaultViewableName : preferredViewableName;
-	  }
-  
-  /**
-   * Get the name that is viewable on ODK Aggregate
-   * 
-   * @return viewable name
-   */
-  public String getViewableName(String languageCode) {
-	  return getDescriptionTableFieldValue(languageCode, FormInfo.formName);
-  }
+		
+		this.xform = FormInfoFilesetTable.assertXformManipulator(topLevelAuri, filesetRow.getUri(), cc);
+		xform.refreshFromDatabase(cc);
+		
+		this.manifest = FormInfoFilesetTable.assertManifestManipulator(topLevelAuri, filesetRow.getUri(), cc);
+		manifest.refreshFromDatabase(cc);
 
-  public String getViewableName() {
-	  return getViewableName(null);
-  }
-  
-  public String getViewableFormNameSuitableAsFileName() {
-	String name = getViewableName();
-	return name.replaceAll("[^\\p{L}0-9]","_"); // any non-alphanumeric is replaced with underscore
-  }
-  
-  public String getDescription(String languageCode) {
-	  return getDescriptionTableFieldValue(languageCode, FormInfo.description);
+		XFormParameters p = new XFormParameters(
+					infoRow.getStringField(infoRow.formId),
+					filesetRow.getLongField(filesetRow.rootElementModelVersion),
+					filesetRow.getLongField(filesetRow.rootElementUiVersion) );
+
+		formDefinition = FormDefinition.getFormDefinition(p, cc);
+	}
+
+
+	private Form(XFormParameters rootElementDefn, boolean isEncryptedForm, boolean isDownloadEnabled, 
+			byte[] xmlBytes,  String title, CallingContext cc) throws ODKDatastoreException, ODKConversionException {
+		Datastore ds = cc.getDatastore();
+		User user = cc.getCurrentUser();
+		
+		FormInfoTable infoRelation = FormInfoTable.assertRelation(cc);
+
+		String formUri = CommonFieldsBase.newMD5HashUri(rootElementDefn.formId);
+		
+		Date now = new Date();
+		infoRow = ds.createEntityUsingRelation(infoRelation, user);
+		infoRow.setStringField(infoRow.primaryKey, formUri);
+		infoRow.setSubmissionDate(now);
+		infoRow.setMarkedAsCompleteDate(now);
+		infoRow.setIsComplete(true);
+		infoRow.setModelVersion(1L);
+		infoRow.setUiVersion(0L);
+		infoRow.setStringField(infoRelation.formId, rootElementDefn.formId);
+
+		newObject = true;
+
+		String topLevelAuri = infoRow.getUri();
+		
+		{
+			// get fileset (for now, zero or one record)
+			FormInfoFilesetTable filesetRelation = FormInfoFilesetTable.assertRelation(cc);
+			filesetRow = ds.createEntityUsingRelation(filesetRelation, user);
+			filesetRow.setTopLevelAuri(topLevelAuri);
+			filesetRow.setParentAuri(topLevelAuri);
+			filesetRow.setOrdinalNumber(1L);
+			filesetRow.setLongField(filesetRow.rootElementModelVersion, rootElementDefn.modelVersion);
+			filesetRow.setLongField(filesetRow.rootElementUiVersion, rootElementDefn.uiVersion);
+			filesetRow.setBooleanField(filesetRow.isEncryptedForm, isEncryptedForm);
+			filesetRow.setBooleanField(filesetRow.isDownloadAllowed, isDownloadEnabled);
+			filesetRow.setStringField(filesetRow.formName, title);
 		}
-  
-  public String getDescription() {
-	  return getDescription(null);
-  }
+		
+		this.xform = FormInfoFilesetTable.assertXformManipulator(topLevelAuri, filesetRow.getUri(), cc);
+		xform.setValueFromByteArray(xmlBytes, "text/xml", Long.valueOf(xmlBytes.length), title + ".xml", cc);
 
-  public String getDescriptionUrl(String languageCode) {
-	  return getDescriptionTableFieldValue(languageCode, FormInfo.descriptionUrl);
-  }
-  
-  public String getDescriptionUrl() {
-	  return getDescriptionUrl(null);
-  }
-
-  /**
-   * Get the date the form was created
-   * 
-   * @return creation date
-   */
-  public Date getCreationDate() {
-    return objectEntity.getCreationDate();
-  }
-
-  /**
-   * Get the last date the form was updated
-   * 
-   * @return last date form was updated
-   */
-  public Date getUpdateDate() {
-    return objectEntity.getLastUpdateDate();
-  }
-
-  /**
-   * Get the user who uploaded/created the form
-   * 
-   * @return user name
-   */
-  public String getCreationUser() {
-    return objectEntity.getCreatorUriUser();
-  }
-
-  /**
-   * Get the file name to be used when generating the XML file describing from
-   * 
-   * @return xml file name
-   */
-  public String getFormFilename() throws ODKDatastoreException {
-	// assume for now that there is only one fileset...
-	RepeatSubmissionType r = (RepeatSubmissionType) objectEntity.getElementValue(FormInfo.fiFilesetTable);
-	List<SubmissionSet> filesets = r.getSubmissionSets();
-	if ( filesets.size() != 1 ) {
-		throw new IllegalStateException("Expecting only one fileset record at this time!");
+		this.manifest = FormInfoFilesetTable.assertManifestManipulator(topLevelAuri, filesetRow.getUri(), cc);
+	
+		formDefinition = FormDefinition.getFormDefinition(rootElementDefn, cc);
 	}
-	SubmissionSet filesetRecord = filesets.get(0);
-	BlobSubmissionType bt = (BlobSubmissionType) filesetRecord.getElementValue(FormInfo.xformDefinition);
-	  
-	  int count = bt.getAttachmentCount();
-	  // we use ordinal counting here: 1..count
-	  for ( int i = 1 ; i <= count ; ++i ) {
-		  String contentType = bt.getContentType(i);
-		  if ( contentType == null ) continue; // incomplete form...
-		  String unrootedFileName = bt.getUnrootedFilename(i);
-		  return unrootedFileName;
-	  }
-	  throw new IllegalStateException("unable to locate the form definition");
-  }
+	
+	public boolean isNewlyCreated() {
+		return newObject;
+	}
+	
+	public void persist(CallingContext cc) throws ODKDatastoreException {
+		Datastore ds = cc.getDatastore();
+		User user = cc.getCurrentUser();
 
-  /**
-   * Get the original XML that specified the form
-   * 
-   * @return get XML definition of XForm
-   */
-  public String getFormXml(CallingContext cc) throws ODKDatastoreException {
-		// assume for now that there is only one fileset...
-		RepeatSubmissionType r = (RepeatSubmissionType) objectEntity.getElementValue(FormInfo.fiFilesetTable);
-		List<SubmissionSet> filesets = r.getSubmissionSets();
-		if ( filesets.size() != 1 ) {
-			throw new IllegalStateException("Expecting only one fileset record at this time!");
+		ds.putEntity(infoRow, user);
+		ds.putEntity(filesetRow, user);
+		manifest.persist(cc);
+		xform.persist(cc);
+
+		if (formDefinition != null) {
+			formDefinition.persistSubmissionAssociation(cc);
 		}
-		SubmissionSet filesetRecord = filesets.get(0);
-		BlobSubmissionType bt = (BlobSubmissionType) filesetRecord.getElementValue(FormInfo.xformDefinition);
-	  
-	  int count = bt.getAttachmentCount();
-	  // we use ordinal counting here: 1..count
-	  for ( int i = 1 ; i <= count ; ++i ) {
-		  String contentType = bt.getContentType(i);
-		  if ( contentType == null ) continue; // incomplete form...
-		  byte[] byteArray = bt.getBlob(i, cc);
-		  try {
-			  return new String(byteArray, "UTF-8");
-		  } catch ( UnsupportedEncodingException e ) {
-			  e.printStackTrace();
-			  throw new IllegalStateException("UTF-8 charset not supported!");
-		  }
-	  }
-	  throw new IllegalStateException("unable to locate the form definition");
-  }
-  
-  /**
-   * Gets whether the form is encrypted
-   * 
-   * @return true if form is encrypted, false otherwise
-   */
-  public Boolean isEncryptedForm() {
-	// assume for now that there is only one fileset...
-	RepeatSubmissionType r = (RepeatSubmissionType) objectEntity.getElementValue(FormInfo.fiFilesetTable);
-	List<SubmissionSet> filesets = r.getSubmissionSets();
-	if ( filesets.size() != 1 ) {
-		throw new IllegalStateException("Expecting only one fileset record at this time!");
 	}
-	SubmissionSet filesetRecord = filesets.get(0);
-    return ((BooleanSubmissionType) filesetRecord.getElementValue(FormInfo.isEncryptedForm)).getValue();
-  }
 
-  /**
-   * Gets whether the form can be downloaded
-   * 
-   * @return true if form can be downloaded, false otherwise
-   */
-  public Boolean getDownloadEnabled() {
-	// assume for now that there is only one fileset...
-	RepeatSubmissionType r = (RepeatSubmissionType) objectEntity.getElementValue(FormInfo.fiFilesetTable);
-	List<SubmissionSet> filesets = r.getSubmissionSets();
-	if ( filesets.size() != 1 ) {
-		throw new IllegalStateException("Expecting only one fileset record at this time!");
+	/**
+	 * Deletes the Form including FormElements and Remote Services
+	 * 
+	 * @param ds
+	 *            Datastore
+	 * @throws ODKDatastoreException
+	 */
+	public void deleteForm(CallingContext cc) throws ODKDatastoreException {
+		if (formDefinition != null) {
+			// delete the data model
+			formDefinition.deleteDataModel(cc);
+		}
+
+		Datastore ds = cc.getDatastore();
+		User user = cc.getCurrentUser();
+		// delete everything in formInfo
+
+		manifest.deleteAll(cc);
+		xform.deleteAll(cc);
+		ds.deleteEntity(new EntityKey(filesetRow, filesetRow.getUri()), user);
+		ds.deleteEntity(new EntityKey(infoRow, infoRow.getUri()), user);
 	}
-	SubmissionSet filesetRecord = filesets.get(0);
-    return ((BooleanSubmissionType) filesetRecord.getElementValue(FormInfo.isDownloadAllowed)).getValue();
-  }
 
-  /**
-   * Sets a boolean value of whether the form can be downloaded
-   * 
-   * @param downloadEnabled
-   *          set to true if form can be downloaded, false otherwise
-   * 
-   */
-  public void setDownloadEnabled(Boolean downloadEnabled) {
-	// assume for now that there is only one fileset...
-	RepeatSubmissionType r = (RepeatSubmissionType) objectEntity.getElementValue(FormInfo.fiFilesetTable);
-	List<SubmissionSet> filesets = r.getSubmissionSets();
-	if ( filesets.size() != 1 ) {
-		throw new IllegalStateException("Expecting only one fileset record at this time!");
+	/**
+	 * Get the datastore key that uniquely identifies the form entity
+	 * 
+	 * @return datastore key
+	 */
+	public EntityKey getEntityKey() {
+		return new EntityKey(infoRow, infoRow.getUri());
 	}
-	SubmissionSet filesetRecord = filesets.get(0);
-    ((BooleanSubmissionType) filesetRecord.getElementValue(FormInfo.isDownloadAllowed)).setBooleanValue(downloadEnabled);
-  }
 
-  /**
-   * Gets whether a new submission can be received
-   * 
-   * @return true if a new submission can be received, false otherwise
-   */
-  public Boolean getSubmissionEnabled() {
-	// if the form definition doesn't exist, we can't accept submissions
-	// this is a transient condition when in the midst of deleting a form or uploading one
-	// and another user attempts to list the available forms.
-	if ( formDefinition == null ) return false;
-	return formDefinition.getIsSubmissionAllowed();
-  }
-
-  /**
-   * Sets a boolean value of whether a new submission can be received
-   * 
-   * @param submissionEnabled
-   *          set to true if a new submission can be received, false otherwise
-   * 
-   */
-  public void setSubmissionEnabled(Boolean submissionEnabled) {
-	  formDefinition.setIsSubmissionAllowed(submissionEnabled);
-  }
-  
-  private FormElementModel findElementByNameHelper(FormElementModel current, String name) {
-	if ( current.getElementName().equals(name) ) return current;
-	FormElementModel m = null;
-	for ( FormElementModel c : current.getChildren() ) {
-		m = findElementByNameHelper(c, name);
-		if ( m != null ) break;
+	public SubmissionKey getSubmissionKey() {
+		return FormInfo.getSubmissionKey(infoRow.getUri());
 	}
-	return m;
-  }
-  
-  /**
-   * Relies on getElementName() to determine the match of the FormElementModel.
-   * Does a depth-first traversal of the list.
-   * 
-   * @param name
-   * @return the found element or null if not found.
-   */
-  public FormElementModel findElementByName(String name) {
-	  return findElementByNameHelper( getTopLevelGroupElement(), name );
-  }
 
-  public FormElementModel getFormElementModel(
+	public FormElementModel getTopLevelGroupElement() {
+		return formDefinition.getTopLevelGroupElement();
+	}
+
+	public String getMajorMinorVersionString() {
+
+		Long modelVersion = filesetRow.getLongField(filesetRow.rootElementModelVersion);
+		Long uiVersion = filesetRow.getLongField(filesetRow.rootElementUiVersion);
+		StringBuilder b = new StringBuilder();
+		if (modelVersion != null) {
+			b.append(modelVersion.toString());
+		}
+		if (uiVersion != null) {
+			b.append(".");
+			b.append(uiVersion.toString());
+		}
+		return b.toString();
+	}
+
+	public FormDefinition getFormDefinition() {
+		return formDefinition;
+	}
+
+	/**
+	 * Get the ODK identifier that identifies the form
+	 * 
+	 * @return odk identifier
+	 */
+	public String getFormId() {
+		return infoRow.getStringField(infoRow.formId);
+	}
+
+	public boolean hasManifestFileset() {
+		return manifest.getAttachmentCount() != 0;
+	}
+
+	public BinaryContentManipulator getManifestFileset() {
+		return manifest;
+	}
+
+	/**
+	 * Get the name that is viewable on ODK Aggregate
+	 * 
+	 * @return viewable name
+	 */
+	public String getViewableName() {
+		return filesetRow.getStringField(filesetRow.formName);
+	}
+
+	public String getViewableFormNameSuitableAsFileName() {
+		String name = getViewableName();
+		return name.replaceAll("[^\\p{L}0-9]", "_"); // any non-alphanumeric is
+														// replaced with
+														// underscore
+	}
+	
+	public String getDescription() {
+		return filesetRow.getStringField(filesetRow.description);
+	}
+	
+	public String getDescriptionUrl() {
+		return filesetRow.getStringField(filesetRow.descriptionUrl);
+	}
+
+	/**
+	 * Get the date the form was created
+	 * 
+	 * @return creation date
+	 */
+	public Date getCreationDate() {
+		return infoRow.getCreationDate();
+	}
+
+	/**
+	 * Get the last date the form was updated
+	 * 
+	 * @return last date form was updated
+	 */
+	public Date getUpdateDate() {
+		return infoRow.getLastUpdateDate();
+	}
+
+	/**
+	 * Get the user who uploaded/created the form
+	 * 
+	 * @return user name
+	 */
+	public String getCreationUser() {
+		return infoRow.getCreatorUriUser();
+	}
+
+	public BinaryContentManipulator getXformDefinition() {
+		return xform;
+	}
+	
+	/**
+	 * Get the file name to be used when generating the XML file describing from
+	 * 
+	 * @return xml file name
+	 */
+	public String getFormFilename() throws ODKDatastoreException {
+		if ( xform.getAttachmentCount() == 1 ) {
+			return xform.getUnrootedFilename(1);
+		} else if ( xform.getAttachmentCount() > 1 ) {
+			throw new IllegalStateException(
+					"Expecting only one fileset record at this time!");
+		}
+		return null;
+	}
+
+	/**
+	 * Get the original XML that specified the form
+	 * 
+	 * @return get XML definition of XForm
+	 */
+	public String getFormXml(CallingContext cc) throws ODKDatastoreException {
+		if ( xform.getAttachmentCount() == 1 ) {
+			if ( xform.getContentHash(1) == null ) {
+				return null;
+			}
+			byte[] byteArray = xform.getBlob(1, cc);
+			try {
+				return new String(byteArray, "UTF-8");
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
+				throw new IllegalStateException("UTF-8 charset not supported!");
+			}
+		} else if ( xform.getAttachmentCount() > 1 ) {
+			throw new IllegalStateException(
+					"Expecting only one fileset record at this time!");
+		}
+		return null;
+	}
+
+	/**
+	 * Gets whether the form is encrypted
+	 * 
+	 * @return true if form is encrypted, false otherwise
+	 */
+	public Boolean isEncryptedForm() {
+		return filesetRow.getBooleanField(filesetRow.isEncryptedForm);
+	}
+
+	/**
+	 * Gets whether the form can be downloaded
+	 * 
+	 * @return true if form can be downloaded, false otherwise
+	 */
+	public Boolean getDownloadEnabled() {
+		return filesetRow.getBooleanField(filesetRow.isDownloadAllowed);
+	}
+
+	/**
+	 * Sets a boolean value of whether the form can be downloaded
+	 * 
+	 * @param downloadEnabled
+	 *            set to true if form can be downloaded, false otherwise
+	 * 
+	 */
+	public void setDownloadEnabled(Boolean downloadEnabled) {
+		filesetRow.setBooleanField(filesetRow.isDownloadAllowed, downloadEnabled);
+	}
+
+	/**
+	 * Gets whether a new submission can be received
+	 * 
+	 * @return true if a new submission can be received, false otherwise
+	 */
+	public Boolean getSubmissionEnabled() {
+		// if the form definition doesn't exist, we can't accept submissions
+		// this is a transient condition when in the midst of deleting a form or
+		// uploading one
+		// and another user attempts to list the available forms.
+		if (formDefinition == null)
+			return false;
+		return formDefinition.getIsSubmissionAllowed();
+	}
+
+	/**
+	 * Sets a boolean value of whether a new submission can be received
+	 * 
+	 * @param submissionEnabled
+	 *            set to true if a new submission can be received, false
+	 *            otherwise
+	 * 
+	 */
+	public void setSubmissionEnabled(Boolean submissionEnabled) {
+		formDefinition.setIsSubmissionAllowed(submissionEnabled);
+	}
+
+	private FormElementModel findElementByNameHelper(FormElementModel current,
+			String name) {
+		if (current.getElementName().equals(name))
+			return current;
+		FormElementModel m = null;
+		for (FormElementModel c : current.getChildren()) {
+			m = findElementByNameHelper(c, name);
+			if (m != null)
+				break;
+		}
+		return m;
+	}
+
+	/**
+	 * Relies on getElementName() to determine the match of the
+	 * FormElementModel. Does a depth-first traversal of the list.
+	 * 
+	 * @param name
+	 * @return the found element or null if not found.
+	 */
+	public FormElementModel findElementByName(String name) {
+		return findElementByNameHelper(getTopLevelGroupElement(), name);
+	}
+
+	public FormElementModel getFormElementModel(
 			List<SubmissionKeyPart> submissionKeyParts) {
 		FormElementModel m = null;
 		boolean formIdElement = true;
 		for (SubmissionKeyPart p : submissionKeyParts) {
-			if ( formIdElement ) {
+			if (formIdElement) {
 				if (!p.getElementName().equals(getFormId())) {
 					return null;
 				}
 				formIdElement = false;
 			} else if (m == null) {
 				m = getTopLevelGroupElement();
-				if ( !p.getElementName().equals(m.getElementName())) {
+				if (!p.getElementName().equals(m.getElementName())) {
 					return null;
 				}
 			} else {
@@ -496,156 +483,180 @@ public class Form {
 		}
 		return m;
 	}
-  
-  private void getRepeatGroupsInModelHelper(FormElementModel current, List<FormElementModel> accumulation) {
-	  for ( FormElementModel m : current.getChildren() ) {
-		  if ( m.getElementType() == FormElementModel.ElementType.REPEAT ) {
-			  accumulation.add(m);
-		  }
-		  getRepeatGroupsInModelHelper(m, accumulation);
-	  }
-  }
-  
-  public List<FormElementModel> getRepeatGroupsInModel() {
-	  List<FormElementModel> list = new ArrayList<FormElementModel>();
-	
-	  getRepeatGroupsInModelHelper(getTopLevelGroupElement(), list);
-	  return list;
-  }
 
-  public Map<String, FormElementModel> getRepeatElementModels() {
+	private void getRepeatGroupsInModelHelper(FormElementModel current,
+			List<FormElementModel> accumulation) {
+		for (FormElementModel m : current.getChildren()) {
+			if (m.getElementType() == FormElementModel.ElementType.REPEAT) {
+				accumulation.add(m);
+			}
+			getRepeatGroupsInModelHelper(m, accumulation);
+		}
+	}
 
-    // check to see if repeatRootMap needs to be created
-    // NOTE: this assumes the form does NOT get altered!!!
-    if (repeatElementMap == null) {
-      repeatElementMap = new HashMap<String, FormElementModel>();
-      populateRepeatElementMap(formDefinition.getTopLevelGroupElement());
-    }
+	public List<FormElementModel> getRepeatGroupsInModel() {
+		List<FormElementModel> list = new ArrayList<FormElementModel>();
 
-    return repeatElementMap;
-  }
+		getRepeatGroupsInModelHelper(getTopLevelGroupElement(), list);
+		return list;
+	}
 
-  private void populateRepeatElementMap(FormElementModel node) {
-    if (node == null) {
-      return;
-    }
-    if (node.getElementType() == ElementType.REPEAT) {
-    	// TODO: this should be fully qualified element name or 
-    	// you could get collisions.
-      repeatElementMap.put(node.getElementName(), node);
-    }
-    List<FormElementModel> children = node.getChildren();
-    if (children == null) {
-      return;
-    }
-    for (FormElementModel child : children) {
-      populateRepeatElementMap(child);
-    }
-  }
-  
-  
-  public FormSummary generateFormSummary(CallingContext cc) {
-    boolean submit = getSubmissionEnabled();    
-    boolean downloadable = getDownloadEnabled();
-    Map<String, String> xmlProperties = new HashMap<String, String>();
-    xmlProperties.put(ServletConsts.FORM_ID, getFormId());
-    xmlProperties.put(ServletConsts.HUMAN_READABLE, BasicConsts.TRUE);
+	public Map<String, FormElementModel> getRepeatElementModels() {
 
-    String viewableURL = HtmlUtil.createHrefWithProperties(cc.getWebApplicationURL(FormXmlServlet.WWW_ADDR),
-        xmlProperties, getViewableName());
-    int mediaFileCount = getManifestFileset().getAttachmentCount();
-    return new FormSummary(getViewableName(), getFormId(), getCreationDate(), getCreationUser(), downloadable, submit, viewableURL, mediaFileCount);
-  }
-  
-  /**
-   * Prints the data element definitions to the print stream specified
-   * 
-   * @param out
-   *          Print stream to send the output to
-   */
-  public void printDataTree(PrintStream out) {
-    printTreeHelper(formDefinition.getTopLevelGroupElement(), out);
-  }
+		// check to see if repeatRootMap needs to be created
+		// NOTE: this assumes the form does NOT get altered!!!
+		if (repeatElementMap == null) {
+			repeatElementMap = new HashMap<String, FormElementModel>();
+			populateRepeatElementMap(formDefinition.getTopLevelGroupElement());
+		}
 
-  /**
-   * Recursive helper function that prints the data elements definitions to the
-   * print stream specified
-   * 
-   * @param node
-   *          node to be processed
-   * @param out
-   *          Print stream to send the output to
-   */
-  private void printTreeHelper(FormElementModel node, PrintStream out) {
-    if (node == null) {
-      return;
-    }
-    out.println(node.toString());
-    List<FormElementModel> children = node.getChildren();
-    if (children == null) {
-      return;
-    }
-    for (FormElementModel child : children) {
-      printTreeHelper(child, out);
-    }
-  }
+		return repeatElementMap;
+	}
 
-  /**
-   * @see java.lang.Object#equals(java.lang.Object)
-   */
-  @Override
-  public boolean equals(Object obj) {
-    if (!(obj instanceof Form)) {
-      return false;
-    }
-    Form other = (Form) obj;
-    if ( objectEntity == null ) return (other.objectEntity == null);
-    
-    return (objectEntity.equals(other.objectEntity));
-    // TODO: do we care about external services?
-  }
+	private void populateRepeatElementMap(FormElementModel node) {
+		if (node == null) {
+			return;
+		}
+		if (node.getElementType() == ElementType.REPEAT) {
+			// TODO: this should be fully qualified element name or
+			// you could get collisions.
+			repeatElementMap.put(node.getElementName(), node);
+		}
+		List<FormElementModel> children = node.getChildren();
+		if (children == null) {
+			return;
+		}
+		for (FormElementModel child : children) {
+			populateRepeatElementMap(child);
+		}
+	}
 
-  /**
-   * @see java.lang.Object#hashCode()
-   */
-  @Override
-  public int hashCode() {
-    int hashCode = 13;
-    if (objectEntity != null)
-      hashCode += objectEntity.hashCode();
-    // TODO: do we care about external services?
-    return hashCode;
-  }
+	public FormSummary generateFormSummary(CallingContext cc) {
+		boolean submit = getSubmissionEnabled();
+		boolean downloadable = getDownloadEnabled();
+		Map<String, String> xmlProperties = new HashMap<String, String>();
+		xmlProperties.put(ServletConsts.FORM_ID, getFormId());
+		xmlProperties.put(ServletConsts.HUMAN_READABLE, BasicConsts.TRUE);
 
-  /**
-   * @see java.lang.Object#toString()
-   */
-  @Override
-  public String toString() {
-    return getViewableName(null);
-  }
-  
-  /**
-   * Returns the top level dynamic class for the FormInfo table.
-   * @param datastore
-   * @param userService
-   * @return
-   * @throws ODKDatastoreException
-   */
-  public static final FormInfoTable getFormInfoRelation(CallingContext cc) throws ODKDatastoreException {
-	  return (FormInfoTable) FormInfo.getFormInfoForm(cc).getTopLevelGroupElement().getFormDataModel().getBackingObjectPrototype();
-  }
-  
-  	/**
-  	 * Clean up the incoming string to extract just the formId from it.
-  	 * 
-  	 * @param submissionKey
-  	 * @return
-  	 */
+		String viewableURL = HtmlUtil.createHrefWithProperties(
+				cc.getWebApplicationURL(FormXmlServlet.WWW_ADDR),
+				xmlProperties, getViewableName());
+		int mediaFileCount = getManifestFileset().getAttachmentCount();
+		return new FormSummary(getViewableName(), getFormId(),
+				getCreationDate(), getCreationUser(), downloadable, submit,
+				viewableURL, mediaFileCount);
+	}
+
+	/**
+	 * Prints the data element definitions to the print stream specified
+	 * 
+	 * @param out
+	 *            Print stream to send the output to
+	 */
+	public void printDataTree(PrintStream out) {
+		printTreeHelper(formDefinition.getTopLevelGroupElement(), out);
+	}
+
+	/**
+	 * Recursive helper function that prints the data elements definitions to
+	 * the print stream specified
+	 * 
+	 * @param node
+	 *            node to be processed
+	 * @param out
+	 *            Print stream to send the output to
+	 */
+	private void printTreeHelper(FormElementModel node, PrintStream out) {
+		if (node == null) {
+			return;
+		}
+		out.println(node.toString());
+		List<FormElementModel> children = node.getChildren();
+		if (children == null) {
+			return;
+		}
+		for (FormElementModel child : children) {
+			printTreeHelper(child, out);
+		}
+	}
+
+	/**
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if (!(obj instanceof Form)) {
+			return false;
+		}
+		Form other = (Form) obj;
+		if (infoRow == null)
+			return (other.infoRow == null);
+
+		return (infoRow.getUri().equals(other.infoRow.getUri()));
+	}
+
+	/**
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		int hashCode = 13;
+		if (infoRow != null)
+			hashCode += infoRow.getUri().hashCode();
+		return hashCode;
+	}
+
+	/**
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return getViewableName();
+	}
+
+	public static final List<Form> getForms(boolean checkAuthorization,
+			CallingContext cc) throws ODKDatastoreException {
+		
+		FormInfoTable relation = FormInfoTable.assertRelation(cc);
+		
+		// ensure that Form table exists...
+		List<Form> forms = new ArrayList<Form>();
+
+		Query formQuery = cc.getDatastore().createQuery(relation, cc.getCurrentUser());
+		List<?> formEntityKeys = 
+			formQuery.executeDistinctValueForDataField(relation.primaryKey);
+				
+		for (Object formEntityKey : formEntityKeys) {
+			Form form = new Form((String) formEntityKey, cc);
+			if (FormInfo.isFormInfoForm(form.getFormId()))
+				continue;
+			// TODO: authorization check?
+			forms.add(form);
+		}
+		return forms;
+	}
+
+	/**
+	 * Called during the startup action to load the Form table and eventually
+	 * handle migrations of forms from older table formats to newer ones.
+	 * 
+	 * @param cc
+	 * @throws ODKDatastoreException
+	 */
+	public static final void initialize(CallingContext cc)
+			throws ODKDatastoreException {
+	}
+
+	/**
+	 * Clean up the incoming string to extract just the formId from it.
+	 * 
+	 * @param submissionKey
+	 * @return
+	 */
 	public static final String extractWellFormedFormId(String submissionKey) {
 		int firstSlash = submissionKey.indexOf('/');
 		String formId = submissionKey;
-		if ( firstSlash != -1 ) {
+		if (firstSlash != -1) {
 			// strip off the group path of the key
 			formId = submissionKey.substring(0, firstSlash);
 		}
@@ -656,7 +667,7 @@ public class Form {
 	 * Static function to retrieve a form with the specified ODK id from the
 	 * datastore
 	 * 
-	 * @param submissionKey
+	 * @param formId
 	 *            The ODK identifier that identifies the form
 	 * 
 	 * @return The ODK aggregate form definition/conversion object
@@ -665,88 +676,32 @@ public class Form {
 	 *             Thrown when a form was not able to be found with the
 	 *             corresponding ODK ID
 	 */
-	public static Form retrieveForm(String submissionKey, CallingContext cc) 
-				throws ODKFormNotFoundException {
+	public static Form retrieveFormByFormId(String formId, CallingContext cc)
+			throws ODKFormNotFoundException {
 
-		// TODO: consider using memcache to have form info in memory for
-		// faster response times.  Note that we already cache the 
-		// FormDefinition...
-		Form formInfoForm = null;
-		try {
-			// make sure the FormInfo table definition is loaded...
-			formInfoForm = FormInfo.getFormInfoForm(cc);
-		} catch (ODKDatastoreException e) {
-			throw new ODKFormNotFoundException(e);
-		}
-
-		if (submissionKey == null) {
+		if (formId == null) {
 			return null;
 		}
-		String formIdValue = extractWellFormedFormId(
-				submissionKey);
-		if (formIdValue.equals(Form.URI_FORM_ID_VALUE_FORM_INFO)) {
-			return formInfoForm;
-		}
-
 		try {
-			String formUri = CommonFieldsBase.newMD5HashUri(formIdValue);
+			String formUri = CommonFieldsBase.newMD5HashUri(formId);
 			Form form = new Form(formUri, cc);
-			if ( !formIdValue.equals(form.getFormId()) ) {
+			if (!formId.equals(form.getFormId())) {
 				throw new IllegalStateException(
-						"more than one FormInfo entry for the given form id: " + formIdValue );
+						"more than one FormInfo entry for the given form id: "
+								+ formId);
 			}
 			return form;
 		} catch (Exception e) {
 			throw new ODKFormNotFoundException(e);
 		}
 	}
-	
+
 	/**
-	 * Create or fetch the given formId.
+	 * Static function to retrieve a form with the specified ODK id from the
+	 * datastore
 	 * 
 	 * @param formId
-	 * @param ds
-	 * @param user
-	 * @return
-	 * @throws ODKDatastoreException
-	 */
-	public static final Submission createOrFetchFormId(String formId, CallingContext cc) throws ODKDatastoreException {
-
-		// TODO: consider using memcache to have form info in memory for
-		// faster response times.  Note that we already cache the 
-		// FormDefinition...
-		Form formInfoForm = null;
-		// make sure the FormInfo table definition is loaded...
-		formInfoForm = FormInfo.getFormInfoForm(cc);
-
-		if (formId.equals(Form.URI_FORM_ID_VALUE_FORM_INFO)) {
-			throw new IllegalStateException("Unexpectedly retrieving formInfo definition");
-		}
-		Submission formInfo = null;
-		String formUri = CommonFieldsBase.newMD5HashUri(formId);
-		
-		try {
-			Datastore ds = cc.getDatastore();
-			User user = cc.getCurrentUser();
-			FormInfoTable fi = (FormInfoTable) ds.getEntity(formInfoForm.getTopLevelGroupElement().getFormDataModel().getBackingObjectPrototype(), formUri, user);
-	    	formInfo = new Submission(fi, formInfoForm.getFormDefinition(), cc);
-		} catch ( ODKEntityNotFoundException e ) {
-			formInfo = new Submission(1L, 0L, formUri, formInfoForm.getFormDefinition(), new Date(), cc);
-
-	    	((StringSubmissionType) formInfo.getElementValue(FormInfo.formId)).setValueFromString(formId);
-	    }
-	    return formInfo;
-	}
-	
-	public static final FormDefinition getFormInfoDefinition(CallingContext cc) throws ODKDatastoreException {
-		return FormInfo.getFormDefinition(cc);
-	}
-
-	/**
-	 * Static function to find form by FormId
-	 * 
-	 * @param formKey
-	 *            The entity key for the FormInfo record defining the form
+	 *            The ODK identifier that identifies the form
 	 * 
 	 * @return The ODK aggregate form definition/conversion object
 	 * 
@@ -754,32 +709,153 @@ public class Form {
 	 *             Thrown when a form was not able to be found with the
 	 *             corresponding ODK ID
 	 */
-	public static Form retrieveFormByEntityKey(EntityKey formKey, CallingContext cc) throws ODKFormNotFoundException {
+	public static Form retrieveForm(List<SubmissionKeyPart> parts, CallingContext cc)
+			throws ODKFormNotFoundException {
 
-		// TODO: consider using memcache to have form info in memory for
-		// faster response times.  Note that we already cache the 
-		// FormDefinition...
-		Form formInfoForm = null;
-		try {
-			// make sure the FormInfo table definition is loaded...
-			formInfoForm = FormInfo.getFormInfoForm(cc);
-		} catch (ODKDatastoreException e) {
-			throw new ODKFormNotFoundException(e);
-		}
-
-		if (formKey == null) {
+		if ( !FormInfo.validFormKey(parts) ) {
 			return null;
 		}
 		
-		if (formKey.getKey().equals(formInfoForm.getEntityKey().getKey())) {
-			return formInfoForm;
-		}
-		
 		try {
-			Form form = new Form(formKey.getKey(), cc);
+			String formUri = parts.get(1).getAuri();
+			Form form = new Form(formUri, cc);
 			return form;
 		} catch (Exception e) {
 			throw new ODKFormNotFoundException(e);
 		}
 	}
+
+	private BlobSubmissionOutcome isSameForm(XFormParameters rootElementDefn,  boolean isEncryptedFlag, String title,
+			byte[] xmlBytes, CallingContext cc) throws ODKDatastoreException, ODKFormAlreadyExistsException {
+		String rootFormId = getFormId();
+		Long rootModel = filesetRow.getLongField(filesetRow.rootElementModelVersion);
+		Long rootUi = filesetRow.getLongField(filesetRow.rootElementUiVersion);
+		Boolean isEncrypted = isEncryptedForm();
+		String formName = getViewableName();
+		
+		boolean same = 
+					rootFormId.equals(rootElementDefn.formId) &&
+						sameVersion(rootModel, rootUi, rootElementDefn.modelVersion, rootElementDefn.uiVersion) &&
+					isEncryptedFlag == isEncrypted &&
+					title.equals(formName);
+		
+		if ( ! same ) throw new ODKFormAlreadyExistsException();
+		
+		if ( xform.getAttachmentCount() == 1 ) {
+			String contentHash = xform.getContentHash(1);
+			if ( contentHash != null ) {
+				String md5Hash = CommonFieldsBase.newMD5HashUri(xmlBytes);
+				if ( !contentHash.equals(md5Hash) ) {
+					throw new ODKFormAlreadyExistsException();
+				} else {
+					return BlobSubmissionOutcome.FILE_UNCHANGED;
+				}
+			} else {
+				return xform.setValueFromByteArray(xmlBytes, "text/xml", Long.valueOf(xmlBytes.length), title + ".xml", cc);
+			}
+		} else {
+			return xform.setValueFromByteArray(xmlBytes, "text/xml", Long.valueOf(xmlBytes.length), title + ".xml", cc);
+		}
+	}
+	/**
+	 * Create or fetch the given formId.
+	 * @param isEncryptedForm 
+	 * @param rootElementDefn 
+	 * 
+	 * @param formId
+	 * @param isDownloadEnabled 
+	 * @param xmlBytes 
+	 * @param submissionElementDefn 
+	 * @param ds
+	 * @param user
+	 * @return
+	 * @throws ODKDatastoreException
+	 * @throws ODKConversionException
+	 *             if formId is too long...
+	 * @throws ODKFormAlreadyExistsException 
+	 */
+	public static final Form createOrFetchFormId(XFormParameters rootElementDefn, boolean isEncryptedForm, String title,
+			byte[] xmlBytes, boolean isDownloadEnabled, CallingContext cc) throws ODKDatastoreException,
+			ODKConversionException, ODKFormAlreadyExistsException {
+
+		Form thisForm = null;
+
+		if (FormInfo.isFormInfoForm(rootElementDefn.formId)) {
+			throw new IllegalStateException(
+					"Unexpectedly retrieving formInfo definition");
+		}
+		String formUri = CommonFieldsBase.newMD5HashUri(rootElementDefn.formId);
+
+		try {
+			thisForm = new Form(formUri, cc);
+			
+			if ( thisForm.isSameForm(rootElementDefn, isEncryptedForm, title, xmlBytes, cc)
+					!= BlobSubmissionOutcome.NEW_FILE_VERSION ) {
+				return thisForm;
+			}
+			throw new ODKFormAlreadyExistsException();
+		} catch (ODKEntityNotFoundException e) {
+			thisForm = new Form( rootElementDefn, isEncryptedForm, isDownloadEnabled, 
+					xmlBytes,  title, cc);
+		}
+		return thisForm;
+	}
+
+	public void setIsComplete(Boolean value) {
+		infoRow.setIsComplete(value);
+	}
+
+	public EntityKey getKey() {
+		return new EntityKey(infoRow, infoRow.getUri());
+	}
+
+	private static final boolean sameVersion(Long rootModel, Long rootUi,
+			Long rootModelVersion, Long rootUiVersion) {
+		return ((rootModelVersion == null) ? (rootModel == null)
+				: (rootModel != null && rootModelVersion.equals(rootModel)))
+				&& ((rootUiVersion == null) ? (rootUi == null)
+						: (rootUi != null && rootUiVersion.equals(rootUi)));
+	}
+
+	/**
+	 * Media files are assumed to be in a directory one level deeper than the
+	 * xml definition. So the filename reported on the mime item has an extra
+	 * leading directory. Strip that off.
+	 * 
+	 * @param aFormDefinition
+	 * @param rootModelVersion
+	 * @param rootUiVersion
+	 * @param item
+	 * @param datastore
+	 * @param user
+	 * @return true if the files are completely new or are identical to the
+	 *         currently-stored ones.
+	 * @throws ODKDatastoreException
+	 */
+	public boolean setXFormMediaFile(Long rootModelVersion, Long rootUiVersion,
+			MultiPartFormItem item, CallingContext cc)
+			throws ODKDatastoreException {
+		Long rootModel = filesetRow.getLongField(filesetRow.rootElementModelVersion);
+		Long rootUi = filesetRow.getLongField(filesetRow.rootElementUiVersion);
+
+		if (!sameVersion(rootModel, rootUi, rootModelVersion, rootUiVersion)) {
+			throw new ODKDatastoreException(
+			"did not find matching FileSet for media file");
+		}
+
+		String filePath = item.getFilename();
+		if (filePath.indexOf("/") != -1) {
+			filePath = filePath.substring(filePath.indexOf("/") + 1);
+		}
+		boolean matchingFiles = ( BlobSubmissionOutcome.NEW_FILE_VERSION !=
+			manifest.setValueFromByteArray(item.getStream().toByteArray(), 
+					item.getContentType(), item.getContentLength(), filePath, cc));
+		return matchingFiles;
+	}
+
+
+	public String getUri() {
+		return infoRow.getUri();
+	}
+
 }

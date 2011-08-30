@@ -92,20 +92,22 @@
 	text-align: right;
 }
 
-
-	
-#layout_panel {
+#layout_panel,
+#help_panel {
 	position: relative;
 	top: 16px;
 }
+
 #odk_aggregate_logo {
 	position: absolute;
 	left: 20px;
 	top: 8px;
 }
+
 #form_title_cell {
 	text-align: center;
 }
+
 #form_name {
 	color: #07115A;
 	margin-top: 0px;
@@ -113,6 +115,7 @@
 	margin-bottom: 0px;
 	padding-bottom: 0px;
 }
+
 #submission_nav_table {
 	width: 100%;
 	border-bottom: 1px solid #07115A;
@@ -125,4 +128,8 @@
 
 #filters_container {
 	border-right: 1px solid #07115A;
+}
+
+#help_panel {
+	border-top: 1px solid #07115A;
 }
