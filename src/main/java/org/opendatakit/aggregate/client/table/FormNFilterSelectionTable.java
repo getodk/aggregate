@@ -61,10 +61,6 @@ public class FormNFilterSelectionTable extends FlexTable {
     setWidget(0, 3, filtersBox);
   }
 
-  public ListBox getFormsBox() {
-    return formsBox;
-  }
-
   public ListBox getFiltersBox() {
     return filtersBox;
   }
