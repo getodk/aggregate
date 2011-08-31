@@ -108,6 +108,11 @@ public class WorksheetServlet extends ServletUtilBase {
       odkIdNotFoundError(resp);
       return;
     }
+    
+    if ( form.getFormDefinition() == null ) {
+	  errorRetreivingData(resp);
+	  return; // ill-formed definition
+    }
 
     WorksheetCreatorWorkerImpl ws = new WorksheetCreatorWorkerImpl(form, miscTasksKey, attemptCount, 
     					spreadsheetName, esType, cc);

@@ -16,7 +16,7 @@
             <role-name>admin</role-name>
         </auth-constraint>
     </security-constraint>
-    
+
    	<security-constraint>
         <web-resource-collection>
             <url-pattern>/remote_api</url-pattern>

@@ -485,7 +485,13 @@ public class FormParserForJavaRosa {
     Datastore ds = cc.getDatastore();
     User user = cc.getCurrentUser();
     
-    FormDefinition fdDefined = FormDefinition.getFormDefinition(submissionElementDefn, cc);
+    FormDefinition fdDefined = null;
+    try {
+    	fdDefined = FormDefinition.getFormDefinition(submissionElementDefn, cc);
+    } catch ( IllegalStateException e ) {
+    	e.printStackTrace();
+    	throw new ODKFormAlreadyExistsException("Internal error: the form already exists but has a bad form definition.  Delete it.");
+    }
     if ( fdDefined != null ) {
         // get most recent form-deletion statuses
     	if ( newlyCreatedXForm ) {

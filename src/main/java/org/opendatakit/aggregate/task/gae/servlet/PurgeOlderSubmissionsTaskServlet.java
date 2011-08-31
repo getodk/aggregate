@@ -92,6 +92,11 @@ public class PurgeOlderSubmissionsTaskServlet extends ServletUtilBase {
       odkIdNotFoundError(resp);
       return;
     }
+    
+    if ( form.getFormDefinition() == null ) {
+	  errorRetreivingData(resp);
+	  return; // ill-formed definition
+    }
 
     PurgeOlderSubmissionsWorkerImpl formDelete = new PurgeOlderSubmissionsWorkerImpl(form, miscTasksKey, 
     					attemptCount, cc);

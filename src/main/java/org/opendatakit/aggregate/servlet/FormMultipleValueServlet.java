@@ -84,6 +84,10 @@ public class FormMultipleValueServlet extends ServletUtilBase {
 		Submission sub = null;
 		try {
 			Form form = Form.retrieveFormByFormId(parts.get(0).getElementName(), cc);
+		    if ( form.getFormDefinition() == null ) {
+				errorRetreivingData(resp);
+				return; // ill-formed definition
+		    }
 			sub = Submission.fetchSubmission(parts, cc);
 
 			if (sub != null) {

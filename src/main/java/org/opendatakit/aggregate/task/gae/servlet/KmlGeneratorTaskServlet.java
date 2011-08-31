@@ -85,6 +85,11 @@ public class KmlGeneratorTaskServlet extends ServletUtilBase {
     FormElementModel imageField = null;
     try {
       form = Form.retrieveFormByFormId(formId, cc);
+      
+      if ( form.getFormDefinition() == null ) {
+  	    errorRetreivingData(resp);
+  	    return; // ill-formed definition
+      }
 
       if (titleFieldName != null) {
         FormElementKey titleKey = new FormElementKey(titleFieldName);

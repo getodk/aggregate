@@ -196,6 +196,10 @@ public class FragmentedCsvServlet extends ServletUtilBase {
     	
     	if (submissionKeyParts.size() >= 2 && submissionKeyParts.get(1).getAuri() != null && numEntriesToFetch > 0) {
         	Form form = Form.retrieveFormByFormId(submissionKeyParts.get(0).getElementName(), cc);
+		    if ( form.getFormDefinition() == null ) {
+				errorRetreivingData(resp);
+				return; // ill-formed definition
+		    }
         	Submission sub = Submission.fetchSubmission(submissionKeyParts, cc);
         	FormElementModel m = form.getFormElementModel(submissionKeyParts);
         	SubmissionElement elem = sub.resolveSubmissionKey(submissionKeyParts);
