@@ -68,6 +68,7 @@ public class SubmissionServiceImpl extends RemoteServiceServlet implements
     try {
       String formId = filterGroup.getFormId();
       Form form = Form.retrieveFormByFormId(formId, cc);
+	  if ( form.getFormDefinition() == null ) return null; // ill-formed definition
       QueryByUIFilterGroup query = new QueryByUIFilterGroup(form, filterGroup, 1000, cc);
       List<Submission> submissions = query.getResultSubmissions(cc);
 
@@ -124,6 +125,7 @@ public class SubmissionServiceImpl extends RemoteServiceServlet implements
     List<SubmissionKeyPart> parts = key.splitSubmissionKey();
     try {
       Form form = Form.retrieveFormByFormId(parts.get(0).getElementName(), cc);
+	  if ( form.getFormDefinition() == null ) return null; // ill-formed definition
       Submission sub = Submission.fetchSubmission(parts, cc);
 
       if (sub != null) {
@@ -170,6 +172,7 @@ public class SubmissionServiceImpl extends RemoteServiceServlet implements
 
     try {
       Form form = Form.retrieveFormByFormId(formId, cc);
+	  if ( form.getFormDefinition() == null ) return null; // ill-formed definition
       QueryByDate query = new QueryByDate(form, BasicConsts.EPOCH, false,
           ServletConsts.FETCH_LIMIT, cc);
       List<Submission> submissions = query.getResultSubmissions(cc);

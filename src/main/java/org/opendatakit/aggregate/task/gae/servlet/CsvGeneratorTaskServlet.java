@@ -86,6 +86,11 @@ public class CsvGeneratorTaskServlet extends ServletUtilBase {
       return;
     }
     
+    if ( form.getFormDefinition() == null ) {
+	  errorRetreivingData(resp);
+	  return; // ill-formed definition
+    }
+
     CsvWorkerImpl impl = new CsvWorkerImpl(form, persistentResultsKey, attemptCount, cc);
     
     impl.generateCsv();

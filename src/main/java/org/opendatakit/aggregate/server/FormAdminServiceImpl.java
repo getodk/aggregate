@@ -61,6 +61,7 @@ public class FormAdminServiceImpl extends RemoteServiceServlet implements
 
 		try {
 			Form form = Form.retrieveFormByFormId(formId, cc);
+			if ( form.getFormDefinition() == null ) return false; // ill-formed definition
 			form.setDownloadEnabled(downloadable);
 			form.persist(cc);
 			return true;
@@ -79,6 +80,7 @@ public class FormAdminServiceImpl extends RemoteServiceServlet implements
 
 		try {
 			Form form = Form.retrieveFormByFormId(formId, cc);
+			if ( form.getFormDefinition() == null ) return false; // ill-formed definition
 			form.setSubmissionEnabled(acceptSubmissions);
 			form.persist(cc);
 			return true;
@@ -118,6 +120,9 @@ public class FormAdminServiceImpl extends RemoteServiceServlet implements
 		Form form;
 		try {
 			form = Form.retrieveFormByFormId(fsc.getFormId(), cc);
+			if ( form.getFormDefinition() == null ) {
+				throw new RequestFailureException("Form " + fsc.getFormId() + " is ill-formed.");
+			}
 		} catch (ODKFormNotFoundException e) {
 			e.printStackTrace();
         	throw new RequestFailureException("Unable to retrieve form " + fsc.getFormId());
