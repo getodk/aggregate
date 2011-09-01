@@ -53,7 +53,6 @@ public class FormXmlTable {
 
     // build XML table of form information
     for (Form form : forms) {
-    	if ( FormInfo.isFormInfoForm(form.getFormId())) continue;
     	if ( !form.getDownloadEnabled() ) continue;
 
       xml += generateFormXmlEntry(form.getFormId(), form.getViewableName()) + BasicConsts.NEW_LINE;

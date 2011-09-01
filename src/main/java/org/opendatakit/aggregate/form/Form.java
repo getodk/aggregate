@@ -636,8 +636,6 @@ public class Form {
 				
 		for (Object formEntityKey : formEntityKeys) {
 			Form form = new Form((String) formEntityKey, cc);
-			if (FormInfo.isFormInfoForm(form.getFormId()))
-				continue;
 			// TODO: authorization check?
 			forms.add(form);
 		}
@@ -788,10 +786,6 @@ public class Form {
 
 		Form thisForm = null;
 
-		if (FormInfo.isFormInfoForm(rootElementDefn.formId)) {
-			throw new IllegalStateException(
-					"Unexpectedly retrieving formInfo definition");
-		}
 		String formUri = CommonFieldsBase.newMD5HashUri(rootElementDefn.formId);
 
 		try {
