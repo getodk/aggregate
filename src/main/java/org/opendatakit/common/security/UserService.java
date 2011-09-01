@@ -16,6 +16,7 @@
 package org.opendatakit.common.security;
 
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+import org.opendatakit.common.web.CallingContext;
 
 
 /**
@@ -64,9 +65,14 @@ public interface UserService {
   public String getSuperUserEmail();
 
   /**
-   * @return the primary key for the super user's registered user entity
+   * @return the configured ODK Aggregate super-user username.
+   */
+  public String getSuperUserUsername();
+
+  /**
+   * @return true if this user is a superUser
    * @throws ODKDatastoreException
    */
-  public abstract String getSuperUserUri() throws ODKDatastoreException;
+  public boolean isSuperUser(CallingContext cc) throws ODKDatastoreException;
 
 }

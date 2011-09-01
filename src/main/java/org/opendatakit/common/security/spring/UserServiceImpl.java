@@ -29,10 +29,13 @@ import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.security.Realm;
+import org.opendatakit.common.security.SecurityBeanDefs;
 import org.opendatakit.common.security.SecurityUtils;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.security.common.GrantedAuthorityName;
+import org.opendatakit.common.web.CallingContext;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.security.authentication.encoding.MessageDigestPasswordEncoder;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.GrantedAuthorityImpl;
@@ -46,9 +49,8 @@ public class UserServiceImpl implements org.opendatakit.common.security.UserServ
 	Datastore datastore;
 	Realm realm;
 	String superUserEmail;
+	String superUserUsername;
 	String userServiceKey;
-
-	String superUserUri = null;
 	
 	final Map<String, User> activeUsers = new HashMap<String, User>();
 	
@@ -100,13 +102,32 @@ public class UserServiceImpl implements org.opendatakit.common.security.UserServ
 		this.superUserEmail = superUserEmail;
 	}
 
+	public String getSuperUserUsername() {
+		return superUserUsername;
+	}
+
+	public void setSuperUserUsername(String superUserUsername) {
+		this.superUserUsername = superUserUsername;
+	}
+	
 	@Override
-	public synchronized String getSuperUserUri() throws ODKDatastoreException {
-		if ( superUserUri == null ) {
-			RegisteredUsersTable t = RegisteredUsersTable.assertSuperUser(this, datastore);
-			superUserUri = t.getUri();
+	public synchronized boolean isSuperUser(CallingContext cc) throws ODKDatastoreException {
+		MessageDigestPasswordEncoder mde = null;
+		try {
+			Object obj =  cc.getBean(SecurityBeanDefs.BASIC_AUTH_PASSWORD_ENCODER);
+			if ( obj != null ) {
+				mde = (MessageDigestPasswordEncoder) obj;
+			}
+		} catch ( Exception e ) {
+			mde = null;
 		}
-		return superUserUri;
+		List<RegisteredUsersTable> tList = RegisteredUsersTable.assertSuperUsers(this, mde, datastore);
+		
+		String uriUser = cc.getCurrentUser().getUriUser();
+		for ( RegisteredUsersTable t : tList ) {
+			if ( t.getUri().equals(uriUser) ) return true;
+		}
+		return false;
 	}
 	
 	@Override
@@ -136,7 +157,6 @@ public class UserServiceImpl implements org.opendatakit.common.security.UserServ
   @Override
   public synchronized void reloadPermissions() {
 	logger.info("Executing: reloadPermissions");
-	superUserUri = null;
 	activeUsers.clear();
   }
   

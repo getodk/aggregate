@@ -31,6 +31,7 @@ import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+import org.opendatakit.common.security.SecurityBeanDefs;
 import org.opendatakit.common.security.SecurityUtils;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.security.client.CredentialsInfo;
@@ -45,6 +46,7 @@ import org.opendatakit.common.security.spring.SecurityRevisionsTable;
 import org.opendatakit.common.security.spring.UserGrantedAuthority;
 import org.opendatakit.common.web.CallingContext;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
+import org.springframework.security.authentication.encoding.MessageDigestPasswordEncoder;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.GrantedAuthorityImpl;
 
@@ -102,18 +104,6 @@ public class SecurityServiceUtil {
 		List<String> ianonAttachmentViewerGrants = new ArrayList<String>();
 		ianonAttachmentViewerGrants.add(GrantedAuthorityName.ROLE_ATTACHMENT_VIEWER.name());
 		anonAttachmentViewerGrants = Collections.unmodifiableList(ianonAttachmentViewerGrants);
-	}
-
-	public static UserSecurityInfo getSuperUser(CallingContext cc) throws DatastoreFailureException {
-	    try {
-	    	RegisteredUsersTable t = RegisteredUsersTable.assertSuperUser(cc.getUserService(), cc.getDatastore());
-			UserSecurityInfo i = new UserSecurityInfo(t.getUsername(), t.getFullName(), t.getEmail(), 
-														UserSecurityInfo.UserType.REGISTERED);
-			return i;
-		} catch (ODKDatastoreException e) {
-			e.printStackTrace();
-			throw new DatastoreFailureException(e);
-		}
 	}
 	
 	/**
@@ -454,7 +444,7 @@ public class SecurityServiceUtil {
 	    User user = cc.getUserService().getCurrentUser();
 		RegisteredUsersTable userDefinition = null;
 		try {
-			userDefinition = RegisteredUsersTable.getUserByUsername(credential.getUsername(), cc);
+			userDefinition = RegisteredUsersTable.getUserByUsername(credential.getUsername(), cc.getUserService(), ds);
 			if ( userDefinition == null ) {
 				throw new AccessDeniedException("User is not a registered user.");
 			}
@@ -497,18 +487,31 @@ public class SecurityServiceUtil {
 	 */
 	public static final synchronized void superUserBootstrap(CallingContext cc) throws ODKDatastoreException {
 		// assert that the superuser exists...
-		RegisteredUsersTable su = RegisteredUsersTable.assertSuperUser(cc.getUserService(), cc.getDatastore());
-		
+		MessageDigestPasswordEncoder mde = null;
+		try {
+			Object obj =  cc.getBean(SecurityBeanDefs.BASIC_AUTH_PASSWORD_ENCODER);
+			if ( obj != null ) {
+				mde = (MessageDigestPasswordEncoder) obj;
+			}
+		} catch ( Exception e ) {
+			mde = null;
+		}
+		List<RegisteredUsersTable> suList = RegisteredUsersTable.assertSuperUsers(cc.getUserService(), mde, cc.getDatastore());
+
 		Set<String> uriUsers;
 		
 		// add the superuser to the list of site administrators
 		uriUsers = UserGrantedAuthority.getUriUsers(siteAuth, cc.getDatastore(), cc.getCurrentUser());
-		uriUsers.add(su.getUri());
+		for ( RegisteredUsersTable su : suList ) {
+			uriUsers.add(su.getUri());
+		}
 		UserGrantedAuthority.assertGrantedAuthorityMembers(siteAuth, uriUsers, cc);
 		
 		// assert that the superuser is the only one with permanent access administration rights...
 		uriUsers.clear();
-		uriUsers.add(su.getUri());
+		for ( RegisteredUsersTable su : suList ) {
+			uriUsers.add(su.getUri());
+		}
 		UserGrantedAuthority.assertGrantedAuthorityMembers(
 				new GrantedAuthorityImpl(GrantedAuthorityName.ROLE_SITE_ACCESS_ADMIN.name()), uriUsers, cc);
 	}
