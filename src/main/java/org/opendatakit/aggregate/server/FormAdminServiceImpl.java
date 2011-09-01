@@ -162,17 +162,11 @@ public class FormAdminServiceImpl extends RemoteServiceServlet implements
 
 	      // If the FormInfo table is the target, log an error!
 	      if (formToDelete != null) {
-	        if (!FormInfo.isFormInfoForm(formToDelete.getFormId())) {
-	          MiscTasks m = new MiscTasks(TaskType.DELETE_FORM, formToDelete, null, cc);
-	          m.persist(cc);
-	          CallingContext ccDaemon = ContextFactory.getCallingContext(this, req);
-	          ccDaemon.setAsDaemon(true);
-	          formDelete.createFormDeleteTask(formToDelete, m.getSubmissionKey(), 1L, ccDaemon);
-	        } else {
-	          String errString = "Attempting to delete FormInfo table definition record!";
-
-	          LogFactory.getLog(this.getClass()).error(errString);
-	        }
+	        MiscTasks m = new MiscTasks(TaskType.DELETE_FORM, formToDelete, null, cc);
+	        m.persist(cc);
+	        CallingContext ccDaemon = ContextFactory.getCallingContext(this, req);
+	        ccDaemon.setAsDaemon(true);
+	        formDelete.createFormDeleteTask(formToDelete, m.getSubmissionKey(), 1L, ccDaemon);
 	      }
 	    } catch (Exception e) {
 	      e.printStackTrace();

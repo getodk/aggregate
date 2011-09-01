@@ -70,7 +70,6 @@ private final String downloadRequestURL;
 
     // build XML table of form information
     for (Form form : forms) {
-    	if ( FormInfo.isFormInfoForm(form.getFormId())) continue;
     	if ( !form.getDownloadEnabled() ) continue;
 
     	idx = generateFormXmlEntry(d, e, idx, form);
