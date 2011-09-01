@@ -175,6 +175,7 @@ public class UserDetailsServiceImpl implements UserDetailsService, InitializingB
 					throw new AuthenticationCredentialsNotFoundException(
 							"Password type " + passwordType.toString() + " cannot be interpretted");
 				}
+				
 				grantedAuthorities = getGrantedAuthorities(t.getUri());
 				if ( password == null ) {
 					throw new AuthenticationCredentialsNotFoundException(
@@ -191,20 +192,13 @@ public class UserDetailsServiceImpl implements UserDetailsService, InitializingB
 				password = UUID.randomUUID().toString();
 				salt = UUID.randomUUID().toString();
 				
-				if ( name.equals(userService.getSuperUserEmail()) ) {
-					// it is the superUser ... cannot be disabled...
-					RegisteredUsersTable su = RegisteredUsersTable.assertSuperUser(userService, datastore);
-					grantedAuthorities = getGrantedAuthorities(su.getUri());
-					uriUser = su.getUri();
+				// try to find user in registered users table...
+				RegisteredUsersTable eUser = RegisteredUsersTable.getUniqueUserByEmail(name, datastore, user);
+				if ( eUser != null ) {
+					uriUser = eUser.getUri();
+					grantedAuthorities = getGrantedAuthorities(eUser.getUri());
 				} else {
-					// not the super-user -- try to find user in registered users table...
-					RegisteredUsersTable eUser = RegisteredUsersTable.getUniqueUserByEmail(name, datastore, user);
-					if ( eUser != null ) {
-						uriUser = eUser.getUri();
-						grantedAuthorities = getGrantedAuthorities(eUser.getUri());
-					} else {
-						throw new UsernameNotFoundException("User " + name + " is not registered");
-					}
+					throw new UsernameNotFoundException("User " + name + " is not registered");
 				}
 			}
 		} catch (ODKDatastoreException e) {

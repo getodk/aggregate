@@ -92,7 +92,7 @@ public class AggregateHtmlServlet extends ServletUtilBase {
 		
 		boolean isSuperUser = false;
 		try {
-			isSuperUser = user.getUriUser().equals(userService.getSuperUserUri());
+			isSuperUser = userService.isSuperUser(cc);
 		} catch ( ODKDatastoreException e ) {
 			e.printStackTrace();
 		}
