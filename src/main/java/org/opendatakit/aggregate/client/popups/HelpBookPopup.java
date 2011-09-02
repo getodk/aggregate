@@ -1,41 +1,31 @@
 package org.opendatakit.aggregate.client.popups;
 
-import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.widgets.ClosePopupButton;
-import org.opendatakit.aggregate.constants.common.Tabs;
+import org.opendatakit.aggregate.constants.common.BookHelpConsts;
 
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.DecoratedTabPanel;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class HelpBookPopup extends PopupPanel {
 	private VerticalPanel panel;
-	private DecoratedTabPanel items;
-	private SubmissionHelpTabUI submission;
-	private ManagementHelpTabUI management;
-	private AdminHelpTabUI siteadmin;
 
 	public HelpBookPopup() {
 		super(false);
 		panel = new VerticalPanel();
-		items = new DecoratedTabPanel();
-		submission = new SubmissionHelpTabUI();
-		management = new ManagementHelpTabUI();
-		siteadmin = new AdminHelpTabUI();
 
 		// populate the panel
 		panel.add(new ClosePopupButton(this));
-		panel.add(items);
-		items.add(submission, Tabs.SUBMISSIONS.getTabLabel());
-		if(AggregateUI.manageVisible) {
-			items.add(management, Tabs.MANAGEMENT.getTabLabel());
+
+		BookHelpConsts[] consts = BookHelpConsts.values();
+		
+		for(int i = 0; i < consts.length; i++) {
+			panel.add(new HTML("<b>" + consts[i].getTitle() + "</b>"));
+			panel.add(new HTML(consts[i].getConcept() + "<br><br>"));
+			panel.add(new HTML(consts[i].getProcedures() + "<br><br>"));
 		}
-		if(AggregateUI.adminVisible) {
-			items.add(siteadmin, Tabs.ADMIN.getTabLabel());
-		}
-		items.selectTab(0);
 
 		ScrollPanel scroll = new ScrollPanel(panel);
 		scroll.setPixelSize((Window.getClientWidth() / 2),(Window.getClientHeight() / 2));
