@@ -25,6 +25,8 @@ import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.EntityKey;
 import org.opendatakit.common.persistence.Query;
+import org.opendatakit.common.persistence.QueryResult;
+import org.opendatakit.common.persistence.QueryResumePoint;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.security.User;
 import org.springframework.jdbc.core.RowMapper;
@@ -237,4 +239,11 @@ public class QueryImpl implements Query {
 		}
 		return keySet;
 	}
+
+	@Override
+	public QueryResult executeQuery(QueryResumePoint startCursor, int fetchLimit)
+			throws ODKDatastoreException {
+		throw new IllegalStateException("unimplemented");
+	}
+
 }

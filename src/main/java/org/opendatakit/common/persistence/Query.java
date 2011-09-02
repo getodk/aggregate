@@ -85,8 +85,18 @@ public interface Query {
   public List<? extends CommonFieldsBase> executeQuery(int fetchLimit) throws ODKDatastoreException;
 
   /**
+   * Returns a list of entities which are the results of executing the query.
+   * 
+   * @param startCursor -- the cursor at which to start (null if new query)
+   * @param fetchLimit -- number of records to fetch
+   * @return
+   * @throws ODKDatastoreException
+   */
+  public QueryResult executeQuery(QueryResumePoint startCursor, int fetchLimit) throws ODKDatastoreException;
+  
+  /**
    * Returns a list of distinct EntityKeys of the topLevelAuri for the set of records
-   * returned by the query.
+   * returned by the query.  This should always be an empty or singleton set.
    * 
    * @param topLevelTable - the relation that the topLevelAuri corresponds to.
    * @param foreignKeyField - the topLevelAuri DataField in the table being queried.

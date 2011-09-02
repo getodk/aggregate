@@ -30,8 +30,11 @@ import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.DataField.DataType;
 import org.opendatakit.common.persistence.EntityKey;
+import org.opendatakit.common.persistence.QueryResult;
+import org.opendatakit.common.persistence.QueryResumePoint;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.security.User;
+import org.opendatakit.common.utils.WebUtils;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.FetchOptions;
@@ -310,11 +313,75 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
 		sortList.add(new SortTracker(attribute, direction));
 	}
 
-	private List<CommonFieldsBase> coreExecuteQuery(int fetchLimit) throws ODKDatastoreException {
+	private List<CommonFieldsBase> coreExecuteQuery(QueryResumePoint startCursor, int fetchLimit) throws ODKDatastoreException {
 		List<CommonFieldsBase> odkEntities = new ArrayList<CommonFieldsBase>();
 
 		DatastoreService ds = datastore.getDatastoreService();
 		List<com.google.appengine.api.datastore.Entity> gaeEntities = null;
+		
+		if ( startCursor != null ) {
+			DataField t = null;
+			for ( DataField d : relation.getFieldList() ) {
+				if ( d.getName().equals( startCursor.getAttributeName() ) ) {
+					t = d;
+					break;
+				}
+			}
+			if ( t == null ) {
+				throw new IllegalStateException("unable to find the matching attribute name");
+			}
+			Object value;
+			String v = startCursor.getValue();
+			switch ( t.getDataType() ) {
+			case BINARY: throw new IllegalStateException("cannot sort on a binary field");
+			case LONG_STRING: throw new IllegalStateException("cannot sort on a long text field");
+			case URI:
+			case STRING: {
+				value = startCursor.getValue(); 
+				break;
+			}
+			case INTEGER: {
+				if ( v == null ) {
+					value = null;
+				} else {
+					value = Long.valueOf(v);
+				}
+				break;
+			}
+			case DECIMAL: {
+				if ( v == null ) {
+					value = null;
+				} else {
+					value = new BigDecimal(v);
+				}
+				break;
+			}
+			case BOOLEAN: {
+				if ( v == null ) {
+					value = null;
+				} else {
+					value = WebUtils.parseBoolean(v);
+				}
+				break;
+			}
+			case DATETIME: {
+				if ( v == null ) {
+					value = null;
+				} else {
+					value = WebUtils.parseDate(v);
+				}
+				break;
+			}
+			default:
+				throw new IllegalStateException("datatype not handled");
+			}
+
+			addFilter( t, startCursor.getOp(), value);
+		}
+		
+		// regardless, always order by PK ascending...
+		addSort( relation.primaryKey, Direction.ASCENDING);
+		
 		/**
 		 * GAE 1.4.2 has changed the way it handles indices so that the actual
 		 * query construction (prepareQuery) no longer throws a 
@@ -387,11 +454,30 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
 				Collections.sort(odkEntities, t);
 			}
 			
+			// process the list...
+			List<CommonFieldsBase> finalEntities;
+			if ( startCursor != null ) {
+				finalEntities = new ArrayList<CommonFieldsBase>();
+				boolean beforeUri = true;
+				for ( CommonFieldsBase cb : odkEntities ) {
+					if ( beforeUri ) {
+						if ( startCursor.getUriLastReturnedValue().equals(cb.getUri()) ) {
+							beforeUri = false;
+						}
+					} else {
+						finalEntities.add(cb);
+					}
+				}
+			} else {
+				finalEntities = odkEntities;
+			}
+			
 			if (fetchLimit != 0 ) {
-				while ( odkEntities.size() > fetchLimit ) {
-					odkEntities.remove(odkEntities.size()-1);
+				while ( finalEntities.size() > fetchLimit ) {
+					finalEntities.remove(finalEntities.size()-1);
 				}
 			}
+			odkEntities = finalEntities;
 		}
 		
 		return odkEntities;
@@ -400,7 +486,75 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
 	@Override
 	public List<? extends CommonFieldsBase> executeQuery(int fetchLimit)
 			throws ODKDatastoreException {
-		return coreExecuteQuery(fetchLimit);
+		return coreExecuteQuery(null, fetchLimit);
+	}
+
+	@Override
+	public QueryResult executeQuery(
+			QueryResumePoint startCursor, int fetchLimit)
+			throws ODKDatastoreException {
+		List<? extends CommonFieldsBase> results = coreExecuteQuery(startCursor, fetchLimit);
+		if ( results.isEmpty() ) {
+			return new QueryResult( startCursor, results, startCursor );
+		}
+		CommonFieldsBase cb = results.get(results.size()-1);
+		SortTracker t = sortList.get(0);
+		QueryResumePoint resumeCursor;
+		String value;
+		switch ( t.getAttribute().getDataType() ) {
+		case BINARY: throw new IllegalStateException("cannot sort on a binary field");
+		case LONG_STRING: throw new IllegalStateException("cannot sort on a long text field");
+		case URI:
+		case STRING: {
+			value = cb.getStringField(t.getAttribute()); 
+			break;
+		}
+		case INTEGER: {
+			Long l = cb.getLongField(t.getAttribute());
+			if ( l == null ) {
+				value = null;
+			} else {
+				value = Long.toString(l);
+			}
+			break;
+		}
+		case DECIMAL: {
+			BigDecimal bd = cb.getNumericField(t.getAttribute());
+			if ( bd == null ) {
+				value = null;
+			} else {
+				value = bd.toString();
+			}
+			break;
+		}
+		case BOOLEAN: {
+			Boolean b = cb.getBooleanField(t.getAttribute());
+			if ( b == null ) {
+				value = null;
+			} else {
+				value = b.toString();
+			}
+			break;
+		}
+		case DATETIME: {
+			Date d = cb.getDateField(t.getAttribute());
+			if ( d == null ) {
+				value = null;
+			} else {
+				value = WebUtils.iso8601Date(d);
+			}
+			break;
+		}
+		default:
+			throw new IllegalStateException("datatype not handled");
+		}
+		
+		if (t.direction == org.opendatakit.common.persistence.Query.Direction.ASCENDING ) {
+			resumeCursor = new QueryResumePoint( t.getAttribute().toString(), FilterOperation.GREATER_THAN_OR_EQUAL, value, cb.getUri());
+		} else {
+			resumeCursor = new QueryResumePoint( t.getAttribute().toString(), FilterOperation.LESS_THAN_OR_EQUAL, value, cb.getUri());
+		}
+		return new QueryResult( startCursor, results, resumeCursor );
 	}
 
 	@Override
@@ -410,7 +564,7 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
 
 		Set<EntityKey> keySet = new HashSet<EntityKey>();
 
-		List<? extends CommonFieldsBase> entities = coreExecuteQuery(0);
+		List<? extends CommonFieldsBase> entities = coreExecuteQuery(null, 0);
 		for ( CommonFieldsBase entity : entities ) {
 			keySet.add( new EntityKey( topLevelTable, entity.getStringField(topLevelAuri)));
 		}
@@ -421,7 +575,7 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
 	public List<?> executeDistinctValueForDataField(DataField dataField) throws ODKDatastoreException {
 		Set<Object> valueList = new HashSet<Object>();
 
-		List<? extends CommonFieldsBase> entities = coreExecuteQuery(0);
+		List<? extends CommonFieldsBase> entities = coreExecuteQuery(null, 0);
 		for ( CommonFieldsBase entity : entities ) {
 			switch ( dataField.getDataType() ) {
 			case BINARY:
