@@ -54,7 +54,7 @@ public class SubmissionTable extends FlexTable {
       setHTML(0, headerIndex++, BLANK_VALUE);
     }
     for (Column column : tableHeaders) {
-      setText(0, headerIndex++, column.getDisplayHeader());
+      setText(0, headerIndex++, column.getDisplayHeader().replace(":", "\n"));
     }
     setHTML(0, headerIndex, BLANK_VALUE);
     setColumnFormatter(new HTMLTable.ColumnFormatter());
