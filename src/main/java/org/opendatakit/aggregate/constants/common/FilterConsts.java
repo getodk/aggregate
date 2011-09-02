@@ -2,11 +2,6 @@ package org.opendatakit.aggregate.constants.common;
 
 
 public enum FilterConsts implements HelpSliderConsts {
-	FETCH("Fetch Form with Filter", "This allows you to view the data for a form, " +
-			"or the part of the data you wish to view using a filter.<br>" +
-			"1.  Use the left drop down list to select a form.<br>" +
-			"2.  Use the right drop down list to select a filter. (optional)<br>" +
-	"3.  Press the button."),
 	ADD("Add Filter", "This adds a filter to the data.  Unless you save it, it will be temporary.<br>" +
 			"1.  Display/Hide - Will you be selecting data to show or hide?<br>" +
 			"2.  Rows/Columns - Choose whether you will be working with the rows or columns of the table.<br>" +
@@ -20,7 +15,7 @@ public enum FilterConsts implements HelpSliderConsts {
 	SAVE("Save", "This will save a filter for future use.  You must have at least one filter in order to save.<br>" +
 			"1.  Please fill in the desired name.<br>" +
 	"2.  Press \"OK\"."),
-	VISUALIZE("Visualize", "This feature allows you to view some of your data in a pie chard, bar graph, or a map.<br>" +
+	VISUALIZE("Visualize", "This feature allows you to view some of your data in a pie chart, bar graph, or a map.<br>" +
 			"1.  Choose whether you want to view a Pie Chart, Bar Graph, or a Map.<br>" +
 			"2a.  If you choose Pie Chart:<br>" +
 			"	a.  Select the column that you want to work with on the x axis.<br>" +

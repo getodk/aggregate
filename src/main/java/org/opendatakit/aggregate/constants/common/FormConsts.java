@@ -13,7 +13,7 @@ public enum FormConsts implements HelpSliderConsts{
 			"2.  Form Id - This is the unique name for the form.<br>" +
 			"3.  Media Files - This displays the count of media files you have uploaded for the form.<br>" +
 			"4.  User - This is the user who uploaded the form.<br>" +
-			"5.  Downloadable - This enables/disables the Aggregate from displayin the form to remote clients so that they can download the " +
+			"5.  Downloadable - This enables/disables the Aggregate from displaying the form to remote clients so that they can download the " +
 			"form<br>" +
 			"6.  Accept Submissions - This enables/disables Aggregate ability to accept submissions for the particular form. This is helpful " +
 	"if you want to prevent users from submitting more data."),
