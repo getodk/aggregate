@@ -250,7 +250,7 @@ public final class GrantedAuthorityHierarchyTable extends CommonFieldsBase {
 				} else if ( roles.contains(authority) ) {
 					roles.remove(authority);
 				} else {
-					deleted.add(new EntityKey(t, t.getUri()));
+					deleted.add(t.getEntityKey());
 				}
 			}
 			// we now have the list of groups and roles to insert, and the list of 

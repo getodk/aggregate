@@ -32,7 +32,6 @@ import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.DataField.IndexType;
 import org.opendatakit.common.persistence.Datastore;
-import org.opendatakit.common.persistence.EntityKey;
 import org.opendatakit.common.persistence.PersistConsts;
 import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
@@ -233,10 +232,10 @@ public class SubmissionFilter extends CommonFieldsBase {
     
     if(colFilters != null) {
       for(SubmissionColumnFilter filter : colFilters){
-        ds.deleteEntity(new EntityKey(filter, filter.getUri()), user);
+        ds.deleteEntity(filter.getEntityKey(), user);
       }
     }    
-    ds.deleteEntity(new EntityKey(this, this.getUri()), user);
+    ds.deleteEntity(getEntityKey(), user);
   }
   
   public Filter transform() {

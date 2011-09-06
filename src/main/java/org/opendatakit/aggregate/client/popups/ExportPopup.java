@@ -18,33 +18,35 @@ package org.opendatakit.aggregate.client.popups;
 
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.SecureGWT;
-import org.opendatakit.aggregate.client.form.KmlSettingOption;
 import org.opendatakit.aggregate.client.form.KmlSettings;
 import org.opendatakit.aggregate.client.widgets.ClosePopupButton;
 import org.opendatakit.aggregate.client.widgets.CreateExportButton;
+import org.opendatakit.aggregate.client.widgets.FileTypeListBox;
+import org.opendatakit.aggregate.client.widgets.KmlSettingListBox;
 import org.opendatakit.aggregate.constants.common.ExportType;
 import org.opendatakit.aggregate.constants.common.SubTabs;
 
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.PopupPanel;
 
 public class ExportPopup extends PopupPanel {
 
+  private static final String GEOPOINT_TOOLTIP = "Geopoint field to map";
+  private static final String BINARY_TOOLTIP = "Binary field to display";
+  private static final String TITLE_TOOLTIP = "Field to use as Title";
+  
   private boolean gotKmlOptions = false;
   private FlexTable layout;
-  private ListBox fileType;
+  private FileTypeListBox fileType;
 
   private String formId;
 
-  private ListBox geoPointsDropDown;
-  private ListBox titleFieldsDropDown;
-  private ListBox binaryFieldsDropDown;
+  private KmlSettingListBox geoPointsDropDown;
+  private KmlSettingListBox titleFieldsDropDown;
+  private KmlSettingListBox binaryFieldsDropDown;
 
   private CreateExportButton exportButton;
 
@@ -54,24 +56,14 @@ public class ExportPopup extends PopupPanel {
 
     layout = new FlexTable();
 
-    geoPointsDropDown = new ListBox();
-    titleFieldsDropDown = new ListBox();
-    binaryFieldsDropDown = new ListBox();
+    geoPointsDropDown = new KmlSettingListBox(GEOPOINT_TOOLTIP);
+    titleFieldsDropDown = new KmlSettingListBox(TITLE_TOOLTIP);
+    binaryFieldsDropDown = new KmlSettingListBox(BINARY_TOOLTIP);
 
     exportButton = new CreateExportButton(this);
+    fileType = new FileTypeListBox(this);
 
-    fileType = new ListBox();
-    fileType.addChangeHandler(new ChangeHandler() {
-      @Override
-      public void onChange(ChangeEvent event) {
-        updateUIOptions();
-      }
-    });
-
-    for (ExportType eT : ExportType.values()) {
-      fileType.addItem(eT.getDisplayText(), eT.name());
-    }
-
+ 
     SecureGWT.getFormService().getPossibleKmlSettings(formId, new KmlSettingsCallback());
 
     layout.setWidget(0, 0, new ClosePopupButton(this));
@@ -110,19 +102,32 @@ public class ExportPopup extends PopupPanel {
     layout.getRowFormatter().setStyleName(1, "disabledTableRow");
   }
 
-  private void updateUIOptions() {
-    ExportType type = ExportType.valueOf(fileType.getValue(fileType.getSelectedIndex()));
-    if (type.equals(ExportType.KML)) {
+  public void updateUIOptions() {
+    ExportType type = fileType.getExportType();
+
+    if (type == null) {
+      exportButton.setEnabled(false);
+      disableKmlOptions();
+      return;
+    }
+
+    switch (type) {
+    case KML:
       if (gotKmlOptions) {
         exportButton.setEnabled(true);
       } else {
         exportButton.setEnabled(false);
       }
       enableKmlOptions();
-
-    } else {
+      break;
+    case CSV:
       exportButton.setEnabled(true);
       disableKmlOptions();
+      break;
+    default: // unknown type
+      exportButton.setEnabled(false);
+      disableKmlOptions();
+      break;
     }
   }
 
@@ -130,31 +135,11 @@ public class ExportPopup extends PopupPanel {
     ExportType type = ExportType.valueOf(fileType.getValue(fileType.getSelectedIndex()));
 
     if (type.equals(ExportType.CSV)) {
-      SecureGWT.getFormService().createCsv(formId, new CreateExportCallback());
+      SecureGWT.getFormService().createCsv(formId, null, new CreateExportCallback());
     } else { // .equals(ExportType.KML.toString())
-      
-      int geoPointIndex = geoPointsDropDown.getSelectedIndex();
-      int titleIndex = titleFieldsDropDown.getSelectedIndex();
-      int binaryIndex = binaryFieldsDropDown.getSelectedIndex();
-
-      int geoPointSize = geoPointsDropDown.getItemCount();
-      int titleSize = titleFieldsDropDown.getItemCount();
-      int binarySize = binaryFieldsDropDown.getItemCount();
-      
-      String geoPointValue = null;
-      if(geoPointSize > geoPointIndex && geoPointSize > 0) {
-        geoPointValue = geoPointsDropDown.getValue(geoPointIndex);
-      }
-      
-      String titleValue = null;
-      if(titleSize > titleIndex  && titleSize > 0) {
-        titleValue = titleFieldsDropDown.getValue(titleIndex);
-      }
-      
-      String binaryValue = null;
-      if(binarySize > binaryIndex && binarySize > 0) {
-        binaryFieldsDropDown.getValue(binaryIndex);
-      }
+      String geoPointValue = geoPointsDropDown.getElementKey();     
+      String titleValue = titleFieldsDropDown.getElementKey();     
+      String binaryValue = binaryFieldsDropDown.getElementKey();
       
       SecureGWT.getFormService().createKml(formId, geoPointValue,
           titleValue, binaryValue, new CreateExportCallback());
@@ -188,12 +173,9 @@ public class ExportPopup extends PopupPanel {
     @Override
     public void onSuccess(KmlSettings result) {
       gotKmlOptions = true;
-      for (KmlSettingOption kSO : result.getGeopointNodes())
-        geoPointsDropDown.addItem(kSO.getDisplayName(), kSO.getElementKey());
-      for (KmlSettingOption kSO : result.getTitleNodes())
-        titleFieldsDropDown.addItem(kSO.getDisplayName(), kSO.getElementKey());
-      for (KmlSettingOption kSO : result.getBinaryNodes())
-        binaryFieldsDropDown.addItem(kSO.getDisplayName(), kSO.getElementKey());
+      geoPointsDropDown.updateValues(result.getGeopointNodes());
+      titleFieldsDropDown.updateValues(result.getTitleNodes());
+      binaryFieldsDropDown.updateValues(result.getBinaryNodes());
     }
   }
   

@@ -59,4 +59,6 @@ public final class FusionTableConsts {
     typeMap.put(ElementType.GROUP, FusionTableType.STRING);
     typeMap.put(ElementType.METADATA, FusionTableType.STRING);
   }
+  public static final int SOCKET_ESTABLISHMENT_TIMEOUT_MILLISECONDS = 30000;
+  public static final int SERVICE_TIMEOUT_MILLISECONDS = 30000;
 }

@@ -31,7 +31,6 @@ import org.opendatakit.aggregate.submission.SubmissionKeyPart;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.Datastore;
-import org.opendatakit.common.persistence.EntityKey;
 import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.persistence.Query.FilterOperation;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
@@ -272,7 +271,7 @@ public class MiscTasks {
 	public void delete(CallingContext cc) throws ODKDatastoreException {
 		Datastore ds = cc.getDatastore();
 		User user = cc.getCurrentUser();
-		ds.deleteEntity(new EntityKey(row, row.getUri()), user);
+		ds.deleteEntity(row.getEntityKey(), user);
 	}
 	
 	public SubmissionKey getSubmissionKey() {

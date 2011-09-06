@@ -26,7 +26,7 @@ public interface FormServiceAsync {
 
   void getExports(AsyncCallback<ArrayList<ExportSummary>> callback);
 
-  void createCsv(String formId, AsyncCallback<Boolean> callback);
+  void createCsv(String formId, String filterUri, AsyncCallback<Boolean> callback);
 
   void getPossibleKmlSettings(String formId, AsyncCallback<KmlSettings> callback);
 

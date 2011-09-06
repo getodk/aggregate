@@ -174,10 +174,10 @@ public class BinaryContentManipulator {
 
       public void recursivelyAddKeys(List<EntityKey> keyList) {
          for (BinaryContentRefBlob e : dbBcbEntityList) {
-            keyList.add(new EntityKey(e, e.getUri()));
+            keyList.add(e.getEntityKey());
          }
          for (RefBlob r : dbRefBlobList) {
-            keyList.add(new EntityKey(r, r.getUri()));
+            keyList.add(r.getEntityKey());
          }
       }
 
@@ -491,7 +491,7 @@ public class BinaryContentManipulator {
     		 BlobManipulator b = new BlobManipulator(bc.getUri(), vrefRelation, blbRelation, cc);
     		 b.recursivelyAddKeys(keyList);
     	 }
-         keyList.add(new EntityKey(bc, bc.getUri()));
+         keyList.add(bc.getEntityKey());
       }
    }
 
