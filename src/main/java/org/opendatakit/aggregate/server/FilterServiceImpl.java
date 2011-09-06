@@ -52,7 +52,7 @@ public class FilterServiceImpl extends RemoteServiceServlet implements FilterSer
       throw new FormNotAvailableException(e1);
     }
     
-    FilterSet filterSet = new FilterSet();
+    FilterSet filterSet = new FilterSet(formId);
     
     try {
       List<SubmissionFilterGroup> filterGroupList = SubmissionFilterGroup.getFilterGroupList(formId, cc);

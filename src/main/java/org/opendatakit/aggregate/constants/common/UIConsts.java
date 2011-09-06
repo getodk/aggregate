@@ -31,6 +31,8 @@ public class UIConsts {
 
   public static final String SUBMISSION_SERVLET_ADDR = "submission";
 
+  public static final String NO_FORM = "none";
+
   // running locally
  // public static final String GOOGLE_MAP_KEY = "";
   

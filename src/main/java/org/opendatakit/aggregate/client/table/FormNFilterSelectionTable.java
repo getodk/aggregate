@@ -21,11 +21,12 @@ import java.util.ArrayList;
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.FilterSubTab;
 import org.opendatakit.aggregate.client.SecureGWT;
-import org.opendatakit.aggregate.client.UIUtils;
 import org.opendatakit.aggregate.client.exception.FormNotAvailableException;
 import org.opendatakit.aggregate.client.filter.FilterGroup;
 import org.opendatakit.aggregate.client.filter.FilterSet;
 import org.opendatakit.aggregate.client.form.FormSummary;
+import org.opendatakit.aggregate.client.widgets.FilterListBox;
+import org.opendatakit.aggregate.client.widgets.FormListBox;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
@@ -37,22 +38,18 @@ import com.google.gwt.user.client.ui.ListBox;
 
 public class FormNFilterSelectionTable extends FlexTable {
   // ui elements
-  private ListBox formsBox;
-  private ListBox filtersBox;
+  private FormListBox formsBox;
+  private FilterListBox filtersBox;
   private FilterSubTab filterSubTab;
 
   // state
-  private ArrayList<FormSummary> displayedFormList;
   private FormSummary selectedForm;
-  private ArrayList<FilterGroup> displayedFilterList;
 
   public FormNFilterSelectionTable(FilterSubTab filterSubTab) {
     this.filterSubTab = filterSubTab;
 
-    formsBox = new ListBox();
-    formsBox.addChangeHandler(new FormChangeDropDownHandler());
-    filtersBox = new ListBox();
-    filtersBox.addChangeHandler(new FilterChangeDropDownHandler());
+    formsBox = new FormListBox(new FormChangeDropDownHandler());
+    filtersBox = new FilterListBox(new FilterChangeDropDownHandler());
 
     getElement().setId("form_and_goal_selection");
     setHTML(0, 0, "<h2 id=\"form_name\"> Form </h2>");
@@ -76,11 +73,10 @@ public class FormNFilterSelectionTable extends FlexTable {
         AggregateUI.getUI().clearError();
         
         // setup the display with the latest updates
-        // update the class state with the updated form list
-        displayedFormList = UIUtils.updateFormDropDown(formsBox, displayedFormList, formsFromService);
+        formsBox.updateFormDropDown(formsFromService);
         
         // update the class state with the currently displayed form
-        selectedForm = UIUtils.getFormFromSelection(formsBox, displayedFormList);
+        selectedForm = formsBox.getSelectedForm();
         
         updateFilterList();
       }
@@ -107,8 +103,8 @@ public class FormNFilterSelectionTable extends FlexTable {
         AggregateUI.getUI().clearError();
 
         // updates the filter dropdown and sets the class state to the newly created filter list
-        displayedFilterList = UIUtils.updateFilterDropDown(filtersBox, selectedForm, displayedFilterList, filterSet);
-        
+        filtersBox.updateFilterDropDown(filterSet);
+         
         // once the update filter completes update what is being displayed
         updateSelectedFormNFilter();
       }
@@ -125,8 +121,8 @@ public class FormNFilterSelectionTable extends FlexTable {
   }
 
   private void updateSelectedFormNFilter() {
-    FormSummary form = UIUtils.getFormFromSelection(formsBox, displayedFormList);
-    FilterGroup filterGroup = UIUtils.getFilterFromSelection(filtersBox, displayedFilterList);
+    FormSummary form = formsBox.getSelectedForm();
+    FilterGroup filterGroup = filtersBox.getSelectedFilter();
   
     // verify a form and filter group exist
     if(form == null || filterGroup == null) {
@@ -144,7 +140,7 @@ public class FormNFilterSelectionTable extends FlexTable {
     @Override
     public void onChange(ChangeEvent event) {
       AggregateUI.getUI().getTimer().restartTimer();
-      FormSummary form = UIUtils.getFormFromSelection(formsBox, displayedFormList);
+      FormSummary form = formsBox.getSelectedForm();
       if(form != null) {
         selectedForm = form;
       }
