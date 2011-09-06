@@ -31,7 +31,6 @@ import org.opendatakit.aggregate.submission.SubmissionKeyPart;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.Datastore;
-import org.opendatakit.common.persistence.EntityKey;
 import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.persistence.Query.FilterOperation;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;

@@ -22,6 +22,10 @@ public class FilterListBox extends AbstractListBox {
     addChangeHandler(handler);
   }
   
+  public ArrayList<FilterGroup> getDisplayedFilterList() {
+    return displayedFilterList;
+  }
+  
   public void updateFilterDropDown(FilterSet filterSet) {
     FilterGroup currentFilterSelected = getSelectedFilter();
     FilterGroup defaultFilterGroup = new FilterGroup(UIConsts.FILTER_NONE, filterSet.getFormId(), null);
