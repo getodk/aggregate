@@ -20,6 +20,7 @@ import java.util.List;
 import org.opendatakit.aggregate.constants.common.ExternalServicePublicationOption;
 import org.opendatakit.aggregate.constants.common.OperationalStatus;
 import org.opendatakit.aggregate.constants.externalservice.ExternalServiceType;
+import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
@@ -235,8 +236,9 @@ public final class FormServiceCursor extends CommonFieldsBase {
     }
   }
   
-  public ExternalService getExternalService(CallingContext cc) throws ODKEntityNotFoundException {
-    return getExternalServiceType().constructExternalService(this, cc);
+  public ExternalService getExternalService(CallingContext cc) throws ODKEntityNotFoundException, ODKFormNotFoundException {
+    Form form = Form.retrieveFormByFormId(getFormId(), cc);
+    return getExternalServiceType().constructExternalService(this, form, cc);
   }
   
   private static FormServiceCursor relation = null;
@@ -284,7 +286,7 @@ public final class FormServiceCursor extends CommonFieldsBase {
       FormServiceCursor c = (FormServiceCursor) cb;
       ExternalService obj;
 
-      obj = c.getExternalServiceType().constructExternalService(c, cc);
+      obj = c.getExternalServiceType().constructExternalService(c, form, cc);
       esList.add(obj);
 
     }

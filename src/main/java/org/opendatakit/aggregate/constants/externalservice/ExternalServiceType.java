@@ -20,6 +20,7 @@ import org.opendatakit.aggregate.externalservice.FormServiceCursor;
 import org.opendatakit.aggregate.externalservice.FusionTable;
 import org.opendatakit.aggregate.externalservice.GoogleSpreadsheet;
 import org.opendatakit.aggregate.externalservice.JsonServer;
+import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.web.CallingContext;
 
@@ -56,16 +57,16 @@ public enum ExternalServiceType {
     return serviceName;
   }
 
-  public ExternalService constructExternalService(FormServiceCursor fsc, CallingContext cc)
+  public ExternalService constructExternalService(FormServiceCursor fsc, Form form, CallingContext cc)
   			throws ODKEntityNotFoundException {
     try {
       switch (this) {
       case GOOGLE_FUSIONTABLES:
-        return new FusionTable(fsc, cc);
+        return new FusionTable(fsc, form, cc);
       case GOOGLE_SPREADSHEET:
-        return new GoogleSpreadsheet(fsc, cc);
+        return new GoogleSpreadsheet(fsc, form, cc);
       case JSON_SERVER:
-        return new JsonServer(fsc, cc);
+        return new JsonServer(fsc, form, cc);
       default:
         return null;
       }

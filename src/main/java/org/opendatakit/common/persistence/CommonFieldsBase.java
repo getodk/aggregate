@@ -121,6 +121,10 @@ public abstract class CommonFieldsBase {
 		fieldValueMap.put(primaryKey, CommonFieldsBase.newUri());
 	}
 
+	public final EntityKey getEntityKey() {
+	  return new EntityKey(this, getUri());
+	}
+	
 	public final String getSchemaName() {
 		return schemaName;
 	}
