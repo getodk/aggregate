@@ -16,6 +16,7 @@
 
 package org.opendatakit.aggregate.client.widgets;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.opendatakit.aggregate.client.AggregateUI;
@@ -30,7 +31,6 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.ListBox;
 
 public class SaveFilterGroupButton extends AbstractButtonBase implements ClickHandler {
 
@@ -70,10 +70,10 @@ public class SaveFilterGroupButton extends AbstractButtonBase implements ClickHa
 			boolean match = false;
 			String newFilterName = Window.prompt(PROMPT_FOR_NAME_TXT, EMPTY_STRING);
 			while (true) {
-				ListBox filtersBox = parentSubTab.getListOfPossibleFilterGroups();
+			  ArrayList<FilterGroup> currentFilters = parentSubTab.getListOfPossibleFilterGroups();
 				if (newFilterName != null ) {
-					for (int i = 0; i < filtersBox.getItemCount(); i++) {
-						if ((filtersBox.getValue(i)).equals(newFilterName)) {
+					for (FilterGroup filter : currentFilters) {
+						if (filter.getName().equals(newFilterName)) {
 							match = true;
 						}
 					}

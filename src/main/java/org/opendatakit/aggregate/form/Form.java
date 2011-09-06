@@ -229,8 +229,8 @@ public class Form {
 
 		manifest.deleteAll(cc);
 		xform.deleteAll(cc);
-		ds.deleteEntity(new EntityKey(filesetRow, filesetRow.getUri()), user);
-		ds.deleteEntity(new EntityKey(infoRow, infoRow.getUri()), user);
+		ds.deleteEntity(filesetRow.getEntityKey(), user);
+		ds.deleteEntity(infoRow.getEntityKey(), user);
 	}
 
 	/**
@@ -239,7 +239,7 @@ public class Form {
 	 * @return datastore key
 	 */
 	public EntityKey getEntityKey() {
-		return new EntityKey(infoRow, infoRow.getUri());
+		return infoRow.getEntityKey();
 	}
 
 	public SubmissionKey getSubmissionKey() {
@@ -808,7 +808,7 @@ public class Form {
 	}
 
 	public EntityKey getKey() {
-		return new EntityKey(infoRow, infoRow.getUri());
+		return infoRow.getEntityKey();
 	}
 
 	private static final boolean sameVersion(Long rootModel, Long rootUi,

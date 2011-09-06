@@ -145,7 +145,7 @@ public class FormServiceImpl extends RemoteServiceServlet implements
   }
 
   @Override
-  public Boolean createCsv(String formId) {
+  public Boolean createCsv(String formId, String filterUri) {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
 

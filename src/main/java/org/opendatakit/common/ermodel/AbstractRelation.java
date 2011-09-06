@@ -323,7 +323,7 @@ public class AbstractRelation implements Relation {
 		List<EntityKey> keys = new ArrayList<EntityKey>();
 		for ( Entity e : eList ) {
 			EntityImpl ei = verifyEntityType(e);
-			keys.add(new EntityKey(ei.backingObject, ei.backingObject.getUri()));
+			keys.add(ei.backingObject.getEntityKey());
 		}
 		ds.deleteEntities(keys, user);
 	}
@@ -617,8 +617,7 @@ public class AbstractRelation implements Relation {
 			Datastore ds = cc.getDatastore();
 			User user = cc.getCurrentUser();
 			
-			ds.deleteEntity(new EntityKey( backingObject, 
-										   backingObject.getUri()), user);
+			ds.deleteEntity(backingObject.getEntityKey(), user);
 		}
 
 		/** the actual persistence layer object holding the data values */

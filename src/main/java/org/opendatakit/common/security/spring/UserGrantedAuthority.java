@@ -190,7 +190,7 @@ public final class UserGrantedAuthority extends CommonFieldsBase {
 				if ( desiredMembers.contains(uriUser) ) {
 					desiredMembers.remove(uriUser);
 				} else {
-					deleted.add(new EntityKey(t, t.getUri()));
+					deleted.add(t.getEntityKey());
 				}
 			}
 			// we now have the list of desiredMembers to insert, and the list of 
@@ -242,7 +242,7 @@ public final class UserGrantedAuthority extends CommonFieldsBase {
 				if ( desiredGroups.contains(groupName) ) {
 					desiredGroups.remove(groupName);
 				} else {
-					deleted.add(new EntityKey(t, t.getUri()));
+					deleted.add(t.getEntityKey());
 				}
 			}
 			// we now have the list of desiredGroups to insert, and the list of 

@@ -24,14 +24,12 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.client.exception.RequestFailureException;
 import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.externalservice.FormServiceCursor;
 import org.opendatakit.aggregate.form.Form;
-import org.opendatakit.aggregate.form.FormInfo;
 import org.opendatakit.aggregate.form.MiscTasks;
 import org.opendatakit.aggregate.form.MiscTasks.TaskType;
 import org.opendatakit.aggregate.process.DeleteSubmissions;

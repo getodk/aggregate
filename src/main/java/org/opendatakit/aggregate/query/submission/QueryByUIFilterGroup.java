@@ -37,74 +37,73 @@ public class QueryByUIFilterGroup extends QueryBase {
     query = cc.getDatastore().createQuery(tbl, cc.getCurrentUser());
     query.addSort(tbl.lastUpdateDate, Query.Direction.ASCENDING);
     query.addFilter(tbl.lastUpdateDate, Query.FilterOperation.GREATER_THAN, BasicConsts.EPOCH);
-    
-    if(filterGroup == null) {
+
+    if (filterGroup == null) {
       return;
     }
-    
+
     for (Filter filter : filterGroup.getFilters()) {
-      if(filter instanceof RowFilter) {
+      if (filter instanceof RowFilter) {
         RowFilter rf = (RowFilter) filter;
         Column column = rf.getColumn();
-        
+
         FormElementKey decodeKey = new FormElementKey(column.getColumnEncoding());
         FormElementModel fem = FormElementModel.retrieveFormElementModel(form, decodeKey);
         FilterOperation op = UITrans.convertFilterOperation(rf.getOperation());
-        
+
         String value = rf.getInput();
         Object compareValue = null;
         switch (fem.getElementType()) {
         case BOOLEAN:
-            compareValue = WebUtils.parseBoolean(value);
-            break;
-		case JRDATETIME:
-			compareValue = WebUtils.parseDate(value);
-			break;
-		case JRDATE:
-			compareValue = WebUtils.parseDate(value);
-			break;
-		case JRTIME:
-			compareValue = WebUtils.parseDate(value);
-			break;
+          compareValue = WebUtils.parseBoolean(value);
+          break;
+        case JRDATETIME:
+          compareValue = WebUtils.parseDate(value);
+          break;
+        case JRDATE:
+          compareValue = WebUtils.parseDate(value);
+          break;
+        case JRTIME:
+          compareValue = WebUtils.parseDate(value);
+          break;
         case INTEGER:
-            compareValue = Long.valueOf(value);
-            break;
+          compareValue = Long.valueOf(value);
+          break;
         case DECIMAL:
-            compareValue = new BigDecimal(value);
-            break;
+          compareValue = new BigDecimal(value);
+          break;
         case SELECT1:
         case STRING:
-            compareValue = value;
-            break;
+          compareValue = value;
+          break;
         case GEOPOINT:
-            compareValue = new BigDecimal(value);
-            super.addFilterGeoPoint(fem, column.getGeopointColumnCode(), op, compareValue);          
-            continue;
+          compareValue = new BigDecimal(value);
+          super.addFilterGeoPoint(fem, column.getGeopointColumnCode(), op, compareValue);
+          continue;
         default:
-        	// e.g., SELECTN
-            // can't apply a filter to this type
-            continue;
+          // e.g., SELECTN
+          // can't apply a filter to this type
+          continue;
         }
-        
+
         super.addFilter(fem, op, compareValue);
       }
     }
 
   }
 
-
   public List<Submission> getResultSubmissions(CallingContext cc) throws ODKDatastoreException {
 
     List<Submission> retrievedSubmissions = new ArrayList<Submission>();
 
     // retrieve submissions
-    List<? extends CommonFieldsBase> submissionEntities = getSubmissionEntities();
+    List<? extends CommonFieldsBase> submissionEntities = getSubmissionEntities(null);
 
     // create a row for each submission
     for (int count = 0; count < submissionEntities.size(); count++) {
       CommonFieldsBase subEntity = submissionEntities.get(count);
-      retrievedSubmissions.add(new Submission((TopLevelDynamicBase) subEntity, form
-          .getFormDefinition(), cc));
+      Submission sub = new Submission((TopLevelDynamicBase) subEntity, form.getFormDefinition(), cc);
+      retrievedSubmissions.add(sub);
     }
     return retrievedSubmissions;
   }

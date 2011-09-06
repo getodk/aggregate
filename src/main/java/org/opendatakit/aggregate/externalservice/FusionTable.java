@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -47,7 +46,6 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
-import org.opendatakit.aggregate.client.externalserv.ExternServSummary;
 import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.ErrorConsts;
 import org.opendatakit.aggregate.constants.HtmlUtil;
@@ -61,31 +59,22 @@ import org.opendatakit.aggregate.datamodel.FormElementKey;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.datamodel.FormElementModel.ElementType;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
-import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.format.element.FusionTableElementFormatter;
 import org.opendatakit.aggregate.format.header.FusionTableHeaderFormatter;
-import org.opendatakit.aggregate.format.header.HeaderFormatter;
 import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.aggregate.submission.SubmissionSet;
 import org.opendatakit.aggregate.submission.SubmissionValue;
 import org.opendatakit.aggregate.submission.type.RepeatSubmissionType;
 import org.opendatakit.common.constants.BasicConsts;
+import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.Datastore;
-import org.opendatakit.common.persistence.EntityKey;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
-import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
-import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.utils.HttpClientFactory;
 import org.opendatakit.common.web.CallingContext;
 
-import com.google.gdata.client.GoogleService;
-import com.google.gdata.client.authn.oauth.GoogleOAuthHelper;
-import com.google.gdata.client.authn.oauth.GoogleOAuthParameters;
-import com.google.gdata.client.authn.oauth.OAuthException;
-import com.google.gdata.client.authn.oauth.OAuthHmacSha1Signer;
 import com.google.gdata.util.ServiceException;
 
 /**
@@ -94,118 +83,56 @@ import com.google.gdata.util.ServiceException;
  * @author mitchellsundt@gmail.com
  * 
  */
-public class FusionTable extends AbstractExternalService implements ExternalService {
+public class FusionTable extends OAuthExternalService implements ExternalService {
   private static final Log logger = LogFactory.getLog(FusionTable.class.getName());
-
-  private static final int FUSION_TABLE_SOCKET_ESTABLISHMENT_TIMEOUT_MILLISECONDS = 30000;
-  private static final int FUSION_TABLE_SERVICE_TIMEOUT_MILLISECONDS = 30000;
 
   /**
    * Datastore entity specific to this type of external service
    */
   private final FusionTableParameterTable objectEntity;
 
-  private final List<FusionTableRepeatParameterTable> repeatElementTableIds
-  								= new ArrayList<FusionTableRepeatParameterTable>();
-  private final GoogleService fusionTableService;
-
   /**
-   * Helper function for constructors.
-   * 
-   * @param cc
-   * @return
-   * @throws ODKDatastoreException
+   * Datastore entity specific to this type of external service for the repeats
    */
-  private static final FusionTableParameterTable newFTPT(CallingContext cc) throws ODKDatastoreException {
-    FusionTableParameterTable fp = FusionTableParameterTable.assertRelation(cc);
-    Datastore ds = cc.getDatastore();
-    User user = cc.getCurrentUser();
-    return ds.createEntityUsingRelation(fp, user);
+  private final List<FusionTableRepeatParameterTable> repeatElementEntities
+  								= new ArrayList<FusionTableRepeatParameterTable>();
+  
+    
+  private FusionTable(FusionTableParameterTable entity, FormServiceCursor formServiceCursor, Form form, CallingContext cc) {
+    super(form, formServiceCursor, new FusionTableElementFormatter(cc.getServerURL()), new FusionTableHeaderFormatter(), cc);
+    objectEntity = entity;
   }
   
-  /**
-   * Helper function for constructors.
-   * 
-   * @param fsc
-   * @param cc
-   * @return
-   * @throws ODKDatastoreException
-   */
-  private static final FusionTableParameterTable retrieveFTPT(FormServiceCursor fsc, CallingContext cc) throws ODKDatastoreException {
-    FusionTableParameterTable fp = FusionTableParameterTable.assertRelation(cc);
-    Datastore ds = cc.getDatastore();
-    User user = cc.getCurrentUser();
-    return ds.getEntity(fp, fsc.getAuriService(), user);
+  private FusionTable(FusionTableParameterTable entity, Form form, ExternalServicePublicationOption externalServiceOption, CallingContext cc) throws ODKDatastoreException {
+    this (entity, createFormServiceCursor(form, entity, externalServiceOption, ExternalServiceType.GOOGLE_FUSIONTABLES, cc), form, cc);
+    persist(cc); 
   }
 
-  /**
-   * Common base constructor that initializes final values.
-   * 
-   * @param form
-   * @param fpObject
-   * @param cc
-   */
-  private FusionTable(Form form, FusionTableParameterTable fpObject, CallingContext cc) {
-    super(form, new FusionTableElementFormatter(cc.getServerURL()),
-        new FusionTableHeaderFormatter(), cc);
-    fusionTableService = new GoogleService(FusionTableConsts.FUSTABLE_SERVICE_NAME,
-    										ServletConsts.APPLICATION_NAME);
-	objectEntity = fpObject;
-  }
-
-  public FusionTable(FormServiceCursor fsc, CallingContext cc) throws ODKEntityNotFoundException,
-      ODKDatastoreException, ODKFormNotFoundException {
-    this(Form.retrieveFormByFormId(fsc.getFormId(), cc), retrieveFTPT(fsc, cc), cc);
-    this.fsc = fsc;
-    repeatElementTableIds.addAll(FusionTableRepeatParameterTable.getRepeatGroupAssociations(
+  public FusionTable(FormServiceCursor formServiceCursor, Form form, CallingContext cc) throws ODKDatastoreException {
+    
+    this(retrieveEntity(FusionTableParameterTable.assertRelation(cc), formServiceCursor, cc), formServiceCursor, form, cc);
+        
+    repeatElementEntities.addAll(FusionTableRepeatParameterTable.getRepeatGroupAssociations(
     								objectEntity.getUri(), cc));
   }
 
   public FusionTable(Form form, ExternalServicePublicationOption externalServiceOption, CallingContext cc)
       throws ODKDatastoreException {
-    this(form, newFTPT(cc), cc);
-    fsc = FormServiceCursor.createFormServiceCursor(form, ExternalServiceType.GOOGLE_FUSIONTABLES,
-        objectEntity, cc);
-    fsc.setExternalServiceOption(externalServiceOption);
-    fsc.setIsExternalServicePrepared(false);
-    fsc.setOperationalStatus(OperationalStatus.ESTABLISHED);
-    fsc.setEstablishmentDateTime(new Date());
-
-    fsc.setUploadCompleted(false);
-    persist(cc);
+    this(newEntity(FusionTableParameterTable.assertRelation(cc), cc), form, externalServiceOption, cc);
   }
-  
-  
+    
   public void authenticateAndCreate(OAuthToken authToken, CallingContext cc) throws ODKExternalServiceException, ODKDatastoreException {
 
-    try {
-      GoogleOAuthParameters oauthParameters = new GoogleOAuthParameters();
-      oauthParameters.setOAuthConsumerKey(ServletConsts.OAUTH_CONSUMER_KEY);
-      oauthParameters.setOAuthConsumerSecret(ServletConsts.OAUTH_CONSUMER_SECRET);
-      oauthParameters.setOAuthToken(authToken.getToken());
-      oauthParameters.setOAuthTokenSecret(authToken.getTokenSecret());
-      fusionTableService.setOAuthCredentials(oauthParameters, new OAuthHmacSha1Signer());
-    } catch (OAuthException e) {
-      String str = "Unable to set credentials in fusion table service record";
-      logger.error(str + "\nReason: " + e.getMessage());
-      // TODO: handle OAuth failure
-      e.printStackTrace();
-      throw new ODKExternalServiceException(str, e);
-    }
-
-    HeaderFormatter headerFormatter = new FusionTableHeaderFormatter();
-    FormElementModel root = form.getTopLevelGroupElement();
-
-    String tableId = executeFusionTableCreation(form, fusionTableService, headerFormatter, root,
-        authToken, cc);
-
+    objectEntity.setAuthToken(authToken.getToken());
+    objectEntity.setAuthTokenSecret(authToken.getTokenSecret());
+    
+    String tableId = executeFusionTableCreation(form.getTopLevelGroupElement(), cc);
+    objectEntity.setFusionTableId(tableId);
+    
     List<TableId> repeatIds = new ArrayList<TableId>();
-
     for (FormElementModel repeatGroupElement : form.getRepeatGroupsInModel()) {
-      String id = executeFusionTableCreation(form, fusionTableService, headerFormatter,
-          repeatGroupElement, authToken, cc);
-      TableId repeatId = new TableId(id, repeatGroupElement);
-      repeatIds.add(repeatId);
+      String id = executeFusionTableCreation(repeatGroupElement, cc);
+      repeatIds.add(new TableId(id, repeatGroupElement));
     }
 
     FusionTableRepeatParameterTable frpt = FusionTableRepeatParameterTable.assertRelation(cc);
@@ -217,49 +144,14 @@ public class FusionTable extends AbstractExternalService implements ExternalServ
       t.setUriFusionTable(objectEntity.getUri());
       t.setFormElementKey(a.getElement().constructFormElementKey(form));
       t.setFusionTableId(a.getId());
-      repeatElementTableIds.add(t);
+      repeatElementEntities.add(t);
     }
 
-    objectEntity.setAuthToken(authToken.getToken());
-    objectEntity.setAuthTokenSecret(authToken.getTokenSecret());
-    objectEntity.setFusionTableId(tableId);
     fsc.setIsExternalServicePrepared(true);
     fsc.setOperationalStatus(OperationalStatus.ACTIVE);
     persist(cc);
   }
   
-  public FusionTable(Form form, OAuthToken authToken, ExternalServicePublicationOption externalServiceOption,
-      String tableId, List<TableId> repeatElementTableIdAssociations, CallingContext cc)
-      throws ODKDatastoreException, ODKExternalServiceException {
-    this(form, newFTPT(cc), cc);
-
-    fsc = FormServiceCursor.createFormServiceCursor(form, ExternalServiceType.GOOGLE_FUSIONTABLES,
-        objectEntity, cc);
-    fsc.setExternalServiceOption(externalServiceOption);
-    fsc.setIsExternalServicePrepared(true);
-    fsc.setOperationalStatus(OperationalStatus.ACTIVE);
-    fsc.setEstablishmentDateTime(new Date());
-
-    fsc.setUploadCompleted(false);
-
-    objectEntity.setAuthToken(authToken.getToken());
-    objectEntity.setAuthTokenSecret(authToken.getTokenSecret());
-    objectEntity.setFusionTableId(tableId);
-
-    FusionTableRepeatParameterTable frpt = FusionTableRepeatParameterTable.assertRelation(cc);
-
-    Datastore ds = cc.getDatastore();
-    User user = cc.getCurrentUser();
-    for (TableId a : repeatElementTableIdAssociations) {
-      FusionTableRepeatParameterTable t = ds.createEntityUsingRelation(frpt, user);
-      t.setUriFusionTable(objectEntity.getUri());
-      t.setFormElementKey(a.getElement().constructFormElementKey(form));
-      t.setFusionTableId(a.getId());
-      repeatElementTableIds.add(t);
-    }
-    persist(cc);
-  }
-
   @Override
   protected void insertData(Submission submission, CallingContext cc) throws ODKExternalServiceException {
     // upload base submission values
@@ -268,7 +160,7 @@ public class FusionTable extends AbstractExternalService implements ExternalServ
     executeInsertData(objectEntity.getFusionTableId(), submission, headers, cc);
 
     // upload repeat value
-    for (FusionTableRepeatParameterTable tableId : repeatElementTableIds) {
+    for (FusionTableRepeatParameterTable tableId : repeatElementEntities) {
       FormElementKey elementKey = tableId.getFormElementKey();
       FormElementModel element = FormElementModel.retrieveFormElementModel(form, elementKey);
       headers = headerFormatter.generateHeaders(form, element, null);
@@ -298,114 +190,11 @@ public class FusionTable extends AbstractExternalService implements ExternalServ
       String insertQuery = FusionTableConsts.INSERT_STMT + tableId
           + createCsvString(headers.iterator()) + FusionTableConsts.VALUES_STMT
           + createCsvString(row.getFormattedValues().iterator());
-      OAuthToken authToken = new OAuthToken(objectEntity.getAuthToken(), objectEntity
-          .getAuthTokenSecret());
-      executeStmt(insertQuery, authToken, cc);
+      executeStmt(insertQuery, cc);
     } catch (Exception e) {
       e.printStackTrace();
       throw new ODKExternalServiceException(e);
     }
-  }
-
-  @Override
-  public void setUploadCompleted(CallingContext cc) throws ODKEntityPersistException {
-    fsc.setUploadCompleted(true);
-    if (fsc.getExternalServicePublicationOption() == ExternalServicePublicationOption.UPLOAD_ONLY) {
-      fsc.setOperationalStatus(OperationalStatus.COMPLETED);
-    }
-    Datastore ds = cc.getDatastore();
-    User user = cc.getCurrentUser();
-    ds.putEntity(fsc, user);
-  }
-
-  @Override
-  public void abandon(CallingContext cc) throws ODKDatastoreException {
-    if (fsc.getOperationalStatus() != OperationalStatus.COMPLETED) {
-      fsc.setOperationalStatus(OperationalStatus.ABANDONED);
-      persist(cc);
-    }
-  }
-
-  @Override
-  public ExternServSummary transform() {    
-    return new ExternServSummary(fsc.getUri(),
-        fsc.getCreatorUriUser(),
-        fsc.getOperationalStatus(),
-        fsc.getEstablishmentDateTime(),
-        fsc.getExternalServicePublicationOption(),
-        fsc.getUploadCompleted(),
-        fsc.getLastUploadCursorDate(),
-        fsc.getLastStreamingCursorDate(),
-        fsc.getExternalServiceType().getServiceName(),
-          getDescriptiveTargetString());
-  }
-  
-  public void persist(CallingContext cc) throws ODKEntityPersistException {
-    Datastore ds = cc.getDatastore();
-    User user = cc.getCurrentUser();
-    ds.putEntities(repeatElementTableIds, user);
-    ds.putEntity(objectEntity, user);
-    ds.putEntity(fsc, user);
-  }
-
-  public void delete(CallingContext cc) throws ODKDatastoreException {
-    // remove fusion table permission as no longer needed
-    // TODO: test that the revoke REALLY works, can be easy to miss since we
-    // ignore exception
-    try {
-      OAuthToken token = new OAuthToken(objectEntity.getAuthToken(), objectEntity
-          .getAuthTokenSecret());
-      ;
-      GoogleOAuthParameters oauthParameters = new GoogleOAuthParameters();
-      oauthParameters.setOAuthConsumerKey(ServletConsts.OAUTH_CONSUMER_KEY);
-      oauthParameters.setOAuthConsumerSecret(ServletConsts.OAUTH_CONSUMER_SECRET);
-      oauthParameters.setOAuthToken(token.getToken());
-      oauthParameters.setOAuthTokenSecret(token.getTokenSecret());
-      GoogleOAuthHelper oauthHelper = new GoogleOAuthHelper(new OAuthHmacSha1Signer());
-
-      oauthHelper.revokeToken(oauthParameters);
-    } catch (OAuthException e) {
-      // just moving on, as we still want to delete
-      e.printStackTrace();
-    }
-
-    List<EntityKey> keys = new ArrayList<EntityKey>();
-    for (FusionTableRepeatParameterTable repeat : repeatElementTableIds) {
-      keys.add(new EntityKey(repeat, repeat.getUri()));
-    }
-    Datastore ds = cc.getDatastore();
-    User user = cc.getCurrentUser();
-    ds.deleteEntities(keys, user);
-    repeatElementTableIds.clear();
-    ds.deleteEntity(new EntityKey(objectEntity, objectEntity.getUri()), user);
-    ds.deleteEntity(new EntityKey(fsc, fsc.getUri()), user);
-  }
-
-  /**
-   * @see java.lang.Object#equals(java.lang.Object)
-   */
-  @Override
-  public boolean equals(Object obj) {
-    if (!(obj instanceof FusionTable)) {
-      return false;
-    }
-    FusionTable other = (FusionTable) obj;
-    return (objectEntity == null ? (other.objectEntity == null)
-        : (other.objectEntity != null && objectEntity.equals(other.objectEntity)))
-        && (fsc == null ? (other.fsc == null) : (other.fsc != null && fsc.equals(other.fsc)));
-  }
-
-  /**
-   * @see java.lang.Object#hashCode()
-   */
-  @Override
-  public int hashCode() {
-    int hashCode = 19;
-    if (objectEntity != null)
-      hashCode += objectEntity.hashCode();
-    if (fsc != null)
-      hashCode += fsc.hashCode();
-    return hashCode;
   }
 
   /**
@@ -423,8 +212,10 @@ public class FusionTable extends AbstractExternalService implements ExternalServ
    *           if FusionTables returns a response with an HTTP response code
    *           other than 200.
    */
-  private static String executeStmt(String statement, OAuthToken authToken, CallingContext cc)
+  private String executeStmt(String statement,  CallingContext cc)
       throws ServiceException, IOException, ODKExternalServiceException {
+
+    OAuthToken authToken = getAuthToken();
     OAuthConsumer consumer = new CommonsHttpOAuthConsumer(ServletConsts.OAUTH_CONSUMER_KEY,
         ServletConsts.OAUTH_CONSUMER_SECRET);
     consumer.setTokenWithSecret(authToken.getToken(), authToken.getTokenSecret());
@@ -433,14 +224,13 @@ public class FusionTable extends AbstractExternalService implements ExternalServ
     try {
     	uri = new URI(FusionTableConsts.FUSION_SCOPE);
     } catch ( Exception e ) {
-    	e.printStackTrace();
     	throw new ODKExternalServiceException(e);
     }
     
     System.out.println(uri.toString());
     HttpParams httpParams = new BasicHttpParams();
-    HttpConnectionParams.setConnectionTimeout(httpParams, FUSION_TABLE_SERVICE_TIMEOUT_MILLISECONDS);
-    HttpConnectionParams.setSoTimeout(httpParams, FUSION_TABLE_SOCKET_ESTABLISHMENT_TIMEOUT_MILLISECONDS);
+    HttpConnectionParams.setConnectionTimeout(httpParams, FusionTableConsts.SERVICE_TIMEOUT_MILLISECONDS);
+    HttpConnectionParams.setSoTimeout(httpParams, FusionTableConsts.SOCKET_ESTABLISHMENT_TIMEOUT_MILLISECONDS);
     
     
     HttpClientFactory factory = (HttpClientFactory) cc.getBean(BeanDefs.HTTP_CLIENT_FACTORY);
@@ -490,7 +280,9 @@ public class FusionTable extends AbstractExternalService implements ExternalServ
       String cur = itr.next();
       str.append(BasicConsts.SINGLE_QUOTE);
       if (cur != null) {
-        str.append(escapeSingleQuotes(cur));
+        String tmp = cur.replaceAll(FusionTableConsts.SINGLE_QUOTE,
+            FusionTableConsts.HTML_ESCAPED_SINGLE_QUOTE);
+        str.append(tmp);
       }
       str.append(BasicConsts.SINGLE_QUOTE);
       if (itr.hasNext()) {
@@ -501,55 +293,13 @@ public class FusionTable extends AbstractExternalService implements ExternalServ
     return str.toString();
   }
 
-  private String escapeSingleQuotes(String string) {
-    return string.replaceAll(FusionTableConsts.SINGLE_QUOTE,
-        FusionTableConsts.HTML_ESCAPED_SINGLE_QUOTE);
-  }
-
-  public static FusionTable createFusionTable(Form form, OAuthToken authToken,
-      ExternalServicePublicationOption externalServiceOption, CallingContext cc) throws ODKDatastoreException,
-      ODKExternalServiceException {
-
-    GoogleService fusionTableService = new GoogleService(FusionTableConsts.FUSTABLE_SERVICE_NAME,
-        ServletConsts.APPLICATION_NAME);
-    try {
-      GoogleOAuthParameters oauthParameters = new GoogleOAuthParameters();
-      oauthParameters.setOAuthConsumerKey(ServletConsts.OAUTH_CONSUMER_KEY);
-      oauthParameters.setOAuthConsumerSecret(ServletConsts.OAUTH_CONSUMER_SECRET);
-      oauthParameters.setOAuthToken(authToken.getToken());
-      oauthParameters.setOAuthTokenSecret(authToken.getTokenSecret());
-      fusionTableService.setOAuthCredentials(oauthParameters, new OAuthHmacSha1Signer());
-    } catch (OAuthException e) {
-      // TODO: handle OAuth failure
-      e.printStackTrace();
-    }
-
-    HeaderFormatter headerFormatter = new FusionTableHeaderFormatter();
-    FormElementModel root = form.getTopLevelGroupElement();
-
-    String tableid = executeFusionTableCreation(form, fusionTableService, headerFormatter, root,
-        authToken, cc);
-
-    List<TableId> repeatIds = new ArrayList<TableId>();
-
-    for (FormElementModel repeatGroupElement : form.getRepeatGroupsInModel()) {
-      String id = executeFusionTableCreation(form, fusionTableService, headerFormatter,
-          repeatGroupElement, authToken, cc);
-      TableId repeatId = new TableId(id, repeatGroupElement);
-      repeatIds.add(repeatId);
-    }
-
-    return new FusionTable(form, authToken, externalServiceOption, tableid.trim(), repeatIds, cc);
-  }
-
-  private static String executeFusionTableCreation(Form form, GoogleService fusionTableService,
-      HeaderFormatter headerFormatter, FormElementModel root, OAuthToken authToken, CallingContext cc)
+  private String executeFusionTableCreation(FormElementModel root, CallingContext cc)
       throws ODKExternalServiceException {
 
     String resultRequest;
     try {
-      String createStmt = createFusionTableStatement(form, root, headerFormatter);
-      resultRequest = executeStmt(createStmt, authToken, cc);
+      String createStmt = createFusionTableStatement(form, root);
+      resultRequest = executeStmt(createStmt, cc);
     } catch (Exception e) {
       logger.error("Failed to create fusion table");
       e.printStackTrace();
@@ -564,8 +314,7 @@ public class FusionTable extends AbstractExternalService implements ExternalServ
     }
   }
 
-  private static String createFusionTableStatement(Form form, FormElementModel rootNode,
-      HeaderFormatter headerFormatter) throws ODKExternalServiceException {
+  private String createFusionTableStatement(Form form, FormElementModel rootNode) throws ODKExternalServiceException {
 
     List<String> headers = headerFormatter.generateHeaders(form, rootNode, null);
 
@@ -596,12 +345,39 @@ public class FusionTable extends AbstractExternalService implements ExternalServ
     createStmt.append(BasicConsts.RIGHT_PARENTHESIS);
     return createStmt.toString();
   }
-
+    
+  /**
+   * @see java.lang.Object#equals(java.lang.Object)
+   */
+  @Override
+  public boolean equals(Object obj) {
+    if (!(obj instanceof FusionTable)) {
+      return false;
+    }
+    FusionTable other = (FusionTable) obj;
+    return (objectEntity == null ? (other.objectEntity == null)
+        : (other.objectEntity != null && objectEntity.equals(other.objectEntity)))
+        && (fsc == null ? (other.fsc == null) : (other.fsc != null && fsc.equals(other.fsc)));
+  }
+  
+  protected OAuthToken getAuthToken() {
+    return new OAuthToken(objectEntity.getAuthToken(), objectEntity.getAuthTokenSecret());
+  }
+  
   @Override
   public String getDescriptiveTargetString() {
     Map<String, String> properties = new HashMap<String, String>();
     properties.put("dsrcid", objectEntity.getFusionTableId());
     return HtmlUtil.createHrefWithProperties("http://www.google.com/fusiontables/DataSource",
         properties, "View Fusion Table");
+  }
+  
+  protected CommonFieldsBase retrieveObjectEntity() {
+    return objectEntity;
+  }
+
+  @Override
+  protected List<? extends CommonFieldsBase> retrieveRepateElementEntities() {
+    return repeatElementEntities;
   }
 }

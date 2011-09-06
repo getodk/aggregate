@@ -22,6 +22,7 @@ import org.opendatakit.aggregate.client.externalserv.ExternServSummary;
 import org.opendatakit.aggregate.client.form.FormServiceAsync;
 import org.opendatakit.aggregate.client.form.FormSummary;
 import org.opendatakit.aggregate.client.table.PublishTable;
+import org.opendatakit.aggregate.client.widgets.FormListBox;
 import org.opendatakit.aggregate.constants.common.HelpSliderConsts;
 import org.opendatakit.aggregate.constants.common.PublishConsts;
 import org.opendatakit.common.security.common.GrantedAuthorityName;
@@ -29,25 +30,19 @@ import org.opendatakit.common.security.common.GrantedAuthorityName;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.ListBox;
 
 public class PublishSubTab extends AggregateSubTabBase {
  
-  private AggregateUI baseUI;
-
   // ui elements
   private PublishTable publishTable;
-  private ListBox formsBox;
+  private FormListBox formsBox;
 
   // state
-  private ArrayList<FormSummary> displayedFormList;
   private FormSummary selectedForm;
 
-  public PublishSubTab(AggregateUI baseUI) {
-    this.baseUI = baseUI;
+  public PublishSubTab() {
 
-    formsBox = new ListBox();
-    formsBox.addChangeHandler(new ChangeDropDownHandler());
+    formsBox = new FormListBox(new ChangeDropDownHandler());
     publishTable = new PublishTable();
 
     // add tables to panels
@@ -63,17 +58,17 @@ public class PublishSubTab extends AggregateSubTabBase {
 
   private class UpdateAction implements AsyncCallback<ArrayList<FormSummary>> {
     public void onFailure(Throwable caught) {
-      baseUI.reportError(caught);
+      AggregateUI.getUI().reportError(caught);
     }
 
-    public void onSuccess(ArrayList<FormSummary> forms) {
-      baseUI.clearError();
-      
-      // update the class state with the updated form list
-      displayedFormList = UIUtils.updateFormDropDown(formsBox, displayedFormList, forms);
+    public void onSuccess(ArrayList<FormSummary> formsFromService) {
+      AggregateUI.getUI().clearError();
       
       // setup the display with the latest updates
-      selectedForm = UIUtils.getFormFromSelection(formsBox, displayedFormList);
+      formsBox.updateFormDropDown(formsFromService);
+      
+      // update the class state with the currently displayed form
+      selectedForm = formsBox.getSelectedForm();
       
       // Make the call to get the published services
       updatePublishTable();
@@ -100,7 +95,7 @@ public class PublishSubTab extends AggregateSubTabBase {
     AsyncCallback<ExternServSummary[]> callback = new AsyncCallback<ExternServSummary[]>() {
       @Override
       public void onFailure(Throwable caught) {
-        baseUI.reportError(caught);
+        AggregateUI.getUI().reportError(caught);
       }
 
       @Override
@@ -127,7 +122,7 @@ public class PublishSubTab extends AggregateSubTabBase {
   private class ChangeDropDownHandler implements ChangeHandler {
     @Override
     public void onChange(ChangeEvent event) {
-      FormSummary form = UIUtils.getFormFromSelection(formsBox, displayedFormList);
+      FormSummary form = formsBox.getSelectedForm();
       if(form != null) {
         selectedForm = form;
       }

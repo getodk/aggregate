@@ -16,6 +16,8 @@
 
 package org.opendatakit.aggregate.client.table;
 
+import java.util.ArrayList;
+
 import org.opendatakit.aggregate.client.FilterSubTab;
 import org.opendatakit.aggregate.client.filter.FilterGroup;
 import org.opendatakit.aggregate.client.widgets.ExportButton;
@@ -23,7 +25,6 @@ import org.opendatakit.aggregate.client.widgets.PublishButton;
 import org.opendatakit.aggregate.client.widgets.VisualizationButton;
 
 import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.ListBox;
 
 
 public class FilterNavigationTable extends FlexTable{
@@ -62,8 +63,8 @@ public class FilterNavigationTable extends FlexTable{
 		formNFilterSelection.update();
 	}
 
-	public ListBox getCurrentFilterList() {
-		return formNFilterSelection.getFiltersBox();
+	public ArrayList<FilterGroup> getCurrentFilterList() {
+		return formNFilterSelection.getCurrentFilters();
 	}
 
 }
