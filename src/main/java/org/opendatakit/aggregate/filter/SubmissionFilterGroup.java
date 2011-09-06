@@ -187,7 +187,7 @@ public class SubmissionFilterGroup extends CommonFieldsBase {
         filter.delete(cc);
       }
     }    
-    ds.deleteEntity(new EntityKey(this, this.getUri()), user);
+    ds.deleteEntity(this.getEntityKey(), user);
   }
   
   private static SubmissionFilterGroup relation = null;

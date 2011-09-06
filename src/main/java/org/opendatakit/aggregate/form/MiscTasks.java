@@ -272,7 +272,7 @@ public class MiscTasks {
 	public void delete(CallingContext cc) throws ODKDatastoreException {
 		Datastore ds = cc.getDatastore();
 		User user = cc.getCurrentUser();
-		ds.deleteEntity(new EntityKey(row, row.getUri()), user);
+		ds.deleteEntity(row.getEntityKey(), user);
 	}
 	
 	public SubmissionKey getSubmissionKey() {

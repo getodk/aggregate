@@ -38,7 +38,7 @@ public interface FormService extends RemoteService {
   
   ArrayList<ExportSummary> getExports() throws AccessDeniedException;
  
-  Boolean createCsv(String formId) throws AccessDeniedException;
+  Boolean createCsv(String formId, String filterUri) throws AccessDeniedException;
   
   KmlSettings getPossibleKmlSettings(String formId) throws AccessDeniedException;
   

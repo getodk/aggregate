@@ -154,7 +154,7 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 		if ( enclosingSet != null ) {
 			tlg.setParentAuri(enclosingSet.getKey().getKey());
 		}
-		this.key = new EntityKey(tlg, tlg.getUri());
+		this.key = tlg.getEntityKey();
 		this.topLevelTableKey = topLevelTableKey;
 		dbEntities.put(group.getFormDataModel().getDDRelationName(), tlg);
 		recursivelyCreateEntities(group.getFormDataModel(), datastore, user);
@@ -185,7 +185,7 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 		}
 		tlg.setModelVersion(modelVersion);
 		tlg.setUiVersion(uiVersion);
-		this.key = new EntityKey(tlg, tlg.getUri());
+		this.key = tlg.getEntityKey();
 		this.topLevelTableKey = key;
 		// persist and recursively construct it...
 		dbEntities.put(group.getFormDataModel().getDDRelationName(), tlg);
@@ -259,7 +259,7 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 		this.formDefinition = formDefinition;
 		this.group = group;
 		this.enclosingSet = enclosingSet;
-		this.key = new EntityKey(row, row.getUri());
+		this.key = row.getEntityKey();
 		Datastore datastore = cc.getDatastore();
 		User user = cc.getCurrentUser();
 
@@ -803,7 +803,7 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 			value.recursivelyAddEntityKeys(keyList, cc);
 		}
 		for ( DynamicCommonFieldsBase e : dbEntities.values() ) {
-			keyList.add( new EntityKey( e, e.getUri()));
+			keyList.add(e.getEntityKey());
 		}
 	}
 

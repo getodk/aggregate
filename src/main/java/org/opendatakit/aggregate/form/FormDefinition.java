@@ -725,12 +725,12 @@ public class FormDefinition {
 					// delete the form data model...
 					List<EntityKey> eks = new ArrayList<EntityKey>();
 				    for ( CommonFieldsBase m : fdmList ) {
-						eks.add(new EntityKey(m, m.getUri()));
+						eks.add(m.getEntityKey());
 				    }
 				    ds.deleteEntities(eks, user);
 				    
 				    // and delete the SA record
-				    ds.deleteEntity(new EntityKey(sa, sa.getUri()), user);
+				    ds.deleteEntity(sa.getEntityKey(), user);
 				    // just in case...
 				    forget(uriSubmissionDataModel);
 				    
