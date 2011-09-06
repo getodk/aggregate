@@ -32,7 +32,6 @@ import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.ListBox;
 
 // TODO: address possible inconsistent states
 
@@ -58,8 +57,8 @@ public class FormNFilterSelectionTable extends FlexTable {
     setWidget(0, 3, filtersBox);
   }
 
-  public ListBox getFiltersBox() {
-    return filtersBox;
+  public ArrayList<FilterGroup> getCurrentFilters() {
+    return filtersBox.getDisplayedFilterList();
   }
   
   public void update() {
@@ -144,7 +143,6 @@ public class FormNFilterSelectionTable extends FlexTable {
       if(form != null) {
         selectedForm = form;
       }
-
       // update filter list based on new form
       // NOTE: the filter list MUST be updated BEFORE the selected updateSelectedFormNFilter() is called
       updateFilterList();      

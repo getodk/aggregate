@@ -33,7 +33,6 @@ public abstract class AbstractListBox extends ListBox implements ChangeHandler, 
   
   public void onChange(ChangeEvent event) {
     AggregateUI baseUI = AggregateUI.getUI();
-    baseUI.clearError();
     baseUI.getTimer().restartTimer();
   }
   
