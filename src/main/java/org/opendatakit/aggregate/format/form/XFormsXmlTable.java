@@ -31,7 +31,6 @@ import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.format.XFormsTableConsts;
 import org.opendatakit.aggregate.form.Form;
-import org.opendatakit.aggregate.form.FormInfo;
 import org.opendatakit.aggregate.servlet.FormXmlServlet;
 import org.opendatakit.aggregate.servlet.XFormsManifestServlet;
 import org.opendatakit.common.constants.BasicConsts;

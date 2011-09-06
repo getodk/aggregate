@@ -31,6 +31,7 @@ import org.opendatakit.aggregate.constants.common.FormActionStatusTimestamp;
 import org.opendatakit.aggregate.constants.common.UIConsts;
 import org.opendatakit.aggregate.constants.externalservice.FusionTableConsts;
 import org.opendatakit.aggregate.constants.externalservice.SpreadsheetConsts;
+import org.opendatakit.aggregate.exception.ODKExternalServiceException;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.externalservice.ExternalService;
 import org.opendatakit.aggregate.externalservice.FormServiceCursor;
@@ -185,6 +186,9 @@ public class ServicesAdminServiceImpl extends RemoteServiceServlet implements
     } catch (ODKDatastoreException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
+    } catch (ODKExternalServiceException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
     }
     return null;
   }
@@ -201,7 +205,7 @@ public class ServicesAdminServiceImpl extends RemoteServiceServlet implements
 		if ( fsc != null ) {
 			es = fsc.getExternalService(cc);
 		}
-	} catch (ODKEntityNotFoundException e) {
+	} catch (Exception e) {
 		// silent failure...
 		return false;
 	}

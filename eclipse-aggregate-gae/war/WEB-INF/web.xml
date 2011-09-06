@@ -151,15 +151,6 @@
 	</servlet-mapping>
 
 	<servlet>
-		<servlet-name>gwttest</servlet-name>
-		<servlet-class>org.opendatakit.aggregate.servlet.GwtTester</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>gwttest</servlet-name>
-		<url-pattern>/www/gwttest</url-pattern>
-	</servlet-mapping>
-
-	<servlet>
 		<servlet-name>aggregate-html</servlet-name>
 		<servlet-class>org.opendatakit.aggregate.servlet.AggregateHtmlServlet</servlet-class>
 	</servlet>
