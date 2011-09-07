@@ -110,7 +110,7 @@ public class FilterSubTab extends AggregateSubTabBase {
   }
 
   public ArrayList<FilterGroup> getListOfPossibleFilterGroups() {
-    return navTable.getCurrentFilterList();
+    return navTable.getCurrentFilters();
   }
 
   public SubmissionTable getSubmissionTable() {

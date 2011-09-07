@@ -18,8 +18,8 @@ import java.util.Date;
 import java.util.List;
 
 import org.opendatakit.aggregate.constants.common.ExternalServicePublicationOption;
+import org.opendatakit.aggregate.constants.common.ExternalServiceType;
 import org.opendatakit.aggregate.constants.common.OperationalStatus;
-import org.opendatakit.aggregate.constants.externalservice.ExternalServiceType;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.common.persistence.CommonFieldsBase;
@@ -238,7 +238,7 @@ public final class FormServiceCursor extends CommonFieldsBase {
   
   public ExternalService getExternalService(CallingContext cc) throws ODKEntityNotFoundException, ODKFormNotFoundException {
     Form form = Form.retrieveFormByFormId(getFormId(), cc);
-    return getExternalServiceType().constructExternalService(this, form, cc);
+    return constructExternalService(this, form, cc);
   }
   
   private static FormServiceCursor relation = null;
@@ -284,9 +284,8 @@ public final class FormServiceCursor extends CommonFieldsBase {
     List<? extends CommonFieldsBase> fscList = query.executeQuery(0);
     for (CommonFieldsBase cb : fscList) {
       FormServiceCursor c = (FormServiceCursor) cb;
-      ExternalService obj;
-
-      obj = c.getExternalServiceType().constructExternalService(c, form, cc);
+      
+      ExternalService obj = constructExternalService(c, form, cc);
       esList.add(obj);
 
     }
@@ -320,5 +319,23 @@ public final class FormServiceCursor extends CommonFieldsBase {
          throw new ODKEntityNotFoundException(e);
       }
       return fscList;
+   }
+   
+   public static final ExternalService constructExternalService(FormServiceCursor fsc, Form form,
+       CallingContext cc) throws ODKEntityNotFoundException {
+     try {
+       switch (fsc.getExternalServiceType()) {
+       case GOOGLE_FUSIONTABLES:
+         return new FusionTable(fsc, form, cc);
+       case GOOGLE_SPREADSHEET:
+         return new GoogleSpreadsheet(fsc, form, cc);
+       case JSON_SERVER:
+         return new JsonServer(fsc, form, cc);
+       default:
+         return null;
+       }
+     } catch (Exception e) {
+       throw new ODKEntityNotFoundException("Some how DB entities got into problem state", e);
+     }
    }
 }

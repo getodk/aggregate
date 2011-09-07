@@ -31,9 +31,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import oauth.signpost.OAuthConsumer;
 import oauth.signpost.commonshttp.CommonsHttpOAuthConsumer;
-import oauth.signpost.exception.OAuthCommunicationException;
-import oauth.signpost.exception.OAuthExpectationFailedException;
-import oauth.signpost.exception.OAuthMessageSignerException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -51,8 +48,8 @@ import org.opendatakit.aggregate.constants.ErrorConsts;
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.common.ExternalServicePublicationOption;
+import org.opendatakit.aggregate.constants.common.ExternalServiceType;
 import org.opendatakit.aggregate.constants.common.OperationalStatus;
-import org.opendatakit.aggregate.constants.externalservice.ExternalServiceType;
 import org.opendatakit.aggregate.constants.externalservice.FusionTableConsts;
 import org.opendatakit.aggregate.constants.format.FormatConsts;
 import org.opendatakit.aggregate.datamodel.FormElementKey;
@@ -244,13 +241,7 @@ public class FusionTable extends OAuthExternalService implements ExternalService
 
     try {
       consumer.sign(post);
-    } catch (OAuthMessageSignerException e) {
-      e.printStackTrace();
-      throw new ServiceException("Failed to sign request: " + e.getMessage());
-    } catch (OAuthExpectationFailedException e) {
-      e.printStackTrace();
-      throw new ServiceException("Failed to sign request: " + e.getMessage());
-    } catch (OAuthCommunicationException e) {
+    } catch (Exception e) {
       e.printStackTrace();
       throw new IOException("Failed to sign request: " + e.getMessage());
     }

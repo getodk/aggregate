@@ -30,9 +30,7 @@ import org.opendatakit.common.constants.HtmlConsts;
 public final class FusionTableConsts {
 
   public static final String CREATE_FUSION_RESP_HEADER = "tableid";
-  public static final String FUSTABLE_SERVICE_NAME = "fusiontables";
   public static final String FUSTABLE_ENCODE = HtmlConsts.UTF8_ENCODE;
-  public static final String BEGIN_SQL = "sql=";
   public static final String FUSTABLE_CONTENT_TYPE = "application/x-www-form-urlencoded";
   public static final String VALUES_STMT = " VALUES ";
   public static final String INSERT_STMT = "INSERT INTO ";
@@ -40,7 +38,10 @@ public final class FusionTableConsts {
   public static final String FUSION_SCOPE = "http://www.google.com/fusiontables/api/query";
   public static final String SINGLE_QUOTE = "'";
   public static final String HTML_ESCAPED_SINGLE_QUOTE = "&#39;";
-
+ 
+  public static final int SOCKET_ESTABLISHMENT_TIMEOUT_MILLISECONDS = 30000;
+  public static final int SERVICE_TIMEOUT_MILLISECONDS = 30000;
+  
   public static final Map<ElementType, FusionTableType> typeMap = new HashMap<ElementType, FusionTableType>();
   static {  
     typeMap.put(ElementType.STRING, FusionTableType.STRING);
@@ -59,6 +60,5 @@ public final class FusionTableConsts {
     typeMap.put(ElementType.GROUP, FusionTableType.STRING);
     typeMap.put(ElementType.METADATA, FusionTableType.STRING);
   }
-  public static final int SOCKET_ESTABLISHMENT_TIMEOUT_MILLISECONDS = 30000;
-  public static final int SERVICE_TIMEOUT_MILLISECONDS = 30000;
+
 }
