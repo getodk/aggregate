@@ -11,6 +11,8 @@ import com.google.gwt.event.dom.client.ChangeHandler;
 public class FormListBox extends AbstractListBox {
   private static final String TOOLTIP_TEXT = "Form to use";
 
+  private static final String NO_FORM = "none";
+  
   private ArrayList<FormSummary> displayedFormList;
   
   public FormListBox() {
@@ -31,7 +33,7 @@ public class FormListBox extends AbstractListBox {
     
     if (forms == null || forms.size() == 0) {
       forms = new ArrayList<FormSummary>();
-      forms.add(new FormSummary(UIConsts.NO_FORM, UIConsts.EMPTY_STRING, null, null, false, false, null, 0));
+      forms.add(new FormSummary(NO_FORM, UIConsts.EMPTY_STRING, null, null, false, false, null, 0));
     } 
 
     clear();
@@ -67,7 +69,7 @@ public class FormListBox extends AbstractListBox {
         // check if we have a form id
         if(formIdToMatch == null) {
           // if there is no formId this should be the 'NO_FORM' form
-          if(form.getTitle() != null && form.getTitle().equals(UIConsts.NO_FORM) && formId.equals(UIConsts.EMPTY_STRING)) {
+          if(form.getTitle() != null && form.getTitle().equals(NO_FORM) && formId.equals(UIConsts.EMPTY_STRING)) {
             return null;
           } else {
             throw new IllegalStateException("Some how a form that is not the 'NO_FORM' had a formId of null");

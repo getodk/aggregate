@@ -19,8 +19,8 @@ import java.util.List;
 
 import org.opendatakit.aggregate.client.externalserv.ExternServSummary;
 import org.opendatakit.aggregate.constants.common.ExternalServicePublicationOption;
+import org.opendatakit.aggregate.constants.common.ExternalServiceType;
 import org.opendatakit.aggregate.constants.common.OperationalStatus;
-import org.opendatakit.aggregate.constants.externalservice.ExternalServiceType;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.format.element.ElementFormatter;
@@ -145,7 +145,7 @@ public abstract class AbstractExternalService implements ExternalService{
         fsc.getUploadCompleted(), 
         fsc.getLastUploadCursorDate(), 
         fsc.getLastStreamingCursorDate(),
-        fsc.getExternalServiceType().getServiceName(), 
+        fsc.getExternalServiceType(), 
         getDescriptiveTargetString());
   }
   
