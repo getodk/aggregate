@@ -122,7 +122,7 @@ public class SecurityServiceUtil {
 			Query q = RegisteredUsersTable.createQuery(cc.getDatastore(), cc.getCurrentUser());
 			RegisteredUsersTable.applyNaturalOrdering(q, cc);
 			
-			List<? extends CommonFieldsBase> l = q.executeQuery(0);
+			List<? extends CommonFieldsBase> l = q.executeQuery();
 			
 			for ( CommonFieldsBase cb : l ) {
 				RegisteredUsersTable t = (RegisteredUsersTable) cb;

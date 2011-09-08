@@ -54,39 +54,29 @@ public class FormInfoFilesetTable extends DynamicBase {
 
 	// DataFields in the fileset table
 	
-	private static final DataField ROOT_ELEMENT_MODEL_VERSION = new DataField("ROOT_ELEMENT_MODEL_VERSION",
+	public static final DataField ROOT_ELEMENT_MODEL_VERSION = new DataField("ROOT_ELEMENT_MODEL_VERSION",
 			DataField.DataType.INTEGER, true);
 
-	private static final DataField ROOT_ELEMENT_UI_VERSION = new DataField("ROOT_ELEMENT_UI_VERSION",
+	public static final DataField ROOT_ELEMENT_UI_VERSION = new DataField("ROOT_ELEMENT_UI_VERSION",
 			DataField.DataType.INTEGER, true);
 
-	private static final DataField IS_ENCRYPTED_FORM = new DataField("IS_ENCRYPTED_FORM",
+	public static final DataField IS_ENCRYPTED_FORM = new DataField("IS_ENCRYPTED_FORM",
 				DataField.DataType.BOOLEAN, true);
 
-	private static final DataField IS_DOWNLOAD_ALLOWED = new DataField("IS_DOWNLOAD_ALLOWED",
+	public static final DataField IS_DOWNLOAD_ALLOWED = new DataField("IS_DOWNLOAD_ALLOWED",
 			DataField.DataType.BOOLEAN, true);
 
-	private static final DataField LANGUAGE_CODE = new DataField("LANGUAGE_CODE",
+	public static final DataField LANGUAGE_CODE = new DataField("LANGUAGE_CODE",
 			DataField.DataType.STRING, true, 8L);
 
-	private static final DataField FORM_NAME = new DataField("FORM_NAME",
+	public static final DataField FORM_NAME = new DataField("FORM_NAME",
 			DataField.DataType.STRING, true, PersistConsts.GUARANTEED_SEARCHABLE_LEN);
 
-	private static final DataField DESCRIPTION = new DataField("DESCRIPTION",
+	public static final DataField DESCRIPTION = new DataField("DESCRIPTION",
 			DataField.DataType.STRING, true, 8192L);
 
-	private static final DataField DESCRIPTION_URL = new DataField("DESCRIPTION_URL",
+	public static final DataField DESCRIPTION_URL = new DataField("DESCRIPTION_URL",
 			DataField.DataType.STRING, true, 2048L);
-
-	// the relation fields...
-	public final DataField rootElementModelVersion;
-	public final DataField rootElementUiVersion;
-	public final DataField isEncryptedForm;
- 	public final DataField isDownloadAllowed;
-	public final DataField languageCode;
-	public final DataField formName;
-	public final DataField description;
-	public final DataField descriptionUrl;
 
 	public static final String URI_FORM_ID_VALUE_FORM_INFO_FILESET = "aggregate.opendatakit.org:FormInfoFileset";
 
@@ -97,14 +87,14 @@ public class FormInfoFilesetTable extends DynamicBase {
 	 */
 	private FormInfoFilesetTable(String databaseSchema) {
 		super(databaseSchema, TABLE_NAME);
-		fieldList.add(rootElementModelVersion = new DataField(ROOT_ELEMENT_MODEL_VERSION));
-		fieldList.add(rootElementUiVersion = new DataField(ROOT_ELEMENT_UI_VERSION));
-		fieldList.add(isEncryptedForm = new DataField(IS_ENCRYPTED_FORM));
-		fieldList.add(isDownloadAllowed = new DataField(IS_DOWNLOAD_ALLOWED));
-		fieldList.add(languageCode = new DataField(LANGUAGE_CODE));
-		fieldList.add(formName = new DataField(FORM_NAME));
-		fieldList.add(description = new DataField(DESCRIPTION));
-		fieldList.add(descriptionUrl = new DataField(DESCRIPTION_URL));
+		fieldList.add(ROOT_ELEMENT_MODEL_VERSION);
+		fieldList.add(ROOT_ELEMENT_UI_VERSION);
+		fieldList.add(IS_ENCRYPTED_FORM);
+		fieldList.add(IS_DOWNLOAD_ALLOWED);
+		fieldList.add(LANGUAGE_CODE);
+		fieldList.add(FORM_NAME);
+		fieldList.add(DESCRIPTION);
+		fieldList.add(DESCRIPTION_URL);
 
 		fieldValueMap.put(primaryKey, FormInfoFilesetTable.URI_FORM_ID_VALUE_FORM_INFO_FILESET);
 	}
@@ -117,14 +107,6 @@ public class FormInfoFilesetTable extends DynamicBase {
 	 */
 	private FormInfoFilesetTable(FormInfoFilesetTable ref, User user) {
 		super(ref, user);
-		rootElementModelVersion = ref.rootElementModelVersion;
-		rootElementUiVersion = ref.rootElementUiVersion;
-		isEncryptedForm = ref.isEncryptedForm;
-		isDownloadAllowed = ref.isDownloadAllowed;
-		languageCode = ref.languageCode;
-		formName = ref.formName;
-		description = ref.description;
-		descriptionUrl = ref.descriptionUrl;
 	}
 
 	@Override

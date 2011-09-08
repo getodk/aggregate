@@ -332,7 +332,7 @@ public class SubmissionFilter extends CommonFieldsBase {
 
     List<SubmissionFilter> filterList = new ArrayList<SubmissionFilter>();
 
-    List<? extends CommonFieldsBase> results = query.executeQuery(0);
+    List<? extends CommonFieldsBase> results = query.executeQuery();
     for (CommonFieldsBase cb : results) {
       if (cb instanceof SubmissionFilter) {
         SubmissionFilter filter = (SubmissionFilter) cb;

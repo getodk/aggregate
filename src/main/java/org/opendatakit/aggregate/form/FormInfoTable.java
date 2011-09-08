@@ -32,10 +32,8 @@ import org.opendatakit.common.web.CallingContext;
 public class FormInfoTable extends TopLevelDynamicBase {
 	static final String TABLE_NAME = "_form_info";
 
-	private static final DataField FORM_ID = new DataField("FORM_ID",
+	public static final DataField FORM_ID = new DataField("FORM_ID",
 			DataField.DataType.STRING, true, Form.MAX_FORM_ID_LENGTH);
-
-	public final DataField formId;
 
 	/**
 	 * Construct a relation prototype.
@@ -44,10 +42,10 @@ public class FormInfoTable extends TopLevelDynamicBase {
 	 */
 	private FormInfoTable(String databaseSchema) {
 		super(databaseSchema, TABLE_NAME);
-		fieldList.add(formId = new DataField(FORM_ID));
+		fieldList.add(FORM_ID);
 
 		fieldValueMap.put(primaryKey, CommonFieldsBase.newMD5HashUri(FormInfo.formInfoXFormParameters.formId));
-		fieldValueMap.put(formId, FormInfo.formInfoXFormParameters.formId);
+		fieldValueMap.put(FORM_ID, FormInfo.formInfoXFormParameters.formId);
 	}
 
 	/**
@@ -58,7 +56,6 @@ public class FormInfoTable extends TopLevelDynamicBase {
 	 */
 	private FormInfoTable(FormInfoTable ref, User user) {
 		super(ref, user);
-		formId = ref.formId;
 	}
 
 	@Override

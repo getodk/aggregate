@@ -13,11 +13,14 @@
  */
 package org.opendatakit.common.ermodel;
 
+import static org.junit.Assert.*;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.TestContextFactory;
-
-import junit.framework.TestCase;
 
 /**
  * Simple test case for the AbstractBlobRelationSet class.
@@ -25,11 +28,11 @@ import junit.framework.TestCase;
  * @author mitchellsundt@gmail.com
  *
  */
-public class BlobRelationSetTest extends TestCase {
+@RunWith(org.junit.runners.JUnit4.class)
+public class BlobRelationSetTest {
 
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
+	@Before
+	public void setUp() throws Exception {
 
 		CallingContext cc = TestContextFactory.getCallingContext();
 
@@ -45,6 +48,7 @@ public class BlobRelationSetTest extends TestCase {
 		}
 	}
 	
+	@Test
 	public void testCase1() throws ODKDatastoreException {
 		CallingContext cc = TestContextFactory.getCallingContext();
 		

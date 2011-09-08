@@ -129,18 +129,7 @@ public abstract class QueryBase {
    */
   protected List<? extends CommonFieldsBase> getSubmissionEntities() throws ODKDatastoreException {
 
-    // TODO: change this function to call other function with null parameter once it's verified
-    // return getSubmissionEntities(null);
-    
-    // retrieve submissions
-    List<? extends CommonFieldsBase> submissionEntities = null;
-    submissionEntities = query.executeQuery(fetchLimit + 1);
-    numOfRecords = submissionEntities.size();
-    if(submissionEntities.size() > fetchLimit) {
-      moreRecords = true;
-      submissionEntities.remove(fetchLimit);
-    }    
-    return submissionEntities;
+    return getSubmissionEntities(null);
   }
   
 
@@ -163,9 +152,7 @@ public abstract class QueryBase {
     // update state
     numOfRecords = submissionEntities.size();
     resumeCursor = results.getResumeCursor();
-    if(submissionEntities.size() > fetchLimit && resumeCursor != null) {
-      moreRecords = true;
-    }    
+    moreRecords = results.hasMoreResults();
     
     return submissionEntities;
   }

@@ -132,7 +132,7 @@ public class BinaryContentManipulator {
                uriVersionedContent);
          q.addSort(bcbRef.part, Direction.ASCENDING);
          List<? extends CommonFieldsBase> bcbList = q
-               .executeQuery(0);
+               .executeQuery();
          for (CommonFieldsBase cb : bcbList) {
             dbBcbEntityList.add((BinaryContentRefBlob) cb);
          }
@@ -432,7 +432,7 @@ public class BinaryContentManipulator {
       q.addFilter(ctntRelation.parentAuri, FilterOperation.EQUAL, parentKey);
       q.addSort(ctntRelation.ordinalNumber, Direction.ASCENDING);
 
-      List<? extends CommonFieldsBase> contentHits = q.executeQuery(0);
+      List<? extends CommonFieldsBase> contentHits = q.executeQuery();
       attachments.clear();
       for (CommonFieldsBase cb : contentHits) {
          attachments.add((BinaryContent) cb);

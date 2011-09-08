@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.datamodel.FormDataModel;
 import org.opendatakit.aggregate.datamodel.FormDataModel.DDRelationName;
 import org.opendatakit.aggregate.datamodel.FormDataModel.ElementType;
@@ -271,6 +270,10 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 			this.topLevelTableKey = key;
 		} else {
 			DynamicBase entity = (DynamicBase) row;
+			// we aren't the top level record so manufacture the 
+			// entity key of the top level record from the relation
+			// for that record and the up-pointer in our record 
+			// that holds the AURI for that top level record.
 			this.topLevelTableKey = new EntityKey(formDefinition
 					.getTopLevelGroup().getBackingObjectPrototype(), entity
 					.getTopLevelAuri());
@@ -305,8 +308,7 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 						Query query = datastore.createQuery(mBaseRelation, user);
 						query.addFilter(mBaseRelation.parentAuri, FilterOperation.EQUAL,
 								uriParent);
-						List<? extends CommonFieldsBase> rows = query
-								.executeQuery(ServletConsts.FETCH_LIMIT);
+						List<? extends CommonFieldsBase> rows = query.executeQuery();
 						if (rows.size() != 1) {
 							throw new IllegalStateException(
 									"Expected exactly one match in phantom reconstruction!");

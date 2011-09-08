@@ -76,13 +76,12 @@ public interface Query {
   public void addValueSetFilter(DataField attributeName, Collection<?> valueSet );
   
   /**
-   * Returns a list of entities which are the results of executing the query.
+   * Returns a list of all the entities which are the results of executing the query.
    * 
-   * @param fetchLimit the maximum number of Entity objects to retrieve from the Datastore
    * @return a List<Entity> which contains the Entity objects from the results of the Query
    * @throws ODKDatastoreException if there was a  problem executing the Query
    */
-  public List<? extends CommonFieldsBase> executeQuery(int fetchLimit) throws ODKDatastoreException;
+  public List<? extends CommonFieldsBase> executeQuery() throws ODKDatastoreException;
 
   /**
    * Returns a list of entities which are the results of executing the query.
@@ -108,7 +107,7 @@ public interface Query {
 
 
   /**
-   * Returns the list of distinct values for a given field with any given filter
+   * Returns the list of all distinct values for a given field with any given filter
    * and sort criteria.
    * 
    * @param dataField

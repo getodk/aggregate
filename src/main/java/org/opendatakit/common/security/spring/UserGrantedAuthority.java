@@ -179,7 +179,7 @@ public final class UserGrantedAuthority extends CommonFieldsBase {
 			Query query = ds.createQuery(relation, user);
 			query.addFilter(UserGrantedAuthority.GRANTED_AUTHORITY, FilterOperation.EQUAL, 
 							group.getAuthority());
-			membersList = query.executeQuery(0);
+			membersList = query.executeQuery();
 
 			// OK we have the desired and actual members lists for this groupname.
 			// find the set of members to remove...
@@ -231,7 +231,7 @@ public final class UserGrantedAuthority extends CommonFieldsBase {
 			List<? extends CommonFieldsBase> groupsList;
 			Query query = ds.createQuery(relation, user);
 			query.addFilter(UserGrantedAuthority.USER, FilterOperation.EQUAL, uriUser);
-			groupsList = query.executeQuery(0);
+			groupsList = query.executeQuery();
 
 			// OK we have the desired and actual groups lists for this username.
 			// find the set of groups to remove...
@@ -279,6 +279,8 @@ public final class UserGrantedAuthority extends CommonFieldsBase {
 			List<EntityKey> memberships = new ArrayList<EntityKey>();
 			for ( Object o : keys ) {
 				String uri = (String) o;
+				// we don't have the record that we want to delete; construct
+				// the entity key from the relation and the URI for the record.
 				memberships.add(new EntityKey(relation, uri));
 			}
 			datastore.deleteEntities(memberships, user);

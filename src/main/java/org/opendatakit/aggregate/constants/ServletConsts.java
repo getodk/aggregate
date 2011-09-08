@@ -117,7 +117,7 @@ public final class ServletConsts {
 
   public static final String RECORD_KEY = "record";
 
-  public static final int FORM_DELETE_RECORD_QUERY_LIMIT = 20;
+  public static final int FORM_DELETE_RECORD_QUERY_LIMIT = 50;
 
   // TODO: revise so no retrieval form limit
   public static final int FETCH_LIMIT = 1000;

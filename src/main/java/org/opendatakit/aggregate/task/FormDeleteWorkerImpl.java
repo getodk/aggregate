@@ -40,6 +40,8 @@ import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.PersistConsts;
 import org.opendatakit.common.persistence.Query;
+import org.opendatakit.common.persistence.QueryResult;
+import org.opendatakit.common.persistence.QueryResumePoint;
 import org.opendatakit.common.persistence.TaskLock;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
@@ -334,21 +336,22 @@ public class FormDeleteWorkerImpl {
     }
 
     if (relation != null) {
+      QueryResumePoint startCursor = null;
       for (;;) {
         // retrieve submissions
         Query surveyQuery = ds.createQuery(relation, user);
         surveyQuery.addSort(relation.lastUpdateDate, Query.Direction.DESCENDING);
         surveyQuery.addSort(relation.primaryKey, Query.Direction.DESCENDING);
 
-        List<? extends CommonFieldsBase> submissionEntities = surveyQuery
-            .executeQuery(ServletConsts.FORM_DELETE_RECORD_QUERY_LIMIT);
-
-        if (submissionEntities.size() == 0)
+        QueryResult result = surveyQuery.executeQuery(startCursor, ServletConsts.FORM_DELETE_RECORD_QUERY_LIMIT);
+        startCursor = result.getResumeCursor();
+        
+        if (result.getResultList().size() == 0)
           break;
 
         List<SubmissionKey> keys = new ArrayList<SubmissionKey>();
         String topLevelGroupName = form.getTopLevelGroupElement().getElementName();
-        for (CommonFieldsBase en : submissionEntities) {
+        for (CommonFieldsBase en : result.getResultList()) {
           TopLevelDynamicBase tl = (TopLevelDynamicBase) en;
           keys.add(new SubmissionKey(form.getFormId(), tl.getModelVersion(), tl.getUiVersion(),
               topLevelGroupName, tl.getUri()));

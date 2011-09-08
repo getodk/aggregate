@@ -111,7 +111,7 @@ public class Form {
 			q = ds.createQuery(filesetRelation, user);
 			q.addFilter(filesetRelation.topLevelAuri, FilterOperation.EQUAL, topLevelAuri);
 			
-			rows = q.executeQuery(0);
+			rows = q.executeQuery();
 			if ( rows.size() == 0 ) {
 				filesetRow = ds.createEntityUsingRelation(filesetRelation, user);
 				filesetRow.setTopLevelAuri(topLevelAuri);
@@ -131,9 +131,9 @@ public class Form {
 		manifest.refreshFromDatabase(cc);
 
 		XFormParameters p = new XFormParameters(
-					infoRow.getStringField(infoRow.formId),
-					filesetRow.getLongField(filesetRow.rootElementModelVersion),
-					filesetRow.getLongField(filesetRow.rootElementUiVersion) );
+					infoRow.getStringField(FormInfoTable.FORM_ID),
+					filesetRow.getLongField(FormInfoFilesetTable.ROOT_ELEMENT_MODEL_VERSION),
+					filesetRow.getLongField(FormInfoFilesetTable.ROOT_ELEMENT_UI_VERSION) );
 
 		formDefinition = FormDefinition.getFormDefinition(p, cc);
 	}
@@ -156,7 +156,7 @@ public class Form {
 		infoRow.setIsComplete(true);
 		infoRow.setModelVersion(1L);
 		infoRow.setUiVersion(0L);
-		infoRow.setStringField(infoRelation.formId, rootElementDefn.formId);
+		infoRow.setStringField(FormInfoTable.FORM_ID, rootElementDefn.formId);
 
 		newObject = true;
 
@@ -169,11 +169,11 @@ public class Form {
 			filesetRow.setTopLevelAuri(topLevelAuri);
 			filesetRow.setParentAuri(topLevelAuri);
 			filesetRow.setOrdinalNumber(1L);
-			filesetRow.setLongField(filesetRow.rootElementModelVersion, rootElementDefn.modelVersion);
-			filesetRow.setLongField(filesetRow.rootElementUiVersion, rootElementDefn.uiVersion);
-			filesetRow.setBooleanField(filesetRow.isEncryptedForm, isEncryptedForm);
-			filesetRow.setBooleanField(filesetRow.isDownloadAllowed, isDownloadEnabled);
-			filesetRow.setStringField(filesetRow.formName, title);
+			filesetRow.setLongField(FormInfoFilesetTable.ROOT_ELEMENT_MODEL_VERSION, rootElementDefn.modelVersion);
+			filesetRow.setLongField(FormInfoFilesetTable.ROOT_ELEMENT_UI_VERSION, rootElementDefn.uiVersion);
+			filesetRow.setBooleanField(FormInfoFilesetTable.IS_ENCRYPTED_FORM, isEncryptedForm);
+			filesetRow.setBooleanField(FormInfoFilesetTable.IS_DOWNLOAD_ALLOWED, isDownloadEnabled);
+			filesetRow.setStringField(FormInfoFilesetTable.FORM_NAME, title);
 		}
 		
 		this.xform = FormInfoFilesetTable.assertXformManipulator(topLevelAuri, filesetRow.getUri(), cc);
@@ -216,9 +216,9 @@ public class Form {
 		} else {
 
 			XFormParameters p = new XFormParameters(
-						infoRow.getStringField(infoRow.formId),
-						filesetRow.getLongField(filesetRow.rootElementModelVersion),
-						filesetRow.getLongField(filesetRow.rootElementUiVersion) );
+						infoRow.getStringField(FormInfoTable.FORM_ID),
+						filesetRow.getLongField(FormInfoFilesetTable.ROOT_ELEMENT_MODEL_VERSION),
+						filesetRow.getLongField(FormInfoFilesetTable.ROOT_ELEMENT_UI_VERSION) );
 
 			FormDefinition.deleteAbnormalModel(p, cc);
 		}
@@ -252,8 +252,8 @@ public class Form {
 
 	public String getMajorMinorVersionString() {
 
-		Long modelVersion = filesetRow.getLongField(filesetRow.rootElementModelVersion);
-		Long uiVersion = filesetRow.getLongField(filesetRow.rootElementUiVersion);
+		Long modelVersion = filesetRow.getLongField(FormInfoFilesetTable.ROOT_ELEMENT_MODEL_VERSION);
+		Long uiVersion = filesetRow.getLongField(FormInfoFilesetTable.ROOT_ELEMENT_UI_VERSION);
 		StringBuilder b = new StringBuilder();
 		if (modelVersion != null) {
 			b.append(modelVersion.toString());
@@ -275,7 +275,7 @@ public class Form {
 	 * @return odk identifier
 	 */
 	public String getFormId() {
-		return infoRow.getStringField(infoRow.formId);
+		return infoRow.getStringField(FormInfoTable.FORM_ID);
 	}
 
 	public boolean hasManifestFileset() {
@@ -292,7 +292,7 @@ public class Form {
 	 * @return viewable name
 	 */
 	public String getViewableName() {
-		return filesetRow.getStringField(filesetRow.formName);
+		return filesetRow.getStringField(FormInfoFilesetTable.FORM_NAME);
 	}
 
 	public String getViewableFormNameSuitableAsFileName() {
@@ -303,11 +303,11 @@ public class Form {
 	}
 	
 	public String getDescription() {
-		return filesetRow.getStringField(filesetRow.description);
+		return filesetRow.getStringField(FormInfoFilesetTable.DESCRIPTION);
 	}
 	
 	public String getDescriptionUrl() {
-		return filesetRow.getStringField(filesetRow.descriptionUrl);
+		return filesetRow.getStringField(FormInfoFilesetTable.DESCRIPTION_URL);
 	}
 
 	/**
@@ -386,7 +386,7 @@ public class Form {
 	 * @return true if form is encrypted, false otherwise
 	 */
 	public Boolean isEncryptedForm() {
-		return filesetRow.getBooleanField(filesetRow.isEncryptedForm);
+		return filesetRow.getBooleanField(FormInfoFilesetTable.IS_ENCRYPTED_FORM);
 	}
 
 	/**
@@ -395,7 +395,7 @@ public class Form {
 	 * @return true if form can be downloaded, false otherwise
 	 */
 	public Boolean getDownloadEnabled() {
-		return filesetRow.getBooleanField(filesetRow.isDownloadAllowed);
+		return filesetRow.getBooleanField(FormInfoFilesetTable.IS_DOWNLOAD_ALLOWED);
 	}
 
 	/**
@@ -406,7 +406,7 @@ public class Form {
 	 * 
 	 */
 	public void setDownloadEnabled(Boolean downloadEnabled) {
-		filesetRow.setBooleanField(filesetRow.isDownloadAllowed, downloadEnabled);
+		filesetRow.setBooleanField(FormInfoFilesetTable.IS_DOWNLOAD_ALLOWED, downloadEnabled);
 	}
 
 	/**
@@ -734,8 +734,8 @@ public class Form {
 	private BlobSubmissionOutcome isSameForm(XFormParameters rootElementDefn,  boolean isEncryptedFlag, String title,
 			byte[] xmlBytes, CallingContext cc) throws ODKDatastoreException, ODKFormAlreadyExistsException {
 		String rootFormId = getFormId();
-		Long rootModel = filesetRow.getLongField(filesetRow.rootElementModelVersion);
-		Long rootUi = filesetRow.getLongField(filesetRow.rootElementUiVersion);
+		Long rootModel = filesetRow.getLongField(FormInfoFilesetTable.ROOT_ELEMENT_MODEL_VERSION);
+		Long rootUi = filesetRow.getLongField(FormInfoFilesetTable.ROOT_ELEMENT_UI_VERSION);
 		Boolean isEncrypted = isEncryptedForm();
 		String formName = getViewableName();
 		
@@ -837,8 +837,8 @@ public class Form {
 	public boolean setXFormMediaFile(Long rootModelVersion, Long rootUiVersion,
 			MultiPartFormItem item, CallingContext cc)
 			throws ODKDatastoreException {
-		Long rootModel = filesetRow.getLongField(filesetRow.rootElementModelVersion);
-		Long rootUi = filesetRow.getLongField(filesetRow.rootElementUiVersion);
+		Long rootModel = filesetRow.getLongField(FormInfoFilesetTable.ROOT_ELEMENT_MODEL_VERSION);
+		Long rootUi = filesetRow.getLongField(FormInfoFilesetTable.ROOT_ELEMENT_UI_VERSION);
 
 		if (!sameVersion(rootModel, rootUi, rootModelVersion, rootUiVersion)) {
 			throw new ODKDatastoreException(

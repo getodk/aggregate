@@ -249,7 +249,7 @@ public class AbstractRelation implements Relation {
 		Query q = ds.createQuery(prototype, user);
 		q.addFilter(dataField, op, value);
 		
-		List<? extends CommonFieldsBase> list = q.executeQuery(0);
+		List<? extends CommonFieldsBase> list = q.executeQuery();
 		List<Entity> eList = new ArrayList<Entity>();
 		for ( CommonFieldsBase b : list ) {
 			eList.add( new EntityImpl( (RelationImpl) b ) );
@@ -285,7 +285,7 @@ public class AbstractRelation implements Relation {
 		User user = cc.getCurrentUser();
 		
 		EntityImpl ei = verifyEntityType(e);
-		ds.deleteEntity(new EntityKey(prototype, ei.backingObject.getUri()), user);
+		ds.deleteEntity(ei.backingObject.getEntityKey(), user);
 	}
 
 	/**
@@ -345,6 +345,8 @@ public class AbstractRelation implements Relation {
 		List<?> pkList = q.executeDistinctValueForDataField(prototype.primaryKey);
 		List<EntityKey> keys = new ArrayList<EntityKey>();
 		for ( Object key : pkList ) {
+			// we don't ahve the individual records, just the PKs for them
+			// construct the entity keys from the relation and those PKs
 			keys.add(new EntityKey(prototype, (String) key));
 		}
 		ds.deleteEntities(keys, user);
