@@ -5,22 +5,28 @@
 	padding: 0px;
 }
 
-body {
-	margin-left: 15px;
+.uploadCloseButton {
+	float: right;
 }
+
+.uploadFrame {
+	float: left;
+	clear: none;
+	border: 0px;
+}
+
 h1 {
 	color: #07115A;
-	margin-top: 15px;
+	font-size: 20px;
+	font-weight: bold;
+	margin-bottom: 20px;
 }
-h2 {
-	color: #777984;
+
+h1, p {
+	font-family: 'Arial Unicode MS', Arial, sans-serif;
 }
-p {
-	margin-top: 10px;
-}
-#uploadButton {
-	margin-top: 12px;
-}
-.clearButton {
-	margin-left: 10px;
+
+#uploadTable {
+	margin-top: 20px;
+	margin-bottom: 20px;
 }
