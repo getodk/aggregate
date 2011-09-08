@@ -520,6 +520,8 @@ public class FormParserForJavaRosa {
 	    //
 	    final FormDataModel fdm = FormDataModel.assertRelation(cc);
 	    
+	    // we haven't actually constructed the fdm record yet, so use the 
+	    // relation when creating the entity key...
 	    final EntityKey k = new EntityKey( fdm, fdmSubmissionUri);
 	
 	    NamingSet opaque = new NamingSet();

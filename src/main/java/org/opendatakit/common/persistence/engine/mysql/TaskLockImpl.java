@@ -273,6 +273,8 @@ public class TaskLockImpl implements TaskLock {
 		boolean result = false;
 		try {
 			TaskLockTable relation = TaskLockTable.assertRelation(datastore, user);
+			// we don't have the record that we want to delete; construct
+			// the entity key from the relation and the URI for the record.
 			datastore.deleteEntity(new EntityKey(relation, lockId), user);
 			result = true;
 		} catch (ODKDatastoreException e) {

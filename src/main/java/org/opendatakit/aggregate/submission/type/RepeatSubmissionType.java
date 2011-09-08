@@ -20,7 +20,6 @@ package org.opendatakit.aggregate.submission.type;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.format.FormatConsts;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.form.FormDefinition;
@@ -133,8 +132,10 @@ public class RepeatSubmissionType implements SubmissionRepeat {
 		q.addSort(((DynamicBase) repeatGroup.getFormDataModel().getBackingObjectPrototype()).ordinalNumber, 
 				Direction.ASCENDING);
 
-		List<? extends CommonFieldsBase> repeatGroupList = q
-				.executeQuery(ServletConsts.FETCH_LIMIT);
+		// reconstruct all the repeating groups from a single submission.
+		// This should be a small number.  We don't have the logic to 
+		// handle fractional returns of rows.
+		List<? extends CommonFieldsBase> repeatGroupList = q.executeQuery();
 		for (CommonFieldsBase cb : repeatGroupList) {
 			DynamicBase d = (DynamicBase) cb;
 			SubmissionSet set = new SubmissionSet(enclosingSet, d, repeatGroup,

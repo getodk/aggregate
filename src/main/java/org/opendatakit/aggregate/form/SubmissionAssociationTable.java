@@ -223,7 +223,7 @@ public final class SubmissionAssociationTable extends CommonFieldsBase {
 		    String submissionFormIdUri = CommonFieldsBase.newMD5HashUri(params.formId); // key under which submission is located...
 		    Query q = cc.getDatastore().createQuery(saRelation, cc.getCurrentUser());
 		    q.addFilter(SubmissionAssociationTable.URI_MD5_SUBMISSION_FORM_ID, Query.FilterOperation.EQUAL, submissionFormIdUri);
-		    List<? extends CommonFieldsBase> l = q.executeQuery(0);
+		    List<? extends CommonFieldsBase> l = q.executeQuery();
 		    for ( CommonFieldsBase b : l ) {
 		    	SubmissionAssociationTable t = (SubmissionAssociationTable) b;
 		    	if ( t.getXFormParameters().equals(params) ) {

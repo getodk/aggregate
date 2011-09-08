@@ -26,7 +26,6 @@ import org.opendatakit.aggregate.datamodel.FormDataModel.ElementType;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.datamodel.InstanceData;
 import org.opendatakit.aggregate.datamodel.SelectChoice;
-import org.opendatakit.aggregate.datamodel.TopLevelDynamicBase;
 import org.opendatakit.aggregate.datamodel.TopLevelInstanceData;
 import org.opendatakit.common.datamodel.BinaryContent;
 import org.opendatakit.common.datamodel.BinaryContentRefBlob;
@@ -97,192 +96,6 @@ public class FormDefinition {
 			ordinal = 1L;
 			sequenceCounter = 1;
 		}
-	}
-	
-	/**
-	 * Append to the list the FormDataModel entries needed to represent this
-	 * dynamic table.  Useful for generating the FormInfo data model from its 
-	 * base tables.
-	 * 
-	 * @param list
-	 * @param definitionKey
-	 * @param form
-	 * @param topLevel
-	 * @param baseUI
-	 * @param ordinal
-	 * @param datastore
-	 * @param user
-	 * @return the uri key for the FDM of the table.
-	 * @throws ODKDatastoreException
-	 */
-	static final String buildTableFormDataModel( List<FormDataModel> list, 
-													DynamicCommonFieldsBase form, 
-													DynamicCommonFieldsBase topLevel, 
-													String parentURI,
-													OrdinalSequence os,
-													CallingContext cc ) throws ODKDatastoreException {
-		FormDataModel fdm = FormDataModel.assertRelation(cc);
-		FormDataModel d;
-		
-		if ( topLevel == null || 
-			 !( topLevel instanceof TopLevelDynamicBase ) ) {
-			throw new IllegalStateException("topLevel entity must be present and a TopLevelDynamicBase!");
-		}
-		// we are making use of the fact that the PK in the 
-		// FormDataModel is the PK within the relation model.
-		final EntityKey k = new EntityKey( fdm, topLevel.getUri());
-		int idx = parentURI.lastIndexOf('(');
-		String parentURI_minusParenPhrase = "elem+" + parentURI;
-		if ( idx != -1 ) {
-			parentURI_minusParenPhrase = parentURI.substring(0,idx);
-		}
-		
-		String groupUri = form.getUri();
-		groupUri = String.format("%1$s(%2$08d)", parentURI_minusParenPhrase, os.sequenceCounter);
-		
-		// define the table...
-		Datastore ds = cc.getDatastore();
-		User user = cc.getCurrentUser();
-		d = ds.createEntityUsingRelation(fdm, user);
-		list.add(d);
-		// reset the PK to be the PK of the table we are representing
-		d.setStringField(fdm.primaryKey, groupUri);
-		d.setOrdinalNumber(os.ordinal);
-		d.setParentUriFormDataModel(parentURI);
-		d.setUriSubmissionDataModel(topLevel.getUri());
-		d.setElementName(form.getTableName());
-		d.setElementType((form == topLevel) ?
-				FormDataModel.ElementType.GROUP :
-				FormDataModel.ElementType.REPEAT );
-		d.setPersistAsColumn(null);
-		d.setPersistAsTable(form.getTableName());
-		d.setPersistAsSchema(form.getSchemaName());
-		
-		// enforce defined ordinal positions based upon order in fieldList
-		
-		// loop through the fields...
-		os.ordinal = 0L;
-		for ( DataField f : form.getFieldList() ) {
-			if ( f.getName().startsWith("_")) continue; // ignore metadata
-			++(os.ordinal);
-			
-			// this field should be in the fdm model...
-			d = ds.createEntityUsingRelation(fdm, user);
-			list.add(d);
-			String pkFormatted = String.format("%1$s(%2$08d)", parentURI_minusParenPhrase, ++(os.sequenceCounter));
-			d.setStringField(fdm.primaryKey, pkFormatted);
-			d.setOrdinalNumber(os.ordinal);
-			d.setParentUriFormDataModel(groupUri);
-			d.setUriSubmissionDataModel(k.getKey());
-			d.setElementName(f.getName());
-			switch ( f.getDataType() ) {
-			case STRING:
-				d.setElementType(FormDataModel.ElementType.STRING);
-				break;
-			case INTEGER:
-				d.setElementType(FormDataModel.ElementType.INTEGER);
-				break;
-			case DECIMAL:
-				d.setElementType(FormDataModel.ElementType.DECIMAL);
-				break;
-			case BOOLEAN:
-				d.setElementType(FormDataModel.ElementType.BOOLEAN);
-				break;
-			case DATETIME:
-				d.setElementType(FormDataModel.ElementType.JRDATETIME);
-				break;
-			case URI:
-			case BINARY: // this data type is hidden under BINARY content structure...
-				default:
-					throw new IllegalStateException("Unexpected DataType");
-			}
-			d.setPersistAsColumn(f.getName());
-			d.setPersistAsTable(form.getTableName());
-			d.setPersistAsSchema(form.getSchemaName());
-		}
-		
-		++(os.ordinal);
-		++(os.sequenceCounter);
-		return groupUri;
-	}
-	
-	static final void buildBinaryContentFormDataModel( List<FormDataModel> list, 
-			String binaryContentElementName,
-			String binaryContentTableName,
-			String binaryContentRefBlobTableName,
-			String refBlobTableName,
-			TopLevelDynamicBase topLevel, 
-			String parentTableKey,
-			OrdinalSequence os,
-			CallingContext cc ) throws ODKDatastoreException {
-		
-		FormDataModel fdm = FormDataModel.assertRelation(cc);
-		FormDataModel d;
-		
-		// we are making use of the fact that the PK in the 
-		// FormDataModel is the PK within the relation model.
-		final String topLevelURI = topLevel.getUri();
-		
-		int idx = parentTableKey.lastIndexOf('(');
-		String parentURI_minusParenPhrase = "elem+" + parentTableKey;
-		if ( idx != -1 ) {
-			parentURI_minusParenPhrase = parentTableKey.substring(0,idx);
-		}
-		String binaryContentUri = String.format("%1$s(%2$08d)", 
-				parentURI_minusParenPhrase,
-		  		os.sequenceCounter);
-		String binaryContentRefBlobUri = String.format("%1$s(%2$08d-%3$s)", 
-				parentURI_minusParenPhrase,
-		  		os.sequenceCounter, "bc_ref");
-		String refBlobUri = String.format("%1$s(%2$08d-%3$s)", 
-				parentURI_minusParenPhrase,
-		  		os.sequenceCounter, "ref_blob");
-		
-		Datastore ds = cc.getDatastore();
-		User user = cc.getCurrentUser();
-		// record for binary content...
-		d = ds.createEntityUsingRelation(fdm, user);
-		d.setStringField(fdm.primaryKey, binaryContentUri);
-		list.add(d);
-		final String bcURI = d.getUri();
-		d.setOrdinalNumber(os.ordinal);
-		d.setParentUriFormDataModel(parentTableKey);
-		d.setUriSubmissionDataModel(topLevelURI);
-		d.setElementName(binaryContentElementName);
-		d.setElementType(FormDataModel.ElementType.BINARY);
-		d.setPersistAsColumn(null);
-		d.setPersistAsTable(binaryContentTableName);
-		d.setPersistAsSchema(fdm.getSchemaName());
-
-		// record for binary content ref blob..
-		d = ds.createEntityUsingRelation(fdm, user);
-		d.setStringField(fdm.primaryKey, binaryContentRefBlobUri);
-		list.add(d);
-		final String bcbURI = d.getUri();
-		d.setOrdinalNumber(1L);
-		d.setParentUriFormDataModel(bcURI);
-		d.setUriSubmissionDataModel(topLevelURI);
-		d.setElementName(binaryContentElementName);
-		d.setElementType(FormDataModel.ElementType.BINARY_CONTENT_REF_BLOB);
-		d.setPersistAsColumn(null);
-		d.setPersistAsTable(binaryContentRefBlobTableName);
-		d.setPersistAsSchema(fdm.getSchemaName());
-
-		// record for ref blob...
-		d = ds.createEntityUsingRelation(fdm, user);
-		d.setStringField(fdm.primaryKey, refBlobUri);
-		list.add(d);
-		d.setOrdinalNumber(1L);
-		d.setParentUriFormDataModel(bcbURI);
-		d.setUriSubmissionDataModel(topLevelURI);
-		d.setElementName(binaryContentElementName);
-		d.setElementType(FormDataModel.ElementType.REF_BLOB);
-		d.setPersistAsColumn(null);
-		d.setPersistAsTable(refBlobTableName);
-		d.setPersistAsSchema(fdm.getSchemaName());
-		
-		++(os.ordinal);
-		++(os.sequenceCounter);
 	}
 	
 	static final void assertModel(XFormParameters p, List<FormDataModel> model, CallingContext cc) throws ODKDatastoreException {
@@ -378,7 +191,7 @@ public class FormDefinition {
 				    FormDataModel fdm = FormDataModel.assertRelation(cc);
 					Query query = ds.createQuery(fdm, user);
 					query.addFilter(FormDataModel.URI_SUBMISSION_DATA_MODEL, FilterOperation.EQUAL, uriSubmissionDataModel);
-					fdmList = query.executeQuery(0);
+					fdmList = query.executeQuery();
 					
 					if ( fdmList == null || fdmList.size() == 0 ) {
 				    	logger.warn("No FDM records for formId " + xformParameters.toString());
@@ -716,7 +529,7 @@ public class FormDefinition {
 				    FormDataModel fdm = FormDataModel.assertRelation(cc);
 					Query query = ds.createQuery(fdm, user);
 					query.addFilter(FormDataModel.URI_SUBMISSION_DATA_MODEL, FilterOperation.EQUAL, uriSubmissionDataModel);
-					fdmList = query.executeQuery(0);
+					fdmList = query.executeQuery();
 						
 					if ( fdmList == null || fdmList.size() == 0 ) {
 						return;
@@ -759,11 +572,10 @@ public class FormDefinition {
 		// forget us in the local cache...
 	    forget(submissionAssociation.getUriSubmissionDataModel());
 
-	    FormDataModel fdm = FormDataModel.assertRelation(cc);
-		List<EntityKey> eks = new ArrayList<EntityKey>();
+	    List<EntityKey> eks = new ArrayList<EntityKey>();
 		// queue everything in the formDataModel for delete
 	    for ( FormDataModel m : elementList ) {
-			eks.add(new EntityKey(fdm, m.getUri()));
+			eks.add(m.getEntityKey());
 	    }
 	    // delete everything out of FDM
 	    ds.deleteEntities(eks, user);
@@ -778,7 +590,7 @@ public class FormDefinition {
 	    }
 		
 		// delete the SA table linking to the model (orphans the model)...
-		ds.deleteEntity(new EntityKey(submissionAssociation, submissionAssociation.getUri()), user);
+		ds.deleteEntity(submissionAssociation.getEntityKey(), user);
 		// forget us in the local cache (optimization...)
 	    forget(submissionAssociation.getUriSubmissionDataModel());
 	}

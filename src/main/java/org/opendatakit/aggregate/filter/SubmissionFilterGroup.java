@@ -248,7 +248,7 @@ public class SubmissionFilterGroup extends CommonFieldsBase {
     
     List<SubmissionFilterGroup> filterGroupList = new ArrayList<SubmissionFilterGroup>();
 
-    List<? extends CommonFieldsBase> results = query.executeQuery(0);
+    List<? extends CommonFieldsBase> results = query.executeQuery();
     for (CommonFieldsBase cb : results) {
       if(cb instanceof SubmissionFilterGroup) {
         SubmissionFilterGroup tmp = (SubmissionFilterGroup)cb;

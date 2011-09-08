@@ -169,7 +169,7 @@ public class UserServiceImpl implements org.opendatakit.common.security.UserServ
 		   */
 	      GrantedAuthorityHierarchyTable relation = GrantedAuthorityHierarchyTable.assertRelation(datastore, getDaemonAccountUser());
 	      Query query = datastore.createQuery(relation, getDaemonAccountUser());
-	      List<?> values = query.executeQuery(0);
+	      List<?> values = query.executeQuery();
 	      return !values.isEmpty();
 	  } catch ( ODKDatastoreException e ) {
 		  e.printStackTrace();

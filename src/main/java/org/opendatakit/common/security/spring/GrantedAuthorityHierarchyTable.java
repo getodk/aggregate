@@ -129,7 +129,7 @@ public final class GrantedAuthorityHierarchyTable extends CommonFieldsBase {
 		Query query = ds.createQuery(relation, user);
 		query.addFilter(GrantedAuthorityHierarchyTable.DOMINATING_GRANTED_AUTHORITY, 
 							FilterOperation.EQUAL, dominantGrant.getAuthority() );
-		groupsList = query.executeQuery(0);
+		groupsList = query.executeQuery();
 
 		// construct the set of groups that this group directly inherits from
 		Set<GrantedAuthority> groups = new HashSet<GrantedAuthority>();
@@ -186,7 +186,7 @@ public final class GrantedAuthorityHierarchyTable extends CommonFieldsBase {
 		relation = GrantedAuthorityHierarchyTable.assertRelation(ds, user);
 		Query query = ds.createQuery(relation, user);
 		query.addSort(GrantedAuthorityHierarchyTable.DOMINATING_GRANTED_AUTHORITY, Direction.ASCENDING);
-		groupsList = query.executeQuery(0);
+		groupsList = query.executeQuery();
 
 		TreeMap<String, TreeSet<String>> inheritFrom = new TreeMap<String, TreeSet<String>>();
 		for ( CommonFieldsBase b : groupsList ) {
@@ -237,7 +237,7 @@ public final class GrantedAuthorityHierarchyTable extends CommonFieldsBase {
 			relation = GrantedAuthorityHierarchyTable.assertRelation(ds, user);
 			Query query = ds.createQuery(relation, user);
 			query.addFilter(GrantedAuthorityHierarchyTable.DOMINATING_GRANTED_AUTHORITY, FilterOperation.EQUAL, dominantGrant.getAuthority());
-			groupsList = query.executeQuery(0);
+			groupsList = query.executeQuery();
 
 			// OK we have the groups and roles to establish for this dominantGrant.
 			// AND we have the groupsList of groups and roles already established for dominantGrant.

@@ -194,7 +194,7 @@ public class TypedEntityQuery<T extends TypedEntity>
      */
     public T get() throws ODKDatastoreException
     {
-        List<T> results = execute(1);
+        List<T> results = execute();
         if (results.isEmpty())
         {
             throw new ODKDatastoreException(
@@ -225,29 +225,14 @@ public class TypedEntityQuery<T extends TypedEntity>
     }
 
     /**
-     * Execute the query and return a list of all results. Equivalent to calling
-     * {@link #execute(int) execute(0)}.
+     * Execute the query and return a list of all results.
      * 
      * @return a list of all the entities which matched the query.
      * @throws ODKDatastoreException
      */
     public List<T> execute() throws ODKDatastoreException
     {
-        return execute(0);
-    }
-
-    /**
-     * Execute the query and return a list of results.
-     * 
-     * @param limit
-     *            the maximum number of entities to retrieve, or 0 for no limit.
-     * @return a list of the entities which matched the query. The size of this
-     *         list will be no greater than limit.
-     * @throws ODKDatastoreException
-     */
-    public List<T> execute(int limit) throws ODKDatastoreException
-    {
-        List<Entity> genericEntities = query.execute(limit);
+        List<Entity> genericEntities = query.execute();
         List<T> relationEntities = new ArrayList<T>();
         for (Entity genericEntity : genericEntities)
         {

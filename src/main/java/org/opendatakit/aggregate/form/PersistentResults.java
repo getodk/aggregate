@@ -305,7 +305,7 @@ public class PersistentResults {
         // query.addFilter(PersistentResults.getRequestingUserKey(),
 	    // FilterOperation.EQUAL, cc.getCurrentUser().getUriUser());
 
-		List<? extends CommonFieldsBase> l = query.executeQuery(0);
+		List<? extends CommonFieldsBase> l = query.executeQuery();
 
 	    List<PersistentResults> results = new ArrayList<PersistentResults>();
 	    for (CommonFieldsBase cb : l) {
@@ -326,7 +326,7 @@ public class PersistentResults {
 	
 		Date limit = new Date(now.getTime() - RETRY_INTERVAL_MILLISECONDS );
 		q.addFilter(PersistentResultsTable.LAST_RETRY_DATE, FilterOperation.LESS_THAN, limit );
-		List<? extends CommonFieldsBase> l = q.executeQuery(0);
+		List<? extends CommonFieldsBase> l = q.executeQuery();
 		/*
 		 * The list of objects consists only of those that were last 
 		 * fired at a lastRetryDate older than the retry interval, which
@@ -363,7 +363,7 @@ public class PersistentResults {
 		PersistentResultsTable relation = PersistentResultsTable.assertRelation(cc);
 		Query q = ds.createQuery(relation, user);
 		q.addFilter(PersistentResultsTable.FORM_ID, FilterOperation.EQUAL, theForm.getFormId());
-		List<? extends CommonFieldsBase> l = q.executeQuery(0);
+		List<? extends CommonFieldsBase> l = q.executeQuery();
 		
 		List<PersistentResults> r = new ArrayList<PersistentResults>();
 		for ( CommonFieldsBase b : l ) {

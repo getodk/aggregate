@@ -162,7 +162,7 @@ public class SubmissionColumnFilter extends CommonFieldsBase {
 
     List<SubmissionColumnFilter> column = new ArrayList<SubmissionColumnFilter>();
 
-    List<? extends CommonFieldsBase> results = query.executeQuery(0);
+    List<? extends CommonFieldsBase> results = query.executeQuery();
     for (CommonFieldsBase cb : results) {
       if (cb instanceof SubmissionColumnFilter) {
         column.add((SubmissionColumnFilter) cb);

@@ -77,7 +77,7 @@ public class ChoiceSubmissionType extends SubmissionFieldBase<List<String>> {
 		q.addFilter(sel.parentAuri, FilterOperation.EQUAL, parentKey);
 		q.addSort(sel.ordinalNumber, Direction.ASCENDING);
 
-		List<? extends CommonFieldsBase> choiceHits = q.executeQuery(0);
+		List<? extends CommonFieldsBase> choiceHits = q.executeQuery();
 		choices.clear();
 		values.clear();
 		for ( CommonFieldsBase cb : choiceHits ) {

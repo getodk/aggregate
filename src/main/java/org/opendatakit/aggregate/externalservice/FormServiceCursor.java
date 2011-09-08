@@ -281,7 +281,7 @@ public final class FormServiceCursor extends CommonFieldsBase {
     query.addFilter(URI_MD5_FORM_ID_PROPERTY, FilterOperation.EQUAL, form.getEntityKey().getKey());
     List<ExternalService> esList = new ArrayList<ExternalService>();
 
-    List<? extends CommonFieldsBase> fscList = query.executeQuery(0);
+    List<? extends CommonFieldsBase> fscList = query.executeQuery();
     for (CommonFieldsBase cb : fscList) {
       FormServiceCursor c = (FormServiceCursor) cb;
       
@@ -311,7 +311,7 @@ public final class FormServiceCursor extends CommonFieldsBase {
          query.addFilter(relation.lastUpdateDate, FilterOperation.LESS_THAN_OR_EQUAL,
                olderThanDate);
          query.addSort(relation.lastUpdateDate, Direction.ASCENDING);
-         List<? extends CommonFieldsBase> cfbList = query.executeQuery(0);
+         List<? extends CommonFieldsBase> cfbList = query.executeQuery();
          for (CommonFieldsBase cfb : cfbList) {
             fscList.add((FormServiceCursor) cfb);
          }

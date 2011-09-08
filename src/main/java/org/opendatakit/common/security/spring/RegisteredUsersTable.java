@@ -288,7 +288,7 @@ public final class RegisteredUsersTable extends CommonFieldsBase {
 		q.addFilter(LOCAL_USERNAME, FilterOperation.EQUAL, username);
 		q.addSort(prototype.lastUpdateDate, Direction.DESCENDING);
 		@SuppressWarnings("unchecked")
-		List<RegisteredUsersTable> l = (List<RegisteredUsersTable>) q.executeQuery(0);
+		List<RegisteredUsersTable> l = (List<RegisteredUsersTable>) q.executeQuery();
 		if ( l.size() != 1 ) {
 			return null;
 		} else {
@@ -316,7 +316,7 @@ public final class RegisteredUsersTable extends CommonFieldsBase {
 		q.addFilter(LOCAL_USERNAME, FilterOperation.EQUAL, username);
 		q.addSort(prototype.lastUpdateDate, Direction.DESCENDING);
 		@SuppressWarnings("unchecked")
-		List<RegisteredUsersTable> l = (List<RegisteredUsersTable>) q.executeQuery(0);
+		List<RegisteredUsersTable> l = (List<RegisteredUsersTable>) q.executeQuery();
 		if ( l.size() > 1 ) {
 			// two or more active records with the same username.
 			// remove the older ones, keeping only the newest.
@@ -359,7 +359,7 @@ public final class RegisteredUsersTable extends CommonFieldsBase {
 		q.addFilter(OPENID_EMAIL, FilterOperation.EQUAL, email);
 		q.addSort(prototype.lastUpdateDate, Direction.DESCENDING);
 		@SuppressWarnings("unchecked")
-		List<RegisteredUsersTable> l = (List<RegisteredUsersTable>) q.executeQuery(0);
+		List<RegisteredUsersTable> l = (List<RegisteredUsersTable>) q.executeQuery();
 		if ( l.size() != 1 ) {
 			return null;
 		} else {
@@ -375,7 +375,7 @@ public final class RegisteredUsersTable extends CommonFieldsBase {
 		q.addFilter(OPENID_EMAIL, FilterOperation.EQUAL, email);
 		q.addSort(prototype.lastUpdateDate, Direction.DESCENDING);
 		@SuppressWarnings("unchecked")
-		List<RegisteredUsersTable> l = (List<RegisteredUsersTable>) q.executeQuery(0);
+		List<RegisteredUsersTable> l = (List<RegisteredUsersTable>) q.executeQuery();
 		if ( l.size() > 1 ) {
 			// two or more active records with the same email.
 			// remove the older ones, keeping only the newest.
