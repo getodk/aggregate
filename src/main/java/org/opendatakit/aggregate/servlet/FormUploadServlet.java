@@ -74,55 +74,57 @@ public class FormUploadServlet extends ServletUtilBase {
    * Script path to include...
    */
   private static final String UPLOAD_SCRIPT_RESOURCE = "javascript/upload_control.js";
+  private static final String UPLOAD_STYLE_RESOURCE = "stylesheets/upload.css";
+  private static final String UPLOAD_BUTTON_STYLE_RESOURCE = "stylesheets/button.css";
 
   private static final String UPLOAD_PAGE_BODY_START = 
 
-"<div style=\"overflow: auto;\"><p><b>Upload one form into ODK Aggregate</b></p>" +
+"<div style=\"overflow: auto;\"><p id=\"subHeading\"><b>Upload one form into ODK Aggregate</b></p>" +
 "<!--[if true]><p style=\"color: red;\">For a better user experience, use Chrome, Firefox or Safari</p>" +
 "<![endif] -->" +
 "<form id=\"ie_backward_compatible_form\"" + 
 " accept-charset=\"UTF-8\" method=\"POST\" encoding=\"multipart/form-data\" enctype=\"multipart/form-data\"" + 
 " action=\"";// emit the ADDR
   private static final String UPLOAD_PAGE_BODY_MIDDLE = "\">" +
-"	  <table>" +
+"	  <table id=\"uploadTable\">" +
 "	  	<tr>" +
 "	  		<td><label for=\"form_def_file\">Form definition:</label></td>" +
-"	  		<td><input id=\"form_def_file\" type=\"file\" size=\"80\"" +
+"	  		<td><input id=\"form_def_file\" type=\"file\" size=\"80\" class=\"gwt-Button\"" +
 "	  			name=\"form_def_file\" /></td>" +
 "	  	</tr>\n" +
 "	  	<tr>" +
 "	  		<td><label for=\"mediaFiles\">Media file(s):</label></td>" +
-"	  		<td><input id=\"mediaFiles\" type=\"file\" size=\"80,20\" name=\"datafile\" multiple /><input id=\"clear_media_files\" type=\"button\" value=\"Clear\" onClick=\"clearMediaInputField('mediaFiles')\" /></td>" +
+"	  		<td><input id=\"mediaFiles\" class=\"gwt-Button\" type=\"file\" size=\"80,20\" name=\"datafile\" multiple /><input id=\"clear_media_files\" type=\"button\" class=\"gwt-Button\" value=\"Clear\" onClick=\"clearMediaInputField('mediaFiles')\" /></td>" +
 "	  	</tr>" +
 "	  	<!--[if true]>" +
 "	      <tr>" +
 "	          <td><label for=\"mediaFiles2\">Media file #2:</label></td>" +
-"	          <td><input id=\"mediaFiles2\" type=\"file\" size=\"80\" name=\"datafile\" /><input id=\"clear_media_files2\" type=\"button\" value=\"Clear\" onClick=\"clearMediaInputField('mediaFiles2')\" /></td>" +
+"	          <td><input id=\"mediaFiles2\" class=\"gwt-Button\" type=\"file\" size=\"80\" name=\"datafile\" /><input id=\"clear_media_files2\" type=\"button\" class=\"gwt-Button\" value=\"Clear\" onClick=\"clearMediaInputField('mediaFiles2')\" /></td>" +
 "	      </tr>" +
 "	      <tr>" +
 "	          <td><label for=\"mediaFiles3\">Media file #3:</label></td>" +
-"	          <td><input id=\"mediaFiles3\" type=\"file\" size=\"80\" name=\"datafile\" /><input id=\"clear_media_files3\" type=\"button\" value=\"Clear\" onClick=\"clearMediaInputField('mediaFiles3')\" /></td>" +
+"	          <td><input id=\"mediaFiles3\" class=\"gwt-Button\" type=\"file\" size=\"80\" name=\"datafile\" /><input id=\"clear_media_files3\" type=\"button\" class=\"gwt-Button\" value=\"Clear\" onClick=\"clearMediaInputField('mediaFiles3')\" /></td>" +
 "	      </tr>" +
 "	      <tr>" +
 "	          <td><label for=\"mediaFiles4\">Media file #4:</label></td>" +
-"	          <td><input id=\"mediaFiles4\" type=\"file\" size=\"80\" name=\"datafile\" /><input id=\"clear_media_files4\" type=\"button\" value=\"Clear\" onClick=\"clearMediaInputField('mediaFiles4')\" /></td>" +
+"	          <td><input id=\"mediaFiles4\" class=\"gwt-Button\" type=\"file\" size=\"80\" name=\"datafile\" /><input id=\"clear_media_files4\" type=\"button\" class=\"gwt-Button\" value=\"Clear\" onClick=\"clearMediaInputField('mediaFiles4')\" /></td>" +
 "	      </tr>" +
 "	      <tr>" +
 "	          <td><label for=\"mediaFiles5\">Media file #5:</label></td>" +
-"	          <td><input id=\"mediaFiles5\" type=\"file\" size=\"80\" name=\"datafile\" /><input id=\"clear_media_files5\" type=\"button\" value=\"Clear\" onClick=\"clearMediaInputField('mediaFiles5')\" /></td>" +
+"	          <td><input id=\"mediaFiles5\" class=\"gwt-Button\" type=\"file\" size=\"80\" name=\"datafile\" /><input id=\"clear_media_files5\" type=\"button\" class=\"gwt-Button\" value=\"Clear\" onClick=\"clearMediaInputField('mediaFiles5')\" /></td>" +
 "	      </tr>" +
 "	      <tr>" +
 "	          <td><label for=\"mediaFiles6\">Media file #6:</label></td>" +
-"	          <td><input id=\"mediaFiles6\" type=\"file\" size=\"80\" name=\"datafile\" /><input id=\"clear_media_files6\" type=\"button\" value=\"Clear\" onClick=\"clearMediaInputField('mediaFiles6')\" /></td>" +
+"	          <td><input id=\"mediaFiles6\" class=\"gwt-Button\" type=\"file\" size=\"80\" name=\"datafile\" /><input id=\"clear_media_files6\" type=\"button\" class=\"gwt-Button\" value=\"Clear\" onClick=\"clearMediaInputField('mediaFiles6')\" /></td>" +
 "	      </tr>" +
 "	      <![endif]-->\n" +
 "	  	<tr>" +
-"	  		<td><input type=\"submit\" name=\"button\" value=\"Upload Form\" /></td>" +
+"	  		<td><input type=\"submit\" name=\"button\" class=\"gwt-Button\" value=\"Upload Form\" /></td>" +
 "	  		<td />" +
 "	  	</tr>" +
 "	  </table>\n" +
 "	  </form>" +
-"<p><b><font color=\"red\">NOTE:</font> String form data will be truncated to " + Long.toString(PersistConsts.DEFAULT_MAX_STRING_LENGTH) +
+"<p id=\"note\"><b><font color=\"red\">NOTE:</font> String form data will be truncated to " + Long.toString(PersistConsts.DEFAULT_MAX_STRING_LENGTH) +
 " characters.</b>  See ODK Aggregate 1.0 documentation for how to increase (or decrease) this size.</p>" +
 "<p>Media files for the form's logo, images, audio clips and video clips " +
 "(if any) should be in a single directory without subdirectories.</p>" +
@@ -156,6 +158,12 @@ public class FormUploadServlet extends ServletUtilBase {
 	headerString.append("<script type=\"application/javascript\" src=\"");
 	headerString.append(cc.getWebApplicationURL(UPLOAD_SCRIPT_RESOURCE));
 	headerString.append("\"></script>");
+	headerString.append("<link rel=\"stylesheet\" type=\"text/css\" href=\"");
+	headerString.append(cc.getWebApplicationURL(UPLOAD_STYLE_RESOURCE));
+	headerString.append("\" />");
+	headerString.append("<link rel=\"stylesheet\" type=\"text/css\" href=\"");
+	headerString.append(cc.getWebApplicationURL(UPLOAD_BUTTON_STYLE_RESOURCE));
+	headerString.append("\" />");
 	beginBasicHtmlResponse(TITLE_INFO, headerString.toString(), resp, cc );// header info
 	PrintWriter out = resp.getWriter();
 	out.write(UPLOAD_PAGE_BODY_START);
@@ -346,6 +354,7 @@ public class FormUploadServlet extends ServletUtilBase {
     out.write(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_SUBMIT, null, "Submit"));
     out.write(HtmlConsts.FORM_CLOSE);
     finishBasicHtmlResponse(resp);
+    System.out.println("\n\n\nform upload servlet\n\n\n");
   }
 
 }
