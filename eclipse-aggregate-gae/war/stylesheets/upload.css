@@ -5,28 +5,22 @@
 	padding: 0px;
 }
 
-.uploadCloseButton {
-	float: right;
+body {
+	margin-left: 15px;
 }
-
-.uploadFrame {
-	float: left;
-	clear: none;
-	border: 0px;
-}
-
 h1 {
 	color: #07115A;
-	font-size: 20px;
-	font-weight: bold;
-	margin-bottom: 20px;
+	margin-top: 15px;
 }
-
-h1, p {
-	font-family: 'Arial Unicode MS', Arial, sans-serif;
+h2 {
+	color: #777984;
 }
-
-#uploadTable {
-	margin-top: 20px;
-	margin-bottom: 20px;
+p {
+	margin-top: 10px;
+}
+#uploadButton {
+	margin-top: 12px;
+}
+.clearButton {
+	margin-left: 10px;
 }
