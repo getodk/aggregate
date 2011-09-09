@@ -75,6 +75,10 @@ public class UserServiceImpl implements org.opendatakit.common.security.UserServ
 		if ( userServiceKey == null ) {
 			throw new IllegalStateException("userServiceKey must be configured");
 		}
+		Log log = LogFactory.getLog(UserServiceImpl.class);
+		log.info("superUserEmail: " + superUserEmail);
+		log.info("superUserUsername: " + superUserUsername);
+
 		reloadPermissions();
 	}
 
