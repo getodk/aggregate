@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.commons.lang.StringEscapeUtils;
 import org.opendatakit.aggregate.constants.common.FormElementNamespace;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.form.Form;
@@ -72,7 +73,7 @@ public class XmlFormatter implements SubmissionFormatter, RepeatCallbackFormatte
 	  // 
 	  // add what could be considered the form's metadata...
 	  // 
-	  attributeRow.addFormattedValue("id=\"" + form.getFormId() + "\"");
+	  attributeRow.addFormattedValue("id=\"" + StringEscapeUtils.escapeXml(form.getFormId()) + "\"");
 	  if ( form.isEncryptedForm()) {
 		  attributeRow.addFormattedValue("encrypted=\"yes\"");
 	  }

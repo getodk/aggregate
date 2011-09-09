@@ -19,6 +19,8 @@ package org.opendatakit.aggregate.servlet;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -26,13 +28,16 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.ErrorConsts;
 import org.opendatakit.aggregate.constants.HtmlUtil;
+import org.opendatakit.aggregate.constants.ParserConsts;
 import org.opendatakit.aggregate.constants.ServletConsts;
+import org.opendatakit.aggregate.constants.common.FormElementNamespace;
 import org.opendatakit.aggregate.constants.common.UIConsts;
 import org.opendatakit.aggregate.exception.ODKConversionException;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
@@ -43,8 +48,11 @@ import org.opendatakit.aggregate.exception.ODKParseException;
 import org.opendatakit.aggregate.externalservice.ExternalService;
 import org.opendatakit.aggregate.externalservice.FormServiceCursor;
 import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.format.Row;
+import org.opendatakit.aggregate.format.element.XmlAttributeFormatter;
 import org.opendatakit.aggregate.parser.MultiPartFormData;
 import org.opendatakit.aggregate.parser.SubmissionParser;
+import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.aggregate.task.UploadSubmissions;
 import org.opendatakit.common.constants.BasicConsts;
 import org.opendatakit.common.constants.HtmlConsts;
@@ -270,9 +278,33 @@ public class SubmissionServlet extends ServletUtilBase {
         PrintWriter out = resp.getWriter();
         out.write("<OpenRosaResponse xmlns=\"http://openrosa.org/http/response\">");
         if ( isIncomplete ) {
-           out.write("<message>partial submission upload was successful!</message>");
-        } else {
-           out.write("<message>full submission upload was successful!</message>");
+            out.write("<message>partial submission upload was successful!</message>");
+         } else {
+            out.write("<message>full submission upload was successful!</message>");
+         }
+        
+        // for Briefcase2, use the attributes on the <message> tag to 
+        // update the local copy of the data (if these attributes are available).
+        {
+          XmlAttributeFormatter attributeFormatter = new XmlAttributeFormatter();
+          Submission sub = submissionParser.getSubmission();
+      	  Row attributeRow = new Row(sub.constructSubmissionKey(null));
+    	  // 
+    	  // add what could be considered the form's metadata...
+    	  // 
+    	  attributeRow.addFormattedValue("id=\"" + StringEscapeUtils.escapeXml(form.getFormId()) + "\"");
+    	  if ( form.isEncryptedForm()) {
+    		  attributeRow.addFormattedValue("encrypted=\"yes\"");
+    	  }
+    	  sub.getFormattedNamespaceValuesForRow(attributeRow, Collections.singletonList(FormElementNamespace.METADATA), attributeFormatter, false, cc);
+    	  
+    	  out.write("<submissionMetadata xmlns=\"" + StringEscapeUtils.escapeXml(ParserConsts.NAMESPACE_ODK) + "\"");
+    	  Iterator<String> itrAttributes = attributeRow.getFormattedValues().iterator();
+          while (itrAttributes.hasNext()) {
+        	  out.write(" ");
+        	  out.write(itrAttributes.next());
+          }
+          out.write("/>");
         }
         out.write("</OpenRosaResponse>");
       }

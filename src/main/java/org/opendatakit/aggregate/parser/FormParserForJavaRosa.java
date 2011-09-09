@@ -76,10 +76,7 @@ import org.opendatakit.common.web.CallingContext;
  */
 public class FormParserForJavaRosa {
 	
-  private static final String NAMESPACE_ODK = "http://www.opendatakit.org/xforms";
-  
   static Log log = LogFactory.getLog(FormParserForJavaRosa.class.getName());
-  private static final String BASE64_RSA_PUBLIC_KEY = "base64RsaPublicKey";
   private static final String ENCRYPTED_FORM_DEFINITION = "<?xml version=\"1.0\"?>" +
   	"<h:html xmlns=\"http://www.w3.org/2002/xforms\" xmlns:h=\"http://www.w3.org/1999/xhtml\" xmlns:ev=\"http://www.w3.org/2001/xml-events\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:jr=\"http://openrosa.org/javarosa\">" +
   	"<h:head>" +
@@ -126,9 +123,9 @@ public class FormParserForJavaRosa {
 	
 	@Override
 	public void handle(Element element, DataBinding binding) {
-		String value = element.getAttributeValue(NAMESPACE_ODK, "length");
+		String value = element.getAttributeValue(ParserConsts.NAMESPACE_ODK, "length");
 		if ( value != null ) {
-			element.setAttribute(NAMESPACE_ODK, "length", null);
+			element.setAttribute(ParserConsts.NAMESPACE_ODK, "length", null);
 		}
 		
 		log.info("Calling handle found value " + ((value == null) ? "null" : value));

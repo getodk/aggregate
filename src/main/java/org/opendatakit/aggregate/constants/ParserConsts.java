@@ -59,4 +59,14 @@ public final class ParserConsts {
    */
   public final static int FILE_SIZE_MAX = 5000000;
 
+  /**
+   * Namespace of ODK extensions to the OpenRosa standards
+   */
+  public static final String NAMESPACE_ODK = "http://www.opendatakit.org/xforms";
+
+  /**
+   * additional attribute used to supply the base64 public key for encrypted submissions
+   */
+  private static final String BASE64_RSA_PUBLIC_KEY = "base64RsaPublicKey";
+
 }
