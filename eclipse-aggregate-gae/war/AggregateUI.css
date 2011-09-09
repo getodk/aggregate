@@ -1,7 +1,12 @@
+h1, h2, h2, p {
+  font-family: 'Arial Unicode MS', Arial, sans-serif;
+}
+
 body, table td, select {
   font-family: Arial Unicode MS, Arial, sans-serif;
   font-size: small;
 }
+
 body {
   color: black;
   margin: 0px;
@@ -10,6 +15,25 @@ body {
   background: white;
   direction: ltr;
 }
+
+h1 {
+	color: #07115A;
+	margin-top: 15px;
+}
+
+h2 {
+	color: #777984;
+}
+
+h3 {
+	margin-top: 10px;
+	color: #777984;
+}
+
+p {
+	margin-top: 10px;
+}
+
 .embedded_iframe {
 	margin: 2px;
 	border: 0px;
@@ -27,10 +51,12 @@ a, a:visited, a:hover {
 	border: 2px solid #777984;
 	background: url("images/mostly_opaque.png");
 }
+
 #filters_data,
 #form_and_goals_panel {
 	border-collapse: collapse;
 }
+
 #submission_container,
 #filters_container,
 #help_container {
@@ -51,6 +77,18 @@ a, a:visited, a:hover {
 	width: 100%;
 	padding: 2px 4px 2px 4px;
 }
+
+.uploadCloseButton {
+        float: right;
+}
+
+.uploadFrame {
+        float: left;
+        clear: none;
+        border: 0px;
+}
+
+
 #chart_image,
 #map_area {
 	width: 600px;

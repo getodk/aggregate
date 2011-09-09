@@ -22,9 +22,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.opendatakit.aggregate.client.filter.ColumnFilter;
-import org.opendatakit.aggregate.client.filter.ColumnFilterHeader;
 import org.opendatakit.aggregate.client.filter.Filter;
 import org.opendatakit.aggregate.client.filter.FilterGroup;
+import org.opendatakit.aggregate.client.submission.Column;
 import org.opendatakit.aggregate.client.submission.SubmissionUISummary;
 import org.opendatakit.aggregate.constants.common.FormElementNamespace;
 import org.opendatakit.aggregate.constants.common.Visibility;
@@ -100,8 +100,8 @@ public class GenerateHeaderInfo {
           ColumnFilter cf = (ColumnFilter) filter;
 
           // convert filter to fem
-          for (ColumnFilterHeader columnHeader : cf.getColumnFilterHeaders()) {
-            String decodeKey = columnHeader.getColumn().getColumnEncoding();
+          for (Column columnHeader : cf.getColumnFilterHeaders()) {
+            String decodeKey = columnHeader.getColumnEncoding();
             FormElementKey femKey = new FormElementKey(decodeKey);
             FormElementModel fem = FormElementModel.retrieveFormElementModel(form, femKey);
             
@@ -127,7 +127,7 @@ public class GenerateHeaderInfo {
                 geopointFlags.put(fem, geopoint);
               }
 
-              Long gpsColumnIndex = columnHeader.getColumn().getGeopointColumnCode();
+              Long gpsColumnIndex = columnHeader.getGeopointColumnCode();
 
               // add to appropriate keep or remove
               if (cf.getVisibility().equals(Visibility.DISPLAY)) {

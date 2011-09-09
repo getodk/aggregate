@@ -14,7 +14,7 @@ public class FilterListBox extends AbstractListBox {
   private ArrayList<FilterGroup> displayedFilterList;
   
   public FilterListBox() {
-    super(TOOLTIP_TEXT);
+    super(TOOLTIP_TEXT, false);
   }
   
   public FilterListBox(ChangeHandler handler) {

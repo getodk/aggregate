@@ -660,14 +660,7 @@ public class AccessConfigurationSheet extends Composite {
 		public void execute(UserSecurityInfo object) {
 			final ConfirmUserDeletePopup popup = new ConfirmUserDeletePopup(
 					object, AccessConfigurationSheet.this);
-			popup.setPopupPositionAndShow(new PopupPanel.PositionCallback() {
-				@Override
-				public void setPosition(int offsetWidth, int offsetHeight) {
-					int left = ((Window.getScrollLeft() + Window.getClientWidth() - offsetWidth) / 2);
-					int top = ((Window.getScrollTop() + Window.getClientHeight() - offsetHeight) / 2);
-					popup.setPopupPosition(left, top);
-				}
-			});
+			popup.setPopupPositionAndShow(popup.getPositionCallBack());
 		}
 	};
 

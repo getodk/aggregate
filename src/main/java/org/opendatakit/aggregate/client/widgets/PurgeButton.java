@@ -26,7 +26,6 @@ import org.opendatakit.aggregate.constants.common.ExternalServicePublicationOpti
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.PopupPanel;
 
 public class PurgeButton extends AbstractButtonBase implements ClickHandler {
 
@@ -89,14 +88,7 @@ public class PurgeButton extends AbstractButtonBase implements ClickHandler {
 
 			// TODO: display pop-up with text from b...
 			final ConfirmPurgePopup popup = new ConfirmPurgePopup(externServ, earliest, b.toString());
-			popup.setPopupPositionAndShow(new PopupPanel.PositionCallback() {
-				@Override
-				public void setPosition(int offsetWidth, int offsetHeight) {
-					int left = ((Window.getScrollLeft() + Window.getClientWidth() - offsetWidth) / 2);
-					int top = ((Window.getScrollTop() + Window.getClientHeight() - offsetHeight) / 2);
-					popup.setPopupPosition(left, top);
-				}
-			});
+			popup.setPopupPositionAndShow(popup.getPositionCallBack());
 		}
 	}
 }

@@ -70,7 +70,6 @@ public class AggregateHtmlServlet extends ServletUtilBase {
 "    <link type=\"text/css\" rel=\"stylesheet\" href=\"stylesheets/button.css\">" +
 "    <link type=\"text/css\" rel=\"stylesheet\" href=\"stylesheets/table.css\">" +
 "    <link type=\"text/css\" rel=\"stylesheet\" href=\"stylesheets/navigation.css\">" +
-"    <link type=\"text/css\" rel=\"stylesheet\" href=\"stylesheets/upload.css\">" +
 "  </head>" +
 "  <body>" +
 "    <iframe src=\"javascript:''\" id=\"__gwt_historyFrame\" tabIndex='-1' style=\"position:absolute;width:0;height:0;border:0\"></iframe>" +

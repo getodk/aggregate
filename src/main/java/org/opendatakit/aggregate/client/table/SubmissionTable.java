@@ -83,21 +83,7 @@ public class SubmissionTable extends FlexTable {
             setText(rowPosition, columnPosition, UIConsts.EMPTY_STRING);
           } else {
             Image image = new Image(value + UIConsts.PREVIEW_SET);
-            image.addClickHandler(new ClickHandler() {
-              @Override
-              public void onClick(ClickEvent event) {
-                final PopupPanel popup = new BinaryPopup(value);
-                popup.setPopupPositionAndShow(new PopupPanel.PositionCallback() {
-                  @Override
-                  public void setPosition(int offsetWidth, int offsetHeight) {
-                    int left = ((Window.getScrollLeft() + Window.getClientWidth() - offsetWidth) / 2);
-                    int top = ((Window.getScrollTop() + Window.getClientHeight() - offsetHeight) / 2);
-                    popup.setPopupPosition(left, top);
-                  }
-                });
-                AggregateUI.getUI().getTimer().restartTimer();
-              }
-            });
+            image.addClickHandler(new PopupClickHandler(value));
             setWidget(rowPosition, columnPosition, image);
           }
           break;
@@ -129,4 +115,27 @@ public class SubmissionTable extends FlexTable {
   public ArrayList<SubmissionUI> getSubmissions() {
     return tableSubmissions;
   }
+  
+  private class PopupClickHandler implements ClickHandler {
+    private final String value;
+    
+    public PopupClickHandler(String value) {
+      this.value = value;
+    }
+    
+    @Override
+    public void onClick(ClickEvent event) {
+      final PopupPanel popup = new BinaryPopup(value);
+      popup.setPopupPositionAndShow(new PopupPanel.PositionCallback() {
+        @Override
+        public void setPosition(int offsetWidth, int offsetHeight) {
+          int left = ((Window.getScrollLeft() + Window.getClientWidth() - offsetWidth) / 2);
+          int top = ((Window.getScrollTop() + Window.getClientHeight() - offsetHeight) / 2);
+          popup.setPopupPosition(left, top);
+        }
+      });
+      AggregateUI.getUI().getTimer().restartTimer();
+    }
+  }
+  
 }

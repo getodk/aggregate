@@ -23,6 +23,8 @@ import org.opendatakit.aggregate.constants.common.UIConsts;
 
 public final class FilterGroup implements Serializable {
 
+  private static final int DEFAULT_FETCH_LIMIT = 1000;
+
   private static final long serialVersionUID = 3317433416889397657L;
 
   private String uri; // unique identifier
@@ -32,8 +34,11 @@ public final class FilterGroup implements Serializable {
 
   private Boolean includeMetadata;
   
+  private int queryFetchLimit;
+
   public FilterGroup() {
     includeMetadata = false;
+    queryFetchLimit = DEFAULT_FETCH_LIMIT;
   }
 
   public FilterGroup(String groupName, String formId, ArrayList<Filter> filtersToApply) {
@@ -116,29 +121,10 @@ public final class FilterGroup implements Serializable {
 	  filters.remove(filter);
   }
 
-  /**
-   * This should apply the filter to the data but not impact the filter group
-   * i.e. user is previewing a new filter
-   * 
-   * @param filter
-   *          the new filter to preview
-   */
-  public void maskAddFilter(Filter filter) {
-
+  public int getQueryFetchLimit() {
+    return queryFetchLimit;
   }
-
-  /**
-   * This should remove the filter to the data but not impact the filter group
-   * i.e. user is removing a filter to see what happens
-   * 
-   * @param filter
-   *          the filter to remove and preview
-   */
-  public void maskRemoveFilter(Filter filter) {
-
-  }
-
-  
+    
   /**
    * @see java.lang.Object#equals(java.lang.Object)
    */

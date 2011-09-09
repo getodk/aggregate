@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.opendatakit.aggregate.client.filter.ColumnFilter;
-import org.opendatakit.aggregate.client.filter.ColumnFilterHeader;
 import org.opendatakit.aggregate.client.filter.Filter;
 import org.opendatakit.aggregate.client.filter.RowFilter;
 import org.opendatakit.aggregate.client.submission.Column;
@@ -305,7 +304,7 @@ public class SubmissionFilter extends CommonFieldsBase {
       ColumnFilter cf = (ColumnFilter) filter;
       subFilter.setColumnVisibility(cf.getVisibility());
       
-      for(ColumnFilterHeader column : cf.getColumnFilterHeaders()) {
+      for(Column column : cf.getColumnFilterHeaders()) {
         SubmissionColumnFilter columnFilter = SubmissionColumnFilter.transform(column, subFilter, cc);
         subFilter.addColumn(columnFilter);
       }

@@ -23,7 +23,7 @@ public class HelpBookToggleButton extends AbstractImageToggleButton {
 	public void onClick(ClickEvent event) {
 		super.onClick(event);
 
-		final HelpBookPopup helpPopup = new HelpBookPopup();
+		HelpBookPopup helpPopup = new HelpBookPopup();
 		helpPopup.show();
 	}
 }

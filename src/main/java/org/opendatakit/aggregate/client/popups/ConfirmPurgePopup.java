@@ -18,24 +18,65 @@ package org.opendatakit.aggregate.client.popups;
 
 import java.util.Date;
 
+import org.opendatakit.aggregate.client.SecureGWT;
 import org.opendatakit.aggregate.client.externalserv.ExternServSummary;
+import org.opendatakit.aggregate.client.widgets.BasicButton;
 import org.opendatakit.aggregate.client.widgets.ClosePopupButton;
-import org.opendatakit.aggregate.client.widgets.ConfirmPurgeButton;
 
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.PopupPanel;
 
-public class ConfirmPurgePopup extends PopupPanel{
+public class ConfirmPurgePopup extends AbstractPopupBase {
 
+  private static final String BUTTON_TXT = "<img src=\"images/green_right_arrow.png\" /> Purge Data";
+  
+  private static final String TOOLTIP_TXT = "Delete published data";
+
+  private static final String HELP_BALLOON_TXT = "This confirms that you want to delete the published "
+      + "data.";
+
+  private String uri;
+  private Date earliest;
+  
   public ConfirmPurgePopup(ExternServSummary e, Date earliest, String bodyText) {
-    super(false);   
-    setModal(true);
+    super();
 
+    this.uri = e.getUri();
+    this.earliest = earliest;
+    
+    BasicButton confirm = new BasicButton(BUTTON_TXT, TOOLTIP_TXT, HELP_BALLOON_TXT);
+    confirm.addClickHandler(new PurgeHandler());
+    
     FlexTable layout = new FlexTable();
     layout.setWidget(0, 0, new HTML(bodyText));
-    layout.setWidget(0, 1, new ConfirmPurgeButton(e.getUri(), earliest, this));
+    layout.setWidget(0, 1, confirm);
     layout.setWidget(0, 2, new ClosePopupButton(this));
     setWidget(layout);
+  }
+
+  private class PurgeHandler implements ClickHandler {
+    @Override
+    public void onClick(ClickEvent event) {
+
+      // OK -- we are to proceed.
+      SecureGWT.getFormAdminService().purgePublishedData(uri, earliest, new AsyncCallback<Date>() {
+
+        @Override
+        public void onFailure(Throwable caught) {
+          Window.alert("Failed purge of published data: " + caught.getMessage());
+        }
+
+        @Override
+        public void onSuccess(Date result) {
+          Window.alert("Successful commencement of the purge of " + "\nall data published as of "
+              + result.toString());
+        }
+      });
+      hide();
+    }
   }
 }

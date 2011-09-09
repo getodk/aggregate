@@ -195,8 +195,7 @@ public class GoogleSpreadsheet extends OAuthExternalService implements ExternalS
       Map<String, String> parameters = new HashMap<String, String>();
 
       parameters.put(ExternalServiceConsts.EXT_SERV_ADDRESS, getSpreadsheetName());
-      parameters.put(ServletConsts.EXTERNAL_SERVICE_TYPE, fsc.getExternalServicePublicationOption()
-          .toString());
+      parameters.put(ServletConsts.EXTERNAL_SERVICE_TYPE, fsc.getExternalServicePublicationOption().name());
 
       MiscTasks m = new MiscTasks(TaskType.WORKSHEET_CREATE, form, parameters, cc);
       m.persist(cc);

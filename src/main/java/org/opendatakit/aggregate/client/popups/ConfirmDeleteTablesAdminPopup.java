@@ -7,31 +7,29 @@ import org.opendatakit.aggregate.client.widgets.ClosePopupButton;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
 
-public class ConfirmSubmissionDeletePopup extends AbstractPopupBase {
-  
-  private static final String BUTTON_TXT = "<img src=\"images/green_right_arrow.png\" /> Delete Submission";
-  private static final String TOOLTIP_TXT = "Delete Submission from database";
-  private static final String HELP_BALLOON_TXT = "This will delete the submission from the database.";
+public class ConfirmDeleteTablesAdminPopup extends AbstractPopupBase {
 
-  private static final String DELETE_SUBMISSION_WARNING = "Are you sure you want to Delete the submission? Once delete the submission will be permanently removed from Aggregate's database";
+  private static final String BUTTON_TXT = "<img src=\"images/green_right_arrow.png\" /> Delete User";
+  private static final String TOOLTIP_TXT = "Remove this user";
+  private static final String HELP_BALLOON_TXT = "Remove this administrative user from editing data.";
 
-  private String submissionKeyAsString;
+  private String aggregateUid;
 
-  public ConfirmSubmissionDeletePopup(String submissionKeyAsString) {
+  public ConfirmDeleteTablesAdminPopup(String aggregateUid) {
     super();
-
-    this.submissionKeyAsString = submissionKeyAsString;
-
-    FlexTable layout = new FlexTable();
+    this.aggregateUid = aggregateUid;
 
     BasicButton deleteButton = new BasicButton(BUTTON_TXT, TOOLTIP_TXT, HELP_BALLOON_TXT);
     deleteButton.addClickHandler(new ExecuteDelete());
-    
-    HTML message = new HTML(DELETE_SUBMISSION_WARNING);
+
+    FlexTable layout = new FlexTable();
+
+    HTML message = new HTML("Delete the ODK Tables user?");
     layout.setWidget(0, 0, message);
     layout.setWidget(0, 1, deleteButton);
     layout.setWidget(0, 2, new ClosePopupButton(this));
@@ -53,11 +51,16 @@ public class ConfirmSubmissionDeletePopup extends AbstractPopupBase {
         @Override
         public void onSuccess(Boolean result) {
           AggregateUI.getUI().clearError();
+          if (result) {
+            Window.alert("Successfully deleted the user");
+          } else {
+            Window.alert("Error: unable to delete the user!");
+          }
           AggregateUI.getUI().getTimer().refreshNow();
         }
       };
       // Make the call to the form service.
-      SecureGWT.getFormAdminService().deleteSubmission(submissionKeyAsString, callback);
+      SecureGWT.getOdkTablesAdminService().deleteAdmin(aggregateUid, callback);
       hide();
     }
   }

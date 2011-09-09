@@ -46,10 +46,9 @@ import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.ListBox;
-import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
-public class VisualizationPopup extends PopupPanel {
+public class VisualizationPopup extends AbstractPopupBase {
 
   private static final String NUMBER_OF_OCCURANCES = "Number of Occurances";
 
@@ -70,7 +69,7 @@ public class VisualizationPopup extends PopupPanel {
   private final String formId;
   
   public VisualizationPopup(FilterSubTab filterSubTab) {
-    super(false);
+    super();
     this.dropDownsTable = new FlexTable();
     this.chartType = new ListBox();
     this.firstData = new ListBox();

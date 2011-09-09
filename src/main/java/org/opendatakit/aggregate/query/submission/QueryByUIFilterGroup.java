@@ -27,9 +27,11 @@ public class QueryByUIFilterGroup extends QueryBase {
 
   private TopLevelDynamicBase tbl;
 
+  private int fetchLimit;
+  
   public QueryByUIFilterGroup(Form form, FilterGroup filterGroup, int maxFetchLimit,
       CallingContext cc) throws ODKFormNotFoundException {
-    super(form, maxFetchLimit);
+    super(form);
 
     tbl = (TopLevelDynamicBase) form.getTopLevelGroupElement().getFormDataModel()
         .getBackingObjectPrototype();
@@ -41,7 +43,9 @@ public class QueryByUIFilterGroup extends QueryBase {
     if (filterGroup == null) {
       return;
     }
-
+    
+    fetchLimit = filterGroup.getQueryFetchLimit();
+    
     for (Filter filter : filterGroup.getFilters()) {
       if (filter instanceof RowFilter) {
         RowFilter rf = (RowFilter) filter;
@@ -97,7 +101,7 @@ public class QueryByUIFilterGroup extends QueryBase {
     List<Submission> retrievedSubmissions = new ArrayList<Submission>();
 
     // retrieve submissions
-    List<? extends CommonFieldsBase> submissionEntities = getSubmissionEntities(null);
+    List<? extends CommonFieldsBase> submissionEntities = getSubmissionEntities(null, fetchLimit);
 
     // create a row for each submission
     for (int count = 0; count < submissionEntities.size(); count++) {

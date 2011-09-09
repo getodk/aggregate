@@ -17,37 +17,55 @@
 package org.opendatakit.aggregate.client.popups;
 
 import org.opendatakit.aggregate.client.permissions.AccessConfigurationSheet;
+import org.opendatakit.aggregate.client.widgets.BasicButton;
 import org.opendatakit.aggregate.client.widgets.ClosePopupButton;
-import org.opendatakit.aggregate.client.widgets.ExecuteDeleteUserButton;
 import org.opendatakit.common.security.client.UserSecurityInfo;
 
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.PopupPanel;
 
-public class ConfirmUserDeletePopup extends PopupPanel {
+public class ConfirmUserDeletePopup extends AbstractPopupBase {
+
+  private static final String BUTTON_TXT = "<img src=\"images/green_right_arrow.png\" /> Delete User";
+  private static final String TOOLTIP_TXT = "Remove this user";
+  private static final String HELP_BALLOON_TXT = "Remove this user from the server.";
+
+  private final UserSecurityInfo user;
+  private final AccessConfigurationSheet accessSheet;
 
   public ConfirmUserDeletePopup(UserSecurityInfo userToDelete, AccessConfigurationSheet sheet) {
-    super(false);
-    setModal(true);
+    super();
+    this.user = userToDelete;
+    this.accessSheet = sheet;
 
+    BasicButton deleteButton = new BasicButton(BUTTON_TXT, TOOLTIP_TXT, HELP_BALLOON_TXT);
+    deleteButton.addClickHandler(new ClickHandler(){
+      @Override
+      public void onClick(ClickEvent event) {
+        accessSheet.deleteUser(user);
+        hide();
+      }  
+    });
+    
     FlexTable layout = new FlexTable();
-   
+
     HTML message;
-    if ( sheet.isUiOutOfSyncWithServer() ) {
-    	message = new HTML("Unsaved changes exist.<br/>"
-						+ "<p>Proceeding will save all pending changes and<br/>permanently delete user <b>"
-        + userToDelete.getCanonicalName()
-        + "</b> on the server.</p>"
-        + "<p>Do you wish to apply all pending changes and <br/>permanently delete this user?</p>");
+    if (sheet.isUiOutOfSyncWithServer()) {
+      message = new HTML(
+          "Unsaved changes exist.<br/>"
+              + "<p>Proceeding will save all pending changes and<br/>permanently delete user <b>"
+              + userToDelete.getCanonicalName()
+              + "</b> on the server.</p>"
+              + "<p>Do you wish to apply all pending changes and <br/>permanently delete this user?</p>");
     } else {
-    	message = new HTML(
-            "<p>Proceeding will permanently delete user <b>"
-            + userToDelete.getCanonicalName()
-            + "</b> on the server.</p><p>Do you wish to permanently delete this user?</p>");
+      message = new HTML("<p>Proceeding will permanently delete user <b>"
+          + userToDelete.getCanonicalName()
+          + "</b> on the server.</p><p>Do you wish to permanently delete this user?</p>");
     }
     layout.setWidget(0, 0, message);
-    layout.setWidget(2, 0, new ExecuteDeleteUserButton(userToDelete, sheet, this));
+    layout.setWidget(2, 0, deleteButton);
     layout.setWidget(2, 1, new ClosePopupButton(this));
 
     setWidget(layout);

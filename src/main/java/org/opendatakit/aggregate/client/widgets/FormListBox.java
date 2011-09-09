@@ -16,7 +16,7 @@ public class FormListBox extends AbstractListBox {
   private ArrayList<FormSummary> displayedFormList;
   
   public FormListBox() {
-    super(TOOLTIP_TEXT);
+    super(TOOLTIP_TEXT, false);
   }
   
   public FormListBox(ChangeHandler handler) {

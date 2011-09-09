@@ -21,10 +21,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.opendatakit.aggregate.client.filter.ColumnFilter;
-import org.opendatakit.aggregate.client.filter.ColumnFilterHeader;
 import org.opendatakit.aggregate.client.filter.Filter;
 import org.opendatakit.aggregate.client.filter.FilterGroup;
 import org.opendatakit.aggregate.client.filter.RowFilter;
+import org.opendatakit.aggregate.client.submission.Column;
 import org.opendatakit.aggregate.client.widgets.AddFilterButton;
 import org.opendatakit.aggregate.client.widgets.CopyFilterGroupButton;
 import org.opendatakit.aggregate.client.widgets.DeleteFilterButton;
@@ -181,10 +181,10 @@ public class FiltersDataPanel extends ScrollPanel {
 					new Label("where column is " + rowFilter.getOperation() + rowFilter.getInput()));
 		} else if (filter instanceof ColumnFilter) {
 			ColumnFilter columnFilter = (ColumnFilter) filter;
-			ArrayList<ColumnFilterHeader> columns = columnFilter.getColumnFilterHeaders();
+			ArrayList<Column> columns = columnFilter.getColumnFilterHeaders();
 			title.setWidget(0, 1, new Label(columnFilter.getVisibility().getDisplayText()));
-			for (ColumnFilterHeader column : columns) {
-				filterItem.addItem(new Label(column.getColumn().getDisplayHeader()));
+			for (Column column : columns) {
+				filterItem.addItem(new Label(column.getDisplayHeader()));
 			}
 		}
 		return filterItem;
