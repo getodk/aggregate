@@ -22,6 +22,26 @@ import org.opendatakit.common.utils.WebUtils;
 
 public class EngineUtils {
 
+	public static final Object getDominantSortAttributeValue( CommonFieldsBase odkEntity, DataField dominantAttr) {
+		switch ( dominantAttr.getDataType() ) {
+		case BINARY: throw new IllegalStateException("unexpected sort on binary field");
+		case LONG_STRING: throw new IllegalStateException("unexpected sort on long text field");
+		case URI:
+		case STRING:
+			return odkEntity.getStringField(dominantAttr);
+		case INTEGER:
+			return odkEntity.getLongField(dominantAttr);
+		case DECIMAL:
+			return odkEntity.getNumericField(dominantAttr);
+		case BOOLEAN:
+			return odkEntity.getBooleanField(dominantAttr);
+		case DATETIME:
+			return odkEntity.getDateField(dominantAttr);
+		default:
+			throw new IllegalStateException("unexpected data type");
+		}
+	}
+	
 	public static final boolean hasMatchingDominantSortAttribute(CommonFieldsBase odkLastEntity, CommonFieldsBase odkEntity, DataField dominantAttr) {
 		boolean matchingDominantAttr = false;
 		switch ( dominantAttr.getDataType() ) {
@@ -32,35 +52,35 @@ public class EngineUtils {
 		{
 			String a1 = odkLastEntity.getStringField(dominantAttr);
 			String a2 = odkEntity.getStringField(dominantAttr);
-			matchingDominantAttr = (a1 == null) ? (a2 == null) : ((a2 != null) && a1.equals(a2));
+			matchingDominantAttr = (a1 == null) ? (a2 == null) : ((a2 != null) && a1.compareTo(a2) == 0);
 		}
 			break;
 		case INTEGER:
 		{
 			Long a1 = odkLastEntity.getLongField(dominantAttr);
-			Long a2 = odkLastEntity.getLongField(dominantAttr);
-			matchingDominantAttr = (a1 == null) ? (a2 == null) : ((a2 != null) && a1.equals(a2));
+			Long a2 = odkEntity.getLongField(dominantAttr);
+			matchingDominantAttr = (a1 == null) ? (a2 == null) : ((a2 != null) && a1.compareTo(a2) == 0);
 		}
 			break;
 		case DECIMAL:
 		{
 			BigDecimal a1 = odkLastEntity.getNumericField(dominantAttr);
-			BigDecimal a2 = odkLastEntity.getNumericField(dominantAttr);
-			matchingDominantAttr = (a1 == null) ? (a2 == null) : ((a2 != null) && a1.equals(a2));
+			BigDecimal a2 = odkEntity.getNumericField(dominantAttr);
+			matchingDominantAttr = (a1 == null) ? (a2 == null) : ((a2 != null) && a1.compareTo(a2) == 0);
 		}
 			break;
 		case BOOLEAN:
 		{
 			Boolean a1 = odkLastEntity.getBooleanField(dominantAttr);
-			Boolean a2 = odkLastEntity.getBooleanField(dominantAttr);
-			matchingDominantAttr = (a1 == null) ? (a2 == null) : ((a2 != null) && a1.equals(a2));
+			Boolean a2 = odkEntity.getBooleanField(dominantAttr);
+			matchingDominantAttr = (a1 == null) ? (a2 == null) : ((a2 != null) && a1.compareTo(a2) == 0);
 		}
 			break;
 		case DATETIME:
 		{
 			Date a1 = odkLastEntity.getDateField(dominantAttr);
-			Date a2 = odkLastEntity.getDateField(dominantAttr);
-			matchingDominantAttr = (a1 == null) ? (a2 == null) : ((a2 != null) && a1.equals(a2));
+			Date a2 = odkEntity.getDateField(dominantAttr);
+			matchingDominantAttr = (a1 == null) ? (a2 == null) : ((a2 != null) && a1.compareTo(a2) == 0);
 		}
 			break;
 		default:
@@ -143,7 +163,8 @@ public class EngineUtils {
 			if ( v == null ) {
 				value = null;
 			} else {
-				value = new BigDecimal(v);
+				BigDecimal bd = new BigDecimal(v);
+				value = bd.setScale(dominantAttr.getNumericScale(), BigDecimal.ROUND_HALF_UP);
 			}
 			break;
 		}
