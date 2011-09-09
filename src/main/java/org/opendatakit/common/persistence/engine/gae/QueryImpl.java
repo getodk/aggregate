@@ -394,9 +394,9 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
 	}
 
 	interface ResultContainer {
-		void add( CommonFieldsBase record );
+		public void add( CommonFieldsBase record );
 		
-		int size();
+		public int size();
 	}
 	
 	/**
@@ -793,7 +793,7 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
 		private final DataField dataField;
 		private final Set<Object> uniqueValueSet = new HashSet<Object>();
 
-		DistinctResultContainer(DataField dataField) {
+		public DistinctResultContainer(DataField dataField) {
 			this.dataField = dataField;
 		}
 		
@@ -877,7 +877,7 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
 			addSort( relation.primaryKey, dominantSort.direction);
 		}
 
-		DistinctResultContainer uniqueResultContainer = new DistinctResultContainer(dominantSortAttr);
+		DistinctResultContainer uniqueResultContainer = new DistinctResultContainer(dataField);
 		
 		chunkFetch(uniqueResultContainer, null, 0);
 

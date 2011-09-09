@@ -228,7 +228,7 @@ public class QueryResultTest {
 	}
 	
 	@Test
-	public void testCase1() throws ODKDatastoreException {
+	public void testCase1str() throws ODKDatastoreException {
 		
 		CallingContext cc = TestContextFactory.getCallingContext();
 		Datastore ds = cc.getDatastore();
@@ -241,6 +241,48 @@ public class QueryResultTest {
 		assertEquals(6, values.size());
 	}
 
+	@Test
+	public void testCase1dbl() throws ODKDatastoreException {
+		
+		CallingContext cc = TestContextFactory.getCallingContext();
+		Datastore ds = cc.getDatastore();
+		User user = cc.getCurrentUser();
+		MyRelation rel = MyRelation.assertRelation(cc);
+		
+		Query query = ds.createQuery(rel, user);
+		
+		List<?> values = query.executeDistinctValueForDataField(MyRelation.fieldDbl);
+		assertEquals(SET_SIZE + 7, values.size());
+	}
+	
+	@Test
+	public void testCase1bool() throws ODKDatastoreException {
+		
+		CallingContext cc = TestContextFactory.getCallingContext();
+		Datastore ds = cc.getDatastore();
+		User user = cc.getCurrentUser();
+		MyRelation rel = MyRelation.assertRelation(cc);
+		
+		Query query = ds.createQuery(rel, user);
+		
+		List<?> values = query.executeDistinctValueForDataField(MyRelation.fieldBool);
+		// true, false, null
+		assertEquals(3, values.size());
+	}
+	
+	@Test
+	public void testCase1int() throws ODKDatastoreException {
+		
+		CallingContext cc = TestContextFactory.getCallingContext();
+		Datastore ds = cc.getDatastore();
+		User user = cc.getCurrentUser();
+		MyRelation rel = MyRelation.assertRelation(cc);
+		
+		Query query = ds.createQuery(rel, user);
+		
+		List<?> values = query.executeDistinctValueForDataField(MyRelation.fieldInt);
+		assertEquals(SET_SIZE, values.size());
+	}
 	
 	@Test
 	public void testCase2() throws ODKDatastoreException {
