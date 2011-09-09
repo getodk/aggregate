@@ -44,15 +44,12 @@ public abstract class QueryBase {
   protected Query query;
   protected final Form form;
   
-  private boolean moreRecords;
-  private int fetchLimit;
-  
+  private boolean moreRecords;  
   private int numOfRecords;
   
   protected QueryResumePoint resumeCursor;
   
-  protected QueryBase(Form form, int fetchLimit) throws ODKFormNotFoundException {
-    this.fetchLimit = fetchLimit;
+  protected QueryBase(Form form) throws ODKFormNotFoundException {
     this.numOfRecords = 0;
     this.form = form;
     this.resumeCursor = null;
@@ -128,14 +125,17 @@ public abstract class QueryBase {
    * @throws ODKDatastoreException 
    */
   protected List<? extends CommonFieldsBase> getSubmissionEntities() throws ODKDatastoreException {
-
-    return getSubmissionEntities(null);
+    List<? extends CommonFieldsBase> results = query.executeQuery();
+    numOfRecords = results.size();
+    
+    return results;
   }
   
 
   /**
    * Generates a result table that contains all the submission data 
    * of the form specified by the ODK ID
+   * @param fetchLimit TODO
    * 
    * 
    * @return
@@ -143,7 +143,7 @@ public abstract class QueryBase {
    * @throws ODKDatastoreException 
    *
    */
-  protected List<? extends CommonFieldsBase> getSubmissionEntities(QueryResumePoint startCursor) throws ODKDatastoreException {
+  protected List<? extends CommonFieldsBase> getSubmissionEntities(QueryResumePoint startCursor, int fetchLimit) throws ODKDatastoreException {
 
     // retrieve submissions
     QueryResult results = query.executeQuery(startCursor, fetchLimit);

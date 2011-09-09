@@ -19,52 +19,69 @@ package org.opendatakit.aggregate.client.popups;
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.SecureGWT;
 import org.opendatakit.aggregate.client.UrlHash;
+import org.opendatakit.aggregate.client.widgets.BasicButton;
 import org.opendatakit.aggregate.client.widgets.ClosePopupButton;
-import org.opendatakit.aggregate.client.widgets.ExecutePublishButton;
-import org.opendatakit.aggregate.client.widgets.ExternalServiceTypeListBox;
-import org.opendatakit.aggregate.client.widgets.PublishOptionListBox;
+import org.opendatakit.aggregate.client.widgets.EnumListBox;
 import org.opendatakit.aggregate.constants.common.ExternalServicePublicationOption;
 import org.opendatakit.aggregate.constants.common.ExternalServiceType;
 
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.TextBox;
 
-public class ExternalServicePopup extends PopupPanel {
+public class ExternalServicePopup extends AbstractPopupBase {
+
+  private static final String BUTTON_TXT = "<img src=\"images/green_right_arrow.png\" /> Export";
+  private static final String TOOLTIP_TXT = "Publish the data";
+  private static final String HELP_BALLOON_TXT = "This will publish the data to Google Fusion Tables "
+      + "or Google Spreadsheets.";
+
+  private static final String ES_SERVICEOPTIONS_TOOLTIP = "Method data should be published";
+  private static final String ES_TYPE_TOOLTIP = "Type of External Service Connection";
 
   private String formId;
   private TextBox name;
-  private ExternalServiceTypeListBox serviceType;
-  private PublishOptionListBox esOptions;
+  private EnumListBox<ExternalServiceType> serviceType;
+  private EnumListBox<ExternalServicePublicationOption> esOptions;
 
   public ExternalServicePopup(String formId) {
-    super(false);
+    super();
 
     this.formId = formId;
+    BasicButton deleteButton = new BasicButton(BUTTON_TXT, TOOLTIP_TXT, HELP_BALLOON_TXT);
+    deleteButton.addClickHandler(new CreateExernalServiceHandler());
 
-    serviceType = new ExternalServiceTypeListBox(this);
-    esOptions = new PublishOptionListBox();
     name = new TextBox();
 
+    serviceType = new EnumListBox<ExternalServiceType>(ES_TYPE_TOOLTIP,
+        ExternalServiceType.values());
+    serviceType.addChangeHandler(new ExternalServiceTypeChangeHandler());
+
+    esOptions = new EnumListBox<ExternalServicePublicationOption>(ES_SERVICEOPTIONS_TOOLTIP,
+        ExternalServicePublicationOption.values());
+
     updateUIOptions();
-    
+
     FlexTable layout = new FlexTable();
     layout.setWidget(0, 0, new HTML("Form: " + formId + " "));
     layout.setWidget(0, 1, serviceType);
     layout.setWidget(0, 2, name);
 
     layout.setWidget(0, 3, esOptions);
-    layout.setWidget(0, 4, new ExecutePublishButton(this));
+    layout.setWidget(0, 4, deleteButton);
     layout.setWidget(0, 5, new ClosePopupButton(this));
 
     setWidget(layout);
   }
 
   public void updateUIOptions() {
-    ExternalServiceType type = serviceType.getExternalServiceType();
-    
+    ExternalServiceType type = serviceType.getSelectedValue();
+
     if (type == null) {
       name.setEnabled(false);
       return;
@@ -82,22 +99,29 @@ public class ExternalServicePopup extends PopupPanel {
       break;
     }
   }
-  
-  public void createExternalService() {
 
-    ExternalServiceType type = serviceType.getExternalServiceType();
-    ExternalServicePublicationOption serviceOp = esOptions.getEsPublishOption();
+  private class CreateExernalServiceHandler implements ClickHandler {
 
-    switch (type) {
-    case GOOGLE_SPREADSHEET:
-      SecureGWT.getServicesAdminService().createGoogleSpreadsheet(formId, name.getText(),
-          serviceOp, new OAuthCallback());
-      break;
-    case GOOGLE_FUSIONTABLES:
-      SecureGWT.getServicesAdminService().createFusionTable(formId, serviceOp, new OAuthCallback());
-      break;
-    default: // unknown type
-      break;
+    @Override
+    public void onClick(ClickEvent event) {
+
+      ExternalServiceType type = serviceType.getSelectedValue();
+      ExternalServicePublicationOption serviceOp = esOptions.getSelectedValue();
+
+      switch (type) {
+      case GOOGLE_SPREADSHEET:
+        SecureGWT.getServicesAdminService().createGoogleSpreadsheet(formId, name.getText(),
+            serviceOp, new OAuthCallback());
+        break;
+      case GOOGLE_FUSIONTABLES:
+        SecureGWT.getServicesAdminService().createFusionTable(formId, serviceOp,
+            new OAuthCallback());
+        break;
+      default: // unknown type
+        break;
+      }
+      
+      hide();
     }
 
   }
@@ -120,6 +144,13 @@ public class ExternalServicePopup extends PopupPanel {
           UrlHash.getHash().goTo(result);
         }
       });
+    }
+  }
+
+  private class ExternalServiceTypeChangeHandler implements ChangeHandler {
+    @Override
+    public void onChange(ChangeEvent event) {
+      updateUIOptions();
     }
   }
 

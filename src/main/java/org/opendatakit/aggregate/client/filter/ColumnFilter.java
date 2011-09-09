@@ -19,6 +19,7 @@ package org.opendatakit.aggregate.client.filter;
 import java.io.Serializable;
 import java.util.ArrayList;
 
+import org.opendatakit.aggregate.client.submission.Column;
 import org.opendatakit.aggregate.constants.common.RowOrCol;
 import org.opendatakit.aggregate.constants.common.Visibility;
 
@@ -29,14 +30,14 @@ public final class ColumnFilter extends Filter implements Serializable {
    */
   private static final long serialVersionUID = -1045936241685471645L;
 
-  private ArrayList<ColumnFilterHeader> columns;
+  private ArrayList<Column> columns;
   private Visibility kr;
 
   public ColumnFilter() {
     super();
   }
 
-  public ColumnFilter(Visibility keepRemove, ArrayList<ColumnFilterHeader> columns, Long ordinal) {
+  public ColumnFilter(Visibility keepRemove, ArrayList<Column> columns, Long ordinal) {
     super(RowOrCol.COLUMN, ordinal);
     this.kr = keepRemove;
     this.columns = columns;
@@ -49,7 +50,7 @@ public final class ColumnFilter extends Filter implements Serializable {
    */
   public ColumnFilter(String uri) {
     super(uri);
-    this.columns = new ArrayList<ColumnFilterHeader>();
+    this.columns = new ArrayList<Column>();
   }
   
   public Visibility getVisibility() {
@@ -60,15 +61,15 @@ public final class ColumnFilter extends Filter implements Serializable {
     this.kr = kr;
   }
 
-  public ArrayList<ColumnFilterHeader> getColumnFilterHeaders() {
+  public ArrayList<Column> getColumnFilterHeaders() {
     return columns;
   }
 
-  public void setColumnFilterHeaders(ArrayList<ColumnFilterHeader> columns) {
+  public void setColumnFilterHeaders(ArrayList<Column> columns) {
     this.columns = columns;
   }
 
-  public void addColumnFilterHeader(ColumnFilterHeader column) {
+  public void addColumnFilterHeader(Column column) {
     this.columns.add(column);
   }
   

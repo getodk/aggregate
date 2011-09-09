@@ -19,7 +19,6 @@ package org.opendatakit.aggregate.filter;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.opendatakit.aggregate.client.filter.ColumnFilterHeader;
 import org.opendatakit.aggregate.client.submission.Column;
 import org.opendatakit.aggregate.constants.common.UIConsts;
 import org.opendatakit.common.persistence.CommonFieldsBase;
@@ -111,9 +110,8 @@ public class SubmissionColumnFilter extends CommonFieldsBase {
     }
   }
 
-  public ColumnFilterHeader transform() {    
-    Column column = new Column(getColumnTitle(), getColumnEncoding(), getGpsColumnCode());
-    return  new ColumnFilterHeader(this.getUri(), column);
+  public Column transform() {    
+    return new Column(this.getUri(), getColumnTitle(), getColumnEncoding(), getGpsColumnCode());
   }
   
   private static SubmissionColumnFilter relation = null;
@@ -132,7 +130,7 @@ public class SubmissionColumnFilter extends CommonFieldsBase {
     return relation;
   }
 
-  static final SubmissionColumnFilter transform(ColumnFilterHeader column, SubmissionFilter parentFilter,
+  static final SubmissionColumnFilter transform(Column column, SubmissionFilter parentFilter,
       CallingContext cc) throws ODKDatastoreException {
 
     SubmissionColumnFilter relation = assertRelation(cc);
@@ -146,9 +144,9 @@ public class SubmissionColumnFilter extends CommonFieldsBase {
     }
     
     columnFilter.setParentFilterUri(parentFilter.getUri());
-    columnFilter.setColumnTitle(column.getColumn().getDisplayHeader());
-    columnFilter.setColumnEncoding(column.getColumn().getColumnEncoding());
-    columnFilter.setGpsColumnCode(column.getColumn().getGeopointColumnCode());
+    columnFilter.setColumnTitle(column.getDisplayHeader());
+    columnFilter.setColumnEncoding(column.getColumnEncoding());
+    columnFilter.setGpsColumnCode(column.getGeopointColumnCode());
 
     return columnFilter;
   }

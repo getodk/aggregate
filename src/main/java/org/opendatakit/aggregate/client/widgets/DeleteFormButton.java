@@ -23,8 +23,6 @@ import org.opendatakit.common.security.common.GrantedAuthorityName;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.PopupPanel;
 
 public class DeleteFormButton extends AbstractButtonBase implements ClickHandler {
 
@@ -48,15 +46,7 @@ public class DeleteFormButton extends AbstractButtonBase implements ClickHandler
 	public void onClick(ClickEvent event) {
 		super.onClick(event);
 
-		// TODO: display pop-up with text from b...
 		final ConfirmFormDeletePopup popup = new ConfirmFormDeletePopup(formId);
-		popup.setPopupPositionAndShow(new PopupPanel.PositionCallback() {
-			@Override
-			public void setPosition(int offsetWidth, int offsetHeight) {
-				int left = ((Window.getScrollLeft() + Window.getClientWidth() - offsetWidth) / 2);
-				int top = ((Window.getScrollTop() + Window.getClientHeight() - offsetHeight) / 2);
-				popup.setPopupPosition(left, top);
-			}
-		});
+		popup.setPopupPositionAndShow(popup.getPositionCallBack());
 	}
 }

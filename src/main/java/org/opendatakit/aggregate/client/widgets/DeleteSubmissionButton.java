@@ -5,8 +5,6 @@ import org.opendatakit.aggregate.client.popups.HelpBalloon;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.PopupPanel;
 
 public class DeleteSubmissionButton extends AbstractButtonBase implements ClickHandler {
 
@@ -27,15 +25,8 @@ public class DeleteSubmissionButton extends AbstractButtonBase implements ClickH
 	public void onClick(ClickEvent event) {
 		super.onClick(event);
 
-		final ConfirmSubmissionDeletePopup popup = new ConfirmSubmissionDeletePopup(submissionKeyAsString);
-		popup.setPopupPositionAndShow(new PopupPanel.PositionCallback() {
-			@Override
-			public void setPosition(int offsetWidth, int offsetHeight) {
-				int left = ((Window.getScrollLeft() + Window.getClientWidth() - offsetWidth) / 2);
-				int top = ((Window.getScrollTop() + Window.getClientHeight() - offsetHeight) / 2);
-				popup.setPopupPosition(left, top);
-			}
-		});
+		ConfirmSubmissionDeletePopup popup = new ConfirmSubmissionDeletePopup(submissionKeyAsString);
+		popup.setPopupPositionAndShow(popup.getPositionCallBack());
 	}
 
 }

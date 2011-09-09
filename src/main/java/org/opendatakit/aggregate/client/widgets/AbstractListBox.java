@@ -17,8 +17,8 @@ public abstract class AbstractListBox extends ListBox implements ChangeHandler, 
   private String tooltipText;
   protected HelpBalloon helpBalloon;
   
-  public AbstractListBox(String tooltipText) {
-    super();
+  public AbstractListBox(String tooltipText, boolean multipleValueSelection) {
+    super(multipleValueSelection);
   
     addChangeHandler(this);
     

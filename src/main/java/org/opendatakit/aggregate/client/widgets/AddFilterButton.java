@@ -25,7 +25,6 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.PopupPanel;
 
 public class AddFilterButton extends AbstractButtonBase implements ClickHandler {
@@ -52,15 +51,8 @@ public class AddFilterButton extends AbstractButtonBase implements ClickHandler 
       return;
     }
     
-    final FilterPopup filterPopup = new FilterPopup(basePanel.getSubmissionTable(), currentFilterGroup);
-    filterPopup.setPopupPositionAndShow(new PopupPanel.PositionCallback() {
-      @Override
-      public void setPosition(int offsetWidth, int offsetHeight) {
-          int left = ((Window.getScrollLeft() + Window.getClientWidth() - offsetWidth) / 2);
-          int top = ((Window.getScrollTop() + Window.getClientHeight() - offsetHeight) / 2);
-          filterPopup.setPopupPosition(left, top);
-      }
-    });
+    FilterPopup filterPopup = new FilterPopup(basePanel.getSubmissionTable(), currentFilterGroup);
+    filterPopup.setPopupPositionAndShow(filterPopup.getPositionCallBack());
     filterPopup.addCloseHandler(new CloseHandler<PopupPanel>() {
 
       @Override

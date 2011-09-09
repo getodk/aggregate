@@ -18,177 +18,152 @@ package org.opendatakit.aggregate.client.popups;
 
 import java.util.ArrayList;
 
-import org.opendatakit.aggregate.client.filter.ColumnFilterHeader;
+import org.opendatakit.aggregate.client.filter.ColumnFilter;
+import org.opendatakit.aggregate.client.filter.Filter;
 import org.opendatakit.aggregate.client.filter.FilterGroup;
+import org.opendatakit.aggregate.client.filter.RowFilter;
 import org.opendatakit.aggregate.client.submission.Column;
 import org.opendatakit.aggregate.client.table.SubmissionTable;
-import org.opendatakit.aggregate.client.widgets.ApplyFilterButton;
+import org.opendatakit.aggregate.client.widgets.BasicButton;
 import org.opendatakit.aggregate.client.widgets.ClosePopupButton;
+import org.opendatakit.aggregate.client.widgets.ColumnListBox;
+import org.opendatakit.aggregate.client.widgets.EnumListBox;
 import org.opendatakit.aggregate.constants.common.FilterOperation;
 import org.opendatakit.aggregate.constants.common.RowOrCol;
 import org.opendatakit.aggregate.constants.common.Visibility;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.ListBox;
-import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.TextBox;
 
-public class FilterPopup extends PopupPanel{
-	
-	private final FilterGroup group;
-	private final FlexTable table;
-	
-	private final ListBox visibility;
-	private final ListBox rowCol;
-	
-	private final ListBox columnForRowFilter;
-	private final ListBox columnsForColumnFilter;
-	private final ListBox filterOp;
-	private final TextBox filterValue;
-	
-	private final ArrayList<Column> headers;
-	
-	public FilterPopup(SubmissionTable submissionData, FilterGroup filterGroup) {
-		super(false); //do not close popup when user clicks out of it
-		this.group = filterGroup;
-		this.headers = submissionData.getHeaders();
-		
-		table = new FlexTable();
-		
-		//keep or remove
-		visibility = new ListBox();
-		for(Visibility vis : Visibility.values()) {
-		  visibility.addItem(vis.getDisplayText(), vis.name());
-		}
-		
-		//rows or columns
-		rowCol = new ListBox();
-		for(RowOrCol type : RowOrCol.values()) {
-		  rowCol.addItem(type.getDisplayText(), type.name());
-		}
-		
-		//where columns
-		final Label whereCols = new Label("where column");
-		
-		//column selection - for row filter
-		columnForRowFilter = new ListBox();
-		for(Column header : headers) {
-			columnForRowFilter.addItem(header.getDisplayHeader());
-		}
-		
-		//columns selection - for column filter
-		columnsForColumnFilter = new ListBox(true);
-		for(Column header : headers) {
-			columnsForColumnFilter.addItem(header.getDisplayHeader());
-		}
-		
-		//comparison operator
-		filterOp = new ListBox();
-		for(FilterOperation op : FilterOperation.values()) {
-		  filterOp.addItem(op.toString());
-		}
+public class FilterPopup extends AbstractPopupBase {
 
-		//value input
-		filterValue = new TextBox();
-				
-		table.setWidget(0, 0, visibility);
-		table.setWidget(0, 1, rowCol);
-		rowCol.addChangeHandler(new ChangeHandler() {
+  private static final String VISIBILITY_TOOLTIP = "Whether to show the column";
+  
+  private static final String ROW_COL_TOOLTIP = "Filter out columns or rows";
 
-			@Override
-			public void onChange(ChangeEvent event) {
-				if(rowCol.getValue(rowCol.getSelectedIndex()).equals(RowOrCol.ROW.name())) {
-					table.setWidget(0, 2, whereCols);
-					columnForRowFilter.setVisible(true);
-					columnsForColumnFilter.setVisible(false);
-					whereCols.setVisible(true);
-					filterOp.setVisible(true);
-					filterValue.setVisible(true);
-				} else {
-					table.setWidget(0, 2, columnsForColumnFilter);
-					columnForRowFilter.setVisible(false);
-					whereCols.setVisible(false);
-					columnsForColumnFilter.setVisible(true);
-					filterOp.setVisible(false);
-					filterValue.setVisible(false);
-				}
-			}
-			
-		});
-		table.setWidget(0, 2, whereCols);
-		table.setWidget(0, 3, columnForRowFilter);
-		table.setWidget(0, 4, filterOp);
-		table.setWidget(0, 5, filterValue);
-		table.setWidget(0, 6, new ClosePopupButton(this));
-	   table.setWidget(1, 0, new ApplyFilterButton(this));
-		
-		columnForRowFilter.setVisible(true);
-		columnsForColumnFilter.setVisible(false);
-		whereCols.setVisible(true);
-		filterOp.setVisible(true);
-		filterValue.setVisible(true);
-		setWidget(table);
-	}
+  private static final String COLUMN_TOOLTIP = "Column to be filtered out";
+  
+  private static final String FILTER_OP_TOOLTIP = "Filter operation to apply";
+  
+  private static final String APPLY_FILTER_TXT = "<img src=\"images/green_check.png\" /> Apply Filter";
+  private static final String APPLY_FILTER_TOOLTIP = "Use the created filter";
+  private static final String APPLY_FILTER_HELP_BALLOON = "This will apply the filter specified.  This will"
+      + " need to be saved in order to use it at a later time.";
 
-  public FilterGroup getGroup() {
-    return group;
+  private final FilterGroup group;
+  private final FlexTable table;
+
+  private final EnumListBox<Visibility> visibility;
+  private final EnumListBox<RowOrCol> rowCol;
+  private final ColumnListBox columnForRowFilter;
+  private final ColumnListBox columnsForColumnFilter;
+  private final EnumListBox<FilterOperation> filterOp;
+  private final TextBox filterValue;
+
+  private final ArrayList<Column> headers;
+
+  private final Label whereCols = new Label("where column");
+
+  public FilterPopup(SubmissionTable submissionData, FilterGroup filterGroup) {
+    super(); // do not close popup when user clicks out of it
+    
+    this.group = filterGroup;
+    this.headers = submissionData.getHeaders();
+
+    // keep or remove
+    visibility = new EnumListBox<Visibility>(VISIBILITY_TOOLTIP, Visibility.values());
+
+    // rows or columns
+    rowCol = new EnumListBox<RowOrCol>(ROW_COL_TOOLTIP, RowOrCol.values());
+    rowCol.addChangeHandler(new ChangeHandler() {
+      public void onChange(ChangeEvent event) {
+        updateUIoptions();
+      }
+    });
+
+    // column selection - for row filter
+    columnForRowFilter = new ColumnListBox(COLUMN_TOOLTIP, headers, false);
+
+    // columns selection - for column filter
+    columnsForColumnFilter = new ColumnListBox(COLUMN_TOOLTIP, headers, true);
+
+    // comparison operator
+    filterOp = new EnumListBox<FilterOperation>(FILTER_OP_TOOLTIP, FilterOperation.values());
+
+    // value input
+    filterValue = new TextBox();
+
+    BasicButton applyFilter = new BasicButton(APPLY_FILTER_TXT, APPLY_FILTER_TOOLTIP,
+        APPLY_FILTER_HELP_BALLOON);
+    applyFilter.addStyleDependentName("positive");
+    applyFilter.addClickHandler(new ApplyFilter());
+
+    table = new FlexTable();
+    table.setWidget(0, 0, visibility);
+    table.setWidget(0, 1, rowCol);
+    table.setWidget(0, 2, whereCols);
+    table.setWidget(0, 3, columnForRowFilter);
+    table.setWidget(0, 4, filterOp);
+    table.setWidget(0, 5, filterValue);
+    table.setWidget(0, 6, new ClosePopupButton(this));
+    table.setWidget(1, 0, applyFilter);
+
+    updateUIoptions();
+
+    setWidget(table);
   }
 
-  public Visibility getKeepRemove() {    
-    String korr = visibility.getValue(visibility.getSelectedIndex());
-    return Visibility.valueOf(korr);
-  }
-
-  public RowOrCol getRowCol() {
-    String rowcol = rowCol.getValue(rowCol.getSelectedIndex());
-    return RowOrCol.valueOf(rowcol);
-  }
-
-  public Column getColumnForRowFilter() {
-    String colname = columnForRowFilter.getValue(columnForRowFilter.getSelectedIndex());
-    String colencode = "";
-    Long colgpsIndex = null;
-    for(Column column: headers) {
-       if(colname.compareTo(column.getDisplayHeader()) == 0) {
-          colencode = column.getColumnEncoding();
-          colgpsIndex = column.getGeopointColumnCode();
-          break;
-       }
+  public void updateUIoptions() {
+    if (rowCol.getSelectedValue().equals(RowOrCol.ROW)) {
+      table.setWidget(0, 2, whereCols);
+      columnForRowFilter.setVisible(true);
+      columnsForColumnFilter.setVisible(false);
+      whereCols.setVisible(true);
+      filterOp.setVisible(true);
+      filterValue.setVisible(true);
+    } else {
+      table.setWidget(0, 2, columnsForColumnFilter);
+      columnForRowFilter.setVisible(false);
+      whereCols.setVisible(false);
+      columnsForColumnFilter.setVisible(true);
+      filterOp.setVisible(false);
+      filterValue.setVisible(false);
     }
-    return new Column(colname, colencode, colgpsIndex);
   }
 
-  public ArrayList<ColumnFilterHeader> getColumnsForColumnFilter() { 
-	  ArrayList<ColumnFilterHeader> columnfilterheaders = new ArrayList<ColumnFilterHeader>();
-    for (int i = columnsForColumnFilter.getSelectedIndex(); i < columnsForColumnFilter.getItemCount(); i++) {
-       String colname = "";
-       String colencode = "";
-       Long colgpsIndex = null;
-       if(columnsForColumnFilter.isItemSelected(i)) {
-          colname = columnsForColumnFilter.getValue(i);
-          for(Column column: headers) {
-             if(colname.compareTo(column.getDisplayHeader()) == 0) {
-                colencode = column.getColumnEncoding();
-                colgpsIndex = column.getGeopointColumnCode();
-                break;
-             }
-          }
-          columnfilterheaders.add(new ColumnFilterHeader(colname, colencode, colgpsIndex));
-       }
+  private class ApplyFilter implements ClickHandler {
+    @Override
+    public void onClick(ClickEvent event) {
+
+      if (group == null) {
+        return;
+      }
+      
+      Visibility kr = visibility.getSelectedValue();
+      RowOrCol rowcol = rowCol.getSelectedValue();
+      long numFilters = (long) group.getFilters().size();
+      
+      Filter newFilter;
+      if (rowcol.equals(RowOrCol.ROW)) {
+        Column column = null;
+        ArrayList<Column> columns = columnForRowFilter.getColumnsForFilter();
+        if (columns.size() > 0) {
+          column = columns.get(0);
+        }          
+        newFilter = new RowFilter(kr, column, filterOp.getSelectedValue(), filterValue.getValue(), numFilters);
+      } else {
+        ArrayList<Column> columnfilterheaders = columnsForColumnFilter.getColumnsForFilter();
+        newFilter = new ColumnFilter(kr, columnfilterheaders, numFilters);
+      }
+
+      group.addFilter(newFilter);
+
+      hide();
     }
-    return columnfilterheaders;
   }
-
-  public FilterOperation getFilterOp() {
-    String compare = filterOp.getValue(filterOp.getSelectedIndex());
-    return FilterOperation.valueOf(compare);
-  }
-
-  public String getFilterValue() {
-    return filterValue.getValue();
-  }
-	
 }

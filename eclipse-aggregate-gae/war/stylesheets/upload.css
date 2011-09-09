@@ -5,16 +5,6 @@
 	padding: 0px;
 }
 
-.uploadCloseButton {
-	float: right;
-}
-
-.uploadFrame {
-	float: left;
-	clear: none;
-	border: 0px;
-}
-
 h1 {
 	color: #07115A;
 	font-size: 20px;

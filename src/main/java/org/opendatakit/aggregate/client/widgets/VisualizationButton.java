@@ -22,8 +22,6 @@ import org.opendatakit.aggregate.client.popups.VisualizationPopup;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.PopupPanel;
 
 public class VisualizationButton extends AbstractButtonBase implements ClickHandler {
 
@@ -43,14 +41,7 @@ public class VisualizationButton extends AbstractButtonBase implements ClickHand
 	public void onClick(ClickEvent event) {
 		super.onClick(event);
 
-		final PopupPanel vizPopup = new VisualizationPopup(filterSubTab);
-		vizPopup.setPopupPositionAndShow(new PopupPanel.PositionCallback() {
-			@Override
-			public void setPosition(int offsetWidth, int offsetHeight) {
-				int left = ((Window.getScrollLeft() + Window.getClientWidth() - offsetWidth) / 2);
-				int top = ((Window.getScrollTop() + Window.getClientHeight() - offsetHeight) / 2);
-				vizPopup.setPopupPosition(left, top);
-			}
-		});
+		VisualizationPopup vizPopup = new VisualizationPopup(filterSubTab);
+		vizPopup.setPopupPositionAndShow(vizPopup.getPositionCallBack());
 	}
 }

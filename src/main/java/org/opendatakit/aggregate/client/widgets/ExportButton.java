@@ -21,8 +21,6 @@ import org.opendatakit.aggregate.client.popups.HelpBalloon;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.PopupPanel;
 
 public class ExportButton extends AbstractButtonBase implements ClickHandler {
 
@@ -41,15 +39,7 @@ public class ExportButton extends AbstractButtonBase implements ClickHandler {
 	@Override
 	public void onClick(ClickEvent event) {
 		super.onClick(event);
-
-		final PopupPanel popup = new ExportPopup(formId);
-		popup.setPopupPositionAndShow(new PopupPanel.PositionCallback() {
-			@Override
-			public void setPosition(int offsetWidth, int offsetHeight) {
-				int left = ((Window.getScrollLeft() + Window.getClientWidth() - offsetWidth) / 2);
-				int top = ((Window.getScrollTop() + Window.getClientHeight() - offsetHeight) / 2);
-				popup.setPopupPosition(left, top);
-			}
-		});
+		ExportPopup popup = new ExportPopup(formId);
+		popup.setPopupPositionAndShow(popup.getPositionCallBack());
 	}
 }
