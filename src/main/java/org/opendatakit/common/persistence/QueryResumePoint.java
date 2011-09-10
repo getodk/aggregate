@@ -14,6 +14,7 @@
 package org.opendatakit.common.persistence;
 
 import org.opendatakit.common.persistence.client.UIQueryResumePoint;
+import org.opendatakit.common.utils.WebUtils;
 
 /**
  * Tracks the information needed to resume a query.
@@ -70,7 +71,15 @@ public class QueryResumePoint {
 		return qrp;
 	}
 	
+	public String asWebsafeCursor() {
+		return WebUtils.formatCursorParameter(this);
+	}
+
 	public static final QueryResumePoint transform(UIQueryResumePoint qrp) {
 		return new QueryResumePoint(qrp.getAttributeName(), qrp.getValue(), qrp.getUriLastReturnedValue());
+	}
+	
+	public static final QueryResumePoint fromWebsafeCursor(String cursor) {
+		return WebUtils.parseCursorParameter(cursor);
 	}
 }
