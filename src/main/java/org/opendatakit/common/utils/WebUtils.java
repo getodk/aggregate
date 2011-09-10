@@ -13,13 +13,27 @@
  */
 package org.opendatakit.common.utils;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.http.impl.cookie.DateParseException;
 import org.apache.http.impl.cookie.DateUtils;
-import org.opendatakit.aggregate.constants.ErrorConsts;
-import org.opendatakit.common.constants.BasicConsts;
+import org.javarosa.xform.parse.XFormParser;
+import org.kxml2.io.KXmlParser;
+import org.kxml2.io.KXmlSerializer;
+import org.kxml2.kdom.Document;
+import org.kxml2.kdom.Element;
+import org.kxml2.kdom.Node;
+import org.opendatakit.common.constants.HtmlConsts;
+import org.opendatakit.common.persistence.QueryResumePoint;
+import org.xmlpull.v1.XmlPullParser;
 
 /**
  * Useful methods for parsing boolean and date values and formatting dates.
@@ -29,13 +43,16 @@ import org.opendatakit.common.constants.BasicConsts;
  */
 public class WebUtils {
 
+	private static final String URI_LAST_RETURNED_VALUE_TAG = "uriLastReturnedValue";
+	private static final String ATTRIBUTE_VALUE_TAG = "attributeValue";
+	private static final String ATTRIBUTE_NAME_TAG = "attributeName";
+	private static final String CURSOR_TAG = "cursor";
+	private static final Log logger = LogFactory.getLog(WebUtils.class);
 	private static final String PATTERN_DATE_TOSTRING = "EEE MMM dd HH:mm:ss zzz yyyy";
 	private static final String PATTERN_ISO8601 = "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
 	private static final String PATTERN_YYYY_MM_DD_DATE_ONLY_NO_TIME_DASH = "yyyy-MM-dd";
 	private static final String PATTERN_NO_DATE_TIME_ONLY = "HH:mm:ss.SSS";
 	private static final SimpleDateFormat iso8601 = new SimpleDateFormat(PATTERN_ISO8601);
-
-	private static final String WEBSAFE_CURSOR_SEPARATOR = " and ";
 	
 	private WebUtils(){};
 	
@@ -163,50 +180,145 @@ public class WebUtils {
 		}
 		return b.toString();
 	}
+		
+	private static final String XML_TAG_NAMESPACE = "http://www.opendatakit.org/cursor";
 	
-	public static final class Cursor {
-		private final Date startDate;
-		private final String uriAfter;
+	public static final String formatCursorParameter(QueryResumePoint cursor) {
+		if ( cursor == null ) return null;
+		Document d = new Document();
+		d.setStandalone(true);
+		d.setEncoding(HtmlConsts.UTF8_ENCODE);
+		Element e = d.createElement(XML_TAG_NAMESPACE, CURSOR_TAG);
+		e.setPrefix(null, XML_TAG_NAMESPACE);
+		d.addChild(0, Node.ELEMENT, e);
+		int idx = 0;
+		Element c = d.createElement(XML_TAG_NAMESPACE, ATTRIBUTE_NAME_TAG);
+		c.addChild(0, Node.TEXT, cursor.getAttributeName());
+		e.addChild(idx++, c);
+		c = d.createElement(XML_TAG_NAMESPACE, ATTRIBUTE_VALUE_TAG);
+		c.addChild(0, Node.TEXT, cursor.getValue());
+		e.addChild(idx++, c);
+		c = d.createElement(XML_TAG_NAMESPACE, URI_LAST_RETURNED_VALUE_TAG);
+		c.addChild(0, Node.TEXT, cursor.getUriLastReturnedValue());
 		
-		public Cursor(Date startDate, String uriAfter ) {
-			this.startDate = startDate;
-			this.uriAfter = uriAfter;
-		}
-
-		public Date getStartDate() {
-			return startDate;
-		}
-
-		public String getUriAfter() {
-			return uriAfter;
+		ByteArrayOutputStream ba = new ByteArrayOutputStream();
+		
+		KXmlSerializer serializer = new KXmlSerializer();
+		try {
+			serializer.setOutput(ba, HtmlConsts.UTF8_ENCODE);
+			// setting the response content type emits the xml header.
+			// just write the body here...
+			d.writeChildren(serializer); 
+		} catch (IOException e1) {
+			e1.printStackTrace();
+			throw new IllegalStateException("unexpected failure");
 		}
 		
-		public String asWebsafeCursorString() {
-			return WebUtils.iso8601Date(startDate) + WEBSAFE_CURSOR_SEPARATOR +
-					((uriAfter == null) ? "" : uriAfter);
+		try {
+			return ba.toString(HtmlConsts.UTF8_ENCODE);
+		} catch (UnsupportedEncodingException e1) {
+			e1.printStackTrace();
+			throw new IllegalStateException("unexpected failure");
 		}
 	}
-	
-	public static final Cursor parseCursorParameter(String websafeCursorString) {
-	    // cursor -- tracks where we resume our record fetch (if missing, we start over)
-	    Date dateCode = BasicConsts.EPOCH;
-	    String uriAfter = null;
-	    if ( websafeCursorString != null ) {
-		    websafeCursorString = websafeCursorString.trim();
-		    if ( websafeCursorString.length() != 0 ) {
-		    	int idx = websafeCursorString.indexOf(WEBSAFE_CURSOR_SEPARATOR);
-		    	if ( idx == -1 ) {
-		    		throw new IllegalArgumentException(ErrorConsts.INVALID_PARAMS);
-		    	}
-		    	String dateString = websafeCursorString.substring(0,idx);
-		    	uriAfter = websafeCursorString.substring(idx + WEBSAFE_CURSOR_SEPARATOR.length());
-	    		dateCode = parseDate(dateString);
-	    		if ( uriAfter.length() == 0 ) {
-	    			uriAfter = null;
-	    		}
-		    }
-	    }
-	    return new Cursor(dateCode, uriAfter);
+
+	public static final QueryResumePoint parseCursorParameter(String websafeCursorString) {
+		// parse the document
+		ByteArrayInputStream is;
+		try {
+			is = new ByteArrayInputStream( websafeCursorString.getBytes(HtmlConsts.UTF8_ENCODE));
+		} catch (UnsupportedEncodingException e1) {
+			e1.printStackTrace();
+			throw new IllegalStateException("Unexpected failure");
+		}
+		Document doc = null;
+        try {
+            InputStreamReader isr = null;
+            try {
+                isr = new InputStreamReader(is, HtmlConsts.UTF8_ENCODE);
+                doc = new Document();
+                KXmlParser parser = new KXmlParser();
+                parser.setInput(isr);
+                parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, true);
+                doc.parse(parser);
+                isr.close();
+            } finally {
+                if (isr != null) {
+                    try {
+                        isr.close();
+                    } catch (Exception e) {
+                        // no-op
+                    }
+                }
+                if (is != null) {
+                    try {
+                        is.close();
+                    } catch (Exception e) {
+                        // no-op
+                    }
+                }
+            }
+        } catch (Exception e) {
+        	logger.error("websafe cursor is not parseable as xml document");
+            e.printStackTrace();
+            throw new IllegalArgumentException("unable to parse websafeCursor");
+        }
+
+        Element manifestElement = doc.getRootElement();
+        if (!manifestElement.getName().equals(CURSOR_TAG)) {
+        	logger.error("websafe cursor root element is not <cursor> -- was " + manifestElement.getName());
+            throw new IllegalArgumentException("websafe cursor root element is not <cursor>");
+        }
+        
+        String namespace = manifestElement.getNamespace();
+        if (!XML_TAG_NAMESPACE.equals(namespace)) {
+        	logger.error("Root element Namespace is incorrect: " + namespace);
+        	throw new IllegalArgumentException("websafe cursor root element namespace invalid");
+        }
+
+		String attributeName = null;
+		String attributeValue = null;
+		String uriLastReturnedValue = null;
+
+        int nElements = manifestElement.getChildCount();
+        for (int i = 0; i < nElements; ++i) {
+            if (manifestElement.getType(i) != Element.ELEMENT) {
+                // e.g., whitespace (text)
+                continue;
+            }
+            
+            Element child = (Element) manifestElement.getElement(i);
+            if (!XML_TAG_NAMESPACE.equals(child.getNamespace())) {
+                // someone else's extension?
+                continue;
+            }
+            
+            String name = child.getName();
+            if (name.equalsIgnoreCase(ATTRIBUTE_NAME_TAG)) {
+            	attributeName = XFormParser.getXMLText(child, true);
+                if (attributeName != null && attributeName.length() == 0) {
+                	attributeName = null;
+                }
+            }
+            else if (name.equalsIgnoreCase(ATTRIBUTE_VALUE_TAG)) {
+            	attributeValue = XFormParser.getXMLText(child, true);
+                if (attributeValue != null && attributeValue.length() == 0) {
+                	attributeValue = null;
+                }
+            }
+            else if (name.equalsIgnoreCase(URI_LAST_RETURNED_VALUE_TAG)) {
+            	uriLastReturnedValue = XFormParser.getXMLText(child, true);
+                if (uriLastReturnedValue != null && uriLastReturnedValue.length() == 0) {
+                	uriLastReturnedValue = null;
+                }
+            }
+        }
+
+        if ( attributeName == null || attributeValue == null || uriLastReturnedValue == null ) {
+        	throw new IllegalArgumentException("null value for websafeCursor element");
+        }
+		
+        return new QueryResumePoint( attributeName, attributeValue, uriLastReturnedValue );
 	}
 
 }

@@ -18,6 +18,7 @@ package org.opendatakit.aggregate.servlet;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -32,13 +33,14 @@ import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.datamodel.TopLevelDynamicBase;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.form.Form;
-import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.common.constants.BasicConsts;
 import org.opendatakit.common.constants.HtmlConsts;
+import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.Query;
+import org.opendatakit.common.persistence.QueryResult;
+import org.opendatakit.common.persistence.QueryResumePoint;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.utils.WebUtils;
-import org.opendatakit.common.utils.WebUtils.Cursor;
 import org.opendatakit.common.web.CallingContext;
 
 /**
@@ -108,7 +110,7 @@ public class SubmissionDownloadListServlet extends ServletUtilBase {
 
     // the cursor string
     String websafeCursorString = getParameter(req, ServletConsts.CURSOR);
-    Cursor cursor = WebUtils.parseCursorParameter(websafeCursorString);
+    QueryResumePoint cursor = WebUtils.parseCursorParameter(websafeCursorString);
 
     // the number of entries
     int numEntries = DEFAULT_NUM_ENTRIES;
@@ -139,10 +141,12 @@ public class SubmissionDownloadListServlet extends ServletUtilBase {
         // are fully uploaded.  We snarf everything.
         Query query = cc.getDatastore().createQuery(tbl, cc.getCurrentUser());
         query.addSort(tbl.lastUpdateDate, Query.Direction.ASCENDING);
-        query.addFilter(tbl.lastUpdateDate, Query.FilterOperation.GREATER_THAN_OR_EQUAL, cursor.getStartDate());
-        query.addSort(tbl.primaryKey, Query.Direction.ASCENDING);
 
-        List<?> uriList = query.executeDistinctValueForDataField(tbl.primaryKey);
+        QueryResult result = query.executeQuery(cursor, numEntries);
+        List<String> uriList = new ArrayList<String>();
+        for ( CommonFieldsBase cb : result.getResultList()) {
+        	uriList.add(cb.getUri());
+        }
 
         Document d = new Document();
     	d.setStandalone(true);
@@ -154,17 +158,7 @@ public class SubmissionDownloadListServlet extends ServletUtilBase {
     	eList.setPrefix(null, XML_TAG_NAMESPACE);
     	eWrapper.addChild(0, Node.ELEMENT, eList);
     	int idx = 0;
-    	String lastUri = null;
-    	boolean filterForUri = (cursor.getUriAfter() != null);
-    	for ( Object o : uriList ) {
-    		String uri = (String) o;
-    		lastUri = uri;
-    		if ( filterForUri ) {
-    			if ( uri.equals(cursor.getUriAfter()) ) {
-    				filterForUri = false;
-    			}
-    			continue;
-    		}
+    	for ( String uri : uriList ) {
     		Element e = eList.createElement(XML_TAG_NAMESPACE, ID_TAG);
     		e.setPrefix(null, XML_TAG_NAMESPACE);
     		e.addChild(0, Node.TEXT, uri);
@@ -174,18 +168,14 @@ public class SubmissionDownloadListServlet extends ServletUtilBase {
     		if ( numEntries <= 0 ) break;
     	}
 
-    	if ( lastUri != null ) {
-        	// fetch the submission by the URI...
-        	Submission thisSubmission = new Submission(lastUri, form, cc);
-        	// construct the follow-on cursor...
-        	Cursor c = new Cursor(thisSubmission.getLastUpdateDate(), lastUri);
-        	websafeCursorString = c.asWebsafeCursorString();
+    	websafeCursorString = result.getResumeCursor().asWebsafeCursor();
+    	if ( websafeCursorString != null ) {
+	    	// emit the cursor value...
+	    	Element eCursorContinue = d.createElement(XML_TAG_NAMESPACE, CURSOR_TAG);
+	    	eCursorContinue.setPrefix(null, XML_TAG_NAMESPACE);
+	    	eCursorContinue.addChild(0, Node.TEXT, websafeCursorString);
+	    	eWrapper.addChild(1, Node.ELEMENT, eCursorContinue);
     	}
-    	// emit the cursor value...
-    	Element eCursorContinue = d.createElement(XML_TAG_NAMESPACE, CURSOR_TAG);
-    	eCursorContinue.setPrefix(null, XML_TAG_NAMESPACE);
-    	eCursorContinue.addChild(0, Node.TEXT, websafeCursorString);
-    	eWrapper.addChild(1, Node.ELEMENT, eCursorContinue);
 
     	KXmlSerializer serializer = new KXmlSerializer();
 		
