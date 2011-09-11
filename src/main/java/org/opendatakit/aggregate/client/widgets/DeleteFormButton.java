@@ -18,35 +18,33 @@ package org.opendatakit.aggregate.client.widgets;
 
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.popups.ConfirmFormDeletePopup;
-import org.opendatakit.aggregate.client.popups.HelpBalloon;
 import org.opendatakit.common.security.common.GrantedAuthorityName;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 
-public class DeleteFormButton extends AbstractButtonBase implements ClickHandler {
+public final class DeleteFormButton extends AggregateButton implements ClickHandler {
 
-	private static final String TOOLTIP_TEXT = "Remove the form";
+  private static final String BUTTON_TXT = "<img src=\"images/red_x.png\" /> Delete";
+  private static final String TOOLTIP_TXT = "Remove the form";
+  private static final String HELP_BALLOON_TXT = "Delete this form from Aggregate.";
 
-	private static final String HELP_BALLOON_TXT = "Delete this form from Aggregate.";
+  private final String formId;
 
-	private String formId;
+  public DeleteFormButton(String formId) {
+    super(BUTTON_TXT, TOOLTIP_TXT, HELP_BALLOON_TXT);
+    this.formId = formId;
+    addStyleDependentName("negative");
+    boolean enabled = AggregateUI.getUI().getUserInfo().getGrantedAuthorities()
+        .contains(GrantedAuthorityName.ROLE_DATA_OWNER);
+    setEnabled(enabled);
+  }
 
-	public DeleteFormButton(String formId) {
-		super("<img src=\"images/red_x.png\" /> Delete", TOOLTIP_TEXT);
-		this.formId = formId;
-		addStyleDependentName("negative");
-		boolean enabled = AggregateUI.getUI().getUserInfo()
-		.getGrantedAuthorities().contains(GrantedAuthorityName.ROLE_DATA_OWNER);
-		setEnabled(enabled);
-		helpBalloon = new HelpBalloon(this, HELP_BALLOON_TXT);
-	}
-
-	@Override
-	public void onClick(ClickEvent event) {
-		super.onClick(event);
-
-		final ConfirmFormDeletePopup popup = new ConfirmFormDeletePopup(formId);
-		popup.setPopupPositionAndShow(popup.getPositionCallBack());
-	}
+  @Override
+  public void onClick(ClickEvent event) {
+    super.onClick(event);
+    
+    ConfirmFormDeletePopup popup = new ConfirmFormDeletePopup(formId);
+    popup.setPopupPositionAndShow(popup.getPositionCallBack());
+  }
 }

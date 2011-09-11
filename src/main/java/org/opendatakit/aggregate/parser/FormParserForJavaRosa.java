@@ -42,6 +42,7 @@ import org.kxml2.kdom.Element;
 import org.opendatakit.aggregate.constants.ParserConsts;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.common.FormActionStatusTimestamp;
+import org.opendatakit.aggregate.constants.common.GeoPointConsts;
 import org.opendatakit.aggregate.datamodel.FormDataModel;
 import org.opendatakit.aggregate.datamodel.FormDataModel.ElementType;
 import org.opendatakit.aggregate.datamodel.TopLevelDynamicBase;
@@ -1127,7 +1128,7 @@ public class FormParserForJavaRosa {
       d = ds.createEntityUsingRelation(fdm, user);
 	  setPrimaryKey( d, fdmSubmissionUri, AuxType.GEO_LAT );
       dmList.add(d);
-      d.setOrdinalNumber(Long.valueOf(FormDataModel.GEOPOINT_LATITUDE_ORDINAL_NUMBER));
+      d.setOrdinalNumber(Long.valueOf(GeoPointConsts.GEOPOINT_LATITUDE_ORDINAL_NUMBER));
       d.setUriSubmissionDataModel(k.getKey());
       d.setParentUriFormDataModel(groupURI);
 	  d.setElementName(treeElement.getName());
@@ -1142,7 +1143,7 @@ public class FormParserForJavaRosa {
       d = ds.createEntityUsingRelation(fdm, user);
 	  setPrimaryKey( d, fdmSubmissionUri, AuxType.GEO_LNG );
       dmList.add(d);
-      d.setOrdinalNumber(Long.valueOf(FormDataModel.GEOPOINT_LONGITUDE_ORDINAL_NUMBER));
+      d.setOrdinalNumber(Long.valueOf(GeoPointConsts.GEOPOINT_LONGITUDE_ORDINAL_NUMBER));
       d.setUriSubmissionDataModel(k.getKey());
       d.setParentUriFormDataModel(groupURI);
 	  d.setElementName(treeElement.getName());
@@ -1157,7 +1158,7 @@ public class FormParserForJavaRosa {
       d = ds.createEntityUsingRelation(fdm, user);
 	  setPrimaryKey( d, fdmSubmissionUri, AuxType.GEO_ALT );
       dmList.add(d);
-      d.setOrdinalNumber(Long.valueOf(FormDataModel.GEOPOINT_ALTITUDE_ORDINAL_NUMBER));
+      d.setOrdinalNumber(Long.valueOf(GeoPointConsts.GEOPOINT_ALTITUDE_ORDINAL_NUMBER));
       d.setUriSubmissionDataModel(k.getKey());
       d.setParentUriFormDataModel(groupURI);
 	  d.setElementName(treeElement.getName());
@@ -1172,7 +1173,7 @@ public class FormParserForJavaRosa {
       d = ds.createEntityUsingRelation(fdm, user);
 	  setPrimaryKey( d, fdmSubmissionUri, AuxType.GEO_ACC );
       dmList.add(d);
-      d.setOrdinalNumber(Long.valueOf(FormDataModel.GEOPOINT_ACCURACY_ORDINAL_NUMBER));
+      d.setOrdinalNumber(Long.valueOf(GeoPointConsts.GEOPOINT_ACCURACY_ORDINAL_NUMBER));
       d.setUriSubmissionDataModel(k.getKey());
       d.setParentUriFormDataModel(groupURI);
 	  d.setElementName(treeElement.getName());

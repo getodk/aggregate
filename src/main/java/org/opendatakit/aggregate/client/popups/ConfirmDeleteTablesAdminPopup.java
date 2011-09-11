@@ -2,7 +2,7 @@ package org.opendatakit.aggregate.client.popups;
 
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.SecureGWT;
-import org.opendatakit.aggregate.client.widgets.BasicButton;
+import org.opendatakit.aggregate.client.widgets.AggregateButton;
 import org.opendatakit.aggregate.client.widgets.ClosePopupButton;
 
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -18,13 +18,14 @@ public class ConfirmDeleteTablesAdminPopup extends AbstractPopupBase {
   private static final String TOOLTIP_TXT = "Remove this user";
   private static final String HELP_BALLOON_TXT = "Remove this administrative user from editing data.";
 
-  private String aggregateUid;
+  private final String aggregateUid;
 
   public ConfirmDeleteTablesAdminPopup(String aggregateUid) {
     super();
     this.aggregateUid = aggregateUid;
 
-    BasicButton deleteButton = new BasicButton(BUTTON_TXT, TOOLTIP_TXT, HELP_BALLOON_TXT);
+    AggregateButton deleteButton = new AggregateButton(BUTTON_TXT, TOOLTIP_TXT,
+        HELP_BALLOON_TXT);
     deleteButton.addClickHandler(new ExecuteDelete());
 
     FlexTable layout = new FlexTable();

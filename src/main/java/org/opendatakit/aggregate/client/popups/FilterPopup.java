@@ -24,7 +24,7 @@ import org.opendatakit.aggregate.client.filter.FilterGroup;
 import org.opendatakit.aggregate.client.filter.RowFilter;
 import org.opendatakit.aggregate.client.submission.Column;
 import org.opendatakit.aggregate.client.table.SubmissionTable;
-import org.opendatakit.aggregate.client.widgets.BasicButton;
+import org.opendatakit.aggregate.client.widgets.AggregateButton;
 import org.opendatakit.aggregate.client.widgets.ClosePopupButton;
 import org.opendatakit.aggregate.client.widgets.ColumnListBox;
 import org.opendatakit.aggregate.client.widgets.EnumListBox;
@@ -40,7 +40,7 @@ import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 
-public class FilterPopup extends AbstractPopupBase {
+public final class FilterPopup extends AbstractPopupBase {
 
   private static final String VISIBILITY_TOOLTIP = "Whether to show the column";
   
@@ -76,10 +76,10 @@ public class FilterPopup extends AbstractPopupBase {
     this.headers = submissionData.getHeaders();
 
     // keep or remove
-    visibility = new EnumListBox<Visibility>(VISIBILITY_TOOLTIP, Visibility.values());
+    visibility = new EnumListBox<Visibility>(Visibility.values(), VISIBILITY_TOOLTIP);
 
     // rows or columns
-    rowCol = new EnumListBox<RowOrCol>(ROW_COL_TOOLTIP, RowOrCol.values());
+    rowCol = new EnumListBox<RowOrCol>(RowOrCol.values(), ROW_COL_TOOLTIP);
     rowCol.addChangeHandler(new ChangeHandler() {
       public void onChange(ChangeEvent event) {
         updateUIoptions();
@@ -87,18 +87,18 @@ public class FilterPopup extends AbstractPopupBase {
     });
 
     // column selection - for row filter
-    columnForRowFilter = new ColumnListBox(COLUMN_TOOLTIP, headers, false);
+    columnForRowFilter = new ColumnListBox(headers, COLUMN_TOOLTIP, false);
 
     // columns selection - for column filter
-    columnsForColumnFilter = new ColumnListBox(COLUMN_TOOLTIP, headers, true);
+    columnsForColumnFilter = new ColumnListBox(headers, COLUMN_TOOLTIP, true);
 
     // comparison operator
-    filterOp = new EnumListBox<FilterOperation>(FILTER_OP_TOOLTIP, FilterOperation.values());
+    filterOp = new EnumListBox<FilterOperation>(FilterOperation.values(), FILTER_OP_TOOLTIP);
 
     // value input
     filterValue = new TextBox();
 
-    BasicButton applyFilter = new BasicButton(APPLY_FILTER_TXT, APPLY_FILTER_TOOLTIP,
+    AggregateButton applyFilter = new AggregateButton(APPLY_FILTER_TXT, APPLY_FILTER_TOOLTIP,
         APPLY_FILTER_HELP_BALLOON);
     applyFilter.addStyleDependentName("positive");
     applyFilter.addClickHandler(new ApplyFilter());
@@ -151,13 +151,13 @@ public class FilterPopup extends AbstractPopupBase {
       Filter newFilter;
       if (rowcol.equals(RowOrCol.ROW)) {
         Column column = null;
-        ArrayList<Column> columns = columnForRowFilter.getColumnsForFilter();
+        ArrayList<Column> columns = columnForRowFilter.getSelectedColumns();
         if (columns.size() > 0) {
           column = columns.get(0);
         }          
         newFilter = new RowFilter(kr, column, filterOp.getSelectedValue(), filterValue.getValue(), numFilters);
       } else {
-        ArrayList<Column> columnfilterheaders = columnsForColumnFilter.getColumnsForFilter();
+        ArrayList<Column> columnfilterheaders = columnsForColumnFilter.getSelectedColumns();
         newFilter = new ColumnFilter(kr, columnfilterheaders, numFilters);
       }
 

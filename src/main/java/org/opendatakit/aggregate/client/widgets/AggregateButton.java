@@ -18,27 +18,30 @@ package org.opendatakit.aggregate.client.widgets;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.ui.PopupPanel;
+import com.google.gwt.user.client.ui.Button;
 
-public final class ClosePopupButton extends AggregateButton implements ClickHandler {
-
-  private static final String BUTTON_TXT = "<img src=\"images/red_x.png\" />";
-  private static final String TOOLTIP_TXT = "Close";
-  private static final String HELP_BALLOON_TXT = "Close the window";
-
-  private final PopupPanel popup;
-
-  public ClosePopupButton(PopupPanel popup) {
-    super(BUTTON_TXT, TOOLTIP_TXT, HELP_BALLOON_TXT);
-    this.popup = popup;
-    addStyleDependentName("close");
-    addStyleDependentName("negative");
+public class AggregateButton extends Button implements ClickHandler{
+  
+  private final AggregateBaseHandlers handlers;
+  
+  public AggregateButton(String buttonText, String tooltipText) {
+    this(buttonText, tooltipText, null);    
   }
 
+  public AggregateButton(String buttonText, String tooltipText, String helpBalloonText) {
+    super(buttonText);
+
+    addClickHandler(this);
+
+    // setup help system
+    handlers = new AggregateBaseHandlers(this, tooltipText, helpBalloonText);  
+    addMouseOverHandler(handlers);
+    addMouseOutHandler(handlers);  
+  }
+  
   @Override
   public void onClick(ClickEvent event) {
-    super.onClick(event);
-    
-    popup.hide();
+    handlers.userAction();
   }
+
 }

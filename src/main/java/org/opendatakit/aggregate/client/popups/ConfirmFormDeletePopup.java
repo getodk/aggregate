@@ -18,7 +18,7 @@ package org.opendatakit.aggregate.client.popups;
 
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.SecureGWT;
-import org.opendatakit.aggregate.client.widgets.BasicButton;
+import org.opendatakit.aggregate.client.widgets.AggregateButton;
 import org.opendatakit.aggregate.client.widgets.ClosePopupButton;
 
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -28,21 +28,21 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
 
-public class ConfirmFormDeletePopup extends AbstractPopupBase {
+public final class ConfirmFormDeletePopup extends AbstractPopupBase {
 
   private static final String BUTTON_TXT = "<img src=\"images/green_right_arrow.png\" /> Delete Data and Form";
   private static final String TOOLTIP_TXT = "Delete data and form";
   private static final String HELP_BALLOON_TXT = "This will delete the form and all of the contained " +
         "data.";
 
-  private String formId;
+  private final String formId;
 
   public ConfirmFormDeletePopup(String formId) {
     super();
 
     this.formId = formId;
 
-    BasicButton deleteButton = new BasicButton(BUTTON_TXT, TOOLTIP_TXT, HELP_BALLOON_TXT);
+    AggregateButton deleteButton = new AggregateButton(BUTTON_TXT, TOOLTIP_TXT, HELP_BALLOON_TXT);
     deleteButton.addClickHandler(new DeleteHandler());
     
     FlexTable layout = new FlexTable();

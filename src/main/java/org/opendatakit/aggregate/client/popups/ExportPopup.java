@@ -19,7 +19,7 @@ package org.opendatakit.aggregate.client.popups;
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.SecureGWT;
 import org.opendatakit.aggregate.client.form.KmlSettings;
-import org.opendatakit.aggregate.client.widgets.BasicButton;
+import org.opendatakit.aggregate.client.widgets.AggregateButton;
 import org.opendatakit.aggregate.client.widgets.ClosePopupButton;
 import org.opendatakit.aggregate.client.widgets.EnumListBox;
 import org.opendatakit.aggregate.client.widgets.KmlSettingListBox;
@@ -35,7 +35,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
 
-public class ExportPopup extends AbstractPopupBase {
+public final class ExportPopup extends AbstractPopupBase {
 
   private static final String FILE_TYPE_TOOLTIP = "Type of File to Generate";
   private static final String GEOPOINT_TOOLTIP = "Geopoint field to map";
@@ -58,7 +58,7 @@ public class ExportPopup extends AbstractPopupBase {
   private KmlSettingListBox titleFieldsDropDown;
   private KmlSettingListBox binaryFieldsDropDown;
 
-  private BasicButton exportButton;
+  private AggregateButton exportButton;
 
   public ExportPopup(String formid) {
     super();
@@ -70,11 +70,11 @@ public class ExportPopup extends AbstractPopupBase {
     titleFieldsDropDown = new KmlSettingListBox(TITLE_TOOLTIP);
     binaryFieldsDropDown = new KmlSettingListBox(BINARY_TOOLTIP);
 
-    exportButton = new BasicButton(CREATE_BUTTON_TXT, CREATE_BUTTON_TOOLTIP,
+    exportButton = new AggregateButton(CREATE_BUTTON_TXT, CREATE_BUTTON_TOOLTIP,
         CREATE_BUTTON_HELP_BALLON);
     exportButton.addClickHandler(new CreateExportHandler()); 
     
-    fileType = new EnumListBox<ExportType>(FILE_TYPE_TOOLTIP, ExportType.values());
+    fileType = new EnumListBox<ExportType>(ExportType.values(), FILE_TYPE_TOOLTIP);
     fileType.addChangeHandler(new ExportTypeChangeHandler());
 
     SecureGWT.getFormService().getPossibleKmlSettings(formId, new KmlSettingsCallback());

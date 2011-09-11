@@ -22,39 +22,38 @@ import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.FilterSubTab;
 import org.opendatakit.aggregate.client.filter.Filter;
 import org.opendatakit.aggregate.client.filter.FilterGroup;
-import org.opendatakit.aggregate.client.popups.HelpBalloon;
 import org.opendatakit.aggregate.constants.common.UIConsts;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 
-public class CopyFilterGroupButton extends AbstractButtonBase implements ClickHandler {
+public final class CopyFilterGroupButton extends AggregateButton implements ClickHandler {
 
-	private static final String TOOLTIP_TEXT = "Save as new filter group";
+  private static final String BUTTON_TXT = "Save As";
+  private static final String TOOLTIP_TXT = "Save as new filter group";
+  private static final String HELP_BALLOON_TXT = "This will save the current filters into a new filter"
+      + "group";
 
-	private static final String HELP_BALLOON_TXT = "This will save the current filters into a new filter" +
-			"group";
+  private final FilterSubTab parentSubTab;
 
-	private FilterSubTab parentSubTab;
+  public CopyFilterGroupButton(FilterSubTab parentSubTab) {
+    super(BUTTON_TXT, TOOLTIP_TXT, HELP_BALLOON_TXT);
+    this.parentSubTab = parentSubTab;
+  }
 
-	public CopyFilterGroupButton(FilterSubTab parentSubTab) {
-		super("Save As", TOOLTIP_TEXT);
-		this.parentSubTab = parentSubTab;
-		helpBalloon = new HelpBalloon(this, HELP_BALLOON_TXT);
-	}
+  @Override
+  public void onClick(ClickEvent event) {
+    super.onClick(event);
+    
+    FilterGroup filterGroup = parentSubTab.getDisplayedFilterGroup();
 
-	@Override
-	public void onClick(ClickEvent event) {
-		super.onClick(event);
+    ArrayList<Filter> newFilterGroupfilters = new ArrayList<Filter>();
+    newFilterGroupfilters.addAll(filterGroup.getFilters());
+    FilterGroup newGroup = new FilterGroup(UIConsts.FILTER_NONE, filterGroup.getFormId(),
+        newFilterGroupfilters);
 
-		FilterGroup filterGroup = parentSubTab.getDisplayedFilterGroup();
-
-		ArrayList<Filter> newFilterGroupfilters = new ArrayList<Filter>();
-		newFilterGroupfilters.addAll(filterGroup.getFilters());
-		FilterGroup newGroup = new FilterGroup(UIConsts.FILTER_NONE, filterGroup.getFormId(), newFilterGroupfilters);
-
-		// set the displaying filters to the newly saved filter group
-		parentSubTab.switchFilterGroup(newGroup);
-		AggregateUI.getUI().getTimer().refreshNow();
-	}
+    // set the displaying filters to the newly saved filter group
+    parentSubTab.switchFilterGroup(newGroup);
+    AggregateUI.getUI().getTimer().refreshNow();
+  }
 }

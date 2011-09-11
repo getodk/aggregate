@@ -19,7 +19,7 @@ package org.opendatakit.aggregate.client.popups;
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.SecureGWT;
 import org.opendatakit.aggregate.client.UrlHash;
-import org.opendatakit.aggregate.client.widgets.BasicButton;
+import org.opendatakit.aggregate.client.widgets.AggregateButton;
 import org.opendatakit.aggregate.client.widgets.ClosePopupButton;
 import org.opendatakit.aggregate.client.widgets.EnumListBox;
 import org.opendatakit.aggregate.constants.common.ExternalServicePublicationOption;
@@ -34,7 +34,7 @@ import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.TextBox;
 
-public class ExternalServicePopup extends AbstractPopupBase {
+public final class ExternalServicePopup extends AbstractPopupBase {
 
   private static final String BUTTON_TXT = "<img src=\"images/green_right_arrow.png\" /> Export";
   private static final String TOOLTIP_TXT = "Publish the data";
@@ -44,26 +44,26 @@ public class ExternalServicePopup extends AbstractPopupBase {
   private static final String ES_SERVICEOPTIONS_TOOLTIP = "Method data should be published";
   private static final String ES_TYPE_TOOLTIP = "Type of External Service Connection";
 
-  private String formId;
-  private TextBox name;
-  private EnumListBox<ExternalServiceType> serviceType;
-  private EnumListBox<ExternalServicePublicationOption> esOptions;
+  private final String formId;
+  private final TextBox name;
+  private final EnumListBox<ExternalServiceType> serviceType;
+  private final EnumListBox<ExternalServicePublicationOption> esOptions;
 
   public ExternalServicePopup(String formId) {
     super();
 
     this.formId = formId;
-    BasicButton deleteButton = new BasicButton(BUTTON_TXT, TOOLTIP_TXT, HELP_BALLOON_TXT);
+    AggregateButton deleteButton = new AggregateButton(BUTTON_TXT, TOOLTIP_TXT, HELP_BALLOON_TXT);
     deleteButton.addClickHandler(new CreateExernalServiceHandler());
 
     name = new TextBox();
 
-    serviceType = new EnumListBox<ExternalServiceType>(ES_TYPE_TOOLTIP,
-        ExternalServiceType.values());
+    serviceType = new EnumListBox<ExternalServiceType>(ExternalServiceType.values(),
+        ES_TYPE_TOOLTIP);
     serviceType.addChangeHandler(new ExternalServiceTypeChangeHandler());
 
-    esOptions = new EnumListBox<ExternalServicePublicationOption>(ES_SERVICEOPTIONS_TOOLTIP,
-        ExternalServicePublicationOption.values());
+    esOptions = new EnumListBox<ExternalServicePublicationOption>(ExternalServicePublicationOption.values(),
+        ES_SERVICEOPTIONS_TOOLTIP);
 
     updateUIOptions();
 
