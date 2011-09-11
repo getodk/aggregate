@@ -33,8 +33,8 @@ import org.opendatakit.aggregate.constants.format.XFormsTableConsts;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.servlet.FormXmlServlet;
 import org.opendatakit.aggregate.servlet.XFormsManifestServlet;
-import org.opendatakit.common.constants.BasicConsts;
-import org.opendatakit.common.constants.HtmlConsts;
+import org.opendatakit.common.web.constants.BasicConsts;
+import org.opendatakit.common.web.constants.HtmlConsts;
 
 /**
  * Generates an OpenRosa-compliant xml description of forms for the servlet

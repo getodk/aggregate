@@ -31,8 +31,8 @@ import org.kxml2.io.KXmlSerializer;
 import org.kxml2.kdom.Document;
 import org.kxml2.kdom.Element;
 import org.kxml2.kdom.Node;
-import org.opendatakit.common.constants.HtmlConsts;
 import org.opendatakit.common.persistence.QueryResumePoint;
+import org.opendatakit.common.web.constants.HtmlConsts;
 import org.xmlpull.v1.XmlPullParser;
 
 /**

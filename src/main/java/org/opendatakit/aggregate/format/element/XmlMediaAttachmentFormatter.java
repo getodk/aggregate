@@ -31,10 +31,10 @@ import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.submission.SubmissionRepeat;
 import org.opendatakit.aggregate.submission.type.BlobSubmissionType;
 import org.opendatakit.aggregate.submission.type.GeoPoint;
-import org.opendatakit.common.constants.BasicConsts;
-import org.opendatakit.common.constants.HtmlUtil;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
+import org.opendatakit.common.web.constants.BasicConsts;
+import org.opendatakit.common.web.constants.HtmlUtil;
 
 /**
  * Emits the list of media filenames and URLs for a given form.

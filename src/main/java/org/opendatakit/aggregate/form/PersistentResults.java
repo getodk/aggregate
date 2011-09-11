@@ -29,7 +29,6 @@ import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.servlet.BinaryDataServlet;
 import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.submission.SubmissionKeyPart;
-import org.opendatakit.common.constants.BasicConsts;
 import org.opendatakit.common.datamodel.BinaryContent;
 import org.opendatakit.common.datamodel.BinaryContentManipulator;
 import org.opendatakit.common.datamodel.BinaryContentRefBlob;
@@ -43,6 +42,7 @@ import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.web.CallingContext;
+import org.opendatakit.common.web.constants.BasicConsts;
 
 /**
  * 

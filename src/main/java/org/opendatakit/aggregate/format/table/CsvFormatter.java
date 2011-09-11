@@ -29,9 +29,9 @@ import org.opendatakit.aggregate.format.element.LinkElementFormatter;
 import org.opendatakit.aggregate.format.header.BasicHeaderFormatter;
 import org.opendatakit.aggregate.servlet.FormMultipleValueServlet;
 import org.opendatakit.aggregate.submission.SubmissionSet;
-import org.opendatakit.common.constants.BasicConsts;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
+import org.opendatakit.common.web.constants.BasicConsts;
 
 /**
  * 

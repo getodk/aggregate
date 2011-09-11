@@ -54,11 +54,11 @@ import org.opendatakit.aggregate.parser.MultiPartFormData;
 import org.opendatakit.aggregate.parser.SubmissionParser;
 import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.aggregate.task.UploadSubmissions;
-import org.opendatakit.common.constants.BasicConsts;
-import org.opendatakit.common.constants.HtmlConsts;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
 import org.opendatakit.common.web.CallingContext;
+import org.opendatakit.common.web.constants.BasicConsts;
+import org.opendatakit.common.web.constants.HtmlConsts;
 
 /**
  * Servlet to process a submission from a form

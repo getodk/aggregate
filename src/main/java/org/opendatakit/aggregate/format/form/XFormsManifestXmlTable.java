@@ -33,9 +33,9 @@ import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.form.FormInfo;
 import org.opendatakit.aggregate.servlet.XFormsDownloadServlet;
 import org.opendatakit.aggregate.submission.SubmissionKey;
-import org.opendatakit.common.constants.BasicConsts;
-import org.opendatakit.common.constants.HtmlConsts;
 import org.opendatakit.common.datamodel.BinaryContentManipulator;
+import org.opendatakit.common.web.constants.BasicConsts;
+import org.opendatakit.common.web.constants.HtmlConsts;
 
 /**
  * Generates an OpenRosa-compliant xml description of forms for the servlet

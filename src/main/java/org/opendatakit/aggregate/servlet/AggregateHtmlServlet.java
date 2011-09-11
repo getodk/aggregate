@@ -25,13 +25,13 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.common.UIConsts;
-import org.opendatakit.common.constants.HtmlConsts;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.security.UserService;
 import org.opendatakit.common.security.spring.SecurityRevisionsTable;
 import org.opendatakit.common.web.CallingContext;
+import org.opendatakit.common.web.constants.HtmlConsts;
 
 /**
  * Stupid class to wrap the Aggregate.html page that GWT uses for 

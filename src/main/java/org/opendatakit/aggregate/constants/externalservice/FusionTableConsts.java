@@ -19,7 +19,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.opendatakit.aggregate.datamodel.FormElementModel.ElementType;
-import org.opendatakit.common.constants.HtmlConsts;
+import org.opendatakit.common.web.constants.HtmlConsts;
 
 /**
  * 

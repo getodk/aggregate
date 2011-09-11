@@ -33,10 +33,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.opendatakit.aggregate.constants.ServletConsts;
-import org.opendatakit.common.constants.BasicConsts;
-import org.opendatakit.common.constants.HtmlConsts;
-import org.opendatakit.common.constants.HtmlUtil;
 import org.opendatakit.common.web.CallingContext;
+import org.opendatakit.common.web.constants.BasicConsts;
+import org.opendatakit.common.web.constants.HtmlConsts;
+import org.opendatakit.common.web.constants.HtmlUtil;
 
 /**
  * Base class for Servlets that contain useful utilities
