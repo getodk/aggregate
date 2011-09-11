@@ -19,7 +19,7 @@ package org.opendatakit.aggregate.client.popups;
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.SecureGWT;
 import org.opendatakit.aggregate.client.externalserv.ExternServSummary;
-import org.opendatakit.aggregate.client.widgets.BasicButton;
+import org.opendatakit.aggregate.client.widgets.AggregateButton;
 import org.opendatakit.aggregate.client.widgets.ClosePopupButton;
 import org.opendatakit.aggregate.constants.common.OperationalStatus;
 
@@ -37,7 +37,7 @@ import com.google.gwt.user.client.ui.HTML;
  * @author mitchellsundt@gmail.com
  * 
  */
-public class ConfirmPublishDeletePopup extends AbstractPopupBase {
+public final class ConfirmPublishDeletePopup extends AbstractPopupBase {
 
   private static final String BUTTON_ICON = "<img src=\"images/green_right_arrow.png\" />";
   private static final String TOOLTIP_TXT = "Remove this publisher";
@@ -55,7 +55,7 @@ public class ConfirmPublishDeletePopup extends AbstractPopupBase {
         : "stop publishing and remove";
 
     String buttonTxt = BUTTON_ICON + action + " Publisher";
-    BasicButton deleteButton = new BasicButton(buttonTxt, TOOLTIP_TXT, HELP_BALLOON_TXT);
+    AggregateButton deleteButton = new AggregateButton(buttonTxt, TOOLTIP_TXT, HELP_BALLOON_TXT);
     deleteButton.addClickHandler(new ExecuteDelete());
 
     FlexTable layout = new FlexTable();

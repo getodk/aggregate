@@ -20,6 +20,7 @@ package org.opendatakit.aggregate.submission.type;
 import java.math.BigDecimal;
 import java.util.List;
 
+import org.opendatakit.aggregate.constants.common.GeoPointConsts;
 import org.opendatakit.aggregate.constants.format.FormatConsts;
 import org.opendatakit.aggregate.datamodel.FormDataModel;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
@@ -78,16 +79,16 @@ public class GeoPointSubmissionType extends SubmissionSingleValueBase<GeoPoint> 
 		}
 		for ( FormDataModel m : element.getFormDataModel().getChildren()) {
 			switch ( m.getOrdinalNumber().intValue() ) {
-			case FormDataModel.GEOPOINT_LATITUDE_ORDINAL_NUMBER:
+			case GeoPointConsts.GEOPOINT_LATITUDE_ORDINAL_NUMBER:
 				backingObject.setNumericField(m.getBackingKey(), coordinates.getLatitude());
 				break;
-			case FormDataModel.GEOPOINT_LONGITUDE_ORDINAL_NUMBER:
+			case GeoPointConsts.GEOPOINT_LONGITUDE_ORDINAL_NUMBER:
 				backingObject.setNumericField(m.getBackingKey(), coordinates.getLongitude());
 				break;
-			case FormDataModel.GEOPOINT_ALTITUDE_ORDINAL_NUMBER:
+			case GeoPointConsts.GEOPOINT_ALTITUDE_ORDINAL_NUMBER:
 				backingObject.setNumericField(m.getBackingKey(), coordinates.getAltitude());
 				break;
-			case FormDataModel.GEOPOINT_ACCURACY_ORDINAL_NUMBER:
+			case GeoPointConsts.GEOPOINT_ACCURACY_ORDINAL_NUMBER:
 				backingObject.setNumericField(m.getBackingKey(), coordinates.getAccuracy());
 				break;
 			}
@@ -120,16 +121,16 @@ public class GeoPointSubmissionType extends SubmissionSingleValueBase<GeoPoint> 
 		BigDecimal accuracy = null;
 		for ( FormDataModel m : element.getFormDataModel().getChildren()) {
 			switch ( m.getOrdinalNumber().intValue() ) {
-			case FormDataModel.GEOPOINT_LATITUDE_ORDINAL_NUMBER:
+			case GeoPointConsts.GEOPOINT_LATITUDE_ORDINAL_NUMBER:
 				latCoor = backingObject.getNumericField(m.getBackingKey());
 				break;
-			case FormDataModel.GEOPOINT_LONGITUDE_ORDINAL_NUMBER:
+			case GeoPointConsts.GEOPOINT_LONGITUDE_ORDINAL_NUMBER:
 				longCoor = backingObject.getNumericField(m.getBackingKey());
 				break;
-			case FormDataModel.GEOPOINT_ALTITUDE_ORDINAL_NUMBER:
+			case GeoPointConsts.GEOPOINT_ALTITUDE_ORDINAL_NUMBER:
 				altitude = backingObject.getNumericField(m.getBackingKey());
 				break;
-			case FormDataModel.GEOPOINT_ACCURACY_ORDINAL_NUMBER:
+			case GeoPointConsts.GEOPOINT_ACCURACY_ORDINAL_NUMBER:
 				accuracy = backingObject.getNumericField(m.getBackingKey());
 				break;
 			}

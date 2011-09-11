@@ -18,297 +18,385 @@ package org.opendatakit.aggregate.client.popups;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.FilterSubTab;
 import org.opendatakit.aggregate.client.SecureGWT;
-import org.opendatakit.aggregate.client.form.KmlSettingOption;
 import org.opendatakit.aggregate.client.form.KmlSettings;
 import org.opendatakit.aggregate.client.preferences.Preferences;
 import org.opendatakit.aggregate.client.submission.Column;
 import org.opendatakit.aggregate.client.submission.SubmissionUI;
-import org.opendatakit.aggregate.client.submission.UIGeoPoint;
+import org.opendatakit.aggregate.client.widgets.AggregateButton;
 import org.opendatakit.aggregate.client.widgets.ClosePopupButton;
+import org.opendatakit.aggregate.client.widgets.ColumnListBox;
+import org.opendatakit.aggregate.client.widgets.EnumListBox;
+import org.opendatakit.aggregate.client.widgets.KmlSettingListBox;
 import org.opendatakit.aggregate.constants.common.ChartType;
+import org.opendatakit.aggregate.constants.common.GeoPointConsts;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.maps.client.InfoWindow;
+import com.google.gwt.maps.client.InfoWindowContent;
 import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.Maps;
 import com.google.gwt.maps.client.control.LargeMapControl;
+import com.google.gwt.maps.client.event.MarkerClickHandler;
 import com.google.gwt.maps.client.geom.LatLng;
 import com.google.gwt.maps.client.overlay.Marker;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.Image;
-import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.visualization.client.AbstractDataTable.ColumnType;
+import com.google.gwt.visualization.client.DataTable;
+import com.google.gwt.visualization.client.VisualizationUtils;
+import com.google.gwt.visualization.client.visualizations.Table;
+import com.google.gwt.visualization.client.visualizations.corechart.BarChart;
+import com.google.gwt.visualization.client.visualizations.corechart.Options;
+import com.google.gwt.visualization.client.visualizations.corechart.PieChart;
+import com.google.gwt.visualization.client.visualizations.corechart.PieChart.PieOptions;
 
-public class VisualizationPopup extends AbstractPopupBase {
+public final class VisualizationPopup extends AbstractPopupBase {
 
-  private static final String NUMBER_OF_OCCURANCES = "Number of Occurances";
+  private static final String COLUMN_TXT = "<h4 id=\"form_name\"> Column to Visualize:</h4>";
+  private static final String GPS_TXT = "<h4 id=\"form_name\"> GeoPoint to Map:</h4>";
+  private static final String TABULATION_TXT = "<h4 id=\"form_name\">Tabulation:</h4>";
+  private static final String TYPE_TXT = "<h4 id=\"form_name\">Visualization Type:</h4>";
 
-  private ArrayList<Column> headers;
-  private ArrayList<SubmissionUI> submissions;
-  
-  private FlexTable dropDownsTable;
-  private ListBox chartType;
-  private ListBox firstData;
-  private ListBox secondData;
-  private Image chart;
-  private FlowPanel mapSpace;
-  
+  private static int VIZ_TYPE_TEXT = 0;
+  private static int VIZ_TYPE_LIST = 1;
+  private static int COLUMN_TEXT = 2;
+  private static int COLUMN_LIST = 3;
+  private static int VALUE_TEXT = 4;
+  private static int VALUE_SELECTION = 5;
+  private static int BUTTON = 6;
+  private static int CLOSE = 7;
+
+  private static final String RESIZE_UNITS = "px";
+
+  private static final String VIZ_TYPE_TOOLTIP = "Type of Visualization";
+
+  private final ArrayList<Column> headers;
+  private final ArrayList<SubmissionUI> submissions;
+
+  private final FlexTable dropDownsTable;
+  private final EnumListBox<ChartType> chartType;
+
+  private final ColumnListBox columnList;
+  private final ColumnListBox dataList;
+  private final KmlSettingListBox geoPoints;
+
   private boolean mapsApiLoaded;
-  
-  private ArrayList<KmlSettingOption> geoPoints ;
+  private boolean chartApiLoaded;
+  private boolean tallyOccurances;
 
   private final String formId;
-  
+
+  private final AggregateButton executeButton;
+
+  private final Label message;
+
+  private final SimplePanel chartPanel;
+
   public VisualizationPopup(FilterSubTab filterSubTab) {
     super();
-    this.dropDownsTable = new FlexTable();
-    this.chartType = new ListBox();
-    this.firstData = new ListBox();
-    this.secondData = new ListBox();
-    
-    this.chart = new Image();
-    this.mapSpace = new FlowPanel();
-    
-    this.formId = filterSubTab.getDisplayedFilterGroup().getFormId();
-    this.headers = filterSubTab.getSubmissionTable().getHeaders();
-    this.submissions = filterSubTab.getSubmissionTable().getSubmissions();
-    
-    this.geoPoints = new ArrayList<KmlSettingOption>();
-    
-    this.mapsApiLoaded = false;
-    
+
+    formId = filterSubTab.getDisplayedFilterGroup().getFormId();
+    headers = filterSubTab.getSubmissionTable().getHeaders();
+    submissions = filterSubTab.getSubmissionTable().getSubmissions();
+
+    chartType = new EnumListBox<ChartType>(ChartType.values(), VIZ_TYPE_TOOLTIP);
+    chartType.addChangeHandler(new ChangeHandler() {
+      @Override
+      public void onChange(ChangeEvent event) {
+        updateUIoptions();
+      }
+    });
+
+    columnList = new ColumnListBox(headers, "TOOLTIP", false);
+    dataList = new ColumnListBox(headers, "TOOLTIP", false);
+    geoPoints = new KmlSettingListBox("TOOLTIP");
+
+    mapsApiLoaded = false;
     Maps.loadMapsApi(Preferences.getGoogleMapsApiKey(), "2", false, new Runnable() {
       public void run() {
         mapsApiLoaded = true;
       }
     });
 
-    for(Column header : headers) {
-      firstData.addItem(header.getDisplayHeader());
-    }
-    
+    chartApiLoaded = false;
+    VisualizationUtils.loadVisualizationApi(new Runnable() {
+      public void run() {
+        chartApiLoaded = true;
+        updateUIoptions();
+      }
+    }, PieChart.PACKAGE, Table.PACKAGE);
+
     SecureGWT.getFormService().getGpsCoordnates(formId, new AsyncCallback<KmlSettings>() {
       public void onFailure(Throwable caught) {
-          AggregateUI.getUI().reportError(caught);
+        AggregateUI.getUI().reportError(caught);
       }
 
       public void onSuccess(KmlSettings result) {
-        geoPoints = result.getGeopointNodes();
+        geoPoints.updateValues(result.getGeopointNodes());
       }
     });
+
+    executeButton = new AggregateButton("", "TOOLTIP");
+    executeButton.addClickHandler(new ExecuteVisualization());
+
+    message = new Label();
+
+    dropDownsTable = new FlexTable();
+    dropDownsTable.addStyleName("popup_menu");
+
+    dropDownsTable.setHTML(0, VIZ_TYPE_TEXT, TYPE_TXT);
+    dropDownsTable.setWidget(0, VIZ_TYPE_LIST, chartType);
+    dropDownsTable.setHTML(0, COLUMN_TEXT, COLUMN_TXT);
+    dropDownsTable.setWidget(0, COLUMN_LIST, columnList);
+    dropDownsTable.setHTML(0, VALUE_TEXT, TABULATION_TXT);
+    dropDownsTable.setWidget(0, VALUE_SELECTION, dataList);
+    dropDownsTable.setWidget(1, VALUE_SELECTION, dataList);
+    dropDownsTable.setWidget(0, BUTTON, executeButton);
+    dropDownsTable.setWidget(0, CLOSE, new ClosePopupButton(this));
+    dropDownsTable.getCellFormatter().addStyleName(0, CLOSE, "popup_close_cell");
+
+    // setup the window size
+    chartPanel = new SimplePanel();
+    Integer height = (Window.getClientHeight() * 5) / 6;
+    Integer width = (Window.getClientWidth() * 5) / 6;
+    chartPanel.setHeight(height.toString() + RESIZE_UNITS);
+    chartPanel.setWidth(width.toString() + RESIZE_UNITS);
 
     VerticalPanel layoutPanel = new VerticalPanel();
-
-    final Button executeButton = new Button("<img src=\"images/pie_chart.png\" /> Pie It");
-    executeButton.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        ChartType type = ChartType.valueOf(chartType.getValue(chartType.getSelectedIndex()));
-        if (type.equals(ChartType.MAP)) {
-          SecureGWT.getSubmissionService().getGeoPoints(formId, geoPoints.get(secondData.getSelectedIndex())
-              .getElementKey(), new AsyncCallback<UIGeoPoint[]>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                AggregateUI.getUI().reportError(caught);
-            }
-
-            @Override
-            public void onSuccess(UIGeoPoint[] result) {
-              if (!mapsApiLoaded)
-                return;
-              LatLng center = null;
-              if (result == null || result.length == 0) {
-                center = LatLng.newInstance(0.0, 0.0);
-              } else {
-                for (int i = 0; i < result.length; i++) {
-                  try {
-                    System.out.println("[" + result[i].getLatitude() + ", "
-                        + result[i].getLongitude() + "]");
-                    center = LatLng.newInstance(Double.parseDouble(result[i].getLatitude()),
-                        Double.parseDouble(result[i].getLongitude()));
-                    break;
-                  } catch (NumberFormatException e) {
-                  } catch (NullPointerException e) {
-                  }
-                }
-              }
-              if (center == null)
-                return;
-              final MapWidget map = new MapWidget(center, 2);
-              map.setSize("100%", "100%");
-              map.addControl(new LargeMapControl());
-              mapSpace.add(map);
-
-              for (UIGeoPoint u : result) {
-                if (u == null || u.getLatitude() == null || u.getLongitude() == null)
-                  continue;
-                try {
-                  LatLng ll = LatLng.newInstance(Double.parseDouble(u.getLatitude()),
-                      Double.parseDouble(u.getLongitude()));
-                  map.addOverlay(new Marker(ll));
-                } catch (NumberFormatException e) {
-                  continue;
-                }
-              }
-            }
-          });
-        } else {
-          chart.setUrl(getImageUrl());
-        }
-        AggregateUI.getUI().getTimer().restartTimer();
-      }
-    });
-
-    chartType.addItem(ChartType.PIE_CHART.getDisplayText(), ChartType.PIE_CHART.name());
-    chartType.addItem(ChartType.BAR_GRAPH.getDisplayText(), ChartType.BAR_GRAPH.name());
-    chartType.addItem(ChartType.MAP.getDisplayText(), ChartType.MAP.name());
-    // chartType.addItem(UI_SCATTER_PLOT);
-
-    chartType.addChangeHandler(new ChangeHandler() {
-      @Override
-      public void onChange(ChangeEvent event) {
-        ChartType selected = ChartType.valueOf(chartType.getValue(chartType.getSelectedIndex()));
-        if (selected.equals(ChartType.MAP)) {
-          executeButton.setHTML("<img src=\"images/map.png\" /> Map It");
-          enableMap();
-        } else {
-          if (selected.equals(ChartType.PIE_CHART)) {
-            executeButton.setHTML("<img src=\"images/pie_chart.png\" /> Pie It");
-          } else if (selected.equals(ChartType.BAR_GRAPH)) {
-            executeButton.setHTML("<img src=\"images/bar_chart.png\" /> Bar It");
-          } else { // selected.equals(UI_SCATTER_PLOT)
-            executeButton.setHTML("<img src=\"scatter_plot.png\" /> Plot It");
-          }
-          disableMap();
-        }
-      }
-    });
-
-    dropDownsTable.setWidget(0, 0, chartType);
-    dropDownsTable.setText(0, 1, "Labels:");
-    dropDownsTable.setWidget(0, 2, firstData);
-    dropDownsTable.setText(0, 3, "Data:");
-    dropDownsTable.setWidget(0, 4, secondData);
-    dropDownsTable.setWidget(0, 5, executeButton);
-    dropDownsTable.setWidget(0, 6, new ClosePopupButton(this));
-    dropDownsTable.addStyleName("popup_menu");
-    dropDownsTable.getCellFormatter().addStyleName(0, 6, "popup_close_cell");
-
     layoutPanel.add(dropDownsTable);
-    chart.getElement().setId("chart_image");
-    chartType.setItemSelected(0, true);
-    layoutPanel.add(chart);
-    layoutPanel.add(mapSpace);
-    mapSpace.getElement().setId("map_area");
-    disableMap();
-
-    SecureGWT.getFormService().getGpsCoordnates(formId, new AsyncCallback<KmlSettings>() {
-      public void onFailure(Throwable caught) {
-          AggregateUI.getUI().reportError(caught);
-      }
-
-      public void onSuccess(KmlSettings result) {
-        geoPoints = result.getGeopointNodes();
-      }
-    });
+    layoutPanel.add(message);
+    layoutPanel.add(chartPanel);
 
     setWidget(layoutPanel);
+    chartType.setItemSelected(0, true);
+    updateUIoptions();
   }
-  
-  private String getImageUrl() {
-    StringBuffer chartUrl = new StringBuffer("https://chart.googleapis.com/chart?cht=");
-    ChartType type = ChartType.valueOf(chartType.getValue(chartType.getSelectedIndex()));
-    chartUrl.append(type.getOptionText());
-    chartUrl.append("&chs=600x500");
+
+  private void updateUIoptions() {
+    ChartType selected = chartType.getSelectedValue();
+    executeButton.setHTML(selected.getButtonText());
+    if (selected.equals(ChartType.MAP)) {
+      dropDownsTable.setHTML(0, COLUMN_TEXT, GPS_TXT);
+      dropDownsTable.setWidget(0, COLUMN_LIST, geoPoints);
+    } else { // must be a chart if not MAP
+      dropDownsTable.setHTML(0, COLUMN_TEXT, COLUMN_TXT);
+      dropDownsTable.setWidget(0, COLUMN_LIST, columnList);
+
+    }
+    center();
+    message.setText("UPDATED");
+
+  }
+
+  private DataTable createDataTable() {
+    Column firstDataValue = columnList.getSelectedColumn();
+    Column secondDataValue = dataList.getSelectedColumn();
+
+    DataTable data = DataTable.create();
+    data.addColumn(ColumnType.STRING, firstDataValue.getDisplayHeader());
+    if (tallyOccurances) {
+      data.addColumn(ColumnType.NUMBER, secondDataValue.getDisplayHeader());
+    } else {
+      data.addColumn(ColumnType.NUMBER, "Number of Ocurrences");
+    }
 
     int firstIndex = 0;
     int secondIndex = 0;
-    String firstDataValue = firstData.getItemText(firstData.getSelectedIndex());
-    String secondDataValue = secondData.getItemText(secondData.getSelectedIndex());
-    chartUrl.append("&chtt=" + secondDataValue);
-    chartUrl.append("&chxt=x,y");
     int index = 0;
     for (Column c : headers) {
-      if (c.getDisplayHeader().equals(firstDataValue))
+      if (c.equals(firstDataValue))
         firstIndex = index;
-      if (c.getDisplayHeader().equals(secondDataValue))
+      if (c.equals(secondDataValue))
         secondIndex = index;
       index++;
     }
+
     HashMap<String, Double> aggregation = new HashMap<String, Double>();
-    boolean numOccurances = false;
-    if (secondDataValue.equals(NUMBER_OF_OCCURANCES)) {
-      numOccurances = true;
-    } else {
-      for (SubmissionUI s : submissions) {
-        try {
-          Double.parseDouble(s.getValues().get(secondIndex));
-        } catch (NumberFormatException e) {
-          numOccurances = true;
-          break;
-        }
-      }
-    }
     for (SubmissionUI s : submissions) {
       String label = s.getValues().get(firstIndex);
-      if (aggregation.containsKey(label)) {
-        double addend = 1;
-        if (!numOccurances)
+     
+      // determine submissions value
+      double addend = 0;
+      if (tallyOccurances) {
+        addend = 1;
+      } else {
+        try {
           addend = Double.parseDouble(s.getValues().get(secondIndex));
+        } catch(Exception e) {
+          // move on because we couldn't parse the value
+        }
+      }
+      
+      // update running total
+      if (aggregation.containsKey(label)) {
         aggregation.put(label, aggregation.get(label) + addend);
       } else {
-        double addend = 1;
-        if (!numOccurances)
-          addend = Double.parseDouble(s.getValues().get(secondIndex));
         aggregation.put(label, addend);
       }
     }
 
-    StringBuffer firstValues = new StringBuffer();
-    StringBuffer secondValues = new StringBuffer();
+    // output table
+    int i = 0;
     for (String s : aggregation.keySet()) {
-      firstValues.append(s);
-      firstValues.append("|");
-      secondValues.append(aggregation.get(s));
-      secondValues.append(",");
+      data.addRow();
+      data.setValue(i, 0, s);
+      data.setValue(i, 1, aggregation.get(s));
+      i++;
     }
-    if (firstValues.length() > 0)
-      firstValues.delete(firstValues.length() - 1, firstValues.length());
-    if (secondValues.length() > 0)
-      secondValues.delete(secondValues.length() - 1, secondValues.length());
-    chartUrl.append("&chd=t:");
-    chartUrl.append(secondValues.toString());
-    chartUrl.append("&chdl=");
-    chartUrl.append(firstValues.toString());
 
-    return chartUrl.toString();
+    return data;
   }
 
-  public void enableMap() {
-    firstData.setEnabled(false);
-    chart.setVisible(false);
-    mapSpace.setVisible(true);
-    secondData.clear();
-    for (KmlSettingOption kSO : geoPoints)
-      secondData.addItem(kSO.getDisplayName(), kSO.getElementKey());
+  /**
+   * Create pie chart
+   * 
+   * @return
+   */
+  private PieChart createPieChart() {
+    DataTable data = createDataTable();
+    PieOptions options = PieChart.createPieOptions();
+    options.setWidth(chartPanel.getOffsetWidth());
+    options.setHeight(chartPanel.getOffsetHeight());
+    options.set3D(true);
+    return new PieChart(data, options);
   }
 
-  public void disableMap() {
-    firstData.setEnabled(true);
-    mapSpace.setVisible(false);
-    chart.setVisible(true);
-    secondData.clear();
-    secondData.addItem(NUMBER_OF_OCCURANCES);
-    for (Column c : headers)
-      secondData.addItem(c.getDisplayHeader());
+  /**
+   * Create bar chart
+   * 
+   * @return
+   */
+  private BarChart createBarChart() {
+    DataTable data = createDataTable();
+    Options options = Options.create();
+    options.setWidth(chartPanel.getOffsetWidth());
+    options.setHeight(chartPanel.getOffsetHeight());
+    return new BarChart(data, options);
+  }
+
+  private int findGpsIndex(String columnElementKey, Integer columnCode) {
+    int index = 0;
+    Long columnNum = columnCode.longValue();
+    for (Column col : headers) {
+      if (col.getColumnEncoding().equals(columnElementKey)
+          && col.getGeopointColumnCode().equals(columnNum)) {
+        return index;
+      }
+      index++;
+    }
+    return -1;
+  }
+
+  private LatLng getLatLonFromSubmission(int latIndex, int lonIndex, SubmissionUI sub) {
+    LatLng gpsPoint;
+    List<String> values = sub.getValues();
+    try {
+      Double lat = Double.parseDouble(values.get(latIndex));
+      Double lon = Double.parseDouble(values.get(lonIndex));
+      gpsPoint = LatLng.newInstance(lat, lon);
+    } catch (Exception e) {
+      // just set the gps point to null, no need to figure out problem
+      gpsPoint = null;
+    }
+    return gpsPoint;
+  }
+
+  private MapWidget createMap() {
+    int latIndex = findGpsIndex(geoPoints.getElementKey(),
+        GeoPointConsts.GEOPOINT_LATITUDE_ORDINAL_NUMBER);
+    int lonIndex = findGpsIndex(geoPoints.getElementKey(),
+        GeoPointConsts.GEOPOINT_LONGITUDE_ORDINAL_NUMBER);
+
+    // check to see if we have lat & long, if not display erro
+    if (latIndex < 0 || lonIndex < 0) {
+      String error = "ERROR:";
+      if(latIndex < 0) {
+        error = error + " The Latitude Coordinate is NOT included in the Filter.";
+      }
+      if(lonIndex < 0) {
+        error = error + " The Longitude Coordinate is NOT included in the Filter.";
+      }
+
+      message.setText(error);
+      return null;
+    }
+
+    // create a center point, stop at the first gps point found
+    LatLng center = LatLng.newInstance(0.0, 0.0);
+    for (SubmissionUI sub : submissions) {
+      LatLng gpsPoint = getLatLonFromSubmission(latIndex, lonIndex, sub);
+      if (gpsPoint != null) {
+        center = gpsPoint;
+        break;
+      }
+    }
+
+    // create mapping area
+    final MapWidget map = new MapWidget(center, 3);
+    map.setSize("100%", "100%");
+    map.addControl(new LargeMapControl());
+
+    // create the markers
+    for (SubmissionUI sub : submissions) {
+      LatLng gpsPoint = getLatLonFromSubmission(latIndex, lonIndex, sub);
+      if (gpsPoint != null) {
+        Marker marker = new Marker(gpsPoint);
+        map.addOverlay(marker);
+
+        // marker needs to be added to the map before calling
+        // InfoWindow.open(marker, ...)
+        marker.addMarkerClickHandler(new MarkerClickHandler() {
+          public void onClick(MarkerClickEvent event) {
+            InfoWindow info = map.getInfoWindow();
+            info.open(event.getSender(), new InfoWindowContent("HELLO WORLD!"));
+          }
+        });
+      }
+    }
+    return map;
+  }
+
+  private class ExecuteVisualization implements ClickHandler {
+
+    @Override
+    public void onClick(ClickEvent event) {
+
+      // verify modules are loaded
+      if (!mapsApiLoaded || !chartApiLoaded) {
+        message.setText("Modules are not loaded yet, please try again!");
+        return;
+      }
+
+      Widget chart;
+      switch (chartType.getSelectedValue()) {
+      case MAP:
+        chart = createMap();
+        break;
+      case PIE_CHART:
+        chart = createPieChart();
+        break;
+      case BAR_GRAPH:
+        chart = createBarChart();
+        break;
+      default:
+        chart = null;
+      }
+      chartPanel.clear();
+      chartPanel.add(chart);
+    }
+
   }
 }

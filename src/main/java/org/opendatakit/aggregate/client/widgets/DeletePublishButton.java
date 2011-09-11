@@ -18,7 +18,6 @@ package org.opendatakit.aggregate.client.widgets;
 
 import org.opendatakit.aggregate.client.externalserv.ExternServSummary;
 import org.opendatakit.aggregate.client.popups.ConfirmPublishDeletePopup;
-import org.opendatakit.aggregate.client.popups.HelpBalloon;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -26,31 +25,26 @@ import com.google.gwt.event.dom.client.ClickHandler;
 /**
  * Delete the publishing of data to an external service.
  * 
- * @author mitchellsundt@gmail.com
- *
  */
-public class DeletePublishButton extends AbstractButtonBase implements ClickHandler {
+public final class DeletePublishButton extends AggregateButton implements ClickHandler {
 
-	private static final String TOOLTIP_TEXT = "Remove published data";
+  private static final String BUTTON_TXT = "<img src=\"images/red_x.png\" /> Delete";
+  private static final String TOOLTIP_TEXT = "Remove published data";
+  private static final String HELP_BALLOON_TXT = "This confirms that you want to delete the published data.";
 
-	private static final String HELP_BALLOON_TXT = "This confirms that you want to delete the published " +
-			"data.";
+  private final ExternServSummary publisher;
 
-	private ExternServSummary publisher;
+  public DeletePublishButton(ExternServSummary publisher) {
+    super(BUTTON_TXT, TOOLTIP_TEXT, HELP_BALLOON_TXT);
+    this.publisher = publisher;
+    addStyleDependentName("negative");
+  }
 
-	public DeletePublishButton(ExternServSummary publisher) {
-		super("<img src=\"images/red_x.png\" /> Delete", TOOLTIP_TEXT);
-		this.publisher = publisher;
-		addStyleDependentName("negative");
-		helpBalloon = new HelpBalloon(this, HELP_BALLOON_TXT);
-	}
-
-	@Override
-	public void onClick(ClickEvent event) {
-		super.onClick(event);
-
-		// TODO: display pop-up with text from b...
-		final ConfirmPublishDeletePopup popup = new ConfirmPublishDeletePopup(publisher);
-		popup.setPopupPositionAndShow(popup.getPositionCallBack());
-	}
+  @Override
+  public void onClick(ClickEvent event) {
+    super.onClick(event);
+    
+    ConfirmPublishDeletePopup popup = new ConfirmPublishDeletePopup(publisher);
+    popup.setPopupPositionAndShow(popup.getPositionCallBack());
+  }
 }

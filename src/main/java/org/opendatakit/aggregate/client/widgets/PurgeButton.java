@@ -20,75 +20,73 @@ import java.util.Date;
 
 import org.opendatakit.aggregate.client.externalserv.ExternServSummary;
 import org.opendatakit.aggregate.client.popups.ConfirmPurgePopup;
-import org.opendatakit.aggregate.client.popups.HelpBalloon;
 import org.opendatakit.aggregate.constants.common.ExternalServicePublicationOption;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
 
-public class PurgeButton extends AbstractButtonBase implements ClickHandler {
+public final class PurgeButton extends AggregateButton implements ClickHandler {
 
-	private static final String TOOLTIP_TEXT = "Clear the published data";
+  private static final String BUTTON_TXT = "Purge Published Data";
+  private static final String TOOLTIP_TXT = "Clear the published data";
+  private static final String HELP_BALLOON_TXT = "This will delete the published data.";
 
-	private static final String HELP_BALLOON_TXT = "This will delete the published data.";
+  private final String formId;
+  private final ExternServSummary externServ;
 
-	private String formId;
-	private ExternServSummary externServ;
+  public PurgeButton(String formId, ExternServSummary externalService) {
+    super(BUTTON_TXT, TOOLTIP_TXT, HELP_BALLOON_TXT);
+    this.formId = formId;
+    this.externServ = externalService;
+  }
 
-	public PurgeButton(String formId, ExternServSummary externalService) {
-		super("Purge Published Data", TOOLTIP_TEXT);
-		this.formId = formId;
-		this.externServ = externalService;
-		helpBalloon = new HelpBalloon(this, HELP_BALLOON_TXT);
-	}
+  @Override
+  public void onClick(ClickEvent event) {
+    super.onClick(event);
+    
+    Date earliest = null;
+    switch (externServ.getPublicationOption()) {
+    case UPLOAD_ONLY:
+      if (externServ.getUploadCompleted()) {
+        earliest = externServ.getTimeEstablished();
+      } else {
+        earliest = externServ.getTimeLastUploadCursor();
+      }
+      break;
+    case UPLOAD_N_STREAM:
+      if (externServ.getUploadCompleted()) {
+        earliest = externServ.getTimeLastStreamingCursor();
+        if (earliest == null) {
+          earliest = externServ.getTimeEstablished();
+        }
+      } else {
+        earliest = externServ.getTimeLastUploadCursor();
+      }
+      break;
+    case STREAM_ONLY:
+      earliest = externServ.getTimeLastStreamingCursor();
+      if (earliest == null) {
+        earliest = externServ.getTimeEstablished();
+      }
+      break;
+    }
 
-	@Override
-	public void onClick(ClickEvent event) {
-		super.onClick(event);
+    StringBuilder b = new StringBuilder();
+    if (earliest == null) {
+      Window.alert("Data has not yet been published -- no data will be purged");
+    } else {
+      if (externServ.getPublicationOption() != ExternalServicePublicationOption.UPLOAD_ONLY) {
+        b.append("<p><b>Note:</b> Even though the chosen publishing action involves an ongoing streaming"
+            + " of data to the external service, this purge action is a one-time event and is "
+            + "not automatically ongoing.  You will need to periodically repeat this process.</p>");
+      }
+      b.append("Click to confirm purge of <b>" + formId + "</b> submissions older than "
+          + earliest.toString());
 
-		Date earliest = null;
-		switch (externServ.getPublicationOption()) {
-		case UPLOAD_ONLY:
-			if (externServ.getUploadCompleted()) {
-				earliest = externServ.getTimeEstablished();
-			} else {
-				earliest = externServ.getTimeLastUploadCursor();
-			}
-			break;
-		case UPLOAD_N_STREAM:
-			if (externServ.getUploadCompleted()) {
-				earliest = externServ.getTimeLastStreamingCursor();
-				if (earliest == null) {
-					earliest = externServ.getTimeEstablished();
-				}
-			} else {
-				earliest = externServ.getTimeLastUploadCursor();
-			}
-			break;
-		case STREAM_ONLY:
-			earliest = externServ.getTimeLastStreamingCursor();
-			if (earliest == null) {
-				earliest = externServ.getTimeEstablished();
-			}
-			break;
-		}
-
-		StringBuilder b = new StringBuilder();
-		if (earliest == null) {
-			Window.alert("Data has not yet been published -- no data will be purged");
-		} else {
-			if (externServ.getPublicationOption() != ExternalServicePublicationOption.UPLOAD_ONLY) {
-				b.append("<p><b>Note:</b> Even though the chosen publishing action involves an ongoing streaming"
-						+ " of data to the external service, this purge action is a one-time event and is "
-						+ "not automatically ongoing.  You will need to periodically repeat this process.</p>");
-			}
-			b.append("Click to confirm purge of <b>" + formId + "</b> submissions older than "
-					+ earliest.toString());
-
-			// TODO: display pop-up with text from b...
-			final ConfirmPurgePopup popup = new ConfirmPurgePopup(externServ, earliest, b.toString());
-			popup.setPopupPositionAndShow(popup.getPositionCallBack());
-		}
-	}
+      // TODO: display pop-up with text from b...
+      final ConfirmPurgePopup popup = new ConfirmPurgePopup(externServ, earliest, b.toString());
+      popup.setPopupPositionAndShow(popup.getPositionCallBack());
+    }
+  }
 }

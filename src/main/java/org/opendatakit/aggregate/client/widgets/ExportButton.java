@@ -17,29 +17,28 @@
 package org.opendatakit.aggregate.client.widgets;
 
 import org.opendatakit.aggregate.client.popups.ExportPopup;
-import org.opendatakit.aggregate.client.popups.HelpBalloon;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 
-public class ExportButton extends AbstractButtonBase implements ClickHandler {
+public final class ExportButton extends AggregateButton implements ClickHandler {
 
-	private static final String TOOLTIP_TEXT = "Export the data";
+  private static final String BUTTON_TXT = "<img src=\"images/green_right_arrow.png\" /> Export";
+  private static final String TOOLTIP_TEXT = "Export the data";
+  private static final String HELP_BALLOON_TXT = "Export the data to a CSV or KML file.";
 
-	private static final String HELP_BALLOON_TXT = "Export the data to a CSV or KML file.";
+  private final String formId;
 
-	private String formId;
+  public ExportButton(String formId) {
+    super(BUTTON_TXT, TOOLTIP_TEXT, HELP_BALLOON_TXT);
+    this.formId = formId;
+  }
 
-	public ExportButton(String formId) {
-		super("<img src=\"images/green_right_arrow.png\" /> Export", TOOLTIP_TEXT);
-		this.formId = formId;
-		helpBalloon = new HelpBalloon(this, HELP_BALLOON_TXT);
-	}
-
-	@Override
-	public void onClick(ClickEvent event) {
-		super.onClick(event);
-		ExportPopup popup = new ExportPopup(formId);
-		popup.setPopupPositionAndShow(popup.getPositionCallBack());
-	}
+  @Override
+  public void onClick(ClickEvent event) {
+    super.onClick(event);
+    
+    ExportPopup popup = new ExportPopup(formId);
+    popup.setPopupPositionAndShow(popup.getPositionCallBack());
+  }
 }

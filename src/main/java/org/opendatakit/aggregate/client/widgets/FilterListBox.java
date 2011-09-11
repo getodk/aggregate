@@ -8,7 +8,7 @@ import org.opendatakit.aggregate.constants.common.UIConsts;
 
 import com.google.gwt.event.dom.client.ChangeHandler;
 
-public class FilterListBox extends AbstractListBox {
+public final class FilterListBox extends AggregateListBox {
   private static final String TOOLTIP_TEXT = "Filter to use";
 
   private ArrayList<FilterGroup> displayedFilterList;

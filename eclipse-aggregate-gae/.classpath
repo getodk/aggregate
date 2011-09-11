@@ -74,7 +74,6 @@
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/gin-1.5.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/guice-3.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/guice-assistedinject-3.0-rc2.jar"/>
-	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/gwt-maps-1.1.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/javax.inject-1.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/spring-web-3.0.5.RELEASE.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/xercesImpl-2.9.1.jar"/>
@@ -83,6 +82,8 @@
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/step2-common-1-20110415.014953-11.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/step2-consumer-1-20110415.015028-11.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/odk-tomcatutil.jar"/>
+	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/gwt-visualization.jar"/>
+	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/gwt-maps.jar"/>
 	<classpathentry kind="con" path="com.google.appengine.eclipse.core.GAE_CONTAINER"/>
 	<classpathentry kind="con" path="com.google.gwt.eclipse.core.GWT_CONTAINER"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>

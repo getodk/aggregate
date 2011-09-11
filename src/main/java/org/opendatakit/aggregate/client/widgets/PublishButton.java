@@ -18,34 +18,31 @@ package org.opendatakit.aggregate.client.widgets;
 
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.popups.ExternalServicePopup;
-import org.opendatakit.aggregate.client.popups.HelpBalloon;
 import org.opendatakit.common.security.common.GrantedAuthorityName;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 
-public class PublishButton extends AbstractButtonBase implements ClickHandler {
+public final class PublishButton extends AggregateButton implements ClickHandler {
 
-  private static final String TOOLTIP_TEXT = "Publish the data";
+  private static final String BUTTON_TXT = "<img src=\"images/green_right_arrow.png\" /> Publish";
+  private static final String TOOLTIP_TXT = "Publish the data";
+  private static final String HELP_BALLOON_TXT = "This will publish the data to Google Fusion Tables or Google Spreadsheets.";
 
-  private static final String HELP_BALLOON_TXT = "This will publish the data to Google Fusion Tables or "
-      + "Google Spreadsheets.";
-
-  private String formId;
+  private final String formId;
 
   public PublishButton(String formId) {
-    super("<img src=\"images/green_right_arrow.png\" /> Publish", TOOLTIP_TEXT);
+    super(BUTTON_TXT, TOOLTIP_TXT, HELP_BALLOON_TXT);
     this.formId = formId;
     boolean enabled = AggregateUI.getUI().getUserInfo().getGrantedAuthorities()
         .contains(GrantedAuthorityName.ROLE_DATA_OWNER);
     setEnabled(enabled);
-    helpBalloon = new HelpBalloon(this, HELP_BALLOON_TXT);
   }
 
   @Override
   public void onClick(ClickEvent event) {
     super.onClick(event);
-
+    
     ExternalServicePopup popup = new ExternalServicePopup(formId);
     popup.setPopupPositionAndShow(popup.getPositionCallBack());
   }

@@ -1,32 +1,30 @@
 package org.opendatakit.aggregate.client.widgets;
 
 import org.opendatakit.aggregate.client.popups.ConfirmSubmissionDeletePopup;
-import org.opendatakit.aggregate.client.popups.HelpBalloon;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 
-public class DeleteSubmissionButton extends AbstractButtonBase implements ClickHandler {
+public final class DeleteSubmissionButton extends AggregateButton implements ClickHandler {
 
-	private static final String TOOLTIP_TEXT = "Delete Submission";
+  private static final String BUTTON_TXT = "<img src=\"images/red_x.png\" />";
+  private static final String TOOLTIP_TEXT = "Delete Submission";
+  private static final String HELP_BALLOON_TXT = "Remove the submission from the database.";
 
-	private static final String HELP_BALLOON_TXT = "Remove the submission from the database.";
+  private final String submissionKeyAsString;
 
-	private String submissionKeyAsString;
+  public DeleteSubmissionButton(String submissionKeyAsString) {
+    super(BUTTON_TXT, TOOLTIP_TEXT, HELP_BALLOON_TXT);
+    this.submissionKeyAsString = submissionKeyAsString;
+    addStyleDependentName("negative");
+  }
 
-	public DeleteSubmissionButton(String submissionKeyAsString) {
-		super("<img src=\"images/red_x.png\" />", TOOLTIP_TEXT);
-		this.submissionKeyAsString = submissionKeyAsString;
-		addStyleDependentName("negative");
-		helpBalloon = new HelpBalloon(this, HELP_BALLOON_TXT);
-	}
-
-	@Override
-	public void onClick(ClickEvent event) {
-		super.onClick(event);
-
-		ConfirmSubmissionDeletePopup popup = new ConfirmSubmissionDeletePopup(submissionKeyAsString);
-		popup.setPopupPositionAndShow(popup.getPositionCallBack());
-	}
+  @Override
+  public void onClick(ClickEvent event) {
+    super.onClick(event);
+    
+    ConfirmSubmissionDeletePopup popup = new ConfirmSubmissionDeletePopup(submissionKeyAsString);
+    popup.setPopupPositionAndShow(popup.getPositionCallBack());
+  }
 
 }

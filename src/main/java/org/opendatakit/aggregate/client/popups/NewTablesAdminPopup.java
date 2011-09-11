@@ -3,7 +3,7 @@ package org.opendatakit.aggregate.client.popups;
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.SecureGWT;
 import org.opendatakit.aggregate.client.preferences.OdkTablesAdmin;
-import org.opendatakit.aggregate.client.widgets.BasicButton;
+import org.opendatakit.aggregate.client.widgets.AggregateButton;
 import org.opendatakit.aggregate.client.widgets.ClosePopupButton;
 
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -14,15 +14,15 @@ import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.TextBox;
 
-public class NewTablesAdminPopup extends AbstractPopupBase {
+public final class NewTablesAdminPopup extends AbstractPopupBase {
 
   private static final String BUTTON_TXT = "<img src=\"images/green_right_arrow.png\" /> Create User";
   private static final String TOOLTIP_TXT = "Create a new user";
   private static final String HELP_BALLOON_TXT = "Create a new administrative user to edit data.";
 
   
-  private TextBox name;
-  private TextBox externalUid;
+  private final TextBox name;
+  private final TextBox externalUid;
 
   public NewTablesAdminPopup() {
     super();
@@ -30,7 +30,7 @@ public class NewTablesAdminPopup extends AbstractPopupBase {
     name = new TextBox();
     externalUid = new TextBox();
 
-    BasicButton deleteButton = new BasicButton(BUTTON_TXT, TOOLTIP_TXT, HELP_BALLOON_TXT);
+    AggregateButton deleteButton = new AggregateButton(BUTTON_TXT, TOOLTIP_TXT, HELP_BALLOON_TXT);
     deleteButton.addClickHandler(new CreateUser());
     
     FlexTable layout = new FlexTable();

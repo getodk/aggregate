@@ -17,7 +17,7 @@
 package org.opendatakit.aggregate.client.popups;
 
 import org.opendatakit.aggregate.client.permissions.AccessConfigurationSheet;
-import org.opendatakit.aggregate.client.widgets.BasicButton;
+import org.opendatakit.aggregate.client.widgets.AggregateButton;
 import org.opendatakit.aggregate.client.widgets.ClosePopupButton;
 import org.opendatakit.common.security.client.UserSecurityInfo;
 
@@ -26,7 +26,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
 
-public class ConfirmUserDeletePopup extends AbstractPopupBase {
+public final class ConfirmUserDeletePopup extends AbstractPopupBase {
 
   private static final String BUTTON_TXT = "<img src=\"images/green_right_arrow.png\" /> Delete User";
   private static final String TOOLTIP_TXT = "Remove this user";
@@ -40,7 +40,7 @@ public class ConfirmUserDeletePopup extends AbstractPopupBase {
     this.user = userToDelete;
     this.accessSheet = sheet;
 
-    BasicButton deleteButton = new BasicButton(BUTTON_TXT, TOOLTIP_TXT, HELP_BALLOON_TXT);
+    AggregateButton deleteButton = new AggregateButton(BUTTON_TXT, TOOLTIP_TXT, HELP_BALLOON_TXT);
     deleteButton.addClickHandler(new ClickHandler(){
       @Override
       public void onClick(ClickEvent event) {

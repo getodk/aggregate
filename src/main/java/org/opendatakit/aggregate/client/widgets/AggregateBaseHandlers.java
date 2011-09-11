@@ -4,38 +4,39 @@ import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.popups.HelpBalloon;
 import org.opendatakit.aggregate.constants.common.UIConsts;
 
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.MouseOutEvent;
 import com.google.gwt.event.dom.client.MouseOutHandler;
 import com.google.gwt.event.dom.client.MouseOverEvent;
 import com.google.gwt.event.dom.client.MouseOverHandler;
-import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.Widget;
 
-public abstract class AbstractListBox extends ListBox implements ChangeHandler, MouseOverHandler, MouseOutHandler {
-
-  private String tooltipText;
-  protected HelpBalloon helpBalloon;
+public final class AggregateBaseHandlers implements MouseOverHandler, MouseOutHandler {
   
-  public AbstractListBox(String tooltipText, boolean multipleValueSelection) {
-    super(multipleValueSelection);
+  private final Widget widget;
+  private final String tooltipText;
+  private final HelpBalloon helpBalloon;
   
-    addChangeHandler(this);
+  public AggregateBaseHandlers(Widget uiwidget, String tooltipTxt, String helpBalloonTxt) {
+    this.widget = uiwidget;
+    this.tooltipText = tooltipTxt;
     
     // setup help system
-    this.helpBalloon = null;
-    this.tooltipText = tooltipText;
-    setTitle(tooltipText);
+    if(helpBalloonTxt == null) {
+      this.helpBalloon = null;
+    } else {
+      this.helpBalloon = new HelpBalloon(widget, helpBalloonTxt);
+    }
     
-    addMouseOverHandler(this);
-    addMouseOutHandler(this);
+    widget.setTitle(tooltipText);
+    
   }
   
-  public void onChange(ChangeEvent event) {
+  public void userAction() {
     AggregateUI baseUI = AggregateUI.getUI();
+    baseUI.clearError();
     baseUI.getTimer().restartTimer();
   }
-  
+
   public void onMouseOver(MouseOverEvent event) {
     if(!AggregateUI.getUI().displayingHelpBalloons()) {
       return;
@@ -43,7 +44,7 @@ public abstract class AbstractListBox extends ListBox implements ChangeHandler, 
     
     if(helpBalloon != null) {
       // hide the tool tip
-      setTitle(UIConsts.EMPTY_STRING);
+      widget.setTitle(UIConsts.EMPTY_STRING);
       
       // show the help balloon;
       helpBalloon.display();
@@ -53,10 +54,11 @@ public abstract class AbstractListBox extends ListBox implements ChangeHandler, 
   public void onMouseOut(MouseOutEvent event) {
     if(helpBalloon != null) {
       // restore the tool tip
-      setTitle(tooltipText);
+      widget.setTitle(tooltipText);
       
       // hide the help balloon;
       helpBalloon.hide();
     }
   }
+
 }

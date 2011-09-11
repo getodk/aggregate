@@ -5,12 +5,16 @@ import java.util.List;
 
 import org.opendatakit.aggregate.client.submission.Column;
 
-public class ColumnListBox extends AbstractListBox {
+public final class ColumnListBox extends AggregateListBox {
 
   private final List<Column> headers;
   
-  public ColumnListBox(String tooltipText, List<Column> headers, boolean multipleValueSelection) {
-    super(tooltipText, multipleValueSelection);
+  public ColumnListBox(List<Column> headers, String tooltipText, boolean multipleValueSelection) {
+    this(headers, tooltipText, multipleValueSelection, null);
+  }
+  
+  public ColumnListBox(List<Column> headers, String tooltipText, boolean multipleValueSelection, String helpBalloonTxt) {
+    super(tooltipText, multipleValueSelection, helpBalloonTxt);
     this.headers = headers;
     
     for (Column header : headers) {
@@ -18,7 +22,7 @@ public class ColumnListBox extends AbstractListBox {
     }   
   }
   
-  public ArrayList<Column> getColumnsForFilter() {
+  public ArrayList<Column> getSelectedColumns() {
     ArrayList<Column> columnfilterheaders = new ArrayList<Column>();
     for (int i = getSelectedIndex(); i < getItemCount(); i++) {
       if (isItemSelected(i)) {
@@ -35,6 +39,15 @@ public class ColumnListBox extends AbstractListBox {
       }
     }
     return columnfilterheaders;
+  }
+  
+  public Column getSelectedColumn() {
+    ArrayList<Column> columns = getSelectedColumns();
+    if (columns.size() > 0) {
+      return columns.get(0);
+    } else {
+      return null;
+    }
   }
   
 }

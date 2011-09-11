@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.opendatakit.aggregate.client.form.KmlSettingOption;
 
-public class KmlSettingListBox extends AbstractListBox {
+public final class KmlSettingListBox extends AggregateListBox {
 
   public KmlSettingListBox(String tooltipText) {
     super(tooltipText, false);
