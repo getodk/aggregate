@@ -36,7 +36,7 @@ import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.BasicConsts;
 import org.opendatakit.common.web.constants.HtmlConsts;
-import org.opendatakit.common.web.constants.HtmlUtil;
+import org.opendatakit.common.web.constants.HtmlStrUtil;
 
 /**
  * Base class for Servlets that contain useful utilities
@@ -105,7 +105,7 @@ public abstract class CommonServletBase extends HttpServlet {
 	    out.write(HtmlConsts.HTML_OPEN);
 	    out.write("<link rel=\"shortcut icon\" href=\"" + cc.getWebApplicationURL("favicon.ico") + "\">");
 
-	    out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.HEAD, headContent + HtmlUtil.wrapWithHtmlTags(
+	    out.write(HtmlStrUtil.wrapWithHtmlTags(HtmlConsts.HEAD, headContent + HtmlStrUtil.wrapWithHtmlTags(
 	        HtmlConsts.TITLE, applicationName)));
 	    out.write(HtmlConsts.BODY_OPEN);
 	    return out;
@@ -126,9 +126,9 @@ public abstract class CommonServletBase extends HttpServlet {
   protected void beginBasicHtmlResponse(String pageName, String headContent, HttpServletResponse resp,
               CallingContext cc) throws IOException {
 	PrintWriter out = beginBasicHtmlResponsePreamble(headContent, resp, cc);
-    out.write(HtmlUtil.createBeginTag(HtmlConsts.CENTERING_DIV));
-    out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.H1, pageName));
-    out.write(HtmlUtil.createEndTag(HtmlConsts.DIV));
+    out.write(HtmlStrUtil.createBeginTag(HtmlConsts.CENTERING_DIV));
+    out.write(HtmlStrUtil.wrapWithHtmlTags(HtmlConsts.H1, pageName));
+    out.write(HtmlStrUtil.createEndTag(HtmlConsts.DIV));
   }
   
   /**
