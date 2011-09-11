@@ -17,8 +17,6 @@
 
 package org.opendatakit.common.web.constants;
 
-import org.opendatakit.aggregate.constants.HtmlUtil;
-
 /**
  * HTML Constants used in ODK aggregate to create proper HTML
  * 
@@ -74,12 +72,12 @@ public final class HtmlConsts {
 	public static final String HEADING_TABLE_PROPERTIES = " width=\"95%\" cellspacing=\"5\"";
 
 	// table html control tags
-	public static final String HTML_OPEN = HtmlUtil.createBeginTag(HTML);
-	public static final String HTML_CLOSE = HtmlUtil.createEndTag(HTML);
-	public static final String BODY_OPEN = HtmlUtil.createBeginTag(BODY);
-	public static final String BODY_CLOSE = HtmlUtil.createEndTag(BODY);
-	public static final String LINE_BREAK = HtmlUtil.createBeginTag(BREAK);
-	public static final String FORM_CLOSE = HtmlUtil.createEndTag(FORM);
+	public static final String HTML_OPEN = HtmlStrUtil.createBeginTag(HTML);
+	public static final String HTML_CLOSE = HtmlStrUtil.createEndTag(HTML);
+	public static final String BODY_OPEN = HtmlStrUtil.createBeginTag(BODY);
+	public static final String BODY_CLOSE = HtmlStrUtil.createEndTag(BODY);
+	public static final String LINE_BREAK = HtmlStrUtil.createBeginTag(BREAK);
+	public static final String FORM_CLOSE = HtmlStrUtil.createEndTag(FORM);
 
 	public static final String PAGE_HEADING_TABLE_OPEN = BEGIN_OPEN_TAG + TABLE
 	+ PAGE_HEADING_TABLE_PROPERTIES + END_TAG;
@@ -88,12 +86,12 @@ public final class HtmlConsts {
 	public static final String BORDERLESS_TABLE_OPEN = BEGIN_OPEN_TAG + TABLE + END_TAG;
 	public static final String TABLE_OPEN = BEGIN_OPEN_TAG + TABLE
 			+ TABLE_BORDER_PROPERTY + END_TAG;
-	public static final String TABLE_CLOSE = HtmlUtil.createEndTag(TABLE);
-	public static final String TABLE_ROW_OPEN = HtmlUtil
+	public static final String TABLE_CLOSE = HtmlStrUtil.createEndTag(TABLE);
+	public static final String TABLE_ROW_OPEN = HtmlStrUtil
 			.createBeginTag(TABLE_ROW);
-	public static final String TABLE_ROW_CLOSE = HtmlUtil
+	public static final String TABLE_ROW_CLOSE = HtmlStrUtil
 			.createEndTag(TABLE_ROW);
-	public static final String TABLE_DATA_CLOSE = HtmlUtil
+	public static final String TABLE_DATA_CLOSE = HtmlStrUtil
 			.createEndTag(TABLE_DATA);
 
 	// input types

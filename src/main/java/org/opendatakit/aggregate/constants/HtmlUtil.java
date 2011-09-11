@@ -33,7 +33,7 @@ import org.opendatakit.common.web.constants.HtmlConsts;
  * @author mitchellsundt@gmail.com
  * 
  */
-public final class HtmlUtil extends org.opendatakit.common.web.constants.HtmlUtil {
+public final class HtmlUtil extends org.opendatakit.common.utils.HtmlUtil {
 
   private static final String LOST_FORM_RE_ENCODING = "We lost the form somehow! Please report the bug!";
 

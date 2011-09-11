@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.TimeZone;
 
 import org.apache.commons.lang.StringEscapeUtils;
+import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.format.FormatConsts;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.format.Row;
@@ -33,7 +34,6 @@ import org.opendatakit.aggregate.submission.type.GeoPoint;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.BasicConsts;
-import org.opendatakit.common.web.constants.HtmlUtil;
 
 /**
  * Formats xml tags <name>value</name> with proper escaping for 
