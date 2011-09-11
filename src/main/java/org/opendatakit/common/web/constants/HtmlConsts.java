@@ -15,7 +15,7 @@
  * the License.
  */
 
-package org.opendatakit.common.constants;
+package org.opendatakit.common.web.constants;
 
 import org.opendatakit.aggregate.constants.HtmlUtil;
 

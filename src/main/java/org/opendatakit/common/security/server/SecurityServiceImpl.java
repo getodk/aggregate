@@ -20,7 +20,6 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.servlet.UserManagePasswordsServlet;
-import org.opendatakit.common.constants.BasicConsts;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
@@ -32,6 +31,7 @@ import org.opendatakit.common.security.client.exception.AccessDeniedException;
 import org.opendatakit.common.security.common.GrantedAuthorityName;
 import org.opendatakit.common.security.spring.RegisteredUsersTable;
 import org.opendatakit.common.web.CallingContext;
+import org.opendatakit.common.web.constants.BasicConsts;
 import org.springframework.security.authentication.encoding.MessageDigestPasswordEncoder;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;

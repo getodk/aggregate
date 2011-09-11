@@ -24,10 +24,10 @@ import org.opendatakit.aggregate.form.PersistentResults;
 import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.task.KmlGenerator;
 import org.opendatakit.aggregate.task.gae.servlet.KmlGeneratorTaskServlet;
-import org.opendatakit.common.constants.BasicConsts;
 import org.opendatakit.common.persistence.PersistConsts;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
+import org.opendatakit.common.web.constants.BasicConsts;
 
 import com.google.appengine.api.taskqueue.Queue;
 import com.google.appengine.api.taskqueue.QueueFactory;

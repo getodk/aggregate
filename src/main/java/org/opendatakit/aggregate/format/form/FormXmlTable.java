@@ -26,8 +26,8 @@ import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.format.FormTableConsts;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.servlet.FormXmlServlet;
-import org.opendatakit.common.constants.BasicConsts;
-import org.opendatakit.common.constants.HtmlConsts;
+import org.opendatakit.common.web.constants.BasicConsts;
+import org.opendatakit.common.web.constants.HtmlConsts;
 
 /**
  * Generates an xml description of forms for the servlets

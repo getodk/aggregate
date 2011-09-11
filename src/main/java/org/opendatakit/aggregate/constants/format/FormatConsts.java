@@ -17,7 +17,7 @@
 
 package org.opendatakit.aggregate.constants.format;
 
-import org.opendatakit.common.constants.BasicConsts;
+import org.opendatakit.common.web.constants.BasicConsts;
 
 
 /**

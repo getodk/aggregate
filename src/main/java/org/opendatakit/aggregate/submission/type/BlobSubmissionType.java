@@ -30,7 +30,6 @@ import org.opendatakit.aggregate.format.element.ElementFormatter;
 import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.submission.SubmissionKeyPart;
 import org.opendatakit.aggregate.submission.SubmissionValue;
-import org.opendatakit.common.constants.BasicConsts;
 import org.opendatakit.common.datamodel.BinaryContent;
 import org.opendatakit.common.datamodel.BinaryContentManipulator;
 import org.opendatakit.common.datamodel.BinaryContentRefBlob;
@@ -39,6 +38,7 @@ import org.opendatakit.common.persistence.EntityKey;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
 import org.opendatakit.common.web.CallingContext;
+import org.opendatakit.common.web.constants.BasicConsts;
 
 /**
  * Data Storage Converter for Blob Type

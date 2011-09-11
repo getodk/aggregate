@@ -19,7 +19,7 @@ import java.util.List;
 
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.datamodel.FormElementModel.ElementType;
-import org.opendatakit.common.constants.BasicConsts;
+import org.opendatakit.common.web.constants.BasicConsts;
 
 /**
  * 

@@ -23,7 +23,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.opendatakit.common.constants.HtmlConsts;
+import org.opendatakit.common.web.constants.HtmlConsts;
 
 /**
  * Simple servlet for the initial local login.  It is needed to get 

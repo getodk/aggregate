@@ -16,7 +16,7 @@
 package org.opendatakit.aggregate.datamodel;
 
 import org.opendatakit.aggregate.form.Form;
-import org.opendatakit.common.constants.BasicConsts;
+import org.opendatakit.common.web.constants.BasicConsts;
 
 /**
  * Simple wrapper class analogous to SubmissionKey that can be manipulated to

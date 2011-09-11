@@ -31,9 +31,9 @@ import org.opendatakit.aggregate.format.element.XmlAttributeFormatter;
 import org.opendatakit.aggregate.format.element.XmlElementFormatter;
 import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.aggregate.submission.SubmissionSet;
-import org.opendatakit.common.constants.HtmlUtil;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
+import org.opendatakit.common.web.constants.HtmlUtil;
 
 /**
  * Xml formatter for a given submission.  Should roughly recreate the submission

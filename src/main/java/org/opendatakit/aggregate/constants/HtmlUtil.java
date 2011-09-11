@@ -22,8 +22,8 @@ import java.util.List;
 
 import org.apache.commons.lang.StringEscapeUtils;
 import org.opendatakit.aggregate.format.Row;
-import org.opendatakit.common.constants.BasicConsts;
-import org.opendatakit.common.constants.HtmlConsts;
+import org.opendatakit.common.web.constants.BasicConsts;
+import org.opendatakit.common.web.constants.HtmlConsts;
 
 /**
  * Static HTML utility functions used to generate proper HTML for ODK Aggregate
@@ -33,7 +33,7 @@ import org.opendatakit.common.constants.HtmlConsts;
  * @author mitchellsundt@gmail.com
  * 
  */
-public final class HtmlUtil extends org.opendatakit.common.constants.HtmlUtil {
+public final class HtmlUtil extends org.opendatakit.common.web.constants.HtmlUtil {
 
   private static final String LOST_FORM_RE_ENCODING = "We lost the form somehow! Please report the bug!";
 

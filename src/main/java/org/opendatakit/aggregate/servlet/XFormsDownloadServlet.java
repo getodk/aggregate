@@ -32,10 +32,10 @@ import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.form.FormInfo;
 import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.submission.SubmissionKeyPart;
-import org.opendatakit.common.constants.HtmlConsts;
 import org.opendatakit.common.datamodel.BinaryContentManipulator;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
+import org.opendatakit.common.web.constants.HtmlConsts;
 
 /**
  * Servlet to download the manifest-declared files of a form. 

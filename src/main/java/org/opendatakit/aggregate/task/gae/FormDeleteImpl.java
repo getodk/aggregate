@@ -20,9 +20,9 @@ import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.task.FormDelete;
 import org.opendatakit.aggregate.task.gae.servlet.FormDeleteTaskServlet;
-import org.opendatakit.common.constants.BasicConsts;
 import org.opendatakit.common.persistence.PersistConsts;
 import org.opendatakit.common.web.CallingContext;
+import org.opendatakit.common.web.constants.BasicConsts;
 
 import com.google.appengine.api.taskqueue.Queue;
 import com.google.appengine.api.taskqueue.QueueFactory;

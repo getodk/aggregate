@@ -38,8 +38,6 @@ import org.opendatakit.aggregate.parser.MultiPartFormItem;
 import org.opendatakit.aggregate.servlet.FormXmlServlet;
 import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.submission.SubmissionKeyPart;
-import org.opendatakit.common.constants.BasicConsts;
-import org.opendatakit.common.constants.HtmlUtil;
 import org.opendatakit.common.datamodel.BinaryContentManipulator;
 import org.opendatakit.common.datamodel.BinaryContentManipulator.BlobSubmissionOutcome;
 import org.opendatakit.common.persistence.CommonFieldsBase;
@@ -52,6 +50,8 @@ import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.web.CallingContext;
+import org.opendatakit.common.web.constants.BasicConsts;
+import org.opendatakit.common.web.constants.HtmlUtil;
 
 /**
  * Persistable definition of the XForm that defines how to store submissions to

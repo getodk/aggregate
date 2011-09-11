@@ -19,7 +19,7 @@ package org.opendatakit.aggregate.submission.type;
 
 import java.math.BigDecimal;
 
-import org.opendatakit.common.constants.BasicConsts;
+import org.opendatakit.common.web.constants.BasicConsts;
 
 /**
  * 

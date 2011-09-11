@@ -56,8 +56,6 @@ import org.opendatakit.aggregate.form.FormDefinition;
 import org.opendatakit.aggregate.form.MiscTasks;
 import org.opendatakit.aggregate.form.SubmissionAssociationTable;
 import org.opendatakit.aggregate.form.XFormParameters;
-import org.opendatakit.common.constants.BasicConsts;
-import org.opendatakit.common.constants.HtmlConsts;
 import org.opendatakit.common.datamodel.DynamicBase;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
@@ -67,6 +65,8 @@ import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.web.CallingContext;
+import org.opendatakit.common.web.constants.BasicConsts;
+import org.opendatakit.common.web.constants.HtmlConsts;
 
 /**
  * Parses an XML definition of an XForm based on java rosa types

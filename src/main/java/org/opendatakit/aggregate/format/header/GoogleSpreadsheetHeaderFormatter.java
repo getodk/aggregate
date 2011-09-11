@@ -8,7 +8,7 @@ import org.opendatakit.aggregate.constants.format.FormatConsts;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.datamodel.FormElementModel.ElementType;
 import org.opendatakit.aggregate.form.Form;
-import org.opendatakit.common.constants.BasicConsts;
+import org.opendatakit.common.web.constants.BasicConsts;
 
 /**
  * Determines how tables are represented in GoogleSpreadsheets
