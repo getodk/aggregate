@@ -481,7 +481,11 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
 					 } else if ( t instanceof SimpleFilterTracker) {
 						 SimpleFilterTracker st = (SimpleFilterTracker) t;
 						 if ( st.isEqualityTest() ) {
-							 st.setFilter(hack);
+							 // GAE Spec says that you can add equality tests
+							 // but deployment as of Sept 9th indicates
+							 // that this is still not working unless you have
+							 // joint indices defined...
+							 // st.setFilter(hack);
 						 }
 					 }
 				 }
