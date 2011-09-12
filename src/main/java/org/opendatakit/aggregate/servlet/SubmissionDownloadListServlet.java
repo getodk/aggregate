@@ -37,6 +37,7 @@ import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.persistence.QueryResult;
 import org.opendatakit.common.persistence.QueryResumePoint;
+import org.opendatakit.common.persistence.Query.FilterOperation;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.utils.WebUtils;
 import org.opendatakit.common.web.CallingContext;
@@ -141,6 +142,7 @@ public class SubmissionDownloadListServlet extends ServletUtilBase {
         // are fully uploaded.  We snarf everything.
         Query query = cc.getDatastore().createQuery(tbl, cc.getCurrentUser());
         query.addSort(tbl.lastUpdateDate, Query.Direction.ASCENDING);
+        query.addFilter(tbl.isComplete, FilterOperation.EQUAL, true);
 
         QueryResult result = query.executeQuery(cursor, numEntries);
         List<String> uriList = new ArrayList<String>();

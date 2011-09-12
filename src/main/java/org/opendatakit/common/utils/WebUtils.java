@@ -194,12 +194,13 @@ public class WebUtils {
 		int idx = 0;
 		Element c = d.createElement(XML_TAG_NAMESPACE, ATTRIBUTE_NAME_TAG);
 		c.addChild(0, Node.TEXT, cursor.getAttributeName());
-		e.addChild(idx++, c);
+		e.addChild(idx++, Node.ELEMENT, c);
 		c = d.createElement(XML_TAG_NAMESPACE, ATTRIBUTE_VALUE_TAG);
 		c.addChild(0, Node.TEXT, cursor.getValue());
-		e.addChild(idx++, c);
+		e.addChild(idx++, Node.ELEMENT, c);
 		c = d.createElement(XML_TAG_NAMESPACE, URI_LAST_RETURNED_VALUE_TAG);
 		c.addChild(0, Node.TEXT, cursor.getUriLastReturnedValue());
+		e.addChild(idx++, Node.ELEMENT, c);
 		
 		ByteArrayOutputStream ba = new ByteArrayOutputStream();
 		
@@ -209,6 +210,7 @@ public class WebUtils {
 			// setting the response content type emits the xml header.
 			// just write the body here...
 			d.writeChildren(serializer); 
+			serializer.flush();
 		} catch (IOException e1) {
 			e1.printStackTrace();
 			throw new IllegalStateException("unexpected failure");
@@ -223,6 +225,9 @@ public class WebUtils {
 	}
 
 	public static final QueryResumePoint parseCursorParameter(String websafeCursorString) {
+		if ( websafeCursorString == null || websafeCursorString.length() == 0 ) {
+			return null;
+		}
 		// parse the document
 		ByteArrayInputStream is;
 		try {
