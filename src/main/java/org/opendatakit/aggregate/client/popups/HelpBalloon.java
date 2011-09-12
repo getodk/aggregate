@@ -12,7 +12,7 @@ public class HelpBalloon extends PopupPanel {
   private int offsetX;
   private int offsetY;
   private Widget widget;
-  
+
   public HelpBalloon(Widget sender, final String text) {
     this(sender, 0, 0, text);
   }
@@ -37,24 +37,24 @@ public class HelpBalloon extends PopupPanel {
     // the popup should always appear towards the center
     if (x >= halfScreenSizeX && y >= halfScreenSizeY) { // 4
       // put ballon in the upper left corner
-      x -= (this.getOffsetWidth()/2 + SPACE);
+      x -= (this.getOffsetWidth() * 3 / 4 + SPACE);
       y -= (this.getOffsetHeight() + SPACE);
     } else if (x < halfScreenSizeX && y >= halfScreenSizeY) { // 3
       // put balloon in upper right corner
-      x += (widget.getOffsetWidth()/2 + SPACE);
+      x += (widget.getOffsetWidth() * 3 / 4 + SPACE);
       y -= (this.getOffsetHeight() + SPACE);
     } else if (x >= halfScreenSizeX && y < halfScreenSizeY) { // 2
       // put balloon in bottom left corner
-      x -= (this.getOffsetWidth()/2 + SPACE);
+      x -= (this.getOffsetWidth() * 3 / 4 + SPACE);
       y += (widget.getOffsetHeight() + SPACE);
     } else {
       // put balloon in bottom right corner
-      x += (widget.getOffsetWidth()/2 + SPACE);
+      x += (widget.getOffsetWidth() * 3 / 4 + SPACE);
       y += (widget.getOffsetHeight() + SPACE);
     }
 
     setPopupPosition(x + offsetX, y + offsetY);
     show();
   }
-  
+
 }

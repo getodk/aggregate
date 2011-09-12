@@ -23,6 +23,16 @@ public class AggregateImageToggleButton extends ToggleButton implements ClickHan
     addMouseOutHandler(handlers); 
   }
   
+  public AggregateImageToggleButton(Image upImg, Image downImg, String tooltipText, String helpBalloonText) {
+    super(upImg, downImg);
+    
+    addClickHandler(this);
+    
+    handlers = new AggregateBaseHandlers(this, tooltipText, helpBalloonText);  
+    addMouseOverHandler(handlers);
+    addMouseOutHandler(handlers); 
+  }
+  
   @Override
   public void onClick(ClickEvent event) {
     handlers.userAction();

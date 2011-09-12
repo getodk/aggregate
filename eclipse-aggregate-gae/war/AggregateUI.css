@@ -102,10 +102,9 @@ a, a:visited, a:hover {
 }
 #nav_bar_help_login {
 	position: absolute;
-	top: 8px;
-	left: 800px;
-	margin: 0px;
-	padding: 0px;
+    top: 0px;
+	margin: 2px;
+	padding: 3px;
 	text-align: right;
 	float: left;
 }

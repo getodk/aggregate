@@ -76,7 +76,7 @@ public class FilterNavigationTable extends FlexTable {
 
     PublishButton publishButton = new PublishButton(filterGroup.getFormId());
     actionTable.setWidget(0, 2, publishButton);
-
+    
     setWidget(0, 2, actionTable);
 
   }
