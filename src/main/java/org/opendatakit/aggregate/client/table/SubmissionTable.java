@@ -26,6 +26,7 @@ import org.opendatakit.aggregate.client.submission.SubmissionUISummary;
 import org.opendatakit.aggregate.client.widgets.DeleteSubmissionButton;
 import org.opendatakit.aggregate.client.widgets.RepeatViewButton;
 import org.opendatakit.aggregate.constants.common.UIConsts;
+import org.opendatakit.common.web.constants.BasicConsts;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -80,7 +81,7 @@ public class SubmissionTable extends FlexTable {
         switch (tableHeaders.get(valueIndex++).getUiDisplayType()) {
         case BINARY:
           if (value == null) {
-            setText(rowPosition, columnPosition, UIConsts.EMPTY_STRING);
+            setText(rowPosition, columnPosition, BasicConsts.EMPTY_STRING);
           } else {
             Image image = new Image(value + UIConsts.PREVIEW_SET);
             image.addClickHandler(new PopupClickHandler(value));
@@ -89,7 +90,7 @@ public class SubmissionTable extends FlexTable {
           break;
         case REPEAT:
           if (value == null) {
-            setText(rowPosition, columnPosition, UIConsts.EMPTY_STRING);
+            setText(rowPosition, columnPosition, BasicConsts.EMPTY_STRING);
           } else {
             RepeatViewButton repeat = new RepeatViewButton(value);
             setWidget(rowPosition, columnPosition, repeat);

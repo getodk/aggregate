@@ -4,24 +4,29 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.opendatakit.aggregate.client.submission.Column;
+import org.opendatakit.aggregate.constants.common.UIDisplayType;
 
 public final class ColumnListBox extends AggregateListBox {
 
   private final List<Column> headers;
-  
-  public ColumnListBox(List<Column> headers, String tooltipText, boolean multipleValueSelection) {
-    this(headers, tooltipText, multipleValueSelection, null);
+
+  public ColumnListBox(List<Column> headers, boolean multipleValueSelection,
+      boolean onlyIncludeTextColumns, String tooltipText) {
+    this(headers, multipleValueSelection, onlyIncludeTextColumns, tooltipText, null);
   }
-  
-  public ColumnListBox(List<Column> headers, String tooltipText, boolean multipleValueSelection, String helpBalloonTxt) {
+
+  public ColumnListBox(List<Column> headers, boolean multipleValueSelection,
+      boolean onlyIncludeTextColumns, String tooltipText, String helpBalloonTxt) {
     super(tooltipText, multipleValueSelection, helpBalloonTxt);
     this.headers = headers;
-    
+
     for (Column header : headers) {
-      addItem(header.getDisplayHeader(), header.getColumnEncoding());
-    }   
+      if (header.getUiDisplayType().equals(UIDisplayType.TEXT)) {
+        addItem(header.getDisplayHeader(), header.getColumnEncoding());
+      }
+    }
   }
-  
+
   public ArrayList<Column> getSelectedColumns() {
     ArrayList<Column> columnfilterheaders = new ArrayList<Column>();
     for (int i = getSelectedIndex(); i < getItemCount(); i++) {
@@ -30,7 +35,8 @@ public final class ColumnListBox extends AggregateListBox {
         String colencode = getValue(i);
         Long colgpsIndex = null;
         for (Column column : headers) {
-          if (colencode.compareTo(column.getColumnEncoding()) == 0) {
+          if (colname.equals(column.getDisplayHeader())
+              && colencode.equals(column.getColumnEncoding())) {
             colgpsIndex = column.getGeopointColumnCode();
             break;
           }
@@ -40,7 +46,7 @@ public final class ColumnListBox extends AggregateListBox {
     }
     return columnfilterheaders;
   }
-  
+
   public Column getSelectedColumn() {
     ArrayList<Column> columns = getSelectedColumns();
     if (columns.size() > 0) {
@@ -49,5 +55,5 @@ public final class ColumnListBox extends AggregateListBox {
       return null;
     }
   }
-  
+
 }

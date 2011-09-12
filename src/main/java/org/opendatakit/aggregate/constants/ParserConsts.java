@@ -67,6 +67,6 @@ public final class ParserConsts {
   /**
    * additional attribute used to supply the base64 public key for encrypted submissions
    */
-  private static final String BASE64_RSA_PUBLIC_KEY = "base64RsaPublicKey";
+  public static final String BASE64_RSA_PUBLIC_KEY = "base64RsaPublicKey";
 
 }

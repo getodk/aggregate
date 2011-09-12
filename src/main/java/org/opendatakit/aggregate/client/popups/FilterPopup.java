@@ -87,10 +87,10 @@ public final class FilterPopup extends AbstractPopupBase {
     });
 
     // column selection - for row filter
-    columnForRowFilter = new ColumnListBox(headers, COLUMN_TOOLTIP, false);
+    columnForRowFilter = new ColumnListBox(headers, false, false, COLUMN_TOOLTIP);
 
     // columns selection - for column filter
-    columnsForColumnFilter = new ColumnListBox(headers, COLUMN_TOOLTIP, true);
+    columnsForColumnFilter = new ColumnListBox(headers, true, false, COLUMN_TOOLTIP);
 
     // comparison operator
     filterOp = new EnumListBox<FilterOperation>(FilterOperation.values(), FILTER_OP_TOOLTIP);

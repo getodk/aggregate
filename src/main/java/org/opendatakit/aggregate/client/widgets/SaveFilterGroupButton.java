@@ -25,6 +25,7 @@ import org.opendatakit.aggregate.client.SecureGWT;
 import org.opendatakit.aggregate.client.filter.Filter;
 import org.opendatakit.aggregate.client.filter.FilterGroup;
 import org.opendatakit.aggregate.constants.common.UIConsts;
+import org.opendatakit.common.web.constants.BasicConsts;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -65,7 +66,7 @@ public final class SaveFilterGroupButton extends AggregateButton implements Clic
     // if default filter group, prompt user for name
     if (UIConsts.FILTER_NONE.equals(filterGroup.getName())) {
       boolean match = false;
-      String newFilterName = Window.prompt(PROMPT_FOR_NAME_TXT, UIConsts.EMPTY_STRING);
+      String newFilterName = Window.prompt(PROMPT_FOR_NAME_TXT, BasicConsts.EMPTY_STRING);
       while (true) {
         ArrayList<FilterGroup> currentFilters = parentSubTab.getListOfPossibleFilterGroups();
         if (newFilterName != null) {
@@ -79,9 +80,9 @@ public final class SaveFilterGroupButton extends AggregateButton implements Clic
           return; // exit
         } else if (match) {
           match = false;
-          newFilterName = Window.prompt(REPROMPT_FOR_NAME_TXT, UIConsts.EMPTY_STRING);
-        } else if (newFilterName.equals(UIConsts.EMPTY_STRING)) {
-          newFilterName = Window.prompt(ERROR_NO_NAME, UIConsts.EMPTY_STRING);
+          newFilterName = Window.prompt(REPROMPT_FOR_NAME_TXT, BasicConsts.EMPTY_STRING);
+        } else if (newFilterName.equals(BasicConsts.EMPTY_STRING)) {
+          newFilterName = Window.prompt(ERROR_NO_NAME, BasicConsts.EMPTY_STRING);
         } else {
           break;
         }

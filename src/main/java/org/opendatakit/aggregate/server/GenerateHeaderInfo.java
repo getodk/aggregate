@@ -226,7 +226,7 @@ public class GenerateHeaderInfo {
         addNodeToHeader(nodeName, node);
       }
     } else if (removes != null) {
-      if (!removes.contains(node)) {
+      if (!removes.contains(node) || node.getElementType().equals(ElementType.GEOPOINT)) {
         addNodeToHeader(nodeName, node);
       }
     } else {
