@@ -54,6 +54,7 @@ import com.google.gwt.maps.client.overlay.Marker;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -69,22 +70,35 @@ import com.google.gwt.visualization.client.visualizations.corechart.PieChart.Pie
 
 public final class VisualizationPopup extends AbstractPopupBase {
 
-  private static final String TALLY_OCCURENCES_TXT = "Tally Occurences of Unique Answer Values";
-  private static final String SUM_COLUMNS_TXT = "Sum Values in Column(below), grouped by specified column(left)";
-  private static final String COLUMN_TXT = "<h4 id=\"form_name\"> Column to <br>Visualize:</h4>";
+  private static final String TABULATION_TXT = "<h4 id=\"form_name\">Tabulation Method:</h4>";
+  private static final String TALLY_EXP_BEGIN = "COUNT: Count occurences of Answer Values from ";
+  private static final String TALLY_EXP_END = ".";
+  private static final String SUM_COLUMNS_TXT = "SUM: Sum numeric values from column: (displayed left)";
+  private static final String SUM_COLUMNS_BEGIN = "[e.g. How many ";
+  private static final String SUM_COLUMNS_MIDDLE = " per ";
+  private static final String SUM_COLUMNS_END = "?]";
 
-  private static final String GPS_TXT = "<h4 id=\"form_name\"> GeoPoint to Map:</h4>";
-  private static final String TABULATION_TXT = "<h4 id=\"form_name\">Tabulation <br> Method:</h4>";
-  private static final String TYPE_TXT = "<h4 id=\"form_name\">Type:</h4>";
+  
+  private static final String TYPE_TXT = "<h2 id=\"form_name\">Type:</h2>";
+  private static final String COLUMN_TXT = "<h2 id=\"form_name\">" + HtmlConsts.TAB + "Column to Visualize:</h2>";
+  private static final String GPS_TXT = "<h2 id=\"form_name\">" + HtmlConsts.TAB + "GeoPoint to Map:</h2>";
 
   private static int VIZ_TYPE_TEXT = 0;
   private static int VIZ_TYPE_LIST = 1;
   private static int COLUMN_TEXT = 2;
   private static int COLUMN_LIST = 3;
-  private static int VALUE_TEXT = 4;
-  private static int VALUE_SELECTION = 5;
-  private static int BUTTON = 6;
-  private static int CLOSE = 7;
+  private static int BUTTON = 5;
+  
+  private static int CLOSE = 5;
+  
+  private static int VALUE_TEXT = 0;
+  private static int TALLY_CHOICE = 1;
+  
+  private static int SUM_CHOICE = 1;
+  private static int SUM_CHOICE_COLUMN = 2;
+  private static int SUM_CHOICE_TXT = 3;
+  
+ 
 
   private static final String RADIO_GROUP = "vizRadioGroup";
   private static final String RESIZE_UNITS = "px";
@@ -94,7 +108,7 @@ public final class VisualizationPopup extends AbstractPopupBase {
   private final ArrayList<Column> headers;
   private final ArrayList<SubmissionUI> submissions;
 
-  private final FlexTable dropDownsTable;
+  private final FlexTable typeControlBar;
   private final EnumListBox<ChartType> chartType;
 
   private final ColumnListBox columnList;
@@ -111,7 +125,8 @@ public final class VisualizationPopup extends AbstractPopupBase {
 
   private RadioButton tallyOccurRadio;
   private RadioButton sumColumnsRadio;
-
+  private Label sumRadioTxt;
+  
   public VisualizationPopup(FilterSubTab filterSubTab) {
     super();
 
@@ -128,7 +143,9 @@ public final class VisualizationPopup extends AbstractPopupBase {
     });
 
     columnList = new ColumnListBox(headers, false, true, "TOOLTIP");
+    columnList.addChangeHandler(new ColumnChangeHandler());
     dataList = new ColumnListBox(headers, false, true, "TOOLTIP");
+    dataList.addChangeHandler(new ColumnChangeHandler());
     geoPoints = new KmlSettingListBox("TOOLTIP");
 
     mapsApiLoaded = false;
@@ -159,34 +176,46 @@ public final class VisualizationPopup extends AbstractPopupBase {
     // create radio button
     // NOTE: need to apply the click handler to both because can't use value
     // change. Because browser limitations prevent ValueChangeEvents from being
-    // sent when the radio button is cleared as a side effect of another in the 
+    // sent when the radio button is cleared as a side effect of another in the
     // group being clicked.
-    tallyOccurRadio = new RadioButton(RADIO_GROUP, TALLY_OCCURENCES_TXT);
+
+    tallyOccurRadio = new RadioButton(RADIO_GROUP, BasicConsts.EMPTY_STRING);
     tallyOccurRadio.addClickHandler(new RadioChangeClickHandler());
-    sumColumnsRadio = new RadioButton(RADIO_GROUP, SUM_COLUMNS_TXT);
-    sumColumnsRadio.addClickHandler(new RadioChangeClickHandler());
-    FlexTable radioButtons = new FlexTable();
-    radioButtons.setWidget(0, 0, tallyOccurRadio);
-    radioButtons.setWidget(1, 0, sumColumnsRadio);
     tallyOccurRadio.setValue(true);
 
+    sumColumnsRadio = new RadioButton(RADIO_GROUP, SUM_COLUMNS_TXT);
+    sumColumnsRadio.addClickHandler(new RadioChangeClickHandler());
+
+    sumRadioTxt = new Label(BasicConsts.EMPTY_STRING);
+    
+    
     executeButton = new AggregateButton(BasicConsts.EMPTY_STRING, "TOOLTIP");
     executeButton.addClickHandler(new ExecuteVisualization());
+
+    typeControlBar = new FlexTable();
+    typeControlBar.setHTML(0, VIZ_TYPE_TEXT, TYPE_TXT);
+    typeControlBar.setWidget(0, VIZ_TYPE_LIST, chartType);
+    typeControlBar.setHTML(0, COLUMN_TEXT, COLUMN_TXT);
+    typeControlBar.setWidget(0, COLUMN_LIST, columnList);
+    typeControlBar.setWidget(0, BUTTON, executeButton);
     
-    dropDownsTable = new FlexTable();
-    dropDownsTable.addStyleName("visualiztion_popup_header");
+    FlexTable topSelectionRow = new FlexTable();
+    topSelectionRow.addStyleName("visualiztion_popup_header");
+    topSelectionRow.setWidget(0, 0, typeControlBar);
+    topSelectionRow.setWidget(0, CLOSE, new ClosePopupButton(this));
+    topSelectionRow.getCellFormatter().addStyleName(0, CLOSE, "popup_close_cell");
+ 
+    FlexTable tabulationBar = new FlexTable();
+    tabulationBar.setHTML(0, VALUE_TEXT, TABULATION_TXT);
+    tabulationBar.setWidget(0, TALLY_CHOICE, tallyOccurRadio);
+    tabulationBar.setWidget(1, SUM_CHOICE, sumColumnsRadio);
+    tabulationBar.setWidget(1, SUM_CHOICE_COLUMN, dataList);
+    tabulationBar.setWidget(1, SUM_CHOICE_TXT, sumRadioTxt);
 
-    dropDownsTable.setHTML(0, VIZ_TYPE_TEXT, TYPE_TXT);
-    dropDownsTable.setWidget(0, VIZ_TYPE_LIST, chartType);
-    dropDownsTable.setHTML(0, COLUMN_TEXT, COLUMN_TXT);
-    dropDownsTable.setWidget(0, COLUMN_LIST, columnList);
-    dropDownsTable.setHTML(0, VALUE_TEXT, TABULATION_TXT);
-    dropDownsTable.setWidget(0, VALUE_SELECTION, radioButtons);
-    dropDownsTable.setWidget(1, VALUE_SELECTION, dataList);
-    dropDownsTable.setWidget(0, BUTTON, executeButton);
-    dropDownsTable.setWidget(0, CLOSE, new ClosePopupButton(this));
-    dropDownsTable.getCellFormatter().addStyleName(0, CLOSE, "popup_close_cell");
-
+    FlexTable bottomSelectionRow = new FlexTable();
+    bottomSelectionRow.addStyleName("visualiztion_popup_header");
+    bottomSelectionRow.setWidget(0, 0, tabulationBar);
+    
     // setup the window size
     chartPanel = new SimplePanel();
     Integer height = (Window.getClientHeight() * 5) / 6;
@@ -195,35 +224,45 @@ public final class VisualizationPopup extends AbstractPopupBase {
     chartPanel.setWidth(width.toString() + RESIZE_UNITS);
 
     VerticalPanel layoutPanel = new VerticalPanel();
-    layoutPanel.add(dropDownsTable);
+    layoutPanel.add(topSelectionRow);
+    layoutPanel.add(bottomSelectionRow);
     layoutPanel.add(chartPanel);
 
     setWidget(layoutPanel);
     chartType.setItemSelected(0, true);
     updateUIoptions();
+    updateColumnGraphingDesc();
   }
 
   private void updateUIoptions() {
     ChartType selected = chartType.getSelectedValue();
     executeButton.setHTML(selected.getButtonText());
     if (selected.equals(ChartType.MAP)) {
-      dropDownsTable.setHTML(0, COLUMN_TEXT, GPS_TXT);
-      dropDownsTable.setWidget(0, COLUMN_LIST, geoPoints);
-      
+      typeControlBar.setHTML(0, COLUMN_TEXT, GPS_TXT);
+      typeControlBar.setWidget(0, COLUMN_LIST, geoPoints);
+
       // disable data section
       tallyOccurRadio.setEnabled(false);
       sumColumnsRadio.setEnabled(false);
       dataList.setEnabled(false);
     } else { // must be a chart if not MAP
-      dropDownsTable.setHTML(0, COLUMN_TEXT, COLUMN_TXT);
-      dropDownsTable.setWidget(0, COLUMN_LIST, columnList);
-      
-      //enable data section
+      typeControlBar.setHTML(0, COLUMN_TEXT, COLUMN_TXT);
+      typeControlBar.setWidget(0, COLUMN_LIST, columnList);
+
+      // enable data section
       tallyOccurRadio.setEnabled(true);
       sumColumnsRadio.setEnabled(true);
       dataList.setEnabled(sumColumnsRadio.getValue());
     }
     center();
+  }
+
+  private void updateColumnGraphingDesc() {
+    String vizColumnTxt = columnList.getSelectedColumn().getDisplayHeader();
+    String sumColumnTxt = dataList.getSelectedColumn().getDisplayHeader();
+
+    tallyOccurRadio.setText(TALLY_EXP_BEGIN + vizColumnTxt + TALLY_EXP_END);
+    sumRadioTxt.setText(SUM_COLUMNS_BEGIN + sumColumnTxt + SUM_COLUMNS_MIDDLE + vizColumnTxt + SUM_COLUMNS_END);
   }
 
   private DataTable createDataTable() {
@@ -448,6 +487,13 @@ public final class VisualizationPopup extends AbstractPopupBase {
     @Override
     public void onClick(ClickEvent event) {
       dataList.setEnabled(sumColumnsRadio.getValue());
+    }
+  }
+
+  private class ColumnChangeHandler implements ChangeHandler {
+    @Override
+    public void onChange(ChangeEvent event) {
+      updateColumnGraphingDesc();
     }
   }
 
