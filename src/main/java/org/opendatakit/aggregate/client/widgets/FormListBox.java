@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import org.opendatakit.aggregate.client.form.FormSummary;
 import org.opendatakit.aggregate.constants.common.FormActionStatusTimestamp;
-import org.opendatakit.aggregate.constants.common.UIConsts;
+import org.opendatakit.common.web.constants.BasicConsts;
 
 import com.google.gwt.event.dom.client.ChangeHandler;
 
@@ -33,7 +33,7 @@ public final class FormListBox extends AggregateListBox {
 
     if (forms == null || forms.size() == 0) {
       forms = new ArrayList<FormSummary>();
-      forms.add(new FormSummary(NO_FORM, UIConsts.EMPTY_STRING, null, null, false, false, null, 0));
+      forms.add(new FormSummary(NO_FORM, BasicConsts.EMPTY_STRING, null, null, false, false, null, 0));
     }
 
     clear();
@@ -70,7 +70,7 @@ public final class FormListBox extends AggregateListBox {
         if (formIdToMatch == null) {
           // if there is no formId this should be the 'NO_FORM' form
           if (form.getTitle() != null && form.getTitle().equals(NO_FORM)
-              && formId.equals(UIConsts.EMPTY_STRING)) {
+              && formId.equals(BasicConsts.EMPTY_STRING)) {
             return null;
           } else {
             throw new IllegalStateException(

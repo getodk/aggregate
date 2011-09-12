@@ -38,7 +38,7 @@ public class UiElementFormatter extends BasicElementFormatter {
     GeopointHeaderIncludes gpsFormatter = null;
 
     if(gpsFormatters != null) {
-      gpsFormatter = gpsFormatters.get(element);
+      gpsFormatter = gpsFormatters.get(element.getElementName());
     }
   
     if (gpsFormatter == null) {

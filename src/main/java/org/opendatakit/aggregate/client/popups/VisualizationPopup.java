@@ -34,6 +34,10 @@ import org.opendatakit.aggregate.client.widgets.EnumListBox;
 import org.opendatakit.aggregate.client.widgets.KmlSettingListBox;
 import org.opendatakit.aggregate.constants.common.ChartType;
 import org.opendatakit.aggregate.constants.common.GeoPointConsts;
+import org.opendatakit.aggregate.constants.common.UIDisplayType;
+import org.opendatakit.common.web.constants.BasicConsts;
+import org.opendatakit.common.web.constants.HtmlConsts;
+import org.opendatakit.common.web.constants.HtmlStrUtil;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
@@ -50,7 +54,7 @@ import com.google.gwt.maps.client.overlay.Marker;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -65,10 +69,13 @@ import com.google.gwt.visualization.client.visualizations.corechart.PieChart.Pie
 
 public final class VisualizationPopup extends AbstractPopupBase {
 
-  private static final String COLUMN_TXT = "<h4 id=\"form_name\"> Column to Visualize:</h4>";
+  private static final String TALLY_OCCURENCES_TXT = "Tally Occurences of Unique Answer Values";
+  private static final String SUM_COLUMNS_TXT = "Sum Values in Column(below), grouped by specified column(left)";
+  private static final String COLUMN_TXT = "<h4 id=\"form_name\"> Column to <br>Visualize:</h4>";
+
   private static final String GPS_TXT = "<h4 id=\"form_name\"> GeoPoint to Map:</h4>";
-  private static final String TABULATION_TXT = "<h4 id=\"form_name\">Tabulation:</h4>";
-  private static final String TYPE_TXT = "<h4 id=\"form_name\">Visualization Type:</h4>";
+  private static final String TABULATION_TXT = "<h4 id=\"form_name\">Tabulation <br> Method:</h4>";
+  private static final String TYPE_TXT = "<h4 id=\"form_name\">Type:</h4>";
 
   private static int VIZ_TYPE_TEXT = 0;
   private static int VIZ_TYPE_LIST = 1;
@@ -79,6 +86,7 @@ public final class VisualizationPopup extends AbstractPopupBase {
   private static int BUTTON = 6;
   private static int CLOSE = 7;
 
+  private static final String RADIO_GROUP = "vizRadioGroup";
   private static final String RESIZE_UNITS = "px";
 
   private static final String VIZ_TYPE_TOOLTIP = "Type of Visualization";
@@ -95,15 +103,14 @@ public final class VisualizationPopup extends AbstractPopupBase {
 
   private boolean mapsApiLoaded;
   private boolean chartApiLoaded;
-  private boolean tallyOccurances;
 
   private final String formId;
 
   private final AggregateButton executeButton;
-
-  private final Label message;
-
   private final SimplePanel chartPanel;
+
+  private RadioButton tallyOccurRadio;
+  private RadioButton sumColumnsRadio;
 
   public VisualizationPopup(FilterSubTab filterSubTab) {
     super();
@@ -120,8 +127,8 @@ public final class VisualizationPopup extends AbstractPopupBase {
       }
     });
 
-    columnList = new ColumnListBox(headers, "TOOLTIP", false);
-    dataList = new ColumnListBox(headers, "TOOLTIP", false);
+    columnList = new ColumnListBox(headers, false, true, "TOOLTIP");
+    dataList = new ColumnListBox(headers, false, true, "TOOLTIP");
     geoPoints = new KmlSettingListBox("TOOLTIP");
 
     mapsApiLoaded = false;
@@ -149,20 +156,32 @@ public final class VisualizationPopup extends AbstractPopupBase {
       }
     });
 
-    executeButton = new AggregateButton("", "TOOLTIP");
+    // create radio button
+    // NOTE: need to apply the click handler to both because can't use value
+    // change. Because browser limitations prevent ValueChangeEvents from being
+    // sent when the radio button is cleared as a side effect of another in the 
+    // group being clicked.
+    tallyOccurRadio = new RadioButton(RADIO_GROUP, TALLY_OCCURENCES_TXT);
+    tallyOccurRadio.addClickHandler(new RadioChangeClickHandler());
+    sumColumnsRadio = new RadioButton(RADIO_GROUP, SUM_COLUMNS_TXT);
+    sumColumnsRadio.addClickHandler(new RadioChangeClickHandler());
+    FlexTable radioButtons = new FlexTable();
+    radioButtons.setWidget(0, 0, tallyOccurRadio);
+    radioButtons.setWidget(1, 0, sumColumnsRadio);
+    tallyOccurRadio.setValue(true);
+
+    executeButton = new AggregateButton(BasicConsts.EMPTY_STRING, "TOOLTIP");
     executeButton.addClickHandler(new ExecuteVisualization());
-
-    message = new Label();
-
+    
     dropDownsTable = new FlexTable();
-    dropDownsTable.addStyleName("popup_menu");
+    dropDownsTable.addStyleName("visualiztion_popup_header");
 
     dropDownsTable.setHTML(0, VIZ_TYPE_TEXT, TYPE_TXT);
     dropDownsTable.setWidget(0, VIZ_TYPE_LIST, chartType);
     dropDownsTable.setHTML(0, COLUMN_TEXT, COLUMN_TXT);
     dropDownsTable.setWidget(0, COLUMN_LIST, columnList);
     dropDownsTable.setHTML(0, VALUE_TEXT, TABULATION_TXT);
-    dropDownsTable.setWidget(0, VALUE_SELECTION, dataList);
+    dropDownsTable.setWidget(0, VALUE_SELECTION, radioButtons);
     dropDownsTable.setWidget(1, VALUE_SELECTION, dataList);
     dropDownsTable.setWidget(0, BUTTON, executeButton);
     dropDownsTable.setWidget(0, CLOSE, new ClosePopupButton(this));
@@ -177,7 +196,6 @@ public final class VisualizationPopup extends AbstractPopupBase {
 
     VerticalPanel layoutPanel = new VerticalPanel();
     layoutPanel.add(dropDownsTable);
-    layoutPanel.add(message);
     layoutPanel.add(chartPanel);
 
     setWidget(layoutPanel);
@@ -191,26 +209,35 @@ public final class VisualizationPopup extends AbstractPopupBase {
     if (selected.equals(ChartType.MAP)) {
       dropDownsTable.setHTML(0, COLUMN_TEXT, GPS_TXT);
       dropDownsTable.setWidget(0, COLUMN_LIST, geoPoints);
+      
+      // disable data section
+      tallyOccurRadio.setEnabled(false);
+      sumColumnsRadio.setEnabled(false);
+      dataList.setEnabled(false);
     } else { // must be a chart if not MAP
       dropDownsTable.setHTML(0, COLUMN_TEXT, COLUMN_TXT);
       dropDownsTable.setWidget(0, COLUMN_LIST, columnList);
-
+      
+      //enable data section
+      tallyOccurRadio.setEnabled(true);
+      sumColumnsRadio.setEnabled(true);
+      dataList.setEnabled(sumColumnsRadio.getValue());
     }
     center();
-    message.setText("UPDATED");
-
   }
 
   private DataTable createDataTable() {
     Column firstDataValue = columnList.getSelectedColumn();
     Column secondDataValue = dataList.getSelectedColumn();
 
+    boolean tally = tallyOccurRadio.getValue();
+
     DataTable data = DataTable.create();
     data.addColumn(ColumnType.STRING, firstDataValue.getDisplayHeader());
-    if (tallyOccurances) {
-      data.addColumn(ColumnType.NUMBER, secondDataValue.getDisplayHeader());
-    } else {
+    if (tally) {
       data.addColumn(ColumnType.NUMBER, "Number of Ocurrences");
+    } else {
+      data.addColumn(ColumnType.NUMBER, "Sum of " + secondDataValue.getDisplayHeader());
     }
 
     int firstIndex = 0;
@@ -227,19 +254,19 @@ public final class VisualizationPopup extends AbstractPopupBase {
     HashMap<String, Double> aggregation = new HashMap<String, Double>();
     for (SubmissionUI s : submissions) {
       String label = s.getValues().get(firstIndex);
-     
+
       // determine submissions value
       double addend = 0;
-      if (tallyOccurances) {
+      if (tally) {
         addend = 1;
       } else {
         try {
           addend = Double.parseDouble(s.getValues().get(secondIndex));
-        } catch(Exception e) {
+        } catch (Exception e) {
           // move on because we couldn't parse the value
         }
       }
-      
+
       // update running total
       if (aggregation.containsKey(label)) {
         aggregation.put(label, aggregation.get(label) + addend);
@@ -323,14 +350,14 @@ public final class VisualizationPopup extends AbstractPopupBase {
     // check to see if we have lat & long, if not display erro
     if (latIndex < 0 || lonIndex < 0) {
       String error = "ERROR:";
-      if(latIndex < 0) {
+      if (latIndex < 0) {
         error = error + " The Latitude Coordinate is NOT included in the Filter.";
       }
-      if(lonIndex < 0) {
+      if (lonIndex < 0) {
         error = error + " The Longitude Coordinate is NOT included in the Filter.";
       }
 
-      message.setText(error);
+      Window.alert(error);
       return null;
     }
 
@@ -358,15 +385,31 @@ public final class VisualizationPopup extends AbstractPopupBase {
 
         // marker needs to be added to the map before calling
         // InfoWindow.open(marker, ...)
+        final SubmissionUI tmpSub = sub;
         marker.addMarkerClickHandler(new MarkerClickHandler() {
           public void onClick(MarkerClickEvent event) {
             InfoWindow info = map.getInfoWindow();
-            info.open(event.getSender(), new InfoWindowContent("HELLO WORLD!"));
+            info.open(event.getSender(), new InfoWindowContent(createInfoWindow(tmpSub)));
           }
         });
       }
     }
     return map;
+  }
+
+  private String createInfoWindow(SubmissionUI submission) {
+    String str = HtmlConsts.TABLE_OPEN;
+    List<String> values = submission.getValues();
+
+    for (int i = 0; i < values.size() && i < headers.size(); i++) {
+      Column column = headers.get(i);
+      if (column != null) {
+        if (column.getUiDisplayType().equals(UIDisplayType.TEXT)) {
+          str += generateDataElement(column.getDisplayHeader(), values.get(i));
+        }
+      }
+    }
+    return str + HtmlConsts.TABLE_CLOSE;
   }
 
   private class ExecuteVisualization implements ClickHandler {
@@ -376,7 +419,7 @@ public final class VisualizationPopup extends AbstractPopupBase {
 
       // verify modules are loaded
       if (!mapsApiLoaded || !chartApiLoaded) {
-        message.setText("Modules are not loaded yet, please try again!");
+        Window.alert("Modules are not loaded yet, please try again!");
         return;
       }
 
@@ -398,5 +441,26 @@ public final class VisualizationPopup extends AbstractPopupBase {
       chartPanel.add(chart);
     }
 
+  }
+
+  private class RadioChangeClickHandler implements ClickHandler {
+
+    @Override
+    public void onClick(ClickEvent event) {
+      dataList.setEnabled(sumColumnsRadio.getValue());
+    }
+  }
+
+  private static String generateDataElement(String name, String value) {
+    String outputValue = BasicConsts.EMPTY_STRING;
+    if (value != null) {
+      outputValue = value;
+    }
+
+    String tmp = HtmlStrUtil.wrapWithHtmlTags(HtmlConsts.TABLE_DATA,
+        HtmlStrUtil.wrapWithHtmlTags(HtmlConsts.B, name))
+        + HtmlStrUtil.wrapWithHtmlTags(HtmlConsts.TABLE_DATA, outputValue);
+
+    return HtmlStrUtil.wrapWithHtmlTags(HtmlConsts.TABLE_ROW, tmp);
   }
 }

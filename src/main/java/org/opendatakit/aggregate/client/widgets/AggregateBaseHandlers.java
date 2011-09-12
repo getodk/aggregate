@@ -2,7 +2,7 @@ package org.opendatakit.aggregate.client.widgets;
 
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.popups.HelpBalloon;
-import org.opendatakit.aggregate.constants.common.UIConsts;
+import org.opendatakit.common.web.constants.BasicConsts;
 
 import com.google.gwt.event.dom.client.MouseOutEvent;
 import com.google.gwt.event.dom.client.MouseOutHandler;
@@ -44,7 +44,7 @@ public final class AggregateBaseHandlers implements MouseOverHandler, MouseOutHa
     
     if(helpBalloon != null) {
       // hide the tool tip
-      widget.setTitle(UIConsts.EMPTY_STRING);
+      widget.setTitle(BasicConsts.EMPTY_STRING);
       
       // show the help balloon;
       helpBalloon.display();

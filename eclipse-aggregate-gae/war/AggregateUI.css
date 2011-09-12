@@ -69,6 +69,12 @@ a, a:visited, a:hover {
 	left: 0px;
 	top: 0px;
 }
+
+.visualiztion_popup_header {
+	background-color: #ECF5F6;
+	width: 100%;
+}
+
 .help_panel {
 	width: 100%;
 }
