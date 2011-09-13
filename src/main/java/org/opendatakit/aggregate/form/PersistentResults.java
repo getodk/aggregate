@@ -53,8 +53,8 @@ import org.opendatakit.common.web.constants.BasicConsts;
  * 
  */
 public class PersistentResults {
-  // public static final long RETRY_INTERVAL_MILLISECONDS = (11 * 60) * 1000;
-  public static final long RETRY_INTERVAL_MILLISECONDS = 10000;
+  public static final long RETRY_INTERVAL_MILLISECONDS = (6 * 60) * 1000; // 6 minutes
+  // public static final long RETRY_INTERVAL_MILLISECONDS = 10000;
   public static final long MAX_RETRY_ATTEMPTS = 3;
 
   public static final String FORM_ID_PERSISTENT_RESULT = "aggregate.opendatakit.org:PersistentResults";
@@ -439,7 +439,7 @@ public class PersistentResults {
         DataField.DataType.STRING, true, Form.MAX_FORM_ID_LENGTH);
 
     private static final DataField URI_FILTER_GROUP_PROPERTY = new DataField("URI_FILTER_GROUP",
-        DataField.DataType.URI, false, PersistConsts.URI_STRING_LEN);
+        DataField.DataType.URI, true, PersistConsts.URI_STRING_LEN);
 
     /**
      * Construct a relation prototype.
