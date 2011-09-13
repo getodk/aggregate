@@ -28,8 +28,12 @@ public class QueryByUIFilterGroup extends QueryBase {
   private TopLevelDynamicBase tbl;
 
   private int fetchLimit;
-  
   public QueryByUIFilterGroup(Form form, FilterGroup filterGroup, int maxFetchLimit,
+	      CallingContext cc) throws ODKFormNotFoundException {
+	  this( form, filterGroup, false, maxFetchLimit, cc);
+  }
+  
+  public QueryByUIFilterGroup(Form form, FilterGroup filterGroup, boolean onlyCompleteSubmissions, int maxFetchLimit,
       CallingContext cc) throws ODKFormNotFoundException {
     super(form);
 
@@ -37,9 +41,17 @@ public class QueryByUIFilterGroup extends QueryBase {
         .getBackingObjectPrototype();
 
     query = cc.getDatastore().createQuery(tbl, cc.getCurrentUser());
-    query.addSort(tbl.lastUpdateDate, Query.Direction.ASCENDING);
-    query.addFilter(tbl.lastUpdateDate, Query.FilterOperation.GREATER_THAN, BasicConsts.EPOCH);
-
+    if ( !onlyCompleteSubmissions ) {
+      // order by the last update date
+      query.addSort(tbl.lastUpdateDate, Query.Direction.ASCENDING);
+      query.addFilter(tbl.lastUpdateDate, Query.FilterOperation.GREATER_THAN, BasicConsts.EPOCH);
+    } else {
+      // order by the completion date and filter against isComplete == true
+      query.addSort(tbl.markedAsCompleteDate, Query.Direction.ASCENDING);
+      query.addFilter(tbl.markedAsCompleteDate, Query.FilterOperation.GREATER_THAN, BasicConsts.EPOCH);
+      query.addFilter(tbl.isComplete, Query.FilterOperation.EQUAL, true);
+    }
+    
     if (filterGroup == null) {
       return;
     }

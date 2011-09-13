@@ -79,7 +79,7 @@ public class CsvWorkerImpl {
       } else {
         subFilterGroup = SubmissionFilterGroup.getFilterGroup(filterGroupUri, cc);
         FilterGroup filterGroup = subFilterGroup.transform();
-        query = new QueryByUIFilterGroup(form, filterGroup, ServletConsts.FETCH_LIMIT, cc);
+        query = new QueryByUIFilterGroup(form, filterGroup, true, ServletConsts.FETCH_LIMIT, cc);
         formatter = new CsvFormatterWithFilters(form, cc.getServerURL(), pw, filterGroup);
       }
       formatter.processSubmissions(query.getResultSubmissions(cc), cc);
