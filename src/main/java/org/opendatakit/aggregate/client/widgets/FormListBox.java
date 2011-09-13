@@ -52,12 +52,12 @@ public final class FormListBox extends AggregateListBox {
       }
     }
 
+    displayedFormList = forms;
+
     if (getItemCount() > 0) {
       // update the panel to display the right form
       setItemSelected(selectedIndex, true);
     }
-
-    displayedFormList = forms;
   }
 
   public FormSummary getSelectedForm() {
