@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import org.opendatakit.aggregate.client.filter.FilterGroup;
 import org.opendatakit.aggregate.client.filter.FilterSet;
 import org.opendatakit.aggregate.constants.common.UIConsts;
+import org.opendatakit.common.web.constants.BasicConsts;
 
 import com.google.gwt.event.dom.client.ChangeHandler;
 
@@ -28,15 +29,20 @@ public final class FilterListBox extends AggregateListBox {
   
   public void updateFilterDropDown(FilterSet filterSet) {
     FilterGroup currentFilterSelected = getSelectedFilter();
-    FilterGroup defaultFilterGroup = new FilterGroup(UIConsts.FILTER_NONE, filterSet.getFormId(), null);
     
     // what the selected index should be set to
     int selectedIndex = 0; // default to the top position, update if available
     
     // create what should be the new filter group
     ArrayList<FilterGroup> filterGroups  = new ArrayList<FilterGroup>();
-    filterGroups.add(defaultFilterGroup);
-    filterGroups.addAll(filterSet.getGroups());
+    if ( filterSet != null ) {
+    	FilterGroup defaultFilterGroup = new FilterGroup(UIConsts.FILTER_NONE, filterSet.getFormId(), null);
+        filterGroups.add(defaultFilterGroup);
+        filterGroups.addAll(filterSet.getGroups());
+    } else {
+    	FilterGroup defaultFilterGroup = new FilterGroup(UIConsts.FILTER_NONE, BasicConsts.EMPTY_STRING, null);
+        filterGroups.add(defaultFilterGroup);
+    }
 
     clear();
     
@@ -49,11 +55,12 @@ public final class FilterListBox extends AggregateListBox {
         selectedIndex = i;
       }
     }
+    
+    // set the displayed list before we set the item that was selected
+    displayedFilterList = filterGroups;
 
     // update the panel to display the right filter
     setItemSelected(selectedIndex, true);
-    
-    displayedFilterList = filterGroups;
   }
   
   public FilterGroup getSelectedFilter() {

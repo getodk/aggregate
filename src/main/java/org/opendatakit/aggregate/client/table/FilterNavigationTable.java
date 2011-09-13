@@ -30,7 +30,9 @@ import org.opendatakit.aggregate.client.widgets.FilterListBox;
 import org.opendatakit.aggregate.client.widgets.FormListBox;
 import org.opendatakit.aggregate.client.widgets.PublishButton;
 import org.opendatakit.aggregate.client.widgets.VisualizationButton;
+import org.opendatakit.common.web.constants.BasicConsts;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -86,10 +88,16 @@ public class FilterNavigationTable extends FlexTable {
   }
   
   public void update() {
+	GWT.log("inside FilterNavigationTable.update");
+	
     // Set up the callback object.
     AsyncCallback<ArrayList<FormSummary>> callback = new AsyncCallback<ArrayList<FormSummary>>() {
       public void onFailure(Throwable caught) {
         AggregateUI.getUI().reportError(caught);
+        // something failed...
+        selectedForm = null;
+        
+        updateFilterList();
       }
 
       public void onSuccess(ArrayList<FormSummary> formsFromService) {
@@ -110,40 +118,51 @@ public class FilterNavigationTable extends FlexTable {
   }
   
   private synchronized void updateFilterList() {
+	GWT.log("inside FilterNavigationTable.updateFilterList");
+
+	if (selectedForm == null || selectedForm.getId().equals(BasicConsts.EMPTY_STRING)) {
+      // no form
+	  // therefore no filters ... update filter box
+      filtersBox.updateFilterDropDown(null);
+      // update the submissions display
+      updateSelectedFormNFilter();
+      return;
+    }
+
+	// otherwise, request the filters appropriate for this form...
     AsyncCallback<FilterSet> callback = new AsyncCallback<FilterSet>() {
       @Override
       public void onFailure(Throwable caught) {
         if(caught instanceof FormNotAvailableException) {
-          // the form was not available, restart the update process
-          update();          
+          // the form is now not available, restart the update process
+          GWT.log("form not available - restarting form/filter update FilterNavigationTable");
+          update();
         } else {
           AggregateUI.getUI().reportError(caught);
+          // no filters... update filter box
+          filtersBox.updateFilterDropDown(null);
+          // update the submissions display
+          updateSelectedFormNFilter();
         }
       }
       
       @Override
       public void onSuccess(FilterSet filterSet) {
         AggregateUI.getUI().clearError();
-
         // updates the filter dropdown and sets the class state to the newly created filter list
         filtersBox.updateFilterDropDown(filterSet);
-         
-        // once the update filter completes update what is being displayed
+        // update the submissions display
         updateSelectedFormNFilter();
       }
     };
 
-    // request the update
-    if (selectedForm == null) {
-      return;
-    }
-    if (selectedForm.getId() != null) {
-      SecureGWT.getFilterService().getFilterSet(selectedForm.getId(), callback);
-    }
+    // request the filters for the form...
+    SecureGWT.getFilterService().getFilterSet(selectedForm.getId(), callback);
 
   }
 
   private void updateSelectedFormNFilter() {
+	GWT.log("inside FilterNavigationTable.updateSelectedFormNFilter");
     FormSummary form = formsBox.getSelectedForm();
     FilterGroup filterGroup = filtersBox.getSelectedFilter();
   
@@ -165,11 +184,18 @@ public class FilterNavigationTable extends FlexTable {
       AggregateUI.getUI().getTimer().restartTimer();
       FormSummary form = formsBox.getSelectedForm();
       if(form != null) {
-        selectedForm = form;
+    	if ( selectedForm == null || !selectedForm.equals(form) ) {
+    		selectedForm = form;
+    	    // update filter list based on new form
+    	    // NOTE: the filter list MUST be updated BEFORE the selected updateSelectedFormNFilter() is called
+    	    updateFilterList();
+    	}
+    	// otherwise no-op (form unchanged)...
+      } else {
+    	// no selected form...
+    	selectedForm = null;
+    	updateFilterList();
       }
-      // update filter list based on new form
-      // NOTE: the filter list MUST be updated BEFORE the selected updateSelectedFormNFilter() is called
-      updateFilterList();      
     }
   }
   
