@@ -1,24 +1,25 @@
-h1, h2, h2, p {
-  font-family: 'Arial Unicode MS', Arial, sans-serif;
+h1,h2,h2,p {
+	font-family: 'Arial Unicode MS', Arial, sans-serif;
 }
 
-body, table td, select {
-  font-family: Arial Unicode MS, Arial, sans-serif;
-  font-size: small;
+body,table td,select {
+	font-family: Arial Unicode MS, Arial, sans-serif;
+	font-size: small;
 }
 
 body {
-  color: black;
-  margin: 0px;
-  border: 0px;
-  padding: 0px;
-  background: white;
-  direction: ltr;
+	color: black;
+	margin: 0px;
+	border: 0px;
+	padding: 0px;
+	background: white;
+	direction: ltr;
 }
 
 h1 {
 	color: #07115A;
 	margin-top: 15px;
+	font-size: xx-large;
 }
 
 h2 {
@@ -39,29 +40,29 @@ p {
 	border: 0px;
 	padding: 2px;
 }
+
 .embedded_iframe ul,ol li {
 	indent: 10px;
 }
 
-a, a:visited, a:hover {
-  color: #0000AA;
+a,a:visited,a:hover {
+	color: #0000AA;
 }
+
 .gwt-PopupPanel {
 	padding: 3px;
 	border: 2px solid #777984;
 	background: url("images/mostly_opaque.png");
 }
 
-#filters_data,
-#form_and_goals_panel {
+#filters_data,#form_and_goals_panel {
 	border-collapse: collapse;
 }
 
-#submission_container,
-#filters_container,
-#help_container {
+#submission_container,#filters_container,#help_container {
 	overflow: scroll;
 }
+
 .error_message {
 	color: red;
 	text-align: center;
@@ -70,14 +71,23 @@ a, a:visited, a:hover {
 	top: 0px;
 }
 
-.visualiztion_popup_header {
+.popup_header {
 	background-color: #ECF5F6;
+}
+
+.stretch_popup_header {
+	background-color: #ECF5F6;
+	width: 100%;
+}
+
+.stretch_header {
 	width: 100%;
 }
 
 .help_panel {
 	width: 100%;
 }
+
 .help_panel td {
 	border: 1px solid #07115A;
 	width: 100%;
@@ -85,24 +95,23 @@ a, a:visited, a:hover {
 }
 
 .uploadCloseButton {
-        float: right;
+	float: right;
 }
 
 .uploadFrame {
-        float: left;
-        clear: none;
-        border: 0px;
+	float: left;
+	clear: none;
+	border: 0px;
 }
 
-
-#chart_image,
-#map_area {
+#chart_image,#map_area {
 	width: 600px;
 	height: 500px;
 }
+
 #nav_bar_help_login {
 	position: absolute;
-    top: 0px;
+	top: 0px;
 	margin: 2px;
 	padding: 3px;
 	text-align: right;

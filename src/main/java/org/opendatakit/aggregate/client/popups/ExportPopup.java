@@ -18,10 +18,13 @@ package org.opendatakit.aggregate.client.popups;
 
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.SecureGWT;
+import org.opendatakit.aggregate.client.filter.FilterGroup;
+import org.opendatakit.aggregate.client.filter.FilterSet;
 import org.opendatakit.aggregate.client.form.KmlSettings;
 import org.opendatakit.aggregate.client.widgets.AggregateButton;
 import org.opendatakit.aggregate.client.widgets.ClosePopupButton;
 import org.opendatakit.aggregate.client.widgets.EnumListBox;
+import org.opendatakit.aggregate.client.widgets.FilterListBox;
 import org.opendatakit.aggregate.client.widgets.KmlSettingListBox;
 import org.opendatakit.aggregate.constants.common.ExportType;
 import org.opendatakit.aggregate.constants.common.SubTabs;
@@ -42,34 +45,45 @@ public final class ExportPopup extends AbstractPopupBase {
   private static final String BINARY_TOOLTIP = "Binary field to display";
   private static final String TITLE_TOOLTIP = "Field to use as Title";
 
-  private static final String CREATE_BUTTON_TXT = "<img src=\"images/green_right_arrow.png\" /> Publish";
+  private static final String CREATE_BUTTON_TXT = "<img src=\"images/green_right_arrow.png\" /> Export";
   private static final String CREATE_BUTTON_TOOLTIP = "Create Export File";
   private static final String CREATE_BUTTON_HELP_BALLON = "This creates either a CSV or KML file of your data.";
 
   private static final String EXPORT_ERROR_MSG = "Either the Geopoint field or your Title field were invalid";
 
   private boolean gotKmlOptions = false;
-  private FlexTable layout;
-  private EnumListBox<ExportType> fileType;
+  private final FlexTable layout;
+  private final EnumListBox<ExportType> fileType;
 
-  private String formId;
+  private final FilterListBox filtersBox;
 
-  private KmlSettingListBox geoPointsDropDown;
-  private KmlSettingListBox titleFieldsDropDown;
-  private KmlSettingListBox binaryFieldsDropDown;
+  private final KmlSettingListBox geoPointsDropDown;
+  private final KmlSettingListBox titleFieldsDropDown;
+  private final KmlSettingListBox binaryFieldsDropDown;
 
-  private AggregateButton exportButton;
+  private final AggregateButton exportButton;
 
-  public ExportPopup(String formid) {
+  private final String formId;
+
+  
+  public ExportPopup(String formid, FilterGroup selectedFilterGroup) {
     super();
     this.formId = formid;
-
-    layout = new FlexTable();
-
+     
+    // ensure the filter group passed in is for the correct form
+    if(formid.equals(selectedFilterGroup.getFormId())) {
+      filtersBox = new FilterListBox(selectedFilterGroup);
+    } else {
+      filtersBox = new FilterListBox();
+    }
+    
     geoPointsDropDown = new KmlSettingListBox(GEOPOINT_TOOLTIP);
     titleFieldsDropDown = new KmlSettingListBox(TITLE_TOOLTIP);
     binaryFieldsDropDown = new KmlSettingListBox(BINARY_TOOLTIP);
 
+    SecureGWT.getFormService().getPossibleKmlSettings(formId, new KmlSettingsCallback());
+    SecureGWT.getFilterService().getFilterSet(formId, new FiltersCallback());
+    
     exportButton = new AggregateButton(CREATE_BUTTON_TXT, CREATE_BUTTON_TOOLTIP,
         CREATE_BUTTON_HELP_BALLON);
     exportButton.addClickHandler(new CreateExportHandler()); 
@@ -77,25 +91,30 @@ public final class ExportPopup extends AbstractPopupBase {
     fileType = new EnumListBox<ExportType>(ExportType.values(), FILE_TYPE_TOOLTIP);
     fileType.addChangeHandler(new ExportTypeChangeHandler());
 
-    SecureGWT.getFormService().getPossibleKmlSettings(formId, new KmlSettingsCallback());
+   
+    FlexTable topBar = new FlexTable();
+    topBar.addStyleName("stretch_header");
+    topBar.setWidget(0, 0, new HTML("<h2> Form:</h2>"));
+    topBar.setWidget(0, 1, new HTML(formId));
+    topBar.setWidget(0, 2, new HTML("<h2>Type:</h2>"));
+    topBar.setWidget(0, 3, fileType);
+    topBar.setWidget(0, 4, new HTML("<h2>Filter:</h2>"));
+    topBar.setWidget(0, 5, filtersBox);
+    topBar.setWidget(0, 6, exportButton);
 
+    FlexTable bottomBar = new FlexTable();
+    bottomBar.setWidget(0, 0, new HTML("<h4>Geopoint:<h4>"));
+    bottomBar.setWidget(0, 1, geoPointsDropDown);
+    bottomBar.setWidget(0, 2, new HTML("<h4>Title:<h4>"));
+    bottomBar.setWidget(0, 3, titleFieldsDropDown);
+    bottomBar.setWidget(0, 4, new HTML("<h4>Picture:<h4>"));
+    bottomBar.setWidget(0, 5, binaryFieldsDropDown);
+
+    layout = new FlexTable();
     layout.setWidget(0, 0, new ClosePopupButton(this));
-    layout.setWidget(0, 1, new HTML("<h3>Form:<h3>"));
-    layout.setWidget(0, 2, new HTML(formId));
-
-    layout.setWidget(0, 3, new HTML("<h3>Type:<h3>"));
-    layout.setWidget(0, 4, fileType);
-    layout.setWidget(0, 6, exportButton);
-
-    layout.setWidget(1, 1, new HTML("<h4>Geopoint:<h4>"));
-    layout.setWidget(1, 2, geoPointsDropDown);
-
-    layout.setWidget(1, 3, new HTML("<h4>Title:<h4>"));
-    layout.setWidget(1, 4, titleFieldsDropDown);
-
-    layout.setWidget(1, 5, new HTML("<h4>Picture:<h4>"));
-    layout.setWidget(1, 6, binaryFieldsDropDown);
-
+    layout.setWidget(0, 1, topBar);
+    layout.setWidget(1, 1, bottomBar);
+    
     updateUIOptions();
 
     setWidget(layout);
@@ -179,6 +198,22 @@ public final class ExportPopup extends AbstractPopupBase {
     }
   }
 
+  private class FiltersCallback implements AsyncCallback<FilterSet> {
+
+    @Override
+    public void onFailure(Throwable caught) {
+        AggregateUI.getUI().reportError(caught);
+    }
+    
+    @Override
+    public void onSuccess(FilterSet filterSet) {
+      // updates the filter dropdown and sets the class state to the newly created filter list
+      filtersBox.updateFilterDropDown(filterSet);
+    }
+  };
+
+  
+  
   private class ExportTypeChangeHandler implements ChangeHandler {
     @Override
     public void onChange(ChangeEvent event) {
@@ -192,7 +227,8 @@ public final class ExportPopup extends AbstractPopupBase {
       ExportType type = ExportType.valueOf(fileType.getValue(fileType.getSelectedIndex()));
 
       if (type.equals(ExportType.CSV)) {
-        SecureGWT.getFormService().createCsv(formId, null, new CreateExportCallback());
+        FilterGroup filterGroup = filtersBox.getSelectedFilter();
+        SecureGWT.getFormService().createCsvFromFilter(filterGroup, new CreateExportCallback());
       } else { // .equals(ExportType.KML.toString())
         String geoPointValue = geoPointsDropDown.getElementKey();
         String titleValue = titleFieldsDropDown.getElementKey();

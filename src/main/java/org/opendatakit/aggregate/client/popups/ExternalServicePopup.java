@@ -35,8 +35,8 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.TextBox;
 
 public final class ExternalServicePopup extends AbstractPopupBase {
-
-  private static final String BUTTON_TXT = "<img src=\"images/green_right_arrow.png\" /> Export";
+  
+  private static final String BUTTON_TXT = "<img src=\"images/green_right_arrow.png\" /> Publish";  
   private static final String TOOLTIP_TXT = "Publish the data";
   private static final String HELP_BALLOON_TXT = "This will publish the data to Google Fusion Tables "
       + "or Google Spreadsheets.";

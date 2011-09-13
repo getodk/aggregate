@@ -69,68 +69,63 @@ public class FormUploadServlet extends ServletUtilBase {
    * Title for generated webpage
    */
   private static final String TITLE_INFO = "Xform Upload";
-  
-  /**
-   * Script path to include...
-   */
-  private static final String UPLOAD_SCRIPT_RESOURCE = "javascript/upload_control.js";
-  private static final String UPLOAD_STYLE_RESOURCE = "stylesheets/upload.css";
-  private static final String UPLOAD_BUTTON_STYLE_RESOURCE = "stylesheets/button.css";
 
-  private static final String UPLOAD_PAGE_BODY_START = 
+  private static final String UPLOAD_PAGE_BODY_START =
 
-"<div style=\"overflow: auto;\"><p id=\"subHeading\"><b>Upload one form into ODK Aggregate</b></p>" +
-"<!--[if true]><p style=\"color: red;\">For a better user experience, use Chrome, Firefox or Safari</p>" +
-"<![endif] -->" +
-"<form id=\"ie_backward_compatible_form\"" + 
-" accept-charset=\"UTF-8\" method=\"POST\" encoding=\"multipart/form-data\" enctype=\"multipart/form-data\"" + 
-" action=\"";// emit the ADDR
-  private static final String UPLOAD_PAGE_BODY_MIDDLE = "\">" +
-"	  <table id=\"uploadTable\">" +
-"	  	<tr>" +
-"	  		<td><label for=\"form_def_file\">Form definition:</label></td>" +
-"	  		<td><input id=\"form_def_file\" type=\"file\" size=\"80\" class=\"gwt-Button\"" +
-"	  			name=\"form_def_file\" /></td>" +
-"	  	</tr>\n" +
-"	  	<tr>" +
-"	  		<td><label for=\"mediaFiles\">Media file(s):</label></td>" +
-"	  		<td><input id=\"mediaFiles\" class=\"gwt-Button\" type=\"file\" size=\"80,20\" name=\"datafile\" multiple /><input id=\"clear_media_files\" type=\"button\" class=\"gwt-Button\" value=\"Clear\" onClick=\"clearMediaInputField('mediaFiles')\" /></td>" +
-"	  	</tr>" +
-"	  	<!--[if true]>" +
-"	      <tr>" +
-"	          <td><label for=\"mediaFiles2\">Media file #2:</label></td>" +
-"	          <td><input id=\"mediaFiles2\" class=\"gwt-Button\" type=\"file\" size=\"80\" name=\"datafile\" /><input id=\"clear_media_files2\" type=\"button\" class=\"gwt-Button\" value=\"Clear\" onClick=\"clearMediaInputField('mediaFiles2')\" /></td>" +
-"	      </tr>" +
-"	      <tr>" +
-"	          <td><label for=\"mediaFiles3\">Media file #3:</label></td>" +
-"	          <td><input id=\"mediaFiles3\" class=\"gwt-Button\" type=\"file\" size=\"80\" name=\"datafile\" /><input id=\"clear_media_files3\" type=\"button\" class=\"gwt-Button\" value=\"Clear\" onClick=\"clearMediaInputField('mediaFiles3')\" /></td>" +
-"	      </tr>" +
-"	      <tr>" +
-"	          <td><label for=\"mediaFiles4\">Media file #4:</label></td>" +
-"	          <td><input id=\"mediaFiles4\" class=\"gwt-Button\" type=\"file\" size=\"80\" name=\"datafile\" /><input id=\"clear_media_files4\" type=\"button\" class=\"gwt-Button\" value=\"Clear\" onClick=\"clearMediaInputField('mediaFiles4')\" /></td>" +
-"	      </tr>" +
-"	      <tr>" +
-"	          <td><label for=\"mediaFiles5\">Media file #5:</label></td>" +
-"	          <td><input id=\"mediaFiles5\" class=\"gwt-Button\" type=\"file\" size=\"80\" name=\"datafile\" /><input id=\"clear_media_files5\" type=\"button\" class=\"gwt-Button\" value=\"Clear\" onClick=\"clearMediaInputField('mediaFiles5')\" /></td>" +
-"	      </tr>" +
-"	      <tr>" +
-"	          <td><label for=\"mediaFiles6\">Media file #6:</label></td>" +
-"	          <td><input id=\"mediaFiles6\" class=\"gwt-Button\" type=\"file\" size=\"80\" name=\"datafile\" /><input id=\"clear_media_files6\" type=\"button\" class=\"gwt-Button\" value=\"Clear\" onClick=\"clearMediaInputField('mediaFiles6')\" /></td>" +
-"	      </tr>" +
-"	      <![endif]-->\n" +
-"	  	<tr>" +
-"	  		<td><input type=\"submit\" name=\"button\" class=\"gwt-Button\" value=\"Upload Form\" /></td>" +
-"	  		<td />" +
-"	  	</tr>" +
-"	  </table>\n" +
-"	  </form>" +
-"<p id=\"note\"><b><font color=\"red\">NOTE:</font> String form data will be truncated to " + Long.toString(PersistConsts.DEFAULT_MAX_STRING_LENGTH) +
-" characters.</b>  See ODK Aggregate 1.0 documentation for how to increase (or decrease) this size.</p>" +
-"<p>Media files for the form's logo, images, audio clips and video clips " +
-"(if any) should be in a single directory without subdirectories.</p>" +
-"<p>On ODK Collect 1.1.7 and higher, the file named \"<code>form_logo.png</code>\"," + 
-"if present in the media folder, will be displayed as the form's logo. </p>" +
-"</div>\n";
+  "<div style=\"overflow: auto;\"><p id=\"subHeading\"><h2>Upload one form into ODK Aggregate</h2></p>"
+      + "<!--[if true]><p style=\"color: red;\">For a better user experience, use Chrome, Firefox or Safari</p>"
+      + "<![endif] -->"
+      + "<form id=\"ie_backward_compatible_form\""
+      + " accept-charset=\"UTF-8\" method=\"POST\" encoding=\"multipart/form-data\" enctype=\"multipart/form-data\""
+      + " action=\"";// emit the ADDR
+  private static final String UPLOAD_PAGE_BODY_MIDDLE = "\">"
+      + "	  <table id=\"uploadTable\">"
+      + "	  	<tr>"
+      + "	  		<td><label for=\"form_def_file\">Form definition (xml file):</label></td>"
+      + "	  		<td><input id=\"form_def_file\" type=\"file\" size=\"80\" class=\"gwt-Button\""
+      + "	  			name=\"form_def_file\" /></td>"
+      + "	  	</tr>\n"
+      + "	  	<tr>"
+      + "	  		<td><label for=\"mediaFiles\">Optional Media file(s):</label></td>"
+      + "	  		<td><input id=\"mediaFiles\" class=\"gwt-Button\" type=\"file\" size=\"80,20\" name=\"datafile\" multiple /><input id=\"clear_media_files\" type=\"button\" class=\"gwt-Button\" value=\"Clear\" onClick=\"clearMediaInputField('mediaFiles')\" /></td>"
+      + "	  	</tr>"
+      + "	  	<!--[if true]>"
+      + "	      <tr>"
+      + "	          <td><label for=\"mediaFiles2\">Media file #2:</label></td>"
+      + "	          <td><input id=\"mediaFiles2\" class=\"gwt-Button\" type=\"file\" size=\"80\" name=\"datafile\" /><input id=\"clear_media_files2\" type=\"button\" class=\"gwt-Button\" value=\"Clear\" onClick=\"clearMediaInputField('mediaFiles2')\" /></td>"
+      + "	      </tr>"
+      + "	      <tr>"
+      + "	          <td><label for=\"mediaFiles3\">Media file #3:</label></td>"
+      + "	          <td><input id=\"mediaFiles3\" class=\"gwt-Button\" type=\"file\" size=\"80\" name=\"datafile\" /><input id=\"clear_media_files3\" type=\"button\" class=\"gwt-Button\" value=\"Clear\" onClick=\"clearMediaInputField('mediaFiles3')\" /></td>"
+      + "	      </tr>"
+      + "	      <tr>"
+      + "	          <td><label for=\"mediaFiles4\">Media file #4:</label></td>"
+      + "	          <td><input id=\"mediaFiles4\" class=\"gwt-Button\" type=\"file\" size=\"80\" name=\"datafile\" /><input id=\"clear_media_files4\" type=\"button\" class=\"gwt-Button\" value=\"Clear\" onClick=\"clearMediaInputField('mediaFiles4')\" /></td>"
+      + "	      </tr>"
+      + "	      <tr>"
+      + "	          <td><label for=\"mediaFiles5\">Media file #5:</label></td>"
+      + "	          <td><input id=\"mediaFiles5\" class=\"gwt-Button\" type=\"file\" size=\"80\" name=\"datafile\" /><input id=\"clear_media_files5\" type=\"button\" class=\"gwt-Button\" value=\"Clear\" onClick=\"clearMediaInputField('mediaFiles5')\" /></td>"
+      + "	      </tr>"
+      + "	      <tr>"
+      + "	          <td><label for=\"mediaFiles6\">Media file #6:</label></td>"
+      + "	          <td><input id=\"mediaFiles6\" class=\"gwt-Button\" type=\"file\" size=\"80\" name=\"datafile\" /><input id=\"clear_media_files6\" type=\"button\" class=\"gwt-Button\" value=\"Clear\" onClick=\"clearMediaInputField('mediaFiles6')\" /></td>"
+      + "	      </tr>"
+      + "	      <![endif]-->\n"
+      + "	  	<tr>"
+      + "	  		<td><input type=\"submit\" name=\"button\" class=\"gwt-Button\" value=\"Upload Form\" /></td>"
+      + "	  		<td />"
+      + "	  	</tr>"
+      + "	  </table>\n"
+      + "	  </form>"
+      + "<p>Media files for the form's logo, images, audio clips and video clips "
+      + "(if any) should be in a single directory without subdirectories.</p>"
+      + "<br><br>"
+      + "<p id=\"note\"><b><font color=\"red\">NOTE:</font> If the form definition contains string answers the string data will be truncated to "
+      + Long.toString(PersistConsts.DEFAULT_MAX_STRING_LENGTH)
+      + " characters.</b>  See ODK Aggregate 1.0 documentation for how to increase (or decrease) this size.</p>"
+      + "<br>"
+      + "<p>On ODK Collect 1.1.7 and higher, the file named \"<code>form_logo.png</code>\","
+      + "if present in the media folder, will be displayed as the form's logo. </p>" + "</div>\n";
 
   /**
    * Title for generated webpage to obtain title
@@ -143,6 +138,7 @@ public class FormUploadServlet extends ServletUtilBase {
   private static final String TITLE_OF_THE_XFORM = "Title of the Xform:";
 
   private static final Log logger = LogFactory.getLog(FormUploadServlet.class);
+
   /**
    * Handler for HTTP Get request to create xform upload page
    * 
@@ -152,23 +148,28 @@ public class FormUploadServlet extends ServletUtilBase {
   @Override
   public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 
-	CallingContext cc = ContextFactory.getCallingContext(this, req);
+    CallingContext cc = ContextFactory.getCallingContext(this, req);
 
-	StringBuilder headerString = new StringBuilder();
-	headerString.append("<script type=\"application/javascript\" src=\"");
-	headerString.append(cc.getWebApplicationURL(UPLOAD_SCRIPT_RESOURCE));
-	headerString.append("\"></script>");
-	headerString.append("<link rel=\"stylesheet\" type=\"text/css\" href=\"");
-	headerString.append(cc.getWebApplicationURL(UPLOAD_STYLE_RESOURCE));
-	headerString.append("\" />");
-	headerString.append("<link rel=\"stylesheet\" type=\"text/css\" href=\"");
-	headerString.append(cc.getWebApplicationURL(UPLOAD_BUTTON_STYLE_RESOURCE));
-	headerString.append("\" />");
-	beginBasicHtmlResponse(TITLE_INFO, headerString.toString(), resp, cc );// header info
-	PrintWriter out = resp.getWriter();
-	out.write(UPLOAD_PAGE_BODY_START);
-	out.write(cc.getWebApplicationURL(ADDR));
-	out.write(UPLOAD_PAGE_BODY_MIDDLE);
+    StringBuilder headerString = new StringBuilder();
+    headerString.append("<script type=\"application/javascript\" src=\"");
+    headerString.append(cc.getWebApplicationURL(ServletConsts.UPLOAD_SCRIPT_RESOURCE));
+    headerString.append("\"></script>");
+    headerString.append("<link rel=\"stylesheet\" type=\"text/css\" href=\"");
+    headerString.append(cc.getWebApplicationURL(ServletConsts.UPLOAD_STYLE_RESOURCE));
+    headerString.append("\" />");
+    headerString.append("<link rel=\"stylesheet\" type=\"text/css\" href=\"");
+    headerString.append(cc.getWebApplicationURL(ServletConsts.UPLOAD_BUTTON_STYLE_RESOURCE));
+    headerString.append("\" />");
+    headerString.append("<link rel=\"stylesheet\" type=\"text/css\" href=\"");
+    headerString.append(cc.getWebApplicationURL(ServletConsts.AGGREGATE_STYLE));
+    headerString.append("\" />");
+    
+    // header info
+    beginBasicHtmlResponse(TITLE_INFO, headerString.toString(), resp, cc);
+    PrintWriter out = resp.getWriter();
+    out.write(UPLOAD_PAGE_BODY_START);
+    out.write(cc.getWebApplicationURL(ADDR));
+    out.write(UPLOAD_PAGE_BODY_MIDDLE);
     finishBasicHtmlResponse(resp);
   }
 
@@ -181,36 +182,30 @@ public class FormUploadServlet extends ServletUtilBase {
    */
   @Override
   public void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-	CallingContext cc = ContextFactory.getCallingContext(this, req);
+    CallingContext cc = ContextFactory.getCallingContext(this, req);
 
     resp.setContentType(HtmlConsts.RESP_TYPE_HTML);
 
-	/*
-	 * OAuth application-layer support for ODK Build publishing.
-	 * This is broken with spring security (which is outside the app layer).
-	 *  
-    User user = cc.getCurrentUser();
-	if (user instanceof org.opendatakit.common.security.gae.UserImpl) {
-      // We are in app engine
-
-      String authParam = getParameter(req, ServletConsts.AUTHENTICATION);
-
-      if (authParam != null && authParam.equalsIgnoreCase(ServletConsts.AUTHENTICATION_OAUTH)) {
-        // Try OAuth authentication
-        try {
-          user = ((org.opendatakit.common.security.gae.UserServiceImpl) cc.getUserService()).getCurrentOAuthUser();
-          if (user.isAnonymous()) {
-            resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, ErrorConsts.OAUTH_ERROR);
-            return;
-          }
-        } catch (OAuthRequestException e) {
-          resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, ErrorConsts.OAUTH_ERROR
-              + "\n Reason: " + e.getLocalizedMessage());
-          return;
-        }
-      }
-    }
-    */
+    /*
+     * OAuth application-layer support for ODK Build publishing. This is broken
+     * with spring security (which is outside the app layer).
+     * 
+     * User user = cc.getCurrentUser(); if (user instanceof
+     * org.opendatakit.common.security.gae.UserImpl) { // We are in app engine
+     * 
+     * String authParam = getParameter(req, ServletConsts.AUTHENTICATION);
+     * 
+     * if (authParam != null &&
+     * authParam.equalsIgnoreCase(ServletConsts.AUTHENTICATION_OAUTH)) { // Try
+     * OAuth authentication try { user =
+     * ((org.opendatakit.common.security.gae.UserServiceImpl)
+     * cc.getUserService()).getCurrentOAuthUser(); if (user.isAnonymous()) {
+     * resp.sendError(HttpServletResponse.SC_UNAUTHORIZED,
+     * ErrorConsts.OAUTH_ERROR); return; } } catch (OAuthRequestException e) {
+     * resp.sendError(HttpServletResponse.SC_UNAUTHORIZED,
+     * ErrorConsts.OAUTH_ERROR + "\n Reason: " + e.getLocalizedMessage());
+     * return; } } }
+     */
 
     // verify request is multipart
     if (!ServletFileUpload.isMultipartContent(req)) {
@@ -250,14 +245,16 @@ public class FormUploadServlet extends ServletUtilBase {
 
       try {
         parser = new FormParserForJavaRosa(formName, formXmlData, inputXml, xmlFileName,
-        									uploadedFormItems, warnings, cc);
+            uploadedFormItems, warnings, cc);
         logger.info("Upload form: " + parser.getFormId());
         // GAE requires some settle time before these entries will be
-        // accurately retrieved. Do not re-fetch the form after it has been uploaded.
+        // accurately retrieved. Do not re-fetch the form after it has been
+        // uploaded.
         bOk = true;
 
       } catch (ODKFormAlreadyExistsException e) {
-        resp.sendError(HttpServletResponse.SC_CONFLICT, ErrorConsts.FORM_WITH_ODKID_EXISTS + "\n" + e.getMessage());
+        resp.sendError(HttpServletResponse.SC_CONFLICT, ErrorConsts.FORM_WITH_ODKID_EXISTS + "\n"
+            + e.getMessage());
         return;
       } catch (ODKIncompleteSubmissionData e) {
         switch (e.getReason()) {
@@ -266,7 +263,7 @@ public class FormUploadServlet extends ServletUtilBase {
           return;
         case ID_MALFORMED:
           resp.sendError(HttpServletResponse.SC_BAD_REQUEST, ErrorConsts.JAVA_ROSA_PARSING_PROBLEM
-        		  + "\n" + e.getMessage());
+              + "\n" + e.getMessage());
           return;
         case ID_MISSING:
           resp.sendError(HttpServletResponse.SC_BAD_REQUEST, ErrorConsts.MISSING_FORM_ID);
@@ -276,7 +273,7 @@ public class FormUploadServlet extends ServletUtilBase {
           return;
         case BAD_JR_PARSE:
           resp.sendError(HttpServletResponse.SC_BAD_REQUEST, ErrorConsts.JAVA_ROSA_PARSING_PROBLEM
-        		  + "\n" + e.getMessage());
+              + "\n" + e.getMessage());
           return;
         default:
           // just move on
@@ -295,10 +292,11 @@ public class FormUploadServlet extends ServletUtilBase {
         resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ErrorConsts.PARSING_PROBLEM
             + "\n" + e.getMessage());
       } catch (ODKParseException e) {
-        // unfortunately, the underlying javarosa utility swallows the parsing error.
+        // unfortunately, the underlying javarosa utility swallows the parsing
+        // error.
         e.printStackTrace();
-        resp.sendError(HttpServletResponse.SC_BAD_REQUEST, ErrorConsts.PARSING_PROBLEM + "\n"
-            + e.getMessage());
+        resp.sendError(HttpServletResponse.SC_BAD_REQUEST,
+            ErrorConsts.PARSING_PROBLEM + "\n" + e.getMessage());
       }
 
     } catch (FileUploadException e) {
@@ -314,24 +312,24 @@ public class FormUploadServlet extends ServletUtilBase {
       PrintWriter out = resp.getWriter();
       out.write(HtmlConsts.HTML_OPEN);
       out.write(HtmlConsts.BODY_OPEN);
-      if ( warnings.length() != 0 ) {
-    	  out.write("<p>Form uploaded with warnings. There are value fields in the form that do not " +
-    	  		"have <code>&lt;bind/&gt;</code> declarations or those <code>&lt;bind/&gt;</code> " +
-    	  		"declarations do not have a <code>type</code> attribute that " +
-    	  		"identifies the data type of that field (e.g., boolean, int, decimal, date, dateTime, time, string, " +
-    	  		"select1, select, barcode, geopoint or binary).</p>" +
-    	  		"<p><b>All these value fields have been declared as string values.</b> It will use " +
-    	  		"lexical ordering on those fields.  E.g., the value 100 will be considered less than 11.</p>" +
-        	  	"<p><font color=\"red\">If these value fields hold date, dateTime, time or numeric data (e.g., decimal or int), then " +
-        	  	"ODK Aggregate will produce erroneous sortings and erroneous filtering results against those value fields.</font></p>" +
-    	  		"<table><th><td>Field Name</td></th>");
-    	  out.write(warnings.toString());
-    	  out.write("</table>");
+      if (warnings.length() != 0) {
+        out.write("<p>Form uploaded with warnings. There are value fields in the form that do not "
+            + "have <code>&lt;bind/&gt;</code> declarations or those <code>&lt;bind/&gt;</code> "
+            + "declarations do not have a <code>type</code> attribute that "
+            + "identifies the data type of that field (e.g., boolean, int, decimal, date, dateTime, time, string, "
+            + "select1, select, barcode, geopoint or binary).</p>"
+            + "<p><b>All these value fields have been declared as string values.</b> It will use "
+            + "lexical ordering on those fields.  E.g., the value 100 will be considered less than 11.</p>"
+            + "<p><font color=\"red\">If these value fields hold date, dateTime, time or numeric data (e.g., decimal or int), then "
+            + "ODK Aggregate will produce erroneous sortings and erroneous filtering results against those value fields.</font></p>"
+            + "<table><th><td>Field Name</td></th>");
+        out.write(warnings.toString());
+        out.write("</table>");
       } else {
-    	  out.write("<p>Successful form upload.</p>");
+        out.write("<p>Successful form upload.</p>");
       }
       out.write("<p>Click ");
-    	  
+
       out.write(HtmlUtil.createHref(cc.getWebApplicationURL(ADDR), "here"));
       out.write(" to return to add new form page.</p>");
       out.write(HtmlConsts.BODY_CLOSE);
@@ -339,13 +337,13 @@ public class FormUploadServlet extends ServletUtilBase {
     }
   }
 
-  private void createTitleQuestionWebpage(HttpServletResponse resp,
-      String formXml, String xmlFileName, CallingContext cc) throws IOException {
+  private void createTitleQuestionWebpage(HttpServletResponse resp, String formXml,
+      String xmlFileName, CallingContext cc) throws IOException {
     beginBasicHtmlResponse(OBTAIN_TITLE_INFO, resp, true, cc); // header info
 
     PrintWriter out = resp.getWriter();
-    out.write(HtmlUtil.createFormBeginTag(cc.getWebApplicationURL(FormUploadServlet.ADDR), HtmlConsts.MULTIPART_FORM_DATA,
-        HtmlConsts.POST));
+    out.write(HtmlUtil.createFormBeginTag(cc.getWebApplicationURL(FormUploadServlet.ADDR),
+        HtmlConsts.MULTIPART_FORM_DATA, HtmlConsts.POST));
     out.write(TITLE_OF_THE_XFORM + HtmlConsts.LINE_BREAK);
     out.write(HtmlUtil.createInput(HtmlConsts.INPUT_TYPE_TEXT, ServletConsts.FORM_NAME_PRAM, null));
     out.write(HtmlConsts.LINE_BREAK + HtmlConsts.LINE_BREAK);

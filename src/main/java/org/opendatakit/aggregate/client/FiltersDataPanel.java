@@ -26,7 +26,7 @@ import org.opendatakit.aggregate.client.filter.FilterGroup;
 import org.opendatakit.aggregate.client.filter.RowFilter;
 import org.opendatakit.aggregate.client.submission.Column;
 import org.opendatakit.aggregate.client.widgets.AddFilterButton;
-import org.opendatakit.aggregate.client.widgets.CopyFilterGroupButton;
+import org.opendatakit.aggregate.client.widgets.SaveAsFilterGroupButton;
 import org.opendatakit.aggregate.client.widgets.DeleteFilterButton;
 import org.opendatakit.aggregate.client.widgets.MetadataCheckBox;
 import org.opendatakit.aggregate.client.widgets.RemoveFilterGroupButton;
@@ -92,7 +92,7 @@ public class FiltersDataPanel extends ScrollPanel {
 				return;
 			}
 
-			CopyFilterGroupButton copyButton = new CopyFilterGroupButton(parentSubTab);
+			SaveAsFilterGroupButton copyButton = new SaveAsFilterGroupButton(parentSubTab);
 			copyButton.setEnabled(false);
 
 			RemoveFilterGroupButton removeButton = new RemoveFilterGroupButton(parentSubTab);

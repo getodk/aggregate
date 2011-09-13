@@ -18,6 +18,7 @@ package org.opendatakit.aggregate.client.form;
 
 import java.util.ArrayList;
 
+import org.opendatakit.aggregate.client.filter.FilterGroup;
 import org.opendatakit.common.security.client.exception.AccessDeniedException;
 
 import com.google.gwt.user.client.rpc.RemoteService;
@@ -39,6 +40,8 @@ public interface FormService extends RemoteService {
   ArrayList<ExportSummary> getExports() throws AccessDeniedException;
  
   Boolean createCsv(String formId, String filterUri) throws AccessDeniedException;
+  
+  Boolean createCsvFromFilter(FilterGroup group) throws AccessDeniedException;
   
   KmlSettings getPossibleKmlSettings(String formId) throws AccessDeniedException;
   

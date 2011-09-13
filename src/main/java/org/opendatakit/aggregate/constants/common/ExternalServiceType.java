@@ -40,4 +40,8 @@ public enum ExternalServiceType implements Serializable {
     return serviceName;
   }
 
+  public String toString() {
+    return serviceName;
+  }
+  
 }

@@ -72,9 +72,9 @@ public final class VisualizationPopup extends AbstractPopupBase {
 
   private static final String TABULATION_TXT = "<h4 id=\"form_name\">Tabulation Method:</h4>";
   private static final String TALLY_EXP_BEGIN = "COUNT: Count occurences of Answer Values from ";
-  private static final String TALLY_EXP_END = ".";
-  private static final String SUM_COLUMNS_TXT = "SUM: Sum numeric values from column: (displayed left)";
-  private static final String SUM_COLUMNS_BEGIN = "[e.g. How many ";
+  private static final String TALLY_EXP_END = ". (selected column above)";
+  private static final String SUM_COLUMNS_TXT = "SUM: Sum numeric values from column: ";
+  private static final String SUM_COLUMNS_BEGIN = " grouped by selected column above [e.g. How many ";
   private static final String SUM_COLUMNS_MIDDLE = " per ";
   private static final String SUM_COLUMNS_END = "?]";
 
@@ -89,14 +89,16 @@ public final class VisualizationPopup extends AbstractPopupBase {
   private static int COLUMN_LIST = 3;
   private static int BUTTON = 5;
   
-  private static int CLOSE = 5;
+  private static int CLOSE = 4;
   
   private static int VALUE_TEXT = 0;
-  private static int TALLY_CHOICE = 1;
+  private static int VALUE_LIST = 1;
   
-  private static int SUM_CHOICE = 1;
-  private static int SUM_CHOICE_COLUMN = 2;
-  private static int SUM_CHOICE_TXT = 3;
+  private static int TALLY_CHOICE = 0;
+  
+  private static int SUM_CHOICE = 0;
+  private static int SUM_CHOICE_COLUMN = 1;
+  private static int SUM_CHOICE_TXT = 2;
   
  
 
@@ -179,15 +181,19 @@ public final class VisualizationPopup extends AbstractPopupBase {
     // sent when the radio button is cleared as a side effect of another in the
     // group being clicked.
 
+    FlexTable tallyTable = new FlexTable();
     tallyOccurRadio = new RadioButton(RADIO_GROUP, BasicConsts.EMPTY_STRING);
     tallyOccurRadio.addClickHandler(new RadioChangeClickHandler());
     tallyOccurRadio.setValue(true);
+    tallyTable.setWidget(0, TALLY_CHOICE, tallyOccurRadio);
 
+    FlexTable sumTable = new FlexTable();
     sumColumnsRadio = new RadioButton(RADIO_GROUP, SUM_COLUMNS_TXT);
     sumColumnsRadio.addClickHandler(new RadioChangeClickHandler());
-
     sumRadioTxt = new Label(BasicConsts.EMPTY_STRING);
-    
+    sumTable.setWidget(1, SUM_CHOICE, sumColumnsRadio);
+    sumTable.setWidget(1, SUM_CHOICE_COLUMN, dataList);
+    sumTable.setWidget(1, SUM_CHOICE_TXT, sumRadioTxt);
     
     executeButton = new AggregateButton(BasicConsts.EMPTY_STRING, "TOOLTIP");
     executeButton.addClickHandler(new ExecuteVisualization());
@@ -200,20 +206,18 @@ public final class VisualizationPopup extends AbstractPopupBase {
     typeControlBar.setWidget(0, BUTTON, executeButton);
     
     FlexTable topSelectionRow = new FlexTable();
-    topSelectionRow.addStyleName("visualiztion_popup_header");
+    topSelectionRow.addStyleName("stretch_popup_header");
     topSelectionRow.setWidget(0, 0, typeControlBar);
     topSelectionRow.setWidget(0, CLOSE, new ClosePopupButton(this));
     topSelectionRow.getCellFormatter().addStyleName(0, CLOSE, "popup_close_cell");
  
     FlexTable tabulationBar = new FlexTable();
     tabulationBar.setHTML(0, VALUE_TEXT, TABULATION_TXT);
-    tabulationBar.setWidget(0, TALLY_CHOICE, tallyOccurRadio);
-    tabulationBar.setWidget(1, SUM_CHOICE, sumColumnsRadio);
-    tabulationBar.setWidget(1, SUM_CHOICE_COLUMN, dataList);
-    tabulationBar.setWidget(1, SUM_CHOICE_TXT, sumRadioTxt);
+    tabulationBar.setWidget(0, VALUE_LIST, tallyTable);
+    tabulationBar.setWidget(1, VALUE_LIST, sumTable);
 
     FlexTable bottomSelectionRow = new FlexTable();
-    bottomSelectionRow.addStyleName("visualiztion_popup_header");
+    bottomSelectionRow.addStyleName("stretch_popup_header");
     bottomSelectionRow.setWidget(0, 0, tabulationBar);
     
     // setup the window size

@@ -84,13 +84,6 @@ public class SubmissionServlet extends ServletUtilBase {
    * Title for generated webpage
    */
   private static final String TITLE = "Submission Upload";
-
-  /**
-   * Script path to include...
-   */
-  private static final String UPLOAD_SCRIPT_RESOURCE = "javascript/upload_control.js";
-  private static final String UPLOAD_STYLE_RESOURCE = "stylesheets/upload.css";
-  private static final String UPLOAD_BUTTON_STYLE_RESOURCE = "stylesheets/button.css";
   
   private static final String UPLOAD_PAGE_BODY_START = 
 
@@ -173,14 +166,17 @@ public class SubmissionServlet extends ServletUtilBase {
 
    StringBuilder headerString = new StringBuilder();
    headerString.append("<script type=\"application/javascript\" src=\"");
-   headerString.append(cc.getWebApplicationURL(UPLOAD_SCRIPT_RESOURCE));
+   headerString.append(cc.getWebApplicationURL(ServletConsts.UPLOAD_SCRIPT_RESOURCE));
    headerString.append("\"></script>");
 	headerString.append("<link rel=\"stylesheet\" type=\"text/css\" href=\"");
-	headerString.append(cc.getWebApplicationURL(UPLOAD_STYLE_RESOURCE));
+	headerString.append(cc.getWebApplicationURL(ServletConsts.UPLOAD_STYLE_RESOURCE));
 	headerString.append("\" />");
 	headerString.append("<link rel=\"stylesheet\" type=\"text/css\" href=\"");
-	headerString.append(cc.getWebApplicationURL(UPLOAD_BUTTON_STYLE_RESOURCE));
+	headerString.append(cc.getWebApplicationURL(ServletConsts.UPLOAD_BUTTON_STYLE_RESOURCE));
 	headerString.append("\" />");
+   headerString.append("<link rel=\"stylesheet\" type=\"text/css\" href=\"");
+   headerString.append(cc.getWebApplicationURL(ServletConsts.AGGREGATE_STYLE));
+   
    beginBasicHtmlResponse(TITLE, headerString.toString(), resp, cc );// header info
    PrintWriter out = resp.getWriter();
    out.write(UPLOAD_PAGE_BODY_START);

@@ -55,7 +55,7 @@ public class RepeatPopup extends AbstractPopupBase {
     panel.add(new ClosePopupButton(this));
     
     ScrollPanel scroll = new ScrollPanel(panel);
-    scroll.setPixelSize((Window.getClientWidth() / 2),(Window.getClientHeight() / 2));
+    scroll.setPixelSize((Window.getClientWidth() * 3 / 4),(Window.getClientHeight() * 3 / 4));
     setWidget(scroll);
   }
   

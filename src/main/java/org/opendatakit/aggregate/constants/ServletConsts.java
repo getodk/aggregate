@@ -136,5 +136,16 @@ public final class ServletConsts {
   public static final String CHECK_INTERVAL_PARAM = "checkIntervalMilliseconds";
 
   public static final String START_DATE = "startDate";
+
+  /**
+   * Script path to include...
+   */
+  public static final String UPLOAD_SCRIPT_RESOURCE = "javascript/upload_control.js";
+
+  public static final String UPLOAD_STYLE_RESOURCE = "stylesheets/upload.css";
+
+  public static final String UPLOAD_BUTTON_STYLE_RESOURCE = "stylesheets/button.css";
+
+  public static final String AGGREGATE_STYLE = "AggregateUI.css";
   
 }

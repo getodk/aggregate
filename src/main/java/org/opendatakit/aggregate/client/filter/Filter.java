@@ -21,10 +21,10 @@ import java.io.Serializable;
 import org.opendatakit.aggregate.constants.common.RowOrCol;
 import org.opendatakit.aggregate.constants.common.UIConsts;
 
-public class Filter implements Serializable {
+public abstract class Filter implements Serializable {
 
   private static final long serialVersionUID = -5453093733004634508L;
-  private String uri; // unique identifier
+  protected String uri; // unique identifier
   private RowOrCol rc;
   private Long ordinal; // order to display in filter group
 
@@ -46,7 +46,13 @@ public class Filter implements Serializable {
   public Filter(String uri) {
     this.uri = uri;
   }
-
+  
+  /**
+   * Used to clear the URI in the elements so it can be Saved As properly in the
+   * server, as the server creates a new entity when uri is set to URI_DEFAULT
+   */
+  public abstract void resetUriToDefault();
+  
   public String getUri() {
     return uri;
   }

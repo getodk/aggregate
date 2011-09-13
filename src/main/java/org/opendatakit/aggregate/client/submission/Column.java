@@ -26,11 +26,11 @@ public class Column implements Serializable {
    * Serialization Identifier
    */
   private static final long serialVersionUID = -5276405259406410364L;
- 
-  // unique identifier for DB if column filter 
+
+  // unique identifier for DB if column filter
   // NOTE: unneeded for row filter
-  private String uri; 
- 
+  private String uri;
+
   private String displayHeader;
   private String columnEncoding;
   private Long geopointColumnCode;
@@ -38,16 +38,16 @@ public class Column implements Serializable {
 
   public Column() {
     this.uri = UIConsts.URI_DEFAULT;
-	 this.uiDisplayType = UIDisplayType.TEXT;
+    this.uiDisplayType = UIDisplayType.TEXT;
   }
-  
+
   public Column(String uri, String displayHeader, String columnName, UIDisplayType displayType) {
     this.uri = uri;
     this.displayHeader = displayHeader;
     this.columnEncoding = columnName;
     this.uiDisplayType = displayType;
   }
-  
+
   public Column(String displayHeader, String columnName, UIDisplayType displayType) {
     this(UIConsts.URI_DEFAULT, displayHeader, columnName, displayType);
   }
@@ -59,16 +59,23 @@ public class Column implements Serializable {
     this.geopointColumnCode = geopointColumnCode;
     this.uiDisplayType = UIDisplayType.TEXT;
   }
-  
-  public Column( String displayHeader, String columnName, Long geopointColumnCode) {
+
+  public Column(String displayHeader, String columnName, Long geopointColumnCode) {
     this(UIConsts.URI_DEFAULT, displayHeader, columnName, geopointColumnCode);
   }
 
-  
+  /**
+   * Used to clear the URI in the elements so it can be Saved As properly in the
+   * server, as the server creates a new entity when uri is set to URI_DEFAULT
+   */
+  public void resetUriToDefault() {
+    uri = UIConsts.URI_DEFAULT;
+  }
+
   public String getUri() {
     return uri;
   }
-  
+
   public String getDisplayHeader() {
     return displayHeader;
   }
@@ -76,15 +83,15 @@ public class Column implements Serializable {
   public String getColumnEncoding() {
     return columnEncoding;
   }
-  
+
   public Long getGeopointColumnCode() {
     return geopointColumnCode;
   }
-  
+
   public UIDisplayType getUiDisplayType() {
-	return uiDisplayType;
+    return uiDisplayType;
   }
-  
+
   /**
    * @see java.lang.Object#equals(java.lang.Object)
    */
@@ -93,14 +100,17 @@ public class Column implements Serializable {
     if (!(obj instanceof Column)) {
       return false;
     }
-    
-    
+
     Column other = (Column) obj;
     return (uri == null ? (other.uri == null) : (uri.equals(other.uri)))
-        && (displayHeader == null ? (other.displayHeader == null) : (displayHeader.equals(other.displayHeader)))
-        && (columnEncoding == null ? (other.columnEncoding == null) : (columnEncoding.equals(other.columnEncoding)))
-        && (geopointColumnCode == null ? (other.geopointColumnCode == null) : (geopointColumnCode.equals(other.geopointColumnCode)))
-        && (uiDisplayType == null ? (other.uiDisplayType == null) : (uiDisplayType.equals(other.uiDisplayType)));
+        && (displayHeader == null ? (other.displayHeader == null) : (displayHeader
+            .equals(other.displayHeader)))
+        && (columnEncoding == null ? (other.columnEncoding == null) : (columnEncoding
+            .equals(other.columnEncoding)))
+        && (geopointColumnCode == null ? (other.geopointColumnCode == null) : (geopointColumnCode
+            .equals(other.geopointColumnCode)))
+        && (uiDisplayType == null ? (other.uiDisplayType == null) : (uiDisplayType
+            .equals(other.uiDisplayType)));
   }
 
   /**
@@ -117,7 +127,7 @@ public class Column implements Serializable {
       hashCode += columnEncoding.hashCode();
     if (geopointColumnCode != null)
       hashCode += geopointColumnCode.hashCode();
-    if(uiDisplayType != null)
+    if (uiDisplayType != null)
       hashCode += uiDisplayType.hashCode();
     return hashCode;
   }

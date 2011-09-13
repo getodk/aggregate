@@ -16,6 +16,7 @@
 
 package org.opendatakit.aggregate.client.widgets;
 
+import org.opendatakit.aggregate.client.filter.FilterGroup;
 import org.opendatakit.aggregate.client.popups.ExportPopup;
 
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -28,17 +29,23 @@ public final class ExportButton extends AggregateButton implements ClickHandler 
   private static final String HELP_BALLOON_TXT = "Export the data to a CSV or KML file.";
 
   private final String formId;
+  private final FilterGroup selectedFilterGroup;
 
   public ExportButton(String formId) {
+    this(formId, null);
+  }
+  
+  public ExportButton(String formId, FilterGroup selectedFilterGroup) {
     super(BUTTON_TXT, TOOLTIP_TEXT, HELP_BALLOON_TXT);
     this.formId = formId;
+    this.selectedFilterGroup = selectedFilterGroup;
   }
-
+  
   @Override
   public void onClick(ClickEvent event) {
     super.onClick(event);
     
-    ExportPopup popup = new ExportPopup(formId);
+    ExportPopup popup = new ExportPopup(formId, selectedFilterGroup);
     popup.setPopupPositionAndShow(popup.getPositionCallBack());
   }
 }
