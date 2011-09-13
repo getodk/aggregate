@@ -73,7 +73,7 @@ public class FilterNavigationTable extends FlexTable {
     VisualizationButton visualizeButton = new VisualizationButton(filterSubTab);
     actionTable.setWidget(0, 0, visualizeButton);
 
-    ExportButton exportButton = new ExportButton(filterGroup.getFormId());
+    ExportButton exportButton = new ExportButton(filterGroup.getFormId(), filterGroup);
     actionTable.setWidget(0, 1, exportButton);
 
     PublishButton publishButton = new PublishButton(filterGroup.getFormId());

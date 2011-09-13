@@ -131,7 +131,7 @@ public class SubmissionFilterGroup extends CommonFieldsBase {
     }
     filters.addAll(filter);
   }
-  
+
   public FilterGroup transform() {
     FilterGroup filterGroup = new FilterGroup(this.getUri());
 
@@ -150,45 +150,46 @@ public class SubmissionFilterGroup extends CommonFieldsBase {
     Datastore ds = cc.getDatastore();
     User user = cc.getCurrentUser();
 
-    // before we persist get a list of all the filters that existed before the persist
+    // before we persist get a list of all the filters that existed before the
+    // persist
     List<SubmissionFilter> oldFilters = SubmissionFilter.getFilterList(this.getUri(), cc);
 
     // remove all the old filters that are no longer part of the filterGroup
     // TODO: redo so that we don't delete to just put back, need an equals check
-    for(SubmissionFilter oldFilter : oldFilters){
-        oldFilter.delete(cc);
+    for (SubmissionFilter oldFilter : oldFilters) {
+      oldFilter.delete(cc);
     }
 
     // persist filter group
     ds.putEntity(this, user);
-    
-    if(filters != null) {
-      
+
+    if (filters != null) {
+
       // persist filters
-      for(SubmissionFilter filter : filters) {
+      for (SubmissionFilter filter : filters) {
         filter.persist(cc);
       }
-      
+
     } else {
       // no filters are in this filter group so remove all old filters
-      for(SubmissionFilter filter : oldFilters){
+      for (SubmissionFilter filter : oldFilters) {
         filter.delete(cc);
       }
     }
   }
-  
+
   public void delete(CallingContext cc) throws ODKDatastoreException {
     Datastore ds = cc.getDatastore();
     User user = cc.getCurrentUser();
-    
-    if(filters != null) {
-      for(SubmissionFilter filter : filters){
+
+    if (filters != null) {
+      for (SubmissionFilter filter : filters) {
         filter.delete(cc);
       }
-    }    
+    }
     ds.deleteEntity(this.getEntityKey(), user);
   }
-  
+
   private static SubmissionFilterGroup relation = null;
 
   private static synchronized final SubmissionFilterGroup assertRelation(CallingContext cc)
@@ -210,7 +211,15 @@ public class SubmissionFilterGroup extends CommonFieldsBase {
     try {
       SubmissionFilterGroup relation = assertRelation(cc);
       CommonFieldsBase entity = cc.getDatastore().getEntity(relation, uri, cc.getCurrentUser());
-      return (SubmissionFilterGroup) entity;
+      
+      if (entity instanceof SubmissionFilterGroup) {
+        SubmissionFilterGroup filterGroup = (SubmissionFilterGroup) entity;
+        filterGroup.addFilters(SubmissionFilter.getFilterList(uri, cc));
+        return filterGroup;
+      } else {
+        return null;
+      }
+
     } catch (ODKDatastoreException e) {
       throw new ODKEntityNotFoundException(e);
     }
@@ -226,7 +235,9 @@ public class SubmissionFilterGroup extends CommonFieldsBase {
     if (uri.equals(UIConsts.URI_DEFAULT)) {
       subFilterGroup = cc.getDatastore().createEntityUsingRelation(relation, cc.getCurrentUser());
     } else {
-      subFilterGroup = getFilterGroup(uri, cc);
+      CommonFieldsBase entity = cc.getDatastore().getEntity(relation, uri, cc.getCurrentUser());
+      subFilterGroup = (SubmissionFilterGroup) entity;
+      ;
     }
 
     subFilterGroup.setName(filterGroup.getName());
@@ -239,19 +250,19 @@ public class SubmissionFilterGroup extends CommonFieldsBase {
 
     return subFilterGroup;
   }
-  
+
   public static final List<SubmissionFilterGroup> getFilterGroupList(String formId,
       CallingContext cc) throws ODKDatastoreException {
     SubmissionFilterGroup relation = assertRelation(cc);
     Query query = cc.getDatastore().createQuery(relation, cc.getCurrentUser());
     query.addFilter(SubmissionFilterGroup.FORM_ID_PROPERTY, FilterOperation.EQUAL, formId);
-    
+
     List<SubmissionFilterGroup> filterGroupList = new ArrayList<SubmissionFilterGroup>();
 
     List<? extends CommonFieldsBase> results = query.executeQuery();
     for (CommonFieldsBase cb : results) {
-      if(cb instanceof SubmissionFilterGroup) {
-        SubmissionFilterGroup tmp = (SubmissionFilterGroup)cb;
+      if (cb instanceof SubmissionFilterGroup) {
+        SubmissionFilterGroup tmp = (SubmissionFilterGroup) cb;
         List<SubmissionFilter> filters = SubmissionFilter.getFilterList(tmp.getUri(), cc);
         tmp.addFilters(filters);
         filterGroupList.add(tmp);

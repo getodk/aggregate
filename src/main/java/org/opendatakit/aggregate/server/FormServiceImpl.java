@@ -25,6 +25,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 
 import org.opendatakit.aggregate.ContextFactory;
+import org.opendatakit.aggregate.client.filter.FilterGroup;
 import org.opendatakit.aggregate.client.form.ExportSummary;
 import org.opendatakit.aggregate.client.form.FormSummary;
 import org.opendatakit.aggregate.client.form.KmlSettings;
@@ -36,6 +37,7 @@ import org.opendatakit.aggregate.constants.format.FormTableConsts;
 import org.opendatakit.aggregate.datamodel.FormElementKey;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
+import org.opendatakit.aggregate.filter.SubmissionFilterGroup;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.form.MiscTasks;
 import org.opendatakit.aggregate.form.PersistentResults;
@@ -43,6 +45,7 @@ import org.opendatakit.aggregate.form.PersistentResults.ResultFileInfo;
 import org.opendatakit.aggregate.task.CsvGenerator;
 import org.opendatakit.aggregate.task.KmlGenerator;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+import org.opendatakit.common.security.client.exception.AccessDeniedException;
 import org.opendatakit.common.web.CallingContext;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
@@ -65,32 +68,33 @@ public class FormServiceImpl extends RemoteServiceServlet implements
     try {
       // ensure that Form table exists...
       List<Form> forms = Form.getForms(false, cc);
-      if ( forms.size() == 0 ) return formSummaries;
+      if (forms.size() == 0)
+        return formSummaries;
 
       // get most recent form-deletion statuses
-      Map<String,FormActionStatusTimestamp> formDeletionStatuses = 
-    	  MiscTasks.getFormDeletionStatusTimestampOfAllFormIds(cc);
+      Map<String, FormActionStatusTimestamp> formDeletionStatuses = MiscTasks
+          .getFormDeletionStatusTimestampOfAllFormIds(cc);
 
       // get most recent purge-submissions statuses
-      Map<String,FormActionStatusTimestamp> submissionPurgeStatuses = 
-    	  MiscTasks.getPurgeSubmissionsStatusTimestampOfAllFormIds(cc);
-      
+      Map<String, FormActionStatusTimestamp> submissionPurgeStatuses = MiscTasks
+          .getPurgeSubmissionsStatusTimestampOfAllFormIds(cc);
+
       for (Form form : forms) {
-    	FormSummary summary = form.generateFormSummary(cc);
+        FormSummary summary = form.generateFormSummary(cc);
         Date formLoadDate = summary.getCreationDate();
-    	formSummaries.add(summary);
-        
+        formSummaries.add(summary);
+
         // the form could have been deleted and reloaded...
-        // make sure that the action is after the creation date for 
+        // make sure that the action is after the creation date for
         // this instance of this form id.
         FormActionStatusTimestamp t;
         t = formDeletionStatuses.get(form.getFormId());
-        if ( t != null && t.getTimestamp().after(formLoadDate) ) {
-        	summary.setMostRecentDeletionRequestStatus(t);
+        if (t != null && t.getTimestamp().after(formLoadDate)) {
+          summary.setMostRecentDeletionRequestStatus(t);
         }
         t = submissionPurgeStatuses.get(form.getFormId());
-        if ( t != null && t.getTimestamp().after(formLoadDate) ) {
-        	summary.setMostRecentPurgeSubmissionsRequestStatus(t);
+        if (t != null && t.getTimestamp().after(formLoadDate)) {
+          summary.setMostRecentPurgeSubmissionsRequestStatus(t);
         }
       }
       return formSummaries;
@@ -120,15 +124,15 @@ public class FormServiceImpl extends RemoteServiceServlet implements
         summary.setTimeCompleted(export.getCompletionDate());
 
         // get info about the downloadable file.
-        // null if no file yet.... 
+        // null if no file yet....
         ResultFileInfo info = export.getResultFileInfo(cc);
-        if ( info != null ) {
-        	String linkText = info.unrootedFilename;
-        	if ( linkText == null || linkText.length() == 0) {
-        		linkText = FormTableConsts.DOWNLOAD_LINK_TEXT;
-        	}
-        	String url = HtmlUtil.createHref(info.downloadUrl, linkText);
-        	summary.setResultFile(url);
+        if (info != null) {
+          String linkText = info.unrootedFilename;
+          if (linkText == null || linkText.length() == 0) {
+            linkText = FormTableConsts.DOWNLOAD_LINK_TEXT;
+          }
+          String url = HtmlUtil.createHref(info.downloadUrl, linkText);
+          summary.setResultFile(url);
         }
         exports.add(summary);
       }
@@ -150,13 +154,17 @@ public class FormServiceImpl extends RemoteServiceServlet implements
     CallingContext cc = ContextFactory.getCallingContext(this, req);
 
     try {
-      FormActionStatusTimestamp deletionTimestamp = MiscTasks.getFormDeletionStatusTimestampOfFormId(formId, cc);
-      // TODO: better error reporting -- form is being deleted. Disallow exports.
-      if ( deletionTimestamp != null ) return false;
+      FormActionStatusTimestamp deletionTimestamp = MiscTasks
+          .getFormDeletionStatusTimestampOfFormId(formId, cc);
+      // TODO: better error reporting -- form is being deleted. Disallow
+      // exports.
+      if (deletionTimestamp != null)
+        return false;
       // create csv job
       Form form = Form.retrieveFormByFormId(formId, cc);
-	  if ( form.getFormDefinition() == null ) return false; // ill-formed definition
-      PersistentResults r = new PersistentResults(ExportType.CSV, form, null, cc);
+      if (form.getFormDefinition() == null)
+        return false; // ill-formed definition
+      PersistentResults r = new PersistentResults(ExportType.CSV, form, null, null, cc);
       r.persist(cc);
 
       // create csv task
@@ -181,7 +189,8 @@ public class FormServiceImpl extends RemoteServiceServlet implements
 
     try {
       Form form = Form.retrieveFormByFormId(formId, cc);
-	  if ( form.getFormDefinition() == null ) return null; // ill-formed definition
+      if (form.getFormDefinition() == null)
+        return null; // ill-formed definition
       GenerateKmlSettings kmlSettings = new GenerateKmlSettings(form, false);
       return kmlSettings.generate();
 
@@ -200,12 +209,16 @@ public class FormServiceImpl extends RemoteServiceServlet implements
     }
 
     try {
-      FormActionStatusTimestamp deletionTimestamp = MiscTasks.getFormDeletionStatusTimestampOfFormId(formId, cc);
-      // TODO: better error reporting -- form is being deleted. Disallow exports.
-      if ( deletionTimestamp != null ) return false;
-      
+      FormActionStatusTimestamp deletionTimestamp = MiscTasks
+          .getFormDeletionStatusTimestampOfFormId(formId, cc);
+      // TODO: better error reporting -- form is being deleted. Disallow
+      // exports.
+      if (deletionTimestamp != null)
+        return false;
+
       Form form = Form.retrieveFormByFormId(formId, cc);
-	  if ( form.getFormDefinition() == null ) return false; // ill-formed definition
+      if (form.getFormDefinition() == null)
+        return false; // ill-formed definition
 
       FormElementModel titleField = null;
       if (titleKey != null) {
@@ -228,12 +241,12 @@ public class FormServiceImpl extends RemoteServiceServlet implements
       Map<String, String> params = new HashMap<String, String>();
       params.put(KmlGenerator.TITLE_FIELD, (titleField == null) ? null : titleField
           .constructFormElementKey(form).toString());
-      params.put(KmlGenerator.IMAGE_FIELD, (imageField == null) ? KmlGenerator.NONE
-          : imageField.constructFormElementKey(form).toString());
+      params.put(KmlGenerator.IMAGE_FIELD, (imageField == null) ? KmlGenerator.NONE : imageField
+          .constructFormElementKey(form).toString());
       params.put(KmlGenerator.GEOPOINT_FIELD, (geopointField == null) ? null : geopointField
           .constructFormElementKey(form).toString());
 
-      PersistentResults r = new PersistentResults(ExportType.KML, form, params, cc);
+      PersistentResults r = new PersistentResults(ExportType.KML, form, null, params, cc);
       r.persist(cc);
 
       KmlGenerator generator = (KmlGenerator) cc.getBean(BeanDefs.KML_BEAN);
@@ -257,7 +270,8 @@ public class FormServiceImpl extends RemoteServiceServlet implements
 
     try {
       Form form = Form.retrieveFormByFormId(formId, cc);
-	  if ( form.getFormDefinition() == null ) return null; // ill-formed definition
+      if (form.getFormDefinition() == null)
+        return null; // ill-formed definition
 
       GenerateKmlSettings kmlSettings = new GenerateKmlSettings(form, true);
       return kmlSettings.generate();
@@ -267,5 +281,45 @@ public class FormServiceImpl extends RemoteServiceServlet implements
     }
   }
 
+  @Override
+  public Boolean createCsvFromFilter(FilterGroup group) throws AccessDeniedException {
+    HttpServletRequest req = this.getThreadLocalRequest();
+    CallingContext cc = ContextFactory.getCallingContext(this, req);
+
+    try {
+      FormActionStatusTimestamp deletionTimestamp = MiscTasks
+          .getFormDeletionStatusTimestampOfFormId(group.getFormId(), cc);
+      // TODO: better error reporting -- form is being deleted. Disallow
+      // exports.
+      if (deletionTimestamp != null)
+        return false;
+
+      // clear uri so a copy can be saved
+      group.resetUriToDefault();
+
+      // save the filter group
+      SubmissionFilterGroup filterGrp = SubmissionFilterGroup.transform(group, cc);
+      filterGrp.setName("FilterForExport");
+      filterGrp.persist(cc);
+
+      // create csv job
+      Form form = Form.retrieveFormByFormId(filterGrp.getFormId(), cc);
+      if (form.getFormDefinition() == null)
+        return false; // ill-formed definition
+      PersistentResults r = new PersistentResults(ExportType.CSV, form, filterGrp, null, cc);
+      r.persist(cc);
+
+      // create csv task
+      CallingContext ccDaemon = ContextFactory.getCallingContext(this, req);
+      ccDaemon.setAsDaemon(true);
+      CsvGenerator generator = (CsvGenerator) cc.getBean(BeanDefs.CSV_BEAN);
+      generator.createCsvTask(form, r.getSubmissionKey(), 1L, ccDaemon);
+      return true;
+
+    } catch (Exception e) {
+      e.printStackTrace();
+      return false;
+    }
+  }
 
 }

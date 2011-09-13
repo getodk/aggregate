@@ -48,7 +48,7 @@ public class FilterSubTab extends AggregateSubTabBase {
     navTable.getElement().setId("submission_nav_table");
     add(navTable);
 
-    // Create Filters ande Submissions Panel
+    // Create Filters and Submissions Panel
     filtersNSubmissions = new HorizontalPanel();
 
     filtersPanel = new FiltersDataPanel(this);

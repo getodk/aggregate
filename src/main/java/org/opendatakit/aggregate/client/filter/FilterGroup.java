@@ -65,6 +65,17 @@ public final class FilterGroup implements Serializable {
     this.filters = new ArrayList<Filter>();
   }
 
+  /**
+   * Used to clear the URI in the elements so it can be Saved As properly in the
+   * server, as the server creates a new entity when uri is set to URI_DEFAULT
+   */
+  public void resetUriToDefault() {
+    this.uri = UIConsts.URI_DEFAULT;
+    for(Filter filter : filters) {
+      filter.resetUriToDefault();
+    }
+  }
+  
   public String getName() {
     return name;
   }

@@ -17,17 +17,22 @@
 package org.opendatakit.aggregate.client.widgets;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.FilterSubTab;
+import org.opendatakit.aggregate.client.SecureGWT;
+import org.opendatakit.aggregate.client.UIUtils;
 import org.opendatakit.aggregate.client.filter.Filter;
 import org.opendatakit.aggregate.client.filter.FilterGroup;
 import org.opendatakit.aggregate.constants.common.UIConsts;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 
-public final class CopyFilterGroupButton extends AggregateButton implements ClickHandler {
+public final class SaveAsFilterGroupButton extends AggregateButton implements ClickHandler {
 
   private static final String BUTTON_TXT = "Save As";
   private static final String TOOLTIP_TXT = "Save as new filter group";
@@ -36,7 +41,7 @@ public final class CopyFilterGroupButton extends AggregateButton implements Clic
 
   private final FilterSubTab parentSubTab;
 
-  public CopyFilterGroupButton(FilterSubTab parentSubTab) {
+  public SaveAsFilterGroupButton(FilterSubTab parentSubTab) {
     super(BUTTON_TXT, TOOLTIP_TXT, HELP_BALLOON_TXT);
     this.parentSubTab = parentSubTab;
   }
@@ -44,16 +49,57 @@ public final class CopyFilterGroupButton extends AggregateButton implements Clic
   @Override
   public void onClick(ClickEvent event) {
     super.onClick(event);
-    
-    FilterGroup filterGroup = parentSubTab.getDisplayedFilterGroup();
 
+    FilterGroup filterGroup = parentSubTab.getDisplayedFilterGroup();   
+    List<Filter> filters = filterGroup.getFilters();
+   
+    // if no filters no need to proceed
+    if (filters == null || filters.size() <= 0) {
+      Window.alert(UIConsts.ERROR_NO_FILTERS);
+      return;
+    }
+    
+    // prompt for name
+    String newFilterName;
+    try {
+      newFilterName = UIUtils.promptForFilterName(parentSubTab.getListOfPossibleFilterGroups());
+    } catch (Exception e) {
+      return; // user pressed cancel
+    }
+    
+    // make a copy of the filter
     ArrayList<Filter> newFilterGroupfilters = new ArrayList<Filter>();
-    newFilterGroupfilters.addAll(filterGroup.getFilters());
-    FilterGroup newGroup = new FilterGroup(UIConsts.FILTER_NONE, filterGroup.getFormId(),
+    newFilterGroupfilters.addAll(filters);
+    final FilterGroup newGroup = new FilterGroup(newFilterName, filterGroup.getFormId(),
         newFilterGroupfilters);
+
+    // reset the Uri to make sure new entities are created on the server
+    newGroup.resetUriToDefault();
+
+    // Set up the callback object.
+    AsyncCallback<String> callback = new AsyncCallback<String>() {
+      public void onFailure(Throwable caught) {
+        AggregateUI.getUI().reportError(caught);
+      }
+
+      @Override
+      public void onSuccess(String uri) {
+        if (uri != null) {
+          newGroup.setUri(uri);
+        }
+        parentSubTab.update();
+      }
+    };
+
+    // Save the filter on the server
+    SecureGWT.getFilterService().updateFilterGroup(newGroup, callback);
+    
 
     // set the displaying filters to the newly saved filter group
     parentSubTab.switchFilterGroup(newGroup);
     AggregateUI.getUI().getTimer().refreshNow();
   }
+  
+
+
 }

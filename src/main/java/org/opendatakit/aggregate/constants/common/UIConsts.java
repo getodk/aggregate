@@ -28,6 +28,10 @@ public class UIConsts {
   public static final String FORM_UPLOAD_SERVLET_ADDR = "formUpload";
 
   public static final String SUBMISSION_SERVLET_ADDR = "submission";
+  public static final String ERROR_NO_FILTERS = "You need at least one filter to save a group.";
+  public static final String ERROR_NO_NAME = "You need to provide a name for this filter group to continue";
+  public static final String PROMPT_FOR_NAME_TXT = "Please enter a name for this group";
+  public static final String REPROMPT_FOR_NAME_TXT = "That group already exists. Please enter a new name";
 
   // running locally
  // public static final String GOOGLE_MAP_KEY = "";
