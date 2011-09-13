@@ -41,6 +41,7 @@ import org.opendatakit.common.persistence.PersistConsts;
 import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.persistence.Query.FilterOperation;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.web.CallingContext;
@@ -53,8 +54,8 @@ import org.opendatakit.common.web.constants.BasicConsts;
  * 
  */
 public class PersistentResults {
-  public static final long RETRY_INTERVAL_MILLISECONDS = (6 * 60) * 1000; // 6 minutes
-  // public static final long RETRY_INTERVAL_MILLISECONDS = 10000;
+  public static final long RETRY_INTERVAL_MILLISECONDS = (11 * 60) * 1000; // 11 minutes
+  // public static final long RETRY_INTERVAL_MILLISECONDS = 10000; // for debugging...
   public static final long MAX_RETRY_ATTEMPTS = 3;
 
   public static final String FORM_ID_PERSISTENT_RESULT = "aggregate.opendatakit.org:PersistentResults";
@@ -295,6 +296,20 @@ public class PersistentResults {
     bcm.deleteAll(cc);
   }
 
+  public void deleteFilterGroup(CallingContext cc) throws ODKDatastoreException {
+    if(getFilterGroupUri() != null) {
+      try {
+   	    SubmissionFilterGroup subFilterGroup = 
+   		  SubmissionFilterGroup.getFilterGroup(getFilterGroupUri(), cc);
+        subFilterGroup.delete(cc);
+      } catch ( ODKEntityNotFoundException e ) {
+    	  // this should be fine to ignore 
+    	  // -- it likely means the filter group was already deleted.
+    	  e.printStackTrace();
+      }
+    }
+  }
+  
   public void persist(CallingContext cc) throws ODKEntityPersistException {
     Datastore ds = cc.getDatastore();
     User user = cc.getCurrentUser();
@@ -304,6 +319,7 @@ public class PersistentResults {
 
   public void delete(CallingContext cc) throws ODKDatastoreException {
     deleteResultFile(cc);
+    deleteFilterGroup(cc);
     Datastore ds = cc.getDatastore();
     User user = cc.getCurrentUser();
     ds.deleteEntity(row.getEntityKey(), user);
