@@ -60,8 +60,11 @@ public class SubmissionPanel extends ScrollPanel {
       }
     };
 
-    if(filterGroup.getFormId() != null) {
+    if(filterGroup.getFormId() != null && filterGroup.getFormId().length() > 0) {
     	SecureGWT.getSubmissionService().getSubmissions(filterGroup, callback);
+    } else {
+    	submissionTable = null;
+    	setWidget(submissionTable);
     }
   }
   
