@@ -144,9 +144,9 @@ public final class VisualizationPopup extends AbstractPopupBase {
       }
     });
 
-    columnList = new ColumnListBox(headers, false, true, "TOOLTIP");
+    columnList = new ColumnListBox(headers, false, true, "Column to Graph");
     columnList.addChangeHandler(new ColumnChangeHandler());
-    dataList = new ColumnListBox(headers, false, true, "TOOLTIP");
+    dataList = new ColumnListBox(headers, false, true, "Column to get data values from");
     dataList.addChangeHandler(new ColumnChangeHandler());
     geoPoints = new KmlSettingListBox("TOOLTIP");
 
@@ -195,7 +195,7 @@ public final class VisualizationPopup extends AbstractPopupBase {
     sumTable.setWidget(1, SUM_CHOICE_COLUMN, dataList);
     sumTable.setWidget(1, SUM_CHOICE_TXT, sumRadioTxt);
     
-    executeButton = new AggregateButton(BasicConsts.EMPTY_STRING, "TOOLTIP");
+    executeButton = new AggregateButton(BasicConsts.EMPTY_STRING, "Excute the Vizualization");
     executeButton.addClickHandler(new ExecuteVisualization());
 
     typeControlBar = new FlexTable();

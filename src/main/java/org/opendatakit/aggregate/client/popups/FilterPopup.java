@@ -87,7 +87,7 @@ public final class FilterPopup extends AbstractPopupBase {
     });
 
     // column selection - for row filter
-    columnForRowFilter = new ColumnListBox(headers, false, false, COLUMN_TOOLTIP);
+    columnForRowFilter = new ColumnListBox(headers, false, true, COLUMN_TOOLTIP);
 
     // columns selection - for column filter
     columnsForColumnFilter = new ColumnListBox(headers, true, false, COLUMN_TOOLTIP);

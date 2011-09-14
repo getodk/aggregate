@@ -21,7 +21,7 @@ public final class ColumnListBox extends AggregateListBox {
     this.headers = headers;
 
     for (Column header : headers) {
-      if (header.getUiDisplayType().equals(UIDisplayType.TEXT)) {
+      if (!onlyIncludeTextColumns || header.getUiDisplayType().equals(UIDisplayType.TEXT)) {
         addItem(header.getDisplayHeader(), header.getColumnEncoding());
       }
     }
