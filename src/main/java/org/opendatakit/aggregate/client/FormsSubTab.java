@@ -33,9 +33,11 @@ public class FormsSubTab extends AggregateSubTabBase {
   // button text & styling
   private static final String SUBMISSION_TXT = "Upload Data";
   private static final String SUBMISSION_TOOLTIP_TXT = "Upload Submissions";
+  private static final String SUBMISSION_BALLOON_TXT = "Upload submissions to add data to your form.";
   private static final String SUBMISSION_BUTTON_TEXT = "<img src=\"images/blue_up_arrow.png\" /> " + SUBMISSION_TXT;
   private static final String NEW_FORM_TXT = "New Form";
   private static final String NEW_FORM_TOOLTIP_TXT = "Uploade NEW form";
+  private static final String NEW_FORM_BALLOON_TXT = "Add a new form to Aggregate.";
   private static final String NEW_FORM_BUTTON_TEXT = "<img src=\"images/yellow_plus.png\" /> " + NEW_FORM_TXT;
 
   private final ServletPopupButton newForm;
@@ -47,9 +49,9 @@ public class FormsSubTab extends AggregateSubTabBase {
   public FormsSubTab(AggregateUI baseUI) {
 
 	newForm = new ServletPopupButton(NEW_FORM_BUTTON_TEXT, NEW_FORM_TXT,
-		        UIConsts.FORM_UPLOAD_SERVLET_ADDR, this, NEW_FORM_TOOLTIP_TXT);
+		        UIConsts.FORM_UPLOAD_SERVLET_ADDR, this, NEW_FORM_TOOLTIP_TXT, NEW_FORM_BALLOON_TXT);
 	uploadSubmission = new ServletPopupButton(SUBMISSION_BUTTON_TEXT, SUBMISSION_TXT,
-	        UIConsts.SUBMISSION_SERVLET_ADDR, this, SUBMISSION_TOOLTIP_TXT);
+	        UIConsts.SUBMISSION_SERVLET_ADDR, this, SUBMISSION_TOOLTIP_TXT, SUBMISSION_BALLOON_TXT);
     // create navigation buttons to servlet
     navTable = new FlexTable();
     navTable.setWidget(0, 0, newForm);

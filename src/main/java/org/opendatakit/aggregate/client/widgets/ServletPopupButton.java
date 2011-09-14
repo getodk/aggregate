@@ -31,8 +31,9 @@ public final class ServletPopupButton extends AggregateButton implements ClickHa
   private final String title;
   private final FormsSubTab basePanel;
 
-  public ServletPopupButton(String buttonText, String title, String url, FormsSubTab basePanel, String tooltipText) {
-    super(buttonText, tooltipText);
+  public ServletPopupButton(String buttonText, String title, String url, FormsSubTab basePanel, 
+		  String tooltipText, String balloonText) {
+    super(buttonText, tooltipText, balloonText);
     this.title = title;
     this.url = url;
     this.basePanel = basePanel;

@@ -6,8 +6,8 @@ import org.opendatakit.aggregate.client.form.KmlSettingOption;
 
 public final class KmlSettingListBox extends AggregateListBox {
 
-  public KmlSettingListBox(String tooltipText) {
-    super(tooltipText, false);
+  public KmlSettingListBox(String tooltipText, String balloonText) {
+    super(tooltipText, false, balloonText);
   }
 
   public void updateValues(List<KmlSettingOption> options) {
