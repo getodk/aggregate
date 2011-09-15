@@ -68,9 +68,8 @@ public class FormXmlServlet extends ServletUtilBase {
    *      javax.servlet.http.HttpServletResponse)
    */
   @Override
-  public void doGet(HttpServletRequest req, HttpServletResponse resp)
-      throws IOException {
-    
+  public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+
     // get parameters
     String formId = getParameter(req, ServletConsts.FORM_ID);
     if (formId == null) {
@@ -96,47 +95,46 @@ public class FormXmlServlet extends ServletUtilBase {
     String xmlString = null;
 
     try {
-	    if (form != null) {
-			xmlString = form.getFormXml(cc);
-	    } else {
-	      odkIdNotFoundError(resp);
-	    }
+      if (form != null) {
+        xmlString = form.getFormXml(cc);
+      } else {
+        odkIdNotFoundError(resp);
+      }
 
-	    // Debug: String debugDisplay = WebUtils.escapeUTF8String(xmlString);
-	
-	    if (humanReadable) {
-	      Map<String, String> properties = new HashMap<String, String>();
-	      properties.put(ServletConsts.FORM_ID, formId);
-	      String downloadXmlButton = HtmlUtil.createHtmlButtonToGetServlet(
-	    		  cc.getWebApplicationURL(ADDR),
-	          ServletConsts.DOWNLOAD_XML_BUTTON_TXT, properties);
-	
-	      beginBasicHtmlResponse(TITLE_INFO, resp, true, cc); // header info
-	      PrintWriter out = resp.getWriter();
-	      out.println("<h3>Form Name: <FONT COLOR=0000FF>" + form.getViewableName()
-	          + "</FONT></h3>");
-	      if ( form.getFormFilename() != null ) {
-	    	  out.println("<h3>File Name: <FONT COLOR=0000FF>" + form.getFormFilename()
-	    			  + "</FONT></h3>");
-	      }
-	      out.println(downloadXmlButton); // download button
-	      out.println("<PRE>");
-	      StringEscapeUtils.escapeHtml(out, xmlString);// form xml
-	      out.println("</PRE>");
-	      finishBasicHtmlResponse(resp); // footer info
-	    } else {
-	      resp.setCharacterEncoding(HtmlConsts.UTF8_ENCODE);
-	      resp.setContentType(HtmlConsts.RESP_TYPE_XML);
-		  PrintWriter out = resp.getWriter();
-		  if ( form.getFormFilename() != null ) {
-			  resp.setHeader(HtmlConsts.CONTENT_DISPOSITION, HtmlConsts.ATTACHMENT_FILENAME_TXT
-			        + form.getFormFilename() + BasicConsts.QUOTE + BasicConsts.SEMI_COLON);
-		  }
-	      out.print(xmlString);
-	    }
-	} catch (ODKDatastoreException e) {
-		e.printStackTrace();
-		odkIdNotFoundError(resp);
-	}
+      // Debug: String debugDisplay = WebUtils.escapeUTF8String(xmlString);
+
+      if (humanReadable) {
+        Map<String, String> properties = new HashMap<String, String>();
+        properties.put(ServletConsts.FORM_ID, formId);
+        String downloadXmlButton = HtmlUtil.createHtmlButtonToGetServlet(
+            cc.getWebApplicationURL(ADDR), ServletConsts.DOWNLOAD_XML_BUTTON_TXT, properties);
+
+        beginBasicHtmlResponse(TITLE_INFO, resp, cc); // header info
+        PrintWriter out = resp.getWriter();
+        out.println("<h3>Form Name: <FONT COLOR=0000FF>" + form.getViewableName() + "</FONT></h3>");
+        if (form.getFormFilename() != null) {
+          out.println("<h3>File Name: <FONT COLOR=0000FF>" + form.getFormFilename()
+              + "</FONT></h3>");
+        }
+        out.println(downloadXmlButton); // download button
+        out.println("<PRE>");
+        StringEscapeUtils.escapeHtml(out, xmlString);// form xml
+        out.println("</PRE>");
+        finishBasicHtmlResponse(resp); // footer info
+      } else {
+        resp.setCharacterEncoding(HtmlConsts.UTF8_ENCODE);
+        resp.setContentType(HtmlConsts.RESP_TYPE_XML);
+        PrintWriter out = resp.getWriter();
+        if (form.getFormFilename() != null) {
+          resp.setHeader(HtmlConsts.CONTENT_DISPOSITION,
+              HtmlConsts.ATTACHMENT_FILENAME_TXT + form.getFormFilename() + BasicConsts.QUOTE
+                  + BasicConsts.SEMI_COLON);
+        }
+        out.print(xmlString);
+      }
+    } catch (ODKDatastoreException e) {
+      e.printStackTrace();
+      odkIdNotFoundError(resp);
+    }
   }
 }

@@ -80,6 +80,7 @@ public class XFormsManifestXmlTable {
 	// setting the response content type emits the xml header.
 	// just write the body here...
 	d.writeChildren(serializer); 
+	serializer.flush();
   }
 
   private int generateManifestXmlEntry(Document d, Element e, int idx, String uri, BinaryContentManipulator m, int i) {

@@ -89,11 +89,10 @@ public abstract class CommonServletBase extends HttpServlet {
    * @param pageName name that should appear on the top of the page
    * @param resp http response to have the information appended to
    * @param req request
-   * @param displayLinks display links accross the top
    * @throws IOException
    */
   protected void beginBasicHtmlResponse(String pageName, HttpServletResponse resp,
-      boolean displayLinks, CallingContext cc) throws IOException {
+      CallingContext cc) throws IOException {
           beginBasicHtmlResponse(pageName, BasicConsts.EMPTY_STRING, resp, cc );
   }
 
@@ -151,8 +150,6 @@ public abstract class CommonServletBase extends HttpServlet {
     formatter.setCalendar(g);
     resp.setHeader(ServletConsts.OPEN_ROSA_DATE_HEADER,  formatter.format(new Date()));
   }
-
-  protected abstract void emitPageHeader(PrintWriter out,  boolean displayLinks, CallingContext cc);
   
   protected abstract String getVersionString(CallingContext cc);
   /**
