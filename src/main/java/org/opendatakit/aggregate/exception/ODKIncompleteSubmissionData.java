@@ -33,7 +33,8 @@ public class ODKIncompleteSubmissionData extends Exception {
     ID_MISSING,
     ID_MALFORMED,
     MISSING_XML,
-    BAD_JR_PARSE;
+    BAD_JR_PARSE,
+    MISMATCHED_SUBMISSION_ELEMENT;
   }
   
   private Reason reason;
@@ -46,9 +47,9 @@ public class ODKIncompleteSubmissionData extends Exception {
   /**
    * Default constructor
    */
-  public ODKIncompleteSubmissionData() {
-    super();
-    reason = Reason.UNKNOWN;
+  @SuppressWarnings("unused")
+  private ODKIncompleteSubmissionData() {
+    this(Reason.UNKNOWN);
   }
 
   /**
@@ -56,9 +57,9 @@ public class ODKIncompleteSubmissionData extends Exception {
    * 
    * @param message exception message
    */
-  public ODKIncompleteSubmissionData(String message) {
-    super(message);
-    reason = Reason.UNKNOWN;
+  @SuppressWarnings("unused")
+  private ODKIncompleteSubmissionData(String message) {
+    this(message, Reason.UNKNOWN);
   }
 
   /**
@@ -67,9 +68,9 @@ public class ODKIncompleteSubmissionData extends Exception {
    * @param message exception message
    * @param cause throwable cause
    */
-  public ODKIncompleteSubmissionData(String message, Throwable cause) {
-    super(message, cause);
-    reason = Reason.UNKNOWN;
+  @SuppressWarnings("unused")
+  private ODKIncompleteSubmissionData(String message, Throwable cause) {
+    this(message, cause, Reason.UNKNOWN);
   }
 
   /**
@@ -77,9 +78,9 @@ public class ODKIncompleteSubmissionData extends Exception {
    * 
    * @param cause throwable cause
    */
-  public ODKIncompleteSubmissionData(Throwable cause) {
-    super(cause);
-    reason = Reason.UNKNOWN;
+  @SuppressWarnings("unused")
+  private ODKIncompleteSubmissionData(Throwable cause) {
+    this(cause, Reason.UNKNOWN);
   }
 
   /**

@@ -13,15 +13,20 @@
  */
 package org.opendatakit.aggregate.parser;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 /**
  * @author mitchellsundt@gmail.com
  * @author wbrunette@gmail.com
  * 
  */
-public class NamingTest extends TestCase {
+@RunWith(org.junit.runners.JUnit4.class)
+public class NamingTest {
 
+	@Test
     public void testSimpleMappings() {
 	assertEquals("THREE_PART_LABEL",Naming.toPersistenceNaming("three_part_label"));
 	assertEquals("THREE_PART_LABEL",Naming.toPersistenceNaming("three-part.label"));
@@ -30,18 +35,21 @@ public class NamingTest extends TestCase {
 	assertEquals("THREE_PART_LABEL",Naming.toPersistenceNaming("three_PARtLabel"));
     }
     
+	@Test
     public void testPreserveDashes() {
 	assertEquals("THREE__PART__LABEL",Naming.toPersistenceNaming("three__Part__Label"));
 	assertEquals("THREE__PART__LABEL",Naming.toPersistenceNaming("three_.Part-_Label"));
 	assertEquals("THREE___PART____LABEL",Naming.toPersistenceNaming("three_-.Part____Label"));
     }
     
+	@Test
     public void testAccentsMappings() {
 	assertEquals("\u00caTES_VOUS",Naming.toPersistenceNaming("\u00cates-vous"));
 	char uch = Character.toUpperCase('\u00e9');
 	assertEquals(("R"+uch+"P"+uch+"TER_EFFACER"),Naming.toPersistenceNaming("R\u00e9p\u00e9terEffacer"));
     }
     
+	@Test
     public void testUnicodeMappings() {
 	
 	// chinese...

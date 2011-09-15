@@ -19,7 +19,6 @@ import org.apache.http.client.ClientProtocolException;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.opendatakit.aggregate.odktables.TestUtils;
 import org.opendatakit.aggregate.odktables.client.api.SimpleAPI;

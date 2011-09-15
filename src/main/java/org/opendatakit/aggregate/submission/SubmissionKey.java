@@ -18,7 +18,7 @@ package org.opendatakit.aggregate.submission;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.opendatakit.common.constants.BasicConsts;
+import org.opendatakit.common.web.constants.BasicConsts;
 
 /**
  * The submission key represents an XPath-style identification of a particular data element

@@ -269,7 +269,7 @@ public class AbstractBlobRelationSet implements BlobRelationSet {
 		User user = cc.getCurrentUser();
 		Query q = ds.createQuery(ctntRelation, user);
 		
-		List<? extends CommonFieldsBase> bList = q.executeQuery(0);
+		List<? extends CommonFieldsBase> bList = q.executeQuery();
 		for ( CommonFieldsBase b : bList ) {
 			BinaryContent bc = (BinaryContent) b;
 			// NOTE: fetch the ParentAuri because that is what we've been

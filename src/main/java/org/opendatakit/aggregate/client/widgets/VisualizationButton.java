@@ -17,40 +17,29 @@
 package org.opendatakit.aggregate.client.widgets;
 
 import org.opendatakit.aggregate.client.FilterSubTab;
-import org.opendatakit.aggregate.client.popups.HelpBalloon;
 import org.opendatakit.aggregate.client.popups.VisualizationPopup;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.PopupPanel;
 
-public class VisualizationButton extends AbstractButtonBase implements ClickHandler {
+public final class VisualizationButton extends AggregateButton implements ClickHandler {
 
-	private static final String TOOLTIP_TEXT = "Visualize the data";
+  private static final String BUTTON_TXT = "<img src=\"images/bar_chart.png\" /> Visualize";
+  private static final String TOOLTIP_TXT = "Visualize the data";
+  private static final String HELP_BALLOON_TXT = "This will open a new popup which will allow you to "
+      + "visualize data using a bar chart, pie chart, or Google Maps.";
 
-	private static final String HELP_BALLOON_TXT = "This will open a new popup which will allow you to " +
-			"visualize data using a bar chart, pie chart, or Google Map.";
+  private final FilterSubTab filterSubTab;
 
-	private FilterSubTab filterSubTab;
+  public VisualizationButton(FilterSubTab filterSubTab) {
+    super(BUTTON_TXT, TOOLTIP_TXT, HELP_BALLOON_TXT);
+    this.filterSubTab = filterSubTab;
+  }
 
-	public VisualizationButton(FilterSubTab filterSubTab) {
-		super("<img src=\"images/bar_chart.png\" /> Visualize", TOOLTIP_TEXT);
-		this.filterSubTab = filterSubTab;
-		helpBalloon = new HelpBalloon(this, HELP_BALLOON_TXT);
-	}
-
-	public void onClick(ClickEvent event) {
-		super.onClick(event);
-
-		final PopupPanel vizPopup = new VisualizationPopup(filterSubTab);
-		vizPopup.setPopupPositionAndShow(new PopupPanel.PositionCallback() {
-			@Override
-			public void setPosition(int offsetWidth, int offsetHeight) {
-				int left = ((Window.getScrollLeft() + Window.getClientWidth() - offsetWidth) / 2);
-				int top = ((Window.getScrollTop() + Window.getClientHeight() - offsetHeight) / 2);
-				vizPopup.setPopupPosition(left, top);
-			}
-		});
-	}
+  public void onClick(ClickEvent event) {
+    super.onClick(event);
+    
+    VisualizationPopup vizPopup = new VisualizationPopup(filterSubTab);
+    vizPopup.setPopupPositionAndShow(vizPopup.getPositionCallBack());
+  }
 }

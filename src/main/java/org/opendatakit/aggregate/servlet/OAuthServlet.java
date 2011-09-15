@@ -10,14 +10,18 @@ import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.common.ExternalServicePublicationOption;
 import org.opendatakit.aggregate.constants.common.UIConsts;
 import org.opendatakit.aggregate.exception.ODKExternalServiceAuthenticationError;
+import org.opendatakit.aggregate.exception.ODKExternalServiceException;
 import org.opendatakit.aggregate.exception.ODKExternalServiceNotAuthenticated;
 import org.opendatakit.aggregate.externalservice.ExternalService;
 import org.opendatakit.aggregate.externalservice.FormServiceCursor;
+import org.opendatakit.aggregate.externalservice.OAuthExternalService;
 import org.opendatakit.aggregate.externalservice.OAuthToken;
 import org.opendatakit.aggregate.task.UploadSubmissions;
 import org.opendatakit.common.web.CallingContext;
 
 public class OAuthServlet extends ServletUtilBase {
+
+  private static final String NOT_OAUTH_ERROR = "Somehow got a non OAuth external service in the OAuth servlet";
 
   /**
    * Serial number for serialization
@@ -30,7 +34,8 @@ public class OAuthServlet extends ServletUtilBase {
   public static final String ADDR = "auth/auth";
 
   /**
-   * Callback from external service acknowledging acceptable authentication token.
+   * Callback from external service acknowledging acceptable authentication
+   * token.
    * 
    * @see javax.servlet.http.HttpServlet#doGet(javax.servlet.http.HttpServletRequest,
    *      javax.servlet.http.HttpServletResponse)
@@ -58,7 +63,12 @@ public class OAuthServlet extends ServletUtilBase {
         ExternalService es = fsc.getExternalService(cc);
         ExternalServicePublicationOption esOption = fsc.getExternalServicePublicationOption();
 
-        es.authenticateAndCreate(authToken, cc);
+        if (!(es instanceof OAuthExternalService)) {
+          throw new ODKExternalServiceException(NOT_OAUTH_ERROR);
+        }
+
+        OAuthExternalService externalService = (OAuthExternalService) es;
+        externalService.authenticateAndCreate(authToken, cc);
 
         // upload data to external service
         if (!esOption.equals(ExternalServicePublicationOption.STREAM_ONLY)) {
@@ -75,7 +85,7 @@ public class OAuthServlet extends ServletUtilBase {
       e.printStackTrace();
       return;
     }
-    
+
     resp.sendRedirect(cc.getWebApplicationURL(AggregateHtmlServlet.ADDR));
   }
 }

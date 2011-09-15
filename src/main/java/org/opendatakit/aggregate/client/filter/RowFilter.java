@@ -21,6 +21,7 @@ import java.io.Serializable;
 import org.opendatakit.aggregate.client.submission.Column;
 import org.opendatakit.aggregate.constants.common.FilterOperation;
 import org.opendatakit.aggregate.constants.common.RowOrCol;
+import org.opendatakit.aggregate.constants.common.UIConsts;
 import org.opendatakit.aggregate.constants.common.Visibility;
 
 public final class RowFilter extends Filter implements Serializable {
@@ -55,6 +56,14 @@ public final class RowFilter extends Filter implements Serializable {
     super(uri);
   }
 
+  /**
+   * Used to clear the URI in the elements so it can be Saved As properly in the
+   * server, as the server creates a new entity when uri is set to URI_DEFAULT
+   */
+  public void resetUriToDefault() {
+    uri = UIConsts.URI_DEFAULT;
+  }
+  
   public Visibility getVisibility() {
     // TODO: Kyle I am not sure why RowFilter has keep/remove?
     return Visibility.DISPLAY;

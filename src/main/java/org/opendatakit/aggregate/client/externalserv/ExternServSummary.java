@@ -20,6 +20,7 @@ import java.io.Serializable;
 import java.util.Date;
 
 import org.opendatakit.aggregate.constants.common.ExternalServicePublicationOption;
+import org.opendatakit.aggregate.constants.common.ExternalServiceType;
 import org.opendatakit.aggregate.constants.common.OperationalStatus;
 
 public final class ExternServSummary implements Serializable {
@@ -38,7 +39,7 @@ public final class ExternServSummary implements Serializable {
 	private Boolean uploadCompleted;
 	private Date timeLastUploadCursor;
 	private Date timeLastStreamingCursor;
-	private String externalServiceTypeName;
+	private ExternalServiceType externalServiceType;
 	private String name;
 
 	public ExternServSummary() {
@@ -50,7 +51,7 @@ public final class ExternServSummary implements Serializable {
 			ExternalServicePublicationOption externalServicePublicationOption,
 			Boolean uploadCompleted,
 			Date timeLastUploadCursor, Date timeLastStreamingCursor,
-			String externalServiceTypeName, String name) {
+			ExternalServiceType externalServiceTypeName, String name) {
 		this.uri = uri;
 		this.user = user;
 		this.operationalStatus = status;
@@ -59,7 +60,7 @@ public final class ExternServSummary implements Serializable {
 		this.uploadCompleted = uploadCompleted;
 		this.timeLastUploadCursor = timeLastUploadCursor;
 		this.timeLastStreamingCursor = timeLastStreamingCursor;
-		this.externalServiceTypeName = externalServiceTypeName;
+		this.externalServiceType = externalServiceTypeName;
 		this.name = name;
 	}
 
@@ -91,8 +92,8 @@ public final class ExternServSummary implements Serializable {
 		return timeLastStreamingCursor;
 	}
 
-	public String getExternalServiceTypeName() {
-		return externalServiceTypeName;
+	public ExternalServiceType getExternalServiceType() {
+		return externalServiceType;
 	}
 
 	public String getName() {

@@ -42,4 +42,8 @@ public enum ExternalServicePublicationOption implements Serializable {
   public String getDescriptionOfOption() {
     return descriptionOfOption;
   }
+  
+  public String toString() {
+    return descriptionOfOption;
+  }
 }

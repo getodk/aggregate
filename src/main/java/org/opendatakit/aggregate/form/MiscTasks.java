@@ -31,7 +31,6 @@ import org.opendatakit.aggregate.submission.SubmissionKeyPart;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.Datastore;
-import org.opendatakit.common.persistence.EntityKey;
 import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.persistence.Query.FilterOperation;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
@@ -272,7 +271,7 @@ public class MiscTasks {
 	public void delete(CallingContext cc) throws ODKDatastoreException {
 		Datastore ds = cc.getDatastore();
 		User user = cc.getCurrentUser();
-		ds.deleteEntity(new EntityKey(row, row.getUri()), user);
+		ds.deleteEntity(row.getEntityKey(), user);
 	}
 	
 	public SubmissionKey getSubmissionKey() {
@@ -309,7 +308,7 @@ public class MiscTasks {
 		Date limit = new Date(now.getTime() - taskType.getLockType().getLockExpirationTimeout() - 1 );
 		q.addFilter(MiscTasksTable.TASK_TYPE, FilterOperation.EQUAL, taskType.name());
 		q.addFilter(MiscTasksTable.LAST_ACTIVITY_DATE, FilterOperation.LESS_THAN, limit );
-		List<? extends CommonFieldsBase> l = q.executeQuery(0);
+		List<? extends CommonFieldsBase> l = q.executeQuery();
 		/*
 		 * The list of objects consists only of those that were last 
 		 * fired at a lastActivityDate older than the retry interval, which
@@ -356,7 +355,7 @@ public class MiscTasks {
 		Query q = ds.createQuery(relation, user);
 		q.addFilter(MiscTasksTable.FORM_ID, FilterOperation.EQUAL, form.getFormId());
 		// collect all MiscTasks entries that refer to the given form...
-		List<? extends CommonFieldsBase> l = q.executeQuery(0);
+		List<? extends CommonFieldsBase> l = q.executeQuery();
 		for ( CommonFieldsBase b : l ) {
 			MiscTasksTable r = (MiscTasksTable) b;
 			MiscTasks result = new MiscTasks(r);
@@ -414,7 +413,7 @@ public class MiscTasks {
 		Query q = ds.createQuery(relation, user);
 		q.addFilter(MiscTasksTable.TASK_TYPE, FilterOperation.EQUAL, TaskType.DELETE_FORM.name());
 		// collect all Deletion tasks that are in progress or being retried...
-		List<? extends CommonFieldsBase> l = q.executeQuery(0);
+		List<? extends CommonFieldsBase> l = q.executeQuery();
 		for ( CommonFieldsBase b : l ) {
 			MiscTasksTable r = (MiscTasksTable) b;
 			MiscTasks result = new MiscTasks(r);
@@ -450,7 +449,7 @@ public class MiscTasks {
 		Query q = ds.createQuery(relation, user);
 		q.addFilter(MiscTasksTable.TASK_TYPE, FilterOperation.EQUAL, TaskType.PURGE_OLDER_SUBMISSIONS.name());
 		// collect all Deletion tasks that are in progress or being retried...
-		List<? extends CommonFieldsBase> l = q.executeQuery(0);
+		List<? extends CommonFieldsBase> l = q.executeQuery();
 		for ( CommonFieldsBase b : l ) {
 			MiscTasksTable r = (MiscTasksTable) b;
 			MiscTasks result = new MiscTasks(r);

@@ -3,10 +3,10 @@ package org.opendatakit.common.web;
 import javax.servlet.ServletContext;
 
 import org.junit.Ignore;
-import org.opendatakit.common.constants.BasicConsts;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.security.UserService;
+import org.opendatakit.common.web.constants.BasicConsts;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 

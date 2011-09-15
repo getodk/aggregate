@@ -72,7 +72,7 @@ public class PublishTable extends FlexTable {
       this.setText(i + STARTING_ROW, STATUS, e.getStatus().toString());
       this.setText(i + STARTING_ROW, TIME_PUBLISH_START, e.getTimeEstablished().toString());
       this.setText(i + STARTING_ROW, ACTION, e.getPublicationOption().getDescriptionOfOption());
-      this.setText(i + STARTING_ROW, TYPE, e.getExternalServiceTypeName());
+      this.setText(i + STARTING_ROW, TYPE, e.getExternalServiceType().getDisplayText());
       this.setWidget(i + STARTING_ROW, NAME, new HTML(e.getName()));
       this.setWidget(i + STARTING_ROW, DELETE,  new DeletePublishButton(e));
     }

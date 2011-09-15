@@ -33,10 +33,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.opendatakit.aggregate.constants.ServletConsts;
-import org.opendatakit.common.constants.BasicConsts;
-import org.opendatakit.common.constants.HtmlConsts;
-import org.opendatakit.common.constants.HtmlUtil;
 import org.opendatakit.common.web.CallingContext;
+import org.opendatakit.common.web.constants.BasicConsts;
+import org.opendatakit.common.web.constants.HtmlConsts;
+import org.opendatakit.common.web.constants.HtmlStrUtil;
 
 /**
  * Base class for Servlets that contain useful utilities
@@ -89,11 +89,10 @@ public abstract class CommonServletBase extends HttpServlet {
    * @param pageName name that should appear on the top of the page
    * @param resp http response to have the information appended to
    * @param req request
-   * @param displayLinks display links accross the top
    * @throws IOException
    */
   protected void beginBasicHtmlResponse(String pageName, HttpServletResponse resp,
-      boolean displayLinks, CallingContext cc) throws IOException {
+      CallingContext cc) throws IOException {
           beginBasicHtmlResponse(pageName, BasicConsts.EMPTY_STRING, resp, cc );
   }
 
@@ -105,7 +104,7 @@ public abstract class CommonServletBase extends HttpServlet {
 	    out.write(HtmlConsts.HTML_OPEN);
 	    out.write("<link rel=\"shortcut icon\" href=\"" + cc.getWebApplicationURL("favicon.ico") + "\">");
 
-	    out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.HEAD, headContent + HtmlUtil.wrapWithHtmlTags(
+	    out.write(HtmlStrUtil.wrapWithHtmlTags(HtmlConsts.HEAD, headContent + HtmlStrUtil.wrapWithHtmlTags(
 	        HtmlConsts.TITLE, applicationName)));
 	    out.write(HtmlConsts.BODY_OPEN);
 	    return out;
@@ -126,9 +125,9 @@ public abstract class CommonServletBase extends HttpServlet {
   protected void beginBasicHtmlResponse(String pageName, String headContent, HttpServletResponse resp,
               CallingContext cc) throws IOException {
 	PrintWriter out = beginBasicHtmlResponsePreamble(headContent, resp, cc);
-    out.write(HtmlUtil.createBeginTag(HtmlConsts.CENTERING_DIV));
-    out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.H1, pageName));
-    out.write(HtmlUtil.createEndTag(HtmlConsts.DIV));
+    out.write(HtmlStrUtil.createBeginTag(HtmlConsts.CENTERING_DIV));
+    out.write(HtmlStrUtil.wrapWithHtmlTags(HtmlConsts.H1, pageName));
+    out.write(HtmlStrUtil.createEndTag(HtmlConsts.DIV));
   }
   
   /**
@@ -151,8 +150,6 @@ public abstract class CommonServletBase extends HttpServlet {
     formatter.setCalendar(g);
     resp.setHeader(ServletConsts.OPEN_ROSA_DATE_HEADER,  formatter.format(new Date()));
   }
-
-  protected abstract void emitPageHeader(PrintWriter out,  boolean displayLinks, CallingContext cc);
   
   protected abstract String getVersionString(CallingContext cc);
   /**

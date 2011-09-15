@@ -1,11 +1,16 @@
 package org.opendatakit.aggregate.datamodel;
 
-import junit.framework.TestCase;
 
+import static org.junit.Assert.*;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.opendatakit.aggregate.datamodel.FormDataModel.ElementType;
 
-public class FormElementModelTest extends TestCase {
+@RunWith(org.junit.runners.JUnit4.class)
+public class FormElementModelTest {
 
+	@Test
     public void testSimpleMappings() {
     	FormElementModel m1 = new FormElementModel(null, FormElementModel.Metadata.META_INSTANCE_ID);
     	FormElementModel m2 = new FormElementModel(null, FormElementModel.Metadata.META_MODEL_VERSION);
@@ -18,6 +23,7 @@ public class FormElementModelTest extends TestCase {
     }
 
 
+	@Test
     public void testCrossMetaMappings() {
     	FormElementModel m1 = new FormElementModel(null, FormElementModel.Metadata.META_INSTANCE_ID);
     	FormDataModel fm = new FormDataModel("schema1");

@@ -22,8 +22,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.opendatakit.aggregate.ContextFactory;
-import org.opendatakit.common.constants.BasicConsts;
 import org.opendatakit.common.web.CallingContext;
+import org.opendatakit.common.web.constants.BasicConsts;
 
 /**
  * 
@@ -54,7 +54,7 @@ public class BlankServlet extends ServletUtilBase {
          throws IOException {
 	  CallingContext cc = ContextFactory.getCallingContext(this, req);
 
-      beginBasicHtmlResponse(BasicConsts.EMPTY_STRING, resp, true, cc); // header info
+      beginBasicHtmlResponse(BasicConsts.EMPTY_STRING, resp, cc); // header info
       finishBasicHtmlResponse(resp);
    }
 

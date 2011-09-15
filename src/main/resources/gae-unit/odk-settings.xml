@@ -32,6 +32,7 @@
 		<property name="datastore" ref="datastore" />
 		<property name="realm" ref="realm" />
 		<property name="superUserEmail" value="${security.server.superUser}" />
+		<property name="superUserUsername" value="${security.server.superUserUsername}" />
 		<property name="userServiceKey" value="${security.server.userServiceKey}" />
 	</bean>
 

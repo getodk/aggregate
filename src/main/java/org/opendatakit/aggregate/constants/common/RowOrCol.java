@@ -34,4 +34,8 @@ public enum RowOrCol implements Serializable {
      return displayText;
    }
    
+   public String toString() {
+     return displayText;
+   }
+   
 };

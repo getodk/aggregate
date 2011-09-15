@@ -28,9 +28,9 @@ import org.opendatakit.aggregate.format.SubmissionFormatter;
 import org.opendatakit.aggregate.format.structure.KmlFormatter;
 import org.opendatakit.aggregate.query.submission.QueryByDate;
 import org.opendatakit.aggregate.submission.SubmissionKey;
-import org.opendatakit.common.constants.BasicConsts;
-import org.opendatakit.common.constants.HtmlConsts;
 import org.opendatakit.common.web.CallingContext;
+import org.opendatakit.common.web.constants.BasicConsts;
+import org.opendatakit.common.web.constants.HtmlConsts;
 
 /**
  * Common worker implementation for the generation of kml files.

@@ -24,14 +24,12 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.client.exception.RequestFailureException;
 import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.externalservice.FormServiceCursor;
 import org.opendatakit.aggregate.form.Form;
-import org.opendatakit.aggregate.form.FormInfo;
 import org.opendatakit.aggregate.form.MiscTasks;
 import org.opendatakit.aggregate.form.MiscTasks.TaskType;
 import org.opendatakit.aggregate.process.DeleteSubmissions;
@@ -162,17 +160,11 @@ public class FormAdminServiceImpl extends RemoteServiceServlet implements
 
 	      // If the FormInfo table is the target, log an error!
 	      if (formToDelete != null) {
-	        if (!FormInfo.isFormInfoForm(formToDelete.getFormId())) {
-	          MiscTasks m = new MiscTasks(TaskType.DELETE_FORM, formToDelete, null, cc);
-	          m.persist(cc);
-	          CallingContext ccDaemon = ContextFactory.getCallingContext(this, req);
-	          ccDaemon.setAsDaemon(true);
-	          formDelete.createFormDeleteTask(formToDelete, m.getSubmissionKey(), 1L, ccDaemon);
-	        } else {
-	          String errString = "Attempting to delete FormInfo table definition record!";
-
-	          LogFactory.getLog(this.getClass()).error(errString);
-	        }
+	        MiscTasks m = new MiscTasks(TaskType.DELETE_FORM, formToDelete, null, cc);
+	        m.persist(cc);
+	        CallingContext ccDaemon = ContextFactory.getCallingContext(this, req);
+	        ccDaemon.setAsDaemon(true);
+	        formDelete.createFormDeleteTask(formToDelete, m.getSubmissionKey(), 1L, ccDaemon);
 	      }
 	    } catch (Exception e) {
 	      e.printStackTrace();

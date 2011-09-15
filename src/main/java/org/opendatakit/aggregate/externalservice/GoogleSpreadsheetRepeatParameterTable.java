@@ -134,7 +134,7 @@ public final class GoogleSpreadsheetRepeatParameterTable extends CommonFieldsBas
 		  Query query = ds.createQuery(frpt, user);
 		  query.addFilter(URI_GOOGLE_SPREADSHEET, FilterOperation.EQUAL, uri);
 
-		  List<? extends CommonFieldsBase> results = query.executeQuery(0);
+		  List<? extends CommonFieldsBase> results = query.executeQuery();
 		  for ( CommonFieldsBase b : results ) {
 			  list.add((GoogleSpreadsheetRepeatParameterTable) b);
 		  }

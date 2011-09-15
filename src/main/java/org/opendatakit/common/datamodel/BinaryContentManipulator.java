@@ -132,7 +132,7 @@ public class BinaryContentManipulator {
                uriVersionedContent);
          q.addSort(bcbRef.part, Direction.ASCENDING);
          List<? extends CommonFieldsBase> bcbList = q
-               .executeQuery(0);
+               .executeQuery();
          for (CommonFieldsBase cb : bcbList) {
             dbBcbEntityList.add((BinaryContentRefBlob) cb);
          }
@@ -174,10 +174,10 @@ public class BinaryContentManipulator {
 
       public void recursivelyAddKeys(List<EntityKey> keyList) {
          for (BinaryContentRefBlob e : dbBcbEntityList) {
-            keyList.add(new EntityKey(e, e.getUri()));
+            keyList.add(e.getEntityKey());
          }
          for (RefBlob r : dbRefBlobList) {
-            keyList.add(new EntityKey(r, r.getUri()));
+            keyList.add(r.getEntityKey());
          }
       }
 
@@ -432,7 +432,7 @@ public class BinaryContentManipulator {
       q.addFilter(ctntRelation.parentAuri, FilterOperation.EQUAL, parentKey);
       q.addSort(ctntRelation.ordinalNumber, Direction.ASCENDING);
 
-      List<? extends CommonFieldsBase> contentHits = q.executeQuery(0);
+      List<? extends CommonFieldsBase> contentHits = q.executeQuery();
       attachments.clear();
       for (CommonFieldsBase cb : contentHits) {
          attachments.add((BinaryContent) cb);
@@ -491,7 +491,7 @@ public class BinaryContentManipulator {
     		 BlobManipulator b = new BlobManipulator(bc.getUri(), vrefRelation, blbRelation, cc);
     		 b.recursivelyAddKeys(keyList);
     	 }
-         keyList.add(new EntityKey(bc, bc.getUri()));
+         keyList.add(bc.getEntityKey());
       }
    }
 

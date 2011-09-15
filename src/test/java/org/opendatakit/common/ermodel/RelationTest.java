@@ -13,12 +13,15 @@
  */
 package org.opendatakit.common.ermodel;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import junit.framework.TestCase;
-
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.opendatakit.common.persistence.DataField;
@@ -35,17 +38,10 @@ import org.opendatakit.common.web.TestContextFactory;
  *
  */
 @RunWith(org.junit.runners.JUnit4.class)
-public class RelationTest extends TestCase {
-
-	@Override
-	public void tearDown() throws Exception {
-		super.tearDown();
-	}
+public class RelationTest {
 	
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
-
+	@Before
+	public void setUp() throws Exception {
 		CallingContext cc = TestContextFactory.getCallingContext();
 		
 		MyRelation rel = new MyRelation(cc);

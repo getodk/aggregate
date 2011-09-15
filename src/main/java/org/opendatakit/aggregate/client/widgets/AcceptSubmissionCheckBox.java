@@ -18,33 +18,33 @@ package org.opendatakit.aggregate.client.widgets;
 
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.SecureGWT;
-import org.opendatakit.aggregate.client.popups.HelpBalloon;
 import org.opendatakit.common.security.common.GrantedAuthorityName;
 
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
-public class AcceptSubmissionCheckBox extends AbstractCheckBoxBase implements ValueChangeHandler<Boolean> {
-
-	private String formId;
-	private static final String TOOLTIP_TEXT = "Allow or disallow form to accept submissions";
+public final class AcceptSubmissionCheckBox extends AggregateCheckBox implements ValueChangeHandler<Boolean> {
+	
+	private static final String TOOLTIP_TXT = "Allow or disallow form to accept submissions";
 	private static final String HELP_BALLOON_TXT = "Check this box if you want your form to accept " +
 			"submissions.  Otherwise leave unchecked.";
 
+	private final String formId;
+	
 	public AcceptSubmissionCheckBox(String formId, Boolean accept) {
-		super(TOOLTIP_TEXT);
+		super(null, TOOLTIP_TXT, HELP_BALLOON_TXT);
 		this.formId = formId;
 		setValue(accept);
 		boolean enabled = AggregateUI.getUI().getUserInfo()
 		.getGrantedAuthorities().contains(GrantedAuthorityName.ROLE_DATA_OWNER);
 		setEnabled(enabled);
-		helpBalloon = new HelpBalloon(this, HELP_BALLOON_TXT);
 	}
 
 	@Override
 	public void onValueChange(ValueChangeEvent<Boolean> event) {
 		super.onValueChange(event);
+		
 		SecureGWT.getFormAdminService().setFormAcceptSubmissions(formId, event.getValue(), new AsyncCallback<Boolean>() {
 			@Override
 			public void onFailure(Throwable caught) {

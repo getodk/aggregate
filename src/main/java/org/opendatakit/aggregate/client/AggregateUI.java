@@ -74,6 +74,10 @@ public class AggregateUI implements EntryPoint {
 
   private static AggregateUI singleton = null;
 
+  // session variables for tab visibility
+  public static boolean manageVisible = false;
+  public static boolean adminVisible = false;
+
   /***********************************
    ***** SINGLETON FETCHING ******
    ***********************************/
@@ -275,10 +279,12 @@ public class AggregateUI implements EntryPoint {
 
       if (authorizedForTab(Tabs.MANAGEMENT)) {
         mainNav.add(management, Tabs.MANAGEMENT.getTabLabel());
+        manageVisible = true;
       }
 
       if (authorizedForTab(Tabs.ADMIN)) {
         mainNav.add(admin, Tabs.ADMIN.getTabLabel());
+        adminVisible = true;
       }
 
       // Select the correct menu item based on url hash.

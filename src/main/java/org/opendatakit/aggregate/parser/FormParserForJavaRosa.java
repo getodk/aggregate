@@ -42,6 +42,7 @@ import org.kxml2.kdom.Element;
 import org.opendatakit.aggregate.constants.ParserConsts;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.common.FormActionStatusTimestamp;
+import org.opendatakit.aggregate.constants.common.GeoPointConsts;
 import org.opendatakit.aggregate.datamodel.FormDataModel;
 import org.opendatakit.aggregate.datamodel.FormDataModel.ElementType;
 import org.opendatakit.aggregate.datamodel.TopLevelDynamicBase;
@@ -55,8 +56,6 @@ import org.opendatakit.aggregate.form.FormDefinition;
 import org.opendatakit.aggregate.form.MiscTasks;
 import org.opendatakit.aggregate.form.SubmissionAssociationTable;
 import org.opendatakit.aggregate.form.XFormParameters;
-import org.opendatakit.common.constants.BasicConsts;
-import org.opendatakit.common.constants.HtmlConsts;
 import org.opendatakit.common.datamodel.DynamicBase;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
@@ -66,6 +65,8 @@ import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.web.CallingContext;
+import org.opendatakit.common.web.constants.BasicConsts;
+import org.opendatakit.common.web.constants.HtmlConsts;
 
 /**
  * Parses an XML definition of an XForm based on java rosa types
@@ -76,10 +77,7 @@ import org.opendatakit.common.web.CallingContext;
  */
 public class FormParserForJavaRosa {
 	
-  private static final String NAMESPACE_ODK = "http://www.opendatakit.org/xforms";
-  
   static Log log = LogFactory.getLog(FormParserForJavaRosa.class.getName());
-  private static final String BASE64_RSA_PUBLIC_KEY = "base64RsaPublicKey";
   private static final String ENCRYPTED_FORM_DEFINITION = "<?xml version=\"1.0\"?>" +
   	"<h:html xmlns=\"http://www.w3.org/2002/xforms\" xmlns:h=\"http://www.w3.org/1999/xhtml\" xmlns:ev=\"http://www.w3.org/2001/xml-events\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:jr=\"http://openrosa.org/javarosa\">" +
   	"<h:head>" +
@@ -126,9 +124,9 @@ public class FormParserForJavaRosa {
 	
 	@Override
 	public void handle(Element element, DataBinding binding) {
-		String value = element.getAttributeValue(NAMESPACE_ODK, "length");
+		String value = element.getAttributeValue(ParserConsts.NAMESPACE_ODK, "length");
 		if ( value != null ) {
-			element.setAttribute(NAMESPACE_ODK, "length", null);
+			element.setAttribute(ParserConsts.NAMESPACE_ODK, "length", null);
 		}
 		
 		log.info("Calling handle found value " + ((value == null) ? "null" : value));
@@ -362,7 +360,7 @@ public class FormParserForJavaRosa {
     // insist that the submission element and root element have the same 
     // formId, modelVersion and uiVersion.
     if ( !submissionElementDefn.equals(rootElementDefn) ) {
-    	throw new ODKIncompleteSubmissionData("submission element and root element differ in their values for: formId, version or uiVersion.");
+    	throw new ODKIncompleteSubmissionData("submission element and root element differ in their values for: formId, version or uiVersion.", Reason.MISMATCHED_SUBMISSION_ELEMENT);
     }
     
     String publicKey = null;
@@ -520,6 +518,8 @@ public class FormParserForJavaRosa {
 	    //
 	    final FormDataModel fdm = FormDataModel.assertRelation(cc);
 	    
+	    // we haven't actually constructed the fdm record yet, so use the 
+	    // relation when creating the entity key...
 	    final EntityKey k = new EntityKey( fdm, fdmSubmissionUri);
 	
 	    NamingSet opaque = new NamingSet();
@@ -1128,7 +1128,7 @@ public class FormParserForJavaRosa {
       d = ds.createEntityUsingRelation(fdm, user);
 	  setPrimaryKey( d, fdmSubmissionUri, AuxType.GEO_LAT );
       dmList.add(d);
-      d.setOrdinalNumber(Long.valueOf(FormDataModel.GEOPOINT_LATITUDE_ORDINAL_NUMBER));
+      d.setOrdinalNumber(Long.valueOf(GeoPointConsts.GEOPOINT_LATITUDE_ORDINAL_NUMBER));
       d.setUriSubmissionDataModel(k.getKey());
       d.setParentUriFormDataModel(groupURI);
 	  d.setElementName(treeElement.getName());
@@ -1143,7 +1143,7 @@ public class FormParserForJavaRosa {
       d = ds.createEntityUsingRelation(fdm, user);
 	  setPrimaryKey( d, fdmSubmissionUri, AuxType.GEO_LNG );
       dmList.add(d);
-      d.setOrdinalNumber(Long.valueOf(FormDataModel.GEOPOINT_LONGITUDE_ORDINAL_NUMBER));
+      d.setOrdinalNumber(Long.valueOf(GeoPointConsts.GEOPOINT_LONGITUDE_ORDINAL_NUMBER));
       d.setUriSubmissionDataModel(k.getKey());
       d.setParentUriFormDataModel(groupURI);
 	  d.setElementName(treeElement.getName());
@@ -1158,7 +1158,7 @@ public class FormParserForJavaRosa {
       d = ds.createEntityUsingRelation(fdm, user);
 	  setPrimaryKey( d, fdmSubmissionUri, AuxType.GEO_ALT );
       dmList.add(d);
-      d.setOrdinalNumber(Long.valueOf(FormDataModel.GEOPOINT_ALTITUDE_ORDINAL_NUMBER));
+      d.setOrdinalNumber(Long.valueOf(GeoPointConsts.GEOPOINT_ALTITUDE_ORDINAL_NUMBER));
       d.setUriSubmissionDataModel(k.getKey());
       d.setParentUriFormDataModel(groupURI);
 	  d.setElementName(treeElement.getName());
@@ -1173,7 +1173,7 @@ public class FormParserForJavaRosa {
       d = ds.createEntityUsingRelation(fdm, user);
 	  setPrimaryKey( d, fdmSubmissionUri, AuxType.GEO_ACC );
       dmList.add(d);
-      d.setOrdinalNumber(Long.valueOf(FormDataModel.GEOPOINT_ACCURACY_ORDINAL_NUMBER));
+      d.setOrdinalNumber(Long.valueOf(GeoPointConsts.GEOPOINT_ACCURACY_ORDINAL_NUMBER));
       d.setUriSubmissionDataModel(k.getKey());
       d.setParentUriFormDataModel(groupURI);
 	  d.setElementName(treeElement.getName());

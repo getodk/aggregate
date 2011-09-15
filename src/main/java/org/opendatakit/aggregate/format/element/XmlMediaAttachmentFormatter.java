@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.StringEscapeUtils;
+import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.format.Row;
@@ -31,10 +32,9 @@ import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.submission.SubmissionRepeat;
 import org.opendatakit.aggregate.submission.type.BlobSubmissionType;
 import org.opendatakit.aggregate.submission.type.GeoPoint;
-import org.opendatakit.common.constants.BasicConsts;
-import org.opendatakit.common.constants.HtmlUtil;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
+import org.opendatakit.common.web.constants.BasicConsts;
 
 /**
  * Emits the list of media filenames and URLs for a given form.
@@ -77,10 +77,12 @@ public class XmlMediaAttachmentFormatter implements ElementFormatter {
 	    String downloadRequestURL = cc.getServerURL() + BasicConsts.FORWARDSLASH + BinaryDataServlet.ADDR;
 	    urlLink = HtmlUtil.createLinkWithProperties(downloadRequestURL, properties);
 	}
-    String xmlString = "<media>" +
+	// parallel to XFormsManifestXmlTable
+    String xmlString = "<mediaFile>" +
     		"<filename>" + StringEscapeUtils.escapeXml(blobSubmission.getUnrootedFilename(1)) + "</filename>" +
-    		"<url>"	+ StringEscapeUtils.escapeXml(urlLink) + "</url>" +
-    	"</media>\n";
+    		"<hash>"	+ StringEscapeUtils.escapeXml(blobSubmission.getContentHash(1)) + "</hash>" +
+    		"<downloadUrl>"	+ StringEscapeUtils.escapeXml(urlLink) + "</downloadUrl>" +
+    	"</mediaFile>\n";
     
     row.addFormattedValue(xmlString);
   }

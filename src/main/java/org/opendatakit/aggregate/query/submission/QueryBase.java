@@ -28,6 +28,8 @@ import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.persistence.Query.FilterOperation;
+import org.opendatakit.common.persistence.QueryResult;
+import org.opendatakit.common.persistence.QueryResumePoint;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
 
@@ -42,15 +44,15 @@ public abstract class QueryBase {
   protected Query query;
   protected final Form form;
   
-  private boolean moreRecords;
-  private int fetchLimit;
-  
+  private boolean moreRecords;  
   private int numOfRecords;
   
-  protected QueryBase(Form form, int maxFetchLimit) throws ODKFormNotFoundException {
-    fetchLimit = maxFetchLimit;
-    numOfRecords = 0;
+  protected QueryResumePoint resumeCursor;
+  
+  protected QueryBase(Form form) throws ODKFormNotFoundException {
+    this.numOfRecords = 0;
     this.form = form;
+    this.resumeCursor = null;
   }
 
   /**
@@ -120,24 +122,41 @@ public abstract class QueryBase {
    * 
    * @return
    *    a result table containing submission data
- * @throws ODKDatastoreException 
-   *
-   * @throws ODKIncompleteSubmissionData 
+   * @throws ODKDatastoreException 
    */
   protected List<? extends CommonFieldsBase> getSubmissionEntities() throws ODKDatastoreException {
-
-    // retrieve submissions
-    List<? extends CommonFieldsBase> submissionEntities = null;
-    submissionEntities = query.executeQuery(fetchLimit + 1);
-    numOfRecords = submissionEntities.size();
-    if(submissionEntities.size() > fetchLimit) {
-      moreRecords = true;
-      submissionEntities.remove(fetchLimit);
-    }    
-    return submissionEntities;
+    List<? extends CommonFieldsBase> results = query.executeQuery();
+    numOfRecords = results.size();
+    
+    return results;
   }
   
 
+  /**
+   * Generates a result table that contains all the submission data 
+   * of the form specified by the ODK ID
+   * @param fetchLimit TODO
+   * 
+   * 
+   * @return
+   *    a result table containing submission data
+   * @throws ODKDatastoreException 
+   *
+   */
+  protected List<? extends CommonFieldsBase> getSubmissionEntities(QueryResumePoint startCursor, int fetchLimit) throws ODKDatastoreException {
+
+    // retrieve submissions
+    QueryResult results = query.executeQuery(startCursor, fetchLimit);
+    List<? extends CommonFieldsBase> submissionEntities = results.getResultList();
+
+    // update state
+    numOfRecords = submissionEntities.size();
+    resumeCursor = results.getResumeCursor();
+    moreRecords = results.hasMoreResults();
+    
+    return submissionEntities;
+  }
+  
   public int getNumRecords() {
     return numOfRecords;
   }

@@ -121,6 +121,10 @@ public abstract class CommonFieldsBase {
 		fieldValueMap.put(primaryKey, CommonFieldsBase.newUri());
 	}
 
+	public final EntityKey getEntityKey() {
+	  return new EntityKey(this, getUri());
+	}
+	
 	public final String getSchemaName() {
 		return schemaName;
 	}
@@ -269,7 +273,8 @@ public abstract class CommonFieldsBase {
 			fieldValueMap.remove(f);
 			return;
 		}
-		fieldValueMap.put(f, value);
+		// enforce scaling here...
+		fieldValueMap.put(f, value.setScale(f.getNumericScale(), BigDecimal.ROUND_HALF_UP));
 	}
 
 	public final Date getDateField(DataField f) {

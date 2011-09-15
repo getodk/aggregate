@@ -19,6 +19,8 @@ package org.opendatakit.aggregate.servlet;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -26,13 +28,16 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.ErrorConsts;
 import org.opendatakit.aggregate.constants.HtmlUtil;
+import org.opendatakit.aggregate.constants.ParserConsts;
 import org.opendatakit.aggregate.constants.ServletConsts;
+import org.opendatakit.aggregate.constants.common.FormElementNamespace;
 import org.opendatakit.aggregate.constants.common.UIConsts;
 import org.opendatakit.aggregate.exception.ODKConversionException;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
@@ -43,14 +48,17 @@ import org.opendatakit.aggregate.exception.ODKParseException;
 import org.opendatakit.aggregate.externalservice.ExternalService;
 import org.opendatakit.aggregate.externalservice.FormServiceCursor;
 import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.format.Row;
+import org.opendatakit.aggregate.format.element.XmlAttributeFormatter;
 import org.opendatakit.aggregate.parser.MultiPartFormData;
 import org.opendatakit.aggregate.parser.SubmissionParser;
+import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.aggregate.task.UploadSubmissions;
-import org.opendatakit.common.constants.BasicConsts;
-import org.opendatakit.common.constants.HtmlConsts;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
 import org.opendatakit.common.web.CallingContext;
+import org.opendatakit.common.web.constants.BasicConsts;
+import org.opendatakit.common.web.constants.HtmlConsts;
 
 /**
  * Servlet to process a submission from a form
@@ -61,7 +69,7 @@ import org.opendatakit.common.web.CallingContext;
  */
 public class SubmissionServlet extends ServletUtilBase {
 
-	private static final Log logger = LogFactory.getLog(SubmissionServlet.class);
+  private static final Log logger = LogFactory.getLog(SubmissionServlet.class);
   /**
    * Serial number for serialization
    */
@@ -77,65 +85,59 @@ public class SubmissionServlet extends ServletUtilBase {
    */
   private static final String TITLE = "Submission Upload";
 
-  /**
-   * Script path to include...
-   */
-  private static final String UPLOAD_SCRIPT_RESOURCE = "javascript/upload_control.js";
+  private static final String UPLOAD_PAGE_BODY_START =
 
-  private static final String UPLOAD_PAGE_BODY_START = 
-
-"<div style=\"overflow: auto;\">" +
-"<p><b>Upload one submission into ODK Aggregate</b></p>" +
-"<!--[if true]><p style=\"color: red;\">For a better user experience, use Chrome, Firefox or Safari</p>" +
-"<![endif] -->" +
-"<form id=\"ie_backward_compatible_form\"" + 
-"                        accept-charset=\"UTF-8\" method=\"POST\" encoding=\"multipart/form-data\" enctype=\"multipart/form-data\"" + 
-"                        action=\"";// emit the ADDR
-  private static final String UPLOAD_PAGE_BODY_MIDDLE = "\">" +
-"    <table>" +
-"     <tr>" +
-"        <td><label for=\"xml_submission_file\">Submission data file:</label></td>" +
-"        <td><input id=\"xml_submission_file\" type=\"file\" size=\"80\"" +
-"           name=\"xml_submission_file\" /></td>" +
-"     </tr>" +
-"     <tr>" +
-"        <td><label for=\"mediaFiles\">Associated data file(s):</label></td>" +
-"        <td><input id=\"mediaFiles\" type=\"file\" size=\"80,20\" name=\"datafile\" multiple /><input id=\"clear_media_files\" type=\"button\" value=\"Clear\" onClick=\"clearMediaInputField('mediaFiles')\" /></td>" +
-"     </tr>" +
-"     <!--[if true]>" +
-"        <tr>" +
-"            <td><label for=\"mediaFiles2\">Associated data file #2:</label></td>" +
-"            <td><input id=\"mediaFiles2\" type=\"file\" size=\"80\" name=\"datafile\" /><input id=\"clear_media_files2\" type=\"button\" value=\"Clear\" onClick=\"clearMediaInputField('mediaFiles2')\" /></td>" +
-"        </tr>" +
-"        <tr>" +
-"            <td><label for=\"mediaFiles3\">Associated data file #3:</label></td>" +
-"            <td><input id=\"mediaFiles3\" type=\"file\" size=\"80\" name=\"datafile\" /><input id=\"clear_media_files3\" type=\"button\" value=\"Clear\" onClick=\"clearMediaInputField('mediaFiles3')\" /></td>" +
-"        </tr>" +
-"        <tr>" +
-"            <td><label for=\"mediaFiles4\">Associated data file #4:</label></td>" +
-"            <td><input id=\"mediaFiles4\" type=\"file\" size=\"80\" name=\"datafile\" /><input id=\"clear_media_files4\" type=\"button\" value=\"Clear\" onClick=\"clearMediaInputField('mediaFiles4')\" /></td>" +
-"        </tr>" +
-"        <tr>" +
-"            <td><label for=\"mediaFiles5\">Associated data file #5:</label></td>" +
-"            <td><input id=\"mediaFiles5\" type=\"file\" size=\"80\" name=\"datafile\" /><input id=\"clear_media_files5\" type=\"button\" value=\"Clear\" onClick=\"clearMediaInputField('mediaFiles5')\" /></td>" +
-"        </tr>" +
-"        <tr>" +
-"            <td><label for=\"mediaFiles6\">Associated data file #6:</label></td>" +
-"            <td><input id=\"mediaFiles6\" type=\"file\" size=\"80\" name=\"datafile\" /><input id=\"clear_media_files6\" type=\"button\" value=\"Clear\" onClick=\"clearMediaInputField('mediaFiles6')\" /></td>" +
-"        </tr>" +
-"        <![endif]-->" +
-"     <tr>" +
-"        <td><input type=\"submit\" name=\"button\" value=\"Upload Submission\" /></td>" +
-"        <td />" +
-"     </tr>" +
-"    </table>" +
-"    </form>" +
-"<p>Submissions are located under the <code>/odk/instances</code> directory on the phone's " +
-"sdcard.  This directory will contain subdirectories with names of the form: <code>formID_yyyy-mm-dd_hh-MM-ss</code></p>" +
-"<p>Within each of these subdirectories are the submission data file (named: <code>formID_yyyy-mm-dd_hh-MM-ss.xml</code>)," +
-"and zero or more associated data files for the images, audio clips, video clips, " +
-"etc. linked with this submission.</p>" +
-"</div>";
+  "<div style=\"overflow: auto;\">"
+      + "<p id=\"subHeading\"><b>Upload one submission into ODK Aggregate</b></p>"
+      + "<!--[if true]><p style=\"color: red;\">For a better user experience, use Chrome, Firefox or Safari</p>"
+      + "<![endif] -->"
+      + "<form id=\"ie_backward_compatible_form\""
+      + "                        accept-charset=\"UTF-8\" method=\"POST\" encoding=\"multipart/form-data\" enctype=\"multipart/form-data\""
+      + "                        action=\"";// emit the ADDR
+  private static final String UPLOAD_PAGE_BODY_MIDDLE = "\">"
+      + "    <table id=\"uploadTable\">"
+      + "     <tr>"
+      + "        <td><label for=\"xml_submission_file\">Submission data file:</label></td>"
+      + "        <td><input id=\"xml_submission_file\" type=\"file\" size=\"80\" class=\"gwt-Button\""
+      + "           name=\"xml_submission_file\" /></td>"
+      + "     </tr>"
+      + "     <tr>"
+      + "        <td><label for=\"mediaFiles\">Associated data file(s):</label></td>"
+      + "        <td><input id=\"mediaFiles\" type=\"file\" class=\"gwt-Button\" size=\"80,20\" name=\"datafile\" multiple /><input id=\"clear_media_files\" type=\"button\" class=\"gwt-Button\" value=\"Clear\" onClick=\"clearMediaInputField('mediaFiles')\" /></td>"
+      + "     </tr>"
+      + "     <!--[if true]>"
+      + "        <tr>"
+      + "            <td><label for=\"mediaFiles2\">Associated data file #2:</label></td>"
+      + "            <td><input id=\"mediaFiles2\" class=\"gwt-Button\" type=\"file\" size=\"80\" name=\"datafile\" /><input id=\"clear_media_files2\" type=\"button\" class=\"gwt-Button\" value=\"Clear\" onClick=\"clearMediaInputField('mediaFiles2')\" /></td>"
+      + "        </tr>"
+      + "        <tr>"
+      + "            <td><label for=\"mediaFiles3\">Associated data file #3:</label></td>"
+      + "            <td><input id=\"mediaFiles3\" class=\"gwt-Button\" type=\"file\" size=\"80\" name=\"datafile\" /><input id=\"clear_media_files3\" type=\"button\" class=\"gwt-Button\" value=\"Clear\" onClick=\"clearMediaInputField('mediaFiles3')\" /></td>"
+      + "        </tr>"
+      + "        <tr>"
+      + "            <td><label for=\"mediaFiles4\">Associated data file #4:</label></td>"
+      + "            <td><input id=\"mediaFiles4\" class=\"gwt-Button\" type=\"file\" size=\"80\" name=\"datafile\" /><input id=\"clear_media_files4\" type=\"button\" class=\"gwt-Button\" value=\"Clear\" onClick=\"clearMediaInputField('mediaFiles4')\" /></td>"
+      + "        </tr>"
+      + "        <tr>"
+      + "            <td><label for=\"mediaFiles5\">Associated data file #5:</label></td>"
+      + "            <td><input id=\"mediaFiles5\" class=\"gwt-Button\" type=\"file\" size=\"80\" name=\"datafile\" /><input id=\"clear_media_files5\" type=\"button\" class=\"gwt-Button\" value=\"Clear\" onClick=\"clearMediaInputField('mediaFiles5')\" /></td>"
+      + "        </tr>"
+      + "        <tr>"
+      + "            <td><label for=\"mediaFiles6\">Associated data file #6:</label></td>"
+      + "            <td><input id=\"mediaFiles6\" class=\"gwt-Button\" type=\"file\" size=\"80\" name=\"datafile\" /><input id=\"clear_media_files6\" type=\"button\" class=\"gwt-Button\" value=\"Clear\" onClick=\"clearMediaInputField('mediaFiles6')\" /></td>"
+      + "        </tr>"
+      + "        <![endif]-->"
+      + "     <tr>"
+      + "        <td><input type=\"submit\" name=\"button\" class=\"gwt-Button\" value=\"Upload Submission\" /></td>"
+      + "        <td />"
+      + "     </tr>"
+      + "    </table>"
+      + "    </form>"
+      + "<p id=\"note\">Submissions are located under the <code>/odk/instances</code> directory on the phone's "
+      + "sdcard.  This directory will contain subdirectories with names of the form: <code>formID_yyyy-mm-dd_hh-MM-ss</code></p>"
+      + "<p>Within each of these subdirectories are the submission data file (named: <code>formID_yyyy-mm-dd_hh-MM-ss.xml</code>),"
+      + "and zero or more associated data files for the images, audio clips, video clips, "
+      + "etc. linked with this submission.</p>" + "</div>";
 
   /**
    * Handler for HTTP Get request that processes a form submission
@@ -145,49 +147,58 @@ public class SubmissionServlet extends ServletUtilBase {
    */
   @Override
   public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-   CallingContext cc = ContextFactory.getCallingContext(this, req);
+    CallingContext cc = ContextFactory.getCallingContext(this, req);
 
-   Double openRosaVersion = getOpenRosaVersion(req);
-   if ( openRosaVersion != null ) {
+    Double openRosaVersion = getOpenRosaVersion(req);
+    if (openRosaVersion != null) {
       /*
-       * If we have an OpenRosa version header, assume that this is due to a 
+       * If we have an OpenRosa version header, assume that this is due to a
        * channel redirect (http: => https:) and that the request was originally
-       * a HEAD request.  Reply with a response appropriate for a HEAD request.
+       * a HEAD request. Reply with a response appropriate for a HEAD request.
        * 
        * It is unclear whether this is a GAE issue or a Spring Frameworks issue.
        */
-	  logger.warn("Inside doGet -- replying as doHead");
+      logger.warn("Inside doGet -- replying as doHead");
       doHead(req, resp);
       return;
-   }
+    }
 
-   StringBuilder headerString = new StringBuilder();
-   headerString.append("<script type=\"application/javascript\" src=\"");
-   headerString.append(cc.getWebApplicationURL(UPLOAD_SCRIPT_RESOURCE));
-   headerString.append("\"></script>");
-   beginBasicHtmlResponse(TITLE, headerString.toString(), resp, cc );// header info
-   PrintWriter out = resp.getWriter();
-   out.write(UPLOAD_PAGE_BODY_START);
-   out.write(cc.getWebApplicationURL(ADDR));
-   out.write(UPLOAD_PAGE_BODY_MIDDLE);
-   finishBasicHtmlResponse(resp);
+    StringBuilder headerString = new StringBuilder();
+    headerString.append("<script type=\"application/javascript\" src=\"");
+    headerString.append(cc.getWebApplicationURL(ServletConsts.UPLOAD_SCRIPT_RESOURCE));
+    headerString.append("\"></script>");
+    headerString.append("<link rel=\"stylesheet\" type=\"text/css\" href=\"");
+    headerString.append(cc.getWebApplicationURL(ServletConsts.UPLOAD_STYLE_RESOURCE));
+    headerString.append("\" />");
+    headerString.append("<link rel=\"stylesheet\" type=\"text/css\" href=\"");
+    headerString.append(cc.getWebApplicationURL(ServletConsts.UPLOAD_BUTTON_STYLE_RESOURCE));
+    headerString.append("\" />");
+    headerString.append("<link rel=\"stylesheet\" type=\"text/css\" href=\"");
+    headerString.append(cc.getWebApplicationURL(ServletConsts.AGGREGATE_STYLE));
+
+    beginBasicHtmlResponse(TITLE, headerString.toString(), resp, cc);// header
+                                                                     // info
+    PrintWriter out = resp.getWriter();
+    out.write(UPLOAD_PAGE_BODY_START);
+    out.write(cc.getWebApplicationURL(ADDR));
+    out.write(UPLOAD_PAGE_BODY_MIDDLE);
+    finishBasicHtmlResponse(resp);
   }
 
   /**
-   * Handler for HTTP head request.  This is used to verify that channel
-   * security and authentication have been properly established. 
+   * Handler for HTTP head request. This is used to verify that channel security
+   * and authentication have been properly established.
    */
   @Override
-  protected void doHead(HttpServletRequest req, HttpServletResponse resp)
-         throws IOException {
-   CallingContext cc = ContextFactory.getCallingContext(this, req);
-   logger.info("Inside doHead");
+  protected void doHead(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+    CallingContext cc = ContextFactory.getCallingContext(this, req);
+    logger.info("Inside doHead");
 
-   addOpenRosaHeaders(resp);
-   String serverUrl = cc.getServerURL();
-   String url = serverUrl +  BasicConsts.FORWARDSLASH + ADDR;
-   resp.setHeader("Location", url);
-   resp.setStatus(204); // no content...
+    addOpenRosaHeaders(resp);
+    String serverUrl = cc.getServerURL();
+    String url = serverUrl + BasicConsts.FORWARDSLASH + ADDR;
+    resp.setHeader("Location", url);
+    resp.setStatus(204); // no content...
   }
 
   /**
@@ -199,15 +210,16 @@ public class SubmissionServlet extends ServletUtilBase {
    */
   @Override
   public void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-   CallingContext cc = ContextFactory.getCallingContext(this, req);
+    CallingContext cc = ContextFactory.getCallingContext(this, req);
 
-   Double openRosaVersion = getOpenRosaVersion(req);
-   boolean isIncomplete = false;
+    Double openRosaVersion = getOpenRosaVersion(req);
+    boolean isIncomplete = false;
     try {
       SubmissionParser submissionParser = null;
       if (ServletFileUpload.isMultipartContent(req)) {
         MultiPartFormData uploadedSubmissionItems = new MultiPartFormData(req);
-        String isIncompleteFlag = uploadedSubmissionItems.getSimpleFormField(ServletConsts.TRANSFER_IS_INCOMPLETE);
+        String isIncompleteFlag = uploadedSubmissionItems
+            .getSimpleFormField(ServletConsts.TRANSFER_IS_INCOMPLETE);
         isIncomplete = (isIncompleteFlag != null && isIncompleteFlag.compareToIgnoreCase("YES") == 0);
         submissionParser = new SubmissionParser(uploadedSubmissionItems, isIncomplete, cc);
       } else {
@@ -224,24 +236,24 @@ public class SubmissionServlet extends ServletUtilBase {
 
       // publication failures should not fail the submission...
       try {
-	     CallingContext ccDaemon = ContextFactory.getCallingContext(this, req);
-	     ccDaemon.setAsDaemon(true);
-	     for (ExternalService rs : tmp) {
-	        uploadTask.createFormUploadTask(rs.getFormServiceCursor(), ccDaemon);
-	     }
+        CallingContext ccDaemon = ContextFactory.getCallingContext(this, req);
+        ccDaemon.setAsDaemon(true);
+        for (ExternalService rs : tmp) {
+          uploadTask.createFormUploadTask(rs.getFormServiceCursor(), ccDaemon);
+        }
       } catch (ODKExternalServiceException e) {
-          logger.info("Publishing enqueue failure (this is recoverable) - " + e.getMessage());
-          e.printStackTrace();
+        logger.info("Publishing enqueue failure (this is recoverable) - " + e.getMessage());
+        e.printStackTrace();
       }
-      
-      // form full url including scheme...
-     String serverUrl = cc.getServerURL();
-     String url = serverUrl +  BasicConsts.FORWARDSLASH + ADDR;
-     resp.setHeader("Location", url);
 
-     resp.setStatus(HttpServletResponse.SC_CREATED);
-      if ( openRosaVersion == null ) {
-    	logger.info("Successful non-OpenRosa submission");
+      // form full url including scheme...
+      String serverUrl = cc.getServerURL();
+      String url = serverUrl + BasicConsts.FORWARDSLASH + ADDR;
+      resp.setHeader("Location", url);
+
+      resp.setStatus(HttpServletResponse.SC_CREATED);
+      if (openRosaVersion == null) {
+        logger.info("Successful non-OpenRosa submission");
 
         resp.setContentType(HtmlConsts.RESP_TYPE_HTML);
         resp.setCharacterEncoding(HtmlConsts.UTF8_ENCODE);
@@ -254,17 +266,46 @@ public class SubmissionServlet extends ServletUtilBase {
         out.write(HtmlConsts.BODY_CLOSE);
         out.write(HtmlConsts.HTML_CLOSE);
       } else {
-    	logger.info("Successful OpenRosa submission");
+        logger.info("Successful OpenRosa submission");
 
-  	    addOpenRosaHeaders(resp);
+        addOpenRosaHeaders(resp);
         resp.setContentType(HtmlConsts.RESP_TYPE_XML);
         resp.setCharacterEncoding(HtmlConsts.UTF8_ENCODE);
         PrintWriter out = resp.getWriter();
         out.write("<OpenRosaResponse xmlns=\"http://openrosa.org/http/response\">");
-        if ( isIncomplete ) {
-           out.write("<message>partial submission upload was successful!</message>");
+        if (isIncomplete) {
+          out.write("<message>partial submission upload was successful!</message>");
         } else {
-           out.write("<message>full submission upload was successful!</message>");
+          out.write("<message>full submission upload was successful!</message>");
+        }
+
+        // for Briefcase2, use the attributes on a <submissionMetadata> tag to
+        // update the local copy of the data (if these attributes are
+        // available).
+        {
+          XmlAttributeFormatter attributeFormatter = new XmlAttributeFormatter();
+          Submission sub = submissionParser.getSubmission();
+          Row attributeRow = new Row(sub.constructSubmissionKey(null));
+          //
+          // add what could be considered the form's metadata...
+          //
+          attributeRow.addFormattedValue("id=\"" + StringEscapeUtils.escapeXml(form.getFormId())
+              + "\"");
+          if (form.isEncryptedForm()) {
+            attributeRow.addFormattedValue("encrypted=\"yes\"");
+          }
+          sub.getFormattedNamespaceValuesForRow(attributeRow,
+              Collections.singletonList(FormElementNamespace.METADATA), attributeFormatter, false,
+              cc);
+
+          out.write("<submissionMetadata xmlns=\""
+              + StringEscapeUtils.escapeXml(ParserConsts.NAMESPACE_ODK) + "\"");
+          Iterator<String> itrAttributes = attributeRow.getFormattedValues().iterator();
+          while (itrAttributes.hasNext()) {
+            out.write(" ");
+            out.write(itrAttributes.next());
+          }
+          out.write("/>");
         }
         out.write("</OpenRosaResponse>");
       }
@@ -280,7 +321,7 @@ public class SubmissionServlet extends ServletUtilBase {
       logger.error("Persist failure - " + e.getMessage());
       e.printStackTrace();
       resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ErrorConsts.PARSING_PROBLEM);
-   } catch (ODKIncompleteSubmissionData e) {
+    } catch (ODKIncompleteSubmissionData e) {
       logger.warn("Incomplete submission failure - " + e.getMessage());
       e.printStackTrace();
       resp.sendError(HttpServletResponse.SC_BAD_REQUEST, ErrorConsts.PARSING_PROBLEM);
@@ -298,12 +339,13 @@ public class SubmissionServlet extends ServletUtilBase {
       resp.sendError(HttpServletResponse.SC_BAD_REQUEST, ErrorConsts.PARSING_PROBLEM);
     } catch (ODKFormSubmissionsDisabledException e) {
       logger.warn("Form submission disabled - " + e.getMessage());
-	  e.printStackTrace();
-      resp.sendError(HttpServletResponse.SC_BAD_REQUEST, ErrorConsts.FORM_DOES_NOT_ALLOW_SUBMISSIONS);
-	} catch (Exception e) {
-	  logger.error("Unexpected exception: " + e.getMessage());
-	  e.printStackTrace();
-	  resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Unexpected exception");
-	}
+      e.printStackTrace();
+      resp.sendError(HttpServletResponse.SC_BAD_REQUEST,
+          ErrorConsts.FORM_DOES_NOT_ALLOW_SUBMISSIONS);
+    } catch (Exception e) {
+      logger.error("Unexpected exception: " + e.getMessage());
+      e.printStackTrace();
+      resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Unexpected exception");
+    }
   }
 }

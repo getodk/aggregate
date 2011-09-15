@@ -21,7 +21,6 @@ import java.security.NoSuchAlgorithmException;
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.permissions.CredentialsInfoBuilder;
 import org.opendatakit.aggregate.client.popups.ChangePasswordPopup;
-import org.opendatakit.aggregate.client.popups.HelpBalloon;
 import org.opendatakit.common.security.client.CredentialsInfo;
 import org.opendatakit.common.security.client.RealmSecurityInfo;
 import org.opendatakit.common.security.client.UserSecurityInfo;
@@ -41,79 +40,78 @@ import com.google.gwt.user.client.ui.PasswordTextBox;
  * @author mitchellsundt@gmail.com
  * 
  */
-public class ExecuteChangePasswordButton extends AbstractButtonBase implements ClickHandler {
+public final class ExecuteChangePasswordButton extends AggregateButton implements ClickHandler {
 
-	private static final String TOOLTIP_TEXT = "Change the user's password";
+  private static final String BUTTON_TXT = "<img src=\"images/green_right_arrow.png\" /> Change Password";
+  private static final String TOOLTIP_TXT = "Change the user's password";
+  private static final String HELP_BALLOON_TXT = "Change the user's password when logging into Aggregate.";
 
-	private static final String HELP_BALLOON_TXT = "Change the user's password when logging into " +
-			"Aggregate.";
+  private static int jsonRequestId = 0;
 
-	private static int jsonRequestId = 0;
+  private ChangePasswordPopup popup;
+  private String baseUrl;
 
-	private ChangePasswordPopup popup;
-	private String baseUrl;
+  public ExecuteChangePasswordButton(ChangePasswordPopup popup) {
+    super(BUTTON_TXT, TOOLTIP_TXT, HELP_BALLOON_TXT);
+    this.popup = popup;
+  }
 
-	public ExecuteChangePasswordButton(ChangePasswordPopup popup) {
-		super("<img src=\"images/green_right_arrow.png\" /> Change Password", TOOLTIP_TEXT);
-		this.popup = popup;
-		helpBalloon = new HelpBalloon(this, HELP_BALLOON_TXT);
-	}
+  @Override
+  public void onClick(ClickEvent event) {
+    super.onClick(event);
+    
+    PasswordTextBox password1 = popup.getPassword1();
+    PasswordTextBox password2 = popup.getPassword2();
+    UserSecurityInfo userInfo = popup.getUser();
+    RealmSecurityInfo realmInfo = AggregateUI.getUI().getRealmInfo();
 
-	@Override
-	public void onClick(ClickEvent event) {
-		super.onClick(event);
-		PasswordTextBox password1 = popup.getPassword1();
-		PasswordTextBox password2 = popup.getPassword2();
-		UserSecurityInfo userInfo = popup.getUser();
-		RealmSecurityInfo realmInfo = AggregateUI.getUI().getRealmInfo();
+    String pw1 = password1.getText();
+    String pw2 = password2.getText();
+    if (pw1 == null || pw2 == null || pw1.length() == 0) {
+      Window.alert("Password cannot be blank");
+    } else if (pw1.equals(pw2)) {
+      if (realmInfo == null || userInfo == null) {
+        Window.alert("Unable to obtain required information from server");
+      } else {
+        CredentialsInfo credential;
+        try {
+          credential = CredentialsInfoBuilder.build(userInfo.getUsername(), realmInfo, pw1);
+        } catch (NoSuchAlgorithmException e) {
+          Window.alert("Unable to build credentials hash");
+          return;
+        }
 
-		String pw1 = password1.getText();
-		String pw2 = password2.getText();
-		if (pw1 == null || pw2 == null || pw1.length() == 0) {
-			Window.alert("Password cannot be blank");
-		} else if (pw1.equals(pw2)) {
-			if (realmInfo == null || userInfo == null) {
-				Window.alert("Unable to obtain required information from server");
-			} else {
-				CredentialsInfo credential;
-				try {
-					credential = CredentialsInfoBuilder.build(userInfo.getUsername(), realmInfo, pw1);
-				} catch (NoSuchAlgorithmException e) {
-					Window.alert("Unable to build credentials hash");
-					return;
-				}
+        baseUrl = realmInfo.getChangeUserPasswordURL();
 
-				baseUrl = realmInfo.getChangeUserPasswordURL();
+        // Construct a JSOP request
+        String parameters = credential.getRequestParameters();
+        String url = baseUrl + "?" + parameters + "&callback=";
+        getJson(jsonRequestId++, url, this);
+      }
+    } else {
+      Window.alert("The passwords do not match. Please retype the password.");
+    }
+  }
 
-				// Construct a JSOP request
-				String parameters = credential.getRequestParameters();
-				String url = baseUrl + "?" + parameters + "&callback=";
-				getJson(jsonRequestId++, url, this);
-			}
-		} else {
-			Window.alert("The passwords do not match. Please retype the password.");
-		}
-	}
+  public void handleJsonResponse(String username, String status) {
+    if (username == null) {
+      Window.alert("JSON change-password request to " + baseUrl + " failed");
+    } else {
+      // process response...
+      if (!(status != null && "OK".equals(status))) {
+        Window.alert("Change password request "
+            + ((username == null) ? "" : ("for " + username + " ")) + "failed.\n"
+            + "JSON change-password request to\n   " + baseUrl + "\nreturned: " + status);
+      }
+    }
+    popup.hide();
+  }
 
-	public void handleJsonResponse(String username, String status) {
-		if (username == null) {
-			Window.alert("JSON change-password request to " + baseUrl + " failed");
-		} else {
-			// process response...
-			if (!(status != null && "OK".equals(status))) {
-				Window.alert("Change password request "
-						+ ((username == null) ? "" : ("for " + username + " ")) + "failed.\n"
-						+ "JSON change-password request to\n   " + baseUrl + "\nreturned: " + status);
-			}
-		}
-		popup.hide();
-	}
+  public void onError(String echo, String error) {
+    Window.alert("Unable to change passwored for " + echo + " error: " + error);
+  }
 
-	public void onError(String echo, String error) {
-		Window.alert("Unable to change passwored for " + echo + " error: " + error);
-	}
-
-	public native static void getJson(int requestId, String url, ExecuteChangePasswordButton handler) /*-{
+  public native static void getJson(int requestId, String url, ExecuteChangePasswordButton handler) /*-{
 		var callback = "callback" + requestId;
 
 		var script = document.createElement("script");

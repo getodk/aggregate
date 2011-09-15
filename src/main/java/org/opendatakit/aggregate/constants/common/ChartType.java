@@ -19,24 +19,28 @@ package org.opendatakit.aggregate.constants.common;
 import java.io.Serializable;
 
 public enum ChartType implements Serializable {
-  PIE_CHART("Pie Chart", "p3"),
-  BAR_GRAPH("Bar Graph", "bvg"),
-  SCATTER_PLOT("Scatter Plot", "s"),
-  MAP("Map", "");
+  PIE_CHART("Pie Chart", "<img src=\"images/pie_chart.png\" /> Pie It"),
+  BAR_GRAPH("Bar Graph", "<img src=\"images/bar_chart.png\" /> Bar It"),
+ // SCATTER_PLOT("Scatter Plot", "s", "<img src=\"scatter_plot.png\" /> Plot It"),
+  MAP("Map", "<img src=\"images/map.png\" /> Map It");
   
   private String displayText;
-  private String optionText;
+  private String buttonText;
   
-  private ChartType(String display, String option) {
+  private ChartType(String display, String buttonTxt) {
     displayText = display;
-    optionText = option;
+    buttonText = buttonTxt;
   }
   
   public String getDisplayText() {
     return displayText;
   }
+  
+  public String getButtonText() {
+    return buttonText;
+  }
 
-  public String getOptionText() {
-    return optionText;
+  public String toString() {
+    return displayText;
   }
 }

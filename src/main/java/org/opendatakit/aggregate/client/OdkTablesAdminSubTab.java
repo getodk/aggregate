@@ -2,7 +2,7 @@ package org.opendatakit.aggregate.client;
 
 import org.opendatakit.aggregate.client.preferences.OdkTablesAdmin;
 import org.opendatakit.aggregate.client.table.OdkAdminListTable;
-import org.opendatakit.aggregate.client.widgets.AddTablesAdmin;
+import org.opendatakit.aggregate.client.widgets.AddTablesAdminButton;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlexTable;
@@ -14,7 +14,7 @@ public class OdkTablesAdminSubTab extends AggregateSubTabBase {
   
   public OdkTablesAdminSubTab() {
     nav = new FlexTable();
-    nav.setWidget(0, 0, new AddTablesAdmin());
+    nav.setWidget(0, 0, new AddTablesAdminButton());
     
     add(nav);
     listOfAdmins = new OdkAdminListTable();
