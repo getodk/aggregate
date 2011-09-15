@@ -79,6 +79,7 @@ private final String downloadRequestURL;
 	// setting the response content type emits the xml header.
 	// just write the body here...
 	d.writeChildren(serializer); 
+	serializer.flush();
   }
 
   private int generateFormXmlEntry(Document d, Element e, int idx, Form form) {
