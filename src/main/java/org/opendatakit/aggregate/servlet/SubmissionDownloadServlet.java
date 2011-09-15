@@ -39,7 +39,7 @@ import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.HtmlConsts;
 
 /**
- * Servlet to generate the XML representation of a given submission entry and 
+ * Servlet to generate the XML representation of a given submission entry and
  * return the attachments associated with that submission.
  * 
  * Used by Briefcase 2.0 download.
@@ -66,54 +66,54 @@ public class SubmissionDownloadServlet extends ServletUtilBase {
    *      javax.servlet.http.HttpServletResponse)
    */
   @Override
-  public void doGet(HttpServletRequest req, HttpServletResponse resp)
-      throws IOException {
-		CallingContext cc = ContextFactory.getCallingContext(this, req);
+  public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+    CallingContext cc = ContextFactory.getCallingContext(this, req);
 
-		// verify parameters are present
-		String keyString = getParameter(req, ServletConsts.FORM_ID);
-		if (keyString == null) {
-			sendErrorNotEnoughParams(resp);
-			return;
-		}
-		SubmissionKey key = new SubmissionKey(keyString);
+    // verify parameters are present
+    String keyString = getParameter(req, ServletConsts.FORM_ID);
+    if (keyString == null) {
+      sendErrorNotEnoughParams(resp);
+      return;
+    }
+    SubmissionKey key = new SubmissionKey(keyString);
 
-		List<SubmissionKeyPart> parts = key.splitSubmissionKey();
-		Submission sub = null;
-		try {
-			Form form = Form.retrieveFormByFormId(parts.get(0).getElementName(), cc);
-		    if ( form.getFormDefinition() == null ) {
-				errorRetreivingData(resp);
-				return; // ill-formed definition
-		    }
-			sub = Submission.fetchSubmission(parts, cc);
+    List<SubmissionKeyPart> parts = key.splitSubmissionKey();
+    Submission sub = null;
+    try {
+      Form form = Form.retrieveFormByFormId(parts.get(0).getElementName(), cc);
+      if (form.getFormDefinition() == null) {
+        errorRetreivingData(resp);
+        return; // ill-formed definition
+      }
+      sub = Submission.fetchSubmission(parts, cc);
 
-			if (sub != null) {
-				
-			    resp.setCharacterEncoding(HtmlConsts.UTF8_ENCODE);
-			    resp.setContentType(HtmlConsts.RESP_TYPE_XML);
-			    addOpenRosaHeaders(resp);
-				
-			    PrintWriter out = resp.getWriter();
-			    out.write("<submission xmlns=\"http://opendatakit.org/submissions\">");
-			    out.write("<data>");
-			    List<FormElementModel> selectedColumnNames = null;
-			    XmlFormatter formatter = new XmlFormatter(out, selectedColumnNames, form, cc);
-				formatter.processSubmissions(Collections.singletonList(sub), cc);
-				out.write("</data>\n");
-				XmlAttachmentFormatter attach = new XmlAttachmentFormatter(out, selectedColumnNames, form, cc);
-				attach.processSubmissions(Collections.singletonList(sub), cc);
-				out.write("</submission>");
-				resp.setStatus(HttpServletResponse.SC_OK);
-			} else {
-				errorRetreivingData(resp);
-			}
-		} catch (ODKFormNotFoundException e1) {
-			odkIdNotFoundError(resp);
-			errorRetreivingData(resp);
-		} catch (ODKDatastoreException e) {
-			e.printStackTrace();
-			errorRetreivingData(resp);
-		}
-	}
+      if (sub != null) {
+
+        resp.setCharacterEncoding(HtmlConsts.UTF8_ENCODE);
+        resp.setContentType(HtmlConsts.RESP_TYPE_XML);
+        addOpenRosaHeaders(resp);
+
+        PrintWriter out = resp.getWriter();
+        out.write("<submission xmlns=\"http://opendatakit.org/submissions\">");
+        out.write("<data>");
+        List<FormElementModel> selectedColumnNames = null;
+        XmlFormatter formatter = new XmlFormatter(out, selectedColumnNames, form, cc);
+        formatter.processSubmissions(Collections.singletonList(sub), cc);
+        out.write("</data>\n");
+        XmlAttachmentFormatter attach = new XmlAttachmentFormatter(out, selectedColumnNames, form,
+            cc);
+        attach.processSubmissions(Collections.singletonList(sub), cc);
+        out.write("</submission>");
+        resp.setStatus(HttpServletResponse.SC_OK);
+      } else {
+        errorRetreivingData(resp);
+      }
+    } catch (ODKFormNotFoundException e1) {
+      odkIdNotFoundError(resp);
+      errorRetreivingData(resp);
+    } catch (ODKDatastoreException e) {
+      e.printStackTrace();
+      errorRetreivingData(resp);
+    }
+  }
 }

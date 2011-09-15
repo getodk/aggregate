@@ -77,10 +77,12 @@ public class XmlMediaAttachmentFormatter implements ElementFormatter {
 	    String downloadRequestURL = cc.getServerURL() + BasicConsts.FORWARDSLASH + BinaryDataServlet.ADDR;
 	    urlLink = HtmlUtil.createLinkWithProperties(downloadRequestURL, properties);
 	}
-    String xmlString = "<media>" +
+	// parallel to XFormsManifestXmlTable
+    String xmlString = "<mediaFile>" +
     		"<filename>" + StringEscapeUtils.escapeXml(blobSubmission.getUnrootedFilename(1)) + "</filename>" +
-    		"<url>"	+ StringEscapeUtils.escapeXml(urlLink) + "</url>" +
-    	"</media>\n";
+    		"<hash>"	+ StringEscapeUtils.escapeXml(blobSubmission.getContentHash(1)) + "</hash>" +
+    		"<downloadUrl>"	+ StringEscapeUtils.escapeXml(urlLink) + "</downloadUrl>" +
+    	"</mediaFile>\n";
     
     row.addFormattedValue(xmlString);
   }
