@@ -33,4 +33,4 @@ mvn install:install-file -Dfile=gwt-visualization-1.1.1.jar -DgroupId=com.google
 
 appengine-remote-api:
 
-mvn install:install-file -Dfile=appengine-remote-api.jar -DgroupId=com.google.appengine -DartifactId=appengine-remote-api -Dversion=1.5.3 -Dpackaging=jar
+mvn install:install-file -Dfile=appengine-remote-api.jar -DgroupId=com.google.appengine -DartifactId=appengine-remote-api -Dversion=1.5.4 -Dpackaging=jar
