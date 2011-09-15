@@ -72,7 +72,7 @@ public class FragmentedCsvServlet extends ServletUtilBase {
 	private static final int DEFAULT_NUM_ENTRIES = 1000;
 
 	private void emitInfoPage(HttpServletRequest req, HttpServletResponse resp, String errorDescription, int status, CallingContext cc) throws IOException {
-        beginBasicHtmlResponse(TITLE_INFO, resp, true, cc); // header info
+        beginBasicHtmlResponse(TITLE_INFO, resp, cc); // header info
         String requestPath = cc.getServerURL() + BasicConsts.FORWARDSLASH + ADDR;
         
         PrintWriter out = resp.getWriter();

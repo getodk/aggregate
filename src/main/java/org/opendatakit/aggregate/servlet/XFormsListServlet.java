@@ -31,8 +31,8 @@ import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.HtmlConsts;
 
 /**
- * Servlet to generate the OpenRosa-compliant XML list of forms to be 
- * presented as the API for forms for computers
+ * Servlet to generate the OpenRosa-compliant XML list of forms to be presented
+ * as the API for forms for computers
  * 
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
@@ -58,12 +58,12 @@ public class XFormsListServlet extends ServletUtilBase {
    */
   @Override
   public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-   CallingContext cc = ContextFactory.getCallingContext(this, req);
+    CallingContext cc = ContextFactory.getCallingContext(this, req);
     addOpenRosaHeaders(resp);
-    
+
     try {
       List<Form> formsList = Form.getForms(false, cc);
-	  XFormsXmlTable formFormatter = new XFormsXmlTable(formsList, cc.getServerURL());
+      XFormsXmlTable formFormatter = new XFormsXmlTable(formsList, cc.getServerURL());
 
       resp.setContentType(HtmlConsts.RESP_TYPE_XML);
       formFormatter.generateXmlListOfForms(resp.getWriter());

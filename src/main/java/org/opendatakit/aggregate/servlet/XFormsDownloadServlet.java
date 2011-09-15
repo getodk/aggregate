@@ -38,10 +38,10 @@ import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.HtmlConsts;
 
 /**
- * Servlet to download the manifest-declared files of a form. 
+ * Servlet to download the manifest-declared files of a form.
  * 
- * Largely copied from BinaryDataServlet.  
- * Restricts the form to be the FormInfo form.
+ * Largely copied from BinaryDataServlet. Restricts the form to be the FormInfo
+ * form.
  * 
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
@@ -66,113 +66,114 @@ public class XFormsDownloadServlet extends ServletUtilBase {
    *      javax.servlet.http.HttpServletResponse)
    */
   @Override
-  public void doGet(HttpServletRequest req, HttpServletResponse resp)
-      throws IOException {
-   CallingContext cc = ContextFactory.getCallingContext(this, req);
-   addOpenRosaHeaders(resp);
+  public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+    CallingContext cc = ContextFactory.getCallingContext(this, req);
+    addOpenRosaHeaders(resp);
 
     // verify parameters are present
     String keyString = getParameter(req, ServletConsts.BLOB_KEY);
     String downloadAsAttachmentString = getParameter(req, ServletConsts.AS_ATTACHMENT);
-    
+
     if (keyString == null) {
       sendErrorNotEnoughParams(resp);
       return;
     }
     SubmissionKey key = new SubmissionKey(keyString);
-    
+
     List<SubmissionKeyPart> parts = key.splitSubmissionKey();
-    
+
     boolean isXformDefinitionRequest = false;
-    
+
     // verify that the submission key is well-formed
-    if ( FormInfo.validFormManifestKey(parts)) {
-    	isXformDefinitionRequest = false;
-    } else if ( FormInfo.validFormXformDefinitionKey(parts)) {
-    	isXformDefinitionRequest = true;
+    if (FormInfo.validFormManifestKey(parts)) {
+      isXformDefinitionRequest = false;
+    } else if (FormInfo.validFormXformDefinitionKey(parts)) {
+      isXformDefinitionRequest = true;
     } else {
-        errorBadParam(resp);
-        return;
+      errorBadParam(resp);
+      return;
     }
-    
+
     // get this form's definition
     Form form;
     try {
-	  form = Form.retrieveForm(parts, cc);
+      form = Form.retrieveForm(parts, cc);
     } catch (ODKFormNotFoundException e1) {
       odkIdNotFoundError(resp);
       return;
     }
-   
-    // the binary content selection is the 4th part (formInfo/row/fileset/[xform|manifest])
+
+    // the binary content selection is the 4th part
+    // (formInfo/row/fileset/[xform|manifest])
     SubmissionKeyPart part = parts.get(3);
 
     byte[] imageBlob;
     String unrootedFileName;
     String contentType;
     Long contentLength;
-    
-    if ( isXformDefinitionRequest ) {
-    	BinaryContentManipulator xform = form.getXformDefinition();
-    	if ( xform.getAttachmentCount() != 1 ) {
-    	    resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-            				"Unexpectedly non-unary attachment count");
-    	    return;
-    	}
-    	unrootedFileName = xform.getUnrootedFilename(1);
-    	contentType = xform.getContentType(1);
-    	contentLength = xform.getContentLength(1);
-    	try {
-			imageBlob = xform.getBlob(1, cc);
-		} catch (ODKDatastoreException e) {
-			e.printStackTrace();
-		      resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-              "Unable to retrieve attachment");
-		    return;
-		}
+
+    if (isXformDefinitionRequest) {
+      BinaryContentManipulator xform = form.getXformDefinition();
+      if (xform.getAttachmentCount() != 1) {
+        resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+            "Unexpectedly non-unary attachment count");
+        return;
+      }
+      unrootedFileName = xform.getUnrootedFilename(1);
+      contentType = xform.getContentType(1);
+      contentLength = xform.getContentLength(1);
+      try {
+        imageBlob = xform.getBlob(1, cc);
+      } catch (ODKDatastoreException e) {
+        e.printStackTrace();
+        resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+            "Unable to retrieve attachment");
+        return;
+      }
     } else {
-    	BinaryContentManipulator manifest = form.getManifestFileset();
-    	if ( part.getOrdinalNumber() == null ) {
-            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, 
-            				"attachment request must be fully qualified");
-            return; 
-    	}
-    	int idx = part.getOrdinalNumber().intValue();
-    	if ( manifest.getAttachmentCount() < idx ) {
-    		errorBadParam(resp);
-            return;
-    	}
-    	unrootedFileName = manifest.getUnrootedFilename(idx);
-    	contentType = manifest.getContentType(idx);
-    	contentLength = manifest.getContentLength(idx);
-    	try {
-			imageBlob = manifest.getBlob(idx, cc);
-		} catch (ODKDatastoreException e) {
-			e.printStackTrace();
-		    resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-              "Unable to retrieve attachment");
-		    return;
-		}
+      BinaryContentManipulator manifest = form.getManifestFileset();
+      if (part.getOrdinalNumber() == null) {
+        resp.sendError(HttpServletResponse.SC_BAD_REQUEST,
+            "attachment request must be fully qualified");
+        return;
+      }
+      int idx = part.getOrdinalNumber().intValue();
+      if (manifest.getAttachmentCount() < idx) {
+        errorBadParam(resp);
+        return;
+      }
+      unrootedFileName = manifest.getUnrootedFilename(idx);
+      contentType = manifest.getContentType(idx);
+      contentLength = manifest.getContentLength(idx);
+      try {
+        imageBlob = manifest.getBlob(idx, cc);
+      } catch (ODKDatastoreException e) {
+        e.printStackTrace();
+        resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+            "Unable to retrieve attachment");
+        return;
+      }
     }
-    
-    if ( imageBlob != null ) {
-      if ( contentType == null ) {
-            resp.setContentType(HtmlConsts.RESP_TYPE_IMAGE_JPEG);
-        } else {
-          resp.setContentType(contentType);
+
+    if (imageBlob != null) {
+      if (contentType == null) {
+        resp.setContentType(HtmlConsts.RESP_TYPE_IMAGE_JPEG);
+      } else {
+        resp.setContentType(contentType);
+      }
+      if (contentLength != null) {
+        resp.setContentLength(contentLength.intValue());
+      }
+
+      if (downloadAsAttachmentString != null && !"".equals(downloadAsAttachmentString)) {
+        // set filename if we are downloading to disk...
+        // need this for manifest fetch logic...
+        if (unrootedFileName != null) {
+          resp.addHeader("Content-Disposition:", "attachment; filename=\"" + unrootedFileName
+              + "\"");
         }
-      if ( contentLength != null ) {
-         resp.setContentLength(contentLength.intValue());
       }
-      
-      if ( downloadAsAttachmentString != null && ! "".equals(downloadAsAttachmentString) ) {
-         // set filename if we are downloading to disk...
-         // need this for manifest fetch logic...
-         if ( unrootedFileName != null ) {
-            resp.addHeader("Content-Disposition:", "attachment; filename=\""+unrootedFileName+"\"");
-         }
-      }
-      
+
       OutputStream os = resp.getOutputStream();
       os.write(imageBlob);
       os.close();

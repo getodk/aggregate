@@ -297,15 +297,6 @@
 	</servlet-mapping>
 
 	<servlet>
-		<servlet-name>briefcase</servlet-name>
-		<servlet-class>org.opendatakit.aggregate.servlet.BriefcaseServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>briefcase</servlet-name>
-		<url-pattern>/Briefcase</url-pattern>
-	</servlet-mapping>
-
-	<servlet>
 		<servlet-name>worksheet</servlet-name>
 		<servlet-class>org.opendatakit.aggregate.task.gae.servlet.WorksheetServlet</servlet-class>
 	</servlet>

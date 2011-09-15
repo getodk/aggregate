@@ -3,6 +3,37 @@ All rights reserved.
 
 App Engine Java SDK - Release Notes
 
+Version 1.5.4
+=============
+- You can now specify the maximum size for a blob in
+  BlobstoreService.createUploadUrl().
+- Zigzag merge join queries will now continue scanning up to the 30 second
+  Datastore query deadline. For zigzag queries that used to generate
+  DatastoreNeedIndexException, many will now succeed. A small percentage will
+  now instead timeout.
+- The SDK datastore viewer in the dev console now displays the number of "Write
+  Ops" for each entity. "Write Ops" are the total number of entity and index
+  writes that were required to create the entity.
+- The Prospective Search API is available in Java for all applications. This API
+  is still experimental, so applications will be limited to a maximum of 1000
+  subscriptions.
+- We made a classloading improvement that we expect to help loading request
+  latencies for projects with large numbers of jars.
+- Added support for the set_default_version flag to Appcfg.
+- The Java Remote API now recognizes the HTTP_X_APPENGINE_INBOUND_APPID. This
+  means that the Datastore Admin copy functionality will work when using
+  Java's Remote API with the destination app.
+- Fixed an issue that incorrectly allowed creation of tasks with whitespace in
+  the url.
+- Fixed the error message for "transaction not found" to be more descriptive.
+- Fixed an issue with the dev appserver's local Blobstore implementation trying
+  to modify an immutable collection.
+    http://code.google.com/p/googleappengine/issues/detail?id=3081
+- Fixed an SDK issue where CONFIG, FINE, FINER, FINEST logging messages were not
+  displayed.
+    http://code.google.com/p/googleappengine/issues/detail?id=4591
+
+
 Version 1.5.3
 =============
 - We've removed the limit on the size of blob uploads using the Blobstore API.

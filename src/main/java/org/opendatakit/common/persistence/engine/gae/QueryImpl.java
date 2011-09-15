@@ -859,7 +859,6 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
 		}
 		 
 		SortTracker dominantSort = sortList.get(0);
-		DataField dominantSortAttr = dominantSort.getAttribute();
 		
 		// if we don't have any sort on the PK, add one
 		// direction of PK sort matches that of dominant sort

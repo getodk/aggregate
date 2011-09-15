@@ -360,7 +360,7 @@ public class FormParserForJavaRosa {
     // insist that the submission element and root element have the same 
     // formId, modelVersion and uiVersion.
     if ( !submissionElementDefn.equals(rootElementDefn) ) {
-    	throw new ODKIncompleteSubmissionData("submission element and root element differ in their values for: formId, version or uiVersion.");
+    	throw new ODKIncompleteSubmissionData("submission element and root element differ in their values for: formId, version or uiVersion.", Reason.MISMATCHED_SUBMISSION_ELEMENT);
     }
     
     String publicKey = null;

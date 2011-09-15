@@ -126,6 +126,7 @@ public class FragmentedCsvFormatter extends TableFormatterBase implements Submis
 		// setting the response content type emits the xml header.
 		// just write the body here...
 		d.writeChildren(serializer); 
+		serializer.flush();
 	}
 
 	  @Override

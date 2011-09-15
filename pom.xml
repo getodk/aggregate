@@ -17,11 +17,11 @@
     	<itFormsDirectory>${project.basedir}/../src/it/testfiles/forms</itFormsDirectory>
     	<itSubmissionsDirectory>${project.basedir}/../src/it/testfiles/submissions</itSubmissionsDirectory>
     	<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<gooogle.appengine.sdk.version>1.5.3</gooogle.appengine.sdk.version>
+		<gooogle.appengine.sdk.version>1.5.4</gooogle.appengine.sdk.version>
 		<google.gdata.version>1.41.5</google.gdata.version>
-		<google.gwt.version>2.3.0</google.gwt.version>
+		<google.gwt.version>2.4.0</google.gwt.version>
 		<gwt.maven.plugin.version>2.3.0-1</gwt.maven.plugin.version>
-		<maven.gae.plugin.version>0.8.4</maven.gae.plugin.version>
+		<maven.gae.plugin.version>0.9.1</maven.gae.plugin.version>
 		<maven.war.plugin.version>2.1.1</maven.war.plugin.version>
 		<maven.antrun.plugin.version>1.6</maven.antrun.plugin.version>
 		<org.springframework.version>3.0.5.RELEASE</org.springframework.version>
@@ -264,8 +264,15 @@
 		</dependency>
 		<dependency>
 		  <groupId>com.google.gwt.google-apis</groupId>
-		  <artifactId>gwt-maps</artifactId>
+		  <artifactId>gwt-maps</artifactId> <!-- see src/main/libs/readme.txt -->
 		  <version>1.1.0</version>
+		  <type>jar</type>
+		  <scope>compile</scope>
+		</dependency>
+		<dependency>
+		  <groupId>com.google.gwt.google-apis</groupId>
+		  <artifactId>gwt-visualization</artifactId> <!-- see src/main/libs/readme.txt -->
+		  <version>1.1.1</version>
 		  <type>jar</type>
 		  <scope>compile</scope>
 		</dependency>
@@ -292,14 +299,8 @@
 			<version>4.0.3</version>
 		</dependency>
 		<dependency>
-		  <!-- This library is not availale in central maven repos (or any maven repos).
-			   It must be installed to your local repository:
-			   1) Get javarosa-libraries.jar
-			   2) mvn install:install-file -Dfile=<path-to-file> -DgroupId=org.javarosa 
-				  -DartifactId=javarosa-libraries -Dversion=latest -Dpackaging=jar
-		  -->
 		  <groupId>org.javarosa</groupId>
-		  <artifactId>javarosa-libraries</artifactId>
+		  <artifactId>javarosa-libraries</artifactId> <!-- see src/main/libs/readme.txt -->
 		  <version>latest</version>
 		  <type>jar</type>
 		  <scope>compile</scope>
@@ -323,21 +324,15 @@
 		  <scope>compile</scope>
 		</dependency>
 		<dependency>
-		  <!-- This library is the GaeHttpClient project in the Aggregate Components tree.
-			  use "mvn install" to install it into your local repository.
-		  -->
 		  <groupId>org.opendatakit</groupId>
-		  <artifactId>odk-httpclient-gae</artifactId>
+		  <artifactId>odk-httpclient-gae</artifactId> <!-- see src/main/libs/readme.txt -->
 		  <version>1.0</version>
 		  <type>jar</type>
 		  <scope>compile</scope>
 		</dependency>
 		<dependency>
-			<!-- This library is the TomcatUtils project in the Aggregate Components tree.
-			  use "mvn install" to install it into your local repository.
-		  -->
 			<groupId>org.opendatakit</groupId>
-			<artifactId>odk-tomcatutil</artifactId>
+			<artifactId>odk-tomcatutil</artifactId> <!-- see src/main/libs/readme.txt -->
 			<version>1.0</version>
 			<type>jar</type>
 			<scope>compile</scope>
@@ -639,7 +634,7 @@
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>gwt-maven-plugin</artifactId>
 					<version>${gwt.maven.plugin.version}</version>
-				<!--	<dependencies>
+					<dependencies>
 						<dependency>	
 							<groupId>com.google.gwt</groupId>
 							<artifactId>gwt-user</artifactId>
@@ -650,15 +645,7 @@
 							<artifactId>gwt-dev</artifactId>
 							<version>${google.gwt.version}</version>
 						</dependency>
-						<dependency>
-							<groupId>com.google.gwt</groupId>
-							<artifactId>gwt-servlet</artifactId>
-							<version>${google.gwt.version}</version>
-						</dependency>
-						<dependency> 
-							<groupId>javax.validation</groupId>
-							<artifactId>validation-api</artifactId>
-					</dependencies> -->
+					</dependencies>
 					<executions>
 						<execution>
 							<id>gwt-javascript</id>

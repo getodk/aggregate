@@ -39,6 +39,8 @@ public final class ErrorConsts {
    * Error message if the FORM ID in the form already exists
    */
   public static final String FORM_WITH_ODKID_EXISTS = "Form Already Exists for this Namespace/Id attribute";
+  
+  public static final String FORM_INVALID_SUBMISSION_ELEMENT = "Attributes of submission element do not match form attributes";
   /**
    * Error message if not all information was received 
    */
