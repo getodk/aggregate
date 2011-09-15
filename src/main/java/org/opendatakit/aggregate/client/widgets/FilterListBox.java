@@ -53,6 +53,20 @@ public final class FilterListBox extends AggregateListBox {
 		return displayedFilterList;
 	}
 
+	public void updateSelectedFilterAfterSave(FilterGroup filterGroup) {
+	  if(filterGroup == null) {
+	    return;
+	  }
+	  
+	  ArrayList<FilterGroup> tmp = new ArrayList<FilterGroup>();
+	  tmp.add(filterGroup);
+	  
+	  insertItem(filterGroup.getName(), 0);
+	  setItemSelected(0, true);
+	  
+	  displayedFilterList = tmp; 
+	}
+	
 	public void updateFilterDropDown(FilterSet filterSet) {
 		FilterGroup currentFilterSelected = getSelectedFilter();
 
