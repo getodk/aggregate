@@ -23,17 +23,17 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.PopupPanel;
 
-public class ServletPopupButton extends AbstractButtonBase implements ClickHandler {
+public final class ServletPopupButton extends AggregateButton implements ClickHandler {
   
-  private String url;
-  private String title;
-  private FormsSubTab basePanel;
+  private final String url;
+  private final String title;
+  private final FormsSubTab basePanel;
 
-  public ServletPopupButton(String buttonText, String title, String url, FormsSubTab basePanel, String tooltipText) {
-    super(buttonText, tooltipText);
+  public ServletPopupButton(String buttonText, String title, String url, FormsSubTab basePanel, 
+		  String tooltipText, String balloonText) {
+    super(buttonText, tooltipText, balloonText);
     this.title = title;
     this.url = url;
     this.basePanel = basePanel;
@@ -42,16 +42,9 @@ public class ServletPopupButton extends AbstractButtonBase implements ClickHandl
   @Override
   public void onClick(ClickEvent event) {
     super.onClick(event);
-
-    final ViewServletPopup servletPopup = new ViewServletPopup(title, url);
-    servletPopup.setPopupPositionAndShow(new PopupPanel.PositionCallback() {
-      @Override
-      public void setPosition(int offsetWidth, int offsetHeight) {
-        int left = (Window.getClientWidth() - offsetWidth) / 2;
-        int top = (Window.getClientHeight() - offsetHeight) / 2;
-        servletPopup.setPopupPosition(left, top);
-      }
-    });
+    
+    ViewServletPopup servletPopup = new ViewServletPopup(title, url);
+    servletPopup.setPopupPositionAndShow(servletPopup.getPositionCallBack());
     servletPopup.addCloseHandler(new CloseHandler<PopupPanel>() {
 
       @Override

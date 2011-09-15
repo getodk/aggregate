@@ -54,6 +54,7 @@ http://code.google.com/p/google-guice/		/Apache 2.0/
 	guice-assistedinject-3.0-rc2.jar
 http://code.google.com/p/gwt-google-apis/   /Apache 2.0/
 	gwt-maps-1.1.0.jar
+	gwt-visualization-1.1.1.jar
 http://code.google.com/webtoolkit/			/Apache 2.0/
 	gwt-servlet-2.3.0.jar
 http://apache.org/		/Apache 2.0/

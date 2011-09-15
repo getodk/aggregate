@@ -36,9 +36,7 @@ public interface ExternalService {
   public void sendSubmissions(List<Submission> submissions, CallingContext cc) throws ODKExternalServiceException;
   
   public void setUploadCompleted(CallingContext cc) throws ODKEntityPersistException;
-  
-  public void authenticateAndCreate(OAuthToken authToken, CallingContext cc) throws ODKExternalServiceException, ODKDatastoreException;
-  
+    
   /**
    * Abandon the action.  
    * 

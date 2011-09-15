@@ -26,6 +26,7 @@ import org.opendatakit.aggregate.client.submission.SubmissionUISummary;
 import org.opendatakit.aggregate.client.widgets.DeleteSubmissionButton;
 import org.opendatakit.aggregate.client.widgets.RepeatViewButton;
 import org.opendatakit.aggregate.constants.common.UIConsts;
+import org.opendatakit.common.web.constants.BasicConsts;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -54,7 +55,7 @@ public class SubmissionTable extends FlexTable {
       setHTML(0, headerIndex++, BLANK_VALUE);
     }
     for (Column column : tableHeaders) {
-      setText(0, headerIndex++, column.getDisplayHeader());
+      setText(0, headerIndex++, column.getDisplayHeader().replace(":", "\n"));
     }
     setHTML(0, headerIndex, BLANK_VALUE);
     setColumnFormatter(new HTMLTable.ColumnFormatter());
@@ -80,30 +81,16 @@ public class SubmissionTable extends FlexTable {
         switch (tableHeaders.get(valueIndex++).getUiDisplayType()) {
         case BINARY:
           if (value == null) {
-            setText(rowPosition, columnPosition, UIConsts.EMPTY_STRING);
+            setText(rowPosition, columnPosition, BasicConsts.EMPTY_STRING);
           } else {
             Image image = new Image(value + UIConsts.PREVIEW_SET);
-            image.addClickHandler(new ClickHandler() {
-              @Override
-              public void onClick(ClickEvent event) {
-                final PopupPanel popup = new BinaryPopup(value);
-                popup.setPopupPositionAndShow(new PopupPanel.PositionCallback() {
-                  @Override
-                  public void setPosition(int offsetWidth, int offsetHeight) {
-                    int left = ((Window.getScrollLeft() + Window.getClientWidth() - offsetWidth) / 2);
-                    int top = ((Window.getScrollTop() + Window.getClientHeight() - offsetHeight) / 2);
-                    popup.setPopupPosition(left, top);
-                  }
-                });
-                AggregateUI.getUI().getTimer().restartTimer();
-              }
-            });
+            image.addClickHandler(new PopupClickHandler(value));
             setWidget(rowPosition, columnPosition, image);
           }
           break;
         case REPEAT:
           if (value == null) {
-            setText(rowPosition, columnPosition, UIConsts.EMPTY_STRING);
+            setText(rowPosition, columnPosition, BasicConsts.EMPTY_STRING);
           } else {
             RepeatViewButton repeat = new RepeatViewButton(value);
             setWidget(rowPosition, columnPosition, repeat);
@@ -129,4 +116,27 @@ public class SubmissionTable extends FlexTable {
   public ArrayList<SubmissionUI> getSubmissions() {
     return tableSubmissions;
   }
+  
+  private class PopupClickHandler implements ClickHandler {
+    private final String value;
+    
+    public PopupClickHandler(String value) {
+      this.value = value;
+    }
+    
+    @Override
+    public void onClick(ClickEvent event) {
+      final PopupPanel popup = new BinaryPopup(value);
+      popup.setPopupPositionAndShow(new PopupPanel.PositionCallback() {
+        @Override
+        public void setPosition(int offsetWidth, int offsetHeight) {
+          int left = ((Window.getScrollLeft() + Window.getClientWidth() - offsetWidth) / 2);
+          int top = ((Window.getScrollTop() + Window.getClientHeight() - offsetHeight) / 2);
+          popup.setPopupPosition(left, top);
+        }
+      });
+      AggregateUI.getUI().getTimer().restartTimer();
+    }
+  }
+  
 }

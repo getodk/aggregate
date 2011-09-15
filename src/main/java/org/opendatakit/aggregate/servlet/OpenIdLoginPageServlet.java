@@ -25,7 +25,7 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.opendatakit.common.constants.HtmlConsts;
+import org.opendatakit.common.web.constants.HtmlConsts;
 
 /**
  * Simple servlet to display the openId login page.  

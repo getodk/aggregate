@@ -31,11 +31,10 @@ import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.format.XFormsTableConsts;
 import org.opendatakit.aggregate.form.Form;
-import org.opendatakit.aggregate.form.FormInfo;
 import org.opendatakit.aggregate.servlet.FormXmlServlet;
 import org.opendatakit.aggregate.servlet.XFormsManifestServlet;
-import org.opendatakit.common.constants.BasicConsts;
-import org.opendatakit.common.constants.HtmlConsts;
+import org.opendatakit.common.web.constants.BasicConsts;
+import org.opendatakit.common.web.constants.HtmlConsts;
 
 /**
  * Generates an OpenRosa-compliant xml description of forms for the servlet
@@ -70,7 +69,6 @@ private final String downloadRequestURL;
 
     // build XML table of form information
     for (Form form : forms) {
-    	if ( FormInfo.isFormInfoForm(form.getFormId())) continue;
     	if ( !form.getDownloadEnabled() ) continue;
 
     	idx = generateFormXmlEntry(d, e, idx, form);
@@ -81,6 +79,7 @@ private final String downloadRequestURL;
 	// setting the response content type emits the xml header.
 	// just write the body here...
 	d.writeChildren(serializer); 
+	serializer.flush();
   }
 
   private int generateFormXmlEntry(Document d, Element e, int idx, Form form) {

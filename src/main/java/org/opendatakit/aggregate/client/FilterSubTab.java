@@ -16,6 +16,8 @@
 
 package org.opendatakit.aggregate.client;
 
+import java.util.ArrayList;
+
 import org.opendatakit.aggregate.client.filter.FilterGroup;
 import org.opendatakit.aggregate.client.table.FilterNavigationTable;
 import org.opendatakit.aggregate.client.table.SubmissionTable;
@@ -25,7 +27,6 @@ import org.opendatakit.aggregate.constants.common.UIConsts;
 
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.ListBox;
 
 public class FilterSubTab extends AggregateSubTabBase {
 
@@ -47,7 +48,7 @@ public class FilterSubTab extends AggregateSubTabBase {
     navTable.getElement().setId("submission_nav_table");
     add(navTable);
 
-    // Create Filters ande Submissions Panel
+    // Create Filters and Submissions Panel
     filtersNSubmissions = new HorizontalPanel();
 
     filtersPanel = new FiltersDataPanel(this);
@@ -108,8 +109,8 @@ public class FilterSubTab extends AggregateSubTabBase {
     submissionPanel.update(filterGroup);
   }
 
-  public ListBox getListOfPossibleFilterGroups() {
-    return navTable.getCurrentFilterList();
+  public ArrayList<FilterGroup> getListOfPossibleFilterGroups() {
+    return navTable.getCurrentFilters();
   }
 
   public SubmissionTable getSubmissionTable() {

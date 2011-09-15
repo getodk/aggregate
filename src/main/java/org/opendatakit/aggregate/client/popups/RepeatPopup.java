@@ -25,15 +25,14 @@ import org.opendatakit.aggregate.client.widgets.ClosePopupButton;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 
-public class RepeatPopup extends PopupPanel {
+public class RepeatPopup extends AbstractPopupBase {
 
   private FlowPanel panel;
   
   public RepeatPopup(final String keyString) {
-    super(false);
+    super();
     panel = new FlowPanel();
    
 
@@ -56,7 +55,7 @@ public class RepeatPopup extends PopupPanel {
     panel.add(new ClosePopupButton(this));
     
     ScrollPanel scroll = new ScrollPanel(panel);
-    scroll.setPixelSize((Window.getClientWidth() / 2),(Window.getClientHeight() / 2));
+    scroll.setPixelSize((Window.getClientWidth() * 3 / 4),(Window.getClientHeight() * 3 / 4));
     setWidget(scroll);
   }
   

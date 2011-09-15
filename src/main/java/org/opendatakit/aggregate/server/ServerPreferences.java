@@ -123,7 +123,7 @@ public class ServerPreferences extends CommonFieldsBase {
       ServerPreferences relation = assertRelation(cc);
       Query query = cc.getDatastore().createQuery(relation, cc.getCurrentUser());
 
-      List<? extends CommonFieldsBase> results = query.executeQuery(0);
+      List<? extends CommonFieldsBase> results = query.executeQuery();
       if (!results.isEmpty()) {
         if (results.get(0) instanceof ServerPreferences) {
           ServerPreferences preferences = (ServerPreferences) results.get(0);

@@ -8,7 +8,6 @@ import java.util.List;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 
@@ -52,14 +51,6 @@ public class QueryTest
     {
         List<Entity> people = d.relation.query().execute();
         assertEquals(2, people.size());
-    }
-
-    // TODO: this fails but I think it's a problem in underlying query implementation
-    @Ignore
-    public void testExecuteWithLimit() throws ODKDatastoreException
-    {
-        List<Entity> people = d.relation.query().execute(1);
-        assertEquals(1, people.size());
     }
 
     @Test

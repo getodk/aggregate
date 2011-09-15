@@ -28,12 +28,12 @@ import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.format.form.XFormsManifestXmlTable;
-import org.opendatakit.common.constants.HtmlConsts;
 import org.opendatakit.common.web.CallingContext;
+import org.opendatakit.common.web.constants.HtmlConsts;
 
 /**
- * Servlet to generate the OpenRosa-compliant XML list of forms to be 
- * presented as the API for forms for computers
+ * Servlet to generate the OpenRosa-compliant XML list of forms to be presented
+ * as the API for forms for computers
  * 
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
@@ -59,9 +59,9 @@ public class XFormsManifestServlet extends ServletUtilBase {
    */
   @Override
   public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-   CallingContext cc = ContextFactory.getCallingContext(this, req);
-   addOpenRosaHeaders(resp);
-    
+    CallingContext cc = ContextFactory.getCallingContext(this, req);
+    addOpenRosaHeaders(resp);
+
     // get parameters
     String formId = getParameter(req, ServletConsts.FORM_ID);
     if (formId == null) {

@@ -96,12 +96,6 @@ public final class FormDataModel extends CommonFieldsBase {
 		REF_BLOB, // the table of the actual byte[] data (xxxBLOB)
 	};
 	
-	// GEOPOINT structured field has the following ordinal interpretations...
-	public static final int GEOPOINT_LATITUDE_ORDINAL_NUMBER = 1;
-	public static final int GEOPOINT_LONGITUDE_ORDINAL_NUMBER = 2;
-	public static final int GEOPOINT_ALTITUDE_ORDINAL_NUMBER = 3;
-	public static final int GEOPOINT_ACCURACY_ORDINAL_NUMBER = 4;
-	
 	private static final String TABLE_NAME = "_form_data_model";
 
 	public static final DataField URI_SUBMISSION_DATA_MODEL = new DataField("URI_SUBMISSION_DATA_MODEL", DataField.DataType.STRING, false, PersistConsts.URI_STRING_LEN).setIndexable(IndexType.HASH);

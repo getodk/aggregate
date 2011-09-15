@@ -249,7 +249,7 @@ public class AbstractRelation implements Relation {
 		Query q = ds.createQuery(prototype, user);
 		q.addFilter(dataField, op, value);
 		
-		List<? extends CommonFieldsBase> list = q.executeQuery(0);
+		List<? extends CommonFieldsBase> list = q.executeQuery();
 		List<Entity> eList = new ArrayList<Entity>();
 		for ( CommonFieldsBase b : list ) {
 			eList.add( new EntityImpl( (RelationImpl) b ) );
@@ -285,7 +285,7 @@ public class AbstractRelation implements Relation {
 		User user = cc.getCurrentUser();
 		
 		EntityImpl ei = verifyEntityType(e);
-		ds.deleteEntity(new EntityKey(prototype, ei.backingObject.getUri()), user);
+		ds.deleteEntity(ei.backingObject.getEntityKey(), user);
 	}
 
 	/**
@@ -323,7 +323,7 @@ public class AbstractRelation implements Relation {
 		List<EntityKey> keys = new ArrayList<EntityKey>();
 		for ( Entity e : eList ) {
 			EntityImpl ei = verifyEntityType(e);
-			keys.add(new EntityKey(ei.backingObject, ei.backingObject.getUri()));
+			keys.add(ei.backingObject.getEntityKey());
 		}
 		ds.deleteEntities(keys, user);
 	}
@@ -345,6 +345,8 @@ public class AbstractRelation implements Relation {
 		List<?> pkList = q.executeDistinctValueForDataField(prototype.primaryKey);
 		List<EntityKey> keys = new ArrayList<EntityKey>();
 		for ( Object key : pkList ) {
+			// we don't ahve the individual records, just the PKs for them
+			// construct the entity keys from the relation and those PKs
 			keys.add(new EntityKey(prototype, (String) key));
 		}
 		ds.deleteEntities(keys, user);
@@ -617,8 +619,7 @@ public class AbstractRelation implements Relation {
 			Datastore ds = cc.getDatastore();
 			User user = cc.getCurrentUser();
 			
-			ds.deleteEntity(new EntityKey( backingObject, 
-										   backingObject.getUri()), user);
+			ds.deleteEntity(backingObject.getEntityKey(), user);
 		}
 
 		/** the actual persistence layer object holding the data values */

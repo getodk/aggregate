@@ -47,6 +47,7 @@ import org.opendatakit.common.web.CallingContext;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.security.access.hierarchicalroles.CycleInRoleHierarchyException;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
+import org.springframework.security.authentication.encoding.MessageDigestPasswordEncoder;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.authority.GrantedAuthorityImpl;
@@ -71,6 +72,8 @@ public class RoleHierarchyImpl implements RoleHierarchy, InitializingBean {
 	private Datastore datastore = null;
 	/** bean to the userService */
 	private UserService userService = null;
+	/** bean to password hash algorithm */
+	private MessageDigestPasswordEncoder passwordEncoder = null;
 	/** bean to the startup action */
 	private WebStartup startupAction = null;
 	
@@ -101,6 +104,14 @@ public class RoleHierarchyImpl implements RoleHierarchy, InitializingBean {
 		this.userService = userService;
 	}
 
+	public MessageDigestPasswordEncoder getPasswordEncoder() {
+		return passwordEncoder;
+	}
+
+	public void setPasswordEncoder(MessageDigestPasswordEncoder passwordEncoder) {
+		this.passwordEncoder = passwordEncoder;
+	}
+
 	public WebStartup getStartupAction() {
 		return startupAction;
 	}
@@ -125,6 +136,8 @@ public class RoleHierarchyImpl implements RoleHierarchy, InitializingBean {
 			public Object getBean(String beanName) {
 				if ( beanName.equals(SecurityBeanDefs.ROLE_HIERARCHY_MANAGER)) {
 					return RoleHierarchyImpl.this;
+				} else if ( beanName.equals(SecurityBeanDefs.BASIC_AUTH_PASSWORD_ENCODER) ) {
+					return RoleHierarchyImpl.this.passwordEncoder;
 				} else {
 					throw new IllegalStateException("Undefined");
 				}

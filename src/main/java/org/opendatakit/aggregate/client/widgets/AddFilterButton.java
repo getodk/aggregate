@@ -19,27 +19,24 @@ package org.opendatakit.aggregate.client.widgets;
 import org.opendatakit.aggregate.client.FilterSubTab;
 import org.opendatakit.aggregate.client.filter.FilterGroup;
 import org.opendatakit.aggregate.client.popups.FilterPopup;
-import org.opendatakit.aggregate.client.popups.HelpBalloon;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.PopupPanel;
 
-public class AddFilterButton extends AbstractButtonBase implements ClickHandler {
+public final class AddFilterButton extends AggregateButton implements ClickHandler {
 
+  private static final String BUTTON_TXT = "<img src=\"images/yellow_plus.png\" /> Add Filter";
+  private static final String TOOLTIP_TXT = "Add a new filter";
   private static final String HELP_BALLOON_TXT = "The button displays a popup window that allows a new filter to be added to the filter group";
 
-  private static final String TOOLTIP_TEXT = "Add a new filter";
-    
-  private FilterSubTab basePanel;
+  private final FilterSubTab basePanel;
 
   public AddFilterButton(FilterSubTab panel) {
-    super("<img src=\"images/yellow_plus.png\" /> Add Filter", TOOLTIP_TEXT);
+    super(BUTTON_TXT, TOOLTIP_TXT, HELP_BALLOON_TXT);
     basePanel = panel;
-    helpBalloon = new HelpBalloon(this, HELP_BALLOON_TXT);
   }
 
   @Override
@@ -52,15 +49,8 @@ public class AddFilterButton extends AbstractButtonBase implements ClickHandler 
       return;
     }
     
-    final FilterPopup filterPopup = new FilterPopup(basePanel.getSubmissionTable(), currentFilterGroup);
-    filterPopup.setPopupPositionAndShow(new PopupPanel.PositionCallback() {
-      @Override
-      public void setPosition(int offsetWidth, int offsetHeight) {
-          int left = ((Window.getScrollLeft() + Window.getClientWidth() - offsetWidth) / 2);
-          int top = ((Window.getScrollTop() + Window.getClientHeight() - offsetHeight) / 2);
-          filterPopup.setPopupPosition(left, top);
-      }
-    });
+    FilterPopup filterPopup = new FilterPopup(basePanel.getSubmissionTable(), currentFilterGroup);
+    filterPopup.setPopupPositionAndShow(filterPopup.getPositionCallBack());
     filterPopup.addCloseHandler(new CloseHandler<PopupPanel>() {
 
       @Override

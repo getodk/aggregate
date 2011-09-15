@@ -215,7 +215,7 @@ public class Query
      */
     public Entity get() throws ODKDatastoreException
     {
-        List<Entity> results = execute(1);
+        List<Entity> results = execute();
         if (results.isEmpty())
         {
             throw new ODKDatastoreException(
@@ -246,30 +246,15 @@ public class Query
     }
 
     /**
-     * Execute the query and return a list of all results. Equivalent to calling
-     * {@link #execute(int) execute(0)}.
+     * Execute the query and return a list of all results.
      * 
      * @return a list of all the entities which matched the query.
      * @throws ODKDatastoreException
      */
     public List<Entity> execute() throws ODKDatastoreException
     {
-        return execute(0);
-    }
-
-    /**
-     * Execute the query and return a list of results.
-     * 
-     * @param limit
-     *            the maximum number of entities to retrieve, or 0 for no limit.
-     * @return a list of the entities which matched the query. The size of this
-     *         list will be no greater than limit.
-     * @throws ODKDatastoreException
-     */
-    public List<Entity> execute(int limit) throws ODKDatastoreException
-    {
         List<org.opendatakit.common.ermodel.Entity> genericEntities = Relation
-                .executeQuery(this.query, limit);
+                .executeQuery(this.query);
         List<Entity> RelationEntities = new ArrayList<Entity>();
         for (org.opendatakit.common.ermodel.Entity genericEntity : genericEntities)
         {

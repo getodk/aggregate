@@ -23,7 +23,8 @@ import org.opendatakit.common.web.CallingContext;
  * <b>Additions to AbstractRelation</b>: Keeps track of an instance of the
  * CallingContext so subclasses do not need to require it in all methods, and
  * adds a public getter for the CallingContext. Adds {@link #createQuery} and
- * {@link #executeQuery} for query functionality.
+ * {@link #executeQuery} for query functionality.  If you need to query a large
+ * set of data, please add QueryResult support.
  * </p>
  * 
  * <p>
@@ -83,7 +84,7 @@ import org.opendatakit.common.web.CallingContext;
  * Query query = people.createQuery();
  * query.addFilter(people.getDataField(People.NAME), FilterOperation.EQUAL,
  *         &quot;John Smith&quot;);
- * List&lt;Entity&gt; results = people.executeQuery(query, 0);
+ * List&lt;Entity&gt; results = people.executeQuery(query);
  * Entity john = results.get(0);
  * john.setField(People.NAME, &quot;Jane Smith&quot;);
  * john.persist(cc);
@@ -155,20 +156,18 @@ public class ExtendedAbstractRelation extends AbstractRelation
 
     /**
      * Executes the given query which was most likely created with
-     * {@link #createQuery()}. Prefer this to {@link Query#executeQuery(int)}
+     * {@link #createQuery()}. Prefer this to {@link Query#executeQuery()}
      * because that method does not return a list of Entity objects.
      * 
      * @param query
      *            the Query to execute
-     * @param limit
-     *            the maximum number of entities to retrieve, or 0 for no limit.
-     * @return a list of the entities which are the results of the query
+     * @return a list of all the entities which are the results of the query
      */
-    public List<Entity> executeQuery(Query query, int limit)
+    public List<Entity> executeQuery(Query query)
     {
         try
         {
-            List<? extends CommonFieldsBase> list = query.executeQuery(limit);
+            List<? extends CommonFieldsBase> list = query.executeQuery();
             List<Entity> entities = new ArrayList<Entity>();
             for (CommonFieldsBase b : list)
             {

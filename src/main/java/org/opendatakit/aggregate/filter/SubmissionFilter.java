@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.opendatakit.aggregate.client.filter.ColumnFilter;
-import org.opendatakit.aggregate.client.filter.ColumnFilterHeader;
 import org.opendatakit.aggregate.client.filter.Filter;
 import org.opendatakit.aggregate.client.filter.RowFilter;
 import org.opendatakit.aggregate.client.submission.Column;
@@ -32,7 +31,6 @@ import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.DataField.IndexType;
 import org.opendatakit.common.persistence.Datastore;
-import org.opendatakit.common.persistence.EntityKey;
 import org.opendatakit.common.persistence.PersistConsts;
 import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
@@ -233,10 +231,10 @@ public class SubmissionFilter extends CommonFieldsBase {
     
     if(colFilters != null) {
       for(SubmissionColumnFilter filter : colFilters){
-        ds.deleteEntity(new EntityKey(filter, filter.getUri()), user);
+        ds.deleteEntity(filter.getEntityKey(), user);
       }
     }    
-    ds.deleteEntity(new EntityKey(this, this.getUri()), user);
+    ds.deleteEntity(getEntityKey(), user);
   }
   
   public Filter transform() {
@@ -306,7 +304,7 @@ public class SubmissionFilter extends CommonFieldsBase {
       ColumnFilter cf = (ColumnFilter) filter;
       subFilter.setColumnVisibility(cf.getVisibility());
       
-      for(ColumnFilterHeader column : cf.getColumnFilterHeaders()) {
+      for(Column column : cf.getColumnFilterHeaders()) {
         SubmissionColumnFilter columnFilter = SubmissionColumnFilter.transform(column, subFilter, cc);
         subFilter.addColumn(columnFilter);
       }
@@ -333,7 +331,7 @@ public class SubmissionFilter extends CommonFieldsBase {
 
     List<SubmissionFilter> filterList = new ArrayList<SubmissionFilter>();
 
-    List<? extends CommonFieldsBase> results = query.executeQuery(0);
+    List<? extends CommonFieldsBase> results = query.executeQuery();
     for (CommonFieldsBase cb : results) {
       if (cb instanceof SubmissionFilter) {
         SubmissionFilter filter = (SubmissionFilter) cb;

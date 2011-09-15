@@ -47,21 +47,12 @@ public class EntityKey {
 		this.key = key;
 	}
 
-//	public EntityKey(String relationName, String key) {
-//		this.relationName = relationName;
-//		this.key = key;
-//	}
-
 	/**
 	 * Returns the relation which this EntityKey refers to.
 	 * 
 	 * @return a String representing the relation name which this EntityKey
 	 *         refers to
 	 */
-//	public String getRelationName() {
-//		return relationName;
-//	}
-	
 	public CommonFieldsBase getRelation() {
 		return relation;
 	}

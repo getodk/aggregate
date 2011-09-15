@@ -117,7 +117,7 @@ public final class ServletConsts {
 
   public static final String RECORD_KEY = "record";
 
-  public static final int FORM_DELETE_RECORD_QUERY_LIMIT = 20;
+  public static final int FORM_DELETE_RECORD_QUERY_LIMIT = 50;
 
   // TODO: revise so no retrieval form limit
   public static final int FETCH_LIMIT = 1000;
@@ -136,5 +136,16 @@ public final class ServletConsts {
   public static final String CHECK_INTERVAL_PARAM = "checkIntervalMilliseconds";
 
   public static final String START_DATE = "startDate";
+
+  /**
+   * Script path to include...
+   */
+  public static final String UPLOAD_SCRIPT_RESOURCE = "javascript/upload_control.js";
+
+  public static final String UPLOAD_STYLE_RESOURCE = "stylesheets/upload.css";
+
+  public static final String UPLOAD_BUTTON_STYLE_RESOURCE = "stylesheets/button.css";
+
+  public static final String AGGREGATE_STYLE = "AggregateUI.css";
   
 }

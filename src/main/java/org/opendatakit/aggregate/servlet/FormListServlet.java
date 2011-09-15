@@ -27,9 +27,9 @@ import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.format.form.FormXmlTable;
 import org.opendatakit.aggregate.format.form.XFormsXmlTable;
-import org.opendatakit.common.constants.HtmlConsts;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
+import org.opendatakit.common.web.constants.HtmlConsts;
 
 /**
  * Servlet to generate the XML list of forms to be presented as the API for
@@ -59,34 +59,34 @@ public class FormListServlet extends ServletUtilBase {
    */
   @Override
   public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-	CallingContext cc = ContextFactory.getCallingContext(this, req);
+    CallingContext cc = ContextFactory.getCallingContext(this, req);
 
-	if ( getOpenRosaVersion(req) != null ) {
-		// OpenRosa implementation
-	  	addOpenRosaHeaders(resp);
-	    try {
-	      List<Form> formsList = Form.getForms(false, cc);
-	      XFormsXmlTable formFormatter = new XFormsXmlTable(formsList, cc.getServerURL());
+    if (getOpenRosaVersion(req) != null) {
+      // OpenRosa implementation
+      addOpenRosaHeaders(resp);
+      try {
+        List<Form> formsList = Form.getForms(false, cc);
+        XFormsXmlTable formFormatter = new XFormsXmlTable(formsList, cc.getServerURL());
 
-	      resp.setContentType(HtmlConsts.RESP_TYPE_XML);
-	      formFormatter.generateXmlListOfForms(resp.getWriter());
-	    } catch (ODKDatastoreException e) {
-		  e.printStackTrace();
-	      errorRetreivingData(resp);
-		}
-	} else {
-		// Collect 1.1.5 legacy app
-	    try {
-	      List<Form> formsList = Form.getForms(false, cc);
-		  FormXmlTable formFormatter = new FormXmlTable(formsList, cc.getServerURL());
-	
-	      resp.setContentType(HtmlConsts.RESP_TYPE_XML);
-	      resp.getWriter().print(formFormatter.generateXmlListOfForms());
-	    } catch (ODKDatastoreException e) {
-		  e.printStackTrace();
-	      errorRetreivingData(resp);
-		}
-	}
+        resp.setContentType(HtmlConsts.RESP_TYPE_XML);
+        formFormatter.generateXmlListOfForms(resp.getWriter());
+      } catch (ODKDatastoreException e) {
+        e.printStackTrace();
+        errorRetreivingData(resp);
+      }
+    } else {
+      // Collect 1.1.5 legacy app
+      try {
+        List<Form> formsList = Form.getForms(false, cc);
+        FormXmlTable formFormatter = new FormXmlTable(formsList, cc.getServerURL());
+
+        resp.setContentType(HtmlConsts.RESP_TYPE_XML);
+        resp.getWriter().print(formFormatter.generateXmlListOfForms());
+      } catch (ODKDatastoreException e) {
+        e.printStackTrace();
+        errorRetreivingData(resp);
+      }
+    }
   }
 
 }

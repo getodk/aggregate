@@ -18,6 +18,8 @@ package org.opendatakit.aggregate.client.form;
 
 import java.util.ArrayList;
 
+import org.opendatakit.aggregate.client.filter.FilterGroup;
+
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
 public interface FormServiceAsync {
@@ -26,7 +28,7 @@ public interface FormServiceAsync {
 
   void getExports(AsyncCallback<ArrayList<ExportSummary>> callback);
 
-  void createCsv(String formId, AsyncCallback<Boolean> callback);
+  void createCsv(String formId, String filterUri, AsyncCallback<Boolean> callback);
 
   void getPossibleKmlSettings(String formId, AsyncCallback<KmlSettings> callback);
 
@@ -34,5 +36,7 @@ public interface FormServiceAsync {
       AsyncCallback<Boolean> callback);
 
   void getGpsCoordnates(String formId, AsyncCallback<KmlSettings> callback);
+
+  void createCsvFromFilter(FilterGroup group, AsyncCallback<Boolean> callback);
 
 }

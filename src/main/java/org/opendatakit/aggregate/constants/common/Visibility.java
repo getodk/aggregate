@@ -33,6 +33,11 @@ public enum Visibility implements Serializable {
     return displayText;
   }
   
+  @Override
+  public String toString() {
+    return displayText;
+  }
+  
   public static Visibility historicalConverter(String str) {
     // TODO: remove after a long time after the upgrade
     // this is to allow an upgrade when we change visibility constant names

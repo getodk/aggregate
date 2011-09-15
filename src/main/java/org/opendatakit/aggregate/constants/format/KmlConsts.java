@@ -16,8 +16,8 @@
 package org.opendatakit.aggregate.constants.format;
 
 import org.opendatakit.aggregate.constants.HtmlUtil;
-import org.opendatakit.common.constants.BasicConsts;
-import org.opendatakit.common.constants.HtmlConsts;
+import org.opendatakit.common.web.constants.BasicConsts;
+import org.opendatakit.common.web.constants.HtmlConsts;
 
 /**
  * 

@@ -592,7 +592,7 @@ public class DatastoreImpl implements Datastore, InitializingBean {
 		 Query query = new QueryImpl(relation, this, user);
 		 query.addFilter(relation.primaryKey, FilterOperation.EQUAL, uri);
 		 try {
-			List<? extends CommonFieldsBase> results = query.executeQuery(2);
+			List<? extends CommonFieldsBase> results = query.executeQuery();
 			if ( results == null || results.size() != 1 ) {
 				throw new ODKEntityNotFoundException("Unable to retrieve "
 						+ relation.getSchemaName() + "." + relation.getTableName() 

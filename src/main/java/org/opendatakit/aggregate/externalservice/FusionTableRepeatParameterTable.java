@@ -131,7 +131,7 @@ public final class FusionTableRepeatParameterTable extends CommonFieldsBase {
 		  Query query = cc.getDatastore().createQuery(frpt, cc.getCurrentUser());
 		  query.addFilter(URI_FUSION_TABLE_PROPERTY, FilterOperation.EQUAL, uri);
 
-		  List<? extends CommonFieldsBase> results = query.executeQuery(0);
+		  List<? extends CommonFieldsBase> results = query.executeQuery();
 		  for ( CommonFieldsBase b : results ) {
 			  list.add((FusionTableRepeatParameterTable) b);
 		  }

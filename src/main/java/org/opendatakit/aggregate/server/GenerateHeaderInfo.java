@@ -22,19 +22,19 @@ import java.util.List;
 import java.util.Map;
 
 import org.opendatakit.aggregate.client.filter.ColumnFilter;
-import org.opendatakit.aggregate.client.filter.ColumnFilterHeader;
 import org.opendatakit.aggregate.client.filter.Filter;
 import org.opendatakit.aggregate.client.filter.FilterGroup;
+import org.opendatakit.aggregate.client.submission.Column;
 import org.opendatakit.aggregate.client.submission.SubmissionUISummary;
 import org.opendatakit.aggregate.constants.common.FormElementNamespace;
+import org.opendatakit.aggregate.constants.common.GeoPointConsts;
 import org.opendatakit.aggregate.constants.common.Visibility;
-import org.opendatakit.aggregate.datamodel.FormDataModel;
 import org.opendatakit.aggregate.datamodel.FormElementKey;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.datamodel.FormElementModel.ElementType;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.submission.type.GeoPoint;
-import org.opendatakit.common.constants.BasicConsts;
+import org.opendatakit.common.web.constants.BasicConsts;
 
 public class GenerateHeaderInfo {
 
@@ -100,8 +100,8 @@ public class GenerateHeaderInfo {
           ColumnFilter cf = (ColumnFilter) filter;
 
           // convert filter to fem
-          for (ColumnFilterHeader columnHeader : cf.getColumnFilterHeaders()) {
-            String decodeKey = columnHeader.getColumn().getColumnEncoding();
+          for (Column columnHeader : cf.getColumnFilterHeaders()) {
+            String decodeKey = columnHeader.getColumnEncoding();
             FormElementKey femKey = new FormElementKey(decodeKey);
             FormElementModel fem = FormElementModel.retrieveFormElementModel(form, femKey);
             
@@ -127,7 +127,7 @@ public class GenerateHeaderInfo {
                 geopointFlags.put(fem, geopoint);
               }
 
-              Long gpsColumnIndex = columnHeader.getColumn().getGeopointColumnCode();
+              Long gpsColumnIndex = columnHeader.getGeopointColumnCode();
 
               // add to appropriate keep or remove
               if (cf.getVisibility().equals(Visibility.DISPLAY)) {
@@ -226,7 +226,7 @@ public class GenerateHeaderInfo {
         addNodeToHeader(nodeName, node);
       }
     } else if (removes != null) {
-      if (!removes.contains(node)) {
+      if (!removes.contains(node) || node.getElementType().equals(ElementType.GEOPOINT)) {
         addNodeToHeader(nodeName, node);
       }
     } else {
@@ -246,29 +246,29 @@ public class GenerateHeaderInfo {
 
       if (gpsColumns == null) {
         summary.addGeopointHeader(nodeName + BasicConsts.COLON + GeoPoint.LATITUDE, key.toString(),
-            Long.valueOf(FormDataModel.GEOPOINT_LATITUDE_ORDINAL_NUMBER));
+            Long.valueOf(GeoPointConsts.GEOPOINT_LATITUDE_ORDINAL_NUMBER));
         summary.addGeopointHeader(nodeName + BasicConsts.COLON + GeoPoint.LONGITUDE,
-            key.toString(), Long.valueOf(FormDataModel.GEOPOINT_LONGITUDE_ORDINAL_NUMBER));
+            key.toString(), Long.valueOf(GeoPointConsts.GEOPOINT_LONGITUDE_ORDINAL_NUMBER));
         summary.addGeopointHeader(nodeName + BasicConsts.COLON + GeoPoint.ALTITUDE, key.toString(),
-            Long.valueOf(FormDataModel.GEOPOINT_ALTITUDE_ORDINAL_NUMBER));
+            Long.valueOf(GeoPointConsts.GEOPOINT_ALTITUDE_ORDINAL_NUMBER));
         summary.addGeopointHeader(nodeName + BasicConsts.COLON + GeoPoint.ACCURACY, key.toString(),
-            Long.valueOf(FormDataModel.GEOPOINT_ACCURACY_ORDINAL_NUMBER));
+            Long.valueOf(GeoPointConsts.GEOPOINT_ACCURACY_ORDINAL_NUMBER));
       } else {
         if (gpsColumns.includeLatitude()) {
           summary.addGeopointHeader(nodeName + BasicConsts.COLON + GeoPoint.LATITUDE,
-              key.toString(), Long.valueOf(FormDataModel.GEOPOINT_LATITUDE_ORDINAL_NUMBER));
+              key.toString(), Long.valueOf(GeoPointConsts.GEOPOINT_LATITUDE_ORDINAL_NUMBER));
         }
         if (gpsColumns.includeLongitude()) {
           summary.addGeopointHeader(nodeName + BasicConsts.COLON + GeoPoint.LONGITUDE,
-              key.toString(), Long.valueOf(FormDataModel.GEOPOINT_LONGITUDE_ORDINAL_NUMBER));
+              key.toString(), Long.valueOf(GeoPointConsts.GEOPOINT_LONGITUDE_ORDINAL_NUMBER));
         }
         if (gpsColumns.includeAltitude()) {
           summary.addGeopointHeader(nodeName + BasicConsts.COLON + GeoPoint.ALTITUDE,
-              key.toString(), Long.valueOf(FormDataModel.GEOPOINT_ALTITUDE_ORDINAL_NUMBER));
+              key.toString(), Long.valueOf(GeoPointConsts.GEOPOINT_ALTITUDE_ORDINAL_NUMBER));
         }
         if (gpsColumns.includeAccuracy()) {
           summary.addGeopointHeader(nodeName + BasicConsts.COLON + GeoPoint.ACCURACY,
-              key.toString(), Long.valueOf(FormDataModel.GEOPOINT_ACCURACY_ORDINAL_NUMBER));
+              key.toString(), Long.valueOf(GeoPointConsts.GEOPOINT_ACCURACY_ORDINAL_NUMBER));
         }
 
       }
@@ -324,16 +324,16 @@ public class GenerateHeaderInfo {
     public void removeColumn(Long columnConst) {
       int ordinal = columnConst.intValue();
       switch (ordinal) {
-      case FormDataModel.GEOPOINT_LATITUDE_ORDINAL_NUMBER:
+      case GeoPointConsts.GEOPOINT_LATITUDE_ORDINAL_NUMBER:
         removeLatFlag = true;
         break;
-      case FormDataModel.GEOPOINT_LONGITUDE_ORDINAL_NUMBER:
+      case GeoPointConsts.GEOPOINT_LONGITUDE_ORDINAL_NUMBER:
         removeLongFlag = true;
         break;
-      case FormDataModel.GEOPOINT_ALTITUDE_ORDINAL_NUMBER:
+      case GeoPointConsts.GEOPOINT_ALTITUDE_ORDINAL_NUMBER:
         removeAltFlag = true;
         break;
-      case FormDataModel.GEOPOINT_ACCURACY_ORDINAL_NUMBER:
+      case GeoPointConsts.GEOPOINT_ACCURACY_ORDINAL_NUMBER:
         removeAccFlag = true;
         break;
       default:
@@ -348,16 +348,16 @@ public class GenerateHeaderInfo {
     public void keepColumn(Long columnConst) {
       int ordinal = columnConst.intValue();
       switch (ordinal) {
-      case FormDataModel.GEOPOINT_LATITUDE_ORDINAL_NUMBER:
+      case GeoPointConsts.GEOPOINT_LATITUDE_ORDINAL_NUMBER:
         keepLatFlag = true;
         break;
-      case FormDataModel.GEOPOINT_LONGITUDE_ORDINAL_NUMBER:
+      case GeoPointConsts.GEOPOINT_LONGITUDE_ORDINAL_NUMBER:
         keepLongFlag = true;
         break;
-      case FormDataModel.GEOPOINT_ALTITUDE_ORDINAL_NUMBER:
+      case GeoPointConsts.GEOPOINT_ALTITUDE_ORDINAL_NUMBER:
         keepAltFlag = true;
         break;
-      case FormDataModel.GEOPOINT_ACCURACY_ORDINAL_NUMBER:
+      case GeoPointConsts.GEOPOINT_ACCURACY_ORDINAL_NUMBER:
         keepAccFlag = true;
         break;
       default:

@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.datamodel.FormDataModel;
 import org.opendatakit.aggregate.datamodel.FormDataModel.DDRelationName;
 import org.opendatakit.aggregate.datamodel.FormDataModel.ElementType;
@@ -50,7 +49,6 @@ import org.opendatakit.aggregate.submission.type.StringSubmissionType;
 import org.opendatakit.aggregate.submission.type.jr.JRDateTimeType;
 import org.opendatakit.aggregate.submission.type.jr.JRDateType;
 import org.opendatakit.aggregate.submission.type.jr.JRTimeType;
-import org.opendatakit.common.constants.BasicConsts;
 import org.opendatakit.common.datamodel.DynamicBase;
 import org.opendatakit.common.datamodel.DynamicCommonFieldsBase;
 import org.opendatakit.common.persistence.CommonFieldsBase;
@@ -62,6 +60,7 @@ import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.web.CallingContext;
+import org.opendatakit.common.web.constants.BasicConsts;
 
 /**
  * Groups a set of submission values together so they can be stored in a
@@ -154,7 +153,7 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 		if ( enclosingSet != null ) {
 			tlg.setParentAuri(enclosingSet.getKey().getKey());
 		}
-		this.key = new EntityKey(tlg, tlg.getUri());
+		this.key = tlg.getEntityKey();
 		this.topLevelTableKey = topLevelTableKey;
 		dbEntities.put(group.getFormDataModel().getDDRelationName(), tlg);
 		recursivelyCreateEntities(group.getFormDataModel(), datastore, user);
@@ -185,7 +184,7 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 		}
 		tlg.setModelVersion(modelVersion);
 		tlg.setUiVersion(uiVersion);
-		this.key = new EntityKey(tlg, tlg.getUri());
+		this.key = tlg.getEntityKey();
 		this.topLevelTableKey = key;
 		// persist and recursively construct it...
 		dbEntities.put(group.getFormDataModel().getDDRelationName(), tlg);
@@ -259,7 +258,7 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 		this.formDefinition = formDefinition;
 		this.group = group;
 		this.enclosingSet = enclosingSet;
-		this.key = new EntityKey(row, row.getUri());
+		this.key = row.getEntityKey();
 		Datastore datastore = cc.getDatastore();
 		User user = cc.getCurrentUser();
 
@@ -271,6 +270,10 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 			this.topLevelTableKey = key;
 		} else {
 			DynamicBase entity = (DynamicBase) row;
+			// we aren't the top level record so manufacture the 
+			// entity key of the top level record from the relation
+			// for that record and the up-pointer in our record 
+			// that holds the AURI for that top level record.
 			this.topLevelTableKey = new EntityKey(formDefinition
 					.getTopLevelGroup().getBackingObjectPrototype(), entity
 					.getTopLevelAuri());
@@ -305,8 +308,7 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 						Query query = datastore.createQuery(mBaseRelation, user);
 						query.addFilter(mBaseRelation.parentAuri, FilterOperation.EQUAL,
 								uriParent);
-						List<? extends CommonFieldsBase> rows = query
-								.executeQuery(ServletConsts.FETCH_LIMIT);
+						List<? extends CommonFieldsBase> rows = query.executeQuery();
 						if (rows.size() != 1) {
 							throw new IllegalStateException(
 									"Expected exactly one match in phantom reconstruction!");
@@ -803,7 +805,7 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 			value.recursivelyAddEntityKeys(keyList, cc);
 		}
 		for ( DynamicCommonFieldsBase e : dbEntities.values() ) {
-			keyList.add( new EntityKey( e, e.getUri()));
+			keyList.add(e.getEntityKey());
 		}
 	}
 

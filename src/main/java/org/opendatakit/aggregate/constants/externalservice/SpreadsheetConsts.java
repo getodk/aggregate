@@ -22,8 +22,6 @@ package org.opendatakit.aggregate.constants.externalservice;
  * 
  */
 public final class SpreadsheetConsts {
-
-  public static final String SPEADSHEET_NAME_LABEL = "Name of Spreadsheet:";
   /**
    * The Google feed permissions. Of the form '/visibility/projection/'. <BR/>
    * See http://code.google.com/apis/spreadsheets/data/3.0/reference.html#
@@ -53,20 +51,10 @@ public final class SpreadsheetConsts {
   public static final String WORKSHEETS_FEED = SPREADSHEETS_SCOPE + "worksheets/";
   public static final String DOCS_SCOPE = "http://docs.google.com/feeds/";
   public static final String DOC_FEED = DOCS_SCOPE + "default" + FEED_PERMISSIONS;
-  public static final String AUTHORIZE_SPREADSHEET_CREATION = "Authorize Doc Service for Spreadsheet Creation";
-  public static final String GOOGLE_DOC_EXPLANATION = "Create Google Doc Spreadsheet for Form: ";
-  public static final String DOCS_PRE_KEY = "spreadsheet%3A";
 
-  /**
-   * The name of the property that specifies the session key for the doc and
-   * spreadsheets services
-   */
-  public static final String OAUTH_TOKEN = "oauthToken";
-  public static final String OAUTH_TOKEN_SECRET = "oauthTokenSecret";
 
   public static final int WORKSHEET_CREATION_DELAY = 15000;
-  public static final String COMPLETED_AUTH = "Completed Authorization <br>";
-
+ 
   /**
    * Characters which cause problems in Google Spreadsheet headers. Removed in
    * the GoogleSpreadsheetHeaderFormatter.

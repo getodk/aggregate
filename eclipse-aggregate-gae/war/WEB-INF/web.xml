@@ -151,15 +151,6 @@
 	</servlet-mapping>
 
 	<servlet>
-		<servlet-name>gwttest</servlet-name>
-		<servlet-class>org.opendatakit.aggregate.servlet.GwtTester</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>gwttest</servlet-name>
-		<url-pattern>/www/gwttest</url-pattern>
-	</servlet-mapping>
-
-	<servlet>
 		<servlet-name>aggregate-html</servlet-name>
 		<servlet-class>org.opendatakit.aggregate.servlet.AggregateHtmlServlet</servlet-class>
 	</servlet>
@@ -303,15 +294,6 @@
 	<servlet-mapping>
 		<servlet-name>downloadSubmission</servlet-name>
 		<url-pattern>/view/downloadSubmission</url-pattern>
-	</servlet-mapping>
-
-	<servlet>
-		<servlet-name>briefcase</servlet-name>
-		<servlet-class>org.opendatakit.aggregate.servlet.BriefcaseServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>briefcase</servlet-name>
-		<url-pattern>/Briefcase</url-pattern>
 	</servlet-mapping>
 
 	<servlet>

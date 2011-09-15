@@ -41,7 +41,7 @@ public class QueryByDate extends QueryBase {
 
   public QueryByDate(Form form, Date lastDate,
       boolean backwardDirection, boolean secondaryOrderingByPrimaryKey, Boolean onlyCompleteSubmissions, int maxFetchLimit, CallingContext cc) throws ODKFormNotFoundException {
-    super(form, maxFetchLimit);
+    super(form);
 
     backward = backwardDirection;
 

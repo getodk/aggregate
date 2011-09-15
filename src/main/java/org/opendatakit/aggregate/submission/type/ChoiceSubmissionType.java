@@ -77,7 +77,7 @@ public class ChoiceSubmissionType extends SubmissionFieldBase<List<String>> {
 		q.addFilter(sel.parentAuri, FilterOperation.EQUAL, parentKey);
 		q.addSort(sel.ordinalNumber, Direction.ASCENDING);
 
-		List<? extends CommonFieldsBase> choiceHits = q.executeQuery(0);
+		List<? extends CommonFieldsBase> choiceHits = q.executeQuery();
 		choices.clear();
 		values.clear();
 		for ( CommonFieldsBase cb : choiceHits ) {
@@ -103,7 +103,7 @@ public class ChoiceSubmissionType extends SubmissionFieldBase<List<String>> {
 	@Override
 	public void recursivelyAddEntityKeys(List<EntityKey> keyList, CallingContext cc) {
 		for ( SelectChoice s : choices ) {
-			keyList.add( new EntityKey( s, s.getUri()));
+			keyList.add( s.getEntityKey());
 		}
 	}
 	
@@ -116,7 +116,7 @@ public class ChoiceSubmissionType extends SubmissionFieldBase<List<String>> {
 			// clear the old underlying data records...
 			List<EntityKey> keys = new ArrayList<EntityKey>();
 			for ( SelectChoice c: choices ) {
-				keys.add(new EntityKey(c, c.getUri()));
+				keys.add(c.getEntityKey());
 			}
 
 			try {

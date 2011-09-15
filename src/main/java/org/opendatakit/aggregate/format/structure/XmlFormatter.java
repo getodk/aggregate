@@ -20,6 +20,8 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.commons.lang.StringEscapeUtils;
+import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.common.FormElementNamespace;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.form.Form;
@@ -30,7 +32,6 @@ import org.opendatakit.aggregate.format.element.XmlAttributeFormatter;
 import org.opendatakit.aggregate.format.element.XmlElementFormatter;
 import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.aggregate.submission.SubmissionSet;
-import org.opendatakit.common.constants.HtmlUtil;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
 
@@ -72,7 +73,7 @@ public class XmlFormatter implements SubmissionFormatter, RepeatCallbackFormatte
 	  // 
 	  // add what could be considered the form's metadata...
 	  // 
-	  attributeRow.addFormattedValue("id=\"" + form.getFormId() + "\"");
+	  attributeRow.addFormattedValue("id=\"" + StringEscapeUtils.escapeXml(form.getFormId()) + "\"");
 	  if ( form.isEncryptedForm()) {
 		  attributeRow.addFormattedValue("encrypted=\"yes\"");
 	  }

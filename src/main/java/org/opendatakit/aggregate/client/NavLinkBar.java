@@ -5,12 +5,15 @@ import org.opendatakit.aggregate.client.widgets.HelpDialogsToggleButton;
 import org.opendatakit.aggregate.client.widgets.HelpSlidePanelToggleButton;
 import org.opendatakit.common.security.client.UserSecurityInfo;
 import org.opendatakit.common.security.client.UserSecurityInfo.UserType;
+import org.opendatakit.common.web.constants.HtmlConsts;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.Anchor;
-import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.SimplePanel;
 
-public class NavLinkBar extends FlowPanel {
+public class NavLinkBar extends SimplePanel {
   
   private static final String LOGOUT_URL_PATH = "j_spring_security_logout";
   private static final String LOGIN_URL_PATH = "relogin.html";
@@ -35,10 +38,13 @@ public class NavLinkBar extends FlowPanel {
     helpBalloonsToggleButton = new HelpDialogsToggleButton();
     helpBalloonsToggleButton.getElement().setId("nav_bar_help_login_item");
     
-    add(loginLogoutLink);
-    add(helpPanelToggleButton);
-    add(helpBookButton);
-    add(helpBalloonsToggleButton);
+    FlexTable layout = new FlexTable();
+    layout.setWidget(0, 0, loginLogoutLink);
+    layout.setWidget(0, 1, helpPanelToggleButton);
+    layout.setWidget(0, 2, helpBookButton);
+    layout.setWidget(0, 3, helpBalloonsToggleButton);
+    layout.setWidget(0, 4, new HTML(HtmlConsts.TAB));
+    add(layout);
   }
   
   public void update() {

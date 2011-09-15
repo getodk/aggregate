@@ -76,17 +76,26 @@ public interface Query {
   public void addValueSetFilter(DataField attributeName, Collection<?> valueSet );
   
   /**
-   * Returns a list of entities which are the results of executing the query.
+   * Returns a list of all the entities which are the results of executing the query.
    * 
-   * @param fetchLimit the maximum number of Entity objects to retrieve from the Datastore
    * @return a List<Entity> which contains the Entity objects from the results of the Query
    * @throws ODKDatastoreException if there was a  problem executing the Query
    */
-  public List<? extends CommonFieldsBase> executeQuery(int fetchLimit) throws ODKDatastoreException;
+  public List<? extends CommonFieldsBase> executeQuery() throws ODKDatastoreException;
 
   /**
+   * Returns a list of entities which are the results of executing the query.
+   * 
+   * @param startCursor -- the cursor at which to start (null if new query)
+   * @param fetchLimit -- number of records to fetch
+   * @return
+   * @throws ODKDatastoreException
+   */
+  public QueryResult executeQuery(QueryResumePoint startCursor, int fetchLimit) throws ODKDatastoreException;
+  
+  /**
    * Returns a list of distinct EntityKeys of the topLevelAuri for the set of records
-   * returned by the query.
+   * returned by the query.  This should always be an empty or singleton set.
    * 
    * @param topLevelTable - the relation that the topLevelAuri corresponds to.
    * @param foreignKeyField - the topLevelAuri DataField in the table being queried.
@@ -98,7 +107,7 @@ public interface Query {
 
 
   /**
-   * Returns the list of distinct values for a given field with any given filter
+   * Returns the list of all distinct values for a given field with any given filter
    * and sort criteria.
    * 
    * @param dataField

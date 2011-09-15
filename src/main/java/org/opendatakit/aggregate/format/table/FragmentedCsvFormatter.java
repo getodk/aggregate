@@ -35,10 +35,10 @@ import org.opendatakit.aggregate.format.element.LinkElementFormatter;
 import org.opendatakit.aggregate.servlet.FragmentedCsvServlet;
 import org.opendatakit.aggregate.submission.SubmissionKeyPart;
 import org.opendatakit.aggregate.submission.SubmissionSet;
-import org.opendatakit.common.constants.BasicConsts;
-import org.opendatakit.common.constants.HtmlConsts;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
+import org.opendatakit.common.web.constants.BasicConsts;
+import org.opendatakit.common.web.constants.HtmlConsts;
 
 /**
  * 
@@ -126,6 +126,7 @@ public class FragmentedCsvFormatter extends TableFormatterBase implements Submis
 		// setting the response content type emits the xml header.
 		// just write the body here...
 		d.writeChildren(serializer); 
+		serializer.flush();
 	}
 
 	  @Override
