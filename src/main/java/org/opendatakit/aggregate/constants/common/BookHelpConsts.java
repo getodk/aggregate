@@ -3,7 +3,7 @@ package org.opendatakit.aggregate.constants.common;
 public enum BookHelpConsts {
 
 	XFORM("Forms", 
-	      "http://www.cs.washington.edu/homes/wrb/NewForm.mpg" , 
+	      "http://www.cs.washington.edu/homes/wrb/NewForm.wmv" , 
 			"Forms are tables which organize your data into rows and columns.  You can view your " +
 			"forms on \"Submissions\" -> \"Filter Submissions\".<br><br>" +
 			"What is \"Downloadable\"? (\"Form Management\" -> \"Forms List\")<br>" +
@@ -21,7 +21,7 @@ public enum BookHelpConsts {
 	"&nbsp;2.  Media File(s) - optional.  Choose the appropriate media files for the form."),
 	
 	FILTER("Filters", 
-	      "http://www.cs.washington.edu/homes/wrb/Filter.mpg", 
+	      "http://www.cs.washington.edu/homes/wrb/Filter.wmv", 
 			"Filters give you the ability to see a subset of your data.  For example, if you wanted to " +
 			"only look at males over the age of 35, you would include 2 filters: <br>" +
 			"&nbsp;1.  Display Rows where column Gender EQUAL male <br>" +
@@ -53,7 +53,7 @@ public enum BookHelpConsts {
 			"checkbox on \"Submissions\" -> \"Filter Submissions\"."),
 	
 	VISUALIZE("Visualize", 
-	    "http://www.cs.washington.edu/homes/wrb/Visualization.mpg",
+	    "http://www.cs.washington.edu/homes/wrb/Visualization.wmv",
 			"Visualizing the data is a quick way to see early results.  You can view your data in a bar" +
 			"graph, pie chart, or on a map.", "How do I visualize the data? (Press \"Visualize\" on \"Submissions\" -> \"Filter Submissions\" " +
 			"or on \"Form Management\" -> \"Forms List\")<br>" +
@@ -74,7 +74,7 @@ public enum BookHelpConsts {
 	"&nbsp;&nbsp;c.  Press \"Map It\"."),
 	
 	EXPORT("Export", 
-	    "http://www.cs.washington.edu/homes/wrb/Export.mpg",
+	    "http://www.cs.washington.edu/homes/wrb/Export.wmv",
 			"Exporting your data allows you to view the information in another software tool.  This" +
 			"can allow you to do more comprehensive work with your data.  You can export your file to" +
 			"a CSV file (Excel) or a KML file (Google Maps).", "How do I export a file? (Press \"Export\" on \"Submissions\" -> \"Filter Submissions\" " +
@@ -88,7 +88,7 @@ public enum BookHelpConsts {
 	"&nbsp;&nbsp;d.  Press \"Export\"."),
 	
 	PUBLISH("Publish",
-	    "http://www.cs.washington.edu/homes/wrb/Publish.mpg", 
+	    "http://www.cs.washington.edu/homes/wrb/Publish.wmv", 
 			"When you publish your data, it will be uploaded to a software tool: Google Fusion Tables or " +
 			"Google Spreadsheets.  You can display data before a certain time, after a certain time, or " +
 			"stream all of the data.  This will allow others to work with the data to do analysis.", "How do I publish my data? (Press \"Publish\" on \"Submissions\" -> \"Filter Submissions\" " +
