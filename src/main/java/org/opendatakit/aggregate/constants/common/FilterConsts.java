@@ -15,22 +15,48 @@ public enum FilterConsts implements HelpSliderConsts {
 	SAVE("Save", "This will save a filter for future use.  You must have at least one filter in order to save.<br>" +
 			"1.  Please fill in the desired name.<br>" +
 	"2.  Press \"OK\"."),
-	VISUALIZE("Visualize", "This feature allows you to view some of your data in a pie chart, bar graph, or a map.<br>" +
-			"1.  Choose whether you want to view a Pie Chart, Bar Graph, or a Map.<br>" +
-			"2a.  If you choose Pie Chart:<br>" +
-			"	a.  Select the column that you want to work with on the x axis.<br>" +
-			"	b.  Select the column that you want to work with on the y axis, or choose \"Number of Occurrences\" to simply to get a " +
-			"count of column entries in your x axis.<br>" +
-			"	c.  Press \"Pie It\".<br>" +
-			"2b.  If you choose Bar Graph:<br>" +
-			"	a.  Select the column that you want to work with on the x axis.<br>" +
-			"	b.  Select the column that you want to work with on the y axis, or choose \"Number of Occurrences\" to simply to get a " +
-			"count of column entries in your x axis.<br>" +
-			"	c.  Press \"Bar It\".<br>" +
-			"2c.  If you choose Map:<br>" +
-			"	a.  Select the column that you want to map.<br>" +
-			"	b.  Select the type of geographical data you are using.<br>" +
-	"	c.  Press \"Map It\"."),
+	VISUALIZE("Visualize",
+			"Aggregate provides a simple web interface for basic data " +
+			"visualization.<br>You can view your data in a bar graph, pie chart," +
+			" or on a map.<br>This Visualize functionality is meant to provide a" +
+			" quick means to view early data results <br>in meaningful ways but is" +
+			" not meant to provide complex data analysis functionality.<br><br>"+
+			"How do I visualize the data? (" +
+			"Press \"Visualize\" on \"Submissions\" -> \"Filter Submissions\")" +
+			"<br>" +
+			"&nbsp;1.  Choose whether you want to view a Pie Chart, Bar Graph," +
+			" or a Map.<br>" +
+			"&nbsp;2a.  If you choose Pie Chart:<br>" +
+			"&nbsp;&nbsp;a.  Choose whether you would like to Count or Sum data." +
+			"<br>" +
+			"&nbsp;&nbsp;&nbsp;Count - Counts the number of times a unique" +
+			" answer occurs in the specified column.<br>" +
+			"&nbsp;&nbsp;&nbsp;1. Select the column that you want to count.<br>" +
+			"&nbsp;&nbsp;&nbsp;Sum - Sums the values in one column grouped" +
+			" together by a value in another column.<br>" +
+			"&nbsp;&nbsp;&nbsp;1.  Select the column of values that you want to" +
+			"add.<br>" +
+			"&nbsp;&nbsp;&nbsp;2.  Select the column of values that you want to" +
+			"use to group the numbers.<br>" +
+			"&nbsp;&nbsp;c.  Press \"Pie It\".<br>" +
+			"&nbsp;2b.  If you choose Bar Graph:<br>" +
+			"&nbsp;&nbsp;a.  Choose whether you would like to Count or Sum data." +
+			"<br>" +
+			"&nbsp;&nbsp;&nbsp;Count - Counts the number of times a unique" +
+			" answer occurs in the specified column.<br>" +
+			"&nbsp;&nbsp;&nbsp;1. Select the column that you want to count.<br>" +
+			"&nbsp;&nbsp;&nbsp;Sum - Sums the values in one column grouped" +
+			" together by a value in another column.<br>" +
+			"&nbsp;&nbsp;&nbsp;1.  Select the column of values that you want to" +
+			"add.<br>" +
+			"&nbsp;&nbsp;&nbsp;2.  Select the column of values that you want to" +
+			"use to group the numbers.<br>" +
+			"&nbsp;&nbsp;c.  Press \"Bar It\".<br>" +
+			"&nbsp;2c.  If you choose Map:<br>" +
+			"&nbsp;&nbsp;a.  Select the column that you want to map.<br>" +
+			"&nbsp;&nbsp;b.  Press \"Map It\"." +
+			"&nbsp;&nbsp;c.  You can click on a point to view a balloon with the" +
+	" other information supplied in the table."),
 	EXPORT("Export", "This allows you to view your data in either Microsoft Excel, or in a Google Map.<br>" +
 			"1.  Choose whether you want to export to a .csv file, or a .kml file.<br>" +
 			"2a.  If you choose CSV, just press \"Export\".<br>" +
