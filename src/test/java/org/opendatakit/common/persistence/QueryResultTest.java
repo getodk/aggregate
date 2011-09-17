@@ -235,7 +235,7 @@ public class QueryResultTest {
 		User user = cc.getCurrentUser();
 		MyRelation rel = MyRelation.assertRelation(cc);
 		
-		Query query = ds.createQuery(rel, user);
+		Query query = ds.createQuery(rel, "QueryResultTest.testCase1str", user);
 		
 		List<?> values = query.executeDistinctValueForDataField(MyRelation.fieldStr);
 		assertEquals(6, values.size());
@@ -249,7 +249,7 @@ public class QueryResultTest {
 		User user = cc.getCurrentUser();
 		MyRelation rel = MyRelation.assertRelation(cc);
 		
-		Query query = ds.createQuery(rel, user);
+		Query query = ds.createQuery(rel, "QueryResultTest.testCase1dbl", user);
 		
 		List<?> values = query.executeDistinctValueForDataField(MyRelation.fieldDbl);
 		assertEquals(SET_SIZE + 7, values.size());
@@ -263,7 +263,7 @@ public class QueryResultTest {
 		User user = cc.getCurrentUser();
 		MyRelation rel = MyRelation.assertRelation(cc);
 		
-		Query query = ds.createQuery(rel, user);
+		Query query = ds.createQuery(rel, "QueryResultTest.testCase1bool", user);
 		
 		List<?> values = query.executeDistinctValueForDataField(MyRelation.fieldBool);
 		// true, false, null
@@ -278,7 +278,7 @@ public class QueryResultTest {
 		User user = cc.getCurrentUser();
 		MyRelation rel = MyRelation.assertRelation(cc);
 		
-		Query query = ds.createQuery(rel, user);
+		Query query = ds.createQuery(rel, "QueryResultTest.testCase1int", user);
 		
 		List<?> values = query.executeDistinctValueForDataField(MyRelation.fieldInt);
 		assertEquals(SET_SIZE, values.size());
@@ -292,7 +292,7 @@ public class QueryResultTest {
 		User user = cc.getCurrentUser();
 		MyRelation rel = MyRelation.assertRelation(cc);
 		
-		Query query = ds.createQuery(rel, user);
+		Query query = ds.createQuery(rel, "QueryResultTest.testCase2", user);
 		query.addFilter(MyRelation.fieldInt, FilterOperation.GREATER_THAN, SET_SIZE - 2);
 		query.addSort(MyRelation.fieldDate, Direction.ASCENDING);
 		query.addSort(MyRelation.fieldDbl, Direction.DESCENDING);
@@ -340,13 +340,13 @@ public class QueryResultTest {
 		MyRelation rel = MyRelation.assertRelation(cc);
 		System.out.println("start testCase3");
 		
-		Query query = ds.createQuery(rel, user);
+		Query query = ds.createQuery(rel, "QueryResultTest.testCase3(1st)", user);
 		query.addFilter(MyRelation.fieldDbl, FilterOperation.EQUAL, new BigDecimal("0.9"));
 		query.addFilter(MyRelation.fieldBool, FilterOperation.EQUAL, true);
 		query.addSort(MyRelation.fieldInt, Direction.ASCENDING);
 		query.addSort(MyRelation.fieldDate, Direction.DESCENDING);
 
-		Query backquery = ds.createQuery(rel, user);
+		Query backquery = ds.createQuery(rel, "QueryResultTest.testCase3(2nd)", user);
 		backquery.addFilter(MyRelation.fieldDbl, FilterOperation.EQUAL, new BigDecimal("0.9"));
 		backquery.addFilter(MyRelation.fieldBool, FilterOperation.EQUAL, true);
 		backquery.addSort(MyRelation.fieldInt, Direction.DESCENDING);

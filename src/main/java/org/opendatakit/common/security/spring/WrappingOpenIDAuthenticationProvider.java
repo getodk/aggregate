@@ -20,6 +20,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.opendatakit.common.security.SecurityUtils;
 import org.opendatakit.common.security.common.GrantedAuthorityName;
 import org.springframework.security.core.Authentication;
@@ -42,6 +44,8 @@ import org.springframework.security.openid.OpenIDAuthenticationToken;
  *
  */
 public class WrappingOpenIDAuthenticationProvider extends OpenIDAuthenticationProvider {
+
+  private static final Log logger = LogFactory.getLog(WrappingOpenIDAuthenticationProvider.class);
 
 	UserDetailsService wrappingUserDetailsService;
 
@@ -76,6 +80,7 @@ public class WrappingOpenIDAuthenticationProvider extends OpenIDAuthenticationPr
 			}
 		}
 		if ( eMail == null ) {
+		   logger.warn("OpenId attributes did not include an e-mail address! ");
 			throw new UsernameNotFoundException("email address not supplied in OpenID attributes");
 		}
 		eMail = WrappingOpenIDAuthenticationProvider.normalizeMailtoAddress(eMail);
@@ -101,7 +106,9 @@ public class WrappingOpenIDAuthenticationProvider extends OpenIDAuthenticationPr
 			noRights = partialDetails.getAuthorities().isEmpty();
 			username = partialDetails.getUsername();
 		} catch (Exception e) {
-			throw new UsernameNotFoundException("account not recognized");
+		  e.printStackTrace();
+		  logger.warn("OpenId attribute e-mail: " + eMail + " did not match any known e-mail addresses! " + e.getMessage());
+        throw new UsernameNotFoundException("account not recognized");
 		}
 
 		AggregateUser trueUser = new AggregateUser(username, 
@@ -115,6 +122,7 @@ public class WrappingOpenIDAuthenticationProvider extends OpenIDAuthenticationPr
 													authorities);
 		if ( noRights || !( trueUser.isEnabled() && trueUser.isAccountNonExpired() &&
 				trueUser.isAccountNonLocked() ) ) {
+         logger.warn("OpenId attribute e-mail: " + eMail + " account is blocked! ");
 			throw new UsernameNotFoundException("account is blocked");
 		}
 		
@@ -142,7 +150,8 @@ public class WrappingOpenIDAuthenticationProvider extends OpenIDAuthenticationPr
 			if ( emailAddress.contains(SecurityUtils.AT_SIGN) ) {
 				mailtoUsername = SecurityUtils.MAILTO_COLON + emailAddress;
 			} else {
-				throw new IllegalStateException("e-mail address is incomplete - it does not specify a domain!");
+			   logger.warn("OpenId attribute e-mail: " + emailAddress + " does not specify a domain! ");
+	         throw new IllegalStateException("e-mail address is incomplete - it does not specify a domain!");
 			}
 		}
 		return mailtoUsername;

@@ -56,7 +56,7 @@ public class QueryForTablesLogic extends CommandLogic<QueryForTables>
             String requestingUserID = queryForTables.getRequestingUserID();
     
             // retrieve request user
-            InternalUser requestingUser = users.query()
+            InternalUser requestingUser = users.query("QueryForTablesLogic.execute")
                     .equal(Users.USER_ID, requestingUserID).get();
             String aggregateUserIdentifier = requestingUser
                     .getAggregateIdentifier();
@@ -64,7 +64,7 @@ public class QueryForTablesLogic extends CommandLogic<QueryForTables>
             // get aggregateTableIdentifiers for which this user has read permissions
             @SuppressWarnings("unchecked")
             List<String> aggregateTableIdentifiers = (List<String>) permissions
-                    .query()
+                    .query("QueryForTablesLogic.execute")
                     .equal(Permissions.AGGREGATE_USER_IDENTIFIER,
                             aggregateUserIdentifier).equal(Permissions.READ, true)
                     .getDistinct(Permissions.AGGREGATE_TABLE_IDENTIFIER);
@@ -100,7 +100,7 @@ public class QueryForTablesLogic extends CommandLogic<QueryForTables>
                 try
                 {
                     InternalUserTableMapping mapping = mappings
-                            .query()
+                            .query("QueryForTablesLogic.execute")
                             .equal(UserTableMappings.AGGREGATE_USER_IDENTIFIER,
                                     aggregateUserIdentifier)
                             .equal(UserTableMappings.AGGREGATE_TABLE_IDENTIFIER,
@@ -117,7 +117,7 @@ public class QueryForTablesLogic extends CommandLogic<QueryForTables>
     
                 // retrieve the columns for the table
                 List<InternalColumn> internalColumns = columns
-                        .query()
+                        .query("QueryForTablesLogic.execute")
                         .equal(Columns.AGGREGATE_TABLE_IDENTIFIER,
                                 aggregateTableIdentifier).execute();
                 List<Column> clientColumns = new ArrayList<Column>();

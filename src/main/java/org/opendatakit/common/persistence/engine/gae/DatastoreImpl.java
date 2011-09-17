@@ -212,8 +212,8 @@ public class DatastoreImpl implements Datastore {
 	}
 
 	@Override
-	public Query createQuery(CommonFieldsBase table, User user) {
-		Query query = new QueryImpl(table, this, user);
+	public Query createQuery(CommonFieldsBase table, String loggingContextTag, User user) {
+		Query query = new QueryImpl(table, loggingContextTag, this, user);
 		return query;
 	}
 	

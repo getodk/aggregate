@@ -339,7 +339,7 @@ public class FormDeleteWorkerImpl {
       QueryResumePoint startCursor = null;
       for (;;) {
         // retrieve submissions
-        Query surveyQuery = ds.createQuery(relation, user);
+        Query surveyQuery = ds.createQuery(relation, "FormDeleteWorkerImpl.doDeletion", user);
         surveyQuery.addSort(relation.lastUpdateDate, Query.Direction.DESCENDING);
         surveyQuery.addSort(relation.primaryKey, Query.Direction.DESCENDING);
 

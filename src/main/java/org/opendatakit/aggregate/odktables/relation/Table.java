@@ -89,7 +89,7 @@ public class Table extends TypedEntityRelation<InternalRow>
     {
         List<InternalColumn> columns = Columns
                 .getInstance(cc)
-                .query()
+                .query("[odktables]Table.getInstance")
                 .equal(Columns.AGGREGATE_TABLE_IDENTIFIER,
                         aggregateTableIdentifier).execute();
         List<Attribute> attributes = new ArrayList<Attribute>();

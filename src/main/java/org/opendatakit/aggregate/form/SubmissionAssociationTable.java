@@ -221,7 +221,7 @@ public final class SubmissionAssociationTable extends CommonFieldsBase {
 			// changes here should be paralleled in the FormParserForJavaRosa
 		    SubmissionAssociationTable saRelation = SubmissionAssociationTable.assertRelation(cc);
 		    String submissionFormIdUri = CommonFieldsBase.newMD5HashUri(params.formId); // key under which submission is located...
-		    Query q = cc.getDatastore().createQuery(saRelation, cc.getCurrentUser());
+		    Query q = cc.getDatastore().createQuery(saRelation, "SubmissionAssociationTable.findSubmissionAssociationsForXForm", cc.getCurrentUser());
 		    q.addFilter(SubmissionAssociationTable.URI_MD5_SUBMISSION_FORM_ID, Query.FilterOperation.EQUAL, submissionFormIdUri);
 		    List<? extends CommonFieldsBase> l = q.executeQuery();
 		    for ( CommonFieldsBase b : l ) {

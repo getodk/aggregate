@@ -47,7 +47,7 @@ public class RemoveTableSynchronizationLogic extends
             String tableID = removeTableSynchronization.getTableID();
 
             // retrieve request user
-            InternalUser requestUser = users.query()
+            InternalUser requestUser = users.query("RemoveTableSynchronizationLogic.execute")
                     .equal(Users.USER_ID, requestingUserID).get();
 
             // get mapping from user's tableID to the aggregateTableIdentifier
@@ -55,7 +55,7 @@ public class RemoveTableSynchronizationLogic extends
             try
             {
                 mapping = mappings
-                        .query()
+                        .query("RemoveTableSynchronizationLogic.execute")
                         .equal(UserTableMappings.AGGREGATE_USER_IDENTIFIER,
                                 requestUser.getAggregateIdentifier())
                         .equal(UserTableMappings.TABLE_ID, tableID).get();

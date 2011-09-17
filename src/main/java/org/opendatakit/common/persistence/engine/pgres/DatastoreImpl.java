@@ -589,7 +589,7 @@ public class DatastoreImpl implements Datastore, InitializingBean {
 	@Override
 	public <T extends CommonFieldsBase> T getEntity(T relation, String uri, User user)
 			throws ODKEntityNotFoundException {
-		 Query query = new QueryImpl(relation, this, user);
+		 Query query = new QueryImpl(relation, "getEntity", this, user);
 		 query.addFilter(relation.primaryKey, FilterOperation.EQUAL, uri);
 		 try {
 			List<? extends CommonFieldsBase> results = query.executeQuery();
@@ -607,8 +607,8 @@ public class DatastoreImpl implements Datastore, InitializingBean {
 	}
 
 	@Override
-	public Query createQuery(CommonFieldsBase relation, User user) {
-		Query query = new QueryImpl(relation, this, user);
+	public Query createQuery(CommonFieldsBase relation, String loggingContextTag, User user) {
+		Query query = new QueryImpl(relation, loggingContextTag, this, user);
 		return query;
 	}
 

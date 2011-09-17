@@ -64,7 +64,7 @@ public class CloneSynchronizedTableLogic extends
                     .getRequestingUserID();
 
             // Get request user
-            InternalUser user = users.query()
+            InternalUser user = users.query("CloneSynchronizedTableLogic.execute")
                     .equal(Users.USER_ID, requestingUserID).get();
 
             // Check if user is allowed to read the table they want to clone
@@ -76,7 +76,7 @@ public class CloneSynchronizedTableLogic extends
 
             // Check if the user is already using the tableID
             boolean mappingExists = mappings
-                    .query()
+                    .query("CloneSynchronizedTableLogic.execute")
                     .equal(UserTableMappings.AGGREGATE_USER_IDENTIFIER,
                             user.getAggregateIdentifier())
                     .equal(UserTableMappings.TABLE_ID, tableID).exists();
@@ -106,13 +106,13 @@ public class CloneSynchronizedTableLogic extends
             // create modification of all the latest rows
             Table table = Table.getInstance(aggregateTableIdentifier, cc);
             List<InternalColumn> cols = columns
-                    .query()
+                    .query("CloneSynchronizedTableLogic.execute")
                     .equal(Columns.AGGREGATE_TABLE_IDENTIFIER,
                             aggregateTableIdentifier).execute();
 
             int modificationNumber = entry.getModificationNumber();
 
-            List<InternalRow> rows = table.query().execute();
+            List<InternalRow> rows = table.query("CloneSynchronizedTableLogic.execute").execute();
             List<SynchronizedRow> clientRows = new ArrayList<SynchronizedRow>();
             for (InternalRow row : rows)
             {

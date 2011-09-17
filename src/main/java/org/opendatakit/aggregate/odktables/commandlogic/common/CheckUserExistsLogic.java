@@ -35,7 +35,7 @@ public class CheckUserExistsLogic extends CommandLogic<CheckUserExists>
             Users users = Users.getInstance(cc);
             
             String userID = checkUserExists.getUserID();
-            userExists = users.query().equal(Users.USER_ID, userID)
+            userExists = users.query("CheckUserExistsLogic.execute").equal(Users.USER_ID, userID)
                     .exists();
         }
         catch (ODKDatastoreException e)

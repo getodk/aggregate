@@ -43,7 +43,7 @@ public class CreateUserLogic extends CommandLogic<CreateUser>
             String requestingUserID = createUser.getRequestingUserID();
             String aggregateUsersIdentifier = users.getAggregateIdentifier();
     
-            InternalUser requestUser = users.query()
+            InternalUser requestUser = users.query("CreateUserLogic.execute")
                     .equal(Users.USER_ID, requestingUserID).get();
     
             if (!requestUser.hasPerm(aggregateUsersIdentifier, Permissions.WRITE))
@@ -72,7 +72,7 @@ public class CreateUserLogic extends CommandLogic<CreateUser>
     
     public static User createUser(Users users, String userID, String userName) throws UserAlreadyExistsException, ODKDatastoreException
     {
-        if (users.query().equal(Users.USER_ID, userID).exists())
+        if (users.query("CreateUserLogic.createUser").equal(Users.USER_ID, userID).exists())
         {
             throw new UserAlreadyExistsException(null);
         }

@@ -275,7 +275,7 @@ public final class FormServiceCursor extends CommonFieldsBase {
   public static final List<ExternalService> getExternalServicesForForm(Form form,
       CallingContext cc) throws ODKDatastoreException {
     FormServiceCursor relation = assertRelation(cc);
-    Query query = cc.getDatastore().createQuery(relation, cc.getCurrentUser());
+    Query query = cc.getDatastore().createQuery(relation, "FormServiceCursor.getExternalServicesForForm[" + form.getFormId() + "]", cc.getCurrentUser());
     // filter on the Form's Uri. We cannot filter on the FORM_ID since it is a
     // Text field in bigtable
     query.addFilter(URI_MD5_FORM_ID_PROPERTY, FilterOperation.EQUAL, form.getEntityKey().getKey());
@@ -307,7 +307,7 @@ public final class FormServiceCursor extends CommonFieldsBase {
       List<FormServiceCursor> fscList = new ArrayList<FormServiceCursor>();
       try {
          FormServiceCursor relation = assertRelation(cc);
-         Query query = cc.getDatastore().createQuery(relation, cc.getCurrentUser());
+         Query query = cc.getDatastore().createQuery(relation, "FormServiceCursor.queryFormServiceCursorRelation", cc.getCurrentUser());
          query.addFilter(relation.lastUpdateDate, FilterOperation.LESS_THAN_OR_EQUAL,
                olderThanDate);
          query.addSort(relation.lastUpdateDate, Direction.ASCENDING);

@@ -71,7 +71,7 @@ public class InternalUser extends TypedEntity
     {
         boolean hasPerm = Permissions
                 .getInstance(cc)
-                .query()
+                .query("[odktables]InternalUser.hasPerm")
                 .equal(Permissions.AGGREGATE_TABLE_IDENTIFIER,
                         aggregateTableIdentifier)
                 .equal(Permissions.AGGREGATE_USER_IDENTIFIER,

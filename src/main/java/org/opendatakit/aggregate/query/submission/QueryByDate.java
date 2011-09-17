@@ -47,7 +47,7 @@ public class QueryByDate extends QueryBase {
 
     TopLevelDynamicBase tbl = (TopLevelDynamicBase) form.getTopLevelGroupElement().getFormDataModel().getBackingObjectPrototype();
     
-    query = cc.getDatastore().createQuery(tbl, cc.getCurrentUser());
+    query = cc.getDatastore().createQuery(tbl, "QueryByDate.constructor", cc.getCurrentUser());
     if (backward) {
     	query.addSort(tbl.markedAsCompleteDate, Query.Direction.DESCENDING);
     	query.addFilter(tbl.markedAsCompleteDate, Query.FilterOperation.LESS_THAN, lastDate);
