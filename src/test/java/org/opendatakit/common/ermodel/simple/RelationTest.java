@@ -113,6 +113,6 @@ public class RelationTest
     @Test
     public void testQuery()
     {
-        d.relation.query();
+        d.relation.query("RelationTest.testQuery");
     }
 }

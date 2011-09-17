@@ -115,7 +115,7 @@ public class Relation
         {
             AttributeRelation attributeRelation = AttributeRelation
                     .getInstance(namespace, cc);
-            boolean relationExists = attributeRelation.query()
+            boolean relationExists = attributeRelation.query("Relation.constructor")
                     .equal(AttributeRelation.RELATION_NAME, name).exists();
 
             if (!relationExists)
@@ -271,7 +271,7 @@ public class Relation
     {
         AttributeRelation attributeRelation = AttributeRelation.getInstance(
                 namespace, cc);
-        List<Entity> attrEntities = attributeRelation.query()
+        List<Entity> attrEntities = attributeRelation.query("Relation.getAttributeEntities")
                 .equal(AttributeRelation.RELATION_NAME, name).execute();
         return attrEntities;
     }
@@ -298,9 +298,9 @@ public class Relation
     /**
      * Constructs a new Query over this Relation.
      */
-    public Query query()
+    public Query query(String loggingContextTag)
     {
-        return new Query(this.relation);
+        return new Query(this.relation, loggingContextTag);
     }
 
     /**

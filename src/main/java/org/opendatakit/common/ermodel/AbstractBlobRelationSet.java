@@ -267,7 +267,7 @@ public class AbstractBlobRelationSet implements BlobRelationSet {
 	public void dropBlobEntitySet( CallingContext cc ) throws ODKDatastoreException {
 		Datastore ds = cc.getDatastore();
 		User user = cc.getCurrentUser();
-		Query q = ds.createQuery(ctntRelation, user);
+		Query q = ds.createQuery(ctntRelation, "AbstractBlobRelationSet.dropBlobEntitySet", user);
 		
 		List<? extends CommonFieldsBase> bList = q.executeQuery();
 		for ( CommonFieldsBase b : bList ) {

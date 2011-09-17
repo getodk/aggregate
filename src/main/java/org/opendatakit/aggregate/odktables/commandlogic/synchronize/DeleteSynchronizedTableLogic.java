@@ -69,7 +69,7 @@ public class DeleteSynchronizedTableLogic extends
             String tableID = deleteSynchronizedTable.getTableID();
 
             // retrieve request user
-            InternalUser requestUser = users.query()
+            InternalUser requestUser = users.query("DeleteSynchronizedTableLogic.execute")
                     .equal(Users.USER_ID, requestingUserID).get();
 
             // retrieve mapping from user's tableID to aggregateTableIdentifier
@@ -77,7 +77,7 @@ public class DeleteSynchronizedTableLogic extends
             try
             {
                 mapping = mappings
-                        .query()
+                        .query("DeleteSynchronizedTableLogic.execute")
                         .equal(UserTableMappings.TABLE_ID, tableID)
                         .equal(UserTableMappings.AGGREGATE_USER_IDENTIFIER,
                                 requestUser.getAggregateIdentifier()).get();
@@ -99,21 +99,21 @@ public class DeleteSynchronizedTableLogic extends
 
             // retrieve all entities that make up a table
             table = Table.getInstance(aggregateTableIdentifier, cc);
-            List<InternalRow> rows = table.query().execute();
+            List<InternalRow> rows = table.query("DeleteSynchronizedTableLogic.execute").execute();
             List<InternalColumn> cols = columns
-                    .query()
+                    .query("DeleteSynchronizedTableLogic.execute")
                     .equal(Columns.AGGREGATE_TABLE_IDENTIFIER,
                             aggregateTableIdentifier).execute();
             List<InternalUserTableMapping> maps = mappings
-                    .query()
+                    .query("DeleteSynchronizedTableLogic.execute")
                     .equal(UserTableMappings.AGGREGATE_TABLE_IDENTIFIER,
                             aggregateTableIdentifier).execute();
             List<InternalPermission> perms = permissions
-                    .query()
+                    .query("DeleteSynchronizedTableLogic.execute")
                     .equal(Permissions.AGGREGATE_TABLE_IDENTIFIER,
                             aggregateTableIdentifier).execute();
             List<InternalModification> mods = modifications
-                    .query()
+                    .query("DeleteSynchronizedTableLogic.execute")
                     .equal(Modifications.AGGREGATE_TABLE_IDENTIFIER,
                             aggregateTableIdentifier).execute();
             InternalTableEntry entry = entries

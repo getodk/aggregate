@@ -73,7 +73,7 @@ public class ChoiceSubmissionType extends SubmissionFieldBase<List<String>> {
 	public void getValueFromEntity(CallingContext cc) throws ODKDatastoreException {
 		
 		SelectChoice sel = (SelectChoice) element.getFormDataModel().getBackingObjectPrototype();
-		Query q = cc.getDatastore().createQuery(element.getFormDataModel().getBackingObjectPrototype(), cc.getCurrentUser());
+		Query q = cc.getDatastore().createQuery(element.getFormDataModel().getBackingObjectPrototype(), "ChoiceSubmissionType.getValueFromEntity", cc.getCurrentUser());
 		q.addFilter(sel.parentAuri, FilterOperation.EQUAL, parentKey);
 		q.addSort(sel.ordinalNumber, Direction.ASCENDING);
 

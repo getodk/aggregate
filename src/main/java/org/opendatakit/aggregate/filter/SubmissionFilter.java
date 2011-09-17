@@ -325,7 +325,7 @@ public class SubmissionFilter extends CommonFieldsBase {
   static final List<SubmissionFilter> getFilterList(String uriFilterGroup, CallingContext cc)
       throws ODKDatastoreException {
     SubmissionFilter relation = assertRelation(cc);
-    Query query = cc.getDatastore().createQuery(relation, cc.getCurrentUser());
+    Query query = cc.getDatastore().createQuery(relation, "SubmissionFilter.getFilterList", cc.getCurrentUser());
     query.addFilter(SubmissionFilter.URI_FILTER_GROUP_PROPERTY,
         org.opendatakit.common.persistence.Query.FilterOperation.EQUAL, uriFilterGroup);
 

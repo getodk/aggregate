@@ -108,7 +108,7 @@ public class Form {
 		{
 			// get fileset (for now, zero or one record)
 			FormInfoFilesetTable filesetRelation = FormInfoFilesetTable.assertRelation(cc);
-			q = ds.createQuery(filesetRelation, user);
+			q = ds.createQuery(filesetRelation, "Form.constructor", user);
 			q.addFilter(filesetRelation.topLevelAuri, FilterOperation.EQUAL, topLevelAuri);
 			
 			rows = q.executeQuery();
@@ -630,7 +630,7 @@ public class Form {
 		// ensure that Form table exists...
 		List<Form> forms = new ArrayList<Form>();
 
-		Query formQuery = cc.getDatastore().createQuery(relation, cc.getCurrentUser());
+		Query formQuery = cc.getDatastore().createQuery(relation, "Form.getForms", cc.getCurrentUser());
 		List<?> formEntityKeys = 
 			formQuery.executeDistinctValueForDataField(relation.primaryKey);
 				

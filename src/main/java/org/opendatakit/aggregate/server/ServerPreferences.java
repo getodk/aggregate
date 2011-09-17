@@ -121,7 +121,7 @@ public class ServerPreferences extends CommonFieldsBase {
       throws ODKEntityNotFoundException {
     try {
       ServerPreferences relation = assertRelation(cc);
-      Query query = cc.getDatastore().createQuery(relation, cc.getCurrentUser());
+      Query query = cc.getDatastore().createQuery(relation, "ServerPreferences.getServerPreferences", cc.getCurrentUser());
 
       List<? extends CommonFieldsBase> results = query.executeQuery();
       if (!results.isEmpty()) {

@@ -87,7 +87,7 @@ public class Users extends TypedEntityRelation<InternalUser>
 
     public InternalUser getByID(String userID) throws ODKDatastoreException
     {
-        return query().equal(USER_ID, userID).get();
+        return query("[odktables]Users.getByID").equal(USER_ID, userID).get();
     }
 
     public String getAggregateIdentifier()

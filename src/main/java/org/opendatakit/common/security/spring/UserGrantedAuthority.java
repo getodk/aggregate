@@ -123,7 +123,7 @@ public final class UserGrantedAuthority extends CommonFieldsBase {
 		Set<GrantedAuthority> authorized = new HashSet<GrantedAuthority>();
 		
 		if ( uriUser != null ) {
-			Query q = ds.createQuery(assertRelation(ds, user), user);
+			Query q = ds.createQuery(assertRelation(ds, user), "UserGrantedAuthority.getGrantedAuthorities", user);
 			q.addFilter(USER, FilterOperation.EQUAL, uriUser);
 			List<?> values = q.executeDistinctValueForDataField(GRANTED_AUTHORITY);
 			for ( Object value : values ) {
@@ -145,7 +145,7 @@ public final class UserGrantedAuthority extends CommonFieldsBase {
 	public static final Set<String> getUriUsers(GrantedAuthority auth, Datastore ds, User user) throws ODKDatastoreException {
 		Set<String> users = new HashSet<String>();
 		if ( auth != null ) {
-			Query q = ds.createQuery(assertRelation(ds, user), user);
+			Query q = ds.createQuery(assertRelation(ds, user), "UserGrantedAuthority.getUriUsers", user);
 			q.addFilter(GRANTED_AUTHORITY, FilterOperation.EQUAL, auth.getAuthority());
 			List<?> values = q.executeDistinctValueForDataField(USER);
 			for ( Object value : values ) {
@@ -176,7 +176,7 @@ public final class UserGrantedAuthority extends CommonFieldsBase {
 			
 			// get the members as currently defined for this group 
 			List<? extends CommonFieldsBase> membersList;
-			Query query = ds.createQuery(relation, user);
+			Query query = ds.createQuery(relation, "UserGrantedAuthority.assertGrantedAuthorityMembers", user);
 			query.addFilter(UserGrantedAuthority.GRANTED_AUTHORITY, FilterOperation.EQUAL, 
 							group.getAuthority());
 			membersList = query.executeQuery();
@@ -229,7 +229,7 @@ public final class UserGrantedAuthority extends CommonFieldsBase {
 			
 			// get the members as currently defined for this group 
 			List<? extends CommonFieldsBase> groupsList;
-			Query query = ds.createQuery(relation, user);
+			Query query = ds.createQuery(relation, "UserGrantedAuthority.assertUserGrantedAuthorities", user);
 			query.addFilter(UserGrantedAuthority.USER, FilterOperation.EQUAL, uriUser);
 			groupsList = query.executeQuery();
 
@@ -273,7 +273,7 @@ public final class UserGrantedAuthority extends CommonFieldsBase {
 
 		try {
 			UserGrantedAuthority relation = UserGrantedAuthority.assertRelation(datastore, user);
-			Query query = datastore.createQuery(relation, user);
+			Query query = datastore.createQuery(relation, "UserGrantedAuthority.deleteGrantedAuthoritiesForUser", user);
 			query.addFilter(UserGrantedAuthority.USER, FilterOperation.EQUAL, uriUser);
 			List<?> keys = query.executeDistinctValueForDataField(relation.primaryKey);
 			List<EntityKey> memberships = new ArrayList<EntityKey>();

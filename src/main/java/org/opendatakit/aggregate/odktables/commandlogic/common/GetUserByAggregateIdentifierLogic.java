@@ -46,7 +46,7 @@ public class GetUserByAggregateIdentifierLogic extends
                     .getRequestingUserID();
             String usersTable = users.getAggregateIdentifier();
     
-            InternalUser requestUser = users.query()
+            InternalUser requestUser = users.query("GetUserByAggregateIdentifierLogic.execute")
                     .equal(Users.USER_ID, requestingUserID).get();
             if (!requestUser.hasPerm(usersTable, Permissions.READ))
             {

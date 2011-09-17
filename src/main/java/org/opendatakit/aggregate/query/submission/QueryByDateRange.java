@@ -47,7 +47,7 @@ public class QueryByDateRange extends QueryBase {
     // Submissions may be partially uploaded and are marked completed once they 
     // are fully uploaded.  We want the query to be aware of that and to not 
     // report anything that is not yet fully loaded.
-    query = cc.getDatastore().createQuery(tbl, cc.getCurrentUser());
+    query = cc.getDatastore().createQuery(tbl, "QueryByDateRange.constructor", cc.getCurrentUser());
     query.addSort(tbl.markedAsCompleteDate, Query.Direction.ASCENDING);
     query.addFilter(tbl.markedAsCompleteDate, Query.FilterOperation.LESS_THAN, endDate);
     query.addFilter(tbl.markedAsCompleteDate, Query.FilterOperation.GREATER_THAN, startDate);

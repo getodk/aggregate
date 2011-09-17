@@ -56,7 +56,7 @@ public class DeleteUserLogic extends CommandLogic<DeleteUser>
             String usersTable = users.getAggregateIdentifier();
 
             // retrieve requesting user
-            InternalUser requestingUser = users.query()
+            InternalUser requestingUser = users.query("DeleteUserLogic.execute")
                     .equal(Users.USER_ID, requestingUserID).get();
 
             // check if request user has permission to delete the user
@@ -104,7 +104,7 @@ public class DeleteUserLogic extends CommandLogic<DeleteUser>
         }
 
         if (tables
-                .query()
+                .query("DeleteUserLogic.deleteUser")
                 .equal(TableEntries.AGGREGATE_OWNER_IDENTIFIER,
                         aggregateUserIdentifier).exists())
         {
@@ -116,7 +116,7 @@ public class DeleteUserLogic extends CommandLogic<DeleteUser>
         try
         {
             perms = permissions
-                    .query()
+                    .query("DeleteUserLogic.deleteUser")
                     .equal(Permissions.AGGREGATE_USER_IDENTIFIER,
                             aggregateUserIdentifier).execute();
         } catch (ODKDatastoreException e)

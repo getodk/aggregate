@@ -58,7 +58,7 @@ public class DeleteTableLogic extends CommandLogic<DeleteTable>
             String tableID = this.deleteTable.getTableID();
             String requestingUserID = this.deleteTable.getRequestingUserID();
 
-            InternalUser requestingUser = users.query()
+            InternalUser requestingUser = users.query("DeleteTableLogic.execute")
                     .equal(Users.USER_ID, requestingUserID).get();
 
             String aggregateRequestingUserIdentifier = requestingUser
@@ -68,7 +68,7 @@ public class DeleteTableLogic extends CommandLogic<DeleteTable>
             try
             {
                 mapping = mappings
-                        .query()
+                        .query("DeleteTableLogic.execute")
                         .equal(UserTableMappings.TABLE_ID, tableID)
                         .equal(UserTableMappings.AGGREGATE_USER_IDENTIFIER,
                                 aggregateRequestingUserIdentifier).get();
@@ -93,7 +93,7 @@ public class DeleteTableLogic extends CommandLogic<DeleteTable>
 
             table = Table.getInstance(aggregateTableIdentifier, cc);
             InternalUserTableMapping cursor = mappings
-                    .query()
+                    .query("DeleteTableLogic.execute")
                     .equal(UserTableMappings.AGGREGATE_USER_IDENTIFIER,
                             aggregateUserIdentifier)
                     .equal(UserTableMappings.AGGREGATE_TABLE_IDENTIFIER,
@@ -102,12 +102,12 @@ public class DeleteTableLogic extends CommandLogic<DeleteTable>
             InternalTableEntry entry = tables
                     .getEntity(aggregateTableIdentifier);
             List<InternalColumn> tableColumns = columns
-                    .query()
+                    .query("DeleteTableLogic.execute")
                     .equal(Columns.AGGREGATE_TABLE_IDENTIFIER,
                             aggregateTableIdentifier).execute();
 
             List<InternalPermission> perms = permissions
-                    .query()
+                    .query("DeleteTableLogic.execute")
                     .equal(Permissions.AGGREGATE_TABLE_IDENTIFIER,
                             aggregateTableIdentifier).execute();
 

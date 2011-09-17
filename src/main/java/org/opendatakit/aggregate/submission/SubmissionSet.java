@@ -305,7 +305,7 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 				{
 					if (mBackingObject == null) {
 						DynamicBase mBaseRelation = (DynamicBase) mRelation;
-						Query query = datastore.createQuery(mBaseRelation, user);
+						Query query = datastore.createQuery(mBaseRelation, "SubmissionSet.recursivelyGetEntities", user);
 						query.addFilter(mBaseRelation.parentAuri, FilterOperation.EQUAL,
 								uriParent);
 						List<? extends CommonFieldsBase> rows = query.executeQuery();

@@ -51,7 +51,7 @@ public class CreateTableLogic extends CommandLogic<CreateTable>
             tableID = createTable.getTableID();
             String requestingUserID = createTable.getRequestingUserID();
 
-            InternalUser requestingUser = users.query()
+            InternalUser requestingUser = users.query("CreateTableLogic.execute")
                     .equal(Users.USER_ID, requestingUserID).get();
             String aggregateUserIdentifier = requestingUser
                     .getAggregateIdentifier();
@@ -59,7 +59,7 @@ public class CreateTableLogic extends CommandLogic<CreateTable>
             // Check if table exists in Cursor
             // If table exists, return failure
             if (cursors
-                    .query()
+                    .query("CreateTableLogic.execute")
                     .equal(UserTableMappings.AGGREGATE_USER_IDENTIFIER,
                             aggregateUserIdentifier)
                     .equal(UserTableMappings.TABLE_ID, tableID).exists())
