@@ -174,9 +174,11 @@ public class GoogleSpreadsheet extends OAuthExternalService implements ExternalS
       try {
         updatedEntry = service.insert(new URL(SpreadsheetConsts.DOC_FEED), createdEntry);
       } catch (Exception e1) {
+    	e1.printStackTrace();
         throw new ODKExternalServiceException(e1);
       }
     } catch (Exception e) {
+      e.printStackTrace();
       throw new ODKExternalServiceException(e);
     }
 
@@ -374,6 +376,8 @@ public class GoogleSpreadsheet extends OAuthExternalService implements ExternalS
           }
         }
       } catch (Exception e) {
+    	e.printStackTrace();
+    	logger.error("Unable to insert data into spreadsheet " + objectEntity.getSpreadsheetName() + " exception: " + e.getMessage());
         throw new ODKExternalServiceException(e);
       }
     }
