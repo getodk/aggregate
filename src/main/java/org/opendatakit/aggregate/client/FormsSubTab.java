@@ -31,12 +31,12 @@ import com.google.gwt.user.client.ui.FlexTable;
 
 public class FormsSubTab extends AggregateSubTabBase {
   // button text & styling
-  private static final String SUBMISSION_TXT = "Upload Data";
+  private static final String SUBMISSION_TXT = "Upload Submission Data";
   private static final String SUBMISSION_TOOLTIP_TXT = "Upload Submissions";
   private static final String SUBMISSION_BALLOON_TXT = "Upload submissions to add data to your form.";
   private static final String SUBMISSION_BUTTON_TEXT = "<img src=\"images/blue_up_arrow.png\" /> " + SUBMISSION_TXT;
   private static final String NEW_FORM_TXT = "New Form";
-  private static final String NEW_FORM_TOOLTIP_TXT = "Uploade NEW form";
+  private static final String NEW_FORM_TOOLTIP_TXT = "Upload NEW form";
   private static final String NEW_FORM_BALLOON_TXT = "Add a new form to Aggregate.";
   private static final String NEW_FORM_BUTTON_TEXT = "<img src=\"images/yellow_plus.png\" /> " + NEW_FORM_TXT;
 

@@ -74,8 +74,9 @@ public final class ExportPopup extends AbstractPopupBase {
 		super();
 		this.formId = formid;
 
+		
 		// ensure the filter group passed in is for the correct form
-		if(formid.equals(selectedFilterGroup.getFormId())) {
+		if(selectedFilterGroup != null && formid.equals(selectedFilterGroup.getFormId())) {
 			filtersBox = new FilterListBox(selectedFilterGroup);
 		} else {
 			filtersBox = new FilterListBox();
