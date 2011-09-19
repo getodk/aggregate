@@ -265,7 +265,7 @@
 		<dependency>
 		  <groupId>com.google.gwt.google-apis</groupId>
 		  <artifactId>gwt-maps</artifactId> <!-- see src/main/libs/readme.txt -->
-		  <version>1.1.0</version>
+		  <version>1.1.1-rc1</version>
 		  <type>jar</type>
 		  <scope>compile</scope>
 		</dependency>

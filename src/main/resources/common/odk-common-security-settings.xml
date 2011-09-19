@@ -10,7 +10,7 @@
 			<beans:list>
 				<beans:value>classpath:jdbc.properties</beans:value>
 				<beans:value>classpath:security.properties</beans:value>
-				<beans:value>classpath:logging.properties</beans:value>
+				<beans:value>WEB-INF/logging.properties</beans:value>
 			</beans:list>
 		</beans:property>
 	</beans:bean>
