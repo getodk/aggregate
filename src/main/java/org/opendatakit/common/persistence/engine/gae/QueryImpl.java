@@ -616,7 +616,7 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
           }
         }
         
-        if ( hasEqualityTests ) {
+        if ( hasEqualityTests && (fetchLimit == 0) ) {
           
           // assume that the equality tests will filter the result set more strongly than the dominant sort attr.
           // GAE doesn't support ordering and equality tests, so just use the equality tests
@@ -634,7 +634,7 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
           // we aren't sorting, so we must read the entire dataset and apply the sort locally
           mustReadEverything = true;
         } else {
-          // we have only range queries.
+          // we have only range queries or we have a non-zero fetchLimit.
           // add all the dominant filter conditions...
           boolean hasDominantFilter = false;
   
@@ -1019,8 +1019,18 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
           // layer. Get that to happen by sorting along that
           // filter dimension (which will pass down to GAE the
           // sort directive and the filters for that column).
-          Tracker t = filterList.get(0);
-          addSort(t.getAttribute(), Direction.ASCENDING);
+          for ( Tracker t : filterList ) {
+            if ( t instanceof SimpleFilterTracker ) {
+              SimpleFilterTracker st = (SimpleFilterTracker) t;
+              if ( st.isEqualityTest() ) continue;
+              addSort(st.getAttribute(), Direction.ASCENDING);
+              break;
+            }
+          }
+          
+          if ( sortList.isEmpty() ) {
+            addSort( relation.primaryKey, Direction.ASCENDING );
+          }
         }
       }
       CoreResult result = coreExecuteQuery(null, 0);
@@ -1121,8 +1131,18 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
         // layer. Get that to happen by sorting along that
         // filter dimension (which will pass down to GAE the
         // sort directive and the filters for that column).
-        Tracker t = filterList.get(0);
-        addSort(t.getAttribute(), Direction.ASCENDING);
+        for ( Tracker t : filterList ) {
+          if ( t instanceof SimpleFilterTracker ) {
+            SimpleFilterTracker st = (SimpleFilterTracker) t;
+            if ( st.isEqualityTest() ) continue;
+            addSort(st.getAttribute(), Direction.ASCENDING);
+            break;
+          }
+        }
+        
+        if ( sortList.isEmpty() ) {
+          addSort( relation.primaryKey, Direction.ASCENDING );
+        }
       }
     }
 
