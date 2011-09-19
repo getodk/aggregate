@@ -335,7 +335,7 @@ public class PersistentResults {
     Datastore ds = cc.getDatastore();
     User user = cc.getCurrentUser();
     PersistentResultsTable relation = PersistentResultsTable.assertRelation(cc);
-    Query query = ds.createQuery(relation, user);
+    Query query = ds.createQuery(relation, "PersistentResults.getAvailablePersistentResults", user);
 
     Date lastDate = new Date();
     query.addSort(relation.lastUpdateDate, Query.Direction.DESCENDING);
@@ -360,7 +360,7 @@ public class PersistentResults {
     Datastore ds = cc.getDatastore();
     User user = cc.getCurrentUser();
     PersistentResultsTable relation = PersistentResultsTable.assertRelation(cc);
-    Query q = ds.createQuery(relation, user);
+    Query q = ds.createQuery(relation, "PersistentResults.getStalledRequests", user);
     Date now = new Date();
 
     Date limit = new Date(now.getTime() - RETRY_INTERVAL_MILLISECONDS);
@@ -402,7 +402,7 @@ public class PersistentResults {
     User user = cc.getCurrentUser();
     Datastore ds = cc.getDatastore();
     PersistentResultsTable relation = PersistentResultsTable.assertRelation(cc);
-    Query q = ds.createQuery(relation, user);
+    Query q = ds.createQuery(relation, "PersistentResults.getAllTasksForForm", user);
     q.addFilter(PersistentResultsTable.FORM_ID, FilterOperation.EQUAL, theForm.getFormId());
     List<? extends CommonFieldsBase> l = q.executeQuery();
 

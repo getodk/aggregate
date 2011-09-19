@@ -104,6 +104,18 @@ a,a:visited,a:hover {
 	border: 0px;
 }
 
+.helpvid {
+	border-style: solid;
+	border-width: 2px 2px 2px 2px;
+	text-decoration: none;
+	padding: 2px;
+	margin-top: 1000px;
+	margin-bottom: 1000px;
+	margin-right: 0px;
+	margin-left: 0px;
+	border-color: #69f #00f #00f #69f;
+}
+
 #chart_image,#map_area {
 	width: 600px;
 	height: 500px;
@@ -126,3 +138,4 @@ a,a:visited,a:hover {
 #filter_desc_title {
 	text-align: left;
 }
+

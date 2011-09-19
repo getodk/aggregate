@@ -79,7 +79,7 @@ public final class SaveFilterGroupButton extends AggregateButton implements Clic
         if (uri != null) {
           filterGroup.setUri(uri);
         }
-        parentSubTab.update();
+        parentSubTab.updateAfterSave(filterGroup);
       }
     };
 

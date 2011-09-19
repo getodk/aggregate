@@ -61,7 +61,7 @@ public class CreateSynchronizedTableLogic extends
                     .getRequestingUserID();
 
             // retrieve request user
-            InternalUser requestingUser = users.query()
+            InternalUser requestingUser = users.query("CreateSynchronizedTableLogic.execute")
                     .equal(Users.USER_ID, requestingUserID).get();
             String aggregateUserIdentifier = requestingUser
                     .getAggregateIdentifier();
@@ -69,7 +69,7 @@ public class CreateSynchronizedTableLogic extends
             // Check if user already has a mapping using the tableID
             // If table exists, return failure
             if (mappings
-                    .query()
+                    .query("CreateSynchronizedTableLogic.execute")
                     .equal(UserTableMappings.AGGREGATE_USER_IDENTIFIER,
                             aggregateUserIdentifier)
                     .equal(UserTableMappings.TABLE_ID, tableID).exists())

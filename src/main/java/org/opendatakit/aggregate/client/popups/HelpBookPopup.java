@@ -1,6 +1,7 @@
 package org.opendatakit.aggregate.client.popups;
 
 import org.opendatakit.aggregate.client.widgets.ClosePopupButton;
+import org.opendatakit.aggregate.client.widgets.HelpVideoButton;
 import org.opendatakit.aggregate.constants.common.BookHelpConsts;
 
 import com.google.gwt.user.client.Window;
@@ -10,25 +11,35 @@ import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class HelpBookPopup extends PopupPanel {
-	private VerticalPanel panel;
+  private VerticalPanel panel;
 
-	public HelpBookPopup() {
-		super(false);
-		panel = new VerticalPanel();
+  public HelpBookPopup() {
+    super(false);
+    panel = new VerticalPanel();
 
-		// populate the panel
-		panel.add(new ClosePopupButton(this));
+    // populate the panel
+    panel.add(new ClosePopupButton(this));
 
-		BookHelpConsts[] consts = BookHelpConsts.values();
-		
-		for(int i = 0; i < consts.length; i++) {
-			panel.add(new HTML("<b>" + consts[i].getTitle() + "</b>"));
-			panel.add(new HTML(consts[i].getConcept() + "<br><br>"));
-			panel.add(new HTML(consts[i].getProcedures() + "<br><br>"));
-		}
+    BookHelpConsts[] consts = BookHelpConsts.values();
 
-		ScrollPanel scroll = new ScrollPanel(panel);
-		scroll.setPixelSize((Window.getClientWidth() / 2),(Window.getClientHeight() / 2));
-		setWidget(scroll);
-	}
+    VerticalPanel content = new VerticalPanel();
+    for (int i = 0; i < consts.length; i++) {
+      content.add(new HTML("<h2 id=\"form_name\">" + consts[i].getTitle() + "</h2>"));
+      if (consts[i].getVideoUrl() != null) {
+        HelpVideoButton vidButton = new HelpVideoButton(consts[i].getTitle() + " Video Assistance",
+            consts[i].getVideoUrl(), "Play Video descibing how to " + consts[i].getTitle());
+        content.add(vidButton);
+      }
+      content.add(new HTML(consts[i].getConcept() + "<br><br>"));
+      content.add(new HTML(consts[i].getProcedures() + "<br><br>"));
+    }
+
+    ScrollPanel scroll = new ScrollPanel(content);
+    scroll.setPixelSize((Window.getClientWidth() * 3 / 4), (Window.getClientHeight() * 3 / 4));
+
+    panel.add(scroll);
+
+    setWidget(panel);
+    center();
+  }
 }

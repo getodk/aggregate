@@ -83,6 +83,10 @@ public class FilterNavigationTable extends FlexTable {
 
   }
 
+  public void updateNavAfterSave(FilterGroup filterGroup) {
+    filtersBox.updateSelectedFilterAfterSave(filterGroup);
+  }
+  
   public ArrayList<FilterGroup> getCurrentFilters() {
     return filtersBox.getDisplayedFilterList();
   }

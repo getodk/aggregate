@@ -59,14 +59,14 @@ public class InsertRowsLogic extends CommandLogic<InsertRows>
             String requestingUserID = insertRows.getRequestingUserID();
             String tableID = insertRows.getTableID();
 
-            InternalUser requestingUser = users.query()
+            InternalUser requestingUser = users.query("InsertRowsLogic.execute")
                     .equal(Users.USER_ID, requestingUserID).get();
 
             String aggregateRequestingUserIdentifier = requestingUser
                     .getAggregateIdentifier();
 
             InternalUserTableMapping mapping = mappings
-                    .query()
+                    .query("InsertRowsLogic.execute")
                     .equal(UserTableMappings.TABLE_ID, tableID)
                     .equal(UserTableMappings.AGGREGATE_USER_IDENTIFIER,
                             aggregateRequestingUserIdentifier).get();
@@ -102,7 +102,7 @@ public class InsertRowsLogic extends CommandLogic<InsertRows>
                     try
                     {
                         InternalColumn col = columns
-                                .query()
+                                .query("InsertRowsLogic.execute")
                                 .equal(Columns.AGGREGATE_TABLE_IDENTIFIER,
                                         aggregateTableIdentifier)
                                 .equal(Columns.COLUMN_NAME, columnName).get();

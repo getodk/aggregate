@@ -136,8 +136,8 @@ public final class RegisteredUsersTable extends CommonFieldsBase {
 		return t;
 	}
 	
-	public static Query createQuery(Datastore ds, User user) throws ODKDatastoreException {
-		Query q = ds.createQuery(RegisteredUsersTable.assertRelation(ds, user), user);
+	public static Query createQuery(Datastore ds, String loggingContextTag, User user) throws ODKDatastoreException {
+		Query q = ds.createQuery(RegisteredUsersTable.assertRelation(ds, user), loggingContextTag, user);
 		q.addFilter(IS_REMOVED, FilterOperation.EQUAL, false );
 		return q;
 	}
@@ -283,8 +283,8 @@ public final class RegisteredUsersTable extends CommonFieldsBase {
 	 */
 	public static final RegisteredUsersTable getUniqueUserByUsername(String username, Datastore datastore, User user) throws ODKDatastoreException {
 		RegisteredUsersTable prototype = assertRelation(datastore, user);
-		Query q = RegisteredUsersTable.createQuery(datastore, user);
-		q.addFilter(IS_REMOVED, FilterOperation.EQUAL, false);
+		Query q = RegisteredUsersTable.createQuery(datastore, "RegisteredUsersTable.getUniqueUserByUsername", user);
+		// already applied: q.addFilter(IS_REMOVED, FilterOperation.EQUAL, false);
 		q.addFilter(LOCAL_USERNAME, FilterOperation.EQUAL, username);
 		q.addSort(prototype.lastUpdateDate, Direction.DESCENDING);
 		@SuppressWarnings("unchecked")
@@ -311,8 +311,8 @@ public final class RegisteredUsersTable extends CommonFieldsBase {
 	public static final RegisteredUsersTable getUserByUsername(String username, UserService userService, Datastore datastore) throws ODKDatastoreException {
 		User user = userService.getDaemonAccountUser();
 		RegisteredUsersTable prototype = assertRelation(datastore, user);
-		Query q = RegisteredUsersTable.createQuery(datastore, user);
-		q.addFilter(IS_REMOVED, FilterOperation.EQUAL, false);
+		Query q = RegisteredUsersTable.createQuery(datastore, "RegisteredUsersTable.getUserByUsername", user);
+		// already applied: q.addFilter(IS_REMOVED, FilterOperation.EQUAL, false);
 		q.addFilter(LOCAL_USERNAME, FilterOperation.EQUAL, username);
 		q.addSort(prototype.lastUpdateDate, Direction.DESCENDING);
 		@SuppressWarnings("unchecked")
@@ -354,8 +354,8 @@ public final class RegisteredUsersTable extends CommonFieldsBase {
 	 */
 	public static final RegisteredUsersTable getUniqueUserByEmail(String email, Datastore datastore, User user) throws ODKDatastoreException {
 		RegisteredUsersTable prototype = assertRelation(datastore, user);
-		Query q = RegisteredUsersTable.createQuery(datastore, user);
-		q.addFilter(IS_REMOVED, FilterOperation.EQUAL, false);
+		Query q = RegisteredUsersTable.createQuery(datastore, "RegisteredUsersTable.getUniqueUserByEmail", user);
+		// already applied: q.addFilter(IS_REMOVED, FilterOperation.EQUAL, false);
 		q.addFilter(OPENID_EMAIL, FilterOperation.EQUAL, email);
 		q.addSort(prototype.lastUpdateDate, Direction.DESCENDING);
 		@SuppressWarnings("unchecked")
@@ -370,7 +370,7 @@ public final class RegisteredUsersTable extends CommonFieldsBase {
 	public static final RegisteredUsersTable getUserByEmail(String email, UserService userService, Datastore datastore) throws ODKDatastoreException {
 		User user = userService.getDaemonAccountUser();
 		RegisteredUsersTable prototype = assertRelation(datastore, user);
-		Query q = datastore.createQuery(prototype, user);
+		Query q = datastore.createQuery(prototype, "RegisteredUsersTable.getUserByEmail", user);
 		q.addFilter(IS_REMOVED, FilterOperation.EQUAL, false);
 		q.addFilter(OPENID_EMAIL, FilterOperation.EQUAL, email);
 		q.addSort(prototype.lastUpdateDate, Direction.DESCENDING);

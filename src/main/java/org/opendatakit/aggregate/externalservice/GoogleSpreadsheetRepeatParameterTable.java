@@ -131,7 +131,7 @@ public final class GoogleSpreadsheetRepeatParameterTable extends CommonFieldsBas
 
 		  Datastore ds = cc.getDatastore();
 		  User user = cc.getCurrentUser();
-		  Query query = ds.createQuery(frpt, user);
+		  Query query = ds.createQuery(frpt, "GoogleSpreadsheetRepeatParameterTable.getRepeatGroupAssociations", user);
 		  query.addFilter(URI_GOOGLE_SPREADSHEET, FilterOperation.EQUAL, uri);
 
 		  List<? extends CommonFieldsBase> results = query.executeQuery();

@@ -87,7 +87,7 @@ public final class SaveAsFilterGroupButton extends AggregateButton implements Cl
         if (uri != null) {
           newGroup.setUri(uri);
         }
-        parentSubTab.update();
+        parentSubTab.updateAfterSave(newGroup);
       }
     };
 

@@ -127,7 +127,7 @@ public class BinaryContentManipulator {
          Datastore ds = cc.getDatastore();
          User user = cc.getCurrentUser();
          // gather the ordered list of parts...
-         Query q = ds.createQuery(bcbRef, user);
+         Query q = ds.createQuery(bcbRef, "BinaryContentManipulator.constructor", user);
          q.addFilter(bcbRef.domAuri, FilterOperation.EQUAL,
                uriVersionedContent);
          q.addSort(bcbRef.part, Direction.ASCENDING);
@@ -428,7 +428,7 @@ public class BinaryContentManipulator {
 
       Datastore ds = cc.getDatastore();
       User user = cc.getCurrentUser();
-      Query q = ds.createQuery(ctntRelation, user);
+      Query q = ds.createQuery(ctntRelation, "BinaryContentManipulator.refreshFromDatabase", user);
       q.addFilter(ctntRelation.parentAuri, FilterOperation.EQUAL, parentKey);
       q.addSort(ctntRelation.ordinalNumber, Direction.ASCENDING);
 

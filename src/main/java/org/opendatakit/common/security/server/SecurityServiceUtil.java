@@ -119,7 +119,7 @@ public class SecurityServiceUtil {
 
 	    ArrayList<UserSecurityInfo> users = new ArrayList<UserSecurityInfo>();
 	    try {
-			Query q = RegisteredUsersTable.createQuery(cc.getDatastore(), cc.getCurrentUser());
+			Query q = RegisteredUsersTable.createQuery(cc.getDatastore(), "SecurityServiceUtil.getAllUsers", cc.getCurrentUser());
 			RegisteredUsersTable.applyNaturalOrdering(q, cc);
 			
 			List<? extends CommonFieldsBase> l = q.executeQuery();
@@ -313,7 +313,7 @@ public class SecurityServiceUtil {
 			}
 		} catch ( ODKDatastoreException e) {
 			e.printStackTrace();
-			throw new DatastoreFailureException("Incomplete security update");
+			throw new DatastoreFailureException("Incomplete security update", e);
 		}
 		return pkMap;
 	}
@@ -354,14 +354,14 @@ public class SecurityServiceUtil {
 				UserGrantedAuthority.assertGrantedAuthorityMembers(auth, desiredMembers, cc);
 			} catch (ODKDatastoreException e) {
 				e.printStackTrace();
-				throw new DatastoreFailureException("Incomplete security update");
+				throw new DatastoreFailureException("Incomplete security update", e);
 			}
 		} else {
 			try {
 				removeBadGrantedAuthorities(badGrants, cc);
 			} catch (ODKDatastoreException e) {
 				e.printStackTrace();
-				throw new DatastoreFailureException("Incomplete security update");
+				throw new DatastoreFailureException("Incomplete security update", e);
 			}
 		}
 	}

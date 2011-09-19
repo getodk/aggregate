@@ -301,7 +301,7 @@ public class MiscTasks {
 		MiscTasksTable relation = MiscTasksTable.assertRelation(cc);
 		Datastore ds = cc.getDatastore();
 		User user = cc.getCurrentUser();
-		Query q = ds.createQuery(relation, user);
+		Query q = ds.createQuery(relation, "MiscTasks.getStalledTaskRequests", user);
 		Date now = new Date();
 		Date ancientTimes = new Date(now.getTime() - MANY_DAYS_AGO);
 		// TODO: rework for each task type...
@@ -352,7 +352,7 @@ public class MiscTasks {
 		MiscTasksTable relation = MiscTasksTable.assertRelation(cc);
 		Datastore ds = cc.getDatastore();
 		User user = cc.getCurrentUser();
-		Query q = ds.createQuery(relation, user);
+		Query q = ds.createQuery(relation, "MiscTasks.getAllTasksForForm", user);
 		q.addFilter(MiscTasksTable.FORM_ID, FilterOperation.EQUAL, form.getFormId());
 		// collect all MiscTasks entries that refer to the given form...
 		List<? extends CommonFieldsBase> l = q.executeQuery();
@@ -410,7 +410,7 @@ public class MiscTasks {
 		MiscTasksTable relation = MiscTasksTable.assertRelation(cc);
 		Datastore ds = cc.getDatastore();
 		User user = cc.getCurrentUser();
-		Query q = ds.createQuery(relation, user);
+		Query q = ds.createQuery(relation, "MiscTasks.getFormDeletionStatusTimestampOfAllFormIds", user);
 		q.addFilter(MiscTasksTable.TASK_TYPE, FilterOperation.EQUAL, TaskType.DELETE_FORM.name());
 		// collect all Deletion tasks that are in progress or being retried...
 		List<? extends CommonFieldsBase> l = q.executeQuery();
@@ -446,7 +446,7 @@ public class MiscTasks {
 		MiscTasksTable relation = MiscTasksTable.assertRelation(cc);
 		Datastore ds = cc.getDatastore();
 		User user = cc.getCurrentUser();
-		Query q = ds.createQuery(relation, user);
+		Query q = ds.createQuery(relation, "MiscTasks.getPurgeSubmissionsStatusTimestampOfAllFormIds", user);
 		q.addFilter(MiscTasksTable.TASK_TYPE, FilterOperation.EQUAL, TaskType.PURGE_OLDER_SUBMISSIONS.name());
 		// collect all Deletion tasks that are in progress or being retried...
 		List<? extends CommonFieldsBase> l = q.executeQuery();

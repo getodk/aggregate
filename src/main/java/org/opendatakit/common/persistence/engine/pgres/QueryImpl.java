@@ -82,7 +82,7 @@ public class QueryImpl implements Query {
 	private final List<Object> bindValues = new ArrayList<Object>();
 	private final StringBuilder querySortBuilder = new StringBuilder();
 
-	public QueryImpl(CommonFieldsBase relation, DatastoreImpl dataStoreImpl, User user) {
+	public QueryImpl(CommonFieldsBase relation, String loggingContextTag, DatastoreImpl dataStoreImpl, User user) {
 		this.relation = relation;
 		this.dataStoreImpl = dataStoreImpl;
 		this.user = user;

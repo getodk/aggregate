@@ -189,7 +189,7 @@ public class FormDefinition {
 			    } else {
 			    	// retrieve it...
 				    FormDataModel fdm = FormDataModel.assertRelation(cc);
-					Query query = ds.createQuery(fdm, user);
+					Query query = ds.createQuery(fdm, "FormDefinition.getFormDefinition", user);
 					query.addFilter(FormDataModel.URI_SUBMISSION_DATA_MODEL, FilterOperation.EQUAL, uriSubmissionDataModel);
 					fdmList = query.executeQuery();
 					
@@ -527,7 +527,7 @@ public class FormDefinition {
 				    
 			    	// retrieve it...
 				    FormDataModel fdm = FormDataModel.assertRelation(cc);
-					Query query = ds.createQuery(fdm, user);
+					Query query = ds.createQuery(fdm, "FormDefinition.deleteAbnormalModel", user);
 					query.addFilter(FormDataModel.URI_SUBMISSION_DATA_MODEL, FilterOperation.EQUAL, uriSubmissionDataModel);
 					fdmList = query.executeQuery();
 						

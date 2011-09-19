@@ -34,7 +34,7 @@ import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.TextBox;
 
-public final class ExternalServicePopup extends AbstractPopupBase {
+public final class PublishPopup extends AbstractPopupBase {
 
 	private static final String BUTTON_TXT = "<img src=\"images/green_right_arrow.png\" /> Publish";  
 	private static final String TOOLTIP_TXT = "Publish the data";
@@ -53,7 +53,7 @@ public final class ExternalServicePopup extends AbstractPopupBase {
 	private final EnumListBox<ExternalServiceType> serviceType;
 	private final EnumListBox<ExternalServicePublicationOption> esOptions;
 
-	public ExternalServicePopup(String formId) {
+	public PublishPopup(String formId) {
 		super();
 
 		this.formId = formId;
@@ -124,7 +124,7 @@ public final class ExternalServicePopup extends AbstractPopupBase {
 			default: // unknown type
 			break;
 			}
-
+			
 			hide();
 		}
 

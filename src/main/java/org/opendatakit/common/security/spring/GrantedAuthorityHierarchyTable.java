@@ -126,7 +126,7 @@ public final class GrantedAuthorityHierarchyTable extends CommonFieldsBase {
 		GrantedAuthorityHierarchyTable relation;
 		List<? extends CommonFieldsBase> groupsList;
 		relation = GrantedAuthorityHierarchyTable.assertRelation(ds, user);
-		Query query = ds.createQuery(relation, user);
+		Query query = ds.createQuery(relation, "GrantedAuthorityHierarchyTable.getSubordinateGrantedAuthorities", user);
 		query.addFilter(GrantedAuthorityHierarchyTable.DOMINATING_GRANTED_AUTHORITY, 
 							FilterOperation.EQUAL, dominantGrant.getAuthority() );
 		groupsList = query.executeQuery();
@@ -152,7 +152,7 @@ public final class GrantedAuthorityHierarchyTable extends CommonFieldsBase {
 
 		{
 			List<?> domGroupsList;
-			query = ds.createQuery(relation, user);
+			query = ds.createQuery(relation, "GrantedAuthorityHierarchyTable.getAllPermissionsAssignableGrantedAuthorities", user);
 			domGroupsList = query.executeDistinctValueForDataField(
 					GrantedAuthorityHierarchyTable.DOMINATING_GRANTED_AUTHORITY);
 	
@@ -165,7 +165,7 @@ public final class GrantedAuthorityHierarchyTable extends CommonFieldsBase {
 
 		{
 			List<?> subGroupsList;
-			query = ds.createQuery(relation, user);
+			query = ds.createQuery(relation, "GrantedAuthorityHierarchyTable.getAllPermissionsAssignableGrantedAuthorities", user);
 			subGroupsList = query.executeDistinctValueForDataField(
 					GrantedAuthorityHierarchyTable.SUBORDINATE_GRANTED_AUTHORITY);
 			
@@ -184,7 +184,7 @@ public final class GrantedAuthorityHierarchyTable extends CommonFieldsBase {
 		GrantedAuthorityHierarchyTable relation;
 		List<? extends CommonFieldsBase> groupsList;
 		relation = GrantedAuthorityHierarchyTable.assertRelation(ds, user);
-		Query query = ds.createQuery(relation, user);
+		Query query = ds.createQuery(relation, "GrantedAuthorityHierarchyTable.getEntireGrantedAuthorityHierarchy", user);
 		query.addSort(GrantedAuthorityHierarchyTable.DOMINATING_GRANTED_AUTHORITY, Direction.ASCENDING);
 		groupsList = query.executeQuery();
 
@@ -235,7 +235,7 @@ public final class GrantedAuthorityHierarchyTable extends CommonFieldsBase {
 			// get the hierarchy as currently defined for this group 
 			List<? extends CommonFieldsBase> groupsList;
 			relation = GrantedAuthorityHierarchyTable.assertRelation(ds, user);
-			Query query = ds.createQuery(relation, user);
+			Query query = ds.createQuery(relation, "GrantedAuthorityHierarchyTable.assertGrantedAuthorityHierarchy", user);
 			query.addFilter(GrantedAuthorityHierarchyTable.DOMINATING_GRANTED_AUTHORITY, FilterOperation.EQUAL, dominantGrant.getAuthority());
 			groupsList = query.executeQuery();
 

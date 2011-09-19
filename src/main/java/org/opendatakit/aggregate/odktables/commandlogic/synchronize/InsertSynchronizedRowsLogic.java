@@ -78,7 +78,7 @@ public class InsertSynchronizedRowsLogic extends
             try
             {
                 mapping = mappings
-                        .query()
+                        .query("InsertSynchronizedRowsLogic.execute")
                         .equal(UserTableMappings.AGGREGATE_USER_IDENTIFIER,
                                 requestUser.getAggregateIdentifier())
                         .equal(UserTableMappings.TABLE_ID, tableID).get();
@@ -157,7 +157,7 @@ public class InsertSynchronizedRowsLogic extends
                 try
                 {
                     col = columns
-                            .query()
+                            .query("InsertSynchronizedRowsLogic.insertNewRows")
                             .equal(Columns.AGGREGATE_TABLE_IDENTIFIER,
                                     aggregateTableIdentifier)
                             .equal(Columns.COLUMN_NAME, rowEntry.getKey())

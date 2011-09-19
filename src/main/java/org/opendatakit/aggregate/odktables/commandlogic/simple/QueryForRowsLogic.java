@@ -53,7 +53,7 @@ public class QueryForRowsLogic extends CommandLogic<QueryForRows>
         String requestingUserID = queryForRows.getRequestingUserID();
         String tableID = queryForRows.getTableID();
 
-        InternalUser requestingUser = users.query()
+        InternalUser requestingUser = users.query("QueryForRowsLogic.execute")
                 .equal(Users.USER_ID, requestingUserID).get();
 
         String aggregateRequestingUserIdentifier = requestingUser
@@ -63,7 +63,7 @@ public class QueryForRowsLogic extends CommandLogic<QueryForRows>
         try
         {
             mapping = mappings
-                    .query()
+                    .query("QueryForRowsLogic.execute")
                     .equal(UserTableMappings.TABLE_ID, tableID)
                     .equal(UserTableMappings.AGGREGATE_USER_IDENTIFIER,
                             aggregateRequestingUserIdentifier).get();
@@ -84,11 +84,11 @@ public class QueryForRowsLogic extends CommandLogic<QueryForRows>
         entries.getEntity(aggregateTableIdentifier);
 
         Table table = Table.getInstance(aggregateTableIdentifier, cc);
-        List<InternalRow> rows = table.query().execute();
+        List<InternalRow> rows = table.query("QueryForRowsLogic.execute").execute();
 
         @SuppressWarnings("unchecked")
         List<String> columnNames = (List<String>) columns
-                .query()
+                .query("QueryForRowsLogic.execute")
                 .equal(Columns.AGGREGATE_TABLE_IDENTIFIER,
                         aggregateTableIdentifier)
                 .getDistinct(Columns.COLUMN_NAME);
@@ -101,7 +101,7 @@ public class QueryForRowsLogic extends CommandLogic<QueryForRows>
             for (String columnName : columnNames)
             {
                 InternalColumn column = columns
-                        .query()
+                        .query("QueryForRowsLogic.execute")
                         .equal(Columns.AGGREGATE_TABLE_IDENTIFIER,
                                 aggregateTableIdentifier)
                         .equal(Columns.COLUMN_NAME, columnName).get();
