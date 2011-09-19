@@ -52,8 +52,10 @@ public class OAuthServlet extends ServletUtilBase {
     try {
       authToken = verifyGDataAuthorization(req, resp);
     } catch (ODKExternalServiceAuthenticationError e) {
+      e.printStackTrace();
       return; // verifyGDataAuthroization function formats response
     } catch (ODKExternalServiceNotAuthenticated e) {
+      e.printStackTrace();
       // do nothing already set to null
     }
 
