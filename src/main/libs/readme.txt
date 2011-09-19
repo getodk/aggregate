@@ -25,7 +25,7 @@ NOTE: this is a special build posted on this thread
 http://code.google.com/p/gwt-platform/issues/detail?id=292
 for resolving a compilation failure concerning JSClassType
 
-mvn install:install-file -Dfile=gwt-maps-1.1.0.jar -DgroupId=com.google.gwt.google-apis -DartifactId=gwt-maps -Dversion=1.1.0 -Dpackaging=jar
+mvn install:install-file -Dfile=gwt-maps-1.1.1-rc1.jar -DgroupId=com.google.gwt.google-apis -DartifactId=gwt-maps -Dversion=1.1.1-rc1 -Dpackaging=jar
 
 gwt-visualization-1.1.1:
 
