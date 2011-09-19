@@ -126,7 +126,7 @@ public class RepeatSubmissionType implements SubmissionRepeat {
 	@Override
 	public void getValueFromEntity(CallingContext cc) throws ODKDatastoreException {
 
-		Query q = cc.getDatastore().createQuery(repeatGroup.getFormDataModel().getBackingObjectPrototype(), cc.getCurrentUser());
+		Query q = cc.getDatastore().createQuery(repeatGroup.getFormDataModel().getBackingObjectPrototype(), "RepeatSubmissionType.getValueFromEntity", cc.getCurrentUser());
 		q.addFilter(((DynamicBase) repeatGroup.getFormDataModel().getBackingObjectPrototype()).parentAuri,
 				FilterOperation.EQUAL, uriAssociatedRow);
 		q.addSort(((DynamicBase) repeatGroup.getFormDataModel().getBackingObjectPrototype()).ordinalNumber, 

@@ -78,7 +78,14 @@ public class FilterSubTab extends AggregateSubTabBase {
     }
     return currentlyDisplayedFilterGroup;
   }
-    
+  
+  public void updateAfterSave(FilterGroup filterGroup) {
+    currentlyDisplayedFilterGroup = filterGroup;
+    currentlyDisplayedFilterGroup.setIncludeMetadata(displayMetaData);
+    navTable.updateNavAfterSave(filterGroup);
+    update();
+  }
+  
   public void switchFilterGroup(FilterGroup filterGroup) {
     // check if filter group is changed, if the same no need to do anything
     if(getDisplayedFilterGroup().equals(filterGroup)) {

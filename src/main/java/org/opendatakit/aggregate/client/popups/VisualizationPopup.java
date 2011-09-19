@@ -421,7 +421,7 @@ public final class VisualizationPopup extends AbstractPopupBase {
 		}
 
 		// create mapping area
-		final MapWidget map = new MapWidget(center, 3);
+		final MapWidget map = new MapWidget(center, 6);
 		map.setSize("100%", "100%");
 		map.addControl(new LargeMapControl());
 

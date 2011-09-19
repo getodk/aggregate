@@ -54,7 +54,7 @@ public class SetTablePermissionsLogic extends CommandLogic<SetTablePermissions>
             String requestingUserID = setTablePermissions.getRequestingUserID();
 
             // retrieve request user
-            InternalUser requestUser = users.query()
+            InternalUser requestUser = users.query("SetTablePermissionsLogic.execute")
                     .equal(Users.USER_ID, requestingUserID).get();
 
             // retrieve table's aggregateTableIdentifier
@@ -62,7 +62,7 @@ public class SetTablePermissionsLogic extends CommandLogic<SetTablePermissions>
             try
             {
                 InternalUserTableMapping mapping = mappings
-                        .query()
+                        .query("SetTablePermissionsLogic.execute")
                         .equal(UserTableMappings.AGGREGATE_USER_IDENTIFIER,
                                 requestUser.getAggregateIdentifier())
                         .equal(UserTableMappings.TABLE_ID, tableID).get();
@@ -108,7 +108,7 @@ public class SetTablePermissionsLogic extends CommandLogic<SetTablePermissions>
             try
             {
                 perm = permissions
-                        .query()
+                        .query("SetTablePermissionsLogic.execute")
                         .equal(Permissions.AGGREGATE_TABLE_IDENTIFIER,
                                 aggregateTableIdentifier)
                         .equal(Permissions.AGGREGATE_USER_IDENTIFIER,

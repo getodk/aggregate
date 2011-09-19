@@ -40,7 +40,7 @@ public class QueryByUIFilterGroup extends QueryBase {
     tbl = (TopLevelDynamicBase) form.getTopLevelGroupElement().getFormDataModel()
         .getBackingObjectPrototype();
 
-    query = cc.getDatastore().createQuery(tbl, cc.getCurrentUser());
+    query = cc.getDatastore().createQuery(tbl, "QueryByUIFilterGroup.constructor", cc.getCurrentUser());
     if ( !onlyCompleteSubmissions ) {
       // order by the last update date
       query.addSort(tbl.lastUpdateDate, Query.Direction.ASCENDING);

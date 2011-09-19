@@ -254,7 +254,7 @@ public class SubmissionFilterGroup extends CommonFieldsBase {
   public static final List<SubmissionFilterGroup> getFilterGroupList(String formId,
       CallingContext cc) throws ODKDatastoreException {
     SubmissionFilterGroup relation = assertRelation(cc);
-    Query query = cc.getDatastore().createQuery(relation, cc.getCurrentUser());
+    Query query = cc.getDatastore().createQuery(relation, "SubmissionFilterGroup.getFilterGroupList", cc.getCurrentUser());
     query.addFilter(SubmissionFilterGroup.FORM_ID_PROPERTY, FilterOperation.EQUAL, formId);
 
     List<SubmissionFilterGroup> filterGroupList = new ArrayList<SubmissionFilterGroup>();

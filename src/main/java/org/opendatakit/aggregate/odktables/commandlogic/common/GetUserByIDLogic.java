@@ -42,7 +42,7 @@ public class GetUserByIDLogic extends CommandLogic<GetUserByID>
             String requestingUserID = this.getUserByID.getRequestingUserID();
             String usersTable = users.getAggregateIdentifier();
     
-            InternalUser requestUser = users.query()
+            InternalUser requestUser = users.query("GetUserByIDLogic.execute")
                     .equal(Users.USER_ID, requestingUserID).get();
     
             if (!requestUser.hasPerm(usersTable, Permissions.READ))
@@ -55,7 +55,7 @@ public class GetUserByIDLogic extends CommandLogic<GetUserByID>
             InternalUser user = null;
             try
             {
-                user = users.query().equal(Users.USER_ID, userID).get();
+                user = users.query("GetUserByIDLogic.execute").equal(Users.USER_ID, userID).get();
             } catch (ODKDatastoreException e)
             {
                 return GetUserByIDResult.failure(userID,

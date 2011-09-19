@@ -5,3 +5,5 @@ relre:^eclipse-aggregate-gae/war/WEB-INF/deploy/.*$
 relre:^eclipse-aggregate-gae/war/WEB-INF/classes/.*$
 relre:^eclipse-aggregate-gae/war/aggregateui/.*$
 relre:^.metadata/.*$
+glob:eclipse-aggregate-gae/.settings/com.google.appengine.eclipse.core.prefs
+glob:eclipse-aggregate-gae/.settings/com.google.gwt.eclipse.core.prefs

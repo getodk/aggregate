@@ -71,7 +71,7 @@ public class QueryRepeats {
     User user = cc.getCurrentUser(); 
     // get the key to the top level relation where this repeat group has the given parent key
     DynamicBase backingObject = ((DynamicBase) repeatGroup.getFormDataModel().getBackingObjectPrototype());
-    Query topLevelKeyQuery = ds.createQuery(backingObject, user);
+    Query topLevelKeyQuery = ds.createQuery(backingObject, "QueryRepeats.getRepeatSubmissionSet", user);
     topLevelKeyQuery.addFilter(backingObject.parentAuri, Query.FilterOperation.EQUAL, parentKey);
     Set<EntityKey> submissionKeys = topLevelKeyQuery.executeForeignKeyQuery(topLevelRelation, backingObject.topLevelAuri);
     if ( submissionKeys.size() != 1 ) {

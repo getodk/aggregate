@@ -145,12 +145,12 @@ public class ExtendedAbstractRelation extends AbstractRelation
      * 
      * @return an empty Query.
      */
-    public Query createQuery()
+    public Query createQuery(String loggingContextTag)
     {
         Datastore ds = cc.getDatastore();
         User user = cc.getCurrentUser();
 
-        Query emptyQuery = ds.createQuery(super.prototype, user);
+        Query emptyQuery = ds.createQuery(super.prototype, loggingContextTag, user);
         return emptyQuery;
     }
 

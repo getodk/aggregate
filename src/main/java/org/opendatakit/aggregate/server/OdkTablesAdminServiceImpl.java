@@ -46,7 +46,7 @@ public class OdkTablesAdminServiceImpl extends RemoteServiceServlet implements
             Permissions permissions = Permissions.getInstance(cc);
 
             List<InternalPermission> perms = permissions
-                    .query()
+                    .query("[odktables]OdkTablesAdminServiceImpl.listAdmin")
                     .equal(Permissions.AGGREGATE_TABLE_IDENTIFIER,
                             users.getAggregateIdentifier())
                     .equal(Permissions.WRITE, true).execute();

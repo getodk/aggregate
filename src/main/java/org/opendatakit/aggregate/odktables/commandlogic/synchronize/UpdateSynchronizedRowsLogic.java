@@ -81,7 +81,7 @@ public class UpdateSynchronizedRowsLogic extends
             try
             {
                 mapping = mappings
-                        .query()
+                        .query("UpdateSynchronizedRowsLogic.execute")
                         .equal(UserTableMappings.AGGREGATE_USER_IDENTIFIER,
                                 requestUser.getAggregateIdentifier())
                         .equal(UserTableMappings.TABLE_ID, tableID).get();
@@ -174,7 +174,7 @@ public class UpdateSynchronizedRowsLogic extends
                 try
                 {
                     col = columns
-                            .query()
+                            .query("UpdateSynchronizedRowsLogic.updateChangedRows")
                             .equal(Columns.AGGREGATE_TABLE_IDENTIFIER,
                                     aggregateTableIdentifier)
                             .equal(Columns.COLUMN_NAME, rowEntry.getKey())

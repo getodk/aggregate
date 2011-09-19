@@ -124,11 +124,12 @@ public interface Datastore {
 	/**
 	 * Returns a new Query -- possibly for a record with a specific primary key.
 	 * 
-	 * @param relation the prototype relation to be fetched.
-	 * @param user non-null user responsible for this request.
+	 * @param relation -- the prototype relation to be fetched.
+	 * @param loggingContextTag -- used when logging query statistics after execute()'s.
+	 * @param user -- non-null user responsible for this request.
 	 * @return a Query object
 	 */
-	public Query createQuery(CommonFieldsBase table, User user);
+	public Query createQuery(CommonFieldsBase table, String loggingContextTag, User user);
 	
 	/**
 	 * Puts the given entity into the Datastore.

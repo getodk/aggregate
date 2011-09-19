@@ -81,9 +81,9 @@ public abstract class TypedEntityRelation<T extends TypedEntity>
      * @return a new empty query over this relation, that is a query with no
      *         filter or sort criteria.
      */
-    public TypedEntityQuery<T> query()
+    public TypedEntityQuery<T> query(String loggingContextTag)
     {
-        return new TypedEntityQuery<T>(this, relation.query());
+        return new TypedEntityQuery<T>(this, relation.query(loggingContextTag));
     }
 
     public Entity newEntity() throws ODKDatastoreException

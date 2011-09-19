@@ -246,7 +246,7 @@ public class AbstractRelation implements Relation {
 		Datastore ds = cc.getDatastore();
 		User user = cc.getCurrentUser();
 		
-		Query q = ds.createQuery(prototype, user);
+		Query q = ds.createQuery(prototype, "AbstractRelation.getEntities", user);
 		q.addFilter(dataField, op, value);
 		
 		List<? extends CommonFieldsBase> list = q.executeQuery();
@@ -341,7 +341,7 @@ public class AbstractRelation implements Relation {
 		Datastore ds = cc.getDatastore();
 		User user = cc.getCurrentUser();
 
-		Query q = ds.createQuery(prototype, user);
+		Query q = ds.createQuery(prototype, "AbstractRelation.dropRelation", user);
 		List<?> pkList = q.executeDistinctValueForDataField(prototype.primaryKey);
 		List<EntityKey> keys = new ArrayList<EntityKey>();
 		for ( Object key : pkList ) {

@@ -148,7 +148,7 @@ public class SubmissionDownloadListServlet extends ServletUtilBase {
       // Submissions may be partially uploaded and are marked completed once
       // they
       // are fully uploaded. We snarf everything.
-      Query query = cc.getDatastore().createQuery(tbl, cc.getCurrentUser());
+      Query query = cc.getDatastore().createQuery(tbl, "SubmissionDownloadListServlet.doGet", cc.getCurrentUser());
       query.addSort(tbl.lastUpdateDate, Query.Direction.ASCENDING);
       query.addFilter(tbl.isComplete, FilterOperation.EQUAL, true);
 

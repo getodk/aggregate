@@ -29,11 +29,11 @@ public class Query
      */
     private org.opendatakit.common.persistence.Query query;
 
-    protected Query(ExtendedAbstractRelation Relation)
+    protected Query(ExtendedAbstractRelation Relation, String loggingContextTag )
     {
         Check.notNull(Relation, "Relation");
         this.Relation = Relation;
-        this.query = Relation.createQuery();
+        this.query = Relation.createQuery(loggingContextTag);
     }
 
     /**

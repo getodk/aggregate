@@ -65,7 +65,7 @@ public class SynchronizeLogic extends CommandLogic<Synchronize>
             int clientModificationNumber = synchronize.getModificationNumber();
 
             // retrieve request user
-            InternalUser requestUser = users.query()
+            InternalUser requestUser = users.query("SynchronizeLogic.execute")
                     .equal(Users.USER_ID, requestingUserID).get();
 
             // retrieve mapping from user's tableID to aggregateTableIdentifer
@@ -73,7 +73,7 @@ public class SynchronizeLogic extends CommandLogic<Synchronize>
             try
             {
                 mapping = mappings
-                        .query()
+                        .query("SynchronizeLogic.execute")
                         .equal(UserTableMappings.AGGREGATE_USER_IDENTIFIER,
                                 requestUser.getAggregateIdentifier())
                         .equal(UserTableMappings.TABLE_ID, tableID).get();
@@ -101,7 +101,7 @@ public class SynchronizeLogic extends CommandLogic<Synchronize>
 
             // Get latest modifications
             List<InternalModification> latestModifications = modifications
-                    .query()
+                    .query("SynchronizeLogic.execute")
                     .equal(Modifications.AGGREGATE_TABLE_IDENTIFIER,
                             aggregateTableIdentifier)
                     .greaterThan(Modifications.MODIFICATION_NUMBER,
@@ -115,7 +115,7 @@ public class SynchronizeLogic extends CommandLogic<Synchronize>
             }
             Table table = Table.getInstance(aggregateTableIdentifier, cc);
             List<InternalColumn> cols = columns
-                    .query()
+                    .query("SynchronizeLogic.execute")
                     .equal(Columns.AGGREGATE_TABLE_IDENTIFIER,
                             aggregateTableIdentifier).execute();
 

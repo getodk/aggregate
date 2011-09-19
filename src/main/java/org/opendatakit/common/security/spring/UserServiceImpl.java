@@ -172,7 +172,7 @@ public class UserServiceImpl implements org.opendatakit.common.security.UserServ
 		   * we have configured access management with at least a default configuration.
 		   */
 	      GrantedAuthorityHierarchyTable relation = GrantedAuthorityHierarchyTable.assertRelation(datastore, getDaemonAccountUser());
-	      Query query = datastore.createQuery(relation, getDaemonAccountUser());
+	      Query query = datastore.createQuery(relation, "UserServiceImpl.isAccessManagementConfigured", getDaemonAccountUser());
 	      List<?> values = query.executeQuery();
 	      return !values.isEmpty();
 	  } catch ( ODKDatastoreException e ) {

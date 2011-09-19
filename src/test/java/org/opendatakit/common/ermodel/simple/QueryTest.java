@@ -41,7 +41,7 @@ public class QueryTest
     @Test
     public void testGet() throws ODKDatastoreException
     {
-        Entity john = d.relation.query().equal(d.attrName, d.johnsName).get();
+        Entity john = d.relation.query("QueryTest.testGet").equal(d.attrName, d.johnsName).get();
         assertEquals(d.johnsName, john.getString(d.attrName));
         assertEquals(d.johnsAge, john.getInteger(d.attrAge).intValue());
     }
@@ -49,7 +49,7 @@ public class QueryTest
     @Test
     public void testExecute() throws ODKDatastoreException
     {
-        List<Entity> people = d.relation.query().execute();
+        List<Entity> people = d.relation.query("QueryTest.testEcecute").execute();
         assertEquals(2, people.size());
     }
 
@@ -57,7 +57,7 @@ public class QueryTest
     public void testInclude() throws ODKDatastoreException
     {
         List<String> names = Arrays.asList(new String[] { d.johnsName });
-        List<Entity> people = d.relation.query().include(d.attrName, names)
+        List<Entity> people = d.relation.query("QueryTest.testInclude").include(d.attrName, names)
                 .execute();
         assertEquals(1, people.size());
         Entity john = people.get(0);
@@ -72,7 +72,7 @@ public class QueryTest
         assertEquals(d.johnsAge, d.joesAge);
         // Test getDistinct
         @SuppressWarnings("unchecked")
-        List<Integer> ages = (List<Integer>) d.relation.query().getDistinct(
+        List<Integer> ages = (List<Integer>) d.relation.query("QueryTest.testGetDistinct").getDistinct(
                 d.attrAge);
         assertEquals(1, ages.size());
     }
@@ -80,7 +80,7 @@ public class QueryTest
     @Test
     public void testGreaterThan() throws ODKDatastoreException
     {
-        List<Entity> people = d.relation.query().greaterThan("AGE", 50)
+        List<Entity> people = d.relation.query("QueryTest.testGreaterThan").greaterThan("AGE", 50)
                 .execute();
         assertTrue(people.isEmpty());
     }
@@ -88,7 +88,7 @@ public class QueryTest
     @Test
     public void testGreaterThanOrEqual() throws ODKDatastoreException
     {
-        List<Entity> people = d.relation.query().greaterThanOrEqual("AGE", 50)
+        List<Entity> people = d.relation.query("QueryTest.testGreaterThanOrEqual").greaterThanOrEqual("AGE", 50)
                 .execute();
         assertEquals(2, people.size());
     }
@@ -96,14 +96,14 @@ public class QueryTest
     @Test
     public void testLessThan() throws ODKDatastoreException
     {
-        List<Entity> people = d.relation.query().lessThan("AGE", 50).execute();
+        List<Entity> people = d.relation.query("QueryTest.testLessThan").lessThan("AGE", 50).execute();
         assertTrue(people.isEmpty());
     }
 
     @Test
     public void testLessThanOrEqual() throws ODKDatastoreException
     {
-        List<Entity> people = d.relation.query().lessThanOrEqual("AGE", 50)
+        List<Entity> people = d.relation.query("QueryTest.testLessThanOrEqual").lessThanOrEqual("AGE", 50)
                 .execute();
         assertEquals(2, people.size());
     }
@@ -111,7 +111,7 @@ public class QueryTest
     @Test
     public void testSortAscending() throws ODKDatastoreException
     {
-        List<Entity> people = d.relation.query().sortAscending(d.attrName)
+        List<Entity> people = d.relation.query("QueryTest.testSortAscending").sortAscending(d.attrName)
                 .execute();
         Entity joe = people.get(0);
         Entity john = people.get(1);
@@ -122,7 +122,7 @@ public class QueryTest
     @Test
     public void testSortDescending() throws ODKDatastoreException
     {
-        List<Entity> people = d.relation.query().sortDescending(d.attrName)
+        List<Entity> people = d.relation.query("QueryTest.testSortDescending").sortDescending(d.attrName)
                 .execute();
         Entity john = people.get(0);
         Entity joe = people.get(1);
