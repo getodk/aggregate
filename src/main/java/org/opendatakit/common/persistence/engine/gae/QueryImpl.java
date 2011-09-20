@@ -56,7 +56,7 @@ import com.google.appengine.api.quota.QuotaServiceFactory;
  */
 public class QueryImpl implements org.opendatakit.common.persistence.Query {
 
-  private static Map<FilterOperation, FilterOperator> operationMap = new HashMap<FilterOperation, FilterOperator>();
+  private static final Map<FilterOperation, FilterOperator> operationMap = new HashMap<FilterOperation, FilterOperator>();
 
   static {
     operationMap.put(FilterOperation.EQUAL, FilterOperator.EQUAL);
@@ -70,6 +70,7 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
   private final CommonFieldsBase relation;
   private final DatastoreImpl datastore;
   private final User user;
+  private final Log logger;
   private final ExecutionTimeLogger gaeCostLogger;
   
   private static final long ACTIVE_COST_LOGGING_CHECK_INTERVAL = 10*1000; // 10 seconds
@@ -151,7 +152,7 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
     }
   }
   
-  private class ExecutionTimeLogger {
+  private final class ExecutionTimeLogger {
     
     private final long startApiTime;
     private long istartApiTime;
@@ -204,7 +205,7 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
    * @author mitchellsundt@gmail.com
    * 
    */
-  abstract class Tracker {
+  private abstract class Tracker {
     final DataField attribute;
 
     Tracker(DataField attribute) {
@@ -302,7 +303,7 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
     abstract void setFilter(com.google.appengine.api.datastore.Query q);
   }
 
-  class SimpleFilterTracker extends Tracker {
+  private final class SimpleFilterTracker extends Tracker {
     final FilterOperation op;
     final Object value;
 
@@ -350,7 +351,7 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
     }
   }
 
-  class ValueSetFilterTracker extends Tracker {
+  private final class ValueSetFilterTracker extends Tracker {
     final Collection<?> valueSet;
 
     ValueSetFilterTracker(DataField attribute, Collection<?> valueSet) {
@@ -387,9 +388,9 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
     }
   }
 
-  List<Tracker> filterList = new ArrayList<Tracker>();
+  private final List<Tracker> filterList = new ArrayList<Tracker>();
 
-  class SortTracker extends Tracker implements Comparator<CommonFieldsBase> {
+  private final class SortTracker extends Tracker implements Comparator<CommonFieldsBase> {
     final Direction direction;
 
     SortTracker(DataField attribute, Direction direction) {
@@ -454,7 +455,7 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
     }
   }
 
-  List<SortTracker> sortList = new ArrayList<SortTracker>();
+  private final List<SortTracker> sortList = new ArrayList<SortTracker>();
 
   public QueryImpl(CommonFieldsBase relation, String loggingContextTag, DatastoreImpl datastore,
       User user) {
@@ -462,6 +463,7 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
     this.loggingContextTag = loggingContextTag;
     this.datastore = datastore;
     this.user = user;
+    this.logger = LogFactory.getLog(QueryImpl.class);
     this.gaeCostLogger = new ExecutionTimeLogger();
   }
 
@@ -519,7 +521,7 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
     sortList.add(new SortTracker(attribute, direction));
   }
 
-  private class CoreResult {
+  private final class CoreResult {
     final List<CommonFieldsBase> results;
     final boolean hasMoreResults;
 
@@ -529,7 +531,7 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
     }
   }
 
-  interface ResultContainer {
+  private interface ResultContainer {
     public void add(CommonFieldsBase record);
 
     public int size();
@@ -594,11 +596,15 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
     boolean possiblyBeforeStartCursor = (startCursorFilter != null);
     int sizeQuestionableFirstMatches = 0;
 
-    boolean mustReadEverything = false;
+    boolean mustReadEverything = (fetchLimit == 0);
+    WorkingValues w = new WorkingValues();
     
     boolean hasQueryResults = true;
     for (; hasQueryResults;) {
 
+      logger.debug("hqrLoop: " + idx + " fetchOffset: " + fetchOffset + " startCursor " + 
+          ((startCursorFilter == null) ? "<<none>>" : 
+              ((startCursorFilter.value == null) ? "null" : startCursorFilter.value.toString())) );
       PreparedQuery preparedHack;
       try {
         Query hack = new com.google.appengine.api.datastore.Query(relation.getSchemaName() + "."
@@ -669,6 +675,8 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
             orderingHack.addSort(dominantSort.getAttribute().getName(), sd);
             
             PreparedQuery orderingPrep = ds.prepare(orderingHack);
+            logger.debug("hqrLoop: finding min/max of dominantSortAttr: " + dominantSortAttr.getName());
+            
             List<com.google.appengine.api.datastore.Entity> values = orderingPrep.asList(FetchOptions.Builder.withDefaults().limit(3));
             if ( values == null || values.isEmpty() ) {
               // the table is empty -- no need to go further...
@@ -680,27 +688,8 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
                 : FilterOperator.LESS_THAN_OR_EQUAL;
             // and apply the filter...
             CommonFieldsBase odkEntity = (CommonFieldsBase) m.mapRow(datastore, values.get(0), 0);
-            switch (dominantSortAttr.getDataType()) {
-            case BINARY:
-            case LONG_STRING:
-              throw new IllegalStateException("unsupported fetch of binary data");
-            case BOOLEAN:
-              hack.addFilter(dominantSort.getAttribute().getName(), fo, odkEntity.getBooleanField(dominantSortAttr));
-              break;
-            case DATETIME:
-              hack.addFilter(dominantSort.getAttribute().getName(), fo, odkEntity.getDateField(dominantSortAttr));
-              break;
-            case DECIMAL:
-              hack.addFilter(dominantSort.getAttribute().getName(), fo, odkEntity.getNumericField(dominantSortAttr));
-              break;
-            case INTEGER:
-              hack.addFilter(dominantSort.getAttribute().getName(), fo, odkEntity.getLongField(dominantSortAttr));
-              break;
-            case STRING:
-            case URI:
-              hack.addFilter(dominantSort.getAttribute().getName(), fo, odkEntity.getStringField(dominantSortAttr));
-              break;
-            }
+            hack.addFilter( dominantSort.getAttribute().getName(), fo, 
+                  EngineUtils.getDominantSortAttributeValue(odkEntity, dominantSortAttr));
           }
           
 //          // GAE: this doesn't work in production, though the ZigZag queries are supposed to support this.
@@ -733,115 +722,191 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
         throw new ODKDatastoreException("[" + loggingContextTag + "] Unable to complete request", e);
       }
       FetchOptions options = FetchOptions.Builder.withDefaults().chunkSize(chunkSize)
-                                            .prefetchSize(chunkSize).offset(fetchOffset).limit(chunkSize);
-      
+                                            .prefetchSize(chunkSize).offset(fetchOffset).limit(32*chunkSize);
+
+      logger.debug("hqrLoop: executing preparedQuery ");
+
       Iterable<com.google.appengine.api.datastore.Entity> it = preparedHack
           .asIterable(options);
 
+      
+      w.idx = idx;
+      w.fetchOffset = fetchOffset;
+      w.startCursorFilter = startCursorFilter;
+      w.possiblyBeforeStartCursor = possiblyBeforeStartCursor;
+      w.sizeQuestionableFirstMatches = sizeQuestionableFirstMatches;
+      w.odkFirstEntityOfCurrentDominantValue = odkFirstEntityOfCurrentDominantValue;
+      w.dominantSortAttrValueHasChanged = dominantSortAttrValueHasChanged;
+      w.odkAdditionalEntities.clear();
+      
       try {
-        // loop as long as the query returns at least one result...
-        hasQueryResults = false;
-        int readSetCount = 0;
-        for (com.google.appengine.api.datastore.Entity gaeEntity : it) {
-          hasQueryResults = true;
-          readSetCount++;
-
-          CommonFieldsBase odkEntity = (CommonFieldsBase) m.mapRow(datastore, gaeEntity, idx++);
-
-          // determine whether this odkEntity shares the same dominantSortAttr
-          // value as the one before it.
-          boolean matchingDominantAttr;
-
-          // reset the fetch offset to zero and update the startCursorFilter
-          // if the matchingAttr has changed.
-          if (odkFirstEntityOfCurrentDominantValue == null) {
-            // initialize counters and update reference entity
-            fetchOffset = 0;
-            odkFirstEntityOfCurrentDominantValue = odkEntity;
-            // matchingDominantAttr is considered true for the first result...
-            matchingDominantAttr = true;
-          } else {
-            matchingDominantAttr = EngineUtils.hasMatchingDominantSortAttribute(
-                odkFirstEntityOfCurrentDominantValue, odkEntity, dominantSortAttr);
-            if (!matchingDominantAttr) {
-              // reset counters and update reference entity
-              fetchOffset = 0;
-              odkFirstEntityOfCurrentDominantValue = odkEntity;
-              dominantSortAttrValueHasChanged = true;
-
-              startCursorFilter = new SimpleFilterTracker(
-                  dominantSortAttr,
-                  dominantSort.direction.equals(Direction.ASCENDING) ? FilterOperation.GREATER_THAN_OR_EQUAL
-                      : FilterOperation.LESS_THAN_OR_EQUAL,
-                  EngineUtils.getDominantSortAttributeValue(odkEntity, dominantSortAttr));
-            }
-          }
-          fetchOffset++;
-
-          // if we have read enough records to satisfy the fetchLimit, we
-          // only need to continue reading records until matchingDominantAttr
-          // becomes false. This indicates that we have collected all the
-          // records
-          // that could possibly be rearranged by subordinate sorts.
-          if (!mustReadEverything && !matchingDominantAttr && !possiblyBeforeStartCursor && fetchLimit != 0
-              && odkEntities.size() > fetchLimit + sizeQuestionableFirstMatches + 1) {
-            // we're done!
-            return;
-          }
-
-          // determine if this result passes all filters...
-          boolean passed = true;
-          for (Tracker t : filterList) {
-            if (!t.passFilter(odkEntity)) {
-              passed = false;
-              break;
-            }
-          }
-
-          if (passed) {
-            if (possiblyBeforeStartCursor && fetchLimit != 0 && dominantSortAttrValueHasChanged) {
-              // We are starting to process the result set.
-              // We are getting at most N (== fetchLimit) values.
-              //
-              // Until the dominantSortAttr value changes from the
-              // value initially given in the constraint, we cannot
-              // be sure that we have fetched any values that will
-              // eventually be returned to the caller. Subordinate
-              // sorts will rearrange the those values and until we
-              // have the final sorted ordering, we cannot exclude
-              // values before the last previously-returned URI.
-              //
-              // So we must accumulate all of those values and not
-              // count them toward the fetch limit. Once we do see
-              // a change in the dominantSortAttr value, we know
-              // we will have at least one value in the result set.
-              //
-              // Remember the number of questionable elements...
-              possiblyBeforeStartCursor = false;
-              sizeQuestionableFirstMatches = odkEntities.size();
-            }
-            // add the match...
-            odkEntities.add(odkEntity);
-          }
+        // loop while the query returns at least one result...
+        hasQueryResults = fetchResults(it, dominantSort, dominantSortAttr, m, 
+              mustReadEverything, fetchLimit, options.getLimit(), odkEntities.size(), w);
+        // and if we succeeded, we update the actual state to that of the fetched results.
+        idx = w.idx;
+        fetchOffset = w.fetchOffset;
+        startCursorFilter = w.startCursorFilter;
+        possiblyBeforeStartCursor = w.possiblyBeforeStartCursor;
+        sizeQuestionableFirstMatches = w.sizeQuestionableFirstMatches;
+        odkFirstEntityOfCurrentDominantValue = w.odkFirstEntityOfCurrentDominantValue;
+        dominantSortAttrValueHasChanged = w.dominantSortAttrValueHasChanged;
+        for ( CommonFieldsBase cb : w.odkAdditionalEntities ) {
+          odkEntities.add(cb);
         }
         
-        if ( options.getLimit() != null && readSetCount < options.getLimit() ) {
-          // we read all the records that were available on the server 
-          // and didn't hit our batch fetch limit... we can stop now.
-          hasQueryResults = false;
+      } catch (ODKDatastoreException e) {
+        // we had an exception -- this might be a cursor timeout(!)
+        // Step down the chunkSize and try again.  The original 
+        // WorkingValues needed to restart the query are unchanged,
+        // so we can safely reissue the query.
+        if ( chunkSize > 20 ) {
+          logger.warn("Retrying fetch with a smaller chunk size");
+          chunkSize /= 4;
+        } else {
+          throw e;
         }
-        
-      } catch (SQLException e) {
-        e.printStackTrace();
-        throw new ODKDatastoreException("[" + loggingContextTag + "] SQL: " + gaeCostLogger.queryString + " exception: " + e.getMessage(), e);
-      } catch (Exception e) {
-        e.printStackTrace();
-        throw new ODKDatastoreException("[" + loggingContextTag + "] SQL: " + gaeCostLogger.queryString + " exception: " + e.getMessage(), e);
       }
     }
+    logger.debug("hqrLoop: done fetching everything!");
   }
 
-  private static class CoreResultContainer implements ResultContainer {
+  private final static class WorkingValues {
+    int idx;
+    int fetchOffset;
+    SimpleFilterTracker startCursorFilter;
+    boolean possiblyBeforeStartCursor;
+    int sizeQuestionableFirstMatches;
+    CommonFieldsBase odkFirstEntityOfCurrentDominantValue;
+    boolean dominantSortAttrValueHasChanged;
+    List<CommonFieldsBase> odkAdditionalEntities = new ArrayList<CommonFieldsBase>();
+    
+    WorkingValues() {
+    }
+  }
+  
+  /**
+   * Updates WorkingValues with current status values.
+   * 
+   * @param it
+   * @param dominantSort
+   * @param dominantSortAttr
+   * @param m
+   * @param mustReadEverything
+   * @param fetchLimit
+   * @param odkEntitiesSize
+   * @param w
+   * @return false if completely done, true if still more work to be done.
+   * @throws ODKDatastoreException 
+   */
+  private final boolean fetchResults(Iterable<com.google.appengine.api.datastore.Entity> it, 
+      SortTracker dominantSort, DataField dominantSortAttr, EntityRowMapper m, 
+      boolean mustReadEverything, int fetchLimit, Integer readSetLimit, int odkEntitiesSize, WorkingValues w) throws ODKDatastoreException {
+
+    // loop as long as the query returns at least one result...
+    boolean hasQueryResults = false;
+    try {
+      int readSetCount = 0;
+      for (com.google.appengine.api.datastore.Entity gaeEntity : it) {
+        hasQueryResults = true;
+        readSetCount++;
+
+        CommonFieldsBase odkEntity = (CommonFieldsBase) m.mapRow(datastore, gaeEntity, w.idx++);
+
+        // determine whether this odkEntity shares the same dominantSortAttr
+        // value as the one before it.
+        boolean matchingDominantAttr;
+
+        // reset the fetch offset to zero and update the startCursorFilter
+        // if the matchingAttr has changed.
+        if (w.odkFirstEntityOfCurrentDominantValue == null) {
+          // initialize counters and update reference entity
+          w.fetchOffset = 0;
+          w.odkFirstEntityOfCurrentDominantValue = odkEntity;
+          // matchingDominantAttr is considered true for the first result...
+          matchingDominantAttr = true;
+        } else {
+          matchingDominantAttr = EngineUtils.hasMatchingDominantSortAttribute(
+              w.odkFirstEntityOfCurrentDominantValue, odkEntity, dominantSortAttr);
+          if (!matchingDominantAttr) {
+            // reset counters and update reference entity
+            w.fetchOffset = 0;
+            w.odkFirstEntityOfCurrentDominantValue = odkEntity;
+            w.dominantSortAttrValueHasChanged = true;
+
+            w.startCursorFilter = new SimpleFilterTracker(
+                dominantSortAttr,
+                dominantSort.direction.equals(Direction.ASCENDING) ? FilterOperation.GREATER_THAN_OR_EQUAL
+                    : FilterOperation.LESS_THAN_OR_EQUAL,
+                EngineUtils.getDominantSortAttributeValue(odkEntity, dominantSortAttr));
+          }
+        }
+        w.fetchOffset++;
+
+        // if we have read enough records to satisfy the fetchLimit, we
+        // only need to continue reading records until matchingDominantAttr
+        // becomes false. This indicates that we have collected all the
+        // records
+        // that could possibly be rearranged by subordinate sorts.
+        if (!mustReadEverything && !matchingDominantAttr && !w.possiblyBeforeStartCursor
+            && odkEntitiesSize + w.odkAdditionalEntities.size() 
+                > fetchLimit + w.sizeQuestionableFirstMatches + 1) {
+          // we're done!
+          return false;
+        }
+
+        // determine if this result passes all filters...
+        boolean passed = true;
+        for (Tracker t : filterList) {
+          if (!t.passFilter(odkEntity)) {
+            passed = false;
+            break;
+          }
+        }
+
+        if (passed) {
+          if (w.possiblyBeforeStartCursor && w.dominantSortAttrValueHasChanged) {
+            // We are starting to process the result set.
+            //
+            // Until the dominantSortAttr value changes from the
+            // value initially given in the constraint, we cannot
+            // be sure that we have fetched any values that will
+            // eventually be returned to the caller. Subordinate
+            // sorts will rearrange the those values and until we
+            // have the final sorted ordering, we cannot exclude
+            // values before the last previously-returned URI.
+            //
+            // So we must accumulate all of those values and not
+            // count them toward the fetch limit. Once we do see
+            // a change in the dominantSortAttr value, we know
+            // we will have at least one value in the result set.
+            //
+            // Remember the number of questionable elements...
+            w.possiblyBeforeStartCursor = false;
+            w.sizeQuestionableFirstMatches = odkEntitiesSize + w.odkAdditionalEntities.size();
+          }
+          // add the match...
+          w.odkAdditionalEntities.add(odkEntity);
+        }
+      }
+      
+      if ( readSetLimit != null && readSetCount < readSetLimit ) {
+        // we read all the records that were available on the server 
+        // and didn't hit our batch fetch limit... we can stop now.
+        return false;
+      }
+      logger.debug("hqrLoop: done with one batch fetch!");
+    } catch (SQLException e) {
+      e.printStackTrace();
+      throw new ODKDatastoreException("[" + loggingContextTag + "] SQL: " + gaeCostLogger.queryString + " exception: " + e.getMessage(), e);
+    } catch (Exception e) {
+      e.printStackTrace();
+      throw new ODKDatastoreException("[" + loggingContextTag + "] SQL: " + gaeCostLogger.queryString + " exception: " + e.getMessage(), e);
+    }
+    return hasQueryResults;
+  }
+  
+  private static final class CoreResultContainer implements ResultContainer {
     private List<CommonFieldsBase> odkEntities = new ArrayList<CommonFieldsBase>();
 
     CoreResultContainer() {
@@ -1063,7 +1128,7 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
     }
   }
 
-  private static class DistinctResultContainer implements ResultContainer {
+  private static final class DistinctResultContainer implements ResultContainer {
     private final DataField dataField;
     private final Set<Object> uniqueValueSet = new HashSet<Object>();
 
