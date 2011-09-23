@@ -179,7 +179,13 @@ public class SubmissionDownloadListServlet extends ServletUtilBase {
           break;
       }
 
-      websafeCursorString = result.getResumeCursor().asWebsafeCursor();
+      QueryResumePoint qrp = result.getResumeCursor();
+      if ( qrp == null ) {
+        websafeCursorString = null;
+      } else {
+        websafeCursorString = qrp.asWebsafeCursor();
+      }
+      
       if (websafeCursorString != null) {
         // emit the cursor value...
         Element eCursorContinue = d.createElement(XML_TAG_NAMESPACE, CURSOR_TAG);
