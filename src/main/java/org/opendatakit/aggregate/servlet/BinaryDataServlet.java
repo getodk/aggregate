@@ -210,7 +210,7 @@ public class BinaryDataServlet extends ServletUtilBase {
     		// set filename if we are downloading to disk...
     		// need this for manifest fetch logic...
 	    	if ( unrootedFileName != null ) {
-	    		resp.addHeader("Content-Disposition:", "attachment; filename=\""+unrootedFileName+"\"");
+	    		resp.addHeader(HtmlConsts.CONTENT_DISPOSITION, "attachment; filename=\""+unrootedFileName+"\"");
 	    	}
     	}
     	
