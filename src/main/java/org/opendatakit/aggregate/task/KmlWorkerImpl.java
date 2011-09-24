@@ -81,7 +81,7 @@ public class KmlWorkerImpl {
 
 	    PersistentResults r = new PersistentResults(persistentResultsKey, cc);
 	    if ( attemptCount.equals(r.getAttemptCount()) ) {
-			r.setResultFile(outputFile, HtmlConsts.RESP_TYPE_PLAIN, Long.valueOf(outputFile.length), form.getViewableFormNameSuitableAsFileName() + ServletConsts.KML_FILENAME_APPEND, cc);
+			r.setResultFile(outputFile, HtmlConsts.RESP_TYPE_KML, Long.valueOf(outputFile.length), form.getViewableFormNameSuitableAsFileName() + ServletConsts.KML_FILENAME_APPEND, cc);
 			r.setStatus(ExportStatus.AVAILABLE);
 			r.setCompletionDate(new Date());
 			r.persist(cc);
