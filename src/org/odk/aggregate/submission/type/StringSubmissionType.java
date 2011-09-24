@@ -19,6 +19,7 @@ package org.odk.aggregate.submission.type;
 
 import java.util.List;
 
+import org.apache.commons.lang.StringEscapeUtils;
 import org.odk.aggregate.constants.BasicConsts;
 import org.odk.aggregate.constants.PersistConsts;
 import org.odk.aggregate.form.Form;
@@ -86,7 +87,23 @@ public class StringSubmissionType extends SubmissionFieldBase<String> {
     }
     jsonObject.addProperty(propertyName, getValue());
   }
-  
+
+  @Override
+  public void addValueToXmlSerialization(StringBuilder b) {
+	  String value = getValue();
+	  if ( value != null ) {
+		  b.append("<" + propertyName + ">");
+		  b.append(StringEscapeUtils.escapeXml(value.toString()));
+		  b.append("</" + propertyName + ">");
+	  } else {
+		  b.append("<" + propertyName + "/>");
+	  }
+  }
+
+  @Override
+  public void addValueToXmlAttachmentSerialization(StringBuilder b, String baseServerUrl) {
+  }
+
   /**
    * Set the string value
    * 

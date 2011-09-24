@@ -21,6 +21,8 @@ package org.odk.aggregate.submission.type;
 
 import java.util.List;
 
+import org.apache.commons.lang.StringEscapeUtils;
+
 import com.google.gson.JsonObject;
 
 /**
@@ -63,7 +65,22 @@ public class DecimalSubmissionType extends SubmissionSingleValueBase<Double> {
     jsonObject.addProperty(propertyName, getValue());
   }
   
-  
+  @Override
+  public void addValueToXmlSerialization(StringBuilder b) {
+	  Double value = getValue();
+	  if ( value != null ) {
+		  b.append("<" + propertyName + ">");
+		  b.append(StringEscapeUtils.escapeXml(value.toString()));
+		  b.append("</" + propertyName + ">");
+	  } else {
+		  b.append("<" + propertyName + "/>");
+	  }
+  }
+
+  @Override
+  public void addValueToXmlAttachmentSerialization(StringBuilder b, String baseServerUrl) {
+  }
+
   /**
    * @see java.lang.Object#equals(java.lang.Object)
    */

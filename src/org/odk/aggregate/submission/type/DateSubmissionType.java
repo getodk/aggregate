@@ -21,6 +21,7 @@ import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.lang.StringEscapeUtils;
 import org.odk.aggregate.exception.ODKConversionException;
 
 import com.google.gson.JsonObject;
@@ -75,7 +76,22 @@ public class DateSubmissionType extends SubmissionSingleValueBase<Date> {
     }
   }
   
-  
+  @Override
+  public void addValueToXmlSerialization(StringBuilder b) {
+	  Date value = getValue();
+	  if ( value != null ) {
+		  b.append("<" + propertyName + ">");
+		  b.append(StringEscapeUtils.escapeXml(value.toString()));
+		  b.append("</" + propertyName + ">");
+	  } else {
+		  b.append("<" + propertyName + "/>");
+	  }
+  }
+
+  @Override
+  public void addValueToXmlAttachmentSerialization(StringBuilder b, String baseServerUrl) {
+  }
+
   /**
    * @see java.lang.Object#equals(java.lang.Object)
    */

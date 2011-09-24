@@ -22,7 +22,11 @@ import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.Map;
+import java.util.TimeZone;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -297,6 +301,15 @@ public class ServletUtilBase extends HttpServlet {
   protected void setDownloadFileName(HttpServletResponse resp, String filename) {
     resp.setHeader(ServletConsts.CONTENT_DISPOSITION, ServletConsts.ATTACHMENT_FILENAME_TXT
         + filename + BasicConsts.QUOTE + BasicConsts.SEMI_COLON);
+  }
+  
+  protected final void addOpenRosaHeaders(HttpServletResponse resp) {
+   resp.setHeader(ServletConsts.OPEN_ROSA_VERSION_HEADER, ServletConsts.OPEN_ROSA_VERSION );
+    GregorianCalendar g = new GregorianCalendar(TimeZone.getTimeZone("GMT"));
+    g.setTime(new Date());
+    SimpleDateFormat formatter = new SimpleDateFormat("E, dd MMM yyyy HH:mm:ss zz");
+    formatter.setCalendar(g);
+    resp.setHeader(ServletConsts.OPEN_ROSA_DATE_HEADER,  formatter.format(new Date()));
   }
 
   protected String getServerURL(HttpServletRequest req) {

@@ -64,4 +64,19 @@ public interface SubmissionValue {
    * @param dbEntity entity to add value to
    */  
   public void addValueToJsonObject(JsonObject jsonObject, List<String> propertyNames);
+
+  /**
+   * Add submission field value to an XmlSerialization
+   * @param b - string builder holding the serialization
+   */
+  public void addValueToXmlSerialization(StringBuilder b);
+
+  /**
+   * Add submission field value to an XmlSerialization of
+   * attachments.  This is only implemented by BlobSubmissionType
+   * 
+   * @param b - string builder holding the serialization
+   * @param baseServerUrl - url for this server
+   */
+  public void addValueToXmlAttachmentSerialization(StringBuilder b, String baseServerUrl);
 }

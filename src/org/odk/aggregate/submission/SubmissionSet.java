@@ -292,6 +292,27 @@ public class SubmissionSet implements Comparable<SubmissionSet>{
     return data;
   }
   
+  public void generateXmlSerialization(StringBuilder b, String attributeList) {
+	  if ( submissionValues != null ) {
+		  b.append("<" + setName + ((attributeList == null) ? "" : attributeList) + ">");
+		  for (SubmissionValue value : submissionValues) {
+			  value.addValueToXmlSerialization(b);
+		  }
+		  b.append("</" + setName + ">");
+	  } else {
+		  // empty...
+		  b.append("<" + setName + "/>");
+	  }
+  }
+  
+  public void generateXmlAttachmentSerialization(StringBuilder b, String baseServerUrl) {
+	  if ( submissionValues != null ) {
+		  for (SubmissionValue value : submissionValues) {
+			  value.addValueToXmlAttachmentSerialization(b, baseServerUrl);
+		  }
+	  }
+  }
+ 
   public long getOrder() {
     return order;
   }
