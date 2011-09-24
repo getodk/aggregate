@@ -19,6 +19,7 @@ package org.odk.aggregate.submission.type;
 
 import java.util.List;
 
+import org.apache.commons.lang.StringEscapeUtils;
 import org.odk.aggregate.constants.BasicConsts;
 import org.odk.aggregate.constants.PersistConsts;
 import org.odk.aggregate.exception.ODKConversionException;
@@ -88,6 +89,32 @@ public class GeoPointSubmissionType extends SubmissionFieldBase<GeoPoint> {
     }
   }
   
+  @Override
+  public void addValueToXmlSerialization(StringBuilder b) {
+	  GeoPoint value = getValue();
+	  if ( value != null ) {
+		  b.append("<" + propertyName + ">");
+		  b.append(StringEscapeUtils.escapeXml(value.getLatitude().toString()));
+		  b.append(" ");
+		  b.append(StringEscapeUtils.escapeXml(value.getLongitude().toString()));
+		  if ( value.getAltitude() != null ) {
+			  b.append(" ");
+			  b.append(StringEscapeUtils.escapeXml(value.getAltitude().toString()));
+		  }
+		  if ( value.getAccuracy() != null ) {
+			  b.append(" ");
+			  b.append(StringEscapeUtils.escapeXml(value.getAccuracy().toString()));
+		  }
+		  b.append("</" + propertyName + ">");
+	  } else {
+		  b.append("<" + propertyName + "/>");
+	  }
+  }
+
+  @Override
+  public void addValueToXmlAttachmentSerialization(StringBuilder b, String baseServerUrl) {
+  }
+
   @Override
   public void getValueFromEntity(Entity dbEntity, Form form) {
     Double latCoor = (Double) dbEntity.getProperty(propertyName + PersistConsts.LATITUDE_PROPERTY);

@@ -24,6 +24,24 @@
 	</servlet-mapping>
 
 	<servlet>
+		<servlet-name>submissionDownloadList</servlet-name>
+		<servlet-class>org.odk.aggregate.servlet.SubmissionDownloadListServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>submissionDownloadList</servlet-name>
+		<url-pattern>/view/submissionList</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>submissionDownload</servlet-name>
+		<servlet-class>org.odk.aggregate.servlet.SubmissionDownloadServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>submissionDownload</servlet-name>
+		<url-pattern>/view/downloadSubmission</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
 		<servlet-name>blank</servlet-name>
 		<servlet-class>org.odk.aggregate.servlet.BlankServlet</servlet-class>
 	</servlet>

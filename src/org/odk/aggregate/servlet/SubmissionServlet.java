@@ -128,11 +128,6 @@ public class SubmissionServlet extends ServletUtilBase {
         submissionParser = new SubmissionParser(req.getInputStream(), em);
       }
 
-      if (submissionParser == null) {
-        resp.sendError(HttpServletResponse.SC_BAD_REQUEST, ErrorConsts.INPUTSTREAM_ERROR);
-        return;
-      }
-
       Form form = submissionParser.getForm();
       String appName = this.getServletContext().getInitParameter("application_name");
       Submission submission = submissionParser.getSubmission();

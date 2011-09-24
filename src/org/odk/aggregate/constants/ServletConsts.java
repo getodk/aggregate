@@ -35,7 +35,7 @@ public class ServletConsts {
   /**
    * Current version of Aggregate
    */
-  public final static String VERSION = "v0.9.7";
+  public final static String VERSION = "v0.9.8";
   
   /**
    * Name of form field that contains XML submission
@@ -139,7 +139,12 @@ public class ServletConsts {
    */  
   public static final String RESP_TYPE_XML = "text/xml";
   
+
+  public static final String OPEN_ROSA_VERSION_HEADER = "X-OpenRosa-Version";
+  public static final String OPEN_ROSA_VERSION = "1.0";
   
+  public static final String OPEN_ROSA_DATE_HEADER = "Date";
+
   /**
    * Encoding scheme for servlets
    */
@@ -290,4 +295,6 @@ public class ServletConsts {
   public static final String AUTHORIZE_FUSION_CREATION = "Authorize Fusion Table Creation from Google Account";
   
   public static final String BEGIN_SQL = "sql=";
+
+public static final String FORM_ID = "formId";
 }

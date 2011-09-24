@@ -479,7 +479,7 @@ public class FragmentedSubmissionTable extends SubmissionTable {
 						FetchOptions.Builder.withLimit(fetchLimit));
 			} else {
 				rl = ds.prepare(surveyQuery).asQueryResultList(
-						FetchOptions.Builder.withLimit(fetchLimit).cursor(cursor));
+						FetchOptions.Builder.withLimit(fetchLimit).startCursor(cursor));
 			}
 	
 			// if we have a full set of records, return the 
@@ -592,7 +592,7 @@ public class FragmentedSubmissionTable extends SubmissionTable {
 			if (websafeCursorString != null) {
 				Cursor cursor = Cursor.fromWebSafeString(websafeCursorString);
 				rl = ds.prepare(surveyQuery).asQueryResultList(
-						FetchOptions.Builder.withLimit(fetchLimit).cursor(cursor));
+						FetchOptions.Builder.withLimit(fetchLimit).startCursor(cursor));
 			} else {
 				rl = ds.prepare(surveyQuery).asQueryResultList(
 						FetchOptions.Builder.withLimit(fetchLimit));

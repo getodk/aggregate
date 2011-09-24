@@ -112,7 +112,25 @@ public class RepeatSubmissionType implements SubmissionRepeat {
       }
     }
   }
-  
+
+  @Override
+  public void addValueToXmlSerialization(StringBuilder b) {
+	if (submissionSets != null) {
+		for (SubmissionSet submissionSet : submissionSets) {
+			submissionSet.generateXmlSerialization(b, null);
+		}
+	}
+  }
+
+  @Override
+  public void addValueToXmlAttachmentSerialization(StringBuilder b, String baseServerUrl) {
+	if (submissionSets != null) {
+		for (SubmissionSet submissionSet : submissionSets) {
+			submissionSet.generateXmlAttachmentSerialization(b, baseServerUrl);
+		}
+	}
+  }
+
   public void getValueFromEntity(Entity dbEntity, Form form) throws ODKIncompleteSubmissionData {
     @SuppressWarnings("unchecked")
     List<Key> submissionSetKeys = (List<Key>) dbEntity.getProperty(getPropertyName());
