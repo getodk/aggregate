@@ -16,7 +16,6 @@
 
 package org.opendatakit.aggregate.server;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -26,17 +25,12 @@ import org.opendatakit.aggregate.client.exception.FormNotAvailableException;
 import org.opendatakit.aggregate.client.filter.FilterGroup;
 import org.opendatakit.aggregate.client.submission.SubmissionUI;
 import org.opendatakit.aggregate.client.submission.SubmissionUISummary;
-import org.opendatakit.aggregate.client.submission.UIGeoPoint;
-import org.opendatakit.aggregate.constants.ServletConsts;
-import org.opendatakit.aggregate.datamodel.FormElementKey;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.format.Row;
-import org.opendatakit.aggregate.format.element.BasicElementFormatter;
 import org.opendatakit.aggregate.format.element.ElementFormatter;
 import org.opendatakit.aggregate.format.element.UiElementFormatter;
-import org.opendatakit.aggregate.query.submission.QueryByDate;
 import org.opendatakit.aggregate.query.submission.QueryByUIFilterGroup;
 import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.aggregate.submission.SubmissionElement;
@@ -47,7 +41,6 @@ import org.opendatakit.aggregate.submission.type.RepeatSubmissionType;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.security.client.exception.AccessDeniedException;
 import org.opendatakit.common.web.CallingContext;
-import org.opendatakit.common.web.constants.BasicConsts;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
@@ -169,60 +162,4 @@ public class SubmissionServiceImpl extends RemoteServiceServlet implements
       }
     }
   }
-
-  @Override
-  public UIGeoPoint[] getGeoPoints(String formId, String geopointKey)
-      throws FormNotAvailableException {
-    HttpServletRequest req = this.getThreadLocalRequest();
-    CallingContext cc = ContextFactory.getCallingContext(this, req);
-
-    try {
-      Form form = Form.retrieveFormByFormId(formId, cc);
-      if (form.getFormDefinition() == null)
-        return null; // ill-formed definition
-      QueryByDate query = new QueryByDate(form, BasicConsts.EPOCH, false,
-          ServletConsts.FETCH_LIMIT, cc);
-      List<Submission> submissions = query.getResultSubmissions(cc);
-
-      UIGeoPoint[] points = new UIGeoPoint[submissions.size()];
-      FormElementModel geopointField = null;
-      if (geopointKey != null) {
-        FormElementKey geopointFEMKey = new FormElementKey(geopointKey);
-        geopointField = FormElementModel.retrieveFormElementModel(form, geopointFEMKey);
-      }
-      List<FormElementModel> filteredElements = new ArrayList<FormElementModel>();
-      filteredElements.add(geopointField);
-      ElementFormatter elemFormatter = new BasicElementFormatter(true, false, false);
-
-      // format row elements
-      int i = 0;
-      for (SubmissionSet sub : submissions) {
-        Row row = sub.getFormattedValuesAsRow(filteredElements, elemFormatter, false, cc);
-
-        try {
-          List<String> formatted = row.getFormattedValues();
-          if (formatted.size() == 2) {
-            UIGeoPoint gpsPoint = new UIGeoPoint(formatted.get(0), formatted.get(1));
-            points[i] = gpsPoint;
-          } else {
-            System.out.println("TOO MANY VALUES TO GENERATE A GEOPOINT");
-          }
-
-        } catch (Exception e) {
-          // TODO Auto-generated catch block
-          e.printStackTrace();
-        }
-        i++;
-      }
-      return points;
-    } catch (ODKFormNotFoundException e) {
-      throw new FormNotAvailableException(e);
-    } catch (ODKDatastoreException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
-
-    return null;
-  }
-
 }
