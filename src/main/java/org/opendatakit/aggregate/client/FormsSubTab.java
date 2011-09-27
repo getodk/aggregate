@@ -24,62 +24,43 @@ import org.opendatakit.aggregate.client.widgets.ServletPopupButton;
 import org.opendatakit.aggregate.constants.common.FormConsts;
 import org.opendatakit.aggregate.constants.common.HelpSliderConsts;
 import org.opendatakit.aggregate.constants.common.UIConsts;
-import org.opendatakit.common.security.common.GrantedAuthorityName;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.FlexTable;
 
 public class FormsSubTab extends AggregateSubTabBase {
   // button text & styling
-  private static final String SUBMISSION_TXT = "Upload Submission Data";
-  private static final String SUBMISSION_TOOLTIP_TXT = "Upload Submissions";
-  private static final String SUBMISSION_BALLOON_TXT = "Upload submissions to add data to your form.";
-  private static final String SUBMISSION_BUTTON_TEXT = "<img src=\"images/blue_up_arrow.png\" /> " + SUBMISSION_TXT;
-  private static final String NEW_FORM_TXT = "New Form";
-  private static final String NEW_FORM_TOOLTIP_TXT = "Upload NEW form";
-  private static final String NEW_FORM_BALLOON_TXT = "Add a new form to Aggregate.";
-  private static final String NEW_FORM_BUTTON_TEXT = "<img src=\"images/yellow_plus.png\" /> " + NEW_FORM_TXT;
 
-  private final ServletPopupButton newForm;
-  private final ServletPopupButton uploadSubmission;
-  
+  private static final String NEW_FORM_TXT = "Add New Form";
+  private static final String NEW_FORM_TOOLTIP_TXT = "Upload NEW form";
+  private static final String NEW_FORM_BALLOON_TXT = "Upload a NEW form to Aggregate.";
+  private static final String NEW_FORM_BUTTON_TEXT = "<img src=\"images/yellow_plus.png\" /> "
+      + NEW_FORM_TXT;
+
+
   private FormTable listOfForms;
-  private FlexTable navTable;
 
   public FormsSubTab(AggregateUI baseUI) {
 
-	newForm = new ServletPopupButton(NEW_FORM_BUTTON_TEXT, NEW_FORM_TXT,
-		        UIConsts.FORM_UPLOAD_SERVLET_ADDR, this, NEW_FORM_TOOLTIP_TXT, NEW_FORM_BALLOON_TXT);
-	uploadSubmission = new ServletPopupButton(SUBMISSION_BUTTON_TEXT, SUBMISSION_TXT,
-	        UIConsts.SUBMISSION_SERVLET_ADDR, this, SUBMISSION_TOOLTIP_TXT, SUBMISSION_BALLOON_TXT);
     // create navigation buttons to servlet
-    navTable = new FlexTable();
-    navTable.setWidget(0, 0, newForm);
-    navTable.setWidget(0, 1, uploadSubmission);
-
+    
+    ServletPopupButton newForm = new ServletPopupButton(NEW_FORM_BUTTON_TEXT, NEW_FORM_TXT,
+        UIConsts.FORM_UPLOAD_SERVLET_ADDR, this, NEW_FORM_TOOLTIP_TXT, NEW_FORM_BALLOON_TXT);
+    
     // create form panel
     listOfForms = new FormTable();
 
     // add tables to panels
-    add(navTable);
+    add(newForm);
     add(listOfForms);
   }
 
-
   @Override
   public boolean canLeave() {
-	  return true;
+    return true;
   }
-  
+
   @Override
   public void update() {
-    boolean enabled = AggregateUI.getUI().getUserInfo()
-	.getGrantedAuthorities().contains(GrantedAuthorityName.ROLE_DATA_OWNER);
-
-    // enable or disable the upload buttons...
-    newForm.setEnabled(enabled);
-    uploadSubmission.setEnabled(enabled);
-    
     // Set up the callback object.
     AsyncCallback<ArrayList<FormSummary>> callback = new AsyncCallback<ArrayList<FormSummary>>() {
       public void onFailure(Throwable caught) {

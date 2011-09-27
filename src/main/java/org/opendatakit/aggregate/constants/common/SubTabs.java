@@ -22,9 +22,10 @@ public enum SubTabs implements Serializable {
 	EXPORT("Exported Submissions", "export"),
 	FILTER("Filter Submissions", "filter"),
 	FORMS("Forms List", "forms"),
-	PUBLISH("Published Data", "publish"),
-	PREFERENCES("Preferences", "preferences"),
 	PERMISSIONS("Permissions", "permission"),
+	PREFERENCES("Preferences", "preferences"),
+	PUBLISH("Published Data", "publish"),
+	SUBMISSION_ADMIN("Submission Admin", "subadmin"),
 	TABLES("ODK Tables Admin", "tablesadmin"); 
 	
    private String tabLabel;

@@ -40,7 +40,7 @@ public class QueryByDate extends QueryBase {
   private boolean backward;
 
   public QueryByDate(Form form, Date lastDate,
-      boolean backwardDirection, boolean secondaryOrderingByPrimaryKey, Boolean onlyCompleteSubmissions, int maxFetchLimit, CallingContext cc) throws ODKFormNotFoundException {
+      boolean backwardDirection, boolean secondaryOrderingByPrimaryKey, Boolean onlyCompleteSubmissions, int maxFetchLimit, CallingContext cc) {
     super(form);
 
     backward = backwardDirection;

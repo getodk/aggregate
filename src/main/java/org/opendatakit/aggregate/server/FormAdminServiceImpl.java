@@ -25,7 +25,9 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 
 import org.opendatakit.aggregate.ContextFactory;
+import org.opendatakit.aggregate.client.exception.FormNotAvailableException;
 import org.opendatakit.aggregate.client.exception.RequestFailureException;
+import org.opendatakit.aggregate.client.submission.SubmissionUISummary;
 import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.externalservice.FormServiceCursor;
@@ -195,4 +197,21 @@ public class FormAdminServiceImpl extends RemoteServiceServlet implements
       return Boolean.TRUE;
     }
 	
+    @Override
+    public SubmissionUISummary getIncompleteSubmissions(String formId) throws AccessDeniedException,
+        FormNotAvailableException {
+      throw new FormNotAvailableException();
+    }
+
+    @Override
+    public Boolean markSubmissionAsComplete(String submissionKeyAsString)
+        throws AccessDeniedException {
+      return null;
+    }
+
+    @Override
+    public ArrayList<String> getFormMediaFileList(String formId) throws AccessDeniedException {
+      return null;
+    }
+
 }
