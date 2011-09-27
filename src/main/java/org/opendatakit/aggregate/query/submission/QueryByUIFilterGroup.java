@@ -11,13 +11,14 @@ import org.opendatakit.aggregate.client.submission.Column;
 import org.opendatakit.aggregate.datamodel.FormElementKey;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.datamodel.TopLevelDynamicBase;
-import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.server.UITrans;
 import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.persistence.Query.FilterOperation;
+import org.opendatakit.common.persistence.QueryResumePoint;
+import org.opendatakit.common.persistence.client.UIQueryResumePoint;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.utils.WebUtils;
 import org.opendatakit.common.web.CallingContext;
@@ -25,18 +26,21 @@ import org.opendatakit.common.web.constants.BasicConsts;
 
 public class QueryByUIFilterGroup extends QueryBase {
 
-  private TopLevelDynamicBase tbl;
+  private static final String MISSING_ARGS = "Missing either Form or FilterGroup making it impossible to query";
+
+  private final TopLevelDynamicBase tbl;
 
   private int fetchLimit;
-  public QueryByUIFilterGroup(Form form, FilterGroup filterGroup, int maxFetchLimit,
-	      CallingContext cc) throws ODKFormNotFoundException {
-	  this( form, filterGroup, false, maxFetchLimit, cc);
-  }
   
-  public QueryByUIFilterGroup(Form form, FilterGroup filterGroup, boolean onlyCompleteSubmissions, int maxFetchLimit,
-      CallingContext cc) throws ODKFormNotFoundException {
+  private final QueryResumePoint cursor;
+  
+  public QueryByUIFilterGroup(Form form, FilterGroup filterGroup, boolean onlyCompleteSubmissions, CallingContext cc) {
     super(form);
 
+    if (filterGroup == null || form == null) {
+      throw new IllegalArgumentException(MISSING_ARGS);
+    }
+    
     tbl = (TopLevelDynamicBase) form.getTopLevelGroupElement().getFormDataModel()
         .getBackingObjectPrototype();
 
@@ -52,11 +56,14 @@ public class QueryByUIFilterGroup extends QueryBase {
       query.addFilter(tbl.isComplete, Query.FilterOperation.EQUAL, true);
     }
     
-    if (filterGroup == null) {
-      return;
-    }
-    
     fetchLimit = filterGroup.getQueryFetchLimit();
+    
+    UIQueryResumePoint uiCursor = filterGroup.getCursor();
+    if(uiCursor != null) {
+      cursor = QueryResumePoint.transform(uiCursor);
+    } else {
+      cursor = null;
+    }
     
     for (Filter filter : filterGroup.getFilters()) {
       if (filter instanceof RowFilter) {
@@ -113,7 +120,7 @@ public class QueryByUIFilterGroup extends QueryBase {
     List<Submission> retrievedSubmissions = new ArrayList<Submission>();
 
     // retrieve submissions
-    List<? extends CommonFieldsBase> submissionEntities = getSubmissionEntities(null, fetchLimit);
+    List<? extends CommonFieldsBase> submissionEntities = getSubmissionEntities(cursor, fetchLimit);
 
     // create a row for each submission
     for (int count = 0; count < submissionEntities.size(); count++) {

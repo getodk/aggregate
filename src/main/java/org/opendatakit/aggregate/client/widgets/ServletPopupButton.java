@@ -16,7 +16,7 @@
 
 package org.opendatakit.aggregate.client.widgets;
 
-import org.opendatakit.aggregate.client.FormsSubTab;
+import org.opendatakit.aggregate.client.AggregateSubTabBase;
 import org.opendatakit.aggregate.client.popups.ViewServletPopup;
 
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -29,9 +29,9 @@ public final class ServletPopupButton extends AggregateButton implements ClickHa
   
   private final String url;
   private final String title;
-  private final FormsSubTab basePanel;
+  private final AggregateSubTabBase basePanel;
 
-  public ServletPopupButton(String buttonText, String title, String url, FormsSubTab basePanel, 
+  public ServletPopupButton(String buttonText, String title, String url, AggregateSubTabBase basePanel, 
 		  String tooltipText, String balloonText) {
     super(buttonText, tooltipText, balloonText);
     this.title = title;

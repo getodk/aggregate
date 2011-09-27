@@ -16,7 +16,10 @@
 
 package org.opendatakit.aggregate.client.form;
 
+import java.util.ArrayList;
 import java.util.Date;
+
+import org.opendatakit.aggregate.client.submission.SubmissionUISummary;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
@@ -32,5 +35,11 @@ public interface FormAdminServiceAsync {
   void setFormDownloadable(String formId, Boolean downloadable, AsyncCallback<Boolean> callback);
 
   void deleteSubmission(String submissionKeyAsString, AsyncCallback<Boolean> callback);
+
+  void getIncompleteSubmissions(String formId, AsyncCallback<SubmissionUISummary> callback);
+
+  void markSubmissionAsComplete(String submissionKeyAsString, AsyncCallback<Boolean> callback);
+
+  void getFormMediaFileList(String formId, AsyncCallback<ArrayList<String>> callback);
 
 }

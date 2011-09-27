@@ -200,7 +200,7 @@ public final class VisualizationPopup extends AbstractPopupBase {
 		sumTable.setWidget(1, SUM_CHOICE_COLUMN, dataList);
 		sumTable.setWidget(1, SUM_CHOICE_TXT, sumRadioTxt);
 
-		executeButton = new AggregateButton(BasicConsts.EMPTY_STRING, "Excute the Vizualization", 
+		executeButton = new AggregateButton(BasicConsts.EMPTY_STRING, "Execute the Vizualization", 
 		"Create the selected Vizualization.");
 		executeButton.addClickHandler(new ExecuteVisualization());
 

@@ -16,9 +16,12 @@
 
 package org.opendatakit.aggregate.client.form;
 
+import java.util.ArrayList;
 import java.util.Date;
 
+import org.opendatakit.aggregate.client.exception.FormNotAvailableException;
 import org.opendatakit.aggregate.client.exception.RequestFailureException;
+import org.opendatakit.aggregate.client.submission.SubmissionUISummary;
 import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
 import org.opendatakit.common.security.client.exception.AccessDeniedException;
 
@@ -46,4 +49,9 @@ public interface FormAdminService extends RemoteService {
   
   Boolean deleteSubmission(String submissionKeyAsString) throws AccessDeniedException;
   
+  SubmissionUISummary getIncompleteSubmissions(String formId) throws AccessDeniedException, FormNotAvailableException;
+  
+  Boolean markSubmissionAsComplete(String submissionKeyAsString) throws AccessDeniedException;
+  
+  ArrayList<String> getFormMediaFileList(String formId) throws AccessDeniedException; 
 }

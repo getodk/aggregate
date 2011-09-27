@@ -60,7 +60,8 @@ public class SubmissionServiceImpl extends RemoteServiceServlet implements
   private static final long serialVersionUID = -7997978505247614945L;
 
   @Override
-  public SubmissionUISummary getSubmissions(FilterGroup filterGroup) throws FormNotAvailableException {
+  public SubmissionUISummary getSubmissions(FilterGroup filterGroup)
+      throws FormNotAvailableException {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
 
@@ -68,8 +69,9 @@ public class SubmissionServiceImpl extends RemoteServiceServlet implements
     try {
       String formId = filterGroup.getFormId();
       Form form = Form.retrieveFormByFormId(formId, cc);
-	  if ( form.getFormDefinition() == null ) return null; // ill-formed definition
-      QueryByUIFilterGroup query = new QueryByUIFilterGroup(form, filterGroup, 1000, cc);
+      if (form.getFormDefinition() == null)
+        return null; // ill-formed definition
+      QueryByUIFilterGroup query = new QueryByUIFilterGroup(form, filterGroup, false, cc);
       List<Submission> submissions = query.getResultSubmissions(cc);
 
       getSubmissions(filterGroup, cc, summary, form, submissions);
@@ -90,15 +92,16 @@ public class SubmissionServiceImpl extends RemoteServiceServlet implements
       throws ODKDatastoreException {
     GenerateHeaderInfo headerGenerator = new GenerateHeaderInfo(filterGroup, summary, form);
     headerGenerator.processForHeaderInfo(form.getTopLevelGroupElement());
-   
+
     List<FormElementModel> filteredElements = headerGenerator.getIncludedElements();
     ElementFormatter elemFormatter = new UiElementFormatter(cc.getServerURL(),
         headerGenerator.getGeopointIncludes());
 
     // format row elements
     for (Submission sub : submissions) {
-      Row row = sub.getFormattedValuesAsRow(headerGenerator.includedFormElementNamespaces(), filteredElements, elemFormatter, false, cc);
-      
+      Row row = sub.getFormattedValuesAsRow(headerGenerator.includedFormElementNamespaces(),
+          filteredElements, elemFormatter, false, cc);
+
       try {
         SubmissionKey subKey = sub.constructSubmissionKey(form.getTopLevelGroupElement());
         summary.addSubmission(new SubmissionUI(row.getFormattedValues(), subKey.toString()));
@@ -110,7 +113,8 @@ public class SubmissionServiceImpl extends RemoteServiceServlet implements
   }
 
   @Override
-  public SubmissionUISummary getRepeatSubmissions(String keyString) throws AccessDeniedException, FormNotAvailableException {
+  public SubmissionUISummary getRepeatSubmissions(String keyString) throws AccessDeniedException,
+      FormNotAvailableException {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
 
@@ -119,13 +123,14 @@ public class SubmissionServiceImpl extends RemoteServiceServlet implements
     if (keyString == null) {
       return null;
     }
-   
+
     SubmissionKey key = new SubmissionKey(keyString);
 
     List<SubmissionKeyPart> parts = key.splitSubmissionKey();
     try {
       Form form = Form.retrieveFormByFormId(parts.get(0).getElementName(), cc);
-	  if ( form.getFormDefinition() == null ) return null; // ill-formed definition
+      if (form.getFormDefinition() == null)
+        return null; // ill-formed definition
       Submission sub = Submission.fetchSubmission(parts, cc);
 
       if (sub != null) {
@@ -166,13 +171,15 @@ public class SubmissionServiceImpl extends RemoteServiceServlet implements
   }
 
   @Override
-  public UIGeoPoint[] getGeoPoints(String formId, String geopointKey) throws FormNotAvailableException {
+  public UIGeoPoint[] getGeoPoints(String formId, String geopointKey)
+      throws FormNotAvailableException {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
 
     try {
       Form form = Form.retrieveFormByFormId(formId, cc);
-	  if ( form.getFormDefinition() == null ) return null; // ill-formed definition
+      if (form.getFormDefinition() == null)
+        return null; // ill-formed definition
       QueryByDate query = new QueryByDate(form, BasicConsts.EPOCH, false,
           ServletConsts.FETCH_LIMIT, cc);
       List<Submission> submissions = query.getResultSubmissions(cc);

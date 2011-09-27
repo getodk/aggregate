@@ -20,7 +20,6 @@ import java.util.List;
 import org.opendatakit.aggregate.datamodel.FormDataModel;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.datamodel.TopLevelDynamicBase;
-import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.submission.Submission;
@@ -49,7 +48,7 @@ public abstract class QueryBase {
   
   protected QueryResumePoint resumeCursor;
   
-  protected QueryBase(Form form) throws ODKFormNotFoundException {
+  protected QueryBase(Form form) {
     this.numOfRecords = 0;
     this.form = form;
     this.resumeCursor = null;

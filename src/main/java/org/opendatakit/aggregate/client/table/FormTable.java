@@ -19,6 +19,7 @@ package org.opendatakit.aggregate.client.table;
 import java.util.ArrayList;
 
 import org.opendatakit.aggregate.client.form.FormSummary;
+import org.opendatakit.aggregate.client.popups.MediaFileListPopup;
 import org.opendatakit.aggregate.client.widgets.AcceptSubmissionCheckBox;
 import org.opendatakit.aggregate.client.widgets.DeleteFormButton;
 import org.opendatakit.aggregate.client.widgets.DownloadableCheckBox;
@@ -27,8 +28,12 @@ import org.opendatakit.aggregate.client.widgets.PublishButton;
 import org.opendatakit.aggregate.constants.common.FormActionStatusTimestamp;
 import org.opendatakit.common.security.client.UserSecurityInfo;
 
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.Widget;
 
 public class FormTable extends FlexTable {
    
@@ -86,10 +91,21 @@ public class FormTable extends FlexTable {
       ++i;
       setWidget(i, TITLE_COLUMN, new HTML(form.getViewableURL()));
       setWidget(i, FORM_ID_COLUMN, new HTML(form.getId()));
-      setWidget(i, MEDIA_COUNT_COLUMN, new HTML(Integer.toString(form.getMediaFileCount())));
+     
+      Widget mediaCount;
+      if(form.getMediaFileCount() > 0) {
+        Anchor mediaCountLink = new Anchor(Integer.toString(form.getMediaFileCount()), true);
+        mediaCountLink.addClickHandler(new MediaFileListClickHandler(form.getId()));
+        mediaCount = mediaCountLink;
+      } else {
+        mediaCount = new HTML(Integer.toString(form.getMediaFileCount()));
+      }
+      setWidget(i, MEDIA_COUNT_COLUMN, mediaCount);
+      
       String user = form.getCreatedUser();
       String displayName = UserSecurityInfo.getDisplayName(user);
       setText(i, USER_COLUMN, displayName);
+      
       setWidget(i, DOWNLOADABLE_COLUMN, 
           new DownloadableCheckBox(form.getId(), form.isDownloadable()));
       setWidget(i, ACCEPT_SUBMISSIONS_COLUMN,
@@ -107,6 +123,22 @@ public class FormTable extends FlexTable {
     while ( getRowCount() > i ) {
     	removeRow(getRowCount()-1);
     }
+  }
+  
+  private class MediaFileListClickHandler implements ClickHandler {
+
+    private String formId;
+    
+    public MediaFileListClickHandler(String formId) {
+      this.formId = formId;
+    }
+    
+    @Override
+    public void onClick(ClickEvent event) {
+      MediaFileListPopup mediaListpopup = new MediaFileListPopup(formId);
+      mediaListpopup.setPopupPositionAndShow(mediaListpopup.getPositionCallBack());
+    }
+    
   }
   
 }

@@ -20,7 +20,6 @@ import java.util.Date;
 import java.util.List;
 
 import org.opendatakit.aggregate.datamodel.TopLevelDynamicBase;
-import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.submission.Submission;
@@ -37,8 +36,7 @@ import org.opendatakit.common.web.CallingContext;
  */
 public class QueryByDateRange extends QueryBase {
 
-  public QueryByDateRange(Form form, int maxFetchLimit, Date startDate, Date endDate, CallingContext cc)
-      throws ODKFormNotFoundException {
+  public QueryByDateRange(Form form, int maxFetchLimit, Date startDate, Date endDate, CallingContext cc) {
     super(form);
    
     TopLevelDynamicBase tbl = (TopLevelDynamicBase) form.getFormDefinition().getTopLevelGroup().getBackingObjectPrototype();
