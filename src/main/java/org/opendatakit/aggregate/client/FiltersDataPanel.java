@@ -26,10 +26,10 @@ import org.opendatakit.aggregate.client.filter.FilterGroup;
 import org.opendatakit.aggregate.client.filter.RowFilter;
 import org.opendatakit.aggregate.client.submission.Column;
 import org.opendatakit.aggregate.client.widgets.AddFilterButton;
-import org.opendatakit.aggregate.client.widgets.SaveAsFilterGroupButton;
 import org.opendatakit.aggregate.client.widgets.DeleteFilterButton;
 import org.opendatakit.aggregate.client.widgets.MetadataCheckBox;
 import org.opendatakit.aggregate.client.widgets.RemoveFilterGroupButton;
+import org.opendatakit.aggregate.client.widgets.SaveAsFilterGroupButton;
 import org.opendatakit.aggregate.client.widgets.SaveFilterGroupButton;
 import org.opendatakit.aggregate.constants.common.UIConsts;
 
@@ -45,11 +45,11 @@ public class FiltersDataPanel extends ScrollPanel {
 
   private Tree filtersTree;
   private FilterSubTab parentSubTab;
+
   private AddFilterButton addFilter;
+  private SaveAsFilterGroupButton copyButton;
+  private RemoveFilterGroupButton removeButton;
 
-  private FlowPanel panel;
-
-  private FlexTable filterGroupButtons;
   private FlowPanel filterHeader;
 
   private FilterGroup previousGroup;
@@ -59,11 +59,22 @@ public class FiltersDataPanel extends ScrollPanel {
     this.parentSubTab = parentPanel;
     getElement().setId("filters_container");
 
-    panel = new FlowPanel();
+    FlowPanel panel = new FlowPanel();
 
-    // create filter header
-    filterGroupButtons = new FlexTable();
+    FlexTable filterGroupButtons = new FlexTable();
+    filterGroupButtons.setWidget(0, 0, new SaveFilterGroupButton(parentSubTab));
+    copyButton = new SaveAsFilterGroupButton(parentSubTab);
+    filterGroupButtons.setWidget(0, 1, copyButton);
+    removeButton = new RemoveFilterGroupButton(parentSubTab);
+    filterGroupButtons.setWidget(0, 2, removeButton);
     panel.add(filterGroupButtons);
+
+    HTML filterText = new HTML("<h3>Filters Applied</h3>");
+    filterText.getElement().setId("filter_desc_title");
+
+    FlowPanel filterGlobal = new FlowPanel();
+    filterGlobal.add(filterText);
+    filterGlobal.add(new MetadataCheckBox(parentSubTab));
 
     // Filters applied header
     filterHeader = new FlowPanel();
@@ -80,58 +91,22 @@ public class FiltersDataPanel extends ScrollPanel {
   }
 
   public void update(FilterGroup group) {
-
-    // TODO: refactor out the redundant code, copied and pasted because 3 am ... definitely sub optimal
-    
     // check if filter group has changed
     if (!group.equals(previousGroup)) {
       previousGroup = group;
       previousName = group.getName();
 
       // if new form clear everything so we can regenerate data
-      filterGroupButtons.clear();
-      filterHeader.clear();
       filtersTree.removeItems();
+      filterHeader.clear();
 
+      // verify form exists, then update
       if (group.getFormId() == null) {
         return;
       }
 
-      SaveAsFilterGroupButton copyButton = new SaveAsFilterGroupButton(parentSubTab);
-      copyButton.setEnabled(false);
-
-      RemoveFilterGroupButton removeButton = new RemoveFilterGroupButton(parentSubTab);
-      removeButton.setEnabled(false);
-
-      filterGroupButtons.setWidget(0, 0, new SaveFilterGroupButton(parentSubTab));
-      filterGroupButtons.setWidget(0, 1, copyButton);
-      filterGroupButtons.setWidget(0, 2, removeButton);
-
-      HTML filterText = new HTML("<h3>Filters Applied</h3>");
-      filterText.getElement().setId("filter_desc_title");
-      filterHeader.add(filterText);
-
-      // set the header information
-      filterHeader.add(new MetadataCheckBox(parentSubTab));
-
-      if (group.getName() != null) {
-        if (!group.getName().equals(UIConsts.FILTER_NONE)) {
-          copyButton.setEnabled(true);
-          removeButton.setEnabled(true);
-        }
-      }
-
-      // create the filter group information
-      String filterName = group.getName();
-      if (filterName.equals(UIConsts.FILTER_NONE)) {
-        filterName = "";
-      }
-
-      FlexTable filterGroupHeader = new FlexTable();
-      filterGroupHeader.setWidget(0, 0, new Label(filterName));
-      filterGroupHeader.setWidget(0, 1, addFilter);
-
-      filterHeader.add(filterGroupHeader);
+      // update filter header
+      updateFilterHeader(group);
 
       // create filter list
       for (Filter filter : group.getFilters()) {
@@ -140,61 +115,32 @@ public class FiltersDataPanel extends ScrollPanel {
         filtersTree.addItem(filterItem);
       }
 
-    } else { // only the filters need to be refreshed
+    } else {
+      // only the filters need to be refreshed (unless a save or save as
+      // happens)
       String name = group.getName();
 
+      // if save/saveAs happen the UI needs to detect the change and update the
+      // filter header information
+      // Note: the group.equals(previousGorup) check does not catch this case
+      // as the filterGroup's name will update in the reference do it does not
+      // detect the difference with the change in the global object. To detect
+      // the change keeping a local copy of name to compare with
       if (name != null) {
-
+        // check for name change
         if (!name.equals(previousName)) {
           previousName = name;
-          // check for name change
+          filterHeader.clear();
+
           if (group.getFormId() == null) {
             return;
           }
-
-          // if new form clear everything so we can regenerate data
-          filterGroupButtons.clear();
-          filterHeader.clear();
-
-          SaveAsFilterGroupButton copyButton = new SaveAsFilterGroupButton(parentSubTab);
-          copyButton.setEnabled(false);
-
-          RemoveFilterGroupButton removeButton = new RemoveFilterGroupButton(parentSubTab);
-          removeButton.setEnabled(false);
-
-          filterGroupButtons.setWidget(0, 0, new SaveFilterGroupButton(parentSubTab));
-          filterGroupButtons.setWidget(0, 1, copyButton);
-          filterGroupButtons.setWidget(0, 2, removeButton);
-
-          HTML filterText = new HTML("<h3>Filters Applied</h3>");
-          filterText.getElement().setId("filter_desc_title");
-          filterHeader.add(filterText);
-
-          // set the header information
-          filterHeader.add(new MetadataCheckBox(parentSubTab));
-
-          if (group.getName() != null) {
-            if (!group.getName().equals(UIConsts.FILTER_NONE)) {
-              copyButton.setEnabled(true);
-              removeButton.setEnabled(true);
-            }
-          }
-          
-          // create the filter group information
-          String filterName = group.getName();
-          if (filterName.equals(UIConsts.FILTER_NONE)) {
-            filterName = "";
-          }
-
-          FlexTable filterGroupHeader = new FlexTable();
-          filterGroupHeader.setWidget(0, 0, new Label(filterName));
-          filterGroupHeader.setWidget(0, 1, addFilter);
-
-          filterHeader.add(filterGroupHeader);
+          updateFilterHeader(group);
         }
       }
-      
-      // find if any changes in filters exist
+
+      // find if any changes in filters exist, then put them back to ensure
+      // filters don't jump around
       Map<Filter, TreeItem> filterMap = new HashMap<Filter, TreeItem>();
       for (int i = 0; i < filtersTree.getItemCount(); i++) {
         TreeItem filterTreeItem = filtersTree.getItem(i);
@@ -220,6 +166,30 @@ public class FiltersDataPanel extends ScrollPanel {
       }
     }
 
+  }
+
+  private void updateFilterHeader(FilterGroup group) {
+    copyButton.setEnabled(false);
+    removeButton.setEnabled(false);
+
+    if (group.getName() != null) {
+      if (!group.getName().equals(UIConsts.FILTER_NONE)) {
+        copyButton.setEnabled(true);
+        removeButton.setEnabled(true);
+      }
+    }
+
+    // create the filter group information
+    String filterName = group.getName();
+    if (filterName.equals(UIConsts.FILTER_NONE)) {
+      filterName = "";
+    }
+
+    FlexTable filterGroupHeader = new FlexTable();
+    filterGroupHeader.setWidget(0, 0, new Label(filterName));
+    filterGroupHeader.setWidget(0, 1, addFilter);
+
+    filterHeader.add(filterGroupHeader);
   }
 
   private TreeItem createFilterTreeItem(Filter filter) {

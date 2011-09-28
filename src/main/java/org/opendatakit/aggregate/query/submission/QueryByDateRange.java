@@ -64,7 +64,7 @@ public class QueryByDateRange extends QueryBase {
     // create a row for each submission
     for (int count = 0; count < submissionEntities.size(); count++) {
     CommonFieldsBase subEntity = submissionEntities.get(count);
-      retrievedSubmissions.add(new Submission((TopLevelDynamicBase) subEntity, form.getFormDefinition(), cc));
+      retrievedSubmissions.add(new Submission((TopLevelDynamicBase) subEntity, getForm().getFormDefinition(), cc));
     }
     return retrievedSubmissions;
   }

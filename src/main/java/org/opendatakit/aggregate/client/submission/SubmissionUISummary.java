@@ -20,6 +20,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 
 import org.opendatakit.aggregate.constants.common.UIDisplayType;
+import org.opendatakit.common.persistence.client.UIQueryResumePoint;
 
 public class SubmissionUISummary implements Serializable {
 
@@ -32,6 +33,14 @@ public class SubmissionUISummary implements Serializable {
   
   private ArrayList<Column> headers;
   
+  private UIQueryResumePoint startCursor;
+  
+  private UIQueryResumePoint resumeCursor;
+  
+  private UIQueryResumePoint backwardCursor;
+  
+  private boolean moreSubmissions;
+  
   public SubmissionUISummary() {
     headers = new ArrayList<Column>();
   }
@@ -40,11 +49,11 @@ public class SubmissionUISummary implements Serializable {
     return headers;
   }
 
-  public void addSubmission(SubmissionUI submission) throws Exception {   
+  public void addSubmission(SubmissionUI submission) {   
     if(submission.getNumberOfFields() == headers.size()) {
       submissions.add(submission);
     } else {
-      throw new Exception("Incorrect number of fields contained in submission");
+      throw new IllegalArgumentException("Incorrect number of fields contained in submission");
     }
   }
 
@@ -67,5 +76,36 @@ public class SubmissionUISummary implements Serializable {
   public ArrayList<SubmissionUI> getSubmissions() {
     return submissions;
   }
-  
+
+  public UIQueryResumePoint getStartCursor() {
+    return startCursor;
+  }
+
+  public void setStartCursor(UIQueryResumePoint startCursor) {
+    this.startCursor = startCursor;
+  }
+
+  public UIQueryResumePoint getResumeCursor() {
+    return resumeCursor;
+  }
+
+  public void setResumeCursor(UIQueryResumePoint resumeCursor) {
+    this.resumeCursor = resumeCursor;
+  }
+
+  public UIQueryResumePoint getBackwardCursor() {
+    return backwardCursor;
+  }
+
+  public void setBackwardCursor(UIQueryResumePoint backwardCursor) {
+    this.backwardCursor = backwardCursor;
+  }
+
+  public boolean hasMoreSubmissions() {
+    return moreSubmissions;
+  }
+
+  public void setMoreSubmissions(boolean moreSubmissions) {
+    this.moreSubmissions = moreSubmissions;
+  }
 }

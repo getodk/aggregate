@@ -86,7 +86,7 @@ public class QueryByDate extends QueryBase {
         subEntity = submissionEntities.get(count);
       }
 
-      retrievedSubmissions.add(new Submission((TopLevelDynamicBase) subEntity, form.getFormDefinition(), cc));
+      retrievedSubmissions.add(new Submission((TopLevelDynamicBase) subEntity, getForm().getFormDefinition(), cc));
       count++;
 
     }
