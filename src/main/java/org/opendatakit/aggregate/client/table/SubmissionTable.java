@@ -58,7 +58,7 @@ public class SubmissionTable extends FlexTable {
     getRowFormatter().addStyleName(0, "titleBar");
 
     // create rows
-    int rowPosition = 1;
+    int rowPosition = 2;
     for (SubmissionUI row : tableSubmissions) {
       int valueIndex = 0; // index matches to column headers
       int columnPosition = 0; // position matches to position in table

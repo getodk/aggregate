@@ -25,6 +25,7 @@ import org.opendatakit.aggregate.client.exception.FormNotAvailableException;
 import org.opendatakit.aggregate.client.filter.FilterGroup;
 import org.opendatakit.aggregate.client.submission.SubmissionUI;
 import org.opendatakit.aggregate.client.submission.SubmissionUISummary;
+import org.opendatakit.aggregate.constants.common.FormElementNamespace;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.form.Form;
@@ -58,16 +59,24 @@ public class SubmissionServiceImpl extends RemoteServiceServlet implements
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
 
-    SubmissionUISummary summary = new SubmissionUISummary();
     try {
-      String formId = filterGroup.getFormId();
-      Form form = Form.retrieveFormByFormId(formId, cc);
+      Form form = Form.retrieveFormByFormId(filterGroup.getFormId(), cc);
       if (form.getFormDefinition() == null)
         return null; // ill-formed definition
       QueryByUIFilterGroup query = new QueryByUIFilterGroup(form, filterGroup, false, cc);
-      List<Submission> submissions = query.getResultSubmissions(cc);
+      
+      SubmissionUISummary summary = new SubmissionUISummary();
+      GenerateHeaderInfo headerGenerator = new GenerateHeaderInfo(filterGroup, summary, form);
+      headerGenerator.processForHeaderInfo(form.getTopLevelGroupElement());
 
-      getSubmissions(filterGroup, cc, summary, form, submissions);
+      List<FormElementModel> filteredElements = headerGenerator.getIncludedElements();
+      ElementFormatter elemFormatter = new UiElementFormatter(cc.getServerURL(),
+          headerGenerator.getGeopointIncludes());
+      List<FormElementNamespace> includedTypes = headerGenerator.includedFormElementNamespaces();
+      
+      query.populateSubmissions(summary, filteredElements, elemFormatter, includedTypes, cc);
+      
+      return summary;
 
     } catch (ODKFormNotFoundException e) {
       throw new FormNotAvailableException(e);
@@ -76,34 +85,9 @@ public class SubmissionServiceImpl extends RemoteServiceServlet implements
       e.printStackTrace();
       return null;
     }
-
-    return summary;
   }
 
-  private void getSubmissions(FilterGroup filterGroup, CallingContext cc,
-      SubmissionUISummary summary, Form form, List<Submission> submissions)
-      throws ODKDatastoreException {
-    GenerateHeaderInfo headerGenerator = new GenerateHeaderInfo(filterGroup, summary, form);
-    headerGenerator.processForHeaderInfo(form.getTopLevelGroupElement());
 
-    List<FormElementModel> filteredElements = headerGenerator.getIncludedElements();
-    ElementFormatter elemFormatter = new UiElementFormatter(cc.getServerURL(),
-        headerGenerator.getGeopointIncludes());
-
-    // format row elements
-    for (Submission sub : submissions) {
-      Row row = sub.getFormattedValuesAsRow(headerGenerator.includedFormElementNamespaces(),
-          filteredElements, elemFormatter, false, cc);
-
-      try {
-        SubmissionKey subKey = sub.constructSubmissionKey(form.getTopLevelGroupElement());
-        summary.addSubmission(new SubmissionUI(row.getFormattedValues(), subKey.toString()));
-      } catch (Exception e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-      }
-    }
-  }
 
   @Override
   public SubmissionUISummary getRepeatSubmissions(String keyString) throws AccessDeniedException,
@@ -111,25 +95,44 @@ public class SubmissionServiceImpl extends RemoteServiceServlet implements
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
 
-    SubmissionUISummary summary = new SubmissionUISummary();
-
     if (keyString == null) {
       return null;
     }
 
-    SubmissionKey key = new SubmissionKey(keyString);
-
-    List<SubmissionKeyPart> parts = key.splitSubmissionKey();
     try {
+      SubmissionKey key = new SubmissionKey(keyString);
+      List<SubmissionKeyPart> parts = key.splitSubmissionKey();
       Form form = Form.retrieveFormByFormId(parts.get(0).getElementName(), cc);
       if (form.getFormDefinition() == null)
         return null; // ill-formed definition
+
       Submission sub = Submission.fetchSubmission(parts, cc);
 
       if (sub != null) {
         SubmissionElement tmp = sub.resolveSubmissionKey(parts);
         RepeatSubmissionType repeat = (RepeatSubmissionType) tmp;
-        getRepeatSubmissions(cc, summary, form, repeat.getSubmissionSets(), repeat.getElement());
+        
+        SubmissionUISummary summary = new SubmissionUISummary();
+        GenerateHeaderInfo headerGenerator = new GenerateHeaderInfo(null, summary, form);
+        headerGenerator.processForHeaderInfo(repeat.getElement());
+        List<FormElementModel> filteredElements = headerGenerator.getIncludedElements();
+        ElementFormatter elemFormatter = new UiElementFormatter(cc.getServerURL(),
+            headerGenerator.getGeopointIncludes());
+
+        // format row elements
+        for (SubmissionSet subSet : repeat.getSubmissionSets()) {
+          Row row = subSet.getFormattedValuesAsRow(filteredElements, elemFormatter, false, cc);
+          try {
+            summary.addSubmission(new SubmissionUI(row.getFormattedValues(), null));
+          } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+          }
+        }
+        return summary;
+        
+      } else {
+        return null;
       }
 
     } catch (ODKFormNotFoundException e) {
@@ -139,27 +142,6 @@ public class SubmissionServiceImpl extends RemoteServiceServlet implements
       e.printStackTrace();
       return null;
     }
-
-    return summary;
   }
 
-  private void getRepeatSubmissions(CallingContext cc, SubmissionUISummary summary, Form form,
-      List<SubmissionSet> repeats, FormElementModel repeatNode) throws ODKDatastoreException {
-    GenerateHeaderInfo headerGenerator = new GenerateHeaderInfo(null, summary, form);
-    headerGenerator.processForHeaderInfo(repeatNode);
-    List<FormElementModel> filteredElements = headerGenerator.getIncludedElements();
-    ElementFormatter elemFormatter = new UiElementFormatter(cc.getServerURL(),
-        headerGenerator.getGeopointIncludes());
-
-    // format row elements
-    for (SubmissionSet sub : repeats) {
-      Row row = sub.getFormattedValuesAsRow(filteredElements, elemFormatter, false, cc);
-      try {
-        summary.addSubmission(new SubmissionUI(row.getFormattedValues(), null));
-      } catch (Exception e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-      }
-    }
-  }
 }
