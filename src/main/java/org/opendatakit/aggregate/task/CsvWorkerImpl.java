@@ -29,8 +29,9 @@ import org.opendatakit.aggregate.format.SubmissionFormatter;
 import org.opendatakit.aggregate.format.table.CsvFormatter;
 import org.opendatakit.aggregate.format.table.CsvFormatterWithFilters;
 import org.opendatakit.aggregate.query.submission.QueryBase;
-import org.opendatakit.aggregate.query.submission.QueryByDate;
+import org.opendatakit.aggregate.query.submission.QueryByDateRange;
 import org.opendatakit.aggregate.query.submission.QueryByUIFilterGroup;
+import org.opendatakit.aggregate.query.submission.QueryByUIFilterGroup.CompletionFlag;
 import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.BasicConsts;
@@ -74,12 +75,12 @@ public class CsvWorkerImpl {
       QueryBase query;
       SubmissionFormatter formatter;
       if (filterGroupUri == null) {
-        query = new QueryByDate(form, BasicConsts.EPOCH, false, ServletConsts.FETCH_LIMIT, cc);
+        query = new QueryByDateRange(form, ServletConsts.FETCH_LIMIT, BasicConsts.EPOCH, null, cc);
         formatter = new CsvFormatter(form, cc.getServerURL(), pw, null);
       } else {
         subFilterGroup = SubmissionFilterGroup.getFilterGroup(filterGroupUri, cc);
         FilterGroup filterGroup = subFilterGroup.transform();
-        query = new QueryByUIFilterGroup(form, filterGroup, true, cc);
+        query = new QueryByUIFilterGroup(form, filterGroup, CompletionFlag.ONLY_COMPLETE_SUBMISSIONS, cc);
         formatter = new CsvFormatterWithFilters(form, cc.getServerURL(), pw, filterGroup);
       }
       formatter.processSubmissions(query.getResultSubmissions(cc), cc);
@@ -88,6 +89,8 @@ public class CsvWorkerImpl {
       pw.close();
       byte[] outputFile = stream.toByteArray();
 
+      // refetch because this might have taken a while...
+      r = new PersistentResults(persistentResultsKey, cc);
       if (attemptCount.equals(r.getAttemptCount())) {
         r.setResultFile(outputFile, HtmlConsts.RESP_TYPE_CSV, Long.valueOf(outputFile.length),
             form.getViewableFormNameSuitableAsFileName() + ServletConsts.CSV_FILENAME_APPEND, cc);
@@ -96,8 +99,8 @@ public class CsvWorkerImpl {
         if(subFilterGroup != null) {
           subFilterGroup.delete(cc);
         }
+        r.persist(cc);
       }
-      r.persist(cc);
     } catch (Exception e) {
       failureRecovery(e);
     }

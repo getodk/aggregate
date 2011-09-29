@@ -69,21 +69,19 @@ public abstract class AbstractExternalService implements ExternalService{
   
   protected abstract void insertData(Submission submission, CallingContext cc) throws ODKExternalServiceException;
   
-  
+  @Override
   public void sendSubmissions(List<Submission> submissions, CallingContext cc) throws ODKExternalServiceException {
     for(Submission submission : submissions)  {
       insertData(submission, cc);
     }
   }
   
+  @Override
   public void sendSubmission(Submission submission, CallingContext cc) throws ODKExternalServiceException {
     insertData(submission, cc);    
   }
-  
-  public FormServiceCursor getFormServiceCursor() {
-    return fsc;
-  }
     
+  @Override
   public void setUploadCompleted(CallingContext cc) throws ODKEntityPersistException {
     fsc.setUploadCompleted(true);
     if (fsc.getExternalServicePublicationOption() == ExternalServicePublicationOption.UPLOAD_ONLY) {
@@ -94,6 +92,7 @@ public abstract class AbstractExternalService implements ExternalService{
     ds.putEntity(fsc, user);
   }
   
+  @Override
   public void abandon(CallingContext cc) throws ODKDatastoreException {
     if (fsc.getOperationalStatus() != OperationalStatus.COMPLETED) {
       fsc.setOperationalStatus(OperationalStatus.ABANDONED);
@@ -101,20 +100,7 @@ public abstract class AbstractExternalService implements ExternalService{
     }
   }
   
-  public void persist(CallingContext cc) throws ODKEntityPersistException {
-    Datastore ds = cc.getDatastore();
-    User user = cc.getCurrentUser();
-   
-    CommonFieldsBase serviceEntity = retrieveObjectEntity();
-    List<? extends CommonFieldsBase> repeats = retrieveRepateElementEntities();
-    
-    if(repeats != null) {
-      ds.putEntities(repeats, user);
-    }
-    ds.putEntity(serviceEntity, user);
-    ds.putEntity(fsc, user);
-  }
-  
+  @Override
   public void delete(CallingContext cc) throws ODKDatastoreException {
     CommonFieldsBase serviceEntity = retrieveObjectEntity();
     List<? extends CommonFieldsBase> repeats = retrieveRepateElementEntities();
@@ -133,6 +119,26 @@ public abstract class AbstractExternalService implements ExternalService{
 
     ds.deleteEntity(serviceEntity.getEntityKey(), user);
     ds.deleteEntity(fsc.getEntityKey(), user);
+  }
+  
+  @Override
+  public void persist(CallingContext cc) throws ODKEntityPersistException {
+    Datastore ds = cc.getDatastore();
+    User user = cc.getCurrentUser();
+   
+    CommonFieldsBase serviceEntity = retrieveObjectEntity();
+    List<? extends CommonFieldsBase> repeats = retrieveRepateElementEntities();
+    
+    if(repeats != null) {
+      ds.putEntities(repeats, user);
+    }
+    ds.putEntity(serviceEntity, user);
+    ds.putEntity(fsc, user);
+  }
+  
+  @Override
+  public FormServiceCursor getFormServiceCursor() {
+    return fsc;
   }
   
   @Override

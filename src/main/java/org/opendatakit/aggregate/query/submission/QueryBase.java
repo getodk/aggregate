@@ -23,7 +23,6 @@ import org.opendatakit.aggregate.datamodel.TopLevelDynamicBase;
 import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.submission.Submission;
-import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.persistence.Query.FilterOperation;
@@ -42,6 +41,8 @@ public abstract class QueryBase {
 
   protected Query query;
   private final Form form;
+  
+  
   
   protected QueryBase(Form form) {
     this.form = form;
@@ -100,35 +101,24 @@ public abstract class QueryBase {
 
   public abstract List<Submission> getResultSubmissions(CallingContext cc) throws ODKIncompleteSubmissionData, ODKDatastoreException;
 
+  
   public final Form getForm(){
     return form;
   }
-  
-  
-  /**
-   * Generates a result table that contains all the submission data 
-   * of the form specified by the ODK ID
-   * 
-   * @return
-   *    a result table containing submission data
-   * @throws ODKDatastoreException 
-   */
-  protected List<? extends CommonFieldsBase> getSubmissionEntities() throws ODKDatastoreException {  
-    return query.executeQuery();
-  }
-  
 
   /**
    * Generates a QueryResultthat contains all the submission data 
    * of the form specified by the ODK ID
    * @return
-   *    
+   * 
    * @throws ODKDatastoreException 
    *
    */
   protected QueryResult getQueryResult(QueryResumePoint startCursor, int fetchLimit) throws ODKDatastoreException {    
     return query.executeQuery(startCursor, fetchLimit);
-  }
 
+    
+  }
+  
   
 }

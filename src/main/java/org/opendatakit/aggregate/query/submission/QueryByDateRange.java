@@ -24,7 +24,11 @@ import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.common.persistence.CommonFieldsBase;
+import org.opendatakit.common.persistence.PersistConsts;
 import org.opendatakit.common.persistence.Query;
+import org.opendatakit.common.persistence.QueryResult;
+import org.opendatakit.common.persistence.QueryResumePoint;
+import org.opendatakit.common.persistence.engine.EngineUtils;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
 
@@ -36,8 +40,13 @@ import org.opendatakit.common.web.CallingContext;
  */
 public class QueryByDateRange extends QueryBase {
 
-  public QueryByDateRange(Form form, int maxFetchLimit, Date startDate, Date endDate, CallingContext cc) {
+  final int fetchLimit;
+  final QueryResumePoint startCursor;
+  QueryResumePoint resumeCursor = null;
+  
+  public QueryByDateRange(Form form, int maxFetchLimit, Date startDate, Date endDate, String uriLast, CallingContext cc) {
     super(form);
+    this.fetchLimit = maxFetchLimit;
    
     TopLevelDynamicBase tbl = (TopLevelDynamicBase) form.getFormDefinition().getTopLevelGroup().getBackingObjectPrototype();
     
@@ -50,16 +59,50 @@ public class QueryByDateRange extends QueryBase {
     query.addFilter(tbl.markedAsCompleteDate, Query.FilterOperation.LESS_THAN, endDate);
     query.addFilter(tbl.markedAsCompleteDate, Query.FilterOperation.GREATER_THAN, startDate);
     query.addFilter(tbl.isComplete, Query.FilterOperation.EQUAL, Boolean.TRUE);
+
+    this.startCursor = (uriLast != null) ? new QueryResumePoint( tbl.markedAsCompleteDate.getName(),
+        EngineUtils.getAttributeValueAsString(startDate, tbl.markedAsCompleteDate), uriLast) : null;
   }
 
+  public QueryByDateRange(Form form, int maxFetchLimit, Date startDate, String uriLast, CallingContext cc) {
+    this(form, maxFetchLimit, startDate, new Date(System.currentTimeMillis() - PersistConsts.MAX_SETTLE_MILLISECONDS), uriLast, cc);
+  }
+
+  /**
+   * Fetch the record with the most recent markedAsCompleteDate, excluding
+   * records that arrived within the MAX_SETTLE of now. 
+   * @param form
+   * @param cc
+   */
+  public QueryByDateRange(Form form, CallingContext cc) {
+    super(form);
+    this.fetchLimit = 1;
+    this.startCursor = null;
+    
+    TopLevelDynamicBase tbl = (TopLevelDynamicBase) form.getFormDefinition().getTopLevelGroup().getBackingObjectPrototype();
+    
+    // Query by lastUpdateDate, filtering by isCompleted.
+    // Submissions may be partially uploaded and are marked completed once they 
+    // are fully uploaded.  We want the query to be aware of that and to not 
+    // report anything that is not yet fully loaded.
+    query = cc.getDatastore().createQuery(tbl, "QueryByDateRange.constructor", cc.getCurrentUser());
+    query.addSort(tbl.markedAsCompleteDate, Query.Direction.DESCENDING);
+    query.addFilter(tbl.markedAsCompleteDate, Query.FilterOperation.LESS_THAN, new Date(System.currentTimeMillis() - PersistConsts.MAX_SETTLE_MILLISECONDS));
+    query.addFilter(tbl.isComplete, Query.FilterOperation.EQUAL, Boolean.TRUE);
+  }
+  
   @Override
   public List<Submission> getResultSubmissions(CallingContext cc) throws ODKIncompleteSubmissionData,
       ODKDatastoreException {
 
     List<Submission> retrievedSubmissions = new ArrayList<Submission>();
 
+    QueryResult result = query.executeQuery(startCursor, fetchLimit);
+    
+    resumeCursor = result.getResumeCursor();
+    
     // retrieve submissions
-    List<? extends CommonFieldsBase> submissionEntities = getSubmissionEntities();
+    List<? extends CommonFieldsBase> submissionEntities = result.getResultList();
 
     // create a row for each submission
     for (int count = 0; count < submissionEntities.size(); count++) {
@@ -67,6 +110,10 @@ public class QueryByDateRange extends QueryBase {
       retrievedSubmissions.add(new Submission((TopLevelDynamicBase) subEntity, getForm().getFormDefinition(), cc));
     }
     return retrievedSubmissions;
+  }
+  
+  public QueryResumePoint getResumeCursor() {
+    return resumeCursor;
   }
 
 }

@@ -33,6 +33,7 @@ import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.format.element.ElementFormatter;
 import org.opendatakit.aggregate.format.element.UiElementFormatter;
 import org.opendatakit.aggregate.query.submission.QueryByUIFilterGroup;
+import org.opendatakit.aggregate.query.submission.QueryByUIFilterGroup.CompletionFlag;
 import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.aggregate.submission.SubmissionElement;
 import org.opendatakit.aggregate.submission.SubmissionKey;
@@ -60,20 +61,19 @@ public class SubmissionServiceImpl extends RemoteServiceServlet implements
     CallingContext cc = ContextFactory.getCallingContext(this, req);
 
     try {
-      Form form = Form.retrieveFormByFormId(filterGroup.getFormId(), cc);
+      String formId = filterGroup.getFormId();
+      Form form = Form.retrieveFormByFormId(formId, cc);
       if (form.getFormDefinition() == null)
         return null; // ill-formed definition
-      QueryByUIFilterGroup query = new QueryByUIFilterGroup(form, filterGroup, false, cc);
+      QueryByUIFilterGroup query = new QueryByUIFilterGroup(form, filterGroup, CompletionFlag.ALL_SUBMISSIONS, cc);
       
       SubmissionUISummary summary = new SubmissionUISummary();
       GenerateHeaderInfo headerGenerator = new GenerateHeaderInfo(filterGroup, summary, form);
       headerGenerator.processForHeaderInfo(form.getTopLevelGroupElement());
-
       List<FormElementModel> filteredElements = headerGenerator.getIncludedElements();
       ElementFormatter elemFormatter = new UiElementFormatter(cc.getServerURL(),
           headerGenerator.getGeopointIncludes());
       List<FormElementNamespace> includedTypes = headerGenerator.includedFormElementNamespaces();
-      
       query.populateSubmissions(summary, filteredElements, elemFormatter, includedTypes, cc);
       
       return summary;
@@ -85,6 +85,7 @@ public class SubmissionServiceImpl extends RemoteServiceServlet implements
       e.printStackTrace();
       return null;
     }
+
   }
 
 
@@ -94,6 +95,7 @@ public class SubmissionServiceImpl extends RemoteServiceServlet implements
       FormNotAvailableException {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
+
 
     if (keyString == null) {
       return null;
@@ -105,7 +107,6 @@ public class SubmissionServiceImpl extends RemoteServiceServlet implements
       Form form = Form.retrieveFormByFormId(parts.get(0).getElementName(), cc);
       if (form.getFormDefinition() == null)
         return null; // ill-formed definition
-
       Submission sub = Submission.fetchSubmission(parts, cc);
 
       if (sub != null) {
@@ -142,6 +143,7 @@ public class SubmissionServiceImpl extends RemoteServiceServlet implements
       e.printStackTrace();
       return null;
     }
+
   }
 
 }
