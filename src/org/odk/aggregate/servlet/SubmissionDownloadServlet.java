@@ -28,7 +28,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang.StringEscapeUtils;
+import org.odk.aggregate.BriefcaseAuth;
 import org.odk.aggregate.EMFactory;
+import org.odk.aggregate.constants.ErrorConsts;
 import org.odk.aggregate.constants.HtmlConsts;
 import org.odk.aggregate.constants.HtmlUtil;
 import org.odk.aggregate.constants.ServletConsts;
@@ -45,6 +47,12 @@ import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
+import com.google.appengine.api.oauth.OAuthRequestException;
+import com.google.appengine.api.oauth.OAuthService;
+import com.google.appengine.api.oauth.OAuthServiceFactory;
+import com.google.appengine.api.users.User;
+import com.google.appengine.api.users.UserService;
+import com.google.appengine.api.users.UserServiceFactory;
 
 /**
  * Servlet to generate the XML representation of a given submission entry and
@@ -76,12 +84,45 @@ public class SubmissionDownloadServlet extends ServletUtilBase {
   @Override
   public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 
-	// verify user is logged in
-	if (!verifyCredentials(req, resp)) {
-		return;
-	}
+    String briefcaseParam = req.getHeader(ServletConsts.BRIEFCASE_APP_TOKEN_HEADER);
 
-	EntityManager em = EMFactory.get().createEntityManager();
+    // copied from FormUploadServlet
+    String authParam = getParameter(req, ServletConsts.AUTHENTICATION);
+
+    User user = null;
+
+    if (authParam != null && authParam.equalsIgnoreCase(ServletConsts.AUTHENTICATION_OAUTH)) {
+      // Try OAuth authentication
+      try {
+        OAuthService oauth = OAuthServiceFactory.getOAuthService();
+        user = oauth.getCurrentUser();
+        if (user == null) {
+          resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, ErrorConsts.OAUTH_ERROR);
+          return;
+        }
+      } catch (OAuthRequestException e) {
+        resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, ErrorConsts.OAUTH_ERROR + "\n Reason: "
+            + e.getLocalizedMessage());
+        return;
+      }
+    } else if (briefcaseParam != null && briefcaseParam.length() != 0) {
+      // Verify briefcase token
+      if (!BriefcaseAuth.verifyBriefcaseAuthToken(briefcaseParam)) {
+        resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid briefcase application token");
+        return;
+      }
+    } else {
+      // Try User Service authentication
+      UserService userService = UserServiceFactory.getUserService();
+      user = userService.getCurrentUser();
+
+      // verify user is logged in
+      if (!verifyCredentials(req, resp)) {
+        return;
+      }
+    }
+
+    EntityManager em = EMFactory.get().createEntityManager();
 
     // verify parameters are present
     String formId = getParameter(req, ServletConsts.FORM_ID);
@@ -94,32 +135,32 @@ public class SubmissionDownloadServlet extends ServletUtilBase {
     // parse it here...
     SubmissionKey key = new SubmissionKey(formId);
     List<SubmissionKeyPart> parts = key.splitSubmissionKey();
-    
-	Form form;
-	try {
-		form = Form.retrieveForm(em, parts.get(0).getElementName());
-	} catch (ODKFormNotFoundException e) {
-		odkIdNotFoundError(resp);
-		return;
-	}
-	DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
-	Key entityKey = KeyFactory.stringToKey(parts.get(1).getAuri());
-	Entity subEntity;
-	try {
-		subEntity = ds.get(entityKey);
-	} catch (EntityNotFoundException e) {
-		e.printStackTrace();
-		errorRetreivingData(resp);
-		return;
-	}
-	Submission sub;
-	try {
-		sub = new Submission(subEntity, form);
-	} catch (ODKIncompleteSubmissionData e) {
-		e.printStackTrace();
-		errorRetreivingData(resp);
-		return;
-	}
+
+    Form form;
+    try {
+      form = Form.retrieveForm(em, parts.get(0).getElementName());
+    } catch (ODKFormNotFoundException e) {
+      odkIdNotFoundError(resp);
+      return;
+    }
+    DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
+    Key entityKey = KeyFactory.stringToKey(parts.get(1).getAuri());
+    Entity subEntity;
+    try {
+      subEntity = ds.get(entityKey);
+    } catch (EntityNotFoundException e) {
+      e.printStackTrace();
+      errorRetreivingData(resp);
+      return;
+    }
+    Submission sub;
+    try {
+      sub = new Submission(subEntity, form);
+    } catch (ODKIncompleteSubmissionData e) {
+      e.printStackTrace();
+      errorRetreivingData(resp);
+      return;
+    }
 
     resp.setCharacterEncoding(HtmlConsts.UTF8_ENCODE);
     resp.setContentType(ServletConsts.RESP_TYPE_XML);
@@ -132,7 +173,8 @@ public class SubmissionDownloadServlet extends ServletUtilBase {
     attr.append(" id=\"");
     attr.append(StringEscapeUtils.escapeXml(parts.get(0).getElementName()));
     attr.append("\" instanceID=\"");
-    attr.append(StringEscapeUtils.escapeXml(getMD5Hash(KeyFactory.keyToString(sub.getKey()))));
+    attr.append(StringEscapeUtils.escapeXml("md5:"
+        + getMD5Hash(KeyFactory.keyToString(sub.getKey()))));
     attr.append("\" submissionDate=\"");
     attr.append(StringEscapeUtils.escapeXml(sub.getSubmittedTime().toString()));
     attr.append("\"");
@@ -141,30 +183,30 @@ public class SubmissionDownloadServlet extends ServletUtilBase {
     out.write(b.toString());
     out.write("</data>\n");
     b.setLength(0);
-    sub.generateXmlAttachmentSerialization(b, HtmlUtil.createUrl(req.getServerName()));
+    sub.generateXmlAttachmentSerialization(b, HtmlUtil.createUrl(getServerURL(req)));
     out.write(b.toString());
     out.write("</submission>");
     resp.setStatus(HttpServletResponse.SC_OK);
+
+    em.close();
   }
-  
 
-	private String getMD5Hash(String value) {
-		try {
-			MessageDigest md = MessageDigest.getInstance("MD5");
-			byte[] asBytes = value.getBytes();
-			md.update(asBytes);
+  private String getMD5Hash(String value) {
+    try {
+      MessageDigest md = MessageDigest.getInstance("MD5");
+      byte[] asBytes = value.getBytes();
+      md.update(asBytes);
 
-			byte[] messageDigest = md.digest();
+      byte[] messageDigest = md.digest();
 
-			BigInteger number = new BigInteger(1, messageDigest);
-			String md5 = number.toString(16);
-			while (md5.length() < 32)
-				md5 = "0" + md5;
-			return md5;
-		} catch (NoSuchAlgorithmException e) {
-			throw new IllegalStateException(
-					"Unexpected problem computing md5 hash", e);
-		}
-	}
+      BigInteger number = new BigInteger(1, messageDigest);
+      String md5 = number.toString(16);
+      while (md5.length() < 32)
+        md5 = "0" + md5;
+      return md5;
+    } catch (NoSuchAlgorithmException e) {
+      throw new IllegalStateException("Unexpected problem computing md5 hash", e);
+    }
+  }
 
 }

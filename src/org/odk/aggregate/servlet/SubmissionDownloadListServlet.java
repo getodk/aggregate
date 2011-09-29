@@ -29,8 +29,10 @@ import org.kxml2.io.KXmlSerializer;
 import org.kxml2.kdom.Document;
 import org.kxml2.kdom.Element;
 import org.kxml2.kdom.Node;
+import org.odk.aggregate.BriefcaseAuth;
 import org.odk.aggregate.EMFactory;
 import org.odk.aggregate.constants.BasicConsts;
+import org.odk.aggregate.constants.ErrorConsts;
 import org.odk.aggregate.constants.HtmlConsts;
 import org.odk.aggregate.constants.PersistConsts;
 import org.odk.aggregate.constants.ServletConsts;
@@ -47,6 +49,12 @@ import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.QueryResultList;
+import com.google.appengine.api.oauth.OAuthRequestException;
+import com.google.appengine.api.oauth.OAuthService;
+import com.google.appengine.api.oauth.OAuthServiceFactory;
+import com.google.appengine.api.users.User;
+import com.google.appengine.api.users.UserService;
+import com.google.appengine.api.users.UserServiceFactory;
 
 /**
  * Servlet to generate the XML list of submission instanceIDs for a given form.
@@ -77,144 +85,174 @@ import com.google.appengine.api.datastore.QueryResultList;
  */
 public class SubmissionDownloadListServlet extends ServletUtilBase {
 
-	private static final String ID_FRAGMENT_TAG = "idChunk";
+  private static final String ID_FRAGMENT_TAG = "idChunk";
 
-	private static final String ID_LIST_TAG = "idList";
+  private static final String ID_LIST_TAG = "idList";
 
-	private static final String CURSOR_TAG = "resumptionCursor";
+  private static final String CURSOR_TAG = "resumptionCursor";
 
-	private static final String ID_TAG = "id";
-	private static int DEFAULT_NUM_ENTRIES = 180000;
+  private static final String ID_TAG = "id";
+  private static int DEFAULT_NUM_ENTRIES = 180000;
 
-	/**
-	 * Serial number for serialization
-	 */
-	private static final long serialVersionUID = 13236849409070038L;
+  /**
+   * Serial number for serialization
+   */
+  private static final long serialVersionUID = 13236849409070038L;
 
-	/**
-	 * URI from base
-	 */
-	public static final String ADDR = "view/submissionList";
+  /**
+   * URI from base
+   */
+  public static final String ADDR = "view/submissionList";
 
-	private static final String XML_TAG_NAMESPACE = "http://opendatakit.org/submissions";
+  private static final String XML_TAG_NAMESPACE = "http://opendatakit.org/submissions";
 
-	/**
-	 * Handler for HTTP Get request that responds with an XML list of
-	 * instanceIDs on the system.
-	 * 
-	 * @see javax.servlet.http.HttpServlet#doGet(javax.servlet.http.HttpServletRequest,
-	 *      javax.servlet.http.HttpServletResponse)
-	 */
-	@Override
-	public void doGet(HttpServletRequest req, HttpServletResponse resp)
-			throws IOException {
+  /**
+   * Handler for HTTP Get request that responds with an XML list of instanceIDs
+   * on the system.
+   * 
+   * @see javax.servlet.http.HttpServlet#doGet(javax.servlet.http.HttpServletRequest,
+   *      javax.servlet.http.HttpServletResponse)
+   */
+  @Override
+  public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 
-		// verify user is logged in
-		if (!verifyCredentials(req, resp)) {
-			return;
-		}
+    String briefcaseParam = req.getHeader(ServletConsts.BRIEFCASE_APP_TOKEN_HEADER);
 
-		EntityManager em = EMFactory.get().createEntityManager();
+    // copied from FormUploadServlet
+    String authParam = getParameter(req, ServletConsts.AUTHENTICATION);
 
-		// get parameters
+    User user = null;
 
-		// the formId of the form submissions to download
-		String formId = getParameter(req, ServletConsts.FORM_ID);
-		if (formId == null) {
-			errorMissingKeyParam(resp);
-			return;
-		}
+    if (authParam != null && authParam.equalsIgnoreCase(ServletConsts.AUTHENTICATION_OAUTH)) {
+      // Try OAuth authentication
+      try {
+        OAuthService oauth = OAuthServiceFactory.getOAuthService();
+        user = oauth.getCurrentUser();
+        if (user == null) {
+          resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, ErrorConsts.OAUTH_ERROR);
+          return;
+        }
+      } catch (OAuthRequestException e) {
+        resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, ErrorConsts.OAUTH_ERROR + "\n Reason: "
+            + e.getLocalizedMessage());
+        return;
+      }
+    } else if (briefcaseParam != null && briefcaseParam.length() != 0) {
+      // Verify briefcase token
+      if (!BriefcaseAuth.verifyBriefcaseAuthToken(briefcaseParam)) {
+        resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid briefcase application token");
+        return;
+      }
+    } else {
+      // Try User Service authentication
+      UserService userService = UserServiceFactory.getUserService();
+      user = userService.getCurrentUser();
 
-		// the cursor string
-		String websafeCursorString = getParameter(req, ServletConsts.CURSOR);
+      // verify user is logged in
+      if (!verifyCredentials(req, resp)) {
+        return;
+      }
+    }
 
-		// the number of entries
-		int numEntries = DEFAULT_NUM_ENTRIES;
-		String numEntriesString = getParameter(req, ServletConsts.NUM_ENTRIES);
-		if (numEntriesString != null && numEntriesString.trim().length() != 0) {
-			numEntries = Integer.parseInt(numEntriesString.trim());
-		}
+    EntityManager em = EMFactory.get().createEntityManager();
 
-		Form form;
-		try {
-			form = Form.retrieveForm(em, formId);
-		} catch (ODKFormNotFoundException e) {
-			odkIdNotFoundError(resp);
-			return;
-		}
+    // get parameters
 
-		FetchOptions fetchOptions = FetchOptions.Builder.withLimit(numEntries);
-		if (websafeCursorString != null && websafeCursorString.length() != 0) {
-			fetchOptions.startCursor(
-					Cursor.fromWebSafeString(websafeCursorString));
-		}
+    // the formId of the form submissions to download
+    String formId = getParameter(req, ServletConsts.FORM_ID);
+    if (formId == null) {
+      errorMissingKeyParam(resp);
+      return;
+    }
 
-		Query keyQuery = new Query(form.getOdkId());
-		keyQuery.addSort(PersistConsts.SUBMITTED_TIME_PROPERTY_TAG,
-				Query.SortDirection.ASCENDING);
-		keyQuery.addFilter(PersistConsts.SUBMITTED_TIME_PROPERTY_TAG,
-				Query.FilterOperator.GREATER_THAN, TableConsts.EPOCH);
-		keyQuery.setKeysOnly();
+    // the cursor string
+    String websafeCursorString = getParameter(req, ServletConsts.CURSOR);
 
-		DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
-		PreparedQuery pq = ds.prepare(keyQuery);
+    // the number of entries
+    int numEntries = DEFAULT_NUM_ENTRIES;
+    String numEntriesString = getParameter(req, ServletConsts.NUM_ENTRIES);
+    if (numEntriesString != null && numEntriesString.trim().length() != 0) {
+      numEntries = Integer.parseInt(numEntriesString.trim());
+    }
 
-		QueryResultList<Entity> results = pq.asQueryResultList(fetchOptions);
+    Form form;
+    try {
+      form = Form.retrieveForm(em, formId);
+    } catch (ODKFormNotFoundException e) {
+      odkIdNotFoundError(resp);
+      return;
+    }
 
-		List<String> uriList = new ArrayList<String>();
-		for (Entity entity : results) {
-			uriList.add(KeyFactory.keyToString(entity.getKey()));
-		}
+    FetchOptions fetchOptions = FetchOptions.Builder.withLimit(numEntries);
+    if (websafeCursorString != null && websafeCursorString.length() != 0) {
+      fetchOptions.startCursor(Cursor.fromWebSafeString(websafeCursorString));
+    }
 
-		// if we had no results, return the websafe cursor that came in...
-		if (uriList.size() != 0) {
-			websafeCursorString = results.getCursor().toWebSafeString();
-		} 
+    Query keyQuery = new Query(form.getOdkId());
+    keyQuery.addSort(PersistConsts.SUBMITTED_TIME_PROPERTY_TAG, Query.SortDirection.ASCENDING);
+    keyQuery.addFilter(PersistConsts.SUBMITTED_TIME_PROPERTY_TAG,
+        Query.FilterOperator.GREATER_THAN, TableConsts.EPOCH);
+    keyQuery.setKeysOnly();
 
-		Document d = new Document();
-		d.setStandalone(true);
-		d.setEncoding(HtmlConsts.UTF8_ENCODE);
-		Element eWrapper = d.createElement(XML_TAG_NAMESPACE, ID_FRAGMENT_TAG);
-		eWrapper.setPrefix(null, XML_TAG_NAMESPACE);
-		d.addChild(0, Node.ELEMENT, eWrapper);
-		Element eList = d.createElement(XML_TAG_NAMESPACE, ID_LIST_TAG);
-		eList.setPrefix(null, XML_TAG_NAMESPACE);
-		eWrapper.addChild(0, Node.ELEMENT, eList);
-		int idx = 0;
-		for (String uri : uriList) {
-			Element e = eList.createElement(XML_TAG_NAMESPACE, ID_TAG);
-			e.setPrefix(null, XML_TAG_NAMESPACE);
-			e.addChild(0, Node.TEXT, uri);
-			eList.addChild(idx++, Node.ELEMENT, e);
-			eList.addChild(idx++, Node.IGNORABLE_WHITESPACE,
-					BasicConsts.NEW_LINE);
-			--numEntries;
-			if (numEntries <= 0)
-				break;
-		}
+    DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
+    PreparedQuery pq = ds.prepare(keyQuery);
 
-		if (websafeCursorString != null) {
-			// emit the cursor value...
-			Element eCursorContinue = d.createElement(XML_TAG_NAMESPACE,
-					CURSOR_TAG);
-			eCursorContinue.setPrefix(null, XML_TAG_NAMESPACE);
-			eCursorContinue.addChild(0, Node.TEXT, websafeCursorString);
-			eWrapper.addChild(1, Node.ELEMENT, eCursorContinue);
-		}
+    QueryResultList<Entity> results = pq.asQueryResultList(fetchOptions);
 
-		KXmlSerializer serializer = new KXmlSerializer();
+    List<String> uriList = new ArrayList<String>();
+    for (Entity entity : results) {
+      uriList.add(KeyFactory.keyToString(entity.getKey()));
+    }
 
-		resp.setCharacterEncoding(HtmlConsts.UTF8_ENCODE);
-		resp.setContentType(ServletConsts.RESP_TYPE_XML);
-		addOpenRosaHeaders(resp);
+    // if we had no results, return the websafe cursor that came in...
+    if (uriList.size() != 0) {
+      websafeCursorString = results.getCursor().toWebSafeString();
+    }
 
-		PrintWriter output = resp.getWriter();
-		serializer.setOutput(output);
-		// setting the response content type emits the xml header.
-		// just write the body here...
-		d.writeChildren(serializer);
-		serializer.flush();
-		resp.setStatus(HttpServletResponse.SC_OK);
-	}
+    Document d = new Document();
+    d.setStandalone(true);
+    d.setEncoding(HtmlConsts.UTF8_ENCODE);
+    Element eWrapper = d.createElement(XML_TAG_NAMESPACE, ID_FRAGMENT_TAG);
+    eWrapper.setPrefix(null, XML_TAG_NAMESPACE);
+    d.addChild(0, Node.ELEMENT, eWrapper);
+    Element eList = d.createElement(XML_TAG_NAMESPACE, ID_LIST_TAG);
+    eList.setPrefix(null, XML_TAG_NAMESPACE);
+    eWrapper.addChild(0, Node.ELEMENT, eList);
+    int idx = 0;
+    for (String uri : uriList) {
+      Element e = eList.createElement(XML_TAG_NAMESPACE, ID_TAG);
+      e.setPrefix(null, XML_TAG_NAMESPACE);
+      e.addChild(0, Node.TEXT, uri);
+      eList.addChild(idx++, Node.ELEMENT, e);
+      eList.addChild(idx++, Node.IGNORABLE_WHITESPACE, BasicConsts.NEW_LINE);
+      --numEntries;
+      if (numEntries <= 0)
+        break;
+    }
+
+    if (websafeCursorString != null) {
+      // emit the cursor value...
+      Element eCursorContinue = d.createElement(XML_TAG_NAMESPACE, CURSOR_TAG);
+      eCursorContinue.setPrefix(null, XML_TAG_NAMESPACE);
+      eCursorContinue.addChild(0, Node.TEXT, websafeCursorString);
+      eWrapper.addChild(1, Node.ELEMENT, eCursorContinue);
+    }
+
+    KXmlSerializer serializer = new KXmlSerializer();
+
+    resp.setCharacterEncoding(HtmlConsts.UTF8_ENCODE);
+    resp.setContentType(ServletConsts.RESP_TYPE_XML);
+    addOpenRosaHeaders(resp);
+
+    PrintWriter output = resp.getWriter();
+    serializer.setOutput(output);
+    // setting the response content type emits the xml header.
+    // just write the body here...
+    d.writeChildren(serializer);
+    serializer.flush();
+    resp.setStatus(HttpServletResponse.SC_OK);
+
+    em.close();
+  }
 
 }

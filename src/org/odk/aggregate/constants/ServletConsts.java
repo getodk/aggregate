@@ -182,6 +182,8 @@ public class ServletConsts {
   
   public static final String AUTHENTICATION_OAUTH = "oauth";
 
+  public static final String BRIEFCASE_APP_TOKEN_HEADER = "briefcaseAppToken";
+
   public static final String OAUTH_CONSUMER_KEY = "anonymous";
   
   public static final String OAUTH_CONSUMER_SECRET = "anonymous";

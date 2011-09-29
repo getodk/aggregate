@@ -152,6 +152,15 @@
 	</servlet-mapping>
 
 	<servlet>
+		<servlet-name>briefcaseAppMgmt</servlet-name>
+		<servlet-class>org.odk.aggregate.servlet.BriefcaseAppMgmtServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>briefcaseAppMgmt</servlet-name>
+		<url-pattern>/BriefcaseAppMgmt</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
 		<servlet-name>externalRepo</servlet-name>
 		<servlet-class>org.odk.aggregate.servlet.ExternalRepoServlet</servlet-class>
 	</servlet>
