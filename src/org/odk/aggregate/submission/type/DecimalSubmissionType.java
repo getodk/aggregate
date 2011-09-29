@@ -67,10 +67,11 @@ public class DecimalSubmissionType extends SubmissionSingleValueBase<Double> {
   
   @Override
   public void addValueToXmlSerialization(StringBuilder b) {
-	  Double value = getValue();
+	  Object value = getValue();
 	  if ( value != null ) {
+		  String asString = value.toString();
 		  b.append("<" + propertyName + ">");
-		  b.append(StringEscapeUtils.escapeXml(value.toString()));
+		  b.append(StringEscapeUtils.escapeXml(asString));
 		  b.append("</" + propertyName + ">");
 	  } else {
 		  b.append("<" + propertyName + "/>");

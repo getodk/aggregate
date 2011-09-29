@@ -2,10 +2,16 @@ package org.odk.aggregate.servlet;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.odk.aggregate.BriefcaseAuth;
+import org.odk.aggregate.BriefcaseAuth.BriefcaseAuthToken;
+import org.odk.aggregate.constants.HtmlUtil;
 
 
 /**
@@ -143,7 +149,6 @@ public class BriefcaseServlet extends ServletUtilBase {
 	@Override
 	public void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws IOException {
-
 		// verify user is logged in
 		if (!verifyCredentials(req, resp)) {
 			return;
@@ -163,8 +168,42 @@ public class BriefcaseServlet extends ServletUtilBase {
 		String headContent = cookieSet;
 		beginBasicHtmlResponse(TITLE_INFO, headContent, resp, req, true); // header
 	    PrintWriter out = resp.getWriter();
+	    
+	    emitBriefcaseAppKey(out);
 	    out.write(BRIEFCASE_BODY);
 		finishBasicHtmlResponse(resp);
 		resp.setStatus(200);
+	}
+	
+	private void emitBriefcaseAppKey(PrintWriter out) {
+		BriefcaseAuthToken t = BriefcaseAuth.getBriefcaseAuthToken();
+		out.write("<h1>Briefcase Application Token</h1>");
+		Map<String,String> paramMap = new HashMap<String,String>();
+		paramMap.put(BriefcaseAppMgmtServlet.OPTION_PARAMETER,
+					BriefcaseAppMgmtServlet.PV_ENABLE);
+		String urlEnable = HtmlUtil.createHrefWithProperties(BriefcaseAppMgmtServlet.ADDR, paramMap, "here");
+		paramMap.clear();
+		paramMap.put(BriefcaseAppMgmtServlet.OPTION_PARAMETER,
+				BriefcaseAppMgmtServlet.PV_DISABLE);
+		String urlDisable = HtmlUtil.createHrefWithProperties(BriefcaseAppMgmtServlet.ADDR, paramMap, "here");
+		paramMap.clear();
+		paramMap.put(BriefcaseAppMgmtServlet.OPTION_PARAMETER,
+				BriefcaseAppMgmtServlet.PV_RESET);
+		String urlReset = HtmlUtil.createHrefWithProperties(BriefcaseAppMgmtServlet.ADDR, paramMap, "reset");
+		
+		if (!t.isEnabled() ) {
+			out.write("<p>Click ");
+			out.write(urlEnable);
+			out.write(" to enable the Briefcase Application " +
+					"Token for use in migrating to ODK Aggregate 1.0</p>");
+		} else {
+			out.write("<p>The token value for use in migrating to ODK Aggregate 1.0 is:</p><pre>");
+			out.write(t.getToken());
+			out.write("</pre><p>Click ");
+			out.write(urlDisable);
+			out.write(" to disable all accesses using this token.</p><p>Click ");
+			out.write(urlReset);
+			out.write(" to generate a new token</p>");
+		}
 	}
 }
