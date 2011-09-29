@@ -114,10 +114,10 @@ public class RepeatSubmissionType implements SubmissionRepeat {
   }
 
   @Override
-  public void addValueToXmlSerialization(StringBuilder b) {
+  public void addValueToXmlSerialization(StringBuilder b, Form form) {
 	if (submissionSets != null) {
 		for (SubmissionSet submissionSet : submissionSets) {
-			submissionSet.generateXmlSerialization(b, null);
+			submissionSet.generateXmlSerialization(b, null, form);
 		}
 	}
   }

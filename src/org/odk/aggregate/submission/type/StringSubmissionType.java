@@ -89,7 +89,7 @@ public class StringSubmissionType extends SubmissionFieldBase<String> {
   }
 
   @Override
-  public void addValueToXmlSerialization(StringBuilder b) {
+  public void addValueToXmlSerialization(StringBuilder b, Form form) {
 	  String value = getValue();
 	  if ( value != null ) {
 		  b.append("<" + propertyName + ">");

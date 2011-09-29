@@ -22,6 +22,7 @@ package org.odk.aggregate.submission.type;
 import java.util.List;
 
 import org.apache.commons.lang.StringEscapeUtils;
+import org.odk.aggregate.form.Form;
 
 import com.google.gson.JsonObject;
 
@@ -66,7 +67,7 @@ public class DecimalSubmissionType extends SubmissionSingleValueBase<Double> {
   }
   
   @Override
-  public void addValueToXmlSerialization(StringBuilder b) {
+  public void addValueToXmlSerialization(StringBuilder b, Form form) {
 	  Object value = getValue();
 	  if ( value != null ) {
 		  String asString = value.toString();

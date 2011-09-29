@@ -179,7 +179,7 @@ public class SubmissionDownloadServlet extends ServletUtilBase {
     attr.append(StringEscapeUtils.escapeXml(sub.getSubmittedTime().toString()));
     attr.append("\"");
     StringBuilder b = new StringBuilder();
-    sub.generateXmlSerialization(b, attr.toString());
+    sub.generateXmlSerialization(b, attr.toString(), form);
     out.write(b.toString());
     out.write("</data>\n");
     b.setLength(0);

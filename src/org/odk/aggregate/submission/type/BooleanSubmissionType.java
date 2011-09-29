@@ -22,6 +22,7 @@ package org.odk.aggregate.submission.type;
 import java.util.List;
 
 import org.apache.commons.lang.StringEscapeUtils;
+import org.odk.aggregate.form.Form;
 
 import com.google.gson.JsonObject;
 
@@ -67,7 +68,7 @@ public class BooleanSubmissionType extends SubmissionSingleValueBase<Boolean> {
   }
 
   @Override
-  public void addValueToXmlSerialization(StringBuilder b) {
+  public void addValueToXmlSerialization(StringBuilder b, Form form) {
 	  Boolean value = getValue();
 	  if ( value != null ) {
 		  b.append("<" + propertyName + ">");

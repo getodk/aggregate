@@ -291,14 +291,31 @@ public class SubmissionSet implements Comparable<SubmissionSet>{
     }  
     return data;
   }
+
+  private void nestedSubmission(FormElement element, StringBuilder b, String attributeList, Form form) {
+    b.append("<" + element.getElementName() + ((attributeList == null) ? "" : attributeList) + ">");
+    boolean first = (this instanceof Submission);
+    for ( FormElement child : element.getChildren() ) {
+      if ( first ) {
+        // Submission has the submissionSet as the first element within it. 
+        // Swallow that...
+        first = false;
+        continue;
+      }
+      if ( child.getSubmissionFieldType() != SubmissionFieldType.UNKNOWN ) {
+        SubmissionField f = this.getSubmissionFieldsMap().get(child.getElementName());
+        f.addValueToXmlSerialization(b, form);
+      } else {
+        nestedSubmission(child, b, null, form);
+      }
+    }
+    b.append("</" + element.getElementName() + ">");
+  }
   
-  public void generateXmlSerialization(StringBuilder b, String attributeList) {
+  public void generateXmlSerialization(StringBuilder b, String attributeList, Form form) {
 	  if ( submissionValues != null ) {
-		  b.append("<" + setName + ((attributeList == null) ? "" : attributeList) + ">");
-		  for (SubmissionValue value : submissionValues) {
-			  value.addValueToXmlSerialization(b);
-		  }
-		  b.append("</" + setName + ">");
+		  FormElement element = form.getBeginningElement(setName);
+		  nestedSubmission(element, b, attributeList, form);
 	  } else {
 		  // empty...
 		  b.append("<" + setName + "/>");

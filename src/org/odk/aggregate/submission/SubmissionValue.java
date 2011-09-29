@@ -68,8 +68,9 @@ public interface SubmissionValue {
   /**
    * Add submission field value to an XmlSerialization
    * @param b - string builder holding the serialization
+   * @param form - form definition (needed to reconstruct nestings for groups).
    */
-  public void addValueToXmlSerialization(StringBuilder b);
+  public void addValueToXmlSerialization(StringBuilder b, Form form);
 
   /**
    * Add submission field value to an XmlSerialization of
