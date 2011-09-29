@@ -90,7 +90,7 @@ public class GeoPointSubmissionType extends SubmissionFieldBase<GeoPoint> {
   }
   
   @Override
-  public void addValueToXmlSerialization(StringBuilder b) {
+  public void addValueToXmlSerialization(StringBuilder b, Form form) {
 	  GeoPoint value = getValue();
 	  if ( value != null && value.getLatitude() != null && value.getLongitude() != null ) {
 		  b.append("<" + propertyName + ">");
