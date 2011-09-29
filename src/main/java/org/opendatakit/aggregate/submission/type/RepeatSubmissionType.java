@@ -31,6 +31,7 @@ import org.opendatakit.aggregate.submission.SubmissionKeyPart;
 import org.opendatakit.aggregate.submission.SubmissionRepeat;
 import org.opendatakit.aggregate.submission.SubmissionSet;
 import org.opendatakit.aggregate.submission.SubmissionValue;
+import org.opendatakit.aggregate.submission.SubmissionVisitor;
 import org.opendatakit.common.datamodel.DynamicBase;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.EntityKey;
@@ -206,15 +207,21 @@ public class RepeatSubmissionType implements SubmissionRepeat {
 		return repeatGroup;
 	}
 
-	/**
-	 * Get Property Name
-	 * 
-	 * @return property name
-	 */
+	@Override
 	public String getPropertyName() {
 		return repeatGroup.getElementName();
 	}
 
+	@Override
+	public boolean depthFirstTraversal(SubmissionVisitor visitor) {
+	  if ( visitor.traverse(this) ) return true;
+	  
+	  for (SubmissionSet s : submissionSets) {
+       if ( s.depthFirstTraversal(visitor) ) return true;
+     }
+	  return false;
+   }
+	
 	public List<SubmissionValue> findElementValue(FormElementModel element) {
 		List<SubmissionValue> values = new ArrayList<SubmissionValue>();
 

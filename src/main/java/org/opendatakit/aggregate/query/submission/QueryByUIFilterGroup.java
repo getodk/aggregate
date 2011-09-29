@@ -34,48 +34,62 @@ import org.opendatakit.common.web.constants.BasicConsts;
 
 public class QueryByUIFilterGroup extends QueryBase {
 
+  public enum CompletionFlag {
+     ONLY_COMPLETE_SUBMISSIONS,
+     ONLY_INCOMPLETE_SUBMISSIONS,
+     ALL_SUBMISSIONS
+  };
+  
   private static final String MISSING_ARGS = "Missing either Form or FilterGroup making it impossible to query";
 
   private final TopLevelDynamicBase tbl;
 
   private int fetchLimit;
-
+  
   private final QueryResumePoint cursor;
-
-  public QueryByUIFilterGroup(Form form, FilterGroup filterGroup, boolean onlyCompleteSubmissions,
-      CallingContext cc) {
+  
+  public QueryByUIFilterGroup(Form form, FilterGroup filterGroup, CompletionFlag completionFlag, CallingContext cc) {
     super(form);
 
     if (filterGroup == null || form == null) {
       throw new IllegalArgumentException(MISSING_ARGS);
     }
-
+    
     tbl = (TopLevelDynamicBase) form.getTopLevelGroupElement().getFormDataModel()
         .getBackingObjectPrototype();
 
-    query = cc.getDatastore().createQuery(tbl, "QueryByUIFilterGroup.constructor",
-        cc.getCurrentUser());
-    if (!onlyCompleteSubmissions) {
+    query = cc.getDatastore().createQuery(tbl, "QueryByUIFilterGroup.constructor", cc.getCurrentUser());
+    switch ( completionFlag ) {
+    case ONLY_COMPLETE_SUBMISSIONS:
+      // order by the completion date and filter against isComplete == true
+      query.addSort(tbl.markedAsCompleteDate, Query.Direction.ASCENDING);
+      query.addFilter(tbl.markedAsCompleteDate, Query.FilterOperation.GREATER_THAN, BasicConsts.EPOCH);
+      query.addFilter(tbl.isComplete, Query.FilterOperation.EQUAL, true);
+      break;
+    case ONLY_INCOMPLETE_SUBMISSIONS:
+      // order by the last update date and filter against isComplete == false
+      query.addSort(tbl.lastUpdateDate, Query.Direction.ASCENDING);
+      query.addFilter(tbl.lastUpdateDate, Query.FilterOperation.GREATER_THAN, BasicConsts.EPOCH);
+      query.addFilter(tbl.isComplete, Query.FilterOperation.EQUAL, false);
+      break;
+    case ALL_SUBMISSIONS:
       // order by the last update date
       query.addSort(tbl.lastUpdateDate, Query.Direction.ASCENDING);
       query.addFilter(tbl.lastUpdateDate, Query.FilterOperation.GREATER_THAN, BasicConsts.EPOCH);
-    } else {
-      // order by the completion date and filter against isComplete == true
-      query.addSort(tbl.markedAsCompleteDate, Query.Direction.ASCENDING);
-      query.addFilter(tbl.markedAsCompleteDate, Query.FilterOperation.GREATER_THAN,
-          BasicConsts.EPOCH);
-      query.addFilter(tbl.isComplete, Query.FilterOperation.EQUAL, true);
+      break;
+    default:
+        throw new IllegalStateException("unhandled case");
     }
-
+    
     fetchLimit = filterGroup.getQueryFetchLimit();
-
+    
     UIQueryResumePoint uiCursor = filterGroup.getCursor();
-    if (uiCursor != null) {
+    if(uiCursor != null) {
       cursor = QueryResumePoint.transform(uiCursor);
     } else {
       cursor = null;
     }
-
+    
     for (Filter filter : filterGroup.getFilters()) {
       if (filter instanceof RowFilter) {
         RowFilter rf = (RowFilter) filter;
@@ -143,7 +157,7 @@ public class QueryByUIFilterGroup extends QueryBase {
     }
     return retrievedSubmissions;
   }
-
+  
   public void populateSubmissions(SubmissionUISummary summary,
       List<FormElementModel> filteredElements, ElementFormatter elemFormatter,
       List<FormElementNamespace> elementTypes, CallingContext cc) throws ODKDatastoreException {

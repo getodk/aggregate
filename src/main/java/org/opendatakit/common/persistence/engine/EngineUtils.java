@@ -141,6 +141,65 @@ public class EngineUtils {
 		return value;
 	}
 
+   public static final String getAttributeValueAsString(Object o, DataField dominantAttr) {
+      String value;
+      switch ( dominantAttr.getDataType() ) {
+      case BINARY: throw new IllegalStateException("cannot sort on a binary field");
+      case LONG_STRING: throw new IllegalStateException("cannot sort on a long text field");
+      case URI:
+      case STRING: {
+         value = (String) o; 
+         break;
+      }
+      case INTEGER: {
+         Long l = (Long) o;
+         if ( l == null ) {
+            value = null;
+         } else {
+            value = Long.toString(l);
+         }
+         break;
+      }
+      case DECIMAL: {
+         BigDecimal bd;
+         if ( o == null ) {
+           bd = null;
+         } else if ( o instanceof Double ) {
+           bd = new BigDecimal(((Double) o).toString());
+         } else {
+           bd = new BigDecimal(o.toString());
+         }
+         if ( bd == null ) {
+            value = null;
+         } else {
+            value = bd.toString();
+         }
+         break;
+      }
+      case BOOLEAN: {
+         Boolean b = (Boolean) o;
+         if ( b == null ) {
+            value = null;
+         } else {
+            value = b.toString();
+         }
+         break;
+      }
+      case DATETIME: {
+         Date d = (Date) o;
+         if ( d == null ) {
+            value = null;
+         } else {
+            value = WebUtils.iso8601Date(d);
+         }
+         break;
+      }
+      default:
+         throw new IllegalStateException("datatype not handled");
+      }
+      return value;
+   }
+
 	public static final Object getDominantSortAttributeValueFromString(String v, DataField dominantAttr) {
 		Object value;
 		switch ( dominantAttr.getDataType() ) {

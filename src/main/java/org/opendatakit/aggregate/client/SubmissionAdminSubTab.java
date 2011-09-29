@@ -2,6 +2,7 @@ package org.opendatakit.aggregate.client;
 
 import java.util.ArrayList;
 
+import org.opendatakit.aggregate.client.filter.FilterGroup;
 import org.opendatakit.aggregate.client.form.FormServiceAsync;
 import org.opendatakit.aggregate.client.form.FormSummary;
 import org.opendatakit.aggregate.client.submission.SubmissionUISummary;
@@ -113,7 +114,9 @@ public class SubmissionAdminSubTab extends AggregateSubTabBase {
     
     // request the update if form is not the "none" form (ie id will equal null)
     if (selectedForm.getId() != null) {
-      SecureGWT.getFormAdminService().getIncompleteSubmissions(selectedForm.getId(), callback);
+      FilterGroup filterGroup = new FilterGroup(UIConsts.FILTER_NONE,
+                                                selectedForm.getId(), null);
+      SecureGWT.getFormAdminService().getIncompleteSubmissions(filterGroup, callback);
     }
 
   }

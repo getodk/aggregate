@@ -21,6 +21,7 @@ import java.util.List;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.exception.ODKConversionException;
 import org.opendatakit.aggregate.submission.SubmissionField;
+import org.opendatakit.aggregate.submission.SubmissionVisitor;
 import org.opendatakit.common.datamodel.BinaryContentManipulator.BlobSubmissionOutcome;
 import org.opendatakit.common.datamodel.DynamicCommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
@@ -65,6 +66,11 @@ public abstract class MetadataBaseType<T> implements SubmissionField<T> {
 		return metadataType.toString();
 	}
 
+	@Override
+	public boolean depthFirstTraversal(SubmissionVisitor visitor) {
+	  return visitor.traverse(this);
+	}
+	
 	@Override
 	public boolean isBinary() {
 		return false;
