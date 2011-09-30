@@ -16,7 +16,6 @@
 
 package org.opendatakit.common.web.client;
 
-import com.google.gwt.cell.client.ActionCell;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.user.cellview.client.Column;
 
@@ -29,19 +28,19 @@ import com.google.gwt.user.cellview.client.Column;
  */
 public class UIEnabledActionColumn<T> extends Column<T, T> {
 	public UIEnabledActionColumn(String label, UIVisiblePredicate<T> isVisiblePredicate,
-			ActionCell.Delegate<T> action) {
+	    UIEnabledActionCell.Delegate<T> action) {
 		this(label, isVisiblePredicate, null, action);
 	}
 
 	public UIEnabledActionColumn(String label, UIEnabledPredicate<T> isEnabledPredicate,
-			ActionCell.Delegate<T> action) {
+	    UIEnabledActionCell.Delegate<T> action) {
 		this(label, null, isEnabledPredicate, action);
 	}
 
 	public UIEnabledActionColumn(String label, 
 			UIVisiblePredicate<T> isVisiblePredicate,
 			UIEnabledPredicate<T> isEnabledPredicate,
-			ActionCell.Delegate<T> action) {
+			UIEnabledActionCell.Delegate<T> action) {
 		super(new UIEnabledActionCell<T>(label, 
 					isVisiblePredicate, isEnabledPredicate,
 					action));
@@ -50,7 +49,7 @@ public class UIEnabledActionColumn<T> extends Column<T, T> {
 	public UIEnabledActionColumn(SafeHtml html, 
 			UIVisiblePredicate<T> isVisiblePredicate,
 			UIEnabledPredicate<T> isEnabledPredicate,
-			ActionCell.Delegate<T> action) {
+			UIEnabledActionCell.Delegate<T> action) {
 		super(new UIEnabledActionCell<T>(html, 
 					isVisiblePredicate, isEnabledPredicate,
 					action));
