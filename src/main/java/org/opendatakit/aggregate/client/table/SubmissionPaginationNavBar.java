@@ -7,12 +7,12 @@ import org.opendatakit.aggregate.client.widgets.CursorAdvancementButton;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.SimplePanel;
 
-public class ResultSubmissionNavBar extends SimplePanel {
+public class SubmissionPaginationNavBar extends SimplePanel {
 
 
   private final FlexTable controls;
   
-  public ResultSubmissionNavBar() {
+  public SubmissionPaginationNavBar() {
 
     getElement().setId("filter_submission_pagination");
     

@@ -39,6 +39,10 @@ public class SubmissionUISummary implements Serializable {
   
   private UIQueryResumePoint backwardCursor;
   
+  private boolean hasMoreResults;
+  
+  private boolean hasPriorResults;
+
   private String formTitle;
   
   public SubmissionUISummary() {
@@ -110,4 +114,20 @@ public class SubmissionUISummary implements Serializable {
     return formTitle;
   }
 
+  public boolean hasMoreResults() {
+    return hasMoreResults;
+  }
+
+  public void setHasMoreResults(boolean hasMoreResults) {
+    this.hasMoreResults = hasMoreResults;
+  }
+
+  public boolean hasPriorResults() {
+    return hasPriorResults;
+  }
+
+  public void setHasPriorResults(boolean hasPriorResults) {
+    this.hasPriorResults = hasPriorResults;
+  }
+  
 }
