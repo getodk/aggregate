@@ -50,7 +50,7 @@ public class FilterNavigationTable extends FlexTable {
 
   public FilterNavigationTable(FilterSubTab filterSubTab) {
     this.filterSubTab = filterSubTab;
-        
+    
     formsBox = new FormListBox(new FormChangeDropDownHandler());
     filtersBox = new FilterListBox(new FilterChangeDropDownHandler());
 

@@ -189,8 +189,6 @@ public class QueryByUIFilterGroup extends QueryBase {
       summary.setBackwardCursor(null);      
     }
     
-    summary.setMoreSubmissions(results.hasMoreResults());
-    
     // create a row for each submission
     for (CommonFieldsBase subEntity : results.getResultList()) {
       Submission sub = new Submission((TopLevelDynamicBase) subEntity, formDef, cc);

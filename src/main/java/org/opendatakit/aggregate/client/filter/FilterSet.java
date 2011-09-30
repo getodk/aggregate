@@ -53,7 +53,5 @@ public final class FilterSet implements Serializable {
 
   public String getFormId() {
     return formId;
-  }
-	
-	
+  }	
 }
