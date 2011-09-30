@@ -184,31 +184,71 @@ public class QueryByUIFilterGroup extends QueryBase {
     QueryResult results = getQueryResult(cursor, fetchLimit);
     FormDefinition formDef = getForm().getFormDefinition();
     FormElementModel fem = getForm().getTopLevelGroupElement();
-    
+
     QueryResumePoint startCursor = results.getStartCursor();
     QueryResumePoint resumeCursor = results.getResumeCursor();
     QueryResumePoint backwardCursor = results.getBackwardCursor();
-    
-    summary.setHasPriorResults(results.hasPriorResults());
-    summary.setHasMoreResults(results.hasMoreResults());
+
+    // The SubmissionUISummary holds data as presented to the 
+    // UI layer.  Therefore, if we are paging backward, we need
+    // to invert the sense of the query results.
+    //
+    // Determine whether we are going forward or backward...
     boolean isForwardCursor = true;
     if(startCursor != null) {
       isForwardCursor = startCursor.isForwardCursor();
-      summary.setStartCursor(startCursor.transform());
-    } else {
-      summary.setStartCursor(null);
     }
     
-    if(resumeCursor != null) {
-      summary.setResumeCursor(resumeCursor.transform());
+    if ( isForwardCursor ) {
+      // everything matches across the UI and query layer...
+      summary.setHasPriorResults(results.hasPriorResults());
+      summary.setHasMoreResults(results.hasMoreResults());
+      if(startCursor != null) {
+        summary.setStartCursor(startCursor.transform());
+      } else {
+        summary.setStartCursor(null);
+      }
+      
+      if(resumeCursor != null) {
+        summary.setResumeCursor(resumeCursor.transform());
+      } else {
+        summary.setResumeCursor(null);
+      }
+      
+      if(backwardCursor != null) {
+        summary.setBackwardCursor(backwardCursor.transform());
+      } else {
+        summary.setBackwardCursor(null);      
+      }
     } else {
-      summary.setResumeCursor(null);
-    }
-    
-    if(backwardCursor != null) {
-      summary.setBackwardCursor(backwardCursor.transform());
-    } else {
-      summary.setBackwardCursor(null);      
+      // we are moving backward; the UI is inverted w.r.t. query. 
+      
+      // SubmissionUISummary.hasPriorResults is query hasMoreResults
+      // SubmissionUISummary.hasMoreResults is query hasPriorResults
+      summary.setHasPriorResults(results.hasMoreResults());
+      summary.setHasMoreResults(results.hasPriorResults());
+      
+      // SubmissionUISummary.startCursor is unchanged
+      if(startCursor != null) {
+        summary.setStartCursor(startCursor.transform());
+      } else {
+        summary.setStartCursor(null);
+      }
+      
+      // SubmissionUISummary.resumeCursor is query backwardCursor
+      if(backwardCursor != null) {
+        summary.setResumeCursor(backwardCursor.transform());
+      } else {
+        summary.setResumeCursor(null);
+      }
+      
+      // SubmissionUISummary.backwardCursor is query resumeCursor
+      if(resumeCursor != null) {
+        summary.setBackwardCursor(resumeCursor.transform());
+      } else {
+        summary.setBackwardCursor(null);      
+      }
+      
     }
     
     List<SubmissionUI> submissionList = new ArrayList<SubmissionUI>();
@@ -223,8 +263,8 @@ public class QueryByUIFilterGroup extends QueryBase {
       submissionList.add(new SubmissionUI(row.getFormattedValues(), subKey.toString()));
     }
     if ( !isForwardCursor ) {
-      // we have the results in the reverse order, so invert them to get them
-      // properly ordered.
+      // query has the results in the reverse order.
+      // invert them to get them properly ordered.
       Collections.reverse(submissionList);
     }
     summary.getSubmissions().addAll(submissionList);
