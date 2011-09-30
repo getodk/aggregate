@@ -114,8 +114,7 @@ public class SubmissionAdminSubTab extends AggregateSubTabBase {
     
     // request the update if form is not the "none" form (ie id will equal null)
     if (selectedForm.getId() != null) {
-      FilterGroup filterGroup = new FilterGroup(UIConsts.FILTER_NONE,
-                                                selectedForm.getId(), null);
+      FilterGroup filterGroup = new FilterGroup(UIConsts.FILTER_NONE, selectedForm.getId(), null);
       SecureGWT.getFormAdminService().getIncompleteSubmissions(filterGroup, callback);
     }
 

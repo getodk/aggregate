@@ -39,10 +39,15 @@ public class SubmissionUISummary implements Serializable {
   
   private UIQueryResumePoint backwardCursor;
   
-  private boolean moreSubmissions;
+  private String formTitle;
   
   public SubmissionUISummary() {
     headers = new ArrayList<Column>();
+  }
+  
+  public SubmissionUISummary(String formTitle) {
+    this();
+    this.formTitle = formTitle;
   }
     
   public ArrayList<Column> getHeaders() {
@@ -101,11 +106,8 @@ public class SubmissionUISummary implements Serializable {
     this.backwardCursor = backwardCursor;
   }
 
-  public boolean hasMoreSubmissions() {
-    return moreSubmissions;
+  public String getFormTitle() {
+    return formTitle;
   }
 
-  public void setMoreSubmissions(boolean moreSubmissions) {
-    this.moreSubmissions = moreSubmissions;
-  }
 }

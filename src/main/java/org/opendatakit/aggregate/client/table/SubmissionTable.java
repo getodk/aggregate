@@ -27,7 +27,6 @@ import org.opendatakit.aggregate.constants.common.UIConsts;
 import org.opendatakit.common.web.constants.BasicConsts;
 
 import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.HTMLTable;
 import com.google.gwt.user.client.ui.Image;
 
 public class SubmissionTable extends FlexTable {
@@ -52,13 +51,12 @@ public class SubmissionTable extends FlexTable {
       setText(0, headerIndex++, column.getDisplayHeader().replace(":", "\n"));
     }
     setHTML(0, headerIndex, BLANK_VALUE);
-    setColumnFormatter(new HTMLTable.ColumnFormatter());
     getColumnFormatter().addStyleName(headerIndex, "blank-submission-column");
 
     getRowFormatter().addStyleName(0, "titleBar");
 
     // create rows
-    int rowPosition = 2;
+    int rowPosition = 1;
     for (SubmissionUI row : tableSubmissions) {
       int valueIndex = 0; // index matches to column headers
       int columnPosition = 0; // position matches to position in table

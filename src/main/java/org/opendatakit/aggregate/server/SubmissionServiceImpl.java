@@ -67,7 +67,7 @@ public class SubmissionServiceImpl extends RemoteServiceServlet implements
         return null; // ill-formed definition
       QueryByUIFilterGroup query = new QueryByUIFilterGroup(form, filterGroup, CompletionFlag.ALL_SUBMISSIONS, cc);
       
-      SubmissionUISummary summary = new SubmissionUISummary();
+      SubmissionUISummary summary = new SubmissionUISummary(form.getViewableName());
       GenerateHeaderInfo headerGenerator = new GenerateHeaderInfo(filterGroup, summary, form);
       headerGenerator.processForHeaderInfo(form.getTopLevelGroupElement());
       List<FormElementModel> filteredElements = headerGenerator.getIncludedElements();
@@ -113,7 +113,7 @@ public class SubmissionServiceImpl extends RemoteServiceServlet implements
         SubmissionElement tmp = sub.resolveSubmissionKey(parts);
         RepeatSubmissionType repeat = (RepeatSubmissionType) tmp;
         
-        SubmissionUISummary summary = new SubmissionUISummary();
+        SubmissionUISummary summary = new SubmissionUISummary(form.getViewableName());
         GenerateHeaderInfo headerGenerator = new GenerateHeaderInfo(null, summary, form);
         headerGenerator.processForHeaderInfo(repeat.getElement());
         List<FormElementModel> filteredElements = headerGenerator.getIncludedElements();

@@ -32,12 +32,13 @@ public class FilterSubTab extends AggregateSubTabBase {
 
   private FilterNavigationTable navTable;
   
-  private HorizontalPanel filtersNSubmissions;
   private FiltersDataPanel filtersPanel;
   private SubmissionPanel submissionPanel;
   
   private FilterGroup currentlyDisplayedFilterGroup;
   private Boolean displayMetaData;
+  
+
 
   public FilterSubTab() {
     displayMetaData = false;
@@ -49,20 +50,19 @@ public class FilterSubTab extends AggregateSubTabBase {
     add(navTable);
 
     // Create Filters and Submissions Panel
-    filtersNSubmissions = new HorizontalPanel();
+    HorizontalPanel filtersNSubmissions = new HorizontalPanel();
 
     filtersPanel = new FiltersDataPanel(this);
     filtersNSubmissions.add(filtersPanel);
-
-    submissionPanel = new SubmissionPanel();
-    filtersNSubmissions.add(submissionPanel);
-
-    filtersNSubmissions.getElement().setId("filters_data");
     filtersNSubmissions.getElement().getFirstChildElement().getFirstChildElement()
-        .getFirstChildElement().setId("filters_panel");
-
+    .getFirstChildElement().setId("filters_panel"); // TODO: improve this
+    
+    submissionPanel = new SubmissionPanel();
+    
+    filtersNSubmissions.add(submissionPanel);
+    filtersNSubmissions.getElement().setId("filters_data");
     filtersNSubmissions.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_JUSTIFY);
-
+    
     add(filtersNSubmissions);
   }
 

@@ -221,17 +221,20 @@ public class FormAdminServiceImpl extends RemoteServiceServlet implements
       HttpServletRequest req = this.getThreadLocalRequest();
       CallingContext cc = ContextFactory.getCallingContext(this, req);
 
-      SubmissionUISummary summary = new SubmissionUISummary();
+      
       try {
         String formId = filterGroup.getFormId();
         Form form = Form.retrieveFormByFormId(formId, cc);
         if (form.getFormDefinition() == null)
           return null; // ill-formed definition
+        SubmissionUISummary summary = new SubmissionUISummary(form.getViewableName());
+        
         QueryByUIFilterGroup query = new QueryByUIFilterGroup(form, filterGroup, CompletionFlag.ONLY_INCOMPLETE_SUBMISSIONS, cc);
         List<Submission> submissions = query.getResultSubmissions(cc);
 
         getSubmissions(filterGroup, cc, summary, form, submissions);
 
+        return summary;
       } catch (ODKFormNotFoundException e) {
         throw new FormNotAvailableException(e);
       } catch (ODKDatastoreException e) {
@@ -240,7 +243,6 @@ public class FormAdminServiceImpl extends RemoteServiceServlet implements
         return null;
       }
 
-      return summary;
     }
 
     private void getSubmissions(FilterGroup filterGroup, CallingContext cc,

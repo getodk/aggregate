@@ -28,6 +28,7 @@ import org.opendatakit.aggregate.client.filter.FilterSet;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.filter.SubmissionFilterGroup;
 import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
@@ -38,42 +39,42 @@ public class FilterServiceImpl extends RemoteServiceServlet implements FilterSer
    * identifier for serialization
    */
   private static final long serialVersionUID = 6350939191805868959L;
- 
 
   @Override
   public FilterSet getFilterSet(String formId) throws FormNotAvailableException {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
-    
+
     try {
       // verify form is still available
-      Form.retrieveFormByFormId(formId, cc);
-    } catch (ODKFormNotFoundException e1) {
-      throw new FormNotAvailableException(e1);
-    }
-    
-    FilterSet filterSet = new FilterSet(formId);
-    
-    try {
-      List<SubmissionFilterGroup> filterGroupList = SubmissionFilterGroup.getFilterGroupList(formId, cc);
-      for(SubmissionFilterGroup group : filterGroupList) {
+      Form form = Form.retrieveFormByFormId(formId, cc);
+
+      FilterSet filterSet = new FilterSet(formId);
+
+      List<SubmissionFilterGroup> filterGroupList = SubmissionFilterGroup.getFilterGroupList(
+          formId, cc);
+      for (SubmissionFilterGroup group : filterGroupList) {
         filterSet.addFilterGroup(group.transform());
       }
-    } catch (Exception e) {
-      // TODO: send exception over service
+      return filterSet;
+    } catch (ODKFormNotFoundException e1) {
+      throw new FormNotAvailableException(e1);
+    } catch (ODKDatastoreException e) {
+      // TODO Auto-generated catch block
       e.printStackTrace();
+      return null;
     }
-    return filterSet;
+
   }
-  
+
   @Override
   public String updateFilterGroup(FilterGroup group) {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
-    
+
     try {
       SubmissionFilterGroup filterGrp = SubmissionFilterGroup.transform(group, cc);
-      filterGrp.persist(cc);      
+      filterGrp.persist(cc);
       return filterGrp.getUri();
     } catch (Exception e) {
       return null;
@@ -84,10 +85,10 @@ public class FilterServiceImpl extends RemoteServiceServlet implements FilterSer
   public Boolean deleteFilterGroup(FilterGroup group) {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
-    
+
     try {
       SubmissionFilterGroup filterGrp = SubmissionFilterGroup.transform(group, cc);
-      filterGrp.delete(cc);      
+      filterGrp.delete(cc);
       return Boolean.TRUE;
     } catch (Exception e) {
       return Boolean.FALSE;

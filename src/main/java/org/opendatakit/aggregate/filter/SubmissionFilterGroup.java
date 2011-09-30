@@ -137,7 +137,7 @@ public class SubmissionFilterGroup extends CommonFieldsBase {
 
     filterGroup.setName(getName());
     filterGroup.setFormId(getFormId());
-
+    
     if (filters != null) {
       for (SubmissionFilter filter : filters) {
         filterGroup.addFilter(filter.transform());
