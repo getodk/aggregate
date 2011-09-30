@@ -75,7 +75,8 @@ public class FiltersDataPanel extends ScrollPanel {
     FlowPanel filterGlobal = new FlowPanel();
     filterGlobal.add(filterText);
     filterGlobal.add(new MetadataCheckBox(parentSubTab));
-
+    panel.add(filterGlobal);
+    
     // Filters applied header
     filterHeader = new FlowPanel();
     panel.add(filterHeader);
