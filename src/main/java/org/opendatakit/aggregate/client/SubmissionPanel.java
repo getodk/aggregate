@@ -19,7 +19,7 @@ package org.opendatakit.aggregate.client;
 import org.opendatakit.aggregate.client.exception.FormNotAvailableException;
 import org.opendatakit.aggregate.client.filter.FilterGroup;
 import org.opendatakit.aggregate.client.submission.SubmissionUISummary;
-import org.opendatakit.aggregate.client.table.ResultSubmissionNavBar;
+import org.opendatakit.aggregate.client.table.SubmissionPaginationNavBar;
 import org.opendatakit.aggregate.client.table.SubmissionTable;
 import org.opendatakit.aggregate.constants.common.SubTabs;
 import org.opendatakit.common.security.common.GrantedAuthorityName;
@@ -31,13 +31,13 @@ import com.google.gwt.user.client.ui.ScrollPanel;
 public class SubmissionPanel extends FlowPanel {
 
   private final ScrollPanel submissionPanel;
-  private final ResultSubmissionNavBar paginationNavBar;
+  private final SubmissionPaginationNavBar paginationNavBar;
   
   private SubmissionTable submissionTable;
 
   public SubmissionPanel() {
     super();
-    paginationNavBar = new ResultSubmissionNavBar();
+    paginationNavBar = new SubmissionPaginationNavBar();
     
     submissionPanel = new ScrollPanel();
     submissionPanel.getElement().setId("submission_container");

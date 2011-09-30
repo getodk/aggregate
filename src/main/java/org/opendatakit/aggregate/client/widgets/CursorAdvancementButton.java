@@ -25,15 +25,14 @@ public final class CursorAdvancementButton extends AggregateButton {
   
   public CursorAdvancementButton(SubmissionUISummary summary, FilterGroup filterGroup, boolean forward) {
     super(forward ? NEXT_BUTTON_TXT : PREV_BUTTON_TXT, forward ? NEXT_TOOLTIP_TXT : PREV_TOOLTIP_TXT, forward ? NEXT_HELP_BALLOON_TXT : PREV_HELP_BALLOON_TXT);
+    this.filterGroup = filterGroup;
+
     if(forward) {
       this.cursor = summary.getResumeCursor();
+      setEnabled(summary.hasMoreResults());
     } else {
       this.cursor = summary.getBackwardCursor();
-    }
-    this.filterGroup = filterGroup;
-    
-    if(cursor == null) {
-      setEnabled(false);
+      setEnabled(summary.hasPriorResults());
     }
   }
   

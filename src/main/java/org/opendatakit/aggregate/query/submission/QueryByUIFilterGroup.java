@@ -171,6 +171,9 @@ public class QueryByUIFilterGroup extends QueryBase {
     QueryResumePoint resumeCursor = results.getResumeCursor();
     QueryResumePoint backwardCursor = results.getBackwardCursor();
     
+    summary.setHasPriorResults(results.hasPriorResults());
+    summary.setHasMoreResults(results.hasMoreResults());
+    
     if(startCursor != null) {
       summary.setStartCursor(startCursor.transform());
     } else {
