@@ -25,6 +25,7 @@ import java.util.TreeSet;
 import org.odk.aggregate.constants.BasicConsts;
 import org.odk.aggregate.exception.ODKIncompleteSubmissionData;
 import org.odk.aggregate.form.Form;
+import org.odk.aggregate.form.FormElement;
 import org.odk.aggregate.submission.SubmissionRepeat;
 import org.odk.aggregate.submission.SubmissionSet;
 
@@ -114,10 +115,10 @@ public class RepeatSubmissionType implements SubmissionRepeat {
   }
 
   @Override
-  public void addValueToXmlSerialization(StringBuilder b, Form form) {
+  public void addValueToXmlSerialization(FormElement element, StringBuilder b) {
 	if (submissionSets != null) {
 		for (SubmissionSet submissionSet : submissionSets) {
-			submissionSet.generateXmlSerialization(b, null, form);
+			submissionSet.generateXmlSerialization(element, b, null);
 		}
 	}
   }

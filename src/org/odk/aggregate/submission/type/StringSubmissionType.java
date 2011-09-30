@@ -23,6 +23,7 @@ import org.apache.commons.lang.StringEscapeUtils;
 import org.odk.aggregate.constants.BasicConsts;
 import org.odk.aggregate.constants.PersistConsts;
 import org.odk.aggregate.form.Form;
+import org.odk.aggregate.form.FormElement;
 
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Text;
@@ -89,7 +90,7 @@ public class StringSubmissionType extends SubmissionFieldBase<String> {
   }
 
   @Override
-  public void addValueToXmlSerialization(StringBuilder b, Form form) {
+  public void addValueToXmlSerialization(FormElement element, StringBuilder b) {
 	  String value = getValue();
 	  if ( value != null ) {
 		  b.append("<" + propertyName + ">");

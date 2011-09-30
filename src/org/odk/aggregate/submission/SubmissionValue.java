@@ -21,6 +21,7 @@ import java.util.List;
 
 import org.odk.aggregate.exception.ODKIncompleteSubmissionData;
 import org.odk.aggregate.form.Form;
+import org.odk.aggregate.form.FormElement;
 
 import com.google.appengine.api.datastore.Entity;
 import com.google.gson.JsonObject;
@@ -67,10 +68,10 @@ public interface SubmissionValue {
 
   /**
    * Add submission field value to an XmlSerialization
+   * @param child - formElement of this value (needed for reconstructing the nesting)
    * @param b - string builder holding the serialization
-   * @param form - form definition (needed to reconstruct nestings for groups).
    */
-  public void addValueToXmlSerialization(StringBuilder b, Form form);
+  public void addValueToXmlSerialization(FormElement child, StringBuilder b);
 
   /**
    * Add submission field value to an XmlSerialization of

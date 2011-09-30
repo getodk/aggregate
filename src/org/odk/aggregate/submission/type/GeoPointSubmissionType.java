@@ -24,6 +24,7 @@ import org.odk.aggregate.constants.BasicConsts;
 import org.odk.aggregate.constants.PersistConsts;
 import org.odk.aggregate.exception.ODKConversionException;
 import org.odk.aggregate.form.Form;
+import org.odk.aggregate.form.FormElement;
 
 import com.google.appengine.api.datastore.Entity;
 import com.google.gson.JsonObject;
@@ -90,7 +91,7 @@ public class GeoPointSubmissionType extends SubmissionFieldBase<GeoPoint> {
   }
   
   @Override
-  public void addValueToXmlSerialization(StringBuilder b, Form form) {
+  public void addValueToXmlSerialization(FormElement element, StringBuilder b) {
 	  GeoPoint value = getValue();
 	  if ( value != null && value.getLatitude() != null && value.getLongitude() != null ) {
 		  b.append("<" + propertyName + ">");
