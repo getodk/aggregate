@@ -22,7 +22,7 @@ package org.odk.aggregate.submission.type;
 import java.util.List;
 
 import org.apache.commons.lang.StringEscapeUtils;
-import org.odk.aggregate.form.Form;
+import org.odk.aggregate.form.FormElement;
 
 import com.google.gson.JsonObject;
 
@@ -67,7 +67,7 @@ public class IntegerSubmissionType extends SubmissionSingleValueBase<Integer> {
   }
 
   @Override
-  public void addValueToXmlSerialization(StringBuilder b, Form form) {
+  public void addValueToXmlSerialization(FormElement element, StringBuilder b) {
 	  Object value = getValue();
 	  if ( value != null ) {
 		  String asString = value.toString();

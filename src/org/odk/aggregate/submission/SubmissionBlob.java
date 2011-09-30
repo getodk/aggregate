@@ -95,9 +95,10 @@ public class SubmissionBlob {
     } else {
       // reconstruct the multiple blobs into one
       ByteArrayOutputStream reconstructedBlob = new ByteArrayOutputStream();
-      List<Key> blobKeys = (List<Key>) dbEntity.getProperty(PersistConsts.BLOB_KEYS_PROPERTY);
+      List<?> blobKeys = (List<?>) dbEntity.getProperty(PersistConsts.BLOB_KEYS_PROPERTY);
       List<Blob> partialBlobs = new ArrayList<Blob>(blobKeys.size());
-      for(Key entityKey : blobKeys) {
+      for(Object o : blobKeys) {
+        Key entityKey = (Key) o;
         Entity partialBlobEntity = ds.get(entityKey);
         Long index = (Long) partialBlobEntity.getProperty(PersistConsts.BLOB_NUM_PROPERTY);
         partialBlobs.add(index.intValue(), (Blob) partialBlobEntity.getProperty(PersistConsts.BLOB_PROPERTY));

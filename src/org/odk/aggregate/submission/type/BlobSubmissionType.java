@@ -28,7 +28,7 @@ import org.odk.aggregate.constants.ErrorConsts;
 import org.odk.aggregate.constants.HtmlUtil;
 import org.odk.aggregate.constants.ServletConsts;
 import org.odk.aggregate.exception.ODKConversionException;
-import org.odk.aggregate.form.Form;
+import org.odk.aggregate.form.FormElement;
 import org.odk.aggregate.servlet.ImageViewerServlet;
 import org.odk.aggregate.submission.SubmissionBlob;
 
@@ -165,7 +165,7 @@ public class BlobSubmissionType extends SubmissionSingleValueBase<Key> {
 	}
 
 	@Override
-	public void addValueToXmlSerialization(StringBuilder b, Form form) {
+	public void addValueToXmlSerialization(FormElement element, StringBuilder b) {
 		Key value = getValue();
 		if (value == null) {
 			b.append("<" + propertyName + "/>");

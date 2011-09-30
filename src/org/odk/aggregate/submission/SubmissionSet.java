@@ -256,6 +256,9 @@ public class SubmissionSet implements Comparable<SubmissionSet>{
     return odkId + setName;
   }
 
+  public String getPropertyName() {
+    return setName;
+  }
   /**
    * Get the datastore entity used to store the submission
    * 
@@ -292,30 +295,26 @@ public class SubmissionSet implements Comparable<SubmissionSet>{
     return data;
   }
 
-  private void nestedSubmission(FormElement element, StringBuilder b, String attributeList, Form form) {
+  private void nestedSubmission(FormElement element, StringBuilder b, String attributeList) {
     b.append("<" + element.getElementName() + ((attributeList == null) ? "" : attributeList) + ">");
-    boolean first = (this instanceof Submission);
+    Map<String,SubmissionValue> valuesMap = getSubmissionValuesMap();
     for ( FormElement child : element.getChildren() ) {
-      if ( first ) {
-        // Submission has the submissionSet as the first element within it. 
-        // Swallow that...
-        first = false;
-        continue;
-      }
-      if ( child.getSubmissionFieldType() != SubmissionFieldType.UNKNOWN ) {
-        SubmissionField f = this.getSubmissionFieldsMap().get(child.getElementName());
-        f.addValueToXmlSerialization(b, form);
+      if ( child.isRepeatable() ) {
+        SubmissionValue f = valuesMap.get(child.getElementName());
+        f.addValueToXmlSerialization(child, b);
+      } else if ( child.getSubmissionFieldType() != SubmissionFieldType.UNKNOWN ) {
+        SubmissionValue f = valuesMap.get(child.getElementName());
+        f.addValueToXmlSerialization(child, b);
       } else {
-        nestedSubmission(child, b, null, form);
+        nestedSubmission(child, b, null);
       }
     }
     b.append("</" + element.getElementName() + ">");
   }
   
-  public void generateXmlSerialization(StringBuilder b, String attributeList, Form form) {
+  public void generateXmlSerialization(FormElement formElement, StringBuilder b, String attributeList) {
 	  if ( submissionValues != null ) {
-		  FormElement element = form.getBeginningElement(setName);
-		  nestedSubmission(element, b, attributeList, form);
+		  nestedSubmission(formElement, b, attributeList);
 	  } else {
 		  // empty...
 		  b.append("<" + setName + "/>");

@@ -37,6 +37,7 @@ import org.odk.aggregate.constants.ServletConsts;
 import org.odk.aggregate.exception.ODKFormNotFoundException;
 import org.odk.aggregate.exception.ODKIncompleteSubmissionData;
 import org.odk.aggregate.form.Form;
+import org.odk.aggregate.form.FormElement;
 import org.odk.aggregate.parser.SubmissionKey;
 import org.odk.aggregate.parser.SubmissionKeyPart;
 import org.odk.aggregate.submission.Submission;
@@ -179,7 +180,8 @@ public class SubmissionDownloadServlet extends ServletUtilBase {
     attr.append(StringEscapeUtils.escapeXml(sub.getSubmittedTime().toString()));
     attr.append("\"");
     StringBuilder b = new StringBuilder();
-    sub.generateXmlSerialization(b, attr.toString(), form);
+    FormElement element = form.getBeginningElement(sub.getPropertyName());
+    sub.generateXmlSerialization(element, b, attr.toString());
     out.write(b.toString());
     out.write("</data>\n");
     b.setLength(0);
