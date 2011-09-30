@@ -2,6 +2,7 @@ package org.opendatakit.aggregate.query.submission;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.opendatakit.aggregate.client.filter.Filter;
@@ -55,6 +56,11 @@ public class QueryByUIFilterGroup extends QueryBase {
       throw new IllegalArgumentException(MISSING_ARGS);
     }
     
+    boolean isForwardCursor = 
+      ((filterGroup.getCursor() == null) ?
+          true :
+          filterGroup.getCursor().getIsForwardCursor());
+    
     tbl = (TopLevelDynamicBase) form.getTopLevelGroupElement().getFormDataModel()
         .getBackingObjectPrototype();
 
@@ -62,19 +68,31 @@ public class QueryByUIFilterGroup extends QueryBase {
     switch ( completionFlag ) {
     case ONLY_COMPLETE_SUBMISSIONS:
       // order by the completion date and filter against isComplete == true
-      query.addSort(tbl.markedAsCompleteDate, Query.Direction.ASCENDING);
+      if ( isForwardCursor ) {
+        query.addSort(tbl.markedAsCompleteDate, Query.Direction.ASCENDING);
+      } else {
+        query.addSort(tbl.markedAsCompleteDate, Query.Direction.DESCENDING);
+      }
       query.addFilter(tbl.markedAsCompleteDate, Query.FilterOperation.GREATER_THAN, BasicConsts.EPOCH);
       query.addFilter(tbl.isComplete, Query.FilterOperation.EQUAL, true);
       break;
     case ONLY_INCOMPLETE_SUBMISSIONS:
       // order by the last update date and filter against isComplete == false
-      query.addSort(tbl.lastUpdateDate, Query.Direction.ASCENDING);
+      if ( isForwardCursor ) {
+        query.addSort(tbl.lastUpdateDate, Query.Direction.ASCENDING);
+      } else {
+        query.addSort(tbl.lastUpdateDate, Query.Direction.DESCENDING);
+      }
       query.addFilter(tbl.lastUpdateDate, Query.FilterOperation.GREATER_THAN, BasicConsts.EPOCH);
       query.addFilter(tbl.isComplete, Query.FilterOperation.EQUAL, false);
       break;
     case ALL_SUBMISSIONS:
       // order by the last update date
-      query.addSort(tbl.lastUpdateDate, Query.Direction.ASCENDING);
+      if ( isForwardCursor ) {
+        query.addSort(tbl.lastUpdateDate, Query.Direction.ASCENDING);
+      } else {
+        query.addSort(tbl.lastUpdateDate, Query.Direction.DESCENDING);
+      }
       query.addFilter(tbl.lastUpdateDate, Query.FilterOperation.GREATER_THAN, BasicConsts.EPOCH);
       break;
     default:
@@ -171,7 +189,9 @@ public class QueryByUIFilterGroup extends QueryBase {
     QueryResumePoint resumeCursor = results.getResumeCursor();
     QueryResumePoint backwardCursor = results.getBackwardCursor();
     
+    boolean isForwardCursor = true;
     if(startCursor != null) {
+      isForwardCursor = startCursor.isForwardCursor();
       summary.setStartCursor(startCursor.transform());
     } else {
       summary.setStartCursor(null);
@@ -189,6 +209,8 @@ public class QueryByUIFilterGroup extends QueryBase {
       summary.setBackwardCursor(null);      
     }
     
+    List<SubmissionUI> submissionList = new ArrayList<SubmissionUI>();
+    
     // create a row for each submission
     for (CommonFieldsBase subEntity : results.getResultList()) {
       Submission sub = new Submission((TopLevelDynamicBase) subEntity, formDef, cc);
@@ -196,8 +218,14 @@ public class QueryByUIFilterGroup extends QueryBase {
           cc);
 
       SubmissionKey subKey = sub.constructSubmissionKey(fem);
-      summary.addSubmission(new SubmissionUI(row.getFormattedValues(), subKey.toString()));
+      submissionList.add(new SubmissionUI(row.getFormattedValues(), subKey.toString()));
     }
+    if ( !isForwardCursor ) {
+      // we have the results in the reverse order, so invert them to get them
+      // properly ordered.
+      Collections.reverse(submissionList);
+    }
+    summary.getSubmissions().addAll(submissionList);
   }
 
 }
