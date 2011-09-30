@@ -35,6 +35,7 @@ import org.opendatakit.common.security.common.EmailParser.Email;
 import org.opendatakit.common.security.common.GrantedAuthorityName;
 import org.opendatakit.common.web.client.BooleanValidationPredicate;
 import org.opendatakit.common.web.client.StringValidationPredicate;
+import org.opendatakit.common.web.client.UIEnabledActionCell;
 import org.opendatakit.common.web.client.UIEnabledActionColumn;
 import org.opendatakit.common.web.client.UIEnabledPredicate;
 import org.opendatakit.common.web.client.UIEnabledValidatingCheckboxColumn;
@@ -42,7 +43,6 @@ import org.opendatakit.common.web.client.UIEnabledValidatingSelectionColumn;
 import org.opendatakit.common.web.client.UIEnabledValidatingTextInputColumn;
 import org.opendatakit.common.web.client.UIVisiblePredicate;
 
-import com.google.gwt.cell.client.ActionCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -654,7 +654,7 @@ public class AccessConfigurationSheet extends Composite {
 	}
 
 	private final class DeleteActionCallback implements
-			ActionCell.Delegate<UserSecurityInfo> {
+	    UIEnabledActionCell.Delegate<UserSecurityInfo> {
 
 		@Override
 		public void execute(UserSecurityInfo object) {
@@ -665,7 +665,7 @@ public class AccessConfigurationSheet extends Composite {
 	};
 
 	private final class ChangePasswordActionCallback implements
-			ActionCell.Delegate<UserSecurityInfo> {
+	      UIEnabledActionCell.Delegate<UserSecurityInfo> {
 
 		@Override
 		public void execute(UserSecurityInfo object) {
