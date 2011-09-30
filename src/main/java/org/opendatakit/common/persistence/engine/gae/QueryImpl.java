@@ -1050,12 +1050,12 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
       cb = r.results.get(r.results.size() - 1);
       value = EngineUtils.getDominantSortAttributeValueAsString(cb, dominantSortAttr);
       QueryResumePoint resumeCursor = new QueryResumePoint(dominantSortAttr.getName(), value,
-          cb.getUri());
+          cb.getUri(), ((startCursor != null) ? startCursor.isForwardCursor() : true));
       // determine the backward cursor...
       cb = r.results.get(0);
       value = EngineUtils.getDominantSortAttributeValueAsString(cb, dominantSortAttr);
       QueryResumePoint backwardCursor = new QueryResumePoint(dominantSortAttr.getName(), value,
-          cb.getUri());
+          cb.getUri(), !((startCursor != null) ? startCursor.isForwardCursor() : true));
   
       return new QueryResult(startCursor, r.results, backwardCursor, resumeCursor, r.hasMoreResults);
     } finally {

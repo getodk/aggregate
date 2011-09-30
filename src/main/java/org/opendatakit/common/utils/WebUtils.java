@@ -43,6 +43,7 @@ import org.xmlpull.v1.XmlPullParser;
  */
 public class WebUtils {
 
+   private static final String IS_FORWARD_CURSOR_VALUE_TAG = "isForwardCursor";
 	private static final String URI_LAST_RETURNED_VALUE_TAG = "uriLastReturnedValue";
 	private static final String ATTRIBUTE_VALUE_TAG = "attributeValue";
 	private static final String ATTRIBUTE_NAME_TAG = "attributeName";
@@ -201,6 +202,9 @@ public class WebUtils {
 		c = d.createElement(XML_TAG_NAMESPACE, URI_LAST_RETURNED_VALUE_TAG);
 		c.addChild(0, Node.TEXT, cursor.getUriLastReturnedValue());
 		e.addChild(idx++, Node.ELEMENT, c);
+      c = d.createElement(XML_TAG_NAMESPACE, IS_FORWARD_CURSOR_VALUE_TAG);
+      c.addChild(0, Node.TEXT, Boolean.toString(cursor.isForwardCursor()));
+      e.addChild(idx++, Node.ELEMENT, c);
 		
 		ByteArrayOutputStream ba = new ByteArrayOutputStream();
 		
@@ -284,6 +288,7 @@ public class WebUtils {
 		String attributeName = null;
 		String attributeValue = null;
 		String uriLastReturnedValue = null;
+		boolean isForwardCursor = true;
 
         int nElements = manifestElement.getChildCount();
         for (int i = 0; i < nElements; ++i) {
@@ -317,13 +322,19 @@ public class WebUtils {
                 	uriLastReturnedValue = null;
                 }
             }
+            else if (name.equalsIgnoreCase(IS_FORWARD_CURSOR_VALUE_TAG)) {
+              String flag = XFormParser.getXMLText(child, true);
+               if (flag != null && flag.length() == 0) {
+                 isForwardCursor = WebUtils.parseBoolean(flag);
+               }
+           }
         }
 
         if ( attributeName == null || attributeValue == null || uriLastReturnedValue == null ) {
         	throw new IllegalArgumentException("null value for websafeCursor element");
         }
 		
-        return new QueryResumePoint( attributeName, attributeValue, uriLastReturnedValue );
+        return new QueryResumePoint( attributeName, attributeValue, uriLastReturnedValue, isForwardCursor );
 	}
 
 }

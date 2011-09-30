@@ -61,7 +61,7 @@ public class QueryByDateRange extends QueryBase {
     query.addFilter(tbl.isComplete, Query.FilterOperation.EQUAL, Boolean.TRUE);
 
     this.startCursor = (uriLast != null) ? new QueryResumePoint( tbl.markedAsCompleteDate.getName(),
-        EngineUtils.getAttributeValueAsString(startDate, tbl.markedAsCompleteDate), uriLast) : null;
+        EngineUtils.getAttributeValueAsString(startDate, tbl.markedAsCompleteDate), uriLast, true) : null;
   }
 
   public QueryByDateRange(Form form, int maxFetchLimit, Date startDate, String uriLast, CallingContext cc) {

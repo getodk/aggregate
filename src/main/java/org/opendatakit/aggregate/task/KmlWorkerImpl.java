@@ -80,7 +80,7 @@ public class KmlWorkerImpl {
       QueryBase query;
       SubmissionFormatter formatter;
       if (filterGroupUri == null) {
-        query = new QueryByDateRange(form, ServletConsts.FETCH_LIMIT, BasicConsts.EPOCH, null, cc);
+        query = new QueryByDateRange(form, 100*ServletConsts.FETCH_LIMIT, BasicConsts.EPOCH, null, cc);
         formatter = new KmlFormatter(form, cc.getServerURL(), geopointField,
             titleField, imageField, pw, null, cc);
       } else {

@@ -65,7 +65,7 @@ public class SubmissionServiceImpl extends RemoteServiceServlet implements
       Form form = Form.retrieveFormByFormId(formId, cc);
       if (form.getFormDefinition() == null)
         return null; // ill-formed definition
-      QueryByUIFilterGroup query = new QueryByUIFilterGroup(form, filterGroup, CompletionFlag.ALL_SUBMISSIONS, cc);
+      QueryByUIFilterGroup query = new QueryByUIFilterGroup(form, filterGroup, CompletionFlag.ONLY_COMPLETE_SUBMISSIONS, cc);
       
       SubmissionUISummary summary = new SubmissionUISummary(form.getViewableName());
       GenerateHeaderInfo headerGenerator = new GenerateHeaderInfo(filterGroup, summary, form);
