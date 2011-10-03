@@ -123,7 +123,7 @@ public final class ExecuteChangePasswordButton extends AggregateButton implement
 			handler.@org.opendatakit.aggregate.client.widgets.ExecuteChangePasswordButton::handleJsonResponse(Ljava/lang/String;Ljava/lang/String;)(jsonObj.username, jsonObj.status);
 		}
 
-		// JSON change password has 1-second timeout
+		// JSON change password has 15-second timeout
 		setTimeout(
 				function() {
 					if (!window[callback + "done"]) {
@@ -134,7 +134,7 @@ public final class ExecuteChangePasswordButton extends AggregateButton implement
 					document.body.removeChild(script);
 					delete window[callback];
 					delete window[callback + "done"];
-				}, 1000);
+				}, 15000);
 
 		document.body.appendChild(script);
   }-*/;
