@@ -33,9 +33,4 @@ public class UIConsts {
   public static final String PROMPT_FOR_NAME_TXT = "Please enter a name for this group";
   public static final String REPROMPT_FOR_NAME_TXT = "That group already exists. Please enter a new name";
 
-  // running locally
- // public static final String GOOGLE_MAP_KEY = "";
-  
-  // google app engine deployment
-//  public static final String GOOGLE_MAP_KEY = "ABQIAAAABkAadQ7rAra4OaknnxN0MhSHx-tc1xWV6Pfl7CPQIU_6shZXHxTQ4sjqmZn7zqPwIfQP9eG5A9VVKg";
 }
