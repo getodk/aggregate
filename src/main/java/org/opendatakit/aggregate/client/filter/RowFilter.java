@@ -38,10 +38,9 @@ public final class RowFilter extends Filter implements Serializable {
     super();
   }
 
-  // TODO: Kyle I am not sure why RowFilter has keep/remove?
   public RowFilter(Visibility keepRemove, Column column, FilterOperation compare, String inputParam,
       Long ordinal) {
-    super(RowOrCol.ROW, ordinal);
+    super(keepRemove, RowOrCol.ROW, ordinal);
     this.operation = compare;
     this.input = inputParam;
     this.column = column;
@@ -64,10 +63,6 @@ public final class RowFilter extends Filter implements Serializable {
     uri = UIConsts.URI_DEFAULT;
   }
   
-  public Visibility getVisibility() {
-    // TODO: Kyle I am not sure why RowFilter has keep/remove?
-    return Visibility.DISPLAY;
-  }
 
   public FilterOperation getOperation() {
     return operation;
