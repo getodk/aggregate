@@ -52,6 +52,21 @@ public class Query
     }
 
     /**
+     * Add a not equal filter to the query.
+     * 
+     * @param attributeName
+     *            the name of an Attribute in the Relation.
+     * @param value
+     *            the value the given Attribute should be not equal to. This must be
+     *            of the correct type for the corresponding Attribute.
+     * @return this Query, with the not equal filter added.
+     */
+    public Query notEqual(String attributeName, Object value)
+    {
+        return addFilter(attributeName, FilterOperation.NOT_EQUAL, value);
+    }
+
+    /**
      * Add a greater than filter to the query.
      * 
      * @param attributeName

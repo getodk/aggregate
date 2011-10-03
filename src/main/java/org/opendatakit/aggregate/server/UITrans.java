@@ -35,12 +35,14 @@ public final class UITrans {
 
   static {
     toClient.put(Query.FilterOperation.EQUAL, FilterOperation.EQUAL);
+    toClient.put(Query.FilterOperation.NOT_EQUAL, FilterOperation.NOT_EQUAL);
     toClient.put(Query.FilterOperation.GREATER_THAN, FilterOperation.GREATER_THAN);
     toClient.put(Query.FilterOperation.GREATER_THAN_OR_EQUAL, FilterOperation.GREATER_THAN_OR_EQUAL);
     toClient.put(Query.FilterOperation.LESS_THAN, FilterOperation.LESS_THAN);
     toClient.put(Query.FilterOperation.LESS_THAN_OR_EQUAL, FilterOperation.LESS_THAN_OR_EQUAL);
     
     toPersistence.put(FilterOperation.EQUAL, Query.FilterOperation.EQUAL);
+    toPersistence.put(FilterOperation.NOT_EQUAL, Query.FilterOperation.NOT_EQUAL);
     toPersistence.put(FilterOperation.GREATER_THAN, Query.FilterOperation.GREATER_THAN);
     toPersistence.put(FilterOperation.GREATER_THAN_OR_EQUAL, Query.FilterOperation.GREATER_THAN_OR_EQUAL);
     toPersistence.put(FilterOperation.LESS_THAN, Query.FilterOperation.LESS_THAN);
