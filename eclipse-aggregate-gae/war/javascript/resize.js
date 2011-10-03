@@ -57,6 +57,8 @@ function setWidths() {
 	$("#mainNav").width(width);
 	$(".error_message").width(width);
 	$("#nav_bar_help_login").offset({left: width - $("#nav_bar_help_login").width() - 10});
+	$("#submission_admin_bar").width(width);
+	$("#submission_admin_list").width(width);
 	
 	// Submissions tab
 	var submissionWidth = width - sidePanelActualWidth;

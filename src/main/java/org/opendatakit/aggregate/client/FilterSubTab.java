@@ -37,10 +37,10 @@ public class FilterSubTab extends AggregateSubTabBase {
   
   private FilterGroup currentlyDisplayedFilterGroup;
   private Boolean displayMetaData;
-  
-
+  private int queryFilterLimit;
 
   public FilterSubTab() {
+    queryFilterLimit = FilterGroup.DEFAULT_FETCH_LIMIT;
     displayMetaData = false;
     getElement().setId("filter_sub_tab");
 
@@ -69,6 +69,7 @@ public class FilterSubTab extends AggregateSubTabBase {
   private void setCurrentlyDisplayedFilterGroup(FilterGroup newFilterGroup) {
     currentlyDisplayedFilterGroup = newFilterGroup;
     currentlyDisplayedFilterGroup.setIncludeMetadata(displayMetaData);
+    currentlyDisplayedFilterGroup.setQueryFetchLimit(queryFilterLimit);
     navTable.updateNavTable(newFilterGroup);
   }
   
@@ -130,9 +131,15 @@ public class FilterSubTab extends AggregateSubTabBase {
 
   public void setDisplayMetaData(Boolean displayMetaData) {
     this.displayMetaData = displayMetaData;
-    
-    // cause a refresh of filter group
-    setCurrentlyDisplayedFilterGroup(getDisplayedFilterGroup());
+    this.currentlyDisplayedFilterGroup.setIncludeMetadata(displayMetaData);
+  }
+  
+  public int getQueryFetchLimit() {
+    return queryFilterLimit;
+  }
+  public void setQueryFetchLimit(int fetchLimit) {
+    this.queryFilterLimit = fetchLimit;
+    this.currentlyDisplayedFilterGroup.setQueryFetchLimit(fetchLimit);
   }
   
   @Override

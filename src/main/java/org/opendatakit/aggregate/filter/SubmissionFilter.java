@@ -107,7 +107,7 @@ public class SubmissionFilter extends CommonFieldsBase {
     return getStringField(URI_FILTER_GROUP_PROPERTY);
   }
 
-  public Visibility getColumnVisibility() {
+  public Visibility getVisibility() {
     String visibility = getStringField(VISIBILITY_PROPERTY);
     try {
       return Visibility.valueOf(visibility);
@@ -158,7 +158,7 @@ public class SubmissionFilter extends CommonFieldsBase {
     }
   }
 
-  public void setColumnVisibility(Visibility visibility) {
+  public void setVisibility(Visibility visibility) {
     if (!setStringField(VISIBILITY_PROPERTY, visibility.name())) {
       throw new IllegalArgumentException("overflow visibility");
     }
@@ -242,7 +242,7 @@ public class SubmissionFilter extends CommonFieldsBase {
     Filter filter;
     if (type.equals(RowOrCol.COLUMN)) {
       ColumnFilter columnFilter = new ColumnFilter(this.getUri());
-      columnFilter.setVisibility(getColumnVisibility());
+     
       
       // populate the list of column filter headers
       if (colFilters != null) {
@@ -260,6 +260,7 @@ public class SubmissionFilter extends CommonFieldsBase {
       filter = rowFilter;
     }
    
+    filter.setVisibility(getVisibility());
     filter.setOrdinal(getOrdinalNumber());
     filter.setRc(getRowOrColumn());
     
@@ -299,10 +300,10 @@ public class SubmissionFilter extends CommonFieldsBase {
     subFilter.setRowOrColumn(filter.getRc());
     subFilter.setFilterGroup(filterGroup.getUri());
     subFilter.setOrdinalNumber(filter.getOrdinal());
+    subFilter.setVisibility(filter.getVisibility());
     
     if(filter instanceof ColumnFilter) {
       ColumnFilter cf = (ColumnFilter) filter;
-      subFilter.setColumnVisibility(cf.getVisibility());
       
       for(Column column : cf.getColumnFilterHeaders()) {
         SubmissionColumnFilter columnFilter = SubmissionColumnFilter.transform(column, subFilter, cc);

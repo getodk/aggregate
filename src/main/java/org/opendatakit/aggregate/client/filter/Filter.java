@@ -20,6 +20,7 @@ import java.io.Serializable;
 
 import org.opendatakit.aggregate.constants.common.RowOrCol;
 import org.opendatakit.aggregate.constants.common.UIConsts;
+import org.opendatakit.aggregate.constants.common.Visibility;
 
 public abstract class Filter implements Serializable {
 
@@ -27,15 +28,17 @@ public abstract class Filter implements Serializable {
   protected String uri; // unique identifier
   private RowOrCol rc;
   private Long ordinal; // order to display in filter group
-
+  private Visibility visibility;
+  
   public Filter() {
 
   }
 
-  public Filter(RowOrCol rowcol, long ordinal) {
+  public Filter(Visibility visibility, RowOrCol rowcol, long ordinal) {
     this.uri = UIConsts.URI_DEFAULT;
     this.rc = rowcol;
     this.ordinal = ordinal;
+    this.visibility = visibility;
   }
 
   /**
@@ -73,6 +76,14 @@ public abstract class Filter implements Serializable {
     this.ordinal = ordinal;
   }
   
+  public Visibility getVisibility() {
+    return visibility;
+  }
+
+  public void setVisibility(Visibility kr) {
+    this.visibility = kr;
+  }
+  
   /**
    * @see java.lang.Object#equals(java.lang.Object)
    */
@@ -83,7 +94,8 @@ public abstract class Filter implements Serializable {
     }
     
     Filter other = (Filter) obj;
-    return (rc == null ? (other.rc == null) : (rc.equals(other.rc)))
+    return (visibility == null ? (other.visibility == null) : (visibility.equals(other.visibility)))
+        && (rc == null ? (other.rc == null) : (rc.equals(other.rc)))
         && (ordinal == null ? (other.ordinal == null) : (ordinal.equals(other.ordinal)));
   }
 

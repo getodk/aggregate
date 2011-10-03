@@ -17,7 +17,7 @@ import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.ScrollPanel;
 
 public class SubmissionAdminSubTab extends AggregateSubTabBase {
 
@@ -29,7 +29,7 @@ public class SubmissionAdminSubTab extends AggregateSubTabBase {
   
   // ui elements
   private FormListBox formsBox;
-  private SimplePanel submissions;
+  private ScrollPanel submissions;
 
   // state
   private FormSummary selectedForm;
@@ -37,14 +37,15 @@ public class SubmissionAdminSubTab extends AggregateSubTabBase {
   public SubmissionAdminSubTab() {
 
     formsBox = new FormListBox(new ChangeDropDownHandler());
-    submissions = new SimplePanel();
+    submissions = new ScrollPanel();
+    submissions.getElement().setId("submission_admin_list");
     
     ServletPopupButton uploadSubmission = new ServletPopupButton(SUBMISSION_BUTTON_TEXT, SUBMISSION_TXT,
         UIConsts.SUBMISSION_SERVLET_ADDR, this, SUBMISSION_TOOLTIP_TXT, SUBMISSION_BALLOON_TXT);
     
     // create navigation buttons to servlet
     FlexTable navTable = new FlexTable();
-    navTable.addStyleName("stretch_header");
+    navTable.getElement().setId("submission_admin_bar");
     navTable.setWidget(0, 0, formsBox);
     navTable.setWidget(0, 1, uploadSubmission);
     navTable.getCellFormatter().getElement(0, 1).setAttribute("align", "right");

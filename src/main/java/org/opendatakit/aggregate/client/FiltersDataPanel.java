@@ -28,10 +28,12 @@ import org.opendatakit.aggregate.client.submission.Column;
 import org.opendatakit.aggregate.client.widgets.AddFilterButton;
 import org.opendatakit.aggregate.client.widgets.DeleteFilterButton;
 import org.opendatakit.aggregate.client.widgets.MetadataCheckBox;
+import org.opendatakit.aggregate.client.widgets.PaginationNumTextBox;
 import org.opendatakit.aggregate.client.widgets.RemoveFilterGroupButton;
 import org.opendatakit.aggregate.client.widgets.SaveAsFilterGroupButton;
 import org.opendatakit.aggregate.client.widgets.SaveFilterGroupButton;
 import org.opendatakit.aggregate.constants.common.UIConsts;
+import org.opendatakit.common.web.constants.HtmlConsts;
 
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -40,6 +42,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Tree;
 import com.google.gwt.user.client.ui.TreeItem;
+import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class FiltersDataPanel extends ScrollPanel {
 
@@ -60,7 +63,8 @@ public class FiltersDataPanel extends ScrollPanel {
     getElement().setId("filters_container");
 
     FlowPanel panel = new FlowPanel();
-
+   // panel.add( new HTML("<h2 id=\"filter_header\">" + HtmlConsts.SPACE + "Filters</h2>"));
+   
     FlexTable filterGroupButtons = new FlexTable();
     filterGroupButtons.setWidget(0, 0, new SaveFilterGroupButton(parentSubTab));
     copyButton = new SaveAsFilterGroupButton(parentSubTab);
@@ -69,14 +73,18 @@ public class FiltersDataPanel extends ScrollPanel {
     filterGroupButtons.setWidget(0, 2, removeButton);
     panel.add(filterGroupButtons);
 
-    HTML filterText = new HTML("<h3>Filters Applied</h3>");
+    HTML filterText = new HTML("<h3 id=\"filter_header\">Filters Applied</h3>");
     filterText.getElement().setId("filter_desc_title");
 
-    FlowPanel filterGlobal = new FlowPanel();
-    filterGlobal.add(filterText);
+    VerticalPanel filterGlobal = new VerticalPanel();
     filterGlobal.add(new MetadataCheckBox(parentSubTab));
+    FlexTable paginationTable = new FlexTable();
+    paginationTable.setHTML(0, 0, "<p id=\"filter_header\">Submissions per page</p>");
+    paginationTable.setWidget(0, 1, new PaginationNumTextBox(parentSubTab));
+    filterGlobal.add(paginationTable);
+    filterGlobal.add(filterText);
     panel.add(filterGlobal);
-    
+
     // Filters applied header
     filterHeader = new FlowPanel();
     panel.add(filterHeader);
@@ -205,14 +213,19 @@ public class FiltersDataPanel extends ScrollPanel {
       RowFilter rowFilter = (RowFilter) filter;
       title.setWidget(0, 1, new Label(rowFilter.getVisibility()
           + rowFilter.getColumn().getDisplayHeader()));
-      title.setWidget(1, 1,
-          new Label("where column is " + rowFilter.getOperation() + rowFilter.getInput()));
+      title.setWidget(1, 1, new Label(" where column is " + rowFilter.getOperation() + " "
+          + rowFilter.getInput()));
     } else if (filter instanceof ColumnFilter) {
       ColumnFilter columnFilter = (ColumnFilter) filter;
       ArrayList<Column> columns = columnFilter.getColumnFilterHeaders();
-      title.setWidget(0, 1, new Label(columnFilter.getVisibility().getDisplayText()));
-      for (Column column : columns) {
-        filterItem.addItem(new Label(column.getDisplayHeader()));
+      if (columns.size() == 1) {
+        title.setWidget(0, 1, new Label(columnFilter.getVisibility().getDisplayText() + " "
+            + columns.get(0).getDisplayHeader()));
+      } else {
+        title.setWidget(0, 1, new Label(columnFilter.getVisibility().getDisplayText() + " ..."));
+        for (Column column : columns) {
+          filterItem.addItem(new Label(column.getDisplayHeader()));
+        }
       }
     }
     return filterItem;

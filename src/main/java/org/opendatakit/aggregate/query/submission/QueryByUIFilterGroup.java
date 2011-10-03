@@ -115,7 +115,7 @@ public class QueryByUIFilterGroup extends QueryBase {
 
         FormElementKey decodeKey = new FormElementKey(column.getColumnEncoding());
         FormElementModel fem = FormElementModel.retrieveFormElementModel(form, decodeKey);
-        FilterOperation op = UITrans.convertFilterOperation(rf.getOperation());
+        FilterOperation op = UITrans.convertFilterOperation(rf.getOperation(), rf.getVisibility());
 
         String value = rf.getInput();
         Object compareValue = null;
