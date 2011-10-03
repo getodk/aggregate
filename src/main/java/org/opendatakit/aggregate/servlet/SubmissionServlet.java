@@ -175,6 +175,7 @@ public class SubmissionServlet extends ServletUtilBase {
     headerString.append("\" />");
     headerString.append("<link rel=\"stylesheet\" type=\"text/css\" href=\"");
     headerString.append(cc.getWebApplicationURL(ServletConsts.AGGREGATE_STYLE));
+    headerString.append("\" />");
 
     beginBasicHtmlResponse(TITLE, headerString.toString(), resp, cc);// header
                                                                      // info

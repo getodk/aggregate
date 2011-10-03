@@ -32,15 +32,13 @@ public final class ColumnFilter extends Filter implements Serializable {
   private static final long serialVersionUID = -1045936241685471645L;
 
   private ArrayList<Column> columns;
-  private Visibility kr;
 
   public ColumnFilter() {
     super();
   }
 
   public ColumnFilter(Visibility keepRemove, ArrayList<Column> columns, Long ordinal) {
-    super(RowOrCol.COLUMN, ordinal);
-    this.kr = keepRemove;
+    super(keepRemove, RowOrCol.COLUMN, ordinal);
     this.columns = columns;
   }
 
@@ -63,14 +61,6 @@ public final class ColumnFilter extends Filter implements Serializable {
     for(Column col : columns) {
       col.resetUriToDefault();
     }
-  }
-  
-  public Visibility getVisibility() {
-    return kr;
-  }
-
-  public void setVisibility(Visibility kr) {
-    this.kr = kr;
   }
 
   public ArrayList<Column> getColumnFilterHeaders() {
@@ -100,8 +90,7 @@ public final class ColumnFilter extends Filter implements Serializable {
     }
     
     ColumnFilter other = (ColumnFilter) obj;
-    return (kr == null ? (other.kr == null) : (kr.equals(other.kr)))
-        && (columns == null ? (other.columns == null) : (columns.equals(other.columns)));
+    return (columns == null ? (other.columns == null) : (columns.equals(other.columns)));
   }
 
   /**
@@ -110,8 +99,6 @@ public final class ColumnFilter extends Filter implements Serializable {
   @Override
   public int hashCode() {
     int hashCode = 11;
-    if (kr != null)
-      hashCode += kr.hashCode();
     if(columns != null)
       hashCode += columns.hashCode();
     return hashCode;

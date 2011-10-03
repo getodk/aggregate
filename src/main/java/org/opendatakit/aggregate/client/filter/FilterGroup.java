@@ -24,7 +24,7 @@ import org.opendatakit.common.persistence.client.UIQueryResumePoint;
 
 public final class FilterGroup implements Serializable {
 
-  private static final int DEFAULT_FETCH_LIMIT = 1000;
+  public static final int DEFAULT_FETCH_LIMIT = 500;
 
   private static final long serialVersionUID = 3317433416889397657L;
 
@@ -137,6 +137,10 @@ public final class FilterGroup implements Serializable {
 
   public int getQueryFetchLimit() {
     return queryFetchLimit;
+  }
+  
+  public void setQueryFetchLimit(int fetchLimit) {
+    queryFetchLimit = fetchLimit;
   }
   
   public UIQueryResumePoint getCursor() {
