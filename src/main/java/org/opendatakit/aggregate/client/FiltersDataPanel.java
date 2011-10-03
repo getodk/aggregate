@@ -206,7 +206,7 @@ public class FiltersDataPanel extends ScrollPanel {
       title.setWidget(0, 1, new Label(rowFilter.getVisibility()
           + rowFilter.getColumn().getDisplayHeader()));
       title.setWidget(1, 1,
-          new Label("where column is " + rowFilter.getOperation() + rowFilter.getInput()));
+          new Label("where column is " + rowFilter.getOperation() + " " + rowFilter.getInput()));
     } else if (filter instanceof ColumnFilter) {
       ColumnFilter columnFilter = (ColumnFilter) filter;
       ArrayList<Column> columns = columnFilter.getColumnFilterHeaders();

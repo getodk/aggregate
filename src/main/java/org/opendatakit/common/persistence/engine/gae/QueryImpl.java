@@ -60,6 +60,7 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
 
   static {
     operationMap.put(FilterOperation.EQUAL, FilterOperator.EQUAL);
+    operationMap.put(FilterOperation.NOT_EQUAL, FilterOperator.NOT_EQUAL);
     operationMap.put(FilterOperation.GREATER_THAN, FilterOperator.GREATER_THAN);
     operationMap.put(FilterOperation.GREATER_THAN_OR_EQUAL, FilterOperator.GREATER_THAN_OR_EQUAL);
     operationMap.put(FilterOperation.LESS_THAN, FilterOperator.LESS_THAN);
@@ -323,6 +324,8 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
       switch (op) {
       case EQUAL:
         return result == 0;
+      case NOT_EQUAL:
+        return result != 0;
       case LESS_THAN:
         return result < 0;
       case LESS_THAN_OR_EQUAL:

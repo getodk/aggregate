@@ -23,6 +23,7 @@ import java.io.Serializable;
  */
 public enum FilterOperation implements Serializable {
  EQUAL("Equals"),
+ NOT_EQUAL("Not Equals"),
  GREATER_THAN("Greater Than"),
  GREATER_THAN_OR_EQUAL("Greater Than or Equal to"),
  LESS_THAN("Less Than"),
