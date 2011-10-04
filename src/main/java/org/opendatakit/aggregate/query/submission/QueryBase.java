@@ -20,11 +20,9 @@ import java.util.List;
 import org.opendatakit.aggregate.datamodel.FormDataModel;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.datamodel.TopLevelDynamicBase;
-import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.submission.Submission;
-import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.persistence.Query.FilterOperation;
@@ -42,17 +40,12 @@ import org.opendatakit.common.web.CallingContext;
 public abstract class QueryBase {
 
   protected Query query;
-  protected final Form form;
+  private final Form form;
   
-  private boolean moreRecords;  
-  private int numOfRecords;
   
-  protected QueryResumePoint resumeCursor;
   
-  protected QueryBase(Form form) throws ODKFormNotFoundException {
-    this.numOfRecords = 0;
+  protected QueryBase(Form form) {
     this.form = form;
-    this.resumeCursor = null;
   }
 
   /**
@@ -108,57 +101,24 @@ public abstract class QueryBase {
 
   public abstract List<Submission> getResultSubmissions(CallingContext cc) throws ODKIncompleteSubmissionData, ODKDatastoreException;
 
-  public boolean moreRecordsAvailable() {
-    return moreRecords;
-  }
   
   public final Form getForm(){
     return form;
   }
-  
-  /**
-   * Generates a result table that contains all the submission data 
-   * of the form specified by the ODK ID
-   * 
-   * @return
-   *    a result table containing submission data
-   * @throws ODKDatastoreException 
-   */
-  protected List<? extends CommonFieldsBase> getSubmissionEntities() throws ODKDatastoreException {
-    List<? extends CommonFieldsBase> results = query.executeQuery();
-    numOfRecords = results.size();
-    
-    return results;
-  }
-  
 
   /**
-   * Generates a result table that contains all the submission data 
+   * Generates a QueryResultthat contains all the submission data 
    * of the form specified by the ODK ID
-   * @param fetchLimit TODO
-   * 
-   * 
    * @return
-   *    a result table containing submission data
+   * 
    * @throws ODKDatastoreException 
    *
    */
-  protected List<? extends CommonFieldsBase> getSubmissionEntities(QueryResumePoint startCursor, int fetchLimit) throws ODKDatastoreException {
+  protected QueryResult getQueryResult(QueryResumePoint startCursor, int fetchLimit) throws ODKDatastoreException {    
+    return query.executeQuery(startCursor, fetchLimit);
 
-    // retrieve submissions
-    QueryResult results = query.executeQuery(startCursor, fetchLimit);
-    List<? extends CommonFieldsBase> submissionEntities = results.getResultList();
-
-    // update state
-    numOfRecords = submissionEntities.size();
-    resumeCursor = results.getResumeCursor();
-    moreRecords = results.hasMoreResults();
     
-    return submissionEntities;
   }
   
-  public int getNumRecords() {
-    return numOfRecords;
-  }
   
 }

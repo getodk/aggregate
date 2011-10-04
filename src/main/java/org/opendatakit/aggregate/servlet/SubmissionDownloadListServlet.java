@@ -35,9 +35,9 @@ import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.Query;
+import org.opendatakit.common.persistence.Query.FilterOperation;
 import org.opendatakit.common.persistence.QueryResult;
 import org.opendatakit.common.persistence.QueryResumePoint;
-import org.opendatakit.common.persistence.Query.FilterOperation;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.utils.WebUtils;
 import org.opendatakit.common.web.CallingContext;
@@ -179,7 +179,13 @@ public class SubmissionDownloadListServlet extends ServletUtilBase {
           break;
       }
 
-      websafeCursorString = result.getResumeCursor().asWebsafeCursor();
+      QueryResumePoint qrp = result.getResumeCursor();
+      if ( qrp == null ) {
+        websafeCursorString = null;
+      } else {
+        websafeCursorString = qrp.asWebsafeCursor();
+      }
+      
       if (websafeCursorString != null) {
         // emit the cursor value...
         Element eCursorContinue = d.createElement(XML_TAG_NAMESPACE, CURSOR_TAG);

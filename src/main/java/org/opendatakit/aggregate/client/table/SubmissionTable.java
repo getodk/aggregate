@@ -18,8 +18,6 @@ package org.opendatakit.aggregate.client.table;
 
 import java.util.ArrayList;
 
-import org.opendatakit.aggregate.client.AggregateUI;
-import org.opendatakit.aggregate.client.popups.BinaryPopup;
 import org.opendatakit.aggregate.client.submission.Column;
 import org.opendatakit.aggregate.client.submission.SubmissionUI;
 import org.opendatakit.aggregate.client.submission.SubmissionUISummary;
@@ -28,13 +26,8 @@ import org.opendatakit.aggregate.client.widgets.RepeatViewButton;
 import org.opendatakit.aggregate.constants.common.UIConsts;
 import org.opendatakit.common.web.constants.BasicConsts;
 
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.HTMLTable;
 import com.google.gwt.user.client.ui.Image;
-import com.google.gwt.user.client.ui.PopupPanel;
 
 public class SubmissionTable extends FlexTable {
 
@@ -58,7 +51,6 @@ public class SubmissionTable extends FlexTable {
       setText(0, headerIndex++, column.getDisplayHeader().replace(":", "\n"));
     }
     setHTML(0, headerIndex, BLANK_VALUE);
-    setColumnFormatter(new HTMLTable.ColumnFormatter());
     getColumnFormatter().addStyleName(headerIndex, "blank-submission-column");
 
     getRowFormatter().addStyleName(0, "titleBar");
@@ -84,7 +76,7 @@ public class SubmissionTable extends FlexTable {
             setText(rowPosition, columnPosition, BasicConsts.EMPTY_STRING);
           } else {
             Image image = new Image(value + UIConsts.PREVIEW_SET);
-            image.addClickHandler(new PopupClickHandler(value));
+            image.addClickHandler(new BinaryPopupClickHandler(value, false));
             setWidget(rowPosition, columnPosition, image);
           }
           break;
@@ -116,27 +108,5 @@ public class SubmissionTable extends FlexTable {
   public ArrayList<SubmissionUI> getSubmissions() {
     return tableSubmissions;
   }
-  
-  private class PopupClickHandler implements ClickHandler {
-    private final String value;
     
-    public PopupClickHandler(String value) {
-      this.value = value;
-    }
-    
-    @Override
-    public void onClick(ClickEvent event) {
-      final PopupPanel popup = new BinaryPopup(value);
-      popup.setPopupPositionAndShow(new PopupPanel.PositionCallback() {
-        @Override
-        public void setPosition(int offsetWidth, int offsetHeight) {
-          int left = ((Window.getScrollLeft() + Window.getClientWidth() - offsetWidth) / 2);
-          int top = ((Window.getScrollTop() + Window.getClientHeight() - offsetHeight) / 2);
-          popup.setPopupPosition(left, top);
-        }
-      });
-      AggregateUI.getUI().getTimer().restartTimer();
-    }
-  }
-  
 }

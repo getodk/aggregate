@@ -179,4 +179,35 @@ public class RelationTest {
 		
 		rel.dropRelation(cc);
 	}
+
+   @Test
+   public void testCase7() throws ODKDatastoreException {
+      CallingContext cc = TestContextFactory.getCallingContext();
+      
+      MyRelation rel = new MyRelation(cc);
+      rel = new MyRelation(cc);
+      Entity e = rel.newEntity(cc);
+      
+      e.setField("secondField", "5");
+      e.setField("thirdField", "5.81");
+      e.setField("fourthField", (new Date()).toString());
+      e.setField("thisIsIt", "a simple long string");
+      
+      e.persist(cc);
+      
+      Entity e2 = rel.newEntity(cc);
+      
+      e2.setField("secondField", "6");
+      e2.setField("thirdField", "6.81");
+      e2.setField("fourthField", (new Date(0)).toString());
+      e2.setField("thisIsIt", "another simple long string");
+      
+      e2.persist(cc);
+      
+      List<Entity> entities = rel.getEntities(MyRelation.fieldDbl, FilterOperation.NOT_EQUAL, 5.81, cc);
+      assertEquals(1, entities.size());
+      assertEquals( e2.getUri(), entities.get(0).getUri());
+      
+      rel.dropRelation(cc);
+   }
 }

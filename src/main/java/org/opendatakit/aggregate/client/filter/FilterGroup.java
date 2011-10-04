@@ -20,10 +20,11 @@ import java.io.Serializable;
 import java.util.ArrayList;
 
 import org.opendatakit.aggregate.constants.common.UIConsts;
+import org.opendatakit.common.persistence.client.UIQueryResumePoint;
 
 public final class FilterGroup implements Serializable {
 
-  private static final int DEFAULT_FETCH_LIMIT = 1000;
+  public static final int DEFAULT_FETCH_LIMIT = 500;
 
   private static final long serialVersionUID = 3317433416889397657L;
 
@@ -36,6 +37,8 @@ public final class FilterGroup implements Serializable {
   
   private int queryFetchLimit;
 
+  private UIQueryResumePoint cursor;
+  
   public FilterGroup() {
     includeMetadata = false;
     queryFetchLimit = DEFAULT_FETCH_LIMIT;
@@ -135,7 +138,19 @@ public final class FilterGroup implements Serializable {
   public int getQueryFetchLimit() {
     return queryFetchLimit;
   }
-    
+  
+  public void setQueryFetchLimit(int fetchLimit) {
+    queryFetchLimit = fetchLimit;
+  }
+  
+  public UIQueryResumePoint getCursor() {
+    return cursor;
+  }
+
+  public void setCursor(UIQueryResumePoint cursor) {
+    this.cursor = cursor;
+  }
+
   /**
    * @see java.lang.Object#equals(java.lang.Object)
    */
@@ -160,8 +175,6 @@ public final class FilterGroup implements Serializable {
       hashCode += name.hashCode();
     if (formId != null)
       hashCode += formId.hashCode();
-    if (uri != null)
-      hashCode += uri.hashCode();
     return hashCode;
   }
 

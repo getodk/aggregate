@@ -26,6 +26,7 @@ import org.opendatakit.aggregate.exception.ODKConversionException;
 import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.format.element.ElementFormatter;
 import org.opendatakit.aggregate.submission.SubmissionField;
+import org.opendatakit.aggregate.submission.SubmissionVisitor;
 import org.opendatakit.common.datamodel.BinaryContentManipulator;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
@@ -48,14 +49,14 @@ public abstract class SubmissionFieldBase<T> implements SubmissionField<T>{
     this.element = element;
   }
 
-  /**
-   * Get Property Name
-   *
-   * @return
-   *    property name
-   */
+  @Override
   public final String getPropertyName() {
     return element.getElementName();
+  }
+  
+  @Override
+  public boolean depthFirstTraversal(SubmissionVisitor visitor) {
+    return visitor.traverse(this);
   }
   
   /**

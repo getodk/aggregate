@@ -60,6 +60,7 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
 
   static {
     operationMap.put(FilterOperation.EQUAL, FilterOperator.EQUAL);
+    operationMap.put(FilterOperation.NOT_EQUAL, FilterOperator.NOT_EQUAL);
     operationMap.put(FilterOperation.GREATER_THAN, FilterOperator.GREATER_THAN);
     operationMap.put(FilterOperation.GREATER_THAN_OR_EQUAL, FilterOperator.GREATER_THAN_OR_EQUAL);
     operationMap.put(FilterOperation.LESS_THAN, FilterOperator.LESS_THAN);
@@ -323,6 +324,8 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
       switch (op) {
       case EQUAL:
         return result == 0;
+      case NOT_EQUAL:
+        return result != 0;
       case LESS_THAN:
         return result < 0;
       case LESS_THAN_OR_EQUAL:
@@ -1050,12 +1053,12 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
       cb = r.results.get(r.results.size() - 1);
       value = EngineUtils.getDominantSortAttributeValueAsString(cb, dominantSortAttr);
       QueryResumePoint resumeCursor = new QueryResumePoint(dominantSortAttr.getName(), value,
-          cb.getUri());
+          cb.getUri(), ((startCursor != null) ? startCursor.isForwardCursor() : true));
       // determine the backward cursor...
       cb = r.results.get(0);
       value = EngineUtils.getDominantSortAttributeValueAsString(cb, dominantSortAttr);
       QueryResumePoint backwardCursor = new QueryResumePoint(dominantSortAttr.getName(), value,
-          cb.getUri());
+          cb.getUri(), !((startCursor != null) ? startCursor.isForwardCursor() : true));
   
       return new QueryResult(startCursor, r.results, backwardCursor, resumeCursor, r.hasMoreResults);
     } finally {

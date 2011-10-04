@@ -19,41 +19,51 @@ import java.io.Serializable;
  * Wrapper object for communicating a resume point up to the GWT UI layer.
  * 
  * @author mitchellsundt@gmail.com
- *
+ * 
  */
 public class UIQueryResumePoint implements Serializable {
-	/**
+  /**
 	 * 
 	 */
-	private static final long serialVersionUID = 7500161085826059616L;
-	private String attributeName;
-	private String value;
-	private String uriLastReturnedValue;
-	
-	public UIQueryResumePoint() {}
+  private static final long serialVersionUID = 7500161085826059616L;
+  private String attributeName;
+  private String value;
+  private String uriLastReturnedValue;
+  private Boolean isForwardCursor;
 
-	public String getAttributeName() {
-		return attributeName;
-	}
+  public UIQueryResumePoint() {
+  }
 
-	public void setAttributeName(String attributeName) {
-		this.attributeName = attributeName;
-	}
+  public String getAttributeName() {
+    return attributeName;
+  }
 
-	public String getValue() {
-		return value;
-	}
+  public void setAttributeName(String attributeName) {
+    this.attributeName = attributeName;
+  }
 
-	public void setValue(String value) {
-		this.value = value;
-	}
+  public String getValue() {
+    return value;
+  }
 
-	public String getUriLastReturnedValue() {
-		return uriLastReturnedValue;
-	}
+  public void setValue(String value) {
+    this.value = value;
+  }
 
-	public void setUriLastReturnedValue(String uriLastReturnedValue) {
-		this.uriLastReturnedValue = uriLastReturnedValue;
-	};
-	
+  public String getUriLastReturnedValue() {
+    return uriLastReturnedValue;
+  }
+
+  public void setUriLastReturnedValue(String uriLastReturnedValue) {
+    this.uriLastReturnedValue = uriLastReturnedValue;
+  }
+
+  public Boolean getIsForwardCursor() {
+    return isForwardCursor;
+  }
+
+  public void setIsForwardCursor(Boolean isForwardCursor) {
+    this.isForwardCursor = isForwardCursor;
+  };
+
 }

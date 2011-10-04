@@ -809,6 +809,36 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 		}
 	}
 
+	@Override
+	public boolean depthFirstTraversal( SubmissionVisitor visitor ) {
+	  if ( visitor.traverse(this) ) return true;
+	  
+     for (SubmissionValue value : getSubmissionValues()) {
+       if ( value != null && value.depthFirstTraversal(visitor) ) return true;
+     }
+	 
+     return false;
+	}
+	
+	/**
+	 * Remove the element from the submission.
+	 * Only implemented for binary attachments at this time.
+	 * For use when manually marking a form as complete.
+	 * 
+	 * @param m
+	 */
+	public void removeElementValue(FormElementModel m) {
+	  if ( m.isMetadata() ) {
+	    throw new IllegalStateException("cannot remove metadata");
+	  }
+
+	  if ( m.getElementType() != FormElementModel.ElementType.BINARY ) {
+	    throw new IllegalStateException("only removal of binary objects supported");
+	  }
+
+	  elementsToValues.remove(m);
+	}
+	
 	public void persist(CallingContext cc)
 			throws ODKEntityPersistException {
 		// persist everything underneath us...

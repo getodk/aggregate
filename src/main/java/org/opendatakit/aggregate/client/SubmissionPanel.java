@@ -19,23 +19,37 @@ package org.opendatakit.aggregate.client;
 import org.opendatakit.aggregate.client.exception.FormNotAvailableException;
 import org.opendatakit.aggregate.client.filter.FilterGroup;
 import org.opendatakit.aggregate.client.submission.SubmissionUISummary;
+import org.opendatakit.aggregate.client.table.SubmissionPaginationNavBar;
 import org.opendatakit.aggregate.client.table.SubmissionTable;
 import org.opendatakit.aggregate.constants.common.SubTabs;
 import org.opendatakit.common.security.common.GrantedAuthorityName;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 
-public class SubmissionPanel extends ScrollPanel {
+public class SubmissionPanel extends FlowPanel {
 
+  private final ScrollPanel submissionPanel;
+  private final SubmissionPaginationNavBar paginationNavBar;
+  
   private SubmissionTable submissionTable;
 
   public SubmissionPanel() {
     super();
-    getElement().setId("submission_container");
+    paginationNavBar = new SubmissionPaginationNavBar();
+    
+    submissionPanel = new ScrollPanel();
+    submissionPanel.getElement().setId("submission_container");
+    
+    add(paginationNavBar);
+    add(submissionPanel);
   }
 
   public void update(FilterGroup filterGroup) {
+    
+    final FilterGroup fg = filterGroup;
+    
     // Set up the callback object.
     AsyncCallback<SubmissionUISummary> callback = new AsyncCallback<SubmissionUISummary>() {
       public void onFailure(Throwable caught) {
@@ -54,8 +68,11 @@ public class SubmissionPanel extends ScrollPanel {
         AggregateUI.getUI().clearError();        
         boolean addDeleteButton = AggregateUI.getUI().getUserInfo().getGrantedAuthorities()
         .contains(GrantedAuthorityName.ROLE_DATA_OWNER);
+        
+        paginationNavBar.update(fg, summary);
+        
         submissionTable = new SubmissionTable(summary, addDeleteButton);
-        setWidget(submissionTable);
+        submissionPanel.setWidget(submissionTable);
         AggregateUI.resize();
       }
     };
@@ -64,7 +81,7 @@ public class SubmissionPanel extends ScrollPanel {
     	SecureGWT.getSubmissionService().getSubmissions(filterGroup, callback);
     } else {
     	submissionTable = null;
-    	setWidget(submissionTable);
+    	submissionPanel.setWidget(submissionTable);
     }
   }
   

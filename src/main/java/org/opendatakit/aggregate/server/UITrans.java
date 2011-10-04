@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.opendatakit.aggregate.constants.common.FilterOperation;
+import org.opendatakit.aggregate.constants.common.Visibility;
 import org.opendatakit.common.persistence.Query;
 
 /**
@@ -30,28 +31,28 @@ import org.opendatakit.common.persistence.Query;
  */
 public final class UITrans {
 
-  private static Map<Query.FilterOperation, FilterOperation> toClient = new HashMap<Query.FilterOperation, FilterOperation>();
-  private static Map<FilterOperation, Query.FilterOperation> toPersistence = new HashMap<FilterOperation, Query.FilterOperation>();
+  private static Map<FilterOperation, Query.FilterOperation> toPersistenceDisplay = new HashMap<FilterOperation, Query.FilterOperation>();
+  private static Map<FilterOperation, Query.FilterOperation> toPersistenceHide = new HashMap<FilterOperation, Query.FilterOperation>();
 
   static {
-    toClient.put(Query.FilterOperation.EQUAL, FilterOperation.EQUAL);
-    toClient.put(Query.FilterOperation.GREATER_THAN, FilterOperation.GREATER_THAN);
-    toClient.put(Query.FilterOperation.GREATER_THAN_OR_EQUAL, FilterOperation.GREATER_THAN_OR_EQUAL);
-    toClient.put(Query.FilterOperation.LESS_THAN, FilterOperation.LESS_THAN);
-    toClient.put(Query.FilterOperation.LESS_THAN_OR_EQUAL, FilterOperation.LESS_THAN_OR_EQUAL);
+    toPersistenceDisplay.put(FilterOperation.EQUAL, Query.FilterOperation.EQUAL);
+    toPersistenceDisplay.put(FilterOperation.NOT_EQUAL, Query.FilterOperation.NOT_EQUAL);
+    toPersistenceDisplay.put(FilterOperation.GREATER_THAN, Query.FilterOperation.GREATER_THAN);
+    toPersistenceDisplay.put(FilterOperation.GREATER_THAN_OR_EQUAL, Query.FilterOperation.GREATER_THAN_OR_EQUAL);
+    toPersistenceDisplay.put(FilterOperation.LESS_THAN, Query.FilterOperation.LESS_THAN);
+    toPersistenceDisplay.put(FilterOperation.LESS_THAN_OR_EQUAL, Query.FilterOperation.LESS_THAN_OR_EQUAL);
     
-    toPersistence.put(FilterOperation.EQUAL, Query.FilterOperation.EQUAL);
-    toPersistence.put(FilterOperation.GREATER_THAN, Query.FilterOperation.GREATER_THAN);
-    toPersistence.put(FilterOperation.GREATER_THAN_OR_EQUAL, Query.FilterOperation.GREATER_THAN_OR_EQUAL);
-    toPersistence.put(FilterOperation.LESS_THAN, Query.FilterOperation.LESS_THAN);
-    toPersistence.put(FilterOperation.LESS_THAN_OR_EQUAL, Query.FilterOperation.LESS_THAN_OR_EQUAL);
+    toPersistenceHide.put(FilterOperation.EQUAL, Query.FilterOperation.NOT_EQUAL);
+    toPersistenceHide.put(FilterOperation.NOT_EQUAL, Query.FilterOperation.EQUAL);
+    toPersistenceHide.put(FilterOperation.GREATER_THAN, Query.FilterOperation.LESS_THAN_OR_EQUAL);
+    toPersistenceHide.put(FilterOperation.GREATER_THAN_OR_EQUAL, Query.FilterOperation.LESS_THAN);
+    toPersistenceHide.put(FilterOperation.LESS_THAN, Query.FilterOperation.GREATER_THAN_OR_EQUAL);
+    toPersistenceHide.put(FilterOperation.LESS_THAN_OR_EQUAL, Query.FilterOperation.GREATER_THAN);
   }
   
-  public static final Query.FilterOperation convertFilterOperation(FilterOperation op) {
-    return toPersistence.get(op);
+  public static final Query.FilterOperation convertFilterOperation(FilterOperation op, Visibility visibility) {
+    return toPersistenceDisplay.get(op);
   }
   
-  public static final FilterOperation convertFilterOperation(Query.FilterOperation op) {
-    return toClient.get(op);
-  }
+ 
 }

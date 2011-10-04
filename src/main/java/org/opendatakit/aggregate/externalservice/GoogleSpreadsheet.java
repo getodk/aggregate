@@ -118,7 +118,7 @@ public class GoogleSpreadsheet extends OAuthExternalService implements ExternalS
     // TODO: REMOVE after bug is fixed
     // http://code.google.com/p/gdata-java-client/issues/detail?id=103
     spreadsheetService.setProtocolVersion(SpreadsheetService.Versions.V1);
-    
+    spreadsheetService.setConnectTimeout(SpreadsheetConsts.SERVER_TIMEOUT);
     try {
       spreadsheetService.setOAuthCredentials(getOAuthParams(), new OAuthHmacSha1Signer());
     } catch (OAuthException e) {
@@ -156,6 +156,7 @@ public class GoogleSpreadsheet extends OAuthExternalService implements ExternalS
 
     // setup service
     DocsService service = new DocsService(ServletConsts.APPLICATION_NAME);
+    service.setConnectTimeout(SpreadsheetConsts.SERVER_TIMEOUT);
     try {
       service.setOAuthCredentials(getOAuthParams(), new OAuthHmacSha1Signer());
     } catch (OAuthException e) {
@@ -301,8 +302,10 @@ public class GoogleSpreadsheet extends OAuthExternalService implements ExternalS
     uncreatedWorksheet.setRowCount(2);
     uncreatedWorksheet.setColCount(headers.size());
     URL worksheetFeedUrl = entry.getWorksheetFeedUrl();
+    logger.info("WorksheetFeedUrl: " + worksheetFeedUrl.toString() );
     WorksheetEntry createdWorksheet = spreadsheetService.insert(worksheetFeedUrl,
         uncreatedWorksheet);
+    logger.info("CellFeedUrl: " + createdWorksheet.getCellFeedUrl().toString() );
 
     // update the cells of the worksheet with the proper headers
     // first query the worksheet for the cells we need to change
@@ -327,7 +330,9 @@ public class GoogleSpreadsheet extends OAuthExternalService implements ExternalS
     }
     // submit the cell feed update as a batch operation
     Link batchLink = existingCellFeed.getLink(Link.Rel.FEED_BATCH, Link.Type.ATOM);
-    CellFeed batchResponse = spreadsheetService.batch(new URL(batchLink.getHref()), batchRequest);
+    URL batchLinkUrl = new URL(batchLink.getHref());
+    logger.info("BatchLinkUrl: " + batchLinkUrl.toString());
+    CellFeed batchResponse = spreadsheetService.batch(batchLinkUrl, batchRequest);
 
     // Check the results
     for (CellEntry cellEntry : batchResponse.getEntries()) {
@@ -420,7 +425,9 @@ public class GoogleSpreadsheet extends OAuthExternalService implements ExternalS
       values.setValueLocal(headerString, (rowString == null) ? BasicConsts.SPACE : rowString);
     }
 
-    spreadsheetService.insert(worksheet.getListFeedUrl(), newEntry);
+    URL listFeedUrl = worksheet.getListFeedUrl();
+    logger.info("listFeedUrl: " + listFeedUrl.toString());
+    spreadsheetService.insert(listFeedUrl, newEntry);
   }
 
   public WorksheetEntry getWorksheet(String worksheetId) throws IOException, ServiceException {

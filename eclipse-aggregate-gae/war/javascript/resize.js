@@ -26,6 +26,7 @@ function setHeights() {
     var tab2Height = $(".tab_measure_2").first().height();
     var contentHeight = layoutHeight - tab1Height - tab2Height;
 	var filterContentHeight = contentHeight - $("#submission_nav_table").height();
+	var filterPaginationHeight = $("#filter_submission_pagination").height();
 	
 	// All tabs
 	$("html").height(height);
@@ -41,7 +42,7 @@ function setHeights() {
 	
 	// Submissions tab
 	$("#filters_container").height(filterContentHeight - /* border width */ 1);
-	$("#submission_container").height(filterContentHeight - /* border width */ 1);
+	$("#submission_container").height(filterContentHeight - filterPaginationHeight - /* border width */ 1);
 }
 
 function setWidths() {
@@ -56,6 +57,8 @@ function setWidths() {
 	$("#mainNav").width(width);
 	$(".error_message").width(width);
 	$("#nav_bar_help_login").offset({left: width - $("#nav_bar_help_login").width() - 10});
+	$("#submission_admin_bar").width(width);
+	$("#submission_admin_list").width(width);
 	
 	// Submissions tab
 	var submissionWidth = width - sidePanelActualWidth;

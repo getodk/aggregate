@@ -44,6 +44,7 @@ import org.springframework.jdbc.core.RowMapper;
 public class QueryImpl implements Query {
 
 	private static final String K_IS_NULL = " IS NULL ";
+   private static final String K_IS_NOT_NULL = " IS NOT NULL ";
 	private static final String K_SELECT = "SELECT ";
 	private static final String K_SELECT_DISTINCT = "SELECT DISTINCT ";
 	private static final String K_BQ = "`";
@@ -61,6 +62,7 @@ public class QueryImpl implements Query {
 
 	static {
 		operationMap.put(FilterOperation.EQUAL, " = ");
+      operationMap.put(FilterOperation.NOT_EQUAL, " <> ");
 		operationMap.put(FilterOperation.GREATER_THAN, " > ");
 		operationMap.put(FilterOperation.GREATER_THAN_OR_EQUAL, " >= ");
 		operationMap.put(FilterOperation.LESS_THAN, " < ");
@@ -156,6 +158,8 @@ public class QueryImpl implements Query {
 		queryBindBuilder.append(K_BQ);
 		if ( op.equals(FilterOperation.EQUAL) && value == null ) {
 			queryBindBuilder.append(K_IS_NULL);
+		} else if ( op.equals(FilterOperation.NOT_EQUAL) && value == null ) {
+	         queryBindBuilder.append(K_IS_NOT_NULL);
 		} else {
 			queryBindBuilder.append(operationMap.get(op));
 			queryBindBuilder.append(K_BIND_VALUE);
@@ -414,11 +418,13 @@ public class QueryImpl implements Query {
 			// determine the resume cursor...
 			cb = r.results.get(r.results.size()-1);
 			value = EngineUtils.getDominantSortAttributeValueAsString(cb, dominantSortAttr);
-			QueryResumePoint resumeCursor = new QueryResumePoint( dominantSortAttr.getName(), value, cb.getUri());
+			QueryResumePoint resumeCursor = new QueryResumePoint( dominantSortAttr.getName(), value, 
+			    cb.getUri(), ((startCursor != null) ? startCursor.isForwardCursor() : true));
 			// determine the backward cursor...
 			cb = r.results.get(0);
 			value = EngineUtils.getDominantSortAttributeValueAsString(cb, dominantSortAttr);
-			QueryResumePoint backwardCursor = new QueryResumePoint( dominantSortAttr.getName(), value, cb.getUri());
+			QueryResumePoint backwardCursor = new QueryResumePoint( dominantSortAttr.getName(), value, 
+			    cb.getUri(), !((startCursor != null) ? startCursor.isForwardCursor() : true));
 			
 			return new QueryResult( startCursor, r.results, backwardCursor, resumeCursor, r.hasMoreResults );
 		} catch ( Exception e ) {

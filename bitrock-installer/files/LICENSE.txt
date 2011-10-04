@@ -36,13 +36,16 @@ http://apache.org/		/Apache 2.0/
 	commons-lang-2.5.jar
 	commons-logging-1.1.1.jar
 http://code.google.com/apis/gdata/docs/directory.html		/Apache 2.0/
-	gdata-base-1.0-1.41.5.jar
-	gdata-client-1.0-1.41.5.jar
-	gdata-core-1.0-1.41.5.jar
-	gdata-docs-3.0-1.41.5.jar
-	gdata-maps-2.0-1.41.5.jar
-	gdata-media-1.0-1.41.5.jar
-	gdata-spreadsheet-3.0-1.41.5.jar
+	gdata-client-1.0-1.46.0.jar
+	gdata-client-meta-1.0-1.46.0.jar
+	gdata-core-1.0-1.46.0.jar
+	gdata-docs-3.0-1.46.0.jar
+	gdata-docs-meta-3.0-1.46.0.jar
+	gdata-maps-2.0-1.46.0.jar
+	gdata-maps-meta-2.0-1.46.0.jar
+	gdata-media-1.0-1.46.0.jar
+	gdata-spreadsheet-3.0-1.46.0.jar
+	gdata-spreadsheet-meta-3.0-1.46.0.jar
 http://code.google.com/p/google-gin/ 		/Apache 2.0/
 	gin-1.5.0.jar
 http://code.google.com/p/google-gson/		/Apache 2.0/

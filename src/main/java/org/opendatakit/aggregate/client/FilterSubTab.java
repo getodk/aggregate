@@ -32,14 +32,15 @@ public class FilterSubTab extends AggregateSubTabBase {
 
   private FilterNavigationTable navTable;
   
-  private HorizontalPanel filtersNSubmissions;
   private FiltersDataPanel filtersPanel;
   private SubmissionPanel submissionPanel;
   
   private FilterGroup currentlyDisplayedFilterGroup;
   private Boolean displayMetaData;
+  private int queryFilterLimit;
 
   public FilterSubTab() {
+    queryFilterLimit = FilterGroup.DEFAULT_FETCH_LIMIT;
     displayMetaData = false;
     getElement().setId("filter_sub_tab");
 
@@ -49,26 +50,26 @@ public class FilterSubTab extends AggregateSubTabBase {
     add(navTable);
 
     // Create Filters and Submissions Panel
-    filtersNSubmissions = new HorizontalPanel();
+    HorizontalPanel filtersNSubmissions = new HorizontalPanel();
 
     filtersPanel = new FiltersDataPanel(this);
     filtersNSubmissions.add(filtersPanel);
-
-    submissionPanel = new SubmissionPanel();
-    filtersNSubmissions.add(submissionPanel);
-
-    filtersNSubmissions.getElement().setId("filters_data");
     filtersNSubmissions.getElement().getFirstChildElement().getFirstChildElement()
-        .getFirstChildElement().setId("filters_panel");
-
+    .getFirstChildElement().setId("filters_panel"); // TODO: improve this
+    
+    submissionPanel = new SubmissionPanel();
+    
+    filtersNSubmissions.add(submissionPanel);
+    filtersNSubmissions.getElement().setId("filters_data");
     filtersNSubmissions.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_JUSTIFY);
-
+    
     add(filtersNSubmissions);
   }
 
   private void setCurrentlyDisplayedFilterGroup(FilterGroup newFilterGroup) {
     currentlyDisplayedFilterGroup = newFilterGroup;
     currentlyDisplayedFilterGroup.setIncludeMetadata(displayMetaData);
+    currentlyDisplayedFilterGroup.setQueryFetchLimit(queryFilterLimit);
     navTable.updateNavTable(newFilterGroup);
   }
   
@@ -130,9 +131,15 @@ public class FilterSubTab extends AggregateSubTabBase {
 
   public void setDisplayMetaData(Boolean displayMetaData) {
     this.displayMetaData = displayMetaData;
-    
-    // cause a refresh of filter group
-    setCurrentlyDisplayedFilterGroup(getDisplayedFilterGroup());
+    this.currentlyDisplayedFilterGroup.setIncludeMetadata(displayMetaData);
+  }
+  
+  public int getQueryFetchLimit() {
+    return queryFilterLimit;
+  }
+  public void setQueryFetchLimit(int fetchLimit) {
+    this.queryFilterLimit = fetchLimit;
+    this.currentlyDisplayedFilterGroup.setQueryFetchLimit(fetchLimit);
   }
   
   @Override
