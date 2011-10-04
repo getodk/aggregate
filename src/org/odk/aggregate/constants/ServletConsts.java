@@ -245,13 +245,15 @@ public class ServletConsts {
   public static final String SPREADSHEETS_FEED = SPREADSHEET_SCOPE + "spreadsheets"
     + FEED_PERMISSIONS;
 
-  public static final String DOCS_SCOPE = "http://docs.google.com/feeds/";
+  public static final String DOCS_SCOPE = "https://docs.google.com/feeds/";
   
   
   public static final String DOC_FEED = DOCS_SCOPE + "default" + FEED_PERMISSIONS;
 
 
   public static final String DOCS_PRE_KEY = "spreadsheet%3A";
+  
+  public static final int GOOGLE_DOCS_SPREADSHEET_SERVER_TIMEOUT = 60000;
   
   /**
    * The name of the property that specifies the session key for the doc and

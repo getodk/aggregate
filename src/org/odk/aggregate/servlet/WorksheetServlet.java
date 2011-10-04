@@ -102,6 +102,7 @@ public class WorksheetServlet extends ServletUtilBase {
       OAuthToken authToken = spreadsheet.getAuthToken();
       SpreadsheetService service = new SpreadsheetService(this.getServletContext()
           .getInitParameter("application_name"));
+      service.setConnectTimeout(ServletConsts.GOOGLE_DOCS_SPREADSHEET_SERVER_TIMEOUT);
       try {
         GoogleOAuthParameters oauthParameters = new GoogleOAuthParameters();
         oauthParameters.setOAuthConsumerKey(ServletConsts.OAUTH_CONSUMER_KEY);
