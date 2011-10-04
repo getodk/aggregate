@@ -42,6 +42,7 @@ var logfileStream = null;
 var terminalGood = '---END-SCRIPT-SUCCESS--- ';
 var terminalBad = '---END-SCRIPT-FAILURE--- ';
 var terminalOutcome = 0; // 0 - unknown, 1 = success, -1 = failure
+var logContainsError = 0; // count the occurances of 'rror' in output
 var showLeftButtonOnSuccess = false;
 	
 function init() { 
@@ -152,8 +153,13 @@ function fetchMoreOutput() {
 		while ( !window.logfile.AtEndOfStream ) {
 			var line = window.logfile.ReadLine();
 			if ( line == window.terminalGood ) {
-				window.terminalOutcome = 1;
-				line = '<b><em><font color="green">' + line + '</font></em></b>';
+				if ( logContainsError == 0 ) {
+					window.terminalOutcome = 1;
+					line = '<b><em><font color="green">' + line + '</font></em></b>';
+				} else {
+					window.terminalOutcome = -1;
+					line = '<b><em><font color="orange">' + line + '</font></em></b>';
+				}
 			}
 			if ( line == window.terminalBad ) {
 				window.terminalOutcome = -1;
@@ -180,7 +186,15 @@ function continueWaitingForCompletion() {
 	var preElement = document.getElementById('output');
 	var output = preElement.innerHTML;
 	output = output + newOutput;
+	logContainsError = logContainsError + newOutput.indexOf('rror:',0) + 1;
 	preElement.innerHTML = output;
+	// adjust scrolling to show last line of output...
+	var sh = preElement.scrollHeight;
+	if ( sh > 0 ) {
+		preElement.scrollTop = sh;
+	} else {
+		preElement.scrollTop = preElement.offsetHeight;
+	}
 	if ( window.terminalOutcome == 0 ) {
 		setTimeout(continueWaitingForCompletion,10);
 	} else {
