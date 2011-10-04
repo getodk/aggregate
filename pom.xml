@@ -18,7 +18,7 @@
     	<itSubmissionsDirectory>${project.basedir}/../src/it/testfiles/submissions</itSubmissionsDirectory>
     	<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<gooogle.appengine.sdk.version>1.5.4</gooogle.appengine.sdk.version>
-		<google.gdata.version>1.41.5</google.gdata.version>
+		<google.gdata.version>1.46.0</google.gdata.version>
 		<google.gwt.version>2.4.0</google.gwt.version>
 		<gwt.maven.plugin.version>2.3.0-1</gwt.maven.plugin.version>
 		<maven.gae.plugin.version>0.9.1</maven.gae.plugin.version>
@@ -175,16 +175,10 @@
 		</dependency>
 		<dependency>
 		  <groupId>com.google.gdata</groupId>
-		  <artifactId>gdata-base-1.0</artifactId>
+		  <artifactId>gdata-core-1.0</artifactId>
 		  <version>${google.gdata.version}</version>
 		  <type>jar</type>
 		  <scope>compile</scope>
-		  <exclusions>
-			<exclusion>  <!-- use guava instead -->
-			  <groupId>com.google.collections</groupId>
-			  <artifactId>google-collections</artifactId>
-			</exclusion>
-		  </exclusions> 
 		</dependency>
 		<dependency>
 		  <groupId>com.google.gdata</groupId>
@@ -195,16 +189,10 @@
 		</dependency>
 		<dependency>
 		  <groupId>com.google.gdata</groupId>
-		  <artifactId>gdata-core-1.0</artifactId>
+		  <artifactId>gdata-client-meta-1.0</artifactId>
 		  <version>${google.gdata.version}</version>
 		  <type>jar</type>
 		  <scope>compile</scope>
-		  <exclusions>
-			<exclusion>  <!-- use guava instead -->
-			  <groupId>com.google.collections</groupId>
-			  <artifactId>google-collections</artifactId>
-			</exclusion>
-		  </exclusions> 
 		</dependency>
 		<dependency>
 		  <groupId>com.google.gdata</groupId>
@@ -215,7 +203,21 @@
 		</dependency>
 		<dependency>
 		  <groupId>com.google.gdata</groupId>
+		  <artifactId>gdata-docs-meta-3.0</artifactId>
+		  <version>${google.gdata.version}</version>
+		  <type>jar</type>
+		  <scope>compile</scope>
+		</dependency>
+		<dependency>
+		  <groupId>com.google.gdata</groupId>
 		  <artifactId>gdata-maps-2.0</artifactId>
+		  <version>${google.gdata.version}</version>
+		  <type>jar</type>
+		  <scope>compile</scope>
+		</dependency>
+		<dependency>
+		  <groupId>com.google.gdata</groupId>
+		  <artifactId>gdata-maps-meta-2.0</artifactId>
 		  <version>${google.gdata.version}</version>
 		  <type>jar</type>
 		  <scope>compile</scope>
@@ -230,6 +232,13 @@
 		<dependency>
 		  <groupId>com.google.gdata</groupId>
 		  <artifactId>gdata-spreadsheet-3.0</artifactId>
+		  <version>${google.gdata.version}</version>
+		  <type>jar</type>
+		  <scope>compile</scope>
+		</dependency>
+		<dependency>
+		  <groupId>com.google.gdata</groupId>
+		  <artifactId>gdata-spreadsheet-meta-3.0</artifactId>
 		  <version>${google.gdata.version}</version>
 		  <type>jar</type>
 		  <scope>compile</scope>
