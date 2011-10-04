@@ -20,13 +20,16 @@
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/commons-io-1.4.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/commons-lang-2.5.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/commons-logging-1.1.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/gdata-base-1.0-1.41.5.jar"/>
-	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/gdata-client-1.0-1.41.5.jar"/>
-	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/gdata-core-1.0-1.41.5.jar"/>
-	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/gdata-docs-3.0-1.41.5.jar"/>
-	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/gdata-maps-2.0-1.41.5.jar"/>
-	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/gdata-media-1.0-1.41.5.jar"/>
-	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/gdata-spreadsheet-3.0-1.41.5.jar"/>
+	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/gdata-client-1.0-1.46.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/gdata-client-meta-1.0-1.46.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/gdata-core-1.0-1.46.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/gdata-docs-3.0-1.46.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/gdata-docs-meta-3.0-1.46.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/gdata-maps-2.0-1.46.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/gdata-maps-meta-2.0-1.46.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/gdata-media-1.0-1.46.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/gdata-spreadsheet-3.0-1.46.0.jar"/>
+	<classpathentr exported="true"y kind="lib" path="war/WEB-INF/lib/gdata-spreadsheet-meta-3.0-1.46.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/gson-1.7.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/guava-r09.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/httpclient-4.0.3.jar"/>
