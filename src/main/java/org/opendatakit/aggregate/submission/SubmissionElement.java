@@ -31,4 +31,11 @@ public interface SubmissionElement {
 	   */
 	  public String getPropertyName();
 
+	  /**
+	   * Perform a left-to-right depth-first traversal of the submission.
+	   * 
+	   * @param visitor to invoke on each element in the submission.
+	   * @return true if the traversal should end (short-circuit) immediately.
+	   */
+	  public boolean depthFirstTraversal( SubmissionVisitor visitor );
 }

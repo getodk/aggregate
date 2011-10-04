@@ -159,6 +159,7 @@ public class RefreshTimer extends Timer {
       case FORMS:
       case FILTER:
       case TABLES:
+      case SUBMISSION_ADMIN:
         if ((intervalsElapsed % 3) == 0) {
           tabPanel.update();
         }
@@ -169,7 +170,6 @@ public class RefreshTimer extends Timer {
         break;
       case PREFERENCES:
         if ((intervalsElapsed % 6) == 0) {
-          GWT.log("PREFERENCES UPDATE CALLED FROM TIMER");
           tabPanel.update();
         }
         break;

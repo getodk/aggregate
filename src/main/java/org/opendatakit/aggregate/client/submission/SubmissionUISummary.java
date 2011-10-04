@@ -20,6 +20,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 
 import org.opendatakit.aggregate.constants.common.UIDisplayType;
+import org.opendatakit.common.persistence.client.UIQueryResumePoint;
 
 public class SubmissionUISummary implements Serializable {
 
@@ -32,19 +33,36 @@ public class SubmissionUISummary implements Serializable {
   
   private ArrayList<Column> headers;
   
+  private UIQueryResumePoint startCursor;
+  
+  private UIQueryResumePoint resumeCursor;
+  
+  private UIQueryResumePoint backwardCursor;
+  
+  private boolean hasMoreResults;
+  
+  private boolean hasPriorResults;
+
+  private String formTitle;
+  
   public SubmissionUISummary() {
     headers = new ArrayList<Column>();
+  }
+  
+  public SubmissionUISummary(String formTitle) {
+    this();
+    this.formTitle = formTitle;
   }
     
   public ArrayList<Column> getHeaders() {
     return headers;
   }
 
-  public void addSubmission(SubmissionUI submission) throws Exception {   
+  public void addSubmission(SubmissionUI submission) {   
     if(submission.getNumberOfFields() == headers.size()) {
       submissions.add(submission);
     } else {
-      throw new Exception("Incorrect number of fields contained in submission");
+      throw new IllegalArgumentException("Incorrect number of fields contained in submission");
     }
   }
 
@@ -66,6 +84,50 @@ public class SubmissionUISummary implements Serializable {
   
   public ArrayList<SubmissionUI> getSubmissions() {
     return submissions;
+  }
+
+  public UIQueryResumePoint getStartCursor() {
+    return startCursor;
+  }
+
+  public void setStartCursor(UIQueryResumePoint startCursor) {
+    this.startCursor = startCursor;
+  }
+
+  public UIQueryResumePoint getResumeCursor() {
+    return resumeCursor;
+  }
+
+  public void setResumeCursor(UIQueryResumePoint resumeCursor) {
+    this.resumeCursor = resumeCursor;
+  }
+
+  public UIQueryResumePoint getBackwardCursor() {
+    return backwardCursor;
+  }
+
+  public void setBackwardCursor(UIQueryResumePoint backwardCursor) {
+    this.backwardCursor = backwardCursor;
+  }
+
+  public String getFormTitle() {
+    return formTitle;
+  }
+
+  public boolean hasMoreResults() {
+    return hasMoreResults;
+  }
+
+  public void setHasMoreResults(boolean hasMoreResults) {
+    this.hasMoreResults = hasMoreResults;
+  }
+
+  public boolean hasPriorResults() {
+    return hasPriorResults;
+  }
+
+  public void setHasPriorResults(boolean hasPriorResults) {
+    this.hasPriorResults = hasPriorResults;
   }
   
 }

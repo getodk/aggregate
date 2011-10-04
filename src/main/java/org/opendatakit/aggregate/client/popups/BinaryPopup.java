@@ -18,24 +18,31 @@ package org.opendatakit.aggregate.client.popups;
 
 import org.opendatakit.aggregate.client.widgets.ClosePopupButton;
 
-import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.Frame;
-import com.google.gwt.user.client.ui.PopupPanel;
+import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.VerticalPanel;
 
-public class BinaryPopup extends PopupPanel {
+public class BinaryPopup extends AbstractPopupBase {
 
-  public BinaryPopup(final String url) {
-    super(false);
+  public BinaryPopup(String url, boolean larger) {
+    super();
     setTitle("Binary");
     
+    int width = Window.getClientWidth() / 2;
+    int height = Window.getClientHeight() / 2;
+    
+    if(larger) {
+      width = Window.getClientWidth() * 4 / 5;
+      height = Window.getClientHeight() * 4 / 5;
+    }
+    
     Frame frame = new Frame(url);
-    frame.setPixelSize((Window.getClientWidth() / 2),(Window.getClientHeight() / 2)); 
+    frame.setPixelSize(width, height); 
 
-    DockLayoutPanel panel = new DockLayoutPanel(Unit.EM);
-    panel.setPixelSize((Window.getClientWidth() / 2)+6,(Window.getClientHeight() / 2)+30);
-    panel.addNorth(new ClosePopupButton(this), 2);   
+    VerticalPanel panel = new VerticalPanel();
+    panel.setPixelSize(width+6, height+30);
+    panel.add(new SimplePanel(new ClosePopupButton(this)));       
     panel.add(frame);      
     setWidget(panel);
   }

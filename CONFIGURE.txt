@@ -68,11 +68,24 @@ jar and copy it into the eclipse project.
 
 Refresh the eclipse-aggregate-gae project (to pick up the updated jar file).
 
-Select eclipse-aggregate-gae project.
+This should now build without errors.  
+
+On Eclipse 3.7, these additional steps may also be required:
+
+Select eclipse-aggregate-gae
+right-click Properties
+
+under /Builders
+de-select Enhancer (based on the bug: http://code.google.com/p/googleappengine/issues/detail?id=1970 )
+
+under /Google/App Engine
+toggle the App Engine SDK between the default and specific settings (to make a rebuild as per instructions http://code.google.com/p/opendatakit/wiki/EclipseDebugging )
+
+(7) Select eclipse-aggregate-gae project.
 
 Click on the red toolbox (GWT compile) to compile the GWT Java code into javascript.
 
-(7) Running:
+(8) Running:
 
 Select eclipse-aggregate-gae project.
 

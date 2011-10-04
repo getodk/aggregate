@@ -140,14 +140,8 @@ public class PurgeOlderSubmissionsWorkerImpl {
 			ODKIncompleteSubmissionData, ODKDatastoreException {
 		// query for next set of submissions
 		QueryByDateRange query = new QueryByDateRange(form, MAX_QUERY_LIMIT,
-				startDate, endDate, cc);
+				startDate, endDate, null, cc);
 		List<Submission> submissions = query.getResultSubmissions(cc);
-
-		// here so we don't have to do null checks on the rest of the code in
-		// this class
-		if (submissions == null) {
-			submissions = new ArrayList<Submission>();
-		}
 		return submissions;
 	}
 	

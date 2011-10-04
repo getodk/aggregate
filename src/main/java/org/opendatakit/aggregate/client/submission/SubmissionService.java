@@ -30,6 +30,4 @@ public interface SubmissionService extends RemoteService {
   
   SubmissionUISummary getRepeatSubmissions(String keyString) throws AccessDeniedException, FormNotAvailableException;
   
-  UIGeoPoint [] getGeoPoints(String formId, String geopointKey) throws AccessDeniedException, FormNotAvailableException;
-  
 }

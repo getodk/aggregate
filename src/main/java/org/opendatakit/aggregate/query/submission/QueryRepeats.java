@@ -22,7 +22,6 @@ import java.util.Set;
 
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.datamodel.TopLevelDynamicBase;
-import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.submission.Submission;
@@ -53,8 +52,7 @@ public class QueryRepeats {
   private final String parentKey;
 
   public QueryRepeats(Form form, String submissionKey,
-      String submissionParentKey) throws ODKFormNotFoundException,
-      ODKEntityNotFoundException {
+      String submissionParentKey) throws ODKEntityNotFoundException {
     this.form = form;
     this.parentKey = submissionParentKey;
     // TODO: kindId should be concatenation of enclosing element names...

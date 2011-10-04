@@ -53,7 +53,7 @@ public class CsvFormatterWithFilters implements SubmissionFormatter {
     output = printWriter;
 
     headers = new ArrayList<String>();
-    SubmissionUISummary summary = new SubmissionUISummary();
+    SubmissionUISummary summary = new SubmissionUISummary(form.getViewableName());
 
     GenerateHeaderInfo headerGenerator = new GenerateHeaderInfo(filterGroup, summary, form);
     headerGenerator.processForHeaderInfo(form.getTopLevelGroupElement());

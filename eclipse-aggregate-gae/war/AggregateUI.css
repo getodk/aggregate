@@ -35,6 +35,7 @@ p {
 	margin-top: 10px;
 }
 
+
 .embedded_iframe {
 	margin: 2px;
 	border: 0px;
@@ -55,13 +56,29 @@ a,a:visited,a:hover {
 	background: url("images/mostly_opaque.png");
 }
 
-#filters_data,#form_and_goals_panel {
+#filters_data {
+	border-collapse: collapse;
+}
+
+#filter_submission_pagination {
+	background: #E3E8FF;
+}
+
+#filter_submission_pagination {
+	text-align: center;
+	color: #a1abff;
+	font-weight: bold;
+	width: 100%;
 	border-collapse: collapse;
 }
 
 #submission_container,#filters_container,#help_container {
 	overflow: scroll;
 }
+
+#submission_admin_bar {
+	width: 100%;
+}	
 
 .error_message {
 	color: red;
@@ -96,6 +113,14 @@ a,a:visited,a:hover {
 
 .uploadCloseButton {
 	float: right;
+}
+
+.floatRight {
+	float: right;
+}
+
+.floatLeft {
+	float: left;
 }
 
 .uploadFrame {
@@ -139,3 +164,61 @@ a,a:visited,a:hover {
 	text-align: left;
 }
 
+.popup_menu {
+	width: 100%;
+}
+.popup_close_cell {
+	text-align: right;
+}
+
+#layout_panel,
+#help_panel {
+	position: relative;
+	top: 16px;
+}
+
+#odk_aggregate_logo {
+	position: absolute;
+	left: 20px;
+	top: 8px;
+}
+
+#form_title_cell {
+	text-align: center;
+}
+
+#form_name {
+	color: #07115A;
+	margin-top: 0px;
+	padding-top: 0px;
+	margin-bottom: 0px;
+	padding-bottom: 0px;
+}
+
+#filter_header {
+	color: #686E93;
+	margin-top: 0px;
+	padding-top: 0px;
+	margin-bottom: 0px;
+	padding-bottom: 0px;
+}
+
+#submission_nav_table {
+	width: 100%;
+	border-bottom: 1px solid #07115A;
+}
+
+#filters_container {
+	border-right: 1px solid #07115A;
+}
+
+#help_panel {
+	border-top: 1px solid #07115A;
+}
+
+.form_title_bar td {
+	padding-left: 10px;
+	padding-right: 10px;
+	text-align: center;
+	align: center;
+}

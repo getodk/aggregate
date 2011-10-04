@@ -2,22 +2,32 @@ package org.opendatakit.aggregate.query.submission;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.opendatakit.aggregate.client.filter.Filter;
 import org.opendatakit.aggregate.client.filter.FilterGroup;
 import org.opendatakit.aggregate.client.filter.RowFilter;
 import org.opendatakit.aggregate.client.submission.Column;
+import org.opendatakit.aggregate.client.submission.SubmissionUI;
+import org.opendatakit.aggregate.client.submission.SubmissionUISummary;
+import org.opendatakit.aggregate.constants.common.FormElementNamespace;
 import org.opendatakit.aggregate.datamodel.FormElementKey;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.datamodel.TopLevelDynamicBase;
-import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.form.FormDefinition;
+import org.opendatakit.aggregate.format.Row;
+import org.opendatakit.aggregate.format.element.ElementFormatter;
 import org.opendatakit.aggregate.server.UITrans;
 import org.opendatakit.aggregate.submission.Submission;
+import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.persistence.Query.FilterOperation;
+import org.opendatakit.common.persistence.QueryResult;
+import org.opendatakit.common.persistence.QueryResumePoint;
+import org.opendatakit.common.persistence.client.UIQueryResumePoint;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.utils.WebUtils;
 import org.opendatakit.common.web.CallingContext;
@@ -25,38 +35,78 @@ import org.opendatakit.common.web.constants.BasicConsts;
 
 public class QueryByUIFilterGroup extends QueryBase {
 
-  private TopLevelDynamicBase tbl;
+  public enum CompletionFlag {
+     ONLY_COMPLETE_SUBMISSIONS,
+     ONLY_INCOMPLETE_SUBMISSIONS,
+     ALL_SUBMISSIONS
+  };
+  
+  private static final String MISSING_ARGS = "Missing either Form or FilterGroup making it impossible to query";
+
+  private final TopLevelDynamicBase tbl;
 
   private int fetchLimit;
-  public QueryByUIFilterGroup(Form form, FilterGroup filterGroup, int maxFetchLimit,
-	      CallingContext cc) throws ODKFormNotFoundException {
-	  this( form, filterGroup, false, maxFetchLimit, cc);
-  }
   
-  public QueryByUIFilterGroup(Form form, FilterGroup filterGroup, boolean onlyCompleteSubmissions, int maxFetchLimit,
-      CallingContext cc) throws ODKFormNotFoundException {
+  private final QueryResumePoint cursor;
+  
+  public QueryByUIFilterGroup(Form form, FilterGroup filterGroup, CompletionFlag completionFlag, CallingContext cc) {
     super(form);
 
+    if (filterGroup == null || form == null) {
+      throw new IllegalArgumentException(MISSING_ARGS);
+    }
+    
+    boolean isForwardCursor = 
+      ((filterGroup.getCursor() == null) ?
+          true :
+          filterGroup.getCursor().getIsForwardCursor());
+    
     tbl = (TopLevelDynamicBase) form.getTopLevelGroupElement().getFormDataModel()
         .getBackingObjectPrototype();
 
     query = cc.getDatastore().createQuery(tbl, "QueryByUIFilterGroup.constructor", cc.getCurrentUser());
-    if ( !onlyCompleteSubmissions ) {
-      // order by the last update date
-      query.addSort(tbl.lastUpdateDate, Query.Direction.ASCENDING);
-      query.addFilter(tbl.lastUpdateDate, Query.FilterOperation.GREATER_THAN, BasicConsts.EPOCH);
-    } else {
+    switch ( completionFlag ) {
+    case ONLY_COMPLETE_SUBMISSIONS:
       // order by the completion date and filter against isComplete == true
-      query.addSort(tbl.markedAsCompleteDate, Query.Direction.ASCENDING);
+      if ( isForwardCursor ) {
+        query.addSort(tbl.markedAsCompleteDate, Query.Direction.ASCENDING);
+      } else {
+        query.addSort(tbl.markedAsCompleteDate, Query.Direction.DESCENDING);
+      }
       query.addFilter(tbl.markedAsCompleteDate, Query.FilterOperation.GREATER_THAN, BasicConsts.EPOCH);
       query.addFilter(tbl.isComplete, Query.FilterOperation.EQUAL, true);
-    }
-    
-    if (filterGroup == null) {
-      return;
+      break;
+    case ONLY_INCOMPLETE_SUBMISSIONS:
+      // order by the last update date and filter against isComplete == false
+      if ( isForwardCursor ) {
+        query.addSort(tbl.lastUpdateDate, Query.Direction.ASCENDING);
+      } else {
+        query.addSort(tbl.lastUpdateDate, Query.Direction.DESCENDING);
+      }
+      query.addFilter(tbl.lastUpdateDate, Query.FilterOperation.GREATER_THAN, BasicConsts.EPOCH);
+      query.addFilter(tbl.isComplete, Query.FilterOperation.EQUAL, false);
+      break;
+    case ALL_SUBMISSIONS:
+      // order by the last update date
+      if ( isForwardCursor ) {
+        query.addSort(tbl.lastUpdateDate, Query.Direction.ASCENDING);
+      } else {
+        query.addSort(tbl.lastUpdateDate, Query.Direction.DESCENDING);
+      }
+      query.addFilter(tbl.lastUpdateDate, Query.FilterOperation.GREATER_THAN, BasicConsts.EPOCH);
+      break;
+    default:
+        throw new IllegalStateException("unhandled case");
     }
     
     fetchLimit = filterGroup.getQueryFetchLimit();
+    
+    UIQueryResumePoint uiCursor = filterGroup.getCursor();
+    if(uiCursor != null) {
+      cursor = QueryResumePoint.transform(uiCursor);
+    } else {
+      cursor = null;
+    }
     
     for (Filter filter : filterGroup.getFilters()) {
       if (filter instanceof RowFilter) {
@@ -65,7 +115,7 @@ public class QueryByUIFilterGroup extends QueryBase {
 
         FormElementKey decodeKey = new FormElementKey(column.getColumnEncoding());
         FormElementModel fem = FormElementModel.retrieveFormElementModel(form, decodeKey);
-        FilterOperation op = UITrans.convertFilterOperation(rf.getOperation());
+        FilterOperation op = UITrans.convertFilterOperation(rf.getOperation(), rf.getVisibility());
 
         String value = rf.getInput();
         Object compareValue = null;
@@ -113,14 +163,111 @@ public class QueryByUIFilterGroup extends QueryBase {
     List<Submission> retrievedSubmissions = new ArrayList<Submission>();
 
     // retrieve submissions
-    List<? extends CommonFieldsBase> submissionEntities = getSubmissionEntities(null, fetchLimit);
+    QueryResult results = getQueryResult(cursor, fetchLimit);
+    List<? extends CommonFieldsBase> submissionEntities = results.getResultList();
 
     // create a row for each submission
     for (int count = 0; count < submissionEntities.size(); count++) {
       CommonFieldsBase subEntity = submissionEntities.get(count);
-      Submission sub = new Submission((TopLevelDynamicBase) subEntity, form.getFormDefinition(), cc);
+      Submission sub = new Submission((TopLevelDynamicBase) subEntity, getForm()
+          .getFormDefinition(), cc);
       retrievedSubmissions.add(sub);
     }
     return retrievedSubmissions;
   }
+  
+  public void populateSubmissions(SubmissionUISummary summary,
+      List<FormElementModel> filteredElements, ElementFormatter elemFormatter,
+      List<FormElementNamespace> elementTypes, CallingContext cc) throws ODKDatastoreException {
+
+    // retrieve submissions
+    QueryResult results = getQueryResult(cursor, fetchLimit);
+    FormDefinition formDef = getForm().getFormDefinition();
+    FormElementModel fem = getForm().getTopLevelGroupElement();
+
+    QueryResumePoint startCursor = results.getStartCursor();
+    QueryResumePoint resumeCursor = results.getResumeCursor();
+    QueryResumePoint backwardCursor = results.getBackwardCursor();
+
+    // The SubmissionUISummary holds data as presented to the 
+    // UI layer.  Therefore, if we are paging backward, we need
+    // to invert the sense of the query results.
+    //
+    // Determine whether we are going forward or backward...
+    boolean isForwardCursor = true;
+    if(startCursor != null) {
+      isForwardCursor = startCursor.isForwardCursor();
+    }
+    
+    if ( isForwardCursor ) {
+      // everything matches across the UI and query layer...
+      summary.setHasPriorResults(results.hasPriorResults());
+      summary.setHasMoreResults(results.hasMoreResults());
+      if(startCursor != null) {
+        summary.setStartCursor(startCursor.transform());
+      } else {
+        summary.setStartCursor(null);
+      }
+      
+      if(resumeCursor != null) {
+        summary.setResumeCursor(resumeCursor.transform());
+      } else {
+        summary.setResumeCursor(null);
+      }
+      
+      if(backwardCursor != null) {
+        summary.setBackwardCursor(backwardCursor.transform());
+      } else {
+        summary.setBackwardCursor(null);      
+      }
+    } else {
+      // we are moving backward; the UI is inverted w.r.t. query. 
+      
+      // SubmissionUISummary.hasPriorResults is query hasMoreResults
+      // SubmissionUISummary.hasMoreResults is query hasPriorResults
+      summary.setHasPriorResults(results.hasMoreResults());
+      summary.setHasMoreResults(results.hasPriorResults());
+      
+      // SubmissionUISummary.startCursor is unchanged
+      if(startCursor != null) {
+        summary.setStartCursor(startCursor.transform());
+      } else {
+        summary.setStartCursor(null);
+      }
+      
+      // SubmissionUISummary.resumeCursor is query backwardCursor
+      if(backwardCursor != null) {
+        summary.setResumeCursor(backwardCursor.transform());
+      } else {
+        summary.setResumeCursor(null);
+      }
+      
+      // SubmissionUISummary.backwardCursor is query resumeCursor
+      if(resumeCursor != null) {
+        summary.setBackwardCursor(resumeCursor.transform());
+      } else {
+        summary.setBackwardCursor(null);      
+      }
+      
+    }
+    
+    List<SubmissionUI> submissionList = new ArrayList<SubmissionUI>();
+    
+    // create a row for each submission
+    for (CommonFieldsBase subEntity : results.getResultList()) {
+      Submission sub = new Submission((TopLevelDynamicBase) subEntity, formDef, cc);
+      Row row = sub.getFormattedValuesAsRow(elementTypes, filteredElements, elemFormatter, false,
+          cc);
+
+      SubmissionKey subKey = sub.constructSubmissionKey(fem);
+      submissionList.add(new SubmissionUI(row.getFormattedValues(), subKey.toString()));
+    }
+    if ( !isForwardCursor ) {
+      // query has the results in the reverse order.
+      // invert them to get them properly ordered.
+      Collections.reverse(submissionList);
+    }
+    summary.getSubmissions().addAll(submissionList);
+  }
+
 }
