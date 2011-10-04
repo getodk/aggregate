@@ -49,9 +49,10 @@ public final class SpreadsheetConsts {
    * for more info.
    */
   public static final String WORKSHEETS_FEED = SPREADSHEETS_SCOPE + "worksheets/";
-  public static final String DOCS_SCOPE = "http://docs.google.com/feeds/";
+  public static final String DOCS_SCOPE = "https://docs.google.com/feeds/";
   public static final String DOC_FEED = DOCS_SCOPE + "default" + FEED_PERMISSIONS;
 
+  public static final int SERVER_TIMEOUT = 60000;
 
   public static final int WORKSHEET_CREATION_DELAY = 15000;
  
