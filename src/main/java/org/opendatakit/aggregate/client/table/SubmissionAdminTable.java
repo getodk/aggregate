@@ -64,7 +64,7 @@ public class SubmissionAdminTable extends FlexTable {
             setText(rowPosition, columnPosition, BasicConsts.EMPTY_STRING);
           } else {
             Image image = new Image(value + UIConsts.PREVIEW_SET);
-            image.addClickHandler(new BinaryPopupClickHandler(value));
+            image.addClickHandler(new BinaryPopupClickHandler(value, false));
             setWidget(rowPosition, columnPosition, image);
           }
           break;

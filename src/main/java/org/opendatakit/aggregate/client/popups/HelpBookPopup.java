@@ -1,7 +1,8 @@
 package org.opendatakit.aggregate.client.popups;
 
+import org.opendatakit.aggregate.client.table.BinaryPopupClickHandler;
+import org.opendatakit.aggregate.client.widgets.AggregateButton;
 import org.opendatakit.aggregate.client.widgets.ClosePopupButton;
-import org.opendatakit.aggregate.client.widgets.HelpVideoButton;
 import org.opendatakit.aggregate.constants.common.BookHelpConsts;
 
 import com.google.gwt.user.client.Window;
@@ -25,11 +26,15 @@ public class HelpBookPopup extends PopupPanel {
     VerticalPanel content = new VerticalPanel();
     for (int i = 0; i < consts.length; i++) {
       content.add(new HTML("<h2 id=\"form_name\">" + consts[i].getTitle() + "</h2>"));
+      
       if (consts[i].getVideoUrl() != null) {
-        HelpVideoButton vidButton = new HelpVideoButton(consts[i].getTitle() + " Video Assistance",
-            consts[i].getVideoUrl(), "Play Video descibing how to " + consts[i].getTitle());
+        String buttonTxt = consts[i].getTitle() + " Video Assistance";
+        String toolTipTxt = "Play Video descibing how to " + consts[i].getTitle();
+        AggregateButton vidButton = new AggregateButton(buttonTxt, toolTipTxt);
+        vidButton.addClickHandler(new BinaryPopupClickHandler(consts[i].getVideoUrl(), true));   
         content.add(vidButton);
       }
+      
       content.add(new HTML(consts[i].getConcept() + "<br><br>"));
       content.add(new HTML(consts[i].getProcedures() + "<br><br>"));
     }

@@ -105,6 +105,8 @@ public abstract class Filter implements Serializable {
   @Override
   public int hashCode() {
     int hashCode = 131;
+    if(visibility != null)
+      hashCode += visibility.hashCode();
     if(rc != null)
       hashCode += rc.hashCode();
     if (ordinal != null)
