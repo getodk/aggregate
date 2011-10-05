@@ -110,6 +110,12 @@ public class SubmissionFilter extends CommonFieldsBase {
   public Visibility getVisibility() {
     String visibility = getStringField(VISIBILITY_PROPERTY);
     try {
+      if ( visibility == null ) {
+        // row filters had null values that should be interpretted
+        // as DISPLAY values.  Return DISPLAY if we find a null.
+        setVisibility(Visibility.DISPLAY);
+        return Visibility.DISPLAY;
+      }
       return Visibility.valueOf(visibility);
     } catch (IllegalArgumentException e) {
       // try again using historical values
