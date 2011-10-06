@@ -61,6 +61,7 @@ public class AggregateHtmlServlet extends ServletUtilBase {
 "<html>" +
 "  <head>" +
 "	<meta http-equiv=\"content-type\" content=\"text/html; charset=UTF-8\">" +
+"  <link rel=\"shortcut icon\" href=\"favicon.ico\"/>" +
 "	<title>ODK Aggregate</title>" +
 "	<script type=\"text/javascript\" src=\"javascript/jquery-1.5.1.min.js\"></script>" +
 "	<script type=\"text/javascript\" src=\"javascript/resize.js\"></script>" +
