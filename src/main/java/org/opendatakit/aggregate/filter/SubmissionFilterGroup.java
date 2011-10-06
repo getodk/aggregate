@@ -105,6 +105,16 @@ public class SubmissionFilterGroup extends CommonFieldsBase {
       throw new IllegalArgumentException("overflow name");
     }
   }
+  
+  public String getUriUser() {
+    return getStringField(URI_USER_PROPERTY);
+  }
+  
+  public void setUriUser(String uriUser) {
+    if (!setStringField(URI_USER_PROPERTY, uriUser)) {
+      throw new IllegalArgumentException("overflow uriUser");
+    }
+  }
 
   public Boolean isPublic() {
     return getBooleanField(IS_PUBLIC);
@@ -212,7 +222,7 @@ public class SubmissionFilterGroup extends CommonFieldsBase {
       SubmissionFilterGroup relation = assertRelation(cc);
       CommonFieldsBase entity = cc.getDatastore().getEntity(relation, uri, cc.getCurrentUser());
       
-      if (entity instanceof SubmissionFilterGroup) {
+      if (entity != null && entity instanceof SubmissionFilterGroup) {
         SubmissionFilterGroup filterGroup = (SubmissionFilterGroup) entity;
         filterGroup.addFilters(SubmissionFilter.getFilterList(uri, cc));
         return filterGroup;
@@ -234,6 +244,7 @@ public class SubmissionFilterGroup extends CommonFieldsBase {
 
     if (uri.equals(UIConsts.URI_DEFAULT)) {
       subFilterGroup = cc.getDatastore().createEntityUsingRelation(relation, cc.getCurrentUser());
+      subFilterGroup.setUriUser(cc.getCurrentUser().getUriUser());
     } else {
       CommonFieldsBase entity = cc.getDatastore().getEntity(relation, uri, cc.getCurrentUser());
       subFilterGroup = (SubmissionFilterGroup) entity;
