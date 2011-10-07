@@ -1,5 +1,6 @@
 package org.opendatakit.aggregate.integration;
 
+/* We are not currently set up to run these.
 import java.io.File;
 
 import com.thoughtworks.selenium.SeleneseTestCase;
@@ -32,3 +33,4 @@ public class TestUploadForm extends SeleneseTestCase
 		// Need to check form was uploaded properly
 	}
 }
+*/

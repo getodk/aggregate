@@ -1,5 +1,6 @@
 package org.opendatakit.aggregate.integration;
 
+/* We are not currently set up to run these.
 import com.thoughtworks.selenium.SeleneseTestCase;
 
 public class TestStartPage extends SeleneseTestCase 
@@ -23,3 +24,4 @@ public class TestStartPage extends SeleneseTestCase
 		assertTrue(selenium.isElementPresent("link=List Forms"));
 	}
 }
+*/
