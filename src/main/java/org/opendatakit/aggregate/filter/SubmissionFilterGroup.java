@@ -248,7 +248,6 @@ public class SubmissionFilterGroup extends CommonFieldsBase {
     } else {
       CommonFieldsBase entity = cc.getDatastore().getEntity(relation, uri, cc.getCurrentUser());
       subFilterGroup = (SubmissionFilterGroup) entity;
-      ;
     }
 
     subFilterGroup.setName(filterGroup.getName());

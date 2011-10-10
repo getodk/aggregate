@@ -55,3 +55,7 @@ mvn install:install-file -Dfile=gdata-spreadsheet-3.0.jar -DgroupId=com.google.g
 
 mvn install:install-file -Dfile=gdata-spreadsheet-meta-3.0.jar -DgroupId=com.google.gdata -DartifactId=gdata-spreadsheet-meta-3.0 -Dversion=1.46.0 -Dpackaging=jar -DgeneratePom=true
 
+This file: jai-imageio-core-standalone-1.2-pre-dr-b04-2010-04-30.jar 
+is built from the sources here: git://github.com/stain/jai-imageio-core.git
+It is copied into the war at the time the installer is created.  This file 
+is only used on Tomcat deployments by the odk-tomcat-util.jar.

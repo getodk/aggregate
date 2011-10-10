@@ -55,7 +55,7 @@ public class LocalLoginPageServlet extends ServletUtilBase {
 "<head>" +
 "<meta http-equiv=\"Refresh\" content=\"1; URL=Aggregate.html\"/>" +
 "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"/>" +
-"<link rel=\"shortcut icon\" href=\"favicon.ico\"/>" +
+"<link rel=\"icon\" href=\"favicon.ico\"/>" +
 "<title>Login successful! Redirecting to forms page</title>" +
 "<link type=\"text/css\" rel=\"stylesheet\" href=\"AggregateUI.css\">" +
 "<link type=\"text/css\" rel=\"stylesheet\" href=\"stylesheets/button.css\">" +
