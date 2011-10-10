@@ -7,7 +7,6 @@
     <version>1.0</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
-  <groupId>org.opendatakit</groupId>
   <artifactId>aggregate-gae</artifactId>
   <packaging>war</packaging>
   <name>ODK Aggregate for Google Appengine</name>
@@ -28,17 +27,15 @@
 		<plugin>
 			<groupId>org.codehaus.mojo</groupId>
 			<artifactId>build-helper-maven-plugin</artifactId>
-			<version>1.5</version>
 			<executions>
 				<execution>
-					<id>add-gwt-source</id>
+					<id>add-java-source</id>
 				</execution>
 			</executions>
 		</plugin>
 		<plugin>
 			<groupId>org.codehaus.mojo</groupId>
 			<artifactId>gwt-maven-plugin</artifactId>
-			<version>${gwt.maven.plugin.version}</version>
 			<executions>
 			  <execution>
 				<id>gwt-javascript</id>
@@ -47,7 +44,6 @@
 		</plugin>
         <plugin>
 			<artifactId>maven-antrun-plugin</artifactId>
-			<version>${maven.antrun.plugin.version}</version>
 			<executions>
 			  <execution>
 				<id>war-clean</id>
@@ -66,7 +62,6 @@
         <plugin>
 			<groupId>org.apache.maven.plugins</groupId>
 			<artifactId>maven-war-plugin</artifactId>
-			<version>${maven.war.plugin.version}</version>
 			<executions>
 			  <execution>
 				<id>war-build</id>

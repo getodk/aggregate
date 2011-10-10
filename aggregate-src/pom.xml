@@ -7,17 +7,16 @@
     <version>1.0</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
-  <groupId>org.opendatakit</groupId>
   <artifactId>aggregate-src</artifactId>
   <packaging>jar</packaging>
   <version>latest</version>
   <name>Common non-test source files</name>
   <build>
-	<plugins>
+	<sourceDirectory>${toplevel.directory}/src/main/java</sourceDirectory>
+    <plugins>
 		<plugin>
 			<groupId>org.codehaus.mojo</groupId>
 			<artifactId>build-helper-maven-plugin</artifactId>
-			<version>1.5</version>
 			<executions>
 				<execution>
 					<id>add-java-source</id>
@@ -25,9 +24,17 @@
 			</executions>
 		</plugin>
 		<plugin>
+			<groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-compiler-plugin</artifactId>
+			<executions>
+				<execution>
+					<id>compile-java-source</id>
+				</execution>
+			</executions>
+		</plugin>
+		<plugin>
 			<groupId>org.codehaus.mojo</groupId>
 			<artifactId>gwt-maven-plugin</artifactId>
-			<version>${gwt.maven.plugin.version}</version>
 			<executions>
 			  <execution>
 				<id>gwt-javascript</id>

@@ -20,10 +20,15 @@
 		<gooogle.appengine.sdk.version>1.5.4</gooogle.appengine.sdk.version>
 		<google.gdata.version>1.46.0</google.gdata.version>
 		<google.gwt.version>2.4.0</google.gwt.version>
-		<gwt.maven.plugin.version>2.3.0-1</gwt.maven.plugin.version>
+		<emma.maven.plugin.version>1.2</emma.maven.plugin.version>
+		<maven.surefire.report.plugin.version>2.6</maven.surefire.report.plugin.version>
+		<maven.surefire.plugin.version>2.6</maven.surefire.plugin.version>
+		<build.helper.maven.plugin.version>1.7</build.helper.maven.plugin.version>
+		<gwt.maven.plugin.version>2.4.0</gwt.maven.plugin.version>
 		<maven.gae.plugin.version>0.9.1</maven.gae.plugin.version>
 		<maven.war.plugin.version>2.1.1</maven.war.plugin.version>
 		<maven.antrun.plugin.version>1.6</maven.antrun.plugin.version>
+		<maven.compiler.plugin.version>2.3.2</maven.compiler.plugin.version>
 		<org.springframework.version>3.0.5.RELEASE</org.springframework.version>
 		<oauth.signpost.version>1.2.1.1</oauth.signpost.version>
 		<org.slf4j.version>1.6.1</org.slf4j.version>
@@ -79,6 +84,16 @@
 			<enabled>false</enabled>
 		  </releases>
 		</repository>
+		<!-- contains the jai imageio standalone code -->
+        <repository>
+            <releases />
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <id>mygrid-repository</id>
+            <name>myGrid Repository</name>
+            <url>http://www.mygrid.org.uk/maven/repository</url>
+        </repository>
 	</repositories>
 	<pluginRepositories>
 		<!-- Repository contains the maven gae plugin -->
@@ -568,7 +583,7 @@
 		<dependency>
 		  <groupId>org.sonatype.maven.plugin</groupId>
 		  <artifactId>emma-maven-plugin</artifactId>
-		  <version>1.2</version>
+		  <version>${emma.maven.plugin.version}</version>
 		  <scope>test</scope>
 		  <exclusions>
 			<exclusion>
@@ -607,29 +622,39 @@
 					<buildOutputDirectory>${project.basedir}/build/webapp</buildOutputDirectory>
 				</configuration>
 			</plugin>
-			<plugin>
-				<!-- This configures the compiler to compile for java 1.6
-				   (it defaults to something much older) -->
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>2.3.2</version>
-				<configuration>
-					<source>1.6</source>
-					<target>1.6</target>
-				</configuration>
-			</plugin>
 		</plugins>
 		<pluginManagement>
 			<!-- these are referenced by other projects -->
 			<plugins>
 				<plugin>
+					<!-- This configures the compiler to compile for java 1.6
+					   (it defaults to something much older) -->
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-compiler-plugin</artifactId>
+					<version>${maven.compiler.plugin.version}</version>
+					<executions>
+						<execution>
+							<id>compile-java-source</id>
+							<configuration>
+								<source>1.6</source>
+								<target>1.6</target>
+							</configuration>
+							<phase>compile</phase>
+							<goals>
+								<goal>compile</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>build-helper-maven-plugin</artifactId>
-					<version>1.5</version>
+					<version>${build.helper.maven.plugin.version}</version>
 					<executions>
 						<execution>
 							<id>add-java-source</id>
 							<!-- used in aggregate-src -->
+							<phase>generate-sources</phase>
 							<goals><goal>add-source</goal></goals>
 							<configuration>
 								<sources>
@@ -681,6 +706,7 @@
 								<delete dir="${project.basedir}/src/main/webapp"/>
 							  </target>
 							</configuration>
+							<phase>pre-clean</phase>
 							<goals>
 							  <goal>run</goal>
 							</goals>
@@ -701,8 +727,11 @@
 										<exclude name="WEB-INF/lib/**" />
 									</fileset>
 								</copy>
+								<copy todir="${project.basedir}/src/main/webapp/WEB-INF/lib" 
+									file="${toplevel.directory}/src/main/libs/jai-imageio-core-standalone-1.2-pre-dr-b04-2010-04-30.jar" />
 							  </target>
 							</configuration>
+							<phase>generate-resources</phase>
 							<goals>
 							  <goal>run</goal>
 							</goals>
@@ -712,11 +741,13 @@
 							<!-- used in aggregate-postgres, aggregate-mysql -->
 							<configuration>
 							  <target>
+								<mkdir dir="${project.basedir}/target/classes"/>
 								<!-- deletes the /classes tree.
 									We don't need another copy of gwt classes -->
 								<delete dir="${project.basedir}/target/classes"/>
 							  </target>
 							</configuration>
+							<phase>prepare-package</phase>
 							<goals>
 							  <goal>run</goal>
 							</goals>
@@ -726,6 +757,7 @@
 							<!-- used in aggregate-gae -->
 							<configuration>
 							  <target>
+								<mkdir dir="${project.basedir}/target/classes"/>
 								<!-- deletes the /classes tree. Leaves a placeholder class.
 									We don't need another copy of gwt classes -->
 								<delete includeemptydirs="true">
@@ -734,6 +766,7 @@
 								</delete>
 							  </target>
 							</configuration>
+							<phase>prepare-package</phase>
 							<goals>
 							  <goal>run</goal>
 							</goals>
@@ -741,11 +774,14 @@
 						<execution>
 							<!-- Prepares a war folder with the instrumented classes -->
 							<id>prepare-instrumented-war-folder</id>
+							<phase>pre-integration-test</phase>
 							<goals>
 							  <goal>run</goal>
 							</goals>
 							<configuration>
 							  <target>
+								<mkdir dir="${project.build.directory}/${project.build.finalName}"/>
+								<mkdir dir="${project.build.directory}/generated-classes/emma/classes"/>
 								<mkdir dir="${project.build.directory}/emma-it/"/>
 								<copy todir="${project.build.directory}/emma-it/${project.build.finalName}">
 								  <fileset dir="${project.build.directory}/${project.build.finalName}">
@@ -763,6 +799,7 @@
 						<execution>
 							<!-- Adds the emma jar to the war folder -->
 							<id>add-emma-to-war-folder</id>
+							<phase>pre-integration-test</phase>
 							<goals>
 							  <goal>run</goal>
 							</goals>
@@ -776,6 +813,7 @@
 						<execution>
 							<!-- Packages the war folder into a war -->
 							<id>prepare-instrumented-war</id>
+							<phase>pre-integration-test</phase>
 							<goals>
 							  <goal>run</goal>
 							</goals>
@@ -789,14 +827,47 @@
 						</execution>
 						<execution>
 							<!--  Makes sure we start with a clean mysql (no pre-existing database that we want to create) -->
-							<id>pre-mysql-teardown</id>
+							<id>mysql-teardown-clean</id>
+							<phase>pre-clean</phase>
 							<goals>
 							  <goal>run</goal>
 							</goals>
 							<configuration>
 							  <target>
 								<exec executable="${mysql.client.executable}" failonerror="false">
-								  <arg line="-u root -p${mysql.root.password}" />
+								  <arg line="-u root --force -p${mysql.root.password}" />
+								  <redirector input="${scriptSourceDirectory}/mysql_teardown.sql" />
+								</exec>
+							  </target>
+							</configuration>
+						</execution>
+						<execution>
+							<!--  Makes sure we start with a clean postgres (no pre-existing database that we want to create) -->
+							<id>postgresql-teardown-clean</id>
+							<phase>pre-clean</phase>
+							<goals>
+							  <goal>run</goal>
+							</goals>
+							<configuration>
+							  <target>
+							    <exec executable="${postgres.client.executable}" failonerror="false">
+								  <env key="PGPASSWORD" value="${postgres.root.password}" />
+								  <arg line="-U postgres -a -n -w -f &quot;${scriptSourceDirectory}/postgres_teardown.sql&quot;" />
+								</exec>
+							  </target>
+							</configuration>
+						</execution>
+						<execution>
+							<!--  Makes sure we start with a clean mysql (no pre-existing database that we want to create) -->
+							<id>pre-mysql-teardown</id>
+							<phase>pre-integration-test</phase>
+							<goals>
+							  <goal>run</goal>
+							</goals>
+							<configuration>
+							  <target>
+								<exec executable="${mysql.client.executable}" failonerror="false">
+								  <arg line="-u root --force -p${mysql.root.password}" />
 								  <redirector input="${scriptSourceDirectory}/mysql_teardown.sql" />
 								</exec>
 							  </target>
@@ -805,6 +876,7 @@
 						<execution>
 							<!--  Makes sure we start with a clean postgres (no pre-existing database that we want to create) -->
 							<id>pre-postgresql-teardown</id>
+							<phase>pre-integration-test</phase>
 							<goals>
 							  <goal>run</goal>
 							</goals>
@@ -820,6 +892,7 @@
 						<execution>
 							<!--  Sets up the mysql database for use in integration testing -->
 							<id>mysql-setup</id>
+							<phase>pre-integration-test</phase>
 							<goals>
 							  <goal>run</goal>
 							</goals>
@@ -835,6 +908,7 @@
 						<execution>
 							<!--  Sets up the postgres database for use in integration testing -->
 							<id>postgresql-setup</id>
+							<phase>pre-integration-test</phase>
 							<goals>
 							  <goal>run</goal>
 							</goals>
@@ -850,6 +924,7 @@
 						<execution>
 							<!--  Tears down whatever we set up in the mysql-setup execution -->
 							<id>mysql-teardown</id>
+							<phase>post-integration-test</phase>
 							<goals>
 							  <goal>run</goal>
 							</goals>
@@ -865,6 +940,7 @@
 						<execution>
 							<!--  Tears down whatever we set up in the postgres-setup execution -->
 							<id>postgresql-teardown</id>
+							<phase>post-integration-test</phase>
 							<goals>
 							  <goal>run</goal>
 							</goals>
@@ -901,7 +977,7 @@
 				  <!-- This configures code coverage reports -->
 				  <groupId>org.sonatype.maven.plugin</groupId>
 				  <artifactId>emma-maven-plugin</artifactId>
-				  <version>1.2</version>
+				  <version>${emma.maven.plugin.version}</version>
 				  <executions>
 					<execution>
 					  <id>emma-instrument-classes</id>
@@ -915,7 +991,7 @@
 				<plugin>
 				  <!-- This configures the running of unit tests. -->
 				  <artifactId>maven-surefire-plugin</artifactId>
-				  <version>2.6</version>
+				  <version>${maven.surefire.plugin.version}</version>
 				  <inherited>true</inherited>
 				  <configuration>
 					<classesDirectory>${project.build.directory}/generated-classes/emma/classes</classesDirectory>
@@ -1034,6 +1110,37 @@
 						</goals>
 					  </execution>
 					</executions>
+				</plugin>
+				<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
+				<plugin>
+					<groupId>org.eclipse.m2e</groupId>
+					<artifactId>lifecycle-mapping</artifactId>
+					<version>1.0.0</version>
+					<configuration>
+						<lifecycleMappingMetadata>
+							<pluginExecutions>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>
+											org.apache.maven.plugins
+										</groupId>
+										<artifactId>
+											maven-antrun-plugin
+										</artifactId>
+										<versionRange>
+											[1.6,)
+										</versionRange>
+										<goals>
+											<goal>run</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<execute />
+									</action>
+								</pluginExecution>
+							</pluginExecutions>
+						</lifecycleMappingMetadata>
+					</configuration>
 				</plugin>
 			</plugins>
 		</pluginManagement>
