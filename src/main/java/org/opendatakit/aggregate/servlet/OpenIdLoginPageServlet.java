@@ -68,7 +68,7 @@ public class OpenIdLoginPageServlet extends ServletUtilBase {
 "<meta http-equiv=\"cache-control\" content=\"no-store, no-cache, must-revalidate\"/>" +
 "<meta http-equiv=\"expires\" content=\"Mon, 26 Jul 1997 05:00:00 GMT\"/>" +
 "<meta http-equiv=\"pragma\" content=\"no-cache\"/>" +
-"<link rel=\"shortcut icon\" href=\"favicon.ico\"/>" +
+"<link rel=\"icon\" href=\"favicon.ico\"/>" +
 "<title>Log onto Aggregate</title>" +
 "<link type=\"text/css\" rel=\"stylesheet\" href=\"AggregateUI.css\">" +
 "<link type=\"text/css\" rel=\"stylesheet\" href=\"stylesheets/button.css\">" +

@@ -102,7 +102,7 @@ public abstract class CommonServletBase extends HttpServlet {
 	    resp.setCharacterEncoding(HtmlConsts.UTF8_ENCODE);
 	    PrintWriter out = resp.getWriter();
 	    out.write(HtmlConsts.HTML_OPEN);
-	    out.write("<link rel=\"shortcut icon\" href=\"" + cc.getWebApplicationURL("favicon.ico") + "\">");
+	    out.write("<link rel=\"icon\" href=\"" + cc.getWebApplicationURL("favicon.ico") + "\">");
 
 	    out.write(HtmlStrUtil.wrapWithHtmlTags(HtmlConsts.HEAD, headContent + HtmlStrUtil.wrapWithHtmlTags(
 	        HtmlConsts.TITLE, applicationName)));
