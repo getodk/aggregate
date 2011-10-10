@@ -7,7 +7,6 @@
     <version>1.0</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
-  <groupId>org.opendatakit</groupId>
   <artifactId>aggregate-postgres</artifactId>
   <packaging>war</packaging>
   <name>ODK Aggregate for PostgreSQL</name>
@@ -28,17 +27,15 @@
 		<plugin>
 			<groupId>org.codehaus.mojo</groupId>
 			<artifactId>build-helper-maven-plugin</artifactId>
-			<version>1.5</version>
 			<executions>
 				<execution>
-					<id>add-gwt-source</id>
+					<id>add-java-source</id>
 				</execution>
 			</executions>
 		</plugin>
 		<plugin>
 			<groupId>org.codehaus.mojo</groupId>
 			<artifactId>gwt-maven-plugin</artifactId>
-			<version>${gwt.maven.plugin.version}</version>
 			<executions>
 			  <execution>
 				<id>gwt-javascript</id>
@@ -47,7 +44,6 @@
 		</plugin>
 		<plugin>
 			<artifactId>maven-antrun-plugin</artifactId>
-			<version>${maven.antrun.plugin.version}</version>
 			<executions>
 				<execution>
 					<id>war-clean</id>
@@ -90,7 +86,6 @@
 		<plugin>
 			<groupId>org.apache.maven.plugins</groupId>
 			<artifactId>maven-war-plugin</artifactId>
-			<version>${maven.war.plugin.version}</version>
 			<executions>
 			  <execution>
 				<id>war-build</id>
@@ -146,7 +141,40 @@
 			  </execution>
 			</executions>
 		</plugin> -->
-    </plugins> 
+    </plugins>
+    <pluginManagement>
+    	<plugins>
+    		<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
+    		<plugin>
+    			<groupId>org.eclipse.m2e</groupId>
+    			<artifactId>lifecycle-mapping</artifactId>
+    			<version>1.0.0</version>
+    			<configuration>
+    				<lifecycleMappingMetadata>
+    					<pluginExecutions>
+    						<pluginExecution>
+    							<pluginExecutionFilter>
+    								<groupId>
+    									org.sonatype.maven.plugin
+    								</groupId>
+    								<artifactId>
+    									emma-maven-plugin
+    								</artifactId>
+    								<versionRange>[1.2,)</versionRange>
+    								<goals>
+    									<goal>instrument</goal>
+    								</goals>
+    							</pluginExecutionFilter>
+    							<action>
+    								<ignore></ignore>
+    							</action>
+    						</pluginExecution>
+    					</pluginExecutions>
+    				</lifecycleMappingMetadata>
+    			</configuration>
+    		</plugin>
+    	</plugins>
+    </pluginManagement>
   </build>
   <profiles>
     <profile>
