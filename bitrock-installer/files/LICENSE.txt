@@ -70,6 +70,10 @@ https://bitbucket.org/javarosa/javarosa/wiki/Home		/Apache 2.0/
 	javarosa-libraries.jar
 http://code.google.com/p/atinject/  /Apache 2.0/
 	javax.inject-1.jar
+https://github.com/stain/jai-imageio-core   /Modified BSD/ /Apache 2.0/
+    jai-imageio-core-standalone-1.2-pre-dr-b04-2010-04-30.jar
+	Copyright (c) 2005 Sun Microsystems, Inc. All Rights Reserved.
+	Modifications (c) Stian Soiland-Reyes <stian@soiland-reyes.com> 2010-04-30
 http://www.jcip.net					/Creative Commons Attribution License/
 	jcip-annotations-1.0.jar
 http://www.jdom.org/index.html		/Apache with acknowledgement clause removed/
