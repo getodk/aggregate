@@ -241,7 +241,8 @@ public final class ExportPopup extends AbstractPopupBase {
         String titleValue = titleFieldsDropDown.getElementKey();
         String binaryValue = binaryFieldsDropDown.getElementKey();
 
-        SecureGWT.getFormService().createKml(formId, geoPointValue, titleValue, binaryValue,
+        FilterGroup filterGroup = filtersBox.getSelectedFilter();
+        SecureGWT.getFormService().createKmlFromFilter(filterGroup, geoPointValue, titleValue, binaryValue,
             new CreateExportCallback());
       }
 
