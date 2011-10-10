@@ -46,6 +46,9 @@ public interface FormService extends RemoteService {
   KmlSettings getPossibleKmlSettings(String formId) throws AccessDeniedException;
   
   Boolean createKml(String formId, String geopointKey, String titleKey, String binaryKey) throws AccessDeniedException;
+
+  Boolean createKmlFromFilter(FilterGroup group, String geopointKey, String titleKey,
+      String binaryKey) throws AccessDeniedException;
   
   KmlSettings getGpsCoordnates(String formId) throws AccessDeniedException;
   

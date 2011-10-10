@@ -28,6 +28,7 @@ import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.form.PersistentResults;
 import org.opendatakit.aggregate.format.SubmissionFormatter;
 import org.opendatakit.aggregate.format.structure.KmlFormatter;
+import org.opendatakit.aggregate.format.structure.KmlFormatterWithFilters;
 import org.opendatakit.aggregate.query.submission.QueryBase;
 import org.opendatakit.aggregate.query.submission.QueryByDateRange;
 import org.opendatakit.aggregate.query.submission.QueryByUIFilterGroup;
@@ -80,16 +81,15 @@ public class KmlWorkerImpl {
       QueryBase query;
       SubmissionFormatter formatter;
       if (filterGroupUri == null) {
-        query = new QueryByDateRange(form, 100*ServletConsts.FETCH_LIMIT, BasicConsts.EPOCH, null, cc);
+        query = new QueryByDateRange(form, 1000*ServletConsts.FETCH_LIMIT, BasicConsts.EPOCH, null, cc);
         formatter = new KmlFormatter(form, cc.getServerURL(), geopointField,
             titleField, imageField, pw, null, cc);
       } else {
         subFilterGroup = SubmissionFilterGroup.getFilterGroup(filterGroupUri, cc);
         FilterGroup filterGroup = subFilterGroup.transform();
         query = new QueryByUIFilterGroup(form, filterGroup, CompletionFlag.ONLY_COMPLETE_SUBMISSIONS, cc);
-        // TODO: change to use FilterGroup
-        formatter = new KmlFormatter(form, cc.getServerURL(), geopointField,
-            titleField, imageField, pw, null, cc);
+        formatter = new KmlFormatterWithFilters(form, cc.getServerURL(), geopointField,
+            titleField, imageField, pw, filterGroup, cc);
       }
       formatter.processSubmissions(query.getResultSubmissions(cc), cc);
 

@@ -39,4 +39,7 @@ public interface FormServiceAsync {
 
   void createCsvFromFilter(FilterGroup group, AsyncCallback<Boolean> callback);
 
+  void createKmlFromFilter(FilterGroup group, String geopointKey, String titleKey, String binaryKey,
+      AsyncCallback<Boolean> callback);
+
 }

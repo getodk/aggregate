@@ -75,7 +75,7 @@ public class CsvWorkerImpl {
       QueryBase query;
       SubmissionFormatter formatter;
       if (filterGroupUri == null) {
-        query = new QueryByDateRange(form, 100*ServletConsts.FETCH_LIMIT, BasicConsts.EPOCH, null, cc);
+        query = new QueryByDateRange(form, 1000*ServletConsts.FETCH_LIMIT, BasicConsts.EPOCH, null, cc);
         formatter = new CsvFormatter(form, cc.getServerURL(), pw, null);
       } else {
         subFilterGroup = SubmissionFilterGroup.getFilterGroup(filterGroupUri, cc);

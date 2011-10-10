@@ -321,4 +321,76 @@ public class FormServiceImpl extends RemoteServiceServlet implements
       return false;
     }
   }
+
+  @Override
+  public Boolean createKmlFromFilter(FilterGroup group, String geopointKey, String titleKey, String binaryKey) {
+    HttpServletRequest req = this.getThreadLocalRequest();
+    CallingContext cc = ContextFactory.getCallingContext(this, req);
+
+    if (group == null || group.getFormId() == null || geopointKey == null) {
+      return false;
+    }
+
+    try {
+      FormActionStatusTimestamp deletionTimestamp = MiscTasks
+          .getFormDeletionStatusTimestampOfFormId(group.getFormId(), cc);
+      // TODO: better error reporting -- form is being deleted. Disallow
+      // exports.
+      if (deletionTimestamp != null)
+        return false;
+
+      // clear uri so a copy can be saved
+      group.resetUriToDefault();
+
+      // save the filter group
+      SubmissionFilterGroup filterGrp = SubmissionFilterGroup.transform(group, cc);
+      filterGrp.setName("FilterForExport");
+      filterGrp.persist(cc);
+
+      Form form = Form.retrieveFormByFormId(group.getFormId(), cc);
+      if (form.getFormDefinition() == null)
+        return false; // ill-formed definition
+
+      FormElementModel titleField = null;
+      if (titleKey != null) {
+        FormElementKey titleFEMKey = new FormElementKey(titleKey);
+        titleField = FormElementModel.retrieveFormElementModel(form, titleFEMKey);
+      }
+
+      FormElementModel geopointField = null;
+      if (geopointKey != null) {
+        FormElementKey geopointFEMKey = new FormElementKey(geopointKey);
+        geopointField = FormElementModel.retrieveFormElementModel(form, geopointFEMKey);
+      }
+
+      FormElementModel imageField = null;
+      if (binaryKey != null) {
+        FormElementKey imageFEMKey = new FormElementKey(binaryKey);
+        imageField = FormElementModel.retrieveFormElementModel(form, imageFEMKey);
+      }
+
+      Map<String, String> params = new HashMap<String, String>();
+      params.put(KmlGenerator.TITLE_FIELD, (titleField == null) ? null : titleField
+          .constructFormElementKey(form).toString());
+      params.put(KmlGenerator.IMAGE_FIELD, (imageField == null) ? KmlGenerator.NONE : imageField
+          .constructFormElementKey(form).toString());
+      params.put(KmlGenerator.GEOPOINT_FIELD, (geopointField == null) ? null : geopointField
+          .constructFormElementKey(form).toString());
+
+      PersistentResults r = new PersistentResults(ExportType.KML, form, filterGrp, params, cc);
+      r.persist(cc);
+
+      KmlGenerator generator = (KmlGenerator) cc.getBean(BeanDefs.KML_BEAN);
+      CallingContext ccDaemon = ContextFactory.getCallingContext(this, req);
+      ccDaemon.setAsDaemon(true);
+      generator.createKmlTask(form, r.getSubmissionKey(), 1L, ccDaemon);
+      return true;
+    } catch (ODKFormNotFoundException e) {
+      e.printStackTrace();
+    } catch (ODKDatastoreException e) {
+      e.printStackTrace();
+    }
+
+    return false;
+  }
 }
