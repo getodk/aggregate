@@ -63,7 +63,11 @@ public class XmlFormatter implements SubmissionFormatter, RepeatCallbackFormatte
   }
 
   @Override
-  public void processSubmissions(List<Submission> submissions, CallingContext cc)
+  public void beforeProcessSubmissions(CallingContext cc) throws ODKDatastoreException {
+  }
+
+  @Override
+  public void processSubmissionSegment(List<Submission> submissions, CallingContext cc)
       throws ODKDatastoreException {
 
     // format row elements
@@ -96,7 +100,19 @@ public class XmlFormatter implements SubmissionFormatter, RepeatCallbackFormatte
       output.append(HtmlUtil.createEndTag(fem.getElementName()));
     }
   }
-  
+
+  @Override
+  public void afterProcessSubmissions(CallingContext cc) throws ODKDatastoreException {
+  }
+    
+@Override
+  public void processSubmissions(List<Submission> submissions, CallingContext cc)
+      throws ODKDatastoreException {
+    beforeProcessSubmissions(cc);
+    processSubmissionSegment(submissions, cc);
+    afterProcessSubmissions(cc);
+  }
+
   public void processRepeatedSubmssionSetsIntoRow(List<SubmissionSet> repeats,
       FormElementModel repeatElement, Row row, CallingContext cc) throws ODKDatastoreException {
 

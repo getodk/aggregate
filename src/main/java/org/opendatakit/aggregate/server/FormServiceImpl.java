@@ -149,40 +149,6 @@ public class FormServiceImpl extends RemoteServiceServlet implements
   }
 
   @Override
-  public Boolean createCsv(String formId, String filterUri) {
-    HttpServletRequest req = this.getThreadLocalRequest();
-    CallingContext cc = ContextFactory.getCallingContext(this, req);
-
-    try {
-      FormActionStatusTimestamp deletionTimestamp = MiscTasks
-          .getFormDeletionStatusTimestampOfFormId(formId, cc);
-      // TODO: better error reporting -- form is being deleted. Disallow
-      // exports.
-      if (deletionTimestamp != null)
-        return false;
-      // create csv job
-      Form form = Form.retrieveFormByFormId(formId, cc);
-      if (form.getFormDefinition() == null)
-        return false; // ill-formed definition
-      PersistentResults r = new PersistentResults(ExportType.CSV, form, null, null, cc);
-      r.persist(cc);
-
-      // create csv task
-      CallingContext ccDaemon = ContextFactory.getCallingContext(this, req);
-      ccDaemon.setAsDaemon(true);
-      CsvGenerator generator = (CsvGenerator) cc.getBean(BeanDefs.CSV_BEAN);
-      generator.createCsvTask(form, r.getSubmissionKey(), 1L, ccDaemon);
-      return true;
-    } catch (ODKFormNotFoundException e1) {
-      e1.printStackTrace();
-    } catch (ODKDatastoreException e) {
-      e.printStackTrace();
-    }
-
-    return false;
-  }
-
-  @Override
   public KmlSettings getPossibleKmlSettings(String formId) {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
@@ -197,70 +163,6 @@ public class FormServiceImpl extends RemoteServiceServlet implements
     } catch (ODKFormNotFoundException e1) {
       return null;
     }
-  }
-
-  @Override
-  public Boolean createKml(String formId, String geopointKey, String titleKey, String binaryKey) {
-    HttpServletRequest req = this.getThreadLocalRequest();
-    CallingContext cc = ContextFactory.getCallingContext(this, req);
-
-    if (formId == null || geopointKey == null) {
-      return false;
-    }
-
-    try {
-      FormActionStatusTimestamp deletionTimestamp = MiscTasks
-          .getFormDeletionStatusTimestampOfFormId(formId, cc);
-      // TODO: better error reporting -- form is being deleted. Disallow
-      // exports.
-      if (deletionTimestamp != null)
-        return false;
-
-      Form form = Form.retrieveFormByFormId(formId, cc);
-      if (form.getFormDefinition() == null)
-        return false; // ill-formed definition
-
-      FormElementModel titleField = null;
-      if (titleKey != null) {
-        FormElementKey titleFEMKey = new FormElementKey(titleKey);
-        titleField = FormElementModel.retrieveFormElementModel(form, titleFEMKey);
-      }
-
-      FormElementModel geopointField = null;
-      if (geopointKey != null) {
-        FormElementKey geopointFEMKey = new FormElementKey(geopointKey);
-        geopointField = FormElementModel.retrieveFormElementModel(form, geopointFEMKey);
-      }
-
-      FormElementModel imageField = null;
-      if (binaryKey != null) {
-        FormElementKey imageFEMKey = new FormElementKey(binaryKey);
-        imageField = FormElementModel.retrieveFormElementModel(form, imageFEMKey);
-      }
-
-      Map<String, String> params = new HashMap<String, String>();
-      params.put(KmlGenerator.TITLE_FIELD, (titleField == null) ? null : titleField
-          .constructFormElementKey(form).toString());
-      params.put(KmlGenerator.IMAGE_FIELD, (imageField == null) ? KmlGenerator.NONE : imageField
-          .constructFormElementKey(form).toString());
-      params.put(KmlGenerator.GEOPOINT_FIELD, (geopointField == null) ? null : geopointField
-          .constructFormElementKey(form).toString());
-
-      PersistentResults r = new PersistentResults(ExportType.KML, form, null, params, cc);
-      r.persist(cc);
-
-      KmlGenerator generator = (KmlGenerator) cc.getBean(BeanDefs.KML_BEAN);
-      CallingContext ccDaemon = ContextFactory.getCallingContext(this, req);
-      ccDaemon.setAsDaemon(true);
-      generator.createKmlTask(form, r.getSubmissionKey(), 1L, ccDaemon);
-      return true;
-    } catch (ODKFormNotFoundException e) {
-      e.printStackTrace();
-    } catch (ODKDatastoreException e) {
-      e.printStackTrace();
-    }
-
-    return false;
   }
 
   @Override

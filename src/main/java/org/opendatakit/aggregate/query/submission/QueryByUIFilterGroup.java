@@ -47,7 +47,7 @@ public class QueryByUIFilterGroup extends QueryBase {
 
   private int fetchLimit;
   
-  private final QueryResumePoint cursor;
+  private QueryResumePoint cursor;
   
   public QueryByUIFilterGroup(Form form, FilterGroup filterGroup, CompletionFlag completionFlag, CallingContext cc) {
     super(form);
@@ -173,6 +173,9 @@ public class QueryByUIFilterGroup extends QueryBase {
           .getFormDefinition(), cc);
       retrievedSubmissions.add(sub);
     }
+    
+    // advance cursor...
+    cursor = results.getResumeCursor();
     return retrievedSubmissions;
   }
   

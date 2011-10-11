@@ -122,6 +122,7 @@ public final class ServletConsts {
   // TODO: revise so no retrieval form limit
   public static final int FETCH_LIMIT = 1000;
 
+  public static final int EXPORT_CURSOR_CHUNK_SIZE = 2048;
   /**
    * The name of the parameter that specifies the cursor location for retrieving
    * data from the data table (fragmented Csv servlet)

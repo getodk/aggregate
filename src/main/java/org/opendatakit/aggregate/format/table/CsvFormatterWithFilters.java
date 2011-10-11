@@ -68,19 +68,32 @@ public class CsvFormatterWithFilters implements SubmissionFormatter {
   }
 
   @Override
-  public void processSubmissions(List<Submission> submissions, CallingContext cc)
-      throws ODKDatastoreException {
-
+  public final void beforeProcessSubmissions(CallingContext cc) throws ODKDatastoreException {
     // format headers
     appendCsvRow(headers.iterator());
-
+  }
+  
+  @Override
+  public final void processSubmissionSegment(List<Submission> submissions,
+        CallingContext cc) throws ODKDatastoreException {
     // format row elements
     for (Submission sub : submissions) {
       Row row = sub.getFormattedValuesAsRow(namespaces, propertyNames, elemFormatter, false, cc);
       appendCsvRow(row.getFormattedValues().iterator());
     }
   }
+  
+  @Override
+  public final void afterProcessSubmissions(CallingContext cc) throws ODKDatastoreException {
+  }
 
+  @Override
+  public final void processSubmissions(List<Submission> submissions, CallingContext cc) throws ODKDatastoreException {
+    beforeProcessSubmissions(cc);
+    processSubmissionSegment(submissions, cc);
+    afterProcessSubmissions(cc);
+  }
+  
   /**
    * Helper function used to append the comma separated value row
    * 
