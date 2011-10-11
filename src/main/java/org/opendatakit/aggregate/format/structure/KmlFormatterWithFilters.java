@@ -156,12 +156,15 @@ public class KmlFormatterWithFilters implements SubmissionFormatter, RepeatCallb
   }
 
   @Override
-  public void processSubmissions(List<Submission> submissions, CallingContext cc) throws ODKDatastoreException {
-    // output preamble & placemark style
+  public void beforeProcessSubmissions(CallingContext cc) throws ODKDatastoreException {
     output.write(String.format(KmlConsts.KML_PREAMBLE_TEMPLATE, form.getFormId(), form
         .getViewableName(), form.getViewableName()));
     output.write(generateStyle(imgElement != null));
+  }
 
+  @Override
+  public void processSubmissionSegment(List<Submission> submissions, CallingContext cc)
+      throws ODKDatastoreException {
     // format row elements
     for (Submission sub : submissions) {
 
@@ -195,9 +198,22 @@ public class KmlFormatterWithFilters implements SubmissionFormatter, RepeatCallb
       }
       output.write(placemarks.toString());
     }
+  }
+
+  @Override
+  public void afterProcessSubmissions(CallingContext cc) throws ODKDatastoreException {
 
     // output postamble
     output.write(KmlConsts.KML_POSTAMBLE_TEMPLATE);
+  }
+
+
+  @Override
+  public void processSubmissions(List<Submission> submissions, CallingContext cc)
+      throws ODKDatastoreException {
+    beforeProcessSubmissions(cc);
+    processSubmissionSegment(submissions, cc);
+    afterProcessSubmissions(cc);
   }
 
   private String generateFormattedPlacemark(Row row, String identifier, String title,

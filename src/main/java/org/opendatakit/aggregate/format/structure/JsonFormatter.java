@@ -54,14 +54,30 @@ public class JsonFormatter implements SubmissionFormatter, RepeatCallbackFormatt
   }
 
   @Override
-  public void processSubmissions(List<Submission> submissions, CallingContext cc)
-      throws ODKDatastoreException {
+  public void beforeProcessSubmissions(CallingContext cc) throws ODKDatastoreException {
+  }
 
+  @Override
+  public void processSubmissionSegment(List<Submission> submissions, CallingContext cc)
+      throws ODKDatastoreException {
     // format row elements
     for (Submission sub : submissions) {
       Row row = sub.getFormattedValuesAsRow(propertyNames, elemFormatter, false, cc);
       appendJsonObject(row.getFormattedValues().iterator());
     }
+  }
+
+  @Override
+  public void afterProcessSubmissions(CallingContext cc) throws ODKDatastoreException {
+  }
+
+
+  @Override
+  public void processSubmissions(List<Submission> submissions, CallingContext cc)
+      throws ODKDatastoreException {
+    beforeProcessSubmissions(cc);
+    processSubmissionSegment(submissions, cc);
+    afterProcessSubmissions(cc);
   }
   
   public void processRepeatedSubmssionSetsIntoRow(List<SubmissionSet> repeats,
@@ -101,7 +117,5 @@ public class JsonFormatter implements SubmissionFormatter, RepeatCallbackFormatt
       }
     }
   }
-
-
 
 }

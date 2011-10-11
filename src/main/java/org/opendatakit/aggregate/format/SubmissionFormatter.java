@@ -28,5 +28,18 @@ import org.opendatakit.common.web.CallingContext;
  * 
  */
 public interface SubmissionFormatter {
-  public void processSubmissions(List<Submission> submissions, CallingContext cc) throws ODKDatastoreException;  
+  public void beforeProcessSubmissions(CallingContext cc) throws ODKDatastoreException;
+
+  /**
+   * Implementation should call before..., ...Segment, after... .
+   * 
+   * @param submissions
+   * @param cc
+   * @throws ODKDatastoreException
+   */
+  public void processSubmissions(List<Submission> submissions, CallingContext cc) throws ODKDatastoreException;
+  
+  public void processSubmissionSegment(List<Submission> submissions, CallingContext cc) throws ODKDatastoreException;
+  
+  public void afterProcessSubmissions(CallingContext cc) throws ODKDatastoreException;
 }

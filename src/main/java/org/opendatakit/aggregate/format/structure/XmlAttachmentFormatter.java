@@ -54,19 +54,35 @@ public class XmlAttachmentFormatter implements SubmissionFormatter, RepeatCallba
     attachmentFormatter = new XmlMediaAttachmentFormatter(this);
   }
 
-@Override
-  public void processSubmissions(List<Submission> submissions, CallingContext cc)
-      throws ODKDatastoreException {
 
+  @Override
+  public void beforeProcessSubmissions(CallingContext cc) throws ODKDatastoreException {
+  }
+
+  @Override
+  public void processSubmissionSegment(List<Submission> submissions, CallingContext cc)
+      throws ODKDatastoreException {
     // format row elements
     for (Submission sub : submissions) {
       Row dataRow = new Row(sub.constructSubmissionKey(null));
-	  sub.getFormattedNamespaceValuesForRow(dataRow, Collections.singletonList(FormElementNamespace.VALUES), attachmentFormatter, false, cc);
-	  Iterator<String> itr = dataRow.getFormattedValues().iterator();
+     sub.getFormattedNamespaceValuesForRow(dataRow, Collections.singletonList(FormElementNamespace.VALUES), attachmentFormatter, false, cc);
+     Iterator<String> itr = dataRow.getFormattedValues().iterator();
       while (itr.hasNext()) {
         output.append(itr.next());
       }
     }
+  }
+
+  @Override
+  public void afterProcessSubmissions(CallingContext cc) throws ODKDatastoreException {
+  }
+    
+@Override
+  public void processSubmissions(List<Submission> submissions, CallingContext cc)
+      throws ODKDatastoreException {
+    beforeProcessSubmissions(cc);
+    processSubmissionSegment(submissions, cc);
+    afterProcessSubmissions(cc);
   }
   
   public void processRepeatedSubmssionSetsIntoRow(List<SubmissionSet> repeats,
@@ -81,5 +97,4 @@ public class XmlAttachmentFormatter implements SubmissionFormatter, RepeatCallba
       }
     }
   }
-    
 }
