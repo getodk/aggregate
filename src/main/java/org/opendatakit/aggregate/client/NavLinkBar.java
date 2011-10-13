@@ -8,6 +8,8 @@ import org.opendatakit.common.security.client.UserSecurityInfo.UserType;
 import org.opendatakit.common.web.constants.HtmlConsts;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.http.client.URL;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
@@ -55,7 +57,12 @@ public class NavLinkBar extends SimplePanel {
         loginLogoutLink.setText("Log Out " + userInfo.getCanonicalName());
      } else {
         GWT.log("Setting login link");
-        loginLogoutLink.setHref(LOGIN_URL_PATH);
+        String login = LOGIN_URL_PATH;
+        // try to redirect back to this page...
+        login += "?redirect=" + 
+            URL.encodeQueryString(Window.Location.getHref());
+
+        loginLogoutLink.setHref(login);
         loginLogoutLink.setText("Log In");
      }
     AggregateUI.resize();
