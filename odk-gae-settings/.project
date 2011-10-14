@@ -3,8 +3,7 @@
 	<name>odk-gae-settings</name>
 	<comment></comment>
 	<projects>
-		<project>ODKAggregatePlatform</project>
- 	</projects>
+	</projects>
 	<buildSpec>
 		<buildCommand>
 			<name>org.eclipse.jdt.core.javabuilder</name>

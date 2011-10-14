@@ -54,6 +54,11 @@
 			<type>2</type>
 			<locationURI>PARENT_PROJECT_LOC/src/test/java</locationURI>
 		</link>
+		<link>
+			<name>it</name>
+			<type>2</type>
+            <locationURI>PARENT_PROJECT_LOC/src/it/java</locationURI>
+		</link>
 	</linkedResources>
 	<variableList>
 		<variable>

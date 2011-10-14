@@ -34,7 +34,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.opendatakit.aggregate.constants.ServletConsts;
-import org.opendatakit.aggregate.servlet.AggregateHtmlServlet;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.BasicConsts;
 import org.opendatakit.common.web.constants.HtmlConsts;
