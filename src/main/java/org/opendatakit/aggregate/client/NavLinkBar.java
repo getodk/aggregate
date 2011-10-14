@@ -58,10 +58,8 @@ public class NavLinkBar extends SimplePanel {
      } else {
         GWT.log("Setting login link");
         String login = LOGIN_URL_PATH;
-        // try to redirect back to this page...
-        login += "?redirect=" + 
-            URL.encodeQueryString(Window.Location.getHref());
-
+        // preserve any query string (aids in GWT debugging)
+        login += Window.Location.getQueryString();
         loginLogoutLink.setHref(login);
         loginLogoutLink.setText("Log In");
      }
