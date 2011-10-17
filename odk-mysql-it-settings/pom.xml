@@ -7,10 +7,10 @@
     <version>1.0</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
-  <artifactId>odk-mysql-unit-settings</artifactId>
+  <artifactId>odk-mysql-it-settings</artifactId>
   <version>latest</version>
   <packaging>jar</packaging>
-  <name>Unit Test Configuration for MySQL</name>
+  <name>Integration Test Configuration for MySQL</name>
   <build>
 	<resources>
 		<resource>

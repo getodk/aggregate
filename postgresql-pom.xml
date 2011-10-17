@@ -1,0 +1,94 @@
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0   http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.opendatakit</groupId>
+		<artifactId>aggregate</artifactId>
+		<version>1.0</version>
+		<relativePath>pom.xml</relativePath>
+	</parent>
+	<artifactId>aggregate-postgresql-specific</artifactId>
+	<version>1.0</version>
+	<packaging>pom</packaging>
+	<name>ODK Aggregate PostgreSQL Specific</name>
+	<modules>
+		<module>aggregate-postgresql</module>
+		<module>postgresql-unit-tests</module>
+	</modules>
+	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<artifactId>maven-antrun-plugin</artifactId>
+					<version>${maven.antrun.plugin.version}</version>
+					<executions>
+						<execution>
+							<!--  Makes sure we start with a clean postgres (no pre-existing database that we want to create) -->
+							<id>postgresql-teardown-clean</id>
+							<phase>pre-clean</phase>
+							<goals>
+							  <goal>run</goal>
+							</goals>
+							<configuration>
+							  <target>
+							    <exec executable="${postgres.client.executable}" failonerror="false">
+								  <env key="PGPASSWORD" value="${postgres.root.password}" />
+								  <arg line="-U postgres -a -n -w -f &quot;${scriptSourceDirectory}/postgres_teardown.sql&quot;" />
+								</exec>
+							  </target>
+							</configuration>
+						</execution>
+						<execution>
+							<!--  Makes sure we start with a clean postgres (no pre-existing database that we want to create) -->
+							<id>pre-postgresql-teardown</id>
+							<phase>pre-integration-test</phase>
+							<goals>
+							  <goal>run</goal>
+							</goals>
+							<configuration>
+							  <target>
+							    <exec executable="${postgres.client.executable}" failonerror="false">
+								  <env key="PGPASSWORD" value="${postgres.root.password}" />
+								  <arg line="-U postgres -a -n -w -f &quot;${scriptSourceDirectory}/postgres_teardown.sql&quot;" />
+								</exec>
+							  </target>
+							</configuration>
+						</execution>
+						<execution>
+							<!--  Sets up the postgres database for use in integration testing -->
+							<id>postgresql-setup</id>
+							<phase>pre-integration-test</phase>
+							<goals>
+							  <goal>run</goal>
+							</goals>
+							<configuration>
+							  <target>
+								<exec executable="${postgres.client.executable}" failonerror="true">
+								  <env key="PGPASSWORD" value="${postgres.root.password}" />
+								  <arg line="-U postgres -a -n -w -f &quot;${scriptSourceDirectory}/postgres_setup.sql&quot;" />
+								</exec>
+							  </target>
+							</configuration>
+						</execution>
+						<execution>
+							<!--  Tears down whatever we set up in the postgres-setup execution -->
+							<id>postgresql-teardown</id>
+							<phase>post-integration-test</phase>
+							<goals>
+							  <goal>run</goal>
+							</goals>
+							<configuration>
+							  <target>
+								<exec executable="${postgres.client.executable}" failonerror="true">
+								  <env key="PGPASSWORD" value="${postgres.root.password}" />
+								  <arg line="-U postgres -a -n -w -f &quot;${scriptSourceDirectory}/postgres_teardown.sql&quot;" />
+								</exec>
+							  </target>
+							</configuration>
+						</execution>
+					</executions>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+	</build>
+</project>
