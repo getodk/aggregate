@@ -23,6 +23,8 @@
 		<emma.maven.plugin.version>1.2</emma.maven.plugin.version>
 		<maven.surefire.report.plugin.version>2.6</maven.surefire.report.plugin.version>
 		<maven.surefire.plugin.version>2.6</maven.surefire.plugin.version>
+		<maven.failsafe.plugin.version>2.10</maven.failsafe.plugin.version>
+		<cargo.maven2.plugin.version>1.1.3</cargo.maven2.plugin.version>
 		<build.helper.maven.plugin.version>1.7</build.helper.maven.plugin.version>
 		<gwt.maven.plugin.version>2.4.0</gwt.maven.plugin.version>
 		<maven.gae.plugin.version>0.9.1</maven.gae.plugin.version>
@@ -42,16 +44,22 @@
 	<modules>
 		<module>aggregate-src</module>
 		<module>odk-gae-settings</module>
+		<module>odk-gae-it-settings</module>
 		<module>odk-gae-unit-settings</module>
 		<module>odk-mysql-settings</module>
+		<module>odk-mysql-it-settings</module>
 		<module>odk-mysql-unit-settings</module>
 		<module>odk-postgres-settings</module>
+		<module>odk-postgres-it-settings</module>
 		<module>odk-postgres-unit-settings</module>
+		
 		<module>aggregate-gae</module>
-		<module>aggregate-mysql</module>
-		<module>aggregate-postgres</module>
 		<module>gae-unit-tests</module>
+		<!-- aggregate-mysql-specific -->
+		<module>aggregate-mysql</module>
 		<module>mysql-unit-tests</module>
+		<!-- aggregate-postgresql-specific -->
+		<module>aggregate-postgres</module>
 		<module>postgres-unit-tests</module>
 	</modules>
 	<repositories>
@@ -342,6 +350,12 @@
 		  <scope>compile</scope>
 		</dependency>
 		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<version>5.1.18</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
 		  <groupId>net.sourceforge.nekohtml</groupId>
 		  <artifactId>nekohtml</artifactId>
 		  <version>1.9.14</version>
@@ -575,9 +589,15 @@
 		</dependency> -->
 	    <!-- Test dependencies -->
 		<dependency>
-		  <groupId>org.seleniumhq.selenium.client-drivers</groupId>
-		  <artifactId>selenium-java-client-driver</artifactId>
-		  <version>1.0.2</version>
+		  <groupId>org.seleniumhq.selenium</groupId>
+		  <artifactId>selenium-java</artifactId>
+		  <version>2.8.0</version>
+		  <scope>test</scope>
+		</dependency>
+		<dependency>
+		  <groupId>org.seleniumhq.selenium</groupId>
+		  <artifactId>selenium-firefox-driver</artifactId>
+		  <version>2.8.0</version>
 		  <scope>test</scope>
 		</dependency>
 		<dependency>
@@ -703,10 +723,9 @@
 							<configuration>
 							  <target>
 								<!-- deletes the /war tree -->
-								<delete dir="${project.basedir}/src/main/webapp"/>
+								<delete dir="${project.basedir}/src/main/webapp" failonerror="false"/>
 							  </target>
 							</configuration>
-							<phase>pre-clean</phase>
 							<goals>
 							  <goal>run</goal>
 							</goals>
@@ -731,7 +750,6 @@
 									file="${toplevel.directory}/src/main/libs/jai-imageio-core-standalone-1.2-pre-dr-b04-2010-04-30.jar" />
 							  </target>
 							</configuration>
-							<phase>generate-resources</phase>
 							<goals>
 							  <goal>run</goal>
 							</goals>
@@ -747,7 +765,6 @@
 								<delete dir="${project.basedir}/target/classes"/>
 							  </target>
 							</configuration>
-							<phase>prepare-package</phase>
 							<goals>
 							  <goal>run</goal>
 							</goals>
@@ -766,7 +783,6 @@
 								</delete>
 							  </target>
 							</configuration>
-							<phase>prepare-package</phase>
 							<goals>
 							  <goal>run</goal>
 							</goals>
@@ -774,7 +790,6 @@
 						<execution>
 							<!-- Prepares a war folder with the instrumented classes -->
 							<id>prepare-instrumented-war-folder</id>
-							<phase>pre-integration-test</phase>
 							<goals>
 							  <goal>run</goal>
 							</goals>
@@ -799,7 +814,6 @@
 						<execution>
 							<!-- Adds the emma jar to the war folder -->
 							<id>add-emma-to-war-folder</id>
-							<phase>pre-integration-test</phase>
 							<goals>
 							  <goal>run</goal>
 							</goals>
@@ -813,7 +827,6 @@
 						<execution>
 							<!-- Packages the war folder into a war -->
 							<id>prepare-instrumented-war</id>
-							<phase>pre-integration-test</phase>
 							<goals>
 							  <goal>run</goal>
 							</goals>
@@ -822,134 +835,6 @@
 								<mkdir dir="${project.build.directory}/emma-it-war/"/>
 								<war destfile="${project.build.directory}/emma-it-war/${project.build.finalName}.war" basedir="${project.build.directory}/emma-it/${project.build.finalName}"/>
 
-							  </target>
-							</configuration>
-						</execution>
-						<execution>
-							<!--  Makes sure we start with a clean mysql (no pre-existing database that we want to create) -->
-							<id>mysql-teardown-clean</id>
-							<phase>pre-clean</phase>
-							<goals>
-							  <goal>run</goal>
-							</goals>
-							<configuration>
-							  <target>
-								<exec executable="${mysql.client.executable}" failonerror="false">
-								  <arg line="-u root --force -p${mysql.root.password}" />
-								  <redirector input="${scriptSourceDirectory}/mysql_teardown.sql" />
-								</exec>
-							  </target>
-							</configuration>
-						</execution>
-						<execution>
-							<!--  Makes sure we start with a clean postgres (no pre-existing database that we want to create) -->
-							<id>postgresql-teardown-clean</id>
-							<phase>pre-clean</phase>
-							<goals>
-							  <goal>run</goal>
-							</goals>
-							<configuration>
-							  <target>
-							    <exec executable="${postgres.client.executable}" failonerror="false">
-								  <env key="PGPASSWORD" value="${postgres.root.password}" />
-								  <arg line="-U postgres -a -n -w -f &quot;${scriptSourceDirectory}/postgres_teardown.sql&quot;" />
-								</exec>
-							  </target>
-							</configuration>
-						</execution>
-						<execution>
-							<!--  Makes sure we start with a clean mysql (no pre-existing database that we want to create) -->
-							<id>pre-mysql-teardown</id>
-							<phase>pre-integration-test</phase>
-							<goals>
-							  <goal>run</goal>
-							</goals>
-							<configuration>
-							  <target>
-								<exec executable="${mysql.client.executable}" failonerror="false">
-								  <arg line="-u root --force -p${mysql.root.password}" />
-								  <redirector input="${scriptSourceDirectory}/mysql_teardown.sql" />
-								</exec>
-							  </target>
-							</configuration>
-						</execution>
-						<execution>
-							<!--  Makes sure we start with a clean postgres (no pre-existing database that we want to create) -->
-							<id>pre-postgresql-teardown</id>
-							<phase>pre-integration-test</phase>
-							<goals>
-							  <goal>run</goal>
-							</goals>
-							<configuration>
-							  <target>
-							    <exec executable="${postgres.client.executable}" failonerror="false">
-								  <env key="PGPASSWORD" value="${postgres.root.password}" />
-								  <arg line="-U postgres -a -n -w -f &quot;${scriptSourceDirectory}/postgres_teardown.sql&quot;" />
-								</exec>
-							  </target>
-							</configuration>
-						</execution>
-						<execution>
-							<!--  Sets up the mysql database for use in integration testing -->
-							<id>mysql-setup</id>
-							<phase>pre-integration-test</phase>
-							<goals>
-							  <goal>run</goal>
-							</goals>
-							<configuration>
-							  <target>
-								<exec executable="${mysql.client.executable}" failonerror="true">
-								  <arg line="-u root -p${mysql.root.password}" />
-								  <redirector input="${scriptSourceDirectory}/mysql_setup.sql" />
-								</exec>
-							  </target>
-							</configuration>
-						</execution>
-						<execution>
-							<!--  Sets up the postgres database for use in integration testing -->
-							<id>postgresql-setup</id>
-							<phase>pre-integration-test</phase>
-							<goals>
-							  <goal>run</goal>
-							</goals>
-							<configuration>
-							  <target>
-								<exec executable="${postgres.client.executable}" failonerror="true">
-								  <env key="PGPASSWORD" value="${postgres.root.password}" />
-								  <arg line="-U postgres -a -n -w -f &quot;${scriptSourceDirectory}/postgres_setup.sql&quot;" />
-								</exec>
-							  </target>
-							</configuration>
-						</execution>
-						<execution>
-							<!--  Tears down whatever we set up in the mysql-setup execution -->
-							<id>mysql-teardown</id>
-							<phase>post-integration-test</phase>
-							<goals>
-							  <goal>run</goal>
-							</goals>
-							<configuration>
-							  <target>
-								<exec executable="${mysql.client.executable}" failonerror="true">
-								  <arg line="-u root -p${mysql.root.password}" />
-								  <redirector input="${scriptSourceDirectory}/mysql_teardown.sql" />
-								</exec>
-							  </target>
-							</configuration>
-						</execution>
-						<execution>
-							<!--  Tears down whatever we set up in the postgres-setup execution -->
-							<id>postgresql-teardown</id>
-							<phase>post-integration-test</phase>
-							<goals>
-							  <goal>run</goal>
-							</goals>
-							<configuration>
-							  <target>
-								<exec executable="${postgres.client.executable}" failonerror="true">
-								  <env key="PGPASSWORD" value="${postgres.root.password}" />
-								  <arg line="-U postgres -a -n -w -f &quot;${scriptSourceDirectory}/postgres_teardown.sql&quot;" />
-								</exec>
 							  </target>
 							</configuration>
 						</execution>
@@ -978,6 +863,12 @@
 				  <groupId>org.sonatype.maven.plugin</groupId>
 				  <artifactId>emma-maven-plugin</artifactId>
 				  <version>${emma.maven.plugin.version}</version>
+				  <configuration>
+					<filter>
+						<excludes>com.google.appengine.*</excludes>
+						<excludes>org.opendatakit.common.persistence.engine.gae.DatastoreImpl</excludes>
+					</filter>
+				  </configuration>
 				  <executions>
 					<execution>
 					  <id>emma-instrument-classes</id>
@@ -989,21 +880,9 @@
 				  </executions>
 				</plugin>
 				<plugin>
-				  <!-- This configures the running of unit tests. -->
-				  <artifactId>maven-surefire-plugin</artifactId>
-				  <version>${maven.surefire.plugin.version}</version>
-				  <inherited>true</inherited>
-				  <configuration>
-					<classesDirectory>${project.build.directory}/generated-classes/emma/classes</classesDirectory>
-					<excludes>
-					  <exclude>**/integration/**</exclude>
-					</excludes>
-				  </configuration>
-				</plugin>
-				<plugin>
 					<!-- This configures the running of integration tests -->
 					<artifactId>maven-failsafe-plugin</artifactId>
-					<version>2.6</version>
+					<version>${maven.failsafe.plugin.version}</version>
 					<executions>
 					  <execution>
 						<id>integration-test</id>
@@ -1011,6 +890,40 @@
 						  <goal>integration-test</goal>
 						</goals>
 						<configuration>
+						  <classpathDependencyScopeExclude>test</classpathDependencyScopeExclude>
+						  <additionalClasspathElements>
+							<additionalClasspathElement>${selenium.home}/selenium-java-2.8.0.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.libs}/apache-mime4j-0.6.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.libs}/bsh-1.3.0.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.libs}/cglib-nodep-2.1_3.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.libs}/commons-codec-1.4.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.libs}/commons-collections-3.2.1.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.libs}/commons-io-2.0.1.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.libs}/commons-jxpath-1.3.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.libs}/commons-lang-2.6.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.libs}/commons-logging-1.1.1.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.libs}/cssparser-0.9.5.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.libs}/guava-r09.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.libs}/hamcrest-all-1.1.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.libs}/htmlunit-2.9.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.libs}/htmlunit-core-js-2.9.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.libs}/httpclient-4.1.2.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.libs}/httpcore-4.1.3.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.libs}/httpmime-4.1.2.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.libs}/jcommander-1.13.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.libs}/jna-3.3.0.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.libs}/json-20080701.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.libs}/junit-dep-4.10.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.libs}/nekohtml-1.9.15.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.libs}/operadriver-v0.7.3.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.libs}/protobuf-java-2.4.1.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.libs}/sac-1.3.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.libs}/serializer-2.7.1.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.libs}/testing-6.0.1-nobsh-noguice.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.libs}/xalan-2.7.1.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.libs}/xercesImpl-2.9.1.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.libs}/xml-apis-1.3.04.jar</additionalClasspathElement>
+						  </additionalClasspathElements>
 						  <testSourceDirectory>${project.parent.basedir}/src/it/java</testSourceDirectory>
 						  <classesDirectory>${project.build.directory}/generated-classes/emma/classes</classesDirectory>
 						  <includes>
@@ -1018,9 +931,11 @@
 						  </includes>
 						  <systemPropertyVariables>
 							<project.artifactId>${project.artifactId}</project.artifactId>
-							<test.forms.dir>${test.forms.dir}</test.forms.dir>
-							<test.submissions.dir>${test.submissions.dir}</test.submissions.dir>
+							<test.forms.dir>${itFormsDirectory}</test.forms.dir>
+							<test.submissions.dir>${itSubmissionsDirectory}</test.submissions.dir>
 							<test.server.port>${test.server.port}</test.server.port>
+							<test.server.hostname>${test.server.hostname}</test.server.hostname>
+							<test.server.baseUrl>${test.server.baseUrl}</test.server.baseUrl>
 						  </systemPropertyVariables>
 						</configuration>
 					  </execution>
@@ -1037,7 +952,7 @@
 						 manager app for integration testing. -->
 					<groupId>org.codehaus.cargo</groupId>
 					<artifactId>cargo-maven2-plugin</artifactId>
-					<version>1.0.4</version>
+					<version>${cargo.maven2.plugin.version}</version>
 					<configuration>
 					  <wait>false</wait>
 					  <container>
@@ -1045,8 +960,14 @@
 						<log>${project.build.directory}/cargo-tree/tomcat6x/cargo.log</log>
 						<zipUrlInstaller>
 						  <url>${catalina.zip}</url>
-						  <installDir>${project.build.directory}/tomcat6x</installDir>
+						  <extractDir>${project.build.directory}/tomcat6x</extractDir>
 						</zipUrlInstaller>
+						<dependencies>
+							<dependency>
+								<groupId>mysql</groupId>
+								<artifactId>mysql-connector-java</artifactId>
+							</dependency>
+						</dependencies>
 					  </container>
 					  <configuration>
 						<type>standalone</type>
@@ -1061,7 +982,6 @@
 								<context>${project.artifactId}</context>
 							  </properties>
 							<type>war</type>
-
 							<pingURL>http://localhost:${test.server.port}/${project.artifactId}/</pingURL>
 							<pingTimeout>30</pingTimeout>
 						  </deployable>
@@ -1090,7 +1010,7 @@
 						 testing. -->
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>selenium-maven-plugin</artifactId>
-					<version>1.1</version>
+					<version>2.0</version>
 					<executions>
 					  <execution>
 						<id>start-selenium</id>
@@ -1136,6 +1056,23 @@
 									</pluginExecutionFilter>
 									<action>
 										<execute />
+									</action>
+								</pluginExecution>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>
+											org.sonatype.maven.plugin
+										</groupId>
+										<artifactId>
+											emma-maven-plugin
+										</artifactId>
+										<versionRange>[1.2,)</versionRange>
+										<goals>
+											<goal>instrument</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore></ignore>
 									</action>
 								</pluginExecution>
 							</pluginExecutions>

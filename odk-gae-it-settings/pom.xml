@@ -24,11 +24,21 @@
 			</excludes>
 		</resource>
 		<resource>
+			<filtering>false</filtering>
+			<directory>${toplevel.directory}/src/main/resources/gae/</directory>
+			<includes>
+			  <include>**/odk-settings.xml</include>
+			</includes>
+		</resource>
+		<resource>
 			<filtering>true</filtering>
 			<directory>${toplevel.directory}/src/main/resources/gae-unit/</directory>
 			<includes>
 			  <include>**/*</include>
 			</includes>
+			<excludes>
+			  <exclude>**/odk-settings.xml</exclude>
+			</excludes>
 		</resource>
 	</resources>
   </build>

@@ -3,8 +3,8 @@
   <h:head>
     <h:title>Land Use</h:title>
     <model>
-      <instance xmlns="landUse">
-        <land>
+      <instance>
+        <land id="landUse">
           <barcode/>
           <location/>
           <image/>
