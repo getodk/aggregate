@@ -50,6 +50,7 @@ public final class ExportPopup extends AbstractPopupBase {
   private static final String CREATE_BUTTON_TOOLTIP = "Create Export File";
   private static final String CREATE_BUTTON_HELP_BALLOON = "This creates either a CSV or KML file of your data.";
 
+  private static final String PROBLEM_NULL_FILTER_GROUP = "Filter group is invalid";
   private static final String EXPORT_ERROR_MSG = "Either the Geopoint field or your Title field were invalid";
   private static final String GEOPOINT_BALLOON = "Choose the geopoint field to map.";
   private static final String TITLE_BALLOON = "Choose the field for the title.";
@@ -233,15 +234,21 @@ public final class ExportPopup extends AbstractPopupBase {
     public void onClick(ClickEvent event) {
       ExportType type = ExportType.valueOf(fileType.getValue(fileType.getSelectedIndex()));
 
+      FilterGroup filterGroup = filtersBox.getSelectedFilter();
+      
+      if ( filterGroup == null ) {
+        AggregateUI.getUI().reportError(new Throwable(PROBLEM_NULL_FILTER_GROUP));
+        return;
+      }
+
       if (type.equals(ExportType.CSV)) {
-        FilterGroup filterGroup = filtersBox.getSelectedFilter();
         SecureGWT.getFormService().createCsvFromFilter(filterGroup, new CreateExportCallback());
       } else { // .equals(ExportType.KML.toString())
         String geoPointValue = geoPointsDropDown.getElementKey();
         String titleValue = titleFieldsDropDown.getElementKey();
         String binaryValue = binaryFieldsDropDown.getElementKey();
 
-        SecureGWT.getFormService().createKml(formId, geoPointValue, titleValue, binaryValue,
+        SecureGWT.getFormService().createKmlFromFilter(filterGroup, geoPointValue, titleValue, binaryValue,
             new CreateExportCallback());
       }
 

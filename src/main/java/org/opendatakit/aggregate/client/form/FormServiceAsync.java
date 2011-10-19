@@ -28,15 +28,13 @@ public interface FormServiceAsync {
 
   void getExports(AsyncCallback<ArrayList<ExportSummary>> callback);
 
-  void createCsv(String formId, String filterUri, AsyncCallback<Boolean> callback);
-
   void getPossibleKmlSettings(String formId, AsyncCallback<KmlSettings> callback);
-
-  void createKml(String formId, String geopointKey, String titleKey, String binaryKey,
-      AsyncCallback<Boolean> callback);
 
   void getGpsCoordnates(String formId, AsyncCallback<KmlSettings> callback);
 
   void createCsvFromFilter(FilterGroup group, AsyncCallback<Boolean> callback);
+
+  void createKmlFromFilter(FilterGroup group, String geopointKey, String titleKey, String binaryKey,
+      AsyncCallback<Boolean> callback);
 
 }

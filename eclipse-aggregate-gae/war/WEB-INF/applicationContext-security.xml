@@ -360,6 +360,11 @@
     
 	<beans:bean id="openIdFilter"
 		class="org.springframework.security.openid.OpenIDAuthenticationFilter">
+		<beans:property name="returnToUrlParameters">
+			<beans:set>
+				<beans:value>spring-security-redirect</beans:value>
+			</beans:set>
+		</beans:property>
 		<beans:property name="authenticationManager">
 			<beans:bean class="org.springframework.security.authentication.ProviderManager">
 				<beans:property name="providers">

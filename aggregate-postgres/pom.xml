@@ -3,14 +3,16 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.opendatakit</groupId>
-    <artifactId>aggregate</artifactId>
+    <artifactId>aggregate-postgresql-specific</artifactId>
     <version>1.0</version>
-    <relativePath>../pom.xml</relativePath>
+    <relativePath>../postgresql-pom.xml</relativePath>
   </parent>
-  <groupId>org.opendatakit</groupId>
   <artifactId>aggregate-postgres</artifactId>
   <packaging>war</packaging>
   <name>ODK Aggregate for PostgreSQL</name>
+  <properties>
+	<test.server.baseUrl>/${project.artifactId}/</test.server.baseUrl>
+  </properties>
   <dependencies>
     <dependency>
       <groupId>org.opendatakit</groupId>
@@ -19,26 +21,34 @@
     </dependency>
     <dependency>
       <groupId>org.opendatakit</groupId>
-      <artifactId>odk-postgres-settings</artifactId>
+      <artifactId>odk-postgres-it-settings</artifactId>
       <version>latest</version>
     </dependency>
   </dependencies>
   <build>
+    <testSourceDirectory>${toplevel.directory}/src/it/java</testSourceDirectory>
+    <testResources>
+		<testResource>
+			<directory>${toplevel.directory}/src/it/java</directory>
+			<filtering>true</filtering>
+			<includes>
+				<include>**/*.properties</include>
+			</includes>
+		</testResource>
+	</testResources>
     <plugins>
 		<plugin>
 			<groupId>org.codehaus.mojo</groupId>
 			<artifactId>build-helper-maven-plugin</artifactId>
-			<version>1.5</version>
 			<executions>
 				<execution>
-					<id>add-gwt-source</id>
+					<id>add-java-source</id>
 				</execution>
 			</executions>
 		</plugin>
 		<plugin>
 			<groupId>org.codehaus.mojo</groupId>
 			<artifactId>gwt-maven-plugin</artifactId>
-			<version>${gwt.maven.plugin.version}</version>
 			<executions>
 			  <execution>
 				<id>gwt-javascript</id>
@@ -47,7 +57,6 @@
 		</plugin>
 		<plugin>
 			<artifactId>maven-antrun-plugin</artifactId>
-			<version>${maven.antrun.plugin.version}</version>
 			<executions>
 				<execution>
 					<id>war-clean</id>
@@ -73,24 +82,11 @@
 					<id>prepare-instrumented-war</id>
 					<phase>pre-integration-test</phase>
 				</execution>
-<!--				<execution>
-					<id>pre-postgres-teardown</id>
-					<phase>pre-integration-test</phase>
-				</execution>
-				<execution>
-					<id>postgres-setup</id>
-					<phase>pre-integration-test</phase>
-				</execution>
-				<execution>
-					<id>postgres-teardown</id>
-					<phase>post-integration-test</phase>
-				</execution> -->
 			</executions>
 		</plugin>
 		<plugin>
 			<groupId>org.apache.maven.plugins</groupId>
 			<artifactId>maven-war-plugin</artifactId>
-			<version>${maven.war.plugin.version}</version>
 			<executions>
 			  <execution>
 				<id>war-build</id>
@@ -108,9 +104,21 @@
 			<artifactId>tomcat-maven-plugin</artifactId>
 			<version>1.1</version>
 		</plugin>
-	<!--	<plugin>
+		<plugin>
+		  <!-- This configures the running of odktables integration tests. -->
+		  <artifactId>maven-surefire-plugin</artifactId>
+		  <version>${maven.surefire.plugin.version}</version>
+		  <inherited>true</inherited>
+		  <configuration>
+		    <skipTests>true</skipTests>
+			<classesDirectory>${project.build.directory}/generated-classes/emma/classes</classesDirectory>
+			<excludes>
+			  <exclude>**/integration/**</exclude>
+			</excludes>
+		  </configuration>
+		</plugin>
+		<plugin>
 			<artifactId>maven-failsafe-plugin</artifactId>
-			<version>2.6</version>
 			<executions>
 			  <execution>
 				<id>integration-test</id>
@@ -123,7 +131,6 @@
 		<plugin>
 			<groupId>org.codehaus.cargo</groupId>
 			<artifactId>cargo-maven2-plugin</artifactId>
-			<version>1.0.4</version>
 			<executions>
 			  <execution>
 				<id>start-container</id>
@@ -136,7 +143,6 @@
 		<plugin>
 			<groupId>org.codehaus.mojo</groupId>
 			<artifactId>selenium-maven-plugin</artifactId>
-			<version>1.1</version>
 			<executions>
 			  <execution>
 				<id>start-selenium</id>
@@ -145,9 +151,25 @@
 				<id>stop-selenium</id>
 			  </execution>
 			</executions>
-		</plugin> -->
-    </plugins> 
-  </build>
+		</plugin>
+    </plugins>
+ </build>
+	<reporting>
+		<plugins>
+		  <plugin>
+			<groupId>org.sonatype.maven.plugin</groupId>
+			<artifactId>emma-maven-plugin</artifactId>
+			<version>${emma.maven.plugin.version}</version>
+			<inherited>true</inherited>
+		  </plugin>
+		  <plugin>
+			<groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-surefire-report-plugin</artifactId>
+			<version>${maven.surefire.report.plugin.version}</version>
+			<inherited>true</inherited>
+		  </plugin>
+		</plugins>
+	</reporting>
   <profiles>
     <profile>
        <!-- This tries to use xvfb only in headless Linux environments --> 

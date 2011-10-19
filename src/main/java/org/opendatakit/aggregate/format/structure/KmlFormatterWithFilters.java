@@ -23,6 +23,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.StringEscapeUtils;
+import org.opendatakit.aggregate.client.filter.FilterGroup;
+import org.opendatakit.aggregate.client.submission.SubmissionUISummary;
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.format.KmlConsts;
@@ -33,6 +35,7 @@ import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.format.SubmissionFormatter;
 import org.opendatakit.aggregate.format.element.ElementFormatter;
 import org.opendatakit.aggregate.format.element.KmlElementFormatter;
+import org.opendatakit.aggregate.server.GenerateHeaderInfo;
 import org.opendatakit.aggregate.servlet.BinaryDataServlet;
 import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.aggregate.submission.SubmissionField;
@@ -52,7 +55,7 @@ import org.opendatakit.common.web.constants.HtmlConsts;
  * @author mitchellsundt@gmail.com
  * 
  */
-public class KmlFormatter implements SubmissionFormatter, RepeatCallbackFormatter {
+public class KmlFormatterWithFilters implements SubmissionFormatter, RepeatCallbackFormatter {
 
   private class GpsRepeatRowData {
     private GeoPoint gps;
@@ -108,13 +111,23 @@ public class KmlFormatter implements SubmissionFormatter, RepeatCallbackFormatte
   private boolean imgInGpsRepeat;
   private boolean titleInGpsRepeat;
   
-  public KmlFormatter(Form xform, String webServerUrl, FormElementModel gpsField,
+  public KmlFormatterWithFilters(Form xform, String webServerUrl, FormElementModel gpsField,
       FormElementModel titleField, FormElementModel imgField, PrintWriter printWriter,
-      List<FormElementModel> selectedColumnNames, CallingContext cc) {
+      FilterGroup filterGroup, CallingContext cc) {
 
     form = xform;
     baseWebServerUrl = webServerUrl;
-    propertyNames = selectedColumnNames;
+    SubmissionUISummary summary = new SubmissionUISummary(form.getViewableName());
+
+    GenerateHeaderInfo headerGenerator = new GenerateHeaderInfo(filterGroup, summary, form);
+    headerGenerator.processForHeaderInfo(form.getTopLevelGroupElement());
+    propertyNames = headerGenerator.getIncludedElements();
+    if ( !propertyNames.contains(titleField) ) {
+    	propertyNames.add(0, titleField);
+    }
+    if ( !propertyNames.contains(imgField) ) {
+    	propertyNames.add(imgField);
+    }
     output = printWriter;
 
     elemFormatter = new KmlElementFormatter(webServerUrl, true, this);
@@ -143,12 +156,15 @@ public class KmlFormatter implements SubmissionFormatter, RepeatCallbackFormatte
   }
 
   @Override
-  public void processSubmissions(List<Submission> submissions, CallingContext cc) throws ODKDatastoreException {
-    // output preamble & placemark style
+  public void beforeProcessSubmissions(CallingContext cc) throws ODKDatastoreException {
     output.write(String.format(KmlConsts.KML_PREAMBLE_TEMPLATE, form.getFormId(), form
         .getViewableName(), form.getViewableName()));
     output.write(generateStyle(imgElement != null));
+  }
 
+  @Override
+  public void processSubmissionSegment(List<Submission> submissions, CallingContext cc)
+      throws ODKDatastoreException {
     // format row elements
     for (Submission sub : submissions) {
 
@@ -182,9 +198,22 @@ public class KmlFormatter implements SubmissionFormatter, RepeatCallbackFormatte
       }
       output.write(placemarks.toString());
     }
+  }
+
+  @Override
+  public void afterProcessSubmissions(CallingContext cc) throws ODKDatastoreException {
 
     // output postamble
     output.write(KmlConsts.KML_POSTAMBLE_TEMPLATE);
+  }
+
+
+  @Override
+  public void processSubmissions(List<Submission> submissions, CallingContext cc)
+      throws ODKDatastoreException {
+    beforeProcessSubmissions(cc);
+    processSubmissionSegment(submissions, cc);
+    afterProcessSubmissions(cc);
   }
 
   private String generateFormattedPlacemark(Row row, String identifier, String title,

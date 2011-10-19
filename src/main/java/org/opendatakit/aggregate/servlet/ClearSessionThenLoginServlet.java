@@ -27,49 +27,50 @@ import org.opendatakit.common.security.UserService;
 import org.opendatakit.common.web.CallingContext;
 
 /**
- * Simple servlet used to clear the session cookie of a client
- * and present the openid_login.html page to them.  This allows
- * for an anonymous user to choose to provide credentials.
+ * Simple servlet used to clear the session cookie of a client and present the
+ * openid_login.html page to them. This allows for an anonymous user to choose
+ * to provide credentials.
  * 
  * @author mitchellsundt@gmail.com
- *
+ * 
  */
 public class ClearSessionThenLoginServlet extends ServletUtilBase {
 
-	/*
-	 * Standard fields 
-	 */
-	
-	private static final long serialVersionUID = 629046684126101848L;
-	
-	public static final String ADDR = "relogin.html";
-	
-	public static final String TITLE_INFO = "ODK Aggregate";
-	
-	@Override
-	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
-			throws ServletException, IOException {
-		CallingContext cc = ContextFactory.getCallingContext(this, req);
-		UserService userService = cc.getUserService();
-		boolean isAnon = !userService.isUserLoggedIn();
-		
-		String query = req.getQueryString(); 
-		if ( query == null || query.length() == 0 ) {
-			query = "";
-		} else {
-			query = "?" + query;
-		}
-		HttpSession s = req.getSession();
-		if ( s != null ) {
-			s.invalidate();
-		}
-		if ( isAnon ) {
-			// anonymous user -- go to the login page...
-			resp.sendRedirect(cc.getWebApplicationURL("openid_login.html"));
-		} else {
-			// we are logged in via openid or basic or digest auth.
-			// redirect to Spring's logout url...
-			resp.sendRedirect(cc.getWebApplicationURL(cc.getUserService().createLogoutURL()));
-		}
-	}
+  /*
+   * Standard fields
+   */
+
+  private static final long serialVersionUID = 629046684126101848L;
+
+  public static final String ADDR = "relogin.html";
+
+  public static final String TITLE_INFO = "ODK Aggregate";
+
+  @Override
+  protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException,
+      IOException {
+    CallingContext cc = ContextFactory.getCallingContext(this, req);
+    UserService userService = cc.getUserService();
+    boolean isAnon = !userService.isUserLoggedIn();
+
+    HttpSession s = req.getSession();
+    if (s != null) {
+      s.invalidate();
+    }
+    String newUrl;
+    if (isAnon) {
+      // anonymous user -- go to the login page...
+      newUrl = cc.getWebApplicationURL("openid_login.html");
+    } else {
+      // we are logged in via openid or basic or digest auth.
+      // redirect to Spring's logout url...
+      newUrl = cc.getWebApplicationURL(cc.getUserService().createLogoutURL());
+    }
+    // preserve the query string (helps with GWT debugging)
+    String query = req.getQueryString();
+    if (query != null && query.length() != 0) {
+      newUrl += "?" + query;
+    }
+    resp.sendRedirect(newUrl);
+  }
 }

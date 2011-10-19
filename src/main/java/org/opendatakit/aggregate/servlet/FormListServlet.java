@@ -18,6 +18,7 @@
 package org.opendatakit.aggregate.servlet;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -64,9 +65,25 @@ public class FormListServlet extends ServletUtilBase {
     if (getOpenRosaVersion(req) != null) {
       // OpenRosa implementation
       addOpenRosaHeaders(resp);
+      String formId = req.getParameter("formID");
+      String verboseStr = req.getParameter("verbose");
+      boolean verbose = false;
+      if ( verboseStr != null && verboseStr.equalsIgnoreCase("true")) {
+    	  verbose = true;
+      }
+      
       try {
         List<Form> formsList = Form.getForms(false, cc);
-        XFormsXmlTable formFormatter = new XFormsXmlTable(formsList, cc.getServerURL());
+        if ( formId != null && formId.length() != 0 ) {
+        	List<Form> newList = new ArrayList<Form>();
+        	for ( Form f : formsList ) {
+        		if ( f.getFormId().equals(formId) ) {
+        			newList.add(f);
+        		}
+        	}
+        	formsList = newList;
+        }
+        XFormsXmlTable formFormatter = new XFormsXmlTable(formsList, verbose, cc.getServerURL());
 
         resp.setContentType(HtmlConsts.RESP_TYPE_XML);
         formFormatter.generateXmlListOfForms(resp.getWriter());

@@ -3,14 +3,16 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.opendatakit</groupId>
-    <artifactId>aggregate</artifactId>
+    <artifactId>aggregate-gae-specific</artifactId>
     <version>1.0</version>
-    <relativePath>../pom.xml</relativePath>
+    <relativePath>../gae-pom.xml</relativePath>
   </parent>
-  <groupId>org.opendatakit</groupId>
   <artifactId>aggregate-gae</artifactId>
   <packaging>war</packaging>
   <name>ODK Aggregate for Google Appengine</name>
+  <properties>
+    <test.server.baseUrl>/</test.server.baseUrl>
+  </properties>
   <dependencies>
     <dependency>
       <groupId>org.opendatakit</groupId>
@@ -19,26 +21,34 @@
     </dependency>
     <dependency>
       <groupId>org.opendatakit</groupId>
-      <artifactId>odk-gae-settings</artifactId>
+      <artifactId>odk-gae-it-settings</artifactId>
       <version>latest</version>
     </dependency>
   </dependencies>
   <build>
+    <testSourceDirectory>${toplevel.directory}/src/it/java</testSourceDirectory>
+    <testResources>
+		<testResource>
+			<directory>${toplevel.directory}/src/it/java</directory>
+			<filtering>true</filtering>
+			<includes>
+				<include>**/*.properties</include>
+			</includes>
+		</testResource>
+	</testResources>
     <plugins>
 		<plugin>
 			<groupId>org.codehaus.mojo</groupId>
 			<artifactId>build-helper-maven-plugin</artifactId>
-			<version>1.5</version>
 			<executions>
 				<execution>
-					<id>add-gwt-source</id>
+					<id>add-java-source</id>
 				</execution>
 			</executions>
 		</plugin>
 		<plugin>
 			<groupId>org.codehaus.mojo</groupId>
 			<artifactId>gwt-maven-plugin</artifactId>
-			<version>${gwt.maven.plugin.version}</version>
 			<executions>
 			  <execution>
 				<id>gwt-javascript</id>
@@ -47,7 +57,6 @@
 		</plugin>
         <plugin>
 			<artifactId>maven-antrun-plugin</artifactId>
-			<version>${maven.antrun.plugin.version}</version>
 			<executions>
 			  <execution>
 				<id>war-clean</id>
@@ -61,12 +70,23 @@
 				<id>war-remove-classes-except-stub</id>
 				<phase>prepare-package</phase>
 			  </execution>
+				<execution>
+					<id>prepare-instrumented-war-folder</id>
+					<phase>pre-integration-test</phase>
+				</execution>
+				<execution>
+					<id>add-emma-to-war-folder</id>
+					<phase>pre-integration-test</phase>
+				</execution>
+				<execution>
+					<id>prepare-instrumented-war</id>
+					<phase>pre-integration-test</phase>
+				</execution>
 			</executions>
         </plugin>
         <plugin>
 			<groupId>org.apache.maven.plugins</groupId>
 			<artifactId>maven-war-plugin</artifactId>
-			<version>${maven.war.plugin.version}</version>
 			<executions>
 			  <execution>
 				<id>war-build</id>
@@ -74,6 +94,11 @@
 			  </execution>
 			</executions>
         </plugin>
+		<plugin>
+			<!--  This references the emma plugin, configuration is in the parent -->
+			<groupId>org.sonatype.maven.plugin</groupId>
+			<artifactId>emma-maven-plugin</artifactId>
+		</plugin>
       <!-- This plug-in integrates project with appengine -->
         <plugin>
 			<groupId>net.kindleit</groupId>
@@ -81,7 +106,27 @@
 			<version>${maven.gae.plugin.version}</version>
 			<configuration>
 			  <serverId>local.gae</serverId>
+			  <appDir>${project.build.directory}/${project.build.finalName}</appDir>
+			  <sdkDir>${gae.home}</sdkDir>
+			  <port>${test.server.port}</port>
+			  <monitorPort>${test.server.gae.monitor.port}</monitorPort>
 			</configuration>
+			<executions>
+				<execution>
+					<id>start-instrumented-gae</id>
+					<phase>pre-integration-test</phase>
+					<goals>
+					  <goal>start</goal>
+					</goals>
+				</execution>
+				<execution>
+					<id>stop-instrumented-gae</id>
+					<phase>post-integration-test</phase>
+					<goals>
+					  <goal>stop</goal>
+					</goals>
+				</execution>
+			</executions>
 			<dependencies>
 			  <dependency>
 				<groupId>net.kindleit</groupId>
@@ -91,6 +136,94 @@
 			  </dependency>
 			</dependencies>
         </plugin>
+		<plugin>
+		  <!-- This configures the running of odktables integration tests. -->
+		  <artifactId>maven-surefire-plugin</artifactId>
+		  <version>${maven.surefire.plugin.version}</version>
+		  <inherited>true</inherited>
+		  <configuration>
+		    <skipTests>true</skipTests>
+			<classesDirectory>${project.build.directory}/generated-classes/emma/classes</classesDirectory>
+			<excludes>
+			  <exclude>**/integration/**</exclude>
+			</excludes>
+		  </configuration>
+		</plugin>
+		<plugin>
+			<artifactId>maven-failsafe-plugin</artifactId>
+			<executions>
+			  <execution>
+				<id>integration-test</id>
+			  </execution>
+			  <execution>
+				<id>verify</id>
+			  </execution>
+			</executions>
+		</plugin>
+		<plugin>
+			<groupId>org.codehaus.mojo</groupId>
+			<artifactId>selenium-maven-plugin</artifactId>
+			<executions>
+			  <execution>
+				<id>start-selenium</id>
+			  </execution>
+			  <execution>
+				<id>stop-selenium</id>
+			  </execution>
+			</executions>
+		</plugin>
     </plugins> 
   </build>
+	<reporting>
+		<plugins>
+		  <plugin>
+			<groupId>org.sonatype.maven.plugin</groupId>
+			<artifactId>emma-maven-plugin</artifactId>
+			<version>${emma.maven.plugin.version}</version>
+			<inherited>true</inherited>
+		  </plugin>
+		  <plugin>
+			<groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-surefire-report-plugin</artifactId>
+			<version>${maven.surefire.report.plugin.version}</version>
+			<inherited>true</inherited>
+		  </plugin>
+		</plugins>
+	</reporting>
+  <profiles>
+    <profile>
+       <!-- This tries to use xvfb only in headless Linux environments --> 
+      <id>Linux</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+		<property>
+			<name>headless.operation</name>
+			<value>yes</value>
+		</property>
+      </activation>
+      <build>
+        <plugins>
+				<!--  Binding to the package phase is a hack to ensure	
+                      Xvfb is run before the Selenium server is started -->
+   <!--       <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>selenium-maven-plugin</artifactId>
+            <version>1.1</version>
+            <executions>
+              <execution>
+                <id>xvfb</id>
+                <phase>package</phase>
+				<configuration>
+					<xvfbExecutable></xvfbExecutable>
+				</configuration>
+                <goals>
+                  <goal>xvfb</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin> -->
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>

@@ -39,6 +39,9 @@ import org.opendatakit.common.web.CallingContext;
  */
 public class HtmlFormatter extends TableFormatterBase implements SubmissionFormatter {
 
+  List<Row> formattedElements = new ArrayList<Row>();
+  List<String> headers = null;
+  
   private boolean checkboxes;
   
   public HtmlFormatter(Form form, String webServerUrl, PrintWriter printWriter, List<FormElementModel> selectedColumnNames, boolean includeCheckboxes) {
@@ -48,20 +51,28 @@ public class HtmlFormatter extends TableFormatterBase implements SubmissionForma
   }
 
   @Override
-  public void processSubmissionSet(Collection<? extends SubmissionSet> submissions,
-		  FormElementModel rootGroup, CallingContext cc) throws ODKDatastoreException {
-    List<Row> formattedElements = new ArrayList<Row>();
-    List<String> headers = headerFormatter.generateHeaders(form, rootGroup, propertyNames);
+  protected void beforeProcessSubmissionSet(FormElementModel rootGroup, CallingContext cc)
+      throws ODKDatastoreException {
+    formattedElements.clear();
+    headers = headerFormatter.generateHeaders(form, rootGroup, propertyNames);
+  }
 
+  @Override
+  protected void processSubmissionSetSegment(Collection<? extends SubmissionSet> submissions,
+      FormElementModel rootGroup, CallingContext cc) throws ODKDatastoreException {
     // format row elements 
     for (SubmissionSet sub : submissions) {
       Row row = sub.getFormattedValuesAsRow(propertyNames, elemFormatter, false, cc);
       formattedElements.add(row);
     }
-    
+  }
+
+  @Override
+  protected void afterProcessSubmissionSet(FormElementModel rootGroup, CallingContext cc)
+      throws ODKDatastoreException {
     // format into html table
     output.append(HtmlUtil.wrapResultTableWithHtmlTags(checkboxes, ServletConsts.RECORD_KEY, headers, formattedElements));
-    
+    formattedElements.clear();
     // TODO: consider reimplementing so we can stream out the html tags instead of writing them once.
     // TODO: consider reimplementing so there is only one loop of element formatting and table formatting
   }

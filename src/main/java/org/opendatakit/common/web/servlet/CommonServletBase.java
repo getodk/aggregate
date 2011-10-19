@@ -31,12 +31,15 @@ import java.util.TimeZone;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.BasicConsts;
 import org.opendatakit.common.web.constants.HtmlConsts;
 import org.opendatakit.common.web.constants.HtmlStrUtil;
+import org.springframework.security.web.WebAttributes;
+import org.springframework.security.web.savedrequest.SavedRequest;
 
 /**
  * Base class for Servlets that contain useful utilities
@@ -58,6 +61,36 @@ public abstract class CommonServletBase extends HttpServlet {
      this.applicationName = applicationName;
   }
   
+  protected String getRedirectUrl(HttpServletRequest request) {
+    HttpSession session = request.getSession(false);
+    if(session != null) {
+        SavedRequest savedRequest = (SavedRequest) session.getAttribute(WebAttributes.SAVED_REQUEST);
+        if(savedRequest != null) {
+            return savedRequest.getRedirectUrl();
+        }
+    }
+    return null;
+  }
+
+  
+  protected String getRedirectUrl(HttpServletRequest request, String defaultUrl) {
+    String redirectParamString = getRedirectUrl(request);
+    if ( redirectParamString == null ) {
+      // use the redirect query parameter if present...
+      redirectParamString = request.getParameter("redirect");
+      if (redirectParamString == null || redirectParamString.length() == 0) {
+        // otherwise, redirect to defaultUrl 
+        // and preserve query string (for GWT debugging)
+        redirectParamString = defaultUrl;
+        String query = request.getQueryString();
+        if (query != null && query.length() != 0) {
+          redirectParamString += "?" + query;
+        }
+      }
+    }
+    return redirectParamString;
+  }
+
   /**
    * Takes the request and displays request in plain text in the response
    * 
@@ -102,7 +135,7 @@ public abstract class CommonServletBase extends HttpServlet {
 	    resp.setCharacterEncoding(HtmlConsts.UTF8_ENCODE);
 	    PrintWriter out = resp.getWriter();
 	    out.write(HtmlConsts.HTML_OPEN);
-	    out.write("<link rel=\"shortcut icon\" href=\"" + cc.getWebApplicationURL("favicon.ico") + "\">");
+	    out.write("<link rel=\"icon\" href=\"" + cc.getWebApplicationURL("favicon.ico") + "\">");
 
 	    out.write(HtmlStrUtil.wrapWithHtmlTags(HtmlConsts.HEAD, headContent + HtmlStrUtil.wrapWithHtmlTags(
 	        HtmlConsts.TITLE, applicationName)));

@@ -3,11 +3,10 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.opendatakit</groupId>
-    <artifactId>aggregate</artifactId>
+    <artifactId>aggregate-mysql-specific</artifactId>
     <version>1.0</version>
-    <relativePath>../pom.xml</relativePath>
+    <relativePath>../mysql-pom.xml</relativePath>
   </parent>
-  <groupId>org.opendatakit</groupId>
   <artifactId>mysql-unit-tests</artifactId>
   <packaging>jar</packaging>
   <version>latest</version>
@@ -39,21 +38,9 @@
 		<plugin>
 			<groupId>org.codehaus.mojo</groupId>
 			<artifactId>build-helper-maven-plugin</artifactId>
-			<version>1.5</version>
 			<executions>
 				<execution>
 					<id>add-java-source</id>
-				</execution>
-				<execution>
-				  <id>add-integration-test-source</id>
-				  <goals>
-					<goal>add-test-source</goal>
-				  </goals>
-				  <configuration>
-					<sources>
-					  <source>${toplevel.directory}/src/it/java</source>
-					</sources>
-				  </configuration>
 				</execution>
 				<execution>
 				  <id>add-unit-test-source</id>
@@ -71,7 +58,6 @@
 		</plugin>
 		<plugin>
 			<artifactId>maven-antrun-plugin</artifactId>
-			<version>${maven.antrun.plugin.version}</version>
 			<executions>
 				<execution>
 					<id>pre-mysql-teardown</id>
@@ -83,9 +69,25 @@
 				</execution>
 				<execution>
 					<id>mysql-teardown</id>
-					<phase>clean</phase>
+					<phase>post-integration-test</phase>
+				</execution>
+				<execution>
+					<id>mysql-teardown-clean</id>
+					<phase>pre-clean</phase>
 				</execution>
 			</executions>
+		</plugin>
+		<plugin>
+		  <!-- This configures the running of unit tests. -->
+		  <artifactId>maven-surefire-plugin</artifactId>
+		  <version>${maven.surefire.plugin.version}</version>
+		  <inherited>true</inherited>
+		  <configuration>
+			<classesDirectory>${project.build.directory}/generated-classes/emma/classes</classesDirectory>
+			<excludes>
+			  <exclude>**/integration/**</exclude>
+			</excludes>
+		  </configuration>
 		</plugin>
 	</plugins>
   </build>
@@ -94,13 +96,13 @@
 		  <plugin>
 			<groupId>org.sonatype.maven.plugin</groupId>
 			<artifactId>emma-maven-plugin</artifactId>
-			<version>1.2</version>
+			<version>${emma.maven.plugin.version}</version>
 			<inherited>true</inherited>
 		  </plugin>
 		  <plugin>
 			<groupId>org.apache.maven.plugins</groupId>
 			<artifactId>maven-surefire-report-plugin</artifactId>
-			<version>2.6</version>
+			<version>${maven.surefire.report.plugin.version}</version>
 			<inherited>true</inherited>
 		  </plugin>
 		</plugins>
