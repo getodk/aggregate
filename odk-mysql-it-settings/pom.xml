@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.opendatakit</groupId>
+    <artifactId>aggregate</artifactId>
+    <version>1.0</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+  <artifactId>odk-mysql-it-settings</artifactId>
+  <version>latest</version>
+  <packaging>jar</packaging>
+  <name>Integration Test Configuration for MySQL</name>
+  <build>
+	<resources>
+		<resource>
+			<filtering>false</filtering>
+			<directory>${toplevel.directory}/src/main/resources/common/</directory>
+			<includes>
+			  <include>**/*</include>
+			</includes>
+			<excludes>
+			  <exclude>**/security.properties</exclude>
+			</excludes>
+		</resource>
+		<resource>
+			<filtering>true</filtering>
+			<directory>${toplevel.directory}/src/main/resources/mysql-unit/</directory>
+			<includes>
+			  <include>**/*</include>
+			</includes>
+		</resource>
+	</resources>
+  </build>
+</project>

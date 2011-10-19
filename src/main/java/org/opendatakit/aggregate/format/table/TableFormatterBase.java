@@ -53,11 +53,39 @@ public abstract class TableFormatterBase implements SubmissionFormatter {
   }
 
   @Override
-  public void processSubmissions(List<Submission> submissions, CallingContext cc) throws ODKDatastoreException {
-    processSubmissionSet(submissions, form.getTopLevelGroupElement(), cc);
+  public final void processSubmissions(List<Submission> submissions, CallingContext cc) throws ODKDatastoreException {
+    beforeProcessSubmissions(cc);
+    processSubmissionSegment(submissions, cc);
+    afterProcessSubmissions(cc);
   }
 
-  protected abstract void processSubmissionSet(Collection<? extends SubmissionSet> submissions,
+  @Override
+  public final void beforeProcessSubmissions(CallingContext cc) throws ODKDatastoreException {
+    beforeProcessSubmissionSet(form.getTopLevelGroupElement(), cc);
+  }
+
+  @Override
+  public final void processSubmissionSegment(List<Submission> submissions, CallingContext cc)
+      throws ODKDatastoreException {
+    processSubmissionSetSegment(submissions, form.getTopLevelGroupElement(), cc);
+  }
+  
+  @Override
+  public final void afterProcessSubmissions(CallingContext cc) throws ODKDatastoreException {
+    afterProcessSubmissionSet(form.getTopLevelGroupElement(), cc);
+  }
+
+  protected abstract void beforeProcessSubmissionSet(FormElementModel rootGroup, CallingContext cc) throws ODKDatastoreException;
+  
+  protected abstract void processSubmissionSetSegment(Collection<? extends SubmissionSet> submissions,
 		  FormElementModel rootGroup, CallingContext cc) throws ODKDatastoreException;
   
+  protected abstract void afterProcessSubmissionSet(FormElementModel rootGroup, CallingContext cc) throws ODKDatastoreException;
+   
+  public final void processSubmissionSet(Collection<? extends SubmissionSet> submissions,
+        FormElementModel rootGroup, CallingContext cc) throws ODKDatastoreException {
+    beforeProcessSubmissionSet(rootGroup, cc);
+    processSubmissionSetSegment(submissions, rootGroup, cc);
+    afterProcessSubmissionSet(rootGroup, cc);
+  }
 }

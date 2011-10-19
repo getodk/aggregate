@@ -18,23 +18,23 @@ package org.opendatakit.aggregate.task;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
 import java.util.Date;
+import java.util.List;
 
 import org.opendatakit.aggregate.client.filter.FilterGroup;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.common.ExportStatus;
+import org.opendatakit.aggregate.constants.common.UIConsts;
 import org.opendatakit.aggregate.filter.SubmissionFilterGroup;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.form.PersistentResults;
 import org.opendatakit.aggregate.format.SubmissionFormatter;
-import org.opendatakit.aggregate.format.table.CsvFormatter;
 import org.opendatakit.aggregate.format.table.CsvFormatterWithFilters;
 import org.opendatakit.aggregate.query.submission.QueryBase;
-import org.opendatakit.aggregate.query.submission.QueryByDateRange;
 import org.opendatakit.aggregate.query.submission.QueryByUIFilterGroup;
 import org.opendatakit.aggregate.query.submission.QueryByUIFilterGroup.CompletionFlag;
+import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.common.web.CallingContext;
-import org.opendatakit.common.web.constants.BasicConsts;
 import org.opendatakit.common.web.constants.HtmlConsts;
 
 /**
@@ -69,21 +69,35 @@ public class CsvWorkerImpl {
 
       PersistentResults r = new PersistentResults(persistentResultsKey, cc);
       String filterGroupUri = r.getFilterGroupUri();
-      SubmissionFilterGroup subFilterGroup = null;
 
+      // placeholder for clean-up...
+      SubmissionFilterGroup subFilterGroup = null;
+      
       // create CSV
       QueryBase query;
       SubmissionFormatter formatter;
+      FilterGroup filterGroup;
+      
+      // figure out the filterGroup...
       if (filterGroupUri == null) {
-        query = new QueryByDateRange(form, 100*ServletConsts.FETCH_LIMIT, BasicConsts.EPOCH, null, cc);
-        formatter = new CsvFormatter(form, cc.getServerURL(), pw, null);
+        filterGroup = new FilterGroup(UIConsts.FILTER_NONE, form.getFormId(), null);
       } else {
         subFilterGroup = SubmissionFilterGroup.getFilterGroup(filterGroupUri, cc);
-        FilterGroup filterGroup = subFilterGroup.transform();
-        query = new QueryByUIFilterGroup(form, filterGroup, CompletionFlag.ONLY_COMPLETE_SUBMISSIONS, cc);
-        formatter = new CsvFormatterWithFilters(form, cc.getServerURL(), pw, filterGroup);
+        filterGroup = subFilterGroup.transform();
       }
-      formatter.processSubmissions(query.getResultSubmissions(cc), cc);
+      filterGroup.setQueryFetchLimit(ServletConsts.EXPORT_CURSOR_CHUNK_SIZE);
+
+      query = new QueryByUIFilterGroup(form, filterGroup, CompletionFlag.ONLY_COMPLETE_SUBMISSIONS, cc);
+      formatter = new CsvFormatterWithFilters(form, cc.getServerURL(), pw, filterGroup);
+      
+      formatter.beforeProcessSubmissions(cc);
+      List<Submission> submissions;
+      for (;;) {
+        submissions = query.getResultSubmissions(cc);
+        if ( submissions.isEmpty()) break;
+        formatter.processSubmissionSegment(submissions, cc);
+      }
+      formatter.afterProcessSubmissions(cc);
 
       // output file
       pw.close();

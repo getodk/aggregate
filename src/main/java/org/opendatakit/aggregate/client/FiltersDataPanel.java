@@ -33,7 +33,6 @@ import org.opendatakit.aggregate.client.widgets.RemoveFilterGroupButton;
 import org.opendatakit.aggregate.client.widgets.SaveAsFilterGroupButton;
 import org.opendatakit.aggregate.client.widgets.SaveFilterGroupButton;
 import org.opendatakit.aggregate.constants.common.UIConsts;
-import org.opendatakit.common.web.constants.HtmlConsts;
 
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;

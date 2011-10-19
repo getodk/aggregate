@@ -30,70 +30,70 @@ import org.springframework.jdbc.core.RowMapper;
  */
 public class RelationRowMapper implements RowMapper<CommonFieldsBase> {
 
-	private final CommonFieldsBase relation;
-	private final User user;
-	
-	RelationRowMapper(CommonFieldsBase relation, User user) {
-		this.relation = relation;
-		this.user = user;
-	}
-	
-	@Override
-	public CommonFieldsBase mapRow(ResultSet rs, int rowNum) throws SQLException {
-		
-		CommonFieldsBase row;
-		try {
-			row = relation.getEmptyRow(user);
-			row.setFromDatabase(true);
-		} catch ( Exception e ) {
-			throw new IllegalStateException("failed to create empty row", e);
-		}
+  private final CommonFieldsBase relation;
+  private final User user;
 
-		/**
-		 * Correct for the funky handling of nulls by the various accessors...
-		 */
-		for ( DataField f : relation.getFieldList() ) {
-			switch ( f.getDataType() ) {
-			case BINARY:
-	            byte [] blobBytes = rs.getBytes(f.getName());
-	            row.setBlobField(f, blobBytes);
-				break;
-			case LONG_STRING:
-			case URI:
-			case STRING:
-				row.setStringField(f, rs.getString(f.getName()));
-				break;
-			case INTEGER:
-				long l = rs.getLong(f.getName());
-				if (rs.wasNull()) {
-					row.setLongField(f, null);
-				} else {
-					row.setLongField(f, Long.valueOf(l));
-				}
-				break;
-			case DECIMAL:
-				row.setNumericField(f, rs.getBigDecimal(f.getName()));
-				break;
-			case BOOLEAN:
-				Boolean b = rs.getBoolean(f.getName());
-				if ( rs.wasNull()) {
-					row.setBooleanField(f, null);
-				} else {
-					row.setBooleanField(f, b);
-				}
-				break;
-			case DATETIME:
-				Date d = rs.getTimestamp(f.getName());			
-				if ( d == null ) {
-					row.setDateField(f, null);
-				} else {
-					row.setDateField(f, (Date) d.clone());
-				}
-				break;
-			default:
-				throw new IllegalStateException("Did not expect non-primitive type in column fetch");
-			}
-		}
-		return row;
-	}
+  RelationRowMapper(CommonFieldsBase relation, User user) {
+    this.relation = relation;
+    this.user = user;
+  }
+
+  @Override
+  public CommonFieldsBase mapRow(ResultSet rs, int rowNum) throws SQLException {
+
+    CommonFieldsBase row;
+    try {
+      row = relation.getEmptyRow(user);
+      row.setFromDatabase(true);
+    } catch (Exception e) {
+      throw new IllegalStateException("failed to create empty row", e);
+    }
+
+    /**
+     * Correct for the funky handling of nulls by the various accessors...
+     */
+    for (DataField f : relation.getFieldList()) {
+      switch (f.getDataType()) {
+      case BINARY:
+        byte[] blobBytes = rs.getBytes(f.getName());
+        row.setBlobField(f, blobBytes);
+        break;
+      case LONG_STRING:
+      case URI:
+      case STRING:
+        row.setStringField(f, rs.getString(f.getName()));
+        break;
+      case INTEGER:
+        long l = rs.getLong(f.getName());
+        if (rs.wasNull()) {
+          row.setLongField(f, null);
+        } else {
+          row.setLongField(f, Long.valueOf(l));
+        }
+        break;
+      case DECIMAL:
+        row.setNumericField(f, rs.getBigDecimal(f.getName()));
+        break;
+      case BOOLEAN:
+        Boolean b = rs.getBoolean(f.getName());
+        if (rs.wasNull()) {
+          row.setBooleanField(f, null);
+        } else {
+          row.setBooleanField(f, b);
+        }
+        break;
+      case DATETIME:
+        Date d = rs.getTimestamp(f.getName());
+        if (d == null) {
+          row.setDateField(f, null);
+        } else {
+          row.setDateField(f, (Date) d.clone());
+        }
+        break;
+      default:
+        throw new IllegalStateException("Did not expect non-primitive type in column fetch");
+      }
+    }
+    return row;
+  }
 }

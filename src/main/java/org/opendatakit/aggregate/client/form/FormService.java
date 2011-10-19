@@ -38,14 +38,13 @@ public interface FormService extends RemoteService {
   ArrayList<FormSummary> getForms() throws AccessDeniedException;
   
   ArrayList<ExportSummary> getExports() throws AccessDeniedException;
- 
-  Boolean createCsv(String formId, String filterUri) throws AccessDeniedException;
   
   Boolean createCsvFromFilter(FilterGroup group) throws AccessDeniedException;
   
   KmlSettings getPossibleKmlSettings(String formId) throws AccessDeniedException;
-  
-  Boolean createKml(String formId, String geopointKey, String titleKey, String binaryKey) throws AccessDeniedException;
+
+  Boolean createKmlFromFilter(FilterGroup group, String geopointKey, String titleKey,
+      String binaryKey) throws AccessDeniedException;
   
   KmlSettings getGpsCoordnates(String formId) throws AccessDeniedException;
   
