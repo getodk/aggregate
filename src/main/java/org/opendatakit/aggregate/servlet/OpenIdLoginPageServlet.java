@@ -82,6 +82,17 @@ public class OpenIdLoginPageServlet extends ServletUtilBase {
 
     // OK. We are using the canonical server name.
     String redirectParamString = getRedirectUrl(req, AggregateHtmlServlet.ADDR);
+    // we need to appropriately cleanse this string for the OpenID login
+    // strip off the server pathname portion
+    if ( redirectParamString.startsWith(cc.getSecureServerURL()) ) {
+      redirectParamString = redirectParamString.substring(cc.getSecureServerURL().length());
+    } else if ( redirectParamString.startsWith(cc.getServerURL()) ) {
+      redirectParamString = redirectParamString.substring(cc.getServerURL().length());
+    }
+    while ( redirectParamString.startsWith("/") ) {
+      redirectParamString = redirectParamString.substring(1);
+    }
+    
     logger.info("Invalidating login session " + req.getSession().getId());
     // Invalidate session.
     HttpSession s = req.getSession();
@@ -139,8 +150,9 @@ public class OpenIdLoginPageServlet extends ServletUtilBase {
         + "<form action=\"j_spring_openid_security_check\" method=\"post\">"
         + "<script type=\"text/javascript\">"
         + "<!--\n"
+        + "var pathSlash=(window.location.pathname.lastIndexOf('/') > 1) ? '/' : '';\n"
         + "document.write('<input name=\"spring-security-redirect\" type=\"hidden\" value=\"' + "
-        + "encodeURIComponent(encodeURIComponent('" + redirectParamString + "' + window.location.hash)) + '\"/>');"
+        + "encodeURIComponent(encodeURIComponent(pathSlash + '" + redirectParamString + "' + window.location.hash)) + '\"/>');"
         + "\n-->"
         + "</script>"
         + "<input name=\"openid_identifier\" size=\"50\" maxlength=\"100\" "
