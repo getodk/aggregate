@@ -1,4 +1,5 @@
 /*
+ * Copyright 2010 Google Inc.
  * Copyright (C) 2011 University of Washington
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
@@ -28,7 +29,6 @@ import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.SelectElement;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
-import com.google.gwt.safehtml.client.SafeHtmlTemplates.Template;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 
@@ -46,7 +46,7 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 public class UIEnabledValidatingSelectionCell<T> extends /* SelectionCell */
 		AbstractInputCell<String, String> {
 	
-	interface Template extends SafeHtmlTemplates {
+	interface OptionsTemplate extends SafeHtmlTemplates {
 		@Template("<option value=\"{0}\">{0}</option>")
 		SafeHtml deselected(String option);
 
@@ -54,7 +54,7 @@ public class UIEnabledValidatingSelectionCell<T> extends /* SelectionCell */
 		SafeHtml selected(String option);
 	}
 
-	private static Template template;
+	private static OptionsTemplate template;
 
 	private HashMap<String, Integer> indexForOption = new HashMap<String, Integer>();
 
@@ -91,7 +91,7 @@ public class UIEnabledValidatingSelectionCell<T> extends /* SelectionCell */
 		this.isVisiblePredicate = isVisiblePredicate;
 		this.isEnabledPredicate = isEnabledPredicate;
 		if (template == null) {
-			template = GWT.create(Template.class);
+			template = GWT.create(OptionsTemplate.class);
 		}
 		this.options = new ArrayList<String>(options);
 		int index = 0;
