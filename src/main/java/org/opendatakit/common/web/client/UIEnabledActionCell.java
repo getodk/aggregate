@@ -1,4 +1,5 @@
 /*
+ * Copyright 2010 Google Inc.
  * Copyright (C) 2011 University of Washington
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
