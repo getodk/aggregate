@@ -164,7 +164,6 @@ public class XmlElementFormatter implements ElementFormatter {
   @Override
   public void formatRepeats(SubmissionRepeat repeat, FormElementModel repeatElement, Row row,
       CallingContext cc) throws ODKDatastoreException {
-	  xmlFormatter.processRepeatedSubmssionSetsIntoRow(repeat.getSubmissionSets(), repeatElement, row, cc);
   }
 
   @Override
