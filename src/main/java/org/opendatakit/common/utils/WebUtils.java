@@ -200,7 +200,9 @@ public class WebUtils {
 		c.addChild(0, Node.TEXT, cursor.getValue());
 		e.addChild(idx++, Node.ELEMENT, c);
 		c = d.createElement(XML_TAG_NAMESPACE, URI_LAST_RETURNED_VALUE_TAG);
-		c.addChild(0, Node.TEXT, cursor.getUriLastReturnedValue());
+		if ( cursor.getUriLastReturnedValue() != null ) {
+		  c.addChild(0, Node.TEXT, cursor.getUriLastReturnedValue());
+		}
 		e.addChild(idx++, Node.ELEMENT, c);
       c = d.createElement(XML_TAG_NAMESPACE, IS_FORWARD_CURSOR_VALUE_TAG);
       c.addChild(0, Node.TEXT, Boolean.toString(cursor.isForwardCursor()));
@@ -330,7 +332,7 @@ public class WebUtils {
            }
         }
 
-        if ( attributeName == null || attributeValue == null || uriLastReturnedValue == null ) {
+        if ( attributeName == null || attributeValue == null ) {
         	throw new IllegalArgumentException("null value for websafeCursor element");
         }
 		
