@@ -1,0 +1,65 @@
+<?xml version="1.0"?>
+<h:html xmlns="http://www.w3.org/2002/xforms"
+        xmlns:h="http://www.w3.org/1999/xhtml"
+        xmlns:ev="http://www.w3.org/2001/xml-events"
+        xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+        xmlns:jr="http://openrosa.org/javarosa">
+  <h:head>
+    <h:title>Dylan's Form</h:title> 
+    <model>
+      <itext>
+        <translation lang="english">
+          <text id="LocationGeopoint"><value>Record your location.</value></text>
+          <text id="LocationPicture"><value>Take a picture of your location.</value></text>
+          <text id="LocationName"><value>What is the name of your location?</value></text>
+          <text id="LocationNumber"><value>Enter a random number from 1 to 5</value></text>
+          <text id="LocationThingName"><value>Name a thing at your location</value></text>
+          <text id="LocationThingLocation"><value>Record the location of the thing.</value></text>
+        </translation>
+       </itext>
+      <instance>
+        <LocationThings id="LocationThings">
+          <DeviceId/>
+          <LocationGeopoint/>
+          <LocationPicture/>
+          <LocationName/>
+          <LocationNumber/>
+          <LocationThing>
+            <LocationThingName/>
+            <LocationThingLocation/>
+          </LocationThing>
+        </LocationThings>
+      </instance>
+      <bind nodeset="/LocationThings/DeviceId" type="string" jr:preload="property" jr:preloadParams="deviceId" />
+      <bind nodeset="/LocationThings/LocationGeopoint" type="geopoint"/>
+      <bind nodeset="/LocationThings/LocationPicture" type="binary"/>
+      <bind nodeset="/LocationThings/LocationName" type="string"/>
+      <bind nodeset="/LocationThings/LocationNumber" type="int"/>
+      <bind nodeset="/LocationThings/LocationThing/LocationThingName" type="string"/>
+      <bind nodeset="/LocationThings/LocationThing/LocationThingLocation" type="geopoint"/>
+    </model>
+  </h:head>
+  <h:body>
+    <input ref="/LocationThings/LocationGeopoint">
+      <label ref="jr:itext('LocationGeopoint')" />
+    </input>
+    <input ref="/LocationThings/LocationPicture">
+      <label ref="jr:itext('LocationPicture')" />
+    </input>
+    <input ref="/LocationThings/LocationName">
+      <label ref="jr:itext('LocationName')" />
+    </input>
+    <input ref="/LocationThings/LocationNumber">
+      <label ref="jr:itext('LocationNumber')" />
+    </input>
+    <repeat nodeset="/LocationThings/LocationThing">
+      <input ref="/LocationThings/LocationThing/LocationThingName">
+        <label ref="jr:itext('LocationThingName')"/>
+      </input>
+      <input ref="/LocationThings/LocationThing/LocationThingLocation">
+        <label ref="jr:itext('LocationThingLocation')"/>
+      </input>
+    </repeat>
+  </h:body>
+</h:html>
+

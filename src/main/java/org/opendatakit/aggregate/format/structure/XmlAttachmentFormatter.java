@@ -43,14 +43,11 @@ public class XmlAttachmentFormatter implements SubmissionFormatter, RepeatCallba
 
   private XmlMediaAttachmentFormatter attachmentFormatter;
 
-  private List<FormElementModel> propertyNames;
-
   private PrintWriter output;
 
   public XmlAttachmentFormatter(PrintWriter printWriter,
-      List<FormElementModel> selectedColumnNames, Form form, CallingContext cc) {
+      Form form, CallingContext cc) {
     output = printWriter;
-    propertyNames = selectedColumnNames;
     attachmentFormatter = new XmlMediaAttachmentFormatter(this);
   }
 
@@ -90,7 +87,7 @@ public class XmlAttachmentFormatter implements SubmissionFormatter, RepeatCallba
 
     // format repeat row elements
     for (SubmissionSet repeat : repeats) {
-      Row repeatRow = repeat.getFormattedValuesAsRow(propertyNames, attachmentFormatter, false, cc);
+      Row repeatRow = repeat.getFormattedValuesAsRow(null, attachmentFormatter, false, cc);
       Iterator<String> itr = repeatRow.getFormattedValues().iterator();
       while (itr.hasNext()) {
         output.append(itr.next());

@@ -26,7 +26,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.ServletConsts;
-import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.format.structure.XmlAttachmentFormatter;
@@ -96,12 +95,10 @@ public class SubmissionDownloadServlet extends ServletUtilBase {
         PrintWriter out = resp.getWriter();
         out.write("<submission xmlns=\"http://opendatakit.org/submissions\">");
         out.write("<data>");
-        List<FormElementModel> selectedColumnNames = null;
-        XmlFormatter formatter = new XmlFormatter(out, selectedColumnNames, form, cc);
+        XmlFormatter formatter = new XmlFormatter(out, form, cc);
         formatter.processSubmissions(Collections.singletonList(sub), cc);
         out.write("</data>\n");
-        XmlAttachmentFormatter attach = new XmlAttachmentFormatter(out, selectedColumnNames, form,
-            cc);
+        XmlAttachmentFormatter attach = new XmlAttachmentFormatter(out, form, cc);
         attach.processSubmissions(Collections.singletonList(sub), cc);
         out.write("</submission>");
         resp.setStatus(HttpServletResponse.SC_OK);

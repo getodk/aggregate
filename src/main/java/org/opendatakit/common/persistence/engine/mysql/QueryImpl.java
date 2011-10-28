@@ -322,11 +322,12 @@ public class QueryImpl implements Query {
     public CoreResult extractData(ResultSet rs) throws SQLException {
       boolean hasMoreResults = false;
       List<CommonFieldsBase> results = new ArrayList<CommonFieldsBase>();
-      boolean beforeUri = (startCursor != null);
+      String startUri = (startCursor == null) ? null : startCursor.getUriLastReturnedValue();
+      boolean beforeUri = (startUri != null);
       while (rs.next()) {
         CommonFieldsBase cb = this.rowMapper.mapRow(rs, results.size());
         if (beforeUri) {
-          if (startCursor.getUriLastReturnedValue().equals(cb.getUri())) {
+          if (startUri.equals(cb.getUri())) {
             beforeUri = false;
           }
         } else if (fetchLimit == 0 || results.size() < fetchLimit) {

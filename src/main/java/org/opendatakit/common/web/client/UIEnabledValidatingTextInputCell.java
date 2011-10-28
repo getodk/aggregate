@@ -1,4 +1,5 @@
 /*
+ * Copyright 2010 Google Inc.
  * Copyright (C) 2011 University of Washington
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
@@ -13,7 +14,6 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package org.opendatakit.common.web.client;
 
 import com.google.gwt.cell.client.AbstractInputCell;
@@ -23,7 +23,6 @@ import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.InputElement;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
-import com.google.gwt.safehtml.client.SafeHtmlTemplates.Template;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 
@@ -42,7 +41,7 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 public class UIEnabledValidatingTextInputCell<T> extends
 		AbstractInputCell<String, UIEnabledValidatingTextInputCell.ViewData> {
 
-	interface Template extends SafeHtmlTemplates {
+	interface EnabledTemplate extends SafeHtmlTemplates {
 		@Template("<input type=\"text\" value=\"{0}\" tabindex=\"-1\"></input>")
 		SafeHtml input(String value);
 	}
@@ -69,8 +68,7 @@ public class UIEnabledValidatingTextInputCell<T> extends
 		/**
 		 * Construct a ViewData instance containing a given value.
 		 * 
-		 * @param value
-		 *            a String value
+		 * @param value a String value
 		 */
 		public ViewData(String value) {
 			this.lastValue = value;
@@ -122,8 +120,7 @@ public class UIEnabledValidatingTextInputCell<T> extends
 		/**
 		 * Set the current value.
 		 * 
-		 * @param curValue
-		 *            the current value
+		 * @param curValue the current value
 		 * @see #getCurrentValue()
 		 */
 		protected void setCurrentValue(String curValue) {
@@ -133,8 +130,7 @@ public class UIEnabledValidatingTextInputCell<T> extends
 		/**
 		 * Set the last value.
 		 * 
-		 * @param lastValue
-		 *            the last value
+		 * @param lastValue the last value
 		 * @see #getLastValue()
 		 */
 		protected void setLastValue(String lastValue) {
@@ -146,7 +142,7 @@ public class UIEnabledValidatingTextInputCell<T> extends
 		}
 	}
 
-	private static Template template;
+	private static EnabledTemplate template;
 
 	private static DisabledTemplate disabledTemplate;
 
@@ -175,7 +171,7 @@ public class UIEnabledValidatingTextInputCell<T> extends
 		this.isVisiblePredicate = isVisiblePredicate;
 		this.isEnabledPredicate = isEnabledPredicate;
 		if (template == null) {
-			template = GWT.create(Template.class);
+			template = GWT.create(EnabledTemplate.class);
 		}
 		if (disabledTemplate == null) {
 			disabledTemplate = GWT.create(DisabledTemplate.class);

@@ -1014,10 +1014,11 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
     // process the list...
     boolean hasMoreResults = false;
     List<CommonFieldsBase> finalEntities = new ArrayList<CommonFieldsBase>();
-    boolean beforeUri = (startCursor != null);
+    String startUri = (startCursor == null) ? null : startCursor.getUriLastReturnedValue();
+    boolean beforeUri = (startUri != null);
     for (CommonFieldsBase cb : odkEntities) {
       if (beforeUri) {
-        if (startCursor.getUriLastReturnedValue().equals(cb.getUri())) {
+        if (startUri.equals(cb.getUri())) {
           beforeUri = false;
         }
       } else if (fetchLimit == 0 || finalEntities.size() < fetchLimit) {

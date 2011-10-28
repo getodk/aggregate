@@ -18,6 +18,7 @@
 package org.opendatakit.aggregate.parser;
 
 import java.io.ByteArrayInputStream;
+import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -27,6 +28,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Vector;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -35,9 +37,10 @@ import org.javarosa.core.model.FormDef;
 import org.javarosa.core.model.SubmissionProfile;
 import org.javarosa.core.model.instance.FormInstance;
 import org.javarosa.core.model.instance.TreeElement;
+import org.javarosa.xform.parse.IXFormParserFactory;
 import org.javarosa.xform.parse.XFormParser;
-import org.javarosa.xform.util.IXFormBindHandler;
 import org.javarosa.xform.util.XFormUtils;
+import org.kxml2.kdom.Document;
 import org.kxml2.kdom.Element;
 import org.opendatakit.aggregate.constants.ParserConsts;
 import org.opendatakit.aggregate.constants.ServletConsts;
@@ -78,6 +81,7 @@ import org.opendatakit.common.web.constants.HtmlConsts;
 public class FormParserForJavaRosa {
 	
   static Log log = LogFactory.getLog(FormParserForJavaRosa.class.getName());
+  private static final String BASE64_RSA_PUBLIC_KEY = "base64RsaPublicKey";
   private static final String ENCRYPTED_FORM_DEFINITION = "<?xml version=\"1.0\"?>" +
   	"<h:html xmlns=\"http://www.w3.org/2002/xforms\" xmlns:h=\"http://www.w3.org/1999/xhtml\" xmlns:ev=\"http://www.w3.org/2001/xml-events\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:jr=\"http://openrosa.org/javarosa\">" +
   	"<h:head>" +
@@ -114,51 +118,87 @@ public class FormParserForJavaRosa {
 	"</h:body>" +
 	"</h:html>";
   
-  private static class XFormBindHandler implements IXFormBindHandler {
+  private static class XFormParserWithBindEnhancementsFactory implements IXFormParserFactory {
 
-	private FormParserForJavaRosa active = null;
-	
-	private void setFormParserForJavaRosa(FormParserForJavaRosa current) {
-		active = current;
-	}
-	
-	@Override
-	public void handle(Element element, DataBinding binding) {
-		String value = element.getAttributeValue(ParserConsts.NAMESPACE_ODK, "length");
-		if ( value != null ) {
-			element.setAttribute(ParserConsts.NAMESPACE_ODK, "length", null);
-		}
-		
-		log.info("Calling handle found value " + ((value == null) ? "null" : value));
+    FormParserForJavaRosa parser;
+    
+    XFormParserWithBindEnhancementsFactory(FormParserForJavaRosa parser) {
+      this.parser = parser;
+    }
+    
+    @Override
+    public XFormParser getXFormParser(Reader form) {
+      return new XFormParserWithBindEnhancements(parser, form);
+    }
 
-		if ( value != null ) {
-			Integer iValue = Integer.valueOf(value);
-			active.setNodesetStringLength(element.getAttributeValue(null, "nodeset"), iValue);
-		}
-	}
+    @Override
+    public XFormParser getXFormParser(Document form) {
+      return new XFormParserWithBindEnhancements(parser, form);
+    }
 
-	@Override
-	public void init() {
-		log.info("Calling init");
-	}
+    @Override
+    public XFormParser getXFormParser(Reader form, Reader instance) {
+      return new XFormParserWithBindEnhancements(parser, form, instance);
+    }
 
-	@Override
-	public void postProcess(FormDef arg0) {
-		log.info("Calling postProcess");
-	}
-	  
+    @Override
+    public XFormParser getXFormParser(Document form, Document instance) {
+      return new XFormParserWithBindEnhancements(parser, form, instance);
+    }
   }
   
-  private static final XFormBindHandler handler;
-  
-  static {
-	  handler = new XFormBindHandler();
-	  XFormParser.registerBindHandler(handler);
+  private static class XFormParserWithBindEnhancements extends XFormParser {
+    private FormParserForJavaRosa parser;
+    
+    public XFormParserWithBindEnhancements(FormParserForJavaRosa parser, Reader form) {
+      super(form);
+      this.parser = parser;
+    }
+
+    public XFormParserWithBindEnhancements(FormParserForJavaRosa parser, Document form) {
+      super(form);
+      this.parser = parser;
+    }
+    
+    public XFormParserWithBindEnhancements(FormParserForJavaRosa parser, Reader form, Reader instance) {
+      super(form, instance);
+      this.parser = parser;
+    }
+    
+    public XFormParserWithBindEnhancements(FormParserForJavaRosa parser, Document form, Document instance) {
+      super(form, instance);
+      this.parser = parser;
+    }
+
+    protected void parseBind(Element e) {
+      Vector usedAtts = new Vector();
+
+      DataBinding binding = processStandardBindAttributes( usedAtts, e);
+
+      String value = e.getAttributeValue(ParserConsts.NAMESPACE_ODK, "length");
+      if ( value != null ) {
+         e.setAttribute(ParserConsts.NAMESPACE_ODK, "length", null);
+      }
+      
+      log.info("Calling handle found value " + ((value == null) ? "null" : value));
+
+      if ( value != null ) {
+         Integer iValue = Integer.valueOf(value);
+         parser.setNodesetStringLength(e.getAttributeValue(null, "nodeset"), iValue);
+      }
+      
+      //print unused attribute warning message for parent element
+      if(XFormUtils.showUnusedAttributeWarning(e, usedAtts)){
+         System.out.println(XFormUtils.unusedAttWarning(e, usedAtts));
+      }
+
+      addBinding(binding);
+    }
   }
 
   private static synchronized final FormDef parseFormDefinition(String xml, FormParserForJavaRosa parser) throws ODKIncompleteSubmissionData {
 
-	    handler.setFormParserForJavaRosa(parser);
+    IXFormParserFactory oldFactory = XFormUtils.setXFormParserFactory(new XFormParserWithBindEnhancementsFactory(parser));
 	    
 	    FormDef formDef = null;
 	    try {
@@ -166,7 +206,7 @@ public class FormParserForJavaRosa {
 	    } catch (Exception e) {
 	      throw new ODKIncompleteSubmissionData(e, Reason.BAD_JR_PARSE);
 	    } finally {
-	      handler.setFormParserForJavaRosa(null);
+	      XFormUtils.setXFormParserFactory(oldFactory);
 	    }
 	    
 	    return formDef;
@@ -337,12 +377,17 @@ public class FormParserForJavaRosa {
     	submissionElementDefn = rootElementDefn;
     } else {
     	trueSubmissionElement = formDef.getInstance().resolveReference(p.getRef());
-    	try {
-    		submissionElementDefn = extractFormParameters( trueSubmissionElement, null );
-    	} catch ( Exception e ) {
-    		throw new ODKIncompleteSubmissionData(
-    	            "The non-root submission element in the data model does not have an id attribute.  Add an id=\"your.domain.org:formId\" attribute to the submission element of your form.",
-    	            Reason.ID_MISSING);
+    	if ( trueSubmissionElement == null ) {
+    	  trueSubmissionElement = rootElement;
+    	  submissionElementDefn = rootElementDefn;
+    	} else {
+        try {
+          submissionElementDefn = extractFormParameters(trueSubmissionElement, null);
+        } catch (Exception e) {
+          throw new ODKIncompleteSubmissionData(
+              "The non-root submission element in the data model does not have an id attribute.  Add an id=\"your.domain.org:formId\" attribute to the submission element of your form.",
+              Reason.ID_MISSING);
+        }
     	}
     }
 
@@ -365,7 +410,7 @@ public class FormParserForJavaRosa {
     
     String publicKey = null;
     if ( p != null ) {
-    	// publicKey = p.getAttribute(BASE64_RSA_PUBLIC_KEY);
+    	publicKey = p.getAttribute(BASE64_RSA_PUBLIC_KEY);
     }
     
     // now see if we are encrypted -- if so, fake the submission element to be 
