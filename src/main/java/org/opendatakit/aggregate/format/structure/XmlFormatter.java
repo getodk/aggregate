@@ -16,6 +16,7 @@
 package org.opendatakit.aggregate.format.structure;
 
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -24,42 +25,156 @@ import org.apache.commons.lang.StringEscapeUtils;
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.common.FormElementNamespace;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
+import org.opendatakit.aggregate.datamodel.FormElementModelVisitor;
 import org.opendatakit.aggregate.form.Form;
-import org.opendatakit.aggregate.format.RepeatCallbackFormatter;
 import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.format.SubmissionFormatter;
 import org.opendatakit.aggregate.format.element.XmlAttributeFormatter;
 import org.opendatakit.aggregate.format.element.XmlElementFormatter;
 import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.aggregate.submission.SubmissionSet;
+import org.opendatakit.aggregate.submission.SubmissionValue;
+import org.opendatakit.aggregate.submission.type.RepeatSubmissionType;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
 
 /**
- * Xml formatter for a given submission.  Should roughly recreate the submission
- * xml as sent up from collect.
- *  
+ * Xml formatter for a given submission. Should roughly recreate the submission
+ * xml as sent up from collect.  Does not respect namespaces of original Xml.
+ * 
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- *
+ * 
  */
-public class XmlFormatter implements SubmissionFormatter, RepeatCallbackFormatter {
+public class XmlFormatter implements SubmissionFormatter {
 
   private Form form;
-  private XmlAttributeFormatter attributeFormatter;
   private XmlElementFormatter elemFormatter;
-
-  private List<FormElementModel> propertyNames;
 
   private PrintWriter output;
 
   public XmlFormatter(PrintWriter printWriter,
-      List<FormElementModel> selectedColumnNames, Form form, CallingContext cc) {
+      Form form, CallingContext cc) {
     output = printWriter;
     this.form = form;
-    propertyNames = selectedColumnNames;
-    attributeFormatter = new XmlAttributeFormatter();
     elemFormatter = new XmlElementFormatter(this);
+  }
+
+  public void writeXml(String xml) {
+    output.write(xml);
+  }
+  
+  class XmlFormElementModelVisitor implements FormElementModelVisitor {
+
+    Submission sub;
+    List<SubmissionSet> nesting = new ArrayList<SubmissionSet>();
+
+    XmlFormElementModelVisitor(Submission sub) {
+      this.sub = sub;
+    }
+
+    @Override
+    public boolean traverse(FormElementModel element, CallingContext cc) {
+      if ( element.isMetadata() ) return false; // handled in enter() method.
+      try {
+          SubmissionSet subSet = nesting.get(nesting.size()-1);
+          SubmissionValue value = subSet.getElementValue(element);
+          Row row = null;
+          switch ( element.getElementType() ) {
+            // xform tag types
+          case STRING:
+          case JRDATETIME:
+          case JRDATE:
+          case JRTIME:
+          case INTEGER:
+          case DECIMAL:
+          case GEOPOINT:
+          case BINARY:  // identifies BinaryContent table
+          case BOOLEAN:
+          case SELECT1: // identifies SelectChoice table
+          case SELECTN: // identifies SelectChoice table
+            value.formatValue(elemFormatter, row, null, cc);
+            break;
+          default:
+            throw new IllegalStateException("unhandled data type");
+          }
+        } catch ( ODKDatastoreException e ) {
+          e.printStackTrace();
+        }
+      return false;
+      }
+
+      @Override
+      public boolean enter(FormElementModel element, CallingContext cc) {
+        if (element.getParent() == null) {
+          // we are the top-level submission...
+          Row attributeRow = new Row(sub.constructSubmissionKey(null));
+          XmlAttributeFormatter attributeFormatter = new XmlAttributeFormatter();
+          //
+          // add what could be considered the form's metadata...
+          //
+          attributeRow.addFormattedValue("id=\"" + StringEscapeUtils.escapeXml(form.getFormId())
+              + "\"");
+          if (form.isEncryptedForm()) {
+            attributeRow.addFormattedValue("encrypted=\"yes\"");
+          }
+          try {
+            // add the submission's metadata...
+            sub.getFormattedNamespaceValuesForRow(attributeRow,
+                Collections.singletonList(FormElementNamespace.METADATA), attributeFormatter, false,
+                cc);
+          } catch (ODKDatastoreException e) {
+            e.printStackTrace();
+            return false;
+          }
+
+          // emit the open tag with all the metadata as attributes
+          output.append("<");
+          output.append(element.getElementName());
+          Iterator<String> itrAttributes = attributeRow.getFormattedValues().iterator();
+          while (itrAttributes.hasNext()) {
+            String value = itrAttributes.next();
+            output.append(" ");
+            output.append(value);
+          }
+          output.append(">");
+          
+          // add the top-level submission set as the top set in the nesting stack.
+          nesting.add(sub);
+          
+        } else if (element.getElementType() == FormElementModel.ElementType.GROUP ) {
+          output.append(HtmlUtil.createBeginTag(element.getElementName()));
+        }
+        return false;
+      }
+
+      @Override
+      public boolean descendIntoRepeat(FormElementModel element, int ordinal, CallingContext cc) {
+        SubmissionSet subSet = nesting.get(nesting.size()-1);
+        SubmissionValue value = subSet.getElementValue(element);
+        RepeatSubmissionType t = (RepeatSubmissionType) value;
+        if ( t.getNumberRepeats() < ordinal ) {
+          return false;
+        }
+        SubmissionSet newSet = t.getSubmissionSets().get(ordinal-1);
+        nesting.add(newSet);
+
+        output.append(HtmlUtil.createBeginTag(element.getElementName()));
+        return true;
+      }
+
+      @Override
+      public void ascendFromRepeat(FormElementModel element, int ordinal, CallingContext cc) {
+        nesting.remove(nesting.size()-1);
+        output.append(HtmlUtil.createEndTag(element.getElementName()));
+      }
+
+      @Override
+      public void leave(FormElementModel element, CallingContext cc) {
+        if ( element.getElementType() == FormElementModel.ElementType.GROUP ) {
+          output.append(HtmlUtil.createEndTag(element.getElementName()));
+        }
+      }
   }
 
   @Override
@@ -73,61 +188,21 @@ public class XmlFormatter implements SubmissionFormatter, RepeatCallbackFormatte
     // format row elements
     for (Submission sub : submissions) {
       FormElementModel fem = sub.getFormElementModel();
-	  Row attributeRow = new Row(sub.constructSubmissionKey(null));
-	  // 
-	  // add what could be considered the form's metadata...
-	  // 
-	  attributeRow.addFormattedValue("id=\"" + StringEscapeUtils.escapeXml(form.getFormId()) + "\"");
-	  if ( form.isEncryptedForm()) {
-		  attributeRow.addFormattedValue("encrypted=\"yes\"");
-	  }
-	  sub.getFormattedNamespaceValuesForRow(attributeRow, Collections.singletonList(FormElementNamespace.METADATA), attributeFormatter, false, cc);
-	  
-	  output.append("<");
-	  output.append(fem.getElementName());
-	  Iterator<String> itrAttributes = attributeRow.getFormattedValues().iterator();
-      while (itrAttributes.hasNext()) {
-    	output.append(" ");
-        output.append(itrAttributes.next());
-      }
-      output.append(">");
-      Row dataRow = new Row(sub.constructSubmissionKey(null));
-	  sub.getFormattedNamespaceValuesForRow(dataRow, Collections.singletonList(FormElementNamespace.VALUES), elemFormatter, false, cc);
-	  Iterator<String> itr = dataRow.getFormattedValues().iterator();
-      while (itr.hasNext()) {
-        output.append(itr.next());
-      }
-      output.append(HtmlUtil.createEndTag(fem.getElementName()));
+      XmlFormElementModelVisitor visitor = new XmlFormElementModelVisitor(sub);
+      
+      fem.depthFirstTraversal(visitor, cc);
     }
   }
 
   @Override
   public void afterProcessSubmissions(CallingContext cc) throws ODKDatastoreException {
   }
-    
-@Override
+
+  @Override
   public void processSubmissions(List<Submission> submissions, CallingContext cc)
       throws ODKDatastoreException {
     beforeProcessSubmissions(cc);
     processSubmissionSegment(submissions, cc);
     afterProcessSubmissions(cc);
   }
-
-  public void processRepeatedSubmssionSetsIntoRow(List<SubmissionSet> repeats,
-      FormElementModel repeatElement, Row row, CallingContext cc) throws ODKDatastoreException {
-
-	StringBuilder b = new StringBuilder();
-    // format repeat row elements
-    for (SubmissionSet repeat : repeats) {
-      b.append(HtmlUtil.createBeginTag(repeatElement.getElementName()));
-      Row repeatRow = repeat.getFormattedValuesAsRow(propertyNames, elemFormatter, false, cc);
-      Iterator<String> itr = repeatRow.getFormattedValues().iterator();
-      while (itr.hasNext()) {
-        b.append(itr.next());
-      }
-      b.append(HtmlUtil.createEndTag(repeatElement.getElementName()));
-    }
-    row.addFormattedValue(b.toString());
-  }
-    
 }

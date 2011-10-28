@@ -38,7 +38,11 @@ import org.opendatakit.common.web.constants.BasicConsts;
 /**
  * Formats xml tags <name>value</name> with proper escaping for 
  * reconstructing the submission xml that Collect may have used
- * when submitting data.
+ * when submitting data.  
+ * 
+ * NOTE: This class does not use the Row object for the 
+ * reconstruction, but instead writes to the XmlFormatter
+ * output stream directly.
  * 
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
@@ -160,7 +164,6 @@ public class XmlElementFormatter implements ElementFormatter {
   @Override
   public void formatRepeats(SubmissionRepeat repeat, FormElementModel repeatElement, Row row,
       CallingContext cc) throws ODKDatastoreException {
-	  xmlFormatter.processRepeatedSubmssionSetsIntoRow(repeat.getSubmissionSets(), repeatElement, row, cc);
   }
 
   @Override
@@ -174,7 +177,9 @@ public class XmlElementFormatter implements ElementFormatter {
       String xmlString = HtmlUtil.createBeginTag(propertyName);
       xmlString += StringEscapeUtils.escapeXml(value.toString());
       xmlString += HtmlUtil.createEndTag(propertyName);
-      row.addFormattedValue(xmlString);
+      xmlFormatter.writeXml(xmlString);
+    } else {
+      xmlFormatter.writeXml( HtmlUtil.createSelfClosingTag(propertyName));
     }
   }
 
