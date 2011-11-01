@@ -16,15 +16,11 @@
 package org.opendatakit.aggregate.format.element;
 
 import java.math.BigDecimal;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.List;
-import java.util.TimeZone;
 
 import org.apache.commons.lang.StringEscapeUtils;
 import org.opendatakit.aggregate.constants.HtmlUtil;
-import org.opendatakit.aggregate.constants.format.FormatConsts;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.format.structure.XmlFormatter;
@@ -32,6 +28,7 @@ import org.opendatakit.aggregate.submission.SubmissionRepeat;
 import org.opendatakit.aggregate.submission.type.BlobSubmissionType;
 import org.opendatakit.aggregate.submission.type.GeoPoint;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+import org.opendatakit.common.utils.WebUtils;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.BasicConsts;
 
@@ -105,27 +102,17 @@ public class XmlElementFormatter implements ElementFormatter {
 
   @Override
   public void formatDate(Date date, FormElementModel element, String ordinalValue, Row row) {
-    addToXmlValueToRow(date, element.getElementName(), row);
-
+    addToXmlValueToRow(WebUtils.asSubmissionDateOnlyString(date), element.getElementName(), row);
   }
 
   @Override
   public void formatDateTime(Date date, FormElementModel element, String ordinalValue, Row row) {
-    addToXmlValueToRow(date, element.getElementName(), row);
-
+    addToXmlValueToRow(WebUtils.asSubmissionDateTimeString(date), element.getElementName(), row);
   }
 
   @Override
   public void formatTime(Date date, FormElementModel element, String ordinalValue, Row row) {
-    if (date != null) {
-      GregorianCalendar g = new GregorianCalendar(TimeZone.getTimeZone("GMT"));
-      g.setTime(date);
-      addToXmlValueToRow(
-          String.format(FormatConsts.TIME_FORMAT_STRING, g.get(Calendar.HOUR_OF_DAY),
-              g.get(Calendar.MINUTE), g.get(Calendar.SECOND)), element.getElementName(), row);
-    } else {
-      addToXmlValueToRow(null, element.getElementName(), row);
-    }
+    addToXmlValueToRow(WebUtils.asSubmissionTimeOnlyString(date), element.getElementName(), row);
   }
 
   @Override
