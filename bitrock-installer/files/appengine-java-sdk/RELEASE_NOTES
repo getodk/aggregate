@@ -3,6 +3,39 @@ All rights reserved.
 
 App Engine Java SDK - Release Notes
 
+Version 1.5.5
+=============
+- We have increased the number of files you can upload with your application to
+  from 3,000 to 10,000.
+- We have increased the size limit for a single file uploaded to App Engine from
+  10MB to 32MB.
+- We have increased the Frontend request deadline from 30 seconds to 60 seconds.
+- We have increased the online URLFetch maximum deadline from 10 seconds to 60
+  seconds. The default deadline remains at 10 seconds. The offline maximum deadline
+  for URLFetch remains at 10 minutes.
+- We have increased the URLFetch Post payload from 1MB to 5MB.
+- App Engine now supports Cross Group (XG) transactions with the High
+  Replication Datastore, which allow you to perform transactions across multiple
+  entity groups.
+    http://code.google.com/appengine/docs/java/datastore/transactions.html
+- We have added a graph to the admin console that displays the number of
+  instances for which you will be billed.
+- In the XMPP API, getPresence() is deprecated in favor of using the inbound
+  presence handlers documented in
+  http://code.google.com/appengine/docs/java/xmpp/overview.html#Handling_User_Presence.
+- Fixed an issue in the Admin Console where the "Run Now" button did not work
+  for tasks with a '-' in the name.
+- Fixed an issue to provide a better error message when a user tries to parse an
+  HttpRequest's input stream more than once in a request.
+- Fixed an issue to provide a better error message when using the Mail API to
+  send email to an invalid user address.
+- Fixed an issue in the SDK where HttpServletRequest.getInputStream().read()
+  always returned -1.
+    http://code.google.com/p/googleappengine/issues/detail?id=5396
+- Fixed an issue where you could not schedule a cron job to run every 100
+  minutes.
+    http://code.google.com/p/googleappengine/issues/detail?id=5861
+
 Version 1.5.4
 =============
 - You can now specify the maximum size for a blob in
