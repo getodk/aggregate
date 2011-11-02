@@ -222,3 +222,10 @@ a,a:visited,a:hover {
 	text-align: center;
 	align: center;
 }
+.app_version_string {
+	font-family: "Lucida Grande", Tahoma, Arial, Verdana, sans-serif;
+	font-size: 80%;
+	font-weight: bold;
+	padding-left: 20px;
+	color: #0044A7;
+}
