@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -57,11 +56,6 @@ import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.utils.HttpClientFactory;
 import org.opendatakit.common.web.CallingContext;
 
-import com.google.appengine.api.urlfetch.HTTPMethod;
-import com.google.appengine.api.urlfetch.HTTPRequest;
-import com.google.appengine.api.urlfetch.HTTPResponse;
-import com.google.appengine.api.urlfetch.URLFetchService;
-import com.google.appengine.api.urlfetch.URLFetchServiceFactory;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -77,6 +71,12 @@ public class OhmageJsonServer extends AbstractExternalService implements
 	private static final Gson gson;
 	static {
 		GsonBuilder builder = new GsonBuilder();
+		builder.registerTypeAdapter(OhmageJsonTypes.Survey.class,
+				new OhmageJsonTypes.Survey());
+		builder.registerTypeAdapter(OhmageJsonTypes.RepeatableSet.class,
+				new OhmageJsonTypes.RepeatableSet());
+		builder.serializeNulls();
+		builder.setPrettyPrinting();
 		gson = builder.create();
 	}
 
@@ -175,7 +175,7 @@ public class OhmageJsonServer extends AbstractExternalService implements
 	 * @throws IOException
 	 * @throws ClientProtocolException
 	 * @throws ODKExternalServiceException
-	 * @throws URISyntaxException 
+	 * @throws URISyntaxException
 	 */
 	public void uploadSurveys(List<OhmageJsonTypes.Survey> surveys,
 			Map<UUID, byte[]> photos, CallingContext cc)
@@ -191,15 +191,18 @@ public class OhmageJsonServer extends AbstractExternalService implements
 		HttpClientFactory factory = (HttpClientFactory) cc
 				.getBean(BeanDefs.HTTP_CLIENT_FACTORY);
 		HttpClient client = factory.createHttpClient(httpParams);
-		HttpPost httppost = new HttpPost("http://www.google.com");//getServerUrl() + "/app/survey/upload");
+		HttpPost httppost = new HttpPost(getServerUrl() + "/app/survey/upload");
+																	
 
 		// TODO: figure out campaign parameters
-		StringBody campaignUrn = new StringBody("");
-		StringBody campaignCreationTimestamp = new StringBody("");
-		StringBody user = new StringBody("");
-		StringBody hashedPassword = new StringBody("");
-		StringBody clientParam = new StringBody("");
+		StringBody campaignUrn = new StringBody("some campaign urn");
+		StringBody campaignCreationTimestamp = new StringBody(
+				"the creation timestamp");
+		StringBody user = new StringBody("username");
+		StringBody hashedPassword = new StringBody("the hashed password");
+		StringBody clientParam = new StringBody("aggregate");
 		StringBody surveyData = new StringBody(gson.toJson(surveys));
+		System.out.println(gson.toJson(surveys));
 
 		MultipartEntity reqEntity = new MultipartEntity();
 		reqEntity.addPart("campaign_urn", campaignUrn);
@@ -210,14 +213,18 @@ public class OhmageJsonServer extends AbstractExternalService implements
 		reqEntity.addPart("client", clientParam);
 		reqEntity.addPart("survey", surveyData);
 		for (Entry<UUID, byte[]> entry : photos.entrySet()) {
-			InputStreamBody imageAttachment = new InputStreamBody(new ByteArrayInputStream(entry.getValue()), "image/jpeg", entry.getKey().toString());
-			//ByteArrayBody imageAttachment = new ByteArrayBody(entry.getValue(),
-					//"image/jpeg", entry.getKey().toString());
+			InputStreamBody imageAttachment = new InputStreamBody(
+					new ByteArrayInputStream(entry.getValue()), "image/jpeg",
+					entry.getKey().toString());
+			// ByteArrayBody imageAttachment = new
+			// ByteArrayBody(entry.getValue(),
+			// "image/jpeg", entry.getKey().toString());
 			reqEntity.addPart(entry.getKey().toString(), imageAttachment);
 		}
 
-		
 		httppost.setEntity(reqEntity);
+
+		reqEntity.writeTo(System.out);
 
 		HttpResponse response = client.execute(httppost);
 		HttpEntity resEntity = response.getEntity();

@@ -1,11 +1,18 @@
 package org.opendatakit.aggregate.externalservice;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
 import org.opendatakit.common.utils.WebUtils;
+
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
 
 /**
  * TODO: comment and deal with null/empty value args
@@ -15,7 +22,7 @@ import org.opendatakit.common.utils.WebUtils;
  */
 public class OhmageJsonTypes {
 
-	public static final class Survey {
+	public static final class Survey implements JsonSerializer<Survey> {
 		/**
 		 * a string in the ISO 8601 format to the detail of seconds “YYYY-MM-DD
 		 * hh:mm:ss”.
@@ -49,7 +56,7 @@ public class OhmageJsonTypes {
 		 * context. See the trigger framework page for a description of the
 		 * object's contents. The object must contain the property launch_time.
 		 */
-		private String survey_lauch_context;
+		private String survey_launch_context;
 
 		/** an array composed of prompt responses and/or repeatable sets. */
 		private List<Response> responses;
@@ -148,7 +155,7 @@ public class OhmageJsonTypes {
 		 * @return the survey_lauch_context
 		 */
 		public String getSurvey_lauch_context() {
-			return survey_lauch_context;
+			return survey_launch_context;
 		}
 
 		/**
@@ -156,7 +163,7 @@ public class OhmageJsonTypes {
 		 *            the survey_lauch_context to set
 		 */
 		public void setSurvey_lauch_context(String survey_lauch_context) {
-			this.survey_lauch_context = survey_lauch_context;
+			this.survey_launch_context = survey_lauch_context;
 		}
 
 		/**
@@ -172,6 +179,27 @@ public class OhmageJsonTypes {
 		 */
 		public void setResponses(List<Response> responses) {
 			this.responses = responses;
+		}
+
+		@Override
+		public JsonElement serialize(Survey src, Type typeOfSrc,
+				JsonSerializationContext context) {
+			JsonObject obj = new JsonObject();
+			obj.addProperty("date", src.date);
+			obj.addProperty("time", src.time);
+			obj.addProperty("timezone", src.timezone);
+			obj.addProperty("location_status", src.location_status);
+			obj.add("location", context.serialize(src.location));
+			obj.addProperty("survey_id", src.survey_id);
+			obj.addProperty("survey_launch_context", src.survey_launch_context);
+			JsonArray responsesArray = new JsonArray();
+			if (src.responses != null) {
+				for (Response response : src.responses) {
+					responsesArray.add(context.serialize(response));
+				}
+			}
+			obj.add("responses", responsesArray);
+			return obj;
 		}
 
 	}
@@ -196,7 +224,8 @@ public class OhmageJsonTypes {
 	public abstract static class Response {
 	}
 
-	public static final class RepeatableSet extends Response {
+	public static final class RepeatableSet extends Response implements
+			JsonSerializer<RepeatableSet> {
 		/** the id/label for a repeatable set of prompts */
 		private final String repeatable_set_id;
 
@@ -205,20 +234,28 @@ public class OhmageJsonTypes {
 		 * set were skipped (the end user refused to answer another iteration
 		 * instead of just stopping normally). required.
 		 */
-		private final boolean skipped;
+		private final Boolean skipped;
 
 		/**
 		 * true/false. If true, identifies that the repeatable set was not
 		 * displayed to the end user. If true, the responses element must be an
 		 * empty array.
 		 */
-		private final boolean not_displayed;
+		private final Boolean not_displayed;
 
 		/**
 		 * prompt_id-value pairs. Each repeatable set iteration is grouped
 		 * together in an array.
 		 */
 		private final List<List<Response>> responses;
+
+		// for gson
+		public RepeatableSet() {
+			this.repeatable_set_id = null;
+			this.skipped = null;
+			this.not_displayed = null;
+			this.responses = null;
+		}
 
 		/**
 		 * @param repeatable_set_id
@@ -264,6 +301,27 @@ public class OhmageJsonTypes {
 		public List<List<Response>> getResponses() {
 			return responses;
 		}
+
+		@Override
+		public JsonElement serialize(RepeatableSet src, Type typeOfSrc,
+				JsonSerializationContext context) {
+			JsonObject obj = new JsonObject();
+			obj.addProperty("repeatable_set_id", src.repeatable_set_id);
+			obj.addProperty("skipped", src.skipped);
+			obj.addProperty("not_displayed", src.not_displayed);
+			JsonArray responsesArray = new JsonArray();
+			if (src.responses != null) {
+				for (List<Response> responseList : src.responses) {
+					JsonArray innerArray = new JsonArray();
+					for (Response response : responseList) {
+						innerArray.add(context.serialize(response));
+					}
+					responsesArray.add(innerArray);
+				}
+			}
+			obj.add("responses", responsesArray);
+			return obj;
+		}
 	}
 
 	public abstract static class PromptResponse extends Response {
@@ -285,6 +343,12 @@ public class OhmageJsonTypes {
 	public static final class timestamp extends PromptResponse {
 		private final String value;
 
+		// for gson
+		private timestamp() {
+			super(null);
+			this.value = null;
+		}
+
 		public timestamp(String prompt_id, Date value) {
 			super(prompt_id);
 			this.value = WebUtils.iso8601Date(value);
@@ -293,6 +357,12 @@ public class OhmageJsonTypes {
 
 	public static final class number extends PromptResponse {
 		private final Long value;
+
+		// for gson
+		private number() {
+			super(null);
+			this.value = null;
+		}
 
 		public number(String prompt_id, Long value) {
 			super(prompt_id);
@@ -303,6 +373,12 @@ public class OhmageJsonTypes {
 	public static final class text extends PromptResponse {
 		/** format depends on the response type for each prompt */
 		private final String value;
+
+		// for gson
+		private text() {
+			super(null);
+			this.value = null;
+		}
 
 		/**
 		 * @param prompt_id
@@ -324,6 +400,13 @@ public class OhmageJsonTypes {
 	public static final class multi_choice_custom extends PromptResponse {
 		private final Integer[] value;
 		private final custom_choice[] custom_choices;
+
+		// for gson
+		private multi_choice_custom() {
+			super(null);
+			this.value = null;
+			this.custom_choices = null;
+		}
 
 		public multi_choice_custom(String prompt_id, List<String> choices,
 				List<String> possibleChoices) {
@@ -347,6 +430,13 @@ public class OhmageJsonTypes {
 		private final Integer value;
 		private final custom_choice[] custom_choices;
 
+		// for gson
+		private single_choice_custom() {
+			super(null);
+			this.value = null;
+			this.custom_choices = null;
+		}
+
 		public single_choice_custom(String prompt_id, String choice,
 				List<String> possibleChoices) {
 			super(prompt_id);
@@ -368,6 +458,12 @@ public class OhmageJsonTypes {
 		private final Integer choice_id;
 		private final String choice_value;
 
+		// for gson
+		private custom_choice() {
+			this.choice_id = null;
+			this.choice_value = null;
+		}
+
 		custom_choice(Integer choice_id, String choice_value) {
 			this.choice_id = choice_id;
 			this.choice_value = choice_value;
@@ -377,51 +473,58 @@ public class OhmageJsonTypes {
 	public static final class photo extends PromptResponse {
 		private final String value;
 
+		// for gson
+		private photo() {
+			super(null);
+			this.value = null;
+		}
+
 		public photo(String prompt_id, UUID photoUUID) {
 			super(prompt_id);
 			this.value = photoUUID.toString();
 		}
 	}
-	
-	public static final class server_response
-	{
+
+	public static final class server_response {
 		private String result;
 		private error[] errors;
+
 		/**
 		 * @return the result
 		 */
 		public String getResult() {
 			return result;
 		}
+
 		/**
 		 * @return the errors
 		 */
 		public error[] getErrors() {
 			return errors;
 		}
-		
+
 	}
-	
+
 	/**
 	 * Used by server_response.
 	 */
-	private static final class error
-	{
+	private static final class error {
 		private Integer code;
 		private String text;
-		
+
 		/**
 		 * @return the code
 		 */
 		public Integer getCode() {
 			return code;
 		}
+
 		/**
 		 * @return the text
 		 */
 		public String getText() {
 			return text;
 		}
-		
+
 	}
 }
