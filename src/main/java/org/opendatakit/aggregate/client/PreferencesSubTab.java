@@ -19,8 +19,10 @@ package org.opendatakit.aggregate.client;
 import org.opendatakit.aggregate.client.preferences.Preferences;
 import org.opendatakit.aggregate.client.widgets.EnableOdkTablesCheckbox;
 import org.opendatakit.aggregate.client.widgets.UpdateGMapsKeyButton;
+import org.opendatakit.aggregate.constants.common.UIConsts;
 
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 
 public class PreferencesSubTab extends AggregateSubTabBase {
@@ -33,6 +35,14 @@ public class PreferencesSubTab extends AggregateSubTabBase {
   private EnableOdkTablesCheckbox odkTablesEnable;
   
   public PreferencesSubTab() {
+    
+    HTML labelVersion = new HTML("<h2>Version Information</h2>");
+    add(labelVersion);
+    Label version = new Label();
+    version.setStylePrimaryName("app_version_string");
+    version.setText(UIConsts.VERSION_STRING);
+    add(version);
+    
     HTML labelMapsKey = new HTML(GOOGLE_MAPS_API_KEY_LABEL);
     add(labelMapsKey);
     

@@ -17,6 +17,8 @@
 package org.opendatakit.aggregate.constants.common;
 
 public class UIConsts { 
+  public static final String VERSION_STRING = "v1.0 Production";
+
   public static final String URI_DEFAULT = "no uuid";
   public static final String FSC_URI_PARAM = "fsc";
   public static final String PREVIEW_PARAM = "previewImage";
