@@ -16,13 +16,10 @@
 
 package org.odk.aggregate.submission.type.jr;
 
-import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.TimeZone;
 
 import org.apache.commons.lang.StringEscapeUtils;
 import org.javarosa.core.model.utils.DateUtils;
-import org.odk.aggregate.constants.ParserConsts;
 import org.odk.aggregate.form.FormElement;
 import org.odk.aggregate.submission.type.DateSubmissionType;
 
@@ -58,9 +55,7 @@ public class JRDateType extends DateSubmissionType {
      Date value = getValue();
      if ( value != null ) {
         b.append("<" + propertyName + ">");
-        SimpleDateFormat fmt = new SimpleDateFormat(ParserConsts.PATTERN_YYYY_MM_DD_DATE_ONLY_NO_TIME_DASH);
-        fmt.setTimeZone(TimeZone.getTimeZone("GMT"));
-        b.append(StringEscapeUtils.escapeXml(fmt.format(value)));
+        b.append(StringEscapeUtils.escapeXml(DateUtils.formatDate(value, DateUtils.FORMAT_ISO8601)));
         b.append("</" + propertyName + ">");
      } else {
         b.append("<" + propertyName + "/>");
