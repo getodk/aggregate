@@ -18,14 +18,16 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.text.DateFormat;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 import java.util.TimeZone;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.http.impl.cookie.DateUtils;
+import org.javarosa.core.model.utils.DateUtils;
 import org.javarosa.xform.parse.XFormParser;
 import org.kxml2.io.KXmlParser;
 import org.kxml2.io.KXmlSerializer;
@@ -50,6 +52,24 @@ public class WebUtils {
   private static final String ATTRIBUTE_NAME_TAG = "attributeName";
   private static final String CURSOR_TAG = "cursor";
   private static final Log logger = LogFactory.getLog(WebUtils.class);
+  /**
+   * Date format pattern used to parse HTTP date headers in RFC 1123 format.
+   * copied from apache.commons.lang.DateUtils
+   */
+  private static final String PATTERN_RFC1123 = "EEE, dd MMM yyyy HH:mm:ss zzz";
+
+  /**
+   * Date format pattern used to parse HTTP date headers in RFC 1036 format.
+   * copied from apache.commons.lang.DateUtils
+   */
+  private static final String PATTERN_RFC1036 = "EEEE, dd-MMM-yy HH:mm:ss zzz";
+
+  /**
+   * Date format pattern used to parse HTTP date headers in ANSI C 
+   * <code>asctime()</code> format.
+   * copied from apache.commons.lang.DateUtils
+   */
+  private static final String PATTERN_ASCTIME = "EEE MMM d HH:mm:ss yyyy";
   private static final String PATTERN_DATE_TOSTRING = "EEE MMM dd HH:mm:ss zzz yyyy";
   private static final String PATTERN_ISO8601 = "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
   private static final String PATTERN_ISO8601_WITHOUT_ZONE = "yyyy-MM-dd'T'HH:mm:ss.SSS";
@@ -59,28 +79,12 @@ public class WebUtils {
   private static final String PATTERN_NO_DATE_TIME_ONLY = "HH:mm:ss.SSS";
 
   private static final SimpleDateFormat asGMTiso8601;
-  private static final SimpleDateFormat asGMTSubmissionDateTimeString;
-  private static final SimpleDateFormat asGMTSubmissionDateOnlyString;
-  private static final SimpleDateFormat asGMTSubmissionTimeOnlyString;
 
   static {
     SimpleDateFormat temp;
     temp = new SimpleDateFormat(PATTERN_ISO8601); // with time zone
     temp.setTimeZone(TimeZone.getTimeZone("GMT"));
     asGMTiso8601 = temp;
-    temp = new SimpleDateFormat(PATTERN_ISO8601); // time zone included (we
-                                                  // don't retain it in DB)
-    temp.setTimeZone(TimeZone.getTimeZone("GMT"));
-    asGMTSubmissionDateTimeString = temp;
-    temp = new SimpleDateFormat(PATTERN_YYYY_MM_DD_DATE_ONLY_NO_TIME_DASH);// no
-                                                                           // timezone
-                                                                           // on
-                                                                           // this
-    temp.setTimeZone(TimeZone.getTimeZone("GMT"));
-    asGMTSubmissionDateOnlyString = temp;
-    temp = new SimpleDateFormat(PATTERN_ISO8601_TIME); // time zone included
-    temp.setTimeZone(TimeZone.getTimeZone("GMT"));
-    asGMTSubmissionTimeOnlyString = temp;
   }
 
   private WebUtils() {
@@ -119,6 +123,30 @@ public class WebUtils {
     return b;
   }
 
+  private static final Date parseDateSubset( String value, String[] parsePatterns, Locale l, TimeZone tz) {
+    // borrowed from apache.commons.lang.DateUtils...
+    Date d = null;
+    SimpleDateFormat parser = null;
+    ParsePosition pos = new ParsePosition(0);
+    for (int i = 0; i < parsePatterns.length; i++) {
+      if (i == 0) {
+        if ( l == null ) {
+          parser = new SimpleDateFormat(parsePatterns[0]);
+        } else {
+          parser = new SimpleDateFormat(parsePatterns[0], l);
+        }
+      } else {
+        parser.applyPattern(parsePatterns[i]);
+      }
+      parser.setTimeZone(tz); // enforce UTC for formats without timezones
+      pos.setIndex(0);
+      d = parser.parse(value, pos);
+      if (d != null && pos.getIndex() == value.length()) {
+        return d;
+      }
+    }
+    return d;
+  }
   /**
    * Parse a string into a datetime value. Tries the common Http formats, the
    * iso8601 format (used by Javarosa), the default formatting from
@@ -128,59 +156,95 @@ public class WebUtils {
    * @return
    */
   public static final Date parseDate(String value) {
+    if ( value == null || value.length() == 0 ) return null;
+
+    String[] localizedParsePatterns = new String[] {
+        // try the common HTTP date formats that have time zones
+        PATTERN_RFC1123, 
+        PATTERN_RFC1036, 
+        PATTERN_DATE_TOSTRING };
+
+    String[] localizedNoTzParsePatterns = new String[] {
+        // ones without timezones... (will assume UTC)
+        PATTERN_ASCTIME }; 
+    
+    String[] tzParsePatterns = new String[] {
+        PATTERN_ISO8601,
+        PATTERN_ISO8601_DATE, 
+        PATTERN_ISO8601_TIME };
+    
+    String[] noTzParsePatterns = new String[] {
+        // ones without timezones... (will assume UTC)
+        PATTERN_ISO8601_WITHOUT_ZONE, 
+        PATTERN_NO_DATE_TIME_ONLY,
+        PATTERN_YYYY_MM_DD_DATE_ONLY_NO_TIME_DASH };
+
     Date d = null;
-    if (value != null) {
-
-      String[] parsePatterns = new String[] {
-          // try the common HTTP date formats that have time zones
-          DateUtils.PATTERN_RFC1123, 
-          DateUtils.PATTERN_RFC1036, PATTERN_ISO8601,
-          PATTERN_DATE_TOSTRING, 
-          PATTERN_ISO8601_DATE, 
-          PATTERN_ISO8601_TIME,
-          // ones without timezones... (will assume UTC)
-          DateUtils.PATTERN_ASCTIME, 
-          PATTERN_ISO8601_WITHOUT_ZONE, 
-          PATTERN_NO_DATE_TIME_ONLY,
-          PATTERN_YYYY_MM_DD_DATE_ONLY_NO_TIME_DASH };
-
-      // borrowed from apache.commons.lang.DateUtils...
-      SimpleDateFormat parser = null;
+    // try to parse with the JavaRosa parsers
+    d = DateUtils.parseDateTime(value);
+    if ( d != null ) return d;
+    d = DateUtils.parseDate(value);
+    if ( d != null ) return d;
+    d = DateUtils.parseTime(value);
+    if ( d != null ) return d;
+    // try localized and english text parsers (for Web headers and interactive filter spec.)
+    d = parseDateSubset(value, localizedParsePatterns, Locale.ENGLISH, TimeZone.getTimeZone("GMT"));
+    if ( d != null ) return d;
+    d = parseDateSubset(value, localizedParsePatterns, null, TimeZone.getTimeZone("GMT"));
+    if ( d != null ) return d;
+    d = parseDateSubset(value, localizedNoTzParsePatterns, Locale.ENGLISH, TimeZone.getTimeZone("GMT"));
+    if ( d != null ) return d;
+    d = parseDateSubset(value, localizedNoTzParsePatterns, null, TimeZone.getTimeZone("GMT"));
+    if ( d != null ) return d;
+    // try other common patterns that might not quite match JavaRosa parsers
+    d = parseDateSubset(value, tzParsePatterns, null, TimeZone.getTimeZone("GMT"));
+    if ( d != null ) return d;
+    d = parseDateSubset(value, noTzParsePatterns, null, TimeZone.getTimeZone("GMT"));
+    if ( d != null ) return d;
+    // try the locale- and timezone- specific parsers
+    {
+      DateFormat formatter = DateFormat.getDateTimeInstance();
       ParsePosition pos = new ParsePosition(0);
-      for (int i = 0; i < parsePatterns.length; i++) {
-        if (i == 0) {
-          parser = new SimpleDateFormat(parsePatterns[0]);
-        } else {
-          parser.applyPattern(parsePatterns[i]);
-        }
-        parser.setTimeZone(TimeZone.getTimeZone("GMT")); // enforce UTC for formats without timezones
-        pos.setIndex(0);
-        d = parser.parse(value, pos);
-        if (d != null && pos.getIndex() == value.length()) {
-          return d;
-        }
+      d = formatter.parse(value, pos);
+      if (d != null && pos.getIndex() == value.length()) {
+        return d;
       }
-      throw new IllegalArgumentException("Unable to parse the date: " + value);
     }
-    return d;
+    {
+      DateFormat formatter = DateFormat.getDateInstance();
+      ParsePosition pos = new ParsePosition(0);
+      d = formatter.parse(value, pos);
+      if (d != null && pos.getIndex() == value.length()) {
+        return d;
+      }
+    }
+    {
+      DateFormat formatter = DateFormat.getTimeInstance();
+      ParsePosition pos = new ParsePosition(0);
+      d = formatter.parse(value, pos);
+      if (d != null && pos.getIndex() == value.length()) {
+        return d;
+      }
+    }
+    throw new IllegalArgumentException("Unable to parse the date: " + value);
   }
 
   public static final String asSubmissionDateTimeString(Date d) {
     if (d == null)
       return null;
-    return asGMTSubmissionDateTimeString.format(d);
+    return DateUtils.formatDateTime(d, DateUtils.FORMAT_ISO8601);
   }
 
   public static final String asSubmissionDateOnlyString(Date d) {
     if (d == null)
       return null;
-    return asGMTSubmissionDateOnlyString.format(d);
+    return DateUtils.formatDate(d, DateUtils.FORMAT_ISO8601);
   }
 
   public static final String asSubmissionTimeOnlyString(Date d) {
     if (d == null)
       return null;
-    return asGMTSubmissionTimeOnlyString.format(d);
+    return DateUtils.formatTime(d, DateUtils.FORMAT_ISO8601);
   }
 
   /**
