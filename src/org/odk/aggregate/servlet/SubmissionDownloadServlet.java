@@ -21,21 +21,19 @@ import java.io.PrintWriter;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.text.SimpleDateFormat;
 import java.util.List;
-import java.util.TimeZone;
 
 import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang.StringEscapeUtils;
+import org.javarosa.core.model.utils.DateUtils;
 import org.odk.aggregate.BriefcaseAuth;
 import org.odk.aggregate.EMFactory;
 import org.odk.aggregate.constants.ErrorConsts;
 import org.odk.aggregate.constants.HtmlConsts;
 import org.odk.aggregate.constants.HtmlUtil;
-import org.odk.aggregate.constants.ParserConsts;
 import org.odk.aggregate.constants.ServletConsts;
 import org.odk.aggregate.exception.ODKFormNotFoundException;
 import org.odk.aggregate.exception.ODKIncompleteSubmissionData;
@@ -180,9 +178,7 @@ public class SubmissionDownloadServlet extends ServletUtilBase {
     attr.append(StringEscapeUtils.escapeXml("md5:"
         + getMD5Hash(KeyFactory.keyToString(sub.getKey()))));
     attr.append("\" submissionDate=\"");
-    SimpleDateFormat fmt = new SimpleDateFormat(ParserConsts.PATTERN_ISO8601); // time zone included
-    fmt.setTimeZone(TimeZone.getTimeZone("GMT"));
-    attr.append(StringEscapeUtils.escapeXml(fmt.format(sub.getSubmittedTime())));
+    attr.append(StringEscapeUtils.escapeXml(DateUtils.formatDateTime(sub.getSubmittedTime(),DateUtils.FORMAT_ISO8601)));
     attr.append("\"");
     StringBuilder b = new StringBuilder();
     FormElement element = form.getBeginningElement(sub.getPropertyName());
