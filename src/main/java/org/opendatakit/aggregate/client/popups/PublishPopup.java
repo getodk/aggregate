@@ -36,17 +36,15 @@ import com.google.gwt.user.client.ui.TextBox;
 
 public final class PublishPopup extends AbstractPopupBase {
 
-	private static final String BUTTON_TXT = "<img src=\"images/green_right_arrow.png\" /> Publish";  
+	private static final String BUTTON_TXT = "<img src=\"images/green_right_arrow.png\" /> Publish";
 	private static final String TOOLTIP_TXT = "Publish the data";
 	private static final String HELP_BALLOON_TXT = "This will publish the data to Google Fusion Tables "
-		+ "or Google Spreadsheets.";
+			+ "or Google Spreadsheets.";
 
 	private static final String ES_SERVICEOPTIONS_TOOLTIP = "Method data should be published";
-	private static final String ES_SERVICEOPTIONS_BALLOON = 
-		"Choose whether you would like only old data, only new data, or all data to be published.";
+	private static final String ES_SERVICEOPTIONS_BALLOON = "Choose whether you would like only old data, only new data, or all data to be published.";
 	private static final String ES_TYPE_TOOLTIP = "Type of External Service Connection";
-	private static final String ES_TYPE_BALLOON = 
-		"Select the application where you want your data to be published.";
+	private static final String ES_TYPE_BALLOON = "Select the application where you want your data to be published.";
 
 	private final String formId;
 	private final TextBox name;
@@ -57,17 +55,22 @@ public final class PublishPopup extends AbstractPopupBase {
 		super();
 
 		this.formId = formId;
-		AggregateButton deleteButton = new AggregateButton(BUTTON_TXT, TOOLTIP_TXT, HELP_BALLOON_TXT);
+		AggregateButton deleteButton = new AggregateButton(BUTTON_TXT,
+				TOOLTIP_TXT, HELP_BALLOON_TXT);
 		deleteButton.addClickHandler(new CreateExernalServiceHandler());
 
 		name = new TextBox();
 
-		ExternalServiceType[] valuesToShow = { ExternalServiceType.GOOGLE_FUSIONTABLES, ExternalServiceType.GOOGLE_SPREADSHEET };
+		ExternalServiceType[] valuesToShow = {
+				ExternalServiceType.GOOGLE_FUSIONTABLES,
+				ExternalServiceType.GOOGLE_SPREADSHEET,
+				ExternalServiceType.OHMAGE_JSON_SERVER };
 		serviceType = new EnumListBox<ExternalServiceType>(valuesToShow,
 				ES_TYPE_TOOLTIP, ES_TYPE_BALLOON);
 		serviceType.addChangeHandler(new ExternalServiceTypeChangeHandler());
 
-		esOptions = new EnumListBox<ExternalServicePublicationOption>(ExternalServicePublicationOption.values(),
+		esOptions = new EnumListBox<ExternalServicePublicationOption>(
+				ExternalServicePublicationOption.values(),
 				ES_SERVICEOPTIONS_TOOLTIP, ES_SERVICEOPTIONS_BALLOON);
 
 		updateUIOptions();
@@ -97,6 +100,10 @@ public final class PublishPopup extends AbstractPopupBase {
 			name.setText("");
 			name.setEnabled(true);
 			break;
+		case OHMAGE_JSON_SERVER:
+			name.setText("http://localhost");
+			name.setEnabled(true);
+			break;
 		case GOOGLE_FUSIONTABLES:
 		default: // unknown type
 			name.setText("Spreadsheet Name");
@@ -118,6 +125,20 @@ public final class PublishPopup extends AbstractPopupBase {
 				SecureGWT.getServicesAdminService().createGoogleSpreadsheet(formId, name.getText(),
 						serviceOp, new OAuthCallback());
 				break;
+			case OHMAGE_JSON_SERVER:
+				SecureGWT.getServicesAdminService().createOhmageJsonServer(formId, name.getText(), serviceOp, new AsyncCallback<String>() {
+
+					@Override
+					public void onFailure(Throwable caught) {
+						// no-op
+					}
+
+					@Override
+					public void onSuccess(String result) {
+						// no-op
+					}
+				});
+				break;
 			case GOOGLE_FUSIONTABLES:
 				SecureGWT.getServicesAdminService().createFusionTable(formId, serviceOp,
 						new OAuthCallback());
@@ -128,7 +149,6 @@ public final class PublishPopup extends AbstractPopupBase {
 			
 			hide();
 		}
-
 	}
 
 	private class OAuthCallback implements AsyncCallback<String> {
@@ -138,17 +158,18 @@ public final class PublishPopup extends AbstractPopupBase {
 		}
 
 		public void onSuccess(String result) {
-			SecureGWT.getServicesAdminService().generateOAuthUrl(result, new AsyncCallback<String>() {
-				@Override
-				public void onFailure(Throwable caught) {
-					AggregateUI.getUI().reportError(caught);
-				}
+			SecureGWT.getServicesAdminService().generateOAuthUrl(result,
+					new AsyncCallback<String>() {
+						@Override
+						public void onFailure(Throwable caught) {
+							AggregateUI.getUI().reportError(caught);
+						}
 
-				@Override
-				public void onSuccess(String result) {
-					UrlHash.getHash().goTo(result);
-				}
-			});
+						@Override
+						public void onSuccess(String result) {
+							UrlHash.getHash().goTo(result);
+						}
+					});
 		}
 	}
 
