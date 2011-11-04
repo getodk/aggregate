@@ -329,8 +329,8 @@ public final class FormServiceCursor extends CommonFieldsBase {
          return new FusionTable(fsc, form, cc);
        case GOOGLE_SPREADSHEET:
          return new GoogleSpreadsheet(fsc, form, cc);
-       case JSON_SERVER:
-         return new JsonServer(fsc, form, cc);
+       case OHMAGE_JSON_SERVER:
+         return new OhmageJsonServer(fsc, form, cc);
        default:
          return null;
        }

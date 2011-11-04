@@ -41,5 +41,7 @@ public interface ServicesAdminService extends RemoteService {
   
   String createGoogleSpreadsheet(String formId, String name, ExternalServicePublicationOption esOption) throws AccessDeniedException;
   
+  String createOhmageJsonServer(String formId, String url, ExternalServicePublicationOption es) throws AccessDeniedException;
+  
   Boolean deletePublisher(String uri) throws AccessDeniedException;
 }
