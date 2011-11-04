@@ -45,6 +45,7 @@ import org.opendatakit.aggregate.constants.common.ExternalServicePublicationOpti
 import org.opendatakit.aggregate.constants.common.ExternalServiceType;
 import org.opendatakit.aggregate.constants.common.OperationalStatus;
 import org.opendatakit.aggregate.constants.externalservice.JsonServerConsts;
+import org.opendatakit.aggregate.constants.externalservice.OhmageJsonServerConsts;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.format.element.BasicElementFormatter;
@@ -191,8 +192,8 @@ public class OhmageJsonServer extends AbstractExternalService implements
 		HttpClientFactory factory = (HttpClientFactory) cc
 				.getBean(BeanDefs.HTTP_CLIENT_FACTORY);
 		HttpClient client = factory.createHttpClient(httpParams);
-		HttpPost httppost = new HttpPost(getServerUrl() + "/app/survey/upload");
-																	
+		HttpPost httppost = new HttpPost(getServerUrl()
+				+ OhmageJsonServerConsts.OHMAGE_SURVEY_UPLOAD_PATH);
 
 		// TODO: figure out campaign parameters
 		StringBody campaignUrn = new StringBody("some campaign urn");
@@ -202,7 +203,6 @@ public class OhmageJsonServer extends AbstractExternalService implements
 		StringBody hashedPassword = new StringBody("the hashed password");
 		StringBody clientParam = new StringBody("aggregate");
 		StringBody surveyData = new StringBody(gson.toJson(surveys));
-		System.out.println(gson.toJson(surveys));
 
 		MultipartEntity reqEntity = new MultipartEntity();
 		reqEntity.addPart("campaign_urn", campaignUrn);
@@ -216,15 +216,10 @@ public class OhmageJsonServer extends AbstractExternalService implements
 			InputStreamBody imageAttachment = new InputStreamBody(
 					new ByteArrayInputStream(entry.getValue()), "image/jpeg",
 					entry.getKey().toString());
-			// ByteArrayBody imageAttachment = new
-			// ByteArrayBody(entry.getValue(),
-			// "image/jpeg", entry.getKey().toString());
 			reqEntity.addPart(entry.getKey().toString(), imageAttachment);
 		}
 
 		httppost.setEntity(reqEntity);
-
-		reqEntity.writeTo(System.out);
 
 		HttpResponse response = client.execute(httppost);
 		HttpEntity resEntity = response.getEntity();
