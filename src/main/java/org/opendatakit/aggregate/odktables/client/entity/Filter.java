@@ -1,7 +1,5 @@
 package org.opendatakit.aggregate.odktables.client.entity;
 
-import org.opendatakit.common.persistence.Query.FilterOperation;
-
 /**
  * A Filter selects a subset of rows from a table.
  * 
