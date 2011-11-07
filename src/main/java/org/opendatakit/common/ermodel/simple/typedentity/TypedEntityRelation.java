@@ -52,6 +52,17 @@ public abstract class TypedEntityRelation<T extends TypedEntity>
     {
         return relation.getName();
     }
+    
+    /**
+     * @param attributeName
+     *            the valid name of an Attribute on this Relation. Must not be
+     *            null or empty.
+     * @return the attribute
+     */
+    public Attribute getAttribute(String attributeName)
+    {
+    	return relation.getAttribute(attributeName);
+    }
 
     public List<Attribute> getAttributes() throws ODKDatastoreException
     {

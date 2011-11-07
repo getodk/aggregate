@@ -1,14 +1,22 @@
 package org.opendatakit.aggregate.odktables.commandlogic.synchronize;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
 import org.opendatakit.aggregate.odktables.client.exception.AggregateInternalErrorException;
 import org.opendatakit.aggregate.odktables.command.synchronize.RemoveTableSynchronization;
 import org.opendatakit.aggregate.odktables.commandlogic.CommandLogic;
+import org.opendatakit.aggregate.odktables.commandlogic.CommandLogicFunctions;
 import org.opendatakit.aggregate.odktables.commandresult.CommandResult.FailureReason;
 import org.opendatakit.aggregate.odktables.commandresult.synchronize.RemoveTableSynchronizationResult;
+import org.opendatakit.aggregate.odktables.entity.InternalFilter;
 import org.opendatakit.aggregate.odktables.entity.InternalUser;
 import org.opendatakit.aggregate.odktables.entity.InternalUserTableMapping;
+import org.opendatakit.aggregate.odktables.relation.Filters;
 import org.opendatakit.aggregate.odktables.relation.UserTableMappings;
 import org.opendatakit.aggregate.odktables.relation.Users;
+import org.opendatakit.common.ermodel.simple.typedentity.TypedEntity;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
 
@@ -40,6 +48,7 @@ public class RemoveTableSynchronizationLogic extends
             // get relation instances
             Users users = Users.getInstance(cc);
             UserTableMappings mappings = UserTableMappings.getInstance(cc);
+            Filters filters = Filters.getInstance(cc);
 
             // get request data
             String requestingUserID = removeTableSynchronization
@@ -47,7 +56,8 @@ public class RemoveTableSynchronizationLogic extends
             String tableID = removeTableSynchronization.getTableID();
 
             // retrieve request user
-            InternalUser requestUser = users.query("RemoveTableSynchronizationLogic.execute")
+            InternalUser requestUser = users
+                    .query("RemoveTableSynchronizationLogic.execute")
                     .equal(Users.USER_ID, requestingUserID).get();
 
             // get mapping from user's tableID to the aggregateTableIdentifier
@@ -65,8 +75,22 @@ public class RemoveTableSynchronizationLogic extends
                         FailureReason.TABLE_DOES_NOT_EXIST);
             }
 
-            // delete the mapping
-            mapping.delete();
+            Collection<TypedEntity> entitiesToDelete = new ArrayList<TypedEntity>();
+
+            // add the mapping
+            entitiesToDelete.add(mapping);
+
+            // get any filters the user has
+            List<InternalFilter> clientFilters = filters
+                    .query("RemoveTableSynchronizationLogic.execute")
+                    .equal(Filters.AGGREGATE_USER_IDENTIFIER,
+                            requestUser.getAggregateIdentifier())
+                    .equal(Filters.AGGREGATE_TABLE_IDENTIFIER,
+                            mapping.getAggregateTableIdentifier()).execute();
+            entitiesToDelete.addAll(clientFilters);
+
+            // delete the entities
+            CommandLogicFunctions.deleteEntities(entitiesToDelete);
         } catch (ODKDatastoreException e)
         {
             throw new AggregateInternalErrorException(e.getMessage());

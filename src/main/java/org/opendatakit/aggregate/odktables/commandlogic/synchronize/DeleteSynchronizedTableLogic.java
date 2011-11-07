@@ -10,6 +10,7 @@ import org.opendatakit.aggregate.odktables.commandlogic.CommandLogicFunctions;
 import org.opendatakit.aggregate.odktables.commandresult.CommandResult.FailureReason;
 import org.opendatakit.aggregate.odktables.commandresult.synchronize.DeleteSynchronizedTableResult;
 import org.opendatakit.aggregate.odktables.entity.InternalColumn;
+import org.opendatakit.aggregate.odktables.entity.InternalFilter;
 import org.opendatakit.aggregate.odktables.entity.InternalModification;
 import org.opendatakit.aggregate.odktables.entity.InternalPermission;
 import org.opendatakit.aggregate.odktables.entity.InternalRow;
@@ -18,6 +19,7 @@ import org.opendatakit.aggregate.odktables.entity.InternalUser;
 import org.opendatakit.aggregate.odktables.entity.InternalUserTableMapping;
 import org.opendatakit.aggregate.odktables.exception.SnafuException;
 import org.opendatakit.aggregate.odktables.relation.Columns;
+import org.opendatakit.aggregate.odktables.relation.Filters;
 import org.opendatakit.aggregate.odktables.relation.Modifications;
 import org.opendatakit.aggregate.odktables.relation.Permissions;
 import org.opendatakit.aggregate.odktables.relation.Table;
@@ -62,6 +64,7 @@ public class DeleteSynchronizedTableLogic extends
             Columns columns = Columns.getInstance(cc);
             Permissions permissions = Permissions.getInstance(cc);
             Modifications modifications = Modifications.getInstance(cc);
+            Filters filters = Filters.getInstance(cc);
 
             // get request data
             String requestingUserID = deleteSynchronizedTable
@@ -69,7 +72,8 @@ public class DeleteSynchronizedTableLogic extends
             String tableID = deleteSynchronizedTable.getTableID();
 
             // retrieve request user
-            InternalUser requestUser = users.query("DeleteSynchronizedTableLogic.execute")
+            InternalUser requestUser = users
+                    .query("DeleteSynchronizedTableLogic.execute")
                     .equal(Users.USER_ID, requestingUserID).get();
 
             // retrieve mapping from user's tableID to aggregateTableIdentifier
@@ -99,7 +103,8 @@ public class DeleteSynchronizedTableLogic extends
 
             // retrieve all entities that make up a table
             table = Table.getInstance(aggregateTableIdentifier, cc);
-            List<InternalRow> rows = table.query("DeleteSynchronizedTableLogic.execute").execute();
+            List<InternalRow> rows = table.query(
+                    "DeleteSynchronizedTableLogic.execute").execute();
             List<InternalColumn> cols = columns
                     .query("DeleteSynchronizedTableLogic.execute")
                     .equal(Columns.AGGREGATE_TABLE_IDENTIFIER,
@@ -118,6 +123,12 @@ public class DeleteSynchronizedTableLogic extends
                             aggregateTableIdentifier).execute();
             InternalTableEntry entry = entries
                     .getEntity(aggregateTableIdentifier);
+            List<InternalFilter> clientFilters = filters
+                    .query("DeleteSynchronizedTableLogic.execute")
+                    .equal(Filters.AGGREGATE_USER_IDENTIFIER,
+                            requestUser.getAggregateIdentifier())
+                    .equal(Filters.AGGREGATE_TABLE_IDENTIFIER,
+                            aggregateTableIdentifier).execute();
 
             entitiesToDelete.addAll(rows);
             entitiesToDelete.addAll(cols);
@@ -125,6 +136,7 @@ public class DeleteSynchronizedTableLogic extends
             entitiesToDelete.addAll(perms);
             entitiesToDelete.addAll(mods);
             entitiesToDelete.add(entry);
+            entitiesToDelete.addAll(clientFilters);
         } catch (ODKDatastoreException e)
         {
             throw new AggregateInternalErrorException(e.getMessage());

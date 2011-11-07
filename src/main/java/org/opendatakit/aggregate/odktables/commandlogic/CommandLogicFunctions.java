@@ -1,5 +1,6 @@
 package org.opendatakit.aggregate.odktables.commandlogic;
 
+import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.UUID;
 
@@ -7,6 +8,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.odktables.command.ODKTablesTaskLockType;
 import org.opendatakit.aggregate.odktables.entity.InternalTableEntry;
+import org.opendatakit.common.ermodel.simple.Attribute;
 import org.opendatakit.common.ermodel.simple.typedentity.TypedEntity;
 import org.opendatakit.common.ermodel.simple.typedentity.TypedEntityRelation;
 import org.opendatakit.common.persistence.Datastore;
@@ -15,6 +17,7 @@ import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.security.User;
+import org.opendatakit.common.utils.WebUtils;
 import org.opendatakit.common.web.CallingContext;
 
 /**
@@ -25,8 +28,8 @@ import org.opendatakit.common.web.CallingContext;
  */
 public class CommandLogicFunctions
 {
-	private static Log logger = LogFactory.getLog(CommandLogicFunctions.class);
-	
+    private static Log logger = LogFactory.getLog(CommandLogicFunctions.class);
+
     public static int updateModificationNumber(InternalTableEntry entry,
             String aggregateTableIdentifier, int newModificationNumber,
             CallingContext cc) throws ODKTaskLockException,
@@ -58,7 +61,7 @@ public class CommandLogicFunctions
                     Thread.sleep(1000);
                 } catch (InterruptedException e)
                 {
-                    // just move on, this retry mechanism 
+                    // just move on, this retry mechanism
                     // is to make things nice
                 }
             }
@@ -84,8 +87,7 @@ public class CommandLogicFunctions
                     relation.dropRelation();
                 } catch (ODKDatastoreException e1)
                 {
-                	logger.error("Was not able to drop relation: "
-                                    + relation);
+                    logger.error("Was not able to drop relation: " + relation);
                     return false;
                 }
             }
@@ -119,7 +121,7 @@ public class CommandLogicFunctions
                 entity.delete();
             } catch (ODKDatastoreException e2)
             {
-            	logger.error("Was not able to delete entity: " + entity);
+                logger.error("Was not able to delete entity: " + entity);
                 return false;
             }
         }
@@ -149,10 +151,50 @@ public class CommandLogicFunctions
                 entity.save();
             } catch (ODKEntityPersistException e1)
             {
-            	logger.error("Was not able to save entity: " + entity);
+                logger.error("Was not able to save entity: " + entity);
                 return false;
             }
         }
         return true;
+    }
+
+    /**
+     * Converts @value to the appropriate type and returns it as an object.
+     * 
+     * @param relation
+     *            the relation which value belongs to
+     * @param attributeName
+     *            the attribute which value belongs to
+     * @param value
+     *            the value to convert
+     * @return @value, converted to the appropriate type for the given relation
+     *         and attribute
+     */
+    public static Object convert(TypedEntityRelation<?> relation,
+            String attributeName, String value)
+    {
+        Attribute attribute = relation.getAttribute(attributeName);
+        Object realValue = null;
+        switch (attribute.getType())
+        {
+        case BOOLEAN:
+            realValue = Boolean.parseBoolean(value);
+            break;
+        case DATETIME:
+            realValue = WebUtils.parseDate(value);
+            break;
+        case DECIMAL:
+            realValue = new BigDecimal(value);
+            break;
+        case INTEGER:
+            realValue = Integer.parseInt(value);
+            break;
+        case STRING:
+            realValue = value;
+            break;
+        default:
+            throw new IllegalArgumentException("Invalid attributeName");
+        }
+        return realValue;
     }
 }
