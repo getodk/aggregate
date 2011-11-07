@@ -23,6 +23,7 @@ import org.opendatakit.aggregate.odktables.TestUtils;
 import org.opendatakit.aggregate.odktables.client.api.SynchronizeAPI;
 import org.opendatakit.aggregate.odktables.client.entity.Column;
 import org.opendatakit.aggregate.odktables.client.entity.Filter;
+import org.opendatakit.aggregate.odktables.client.entity.FilterOperation;
 import org.opendatakit.aggregate.odktables.client.entity.Modification;
 import org.opendatakit.aggregate.odktables.client.entity.SynchronizedRow;
 import org.opendatakit.aggregate.odktables.client.entity.TableEntry;
@@ -38,7 +39,6 @@ import org.opendatakit.aggregate.odktables.client.exception.TableDoesNotExistExc
 import org.opendatakit.aggregate.odktables.client.exception.UserAlreadyExistsException;
 import org.opendatakit.aggregate.odktables.client.exception.UserDoesNotExistException;
 import org.opendatakit.common.ermodel.simple.AttributeType;
-import org.opendatakit.common.persistence.Query.FilterOperation;
 
 /**
  * <p>
