@@ -42,6 +42,7 @@
               <include>**/odktables/command/**</include>
               <include>**/odktables/commandresult/**</include>
               <include>org/opendatakit/common/ermodel/simple/AttributeType.class</include>
+              <include>org/opendatakit/common/utils/Check.class</include>
             </includes>
           </configuration>
         </plugin>
@@ -56,6 +57,7 @@
                 <include>**/odktables/command/**</include>
                 <include>**/odktables/commandresult/**</include>
                 <include>org/opendatakit/common/ermodel/simple/AttributeType.java</include>
+              <include>org/opendatakit/common/utils/Check.java</include>
               </includes>
             </configuration>
         </plugin>
