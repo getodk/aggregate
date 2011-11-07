@@ -13,10 +13,10 @@ import org.opendatakit.common.web.CallingContext;
 
 /**
  * <p>
- * Columns is a relation containing all {@link InternalColumn} entities stored in the
- * datastore. Columns defines the columns for all tables. That is, the set of
- * all Columns entities which have the same aggregateTableIdentifier serves as the definition
- * for the columns of that table.
+ * Columns is a relation containing all {@link InternalColumn} entities stored
+ * in the datastore. Columns defines the columns for all tables. That is, the
+ * set of all Columns entities which have the same aggregateTableIdentifier
+ * serves as the definition for the columns of that table.
  * </p>
  * 
  * @author the.dylan.price@gmail.com
@@ -54,8 +54,8 @@ public class Columns extends TypedEntityRelation<InternalColumn>
     /**
      * The aggregateTableIdentifier field.
      */
-    private static final Attribute aggregateTableIdentifier = new Attribute(AGGREGATE_TABLE_IDENTIFIER,
-            AttributeType.STRING, false);
+    private static final Attribute aggregateTableIdentifier = new Attribute(
+            AGGREGATE_TABLE_IDENTIFIER, AttributeType.STRING, false);
     /**
      * The columnName field.
      */
@@ -103,11 +103,12 @@ public class Columns extends TypedEntityRelation<InternalColumn>
     }
 
     @Override
-    public InternalColumn initialize(Entity entity) throws ODKDatastoreException
+    public InternalColumn initialize(Entity entity)
+            throws ODKDatastoreException
     {
         return InternalColumn.fromEntity(entity);
     }
-    
+
     /**
      * Returns the singleton instance of the Columns relation.
      * 

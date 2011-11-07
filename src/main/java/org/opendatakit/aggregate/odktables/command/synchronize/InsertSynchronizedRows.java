@@ -8,18 +8,17 @@ import org.opendatakit.common.utils.Check;
 
 /**
  * InsertSynchronizedRows is immutable.
- *
+ * 
  * @author the.dylan.price@gmail.com
  */
 public class InsertSynchronizedRows implements Command
 {
     private static final String path = "/synchronize/insertSynchronizedRows";
-    
+
     private final String requestingUserID;
     private final String tableID;
     private final int modificationNumber;
     private final List<SynchronizedRow> newRows;
-    
 
     /**
      * For serialization by Gson
@@ -27,31 +26,31 @@ public class InsertSynchronizedRows implements Command
     @SuppressWarnings("unused")
     private InsertSynchronizedRows()
     {
-       this.requestingUserID = null;
-       this.tableID = null;
-       this.modificationNumber = 0;
-       this.newRows = null;
-       
+        this.requestingUserID = null;
+        this.tableID = null;
+        this.modificationNumber = 0;
+        this.newRows = null;
+
     }
 
     /**
      * Constructs a new InsertSynchronizedRows.
      */
-    public InsertSynchronizedRows(String requestingUserID, String tableID, int modificationNumber, List<SynchronizedRow> newRows)
+    public InsertSynchronizedRows(String requestingUserID, String tableID,
+            int modificationNumber, List<SynchronizedRow> newRows)
     {
-        
+
         Check.notNullOrEmpty(requestingUserID, "requestingUserID");
         Check.notNullOrEmpty(tableID, "tableID");
         Check.notNull(modificationNumber, "modificationNumber");
-        Check.notNull(newRows, "newRows"); 
-        
+        Check.notNull(newRows, "newRows");
+
         this.requestingUserID = requestingUserID;
         this.tableID = tableID;
         this.modificationNumber = modificationNumber;
         this.newRows = newRows;
     }
 
-    
     /**
      * @return the requestingUserID
      */
@@ -59,7 +58,7 @@ public class InsertSynchronizedRows implements Command
     {
         return this.requestingUserID;
     }
-    
+
     /**
      * @return the tableID
      */
@@ -67,7 +66,7 @@ public class InsertSynchronizedRows implements Command
     {
         return this.tableID;
     }
-    
+
     /**
      * @return the modificationNumber
      */
@@ -75,7 +74,7 @@ public class InsertSynchronizedRows implements Command
     {
         return this.modificationNumber;
     }
-    
+
     /**
      * @return the newRows
      */
@@ -83,17 +82,14 @@ public class InsertSynchronizedRows implements Command
     {
         return this.newRows;
     }
-    
 
     @Override
     public String toString()
     {
-        return String.format("InsertSynchronizedRows: " +
-                "requestingUserID=%s " +
-                "tableID=%s " +
-                "modificationNumber=%s " +
-                "newRows=%s " +
-                "", requestingUserID, tableID, modificationNumber, newRows);
+        return String.format("InsertSynchronizedRows: "
+                + "requestingUserID=%s " + "tableID=%s "
+                + "modificationNumber=%s " + "newRows=%s " + "",
+                requestingUserID, tableID, modificationNumber, newRows);
     }
 
     @Override
@@ -113,4 +109,3 @@ public class InsertSynchronizedRows implements Command
         return path;
     }
 }
-

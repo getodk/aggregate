@@ -39,8 +39,8 @@ public class UpdateSynchronizedRowsResult extends
     private final String badColumnName;
 
     private UpdateSynchronizedRowsResult(boolean successful,
-            FailureReason reason, Modification modification, String aggregateRowIdentifier,
-            String tableID, String badColumnName)
+            FailureReason reason, Modification modification,
+            String aggregateRowIdentifier, String tableID, String badColumnName)
     {
         super(successful, reason);
         this.modification = modification;

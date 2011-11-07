@@ -54,7 +54,8 @@ public class SetTablePermissionsLogic extends CommandLogic<SetTablePermissions>
             String requestingUserID = setTablePermissions.getRequestingUserID();
 
             // retrieve request user
-            InternalUser requestUser = users.query("SetTablePermissionsLogic.execute")
+            InternalUser requestUser = users
+                    .query("SetTablePermissionsLogic.execute")
                     .equal(Users.USER_ID, requestingUserID).get();
 
             // retrieve table's aggregateTableIdentifier

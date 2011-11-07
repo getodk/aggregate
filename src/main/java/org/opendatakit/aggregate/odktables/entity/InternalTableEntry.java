@@ -8,8 +8,8 @@ import org.opendatakit.common.web.CallingContext;
 
 /**
  * <p>
- * An InternalTableEntry is a (aggregateTableIdentifier, ownerAggregate Identifier,
- * tableName, modificationNumber, isSynchronized) tuple, where
+ * An InternalTableEntry is a (aggregateTableIdentifier, ownerAggregate
+ * Identifier, tableName, modificationNumber, isSynchronized) tuple, where
  * <ul>
  * <li>aggregateTableIdentifier: the globally unique identifer of a table</li>
  * <li>ownerAggregate Identifier: the globally unique identifier of the user who
@@ -72,7 +72,7 @@ public class InternalTableEntry extends TypedEntity
     {
         entity.set(TableEntries.MODIFICATION_NUMBER, value);
     }
-    
+
     public boolean isSynchronized()
     {
         return entity.getBoolean(TableEntries.IS_SYNCHRONIZED);

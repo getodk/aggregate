@@ -11,12 +11,13 @@ import org.opendatakit.aggregate.odktables.commandresult.CommandResult;
 import org.opendatakit.common.utils.Check;
 
 /**
- * A GetUserByAggregate IdentifierResult represents the result of executing a GetUserByAggregate Identifier
- * command.
+ * A GetUserByAggregate IdentifierResult represents the result of executing a
+ * GetUserByAggregate Identifier command.
  * 
  * @author the.dylan.price@gmail.com
  */
-public class GetUserByAggregateIdentifierResult extends CommandResult<GetUserByAggregateIdentifier>
+public class GetUserByAggregateIdentifierResult extends
+        CommandResult<GetUserByAggregateIdentifier>
 {
     private static final List<FailureReason> possibleFailureReasons;
     static
@@ -50,7 +51,8 @@ public class GetUserByAggregateIdentifierResult extends CommandResult<GetUserByA
     /**
      * The failure constructor. See {@link #failure} for param info.
      */
-    private GetUserByAggregateIdentifierResult(String aggregateUserIdentifier, FailureReason reason)
+    private GetUserByAggregateIdentifierResult(String aggregateUserIdentifier,
+            FailureReason reason)
     {
         super(false, reason);
 
@@ -84,7 +86,8 @@ public class GetUserByAggregateIdentifierResult extends CommandResult<GetUserByA
             switch (getReason())
             {
             case USER_DOES_NOT_EXIST:
-                throw new UserDoesNotExistException(this.aggregateUserIdentifier);
+                throw new UserDoesNotExistException(
+                        this.aggregateUserIdentifier);
             case PERMISSION_DENIED:
                 throw new PermissionDeniedException();
             default:
@@ -99,7 +102,8 @@ public class GetUserByAggregateIdentifierResult extends CommandResult<GetUserByA
     @Override
     public String toString()
     {
-        return String.format("GetUserByAggregate IdentifierResult [user=%s]", user);
+        return String.format("GetUserByAggregate IdentifierResult [user=%s]",
+                user);
     }
 
     /* (non-Javadoc)
@@ -139,8 +143,8 @@ public class GetUserByAggregateIdentifierResult extends CommandResult<GetUserByA
     /**
      * @param user
      *            the user retrieved
-     * @return a new GetUserByAggregate IdentifierResult representing the successful completion
-     *         of a GetUserByAggregate Identifier command.
+     * @return a new GetUserByAggregate IdentifierResult representing the
+     *         successful completion of a GetUserByAggregate Identifier command.
      * 
      */
     public static GetUserByAggregateIdentifierResult success(User user)
@@ -150,16 +154,18 @@ public class GetUserByAggregateIdentifierResult extends CommandResult<GetUserByA
 
     /**
      * @param aggregateUserIdentifier
-     *            the Aggregate Identifier of the user who failed to be retrieved
+     *            the Aggregate Identifier of the user who failed to be
+     *            retrieved
      * @param reason
      *            the reason the command failed. Must be either
      *            USER_DOES_NOT_EXIST or PERMISSION_DENIED.
-     * @return a new GetUserByAggregate IdentifierResult representing the failed GetUserByAggregate Identifier
-     *         command.
+     * @return a new GetUserByAggregate IdentifierResult representing the failed
+     *         GetUserByAggregate Identifier command.
      */
-    public static GetUserByAggregateIdentifierResult failure(String aggregateUserIdentifier,
-            FailureReason reason)
+    public static GetUserByAggregateIdentifierResult failure(
+            String aggregateUserIdentifier, FailureReason reason)
     {
-        return new GetUserByAggregateIdentifierResult(aggregateUserIdentifier, reason);
+        return new GetUserByAggregateIdentifierResult(aggregateUserIdentifier,
+                reason);
     }
 }
