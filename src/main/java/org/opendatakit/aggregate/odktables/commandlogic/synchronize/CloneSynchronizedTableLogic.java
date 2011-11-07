@@ -1,16 +1,20 @@
 package org.opendatakit.aggregate.odktables.commandlogic.synchronize;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
+import org.opendatakit.aggregate.odktables.client.entity.Filter;
 import org.opendatakit.aggregate.odktables.client.entity.Modification;
 import org.opendatakit.aggregate.odktables.client.entity.SynchronizedRow;
 import org.opendatakit.aggregate.odktables.client.exception.AggregateInternalErrorException;
 import org.opendatakit.aggregate.odktables.command.synchronize.CloneSynchronizedTable;
 import org.opendatakit.aggregate.odktables.commandlogic.CommandLogic;
+import org.opendatakit.aggregate.odktables.commandlogic.CommandLogicFunctions;
 import org.opendatakit.aggregate.odktables.commandresult.CommandResult.FailureReason;
 import org.opendatakit.aggregate.odktables.commandresult.synchronize.CloneSynchronizedTableResult;
 import org.opendatakit.aggregate.odktables.entity.InternalColumn;
+import org.opendatakit.aggregate.odktables.entity.InternalFilter;
 import org.opendatakit.aggregate.odktables.entity.InternalRow;
 import org.opendatakit.aggregate.odktables.entity.InternalTableEntry;
 import org.opendatakit.aggregate.odktables.entity.InternalUser;
@@ -21,6 +25,7 @@ import org.opendatakit.aggregate.odktables.relation.Table;
 import org.opendatakit.aggregate.odktables.relation.TableEntries;
 import org.opendatakit.aggregate.odktables.relation.UserTableMappings;
 import org.opendatakit.aggregate.odktables.relation.Users;
+import org.opendatakit.common.ermodel.simple.typedentity.TypedEntityQuery;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
 
@@ -62,9 +67,11 @@ public class CloneSynchronizedTableLogic extends
                     .getAggregateTableIdentifier();
             String requestingUserID = cloneSynchronizedTable
                     .getRequestingUserID();
+            Collection<Filter> filters = cloneSynchronizedTable.getFilters();
 
             // Get request user
-            InternalUser user = users.query("CloneSynchronizedTableLogic.execute")
+            InternalUser user = users
+                    .query("CloneSynchronizedTableLogic.execute")
                     .equal(Users.USER_ID, requestingUserID).get();
 
             // Check if user is allowed to read the table they want to clone
@@ -103,7 +110,17 @@ public class CloneSynchronizedTableLogic extends
                     tableID, cc);
             mapping.save();
 
-            // create modification of all the latest rows
+            // save filters
+            for (Filter filter : filters)
+            {
+                InternalFilter internalFilter = new InternalFilter(
+                        user.getAggregateIdentifier(),
+                        aggregateTableIdentifier, filter.getColumnName(),
+                        filter.getOp(), filter.getValue(), cc);
+                internalFilter.save();
+            }
+
+            // create modification of the latest rows, applying any filters
             Table table = Table.getInstance(aggregateTableIdentifier, cc);
             List<InternalColumn> cols = columns
                     .query("CloneSynchronizedTableLogic.execute")
@@ -112,7 +129,21 @@ public class CloneSynchronizedTableLogic extends
 
             int modificationNumber = entry.getModificationNumber();
 
-            List<InternalRow> rows = table.query("CloneSynchronizedTableLogic.execute").execute();
+            TypedEntityQuery<InternalRow> query = table
+                    .query("CloneSynchronizedTableLogic.execute");
+            for (Filter filter : filters)
+            {
+                InternalColumn col = InternalColumn.search(cols,
+                        filter.getColumnName());
+                String columnName = Table.convertIdentifier(col
+                        .getAggregateIdentifier());
+                Object value = CommandLogicFunctions.convert(table, columnName,
+                        filter.getValue());
+                query.addFilter(columnName, filter.getOp(), value);
+            }
+
+            // convert rows to SynchronizedRow
+            List<InternalRow> rows = query.execute();
             List<SynchronizedRow> clientRows = new ArrayList<SynchronizedRow>();
             for (InternalRow row : rows)
             {
