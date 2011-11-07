@@ -37,7 +37,8 @@ public class DeleteTableResult extends CommandResult<DeleteTable>
     /**
      * The failure constructor. See {@link #failure} for param info.
      */
-    private DeleteTableResult(String aggregateTableIdentifier, FailureReason reason)
+    private DeleteTableResult(String aggregateTableIdentifier,
+            FailureReason reason)
     {
         super(false, reason);
 
@@ -81,7 +82,8 @@ public class DeleteTableResult extends CommandResult<DeleteTable>
     @Override
     public String toString()
     {
-        return String.format("DeleteTableResult [aggregateTableIdentifier=%s]", aggregateTableIdentifier);
+        return String.format("DeleteTableResult [aggregateTableIdentifier=%s]",
+                aggregateTableIdentifier);
     }
 
     /* (non-Javadoc)
@@ -92,8 +94,10 @@ public class DeleteTableResult extends CommandResult<DeleteTable>
     {
         final int prime = 31;
         int result = super.hashCode();
-        result = prime * result
-                + ((aggregateTableIdentifier == null) ? 0 : aggregateTableIdentifier.hashCode());
+        result = prime
+                * result
+                + ((aggregateTableIdentifier == null) ? 0
+                        : aggregateTableIdentifier.hashCode());
         return result;
     }
 
@@ -114,7 +118,8 @@ public class DeleteTableResult extends CommandResult<DeleteTable>
         {
             if (other.aggregateTableIdentifier != null)
                 return false;
-        } else if (!aggregateTableIdentifier.equals(other.aggregateTableIdentifier))
+        } else if (!aggregateTableIdentifier
+                .equals(other.aggregateTableIdentifier))
             return false;
         return true;
     }

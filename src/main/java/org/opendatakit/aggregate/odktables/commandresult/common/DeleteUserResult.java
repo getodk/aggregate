@@ -84,7 +84,8 @@ public class DeleteUserResult extends CommandResult<DeleteUser>
             switch (getReason())
             {
             case USER_DOES_NOT_EXIST:
-                throw new UserDoesNotExistException(this.aggregateUserIdentifier);
+                throw new UserDoesNotExistException(
+                        this.aggregateUserIdentifier);
             case PERMISSION_DENIED:
                 throw new PermissionDeniedException();
             case CANNOT_DELETE:

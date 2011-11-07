@@ -1,10 +1,13 @@
 package org.opendatakit.aggregate.odktables.entity;
 
+import java.util.List;
+
 import org.opendatakit.aggregate.odktables.relation.Columns;
 import org.opendatakit.common.ermodel.simple.AttributeType;
 import org.opendatakit.common.ermodel.simple.Entity;
 import org.opendatakit.common.ermodel.simple.typedentity.TypedEntity;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+import org.opendatakit.common.utils.Check;
 import org.opendatakit.common.web.CallingContext;
 
 /**
@@ -13,9 +16,8 @@ import org.opendatakit.common.web.CallingContext;
  * nullable) tuple, where
  * <ul>
  * <li>aggregateTableIdentifier: the globally unique identifier of the table
- * this column belongs to</li>
- * <li>columnName: the name of the column. This must consist if upper case
- * letters, numbers, and underscores, and must start with an uppercase letter.</li>
+ * this column belongs to.</li>
+ * <li>columnName: the name of the column.</li>
  * <li>columnType: the type of the column. This is a DataField.DataType.</li>
  * <li>nullable: whether the column is allowed to contain a null value.</li>
  * </ul>
@@ -94,5 +96,29 @@ public class InternalColumn extends TypedEntity
             throws ODKDatastoreException
     {
         return new InternalColumn(entity);
+    }
+
+    /**
+     * Searches @list for an InternalColumn with the name @columnName. If found,
+     * returns that InternalColumn, otherwise returns null.
+     * 
+     * @param list
+     *            a list of InternalColumns. Must not be null.
+     * @param columnName
+     *            the column name to search for. Must not be null or empty.
+     * @return the column if found, else null.
+     */
+    public static InternalColumn search(List<InternalColumn> list,
+            String columnName)
+    {
+        Check.notNull(list, "list");
+        Check.notNullOrEmpty(columnName, "columnName");
+
+        for (InternalColumn column : list)
+        {
+            if (column.getName().equals(columnName))
+                return column;
+        }
+        return null;
     }
 }

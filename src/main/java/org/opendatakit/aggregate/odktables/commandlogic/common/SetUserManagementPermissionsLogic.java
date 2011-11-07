@@ -49,7 +49,8 @@ public class SetUserManagementPermissionsLogic extends
                     .getAggregateUserIdentifier();
 
             // retrieve request user
-            InternalUser requestingUser = users.query("SetUserManagementPermissionsLogic.execute")
+            InternalUser requestingUser = users
+                    .query("SetUserManagementPermissionsLogic.execute")
                     .equal(Users.USER_ID, requestingUserID).get();
 
             // To set user management permissions the user must have write permission on the users table

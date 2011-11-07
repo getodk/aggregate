@@ -5,17 +5,16 @@ import org.opendatakit.common.utils.Check;
 
 /**
  * Synchronize is immutable.
- *
+ * 
  * @author the.dylan.price@gmail.com
  */
 public class Synchronize implements Command
 {
     private static final String path = "/synchronize/synchronize";
-    
+
     private final String requestingUserID;
     private final String tableID;
     private final int modificationNumber;
-    
 
     /**
      * For serialization by Gson
@@ -23,28 +22,28 @@ public class Synchronize implements Command
     @SuppressWarnings("unused")
     private Synchronize()
     {
-       this.requestingUserID = null;
-       this.tableID = null;
-       this.modificationNumber = 0;
-       
+        this.requestingUserID = null;
+        this.tableID = null;
+        this.modificationNumber = 0;
+
     }
 
     /**
      * Constructs a new Synchronize.
      */
-    public Synchronize(String requestingUserID, String tableID, int modificationNumber)
+    public Synchronize(String requestingUserID, String tableID,
+            int modificationNumber)
     {
-        
+
         Check.notNullOrEmpty(requestingUserID, "requestingUserID");
         Check.notNullOrEmpty(tableID, "tableID");
-        Check.notNull(modificationNumber, "modificationNumber"); 
-        
+        Check.notNull(modificationNumber, "modificationNumber");
+
         this.requestingUserID = requestingUserID;
         this.tableID = tableID;
         this.modificationNumber = modificationNumber;
     }
 
-    
     /**
      * @return the requestingUserID
      */
@@ -52,7 +51,7 @@ public class Synchronize implements Command
     {
         return this.requestingUserID;
     }
-    
+
     /**
      * @return the tableID
      */
@@ -60,7 +59,7 @@ public class Synchronize implements Command
     {
         return this.tableID;
     }
-    
+
     /**
      * @return the modificationNumber
      */
@@ -68,16 +67,13 @@ public class Synchronize implements Command
     {
         return this.modificationNumber;
     }
-    
 
     @Override
     public String toString()
     {
-        return String.format("Synchronize: " +
-                "requestingUserID=%s " +
-                "tableID=%s " +
-                "modificationNumber=%s " +
-                "", requestingUserID, tableID, modificationNumber);
+        return String.format("Synchronize: " + "requestingUserID=%s "
+                + "tableID=%s " + "modificationNumber=%s " + "",
+                requestingUserID, tableID, modificationNumber);
     }
 
     @Override
@@ -97,4 +93,3 @@ public class Synchronize implements Command
         return path;
     }
 }
-
