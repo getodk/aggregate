@@ -46,6 +46,20 @@
           </configuration>
         </plugin>
         <plugin>
+            <artifactId>maven-source-plugin</artifactId>
+            <configuration>
+              <includes>
+                <include>**/odktables/command/Command.java</include>
+                <include>**/odktables/command/CommandConverter.java</include>
+                <include>**/odktables/commandresult/CommandResult*.java</include>
+                <include>**/odktables/client/**</include>
+                <include>**/odktables/command/**</include>
+                <include>**/odktables/commandresult/**</include>
+                <include>org/opendatakit/common/ermodel/simple/AttributeType.java</include>
+              </includes>
+            </configuration>
+        </plugin>
+        <plugin>
           <artifactId>maven-javadoc-plugin</artifactId>
           <executions>
             <execution>
