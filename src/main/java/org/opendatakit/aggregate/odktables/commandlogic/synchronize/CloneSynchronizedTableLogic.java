@@ -26,6 +26,7 @@ import org.opendatakit.aggregate.odktables.relation.TableEntries;
 import org.opendatakit.aggregate.odktables.relation.UserTableMappings;
 import org.opendatakit.aggregate.odktables.relation.Users;
 import org.opendatakit.common.ermodel.simple.typedentity.TypedEntityQuery;
+import org.opendatakit.common.persistence.Query.FilterOperation;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
 
@@ -116,7 +117,8 @@ public class CloneSynchronizedTableLogic extends
                 InternalFilter internalFilter = new InternalFilter(
                         user.getAggregateIdentifier(),
                         aggregateTableIdentifier, filter.getColumnName(),
-                        filter.getOp(), filter.getValue(), cc);
+                        FilterOperation.valueOf(filter.getOp().name()),
+                        filter.getValue(), cc);
                 internalFilter.save();
             }
 
@@ -139,7 +141,8 @@ public class CloneSynchronizedTableLogic extends
                         .getAggregateIdentifier());
                 Object value = CommandLogicFunctions.convert(table, columnName,
                         filter.getValue());
-                query.addFilter(columnName, filter.getOp(), value);
+                query.addFilter(columnName,
+                        FilterOperation.valueOf(filter.getOp().name()), value);
             }
 
             // convert rows to SynchronizedRow
