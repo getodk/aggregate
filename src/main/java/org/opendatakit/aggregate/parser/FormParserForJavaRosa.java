@@ -94,6 +94,7 @@ public class FormParserForJavaRosa {
 						"<timeEnd/>" +
 						"<instanceID/>" +
 					"</meta>" +
+               "<base64EncryptedKey/>" +
 					"<encryptedXmlFile/>" +
 					"<media>" +
 						"<file/>" +
@@ -103,6 +104,7 @@ public class FormParserForJavaRosa {
 			"<bind nodeset=\"/data/meta/timeStart\" type=\"datetime\"/>" +
 			"<bind nodeset=\"/data/meta/timeEnd\" type=\"datetime\"/>" +
 			"<bind nodeset=\"/data/meta/instanceID\" type=\"string\"/>" +
+         "<bind nodeset=\"/data/base64EncryptedKey\" type=\"string\"/>" +
 			"<bind nodeset=\"/data/encryptedXmlFile\" type=\"binary\"/>" +
 			"<bind nodeset=\"/data/media/file\" type=\"binary\"/>" +
 		"</model>" +
@@ -111,6 +113,7 @@ public class FormParserForJavaRosa {
 		"<input ref=\"meta/timeStart\"><label>start</label></input>" +
 		"<input ref=\"meta/timeEnd\"><label>end</label></input>" +
 		"<input ref=\"meta/instanceID\"><label>InstanceID</label></input>" +
+      "<input ref=\"base64EncryptedKey\"><label>Encrypted SymmetricKey</label></input>" +
 		"<upload ref=\"encryptedXmlFile\" mediatype=\"image/*\"><label>submission</label></upload>" +
 		"<repeat nodeset=\"/data/media\">" +
 			"<upload ref=\"file\" mediatype=\"image/*\"><label>media file</label></upload>" +

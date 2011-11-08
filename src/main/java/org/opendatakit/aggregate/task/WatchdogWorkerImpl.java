@@ -119,7 +119,7 @@ public class WatchdogWorkerImpl {
     QueryByDateRange query = new QueryByDateRange(form, cc);
     List<Submission> submissions = query.getResultSubmissions(cc);
     String lastSubmissionKey = null;
-    if (submissions != null && submissions.size() == 1) {
+    if (submissions != null && submissions.size() >= 1) {
       Submission lastSubmission = submissions.get(0);
       // NOTE: using markedAsCompleteDate because the submission date
       // marks the original initiation of the upload of the submission
