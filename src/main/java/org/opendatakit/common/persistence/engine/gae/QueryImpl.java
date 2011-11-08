@@ -88,6 +88,7 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
       try {
         com.google.appengine.api.datastore.Query query = new Query("_COST_LOGGING_");
         PreparedQuery pq = datastore.getDatastoreService().prepare(query);
+        logger.info("costLogging fetch.");
         List<com.google.appengine.api.datastore.Entity> eList = pq.asList(FetchOptions.Builder.withDefaults());
         if ( eList.isEmpty() ) {
           costLoggingMinimumMegacyclesThreshold = 10*1200; // 10 seconds...
@@ -678,7 +679,8 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
             orderingHack.addSort(dominantSort.getAttribute().getName(), sd);
             
             PreparedQuery orderingPrep = ds.prepare(orderingHack);
-            logger.debug("hqrLoop: finding min/max of dominantSortAttr: " + dominantSortAttr.getName());
+            logger.info("hqrLoop: finding min/max in " + relation.getSchemaName() + "."
+                + relation.getTableName() + " of dominantSortAttr: " + dominantSortAttr.getName());
             
             List<com.google.appengine.api.datastore.Entity> values = orderingPrep.asList(FetchOptions.Builder.withDefaults().limit(3));
             if ( values == null || values.isEmpty() ) {
@@ -727,7 +729,8 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
       FetchOptions options = FetchOptions.Builder.withDefaults().chunkSize(chunkSize)
                                             .prefetchSize(chunkSize).offset(fetchOffset).limit(32*chunkSize);
 
-      logger.debug("hqrLoop: executing preparedQuery ");
+      logger.info("hqrLoop: executing preparedQuery on " + relation.getSchemaName() + "."
+                + relation.getTableName());
 
       Iterable<com.google.appengine.api.datastore.Entity> it = preparedHack
           .asIterable(options);
