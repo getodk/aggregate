@@ -34,7 +34,6 @@
             <default>${env(WRITE_OPTIONS)}</default>
             <ask>0</ask>
             <cliOptionText>Output a .options file that contains the configuration from running the installer.</cliOptionText>
-            <displayStyle>radiobuttons</displayStyle>
         </booleanParameter>
         <stringParameter>
             <name>security_server_siteKey</name>
