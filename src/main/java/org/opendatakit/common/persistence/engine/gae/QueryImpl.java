@@ -73,57 +73,64 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
   private final User user;
   private final Log logger;
   private final ExecutionTimeLogger gaeCostLogger;
-  
-  private static final long ACTIVE_COST_LOGGING_CHECK_INTERVAL = 10*1000; // 10 seconds
-  private static long costLoggingMinimumMegacyclesThreshold = 10*1200; // 10 seconds
+
+  private static final long ACTIVE_COST_LOGGING_CHECK_INTERVAL = 10 * 1000; // 10
+                                                                            // seconds
+  private static long costLoggingMinimumMegacyclesThreshold = 10 * 1200; // 10
+                                                                         // seconds
   private static long milliLastCheck = 0L;
-  
+
   private final synchronized void updateCostLoggingThreshold() {
     Log logger = LogFactory.getLog(QueryImpl.class);
-    
+
     long currentTime = System.currentTimeMillis();
-    if ( milliLastCheck + ACTIVE_COST_LOGGING_CHECK_INTERVAL < currentTime ) {
-      
-      milliLastCheck = currentTime;// update early in case an exception is thrown...
+    if (milliLastCheck + ACTIVE_COST_LOGGING_CHECK_INTERVAL < currentTime) {
+
+      milliLastCheck = currentTime;// update early in case an exception is
+                                   // thrown...
       try {
         com.google.appengine.api.datastore.Query query = new Query("_COST_LOGGING_");
         PreparedQuery pq = datastore.getDatastoreService().prepare(query);
-        logger.info("costLogging fetch.");
-        List<com.google.appengine.api.datastore.Entity> eList = pq.asList(FetchOptions.Builder.withDefaults());
-        if ( eList.isEmpty() ) {
-          costLoggingMinimumMegacyclesThreshold = 10*1200; // 10 seconds...
+        logger.debug("costLogging fetch.");
+        datastore.recordQueryUsage("_COST_LOGGING_");
+        List<com.google.appengine.api.datastore.Entity> eList = pq.asList(FetchOptions.Builder
+            .withDefaults());
+        if (eList.isEmpty()) {
+          costLoggingMinimumMegacyclesThreshold = 10 * 1200; // 10 seconds...
           logger.warn("writing 10-second cost logging threshold record");
-          com.google.appengine.api.datastore.Entity e = new com.google.appengine.api.datastore.Entity( "_COST_LOGGING_", "T" + WebUtils.iso8601Date(new Date()) );
-          e.setProperty("COST_LOGGING_MEGACYCLE_THRESHOLD", 10*1200 ); // 10 seconds...
+          com.google.appengine.api.datastore.Entity e = new com.google.appengine.api.datastore.Entity(
+              "_COST_LOGGING_", "T" + WebUtils.iso8601Date(new Date()));
+          e.setProperty("COST_LOGGING_MEGACYCLE_THRESHOLD", 10 * 1200); // 10
+                                                                        // seconds...
           e.setProperty("LAST_UPDATE_DATE", new Date());
           datastore.getDatastoreService().put(e);
         } else {
           Long newValue = null;
-          for ( com.google.appengine.api.datastore.Entity e : eList ) {
+          for (com.google.appengine.api.datastore.Entity e : eList) {
             Object o = e.getProperty("COST_LOGGING_MEGACYCLE_THRESHOLD");
-            if ( o != null ) {
-              if ( o instanceof Long ) {
+            if (o != null) {
+              if (o instanceof Long) {
                 Long l = (Long) o;
-                if ( newValue == null || newValue.compareTo(l) > 0 ) {
+                if (newValue == null || newValue.compareTo(l) > 0) {
                   newValue = l;
                 } else {
                   logger.warn("deleting superceded logging threshold record");
                   datastore.getDatastoreService().delete(e.getKey());
                 }
-              } else if ( o instanceof Integer ) {
+              } else if (o instanceof Integer) {
                 Integer i = (Integer) o;
                 Long l = Long.valueOf(i);
-                if ( newValue == null || newValue.compareTo(l) > 0 ) {
+                if (newValue == null || newValue.compareTo(l) > 0) {
                   newValue = l;
                 } else {
                   logger.warn("deleting superceded logging threshold record");
                   datastore.getDatastoreService().delete(e.getKey());
                 }
-              } else if ( o instanceof String ) {
+              } else if (o instanceof String) {
                 String s = (String) o;
-                try { 
+                try {
                   Long l = Long.parseLong(s);
-                  if ( newValue == null || newValue.compareTo(l) > 0 ) {
+                  if (newValue == null || newValue.compareTo(l) > 0) {
                     newValue = l;
                   } else {
                     logger.warn("deleting superceded logging threshold record");
@@ -139,64 +146,67 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
               }
             }
           }
-          if ( newValue == null ) {
+          if (newValue == null) {
             logger.warn("resetting cost logging to 10 second (12000 megacycle) threshold");
-            costLoggingMinimumMegacyclesThreshold = 10*1200; // 10 seconds...
-          } else if ( costLoggingMinimumMegacyclesThreshold != newValue.longValue() ) { 
+            costLoggingMinimumMegacyclesThreshold = 10 * 1200; // 10 seconds...
+          } else if (costLoggingMinimumMegacyclesThreshold != newValue.longValue()) {
             logger.warn("changing cost logging to " + newValue + " megacycle threshold");
             costLoggingMinimumMegacyclesThreshold = newValue;
           }
         }
-      } catch ( Exception e ) {
+      } catch (Exception e) {
         e.printStackTrace();
         logger.error("exception while updating cost logging threshold: " + e.getMessage());
       }
     }
   }
-  
+
   private final class ExecutionTimeLogger {
-    
+
     private final long startApiTime;
     private long istartApiTime;
     private String queryString = null;
-    
+
     ExecutionTimeLogger() {
       updateCostLoggingThreshold();
-      
+
       QuotaService svc = QuotaServiceFactory.getQuotaService();
       istartApiTime = startApiTime = svc.getApiTimeInMegaCycles();
     }
-    
+
     void declareQuery(com.google.appengine.api.datastore.Query hack) {
-      if ( queryString != null ) {
+      if (queryString != null) {
         intermediateLogging();
       }
       queryString = hack.toString();
-      // report intermediate results from when query is declared (i.e., execution steps only).
+      // report intermediate results from when query is declared (i.e.,
+      // execution steps only).
       QuotaService svc = QuotaServiceFactory.getQuotaService();
       istartApiTime = svc.getApiTimeInMegaCycles();
     }
-    
+
     private void intermediateLogging() {
       QuotaService svc = QuotaServiceFactory.getQuotaService();
       long endApiTime = svc.getApiTimeInMegaCycles();
       long elapsed = endApiTime - istartApiTime;
-      if ( elapsed >= costLoggingMinimumMegacyclesThreshold ) {
+      if (elapsed >= costLoggingMinimumMegacyclesThreshold) {
         Log logger = LogFactory.getLog(QueryImpl.ExecutionTimeLogger.class);
-        logger.warn(String.format("%1$06d **intermediate** %2$s[%3$s] %4$s", elapsed, loggingContextTag, relation.getTableName(), queryString ));
+        logger.warn(String.format("%1$06d **intermediate** %2$s[%3$s] %4$s", elapsed,
+            loggingContextTag, relation.getTableName(), queryString));
       }
     }
-    
+
     void wrapUp() {
       QuotaService svc = QuotaServiceFactory.getQuotaService();
       long endApiTime = svc.getApiTimeInMegaCycles();
       long elapsed = endApiTime - startApiTime;
-      if ( queryString != null ) {
+      if (queryString != null) {
         intermediateLogging();
       }
-      if ( elapsed >= costLoggingMinimumMegacyclesThreshold ) {
+      if (elapsed >= costLoggingMinimumMegacyclesThreshold) {
         Log logger = LogFactory.getLog(QueryImpl.ExecutionTimeLogger.class);
-        logger.warn(String.format("%1$06d **final** %2$s[%3$s]", elapsed, loggingContextTag, relation.getTableName() ));
+        logger.warn(String.format("%1$06d **final** %2$s[%3$s]", elapsed, loggingContextTag,
+            relation.getTableName()));
       }
     }
   }
@@ -569,7 +579,14 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
     DataField dominantSortAttr = dominantSort.getAttribute();
 
     // Fetch chunks bigger that the default...
-    int chunkSize = 2048;
+    // but not too big -- we get charged for each of these!
+    //
+    // Set to a few more than the default filter group size
+    // FilterGroup.DEFAULT_FETCH_LIMIT as that default size
+    // is likely to be used most for displaying paginated
+    // submissions.
+    //
+    int chunkSize = 105;
 
     // We always start the first fetch with an offset of zero
     // even if this is a resumed query (startCursorFilter != null).
@@ -602,19 +619,24 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
 
     boolean mustReadEverything = (fetchLimit == 0);
     WorkingValues w = new WorkingValues();
-    
+
     boolean hasQueryResults = true;
     for (; hasQueryResults;) {
 
-      logger.debug("hqrLoop: " + idx + " fetchOffset: " + fetchOffset + " startCursor " + 
-          ((startCursorFilter == null) ? "<<none>>" : 
-              ((startCursorFilter.value == null) ? "null" : startCursorFilter.value.toString())) );
+      logger.debug("hqrLoop: "
+          + idx
+          + " fetchOffset: "
+          + fetchOffset
+          + " startCursor "
+          + ((startCursorFilter == null) ? "<<none>>" : ((startCursorFilter.value == null) ? "null"
+              : startCursorFilter.value.toString())));
       PreparedQuery preparedHack;
       try {
         Query hack = new com.google.appengine.api.datastore.Query(relation.getSchemaName() + "."
             + relation.getTableName());
 
-        // determine whether the query has equality tests on fields other than the dominant sort attribute
+        // determine whether the query has equality tests on fields other than
+        // the dominant sort attribute
         boolean hasEqualityTests = false;
         for (Tracker t : filterList) {
           if (t instanceof SimpleFilterTracker) {
@@ -625,13 +647,15 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
             }
           }
         }
-        
-        if ( hasEqualityTests && (fetchLimit == 0) ) {
-          
-          // assume that the equality tests will filter the result set more strongly than the dominant sort attr.
-          // GAE doesn't support ordering and equality tests, so just use the equality tests
+
+        if (hasEqualityTests && (fetchLimit == 0)) {
+
+          // assume that the equality tests will filter the result set more
+          // strongly than the dominant sort attr.
+          // GAE doesn't support ordering and equality tests, so just use the
+          // equality tests
           // and don't apply any ordering.
-          
+
           for (Tracker t : filterList) {
             if (t instanceof SimpleFilterTracker) {
               SimpleFilterTracker st = (SimpleFilterTracker) t;
@@ -641,19 +665,20 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
             }
           }
 
-          // we aren't sorting, so we must read the entire dataset and apply the sort locally
+          // we aren't sorting, so we must read the entire dataset and apply the
+          // sort locally
           mustReadEverything = true;
         } else {
           // we have only range queries or we have a non-zero fetchLimit.
           // add all the dominant filter conditions...
           boolean hasDominantFilter = false;
-  
+
           // apply the startCursor filter on dominant attr.
           if (startCursorFilter != null) {
             startCursorFilter.setFilter(hack);
             hasDominantFilter = true;
           }
-  
+
           // add any other filter conditions on the dominant sort attribute.
           // e.g., for "between x and y" types of queries.
           for (Tracker t : filterList) {
@@ -662,63 +687,70 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
               hasDominantFilter = true;
             }
           }
-  
+
           SortDirection sd = dominantSort.direction.equals(Direction.ASCENDING) ? SortDirection.ASCENDING
               : SortDirection.DESCENDING;
-  
+
           if (!hasDominantFilter) {
-            // GAE production throws an exception when a query with equality filters 
+            // GAE production throws an exception when a query with equality
+            // filters
             // and a sort on a column not constrained by any filter is issued.
-            // 
-            // To work around this, issue a query to return the current min/max value 
-            // of the dominant sort attribute and apply a GE/LE constraint using that
-            // value.  This is effectively a no-op, but keeps GAE happy.
-            // 
-            Query orderingHack = new com.google.appengine.api.datastore.Query(relation.getSchemaName() + "."
-                + relation.getTableName());
+            //
+            // To work around this, issue a query to return the current min/max
+            // value
+            // of the dominant sort attribute and apply a GE/LE constraint using
+            // that
+            // value. This is effectively a no-op, but keeps GAE happy.
+            //
+            Query orderingHack = new com.google.appengine.api.datastore.Query(
+                relation.getSchemaName() + "." + relation.getTableName());
             orderingHack.addSort(dominantSort.getAttribute().getName(), sd);
-            
+
             PreparedQuery orderingPrep = ds.prepare(orderingHack);
-            logger.info("hqrLoop: finding min/max in " + relation.getSchemaName() + "."
+            logger.debug("hqrLoop: finding min/max in " + relation.getSchemaName() + "."
                 + relation.getTableName() + " of dominantSortAttr: " + dominantSortAttr.getName());
-            
-            List<com.google.appengine.api.datastore.Entity> values = orderingPrep.asList(FetchOptions.Builder.withDefaults().limit(3));
-            if ( values == null || values.isEmpty() ) {
+
+            datastore.recordQueryUsage(relation);
+            List<com.google.appengine.api.datastore.Entity> values = orderingPrep
+                .asList(FetchOptions.Builder.withDefaults().limit(3));
+            if (values == null || values.isEmpty()) {
               // the table is empty -- no need to go further...
               return;
             }
-  
+
             // determine the GE/LE sense of the bogus filter constraint...
             FilterOperator fo = dominantSort.direction.equals(Direction.ASCENDING) ? FilterOperator.GREATER_THAN_OR_EQUAL
                 : FilterOperator.LESS_THAN_OR_EQUAL;
             // and apply the filter...
             CommonFieldsBase odkEntity = (CommonFieldsBase) m.mapRow(datastore, values.get(0), 0);
-            hack.addFilter( dominantSort.getAttribute().getName(), fo, 
-                  EngineUtils.getDominantSortAttributeValue(odkEntity, dominantSortAttr));
+            hack.addFilter(dominantSort.getAttribute().getName(), fo,
+                EngineUtils.getDominantSortAttributeValue(odkEntity, dominantSortAttr));
           }
-          
-//          // GAE: this doesn't work in production, though the ZigZag queries are supposed to support this.
-//          
-//          // and add all equality filter conditions.
-//          // track whether the dominant sort column has an equality filter.
-//          for (Tracker t : filterList) {
-//            if ( !dominantSortAttr.equals(t.getAttribute())) {
-//              if (t instanceof SimpleFilterTracker) {
-//                SimpleFilterTracker st = (SimpleFilterTracker) t;
-//                if (st.isEqualityTest()) {
-//                  st.setFilter(hack);
-//                }
-//              }
-//            }
-//          }
+
+          // // GAE: this doesn't work in production, though the ZigZag queries
+          // are supposed to support this.
+          //
+          // // and add all equality filter conditions.
+          // // track whether the dominant sort column has an equality filter.
+          // for (Tracker t : filterList) {
+          // if ( !dominantSortAttr.equals(t.getAttribute())) {
+          // if (t instanceof SimpleFilterTracker) {
+          // SimpleFilterTracker st = (SimpleFilterTracker) t;
+          // if (st.isEqualityTest()) {
+          // st.setFilter(hack);
+          // }
+          // }
+          // }
+          // }
 
           // add the dominant sort.
           hack.addSort(dominantSort.getAttribute().getName(), sd);
-          // subordinate sorts cannot be applied -- GAE production doesn't like them.
+          // subordinate sorts cannot be applied -- GAE production doesn't like
+          // them.
         }
-        
+
         gaeCostLogger.declareQuery(hack);
-        
+
         // Since we are filtering locally, we need to grab a chunk of values
         // in the expectation that most will fail the filter.
         preparedHack = ds.prepare(hack);
@@ -727,15 +759,14 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
         throw new ODKDatastoreException("[" + loggingContextTag + "] Unable to complete request", e);
       }
       FetchOptions options = FetchOptions.Builder.withDefaults().chunkSize(chunkSize)
-                                            .prefetchSize(chunkSize).offset(fetchOffset).limit(32*chunkSize);
+          .prefetchSize(chunkSize).offset(fetchOffset).limit(32 * chunkSize);
 
-      logger.info("hqrLoop: executing preparedQuery on " + relation.getSchemaName() + "."
-                + relation.getTableName());
+      logger.debug("hqrLoop: executing preparedQuery on " + relation.getSchemaName() + "."
+          + relation.getTableName());
 
-      Iterable<com.google.appengine.api.datastore.Entity> it = preparedHack
-          .asIterable(options);
+      datastore.recordQueryUsage(relation);
+      Iterable<com.google.appengine.api.datastore.Entity> it = preparedHack.asIterable(options);
 
-      
       w.idx = idx;
       w.fetchOffset = fetchOffset;
       w.startCursorFilter = startCursorFilter;
@@ -744,12 +775,13 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
       w.odkFirstEntityOfCurrentDominantValue = odkFirstEntityOfCurrentDominantValue;
       w.dominantSortAttrValueHasChanged = dominantSortAttrValueHasChanged;
       w.odkAdditionalEntities.clear();
-      
+
       try {
         // loop while the query returns at least one result...
-        hasQueryResults = fetchResults(it, dominantSort, dominantSortAttr, m, 
-              mustReadEverything, fetchLimit, options.getLimit(), odkEntities.size(), w);
-        // and if we succeeded, we update the actual state to that of the fetched results.
+        hasQueryResults = fetchResults(it, dominantSort, dominantSortAttr, m, mustReadEverything,
+            fetchLimit, options.getLimit(), odkEntities.size(), w);
+        // and if we succeeded, we update the actual state to that of the
+        // fetched results.
         idx = w.idx;
         fetchOffset = w.fetchOffset;
         startCursorFilter = w.startCursorFilter;
@@ -757,16 +789,16 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
         sizeQuestionableFirstMatches = w.sizeQuestionableFirstMatches;
         odkFirstEntityOfCurrentDominantValue = w.odkFirstEntityOfCurrentDominantValue;
         dominantSortAttrValueHasChanged = w.dominantSortAttrValueHasChanged;
-        for ( CommonFieldsBase cb : w.odkAdditionalEntities ) {
+        for (CommonFieldsBase cb : w.odkAdditionalEntities) {
           odkEntities.add(cb);
         }
-        
+
       } catch (ODKDatastoreException e) {
         // we had an exception -- this might be a cursor timeout(!)
-        // Step down the chunkSize and try again.  The original 
+        // Step down the chunkSize and try again. The original
         // WorkingValues needed to restart the query are unchanged,
         // so we can safely reissue the query.
-        if ( chunkSize > 20 ) {
+        if (chunkSize > 20) {
           logger.warn("Retrying fetch with a smaller chunk size");
           chunkSize /= 4;
         } else {
@@ -786,11 +818,11 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
     CommonFieldsBase odkFirstEntityOfCurrentDominantValue;
     boolean dominantSortAttrValueHasChanged;
     List<CommonFieldsBase> odkAdditionalEntities = new ArrayList<CommonFieldsBase>();
-    
+
     WorkingValues() {
     }
   }
-  
+
   /**
    * Updates WorkingValues with current status values.
    * 
@@ -803,11 +835,12 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
    * @param odkEntitiesSize
    * @param w
    * @return false if completely done, true if still more work to be done.
-   * @throws ODKDatastoreException 
+   * @throws ODKDatastoreException
    */
-  private final boolean fetchResults(Iterable<com.google.appengine.api.datastore.Entity> it, 
-      SortTracker dominantSort, DataField dominantSortAttr, EntityRowMapper m, 
-      boolean mustReadEverything, int fetchLimit, Integer readSetLimit, int odkEntitiesSize, WorkingValues w) throws ODKDatastoreException {
+  private final boolean fetchResults(Iterable<com.google.appengine.api.datastore.Entity> it,
+      SortTracker dominantSort, DataField dominantSortAttr, EntityRowMapper m,
+      boolean mustReadEverything, int fetchLimit, Integer readSetLimit, int odkEntitiesSize,
+      WorkingValues w) throws ODKDatastoreException {
 
     // loop as long as the query returns at least one result...
     boolean hasQueryResults = false;
@@ -854,9 +887,11 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
         // becomes false. This indicates that we have collected all the
         // records
         // that could possibly be rearranged by subordinate sorts.
-        if (!mustReadEverything && !matchingDominantAttr && !w.possiblyBeforeStartCursor
-            && odkEntitiesSize + w.odkAdditionalEntities.size() 
-                > fetchLimit + w.sizeQuestionableFirstMatches + 1) {
+        if (!mustReadEverything
+            && !matchingDominantAttr
+            && !w.possiblyBeforeStartCursor
+            && odkEntitiesSize + w.odkAdditionalEntities.size() > fetchLimit
+                + w.sizeQuestionableFirstMatches + 1) {
           // we're done!
           return false;
         }
@@ -895,23 +930,25 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
           w.odkAdditionalEntities.add(odkEntity);
         }
       }
-      
-      if ( readSetLimit != null && readSetCount < readSetLimit ) {
-        // we read all the records that were available on the server 
+
+      if (readSetLimit != null && readSetCount < readSetLimit) {
+        // we read all the records that were available on the server
         // and didn't hit our batch fetch limit... we can stop now.
         return false;
       }
       logger.debug("hqrLoop: done with one batch fetch!");
     } catch (SQLException e) {
       e.printStackTrace();
-      throw new ODKDatastoreException("[" + loggingContextTag + "] SQL: " + gaeCostLogger.queryString + " exception: " + e.getMessage(), e);
+      throw new ODKDatastoreException("[" + loggingContextTag + "] SQL: "
+          + gaeCostLogger.queryString + " exception: " + e.getMessage(), e);
     } catch (Exception e) {
       e.printStackTrace();
-      throw new ODKDatastoreException("[" + loggingContextTag + "] SQL: " + gaeCostLogger.queryString + " exception: " + e.getMessage(), e);
+      throw new ODKDatastoreException("[" + loggingContextTag + "] SQL: "
+          + gaeCostLogger.queryString + " exception: " + e.getMessage(), e);
     }
     return hasQueryResults;
   }
-  
+
   private static final class CoreResultContainer implements ResultContainer {
     private List<CommonFieldsBase> odkEntities = new ArrayList<CommonFieldsBase>();
 
@@ -1040,7 +1077,7 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
       throws ODKDatastoreException {
     try {
       CoreResult r = coreExecuteQuery(startCursor, fetchLimit);
-  
+
       // quick exit -- empty set
       if (r.results.isEmpty()) {
         return new QueryResult(startCursor, r.results, null, startCursor, false);
@@ -1048,7 +1085,7 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
       // otherwise, we need to get the values of the dominantAttr and uri of the
       // last field.
       DataField dominantSortAttr = sortList.get(0).getAttribute();
-  
+
       // otherwise, we need to get the values of the dominantAttr and uri of the
       // last field.
       CommonFieldsBase cb;
@@ -1063,7 +1100,7 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
       value = EngineUtils.getDominantSortAttributeValueAsString(cb, dominantSortAttr);
       QueryResumePoint backwardCursor = new QueryResumePoint(dominantSortAttr.getName(), value,
           cb.getUri(), !((startCursor != null) ? startCursor.isForwardCursor() : true));
-  
+
       return new QueryResult(startCursor, r.results, backwardCursor, resumeCursor, r.hasMoreResults);
     } finally {
       gaeCostLogger.wrapUp();
@@ -1077,7 +1114,7 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
       // Ensure at least one dominant sort is applied to the result set.
       // This allows the methods that return all matches to leverage the
       // core query execution logic.
-  
+
       if (sortList.isEmpty()) {
         if (filterList.isEmpty()) {
           // use primary key, as we know that is never null.
@@ -1091,17 +1128,18 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
           // layer. Get that to happen by sorting along that
           // filter dimension (which will pass down to GAE the
           // sort directive and the filters for that column).
-          for ( Tracker t : filterList ) {
-            if ( t instanceof SimpleFilterTracker ) {
+          for (Tracker t : filterList) {
+            if (t instanceof SimpleFilterTracker) {
               SimpleFilterTracker st = (SimpleFilterTracker) t;
-              if ( st.isEqualityTest() ) continue;
+              if (st.isEqualityTest())
+                continue;
               addSort(st.getAttribute(), Direction.ASCENDING);
               break;
             }
           }
-          
-          if ( sortList.isEmpty() ) {
-            addSort( relation.primaryKey, Direction.ASCENDING );
+
+          if (sortList.isEmpty()) {
+            addSort(relation.primaryKey, Direction.ASCENDING);
           }
         }
       }
@@ -1118,7 +1156,7 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
 
     try {
       List<?> keys = doExecuteDistinctValueForDataField(topLevelAuri);
-  
+
       Set<EntityKey> keySet = new HashSet<EntityKey>();
       for (Object o : keys) {
         String key = (String) o;
@@ -1177,7 +1215,7 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
       return uniqueValueSet;
     }
   }
-  
+
   @Override
   public List<?> executeDistinctValueForDataField(DataField dataField) throws ODKDatastoreException {
     try {
@@ -1186,8 +1224,9 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
       gaeCostLogger.wrapUp();
     }
   }
-  
-  private List<?> doExecuteDistinctValueForDataField(DataField dataField) throws ODKDatastoreException {
+
+  private List<?> doExecuteDistinctValueForDataField(DataField dataField)
+      throws ODKDatastoreException {
     // use a cursor, since we have to bring everything into memory...
     // this means we need to have at least one sort criteria in place.
     if (sortList.isEmpty()) {
@@ -1203,17 +1242,18 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
         // layer. Get that to happen by sorting along that
         // filter dimension (which will pass down to GAE the
         // sort directive and the filters for that column).
-        for ( Tracker t : filterList ) {
-          if ( t instanceof SimpleFilterTracker ) {
+        for (Tracker t : filterList) {
+          if (t instanceof SimpleFilterTracker) {
             SimpleFilterTracker st = (SimpleFilterTracker) t;
-            if ( st.isEqualityTest() ) continue;
+            if (st.isEqualityTest())
+              continue;
             addSort(st.getAttribute(), Direction.ASCENDING);
             break;
           }
         }
-        
-        if ( sortList.isEmpty() ) {
-          addSort( relation.primaryKey, Direction.ASCENDING );
+
+        if (sortList.isEmpty()) {
+          addSort(relation.primaryKey, Direction.ASCENDING);
         }
       }
     }

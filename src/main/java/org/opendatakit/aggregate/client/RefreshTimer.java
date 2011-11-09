@@ -41,12 +41,12 @@ public class RefreshTimer extends Timer {
   // inter-callback interval. So if the computer on which the
   // browser is running is slow, you can get a backlog of
   // callbacks queued up.
-  private static final int REFRESH_INTERVAL = 5000; // ms
+  private static final int REFRESH_INTERVAL = 10000; // ms
   // private static final int REFRESH_INTERVAL = 100000; // ms
 
   // STALL_INTERVALS is the number of intervals of no UI
   // interaction after which the timer will be stopped.
-  private static final int UI_STALL_INTERVALS = 60; // 5 min / 5 sec each
+  private static final int UI_STALL_INTERVALS = 30; // 5 min / 10 sec each
 
   // lastCompletionTime tracks the completion timestamp
   // of the last timer action. Used to detect and skip

@@ -27,6 +27,7 @@ import org.opendatakit.common.persistence.EntityKey;
 import org.opendatakit.common.persistence.PersistConsts;
 import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.persistence.TaskLock;
+import org.opendatakit.common.persistence.engine.DatastoreAccessMetrics;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
@@ -67,6 +68,8 @@ public class DatastoreImpl implements Datastore {
 	private final String schemaName;
 
 	private DatastoreService ds;
+	
+	private DatastoreAccessMetrics dam = new DatastoreAccessMetrics();
 
 	public DatastoreImpl() throws Exception {
 		ds = DatastoreServiceFactory.getDatastoreService();
@@ -76,6 +79,14 @@ public class DatastoreImpl implements Datastore {
 	DatastoreService getDatastoreService() {
 		return ds;
 	}
+
+  void recordQueryUsage(CommonFieldsBase relation) {
+    dam.recordQueryUsage(relation);
+  }
+   
+   void recordQueryUsage(String specialTableName) {
+     dam.recordQueryUsage(specialTableName);
+   }
 	
 	@Override
 	public String getDefaultSchemaName() {
@@ -195,6 +206,7 @@ public class DatastoreImpl implements Datastore {
 			throws ODKEntityNotFoundException {
 		Key selfKey = constructGaeKey( relation, uri);
 		com.google.appengine.api.datastore.Entity gaeEntity = null;
+      dam.recordGetUsage(relation);
 		try {
 			gaeEntity = ds.get(selfKey);
 		} catch (EntityNotFoundException e) {
@@ -355,6 +367,7 @@ public class DatastoreImpl implements Datastore {
 			throws ODKEntityPersistException {
 		com.google.appengine.api.datastore.Entity e = prepareGaeFromRow(entity,
 				user);
+      dam.recordPutUsage(entity);
 		try {
 			ds.put(e);
 		} catch ( Exception ex ) {
@@ -367,6 +380,7 @@ public class DatastoreImpl implements Datastore {
 			User user) throws ODKEntityPersistException {
 		List<com.google.appengine.api.datastore.Entity> gaeEntities = new ArrayList<com.google.appengine.api.datastore.Entity>();
 		for (CommonFieldsBase entity : entities) {
+	      dam.recordPutUsage(entity);
 			gaeEntities.add(prepareGaeFromRow(entity, user));
 		}
 		try {
@@ -382,6 +396,7 @@ public class DatastoreImpl implements Datastore {
 	public void deleteEntity(EntityKey key, User user)
 			throws ODKDatastoreException {
 		Key dsKey = constructGaeKey(key.getRelation(), key.getKey());
+      dam.recordDeleteUsage(key);
 		try {
 			LogFactory.getLog(DatastoreImpl.class).info(
 					"Executing delete " + constructGaeKind(key.getRelation()) + " with key " + key.getKey() + " by user " + user.getUriUser());
@@ -401,6 +416,7 @@ public class DatastoreImpl implements Datastore {
 
 		List<Key> datastoreKeys = new ArrayList<Key>();
 		for (EntityKey entityKey : keys) {
+	      dam.recordDeleteUsage(entityKey);
 			datastoreKeys.add(constructGaeKey(entityKey.getRelation(),
 					entityKey.getKey()));
 			LogFactory.getLog(DatastoreImpl.class).info(
@@ -416,6 +432,6 @@ public class DatastoreImpl implements Datastore {
 
   @Override
   public TaskLock createTaskLock(User user) {
-    return new TaskLockImpl();
+    return new TaskLockImpl(dam);
   }
 }

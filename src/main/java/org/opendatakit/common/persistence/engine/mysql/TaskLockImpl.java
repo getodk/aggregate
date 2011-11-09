@@ -30,6 +30,7 @@ import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.EntityKey;
 import org.opendatakit.common.persistence.ITaskLockType;
 import org.opendatakit.common.persistence.TaskLock;
+import org.opendatakit.common.persistence.engine.DatastoreAccessMetrics;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
@@ -48,11 +49,13 @@ public class TaskLockImpl implements TaskLock {
 
   private static final String PERSISTENCE_LAYER_PROBLEM = "Persistence layer failure";
 
+  final DatastoreAccessMetrics dam;
   final DatastoreImpl datastore;
   final User user;
 
-  TaskLockImpl(DatastoreImpl datastore, User user) {
+  TaskLockImpl(DatastoreImpl datastore, DatastoreAccessMetrics dam, User user) {
     this.datastore = datastore;
+    this.dam = dam;
     this.user = user;
   }
 
@@ -111,6 +114,7 @@ public class TaskLockImpl implements TaskLock {
     stmts.add(b.toString());
     b.setLength(0);
 
+    dam.recordPutUsage(TaskLockTable.TABLE_NAME);
     if (!entity.isFromDatabase()) {
       // insert a new record
       b.append("INSERT INTO ");
@@ -195,6 +199,7 @@ public class TaskLockImpl implements TaskLock {
       b.setLength(0);
     }
     // delete stale locks (don't care who's)
+    dam.recordDeleteUsage(TaskLockTable.TABLE_NAME);
     b.append("DELETE t1 FROM ");
     b.append(tableName);
     b.append(" AS t1 WHERE t1.");
@@ -208,6 +213,8 @@ public class TaskLockImpl implements TaskLock {
     b.append("SET @minExpiration = @present");
     stmts.add(b.toString());
     b.setLength(0);
+    
+    dam.recordQueryUsage(TaskLockTable.TABLE_NAME);
     b.append("SELECT @minExpiration:=MIN(t3.");
     b.append(K_BQ);
     b.append(entity.expirationDateTime.getName());
@@ -227,6 +234,7 @@ public class TaskLockImpl implements TaskLock {
     b.setLength(0);
     // delete all locks except the oldest one for this resource and task type...
     // whatever lock exists identifies the owner of the resource.
+    dam.recordDeleteUsage(TaskLockTable.TABLE_NAME);
     b.append("DELETE t4 FROM ");
     b.append(tableName);
     b.append(" AS t4 WHERE t4.");

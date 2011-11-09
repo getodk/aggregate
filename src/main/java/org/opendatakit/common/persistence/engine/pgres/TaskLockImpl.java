@@ -30,6 +30,7 @@ import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.EntityKey;
 import org.opendatakit.common.persistence.ITaskLockType;
 import org.opendatakit.common.persistence.TaskLock;
+import org.opendatakit.common.persistence.engine.DatastoreAccessMetrics;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
@@ -48,11 +49,13 @@ public class TaskLockImpl implements TaskLock {
 
   private static final String PERSISTENCE_LAYER_PROBLEM = "Persistence layer failure";
 
+  final DatastoreAccessMetrics dam;
   final DatastoreImpl datastore;
   final User user;
 
-  TaskLockImpl(DatastoreImpl datastore, User user) {
+  TaskLockImpl(DatastoreImpl datastore, DatastoreAccessMetrics dam, User user) {
     this.datastore = datastore;
+    this.dam = dam;
     this.user = user;
   }
 
@@ -87,6 +90,8 @@ public class TaskLockImpl implements TaskLock {
     b.append("LOCK TABLE ").append(tableName).append(" IN ACCESS EXCLUSIVE MODE");
     stmts.add(b.toString());
     b.setLength(0);
+
+    dam.recordPutUsage(TaskLockTable.TABLE_NAME);
     if (!entity.isFromDatabase()) {
       // insert a new record (prospective lock)
       b.append("INSERT INTO ");
@@ -173,12 +178,14 @@ public class TaskLockImpl implements TaskLock {
       b.setLength(0);
     }
     // delete stale locks (don't care who's)
+    dam.recordDeleteUsage(TaskLockTable.TABLE_NAME);
     b.append("DELETE FROM ").append(tableName).append(" WHERE ");
     b.append(K_BQ).append(entity.expirationDateTime.getName()).append(K_BQ).append(" <= NOW()");
     stmts.add(b.toString());
     b.setLength(0);
     // delete prospective locks which are not the oldest for that resource and
     // task type
+    dam.recordDeleteUsage(TaskLockTable.TABLE_NAME);
     b.append("DELETE FROM ").append(tableName).append(" WHERE ");
     b.append(K_BQ).append(entity.formId.getName()).append(K_BQ).append(" = ").append(formIdInline)
         .append(" AND ");

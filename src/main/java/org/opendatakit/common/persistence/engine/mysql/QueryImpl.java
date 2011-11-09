@@ -250,6 +250,7 @@ public class QueryImpl implements Query {
     RowMapper<? extends CommonFieldsBase> rowMapper = null;
     rowMapper = new RelationRowMapper(relation, user);
 
+    dataStoreImpl.recordQueryUsage(relation);
     try {
       return (List<? extends CommonFieldsBase>) dataStoreImpl.getJdbcConnection().query(query,
           bindValues.toArray(), rowMapper);
@@ -265,6 +266,7 @@ public class QueryImpl implements Query {
     String query = generateDistinctFieldValueQuery(dataField) + queryBindBuilder.toString()
         + querySortBuilder.toString() + ";";
 
+    dataStoreImpl.recordQueryUsage(relation);
     List<?> keys = null;
     try {
       keys = dataStoreImpl.getJdbcConnection().queryForList(query, bindValues.toArray(),
@@ -397,6 +399,7 @@ public class QueryImpl implements Query {
     RowMapperFilteredResultSetExtractor rse = new RowMapperFilteredResultSetExtractor(startCursor,
         fetchLimit, rowMapper);
 
+    dataStoreImpl.recordQueryUsage(relation);
     try {
       CoreResult r = dataStoreImpl.getJdbcConnection().query(query, values.toArray(), rse);
 
