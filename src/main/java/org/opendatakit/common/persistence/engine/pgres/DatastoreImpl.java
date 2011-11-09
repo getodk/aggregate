@@ -34,6 +34,7 @@ import org.opendatakit.common.persistence.PersistConsts;
 import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.persistence.Query.FilterOperation;
 import org.opendatakit.common.persistence.TaskLock;
+import org.opendatakit.common.persistence.engine.DatastoreAccessMetrics;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
@@ -50,11 +51,11 @@ import org.springframework.jdbc.core.RowMapper;
  */
 public class DatastoreImpl implements Datastore, InitializingBean {
 
-  public DataSource dataSource;
-
   private static final int MAX_COLUMN_NAME_LEN = 64;
-  private static final int MAX_TABLE_NAME_LEN = 60; // reserve 4 char for idx
-                                                    // name
+  private static final int MAX_TABLE_NAME_LEN = 60; // reserve 4 char for idx name
+
+  private final DatastoreAccessMetrics dam = new DatastoreAccessMetrics();
+  private DataSource dataSource = null;
 
   private static final Long MAX_BLOB_SIZE = 65536 * 4096L;
   private String schemaName = null;
@@ -275,6 +276,10 @@ public class DatastoreImpl implements Datastore, InitializingBean {
       throw new IllegalStateException("Unexpected data type");
     }
   }
+  
+  void recordQueryUsage(CommonFieldsBase relation) {
+    dam.recordQueryUsage(relation);
+  }
 
   @Override
   public String getDefaultSchemaName() {
@@ -297,6 +302,7 @@ public class DatastoreImpl implements Datastore, InitializingBean {
 
   private final boolean updateRelation(CommonFieldsBase relation) {
 
+    dam.recordQueryUsage(TableDefinition.INFORMATION_SCHEMA_COLUMNS);
     String qs = TableDefinition.TABLE_DEF_QUERY;
     List<?> columns;
     columns = getJdbcConnection().query(qs,
@@ -536,6 +542,7 @@ public class DatastoreImpl implements Datastore, InitializingBean {
 
   @Override
   public boolean hasRelation(String schema, String tableName, User user) {
+    dam.recordQueryUsage(TableDefinition.INFORMATION_SCHEMA_COLUMNS);
     String qs = TableDefinition.TABLE_EXISTS_QUERY;
     int columnCount = getJdbcConnection().queryForInt(qs, new Object[] { schema, tableName });
     return (columnCount != 0);
@@ -588,6 +595,7 @@ public class DatastoreImpl implements Datastore, InitializingBean {
       throws ODKEntityNotFoundException {
     Query query = new QueryImpl(relation, "getEntity", this, user);
     query.addFilter(relation.primaryKey, FilterOperation.EQUAL, uri);
+    dam.recordGetUsage(relation);
     try {
       List<? extends CommonFieldsBase> results = query.executeQuery();
       if (results == null || results.size() != 1) {
@@ -609,6 +617,7 @@ public class DatastoreImpl implements Datastore, InitializingBean {
 
   @Override
   public void putEntity(CommonFieldsBase entity, User user) throws ODKEntityPersistException {
+    dam.recordPutUsage(entity);
     try {
       boolean first;
       StringBuilder b = new StringBuilder();
@@ -724,6 +733,7 @@ public class DatastoreImpl implements Datastore, InitializingBean {
   @Override
   public void deleteEntity(EntityKey key, User user) throws ODKDatastoreException {
 
+    dam.recordDeleteUsage(key);
     try {
       CommonFieldsBase d = key.getRelation();
 
@@ -771,6 +781,6 @@ public class DatastoreImpl implements Datastore, InitializingBean {
 
   @Override
   public TaskLock createTaskLock(User user) {
-    return new TaskLockImpl(this, user);
+    return new TaskLockImpl(this, dam, user);
   }
 }

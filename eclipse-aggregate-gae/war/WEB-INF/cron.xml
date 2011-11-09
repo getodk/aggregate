@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <cronentries>
   <cron>
-    <url>/gae/watchdog?checkIntervalMilliseconds=180000</url>
-    <description>Check tasks every 3 minutes</description>
-    <schedule>every 3 minutes</schedule>
+    <url>/gae/watchdog?checkIntervalMilliseconds=360000</url>
+    <description>Check tasks every 6 minutes</description>
+    <schedule>every 6 minutes</schedule>
   </cron>
 </cronentries>

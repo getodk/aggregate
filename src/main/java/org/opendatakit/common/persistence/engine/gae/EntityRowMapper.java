@@ -26,24 +26,25 @@ import org.opendatakit.common.security.User;
  */
 public class EntityRowMapper {
 
-	private final CommonFieldsBase relation;
-	private final User user;
-	
-	EntityRowMapper(CommonFieldsBase tableDefn, User user) {
-		this.relation = tableDefn;
-		this.user = user;
-	}
-	
-	public Object mapRow(DatastoreImpl ds, com.google.appengine.api.datastore.Entity rs, int rowNum) throws SQLException {
-		
-		CommonFieldsBase row;
-		try {
-			row = relation.getEmptyRow(user);
-			row.setFromDatabase(true);
-		} catch (Exception e ) {
-			throw new IllegalStateException("failed to create empty row", e);
-		}
-		ds.updateRowFromGae(row, rs);
-		return row;
-	}
+  private final CommonFieldsBase relation;
+  private final User user;
+
+  EntityRowMapper(CommonFieldsBase tableDefn, User user) {
+    this.relation = tableDefn;
+    this.user = user;
+  }
+
+  public Object mapRow(DatastoreImpl ds, com.google.appengine.api.datastore.Entity rs, int rowNum)
+      throws SQLException {
+
+    CommonFieldsBase row;
+    try {
+      row = relation.getEmptyRow(user);
+      row.setFromDatabase(true);
+    } catch (Exception e) {
+      throw new IllegalStateException("failed to create empty row", e);
+    }
+    ds.updateRowFromGae(row, rs);
+    return row;
+  }
 }
