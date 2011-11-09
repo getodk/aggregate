@@ -569,7 +569,14 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
     DataField dominantSortAttr = dominantSort.getAttribute();
 
     // Fetch chunks bigger that the default...
-    int chunkSize = 2048;
+    // but not too big -- we get charged for each of these!
+    //
+    // Set to a few more than the default filter group size
+    // FilterGroup.DEFAULT_FETCH_LIMIT as that default size
+    // is likely to be used most for displaying paginated 
+    // submissions.
+    //
+    int chunkSize = 105;
 
     // We always start the first fetch with an offset of zero
     // even if this is a resumed query (startCursorFilter != null).
