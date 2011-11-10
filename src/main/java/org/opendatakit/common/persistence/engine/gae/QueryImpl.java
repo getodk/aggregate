@@ -581,12 +581,10 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
     // Fetch chunks bigger that the default...
     // but not too big -- we get charged for each of these!
     //
-    // Set to a few more than the default filter group size
-    // FilterGroup.DEFAULT_FETCH_LIMIT as that default size
-    // is likely to be used most for displaying paginated
-    // submissions.
+    // Set to either 2048 if we're fetching everything or 
+	// 10% more than the specified fetch limit, up to 2048.
     //
-    int chunkSize = 105;
+    int chunkSize = (fetchLimit == 0) ? 2048 : Math.min((fetchLimit*11)/10, 2048);
 
     // We always start the first fetch with an offset of zero
     // even if this is a resumed query (startCursorFilter != null).
