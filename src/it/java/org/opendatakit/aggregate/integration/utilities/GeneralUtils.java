@@ -15,8 +15,11 @@ public class GeneralUtils {
 			String className = GeneralUtils.class.getSimpleName();
 			File thisDirectory = new File(GeneralUtils.class.getResource(
 					className + ".class").toURI()).getParentFile();
-			String propertiesFile = thisDirectory.getAbsolutePath()
-					+ File.separator + "Integration.properties";
+			File itRootDirectory = thisDirectory
+			    .getParentFile().getParentFile().getParentFile()
+			    .getParentFile().getParentFile().getParentFile();
+			File propertiesFile = new File( new File( itRootDirectory, "resources"),
+			                                "Integration.properties");
 			Reader reader = new FileReader(propertiesFile);
 			fileProps.load(reader);
 		} catch (IOException e) {
