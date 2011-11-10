@@ -158,6 +158,9 @@ public class WebUtils {
   public static final Date parseDate(String value) {
     if ( value == null || value.length() == 0 ) return null;
 
+    String[] iso8601Pattern = new String[] {
+        PATTERN_ISO8601 };
+
     String[] localizedParsePatterns = new String[] {
         // try the common HTTP date formats that have time zones
         PATTERN_RFC1123, 
@@ -180,6 +183,9 @@ public class WebUtils {
         PATTERN_YYYY_MM_DD_DATE_ONLY_NO_TIME_DASH };
 
     Date d = null;
+    // iso8601 parsing is sometimes off-by-one when JR does it...
+    d = parseDateSubset(value, iso8601Pattern, null, TimeZone.getTimeZone("GMT"));
+    if ( d != null ) return d;
     // try to parse with the JavaRosa parsers
     d = DateUtils.parseDateTime(value);
     if ( d != null ) return d;
