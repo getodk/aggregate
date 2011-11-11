@@ -584,7 +584,7 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
     // Set to either 2048 if we're fetching everything or 
 	// 10% more than the specified fetch limit, up to 2048.
     //
-    int chunkSize = (fetchLimit == 0) ? 2048 : Math.min((fetchLimit*11)/10, 2048);
+    int chunkSize = 2048;
 
     // We always start the first fetch with an offset of zero
     // even if this is a resumed query (startCursorFilter != null).
