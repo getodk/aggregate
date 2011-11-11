@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<cronentries>
+<cronentries xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="cron.xsd">
   <cron>
     <url>/gae/watchdog?checkIntervalMilliseconds=360000</url>
     <description>Check tasks every 6 minutes</description>
