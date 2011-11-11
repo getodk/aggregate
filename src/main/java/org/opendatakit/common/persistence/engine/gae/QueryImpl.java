@@ -579,11 +579,8 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
     DataField dominantSortAttr = dominantSort.getAttribute();
 
     // Fetch chunks bigger that the default...
-    // but not too big -- we get charged for each of these!
-    //
-    // Set to either 2048 if we're fetching everything or 
-	// 10% more than the specified fetch limit, up to 2048.
-    //
+    // Bulk fetches are dead slow if the chunks are small. 
+    // This burns quota but makes fetches that filter data faster.
     int chunkSize = 2048;
 
     // We always start the first fetch with an offset of zero
@@ -728,18 +725,18 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
           // // GAE: this doesn't work in production, though the ZigZag queries
           // are supposed to support this.
           //
-          // // and add all equality filter conditions.
-          // // track whether the dominant sort column has an equality filter.
-          // for (Tracker t : filterList) {
-          // if ( !dominantSortAttr.equals(t.getAttribute())) {
-          // if (t instanceof SimpleFilterTracker) {
-          // SimpleFilterTracker st = (SimpleFilterTracker) t;
-          // if (st.isEqualityTest()) {
-          // st.setFilter(hack);
-          // }
-          // }
-          // }
-          // }
+          // and add all equality filter conditions.
+          // track whether the dominant sort column has an equality filter.
+//          for (Tracker t : filterList) {
+//            if (!dominantSortAttr.equals(t.getAttribute())) {
+//              if (t instanceof SimpleFilterTracker) {
+//                SimpleFilterTracker st = (SimpleFilterTracker) t;
+//                if (st.isEqualityTest()) {
+//                  st.setFilter(hack);
+//                }
+//              }
+//            }
+//          }
 
           // add the dominant sort.
           hack.addSort(dominantSort.getAttribute().getName(), sd);
@@ -796,8 +793,8 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
         // Step down the chunkSize and try again. The original
         // WorkingValues needed to restart the query are unchanged,
         // so we can safely reissue the query.
-        if (chunkSize > 20) {
-          logger.warn("Retrying fetch with a smaller chunk size");
+        if (chunkSize > 256) {
+          logger.warn("Retrying fetch with a smaller chunk size: " + e.getMessage());
           chunkSize /= 4;
         } else {
           throw e;
