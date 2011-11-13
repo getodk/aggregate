@@ -64,8 +64,22 @@ synchronize user2 people
 
 printTable user2 people
 
-# Clean up
+# Test that we can synchronize twice in a row
+synchronize user2 people
+
 removeTableSynchronization user2 people
+
+# Test that user can't filter by non-existent column
+cloneSynchronizedTableWithFilters user2 people
+    age GREATER_THAN_OR_EQUAL 40
+    weight LESS_THAN_OR_EQUAL 140
+    nosuchcolumn EQUAL value
+
+# Test that user can't filter by values of the wrong type
+cloneSynchronizedTableWithFilters user2 people
+    age EQUAL notanumber
+
+# Clean up
 setTablePermissions user1 user2 people false false false
 deleteSynchronizedTable user1 people
 deleteUser user1

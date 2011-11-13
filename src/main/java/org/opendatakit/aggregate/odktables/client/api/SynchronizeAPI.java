@@ -13,6 +13,7 @@ import org.opendatakit.aggregate.odktables.client.entity.Modification;
 import org.opendatakit.aggregate.odktables.client.entity.SynchronizedRow;
 import org.opendatakit.aggregate.odktables.client.exception.AggregateInternalErrorException;
 import org.opendatakit.aggregate.odktables.client.exception.ColumnDoesNotExistException;
+import org.opendatakit.aggregate.odktables.client.exception.FilterValueTypeMismatchException;
 import org.opendatakit.aggregate.odktables.client.exception.OutOfSynchException;
 import org.opendatakit.aggregate.odktables.client.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.client.exception.RowOutOfSynchException;
@@ -150,8 +151,19 @@ public class SynchronizeAPI extends CommonAPI
             PermissionDeniedException, TableDoesNotExistException,
             TableAlreadyExistsException, AggregateInternalErrorException
     {
-        return cloneSynchronizedTable(aggregateTableIdentifier, tableID,
-                new ArrayList<Filter>());
+        try
+        {
+            return cloneSynchronizedTable(aggregateTableIdentifier, tableID,
+                    new ArrayList<Filter>());
+        } catch (ColumnDoesNotExistException e)
+        {
+            // this should never happen since we are not sending up any filters
+            throw new AggregateInternalErrorException(e.getMessage());
+        } catch (FilterValueTypeMismatchException e)
+        {
+            // this should never happen since we are not sending up any filters
+            throw new AggregateInternalErrorException(e.getMessage());
+        }
     }
 
     /**
@@ -188,12 +200,19 @@ public class SynchronizeAPI extends CommonAPI
      *             call to fail
      * @throws IOException
      *             if there is a problem communicating with the Aggregate server
+     * @throws ColumnDoesNotExistException
+     *             if a column specified in one of the filters does not exist in
+     *             the table
+     * @throws FilterValueTypeMismatchException
+     *             if the value in one of the filters can not be converted to
+     *             the appropriate type for that column
      */
     public Modification cloneSynchronizedTable(String aggregateTableIdentifier,
             String tableID, Collection<Filter> filters)
             throws ClientProtocolException, IOException,
             PermissionDeniedException, TableDoesNotExistException,
-            TableAlreadyExistsException, AggregateInternalErrorException
+            TableAlreadyExistsException, AggregateInternalErrorException,
+            ColumnDoesNotExistException, FilterValueTypeMismatchException
     {
         CloneSynchronizedTable command = new CloneSynchronizedTable(
                 requestingUserID, tableID, aggregateTableIdentifier, filters);

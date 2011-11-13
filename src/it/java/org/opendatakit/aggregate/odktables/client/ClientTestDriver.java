@@ -31,6 +31,7 @@ import org.opendatakit.aggregate.odktables.client.entity.User;
 import org.opendatakit.aggregate.odktables.client.exception.AggregateInternalErrorException;
 import org.opendatakit.aggregate.odktables.client.exception.CannotDeleteException;
 import org.opendatakit.aggregate.odktables.client.exception.ColumnDoesNotExistException;
+import org.opendatakit.aggregate.odktables.client.exception.FilterValueTypeMismatchException;
 import org.opendatakit.aggregate.odktables.client.exception.OutOfSynchException;
 import org.opendatakit.aggregate.odktables.client.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.client.exception.RowOutOfSynchException;
@@ -375,7 +376,9 @@ public class ClientTestDriver
     private void cloneSynchronizedTable(List<String> arguments)
             throws ClientProtocolException, AggregateInternalErrorException,
             UserDoesNotExistException, TableDoesNotExistException,
-            PermissionDeniedException, TableAlreadyExistsException, IOException
+            PermissionDeniedException, TableAlreadyExistsException,
+            IOException, ColumnDoesNotExistException,
+            FilterValueTypeMismatchException
     {
         if (arguments.size() != 2)
             throw new RuntimeException(
@@ -389,7 +392,9 @@ public class ClientTestDriver
     private void cloneSynchronizedTableWithFilters(List<String> arguments)
             throws ClientProtocolException, AggregateInternalErrorException,
             UserDoesNotExistException, TableDoesNotExistException,
-            PermissionDeniedException, TableAlreadyExistsException, IOException
+            PermissionDeniedException, TableAlreadyExistsException,
+            IOException, ColumnDoesNotExistException,
+            FilterValueTypeMismatchException
     {
         if (arguments.size() != 2)
             throw new RuntimeException(
@@ -406,7 +411,8 @@ public class ClientTestDriver
             List<Filter> filters) throws ClientProtocolException,
             AggregateInternalErrorException, UserDoesNotExistException,
             IOException, TableDoesNotExistException, PermissionDeniedException,
-            TableAlreadyExistsException
+            TableAlreadyExistsException, ColumnDoesNotExistException,
+            FilterValueTypeMismatchException
     {
         updateTables(clientName);
         TableEntry table = getTableEntry(clientName, tableName);

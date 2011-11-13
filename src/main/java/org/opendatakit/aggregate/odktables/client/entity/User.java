@@ -30,6 +30,17 @@ public class User
     private final String userName;
 
     /**
+     * For Gson
+     */
+    @SuppressWarnings("unused")
+    private User()
+    {
+        this.userID = null;
+        this.aggregateUserIdentifier = null;
+        this.userName = null;
+    }
+    
+    /**
      * Creates a new User.
      * 
      * @param userID

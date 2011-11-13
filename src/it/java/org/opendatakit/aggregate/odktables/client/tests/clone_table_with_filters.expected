@@ -70,8 +70,20 @@ modification: 2
         name JessicasTwin
         weight 140.0000000000
 
-# Clean up
+# Test that we can synchronize twice in a row
+synchronize user2 people
+
 removeTableSynchronization user2 people
+
+# Test that user can't filter by non-existent column
+cloneSynchronizedTableWithFilters user2 people
+Exception: org.opendatakit.aggregate.odktables.client.exception.ColumnDoesNotExistException: Column with name nosuchcolumn does not exist in table with tableID people
+
+# Test that user can't filter by values of the wrong type
+cloneSynchronizedTableWithFilters user2 people
+Exception: org.opendatakit.aggregate.odktables.client.exception.FilterValueTypeMismatchException: Value notanumber can not be interpreted as type INTEGER
+
+# Clean up
 setTablePermissions user1 user2 people false false false
 deleteSynchronizedTable user1 people
 deleteUser user1
