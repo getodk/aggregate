@@ -44,19 +44,22 @@ import org.junit.runner.Description;
 import org.junit.runners.Parameterized;
 import org.junit.runners.model.FrameworkMethod;
 
-public class LabelledParameterized extends Parameterized {
+public class LabelledParameterized extends Parameterized
+{
 
     @Retention(value = RetentionPolicy.RUNTIME)
-	@Target(value = ElementType.METHOD)
-	public static @interface Labels {
-	    // no args at present
-	}
+    @Target(value = ElementType.METHOD)
+    public static @interface Labels
+    {
+        // no args at present
+    }
 
     private List<String> labels;
 
     private Description labelledDescription;
 
-    public LabelledParameterized(Class<?> cl) throws Throwable {
+    public LabelledParameterized(Class<?> cl) throws Throwable
+    {
         super(cl);
         initialiseLabels();
         generateLabelledDescription();
@@ -64,16 +67,19 @@ public class LabelledParameterized extends Parameterized {
 
     //necessary to make assignment at the end work.
     @SuppressWarnings("unchecked")
-	private void initialiseLabels() throws Exception {
-        List<FrameworkMethod> methods = this.getTestClass().getAnnotatedMethods(Labels.class);
+    private void initialiseLabels() throws Exception
+    {
+        List<FrameworkMethod> methods = this.getTestClass()
+                .getAnnotatedMethods(Labels.class);
 
         Method foundLabelMethod = null;
-        for (FrameworkMethod junitMethod : methods) {
-        	Method method = junitMethod.getMethod();
-        	
+        for (FrameworkMethod junitMethod : methods)
+        {
+            Method method = junitMethod.getMethod();
+
             if (foundLabelMethod != null)
                 throw new Exception(
-				    "Only one method should be annotated with @Labels");
+                        "Only one method should be annotated with @Labels");
 
             int modifiers = method.getModifiers();
             if (!Modifier.isStatic(modifiers))
@@ -82,25 +88,25 @@ public class LabelledParameterized extends Parameterized {
             Class<?> returnType = method.getReturnType();
             if (returnType != List.class)
                 throw new Exception(
-				    "Return type of @Labels method must be List<String>");
+                        "Return type of @Labels method must be List<String>");
 
             Type type = method.getGenericReturnType();
             if (!(type instanceof ParameterizedType))
                 throw new Exception(
-				    "Return type of @Labels method must be List<String>");
+                        "Return type of @Labels method must be List<String>");
 
             ParameterizedType genericType = (ParameterizedType) type;
             Type[] typeArguments = genericType.getActualTypeArguments();
 
             if (typeArguments[0] != String.class)
                 throw new Exception(
-				    "Return type of @Labels method must be List<String>");
+                        "Return type of @Labels method must be List<String>");
 
             foundLabelMethod = method;
         }
         if (foundLabelMethod == null)
             throw new Exception("No @Labels method found");
-        
+
         this.labels = (List<String>) foundLabelMethod.invoke(null);
     }
 
@@ -111,24 +117,26 @@ public class LabelledParameterized extends Parameterized {
      * Relies on childDescriptions list being modifiable.
      * 
      */
-    private void generateLabelledDescription() throws Exception {
+    private void generateLabelledDescription() throws Exception
+    {
         Description originalDescription = super.getDescription();
         labelledDescription = Description
-	    .createSuiteDescription(originalDescription.getDisplayName());
+                .createSuiteDescription(originalDescription.getDisplayName());
         ArrayList<Description> childDescriptions = originalDescription
-	    .getChildren();
+                .getChildren();
         int childCount = childDescriptions.size();
         if (childCount != labels.size())
             throw new Exception(
-				"Number of labels and number of parameters must match.");
+                    "Number of labels and number of parameters must match.");
 
-        for (int i = 0; i < childDescriptions.size(); i++) {
+        for (int i = 0; i < childDescriptions.size(); i++)
+        {
             Description childDescription = childDescriptions.get(i);
             String label = labels.get(i);
             Description newDescription = Description
-		.createSuiteDescription(label);
+                    .createSuiteDescription(label);
             ArrayList<Description> grandChildren = childDescription
-		.getChildren();
+                    .getChildren();
             for (Description grandChild : grandChildren)
                 newDescription.addChild(grandChild);
             labelledDescription.addChild(newDescription);
@@ -136,7 +144,8 @@ public class LabelledParameterized extends Parameterized {
     }
 
     @Override
-	public Description getDescription() {
+    public Description getDescription()
+    {
         return labelledDescription;
     }
 

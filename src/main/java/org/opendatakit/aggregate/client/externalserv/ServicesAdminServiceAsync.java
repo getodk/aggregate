@@ -22,16 +22,22 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 
 public interface ServicesAdminServiceAsync {
 
-  void createFusionTable(String formId, ExternalServicePublicationOption esOption,
-      AsyncCallback<String> callback);
+	void createFusionTable(String formId,
+			ExternalServicePublicationOption esOption,
+			AsyncCallback<String> callback);
 
-  void createGoogleSpreadsheet(String formId, String name,
-      ExternalServicePublicationOption esOption, AsyncCallback<String> callback);
+	void createGoogleSpreadsheet(String formId, String name,
+			ExternalServicePublicationOption esOption,
+			AsyncCallback<String> callback);
 
-  void generateOAuthUrl(String uri, AsyncCallback<String> callback);
+	void generateOAuthUrl(String uri, AsyncCallback<String> callback);
 
-  void getExternalServices(String formid, AsyncCallback<ExternServSummary[]> callback);
+	void getExternalServices(String formid,
+			AsyncCallback<ExternServSummary[]> callback);
 
-  void deletePublisher(String uri, AsyncCallback<Boolean> callback);
+	void deletePublisher(String uri, AsyncCallback<Boolean> callback);
+
+	void createOhmageJsonServer(String formId, String url,
+			ExternalServicePublicationOption es, AsyncCallback<String> callback);
 
 }

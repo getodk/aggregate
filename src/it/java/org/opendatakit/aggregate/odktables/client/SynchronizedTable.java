@@ -13,7 +13,7 @@ import org.opendatakit.aggregate.odktables.client.entity.TableEntry;
  * A table stored in a SynchronizedClient.
  * 
  * @author the.dylan.price@gmail.com
- *
+ * 
  */
 public class SynchronizedTable
 {

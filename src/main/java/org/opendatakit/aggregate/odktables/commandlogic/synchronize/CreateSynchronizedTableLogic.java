@@ -61,7 +61,8 @@ public class CreateSynchronizedTableLogic extends
                     .getRequestingUserID();
 
             // retrieve request user
-            InternalUser requestingUser = users.query("CreateSynchronizedTableLogic.execute")
+            InternalUser requestingUser = users
+                    .query("CreateSynchronizedTableLogic.execute")
                     .equal(Users.USER_ID, requestingUserID).get();
             String aggregateUserIdentifier = requestingUser
                     .getAggregateIdentifier();

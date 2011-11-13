@@ -40,6 +40,11 @@ public class TestUploadForm {
     selenium = new WebDriverBackedSelenium(driver, "http://" + username + ":" + password + "@"
         + hostname + ":" + port + baseUrl);
 
+    System.out.println(formsDir);
+    System.out.println(hostname);
+    System.out.println(baseUrl);
+    System.out.println(port + "");
+    
     selenium.open("local_login.html");
     Wait mainload = new Wait() {
       public boolean until() {

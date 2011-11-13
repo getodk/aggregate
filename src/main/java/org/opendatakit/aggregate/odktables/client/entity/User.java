@@ -43,8 +43,10 @@ public class User
     public User(String userID, String aggregateUserIdentifier, String userName)
     {
         // userID may be null (we may not want the to know what it is)
-        if (aggregateUserIdentifier == null || aggregateUserIdentifier.length() == 0)
-            throw new IllegalArgumentException("aggregateUserIdentifier was null or empty");
+        if (aggregateUserIdentifier == null
+                || aggregateUserIdentifier.length() == 0)
+            throw new IllegalArgumentException(
+                    "aggregateUserIdentifier was null or empty");
         if (userName == null || userName.length() == 0)
             throw new IllegalArgumentException("userName was null or empty");
 
@@ -83,7 +85,8 @@ public class User
     @Override
     public String toString()
     {
-        return String.format("User [userID=%s, aggregateUserIdentifier=%s, userName=%s]",
+        return String.format(
+                "User [userID=%s, aggregateUserIdentifier=%s, userName=%s]",
                 userID, aggregateUserIdentifier, userName);
     }
 
@@ -98,7 +101,10 @@ public class User
         result = prime * result + ((userID == null) ? 0 : userID.hashCode());
         result = prime * result
                 + ((userName == null) ? 0 : userName.hashCode());
-        result = prime * result + ((aggregateUserIdentifier == null) ? 0 : aggregateUserIdentifier.hashCode());
+        result = prime
+                * result
+                + ((aggregateUserIdentifier == null) ? 0
+                        : aggregateUserIdentifier.hashCode());
         return result;
     }
 
@@ -131,7 +137,8 @@ public class User
         {
             if (other.aggregateUserIdentifier != null)
                 return false;
-        } else if (!aggregateUserIdentifier.equals(other.aggregateUserIdentifier))
+        } else if (!aggregateUserIdentifier
+                .equals(other.aggregateUserIdentifier))
             return false;
         return true;
     }

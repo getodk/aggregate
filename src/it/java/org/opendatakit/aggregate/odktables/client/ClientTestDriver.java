@@ -22,6 +22,8 @@ import org.apache.http.client.ClientProtocolException;
 import org.opendatakit.aggregate.odktables.TestUtils;
 import org.opendatakit.aggregate.odktables.client.api.SynchronizeAPI;
 import org.opendatakit.aggregate.odktables.client.entity.Column;
+import org.opendatakit.aggregate.odktables.client.entity.Filter;
+import org.opendatakit.aggregate.odktables.client.entity.FilterOperation;
 import org.opendatakit.aggregate.odktables.client.entity.Modification;
 import org.opendatakit.aggregate.odktables.client.entity.SynchronizedRow;
 import org.opendatakit.aggregate.odktables.client.entity.TableEntry;
@@ -62,6 +64,10 @@ import org.opendatakit.common.ermodel.simple.AttributeType;
  * 
  * <i>cloneSynchronizedTable (userName) (tableName)</i>
  * 
+ * <i>cloneSynchronizedTableWithFilters (userName) (tableName)
+ * 		  (columnName) (filterType) (value)
+ * 		  ...</i>
+ * 
  * <i>removeTableSynchronization (userName) (tableName)</i>
  * 
  * <i>deleteSynchronizedTable (userName) (tableName)</i>
@@ -93,7 +99,8 @@ public class ClientTestDriver
     private SynchronizeAPI conn;
     // Map from userID to the client
     private Map<String, SynchronizedClient> clients;
-    // Map from userID to a list of Aggregate tables that they are allowed to read
+    // Map from userID to a list of Aggregate tables that they are allowed to
+    // read
     private Map<String, List<TableEntry>> aggregateTables;
     private Scanner input;
     private PrintWriter output;
@@ -177,6 +184,9 @@ public class ClientTestDriver
             } else if (command.equals("cloneSynchronizedTable"))
             {
                 cloneSynchronizedTable(arguments);
+            } else if (command.equals("cloneSynchronizedTableWithFilters"))
+            {
+                cloneSynchronizedTableWithFilters(arguments);
             } else if (command.equals("removeTableSynchronization"))
             {
                 removeTableSynchronization(arguments);
@@ -373,21 +383,46 @@ public class ClientTestDriver
 
         String clientName = arguments.get(0);
         String tableName = arguments.get(1);
-        cloneSynchronizedTable(clientName, tableName);
+        cloneSynchronizedTable(clientName, tableName, null);
     }
 
-    private void cloneSynchronizedTable(String clientName, String tableName)
+    private void cloneSynchronizedTableWithFilters(List<String> arguments)
             throws ClientProtocolException, AggregateInternalErrorException,
-            UserDoesNotExistException, IOException, TableDoesNotExistException,
-            PermissionDeniedException, TableAlreadyExistsException
+            UserDoesNotExistException, TableDoesNotExistException,
+            PermissionDeniedException, TableAlreadyExistsException, IOException
+    {
+        if (arguments.size() != 2)
+            throw new RuntimeException(
+                    "Bad arguments to cloneSynchronizedTableWithFilters: "
+                            + arguments);
+
+        String clientName = arguments.get(0);
+        String tableName = arguments.get(1);
+        List<Filter> filters = parseFilters();
+        cloneSynchronizedTable(clientName, tableName, filters);
+    }
+
+    private void cloneSynchronizedTable(String clientName, String tableName,
+            List<Filter> filters) throws ClientProtocolException,
+            AggregateInternalErrorException, UserDoesNotExistException,
+            IOException, TableDoesNotExistException, PermissionDeniedException,
+            TableAlreadyExistsException
     {
         updateTables(clientName);
         TableEntry table = getTableEntry(clientName, tableName);
         SynchronizedTable ownerTable = getOwnerTable(table);
 
         conn.setUserID(clientName);
-        Modification mod = conn.cloneSynchronizedTable(
-                table.getAggregateTableIdentifier(), tableName);
+        Modification mod;
+        if (filters == null || filters.isEmpty())
+        {
+            mod = conn.cloneSynchronizedTable(
+                    table.getAggregateTableIdentifier(), tableName);
+        } else
+        {
+            mod = conn.cloneSynchronizedTable(
+                    table.getAggregateTableIdentifier(), tableName, filters);
+        }
 
         SynchronizedClient client = clients.get(clientName);
         SynchronizedTable clientTable = new SynchronizedTable(
@@ -691,7 +726,7 @@ public class ClientTestDriver
             input.nextLine();
 
             String inputLine2;
-            while ((inputLine2 = input.findInLine("    \\w+ \\w+ *")) != null)
+            while ((inputLine2 = input.findInLine("    \\w+ [^ \\t\\s]+ *")) != null)
             {
                 StringTokenizer st2 = new StringTokenizer(inputLine2);
 
@@ -704,6 +739,40 @@ public class ClientTestDriver
             rows.put(rowID, row);
         }
         return rows;
+    }
+
+    /**
+     * this.input should be sitting on the beginning of the line with the first
+     * filter. e.g.
+     * 
+     * <pre>
+     *  cloneSynchronizedTable user1 people
+     * # this.input points at the first space
+     * # |
+     * # V
+     *      columnName filterType value
+     * </pre>
+     * 
+     * @return a list of filters
+     */
+    private List<Filter> parseFilters()
+    {
+        List<Filter> filters = new ArrayList<Filter>();
+        String inputLine;
+        while ((inputLine = input.findInLine("    \\w+ \\w+ [^ \\t\\s]+ *")) != null)
+        {
+            StringTokenizer st = new StringTokenizer(inputLine);
+
+            String columnName = st.nextToken();
+            FilterOperation op = FilterOperation.valueOf(st.nextToken());
+            String value = st.nextToken();
+            Filter filter = new Filter(columnName, op, value);
+
+            input.nextLine();
+
+            filters.add(filter);
+        }
+        return filters;
     }
 
     /**

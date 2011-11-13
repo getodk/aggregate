@@ -56,7 +56,8 @@ public class DeleteUserLogic extends CommandLogic<DeleteUser>
             String usersTable = users.getAggregateIdentifier();
 
             // retrieve requesting user
-            InternalUser requestingUser = users.query("DeleteUserLogic.execute")
+            InternalUser requestingUser = users
+                    .query("DeleteUserLogic.execute")
                     .equal(Users.USER_ID, requestingUserID).get();
 
             // check if request user has permission to delete the user

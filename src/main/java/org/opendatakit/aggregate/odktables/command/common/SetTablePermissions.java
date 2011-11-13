@@ -37,13 +37,12 @@ public class SetTablePermissions implements Command
     /**
      * Constructs a new SetTablePermissions.
      */
-    public SetTablePermissions(String requestingUserID,
-            String tableID, String aggregateUserIdentifier,
-            boolean read, boolean write, boolean delete)
+    public SetTablePermissions(String requestingUserID, String tableID,
+            String aggregateUserIdentifier, boolean read, boolean write,
+            boolean delete)
     {
 
-        Check.notNullOrEmpty(tableID,
-                "tableID");
+        Check.notNullOrEmpty(tableID, "tableID");
         Check.notNullOrEmpty(aggregateUserIdentifier, "aggregateUserIdentifier");
         Check.notNull(read, "read");
         Check.notNull(write, "write");
@@ -109,12 +108,10 @@ public class SetTablePermissions implements Command
     @Override
     public String toString()
     {
-        return String.format("SetTablePermissions: "
-                + "tableID=%s "
+        return String.format("SetTablePermissions: " + "tableID=%s "
                 + "aggregateUserIdentifier=%s " + "read=%s " + "write=%s "
-                + "requestingUserID=%s " + "delete=%s " + "",
-                tableID, aggregateUserIdentifier, read, write,
-                requestingUserID, delete);
+                + "requestingUserID=%s " + "delete=%s " + "", tableID,
+                aggregateUserIdentifier, read, write, requestingUserID, delete);
     }
 
     @Override
