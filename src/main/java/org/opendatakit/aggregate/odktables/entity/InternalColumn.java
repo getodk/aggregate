@@ -99,7 +99,7 @@ public class InternalColumn extends TypedEntity
     }
 
     /**
-     * Searches @list for an InternalColumn with the name @columnName. If found,
+     * Searches list for an InternalColumn with the name columnName. If found,
      * returns that InternalColumn, otherwise returns null.
      * 
      * @param list

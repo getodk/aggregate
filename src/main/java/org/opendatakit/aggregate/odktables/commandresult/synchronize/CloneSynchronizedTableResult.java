@@ -4,11 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.opendatakit.aggregate.odktables.client.entity.Modification;
+import org.opendatakit.aggregate.odktables.client.exception.ColumnDoesNotExistException;
+import org.opendatakit.aggregate.odktables.client.exception.FilterValueTypeMismatchException;
 import org.opendatakit.aggregate.odktables.client.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.client.exception.TableAlreadyExistsException;
 import org.opendatakit.aggregate.odktables.client.exception.TableDoesNotExistException;
 import org.opendatakit.aggregate.odktables.command.synchronize.CloneSynchronizedTable;
 import org.opendatakit.aggregate.odktables.commandresult.CommandResult;
+import org.opendatakit.common.ermodel.simple.AttributeType;
 import org.opendatakit.common.utils.Check;
 
 /**
@@ -27,16 +30,24 @@ public class CloneSynchronizedTableResult extends
         possibleFailureReasons.add(FailureReason.TABLE_ALREADY_EXISTS);
         possibleFailureReasons.add(FailureReason.TABLE_DOES_NOT_EXIST);
         possibleFailureReasons.add(FailureReason.PERMISSION_DENIED);
+        possibleFailureReasons.add(FailureReason.COLUMN_DOES_NOT_EXIST);
+        possibleFailureReasons.add(FailureReason.FILTER_VALUE_TYPE_MISMATCH);
     }
 
     private final Modification modification;
     private final String tableID;
+    private final String badColumnName;
+    private final AttributeType type;
+    private final String value;
 
     private CloneSynchronizedTableResult()
     {
         super(true, null);
         this.modification = null;
         this.tableID = null;
+        this.badColumnName = null;
+        this.type = null;
+        this.value = null;
     }
 
     /**
@@ -50,12 +61,16 @@ public class CloneSynchronizedTableResult extends
 
         this.modification = modification;
         this.tableID = null;
+        this.badColumnName = null;
+        this.type = null;
+        this.value = null;
     }
 
     /**
      * The failure constructor. See {@link #failure} for param info.
      */
-    private CloneSynchronizedTableResult(String tableID, FailureReason reason)
+    private CloneSynchronizedTableResult(String tableID, String badColumnName,
+            AttributeType type, String value, FailureReason reason)
     {
         super(false, reason);
 
@@ -68,6 +83,9 @@ public class CloneSynchronizedTableResult extends
 
         this.modification = null;
         this.tableID = tableID;
+        this.badColumnName = badColumnName;
+        this.type = type;
+        this.value = value;
     }
 
     /**
@@ -75,9 +93,12 @@ public class CloneSynchronizedTableResult extends
      * 
      * @throws TableDoesNotExistException
      * @throws TableAlreadyExistsException
+     * @throws ColumnDoesNotExistException
+     * @throws FilterValueTypeMismatchException
      */
     public Modification getModification() throws PermissionDeniedException,
-            TableDoesNotExistException, TableAlreadyExistsException
+            TableDoesNotExistException, TableAlreadyExistsException,
+            ColumnDoesNotExistException, FilterValueTypeMismatchException
     {
         if (successful())
         {
@@ -92,6 +113,10 @@ public class CloneSynchronizedTableResult extends
                 throw new TableDoesNotExistException(tableID);
             case PERMISSION_DENIED:
                 throw new PermissionDeniedException();
+            case COLUMN_DOES_NOT_EXIST:
+                throw new ColumnDoesNotExistException(tableID, badColumnName);
+            case FILTER_VALUE_TYPE_MISMATCH:
+                throw new FilterValueTypeMismatchException(type, value);
             default:
                 throw new RuntimeException("An unknown error occured.");
             }
@@ -111,20 +136,38 @@ public class CloneSynchronizedTableResult extends
         return new CloneSynchronizedTableResult(modification);
     }
 
-    /**
-     * @param tableID
-     *            the tableID which was involved in the command
-     * @param aggregateTableIdentifier
-     *            the Aggregate Identifier which was involved in the command
-     * @param reason
-     *            the reason the command failed. Must be one of
-     *            TABLE_ALREADY_EXISTS, TABLE_DOES_NOT_EXIST, PERMISSION_DENIED.
-     * @return a new CloneSynchronizedTableResult representing the failed
-     *         completion of a CloneSynchronizedTable command.
-     */
-    public static CloneSynchronizedTableResult failure(String tableID,
-            FailureReason reason)
+    public static CloneSynchronizedTableResult failureTableAlreadyExists(
+            String tableID)
     {
-        return new CloneSynchronizedTableResult(tableID, reason);
+        return new CloneSynchronizedTableResult(tableID, null, null, null,
+                FailureReason.TABLE_ALREADY_EXISTS);
     }
+
+    public static CloneSynchronizedTableResult failureTableDoesNotExist(
+            String tableID)
+    {
+        return new CloneSynchronizedTableResult(tableID, null, null, null,
+                FailureReason.TABLE_DOES_NOT_EXIST);
+    }
+
+    public static CloneSynchronizedTableResult failurePermissionDenied()
+    {
+        return new CloneSynchronizedTableResult(null, null, null, null,
+                FailureReason.PERMISSION_DENIED);
+    }
+
+    public static CloneSynchronizedTableResult failureColumnDoesNotExist(
+            String tableID, String badColumnName)
+    {
+        return new CloneSynchronizedTableResult(tableID, badColumnName, null,
+                null, FailureReason.COLUMN_DOES_NOT_EXIST);
+    }
+
+    public static CloneSynchronizedTableResult failureFilterValueTypeMismatch(
+            String tableID, AttributeType type, String value)
+    {
+        return new CloneSynchronizedTableResult(tableID, null, type, value,
+                FailureReason.FILTER_VALUE_TYPE_MISMATCH);
+    }
+
 }

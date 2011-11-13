@@ -135,38 +135,32 @@ public class SynchronizeLogic extends CommandLogic<Synchronize>
                     .equal(Columns.AGGREGATE_TABLE_IDENTIFIER,
                             aggregateTableIdentifier).execute();
 
-            TypedEntityQuery<InternalRow> query = table
-                    .query("SynchronizeTableLogic.execute");
-            query.include(CommonFieldsBase.URI_COLUMN_NAME,
-                    aggregateRowIdentifiers).execute();
-
-            for (InternalFilter filter : clientFilters)
+            List<InternalRow> rows = new ArrayList<InternalRow>();
+            if (!aggregateRowIdentifiers.isEmpty())
             {
-                InternalColumn col = InternalColumn.search(cols,
-                        filter.getColumnName());
-                String columnName = Table.convertIdentifier(col
-                        .getAggregateIdentifier());
-                Object value = CommandLogicFunctions.convert(table, columnName,
-                        filter.getValue());
-                query.addFilter(columnName, filter.getFilterOperation(), value);
+                TypedEntityQuery<InternalRow> query = table
+                        .query("SynchronizeTableLogic.execute");
+                query.include(CommonFieldsBase.URI_COLUMN_NAME,
+                        aggregateRowIdentifiers).execute();
+
+                for (InternalFilter filter : clientFilters)
+                {
+                    InternalColumn col = InternalColumn.search(cols,
+                            filter.getColumnName());
+                    String columnName = Table.convertIdentifier(col
+                            .getAggregateIdentifier());
+                    Object value = CommandLogicFunctions.convert(table
+                            .getAttribute(columnName).getType(), filter
+                            .getValue());
+                    query.addFilter(columnName, filter.getFilterOperation(),
+                            value);
+                }
+                rows = query.execute();
             }
-            List<InternalRow> rows = query.execute();
 
             // Convert rows to SynchronizedRow
-            List<SynchronizedRow> latestRows = new ArrayList<SynchronizedRow>();
-            for (InternalRow row : rows)
-            {
-                SynchronizedRow latestRow = new SynchronizedRow();
-                latestRow.setAggregateRowIdentifier(row
-                        .getAggregateIdentifier());
-                latestRow.setRevisionTag(row.getRevisionTag());
-                for (InternalColumn col : cols)
-                {
-                    String value = row.getValue(col.getAggregateIdentifier());
-                    latestRow.setValue(col.getName(), value);
-                }
-                latestRows.add(latestRow);
-            }
+            List<SynchronizedRow> latestRows = CommandLogicFunctions.convert(
+                    rows, cols);
 
             modification = new Modification(currentModificationNumber,
                     latestRows);
