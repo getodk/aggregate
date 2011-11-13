@@ -11,7 +11,9 @@ public class UserDoesNotExistException extends ODKTablesClientException
 
     public UserDoesNotExistException(String aggregateUserIdentifier)
     {
-        super(String.format("User with aggregateUserIdentifier %s does not exist!", aggregateUserIdentifier));
+        super(String.format(
+                "User with aggregateUserIdentifier %s does not exist!",
+                aggregateUserIdentifier));
         this.aggregateUserIdentifier = aggregateUserIdentifier;
     }
 

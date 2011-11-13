@@ -49,7 +49,8 @@ public class GetUserByIDResult extends CommandResult<GetUserByID>
     /**
      * The failure constructor. See {@link #failure} for param info.
      */
-    private GetUserByIDResult(String aggregateUserIdentifier, FailureReason reason)
+    private GetUserByIDResult(String aggregateUserIdentifier,
+            FailureReason reason)
     {
         super(false, reason);
 
@@ -71,9 +72,10 @@ public class GetUserByIDResult extends CommandResult<GetUserByID>
      * Retrieve the results from the GetUserByID command.
      * 
      * @return the user requested
-     * @throws UserDoesNotExistException 
+     * @throws UserDoesNotExistException
      */
-    public User getUser() throws PermissionDeniedException, UserDoesNotExistException
+    public User getUser() throws PermissionDeniedException,
+            UserDoesNotExistException
     {
         if (successful())
         {
@@ -83,7 +85,8 @@ public class GetUserByIDResult extends CommandResult<GetUserByID>
             switch (getReason())
             {
             case USER_DOES_NOT_EXIST:
-                throw new UserDoesNotExistException(this.aggregateUserIdentifier);
+                throw new UserDoesNotExistException(
+                        this.aggregateUserIdentifier);
             case PERMISSION_DENIED:
                 throw new PermissionDeniedException();
             default:
@@ -111,7 +114,10 @@ public class GetUserByIDResult extends CommandResult<GetUserByID>
         final int prime = 31;
         int result = super.hashCode();
         result = prime * result + ((user == null) ? 0 : user.hashCode());
-        result = prime * result + ((aggregateUserIdentifier == null) ? 0 : aggregateUserIdentifier.hashCode());
+        result = prime
+                * result
+                + ((aggregateUserIdentifier == null) ? 0
+                        : aggregateUserIdentifier.hashCode());
         return result;
     }
 
@@ -138,7 +144,8 @@ public class GetUserByIDResult extends CommandResult<GetUserByID>
         {
             if (other.aggregateUserIdentifier != null)
                 return false;
-        } else if (!aggregateUserIdentifier.equals(other.aggregateUserIdentifier))
+        } else if (!aggregateUserIdentifier
+                .equals(other.aggregateUserIdentifier))
             return false;
         return true;
     }
@@ -157,13 +164,16 @@ public class GetUserByIDResult extends CommandResult<GetUserByID>
 
     /**
      * @param aggregateUserIdentifier
-     *            the aggregate identifier of the user who failed to be retrieved
+     *            the aggregate identifier of the user who failed to be
+     *            retrieved
      * @param reason
      *            the reason the command failed. Must be either
      *            USER_DOES_NOT_EXIST or PERMISSION_DENIED.
-     * @return a new GetUserByIDResult representing the failed GetUserByID command.
+     * @return a new GetUserByIDResult representing the failed GetUserByID
+     *         command.
      */
-    public static GetUserByIDResult failure(String aggregateUserIdentifier, FailureReason reason)
+    public static GetUserByIDResult failure(String aggregateUserIdentifier,
+            FailureReason reason)
     {
         return new GetUserByIDResult(aggregateUserIdentifier, reason);
     }

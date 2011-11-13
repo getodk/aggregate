@@ -110,8 +110,8 @@ public class QueryForRowsResult extends CommandResult<QueryForRows>
     @Override
     public String toString()
     {
-        return String.format("QueryForRowsResult [rows=%s, tableID=%s]",
-                rows, tableID);
+        return String.format("QueryForRowsResult [rows=%s, tableID=%s]", rows,
+                tableID);
     }
 
     /* (non-Javadoc)
@@ -123,8 +123,7 @@ public class QueryForRowsResult extends CommandResult<QueryForRows>
         final int prime = 31;
         int result = super.hashCode();
         result = prime * result + ((rows == null) ? 0 : rows.hashCode());
-        result = prime * result
-                + ((tableID == null) ? 0 : tableID.hashCode());
+        result = prime * result + ((tableID == null) ? 0 : tableID.hashCode());
         return result;
     }
 
@@ -169,7 +168,8 @@ public class QueryForRowsResult extends CommandResult<QueryForRows>
 
     /**
      * @param tableID
-     *            the client's identifier for the table which failed to be queried
+     *            the client's identifier for the table which failed to be
+     *            queried
      * @param reason
      *            the reason that the query failed. Must be either
      *            TABLE_DOES_NOT_EXIST, or PERMISSION_DENIED.

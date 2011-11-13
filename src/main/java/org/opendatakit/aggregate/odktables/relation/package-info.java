@@ -21,12 +21,13 @@
  * <td><center><img src="doc-files/Modifications.png"/></center></td>
  * <td><center><img src="doc-files/Permissions.png"/></center></td>
  * <tr>
- * <td><center><img src="doc-files/Table.png"/></center></td>
- * <td><center><img src="doc-files/TableEntries.png"/></center></td>
- * </tr>
- * <tr>
  * <td><center><img src="doc-files/Users.png"/></center></td>
  * <td><center><img src="doc-files/UserTableMappings.png"/></center></td>
+ * <td><center><img src="doc-files/Filters.png"/></center></td>
+ * </tr>
+ * <tr>
+ * <td><center><img src="doc-files/Table.png"/></center></td>
+ * <td><center><img src="doc-files/TableEntries.png"/></center></td>
  * </tr>
  * </table>
  * </center>
