@@ -63,8 +63,8 @@ public final class PublishPopup extends AbstractPopupBase {
 
 		ExternalServiceType[] valuesToShow = {
 				ExternalServiceType.GOOGLE_FUSIONTABLES,
-				ExternalServiceType.GOOGLE_SPREADSHEET,
-				ExternalServiceType.OHMAGE_JSON_SERVER };
+				ExternalServiceType.GOOGLE_SPREADSHEET};
+				//ExternalServiceType.OHMAGE_JSON_SERVER };
 		serviceType = new EnumListBox<ExternalServiceType>(valuesToShow,
 				ES_TYPE_TOOLTIP, ES_TYPE_BALLOON);
 		serviceType.addChangeHandler(new ExternalServiceTypeChangeHandler());
