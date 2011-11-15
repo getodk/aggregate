@@ -64,7 +64,7 @@ public class CsvFormatterWithFilters implements SubmissionFormatter {
       headers.add(col.getDisplayHeader());
     }
     elemFormatter = new LinkElementFormatter(webServerUrl, FormMultipleValueServlet.ADDR, true,
-        true, true);
+        true, true, false);
   }
 
   @Override

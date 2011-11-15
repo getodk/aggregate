@@ -69,7 +69,7 @@ public class JsonServer extends AbstractExternalService implements ExternalServi
   private final JsonServerParameterTable objectEntity;
 
   private JsonServer(JsonServerParameterTable entity, FormServiceCursor formServiceCursor, Form form, CallingContext cc) {
-    super(form, formServiceCursor, new BasicElementFormatter(true, true, true), new BasicHeaderFormatter(true, true, true), cc);
+    super(form, formServiceCursor, new BasicElementFormatter(true, true, true, false), new BasicHeaderFormatter(true, true, true), cc);
     objectEntity = entity;
   }
   

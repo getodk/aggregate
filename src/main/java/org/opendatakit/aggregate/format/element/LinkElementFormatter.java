@@ -60,8 +60,8 @@ public class LinkElementFormatter extends BasicElementFormatter {
    *          include GPS accuracy data
    */
   public LinkElementFormatter(String baseWebServerUrl, String repeatServlet,
-		  boolean separateGpsCoordinates, boolean includeGpsAltitude, boolean includeGpsAccuracy) {
-    super(separateGpsCoordinates, includeGpsAltitude, includeGpsAccuracy);
+		  boolean separateGpsCoordinates, boolean includeGpsAltitude, boolean includeGpsAccuracy, boolean googleDocsDate) {
+    super(separateGpsCoordinates, includeGpsAltitude, includeGpsAccuracy, googleDocsDate);
     this.baseWebServerUrl = baseWebServerUrl;
     this.repeatServlet = repeatServlet;
   }

@@ -65,7 +65,7 @@ public class FragmentedCsvFormatter extends TableFormatterBase implements Submis
     super(xform, printWriter, null);
     this.websafeCursorString = websafeCursorString;
     elemFormatter = new LinkElementFormatter(webServerUrl, FragmentedCsvServlet.ADDR, true, true,
-        true);
+        true, false);
   }
 
   /**
