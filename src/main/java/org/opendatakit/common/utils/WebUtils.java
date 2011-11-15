@@ -77,14 +77,20 @@ public class WebUtils {
   private static final String PATTERN_ISO8601_TIME = "HH:mm:ss.SSSZ";
   private static final String PATTERN_YYYY_MM_DD_DATE_ONLY_NO_TIME_DASH = "yyyy-MM-dd";
   private static final String PATTERN_NO_DATE_TIME_ONLY = "HH:mm:ss.SSS";
-
+  private static final String PATTERN_GOOGLE_DOCS = "MM/dd/yyyy HH:mm:ss.SSS";
+  
   private static final SimpleDateFormat asGMTiso8601;
-
+  private static final SimpleDateFormat asGoogleDoc;
+  
   static {
     SimpleDateFormat temp;
     temp = new SimpleDateFormat(PATTERN_ISO8601); // with time zone
     temp.setTimeZone(TimeZone.getTimeZone("GMT"));
     asGMTiso8601 = temp;
+    
+    temp = new SimpleDateFormat(PATTERN_GOOGLE_DOCS);
+    temp.setTimeZone(TimeZone.getTimeZone("GMT"));
+    asGoogleDoc = temp;
   }
 
   private WebUtils() {
@@ -180,7 +186,8 @@ public class WebUtils {
         // ones without timezones... (will assume UTC)
         PATTERN_ISO8601_WITHOUT_ZONE, 
         PATTERN_NO_DATE_TIME_ONLY,
-        PATTERN_YYYY_MM_DD_DATE_ONLY_NO_TIME_DASH };
+        PATTERN_YYYY_MM_DD_DATE_ONLY_NO_TIME_DASH,
+        PATTERN_GOOGLE_DOCS };
 
     Date d = null;
     // iso8601 parsing is sometimes off-by-one when JR does it...
@@ -287,6 +294,18 @@ public class WebUtils {
       }
     }
     return b.toString();
+  }
+
+  /**
+   * Return the GoogleDocs datetime string representation of a datetime.
+   * 
+   * @param d
+   * @return
+   */
+  public static final String googleDocsDateTime(Date d) {
+    if (d == null)
+      return null;
+    return asGoogleDoc.format(d);
   }
 
   /**

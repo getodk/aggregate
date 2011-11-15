@@ -110,7 +110,7 @@ public class GoogleSpreadsheet extends OAuthExternalService implements ExternalS
    */
   private GoogleSpreadsheet(Form form, GoogleSpreadsheetParameterTable gsObject, FormServiceCursor formServiceCursor, CallingContext cc) throws ODKExternalServiceException {
     super(form, formServiceCursor, 
-        new LinkElementFormatter(cc.getServerURL(), FormMultipleValueServlet.ADDR, true, true, true),
+        new LinkElementFormatter(cc.getServerURL(), FormMultipleValueServlet.ADDR, true, true, true, true),
         new GoogleSpreadsheetHeaderFormatter(true, true, true),
         cc);
     spreadsheetService = new SpreadsheetService(ServletConsts.APPLICATION_NAME);
