@@ -32,6 +32,7 @@ import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.BasicConsts;
 import org.opendatakit.common.web.constants.HtmlConsts;
@@ -89,7 +90,16 @@ public class FormXmlServlet extends ServletUtilBase {
     try {
       form = Form.retrieveFormByFormId(formId, cc);
     } catch (ODKFormNotFoundException e) {
+      e.printStackTrace();
       odkIdNotFoundError(resp);
+      return;
+    } catch (ODKOverQuotaException e) {
+      e.printStackTrace();
+      quotaExceededError(resp);
+      return;
+    } catch (ODKDatastoreException e) {
+      e.printStackTrace();
+      datastoreError(resp);
       return;
     }
     String xmlString = null;

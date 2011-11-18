@@ -39,9 +39,11 @@ import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.InvocationException;
 import com.google.gwt.user.client.ui.DecoratedTabPanel;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -50,14 +52,14 @@ import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.Tree;
 import com.google.gwt.user.client.ui.TreeItem;
-import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class AggregateUI implements EntryPoint {
 
   private UrlHash hash;
   private Label errorMsgLabel;
+  private FlowPanel errorPanel;
 
-  private VerticalPanel wrappingLayoutPanel;
+  private FlowPanel wrappingLayoutPanel;
   private HorizontalPanel layoutPanel;
   private ScrollPanel helpPanel;
   private TreeItem rootItem;
@@ -110,12 +112,18 @@ public class AggregateUI implements EntryPoint {
     singleton = null;
     timer = new RefreshTimer(this);
 
+    // define the error message info...
+    errorMsgLabel = new Label();
+    errorMsgLabel.setStyleName("error_message");
+    errorPanel = new FlowPanel();
+    errorPanel.add(errorMsgLabel);
+    errorPanel.setVisible(false);
+
     // create tab datastructures
     tabMap = new HashMap<Tabs, AggregateTabBase>();
     tabPosition = new ArrayList<Tabs>();
 
-    wrappingLayoutPanel = new VerticalPanel();
-    errorMsgLabel = new Label();
+    wrappingLayoutPanel = new FlowPanel();
     layoutPanel = new HorizontalPanel();
     helpPanel = new ScrollPanel();
 
@@ -136,16 +144,13 @@ public class AggregateUI implements EntryPoint {
     helpPanel.add(helpTree);
     helpPanel.getElement().setId("help_panel");
 
-    // add the error message info...
-    errorMsgLabel.setStyleName("error_message");
-    errorMsgLabel.setVisible(false);
-    wrappingLayoutPanel.add(errorMsgLabel);
     wrappingLayoutPanel.add(layoutPanel);
 
     // add to layout
     layoutPanel.add(mainNav);
     layoutPanel.getElement().setId("layout_panel");
 
+    RootPanel.get("error_content").add(errorPanel);
     RootPanel.get("dynamic_content").add(wrappingLayoutPanel);
     RootPanel.get("dynamic_content").add(settingsBar);
     RootPanel.get("dynamic_content").add(
@@ -165,7 +170,6 @@ public class AggregateUI implements EntryPoint {
     // Get url hash.
     hash = UrlHash.getHash();
     hash.get();
-    errorMsgLabel.setVisible(false);
     userInfo = null;
 
     // assign the singleton here...
@@ -538,6 +542,14 @@ public class AggregateUI implements EntryPoint {
     resize();
   }
 
+  public void displayErrorPanel() {
+    errorPanel.setVisible(true);
+  }
+  
+  public void hideErrorPanel() {
+    errorPanel.setVisible(false);
+  }
+  
   public void displayHelpPanel() {
     wrappingLayoutPanel.add(helpPanel);
     resize();
@@ -556,24 +568,37 @@ public class AggregateUI implements EntryPoint {
    ****** ERROR STUFF ******
    ***********************************/
   public void reportError(Throwable t) {
-    if (t instanceof org.opendatakit.common.persistence.client.exception.DatastoreFailureException) {
-      errorMsgLabel.setText("Error: " + t.getMessage());
-      errorMsgLabel.setVisible(true);
-    } else if (t instanceof org.opendatakit.common.security.client.exception.AccessDeniedException) {
-      errorMsgLabel
-          .setText("You do not have permission for this action.\nError: " + t.getMessage());
-      errorMsgLabel.setVisible(true);
-    } else if (t instanceof InvocationException) {
-      redirect(GWT.getHostPageBaseURL() + UIConsts.HOST_PAGE_BASE_ADDR);
-    } else {
-      errorMsgLabel.setText("Error: " + t.getMessage());
-      errorMsgLabel.setVisible(true);
-    }
+    reportError("Error: ", t);
   }
 
+  public void reportError(String context, Throwable t) {
+    String textMessage;
+    if (t instanceof org.opendatakit.common.persistence.client.exception.DatastoreFailureException) {
+      textMessage = context + t.getMessage();
+    } else if (t instanceof org.opendatakit.common.security.client.exception.AccessDeniedException) {
+      textMessage = "You do not have permission for this action.\n" + context + t.getMessage();
+    } else if (t instanceof InvocationException) {
+      // could occur if the cached JavaScript is out-of-sync with server
+      redirect(GWT.getHostPageBaseURL() + UIConsts.HOST_PAGE_BASE_ADDR);
+      return;
+    } else if ( t.getMessage().contains("uuid:081e8b57-1698-4bbf-ba5b-ae31338b121d") ) {
+      // magic number for the service-error.html page.
+      // Generally means an out-of-quota error.
+      redirect(GWT.getHostPageBaseURL() + UIConsts.HOST_PAGE_BASE_ADDR);
+      return;
+    } else {
+      textMessage = context + t.getMessage();
+    }
+    int lines = 1 + (textMessage.length() / 80);
+    errorMsgLabel.setText(textMessage);
+    errorPanel.setVisible(true);
+    errorPanel.setHeight(Integer.toString(lines) + "em");
+    displayErrorPanel();
+    Window.alert(textMessage);
+  }
+  
   public void clearError() {
-    errorMsgLabel.setVisible(false);
-    errorMsgLabel.setText("");
+    hideErrorPanel();
   }
 
 }

@@ -34,7 +34,9 @@ import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.PersistConsts;
 import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
+import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.web.CallingContext;
 
@@ -220,7 +222,7 @@ public class SubmissionFilter extends CommonFieldsBase {
     }
   }
   
-  public void persist(CallingContext cc) throws ODKEntityPersistException {
+  public void persist(CallingContext cc) throws ODKEntityPersistException, ODKOverQuotaException {
     Datastore ds = cc.getDatastore();
     User user = cc.getCurrentUser();
 
@@ -290,7 +292,7 @@ public class SubmissionFilter extends CommonFieldsBase {
   }
 
   static final SubmissionFilter transform(Filter filter, SubmissionFilterGroup filterGroup,
-      CallingContext cc) throws ODKDatastoreException {
+      CallingContext cc) throws ODKOverQuotaException, ODKEntityNotFoundException, ODKDatastoreException {
 
     SubmissionFilter relation = assertRelation(cc);
     String uri = filter.getUri();

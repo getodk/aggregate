@@ -844,8 +844,14 @@ public class FormParserForJavaRosa {
     	  if ( cleaveCount+groupSize > (3*nCol)/4) {
     		  continue; // just too big to split this way see if there is a smaller group...
     	  }
-          String newGroupTable = opaque.generateUniqueTableName(tbl.getSchemaName(), tbl.getTableName(),
-        		  				cc);
+          String newGroupTable;
+          try {
+            newGroupTable = opaque.generateUniqueTableName(tbl.getSchemaName(), tbl.getTableName(),
+            	  				cc);
+          } catch (ODKDatastoreException e) {
+            e.printStackTrace();
+            throw new IllegalStateException("unable to interrogate database");
+          }
           recursivelyReassignChildren(m, tbl, newGroupTable);
           cleaveCount += groupSize;
           // and if we have cleaved over half, (divide and conquer), retry it with the database.
@@ -867,8 +873,14 @@ public class FormParserForJavaRosa {
     // so we just need to get that, and update the entries
     // in the last half of the array.
     String phantomURI = generatePhantomKey(fdmSubmissionUri);
-    String newPhantomTableName = opaque.generateUniqueTableName(tbl.getSchemaName(), tbl.getTableName(),
-				cc);
+    String newPhantomTableName;
+    try {
+      newPhantomTableName = opaque.generateUniqueTableName(tbl.getSchemaName(), tbl.getTableName(),
+      		cc);
+    } catch (ODKDatastoreException e) {
+      e.printStackTrace();
+      throw new IllegalStateException("unable to interrogate database");
+    }
     int desiredOriginalTableColCount = (nCol / 2);
     List<FormDataModel> children = parentTable.getChildren();
     int skipCleaveCount = 0;

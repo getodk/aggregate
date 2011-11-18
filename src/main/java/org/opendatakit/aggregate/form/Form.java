@@ -49,6 +49,7 @@ import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.persistence.Query.FilterOperation;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
+import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.BasicConsts;
@@ -78,28 +79,22 @@ public class Form {
     }
   }
 
-  private static final long LIFETIME_MS = 30000L;
   private static final Map<String, FormCache> cache = new HashMap<String, FormCache>();
 
   private static synchronized Form getForm(String topLevelAuri, CallingContext cc)
-      throws ODKDatastoreException {
+      throws ODKOverQuotaException, ODKDatastoreException {
     FormCache c = cache.get(topLevelAuri);
-    if (c != null && c.timestamp + LIFETIME_MS > System.currentTimeMillis()) {
-      logger.info("FormCache: testing Form: " + topLevelAuri);
-      FormInfoTable infoRelation = FormInfoTable.assertRelation(cc);
-
-      Form f = c.form;
-      // double-check that the entity is actually still there...
-      try {
-        cc.getDatastore().getEntity(infoRelation, topLevelAuri, cc.getCurrentUser());
-      } catch (ODKEntityNotFoundException e) {
-        f = null;
-      }
-
-      if (f != null) {
-        logger.info("FormCache: using cached Form: " + topLevelAuri);
-        return f;
-      }
+    if (c != null && c.timestamp + PersistConsts.MAX_SETTLE_MILLISECONDS > System.currentTimeMillis()) {
+      // TODO: This cache should reside in MemCache.  Right now, different running
+      // servers might see different Form definitions for up to the settle time.
+      //
+      // Since the datastore is treated as having a settle time of MAX_SETTLE_MILLISECONDS,
+      // we should rely on the cache for that time interval.  Without MemCache-style
+      // support, this is somewhat problematic since different server instances might
+      // see different versions of the same Form.
+      // 
+      logger.info("FormCache: using cached Form: " + topLevelAuri);
+      return c.form;
     }
 
     logger.info("FormCache: inserting Form: " + topLevelAuri);
@@ -315,8 +310,8 @@ public class Form {
     return b.toString();
   }
 
-  public FormDefinition getFormDefinition() {
-    return formDefinition;
+  public boolean hasValidFormDefinition() {
+    return (formDefinition != null);
   }
 
   /**
@@ -666,7 +661,7 @@ public class Form {
   }
 
   public static final List<Form> getForms(boolean checkAuthorization, CallingContext cc)
-      throws ODKDatastoreException {
+      throws ODKOverQuotaException, ODKDatastoreException {
 
     FormInfoTable relation = FormInfoTable.assertRelation(cc);
 
@@ -719,12 +714,14 @@ public class Form {
    * 
    * @return The ODK aggregate form definition/conversion object
    * 
+   * @throws ODKOverQuotaException
+   * @throws ODKDatastoreException
    * @throws ODKFormNotFoundException
    *           Thrown when a form was not able to be found with the
    *           corresponding ODK ID
    */
   public static Form retrieveFormByFormId(String formId, CallingContext cc)
-      throws ODKFormNotFoundException {
+      throws ODKFormNotFoundException, ODKOverQuotaException, ODKDatastoreException {
 
     if (formId == null) {
       return null;
@@ -737,6 +734,10 @@ public class Form {
             + formId);
       }
       return form;
+    } catch (ODKOverQuotaException e) {
+      throw e;
+    } catch (ODKDatastoreException e) {
+      throw e;
     } catch (Exception e) {
       throw new ODKFormNotFoundException(e);
     }
@@ -751,12 +752,14 @@ public class Form {
    * 
    * @return The ODK aggregate form definition/conversion object
    * 
+   * @throws ODKOverQuotaException
+   * @throws ODKDatastoreException
    * @throws ODKFormNotFoundException
    *           Thrown when a form was not able to be found with the
    *           corresponding ODK ID
    */
   public static Form retrieveForm(List<SubmissionKeyPart> parts, CallingContext cc)
-      throws ODKFormNotFoundException {
+      throws ODKOverQuotaException, ODKDatastoreException, ODKFormNotFoundException {
 
     if (!FormInfo.validFormKey(parts)) {
       return null;
@@ -766,6 +769,10 @@ public class Form {
       String formUri = parts.get(1).getAuri();
       Form form = getForm(formUri, cc);
       return form;
+    } catch ( ODKOverQuotaException e) {
+      throw e;
+    } catch ( ODKDatastoreException e) {
+      throw e;
     } catch (Exception e) {
       throw new ODKFormNotFoundException(e);
     }
@@ -819,6 +826,7 @@ public class Form {
    * @param ds
    * @param user
    * @return
+   * @throws ODKOverQuotaException
    * @throws ODKDatastoreException
    * @throws ODKConversionException
    *           if formId is too long...
@@ -826,7 +834,7 @@ public class Form {
    */
   public static final Form createOrFetchFormId(XFormParameters rootElementDefn,
       boolean isEncryptedForm, String title, byte[] xmlBytes, boolean isDownloadEnabled,
-      CallingContext cc) throws ODKDatastoreException, ODKConversionException,
+      CallingContext cc) throws ODKOverQuotaException, ODKDatastoreException, ODKConversionException,
       ODKFormAlreadyExistsException {
 
     Form thisForm = null;

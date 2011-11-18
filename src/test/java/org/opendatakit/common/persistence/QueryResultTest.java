@@ -31,6 +31,7 @@ import org.opendatakit.common.persistence.Query.Direction;
 import org.opendatakit.common.persistence.Query.FilterOperation;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
+import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.utils.WebUtils;
 import org.opendatakit.common.web.CallingContext;
@@ -96,7 +97,7 @@ public class QueryResultTest {
 			this.b = b;
 		}
 		
-		void assertInstance(MyRelation rel, CallingContext cc) throws ODKEntityPersistException {
+		void assertInstance(MyRelation rel, CallingContext cc) throws ODKEntityPersistException, ODKOverQuotaException {
 			Datastore ds = cc.getDatastore();
 			User user = cc.getCurrentUser();
 			

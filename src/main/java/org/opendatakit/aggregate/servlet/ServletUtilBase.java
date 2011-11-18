@@ -67,6 +67,28 @@ public class ServletUtilBase extends CommonServletBase {
   }
 
   /**
+   * Generate error response for quota exceeded.
+   * 
+   * @param resp
+   * @throws IOException
+   *           caused by problems writing error information to response
+   */
+  protected void quotaExceededError(HttpServletResponse resp) throws IOException {
+    resp.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE, ErrorConsts.QUOTA_EXCEEDED);
+  }
+  
+  /**
+   * Generate error response for datastore access issues.
+   * 
+   * @param resp
+   * @throws IOException
+   *           caused by problems writing error information to response
+   */
+  protected void datastoreError(HttpServletResponse resp) throws IOException {
+    resp.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE, ErrorConsts.PERSISTENCE_LAYER_PROBLEM);
+  }
+  
+  /**
    * Generate error response for missing the Key parameter
    * 
    * @param resp

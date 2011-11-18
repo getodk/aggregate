@@ -45,14 +45,14 @@ public final class AcceptSubmissionCheckBox extends AggregateCheckBox implements
 	public void onValueChange(ValueChangeEvent<Boolean> event) {
 		super.onValueChange(event);
 		
-		SecureGWT.getFormAdminService().setFormAcceptSubmissions(formId, event.getValue(), new AsyncCallback<Boolean>() {
+		SecureGWT.getFormAdminService().setFormAcceptSubmissions(formId, event.getValue(), new AsyncCallback<Void>() {
 			@Override
 			public void onFailure(Throwable caught) {
 				AggregateUI.getUI().reportError(caught);
 			}
 
 			@Override
-			public void onSuccess(Boolean result) {
+			public void onSuccess(Void v) {
 				AggregateUI.getUI().clearError();
 			}
 		});

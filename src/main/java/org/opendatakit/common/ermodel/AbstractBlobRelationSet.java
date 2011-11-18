@@ -26,6 +26,7 @@ import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
+import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.web.CallingContext;
 
@@ -236,7 +237,7 @@ public class AbstractBlobRelationSet implements BlobRelationSet {
 	
 	
 	@Override
-	public void putBlobEntitySet( BlobEntitySet e, CallingContext cc ) throws ODKEntityPersistException {
+	public void putBlobEntitySet( BlobEntitySet e, CallingContext cc ) throws ODKEntityPersistException, ODKOverQuotaException {
 		e.persist(cc);
 	}
 	
@@ -247,7 +248,7 @@ public class AbstractBlobRelationSet implements BlobRelationSet {
 	
 	
 	@Override
-	public void putBlobEntitySets( List<BlobEntitySet> eList, CallingContext cc ) throws ODKEntityPersistException {
+	public void putBlobEntitySets( List<BlobEntitySet> eList, CallingContext cc ) throws ODKEntityPersistException, ODKOverQuotaException {
 		for ( BlobEntitySet e : eList ) {
 			e.persist(cc);
 		}
@@ -349,7 +350,7 @@ public class AbstractBlobRelationSet implements BlobRelationSet {
 		}
 
 		@Override
-		public void persist(CallingContext cc) throws ODKEntityPersistException {
+		public void persist(CallingContext cc) throws ODKEntityPersistException, ODKOverQuotaException {
 			m.persist(cc);
 		}
 

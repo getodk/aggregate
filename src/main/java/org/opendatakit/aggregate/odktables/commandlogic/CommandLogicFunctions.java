@@ -13,6 +13,7 @@ import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.TaskLock;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
+import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.web.CallingContext;
@@ -30,7 +31,7 @@ public class CommandLogicFunctions
     public static int updateModificationNumber(InternalTableEntry entry,
             String aggregateTableIdentifier, int newModificationNumber,
             CallingContext cc) throws ODKTaskLockException,
-            ODKEntityPersistException
+            ODKEntityPersistException, ODKOverQuotaException
     {
         Datastore ds = cc.getDatastore();
         User user = cc.getCurrentUser();
@@ -151,7 +152,13 @@ public class CommandLogicFunctions
             {
             	logger.error("Was not able to save entity: " + entity);
                 return false;
+            } catch (ODKOverQuotaException e1) {
+              logger.error("Over quota - was not able to save entity: " + entity);
+              return false;
             }
+        } catch (ODKOverQuotaException e) {
+          logger.error("Over quota - was not able to save entity: " + entity);
+          return false;
         }
         return true;
     }

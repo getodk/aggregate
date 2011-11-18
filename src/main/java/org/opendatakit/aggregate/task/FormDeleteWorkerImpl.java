@@ -45,6 +45,7 @@ import org.opendatakit.common.persistence.QueryResumePoint;
 import org.opendatakit.common.persistence.TaskLock;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
+import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.web.CallingContext;
@@ -296,7 +297,7 @@ public class FormDeleteWorkerImpl {
 
   }
 
-  private void doMarkAsComplete(MiscTasks t) throws ODKEntityPersistException {
+  private void doMarkAsComplete(MiscTasks t) throws ODKEntityPersistException, ODKOverQuotaException {
     // and mark us as completed... (don't delete for audit..).
     t.setCompletionDate(new Date());
     t.setStatus(FormActionStatus.SUCCESSFUL);
@@ -310,8 +311,10 @@ public class FormDeleteWorkerImpl {
    * @return true if form is fully deleted...
    * @throws ODKDatastoreException
    * @throws ODKTaskLockException
+   * @throws ODKOverQuotaException
+   * @throws ODKFormNotFoundException
    */
-  private boolean doDeletion(MiscTasks t) throws ODKDatastoreException, ODKTaskLockException {
+  private boolean doDeletion(MiscTasks t) throws ODKOverQuotaException, ODKFormNotFoundException, ODKDatastoreException, ODKTaskLockException {
 
     if (!deleteMiscTasks(t))
       return false;

@@ -27,6 +27,8 @@ import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.servlet.ServletUtilBase;
 import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.task.CsvWorkerImpl;
+import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.web.CallingContext;
 
 /**
@@ -81,12 +83,21 @@ public class CsvGeneratorTaskServlet extends ServletUtilBase {
     Form form = null;
     try {
       form = Form.retrieveFormByFormId(formId, cc);
-    } catch (ODKFormNotFoundException e1) {
+    } catch (ODKFormNotFoundException e) {
+      e.printStackTrace();
       odkIdNotFoundError(resp);
+      return;
+    } catch (ODKOverQuotaException e) {
+      e.printStackTrace();
+      quotaExceededError(resp);
+      return;
+    } catch (ODKDatastoreException e) {
+      e.printStackTrace();
+      datastoreError(resp);
       return;
     }
     
-    if ( form.getFormDefinition() == null ) {
+    if ( !form.hasValidFormDefinition() ) {
 	  errorRetreivingData(resp);
 	  return; // ill-formed definition
     }

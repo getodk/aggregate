@@ -28,6 +28,8 @@ import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.PersistConsts;
 import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
+import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.web.CallingContext;
 
@@ -131,7 +133,7 @@ public class SubmissionColumnFilter extends CommonFieldsBase {
   }
 
   static final SubmissionColumnFilter transform(Column column, SubmissionFilter parentFilter,
-      CallingContext cc) throws ODKDatastoreException {
+      CallingContext cc) throws ODKOverQuotaException, ODKEntityNotFoundException, ODKDatastoreException {
 
     SubmissionColumnFilter relation = assertRelation(cc);
     String uri = column.getUri();

@@ -24,7 +24,6 @@ import org.opendatakit.aggregate.constants.format.FormatConsts;
 import org.opendatakit.aggregate.datamodel.FormDataModel;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.exception.ODKConversionException;
-import org.opendatakit.aggregate.form.FormDefinition;
 import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.format.element.ElementFormatter;
 import org.opendatakit.aggregate.submission.SubmissionKey;
@@ -37,6 +36,7 @@ import org.opendatakit.common.datamodel.RefBlob;
 import org.opendatakit.common.persistence.EntityKey;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
+import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.BasicConsts;
 
@@ -85,8 +85,7 @@ public class BlobSubmissionType extends SubmissionFieldBase<SubmissionKey> {
 	 *            Name of submission element
 	 */
 	public BlobSubmissionType(FormElementModel element, String parentKey,
-			EntityKey topLevelTableKey, FormDefinition formDefinition,
-			SubmissionKey submissionKey) {
+			EntityKey topLevelTableKey, SubmissionKey submissionKey) {
 		super(element);
 		this.parentKey = parentKey;
 		this.submissionKey = submissionKey;
@@ -147,7 +146,7 @@ public class BlobSubmissionType extends SubmissionFieldBase<SubmissionKey> {
 	}
 
 	@Override
-	public void persist(CallingContext cc) throws ODKEntityPersistException {
+	public void persist(CallingContext cc) throws ODKEntityPersistException, ODKOverQuotaException {
 		bcm.persist(cc);
 	}
 

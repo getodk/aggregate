@@ -26,14 +26,14 @@ public class MarkSubmissionCompleteButton extends AggregateButton implements Cli
     super.onClick(event);
     
     // Set up the callback object.
-    AsyncCallback<Boolean> callback = new AsyncCallback<Boolean>() {
+    AsyncCallback<Void> callback = new AsyncCallback<Void>() {
       @Override
       public void onFailure(Throwable caught) {
         AggregateUI.getUI().reportError(caught);
       }
 
       @Override
-      public void onSuccess(Boolean result) {
+      public void onSuccess(Void result) {
         AggregateUI.getUI().clearError();
         AggregateUI.getUI().getTimer().refreshNow();
       }

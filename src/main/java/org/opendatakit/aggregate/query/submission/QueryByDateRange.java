@@ -48,7 +48,7 @@ public class QueryByDateRange extends QueryBase {
     super(form);
     this.fetchLimit = maxFetchLimit;
    
-    TopLevelDynamicBase tbl = (TopLevelDynamicBase) form.getFormDefinition().getTopLevelGroup().getBackingObjectPrototype();
+    TopLevelDynamicBase tbl = (TopLevelDynamicBase) form.getTopLevelGroupElement().getFormDataModel().getBackingObjectPrototype();
     
     // Query by lastUpdateDate, filtering by isCompleted.
     // Submissions may be partially uploaded and are marked completed once they 
@@ -79,7 +79,7 @@ public class QueryByDateRange extends QueryBase {
     this.fetchLimit = 1;
     this.startCursor = null;
     
-    TopLevelDynamicBase tbl = (TopLevelDynamicBase) form.getFormDefinition().getTopLevelGroup().getBackingObjectPrototype();
+    TopLevelDynamicBase tbl = (TopLevelDynamicBase) form.getTopLevelGroupElement().getFormDataModel().getBackingObjectPrototype();
     
     // Query by lastUpdateDate, filtering by isCompleted.
     // Submissions may be partially uploaded and are marked completed once they 
@@ -107,7 +107,7 @@ public class QueryByDateRange extends QueryBase {
     // create a row for each submission
     for (int count = 0; count < submissionEntities.size(); count++) {
     CommonFieldsBase subEntity = submissionEntities.get(count);
-      retrievedSubmissions.add(new Submission((TopLevelDynamicBase) subEntity, getForm().getFormDefinition(), cc));
+      retrievedSubmissions.add(new Submission((TopLevelDynamicBase) subEntity, getForm(), cc));
     }
     return retrievedSubmissions;
   }

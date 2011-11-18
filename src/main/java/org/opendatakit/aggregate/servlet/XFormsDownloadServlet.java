@@ -34,6 +34,7 @@ import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.submission.SubmissionKeyPart;
 import org.opendatakit.common.datamodel.BinaryContentManipulator;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.HtmlConsts;
 
@@ -98,8 +99,17 @@ public class XFormsDownloadServlet extends ServletUtilBase {
     Form form;
     try {
       form = Form.retrieveForm(parts, cc);
-    } catch (ODKFormNotFoundException e1) {
+    } catch (ODKFormNotFoundException e) {
+      e.printStackTrace();
       odkIdNotFoundError(resp);
+      return;
+    } catch (ODKOverQuotaException e) {
+      e.printStackTrace();
+      quotaExceededError(resp);
+      return;
+    } catch (ODKDatastoreException e) {
+      e.printStackTrace();
+      datastoreError(resp);
       return;
     }
 

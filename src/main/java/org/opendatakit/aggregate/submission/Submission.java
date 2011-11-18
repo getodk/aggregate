@@ -26,7 +26,6 @@ import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.datamodel.TopLevelDynamicBase;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.form.Form;
-import org.opendatakit.aggregate.form.FormDefinition;
 import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.format.element.ElementFormatter;
 import org.opendatakit.common.persistence.Datastore;
@@ -56,8 +55,8 @@ public class Submission extends SubmissionSet {
 	 * @throws ODKDatastoreException
 	 */
 	public Submission(Long modelVersion, Long uiVersion, String uriTopLevelGroup,
-			FormDefinition formDefinition, Date submissionDate, CallingContext cc) throws ODKDatastoreException {
-		super( modelVersion, uiVersion, uriTopLevelGroup, formDefinition, cc);
+			Form form, Date submissionDate, CallingContext cc) throws ODKDatastoreException {
+		super( modelVersion, uiVersion, uriTopLevelGroup, form, cc);
 		((TopLevelDynamicBase) getGroupBackingObject()).setSubmissionDate(submissionDate);
 	}
 
@@ -70,15 +69,15 @@ public class Submission extends SubmissionSet {
 	 * @throws ODKDatastoreException
 	 */
 	public Submission(TopLevelDynamicBase submission,
-			FormDefinition formDefinition, CallingContext cc)
+			Form form, CallingContext cc)
 			throws ODKDatastoreException {
-		super(null, submission, formDefinition.getTopLevelGroupElement(),
-				formDefinition, cc);
+		super(null, submission, form.getTopLevelGroupElement(),
+				form, cc);
 	}
 	
 	public Submission(String uri, Form form, CallingContext cc) throws ODKEntityNotFoundException, ODKDatastoreException {
 		super(null, (TopLevelDynamicBase) cc.getDatastore().getEntity(form.getTopLevelGroupElement().getFormDataModel().getBackingObjectPrototype(), uri, cc.getCurrentUser()),
-				form.getTopLevelGroupElement(), form.getFormDefinition(), cc);
+				form.getTopLevelGroupElement(), form, cc);
 	}
 
 	/**
@@ -207,7 +206,7 @@ public class Submission extends SubmissionSet {
 			throw new IllegalArgumentException("submission key is empty");
 		}
 
-		if ( !parts.get(0).getElementName().equals(getFormDefinition().getFormId())) {
+		if ( !parts.get(0).getElementName().equals(getFormId())) {
 			throw new IllegalArgumentException(
 					"formId of submissionKey does not match FormId");
 		}
@@ -222,7 +221,7 @@ public class Submission extends SubmissionSet {
 			throw new IllegalArgumentException("submission key is empty");
 		}
 		Form form = Form.retrieveFormByFormId(parts.get(0).getElementName(), cc);
-	    if ( form.getFormDefinition() == null ) {
+	    if ( !form.hasValidFormDefinition() ) {
 	    	throw new IllegalArgumentException("Form definition is ill-formed"); // ill-formed definition
 	    }
 
@@ -246,6 +245,6 @@ public class Submission extends SubmissionSet {
 		TopLevelDynamicBase tle = (TopLevelDynamicBase) ds.getEntity(form
 				.getTopLevelGroupElement().getFormDataModel().getBackingObjectPrototype(), tlg.getAuri(), user);
 
-		return new Submission(tle, form.getFormDefinition(), cc);
+		return new Submission(tle, form, cc);
 	}
 }

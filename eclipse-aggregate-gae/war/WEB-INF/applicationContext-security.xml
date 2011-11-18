@@ -62,6 +62,8 @@
 
 		<!-- grant access to all routing pages -->
 		<intercept-url pattern="/access-denied.html" access="true" />
+		<intercept-url pattern="/over-quota.html" access="true" />
+		<intercept-url pattern="/service-error.html" access="true" />
 		<intercept-url pattern="/AggregateUI.css" access="true" />
 		<intercept-url pattern="/favicon.ico" access="true" />
 		<intercept-url pattern="/index.html" access="true" />
@@ -124,6 +126,8 @@
 	        <intercept-url pattern="/res/**" access="ANY_CHANNEL" />
 			<intercept-url pattern="/stylesheets/**" access="ANY_CHANNEL" />
 			<intercept-url pattern="/AggregateUI.css" access="ANY_CHANNEL" />
+			<intercept-url pattern="/over-quota.html" access="ANY_CHANNEL" />
+			<intercept-url pattern="/service-error.html" access="ANY_CHANNEL" />
 			<intercept-url pattern="/access-denied.html" access="${security.server.channelType}" />
 	        <intercept-url pattern="/index.html" access="${security.server.channelType}" />
 	        <intercept-url pattern="/logout.html" access="${security.server.channelType}" />

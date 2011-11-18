@@ -5,6 +5,7 @@ import java.util.Date;
 import org.opendatakit.common.ermodel.simple.Entity;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
+import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 
 public class TypedEntity
 {
@@ -31,7 +32,7 @@ public class TypedEntity
         return entity.getCreationDate();
     }
 
-    public void save() throws ODKEntityPersistException
+    public void save() throws ODKEntityPersistException, ODKOverQuotaException
     {
         entity.save();
     }

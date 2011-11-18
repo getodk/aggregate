@@ -33,6 +33,7 @@ import org.opendatakit.common.persistence.Query.Direction;
 import org.opendatakit.common.persistence.Query.FilterOperation;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
+import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.web.CallingContext;
 
@@ -108,7 +109,7 @@ public class ChoiceSubmissionType extends SubmissionFieldBase<List<String>> {
 	}
 	
 	@Override
-	public void persist(CallingContext cc) throws ODKEntityPersistException {
+	public void persist(CallingContext cc) throws ODKEntityPersistException, ODKOverQuotaException {
 		
 		if ( isChanged ) {
 			Datastore ds = cc.getDatastore();

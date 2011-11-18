@@ -22,13 +22,18 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.client.exception.FormNotAvailableException;
+import org.opendatakit.aggregate.client.exception.RequestFailureException;
 import org.opendatakit.aggregate.client.filter.FilterGroup;
 import org.opendatakit.aggregate.client.filter.FilterService;
 import org.opendatakit.aggregate.client.filter.FilterSet;
+import org.opendatakit.aggregate.constants.ErrorConsts;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.filter.SubmissionFilterGroup;
 import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
+import org.opendatakit.common.security.client.exception.AccessDeniedException;
 import org.opendatakit.common.web.CallingContext;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
@@ -41,13 +46,16 @@ public class FilterServiceImpl extends RemoteServiceServlet implements FilterSer
   private static final long serialVersionUID = 6350939191805868959L;
 
   @Override
-  public FilterSet getFilterSet(String formId) throws FormNotAvailableException {
+  public FilterSet getFilterSet(String formId) throws FormNotAvailableException, RequestFailureException, DatastoreFailureException {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
 
     try {
       // verify form is still available
       Form form = Form.retrieveFormByFormId(formId, cc);
+      if (!form.hasValidFormDefinition()) {
+        throw new RequestFailureException(ErrorConsts.FORM_DEFINITION_INVALID);
+      }
 
       FilterSet filterSet = new FilterSet(formId);
 
@@ -57,18 +65,20 @@ public class FilterServiceImpl extends RemoteServiceServlet implements FilterSer
         filterSet.addFilterGroup(group.transform());
       }
       return filterSet;
-    } catch (ODKFormNotFoundException e1) {
-      throw new FormNotAvailableException(e1);
-    } catch (ODKDatastoreException e) {
-      // TODO Auto-generated catch block
+    } catch (ODKFormNotFoundException e) {
       e.printStackTrace();
-      return null;
+      throw new FormNotAvailableException(e);
+    } catch (ODKOverQuotaException e) {
+      e.printStackTrace();
+      throw new RequestFailureException(ErrorConsts.QUOTA_EXCEEDED);
+    } catch (ODKDatastoreException e) {
+      e.printStackTrace();
+      throw new DatastoreFailureException(e);
     }
-
   }
 
   @Override
-  public String updateFilterGroup(FilterGroup group) {
+  public String updateFilterGroup(FilterGroup group) throws AccessDeniedException, RequestFailureException, DatastoreFailureException {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
 
@@ -76,13 +86,17 @@ public class FilterServiceImpl extends RemoteServiceServlet implements FilterSer
       SubmissionFilterGroup filterGrp = SubmissionFilterGroup.transform(group, cc);
       filterGrp.persist(cc);
       return filterGrp.getUri();
-    } catch (Exception e) {
-      return null;
+    } catch (ODKOverQuotaException e) {
+      e.printStackTrace();
+      throw new RequestFailureException(ErrorConsts.QUOTA_EXCEEDED);
+    } catch (ODKDatastoreException e) {
+      e.printStackTrace();
+      throw new DatastoreFailureException(e);
     }
   }
 
   @Override
-  public Boolean deleteFilterGroup(FilterGroup group) {
+  public Boolean deleteFilterGroup(FilterGroup group) throws AccessDeniedException, RequestFailureException, DatastoreFailureException {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
 
@@ -90,8 +104,12 @@ public class FilterServiceImpl extends RemoteServiceServlet implements FilterSer
       SubmissionFilterGroup filterGrp = SubmissionFilterGroup.transform(group, cc);
       filterGrp.delete(cc);
       return Boolean.TRUE;
-    } catch (Exception e) {
-      return Boolean.FALSE;
+    } catch (ODKOverQuotaException e) {
+      e.printStackTrace();
+      throw new RequestFailureException(ErrorConsts.QUOTA_EXCEEDED);
+    } catch (ODKDatastoreException e) {
+      e.printStackTrace();
+      throw new DatastoreFailureException(e);
     }
   }
 }

@@ -7,8 +7,6 @@ import org.apache.commons.lang.StringUtils;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
-import org.junit.Test;
 import org.opendatakit.aggregate.integration.utilities.GeneralUtils;
 import org.opendatakit.aggregate.integration.utilities.Interact;
 import org.openqa.selenium.WebDriver;

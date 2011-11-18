@@ -35,6 +35,7 @@ import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.persistence.Query.FilterOperation;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
+import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.web.CallingContext;
 
@@ -262,7 +263,7 @@ public class MiscTasks {
 		return "MT:" + getFormId();
 	}
 	
-	public void persist(CallingContext cc) throws ODKEntityPersistException {
+	public void persist(CallingContext cc) throws ODKEntityPersistException, ODKOverQuotaException {
 		Datastore ds = cc.getDatastore();
 		User user = cc.getCurrentUser();
 		ds.putEntity(row, user);
