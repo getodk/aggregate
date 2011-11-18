@@ -39,6 +39,7 @@ import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.TaskLock;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
+import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.web.CallingContext;
@@ -145,7 +146,7 @@ public class PurgeOlderSubmissionsWorkerImpl {
 		return submissions;
 	}
 	
-	private void doMarkAsComplete(MiscTasks t) throws ODKEntityPersistException {
+	private void doMarkAsComplete(MiscTasks t) throws ODKEntityPersistException, ODKOverQuotaException {
 		// and mark us as completed... (don't delete for audit..).
 		t.setCompletionDate(new Date());
 		t.setStatus(FormActionStatus.SUCCESSFUL);
@@ -192,7 +193,7 @@ public class PurgeOlderSubmissionsWorkerImpl {
 				
 				List<SubmissionKey> keys = new ArrayList<SubmissionKey>();
 				for ( Submission s : submissions ) {
-					keys.add(new SubmissionKey(s.getFormDefinition().getFormId(),
+					keys.add(new SubmissionKey(s.getFormId(),
 							s.getModelVersion(), s.getUiVersion(), 
 							s.getFormElementModel().getElementName(), s.getKey().getKey()));
 				}

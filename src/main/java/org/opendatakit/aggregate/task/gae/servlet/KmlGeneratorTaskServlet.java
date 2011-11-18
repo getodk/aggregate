@@ -30,6 +30,8 @@ import org.opendatakit.aggregate.servlet.ServletUtilBase;
 import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.task.KmlGenerator;
 import org.opendatakit.aggregate.task.KmlWorkerImpl;
+import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.web.CallingContext;
 
 /**
@@ -58,7 +60,7 @@ public class KmlGeneratorTaskServlet extends ServletUtilBase {
   @Override
   public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
     // TODO: talk to MITCH about the fact the user will be incorrect
-	CallingContext cc = ContextFactory.getCallingContext(this, req);
+    CallingContext cc = ContextFactory.getCallingContext(this, req);
 
     // get parameter
     String formId = getParameter(req, ServletConsts.FORM_ID);
@@ -67,28 +69,28 @@ public class KmlGeneratorTaskServlet extends ServletUtilBase {
     String titleFieldName = getParameter(req, KmlGenerator.TITLE_FIELD);
     String imageFieldName = getParameter(req, KmlGenerator.IMAGE_FIELD);
     String persistentResultsString = getParameter(req, ServletConsts.PERSISTENT_RESULTS_KEY);
-    if ( persistentResultsString == null ) {
-    	errorBadParam(resp);
-    	return;
+    if (persistentResultsString == null) {
+      errorBadParam(resp);
+      return;
     }
     SubmissionKey persistentResultsKey = new SubmissionKey(persistentResultsString);
     String attemptCountString = getParameter(req, ServletConsts.ATTEMPT_COUNT);
-    if ( attemptCountString == null ) {
-    	errorBadParam(resp);
-    	return;
+    if (attemptCountString == null) {
+      errorBadParam(resp);
+      return;
     }
     Long attemptCount = Long.valueOf(attemptCountString);
-    
+
     Form form = null;
     FormElementModel titleField = null;
     FormElementModel geopointField = null;
     FormElementModel imageField = null;
     try {
       form = Form.retrieveFormByFormId(formId, cc);
-      
-      if ( form.getFormDefinition() == null ) {
-  	    errorRetreivingData(resp);
-  	    return; // ill-formed definition
+
+      if (!form.hasValidFormDefinition()) {
+        errorRetreivingData(resp);
+        return; // ill-formed definition
       }
 
       if (titleFieldName != null) {
@@ -105,13 +107,22 @@ public class KmlGeneratorTaskServlet extends ServletUtilBase {
           imageField = FormElementModel.retrieveFormElementModel(form, imageKey);
         }
       }
-
     } catch (ODKFormNotFoundException e) {
-        odkIdNotFoundError(resp);
-        return;
+      e.printStackTrace();
+      odkIdNotFoundError(resp);
+      return;
+    } catch (ODKOverQuotaException e) {
+      e.printStackTrace();
+      quotaExceededError(resp);
+      return;
+    } catch (ODKDatastoreException e) {
+      e.printStackTrace();
+      datastoreError(resp);
+      return;
     }
 
-    KmlWorkerImpl worker = new KmlWorkerImpl(form, persistentResultsKey, attemptCount, titleField, geopointField, imageField, cc);
-	worker.generateKml();
+    KmlWorkerImpl worker = new KmlWorkerImpl(form, persistentResultsKey, attemptCount, titleField,
+        geopointField, imageField, cc);
+    worker.generateKml();
   }
 }

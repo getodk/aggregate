@@ -80,7 +80,7 @@ public class SubmissionDownloadServlet extends ServletUtilBase {
     Submission sub = null;
     try {
       Form form = Form.retrieveFormByFormId(parts.get(0).getElementName(), cc);
-      if (form.getFormDefinition() == null) {
+      if (!form.hasValidFormDefinition()) {
         errorRetreivingData(resp);
         return; // ill-formed definition
       }

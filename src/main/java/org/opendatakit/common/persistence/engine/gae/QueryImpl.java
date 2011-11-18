@@ -36,6 +36,7 @@ import org.opendatakit.common.persistence.QueryResult;
 import org.opendatakit.common.persistence.QueryResumePoint;
 import org.opendatakit.common.persistence.engine.EngineUtils;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.utils.WebUtils;
 
@@ -47,6 +48,7 @@ import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.appengine.api.datastore.Query.SortDirection;
 import com.google.appengine.api.quota.QuotaService;
 import com.google.appengine.api.quota.QuotaServiceFactory;
+import com.google.apphosting.api.ApiProxy.OverQuotaException;
 
 /**
  * 
@@ -563,9 +565,10 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
    *          -- number of records the requester wants.
    * @return
    * @throws ODKDatastoreException
+   * @throws ODKOverQuotaException
    */
   private void chunkFetch(ResultContainer odkEntities, SimpleFilterTracker startCursorFilter,
-      int fetchLimit) throws ODKDatastoreException {
+      int fetchLimit) throws ODKDatastoreException, ODKOverQuotaException {
 
     // Step 1: create a prepared query that we may repeatedly
     // fetch values from using a chunk size, fetch limit and
@@ -750,6 +753,8 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
         // in the expectation that most will fail the filter.
         preparedHack = ds.prepare(hack);
 
+      } catch (OverQuotaException e) {
+        throw new ODKOverQuotaException("[" + loggingContextTag + "] Quota exceeded", e);
       } catch (Exception e) {
         throw new ODKDatastoreException("[" + loggingContextTag + "] Unable to complete request", e);
       }
@@ -760,7 +765,14 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
           + relation.getTableName());
 
       datastore.recordQueryUsage(relation);
-      Iterable<com.google.appengine.api.datastore.Entity> it = preparedHack.asIterable(options);
+      Iterable<com.google.appengine.api.datastore.Entity> it;
+      try {
+        it = preparedHack.asIterable(options);
+      } catch (OverQuotaException e) {
+        throw new ODKOverQuotaException("[" + loggingContextTag + "] Quota exceeded", e);
+      } catch (Exception e) {
+        throw new ODKDatastoreException("[" + loggingContextTag + "] Unable to complete request", e);
+      }
 
       w.idx = idx;
       w.fetchOffset = fetchOffset;
@@ -788,6 +800,8 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
           odkEntities.add(cb);
         }
 
+      } catch (ODKOverQuotaException e) {
+        throw e;
       } catch (ODKDatastoreException e) {
         // we had an exception -- this might be a cursor timeout(!)
         // Step down the chunkSize and try again. The original
@@ -831,11 +845,12 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
    * @param w
    * @return false if completely done, true if still more work to be done.
    * @throws ODKDatastoreException
+   * @throws ODKOverQuotaException
    */
   private final boolean fetchResults(Iterable<com.google.appengine.api.datastore.Entity> it,
       SortTracker dominantSort, DataField dominantSortAttr, EntityRowMapper m,
       boolean mustReadEverything, int fetchLimit, Integer readSetLimit, int odkEntitiesSize,
-      WorkingValues w) throws ODKDatastoreException {
+      WorkingValues w) throws ODKDatastoreException, ODKOverQuotaException {
 
     // loop as long as the query returns at least one result...
     boolean hasQueryResults = false;
@@ -936,6 +951,8 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
       e.printStackTrace();
       throw new ODKDatastoreException("[" + loggingContextTag + "] SQL: "
           + gaeCostLogger.queryString + " exception: " + e.getMessage(), e);
+    } catch (OverQuotaException e) {
+      throw new ODKOverQuotaException("[" + loggingContextTag + "] Quota exceeded", e);
     } catch (Exception e) {
       e.printStackTrace();
       throw new ODKDatastoreException("[" + loggingContextTag + "] SQL: "
@@ -966,7 +983,7 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
   }
 
   private CoreResult coreExecuteQuery(QueryResumePoint startCursor, int fetchLimit)
-      throws ODKDatastoreException {
+      throws ODKDatastoreException, ODKOverQuotaException {
 
     // get the dominant sort definition
     if (sortList.size() == 0) {
@@ -1069,7 +1086,7 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
 
   @Override
   public QueryResult executeQuery(QueryResumePoint startCursor, int fetchLimit)
-      throws ODKDatastoreException {
+      throws ODKDatastoreException, ODKOverQuotaException {
     try {
       CoreResult r = coreExecuteQuery(startCursor, fetchLimit);
 
@@ -1103,7 +1120,7 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
   }
 
   @Override
-  public List<? extends CommonFieldsBase> executeQuery() throws ODKDatastoreException {
+  public List<? extends CommonFieldsBase> executeQuery() throws ODKDatastoreException, ODKOverQuotaException {
 
     try {
       // Ensure at least one dominant sort is applied to the result set.
@@ -1147,7 +1164,7 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
 
   @Override
   public Set<EntityKey> executeForeignKeyQuery(CommonFieldsBase topLevelTable,
-      DataField topLevelAuri) throws ODKDatastoreException {
+      DataField topLevelAuri) throws ODKDatastoreException, ODKOverQuotaException {
 
     try {
       List<?> keys = doExecuteDistinctValueForDataField(topLevelAuri);
@@ -1212,7 +1229,7 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
   }
 
   @Override
-  public List<?> executeDistinctValueForDataField(DataField dataField) throws ODKDatastoreException {
+  public List<?> executeDistinctValueForDataField(DataField dataField) throws ODKDatastoreException, ODKOverQuotaException {
     try {
       return doExecuteDistinctValueForDataField(dataField);
     } finally {
@@ -1221,7 +1238,7 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
   }
 
   private List<?> doExecuteDistinctValueForDataField(DataField dataField)
-      throws ODKDatastoreException {
+      throws ODKDatastoreException, ODKOverQuotaException {
     // use a cursor, since we have to bring everything into memory...
     // this means we need to have at least one sort criteria in place.
     if (sortList.isEmpty()) {

@@ -64,23 +64,19 @@ public final class ConfirmFormDeletePopup extends AbstractPopupBase {
     public void onClick(ClickEvent event) {
       // OK -- we are to proceed.
       // Set up the callback object.
-      AsyncCallback<Boolean> callback = new AsyncCallback<Boolean>() {
+      AsyncCallback<Void> callback = new AsyncCallback<Void>() {
         @Override
         public void onFailure(Throwable caught) {
           AggregateUI.getUI().reportError(caught);
         }
 
         @Override
-        public void onSuccess(Boolean result) {
+        public void onSuccess(Void result) {
           AggregateUI.getUI().clearError();
-          if (result) {
-            Window.alert("Successfully scheduled this form's deletion.\n"
+          Window.alert("Successfully scheduled this form's deletion.\n"
                 + "It may take several minutes to delete all the "
                 + "data submissions\nfor this form -- after which the "
                 + "form definition itself will be deleted.");
-          } else {
-            Window.alert("Error: unable to delete this form!");
-          }
           AggregateUI.getUI().getTimer().refreshNow();
         }
       };

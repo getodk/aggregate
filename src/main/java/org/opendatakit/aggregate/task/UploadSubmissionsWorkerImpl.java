@@ -37,6 +37,7 @@ import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.TaskLock;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
+import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.web.CallingContext;
@@ -78,14 +79,28 @@ public class UploadSubmissionsWorkerImpl {
   public void uploadAllSubmissions() throws ODKEntityNotFoundException,
       ODKExternalServiceException, ODKFormNotFoundException {
 
-    pExtService = pFsc.getExternalService(cc);
-    form = Form.retrieveFormByFormId(pFsc.getFormId(), cc);
-    if ( form.getFormDefinition() == null ) {
-        Logger
-        .getLogger(UploadSubmissionsWorkerImpl.class.getName())
-        .severe(
-            "Upload not performed -- ill-formed form definition.");
-        return;
+    try {
+      pExtService = pFsc.getExternalService(cc);
+      form = Form.retrieveFormByFormId(pFsc.getFormId(), cc);
+      if ( !form.hasValidFormDefinition() ) {
+          Logger
+          .getLogger(UploadSubmissionsWorkerImpl.class.getName())
+          .severe(
+              "Upload not performed -- ill-formed form definition.");
+          return;
+      }
+    } catch (ODKOverQuotaException e) {
+      Logger
+      .getLogger(UploadSubmissionsWorkerImpl.class.getName())
+      .warning(
+          "Quota exceeded.");
+      return;
+    } catch (ODKDatastoreException e) {
+      Logger
+      .getLogger(UploadSubmissionsWorkerImpl.class.getName())
+      .warning(
+          "Persistence layer problem: " + e.getMessage());
+      return;
     }
 
     Datastore ds = cc.getDatastore();

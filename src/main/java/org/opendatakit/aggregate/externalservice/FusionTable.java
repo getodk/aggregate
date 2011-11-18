@@ -67,6 +67,8 @@ import org.opendatakit.aggregate.submission.type.RepeatSubmissionType;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
+import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.utils.HttpClientFactory;
 import org.opendatakit.common.web.CallingContext;
@@ -100,7 +102,8 @@ public class FusionTable extends OAuthExternalService implements ExternalService
     objectEntity = entity;
   }
   
-  private FusionTable(FusionTableParameterTable entity, Form form, ExternalServicePublicationOption externalServiceOption, CallingContext cc) throws ODKDatastoreException {
+  private FusionTable(FusionTableParameterTable entity, Form form, 
+      ExternalServicePublicationOption externalServiceOption, CallingContext cc) throws ODKEntityPersistException, ODKOverQuotaException, ODKDatastoreException {
     this (entity, createFormServiceCursor(form, entity, externalServiceOption, ExternalServiceType.GOOGLE_FUSIONTABLES, cc), form, cc);
     persist(cc); 
   }
@@ -114,7 +117,7 @@ public class FusionTable extends OAuthExternalService implements ExternalService
   }
 
   public FusionTable(Form form, ExternalServicePublicationOption externalServiceOption, CallingContext cc)
-      throws ODKDatastoreException {
+      throws ODKEntityPersistException, ODKOverQuotaException, ODKDatastoreException {
     this(newEntity(FusionTableParameterTable.assertRelation(cc), cc), form, externalServiceOption, cc);
   }
     

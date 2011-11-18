@@ -40,19 +40,19 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
  */@RemoteServiceRelativePath("formadminservice")
 public interface FormAdminService extends RemoteService {
   
-  Boolean setFormDownloadable(String formId, Boolean downloadable) throws AccessDeniedException;
+  void setFormDownloadable(String formId, Boolean downloadable) throws AccessDeniedException, FormNotAvailableException, RequestFailureException, DatastoreFailureException;
   
-  Boolean setFormAcceptSubmissions(String formId, Boolean acceptSubmissions) throws AccessDeniedException;
+  void setFormAcceptSubmissions(String formId, Boolean acceptSubmissions) throws AccessDeniedException, FormNotAvailableException, RequestFailureException, DatastoreFailureException;
   
-  Date purgePublishedData(String uriExternalService, Date earliest) throws AccessDeniedException, RequestFailureException, DatastoreFailureException;
+  Date purgePublishedData(String uriExternalService, Date earliest) throws  AccessDeniedException, FormNotAvailableException, DatastoreFailureException, RequestFailureException;
   
-  Boolean deleteForm(String formId) throws AccessDeniedException;
+  void deleteForm(String formId) throws  AccessDeniedException, FormNotAvailableException, DatastoreFailureException, RequestFailureException;
   
-  Boolean deleteSubmission(String submissionKeyAsString) throws AccessDeniedException;
+  void deleteSubmission(String submissionKeyAsString) throws AccessDeniedException, DatastoreFailureException, FormNotAvailableException, RequestFailureException;
   
-  SubmissionUISummary getIncompleteSubmissions(FilterGroup filter) throws AccessDeniedException, FormNotAvailableException;
+  SubmissionUISummary getIncompleteSubmissions(FilterGroup filter) throws AccessDeniedException, FormNotAvailableException, DatastoreFailureException, RequestFailureException;
   
-  Boolean markSubmissionAsComplete(String submissionKeyAsString) throws AccessDeniedException;
+  void markSubmissionAsComplete(String submissionKeyAsString) throws AccessDeniedException, FormNotAvailableException, DatastoreFailureException, RequestFailureException;
   
-  ArrayList<MediaFileSummary> getFormMediaFileList(String formId) throws AccessDeniedException, FormNotAvailableException; 
+  ArrayList<MediaFileSummary> getFormMediaFileList(String formId) throws AccessDeniedException, FormNotAvailableException, DatastoreFailureException, RequestFailureException; 
 }

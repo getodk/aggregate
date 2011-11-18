@@ -7,6 +7,7 @@ import org.opendatakit.common.ermodel.ExtendedAbstractRelation;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
+import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.utils.Check;
 
 /**
@@ -176,8 +177,9 @@ public class Entity
      * 
      * @throws ODKEntityPersistException
      *             if there was a problem saving the Entity.
+     * @throws ODKOverQuotaException 
      */
-    public void save() throws ODKEntityPersistException
+    public void save() throws ODKEntityPersistException, ODKOverQuotaException
     {
         this.entity.persist(this.relation.getCC());
     }

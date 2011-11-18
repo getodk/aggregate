@@ -234,7 +234,7 @@ public class FragmentedCsvServlet extends ServletUtilBase {
       if (submissionKeyParts.size() >= 2 && submissionKeyParts.get(1).getAuri() != null
           && numEntriesToFetch > 0) {
         Form form = Form.retrieveFormByFormId(submissionKeyParts.get(0).getElementName(), cc);
-        if (form.getFormDefinition() == null) {
+        if (!form.hasValidFormDefinition()) {
           errorRetreivingData(resp);
           return; // ill-formed definition
         }
@@ -265,7 +265,6 @@ public class FragmentedCsvServlet extends ServletUtilBase {
         // reworked from formxmlservlet.java
         Form form = Form.retrieveFormByFormId(submissionKeyParts.get(0).getElementName(), cc);
 
-        form.getFormDefinition();
         QueryByDateRange query = new QueryByDateRange(form, numEntriesToFetch, dateCode, uriAfter, cc);
         List<Submission> submissions = query.getResultSubmissions(cc);
 

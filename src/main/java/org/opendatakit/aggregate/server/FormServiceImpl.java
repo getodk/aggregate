@@ -25,17 +25,21 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 
 import org.opendatakit.aggregate.ContextFactory;
+import org.opendatakit.aggregate.client.exception.FormNotAvailableException;
+import org.opendatakit.aggregate.client.exception.RequestFailureException;
 import org.opendatakit.aggregate.client.filter.FilterGroup;
 import org.opendatakit.aggregate.client.form.ExportSummary;
 import org.opendatakit.aggregate.client.form.FormSummary;
 import org.opendatakit.aggregate.client.form.KmlSettings;
 import org.opendatakit.aggregate.constants.BeanDefs;
+import org.opendatakit.aggregate.constants.ErrorConsts;
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.common.ExportType;
 import org.opendatakit.aggregate.constants.common.FormActionStatusTimestamp;
 import org.opendatakit.aggregate.constants.format.FormTableConsts;
 import org.opendatakit.aggregate.datamodel.FormElementKey;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
+import org.opendatakit.aggregate.datamodel.FormElementModel.ElementType;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.filter.SubmissionFilterGroup;
 import org.opendatakit.aggregate.form.Form;
@@ -44,7 +48,9 @@ import org.opendatakit.aggregate.form.PersistentResults;
 import org.opendatakit.aggregate.form.PersistentResults.ResultFileInfo;
 import org.opendatakit.aggregate.task.CsvGenerator;
 import org.opendatakit.aggregate.task.KmlGenerator;
+import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.security.client.exception.AccessDeniedException;
 import org.opendatakit.common.web.CallingContext;
 
@@ -57,9 +63,10 @@ public class FormServiceImpl extends RemoteServiceServlet implements
    * Serial number for serialization
    */
   private static final long serialVersionUID = -193679930586769386L;
+  private static final String LIMITATION_MSG = "Picture and Title must be in the submission (top-level) or must be in the same repeat group as the GeoPoint";
 
   @Override
-  public ArrayList<FormSummary> getForms() {
+  public ArrayList<FormSummary> getForms() throws RequestFailureException, DatastoreFailureException {
 
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
@@ -99,15 +106,17 @@ public class FormServiceImpl extends RemoteServiceServlet implements
       }
       return formSummaries;
 
-    } catch (ODKDatastoreException e) {
-      // TODO Auto-generated catch block
+    } catch (ODKOverQuotaException e) {
       e.printStackTrace();
+      throw new RequestFailureException(ErrorConsts.QUOTA_EXCEEDED);
+    } catch (ODKDatastoreException e) {
+      e.printStackTrace();
+      throw new DatastoreFailureException();
     }
-    return formSummaries;
   }
 
   @Override
-  public ArrayList<ExportSummary> getExports() {
+  public ArrayList<ExportSummary> getExports() throws RequestFailureException, FormNotAvailableException, DatastoreFailureException {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
 
@@ -140,61 +149,80 @@ public class FormServiceImpl extends RemoteServiceServlet implements
       return exports;
 
     } catch (ODKFormNotFoundException e) {
-      return exports;
+      e.printStackTrace();
+      throw new FormNotAvailableException(e);
+    } catch (ODKOverQuotaException e) {
+      e.printStackTrace();
+      throw new RequestFailureException(ErrorConsts.QUOTA_EXCEEDED);
     } catch (ODKDatastoreException e) {
       e.printStackTrace();
+      throw new DatastoreFailureException();
     }
-
-    return exports;
   }
 
   @Override
-  public KmlSettings getPossibleKmlSettings(String formId) {
+  public KmlSettings getPossibleKmlSettings(String formId) throws RequestFailureException, FormNotAvailableException, DatastoreFailureException {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
 
     try {
       Form form = Form.retrieveFormByFormId(formId, cc);
-      if (form.getFormDefinition() == null)
-        return null; // ill-formed definition
+      if (!form.hasValidFormDefinition()) {
+        throw new RequestFailureException(ErrorConsts.FORM_DEFINITION_INVALID); // ill-formed definition
+      }
       GenerateKmlSettings kmlSettings = new GenerateKmlSettings(form, false);
       return kmlSettings.generate();
 
-    } catch (ODKFormNotFoundException e1) {
-      return null;
+    } catch (ODKFormNotFoundException e) {
+      e.printStackTrace();
+      throw new FormNotAvailableException(e);
+    } catch (ODKOverQuotaException e) {
+      e.printStackTrace();
+      throw new RequestFailureException(ErrorConsts.QUOTA_EXCEEDED);
+    } catch (ODKDatastoreException e) {
+      e.printStackTrace();
+      throw new DatastoreFailureException();
     }
   }
 
   @Override
-  public KmlSettings getGpsCoordnates(String formId) {
+  public KmlSettings getGpsCoordnates(String formId) throws RequestFailureException, FormNotAvailableException, DatastoreFailureException {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
 
     try {
       Form form = Form.retrieveFormByFormId(formId, cc);
-      if (form.getFormDefinition() == null)
-        return null; // ill-formed definition
+      if (!form.hasValidFormDefinition()) {
+        throw new RequestFailureException(ErrorConsts.FORM_DEFINITION_INVALID); // ill-formed definition
+      }
 
       GenerateKmlSettings kmlSettings = new GenerateKmlSettings(form, true);
       return kmlSettings.generate();
 
-    } catch (ODKFormNotFoundException e1) {
-      return null;
+    } catch (ODKFormNotFoundException e) {
+      e.printStackTrace();
+      throw new FormNotAvailableException(e);
+    } catch (ODKOverQuotaException e) {
+      e.printStackTrace();
+      throw new RequestFailureException(ErrorConsts.QUOTA_EXCEEDED);
+    } catch (ODKDatastoreException e) {
+      e.printStackTrace();
+      throw new DatastoreFailureException();
     }
   }
 
   @Override
-  public Boolean createCsvFromFilter(FilterGroup group) throws AccessDeniedException {
+  public Boolean createCsvFromFilter(FilterGroup group) throws AccessDeniedException, FormNotAvailableException, RequestFailureException, DatastoreFailureException {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
 
     try {
       FormActionStatusTimestamp deletionTimestamp = MiscTasks
           .getFormDeletionStatusTimestampOfFormId(group.getFormId(), cc);
-      // TODO: better error reporting -- form is being deleted. Disallow
-      // exports.
-      if (deletionTimestamp != null)
-        return false;
+      // Form is being deleted. Disallow exports.
+      if (deletionTimestamp != null) {
+        throw new RequestFailureException("Form is marked for deletion - csv export request aborted.");
+      }
 
       // clear uri so a copy can be saved
       group.resetUriToDefault();
@@ -206,8 +234,9 @@ public class FormServiceImpl extends RemoteServiceServlet implements
 
       // create csv job
       Form form = Form.retrieveFormByFormId(filterGrp.getFormId(), cc);
-      if (form.getFormDefinition() == null)
-        return false; // ill-formed definition
+      if (!form.hasValidFormDefinition()) {
+        throw new RequestFailureException(ErrorConsts.FORM_DEFINITION_INVALID); // ill-formed definition
+      }
       PersistentResults r = new PersistentResults(ExportType.CSV, form, filterGrp, null, cc);
       r.persist(cc);
 
@@ -218,14 +247,20 @@ public class FormServiceImpl extends RemoteServiceServlet implements
       generator.createCsvTask(form, r.getSubmissionKey(), 1L, ccDaemon);
       return true;
 
-    } catch (Exception e) {
+    } catch (ODKFormNotFoundException e) {
       e.printStackTrace();
-      return false;
+      throw new FormNotAvailableException(e);
+    } catch (ODKOverQuotaException e) {
+      e.printStackTrace();
+      throw new RequestFailureException(ErrorConsts.QUOTA_EXCEEDED);
+    } catch (ODKDatastoreException e) {
+      e.printStackTrace();
+      throw new DatastoreFailureException();
     }
   }
 
   @Override
-  public Boolean createKmlFromFilter(FilterGroup group, String geopointKey, String titleKey, String binaryKey) {
+  public Boolean createKmlFromFilter(FilterGroup group, String geopointKey, String titleKey, String binaryKey) throws FormNotAvailableException, RequestFailureException, DatastoreFailureException {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
 
@@ -236,10 +271,10 @@ public class FormServiceImpl extends RemoteServiceServlet implements
     try {
       FormActionStatusTimestamp deletionTimestamp = MiscTasks
           .getFormDeletionStatusTimestampOfFormId(group.getFormId(), cc);
-      // TODO: better error reporting -- form is being deleted. Disallow
-      // exports.
-      if (deletionTimestamp != null)
-        return false;
+      // Form is being deleted. Disallow exports.
+      if (deletionTimestamp != null) {
+        throw new RequestFailureException("Form is marked for deletion - kml export request aborted.");
+      }
 
       // clear uri so a copy can be saved
       group.resetUriToDefault();
@@ -250,8 +285,9 @@ public class FormServiceImpl extends RemoteServiceServlet implements
       filterGrp.persist(cc);
 
       Form form = Form.retrieveFormByFormId(group.getFormId(), cc);
-      if (form.getFormDefinition() == null)
-        return false; // ill-formed definition
+      if (!form.hasValidFormDefinition()) {
+        throw new RequestFailureException(ErrorConsts.FORM_DEFINITION_INVALID); // ill-formed definition
+      }
 
       FormElementModel titleField = null;
       if (titleKey != null) {
@@ -271,6 +307,35 @@ public class FormServiceImpl extends RemoteServiceServlet implements
         imageField = FormElementModel.retrieveFormElementModel(form, imageFEMKey);
       }
 
+      // Apply rendering constraints
+      FormElementModel topElement = form.getTopLevelGroupElement();
+      
+      FormElementModel titleParent = titleField.getParent();
+      // ignore semantically meaningless nesting groups
+      while ( titleParent.getParent() != null && titleParent.getElementType().equals(ElementType.GROUP) ) {
+        titleParent = titleParent.getParent();
+      }
+      FormElementModel gpsParent = geopointField.getParent();
+      // ignore semantically meaningless nesting groups
+      while ( gpsParent.getParent() != null && gpsParent.getElementType().equals(ElementType.GROUP) ) {
+        gpsParent = gpsParent.getParent();
+      }
+      
+      if (!titleParent.equals(topElement) && !titleParent.equals(gpsParent)) {
+        throw new RequestFailureException(LIMITATION_MSG);
+      }
+      if (imageField == null) {
+      } else {
+        FormElementModel imgParent = imageField.getParent();
+        // ignore semantically meaningless nesting groups
+        while ( imgParent.getParent() != null && imgParent.getElementType().equals(ElementType.GROUP) ) {
+          imgParent = imgParent.getParent();
+        }
+        if (!imgParent.equals(topElement) && !imgParent.equals(gpsParent)) {
+          throw new RequestFailureException(LIMITATION_MSG);
+        }
+      } 
+
       Map<String, String> params = new HashMap<String, String>();
       params.put(KmlGenerator.TITLE_FIELD, (titleField == null) ? null : titleField
           .constructFormElementKey(form).toString());
@@ -289,10 +354,13 @@ public class FormServiceImpl extends RemoteServiceServlet implements
       return true;
     } catch (ODKFormNotFoundException e) {
       e.printStackTrace();
+      throw new FormNotAvailableException(e);
+    } catch (ODKOverQuotaException e) {
+      e.printStackTrace();
+      throw new RequestFailureException(ErrorConsts.QUOTA_EXCEEDED);
     } catch (ODKDatastoreException e) {
       e.printStackTrace();
+      throw new DatastoreFailureException();
     }
-
-    return false;
   }
 }

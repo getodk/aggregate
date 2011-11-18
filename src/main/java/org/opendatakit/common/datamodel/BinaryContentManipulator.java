@@ -27,6 +27,7 @@ import org.opendatakit.common.persistence.Query.Direction;
 import org.opendatakit.common.persistence.Query.FilterOperation;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
+import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.web.CallingContext;
 
@@ -181,7 +182,7 @@ public class BinaryContentManipulator {
          }
       }
 
-      public void persist(CallingContext cc) throws ODKEntityPersistException {
+      public void persist(CallingContext cc) throws ODKEntityPersistException, ODKOverQuotaException {
          List<CommonFieldsBase> rows = new ArrayList<CommonFieldsBase>();
          rows.addAll(dbRefBlobList);
          rows.addAll(dbBcbEntityList);
@@ -439,7 +440,7 @@ public class BinaryContentManipulator {
       }
    }
 
-   public void persist(CallingContext cc) throws ODKEntityPersistException {
+   public void persist(CallingContext cc) throws ODKEntityPersistException, ODKOverQuotaException {
       // the items to store are the attachments vector.
       cc.getDatastore().putEntities(attachments, cc.getCurrentUser());
    }

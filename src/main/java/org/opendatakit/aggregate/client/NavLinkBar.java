@@ -8,7 +8,6 @@ import org.opendatakit.common.security.client.UserSecurityInfo.UserType;
 import org.opendatakit.common.web.constants.HtmlConsts;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.FlexTable;

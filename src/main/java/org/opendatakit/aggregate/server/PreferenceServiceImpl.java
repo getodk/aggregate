@@ -19,6 +19,7 @@ package org.opendatakit.aggregate.server;
 import javax.servlet.http.HttpServletRequest;
 
 import org.opendatakit.aggregate.ContextFactory;
+import org.opendatakit.aggregate.client.exception.RequestFailureException;
 import org.opendatakit.aggregate.client.preferences.PreferenceSummary;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
@@ -36,7 +37,7 @@ org.opendatakit.aggregate.client.preferences.PreferenceService {
   private static final long serialVersionUID = -4892832848446000170L;
 
   @Override
-  public void setGoogleMapsKey(String key) {
+  public void setGoogleMapsKey(String key) throws AccessDeniedException, RequestFailureException {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);   
     
@@ -49,17 +50,17 @@ org.opendatakit.aggregate.client.preferences.PreferenceService {
       pref.setGoogleMapApiKey(key);
       pref.persist(cc);
     } catch (ODKEntityNotFoundException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
+      throw new RequestFailureException(e);
     } catch (ODKDatastoreException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
+      throw new RequestFailureException(e);
     }
     
   }
 
   @Override
-  public PreferenceSummary getPreferences() throws AccessDeniedException {
+  public PreferenceSummary getPreferences() throws AccessDeniedException, RequestFailureException {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);   
     
@@ -69,15 +70,18 @@ org.opendatakit.aggregate.client.preferences.PreferenceService {
         return pref.getPreferenceSummary();
       }
     } catch (ODKEntityNotFoundException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
+      throw new RequestFailureException(e);
+    } catch (ODKDatastoreException e) {
+      e.printStackTrace();
+      throw new RequestFailureException(e);
     }
     
     return null;
   }
 
   @Override
-  public void setOdkTablesEnabled(Boolean enabled) throws AccessDeniedException {
+  public void setOdkTablesEnabled(Boolean enabled) throws AccessDeniedException, RequestFailureException {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);   
     
@@ -90,11 +94,11 @@ org.opendatakit.aggregate.client.preferences.PreferenceService {
       pref.setOdkTablesEnabled(enabled);
       pref.persist(cc);
     } catch (ODKEntityNotFoundException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
+      throw new RequestFailureException(e);
     } catch (ODKDatastoreException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
+      throw new RequestFailureException(e);
     }
     
   }

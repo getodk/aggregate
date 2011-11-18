@@ -30,6 +30,7 @@ import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
+import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.utils.WebUtils;
 import org.opendatakit.common.web.CallingContext;
@@ -217,9 +218,11 @@ public class AbstractRelation implements Relation {
 	 * @param uri
 	 * @param cc
 	 * @return
-	 * @throws ODKEntityNotFoundException
+    * @throws ODKEntityNotFoundException
+    * @throws ODKOverQuotaException
+	 * @throws ODKDatastoreException 
 	 */
-	public Entity getEntity(String uri, CallingContext cc) throws ODKEntityNotFoundException {
+	public Entity getEntity(String uri, CallingContext cc) throws ODKDatastoreException {
 		Datastore ds = cc.getDatastore();
 		User user = cc.getCurrentUser();
 		
@@ -234,6 +237,7 @@ public class AbstractRelation implements Relation {
 	 * @param value
 	 * @param cc
 	 * @return
+    * @throws ODKOverQuotaException
 	 * @throws ODKDatastoreException
 	 */
 	@Override
@@ -264,8 +268,9 @@ public class AbstractRelation implements Relation {
 	 * @param e
 	 * @param cc
 	 * @throws ODKEntityPersistException
+	 * @throws ODKOverQuotaException 
 	 */
-	public void putEntity(Entity e, CallingContext cc) throws ODKEntityPersistException {
+	public void putEntity(Entity e, CallingContext cc) throws ODKEntityPersistException, ODKOverQuotaException {
 		Datastore ds = cc.getDatastore();
 		User user = cc.getCurrentUser();
 		
@@ -295,8 +300,9 @@ public class AbstractRelation implements Relation {
 	 * @param eList
 	 * @param cc
 	 * @throws ODKEntityPersistException
+	 * @throws ODKOverQuotaException 
 	 */
-	public void putEntities(List<Entity> eList, CallingContext cc) throws ODKEntityPersistException {
+	public void putEntities(List<Entity> eList, CallingContext cc) throws ODKEntityPersistException, ODKOverQuotaException {
 		Datastore ds = cc.getDatastore();
 		User user = cc.getCurrentUser();
 
@@ -599,9 +605,10 @@ public class AbstractRelation implements Relation {
 		 * 
 		 * @param cc
 		 * @throws ODKEntityPersistException
+		 * @throws ODKOverQuotaException 
 		 */
 		@Override
-		public void persist(CallingContext cc) throws ODKEntityPersistException {
+		public void persist(CallingContext cc) throws ODKEntityPersistException, ODKOverQuotaException {
 			Datastore ds = cc.getDatastore();
 			User user = cc.getCurrentUser();
 			

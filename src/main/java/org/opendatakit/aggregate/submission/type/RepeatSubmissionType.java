@@ -22,7 +22,7 @@ import java.util.List;
 
 import org.opendatakit.aggregate.constants.format.FormatConsts;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
-import org.opendatakit.aggregate.form.FormDefinition;
+import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.format.element.ElementFormatter;
 import org.opendatakit.aggregate.submission.SubmissionElement;
@@ -40,6 +40,7 @@ import org.opendatakit.common.persistence.Query.Direction;
 import org.opendatakit.common.persistence.Query.FilterOperation;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
+import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.web.CallingContext;
 
 /**
@@ -55,7 +56,7 @@ public class RepeatSubmissionType implements SubmissionRepeat {
 	/**
 	 * ODK identifier that uniquely identifies the form
 	 */
-	private final FormDefinition formDefinition;
+	private final Form form;
 
 	/**
 	 * Enclosing submission set
@@ -76,9 +77,9 @@ public class RepeatSubmissionType implements SubmissionRepeat {
 
 	public RepeatSubmissionType(SubmissionSet enclosingSet,
 			FormElementModel repeatGroup, String uriAssociatedRow,
-			FormDefinition formDefinition) {
+			Form form) {
 		this.enclosingSet = enclosingSet;
-		this.formDefinition = formDefinition;
+		this.form = form;
 		this.repeatGroup = repeatGroup;
 		this.uriAssociatedRow = uriAssociatedRow;
 	}
@@ -140,7 +141,7 @@ public class RepeatSubmissionType implements SubmissionRepeat {
 		for (CommonFieldsBase cb : repeatGroupList) {
 			DynamicBase d = (DynamicBase) cb;
 			SubmissionSet set = new SubmissionSet(enclosingSet, d, repeatGroup,
-					formDefinition, cc);
+					form, cc);
 			submissionSets.add(set);
 		}
 	}
@@ -155,7 +156,7 @@ public class RepeatSubmissionType implements SubmissionRepeat {
 		}
 
 		RepeatSubmissionType other = (RepeatSubmissionType) obj;
-		return formDefinition.equals(other.formDefinition)
+		return form.equals(other.form)
 				&& repeatGroup.equals(other.repeatGroup)
 				&& submissionSets.equals(other.submissionSets);
 	}
@@ -167,7 +168,7 @@ public class RepeatSubmissionType implements SubmissionRepeat {
 	public int hashCode() {
 		int hashCode = 13;
 
-		hashCode += formDefinition.hashCode();
+		hashCode += form.hashCode();
 		hashCode += repeatGroup.hashCode();
 		hashCode += submissionSets.hashCode();
 
@@ -196,7 +197,7 @@ public class RepeatSubmissionType implements SubmissionRepeat {
 
 	@Override
 	public void persist(CallingContext cc)
-			throws ODKEntityPersistException {
+			throws ODKEntityPersistException, ODKOverQuotaException {
 		for (SubmissionSet s : submissionSets) {
 			s.persist(cc);
 		}

@@ -47,14 +47,14 @@ public final class DownloadableCheckBox extends AggregateCheckBox implements
     super.onValueChange(event);
    
     SecureGWT.getFormAdminService().setFormDownloadable(formId, event.getValue(),
-        new AsyncCallback<Boolean>() {
+        new AsyncCallback<Void>() {
           @Override
           public void onFailure(Throwable caught) {
             AggregateUI.getUI().reportError(caught);
           }
 
           @Override
-          public void onSuccess(Boolean result) {
+          public void onSuccess(Void v) {
             AggregateUI.getUI().clearError();
           }
         });

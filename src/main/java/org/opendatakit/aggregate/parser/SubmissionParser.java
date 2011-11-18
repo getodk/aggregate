@@ -358,9 +358,9 @@ public class SubmissionParser {
 			Datastore ds = cc.getDatastore();
 			User user = cc.getCurrentUser();
 			TopLevelInstanceData fi = (TopLevelInstanceData) ds.getEntity(form.getTopLevelGroupElement().getFormDataModel().getBackingObjectPrototype(), instanceId, user);
-			submission = new Submission(fi, form.getFormDefinition(), cc);
+			submission = new Submission(fi, form, cc);
 		} catch ( ODKEntityNotFoundException e ) {
-			submission = new Submission( modelVersion, uiVersion, instanceId, form.getFormDefinition(), submissionDate, cc);
+			submission = new Submission( modelVersion, uiVersion, instanceId, form, submissionDate, cc);
 	    }
 
 		topLevelTableKey = submission.getKey();
@@ -478,7 +478,7 @@ public class SubmissionParser {
 					// Create a submission set for a new instance...
 					long l = repeats.getNumberRepeats()+1L;
 					repeatableSubmissionSet = new SubmissionSet(
-							submissionSet, l, m, form.getFormDefinition(),
+							submissionSet, l, m, form,
 							topLevelTableKey, cc);
 					repeats.addSubmissionSet(repeatableSubmissionSet);
 				} else {

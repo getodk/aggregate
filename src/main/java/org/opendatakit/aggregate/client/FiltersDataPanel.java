@@ -41,7 +41,6 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Tree;
 import com.google.gwt.user.client.ui.TreeItem;
-import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class FiltersDataPanel extends ScrollPanel {
 
@@ -75,7 +74,7 @@ public class FiltersDataPanel extends ScrollPanel {
     HTML filterText = new HTML("<h3 id=\"filter_header\">Filters Applied</h3>");
     filterText.getElement().setId("filter_desc_title");
 
-    VerticalPanel filterGlobal = new VerticalPanel();
+    FlowPanel filterGlobal = new FlowPanel();
     filterGlobal.add(new MetadataCheckBox(parentSubTab));
     FlexTable paginationTable = new FlexTable();
     paginationTable.setHTML(0, 0, "<p id=\"filter_header\">Submissions per page</p>");

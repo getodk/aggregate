@@ -7,6 +7,7 @@ import org.opendatakit.common.ermodel.ExtendedAbstractRelation;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
+import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.utils.Check;
 import org.opendatakit.common.web.CallingContext;
 
@@ -283,12 +284,13 @@ public class Relation
      *            the identifier of the entity (you can get this by calling
      *            {@link Entity#getAggregateIdentifier()}).
      * @return the Entity
+     * @throws ODKOverQuotaException 
      * @throws ODKEntityNotFoundException
      *             if there is no Entity with the given identifier stored in
      *             this Relation.
      */
     public Entity getEntity(String aggregateIdentifier)
-            throws ODKEntityNotFoundException
+            throws ODKDatastoreException
     {
         Check.notNullOrEmpty(aggregateIdentifier, "aggregateIdentifier");
         return Entity.fromEntity(relation,

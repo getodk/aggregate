@@ -82,7 +82,7 @@ public class AggregateHtmlServlet extends ServletUtilBase {
       + "      <div style=\"width: 22em; position: absolute; left: 50%; margin-left: -11em; color: red; background-color: white; border: 1px solid red; padding: 4px; font-family: sans-serif\">"
       + "        Your web browser must have JavaScript enabled"
       + "        in order for this application to display correctly." + "      </div>"
-      + "    </noscript>" + "	<div id=\"dynamic_content\"></div>" + "  </body>" + "</html>";
+      + "    </noscript>" + "	<div id=\"error_content\"></div><div id=\"dynamic_content\"></div>" + "  </body>" + "</html>";
 
   @Override
   protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException,

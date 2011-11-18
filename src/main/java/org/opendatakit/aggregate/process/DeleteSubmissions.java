@@ -26,6 +26,7 @@ import org.opendatakit.aggregate.submission.SubmissionKeyPart;
 import org.opendatakit.common.persistence.EntityKey;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
+import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.web.CallingContext;
 
 /**
@@ -43,7 +44,7 @@ public class DeleteSubmissions {
     this.submissionKeys = keys;
   }
 
-  public void deleteSubmissions(CallingContext cc) throws ODKDatastoreException{
+  public void deleteSubmissions(CallingContext cc) throws ODKOverQuotaException, ODKFormNotFoundException, ODKDatastoreException {
     List<EntityKey> deleteKeys = new ArrayList<EntityKey>();
 
     for (SubmissionKey submissionKey : submissionKeys) {
@@ -55,7 +56,7 @@ public class DeleteSubmissions {
       } catch (ODKEntityNotFoundException e) {
         // just move on
       } catch (ODKFormNotFoundException e) {
-		e.printStackTrace();
+		  e.printStackTrace();
       }
     }
     cc.getDatastore().deleteEntities(deleteKeys, cc.getCurrentUser());

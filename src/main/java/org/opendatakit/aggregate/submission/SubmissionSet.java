@@ -31,7 +31,7 @@ import org.opendatakit.aggregate.datamodel.FormDataModel.DDRelationName;
 import org.opendatakit.aggregate.datamodel.FormDataModel.ElementType;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.datamodel.TopLevelDynamicBase;
-import org.opendatakit.aggregate.form.FormDefinition;
+import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.format.element.ElementFormatter;
 import org.opendatakit.aggregate.submission.type.BlobSubmissionType;
@@ -58,6 +58,7 @@ import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.persistence.Query.FilterOperation;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
+import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.BasicConsts;
@@ -103,7 +104,7 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 	/**
 	 * The definition of this form (for access to lst).
 	 */
-	private final FormDefinition formDefinition;
+	private final Form form;
 
 	/**
 	 * Identifier for this submission set (all other entries in dbEntities are
@@ -138,10 +139,10 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 	 * @throws ODKDatastoreException
 	 */
 	public SubmissionSet(SubmissionSet enclosingSet, Long ordinalNumber,
-			FormElementModel group, FormDefinition formDefinition,
+			FormElementModel group, Form form,
 			EntityKey topLevelTableKey, CallingContext cc)
 			throws ODKDatastoreException {
-		this.formDefinition = formDefinition;
+		this.form = form;
 		this.group = group;
 		this.enclosingSet = enclosingSet;
 		Datastore datastore = cc.getDatastore();
@@ -161,18 +162,18 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 	}
 
 	public SubmissionSet(Long modelVersion, Long uiVersion, 
-			FormDefinition formDefinition,
+			Form form,
 			CallingContext cc)
 			throws ODKDatastoreException {
-		this(modelVersion, uiVersion, null, formDefinition, cc);
+		this(modelVersion, uiVersion, null, form, cc);
 	}
 
 	public SubmissionSet(Long modelVersion, Long uiVersion, String uriTopLevelGroup, 
-			FormDefinition formDefinition,
+			Form form,
 			CallingContext cc)
 			throws ODKDatastoreException {
-		this.formDefinition = formDefinition;
-		this.group = formDefinition.getTopLevelGroupElement();
+		this.form = form;
+		this.group = form.getTopLevelGroupElement();
 		this.enclosingSet = null;
 		Datastore datastore = cc.getDatastore();
 		User user = cc.getCurrentUser();
@@ -252,10 +253,10 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 	 * @throws ODKDatastoreException
 	 */
 	public SubmissionSet(SubmissionSet enclosingSet, DynamicCommonFieldsBase row,
-			FormElementModel group, FormDefinition formDefinition,
+			FormElementModel group, Form form,
 			CallingContext cc)
 			throws ODKDatastoreException {
-		this.formDefinition = formDefinition;
+		this.form = form;
 		this.group = group;
 		this.enclosingSet = enclosingSet;
 		this.key = row.getEntityKey();
@@ -274,8 +275,8 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 			// entity key of the top level record from the relation
 			// for that record and the up-pointer in our record 
 			// that holds the AURI for that top level record.
-			this.topLevelTableKey = new EntityKey(formDefinition
-					.getTopLevelGroup().getBackingObjectPrototype(), entity
+			this.topLevelTableKey = new EntityKey(form.getTopLevelGroupElement()
+			      .getFormDataModel().getBackingObjectPrototype(), entity
 					.getTopLevelAuri());
 		}
 		dbEntities.put(group.getFormDataModel().getDDRelationName(), row);
@@ -461,8 +462,7 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 					break;
 				case BINARY: // identifies BinaryContent table
 					submissionField = new BlobSubmissionType(m, groupRowGroup.getUri(),
-							topLevelTableKey, formDefinition, 
-							constructSubmissionKey(m));
+							topLevelTableKey, constructSubmissionKey(m));
 					// pass in row we occur under (to access parentAuri)
 					submissionField.getValueFromEntity(cc);
 					elementsToValues.put(m, submissionField);
@@ -483,7 +483,7 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 					break;
 				case REPEAT:
 					RepeatSubmissionType repeatNode = new RepeatSubmissionType(
-							this, m,  groupRowGroup.getUri(), formDefinition);
+							this, m,  groupRowGroup.getUri(), form);
 					repeatNode.getValueFromEntity(cc);
 					elementsToValues.put(m, repeatNode);
 					break;
@@ -507,7 +507,7 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 
 		StringBuilder b = new StringBuilder();
 		if (group.getParent() == null) {
-			b.append(formDefinition.getFormId());
+			b.append(form.getFormId());
 			b.append("[@version=");
 			b.append(((TopLevelDynamicBase) getGroupBackingObject()).getModelVersion());
 			b.append(" and @uiVersion=");
@@ -716,8 +716,8 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 		return key;
 	}
 
-	public FormDefinition getFormDefinition() {
-		return formDefinition;
+	public String getFormId() {
+	  return form.getFormId();
 	}
 
 	protected DynamicCommonFieldsBase getGroupBackingObject(FormElementModel m) {
@@ -800,7 +800,7 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 	}
 
 	public void recursivelyAddEntityKeys(List<EntityKey> keyList, CallingContext cc)
-			throws ODKDatastoreException {
+			throws ODKOverQuotaException, ODKDatastoreException {
 		for (SubmissionValue value : getSubmissionValues()) {
 			value.recursivelyAddEntityKeys(keyList, cc);
 		}
@@ -840,7 +840,7 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 	}
 	
 	public void persist(CallingContext cc)
-			throws ODKEntityPersistException {
+			throws ODKEntityPersistException, ODKOverQuotaException {
 		// persist everything underneath us...
 		for (Map.Entry<FormElementModel, SubmissionValue> entry : elementsToValues
 				.entrySet()) {

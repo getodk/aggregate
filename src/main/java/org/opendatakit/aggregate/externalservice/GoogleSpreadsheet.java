@@ -55,6 +55,8 @@ import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
+import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
+import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.BasicConsts;
@@ -108,7 +110,8 @@ public class GoogleSpreadsheet extends OAuthExternalService implements ExternalS
    * @param cc
    * @throws ODKExternalServiceException 
    */
-  private GoogleSpreadsheet(Form form, GoogleSpreadsheetParameterTable gsObject, FormServiceCursor formServiceCursor, CallingContext cc) throws ODKExternalServiceException {
+  private GoogleSpreadsheet(Form form, GoogleSpreadsheetParameterTable gsObject, 
+      FormServiceCursor formServiceCursor, CallingContext cc) throws ODKExternalServiceException {
     super(form, formServiceCursor, 
         new LinkElementFormatter(cc.getServerURL(), FormMultipleValueServlet.ADDR, true, true, true, true),
         new GoogleSpreadsheetHeaderFormatter(true, true, true),
@@ -126,12 +129,13 @@ public class GoogleSpreadsheet extends OAuthExternalService implements ExternalS
     }
   }
 
-  private GoogleSpreadsheet(Form form, GoogleSpreadsheetParameterTable entity, ExternalServicePublicationOption externalServiceOption, CallingContext cc) throws ODKDatastoreException, ODKExternalServiceException {
+  private GoogleSpreadsheet(Form form, GoogleSpreadsheetParameterTable entity, 
+      ExternalServicePublicationOption externalServiceOption, CallingContext cc) throws ODKDatastoreException, ODKOverQuotaException, ODKExternalServiceException {
     this(form, entity, createFormServiceCursor(form, entity, externalServiceOption, ExternalServiceType.GOOGLE_SPREADSHEET, cc), cc);
   }
   
   public GoogleSpreadsheet(FormServiceCursor fsc, Form form, CallingContext cc)
-      throws ODKEntityNotFoundException, ODKDatastoreException, ODKFormNotFoundException, ODKExternalServiceException {
+      throws ODKEntityNotFoundException, ODKDatastoreException, ODKOverQuotaException, ODKExternalServiceException, ODKFormNotFoundException {
     this(form, retrieveEntity(GoogleSpreadsheetParameterTable.assertRelation(cc), fsc, cc), fsc, cc);
    
     repeatElementEntities.addAll(GoogleSpreadsheetRepeatParameterTable.getRepeatGroupAssociations(
@@ -141,7 +145,7 @@ public class GoogleSpreadsheet extends OAuthExternalService implements ExternalS
 
   public GoogleSpreadsheet(Form form, String name,
       ExternalServicePublicationOption externalServiceOption, CallingContext cc)
-      throws ODKDatastoreException, ODKExternalServiceException {
+      throws ODKDatastoreException, ODKOverQuotaException, ODKExternalServiceException, ODKEntityPersistException {
     this(form, newEntity(GoogleSpreadsheetParameterTable.assertRelation(cc), cc), externalServiceOption, cc);
     
     objectEntity.setSpreadsheetName(name);

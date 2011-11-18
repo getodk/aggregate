@@ -59,9 +59,8 @@ public class SubmissionPanel extends FlowPanel {
           if(filterTab != null) {
             filterTab.update();
           }
-        } else {
-          AggregateUI.getUI().reportError(caught);
         }
+        AggregateUI.getUI().reportError(caught);
       }
 
       public void onSuccess(SubmissionUISummary summary) {
