@@ -325,17 +325,18 @@ public class TaskLockImpl implements TaskLock {
   }
 
   private Entity queryForLock(String formId, ITaskLockType taskType) throws ODKTaskLockException {
+    int readCount = 0;
     try {
       Query query = new Query(KIND);
       query.addFilter(FORM_ID_PROPERTY, Query.FilterOperator.EQUAL, formId);
       query.addFilter(TASK_TYPE_PROPERTY, Query.FilterOperator.EQUAL, taskType.getName());
       PreparedQuery pquery = ds.prepare(query);
-      dam.recordQueryUsage(KIND);
       Iterable<Entity> entities = pquery.asIterable();
       // There may be expired locks in the database.
       // Skip over those and find the active lock.
       Entity active = null;
       for (Entity e : entities) {
+        ++readCount;
         if (!checkForExpiration(e)) {
           if (active != null) {
             Long timestamp1 = getTimestamp(active);
@@ -364,7 +365,10 @@ public class TaskLockImpl implements TaskLock {
     } catch (Exception e) { // may catch datastore issues?
       e.printStackTrace();
       throw new ODKTaskLockException(OTHER_ERROR, e);
+    } finally {
+      dam.recordQueryUsage(KIND, readCount);
     }
+    
   }
 
 }
