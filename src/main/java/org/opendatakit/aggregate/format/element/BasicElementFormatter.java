@@ -114,7 +114,7 @@ public class BasicElementFormatter implements ElementFormatter {
 
   public void formatDate(Date date, FormElementModel element, String ordinalValue, Row row) {
     if ( googleDocsDate ) {
-      basicStringConversion( WebUtils.googleDocsDateTime(date), row);  
+      basicStringConversion( WebUtils.googleDocsDateOnly(date), row);  
     } else {
       basicStringConversion(date, row);
     }

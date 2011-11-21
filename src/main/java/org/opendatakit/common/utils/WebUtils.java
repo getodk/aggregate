@@ -78,9 +78,11 @@ public class WebUtils {
   private static final String PATTERN_YYYY_MM_DD_DATE_ONLY_NO_TIME_DASH = "yyyy-MM-dd";
   private static final String PATTERN_NO_DATE_TIME_ONLY = "HH:mm:ss.SSS";
   private static final String PATTERN_GOOGLE_DOCS = "MM/dd/yyyy HH:mm:ss.SSS";
+  private static final String PATTERN_GOOGLE_DOCS_DATE_ONLY = "MM/dd/yyyy";
   
   private static final SimpleDateFormat asGMTiso8601;
   private static final SimpleDateFormat asGoogleDoc;
+  private static final SimpleDateFormat asGoogleDocDateOnly;
   
   static {
     SimpleDateFormat temp;
@@ -91,6 +93,10 @@ public class WebUtils {
     temp = new SimpleDateFormat(PATTERN_GOOGLE_DOCS);
     temp.setTimeZone(TimeZone.getTimeZone("GMT"));
     asGoogleDoc = temp;
+    
+    temp = new SimpleDateFormat(PATTERN_GOOGLE_DOCS_DATE_ONLY);
+    temp.setTimeZone(TimeZone.getTimeZone("GMT"));
+    asGoogleDocDateOnly = temp;
   }
 
   private WebUtils() {
@@ -308,6 +314,18 @@ public class WebUtils {
     return asGoogleDoc.format(d);
   }
 
+  /**
+   * Return the GoogleDocs date string representation of a date-only datetime.
+   * 
+   * @param d
+   * @return
+   */
+  public static final String googleDocsDateOnly(Date d) {
+    if (d == null)
+      return null;
+    return asGoogleDocDateOnly.format(d);
+  }
+  
   /**
    * Return the ISO8601 string representation of a date.
    * 
