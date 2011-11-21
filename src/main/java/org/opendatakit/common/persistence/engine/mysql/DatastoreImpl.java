@@ -172,7 +172,7 @@ public class DatastoreImpl implements Datastore, InitializingBean {
     private static final Long MAX_ROW_SIZE = 65000L;
 
     private static final Map<String, ShowDefinition> query(String schemaName, String tableName,
-        JdbcTemplate db) {
+        JdbcTemplate db, DatastoreAccessMetrics dam) {
       StringBuilder b = new StringBuilder();
       b.append(K_SHOW);
       b.append(K_BQ);
@@ -187,6 +187,8 @@ public class DatastoreImpl implements Datastore, InitializingBean {
       try {
         List<?> columns;
         columns = db.query(b.toString(), showDef);
+        dam.recordQueryUsage("SHOW COLUMNS", columns.size());
+        
         for (Object o : columns) {
           ShowDefinition sd = (ShowDefinition) o;
           defs.put(sd.getColumnName(), sd);
@@ -331,8 +333,8 @@ public class DatastoreImpl implements Datastore, InitializingBean {
     }
   }
   
-  void recordQueryUsage(CommonFieldsBase relation) {
-    dam.recordQueryUsage(relation);
+  void recordQueryUsage(CommonFieldsBase relation, int recCount) {
+    dam.recordQueryUsage(relation, recCount);
   }
 
   @Override
@@ -356,9 +358,8 @@ public class DatastoreImpl implements Datastore, InitializingBean {
 
   private final boolean updateRelation(CommonFieldsBase relation) {
 
-    dam.recordQueryUsage("SHOW COLUMNS");
     Map<String, ShowDefinition> defns = ShowDefinition.query(relation.getSchemaName(),
-        relation.getTableName(), getJdbcConnection());
+        relation.getTableName(), getJdbcConnection(), dam);
 
     if (defns.size() > 0) {
 
@@ -556,7 +557,6 @@ public class DatastoreImpl implements Datastore, InitializingBean {
   @Override
   public boolean hasRelation(String schema, String tableName, User user) {
     // Query for the create table string.
-    dam.recordQueryUsage("SHOW CREATE TABLE");
     try {
       StringBuilder b = new StringBuilder();
       b.setLength(0);
@@ -569,9 +569,11 @@ public class DatastoreImpl implements Datastore, InitializingBean {
       b.append(tableName);
       b.append(K_BQ);
       // this will throw an exception if the table doesn't exist...
-      getJdbcConnection().queryForList(b.toString());
+      List<Map<String, Object>> l = getJdbcConnection().queryForList(b.toString());
+      dam.recordQueryUsage("SHOW CREATE TABLE", l.size());
       // and if it does exist, we don't care about the return value...
     } catch (BadSqlGrammarException e) {
+      dam.recordQueryUsage("SHOW CREATE TABLE", 0);
       // we expect this if the table does not exist...
       return false;
     }

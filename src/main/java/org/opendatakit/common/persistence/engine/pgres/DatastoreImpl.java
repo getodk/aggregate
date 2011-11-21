@@ -277,8 +277,8 @@ public class DatastoreImpl implements Datastore, InitializingBean {
     }
   }
   
-  void recordQueryUsage(CommonFieldsBase relation) {
-    dam.recordQueryUsage(relation);
+  void recordQueryUsage(CommonFieldsBase relation, int recCount) {
+    dam.recordQueryUsage(relation, recCount);
   }
 
   @Override
@@ -302,11 +302,11 @@ public class DatastoreImpl implements Datastore, InitializingBean {
 
   private final boolean updateRelation(CommonFieldsBase relation) {
 
-    dam.recordQueryUsage(TableDefinition.INFORMATION_SCHEMA_COLUMNS);
     String qs = TableDefinition.TABLE_DEF_QUERY;
     List<?> columns;
     columns = getJdbcConnection().query(qs,
         new Object[] { relation.getSchemaName(), relation.getTableName() }, tableDef);
+    dam.recordQueryUsage(TableDefinition.INFORMATION_SCHEMA_COLUMNS, columns.size());
 
     if (columns.size() > 0) {
       Map<String, TableDefinition> map = new HashMap<String, TableDefinition>();
@@ -542,7 +542,7 @@ public class DatastoreImpl implements Datastore, InitializingBean {
 
   @Override
   public boolean hasRelation(String schema, String tableName, User user) {
-    dam.recordQueryUsage(TableDefinition.INFORMATION_SCHEMA_COLUMNS);
+    dam.recordQueryUsage(TableDefinition.INFORMATION_SCHEMA_COLUMNS, 1);
     String qs = TableDefinition.TABLE_EXISTS_QUERY;
     int columnCount = getJdbcConnection().queryForInt(qs, new Object[] { schema, tableName });
     return (columnCount != 0);
