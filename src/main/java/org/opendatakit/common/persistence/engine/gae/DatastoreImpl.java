@@ -81,12 +81,12 @@ public class DatastoreImpl implements Datastore {
     return ds;
   }
 
-  void recordQueryUsage(CommonFieldsBase relation) {
-    dam.recordQueryUsage(relation);
+  void recordQueryUsage(CommonFieldsBase relation, int recCount) {
+    dam.recordQueryUsage(relation, recCount);
   }
 
-  void recordQueryUsage(String specialTableName) {
-    dam.recordQueryUsage(specialTableName);
+  void recordQueryUsage(String specialTableName, int recCount) {
+    dam.recordQueryUsage(specialTableName, recCount);
   }
 
   @Override

@@ -65,11 +65,12 @@ public class TaskLockImpl implements TaskLock {
       query.addFilter(FORM_ID_PROPERTY, Query.FilterOperator.EQUAL, formId);
       query.addFilter(TASK_TYPE_PROPERTY, Query.FilterOperator.EQUAL, taskType.getName());
       PreparedQuery pquery = ds.prepare(query);
-      dam.recordQueryUsage(KIND);
+
       Iterable<Entity> entities = pquery.asIterable();
       List<Key> keysToDelete = new ArrayList<Key>();
-
+      int recCount = 0;
       for (Entity entity : entities) {
+        ++recCount;
         boolean shouldDelete = false;
         // see if deadline is more than a day in the past.
         // if so, remove lock from table.
@@ -90,6 +91,7 @@ public class TaskLockImpl implements TaskLock {
           keysToDelete.add(entity.getKey());
         }
       }
+      dam.recordQueryUsage(KIND, recCount);
 
       // we have the list of candidate records
       // now gain a transactional lock for each and
