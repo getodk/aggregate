@@ -184,7 +184,6 @@ public abstract class CommonServletBase extends HttpServlet {
     resp.setHeader(ServletConsts.OPEN_ROSA_DATE_HEADER,  formatter.format(new Date()));
   }
   
-  protected abstract String getVersionString(CallingContext cc);
   /**
    * Generate HTML footer string for web responses
    * 

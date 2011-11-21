@@ -49,11 +49,6 @@ public class ServletUtilBase extends CommonServletBase {
     super(ServletConsts.APPLICATION_NAME);
   }
   
-  @Override
-  protected String getVersionString(CallingContext cc) {
-	return HtmlConsts.TAB + "<FONT SIZE=1>" + ServletConsts.VERSION + "</FONT>";
-  }
-  
   /**
    * Generate error response for ODK ID not found
    * 
