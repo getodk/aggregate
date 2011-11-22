@@ -81,7 +81,20 @@ public class Form {
 
   private static final Map<String, FormCache> cache = new HashMap<String, FormCache>();
 
-  private static synchronized Form getForm(String topLevelAuri, CallingContext cc)
+  /**
+   * Common private static method through which all Form objects are obtained.
+   * This provides a cache of the form data.  If known, the top-level object's
+   * row object is passed in.  This is a database access optimization (minimize
+   * GAE billing).
+   *  
+   * @param topLevelAuri
+   * @param infoRow
+   * @param cc
+   * @return
+   * @throws ODKOverQuotaException
+   * @throws ODKDatastoreException
+   */
+  private static synchronized Form getForm(String topLevelAuri, FormInfoTable infoRow, CallingContext cc)
       throws ODKOverQuotaException, ODKDatastoreException {
     FormCache c = cache.get(topLevelAuri);
     if (c != null && c.timestamp + PersistConsts.MAX_SETTLE_MILLISECONDS > System.currentTimeMillis()) {
@@ -97,8 +110,17 @@ public class Form {
       return c.form;
     }
 
+    Datastore ds = cc.getDatastore();
+    User user = cc.getCurrentUser();
+
+    FormInfoTable infoRelation = FormInfoTable.assertRelation(cc);
+
+    if ( infoRow == null ) {
+      infoRow = ds.getEntity(infoRelation, topLevelAuri, user);
+    }
+
     logger.info("FormCache: inserting Form: " + topLevelAuri);
-    Form f = new Form(topLevelAuri, cc);
+    Form f = new Form(infoRow, cc);
     FormCache fc = new FormCache(System.currentTimeMillis(), f);
     cache.put(topLevelAuri, fc);
     return f;
@@ -133,14 +155,13 @@ public class Form {
    */
   private Map<String, FormElementModel> repeatElementMap;
 
-  private Form(String topLevelAuri, CallingContext cc) throws ODKDatastoreException {
+  private Form(FormInfoTable infoRow, CallingContext cc) throws ODKDatastoreException {
     Datastore ds = cc.getDatastore();
     User user = cc.getCurrentUser();
-
-    FormInfoTable infoRelation = FormInfoTable.assertRelation(cc);
-
-    infoRow = ds.getEntity(infoRelation, topLevelAuri, user);
-
+    
+    this.infoRow = infoRow;
+    String topLevelAuri = infoRow.getUri();
+    
     newObject = false;
 
     Query q;
@@ -669,10 +690,11 @@ public class Form {
     List<Form> forms = new ArrayList<Form>();
 
     Query formQuery = cc.getDatastore().createQuery(relation, "Form.getForms", cc.getCurrentUser());
-    List<?> formEntityKeys = formQuery.executeDistinctValueForDataField(relation.primaryKey);
+    List<? extends CommonFieldsBase> infoRows = formQuery.executeQuery();
 
-    for (Object formEntityKey : formEntityKeys) {
-      Form form = getForm((String) formEntityKey, cc);
+    for (CommonFieldsBase cb : infoRows) {
+      FormInfoTable infoRow = (FormInfoTable) cb;
+      Form form = getForm(cb.getUri(), infoRow, cc);
       // TODO: authorization check?
       forms.add(form);
     }
@@ -728,7 +750,7 @@ public class Form {
     }
     try {
       String formUri = CommonFieldsBase.newMD5HashUri(formId);
-      Form form = getForm(formUri, cc);
+      Form form = getForm(formUri, null, cc);
       if (!formId.equals(form.getFormId())) {
         throw new IllegalStateException("more than one FormInfo entry for the given form id: "
             + formId);
@@ -767,7 +789,7 @@ public class Form {
 
     try {
       String formUri = parts.get(1).getAuri();
-      Form form = getForm(formUri, cc);
+      Form form = getForm(formUri, null, cc);
       return form;
     } catch ( ODKOverQuotaException e) {
       throw e;
@@ -842,7 +864,7 @@ public class Form {
     String formUri = CommonFieldsBase.newMD5HashUri(rootElementDefn.formId);
 
     try {
-      thisForm = getForm(formUri, cc);
+      thisForm = getForm(formUri, null, cc);
 
       if (thisForm.isSameForm(rootElementDefn, isEncryptedForm, title, xmlBytes, cc) != BlobSubmissionOutcome.NEW_FILE_VERSION) {
         return thisForm;

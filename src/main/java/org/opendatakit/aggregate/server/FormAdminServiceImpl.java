@@ -63,6 +63,7 @@ import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.security.client.exception.AccessDeniedException;
+import org.opendatakit.common.utils.WebUtils;
 import org.opendatakit.common.web.CallingContext;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
@@ -152,8 +153,7 @@ public class FormAdminServiceImpl extends RemoteServiceServlet implements
     // set up the purge request here...
     Map<String, String> parameters = new HashMap<String, String>();
 
-    parameters.put(PurgeOlderSubmissions.PURGE_DATE,
-        PurgeOlderSubmissions.PURGE_DATE_FORMAT.format(earliest));
+    parameters.put(PurgeOlderSubmissions.PURGE_DATE, WebUtils.purgeDateString(earliest));
     Form form;
     try {
       form = Form.retrieveFormByFormId(fsc.getFormId(), cc);

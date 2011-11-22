@@ -42,6 +42,7 @@ import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
 import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.security.User;
+import org.opendatakit.common.utils.WebUtils;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.BasicConsts;
 
@@ -168,8 +169,7 @@ public class PurgeOlderSubmissionsWorkerImpl {
 	    User user = cc.getCurrentUser();
 
 	    Map<String,String> rp = t.getRequestParameters();
-	    Date purgeBeforeDate = 
-	    	PurgeOlderSubmissions.PURGE_DATE_FORMAT.parse(rp.get(PurgeOlderSubmissions.PURGE_DATE));
+	    Date purgeBeforeDate = WebUtils.parsePurgeDateString(rp.get(PurgeOlderSubmissions.PURGE_DATE));
 	    
 	    // it is possible to have a FormInfo entry without any information
 	    // on the backing object (no records in FormDataModel).  In that
