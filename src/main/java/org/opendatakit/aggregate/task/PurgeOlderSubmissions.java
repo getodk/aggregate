@@ -15,8 +15,6 @@
  */
 package org.opendatakit.aggregate.task;
 
-import java.text.SimpleDateFormat;
-
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.form.Form;
 import org.opendatakit.aggregate.submission.SubmissionKey;
@@ -33,9 +31,6 @@ public interface PurgeOlderSubmissions {
 	
 	public static final String PURGE_DATE = "purgeBefore";
 
-	public static final SimpleDateFormat PURGE_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-
 	public void createPurgeOlderSubmissionsTask(Form form, SubmissionKey miscTasksKey,
 				long attemptCount, CallingContext cc) throws ODKDatastoreException, ODKFormNotFoundException;
-
 }

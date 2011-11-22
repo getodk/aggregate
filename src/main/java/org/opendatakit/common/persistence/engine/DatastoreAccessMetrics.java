@@ -39,6 +39,7 @@ public final class DatastoreAccessMetrics {
   // map of fully qualified table name to index in counter array.
   private final Map<String, Short> tableMap = new TreeMap<String, Short>();
   private short nextCountIdx = 0;
+  private int readCount = 0;
   
   /**
    * Maintain a tally of which tables those actions were against.
@@ -107,9 +108,12 @@ public final class DatastoreAccessMetrics {
    * NOTE: This method is NOT thread-safe. 
    * Call only from within a synchronized method! 
    */
-  private void logUsage() {
+  private void logUsage(int incCount) {
     long now = System.currentTimeMillis();
-    if ( lastLogging + ACCESS_METRIC_DUMP_INTERVAL < now ) {
+    int oldReadCount = readCount;
+    readCount = readCount + incCount;
+    if ( (readCount / 500) != (oldReadCount / 500) ||
+         ( lastLogging + ACCESS_METRIC_DUMP_INTERVAL < now ) ) {
       lastLogging = now;
       
       String gmtDate = WebUtils.iso8601Date(new java.util.Date(now));
@@ -147,7 +151,7 @@ public final class DatastoreAccessMetrics {
     }
     
     rbc.recordUsage(countArrayIdx, incCount);
-    logUsage();
+    logUsage(incCount);
   }
   
   private void recordUsage( String fullyQualifiedName, RingBufferCountArray rbc, int incCount ) {

@@ -295,7 +295,7 @@ public class FusionTable extends OAuthExternalService implements ExternalService
       String createStmt = createFusionTableStatement(form, root);
       resultRequest = executeStmt(createStmt, cc);
     } catch (Exception e) {
-      logger.error("Failed to create fusion table");
+      logger.error("Failed to create fusion table: " + e.getMessage());
       e.printStackTrace();
       throw new ODKExternalServiceException(e);
     }
