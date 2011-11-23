@@ -33,8 +33,6 @@ import org.opendatakit.aggregate.submission.type.GeoPoint;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
 
-import com.google.appengine.repackaged.com.google.common.util.Base64;
-
 /**
  * TODO: comment
  * 

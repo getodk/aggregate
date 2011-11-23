@@ -47,7 +47,7 @@ import org.opendatakit.aggregate.constants.common.OperationalStatus;
 import org.opendatakit.aggregate.constants.externalservice.JsonServerConsts;
 import org.opendatakit.aggregate.constants.externalservice.OhmageJsonServerConsts;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
-import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.format.element.BasicElementFormatter;
 import org.opendatakit.aggregate.format.element.OhmageJsonElementFormatter;
 import org.opendatakit.aggregate.format.header.BasicHeaderFormatter;
@@ -87,13 +87,13 @@ public class OhmageJsonServer extends AbstractExternalService implements
 	private final OhmageJsonServerParameterTable objectEntity;
 
 	private OhmageJsonServer(OhmageJsonServerParameterTable entity,
-			FormServiceCursor formServiceCursor, Form form, CallingContext cc) {
+			FormServiceCursor formServiceCursor, IForm form, CallingContext cc) {
 		super(form, formServiceCursor, new BasicElementFormatter(true, true,
-				true), new BasicHeaderFormatter(true, true, true), cc);
+				true, false), new BasicHeaderFormatter(true, true, true), cc);
 		objectEntity = entity;
 	}
 
-	private OhmageJsonServer(OhmageJsonServerParameterTable entity, Form form,
+	private OhmageJsonServer(OhmageJsonServerParameterTable entity, IForm form,
 			ExternalServicePublicationOption externalServiceOption,
 			CallingContext cc) throws ODKDatastoreException {
 		this(entity, createFormServiceCursor(form, entity,
@@ -101,13 +101,13 @@ public class OhmageJsonServer extends AbstractExternalService implements
 				cc), form, cc);
 	}
 
-	public OhmageJsonServer(FormServiceCursor formServiceCursor, Form form,
+	public OhmageJsonServer(FormServiceCursor formServiceCursor, IForm form,
 			CallingContext cc) throws ODKDatastoreException {
 		this(retrieveEntity(OhmageJsonServerParameterTable.assertRelation(cc),
 				formServiceCursor, cc), formServiceCursor, form, cc);
 	}
 
-	public OhmageJsonServer(Form form, String serverURL,
+	public OhmageJsonServer(IForm form, String serverURL,
 			ExternalServicePublicationOption externalServiceOption,
 			CallingContext cc) throws ODKDatastoreException {
 		this(newEntity(OhmageJsonServerParameterTable.assertRelation(cc), cc),
