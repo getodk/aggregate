@@ -49,8 +49,7 @@ public class SetTablePermissionsResult extends
     {
         super(false, reason);
 
-        Check.notNullOrEmpty(tableID,
-                "tableID");
+        Check.notNullOrEmpty(tableID, "tableID");
         Check.notNullOrEmpty(aggregateUserIdentifier, "aggregateUserIdentifier");
         if (!possibleFailureReasons.contains(reason))
             throw new IllegalArgumentException(
@@ -107,10 +106,7 @@ public class SetTablePermissionsResult extends
     {
         final int prime = 31;
         int result = super.hashCode();
-        result = prime
-                * result
-                + ((tableID == null) ? 0
-                        : tableID.hashCode());
+        result = prime * result + ((tableID == null) ? 0 : tableID.hashCode());
         result = prime
                 * result
                 + ((aggregateUserIdentifier == null) ? 0
@@ -135,8 +131,7 @@ public class SetTablePermissionsResult extends
         {
             if (other.tableID != null)
                 return false;
-        } else if (!tableID
-                .equals(other.tableID))
+        } else if (!tableID.equals(other.tableID))
             return false;
         if (aggregateUserIdentifier == null)
         {
@@ -169,11 +164,10 @@ public class SetTablePermissionsResult extends
      * @return a new SetPermissionsResult representing the failed completion of
      *         a SetPermissions command.
      */
-    public static SetTablePermissionsResult failure(
-            String tableID, String aggregateUserIdentifier,
-            FailureReason reason)
+    public static SetTablePermissionsResult failure(String tableID,
+            String aggregateUserIdentifier, FailureReason reason)
     {
-        return new SetTablePermissionsResult(tableID,
-                aggregateUserIdentifier, reason);
+        return new SetTablePermissionsResult(tableID, aggregateUserIdentifier,
+                reason);
     }
 }

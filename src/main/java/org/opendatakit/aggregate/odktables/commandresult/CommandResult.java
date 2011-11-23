@@ -75,7 +75,8 @@ public abstract class CommandResult<T extends Command>
         PERMISSION_DENIED,
         CANNOT_DELETE,
         OUT_OF_SYNCH,
-        ROW_OUT_OF_SYNCH;
+        ROW_OUT_OF_SYNCH,
+        FILTER_VALUE_TYPE_MISMATCH;
     }
 
     private final boolean successful;

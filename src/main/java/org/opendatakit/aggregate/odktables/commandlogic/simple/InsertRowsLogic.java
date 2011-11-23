@@ -59,7 +59,8 @@ public class InsertRowsLogic extends CommandLogic<InsertRows>
             String requestingUserID = insertRows.getRequestingUserID();
             String tableID = insertRows.getTableID();
 
-            InternalUser requestingUser = users.query("InsertRowsLogic.execute")
+            InternalUser requestingUser = users
+                    .query("InsertRowsLogic.execute")
                     .equal(Users.USER_ID, requestingUserID).get();
 
             String aggregateRequestingUserIdentifier = requestingUser

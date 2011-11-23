@@ -1,26 +1,33 @@
 package org.opendatakit.aggregate.odktables.commandlogic.synchronize;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
+import org.opendatakit.aggregate.odktables.client.entity.Filter;
 import org.opendatakit.aggregate.odktables.client.entity.Modification;
 import org.opendatakit.aggregate.odktables.client.entity.SynchronizedRow;
 import org.opendatakit.aggregate.odktables.client.exception.AggregateInternalErrorException;
 import org.opendatakit.aggregate.odktables.command.synchronize.CloneSynchronizedTable;
 import org.opendatakit.aggregate.odktables.commandlogic.CommandLogic;
-import org.opendatakit.aggregate.odktables.commandresult.CommandResult.FailureReason;
+import org.opendatakit.aggregate.odktables.commandlogic.CommandLogicFunctions;
 import org.opendatakit.aggregate.odktables.commandresult.synchronize.CloneSynchronizedTableResult;
 import org.opendatakit.aggregate.odktables.entity.InternalColumn;
+import org.opendatakit.aggregate.odktables.entity.InternalFilter;
 import org.opendatakit.aggregate.odktables.entity.InternalRow;
 import org.opendatakit.aggregate.odktables.entity.InternalTableEntry;
 import org.opendatakit.aggregate.odktables.entity.InternalUser;
 import org.opendatakit.aggregate.odktables.entity.InternalUserTableMapping;
+import org.opendatakit.aggregate.odktables.exception.SnafuException;
 import org.opendatakit.aggregate.odktables.relation.Columns;
 import org.opendatakit.aggregate.odktables.relation.Permissions;
 import org.opendatakit.aggregate.odktables.relation.Table;
 import org.opendatakit.aggregate.odktables.relation.TableEntries;
 import org.opendatakit.aggregate.odktables.relation.UserTableMappings;
 import org.opendatakit.aggregate.odktables.relation.Users;
+import org.opendatakit.common.ermodel.simple.typedentity.TypedEntity;
+import org.opendatakit.common.ermodel.simple.typedentity.TypedEntityQuery;
+import org.opendatakit.common.persistence.Query.FilterOperation;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
 
@@ -48,6 +55,7 @@ public class CloneSynchronizedTableLogic extends
             throws AggregateInternalErrorException
     {
         Modification clientModification;
+        List<TypedEntity> entitiesToSave = new ArrayList<TypedEntity>();
         try
         {
             // Get relation instances
@@ -62,16 +70,17 @@ public class CloneSynchronizedTableLogic extends
                     .getAggregateTableIdentifier();
             String requestingUserID = cloneSynchronizedTable
                     .getRequestingUserID();
+            Collection<Filter> filters = cloneSynchronizedTable.getFilters();
 
             // Get request user
-            InternalUser user = users.query("CloneSynchronizedTableLogic.execute")
+            InternalUser user = users
+                    .query("CloneSynchronizedTableLogic.execute")
                     .equal(Users.USER_ID, requestingUserID).get();
 
             // Check if user is allowed to read the table they want to clone
             if (!user.hasPerm(aggregateTableIdentifier, Permissions.READ))
             {
-                return CloneSynchronizedTableResult.failure(tableID,
-                        FailureReason.PERMISSION_DENIED);
+                return CloneSynchronizedTableResult.failurePermissionDenied();
             }
 
             // Check if the user is already using the tableID
@@ -82,8 +91,8 @@ public class CloneSynchronizedTableLogic extends
                     .equal(UserTableMappings.TABLE_ID, tableID).exists();
             if (mappingExists)
             {
-                return CloneSynchronizedTableResult.failure(tableID,
-                        FailureReason.TABLE_ALREADY_EXISTS);
+                return CloneSynchronizedTableResult
+                        .failureTableAlreadyExists(tableID);
             }
 
             // Retrieve the table entry for the table that is to be cloned
@@ -93,41 +102,74 @@ public class CloneSynchronizedTableLogic extends
                 entry = entries.getEntity(aggregateTableIdentifier);
             } catch (ODKDatastoreException e)
             {
-                return CloneSynchronizedTableResult.failure(tableID,
-                        FailureReason.TABLE_DOES_NOT_EXIST);
+                return CloneSynchronizedTableResult
+                        .failureTableDoesNotExist(tableID);
             }
 
             // add entry to user table mapping
             InternalUserTableMapping mapping = new InternalUserTableMapping(
                     user.getAggregateIdentifier(), aggregateTableIdentifier,
                     tableID, cc);
-            mapping.save();
+            entitiesToSave.add(mapping);
 
-            // create modification of all the latest rows
-            Table table = Table.getInstance(aggregateTableIdentifier, cc);
+            // get columns of table
             List<InternalColumn> cols = columns
                     .query("CloneSynchronizedTableLogic.execute")
                     .equal(Columns.AGGREGATE_TABLE_IDENTIFIER,
                             aggregateTableIdentifier).execute();
 
+            // save filters
+            for (Filter filter : filters)
+            {
+                InternalColumn col = InternalColumn.search(cols,
+                        filter.getColumnName());
+                if (col == null)
+                {
+                    return CloneSynchronizedTableResult
+                            .failureColumnDoesNotExist(tableID,
+                                    filter.getColumnName());
+                }
+                try
+                {
+                    CommandLogicFunctions.convert(col.getType(),
+                            filter.getValue());
+                } catch (Exception e)
+                {
+                    return CloneSynchronizedTableResult
+                            .failureFilterValueTypeMismatch(tableID,
+                                    col.getType(), filter.getValue());
+                }
+                InternalFilter internalFilter = new InternalFilter(
+                        user.getAggregateIdentifier(),
+                        aggregateTableIdentifier, filter.getColumnName(),
+                        FilterOperation.valueOf(filter.getOp().name()),
+                        filter.getValue(), cc);
+                entitiesToSave.add(internalFilter);
+            }
+
+            // create modification of the latest rows, applying any filters
+            Table table = Table.getInstance(aggregateTableIdentifier, cc);
+
             int modificationNumber = entry.getModificationNumber();
 
-            List<InternalRow> rows = table.query("CloneSynchronizedTableLogic.execute").execute();
-            List<SynchronizedRow> clientRows = new ArrayList<SynchronizedRow>();
-            for (InternalRow row : rows)
+            TypedEntityQuery<InternalRow> query = table
+                    .query("CloneSynchronizedTableLogic.execute");
+            for (Filter filter : filters)
             {
-                SynchronizedRow clientRow = new SynchronizedRow();
-                clientRow.setAggregateRowIdentifier(row
+                InternalColumn col = InternalColumn.search(cols,
+                        filter.getColumnName());
+                String columnName = Table.convertIdentifier(col
                         .getAggregateIdentifier());
-                clientRow.setRevisionTag(row.getRevisionTag());
-                for (InternalColumn column : cols)
-                {
-                    String value = row
-                            .getValue(column.getAggregateIdentifier());
-                    clientRow.setValue(column.getName(), value);
-                }
-                clientRows.add(clientRow);
+                Object value = CommandLogicFunctions.convert(table
+                        .getAttribute(columnName).getType(), filter.getValue());
+                query.addFilter(columnName,
+                        FilterOperation.valueOf(filter.getOp().name()), value);
             }
+
+            // convert rows to SynchronizedRow
+            List<InternalRow> rows = query.execute();
+            List<SynchronizedRow> clientRows = CommandLogicFunctions.convert(
+                    rows, cols);
 
             clientModification = new Modification(modificationNumber,
                     clientRows);
@@ -135,6 +177,12 @@ public class CloneSynchronizedTableLogic extends
         {
             throw new AggregateInternalErrorException(e.getMessage());
         }
+
+        // save entities
+        boolean success = CommandLogicFunctions.saveEntities(entitiesToSave);
+        if (!success)
+            throw new SnafuException("Could not save entities: "
+                    + entitiesToSave);
 
         return CloneSynchronizedTableResult.success(clientModification);
     }

@@ -33,39 +33,39 @@ public class GetUserByIDLogic extends CommandLogic<GetUserByID>
     public GetUserByIDResult execute(CallingContext cc)
             throws AggregateInternalErrorException
     {
-        User retrievedUser; 
+        User retrievedUser;
         try
         {
             Users users = Users.getInstance(cc);
-    
+
             String userID = this.getUserByID.getUserID();
             String requestingUserID = this.getUserByID.getRequestingUserID();
             String usersTable = users.getAggregateIdentifier();
-    
+
             InternalUser requestUser = users.query("GetUserByIDLogic.execute")
                     .equal(Users.USER_ID, requestingUserID).get();
-    
+
             if (!requestUser.hasPerm(usersTable, Permissions.READ))
             {
                 return GetUserByIDResult.failure(
                         requestUser.getAggregateIdentifier(),
                         FailureReason.PERMISSION_DENIED);
             }
-    
+
             InternalUser user = null;
             try
             {
-                user = users.query("GetUserByIDLogic.execute").equal(Users.USER_ID, userID).get();
+                user = users.query("GetUserByIDLogic.execute")
+                        .equal(Users.USER_ID, userID).get();
             } catch (ODKDatastoreException e)
             {
                 return GetUserByIDResult.failure(userID,
                         FailureReason.USER_DOES_NOT_EXIST);
             }
-    
+
             retrievedUser = new User(userID, user.getAggregateIdentifier(),
                     user.getName());
-        }
-        catch (ODKDatastoreException e)
+        } catch (ODKDatastoreException e)
         {
             throw new AggregateInternalErrorException(e.getMessage());
         }

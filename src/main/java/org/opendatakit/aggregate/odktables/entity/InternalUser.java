@@ -75,8 +75,7 @@ public class InternalUser extends TypedEntity
                 .equal(Permissions.AGGREGATE_TABLE_IDENTIFIER,
                         aggregateTableIdentifier)
                 .equal(Permissions.AGGREGATE_USER_IDENTIFIER,
-                        getAggregateIdentifier())
-                .equal(permission, true)
+                        getAggregateIdentifier()).equal(permission, true)
                 .exists();
         return hasPerm;
     }

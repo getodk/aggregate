@@ -371,8 +371,27 @@ public class AbstractRelation implements Relation {
 	public DataField getDataField(String fieldName) {
 		DataField f = nameMap.get(fieldName);
 		if ( f == null ) {
-			throw new IllegalArgumentException("Field name " 
-					+ fieldName + " is not a valid field name for this relation");
+			if (this.prototype == null) {
+				throw new IllegalArgumentException("Field name " + fieldName
+						+ " is not a valid field name for this relation");
+			} else if (fieldName
+					.equals(CommonFieldsBase.CREATION_DATE_COLUMN_NAME)) {
+				f = this.prototype.creationDate;
+			} else if (fieldName
+					.equals(CommonFieldsBase.CREATOR_URI_USER_COLUMN_NAME)) {
+				f = this.prototype.creatorUriUser;
+			} else if (fieldName
+					.equals(CommonFieldsBase.LAST_UPDATE_DATE_COLUMN_NAME)) {
+				f = this.prototype.lastUpdateDate;
+			} else if (fieldName
+					.equals(CommonFieldsBase.LAST_UPDATE_URI_USER_COLUMN_NAME)) {
+				f = this.prototype.lastUpdateUriUser;
+			} else if (fieldName.equals(CommonFieldsBase.URI_COLUMN_NAME)) {
+				f = this.prototype.primaryKey;
+			} else {
+				throw new IllegalArgumentException("Field name " + fieldName
+						+ " is not a valid field name for this relation");
+			}
 		}
 		return f;
 	}

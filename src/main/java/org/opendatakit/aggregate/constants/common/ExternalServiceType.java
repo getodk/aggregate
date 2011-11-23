@@ -28,7 +28,8 @@ import java.io.Serializable;
  */
 public enum ExternalServiceType implements Serializable {
   GOOGLE_SPREADSHEET("Google Spreadsheet"),
-  JSON_SERVER("JSON Server"), 
+  JSON_SERVER("JSON Server"),
+  OHMAGE_JSON_SERVER("Ohmage JSON Server"), 
   GOOGLE_FUSIONTABLES( "Google FusionTables");
 
   private String serviceName;

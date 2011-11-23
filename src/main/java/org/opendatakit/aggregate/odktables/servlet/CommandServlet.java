@@ -23,7 +23,7 @@ import com.google.gson.JsonParseException;
 
 public class CommandServlet extends ServletUtilBase
 {
-	private static Log logger = LogFactory.getLog(CommandServlet.class);
+    private static Log logger = LogFactory.getLog(CommandServlet.class);
     /**
      * Serial number for serialization.
      */
@@ -91,7 +91,7 @@ public class CommandServlet extends ServletUtilBase
             return;
         } catch (AggregateInternalErrorException e)
         {
-        	logger.warn(e.toString());
+            logger.warn(e.toString());
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
                     "Could not complete request. Please try again later.");
             return;
