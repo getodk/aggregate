@@ -13,9 +13,9 @@ import org.opendatakit.common.web.CallingContext;
 
 /**
  * <p>
- * Permissions is a relation containing all the {@link InternalPermission} entities
- * stored in the datastore. Permissions keeps track of read, write, and delete
- * permissions for all tables created through the odktables API.
+ * Permissions is a relation containing all the {@link InternalPermission}
+ * entities stored in the datastore. Permissions keeps track of read, write, and
+ * delete permissions for all tables created through the odktables API.
  * </p>
  * 
  * @author the.dylan.price@gmail.com
@@ -58,18 +58,18 @@ public class Permissions extends TypedEntityRelation<InternalPermission>
     /**
      * The aggregateTableIdentifier field.
      */
-    private static final Attribute aggregateTableIdentifier = new Attribute(AGGREGATE_TABLE_IDENTIFIER,
-            AttributeType.STRING, false);
+    private static final Attribute aggregateTableIdentifier = new Attribute(
+            AGGREGATE_TABLE_IDENTIFIER, AttributeType.STRING, false);
     /**
      * The aggregateUserIdentifier field.
      */
-    private static final Attribute aggregateUserIdentifier = new Attribute(AGGREGATE_USER_IDENTIFIER,
-            AttributeType.STRING, false);
+    private static final Attribute aggregateUserIdentifier = new Attribute(
+            AGGREGATE_USER_IDENTIFIER, AttributeType.STRING, false);
     /**
      * The read field.
      */
-    private static final Attribute read = new Attribute(READ, AttributeType.BOOLEAN,
-            false);
+    private static final Attribute read = new Attribute(READ,
+            AttributeType.BOOLEAN, false);
     /**
      * The write field.
      */
@@ -113,7 +113,8 @@ public class Permissions extends TypedEntityRelation<InternalPermission>
     }
 
     @Override
-    public InternalPermission initialize(Entity entity) throws ODKDatastoreException
+    public InternalPermission initialize(Entity entity)
+            throws ODKDatastoreException
     {
         return InternalPermission.fromEntity(entity);
     }

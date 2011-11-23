@@ -5,16 +5,15 @@ import org.opendatakit.common.utils.Check;
 
 /**
  * RemoveTableSynchronization is immutable.
- *
+ * 
  * @author the.dylan.price@gmail.com
  */
 public class RemoveTableSynchronization implements Command
 {
     private static final String path = "/synchronize/removeTableSynchronization";
-    
+
     private final String requestingUserID;
     private final String tableID;
-    
 
     /**
      * For serialization by Gson
@@ -22,9 +21,9 @@ public class RemoveTableSynchronization implements Command
     @SuppressWarnings("unused")
     private RemoveTableSynchronization()
     {
-       this.requestingUserID = null;
-       this.tableID = null;
-       
+        this.requestingUserID = null;
+        this.tableID = null;
+
     }
 
     /**
@@ -32,15 +31,14 @@ public class RemoveTableSynchronization implements Command
      */
     public RemoveTableSynchronization(String requestingUserID, String tableID)
     {
-        
+
         Check.notNullOrEmpty(requestingUserID, "requestingUserID");
-        Check.notNullOrEmpty(tableID, "tableID"); 
-        
+        Check.notNullOrEmpty(tableID, "tableID");
+
         this.requestingUserID = requestingUserID;
         this.tableID = tableID;
     }
 
-    
     /**
      * @return the requestingUserID
      */
@@ -48,7 +46,7 @@ public class RemoveTableSynchronization implements Command
     {
         return this.requestingUserID;
     }
-    
+
     /**
      * @return the tableID
      */
@@ -56,15 +54,13 @@ public class RemoveTableSynchronization implements Command
     {
         return this.tableID;
     }
-    
 
     @Override
     public String toString()
     {
-        return String.format("RemoveTableSynchronization: " +
-                "requestingUserID=%s " +
-                "tableID=%s " +
-                "", requestingUserID, tableID);
+        return String.format("RemoveTableSynchronization: "
+                + "requestingUserID=%s " + "tableID=%s " + "",
+                requestingUserID, tableID);
     }
 
     @Override
@@ -84,4 +80,3 @@ public class RemoveTableSynchronization implements Command
         return path;
     }
 }
-
