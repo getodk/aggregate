@@ -25,11 +25,13 @@ import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.exception.ODKExternalServiceDependencyException;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
-import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.form.FormFactory;
+import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.servlet.ServletUtilBase;
 import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.task.FormDeleteWorkerImpl;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.web.CallingContext;
 
 /**
@@ -82,11 +84,20 @@ public class FormDeleteTaskServlet extends ServletUtilBase {
     }
     Long attemptCount = Long.valueOf(attemptCountString);
 
-    Form form;
+    IForm form;
     try {
-      form = Form.retrieveFormByFormId(formId, cc);
+      form = FormFactory.retrieveFormByFormId(formId, cc);
     } catch (ODKFormNotFoundException e) {
+      e.printStackTrace();
       odkIdNotFoundError(resp);
+      return;
+    } catch (ODKOverQuotaException e) {
+      e.printStackTrace();
+      quotaExceededError(resp);
+      return;
+    } catch (ODKDatastoreException e) {
+      e.printStackTrace();
+      datastoreError(resp);
       return;
     }
 

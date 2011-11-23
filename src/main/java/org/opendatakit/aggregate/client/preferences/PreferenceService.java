@@ -16,6 +16,7 @@
 
 package org.opendatakit.aggregate.client.preferences;
 
+import org.opendatakit.aggregate.client.exception.RequestFailureException;
 import org.opendatakit.common.security.client.exception.AccessDeniedException;
 
 import com.google.gwt.user.client.rpc.RemoteService;
@@ -30,9 +31,9 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
  */
 @RemoteServiceRelativePath("preferenceservice")
 public interface PreferenceService extends RemoteService {
-  PreferenceSummary getPreferences() throws AccessDeniedException;
+  PreferenceSummary getPreferences() throws AccessDeniedException, RequestFailureException;
   
-  void setGoogleMapsKey(String key) throws AccessDeniedException;
+  void setGoogleMapsKey(String key) throws AccessDeniedException, RequestFailureException;
   
-  void setOdkTablesEnabled(Boolean enabled) throws AccessDeniedException;
+  void setOdkTablesEnabled(Boolean enabled) throws AccessDeniedException, RequestFailureException;
 }

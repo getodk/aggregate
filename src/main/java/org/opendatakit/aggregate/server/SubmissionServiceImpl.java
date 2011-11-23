@@ -22,13 +22,16 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.client.exception.FormNotAvailableException;
+import org.opendatakit.aggregate.client.exception.RequestFailureException;
 import org.opendatakit.aggregate.client.filter.FilterGroup;
 import org.opendatakit.aggregate.client.submission.SubmissionUI;
 import org.opendatakit.aggregate.client.submission.SubmissionUISummary;
+import org.opendatakit.aggregate.constants.ErrorConsts;
 import org.opendatakit.aggregate.constants.common.FormElementNamespace;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
-import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.form.FormFactory;
+import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.format.element.ElementFormatter;
 import org.opendatakit.aggregate.format.element.UiElementFormatter;
@@ -40,7 +43,9 @@ import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.submission.SubmissionKeyPart;
 import org.opendatakit.aggregate.submission.SubmissionSet;
 import org.opendatakit.aggregate.submission.type.RepeatSubmissionType;
+import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.security.client.exception.AccessDeniedException;
 import org.opendatakit.common.web.CallingContext;
 
@@ -56,15 +61,16 @@ public class SubmissionServiceImpl extends RemoteServiceServlet implements
 
   @Override
   public SubmissionUISummary getSubmissions(FilterGroup filterGroup)
-      throws FormNotAvailableException {
+      throws FormNotAvailableException, RequestFailureException, DatastoreFailureException, AccessDeniedException {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
 
     try {
       String formId = filterGroup.getFormId();
-      Form form = Form.retrieveFormByFormId(formId, cc);
-      if (form.getFormDefinition() == null)
-        return null; // ill-formed definition
+      IForm form = FormFactory.retrieveFormByFormId(formId, cc);
+      if (!form.hasValidFormDefinition()) {
+        throw new RequestFailureException(ErrorConsts.FORM_DEFINITION_INVALID); // ill-formed definition
+      }
       QueryByUIFilterGroup query = new QueryByUIFilterGroup(form, filterGroup, CompletionFlag.ONLY_COMPLETE_SUBMISSIONS, cc);
       
       SubmissionUISummary summary = new SubmissionUISummary(form.getViewableName());
@@ -79,11 +85,14 @@ public class SubmissionServiceImpl extends RemoteServiceServlet implements
       return summary;
 
     } catch (ODKFormNotFoundException e) {
-      throw new FormNotAvailableException(e);
-    } catch (ODKDatastoreException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
-      return null;
+      throw new FormNotAvailableException(e);
+    } catch (ODKOverQuotaException e) {
+      e.printStackTrace();
+      throw new RequestFailureException(ErrorConsts.QUOTA_EXCEEDED);
+    } catch (ODKDatastoreException e) {
+      e.printStackTrace();
+      throw new DatastoreFailureException(e);
     }
 
   }
@@ -91,8 +100,8 @@ public class SubmissionServiceImpl extends RemoteServiceServlet implements
 
 
   @Override
-  public SubmissionUISummary getRepeatSubmissions(String keyString) throws AccessDeniedException,
-      FormNotAvailableException {
+  public SubmissionUISummary getRepeatSubmissions(String keyString) 
+      throws FormNotAvailableException, RequestFailureException, DatastoreFailureException, AccessDeniedException {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
 
@@ -104,9 +113,10 @@ public class SubmissionServiceImpl extends RemoteServiceServlet implements
     try {
       SubmissionKey key = new SubmissionKey(keyString);
       List<SubmissionKeyPart> parts = key.splitSubmissionKey();
-      Form form = Form.retrieveFormByFormId(parts.get(0).getElementName(), cc);
-      if (form.getFormDefinition() == null)
-        return null; // ill-formed definition
+      IForm form = FormFactory.retrieveFormByFormId(parts.get(0).getElementName(), cc);
+      if (!form.hasValidFormDefinition()) {
+        throw new RequestFailureException(ErrorConsts.FORM_DEFINITION_INVALID); // ill-formed definition
+      }
       Submission sub = Submission.fetchSubmission(parts, cc);
 
       if (sub != null) {
@@ -137,13 +147,15 @@ public class SubmissionServiceImpl extends RemoteServiceServlet implements
       }
 
     } catch (ODKFormNotFoundException e) {
-      throw new FormNotAvailableException(e);
-    } catch (ODKDatastoreException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
-      return null;
+      throw new FormNotAvailableException(e);
+    } catch (ODKOverQuotaException e) {
+      e.printStackTrace();
+      throw new RequestFailureException(ErrorConsts.QUOTA_EXCEEDED);
+    } catch (ODKDatastoreException e) {
+      e.printStackTrace();
+      throw new DatastoreFailureException(e);
     }
-
   }
 
 }

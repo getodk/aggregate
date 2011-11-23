@@ -18,7 +18,10 @@ package org.opendatakit.aggregate.client.form;
 
 import java.util.ArrayList;
 
+import org.opendatakit.aggregate.client.exception.FormNotAvailableException;
+import org.opendatakit.aggregate.client.exception.RequestFailureException;
 import org.opendatakit.aggregate.client.filter.FilterGroup;
+import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
 import org.opendatakit.common.security.client.exception.AccessDeniedException;
 
 import com.google.gwt.user.client.rpc.RemoteService;
@@ -35,17 +38,17 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 @RemoteServiceRelativePath("formservice")
 public interface FormService extends RemoteService {
 
-  ArrayList<FormSummary> getForms() throws AccessDeniedException;
+  ArrayList<FormSummary> getForms() throws AccessDeniedException, RequestFailureException, DatastoreFailureException;
   
-  ArrayList<ExportSummary> getExports() throws AccessDeniedException;
+  ArrayList<ExportSummary> getExports() throws AccessDeniedException, FormNotAvailableException, RequestFailureException, DatastoreFailureException;
   
-  Boolean createCsvFromFilter(FilterGroup group) throws AccessDeniedException;
+  Boolean createCsvFromFilter(FilterGroup group) throws AccessDeniedException, FormNotAvailableException, RequestFailureException, DatastoreFailureException;
   
-  KmlSettings getPossibleKmlSettings(String formId) throws AccessDeniedException;
+  KmlSettings getPossibleKmlSettings(String formId) throws AccessDeniedException, FormNotAvailableException, RequestFailureException, DatastoreFailureException;
 
   Boolean createKmlFromFilter(FilterGroup group, String geopointKey, String titleKey,
-      String binaryKey) throws AccessDeniedException;
+      String binaryKey) throws AccessDeniedException, FormNotAvailableException, RequestFailureException, DatastoreFailureException;
   
-  KmlSettings getGpsCoordnates(String formId) throws AccessDeniedException;
+  KmlSettings getGpsCoordnates(String formId) throws AccessDeniedException, FormNotAvailableException, RequestFailureException, DatastoreFailureException;
   
 }

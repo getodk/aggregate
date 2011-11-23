@@ -21,7 +21,7 @@ import java.util.List;
 
 import org.opendatakit.aggregate.datamodel.TopLevelDynamicBase;
 import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
-import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.PersistConsts;
@@ -44,11 +44,11 @@ public class QueryByDateRange extends QueryBase {
   final QueryResumePoint startCursor;
   QueryResumePoint resumeCursor = null;
   
-  public QueryByDateRange(Form form, int maxFetchLimit, Date startDate, Date endDate, String uriLast, CallingContext cc) {
+  public QueryByDateRange(IForm form, int maxFetchLimit, Date startDate, Date endDate, String uriLast, CallingContext cc) {
     super(form);
     this.fetchLimit = maxFetchLimit;
    
-    TopLevelDynamicBase tbl = (TopLevelDynamicBase) form.getFormDefinition().getTopLevelGroup().getBackingObjectPrototype();
+    TopLevelDynamicBase tbl = (TopLevelDynamicBase) form.getTopLevelGroupElement().getFormDataModel().getBackingObjectPrototype();
     
     // Query by lastUpdateDate, filtering by isCompleted.
     // Submissions may be partially uploaded and are marked completed once they 
@@ -64,7 +64,7 @@ public class QueryByDateRange extends QueryBase {
         EngineUtils.getAttributeValueAsString(startDate, tbl.markedAsCompleteDate), uriLast, true) : null;
   }
 
-  public QueryByDateRange(Form form, int maxFetchLimit, Date startDate, String uriLast, CallingContext cc) {
+  public QueryByDateRange(IForm form, int maxFetchLimit, Date startDate, String uriLast, CallingContext cc) {
     this(form, maxFetchLimit, startDate, new Date(System.currentTimeMillis() - PersistConsts.MAX_SETTLE_MILLISECONDS), uriLast, cc);
   }
 
@@ -74,12 +74,12 @@ public class QueryByDateRange extends QueryBase {
    * @param form
    * @param cc
    */
-  public QueryByDateRange(Form form, CallingContext cc) {
+  public QueryByDateRange(IForm form, CallingContext cc) {
     super(form);
     this.fetchLimit = 1;
     this.startCursor = null;
     
-    TopLevelDynamicBase tbl = (TopLevelDynamicBase) form.getFormDefinition().getTopLevelGroup().getBackingObjectPrototype();
+    TopLevelDynamicBase tbl = (TopLevelDynamicBase) form.getTopLevelGroupElement().getFormDataModel().getBackingObjectPrototype();
     
     // Query by lastUpdateDate, filtering by isCompleted.
     // Submissions may be partially uploaded and are marked completed once they 
@@ -107,7 +107,7 @@ public class QueryByDateRange extends QueryBase {
     // create a row for each submission
     for (int count = 0; count < submissionEntities.size(); count++) {
     CommonFieldsBase subEntity = submissionEntities.get(count);
-      retrievedSubmissions.add(new Submission((TopLevelDynamicBase) subEntity, getForm().getFormDefinition(), cc));
+      retrievedSubmissions.add(new Submission((TopLevelDynamicBase) subEntity, getForm(), cc));
     }
     return retrievedSubmissions;
   }

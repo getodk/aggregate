@@ -39,21 +39,23 @@ public class GetUserByAggregateIdentifierLogic extends
         try
         {
             Users users = Users.getInstance(cc);
-    
+
             String aggregateUserIdentifier = this.getUserByAggregateIdentifier
                     .getAggregateUserIdentifier();
             String requestingUserID = this.getUserByAggregateIdentifier
                     .getRequestingUserID();
             String usersTable = users.getAggregateIdentifier();
-    
-            InternalUser requestUser = users.query("GetUserByAggregateIdentifierLogic.execute")
+
+            InternalUser requestUser = users
+                    .query("GetUserByAggregateIdentifierLogic.execute")
                     .equal(Users.USER_ID, requestingUserID).get();
             if (!requestUser.hasPerm(usersTable, Permissions.READ))
             {
                 return GetUserByAggregateIdentifierResult.failure(
-                        aggregateUserIdentifier, FailureReason.PERMISSION_DENIED);
+                        aggregateUserIdentifier,
+                        FailureReason.PERMISSION_DENIED);
             }
-    
+
             InternalUser user = null;
             try
             {
@@ -61,16 +63,16 @@ public class GetUserByAggregateIdentifierLogic extends
             } catch (ODKDatastoreException e)
             {
                 return GetUserByAggregateIdentifierResult.failure(
-                        aggregateUserIdentifier, FailureReason.USER_DOES_NOT_EXIST);
+                        aggregateUserIdentifier,
+                        FailureReason.USER_DOES_NOT_EXIST);
             }
-    
+
             // set userID to null since we don't want people finding it out
-            retrievedUser = new User(null,
-                    user.getAggregateIdentifier(), user.getName());
-        }
-        catch (ODKDatastoreException e)
+            retrievedUser = new User(null, user.getAggregateIdentifier(),
+                    user.getName());
+        } catch (ODKDatastoreException e)
         {
-           throw new AggregateInternalErrorException(e.getMessage()); 
+            throw new AggregateInternalErrorException(e.getMessage());
         }
 
         return GetUserByAggregateIdentifierResult.success(retrievedUser);

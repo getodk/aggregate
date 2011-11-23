@@ -21,6 +21,7 @@ import org.opendatakit.aggregate.exception.ODKExternalServiceException;
 import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
+import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.web.CallingContext;
 
 /**
@@ -35,7 +36,7 @@ public interface ExternalService {
   
   public void sendSubmissions(List<Submission> submissions, CallingContext cc) throws ODKExternalServiceException;
   
-  public void setUploadCompleted(CallingContext cc) throws ODKEntityPersistException;
+  public void setUploadCompleted(CallingContext cc) throws ODKEntityPersistException, ODKOverQuotaException;
     
   /**
    * Abandon the action.  
@@ -55,8 +56,9 @@ public interface ExternalService {
    * Persist status changes to the persistence layer.
    * 
    * @throws ODKEntityPersistException
+   * @throws ODKOverQuotaException 
    */
-  public void persist(CallingContext cc) throws ODKEntityPersistException;
+  public void persist(CallingContext cc) throws ODKEntityPersistException, ODKOverQuotaException;
 
   /**
    * get the FormServiceCursor for this external service connection.

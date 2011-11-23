@@ -26,6 +26,7 @@ import org.opendatakit.aggregate.format.element.ElementFormatter;
 import org.opendatakit.common.persistence.EntityKey;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
+import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.web.CallingContext;
 
 /**
@@ -56,16 +57,18 @@ public interface SubmissionValue extends SubmissionElement {
    * 
    * @param keyList
  * @throws ODKDatastoreException 
+ * @throws ODKOverQuotaException
    */
-  public void recursivelyAddEntityKeys(List<EntityKey> keyList, CallingContext cc) throws ODKDatastoreException;
+  public void recursivelyAddEntityKeys(List<EntityKey> keyList, CallingContext cc) throws ODKOverQuotaException, ODKDatastoreException;
   
   /**
    * Recursively persist this submission to the datastore.
    * 
    * @param callingContext
  * @throws ODKEntityPersistException 
+   * @throws ODKOverQuotaException 
    */
-  public void persist(CallingContext cc ) throws ODKEntityPersistException;
+  public void persist(CallingContext cc ) throws ODKEntityPersistException, ODKOverQuotaException;
   
   /**
    * Format value for output

@@ -27,6 +27,7 @@ import org.opendatakit.common.persistence.Query.Direction;
 import org.opendatakit.common.persistence.Query.FilterOperation;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
+import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.web.CallingContext;
 
@@ -181,7 +182,7 @@ public class BinaryContentManipulator {
          }
       }
 
-      public void persist(CallingContext cc) throws ODKEntityPersistException {
+      public void persist(CallingContext cc) throws ODKEntityPersistException, ODKOverQuotaException {
          List<CommonFieldsBase> rows = new ArrayList<CommonFieldsBase>();
          rows.addAll(dbRefBlobList);
          rows.addAll(dbBcbEntityList);
@@ -430,6 +431,7 @@ public class BinaryContentManipulator {
       User user = cc.getCurrentUser();
       Query q = ds.createQuery(ctntRelation, "BinaryContentManipulator.refreshFromDatabase", user);
       q.addFilter(ctntRelation.parentAuri, FilterOperation.EQUAL, parentKey);
+      q.addSort(ctntRelation.parentAuri, Direction.ASCENDING); // GAE work-around
       q.addSort(ctntRelation.ordinalNumber, Direction.ASCENDING);
 
       List<? extends CommonFieldsBase> contentHits = q.executeQuery();
@@ -439,7 +441,7 @@ public class BinaryContentManipulator {
       }
    }
 
-   public void persist(CallingContext cc) throws ODKEntityPersistException {
+   public void persist(CallingContext cc) throws ODKEntityPersistException, ODKOverQuotaException {
       // the items to store are the attachments vector.
       cc.getDatastore().putEntities(attachments, cc.getCurrentUser());
    }

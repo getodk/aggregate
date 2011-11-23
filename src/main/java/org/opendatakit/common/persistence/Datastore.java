@@ -18,6 +18,7 @@ import java.util.Collection;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
+import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.security.User;
 
 /**
@@ -63,6 +64,8 @@ public interface Datastore {
 	 * @param user non-null user responsible for this request.
 	 * @throws ODKDatastoreException
 	 *             if there was an error creating the relation
+    * @throws ODKOverQuotaException 
+    *             if there was a quota limit violation
 	 */
 	public void assertRelation(CommonFieldsBase relation, User user ) throws ODKDatastoreException;
 
@@ -76,6 +79,8 @@ public interface Datastore {
 	 * @param user non-null user responsible for this request.
 	 * @throws ODKDatastoreException
 	 *             if there was an error deleting the relation
+    * @throws ODKOverQuotaException 
+    *             if there was a quota limit violation
 	 */
 	public void dropRelation(CommonFieldsBase relation, User user ) throws ODKDatastoreException;
 
@@ -88,8 +93,12 @@ public interface Datastore {
 	 * @param tableName
 	 * @param user non-null user responsible for this request.
 	 * @return true if the given relation exists.
+	 * @throws ODKDatastoreException
+    *                e.g., ODKOverQuotaException
+    * @throws ODKOverQuotaException 
+    *             if there was a quota limit violation
 	 */
-	public boolean hasRelation(String schema, String tableName, User user );
+	public boolean hasRelation(String schema, String tableName, User user ) throws ODKDatastoreException;
 
 	/**
 	 * Returns an empty entity able to be stored in the given relation. The
@@ -118,8 +127,13 @@ public interface Datastore {
 	 * @return the Entity associated with the given uri
 	 * @throws ODKEntityNotFoundException
 	 *             if the Entity could not be found in the Datastore
+	 * @throws ODKDatastoreException 
+	 *             if there is an unspecified error in the Datastore layer
+	 * @throws ODKOverQuotaException
+	 *             if there is a quota limit violation
 	 */
-	public <T extends CommonFieldsBase> T getEntity(T relation, String uri, User user) throws ODKEntityNotFoundException;
+	public <T extends CommonFieldsBase> T getEntity(T relation, String uri, User user)
+	    throws ODKOverQuotaException, ODKEntityNotFoundException, ODKDatastoreException;
 
 	/**
 	 * Returns a new Query -- possibly for a record with a specific primary key.
@@ -141,8 +155,10 @@ public interface Datastore {
 	 * @param user non-null user responsible for this request.
 	 * @throws ODKEntityPersistException
 	 *             if there was an error persisting the Entity
+	 * @throws ODKOverQuotaException 
+	 *             if there is a quota limit violation
 	 */
-	public void putEntity(CommonFieldsBase entity, User user) throws ODKEntityPersistException;
+	public void putEntity(CommonFieldsBase entity, User user) throws ODKEntityPersistException, ODKOverQuotaException;
 
 	/**
 	 * Puts multiple entities into the Datastore.
@@ -154,9 +170,11 @@ public interface Datastore {
 	 * @param user non-null user responsible for this request.
 	 * @throws ODKEntityPersistException
 	 *             if there was an error persisting the Entity
+	 * @throws ODKOverQuotaException 
+	 *             if there was a quota limit violation
 	 */
 	public void putEntities(Collection<? extends CommonFieldsBase> entities, User user)
-			throws ODKEntityPersistException;
+			throws ODKEntityPersistException, ODKOverQuotaException;
 
 	/**
 	 * Deletes the entity corresponding to the given EntityKey.
@@ -165,8 +183,10 @@ public interface Datastore {
 	 * @param user non-null user responsible for this request.
 	 * @throws ODKDatastoreException
 	 *             if there was an error deleting the Entity
+    * @throws ODKOverQuotaException 
+    *             if there was a quota limit violation
 	 */
-	public void deleteEntity(EntityKey key, User user) throws ODKDatastoreException;
+	public void deleteEntity(EntityKey key, User user) throws ODKOverQuotaException, ODKDatastoreException;
 
 	/**
 	 * Deletes all of the entities which correspond to the given EntityKeys.
@@ -175,9 +195,11 @@ public interface Datastore {
 	 * @param user non-null user responsible for this request.
 	 * @throws ODKDatastoreException
 	 *             if there was an error deleting the Entities
+    * @throws ODKOverQuotaException 
+    *             if there was a quota limit violation
 	 */
 	public void deleteEntities(Collection<EntityKey> keys, User user)
-			throws ODKDatastoreException;
+			throws ODKOverQuotaException, ODKDatastoreException;
 	
 	/**
 	 * Create a task lock object.  A database-mediated global mutex.

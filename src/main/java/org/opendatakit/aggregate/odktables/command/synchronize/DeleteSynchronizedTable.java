@@ -5,16 +5,15 @@ import org.opendatakit.common.utils.Check;
 
 /**
  * DeleteSynchronizedTable is immutable.
- *
+ * 
  * @author the.dylan.price@gmail.com
  */
 public class DeleteSynchronizedTable implements Command
 {
     private static final String path = "/synchronize/deleteSynchronizedTable";
-    
+
     private final String requestingUserID;
     private final String tableID;
-    
 
     /**
      * For serialization by Gson
@@ -22,25 +21,26 @@ public class DeleteSynchronizedTable implements Command
     @SuppressWarnings("unused")
     private DeleteSynchronizedTable()
     {
-       this.requestingUserID = null;
-       this.tableID = null;
-       
+        this.requestingUserID = null;
+        this.tableID = null;
+
     }
 
     /**
      * Constructs a new DeleteSynchronizedTable.
      */
-    public DeleteSynchronizedTable(String requestingUserID, String aggregateTableIdentifier)
+    public DeleteSynchronizedTable(String requestingUserID,
+            String aggregateTableIdentifier)
     {
-        
+
         Check.notNullOrEmpty(requestingUserID, "requestingUserID");
-        Check.notNullOrEmpty(aggregateTableIdentifier, "aggregateTableIdentifier"); 
-        
+        Check.notNullOrEmpty(aggregateTableIdentifier,
+                "aggregateTableIdentifier");
+
         this.requestingUserID = requestingUserID;
         this.tableID = aggregateTableIdentifier;
     }
 
-    
     /**
      * @return the requestingUserID
      */
@@ -48,7 +48,7 @@ public class DeleteSynchronizedTable implements Command
     {
         return this.requestingUserID;
     }
-    
+
     /**
      * @return the aggregateTableIdentifier
      */
@@ -56,15 +56,13 @@ public class DeleteSynchronizedTable implements Command
     {
         return this.tableID;
     }
-    
 
     @Override
     public String toString()
     {
-        return String.format("DeleteSynchronizedTable: " +
-                "requestingUserID=%s " +
-                "aggregateTableIdentifier=%s " +
-                "", requestingUserID, tableID);
+        return String.format("DeleteSynchronizedTable: "
+                + "requestingUserID=%s " + "aggregateTableIdentifier=%s " + "",
+                requestingUserID, tableID);
     }
 
     @Override
@@ -84,4 +82,3 @@ public class DeleteSynchronizedTable implements Command
         return path;
     }
 }
-

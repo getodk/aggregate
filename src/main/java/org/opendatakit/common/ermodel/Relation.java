@@ -20,6 +20,7 @@ import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
+import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.web.CallingContext;
 
 /**
@@ -70,8 +71,10 @@ public interface Relation {
 	 * @param cc
 	 * @return
 	 * @throws ODKEntityNotFoundException
+    * @throws ODKOverQuotaException
+	 * @throws ODKDatastoreException 
 	 */
-	public Entity getEntity(String uri, CallingContext cc) throws ODKEntityNotFoundException;
+	public Entity getEntity(String uri, CallingContext cc) throws ODKEntityNotFoundException, ODKDatastoreException;
 
 	/**
 	 * Search for the entities having dataField values in the given relation to the specified value.
@@ -92,8 +95,9 @@ public interface Relation {
 	 * @param e
 	 * @param cc
 	 * @throws ODKEntityPersistException
+	 * @throws ODKOverQuotaException 
 	 */
-	public void putEntity(Entity e, CallingContext cc) throws ODKEntityPersistException;
+	public void putEntity(Entity e, CallingContext cc) throws ODKEntityPersistException, ODKOverQuotaException;
 	
 	/**
 	 * Delete the given entity from the datastore.
@@ -112,8 +116,9 @@ public interface Relation {
 	 * @param eList
 	 * @param cc
 	 * @throws ODKEntityPersistException
+	 * @throws ODKOverQuotaException 
 	 */
-	public void putEntities(List<Entity> eList, CallingContext cc) throws ODKEntityPersistException;
+	public void putEntities(List<Entity> eList, CallingContext cc) throws ODKEntityPersistException, ODKOverQuotaException;
 	
 	/**
 	 * This is just a convenience function.  It can fail after

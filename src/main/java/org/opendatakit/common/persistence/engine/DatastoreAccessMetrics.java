@@ -39,6 +39,7 @@ public final class DatastoreAccessMetrics {
   // map of fully qualified table name to index in counter array.
   private final Map<String, Short> tableMap = new TreeMap<String, Short>();
   private short nextCountIdx = 0;
+  private int readCount = 0;
   
   /**
    * Maintain a tally of which tables those actions were against.
@@ -69,21 +70,21 @@ public final class DatastoreAccessMetrics {
       }
     }
     
-    void recordUsage(short countArrayIdx ) {
+    private void recordUsage(short countArrayIdx, int incCount ) {
       // make sure our count array is sized big enough...
       resizeArray( countArrayIdx );
       
-      ++countArray[countArrayIdx];
+      countArray[countArrayIdx] = countArray[countArrayIdx] + incCount;
     }
     
-    Integer getUsage(short countArrayIdx) {
+    private Integer getUsage(short countArrayIdx) {
       // make sure our count array is sized big enough...
       resizeArray( countArrayIdx );
 
       return countArray[countArrayIdx];
     }
     
-    void clear() {
+    private void clear() {
       for ( int i = 0 ; i < countArray.length ; ++i ) {
         countArray[i] = 0;
       }
@@ -95,6 +96,7 @@ public final class DatastoreAccessMetrics {
   
   private long lastLogging = 0L;
   private final RingBufferCountArray countQueryArray = new RingBufferCountArray();
+  private final RingBufferCountArray countQueryResultArray = new RingBufferCountArray();
   private final RingBufferCountArray countGetArray = new RingBufferCountArray();
   private final RingBufferCountArray countPutArray = new RingBufferCountArray();
   private final RingBufferCountArray countDeleteArray = new RingBufferCountArray();
@@ -106,23 +108,28 @@ public final class DatastoreAccessMetrics {
    * NOTE: This method is NOT thread-safe. 
    * Call only from within a synchronized method! 
    */
-  private void logUsage() {
+  private void logUsage(int incCount) {
     long now = System.currentTimeMillis();
-    if ( lastLogging + ACCESS_METRIC_DUMP_INTERVAL < now ) {
+    int oldReadCount = readCount;
+    readCount = readCount + incCount;
+    if ( (readCount / 500) != (oldReadCount / 500) ||
+         ( lastLogging + ACCESS_METRIC_DUMP_INTERVAL < now ) ) {
       lastLogging = now;
       
       String gmtDate = WebUtils.iso8601Date(new java.util.Date(now));
-      logger.info("---------- " + gmtDate + " ------------");
+      logger.info("---------- " + gmtDate + " @ " + readCount + " ------------");
       for ( Map.Entry<String, Short> entry : tableMap.entrySet() ) {
         Short idx = entry.getValue();
         logger.info(entry.getKey() + 
             "," + countQueryArray.getUsage(idx) + 
+            "," + countQueryResultArray.getUsage(idx) +
             "," + countGetArray.getUsage(idx) + 
             "," + countPutArray.getUsage(idx) + 
             "," + countDeleteArray.getUsage(idx));
       }
       logger.info("-----------------------------------------");
       countQueryArray.clear();
+      countQueryResultArray.clear();
       countGetArray.clear();
       countPutArray.clear();
       countDeleteArray.clear();
@@ -136,32 +143,46 @@ public final class DatastoreAccessMetrics {
    * @param fullyQualifiedName
    * @param rbc
    */
-  private synchronized void synchronizedRecordUsage( String fullyQualifiedName, RingBufferCountArray rbc ) {
+  private synchronized void synchronizedRecordUsage( String fullyQualifiedName, RingBufferCountArray rbc, int incCount ) {
     Short countArrayIdx = tableMap.get(fullyQualifiedName);
     if ( countArrayIdx == null ) {
       countArrayIdx = nextCountIdx++;
       tableMap.put(fullyQualifiedName, countArrayIdx);
     }
     
-    rbc.recordUsage(countArrayIdx);
-    logUsage();
+    rbc.recordUsage(countArrayIdx, incCount);
+    logUsage(incCount);
+  }
+  
+  private void recordUsage( String fullyQualifiedName, RingBufferCountArray rbc, int incCount ) {
+    try {
+      synchronizedRecordUsage(fullyQualifiedName, rbc, incCount);
+    } catch ( Exception e ) {
+      e.printStackTrace();
+    }
   }
   
   private void recordUsage( String fullyQualifiedName, RingBufferCountArray rbc ) {
-    // synchronizedRecordUsage(fullyQualifiedName, rbc);
+    recordUsage( fullyQualifiedName, rbc, 1 );
   }
     
-  private void recordUsage( CommonFieldsBase relation, RingBufferCountArray rbc ) {
+  private void recordUsage( CommonFieldsBase relation, RingBufferCountArray rbc, int incCount ) {
     String fullyQualifiedName = relation.getSchemaName() + "." + relation.getTableName();
-    recordUsage( fullyQualifiedName, rbc);
+    recordUsage( fullyQualifiedName, rbc, incCount);
   }
   
-  public void recordQueryUsage( String specialTableName ) {
+  private void recordUsage( CommonFieldsBase relation, RingBufferCountArray rbc ) {
+    recordUsage( relation, rbc, 1 );
+  }
+  
+  public void recordQueryUsage( String specialTableName, int resultCount ) {
     recordUsage( specialTableName, countQueryArray );
+    recordUsage( specialTableName, countQueryResultArray, resultCount );
   }
   
-  public void recordQueryUsage(  CommonFieldsBase relation ) {
+  public void recordQueryUsage(  CommonFieldsBase relation, int resultCount ) {
     recordUsage( relation, countQueryArray );
+    recordUsage( relation, countQueryResultArray, resultCount );
   }
 
   public void recordGetUsage( String specialTableName ) {

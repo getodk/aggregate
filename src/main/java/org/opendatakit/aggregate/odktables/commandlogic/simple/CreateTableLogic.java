@@ -51,7 +51,8 @@ public class CreateTableLogic extends CommandLogic<CreateTable>
             tableID = createTable.getTableID();
             String requestingUserID = createTable.getRequestingUserID();
 
-            InternalUser requestingUser = users.query("CreateTableLogic.execute")
+            InternalUser requestingUser = users
+                    .query("CreateTableLogic.execute")
                     .equal(Users.USER_ID, requestingUserID).get();
             String aggregateUserIdentifier = requestingUser
                     .getAggregateIdentifier();

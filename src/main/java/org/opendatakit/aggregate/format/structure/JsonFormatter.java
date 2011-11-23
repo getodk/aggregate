@@ -21,7 +21,7 @@ import java.util.List;
 
 import org.opendatakit.aggregate.constants.format.FormatConsts;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
-import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.format.RepeatCallbackFormatter;
 import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.format.SubmissionFormatter;
@@ -47,7 +47,7 @@ public class JsonFormatter implements SubmissionFormatter, RepeatCallbackFormatt
   private PrintWriter output;
 
   public JsonFormatter(PrintWriter printWriter,
-      List<FormElementModel> selectedColumnNames, Form form, CallingContext cc) {
+      List<FormElementModel> selectedColumnNames, IForm form, CallingContext cc) {
     output = printWriter;
     propertyNames = selectedColumnNames;
     elemFormatter = new JsonElementFormatter(true, true, true);

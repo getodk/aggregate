@@ -37,7 +37,7 @@ public class FusionTableElementFormatter extends LinkElementFormatter {
   private static final String FT_PLACEMARK_POINT_TEMPLATE = "<Point><coordinates>%s</coordinates></Point>";
   
   public FusionTableElementFormatter(String webServerUrl) {
-    super(webServerUrl, FormMultipleValueServlet.ADDR, true, true, true);
+    super(webServerUrl, FormMultipleValueServlet.ADDR, true, true, true, true);
   }
   
   @Override

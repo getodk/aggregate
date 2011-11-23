@@ -58,7 +58,8 @@ public class DeleteTableLogic extends CommandLogic<DeleteTable>
             String tableID = this.deleteTable.getTableID();
             String requestingUserID = this.deleteTable.getRequestingUserID();
 
-            InternalUser requestingUser = users.query("DeleteTableLogic.execute")
+            InternalUser requestingUser = users
+                    .query("DeleteTableLogic.execute")
                     .equal(Users.USER_ID, requestingUserID).get();
 
             String aggregateRequestingUserIdentifier = requestingUser

@@ -20,7 +20,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.opendatakit.aggregate.datamodel.FormElementModel;
-import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.format.SubmissionFormatter;
 import org.opendatakit.aggregate.format.element.ElementFormatter;
 import org.opendatakit.aggregate.format.header.BasicHeaderFormatter;
@@ -41,10 +41,10 @@ public abstract class TableFormatterBase implements SubmissionFormatter {
   protected ElementFormatter elemFormatter;
   protected HeaderFormatter headerFormatter;
   protected List<FormElementModel> propertyNames;
-  protected final Form form;
+  protected final IForm form;
   protected final PrintWriter output;
 
-  public TableFormatterBase(Form xform, PrintWriter printWriter,
+  public TableFormatterBase(IForm xform, PrintWriter printWriter,
       List<FormElementModel> selectedColumnNames) {
     form = xform;
     output = printWriter;

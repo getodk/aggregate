@@ -286,6 +286,7 @@ public final class RegisteredUsersTable extends CommonFieldsBase {
 		Query q = RegisteredUsersTable.createQuery(datastore, "RegisteredUsersTable.getUniqueUserByUsername", user);
 		// already applied: q.addFilter(IS_REMOVED, FilterOperation.EQUAL, false);
 		q.addFilter(LOCAL_USERNAME, FilterOperation.EQUAL, username);
+		q.addSort(LOCAL_USERNAME, Direction.ASCENDING); // GAE work-around
 		q.addSort(prototype.lastUpdateDate, Direction.DESCENDING);
 		@SuppressWarnings("unchecked")
 		List<RegisteredUsersTable> l = (List<RegisteredUsersTable>) q.executeQuery();
@@ -314,6 +315,7 @@ public final class RegisteredUsersTable extends CommonFieldsBase {
 		Query q = RegisteredUsersTable.createQuery(datastore, "RegisteredUsersTable.getUserByUsername", user);
 		// already applied: q.addFilter(IS_REMOVED, FilterOperation.EQUAL, false);
 		q.addFilter(LOCAL_USERNAME, FilterOperation.EQUAL, username);
+		q.addSort(LOCAL_USERNAME, Direction.ASCENDING); // GAE work-around
 		q.addSort(prototype.lastUpdateDate, Direction.DESCENDING);
 		@SuppressWarnings("unchecked")
 		List<RegisteredUsersTable> l = (List<RegisteredUsersTable>) q.executeQuery();
@@ -357,6 +359,7 @@ public final class RegisteredUsersTable extends CommonFieldsBase {
 		Query q = RegisteredUsersTable.createQuery(datastore, "RegisteredUsersTable.getUniqueUserByEmail", user);
 		// already applied: q.addFilter(IS_REMOVED, FilterOperation.EQUAL, false);
 		q.addFilter(OPENID_EMAIL, FilterOperation.EQUAL, email);
+		q.addSort(OPENID_EMAIL, Direction.ASCENDING); // GAE work-around
 		q.addSort(prototype.lastUpdateDate, Direction.DESCENDING);
 		@SuppressWarnings("unchecked")
 		List<RegisteredUsersTable> l = (List<RegisteredUsersTable>) q.executeQuery();
@@ -371,8 +374,9 @@ public final class RegisteredUsersTable extends CommonFieldsBase {
 		User user = userService.getDaemonAccountUser();
 		RegisteredUsersTable prototype = assertRelation(datastore, user);
 		Query q = datastore.createQuery(prototype, "RegisteredUsersTable.getUserByEmail", user);
+      q.addFilter(OPENID_EMAIL, FilterOperation.EQUAL, email);
+      q.addSort(OPENID_EMAIL, Direction.ASCENDING); // GAE work-around
 		q.addFilter(IS_REMOVED, FilterOperation.EQUAL, false);
-		q.addFilter(OPENID_EMAIL, FilterOperation.EQUAL, email);
 		q.addSort(prototype.lastUpdateDate, Direction.DESCENDING);
 		@SuppressWarnings("unchecked")
 		List<RegisteredUsersTable> l = (List<RegisteredUsersTable>) q.executeQuery();

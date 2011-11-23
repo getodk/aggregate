@@ -18,6 +18,7 @@ import java.util.Date;
 import org.opendatakit.common.datamodel.BinaryContentManipulator.BlobSubmissionOutcome;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
+import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.web.CallingContext;
 
 /**
@@ -128,8 +129,9 @@ public interface BlobEntitySet {
 	 * 
 	 * @param cc
 	 * @throws ODKEntityPersistException
+	 * @throws ODKOverQuotaException 
 	 */
-	public void persist(CallingContext cc) throws ODKEntityPersistException;
+	public void persist(CallingContext cc) throws ODKEntityPersistException, ODKOverQuotaException;
 
 	/**
 	 * Remove the BlobSet from the datastore.

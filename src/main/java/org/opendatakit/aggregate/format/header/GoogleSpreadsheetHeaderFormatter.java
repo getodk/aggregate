@@ -7,7 +7,7 @@ import org.opendatakit.aggregate.constants.externalservice.SpreadsheetConsts;
 import org.opendatakit.aggregate.constants.format.FormatConsts;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.datamodel.FormElementModel.ElementType;
-import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.common.web.constants.BasicConsts;
 
 /**
@@ -41,7 +41,7 @@ public class GoogleSpreadsheetHeaderFormatter extends BasicHeaderFormatter imple
    *          return all properties for the SubmissionSet
    */
   @Override
-  public List<String> generateHeaders(Form form, FormElementModel rootGroup,
+  public List<String> generateHeaders(IForm form, FormElementModel rootGroup,
       List<FormElementModel> propertyNamesArg) {
     propertyNames = propertyNamesArg;
     headers = new ArrayList<String>();

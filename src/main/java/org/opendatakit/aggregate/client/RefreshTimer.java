@@ -44,9 +44,25 @@ public class RefreshTimer extends Timer {
   private static final int REFRESH_INTERVAL = 10000; // ms
   // private static final int REFRESH_INTERVAL = 100000; // ms
 
+  // MISC_REFRESH_MULTIPLIER is the multiplier to apply to 
+  // the REFRESH_INTERVAL to slow down the rate at which 
+  // an update occurs from the server.  See code for what 
+  // pages have this multiplier.
+  private static final int MISC_REFRESH_MULTIPLIER = 3;
+  
+  // SUBMISSIONS_REFRESH_MULTIPLIER is the multiplier to apply
+  // to the REFRESH_INTERVAL to slow down the rate at which
+  // a fresh set of submissions is pulled from the server.
+  private static final int SUBMISSIONS_REFRESH_MULTIPLIER = 7;
+  
+  // PREFERENCES_REFRESH_MULTIPLIER is the multiplier to apply
+  // to the REFRESH_INTERVAL to slow down the rate at which 
+  // the preferences data is pulled from the server.
+  private static final int PREFERENCES_REFRESH_MULTIPLIER = 6;
+  
   // STALL_INTERVALS is the number of intervals of no UI
   // interaction after which the timer will be stopped.
-  private static final int UI_STALL_INTERVALS = 30; // 5 min / 10 sec each
+  private static final int UI_STALL_INTERVALS = 18; // 3 min / 10 sec each
 
   // lastCompletionTime tracks the completion timestamp
   // of the last timer action. Used to detect and skip
@@ -55,7 +71,10 @@ public class RefreshTimer extends Timer {
 
   // intervalsElapsed counts the intervals since a UI interaction
   private int intervalsElapsed = 0;
-
+  
+  // intervalsCount counts the total number of intervals since page load
+  private int intervalsCount = 0;
+  
   // isActive tracks the active/cancelled state of the timer
   // the GWT timer doesn't provide this information.
   private boolean isActive = false;
@@ -112,6 +131,7 @@ public class RefreshTimer extends Timer {
   @Override
   public void cancel() {
     super.cancel();
+    intervalsElapsed = 0;
     isActive = false;
   }
 
@@ -121,9 +141,11 @@ public class RefreshTimer extends Timer {
       intervalsElapsed = 0;
     } else {
       // reset the ui inactivity counter
+      // reset the ui refresh cycle counter
       // restart the periodic timer
       // set the isActive flag
       intervalsElapsed = 0;
+      intervalsCount = -1;
       scheduleRepeating(REFRESH_INTERVAL);
       isActive = true;
     }
@@ -134,6 +156,7 @@ public class RefreshTimer extends Timer {
     if (isInitializing)
       return;
 
+    intervalsCount++;
     long timeRefreshStart = System.currentTimeMillis();
     if (lastCompletionTime + REFRESH_INTERVAL - (REFRESH_INTERVAL / 10L) > timeRefreshStart) {
       // timer is backed up -- flush the queued callbacks
@@ -144,6 +167,7 @@ public class RefreshTimer extends Timer {
     if (intervalsElapsed == UI_STALL_INTERVALS) {
       // this appears to be an idle UI - stop all refresh polling.
       cancel();
+      return;
     }
     intervalsElapsed++;
     
@@ -157,24 +181,33 @@ public class RefreshTimer extends Timer {
       
       switch (currentSubTab) {
       case FORMS:
-      case FILTER:
       case TABLES:
+        if ((intervalsCount % MISC_REFRESH_MULTIPLIER) == 0) {
+          GWT.log("forms/tables Refresh");
+          tabPanel.update();
+        }
+        break;
       case SUBMISSION_ADMIN:
-        if ((intervalsElapsed % 3) == 0) {
+      case FILTER:
+        if ((intervalsCount % SUBMISSIONS_REFRESH_MULTIPLIER) == 0) {
+          GWT.log("submissions Refresh");
           tabPanel.update();
         }
         break;
       case EXPORT:
       case PUBLISH:
+        GWT.log("export/publish Refresh");
         tabPanel.update();
         break;
       case PREFERENCES:
-        if ((intervalsElapsed % 6) == 0) {
+        if ((intervalsCount % PREFERENCES_REFRESH_MULTIPLIER) == 0) {
+          GWT.log("preferences Refresh");
           tabPanel.update();
         }
         break;
       case PERMISSIONS:
         if (lastCompletionTime == 0L) {
+          GWT.log("permissions Refresh");
           // update this ONLY if we are forcing a refreshNow().
           // otherwise, let the entries be stale w.r.t. server.
           tabPanel.update();

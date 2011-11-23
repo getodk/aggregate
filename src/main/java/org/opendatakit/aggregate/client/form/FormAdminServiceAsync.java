@@ -26,20 +26,20 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 
 public interface FormAdminServiceAsync {
 
-  void deleteForm(String formId, AsyncCallback<Boolean> callback);
+  void deleteForm(String formId, AsyncCallback<Void> callback);
 
   void purgePublishedData(String uriExternalService, Date earliest, AsyncCallback<Date> callback);
 
   void setFormAcceptSubmissions(String formId, Boolean acceptSubmissions,
-      AsyncCallback<Boolean> callback);
+      AsyncCallback<Void> callback);
 
-  void setFormDownloadable(String formId, Boolean downloadable, AsyncCallback<Boolean> callback);
+  void setFormDownloadable(String formId, Boolean downloadable, AsyncCallback<Void> callback);
 
-  void deleteSubmission(String submissionKeyAsString, AsyncCallback<Boolean> callback);
+  void deleteSubmission(String submissionKeyAsString, AsyncCallback<Void> callback);
 
   void getIncompleteSubmissions(FilterGroup filter, AsyncCallback<SubmissionUISummary> callback);
 
-  void markSubmissionAsComplete(String submissionKeyAsString, AsyncCallback<Boolean> callback);
+  void markSubmissionAsComplete(String submissionKeyAsString, AsyncCallback<Void> callback);
 
   void getFormMediaFileList(String formId, AsyncCallback<ArrayList<MediaFileSummary>> callback);
 

@@ -29,7 +29,8 @@ import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.format.KmlConsts;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
-import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.datamodel.FormElementModel.ElementType;
+import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.format.RepeatCallbackFormatter;
 import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.format.SubmissionFormatter;
@@ -92,7 +93,7 @@ public class KmlFormatterWithFilters implements SubmissionFormatter, RepeatCallb
   private static final int APPROX_ITEM_LENGTHS = 100;
   private static final int APPROX_TABLE_FORMATTING_LENGTH = 1000;
 
-  private Form form;
+  private IForm form;
   private List<FormElementModel> propertyNames;
 
   private FormElementModel gpsElement;
@@ -111,7 +112,7 @@ public class KmlFormatterWithFilters implements SubmissionFormatter, RepeatCallb
   private boolean imgInGpsRepeat;
   private boolean titleInGpsRepeat;
   
-  public KmlFormatterWithFilters(Form xform, String webServerUrl, FormElementModel gpsField,
+  public KmlFormatterWithFilters(IForm xform, String webServerUrl, FormElementModel gpsField,
       FormElementModel titleField, FormElementModel imgField, PrintWriter printWriter,
       FilterGroup filterGroup, CallingContext cc) {
 
@@ -135,11 +136,21 @@ public class KmlFormatterWithFilters implements SubmissionFormatter, RepeatCallb
     gpsElement = gpsField;
     titleElement = titleField;
     imgElement = imgField;
+    
+    // Verify that nesting constraints hold.
+    //
     topElement = form.getTopLevelGroupElement();
     gpsParent = gpsField.getParent();
+    // ignore semantically meaningless nesting groups
+    while ( gpsParent.getParent() != null && gpsParent.getElementType().equals(ElementType.GROUP) ) {
+      gpsParent = gpsParent.getParent();
+    }
 
-    //verify constraints hold
     FormElementModel titleParent = titleElement.getParent();
+    // ignore semantically meaningless nesting groups
+    while ( titleParent.getParent() != null && titleParent.getElementType().equals(ElementType.GROUP) ) {
+      titleParent = titleParent.getParent();
+    }
     titleInGpsRepeat = (!titleParent.equals(topElement));
     if (!titleParent.equals(topElement) && !titleParent.equals(gpsParent)) {
       throw new IllegalStateException(LIMITATION_MSG);
@@ -148,6 +159,10 @@ public class KmlFormatterWithFilters implements SubmissionFormatter, RepeatCallb
       imgInGpsRepeat = false;
     } else {
       FormElementModel imgParent = imgElement.getParent();
+      // ignore semantically meaningless nesting groups
+      while ( imgParent.getParent() != null && imgParent.getElementType().equals(ElementType.GROUP) ) {
+        imgParent = imgParent.getParent();
+      }
       imgInGpsRepeat = (!imgParent.equals(topElement));
       if (!imgParent.equals(topElement) && !imgParent.equals(gpsParent)) {
         throw new IllegalStateException(LIMITATION_MSG);

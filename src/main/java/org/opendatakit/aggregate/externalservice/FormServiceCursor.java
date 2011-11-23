@@ -21,7 +21,8 @@ import org.opendatakit.aggregate.constants.common.ExternalServicePublicationOpti
 import org.opendatakit.aggregate.constants.common.ExternalServiceType;
 import org.opendatakit.aggregate.constants.common.OperationalStatus;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
-import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.form.FormFactory;
+import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.DataField.IndexType;
@@ -32,6 +33,7 @@ import org.opendatakit.common.persistence.Query.Direction;
 import org.opendatakit.common.persistence.Query.FilterOperation;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
+import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.web.CallingContext;
 
@@ -236,8 +238,8 @@ public final class FormServiceCursor extends CommonFieldsBase {
     }
   }
   
-  public ExternalService getExternalService(CallingContext cc) throws ODKEntityNotFoundException, ODKFormNotFoundException {
-    Form form = Form.retrieveFormByFormId(getFormId(), cc);
+  public ExternalService getExternalService(CallingContext cc) throws ODKEntityNotFoundException, ODKFormNotFoundException, ODKOverQuotaException, ODKDatastoreException {
+    IForm form = FormFactory.retrieveFormByFormId(getFormId(), cc);
     return constructExternalService(this, form, cc);
   }
   
@@ -257,7 +259,7 @@ public final class FormServiceCursor extends CommonFieldsBase {
     return relation;
   }
 
-  public static final FormServiceCursor createFormServiceCursor(Form form,
+  public static final FormServiceCursor createFormServiceCursor(IForm form,
       ExternalServiceType type, CommonFieldsBase service, CallingContext cc)
       throws ODKDatastoreException {
     FormServiceCursor relation = assertRelation(cc);
@@ -272,7 +274,7 @@ public final class FormServiceCursor extends CommonFieldsBase {
     return c;
   }
   
-  public static final List<ExternalService> getExternalServicesForForm(Form form,
+  public static final List<ExternalService> getExternalServicesForForm(IForm form,
       CallingContext cc) throws ODKDatastoreException {
     FormServiceCursor relation = assertRelation(cc);
     Query query = cc.getDatastore().createQuery(relation, "FormServiceCursor.getExternalServicesForForm[" + form.getFormId() + "]", cc.getCurrentUser());
@@ -292,18 +294,22 @@ public final class FormServiceCursor extends CommonFieldsBase {
     return esList;
   }
 
-  public static final FormServiceCursor getFormServiceCursor(String uri, CallingContext cc) throws ODKEntityNotFoundException {
+  public static final FormServiceCursor getFormServiceCursor(String uri, CallingContext cc) throws ODKEntityNotFoundException, ODKOverQuotaException, ODKDatastoreException {
     try {
       FormServiceCursor relation = assertRelation(cc);
       CommonFieldsBase entity = cc.getDatastore().getEntity(relation, uri, cc.getCurrentUser());
       return (FormServiceCursor) entity;
+    } catch (ODKOverQuotaException e) {
+      throw e;
+    } catch (ODKEntityNotFoundException e) {
+      throw e;
     } catch (ODKDatastoreException e) {
-      throw new ODKEntityNotFoundException(e);
+      throw e;
     }
   }
   
    public static final List<FormServiceCursor> queryFormServiceCursorRelation(Date olderThanDate,
-         CallingContext cc) throws ODKEntityNotFoundException {
+         CallingContext cc) throws ODKEntityNotFoundException, ODKOverQuotaException {
       List<FormServiceCursor> fscList = new ArrayList<FormServiceCursor>();
       try {
          FormServiceCursor relation = assertRelation(cc);
@@ -315,25 +321,29 @@ public final class FormServiceCursor extends CommonFieldsBase {
          for (CommonFieldsBase cfb : cfbList) {
             fscList.add((FormServiceCursor) cfb);
          }
+      } catch (ODKOverQuotaException e) {
+        throw e;
       } catch (ODKDatastoreException e) {
          throw new ODKEntityNotFoundException(e);
       }
       return fscList;
    }
    
-   public static final ExternalService constructExternalService(FormServiceCursor fsc, Form form,
-       CallingContext cc) throws ODKEntityNotFoundException {
+   public static final ExternalService constructExternalService(FormServiceCursor fsc, IForm form,
+       CallingContext cc) throws ODKEntityNotFoundException, ODKOverQuotaException {
      try {
        switch (fsc.getExternalServiceType()) {
        case GOOGLE_FUSIONTABLES:
          return new FusionTable(fsc, form, cc);
        case GOOGLE_SPREADSHEET:
          return new GoogleSpreadsheet(fsc, form, cc);
-       case JSON_SERVER:
-         return new JsonServer(fsc, form, cc);
+       case OHMAGE_JSON_SERVER:
+         return new OhmageJsonServer(fsc, form, cc);
        default:
          return null;
        }
+     } catch (ODKOverQuotaException e) {
+       throw e;
      } catch (Exception e) {
        throw new ODKEntityNotFoundException("Some how DB entities got into problem state", e);
      }

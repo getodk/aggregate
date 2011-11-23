@@ -42,7 +42,7 @@ import org.opendatakit.aggregate.constants.externalservice.JsonServerConsts;
 import org.opendatakit.aggregate.constants.externalservice.JsonServerType;
 import org.opendatakit.aggregate.datamodel.FormElementModel.ElementType;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
-import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.format.element.BasicElementFormatter;
 import org.opendatakit.aggregate.format.header.BasicHeaderFormatter;
 import org.opendatakit.aggregate.format.structure.JsonFormatter;
@@ -68,20 +68,20 @@ public class JsonServer extends AbstractExternalService implements ExternalServi
    */
   private final JsonServerParameterTable objectEntity;
 
-  private JsonServer(JsonServerParameterTable entity, FormServiceCursor formServiceCursor, Form form, CallingContext cc) {
-    super(form, formServiceCursor, new BasicElementFormatter(true, true, true), new BasicHeaderFormatter(true, true, true), cc);
+  private JsonServer(JsonServerParameterTable entity, FormServiceCursor formServiceCursor, IForm form, CallingContext cc) {
+    super(form, formServiceCursor, new BasicElementFormatter(true, true, true, false), new BasicHeaderFormatter(true, true, true), cc);
     objectEntity = entity;
   }
   
-  private JsonServer(JsonServerParameterTable entity, Form form, ExternalServicePublicationOption externalServiceOption, CallingContext cc) throws ODKDatastoreException {
+  private JsonServer(JsonServerParameterTable entity, IForm form, ExternalServicePublicationOption externalServiceOption, CallingContext cc) throws ODKDatastoreException {
     this (entity, createFormServiceCursor(form, entity, externalServiceOption, ExternalServiceType.JSON_SERVER, cc), form, cc);
   }
 
-  public JsonServer(FormServiceCursor formServiceCursor, Form form, CallingContext cc) throws ODKDatastoreException {
+  public JsonServer(FormServiceCursor formServiceCursor, IForm form, CallingContext cc) throws ODKDatastoreException {
     this(retrieveEntity(JsonServerParameterTable.assertRelation(cc), formServiceCursor, cc), formServiceCursor, form, cc);
   }
 
-  public JsonServer(Form form,  String serverURL, ExternalServicePublicationOption externalServiceOption, CallingContext cc)
+  public JsonServer(IForm form,  String serverURL, ExternalServicePublicationOption externalServiceOption, CallingContext cc)
       throws ODKDatastoreException {
     this(newEntity(JsonServerParameterTable.assertRelation(cc), cc), form, externalServiceOption, cc);
 

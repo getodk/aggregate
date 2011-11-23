@@ -26,6 +26,7 @@ import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
+import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.web.CallingContext;
 
@@ -94,7 +95,7 @@ public class ServerPreferences extends CommonFieldsBase {
     setBooleanField(ODK_TABLES_ENABLED, enabled);
   }
 
-  public void persist(CallingContext cc) throws ODKEntityPersistException {
+  public void persist(CallingContext cc) throws ODKEntityPersistException, ODKOverQuotaException {
     Datastore ds = cc.getDatastore();
     User user = cc.getCurrentUser();
 
@@ -118,7 +119,7 @@ public class ServerPreferences extends CommonFieldsBase {
   }
 
   public static final ServerPreferences getServerPreferences(CallingContext cc)
-      throws ODKEntityNotFoundException {
+      throws ODKEntityNotFoundException, ODKOverQuotaException {
     try {
       ServerPreferences relation = assertRelation(cc);
       Query query = cc.getDatastore().createQuery(relation, "ServerPreferences.getServerPreferences", cc.getCurrentUser());
@@ -134,6 +135,8 @@ public class ServerPreferences extends CommonFieldsBase {
       return  cc.getDatastore().createEntityUsingRelation(relation,
           cc.getCurrentUser());
 
+    } catch (ODKOverQuotaException e) {
+      throw e;
     } catch (ODKDatastoreException e) {
       throw new ODKEntityNotFoundException(e);
     }

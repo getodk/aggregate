@@ -28,7 +28,9 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  */
 public class DatastoreFailureException extends Exception implements
 		Serializable, IsSerializable {
-	/**
+	private static final String DATASTORE_FAILURE_EXCEPTION = "Problem persisting data or accessing data";
+
+  /**
 	 * 
 	 */
 	private static final long serialVersionUID = 3102327639058143399L;
@@ -40,7 +42,7 @@ public class DatastoreFailureException extends Exception implements
 	 */
 	public DatastoreFailureException() {
 		super();
-		message = "DatastoreFailureException";
+		message = DATASTORE_FAILURE_EXCEPTION;
 	}
 
 	/**
@@ -65,7 +67,7 @@ public class DatastoreFailureException extends Exception implements
 	 */
 	public DatastoreFailureException(Throwable arg0) {
 		super(arg0);
-		message = "DatastoreFailureException (" + arg0.getMessage() + ")";
+		message = DATASTORE_FAILURE_EXCEPTION + " (" + arg0.getMessage() + ")";
 	}
 
 	@Override

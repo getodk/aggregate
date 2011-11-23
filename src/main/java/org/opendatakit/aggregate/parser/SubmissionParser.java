@@ -41,7 +41,8 @@ import org.opendatakit.aggregate.exception.ODKFormSubmissionsDisabledException;
 import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
 import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData.Reason;
 import org.opendatakit.aggregate.exception.ODKParseException;
-import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.form.FormFactory;
+import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.aggregate.submission.SubmissionField;
 import org.opendatakit.aggregate.submission.SubmissionSet;
@@ -78,7 +79,7 @@ public class SubmissionParser {
 	 */
 	private String formId;
 
-	private Form form;
+	private IForm form;
 
 	/**
 	 * Root of XML submission
@@ -111,7 +112,7 @@ public class SubmissionParser {
 	 * 
 	 * @return
 	 */
-	public Form getForm() {
+	public IForm getForm() {
 		return form;
 	}
 
@@ -309,9 +310,9 @@ public class SubmissionParser {
 		// need to escape all slashes... for xpath processing...
 		formId = formId.replaceAll(ParserConsts.FORWARD_SLASH, ParserConsts.FORWARD_SLASH_SUBSTITUTION);
 		
-		String fullyQualifiedId = Form.extractWellFormedFormId(formId);
+		String fullyQualifiedId = FormFactory.extractWellFormedFormId(formId);
 
-		form = Form.retrieveFormByFormId(fullyQualifiedId, cc);
+		form = FormFactory.retrieveFormByFormId(fullyQualifiedId, cc);
 		if ( !form.getSubmissionEnabled() ) {
 			throw new ODKFormSubmissionsDisabledException();
 		}
@@ -358,9 +359,9 @@ public class SubmissionParser {
 			Datastore ds = cc.getDatastore();
 			User user = cc.getCurrentUser();
 			TopLevelInstanceData fi = (TopLevelInstanceData) ds.getEntity(form.getTopLevelGroupElement().getFormDataModel().getBackingObjectPrototype(), instanceId, user);
-			submission = new Submission(fi, form.getFormDefinition(), cc);
+			submission = new Submission(fi, form, cc);
 		} catch ( ODKEntityNotFoundException e ) {
-			submission = new Submission( modelVersion, uiVersion, instanceId, form.getFormDefinition(), submissionDate, cc);
+			submission = new Submission( modelVersion, uiVersion, instanceId, form, submissionDate, cc);
 	    }
 
 		topLevelTableKey = submission.getKey();
@@ -478,7 +479,7 @@ public class SubmissionParser {
 					// Create a submission set for a new instance...
 					long l = repeats.getNumberRepeats()+1L;
 					repeatableSubmissionSet = new SubmissionSet(
-							submissionSet, l, m, form.getFormDefinition(),
+							submissionSet, l, m, form,
 							topLevelTableKey, cc);
 					repeats.addSubmissionSet(repeatableSubmissionSet);
 				} else {

@@ -4,7 +4,8 @@ import org.opendatakit.aggregate.odktables.command.common.CheckUserExists;
 import org.opendatakit.aggregate.odktables.commandresult.CommandResult;
 
 /**
- * A CheckUserExistsResult represents the result of executing a CheckUserExists command.
+ * A CheckUserExistsResult represents the result of executing a CheckUserExists
+ * command.
  * 
  * @author the.dylan.price@gmail.com
  */
@@ -14,8 +15,8 @@ public class CheckUserExistsResult extends CommandResult<CheckUserExists>
 
     private CheckUserExistsResult()
     {
-       super(true, null);
-       this.userExists = false; 
+        super(true, null);
+        this.userExists = false;
     }
 
     /**
@@ -45,9 +46,9 @@ public class CheckUserExistsResult extends CommandResult<CheckUserExists>
                 userExists);
     }
 
-
     /**
-     * @return a new CheckUserExistsResult representing the successful completion of a CheckUserExists command.
+     * @return a new CheckUserExistsResult representing the successful
+     *         completion of a CheckUserExists command.
      * 
      */
     public static CheckUserExistsResult success(boolean userExists)

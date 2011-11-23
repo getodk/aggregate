@@ -27,13 +27,14 @@ import org.opendatakit.aggregate.exception.ODKExternalServiceException;
 import org.opendatakit.aggregate.externalservice.ExternalService;
 import org.opendatakit.aggregate.externalservice.FormServiceCursor;
 import org.opendatakit.aggregate.externalservice.GoogleSpreadsheet;
-import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.form.MiscTasks;
 import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.TaskLock;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
+import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.web.CallingContext;
@@ -47,7 +48,7 @@ import org.opendatakit.common.web.CallingContext;
  */
 public class WorksheetCreatorWorkerImpl {
 
-	private final Form form;
+	private final IForm form;
 	private final SubmissionKey miscTasksKey;
 	private final Long attemptCount;
 	private final String spreadsheetName;
@@ -55,7 +56,7 @@ public class WorksheetCreatorWorkerImpl {
 	private final CallingContext cc;
 	private final String pFormIdLockId;
 	
-	public WorksheetCreatorWorkerImpl(Form form, 
+	public WorksheetCreatorWorkerImpl(IForm form, 
 			SubmissionKey miscTasksKey, long attemptCount, 
 			String spreadsheetName, ExternalServicePublicationOption esType,
 			CallingContext cc) {
@@ -154,7 +155,7 @@ public class WorksheetCreatorWorkerImpl {
 		}
 	}
 	
-	public void doMarkAsComplete(MiscTasks t) throws ODKEntityPersistException {
+	public void doMarkAsComplete(MiscTasks t) throws ODKEntityPersistException, ODKOverQuotaException {
 		// and mark us as completed... (don't delete for audit..).
 		t.setCompletionDate(new Date());
 		t.setStatus(FormActionStatus.SUCCESSFUL);

@@ -18,6 +18,7 @@ package org.opendatakit.aggregate.client.popups;
 
 import java.util.Date;
 
+import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.SecureGWT;
 import org.opendatakit.aggregate.client.externalserv.ExternServSummary;
 import org.opendatakit.aggregate.client.widgets.AggregateButton;
@@ -64,7 +65,7 @@ public class ConfirmPurgePopup extends AbstractPopupBase {
 
         @Override
         public void onFailure(Throwable caught) {
-          Window.alert("Failed purge of published data: " + caught.getMessage());
+          AggregateUI.getUI().reportError("Failed purge of published data: ", caught);
         }
 
         @Override
