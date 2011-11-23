@@ -228,6 +228,39 @@ public class ServicesAdminServiceImpl extends RemoteServiceServlet implements
       throw new RequestFailureException(e);
     }
   }
+  
+  @Override
+  public String createOhmageJsonServer(String formId, String url,
+        ExternalServicePublicationOption esOption)
+            throws AccessDeniedException,
+            FormNotAvailableException, RequestFailureException, DatastoreFailureException {
+     HttpServletRequest req = this.getThreadLocalRequest();
+     CallingContext cc = ContextFactory.getCallingContext(this, req);
+
+     try {
+        FormActionStatusTimestamp deletionTimestamp = MiscTasks
+              .getFormDeletionStatusTimestampOfFormId(formId, cc);
+        if (deletionTimestamp != null) {
+          throw new RequestFailureException(
+              "Form is marked for deletion - publishing request for Ohmage JSON server aborted.");
+        }
+        IForm form = FormFactory.retrieveFormByFormId(formId, cc);
+        if (!form.hasValidFormDefinition()) {
+          throw new RequestFailureException(ErrorConsts.FORM_DEFINITION_INVALID);
+        }
+        OhmageJsonServer server = new OhmageJsonServer(form, url, esOption, cc);
+        return server.getFormServiceCursor().getUri();
+     } catch (ODKOverQuotaException e) {
+       e.printStackTrace();
+       throw new RequestFailureException(ErrorConsts.QUOTA_EXCEEDED);
+     } catch (ODKFormNotFoundException e) {
+       e.printStackTrace();
+       throw new FormNotAvailableException(e);
+     } catch (ODKDatastoreException e) {
+       e.printStackTrace();
+       throw new DatastoreFailureException(e);
+     }
+  }
 
   @Override
   public Boolean deletePublisher(String uri) throws AccessDeniedException,
