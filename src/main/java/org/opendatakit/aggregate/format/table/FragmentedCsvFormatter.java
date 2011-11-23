@@ -28,7 +28,7 @@ import org.kxml2.kdom.Node;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.format.FormatConsts;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
-import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.format.SubmissionFormatter;
 import org.opendatakit.aggregate.format.element.LinkElementFormatter;
@@ -60,7 +60,7 @@ public class FragmentedCsvFormatter extends TableFormatterBase implements Submis
   private List<String> headers = null;
   private boolean includeParentKey = false;
 
-  public FragmentedCsvFormatter(Form xform, List<SubmissionKeyPart> submissionParts,
+  public FragmentedCsvFormatter(IForm xform, List<SubmissionKeyPart> submissionParts,
       String webServerUrl, String websafeCursorString, PrintWriter printWriter) {
     super(xform, printWriter, null);
     this.websafeCursorString = websafeCursorString;

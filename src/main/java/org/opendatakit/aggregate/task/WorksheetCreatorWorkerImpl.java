@@ -27,7 +27,7 @@ import org.opendatakit.aggregate.exception.ODKExternalServiceException;
 import org.opendatakit.aggregate.externalservice.ExternalService;
 import org.opendatakit.aggregate.externalservice.FormServiceCursor;
 import org.opendatakit.aggregate.externalservice.GoogleSpreadsheet;
-import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.form.MiscTasks;
 import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.common.persistence.Datastore;
@@ -48,7 +48,7 @@ import org.opendatakit.common.web.CallingContext;
  */
 public class WorksheetCreatorWorkerImpl {
 
-	private final Form form;
+	private final IForm form;
 	private final SubmissionKey miscTasksKey;
 	private final Long attemptCount;
 	private final String spreadsheetName;
@@ -56,7 +56,7 @@ public class WorksheetCreatorWorkerImpl {
 	private final CallingContext cc;
 	private final String pFormIdLockId;
 	
-	public WorksheetCreatorWorkerImpl(Form form, 
+	public WorksheetCreatorWorkerImpl(IForm form, 
 			SubmissionKey miscTasksKey, long attemptCount, 
 			String spreadsheetName, ExternalServicePublicationOption esType,
 			CallingContext cc) {

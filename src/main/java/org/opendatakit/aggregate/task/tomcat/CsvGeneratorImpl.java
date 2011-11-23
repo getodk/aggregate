@@ -16,7 +16,7 @@
 package org.opendatakit.aggregate.task.tomcat;
 
 import org.opendatakit.aggregate.constants.BeanDefs;
-import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.task.CsvGenerator;
 import org.opendatakit.aggregate.task.CsvWorkerImpl;
@@ -37,7 +37,7 @@ public class CsvGeneratorImpl implements CsvGenerator {
 	static class CsvRunner implements Runnable {
 		final CsvWorkerImpl impl;
 		
-		public CsvRunner( Form form, SubmissionKey persistentResultsKey, long attemptCount, CallingContext cc) {
+		public CsvRunner( IForm form, SubmissionKey persistentResultsKey, long attemptCount, CallingContext cc) {
 			impl = new CsvWorkerImpl(form, persistentResultsKey, attemptCount, cc );
 		}
 
@@ -48,7 +48,7 @@ public class CsvGeneratorImpl implements CsvGenerator {
 	}
 
   @Override
-  public void createCsvTask(Form form, SubmissionKey persistentResultsKey,
+  public void createCsvTask(IForm form, SubmissionKey persistentResultsKey,
 		long attemptCount, CallingContext cc)
 		throws ODKDatastoreException {
 	WatchdogImpl wd = (WatchdogImpl) cc.getBean(BeanDefs.WATCHDOG);

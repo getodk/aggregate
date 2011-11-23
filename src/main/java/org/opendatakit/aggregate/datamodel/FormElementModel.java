@@ -21,7 +21,7 @@ import java.util.List;
 
 import org.opendatakit.aggregate.constants.common.FormElementNamespace;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
-import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.common.web.CallingContext;
 
 /**
@@ -350,7 +350,7 @@ public final class FormElementModel {
    * @param form
    * @return string representation of this FormElementModel
    */
-  private final String getFullyQualifiedElementName(Form form) {
+  private final String getFullyQualifiedElementName(IForm form) {
 
     StringBuilder b = new StringBuilder();
     if (getParent() == null) {
@@ -379,7 +379,7 @@ public final class FormElementModel {
    *          the form containing this FormElementModel
    * @return the FormElementKey describing the FormElementModel
    */
-  public final FormElementKey constructFormElementKey(Form form) {
+  public final FormElementKey constructFormElementKey(IForm form) {
     return new FormElementKey(getFullyQualifiedElementName(form));
   }
 
@@ -417,7 +417,7 @@ public final class FormElementModel {
    * @return the form element model corresponding to the key.
    * @throws ODKFormNotFoundException
    */
-  public static final FormElementModel retrieveFormElementModel(Form form, FormElementKey key) {
+  public static final FormElementModel retrieveFormElementModel(IForm form, FormElementKey key) {
     String[] slashParts = key.toString().split(K_SL);
     int slashPosition = 0;
     if (!form.getFormId().equals(slashParts[slashPosition])) {

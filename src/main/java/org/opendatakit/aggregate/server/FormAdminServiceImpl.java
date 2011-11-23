@@ -38,7 +38,8 @@ import org.opendatakit.aggregate.constants.ErrorConsts;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.externalservice.FormServiceCursor;
-import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.form.FormFactory;
+import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.form.MiscTasks;
 import org.opendatakit.aggregate.form.MiscTasks.TaskType;
 import org.opendatakit.aggregate.format.Row;
@@ -82,7 +83,7 @@ public class FormAdminServiceImpl extends RemoteServiceServlet implements
     CallingContext cc = ContextFactory.getCallingContext(this, req);
 
     try {
-      Form form = Form.retrieveFormByFormId(formId, cc);
+      IForm form = FormFactory.retrieveFormByFormId(formId, cc);
       if (!form.hasValidFormDefinition()) {
         throw new RequestFailureException(ErrorConsts.FORM_DEFINITION_INVALID); // ill-formed definition
       }
@@ -106,7 +107,7 @@ public class FormAdminServiceImpl extends RemoteServiceServlet implements
     CallingContext cc = ContextFactory.getCallingContext(this, req);
 
     try {
-      Form form = Form.retrieveFormByFormId(formId, cc);
+      IForm form = FormFactory.retrieveFormByFormId(formId, cc);
       if (!form.hasValidFormDefinition()) {
         throw new RequestFailureException(ErrorConsts.FORM_DEFINITION_INVALID); // ill-formed definition
       }
@@ -154,9 +155,9 @@ public class FormAdminServiceImpl extends RemoteServiceServlet implements
     Map<String, String> parameters = new HashMap<String, String>();
 
     parameters.put(PurgeOlderSubmissions.PURGE_DATE, WebUtils.purgeDateString(earliest));
-    Form form;
+    IForm form;
     try {
-      form = Form.retrieveFormByFormId(fsc.getFormId(), cc);
+      form = FormFactory.retrieveFormByFormId(fsc.getFormId(), cc);
       if (!form.hasValidFormDefinition()) {
         throw new RequestFailureException(ErrorConsts.FORM_DEFINITION_INVALID);
       }
@@ -213,7 +214,7 @@ public class FormAdminServiceImpl extends RemoteServiceServlet implements
         throw new RequestFailureException("Unable to configure task to delete form " + formId);
       }
 
-      Form formToDelete = Form.retrieveFormByFormId(formId, cc);
+      IForm formToDelete = FormFactory.retrieveFormByFormId(formId, cc);
 
       // If the FormInfo table is the target, log an error!
       if (formToDelete != null) {
@@ -270,7 +271,7 @@ public class FormAdminServiceImpl extends RemoteServiceServlet implements
 
     try {
       String formId = filterGroup.getFormId();
-      Form form = Form.retrieveFormByFormId(formId, cc);
+      IForm form = FormFactory.retrieveFormByFormId(formId, cc);
       if (!form.hasValidFormDefinition()) {
         throw new RequestFailureException(ErrorConsts.FORM_DEFINITION_INVALID);
       }
@@ -296,7 +297,7 @@ public class FormAdminServiceImpl extends RemoteServiceServlet implements
   }
 
   private void getSubmissions(FilterGroup filterGroup, CallingContext cc,
-      SubmissionUISummary summary, Form form, List<Submission> submissions)
+      SubmissionUISummary summary, IForm form, List<Submission> submissions)
       throws AccessDeniedException, DatastoreFailureException, RequestFailureException {
     GenerateHeaderInfo headerGenerator = new GenerateHeaderInfo(filterGroup, summary, form);
     headerGenerator.processForHeaderInfo(form.getTopLevelGroupElement());
@@ -408,7 +409,7 @@ public class FormAdminServiceImpl extends RemoteServiceServlet implements
     ArrayList<MediaFileSummary> mediaSummaryList = new ArrayList<MediaFileSummary>();
 
     try {
-      Form form = Form.retrieveFormByFormId(formId, cc);
+      IForm form = FormFactory.retrieveFormByFormId(formId, cc);
       if (!form.hasValidFormDefinition())
         return mediaSummaryList; // ill-formed definition -- still show it...
 

@@ -41,7 +41,8 @@ import org.opendatakit.aggregate.exception.ODKFormSubmissionsDisabledException;
 import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
 import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData.Reason;
 import org.opendatakit.aggregate.exception.ODKParseException;
-import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.form.FormFactory;
+import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.aggregate.submission.SubmissionField;
 import org.opendatakit.aggregate.submission.SubmissionSet;
@@ -78,7 +79,7 @@ public class SubmissionParser {
 	 */
 	private String formId;
 
-	private Form form;
+	private IForm form;
 
 	/**
 	 * Root of XML submission
@@ -111,7 +112,7 @@ public class SubmissionParser {
 	 * 
 	 * @return
 	 */
-	public Form getForm() {
+	public IForm getForm() {
 		return form;
 	}
 
@@ -309,9 +310,9 @@ public class SubmissionParser {
 		// need to escape all slashes... for xpath processing...
 		formId = formId.replaceAll(ParserConsts.FORWARD_SLASH, ParserConsts.FORWARD_SLASH_SUBSTITUTION);
 		
-		String fullyQualifiedId = Form.extractWellFormedFormId(formId);
+		String fullyQualifiedId = FormFactory.extractWellFormedFormId(formId);
 
-		form = Form.retrieveFormByFormId(fullyQualifiedId, cc);
+		form = FormFactory.retrieveFormByFormId(fullyQualifiedId, cc);
 		if ( !form.getSubmissionEnabled() ) {
 			throw new ODKFormSubmissionsDisabledException();
 		}

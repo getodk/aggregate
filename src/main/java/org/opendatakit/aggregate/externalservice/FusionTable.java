@@ -56,7 +56,7 @@ import org.opendatakit.aggregate.datamodel.FormElementKey;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.datamodel.FormElementModel.ElementType;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
-import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.format.element.FusionTableElementFormatter;
 import org.opendatakit.aggregate.format.header.FusionTableHeaderFormatter;
@@ -97,18 +97,18 @@ public class FusionTable extends OAuthExternalService implements ExternalService
   								= new ArrayList<FusionTableRepeatParameterTable>();
   
     
-  private FusionTable(FusionTableParameterTable entity, FormServiceCursor formServiceCursor, Form form, CallingContext cc) {
+  private FusionTable(FusionTableParameterTable entity, FormServiceCursor formServiceCursor, IForm form, CallingContext cc) {
     super(form, formServiceCursor, new FusionTableElementFormatter(cc.getServerURL()), new FusionTableHeaderFormatter(), cc);
     objectEntity = entity;
   }
   
-  private FusionTable(FusionTableParameterTable entity, Form form, 
+  private FusionTable(FusionTableParameterTable entity, IForm form, 
       ExternalServicePublicationOption externalServiceOption, CallingContext cc) throws ODKEntityPersistException, ODKOverQuotaException, ODKDatastoreException {
     this (entity, createFormServiceCursor(form, entity, externalServiceOption, ExternalServiceType.GOOGLE_FUSIONTABLES, cc), form, cc);
     persist(cc); 
   }
 
-  public FusionTable(FormServiceCursor formServiceCursor, Form form, CallingContext cc) throws ODKDatastoreException {
+  public FusionTable(FormServiceCursor formServiceCursor, IForm form, CallingContext cc) throws ODKDatastoreException {
     
     this(retrieveEntity(FusionTableParameterTable.assertRelation(cc), formServiceCursor, cc), formServiceCursor, form, cc);
         
@@ -116,7 +116,7 @@ public class FusionTable extends OAuthExternalService implements ExternalService
     								objectEntity.getUri(), cc));
   }
 
-  public FusionTable(Form form, ExternalServicePublicationOption externalServiceOption, CallingContext cc)
+  public FusionTable(IForm form, ExternalServicePublicationOption externalServiceOption, CallingContext cc)
       throws ODKEntityPersistException, ODKOverQuotaException, ODKDatastoreException {
     this(newEntity(FusionTableParameterTable.assertRelation(cc), cc), form, externalServiceOption, cc);
   }
@@ -308,7 +308,7 @@ public class FusionTable extends OAuthExternalService implements ExternalService
     }
   }
 
-  private String createFusionTableStatement(Form form, FormElementModel rootNode) throws ODKExternalServiceException {
+  private String createFusionTableStatement(IForm form, FormElementModel rootNode) throws ODKExternalServiceException {
 
     List<String> headers = headerFormatter.generateHeaders(form, rootNode, null);
 

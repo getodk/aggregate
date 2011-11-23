@@ -32,7 +32,8 @@ import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.datamodel.TopLevelDynamicBase;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
-import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.form.FormFactory;
+import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.persistence.Query.FilterOperation;
@@ -126,9 +127,9 @@ public class SubmissionDownloadListServlet extends ServletUtilBase {
       numEntries = Integer.parseInt(numEntriesString.trim());
     }
 
-    Form form;
+    IForm form;
     try {
-      form = Form.retrieveFormByFormId(formId, cc);
+      form = FormFactory.retrieveFormByFormId(formId, cc);
     } catch (ODKFormNotFoundException e) {
       e.printStackTrace();
       odkIdNotFoundError(resp);

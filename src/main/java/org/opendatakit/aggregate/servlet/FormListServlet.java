@@ -25,7 +25,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.opendatakit.aggregate.ContextFactory;
-import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.form.FormFactory;
+import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.format.form.FormXmlTable;
 import org.opendatakit.aggregate.format.form.XFormsXmlTable;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
@@ -73,10 +74,10 @@ public class FormListServlet extends ServletUtilBase {
       }
       
       try {
-        List<Form> formsList = Form.getForms(false, cc);
+        List<IForm> formsList = FormFactory.getForms(false, cc);
         if ( formId != null && formId.length() != 0 ) {
-        	List<Form> newList = new ArrayList<Form>();
-        	for ( Form f : formsList ) {
+        	List<IForm> newList = new ArrayList<IForm>();
+        	for ( IForm f : formsList ) {
         		if ( f.getFormId().equals(formId) ) {
         			newList.add(f);
         		}
@@ -94,7 +95,7 @@ public class FormListServlet extends ServletUtilBase {
     } else {
       // Collect 1.1.5 legacy app
       try {
-        List<Form> formsList = Form.getForms(false, cc);
+        List<IForm> formsList = FormFactory.getForms(false, cc);
         FormXmlTable formFormatter = new FormXmlTable(formsList, cc.getServerURL());
 
         resp.setContentType(HtmlConsts.RESP_TYPE_XML);

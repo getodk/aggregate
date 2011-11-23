@@ -76,6 +76,7 @@ public class ChoiceSubmissionType extends SubmissionFieldBase<List<String>> {
 		SelectChoice sel = (SelectChoice) element.getFormDataModel().getBackingObjectPrototype();
 		Query q = cc.getDatastore().createQuery(element.getFormDataModel().getBackingObjectPrototype(), "ChoiceSubmissionType.getValueFromEntity", cc.getCurrentUser());
 		q.addFilter(sel.parentAuri, FilterOperation.EQUAL, parentKey);
+		q.addSort(sel.parentAuri, Direction.ASCENDING); // for GAE work-around
 		q.addSort(sel.ordinalNumber, Direction.ASCENDING);
 
 		List<? extends CommonFieldsBase> choiceHits = q.executeQuery();

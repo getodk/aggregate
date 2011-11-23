@@ -30,7 +30,8 @@ import org.opendatakit.aggregate.constants.ErrorConsts;
 import org.opendatakit.aggregate.constants.common.FormElementNamespace;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
-import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.form.FormFactory;
+import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.format.element.ElementFormatter;
 import org.opendatakit.aggregate.format.element.UiElementFormatter;
@@ -66,7 +67,7 @@ public class SubmissionServiceImpl extends RemoteServiceServlet implements
 
     try {
       String formId = filterGroup.getFormId();
-      Form form = Form.retrieveFormByFormId(formId, cc);
+      IForm form = FormFactory.retrieveFormByFormId(formId, cc);
       if (!form.hasValidFormDefinition()) {
         throw new RequestFailureException(ErrorConsts.FORM_DEFINITION_INVALID); // ill-formed definition
       }
@@ -112,7 +113,7 @@ public class SubmissionServiceImpl extends RemoteServiceServlet implements
     try {
       SubmissionKey key = new SubmissionKey(keyString);
       List<SubmissionKeyPart> parts = key.splitSubmissionKey();
-      Form form = Form.retrieveFormByFormId(parts.get(0).getElementName(), cc);
+      IForm form = FormFactory.retrieveFormByFormId(parts.get(0).getElementName(), cc);
       if (!form.hasValidFormDefinition()) {
         throw new RequestFailureException(ErrorConsts.FORM_DEFINITION_INVALID); // ill-formed definition
       }

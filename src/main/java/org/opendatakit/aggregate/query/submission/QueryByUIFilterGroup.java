@@ -15,7 +15,7 @@ import org.opendatakit.aggregate.constants.common.FormElementNamespace;
 import org.opendatakit.aggregate.datamodel.FormElementKey;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.datamodel.TopLevelDynamicBase;
-import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.format.element.ElementFormatter;
 import org.opendatakit.aggregate.server.UITrans;
@@ -48,7 +48,7 @@ public class QueryByUIFilterGroup extends QueryBase {
   
   private QueryResumePoint cursor;
   
-  public QueryByUIFilterGroup(Form form, FilterGroup filterGroup, CompletionFlag completionFlag, CallingContext cc) {
+  public QueryByUIFilterGroup(IForm form, FilterGroup filterGroup, CompletionFlag completionFlag, CallingContext cc) {
     super(form);
 
     if (filterGroup == null || form == null) {

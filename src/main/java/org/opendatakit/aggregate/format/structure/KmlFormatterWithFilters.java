@@ -30,7 +30,7 @@ import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.format.KmlConsts;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.datamodel.FormElementModel.ElementType;
-import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.format.RepeatCallbackFormatter;
 import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.format.SubmissionFormatter;
@@ -93,7 +93,7 @@ public class KmlFormatterWithFilters implements SubmissionFormatter, RepeatCallb
   private static final int APPROX_ITEM_LENGTHS = 100;
   private static final int APPROX_TABLE_FORMATTING_LENGTH = 1000;
 
-  private Form form;
+  private IForm form;
   private List<FormElementModel> propertyNames;
 
   private FormElementModel gpsElement;
@@ -112,7 +112,7 @@ public class KmlFormatterWithFilters implements SubmissionFormatter, RepeatCallb
   private boolean imgInGpsRepeat;
   private boolean titleInGpsRepeat;
   
-  public KmlFormatterWithFilters(Form xform, String webServerUrl, FormElementModel gpsField,
+  public KmlFormatterWithFilters(IForm xform, String webServerUrl, FormElementModel gpsField,
       FormElementModel titleField, FormElementModel imgField, PrintWriter printWriter,
       FilterGroup filterGroup, CallingContext cc) {
 

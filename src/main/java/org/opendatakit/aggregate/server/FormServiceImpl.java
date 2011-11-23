@@ -42,7 +42,8 @@ import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.datamodel.FormElementModel.ElementType;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.filter.SubmissionFilterGroup;
-import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.form.FormFactory;
+import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.form.MiscTasks;
 import org.opendatakit.aggregate.form.PersistentResults;
 import org.opendatakit.aggregate.form.PersistentResults.ResultFileInfo;
@@ -74,7 +75,7 @@ public class FormServiceImpl extends RemoteServiceServlet implements
 
     try {
       // ensure that Form table exists...
-      List<Form> forms = Form.getForms(false, cc);
+      List<IForm> forms = FormFactory.getForms(false, cc);
       if (forms.size() == 0)
         return formSummaries;
 
@@ -86,7 +87,7 @@ public class FormServiceImpl extends RemoteServiceServlet implements
       Map<String, FormActionStatusTimestamp> submissionPurgeStatuses = MiscTasks
           .getPurgeSubmissionsStatusTimestampOfAllFormIds(cc);
 
-      for (Form form : forms) {
+      for (IForm form : forms) {
         FormSummary summary = form.generateFormSummary(cc);
         Date formLoadDate = summary.getCreationDate();
         formSummaries.add(summary);
@@ -166,7 +167,7 @@ public class FormServiceImpl extends RemoteServiceServlet implements
     CallingContext cc = ContextFactory.getCallingContext(this, req);
 
     try {
-      Form form = Form.retrieveFormByFormId(formId, cc);
+      IForm form = FormFactory.retrieveFormByFormId(formId, cc);
       if (!form.hasValidFormDefinition()) {
         throw new RequestFailureException(ErrorConsts.FORM_DEFINITION_INVALID); // ill-formed definition
       }
@@ -191,7 +192,7 @@ public class FormServiceImpl extends RemoteServiceServlet implements
     CallingContext cc = ContextFactory.getCallingContext(this, req);
 
     try {
-      Form form = Form.retrieveFormByFormId(formId, cc);
+      IForm form = FormFactory.retrieveFormByFormId(formId, cc);
       if (!form.hasValidFormDefinition()) {
         throw new RequestFailureException(ErrorConsts.FORM_DEFINITION_INVALID); // ill-formed definition
       }
@@ -233,7 +234,7 @@ public class FormServiceImpl extends RemoteServiceServlet implements
       filterGrp.persist(cc);
 
       // create csv job
-      Form form = Form.retrieveFormByFormId(filterGrp.getFormId(), cc);
+      IForm form = FormFactory.retrieveFormByFormId(filterGrp.getFormId(), cc);
       if (!form.hasValidFormDefinition()) {
         throw new RequestFailureException(ErrorConsts.FORM_DEFINITION_INVALID); // ill-formed definition
       }
@@ -284,7 +285,7 @@ public class FormServiceImpl extends RemoteServiceServlet implements
       filterGrp.setName("FilterForExport");
       filterGrp.persist(cc);
 
-      Form form = Form.retrieveFormByFormId(group.getFormId(), cc);
+      IForm form = FormFactory.retrieveFormByFormId(group.getFormId(), cc);
       if (!form.hasValidFormDefinition()) {
         throw new RequestFailureException(ErrorConsts.FORM_DEFINITION_INVALID); // ill-formed definition
       }

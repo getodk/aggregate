@@ -117,7 +117,7 @@ public final class DatastoreAccessMetrics {
       lastLogging = now;
       
       String gmtDate = WebUtils.iso8601Date(new java.util.Date(now));
-      logger.info("---------- " + gmtDate + " ------------");
+      logger.info("---------- " + gmtDate + " @ " + readCount + " ------------");
       for ( Map.Entry<String, Short> entry : tableMap.entrySet() ) {
         Short idx = entry.getValue();
         logger.info(entry.getKey() + 

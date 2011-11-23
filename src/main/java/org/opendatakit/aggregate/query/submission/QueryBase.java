@@ -21,7 +21,7 @@ import org.opendatakit.aggregate.datamodel.FormDataModel;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.datamodel.TopLevelDynamicBase;
 import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
-import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.Query;
@@ -40,11 +40,11 @@ import org.opendatakit.common.web.CallingContext;
 public abstract class QueryBase {
 
   protected Query query;
-  private final Form form;
+  private final IForm form;
   
   
   
-  protected QueryBase(Form form) {
+  protected QueryBase(IForm form) {
     this.form = form;
   }
 
@@ -102,7 +102,7 @@ public abstract class QueryBase {
   public abstract List<Submission> getResultSubmissions(CallingContext cc) throws ODKIncompleteSubmissionData, ODKDatastoreException;
 
   
-  public final Form getForm(){
+  public final IForm getForm(){
     return form;
   }
 

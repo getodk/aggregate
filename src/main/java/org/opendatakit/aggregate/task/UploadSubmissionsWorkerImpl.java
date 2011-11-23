@@ -30,7 +30,8 @@ import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
 import org.opendatakit.aggregate.externalservice.ExternalService;
 import org.opendatakit.aggregate.externalservice.FormServiceCursor;
-import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.form.FormFactory;
+import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.query.submission.QueryByDateRange;
 import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.common.persistence.Datastore;
@@ -63,7 +64,7 @@ public class UploadSubmissionsWorkerImpl {
   private final FormServiceCursor pFsc;
   private final ExternalServicePublicationOption pEsOption;
   private ExternalService pExtService;
-  private Form form;
+  private IForm form;
 
   public UploadSubmissionsWorkerImpl(FormServiceCursor fsc, CallingContext cc) {
     pFsc = fsc;
@@ -81,7 +82,7 @@ public class UploadSubmissionsWorkerImpl {
 
     try {
       pExtService = pFsc.getExternalService(cc);
-      form = Form.retrieveFormByFormId(pFsc.getFormId(), cc);
+      form = FormFactory.retrieveFormByFormId(pFsc.getFormId(), cc);
       if ( !form.hasValidFormDefinition() ) {
           Logger
           .getLogger(UploadSubmissionsWorkerImpl.class.getName())

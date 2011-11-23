@@ -34,7 +34,8 @@ import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
 import org.opendatakit.aggregate.exception.ODKParseException;
-import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.form.FormFactory;
+import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.format.table.FragmentedCsvFormatter;
 import org.opendatakit.aggregate.query.submission.QueryByDateRange;
 import org.opendatakit.aggregate.submission.Submission;
@@ -233,7 +234,7 @@ public class FragmentedCsvServlet extends ServletUtilBase {
 
       if (submissionKeyParts.size() >= 2 && submissionKeyParts.get(1).getAuri() != null
           && numEntriesToFetch > 0) {
-        Form form = Form.retrieveFormByFormId(submissionKeyParts.get(0).getElementName(), cc);
+        IForm form = FormFactory.retrieveFormByFormId(submissionKeyParts.get(0).getElementName(), cc);
         if (!form.hasValidFormDefinition()) {
           errorRetreivingData(resp);
           return; // ill-formed definition
@@ -263,7 +264,7 @@ public class FragmentedCsvServlet extends ServletUtilBase {
         // top-level form can be referenced either by just "form-identity" or by
         // "form-identity/top-level-tag"
         // reworked from formxmlservlet.java
-        Form form = Form.retrieveFormByFormId(submissionKeyParts.get(0).getElementName(), cc);
+        IForm form = FormFactory.retrieveFormByFormId(submissionKeyParts.get(0).getElementName(), cc);
 
         QueryByDateRange query = new QueryByDateRange(form, numEntriesToFetch, dateCode, uriAfter, cc);
         List<Submission> submissions = query.getResultSubmissions(cc);

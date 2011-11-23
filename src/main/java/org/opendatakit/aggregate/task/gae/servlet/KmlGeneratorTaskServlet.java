@@ -25,7 +25,8 @@ import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.datamodel.FormElementKey;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
-import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.form.FormFactory;
+import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.servlet.ServletUtilBase;
 import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.task.KmlGenerator;
@@ -81,12 +82,12 @@ public class KmlGeneratorTaskServlet extends ServletUtilBase {
     }
     Long attemptCount = Long.valueOf(attemptCountString);
 
-    Form form = null;
+    IForm form = null;
     FormElementModel titleField = null;
     FormElementModel geopointField = null;
     FormElementModel imageField = null;
     try {
-      form = Form.retrieveFormByFormId(formId, cc);
+      form = FormFactory.retrieveFormByFormId(formId, cc);
 
       if (!form.hasValidFormDefinition()) {
         errorRetreivingData(resp);

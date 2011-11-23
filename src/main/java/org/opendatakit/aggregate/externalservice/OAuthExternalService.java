@@ -3,7 +3,7 @@ package org.opendatakit.aggregate.externalservice;
 import org.apache.commons.logging.Log;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
-import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.format.element.ElementFormatter;
 import org.opendatakit.aggregate.format.header.HeaderFormatter;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
@@ -16,7 +16,7 @@ import com.google.gdata.client.authn.oauth.OAuthHmacSha1Signer;
 
 public abstract class OAuthExternalService extends AbstractExternalService {
 
-  protected OAuthExternalService(Form form, FormServiceCursor formServiceCursor, ElementFormatter formatter, HeaderFormatter headerFormatter, CallingContext cc){
+  protected OAuthExternalService(IForm form, FormServiceCursor formServiceCursor, ElementFormatter formatter, HeaderFormatter headerFormatter, CallingContext cc){
     super(form, formServiceCursor, formatter, headerFormatter, cc);
   }
   

@@ -26,7 +26,7 @@ import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.common.FormElementNamespace;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.datamodel.FormElementModelVisitor;
-import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.format.SubmissionFormatter;
 import org.opendatakit.aggregate.format.element.XmlAttributeFormatter;
@@ -48,13 +48,13 @@ import org.opendatakit.common.web.CallingContext;
  */
 public class XmlFormatter implements SubmissionFormatter {
 
-  private Form form;
+  private IForm form;
   private XmlElementFormatter elemFormatter;
 
   private PrintWriter output;
 
   public XmlFormatter(PrintWriter printWriter,
-      Form form, CallingContext cc) {
+      IForm form, CallingContext cc) {
     output = printWriter;
     this.form = form;
     elemFormatter = new XmlElementFormatter(this);

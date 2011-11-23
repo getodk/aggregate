@@ -28,7 +28,8 @@ import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.ErrorConsts;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
-import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.form.FormFactory;
+import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.form.FormInfo;
 import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.submission.SubmissionKeyPart;
@@ -96,9 +97,9 @@ public class XFormsDownloadServlet extends ServletUtilBase {
     }
 
     // get this form's definition
-    Form form;
+    IForm form;
     try {
-      form = Form.retrieveForm(parts, cc);
+      form = FormFactory.retrieveForm(parts, cc);
     } catch (ODKFormNotFoundException e) {
       e.printStackTrace();
       odkIdNotFoundError(resp);

@@ -18,7 +18,7 @@
 package org.opendatakit.aggregate.format;
 
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
-import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.web.constants.BasicConsts;
@@ -33,7 +33,7 @@ import org.opendatakit.common.web.constants.BasicConsts;
  */
 public abstract class SubmissionFormatBase {
  
-  protected Form form;
+  protected IForm form;
   
   /**
    * url of aggregate instance, the base that appends to the servlet address
@@ -54,7 +54,7 @@ public abstract class SubmissionFormatBase {
    * @param separateGeopoint 
    *     true if gps coordinates should be separated, false otherwise
    */
-  protected SubmissionFormatBase(Form xform, String webServerURL, boolean separateGeopoint) {
+  protected SubmissionFormatBase(IForm xform, String webServerURL, boolean separateGeopoint) {
     form = xform;
     baseWebServerUrl = webServerURL + BasicConsts.FORWARDSLASH;
     separateCoordinates = separateGeopoint;
@@ -67,7 +67,7 @@ public abstract class SubmissionFormatBase {
    * @param webServerURL 
    *     url of aggregate instance, the base that appends to the servlet address
    */
-  protected SubmissionFormatBase(Form xform, String webServerURL) {
+  protected SubmissionFormatBase(IForm xform, String webServerURL) {
     this(xform, webServerURL, true);
   }
   
@@ -80,7 +80,7 @@ public abstract class SubmissionFormatBase {
    * @param user the user initiating the request
    * @throws ODKFormNotFoundException 
    */
-  protected SubmissionFormatBase(String webServerURL, Form form, Datastore datastore, User user) throws ODKFormNotFoundException {
+  protected SubmissionFormatBase(String webServerURL, IForm form, Datastore datastore, User user) throws ODKFormNotFoundException {
     this(form, webServerURL, true);
   }
   

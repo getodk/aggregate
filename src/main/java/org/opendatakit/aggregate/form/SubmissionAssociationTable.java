@@ -44,7 +44,7 @@ public final class SubmissionAssociationTable extends CommonFieldsBase {
 			DataField.DataType.URI, false, PersistConsts.URI_STRING_LEN).setIndexable(IndexType.HASH);
 	
 	private static final DataField SUBMISSION_FORM_ID = new DataField("SUBMISSION_FORM_ID",
-			DataField.DataType.STRING, true, Form.MAX_FORM_ID_LENGTH);
+			DataField.DataType.STRING, true, IForm.MAX_FORM_ID_LENGTH);
 
 	private static final DataField SUBMISSION_MODEL_VERSION = new DataField("SUBMISSION_MODEL_VERSION",
 			DataField.DataType.INTEGER, true);

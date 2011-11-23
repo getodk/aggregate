@@ -22,7 +22,7 @@ import org.opendatakit.aggregate.constants.common.ExternalServicePublicationOpti
 import org.opendatakit.aggregate.constants.common.ExternalServiceType;
 import org.opendatakit.aggregate.constants.common.OperationalStatus;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
-import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.format.element.ElementFormatter;
 import org.opendatakit.aggregate.format.header.HeaderFormatter;
 import org.opendatakit.aggregate.submission.Submission;
@@ -50,13 +50,13 @@ public abstract class AbstractExternalService implements ExternalService{
    */
   protected final FormServiceCursor fsc;
   
-  protected final Form form;
+  protected final IForm form;
   
   protected final ElementFormatter formatter;
   
   protected final HeaderFormatter headerFormatter;
   
-  protected AbstractExternalService(Form form, FormServiceCursor formServiceCursor, ElementFormatter formatter, HeaderFormatter headerFormatter, CallingContext cc) {
+  protected AbstractExternalService(IForm form, FormServiceCursor formServiceCursor, ElementFormatter formatter, HeaderFormatter headerFormatter, CallingContext cc) {
     this.form = form;
     this.formatter = formatter;
     this.headerFormatter = headerFormatter;
@@ -173,7 +173,7 @@ public abstract class AbstractExternalService implements ExternalService{
    * Helper function for constructors.
    * 
    */
-  protected static FormServiceCursor createFormServiceCursor(Form form, CommonFieldsBase entity, ExternalServicePublicationOption externalServiceOption, ExternalServiceType type, CallingContext cc) throws ODKDatastoreException {
+  protected static FormServiceCursor createFormServiceCursor(IForm form, CommonFieldsBase entity, ExternalServicePublicationOption externalServiceOption, ExternalServiceType type, CallingContext cc) throws ODKDatastoreException {
     FormServiceCursor formServiceCursor = FormServiceCursor.createFormServiceCursor(form, type, entity, cc);
     formServiceCursor.setExternalServiceOption(externalServiceOption);
     formServiceCursor.setIsExternalServicePrepared(false); 
