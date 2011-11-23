@@ -17,6 +17,7 @@ import java.util.List;
 
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
+import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.web.CallingContext;
 
 /**
@@ -79,8 +80,9 @@ public interface BlobRelationSet {
 	 * @param e
 	 * @param cc
 	 * @throws ODKEntityPersistException
+	 * @throws ODKOverQuotaException 
 	 */
-	public void putBlobEntitySet( BlobEntitySet e, CallingContext cc ) throws ODKEntityPersistException;
+	public void putBlobEntitySet( BlobEntitySet e, CallingContext cc ) throws ODKEntityPersistException, ODKOverQuotaException;
 	
 	/**
 	 * Remove the blob entity set from the datastore.
@@ -99,8 +101,9 @@ public interface BlobRelationSet {
 	 * @param e
 	 * @param cc
 	 * @throws ODKEntityPersistException
+	 * @throws ODKOverQuotaException 
 	 */
-	public void putBlobEntitySets( List<BlobEntitySet> e, CallingContext cc ) throws ODKEntityPersistException;
+	public void putBlobEntitySets( List<BlobEntitySet> e, CallingContext cc ) throws ODKEntityPersistException, ODKOverQuotaException;
 
 	/**
 	 * This is just a convenience method.  It may fail midway through 

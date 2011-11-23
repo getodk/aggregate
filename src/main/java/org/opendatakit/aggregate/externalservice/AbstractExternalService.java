@@ -22,7 +22,7 @@ import org.opendatakit.aggregate.constants.common.ExternalServicePublicationOpti
 import org.opendatakit.aggregate.constants.common.ExternalServiceType;
 import org.opendatakit.aggregate.constants.common.OperationalStatus;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
-import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.format.element.ElementFormatter;
 import org.opendatakit.aggregate.format.header.HeaderFormatter;
 import org.opendatakit.aggregate.submission.Submission;
@@ -31,6 +31,7 @@ import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.EntityKey;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
+import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.web.CallingContext;
 
@@ -49,13 +50,13 @@ public abstract class AbstractExternalService implements ExternalService{
    */
   protected final FormServiceCursor fsc;
   
-  protected final Form form;
+  protected final IForm form;
   
   protected final ElementFormatter formatter;
   
   protected final HeaderFormatter headerFormatter;
   
-  protected AbstractExternalService(Form form, FormServiceCursor formServiceCursor, ElementFormatter formatter, HeaderFormatter headerFormatter, CallingContext cc) {
+  protected AbstractExternalService(IForm form, FormServiceCursor formServiceCursor, ElementFormatter formatter, HeaderFormatter headerFormatter, CallingContext cc) {
     this.form = form;
     this.formatter = formatter;
     this.headerFormatter = headerFormatter;
@@ -82,7 +83,7 @@ public abstract class AbstractExternalService implements ExternalService{
   }
     
   @Override
-  public void setUploadCompleted(CallingContext cc) throws ODKEntityPersistException {
+  public void setUploadCompleted(CallingContext cc) throws ODKEntityPersistException, ODKOverQuotaException {
     fsc.setUploadCompleted(true);
     if (fsc.getExternalServicePublicationOption() == ExternalServicePublicationOption.UPLOAD_ONLY) {
       fsc.setOperationalStatus(OperationalStatus.COMPLETED);
@@ -122,7 +123,7 @@ public abstract class AbstractExternalService implements ExternalService{
   }
   
   @Override
-  public void persist(CallingContext cc) throws ODKEntityPersistException {
+  public void persist(CallingContext cc) throws ODKEntityPersistException, ODKOverQuotaException {
     Datastore ds = cc.getDatastore();
     User user = cc.getCurrentUser();
    
@@ -172,7 +173,7 @@ public abstract class AbstractExternalService implements ExternalService{
    * Helper function for constructors.
    * 
    */
-  protected static FormServiceCursor createFormServiceCursor(Form form, CommonFieldsBase entity, ExternalServicePublicationOption externalServiceOption, ExternalServiceType type, CallingContext cc) throws ODKDatastoreException {
+  protected static FormServiceCursor createFormServiceCursor(IForm form, CommonFieldsBase entity, ExternalServicePublicationOption externalServiceOption, ExternalServiceType type, CallingContext cc) throws ODKDatastoreException {
     FormServiceCursor formServiceCursor = FormServiceCursor.createFormServiceCursor(form, type, entity, cc);
     formServiceCursor.setExternalServiceOption(externalServiceOption);
     formServiceCursor.setIsExternalServicePrepared(false); 

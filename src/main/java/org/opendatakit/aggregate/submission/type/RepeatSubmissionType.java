@@ -22,7 +22,7 @@ import java.util.List;
 
 import org.opendatakit.aggregate.constants.format.FormatConsts;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
-import org.opendatakit.aggregate.form.FormDefinition;
+import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.format.element.ElementFormatter;
 import org.opendatakit.aggregate.submission.SubmissionElement;
@@ -40,6 +40,7 @@ import org.opendatakit.common.persistence.Query.Direction;
 import org.opendatakit.common.persistence.Query.FilterOperation;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
+import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.web.CallingContext;
 
 /**
@@ -52,206 +53,206 @@ import org.opendatakit.common.web.CallingContext;
  */
 public class RepeatSubmissionType implements SubmissionRepeat {
 
-	/**
-	 * ODK identifier that uniquely identifies the form
-	 */
-	private final FormDefinition formDefinition;
+  /**
+   * ODK identifier that uniquely identifies the form
+   */
+  private final IForm form;
 
-	/**
-	 * Enclosing submission set
-	 */
-	private final SubmissionSet enclosingSet;
+  /**
+   * Enclosing submission set
+   */
+  private final SubmissionSet enclosingSet;
 
-	/**
-	 * Identifier for repeat
-	 */
-	private final FormElementModel repeatGroup;
+  /**
+   * Identifier for repeat
+   */
+  private final FormElementModel repeatGroup;
 
-	private final String uriAssociatedRow;
-	/**
-	 * List of submission sets that are a part of this submission set Ordered by
-	 * OrdinalNumber...
-	 */
-	private List<SubmissionSet> submissionSets = new ArrayList<SubmissionSet>();
+  private final String uriAssociatedRow;
+  /**
+   * List of submission sets that are a part of this submission set Ordered by
+   * OrdinalNumber...
+   */
+  private List<SubmissionSet> submissionSets = new ArrayList<SubmissionSet>();
 
-	public RepeatSubmissionType(SubmissionSet enclosingSet,
-			FormElementModel repeatGroup, String uriAssociatedRow,
-			FormDefinition formDefinition) {
-		this.enclosingSet = enclosingSet;
-		this.formDefinition = formDefinition;
-		this.repeatGroup = repeatGroup;
-		this.uriAssociatedRow = uriAssociatedRow;
-	}
+  public RepeatSubmissionType(SubmissionSet enclosingSet, FormElementModel repeatGroup,
+      String uriAssociatedRow, IForm form) {
+    this.enclosingSet = enclosingSet;
+    this.form = form;
+    this.repeatGroup = repeatGroup;
+    this.uriAssociatedRow = uriAssociatedRow;
+  }
 
-	public SubmissionSet getEnclosingSet() {
-		return enclosingSet;
-	}
-	
-	public String getUniqueKeyStr() {
-	  EntityKey key = enclosingSet.getKey();
-	  return key.getKey();
-	}
-	
-	public void addSubmissionSet(SubmissionSet submissionSet) {
-		submissionSets.add(submissionSet);
-	}
+  public SubmissionSet getEnclosingSet() {
+    return enclosingSet;
+  }
 
-	public List<SubmissionSet> getSubmissionSets() {
-		return submissionSets;
-	}
+  public String getUniqueKeyStr() {
+    EntityKey key = enclosingSet.getKey();
+    return key.getKey();
+  }
 
-	public int getNumberRepeats() {
-		return submissionSets.size();
-	}
+  public void addSubmissionSet(SubmissionSet submissionSet) {
+    submissionSets.add(submissionSet);
+  }
 
-	/**
-	 * @return submissionKey that defines all the repeats for this particular repeat group.
-	 */
-	public SubmissionKey constructSubmissionKey() {
-		return enclosingSet.constructSubmissionKey(repeatGroup);
-	}
-	
-	/**
-	 * Format value for output
-	 * 
-	 * @param elemFormatter
-	 *            the element formatter that will convert the value to the
-	 *            proper format for output
-	 */
-	@Override
-	public void formatValue(ElementFormatter elemFormatter, Row row, String ordinalValue, CallingContext cc)
-			throws ODKDatastoreException {
-		elemFormatter.formatRepeats(this, repeatGroup, row, cc);
-	}
+  public List<SubmissionSet> getSubmissionSets() {
+    return submissionSets;
+  }
 
-	@Override
-	public void getValueFromEntity(CallingContext cc) throws ODKDatastoreException {
+  public int getNumberRepeats() {
+    return submissionSets.size();
+  }
 
-		Query q = cc.getDatastore().createQuery(repeatGroup.getFormDataModel().getBackingObjectPrototype(), "RepeatSubmissionType.getValueFromEntity", cc.getCurrentUser());
-		q.addFilter(((DynamicBase) repeatGroup.getFormDataModel().getBackingObjectPrototype()).parentAuri,
-				FilterOperation.EQUAL, uriAssociatedRow);
-		q.addSort(((DynamicBase) repeatGroup.getFormDataModel().getBackingObjectPrototype()).ordinalNumber, 
-				Direction.ASCENDING);
+  /**
+   * @return submissionKey that defines all the repeats for this particular
+   *         repeat group.
+   */
+  public SubmissionKey constructSubmissionKey() {
+    return enclosingSet.constructSubmissionKey(repeatGroup);
+  }
 
-		// reconstruct all the repeating groups from a single submission.
-		// This should be a small number.  We don't have the logic to 
-		// handle fractional returns of rows.
-		List<? extends CommonFieldsBase> repeatGroupList = q.executeQuery();
-		for (CommonFieldsBase cb : repeatGroupList) {
-			DynamicBase d = (DynamicBase) cb;
-			SubmissionSet set = new SubmissionSet(enclosingSet, d, repeatGroup,
-					formDefinition, cc);
-			submissionSets.add(set);
-		}
-	}
+  /**
+   * Format value for output
+   * 
+   * @param elemFormatter
+   *          the element formatter that will convert the value to the proper
+   *          format for output
+   */
+  @Override
+  public void formatValue(ElementFormatter elemFormatter, Row row, String ordinalValue,
+      CallingContext cc) throws ODKDatastoreException {
+    elemFormatter.formatRepeats(this, repeatGroup, row, cc);
+  }
 
-	/**
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
-	@Override
-	public boolean equals(Object obj) {
-		if (!(obj instanceof RepeatSubmissionType)) {
-			return false;
-		}
+  @Override
+  public void getValueFromEntity(CallingContext cc) throws ODKDatastoreException {
 
-		RepeatSubmissionType other = (RepeatSubmissionType) obj;
-		return formDefinition.equals(other.formDefinition)
-				&& repeatGroup.equals(other.repeatGroup)
-				&& submissionSets.equals(other.submissionSets);
-	}
+    DynamicBase rel = (DynamicBase) repeatGroup.getFormDataModel().getBackingObjectPrototype();
 
-	/**
-	 * @see java.lang.Object#hashCode()
-	 */
-	@Override
-	public int hashCode() {
-		int hashCode = 13;
+    Query q = cc.getDatastore().createQuery(rel, "RepeatSubmissionType.getValueFromEntity", cc.getCurrentUser());
+    q.addFilter(rel.parentAuri, FilterOperation.EQUAL, uriAssociatedRow);
+    q.addSort(rel.parentAuri, Direction.ASCENDING); // for GAE work-around
+    q.addSort(rel.ordinalNumber, Direction.ASCENDING);
 
-		hashCode += formDefinition.hashCode();
-		hashCode += repeatGroup.hashCode();
-		hashCode += submissionSets.hashCode();
+    // reconstruct all the repeating groups from a single submission.
+    // This should be a small number. We don't have the logic to
+    // handle fractional returns of rows.
+    List<? extends CommonFieldsBase> repeatGroupList = q.executeQuery();
+    for (CommonFieldsBase cb : repeatGroupList) {
+      DynamicBase d = (DynamicBase) cb;
+      SubmissionSet set = new SubmissionSet(enclosingSet, d, repeatGroup, form, cc);
+      submissionSets.add(set);
+    }
+  }
 
-		return hashCode;
-	}
+  /**
+   * @see java.lang.Object#equals(java.lang.Object)
+   */
+  @Override
+  public boolean equals(Object obj) {
+    if (!(obj instanceof RepeatSubmissionType)) {
+      return false;
+    }
 
-	/**
-	 * @see java.lang.Object#toString()
-	 */
-	@Override
-	public String toString() {
-		String str = enclosingSet.constructSubmissionKey(repeatGroup) + "\n";
-		for (SubmissionSet set : submissionSets) {
-			str += FormatConsts.TO_STRING_DELIMITER + set.toString();
-		}
-		return str;
-	}
+    RepeatSubmissionType other = (RepeatSubmissionType) obj;
+    return form.equals(other.form) && repeatGroup.equals(other.repeatGroup)
+        && submissionSets.equals(other.submissionSets);
+  }
 
-	@Override
-	public void recursivelyAddEntityKeys(List<EntityKey> keyList, CallingContext cc)
-			throws ODKDatastoreException {
-		for (SubmissionSet s : submissionSets) {
-			s.recursivelyAddEntityKeys(keyList, cc);
-		}
-	}
+  /**
+   * @see java.lang.Object#hashCode()
+   */
+  @Override
+  public int hashCode() {
+    int hashCode = 13;
 
-	@Override
-	public void persist(CallingContext cc)
-			throws ODKEntityPersistException {
-		for (SubmissionSet s : submissionSets) {
-			s.persist(cc);
-		}
-	}
+    hashCode += form.hashCode();
+    hashCode += repeatGroup.hashCode();
+    hashCode += submissionSets.hashCode();
 
-	@Override
-	public FormElementModel getElement() {
-		return repeatGroup;
-	}
+    return hashCode;
+  }
 
-	@Override
-	public String getPropertyName() {
-		return repeatGroup.getElementName();
-	}
+  /**
+   * @see java.lang.Object#toString()
+   */
+  @Override
+  public String toString() {
+    String str = enclosingSet.constructSubmissionKey(repeatGroup) + "\n";
+    for (SubmissionSet set : submissionSets) {
+      str += FormatConsts.TO_STRING_DELIMITER + set.toString();
+    }
+    return str;
+  }
 
-	@Override
-	public boolean depthFirstTraversal(SubmissionVisitor visitor) {
-	  if ( visitor.traverse(this) ) return true;
-	  
-	  for (SubmissionSet s : submissionSets) {
-       if ( s.depthFirstTraversal(visitor) ) return true;
-     }
-	  return false;
-   }
-	
-	public List<SubmissionValue> findElementValue(FormElementModel element) {
-		List<SubmissionValue> values = new ArrayList<SubmissionValue>();
+  @Override
+  public void recursivelyAddEntityKeys(List<EntityKey> keyList, CallingContext cc)
+      throws ODKDatastoreException {
+    for (SubmissionSet s : submissionSets) {
+      s.recursivelyAddEntityKeys(keyList, cc);
+    }
+  }
 
-		for (SubmissionSet s : submissionSets) {
-			values.addAll(s.findElementValue(element));
-		}
-		return values;
-	}
+  @Override
+  public void persist(CallingContext cc) throws ODKEntityPersistException, ODKOverQuotaException {
+    for (SubmissionSet s : submissionSets) {
+      s.persist(cc);
+    }
+  }
 
-	@Override
-	public SubmissionElement resolveSubmissionKeyBeginningAt(int i,
-			List<SubmissionKeyPart> parts) {
-		SubmissionKeyPart p = parts.get(i);
-		
-		Long ordinalNumber = p.getOrdinalNumber();
-		if ( ordinalNumber != null ) {
-			return submissionSets.get(ordinalNumber.intValue()-1).resolveSubmissionKeyBeginningAt(i, parts);
-		}
-		
-		String auri = p.getAuri();
-		if ( auri == null ) {
-			return this; // they want the repeat group...
-		}
-		
-		for (SubmissionSet s : submissionSets) {
-			if ( s.getKey().getKey().equals(auri)) {
-				return s.resolveSubmissionKeyBeginningAt(i, parts);
-			}
-		}
-		return null;
-	}
+  @Override
+  public FormElementModel getElement() {
+    return repeatGroup;
+  }
+
+  @Override
+  public String getPropertyName() {
+    return repeatGroup.getElementName();
+  }
+
+  @Override
+  public boolean depthFirstTraversal(SubmissionVisitor visitor) {
+    if (visitor.traverse(this))
+      return true;
+
+    for (SubmissionSet s : submissionSets) {
+      if (s.depthFirstTraversal(visitor))
+        return true;
+    }
+    return false;
+  }
+
+  public List<SubmissionValue> findElementValue(FormElementModel element) {
+    List<SubmissionValue> values = new ArrayList<SubmissionValue>();
+
+    for (SubmissionSet s : submissionSets) {
+      values.addAll(s.findElementValue(element));
+    }
+    return values;
+  }
+
+  @Override
+  public SubmissionElement resolveSubmissionKeyBeginningAt(int i, List<SubmissionKeyPart> parts) {
+    SubmissionKeyPart p = parts.get(i);
+
+    Long ordinalNumber = p.getOrdinalNumber();
+    if (ordinalNumber != null) {
+      return submissionSets.get(ordinalNumber.intValue() - 1).resolveSubmissionKeyBeginningAt(i,
+          parts);
+    }
+
+    String auri = p.getAuri();
+    if (auri == null) {
+      return this; // they want the repeat group...
+    }
+
+    for (SubmissionSet s : submissionSets) {
+      if (s.getKey().getKey().equals(auri)) {
+        return s.resolveSubmissionKeyBeginningAt(i, parts);
+      }
+    }
+    return null;
+  }
 
 }

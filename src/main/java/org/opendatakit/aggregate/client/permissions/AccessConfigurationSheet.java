@@ -297,7 +297,7 @@ public class AccessConfigurationSheet extends Composite {
   private class UpdateUserDisplay implements AsyncCallback<ArrayList<UserSecurityInfo>> {
     @Override
     public void onFailure(Throwable caught) {
-      Window.alert("Unable to retrieve users from server: " + caught.getMessage());
+      AggregateUI.getUI().reportError(" Unable to retrieve users from server: ", caught);
     }
 
     @Override
@@ -357,7 +357,7 @@ public class AccessConfigurationSheet extends Composite {
 
           @Override
           public void onFailure(Throwable caught) {
-            Window.alert("Incomplete security update: " + caught.getMessage());
+            AggregateUI.getUI().reportError("Incomplete security update: ", caught);
           }
 
           @Override

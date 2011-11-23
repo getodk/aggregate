@@ -43,9 +43,9 @@ public final class EnableOdkTablesCheckbox extends AggregateCheckBox implements
     SecureGWT.getPreferenceService().setOdkTablesEnabled(enabled, new AsyncCallback<Void>() {
       @Override
       public void onFailure(Throwable caught) {
-        AggregateUI.getUI().reportError(caught);
         // restore old value
         setValue(Preferences.getOdkTablesEnabled());
+        AggregateUI.getUI().reportError(caught);
       }
 
       @Override

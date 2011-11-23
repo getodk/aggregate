@@ -207,6 +207,7 @@ public final class ExportPopup extends AbstractPopupBase {
 
     @Override
     public void onFailure(Throwable caught) {
+      filtersBox.updateFilterDropDown(null);
       AggregateUI.getUI().reportError(caught);
     }
 

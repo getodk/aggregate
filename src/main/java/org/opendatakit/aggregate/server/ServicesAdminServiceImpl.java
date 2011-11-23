@@ -23,7 +23,10 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 
 import org.opendatakit.aggregate.ContextFactory;
+import org.opendatakit.aggregate.client.exception.FormNotAvailableException;
+import org.opendatakit.aggregate.client.exception.RequestFailureException;
 import org.opendatakit.aggregate.client.externalserv.ExternServSummary;
+import org.opendatakit.aggregate.constants.ErrorConsts;
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.common.ExternalServicePublicationOption;
@@ -37,11 +40,15 @@ import org.opendatakit.aggregate.externalservice.ExternalService;
 import org.opendatakit.aggregate.externalservice.FormServiceCursor;
 import org.opendatakit.aggregate.externalservice.FusionTable;
 import org.opendatakit.aggregate.externalservice.GoogleSpreadsheet;
-import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.externalservice.OhmageJsonServer;
+import org.opendatakit.aggregate.form.FormFactory;
+import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.form.MiscTasks;
 import org.opendatakit.aggregate.servlet.OAuthServlet;
+import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
+import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.security.client.exception.AccessDeniedException;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.BasicConsts;
@@ -58,18 +65,19 @@ public class ServicesAdminServiceImpl extends RemoteServiceServlet implements
   /**
 	 * 
 	 */
-	private static final long serialVersionUID = 51251316598366231L;
+  private static final long serialVersionUID = 51251316598366231L;
 
-@Override
-  public ExternServSummary[] getExternalServices(String formId) {
+  @Override
+  public ExternServSummary[] getExternalServices(String formId) throws AccessDeniedException,
+      FormNotAvailableException, RequestFailureException, DatastoreFailureException {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
 
-    if(formId.equals(BasicConsts.EMPTY_STRING))
+    if (formId.equals(BasicConsts.EMPTY_STRING))
       return null;
-    
+
     try {
-      Form form = Form.retrieveFormByFormId(formId, cc);
+      IForm form = FormFactory.retrieveFormByFormId(formId, cc);
       List<ExternalService> esList = FormServiceCursor.getExternalServicesForForm(form, cc);
 
       ExternServSummary[] externServices;
@@ -86,10 +94,15 @@ public class ServicesAdminServiceImpl extends RemoteServiceServlet implements
         return null;
       }
 
-    } catch (Exception e) {
-      // TODO Auto-generated catch block
+    } catch (ODKOverQuotaException e) {
       e.printStackTrace();
-      return null;
+      throw new RequestFailureException(ErrorConsts.QUOTA_EXCEEDED);
+    } catch (ODKFormNotFoundException e) {
+      e.printStackTrace();
+      throw new FormNotAvailableException(e);
+    } catch (ODKDatastoreException e) {
+      e.printStackTrace();
+      throw new DatastoreFailureException(e);
     }
   }
 
@@ -138,89 +151,157 @@ public class ServicesAdminServiceImpl extends RemoteServiceServlet implements
     } catch (OAuthException e) {
       e.printStackTrace();
     } catch (ODKEntityNotFoundException e) {
-      // TODO Auto-generated catch block
+      e.printStackTrace();
+    } catch (ODKOverQuotaException e) {
+      e.printStackTrace();
+    } catch (ODKDatastoreException e) {
       e.printStackTrace();
     }
     return null;
   }
 
   @Override
-  public String createFusionTable(String formId, ExternalServicePublicationOption esOption) {
+  public String createFusionTable(String formId, ExternalServicePublicationOption esOption)
+      throws AccessDeniedException, FormNotAvailableException, RequestFailureException,
+      DatastoreFailureException {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
 
     try {
-      FormActionStatusTimestamp deletionTimestamp = MiscTasks.getFormDeletionStatusTimestampOfFormId(formId, cc);
-      // TODO: better error reporting -- form is being deleted. Disallow creation of publishers.
-      if ( deletionTimestamp != null ) return null;
-      Form form = Form.retrieveFormByFormId(formId, cc);
-	  if ( form.getFormDefinition() == null ) return null; // ill-formed definition
+      FormActionStatusTimestamp deletionTimestamp = MiscTasks
+          .getFormDeletionStatusTimestampOfFormId(formId, cc);
+      // Form is being deleted. Disallow exports.
+      if (deletionTimestamp != null) {
+        throw new RequestFailureException(
+            "Form is marked for deletion - publishing request for fusion table aborted.");
+      }
+      IForm form = FormFactory.retrieveFormByFormId(formId, cc);
+      if (!form.hasValidFormDefinition()) {
+        throw new RequestFailureException(ErrorConsts.FORM_DEFINITION_INVALID);
+      }
       FusionTable fusion = new FusionTable(form, esOption, cc);
       return fusion.getFormServiceCursor().getUri();
+    } catch (ODKOverQuotaException e) {
+      e.printStackTrace();
+      throw new RequestFailureException(ErrorConsts.QUOTA_EXCEEDED);
     } catch (ODKFormNotFoundException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
+      throw new FormNotAvailableException(e);
     } catch (ODKDatastoreException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
+      throw new DatastoreFailureException(e);
     }
-    return null;
   }
 
   @Override
-  public String createGoogleSpreadsheet(String formId, String name, ExternalServicePublicationOption esOption) {
+  public String createGoogleSpreadsheet(String formId, String name,
+      ExternalServicePublicationOption esOption) throws AccessDeniedException,
+      FormNotAvailableException, RequestFailureException, DatastoreFailureException {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
 
     try {
-      FormActionStatusTimestamp deletionTimestamp = MiscTasks.getFormDeletionStatusTimestampOfFormId(formId, cc);
-      // TODO: better error reporting -- form is being deleted. Disallow creation of publishers.
-      if ( deletionTimestamp != null ) return null;
-      Form form = Form.retrieveFormByFormId(formId, cc);
-	  if ( form.getFormDefinition() == null ) return null; // ill-formed definition
+      FormActionStatusTimestamp deletionTimestamp = MiscTasks
+          .getFormDeletionStatusTimestampOfFormId(formId, cc);
+      // Form is being deleted. Disallow exports.
+      if (deletionTimestamp != null) {
+        throw new RequestFailureException(
+            "Form is marked for deletion - publishing request for fusion table aborted.");
+      }
+      IForm form = FormFactory.retrieveFormByFormId(formId, cc);
+      if (!form.hasValidFormDefinition()) {
+        throw new RequestFailureException(ErrorConsts.FORM_DEFINITION_INVALID);
+      }
       GoogleSpreadsheet spreadsheet = new GoogleSpreadsheet(form, name, esOption, cc);
       return spreadsheet.getFormServiceCursor().getUri();
+    } catch (ODKOverQuotaException e) {
+      e.printStackTrace();
+      throw new RequestFailureException(ErrorConsts.QUOTA_EXCEEDED);
     } catch (ODKFormNotFoundException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
+      throw new FormNotAvailableException(e);
     } catch (ODKDatastoreException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
+      throw new DatastoreFailureException(e);
     } catch (ODKExternalServiceException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
+      throw new RequestFailureException(e);
     }
-    return null;
+  }
+  
+  @Override
+  public String createOhmageJsonServer(String formId, String url,
+        ExternalServicePublicationOption esOption)
+            throws AccessDeniedException,
+            FormNotAvailableException, RequestFailureException, DatastoreFailureException {
+     HttpServletRequest req = this.getThreadLocalRequest();
+     CallingContext cc = ContextFactory.getCallingContext(this, req);
+
+     try {
+        FormActionStatusTimestamp deletionTimestamp = MiscTasks
+              .getFormDeletionStatusTimestampOfFormId(formId, cc);
+        if (deletionTimestamp != null) {
+          throw new RequestFailureException(
+              "Form is marked for deletion - publishing request for Ohmage JSON server aborted.");
+        }
+        IForm form = FormFactory.retrieveFormByFormId(formId, cc);
+        if (!form.hasValidFormDefinition()) {
+          throw new RequestFailureException(ErrorConsts.FORM_DEFINITION_INVALID);
+        }
+        OhmageJsonServer server = new OhmageJsonServer(form, url, esOption, cc);
+        return server.getFormServiceCursor().getUri();
+     } catch (ODKOverQuotaException e) {
+       e.printStackTrace();
+       throw new RequestFailureException(ErrorConsts.QUOTA_EXCEEDED);
+     } catch (ODKFormNotFoundException e) {
+       e.printStackTrace();
+       throw new FormNotAvailableException(e);
+     } catch (ODKDatastoreException e) {
+       e.printStackTrace();
+       throw new DatastoreFailureException(e);
+     }
   }
 
   @Override
-  public Boolean deletePublisher(String uri) throws AccessDeniedException {
+  public Boolean deletePublisher(String uri) throws AccessDeniedException,
+      FormNotAvailableException, RequestFailureException, DatastoreFailureException {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
 
-	FormServiceCursor fsc = null;
-	ExternalService es = null;
-	try {
-		fsc = FormServiceCursor.getFormServiceCursor(uri, cc);
-		if ( fsc != null ) {
-			es = fsc.getExternalService(cc);
-		}
-	} catch (Exception e) {
-		// silent failure...
-		return false;
-	}
+    FormServiceCursor fsc = null;
+    ExternalService es = null;
+    try {
+      fsc = FormServiceCursor.getFormServiceCursor(uri, cc);
+      if (fsc != null) {
+        es = fsc.getExternalService(cc);
+      }
+    } catch (ODKFormNotFoundException e) {
+      e.printStackTrace();
+      throw new FormNotAvailableException(e);
+    } catch (ODKOverQuotaException e) {
+      e.printStackTrace();
+      throw new RequestFailureException(ErrorConsts.QUOTA_EXCEEDED);
+    } catch ( ODKEntityNotFoundException e) {
+      e.printStackTrace();
+      throw new RequestFailureException("Publisher not found");
+    } catch ( ODKDatastoreException e) {
+      e.printStackTrace();
+      throw new DatastoreFailureException(e);
+    }
 
-	if ( es != null ) {
-		try {
-			es.delete(cc);
-			// success!
-			return true; 
-		} catch (ODKDatastoreException e) {
-			// this one we log...
-			e.printStackTrace();
-			return false;
-		}
-	}
-	return false;
+    if (es != null) {
+      try {
+        es.delete(cc);
+        // success!
+        return true;
+      } catch (ODKOverQuotaException e) {
+        e.printStackTrace();
+        throw new RequestFailureException(ErrorConsts.QUOTA_EXCEEDED);
+      } catch ( ODKDatastoreException e) {
+        e.printStackTrace();
+        throw new DatastoreFailureException(e);
+      }
+    }
+    return false;
   }
 }

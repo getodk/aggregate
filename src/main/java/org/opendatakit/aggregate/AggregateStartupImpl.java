@@ -15,7 +15,7 @@
  */
 package org.opendatakit.aggregate;
 
-import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.form.FormFactory;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.utils.WebStartup;
 import org.opendatakit.common.web.CallingContext;
@@ -32,7 +32,7 @@ public class AggregateStartupImpl implements WebStartup {
 		// additional logic is required to detect whether this 
 		// is the first webserver instance.  We don't care.
 		try {
-			Form.initialize(bootstrapCc);
+			FormFactory.initialize(bootstrapCc);
 		} catch (ODKDatastoreException e) {
 			e.printStackTrace();
 		}

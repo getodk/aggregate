@@ -15,8 +15,7 @@ import org.opendatakit.aggregate.constants.common.FormElementNamespace;
 import org.opendatakit.aggregate.datamodel.FormElementKey;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.datamodel.TopLevelDynamicBase;
-import org.opendatakit.aggregate.form.Form;
-import org.opendatakit.aggregate.form.FormDefinition;
+import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.format.element.ElementFormatter;
 import org.opendatakit.aggregate.server.UITrans;
@@ -49,7 +48,7 @@ public class QueryByUIFilterGroup extends QueryBase {
   
   private QueryResumePoint cursor;
   
-  public QueryByUIFilterGroup(Form form, FilterGroup filterGroup, CompletionFlag completionFlag, CallingContext cc) {
+  public QueryByUIFilterGroup(IForm form, FilterGroup filterGroup, CompletionFlag completionFlag, CallingContext cc) {
     super(form);
 
     if (filterGroup == null || form == null) {
@@ -169,8 +168,7 @@ public class QueryByUIFilterGroup extends QueryBase {
     // create a row for each submission
     for (int count = 0; count < submissionEntities.size(); count++) {
       CommonFieldsBase subEntity = submissionEntities.get(count);
-      Submission sub = new Submission((TopLevelDynamicBase) subEntity, getForm()
-          .getFormDefinition(), cc);
+      Submission sub = new Submission((TopLevelDynamicBase) subEntity, getForm(), cc);
       retrievedSubmissions.add(sub);
     }
     
@@ -185,7 +183,6 @@ public class QueryByUIFilterGroup extends QueryBase {
 
     // retrieve submissions
     QueryResult results = getQueryResult(cursor, fetchLimit);
-    FormDefinition formDef = getForm().getFormDefinition();
     FormElementModel fem = getForm().getTopLevelGroupElement();
 
     QueryResumePoint startCursor = results.getStartCursor();
@@ -258,7 +255,7 @@ public class QueryByUIFilterGroup extends QueryBase {
     
     // create a row for each submission
     for (CommonFieldsBase subEntity : results.getResultList()) {
-      Submission sub = new Submission((TopLevelDynamicBase) subEntity, formDef, cc);
+      Submission sub = new Submission((TopLevelDynamicBase) subEntity, getForm(), cc);
       Row row = sub.getFormattedValuesAsRow(elementTypes, filteredElements, elemFormatter, false,
           cc);
 

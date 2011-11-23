@@ -31,6 +31,7 @@ import org.opendatakit.aggregate.submission.SubmissionRepeat;
 import org.opendatakit.aggregate.submission.type.BlobSubmissionType;
 import org.opendatakit.aggregate.submission.type.GeoPoint;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+import org.opendatakit.common.utils.WebUtils;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.BasicConsts;
 
@@ -56,6 +57,11 @@ public class BasicElementFormatter implements ElementFormatter {
    * include GPS accuracy data
    */
   private boolean includeAccuracy;
+  
+  /**
+   * Format dates appropriately for googleDocs
+   */
+  private boolean googleDocsDate;
 
   private DecimalFormat decimalFormatter;
   
@@ -71,10 +77,11 @@ public class BasicElementFormatter implements ElementFormatter {
    *          include GPS accuracy data
    */
   public BasicElementFormatter(boolean separateGpsCoordinates, boolean includeGpsAltitude,
-      boolean includeGpsAccuracy) {
+      boolean includeGpsAccuracy, boolean googleDocsDate) {
     separateCoordinates = separateGpsCoordinates;
     includeAltitude = includeGpsAltitude;
     includeAccuracy = includeGpsAccuracy;
+    this.googleDocsDate = googleDocsDate;
     decimalFormatter = new DecimalFormat("########.0#######");
   }
 
@@ -106,11 +113,19 @@ public class BasicElementFormatter implements ElementFormatter {
   }
 
   public void formatDate(Date date, FormElementModel element, String ordinalValue, Row row) {
-    basicStringConversion(date, row);
+    if ( googleDocsDate ) {
+      basicStringConversion( WebUtils.googleDocsDateOnly(date), row);  
+    } else {
+      basicStringConversion(date, row);
+    }
   }
 
   public void formatDateTime(Date date, FormElementModel element, String ordinalValue, Row row) {
-    basicStringConversion(date, row);
+    if ( googleDocsDate ) {
+      basicStringConversion( WebUtils.googleDocsDateTime(date), row);  
+    } else {
+      basicStringConversion(date, row);
+    }
   }
 
   public void formatTime(Date date, FormElementModel element, String ordinalValue, Row row) {

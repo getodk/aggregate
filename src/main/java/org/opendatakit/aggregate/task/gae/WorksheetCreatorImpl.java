@@ -21,7 +21,7 @@ import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.externalservice.ExternalServiceConsts;
 import org.opendatakit.aggregate.constants.externalservice.SpreadsheetConsts;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
-import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.form.MiscTasks;
 import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.task.WorksheetCreator;
@@ -46,7 +46,7 @@ import com.google.appengine.api.taskqueue.TaskOptions;
 public class WorksheetCreatorImpl implements WorksheetCreator {
 
   @Override
-  public final void createWorksheetTask(Form form,
+  public final void createWorksheetTask(IForm form,
 			SubmissionKey miscTasksKey, long attemptCount,
 			CallingContext cc)
       throws ODKFormNotFoundException, ODKDatastoreException {

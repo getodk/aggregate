@@ -250,11 +250,13 @@ public class QueryImpl implements Query {
     RowMapper<? extends CommonFieldsBase> rowMapper = null;
     rowMapper = new RelationRowMapper(relation, user);
 
-    dataStoreImpl.recordQueryUsage(relation);
     try {
-      return (List<? extends CommonFieldsBase>) dataStoreImpl.getJdbcConnection().query(query,
+      List<? extends CommonFieldsBase> l = dataStoreImpl.getJdbcConnection().query(query,
           bindValues.toArray(), rowMapper);
+      dataStoreImpl.recordQueryUsage(relation, l.size());
+      return l;
     } catch (Exception e) {
+      dataStoreImpl.recordQueryUsage(relation, 0);
       e.printStackTrace();
       throw new ODKDatastoreException(e);
     }
@@ -266,12 +268,13 @@ public class QueryImpl implements Query {
     String query = generateDistinctFieldValueQuery(dataField) + queryBindBuilder.toString()
         + querySortBuilder.toString() + ";";
 
-    dataStoreImpl.recordQueryUsage(relation);
     List<?> keys = null;
     try {
       keys = dataStoreImpl.getJdbcConnection().queryForList(query, bindValues.toArray(),
           String.class);
+      dataStoreImpl.recordQueryUsage(relation, keys.size());
     } catch (Exception e) {
+      dataStoreImpl.recordQueryUsage(relation, 0);
       e.printStackTrace();
       throw new ODKDatastoreException(e);
     }
@@ -309,6 +312,7 @@ public class QueryImpl implements Query {
 
   private class RowMapperFilteredResultSetExtractor implements ResultSetExtractor<CoreResult> {
 
+    private int readCount = 0;
     private final QueryResumePoint startCursor;
     private final int fetchLimit;
     private final RowMapper<? extends CommonFieldsBase> rowMapper;
@@ -327,6 +331,7 @@ public class QueryImpl implements Query {
       String startUri = (startCursor == null) ? null : startCursor.getUriLastReturnedValue();
       boolean beforeUri = (startUri != null);
       while (rs.next()) {
+        ++readCount;
         CommonFieldsBase cb = this.rowMapper.mapRow(rs, results.size());
         if (beforeUri) {
           if (startUri.equals(cb.getUri())) {
@@ -340,6 +345,10 @@ public class QueryImpl implements Query {
         }
       }
       return new CoreResult(results, hasMoreResults);
+    }
+    
+    public int getReadCount() {
+      return readCount;
     }
 
   }
@@ -399,9 +408,13 @@ public class QueryImpl implements Query {
     RowMapperFilteredResultSetExtractor rse = new RowMapperFilteredResultSetExtractor(startCursor,
         fetchLimit, rowMapper);
 
-    dataStoreImpl.recordQueryUsage(relation);
     try {
-      CoreResult r = dataStoreImpl.getJdbcConnection().query(query, values.toArray(), rse);
+      CoreResult r;
+      try {
+        r = dataStoreImpl.getJdbcConnection().query(query, values.toArray(), rse);
+      } finally {
+        dataStoreImpl.recordQueryUsage(relation, rse.getReadCount());
+      }
 
       if (r.results.size() == 0) {
         return new QueryResult(startCursor, r.results, null, startCursor, false);

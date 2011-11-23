@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -77,15 +78,10 @@ public class WebUtils {
   private static final String PATTERN_ISO8601_TIME = "HH:mm:ss.SSSZ";
   private static final String PATTERN_YYYY_MM_DD_DATE_ONLY_NO_TIME_DASH = "yyyy-MM-dd";
   private static final String PATTERN_NO_DATE_TIME_ONLY = "HH:mm:ss.SSS";
+  private static final String PATTERN_GOOGLE_DOCS = "MM/dd/yyyy HH:mm:ss.SSS";
+  private static final String PATTERN_GOOGLE_DOCS_DATE_ONLY = "MM/dd/yyyy";
 
-  private static final SimpleDateFormat asGMTiso8601;
-
-  static {
-    SimpleDateFormat temp;
-    temp = new SimpleDateFormat(PATTERN_ISO8601); // with time zone
-    temp.setTimeZone(TimeZone.getTimeZone("GMT"));
-    asGMTiso8601 = temp;
-  }
+  private static final String PURGE_DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
 
   private WebUtils() {
   };
@@ -180,7 +176,8 @@ public class WebUtils {
         // ones without timezones... (will assume UTC)
         PATTERN_ISO8601_WITHOUT_ZONE, 
         PATTERN_NO_DATE_TIME_ONLY,
-        PATTERN_YYYY_MM_DD_DATE_ONLY_NO_TIME_DASH };
+        PATTERN_YYYY_MM_DD_DATE_ONLY_NO_TIME_DASH,
+        PATTERN_GOOGLE_DOCS };
 
     Date d = null;
     // iso8601 parsing is sometimes off-by-one when JR does it...
@@ -290,6 +287,34 @@ public class WebUtils {
   }
 
   /**
+   * Return the GoogleDocs datetime string representation of a datetime.
+   * 
+   * @param d
+   * @return
+   */
+  public static final String googleDocsDateTime(Date d) {
+    if (d == null)
+      return null;
+    SimpleDateFormat asGoogleDoc = new SimpleDateFormat(PATTERN_GOOGLE_DOCS);
+    asGoogleDoc.setTimeZone(TimeZone.getTimeZone("GMT"));
+    return asGoogleDoc.format(d);
+  }
+
+  /**
+   * Return the GoogleDocs date string representation of a date-only datetime.
+   * 
+   * @param d
+   * @return
+   */
+  public static final String googleDocsDateOnly(Date d) {
+    if (d == null)
+      return null;
+    SimpleDateFormat asGoogleDocDateOnly = new SimpleDateFormat(PATTERN_GOOGLE_DOCS_DATE_ONLY);
+    asGoogleDocDateOnly.setTimeZone(TimeZone.getTimeZone("GMT"));
+    return asGoogleDocDateOnly.format(d);
+  }
+  
+  /**
    * Return the ISO8601 string representation of a date.
    * 
    * @param d
@@ -298,9 +323,29 @@ public class WebUtils {
   public static final String iso8601Date(Date d) {
     if (d == null)
       return null;
+    // SDF is not thread-safe
+    SimpleDateFormat asGMTiso8601 = new SimpleDateFormat(PATTERN_ISO8601); // with time zone
+    asGMTiso8601.setTimeZone(TimeZone.getTimeZone("GMT"));
     return asGMTiso8601.format(d);
   }
 
+  public static final String purgeDateString(Date d) {
+    if (d == null)
+      return null;
+    // SDF is not thread-safe
+    SimpleDateFormat purgeDateFormat = new SimpleDateFormat(PURGE_DATE_FORMAT);
+    return purgeDateFormat.format(d);
+  }
+  
+  public static final Date parsePurgeDateString(String str) throws ParseException {
+    if ( str == null ) {
+      return null;
+    }
+    // SDF is not thread-safe
+    SimpleDateFormat purgeDateFormat = new SimpleDateFormat(PURGE_DATE_FORMAT);
+    return purgeDateFormat.parse(str);
+  }
+  
   /**
    * Return a string with utf-8 characters replaced with backslash-uxxxx codes.
    * Useful for debugging.

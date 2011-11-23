@@ -40,6 +40,7 @@ import org.opendatakit.common.persistence.Query.FilterOperation;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
+import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.web.CallingContext;
 
@@ -595,7 +596,7 @@ public class FormDefinition {
 	    forget(submissionAssociation.getUriSubmissionDataModel());
 	}
 	
-	public void persistSubmissionAssociation(CallingContext cc) throws ODKEntityPersistException {
+	public void persistSubmissionAssociation(CallingContext cc) throws ODKEntityPersistException, ODKOverQuotaException {
 		// the only mutable part of the form definition is the 
 		// submission association table's flags...
 		User user = cc.getCurrentUser();

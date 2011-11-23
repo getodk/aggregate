@@ -22,7 +22,7 @@ import java.util.List;
 
 import org.opendatakit.aggregate.constants.common.FormElementNamespace;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
-import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.format.RepeatCallbackFormatter;
 import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.format.SubmissionFormatter;
@@ -46,7 +46,7 @@ public class XmlAttachmentFormatter implements SubmissionFormatter, RepeatCallba
   private PrintWriter output;
 
   public XmlAttachmentFormatter(PrintWriter printWriter,
-      Form form, CallingContext cc) {
+      IForm form, CallingContext cc) {
     output = printWriter;
     attachmentFormatter = new XmlMediaAttachmentFormatter(this);
   }

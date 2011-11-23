@@ -19,9 +19,9 @@ package org.opendatakit.aggregate.client.popups;
 import org.opendatakit.aggregate.client.widgets.ClosePopupButton;
 
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Frame;
 import com.google.gwt.user.client.ui.SimplePanel;
-import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class BinaryPopup extends AbstractPopupBase {
 
@@ -40,7 +40,7 @@ public class BinaryPopup extends AbstractPopupBase {
     Frame frame = new Frame(url);
     frame.setPixelSize(width, height); 
 
-    VerticalPanel panel = new VerticalPanel();
+    FlowPanel panel = new FlowPanel();
     panel.setPixelSize(width+6, height+30);
     panel.add(new SimplePanel(new ClosePopupButton(this)));       
     panel.add(frame);      

@@ -26,7 +26,7 @@ import org.opendatakit.aggregate.constants.common.ExportStatus;
 import org.opendatakit.aggregate.constants.common.UIConsts;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.filter.SubmissionFilterGroup;
-import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.form.PersistentResults;
 import org.opendatakit.aggregate.format.SubmissionFormatter;
 import org.opendatakit.aggregate.format.structure.KmlFormatterWithFilters;
@@ -47,7 +47,7 @@ import org.opendatakit.common.web.constants.HtmlConsts;
  */
 public class KmlWorkerImpl {
 
-  private final Form form;
+  private final IForm form;
   private final SubmissionKey persistentResultsKey;
   private final Long attemptCount;
   private final FormElementModel titleField;
@@ -55,7 +55,7 @@ public class KmlWorkerImpl {
   private final FormElementModel imageField;
   private final CallingContext cc;
 
-  public KmlWorkerImpl(Form form, SubmissionKey persistentResultsKey, long attemptCount,
+  public KmlWorkerImpl(IForm form, SubmissionKey persistentResultsKey, long attemptCount,
       FormElementModel titleField, FormElementModel geopointField, FormElementModel imageField,
       CallingContext cc) {
     this.form = form;

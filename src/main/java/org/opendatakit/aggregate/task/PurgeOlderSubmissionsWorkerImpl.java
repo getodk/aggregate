@@ -28,7 +28,7 @@ import org.opendatakit.aggregate.constants.common.FormActionStatus;
 import org.opendatakit.aggregate.exception.ODKExternalServiceDependencyException;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
-import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.form.MiscTasks;
 import org.opendatakit.aggregate.process.DeleteSubmissions;
 import org.opendatakit.aggregate.query.submission.QueryByDateRange;
@@ -39,8 +39,10 @@ import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.TaskLock;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
+import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.security.User;
+import org.opendatakit.common.utils.WebUtils;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.BasicConsts;
 
@@ -56,12 +58,12 @@ public class PurgeOlderSubmissionsWorkerImpl {
 
 	private static final int MAX_QUERY_LIMIT = ServletConsts.FETCH_LIMIT;
 
-	private final Form form;
+	private final IForm form;
 	private final SubmissionKey miscTasksKey;
 	private final CallingContext cc;
 	private final String pFormIdLockId;
 
-	public PurgeOlderSubmissionsWorkerImpl(Form form, SubmissionKey miscTasksKey,
+	public PurgeOlderSubmissionsWorkerImpl(IForm form, SubmissionKey miscTasksKey,
 			long attemptCount, CallingContext cc) {
 		this.form = form;
 		this.miscTasksKey = miscTasksKey;
@@ -145,7 +147,7 @@ public class PurgeOlderSubmissionsWorkerImpl {
 		return submissions;
 	}
 	
-	private void doMarkAsComplete(MiscTasks t) throws ODKEntityPersistException {
+	private void doMarkAsComplete(MiscTasks t) throws ODKEntityPersistException, ODKOverQuotaException {
 		// and mark us as completed... (don't delete for audit..).
 		t.setCompletionDate(new Date());
 		t.setStatus(FormActionStatus.SUCCESSFUL);
@@ -167,8 +169,7 @@ public class PurgeOlderSubmissionsWorkerImpl {
 	    User user = cc.getCurrentUser();
 
 	    Map<String,String> rp = t.getRequestParameters();
-	    Date purgeBeforeDate = 
-	    	PurgeOlderSubmissions.PURGE_DATE_FORMAT.parse(rp.get(PurgeOlderSubmissions.PURGE_DATE));
+	    Date purgeBeforeDate = WebUtils.parsePurgeDateString(rp.get(PurgeOlderSubmissions.PURGE_DATE));
 	    
 	    // it is possible to have a FormInfo entry without any information
 	    // on the backing object (no records in FormDataModel).  In that
@@ -192,7 +193,7 @@ public class PurgeOlderSubmissionsWorkerImpl {
 				
 				List<SubmissionKey> keys = new ArrayList<SubmissionKey>();
 				for ( Submission s : submissions ) {
-					keys.add(new SubmissionKey(s.getFormDefinition().getFormId(),
+					keys.add(new SubmissionKey(s.getFormId(),
 							s.getModelVersion(), s.getUiVersion(), 
 							s.getFormElementModel().getElementName(), s.getKey().getKey()));
 				}

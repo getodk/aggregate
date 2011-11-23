@@ -16,7 +16,7 @@
 package org.opendatakit.aggregate.task;
 
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
-import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
@@ -30,7 +30,7 @@ import org.opendatakit.common.web.CallingContext;
  */
 public interface WorksheetCreator {
 
-	public void createWorksheetTask(Form form,
+	public void createWorksheetTask(IForm form,
 			SubmissionKey miscTasksKey, long attemptCount,
 			CallingContext cc)
 			throws ODKDatastoreException, ODKFormNotFoundException;

@@ -8,7 +8,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
-import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
 
 /**
  * Test for Entity
@@ -39,8 +38,7 @@ public class EntityTest
     }
 
     @Test
-    public void testGetEntity() throws ODKEntityNotFoundException,
-            ODKEntityPersistException
+    public void testGetEntity() throws ODKDatastoreException
     {
         Entity john = d.relation.getEntity(d.johnsIdentifier);
         assertEquals(d.johnsName, john.getString(d.attrName));
@@ -48,8 +46,7 @@ public class EntityTest
     }
 
     @Test
-    public void testSet() throws ODKEntityNotFoundException,
-            ODKEntityPersistException
+    public void testSet() throws ODKDatastoreException
     {
         Entity john = d.relation.getEntity(d.johnsIdentifier);
         john.set(d.attrName, "John2");
@@ -62,8 +59,7 @@ public class EntityTest
     }
 
     @Test
-    public void testSetAsString() throws ODKEntityNotFoundException,
-            ODKEntityPersistException
+    public void testSetAsString() throws ODKDatastoreException
     {
         Entity john = d.relation.getEntity(d.johnsIdentifier);
         john.setAsString(d.attrAge, "100");
@@ -88,8 +84,7 @@ public class EntityTest
     }
 
     @Test
-    public void testSave() throws ODKEntityNotFoundException,
-            ODKEntityPersistException
+    public void testSave() throws ODKDatastoreException
     {
         Entity john = d.relation.getEntity(d.johnsIdentifier);
         john.set(d.attrAge, 60);

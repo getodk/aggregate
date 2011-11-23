@@ -49,11 +49,6 @@ public class ServletUtilBase extends CommonServletBase {
     super(ServletConsts.APPLICATION_NAME);
   }
   
-  @Override
-  protected String getVersionString(CallingContext cc) {
-	return HtmlConsts.TAB + "<FONT SIZE=1>" + ServletConsts.VERSION + "</FONT>";
-  }
-  
   /**
    * Generate error response for ODK ID not found
    * 
@@ -66,6 +61,28 @@ public class ServletUtilBase extends CommonServletBase {
     resp.sendError(HttpServletResponse.SC_NOT_FOUND, ErrorConsts.ODKID_NOT_FOUND);
   }
 
+  /**
+   * Generate error response for quota exceeded.
+   * 
+   * @param resp
+   * @throws IOException
+   *           caused by problems writing error information to response
+   */
+  protected void quotaExceededError(HttpServletResponse resp) throws IOException {
+    resp.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE, ErrorConsts.QUOTA_EXCEEDED);
+  }
+  
+  /**
+   * Generate error response for datastore access issues.
+   * 
+   * @param resp
+   * @throws IOException
+   *           caused by problems writing error information to response
+   */
+  protected void datastoreError(HttpServletResponse resp) throws IOException {
+    resp.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE, ErrorConsts.PERSISTENCE_LAYER_PROBLEM);
+  }
+  
   /**
    * Generate error response for missing the Key parameter
    * 

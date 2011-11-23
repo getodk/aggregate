@@ -29,16 +29,15 @@ public class CheckUserExistsLogic extends CommandLogic<CheckUserExists>
     public CheckUserExistsResult execute(CallingContext cc)
             throws AggregateInternalErrorException
     {
-        boolean userExists; 
+        boolean userExists;
         try
         {
             Users users = Users.getInstance(cc);
-            
+
             String userID = checkUserExists.getUserID();
-            userExists = users.query("CheckUserExistsLogic.execute").equal(Users.USER_ID, userID)
-                    .exists();
-        }
-        catch (ODKDatastoreException e)
+            userExists = users.query("CheckUserExistsLogic.execute")
+                    .equal(Users.USER_ID, userID).exists();
+        } catch (ODKDatastoreException e)
         {
             throw new AggregateInternalErrorException(e.getMessage());
         }

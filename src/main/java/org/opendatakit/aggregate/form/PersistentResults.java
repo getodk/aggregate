@@ -43,6 +43,7 @@ import org.opendatakit.common.persistence.Query.FilterOperation;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
+import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.BasicConsts;
@@ -118,7 +119,7 @@ public class PersistentResults {
    * @param user
    * @throws ODKDatastoreException
    */
-  public PersistentResults(ExportType type, Form form, SubmissionFilterGroup filterGroup, Map<String, String> parameters,
+  public PersistentResults(ExportType type, IForm form, SubmissionFilterGroup filterGroup, Map<String, String> parameters,
       CallingContext cc) throws ODKDatastoreException {
     Datastore ds = cc.getDatastore();
     User user = cc.getCurrentUser();
@@ -310,7 +311,7 @@ public class PersistentResults {
     }
   }
   
-  public void persist(CallingContext cc) throws ODKEntityPersistException {
+  public void persist(CallingContext cc) throws ODKEntityPersistException, ODKOverQuotaException {
     Datastore ds = cc.getDatastore();
     User user = cc.getCurrentUser();
     bcm.persist(cc);
@@ -397,7 +398,7 @@ public class PersistentResults {
     return r;
   }
 
-  public static final List<PersistentResults> getAllTasksForForm(Form theForm, CallingContext cc)
+  public static final List<PersistentResults> getAllTasksForForm(IForm theForm, CallingContext cc)
       throws ODKDatastoreException {
     User user = cc.getCurrentUser();
     Datastore ds = cc.getDatastore();
@@ -452,7 +453,7 @@ public class PersistentResults {
         DataField.DataType.DATETIME, true);
 
     private static final DataField FORM_ID = new DataField("FORM_ID_KEY",
-        DataField.DataType.STRING, true, Form.MAX_FORM_ID_LENGTH);
+        DataField.DataType.STRING, true, IForm.MAX_FORM_ID_LENGTH);
 
     private static final DataField URI_FILTER_GROUP_PROPERTY = new DataField("URI_FILTER_GROUP",
         DataField.DataType.URI, true, PersistConsts.URI_STRING_LEN);

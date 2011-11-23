@@ -31,6 +31,10 @@ public final class ErrorConsts {
    */
   public static final String ODKID_NOT_FOUND =
       "Unable to find form with matching Form Id as submission";
+  public static final String FORM_NOT_FOUND = 
+      "Form not found";
+  public static final String FORM_DEFINITION_INVALID = 
+      "Form definition incomplete or missing";
   /**
    * Error message for if key was not successfully part of the request
    */
@@ -85,6 +89,7 @@ public final class ErrorConsts {
   public static final String NOT_A_KEY = "Incorrect type was stored, expecting a key for the view link";
   public static final String TASK_PROBLEM = "PROBLEM WITH TASK: ";
 
+  public static final String QUOTA_EXCEEDED = "Quota exceeded";
   public static final String PERSISTENCE_LAYER_PROBLEM = "Problem persisting data or accessing data";
   public static final String UPLOAD_PROBLEM = "Upload transmission unexpectedly failed";
   

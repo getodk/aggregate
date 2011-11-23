@@ -80,7 +80,7 @@ public class GWTAccessDeniedHandlerImpl implements AccessDeniedHandler, ServletC
 		}
 
 		/**
-		 * This is taken from GWT 2.3 sources.  The changed code was to, rather than 
+		 * This is taken from GWT 2.4 sources.  The changed code was to, rather than 
 		 * call the actual XxxxServer method that would have handled the request, 
 		 * simply encode an AccessDeniedException as the failure response for the request.
 		 * 
@@ -92,7 +92,7 @@ public class GWTAccessDeniedHandlerImpl implements AccessDeniedHandler, ServletC
 			try {
 				RPCRequest rpcRequest = RPC.decodeRequest(payload);
 				onAfterRequestDeserialized(rpcRequest);
-				// ******* CHANGED GWT 2.3 CODE STARTS
+				// ******* CHANGED GWT 2.4 CODE STARTS
 				LogFactory.getLog(GWTAccessDeniedHandlerImpl.class).warn("GWT Method: " 
 							+ rpcRequest.getMethod().getName() + " Exception: " + e.getMessage());
 				return RPC
@@ -100,7 +100,7 @@ public class GWTAccessDeniedHandlerImpl implements AccessDeniedHandler, ServletC
 								rpcRequest.getMethod(),
 								new org.opendatakit.common.security.client.exception.AccessDeniedException(
 										e));
-				// ******** CHANGED GWT 2.3 CODE ENDS
+				// ******** CHANGED GWT 2.4 CODE ENDS
 			} catch (IncompatibleRemoteServiceException ex) {
 				LogFactory.getLog(GWTAccessDeniedHandlerImpl.class).warn("An IncompatibleRemoteServiceException was thrown while processing this call.",
 						ex);

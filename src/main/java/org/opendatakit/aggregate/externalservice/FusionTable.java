@@ -56,7 +56,7 @@ import org.opendatakit.aggregate.datamodel.FormElementKey;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.datamodel.FormElementModel.ElementType;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
-import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.format.element.FusionTableElementFormatter;
 import org.opendatakit.aggregate.format.header.FusionTableHeaderFormatter;
@@ -67,6 +67,8 @@ import org.opendatakit.aggregate.submission.type.RepeatSubmissionType;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
+import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.utils.HttpClientFactory;
 import org.opendatakit.common.web.CallingContext;
@@ -95,17 +97,18 @@ public class FusionTable extends OAuthExternalService implements ExternalService
   								= new ArrayList<FusionTableRepeatParameterTable>();
   
     
-  private FusionTable(FusionTableParameterTable entity, FormServiceCursor formServiceCursor, Form form, CallingContext cc) {
+  private FusionTable(FusionTableParameterTable entity, FormServiceCursor formServiceCursor, IForm form, CallingContext cc) {
     super(form, formServiceCursor, new FusionTableElementFormatter(cc.getServerURL()), new FusionTableHeaderFormatter(), cc);
     objectEntity = entity;
   }
   
-  private FusionTable(FusionTableParameterTable entity, Form form, ExternalServicePublicationOption externalServiceOption, CallingContext cc) throws ODKDatastoreException {
+  private FusionTable(FusionTableParameterTable entity, IForm form, 
+      ExternalServicePublicationOption externalServiceOption, CallingContext cc) throws ODKEntityPersistException, ODKOverQuotaException, ODKDatastoreException {
     this (entity, createFormServiceCursor(form, entity, externalServiceOption, ExternalServiceType.GOOGLE_FUSIONTABLES, cc), form, cc);
     persist(cc); 
   }
 
-  public FusionTable(FormServiceCursor formServiceCursor, Form form, CallingContext cc) throws ODKDatastoreException {
+  public FusionTable(FormServiceCursor formServiceCursor, IForm form, CallingContext cc) throws ODKDatastoreException {
     
     this(retrieveEntity(FusionTableParameterTable.assertRelation(cc), formServiceCursor, cc), formServiceCursor, form, cc);
         
@@ -113,8 +116,8 @@ public class FusionTable extends OAuthExternalService implements ExternalService
     								objectEntity.getUri(), cc));
   }
 
-  public FusionTable(Form form, ExternalServicePublicationOption externalServiceOption, CallingContext cc)
-      throws ODKDatastoreException {
+  public FusionTable(IForm form, ExternalServicePublicationOption externalServiceOption, CallingContext cc)
+      throws ODKEntityPersistException, ODKOverQuotaException, ODKDatastoreException {
     this(newEntity(FusionTableParameterTable.assertRelation(cc), cc), form, externalServiceOption, cc);
   }
     
@@ -292,7 +295,7 @@ public class FusionTable extends OAuthExternalService implements ExternalService
       String createStmt = createFusionTableStatement(form, root);
       resultRequest = executeStmt(createStmt, cc);
     } catch (Exception e) {
-      logger.error("Failed to create fusion table");
+      logger.error("Failed to create fusion table: " + e.getMessage());
       e.printStackTrace();
       throw new ODKExternalServiceException(e);
     }
@@ -305,7 +308,7 @@ public class FusionTable extends OAuthExternalService implements ExternalService
     }
   }
 
-  private String createFusionTableStatement(Form form, FormElementModel rootNode) throws ODKExternalServiceException {
+  private String createFusionTableStatement(IForm form, FormElementModel rootNode) throws ODKExternalServiceException {
 
     List<String> headers = headerFormatter.generateHeaders(form, rootNode, null);
 

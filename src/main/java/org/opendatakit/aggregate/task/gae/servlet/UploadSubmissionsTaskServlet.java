@@ -27,7 +27,9 @@ import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.externalservice.FormServiceCursor;
 import org.opendatakit.aggregate.servlet.ServletUtilBase;
 import org.opendatakit.aggregate.task.UploadSubmissionsWorkerImpl;
+import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
+import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.web.CallingContext;
 
 /**
@@ -72,6 +74,15 @@ public class UploadSubmissionsTaskServlet extends ServletUtilBase{
       // TODO: fix bug we should not be generating tasks for fsc that don't exist
       // however not critical bug as execution path dies with this try/catch
       System.err.println("BUG: we generated an task for a form service cursor that didn't exist");
+      resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.toString());
+      return;
+    } catch (ODKOverQuotaException e) {
+      System.err.println("Over quota.");
+      resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.toString());
+      return;
+    } catch (ODKDatastoreException e) {
+      e.printStackTrace();
+      System.err.println("Datastore failure.");
       resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.toString());
       return;
     }

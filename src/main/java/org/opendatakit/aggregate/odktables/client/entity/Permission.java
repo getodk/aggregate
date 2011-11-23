@@ -9,8 +9,10 @@ package org.opendatakit.aggregate.odktables.client.entity;
  * <p>
  * A Permission has the following attributes:
  * <ul>
- * <li>aggregateUserIdentifier: the Aggregate Identifier of the user who the permission is for</li>
- * <li>aggregateTableIdentifier: the Aggregate Identifier of the table who the permission is on</li>
+ * <li>aggregateUserIdentifier: the Aggregate Identifier of the user who the
+ * permission is for</li>
+ * <li>aggregateTableIdentifier: the Aggregate Identifier of the table who the
+ * permission is on</li>
  * <li>read: true if the user is allowed to read from the table</li>
  * <li>write: true if the user is allowed to write to the table</li>
  * <li>delete: true if the user is allowed to delete from or delete the table</li>
@@ -59,8 +61,9 @@ public class Permission
      * @param delete
      *            true if the user is allowed to delete from or delete the table
      */
-    public Permission(String aggregateUserIdentifier, String aggregateTableIdentifier, boolean read,
-            boolean write, boolean delete)
+    public Permission(String aggregateUserIdentifier,
+            String aggregateTableIdentifier, boolean read, boolean write,
+            boolean delete)
     {
         this.aggregateUserIdentifier = aggregateUserIdentifier;
         this.aggregateTableIdentifier = aggregateTableIdentifier;
@@ -117,7 +120,8 @@ public class Permission
     {
         return String
                 .format("Permission [aggregateUserIdentifier=%s, aggregateTableIdentifier=%s, read=%s, write=%s, delete=%s]",
-                        aggregateUserIdentifier, aggregateTableIdentifier, read, write, delete);
+                        aggregateUserIdentifier, aggregateTableIdentifier,
+                        read, write, delete);
     }
 
     /* (non-Javadoc)
@@ -130,10 +134,14 @@ public class Permission
         int result = 1;
         result = prime * result + (delete ? 1231 : 1237);
         result = prime * result + (read ? 1231 : 1237);
-        result = prime * result
-                + ((aggregateTableIdentifier == null) ? 0 : aggregateTableIdentifier.hashCode());
-        result = prime * result
-                + ((aggregateUserIdentifier == null) ? 0 : aggregateUserIdentifier.hashCode());
+        result = prime
+                * result
+                + ((aggregateTableIdentifier == null) ? 0
+                        : aggregateTableIdentifier.hashCode());
+        result = prime
+                * result
+                + ((aggregateUserIdentifier == null) ? 0
+                        : aggregateUserIdentifier.hashCode());
         result = prime * result + (write ? 1231 : 1237);
         return result;
     }
@@ -159,13 +167,15 @@ public class Permission
         {
             if (other.aggregateTableIdentifier != null)
                 return false;
-        } else if (!aggregateTableIdentifier.equals(other.aggregateTableIdentifier))
+        } else if (!aggregateTableIdentifier
+                .equals(other.aggregateTableIdentifier))
             return false;
         if (aggregateUserIdentifier == null)
         {
             if (other.aggregateUserIdentifier != null)
                 return false;
-        } else if (!aggregateUserIdentifier.equals(other.aggregateUserIdentifier))
+        } else if (!aggregateUserIdentifier
+                .equals(other.aggregateUserIdentifier))
             return false;
         if (write != other.write)
             return false;

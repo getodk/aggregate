@@ -30,13 +30,15 @@ import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
 import org.opendatakit.aggregate.externalservice.ExternalService;
 import org.opendatakit.aggregate.externalservice.FormServiceCursor;
-import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.form.FormFactory;
+import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.query.submission.QueryByDateRange;
 import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.TaskLock;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
+import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.web.CallingContext;
@@ -62,7 +64,7 @@ public class UploadSubmissionsWorkerImpl {
   private final FormServiceCursor pFsc;
   private final ExternalServicePublicationOption pEsOption;
   private ExternalService pExtService;
-  private Form form;
+  private IForm form;
 
   public UploadSubmissionsWorkerImpl(FormServiceCursor fsc, CallingContext cc) {
     pFsc = fsc;
@@ -78,14 +80,28 @@ public class UploadSubmissionsWorkerImpl {
   public void uploadAllSubmissions() throws ODKEntityNotFoundException,
       ODKExternalServiceException, ODKFormNotFoundException {
 
-    pExtService = pFsc.getExternalService(cc);
-    form = Form.retrieveFormByFormId(pFsc.getFormId(), cc);
-    if ( form.getFormDefinition() == null ) {
-        Logger
-        .getLogger(UploadSubmissionsWorkerImpl.class.getName())
-        .severe(
-            "Upload not performed -- ill-formed form definition.");
-        return;
+    try {
+      pExtService = pFsc.getExternalService(cc);
+      form = FormFactory.retrieveFormByFormId(pFsc.getFormId(), cc);
+      if ( !form.hasValidFormDefinition() ) {
+          Logger
+          .getLogger(UploadSubmissionsWorkerImpl.class.getName())
+          .severe(
+              "Upload not performed -- ill-formed form definition.");
+          return;
+      }
+    } catch (ODKOverQuotaException e) {
+      Logger
+      .getLogger(UploadSubmissionsWorkerImpl.class.getName())
+      .warning(
+          "Quota exceeded.");
+      return;
+    } catch (ODKDatastoreException e) {
+      Logger
+      .getLogger(UploadSubmissionsWorkerImpl.class.getName())
+      .warning(
+          "Persistence layer problem: " + e.getMessage());
+      return;
     }
 
     Datastore ds = cc.getDatastore();

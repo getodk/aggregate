@@ -19,7 +19,7 @@ import java.util.Map;
 
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
-import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.form.PersistentResults;
 import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.task.KmlGenerator;
@@ -45,7 +45,7 @@ import com.google.appengine.api.taskqueue.TaskOptions;
 public class KmlGeneratorImpl implements KmlGenerator {
 
   @Override
-  public void createKmlTask(Form form, SubmissionKey persistentResultsKey, long attemptCount,
+  public void createKmlTask(IForm form, SubmissionKey persistentResultsKey, long attemptCount,
       CallingContext cc) throws ODKDatastoreException,
       ODKFormNotFoundException {
     PersistentResults r = new PersistentResults(persistentResultsKey, cc);

@@ -51,31 +51,33 @@ public class QueryForTablesLogic extends CommandLogic<QueryForTables>
             Permissions permissions = Permissions.getInstance(cc);
             UserTableMappings mappings = UserTableMappings.getInstance(cc);
             Columns columns = Columns.getInstance(cc);
-    
+
             // get request data
             String requestingUserID = queryForTables.getRequestingUserID();
-    
+
             // retrieve request user
-            InternalUser requestingUser = users.query("QueryForTablesLogic.execute")
+            InternalUser requestingUser = users
+                    .query("QueryForTablesLogic.execute")
                     .equal(Users.USER_ID, requestingUserID).get();
             String aggregateUserIdentifier = requestingUser
                     .getAggregateIdentifier();
-    
+
             // get aggregateTableIdentifiers for which this user has read permissions
             @SuppressWarnings("unchecked")
             List<String> aggregateTableIdentifiers = (List<String>) permissions
                     .query("QueryForTablesLogic.execute")
                     .equal(Permissions.AGGREGATE_USER_IDENTIFIER,
-                            aggregateUserIdentifier).equal(Permissions.READ, true)
+                            aggregateUserIdentifier)
+                    .equal(Permissions.READ, true)
                     .getDistinct(Permissions.AGGREGATE_TABLE_IDENTIFIER);
-    
+
             // retrieve all entries corresponding to the identifiers
             boolean includesUsersTable = false;
             List<InternalTableEntry> allEntries = new ArrayList<InternalTableEntry>();
             for (String aggregateTableIdentifier : aggregateTableIdentifiers)
             {
-                if (!aggregateTableIdentifier
-                        .equals(users.getAggregateIdentifier()))
+                if (!aggregateTableIdentifier.equals(users
+                        .getAggregateIdentifier()))
                 {
                     allEntries.add(entries.getEntity(aggregateTableIdentifier));
                 } else
@@ -84,14 +86,15 @@ public class QueryForTablesLogic extends CommandLogic<QueryForTables>
                     includesUsersTable = true;
                 }
             }
-    
+
             // create a TableEntry to send back to client for each entry in table
             clientEntries = new ArrayList<TableEntry>();
             for (InternalTableEntry entry : allEntries)
             {
                 String aggregateOwnerIdentifier = entry
                         .getAggregateOwnerIdentifier();
-                String aggregateTableIdentifier = entry.getAggregateIdentifier();
+                String aggregateTableIdentifier = entry
+                        .getAggregateIdentifier();
                 String tableName = entry.getName();
                 boolean isSynchronized = entry.isSynchronized();
                 InternalUser user = users.getEntity(aggregateOwnerIdentifier);
@@ -110,11 +113,11 @@ public class QueryForTablesLogic extends CommandLogic<QueryForTables>
                 {
                     // Do nothing, this just means the user is not registered with this table right now. 
                 }
-    
+
                 // send null for userID because we don't want people finding out what it is
                 User clientUser = new User(null, user.getAggregateIdentifier(),
                         user.getName());
-    
+
                 // retrieve the columns for the table
                 List<InternalColumn> internalColumns = columns
                         .query("QueryForTablesLogic.execute")
@@ -124,17 +127,18 @@ public class QueryForTablesLogic extends CommandLogic<QueryForTables>
                 for (InternalColumn internalColumn : internalColumns)
                 {
                     Column clientColumn = new Column(internalColumn.getName(),
-                            internalColumn.getType(), internalColumn.getNullable());
+                            internalColumn.getType(),
+                            internalColumn.getNullable());
                     clientColumns.add(clientColumn);
                 }
-    
+
                 // create the TableEntry
                 TableEntry clientEntry = new TableEntry(clientUser,
                         entry.getAggregateIdentifier(), tableID, tableName,
                         clientColumns, isSynchronized);
                 clientEntries.add(clientEntry);
             }
-    
+
             // special case Users table
             if (includesUsersTable)
             {
@@ -150,12 +154,12 @@ public class QueryForTablesLogic extends CommandLogic<QueryForTables>
                     clientColumns.add(column);
                 }
                 boolean isSynchronized = false;
-                TableEntry clientEntry = new TableEntry(null, aggregateIdentifier,
-                        tableID, tableName, clientColumns, isSynchronized);
+                TableEntry clientEntry = new TableEntry(null,
+                        aggregateIdentifier, tableID, tableName, clientColumns,
+                        isSynchronized);
                 clientEntries.add(clientEntry);
             }
-        }
-        catch (ODKDatastoreException e)
+        } catch (ODKDatastoreException e)
         {
             throw new AggregateInternalErrorException(e.getMessage());
         }

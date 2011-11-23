@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 
 /**
  * The Query interface defines how persistence implementations should create query functionality.
@@ -81,6 +82,7 @@ public interface Query {
    * 
    * @return a List<Entity> which contains the Entity objects from the results of the Query
    * @throws ODKDatastoreException if there was a  problem executing the Query
+   * @throws ODKOverQuotaException if the usage quota was exceeded
    */
   public List<? extends CommonFieldsBase> executeQuery() throws ODKDatastoreException;
 
@@ -91,8 +93,9 @@ public interface Query {
    * @param fetchLimit -- number of records to fetch
    * @return
    * @throws ODKDatastoreException
+   * @throws ODKOverQuotaException if the usage quota was exceeded
    */
-  public QueryResult executeQuery(QueryResumePoint startCursor, int fetchLimit) throws ODKDatastoreException;
+  public QueryResult executeQuery(QueryResumePoint startCursor, int fetchLimit) throws ODKDatastoreException, ODKOverQuotaException;
   
   /**
    * Returns a list of distinct EntityKeys of the topLevelAuri for the set of records
@@ -102,9 +105,10 @@ public interface Query {
    * @param foreignKeyField - the topLevelAuri DataField in the table being queried.
    * @return
    * @throws ODKDatastoreException
+   * @throws ODKOverQuotaException if the usage quota was exceeded
    */
   public Set<EntityKey> executeForeignKeyQuery(CommonFieldsBase topLevelTable, DataField foreignKeyField )
-  							throws ODKDatastoreException;
+  							throws ODKDatastoreException, ODKOverQuotaException;
 
 
   /**
@@ -113,7 +117,8 @@ public interface Query {
    * 
    * @param dataField
    * @return
- * @throws ODKDatastoreException 
+   * @throws ODKDatastoreException 
+   * @throws ODKOverQuotaException if the usage quota was exceeded
    */
-  public List<?> executeDistinctValueForDataField(DataField dataField) throws ODKDatastoreException;
+  public List<?> executeDistinctValueForDataField(DataField dataField) throws ODKDatastoreException, ODKOverQuotaException;
 }

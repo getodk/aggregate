@@ -32,7 +32,7 @@ import org.opendatakit.aggregate.constants.common.Visibility;
 import org.opendatakit.aggregate.datamodel.FormElementKey;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.datamodel.FormElementModel.ElementType;
-import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.submission.type.GeoPoint;
 import org.opendatakit.common.web.constants.BasicConsts;
 
@@ -40,7 +40,7 @@ public class GenerateHeaderInfo {
 
   private SubmissionUISummary summary;
 
-  private Form form;
+  private IForm form;
 
   private FilterGroup filterGroup;
 
@@ -51,7 +51,7 @@ public class GenerateHeaderInfo {
 
   private Map<FormElementModel, GeopointColumn> geopointFlags;
 
-  public GenerateHeaderInfo(FilterGroup filterGroup, SubmissionUISummary summary, Form form) {
+  public GenerateHeaderInfo(FilterGroup filterGroup, SubmissionUISummary summary, IForm form) {
     this.summary = summary;
     this.form = form;
     this.filterGroup = filterGroup;

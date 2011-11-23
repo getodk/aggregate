@@ -32,9 +32,11 @@ import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.Query;
+import org.opendatakit.common.persistence.Query.Direction;
 import org.opendatakit.common.persistence.Query.FilterOperation;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
+import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.web.CallingContext;
 
@@ -146,7 +148,7 @@ public class MiscTasks {
 	 * @param user
 	 * @throws ODKDatastoreException
 	 */
-	public MiscTasks(TaskType type, Form formRequested, Map<String,String> parameters, CallingContext cc) throws ODKDatastoreException {
+	public MiscTasks(TaskType type, IForm formRequested, Map<String,String> parameters, CallingContext cc) throws ODKDatastoreException {
 		MiscTasksTable relation = MiscTasksTable.assertRelation(cc);
 		
 		Datastore ds = cc.getDatastore();
@@ -262,7 +264,7 @@ public class MiscTasks {
 		return "MT:" + getFormId();
 	}
 	
-	public void persist(CallingContext cc) throws ODKEntityPersistException {
+	public void persist(CallingContext cc) throws ODKEntityPersistException, ODKOverQuotaException {
 		Datastore ds = cc.getDatastore();
 		User user = cc.getCurrentUser();
 		ds.putEntity(row, user);
@@ -307,6 +309,7 @@ public class MiscTasks {
 		// TODO: rework for each task type...
 		Date limit = new Date(now.getTime() - taskType.getLockType().getLockExpirationTimeout() - 1 );
 		q.addFilter(MiscTasksTable.TASK_TYPE, FilterOperation.EQUAL, taskType.name());
+		q.addSort(MiscTasksTable.TASK_TYPE, Direction.ASCENDING); // GAE work-around
 		q.addFilter(MiscTasksTable.LAST_ACTIVITY_DATE, FilterOperation.LESS_THAN, limit );
 		List<? extends CommonFieldsBase> l = q.executeQuery();
 		/*
@@ -347,7 +350,7 @@ public class MiscTasks {
 		}
 	}
 
-	public static List<MiscTasks> getAllTasksForForm(Form form, CallingContext cc) throws ODKDatastoreException {
+	public static List<MiscTasks> getAllTasksForForm(IForm form, CallingContext cc) throws ODKDatastoreException {
 		List<MiscTasks> taskList = new ArrayList<MiscTasks>();
 		MiscTasksTable relation = MiscTasksTable.assertRelation(cc);
 		Datastore ds = cc.getDatastore();
@@ -483,7 +486,7 @@ public class MiscTasks {
 		static final String TABLE_NAME = "_misc_tasks";
 	
 		private static final DataField FORM_ID = new DataField("FORM_ID",
-				DataField.DataType.STRING, true, Form.MAX_FORM_ID_LENGTH);
+				DataField.DataType.STRING, true, IForm.MAX_FORM_ID_LENGTH);
 		
 		private static final DataField REQUESTING_USER = new DataField("REQUESTING_USER",
 				DataField.DataType.STRING, true);

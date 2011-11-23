@@ -96,11 +96,11 @@ public class FilterNavigationTable extends FlexTable {
     // Set up the callback object.
     AsyncCallback<ArrayList<FormSummary>> callback = new AsyncCallback<ArrayList<FormSummary>>() {
       public void onFailure(Throwable caught) {
-        AggregateUI.getUI().reportError(caught);
         // something failed...
         selectedForm = null;
         
         updateFilterList();
+        AggregateUI.getUI().reportError(caught);
       }
 
       public void onSuccess(ArrayList<FormSummary> formsFromService) {
@@ -141,11 +141,11 @@ public class FilterNavigationTable extends FlexTable {
           GWT.log("form not available - restarting form/filter update FilterNavigationTable");
           update();
         } else {
-          AggregateUI.getUI().reportError(caught);
           // no filters... update filter box
           filtersBox.updateFilterDropDown(null);
           // update the submissions display
           updateSelectedFormNFilter();
+          AggregateUI.getUI().reportError(caught);
         }
       }
       

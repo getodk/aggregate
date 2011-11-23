@@ -1,8 +1,8 @@
-
 package org.opendatakit.aggregate.odktables.client.exception;
 
 /**
- * An exception for when an attempt to update a table is made but the caller's version is out of synch with the one in Aggregate.
+ * An exception for when an attempt to update a table is made but the caller's
+ * version is out of synch with the one in Aggregate.
  * 
  * @author the.dylan.price@gmail.com
  */

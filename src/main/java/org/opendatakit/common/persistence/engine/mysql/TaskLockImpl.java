@@ -214,7 +214,7 @@ public class TaskLockImpl implements TaskLock {
     stmts.add(b.toString());
     b.setLength(0);
     
-    dam.recordQueryUsage(TaskLockTable.TABLE_NAME);
+    dam.recordQueryUsage(TaskLockTable.TABLE_NAME, 1);
     b.append("SELECT @minExpiration:=MIN(t3.");
     b.append(K_BQ);
     b.append(entity.expirationDateTime.getName());

@@ -33,7 +33,7 @@ public class FormInfoTable extends TopLevelDynamicBase {
 	static final String TABLE_NAME = "_form_info";
 
 	public static final DataField FORM_ID = new DataField("FORM_ID",
-			DataField.DataType.STRING, true, Form.MAX_FORM_ID_LENGTH);
+			DataField.DataType.STRING, true, IForm.MAX_FORM_ID_LENGTH);
 
 	/**
 	 * Construct a relation prototype.

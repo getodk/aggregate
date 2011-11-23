@@ -23,7 +23,7 @@ import org.opendatakit.aggregate.client.filter.Filter;
 import org.opendatakit.aggregate.client.filter.FilterGroup;
 import org.opendatakit.aggregate.constants.common.UIConsts;
 import org.opendatakit.aggregate.datamodel.FormDataModel;
-import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.DataField.IndexType;
@@ -33,6 +33,7 @@ import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.persistence.Query.FilterOperation;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
+import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.web.CallingContext;
 
@@ -47,7 +48,7 @@ public class SubmissionFilterGroup extends CommonFieldsBase {
   private static final String TABLE_NAME = "_filter_group";
 
   private static final DataField FORM_ID_PROPERTY = new DataField("FORM_ID",
-      DataField.DataType.STRING, true, Form.MAX_FORM_ID_LENGTH);
+      DataField.DataType.STRING, true, IForm.MAX_FORM_ID_LENGTH);
   private static final DataField NAME_PROPERTY = new DataField("NAME", DataField.DataType.STRING,
       true, FormDataModel.MAX_ELEMENT_NAME_LENGTH);
   private static final DataField URI_USER_PROPERTY = new DataField("URI_USER",
@@ -217,7 +218,7 @@ public class SubmissionFilterGroup extends CommonFieldsBase {
   }
 
   public static final SubmissionFilterGroup getFilterGroup(String uri, CallingContext cc)
-      throws ODKEntityNotFoundException {
+      throws ODKEntityNotFoundException, ODKOverQuotaException {
     try {
       SubmissionFilterGroup relation = assertRelation(cc);
       CommonFieldsBase entity = cc.getDatastore().getEntity(relation, uri, cc.getCurrentUser());
@@ -229,14 +230,15 @@ public class SubmissionFilterGroup extends CommonFieldsBase {
       } else {
         return null;
       }
-
+    } catch (ODKOverQuotaException e) {
+      throw e;
     } catch (ODKDatastoreException e) {
       throw new ODKEntityNotFoundException(e);
     }
   }
 
   public static final SubmissionFilterGroup transform(FilterGroup filterGroup, CallingContext cc)
-      throws ODKDatastoreException {
+      throws ODKEntityNotFoundException, ODKOverQuotaException, ODKDatastoreException {
 
     SubmissionFilterGroup relation = assertRelation(cc);
     String uri = filterGroup.getUri();

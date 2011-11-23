@@ -21,7 +21,7 @@ import java.util.List;
 import org.opendatakit.aggregate.constants.format.FormatConsts;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.datamodel.FormElementModel.ElementType;
-import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.submission.type.GeoPoint;
 import org.opendatakit.common.web.constants.BasicConsts;
 
@@ -48,7 +48,7 @@ public class FusionTableHeaderFormatter extends AbstractHeaderFormatter implemen
    *          list of properties to include in headers, if null is passed will
    *          return all properties for the SubmissionSet
    */
-  public List<String> generateHeaders(Form form, FormElementModel rootGroup,
+  public List<String> generateHeaders(IForm form, FormElementModel rootGroup,
       List<FormElementModel> propertyNamesArg) {
     
 	propertyNames = propertyNamesArg;

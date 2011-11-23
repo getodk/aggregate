@@ -2,14 +2,18 @@ package org.opendatakit.aggregate.odktables.client.api;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.apache.http.client.ClientProtocolException;
 import org.opendatakit.aggregate.odktables.client.entity.Column;
+import org.opendatakit.aggregate.odktables.client.entity.Filter;
 import org.opendatakit.aggregate.odktables.client.entity.Modification;
 import org.opendatakit.aggregate.odktables.client.entity.SynchronizedRow;
 import org.opendatakit.aggregate.odktables.client.exception.AggregateInternalErrorException;
 import org.opendatakit.aggregate.odktables.client.exception.ColumnDoesNotExistException;
+import org.opendatakit.aggregate.odktables.client.exception.FilterValueTypeMismatchException;
 import org.opendatakit.aggregate.odktables.client.exception.OutOfSynchException;
 import org.opendatakit.aggregate.odktables.client.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.client.exception.RowOutOfSynchException;
@@ -104,8 +108,7 @@ public class SynchronizeAPI extends CommonAPI
     public Modification createSynchronizedTable(String tableID,
             String tableName, List<Column> columns)
             throws ClientProtocolException, IOException,
-            TableAlreadyExistsException,
-            AggregateInternalErrorException
+            TableAlreadyExistsException, AggregateInternalErrorException
     {
         CreateSynchronizedTable command = new CreateSynchronizedTable(
                 requestingUserID, tableName, tableID, columns);
@@ -148,8 +151,71 @@ public class SynchronizeAPI extends CommonAPI
             PermissionDeniedException, TableDoesNotExistException,
             TableAlreadyExistsException, AggregateInternalErrorException
     {
+        try
+        {
+            return cloneSynchronizedTable(aggregateTableIdentifier, tableID,
+                    new ArrayList<Filter>());
+        } catch (ColumnDoesNotExistException e)
+        {
+            // this should never happen since we are not sending up any filters
+            throw new AggregateInternalErrorException(e.getMessage());
+        } catch (FilterValueTypeMismatchException e)
+        {
+            // this should never happen since we are not sending up any filters
+            throw new AggregateInternalErrorException(e.getMessage());
+        }
+    }
+
+    /**
+     * Clones an existing synchronized table.
+     * 
+     * @param aggregateTableIdentifier
+     *            the universally unique identifier of the table
+     * @param tableID
+     *            the unique identifier that the caller will use to identify the
+     *            table
+     * @param filters
+     *            a list of filters to apply to the table such that the caller
+     *            is cloning a subset of the table and will only ever see this
+     *            subset. That is, future calls to {@link #synchronize} and
+     *            {@link #querySynchronizedTable} will automatically apply these
+     *            filters to the data sent back.
+     * @return the current Modification of the table. The list returned by
+     *         getRows() will be populated with aggregateRowIdentifier,
+     *         revisionTag, and data for the row. Make sure that all of this
+     *         data is stored as it will be required for other API calls (see
+     *         {@link SynchronizedAPI the top of this file} for a summary of
+     *         client requirements for synchronized API usage).
+     * @throws ClientProtocolException
+     * @throws TableAlreadyExistsException
+     *             if the caller has already registered a table with tableID
+     * @throws TableDoesNotExistException
+     *             if no table with Aggregate Identifier
+     *             aggregateTableIdentifier exists
+     * @throws PermissionDeniedException
+     *             if the userID used to make the API call does not have read
+     *             permission on the table
+     * @throws AggregateInternalErrorException
+     *             if Aggregate encounters an internal error that causes the
+     *             call to fail
+     * @throws IOException
+     *             if there is a problem communicating with the Aggregate server
+     * @throws ColumnDoesNotExistException
+     *             if a column specified in one of the filters does not exist in
+     *             the table
+     * @throws FilterValueTypeMismatchException
+     *             if the value in one of the filters can not be converted to
+     *             the appropriate type for that column
+     */
+    public Modification cloneSynchronizedTable(String aggregateTableIdentifier,
+            String tableID, Collection<Filter> filters)
+            throws ClientProtocolException, IOException,
+            PermissionDeniedException, TableDoesNotExistException,
+            TableAlreadyExistsException, AggregateInternalErrorException,
+            ColumnDoesNotExistException, FilterValueTypeMismatchException
+    {
         CloneSynchronizedTable command = new CloneSynchronizedTable(
-                requestingUserID, tableID, aggregateTableIdentifier);
+                requestingUserID, tableID, aggregateTableIdentifier, filters);
         CloneSynchronizedTableResult result = sendCommand(command,
                 CloneSynchronizedTableResult.class);
         return result.getModification();
@@ -363,5 +429,14 @@ public class SynchronizeAPI extends CommonAPI
                 modificationNumber);
         SynchronizeResult result = sendCommand(command, SynchronizeResult.class);
         return result.getModification();
+    }
+
+    /**
+     * Not implemented.
+     */
+    public Modification querySynchronizedTable(String tableID,
+            Collection<Filter> filters)
+    {
+        throw new RuntimeException("Not implemented");
     }
 }

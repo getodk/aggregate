@@ -117,12 +117,18 @@ public class UpdateSynchronizedRowsLogic extends
             CommandLogicFunctions.updateModificationNumber(entry,
                     aggregateTableIdentifier, newModificationNumber, cc);
 
+            // get columns of table
+            List<InternalColumn> cols = columns
+                    .query("InsertSynchronizedRows.execute")
+                    .equal(Columns.AGGREGATE_TABLE_IDENTIFIER,
+                            aggregateTableIdentifier).execute();
+
             // Update changed rows and create modification
             try
             {
                 clientModification = updateChangedRows(changedRows,
-                        aggregateTableIdentifier, newModificationNumber,
-                        columns, cc);
+                        aggregateTableIdentifier, newModificationNumber, cols,
+                        cc);
             } catch (RowOutOfSynchException e)
             {
                 return UpdateSynchronizedRowsResult.failure(
@@ -150,8 +156,9 @@ public class UpdateSynchronizedRowsLogic extends
 
     private Modification updateChangedRows(List<SynchronizedRow> changedRows,
             String aggregateTableIdentifier, int newModificationNumber,
-            Columns columns, CallingContext cc) throws ODKDatastoreException,
-            RowOutOfSynchException, ColumnDoesNotExistException
+            List<InternalColumn> cols, CallingContext cc)
+            throws ODKDatastoreException, RowOutOfSynchException,
+            ColumnDoesNotExistException
     {
         List<SynchronizedRow> updatedRows = new ArrayList<SynchronizedRow>();
         Table table = Table.getInstance(aggregateTableIdentifier, cc);
@@ -171,15 +178,8 @@ public class UpdateSynchronizedRowsLogic extends
                     .getColumnValuePairs().entrySet())
             {
                 InternalColumn col;
-                try
-                {
-                    col = columns
-                            .query("UpdateSynchronizedRowsLogic.updateChangedRows")
-                            .equal(Columns.AGGREGATE_TABLE_IDENTIFIER,
-                                    aggregateTableIdentifier)
-                            .equal(Columns.COLUMN_NAME, rowEntry.getKey())
-                            .get();
-                } catch (ODKDatastoreException e)
+                col = InternalColumn.search(cols, rowEntry.getKey());
+                if (col == null)
                 {
                     throw new ColumnDoesNotExistException(null,
                             rowEntry.getKey());

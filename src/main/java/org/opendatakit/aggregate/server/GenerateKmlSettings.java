@@ -21,15 +21,15 @@ import java.util.List;
 import org.opendatakit.aggregate.client.form.KmlSettings;
 import org.opendatakit.aggregate.datamodel.FormElementKey;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
-import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.form.IForm;
 
 public class GenerateKmlSettings {
 
   private KmlSettings settings;
-  private Form form;
+  private IForm form;
   boolean ignoreRepeats;
   
-  public GenerateKmlSettings(Form form, boolean ignoreRepeats) {
+  public GenerateKmlSettings(IForm form, boolean ignoreRepeats) {
     this.form = form;
     this.settings = new KmlSettings();
     this.ignoreRepeats = ignoreRepeats;
@@ -46,7 +46,7 @@ public class GenerateKmlSettings {
    * FormElementKeys
    * 
    */
-  private void processElementForColumnHead(Form form, FormElementModel node, FormElementModel root) {
+  private void processElementForColumnHead(IForm form, FormElementModel node, FormElementModel root) {
     if (node == null)
       return;
 

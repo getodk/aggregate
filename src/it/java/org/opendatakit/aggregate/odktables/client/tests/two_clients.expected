@@ -31,11 +31,11 @@ modification: 1
     row1
         age 22
         name Dylan
-        weight 175
+        weight 175.0000000000
     row2
         age 50
         name John
-        weight 200
+        weight 200.0000000000
 
 updateSynchronizedRows user1 people
 
@@ -57,11 +57,11 @@ modification: 2
     row1
         age 23
         name DylanUpdate
-        weight 175
+        weight 175.0000000000
     row2
         age 50
         name John
-        weight 200
+        weight 200.0000000000
 
 updateSynchronizedRows user2 people
 
@@ -74,7 +74,7 @@ modification: 3
     row2
         age 50
         name John
-        weight 200
+        weight 200.0000000000
 
 synchronize user1 people
 
@@ -83,7 +83,7 @@ modification: 3
     row1
         age 24
         name DylanAgain
-        weight 24
+        weight 24.0000000000
     row2
         age 50
         name John

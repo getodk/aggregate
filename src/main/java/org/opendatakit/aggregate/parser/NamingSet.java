@@ -24,6 +24,7 @@ import java.util.UUID;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.opendatakit.common.persistence.Datastore;
+import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.web.CallingContext;
 
@@ -106,8 +107,9 @@ final class NamingSet {
 	 * 
 	 * @param ds
 	 * @param user
+	 * @throws ODKDatastoreException 
 	 */
-	public void resolveNames(Datastore ds, User user) {
+	public void resolveNames(Datastore ds, User user) throws ODKDatastoreException {
 		resolveTableNames(ds, user);
 		resolveColumnNames(ds.getMaxLenColumnName());
 	}
@@ -119,8 +121,9 @@ final class NamingSet {
 	 * 
 	 * @param ds
 	 * @param user
+	 * @throws ODKDatastoreException 
 	 */
-	private void resolveTableNames(Datastore ds, User user) {
+	private void resolveTableNames(Datastore ds, User user) throws ODKDatastoreException {
 		int maxLenTableName = ds.getMaxLenTableName();
 		// resolve the table names
 		
@@ -257,8 +260,9 @@ final class NamingSet {
 	 * @param ds
 	 * @param user
 	 * @return
+	 * @throws ODKDatastoreException 
 	 */
-	public String generateUniqueTableName(String schema, String originalTable, CallingContext cc) {
+	public String generateUniqueTableName(String schema, String originalTable, CallingContext cc) throws ODKDatastoreException {
 		Datastore ds = cc.getDatastore();
 		User user = cc.getCurrentUser();
 		int maxLenTableName = ds.getMaxLenTableName();

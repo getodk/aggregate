@@ -26,7 +26,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
-import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.form.FormFactory;
+import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.format.table.HtmlFormatter;
 import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.aggregate.submission.SubmissionElement;
@@ -83,8 +84,8 @@ public class FormMultipleValueServlet extends ServletUtilBase {
 		List<SubmissionKeyPart> parts = key.splitSubmissionKey();
 		Submission sub = null;
 		try {
-			Form form = Form.retrieveFormByFormId(parts.get(0).getElementName(), cc);
-		    if ( form.getFormDefinition() == null ) {
+			IForm form = FormFactory.retrieveFormByFormId(parts.get(0).getElementName(), cc);
+		    if ( !form.hasValidFormDefinition() ) {
 				errorRetreivingData(resp);
 				return; // ill-formed definition
 		    }

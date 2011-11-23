@@ -16,7 +16,10 @@
 
 package org.opendatakit.aggregate.client.externalserv;
 
+import org.opendatakit.aggregate.client.exception.FormNotAvailableException;
+import org.opendatakit.aggregate.client.exception.RequestFailureException;
 import org.opendatakit.aggregate.constants.common.ExternalServicePublicationOption;
+import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
 import org.opendatakit.common.security.client.exception.AccessDeniedException;
 
 import com.google.gwt.user.client.rpc.RemoteService;
@@ -33,13 +36,14 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 @RemoteServiceRelativePath("servicesadminservice")
 public interface ServicesAdminService extends RemoteService {
 
-  ExternServSummary [] getExternalServices(String formid) throws AccessDeniedException;
+  ExternServSummary [] getExternalServices(String formid) throws AccessDeniedException, FormNotAvailableException, RequestFailureException, DatastoreFailureException;
   
   String generateOAuthUrl(String uri) throws AccessDeniedException;
   
-  String createFusionTable(String formId, ExternalServicePublicationOption esOption) throws AccessDeniedException;
+  String createFusionTable(String formId, ExternalServicePublicationOption esOption) throws AccessDeniedException, FormNotAvailableException, RequestFailureException, DatastoreFailureException;
   
-  String createGoogleSpreadsheet(String formId, String name, ExternalServicePublicationOption esOption) throws AccessDeniedException;
+  String createGoogleSpreadsheet(String formId, String name, ExternalServicePublicationOption esOption) throws AccessDeniedException, FormNotAvailableException, RequestFailureException, DatastoreFailureException;
   
-  Boolean deletePublisher(String uri) throws AccessDeniedException;
+  String createOhmageJsonServer(String formId, String url, ExternalServicePublicationOption es) throws AccessDeniedException, FormNotAvailableException, RequestFailureException, DatastoreFailureException;
+  Boolean deletePublisher(String uri) throws AccessDeniedException, FormNotAvailableException, RequestFailureException, DatastoreFailureException;
 }
