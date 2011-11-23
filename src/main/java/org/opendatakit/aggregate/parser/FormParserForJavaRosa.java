@@ -526,7 +526,7 @@ public class FormParserForJavaRosa {
 				itm.getValue(), cc);
     }
     // Determine the information about the submission...
-	formInfo.setIsComplete(true);
+	 formInfo.setIsComplete(true);
     formInfo.persist(cc);
 
     Datastore ds = cc.getDatastore();

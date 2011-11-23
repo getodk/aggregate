@@ -127,7 +127,9 @@ class Form implements IForm {
     formDefinition = FormDefinition.getFormDefinition(p, cc);
     
     repeatElementMap = new HashMap<String, FormElementModel>();
-    populateRepeatElementMap(formDefinition.getTopLevelGroupElement());
+	if ( formDefinition != null ) {
+		populateRepeatElementMap(formDefinition.getTopLevelGroupElement());
+	}
   }
 
   Form(XFormParameters rootElementDefn, boolean isEncryptedForm, boolean isDownloadEnabled,
@@ -180,7 +182,9 @@ class Form implements IForm {
     formDefinition = FormDefinition.getFormDefinition(rootElementDefn, cc);
 
     repeatElementMap = new HashMap<String, FormElementModel>();
-    populateRepeatElementMap(formDefinition.getTopLevelGroupElement());
+	if ( formDefinition != null ) {
+		populateRepeatElementMap(formDefinition.getTopLevelGroupElement());
+	}
   }
 
   public boolean isNewlyCreated() {

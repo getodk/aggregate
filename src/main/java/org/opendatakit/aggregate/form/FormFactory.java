@@ -109,7 +109,7 @@ public class FormFactory {
         // top-level FormInfoTable even if only subordinate values are updated.
         Date infoDate = infoRow.getLastUpdateDate();
         Date oldDate = (f == null) ? null : f.getLastUpdateDate();
-        if ( f != null && 
+        if ( f != null &&  f.hasValidFormDefinition() &&
             (infoRow.getCreationDate().equals(f.getCreationDate())) &&
             ((infoDate == null && oldDate == null) ||
              (infoDate != null && oldDate != null && infoDate.equals(oldDate))) ) {
@@ -162,13 +162,14 @@ public class FormFactory {
    * @param cc
    * @return
    * @throws ODKOverQuotaException
+   * @throws ODKEntityNotFoundException
    * @throws ODKDatastoreException
    */
   private static IForm getForm(String topLevelAuri, CallingContext cc)
-      throws ODKOverQuotaException, ODKDatastoreException {
+      throws ODKOverQuotaException, ODKEntityNotFoundException, ODKDatastoreException {
     List<IForm> forms = internalGetForms(topLevelAuri, cc);
     
-    if ( forms.isEmpty() ) return null;
+    if ( forms.isEmpty() ) throw new ODKEntityNotFoundException("Could not retrieve form uri: " + topLevelAuri);
     IForm f = forms.get(0);
     // TODO: check authorization?
     return f;
