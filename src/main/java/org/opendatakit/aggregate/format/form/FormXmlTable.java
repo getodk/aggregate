@@ -24,7 +24,7 @@ import java.util.Map;
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.format.FormTableConsts;
-import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.servlet.FormXmlServlet;
 import org.opendatakit.common.web.constants.BasicConsts;
 import org.opendatakit.common.web.constants.HtmlConsts;
@@ -40,9 +40,9 @@ public class FormXmlTable {
 
   private String requestURL;
 
-  private List<Form> forms;
+  private List<IForm> forms;
 
-  public FormXmlTable(List<Form> formsToFormat, String webServerUrl) {
+  public FormXmlTable(List<IForm> formsToFormat, String webServerUrl) {
     this.requestURL = webServerUrl + BasicConsts.FORWARDSLASH + FormXmlServlet.ADDR;
     this.forms = formsToFormat;
   }
@@ -51,7 +51,7 @@ public class FormXmlTable {
     String xml = FormTableConsts.BEGIN_FORMS_TAG + BasicConsts.NEW_LINE;
 
     // build XML table of form information
-    for (Form form : forms) {
+    for (IForm form : forms) {
     	if ( !form.getDownloadEnabled() ) continue;
 
       xml += generateFormXmlEntry(form.getFormId(), form.getViewableName()) + BasicConsts.NEW_LINE;

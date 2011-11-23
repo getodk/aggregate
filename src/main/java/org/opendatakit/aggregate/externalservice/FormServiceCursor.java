@@ -21,7 +21,8 @@ import org.opendatakit.aggregate.constants.common.ExternalServicePublicationOpti
 import org.opendatakit.aggregate.constants.common.ExternalServiceType;
 import org.opendatakit.aggregate.constants.common.OperationalStatus;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
-import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.form.FormFactory;
+import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.DataField.IndexType;
@@ -238,7 +239,7 @@ public final class FormServiceCursor extends CommonFieldsBase {
   }
   
   public ExternalService getExternalService(CallingContext cc) throws ODKEntityNotFoundException, ODKFormNotFoundException, ODKOverQuotaException, ODKDatastoreException {
-    Form form = Form.retrieveFormByFormId(getFormId(), cc);
+    IForm form = FormFactory.retrieveFormByFormId(getFormId(), cc);
     return constructExternalService(this, form, cc);
   }
   
@@ -258,7 +259,7 @@ public final class FormServiceCursor extends CommonFieldsBase {
     return relation;
   }
 
-  public static final FormServiceCursor createFormServiceCursor(Form form,
+  public static final FormServiceCursor createFormServiceCursor(IForm form,
       ExternalServiceType type, CommonFieldsBase service, CallingContext cc)
       throws ODKDatastoreException {
     FormServiceCursor relation = assertRelation(cc);
@@ -273,7 +274,7 @@ public final class FormServiceCursor extends CommonFieldsBase {
     return c;
   }
   
-  public static final List<ExternalService> getExternalServicesForForm(Form form,
+  public static final List<ExternalService> getExternalServicesForForm(IForm form,
       CallingContext cc) throws ODKDatastoreException {
     FormServiceCursor relation = assertRelation(cc);
     Query query = cc.getDatastore().createQuery(relation, "FormServiceCursor.getExternalServicesForForm[" + form.getFormId() + "]", cc.getCurrentUser());
@@ -328,7 +329,7 @@ public final class FormServiceCursor extends CommonFieldsBase {
       return fscList;
    }
    
-   public static final ExternalService constructExternalService(FormServiceCursor fsc, Form form,
+   public static final ExternalService constructExternalService(FormServiceCursor fsc, IForm form,
        CallingContext cc) throws ODKEntityNotFoundException, ODKOverQuotaException {
      try {
        switch (fsc.getExternalServiceType()) {

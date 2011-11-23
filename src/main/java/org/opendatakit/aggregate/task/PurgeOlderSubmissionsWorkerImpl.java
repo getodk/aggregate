@@ -28,7 +28,7 @@ import org.opendatakit.aggregate.constants.common.FormActionStatus;
 import org.opendatakit.aggregate.exception.ODKExternalServiceDependencyException;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
-import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.form.MiscTasks;
 import org.opendatakit.aggregate.process.DeleteSubmissions;
 import org.opendatakit.aggregate.query.submission.QueryByDateRange;
@@ -58,12 +58,12 @@ public class PurgeOlderSubmissionsWorkerImpl {
 
 	private static final int MAX_QUERY_LIMIT = ServletConsts.FETCH_LIMIT;
 
-	private final Form form;
+	private final IForm form;
 	private final SubmissionKey miscTasksKey;
 	private final CallingContext cc;
 	private final String pFormIdLockId;
 
-	public PurgeOlderSubmissionsWorkerImpl(Form form, SubmissionKey miscTasksKey,
+	public PurgeOlderSubmissionsWorkerImpl(IForm form, SubmissionKey miscTasksKey,
 			long attemptCount, CallingContext cc) {
 		this.form = form;
 		this.miscTasksKey = miscTasksKey;

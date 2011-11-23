@@ -19,7 +19,7 @@ import java.util.List;
 
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.datamodel.FormElementModel.ElementType;
-import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.form.IForm;
 
 /**
  * 
@@ -28,7 +28,7 @@ import org.opendatakit.aggregate.form.Form;
  * 
  */
 public interface HeaderFormatter {
-  public List<String> generateHeaders(Form form, FormElementModel rootGroup, List<FormElementModel> propertyNames);
+  public List<String> generateHeaders(IForm form, FormElementModel rootGroup, List<FormElementModel> propertyNames);
 
   public List<ElementType> getHeaderTypes();
 }

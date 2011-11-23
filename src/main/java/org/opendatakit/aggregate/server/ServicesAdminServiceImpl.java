@@ -40,7 +40,8 @@ import org.opendatakit.aggregate.externalservice.ExternalService;
 import org.opendatakit.aggregate.externalservice.FormServiceCursor;
 import org.opendatakit.aggregate.externalservice.FusionTable;
 import org.opendatakit.aggregate.externalservice.GoogleSpreadsheet;
-import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.form.FormFactory;
+import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.form.MiscTasks;
 import org.opendatakit.aggregate.servlet.OAuthServlet;
 import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
@@ -75,7 +76,7 @@ public class ServicesAdminServiceImpl extends RemoteServiceServlet implements
       return null;
 
     try {
-      Form form = Form.retrieveFormByFormId(formId, cc);
+      IForm form = FormFactory.retrieveFormByFormId(formId, cc);
       List<ExternalService> esList = FormServiceCursor.getExternalServicesForForm(form, cc);
 
       ExternServSummary[] externServices;
@@ -173,7 +174,7 @@ public class ServicesAdminServiceImpl extends RemoteServiceServlet implements
         throw new RequestFailureException(
             "Form is marked for deletion - publishing request for fusion table aborted.");
       }
-      Form form = Form.retrieveFormByFormId(formId, cc);
+      IForm form = FormFactory.retrieveFormByFormId(formId, cc);
       if (!form.hasValidFormDefinition()) {
         throw new RequestFailureException(ErrorConsts.FORM_DEFINITION_INVALID);
       }
@@ -206,7 +207,7 @@ public class ServicesAdminServiceImpl extends RemoteServiceServlet implements
         throw new RequestFailureException(
             "Form is marked for deletion - publishing request for fusion table aborted.");
       }
-      Form form = Form.retrieveFormByFormId(formId, cc);
+      IForm form = FormFactory.retrieveFormByFormId(formId, cc);
       if (!form.hasValidFormDefinition()) {
         throw new RequestFailureException(ErrorConsts.FORM_DEFINITION_INVALID);
       }

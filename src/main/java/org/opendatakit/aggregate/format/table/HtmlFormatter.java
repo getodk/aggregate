@@ -23,7 +23,7 @@ import java.util.List;
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
-import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.format.SubmissionFormatter;
 import org.opendatakit.aggregate.format.element.HtmlLinkElementFormatter;
@@ -44,7 +44,7 @@ public class HtmlFormatter extends TableFormatterBase implements SubmissionForma
   
   private boolean checkboxes;
   
-  public HtmlFormatter(Form form, String webServerUrl, PrintWriter printWriter, List<FormElementModel> selectedColumnNames, boolean includeCheckboxes) {
+  public HtmlFormatter(IForm form, String webServerUrl, PrintWriter printWriter, List<FormElementModel> selectedColumnNames, boolean includeCheckboxes) {
     super(form, printWriter, selectedColumnNames);
     checkboxes = includeCheckboxes;
     elemFormatter = new HtmlLinkElementFormatter(webServerUrl, true, true, true);

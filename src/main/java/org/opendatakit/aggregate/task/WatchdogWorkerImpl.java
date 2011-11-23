@@ -24,7 +24,8 @@ import org.opendatakit.aggregate.exception.ODKExternalServiceException;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
 import org.opendatakit.aggregate.externalservice.FormServiceCursor;
-import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.form.FormFactory;
+import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.form.MiscTasks;
 import org.opendatakit.aggregate.form.PersistentResults;
 import org.opendatakit.aggregate.query.submission.QueryByDateRange;
@@ -109,7 +110,7 @@ public class WatchdogWorkerImpl {
     System.out.println("Checking streaming for " + fsc.getExternalServiceType());
     // get the last submission sent to the external service
     String lastStreamingKey = fsc.getLastStreamingKey();
-    Form form = Form.retrieveFormByFormId(fsc.getFormId(), cc);
+    IForm form = FormFactory.retrieveFormByFormId(fsc.getFormId(), cc);
     if (!form.hasValidFormDefinition()) {
       System.out.println("Form definition was ill-formed while checking for streaming for "
           + fsc.getExternalServiceType());
@@ -147,7 +148,7 @@ public class WatchdogWorkerImpl {
         long attemptCount = persistentResult.getAttemptCount();
         persistentResult.setAttemptCount(++attemptCount);
         persistentResult.persist(cc);
-        Form form = Form.retrieveFormByFormId(persistentResult.getFormId(), cc);
+        IForm form = FormFactory.retrieveFormByFormId(persistentResult.getFormId(), cc);
         if (!form.hasValidFormDefinition()) {
           System.out.println("Form of stalled task is ill-formed");
           return;
@@ -179,7 +180,7 @@ public class WatchdogWorkerImpl {
         long attemptCount = aTask.getAttemptCount();
         aTask.setAttemptCount(++attemptCount);
         aTask.persist(cc);
-        Form form = Form.retrieveFormByFormId(aTask.getFormId(), cc);
+        IForm form = FormFactory.retrieveFormByFormId(aTask.getFormId(), cc);
         if (!form.hasValidFormDefinition()) {
           System.out.println("Form definition is ill-formed while checking stalled request: "
               + aTask.getSubmissionKey());

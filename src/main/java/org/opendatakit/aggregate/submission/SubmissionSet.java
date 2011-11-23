@@ -31,7 +31,7 @@ import org.opendatakit.aggregate.datamodel.FormDataModel.DDRelationName;
 import org.opendatakit.aggregate.datamodel.FormDataModel.ElementType;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.datamodel.TopLevelDynamicBase;
-import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.format.element.ElementFormatter;
 import org.opendatakit.aggregate.submission.type.BlobSubmissionType;
@@ -104,7 +104,7 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 	/**
 	 * The definition of this form (for access to lst).
 	 */
-	private final Form form;
+	private final IForm form;
 
 	/**
 	 * Identifier for this submission set (all other entries in dbEntities are
@@ -139,7 +139,7 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 	 * @throws ODKDatastoreException
 	 */
 	public SubmissionSet(SubmissionSet enclosingSet, Long ordinalNumber,
-			FormElementModel group, Form form,
+			FormElementModel group, IForm form,
 			EntityKey topLevelTableKey, CallingContext cc)
 			throws ODKDatastoreException {
 		this.form = form;
@@ -162,14 +162,14 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 	}
 
 	public SubmissionSet(Long modelVersion, Long uiVersion, 
-			Form form,
+			IForm form,
 			CallingContext cc)
 			throws ODKDatastoreException {
 		this(modelVersion, uiVersion, null, form, cc);
 	}
 
 	public SubmissionSet(Long modelVersion, Long uiVersion, String uriTopLevelGroup, 
-			Form form,
+			IForm form,
 			CallingContext cc)
 			throws ODKDatastoreException {
 		this.form = form;
@@ -253,7 +253,7 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 	 * @throws ODKDatastoreException
 	 */
 	public SubmissionSet(SubmissionSet enclosingSet, DynamicCommonFieldsBase row,
-			FormElementModel group, Form form,
+			FormElementModel group, IForm form,
 			CallingContext cc)
 			throws ODKDatastoreException {
 		this.form = form;

@@ -54,7 +54,8 @@ import org.opendatakit.aggregate.exception.ODKFormAlreadyExistsException;
 import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
 import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData.Reason;
 import org.opendatakit.aggregate.exception.ODKParseException;
-import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.form.FormFactory;
+import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.form.FormDefinition;
 import org.opendatakit.aggregate.form.MiscTasks;
 import org.opendatakit.aggregate.form.SubmissionAssociationTable;
@@ -513,7 +514,7 @@ public class FormParserForJavaRosa {
     String isIncompleteFlag = uploadedFormItems.getSimpleFormField(ServletConsts.TRANSFER_IS_INCOMPLETE);
     boolean isDownloadEnabled = ( isIncompleteFlag == null || isIncompleteFlag.trim().length() == 0 );
 
-    Form formInfo = Form.createOrFetchFormId(rootElementDefn, isEncryptedForm,
+    IForm formInfo = FormFactory.createOrFetchFormId(rootElementDefn, isEncryptedForm,
     					title, xmlBytes, isDownloadEnabled, cc);
     boolean newlyCreatedXForm = formInfo.isNewlyCreated();
 

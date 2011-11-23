@@ -17,7 +17,7 @@ package org.opendatakit.aggregate.task.tomcat;
 
 import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
-import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.task.FormDelete;
 import org.opendatakit.aggregate.task.FormDeleteWorkerImpl;
@@ -38,7 +38,7 @@ public class FormDeleteImpl implements FormDelete {
 	static class FormDeleteRunner implements Runnable {
 		final FormDeleteWorkerImpl impl;
 
-		public FormDeleteRunner(Form form, SubmissionKey miscTasksKey,
+		public FormDeleteRunner(IForm form, SubmissionKey miscTasksKey,
 				long attemptCount, CallingContext cc) {
 			impl = new FormDeleteWorkerImpl( form, miscTasksKey, attemptCount, cc);
 		}
@@ -55,7 +55,7 @@ public class FormDeleteImpl implements FormDelete {
 	}
 
   @Override
-  public final void createFormDeleteTask(Form form, SubmissionKey miscTasksKey,
+  public final void createFormDeleteTask(IForm form, SubmissionKey miscTasksKey,
 			long attemptCount, CallingContext cc) throws ODKDatastoreException, ODKFormNotFoundException {
 	WatchdogImpl wd = (WatchdogImpl) cc.getBean(BeanDefs.WATCHDOG);
 	// use watchdog's calling context in runner...

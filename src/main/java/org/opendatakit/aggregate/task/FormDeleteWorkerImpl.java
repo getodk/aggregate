@@ -30,7 +30,7 @@ import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.externalservice.ExternalService;
 import org.opendatakit.aggregate.externalservice.FormServiceCursor;
 import org.opendatakit.aggregate.filter.SubmissionFilterGroup;
-import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.form.MiscTasks;
 import org.opendatakit.aggregate.form.MiscTasks.TaskType;
 import org.opendatakit.aggregate.form.PersistentResults;
@@ -59,12 +59,12 @@ import org.opendatakit.common.web.CallingContext;
  */
 public class FormDeleteWorkerImpl {
 
-  private final Form form;
+  private final IForm form;
   private final SubmissionKey miscTasksKey;
   private final CallingContext cc;
   private final String pFormIdLockId;
 
-  public FormDeleteWorkerImpl(Form form, SubmissionKey miscTasksKey, long attemptCount,
+  public FormDeleteWorkerImpl(IForm form, SubmissionKey miscTasksKey, long attemptCount,
       CallingContext cc) {
     this.form = form;
     this.miscTasksKey = miscTasksKey;

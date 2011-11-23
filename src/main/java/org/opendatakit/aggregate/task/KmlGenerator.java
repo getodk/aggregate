@@ -16,7 +16,7 @@
 package org.opendatakit.aggregate.task;
 
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
-import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
@@ -35,6 +35,6 @@ public interface KmlGenerator {
 	public static final String IMAGE_FIELD = "imageField";
 	public static final String GEOPOINT_FIELD = "geopointField";
 
-	public void createKmlTask(Form form, SubmissionKey persistentResultsKey,
+	public void createKmlTask(IForm form, SubmissionKey persistentResultsKey,
 			long attemptCount, CallingContext cc) throws ODKDatastoreException, ODKFormNotFoundException;
 }

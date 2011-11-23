@@ -29,7 +29,7 @@ import org.kxml2.kdom.Node;
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.format.XFormsTableConsts;
-import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.form.FormInfo;
 import org.opendatakit.aggregate.servlet.XFormsDownloadServlet;
 import org.opendatakit.aggregate.submission.SubmissionKey;
@@ -49,9 +49,9 @@ public class XFormsManifestXmlTable {
 
   private final String downloadRequestURL;
 
-  private Form form;
+  private IForm form;
 
-  public XFormsManifestXmlTable(Form form, String webServerUrl) {
+  public XFormsManifestXmlTable(IForm form, String webServerUrl) {
     this.downloadRequestURL = webServerUrl + BasicConsts.FORWARDSLASH + XFormsDownloadServlet.ADDR;
     this.form = form;
   }

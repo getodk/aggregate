@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2009 Google Inc. 
- * Copyright (C) 2010 University of Washington.
+ * Copyright (C) 2011 University of Washington.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -25,8 +24,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.client.form.FormSummary;
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.ServletConsts;
@@ -34,7 +31,6 @@ import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.datamodel.FormElementModel.ElementType;
 import org.opendatakit.aggregate.exception.ODKConversionException;
 import org.opendatakit.aggregate.exception.ODKFormAlreadyExistsException;
-import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.parser.MultiPartFormItem;
 import org.opendatakit.aggregate.servlet.FormXmlServlet;
 import org.opendatakit.aggregate.submission.SubmissionKey;
@@ -44,98 +40,26 @@ import org.opendatakit.common.datamodel.BinaryContentManipulator.BlobSubmissionO
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.EntityKey;
-import org.opendatakit.common.persistence.PersistConsts;
 import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.persistence.Query.FilterOperation;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
-import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
-import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.BasicConsts;
 
 /**
- * Persistable definition of the XForm that defines how to store submissions to
- * the datastore. Includes form elements that specify how to properly convert
- * the data to/from the datastore.
+ * Implementation of the IForm interface.
+ * Form objects can be shared across multiple threads.  
  * 
- * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
  * 
  */
-public class Form {
-
-  private static final Log logger = LogFactory.getLog(Form.class);
-
-  public static final Long MAX_FORM_ID_LENGTH = PersistConsts.GUARANTEED_SEARCHABLE_LEN;
-
-  private static final class FormCache {
-    final long timestamp;
-    final Form form;
-
-    FormCache(long timestamp, Form form) {
-      this.timestamp = timestamp;
-      this.form = form;
-    }
-  }
-
-  private static final Map<String, FormCache> cache = new HashMap<String, FormCache>();
-
-  /**
-   * Common private static method through which all Form objects are obtained.
-   * This provides a cache of the form data.  If known, the top-level object's
-   * row object is passed in.  This is a database access optimization (minimize
-   * GAE billing).
-   *  
-   * @param topLevelAuri
-   * @param infoRow
-   * @param cc
-   * @return
-   * @throws ODKOverQuotaException
-   * @throws ODKDatastoreException
-   */
-  private static synchronized Form getForm(String topLevelAuri, FormInfoTable infoRow, CallingContext cc)
-      throws ODKOverQuotaException, ODKDatastoreException {
-    FormCache c = cache.get(topLevelAuri);
-    if (c != null && c.timestamp + PersistConsts.MAX_SETTLE_MILLISECONDS > System.currentTimeMillis()) {
-      // TODO: This cache should reside in MemCache.  Right now, different running
-      // servers might see different Form definitions for up to the settle time.
-      //
-      // Since the datastore is treated as having a settle time of MAX_SETTLE_MILLISECONDS,
-      // we should rely on the cache for that time interval.  Without MemCache-style
-      // support, this is somewhat problematic since different server instances might
-      // see different versions of the same Form.
-      // 
-      logger.info("FormCache: using cached Form: " + topLevelAuri);
-      return c.form;
-    }
-
-    Datastore ds = cc.getDatastore();
-    User user = cc.getCurrentUser();
-
-    FormInfoTable infoRelation = FormInfoTable.assertRelation(cc);
-
-    if ( infoRow == null ) {
-      infoRow = ds.getEntity(infoRelation, topLevelAuri, user);
-    }
-
-    logger.info("FormCache: inserting Form: " + topLevelAuri);
-    Form f = new Form(infoRow, cc);
-    FormCache fc = new FormCache(System.currentTimeMillis(), f);
-    cache.put(topLevelAuri, fc);
-    return f;
-  }
-
-  private static synchronized void clearForm(String topLevelAuri) {
-    cache.remove(topLevelAuri);
-  }
+class Form implements IForm {
 
   /*
    * Following public fields are valid after the first successful call to
    * getFormDefinition()
    */
-
-  private boolean newObject;
 
   private final FormInfoTable infoRow;
 
@@ -150,12 +74,15 @@ public class Form {
    */
   private final FormDefinition formDefinition;
 
+  private final boolean newObject;
+
   /**
    * NOT persisted
    */
-  private Map<String, FormElementModel> repeatElementMap;
 
-  private Form(FormInfoTable infoRow, CallingContext cc) throws ODKDatastoreException {
+  private final Map<String, FormElementModel> repeatElementMap;
+
+  Form(FormInfoTable infoRow, CallingContext cc) throws ODKDatastoreException {
     Datastore ds = cc.getDatastore();
     User user = cc.getCurrentUser();
     
@@ -198,9 +125,12 @@ public class Form {
         filesetRow.getLongField(FormInfoFilesetTable.ROOT_ELEMENT_UI_VERSION));
 
     formDefinition = FormDefinition.getFormDefinition(p, cc);
+    
+    repeatElementMap = new HashMap<String, FormElementModel>();
+    populateRepeatElementMap(formDefinition.getTopLevelGroupElement());
   }
 
-  private Form(XFormParameters rootElementDefn, boolean isEncryptedForm, boolean isDownloadEnabled,
+  Form(XFormParameters rootElementDefn, boolean isEncryptedForm, boolean isDownloadEnabled,
       byte[] xmlBytes, String title, CallingContext cc) throws ODKDatastoreException,
       ODKConversionException {
     Datastore ds = cc.getDatastore();
@@ -248,13 +178,16 @@ public class Form {
         filesetRow.getUri(), cc);
 
     formDefinition = FormDefinition.getFormDefinition(rootElementDefn, cc);
+
+    repeatElementMap = new HashMap<String, FormElementModel>();
+    populateRepeatElementMap(formDefinition.getTopLevelGroupElement());
   }
 
   public boolean isNewlyCreated() {
     return newObject;
   }
 
-  public void persist(CallingContext cc) throws ODKDatastoreException {
+  public synchronized void persist(CallingContext cc) throws ODKDatastoreException {
     Datastore ds = cc.getDatastore();
     User user = cc.getCurrentUser();
 
@@ -275,8 +208,8 @@ public class Form {
    *          Datastore
    * @throws ODKDatastoreException
    */
-  public void deleteForm(CallingContext cc) throws ODKDatastoreException {
-    clearForm(getUri());
+  public synchronized void deleteForm(CallingContext cc) throws ODKDatastoreException {
+    FormFactory.clearForm(this);
     if (formDefinition != null) {
       // delete the data model normally
       formDefinition.deleteDataModel(cc);
@@ -390,7 +323,7 @@ public class Form {
    * 
    * @return last date form was updated
    */
-  public Date getUpdateDate() {
+  public Date getLastUpdateDate() {
     return infoRow.getLastUpdateDate();
   }
 
@@ -571,14 +504,6 @@ public class Form {
   }
 
   public Map<String, FormElementModel> getRepeatElementModels() {
-
-    // check to see if repeatRootMap needs to be created
-    // NOTE: this assumes the form does NOT get altered!!!
-    if (repeatElementMap == null) {
-      repeatElementMap = new HashMap<String, FormElementModel>();
-      populateRepeatElementMap(formDefinition.getTopLevelGroupElement());
-    }
-
     return repeatElementMap;
   }
 
@@ -681,126 +606,7 @@ public class Form {
     return getViewableName();
   }
 
-  public static final List<Form> getForms(boolean checkAuthorization, CallingContext cc)
-      throws ODKOverQuotaException, ODKDatastoreException {
-
-    FormInfoTable relation = FormInfoTable.assertRelation(cc);
-
-    // ensure that Form table exists...
-    List<Form> forms = new ArrayList<Form>();
-
-    Query formQuery = cc.getDatastore().createQuery(relation, "Form.getForms", cc.getCurrentUser());
-    List<? extends CommonFieldsBase> infoRows = formQuery.executeQuery();
-
-    for (CommonFieldsBase cb : infoRows) {
-      FormInfoTable infoRow = (FormInfoTable) cb;
-      Form form = getForm(cb.getUri(), infoRow, cc);
-      // TODO: authorization check?
-      forms.add(form);
-    }
-    return forms;
-  }
-
-  /**
-   * Called during the startup action to load the Form table and eventually
-   * handle migrations of forms from older table formats to newer ones.
-   * 
-   * @param cc
-   * @throws ODKDatastoreException
-   */
-  public static final void initialize(CallingContext cc) throws ODKDatastoreException {
-  }
-
-  /**
-   * Clean up the incoming string to extract just the formId from it.
-   * 
-   * @param submissionKey
-   * @return
-   */
-  public static final String extractWellFormedFormId(String submissionKey) {
-    int firstSlash = submissionKey.indexOf('/');
-    String formId = submissionKey;
-    if (firstSlash != -1) {
-      // strip off the group path of the key
-      formId = submissionKey.substring(0, firstSlash);
-    }
-    return formId;
-  }
-
-  /**
-   * Static function to retrieve a form with the specified ODK id from the
-   * datastore
-   * 
-   * @param formId
-   *          The ODK identifier that identifies the form
-   * 
-   * @return The ODK aggregate form definition/conversion object
-   * 
-   * @throws ODKOverQuotaException
-   * @throws ODKDatastoreException
-   * @throws ODKFormNotFoundException
-   *           Thrown when a form was not able to be found with the
-   *           corresponding ODK ID
-   */
-  public static Form retrieveFormByFormId(String formId, CallingContext cc)
-      throws ODKFormNotFoundException, ODKOverQuotaException, ODKDatastoreException {
-
-    if (formId == null) {
-      return null;
-    }
-    try {
-      String formUri = CommonFieldsBase.newMD5HashUri(formId);
-      Form form = getForm(formUri, null, cc);
-      if (!formId.equals(form.getFormId())) {
-        throw new IllegalStateException("more than one FormInfo entry for the given form id: "
-            + formId);
-      }
-      return form;
-    } catch (ODKOverQuotaException e) {
-      throw e;
-    } catch (ODKDatastoreException e) {
-      throw e;
-    } catch (Exception e) {
-      throw new ODKFormNotFoundException(e);
-    }
-  }
-
-  /**
-   * Static function to retrieve a form with the specified ODK id from the
-   * datastore
-   * 
-   * @param formId
-   *          The ODK identifier that identifies the form
-   * 
-   * @return The ODK aggregate form definition/conversion object
-   * 
-   * @throws ODKOverQuotaException
-   * @throws ODKDatastoreException
-   * @throws ODKFormNotFoundException
-   *           Thrown when a form was not able to be found with the
-   *           corresponding ODK ID
-   */
-  public static Form retrieveForm(List<SubmissionKeyPart> parts, CallingContext cc)
-      throws ODKOverQuotaException, ODKDatastoreException, ODKFormNotFoundException {
-
-    if (!FormInfo.validFormKey(parts)) {
-      return null;
-    }
-
-    try {
-      String formUri = parts.get(1).getAuri();
-      Form form = getForm(formUri, null, cc);
-      return form;
-    } catch ( ODKOverQuotaException e) {
-      throw e;
-    } catch ( ODKDatastoreException e) {
-      throw e;
-    } catch (Exception e) {
-      throw new ODKFormNotFoundException(e);
-    }
-  }
-
-  private BlobSubmissionOutcome isSameForm(XFormParameters rootElementDefn,
+  public BlobSubmissionOutcome isSameForm(XFormParameters rootElementDefn,
       boolean isEncryptedFlag, String title, byte[] xmlBytes, CallingContext cc)
       throws ODKDatastoreException, ODKFormAlreadyExistsException {
     String rootFormId = getFormId();
@@ -833,47 +639,6 @@ public class Form {
       return xform.setValueFromByteArray(xmlBytes, "text/xml", Long.valueOf(xmlBytes.length), title
           + ".xml", cc);
     }
-  }
-
-  /**
-   * Create or fetch the given formId.
-   * 
-   * @param isEncryptedForm
-   * @param rootElementDefn
-   * 
-   * @param formId
-   * @param isDownloadEnabled
-   * @param xmlBytes
-   * @param submissionElementDefn
-   * @param ds
-   * @param user
-   * @return
-   * @throws ODKOverQuotaException
-   * @throws ODKDatastoreException
-   * @throws ODKConversionException
-   *           if formId is too long...
-   * @throws ODKFormAlreadyExistsException
-   */
-  public static final Form createOrFetchFormId(XFormParameters rootElementDefn,
-      boolean isEncryptedForm, String title, byte[] xmlBytes, boolean isDownloadEnabled,
-      CallingContext cc) throws ODKOverQuotaException, ODKDatastoreException, ODKConversionException,
-      ODKFormAlreadyExistsException {
-
-    Form thisForm = null;
-
-    String formUri = CommonFieldsBase.newMD5HashUri(rootElementDefn.formId);
-
-    try {
-      thisForm = getForm(formUri, null, cc);
-
-      if (thisForm.isSameForm(rootElementDefn, isEncryptedForm, title, xmlBytes, cc) != BlobSubmissionOutcome.NEW_FILE_VERSION) {
-        return thisForm;
-      }
-      throw new ODKFormAlreadyExistsException();
-    } catch (ODKEntityNotFoundException e) {
-      thisForm = new Form(rootElementDefn, isEncryptedForm, isDownloadEnabled, xmlBytes, title, cc);
-    }
-    return thisForm;
   }
 
   public void setIsComplete(Boolean value) {
@@ -929,5 +694,6 @@ public class Form {
   public String getUri() {
     return infoRow.getUri();
   }
+
 
 }

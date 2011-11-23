@@ -26,7 +26,7 @@ import org.opendatakit.aggregate.client.submission.SubmissionUISummary;
 import org.opendatakit.aggregate.constants.common.FormElementNamespace;
 import org.opendatakit.aggregate.constants.format.FormatConsts;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
-import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.format.SubmissionFormatter;
 import org.opendatakit.aggregate.format.element.ElementFormatter;
@@ -43,11 +43,11 @@ public class CsvFormatterWithFilters implements SubmissionFormatter {
   private ElementFormatter elemFormatter;
   private List<FormElementModel> propertyNames;
   private List<String> headers;
-  private final Form form;
+  private final IForm form;
   private final PrintWriter output;
   private List<FormElementNamespace> namespaces;
 
-  public CsvFormatterWithFilters(Form xform, String webServerUrl, PrintWriter printWriter,
+  public CsvFormatterWithFilters(IForm xform, String webServerUrl, PrintWriter printWriter,
       FilterGroup filterGroup) {
     form = xform;
     output = printWriter;

@@ -25,7 +25,7 @@ import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.common.ExportStatus;
 import org.opendatakit.aggregate.constants.common.UIConsts;
 import org.opendatakit.aggregate.filter.SubmissionFilterGroup;
-import org.opendatakit.aggregate.form.Form;
+import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.form.PersistentResults;
 import org.opendatakit.aggregate.format.SubmissionFormatter;
 import org.opendatakit.aggregate.format.table.CsvFormatterWithFilters;
@@ -46,12 +46,12 @@ import org.opendatakit.common.web.constants.HtmlConsts;
  */
 public class CsvWorkerImpl {
 
-  private final Form form;
+  private final IForm form;
   private final SubmissionKey persistentResultsKey;
   private final Long attemptCount;
   private final CallingContext cc;
 
-  public CsvWorkerImpl(Form form, SubmissionKey persistentResultsKey, Long attemptCount,
+  public CsvWorkerImpl(IForm form, SubmissionKey persistentResultsKey, Long attemptCount,
       CallingContext cc) {
     this.form = form;
     this.persistentResultsKey = persistentResultsKey;

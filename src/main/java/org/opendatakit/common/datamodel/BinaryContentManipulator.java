@@ -431,6 +431,7 @@ public class BinaryContentManipulator {
       User user = cc.getCurrentUser();
       Query q = ds.createQuery(ctntRelation, "BinaryContentManipulator.refreshFromDatabase", user);
       q.addFilter(ctntRelation.parentAuri, FilterOperation.EQUAL, parentKey);
+      q.addSort(ctntRelation.parentAuri, Direction.ASCENDING); // GAE work-around
       q.addSort(ctntRelation.ordinalNumber, Direction.ASCENDING);
 
       List<? extends CommonFieldsBase> contentHits = q.executeQuery();
