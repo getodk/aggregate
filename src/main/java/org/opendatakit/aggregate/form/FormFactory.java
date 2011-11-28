@@ -31,6 +31,7 @@ import org.opendatakit.aggregate.exception.ODKConversionException;
 import org.opendatakit.aggregate.exception.ODKFormAlreadyExistsException;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.submission.SubmissionKeyPart;
+import org.opendatakit.aggregate.util.BackendActionsTable;
 import org.opendatakit.common.datamodel.BinaryContentManipulator.BlobSubmissionOutcome;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.Datastore;
@@ -136,6 +137,9 @@ public class FormFactory {
       // space out the updates because the cacheTimestamp is established after all
       // the datastore accesses.
       cacheTimestamp = System.currentTimeMillis();
+      
+      // test to see if we need to trigger the watchdog
+      BackendActionsTable.triggerWatchdog(cc);
     }
     
     for (IForm v : cache) {

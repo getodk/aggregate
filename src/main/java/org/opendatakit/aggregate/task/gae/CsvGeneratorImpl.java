@@ -25,14 +25,16 @@ import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.BasicConsts;
 
+import com.google.appengine.api.backends.BackendService;
+import com.google.appengine.api.backends.BackendServiceFactory;
 import com.google.appengine.api.taskqueue.Queue;
 import com.google.appengine.api.taskqueue.QueueFactory;
 import com.google.appengine.api.taskqueue.TaskOptions;
 
 /**
- * This is a singleton bean.  It cannot have any per-request state.
- * It uses a static inner class to encapsulate the per-request state
- * of a running background task.
+ * This is a singleton bean. It cannot have any per-request state. It uses a
+ * static inner class to encapsulate the per-request state of a running
+ * background task.
  * 
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
@@ -41,8 +43,14 @@ import com.google.appengine.api.taskqueue.TaskOptions;
 public class CsvGeneratorImpl implements CsvGenerator {
 
   @Override
-  public void createCsvTask(IForm form, SubmissionKey persistentResultsKey, long attemptCount, CallingContext cc) throws ODKDatastoreException {
-    TaskOptions task = TaskOptions.Builder.withUrl(BasicConsts.FORWARDSLASH + CsvGeneratorTaskServlet.ADDR);
+  public void createCsvTask(IForm form, SubmissionKey persistentResultsKey, long attemptCount,
+      CallingContext cc) throws ODKDatastoreException {
+    TaskOptions task = TaskOptions.Builder.withUrl(BasicConsts.FORWARDSLASH
+        + CsvGeneratorTaskServlet.ADDR);
+    BackendService backendsApi = BackendServiceFactory.getBackendService();
+    String hostname = backendsApi.getBackendAddress(ServletConsts.BACKEND_GAE_SERVICE);
+    task.header(ServletConsts.HOST, hostname);
+
     task.method(TaskOptions.Method.GET);
     task.countdownMillis(PersistConsts.MIN_SETTLE_MILLISECONDS);
     task.param(ServletConsts.FORM_ID, form.getFormId());

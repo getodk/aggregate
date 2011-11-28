@@ -74,6 +74,9 @@ public final class ServletConsts {
 
   public static final String ATTEMPT_COUNT = "attemptCount";
 
+  public static final String BACKEND_GAE_SERVICE = "background";
+  
+  public static final String HOST = "Host";
   /**
    * The name of the property that determines how to format webpage
    */
