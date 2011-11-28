@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<queue-entries xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<queue-entries
+		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:noNamespaceSchemaLocation="queue.xsd">
   <queue>
     <name>default</name>

@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <appengine-web-app xmlns="http://appengine.google.com/ns/1.0">
-	<application>opendatakit</application>
+	<application>msundt-agg-test2</application>
 	<version>1</version>
 		
 	<!--  use sessions and don't require that they commit to the backing store -->
 	<sessions-enabled>true</sessions-enabled>
-	<async-session-persistence enabled="true" />
 	<!--  Make GAE more like Tomcat w.r.t. threading... -->
 	<threadsafe>true</threadsafe>
 	<!--  Configure static error handlers -->

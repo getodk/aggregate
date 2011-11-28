@@ -15,8 +15,6 @@
  */
 package org.opendatakit.aggregate;
 
-import org.opendatakit.aggregate.form.FormFactory;
-import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.utils.WebStartup;
 import org.opendatakit.common.web.CallingContext;
 
@@ -27,15 +25,6 @@ public class AggregateStartupImpl implements WebStartup {
 	
 	@Override
 	public void doStartupAction(CallingContext bootstrapCc) {
-		// be sure the FormInfo record is created.
-		// note that this is called for every webserver instance.
-		// additional logic is required to detect whether this 
-		// is the first webserver instance.  We don't care.
-		try {
-			FormFactory.initialize(bootstrapCc);
-		} catch (ODKDatastoreException e) {
-			e.printStackTrace();
-		}
 	}
 
 }

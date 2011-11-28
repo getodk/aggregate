@@ -30,6 +30,7 @@ import org.opendatakit.aggregate.form.MiscTasks;
 import org.opendatakit.aggregate.form.PersistentResults;
 import org.opendatakit.aggregate.query.submission.QueryByDateRange;
 import org.opendatakit.aggregate.submission.Submission;
+import org.opendatakit.aggregate.util.BackendActionsTable;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
 
@@ -52,17 +53,23 @@ public class WatchdogWorkerImpl {
     FormDelete formDelete = (FormDelete) cc.getBean(BeanDefs.FORM_DELETE_BEAN);
     PurgeOlderSubmissions purgeSubmissions = (PurgeOlderSubmissions) cc
         .getBean(BeanDefs.PURGE_OLDER_SUBMISSIONS_BEAN);
-    checkFormServiceCursors(checkIntervalMilliseconds, uploadSubmissions, cc);
-    checkPersistentResults(csvGenerator, kmlGenerator, cc);
-    checkMiscTasks(worksheetCreator, formDelete, purgeSubmissions, cc);
+    boolean activeTasks = false;
+    // NOTE: do not short-circuit these check actions...
+    activeTasks = activeTasks | checkFormServiceCursors(checkIntervalMilliseconds, uploadSubmissions, cc);
+    activeTasks = activeTasks | checkPersistentResults(csvGenerator, kmlGenerator, cc);
+    activeTasks = activeTasks | checkMiscTasks(worksheetCreator, formDelete, purgeSubmissions, cc);
+    if ( activeTasks ) {
+      BackendActionsTable.scheduleFutureWatchdog(Watchdog.WATCHDOG_BUSY_RETRY_INTERVAL_MILLISECONDS, cc);
+    }
   }
 
-  private void checkFormServiceCursors(long checkIntervalMilliseconds,
+  private boolean checkFormServiceCursors(long checkIntervalMilliseconds,
       UploadSubmissions uploadSubmissions, CallingContext cc) throws ODKExternalServiceException,
       ODKFormNotFoundException, ODKDatastoreException, ODKIncompleteSubmissionData {
     Date olderThanDate = new Date(System.currentTimeMillis() - checkIntervalMilliseconds);
     List<FormServiceCursor> fscList = FormServiceCursor.queryFormServiceCursorRelation(
         olderThanDate, cc);
+    boolean activeTasks = false;
     for (FormServiceCursor fsc : fscList) {
       if (!fsc.isExternalServicePrepared())
         continue;
@@ -71,50 +78,55 @@ public class WatchdogWorkerImpl {
 
       switch (fsc.getExternalServicePublicationOption()) {
       case UPLOAD_ONLY:
-        checkUpload(fsc, uploadSubmissions, cc);
+        activeTasks = activeTasks | checkUpload(fsc, uploadSubmissions, cc);
         break;
       case STREAM_ONLY:
-        checkStreaming(fsc, uploadSubmissions, cc);
+        activeTasks = activeTasks | checkStreaming(fsc, uploadSubmissions, cc);
         break;
       case UPLOAD_N_STREAM:
         if (!fsc.getUploadCompleted())
-          checkUpload(fsc, uploadSubmissions, cc);
+          activeTasks = activeTasks | checkUpload(fsc, uploadSubmissions, cc);
         if (fsc.getUploadCompleted())
-          checkStreaming(fsc, uploadSubmissions, cc);
+          activeTasks = activeTasks | checkStreaming(fsc, uploadSubmissions, cc);
         break;
       default:
         break;
       }
     }
+    return activeTasks;
   }
 
-  private void checkUpload(FormServiceCursor fsc, UploadSubmissions uploadSubmissions,
+  private boolean checkUpload(FormServiceCursor fsc, UploadSubmissions uploadSubmissions,
       CallingContext cc) throws ODKExternalServiceException {
     // TODO: remove
     System.out.println("Checking upload for " + fsc.getExternalServiceType());
+    boolean activeTask = false;
     if (!fsc.getUploadCompleted()) {
       Date lastUploadDate = fsc.getLastUploadCursorDate();
       Date establishmentDate = fsc.getEstablishmentDateTime();
       if (establishmentDate != null && lastUploadDate == null
           || lastUploadDate.compareTo(establishmentDate) < 0) {
         // there is still work to do
+        activeTask = true;
         uploadSubmissions.createFormUploadTask(fsc, cc);
       }
     }
+    return activeTask;
   }
 
-  private void checkStreaming(FormServiceCursor fsc, UploadSubmissions uploadSubmissions,
+  private boolean checkStreaming(FormServiceCursor fsc, UploadSubmissions uploadSubmissions,
       CallingContext cc) throws ODKFormNotFoundException, ODKDatastoreException,
       ODKExternalServiceException, ODKIncompleteSubmissionData {
     // TODO: remove
     System.out.println("Checking streaming for " + fsc.getExternalServiceType());
+    boolean activeTask = false;
     // get the last submission sent to the external service
     String lastStreamingKey = fsc.getLastStreamingKey();
     IForm form = FormFactory.retrieveFormByFormId(fsc.getFormId(), cc);
     if (!form.hasValidFormDefinition()) {
       System.out.println("Form definition was ill-formed while checking for streaming for "
           + fsc.getExternalServiceType());
-      return;
+      return false;
     }
     // query for last submission submitted for the form
     QueryByDateRange query = new QueryByDateRange(form, cc);
@@ -130,17 +142,20 @@ public class WatchdogWorkerImpl {
         lastSubmissionKey = lastSubmission.getKey().getKey();
         if (lastStreamingKey == null || !lastStreamingKey.equals(lastSubmissionKey)) {
           // there is work to do
+          activeTask = true;
           uploadSubmissions.createFormUploadTask(fsc, cc);
         }
       }
     }
+    return activeTask;
   }
 
-  private void checkPersistentResults(CsvGenerator csvGenerator, KmlGenerator kmlGenerator,
+  private boolean checkPersistentResults(CsvGenerator csvGenerator, KmlGenerator kmlGenerator,
       CallingContext cc) throws ODKDatastoreException, ODKFormNotFoundException {
     try {
       // TODO: remove
       System.out.println("Checking persistent results");
+      boolean activeTasks = false;
       List<PersistentResults> persistentResults = PersistentResults.getStalledRequests(cc);
       for (PersistentResults persistentResult : persistentResults) {
         // TODO: remove
@@ -151,8 +166,9 @@ public class WatchdogWorkerImpl {
         IForm form = FormFactory.retrieveFormByFormId(persistentResult.getFormId(), cc);
         if (!form.hasValidFormDefinition()) {
           System.out.println("Form of stalled task is ill-formed");
-          return;
+          continue; // skip this and move on...
         }
+        activeTasks = true;
         switch (persistentResult.getResultType()) {
         case CSV:
           csvGenerator.createCsvTask(form, persistentResult.getSubmissionKey(), attemptCount, cc);
@@ -162,17 +178,19 @@ public class WatchdogWorkerImpl {
           break;
         }
       }
+      return activeTasks;
     } finally {
       System.out.println("Done checking persistent results");
     }
   }
 
-  private void checkMiscTasks(WorksheetCreator wsCreator, FormDelete formDelete,
+  private boolean checkMiscTasks(WorksheetCreator wsCreator, FormDelete formDelete,
       PurgeOlderSubmissions purgeSubmissions, CallingContext cc) throws ODKDatastoreException,
       ODKFormNotFoundException {
     try {
       // TODO: remove
       System.out.println("Checking miscellaneous tasks");
+      boolean activeTasks = false;
       List<MiscTasks> miscTasks = MiscTasks.getStalledRequests(cc);
       for (MiscTasks aTask : miscTasks) {
         // TODO: remove
@@ -188,20 +206,24 @@ public class WatchdogWorkerImpl {
         switch (aTask.getTaskType()) {
         case WORKSHEET_CREATE:
           if (form.hasValidFormDefinition()) {
+            activeTasks = true;
             wsCreator.createWorksheetTask(form, aTask.getSubmissionKey(), attemptCount, cc);
           }
           break;
         case DELETE_FORM:
+          activeTasks = true;
           formDelete.createFormDeleteTask(form, aTask.getSubmissionKey(), attemptCount, cc);
           break;
         case PURGE_OLDER_SUBMISSIONS:
           if (form.hasValidFormDefinition()) {
+            activeTasks = true;
             purgeSubmissions.createPurgeOlderSubmissionsTask(form, aTask.getSubmissionKey(),
                 attemptCount, cc);
           }
           break;
         }
       }
+      return activeTasks;
     } finally {
       System.out.println("Done checking miscellaneous tasks");
     }

@@ -17,6 +17,7 @@ package org.opendatakit.aggregate.task.gae;
 
 import java.net.URLEncoder;
 
+import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.externalservice.ExternalServiceConsts;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
 import org.opendatakit.aggregate.externalservice.FormServiceCursor;
@@ -27,14 +28,16 @@ import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.BasicConsts;
 import org.opendatakit.common.web.constants.HtmlConsts;
 
+import com.google.appengine.api.backends.BackendService;
+import com.google.appengine.api.backends.BackendServiceFactory;
 import com.google.appengine.api.taskqueue.Queue;
 import com.google.appengine.api.taskqueue.QueueFactory;
 import com.google.appengine.api.taskqueue.TaskOptions;
 
 /**
- * This is a singleton bean.  It cannot have any per-request state.
- * It uses a static inner class to encapsulate the per-request state
- * of a running background task.
+ * This is a singleton bean. It cannot have any per-request state. It uses a
+ * static inner class to encapsulate the per-request state of a running
+ * background task.
  * 
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
@@ -43,20 +46,26 @@ import com.google.appengine.api.taskqueue.TaskOptions;
 public class UploadSubmissionsImpl implements UploadSubmissions {
 
   private static final String UPLOAD_SUBMISSION_QUEUE = "upload-submission-queue";
-  
+
   @Override
   public void createFormUploadTask(FormServiceCursor fsc, CallingContext cc)
       throws ODKExternalServiceException {
 
     try {
-      System.out.println("Creating " + fsc.getExternalServicePublicationOption().toString().toLowerCase() + " upload task: " + fsc.getExternalServiceType());
+      System.out.println("Creating "
+          + fsc.getExternalServicePublicationOption().toString().toLowerCase() + " upload task: "
+          + fsc.getExternalServiceType());
       String fscUri = URLEncoder.encode(fsc.getUri(), HtmlConsts.UTF8_ENCODE);
+      TaskOptions task = TaskOptions.Builder.withUrl(BasicConsts.FORWARDSLASH
+          + UploadSubmissionsTaskServlet.ADDR);
+      BackendService backendsApi = BackendServiceFactory.getBackendService();
+      String hostname = backendsApi.getBackendAddress(ServletConsts.BACKEND_GAE_SERVICE);
+      task.header(ServletConsts.HOST, hostname);
 
-      TaskOptions task = TaskOptions.Builder.withUrl(BasicConsts.FORWARDSLASH + UploadSubmissionsTaskServlet.ADDR);
       task.countdownMillis(500 + PersistConsts.MAX_SETTLE_MILLISECONDS);
       task.method(TaskOptions.Method.GET);
       task.param(ExternalServiceConsts.FSC_URI_PARAM, fscUri);
-      
+
       Queue queue = QueueFactory.getQueue(UPLOAD_SUBMISSION_QUEUE);
       queue.add(task);
     } catch (Exception e) {
