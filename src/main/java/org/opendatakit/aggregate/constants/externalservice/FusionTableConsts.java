@@ -39,8 +39,8 @@ public final class FusionTableConsts {
   public static final String SINGLE_QUOTE = "'";
   public static final String HTML_ESCAPED_SINGLE_QUOTE = "&#39;";
  
-  public static final int SOCKET_ESTABLISHMENT_TIMEOUT_MILLISECONDS = 30000;
-  public static final int SERVICE_TIMEOUT_MILLISECONDS = 30000;
+  public static final int SOCKET_ESTABLISHMENT_TIMEOUT_MILLISECONDS = 60000;
+  public static final int SERVICE_TIMEOUT_MILLISECONDS = 60000;
   
   public static final Map<ElementType, FusionTableType> typeMap = new HashMap<ElementType, FusionTableType>();
   static {  
