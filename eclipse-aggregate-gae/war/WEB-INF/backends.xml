@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<backends xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="backends.xsd">
+  <backend name="background">
+  	<instances>1</instances>
+  	<class>B2</class>
+  	<max-concurrent-requests>5</max-concurrent-requests>
+  	<options>
+  	<dynamic>true</dynamic>
+  	</options>
+  </backend>
+</backends>
