@@ -30,14 +30,16 @@ import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.BasicConsts;
 
+import com.google.appengine.api.backends.BackendService;
+import com.google.appengine.api.backends.BackendServiceFactory;
 import com.google.appengine.api.taskqueue.Queue;
 import com.google.appengine.api.taskqueue.QueueFactory;
 import com.google.appengine.api.taskqueue.TaskOptions;
 
 /**
- * This is a singleton bean.  It cannot have any per-request state.
- * It uses a static inner class to encapsulate the per-request state
- * of a running background task.
+ * This is a singleton bean. It cannot have any per-request state. It uses a
+ * static inner class to encapsulate the per-request state of a running
+ * background task.
  * 
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
@@ -46,24 +48,28 @@ import com.google.appengine.api.taskqueue.TaskOptions;
 public class WorksheetCreatorImpl implements WorksheetCreator {
 
   @Override
-  public final void createWorksheetTask(IForm form,
-			SubmissionKey miscTasksKey, long attemptCount,
-			CallingContext cc)
-      throws ODKFormNotFoundException, ODKDatastoreException {
+  public final void createWorksheetTask(IForm form, SubmissionKey miscTasksKey, long attemptCount,
+      CallingContext cc) throws ODKFormNotFoundException, ODKDatastoreException {
     MiscTasks r = new MiscTasks(miscTasksKey, cc);
     Map<String, String> params = r.getRequestParameters();
 
-    TaskOptions task = TaskOptions.Builder.withUrl(BasicConsts.FORWARDSLASH + WorksheetServlet.ADDR);
+    TaskOptions task = TaskOptions.Builder
+        .withUrl(BasicConsts.FORWARDSLASH + WorksheetServlet.ADDR);
+    BackendService backendsApi = BackendServiceFactory.getBackendService();
+    String hostname = backendsApi.getBackendAddress(ServletConsts.BACKEND_GAE_SERVICE);
+    task.header(ServletConsts.HOST, hostname);
+
     task.method(TaskOptions.Method.GET);
     task.countdownMillis(SpreadsheetConsts.WORKSHEET_CREATION_DELAY);
     task.param(ServletConsts.FORM_ID, form.getFormId());
-    task.param(ExternalServiceConsts.EXT_SERV_ADDRESS, params.get(ExternalServiceConsts.EXT_SERV_ADDRESS));
+    task.param(ExternalServiceConsts.EXT_SERV_ADDRESS,
+        params.get(ExternalServiceConsts.EXT_SERV_ADDRESS));
     task.param(ServletConsts.EXTERNAL_SERVICE_TYPE, params.get(ServletConsts.EXTERNAL_SERVICE_TYPE));
     task.param(ServletConsts.MISC_TASKS_KEY, miscTasksKey.toString());
     task.param(ServletConsts.ATTEMPT_COUNT, Long.toString(attemptCount));
 
     Queue queue = QueueFactory.getDefaultQueue();
-	queue.add(task);
+    queue.add(task);
   }
 
 }

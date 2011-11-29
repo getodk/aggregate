@@ -18,6 +18,13 @@ package org.opendatakit.aggregate.task;
 import org.opendatakit.common.web.CallingContext;
 
 /**
+ * Watchdog has two radically divergent implementations.  
+ * <ul><li>On Tomcat, Watchdog is executed using the spring task framework.</li><li>
+ * On GAE, Watchdog is fired every WATCHDOG_RETRY_INTERVAL_MILLISECONDS
+ * when the website is active or, if, Watchdog itself determines 
+ * that there is work, then Watchdog is re-fired every 
+ * WATCHDOG_BUSY_RETRY_INTERVAL_MILLISECONDS until there is no
+ * pending work.</li></ul>
  * 
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
@@ -25,7 +32,20 @@ import org.opendatakit.common.web.CallingContext;
  */
 public interface Watchdog {
 
+  /** check interval for launching watchdog due to UI activity */
+  public static long WATCHDOG_RETRY_INTERVAL_MILLISECONDS = 40L * 60000L; // 40 minutes
+  
+  /** interval used within watchdogs with work to relaunch themselves */
+  public static long WATCHDOG_BUSY_RETRY_INTERVAL_MILLISECONDS = 10L * 60000L; // 10 minutes
+
   public void createWatchdogTask(long checkIntervalMilliseconds);
+
+  /**
+   * Invoked when the website is accessed after a period of inactivity.
+   * 
+   * @param cc
+   */
+  public void onUsage(long delayMilliseconds, CallingContext cc);
   
   /**
    * @return implemented only on Tomcat for getting CC in task context.
