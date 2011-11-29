@@ -17,6 +17,7 @@ package org.opendatakit.common.security;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.opendatakit.aggregate.constants.common.UIConsts;
 import org.springframework.beans.factory.InitializingBean;
 
 /**
@@ -47,6 +48,7 @@ public class Realm implements InitializingBean {
 		}
 		
 		Log log = LogFactory.getLog(Realm.class);
+		log.info("Version: " + UIConsts.VERSION_STRING);
 		log.info("Hostname: " + hostname);
 		log.info("Port: " + Integer.toString(port));
 		log.info("SecurePort: " + Integer.toString(securePort));
