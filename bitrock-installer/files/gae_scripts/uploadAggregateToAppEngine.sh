@@ -19,7 +19,7 @@ OUTCOME=1
 [ -z "${DEBUG}" ] || set -x  # trace if $DEBUG env. var. is non-zero
 UPLOAD_ROOT=`dirname "$0" | sed -e "s#^\\([^/]\\)#${PWD}/\\1#"` # sed makes absolute
 cd "$UPLOAD_ROOT"
-( ( ( "$UPLOAD_ROOT/appengine-java-sdk/bin/appcfg.sh" --email=${EMAIL} --passin ${MODE} ODKAggregate 2>&1 && echo '---- WEBSITE COMPLETE - BEGIN BACKEND ----' &&  "$UPLOAD_ROOT/appengine-java-sdk/bin/appcfg.sh" --email=${EMAIL} --passin backends ${MODE} ODKAggregate 2>&1 OUTCOME=0 && echo ---END-SCRIPT_SUCCESS--- ) || echo ---END-SCRIPT-FAILURE--- ) | sed -e"/assword fo/s/.*//" ) << __THE__END__
+( ( ( "$UPLOAD_ROOT/appengine-java-sdk/bin/appcfg.sh" --email=${EMAIL} --passin ${MODE} ODKAggregate 2>&1 && echo '---- WEBSITE COMPLETE - BEGIN BACKEND ----' &&  "$UPLOAD_ROOT/appengine-java-sdk/bin/appcfg.sh" --email=${EMAIL} --passin backends ${MODE} ODKAggregate 2>&1 && OUTCOME=0 && echo ---END-SCRIPT_SUCCESS--- ) || echo ---END-SCRIPT-FAILURE--- ) | sed -e"/assword fo/s/.*//" ) << __THE__END__
 ${PASSWD}
 __THE__END__
 read -p "Press any key to close window . . ."
