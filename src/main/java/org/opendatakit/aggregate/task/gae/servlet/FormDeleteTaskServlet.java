@@ -109,9 +109,6 @@ public class FormDeleteTaskServlet extends ServletUtilBase {
 		e.printStackTrace();
 		resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.toString());
 		return;
-	} catch (ODKFormNotFoundException e) {
-		odkIdNotFoundError(resp);
-		return;
 	} catch (ODKExternalServiceDependencyException e) {
 		e.printStackTrace();
 		resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.toString());
