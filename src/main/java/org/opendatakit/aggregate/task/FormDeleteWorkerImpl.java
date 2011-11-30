@@ -20,6 +20,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.TaskLockType;
@@ -63,6 +64,7 @@ public class FormDeleteWorkerImpl {
   private final SubmissionKey miscTasksKey;
   private final CallingContext cc;
   private final String pFormIdLockId;
+  private final Log logger = LogFactory.getLog(FormDeleteWorkerImpl.class);
 
   public FormDeleteWorkerImpl(IForm form, SubmissionKey miscTasksKey, long attemptCount,
       CallingContext cc) {
@@ -72,17 +74,24 @@ public class FormDeleteWorkerImpl {
     pFormIdLockId = UUID.randomUUID().toString();
   }
 
-  public final void deleteForm() throws ODKDatastoreException, ODKFormNotFoundException,
-      ODKExternalServiceDependencyException {
+  public final void deleteForm() throws ODKDatastoreException, ODKExternalServiceDependencyException {
 
-    LogFactory.getLog(FormDeleteWorkerImpl.class).info("deletion task: " + miscTasksKey.toString());
+    logger.info("deletion task: " + miscTasksKey.toString());
 
     MiscTasks t;
     try {
       t = new MiscTasks(miscTasksKey, cc);
+    } catch (ODKOverQuotaException e) {
+      logger.warn("Quota exceeded.");
+      return;
+    } catch (ODKDatastoreException e) {
+      logger.error("Persistence layer problem: " + e.getMessage());
+      return;
     } catch (Exception e) {
+      logger.error("Unexpected exception: " + e.getMessage());
       return;
     }
+    
     // gain lock on the formId itself...
     // the locked resource should be the formId, but for testing
     // it is useful to have the external services collide using
@@ -104,6 +113,7 @@ public class FormDeleteWorkerImpl {
     }
 
     if (!locked) {
+      logger.warn("Unable to acquire lock");
       return;
     }
 
@@ -115,7 +125,14 @@ public class FormDeleteWorkerImpl {
         // deletion request should have been created after the form...
         doDeletion(t);
       }
+    } catch (ODKOverQuotaException e) {
+      logger.warn("Quota exceeded.");
+      throw e;
+    } catch (ODKDatastoreException e) {
+      logger.error("Persistence layer problem: " + e.getMessage());
+      throw e;
     } catch (Exception e) {
+      logger.error("Unexpected exception: " + e.getMessage());
       e.printStackTrace();
     } finally {
       formIdTaskLock = ds.createTaskLock(user);
@@ -149,6 +166,7 @@ public class FormDeleteWorkerImpl {
     // first, delete all the tasks for this form.
     Datastore ds = cc.getDatastore();
     User user = cc.getCurrentUser();
+    boolean outcome = true;
     List<MiscTasks> tasks = MiscTasks.getAllTasksForForm(form, cc);
     for (MiscTasks task : tasks) {
       if (task.getUri().equals(self.getUri())) {
@@ -188,8 +206,8 @@ public class FormDeleteWorkerImpl {
           e1.printStackTrace();
         } finally {
           if (!deleted) {
-            // TODO: repost...
-            return false;
+            outcome = false;
+            logger.error("Failed to delete MiscTask: " + task.getUri());
           }
         }
         // release the lock
@@ -212,7 +230,7 @@ public class FormDeleteWorkerImpl {
         }
       }
     }
-    return true;
+    return outcome;
   }
 
   /**
@@ -227,7 +245,15 @@ public class FormDeleteWorkerImpl {
     List<PersistentResults> tasks = PersistentResults.getAllTasksForForm(form, cc);
     for (PersistentResults task : tasks) {
       // delete the task...
-      task.delete(cc);
+      boolean deleted = false;
+      try {
+        task.delete(cc);
+        deleted = true;
+      } finally {
+        if ( !deleted ) {
+          logger.error("Unable to delete PersistentResults: " + task.getUri());
+        }
+      }
     }
     return true;
   }
@@ -260,6 +286,7 @@ public class FormDeleteWorkerImpl {
       } finally {
         if (!deleted) {
           allDeleted = false;
+          logger.error("Unable to delete FormServiceCursor: " + service.getFormServiceCursor().getUri());
         }
       }
       taskLock = ds.createTaskLock(user);
@@ -284,17 +311,19 @@ public class FormDeleteWorkerImpl {
 
   private void deleteFilters() throws ODKDatastoreException {
 
-    try {
-      List<SubmissionFilterGroup> filterGroupList = SubmissionFilterGroup.getFilterGroupList(
-          form.getFormId(), cc);
-      for (SubmissionFilterGroup group : filterGroupList) {
+    List<SubmissionFilterGroup> filterGroupList = SubmissionFilterGroup.getFilterGroupList(
+        form.getFormId(), cc);
+    for (SubmissionFilterGroup group : filterGroupList) {
+      boolean deleted = false;
+      try {
         group.delete(cc);
+        deleted = true;
+      } finally {
+        if ( !deleted ) {
+          logger.error("Unable to delete SubmissionFilterGroup: " + group.getUri());
+        }
       }
-    } catch (Exception e) {
-      // TODO: send exception over service
-      e.printStackTrace();
     }
-
   }
 
   private void doMarkAsComplete(MiscTasks t) throws ODKEntityPersistException, ODKOverQuotaException {
@@ -385,7 +414,8 @@ public class FormDeleteWorkerImpl {
     if (!deleteMiscTasks(t))
       return false;
 
-    // delete the filters (waiting until the end because a task could have using a filter)
+    // delete the filters 
+    // wait until the end because a task could be using a filter.
     deleteFilters();
     
     // delete the form.
