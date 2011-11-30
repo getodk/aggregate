@@ -183,15 +183,10 @@ public class WorksheetCreatorWorkerImpl {
 	    MiscTasks r = new MiscTasks(miscTasksKey, cc);
 	    if ( attemptCount.equals(r.getAttemptCount()) ) {
 	    	
-	    	// inform the form service cursor that it can start uploading or streaming
-	    	FormServiceCursor fsc = spreadsheet.getFormServiceCursor();
-	    	fsc.setIsExternalServicePrepared(true);
-	    	cc.getDatastore().putEntity(fsc, cc.getCurrentUser());
-	    	
 			// if we need to upload submissions, start a task to do so
 	    	UploadSubmissions us = (UploadSubmissions) cc.getBean(BeanDefs.UPLOAD_TASK_BEAN);
 			if (!esType.equals(ExternalServicePublicationOption.STREAM_ONLY)) {
-				us.createFormUploadTask(fsc, cc);
+				us.createFormUploadTask(spreadsheet.getFormServiceCursor(), cc);
 			}
 			
 			doMarkAsComplete(r);
