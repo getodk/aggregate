@@ -272,6 +272,10 @@ public class PersistentResults {
     bcm.setValueFromByteArray(byteArray, contentType, contentLength, unrootedFilePath, cc);
   }
 
+  public String getUri() {
+    return row.getUri();
+  }
+  
   public String getFormId() {
     return row.getStringField(PersistentResultsTable.FORM_ID);
   }

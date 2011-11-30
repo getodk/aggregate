@@ -120,6 +120,7 @@ public class UploadSubmissionsWorkerImpl {
     }
 
     if (!locked) {
+      logger.warn("Unable to acquire lock");
       return;
     }
 
