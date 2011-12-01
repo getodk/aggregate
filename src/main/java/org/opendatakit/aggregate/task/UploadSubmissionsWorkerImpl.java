@@ -55,7 +55,15 @@ import org.opendatakit.common.web.constants.BasicConsts;
  */
 public class UploadSubmissionsWorkerImpl {
 
-  private static final int MAX_QUERY_LIMIT = ServletConsts.FETCH_LIMIT;
+  // Backend tasks are still limited to a 10-minute request time-out.
+  // Timing against Fusion Tables indicates that on a good day, it takes
+  // about 900 ms per published submission (no repeats).  This means that
+  // in 10 minutes (600,000 ms), you should be able to submit 666
+  // records into fusion tables.  If we give a 6-fold factor for a 
+  // combination of multiple repeat groups within a submission and
+  // the slowness of submissions on a bad day, this brings the fetch
+  // limit down to about 100 records.
+  private static final int MAX_QUERY_LIMIT = 100;
   private static final int DELAY_BETWEEN_RELEASE_RETRIES = 1000;
   private static final int MAX_NUMBER_OF_RELEASE_RETRIES = 10;
 
@@ -186,8 +194,7 @@ public class UploadSubmissionsWorkerImpl {
     }
     
     if ( reQueue ) {
-      // create another task to either start streaming
-      // OR to delete if upload ONLY
+      // create another task to continue upload
       UploadSubmissions uploadSubmissionsBean = (UploadSubmissions) cc
           .getBean(BeanDefs.UPLOAD_TASK_BEAN);
       uploadSubmissionsBean.createFormUploadTask(pFsc, cc);
@@ -253,9 +260,10 @@ public class UploadSubmissionsWorkerImpl {
       int counter = 0;
       for (Submission submission : submissionsToSend) {
         pExtService.sendSubmission(submission, cc);
+        ++counter;
         // See QueryByDateRange
         // -- we are querying by the markedAsCompleteDate
-        lastDateSent = submission.getLastUpdateDate();
+        lastDateSent = submission.getMarkedAsCompleteDate();
         lastKeySent = submission.getKey().getKey();
         if (streaming) {
           pFsc.setLastStreamingCursorDate(lastDateSent);
