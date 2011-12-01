@@ -18,6 +18,7 @@ package org.opendatakit.aggregate.submission;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.opendatakit.aggregate.constants.ParserConsts;
 import org.opendatakit.common.web.constants.BasicConsts;
 
 /**
@@ -67,7 +68,20 @@ public class SubmissionKey {
 
 	public final List<SubmissionKeyPart> splitSubmissionKey() {
 		List<SubmissionKeyPart> parts = new ArrayList<SubmissionKeyPart>();
-		String[] stringParts = this.toString().split(BasicConsts.FORWARDSLASH);
+		String[] stringParts;
+		// handle slashes in formId by looking backward for the first occurance of the version
+		int idxBeginningVersion = key.lastIndexOf(SubmissionKeyPart.K_OPEN_BRACKET_VERSION_EQUALS);
+		if ( idxBeginningVersion > 0 ) {
+		  String firstPartFront = key.substring(0,idxBeginningVersion);
+		  String remainder = key.substring(idxBeginningVersion);
+		  stringParts = remainder.split(BasicConsts.FORWARDSLASH);
+		  if ( firstPartFront.contains(ParserConsts.FORWARD_SLASH) ) {
+		    firstPartFront = firstPartFront.replaceAll(ParserConsts.FORWARD_SLASH, ParserConsts.FORWARD_SLASH_SUBSTITUTION);
+		  }
+		  stringParts[0] = firstPartFront + stringParts[0];
+		} else {
+		  stringParts = key.split(BasicConsts.FORWARDSLASH);
+		}
 		for ( String s : stringParts ) {
 			parts.add( new SubmissionKeyPart(s));
 		}

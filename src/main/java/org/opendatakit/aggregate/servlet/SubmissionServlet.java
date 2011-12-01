@@ -290,7 +290,7 @@ public class SubmissionServlet extends ServletUtilBase {
           //
           // add what could be considered the form's metadata...
           //
-          attributeRow.addFormattedValue("id=\"" + StringEscapeUtils.escapeXml(form.getFormId())
+          attributeRow.addFormattedValue("id=\"" + StringEscapeUtils.escapeXml(form.getFormId().replace(ParserConsts.FORWARD_SLASH_SUBSTITUTION, ParserConsts.FORWARD_SLASH))              
               + "\"");
           if (form.isEncryptedForm()) {
             attributeRow.addFormattedValue("encrypted=\"yes\"");

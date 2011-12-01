@@ -29,6 +29,7 @@ import org.kxml2.kdom.Document;
 import org.kxml2.kdom.Element;
 import org.kxml2.kdom.Node;
 import org.opendatakit.aggregate.ContextFactory;
+import org.opendatakit.aggregate.constants.ParserConsts;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.datamodel.TopLevelDynamicBase;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
@@ -115,7 +116,10 @@ public class SubmissionDownloadListServlet extends ServletUtilBase {
       errorMissingKeyParam(resp);
       return;
     }
-
+    if ( formId.contains(ParserConsts.FORWARD_SLASH) ) {
+      formId = formId.replaceAll(ParserConsts.FORWARD_SLASH, ParserConsts.FORWARD_SLASH_SUBSTITUTION);
+    }
+    
     // the cursor string
     String websafeCursorString = getParameter(req, ServletConsts.CURSOR);
     QueryResumePoint cursor = WebUtils.parseCursorParameter(websafeCursorString);
