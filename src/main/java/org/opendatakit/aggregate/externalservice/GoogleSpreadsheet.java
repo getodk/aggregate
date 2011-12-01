@@ -209,7 +209,7 @@ public class GoogleSpreadsheet extends OAuthExternalService implements ExternalS
 
       CallingContext ccDaemon = ContextFactory.duplicateContext(cc);
       ccDaemon.setAsDaemon(true);
-      ws.createWorksheetTask(form, m.getSubmissionKey(), 1L, ccDaemon);
+      ws.createWorksheetTask(form, m, 1L, ccDaemon);
     } catch (ODKFormNotFoundException e) {
       e.printStackTrace();
     }

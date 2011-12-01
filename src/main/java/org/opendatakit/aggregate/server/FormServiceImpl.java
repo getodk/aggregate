@@ -351,7 +351,7 @@ public class FormServiceImpl extends RemoteServiceServlet implements
       KmlGenerator generator = (KmlGenerator) cc.getBean(BeanDefs.KML_BEAN);
       CallingContext ccDaemon = ContextFactory.getCallingContext(this, req);
       ccDaemon.setAsDaemon(true);
-      generator.createKmlTask(form, r.getSubmissionKey(), 1L, ccDaemon);
+      generator.createKmlTask(form, r, 1L, ccDaemon);
       return true;
     } catch (ODKFormNotFoundException e) {
       e.printStackTrace();

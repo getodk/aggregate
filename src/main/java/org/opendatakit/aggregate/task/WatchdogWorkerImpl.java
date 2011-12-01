@@ -174,7 +174,7 @@ public class WatchdogWorkerImpl {
           csvGenerator.createCsvTask(form, persistentResult.getSubmissionKey(), attemptCount, cc);
           break;
         case KML:
-          kmlGenerator.createKmlTask(form, persistentResult.getSubmissionKey(), attemptCount, cc);
+          kmlGenerator.createKmlTask(form, persistentResult, attemptCount, cc);
           break;
         }
       }
@@ -207,7 +207,7 @@ public class WatchdogWorkerImpl {
         case WORKSHEET_CREATE:
           if (form.hasValidFormDefinition()) {
             activeTasks = true;
-            wsCreator.createWorksheetTask(form, aTask.getSubmissionKey(), attemptCount, cc);
+            wsCreator.createWorksheetTask(form, aTask, attemptCount, cc);
           }
           break;
         case DELETE_FORM:
