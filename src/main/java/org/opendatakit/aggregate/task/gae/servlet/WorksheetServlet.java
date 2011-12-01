@@ -62,7 +62,6 @@ public class WorksheetServlet extends ServletUtilBase {
    */
   @Override
   public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-    // TODO: talk to MITCH about the fact the user will be incorrect
 	CallingContext cc = ContextFactory.getCallingContext(this, req);
 	cc.setAsDaemon(true);
 
