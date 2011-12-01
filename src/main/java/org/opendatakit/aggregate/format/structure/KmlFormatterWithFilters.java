@@ -172,8 +172,10 @@ public class KmlFormatterWithFilters implements SubmissionFormatter, RepeatCallb
 
   @Override
   public void beforeProcessSubmissions(CallingContext cc) throws ODKDatastoreException {
-    output.write(String.format(KmlConsts.KML_PREAMBLE_TEMPLATE, form.getFormId(), form
-        .getViewableName(), form.getViewableName()));
+    output.write(String.format(KmlConsts.KML_PREAMBLE_TEMPLATE, 
+        StringEscapeUtils.escapeXml(form.getFormId()), 
+        StringEscapeUtils.escapeXml(form.getViewableName()),
+        StringEscapeUtils.escapeXml(form.getViewableName())));
     output.write(generateStyle(imgElement != null));
   }
 
