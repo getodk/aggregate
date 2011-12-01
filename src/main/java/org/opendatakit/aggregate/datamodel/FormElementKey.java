@@ -42,10 +42,10 @@ public class FormElementKey {
     String tmp = formElementKey;
     String formId = form.getFormId() + BasicConsts.FORWARDSLASH;
     if (tmp.startsWith(formId)) {
-      tmp = tmp.replaceFirst(formId, BasicConsts.EMPTY_STRING);
+      tmp = tmp.substring(formId.length());
       String topLevel = form.getTopLevelGroupElement().getElementName() + BasicConsts.FORWARDSLASH;
       if (tmp.startsWith(topLevel)) {
-        tmp = tmp.replaceFirst(topLevel, BasicConsts.EMPTY_STRING);
+        tmp = tmp.substring(topLevel.length());
       }
 
     }

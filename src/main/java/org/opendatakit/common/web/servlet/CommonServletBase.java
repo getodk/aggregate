@@ -21,7 +21,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -217,12 +216,7 @@ public abstract class CommonServletBase extends HttpServlet {
    */
   protected final String getParameter(HttpServletRequest req, String parameterName)
       throws UnsupportedEncodingException {
-    String encodedParamter = req.getParameter(parameterName);
-    String parameter = null;
-
-    if (encodedParamter != null) {
-      parameter = URLDecoder.decode(encodedParamter, HtmlConsts.UTF8_ENCODE);
-    }
+    String parameter = req.getParameter(parameterName);
     
     // TODO: consider if aggregate should really be passing nulls in parameters
     // TODO: FIX!!! as null happens when parameter not present, but what about passing nulls?
