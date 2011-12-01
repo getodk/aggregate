@@ -23,6 +23,7 @@ import java.util.List;
 
 import org.apache.commons.lang.StringEscapeUtils;
 import org.opendatakit.aggregate.constants.HtmlUtil;
+import org.opendatakit.aggregate.constants.ParserConsts;
 import org.opendatakit.aggregate.constants.common.FormElementNamespace;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.datamodel.FormElementModelVisitor;
@@ -113,7 +114,7 @@ public class XmlFormatter implements SubmissionFormatter {
           //
           // add what could be considered the form's metadata...
           //
-          attributeRow.addFormattedValue("id=\"" + StringEscapeUtils.escapeXml(form.getFormId())
+          attributeRow.addFormattedValue("id=\"" + StringEscapeUtils.escapeXml(form.getFormId().replace(ParserConsts.FORWARD_SLASH_SUBSTITUTION, ParserConsts.FORWARD_SLASH))
               + "\"");
           if (form.isEncryptedForm()) {
             attributeRow.addFormattedValue("encrypted=\"yes\"");
