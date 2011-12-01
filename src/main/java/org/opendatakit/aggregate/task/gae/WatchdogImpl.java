@@ -41,12 +41,6 @@ import org.opendatakit.common.web.constants.BasicConsts;
 import org.opendatakit.common.web.constants.HtmlConsts;
 import org.springframework.beans.factory.InitializingBean;
 
-import com.google.appengine.api.backends.BackendService;
-import com.google.appengine.api.backends.BackendServiceFactory;
-import com.google.appengine.api.taskqueue.Queue;
-import com.google.appengine.api.taskqueue.QueueFactory;
-import com.google.appengine.api.taskqueue.TaskOptions;
-
 /**
  * 
  * @author wbrunette@gmail.com
@@ -234,17 +228,12 @@ public class WatchdogImpl implements Watchdog, InitializingBean {
   @Override
   public void onUsage(long delayMilliseconds, CallingContext cc) {
     // fire off a watchdog background task...
-    TaskOptions task = TaskOptions.Builder.withUrl(BasicConsts.FORWARDSLASH + WatchdogServlet.ADDR);
-    BackendService backendsApi = BackendServiceFactory.getBackendService();
-    String hostname = backendsApi.getBackendAddress(ServletConsts.BACKEND_GAE_SERVICE);
-    task.header(ServletConsts.HOST, hostname);
+    TaskOptionsBuilder b = new TaskOptionsBuilder(WatchdogServlet.ADDR);
     if ( delayMilliseconds != 0L ) {
-      task.countdownMillis(delayMilliseconds);
+      b.countdownMillis(delayMilliseconds);
     }
-    task.method(TaskOptions.Method.GET);
-    task.param(ServletConsts.CHECK_INTERVAL_PARAM, Long.toString(WATCHDOG_RETRY_INTERVAL_MILLISECONDS));
-    Queue queue = QueueFactory.getDefaultQueue();
-    queue.add(task);
+    b.param(ServletConsts.CHECK_INTERVAL_PARAM, Long.toString(WATCHDOG_RETRY_INTERVAL_MILLISECONDS));
+    b.enqueue();
   }
 
   public WatchdogImpl() {
