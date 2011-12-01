@@ -72,7 +72,7 @@ public class RefreshTimer extends Timer {
   // intervalsElapsed counts the intervals since a UI interaction
   private int intervalsElapsed = 0;
   
-  // intervalsCount counts the total number of intervals since page load
+  // intervalsCount counts the total number of intervals since page load or refreshNow()
   private int intervalsCount = 0;
   
   // isActive tracks the active/cancelled state of the timer
@@ -124,6 +124,9 @@ public class RefreshTimer extends Timer {
     // frequent actions (those modulo N)
     // actually run.
     intervalsElapsed = -1;
+    // and set intervalsCount to -1
+    // this ensures that we refresh.
+    intervalsCount = -1;
     // trigger a run of the timer.
     run();
   }
