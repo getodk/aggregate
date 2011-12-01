@@ -28,6 +28,7 @@ import org.kxml2.kdom.Document;
 import org.kxml2.kdom.Element;
 import org.kxml2.kdom.Node;
 import org.opendatakit.aggregate.constants.HtmlUtil;
+import org.opendatakit.aggregate.constants.ParserConsts;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.format.XFormsTableConsts;
 import org.opendatakit.aggregate.form.IForm;
@@ -94,7 +95,7 @@ public class XFormsXmlTable {
 
     Element formIdElement = d.createElement(XML_TAG_NAMESPACE, XFormsTableConsts.FORM_ID_TAG);
     xformElement.addChild(xfIdx++, Node.ELEMENT, formIdElement);
-    formIdElement.addChild(0, Node.TEXT, form.getFormId());
+    formIdElement.addChild(0, Node.TEXT, form.getFormId().replace(ParserConsts.FORWARD_SLASH_SUBSTITUTION, ParserConsts.FORWARD_SLASH));
     xformElement.addChild(xfIdx++, Node.IGNORABLE_WHITESPACE, BasicConsts.NEW_LINE);
 
     Element formNameElement = d.createElement(XML_TAG_NAMESPACE, XFormsTableConsts.FORM_NAME_TAG);
