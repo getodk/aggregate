@@ -65,10 +65,9 @@ public class WorksheetCreatorImpl implements WorksheetCreator {
 	}
 
 	@Override
-	public final void createWorksheetTask(IForm form, SubmissionKey miscTasksKey, long attemptCount,
+	public final void createWorksheetTask(IForm form, MiscTasks miscTasks, long attemptCount,
 			CallingContext cc) throws ODKDatastoreException, ODKFormNotFoundException {
-	    MiscTasks r = new MiscTasks(miscTasksKey, cc);
-	    Map<String,String> params = r.getRequestParameters();
+	    Map<String,String> params = miscTasks.getRequestParameters();
 	    String esTypeString = params.get(ServletConsts.EXTERNAL_SERVICE_TYPE);
 	    if (esTypeString == null) {
 	        throw new IllegalStateException("no external service type specified on create worksheet task");
@@ -83,7 +82,7 @@ public class WorksheetCreatorImpl implements WorksheetCreator {
 	    }
 	    WatchdogImpl wd = (WatchdogImpl) cc.getBean(BeanDefs.WATCHDOG);
 		// use watchdog's calling context in runner...
-	    WorksheetCreatorRunner wr = new WorksheetCreatorRunner( form, miscTasksKey,
+	    WorksheetCreatorRunner wr = new WorksheetCreatorRunner( form, miscTasks.getSubmissionKey(),
 	    		attemptCount, 
 				spreadsheetName, esType,
 				wd.getCallingContext() );
