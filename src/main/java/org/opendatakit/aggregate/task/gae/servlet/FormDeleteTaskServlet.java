@@ -21,6 +21,8 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.exception.ODKExternalServiceDependencyException;
@@ -61,28 +63,41 @@ public class FormDeleteTaskServlet extends ServletUtilBase {
   @Override
   public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
     // TODO: talk to MITCH about the fact the user will be incorrect
-	CallingContext cc = ContextFactory.getCallingContext(this, req);
-	cc.setAsDaemon(true);
+    CallingContext cc = ContextFactory.getCallingContext(this, req);
+    cc.setAsDaemon(true);
+
+    Log logger = LogFactory.getLog(FormDeleteTaskServlet.class);
 
     // get parameter
 
     String formId = getParameter(req, ServletConsts.FORM_ID);
     if (formId == null) {
       errorMissingKeyParam(resp);
+      logger.error("missing " + ServletConsts.FORM_ID);
       return;
     }
     String miscTasksString = getParameter(req, ServletConsts.MISC_TASKS_KEY);
-    if ( miscTasksString == null ) {
-    	errorBadParam(resp);
-    	return;
+    if (miscTasksString == null) {
+      errorBadParam(resp);
+      logger.error("missing " + ServletConsts.MISC_TASKS_KEY);
+      return;
     }
     SubmissionKey miscTasksKey = new SubmissionKey(miscTasksString);
     String attemptCountString = getParameter(req, ServletConsts.ATTEMPT_COUNT);
-    if ( attemptCountString == null ) {
-    	errorBadParam(resp);
-    	return;
+    if (attemptCountString == null) {
+      errorBadParam(resp);
+      logger.error("missing " + ServletConsts.ATTEMPT_COUNT);
+      return;
     }
-    Long attemptCount = Long.valueOf(attemptCountString);
+
+    Long attemptCount;
+    try {
+      attemptCount = Long.valueOf(attemptCountString);
+    } catch (NumberFormatException e) {
+      errorBadParam(resp);
+      logger.error("parsing failed: " + ServletConsts.ATTEMPT_COUNT);
+      return;
+    }
 
     IForm form;
     try {
@@ -90,29 +105,44 @@ public class FormDeleteTaskServlet extends ServletUtilBase {
     } catch (ODKFormNotFoundException e) {
       e.printStackTrace();
       odkIdNotFoundError(resp);
+      logger.error("fetching form failed: " + e.toString());
       return;
     } catch (ODKOverQuotaException e) {
       e.printStackTrace();
       quotaExceededError(resp);
+      logger.error("fetching form failed: " + e.toString());
       return;
     } catch (ODKDatastoreException e) {
       e.printStackTrace();
       datastoreError(resp);
+      logger.error("fetching form failed: " + e.toString());
+      return;
+    } catch (Exception e) {
+      e.printStackTrace();
+      resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.toString());
+      logger.error("fetching form failed: " + e.toString());
       return;
     }
 
-    FormDeleteWorkerImpl formDelete = new FormDeleteWorkerImpl(form, miscTasksKey, 
-    					attemptCount, cc);
-      try {
-		formDelete.deleteForm();
-	} catch (ODKDatastoreException e) {
-		e.printStackTrace();
-		resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.toString());
-		return;
-	} catch (ODKExternalServiceDependencyException e) {
-		e.printStackTrace();
-		resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.toString());
-		return;
-	}
+    try {
+      FormDeleteWorkerImpl formDelete = new FormDeleteWorkerImpl(form, miscTasksKey, attemptCount,
+          cc);
+      formDelete.deleteForm();
+    } catch (ODKDatastoreException e) {
+      e.printStackTrace();
+      resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.toString());
+      logger.error("delete form failed: " + e.toString());
+      return;
+    } catch (ODKExternalServiceDependencyException e) {
+      e.printStackTrace();
+      resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.toString());
+      logger.error("delete form failed: " + e.toString());
+      return;
+    } catch (Exception e) {
+      e.printStackTrace();
+      resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.toString());
+      logger.error("delete form failed: " + e.toString());
+      return;
+    }
   }
 }
