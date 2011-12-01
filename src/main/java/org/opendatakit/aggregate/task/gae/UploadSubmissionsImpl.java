@@ -15,9 +15,6 @@
  */
 package org.opendatakit.aggregate.task.gae;
 
-import java.net.URLEncoder;
-
-import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.externalservice.ExternalServiceConsts;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
 import org.opendatakit.aggregate.externalservice.FormServiceCursor;
@@ -25,14 +22,6 @@ import org.opendatakit.aggregate.task.UploadSubmissions;
 import org.opendatakit.aggregate.task.gae.servlet.UploadSubmissionsTaskServlet;
 import org.opendatakit.common.persistence.PersistConsts;
 import org.opendatakit.common.web.CallingContext;
-import org.opendatakit.common.web.constants.BasicConsts;
-import org.opendatakit.common.web.constants.HtmlConsts;
-
-import com.google.appengine.api.backends.BackendService;
-import com.google.appengine.api.backends.BackendServiceFactory;
-import com.google.appengine.api.taskqueue.Queue;
-import com.google.appengine.api.taskqueue.QueueFactory;
-import com.google.appengine.api.taskqueue.TaskOptions;
 
 /**
  * This is a singleton bean. It cannot have any per-request state. It uses a
@@ -55,19 +44,11 @@ public class UploadSubmissionsImpl implements UploadSubmissions {
       System.out.println("Creating "
           + fsc.getExternalServicePublicationOption().toString().toLowerCase() + " upload task: "
           + fsc.getExternalServiceType());
-      String fscUri = URLEncoder.encode(fsc.getUri(), HtmlConsts.UTF8_ENCODE);
-      TaskOptions task = TaskOptions.Builder.withUrl(BasicConsts.FORWARDSLASH
-          + UploadSubmissionsTaskServlet.ADDR);
-      BackendService backendsApi = BackendServiceFactory.getBackendService();
-      String hostname = backendsApi.getBackendAddress(ServletConsts.BACKEND_GAE_SERVICE);
-      task.header(ServletConsts.HOST, hostname);
-
-      task.countdownMillis(500 + PersistConsts.MAX_SETTLE_MILLISECONDS);
-      task.method(TaskOptions.Method.GET);
-      task.param(ExternalServiceConsts.FSC_URI_PARAM, fscUri);
-
-      Queue queue = QueueFactory.getQueue(UPLOAD_SUBMISSION_QUEUE);
-      queue.add(task);
+      
+      TaskOptionsBuilder b = new TaskOptionsBuilder(UploadSubmissionsTaskServlet.ADDR);
+      b.countdownMillis(500 + PersistConsts.MAX_SETTLE_MILLISECONDS);
+      b.param(ExternalServiceConsts.FSC_URI_PARAM, fsc.getUri());
+      b.enqueue(UPLOAD_SUBMISSION_QUEUE);
     } catch (Exception e) {
       throw new ODKExternalServiceException(e);
     }

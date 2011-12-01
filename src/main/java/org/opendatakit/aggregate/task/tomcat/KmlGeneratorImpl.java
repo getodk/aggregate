@@ -59,10 +59,9 @@ public class KmlGeneratorImpl implements KmlGenerator {
 	}
 
 	@Override
-	public void createKmlTask(IForm form, SubmissionKey persistentResultsKey, long attemptCount,
+	public void createKmlTask(IForm form, PersistentResults persistentResults, long attemptCount,
 			CallingContext cc) throws ODKDatastoreException, ODKFormNotFoundException {
-	    PersistentResults r = new PersistentResults(persistentResultsKey, cc);
-	    Map<String,String> params = r.getRequestParameters();
+	    Map<String,String> params = persistentResults.getRequestParameters();
 	    FormElementModel titleField = null;
 	    FormElementModel imageField = null;
 	    FormElementModel geopointField = null;
@@ -88,7 +87,7 @@ public class KmlGeneratorImpl implements KmlGenerator {
 	    }
 		WatchdogImpl wd = (WatchdogImpl) cc.getBean(BeanDefs.WATCHDOG);
 		// use watchdog's calling context in runner...
-		KmlRunner runner = new KmlRunner(form, persistentResultsKey, attemptCount,
+		KmlRunner runner = new KmlRunner(form, persistentResults.getSubmissionKey(), attemptCount,
 				titleField, geopointField, imageField, wd.getCallingContext());
 		AggregrateThreadExecutor exec = AggregrateThreadExecutor
 				.getAggregateThreadExecutor();
