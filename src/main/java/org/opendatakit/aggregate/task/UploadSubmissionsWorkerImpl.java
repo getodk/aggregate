@@ -131,17 +131,17 @@ public class UploadSubmissionsWorkerImpl {
       return;
     }
 
-    if (!pFsc.isExternalServicePrepared()) {
-      logger.warn("Upload invoked before external service is prepared");
-      return;
-    }
-    
-    if (pFsc.getOperationalStatus() != OperationalStatus.ACTIVE) {
-      logger.warn("Upload invoked when operational status is not ACTIVE");
-      return;
-    }
-
     try {
+      if (!pFsc.isExternalServicePrepared()) {
+        logger.warn("Upload invoked before external service is prepared");
+        return;
+      }
+      
+      if (pFsc.getOperationalStatus() != OperationalStatus.ACTIVE) {
+        logger.warn("Upload invoked when operational status is not ACTIVE");
+        return;
+      }
+
       switch (pEsOption) {
       case UPLOAD_ONLY:
         if (pFsc.getUploadCompleted()) {
