@@ -242,8 +242,10 @@ public class FormFactory {
             + formId);
       }
       return form;
-    } catch (ODKOverQuotaException e) {
+    } catch (ODKOverQuotaException e) { // datastore exception
       throw e;
+    } catch (ODKEntityNotFoundException e) { // datastore exception
+      throw new ODKFormNotFoundException(e);
     } catch (ODKDatastoreException e) {
       throw e;
     } catch (Exception e) {
@@ -277,8 +279,10 @@ public class FormFactory {
       String formUri = parts.get(1).getAuri();
       IForm form = getForm(formUri, cc);
       return form;
-    } catch ( ODKOverQuotaException e) {
+    } catch ( ODKOverQuotaException e) { // datastore exception
       throw e;
+    } catch ( ODKEntityNotFoundException e) { // datastore exception
+      throw new ODKFormNotFoundException(e);
     } catch ( ODKDatastoreException e) {
       throw e;
     } catch (Exception e) {

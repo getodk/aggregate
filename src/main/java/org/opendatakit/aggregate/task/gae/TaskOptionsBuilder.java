@@ -54,15 +54,7 @@ public class TaskOptionsBuilder {
   }
   
   public void param(String key, String value) {
-    // the task parameters are just like HTTP parameters in that 
-    // they need to be URL-encoded when added to the parameter list.
-    try {
-      task.param(key, URLEncoder.encode(value, HtmlConsts.UTF8_ENCODE));
-    } catch (UnsupportedEncodingException e) {
-      e.printStackTrace();
-      LogFactory.getLog(TaskOptionsBuilder.class).error("Unexpected failure: " + e.toString());
-      throw new IllegalStateException("Unexpected failure");
-    }
+    task.param(key, value);
   }
   
   public void enqueue() {
