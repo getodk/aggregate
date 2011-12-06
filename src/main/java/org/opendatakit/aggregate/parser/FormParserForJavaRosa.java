@@ -54,9 +54,9 @@ import org.opendatakit.aggregate.exception.ODKFormAlreadyExistsException;
 import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
 import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData.Reason;
 import org.opendatakit.aggregate.exception.ODKParseException;
+import org.opendatakit.aggregate.form.FormDefinition;
 import org.opendatakit.aggregate.form.FormFactory;
 import org.opendatakit.aggregate.form.IForm;
-import org.opendatakit.aggregate.form.FormDefinition;
 import org.opendatakit.aggregate.form.MiscTasks;
 import org.opendatakit.aggregate.form.SubmissionAssociationTable;
 import org.opendatakit.aggregate.form.XFormParameters;
@@ -91,8 +91,6 @@ public class FormParserForJavaRosa {
 			"<instance>" +
 				"<data id=\"encrypted\" >" +
 					"<meta>" +
-						"<timeStart/>" +
-						"<timeEnd/>" +
 						"<instanceID/>" +
 					"</meta>" +
                "<base64EncryptedKey/>" +
@@ -102,8 +100,6 @@ public class FormParserForJavaRosa {
 					"</media>" +
 				"</data>" +
 			"</instance>" +
-			"<bind nodeset=\"/data/meta/timeStart\" type=\"datetime\"/>" +
-			"<bind nodeset=\"/data/meta/timeEnd\" type=\"datetime\"/>" +
 			"<bind nodeset=\"/data/meta/instanceID\" type=\"string\"/>" +
          "<bind nodeset=\"/data/base64EncryptedKey\" type=\"string\"/>" +
 			"<bind nodeset=\"/data/encryptedXmlFile\" type=\"binary\"/>" +
@@ -111,8 +107,6 @@ public class FormParserForJavaRosa {
 		"</model>" +
 	"</h:head>" +
 	"<h:body>" +
-		"<input ref=\"meta/timeStart\"><label>start</label></input>" +
-		"<input ref=\"meta/timeEnd\"><label>end</label></input>" +
 		"<input ref=\"meta/instanceID\"><label>InstanceID</label></input>" +
       "<input ref=\"base64EncryptedKey\"><label>Encrypted SymmetricKey</label></input>" +
 		"<upload ref=\"encryptedXmlFile\" mediatype=\"image/*\"><label>submission</label></upload>" +
