@@ -17,8 +17,6 @@
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/bonecp-0.7.1.RELEASE.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/commons-codec-1.5.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/commons-fileupload-1.2.2.jar"/>
-	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/commons-httpclient-3.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/commons-io-1.4.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/commons-lang-2.5.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/commons-logging-1.1.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/gdata-client-1.0-1.46.0.jar"/>
@@ -33,9 +31,6 @@
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/gdata-spreadsheet-meta-3.0-1.46.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/gson-1.7.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/guava-r09.jar"/>
-	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/httpclient-4.0.3.jar"/>
-	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/httpcore-4.0.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/httpmime-4.0.3.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/icu4j-3.4.4.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/javarosa-libraries-latest.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/jcip-annotations-1.0.jar"/>
@@ -86,9 +81,15 @@
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/step2-common-1-20110415.014953-11.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/step2-consumer-1-20110415.015028-11.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/odk-tomcatutil.jar"/>
-	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/gwt-visualization.jar"/>
-	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/gwt-maps.jar"/>
 	<classpathentry kind="con" path="com.google.appengine.eclipse.core.GAE_CONTAINER"/>
 	<classpathentry kind="con" path="com.google.gwt.eclipse.core.GWT_CONTAINER"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/selenium-server-standalone-2.8.0.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/commons-io-2.0.1.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/gwt-maps-1.1.1-rc1.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/gwt-visualization-1.1.1.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/httpclient-4.1.2.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/httpcore-4.1.2.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/httpmime-4.1.2.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/jai-imageio-core-standalone-1.2-pre-dr-b04-2010-04-30.jar"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>
