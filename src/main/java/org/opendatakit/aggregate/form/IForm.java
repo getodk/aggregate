@@ -33,6 +33,7 @@ import org.opendatakit.common.datamodel.BinaryContentManipulator.BlobSubmissionO
 import org.opendatakit.common.persistence.EntityKey;
 import org.opendatakit.common.persistence.PersistConsts;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.web.CallingContext;
 
 /**
@@ -82,7 +83,7 @@ public interface IForm {
    */
   public String getFormId();
 
-  public boolean hasManifestFileset();
+  public boolean hasManifestFileset(CallingContext cc) throws ODKDatastoreException;
 
   public BinaryContentManipulator getManifestFileset();
 
@@ -127,7 +128,7 @@ public interface IForm {
    * 
    * @return xml file name
    */
-  public String getFormFilename() throws ODKDatastoreException;
+  public String getFormFilename(CallingContext cc) throws ODKDatastoreException;
 
   /**
    * Get the original XML that specified the form
@@ -189,7 +190,7 @@ public interface IForm {
   
   public Map<String, FormElementModel> getRepeatElementModels();
   
-  public FormSummary generateFormSummary(CallingContext cc);
+  public FormSummary generateFormSummary(CallingContext cc) throws ODKOverQuotaException, ODKDatastoreException;
   
   /**
    * Prints the data element definitions to the print stream specified

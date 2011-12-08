@@ -83,14 +83,14 @@ public class JsonElementFormatter implements ElementFormatter {
   public void formatBinary(BlobSubmissionType blobSubmission, FormElementModel element, String ordinalValue, Row row, CallingContext cc)
       throws ODKDatastoreException {
     if( blobSubmission == null || 
-    	(blobSubmission.getAttachmentCount() == 0) ||
-    	(blobSubmission.getContentHash(1) == null) ) {
+    	(blobSubmission.getAttachmentCount(cc) == 0) ||
+    	(blobSubmission.getContentHash(1, cc) == null) ) {
           row.addFormattedValue(null);
           return;
     }
 
     byte[] imageBlob = null;
-    if (blobSubmission.getAttachmentCount() == 1) {
+    if (blobSubmission.getAttachmentCount(cc) == 1) {
       imageBlob = blobSubmission.getBlob(1, cc);
     }
     if (imageBlob != null && imageBlob.length > 0) {

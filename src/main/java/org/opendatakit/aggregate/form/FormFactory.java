@@ -291,7 +291,8 @@ public class FormFactory {
   }
 
   /**
-   * Create or fetch the given formId.
+   * Create or fetch the given formId. 
+   * ONLY call this from FormParserForJavaRosa (where new forms are created).
    * 
    * @param isEncryptedForm
    * @param rootElementDefn

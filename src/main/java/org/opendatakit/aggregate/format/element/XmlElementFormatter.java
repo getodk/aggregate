@@ -66,11 +66,11 @@ public class XmlElementFormatter implements ElementFormatter {
   public void formatBinary(BlobSubmissionType blobSubmission, FormElementModel element, String ordinalValue,
       Row row, CallingContext cc) throws ODKDatastoreException {
     if( blobSubmission == null || 
-    	(blobSubmission.getAttachmentCount() == 0) ||
-    	(blobSubmission.getContentHash(1) == null) ) {
+    	(blobSubmission.getAttachmentCount(cc) == 0) ||
+    	(blobSubmission.getContentHash(1, cc) == null) ) {
    	    addToXmlValueToRow(null, element.getElementName(), row);
 	} else {
-		addToXmlValueToRow(blobSubmission.getUnrootedFilename(1), element.getElementName(), row);
+		addToXmlValueToRow(blobSubmission.getUnrootedFilename(1, cc), element.getElementName(), row);
 	}
   }
 

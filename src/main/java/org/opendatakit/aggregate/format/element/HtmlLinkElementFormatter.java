@@ -71,8 +71,8 @@ public class HtmlLinkElementFormatter extends BasicElementFormatter{
   @Override
   public void formatBinary(BlobSubmissionType blobSubmission, FormElementModel element, String ordinalValue, Row row, CallingContext cc) throws ODKDatastoreException {
     if( blobSubmission == null || 
-    	(blobSubmission.getAttachmentCount() == 0) ||
-    	(blobSubmission.getContentHash(1) == null) ) {
+    	(blobSubmission.getAttachmentCount(cc) == 0) ||
+    	(blobSubmission.getContentHash(1, cc) == null) ) {
       row.addFormattedValue(null);
       return;
     }
@@ -84,8 +84,8 @@ public class HtmlLinkElementFormatter extends BasicElementFormatter{
     if ( binariesAsDownloadLink ) {
     	properties.put(ServletConsts.AS_ATTACHMENT, "yes");
     	linkText = FormTableConsts.DOWNLOAD_LINK_TEXT;
-    	if ( blobSubmission.getAttachmentCount() == 1 ) {
-    		linkText = blobSubmission.getUnrootedFilename(1);
+    	if ( blobSubmission.getAttachmentCount(cc) == 1 ) {
+    		linkText = blobSubmission.getUnrootedFilename(1, cc);
     		if ( linkText == null || linkText.length() == 0 ) {
     	    	linkText = FormTableConsts.DOWNLOAD_LINK_TEXT;
     		}

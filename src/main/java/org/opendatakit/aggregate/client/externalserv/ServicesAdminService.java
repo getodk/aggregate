@@ -38,7 +38,7 @@ public interface ServicesAdminService extends RemoteService {
 
   ExternServSummary [] getExternalServices(String formid) throws AccessDeniedException, FormNotAvailableException, RequestFailureException, DatastoreFailureException;
   
-  String generateOAuthUrl(String uri) throws AccessDeniedException;
+  String generateOAuthUrl(String uri) throws AccessDeniedException, RequestFailureException, DatastoreFailureException;
   
   String createFusionTable(String formId, ExternalServicePublicationOption esOption) throws AccessDeniedException, FormNotAvailableException, RequestFailureException, DatastoreFailureException;
   

@@ -563,7 +563,7 @@ public class SubmissionParser {
 				
 				// and if we already have the content loaded, the content hash will be non-null
 				BlobSubmissionType blob = (BlobSubmissionType) submissionElement;
-				return (blob.getContentHash(1) != null);
+				return (blob.getContentHash(1, cc) != null);
 			}
 		}
 		return true;

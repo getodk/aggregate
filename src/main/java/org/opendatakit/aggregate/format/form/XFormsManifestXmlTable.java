@@ -34,6 +34,8 @@ import org.opendatakit.aggregate.form.FormInfo;
 import org.opendatakit.aggregate.servlet.XFormsDownloadServlet;
 import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.common.datamodel.BinaryContentManipulator;
+import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.BasicConsts;
 import org.opendatakit.common.web.constants.HtmlConsts;
 
@@ -56,7 +58,7 @@ public class XFormsManifestXmlTable {
     this.form = form;
   }
 
-  public void generateXmlManifestList(PrintWriter output) throws IOException {
+  public void generateXmlManifestList(PrintWriter output, CallingContext cc) throws IOException, ODKDatastoreException {
 	Document d = new Document();
 	d.setStandalone(true);
 	d.setEncoding(HtmlConsts.UTF8_ENCODE);
@@ -69,9 +71,9 @@ public class XFormsManifestXmlTable {
     // build XML table of form information
     BinaryContentManipulator manifest = form.getManifestFileset();
     if ( manifest != null ) {
-    	int fileCount = manifest.getAttachmentCount();
+    	int fileCount = manifest.getAttachmentCount(cc);
     	for ( int i = 1 ; i <= fileCount ; ++i ) {
-	      idx = generateManifestXmlEntry(d, e, idx, form.getUri(), manifest, i);
+	      idx = generateManifestXmlEntry(d, e, idx, form.getUri(), manifest, i, cc);
     	}
     }
 
@@ -83,9 +85,9 @@ public class XFormsManifestXmlTable {
 	serializer.flush();
   }
 
-  private int generateManifestXmlEntry(Document d, Element e, int idx, String uri, BinaryContentManipulator m, int i) {
-	  String filename = m.getUnrootedFilename(i);
-	  String hash = m.getContentHash(i);
+  private int generateManifestXmlEntry(Document d, Element e, int idx, String uri, BinaryContentManipulator m, int i, CallingContext cc) throws ODKDatastoreException {
+	  String filename = m.getUnrootedFilename(i, cc);
+	  String hash = m.getContentHash(i, cc);
 
 	  // if we don't have the file (hash==null), then don't emit anything.
 	  if ( hash == null ) return idx;
