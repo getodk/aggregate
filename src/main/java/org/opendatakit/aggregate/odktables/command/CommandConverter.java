@@ -12,6 +12,7 @@ import org.opendatakit.aggregate.odktables.command.common.GetUserByID;
 import org.opendatakit.aggregate.odktables.command.common.ListAllTables;
 import org.opendatakit.aggregate.odktables.command.common.SetTablePermissions;
 import org.opendatakit.aggregate.odktables.command.common.SetUserManagementPermissions;
+import org.opendatakit.aggregate.odktables.command.common.UpdateTableProperties;
 import org.opendatakit.aggregate.odktables.command.simple.CreateTable;
 import org.opendatakit.aggregate.odktables.command.simple.DeleteTable;
 import org.opendatakit.aggregate.odktables.command.simple.InsertRows;
@@ -70,6 +71,8 @@ public class CommandConverter {
 		SetTablePermissions.class);
 	commandMap.put(SetUserManagementPermissions.methodPath(),
 		SetUserManagementPermissions.class);
+	commandMap.put(UpdateTableProperties.methodPath(),
+		UpdateTableProperties.class);
 
 	// Simple
 	commandMap.put(CreateTable.methodPath(), CreateTable.class);

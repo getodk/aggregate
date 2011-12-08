@@ -33,6 +33,7 @@ import org.opendatakit.aggregate.odktables.command.common.GetUserByID;
 import org.opendatakit.aggregate.odktables.command.common.ListAllTables;
 import org.opendatakit.aggregate.odktables.command.common.SetTablePermissions;
 import org.opendatakit.aggregate.odktables.command.common.SetUserManagementPermissions;
+import org.opendatakit.aggregate.odktables.command.common.UpdateTableProperties;
 import org.opendatakit.aggregate.odktables.commandresult.CommandResult;
 import org.opendatakit.aggregate.odktables.commandresult.common.CheckUserExistsResult;
 import org.opendatakit.aggregate.odktables.commandresult.common.CreateUserResult;
@@ -42,6 +43,7 @@ import org.opendatakit.aggregate.odktables.commandresult.common.GetUserByIDResul
 import org.opendatakit.aggregate.odktables.commandresult.common.ListAllTablesResult;
 import org.opendatakit.aggregate.odktables.commandresult.common.SetTablePermissionsResult;
 import org.opendatakit.aggregate.odktables.commandresult.common.SetUserManagementPermissionsResult;
+import org.opendatakit.aggregate.odktables.commandresult.common.UpdateTablePropertiesResult;
 import org.opendatakit.common.utils.Check;
 
 /**
@@ -333,6 +335,35 @@ public class CommonAPI {
 	ListAllTablesResult result = sendCommand(command,
 		ListAllTablesResult.class);
 	return result.getEntries();
+    }
+
+    /**
+     * Not implemented. Overwrite the properties associated with a table.
+     * 
+     * @param tableID
+     *            the client's identifier for a table
+     * @param properties
+     *            metadata to store with the table
+     * @throws PermissionDeniedException
+     *             if the client does not have write permission on the table
+     * @throws TableDoesNotExistException
+     *             if client has no such table with the given tableID
+     * @throws AggregateInternalErrorException
+     *             if Aggregate encounters an internal error that causes the
+     *             call to fail
+     * @throws IOException
+     *             if there is a problem communicating with the Aggregate server
+     * @throws ClientProtocolException
+     */
+    public void updateTableProperties(String tableID, String properties)
+	    throws TableDoesNotExistException, PermissionDeniedException,
+	    ClientProtocolException, AggregateInternalErrorException,
+	    IOException {
+	UpdateTableProperties command = new UpdateTableProperties(
+		requestingUserID, tableID, properties);
+	UpdateTablePropertiesResult result = sendCommand(command,
+		UpdateTablePropertiesResult.class);
+	result.checkResult();
     }
 
     /**
