@@ -30,7 +30,7 @@ import org.opendatakit.aggregate.odktables.command.common.CreateUser;
 import org.opendatakit.aggregate.odktables.command.common.DeleteUser;
 import org.opendatakit.aggregate.odktables.command.common.GetUserByAggregateIdentifier;
 import org.opendatakit.aggregate.odktables.command.common.GetUserByID;
-import org.opendatakit.aggregate.odktables.command.common.QueryForTables;
+import org.opendatakit.aggregate.odktables.command.common.ListAllTables;
 import org.opendatakit.aggregate.odktables.command.common.SetTablePermissions;
 import org.opendatakit.aggregate.odktables.command.common.SetUserManagementPermissions;
 import org.opendatakit.aggregate.odktables.commandresult.CommandResult;
@@ -39,7 +39,7 @@ import org.opendatakit.aggregate.odktables.commandresult.common.CreateUserResult
 import org.opendatakit.aggregate.odktables.commandresult.common.DeleteUserResult;
 import org.opendatakit.aggregate.odktables.commandresult.common.GetUserByAggregateIdentifierResult;
 import org.opendatakit.aggregate.odktables.commandresult.common.GetUserByIDResult;
-import org.opendatakit.aggregate.odktables.commandresult.common.QueryForTablesResult;
+import org.opendatakit.aggregate.odktables.commandresult.common.ListAllTablesResult;
 import org.opendatakit.aggregate.odktables.commandresult.common.SetTablePermissionsResult;
 import org.opendatakit.aggregate.odktables.commandresult.common.SetUserManagementPermissionsResult;
 import org.opendatakit.common.utils.Check;
@@ -329,9 +329,9 @@ public class CommonAPI {
      */
     public List<TableEntry> listAllTables() throws ClientProtocolException,
 	    IOException, AggregateInternalErrorException {
-	QueryForTables command = new QueryForTables(requestingUserID);
-	QueryForTablesResult result = sendCommand(command,
-		QueryForTablesResult.class);
+	ListAllTables command = new ListAllTables(requestingUserID);
+	ListAllTablesResult result = sendCommand(command,
+		ListAllTablesResult.class);
 	return result.getEntries();
     }
 

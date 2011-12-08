@@ -11,7 +11,7 @@ import org.opendatakit.aggregate.odktables.command.common.CreateUser;
 import org.opendatakit.aggregate.odktables.command.common.DeleteUser;
 import org.opendatakit.aggregate.odktables.command.common.GetUserByAggregateIdentifier;
 import org.opendatakit.aggregate.odktables.command.common.GetUserByID;
-import org.opendatakit.aggregate.odktables.command.common.QueryForTables;
+import org.opendatakit.aggregate.odktables.command.common.ListAllTables;
 import org.opendatakit.aggregate.odktables.command.common.SetTablePermissions;
 import org.opendatakit.aggregate.odktables.command.common.SetUserManagementPermissions;
 import org.opendatakit.aggregate.odktables.command.simple.CreateTable;
@@ -30,7 +30,7 @@ import org.opendatakit.aggregate.odktables.commandlogic.common.CreateUserLogic;
 import org.opendatakit.aggregate.odktables.commandlogic.common.DeleteUserLogic;
 import org.opendatakit.aggregate.odktables.commandlogic.common.GetUserByAggregateIdentifierLogic;
 import org.opendatakit.aggregate.odktables.commandlogic.common.GetUserByIDLogic;
-import org.opendatakit.aggregate.odktables.commandlogic.common.QueryForTablesLogic;
+import org.opendatakit.aggregate.odktables.commandlogic.common.ListAllTablesLogic;
 import org.opendatakit.aggregate.odktables.commandlogic.common.SetTablePermissionsLogic;
 import org.opendatakit.aggregate.odktables.commandlogic.common.SetUserManagementPermissionsLogic;
 import org.opendatakit.aggregate.odktables.commandlogic.simple.CreateTableLogic;
@@ -129,7 +129,7 @@ public abstract class CommandLogic<T extends Command> {
 	commandClassMap.put(GetUserByID.class, CommandType.GET_USER_BY_ID);
 	commandClassMap.put(GetUserByAggregateIdentifier.class,
 		CommandType.GET_USER_BY_AGGREGATE_IDENTIFIER);
-	commandClassMap.put(QueryForTables.class, CommandType.QUERY_FOR_TABLES);
+	commandClassMap.put(ListAllTables.class, CommandType.QUERY_FOR_TABLES);
 	commandClassMap.put(SetTablePermissions.class,
 		CommandType.SET_TABLE_PERMISSIONS);
 	commandClassMap.put(SetUserManagementPermissions.class,
@@ -186,7 +186,7 @@ public abstract class CommandLogic<T extends Command> {
 	    return new GetUserByAggregateIdentifierLogic(
 		    (GetUserByAggregateIdentifier) command);
 	case QUERY_FOR_TABLES:
-	    return new QueryForTablesLogic((QueryForTables) command);
+	    return new ListAllTablesLogic((ListAllTables) command);
 	case SET_TABLE_PERMISSIONS:
 	    return new SetTablePermissionsLogic((SetTablePermissions) command);
 	case SET_USER_MANAGEMENT_PERMISSIONS:
