@@ -23,8 +23,8 @@ import org.opendatakit.aggregate.odktables.command.Command;
  * If the execution of a Command was successful, then the CommandResult will
  * contain the expected data from running the Command. For example, if a
  * CreateTable is successful, then the CreateTableResponse will contain the
- * tableId of the newly created table. Furthermore, if a InsertTables is
- * successful, then the InsertTablesResponse will contain a list of rowIds which
+ * tableId of the newly created table. Furthermore, if a InsertRows is
+ * successful, then the InsertRowsResponse will contain a list of rowIds which
  * correspond to the new rows inserted.
  * </p>
  * 
@@ -51,10 +51,10 @@ import org.opendatakit.aggregate.odktables.command.Command;
  * <li>A getter method which returns the data of the result, or throws an
  * exception(s) to indicate the failure. These exceptions should be subclasses
  * of ODKTablesClientException.</li>
- * <li>A static 'successful' method which creates and returns an instance of
- * your class, using the private 'successful' constructor.</li>
- * <li>A static 'failure' method which creates and resturns an instance of your
- * class, using the private 'failure' constructor.</li> </ul>
+ * <li>At least one static 'successful' method which creates and returns an
+ * instance of your class, using the private 'successful' constructor.</li>
+ * <li>At least one static 'failure' method which creates and resturns an
+ * instance of your class, using the private 'failure' constructor.</li> </ul>
  * 
  * @author the.dylan.price@gmail.com
  */
@@ -64,7 +64,17 @@ public abstract class CommandResult<T extends Command> {
      * command could fail.
      */
     public enum FailureReason {
-	TABLE_ALREADY_EXISTS, TABLE_DOES_NOT_EXIST, ROW_ALREADY_EXISTS, COLUMN_DOES_NOT_EXIST, USER_ALREADY_EXISTS, USER_DOES_NOT_EXIST, PERMISSION_DENIED, CANNOT_DELETE, OUT_OF_SYNCH, ROW_OUT_OF_SYNCH, FILTER_VALUE_TYPE_MISMATCH;
+	TABLE_ALREADY_EXISTS, 
+	TABLE_DOES_NOT_EXIST, 
+	ROW_ALREADY_EXISTS, 
+	COLUMN_DOES_NOT_EXIST, 
+	USER_ALREADY_EXISTS, 
+	USER_DOES_NOT_EXIST, 
+	PERMISSION_DENIED, 
+	CANNOT_DELETE, 
+	OUT_OF_SYNCH, 
+	ROW_OUT_OF_SYNCH, 
+	FILTER_VALUE_TYPE_MISMATCH;
     }
 
     private final boolean successful;
