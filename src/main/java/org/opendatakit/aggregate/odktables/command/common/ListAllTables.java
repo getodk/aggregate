@@ -4,11 +4,11 @@ import org.opendatakit.aggregate.odktables.command.Command;
 import org.opendatakit.common.utils.Check;
 
 /**
- * QueryForTables is immutable.
+ * ListAllTables is immutable.
  * 
  * @author the.dylan.price@gmail.com
  */
-public class QueryForTables implements Command {
+public class ListAllTables implements Command {
     private static final String path = "/common/listTables";
 
     private final String requestingUserID;
@@ -17,7 +17,7 @@ public class QueryForTables implements Command {
      * For serialization by Gson
      */
     @SuppressWarnings("unused")
-    private QueryForTables() {
+    private ListAllTables() {
 	this.requestingUserID = null;
 
     }
@@ -25,7 +25,7 @@ public class QueryForTables implements Command {
     /**
      * Constructs a new QueryForTables.
      */
-    public QueryForTables(String requestingUserID) {
+    public ListAllTables(String requestingUserID) {
 
 	Check.notNullOrEmpty(requestingUserID, "requestingUserID");
 

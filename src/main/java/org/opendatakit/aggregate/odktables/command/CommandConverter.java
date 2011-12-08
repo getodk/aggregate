@@ -9,7 +9,7 @@ import org.opendatakit.aggregate.odktables.command.common.CreateUser;
 import org.opendatakit.aggregate.odktables.command.common.DeleteUser;
 import org.opendatakit.aggregate.odktables.command.common.GetUserByAggregateIdentifier;
 import org.opendatakit.aggregate.odktables.command.common.GetUserByID;
-import org.opendatakit.aggregate.odktables.command.common.QueryForTables;
+import org.opendatakit.aggregate.odktables.command.common.ListAllTables;
 import org.opendatakit.aggregate.odktables.command.common.SetTablePermissions;
 import org.opendatakit.aggregate.odktables.command.common.SetUserManagementPermissions;
 import org.opendatakit.aggregate.odktables.command.simple.CreateTable;
@@ -65,7 +65,7 @@ public class CommandConverter {
 	commandMap.put(GetUserByAggregateIdentifier.methodPath(),
 		GetUserByAggregateIdentifier.class);
 	commandMap.put(GetUserByID.methodPath(), GetUserByID.class);
-	commandMap.put(QueryForTables.methodPath(), QueryForTables.class);
+	commandMap.put(ListAllTables.methodPath(), ListAllTables.class);
 	commandMap.put(SetTablePermissions.methodPath(),
 		SetTablePermissions.class);
 	commandMap.put(SetUserManagementPermissions.methodPath(),
