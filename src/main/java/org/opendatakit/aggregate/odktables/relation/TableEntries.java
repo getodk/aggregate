@@ -21,9 +21,8 @@ import org.opendatakit.common.web.CallingContext;
  * @author the.dylan.price@gmail.com
  */
 public class TableEntries
-        extends
-        TypedEntityRelation<org.opendatakit.aggregate.odktables.entity.InternalTableEntry>
-{
+	extends
+	TypedEntityRelation<org.opendatakit.aggregate.odktables.entity.InternalTableEntry> {
     // Field names
     /**
      * The name of the aggregateOwnerIdentifier field.
@@ -51,38 +50,39 @@ public class TableEntries
      */
     private static final String RELATION_NAME = "TABLE_ENTRIES";
 
-    // The following defines the actual attributes that will be in the datastore:
-    // The aggregateTableIdentifier field is the entity Aggregate Identifier, so is created automatically
+    // The following defines the actual attributes that will be in the
+    // datastore:
+    // The aggregateTableIdentifier field is the entity Aggregate Identifier, so
+    // is created automatically
     /**
      * The ownerAggregate Identifier field.
      */
     private static final Attribute aggregateOwnerIdentifier = new Attribute(
-            AGGREGATE_OWNER_IDENTIFIER, AttributeType.STRING, false);
+	    AGGREGATE_OWNER_IDENTIFIER, AttributeType.STRING, false);
     /**
      * The tableName field.
      */
     private static final Attribute tableName = new Attribute(TABLE_NAME,
-            AttributeType.STRING, false);
+	    AttributeType.STRING, false);
     /**
      * The modificationNumber field.
      */
     private static final Attribute modificationNumber = new Attribute(
-            MODIFICATION_NUMBER, AttributeType.INTEGER, false);
+	    MODIFICATION_NUMBER, AttributeType.INTEGER, false);
 
     /**
      * The isSynchronized field.
      */
     private static final Attribute isSynchronized = new Attribute(
-            IS_SYNCHRONIZED, AttributeType.BOOLEAN, false);
+	    IS_SYNCHRONIZED, AttributeType.BOOLEAN, false);
 
     private static final List<Attribute> attributes;
-    static
-    {
-        attributes = new ArrayList<Attribute>();
-        attributes.add(aggregateOwnerIdentifier);
-        attributes.add(tableName);
-        attributes.add(modificationNumber);
-        attributes.add(isSynchronized);
+    static {
+	attributes = new ArrayList<Attribute>();
+	attributes.add(aggregateOwnerIdentifier);
+	attributes.add(tableName);
+	attributes.add(modificationNumber);
+	attributes.add(isSynchronized);
     }
     /**
      * The singleton instance of the TableEntries.
@@ -100,16 +100,14 @@ public class TableEntries
      *             if there was a problem during communication with the
      *             datastore
      */
-    private TableEntries(CallingContext cc) throws ODKDatastoreException
-    {
-        super(Table.NAMESPACE, RELATION_NAME, attributes, cc);
+    private TableEntries(CallingContext cc) throws ODKDatastoreException {
+	super(Table.NAMESPACE, RELATION_NAME, attributes, cc);
     }
 
     @Override
     public InternalTableEntry initialize(Entity entity)
-            throws ODKDatastoreException
-    {
-        return InternalTableEntry.fromEntity(entity);
+	    throws ODKDatastoreException {
+	return InternalTableEntry.fromEntity(entity);
     }
 
     /**
@@ -125,12 +123,10 @@ public class TableEntries
      *             if there is a problem communicating with the datastore
      */
     public static TableEntries getInstance(CallingContext cc)
-            throws ODKDatastoreException
-    {
-        if (instance == null || instance.getCC() != cc)
-        {
-            instance = new TableEntries(cc);
-        }
-        return instance;
+	    throws ODKDatastoreException {
+	if (instance == null || instance.getCC() != cc) {
+	    instance = new TableEntries(cc);
+	}
+	return instance;
     }
 }

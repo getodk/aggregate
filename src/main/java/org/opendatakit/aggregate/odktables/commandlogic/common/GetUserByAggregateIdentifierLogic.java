@@ -20,61 +20,53 @@ import org.opendatakit.common.web.CallingContext;
  * 
  */
 public class GetUserByAggregateIdentifierLogic extends
-        CommandLogic<GetUserByAggregateIdentifier>
-{
+	CommandLogic<GetUserByAggregateIdentifier> {
 
     private final GetUserByAggregateIdentifier getUserByAggregateIdentifier;
 
     public GetUserByAggregateIdentifierLogic(
-            GetUserByAggregateIdentifier getUserByAggregateIdentifier)
-    {
-        this.getUserByAggregateIdentifier = getUserByAggregateIdentifier;
+	    GetUserByAggregateIdentifier getUserByAggregateIdentifier) {
+	this.getUserByAggregateIdentifier = getUserByAggregateIdentifier;
     }
 
     @Override
     public GetUserByAggregateIdentifierResult execute(CallingContext cc)
-            throws AggregateInternalErrorException
-    {
-        User retrievedUser;
-        try
-        {
-            Users users = Users.getInstance(cc);
+	    throws AggregateInternalErrorException {
+	User retrievedUser;
+	try {
+	    Users users = Users.getInstance(cc);
 
-            String aggregateUserIdentifier = this.getUserByAggregateIdentifier
-                    .getAggregateUserIdentifier();
-            String requestingUserID = this.getUserByAggregateIdentifier
-                    .getRequestingUserID();
-            String usersTable = users.getAggregateIdentifier();
+	    String aggregateUserIdentifier = this.getUserByAggregateIdentifier
+		    .getAggregateUserIdentifier();
+	    String requestingUserID = this.getUserByAggregateIdentifier
+		    .getRequestingUserID();
+	    String usersTable = users.getAggregateIdentifier();
 
-            InternalUser requestUser = users
-                    .query("GetUserByAggregateIdentifierLogic.execute")
-                    .equal(Users.USER_ID, requestingUserID).get();
-            if (!requestUser.hasPerm(usersTable, Permissions.READ))
-            {
-                return GetUserByAggregateIdentifierResult.failure(
-                        aggregateUserIdentifier,
-                        FailureReason.PERMISSION_DENIED);
-            }
+	    InternalUser requestUser = users
+		    .query("GetUserByAggregateIdentifierLogic.execute")
+		    .equal(Users.USER_ID, requestingUserID).get();
+	    if (!requestUser.hasPerm(usersTable, Permissions.READ)) {
+		return GetUserByAggregateIdentifierResult.failure(
+			aggregateUserIdentifier,
+			FailureReason.PERMISSION_DENIED);
+	    }
 
-            InternalUser user = null;
-            try
-            {
-                user = users.getEntity(aggregateUserIdentifier);
-            } catch (ODKDatastoreException e)
-            {
-                return GetUserByAggregateIdentifierResult.failure(
-                        aggregateUserIdentifier,
-                        FailureReason.USER_DOES_NOT_EXIST);
-            }
+	    InternalUser user = null;
+	    try {
+		user = users.getEntity(aggregateUserIdentifier);
+	    } catch (ODKDatastoreException e) {
+		return GetUserByAggregateIdentifierResult.failure(
+			aggregateUserIdentifier,
+			FailureReason.USER_DOES_NOT_EXIST);
+	    }
 
-            // set userID to null since we don't want people finding it out
-            retrievedUser = new User(null, user.getAggregateIdentifier(),
-                    user.getName());
-        } catch (ODKDatastoreException e)
-        {
-            throw new AggregateInternalErrorException(e.getMessage());
-        }
+	    // set userID to null since we don't want people finding it out
+	    retrievedUser = new User(null, user.getAggregateIdentifier(),
+		    user.getName());
+	} catch (ODKDatastoreException e) {
+	    throw new AggregateInternalErrorException(e.getMessage());
+	}
 
-        return GetUserByAggregateIdentifierResult.success(retrievedUser);
+	return GetUserByAggregateIdentifierResult.success(retrievedUser);
     }
 }

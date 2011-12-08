@@ -26,89 +26,74 @@ import org.opendatakit.common.web.CallingContext;
  * @author the.dylan.price@gmail.com
  * 
  */
-public class InternalPermission extends TypedEntity
-{
+public class InternalPermission extends TypedEntity {
 
     public InternalPermission(String aggregateTableIdentifier,
-            String aggregateUserIdentifier, boolean read, boolean write,
-            boolean delete, CallingContext cc) throws ODKDatastoreException
-    {
-        super(Permissions.getInstance(cc).newEntity());
-        setAggregateTableIdentifier(aggregateTableIdentifier);
-        setAggregateUserIdentifier(aggregateUserIdentifier);
-        setRead(read);
-        setWrite(write);
-        setDelete(delete);
+	    String aggregateUserIdentifier, boolean read, boolean write,
+	    boolean delete, CallingContext cc) throws ODKDatastoreException {
+	super(Permissions.getInstance(cc).newEntity());
+	setAggregateTableIdentifier(aggregateTableIdentifier);
+	setAggregateUserIdentifier(aggregateUserIdentifier);
+	setRead(read);
+	setWrite(write);
+	setDelete(delete);
     }
 
-    public InternalPermission(Entity entity) throws ODKDatastoreException
-    {
-        super(entity);
+    public InternalPermission(Entity entity) throws ODKDatastoreException {
+	super(entity);
     }
 
-    public String getAggregateTableIdentifier()
-    {
-        return entity.getString(Permissions.AGGREGATE_TABLE_IDENTIFIER);
+    public String getAggregateTableIdentifier() {
+	return entity.getString(Permissions.AGGREGATE_TABLE_IDENTIFIER);
     }
 
-    public void setAggregateTableIdentifier(String value)
-    {
-        entity.set(Permissions.AGGREGATE_TABLE_IDENTIFIER, value);
+    public void setAggregateTableIdentifier(String value) {
+	entity.set(Permissions.AGGREGATE_TABLE_IDENTIFIER, value);
     }
 
-    public String getAggregateUserIdentifier()
-    {
-        return entity.getString(Permissions.AGGREGATE_USER_IDENTIFIER);
+    public String getAggregateUserIdentifier() {
+	return entity.getString(Permissions.AGGREGATE_USER_IDENTIFIER);
     }
 
-    public void setAggregateUserIdentifier(String value)
-    {
-        entity.set(Permissions.AGGREGATE_USER_IDENTIFIER, value);
+    public void setAggregateUserIdentifier(String value) {
+	entity.set(Permissions.AGGREGATE_USER_IDENTIFIER, value);
     }
 
-    public boolean getRead()
-    {
-        return entity.getBoolean(Permissions.READ);
+    public boolean getRead() {
+	return entity.getBoolean(Permissions.READ);
     }
 
-    public void setRead(boolean value)
-    {
-        entity.set(Permissions.READ, value);
+    public void setRead(boolean value) {
+	entity.set(Permissions.READ, value);
     }
 
-    public boolean getWrite()
-    {
-        return entity.getBoolean(Permissions.WRITE);
+    public boolean getWrite() {
+	return entity.getBoolean(Permissions.WRITE);
     }
 
-    public void setWrite(boolean value)
-    {
-        entity.set(Permissions.WRITE, value);
+    public void setWrite(boolean value) {
+	entity.set(Permissions.WRITE, value);
     }
 
-    public boolean getDelete()
-    {
-        return entity.getBoolean(Permissions.DELETE);
+    public boolean getDelete() {
+	return entity.getBoolean(Permissions.DELETE);
     }
 
-    public void setDelete(boolean value)
-    {
-        entity.set(Permissions.DELETE, value);
+    public void setDelete(boolean value) {
+	entity.set(Permissions.DELETE, value);
     }
 
     @Override
-    public String toString()
-    {
-        return String
-                .format("InternalPermission[aggregateTableIdentifier=%s, aggregateUserIdentifier=%s, read=%s, write=%s, delete=%s",
-                        getAggregateTableIdentifier(),
-                        getAggregateUserIdentifier(), getRead(), getWrite(),
-                        getDelete());
+    public String toString() {
+	return String
+		.format("InternalPermission[aggregateTableIdentifier=%s, aggregateUserIdentifier=%s, read=%s, write=%s, delete=%s",
+			getAggregateTableIdentifier(),
+			getAggregateUserIdentifier(), getRead(), getWrite(),
+			getDelete());
     }
 
     public static InternalPermission fromEntity(Entity entity)
-            throws ODKDatastoreException
-    {
-        return new InternalPermission(entity);
+	    throws ODKDatastoreException {
+	return new InternalPermission(entity);
     }
 }

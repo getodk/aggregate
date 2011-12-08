@@ -8,9 +8,8 @@ import org.opendatakit.common.utils.Check;
  * 
  * @author the.dylan.price@gmail.com
  */
-public class QueryForTables implements Command
-{
-    private static final String path = "/common/listAllTables";
+public class QueryForTables implements Command {
+    private static final String path = "/common/listTables";
 
     private final String requestingUserID;
 
@@ -18,42 +17,37 @@ public class QueryForTables implements Command
      * For serialization by Gson
      */
     @SuppressWarnings("unused")
-    private QueryForTables()
-    {
-        this.requestingUserID = null;
+    private QueryForTables() {
+	this.requestingUserID = null;
 
     }
 
     /**
      * Constructs a new QueryForTables.
      */
-    public QueryForTables(String requestingUserID)
-    {
+    public QueryForTables(String requestingUserID) {
 
-        Check.notNullOrEmpty(requestingUserID, "requestingUserID");
+	Check.notNullOrEmpty(requestingUserID, "requestingUserID");
 
-        this.requestingUserID = requestingUserID;
+	this.requestingUserID = requestingUserID;
     }
 
     /**
      * @return the requestingUserID
      */
-    public String getRequestingUserID()
-    {
-        return this.requestingUserID;
+    public String getRequestingUserID() {
+	return this.requestingUserID;
     }
 
     @Override
-    public String toString()
-    {
-        return String.format("QueryForTables: " + "requestingUserID=%s " + "",
-                requestingUserID);
+    public String toString() {
+	return String.format("QueryForTables: " + "requestingUserID=%s " + "",
+		requestingUserID);
     }
 
     @Override
-    public String getMethodPath()
-    {
-        return methodPath();
+    public String getMethodPath() {
+	return methodPath();
     }
 
     /**
@@ -62,8 +56,7 @@ public class QueryForTables implements Command
      *         http://aggregate.opendatakit.org/odktables/createTable, then this
      *         method would return '/odktables/createTable'.
      */
-    public static String methodPath()
-    {
-        return path;
+    public static String methodPath() {
+	return path;
     }
 }

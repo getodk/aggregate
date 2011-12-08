@@ -18,8 +18,7 @@ import org.opendatakit.common.ermodel.simple.AttributeType;
  * 
  * @author the.dylan.price@gmail.com
  */
-public final class Column
-{
+public final class Column {
 
     private final String name;
     private final AttributeType type;
@@ -29,11 +28,10 @@ public final class Column
      * So that Gson can serialize this class.
      */
     @SuppressWarnings("unused")
-    private Column()
-    {
-        this.name = null;
-        this.type = null;
-        this.nullable = true;
+    private Column() {
+	this.name = null;
+	this.type = null;
+	this.nullable = true;
     }
 
     /**
@@ -46,63 +44,55 @@ public final class Column
      * @param nullable
      *            whether the values in this column are allowed to be null
      */
-    public Column(String name, AttributeType type, boolean nullable)
-    {
-        if (name == null || name.length() == 0)
-        {
-            throw new IllegalArgumentException("name was null or empty");
-        }
-        this.name = name;
-        this.type = type;
-        this.nullable = nullable;
+    public Column(String name, AttributeType type, boolean nullable) {
+	if (name == null || name.length() == 0) {
+	    throw new IllegalArgumentException("name was null or empty");
+	}
+	this.name = name;
+	this.type = type;
+	this.nullable = nullable;
     }
 
     /**
      * @return the name
      */
-    public String getName()
-    {
-        return name;
+    public String getName() {
+	return name;
     }
 
     /**
      * @return the type
      */
-    public AttributeType getType()
-    {
-        return type;
+    public AttributeType getType() {
+	return type;
     }
 
     /**
      * @return true if this column's values are allowed to be null
      */
-    public boolean isNullable()
-    {
-        return this.nullable;
+    public boolean isNullable() {
+	return this.nullable;
     }
 
     @Override
-    public String toString()
-    {
-        return String.format("{Name = %s, Type = %s, Nullable = %s}",
-                this.name, this.type, this.nullable);
+    public String toString() {
+	return String.format("{Name = %s, Type = %s, Nullable = %s}",
+		this.name, this.type, this.nullable);
     }
 
     @Override
-    public boolean equals(Object other)
-    {
-        if (!(other instanceof Column))
-            return false;
-        Column o = (Column) other;
-        return o.name.equalsIgnoreCase(this.name) && o.type.equals(this.type)
-                && o.nullable == this.nullable;
+    public boolean equals(Object other) {
+	if (!(other instanceof Column))
+	    return false;
+	Column o = (Column) other;
+	return o.name.equalsIgnoreCase(this.name) && o.type.equals(this.type)
+		&& o.nullable == this.nullable;
     }
 
     @Override
-    public int hashCode()
-    {
-        int isNullable = (this.nullable == true) ? 1 : 0;
-        return 4 * this.name.hashCode() + 23 * this.type.hashCode()
-                + isNullable;
+    public int hashCode() {
+	int isNullable = (this.nullable == true) ? 1 : 0;
+	return 4 * this.name.hashCode() + 23 * this.type.hashCode()
+		+ isNullable;
     }
 }
