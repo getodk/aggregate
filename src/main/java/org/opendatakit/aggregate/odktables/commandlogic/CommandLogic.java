@@ -66,7 +66,7 @@ import org.opendatakit.common.web.CallingContext;
  * </pre>
  * 
  * <p>
- * That way the CreateTableLogic can easily be constructed from a serialized
+ * That way the CreateTableLogic can easily be constructed from a deserialized
  * CreateTable and it can access the data it needs to validate and execute the
  * Command.
  * </p>
