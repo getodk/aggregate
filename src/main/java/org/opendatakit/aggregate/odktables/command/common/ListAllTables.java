@@ -9,7 +9,7 @@ import org.opendatakit.common.utils.Check;
  * @author the.dylan.price@gmail.com
  */
 public class ListAllTables implements Command {
-    private static final String path = "/common/listTables";
+    private static final String path = "/common/listAllTables";
 
     private final String requestingUserID;
 
