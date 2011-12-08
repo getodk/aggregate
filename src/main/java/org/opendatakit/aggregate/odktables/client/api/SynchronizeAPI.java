@@ -56,8 +56,7 @@ import org.opendatakit.aggregate.odktables.commandresult.synchronize.UpdateSynch
  * </p>
  * 
  */
-public class SynchronizeAPI extends CommonAPI
-{
+public class SynchronizeAPI extends CommonAPI {
 
     /**
      * Constructs a new instance of SynchronizedAPI, using the supplied user
@@ -78,10 +77,9 @@ public class SynchronizeAPI extends CommonAPI
      *             initial communication to fail
      */
     public SynchronizeAPI(URI aggregateURI, String userID)
-            throws ClientProtocolException, UserDoesNotExistException,
-            IOException, AggregateInternalErrorException
-    {
-        super(aggregateURI, userID);
+	    throws ClientProtocolException, UserDoesNotExistException,
+	    IOException, AggregateInternalErrorException {
+	super(aggregateURI, userID);
     }
 
     /**
@@ -91,6 +89,9 @@ public class SynchronizeAPI extends CommonAPI
      *            the client's unique identifier for the table
      * @param tableName
      *            the human readable name of the table
+     * @param properties
+     *            any metadata the client wants to associate with the new table.
+     *            May be null or empty.
      * @param columns
      *            a list of columns defining the columns the table should have
      * @return the initial Modification of the newly created table (calling
@@ -106,15 +107,14 @@ public class SynchronizeAPI extends CommonAPI
      *             if there is a problem communicating with the Aggregate server
      */
     public Modification createSynchronizedTable(String tableID,
-            String tableName, List<Column> columns)
-            throws ClientProtocolException, IOException,
-            TableAlreadyExistsException, AggregateInternalErrorException
-    {
-        CreateSynchronizedTable command = new CreateSynchronizedTable(
-                requestingUserID, tableName, tableID, columns);
-        CreateSynchronizedTableResult result = sendCommand(command,
-                CreateSynchronizedTableResult.class);
-        return result.getModification();
+	    String tableName, String properties, List<Column> columns)
+	    throws ClientProtocolException, IOException,
+	    TableAlreadyExistsException, AggregateInternalErrorException {
+	CreateSynchronizedTable command = new CreateSynchronizedTable(
+		requestingUserID, tableName, tableID, properties, columns);
+	CreateSynchronizedTableResult result = sendCommand(command,
+		CreateSynchronizedTableResult.class);
+	return result.getModification();
     }
 
     /**
@@ -147,23 +147,19 @@ public class SynchronizeAPI extends CommonAPI
      *             if there is a problem communicating with the Aggregate server
      */
     public Modification cloneSynchronizedTable(String aggregateTableIdentifier,
-            String tableID) throws ClientProtocolException, IOException,
-            PermissionDeniedException, TableDoesNotExistException,
-            TableAlreadyExistsException, AggregateInternalErrorException
-    {
-        try
-        {
-            return cloneSynchronizedTable(aggregateTableIdentifier, tableID,
-                    new ArrayList<Filter>());
-        } catch (ColumnDoesNotExistException e)
-        {
-            // this should never happen since we are not sending up any filters
-            throw new AggregateInternalErrorException(e.getMessage());
-        } catch (FilterValueTypeMismatchException e)
-        {
-            // this should never happen since we are not sending up any filters
-            throw new AggregateInternalErrorException(e.getMessage());
-        }
+	    String tableID) throws ClientProtocolException, IOException,
+	    PermissionDeniedException, TableDoesNotExistException,
+	    TableAlreadyExistsException, AggregateInternalErrorException {
+	try {
+	    return cloneSynchronizedTable(aggregateTableIdentifier, tableID,
+		    new ArrayList<Filter>());
+	} catch (ColumnDoesNotExistException e) {
+	    // this should never happen since we are not sending up any filters
+	    throw new AggregateInternalErrorException(e.getMessage());
+	} catch (FilterValueTypeMismatchException e) {
+	    // this should never happen since we are not sending up any filters
+	    throw new AggregateInternalErrorException(e.getMessage());
+	}
     }
 
     /**
@@ -208,17 +204,16 @@ public class SynchronizeAPI extends CommonAPI
      *             the appropriate type for that column
      */
     public Modification cloneSynchronizedTable(String aggregateTableIdentifier,
-            String tableID, Collection<Filter> filters)
-            throws ClientProtocolException, IOException,
-            PermissionDeniedException, TableDoesNotExistException,
-            TableAlreadyExistsException, AggregateInternalErrorException,
-            ColumnDoesNotExistException, FilterValueTypeMismatchException
-    {
-        CloneSynchronizedTable command = new CloneSynchronizedTable(
-                requestingUserID, tableID, aggregateTableIdentifier, filters);
-        CloneSynchronizedTableResult result = sendCommand(command,
-                CloneSynchronizedTableResult.class);
-        return result.getModification();
+	    String tableID, Collection<Filter> filters)
+	    throws ClientProtocolException, IOException,
+	    PermissionDeniedException, TableDoesNotExistException,
+	    TableAlreadyExistsException, AggregateInternalErrorException,
+	    ColumnDoesNotExistException, FilterValueTypeMismatchException {
+	CloneSynchronizedTable command = new CloneSynchronizedTable(
+		requestingUserID, tableID, aggregateTableIdentifier, filters);
+	CloneSynchronizedTableResult result = sendCommand(command,
+		CloneSynchronizedTableResult.class);
+	return result.getModification();
     }
 
     /**
@@ -237,14 +232,13 @@ public class SynchronizeAPI extends CommonAPI
      *             if there is a problem communicating with the Aggregate server
      */
     public void removeTableSynchronization(String tableID)
-            throws ClientProtocolException, IOException,
-            TableDoesNotExistException, AggregateInternalErrorException
-    {
-        RemoveTableSynchronization command = new RemoveTableSynchronization(
-                requestingUserID, tableID);
-        RemoveTableSynchronizationResult result = sendCommand(command,
-                RemoveTableSynchronizationResult.class);
-        result.checkResults();
+	    throws ClientProtocolException, IOException,
+	    TableDoesNotExistException, AggregateInternalErrorException {
+	RemoveTableSynchronization command = new RemoveTableSynchronization(
+		requestingUserID, tableID);
+	RemoveTableSynchronizationResult result = sendCommand(command,
+		RemoveTableSynchronizationResult.class);
+	result.checkResults();
     }
 
     /**
@@ -266,15 +260,14 @@ public class SynchronizeAPI extends CommonAPI
      *             if there is a problem communicating with the Aggregate server
      */
     public void deleteSynchronizedTable(String tableID)
-            throws ClientProtocolException, IOException,
-            PermissionDeniedException, TableDoesNotExistException,
-            AggregateInternalErrorException
-    {
-        DeleteSynchronizedTable command = new DeleteSynchronizedTable(
-                requestingUserID, tableID);
-        DeleteSynchronizedTableResult result = sendCommand(command,
-                DeleteSynchronizedTableResult.class);
-        result.checkResults();
+	    throws ClientProtocolException, IOException,
+	    PermissionDeniedException, TableDoesNotExistException,
+	    AggregateInternalErrorException {
+	DeleteSynchronizedTable command = new DeleteSynchronizedTable(
+		requestingUserID, tableID);
+	DeleteSynchronizedTableResult result = sendCommand(command,
+		DeleteSynchronizedTableResult.class);
+	result.checkResults();
     }
 
     /**
@@ -320,16 +313,15 @@ public class SynchronizeAPI extends CommonAPI
      *             exist in the table
      */
     public Modification insertSynchronizedRows(String tableID,
-            int modificationNumber, List<SynchronizedRow> newRows)
-            throws ClientProtocolException, IOException, OutOfSynchException,
-            TableDoesNotExistException, PermissionDeniedException,
-            AggregateInternalErrorException, ColumnDoesNotExistException
-    {
-        InsertSynchronizedRows command = new InsertSynchronizedRows(
-                requestingUserID, tableID, modificationNumber, newRows);
-        InsertSynchronizedRowsResult result = sendCommand(command,
-                InsertSynchronizedRowsResult.class);
-        return result.getModification();
+	    int modificationNumber, List<SynchronizedRow> newRows)
+	    throws ClientProtocolException, IOException, OutOfSynchException,
+	    TableDoesNotExistException, PermissionDeniedException,
+	    AggregateInternalErrorException, ColumnDoesNotExistException {
+	InsertSynchronizedRows command = new InsertSynchronizedRows(
+		requestingUserID, tableID, modificationNumber, newRows);
+	InsertSynchronizedRowsResult result = sendCommand(command,
+		InsertSynchronizedRowsResult.class);
+	return result.getModification();
     }
 
     /**
@@ -376,17 +368,16 @@ public class SynchronizeAPI extends CommonAPI
      *             exist in the table
      */
     public Modification updateSynchronizedRows(String tableID,
-            int modificationNumber, List<SynchronizedRow> changedRows)
-            throws ClientProtocolException, IOException,
-            PermissionDeniedException, OutOfSynchException,
-            TableDoesNotExistException, RowOutOfSynchException,
-            AggregateInternalErrorException, ColumnDoesNotExistException
-    {
-        UpdateSynchronizedRows command = new UpdateSynchronizedRows(
-                requestingUserID, changedRows, tableID, modificationNumber);
-        UpdateSynchronizedRowsResult result = sendCommand(command,
-                UpdateSynchronizedRowsResult.class);
-        return result.getModification();
+	    int modificationNumber, List<SynchronizedRow> changedRows)
+	    throws ClientProtocolException, IOException,
+	    PermissionDeniedException, OutOfSynchException,
+	    TableDoesNotExistException, RowOutOfSynchException,
+	    AggregateInternalErrorException, ColumnDoesNotExistException {
+	UpdateSynchronizedRows command = new UpdateSynchronizedRows(
+		requestingUserID, changedRows, tableID, modificationNumber);
+	UpdateSynchronizedRowsResult result = sendCommand(command,
+		UpdateSynchronizedRowsResult.class);
+	return result.getModification();
     }
 
     /**
@@ -421,22 +412,20 @@ public class SynchronizeAPI extends CommonAPI
      *             if there is a problem communicating with the Aggregate server
      */
     public Modification synchronize(String tableID, int modificationNumber)
-            throws ClientProtocolException, IOException,
-            PermissionDeniedException, TableDoesNotExistException,
-            AggregateInternalErrorException
-    {
-        Synchronize command = new Synchronize(requestingUserID, tableID,
-                modificationNumber);
-        SynchronizeResult result = sendCommand(command, SynchronizeResult.class);
-        return result.getModification();
+	    throws ClientProtocolException, IOException,
+	    PermissionDeniedException, TableDoesNotExistException,
+	    AggregateInternalErrorException {
+	Synchronize command = new Synchronize(requestingUserID, tableID,
+		modificationNumber);
+	SynchronizeResult result = sendCommand(command, SynchronizeResult.class);
+	return result.getModification();
     }
 
     /**
      * Not implemented.
      */
     public Modification querySynchronizedTable(String tableID,
-            Collection<Filter> filters)
-    {
-        throw new RuntimeException("Not implemented");
+	    Collection<Filter> filters) {
+	throw new RuntimeException("Not implemented");
     }
 }
