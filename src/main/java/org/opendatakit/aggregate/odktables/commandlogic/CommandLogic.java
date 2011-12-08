@@ -14,6 +14,7 @@ import org.opendatakit.aggregate.odktables.command.common.GetUserByID;
 import org.opendatakit.aggregate.odktables.command.common.ListAllTables;
 import org.opendatakit.aggregate.odktables.command.common.SetTablePermissions;
 import org.opendatakit.aggregate.odktables.command.common.SetUserManagementPermissions;
+import org.opendatakit.aggregate.odktables.command.common.UpdateTableProperties;
 import org.opendatakit.aggregate.odktables.command.simple.CreateTable;
 import org.opendatakit.aggregate.odktables.command.simple.DeleteTable;
 import org.opendatakit.aggregate.odktables.command.simple.InsertRows;
@@ -33,6 +34,7 @@ import org.opendatakit.aggregate.odktables.commandlogic.common.GetUserByIDLogic;
 import org.opendatakit.aggregate.odktables.commandlogic.common.ListAllTablesLogic;
 import org.opendatakit.aggregate.odktables.commandlogic.common.SetTablePermissionsLogic;
 import org.opendatakit.aggregate.odktables.commandlogic.common.SetUserManagementPermissionsLogic;
+import org.opendatakit.aggregate.odktables.commandlogic.common.UpdateTablePropertiesLogic;
 import org.opendatakit.aggregate.odktables.commandlogic.simple.CreateTableLogic;
 import org.opendatakit.aggregate.odktables.commandlogic.simple.DeleteTableLogic;
 import org.opendatakit.aggregate.odktables.commandlogic.simple.InsertRowsLogic;
@@ -112,6 +114,7 @@ public abstract class CommandLogic<T extends Command> {
 	LIST_ALL_TABLES, 
 	SET_TABLE_PERMISSIONS, 
 	SET_USER_MANAGEMENT_PERMISSIONS,
+	UPDATE_TABLE_PROPERTIES,
 
 	// Simple
 	CREATE_TABLE, 
@@ -150,6 +153,8 @@ public abstract class CommandLogic<T extends Command> {
 		CommandType.SET_TABLE_PERMISSIONS);
 	commandClassMap.put(SetUserManagementPermissions.class,
 		CommandType.SET_USER_MANAGEMENT_PERMISSIONS);
+	commandClassMap.put(UpdateTableProperties.class, 
+		CommandType.UPDATE_TABLE_PROPERTIES);
 
 	// Simple
 	commandClassMap.put(CreateTable.class, CommandType.CREATE_TABLE);
@@ -208,6 +213,9 @@ public abstract class CommandLogic<T extends Command> {
 	case SET_USER_MANAGEMENT_PERMISSIONS:
 	    return new SetUserManagementPermissionsLogic(
 		    (SetUserManagementPermissions) command);
+	case UPDATE_TABLE_PROPERTIES:
+	    return new UpdateTablePropertiesLogic(
+		    (UpdateTableProperties) command);
 
 	    // Simple
 	case CREATE_TABLE:
