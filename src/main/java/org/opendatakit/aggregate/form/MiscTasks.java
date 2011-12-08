@@ -31,6 +31,7 @@ import org.opendatakit.aggregate.submission.SubmissionKeyPart;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.Datastore;
+import org.opendatakit.common.persistence.PersistConsts;
 import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.persistence.Query.Direction;
 import org.opendatakit.common.persistence.Query.FilterOperation;
@@ -307,7 +308,7 @@ public class MiscTasks {
 		Date now = new Date();
 		Date ancientTimes = new Date(now.getTime() - MANY_DAYS_AGO);
 		// TODO: rework for each task type...
-		Date limit = new Date(now.getTime() - taskType.getLockType().getLockExpirationTimeout() - 1 );
+		Date limit = new Date(now.getTime() - taskType.getLockType().getLockExpirationTimeout() - PersistConsts.MAX_SETTLE_MILLISECONDS );
 		q.addFilter(MiscTasksTable.TASK_TYPE, FilterOperation.EQUAL, taskType.name());
 		q.addSort(MiscTasksTable.TASK_TYPE, Direction.ASCENDING); // GAE work-around
 		q.addFilter(MiscTasksTable.LAST_ACTIVITY_DATE, FilterOperation.LESS_THAN, limit );

@@ -92,7 +92,17 @@ public class XFormsManifestServlet extends ServletUtilBase {
     XFormsManifestXmlTable formFormatter = new XFormsManifestXmlTable(form, cc.getServerURL());
     resp.setContentType(HtmlConsts.RESP_TYPE_XML);
     PrintWriter out = resp.getWriter();
-    formFormatter.generateXmlManifestList(out);
+    try {
+      formFormatter.generateXmlManifestList(out, cc);
+    } catch (ODKOverQuotaException e) {
+      e.printStackTrace();
+      quotaExceededError(resp);
+      return;
+    } catch (ODKDatastoreException e) {
+      e.printStackTrace();
+      datastoreError(resp);
+      return;
+    }
   }
 
 }

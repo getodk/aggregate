@@ -345,15 +345,15 @@ public class FormAdminServiceImpl extends RemoteServiceServlet implements
           SubmissionValue v = set.getElementValue(e);
           if (v instanceof BlobSubmissionType) {
             BlobSubmissionType blob = (BlobSubmissionType) v;
-            if (blob.getAttachmentCount() == 1 && blob.getContentHash(1) == null) {
-              // we have a missing attachment...
-              try {
+            try {
+              if (blob.getAttachmentCount(cc) == 1 && blob.getContentHash(1, cc) == null) {
+                // we have a missing attachment...
                 blob.deleteAll(cc);
                 set.removeElementValue(e);
-              } catch (ODKDatastoreException e1) {
-                e1.printStackTrace();
-                success = false;
               }
+            } catch ( ODKDatastoreException ex ) {
+              ex.printStackTrace();
+              success = false;
             }
           }
         }
@@ -414,9 +414,9 @@ public class FormAdminServiceImpl extends RemoteServiceServlet implements
         return mediaSummaryList; // ill-formed definition -- still show it...
 
       BinaryContentManipulator bcm = form.getManifestFileset();
-      for (int i = 0; i < bcm.getAttachmentCount(); ++i) {
-        MediaFileSummary mfs = new MediaFileSummary(bcm.getUnrootedFilename(i + 1),
-            bcm.getContentType(i + 1), bcm.getContentLength(i + 1));
+      for (int i = 0; i < bcm.getAttachmentCount(cc); ++i) {
+        MediaFileSummary mfs = new MediaFileSummary(bcm.getUnrootedFilename(i + 1, cc),
+            bcm.getContentType(i + 1, cc), bcm.getContentLength(i + 1, cc));
         mediaSummaryList.add(mfs);
       }
       

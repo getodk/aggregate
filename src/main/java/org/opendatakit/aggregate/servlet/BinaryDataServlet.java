@@ -41,6 +41,7 @@ import org.opendatakit.aggregate.submission.SubmissionKeyPart;
 import org.opendatakit.aggregate.submission.type.BlobSubmissionType;
 import org.opendatakit.aggregate.util.ImageUtil;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.HtmlConsts;
 
@@ -115,6 +116,10 @@ public class BinaryDataServlet extends ServletUtilBase {
         contentType = info.contentType;
         contentLength = info.contentLength;
         imageBlob = p.getResultFileContents(cc);
+      } catch (ODKOverQuotaException e) {
+        e.printStackTrace();
+        quotaExceededError(resp);
+        return;
       } catch (ODKDatastoreException e) {
         e.printStackTrace();
         resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
@@ -128,6 +133,10 @@ public class BinaryDataServlet extends ServletUtilBase {
         sub = Submission.fetchSubmission(parts, cc);
       } catch (ODKFormNotFoundException e1) {
         odkIdNotFoundError(resp);
+        return;
+      } catch (ODKOverQuotaException e) {
+        e.printStackTrace();
+        quotaExceededError(resp);
         return;
       } catch (ODKDatastoreException e) {
         e.printStackTrace();
@@ -158,38 +167,35 @@ public class BinaryDataServlet extends ServletUtilBase {
           return;
         }
 
-        if (b.getAttachmentCount() == 1) {
-          try {
-            imageBlob = b.getBlob(1, cc);
-            unrootedFileName = b.getUnrootedFilename(1);
-            contentType = b.getContentType(1);
-            contentLength = b.getContentLength(1);
-          } catch (ODKDatastoreException e) {
-            e.printStackTrace();
-            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-                "Unable to retrieve attachment");
-            return;
-          }
-        } else {
-          SubmissionKeyPart p = parts.get(parts.size() - 1);
-          Long ordinal = p.getOrdinalNumber();
-          if (ordinal == null) {
-            resp.sendError(HttpServletResponse.SC_BAD_REQUEST,
-                "attachment request must be fully qualified");
-            return;
-          } else {
-            try {
-              imageBlob = b.getBlob(ordinal.intValue(), cc);
-              unrootedFileName = b.getUnrootedFilename(ordinal.intValue());
-              contentType = b.getContentType(ordinal.intValue());
-              contentLength = b.getContentLength(ordinal.intValue());
-            } catch (ODKDatastoreException e) {
-              e.printStackTrace();
-              resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-                  "Unable to retrieve attachment");
+        try {
+          // ordinal should be 1 if there is just 1 attachment...
+          int ordinal = b.getAttachmentCount(cc);
+          if ( ordinal != 1 ) {
+            // we have multiple attachments
+            // -- use submissionKey to determine which one we want
+            SubmissionKeyPart p = parts.get(parts.size() - 1);
+            Long ord = p.getOrdinalNumber();
+            if (ord == null) {
+              resp.sendError(HttpServletResponse.SC_BAD_REQUEST,
+                  "attachment request must be fully qualified");
               return;
             }
+            // OK. This is the attachment we want...
+            ordinal = ord.intValue();
           }
+          imageBlob = b.getBlob(ordinal, cc);
+          unrootedFileName = b.getUnrootedFilename(ordinal, cc);
+          contentType = b.getContentType(ordinal, cc);
+          contentLength = b.getContentLength(ordinal, cc);
+        } catch (ODKOverQuotaException e) {
+          e.printStackTrace();
+          quotaExceededError(resp);
+          return;
+        } catch (ODKDatastoreException e) {
+          e.printStackTrace();
+          resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+              "Unable to retrieve attachment");
+          return;
         }
       }
     }

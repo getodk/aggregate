@@ -107,7 +107,7 @@ public class ServicesAdminServiceImpl extends RemoteServiceServlet implements
   }
 
   @Override
-  public String generateOAuthUrl(String uri) {
+  public String generateOAuthUrl(String uri) throws RequestFailureException, DatastoreFailureException {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
 
@@ -154,8 +154,10 @@ public class ServicesAdminServiceImpl extends RemoteServiceServlet implements
       e.printStackTrace();
     } catch (ODKOverQuotaException e) {
       e.printStackTrace();
+      throw new RequestFailureException(ErrorConsts.QUOTA_EXCEEDED);
     } catch (ODKDatastoreException e) {
       e.printStackTrace();
+      throw new DatastoreFailureException(e);
     }
     return null;
   }
