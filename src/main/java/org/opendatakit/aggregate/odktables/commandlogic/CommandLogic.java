@@ -109,7 +109,7 @@ public abstract class CommandLogic<T extends Command> {
 	DELETE_USER, 
 	GET_USER_BY_ID, 
 	GET_USER_BY_AGGREGATE_IDENTIFIER, 
-	QUERY_FOR_TABLES, 
+	LIST_ALL_TABLES, 
 	SET_TABLE_PERMISSIONS, 
 	SET_USER_MANAGEMENT_PERMISSIONS,
 
@@ -145,7 +145,7 @@ public abstract class CommandLogic<T extends Command> {
 	commandClassMap.put(GetUserByID.class, CommandType.GET_USER_BY_ID);
 	commandClassMap.put(GetUserByAggregateIdentifier.class,
 		CommandType.GET_USER_BY_AGGREGATE_IDENTIFIER);
-	commandClassMap.put(ListAllTables.class, CommandType.QUERY_FOR_TABLES);
+	commandClassMap.put(ListAllTables.class, CommandType.LIST_ALL_TABLES);
 	commandClassMap.put(SetTablePermissions.class,
 		CommandType.SET_TABLE_PERMISSIONS);
 	commandClassMap.put(SetUserManagementPermissions.class,
@@ -201,7 +201,7 @@ public abstract class CommandLogic<T extends Command> {
 	case GET_USER_BY_AGGREGATE_IDENTIFIER:
 	    return new GetUserByAggregateIdentifierLogic(
 		    (GetUserByAggregateIdentifier) command);
-	case QUERY_FOR_TABLES:
+	case LIST_ALL_TABLES:
 	    return new ListAllTablesLogic((ListAllTables) command);
 	case SET_TABLE_PERMISSIONS:
 	    return new SetTablePermissionsLogic((SetTablePermissions) command);
