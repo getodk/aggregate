@@ -52,8 +52,7 @@ package org.opendatakit.aggregate.odktables.command;
  * 
  * @author the.dylan.price@gmail.com
  */
-public interface Command
-{
+public interface Command {
 
     /**
      * @return the path of this Command relative to the address of an Aggregate

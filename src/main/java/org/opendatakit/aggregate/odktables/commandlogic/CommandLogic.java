@@ -73,8 +73,7 @@ import org.opendatakit.common.web.CallingContext;
  * 
  * @author the.dylan.price@gmail.com
  */
-public abstract class CommandLogic<T extends Command>
-{
+public abstract class CommandLogic<T extends Command> {
     /**
      * <p>
      * Executes the logic necessary to run the command.
@@ -96,39 +95,22 @@ public abstract class CommandLogic<T extends Command>
      * @return the result of executing the command
      */
     public abstract CommandResult<T> execute(CallingContext cc)
-            throws AggregateInternalErrorException, SnafuException;
+	    throws AggregateInternalErrorException, SnafuException;
 
     /**
      * There should be one CommandType for each implementation of the Command
      * interface. This is just to support switching in
      * {@link CommandConverter#newCommandLogic(Command)}.
      */
-    private enum CommandType
-    {
-        // Common
-        CHECK_USER_EXISTS,
-        CREATE_USER,
-        DELETE_USER,
-        GET_USER_BY_ID,
-        GET_USER_BY_AGGREGATE_IDENTIFIER,
-        QUERY_FOR_TABLES,
-        SET_TABLE_PERMISSIONS,
-        SET_USER_MANAGEMENT_PERMISSIONS,
+    private enum CommandType {
+	// Common
+	CHECK_USER_EXISTS, CREATE_USER, DELETE_USER, GET_USER_BY_ID, GET_USER_BY_AGGREGATE_IDENTIFIER, QUERY_FOR_TABLES, SET_TABLE_PERMISSIONS, SET_USER_MANAGEMENT_PERMISSIONS,
 
-        // Simple
-        CREATE_TABLE,
-        DELETE_TABLE,
-        INSERT_ROWS,
-        QUERY_FOR_ROWS,
+	// Simple
+	CREATE_TABLE, DELETE_TABLE, INSERT_ROWS, QUERY_FOR_ROWS,
 
-        // Synchronized
-        CLONE_SYNCHRONIZED_TABLE,
-        CREATE_SYNCHRONIZED_TABLE,
-        DELETE_SYNCHRONIZED_TABLE,
-        INSERT_SYNCHRONIZED_ROWS,
-        REMOVE_TABLE_SYNCHRONIZATION,
-        SYNCHRONIZE,
-        UPDATE_SYNCHRONIZED_ROWS,
+	// Synchronized
+	CLONE_SYNCHRONIZED_TABLE, CREATE_SYNCHRONIZED_TABLE, DELETE_SYNCHRONIZED_TABLE, INSERT_SYNCHRONIZED_ROWS, REMOVE_TABLE_SYNCHRONIZATION, SYNCHRONIZE, UPDATE_SYNCHRONIZED_ROWS,
     }
 
     /**
@@ -136,44 +118,43 @@ public abstract class CommandLogic<T extends Command>
      * CommandType.CREATE_TABLE.
      */
     private static final Map<Class<? extends Command>, CommandType> commandClassMap;
-    static
-    {
-        commandClassMap = new HashMap<Class<? extends Command>, CommandType>();
+    static {
+	commandClassMap = new HashMap<Class<? extends Command>, CommandType>();
 
-        // Common
-        commandClassMap.put(CheckUserExists.class,
-                CommandType.CHECK_USER_EXISTS);
-        commandClassMap.put(CreateUser.class, CommandType.CREATE_USER);
-        commandClassMap.put(DeleteUser.class, CommandType.DELETE_USER);
-        commandClassMap.put(GetUserByID.class, CommandType.GET_USER_BY_ID);
-        commandClassMap.put(GetUserByAggregateIdentifier.class,
-                CommandType.GET_USER_BY_AGGREGATE_IDENTIFIER);
-        commandClassMap.put(QueryForTables.class, CommandType.QUERY_FOR_TABLES);
-        commandClassMap.put(SetTablePermissions.class,
-                CommandType.SET_TABLE_PERMISSIONS);
-        commandClassMap.put(SetUserManagementPermissions.class,
-                CommandType.SET_USER_MANAGEMENT_PERMISSIONS);
+	// Common
+	commandClassMap.put(CheckUserExists.class,
+		CommandType.CHECK_USER_EXISTS);
+	commandClassMap.put(CreateUser.class, CommandType.CREATE_USER);
+	commandClassMap.put(DeleteUser.class, CommandType.DELETE_USER);
+	commandClassMap.put(GetUserByID.class, CommandType.GET_USER_BY_ID);
+	commandClassMap.put(GetUserByAggregateIdentifier.class,
+		CommandType.GET_USER_BY_AGGREGATE_IDENTIFIER);
+	commandClassMap.put(QueryForTables.class, CommandType.QUERY_FOR_TABLES);
+	commandClassMap.put(SetTablePermissions.class,
+		CommandType.SET_TABLE_PERMISSIONS);
+	commandClassMap.put(SetUserManagementPermissions.class,
+		CommandType.SET_USER_MANAGEMENT_PERMISSIONS);
 
-        // Simple
-        commandClassMap.put(CreateTable.class, CommandType.CREATE_TABLE);
-        commandClassMap.put(DeleteTable.class, CommandType.DELETE_TABLE);
-        commandClassMap.put(InsertRows.class, CommandType.INSERT_ROWS);
-        commandClassMap.put(QueryForRows.class, CommandType.QUERY_FOR_ROWS);
+	// Simple
+	commandClassMap.put(CreateTable.class, CommandType.CREATE_TABLE);
+	commandClassMap.put(DeleteTable.class, CommandType.DELETE_TABLE);
+	commandClassMap.put(InsertRows.class, CommandType.INSERT_ROWS);
+	commandClassMap.put(QueryForRows.class, CommandType.QUERY_FOR_ROWS);
 
-        // Synchronized
-        commandClassMap.put(CloneSynchronizedTable.class,
-                CommandType.CLONE_SYNCHRONIZED_TABLE);
-        commandClassMap.put(CreateSynchronizedTable.class,
-                CommandType.CREATE_SYNCHRONIZED_TABLE);
-        commandClassMap.put(DeleteSynchronizedTable.class,
-                CommandType.DELETE_SYNCHRONIZED_TABLE);
-        commandClassMap.put(InsertSynchronizedRows.class,
-                CommandType.INSERT_SYNCHRONIZED_ROWS);
-        commandClassMap.put(RemoveTableSynchronization.class,
-                CommandType.REMOVE_TABLE_SYNCHRONIZATION);
-        commandClassMap.put(Synchronize.class, CommandType.SYNCHRONIZE);
-        commandClassMap.put(UpdateSynchronizedRows.class,
-                CommandType.UPDATE_SYNCHRONIZED_ROWS);
+	// Synchronized
+	commandClassMap.put(CloneSynchronizedTable.class,
+		CommandType.CLONE_SYNCHRONIZED_TABLE);
+	commandClassMap.put(CreateSynchronizedTable.class,
+		CommandType.CREATE_SYNCHRONIZED_TABLE);
+	commandClassMap.put(DeleteSynchronizedTable.class,
+		CommandType.DELETE_SYNCHRONIZED_TABLE);
+	commandClassMap.put(InsertSynchronizedRows.class,
+		CommandType.INSERT_SYNCHRONIZED_ROWS);
+	commandClassMap.put(RemoveTableSynchronization.class,
+		CommandType.REMOVE_TABLE_SYNCHRONIZATION);
+	commandClassMap.put(Synchronize.class, CommandType.SYNCHRONIZE);
+	commandClassMap.put(UpdateSynchronizedRows.class,
+		CommandType.UPDATE_SYNCHRONIZED_ROWS);
     }
 
     /**
@@ -184,70 +165,68 @@ public abstract class CommandLogic<T extends Command>
      *            the command to create the CommandLogic for.
      * @return a new CommandLogic constructed using the given command.
      */
-    public static CommandLogic<? extends Command> newInstance(Command command)
-    {
-        Class<?> commandClass = command.getClass();
-        CommandType commandType = commandClassMap.get(commandClass);
+    public static CommandLogic<? extends Command> newInstance(Command command) {
+	Class<?> commandClass = command.getClass();
+	CommandType commandType = commandClassMap.get(commandClass);
 
-        if (commandType == null)
-            throw new IllegalArgumentException("No such command: " + command);
+	if (commandType == null)
+	    throw new IllegalArgumentException("No such command: " + command);
 
-        switch (commandType)
-        {
-        // Common
-        case CHECK_USER_EXISTS:
-            return new CheckUserExistsLogic((CheckUserExists) command);
-        case CREATE_USER:
-            return new CreateUserLogic((CreateUser) command);
-        case DELETE_USER:
-            return new DeleteUserLogic((DeleteUser) command);
-        case GET_USER_BY_ID:
-            return new GetUserByIDLogic((GetUserByID) command);
-        case GET_USER_BY_AGGREGATE_IDENTIFIER:
-            return new GetUserByAggregateIdentifierLogic(
-                    (GetUserByAggregateIdentifier) command);
-        case QUERY_FOR_TABLES:
-            return new QueryForTablesLogic((QueryForTables) command);
-        case SET_TABLE_PERMISSIONS:
-            return new SetTablePermissionsLogic((SetTablePermissions) command);
-        case SET_USER_MANAGEMENT_PERMISSIONS:
-            return new SetUserManagementPermissionsLogic(
-                    (SetUserManagementPermissions) command);
+	switch (commandType) {
+	// Common
+	case CHECK_USER_EXISTS:
+	    return new CheckUserExistsLogic((CheckUserExists) command);
+	case CREATE_USER:
+	    return new CreateUserLogic((CreateUser) command);
+	case DELETE_USER:
+	    return new DeleteUserLogic((DeleteUser) command);
+	case GET_USER_BY_ID:
+	    return new GetUserByIDLogic((GetUserByID) command);
+	case GET_USER_BY_AGGREGATE_IDENTIFIER:
+	    return new GetUserByAggregateIdentifierLogic(
+		    (GetUserByAggregateIdentifier) command);
+	case QUERY_FOR_TABLES:
+	    return new QueryForTablesLogic((QueryForTables) command);
+	case SET_TABLE_PERMISSIONS:
+	    return new SetTablePermissionsLogic((SetTablePermissions) command);
+	case SET_USER_MANAGEMENT_PERMISSIONS:
+	    return new SetUserManagementPermissionsLogic(
+		    (SetUserManagementPermissions) command);
 
-            // Simple
-        case CREATE_TABLE:
-            return new CreateTableLogic((CreateTable) command);
-        case DELETE_TABLE:
-            return new DeleteTableLogic((DeleteTable) command);
-        case INSERT_ROWS:
-            return new InsertRowsLogic((InsertRows) command);
-        case QUERY_FOR_ROWS:
-            return new QueryForRowsLogic((QueryForRows) command);
+	    // Simple
+	case CREATE_TABLE:
+	    return new CreateTableLogic((CreateTable) command);
+	case DELETE_TABLE:
+	    return new DeleteTableLogic((DeleteTable) command);
+	case INSERT_ROWS:
+	    return new InsertRowsLogic((InsertRows) command);
+	case QUERY_FOR_ROWS:
+	    return new QueryForRowsLogic((QueryForRows) command);
 
-            // Synchronized
-        case CLONE_SYNCHRONIZED_TABLE:
-            return new CloneSynchronizedTableLogic(
-                    (CloneSynchronizedTable) command);
-        case CREATE_SYNCHRONIZED_TABLE:
-            return new CreateSynchronizedTableLogic(
-                    (CreateSynchronizedTable) command);
-        case DELETE_SYNCHRONIZED_TABLE:
-            return new DeleteSynchronizedTableLogic(
-                    (DeleteSynchronizedTable) command);
-        case INSERT_SYNCHRONIZED_ROWS:
-            return new InsertSynchronizedRowsLogic(
-                    (InsertSynchronizedRows) command);
-        case REMOVE_TABLE_SYNCHRONIZATION:
-            return new RemoveTableSynchronizationLogic(
-                    (RemoveTableSynchronization) command);
-        case SYNCHRONIZE:
-            return new SynchronizeLogic((Synchronize) command);
-        case UPDATE_SYNCHRONIZED_ROWS:
-            return new UpdateSynchronizedRowsLogic(
-                    (UpdateSynchronizedRows) command);
+	    // Synchronized
+	case CLONE_SYNCHRONIZED_TABLE:
+	    return new CloneSynchronizedTableLogic(
+		    (CloneSynchronizedTable) command);
+	case CREATE_SYNCHRONIZED_TABLE:
+	    return new CreateSynchronizedTableLogic(
+		    (CreateSynchronizedTable) command);
+	case DELETE_SYNCHRONIZED_TABLE:
+	    return new DeleteSynchronizedTableLogic(
+		    (DeleteSynchronizedTable) command);
+	case INSERT_SYNCHRONIZED_ROWS:
+	    return new InsertSynchronizedRowsLogic(
+		    (InsertSynchronizedRows) command);
+	case REMOVE_TABLE_SYNCHRONIZATION:
+	    return new RemoveTableSynchronizationLogic(
+		    (RemoveTableSynchronization) command);
+	case SYNCHRONIZE:
+	    return new SynchronizeLogic((Synchronize) command);
+	case UPDATE_SYNCHRONIZED_ROWS:
+	    return new UpdateSynchronizedRowsLogic(
+		    (UpdateSynchronizedRows) command);
 
-        default:
-            throw new IllegalArgumentException("No such command: " + command);
-        }
+	default:
+	    throw new IllegalArgumentException("No such command: " + command);
+	}
     }
 }

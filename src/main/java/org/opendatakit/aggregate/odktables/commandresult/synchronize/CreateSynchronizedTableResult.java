@@ -16,55 +16,50 @@ import org.opendatakit.common.utils.Check;
  * @author the.dylan.price@gmail.com
  */
 public class CreateSynchronizedTableResult extends
-        CommandResult<CreateSynchronizedTable>
-{
+	CommandResult<CreateSynchronizedTable> {
     private static final List<FailureReason> possibleFailureReasons;
-    static
-    {
-        possibleFailureReasons = new ArrayList<FailureReason>();
-        possibleFailureReasons.add(FailureReason.TABLE_ALREADY_EXISTS);
+    static {
+	possibleFailureReasons = new ArrayList<FailureReason>();
+	possibleFailureReasons.add(FailureReason.TABLE_ALREADY_EXISTS);
     }
 
     private final Modification modification;
     private final String tableID;
 
-    private CreateSynchronizedTableResult()
-    {
-        super(true, null);
-        this.modification = null;
-        this.tableID = null;
+    private CreateSynchronizedTableResult() {
+	super(true, null);
+	this.modification = null;
+	this.tableID = null;
 
     }
 
     /**
      * The success constructor. See {@link #success} for param info.
      */
-    private CreateSynchronizedTableResult(Modification modification)
-    {
-        super(true, null);
+    private CreateSynchronizedTableResult(Modification modification) {
+	super(true, null);
 
-        Check.notNull(modification, "modification");
+	Check.notNull(modification, "modification");
 
-        this.modification = modification;
-        this.tableID = null;
+	this.modification = modification;
+	this.tableID = null;
     }
 
     /**
      * The failure constructor. See {@link #failure} for param info.
      */
-    private CreateSynchronizedTableResult(String tableID, FailureReason reason)
-    {
-        super(false, reason);
+    private CreateSynchronizedTableResult(String tableID, FailureReason reason) {
+	super(false, reason);
 
-        Check.notNullOrEmpty(tableID, "tableID");
-        if (!possibleFailureReasons.contains(reason))
-            throw new IllegalArgumentException(
-                    String.format(
-                            "Failure reason %s not a valid failure reason for CreateSynchronizedTable.",
-                            reason));
+	Check.notNullOrEmpty(tableID, "tableID");
+	if (!possibleFailureReasons.contains(reason))
+	    throw new IllegalArgumentException(
+		    String.format(
+			    "Failure reason %s not a valid failure reason for CreateSynchronizedTable.",
+			    reason));
 
-        this.modification = null;
-        this.tableID = tableID;
+	this.modification = null;
+	this.tableID = tableID;
     }
 
     /**
@@ -72,21 +67,17 @@ public class CreateSynchronizedTableResult extends
      * 
      * @throws TableAlreadyExistsException
      */
-    public Modification getModification() throws TableAlreadyExistsException
-    {
-        if (successful())
-        {
-            return this.modification;
-        } else
-        {
-            switch (getReason())
-            {
-            case TABLE_ALREADY_EXISTS:
-                throw new TableAlreadyExistsException(tableID);
-            default:
-                throw new RuntimeException("An unknown error occured.");
-            }
-        }
+    public Modification getModification() throws TableAlreadyExistsException {
+	if (successful()) {
+	    return this.modification;
+	} else {
+	    switch (getReason()) {
+	    case TABLE_ALREADY_EXISTS:
+		throw new TableAlreadyExistsException(tableID);
+	    default:
+		throw new RuntimeException("An unknown error occured.");
+	    }
+	}
     }
 
     /**
@@ -97,9 +88,8 @@ public class CreateSynchronizedTableResult extends
      * 
      */
     public static CreateSynchronizedTableResult success(
-            Modification modification)
-    {
-        return new CreateSynchronizedTableResult(modification);
+	    Modification modification) {
+	return new CreateSynchronizedTableResult(modification);
     }
 
     /**
@@ -111,8 +101,7 @@ public class CreateSynchronizedTableResult extends
      *         completion of a CreateSynchronizedTable command.
      */
     public static CreateSynchronizedTableResult failure(String tableID,
-            FailureReason reason)
-    {
-        return new CreateSynchronizedTableResult(tableID, reason);
+	    FailureReason reason) {
+	return new CreateSynchronizedTableResult(tableID, reason);
     }
 }

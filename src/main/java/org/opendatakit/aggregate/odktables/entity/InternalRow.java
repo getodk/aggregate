@@ -21,53 +21,44 @@ import org.opendatakit.common.web.CallingContext;
  * 
  * @author the.dylan.price@gmail.com
  */
-public class InternalRow extends TypedEntity
-{
+public class InternalRow extends TypedEntity {
 
     public InternalRow(String aggregateTableIdentifier, CallingContext cc)
-            throws ODKDatastoreException
-    {
-        super(Table.getInstance(aggregateTableIdentifier, cc).newEntity());
-        updateRevisionTag();
+	    throws ODKDatastoreException {
+	super(Table.getInstance(aggregateTableIdentifier, cc).newEntity());
+	updateRevisionTag();
     }
 
-    public InternalRow(Entity entity)
-    {
-        super(entity);
+    public InternalRow(Entity entity) {
+	super(entity);
     }
 
-    public String getRevisionTag()
-    {
-        return entity.getString(Table.REVISION_TAG);
+    public String getRevisionTag() {
+	return entity.getString(Table.REVISION_TAG);
     }
 
-    public void updateRevisionTag()
-    {
-        entity.set(Table.REVISION_TAG, UUID.randomUUID().toString());
+    public void updateRevisionTag() {
+	entity.set(Table.REVISION_TAG, UUID.randomUUID().toString());
     }
 
-    public String getValue(String aggregateAttributeIdentifier)
-    {
-        return entity.getAsString(Table
-                .convertIdentifier(aggregateAttributeIdentifier));
+    public String getValue(String aggregateAttributeIdentifier) {
+	return entity.getAsString(Table
+		.convertIdentifier(aggregateAttributeIdentifier));
     }
 
-    public void setValue(String aggregateAttributeIdentifier, String value)
-    {
-        entity.setAsString(
-                Table.convertIdentifier(aggregateAttributeIdentifier), value);
+    public void setValue(String aggregateAttributeIdentifier, String value) {
+	entity.setAsString(
+		Table.convertIdentifier(aggregateAttributeIdentifier), value);
     }
 
     @Override
-    public String toString()
-    {
-        return String.format(
-                "InternalRow[aggregateRowIdentifier=%s, revisionTag=%s",
-                getAggregateIdentifier(), getRevisionTag());
+    public String toString() {
+	return String.format(
+		"InternalRow[aggregateRowIdentifier=%s, revisionTag=%s",
+		getAggregateIdentifier(), getRevisionTag());
     }
 
-    public static InternalRow fromEntity(Entity entity)
-    {
-        return new InternalRow(entity);
+    public static InternalRow fromEntity(Entity entity) {
+	return new InternalRow(entity);
     }
 }

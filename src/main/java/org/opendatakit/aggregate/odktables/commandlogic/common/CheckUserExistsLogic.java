@@ -15,33 +15,28 @@ import org.opendatakit.common.web.CallingContext;
  * @author the.dylan.price@gmail.com
  * 
  */
-public class CheckUserExistsLogic extends CommandLogic<CheckUserExists>
-{
+public class CheckUserExistsLogic extends CommandLogic<CheckUserExists> {
 
     private final CheckUserExists checkUserExists;
 
-    public CheckUserExistsLogic(CheckUserExists checkUserExists)
-    {
-        this.checkUserExists = checkUserExists;
+    public CheckUserExistsLogic(CheckUserExists checkUserExists) {
+	this.checkUserExists = checkUserExists;
     }
 
     @Override
     public CheckUserExistsResult execute(CallingContext cc)
-            throws AggregateInternalErrorException
-    {
-        boolean userExists;
-        try
-        {
-            Users users = Users.getInstance(cc);
+	    throws AggregateInternalErrorException {
+	boolean userExists;
+	try {
+	    Users users = Users.getInstance(cc);
 
-            String userID = checkUserExists.getUserID();
-            userExists = users.query("CheckUserExistsLogic.execute")
-                    .equal(Users.USER_ID, userID).exists();
-        } catch (ODKDatastoreException e)
-        {
-            throw new AggregateInternalErrorException(e.getMessage());
-        }
+	    String userID = checkUserExists.getUserID();
+	    userExists = users.query("CheckUserExistsLogic.execute")
+		    .equal(Users.USER_ID, userID).exists();
+	} catch (ODKDatastoreException e) {
+	    throw new AggregateInternalErrorException(e.getMessage());
+	}
 
-        return CheckUserExistsResult.success(userExists);
+	return CheckUserExistsResult.success(userExists);
     }
 }

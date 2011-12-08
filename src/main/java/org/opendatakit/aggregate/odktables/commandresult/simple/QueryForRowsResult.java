@@ -17,14 +17,12 @@ import org.opendatakit.common.utils.Check;
  * 
  * @author the.dylan.price@gmail.com
  */
-public class QueryForRowsResult extends CommandResult<QueryForRows>
-{
+public class QueryForRowsResult extends CommandResult<QueryForRows> {
     private static final List<FailureReason> possibleFailureReasons;
-    static
-    {
-        possibleFailureReasons = new ArrayList<FailureReason>();
-        possibleFailureReasons.add(FailureReason.TABLE_DOES_NOT_EXIST);
-        possibleFailureReasons.add(FailureReason.PERMISSION_DENIED);
+    static {
+	possibleFailureReasons = new ArrayList<FailureReason>();
+	possibleFailureReasons.add(FailureReason.TABLE_DOES_NOT_EXIST);
+	possibleFailureReasons.add(FailureReason.PERMISSION_DENIED);
     }
 
     private final List<Row> rows;
@@ -33,38 +31,34 @@ public class QueryForRowsResult extends CommandResult<QueryForRows>
     /**
      * Need a no-arg constructor for serialization by Gson.
      */
-    private QueryForRowsResult()
-    {
-        super(true, null);
-        this.rows = null;
-        this.tableID = null;
+    private QueryForRowsResult() {
+	super(true, null);
+	this.rows = null;
+	this.tableID = null;
     }
 
     /**
      * The success constructor. See {@link #success} for param info.
      */
-    private QueryForRowsResult(List<Row> rows)
-    {
-        super(true, null);
-        Check.notNull(rows, "rows");
-        this.rows = rows;
-        this.tableID = null;
+    private QueryForRowsResult(List<Row> rows) {
+	super(true, null);
+	Check.notNull(rows, "rows");
+	this.rows = rows;
+	this.tableID = null;
     }
 
     /**
      * The failure constructor. See {@link #failure} for param info.
      */
-    private QueryForRowsResult(String tableID, FailureReason reason)
-    {
-        super(false, reason);
-        Check.notNullOrEmpty(tableID, "tableID");
-        if (!possibleFailureReasons.contains(getReason()))
-        {
-            throw new IllegalArgumentException("Not a valid FailureReason: "
-                    + getReason());
-        }
-        this.rows = null;
-        this.tableID = tableID;
+    private QueryForRowsResult(String tableID, FailureReason reason) {
+	super(false, reason);
+	Check.notNullOrEmpty(tableID, "tableID");
+	if (!possibleFailureReasons.contains(getReason())) {
+	    throw new IllegalArgumentException("Not a valid FailureReason: "
+		    + getReason());
+	}
+	this.rows = null;
+	this.tableID = tableID;
     }
 
     /**
@@ -77,82 +71,78 @@ public class QueryForRowsResult extends CommandResult<QueryForRows>
      * @throws PermissionDeniedException
      */
     public List<Row> getRows() throws TableDoesNotExistException,
-            UserDoesNotExistException, PermissionDeniedException
-    {
-        if (successful())
-        {
-            return this.rows;
-        } else
-        {
-            switch (getReason())
-            {
-            case TABLE_DOES_NOT_EXIST:
-                throw new TableDoesNotExistException(tableID);
-            case PERMISSION_DENIED:
-                throw new PermissionDeniedException();
-            default:
-                throw new RuntimeException("An unknown error occured.");
-            }
-        }
+	    UserDoesNotExistException, PermissionDeniedException {
+	if (successful()) {
+	    return this.rows;
+	} else {
+	    switch (getReason()) {
+	    case TABLE_DOES_NOT_EXIST:
+		throw new TableDoesNotExistException(tableID);
+	    case PERMISSION_DENIED:
+		throw new PermissionDeniedException();
+	    default:
+		throw new RuntimeException("An unknown error occured.");
+	    }
+	}
     }
 
     /**
      * @return the aggregateTableIdentifier
      */
-    public String getAggregateTableIdentifier()
-    {
-        return tableID;
+    public String getAggregateTableIdentifier() {
+	return tableID;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.lang.Object#toString()
      */
     @Override
-    public String toString()
-    {
-        return String.format("QueryForRowsResult [rows=%s, tableID=%s]", rows,
-                tableID);
+    public String toString() {
+	return String.format("QueryForRowsResult [rows=%s, tableID=%s]", rows,
+		tableID);
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.lang.Object#hashCode()
      */
     @Override
-    public int hashCode()
-    {
-        final int prime = 31;
-        int result = super.hashCode();
-        result = prime * result + ((rows == null) ? 0 : rows.hashCode());
-        result = prime * result + ((tableID == null) ? 0 : tableID.hashCode());
-        return result;
+    public int hashCode() {
+	final int prime = 31;
+	int result = super.hashCode();
+	result = prime * result + ((rows == null) ? 0 : rows.hashCode());
+	result = prime * result + ((tableID == null) ? 0 : tableID.hashCode());
+	return result;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.lang.Object#equals(java.lang.Object)
      */
     @Override
-    public boolean equals(Object obj)
-    {
-        if (this == obj)
-            return true;
-        if (!super.equals(obj))
-            return false;
-        if (!(obj instanceof QueryForRowsResult))
-            return false;
-        QueryForRowsResult other = (QueryForRowsResult) obj;
-        if (rows == null)
-        {
-            if (other.rows != null)
-                return false;
-        } else if (!rows.equals(other.rows))
-            return false;
-        if (tableID == null)
-        {
-            if (other.tableID != null)
-                return false;
-        } else if (!tableID.equals(other.tableID))
-            return false;
-        return true;
+    public boolean equals(Object obj) {
+	if (this == obj)
+	    return true;
+	if (!super.equals(obj))
+	    return false;
+	if (!(obj instanceof QueryForRowsResult))
+	    return false;
+	QueryForRowsResult other = (QueryForRowsResult) obj;
+	if (rows == null) {
+	    if (other.rows != null)
+		return false;
+	} else if (!rows.equals(other.rows))
+	    return false;
+	if (tableID == null) {
+	    if (other.tableID != null)
+		return false;
+	} else if (!tableID.equals(other.tableID))
+	    return false;
+	return true;
     }
 
     /**
@@ -161,9 +151,8 @@ public class QueryForRowsResult extends CommandResult<QueryForRows>
      * @return a new QueryForRowsResult representing the successful execution of
      *         a QueryForRows command.
      */
-    public static QueryForRowsResult success(List<Row> rows)
-    {
-        return new QueryForRowsResult(rows);
+    public static QueryForRowsResult success(List<Row> rows) {
+	return new QueryForRowsResult(rows);
     }
 
     /**
@@ -177,8 +166,7 @@ public class QueryForRowsResult extends CommandResult<QueryForRows>
      *         QueryForRows command.
      */
     public static QueryForRowsResult failure(String tableID,
-            FailureReason reason)
-    {
-        return new QueryForRowsResult(tableID, reason);
+	    FailureReason reason) {
+	return new QueryForRowsResult(tableID, reason);
     }
 }

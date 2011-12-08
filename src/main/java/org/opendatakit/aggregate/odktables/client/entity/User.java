@@ -22,8 +22,7 @@ package org.opendatakit.aggregate.odktables.client.entity;
  * @author the.dylan.price@gmail.com
  * 
  */
-public class User
-{
+public class User {
 
     private final String userID;
     private final String aggregateUserIdentifier;
@@ -33,13 +32,12 @@ public class User
      * For Gson
      */
     @SuppressWarnings("unused")
-    private User()
-    {
-        this.userID = null;
-        this.aggregateUserIdentifier = null;
-        this.userName = null;
+    private User() {
+	this.userID = null;
+	this.aggregateUserIdentifier = null;
+	this.userName = null;
     }
-    
+
     /**
      * Creates a new User.
      * 
@@ -51,107 +49,103 @@ public class User
      * @param userName
      *            the human readable name of the user
      */
-    public User(String userID, String aggregateUserIdentifier, String userName)
-    {
-        // userID may be null (we may not want the to know what it is)
-        if (aggregateUserIdentifier == null
-                || aggregateUserIdentifier.length() == 0)
-            throw new IllegalArgumentException(
-                    "aggregateUserIdentifier was null or empty");
-        if (userName == null || userName.length() == 0)
-            throw new IllegalArgumentException("userName was null or empty");
+    public User(String userID, String aggregateUserIdentifier, String userName) {
+	// userID may be null (we may not want the to know what it is)
+	if (aggregateUserIdentifier == null
+		|| aggregateUserIdentifier.length() == 0)
+	    throw new IllegalArgumentException(
+		    "aggregateUserIdentifier was null or empty");
+	if (userName == null || userName.length() == 0)
+	    throw new IllegalArgumentException("userName was null or empty");
 
-        this.userID = userID;
-        this.aggregateUserIdentifier = aggregateUserIdentifier;
-        this.userName = userName;
+	this.userID = userID;
+	this.aggregateUserIdentifier = aggregateUserIdentifier;
+	this.userName = userName;
     }
 
     /**
      * @return the userID
      */
-    public String getUserID()
-    {
-        return userID;
+    public String getUserID() {
+	return userID;
     }
 
     /**
      * @return the aggregateUserIdentifier
      */
-    public String getAggregateUserIdentifier()
-    {
-        return aggregateUserIdentifier;
+    public String getAggregateUserIdentifier() {
+	return aggregateUserIdentifier;
     }
 
     /**
      * @return the userName
      */
-    public String getUserName()
-    {
-        return userName;
+    public String getUserName() {
+	return userName;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.lang.Object#toString()
      */
     @Override
-    public String toString()
-    {
-        return String.format(
-                "User [userID=%s, aggregateUserIdentifier=%s, userName=%s]",
-                userID, aggregateUserIdentifier, userName);
+    public String toString() {
+	return String.format(
+		"User [userID=%s, aggregateUserIdentifier=%s, userName=%s]",
+		userID, aggregateUserIdentifier, userName);
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.lang.Object#hashCode()
      */
     @Override
-    public int hashCode()
-    {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((userID == null) ? 0 : userID.hashCode());
-        result = prime * result
-                + ((userName == null) ? 0 : userName.hashCode());
-        result = prime
-                * result
-                + ((aggregateUserIdentifier == null) ? 0
-                        : aggregateUserIdentifier.hashCode());
-        return result;
+    public int hashCode() {
+	final int prime = 31;
+	int result = 1;
+	result = prime * result + ((userID == null) ? 0 : userID.hashCode());
+	result = prime * result
+		+ ((userName == null) ? 0 : userName.hashCode());
+	result = prime
+		* result
+		+ ((aggregateUserIdentifier == null) ? 0
+			: aggregateUserIdentifier.hashCode());
+	return result;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.lang.Object#equals(java.lang.Object)
      */
     @Override
-    public boolean equals(Object obj)
-    {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        User other = (User) obj;
-        if (userID == null)
-        {
-            if (other.userID != null)
-                return false;
-        } else if (!userID.equals(other.userID))
-            return false;
-        if (userName == null)
-        {
-            if (other.userName != null)
-                return false;
-        } else if (!userName.equals(other.userName))
-            return false;
-        if (aggregateUserIdentifier == null)
-        {
-            if (other.aggregateUserIdentifier != null)
-                return false;
-        } else if (!aggregateUserIdentifier
-                .equals(other.aggregateUserIdentifier))
-            return false;
-        return true;
+    public boolean equals(Object obj) {
+	if (this == obj)
+	    return true;
+	if (obj == null)
+	    return false;
+	if (getClass() != obj.getClass())
+	    return false;
+	User other = (User) obj;
+	if (userID == null) {
+	    if (other.userID != null)
+		return false;
+	} else if (!userID.equals(other.userID))
+	    return false;
+	if (userName == null) {
+	    if (other.userName != null)
+		return false;
+	} else if (!userName.equals(other.userName))
+	    return false;
+	if (aggregateUserIdentifier == null) {
+	    if (other.aggregateUserIdentifier != null)
+		return false;
+	} else if (!aggregateUserIdentifier
+		.equals(other.aggregateUserIdentifier))
+	    return false;
+	return true;
     }
 
 }

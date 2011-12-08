@@ -20,17 +20,15 @@ import org.opendatakit.common.utils.Check;
  * @author the.dylan.price@gmail.com
  */
 public class UpdateSynchronizedRowsResult extends
-        CommandResult<UpdateSynchronizedRows>
-{
+	CommandResult<UpdateSynchronizedRows> {
     private static final List<FailureReason> possibleFailureReasons;
-    static
-    {
-        possibleFailureReasons = new ArrayList<FailureReason>();
-        possibleFailureReasons.add(FailureReason.TABLE_DOES_NOT_EXIST);
-        possibleFailureReasons.add(FailureReason.PERMISSION_DENIED);
-        possibleFailureReasons.add(FailureReason.OUT_OF_SYNCH);
-        possibleFailureReasons.add(FailureReason.ROW_OUT_OF_SYNCH);
-        possibleFailureReasons.add(FailureReason.COLUMN_DOES_NOT_EXIST);
+    static {
+	possibleFailureReasons = new ArrayList<FailureReason>();
+	possibleFailureReasons.add(FailureReason.TABLE_DOES_NOT_EXIST);
+	possibleFailureReasons.add(FailureReason.PERMISSION_DENIED);
+	possibleFailureReasons.add(FailureReason.OUT_OF_SYNCH);
+	possibleFailureReasons.add(FailureReason.ROW_OUT_OF_SYNCH);
+	possibleFailureReasons.add(FailureReason.COLUMN_DOES_NOT_EXIST);
     }
 
     private final Modification modification;
@@ -39,44 +37,40 @@ public class UpdateSynchronizedRowsResult extends
     private final String badColumnName;
 
     private UpdateSynchronizedRowsResult(boolean successful,
-            FailureReason reason, Modification modification,
-            String aggregateRowIdentifier, String tableID, String badColumnName)
-    {
-        super(successful, reason);
-        this.modification = modification;
-        this.tableID = tableID;
-        this.aggregateRowIdentifier = aggregateRowIdentifier;
-        this.badColumnName = badColumnName;
+	    FailureReason reason, Modification modification,
+	    String aggregateRowIdentifier, String tableID, String badColumnName) {
+	super(successful, reason);
+	this.modification = modification;
+	this.tableID = tableID;
+	this.aggregateRowIdentifier = aggregateRowIdentifier;
+	this.badColumnName = badColumnName;
     }
 
-    private UpdateSynchronizedRowsResult()
-    {
-        this(true, null, null, null, null, null);
+    private UpdateSynchronizedRowsResult() {
+	this(true, null, null, null, null, null);
     }
 
     /**
      * The success constructor. See {@link #success} for param info.
      */
-    private UpdateSynchronizedRowsResult(Modification modification)
-    {
-        this(true, null, modification, null, null, null);
-        Check.notNull(modification, "modification");
+    private UpdateSynchronizedRowsResult(Modification modification) {
+	this(true, null, modification, null, null, null);
+	Check.notNull(modification, "modification");
     }
 
     /**
      * The failure constructor. See {@link #failure} for param info.
      */
     private UpdateSynchronizedRowsResult(String aggregateRowIdentifier,
-            String tableID, String badColumnName, FailureReason reason)
-    {
-        this(false, reason, null, aggregateRowIdentifier, tableID,
-                badColumnName);
-        Check.notNullOrEmpty(tableID, "tableID");
-        if (!possibleFailureReasons.contains(reason))
-            throw new IllegalArgumentException(
-                    String.format(
-                            "Failure reason %s not a valid failure reason for UpdateSynchronizedRows.",
-                            reason));
+	    String tableID, String badColumnName, FailureReason reason) {
+	this(false, reason, null, aggregateRowIdentifier, tableID,
+		badColumnName);
+	Check.notNullOrEmpty(tableID, "tableID");
+	if (!possibleFailureReasons.contains(reason))
+	    throw new IllegalArgumentException(
+		    String.format(
+			    "Failure reason %s not a valid failure reason for UpdateSynchronizedRows.",
+			    reason));
     }
 
     /**
@@ -88,41 +82,38 @@ public class UpdateSynchronizedRowsResult extends
      * @throws ColumnDoesNotExistException
      */
     public Modification getModification() throws PermissionDeniedException,
-            OutOfSynchException, TableDoesNotExistException,
-            RowOutOfSynchException, ColumnDoesNotExistException
-    {
-        if (successful())
-        {
-            return modification;
-        } else
-        {
-            switch (getReason())
-            {
-            case ROW_OUT_OF_SYNCH:
-                throw new RowOutOfSynchException(aggregateRowIdentifier);
-            case OUT_OF_SYNCH:
-                throw new OutOfSynchException();
-            case TABLE_DOES_NOT_EXIST:
-                throw new TableDoesNotExistException(tableID);
-            case PERMISSION_DENIED:
-                throw new PermissionDeniedException();
-            case COLUMN_DOES_NOT_EXIST:
-                throw new ColumnDoesNotExistException(tableID, badColumnName);
-            default:
-                throw new RuntimeException("An unknown error occured.");
-            }
-        }
+	    OutOfSynchException, TableDoesNotExistException,
+	    RowOutOfSynchException, ColumnDoesNotExistException {
+	if (successful()) {
+	    return modification;
+	} else {
+	    switch (getReason()) {
+	    case ROW_OUT_OF_SYNCH:
+		throw new RowOutOfSynchException(aggregateRowIdentifier);
+	    case OUT_OF_SYNCH:
+		throw new OutOfSynchException();
+	    case TABLE_DOES_NOT_EXIST:
+		throw new TableDoesNotExistException(tableID);
+	    case PERMISSION_DENIED:
+		throw new PermissionDeniedException();
+	    case COLUMN_DOES_NOT_EXIST:
+		throw new ColumnDoesNotExistException(tableID, badColumnName);
+	    default:
+		throw new RuntimeException("An unknown error occured.");
+	    }
+	}
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.lang.Object#toString()
      */
     @Override
-    public String toString()
-    {
-        return String.format(
-                "UpdateSynchronizedRowsResult [modification=%s, tableID=%s]",
-                modification, tableID);
+    public String toString() {
+	return String.format(
+		"UpdateSynchronizedRowsResult [modification=%s, tableID=%s]",
+		modification, tableID);
     }
 
     /**
@@ -130,9 +121,8 @@ public class UpdateSynchronizedRowsResult extends
      *         completion of an UpdateSynchronizedRows command.
      * 
      */
-    public static UpdateSynchronizedRowsResult success(Modification modification)
-    {
-        return new UpdateSynchronizedRowsResult(modification);
+    public static UpdateSynchronizedRowsResult success(Modification modification) {
+	return new UpdateSynchronizedRowsResult(modification);
     }
 
     /**
@@ -140,10 +130,9 @@ public class UpdateSynchronizedRowsResult extends
      *         completion of an UpdateSynchronizedRows command.
      */
     public static UpdateSynchronizedRowsResult failure(
-            String aggregateRowIdentifier, String tableID,
-            String badColumnName, FailureReason reason)
-    {
-        return new UpdateSynchronizedRowsResult(aggregateRowIdentifier,
-                tableID, badColumnName, reason);
+	    String aggregateRowIdentifier, String tableID,
+	    String badColumnName, FailureReason reason) {
+	return new UpdateSynchronizedRowsResult(aggregateRowIdentifier,
+		tableID, badColumnName, reason);
     }
 }
