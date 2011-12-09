@@ -125,7 +125,7 @@ public class BinaryContentManipulator {
       Datastore ds = cc.getDatastore();
       User user = cc.getCurrentUser();
       // gather the ordered list of parts...
-      Query q = ds.createQuery(bcbRef, "BinaryContentManipulator.constructor", user);
+      Query q = ds.createQuery(bcbRef, "BinaryContentManipulator.BlobManipulator.constructor", user);
       q.addFilter(bcbRef.domAuri, FilterOperation.EQUAL, uriVersionedContent);
       q.addSort(bcbRef.domAuri, Direction.ASCENDING); // gae optimization
       q.addSort(bcbRef.part, Direction.ASCENDING);
