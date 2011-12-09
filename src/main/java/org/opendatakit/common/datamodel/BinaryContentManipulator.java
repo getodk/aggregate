@@ -442,7 +442,7 @@ public class BinaryContentManipulator {
       for (CommonFieldsBase cb : contentHits) {
         attachments.add((BinaryContent) cb);
       }
-      refreshBeforeUse = true;
+      refreshBeforeUse = false;
     }
   }
   
