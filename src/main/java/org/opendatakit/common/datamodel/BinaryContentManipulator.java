@@ -127,6 +127,7 @@ public class BinaryContentManipulator {
       // gather the ordered list of parts...
       Query q = ds.createQuery(bcbRef, "BinaryContentManipulator.constructor", user);
       q.addFilter(bcbRef.domAuri, FilterOperation.EQUAL, uriVersionedContent);
+      q.addSort(bcbRef.domAuri, Direction.ASCENDING); // gae optimization
       q.addSort(bcbRef.part, Direction.ASCENDING);
       List<? extends CommonFieldsBase> bcbList = q.executeQuery();
       for (CommonFieldsBase cb : bcbList) {
