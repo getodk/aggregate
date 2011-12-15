@@ -8,8 +8,7 @@ import org.opendatakit.common.utils.Check;
  * 
  * @author the.dylan.price@gmail.com
  */
-public class GetUserByID implements Command
-{
+public class GetUserByID implements Command {
     private static final String path = "/common/getUserByID";
 
     private final String requestingUserID;
@@ -19,53 +18,47 @@ public class GetUserByID implements Command
      * For serialization by Gson
      */
     @SuppressWarnings("unused")
-    private GetUserByID()
-    {
-        this.requestingUserID = null;
-        this.userID = null;
+    private GetUserByID() {
+	this.requestingUserID = null;
+	this.userID = null;
 
     }
 
     /**
      * Constructs a new GetUserByID.
      */
-    public GetUserByID(String requestingUserID, String userID)
-    {
+    public GetUserByID(String requestingUserID, String userID) {
 
-        Check.notNullOrEmpty(requestingUserID, "requestingUserID");
-        Check.notNullOrEmpty(userID, "userID");
+	Check.notNullOrEmpty(requestingUserID, "requestingUserID");
+	Check.notNullOrEmpty(userID, "userID");
 
-        this.requestingUserID = requestingUserID;
-        this.userID = userID;
+	this.requestingUserID = requestingUserID;
+	this.userID = userID;
     }
 
     /**
      * @return the requestingUserID
      */
-    public String getRequestingUserID()
-    {
-        return this.requestingUserID;
+    public String getRequestingUserID() {
+	return this.requestingUserID;
     }
 
     /**
      * @return the userID
      */
-    public String getUserID()
-    {
-        return this.userID;
+    public String getUserID() {
+	return this.userID;
     }
 
     @Override
-    public String toString()
-    {
-        return String.format("GetUserByID: " + "requestingUserID=%s "
-                + "userID=%s " + "", requestingUserID, userID);
+    public String toString() {
+	return String.format("GetUserByID: " + "requestingUserID=%s "
+		+ "userID=%s " + "", requestingUserID, userID);
     }
 
     @Override
-    public String getMethodPath()
-    {
-        return methodPath();
+    public String getMethodPath() {
+	return methodPath();
     }
 
     /**
@@ -74,8 +67,7 @@ public class GetUserByID implements Command
      *         http://aggregate.opendatakit.org/odktables/createTable, then this
      *         method would return '/odktables/createTable'.
      */
-    public static String methodPath()
-    {
-        return path;
+    public static String methodPath() {
+	return path;
     }
 }

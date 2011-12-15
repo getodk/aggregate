@@ -11,8 +11,7 @@ import org.opendatakit.common.utils.Check;
  * 
  * @author the.dylan.price@gmail.com
  */
-public class CreateTable implements Command
-{
+public class CreateTable implements Command {
     private static final String path = "/simple/createTable";
 
     private final String tableName;
@@ -24,12 +23,11 @@ public class CreateTable implements Command
      * For serialization by Gson
      */
     @SuppressWarnings("unused")
-    private CreateTable()
-    {
-        this.tableName = null;
-        this.requestingUserID = null;
-        this.tableID = null;
-        this.columns = null;
+    private CreateTable() {
+	this.tableName = null;
+	this.requestingUserID = null;
+	this.tableID = null;
+	this.columns = null;
 
     }
 
@@ -37,64 +35,57 @@ public class CreateTable implements Command
      * Constructs a new CreateTable.
      */
     public CreateTable(String requestingUserID, String tableName,
-            String tableID, List<Column> columns)
-    {
+	    String tableID, List<Column> columns) {
 
-        Check.notNullOrEmpty(tableName, "tableName");
-        Check.notNullOrEmpty(requestingUserID, "requestingUserID");
-        Check.notNullOrEmpty(tableID, "tableID");
-        Check.notNull(columns, "columns");
+	Check.notNullOrEmpty(tableName, "tableName");
+	Check.notNullOrEmpty(requestingUserID, "requestingUserID");
+	Check.notNullOrEmpty(tableID, "tableID");
+	Check.notNull(columns, "columns");
 
-        this.tableName = tableName;
-        this.requestingUserID = requestingUserID;
-        this.tableID = tableID;
-        this.columns = columns;
+	this.tableName = tableName;
+	this.requestingUserID = requestingUserID;
+	this.tableID = tableID;
+	this.columns = columns;
     }
 
     /**
      * @return the tableName
      */
-    public String getTableName()
-    {
-        return this.tableName;
+    public String getTableName() {
+	return this.tableName;
     }
 
     /**
      * @return the requestingUserID
      */
-    public String getRequestingUserID()
-    {
-        return this.requestingUserID;
+    public String getRequestingUserID() {
+	return this.requestingUserID;
     }
 
     /**
      * @return the tableID
      */
-    public String getTableID()
-    {
-        return this.tableID;
+    public String getTableID() {
+	return this.tableID;
     }
 
     /**
      * @return the columns
      */
-    public List<Column> getColumns()
-    {
-        return this.columns;
+    public List<Column> getColumns() {
+	return this.columns;
     }
 
     @Override
-    public String toString()
-    {
-        return String.format("CreateTable: " + "tableName=%s "
-                + "requestingUserID=%s " + "tableID=%s " + "columns=%s " + "",
-                tableName, requestingUserID, tableID, columns);
+    public String toString() {
+	return String.format("CreateTable: " + "tableName=%s "
+		+ "requestingUserID=%s " + "tableID=%s " + "columns=%s " + "",
+		tableName, requestingUserID, tableID, columns);
     }
 
     @Override
-    public String getMethodPath()
-    {
-        return methodPath();
+    public String getMethodPath() {
+	return methodPath();
     }
 
     /**
@@ -103,8 +94,7 @@ public class CreateTable implements Command
      *         http://aggregate.opendatakit.org/odktables/createTable, then this
      *         method would return '/odktables/createTable'.
      */
-    public static String methodPath()
-    {
-        return path;
+    public static String methodPath() {
+	return path;
     }
 }

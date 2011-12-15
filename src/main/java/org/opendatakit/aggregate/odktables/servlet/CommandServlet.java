@@ -21,8 +21,7 @@ import org.opendatakit.common.web.CallingContext;
 
 import com.google.gson.JsonParseException;
 
-public class CommandServlet extends ServletUtilBase
-{
+public class CommandServlet extends ServletUtilBase {
     private static Log logger = LogFactory.getLog(CommandServlet.class);
     /**
      * Serial number for serialization.
@@ -30,79 +29,71 @@ public class CommandServlet extends ServletUtilBase
     private static final long serialVersionUID = -7810505933356321858L;
 
     // TODO: should I have GET and POST or just POST?
-    //    @Override
-    //    protected void doGet(HttpServletRequest req, HttpServletResponse resp)
-    //            throws ServletException, IOException
-    //    {
-    //        // TODO: check if query, i.e. something that should be a GET
-    //        executeCommandAndReturnResponse(req, resp);
-    //    }
+    // @Override
+    // protected void doGet(HttpServletRequest req, HttpServletResponse resp)
+    // throws ServletException, IOException
+    // {
+    // // TODO: check if query, i.e. something that should be a GET
+    // executeCommandAndReturnResponse(req, resp);
+    // }
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
-            throws ServletException, IOException
-    {
-        // TODO: check if modifies datastore, i.e. something that should be a POST
-        executeCommandAndReturnResponse(req, resp);
+	    throws ServletException, IOException {
+	// TODO: check if modifies datastore, i.e. something that should be a
+	// POST
+	executeCommandAndReturnResponse(req, resp);
     }
 
     private void executeCommandAndReturnResponse(HttpServletRequest req,
-            HttpServletResponse resp) throws IOException
-    {
-        CallingContext cc = ContextFactory.getCallingContext(this, req);
-        InputStreamReader reader = new InputStreamReader(req.getInputStream());
-        try
-        {
-            String methodName = req.getPathInfo();
+	    HttpServletResponse resp) throws IOException {
+	CallingContext cc = ContextFactory.getCallingContext(this, req);
+	InputStreamReader reader = new InputStreamReader(req.getInputStream());
+	try {
+	    String methodName = req.getPathInfo();
 
-            Class<? extends Command> commandClass = CommandConverter
-                    .getInstance().getCommandClass(methodName);
+	    Class<? extends Command> commandClass = CommandConverter
+		    .getInstance().getCommandClass(methodName);
 
-            if (commandClass == null)
-            {
-                resp.sendError(HttpServletResponse.SC_BAD_REQUEST,
-                        "No method by the name of: " + methodName);
-                return;
-            }
+	    if (commandClass == null) {
+		resp.sendError(HttpServletResponse.SC_BAD_REQUEST,
+			"No method by the name of: " + methodName);
+		return;
+	    }
 
-            Command command = CommandConverter.getInstance()
-                    .deserializeCommand(reader, commandClass);
+	    Command command = CommandConverter.getInstance()
+		    .deserializeCommand(reader, commandClass);
 
-            CommandLogic<?> commandLogic = CommandLogic.newInstance(command);
+	    CommandLogic<?> commandLogic = CommandLogic.newInstance(command);
 
-            CommandResult<?> result = commandLogic.execute(cc);
+	    CommandResult<?> result = commandLogic.execute(cc);
 
-            if (result.successful())
-            {
-                resp.setStatus(HttpServletResponse.SC_OK);
-            } else
-            {
-                resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            }
+	    if (result.successful()) {
+		resp.setStatus(HttpServletResponse.SC_OK);
+	    } else {
+		resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+	    }
 
-            resp.getWriter().println(
-                    CommandConverter.getInstance().serializeResult(result));
-            resp.flushBuffer();
-            return;
-        } catch (JsonParseException e)
-        {
-            resp.sendError(HttpServletResponse.SC_BAD_REQUEST,
-                    "Malformed json syntax: " + e.getMessage());
-            return;
-        } catch (AggregateInternalErrorException e)
-        {
-            logger.warn(e.toString());
-            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-                    "Could not complete request. Please try again later.");
-            return;
-        } catch (SnafuException e)
-        {
-            logger.error(e.toString());
-            resp.sendError(
-                    HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-                    "Aggregate suffered an unrecoverable error that likely left the "
-                            + "datastore in a corrupted state. Please contact the Aggregate "
-                            + "administrator about this issue.");
-        }
+	    resp.getWriter().println(
+		    CommandConverter.getInstance().serializeResult(result));
+	    resp.flushBuffer();
+	    return;
+	} catch (JsonParseException e) {
+	    resp.sendError(HttpServletResponse.SC_BAD_REQUEST,
+		    "Malformed json syntax: " + e.getMessage());
+	    return;
+	} catch (AggregateInternalErrorException e) {
+	    logger.warn(e.toString());
+	    resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+		    "Could not complete request. Please try again later.");
+	    return;
+	} catch (SnafuException e) {
+	    logger.error(e.toString());
+	    resp.sendError(
+		    HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+		    "Aggregate suffered an unrecoverable error that likely left the "
+			    + "datastore in a corrupted state. Please contact the Aggregate "
+			    + "administrator about this issue.");
+	}
     }
 }

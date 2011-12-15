@@ -22,8 +22,7 @@ import org.opendatakit.common.web.CallingContext;
  * 
  * @author the.dylan.price@gmail.com
  */
-public class Table extends TypedEntityRelation<InternalRow>
-{
+public class Table extends TypedEntityRelation<InternalRow> {
     /**
      * The name of the revisionTag field.
      */
@@ -33,7 +32,7 @@ public class Table extends TypedEntityRelation<InternalRow>
      * The revisionTag field.
      */
     private static final Attribute revisionTag = new Attribute(REVISION_TAG,
-            AttributeType.STRING, false);
+	    AttributeType.STRING, false);
 
     /**
      * The namespace for all relations.
@@ -63,55 +62,49 @@ public class Table extends TypedEntityRelation<InternalRow>
      *             datastore
      */
     private Table(String namespace, String aggregateTableIdentifier,
-            List<Attribute> attributes, CallingContext cc)
-            throws ODKDatastoreException
-    {
-        super(namespace, aggregateTableIdentifier, attributes, cc);
-        this.attributes = attributes;
+	    List<Attribute> attributes, CallingContext cc)
+	    throws ODKDatastoreException {
+	super(namespace, aggregateTableIdentifier, attributes, cc);
+	this.attributes = attributes;
     }
 
     @Override
-    public InternalRow initialize(Entity entity) throws ODKDatastoreException
-    {
-        return InternalRow.fromEntity(entity);
+    public InternalRow initialize(Entity entity) throws ODKDatastoreException {
+	return InternalRow.fromEntity(entity);
     }
 
     /**
      * @return a list of Attributes representing the columns of this table.
      */
-    public List<Attribute> getAttributes()
-    {
-        return Collections.unmodifiableList(this.attributes);
+    public List<Attribute> getAttributes() {
+	return Collections.unmodifiableList(this.attributes);
     }
 
     public static Table getInstance(String aggregateTableIdentifier,
-            CallingContext cc) throws ODKDatastoreException
-    {
-        List<InternalColumn> columns = Columns
-                .getInstance(cc)
-                .query("[odktables]Table.getInstance")
-                .equal(Columns.AGGREGATE_TABLE_IDENTIFIER,
-                        aggregateTableIdentifier).execute();
-        List<Attribute> attributes = new ArrayList<Attribute>();
+	    CallingContext cc) throws ODKDatastoreException {
+	List<InternalColumn> columns = Columns
+		.getInstance(cc)
+		.query("[odktables]Table.getInstance")
+		.equal(Columns.AGGREGATE_TABLE_IDENTIFIER,
+			aggregateTableIdentifier).execute();
+	List<Attribute> attributes = new ArrayList<Attribute>();
 
-        for (InternalColumn column : columns)
-        {
-            String name = convertIdentifier(column.getAggregateIdentifier());
-            AttributeType type = column.getType();
-            boolean nullable = column.getNullable();
-            Attribute attribute = new Attribute(name, type, nullable);
-            attributes.add(attribute);
-        }
+	for (InternalColumn column : columns) {
+	    String name = convertIdentifier(column.getAggregateIdentifier());
+	    AttributeType type = column.getType();
+	    boolean nullable = column.getNullable();
+	    Attribute attribute = new Attribute(name, type, nullable);
+	    attributes.add(attribute);
+	}
 
-        attributes.add(revisionTag);
-        String tableName = convertIdentifier(aggregateTableIdentifier);
+	attributes.add(revisionTag);
+	String tableName = convertIdentifier(aggregateTableIdentifier);
 
-        return new Table(TABLE_NAMESPACE, tableName, attributes, cc);
+	return new Table(TABLE_NAMESPACE, tableName, attributes, cc);
     }
 
-    public static String convertIdentifier(String aggregateIdentifier)
-    {
-        return aggregateIdentifier.replace('-', '_').replace(':', '_')
-                .toUpperCase();
+    public static String convertIdentifier(String aggregateIdentifier) {
+	return aggregateIdentifier.replace('-', '_').replace(':', '_')
+		.toUpperCase();
     }
 }

@@ -8,8 +8,7 @@ import org.opendatakit.common.utils.Check;
  * 
  * @author the.dylan.price@gmail.com
  */
-public class CreateUser implements Command
-{
+public class CreateUser implements Command {
     private static final String path = "/common/createUser";
 
     private final String userName;
@@ -20,65 +19,58 @@ public class CreateUser implements Command
      * For serialization by Gson
      */
     @SuppressWarnings("unused")
-    private CreateUser()
-    {
-        this.userName = null;
-        this.requestingUserID = null;
-        this.userID = null;
+    private CreateUser() {
+	this.userName = null;
+	this.requestingUserID = null;
+	this.userID = null;
 
     }
 
     /**
      * Constructs a new CreateUser.
      */
-    public CreateUser(String requestingUserID, String userName, String userID)
-    {
+    public CreateUser(String requestingUserID, String userName, String userID) {
 
-        Check.notNullOrEmpty(userName, "userName");
-        Check.notNullOrEmpty(requestingUserID, "requestingUserID");
-        Check.notNullOrEmpty(userID, "userID");
+	Check.notNullOrEmpty(userName, "userName");
+	Check.notNullOrEmpty(requestingUserID, "requestingUserID");
+	Check.notNullOrEmpty(userID, "userID");
 
-        this.userName = userName;
-        this.requestingUserID = requestingUserID;
-        this.userID = userID;
+	this.userName = userName;
+	this.requestingUserID = requestingUserID;
+	this.userID = userID;
     }
 
     /**
      * @return the userName
      */
-    public String getUserName()
-    {
-        return this.userName;
+    public String getUserName() {
+	return this.userName;
     }
 
     /**
      * @return the requestingUserID
      */
-    public String getRequestingUserID()
-    {
-        return this.requestingUserID;
+    public String getRequestingUserID() {
+	return this.requestingUserID;
     }
 
     /**
      * @return the userID
      */
-    public String getUserID()
-    {
-        return this.userID;
+    public String getUserID() {
+	return this.userID;
     }
 
     @Override
-    public String toString()
-    {
-        return String.format("CreateUser: " + "userName=%s "
-                + "requestingUserID=%s " + "userID=%s " + "", userName,
-                requestingUserID, userID);
+    public String toString() {
+	return String.format("CreateUser: " + "userName=%s "
+		+ "requestingUserID=%s " + "userID=%s " + "", userName,
+		requestingUserID, userID);
     }
 
     @Override
-    public String getMethodPath()
-    {
-        return methodPath();
+    public String getMethodPath() {
+	return methodPath();
     }
 
     /**
@@ -87,8 +79,7 @@ public class CreateUser implements Command
      *         http://aggregate.opendatakit.org/odktables/createTable, then this
      *         method would return '/odktables/createTable'.
      */
-    public static String methodPath()
-    {
-        return path;
+    public static String methodPath() {
+	return path;
     }
 }
