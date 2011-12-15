@@ -74,6 +74,15 @@ public interface IForm {
 
   public String getMajorMinorVersionString();
   
+  public String getOpenRosaVersionString();
+  
+  /**
+   * Get the md5 hash of the Form Definition file.
+   * 
+   * @return
+   */
+  public String getXFormFileHash(CallingContext cc) throws ODKDatastoreException;
+  
   public boolean hasValidFormDefinition();
 
   /**
