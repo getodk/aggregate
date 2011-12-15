@@ -100,7 +100,7 @@ public class AggregateHtmlServlet extends ServletUtilBase {
       newUrl += "?" + query;
     }
     URL url = new URL(newUrl);
-    if (!url.getHost().equals(req.getServerName())) {
+    if (!url.getHost().equalsIgnoreCase(req.getServerName())) {
       // we should redirect over to the proper fully-formed URL.
       logger.info("Incoming servername: " + req.getServerName() + " expected: " + url.getHost() + " -- redirecting.");
       resp.sendRedirect(newUrl);

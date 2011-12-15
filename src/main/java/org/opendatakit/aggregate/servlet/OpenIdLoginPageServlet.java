@@ -64,7 +64,7 @@ public class OpenIdLoginPageServlet extends ServletUtilBase {
       newUrl += "?" + query;
     }
     URL url = new URL(newUrl);
-    if (!url.getHost().equals(req.getServerName())) {
+    if (!url.getHost().equalsIgnoreCase(req.getServerName())) {
       logger.info("Incoming servername: " + req.getServerName() + " expected: " + url.getHost() + " -- redirecting.");
       // try to get original destination URL from Spring...
       String redirectUrl = getRedirectUrl(req, ADDR);
