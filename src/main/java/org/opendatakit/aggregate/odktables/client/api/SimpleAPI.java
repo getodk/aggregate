@@ -27,8 +27,7 @@ import org.opendatakit.aggregate.odktables.commandresult.simple.QueryForRowsResu
  * SimpleAPI contains API calls for using Aggregate as a simple table storage
  * service.
  */
-public class SimpleAPI extends CommonAPI
-{
+public class SimpleAPI extends CommonAPI {
 
     /**
      * Constructs a new instance of SimpleAPI, using the supplied user
@@ -49,10 +48,9 @@ public class SimpleAPI extends CommonAPI
      *             initial communication to fail
      */
     public SimpleAPI(URI aggregateURI, String userID)
-            throws ClientProtocolException, UserDoesNotExistException,
-            IOException, AggregateInternalErrorException
-    {
-        super(aggregateURI, userID);
+	    throws ClientProtocolException, UserDoesNotExistException,
+	    IOException, AggregateInternalErrorException {
+	super(aggregateURI, userID);
     }
 
     /**
@@ -80,14 +78,13 @@ public class SimpleAPI extends CommonAPI
      * @throws UserDoesNotExistException
      */
     public String createTable(String tableID, String tableName,
-            List<Column> columns) throws ClientProtocolException, IOException,
-            TableAlreadyExistsException, UserDoesNotExistException,
-            AggregateInternalErrorException
-    {
-        CreateTable command = new CreateTable(requestingUserID, tableName,
-                tableID, columns);
-        CreateTableResult result = sendCommand(command, CreateTableResult.class);
-        return result.getCreatedTableId();
+	    List<Column> columns) throws ClientProtocolException, IOException,
+	    TableAlreadyExistsException, UserDoesNotExistException,
+	    AggregateInternalErrorException {
+	CreateTable command = new CreateTable(requestingUserID, tableName,
+		tableID, columns);
+	CreateTableResult result = sendCommand(command, CreateTableResult.class);
+	return result.getCreatedTableId();
     }
 
     /**
@@ -108,12 +105,11 @@ public class SimpleAPI extends CommonAPI
      *             if there is a problem communicating with the Aggregate server
      */
     public void deleteTable(String tableID) throws ClientProtocolException,
-            IOException, PermissionDeniedException, TableDoesNotExistException,
-            AggregateInternalErrorException
-    {
-        DeleteTable command = new DeleteTable(requestingUserID, tableID);
-        DeleteTableResult result = sendCommand(command, DeleteTableResult.class);
-        result.checkResults();
+	    IOException, PermissionDeniedException, TableDoesNotExistException,
+	    AggregateInternalErrorException {
+	DeleteTable command = new DeleteTable(requestingUserID, tableID);
+	DeleteTableResult result = sendCommand(command, DeleteTableResult.class);
+	result.checkResults();
     }
 
     /**
@@ -132,13 +128,12 @@ public class SimpleAPI extends CommonAPI
      * @throws UserDoesNotExistException
      */
     public List<Row> getAllRows(String tableID) throws ClientProtocolException,
-            IOException, TableDoesNotExistException, UserDoesNotExistException,
-            PermissionDeniedException, AggregateInternalErrorException
-    {
-        QueryForRows command = new QueryForRows(requestingUserID, tableID);
-        QueryForRowsResult result = sendCommand(command,
-                QueryForRowsResult.class);
-        return result.getRows();
+	    IOException, TableDoesNotExistException, UserDoesNotExistException,
+	    PermissionDeniedException, AggregateInternalErrorException {
+	QueryForRows command = new QueryForRows(requestingUserID, tableID);
+	QueryForRowsResult result = sendCommand(command,
+		QueryForRowsResult.class);
+	return result.getRows();
     }
 
     /**
@@ -169,12 +164,11 @@ public class SimpleAPI extends CommonAPI
      *             in the table
      */
     public Map<String, String> insertRows(String tableID, List<Row> rows)
-            throws ClientProtocolException, IOException,
-            TableDoesNotExistException, PermissionDeniedException,
-            AggregateInternalErrorException, ColumnDoesNotExistException
-    {
-        InsertRows command = new InsertRows(requestingUserID, rows, tableID);
-        InsertRowsResult result = sendCommand(command, InsertRowsResult.class);
-        return result.getMapOfInsertedRowIDsToAggregateRowIdentifiers();
+	    throws ClientProtocolException, IOException,
+	    TableDoesNotExistException, PermissionDeniedException,
+	    AggregateInternalErrorException, ColumnDoesNotExistException {
+	InsertRows command = new InsertRows(requestingUserID, rows, tableID);
+	InsertRowsResult result = sendCommand(command, InsertRowsResult.class);
+	return result.getMapOfInsertedRowIDsToAggregateRowIdentifiers();
     }
 }

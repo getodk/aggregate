@@ -31,103 +31,95 @@ import org.opendatakit.common.web.CallingContext;
  * 
  * @author the.dylan.price@gmail.com
  */
-public class DeleteTableLogic extends CommandLogic<DeleteTable>
-{
+public class DeleteTableLogic extends CommandLogic<DeleteTable> {
 
     private final DeleteTable deleteTable;
 
-    public DeleteTableLogic(DeleteTable deleteTable)
-    {
-        this.deleteTable = deleteTable;
+    public DeleteTableLogic(DeleteTable deleteTable) {
+	this.deleteTable = deleteTable;
     }
 
     @Override
     public DeleteTableResult execute(CallingContext cc)
-            throws AggregateInternalErrorException
-    {
-        Table table;
-        List<TypedEntity> entitiesToDelete;
-        try
-        {
-            TableEntries tables = TableEntries.getInstance(cc);
-            Users users = Users.getInstance(cc);
-            UserTableMappings mappings = UserTableMappings.getInstance(cc);
-            Columns columns = Columns.getInstance(cc);
-            Permissions permissions = Permissions.getInstance(cc);
+	    throws AggregateInternalErrorException {
+	Table table;
+	List<TypedEntity> entitiesToDelete;
+	try {
+	    TableEntries tables = TableEntries.getInstance(cc);
+	    Users users = Users.getInstance(cc);
+	    UserTableMappings mappings = UserTableMappings.getInstance(cc);
+	    Columns columns = Columns.getInstance(cc);
+	    Permissions permissions = Permissions.getInstance(cc);
 
-            String tableID = this.deleteTable.getTableID();
-            String requestingUserID = this.deleteTable.getRequestingUserID();
+	    String tableID = this.deleteTable.getTableID();
+	    String requestingUserID = this.deleteTable.getRequestingUserID();
 
-            InternalUser requestingUser = users
-                    .query("DeleteTableLogic.execute")
-                    .equal(Users.USER_ID, requestingUserID).get();
+	    InternalUser requestingUser = users
+		    .query("DeleteTableLogic.execute")
+		    .equal(Users.USER_ID, requestingUserID).get();
 
-            String aggregateRequestingUserIdentifier = requestingUser
-                    .getAggregateIdentifier();
+	    String aggregateRequestingUserIdentifier = requestingUser
+		    .getAggregateIdentifier();
 
-            InternalUserTableMapping mapping;
-            try
-            {
-                mapping = mappings
-                        .query("DeleteTableLogic.execute")
-                        .equal(UserTableMappings.TABLE_ID, tableID)
-                        .equal(UserTableMappings.AGGREGATE_USER_IDENTIFIER,
-                                aggregateRequestingUserIdentifier).get();
-            } catch (ODKDatastoreException e)
-            {
-                return DeleteTableResult.failure(null,
-                        FailureReason.TABLE_DOES_NOT_EXIST);
-            }
+	    InternalUserTableMapping mapping;
+	    try {
+		mapping = mappings
+			.query("DeleteTableLogic.execute")
+			.equal(UserTableMappings.TABLE_ID, tableID)
+			.equal(UserTableMappings.AGGREGATE_USER_IDENTIFIER,
+				aggregateRequestingUserIdentifier).get();
+	    } catch (ODKDatastoreException e) {
+		return DeleteTableResult.failure(null,
+			FailureReason.TABLE_DOES_NOT_EXIST);
+	    }
 
-            String aggregateTableIdentifier = mapping
-                    .getAggregateTableIdentifier();
+	    String aggregateTableIdentifier = mapping
+		    .getAggregateTableIdentifier();
 
-            if (!requestingUser.hasPerm(aggregateTableIdentifier,
-                    Permissions.DELETE))
-            {
-                return DeleteTableResult.failure(aggregateTableIdentifier,
-                        FailureReason.PERMISSION_DENIED);
-            }
+	    if (!requestingUser.hasPerm(aggregateTableIdentifier,
+		    Permissions.DELETE)) {
+		return DeleteTableResult.failure(aggregateTableIdentifier,
+			FailureReason.PERMISSION_DENIED);
+	    }
 
-            String aggregateUserIdentifier = requestingUser
-                    .getAggregateIdentifier();
+	    String aggregateUserIdentifier = requestingUser
+		    .getAggregateIdentifier();
 
-            table = Table.getInstance(aggregateTableIdentifier, cc);
-            InternalUserTableMapping cursor = mappings
-                    .query("DeleteTableLogic.execute")
-                    .equal(UserTableMappings.AGGREGATE_USER_IDENTIFIER,
-                            aggregateUserIdentifier)
-                    .equal(UserTableMappings.AGGREGATE_TABLE_IDENTIFIER,
-                            aggregateTableIdentifier).get();
+	    table = Table.getInstance(aggregateTableIdentifier, cc);
+	    InternalUserTableMapping cursor = mappings
+		    .query("DeleteTableLogic.execute")
+		    .equal(UserTableMappings.AGGREGATE_USER_IDENTIFIER,
+			    aggregateUserIdentifier)
+		    .equal(UserTableMappings.AGGREGATE_TABLE_IDENTIFIER,
+			    aggregateTableIdentifier).get();
 
-            InternalTableEntry entry = tables
-                    .getEntity(aggregateTableIdentifier);
-            List<InternalColumn> tableColumns = columns
-                    .query("DeleteTableLogic.execute")
-                    .equal(Columns.AGGREGATE_TABLE_IDENTIFIER,
-                            aggregateTableIdentifier).execute();
+	    InternalTableEntry entry = tables
+		    .getEntity(aggregateTableIdentifier);
+	    List<InternalColumn> tableColumns = columns
+		    .query("DeleteTableLogic.execute")
+		    .equal(Columns.AGGREGATE_TABLE_IDENTIFIER,
+			    aggregateTableIdentifier).execute();
 
-            List<InternalPermission> perms = permissions
-                    .query("DeleteTableLogic.execute")
-                    .equal(Permissions.AGGREGATE_TABLE_IDENTIFIER,
-                            aggregateTableIdentifier).execute();
+	    List<InternalPermission> perms = permissions
+		    .query("DeleteTableLogic.execute")
+		    .equal(Permissions.AGGREGATE_TABLE_IDENTIFIER,
+			    aggregateTableIdentifier).execute();
 
-            entitiesToDelete = new ArrayList<TypedEntity>();
-            entitiesToDelete.add(cursor);
-            entitiesToDelete.add(entry);
-            entitiesToDelete.addAll(tableColumns);
-            entitiesToDelete.addAll(perms);
-        } catch (ODKDatastoreException e)
-        {
-            throw new AggregateInternalErrorException(e.getMessage());
-        }
+	    entitiesToDelete = new ArrayList<TypedEntity>();
+	    entitiesToDelete.add(cursor);
+	    entitiesToDelete.add(entry);
+	    entitiesToDelete.addAll(tableColumns);
+	    entitiesToDelete.addAll(perms);
+	} catch (ODKDatastoreException e) {
+	    throw new AggregateInternalErrorException(e.getMessage());
+	}
 
-        boolean success = CommandLogicFunctions.deleteEntitiesAndRelation(
-                entitiesToDelete, table);
-        if (!success)
-            throw new SnafuException("Could not delete entities: "
-                    + entitiesToDelete);
+	boolean success = CommandLogicFunctions.deleteEntitiesAndRelation(
+		entitiesToDelete, table);
+	if (!success)
+	    throw new SnafuException("Could not delete entities: "
+		    + entitiesToDelete);
 
-        return DeleteTableResult.success();
+	return DeleteTableResult.success();
     }
 }

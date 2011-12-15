@@ -20,8 +20,7 @@ import org.opendatakit.common.web.CallingContext;
  * 
  * @author the.dylan.price@gmail.com
  */
-public class Modifications extends TypedEntityRelation<InternalModification>
-{
+public class Modifications extends TypedEntityRelation<InternalModification> {
     // Field names
     /**
      * The name of the aggregateTableIdentifier field.
@@ -44,28 +43,28 @@ public class Modifications extends TypedEntityRelation<InternalModification>
      */
     private static final String RELATION_NAME = "MODIFICATIONS";
 
-    // The following defines the actual attributes that will be in the datastore:
+    // The following defines the actual attributes that will be in the
+    // datastore:
     /**
      * The field for the aggregateTableIdentifier.
      */
     private static final Attribute aggregateTableIdentifier = new Attribute(
-            AGGREGATE_TABLE_IDENTIFIER, AttributeType.STRING, false);
+	    AGGREGATE_TABLE_IDENTIFIER, AttributeType.STRING, false);
     /**
      * The field for the modificationNumber.
      */
     private static final Attribute modificationNumber = new Attribute(
-            MODIFICATION_NUMBER, AttributeType.INTEGER, false);
+	    MODIFICATION_NUMBER, AttributeType.INTEGER, false);
 
     private static final Attribute aggregateRowIdentifier = new Attribute(
-            AGGREGATE_ROW_IDENTIFIER, AttributeType.STRING, false);
+	    AGGREGATE_ROW_IDENTIFIER, AttributeType.STRING, false);
 
     private static final List<Attribute> attributes;
-    static
-    {
-        attributes = new ArrayList<Attribute>();
-        attributes.add(aggregateTableIdentifier);
-        attributes.add(modificationNumber);
-        attributes.add(aggregateRowIdentifier);
+    static {
+	attributes = new ArrayList<Attribute>();
+	attributes.add(aggregateTableIdentifier);
+	attributes.add(modificationNumber);
+	attributes.add(aggregateRowIdentifier);
     }
 
     /**
@@ -84,15 +83,13 @@ public class Modifications extends TypedEntityRelation<InternalModification>
      *             if there was a problem during communication with the
      *             datastore
      */
-    private Modifications(CallingContext cc) throws ODKDatastoreException
-    {
-        super(Table.NAMESPACE, RELATION_NAME, attributes, cc);
+    private Modifications(CallingContext cc) throws ODKDatastoreException {
+	super(Table.NAMESPACE, RELATION_NAME, attributes, cc);
     }
 
     public InternalModification initialize(Entity entity)
-            throws ODKDatastoreException
-    {
-        return InternalModification.fromEntity(entity);
+	    throws ODKDatastoreException {
+	return InternalModification.fromEntity(entity);
     }
 
     /**
@@ -108,12 +105,10 @@ public class Modifications extends TypedEntityRelation<InternalModification>
      *             if there is a problem communicating with the datastore
      */
     public static Modifications getInstance(CallingContext cc)
-            throws ODKDatastoreException
-    {
-        if (instance == null || instance.getCC() != cc)
-        {
-            instance = new Modifications(cc);
-        }
-        return instance;
+	    throws ODKDatastoreException {
+	if (instance == null || instance.getCC() != cc) {
+	    instance = new Modifications(cc);
+	}
+	return instance;
     }
 }

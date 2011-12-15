@@ -6,8 +6,7 @@ package org.opendatakit.aggregate.odktables.client.exception;
  * 
  * @author the.dylan.price@gmail.com
  */
-public class TableAlreadyExistsException extends ODKTablesClientException
-{
+public class TableAlreadyExistsException extends ODKTablesClientException {
     /**
      * Serial number for serialization.
      */
@@ -15,15 +14,13 @@ public class TableAlreadyExistsException extends ODKTablesClientException
 
     private String tableID;
 
-    public TableAlreadyExistsException(String tableID)
-    {
-        super(String.format("Table with tableID '%s' already exists!", tableID));
+    public TableAlreadyExistsException(String tableID) {
+	super(String.format("Table with tableID '%s' already exists!", tableID));
 
-        this.tableID = tableID;
+	this.tableID = tableID;
     }
 
-    public String getTableID()
-    {
-        return this.tableID;
+    public String getTableID() {
+	return this.tableID;
     }
 }

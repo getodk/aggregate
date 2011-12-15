@@ -24,78 +24,65 @@ import org.opendatakit.common.web.CallingContext;
  * @author the.dylan.price@gmail.com
  * 
  */
-public class InternalTableEntry extends TypedEntity
-{
+public class InternalTableEntry extends TypedEntity {
 
     public InternalTableEntry(String aggregateOwnerIdentifier,
-            String tableName, boolean isSynchronized, CallingContext cc)
-            throws ODKDatastoreException
-    {
-        super(TableEntries.getInstance(cc).newEntity());
-        setAggregateOwnerIdentifier(aggregateOwnerIdentifier);
-        setName(tableName);
-        setModificationNumber(0);
-        setSynchronized(isSynchronized);
+	    String tableName, boolean isSynchronized, CallingContext cc)
+	    throws ODKDatastoreException {
+	super(TableEntries.getInstance(cc).newEntity());
+	setAggregateOwnerIdentifier(aggregateOwnerIdentifier);
+	setName(tableName);
+	setModificationNumber(0);
+	setSynchronized(isSynchronized);
     }
 
-    public InternalTableEntry(Entity entity) throws ODKDatastoreException
-    {
-        super(entity);
+    public InternalTableEntry(Entity entity) throws ODKDatastoreException {
+	super(entity);
     }
 
-    public String getAggregateOwnerIdentifier()
-    {
-        return entity.getString(TableEntries.AGGREGATE_OWNER_IDENTIFIER);
+    public String getAggregateOwnerIdentifier() {
+	return entity.getString(TableEntries.AGGREGATE_OWNER_IDENTIFIER);
     }
 
-    public void setAggregateOwnerIdentifier(String value)
-    {
-        entity.set(TableEntries.AGGREGATE_OWNER_IDENTIFIER, value);
+    public void setAggregateOwnerIdentifier(String value) {
+	entity.set(TableEntries.AGGREGATE_OWNER_IDENTIFIER, value);
     }
 
-    public String getName()
-    {
-        return entity.getString(TableEntries.TABLE_NAME);
+    public String getName() {
+	return entity.getString(TableEntries.TABLE_NAME);
     }
 
-    public void setName(String value)
-    {
-        entity.set(TableEntries.TABLE_NAME, value);
+    public void setName(String value) {
+	entity.set(TableEntries.TABLE_NAME, value);
     }
 
-    public int getModificationNumber()
-    {
-        return entity.getInteger(TableEntries.MODIFICATION_NUMBER);
+    public int getModificationNumber() {
+	return entity.getInteger(TableEntries.MODIFICATION_NUMBER);
     }
 
-    public void setModificationNumber(int value)
-    {
-        entity.set(TableEntries.MODIFICATION_NUMBER, value);
+    public void setModificationNumber(int value) {
+	entity.set(TableEntries.MODIFICATION_NUMBER, value);
     }
 
-    public boolean isSynchronized()
-    {
-        return entity.getBoolean(TableEntries.IS_SYNCHRONIZED);
+    public boolean isSynchronized() {
+	return entity.getBoolean(TableEntries.IS_SYNCHRONIZED);
     }
 
-    public void setSynchronized(boolean value)
-    {
-        entity.set(TableEntries.IS_SYNCHRONIZED, value);
+    public void setSynchronized(boolean value) {
+	entity.set(TableEntries.IS_SYNCHRONIZED, value);
     }
 
     @Override
-    public String toString()
-    {
-        return String
-                .format("InternalTableEntry[aggregateIdentifier=%s, aggregateOwnerIdentifier=%s, name=%s, modificationNumber=%s, isSynchronized=%s",
-                        getAggregateIdentifier(),
-                        getAggregateOwnerIdentifier(), getName(),
-                        getModificationNumber(), isSynchronized());
+    public String toString() {
+	return String
+		.format("InternalTableEntry[aggregateIdentifier=%s, aggregateOwnerIdentifier=%s, name=%s, modificationNumber=%s, isSynchronized=%s",
+			getAggregateIdentifier(),
+			getAggregateOwnerIdentifier(), getName(),
+			getModificationNumber(), isSynchronized());
     }
 
     public static InternalTableEntry fromEntity(Entity entity)
-            throws ODKDatastoreException
-    {
-        return new InternalTableEntry(entity);
+	    throws ODKDatastoreException {
+	return new InternalTableEntry(entity);
     }
 }

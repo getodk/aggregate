@@ -1,39 +1,58 @@
-package org.opendatakit.aggregate.odktables.command.synchronize;
+package org.opendatakit.aggregate.odktables.command.common;
 
 import org.opendatakit.aggregate.odktables.command.Command;
 import org.opendatakit.common.utils.Check;
 
 /**
- * RemoveTableSynchronization is immutable.
+ * UpdateTableProperties is immutable.
  * 
  * @author the.dylan.price@gmail.com
  */
-public class RemoveTableSynchronization implements Command {
-    private static final String path = "/synchronize/removeTableSynchronization";
+public class UpdateTableProperties implements Command {
+
+    private static final String path = "/common/updateTableProperties";
 
     private final String requestingUserID;
     private final String tableID;
+    private final String properties;
 
     /**
      * For serialization by Gson
      */
     @SuppressWarnings("unused")
-    private RemoveTableSynchronization() {
+    private UpdateTableProperties() {
 	this.requestingUserID = null;
 	this.tableID = null;
-
+	this.properties = null;
     }
 
     /**
-     * Constructs a new RemoveTableSynchronization.
+     * Constructs a new QueryForTables.
      */
-    public RemoveTableSynchronization(String requestingUserID, String tableID) {
+    public UpdateTableProperties(String requestingUserID, String tableID,
+	    String properties) {
 
 	Check.notNullOrEmpty(requestingUserID, "requestingUserID");
 	Check.notNullOrEmpty(tableID, "tableID");
+	// properties may be null or empty
 
 	this.requestingUserID = requestingUserID;
 	this.tableID = tableID;
+	this.properties = properties;
+    }
+
+    /**
+     * @return the tableID
+     */
+    public String getTableID() {
+	return tableID;
+    }
+
+    /**
+     * @return the properties
+     */
+    public String getProperties() {
+	return properties;
     }
 
     /**
@@ -43,18 +62,15 @@ public class RemoveTableSynchronization implements Command {
 	return this.requestingUserID;
     }
 
-    /**
-     * @return the tableID
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#toString()
      */
-    public String getTableID() {
-	return this.tableID;
-    }
-
     @Override
     public String toString() {
-	return String.format("RemoveTableSynchronization: "
-		+ "requestingUserID=%s " + "tableID=%s " + "",
-		requestingUserID, tableID);
+	return "UpdateTableProperties [requestingUserID=" + requestingUserID
+		+ ", tableID=" + tableID + ", properties=" + properties + "]";
     }
 
     @Override
