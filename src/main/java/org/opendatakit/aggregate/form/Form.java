@@ -266,6 +266,21 @@ class Form implements IForm {
     return b.toString();
   }
 
+  public String getOpenRosaVersionString() {
+
+    Long modelVersion = filesetRow.getLongField(FormInfoFilesetTable.ROOT_ELEMENT_MODEL_VERSION);
+    StringBuilder b = new StringBuilder();
+    if (modelVersion != null) {
+      b.append(modelVersion.toString());
+    }
+    return b.toString();
+  }
+  
+  @Override
+  public String getXFormFileHash(CallingContext cc) throws ODKDatastoreException {
+    return xform.getContentHash(1, cc);
+  }
+
   public boolean hasValidFormDefinition() {
     return (formDefinition != null);
   }

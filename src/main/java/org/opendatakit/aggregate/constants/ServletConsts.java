@@ -41,6 +41,8 @@ public final class ServletConsts {
   
   public static final String OPEN_ROSA_DATE_HEADER = "Date";
 
+  public static final String OPEN_ROSA_ACCEPT_CONTENT_LENGTH_HEADER = "X-OpenRosa-Accept-Content-Length";
+  
   /**
    * Flag on submissions and form uploads indicating that this is 
    * a partial submission or form upload.

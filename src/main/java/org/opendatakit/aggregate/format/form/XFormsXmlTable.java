@@ -105,12 +105,24 @@ public class XFormsXmlTable {
     formNameElement.addChild(0, Node.TEXT, form.getViewableName());
     xformElement.addChild(xfIdx++, Node.IGNORABLE_WHITESPACE, BasicConsts.NEW_LINE);
 
+    // transitional -- 1.1.6 and 1.1.7
     Element majorMinorVersionElement = d.createElement(XML_TAG_NAMESPACE,
         XFormsTableConsts.MAJOR_MINOR_VERSION_TAG);
     xformElement.addChild(xfIdx++, Node.ELEMENT, majorMinorVersionElement);
     majorMinorVersionElement.addChild(0, Node.TEXT, form.getMajorMinorVersionString());
     xformElement.addChild(xfIdx++, Node.IGNORABLE_WHITESPACE, BasicConsts.NEW_LINE);
 
+    // conforming OpenRosa 1.0
+    Element versionElement = d.createElement(XML_TAG_NAMESPACE, XFormsTableConsts.VERSION_TAG);
+    xformElement.addChild(xfIdx++, Node.ELEMENT, versionElement);
+    versionElement.addChild(0, Node.TEXT, form.getOpenRosaVersionString());
+    xformElement.addChild(xfIdx++, Node.IGNORABLE_WHITESPACE, BasicConsts.NEW_LINE);
+
+    Element hashElement = d.createElement(XML_TAG_NAMESPACE, XFormsTableConsts.HASH_TAG);
+    xformElement.addChild(xfIdx++, Node.ELEMENT, hashElement);
+    hashElement.addChild(0,  Node.TEXT, form.getXFormFileHash(cc));
+    xformElement.addChild(xfIdx++, Node.IGNORABLE_WHITESPACE, BasicConsts.NEW_LINE);
+    
     String description = form.getDescription();
     if (description != null && verbose) {
       Element descriptionElement = d.createElement(XML_TAG_NAMESPACE,
