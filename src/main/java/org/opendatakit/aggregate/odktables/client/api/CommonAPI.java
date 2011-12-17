@@ -18,6 +18,7 @@ import org.opendatakit.aggregate.odktables.client.entity.TableEntry;
 import org.opendatakit.aggregate.odktables.client.entity.User;
 import org.opendatakit.aggregate.odktables.client.exception.AggregateInternalErrorException;
 import org.opendatakit.aggregate.odktables.client.exception.CannotDeleteException;
+import org.opendatakit.aggregate.odktables.client.exception.ColumnDoesNotExistException;
 import org.opendatakit.aggregate.odktables.client.exception.Http404Exception;
 import org.opendatakit.aggregate.odktables.client.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.client.exception.TableDoesNotExistException;
@@ -33,6 +34,7 @@ import org.opendatakit.aggregate.odktables.command.common.GetUserByID;
 import org.opendatakit.aggregate.odktables.command.common.ListAllTables;
 import org.opendatakit.aggregate.odktables.command.common.SetTablePermissions;
 import org.opendatakit.aggregate.odktables.command.common.SetUserManagementPermissions;
+import org.opendatakit.aggregate.odktables.command.common.UpdateColumnProperties;
 import org.opendatakit.aggregate.odktables.command.common.UpdateTableProperties;
 import org.opendatakit.aggregate.odktables.commandresult.CommandResult;
 import org.opendatakit.aggregate.odktables.commandresult.common.CheckUserExistsResult;
@@ -43,6 +45,7 @@ import org.opendatakit.aggregate.odktables.commandresult.common.GetUserByIDResul
 import org.opendatakit.aggregate.odktables.commandresult.common.ListAllTablesResult;
 import org.opendatakit.aggregate.odktables.commandresult.common.SetTablePermissionsResult;
 import org.opendatakit.aggregate.odktables.commandresult.common.SetUserManagementPermissionsResult;
+import org.opendatakit.aggregate.odktables.commandresult.common.UpdateColumnPropertiesResult;
 import org.opendatakit.aggregate.odktables.commandresult.common.UpdateTablePropertiesResult;
 import org.opendatakit.common.utils.Check;
 
@@ -363,6 +366,40 @@ public class CommonAPI {
 		requestingUserID, tableID, properties);
 	UpdateTablePropertiesResult result = sendCommand(command,
 		UpdateTablePropertiesResult.class);
+	result.checkResult();
+    }
+
+    /**
+     * Not implemented. Overwrite the properties associated with a column.
+     * 
+     * @param tableID
+     *            the client's identifier for a table
+     * @param columnName
+     *            the name of the column to update properties for
+     * @param properties
+     *            metadata to store on the column
+     * @throws PermissionDeniedException
+     *             if the client does not have write permission on the table
+     * @throws TableDoesNotExistException
+     *             if client has no such table with the given tableID
+     * @throws ColumnDoesNotExistException
+     *             if there is no such column with columnName.
+     * @throws AggregateInternalErrorException
+     *             if Aggregate encounters an internal error that causes the
+     *             call to fail
+     * @throws IOException
+     *             if there is a problem communicating with the Aggregate server
+     * @throws ClientProtocolException
+     */
+    public void updateColumnProperties(String tableID, String columnName,
+	    String properties) throws ClientProtocolException,
+	    AggregateInternalErrorException, IOException,
+	    TableDoesNotExistException, PermissionDeniedException,
+	    ColumnDoesNotExistException {
+	UpdateColumnProperties command = new UpdateColumnProperties(
+		requestingUserID, tableID, columnName, properties);
+	UpdateColumnPropertiesResult result = sendCommand(command,
+		UpdateColumnPropertiesResult.class);
 	result.checkResult();
     }
 
