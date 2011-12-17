@@ -98,6 +98,12 @@ public class QueryByUIFilterGroup extends QueryBase {
       query.addFilter(tbl.isComplete, Query.FilterOperation.EQUAL, true);
       break;
     case ONLY_INCOMPLETE_SUBMISSIONS:
+      // we expect incomplete submissions to be a small fraction of 
+      // total submissions -- so filter by these, with subsidiary
+      // filtering by lastUpdateDate.
+      query.addFilter(tbl.isComplete, Query.FilterOperation.EQUAL, false);
+      query.addSort(tbl.isComplete, Query.Direction.ASCENDING); // gae optimization
+      
       // order by the last update date and filter against isComplete == false
       if ( isForwardCursor ) {
         query.addSort(tbl.lastUpdateDate, Query.Direction.ASCENDING);
@@ -105,7 +111,6 @@ public class QueryByUIFilterGroup extends QueryBase {
         query.addSort(tbl.lastUpdateDate, Query.Direction.DESCENDING);
       }
       query.addFilter(tbl.lastUpdateDate, Query.FilterOperation.GREATER_THAN, BasicConsts.EPOCH);
-      query.addFilter(tbl.isComplete, Query.FilterOperation.EQUAL, false);
       break;
     case ALL_SUBMISSIONS:
       // order by the last update date
