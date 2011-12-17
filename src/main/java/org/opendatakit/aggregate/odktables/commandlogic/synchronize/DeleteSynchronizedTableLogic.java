@@ -81,7 +81,7 @@ public class DeleteSynchronizedTableLogic extends
 			.equal(UserTableMappings.AGGREGATE_USER_IDENTIFIER,
 				requestUser.getAggregateIdentifier()).get();
 	    } catch (ODKDatastoreException e) {
-		return DeleteSynchronizedTableResult.failure(null,
+		return DeleteSynchronizedTableResult.failure(tableID,
 			FailureReason.TABLE_DOES_NOT_EXIST);
 	    }
 
