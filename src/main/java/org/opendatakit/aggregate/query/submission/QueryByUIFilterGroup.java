@@ -3,6 +3,7 @@ package org.opendatakit.aggregate.query.submission;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import org.opendatakit.aggregate.client.filter.Filter;
@@ -42,11 +43,30 @@ public class QueryByUIFilterGroup extends QueryBase {
   
   private static final String MISSING_ARGS = "Missing either Form or FilterGroup making it impossible to query";
 
+  private final CompletionFlag completionFlag;
   private final TopLevelDynamicBase tbl;
 
   private int fetchLimit;
   
   private QueryResumePoint cursor;
+  
+  public void addFilterByPrimaryDate(Query.FilterOperation operation, Date dateToFilter) {
+
+    switch ( completionFlag ) {
+    case ONLY_COMPLETE_SUBMISSIONS:
+      query.addFilter(tbl.markedAsCompleteDate, operation, dateToFilter);
+      break;
+    case ONLY_INCOMPLETE_SUBMISSIONS:
+      query.addFilter(tbl.lastUpdateDate, operation, dateToFilter);
+      break;
+    case ALL_SUBMISSIONS:
+      query.addFilter(tbl.lastUpdateDate, operation, dateToFilter);
+      break;
+    default:
+        throw new IllegalStateException("unhandled case");
+    }
+    
+  }
   
   public QueryByUIFilterGroup(IForm form, FilterGroup filterGroup, CompletionFlag completionFlag, CallingContext cc) {
     super(form);
@@ -55,15 +75,17 @@ public class QueryByUIFilterGroup extends QueryBase {
       throw new IllegalArgumentException(MISSING_ARGS);
     }
     
-    boolean isForwardCursor = 
-      ((filterGroup.getCursor() == null) ?
-          true :
-          filterGroup.getCursor().getIsForwardCursor());
+    this.completionFlag = completionFlag;
     
-    tbl = (TopLevelDynamicBase) form.getTopLevelGroupElement().getFormDataModel()
+    this.tbl = (TopLevelDynamicBase) form.getTopLevelGroupElement().getFormDataModel()
         .getBackingObjectPrototype();
 
-    query = cc.getDatastore().createQuery(tbl, "QueryByUIFilterGroup.constructor", cc.getCurrentUser());
+    this.query = cc.getDatastore().createQuery(tbl, "QueryByUIFilterGroup.constructor", cc.getCurrentUser());
+
+    boolean isForwardCursor = ((filterGroup.getCursor() == null) ?
+        true :
+        filterGroup.getCursor().getIsForwardCursor());
+  
     switch ( completionFlag ) {
     case ONLY_COMPLETE_SUBMISSIONS:
       // order by the completion date and filter against isComplete == true
@@ -76,6 +98,12 @@ public class QueryByUIFilterGroup extends QueryBase {
       query.addFilter(tbl.isComplete, Query.FilterOperation.EQUAL, true);
       break;
     case ONLY_INCOMPLETE_SUBMISSIONS:
+      // we expect incomplete submissions to be a small fraction of 
+      // total submissions -- so filter by these, with subsidiary
+      // filtering by lastUpdateDate.
+      query.addFilter(tbl.isComplete, Query.FilterOperation.EQUAL, false);
+      query.addSort(tbl.isComplete, Query.Direction.ASCENDING); // gae optimization
+      
       // order by the last update date and filter against isComplete == false
       if ( isForwardCursor ) {
         query.addSort(tbl.lastUpdateDate, Query.Direction.ASCENDING);
@@ -83,7 +111,6 @@ public class QueryByUIFilterGroup extends QueryBase {
         query.addSort(tbl.lastUpdateDate, Query.Direction.DESCENDING);
       }
       query.addFilter(tbl.lastUpdateDate, Query.FilterOperation.GREATER_THAN, BasicConsts.EPOCH);
-      query.addFilter(tbl.isComplete, Query.FilterOperation.EQUAL, false);
       break;
     case ALL_SUBMISSIONS:
       // order by the last update date

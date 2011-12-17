@@ -110,6 +110,7 @@ public class FormXmlServlet extends ServletUtilBase {
         xmlString = form.getFormXml(cc);
       } else {
         odkIdNotFoundError(resp);
+        return;
       }
 
       // Debug: String debugDisplay = WebUtils.escapeUTF8String(xmlString);
@@ -123,8 +124,8 @@ public class FormXmlServlet extends ServletUtilBase {
         beginBasicHtmlResponse(TITLE_INFO, resp, cc); // header info
         PrintWriter out = resp.getWriter();
         out.println("<h3>Form Name: <FONT COLOR=0000FF>" + form.getViewableName() + "</FONT></h3>");
-        if (form.getFormFilename() != null) {
-          out.println("<h3>File Name: <FONT COLOR=0000FF>" + form.getFormFilename()
+        if (form.getFormFilename(cc) != null) {
+          out.println("<h3>File Name: <FONT COLOR=0000FF>" + form.getFormFilename(cc)
               + "</FONT></h3>");
         }
         out.println(downloadXmlButton); // download button
@@ -136,13 +137,16 @@ public class FormXmlServlet extends ServletUtilBase {
         resp.setCharacterEncoding(HtmlConsts.UTF8_ENCODE);
         resp.setContentType(HtmlConsts.RESP_TYPE_XML);
         PrintWriter out = resp.getWriter();
-        if (form.getFormFilename() != null) {
+        if (form.getFormFilename(cc) != null) {
           resp.setHeader(HtmlConsts.CONTENT_DISPOSITION,
-              HtmlConsts.ATTACHMENT_FILENAME_TXT + form.getFormFilename() + BasicConsts.QUOTE
+              HtmlConsts.ATTACHMENT_FILENAME_TXT + form.getFormFilename(cc) + BasicConsts.QUOTE
                   + BasicConsts.SEMI_COLON);
         }
         out.print(xmlString);
       }
+    } catch (ODKOverQuotaException e) {
+      e.printStackTrace();
+      quotaExceededError(resp);
     } catch (ODKDatastoreException e) {
       e.printStackTrace();
       odkIdNotFoundError(resp);

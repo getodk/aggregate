@@ -125,15 +125,15 @@ public class XFormsDownloadServlet extends ServletUtilBase {
 
     if (isXformDefinitionRequest) {
       BinaryContentManipulator xform = form.getXformDefinition();
-      if (xform.getAttachmentCount() != 1) {
-        resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-            "Unexpectedly non-unary attachment count");
-        return;
-      }
-      unrootedFileName = xform.getUnrootedFilename(1);
-      contentType = xform.getContentType(1);
-      contentLength = xform.getContentLength(1);
       try {
+        if (xform.getAttachmentCount(cc) != 1) {
+          resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+              "Unexpectedly non-unary attachment count");
+          return;
+        }
+        unrootedFileName = xform.getUnrootedFilename(1, cc);
+        contentType = xform.getContentType(1, cc);
+        contentLength = xform.getContentLength(1, cc);
         imageBlob = xform.getBlob(1, cc);
       } catch (ODKDatastoreException e) {
         e.printStackTrace();
@@ -149,14 +149,14 @@ public class XFormsDownloadServlet extends ServletUtilBase {
         return;
       }
       int idx = part.getOrdinalNumber().intValue();
-      if (manifest.getAttachmentCount() < idx) {
-        errorBadParam(resp);
-        return;
-      }
-      unrootedFileName = manifest.getUnrootedFilename(idx);
-      contentType = manifest.getContentType(idx);
-      contentLength = manifest.getContentLength(idx);
       try {
+        if (manifest.getAttachmentCount(cc) < idx) {
+          errorBadParam(resp);
+          return;
+        }
+        unrootedFileName = manifest.getUnrootedFilename(idx, cc);
+        contentType = manifest.getContentType(idx, cc);
+        contentLength = manifest.getContentLength(idx, cc);
         imageBlob = manifest.getBlob(idx, cc);
       } catch (ODKDatastoreException e) {
         e.printStackTrace();

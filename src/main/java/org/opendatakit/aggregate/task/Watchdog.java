@@ -33,11 +33,13 @@ import org.opendatakit.common.web.CallingContext;
 public interface Watchdog {
 
   /** check interval for launching watchdog due to UI activity */
-  public static long WATCHDOG_RETRY_INTERVAL_MILLISECONDS = 40L * 60000L; // 40 minutes
+  public static long WATCHDOG_IDLING_RETRY_INTERVAL_MILLISECONDS = 40L * 60000L; // 40 minutes
+  /** check interval used in Tomcat installations */
+  public static long WATCHDOG_TOMCAT_RETRY_INTERVAL_MILLISECONDS = 6L * 60000L; // 6 minutes
   
   /** interval used within watchdogs with work to relaunch themselves */
   public static long WATCHDOG_BUSY_RETRY_INTERVAL_MILLISECONDS = 10L * 60000L; // 10 minutes
-
+  
   public void createWatchdogTask(long checkIntervalMilliseconds);
 
   /**

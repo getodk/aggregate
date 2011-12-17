@@ -35,7 +35,7 @@ public class GaeHttpClientFactoryImpl implements HttpClientFactory {
 	@Override
 	public HttpClient createHttpClient(HttpParams params) {
 		return new DefaultHttpClient(
-				new GaeClientConnectionManager(params, 
+				new GaeClientConnectionManager( 
 						GaeClientConnectionManager.DEFAULT_SCHEME_REGISTRY), params);
 	}
 

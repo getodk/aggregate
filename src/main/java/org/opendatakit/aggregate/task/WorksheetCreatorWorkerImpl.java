@@ -19,6 +19,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.TaskLockType;
 import org.opendatakit.aggregate.constants.common.ExternalServicePublicationOption;
@@ -93,6 +95,11 @@ public class WorksheetCreatorWorkerImpl {
 	}
 
 	public final void worksheetCreator() {
+     
+     Log logger = LogFactory.getLog(PurgeOlderSubmissionsWorkerImpl.class);
+     logger.info("Beginning Worksheet Creator: " + miscTasksKey.toString() +
+                   " form " + form.getFormId());
+
 		MiscTasks t;
 		try {
 		    t = new MiscTasks(miscTasksKey, cc);

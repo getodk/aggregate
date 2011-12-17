@@ -34,6 +34,8 @@ import org.opendatakit.aggregate.constants.format.XFormsTableConsts;
 import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.servlet.FormXmlServlet;
 import org.opendatakit.aggregate.servlet.XFormsManifestServlet;
+import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.BasicConsts;
 import org.opendatakit.common.web.constants.HtmlConsts;
 
@@ -61,7 +63,7 @@ public class XFormsXmlTable {
     this.forms = formsToFormat;
   }
 
-  public void generateXmlListOfForms(PrintWriter output) throws IOException {
+  public void generateXmlListOfForms(PrintWriter output, CallingContext cc) throws IOException, ODKDatastoreException {
     Document d = new Document();
     d.setStandalone(true);
     d.setEncoding(HtmlConsts.UTF8_ENCODE);
@@ -76,7 +78,7 @@ public class XFormsXmlTable {
       if (!form.getDownloadEnabled())
         continue;
 
-      idx = generateFormXmlEntry(d, e, idx, form);
+      idx = generateFormXmlEntry(d, e, idx, form, cc);
     }
 
     KXmlSerializer serializer = new KXmlSerializer();
@@ -87,7 +89,7 @@ public class XFormsXmlTable {
     serializer.flush();
   }
 
-  private int generateFormXmlEntry(Document d, Element e, int idx, IForm form) {
+  private int generateFormXmlEntry(Document d, Element e, int idx, IForm form, CallingContext cc) throws ODKDatastoreException {
 
     int xfIdx = 0;
     Element xformElement = d.createElement(XML_TAG_NAMESPACE, XFormsTableConsts.XFORM_TAG);
@@ -103,12 +105,24 @@ public class XFormsXmlTable {
     formNameElement.addChild(0, Node.TEXT, form.getViewableName());
     xformElement.addChild(xfIdx++, Node.IGNORABLE_WHITESPACE, BasicConsts.NEW_LINE);
 
+    // transitional -- 1.1.6 and 1.1.7
     Element majorMinorVersionElement = d.createElement(XML_TAG_NAMESPACE,
         XFormsTableConsts.MAJOR_MINOR_VERSION_TAG);
     xformElement.addChild(xfIdx++, Node.ELEMENT, majorMinorVersionElement);
     majorMinorVersionElement.addChild(0, Node.TEXT, form.getMajorMinorVersionString());
     xformElement.addChild(xfIdx++, Node.IGNORABLE_WHITESPACE, BasicConsts.NEW_LINE);
 
+    // conforming OpenRosa 1.0
+    Element versionElement = d.createElement(XML_TAG_NAMESPACE, XFormsTableConsts.VERSION_TAG);
+    xformElement.addChild(xfIdx++, Node.ELEMENT, versionElement);
+    versionElement.addChild(0, Node.TEXT, form.getOpenRosaVersionString());
+    xformElement.addChild(xfIdx++, Node.IGNORABLE_WHITESPACE, BasicConsts.NEW_LINE);
+
+    Element hashElement = d.createElement(XML_TAG_NAMESPACE, XFormsTableConsts.HASH_TAG);
+    xformElement.addChild(xfIdx++, Node.ELEMENT, hashElement);
+    hashElement.addChild(0,  Node.TEXT, form.getXFormFileHash(cc));
+    xformElement.addChild(xfIdx++, Node.IGNORABLE_WHITESPACE, BasicConsts.NEW_LINE);
+    
     String description = form.getDescription();
     if (description != null && verbose) {
       Element descriptionElement = d.createElement(XML_TAG_NAMESPACE,
@@ -138,7 +152,7 @@ public class XFormsXmlTable {
       xformElement.addChild(xfIdx++, Node.IGNORABLE_WHITESPACE, BasicConsts.NEW_LINE);
     }
 
-    if (form.hasManifestFileset()) {
+    if (form.hasManifestFileset(cc)) {
       Map<String, String> properties = new HashMap<String, String>();
       properties.put(ServletConsts.FORM_ID, form.getFormId());
       String urlLink = HtmlUtil.createLinkWithProperties(manifestRequestURL, properties);

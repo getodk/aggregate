@@ -114,11 +114,9 @@ class Form implements IForm {
     }
 
     this.xform = FormInfoFilesetTable.assertXformManipulator(topLevelAuri, filesetRow.getUri(), cc);
-    xform.refreshFromDatabase(cc);
 
     this.manifest = FormInfoFilesetTable.assertManifestManipulator(topLevelAuri,
         filesetRow.getUri(), cc);
-    manifest.refreshFromDatabase(cc);
 
     XFormParameters p = new XFormParameters(infoRow.getStringField(FormInfoTable.FORM_ID),
         filesetRow.getLongField(FormInfoFilesetTable.ROOT_ELEMENT_MODEL_VERSION),
@@ -268,6 +266,21 @@ class Form implements IForm {
     return b.toString();
   }
 
+  public String getOpenRosaVersionString() {
+
+    Long modelVersion = filesetRow.getLongField(FormInfoFilesetTable.ROOT_ELEMENT_MODEL_VERSION);
+    StringBuilder b = new StringBuilder();
+    if (modelVersion != null) {
+      b.append(modelVersion.toString());
+    }
+    return b.toString();
+  }
+  
+  @Override
+  public String getXFormFileHash(CallingContext cc) throws ODKDatastoreException {
+    return xform.getContentHash(1, cc);
+  }
+
   public boolean hasValidFormDefinition() {
     return (formDefinition != null);
   }
@@ -281,8 +294,8 @@ class Form implements IForm {
     return infoRow.getStringField(FormInfoTable.FORM_ID);
   }
 
-  public boolean hasManifestFileset() {
-    return manifest.getAttachmentCount() != 0;
+  public boolean hasManifestFileset(CallingContext cc) throws ODKDatastoreException {
+    return manifest.getAttachmentCount(cc) != 0;
   }
 
   public BinaryContentManipulator getManifestFileset() {
@@ -349,10 +362,10 @@ class Form implements IForm {
    * 
    * @return xml file name
    */
-  public String getFormFilename() throws ODKDatastoreException {
-    if (xform.getAttachmentCount() == 1) {
-      return xform.getUnrootedFilename(1);
-    } else if (xform.getAttachmentCount() > 1) {
+  public String getFormFilename(CallingContext cc) throws ODKDatastoreException {
+    if (xform.getAttachmentCount(cc) == 1) {
+      return xform.getUnrootedFilename(1, cc);
+    } else if (xform.getAttachmentCount(cc) > 1) {
       throw new IllegalStateException("Expecting only one fileset record at this time!");
     }
     return null;
@@ -364,8 +377,8 @@ class Form implements IForm {
    * @return get XML definition of XForm
    */
   public String getFormXml(CallingContext cc) throws ODKDatastoreException {
-    if (xform.getAttachmentCount() == 1) {
-      if (xform.getContentHash(1) == null) {
+    if (xform.getAttachmentCount(cc) == 1) {
+      if (xform.getContentHash(1, cc) == null) {
         return null;
       }
       byte[] byteArray = xform.getBlob(1, cc);
@@ -375,7 +388,7 @@ class Form implements IForm {
         e.printStackTrace();
         throw new IllegalStateException("UTF-8 charset not supported!");
       }
-    } else if (xform.getAttachmentCount() > 1) {
+    } else if (xform.getAttachmentCount(cc) > 1) {
       throw new IllegalStateException("Expecting only one fileset record at this time!");
     }
     return null;
@@ -529,7 +542,7 @@ class Form implements IForm {
     }
   }
 
-  public FormSummary generateFormSummary(CallingContext cc) {
+  public FormSummary generateFormSummary(CallingContext cc) throws ODKDatastoreException {
     boolean submit = getSubmissionEnabled();
     boolean downloadable = getDownloadEnabled();
     Map<String, String> xmlProperties = new HashMap<String, String>();
@@ -538,7 +551,7 @@ class Form implements IForm {
 
     String viewableURL = HtmlUtil.createHrefWithProperties(
         cc.getWebApplicationURL(FormXmlServlet.WWW_ADDR), xmlProperties, getViewableName());
-    int mediaFileCount = getManifestFileset().getAttachmentCount();
+    int mediaFileCount = getManifestFileset().getAttachmentCount(cc);
     return new FormSummary(getViewableName(), getFormId(), getCreationDate(), getCreationUser(),
         downloadable, submit, viewableURL, mediaFileCount);
   }
@@ -626,8 +639,8 @@ class Form implements IForm {
     if (!same)
       throw new ODKFormAlreadyExistsException();
 
-    if (xform.getAttachmentCount() == 1) {
-      String contentHash = xform.getContentHash(1);
+    if (xform.getAttachmentCount(cc) == 1) {
+      String contentHash = xform.getContentHash(1, cc);
       if (contentHash != null) {
         String md5Hash = CommonFieldsBase.newMD5HashUri(xmlBytes);
         if (!contentHash.equals(md5Hash)) {

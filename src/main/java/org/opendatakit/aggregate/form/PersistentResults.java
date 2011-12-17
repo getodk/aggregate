@@ -237,27 +237,25 @@ public class PersistentResults {
 
   public ResultFileInfo getResultFileInfo(CallingContext cc) throws ODKDatastoreException {
 
-    bcm.refreshFromDatabase(cc);
-    if (bcm.getAttachmentCount() == 0)
+    if (bcm.getAttachmentCount(cc) == 0)
       return null;
-    if (bcm.getAttachmentCount() > 1) {
+    if (bcm.getAttachmentCount(cc) > 1) {
       throw new IllegalStateException("Too many results attached!");
     }
-    String unrootedFilename = bcm.getUnrootedFilename(1);
+    String unrootedFilename = bcm.getUnrootedFilename(1, cc);
     SubmissionKey key = getSubmissionKey();
     Map<String, String> properties = new HashMap<String, String>();
     properties.put(ServletConsts.BLOB_KEY, key.toString());
     properties.put(ServletConsts.AS_ATTACHMENT, "yes");
     String addr = cc.getServerURL() + BasicConsts.FORWARDSLASH + BinaryDataServlet.ADDR;
     String url = HtmlUtil.createLinkWithProperties(addr, properties);
-    return new ResultFileInfo(unrootedFilename, url, bcm.getContentType(1), bcm.getContentLength(1));
+    return new ResultFileInfo(unrootedFilename, url, bcm.getContentType(1, cc), bcm.getContentLength(1, cc));
   }
 
   public byte[] getResultFileContents(CallingContext cc) throws ODKDatastoreException {
-    bcm.refreshFromDatabase(cc);
-    if (bcm.getAttachmentCount() == 0)
+    if (bcm.getAttachmentCount(cc) == 0)
       return null;
-    if (bcm.getAttachmentCount() > 1) {
+    if (bcm.getAttachmentCount(cc) > 1) {
       throw new IllegalStateException("Too many results attached!");
     }
     return bcm.getBlob(1, cc);
@@ -265,8 +263,7 @@ public class PersistentResults {
 
   public void setResultFile(byte[] byteArray, String contentType, Long contentLength,
       String unrootedFilePath, CallingContext cc) throws ODKDatastoreException {
-    bcm.refreshFromDatabase(cc);
-    if (bcm.getAttachmentCount() > 0) {
+    if (bcm.getAttachmentCount(cc) > 0) {
       throw new IllegalStateException("Results are already attached!");
     }
     bcm.setValueFromByteArray(byteArray, contentType, contentLength, unrootedFilePath, cc);
@@ -297,7 +294,6 @@ public class PersistentResults {
   }
   
   public void deleteResultFile(CallingContext cc) throws ODKDatastoreException {
-    bcm.refreshFromDatabase(cc);
     bcm.deleteAll(cc);
   }
 

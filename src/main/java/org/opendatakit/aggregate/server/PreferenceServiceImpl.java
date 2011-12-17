@@ -21,8 +21,11 @@ import javax.servlet.http.HttpServletRequest;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.client.exception.RequestFailureException;
 import org.opendatakit.aggregate.client.preferences.PreferenceSummary;
+import org.opendatakit.aggregate.constants.ErrorConsts;
+import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
+import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.security.client.exception.AccessDeniedException;
 import org.opendatakit.common.web.CallingContext;
 
@@ -37,7 +40,7 @@ org.opendatakit.aggregate.client.preferences.PreferenceService {
   private static final long serialVersionUID = -4892832848446000170L;
 
   @Override
-  public void setGoogleMapsKey(String key) throws AccessDeniedException, RequestFailureException {
+  public void setGoogleMapsKey(String key) throws AccessDeniedException, RequestFailureException, DatastoreFailureException {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);   
     
@@ -52,15 +55,18 @@ org.opendatakit.aggregate.client.preferences.PreferenceService {
     } catch (ODKEntityNotFoundException e) {
       e.printStackTrace();
       throw new RequestFailureException(e);
+    } catch (ODKOverQuotaException e) {
+      e.printStackTrace();
+      throw new RequestFailureException(ErrorConsts.QUOTA_EXCEEDED);
     } catch (ODKDatastoreException e) {
       e.printStackTrace();
-      throw new RequestFailureException(e);
+      throw new DatastoreFailureException(e);
     }
     
   }
 
   @Override
-  public PreferenceSummary getPreferences() throws AccessDeniedException, RequestFailureException {
+  public PreferenceSummary getPreferences() throws AccessDeniedException, RequestFailureException, DatastoreFailureException {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);   
     
@@ -72,16 +78,16 @@ org.opendatakit.aggregate.client.preferences.PreferenceService {
     } catch (ODKEntityNotFoundException e) {
       e.printStackTrace();
       throw new RequestFailureException(e);
-    } catch (ODKDatastoreException e) {
+    } catch (ODKOverQuotaException e) {
       e.printStackTrace();
-      throw new RequestFailureException(e);
+      throw new RequestFailureException(ErrorConsts.QUOTA_EXCEEDED);
     }
     
     return null;
   }
 
   @Override
-  public void setOdkTablesEnabled(Boolean enabled) throws AccessDeniedException, RequestFailureException {
+  public void setOdkTablesEnabled(Boolean enabled) throws AccessDeniedException, RequestFailureException, DatastoreFailureException {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);   
     
@@ -96,9 +102,12 @@ org.opendatakit.aggregate.client.preferences.PreferenceService {
     } catch (ODKEntityNotFoundException e) {
       e.printStackTrace();
       throw new RequestFailureException(e);
+    } catch (ODKOverQuotaException e) {
+      e.printStackTrace();
+      throw new RequestFailureException(ErrorConsts.QUOTA_EXCEEDED);
     } catch (ODKDatastoreException e) {
       e.printStackTrace();
-      throw new RequestFailureException(e);
+      throw new DatastoreFailureException(e);
     }
     
   }
