@@ -20,6 +20,8 @@ import java.io.PrintWriter;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.client.filter.FilterGroup;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.common.ExportStatus;
@@ -68,6 +70,10 @@ public class KmlWorkerImpl {
   }
 
   public void generateKml() {
+    Log logger = LogFactory.getLog(KmlWorkerImpl.class);
+    logger.info("Beginning KML generation: " + persistentResultsKey.toString() +
+                " form " + form.getFormId());
+
 
     try {
       ByteArrayOutputStream stream = new ByteArrayOutputStream();

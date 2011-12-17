@@ -20,7 +20,7 @@ import org.opendatakit.aggregate.exception.ODKExternalServiceException;
 import org.opendatakit.aggregate.externalservice.FormServiceCursor;
 import org.opendatakit.aggregate.task.UploadSubmissions;
 import org.opendatakit.aggregate.task.gae.servlet.UploadSubmissionsTaskServlet;
-import org.opendatakit.common.persistence.PersistConsts;
+import org.opendatakit.aggregate.util.BackendActionsTable;
 import org.opendatakit.common.web.CallingContext;
 
 /**
@@ -46,7 +46,7 @@ public class UploadSubmissionsImpl implements UploadSubmissions {
           + fsc.getExternalServiceType());
       
       TaskOptionsBuilder b = new TaskOptionsBuilder(UploadSubmissionsTaskServlet.ADDR);
-      b.countdownMillis(500 + PersistConsts.MAX_SETTLE_MILLISECONDS);
+      b.countdownMillis(BackendActionsTable.PUBLISHING_DELAY_MILLISECONDS);
       b.param(ExternalServiceConsts.FSC_URI_PARAM, fsc.getUri());
       b.enqueue(UPLOAD_SUBMISSION_QUEUE);
     } catch (Exception e) {
