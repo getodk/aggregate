@@ -14,6 +14,7 @@ import org.opendatakit.aggregate.odktables.command.common.GetUserByID;
 import org.opendatakit.aggregate.odktables.command.common.ListAllTables;
 import org.opendatakit.aggregate.odktables.command.common.SetTablePermissions;
 import org.opendatakit.aggregate.odktables.command.common.SetUserManagementPermissions;
+import org.opendatakit.aggregate.odktables.command.common.UpdateColumnProperties;
 import org.opendatakit.aggregate.odktables.command.common.UpdateTableProperties;
 import org.opendatakit.aggregate.odktables.command.simple.CreateTable;
 import org.opendatakit.aggregate.odktables.command.simple.DeleteTable;
@@ -34,6 +35,7 @@ import org.opendatakit.aggregate.odktables.commandlogic.common.GetUserByIDLogic;
 import org.opendatakit.aggregate.odktables.commandlogic.common.ListAllTablesLogic;
 import org.opendatakit.aggregate.odktables.commandlogic.common.SetTablePermissionsLogic;
 import org.opendatakit.aggregate.odktables.commandlogic.common.SetUserManagementPermissionsLogic;
+import org.opendatakit.aggregate.odktables.commandlogic.common.UpdateColumnPropertiesLogic;
 import org.opendatakit.aggregate.odktables.commandlogic.common.UpdateTablePropertiesLogic;
 import org.opendatakit.aggregate.odktables.commandlogic.simple.CreateTableLogic;
 import org.opendatakit.aggregate.odktables.commandlogic.simple.DeleteTableLogic;
@@ -106,30 +108,13 @@ public abstract class CommandLogic<T extends Command> {
      */
     private enum CommandType {
 	// Common
-	CHECK_USER_EXISTS, 
-	CREATE_USER, 
-	DELETE_USER, 
-	GET_USER_BY_ID, 
-	GET_USER_BY_AGGREGATE_IDENTIFIER, 
-	LIST_ALL_TABLES, 
-	SET_TABLE_PERMISSIONS, 
-	SET_USER_MANAGEMENT_PERMISSIONS,
-	UPDATE_TABLE_PROPERTIES,
+	CHECK_USER_EXISTS, CREATE_USER, DELETE_USER, GET_USER_BY_ID, GET_USER_BY_AGGREGATE_IDENTIFIER, LIST_ALL_TABLES, SET_TABLE_PERMISSIONS, SET_USER_MANAGEMENT_PERMISSIONS, UPDATE_TABLE_PROPERTIES, UPDATE_COLUMN_PROPERTIES,
 
 	// Simple
-	CREATE_TABLE, 
-	DELETE_TABLE, 
-	INSERT_ROWS, 
-	QUERY_FOR_ROWS,
+	CREATE_TABLE, DELETE_TABLE, INSERT_ROWS, QUERY_FOR_ROWS,
 
 	// Synchronized
-	CLONE_SYNCHRONIZED_TABLE, 
-	CREATE_SYNCHRONIZED_TABLE, 
-	DELETE_SYNCHRONIZED_TABLE, 
-	INSERT_SYNCHRONIZED_ROWS, 
-	REMOVE_TABLE_SYNCHRONIZATION, 
-	SYNCHRONIZE, 
-	UPDATE_SYNCHRONIZED_ROWS,
+	CLONE_SYNCHRONIZED_TABLE, CREATE_SYNCHRONIZED_TABLE, DELETE_SYNCHRONIZED_TABLE, INSERT_SYNCHRONIZED_ROWS, REMOVE_TABLE_SYNCHRONIZATION, SYNCHRONIZE, UPDATE_SYNCHRONIZED_ROWS,
     }
 
     /**
@@ -153,8 +138,10 @@ public abstract class CommandLogic<T extends Command> {
 		CommandType.SET_TABLE_PERMISSIONS);
 	commandClassMap.put(SetUserManagementPermissions.class,
 		CommandType.SET_USER_MANAGEMENT_PERMISSIONS);
-	commandClassMap.put(UpdateTableProperties.class, 
+	commandClassMap.put(UpdateTableProperties.class,
 		CommandType.UPDATE_TABLE_PROPERTIES);
+	commandClassMap.put(UpdateColumnProperties.class,
+		CommandType.UPDATE_COLUMN_PROPERTIES);
 
 	// Simple
 	commandClassMap.put(CreateTable.class, CommandType.CREATE_TABLE);
@@ -216,6 +203,9 @@ public abstract class CommandLogic<T extends Command> {
 	case UPDATE_TABLE_PROPERTIES:
 	    return new UpdateTablePropertiesLogic(
 		    (UpdateTableProperties) command);
+	case UPDATE_COLUMN_PROPERTIES:
+	    return new UpdateColumnPropertiesLogic(
+		    (UpdateColumnProperties) command);
 
 	    // Simple
 	case CREATE_TABLE:
