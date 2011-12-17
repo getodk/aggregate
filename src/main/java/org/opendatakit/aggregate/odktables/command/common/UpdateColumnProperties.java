@@ -1,5 +1,8 @@
 package org.opendatakit.aggregate.odktables.command.common;
 
+import java.util.Collections;
+import java.util.Map;
+
 import org.opendatakit.aggregate.odktables.command.Command;
 import org.opendatakit.common.utils.Check;
 
@@ -15,8 +18,7 @@ public class UpdateColumnProperties implements Command {
 
     private final String requestingUserID;
     private final String tableID;
-    private final String columnName;
-    private final String properties;
+    private final Map<String, String> columnsToProperties;
 
     /**
      * For serialization by Gson
@@ -25,32 +27,23 @@ public class UpdateColumnProperties implements Command {
     private UpdateColumnProperties() {
 	this.requestingUserID = null;
 	this.tableID = null;
-	this.columnName = null;
-	this.properties = null;
+	this.columnsToProperties = null;
     }
 
     /**
      * Constructs a new QueryForTables.
      */
     public UpdateColumnProperties(String requestingUserID, String tableID,
-	    String columnName, String properties) {
+	    Map<String, String> columnsToProperties) {
 
 	Check.notNullOrEmpty(requestingUserID, "requestingUserID");
 	Check.notNullOrEmpty(tableID, "tableID");
-	Check.notNullOrEmpty(columnName, "columnName");
+	Check.notNullOrEmpty(columnsToProperties, "columnsToProperties");
 	// properties may be null or empty
 
 	this.requestingUserID = requestingUserID;
 	this.tableID = tableID;
-	this.columnName = columnName;
-	this.properties = properties;
-    }
-
-    /**
-     * @return the columnName
-     */
-    public String getColumnName() {
-	return columnName;
+	this.columnsToProperties = columnsToProperties;
     }
 
     /**
@@ -61,29 +54,28 @@ public class UpdateColumnProperties implements Command {
     }
 
     /**
-     * @return the properties
-     */
-    public String getProperties() {
-	return properties;
-    }
-
-    /**
      * @return the requestingUserID
      */
     public String getRequestingUserID() {
 	return this.requestingUserID;
     }
+    
+    /**
+     * @return the columnsToProperties as an unmodifiable map
+     */
+    public Map<String, String> getColumnsToProperties()
+    {
+	return Collections.unmodifiableMap(this.columnsToProperties);
+    }
 
-    /*
-     * (non-Javadoc)
-     * 
+    /* (non-Javadoc)
      * @see java.lang.Object#toString()
      */
     @Override
     public String toString() {
 	return "UpdateColumnProperties [requestingUserID=" + requestingUserID
-		+ ", tableID=" + tableID + ", columnName=" + columnName
-		+ ", properties=" + properties + "]";
+		+ ", tableID=" + tableID + ", columnsToProperties="
+		+ columnsToProperties + "]";
     }
 
     @Override
