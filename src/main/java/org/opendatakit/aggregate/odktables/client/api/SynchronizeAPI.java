@@ -118,6 +118,34 @@ public class SynchronizeAPI extends CommonAPI {
     }
 
     /**
+     * Creates a new synchronized table.
+     * 
+     * @param tableID
+     *            the client's unique identifier for the table
+     * @param tableName
+     *            the human readable name of the table
+     * @param columns
+     *            a list of columns defining the columns the table should have
+     * @return the initial Modification of the newly created table (calling
+     *         getRows() on the Modification will return an empty list).
+     * @throws ClientProtocolException
+     * @throws TableAlreadyExistsException
+     *             if the caller has already created a synchronized table with
+     *             the given tableID.
+     * @throws AggregateInternalErrorException
+     *             if Aggregate encounters an internal error that causes the
+     *             call to fail
+     * @throws IOException
+     *             if there is a problem communicating with the Aggregate server
+     */
+    public Modification createSynchronizedTable(String tableID,
+	    String tableName, List<Column> columns)
+	    throws ClientProtocolException, IOException,
+	    TableAlreadyExistsException, AggregateInternalErrorException {
+	return createSynchronizedTable(tableID, tableName, null, columns);
+    }
+
+    /**
      * Clones an existing synchronized table.
      * 
      * @param aggregateTableIdentifier
