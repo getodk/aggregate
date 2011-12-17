@@ -48,8 +48,12 @@ import org.opendatakit.common.ermodel.simple.AttributeType;
  * </p>
  * 
  * <pre>
- * The commands are:
- * TODO: document script file
+ * <b>Key:</b>
+ * <i>commandName</i>: the name of the command
+ * <i>(argument)</i>: a required argument
+ * <i>[argument]</i>: an optional argument
+ * 
+ * <b>The commands are:</b>
  * 
  * <i>createUser (userName)</i>
  * 
@@ -59,12 +63,8 @@ import org.opendatakit.common.ermodel.simple.AttributeType;
  * 
  * <i>listAllTables (userName)</i>
  * 
- * <i>createSynchronizedTable (userName) (tableName)
- *        (columnName) (columnType) (nullable)
- *        ...</i>
- * 
- * <i>createSynchronizedTable (userName) (tableName) (properties)
- *        (columnName) (columnType) (nullable)
+ * <i>createSynchronizedTable (userName) (tableName) [properties]
+ *        (columnName) (columnType) (nullable) [properties]
  *        ...</i>
  *        
  * <i>cloneSynchronizedTable (userName) (tableName)</i>
@@ -308,14 +308,17 @@ public class ClientTestDriver {
 	List<Column> columns = new ArrayList<Column>();
 	String inputLine;
 	while ((inputLine = input
-		.findInLine("    \\w+ [A-Z_]+ (false)|(true) *")) != null) {
+		.findInLine("    \\w+ [A-Z_]+ (false|true)( \\S+)? *")) != null) {
 	    StringTokenizer st = new StringTokenizer(inputLine);
 
 	    String name = st.nextToken();
 	    AttributeType type = AttributeType.valueOf(st.nextToken());
 	    boolean nullable = Boolean.parseBoolean(st.nextToken());
+	    String columnProps = null;
+	    if (st.hasMoreTokens())
+    	    	columnProps = st.nextToken();
 
-	    Column column = new Column(name, type, nullable);
+	    Column column = new Column(name, type, nullable, columnProps);
 	    columns.add(column);
 
 	    // advance scanner
