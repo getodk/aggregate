@@ -20,8 +20,7 @@ public class UpdateTablePropertiesLogic extends
     @Override
     public UpdateTablePropertiesResult execute(CallingContext cc)
 	    throws AggregateInternalErrorException, SnafuException {
-	// TODO Auto-generated method stub
-	return null;
+	throw new AggregateInternalErrorException("Not implemented.");
     }
 
 }
