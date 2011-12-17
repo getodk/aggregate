@@ -5,6 +5,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -374,10 +375,8 @@ public class CommonAPI {
      * 
      * @param tableID
      *            the client's identifier for a table
-     * @param columnName
-     *            the name of the column to update properties for
-     * @param properties
-     *            metadata to store on the column
+     * @param columnsToProperties
+     *            a map of column names to the new properties for those columns
      * @throws PermissionDeniedException
      *             if the client does not have write permission on the table
      * @throws TableDoesNotExistException
@@ -391,13 +390,13 @@ public class CommonAPI {
      *             if there is a problem communicating with the Aggregate server
      * @throws ClientProtocolException
      */
-    public void updateColumnProperties(String tableID, String columnName,
-	    String properties) throws ClientProtocolException,
-	    AggregateInternalErrorException, IOException,
-	    TableDoesNotExistException, PermissionDeniedException,
+    public void updateColumnProperties(String tableID,
+	    Map<String, String> columnsToProperties)
+	    throws ClientProtocolException, AggregateInternalErrorException,
+	    IOException, TableDoesNotExistException, PermissionDeniedException,
 	    ColumnDoesNotExistException {
 	UpdateColumnProperties command = new UpdateColumnProperties(
-		requestingUserID, tableID, columnName, properties);
+		requestingUserID, tableID, columnsToProperties);
 	UpdateColumnPropertiesResult result = sendCommand(command,
 		UpdateColumnPropertiesResult.class);
 	result.checkResult();
