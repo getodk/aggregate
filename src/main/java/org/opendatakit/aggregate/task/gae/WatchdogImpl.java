@@ -232,7 +232,7 @@ public class WatchdogImpl implements Watchdog, InitializingBean {
     if ( delayMilliseconds != 0L ) {
       b.countdownMillis(delayMilliseconds);
     }
-    b.param(ServletConsts.CHECK_INTERVAL_PARAM, Long.toString(WATCHDOG_RETRY_INTERVAL_MILLISECONDS));
+    b.param(ServletConsts.CHECK_INTERVAL_PARAM, Long.toString(WATCHDOG_IDLING_RETRY_INTERVAL_MILLISECONDS));
     b.enqueue();
   }
 

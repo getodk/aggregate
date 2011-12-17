@@ -278,7 +278,7 @@ public class WatchdogImpl implements Watchdog, SmartLifecycle, InitializingBean,
   @Override
   public void start() {
     System.out.println("start WATCHDOG TASK IN TOMCAT");
-    createWatchdogTask(WATCHDOG_RETRY_INTERVAL_MILLISECONDS);
+    createWatchdogTask(WATCHDOG_TOMCAT_RETRY_INTERVAL_MILLISECONDS);
     isStarted = true;
   }
 

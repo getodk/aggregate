@@ -74,7 +74,7 @@ public class UploadSubmissionsWorkerImpl {
   private ExternalService pExtService;
   private IForm form;
   private long lastUpdateTimestamp = System.currentTimeMillis();
-
+  
   public UploadSubmissionsWorkerImpl(FormServiceCursor fsc, CallingContext cc) {
     pFsc = fsc;
     this.cc = cc;
@@ -92,6 +92,7 @@ public class UploadSubmissionsWorkerImpl {
     // In those cases, let the watchdog restart the activity because
     // the remedy will likely take longer than the requeue delay.
     boolean reQueue = false;
+    logger.info("Beginning UPLOAD service: " + pFsc.getAuriService() + " form " + pFsc.getFormId());
     
     try {
       pExtService = pFsc.getExternalService(cc);

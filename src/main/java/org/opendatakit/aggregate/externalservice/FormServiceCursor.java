@@ -281,6 +281,7 @@ public final class FormServiceCursor extends CommonFieldsBase {
     // filter on the Form's Uri. We cannot filter on the FORM_ID since it is a
     // Text field in bigtable
     query.addFilter(URI_MD5_FORM_ID_PROPERTY, FilterOperation.EQUAL, form.getEntityKey().getKey());
+    query.addSort(URI_MD5_FORM_ID_PROPERTY, Direction.ASCENDING); // gae optimization
     List<ExternalService> esList = new ArrayList<ExternalService>();
 
     List<? extends CommonFieldsBase> fscList = query.executeQuery();
