@@ -16,7 +16,7 @@ import com.thoughtworks.selenium.Wait;
 
 @RunWith(org.junit.runners.JUnit4.class)
 public class TestUploadForm {
-  private static long TIMEOUT_INTERVAL_MS = 30000L; // ms
+  private static long TIMEOUT_INTERVAL_MS = 120000L; // ms
   private static long RETRY_INTERVAL_MS = 100L; // ms
 
   private static String formsDir;
