@@ -1,6 +1,7 @@
 package org.opendatakit.common.utils;
 
 import java.util.Collection;
+import java.util.Map;
 
 /**
  * Class for checking preconditions on method arguments.
@@ -56,6 +57,14 @@ public final class Check
     public static void notNullOrEmpty(Collection<?> variable, String name)
     {
         Check.notNull(variable, name);
+        if (variable.size() == 0)
+            throw new IllegalArgumentException(String.format("%s was empty",
+                    name));
+    }
+    
+    public static void notNullOrEmpty(Map<?, ?> variable, String name)
+    {
+	Check.notNull(variable, name);
         if (variable.size() == 0)
             throw new IllegalArgumentException(String.format("%s was empty",
                     name));
