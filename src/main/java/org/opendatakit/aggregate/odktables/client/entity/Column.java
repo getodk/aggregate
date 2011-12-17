@@ -70,18 +70,9 @@ public final class Column {
      *            the type of data that the new Column will hold.
      * @param nullable
      *            whether the values in this column are allowed to be null
-     * @param properties
-     *            a string that can be any metadata the client wants to store on
-     *            the column. May be null or empty.
      */
     public Column(String name, AttributeType type, boolean nullable) {
-	if (name == null || name.length() == 0) {
-	    throw new IllegalArgumentException("name was null or empty");
-	}
-	this.name = name;
-	this.type = type;
-	this.nullable = nullable;
-	this.properties = null;
+	this(name, type, nullable, null);
     }
 
     /**
