@@ -42,7 +42,9 @@ public abstract class TopLevelDynamicBase extends DynamicCommonFieldsBase {
 
 	/* top level dynamic */
 	public static final int ADDITIONAL_COLUMN_COUNT = 5 + CommonFieldsBase.AUDIT_COLUMN_COUNT;
-	
+
+	public static final String FIELD_NAME_MARKED_AS_COMPLETE_DATE = "_MARKED_AS_COMPLETE_DATE";
+	    
 	/** (data model) version from submission */
 	private static final DataField MODEL_VERSION = new DataField("_MODEL_VERSION", DataField.DataType.INTEGER, true);
 	/** uiVersion from submission */
@@ -59,7 +61,7 @@ public abstract class TopLevelDynamicBase extends DynamicCommonFieldsBase {
 	 */
 	private static final DataField IS_COMPLETE = new DataField("_IS_COMPLETE", DataField.DataType.BOOLEAN, true);
 
-	private static final DataField MARKED_AS_COMPLETE_DATE = new DataField("_MARKED_AS_COMPLETE_DATE", DataField.DataType.DATETIME, true).setIndexable(IndexType.ORDERED);
+	private static final DataField MARKED_AS_COMPLETE_DATE = new DataField(FIELD_NAME_MARKED_AS_COMPLETE_DATE, DataField.DataType.DATETIME, true).setIndexable(IndexType.ORDERED);
 
 	private static final DataField SUBMISSION_DATE = new DataField("_SUBMISSION_DATE", DataField.DataType.DATETIME, true);
 

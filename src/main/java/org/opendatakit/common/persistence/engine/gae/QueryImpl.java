@@ -391,10 +391,8 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
       return ds.prepare(hack);
 
     } catch (OverQuotaException e) {
-      datastore.recordQueryUsage(relation, 0);
       throw new ODKOverQuotaException("[" + loggingContextTag + "] Quota exceeded", e);
     } catch (Exception e) {
-      datastore.recordQueryUsage(relation, 0);
       throw new ODKDatastoreException("[" + loggingContextTag + "] Unable to complete request", e);
     }
   }

@@ -30,6 +30,7 @@ import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.format.form.FormXmlTable;
 import org.opendatakit.aggregate.format.form.XFormsXmlTable;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.HtmlConsts;
 
@@ -87,7 +88,10 @@ public class FormListServlet extends ServletUtilBase {
         XFormsXmlTable formFormatter = new XFormsXmlTable(formsList, verbose, cc.getServerURL());
 
         resp.setContentType(HtmlConsts.RESP_TYPE_XML);
-        formFormatter.generateXmlListOfForms(resp.getWriter());
+        formFormatter.generateXmlListOfForms(resp.getWriter(), cc);
+      } catch (ODKOverQuotaException e) {
+        e.printStackTrace();
+        quotaExceededError(resp);
       } catch (ODKDatastoreException e) {
         e.printStackTrace();
         errorRetreivingData(resp);

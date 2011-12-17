@@ -63,8 +63,8 @@ public class XmlMediaAttachmentFormatter implements ElementFormatter {
       Row row, CallingContext cc) throws ODKDatastoreException {
 
     if( blobSubmission == null || 
-    	(blobSubmission.getAttachmentCount() == 0) ||
-    	(blobSubmission.getContentHash(1) == null) ) {
+    	(blobSubmission.getAttachmentCount(cc) == 0) ||
+    	(blobSubmission.getContentHash(1, cc) == null) ) {
     	return;
     }
 	
@@ -79,8 +79,8 @@ public class XmlMediaAttachmentFormatter implements ElementFormatter {
 	}
 	// parallel to XFormsManifestXmlTable
     String xmlString = "<mediaFile>" +
-    		"<filename>" + StringEscapeUtils.escapeXml(blobSubmission.getUnrootedFilename(1)) + "</filename>" +
-    		"<hash>"	+ StringEscapeUtils.escapeXml(blobSubmission.getContentHash(1)) + "</hash>" +
+    		"<filename>" + StringEscapeUtils.escapeXml(blobSubmission.getUnrootedFilename(1, cc)) + "</filename>" +
+    		"<hash>"	+ StringEscapeUtils.escapeXml(blobSubmission.getContentHash(1, cc)) + "</hash>" +
     		"<downloadUrl>"	+ StringEscapeUtils.escapeXml(urlLink) + "</downloadUrl>" +
     	"</mediaFile>\n";
     

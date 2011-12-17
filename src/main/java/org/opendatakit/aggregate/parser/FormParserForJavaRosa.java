@@ -54,9 +54,9 @@ import org.opendatakit.aggregate.exception.ODKFormAlreadyExistsException;
 import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
 import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData.Reason;
 import org.opendatakit.aggregate.exception.ODKParseException;
+import org.opendatakit.aggregate.form.FormDefinition;
 import org.opendatakit.aggregate.form.FormFactory;
 import org.opendatakit.aggregate.form.IForm;
-import org.opendatakit.aggregate.form.FormDefinition;
 import org.opendatakit.aggregate.form.MiscTasks;
 import org.opendatakit.aggregate.form.SubmissionAssociationTable;
 import org.opendatakit.aggregate.form.XFormParameters;
@@ -89,36 +89,33 @@ public class FormParserForJavaRosa {
 		"<h:title>Encrypted Form</h:title>" +
 		"<model>" +
 			"<instance>" +
-				"<data id=\"encrypted\" >" +
-					"<meta>" +
-						"<timeStart/>" +
-						"<timeEnd/>" +
-						"<instanceID/>" +
-					"</meta>" +
+				"<data id=\"encrypted\" xmlns=\"http://www.opendatakit.org/xforms/encrypted\" xmlns:orx=\"http://openrosa.org/xforms\">" +
                "<base64EncryptedKey/>" +
-					"<encryptedXmlFile/>" +
+					"<orx:meta>" +
+						"<orx:instanceID/>" +
+					"</orx:meta>" +
 					"<media>" +
 						"<file/>" +
 					"</media>" +
-				"</data>" +
+		         "<encryptedXmlFile/>" +
+					"<base64EncryptedElementSignature/>" +
+	  			"</data>" +
 			"</instance>" +
-			"<bind nodeset=\"/data/meta/timeStart\" type=\"datetime\"/>" +
-			"<bind nodeset=\"/data/meta/timeEnd\" type=\"datetime\"/>" +
-			"<bind nodeset=\"/data/meta/instanceID\" type=\"string\"/>" +
          "<bind nodeset=\"/data/base64EncryptedKey\" type=\"string\"/>" +
-			"<bind nodeset=\"/data/encryptedXmlFile\" type=\"binary\"/>" +
+			"<bind nodeset=\"/data/meta/instanceID\" type=\"string\"/>" +
 			"<bind nodeset=\"/data/media/file\" type=\"binary\"/>" +
+         "<bind nodeset=\"/data/encryptedXmlFile\" type=\"binary\"/>" +
+         "<bind nodeset=\"/data/base64EncryptedElementSignature\" type=\"string\"/>" +
 		"</model>" +
 	"</h:head>" +
 	"<h:body>" +
-		"<input ref=\"meta/timeStart\"><label>start</label></input>" +
-		"<input ref=\"meta/timeEnd\"><label>end</label></input>" +
+      "<input ref=\"base64EncryptedKey\"><label>Encrypted Symmetric Key</label></input>" +
 		"<input ref=\"meta/instanceID\"><label>InstanceID</label></input>" +
-      "<input ref=\"base64EncryptedKey\"><label>Encrypted SymmetricKey</label></input>" +
-		"<upload ref=\"encryptedXmlFile\" mediatype=\"image/*\"><label>submission</label></upload>" +
 		"<repeat nodeset=\"/data/media\">" +
 			"<upload ref=\"file\" mediatype=\"image/*\"><label>media file</label></upload>" +
 		"</repeat>" +
+      "<upload ref=\"encryptedXmlFile\" mediatype=\"image/*\"><label>submission</label></upload>" +
+      "<input ref=\"base64EncryptedElementSignature\"><label>Encrypted Element Signature</label></input>" +
 	"</h:body>" +
 	"</h:html>";
   

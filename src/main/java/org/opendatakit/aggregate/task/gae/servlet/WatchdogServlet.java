@@ -20,6 +20,8 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
@@ -58,6 +60,8 @@ public class WatchdogServlet extends ServletUtilBase{
 	CallingContext cc = ContextFactory.getCallingContext(this, req);
 	cc.setAsDaemon(true);
 
+	Log logger = LogFactory.getLog(WatchdogServlet.class);
+	
     // get parameter
     String checkIntervalString = getParameter(req, ServletConsts.CHECK_INTERVAL_PARAM);
     if (checkIntervalString == null) {
@@ -66,26 +70,32 @@ public class WatchdogServlet extends ServletUtilBase{
     }
     long checkIntervalMilliseconds = Long.parseLong(checkIntervalString);
     
-    System.out.println("STARTING WATCHDOG TASK");
+    logger.info("Beginning servlet processing");
     WatchdogWorkerImpl worker = new WatchdogWorkerImpl();
     try {
       worker.checkTasks(checkIntervalMilliseconds, cc);
+      logger.info("ending successful servlet processing");
+      resp.setStatus(HttpServletResponse.SC_ACCEPTED);
     } catch (ODKExternalServiceException e) {
       e.printStackTrace();
+      logger.error(e.toString());
       resp.sendError(HttpServletResponse.SC_BAD_GATEWAY, e.toString());
       return;
     } catch (ODKFormNotFoundException e) {
+      e.printStackTrace();
+      logger.error(e.toString());
       odkIdNotFoundError(resp);
       return;
     } catch (ODKDatastoreException e) {
       e.printStackTrace();
+      logger.error(e.toString());
       resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.toString());
       return;
     } catch (ODKIncompleteSubmissionData e) {
       e.printStackTrace();
+      logger.error(e.toString());
       resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.toString());
       return;
     }
-    resp.setStatus(HttpServletResponse.SC_ACCEPTED);
   }
 }

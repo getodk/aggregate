@@ -16,10 +16,17 @@
 package org.opendatakit.aggregate.task;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.opendatakit.aggregate.client.filter.FilterGroup;
 import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.common.OperationalStatus;
+import org.opendatakit.aggregate.constants.common.UIConsts;
+import org.opendatakit.aggregate.datamodel.TopLevelDynamicBase;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
@@ -28,10 +35,14 @@ import org.opendatakit.aggregate.form.FormFactory;
 import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.form.MiscTasks;
 import org.opendatakit.aggregate.form.PersistentResults;
-import org.opendatakit.aggregate.query.submission.QueryByDateRange;
+import org.opendatakit.aggregate.query.submission.QueryByUIFilterGroup;
+import org.opendatakit.aggregate.query.submission.QueryByUIFilterGroup.CompletionFlag;
 import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.aggregate.util.BackendActionsTable;
+import org.opendatakit.common.persistence.PersistConsts;
+import org.opendatakit.common.persistence.QueryResumePoint;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+import org.opendatakit.common.utils.WebUtils;
 import org.opendatakit.common.web.CallingContext;
 
 /**
@@ -43,9 +54,75 @@ import org.opendatakit.common.web.CallingContext;
  */
 public class WatchdogWorkerImpl {
 
+  private Log logger = LogFactory.getLog(WatchdogWorkerImpl.class);
+  
+  private static class SubmissionMetadata {
+    public final String uri;
+    public final Date markedAsCompleteDate;
+    
+    SubmissionMetadata( String uri, Date markedAsCompleteDate ) {
+      this.uri = uri;
+      this.markedAsCompleteDate = markedAsCompleteDate;
+    }
+  }
+  
+  // accessed only by getLastSubmissionMetadata
+  private Map<String, SubmissionMetadata> formSubmissionsMap =
+      new HashMap<String, SubmissionMetadata>();
+  
+  /**
+   * Determine and return the metadata for the last submission against this 
+   * form.  That metadata consists of the marked-as-complete date and uri
+   * of the submission.  Used to determine whether to launch an upload task.
+   * 
+   * @param form
+   * @param cc
+   * @return
+   * @throws ODKDatastoreException
+   */
+  private synchronized SubmissionMetadata getLastSubmissionMetadata( IForm form, CallingContext cc )
+      throws ODKDatastoreException {
+    
+    // use cached value -- prevents excessive queries against the form tables
+    // during Watchdog verification of streaming publishers.
+    SubmissionMetadata metadata = formSubmissionsMap.get(form.getUri());
+    if ( metadata != null ) return metadata;
+    
+    // compute the upper limit for data we want to process
+    // limitDate is the datastore's settle time into the past.
+    Date limitDate = new Date(System.currentTimeMillis() - PersistConsts.MAX_SETTLE_MILLISECONDS);
+    QueryResumePoint qrp = new QueryResumePoint(
+        TopLevelDynamicBase.FIELD_NAME_MARKED_AS_COMPLETE_DATE,
+                          WebUtils.iso8601Date(limitDate), null, false);
+    
+    FilterGroup filterGroup = new FilterGroup(UIConsts.FILTER_NONE, form.getFormId(), null);
+    filterGroup.setCursor(qrp.transform());
+    filterGroup.setQueryFetchLimit(1);
+    
+    // query for the most recent submission that was marked-as-complete for this form
+    QueryByUIFilterGroup query =
+        new QueryByUIFilterGroup(form, filterGroup, 
+              CompletionFlag.ONLY_COMPLETE_SUBMISSIONS, cc);
+    
+    List<Submission> submissions = query.getResultSubmissions(cc);
+    if (submissions != null && submissions.size() >= 1) {
+      Submission lastSubmission = submissions.get(0);
+      metadata = new SubmissionMetadata( lastSubmission.getKey().getKey(), 
+                                      lastSubmission.getMarkedAsCompleteDate());
+      formSubmissionsMap.put(form.getUri(), metadata);
+      return metadata;
+    }
+    return null;
+  }
+  
   public void checkTasks(long checkIntervalMilliseconds, CallingContext cc)
       throws ODKExternalServiceException, ODKFormNotFoundException, ODKDatastoreException,
       ODKIncompleteSubmissionData {
+    BackendActionsTable.updateWatchdogStart(cc);
+    formSubmissionsMap.clear();
+    
+    logger.info("Beginning Watchdog");
+
     UploadSubmissions uploadSubmissions = (UploadSubmissions) cc.getBean(BeanDefs.UPLOAD_TASK_BEAN);
     CsvGenerator csvGenerator = (CsvGenerator) cc.getBean(BeanDefs.CSV_BEAN);
     KmlGenerator kmlGenerator = (KmlGenerator) cc.getBean(BeanDefs.KML_BEAN);
@@ -98,8 +175,7 @@ public class WatchdogWorkerImpl {
 
   private boolean checkUpload(FormServiceCursor fsc, UploadSubmissions uploadSubmissions,
       CallingContext cc) throws ODKExternalServiceException {
-    // TODO: remove
-    System.out.println("Checking upload for " + fsc.getExternalServiceType());
+    logger.info("Checking upload for " + fsc.getExternalServiceType() + " fsc: " + fsc.getUri());
     boolean activeTask = false;
     if (!fsc.getUploadCompleted()) {
       Date lastUploadDate = fsc.getLastUploadCursorDate();
@@ -114,58 +190,83 @@ public class WatchdogWorkerImpl {
     return activeTask;
   }
 
+  /**
+   * Determine whether the form has recently-completed submissions that have not
+   * yet been published.  Use a cache of SubmissionMetadata to minimize queries
+   * against the database in the case where there are many publishers for a given
+   * table.
+   * 
+   * @param fsc
+   * @param uploadSubmissions
+   * @param cc
+   * @return
+   * @throws ODKFormNotFoundException
+   * @throws ODKDatastoreException
+   * @throws ODKExternalServiceException
+   * @throws ODKIncompleteSubmissionData
+   */
   private boolean checkStreaming(FormServiceCursor fsc, UploadSubmissions uploadSubmissions,
       CallingContext cc) throws ODKFormNotFoundException, ODKDatastoreException,
       ODKExternalServiceException, ODKIncompleteSubmissionData {
-    // TODO: remove
-    System.out.println("Checking streaming for " + fsc.getExternalServiceType());
-    boolean activeTask = false;
+    logger.info("Checking streaming for " + fsc.getExternalServiceType() + " fsc: " + fsc.getUri());
     // get the last submission sent to the external service
-    String lastStreamingKey = fsc.getLastStreamingKey();
     IForm form = FormFactory.retrieveFormByFormId(fsc.getFormId(), cc);
     if (!form.hasValidFormDefinition()) {
-      System.out.println("Form definition was ill-formed while checking for streaming for "
-          + fsc.getExternalServiceType());
+      logger.warn("Form definition was ill-formed while checking for streaming for "
+          + fsc.getExternalServiceType() + " fsc: " + fsc.getUri());
       return false;
     }
-    // query for last submission submitted for the form
-    QueryByDateRange query = new QueryByDateRange(form, cc);
-    List<Submission> submissions = query.getResultSubmissions(cc);
-    String lastSubmissionKey = null;
-    if (submissions != null && submissions.size() >= 1) {
-      Submission lastSubmission = submissions.get(0);
-      // NOTE: using markedAsCompleteDate because the submission date
-      // marks the original initiation of the upload of the submission
-      // to the server and is preserved as briefcase entries are copied
-      // across servers. We only want to stream completed uploads...
-      if (lastSubmission.getMarkedAsCompleteDate().compareTo(fsc.getEstablishmentDateTime()) >= 0) {
-        lastSubmissionKey = lastSubmission.getKey().getKey();
-        if (lastStreamingKey == null || !lastStreamingKey.equals(lastSubmissionKey)) {
-          // there is work to do
-          activeTask = true;
-          uploadSubmissions.createFormUploadTask(fsc, cc);
+    
+    SubmissionMetadata metadata = getLastSubmissionMetadata(form, cc);
+    
+    // determine whether we should make this publisher active
+    boolean makeActive = false;
+    if ( metadata != null && 
+         metadata.markedAsCompleteDate.compareTo(fsc.getEstablishmentDateTime()) >= 0 ) {
+      // submissions have occurred after the establishment time
+      Date limit = fsc.getLastStreamingCursorDate();
+      if ( limit == null ) {
+        // streaming hasn't started yet...
+        makeActive = true;
+      } else {
+        // streaming has started
+        int cmpDates = metadata.markedAsCompleteDate.compareTo(limit);
+        if ( cmpDates > 0 ) {
+          // the latest submission is more recent than that last streamed
+          makeActive = true;
+        } else if ( cmpDates == 0 ) {
+          // the latest submission is at the same time as that last streamed
+          if ( fsc.getLastStreamingKey() == null ||
+               !metadata.uri.equals(fsc.getLastStreamingKey()) ) {
+            // the latest submission is not the one last streamed.
+            makeActive = true;
+          }
         }
       }
     }
-    return activeTask;
+    
+    if ( makeActive ) {
+      // there is work to do
+      uploadSubmissions.createFormUploadTask(fsc, cc);
+    }
+    return makeActive;
   }
 
   private boolean checkPersistentResults(CsvGenerator csvGenerator, KmlGenerator kmlGenerator,
       CallingContext cc) throws ODKDatastoreException, ODKFormNotFoundException {
     try {
-      // TODO: remove
-      System.out.println("Checking persistent results");
+      logger.info("Checking all persistent results");
       boolean activeTasks = false;
       List<PersistentResults> persistentResults = PersistentResults.getStalledRequests(cc);
       for (PersistentResults persistentResult : persistentResults) {
-        // TODO: remove
-        System.out.println("Found stalled request: " + persistentResult.getSubmissionKey());
+        logger.info("Found stalled request: " + persistentResult.getSubmissionKey());
         long attemptCount = persistentResult.getAttemptCount();
         persistentResult.setAttemptCount(++attemptCount);
         persistentResult.persist(cc);
         IForm form = FormFactory.retrieveFormByFormId(persistentResult.getFormId(), cc);
         if (!form.hasValidFormDefinition()) {
-          System.out.println("Form of stalled task is ill-formed");
+          logger.warn("Form of stalled task is ill-formed: " +
+              persistentResult.getSubmissionKey() + " formId: " + persistentResult.getFormId());
           continue; // skip this and move on...
         }
         activeTasks = true;
@@ -180,7 +281,7 @@ public class WatchdogWorkerImpl {
       }
       return activeTasks;
     } finally {
-      System.out.println("Done checking persistent results");
+      logger.info("Done checking persistent results");
     }
   }
 
@@ -188,20 +289,18 @@ public class WatchdogWorkerImpl {
       PurgeOlderSubmissions purgeSubmissions, CallingContext cc) throws ODKDatastoreException,
       ODKFormNotFoundException {
     try {
-      // TODO: remove
-      System.out.println("Checking miscellaneous tasks");
+      logger.info("Checking miscellaneous tasks");
       boolean activeTasks = false;
       List<MiscTasks> miscTasks = MiscTasks.getStalledRequests(cc);
       for (MiscTasks aTask : miscTasks) {
-        // TODO: remove
-        System.out.println("Found stalled request: " + aTask.getSubmissionKey());
+        logger.info("Found stalled request: " + aTask.getSubmissionKey());
         long attemptCount = aTask.getAttemptCount();
         aTask.setAttemptCount(++attemptCount);
         aTask.persist(cc);
         IForm form = FormFactory.retrieveFormByFormId(aTask.getFormId(), cc);
         if (!form.hasValidFormDefinition()) {
-          System.out.println("Form definition is ill-formed while checking stalled request: "
-              + aTask.getSubmissionKey());
+          logger.warn("Form definition is ill-formed while checking stalled request: "
+              + aTask.getSubmissionKey() + " formId: " + aTask.getFormId());
         }
         switch (aTask.getTaskType()) {
         case WORKSHEET_CREATE:
@@ -225,7 +324,7 @@ public class WatchdogWorkerImpl {
       }
       return activeTasks;
     } finally {
-      System.out.println("Done checking miscellaneous tasks");
+      logger.info("Done checking miscellaneous tasks");
     }
   }
 

@@ -60,6 +60,8 @@ import org.opendatakit.common.web.CallingContext;
  */
 public class FormDeleteWorkerImpl {
 
+  public static final int FORM_DELETE_RECORD_QUERY_LIMIT = 50;
+
   private final IForm form;
   private final SubmissionKey miscTasksKey;
   private final CallingContext cc;
@@ -76,7 +78,9 @@ public class FormDeleteWorkerImpl {
 
   public final void deleteForm() throws ODKDatastoreException, ODKExternalServiceDependencyException {
 
-    logger.info("deletion task: " + miscTasksKey.toString());
+    
+    logger.info("Beginning Form Deletion: " + miscTasksKey.toString() +
+                  " form " + form.getFormId());
 
     MiscTasks t;
     try {
@@ -375,7 +379,7 @@ public class FormDeleteWorkerImpl {
         surveyQuery.addSort(relation.lastUpdateDate, Query.Direction.DESCENDING);
         surveyQuery.addSort(relation.primaryKey, Query.Direction.DESCENDING);
 
-        QueryResult result = surveyQuery.executeQuery(startCursor, ServletConsts.FORM_DELETE_RECORD_QUERY_LIMIT);
+        QueryResult result = surveyQuery.executeQuery(startCursor, FORM_DELETE_RECORD_QUERY_LIMIT);
         startCursor = result.getResumeCursor();
         
         if (result.getResultList().size() == 0)

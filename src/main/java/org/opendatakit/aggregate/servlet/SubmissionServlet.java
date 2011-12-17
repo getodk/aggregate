@@ -38,6 +38,7 @@ import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.ParserConsts;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.common.FormElementNamespace;
+import org.opendatakit.aggregate.constants.common.OperationalStatus;
 import org.opendatakit.aggregate.constants.common.UIConsts;
 import org.opendatakit.aggregate.exception.ODKConversionException;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
@@ -54,6 +55,8 @@ import org.opendatakit.aggregate.parser.MultiPartFormData;
 import org.opendatakit.aggregate.parser.SubmissionParser;
 import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.aggregate.task.UploadSubmissions;
+import org.opendatakit.aggregate.util.BackendActionsTable;
+import org.opendatakit.common.persistence.PersistConsts;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
 import org.opendatakit.common.web.CallingContext;
@@ -231,20 +234,34 @@ public class SubmissionServlet extends ServletUtilBase {
 
       IForm form = submissionParser.getForm();
 
-      // send information to remote servers that need to be notified
-      List<ExternalService> tmp = FormServiceCursor.getExternalServicesForForm(form, cc);
-      UploadSubmissions uploadTask = (UploadSubmissions) cc.getBean(BeanDefs.UPLOAD_TASK_BEAN);
-
-      // publication failures should not fail the submission...
-      try {
-        CallingContext ccDaemon = ContextFactory.getCallingContext(this, req);
-        ccDaemon.setAsDaemon(true);
-        for (ExternalService rs : tmp) {
-          uploadTask.createFormUploadTask(rs.getFormServiceCursor(), ccDaemon);
+      // Only trigger uploads if this submission was not already
+      // marked as complete before this interaction and if it is
+      // now complete. AND...
+      // Issue a publish request only if we haven't issued one recently.
+      // use BackendActionsTable to mediate that decision.
+      // This test ONLY OCCURS during submissions, not during Watchdog
+      // firings, so we don't have to worry about bugs here affecting Watchdog.
+      if (!submissionParser.wasPreexistingComplete() &&
+          submissionParser.getSubmission().isComplete() &&
+          BackendActionsTable.triggerPublisher(form.getUri(), cc) ) {
+        // send information to remote servers that need to be notified
+        List<ExternalService> tmp = FormServiceCursor.getExternalServicesForForm(form, cc);
+        UploadSubmissions uploadTask = (UploadSubmissions) cc.getBean(BeanDefs.UPLOAD_TASK_BEAN);
+  
+        // publication failures should not fail the submission...
+        try {
+          CallingContext ccDaemon = ContextFactory.getCallingContext(this, req);
+          ccDaemon.setAsDaemon(true);
+          for (ExternalService rs : tmp) {
+            // only create upload tasks for active publishers
+            if ( rs.getFormServiceCursor().getOperationalStatus() == OperationalStatus.ACTIVE ) {
+              uploadTask.createFormUploadTask(rs.getFormServiceCursor(), ccDaemon);
+            }
+          }
+        } catch (ODKExternalServiceException e) {
+          logger.info("Publishing enqueue failure (this is recoverable) - " + e.getMessage());
+          e.printStackTrace();
         }
-      } catch (ODKExternalServiceException e) {
-        logger.info("Publishing enqueue failure (this is recoverable) - " + e.getMessage());
-        e.printStackTrace();
       }
 
       // form full url including scheme...

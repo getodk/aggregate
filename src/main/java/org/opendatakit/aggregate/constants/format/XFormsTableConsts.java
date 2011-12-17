@@ -31,6 +31,7 @@ public final class XFormsTableConsts {
   public static final String FORM_ID_TAG = "formID";
   public static final String FORM_NAME_TAG = "name";
   public static final String MAJOR_MINOR_VERSION_TAG = "majorMinorVersion";
+  public static final String VERSION_TAG = "version";
   public static final String DESCRIPTION_TEXT_TAG = "descriptionText";
   public static final String DESCRIPTION_URL_TAG = "descriptionUrl";
   public static final String DOWNLOAD_URL_TAG = "downloadUrl";

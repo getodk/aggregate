@@ -55,7 +55,7 @@ public class BlobRelationSetTest {
 		MyBlobRelationSet rel = new MyBlobRelationSet(cc);
 		
 		BlobEntitySet instance = rel.newBlobEntitySet(cc);
-		assertEquals( 0, instance.getAttachmentCount());
+		assertEquals( 0, instance.getAttachmentCount(cc));
 		
 		String s = "this is a string";
 		instance.addBlob(s.getBytes(), "text/plain", null, cc);
@@ -63,19 +63,19 @@ public class BlobRelationSetTest {
 		instance.addBlob(t.getBytes(), "text/xml", "different", cc);
 		instance.persist(cc);
 		BlobEntitySet alt = rel.getBlobEntitySet(instance.getUri(), cc);
-		assertEquals(2, alt.getAttachmentCount());
-		String name = alt.getUnrootedFilename(1);
+		assertEquals(2, alt.getAttachmentCount(cc));
+		String name = alt.getUnrootedFilename(1, cc);
 		String otherType = null;
 		if ( name == null ) {
-			assertEquals("text/plain", alt.getContentType(1));
-			assertEquals(s.getBytes().length, alt.getContentLength(1).intValue());
+			assertEquals("text/plain", alt.getContentType(1, cc));
+			assertEquals(s.getBytes().length, alt.getContentLength(1, cc).intValue());
 			otherType = "text/xml";
 		} else {
-			assertEquals("text/xml", alt.getContentType(1));
-			assertEquals(t.getBytes().length, alt.getContentLength(1).intValue());
+			assertEquals("text/xml", alt.getContentType(1, cc));
+			assertEquals(t.getBytes().length, alt.getContentLength(1, cc).intValue());
 			otherType = "text/plain";
 		}
-		assertEquals(otherType, alt.getContentType(2));
+		assertEquals(otherType, alt.getContentType(2, cc));
 		
 		rel.dropBlobEntitySet(cc);
 	}

@@ -15,13 +15,8 @@
  */
 package org.opendatakit.aggregate.task.gae;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-
-import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.common.web.constants.BasicConsts;
-import org.opendatakit.common.web.constants.HtmlConsts;
 
 import com.google.appengine.api.backends.BackendService;
 import com.google.appengine.api.backends.BackendServiceFactory;
@@ -30,39 +25,41 @@ import com.google.appengine.api.taskqueue.QueueFactory;
 import com.google.appengine.api.taskqueue.TaskOptions;
 
 /**
- * Builder for the TaskOptions structure.  Also enqueues the created
- * task onto the specified task queue.
+ * Builder for the TaskOptions structure. Also enqueues the created task onto
+ * the specified task queue.
  * 
  * @author mitchellsundt@gmail.com
- *
+ * 
  */
 public class TaskOptionsBuilder {
 
   private final TaskOptions task;
-  
+
   TaskOptionsBuilder(String addr) {
     task = TaskOptions.Builder.withUrl(BasicConsts.FORWARDSLASH + addr);
-    BackendService backendsApi = BackendServiceFactory.getBackendService();
-    String hostname = backendsApi.getBackendAddress(ServletConsts.BACKEND_GAE_SERVICE);
-    task.header(ServletConsts.HOST, hostname);
-    
     task.method(TaskOptions.Method.GET);
   }
-  
+
   public void countdownMillis(long countdownMillis) {
     task.countdownMillis(countdownMillis);
   }
-  
+
   public void param(String key, String value) {
     task.param(key, value);
   }
-  
+
   public void enqueue() {
+    // these tasks run on the background thread...
+    BackendService backendsApi = BackendServiceFactory.getBackendService();
+    String hostname = backendsApi.getBackendAddress(ServletConsts.BACKEND_GAE_SERVICE);
+    task.header(ServletConsts.HOST, hostname);
+
     Queue queue = QueueFactory.getDefaultQueue();
     queue.add(task);
   }
-  
+
   public void enqueue(String queueName) {
+    // the named queue runs on the foreground thread...
     Queue queue = QueueFactory.getQueue(queueName);
     queue.add(task);
   }

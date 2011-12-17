@@ -20,6 +20,8 @@ import java.io.PrintWriter;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.client.filter.FilterGroup;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.common.ExportStatus;
@@ -63,6 +65,10 @@ public class CsvWorkerImpl {
   }
 
   public void generateCsv() {
+    Log logger = LogFactory.getLog(CsvWorkerImpl.class);
+    logger.info("Beginning CSV generation: " + persistentResultsKey.toString() +
+                " form " + form.getFormId());
+
     try {
       ByteArrayOutputStream stream = new ByteArrayOutputStream();
       PrintWriter pw = new PrintWriter(stream);
