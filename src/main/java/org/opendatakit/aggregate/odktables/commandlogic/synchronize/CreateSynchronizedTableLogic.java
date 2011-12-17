@@ -32,93 +32,87 @@ import org.opendatakit.common.web.CallingContext;
  * 
  */
 public class CreateSynchronizedTableLogic extends
-        CommandLogic<CreateSynchronizedTable>
-{
+	CommandLogic<CreateSynchronizedTable> {
 
     private final CreateSynchronizedTable createSynchronizedTable;
 
     public CreateSynchronizedTableLogic(
-            CreateSynchronizedTable createSynchronizedTable)
-    {
-        this.createSynchronizedTable = createSynchronizedTable;
+	    CreateSynchronizedTable createSynchronizedTable) {
+	this.createSynchronizedTable = createSynchronizedTable;
     }
 
     @Override
     public CreateSynchronizedTableResult execute(CallingContext cc)
-            throws AggregateInternalErrorException
-    {
-        Modification clientModification;
-        List<TypedEntity> entitiesToSave = new ArrayList<TypedEntity>();
-        try
-        {
-            // get relation instances
-            Users users = Users.getInstance(cc);
-            UserTableMappings mappings = UserTableMappings.getInstance(cc);
+	    throws AggregateInternalErrorException {
+	Modification clientModification;
+	List<TypedEntity> entitiesToSave = new ArrayList<TypedEntity>();
+	try {
+	    // get relation instances
+	    Users users = Users.getInstance(cc);
+	    UserTableMappings mappings = UserTableMappings.getInstance(cc);
 
-            // get request data
-            String tableID = createSynchronizedTable.getTableID();
-            String requestingUserID = createSynchronizedTable
-                    .getRequestingUserID();
+	    // get request data
+	    String tableID = createSynchronizedTable.getTableID();
+	    String requestingUserID = createSynchronizedTable
+		    .getRequestingUserID();
 
-            // retrieve request user
-            InternalUser requestingUser = users
-                    .query("CreateSynchronizedTableLogic.execute")
-                    .equal(Users.USER_ID, requestingUserID).get();
-            String aggregateUserIdentifier = requestingUser
-                    .getAggregateIdentifier();
+	    // retrieve request user
+	    InternalUser requestingUser = users
+		    .query("CreateSynchronizedTableLogic.execute")
+		    .equal(Users.USER_ID, requestingUserID).get();
+	    String aggregateUserIdentifier = requestingUser
+		    .getAggregateIdentifier();
 
-            // Check if user already has a mapping using the tableID
-            // If table exists, return failure
-            if (mappings
-                    .query("CreateSynchronizedTableLogic.execute")
-                    .equal(UserTableMappings.AGGREGATE_USER_IDENTIFIER,
-                            aggregateUserIdentifier)
-                    .equal(UserTableMappings.TABLE_ID, tableID).exists())
-            {
-                return CreateSynchronizedTableResult.failure(tableID,
-                        FailureReason.TABLE_ALREADY_EXISTS);
-            }
-            // Create the table
+	    // Check if user already has a mapping using the tableID
+	    // If table exists, return failure
+	    if (mappings
+		    .query("CreateSynchronizedTableLogic.execute")
+		    .equal(UserTableMappings.AGGREGATE_USER_IDENTIFIER,
+			    aggregateUserIdentifier)
+		    .equal(UserTableMappings.TABLE_ID, tableID).exists()) {
+		return CreateSynchronizedTableResult.failure(tableID,
+			FailureReason.TABLE_ALREADY_EXISTS);
+	    }
+	    // Create the table
 
-            // create the table entry
-            InternalTableEntry entry = new InternalTableEntry(
-                    aggregateUserIdentifier,
-                    createSynchronizedTable.getTableName(), true, cc);
-            entitiesToSave.add(entry);
-            // create the columns
-            for (org.opendatakit.aggregate.odktables.client.entity.Column clientColumn : createSynchronizedTable
-                    .getColumns())
-            {
-                InternalColumn column = new InternalColumn(
-                        entry.getAggregateIdentifier(), clientColumn.getName(),
-                        clientColumn.getType(), clientColumn.isNullable(), cc);
-                entitiesToSave.add(column);
-            }
-            // create the mapping from aggregateTableIdentifier to user's tableID
-            InternalUserTableMapping mapping = new InternalUserTableMapping(
-                    aggregateUserIdentifier, entry.getAggregateIdentifier(),
-                    tableID, cc);
-            entitiesToSave.add(mapping);
+	    // create the table entry
+	    InternalTableEntry entry = new InternalTableEntry(
+		    aggregateUserIdentifier,
+		    createSynchronizedTable.getTableName(), true, cc);
+	    entitiesToSave.add(entry);
+	    // create the columns
+	    for (org.opendatakit.aggregate.odktables.client.entity.Column clientColumn : createSynchronizedTable
+		    .getColumns()) {
+		InternalColumn column = new InternalColumn(
+			entry.getAggregateIdentifier(), clientColumn.getName(),
+			clientColumn.getType(), clientColumn.isNullable(), cc);
+		entitiesToSave.add(column);
+	    }
+	    // create the mapping from aggregateTableIdentifier to user's
+	    // tableID
+	    InternalUserTableMapping mapping = new InternalUserTableMapping(
+		    aggregateUserIdentifier, entry.getAggregateIdentifier(),
+		    tableID, cc);
+	    entitiesToSave.add(mapping);
 
-            // make sure the user has full permissions on their own table
-            InternalPermission perm = new InternalPermission(
-                    entry.getAggregateIdentifier(), aggregateUserIdentifier,
-                    true, true, true, cc);
-            entitiesToSave.add(perm);
-            // create initial empty modification
-            clientModification = new Modification(0,
-                    Collections.<SynchronizedRow> emptyList());
+	    // make sure the user has full permissions on their own table
+	    InternalPermission perm = new InternalPermission(
+		    entry.getAggregateIdentifier(), aggregateUserIdentifier,
+		    true, true, true, cc);
+	    entitiesToSave.add(perm);
+	    // create initial empty modification
+	    clientModification = new Modification(0,
+		    Collections.<SynchronizedRow> emptyList());
 
-        } catch (ODKDatastoreException e)
-        {
-            throw new AggregateInternalErrorException(e.getMessage());
-        }
+	} catch (ODKDatastoreException e) {
+	    throw new AggregateInternalErrorException(e.getMessage());
+	}
 
-        boolean success = CommandLogicFunctions.saveEntities(entitiesToSave);
-        if (!success)
-            throw new SnafuException("Could not save entities: "
-                    + entitiesToSave);
+	boolean success = CommandLogicFunctions.saveEntities(entitiesToSave);
+	if (!success)
+	    throw new SnafuException("Could not save entities: "
+		    + entitiesToSave);
 
-        return CreateSynchronizedTableResult.success(clientModification);
+	return CreateSynchronizedTableResult.success(clientModification);
     }
 }

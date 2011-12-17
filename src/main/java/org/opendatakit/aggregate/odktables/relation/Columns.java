@@ -21,8 +21,7 @@ import org.opendatakit.common.web.CallingContext;
  * 
  * @author the.dylan.price@gmail.com
  */
-public class Columns extends TypedEntityRelation<InternalColumn>
-{
+public class Columns extends TypedEntityRelation<InternalColumn> {
     // Field names
     /**
      * The name of the aggregateTableIdentifier field.
@@ -50,36 +49,36 @@ public class Columns extends TypedEntityRelation<InternalColumn>
      */
     private static final String RELATION_NAME = "COLUMNS";
 
-    // The following defines the actual attributes that will be in the datastore:
+    // The following defines the actual attributes that will be in the
+    // datastore:
     /**
      * The aggregateTableIdentifier field.
      */
     private static final Attribute aggregateTableIdentifier = new Attribute(
-            AGGREGATE_TABLE_IDENTIFIER, AttributeType.STRING, false);
+	    AGGREGATE_TABLE_IDENTIFIER, AttributeType.STRING, false);
     /**
      * The columnName field.
      */
     private static final Attribute columnName = new Attribute(COLUMN_NAME,
-            AttributeType.STRING, false);
+	    AttributeType.STRING, false);
     /**
      * The columnType field.
      */
     private static final Attribute columnType = new Attribute(COLUMN_TYPE,
-            AttributeType.STRING, false);
+	    AttributeType.STRING, false);
     /**
      * The nullable field.
      */
     private static final Attribute nullable = new Attribute(NULLABLE,
-            AttributeType.BOOLEAN, false);
+	    AttributeType.BOOLEAN, false);
 
     private static final List<Attribute> attributes;
-    static
-    {
-        attributes = new ArrayList<Attribute>();
-        attributes.add(aggregateTableIdentifier);
-        attributes.add(columnName);
-        attributes.add(columnType);
-        attributes.add(nullable);
+    static {
+	attributes = new ArrayList<Attribute>();
+	attributes.add(aggregateTableIdentifier);
+	attributes.add(columnName);
+	attributes.add(columnType);
+	attributes.add(nullable);
     }
     /**
      * The singleton instance of the Columns relation.
@@ -97,16 +96,14 @@ public class Columns extends TypedEntityRelation<InternalColumn>
      *             if there was a problem during communication with the
      *             datastore
      */
-    private Columns(CallingContext cc) throws ODKDatastoreException
-    {
-        super(Table.NAMESPACE, RELATION_NAME, attributes, cc);
+    private Columns(CallingContext cc) throws ODKDatastoreException {
+	super(Table.NAMESPACE, RELATION_NAME, attributes, cc);
     }
 
     @Override
     public InternalColumn initialize(Entity entity)
-            throws ODKDatastoreException
-    {
-        return InternalColumn.fromEntity(entity);
+	    throws ODKDatastoreException {
+	return InternalColumn.fromEntity(entity);
     }
 
     /**
@@ -122,12 +119,10 @@ public class Columns extends TypedEntityRelation<InternalColumn>
      *             if there is a problem communicating with the datastore
      */
     public static Columns getInstance(CallingContext cc)
-            throws ODKDatastoreException
-    {
-        if (instance == null || instance.getCC() != cc)
-        {
-            instance = new Columns(cc);
-        }
-        return instance;
+	    throws ODKDatastoreException {
+	if (instance == null || instance.getCC() != cc) {
+	    instance = new Columns(cc);
+	}
+	return instance;
     }
 }

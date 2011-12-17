@@ -20,8 +20,7 @@ import org.opendatakit.common.web.CallingContext;
  * 
  * @author the.dylan.price@gmail.com
  */
-public class Users extends TypedEntityRelation<InternalUser>
-{
+public class Users extends TypedEntityRelation<InternalUser> {
     // Field names
     /**
      * The name of the userID field.
@@ -39,24 +38,24 @@ public class Users extends TypedEntityRelation<InternalUser>
      */
     private static final String RELATION_NAME = "USERS";
 
-    // The following defines the actual attributes that will be in the datastore:
+    // The following defines the actual attributes that will be in the
+    // datastore:
     /**
      * The field for the user id.
      */
     private static final Attribute userID = new Attribute(USER_ID,
-            AttributeType.STRING, false);
+	    AttributeType.STRING, false);
     /**
      * The field for the user name.
      */
     private static final Attribute userName = new Attribute(USER_NAME,
-            AttributeType.STRING, false);
+	    AttributeType.STRING, false);
 
     private static final List<Attribute> attributes;
-    static
-    {
-        attributes = new ArrayList<Attribute>();
-        attributes.add(userID);
-        attributes.add(userName);
+    static {
+	attributes = new ArrayList<Attribute>();
+	attributes.add(userID);
+	attributes.add(userName);
     }
 
     /**
@@ -75,24 +74,20 @@ public class Users extends TypedEntityRelation<InternalUser>
      *             if there was a problem during communication with the
      *             datastore
      */
-    private Users(CallingContext cc) throws ODKDatastoreException
-    {
-        super(Table.NAMESPACE, RELATION_NAME, attributes, cc);
+    private Users(CallingContext cc) throws ODKDatastoreException {
+	super(Table.NAMESPACE, RELATION_NAME, attributes, cc);
     }
 
-    public InternalUser initialize(Entity entity) throws ODKDatastoreException
-    {
-        return InternalUser.fromEntity(entity, getCC());
+    public InternalUser initialize(Entity entity) throws ODKDatastoreException {
+	return InternalUser.fromEntity(entity, getCC());
     }
 
-    public InternalUser getByID(String userID) throws ODKDatastoreException
-    {
-        return query("[odktables]Users.getByID").equal(USER_ID, userID).get();
+    public InternalUser getByID(String userID) throws ODKDatastoreException {
+	return query("[odktables]Users.getByID").equal(USER_ID, userID).get();
     }
 
-    public String getAggregateIdentifier()
-    {
-        return RELATION_NAME;
+    public String getAggregateIdentifier() {
+	return RELATION_NAME;
     }
 
     /**
@@ -108,14 +103,12 @@ public class Users extends TypedEntityRelation<InternalUser>
      *             if there is a problem communicating with the datastore
      */
     public static Users getInstance(CallingContext cc)
-            throws ODKDatastoreException
-    {
-        if (instance == null || instance.getCC() != cc)
-        {
-            instance = new Users(cc);
-        }
+	    throws ODKDatastoreException {
+	if (instance == null || instance.getCC() != cc) {
+	    instance = new Users(cc);
+	}
 
-        return instance;
+	return instance;
     }
 
 }

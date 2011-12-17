@@ -1,0 +1,9 @@
+# Set up
+createUser user1
+
+# Test that we can create column properties
+createSynchronizedTable user1 people
+
+# Clean up
+deleteSynchronizedTable user1 people
+deleteUser user1

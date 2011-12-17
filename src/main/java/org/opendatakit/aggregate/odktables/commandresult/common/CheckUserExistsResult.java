@@ -9,41 +9,38 @@ import org.opendatakit.aggregate.odktables.commandresult.CommandResult;
  * 
  * @author the.dylan.price@gmail.com
  */
-public class CheckUserExistsResult extends CommandResult<CheckUserExists>
-{
+public class CheckUserExistsResult extends CommandResult<CheckUserExists> {
     private final boolean userExists;
 
-    private CheckUserExistsResult()
-    {
-        super(true, null);
-        this.userExists = false;
+    private CheckUserExistsResult() {
+	super(true, null);
+	this.userExists = false;
     }
 
     /**
      * The success constructor. See {@link #success} for param info.
      */
-    private CheckUserExistsResult(boolean userExists)
-    {
-        super(true, null);
-        this.userExists = userExists;
+    private CheckUserExistsResult(boolean userExists) {
+	super(true, null);
+	this.userExists = userExists;
     }
 
     /**
      * Retrieve the results from the CheckUserExists command.
      */
-    public boolean getUserExists()
-    {
-        return userExists;
+    public boolean getUserExists() {
+	return userExists;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.lang.Object#toString()
      */
     @Override
-    public String toString()
-    {
-        return String.format("CheckUserExistsResult [userExists=%s]",
-                userExists);
+    public String toString() {
+	return String.format("CheckUserExistsResult [userExists=%s]",
+		userExists);
     }
 
     /**
@@ -51,8 +48,7 @@ public class CheckUserExistsResult extends CommandResult<CheckUserExists>
      *         completion of a CheckUserExists command.
      * 
      */
-    public static CheckUserExistsResult success(boolean userExists)
-    {
-        return new CheckUserExistsResult(userExists);
+    public static CheckUserExistsResult success(boolean userExists) {
+	return new CheckUserExistsResult(userExists);
     }
 }
