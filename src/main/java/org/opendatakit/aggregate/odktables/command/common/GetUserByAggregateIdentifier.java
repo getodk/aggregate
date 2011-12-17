@@ -8,8 +8,7 @@ import org.opendatakit.common.utils.Check;
  * 
  * @author the.dylan.price@gmail.com
  */
-public class GetUserByAggregateIdentifier implements Command
-{
+public class GetUserByAggregateIdentifier implements Command {
     private static final String path = "/common/getUserByAggregateIdentifier";
 
     private final String requestingUserID;
@@ -19,10 +18,9 @@ public class GetUserByAggregateIdentifier implements Command
      * For serialization by Gson
      */
     @SuppressWarnings("unused")
-    private GetUserByAggregateIdentifier()
-    {
-        this.requestingUserID = null;
-        this.aggregateUserIdentifier = null;
+    private GetUserByAggregateIdentifier() {
+	this.requestingUserID = null;
+	this.aggregateUserIdentifier = null;
 
     }
 
@@ -30,44 +28,39 @@ public class GetUserByAggregateIdentifier implements Command
      * Constructs a new GetUserByAggregate Identifier.
      */
     public GetUserByAggregateIdentifier(String requestingUserID,
-            String aggregateUserIdentifier)
-    {
+	    String aggregateUserIdentifier) {
 
-        Check.notNullOrEmpty(requestingUserID, "requestingUserID");
-        Check.notNullOrEmpty(aggregateUserIdentifier, "aggregateUserIdentifier");
+	Check.notNullOrEmpty(requestingUserID, "requestingUserID");
+	Check.notNullOrEmpty(aggregateUserIdentifier, "aggregateUserIdentifier");
 
-        this.requestingUserID = requestingUserID;
-        this.aggregateUserIdentifier = aggregateUserIdentifier;
+	this.requestingUserID = requestingUserID;
+	this.aggregateUserIdentifier = aggregateUserIdentifier;
     }
 
     /**
      * @return the requestingUserID
      */
-    public String getRequestingUserID()
-    {
-        return this.requestingUserID;
+    public String getRequestingUserID() {
+	return this.requestingUserID;
     }
 
     /**
      * @return the aggregateUserIdentifier
      */
-    public String getAggregateUserIdentifier()
-    {
-        return this.aggregateUserIdentifier;
+    public String getAggregateUserIdentifier() {
+	return this.aggregateUserIdentifier;
     }
 
     @Override
-    public String toString()
-    {
-        return String.format("GetUserByAggregate Identifier: "
-                + "requestingUserID=%s " + "aggregateUserIdentifier=%s " + "",
-                requestingUserID, aggregateUserIdentifier);
+    public String toString() {
+	return String.format("GetUserByAggregate Identifier: "
+		+ "requestingUserID=%s " + "aggregateUserIdentifier=%s " + "",
+		requestingUserID, aggregateUserIdentifier);
     }
 
     @Override
-    public String getMethodPath()
-    {
-        return methodPath();
+    public String getMethodPath() {
+	return methodPath();
     }
 
     /**
@@ -76,8 +69,7 @@ public class GetUserByAggregateIdentifier implements Command
      *         http://aggregate.opendatakit.org/odktables/createTable, then this
      *         method would return '/odktables/createTable'.
      */
-    public static String methodPath()
-    {
-        return path;
+    public static String methodPath() {
+	return path;
     }
 }

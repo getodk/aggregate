@@ -8,8 +8,7 @@ import org.opendatakit.common.utils.Check;
  * 
  * @author the.dylan.price@gmail.com
  */
-public class CheckUserExists implements Command
-{
+public class CheckUserExists implements Command {
     private static final String path = "/common/checkUserExists";
 
     private final String userID;
@@ -18,39 +17,34 @@ public class CheckUserExists implements Command
      * For serialization by Gson
      */
     @SuppressWarnings("unused")
-    private CheckUserExists()
-    {
-        this.userID = null;
+    private CheckUserExists() {
+	this.userID = null;
 
     }
 
     /**
      * Constructs a new CheckUserExists.
      */
-    public CheckUserExists(String userID)
-    {
-        Check.notNullOrEmpty(userID, "userID");
-        this.userID = userID;
+    public CheckUserExists(String userID) {
+	Check.notNullOrEmpty(userID, "userID");
+	this.userID = userID;
     }
 
     /**
      * @return the userID
      */
-    public String getUserID()
-    {
-        return this.userID;
+    public String getUserID() {
+	return this.userID;
     }
 
     @Override
-    public String toString()
-    {
-        return String.format("CheckUserExists: " + "userID=%s ", userID);
+    public String toString() {
+	return String.format("CheckUserExists: " + "userID=%s ", userID);
     }
 
     @Override
-    public String getMethodPath()
-    {
-        return methodPath();
+    public String getMethodPath() {
+	return methodPath();
     }
 
     /**
@@ -59,8 +53,7 @@ public class CheckUserExists implements Command
      *         http://aggregate.opendatakit.org/odktables/createTable, then this
      *         method would return '/odktables/createTable'.
      */
-    public static String methodPath()
-    {
-        return path;
+    public static String methodPath() {
+	return path;
     }
 }

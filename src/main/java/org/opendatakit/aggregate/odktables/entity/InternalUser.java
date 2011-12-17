@@ -21,76 +21,65 @@ import org.opendatakit.common.web.CallingContext;
  * @author the.dylan.price@gmail.com
  * 
  */
-public class InternalUser extends TypedEntity
-{
+public class InternalUser extends TypedEntity {
     private CallingContext cc;
 
     public InternalUser(String userID, String userName, CallingContext cc)
-            throws ODKDatastoreException
-    {
-        super(Users.getInstance(cc).newEntity());
-        this.cc = cc;
-        setID(userID);
-        setName(userName);
+	    throws ODKDatastoreException {
+	super(Users.getInstance(cc).newEntity());
+	this.cc = cc;
+	setID(userID);
+	setName(userName);
     }
 
     public InternalUser(Entity entity, CallingContext cc)
-            throws ODKDatastoreException
-    {
-        super(entity);
-        this.cc = cc;
+	    throws ODKDatastoreException {
+	super(entity);
+	this.cc = cc;
     }
 
-    public String getAggregateIdentifier()
-    {
-        return entity.getAggregateIdentifier();
+    public String getAggregateIdentifier() {
+	return entity.getAggregateIdentifier();
     }
 
-    public String getID()
-    {
-        return entity.getString(Users.USER_ID);
+    public String getID() {
+	return entity.getString(Users.USER_ID);
     }
 
-    public void setID(String value)
-    {
-        entity.set(Users.USER_ID, value);
+    public void setID(String value) {
+	entity.set(Users.USER_ID, value);
     }
 
-    public String getName()
-    {
-        return entity.getString(Users.USER_NAME);
+    public String getName() {
+	return entity.getString(Users.USER_NAME);
     }
 
-    public void setName(String value)
-    {
-        entity.set(Users.USER_NAME, value);
+    public void setName(String value) {
+	entity.set(Users.USER_NAME, value);
     }
 
     public boolean hasPerm(String aggregateTableIdentifier, String permission)
-            throws ODKDatastoreException
-    {
-        boolean hasPerm = Permissions
-                .getInstance(cc)
-                .query("[odktables]InternalUser.hasPerm")
-                .equal(Permissions.AGGREGATE_TABLE_IDENTIFIER,
-                        aggregateTableIdentifier)
-                .equal(Permissions.AGGREGATE_USER_IDENTIFIER,
-                        getAggregateIdentifier()).equal(permission, true)
-                .exists();
-        return hasPerm;
+	    throws ODKDatastoreException {
+	boolean hasPerm = Permissions
+		.getInstance(cc)
+		.query("[odktables]InternalUser.hasPerm")
+		.equal(Permissions.AGGREGATE_TABLE_IDENTIFIER,
+			aggregateTableIdentifier)
+		.equal(Permissions.AGGREGATE_USER_IDENTIFIER,
+			getAggregateIdentifier()).equal(permission, true)
+		.exists();
+	return hasPerm;
     }
 
     @Override
-    public String toString()
-    {
-        return String.format(
-                "InternalUser[aggregateIdentifier=%s, userID=%s, name=%s",
-                getAggregateIdentifier(), getID(), getName());
+    public String toString() {
+	return String.format(
+		"InternalUser[aggregateIdentifier=%s, userID=%s, name=%s",
+		getAggregateIdentifier(), getID(), getName());
     }
 
     public static InternalUser fromEntity(Entity entity, CallingContext cc)
-            throws ODKDatastoreException
-    {
-        return new InternalUser(entity, cc);
+	    throws ODKDatastoreException {
+	return new InternalUser(entity, cc);
     }
 }

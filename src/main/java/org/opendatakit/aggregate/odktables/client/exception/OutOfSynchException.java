@@ -6,16 +6,14 @@ package org.opendatakit.aggregate.odktables.client.exception;
  * 
  * @author the.dylan.price@gmail.com
  */
-public class OutOfSynchException extends ODKTablesClientException
-{
+public class OutOfSynchException extends ODKTablesClientException {
     /**
      * Serial number for serialization.
      */
     private static final long serialVersionUID = -9027773843183177336L;
 
-    public OutOfSynchException()
-    {
-        super("Table out of synch with Aggregate!.");
+    public OutOfSynchException() {
+	super("Table out of synch with Aggregate!.");
 
     }
 }

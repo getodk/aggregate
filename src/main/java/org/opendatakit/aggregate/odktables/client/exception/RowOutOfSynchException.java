@@ -1,7 +1,6 @@
 package org.opendatakit.aggregate.odktables.client.exception;
 
-public class RowOutOfSynchException extends ODKTablesClientException
-{
+public class RowOutOfSynchException extends ODKTablesClientException {
     /**
      * For serialization.
      */
@@ -9,18 +8,16 @@ public class RowOutOfSynchException extends ODKTablesClientException
 
     private final String aggregateRowIdentifier;
 
-    public RowOutOfSynchException(String aggregateRowIdentifier)
-    {
-        super(String.format("Row %s has wrong revisionTag!",
-                aggregateRowIdentifier));
-        this.aggregateRowIdentifier = aggregateRowIdentifier;
+    public RowOutOfSynchException(String aggregateRowIdentifier) {
+	super(String.format("Row %s has wrong revisionTag!",
+		aggregateRowIdentifier));
+	this.aggregateRowIdentifier = aggregateRowIdentifier;
     }
 
     /**
      * @return the aggregateRowIdentifier
      */
-    public String getAggregateRowIdentifier()
-    {
-        return aggregateRowIdentifier;
+    public String getAggregateRowIdentifier() {
+	return aggregateRowIdentifier;
     }
 }

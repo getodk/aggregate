@@ -1,7 +1,6 @@
 package org.opendatakit.aggregate.odktables.client.exception;
 
-public class RowAlreadyExistsException extends ODKTablesClientException
-{
+public class RowAlreadyExistsException extends ODKTablesClientException {
     /**
      * Serial number for serialization.
      */
@@ -10,24 +9,21 @@ public class RowAlreadyExistsException extends ODKTablesClientException
     private String tableID;
     private String rowID;
 
-    public RowAlreadyExistsException(String tableID, String rowID)
-    {
-        super(String.format("Row with rowID '%s' already exists!", rowID));
+    public RowAlreadyExistsException(String tableID, String rowID) {
+	super(String.format("Row with rowID '%s' already exists!", rowID));
 
-        this.tableID = tableID;
-        this.rowID = rowID;
+	this.tableID = tableID;
+	this.rowID = rowID;
     }
 
-    public String getTableID()
-    {
-        return this.tableID;
+    public String getTableID() {
+	return this.tableID;
     }
 
     /**
      * @return the rowID of the row that already exists.
      */
-    public String getRowID()
-    {
-        return this.rowID;
+    public String getRowID() {
+	return this.rowID;
     }
 }
