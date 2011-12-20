@@ -38,117 +38,110 @@ import org.opendatakit.common.web.CallingContext;
  * 
  */
 public class DeleteSynchronizedTableLogic extends
-        CommandLogic<DeleteSynchronizedTable>
-{
+	CommandLogic<DeleteSynchronizedTable> {
 
     private final DeleteSynchronizedTable deleteSynchronizedTable;
 
     public DeleteSynchronizedTableLogic(
-            DeleteSynchronizedTable deleteSynchronizedTable)
-    {
-        this.deleteSynchronizedTable = deleteSynchronizedTable;
+	    DeleteSynchronizedTable deleteSynchronizedTable) {
+	this.deleteSynchronizedTable = deleteSynchronizedTable;
     }
 
     @Override
     public DeleteSynchronizedTableResult execute(CallingContext cc)
-            throws AggregateInternalErrorException
-    {
-        Table table;
-        List<TypedEntity> entitiesToDelete = new ArrayList<TypedEntity>();
-        try
-        {
-            // get relation instances
-            Users users = Users.getInstance(cc);
-            UserTableMappings mappings = UserTableMappings.getInstance(cc);
-            TableEntries entries = TableEntries.getInstance(cc);
-            Columns columns = Columns.getInstance(cc);
-            Permissions permissions = Permissions.getInstance(cc);
-            Modifications modifications = Modifications.getInstance(cc);
-            Filters filters = Filters.getInstance(cc);
+	    throws AggregateInternalErrorException {
+	Table table;
+	List<TypedEntity> entitiesToDelete = new ArrayList<TypedEntity>();
+	try {
+	    // get relation instances
+	    Users users = Users.getInstance(cc);
+	    UserTableMappings mappings = UserTableMappings.getInstance(cc);
+	    TableEntries entries = TableEntries.getInstance(cc);
+	    Columns columns = Columns.getInstance(cc);
+	    Permissions permissions = Permissions.getInstance(cc);
+	    Modifications modifications = Modifications.getInstance(cc);
+	    Filters filters = Filters.getInstance(cc);
 
-            // get request data
-            String requestingUserID = deleteSynchronizedTable
-                    .getRequestingUserID();
-            String tableID = deleteSynchronizedTable.getTableID();
+	    // get request data
+	    String requestingUserID = deleteSynchronizedTable
+		    .getRequestingUserID();
+	    String tableID = deleteSynchronizedTable.getTableID();
 
-            // retrieve request user
-            InternalUser requestUser = users
-                    .query("DeleteSynchronizedTableLogic.execute")
-                    .equal(Users.USER_ID, requestingUserID).get();
+	    // retrieve request user
+	    InternalUser requestUser = users
+		    .query("DeleteSynchronizedTableLogic.execute")
+		    .equal(Users.USER_ID, requestingUserID).get();
 
-            // retrieve mapping from user's tableID to aggregateTableIdentifier
-            InternalUserTableMapping mapping;
-            try
-            {
-                mapping = mappings
-                        .query("DeleteSynchronizedTableLogic.execute")
-                        .equal(UserTableMappings.TABLE_ID, tableID)
-                        .equal(UserTableMappings.AGGREGATE_USER_IDENTIFIER,
-                                requestUser.getAggregateIdentifier()).get();
-            } catch (ODKDatastoreException e)
-            {
-                return DeleteSynchronizedTableResult.failure(null,
-                        FailureReason.TABLE_DOES_NOT_EXIST);
-            }
+	    // retrieve mapping from user's tableID to aggregateTableIdentifier
+	    InternalUserTableMapping mapping;
+	    try {
+		mapping = mappings
+			.query("DeleteSynchronizedTableLogic.execute")
+			.equal(UserTableMappings.TABLE_ID, tableID)
+			.equal(UserTableMappings.AGGREGATE_USER_IDENTIFIER,
+				requestUser.getAggregateIdentifier()).get();
+	    } catch (ODKDatastoreException e) {
+		return DeleteSynchronizedTableResult.failure(tableID,
+			FailureReason.TABLE_DOES_NOT_EXIST);
+	    }
 
-            // in order to delete the table the user must have delete permission on the table
-            String aggregateTableIdentifier = mapping
-                    .getAggregateTableIdentifier();
-            if (!requestUser.hasPerm(aggregateTableIdentifier,
-                    Permissions.DELETE))
-            {
-                return DeleteSynchronizedTableResult.failure(
-                        mapping.getTableID(), FailureReason.PERMISSION_DENIED);
-            }
+	    // in order to delete the table the user must have delete permission
+	    // on the table
+	    String aggregateTableIdentifier = mapping
+		    .getAggregateTableIdentifier();
+	    if (!requestUser.hasPerm(aggregateTableIdentifier,
+		    Permissions.DELETE)) {
+		return DeleteSynchronizedTableResult.failure(
+			mapping.getTableID(), FailureReason.PERMISSION_DENIED);
+	    }
 
-            // retrieve all entities that make up a table
-            table = Table.getInstance(aggregateTableIdentifier, cc);
-            List<InternalRow> rows = table.query(
-                    "DeleteSynchronizedTableLogic.execute").execute();
-            List<InternalColumn> cols = columns
-                    .query("DeleteSynchronizedTableLogic.execute")
-                    .equal(Columns.AGGREGATE_TABLE_IDENTIFIER,
-                            aggregateTableIdentifier).execute();
-            List<InternalUserTableMapping> maps = mappings
-                    .query("DeleteSynchronizedTableLogic.execute")
-                    .equal(UserTableMappings.AGGREGATE_TABLE_IDENTIFIER,
-                            aggregateTableIdentifier).execute();
-            List<InternalPermission> perms = permissions
-                    .query("DeleteSynchronizedTableLogic.execute")
-                    .equal(Permissions.AGGREGATE_TABLE_IDENTIFIER,
-                            aggregateTableIdentifier).execute();
-            List<InternalModification> mods = modifications
-                    .query("DeleteSynchronizedTableLogic.execute")
-                    .equal(Modifications.AGGREGATE_TABLE_IDENTIFIER,
-                            aggregateTableIdentifier).execute();
-            InternalTableEntry entry = entries
-                    .getEntity(aggregateTableIdentifier);
-            List<InternalFilter> clientFilters = filters
-                    .query("DeleteSynchronizedTableLogic.execute")
-                    .equal(Filters.AGGREGATE_USER_IDENTIFIER,
-                            requestUser.getAggregateIdentifier())
-                    .equal(Filters.AGGREGATE_TABLE_IDENTIFIER,
-                            aggregateTableIdentifier).execute();
+	    // retrieve all entities that make up a table
+	    table = Table.getInstance(aggregateTableIdentifier, cc);
+	    List<InternalRow> rows = table.query(
+		    "DeleteSynchronizedTableLogic.execute").execute();
+	    List<InternalColumn> cols = columns
+		    .query("DeleteSynchronizedTableLogic.execute")
+		    .equal(Columns.AGGREGATE_TABLE_IDENTIFIER,
+			    aggregateTableIdentifier).execute();
+	    List<InternalUserTableMapping> maps = mappings
+		    .query("DeleteSynchronizedTableLogic.execute")
+		    .equal(UserTableMappings.AGGREGATE_TABLE_IDENTIFIER,
+			    aggregateTableIdentifier).execute();
+	    List<InternalPermission> perms = permissions
+		    .query("DeleteSynchronizedTableLogic.execute")
+		    .equal(Permissions.AGGREGATE_TABLE_IDENTIFIER,
+			    aggregateTableIdentifier).execute();
+	    List<InternalModification> mods = modifications
+		    .query("DeleteSynchronizedTableLogic.execute")
+		    .equal(Modifications.AGGREGATE_TABLE_IDENTIFIER,
+			    aggregateTableIdentifier).execute();
+	    InternalTableEntry entry = entries
+		    .getEntity(aggregateTableIdentifier);
+	    List<InternalFilter> clientFilters = filters
+		    .query("DeleteSynchronizedTableLogic.execute")
+		    .equal(Filters.AGGREGATE_USER_IDENTIFIER,
+			    requestUser.getAggregateIdentifier())
+		    .equal(Filters.AGGREGATE_TABLE_IDENTIFIER,
+			    aggregateTableIdentifier).execute();
 
-            entitiesToDelete.addAll(rows);
-            entitiesToDelete.addAll(cols);
-            entitiesToDelete.addAll(maps);
-            entitiesToDelete.addAll(perms);
-            entitiesToDelete.addAll(mods);
-            entitiesToDelete.add(entry);
-            entitiesToDelete.addAll(clientFilters);
-        } catch (ODKDatastoreException e)
-        {
-            throw new AggregateInternalErrorException(e.getMessage());
-        }
+	    entitiesToDelete.addAll(rows);
+	    entitiesToDelete.addAll(cols);
+	    entitiesToDelete.addAll(maps);
+	    entitiesToDelete.addAll(perms);
+	    entitiesToDelete.addAll(mods);
+	    entitiesToDelete.add(entry);
+	    entitiesToDelete.addAll(clientFilters);
+	} catch (ODKDatastoreException e) {
+	    throw new AggregateInternalErrorException(e.getMessage());
+	}
 
-        // delete all entities
-        boolean success = CommandLogicFunctions
-                .deleteEntities(entitiesToDelete);
-        if (!success)
-            throw new SnafuException("Could not delete entities: "
-                    + entitiesToDelete);
+	// delete all entities
+	boolean success = CommandLogicFunctions
+		.deleteEntities(entitiesToDelete);
+	if (!success)
+	    throw new SnafuException("Could not delete entities: "
+		    + entitiesToDelete);
 
-        return DeleteSynchronizedTableResult.success();
+	return DeleteSynchronizedTableResult.success();
     }
 }

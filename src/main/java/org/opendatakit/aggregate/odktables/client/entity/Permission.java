@@ -26,8 +26,7 @@ package org.opendatakit.aggregate.odktables.client.entity;
  * @author the.dylan.price@gmail.com
  * 
  */
-public class Permission
-{
+public class Permission {
     private String aggregateUserIdentifier;
     private String aggregateTableIdentifier;
     private boolean read;
@@ -38,13 +37,12 @@ public class Permission
      * For Gson serialization.
      */
     @SuppressWarnings("unused")
-    private Permission()
-    {
-        this.aggregateUserIdentifier = null;
-        this.aggregateTableIdentifier = null;
-        this.read = false;
-        this.write = false;
-        this.delete = false;
+    private Permission() {
+	this.aggregateUserIdentifier = null;
+	this.aggregateTableIdentifier = null;
+	this.read = false;
+	this.write = false;
+	this.delete = false;
     }
 
     /**
@@ -62,123 +60,118 @@ public class Permission
      *            true if the user is allowed to delete from or delete the table
      */
     public Permission(String aggregateUserIdentifier,
-            String aggregateTableIdentifier, boolean read, boolean write,
-            boolean delete)
-    {
-        this.aggregateUserIdentifier = aggregateUserIdentifier;
-        this.aggregateTableIdentifier = aggregateTableIdentifier;
-        this.read = read;
-        this.write = write;
-        this.delete = delete;
+	    String aggregateTableIdentifier, boolean read, boolean write,
+	    boolean delete) {
+	this.aggregateUserIdentifier = aggregateUserIdentifier;
+	this.aggregateTableIdentifier = aggregateTableIdentifier;
+	this.read = read;
+	this.write = write;
+	this.delete = delete;
     }
 
     /**
      * @return the aggregateUserIdentifier
      */
-    public String getAggregateUserIdentifier()
-    {
-        return aggregateUserIdentifier;
+    public String getAggregateUserIdentifier() {
+	return aggregateUserIdentifier;
     }
 
     /**
      * @return the aggregateTableIdentifier
      */
-    public String getAggregateTableIdentifier()
-    {
-        return aggregateTableIdentifier;
+    public String getAggregateTableIdentifier() {
+	return aggregateTableIdentifier;
     }
 
     /**
      * @return the read
      */
-    public boolean read()
-    {
-        return read;
+    public boolean read() {
+	return read;
     }
 
     /**
      * @return the write
      */
-    public boolean write()
-    {
-        return write;
+    public boolean write() {
+	return write;
     }
 
     /**
      * @return the delete
      */
-    public boolean delete()
-    {
-        return delete;
+    public boolean delete() {
+	return delete;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.lang.Object#toString()
      */
     @Override
-    public String toString()
-    {
-        return String
-                .format("Permission [aggregateUserIdentifier=%s, aggregateTableIdentifier=%s, read=%s, write=%s, delete=%s]",
-                        aggregateUserIdentifier, aggregateTableIdentifier,
-                        read, write, delete);
+    public String toString() {
+	return String
+		.format("Permission [aggregateUserIdentifier=%s, aggregateTableIdentifier=%s, read=%s, write=%s, delete=%s]",
+			aggregateUserIdentifier, aggregateTableIdentifier,
+			read, write, delete);
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.lang.Object#hashCode()
      */
     @Override
-    public int hashCode()
-    {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + (delete ? 1231 : 1237);
-        result = prime * result + (read ? 1231 : 1237);
-        result = prime
-                * result
-                + ((aggregateTableIdentifier == null) ? 0
-                        : aggregateTableIdentifier.hashCode());
-        result = prime
-                * result
-                + ((aggregateUserIdentifier == null) ? 0
-                        : aggregateUserIdentifier.hashCode());
-        result = prime * result + (write ? 1231 : 1237);
-        return result;
+    public int hashCode() {
+	final int prime = 31;
+	int result = 1;
+	result = prime * result + (delete ? 1231 : 1237);
+	result = prime * result + (read ? 1231 : 1237);
+	result = prime
+		* result
+		+ ((aggregateTableIdentifier == null) ? 0
+			: aggregateTableIdentifier.hashCode());
+	result = prime
+		* result
+		+ ((aggregateUserIdentifier == null) ? 0
+			: aggregateUserIdentifier.hashCode());
+	result = prime * result + (write ? 1231 : 1237);
+	return result;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.lang.Object#equals(java.lang.Object)
      */
     @Override
-    public boolean equals(Object obj)
-    {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (!(obj instanceof Permission))
-            return false;
-        Permission other = (Permission) obj;
-        if (delete != other.delete)
-            return false;
-        if (read != other.read)
-            return false;
-        if (aggregateTableIdentifier == null)
-        {
-            if (other.aggregateTableIdentifier != null)
-                return false;
-        } else if (!aggregateTableIdentifier
-                .equals(other.aggregateTableIdentifier))
-            return false;
-        if (aggregateUserIdentifier == null)
-        {
-            if (other.aggregateUserIdentifier != null)
-                return false;
-        } else if (!aggregateUserIdentifier
-                .equals(other.aggregateUserIdentifier))
-            return false;
-        if (write != other.write)
-            return false;
-        return true;
+    public boolean equals(Object obj) {
+	if (this == obj)
+	    return true;
+	if (obj == null)
+	    return false;
+	if (!(obj instanceof Permission))
+	    return false;
+	Permission other = (Permission) obj;
+	if (delete != other.delete)
+	    return false;
+	if (read != other.read)
+	    return false;
+	if (aggregateTableIdentifier == null) {
+	    if (other.aggregateTableIdentifier != null)
+		return false;
+	} else if (!aggregateTableIdentifier
+		.equals(other.aggregateTableIdentifier))
+	    return false;
+	if (aggregateUserIdentifier == null) {
+	    if (other.aggregateUserIdentifier != null)
+		return false;
+	} else if (!aggregateUserIdentifier
+		.equals(other.aggregateUserIdentifier))
+	    return false;
+	if (write != other.write)
+	    return false;
+	return true;
     }
 }

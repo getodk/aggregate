@@ -1,7 +1,6 @@
 package org.opendatakit.aggregate.odktables.client.exception;
 
-public class TableDoesNotExistException extends ODKTablesClientException
-{
+public class TableDoesNotExistException extends ODKTablesClientException {
 
     /**
      * Serial number for serialization.
@@ -10,14 +9,12 @@ public class TableDoesNotExistException extends ODKTablesClientException
 
     private String tableID;
 
-    public TableDoesNotExistException(String tableID)
-    {
-        super(String.format("Table with ID %s does not exist!", tableID));
-        this.tableID = tableID;
+    public TableDoesNotExistException(String tableID) {
+	super(String.format("Table with ID %s does not exist!", tableID));
+	this.tableID = tableID;
     }
 
-    public String getTableID()
-    {
-        return this.tableID;
+    public String getTableID() {
+	return this.tableID;
     }
 }

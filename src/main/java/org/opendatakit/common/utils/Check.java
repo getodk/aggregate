@@ -1,6 +1,7 @@
 package org.opendatakit.common.utils;
 
 import java.util.Collection;
+import java.util.Map;
 
 /**
  * Class for checking preconditions on method arguments.
@@ -8,8 +9,7 @@ import java.util.Collection;
  * @author the.dylan.price@gmail.com
  * 
  */
-public final class Check
-{
+public final class Check {
 
     /**
      * @param variable
@@ -21,11 +21,10 @@ public final class Check
      *             the message "name was null", where name is the variable you
      *             pass in for name.
      */
-    public static void notNull(Object variable, String name)
-    {
-        if (variable == null)
-            throw new IllegalArgumentException(String.format("%s was null",
-                    name));
+    public static void notNull(Object variable, String name) {
+	if (variable == null)
+	    throw new IllegalArgumentException(String.format("%s was null",
+		    name));
     }
 
     /**
@@ -36,12 +35,11 @@ public final class Check
      * @throws IllegalArgumentException
      *             if variable is null or empty
      */
-    public static void notNullOrEmpty(String variable, String name)
-    {
-        Check.notNull(variable, name);
-        if (variable.length() == 0)
-            throw new IllegalArgumentException(String.format("%s was empty",
-                    name));
+    public static void notNullOrEmpty(String variable, String name) {
+	Check.notNull(variable, name);
+	if (variable.length() == 0)
+	    throw new IllegalArgumentException(String.format("%s was empty",
+		    name));
 
     }
 
@@ -53,11 +51,17 @@ public final class Check
      * @throws IllegalArgumentException
      *             if variable is null or empty
      */
-    public static void notNullOrEmpty(Collection<?> variable, String name)
-    {
-        Check.notNull(variable, name);
-        if (variable.size() == 0)
-            throw new IllegalArgumentException(String.format("%s was empty",
-                    name));
+    public static void notNullOrEmpty(Collection<?> variable, String name) {
+	Check.notNull(variable, name);
+	if (variable.size() == 0)
+	    throw new IllegalArgumentException(String.format("%s was empty",
+		    name));
+    }
+
+    public static void notNullOrEmpty(Map<?, ?> variable, String name) {
+	Check.notNull(variable, name);
+	if (variable.size() == 0)
+	    throw new IllegalArgumentException(String.format("%s was empty",
+		    name));
     }
 }

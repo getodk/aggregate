@@ -7,7 +7,13 @@ createSynchronizedTable user1 people
 # Test that we can't create a table that already exists
 createSynchronizedTable user1 people
 Exception: org.opendatakit.aggregate.odktables.client.exception.TableAlreadyExistsException: Table with tableID 'people' already exists!
-    
+
+# Test that we can create a table with properties
+createSynchronizedTable user1 props {'key':'value','property2':'value'}
+	column1 STRING false
+	column2 INTEGER true
+
 # Clean up
 deleteSynchronizedTable user1 people
+deleteSynchronizedTable user1 props
 deleteUser user1

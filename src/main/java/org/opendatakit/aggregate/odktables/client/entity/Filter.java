@@ -7,8 +7,7 @@ package org.opendatakit.aggregate.odktables.client.entity;
  * 
  * @author the.dylan.price@gmail.com
  */
-public class Filter
-{
+public class Filter {
 
     private final String columnName;
     private final FilterOperation op;
@@ -18,41 +17,36 @@ public class Filter
      * For serialization by Gson
      */
     @SuppressWarnings("unused")
-    private Filter()
-    {
-        this.columnName = null;
-        this.op = null;
-        this.value = null;
+    private Filter() {
+	this.columnName = null;
+	this.op = null;
+	this.value = null;
     }
 
-    public Filter(String columnName, FilterOperation op, String value)
-    {
-        this.columnName = columnName;
-        this.op = op;
-        this.value = value;
+    public Filter(String columnName, FilterOperation op, String value) {
+	this.columnName = columnName;
+	this.op = op;
+	this.value = value;
     }
 
     /**
      * @return the columnName
      */
-    public String getColumnName()
-    {
-        return columnName;
+    public String getColumnName() {
+	return columnName;
     }
 
     /**
      * @return the op
      */
-    public FilterOperation getOp()
-    {
-        return op;
+    public FilterOperation getOp() {
+	return op;
     }
 
     /**
      * @return the value
      */
-    public String getValue()
-    {
-        return value;
+    public String getValue() {
+	return value;
     }
 }

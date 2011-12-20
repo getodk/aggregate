@@ -20,8 +20,7 @@ import org.opendatakit.common.web.CallingContext;
  * 
  * @author the.dylan.price@gmail.com
  */
-public class Permissions extends TypedEntityRelation<InternalPermission>
-{
+public class Permissions extends TypedEntityRelation<InternalPermission> {
     // Field names
     /**
      * The name of the aggregateTableIdentifier field.
@@ -54,42 +53,42 @@ public class Permissions extends TypedEntityRelation<InternalPermission>
      */
     private static final String RELATION_NAME = "PERMISSIONS";
 
-    // The following defines the actual attributes that will be in the datastore:
+    // The following defines the actual attributes that will be in the
+    // datastore:
     /**
      * The aggregateTableIdentifier field.
      */
     private static final Attribute aggregateTableIdentifier = new Attribute(
-            AGGREGATE_TABLE_IDENTIFIER, AttributeType.STRING, false);
+	    AGGREGATE_TABLE_IDENTIFIER, AttributeType.STRING, false);
     /**
      * The aggregateUserIdentifier field.
      */
     private static final Attribute aggregateUserIdentifier = new Attribute(
-            AGGREGATE_USER_IDENTIFIER, AttributeType.STRING, false);
+	    AGGREGATE_USER_IDENTIFIER, AttributeType.STRING, false);
     /**
      * The read field.
      */
     private static final Attribute read = new Attribute(READ,
-            AttributeType.BOOLEAN, false);
+	    AttributeType.BOOLEAN, false);
     /**
      * The write field.
      */
     private static final Attribute write = new Attribute(WRITE,
-            AttributeType.BOOLEAN, false);
+	    AttributeType.BOOLEAN, false);
     /**
      * The delete field.
      */
     private static final Attribute delete = new Attribute(DELETE,
-            AttributeType.BOOLEAN, false);
+	    AttributeType.BOOLEAN, false);
 
     private static final List<Attribute> attributes;
-    static
-    {
-        attributes = new ArrayList<Attribute>();
-        attributes.add(aggregateTableIdentifier);
-        attributes.add(aggregateUserIdentifier);
-        attributes.add(read);
-        attributes.add(write);
-        attributes.add(delete);
+    static {
+	attributes = new ArrayList<Attribute>();
+	attributes.add(aggregateTableIdentifier);
+	attributes.add(aggregateUserIdentifier);
+	attributes.add(read);
+	attributes.add(write);
+	attributes.add(delete);
     }
     /**
      * The singleton instance of the Permissions relation.
@@ -107,16 +106,14 @@ public class Permissions extends TypedEntityRelation<InternalPermission>
      *             if there was a problem during communication with the
      *             datastore
      */
-    private Permissions(CallingContext cc) throws ODKDatastoreException
-    {
-        super(Table.NAMESPACE, RELATION_NAME, attributes, cc);
+    private Permissions(CallingContext cc) throws ODKDatastoreException {
+	super(Table.NAMESPACE, RELATION_NAME, attributes, cc);
     }
 
     @Override
     public InternalPermission initialize(Entity entity)
-            throws ODKDatastoreException
-    {
-        return InternalPermission.fromEntity(entity);
+	    throws ODKDatastoreException {
+	return InternalPermission.fromEntity(entity);
     }
 
     /**
@@ -133,12 +130,10 @@ public class Permissions extends TypedEntityRelation<InternalPermission>
      *             if there is a problem communicating with the datastore
      */
     public static Permissions getInstance(CallingContext cc)
-            throws ODKDatastoreException
-    {
-        if (instance == null || instance.getCC() != cc)
-        {
-            instance = new Permissions(cc);
-        }
-        return instance;
+	    throws ODKDatastoreException {
+	if (instance == null || instance.getCC() != cc) {
+	    instance = new Permissions(cc);
+	}
+	return instance;
     }
 }

@@ -11,8 +11,7 @@ import org.opendatakit.common.utils.Check;
  * 
  * @author the.dylan.price@gmail.com
  */
-public class UpdateSynchronizedRows implements Command
-{
+public class UpdateSynchronizedRows implements Command {
     private static final String path = "/synchronize/updateSynchronizedRows";
 
     private final List<SynchronizedRow> changedRows;
@@ -24,12 +23,11 @@ public class UpdateSynchronizedRows implements Command
      * For serialization by Gson
      */
     @SuppressWarnings("unused")
-    private UpdateSynchronizedRows()
-    {
-        this.changedRows = null;
-        this.requestingUserID = null;
-        this.tableID = null;
-        this.modificationNumber = 0;
+    private UpdateSynchronizedRows() {
+	this.changedRows = null;
+	this.requestingUserID = null;
+	this.tableID = null;
+	this.modificationNumber = 0;
 
     }
 
@@ -37,66 +35,59 @@ public class UpdateSynchronizedRows implements Command
      * Constructs a new UpdateSynchronizedRows.
      */
     public UpdateSynchronizedRows(String requestingUserID,
-            List<SynchronizedRow> changedRows, String tableID,
-            int modificationNumber)
-    {
+	    List<SynchronizedRow> changedRows, String tableID,
+	    int modificationNumber) {
 
-        Check.notNull(changedRows, "changedRows");
-        Check.notNullOrEmpty(requestingUserID, "requestingUserID");
-        Check.notNullOrEmpty(tableID, "tableID");
-        Check.notNull(modificationNumber, "modificationNumber");
+	Check.notNull(changedRows, "changedRows");
+	Check.notNullOrEmpty(requestingUserID, "requestingUserID");
+	Check.notNullOrEmpty(tableID, "tableID");
+	Check.notNull(modificationNumber, "modificationNumber");
 
-        this.changedRows = changedRows;
-        this.requestingUserID = requestingUserID;
-        this.tableID = tableID;
-        this.modificationNumber = modificationNumber;
+	this.changedRows = changedRows;
+	this.requestingUserID = requestingUserID;
+	this.tableID = tableID;
+	this.modificationNumber = modificationNumber;
     }
 
     /**
      * @return the changedRows
      */
-    public List<SynchronizedRow> getChangedRows()
-    {
-        return this.changedRows;
+    public List<SynchronizedRow> getChangedRows() {
+	return this.changedRows;
     }
 
     /**
      * @return the requestingUserID
      */
-    public String getRequestingUserID()
-    {
-        return this.requestingUserID;
+    public String getRequestingUserID() {
+	return this.requestingUserID;
     }
 
     /**
      * @return the tableID
      */
-    public String getTableID()
-    {
-        return this.tableID;
+    public String getTableID() {
+	return this.tableID;
     }
 
     /**
      * @return the modificationNumber
      */
-    public int getModificationNumber()
-    {
-        return this.modificationNumber;
+    public int getModificationNumber() {
+	return this.modificationNumber;
     }
 
     @Override
-    public String toString()
-    {
-        return String.format("UpdateSynchronizedRows: " + "changedRows=%s "
-                + "requestingUserID=%s " + "tableID=%s "
-                + "modificationNumber=%s " + "", changedRows, requestingUserID,
-                tableID, modificationNumber);
+    public String toString() {
+	return String.format("UpdateSynchronizedRows: " + "changedRows=%s "
+		+ "requestingUserID=%s " + "tableID=%s "
+		+ "modificationNumber=%s " + "", changedRows, requestingUserID,
+		tableID, modificationNumber);
     }
 
     @Override
-    public String getMethodPath()
-    {
-        return methodPath();
+    public String getMethodPath() {
+	return methodPath();
     }
 
     /**
@@ -105,8 +96,7 @@ public class UpdateSynchronizedRows implements Command
      *         http://aggregate.opendatakit.org/odktables/createTable, then this
      *         method would return '/odktables/createTable'.
      */
-    public static String methodPath()
-    {
-        return path;
+    public static String methodPath() {
+	return path;
     }
 }
