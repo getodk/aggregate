@@ -48,6 +48,8 @@ import org.opendatakit.common.web.constants.BasicConsts;
 public class XmlElementFormatter implements ElementFormatter {
 	XmlFormatter xmlFormatter;
   
+	String prefix = "";
+	
   /**
    * Construct a XML Element Formatter
  * @param xmlFormatter 
@@ -55,6 +57,10 @@ public class XmlElementFormatter implements ElementFormatter {
    */
   public XmlElementFormatter(XmlFormatter xmlFormatter) {
 	  this.xmlFormatter = xmlFormatter;
+  }
+  
+  public void setPrefix(String prefix) {
+    this.prefix = prefix;
   }
 
   @Override
@@ -161,12 +167,12 @@ public class XmlElementFormatter implements ElementFormatter {
   private void addToXmlValueToRow(Object value, String propertyName, Row row) {
     
     if (value != null) {
-      String xmlString = HtmlUtil.createBeginTag(propertyName);
+      String xmlString = HtmlUtil.createBeginTag(prefix + propertyName);
       xmlString += StringEscapeUtils.escapeXml(value.toString());
-      xmlString += HtmlUtil.createEndTag(propertyName);
+      xmlString += HtmlUtil.createEndTag(prefix + propertyName);
       xmlFormatter.writeXml(xmlString);
     } else {
-      xmlFormatter.writeXml( HtmlUtil.createSelfClosingTag(propertyName));
+      xmlFormatter.writeXml( HtmlUtil.createSelfClosingTag(prefix + propertyName));
     }
   }
 
