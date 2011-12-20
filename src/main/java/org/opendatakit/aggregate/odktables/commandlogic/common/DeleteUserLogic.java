@@ -27,115 +27,99 @@ import org.opendatakit.common.web.CallingContext;
  * 
  * @author the.dylan.price@gmail.com
  */
-public class DeleteUserLogic extends CommandLogic<DeleteUser>
-{
+public class DeleteUserLogic extends CommandLogic<DeleteUser> {
 
     private DeleteUser deleteUser;
 
-    public DeleteUserLogic(DeleteUser deleteUser)
-    {
-        this.deleteUser = deleteUser;
+    public DeleteUserLogic(DeleteUser deleteUser) {
+	this.deleteUser = deleteUser;
     }
 
     @Override
     public DeleteUserResult execute(CallingContext cc)
-            throws AggregateInternalErrorException
-    {
-        String aggregateUserIdentifier;
-        try
-        {
-            // get relation instances
-            Users users = Users.getInstance(cc);
-            TableEntries tables = TableEntries.getInstance(cc);
-            Permissions permissions = Permissions.getInstance(cc);
+	    throws AggregateInternalErrorException {
+	String aggregateUserIdentifier;
+	try {
+	    // get relation instances
+	    Users users = Users.getInstance(cc);
+	    TableEntries tables = TableEntries.getInstance(cc);
+	    Permissions permissions = Permissions.getInstance(cc);
 
-            // get request data
-            aggregateUserIdentifier = this.deleteUser
-                    .getAggregateUserIdentifier();
-            String requestingUserID = this.deleteUser.getRequestingUserID();
-            String usersTable = users.getAggregateIdentifier();
+	    // get request data
+	    aggregateUserIdentifier = this.deleteUser
+		    .getAggregateUserIdentifier();
+	    String requestingUserID = this.deleteUser.getRequestingUserID();
+	    String usersTable = users.getAggregateIdentifier();
 
-            // retrieve requesting user
-            InternalUser requestingUser = users
-                    .query("DeleteUserLogic.execute")
-                    .equal(Users.USER_ID, requestingUserID).get();
+	    // retrieve requesting user
+	    InternalUser requestingUser = users
+		    .query("DeleteUserLogic.execute")
+		    .equal(Users.USER_ID, requestingUserID).get();
 
-            // check if request user has permission to delete the user
-            if (!requestingUser.hasPerm(usersTable, Permissions.DELETE))
-            {
-                return DeleteUserResult.failure(aggregateUserIdentifier,
-                        FailureReason.PERMISSION_DENIED);
-            }
+	    // check if request user has permission to delete the user
+	    if (!requestingUser.hasPerm(usersTable, Permissions.DELETE)) {
+		return DeleteUserResult.failure(aggregateUserIdentifier,
+			FailureReason.PERMISSION_DENIED);
+	    }
 
-            // delete user
-            try
-            {
-                deleteUser(users, permissions, tables, aggregateUserIdentifier);
-            } catch (UserDoesNotExistException e)
-            {
-                return DeleteUserResult.failure(aggregateUserIdentifier,
-                        FailureReason.USER_DOES_NOT_EXIST);
-            } catch (CannotDeleteException e)
-            {
-                return DeleteUserResult.failure(aggregateUserIdentifier,
-                        FailureReason.CANNOT_DELETE);
-            }
-        } catch (ODKDatastoreException e)
-        {
-            throw new AggregateInternalErrorException(e.getMessage());
-        }
+	    // delete user
+	    try {
+		deleteUser(users, permissions, tables, aggregateUserIdentifier);
+	    } catch (UserDoesNotExistException e) {
+		return DeleteUserResult.failure(aggregateUserIdentifier,
+			FailureReason.USER_DOES_NOT_EXIST);
+	    } catch (CannotDeleteException e) {
+		return DeleteUserResult.failure(aggregateUserIdentifier,
+			FailureReason.CANNOT_DELETE);
+	    }
+	} catch (ODKDatastoreException e) {
+	    throw new AggregateInternalErrorException(e.getMessage());
+	}
 
-        return DeleteUserResult.success(aggregateUserIdentifier);
+	return DeleteUserResult.success(aggregateUserIdentifier);
     }
 
     public static void deleteUser(Users users, Permissions permissions,
-            TableEntries tables, String aggregateUserIdentifier)
-            throws UserDoesNotExistException, CannotDeleteException,
-            ODKDatastoreException
-    {
-        List<TypedEntity> entitiesToDelete = new ArrayList<TypedEntity>();
-        InternalUser user = null;
-        try
-        {
-            user = users.getEntity(aggregateUserIdentifier);
-        } catch (ODKDatastoreException e)
-        {
-            // user does not exist
-            throw new UserDoesNotExistException(aggregateUserIdentifier);
-        }
+	    TableEntries tables, String aggregateUserIdentifier)
+	    throws UserDoesNotExistException, CannotDeleteException,
+	    ODKDatastoreException {
+	List<TypedEntity> entitiesToDelete = new ArrayList<TypedEntity>();
+	InternalUser user = null;
+	try {
+	    user = users.getEntity(aggregateUserIdentifier);
+	} catch (ODKDatastoreException e) {
+	    // user does not exist
+	    throw new UserDoesNotExistException(aggregateUserIdentifier);
+	}
 
-        if (tables
-                .query("DeleteUserLogic.deleteUser")
-                .equal(TableEntries.AGGREGATE_OWNER_IDENTIFIER,
-                        aggregateUserIdentifier).exists())
-        {
-            // user still has some tables
-            throw new CannotDeleteException(aggregateUserIdentifier);
-        }
+	if (tables
+		.query("DeleteUserLogic.deleteUser")
+		.equal(TableEntries.AGGREGATE_OWNER_IDENTIFIER,
+			aggregateUserIdentifier).exists()) {
+	    // user still has some tables
+	    throw new CannotDeleteException(aggregateUserIdentifier);
+	}
 
-        List<InternalPermission> perms;
-        try
-        {
-            perms = permissions
-                    .query("DeleteUserLogic.deleteUser")
-                    .equal(Permissions.AGGREGATE_USER_IDENTIFIER,
-                            aggregateUserIdentifier).execute();
-        } catch (ODKDatastoreException e)
-        {
-            // TODO: retry delete?
-            throw e;
-        }
+	List<InternalPermission> perms;
+	try {
+	    perms = permissions
+		    .query("DeleteUserLogic.deleteUser")
+		    .equal(Permissions.AGGREGATE_USER_IDENTIFIER,
+			    aggregateUserIdentifier).execute();
+	} catch (ODKDatastoreException e) {
+	    // TODO: retry delete?
+	    throw e;
+	}
 
-        for (InternalPermission perm : perms)
-        {
-            entitiesToDelete.add(perm);
-        }
-        entitiesToDelete.add(user);
+	for (InternalPermission perm : perms) {
+	    entitiesToDelete.add(perm);
+	}
+	entitiesToDelete.add(user);
 
-        boolean success = CommandLogicFunctions
-                .deleteEntities(entitiesToDelete);
-        if (!success)
-            throw new SnafuException("Could not delete entities: "
-                    + entitiesToDelete);
+	boolean success = CommandLogicFunctions
+		.deleteEntities(entitiesToDelete);
+	if (!success)
+	    throw new SnafuException("Could not delete entities: "
+		    + entitiesToDelete);
     }
 }

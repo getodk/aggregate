@@ -8,8 +8,7 @@ import org.opendatakit.common.utils.Check;
  * 
  * @author the.dylan.price@gmail.com
  */
-public class DeleteTable implements Command
-{
+public class DeleteTable implements Command {
     private static final String path = "/simple/deleteTable";
 
     private final String requestingUserID;
@@ -19,53 +18,47 @@ public class DeleteTable implements Command
      * For serialization by Gson
      */
     @SuppressWarnings("unused")
-    private DeleteTable()
-    {
-        this.requestingUserID = null;
-        this.tableID = null;
+    private DeleteTable() {
+	this.requestingUserID = null;
+	this.tableID = null;
 
     }
 
     /**
      * Constructs a new DeleteTable.
      */
-    public DeleteTable(String requestingUserID, String tableID)
-    {
+    public DeleteTable(String requestingUserID, String tableID) {
 
-        Check.notNullOrEmpty(requestingUserID, "requestingUserID");
-        Check.notNullOrEmpty(tableID, "tableID");
+	Check.notNullOrEmpty(requestingUserID, "requestingUserID");
+	Check.notNullOrEmpty(tableID, "tableID");
 
-        this.requestingUserID = requestingUserID;
-        this.tableID = tableID;
+	this.requestingUserID = requestingUserID;
+	this.tableID = tableID;
     }
 
     /**
      * @return the requestingUserID
      */
-    public String getRequestingUserID()
-    {
-        return this.requestingUserID;
+    public String getRequestingUserID() {
+	return this.requestingUserID;
     }
 
     /**
      * @return the tableID
      */
-    public String getTableID()
-    {
-        return this.tableID;
+    public String getTableID() {
+	return this.tableID;
     }
 
     @Override
-    public String toString()
-    {
-        return String.format("DeleteTable: " + "requestingUserID=%s "
-                + "tableID=%s " + "", requestingUserID, tableID);
+    public String toString() {
+	return String.format("DeleteTable: " + "requestingUserID=%s "
+		+ "tableID=%s " + "", requestingUserID, tableID);
     }
 
     @Override
-    public String getMethodPath()
-    {
-        return methodPath();
+    public String getMethodPath() {
+	return methodPath();
     }
 
     /**
@@ -74,8 +67,7 @@ public class DeleteTable implements Command
      *         http://aggregate.opendatakit.org/odktables/createTable, then this
      *         method would return '/odktables/createTable'.
      */
-    public static String methodPath()
-    {
-        return path;
+    public static String methodPath() {
+	return path;
     }
 }

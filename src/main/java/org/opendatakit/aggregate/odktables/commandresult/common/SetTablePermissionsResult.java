@@ -17,15 +17,13 @@ import org.opendatakit.common.utils.Check;
  * @author the.dylan.price@gmail.com
  */
 public class SetTablePermissionsResult extends
-        CommandResult<SetTablePermissions>
-{
+	CommandResult<SetTablePermissions> {
     private static final List<FailureReason> possibleFailureReasons;
-    static
-    {
-        possibleFailureReasons = new ArrayList<FailureReason>();
-        possibleFailureReasons.add(FailureReason.USER_DOES_NOT_EXIST);
-        possibleFailureReasons.add(FailureReason.TABLE_DOES_NOT_EXIST);
-        possibleFailureReasons.add(FailureReason.PERMISSION_DENIED);
+    static {
+	possibleFailureReasons = new ArrayList<FailureReason>();
+	possibleFailureReasons.add(FailureReason.USER_DOES_NOT_EXIST);
+	possibleFailureReasons.add(FailureReason.TABLE_DOES_NOT_EXIST);
+	possibleFailureReasons.add(FailureReason.PERMISSION_DENIED);
     }
 
     private final String tableID;
@@ -34,31 +32,29 @@ public class SetTablePermissionsResult extends
     /**
      * The success constructor. See {@link #success} for param info.
      */
-    private SetTablePermissionsResult()
-    {
-        super(true, null);
-        this.tableID = null;
-        this.aggregateUserIdentifier = null;
+    private SetTablePermissionsResult() {
+	super(true, null);
+	this.tableID = null;
+	this.aggregateUserIdentifier = null;
     }
 
     /**
      * The failure constructor. See {@link #failure} for param info.
      */
     private SetTablePermissionsResult(String tableID,
-            String aggregateUserIdentifier, FailureReason reason)
-    {
-        super(false, reason);
+	    String aggregateUserIdentifier, FailureReason reason) {
+	super(false, reason);
 
-        Check.notNullOrEmpty(tableID, "tableID");
-        Check.notNullOrEmpty(aggregateUserIdentifier, "aggregateUserIdentifier");
-        if (!possibleFailureReasons.contains(reason))
-            throw new IllegalArgumentException(
-                    String.format(
-                            "Failure reason %s not a valid failure reason for SetPermissions.",
-                            reason));
+	Check.notNullOrEmpty(tableID, "tableID");
+	Check.notNullOrEmpty(aggregateUserIdentifier, "aggregateUserIdentifier");
+	if (!possibleFailureReasons.contains(reason))
+	    throw new IllegalArgumentException(
+		    String.format(
+			    "Failure reason %s not a valid failure reason for SetPermissions.",
+			    reason));
 
-        this.tableID = tableID;
-        this.aggregateUserIdentifier = aggregateUserIdentifier;
+	this.tableID = tableID;
+	this.aggregateUserIdentifier = aggregateUserIdentifier;
     }
 
     /**
@@ -69,87 +65,84 @@ public class SetTablePermissionsResult extends
      * @throws TableDoesNotExistException
      */
     public void checkResult() throws PermissionDeniedException,
-            UserDoesNotExistException, TableDoesNotExistException
-    {
-        if (!successful())
-        {
-            switch (getReason())
-            {
-            case USER_DOES_NOT_EXIST:
-                throw new UserDoesNotExistException(aggregateUserIdentifier);
-            case TABLE_DOES_NOT_EXIST:
-                throw new TableDoesNotExistException(tableID);
-            case PERMISSION_DENIED:
-                throw new PermissionDeniedException();
-            default:
-                throw new RuntimeException("An unknown error occured.");
-            }
-        }
+	    UserDoesNotExistException, TableDoesNotExistException {
+	if (!successful()) {
+	    switch (getReason()) {
+	    case USER_DOES_NOT_EXIST:
+		throw new UserDoesNotExistException(aggregateUserIdentifier);
+	    case TABLE_DOES_NOT_EXIST:
+		throw new TableDoesNotExistException(tableID);
+	    case PERMISSION_DENIED:
+		throw new PermissionDeniedException();
+	    default:
+		throw new RuntimeException("An unknown error occured.");
+	    }
+	}
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.lang.Object#toString()
      */
     @Override
-    public String toString()
-    {
-        return String
-                .format("SetPermissionsResult [aggregateTableIdentifier=%s, aggregateUserIdentifier=%s]",
-                        tableID, aggregateUserIdentifier);
+    public String toString() {
+	return String
+		.format("SetPermissionsResult [aggregateTableIdentifier=%s, aggregateUserIdentifier=%s]",
+			tableID, aggregateUserIdentifier);
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.lang.Object#hashCode()
      */
     @Override
-    public int hashCode()
-    {
-        final int prime = 31;
-        int result = super.hashCode();
-        result = prime * result + ((tableID == null) ? 0 : tableID.hashCode());
-        result = prime
-                * result
-                + ((aggregateUserIdentifier == null) ? 0
-                        : aggregateUserIdentifier.hashCode());
-        return result;
+    public int hashCode() {
+	final int prime = 31;
+	int result = super.hashCode();
+	result = prime * result + ((tableID == null) ? 0 : tableID.hashCode());
+	result = prime
+		* result
+		+ ((aggregateUserIdentifier == null) ? 0
+			: aggregateUserIdentifier.hashCode());
+	return result;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.lang.Object#equals(java.lang.Object)
      */
     @Override
-    public boolean equals(Object obj)
-    {
-        if (this == obj)
-            return true;
-        if (!super.equals(obj))
-            return false;
-        if (!(obj instanceof SetTablePermissionsResult))
-            return false;
-        SetTablePermissionsResult other = (SetTablePermissionsResult) obj;
-        if (tableID == null)
-        {
-            if (other.tableID != null)
-                return false;
-        } else if (!tableID.equals(other.tableID))
-            return false;
-        if (aggregateUserIdentifier == null)
-        {
-            if (other.aggregateUserIdentifier != null)
-                return false;
-        } else if (!aggregateUserIdentifier
-                .equals(other.aggregateUserIdentifier))
-            return false;
-        return true;
+    public boolean equals(Object obj) {
+	if (this == obj)
+	    return true;
+	if (!super.equals(obj))
+	    return false;
+	if (!(obj instanceof SetTablePermissionsResult))
+	    return false;
+	SetTablePermissionsResult other = (SetTablePermissionsResult) obj;
+	if (tableID == null) {
+	    if (other.tableID != null)
+		return false;
+	} else if (!tableID.equals(other.tableID))
+	    return false;
+	if (aggregateUserIdentifier == null) {
+	    if (other.aggregateUserIdentifier != null)
+		return false;
+	} else if (!aggregateUserIdentifier
+		.equals(other.aggregateUserIdentifier))
+	    return false;
+	return true;
     }
 
     /**
      * @return a new SetPermissionsResult representing the successful completion
      *         of a SetPermissions command.
      */
-    public static SetTablePermissionsResult success()
-    {
-        return new SetTablePermissionsResult();
+    public static SetTablePermissionsResult success() {
+	return new SetTablePermissionsResult();
     }
 
     /**
@@ -165,9 +158,8 @@ public class SetTablePermissionsResult extends
      *         a SetPermissions command.
      */
     public static SetTablePermissionsResult failure(String tableID,
-            String aggregateUserIdentifier, FailureReason reason)
-    {
-        return new SetTablePermissionsResult(tableID, aggregateUserIdentifier,
-                reason);
+	    String aggregateUserIdentifier, FailureReason reason) {
+	return new SetTablePermissionsResult(tableID, aggregateUserIdentifier,
+		reason);
     }
 }
