@@ -84,7 +84,7 @@ public class FormParserForJavaRosa {
   static Log log = LogFactory.getLog(FormParserForJavaRosa.class.getName());
   private static final String BASE64_RSA_PUBLIC_KEY = "base64RsaPublicKey";
   private static final String ENCRYPTED_FORM_DEFINITION = "<?xml version=\"1.0\"?>" +
-  	"<h:html xmlns=\"http://www.w3.org/2002/xforms\" xmlns:h=\"http://www.w3.org/1999/xhtml\" xmlns:ev=\"http://www.w3.org/2001/xml-events\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:jr=\"http://openrosa.org/javarosa\">" +
+  	"<h:html xmlns=\"http://www.w3.org/2002/xforms\" xmlns:h=\"http://www.w3.org/1999/xhtml\" xmlns:ev=\"http://www.w3.org/2001/xml-events\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:odk=\"" + ParserConsts.NAMESPACE_ODK + "\" xmlns:jr=\"http://openrosa.org/javarosa\">" +
   	"<h:head>" +
 		"<h:title>Encrypted Form</h:title>" +
 		"<model>" +
@@ -101,11 +101,11 @@ public class FormParserForJavaRosa {
 					"<base64EncryptedElementSignature/>" +
 	  			"</data>" +
 			"</instance>" +
-         "<bind nodeset=\"/data/base64EncryptedKey\" type=\"string\"/>" +
+         "<bind nodeset=\"/data/base64EncryptedKey\" type=\"string\" odk:length=\"2048\" />" +
 			"<bind nodeset=\"/data/meta/instanceID\" type=\"string\"/>" +
 			"<bind nodeset=\"/data/media/file\" type=\"binary\"/>" +
          "<bind nodeset=\"/data/encryptedXmlFile\" type=\"binary\"/>" +
-         "<bind nodeset=\"/data/base64EncryptedElementSignature\" type=\"string\"/>" +
+         "<bind nodeset=\"/data/base64EncryptedElementSignature\" type=\"string\" odk:length=\"2048\" />" +
 		"</model>" +
 	"</h:head>" +
 	"<h:body>" +

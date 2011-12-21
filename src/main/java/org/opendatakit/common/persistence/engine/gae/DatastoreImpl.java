@@ -24,7 +24,6 @@ import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.EntityKey;
-import org.opendatakit.common.persistence.PersistConsts;
 import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.persistence.TaskLock;
 import org.opendatakit.common.persistence.engine.DatastoreAccessMetrics;
@@ -70,6 +69,8 @@ public class DatastoreImpl implements Datastore {
 
   private DatastoreService ds;
 
+  private StringFieldLengthMapping stringFieldLengthMap = new StringFieldLengthMapping();
+  
   private DatastoreAccessMetrics dam = new DatastoreAccessMetrics();
 
   public DatastoreImpl() throws Exception {
@@ -108,6 +109,10 @@ public class DatastoreImpl implements Datastore {
   public void assertRelation(CommonFieldsBase relation, User user) throws ODKDatastoreException {
     int nColumns = 0;
     long nBytes = 0L;
+    
+    // update the relation so that all STRING and URI field lengths are defined (non-null)
+    stringFieldLengthMap.assertStringFieldLengths(constructGaeKind(relation), relation, dam, this, user);
+    
     for (DataField d : relation.getFieldList()) {
       switch (d.getDataType()) {
       case LONG_STRING:
@@ -116,9 +121,6 @@ public class DatastoreImpl implements Datastore {
         break;
       case STRING:
       case URI:
-        if (d.getMaxCharLen() == null) {
-          d.setMaxCharLen(PersistConsts.DEFAULT_MAX_STRING_LENGTH);
-        }
         nBytes += d.getMaxCharLen();
         ++nColumns;
         break;
@@ -177,6 +179,8 @@ public class DatastoreImpl implements Datastore {
 
   @Override
   public void dropRelation(CommonFieldsBase relation, User user) throws ODKDatastoreException {
+    // remove string lengths...
+    stringFieldLengthMap.removeStringFieldLengths(constructGaeKind(relation), dam, this, user);
     // TODO: delete all entities in the relation.
     // as long as it is a form, the form delete will delete all
     // submissions before calling this, so we are OK for the common
