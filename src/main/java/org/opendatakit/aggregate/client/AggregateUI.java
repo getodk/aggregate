@@ -19,6 +19,7 @@ package org.opendatakit.aggregate.client;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import org.opendatakit.aggregate.client.exception.RequestFailureException;
 import org.opendatakit.aggregate.client.handlers.RefreshCloseHandler;
 import org.opendatakit.aggregate.client.handlers.RefreshOpenHandler;
 import org.opendatakit.aggregate.client.handlers.RefreshSelectionHandler;
@@ -79,6 +80,9 @@ public class AggregateUI implements EntryPoint {
   // session variables for tab visibility
   public static boolean manageVisible = false;
   public static boolean adminVisible = false;
+  
+  // hack...
+  public static final String QUOTA_EXCEEDED = "Quota exceeded";
 
   /***********************************
    ***** SINGLETON FETCHING ******
@@ -199,7 +203,12 @@ public class AggregateUI implements EntryPoint {
 
           @Override
           public void onFailure(Throwable caught) {
-
+            if ( caught instanceof RequestFailureException ) {
+              RequestFailureException e = (RequestFailureException) caught;
+              if ( e.getMessage().equals(QUOTA_EXCEEDED) ) {
+                return; // Don't retry -- we have a quota problem...
+              }
+            }
             // OK. So it failed. If it did, just try doing everything
             // again. We should have a valid session cookie after the
             // first failure, so these should all then work.

@@ -56,7 +56,6 @@ import org.opendatakit.aggregate.parser.SubmissionParser;
 import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.aggregate.task.UploadSubmissions;
 import org.opendatakit.aggregate.util.BackendActionsTable;
-import org.opendatakit.common.persistence.PersistConsts;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
 import org.opendatakit.common.web.CallingContext;
