@@ -16,8 +16,10 @@ package org.opendatakit.aggregate.form;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -67,6 +69,8 @@ public class FormDefinition {
 	 * Map from the uriSubmissionDataModel key (uuid) to the FormDefinition.
 	 * If forms are deleted and reloaded, they get a different key each time.
 	 * The key is defined in the SubmissionAssociationTable.
+	 * 
+	 * NOTE: should only be accessed via synchronized methods to get or remove forms.
 	 */
 	private static final Map<String, FormDefinition> formDefinitions = new HashMap<String, FormDefinition>();
 	
@@ -151,7 +155,32 @@ public class FormDefinition {
 		}
 	    return sa;
 	}
+	
 	/**
+	 * Traverse the form data model and assertRelation() on all the backing objects.
+	 * Called from within the synchronized getFormDefinition() static method.
+	 * 
+	 * @param m
+	 * @param objs
+	 * @param cc
+	 * @throws ODKDatastoreException
+	 */
+	private static final void assertBackingObjects( FormDataModel m, 
+	    Set<CommonFieldsBase> objs, CallingContext cc ) throws ODKDatastoreException {
+	  CommonFieldsBase obj = m.getBackingObjectPrototype();
+	  if ( obj != null && !objs.contains(obj) ) {
+	    objs.add(obj);
+	    cc.getDatastore().assertRelation(obj, cc.getCurrentUser());
+	  }
+	  
+	  for ( FormDataModel c : m.getChildren() ) {
+	    assertBackingObjects(c, objs, cc);
+	  }
+	}
+	
+	/**
+	 * Synchronized access to the formDefinitions map.  Synchronization is only required for the 
+	 * put operation on the map, but also aids in efficient quota usage during periods of intense start-up. 
 	 * 
 	 * @param xformParameters  -- the form id, version and ui version of a form definition.
 	 * @param uriSubmissionDataModel -- the uri of the definition specification.
@@ -160,7 +189,7 @@ public class FormDefinition {
 	 * 			currently valid definition of a form is being used (should the form be
 	 * 			deleted then reloaded).
 	 */
-	public static final FormDefinition getFormDefinition(XFormParameters xformParameters, CallingContext cc) {
+	public static synchronized final FormDefinition getFormDefinition(XFormParameters xformParameters, CallingContext cc) {
 
 		if ( xformParameters.formId.indexOf('/') != -1 ) {
 			throw new IllegalArgumentException("formId is not well formed: " + xformParameters.formId);
@@ -210,12 +239,8 @@ public class FormDefinition {
 
 					// and synchronize field sizes to those defined in the database...
 					try {
-						// update the form data model with the actual dimensions
-						// of its columns -- or create the tables from scratch...
-						for ( Map.Entry<String, DynamicCommonFieldsBase> e : fd.backingTableMap.entrySet() ) {
-							
-							ds.assertRelation(e.getValue(), user);
-						}
+					  Set<CommonFieldsBase> objs = new HashSet<CommonFieldsBase>();
+					  assertBackingObjects(fd.getTopLevelGroup(), objs, cc);
 					} catch (ODKDatastoreException e1) {
 						e1.printStackTrace();
 				    	logger.error("Asserting relations failed for formId " + xformParameters.toString());
@@ -239,7 +264,7 @@ public class FormDefinition {
 		return null;
 	}
 
-    static final void forget(String uriSubmissionDataModel) {
+    static synchronized final void forget(String uriSubmissionDataModel) {
 		formDefinitions.remove(uriSubmissionDataModel);
 	}
 

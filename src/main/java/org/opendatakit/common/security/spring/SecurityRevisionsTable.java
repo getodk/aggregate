@@ -66,7 +66,7 @@ public class SecurityRevisionsTable extends CommonFieldsBase {
 	 * @return
 	 * @throws ODKDatastoreException
 	 */
-	private static synchronized SecurityRevisionsTable assertRelation(Datastore datastore, User user) throws ODKDatastoreException {
+	private static synchronized final SecurityRevisionsTable assertRelation(Datastore datastore, User user) throws ODKDatastoreException {
 		if ( relation == null ) {
 			SecurityRevisionsTable relationPrototype;
 			relationPrototype = new SecurityRevisionsTable(datastore.getDefaultSchemaName());
