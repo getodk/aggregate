@@ -120,7 +120,7 @@ public class BackendActionsTable extends CommonFieldsBase {
    * @return
    * @throws ODKDatastoreException
    */
-  private static BackendActionsTable assertRelation(Datastore datastore, User user)
+  private static synchronized final BackendActionsTable assertRelation(Datastore datastore, User user)
       throws ODKDatastoreException {
     if (relation == null) {
       BackendActionsTable relationPrototype;

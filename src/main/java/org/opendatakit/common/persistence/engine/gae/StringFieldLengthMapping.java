@@ -16,6 +16,8 @@ package org.opendatakit.common.persistence.engine.gae;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.DataField.DataType;
@@ -47,6 +49,8 @@ public class StringFieldLengthMapping {
 
   private static final String TABLE_NAME = "_STRING_FIELD_LENGTHS_";
   private static final String LENGTH_MAPPING = "LENGTH_MAPPING";
+
+  private Log logger = LogFactory.getLog(StringFieldLengthMapping.class);
   
   public StringFieldLengthMapping() {
   }
@@ -64,6 +68,7 @@ public class StringFieldLengthMapping {
   public synchronized void removeStringFieldLengths(String gaeEntityKind, 
       DatastoreAccessMetrics dam, DatastoreImpl datastore, User user) throws ODKDatastoreException {
     
+    logger.info(gaeEntityKind);
     Key key = KeyFactory.createKey(TABLE_NAME, gaeEntityKind);
     try {
       datastore.getDatastoreService().delete(key);
@@ -83,6 +88,8 @@ public class StringFieldLengthMapping {
    * @param user
    */
   private void putEntity(Entity e, Map<String, Long> lenMap, DatastoreAccessMetrics dam, DatastoreImpl datastore, User user ) {
+    logger.info(e.getKey().getName());
+
     // build up the string that will be saved in BigTables
     StringBuilder b = new StringBuilder();
     for ( Map.Entry<String, Long> entry : lenMap.entrySet() ) {
@@ -112,7 +119,8 @@ public class StringFieldLengthMapping {
       CommonFieldsBase relation, DatastoreAccessMetrics dam, DatastoreImpl datastore, User user) throws ODKDatastoreException {
 
     Map<String,Long> lenMap = new HashMap<String, Long>();
-
+    
+    logger.info(gaeEntityKind);
     Key key = KeyFactory.createKey(TABLE_NAME, gaeEntityKind);
     
     try {
