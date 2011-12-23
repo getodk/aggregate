@@ -1,7 +1,6 @@
 package org.opendatakit.aggregate.odktables.client.exception;
 
-public class UserDoesNotExistException extends ODKTablesClientException
-{
+public class UserDoesNotExistException extends ODKTablesClientException {
     /**
      * 
      */
@@ -9,16 +8,14 @@ public class UserDoesNotExistException extends ODKTablesClientException
 
     private final String aggregateUserIdentifier;
 
-    public UserDoesNotExistException(String aggregateUserIdentifier)
-    {
-        super(String.format(
-                "User with aggregateUserIdentifier %s does not exist!",
-                aggregateUserIdentifier));
-        this.aggregateUserIdentifier = aggregateUserIdentifier;
+    public UserDoesNotExistException(String aggregateUserIdentifier) {
+	super(String.format(
+		"User with aggregateUserIdentifier %s does not exist!",
+		aggregateUserIdentifier));
+	this.aggregateUserIdentifier = aggregateUserIdentifier;
     }
 
-    public String getAggregateUserIdentifier()
-    {
-        return this.aggregateUserIdentifier;
+    public String getAggregateUserIdentifier() {
+	return this.aggregateUserIdentifier;
     }
 }

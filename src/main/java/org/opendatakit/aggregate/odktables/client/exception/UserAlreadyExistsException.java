@@ -1,7 +1,6 @@
 package org.opendatakit.aggregate.odktables.client.exception;
 
-public class UserAlreadyExistsException extends ODKTablesClientException
-{
+public class UserAlreadyExistsException extends ODKTablesClientException {
     /**
      * 
      */
@@ -9,16 +8,14 @@ public class UserAlreadyExistsException extends ODKTablesClientException
 
     private final String aggregateUserIdentifier;
 
-    public UserAlreadyExistsException(String aggregateUserIdentifier)
-    {
-        super(String.format(
-                "User with aggregateUserIdentifier %s already exists!",
-                aggregateUserIdentifier));
-        this.aggregateUserIdentifier = aggregateUserIdentifier;
+    public UserAlreadyExistsException(String aggregateUserIdentifier) {
+	super(String.format(
+		"User with aggregateUserIdentifier %s already exists!",
+		aggregateUserIdentifier));
+	this.aggregateUserIdentifier = aggregateUserIdentifier;
     }
 
-    public String getAggregateUserIdentifier()
-    {
-        return this.aggregateUserIdentifier;
+    public String getAggregateUserIdentifier() {
+	return this.aggregateUserIdentifier;
     }
 }

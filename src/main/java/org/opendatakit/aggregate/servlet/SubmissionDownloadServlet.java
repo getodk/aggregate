@@ -94,7 +94,7 @@ public class SubmissionDownloadServlet extends ServletUtilBase {
         addOpenRosaHeaders(resp);
 
         PrintWriter out = resp.getWriter();
-        out.write("<submission xmlns=\"http://opendatakit.org/submissions\">");
+        out.write("<submission xmlns=\"http://opendatakit.org/submissions\" xmlns:orx=\"http://openrosa.org/xforms\" >");
         out.write("<data>");
         XmlFormatter formatter = new XmlFormatter(out, form, cc);
         formatter.processSubmissions(Collections.singletonList(sub), cc);

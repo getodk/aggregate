@@ -20,8 +20,7 @@ import org.opendatakit.common.web.CallingContext;
  * 
  * @author the.dylan.price@gmail.com
  */
-public class Filters extends TypedEntityRelation<InternalFilter>
-{
+public class Filters extends TypedEntityRelation<InternalFilter> {
 
     // Field names
     /**
@@ -61,38 +60,37 @@ public class Filters extends TypedEntityRelation<InternalFilter>
      * The aggregateTableIdentifier field.
      */
     private static final Attribute aggregateUserIdentifier = new Attribute(
-            AGGREGATE_USER_IDENTIFIER, AttributeType.STRING, false);
+	    AGGREGATE_USER_IDENTIFIER, AttributeType.STRING, false);
 
     /**
      * The aggregateTableIdentifier field.
      */
     private static final Attribute aggregateTableIdentifier = new Attribute(
-            AGGREGATE_TABLE_IDENTIFIER, AttributeType.STRING, false);
+	    AGGREGATE_TABLE_IDENTIFIER, AttributeType.STRING, false);
     /**
      * The columnName field.
      */
     private static final Attribute columnName = new Attribute(COLUMN_NAME,
-            AttributeType.STRING, false);
+	    AttributeType.STRING, false);
     /**
      * The filterOperation field.
      */
     private static final Attribute filterOperation = new Attribute(
-            FILTER_OPERATION, AttributeType.STRING, false);
+	    FILTER_OPERATION, AttributeType.STRING, false);
     /**
      * The value field.
      */
     private static final Attribute value = new Attribute(VALUE,
-            AttributeType.STRING, false);
+	    AttributeType.STRING, false);
 
     private static final List<Attribute> attributes;
-    static
-    {
-        attributes = new ArrayList<Attribute>();
-        attributes.add(aggregateUserIdentifier);
-        attributes.add(aggregateTableIdentifier);
-        attributes.add(columnName);
-        attributes.add(filterOperation);
-        attributes.add(value);
+    static {
+	attributes = new ArrayList<Attribute>();
+	attributes.add(aggregateUserIdentifier);
+	attributes.add(aggregateTableIdentifier);
+	attributes.add(columnName);
+	attributes.add(filterOperation);
+	attributes.add(value);
     }
 
     /**
@@ -111,16 +109,14 @@ public class Filters extends TypedEntityRelation<InternalFilter>
      *             if there was a problem during communication with the
      *             datastore
      */
-    private Filters(CallingContext cc) throws ODKDatastoreException
-    {
-        super(Table.NAMESPACE, RELATION_NAME, attributes, cc);
+    private Filters(CallingContext cc) throws ODKDatastoreException {
+	super(Table.NAMESPACE, RELATION_NAME, attributes, cc);
     }
 
     @Override
     public InternalFilter initialize(Entity entity)
-            throws ODKDatastoreException
-    {
-        return InternalFilter.fromEntity(entity);
+	    throws ODKDatastoreException {
+	return InternalFilter.fromEntity(entity);
     }
 
     /**
@@ -136,12 +132,10 @@ public class Filters extends TypedEntityRelation<InternalFilter>
      *             if there is a problem communicating with the datastore
      */
     public static Filters getInstance(CallingContext cc)
-            throws ODKDatastoreException
-    {
-        if (instance == null || instance.getCC() != cc)
-        {
-            instance = new Filters(cc);
-        }
-        return instance;
+	    throws ODKDatastoreException {
+	if (instance == null || instance.getCC() != cc) {
+	    instance = new Filters(cc);
+	}
+	return instance;
     }
 }

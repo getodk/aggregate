@@ -2,11 +2,11 @@ package org.opendatakit.aggregate.odktables.command;
 
 /**
  * <p>
- * Command is an interface that signifies a command that can be requested to be
- * run against Aggregate. Implementations of the Command interface are simple,
- * immutable data objects that hold all the necessary information for a certain
- * command. The actual logic of these commands is put in a separate CommandLogic
- * subclass, and the result of executing a command is put in yet another
+ * Command is an interface that represents a command that can be run in
+ * Aggregate. Implementations of the Command interface are simple, immutable
+ * data objects that hold all the necessary information for a certain command.
+ * The actual logic of these commands is put in a separate class: a subclass of
+ * CommandLogic, and the result of executing a command is put in yet another
  * separate class: a subclass of CommandResult.
  * </p>
  * 
@@ -52,8 +52,7 @@ package org.opendatakit.aggregate.odktables.command;
  * 
  * @author the.dylan.price@gmail.com
  */
-public interface Command
-{
+public interface Command {
 
     /**
      * @return the path of this Command relative to the address of an Aggregate

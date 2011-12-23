@@ -17,8 +17,7 @@ package org.opendatakit.aggregate.odktables.client.exception;
  * 
  * @author the.dylan.price@gmail.com
  */
-public abstract class ODKTablesClientException extends Exception
-{
+public abstract class ODKTablesClientException extends Exception {
     /**
      * Serial number for serialization
      */
@@ -30,8 +29,7 @@ public abstract class ODKTablesClientException extends Exception
      * @param message
      *            the message for the exception
      */
-    protected ODKTablesClientException(String message)
-    {
-        super(message);
+    protected ODKTablesClientException(String message) {
+	super(message);
     }
 }
