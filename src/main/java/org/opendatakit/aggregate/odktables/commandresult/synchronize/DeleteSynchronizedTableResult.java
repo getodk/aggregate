@@ -16,14 +16,12 @@ import org.opendatakit.common.utils.Check;
  * @author the.dylan.price@gmail.com
  */
 public class DeleteSynchronizedTableResult extends
-        CommandResult<DeleteSynchronizedTable>
-{
+	CommandResult<DeleteSynchronizedTable> {
     private static final List<FailureReason> possibleFailureReasons;
-    static
-    {
-        possibleFailureReasons = new ArrayList<FailureReason>();
-        possibleFailureReasons.add(FailureReason.TABLE_DOES_NOT_EXIST);
-        possibleFailureReasons.add(FailureReason.PERMISSION_DENIED);
+    static {
+	possibleFailureReasons = new ArrayList<FailureReason>();
+	possibleFailureReasons.add(FailureReason.TABLE_DOES_NOT_EXIST);
+	possibleFailureReasons.add(FailureReason.PERMISSION_DENIED);
     }
 
     private final String tableID;
@@ -31,27 +29,25 @@ public class DeleteSynchronizedTableResult extends
     /**
      * The success constructor. See {@link #success} for param info.
      */
-    private DeleteSynchronizedTableResult()
-    {
-        super(true, null);
-        this.tableID = null;
+    private DeleteSynchronizedTableResult() {
+	super(true, null);
+	this.tableID = null;
     }
 
     /**
      * The failure constructor. See {@link #failure} for param info.
      */
-    private DeleteSynchronizedTableResult(String tableID, FailureReason reason)
-    {
-        super(false, reason);
+    private DeleteSynchronizedTableResult(String tableID, FailureReason reason) {
+	super(false, reason);
 
-        Check.notNullOrEmpty(tableID, "tableID");
-        if (!possibleFailureReasons.contains(reason))
-            throw new IllegalArgumentException(
-                    String.format(
-                            "Failure reason %s not a valid failure reason for DeleteSynchronizedTable.",
-                            reason));
+	Check.notNullOrEmpty(tableID, "tableID");
+	if (!possibleFailureReasons.contains(reason))
+	    throw new IllegalArgumentException(
+		    String.format(
+			    "Failure reason %s not a valid failure reason for DeleteSynchronizedTable.",
+			    reason));
 
-        this.tableID = tableID;
+	this.tableID = tableID;
     }
 
     /**
@@ -60,64 +56,63 @@ public class DeleteSynchronizedTableResult extends
      * @throws TableDoesNotExistException
      */
     public void checkResults() throws PermissionDeniedException,
-            TableDoesNotExistException
-    {
-        if (!successful())
-        {
-            switch (getReason())
-            {
-            case TABLE_DOES_NOT_EXIST:
-                throw new TableDoesNotExistException(tableID);
-            case PERMISSION_DENIED:
-                throw new PermissionDeniedException();
-            default:
-                throw new RuntimeException("An unknown error occured.");
-            }
-        }
+	    TableDoesNotExistException {
+	if (!successful()) {
+	    switch (getReason()) {
+	    case TABLE_DOES_NOT_EXIST:
+		throw new TableDoesNotExistException(tableID);
+	    case PERMISSION_DENIED:
+		throw new PermissionDeniedException();
+	    default:
+		throw new RuntimeException("An unknown error occured.");
+	    }
+	}
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.lang.Object#toString()
      */
     @Override
-    public String toString()
-    {
-        return String.format("DeleteSynchronizedTableResult [tableID=%s]",
-                tableID);
+    public String toString() {
+	return String.format("DeleteSynchronizedTableResult [tableID=%s]",
+		tableID);
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.lang.Object#hashCode()
      */
     @Override
-    public int hashCode()
-    {
-        final int prime = 31;
-        int result = super.hashCode();
-        result = prime * result + ((tableID == null) ? 0 : tableID.hashCode());
-        return result;
+    public int hashCode() {
+	final int prime = 31;
+	int result = super.hashCode();
+	result = prime * result + ((tableID == null) ? 0 : tableID.hashCode());
+	return result;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.lang.Object#equals(java.lang.Object)
      */
     @Override
-    public boolean equals(Object obj)
-    {
-        if (this == obj)
-            return true;
-        if (!super.equals(obj))
-            return false;
-        if (!(obj instanceof DeleteSynchronizedTableResult))
-            return false;
-        DeleteSynchronizedTableResult other = (DeleteSynchronizedTableResult) obj;
-        if (tableID == null)
-        {
-            if (other.tableID != null)
-                return false;
-        } else if (!tableID.equals(other.tableID))
-            return false;
-        return true;
+    public boolean equals(Object obj) {
+	if (this == obj)
+	    return true;
+	if (!super.equals(obj))
+	    return false;
+	if (!(obj instanceof DeleteSynchronizedTableResult))
+	    return false;
+	DeleteSynchronizedTableResult other = (DeleteSynchronizedTableResult) obj;
+	if (tableID == null) {
+	    if (other.tableID != null)
+		return false;
+	} else if (!tableID.equals(other.tableID))
+	    return false;
+	return true;
     }
 
     /**
@@ -125,9 +120,8 @@ public class DeleteSynchronizedTableResult extends
      *         completion of a DeleteSynchronizedTable command.
      * 
      */
-    public static DeleteSynchronizedTableResult success()
-    {
-        return new DeleteSynchronizedTableResult();
+    public static DeleteSynchronizedTableResult success() {
+	return new DeleteSynchronizedTableResult();
     }
 
     /**
@@ -135,8 +129,7 @@ public class DeleteSynchronizedTableResult extends
      *         completion of a DeleteSynchronizedTable command.
      */
     public static DeleteSynchronizedTableResult failure(String tableID,
-            FailureReason reason)
-    {
-        return new DeleteSynchronizedTableResult(tableID, reason);
+	    FailureReason reason) {
+	return new DeleteSynchronizedTableResult(tableID, reason);
     }
 }

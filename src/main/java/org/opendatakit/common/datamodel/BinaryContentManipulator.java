@@ -59,6 +59,7 @@ public class BinaryContentManipulator {
   private final String parentKey;
   private final String topLevelKey;
 
+  // these relations have already been asserted on the datastore...
   private final BinaryContent ctntRelation;
   private final BinaryContentRefBlob vrefRelation;
   private final RefBlob blbRelation;

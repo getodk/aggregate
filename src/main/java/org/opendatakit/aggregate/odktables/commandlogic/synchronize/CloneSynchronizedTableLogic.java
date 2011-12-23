@@ -39,151 +39,137 @@ import org.opendatakit.common.web.CallingContext;
  * 
  */
 public class CloneSynchronizedTableLogic extends
-        CommandLogic<CloneSynchronizedTable>
-{
+	CommandLogic<CloneSynchronizedTable> {
 
     private final CloneSynchronizedTable cloneSynchronizedTable;
 
     public CloneSynchronizedTableLogic(
-            CloneSynchronizedTable cloneSynchronizedTable)
-    {
-        this.cloneSynchronizedTable = cloneSynchronizedTable;
+	    CloneSynchronizedTable cloneSynchronizedTable) {
+	this.cloneSynchronizedTable = cloneSynchronizedTable;
     }
 
     @Override
     public CloneSynchronizedTableResult execute(CallingContext cc)
-            throws AggregateInternalErrorException
-    {
-        Modification clientModification;
-        List<TypedEntity> entitiesToSave = new ArrayList<TypedEntity>();
-        try
-        {
-            // Get relation instances
-            TableEntries entries = TableEntries.getInstance(cc);
-            UserTableMappings mappings = UserTableMappings.getInstance(cc);
-            Users users = Users.getInstance(cc);
-            Columns columns = Columns.getInstance(cc);
+	    throws AggregateInternalErrorException {
+	Modification clientModification;
+	List<TypedEntity> entitiesToSave = new ArrayList<TypedEntity>();
+	try {
+	    // Get relation instances
+	    TableEntries entries = TableEntries.getInstance(cc);
+	    UserTableMappings mappings = UserTableMappings.getInstance(cc);
+	    Users users = Users.getInstance(cc);
+	    Columns columns = Columns.getInstance(cc);
 
-            // Get data from request
-            String tableID = cloneSynchronizedTable.getTableID();
-            String aggregateTableIdentifier = cloneSynchronizedTable
-                    .getAggregateTableIdentifier();
-            String requestingUserID = cloneSynchronizedTable
-                    .getRequestingUserID();
-            Collection<Filter> filters = cloneSynchronizedTable.getFilters();
+	    // Get data from request
+	    String tableID = cloneSynchronizedTable.getTableID();
+	    String aggregateTableIdentifier = cloneSynchronizedTable
+		    .getAggregateTableIdentifier();
+	    String requestingUserID = cloneSynchronizedTable
+		    .getRequestingUserID();
+	    Collection<Filter> filters = cloneSynchronizedTable.getFilters();
 
-            // Get request user
-            InternalUser user = users
-                    .query("CloneSynchronizedTableLogic.execute")
-                    .equal(Users.USER_ID, requestingUserID).get();
+	    // Get request user
+	    InternalUser user = users
+		    .query("CloneSynchronizedTableLogic.execute")
+		    .equal(Users.USER_ID, requestingUserID).get();
 
-            // Check if user is allowed to read the table they want to clone
-            if (!user.hasPerm(aggregateTableIdentifier, Permissions.READ))
-            {
-                return CloneSynchronizedTableResult.failurePermissionDenied();
-            }
+	    // Check if user is allowed to read the table they want to clone
+	    if (!user.hasPerm(aggregateTableIdentifier, Permissions.READ)) {
+		return CloneSynchronizedTableResult.failurePermissionDenied();
+	    }
 
-            // Check if the user is already using the tableID
-            boolean mappingExists = mappings
-                    .query("CloneSynchronizedTableLogic.execute")
-                    .equal(UserTableMappings.AGGREGATE_USER_IDENTIFIER,
-                            user.getAggregateIdentifier())
-                    .equal(UserTableMappings.TABLE_ID, tableID).exists();
-            if (mappingExists)
-            {
-                return CloneSynchronizedTableResult
-                        .failureTableAlreadyExists(tableID);
-            }
+	    // Check if the user is already using the tableID
+	    boolean mappingExists = mappings
+		    .query("CloneSynchronizedTableLogic.execute")
+		    .equal(UserTableMappings.AGGREGATE_USER_IDENTIFIER,
+			    user.getAggregateIdentifier())
+		    .equal(UserTableMappings.TABLE_ID, tableID).exists();
+	    if (mappingExists) {
+		return CloneSynchronizedTableResult
+			.failureTableAlreadyExists(tableID);
+	    }
 
-            // Retrieve the table entry for the table that is to be cloned
-            InternalTableEntry entry;
-            try
-            {
-                entry = entries.getEntity(aggregateTableIdentifier);
-            } catch (ODKDatastoreException e)
-            {
-                return CloneSynchronizedTableResult
-                        .failureTableDoesNotExist(tableID);
-            }
+	    // Retrieve the table entry for the table that is to be cloned
+	    InternalTableEntry entry;
+	    try {
+		entry = entries.getEntity(aggregateTableIdentifier);
+	    } catch (ODKDatastoreException e) {
+		return CloneSynchronizedTableResult
+			.failureTableDoesNotExist(tableID);
+	    }
 
-            // add entry to user table mapping
-            InternalUserTableMapping mapping = new InternalUserTableMapping(
-                    user.getAggregateIdentifier(), aggregateTableIdentifier,
-                    tableID, cc);
-            entitiesToSave.add(mapping);
+	    // add entry to user table mapping
+	    InternalUserTableMapping mapping = new InternalUserTableMapping(
+		    user.getAggregateIdentifier(), aggregateTableIdentifier,
+		    tableID, cc);
+	    entitiesToSave.add(mapping);
 
-            // get columns of table
-            List<InternalColumn> cols = columns
-                    .query("CloneSynchronizedTableLogic.execute")
-                    .equal(Columns.AGGREGATE_TABLE_IDENTIFIER,
-                            aggregateTableIdentifier).execute();
+	    // get columns of table
+	    List<InternalColumn> cols = columns
+		    .query("CloneSynchronizedTableLogic.execute")
+		    .equal(Columns.AGGREGATE_TABLE_IDENTIFIER,
+			    aggregateTableIdentifier).execute();
 
-            // save filters
-            for (Filter filter : filters)
-            {
-                InternalColumn col = InternalColumn.search(cols,
-                        filter.getColumnName());
-                if (col == null)
-                {
-                    return CloneSynchronizedTableResult
-                            .failureColumnDoesNotExist(tableID,
-                                    filter.getColumnName());
-                }
-                try
-                {
-                    CommandLogicFunctions.convert(col.getType(),
-                            filter.getValue());
-                } catch (Exception e)
-                {
-                    return CloneSynchronizedTableResult
-                            .failureFilterValueTypeMismatch(tableID,
-                                    col.getType(), filter.getValue());
-                }
-                InternalFilter internalFilter = new InternalFilter(
-                        user.getAggregateIdentifier(),
-                        aggregateTableIdentifier, filter.getColumnName(),
-                        FilterOperation.valueOf(filter.getOp().name()),
-                        filter.getValue(), cc);
-                entitiesToSave.add(internalFilter);
-            }
+	    // save filters
+	    for (Filter filter : filters) {
+		InternalColumn col = InternalColumn.search(cols,
+			filter.getColumnName());
+		if (col == null) {
+		    return CloneSynchronizedTableResult
+			    .failureColumnDoesNotExist(tableID,
+				    filter.getColumnName());
+		}
+		try {
+		    CommandLogicFunctions.convert(col.getType(),
+			    filter.getValue());
+		} catch (Exception e) {
+		    return CloneSynchronizedTableResult
+			    .failureFilterValueTypeMismatch(tableID,
+				    col.getType(), filter.getValue());
+		}
+		InternalFilter internalFilter = new InternalFilter(
+			user.getAggregateIdentifier(),
+			aggregateTableIdentifier, filter.getColumnName(),
+			FilterOperation.valueOf(filter.getOp().name()),
+			filter.getValue(), cc);
+		entitiesToSave.add(internalFilter);
+	    }
 
-            // create modification of the latest rows, applying any filters
-            Table table = Table.getInstance(aggregateTableIdentifier, cc);
+	    // create modification of the latest rows, applying any filters
+	    Table table = Table.getInstance(aggregateTableIdentifier, cc);
 
-            int modificationNumber = entry.getModificationNumber();
+	    int modificationNumber = entry.getModificationNumber();
 
-            TypedEntityQuery<InternalRow> query = table
-                    .query("CloneSynchronizedTableLogic.execute");
-            for (Filter filter : filters)
-            {
-                InternalColumn col = InternalColumn.search(cols,
-                        filter.getColumnName());
-                String columnName = Table.convertIdentifier(col
-                        .getAggregateIdentifier());
-                Object value = CommandLogicFunctions.convert(table
-                        .getAttribute(columnName).getType(), filter.getValue());
-                query.addFilter(columnName,
-                        FilterOperation.valueOf(filter.getOp().name()), value);
-            }
+	    TypedEntityQuery<InternalRow> query = table
+		    .query("CloneSynchronizedTableLogic.execute");
+	    for (Filter filter : filters) {
+		InternalColumn col = InternalColumn.search(cols,
+			filter.getColumnName());
+		String columnName = Table.convertIdentifier(col
+			.getAggregateIdentifier());
+		Object value = CommandLogicFunctions.convert(table
+			.getAttribute(columnName).getType(), filter.getValue());
+		query.addFilter(columnName,
+			FilterOperation.valueOf(filter.getOp().name()), value);
+	    }
 
-            // convert rows to SynchronizedRow
-            List<InternalRow> rows = query.execute();
-            List<SynchronizedRow> clientRows = CommandLogicFunctions.convert(
-                    rows, cols);
+	    // convert rows to SynchronizedRow
+	    List<InternalRow> rows = query.execute();
+	    List<SynchronizedRow> clientRows = CommandLogicFunctions.convert(
+		    rows, cols);
 
-            clientModification = new Modification(modificationNumber,
-                    clientRows);
-        } catch (ODKDatastoreException e)
-        {
-            throw new AggregateInternalErrorException(e.getMessage());
-        }
+	    clientModification = new Modification(modificationNumber,
+		    clientRows);
+	} catch (ODKDatastoreException e) {
+	    throw new AggregateInternalErrorException(e.getMessage());
+	}
 
-        // save entities
-        boolean success = CommandLogicFunctions.saveEntities(entitiesToSave);
-        if (!success)
-            throw new SnafuException("Could not save entities: "
-                    + entitiesToSave);
+	// save entities
+	boolean success = CommandLogicFunctions.saveEntities(entitiesToSave);
+	if (!success)
+	    throw new SnafuException("Could not save entities: "
+		    + entitiesToSave);
 
-        return CloneSynchronizedTableResult.success(clientModification);
+	return CloneSynchronizedTableResult.success(clientModification);
     }
 }

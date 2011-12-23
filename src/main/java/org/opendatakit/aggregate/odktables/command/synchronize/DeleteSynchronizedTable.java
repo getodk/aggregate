@@ -8,8 +8,7 @@ import org.opendatakit.common.utils.Check;
  * 
  * @author the.dylan.price@gmail.com
  */
-public class DeleteSynchronizedTable implements Command
-{
+public class DeleteSynchronizedTable implements Command {
     private static final String path = "/synchronize/deleteSynchronizedTable";
 
     private final String requestingUserID;
@@ -19,10 +18,9 @@ public class DeleteSynchronizedTable implements Command
      * For serialization by Gson
      */
     @SuppressWarnings("unused")
-    private DeleteSynchronizedTable()
-    {
-        this.requestingUserID = null;
-        this.tableID = null;
+    private DeleteSynchronizedTable() {
+	this.requestingUserID = null;
+	this.tableID = null;
 
     }
 
@@ -30,45 +28,40 @@ public class DeleteSynchronizedTable implements Command
      * Constructs a new DeleteSynchronizedTable.
      */
     public DeleteSynchronizedTable(String requestingUserID,
-            String aggregateTableIdentifier)
-    {
+	    String aggregateTableIdentifier) {
 
-        Check.notNullOrEmpty(requestingUserID, "requestingUserID");
-        Check.notNullOrEmpty(aggregateTableIdentifier,
-                "aggregateTableIdentifier");
+	Check.notNullOrEmpty(requestingUserID, "requestingUserID");
+	Check.notNullOrEmpty(aggregateTableIdentifier,
+		"aggregateTableIdentifier");
 
-        this.requestingUserID = requestingUserID;
-        this.tableID = aggregateTableIdentifier;
+	this.requestingUserID = requestingUserID;
+	this.tableID = aggregateTableIdentifier;
     }
 
     /**
      * @return the requestingUserID
      */
-    public String getRequestingUserID()
-    {
-        return this.requestingUserID;
+    public String getRequestingUserID() {
+	return this.requestingUserID;
     }
 
     /**
      * @return the aggregateTableIdentifier
      */
-    public String getTableID()
-    {
-        return this.tableID;
+    public String getTableID() {
+	return this.tableID;
     }
 
     @Override
-    public String toString()
-    {
-        return String.format("DeleteSynchronizedTable: "
-                + "requestingUserID=%s " + "aggregateTableIdentifier=%s " + "",
-                requestingUserID, tableID);
+    public String toString() {
+	return String.format("DeleteSynchronizedTable: "
+		+ "requestingUserID=%s " + "aggregateTableIdentifier=%s " + "",
+		requestingUserID, tableID);
     }
 
     @Override
-    public String getMethodPath()
-    {
-        return methodPath();
+    public String getMethodPath() {
+	return methodPath();
     }
 
     /**
@@ -77,8 +70,7 @@ public class DeleteSynchronizedTable implements Command
      *         http://aggregate.opendatakit.org/odktables/createTable, then this
      *         method would return '/odktables/createTable'.
      */
-    public static String methodPath()
-    {
-        return path;
+    public static String methodPath() {
+	return path;
     }
 }

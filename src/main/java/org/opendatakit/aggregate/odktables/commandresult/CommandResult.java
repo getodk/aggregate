@@ -23,8 +23,8 @@ import org.opendatakit.aggregate.odktables.command.Command;
  * If the execution of a Command was successful, then the CommandResult will
  * contain the expected data from running the Command. For example, if a
  * CreateTable is successful, then the CreateTableResponse will contain the
- * tableId of the newly created table. Furthermore, if a InsertTables is
- * successful, then the InsertTablesResponse will contain a list of rowIds which
+ * tableId of the newly created table. Furthermore, if a InsertRows is
+ * successful, then the InsertRowsResponse will contain a list of rowIds which
  * correspond to the new rows inserted.
  * </p>
  * 
@@ -51,32 +51,30 @@ import org.opendatakit.aggregate.odktables.command.Command;
  * <li>A getter method which returns the data of the result, or throws an
  * exception(s) to indicate the failure. These exceptions should be subclasses
  * of ODKTablesClientException.</li>
- * <li>A static 'successful' method which creates and returns an instance of
- * your class, using the private 'successful' constructor.</li>
- * <li>A static 'failure' method which creates and resturns an instance of your
- * class, using the private 'failure' constructor.</li> </ul>
+ * <li>At least one static 'successful' method which creates and returns an
+ * instance of your class, using the private 'successful' constructor.</li>
+ * <li>At least one static 'failure' method which creates and resturns an
+ * instance of your class, using the private 'failure' constructor.</li> </ul>
  * 
  * @author the.dylan.price@gmail.com
  */
-public abstract class CommandResult<T extends Command>
-{
+public abstract class CommandResult<T extends Command> {
     /**
      * FailureReason enumerates all the possible reasons the execution of a
      * command could fail.
      */
-    public enum FailureReason
-    {
-        TABLE_ALREADY_EXISTS,
-        TABLE_DOES_NOT_EXIST,
-        ROW_ALREADY_EXISTS,
-        COLUMN_DOES_NOT_EXIST,
-        USER_ALREADY_EXISTS,
-        USER_DOES_NOT_EXIST,
-        PERMISSION_DENIED,
-        CANNOT_DELETE,
-        OUT_OF_SYNCH,
-        ROW_OUT_OF_SYNCH,
-        FILTER_VALUE_TYPE_MISMATCH;
+    public enum FailureReason {
+	TABLE_ALREADY_EXISTS, 
+	TABLE_DOES_NOT_EXIST, 
+	ROW_ALREADY_EXISTS, 
+	COLUMN_DOES_NOT_EXIST, 
+	USER_ALREADY_EXISTS, 
+	USER_DOES_NOT_EXIST, 
+	PERMISSION_DENIED, 
+	CANNOT_DELETE, 
+	OUT_OF_SYNCH, 
+	ROW_OUT_OF_SYNCH, 
+	FILTER_VALUE_TYPE_MISMATCH;
     }
 
     private final boolean successful;
@@ -92,67 +90,59 @@ public abstract class CommandResult<T extends Command>
      *            If successful == true, then this should be null. If successful
      *            == false, then this must not be null.
      */
-    protected CommandResult(boolean successful, FailureReason reason)
-    {
-        if (successful && reason != null)
-        {
-            throw new IllegalArgumentException(
-                    "Can not be successful and have a non-null FailureReason");
-        }
-        if (!successful && reason == null)
-        {
-            throw new IllegalArgumentException(
-                    "Can not be unsuccessful and have a null FailureReason");
-        }
+    protected CommandResult(boolean successful, FailureReason reason) {
+	if (successful && reason != null) {
+	    throw new IllegalArgumentException(
+		    "Can not be successful and have a non-null FailureReason");
+	}
+	if (!successful && reason == null) {
+	    throw new IllegalArgumentException(
+		    "Can not be unsuccessful and have a null FailureReason");
+	}
 
-        this.successful = successful;
-        this.reason = reason;
+	this.successful = successful;
+	this.reason = reason;
     }
 
     /**
      * @return true if the command was successful, false otherwise.
      */
-    public boolean successful()
-    {
-        return this.successful;
+    public boolean successful() {
+	return this.successful;
     }
 
     /**
      * @return if the command failed, then returns the reason it failed.
      *         Otherwise returns null.
      */
-    public FailureReason getReason()
-    {
-        if (!successful())
-            return this.reason;
-        else
-            return null;
+    public FailureReason getReason() {
+	if (!successful())
+	    return this.reason;
+	else
+	    return null;
     }
 
     @Override
-    public String toString()
-    {
-        return String.format("Success = %s, Reason = %s", this.successful,
-                this.reason);
+    public String toString() {
+	return String.format("Success = %s, Reason = %s", this.successful,
+		this.reason);
     }
 
     @Override
-    public boolean equals(Object obj)
-    {
-        if (!(obj instanceof CommandResult))
-            return false;
-        CommandResult<?> o = (CommandResult<?>) obj;
-        boolean successEquals = o.successful == this.successful;
-        boolean reasonsEqual = (o.reason == null && this.reason == null)
-                || (o.reason.equals(this.reason));
-        return successEquals && reasonsEqual;
+    public boolean equals(Object obj) {
+	if (!(obj instanceof CommandResult))
+	    return false;
+	CommandResult<?> o = (CommandResult<?>) obj;
+	boolean successEquals = o.successful == this.successful;
+	boolean reasonsEqual = (o.reason == null && this.reason == null)
+		|| (o.reason.equals(this.reason));
+	return successEquals && reasonsEqual;
     }
 
     @Override
-    public int hashCode()
-    {
-        int success = (this.successful) ? 1 : 0;
-        int reasonHash = (this.reason == null) ? 1 : this.reason.hashCode();
-        return success + 72 * reasonHash;
+    public int hashCode() {
+	int success = (this.successful) ? 1 : 0;
+	int reasonHash = (this.reason == null) ? 1 : this.reason.hashCode();
+	return success + 72 * reasonHash;
     }
 }

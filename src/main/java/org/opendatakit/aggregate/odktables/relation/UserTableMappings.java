@@ -22,8 +22,7 @@ import org.opendatakit.common.web.CallingContext;
  * @author the.dylan.price@gmail.com
  */
 public class UserTableMappings extends
-        TypedEntityRelation<InternalUserTableMapping>
-{
+	TypedEntityRelation<InternalUserTableMapping> {
     // Field names
     /**
      * The name of the aggregateUserIdentifier field.
@@ -46,30 +45,30 @@ public class UserTableMappings extends
      */
     private static final String RELATION_NAME = "USER_TABLE_MAPPINGS";
 
-    // The following defines the actual attributes that will be in the datastore:
+    // The following defines the actual attributes that will be in the
+    // datastore:
     /**
      * The aggregateUserIdentifier field.
      */
     private static final Attribute aggregateUserIdentifier = new Attribute(
-            AGGREGATE_USER_IDENTIFIER, AttributeType.STRING, false);
+	    AGGREGATE_USER_IDENTIFIER, AttributeType.STRING, false);
     /**
      * The aggregateTableIdentifier field.
      */
     private static final Attribute aggregateTableIdentifier = new Attribute(
-            AGGREGATE_TABLE_IDENTIFIER, AttributeType.STRING, false);
+	    AGGREGATE_TABLE_IDENTIFIER, AttributeType.STRING, false);
     /**
      * The tableID field.
      */
     private static final Attribute tableID = new Attribute(TABLE_ID,
-            AttributeType.STRING, false);
+	    AttributeType.STRING, false);
 
     private static final List<Attribute> attributes;
-    static
-    {
-        attributes = new ArrayList<Attribute>();
-        attributes.add(aggregateUserIdentifier);
-        attributes.add(aggregateTableIdentifier);
-        attributes.add(tableID);
+    static {
+	attributes = new ArrayList<Attribute>();
+	attributes.add(aggregateUserIdentifier);
+	attributes.add(aggregateTableIdentifier);
+	attributes.add(tableID);
     }
     /**
      * The singleton instance of the Cursor relation.
@@ -87,16 +86,14 @@ public class UserTableMappings extends
      *             if there was a problem during communication with the
      *             datastore
      */
-    private UserTableMappings(CallingContext cc) throws ODKDatastoreException
-    {
-        super(Table.NAMESPACE, RELATION_NAME, attributes, cc);
+    private UserTableMappings(CallingContext cc) throws ODKDatastoreException {
+	super(Table.NAMESPACE, RELATION_NAME, attributes, cc);
     }
 
     @Override
     public InternalUserTableMapping initialize(Entity entity)
-            throws ODKDatastoreException
-    {
-        return InternalUserTableMapping.fromEntity(entity);
+	    throws ODKDatastoreException {
+	return InternalUserTableMapping.fromEntity(entity);
     }
 
     /**
@@ -112,12 +109,10 @@ public class UserTableMappings extends
      *             if there is a problem communicating with the datastore
      */
     public static UserTableMappings getInstance(CallingContext cc)
-            throws ODKDatastoreException
-    {
-        if (instance == null || instance.getCC() != cc)
-        {
-            instance = new UserTableMappings(cc);
-        }
-        return instance;
+	    throws ODKDatastoreException {
+	if (instance == null || instance.getCC() != cc) {
+	    instance = new UserTableMappings(cc);
+	}
+	return instance;
     }
 }

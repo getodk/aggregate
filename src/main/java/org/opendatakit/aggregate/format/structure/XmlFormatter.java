@@ -51,6 +51,8 @@ public class XmlFormatter implements SubmissionFormatter {
 
   private IForm form;
   private XmlElementFormatter elemFormatter;
+  private boolean firstMeta = true;
+  private int metaDepth = 0;
 
   private PrintWriter output;
 
@@ -67,6 +69,10 @@ public class XmlFormatter implements SubmissionFormatter {
   
   class XmlFormElementModelVisitor implements FormElementModelVisitor {
 
+    private static final String META_TAG = "meta";
+
+    private static final String OPENROSA_META_TAG = "orx:meta";
+    
     Submission sub;
     List<SubmissionSet> nesting = new ArrayList<SubmissionSet>();
 
@@ -144,7 +150,14 @@ public class XmlFormatter implements SubmissionFormatter {
           nesting.add(sub);
           
         } else if (element.getElementType() == FormElementModel.ElementType.GROUP ) {
-          output.append(HtmlUtil.createBeginTag(element.getElementName()));
+          if ( element.getElementName().equals(META_TAG) ) {
+            if ( firstMeta && ++metaDepth != 0 ) {
+              elemFormatter.setPrefix("orx:");
+            }
+            output.append(HtmlUtil.createBeginTag(OPENROSA_META_TAG));
+          } else {
+            output.append(HtmlUtil.createBeginTag(element.getElementName()));
+          }
         }
         return false;
       }
@@ -173,7 +186,15 @@ public class XmlFormatter implements SubmissionFormatter {
       @Override
       public void leave(FormElementModel element, CallingContext cc) {
         if ( element.getElementType() == FormElementModel.ElementType.GROUP ) {
-          output.append(HtmlUtil.createEndTag(element.getElementName()));
+          if ( element.getElementName().equals(META_TAG) ) {
+            output.append(HtmlUtil.createEndTag(OPENROSA_META_TAG));
+            if ( firstMeta && --metaDepth == 0 ) {
+              elemFormatter.setPrefix("");
+              firstMeta = false;
+            }
+          } else {
+            output.append(HtmlUtil.createEndTag(element.getElementName()));
+          }
         }
       }
   }

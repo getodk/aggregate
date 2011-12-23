@@ -5,6 +5,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -18,6 +19,7 @@ import org.opendatakit.aggregate.odktables.client.entity.TableEntry;
 import org.opendatakit.aggregate.odktables.client.entity.User;
 import org.opendatakit.aggregate.odktables.client.exception.AggregateInternalErrorException;
 import org.opendatakit.aggregate.odktables.client.exception.CannotDeleteException;
+import org.opendatakit.aggregate.odktables.client.exception.ColumnDoesNotExistException;
 import org.opendatakit.aggregate.odktables.client.exception.Http404Exception;
 import org.opendatakit.aggregate.odktables.client.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.client.exception.TableDoesNotExistException;
@@ -30,26 +32,29 @@ import org.opendatakit.aggregate.odktables.command.common.CreateUser;
 import org.opendatakit.aggregate.odktables.command.common.DeleteUser;
 import org.opendatakit.aggregate.odktables.command.common.GetUserByAggregateIdentifier;
 import org.opendatakit.aggregate.odktables.command.common.GetUserByID;
-import org.opendatakit.aggregate.odktables.command.common.QueryForTables;
+import org.opendatakit.aggregate.odktables.command.common.ListAllTables;
 import org.opendatakit.aggregate.odktables.command.common.SetTablePermissions;
 import org.opendatakit.aggregate.odktables.command.common.SetUserManagementPermissions;
+import org.opendatakit.aggregate.odktables.command.common.UpdateColumnProperties;
+import org.opendatakit.aggregate.odktables.command.common.UpdateTableProperties;
 import org.opendatakit.aggregate.odktables.commandresult.CommandResult;
 import org.opendatakit.aggregate.odktables.commandresult.common.CheckUserExistsResult;
 import org.opendatakit.aggregate.odktables.commandresult.common.CreateUserResult;
 import org.opendatakit.aggregate.odktables.commandresult.common.DeleteUserResult;
 import org.opendatakit.aggregate.odktables.commandresult.common.GetUserByAggregateIdentifierResult;
 import org.opendatakit.aggregate.odktables.commandresult.common.GetUserByIDResult;
-import org.opendatakit.aggregate.odktables.commandresult.common.QueryForTablesResult;
+import org.opendatakit.aggregate.odktables.commandresult.common.ListAllTablesResult;
 import org.opendatakit.aggregate.odktables.commandresult.common.SetTablePermissionsResult;
 import org.opendatakit.aggregate.odktables.commandresult.common.SetUserManagementPermissionsResult;
+import org.opendatakit.aggregate.odktables.commandresult.common.UpdateColumnPropertiesResult;
+import org.opendatakit.aggregate.odktables.commandresult.common.UpdateTablePropertiesResult;
 import org.opendatakit.common.utils.Check;
 
 /**
  * CommonAPI contains API calls that are common to both SimpleAPI and
  * SynchronizedAPI.
  */
-public class CommonAPI
-{
+public class CommonAPI {
 
     protected String requestingUserID;
     private final URI aggregateURI;
@@ -74,17 +79,16 @@ public class CommonAPI
      *             initial communication to fail
      */
     public CommonAPI(URI aggregateURI, String userID)
-            throws ClientProtocolException, IOException,
-            UserDoesNotExistException, AggregateInternalErrorException
-    {
-        Check.notNull(aggregateURI, "aggregateURI");
-        Check.notNullOrEmpty(userID, "userID");
+	    throws ClientProtocolException, IOException,
+	    UserDoesNotExistException, AggregateInternalErrorException {
+	Check.notNull(aggregateURI, "aggregateURI");
+	Check.notNullOrEmpty(userID, "userID");
 
-        this.aggregateURI = aggregateURI;
-        this.requestingUserID = userID;
-        this.client = new DefaultHttpClient();
+	this.aggregateURI = aggregateURI;
+	this.requestingUserID = userID;
+	this.client = new DefaultHttpClient();
 
-        checkUserExists(userID);
+	checkUserExists(userID);
     }
 
     /**
@@ -102,22 +106,20 @@ public class CommonAPI
      * @throws ClientProtocolException
      */
     public void setUserID(String userID) throws ClientProtocolException,
-            AggregateInternalErrorException, UserDoesNotExistException,
-            IOException
-    {
-        checkUserExists(userID);
-        this.requestingUserID = userID;
+	    AggregateInternalErrorException, UserDoesNotExistException,
+	    IOException {
+	checkUserExists(userID);
+	this.requestingUserID = userID;
     }
 
     private void checkUserExists(String userID) throws ClientProtocolException,
-            AggregateInternalErrorException, IOException,
-            UserDoesNotExistException
-    {
-        CheckUserExists checkUserExists = new CheckUserExists(userID);
-        CheckUserExistsResult result = sendCommand(checkUserExists,
-                CheckUserExistsResult.class);
-        if (!result.getUserExists())
-            throw new UserDoesNotExistException("null and userID " + userID);
+	    AggregateInternalErrorException, IOException,
+	    UserDoesNotExistException {
+	CheckUserExists checkUserExists = new CheckUserExists(userID);
+	CheckUserExistsResult result = sendCommand(checkUserExists,
+		CheckUserExistsResult.class);
+	if (!result.getUserExists())
+	    throw new UserDoesNotExistException("null and userID " + userID);
     }
 
     /**
@@ -142,15 +144,14 @@ public class CommonAPI
      * @throws ClientProtocolException
      */
     public User createUser(String userID, String userName)
-            throws ClientProtocolException, IOException,
-            UserAlreadyExistsException, PermissionDeniedException,
-            AggregateInternalErrorException
-    {
-        CreateUser createUser = new CreateUser(requestingUserID, userName,
-                userID);
-        CreateUserResult result = sendCommand(createUser,
-                CreateUserResult.class);
-        return result.getCreatedUser();
+	    throws ClientProtocolException, IOException,
+	    UserAlreadyExistsException, PermissionDeniedException,
+	    AggregateInternalErrorException {
+	CreateUser createUser = new CreateUser(requestingUserID, userName,
+		userID);
+	CreateUserResult result = sendCommand(createUser,
+		CreateUserResult.class);
+	return result.getCreatedUser();
     }
 
     /**
@@ -172,13 +173,12 @@ public class CommonAPI
      *             if there is a problem communicating with the Aggregate server
      */
     public User getUserByID(String userID) throws ClientProtocolException,
-            IOException, PermissionDeniedException, UserDoesNotExistException,
-            AggregateInternalErrorException
-    {
-        GetUserByID getUserByID = new GetUserByID(requestingUserID, userID);
-        GetUserByIDResult result = sendCommand(getUserByID,
-                GetUserByIDResult.class);
-        return result.getUser();
+	    IOException, PermissionDeniedException, UserDoesNotExistException,
+	    AggregateInternalErrorException {
+	GetUserByID getUserByID = new GetUserByID(requestingUserID, userID);
+	GetUserByIDResult result = sendCommand(getUserByID,
+		GetUserByIDResult.class);
+	return result.getUser();
     }
 
     /**
@@ -202,16 +202,15 @@ public class CommonAPI
      *             if there is a problem communicating with the Aggregate server
      */
     public User getUserByAggregateIdentifier(String aggregateUserIdentifier)
-            throws ClientProtocolException, IOException,
-            PermissionDeniedException, UserDoesNotExistException,
-            AggregateInternalErrorException
-    {
-        GetUserByAggregateIdentifier getUserByAggregateIdentifier = new GetUserByAggregateIdentifier(
-                requestingUserID, aggregateUserIdentifier);
-        GetUserByAggregateIdentifierResult result = sendCommand(
-                getUserByAggregateIdentifier,
-                GetUserByAggregateIdentifierResult.class);
-        return result.getUser();
+	    throws ClientProtocolException, IOException,
+	    PermissionDeniedException, UserDoesNotExistException,
+	    AggregateInternalErrorException {
+	GetUserByAggregateIdentifier getUserByAggregateIdentifier = new GetUserByAggregateIdentifier(
+		requestingUserID, aggregateUserIdentifier);
+	GetUserByAggregateIdentifierResult result = sendCommand(
+		getUserByAggregateIdentifier,
+		GetUserByAggregateIdentifierResult.class);
+	return result.getUser();
     }
 
     /**
@@ -238,15 +237,14 @@ public class CommonAPI
      *             if there is a problem communicating with the Aggregate server
      */
     public void deleteUser(String aggregateUserIdentifier)
-            throws PermissionDeniedException, UserDoesNotExistException,
-            CannotDeleteException, ClientProtocolException, IOException,
-            AggregateInternalErrorException
-    {
-        DeleteUser deleteUser = new DeleteUser(requestingUserID,
-                aggregateUserIdentifier);
-        DeleteUserResult result = sendCommand(deleteUser,
-                DeleteUserResult.class);
-        result.getDeletedAggregateUserIdentifier();
+	    throws PermissionDeniedException, UserDoesNotExistException,
+	    CannotDeleteException, ClientProtocolException, IOException,
+	    AggregateInternalErrorException {
+	DeleteUser deleteUser = new DeleteUser(requestingUserID,
+		aggregateUserIdentifier);
+	DeleteUserResult result = sendCommand(deleteUser,
+		DeleteUserResult.class);
+	result.getDeletedAggregateUserIdentifier();
     }
 
     /**
@@ -278,19 +276,19 @@ public class CommonAPI
      *             if there is a problem communicating with the Aggregate server
      */
     public void setTablePermissions(String aggregateUserIdentifier,
-            String tableID, boolean read, boolean write,
+	    String tableID, boolean read, boolean write,
 
-            boolean delete) throws ClientProtocolException, IOException,
-            PermissionDeniedException, UserDoesNotExistException,
-            TableDoesNotExistException, AggregateInternalErrorException
+	    boolean delete) throws ClientProtocolException, IOException,
+	    PermissionDeniedException, UserDoesNotExistException,
+	    TableDoesNotExistException, AggregateInternalErrorException
 
     {
-        SetTablePermissions setTablePermissions = new SetTablePermissions(
-                requestingUserID, tableID, aggregateUserIdentifier, read,
-                write, delete);
-        SetTablePermissionsResult result = sendCommand(setTablePermissions,
-                SetTablePermissionsResult.class);
-        result.checkResult();
+	SetTablePermissions setTablePermissions = new SetTablePermissions(
+		requestingUserID, tableID, aggregateUserIdentifier, read,
+		write, delete);
+	SetTablePermissionsResult result = sendCommand(setTablePermissions,
+		SetTablePermissionsResult.class);
+	result.checkResult();
     }
 
     /**
@@ -315,15 +313,14 @@ public class CommonAPI
      *             if there is a problem communicating with the Aggregate server
      */
     public void setUserManagementPermissions(String aggregateUserIdentifier,
-            boolean allowed) throws ClientProtocolException, IOException,
-            PermissionDeniedException, UserDoesNotExistException,
-            AggregateInternalErrorException
-    {
-        SetUserManagementPermissions command = new SetUserManagementPermissions(
-                requestingUserID, aggregateUserIdentifier, allowed);
-        SetUserManagementPermissionsResult result = sendCommand(command,
-                SetUserManagementPermissionsResult.class);
-        result.checkResult();
+	    boolean allowed) throws ClientProtocolException, IOException,
+	    PermissionDeniedException, UserDoesNotExistException,
+	    AggregateInternalErrorException {
+	SetUserManagementPermissions command = new SetUserManagementPermissions(
+		requestingUserID, aggregateUserIdentifier, allowed);
+	SetUserManagementPermissionsResult result = sendCommand(command,
+		SetUserManagementPermissionsResult.class);
+	result.checkResult();
     }
 
     /**
@@ -337,12 +334,72 @@ public class CommonAPI
      *             if there is a problem communicating with the Aggregate server
      */
     public List<TableEntry> listAllTables() throws ClientProtocolException,
-            IOException, AggregateInternalErrorException
-    {
-        QueryForTables command = new QueryForTables(requestingUserID);
-        QueryForTablesResult result = sendCommand(command,
-                QueryForTablesResult.class);
-        return result.getEntries();
+	    IOException, AggregateInternalErrorException {
+	ListAllTables command = new ListAllTables(requestingUserID);
+	ListAllTablesResult result = sendCommand(command,
+		ListAllTablesResult.class);
+	return result.getEntries();
+    }
+
+    /**
+     * Not implemented. Overwrite the properties associated with a table.
+     * 
+     * @param tableID
+     *            the client's identifier for a table
+     * @param properties
+     *            metadata to store with the table
+     * @throws PermissionDeniedException
+     *             if the client does not have write permission on the table
+     * @throws TableDoesNotExistException
+     *             if client has no such table with the given tableID
+     * @throws AggregateInternalErrorException
+     *             if Aggregate encounters an internal error that causes the
+     *             call to fail
+     * @throws IOException
+     *             if there is a problem communicating with the Aggregate server
+     * @throws ClientProtocolException
+     */
+    public void updateTableProperties(String tableID, String properties)
+	    throws TableDoesNotExistException, PermissionDeniedException,
+	    ClientProtocolException, AggregateInternalErrorException,
+	    IOException {
+	UpdateTableProperties command = new UpdateTableProperties(
+		requestingUserID, tableID, properties);
+	UpdateTablePropertiesResult result = sendCommand(command,
+		UpdateTablePropertiesResult.class);
+	result.checkResult();
+    }
+
+    /**
+     * Not implemented. Overwrite the properties associated with a column.
+     * 
+     * @param tableID
+     *            the client's identifier for a table
+     * @param columnsToProperties
+     *            a map of column names to the new properties for those columns
+     * @throws PermissionDeniedException
+     *             if the client does not have write permission on the table
+     * @throws TableDoesNotExistException
+     *             if client has no such table with the given tableID
+     * @throws ColumnDoesNotExistException
+     *             if there is no such column with columnName.
+     * @throws AggregateInternalErrorException
+     *             if Aggregate encounters an internal error that causes the
+     *             call to fail
+     * @throws IOException
+     *             if there is a problem communicating with the Aggregate server
+     * @throws ClientProtocolException
+     */
+    public void updateColumnProperties(String tableID,
+	    Map<String, String> columnsToProperties)
+	    throws ClientProtocolException, AggregateInternalErrorException,
+	    IOException, TableDoesNotExistException, PermissionDeniedException,
+	    ColumnDoesNotExistException {
+	UpdateColumnProperties command = new UpdateColumnProperties(
+		requestingUserID, tableID, columnsToProperties);
+	UpdateColumnPropertiesResult result = sendCommand(command,
+		UpdateColumnPropertiesResult.class);
+	result.checkResult();
     }
 
     /**
@@ -357,31 +414,28 @@ public class CommonAPI
      * @throws AggregateInternalErrorException
      */
     protected <T extends CommandResult<?>> T sendCommand(Command command,
-            Class<T> commandResultClass) throws ClientProtocolException,
-            IOException, AggregateInternalErrorException
-    {
-        URI uri = aggregateURI.resolve("/odktables" + command.getMethodPath());
-        String json = CommandConverter.getInstance().serializeCommand(command);
-        HttpPost post = new HttpPost(uri);
-        HttpEntity entity = new StringEntity(json);
-        post.setEntity(entity);
-        HttpResponse response = client.execute(post);
-        StatusLine status = response.getStatusLine();
-        if (status.getStatusCode() / 100 == 5)
-        {
-            response.getEntity().consumeContent();
-            throw new AggregateInternalErrorException(status.getReasonPhrase());
-        }
-        if (status.getStatusCode() == 404)
-        {
-            response.getEntity().consumeContent();
-            throw new Http404Exception(status.getReasonPhrase());
-        }
-        Reader reader = new InputStreamReader(response.getEntity().getContent());
-        T result = CommandConverter.getInstance().deserializeResult(reader,
-                commandResultClass);
-        reader.close();
-        return result;
+	    Class<T> commandResultClass) throws ClientProtocolException,
+	    IOException, AggregateInternalErrorException {
+	URI uri = aggregateURI.resolve("/odktables" + command.getMethodPath());
+	String json = CommandConverter.getInstance().serializeCommand(command);
+	HttpPost post = new HttpPost(uri);
+	HttpEntity entity = new StringEntity(json);
+	post.setEntity(entity);
+	HttpResponse response = client.execute(post);
+	StatusLine status = response.getStatusLine();
+	if (status.getStatusCode() / 100 == 5) {
+	    response.getEntity().consumeContent();
+	    throw new AggregateInternalErrorException(status.getReasonPhrase());
+	}
+	if (status.getStatusCode() == 404) {
+	    response.getEntity().consumeContent();
+	    throw new Http404Exception(status.getReasonPhrase());
+	}
+	Reader reader = new InputStreamReader(response.getEntity().getContent());
+	T result = CommandConverter.getInstance().deserializeResult(reader,
+		commandResultClass);
+	reader.close();
+	return result;
     }
 
 }

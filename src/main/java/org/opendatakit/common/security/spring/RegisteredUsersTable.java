@@ -236,7 +236,7 @@ public final class RegisteredUsersTable extends CommonFieldsBase {
 	 * @return
 	 * @throws ODKDatastoreException
 	 */
-	private static synchronized RegisteredUsersTable assertRelation(Datastore datastore, User user) throws ODKDatastoreException {
+	private static synchronized final RegisteredUsersTable assertRelation(Datastore datastore, User user) throws ODKDatastoreException {
 		if ( relation == null ) {
 			RegisteredUsersTable relationPrototype;
 			relationPrototype = new RegisteredUsersTable(datastore.getDefaultSchemaName());
