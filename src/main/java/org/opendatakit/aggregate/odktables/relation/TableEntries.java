@@ -44,6 +44,11 @@ public class TableEntries
      */
     public static final String IS_SYNCHRONIZED = "IS_SYNCHRONIZED";
 
+    /**
+     * The name of the properties field.
+     */
+    public static final String PROPERTIES = "PROPERTIES";
+
     // Relation name:
     /**
      * The name of the TableEntries relation.
@@ -76,6 +81,12 @@ public class TableEntries
     private static final Attribute isSynchronized = new Attribute(
 	    IS_SYNCHRONIZED, AttributeType.BOOLEAN, false);
 
+    /**
+     * The properties field.
+     */
+    private static final Attribute properties = new Attribute(PROPERTIES,
+	    AttributeType.STRING, true);
+
     private static final List<Attribute> attributes;
     static {
 	attributes = new ArrayList<Attribute>();
@@ -83,6 +94,7 @@ public class TableEntries
 	attributes.add(tableName);
 	attributes.add(modificationNumber);
 	attributes.add(isSynchronized);
+	attributes.add(properties);
     }
     /**
      * The singleton instance of the TableEntries.
