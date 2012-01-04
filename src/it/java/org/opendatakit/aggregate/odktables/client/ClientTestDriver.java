@@ -91,6 +91,12 @@ import org.opendatakit.common.ermodel.simple.AttributeType;
  * 
  * <i>synchronize (userName) (tableName)</i>
  * 
+ * <i>updateColumnProps (userName) (tableName)
+ * 	  (columnName) (properties)
+ * 	  ...</i>
+ * 
+ * <i>updateTableProps (userName) (tableName) (properties)</i>
+ * 
  * <i>printTable (userName) (tableName)</i>
  * </pre>
  * 
@@ -316,7 +322,7 @@ public class ClientTestDriver {
 	    boolean nullable = Boolean.parseBoolean(st.nextToken());
 	    String columnProps = null;
 	    if (st.hasMoreTokens())
-    	    	columnProps = st.nextToken();
+		columnProps = st.nextToken();
 
 	    Column column = new Column(name, type, nullable, columnProps);
 	    columns.add(column);
@@ -626,8 +632,21 @@ public class ClientTestDriver {
     private void printTable(String clientName, String tableName) {
 	SynchronizedClient client = clients.get(clientName);
 	SynchronizedTable table = client.getTable(tableName);
+
+	output.println(String.format("table properties: %s",
+		table.getProperties()));
+	output.println("column properties:");
+
+	List<Column> columns = new ArrayList<Column>(table.getColumns());
+	Collections.sort(columns);
+	for (Column column : columns) {
+	    output.println(String.format("    %s %s", column.getName(),
+		    column.getProperties()));
+	}
+
 	output.println(String.format("modification: %s",
 		table.getModificationNumber()));
+
 	List<SynchronizedRow> rows = new ArrayList<SynchronizedRow>(
 		table.getRows());
 	Collections.sort(rows, TestUtils.rowComparator);
