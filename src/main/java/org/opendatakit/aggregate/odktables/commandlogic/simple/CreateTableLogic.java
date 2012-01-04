@@ -3,6 +3,7 @@ package org.opendatakit.aggregate.odktables.commandlogic.simple;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.opendatakit.aggregate.odktables.client.entity.Column;
 import org.opendatakit.aggregate.odktables.client.exception.AggregateInternalErrorException;
 import org.opendatakit.aggregate.odktables.command.simple.CreateTable;
 import org.opendatakit.aggregate.odktables.commandlogic.CommandLogic;
@@ -71,8 +72,7 @@ public class CreateTableLogic extends CommandLogic<CreateTable> {
 		    aggregateUserIdentifier, createTable.getTableName(), false,
 		    null, cc);
 	    entitiesToSave.add(entry);
-	    for (org.opendatakit.aggregate.odktables.client.entity.Column clientColumn : createTable
-		    .getColumns()) {
+	    for (Column clientColumn : createTable.getColumns()) {
 		InternalColumn column = new InternalColumn(
 			entry.getAggregateIdentifier(), clientColumn.getName(),
 			clientColumn.getType(), clientColumn.isNullable(),
