@@ -188,6 +188,10 @@ public class ClientTestDriver {
 		updateSynchronizedRows(arguments);
 	    } else if (command.equals("synchronize")) {
 		synchronize(arguments);
+	    } else if (command.equals("updateColumnProps")) {
+		updateColumnProps(arguments);
+	    } else if (command.equals("updateTableProps")) {
+		updateTableProps(arguments);
 	    } else if (command.equals("printTable")) {
 		printTable(arguments);
 	    } else {
@@ -616,6 +620,85 @@ public class ClientTestDriver {
 		table.insertRow(row);
 	    }
 	}
+    }
+
+    private void updateTableProps(List<String> arguments)
+	    throws ClientProtocolException, AggregateInternalErrorException,
+	    UserDoesNotExistException, TableDoesNotExistException,
+	    PermissionDeniedException, IOException {
+	if (arguments.size() != 3)
+	    throw new IllegalArgumentException(
+		    "Bad arguments to updateTableProps: " + arguments);
+
+	String clientName = arguments.get(0);
+	String tableName = arguments.get(1);
+	String properties = arguments.get(2);
+	updateTableProps(clientName, tableName, properties);
+    }
+
+    private void updateTableProps(String clientName, String tableName,
+	    String properties) throws ClientProtocolException,
+	    AggregateInternalErrorException, UserDoesNotExistException,
+	    IOException, TableDoesNotExistException, PermissionDeniedException {
+	SynchronizedClient client = clients.get(clientName);
+	SynchronizedTable table = client.getTable(tableName);
+
+	conn.setUserID(clientName);
+	conn.updateTableProperties(tableName, properties);
+
+	table.setProperties(properties);
+    }
+
+    private void updateColumnProps(List<String> arguments)
+	    throws ClientProtocolException, AggregateInternalErrorException,
+	    UserDoesNotExistException, TableDoesNotExistException,
+	    PermissionDeniedException, ColumnDoesNotExistException, IOException {
+	if (arguments.size() != 2)
+	    throw new IllegalArgumentException(
+		    "Bad arguments to updateColumnProps: " + arguments);
+
+	String clientName = arguments.get(0);
+	String tableName = arguments.get(1);
+	Map<String, String> columnsToProps = new HashMap<String, String>();
+	String inputLine;
+	while ((inputLine = input.findInLine("    \\w+ \\S+ *")) != null) {
+	    StringTokenizer st = new StringTokenizer(inputLine);
+
+	    String name = st.nextToken();
+	    String columnProps = st.nextToken();
+
+	    columnsToProps.put(name, columnProps);
+
+	    // advance scanner
+	    input.nextLine();
+	}
+	updateColumnProps(clientName, tableName, columnsToProps);
+    }
+
+    private void updateColumnProps(String clientName, String tableName,
+	    Map<String, String> columnsToProps) throws ClientProtocolException,
+	    AggregateInternalErrorException, UserDoesNotExistException,
+	    IOException, TableDoesNotExistException, PermissionDeniedException,
+	    ColumnDoesNotExistException {
+	SynchronizedClient client = clients.get(clientName);
+	SynchronizedTable table = client.getTable(tableName);
+
+	conn.setUserID(clientName);
+	conn.updateColumnProperties(tableName, columnsToProps);
+
+	List<Column> columns = table.getColumns();
+	Map<String, Column> names = new HashMap<String, Column>();
+	for (Column column : columns)
+	    names.put(column.getName(), column);
+
+	for (Entry<String, String> entry : columnsToProps.entrySet()) {
+	    Column column = names.get(entry.getKey());
+	    String properties = entry.getValue();
+	    Column newColumn = new Column(column.getName(), column.getType(),
+		    column.isNullable(), properties);
+	    names.put(column.getName(), newColumn);
+	}
+	table.setColumns(new ArrayList<Column>(names.values()));
     }
 
     private void printTable(List<String> arguments) {
