@@ -39,6 +39,10 @@ public class SynchronizedTable {
 	return entry.getAggregateTableIdentifier();
     }
 
+    public String getProperties() {
+	return entry.getProperties();
+    }
+
     public void setAggregateTableIdentifer(String value) {
 	entry = new TableEntry(null, value, entry.getTableID(),
 		entry.getTableName(), entry.getProperties(),
