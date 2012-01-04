@@ -43,6 +43,13 @@ public class SynchronizedTable {
 	return entry.getProperties();
     }
 
+    public void setProperties(String properties) {
+	entry = new TableEntry(entry.getUser(),
+		entry.getAggregateTableIdentifier(), entry.getTableID(),
+		entry.getTableName(), properties, entry.getColumns(),
+		entry.isSynchronized());
+    }
+
     public void setAggregateTableIdentifer(String value) {
 	entry = new TableEntry(null, value, entry.getTableID(),
 		entry.getTableName(), entry.getProperties(),
@@ -59,6 +66,13 @@ public class SynchronizedTable {
 
     public List<Column> getColumns() {
 	return entry.getColumns();
+    }
+
+    public void setColumns(List<Column> columns) {
+	entry = new TableEntry(entry.getUser(),
+		entry.getAggregateTableIdentifier(), entry.getTableID(),
+		entry.getTableName(), entry.getProperties(), columns,
+		entry.isSynchronized());
     }
 
     public void insertRow(SynchronizedRow row) {
