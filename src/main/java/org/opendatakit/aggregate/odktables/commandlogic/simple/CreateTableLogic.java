@@ -41,12 +41,15 @@ public class CreateTableLogic extends CommandLogic<CreateTable> {
 	List<TypedEntity> entitiesToSave = new ArrayList<TypedEntity>();
 	String tableID;
 	try {
+	    // get relation instances
 	    Users users = Users.getInstance(cc);
 	    UserTableMappings cursors = UserTableMappings.getInstance(cc);
 
+	    // get request data
 	    tableID = createTable.getTableID();
 	    String requestingUserID = createTable.getRequestingUserID();
 
+	    // retrieve request user
 	    InternalUser requestingUser = users
 		    .query("CreateTableLogic.execute")
 		    .equal(Users.USER_ID, requestingUserID).get();
@@ -66,13 +69,14 @@ public class CreateTableLogic extends CommandLogic<CreateTable> {
 	    // Create table
 	    InternalTableEntry entry = new InternalTableEntry(
 		    aggregateUserIdentifier, createTable.getTableName(), false,
-		    cc);
+		    null, cc);
 	    entitiesToSave.add(entry);
 	    for (org.opendatakit.aggregate.odktables.client.entity.Column clientColumn : createTable
 		    .getColumns()) {
 		InternalColumn column = new InternalColumn(
 			entry.getAggregateIdentifier(), clientColumn.getName(),
-			clientColumn.getType(), clientColumn.isNullable(), cc);
+			clientColumn.getType(), clientColumn.isNullable(),
+			null, cc);
 		entitiesToSave.add(column);
 	    }
 	    InternalUserTableMapping mapping = new InternalUserTableMapping(
