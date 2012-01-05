@@ -37,7 +37,7 @@ tableName: people, userName: user1
 cloneSynchronizedTable user2 people
 
 printTable user2 people
-table properties: 
+table properties: null
 column properties:
     age null
     name null
@@ -73,7 +73,7 @@ modification: 2
 synchronize user2 people
 
 printTable user2 people
-table properties: 
+table properties: null
 column properties:
     age null
     name null
@@ -91,7 +91,7 @@ modification: 2
 updateSynchronizedRows user2 people
 
 printTable user2 people
-table properties: 
+table properties: null
 column properties:
     age null
     name null
