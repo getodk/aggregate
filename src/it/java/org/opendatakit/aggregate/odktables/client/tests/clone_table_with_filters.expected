@@ -12,7 +12,7 @@ setTablePermissions user1 user2 people true false false
 cloneSynchronizedTableWithFilters user2 people
     
 printTable user2 people
-table properties: 
+table properties: null
 column properties:
     age null
     name null
@@ -33,7 +33,7 @@ removeTableSynchronization user2 people
 cloneSynchronizedTable user2 people
 
 printTable user2 people
-table properties: 
+table properties: null
 column properties:
     age null
     name null
@@ -58,7 +58,7 @@ removeTableSynchronization user2 people
 cloneSynchronizedTableWithFilters user2 people
 
 printTable user2 people
-table properties: 
+table properties: null
 column properties:
     age null
     name null
@@ -75,7 +75,7 @@ insertSynchronizedRows user1 people
 synchronize user2 people
 
 printTable user2 people
-table properties: 
+table properties: null
 column properties:
     age null
     name null
