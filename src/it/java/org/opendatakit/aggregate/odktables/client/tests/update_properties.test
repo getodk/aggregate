@@ -1,0 +1,71 @@
+# Set up
+createUser user1
+createUser user2
+
+createSynchronizedTable user1 people {'key':'0'}
+    name STRING false {'key':'0'}
+    age INTEGER false {'key':'0'}
+    weight DECIMAL false {'key':'0'}
+
+setTablePermissions user1 user2 people true false false
+
+# Test update table properties
+updateTableProps user1 people {'key':'1'}
+    
+printTable user1 people
+    
+# Test user can't update properties of non-existent table
+updateTableProps user1 nosuchtable {'key':'xxxx'}
+
+# Test user without permission can't update properties
+cloneSynchronizedTable user2 people
+
+updateTableProps user2 people {'key':'xxxx'}
+
+# Test user with permission can update properties
+setTablePermissions user1 user2 people true true false
+
+updateTableProps user2 people {'key':'xxxx'}
+
+printTable user2 people
+
+removeTableSynchronization user2 people
+
+# Test updating column properties
+updateColumnProps user1 people
+    name {'key':'1'}
+    age {'key':'1'}
+	
+printTable user1 people
+
+# Test can't update column properties without permission
+setTablePermissions user1 user2 people true false false
+
+cloneSynchronizedTable user2 people
+
+updateColumnProps user2 people
+    name {'key':'1'}
+    
+# Test can update properties with permission
+setTablePermissions user1 user2 people true true false
+
+updateColumnProps user2 people
+    name {'key':'1'}
+    
+printTable user2 people
+    
+removeTableSynchronization user2 people
+
+# Test can't update column properties of non-existent columns
+updateColumnProps user1 people
+    nosuchcol {'key':'xxxx'}
+    
+# Test can't update column properties of non-existent table
+updateColumnProps user1 nosuchtable
+    name {'key':'xxxx'}
+
+# Clean up
+setTablePermissions user1 user2 people false false false
+deleteSynchronizedTable user1 people
+deleteUser user1
+deleteUser user2

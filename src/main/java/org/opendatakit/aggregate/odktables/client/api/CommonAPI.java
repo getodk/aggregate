@@ -342,7 +342,7 @@ public class CommonAPI {
     }
 
     /**
-     * Not implemented. Overwrite the properties associated with a table.
+     * Overwrite the properties associated with a table.
      * 
      * @param tableID
      *            the client's identifier for a table
@@ -371,7 +371,7 @@ public class CommonAPI {
     }
 
     /**
-     * Not implemented. Overwrite the properties associated with a column.
+     * Overwrite the properties associated with a column.
      * 
      * @param tableID
      *            the client's identifier for a table

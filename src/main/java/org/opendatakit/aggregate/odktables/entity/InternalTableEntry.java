@@ -9,7 +9,8 @@ import org.opendatakit.common.web.CallingContext;
 /**
  * <p>
  * An InternalTableEntry is a (aggregateTableIdentifier, ownerAggregate
- * Identifier, tableName, modificationNumber, isSynchronized) tuple, where
+ * Identifier, tableName, modificationNumber, isSynchronized, properties) tuple,
+ * where
  * <ul>
  * <li>aggregateTableIdentifier: the globally unique identifer of a table</li>
  * <li>ownerAggregate Identifier: the globally unique identifier of the user who
@@ -18,6 +19,7 @@ import org.opendatakit.common.web.CallingContext;
  * <li>modificationNumber: the current modification number. This should be
  * incremented every time the table is edited.</li>
  * <li>isSynchronized: true if the table is a synchronized table</li>
+ * <li>properties: arbitrary metadata the client wants to store on the table</li>
  * </ul>
  * </p>
  * 
@@ -27,13 +29,14 @@ import org.opendatakit.common.web.CallingContext;
 public class InternalTableEntry extends TypedEntity {
 
     public InternalTableEntry(String aggregateOwnerIdentifier,
-	    String tableName, boolean isSynchronized, CallingContext cc)
-	    throws ODKDatastoreException {
+	    String tableName, boolean isSynchronized, String properties,
+	    CallingContext cc) throws ODKDatastoreException {
 	super(TableEntries.getInstance(cc).newEntity());
 	setAggregateOwnerIdentifier(aggregateOwnerIdentifier);
 	setName(tableName);
 	setModificationNumber(0);
 	setSynchronized(isSynchronized);
+	setProperties(properties);
     }
 
     public InternalTableEntry(Entity entity) throws ODKDatastoreException {
@@ -72,13 +75,22 @@ public class InternalTableEntry extends TypedEntity {
 	entity.set(TableEntries.IS_SYNCHRONIZED, value);
     }
 
+    public String getProperties() {
+	return entity.getString(TableEntries.PROPERTIES);
+    }
+
+    public void setProperties(String value) {
+	entity.set(TableEntries.PROPERTIES, value);
+    }
+
     @Override
     public String toString() {
 	return String
-		.format("InternalTableEntry[aggregateIdentifier=%s, aggregateOwnerIdentifier=%s, name=%s, modificationNumber=%s, isSynchronized=%s",
+		.format("InternalTableEntry[aggregateIdentifier=%s, aggregateOwnerIdentifier=%s, name=%s, modificationNumber=%s, isSynchronized=%s, properties=%s]",
 			getAggregateIdentifier(),
 			getAggregateOwnerIdentifier(), getName(),
-			getModificationNumber(), isSynchronized());
+			getModificationNumber(), isSynchronized(),
+			getProperties());
     }
 
     public static InternalTableEntry fromEntity(Entity entity)
