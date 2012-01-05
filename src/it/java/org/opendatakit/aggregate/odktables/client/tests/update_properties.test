@@ -27,7 +27,7 @@ setTablePermissions user1 user2 people true true false
 
 updateTableProps user2 people {'key':'xxxx'}
 
-printTable user1 people
+printTable user2 people
 
 removeTableSynchronization user2 people
 
@@ -52,7 +52,7 @@ setTablePermissions user1 user2 people true true false
 updateColumnProps user2 people
     name {'key':'1'}
     
-printTable user1 people
+printTable user2 people
     
 removeTableSynchronization user2 people
 
