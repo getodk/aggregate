@@ -115,7 +115,7 @@ public class ListAllTablesLogic extends CommandLogic<ListAllTables> {
 
 		// retrieve the columns for the table
 		List<InternalColumn> internalColumns = columns
-			.query("QueryForTablesLogic.execute")
+			.query("ListAllTablesLogic.execute")
 			.equal(Columns.AGGREGATE_TABLE_IDENTIFIER,
 				aggregateTableIdentifier).execute();
 		List<Column> clientColumns = new ArrayList<Column>();
