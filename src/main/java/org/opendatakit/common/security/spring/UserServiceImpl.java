@@ -38,7 +38,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.security.authentication.encoding.MessageDigestPasswordEncoder;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.GrantedAuthorityImpl;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 public class UserServiceImpl implements org.opendatakit.common.security.UserService, InitializingBean {
@@ -195,14 +195,14 @@ public class UserServiceImpl implements org.opendatakit.common.security.UserServ
 		}
   }
 
-  private synchronized User internalGetUser(String uriUser, Collection<GrantedAuthority> authorities) {
+  private synchronized User internalGetUser(String uriUser, Collection<? extends GrantedAuthority> authorities) {
 	User match = activeUsers.get(uriUser);
 	if ( match != null ) {
 		return match; 
 	} else if ( User.ANONYMOUS_USER.equals(uriUser) ) {
 		// ignored passed-in authorities
 		Set<GrantedAuthority> anonGroups = new HashSet<GrantedAuthority>();
-		anonGroups.add(new GrantedAuthorityImpl(GrantedAuthorityName.USER_IS_ANONYMOUS.name()));
+		anonGroups.add(new SimpleGrantedAuthority(GrantedAuthorityName.USER_IS_ANONYMOUS.name()));
 		match = new UserImpl(User.ANONYMOUS_USER, 
 				User.ANONYMOUS_USER_NICKNAME, anonGroups, datastore );
 		activeUsers.put(uriUser, match);
@@ -211,7 +211,7 @@ public class UserServiceImpl implements org.opendatakit.common.security.UserServ
 		// ignored passed-in authorities
 		Set<GrantedAuthority> daemonGroups = new HashSet<GrantedAuthority>();
 		daemonGroups = new HashSet<GrantedAuthority>();
-		daemonGroups.add(new GrantedAuthorityImpl(GrantedAuthorityName.USER_IS_DAEMON.name()));
+		daemonGroups.add(new SimpleGrantedAuthority(GrantedAuthorityName.USER_IS_DAEMON.name()));
 		match = new UserImpl(User.DAEMON_USER, 
 				User.DAEMON_USER_NICKNAME, daemonGroups, datastore );
 		activeUsers.put(uriUser, match);

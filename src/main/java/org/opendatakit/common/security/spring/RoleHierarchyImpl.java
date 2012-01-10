@@ -50,7 +50,7 @@ import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
 import org.springframework.security.authentication.encoding.MessageDigestPasswordEncoder;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
-import org.springframework.security.core.authority.GrantedAuthorityImpl;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 /**
  * Much of this implementation is copied verbatim from Spring 3.0.5
@@ -310,7 +310,7 @@ public class RoleHierarchyImpl implements RoleHierarchy, InitializingBean {
 	}
 
 	@Override
-    public Collection<GrantedAuthority> getReachableGrantedAuthorities(Collection<GrantedAuthority> authorities) {
+    public Collection<? extends GrantedAuthority> getReachableGrantedAuthorities(Collection<? extends GrantedAuthority> authorities) {
         if (authorities == null || authorities.isEmpty()) {
             return AuthorityUtils.NO_AUTHORITIES;
         }
@@ -465,7 +465,7 @@ public class RoleHierarchyImpl implements RoleHierarchy, InitializingBean {
         	GrantedAuthorityHierarchyTable.getEntireGrantedAuthorityHierarchy(datastore, user);
         
         for ( Map.Entry<String, TreeSet<String>> e : oneStepRelations.entrySet() ) {
-        	GrantedAuthority higherRole = new GrantedAuthorityImpl(e.getKey());
+        	GrantedAuthority higherRole = new SimpleGrantedAuthority(e.getKey());
             Set<GrantedAuthority> rolesReachableInOneStepSet = null;
 
             if (!rolesReachableInOneStepMap.containsKey(higherRole)) {
@@ -476,7 +476,7 @@ public class RoleHierarchyImpl implements RoleHierarchy, InitializingBean {
             }
 
             for ( String s : e.getValue() ) {
-        		GrantedAuthority lowerRole = new GrantedAuthorityImpl(s);
+        		GrantedAuthority lowerRole = new SimpleGrantedAuthority(s);
         		
                 addReachableRoles(rolesReachableInOneStepSet, lowerRole);
 

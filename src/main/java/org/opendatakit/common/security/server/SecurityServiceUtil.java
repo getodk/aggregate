@@ -48,7 +48,7 @@ import org.opendatakit.common.web.CallingContext;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
 import org.springframework.security.authentication.encoding.MessageDigestPasswordEncoder;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.GrantedAuthorityImpl;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 /**
  * Common utility methods extracted from the AccessConfigurationServlet so they
@@ -61,19 +61,19 @@ public class SecurityServiceUtil {
 
 	private static final Set<String> specialNames = new HashSet<String>();
 
-	public static final GrantedAuthority siteAuth = new GrantedAuthorityImpl(GrantedAuthorityName.GROUP_SITE_ADMINS.name());
+	public static final GrantedAuthority siteAuth = new SimpleGrantedAuthority(GrantedAuthorityName.GROUP_SITE_ADMINS.name());
 	public static final List<String> siteAdministratorGrants;
 
-	public static final GrantedAuthority dataOwnerAuth = new GrantedAuthorityImpl(GrantedAuthorityName.GROUP_FORM_MANAGERS.name());
+	public static final GrantedAuthority dataOwnerAuth = new SimpleGrantedAuthority(GrantedAuthorityName.GROUP_FORM_MANAGERS.name());
 	public static final List<String> dataOwnerGrants;
 	
-	public static final GrantedAuthority dataViewerAuth = new GrantedAuthorityImpl(GrantedAuthorityName.GROUP_DATA_VIEWERS.name());
+	public static final GrantedAuthority dataViewerAuth = new SimpleGrantedAuthority(GrantedAuthorityName.GROUP_DATA_VIEWERS.name());
 	public static final List<String> dataViewerGrants;
 	
-	public static final GrantedAuthority dataCollectorAuth = new GrantedAuthorityImpl(GrantedAuthorityName.GROUP_DATA_COLLECTORS.name());
+	public static final GrantedAuthority dataCollectorAuth = new SimpleGrantedAuthority(GrantedAuthorityName.GROUP_DATA_COLLECTORS.name());
 	public static final List<String> dataCollectorGrants;
 
-	public static final GrantedAuthority anonAuth = new GrantedAuthorityImpl(GrantedAuthorityName.USER_IS_ANONYMOUS.name());
+	public static final GrantedAuthority anonAuth = new SimpleGrantedAuthority(GrantedAuthorityName.USER_IS_ANONYMOUS.name());
 	// special grants for Google Earth work-around 
 	public static final List<String> anonAttachmentViewerGrants;
 	
@@ -190,7 +190,7 @@ public class SecurityServiceUtil {
 				}
 			}
 		}
-		Collection<GrantedAuthority> auths = hierarchy.getReachableGrantedAuthorities(grants);
+		Collection<? extends GrantedAuthority> auths = hierarchy.getReachableGrantedAuthorities(grants);
 		for ( GrantedAuthority auth : auths ) {
 			GrantedAuthorityName name = mapName(auth, badGrants);
 			if ( name != null && !GrantedAuthorityName.permissionsCanBeAssigned(auth.getAuthority()) ) {
@@ -211,7 +211,7 @@ public class SecurityServiceUtil {
 		TreeSet<GrantedAuthorityName> groups = new TreeSet<GrantedAuthorityName>();
 		TreeSet<GrantedAuthorityName> authorities = new TreeSet<GrantedAuthorityName>();
 		groups.add(specialGroup);
-		GrantedAuthority specialAuth = new GrantedAuthorityImpl(specialGroup.name());
+		GrantedAuthority specialAuth = new SimpleGrantedAuthority(specialGroup.name());
 		try {
 			Set<GrantedAuthority> auths = GrantedAuthorityHierarchyTable.getSubordinateGrantedAuthorities(specialAuth, cc);
 			for ( GrantedAuthority auth : auths ) {
@@ -225,7 +225,7 @@ public class SecurityServiceUtil {
 			throw new DatastoreFailureException("Unable to retrieve granted authorities of " + specialGroup.name());
 		}
 		
-		Collection<GrantedAuthority> auths = hierarchy.getReachableGrantedAuthorities(Collections.singletonList(specialAuth));
+		Collection<? extends GrantedAuthority> auths = hierarchy.getReachableGrantedAuthorities(Collections.singletonList(specialAuth));
 		for ( GrantedAuthority auth : auths ) {
 			GrantedAuthorityName name = mapName(auth, badGrants);
 			if ( name != null && !GrantedAuthorityName.permissionsCanBeAssigned(auth.getAuthority()) ) {
@@ -408,7 +408,7 @@ public class SecurityServiceUtil {
 			// remove anything else from database...
 			List<String> empty = Collections.emptyList();
 			for ( String s : authorities ) {
-				GrantedAuthorityHierarchyTable.assertGrantedAuthorityHierarchy(new GrantedAuthorityImpl(s), empty, cc );
+				GrantedAuthorityHierarchyTable.assertGrantedAuthorityHierarchy(new SimpleGrantedAuthority(s), empty, cc );
 			}
 			
 			Map<UserSecurityInfo, String> pkMap = setUsers(users, cc);
@@ -513,7 +513,7 @@ public class SecurityServiceUtil {
 			uriUsers.add(su.getUri());
 		}
 		UserGrantedAuthority.assertGrantedAuthorityMembers(
-				new GrantedAuthorityImpl(GrantedAuthorityName.ROLE_SITE_ACCESS_ADMIN.name()), uriUsers, cc);
+				new SimpleGrantedAuthority(GrantedAuthorityName.ROLE_SITE_ACCESS_ADMIN.name()), uriUsers, cc);
 	}
 
 }
