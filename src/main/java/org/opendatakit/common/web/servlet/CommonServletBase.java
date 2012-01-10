@@ -33,11 +33,11 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.opendatakit.aggregate.constants.ServletConsts;
+import org.opendatakit.common.security.spring.SpringInternals;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.BasicConsts;
 import org.opendatakit.common.web.constants.HtmlConsts;
 import org.opendatakit.common.web.constants.HtmlStrUtil;
-import org.springframework.security.web.WebAttributes;
 import org.springframework.security.web.savedrequest.SavedRequest;
 
 /**
@@ -63,7 +63,7 @@ public abstract class CommonServletBase extends HttpServlet {
   protected String getRedirectUrl(HttpServletRequest request) {
     HttpSession session = request.getSession(false);
     if(session != null) {
-        SavedRequest savedRequest = (SavedRequest) session.getAttribute(WebAttributes.SAVED_REQUEST);
+        SavedRequest savedRequest = (SavedRequest) session.getAttribute(SpringInternals.SAVED_REQUEST);
         if(savedRequest != null) {
             return savedRequest.getRedirectUrl();
         }

@@ -33,7 +33,7 @@ import org.opendatakit.common.security.User;
 import org.opendatakit.common.security.UserService;
 import org.opendatakit.common.web.CallingContext;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.GrantedAuthorityImpl;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 /**
  * Persistence layer object for recording the authorities directly granted to 
@@ -95,7 +95,7 @@ public final class UserGrantedAuthority extends CommonFieldsBase {
 	}
 	
 	private final GrantedAuthority getGrantedAuthority() {
-		return new GrantedAuthorityImpl(this.getStringField(GRANTED_AUTHORITY));
+		return new SimpleGrantedAuthority(this.getStringField(GRANTED_AUTHORITY));
 	}
 	
 	private final void setGrantedAuthority(GrantedAuthority value) {
@@ -127,7 +127,7 @@ public final class UserGrantedAuthority extends CommonFieldsBase {
 			q.addFilter(USER, FilterOperation.EQUAL, uriUser);
 			List<?> values = q.executeDistinctValueForDataField(GRANTED_AUTHORITY);
 			for ( Object value : values ) {
-				authorized.add(new GrantedAuthorityImpl((String) value));
+				authorized.add(new SimpleGrantedAuthority((String) value));
 			}
 		}
 		return authorized;
@@ -251,7 +251,7 @@ public final class UserGrantedAuthority extends CommonFieldsBase {
 			for ( String group : desiredGroups ) {
 				UserGrantedAuthority t = ds.createEntityUsingRelation(relation, user);
 				t.setUser(uriUser);
-				t.setGrantedAuthority(new GrantedAuthorityImpl(group));
+				t.setGrantedAuthority(new SimpleGrantedAuthority(group));
 				added.add(t);
 			}
 

@@ -27,7 +27,7 @@ import org.opendatakit.common.security.common.GrantedAuthorityName;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.GrantedAuthorityImpl;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -92,7 +92,7 @@ public class WrappingOpenIDAuthenticationProvider extends OpenIDAuthenticationPr
 		
 		authorities.addAll(userDetails.getAuthorities());
 		// add the AUTH_OPENID granted authority,
-		authorities.add(new GrantedAuthorityImpl(GrantedAuthorityName.AUTH_OPENID.toString()));
+		authorities.add(new SimpleGrantedAuthority(GrantedAuthorityName.AUTH_OPENID.toString()));
 
 		// attempt to look user up in registered users table...
 		String username = null;
