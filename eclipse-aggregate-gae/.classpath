@@ -52,7 +52,6 @@
 	<classpathentry kind="lib" path="war/WEB-INF/lib/httpcore-4.1.2.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/httpmime-4.1.2.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/jai-imageio-core-standalone-1.2-pre-dr-b04-2010-04-30.jar"/>
-	<classpathentry kind="lib" path="C:/Users/user/Downloads/selenium-java-2.8.0/selenium-2.8.0/selenium-java-2.8.0.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/spring-aop-3.1.0.RELEASE.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/spring-asm-3.1.0.RELEASE.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/spring-aspects-3.1.0.RELEASE.jar"/>
@@ -66,7 +65,6 @@
 	<classpathentry kind="lib" path="war/WEB-INF/lib/spring-jdbc-3.1.0.RELEASE.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/spring-tx-3.1.0.RELEASE.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/spring-web-3.1.0.RELEASE.jar"/>
-	<classpathentry kind="con" path="com.google.appengine.eclipse.core.GAE_CONTAINER"/>
 	<classpathentry kind="con" path="com.google.gwt.eclipse.core.GWT_CONTAINER"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/commons-codec-1.6.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/commons-lang-2.6.jar"/>
@@ -86,5 +84,7 @@
 	<classpathentry kind="lib" path="war/WEB-INF/lib/spring-security-crypto-3.1.0.odk.SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/spring-security-web-3.1.0.odk.SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/xml-apis-1.4.01.jar"/>
+	<classpathentry kind="con" path="com.google.appengine.eclipse.core.GAE_CONTAINER/appengine-java-sdk-1.6.1"/>
+	<classpathentry kind="lib" path="C:/Users/user/Documentsss/selenium/selenium-2.16.1/selenium-java-2.16.1.jar"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>
