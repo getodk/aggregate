@@ -6,24 +6,24 @@ import org.opendatakit.aggregate.client.widgets.ClosePopupButton;
 import org.opendatakit.aggregate.constants.common.BookHelpConsts;
 
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
+import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class HelpBookPopup extends PopupPanel {
-  private FlowPanel panel;
+  private VerticalPanel panel;
 
   public HelpBookPopup() {
     super(false);
-    panel = new FlowPanel();
+    panel = new VerticalPanel();
 
     // populate the panel
     panel.add(new ClosePopupButton(this));
 
     BookHelpConsts[] consts = BookHelpConsts.values();
 
-    FlowPanel content = new FlowPanel();
+    VerticalPanel content = new VerticalPanel();
     for (int i = 0; i < consts.length; i++) {
       content.add(new HTML("<h2 id=\"form_name\">" + consts[i].getTitle() + "</h2>"));
       
