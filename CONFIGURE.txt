@@ -35,8 +35,8 @@ Windows / Preferences:
 
   Google / App Engine:
   
-    Be sure there is an App Engine 1.5.5 or higher SDK defined.
-	If the default App Engine version is not 1.5.5, you may need to 
+    Be sure there is an App Engine 1.6.1 or higher SDK defined.
+	If the default App Engine version is not 1.6.1, you may need to 
 	tweak with the project settings to get the newer jars to be added.
 
   Google / Web Toolkit:
@@ -236,7 +236,7 @@ A minimal file is:
   	  <activation><activeByDefault>true</activeByDefault></activation>
   	  <properties>
 		<temp.home>C:\\Users\\user\\AppData\\Local\\Temp</temp.home>
-	    <gae.home>\C:\\Program Files (x86)\\Google AE\\appengine-java-sdk-1.5.5</gae.home>
+	    <gae.home>\C:\\Program Files (x86)\\Google AE\\appengine-java-sdk-1.6.1</gae.home>
 		<bitrock.home>C:\Program Files (x86)\BitRock InstallBuilder Professional 8.0.1</bitrock.home>
 	    <keystore.propertyfile>\C:\\Users\\user\\keystore\\jarSignerDetails.txt</keystore.propertyfile>
 		<headless.operation>no</headless.operation>
@@ -274,9 +274,9 @@ Windows / Preferences:
 
   Google / App Engine:
   
-    Be sure there is an App Engine 1.5.5 or higher SDK defined.
+    Be sure there is an App Engine 1.6.1 or higher SDK defined.
 	The default GWT version should match that in the maven 
-	pom.xml (currently 1.5.5).
+	pom.xml (currently 1.6.1).
 
   Google / Web Toolkit:
   

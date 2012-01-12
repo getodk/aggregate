@@ -17,7 +17,7 @@
     	<itFormsDirectory>${project.basedir}/../src/it/testfiles/forms</itFormsDirectory>
     	<itSubmissionsDirectory>${project.basedir}/../src/it/testfiles/submissions</itSubmissionsDirectory>
     	<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<gooogle.appengine.sdk.version>1.5.5</gooogle.appengine.sdk.version> <!-- NOTE: change gae.home too! -->
+		<gooogle.appengine.sdk.version>1.6.1</gooogle.appengine.sdk.version> <!-- NOTE: change gae.home too! -->
 		<google.gdata.version>1.46.0</google.gdata.version>
 		<google.gwt.version>2.4.0</google.gwt.version>
 		<emma.maven.plugin.version>1.2</emma.maven.plugin.version>
@@ -31,12 +31,15 @@
 		<maven.war.plugin.version>2.1.1</maven.war.plugin.version>
 		<maven.antrun.plugin.version>1.6</maven.antrun.plugin.version>
 		<maven.compiler.plugin.version>2.3.2</maven.compiler.plugin.version>
+		<junit.version>4.10</junit.version>
 		<org.springframework.version>3.1.0.RELEASE</org.springframework.version>
 		<oauth.signpost.version>1.2.1.1</oauth.signpost.version>
 		<org.slf4j.version>1.6.4</org.slf4j.version>
+		<log4j.version>1.2.16</log4j.version>
 		<org.springframework.security.version>3.1.0.odk.SNAPSHOT</org.springframework.security.version> <!-- could do 3.1.0.RELEASE -->
 		<openid4java.version>0.9.6.662.odk.SNAPSHOT</openid4java.version>
 		<org.springframework.security.openid.version>3.1.0.odk.SNAPSHOT</org.springframework.security.openid.version>
+		<org.seleniumhq.version>2.16.1</org.seleniumhq.version>
 		<!--
 			keystore.propertyfile - define this in your settings.xml - the
 			location of the properties file for the keystore
@@ -170,6 +173,13 @@
 	</pluginRepositories>
 	<dependencies>
 		<dependency>
+		  <groupId>commons-logging</groupId>
+		  <artifactId>commons-logging</artifactId>
+		  <version>1.1.1</version>
+		  <type>jar</type>
+		  <scope>compile</scope> 
+		</dependency>
+		<dependency>
 		  <groupId>aopalliance</groupId>
 		  <artifactId>aopalliance</artifactId>
 		  <version>1.0</version>
@@ -206,6 +216,12 @@
 			<groupId>com.jolbox</groupId>
 			<artifactId>bonecp</artifactId>
 			<version>0.7.1.RELEASE</version>
+		  <exclusions>
+			<exclusion>
+			  <groupId>org.slf4j</groupId>
+			  <artifactId>slf4j-api</artifactId>
+			</exclusion>
+		  </exclusions>
 		</dependency>
 		<dependency>
 		  <groupId>commons-codec</groupId>
@@ -225,13 +241,6 @@
 		  <groupId>commons-lang</groupId>
 		  <artifactId>commons-lang</artifactId>
 		  <version>2.6</version>
-		  <type>jar</type>
-		  <scope>compile</scope>
-		</dependency>
-		<dependency>
-		  <groupId>commons-logging</groupId>
-		  <artifactId>commons-logging</artifactId>
-		  <version>1.1.1</version>
 		  <type>jar</type>
 		  <scope>compile</scope>
 		</dependency>
@@ -424,6 +433,16 @@
 			<groupId>org.openid4java</groupId>
 			<artifactId>openid4java-nodeps</artifactId>
 			<version>${openid4java.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>jcl-over-slf4j</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-log4j12</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 		  <groupId>org.springframework</groupId>
@@ -535,10 +554,23 @@
 			<artifactId>slf4j-jcl</artifactId>
 			<version>${org.slf4j.version}</version>
 		</dependency>
-		<dependency>
+		<dependency> <!-- exclude this from the war -->
 			<groupId>org.slf4j</groupId>
-			<artifactId>log4j-over-slf4j</artifactId>
+			<artifactId>jcl-over-slf4j</artifactId>
 			<version>${org.slf4j.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency> <!-- exclude this from the war -->
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-log4j12</artifactId>
+			<version>${org.slf4j.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency> <!-- exclude this from the war -->
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+			<version>${log4j.version}</version>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.security</groupId>
@@ -554,6 +586,16 @@
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-openid</artifactId>
 			<version>${org.springframework.security.openid.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>jcl-over-slf4j</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-log4j12</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.security</groupId>
@@ -581,7 +623,7 @@
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>4.10</version>
+			<version>${junit.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -606,13 +648,19 @@
 		<dependency>
 		  <groupId>org.seleniumhq.selenium</groupId>
 		  <artifactId>selenium-java</artifactId>
-		  <version>2.16.1</version>
+		  <version>${org.seleniumhq.version}</version>
+		  <scope>test</scope>
+		</dependency>
+ 	    <dependency>
+		  <groupId>org.seleniumhq.selenium</groupId>
+		  <artifactId>selenium-server</artifactId>
+ 		  <version>${org.seleniumhq.version}</version>
 		  <scope>test</scope>
 		</dependency>
 		<dependency>
 		  <groupId>org.seleniumhq.selenium</groupId>
 		  <artifactId>selenium-firefox-driver</artifactId>
-		  <version>2.16.1</version>
+		  <version>${org.seleniumhq.version}</version>
 		  <scope>test</scope>
 		</dependency>
 		<dependency>
@@ -931,6 +979,7 @@
 							<additionalClasspathElement>${selenium.libs}/jna-platform-3.4.0.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/json-20080701.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/junit-dep-4.10.jar</additionalClasspathElement>
+							<additionalClasspathElement>${localRepository}/junit/junit/${junit.version}/junit-${junit.version}.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/nekohtml-1.9.15.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/operadriver-v0.8.1.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/protobuf-java-2.4.1.jar</additionalClasspathElement>
