@@ -219,11 +219,13 @@ public class UploadSubmissionsWorkerImpl {
     List<Submission> submissions = querySubmissionsDateRange(startDate, endDate, lastUploadKey);
     
     if (submissions.isEmpty()) {
+      logger.info("There are no submissions available for upload");
       // there are no submissions so uploading is complete
       // this persists pFsc
       pExtService.setUploadCompleted(cc);
       return (pEsOption == ExternalServicePublicationOption.UPLOAD_N_STREAM);
     } else {
+      logger.info("There are " + submissions.size() + " submissions available for upload");
       // this persists pFsc
       sendSubmissions(submissions, false);
     }
@@ -242,7 +244,10 @@ public class UploadSubmissionsWorkerImpl {
     String lastStreamedKey = pFsc.getLastStreamingKey();
     List<Submission> submissions = querySubmissionsStartDate(startDate, lastStreamedKey);
 
-    if (!submissions.isEmpty()) {
+    if (submissions.isEmpty()) {
+      logger.info("There are no submissions available for streaming");
+    } else {
+      logger.info("There are " + submissions.size() + " submissions available for streaming");
       // this persists pFsc
       sendSubmissions(submissions, true);
       return true;

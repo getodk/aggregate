@@ -36,9 +36,9 @@
 		<oauth.signpost.version>1.2.1.1</oauth.signpost.version>
 		<org.slf4j.version>1.6.4</org.slf4j.version>
 		<log4j.version>1.2.16</log4j.version>
-		<org.springframework.security.version>3.1.0.odk.SNAPSHOT</org.springframework.security.version> <!-- could do 3.1.0.RELEASE -->
-		<openid4java.version>0.9.6.662.odk.SNAPSHOT</openid4java.version>
-		<org.springframework.security.openid.version>3.1.0.odk.SNAPSHOT</org.springframework.security.openid.version>
+		<org.springframework.security.version>3.1.0.odk-SNAPSHOT</org.springframework.security.version> <!-- could do 3.1.0.RELEASE -->
+		<openid4java.version>0.9.6.662.odk-SNAPSHOT</openid4java.version>
+		<org.springframework.security.openid.version>3.1.0.odk-SNAPSHOT</org.springframework.security.openid.version>
 		<org.seleniumhq.version>2.16.1</org.seleniumhq.version>
 		<!--
 			keystore.propertyfile - define this in your settings.xml - the
@@ -58,8 +58,8 @@
 		<module>odk-postgres-unit-settings</module>
 		
 		<!-- aggregate-mysql-specific -->
-		<module>aggregate-mysql</module>
 		<module>mysql-unit-tests</module>
+		<module>aggregate-mysql</module>
 		<!-- aggregate-gae-specific -->
 		<module>gae-unit-tests</module>
 		<module>aggregate-gae</module>
@@ -515,6 +515,16 @@
 		  <groupId>org.springframework</groupId>
 		  <artifactId>spring-test</artifactId>
 		  <version>${org.springframework.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>jcl-over-slf4j</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-log4j12</artifactId>
+				</exclusion>
+			</exclusions>
 		  <scope>test</scope>
 		</dependency>
 		<dependency>
@@ -553,24 +563,6 @@
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-jcl</artifactId>
 			<version>${org.slf4j.version}</version>
-		</dependency>
-		<dependency> <!-- exclude this from the war -->
-			<groupId>org.slf4j</groupId>
-			<artifactId>jcl-over-slf4j</artifactId>
-			<version>${org.slf4j.version}</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency> <!-- exclude this from the war -->
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-log4j12</artifactId>
-			<version>${org.slf4j.version}</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency> <!-- exclude this from the war -->
-			<groupId>log4j</groupId>
-			<artifactId>log4j</artifactId>
-			<version>${log4j.version}</version>
-			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.security</groupId>
@@ -649,12 +641,6 @@
 		  <groupId>org.seleniumhq.selenium</groupId>
 		  <artifactId>selenium-java</artifactId>
 		  <version>${org.seleniumhq.version}</version>
-		  <scope>test</scope>
-		</dependency>
- 	    <dependency>
-		  <groupId>org.seleniumhq.selenium</groupId>
-		  <artifactId>selenium-server</artifactId>
- 		  <version>${org.seleniumhq.version}</version>
 		  <scope>test</scope>
 		</dependency>
 		<dependency>

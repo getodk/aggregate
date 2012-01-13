@@ -2,14 +2,7 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="it"/>
-	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4">
-		<attributes>
-			<attribute name="org.eclipse.jst.component.dependency" value="/WEB-INF/lib"/>
-		</attributes>
-	</classpathentry>
 	<classpathentry excluding="org/opendatakit/common/testing/gae/" kind="src" path="test"/>
-	<classpathentry exported="true" kind="con" path="org.eclipse.jst.j2ee.internal.module.container"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/aopalliance-1.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/apache-mime4j-0.6.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/aspectjrt-1.6.8.jar"/>
@@ -65,26 +58,33 @@
 	<classpathentry kind="lib" path="war/WEB-INF/lib/spring-jdbc-3.1.0.RELEASE.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/spring-tx-3.1.0.RELEASE.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/spring-web-3.1.0.RELEASE.jar"/>
-	<classpathentry kind="con" path="com.google.gwt.eclipse.core.GWT_CONTAINER"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/commons-codec-1.6.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/commons-lang-2.6.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/jdom-1.1.2.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/nekohtml-1.9.15.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/openid4java-nodeps-0.9.6.662.odk.SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/openxri-client-1.2.1.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/openxri-syntax-1.2.1.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/slf4j-api-1.6.4.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/slf4j-jcl-1.6.4.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/spring-security-openid-3.1.0.odk.SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/xalan-2.7.1.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/xercesImpl-2.11.0.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/xmlsec-1.4.6.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/spring-security-config-3.1.0.odk.SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/spring-security-core-3.1.0.odk.SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/spring-security-crypto-3.1.0.odk.SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/spring-security-web-3.1.0.odk.SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/xml-apis-1.4.01.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/openid4java-nodeps-0.9.6.662.odk-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/spring-security-config-3.1.0.odk-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/spring-security-core-3.1.0.odk-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/spring-security-crypto-3.1.0.odk-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/spring-security-openid-3.1.0.odk-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/spring-security-web-3.1.0.odk-SNAPSHOT.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="con" path="org.eclipse.jst.j2ee.internal.module.container"/>
+	<classpathentry kind="con" path="com.google.gwt.eclipse.core.GWT_CONTAINER"/>
 	<classpathentry kind="con" path="com.google.appengine.eclipse.core.GAE_CONTAINER/appengine-java-sdk-1.6.1"/>
 	<classpathentry kind="lib" path="C:/Users/user/Documentsss/selenium/selenium-2.16.1/selenium-java-2.16.1.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4">
+		<attributes>
+			<attribute name="org.eclipse.jst.component.dependency" value="/WEB-INF/lib"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>

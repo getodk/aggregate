@@ -3,7 +3,7 @@ They need to be installed into the local M2_REPO repository.
 
 javarosa-libraries:
 
-mvn install:install-file -Dfile=javarosa-libraries.jar -DgroupId=org.javarosa -DartifactId=javarosa-libraries -Dversion=latest -Dpackaging=jar
+mvn install:install-file -Dfile=javarosa-libraries-latest.jar -DgroupId=org.javarosa -DartifactId=javarosa-libraries -Dversion=latest -Dpackaging=jar
 
 odk-httpclient-gae:
 
@@ -12,23 +12,23 @@ and running 'mvn install' in the GaeHttpClient project.  Or,
 
 mvn install:install-file -Dfile=odk-httpclient-gae-1.0.jar -DgroupId=org.opendatakit -DartifactId=odk-httpclient-gae -Dversion=1.0 -Dpackaging=jar
 
-openid4java-nodeps-0.9.6.662.odk.SNAPSHOT:
+openid4java-nodeps-0.9.6.662.odk-SNAPSHOT:
 
-mvn install:install-file -Dfile=openid4java-parent-pom.xml -DgroupId=org.openid4java -DartifactId=openid4java-parent -Dversion=0.9.6.662.odk.SNAPSHOT -Dpackaging=pom
+mvn install:install-file -Dfile=openid4java-parent-pom.xml -DgroupId=org.openid4java -DartifactId=openid4java-parent -Dversion=0.9.6.662.odk-SNAPSHOT -Dpackaging=pom
 
-mvn install:install-file -Dfile=openid4java-nodeps-0.9.6.662.odk.SNAPSHOT.jar -DgroupId=org.openid4java -DartifactId=openid4java-nodeps -Dversion=0.9.6.662.odk.SNAPSHOT -Dpackaging=jar
+mvn install:install-file -Dfile=openid4java-nodeps-0.9.6.662.odk-SNAPSHOT.jar -DgroupId=org.openid4java -DartifactId=openid4java-nodeps -Dversion=0.9.6.662.odk-SNAPSHOT -Dpackaging=jar
 
-spring-security-openid-3.1.0.odk.SNAPSHOT:
+spring-security-openid-3.1.0.odk-SNAPSHOT:
 
-mvn install:install-file -Dfile=spring-security-crypto-3.1.0.odk.SNAPSHOT.jar -DgroupId=org.springframework.security -DartifactId=spring-security-crypto -Dversion=3.1.0.odk.SNAPSHOT -Dpackaging=jar
+mvn install:install-file -Dfile=spring-security-crypto-3.1.0.odk-SNAPSHOT.jar -DgroupId=org.springframework.security -DartifactId=spring-security-crypto -Dversion=3.1.0.odk-SNAPSHOT -Dpackaging=jar
 
-mvn install:install-file -Dfile=spring-security-config-3.1.0.odk.SNAPSHOT.jar -DgroupId=org.springframework.security -DartifactId=spring-security-config -Dversion=3.1.0.odk.SNAPSHOT -Dpackaging=jar
+mvn install:install-file -Dfile=spring-security-config-3.1.0.odk-SNAPSHOT.jar -DgroupId=org.springframework.security -DartifactId=spring-security-config -Dversion=3.1.0.odk-SNAPSHOT -Dpackaging=jar
 
-mvn install:install-file -Dfile=spring-security-core-3.1.0.odk.SNAPSHOT.jar -DgroupId=org.springframework.security -DartifactId=spring-security-core -Dversion=3.1.0.odk.SNAPSHOT -Dpackaging=jar
+mvn install:install-file -Dfile=spring-security-core-3.1.0.odk-SNAPSHOT.jar -DgroupId=org.springframework.security -DartifactId=spring-security-core -Dversion=3.1.0.odk-SNAPSHOT -Dpackaging=jar
 
-mvn install:install-file -Dfile=spring-security-web-3.1.0.odk.SNAPSHOT.jar -DgroupId=org.springframework.security -DartifactId=spring-security-web -Dversion=3.1.0.odk.SNAPSHOT -Dpackaging=jar
+mvn install:install-file -Dfile=spring-security-web-3.1.0.odk-SNAPSHOT.jar -DgroupId=org.springframework.security -DartifactId=spring-security-web -Dversion=3.1.0.odk-SNAPSHOT -Dpackaging=jar
 
-mvn install:install-file -Dfile=spring-security-openid-3.1.0.odk.SNAPSHOT.jar -DgroupId=org.springframework.security -DartifactId=spring-security-openid -Dversion=3.1.0.odk.SNAPSHOT -Dpackaging=jar
+mvn install:install-file -Dfile=spring-security-openid-3.1.0.odk-SNAPSHOT.jar -DgroupId=org.springframework.security -DartifactId=spring-security-openid -Dversion=3.1.0.odk-SNAPSHOT -Dpackaging=jar
 
 odk-tomcatutil:
 

@@ -23,6 +23,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.EntityKey;
@@ -83,9 +85,11 @@ public class QueryImpl implements Query {
   private final StringBuilder queryBindBuilder = new StringBuilder();
   private final List<Object> bindValues = new ArrayList<Object>();
   private final StringBuilder querySortBuilder = new StringBuilder();
+  private final Log queryStringLogger;
 
   public QueryImpl(CommonFieldsBase relation, String loggingContextTag,
       DatastoreImpl dataStoreImpl, User user) {
+    this.queryStringLogger = LogFactory.getLog("org.opendatakit.common.persistence.LogQueryString." + relation.getSchemaName() + "." + relation.getTableName());
     this.relation = relation;
     this.dataStoreImpl = dataStoreImpl;
     this.user = user;
@@ -251,6 +255,7 @@ public class QueryImpl implements Query {
     rowMapper = new RelationRowMapper(relation, user);
 
     try {
+      queryStringLogger.debug(query);
       List<? extends CommonFieldsBase> l = dataStoreImpl.getJdbcConnection().query(query,
           bindValues.toArray(), rowMapper);
       dataStoreImpl.recordQueryUsage(relation, l.size());
@@ -411,6 +416,7 @@ public class QueryImpl implements Query {
     try {
       CoreResult r;
       try {
+        queryStringLogger.debug(query);
         r = dataStoreImpl.getJdbcConnection().query(query, values.toArray(), rse);
       } finally {
         dataStoreImpl.recordQueryUsage(relation, rse.getReadCount());
