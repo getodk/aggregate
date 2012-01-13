@@ -14,12 +14,13 @@ import org.opendatakit.common.ermodel.simple.AttributeType;
  * </p>
  * 
  * <p>
- * Column is immutable.
+ * Column is immutable. Columns are comparable, the ordering is according to the
+ * ordering of the Column names.
  * </p>
  * 
  * @author the.dylan.price@gmail.com
  */
-public final class Column {
+public final class Column implements Comparable<Column> {
 
     private final String name;
     private final AttributeType type;
@@ -153,6 +154,11 @@ public final class Column {
 	if (type != other.type)
 	    return false;
 	return true;
+    }
+
+    @Override
+    public int compareTo(Column o) {
+	return name.compareTo(o.name);
     }
 
 }

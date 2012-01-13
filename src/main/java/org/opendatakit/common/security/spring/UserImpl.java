@@ -25,7 +25,7 @@ import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.security.common.GrantedAuthorityName;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.GrantedAuthorityImpl;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 public class UserImpl implements org.opendatakit.common.security.User {
 
@@ -38,7 +38,7 @@ public class UserImpl implements org.opendatakit.common.security.User {
 	
 	
 	UserImpl(String uriUser, String nickName,
-			Collection<GrantedAuthority> groupsAndGrantedAuthorities,
+			Collection<? extends GrantedAuthority> groupsAndGrantedAuthorities,
 			Datastore datastore) {
 		this.uriUser = uriUser;
 		this.nickName = nickName;
@@ -76,7 +76,7 @@ public class UserImpl implements org.opendatakit.common.security.User {
 	
 	@Override
 	public boolean isRegistered() {
-		return groups.contains(new GrantedAuthorityImpl(GrantedAuthorityName.USER_IS_REGISTERED.name()));
+		return groups.contains(new SimpleGrantedAuthority(GrantedAuthorityName.USER_IS_REGISTERED.name()));
 	}
 
 	@Override

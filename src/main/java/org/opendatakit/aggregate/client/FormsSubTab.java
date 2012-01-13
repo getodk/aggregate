@@ -40,7 +40,9 @@ public class FormsSubTab extends AggregateSubTabBase {
   private FormTable listOfForms;
 
   public FormsSubTab(AggregateUI baseUI) {
-
+    // vertical
+    setStylePrimaryName(UIConsts.VERTICAL_FLOW_PANEL_STYLENAME);
+    
     // create navigation buttons to servlet
     
     ServletPopupButton newForm = new ServletPopupButton(NEW_FORM_BUTTON_TEXT, NEW_FORM_TXT,

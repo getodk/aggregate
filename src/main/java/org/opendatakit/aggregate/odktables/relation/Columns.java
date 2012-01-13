@@ -43,6 +43,11 @@ public class Columns extends TypedEntityRelation<InternalColumn> {
      */
     public static String NULLABLE = "NULLABLE";
 
+    /**
+     * The name of the properties field.
+     */
+    public static String PROPERTIES = "PROPERTIES";
+
     // Relation name
     /**
      * The name of the Columns relation.
@@ -72,6 +77,12 @@ public class Columns extends TypedEntityRelation<InternalColumn> {
     private static final Attribute nullable = new Attribute(NULLABLE,
 	    AttributeType.BOOLEAN, false);
 
+    /**
+     * The properties field.
+     */
+    private static final Attribute properties = new Attribute(PROPERTIES,
+	    AttributeType.STRING, true);
+
     private static final List<Attribute> attributes;
     static {
 	attributes = new ArrayList<Attribute>();
@@ -79,6 +90,7 @@ public class Columns extends TypedEntityRelation<InternalColumn> {
 	attributes.add(columnName);
 	attributes.add(columnType);
 	attributes.add(nullable);
+	attributes.add(properties);
     }
     /**
      * The singleton instance of the Columns relation.

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.opendatakit.aggregate.odktables.client.entity.Column;
 import org.opendatakit.aggregate.odktables.client.entity.Modification;
 import org.opendatakit.aggregate.odktables.client.entity.SynchronizedRow;
 import org.opendatakit.aggregate.odktables.client.exception.AggregateInternalErrorException;
@@ -55,6 +56,7 @@ public class CreateSynchronizedTableLogic extends
 	    String tableID = createSynchronizedTable.getTableID();
 	    String requestingUserID = createSynchronizedTable
 		    .getRequestingUserID();
+	    String tableProperties = createSynchronizedTable.getProperties();
 
 	    // retrieve request user
 	    InternalUser requestingUser = users
@@ -78,14 +80,15 @@ public class CreateSynchronizedTableLogic extends
 	    // create the table entry
 	    InternalTableEntry entry = new InternalTableEntry(
 		    aggregateUserIdentifier,
-		    createSynchronizedTable.getTableName(), true, cc);
+		    createSynchronizedTable.getTableName(), true,
+		    tableProperties, cc);
 	    entitiesToSave.add(entry);
 	    // create the columns
-	    for (org.opendatakit.aggregate.odktables.client.entity.Column clientColumn : createSynchronizedTable
-		    .getColumns()) {
+	    for (Column clientColumn : createSynchronizedTable.getColumns()) {
 		InternalColumn column = new InternalColumn(
 			entry.getAggregateIdentifier(), clientColumn.getName(),
-			clientColumn.getType(), clientColumn.isNullable(), cc);
+			clientColumn.getType(), clientColumn.isNullable(),
+			clientColumn.getProperties(), cc);
 		entitiesToSave.add(column);
 	    }
 	    // create the mapping from aggregateTableIdentifier to user's

@@ -85,7 +85,7 @@ public class CommandServlet extends ServletUtilBase {
 	} catch (AggregateInternalErrorException e) {
 	    logger.warn(e.toString());
 	    resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-		    "Could not complete request. Please try again later.");
+		    String.format("Internal error: %s", e.getMessage()));
 	    return;
 	} catch (SnafuException e) {
 	    logger.error(e.toString());

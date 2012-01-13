@@ -5,7 +5,7 @@
 	xsi:schemaLocation="http://www.springframework.org/schema/beans
            http://www.springframework.org/schema/beans/spring-beans.xsd
            http://www.springframework.org/schema/task
-           http://www.springframework.org/schema/task/spring-task-3.0.xsd">
+           http://www.springframework.org/schema/task/spring-task-3.1.xsd">
 
 	<bean
 		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
@@ -70,7 +70,7 @@
     <bean id="http_client_factory" class="org.opendatakit.common.utils.tomcat.TomcatHttpClientFactoryImpl" />
     <bean id="image_util" class="org.opendatakit.aggregate.util.tomcat.ImageUtilImpl" />
 	<bean id="startup" class="org.opendatakit.aggregate.AggregateStartupImpl" />
-    
+
 	<bean id="watchdog" class="org.opendatakit.aggregate.task.tomcat.WatchdogImpl">
 		<property name="datastore" ref="datastore" />
 		<property name="userService" ref="user_service" />

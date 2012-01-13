@@ -32,13 +32,16 @@ final class ExecutionTimeLogger {
   private final String loggingContextTag;
   private final CommonFieldsBase relation;
   private final long startApiTime;
+  private final Log logger;
+  private final Log queryStringLogger;
   private long istartApiTime;
   String queryString = null;
 
   ExecutionTimeLogger(DatastoreImpl datastore, String loggingContextTag, CommonFieldsBase relation) {
     this.loggingContextTag = loggingContextTag;
     this.relation = relation;
-    
+    this.logger = LogFactory.getLog(ExecutionTimeLogger.class);
+    this.queryStringLogger = LogFactory.getLog("org.opendatakit.common.persistence.LogQueryString." + relation.getSchemaName() + "." + relation.getTableName());
     QueryImpl.updateCostLoggingThreshold(datastore);
 
     QuotaService svc = QuotaServiceFactory.getQuotaService();
@@ -50,6 +53,8 @@ final class ExecutionTimeLogger {
       intermediateLogging();
     }
     queryString = hack.toString();
+    queryStringLogger.debug(queryString);
+
     // report intermediate results from when query is declared (i.e.,
     // execution steps only).
     QuotaService svc = QuotaServiceFactory.getQuotaService();
@@ -61,7 +66,6 @@ final class ExecutionTimeLogger {
     long endApiTime = svc.getApiTimeInMegaCycles();
     long elapsed = endApiTime - istartApiTime;
     if (elapsed >= QueryImpl.costLoggingMinimumMegacyclesThreshold) {
-      Log logger = LogFactory.getLog(ExecutionTimeLogger.class);
       logger.warn(String.format("%1$06d **intermediate** %2$s[%3$s] %4$s", elapsed,
           loggingContextTag, relation.getTableName(), queryString));
     }
@@ -75,7 +79,6 @@ final class ExecutionTimeLogger {
       intermediateLogging();
     }
     if (elapsed >= QueryImpl.costLoggingMinimumMegacyclesThreshold) {
-      Log logger = LogFactory.getLog(ExecutionTimeLogger.class);
       logger.warn(String.format("%1$06d **final** %2$s[%3$s]", elapsed, loggingContextTag,
           relation.getTableName()));
     }

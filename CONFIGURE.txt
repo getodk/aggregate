@@ -35,17 +35,17 @@ Windows / Preferences:
 
   Google / App Engine:
   
-    Be sure there is an App Engine 1.5.3 or higher SDK defined.
-	If the default App Engine version is not 1.5.3, you may need to 
+    Be sure there is an App Engine 1.6.1 or higher SDK defined.
+	If the default App Engine version is not 1.6.1, you may need to 
 	tweak with the project settings to get the newer jars to be added.
 
   Google / Web Toolkit:
   
-    Be sure there is a WebToolkit SDK defined 2.3.0 or higher.
+    Be sure there is a WebToolkit SDK defined 2.4.0 or higher.
 	The default GWT version should match that in the maven 
-	pom.xml (currently 2.3.0).  The GWT library is installed as 
+	pom.xml (currently 2.4.0).  The GWT library is installed as 
 	part of the plugin and can be found in:
-	...\eclipse\plugins\com.google.gwt.eclipse.sdkbundle_2.3.0...\gwt-2.3.0
+	...\eclipse\plugins\com.google.gwt.eclipse.sdkbundle_2.4.0...\gwt-2.4.0
 
 File / Import:
 
@@ -212,7 +212,7 @@ local repository.  In some cases, these are cutting edge Google libraries that
 may no longer need to be manually installed (once they get published to maven).
 
 (8) Download the Selenium Client Driver ( http://seleniumhq.org/download/ )
-The Maven pom.xml expects version 2.8.0.  Explode the zip and make note of 
+The Maven pom.xml expects version 2.9.0.  Explode the zip and make note of 
 the directory.
  
 (9) Edit Maven's settings.xml file (this is in the .m2 directory).
@@ -236,23 +236,22 @@ A minimal file is:
   	  <activation><activeByDefault>true</activeByDefault></activation>
   	  <properties>
 		<temp.home>C:\\Users\\user\\AppData\\Local\\Temp</temp.home>
-	    <gae.home>\C:\\Program Files (x86)\\Google AE\\appengine-java-sdk-1.5.4</gae.home>
-		<bitrock.home>C:\Program Files (x86)\BitRock InstallBuilder Professional 7.2.5</bitrock.home>
+	    <gae.home>\C:\\Program Files (x86)\\Google AE\\appengine-java-sdk-1.6.1</gae.home>
+		<bitrock.home>C:\Program Files (x86)\BitRock InstallBuilder Professional 8.0.1</bitrock.home>
 	    <keystore.propertyfile>\C:\\Users\\user\\keystore\\jarSignerDetails.txt</keystore.propertyfile>
 		<headless.operation>no</headless.operation>
 		<mysql.client.executable>C:\\Program Files\\MySQL\\MySQL Server 5.1\\bin\\mysql.exe</mysql.client.executable>
 		<mysql.root.password>MYSQLROOTPASSWORDHERE</mysql.root.password>
 		<postgres.client.executable>C:\\Program Files\\PostgreSQL\\9.0\\bin\\psql.exe</postgres.client.executable>
 		<postgres.root.password>POSTGRESQLROOTPASSWORDHERE</postgres.root.password>
-		<selenium.home>C:\\Users\\user\\Downloads\\selenium-java-2.8.0\\selenium-2.8.0</selenium.home>
-		<selenium.libs>C:\\Users\\user\\Downloads\\selenium-java-2.8.0\\selenium-2.8.0\\libs</selenium.libs>
+		<selenium.home>C:\\Users\\user\\Downloads\\selenium-java-2.9.0\\selenium-2.9.0</selenium.home>
+		<selenium.libs>C:\\Users\\user\\Downloads\\selenium-java-2.9.0\\selenium-2.9.0\\libs</selenium.libs>
 		<test.server.hostname>YOUR.FULLY.QUALIFIED.HOSTNAME.AND.ORG</test.server.hostname>
 		<test.server.port>7070</test.server.port>
 		<test.server.secure.port>7443</test.server.secure.port>
 		<test.server.gae.monitor.port>7075</test.server.gae.monitor.port>
 		<firefox.executable></firefox.executable>
 		<catalina.zip>file:///C:\\Users\\user\\Downloads\\apache-tomcat-6.0.32-windows-x64.zip</catalina.zip>
-	  </properties>
 	  </properties>
   	</profile>
   </profiles>
@@ -275,15 +274,15 @@ Windows / Preferences:
 
   Google / App Engine:
   
-    Be sure there is an App Engine 1.5.1 or higher SDK defined.
+    Be sure there is an App Engine 1.6.1 or higher SDK defined.
 	The default GWT version should match that in the maven 
-	pom.xml (currently 1.5.1).
+	pom.xml (currently 1.6.1).
 
   Google / Web Toolkit:
   
-    Be sure there is a WebToolkit SDK defined 2.3.0 or higher.
+    Be sure there is a WebToolkit SDK defined 2.4.0 or higher.
 	The default GWT version should match that in the maven 
-	pom.xml (currently 2.3.0).
+	pom.xml (currently 2.4.0).
 	
   Java / Build Path / Classpath Variables:
 

@@ -167,9 +167,10 @@ public class ServletUtilBase extends CommonServletBase {
 			try {
 				oauthHelper.getAccessToken(oauthParameters);
 			} catch (OAuthException e) {
-		        resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+			   e.printStackTrace();
+		      resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
 		        		ErrorConsts.OAUTH_SECURITY_ERROR_WHILE_RETRIEVING_SESSION_TOKEN);
-				throw new ODKExternalServiceAuthenticationError();
+				throw new ODKExternalServiceAuthenticationError(e.toString());
 			}
 			
 			return new OAuthToken(oauthParameters.getOAuthToken(), oauthParameters.getOAuthTokenSecret());
