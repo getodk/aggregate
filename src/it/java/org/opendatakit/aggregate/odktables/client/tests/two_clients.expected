@@ -4,11 +4,21 @@ createUser user2
 createSynchronizedTable user1 people
 
 printTable user1 people
+table properties: null
+column properties:
+    age null
+    name null
+    weight null
 modification: 0
 
 insertSynchronizedRows user1 people 
 
 printTable user1 people
+table properties: null
+column properties:
+    age null
+    name null
+    weight null
 modification: 1
     row1
         age 22
@@ -27,6 +37,11 @@ tableName: people, userName: user1
 cloneSynchronizedTable user2 people
 
 printTable user2 people
+table properties: null
+column properties:
+    age null
+    name null
+    weight null
 modification: 1
     row1
         age 22
@@ -40,6 +55,11 @@ modification: 1
 updateSynchronizedRows user1 people
 
 printTable user1 people
+table properties: null
+column properties:
+    age null
+    name null
+    weight null
 modification: 2
     row1
         age 23
@@ -53,6 +73,11 @@ modification: 2
 synchronize user2 people
 
 printTable user2 people
+table properties: null
+column properties:
+    age null
+    name null
+    weight null
 modification: 2
     row1
         age 23
@@ -66,6 +91,11 @@ modification: 2
 updateSynchronizedRows user2 people
 
 printTable user2 people
+table properties: null
+column properties:
+    age null
+    name null
+    weight null
 modification: 3
     row1
         age 24
@@ -79,6 +109,11 @@ modification: 3
 synchronize user1 people
 
 printTable user1 people
+table properties: null
+column properties:
+    age null
+    name null
+    weight null
 modification: 3
     row1
         age 24

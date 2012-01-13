@@ -24,8 +24,8 @@ import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
 
 /**
- * ListAllTablesLogic encapsulates the logic necessary to validate and execute
- * a QueryForTables Command.
+ * ListAllTablesLogic encapsulates the logic necessary to validate and execute a
+ * QueryForTables Command.
  * 
  * @author the.dylan.price@gmail.com
  */
@@ -115,22 +115,22 @@ public class ListAllTablesLogic extends CommandLogic<ListAllTables> {
 
 		// retrieve the columns for the table
 		List<InternalColumn> internalColumns = columns
-			.query("QueryForTablesLogic.execute")
+			.query("ListAllTablesLogic.execute")
 			.equal(Columns.AGGREGATE_TABLE_IDENTIFIER,
 				aggregateTableIdentifier).execute();
 		List<Column> clientColumns = new ArrayList<Column>();
 		for (InternalColumn internalColumn : internalColumns) {
 		    Column clientColumn = new Column(internalColumn.getName(),
 			    internalColumn.getType(),
-			    internalColumn.getNullable());
+			    internalColumn.getNullable(),
+			    internalColumn.getProperties());
 		    clientColumns.add(clientColumn);
 		}
 
 		// create the TableEntry
-		// TODO: implement properties
 		TableEntry clientEntry = new TableEntry(clientUser,
-			entry.getAggregateIdentifier(), tableID, tableName, "",
-			clientColumns, isSynchronized);
+			entry.getAggregateIdentifier(), tableID, tableName,
+			entry.getProperties(), clientColumns, isSynchronized);
 		clientEntries.add(clientEntry);
 	    }
 
@@ -147,9 +147,8 @@ public class ListAllTablesLogic extends CommandLogic<ListAllTables> {
 		    clientColumns.add(column);
 		}
 		boolean isSynchronized = false;
-		// TODO: add properties
 		TableEntry clientEntry = new TableEntry(null,
-			aggregateIdentifier, tableID, tableName, "",
+			aggregateIdentifier, tableID, tableName, null,
 			clientColumns, isSynchronized);
 		clientEntries.add(clientEntry);
 	    }
