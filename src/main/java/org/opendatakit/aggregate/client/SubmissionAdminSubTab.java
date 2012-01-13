@@ -35,7 +35,9 @@ public class SubmissionAdminSubTab extends AggregateSubTabBase {
   private FormSummary selectedForm;
 
   public SubmissionAdminSubTab() {
-
+    // vertical
+    setStylePrimaryName(UIConsts.VERTICAL_FLOW_PANEL_STYLENAME);
+    
     formsBox = new FormListBox(new ChangeDropDownHandler());
     submissions = new ScrollPanel();
     submissions.getElement().setId("submission_admin_list");

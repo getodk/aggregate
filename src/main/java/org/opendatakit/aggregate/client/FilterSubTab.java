@@ -40,6 +40,9 @@ public class FilterSubTab extends AggregateSubTabBase {
   private int queryFilterLimit;
 
   public FilterSubTab() {
+    // vertical
+    setStylePrimaryName(UIConsts.VERTICAL_FLOW_PANEL_STYLENAME);
+    
     queryFilterLimit = FilterGroup.DEFAULT_FETCH_LIMIT;
     displayMetaData = false;
     getElement().setId("filter_sub_tab");

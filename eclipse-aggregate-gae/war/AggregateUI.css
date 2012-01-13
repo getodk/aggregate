@@ -123,6 +123,10 @@ a,a:visited,a:hover {
 	float: left;
 }
 
+.verticalFlowPanel {
+	float: left;
+}
+
 .uploadFrame {
 	float: left;
 	clear: none;

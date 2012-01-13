@@ -22,6 +22,7 @@ import org.opendatakit.aggregate.client.form.ExportSummary;
 import org.opendatakit.aggregate.client.table.ExportTable;
 import org.opendatakit.aggregate.constants.common.ExportConsts;
 import org.opendatakit.aggregate.constants.common.HelpSliderConsts;
+import org.opendatakit.aggregate.constants.common.UIConsts;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
@@ -30,6 +31,9 @@ public class ExportSubTab extends AggregateSubTabBase {
   private ExportTable exportTable;
 
   public ExportSubTab() {
+    // vertical
+    setStylePrimaryName(UIConsts.VERTICAL_FLOW_PANEL_STYLENAME);
+
     exportTable = new ExportTable();
     add(exportTable);
   }

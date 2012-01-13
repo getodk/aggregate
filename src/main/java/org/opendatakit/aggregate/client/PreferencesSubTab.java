@@ -35,7 +35,9 @@ public class PreferencesSubTab extends AggregateSubTabBase {
   private EnableOdkTablesCheckbox odkTablesEnable;
   
   public PreferencesSubTab() {
-    
+    // vertical
+    setStylePrimaryName(UIConsts.VERTICAL_FLOW_PANEL_STYLENAME);
+        
     HTML labelVersion = new HTML("<h2>Version Information</h2>");
     add(labelVersion);
     Label version = new Label();

@@ -34,6 +34,7 @@ import org.opendatakit.aggregate.client.widgets.EnumListBox;
 import org.opendatakit.aggregate.client.widgets.KmlSettingListBox;
 import org.opendatakit.aggregate.constants.common.ChartType;
 import org.opendatakit.aggregate.constants.common.GeoPointConsts;
+import org.opendatakit.aggregate.constants.common.UIConsts;
 import org.opendatakit.aggregate.constants.common.UIDisplayType;
 import org.opendatakit.common.web.constants.BasicConsts;
 import org.opendatakit.common.web.constants.HtmlConsts;
@@ -233,7 +234,8 @@ public final class VisualizationPopup extends AbstractPopupBase {
 		chartPanel.setHeight(height.toString() + RESIZE_UNITS);
 		chartPanel.setWidth(width.toString() + RESIZE_UNITS);
 
-		FlowPanel layoutPanel = new FlowPanel();
+		FlowPanel layoutPanel = new FlowPanel(); // vertical
+		layoutPanel.setStylePrimaryName(UIConsts.VERTICAL_FLOW_PANEL_STYLENAME);
 		layoutPanel.add(topSelectionRow);
 		layoutPanel.add(bottomSelectionRow);
 		layoutPanel.add(chartPanel);

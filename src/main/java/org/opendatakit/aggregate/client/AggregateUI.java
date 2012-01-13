@@ -127,7 +127,8 @@ public class AggregateUI implements EntryPoint {
     tabMap = new HashMap<Tabs, AggregateTabBase>();
     tabPosition = new ArrayList<Tabs>();
 
-    wrappingLayoutPanel = new FlowPanel();
+    wrappingLayoutPanel = new FlowPanel(); // vertical
+    wrappingLayoutPanel.setStylePrimaryName(UIConsts.VERTICAL_FLOW_PANEL_STYLENAME);
     layoutPanel = new HorizontalPanel();
     helpPanel = new ScrollPanel();
 

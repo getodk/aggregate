@@ -74,7 +74,8 @@ public class FiltersDataPanel extends ScrollPanel {
     HTML filterText = new HTML("<h3 id=\"filter_header\">Filters Applied</h3>");
     filterText.getElement().setId("filter_desc_title");
 
-    FlowPanel filterGlobal = new FlowPanel();
+    FlowPanel filterGlobal = new FlowPanel(); // vertical
+    filterGlobal.setStylePrimaryName(UIConsts.VERTICAL_FLOW_PANEL_STYLENAME);
     filterGlobal.add(new MetadataCheckBox(parentSubTab));
     FlexTable paginationTable = new FlexTable();
     paginationTable.setHTML(0, 0, "<p id=\"filter_header\">Submissions per page</p>");
