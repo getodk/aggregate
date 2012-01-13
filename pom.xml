@@ -58,8 +58,8 @@
 		<module>odk-postgres-unit-settings</module>
 		
 		<!-- aggregate-mysql-specific -->
-		<module>mysql-unit-tests</module>
 		<module>aggregate-mysql</module>
+		<module>mysql-unit-tests</module>
 		<!-- aggregate-gae-specific -->
 		<module>gae-unit-tests</module>
 		<module>aggregate-gae</module>
@@ -190,6 +190,12 @@
 			<groupId>org.apache.james</groupId>
 			<artifactId>apache-mime4j-core</artifactId>
 			<version>0.7.1</version>
+			<exclusions>
+				<exclusion>
+					<groupId>log4j</groupId>
+					<artifactId>log4j</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 		  <groupId>com.google.appengine</groupId>
@@ -220,6 +226,10 @@
 			<exclusion>
 			  <groupId>org.slf4j</groupId>
 			  <artifactId>slf4j-api</artifactId>
+			</exclusion>
+			<exclusion>
+			  <groupId>log4j</groupId>
+			  <artifactId>log4j</artifactId>
 			</exclusion>
 		  </exclusions>
 		</dependency>
@@ -442,6 +452,10 @@
 					<groupId>org.slf4j</groupId>
 					<artifactId>slf4j-log4j12</artifactId>
 				</exclusion>
+				<exclusion>
+				  <groupId>log4j</groupId>
+				  <artifactId>log4j</artifactId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 		<dependency>
@@ -498,11 +512,39 @@
 		  <groupId>org.springframework</groupId>
 		  <artifactId>spring-instrument</artifactId>
 		  <version>${org.springframework.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>jcl-over-slf4j</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-log4j12</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>log4j</groupId>
+					<artifactId>log4j</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 		  <groupId>org.springframework</groupId>
 		  <artifactId>spring-instrument-tomcat</artifactId>
 		  <version>${org.springframework.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>jcl-over-slf4j</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-log4j12</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>log4j</groupId>
+					<artifactId>log4j</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 		  <groupId>org.springframework</groupId>
@@ -524,8 +566,18 @@
 					<groupId>org.slf4j</groupId>
 					<artifactId>slf4j-log4j12</artifactId>
 				</exclusion>
+				<exclusion>
+					<groupId>log4j</groupId>
+					<artifactId>log4j</artifactId>
+				</exclusion>
 			</exclusions>
 		  <scope>test</scope>
+		</dependency>
+		<dependency>
+		  <groupId>org.springframework</groupId>
+		  <artifactId>spring-tx</artifactId>
+		  <version>${org.springframework.version}</version>
+		  <scope>compile</scope>
 		</dependency>
 		<dependency>
 		  <groupId>org.springframework</groupId>
@@ -587,6 +639,10 @@
 					<groupId>org.slf4j</groupId>
 					<artifactId>slf4j-log4j12</artifactId>
 				</exclusion>
+				<exclusion>
+				  <groupId>log4j</groupId>
+				  <artifactId>log4j</artifactId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 		<dependency>
@@ -639,9 +695,39 @@
 	    <!-- Test dependencies -->
 		<dependency>
 		  <groupId>org.seleniumhq.selenium</groupId>
+		  <artifactId>selenium-support</artifactId>
+		  <version>${org.seleniumhq.version}</version>
+		  <scope>test</scope>
+		  <exclusions>
+			<exclusion>
+			  <groupId>log4j</groupId>
+			  <artifactId>log4j</artifactId>
+			</exclusion>
+		  </exclusions>
+		</dependency>
+		<dependency>
+		  <groupId>org.seleniumhq.selenium</groupId>
+		  <artifactId>selenium-api</artifactId>
+		  <version>${org.seleniumhq.version}</version>
+		  <scope>test</scope>
+		  <exclusions>
+			<exclusion>
+			  <groupId>log4j</groupId>
+			  <artifactId>log4j</artifactId>
+			</exclusion>
+		  </exclusions>
+		</dependency>
+		<dependency>
+		  <groupId>org.seleniumhq.selenium</groupId>
 		  <artifactId>selenium-java</artifactId>
 		  <version>${org.seleniumhq.version}</version>
 		  <scope>test</scope>
+		  <exclusions>
+			<exclusion>
+			  <groupId>log4j</groupId>
+			  <artifactId>log4j</artifactId>
+			</exclusion>
+		  </exclusions>
 		</dependency>
 		<dependency>
 		  <groupId>org.seleniumhq.selenium</groupId>
@@ -691,6 +777,11 @@
 					<buildOutputDirectory>${project.basedir}/build/webapp</buildOutputDirectory>
 				</configuration>
 			</plugin>
+			  <plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<version>2.4</version>
+			  </plugin>
 		</plugins>
 		<pluginManagement>
 			<!-- these are referenced by other projects -->
