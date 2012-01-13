@@ -17,6 +17,7 @@
 package org.opendatakit.aggregate.client;
 
 import org.opendatakit.aggregate.client.permissions.AccessConfigurationSheet;
+import org.opendatakit.aggregate.constants.common.UIConsts;
 import org.opendatakit.common.security.common.GrantedAuthorityName;
 
 import com.google.gwt.user.client.Window;
@@ -26,6 +27,9 @@ public class PermissionsSubTab extends AggregateSubTabBase {
   private AccessConfigurationSheet accessConfig;
   
   public PermissionsSubTab() {
+    // vertical
+    setStylePrimaryName(UIConsts.VERTICAL_FLOW_PANEL_STYLENAME);
+    
   }
 
   @Override

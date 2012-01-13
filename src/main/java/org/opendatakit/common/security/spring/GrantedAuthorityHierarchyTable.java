@@ -36,7 +36,7 @@ import org.opendatakit.common.security.User;
 import org.opendatakit.common.security.common.GrantedAuthorityName;
 import org.opendatakit.common.web.CallingContext;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.GrantedAuthorityImpl;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 /**
  * Persistence object used by {@link RoleHierarchyImpl} to maintain the hierarchy tree of
@@ -84,7 +84,7 @@ public final class GrantedAuthorityHierarchyTable extends CommonFieldsBase {
 	}
 
 	private final GrantedAuthority getDominatingGrantedAuthority() {
-		return new GrantedAuthorityImpl(getStringField(DOMINATING_GRANTED_AUTHORITY));
+		return new SimpleGrantedAuthority(getStringField(DOMINATING_GRANTED_AUTHORITY));
 	}
 	
 	private final void setDominatingGrantedAuthority(String name) {
@@ -94,7 +94,7 @@ public final class GrantedAuthorityHierarchyTable extends CommonFieldsBase {
 	}
 	
 	private final GrantedAuthority getSubordinateGrantedAuthority() {
-		return new GrantedAuthorityImpl(getStringField(SUBORDINATE_GRANTED_AUTHORITY));
+		return new SimpleGrantedAuthority(getStringField(SUBORDINATE_GRANTED_AUTHORITY));
 	}
 
 	private final void setSubordinateGrantedAuthority(String name) {

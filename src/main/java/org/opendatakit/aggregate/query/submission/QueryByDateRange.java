@@ -50,14 +50,14 @@ public class QueryByDateRange extends QueryBase {
    
     TopLevelDynamicBase tbl = (TopLevelDynamicBase) form.getTopLevelGroupElement().getFormDataModel().getBackingObjectPrototype();
     
-    // Query by lastUpdateDate, filtering by isCompleted.
+    // Query by markedAsCompleteDate, filtering by isCompleted.
     // Submissions may be partially uploaded and are marked completed once they 
     // are fully uploaded.  We want the query to be aware of that and to not 
     // report anything that is not yet fully loaded.
     query = cc.getDatastore().createQuery(tbl, "QueryByDateRange.constructor", cc.getCurrentUser());
     query.addSort(tbl.markedAsCompleteDate, Query.Direction.ASCENDING);
     query.addFilter(tbl.markedAsCompleteDate, Query.FilterOperation.LESS_THAN, endDate);
-    query.addFilter(tbl.markedAsCompleteDate, Query.FilterOperation.GREATER_THAN, startDate);
+    query.addFilter(tbl.markedAsCompleteDate, Query.FilterOperation.GREATER_THAN_OR_EQUAL, startDate);
     query.addFilter(tbl.isComplete, Query.FilterOperation.EQUAL, Boolean.TRUE);
 
     this.startCursor = (uriLast != null) ? new QueryResumePoint( tbl.markedAsCompleteDate.getName(),

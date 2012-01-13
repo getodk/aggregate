@@ -25,6 +25,7 @@ import org.opendatakit.aggregate.client.table.PublishTable;
 import org.opendatakit.aggregate.client.widgets.FormListBox;
 import org.opendatakit.aggregate.constants.common.HelpSliderConsts;
 import org.opendatakit.aggregate.constants.common.PublishConsts;
+import org.opendatakit.aggregate.constants.common.UIConsts;
 import org.opendatakit.common.security.common.GrantedAuthorityName;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
@@ -41,7 +42,9 @@ public class PublishSubTab extends AggregateSubTabBase {
   private FormSummary selectedForm;
 
   public PublishSubTab() {
-
+    // vertical
+    setStylePrimaryName(UIConsts.VERTICAL_FLOW_PANEL_STYLENAME);
+    
     formsBox = new FormListBox(new ChangeDropDownHandler());
     publishTable = new PublishTable();
 

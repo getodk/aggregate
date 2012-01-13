@@ -30,7 +30,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.dao.TransientDataAccessResourceException;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.GrantedAuthorityImpl;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -106,7 +106,7 @@ public class UserDetailsServiceImpl implements UserDetailsService, InitializingB
 		this.authorities.clear();
 		for ( String a : authorities ) {
 			if ( a.length() != 0 ) {
-				this.authorities.add(new GrantedAuthorityImpl(a));
+				this.authorities.add(new SimpleGrantedAuthority(a));
 			}
 		}
 	}
@@ -125,7 +125,7 @@ public class UserDetailsServiceImpl implements UserDetailsService, InitializingB
 		User user = userService.getDaemonAccountUser();
 		Set<GrantedAuthority> grantedAuthorities = 
 			UserGrantedAuthority.getGrantedAuthorities(uriUser, datastore, user);
-		grantedAuthorities.add(new GrantedAuthorityImpl(GrantedAuthorityName.USER_IS_REGISTERED.name()));
+		grantedAuthorities.add(new SimpleGrantedAuthority(GrantedAuthorityName.USER_IS_REGISTERED.name()));
 		grantedAuthorities.addAll(authorities);
 		return grantedAuthorities;
 	}

@@ -13,13 +13,14 @@ import org.opendatakit.common.web.CallingContext;
 /**
  * <p>
  * An InternalColumn is a (aggregateTableIdentifier, columnName, columnType,
- * nullable) tuple, where
+ * nullable, properties) tuple, where
  * <ul>
  * <li>aggregateTableIdentifier: the globally unique identifier of the table
  * this column belongs to.</li>
  * <li>columnName: the name of the column.</li>
  * <li>columnType: the type of the column. This is a DataField.DataType.</li>
  * <li>nullable: whether the column is allowed to contain a null value.</li>
+ * <li>properties: arbitrary metadata the client wants to store on the column</li>
  * </ul>
  * </p>
  * 
@@ -29,13 +30,14 @@ import org.opendatakit.common.web.CallingContext;
 public class InternalColumn extends TypedEntity {
 
     public InternalColumn(String aggregateTableIdentifier, String columnName,
-	    AttributeType columnType, boolean nullable, CallingContext cc)
-	    throws ODKDatastoreException {
+	    AttributeType columnType, boolean nullable, String properties,
+	    CallingContext cc) throws ODKDatastoreException {
 	super(Columns.getInstance(cc).newEntity());
 	setAggregateTableIdentifier(aggregateTableIdentifier);
 	setName(columnName);
 	setType(columnType);
 	setNullable(nullable);
+	setProperties(properties);
     }
 
     private InternalColumn(Entity entity) throws ODKDatastoreException {
@@ -74,10 +76,19 @@ public class InternalColumn extends TypedEntity {
 	entity.set(Columns.NULLABLE, value);
     }
 
+    public String getProperties() {
+	return entity.getString(Columns.PROPERTIES);
+    }
+
+    public void setProperties(String value) {
+	entity.set(Columns.PROPERTIES, value);
+    }
+
     @Override
     public String toString() {
-	return String.format("InternalColumn[name=%s, type=%s, nullable=%s",
-		getName(), getType(), getNullable());
+	return String.format(
+		"InternalColumn[name=%s, type=%s, nullable=%s, properties=%s]",
+		getName(), getType(), getNullable(), getProperties());
     }
 
     public static InternalColumn fromEntity(Entity entity)
