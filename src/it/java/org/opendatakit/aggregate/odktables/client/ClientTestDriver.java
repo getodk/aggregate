@@ -91,6 +91,12 @@ import org.opendatakit.common.ermodel.simple.AttributeType;
  * 
  * <i>synchronize (userName) (tableName)</i>
  * 
+ * <i>updateColumnProps (userName) (tableName)
+ * 	  (columnName) (properties)
+ * 	  ...</i>
+ * 
+ * <i>updateTableProps (userName) (tableName) (properties)</i>
+ * 
  * <i>printTable (userName) (tableName)</i>
  * </pre>
  * 
@@ -182,6 +188,10 @@ public class ClientTestDriver {
 		updateSynchronizedRows(arguments);
 	    } else if (command.equals("synchronize")) {
 		synchronize(arguments);
+	    } else if (command.equals("updateColumnProps")) {
+		updateColumnProps(arguments);
+	    } else if (command.equals("updateTableProps")) {
+		updateTableProps(arguments);
 	    } else if (command.equals("printTable")) {
 		printTable(arguments);
 	    } else {
@@ -316,7 +326,7 @@ public class ClientTestDriver {
 	    boolean nullable = Boolean.parseBoolean(st.nextToken());
 	    String columnProps = null;
 	    if (st.hasMoreTokens())
-    	    	columnProps = st.nextToken();
+		columnProps = st.nextToken();
 
 	    Column column = new Column(name, type, nullable, columnProps);
 	    columns.add(column);
@@ -612,6 +622,85 @@ public class ClientTestDriver {
 	}
     }
 
+    private void updateTableProps(List<String> arguments)
+	    throws ClientProtocolException, AggregateInternalErrorException,
+	    UserDoesNotExistException, TableDoesNotExistException,
+	    PermissionDeniedException, IOException {
+	if (arguments.size() != 3)
+	    throw new IllegalArgumentException(
+		    "Bad arguments to updateTableProps: " + arguments);
+
+	String clientName = arguments.get(0);
+	String tableName = arguments.get(1);
+	String properties = arguments.get(2);
+	updateTableProps(clientName, tableName, properties);
+    }
+
+    private void updateTableProps(String clientName, String tableName,
+	    String properties) throws ClientProtocolException,
+	    AggregateInternalErrorException, UserDoesNotExistException,
+	    IOException, TableDoesNotExistException, PermissionDeniedException {
+	SynchronizedClient client = clients.get(clientName);
+	SynchronizedTable table = client.getTable(tableName);
+
+	conn.setUserID(clientName);
+	conn.updateTableProperties(tableName, properties);
+
+	table.setProperties(properties);
+    }
+
+    private void updateColumnProps(List<String> arguments)
+	    throws ClientProtocolException, AggregateInternalErrorException,
+	    UserDoesNotExistException, TableDoesNotExistException,
+	    PermissionDeniedException, ColumnDoesNotExistException, IOException {
+	if (arguments.size() != 2)
+	    throw new IllegalArgumentException(
+		    "Bad arguments to updateColumnProps: " + arguments);
+
+	String clientName = arguments.get(0);
+	String tableName = arguments.get(1);
+	Map<String, String> columnsToProps = new HashMap<String, String>();
+	String inputLine;
+	while ((inputLine = input.findInLine("    \\w+ \\S+ *")) != null) {
+	    StringTokenizer st = new StringTokenizer(inputLine);
+
+	    String name = st.nextToken();
+	    String columnProps = st.nextToken();
+
+	    columnsToProps.put(name, columnProps);
+
+	    // advance scanner
+	    input.nextLine();
+	}
+	updateColumnProps(clientName, tableName, columnsToProps);
+    }
+
+    private void updateColumnProps(String clientName, String tableName,
+	    Map<String, String> columnsToProps) throws ClientProtocolException,
+	    AggregateInternalErrorException, UserDoesNotExistException,
+	    IOException, TableDoesNotExistException, PermissionDeniedException,
+	    ColumnDoesNotExistException {
+	SynchronizedClient client = clients.get(clientName);
+	SynchronizedTable table = client.getTable(tableName);
+
+	conn.setUserID(clientName);
+	conn.updateColumnProperties(tableName, columnsToProps);
+
+	List<Column> columns = table.getColumns();
+	Map<String, Column> names = new HashMap<String, Column>();
+	for (Column column : columns)
+	    names.put(column.getName(), column);
+
+	for (Entry<String, String> entry : columnsToProps.entrySet()) {
+	    Column column = names.get(entry.getKey());
+	    String properties = entry.getValue();
+	    Column newColumn = new Column(column.getName(), column.getType(),
+		    column.isNullable(), properties);
+	    names.put(column.getName(), newColumn);
+	}
+	table.setColumns(new ArrayList<Column>(names.values()));
+    }
+
     private void printTable(List<String> arguments) {
 	if (arguments.size() != 2)
 	    throw new RuntimeException("Bad arguments to printTable: "
@@ -626,8 +715,21 @@ public class ClientTestDriver {
     private void printTable(String clientName, String tableName) {
 	SynchronizedClient client = clients.get(clientName);
 	SynchronizedTable table = client.getTable(tableName);
+
+	output.println(String.format("table properties: %s",
+		table.getProperties()));
+	output.println("column properties:");
+
+	List<Column> columns = new ArrayList<Column>(table.getColumns());
+	Collections.sort(columns);
+	for (Column column : columns) {
+	    output.println(String.format("    %s %s", column.getName(),
+		    column.getProperties()));
+	}
+
 	output.println(String.format("modification: %s",
 		table.getModificationNumber()));
+
 	List<SynchronizedRow> rows = new ArrayList<SynchronizedRow>(
 		table.getRows());
 	Collections.sort(rows, TestUtils.rowComparator);
