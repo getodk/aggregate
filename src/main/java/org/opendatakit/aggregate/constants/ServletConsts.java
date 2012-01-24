@@ -115,7 +115,7 @@ public final class ServletConsts {
 
   public static final String RECORD_KEY = "record";
 
-  public static final int EXPORT_CURSOR_CHUNK_SIZE = 2048;
+  public static final int EXPORT_CURSOR_CHUNK_SIZE = 100;
   /**
    * The name of the parameter that specifies the cursor location for retrieving
    * data from the data table (fragmented Csv servlet)
