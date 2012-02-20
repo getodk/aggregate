@@ -15,7 +15,6 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.util.EntityUtils;
 import org.opendatakit.aggregate.odktables.client.entity.TableEntry;
 import org.opendatakit.aggregate.odktables.client.entity.User;
 import org.opendatakit.aggregate.odktables.client.exception.AggregateInternalErrorException;
@@ -425,11 +424,11 @@ public class CommonAPI {
 	HttpResponse response = client.execute(post);
 	StatusLine status = response.getStatusLine();
 	if (status.getStatusCode() / 100 == 5) {
-	    EntityUtils.consume(response.getEntity());
+	    response.getEntity().consumeContent();
 	    throw new AggregateInternalErrorException(status.getReasonPhrase());
 	}
 	if (status.getStatusCode() == 404) {
-       EntityUtils.consume(response.getEntity());
+	    response.getEntity().consumeContent();
 	    throw new Http404Exception(status.getReasonPhrase());
 	}
 	Reader reader = new InputStreamReader(response.getEntity().getContent());
