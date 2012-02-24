@@ -146,7 +146,7 @@ public class UserDetailsServiceImpl implements UserDetailsService, InitializingB
 		final String password;
 		final String salt;
 		final Set<GrantedAuthority> grantedAuthorities;
-		boolean isEnabled = true;
+		final boolean isEnabled = true;
 		final boolean isCredentialNonExpired = true;
 		try {
 			if ( credentialType == CredentialType.Username ) {
@@ -200,10 +200,6 @@ public class UserDetailsServiceImpl implements UserDetailsService, InitializingB
 				if ( eUser != null ) {
 					uriUser = eUser.getUri();
 					grantedAuthorities = getGrantedAuthorities(eUser.getUri());
-					// allow for Oauth and Oauth2 to be disabled.
-	            if ( credentialType == CredentialType.Token ) {
-	              isEnabled = eUser.getGoogleTokenEnabled();
-	            }
 				} else {
 					throw new UsernameNotFoundException("User " + name + " is not registered");
 				}
