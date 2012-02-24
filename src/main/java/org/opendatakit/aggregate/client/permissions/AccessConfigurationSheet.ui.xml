@@ -7,10 +7,11 @@
 <h4>Users access the site either</h4>
 <ul><li>anonymously (i.e., as the <em>anonymousUser</em>), or</li>
 <li>via a Google account, using OpenID (requires an Email account (e.g., user@gmail.com)), or</li>
+<li>via an Oauth 1.0 or Oauth 2.0 token (check the <em>Enable Tokens</em> checkbox on a Google account), or</li>
 <li>via an ODK account, with a username and password that a site administrator has configured for them.</li></ul>
 <h4>Capabilities are as follows:</h4>
 <ul><li>Data Collector - able to download forms to ODK Collect and submit data from ODK Collect to ODK Aggregate.
-<br/>Only ODK accounts and the <em>anonymousUser</em> can be granted Data Collector rights.
+<br/>Only ODK accounts, the <em>anonymousUser</em> and Oauth-enabled Google accounts can be granted Data Collector rights.
 <br/>The <em>anonymousUser</em> must be granted Data Collector rights to accept submissions from unidentified sources (e.g., from ODK Collect 1.1.5 and earlier,
  or from ODK Collect 1.1.7 and later if not authenticating).</li>
   <li>Data Viewer - able to log onto the ODK Aggregate website, filter and view submissions, and generate

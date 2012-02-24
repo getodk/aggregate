@@ -101,6 +101,9 @@ public final class RegisteredUsersTable extends CommonFieldsBase {
 	
 	private static final DataField IS_REMOVED = new DataField(
 			"IS_REMOVED", DataField.DataType.BOOLEAN, false );
+
+	private static final DataField GOOGLE_TOKEN_ENABLED = new DataField(
+	      "GOOGLE_TOKEN_ENABLED", DataField.DataType.BOOLEAN, true);
 	
 	/**
 	 * Construct a relation prototype.  Only called via {@link #assertRelation(Datastore, User)}
@@ -116,6 +119,7 @@ public final class RegisteredUsersTable extends CommonFieldsBase {
 		fieldList.add(BASIC_AUTH_SALT);
 		fieldList.add(DIGEST_AUTH_PASSWORD);
 		fieldList.add(IS_REMOVED);
+		fieldList.add(GOOGLE_TOKEN_ENABLED);
 	}
 	
 	/**
@@ -223,7 +227,17 @@ public final class RegisteredUsersTable extends CommonFieldsBase {
 	public void setIsRemoved(Boolean value) {
 		setBooleanField(IS_REMOVED, value);
 	}
-
+	
+	public boolean getGoogleTokenEnabled() {
+	  Boolean value = getBooleanField(GOOGLE_TOKEN_ENABLED);
+	  if ( value == null ) return false;
+	  return value;
+	}
+	
+	public void setGoogleTokenEnabled(Boolean value) {
+	  setBooleanField(GOOGLE_TOKEN_ENABLED, value);
+	}
+	
 	private static RegisteredUsersTable relation = null;
 	
 	/**
@@ -444,6 +458,8 @@ public final class RegisteredUsersTable extends CommonFieldsBase {
 			return r;
 		} else {
 			t.setFullName(u.getFullName());
+			t.setGoogleTokenEnabled(( u.getUsername() == null ) &&
+			                          u.getEnableGoogleAuthTokens());
 			ds.putEntity(t, user);
 			return t;
 		}

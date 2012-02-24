@@ -49,6 +49,7 @@
     <bean id="http_client_factory" class="org.opendatakit.common.utils.gae.GaeHttpClientFactoryImpl" />
 	<bean id="image_util" class="org.opendatakit.aggregate.util.gae.ImageUtilImpl" />
 	<bean id="startup" class="org.opendatakit.aggregate.AggregateStartupImpl" />
+	<bean id="oob_user_fetcher" class="org.opendatakit.common.utils.gae.GaeOutOfBandUserFetcher" />
 
 	<bean id="watchdog" class="org.opendatakit.aggregate.task.gae.WatchdogImpl">
 		<property name="datastore" ref="datastore" />

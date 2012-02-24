@@ -48,20 +48,30 @@ public class UserSecurityInfo implements Comparable<UserSecurityInfo>, Serializa
 	String fullname; // tie-back to whatever the site admin wants to know.
 	String email; // null if username is non-null
 	UserType type;
+	boolean enableGoogleAuthTokens;
 	TreeSet<GrantedAuthorityName> assignedUserGroups = new TreeSet<GrantedAuthorityName>();
 	TreeSet<GrantedAuthorityName> grantedAuthorities = new TreeSet<GrantedAuthorityName>();
 	
 	public UserSecurityInfo() {	
 	}
 	
-	public UserSecurityInfo(String username, String fullname, String email, UserType type) {
+	public UserSecurityInfo(String username, String fullname, String email, UserType type, boolean enableGoogleAuthTokens) {
 		this.username = username;
 		this.fullname = fullname;
 		this.email = email;
 		this.type = type;
+		this.enableGoogleAuthTokens = enableGoogleAuthTokens;
 		if ( (email != null && username != null) || (email == null && username == null) ) {
 			throw new IllegalArgumentException("must have either just username or just email non-null");
 		}
+	}
+	
+	public boolean getEnableGoogleAuthTokens() {
+	  return enableGoogleAuthTokens;
+	}
+	
+	public void setEnableGoogleAuthTokens(boolean enableGoogleAuthTokens) {
+	  this.enableGoogleAuthTokens = enableGoogleAuthTokens;
 	}
 	
 	public UserType getType() {

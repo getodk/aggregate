@@ -70,14 +70,15 @@ org.opendatakit.common.security.client.security.SecurityService {
 				t = RegisteredUsersTable.getUserByUri(uriUser, ds, user);
 				if ( t != null ) {
 					info = new UserSecurityInfo(t.getUsername(), t.getFullName(), t.getEmail(), 
-																UserSecurityInfo.UserType.REGISTERED);
+																UserSecurityInfo.UserType.REGISTERED,
+																t.getGoogleTokenEnabled());
 					SecurityServiceUtil.setAuthenticationLists(info, t.getUri(), cc);
 				} else {
 					throw new DatastoreFailureException("Unable to retrieve user record");
 				}
 			} else if ( user.isAnonymous() ) {
 	    		info = new UserSecurityInfo(User.ANONYMOUS_USER, User.ANONYMOUS_USER_NICKNAME, null, 
-												UserSecurityInfo.UserType.ANONYMOUS);
+												UserSecurityInfo.UserType.ANONYMOUS, false);
 	    		SecurityServiceUtil.setAuthenticationListsForSpecialUser(info, GrantedAuthorityName.USER_IS_ANONYMOUS, cc);
 			} else {
 				// should never get to this case via interactive actions...
