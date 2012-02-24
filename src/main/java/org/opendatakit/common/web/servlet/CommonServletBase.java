@@ -25,6 +25,8 @@ import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.TimeZone;
 
 import javax.servlet.http.HttpServlet;
@@ -32,6 +34,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.commons.logging.Log;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.common.security.spring.SpringInternals;
 import org.opendatakit.common.web.CallingContext;
@@ -58,6 +61,43 @@ public abstract class CommonServletBase extends HttpServlet {
   
   protected CommonServletBase(String applicationName) {
      this.applicationName = applicationName;
+  }
+  
+  protected Map<String,String> parseParameterMap(HttpServletRequest request, Log logger) {
+
+    Map<String, String> parameters = new HashMap<String,String>();
+    @SuppressWarnings("rawtypes")
+    Map m = request.getParameterMap();
+    for ( Object eo : m.entrySet() ) {
+      @SuppressWarnings("unchecked")
+      Map.Entry<Object, Object> e = (Map.Entry<Object, Object>) eo;
+      Object k = e.getKey();
+      Object v = e.getValue();
+      String key = null;
+      String value = null;
+      if ( k instanceof String ) {
+        key = (String) k;
+      } else {
+        logger.error("key is not a string: " + k.getClass().getCanonicalName());
+      }
+      if ( v instanceof String[] ) {
+        String[] va = (String[]) v;
+        if ( va.length == 1 ) {
+          value = va[0];
+        } else if ( va.length != 0 ) {
+          logger.error("v is an array of string of length: " + va.length);
+          value = va[0];
+        }
+      } else if ( v instanceof String ) {
+        value = (String) v;
+      } else {
+        logger.error("v is not a string: " + v.getClass().getCanonicalName());
+      }
+      if ( key != null && value != null ) {
+        parameters.put(key, value);
+      }
+    }
+    return parameters;
   }
   
   protected String getRedirectUrl(HttpServletRequest request) {

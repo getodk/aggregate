@@ -38,48 +38,50 @@
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/javax.inject-1.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/odk-gae-settings-latest.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/odk-tomcatutil.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/commons-io-2.0.1.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/gwt-maps-1.1.1-rc1.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/gwt-visualization-1.1.1.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/httpclient-4.1.2.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/httpcore-4.1.2.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/httpmime-4.1.2.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/jai-imageio-core-standalone-1.2-pre-dr-b04-2010-04-30.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/spring-aop-3.1.0.RELEASE.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/spring-asm-3.1.0.RELEASE.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/spring-aspects-3.1.0.RELEASE.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/spring-beans-3.1.0.RELEASE.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/spring-context-3.1.0.RELEASE.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/spring-context-support-3.1.0.RELEASE.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/spring-core-3.1.0.RELEASE.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/spring-expression-3.1.0.RELEASE.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/spring-instrument-3.1.0.RELEASE.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/spring-instrument-tomcat-3.1.0.RELEASE.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/spring-jdbc-3.1.0.RELEASE.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/spring-tx-3.1.0.RELEASE.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/spring-web-3.1.0.RELEASE.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/commons-codec-1.6.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/commons-lang-2.6.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/jdom-1.1.2.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/nekohtml-1.9.15.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/openxri-client-1.2.1.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/openxri-syntax-1.2.1.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/slf4j-api-1.6.4.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/slf4j-jcl-1.6.4.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/xalan-2.7.1.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/xercesImpl-2.11.0.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/xmlsec-1.4.6.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/xml-apis-1.4.01.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/openid4java-nodeps-0.9.6.662.odk-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/spring-security-config-3.1.0.odk-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/spring-security-core-3.1.0.odk-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/spring-security-crypto-3.1.0.odk-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/spring-security-openid-3.1.0.odk-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/spring-security-web-3.1.0.odk-SNAPSHOT.jar"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/commons-io-2.0.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/gwt-maps-1.1.1-rc1.jar"/>
+	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/gwt-visualization-1.1.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/httpclient-4.1.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/httpcore-4.1.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/httpmime-4.1.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/jai-imageio-core-standalone-1.2-pre-dr-b04-2010-04-30.jar"/>
+	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/spring-aop-3.1.0.RELEASE.jar"/>
+	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/spring-asm-3.1.0.RELEASE.jar"/>
+	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/spring-aspects-3.1.0.RELEASE.jar"/>
+	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/spring-beans-3.1.0.RELEASE.jar"/>
+	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/spring-context-3.1.0.RELEASE.jar"/>
+	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/spring-context-support-3.1.0.RELEASE.jar"/>
+	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/spring-core-3.1.0.RELEASE.jar"/>
+	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/spring-expression-3.1.0.RELEASE.jar"/>
+	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/spring-instrument-3.1.0.RELEASE.jar"/>
+	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/spring-instrument-tomcat-3.1.0.RELEASE.jar"/>
+	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/spring-jdbc-3.1.0.RELEASE.jar"/>
+	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/spring-tx-3.1.0.RELEASE.jar"/>
+	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/spring-web-3.1.0.RELEASE.jar"/>
+	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/commons-codec-1.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/commons-lang-2.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/jdom-1.1.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/nekohtml-1.9.15.jar"/>
+	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/openxri-client-1.2.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/openxri-syntax-1.2.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/slf4j-api-1.6.4.jar"/>
+	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/slf4j-jcl-1.6.4.jar"/>
+	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/xalan-2.7.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/xercesImpl-2.11.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/xmlsec-1.4.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/xml-apis-1.4.01.jar"/>
+	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/openid4java-nodeps-0.9.6.662.odk-SNAPSHOT.jar"/>
+	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/spring-security-config-3.1.0.odk-SNAPSHOT.jar"/>
+	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/spring-security-core-3.1.0.odk-SNAPSHOT.jar"/>
+	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/spring-security-crypto-3.1.0.odk-SNAPSHOT.jar"/>
+	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/spring-security-openid-3.1.0.odk-SNAPSHOT.jar"/>
+	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/spring-security-web-3.1.0.odk-SNAPSHOT.jar"/>
+	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/jackson-core-asl-1.8.8.jar"/>
+	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/jackson-mapper-asl-1.8.8.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jst.j2ee.internal.module.container"/>
 	<classpathentry kind="con" path="com.google.gwt.eclipse.core.GWT_CONTAINER"/>
 	<classpathentry kind="con" path="com.google.appengine.eclipse.core.GAE_CONTAINER"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4">
 		<attributes>
 			<attribute name="org.eclipse.jst.component.dependency" value="/WEB-INF/lib"/>

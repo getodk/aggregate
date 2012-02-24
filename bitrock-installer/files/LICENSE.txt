@@ -69,6 +69,9 @@ https://github.com/stain/jai-imageio-core   /Modified BSD/ /Apache 2.0/
     jai-imageio-core-standalone-1.2-pre-dr-b04-2010-04-30.jar
 	Copyright (c) 2005 Sun Microsystems, Inc. All Rights Reserved.
 	Modifications (c) Stian Soiland-Reyes <stian@soiland-reyes.com> 2010-04-30
+http://wiki.fasterxml.com/JacksonHome      /Apache 2.0/
+	jackson-core-asl-1.8.8.jar
+	jackson-mapper-asl-1.8.8.jar
 https://bitbucket.org/javarosa/javarosa/wiki/Home		/Apache 2.0/
 	javarosa-libraries.jar
 http://code.google.com/p/atinject/  /Apache 2.0/

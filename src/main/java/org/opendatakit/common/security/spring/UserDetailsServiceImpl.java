@@ -52,7 +52,8 @@ public class UserDetailsServiceImpl implements UserDetailsService, InitializingB
 	
 	enum CredentialType {
 		Username,
-		Email
+		Email,
+		Token // Out-of-band (Oauth) or Oauth2 token
 	};
 	
 	private Datastore datastore;
@@ -97,6 +98,8 @@ public class UserDetailsServiceImpl implements UserDetailsService, InitializingB
 			credentialType = CredentialType.Username;
 		} else if ( CredentialType.Email.name().equals(type)) {
 			credentialType = CredentialType.Email;
+      } else if ( CredentialType.Token.name().equals(type)) {
+        credentialType = CredentialType.Token;
 		} else {
 			throw new IllegalArgumentException("Unrecognized CredentialType");
 		}
@@ -143,7 +146,7 @@ public class UserDetailsServiceImpl implements UserDetailsService, InitializingB
 		final String password;
 		final String salt;
 		final Set<GrantedAuthority> grantedAuthorities;
-		final boolean isEnabled = true;
+		boolean isEnabled = true;
 		final boolean isCredentialNonExpired = true;
 		try {
 			if ( credentialType == CredentialType.Username ) {
@@ -182,7 +185,7 @@ public class UserDetailsServiceImpl implements UserDetailsService, InitializingB
 							"User " + name + " does not have a password configured. You must close and re-open your browser to clear this error.");
 				}
 			} else {
-				// openid...
+				// openid or token (oauth or oauth2)...
 				// there is no password for an openid credential
 				if ( passwordType != PasswordType.Random ) {
 					throw new AuthenticationCredentialsNotFoundException(
@@ -197,6 +200,10 @@ public class UserDetailsServiceImpl implements UserDetailsService, InitializingB
 				if ( eUser != null ) {
 					uriUser = eUser.getUri();
 					grantedAuthorities = getGrantedAuthorities(eUser.getUri());
+					// allow for Oauth and Oauth2 to be disabled.
+	            if ( credentialType == CredentialType.Token ) {
+	              isEnabled = eUser.getGoogleTokenEnabled();
+	            }
 				} else {
 					throw new UsernameNotFoundException("User " + name + " is not registered");
 				}

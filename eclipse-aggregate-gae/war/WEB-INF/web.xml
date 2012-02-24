@@ -1,7 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<web-app xmlns="http://java.sun.com/xml/ns/javaee" version="2.5"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd http://java.sun.com/xml/ns/javaee http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.0.5.xsd">
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://java.sun.com/xml/ns/javaee"
+	xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+	version="2.5"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee 
+	http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd 
+	http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd 
+	http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.1.0.xsd">
  
 	<context-param>
 		<param-name>contextConfigLocation</param-name>
@@ -26,6 +31,10 @@
         </auth-constraint>
     </security-constraint>
 
+	<listener>
+		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+	</listener>
+
 	<filter>
 		<filter-name>serverSpringSecurityFilterChain</filter-name>
 		<filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
@@ -36,13 +45,7 @@
 		<url-pattern>/*</url-pattern>
 	</filter-mapping>
 
-	<listener>
-		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
-	</listener>
-
-
- <!-- Servlets -->
-  
+  <!-- Simple Servlets -->
   <servlet>
     <servlet-name>filterServiceImpl</servlet-name>
     <servlet-class>org.opendatakit.aggregate.server.FilterServiceImpl</servlet-class>
@@ -142,11 +145,11 @@
 
 
 	<servlet>
-		<servlet-name>oauth</servlet-name>
+		<servlet-name>oauthCallback</servlet-name>
 		<servlet-class>org.opendatakit.aggregate.servlet.OAuthServlet</servlet-class>
 	</servlet>
 	<servlet-mapping>
-		<servlet-name>oauth</servlet-name>
+		<servlet-name>oauthCallback</servlet-name>
 		<url-pattern>/auth/auth</url-pattern>
 	</servlet-mapping>
 

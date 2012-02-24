@@ -122,7 +122,7 @@ public class AccessConfigurationSheet extends Composite {
     public boolean isValid(boolean prospectiveValue, UserSecurityInfo key) {
       // data collector must be an ODK account
       boolean badCollector = auth.equals(GrantedAuthorityName.GROUP_DATA_COLLECTORS)
-          && key.getUsername() == null;
+          && (key.getUsername() == null && !key.getEnableGoogleAuthTokens());
       // site admin must not be the anonymous user
       boolean badSiteAdmin = auth.equals(GrantedAuthorityName.GROUP_SITE_ADMINS)
           && (key.getType() == UserType.ANONYMOUS);
@@ -147,7 +147,9 @@ public class AccessConfigurationSheet extends Composite {
 
       if (auth == GrantedAuthorityName.GROUP_DATA_COLLECTORS) {
         // data collectors can only be ODK accounts...
-        return (key.getUsername() != null);
+        // or OpenId accounts that have tokens enabled...
+        return ((key.getUsername() != null) ||
+                (key.getUsername() == null && key.getEnableGoogleAuthTokens()));
       }
       return true;
     }
@@ -168,8 +170,12 @@ public class AccessConfigurationSheet extends Composite {
 
       switch (auth) {
       case GROUP_DATA_COLLECTORS:
-        // data collectors must be anonymous or an ODK account type.
-        return (info.getType() == UserType.ANONYMOUS) || (info.getUsername() != null);
+        // data collectors must be anonymous
+        // or an ODK account type
+        // or have 'Enable Tokens' checked
+        return (info.getType() == UserType.ANONYMOUS) ||
+               (info.getUsername() != null) ||
+               ((info.getUsername() == null && info.getEnableGoogleAuthTokens()));
       case GROUP_DATA_VIEWERS:
         if (assignedGroups.contains(GrantedAuthorityName.GROUP_FORM_MANAGERS)
             || assignedGroups.contains(GrantedAuthorityName.GROUP_SITE_ADMINS)) {
@@ -228,6 +234,58 @@ public class AccessConfigurationSheet extends Composite {
     }
   }
 
+  private class EnableGoogleOauth2Column extends UIEnabledValidatingCheckboxColumn<UserSecurityInfo> {
+
+    protected EnableGoogleOauth2Column() {
+      super(new BooleanValidationPredicate<UserSecurityInfo>() {
+          @Override
+          public boolean isValid(boolean prospectiveValue, UserSecurityInfo key) {
+            return  (key.getUsername() == null);
+          }}, 
+           new UIVisiblePredicate<UserSecurityInfo>() {
+                @Override
+                public boolean isVisible(UserSecurityInfo key) {
+                  return (key.getUsername() == null);
+                }
+            }, new EnableOpenIdAccountPredicate(),
+            new Comparator<UserSecurityInfo>() {
+
+              @Override
+              public int compare(UserSecurityInfo arg0, UserSecurityInfo arg1) {
+                  boolean arg0Enabled = arg0.getEnableGoogleAuthTokens();
+                  boolean arg1Enabled = arg1.getEnableGoogleAuthTokens();
+
+                  if (arg0Enabled == arg1Enabled) {
+                    // same value. Order by whether or not we can enable
+                    // this box (whether the user is an OpenId user).
+                    arg0Enabled = (arg0.getUsername() == null);
+                    arg1Enabled = (arg1.getUsername() == null);
+                    if (arg0Enabled == arg1Enabled)
+                      return 0;
+                    if (arg0Enabled)
+                      return -1;
+                    return 1;
+                  }
+                  // checked before unchecked...
+                  if (arg0Enabled)
+                    return -1;
+                  return 1;
+                }} );
+    }
+
+    @Override
+    public void setValue(UserSecurityInfo object, Boolean value) {
+      object.setEnableGoogleAuthTokens(value);
+      uiOutOfSyncWithServer();
+      userTable.redraw(); // because this changes the Data Collector checkbox visibility...
+    }
+
+    @Override
+    public Boolean getValue(UserSecurityInfo object) {
+      return object.getEnableGoogleAuthTokens();
+    }
+  }
+  
   private class GroupMembershipColumn extends UIEnabledValidatingCheckboxColumn<UserSecurityInfo> {
     final GrantedAuthorityName auth;
 
@@ -346,8 +404,8 @@ public class AccessConfigurationSheet extends Composite {
         }
         break;
       } else {
-        if (i.getUsername() == null) {
-          // don't allow Google users to be data collectors
+        if (i.getUsername() == null && !i.getEnableGoogleAuthTokens()) {
+          // don't allow Google users without Tokens to be data collectors
           i.getAssignedUserGroups().remove(GrantedAuthorityName.GROUP_DATA_COLLECTORS);
         }
       }
@@ -408,6 +466,14 @@ public class AccessConfigurationSheet extends Composite {
     @Override
     public boolean isEnabled(UserSecurityInfo info) {
       return (info.getType() == UserType.REGISTERED && info.getUsername() != null);
+    }
+  };
+
+  private static final class EnableOpenIdAccountPredicate implements
+      UIEnabledPredicate<UserSecurityInfo> {
+    @Override
+    public boolean isEnabled(UserSecurityInfo info) {
+      return (info.getType() == UserType.REGISTERED && info.getUsername() == null);
     }
   };
 
@@ -684,6 +750,9 @@ public class AccessConfigurationSheet extends Composite {
         "Change Password", new EnableLocalAccountPredicate(), new ChangePasswordActionCallback());
     userTable.addColumn(changePassword, "");
 
+    EnableGoogleOauth2Column ec = new EnableGoogleOauth2Column();
+    userTable.addColumn( ec, "Enable Tokens");
+    
     // Type of User
     AccountTypeSelectionColumn type = new AccountTypeSelectionColumn();
     userTable.addColumn(type, "Account Type");
@@ -761,7 +830,7 @@ public class AccessConfigurationSheet extends Composite {
         ++nUnchanged;
       } else {
         u = new UserSecurityInfo(email.getUsername(), email.getFullName(), email.getEmail(),
-            UserType.REGISTERED);
+            UserType.REGISTERED, false);
         list.add(u);
         if (localUser) {
           localUsers.put(u.getUsername(), u);

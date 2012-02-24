@@ -127,14 +127,14 @@ public class SecurityServiceUtil {
 			for ( CommonFieldsBase cb : l ) {
 				RegisteredUsersTable t = (RegisteredUsersTable) cb;
 				UserSecurityInfo i = new UserSecurityInfo(t.getUsername(), t.getFullName(), t.getEmail(), 
-															UserSecurityInfo.UserType.REGISTERED);
+															UserSecurityInfo.UserType.REGISTERED, t.getGoogleTokenEnabled());
 				if ( withAuthorities ) {
 					SecurityServiceUtil.setAuthenticationLists(i, t.getUri(), cc);
 				}
 				users.add(i);
 			}
 			// TODO: why doesn't this work?
-		    UserSecurityInfo anonymous = new UserSecurityInfo(User.ANONYMOUS_USER, User.ANONYMOUS_USER_NICKNAME, null, UserSecurityInfo.UserType.ANONYMOUS);
+		    UserSecurityInfo anonymous = new UserSecurityInfo(User.ANONYMOUS_USER, User.ANONYMOUS_USER_NICKNAME, null, UserSecurityInfo.UserType.ANONYMOUS, false);
 		    if ( withAuthorities ) {
 	    		SecurityServiceUtil.setAuthenticationListsForSpecialUser(anonymous, GrantedAuthorityName.USER_IS_ANONYMOUS, cc);
 		    }
