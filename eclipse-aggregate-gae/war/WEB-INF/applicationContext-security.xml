@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <beans:beans xmlns="http://www.springframework.org/schema/security"
-	xmlns:beans="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.1.xsd">
+	xmlns:beans="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+	 http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.1.xsd">
 
 	<beans:import resource="classpath:odk-security-settings.xml"/>
 	
@@ -63,6 +65,7 @@
 		<!-- grant access to all routing pages -->
 		<intercept-url pattern="/access-denied.html" access="true" />
 		<intercept-url pattern="/over-quota.html" access="true" />
+		<intercept-url pattern="/robots.txt" access="true" />
 		<intercept-url pattern="/service-error.html" access="true" />
 		<intercept-url pattern="/AggregateUI.css" access="true" />
 		<intercept-url pattern="/favicon.ico" access="true" />
@@ -107,13 +110,15 @@
 		class="org.springframework.security.web.FilterChainProxy">
 		<filter-chain-map path-type="ant">
 			<filter-chain pattern="/local_login.html"
-				filters="channelProcessingFilter,securityContextPersistenceFilter,logoutFilter,anonymousFilter,${security.server.deviceAuthentication}AuthFilter,requestCacheAwareFilter,securityContextHolderAwareFilter,sessionManagerFilter,localExceptionTranslationFilter,filterSecurityInterceptor" />
+				filters="channelProcessingFilter,securityContextHolderAwareFilter,securityContextPersistenceFilter,logoutFilter,oauth2ResourceFilter,oobAuthFilter,${security.server.deviceAuthentication}AuthFilter,requestCacheAwareFilter,anonymousFilter,sessionManagerFilter,localExceptionTranslationFilter,filterSecurityInterceptor" />
 			<filter-chain pattern="/*"
-				filters="channelProcessingFilter,securityContextPersistenceFilter,logoutFilter,anonymousFilter,${security.server.deviceAuthentication}AuthFilter,openIdFilter,requestCacheAwareFilter,securityContextHolderAwareFilter,sessionManagerFilter,exceptionTranslationFilter,filterSecurityInterceptor" />
+				filters="channelProcessingFilter,securityContextHolderAwareFilter,securityContextPersistenceFilter,logoutFilter,oauth2ResourceFilter,oobAuthFilter,${security.server.deviceAuthentication}AuthFilter,openIdFilter,requestCacheAwareFilter,anonymousFilter,sessionManagerFilter,exceptionTranslationFilter,filterSecurityInterceptor" />
 			<filter-chain pattern="/**"
-				filters="channelProcessingFilter,securityContextPersistenceFilter,logoutFilter,anonymousFilter,${security.server.deviceAuthentication}AuthFilter,openIdFilter,requestCacheAwareFilter,securityContextHolderAwareFilter,sessionManagerFilter,exceptionTranslationFilter,filterSecurityInterceptor" />
+				filters="channelProcessingFilter,securityContextHolderAwareFilter,securityContextPersistenceFilter,logoutFilter,oauth2ResourceFilter,oobAuthFilter,${security.server.deviceAuthentication}AuthFilter,openIdFilter,requestCacheAwareFilter,anonymousFilter,sessionManagerFilter,exceptionTranslationFilter,filterSecurityInterceptor" />
 		</filter-chain-map>
 	</beans:bean>
+    
+    <!-- Secure channel processing -->
 
 	<beans:bean id="channelProcessingFilter" class="org.springframework.security.web.access.channel.ChannelProcessingFilter">
 	  <beans:property name="channelDecisionManager" ref="channelDecisionManager"/>
@@ -227,17 +232,7 @@
 	<!--	Otherwise, it does openId auth.-->
 	<beans:bean id="exceptionTranslationFilter"
 		class="org.springframework.security.web.access.ExceptionTranslationFilter">
-		<beans:property name="authenticationEntryPoint">
-			<beans:bean
-				class="org.springframework.security.web.authentication.DelegatingAuthenticationEntryPoint">
-				<beans:constructor-arg>
-					<beans:map>
-                        <beans:entry key="hasHeader('X-OpenRosa-Version','1.0')" value-ref="${security.server.deviceAuthentication}EntryPoint" />
-					</beans:map>
-				</beans:constructor-arg>
-				<beans:property name="defaultEntryPoint" ref="openIdEntryPoint" />
-			</beans:bean>
-		</beans:property>
+		<beans:property name="authenticationEntryPoint" ref="delegatingAuthenticationEntryPoint"/>
 		<beans:property name="accessDeniedHandler">
 			<beans:bean class="org.opendatakit.common.security.spring.GWTAccessDeniedHandlerImpl">
 				<beans:property name="gwtHeader" value="X-opendatakit-gwt"/>
@@ -248,6 +243,16 @@
 				</beans:property>
 			</beans:bean>
 		</beans:property>
+	</beans:bean>
+
+	<beans:bean id="delegatingAuthenticationEntryPoint"
+		class="org.springframework.security.web.authentication.DelegatingAuthenticationEntryPoint">
+		<beans:constructor-arg>
+			<beans:map>
+                      <beans:entry key="hasHeader('X-OpenRosa-Version','1.0')" value-ref="${security.server.deviceAuthentication}EntryPoint" />
+			</beans:map>
+		</beans:constructor-arg>
+		<beans:property name="defaultEntryPoint" ref="openIdEntryPoint" />
 	</beans:bean>
 
 	<!-- This forces the login to use the configured locally-held credential mechanism -->
@@ -272,7 +277,7 @@
 	<!--			Basic Authentication -->
 	
 	<beans:bean id="basicAuthFilter"
-		class="org.springframework.security.web.authentication.www.BasicAuthenticationFilter">
+		class="org.opendatakit.common.security.spring.BasicAuthenticationFilter">
 		<beans:property name="authenticationManager">
 			<beans:bean class="org.springframework.security.authentication.ProviderManager">
 				<beans:property name="providers">
@@ -321,7 +326,7 @@
 	-->
 
 	<beans:bean id="digestAuthFilter"
-		class="org.springframework.security.web.authentication.www.DigestAuthenticationFilter">
+		class="org.opendatakit.common.security.spring.DigestAuthenticationFilter">
 		<beans:property name="passwordAlreadyEncoded" value="true" />
 		<beans:property name="userDetailsService" ref="digestLoginService" />
 		<beans:property name="authenticationEntryPoint" ref="digestEntryPoint" />
@@ -361,13 +366,18 @@
 	
 	<!--	There are additional settings for this to work on GoogleAppEngine. -->
 	<!--    See odk-security-settings.xml -->
-    
+
 	<beans:bean id="openIdFilter"
-		class="org.springframework.security.openid.OpenIDAuthenticationFilter">
+		class="org.opendatakit.common.security.spring.OpenIDAuthenticationFilter">
 		<beans:property name="returnToUrlParameters">
 			<beans:set>
 				<beans:value>spring-security-redirect</beans:value>
 			</beans:set>
+		</beans:property>
+		<beans:property name="authenticationSuccessHandler">
+			<beans:bean class="org.opendatakit.common.security.spring.TargetUrlRequestAwareAuthenticationSuccessHandler">
+				<beans:property name="targetUrlParameter" value="spring-security-redirect"/>
+			</beans:bean>
 		</beans:property>
 		<beans:property name="authenticationManager">
 			<beans:bean class="org.springframework.security.authentication.ProviderManager">
@@ -405,8 +415,19 @@
 	</beans:bean>
 
 	<beans:bean id="openIdEntryPoint"
-		class="org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint">
-		<beans:property name="loginFormUrl" value="/openid_login.html" />
+		class="org.opendatakit.common.security.spring.RedirectingLoginUrlAuthenticationEntryPoint">
+		<beans:constructor-arg name="loginFormUrl" value="/openid_login.html" />
+		<beans:property name="portResolver" ref="portResolver" />
+		<beans:property name="portMapper" ref="portMapper" />
+	</beans:bean>
+
+	<!--	Known registered users are maintained in the registered users table -->
+	<!--	There is no password for OpenId-authenticated users, so it is set to a random value. -->
+	<beans:bean id="openIdUserDetailsService" class="org.opendatakit.common.security.spring.UserDetailsServiceImpl">
+		<beans:property name="datastore" ref="datastore"/>
+		<beans:property name="userService" ref="user_service"/>
+		<beans:property name="passwordType" value="Random"/>
+		<beans:property name="credentialType" value="Email"/>
 	</beans:bean>
 
 	<!--	This OpenId authentication implementation first accepts all authenticated -->
@@ -422,19 +443,76 @@
 		<beans:property name="userDetailsService">
 			<beans:bean class="org.opendatakit.common.security.spring.EmptyUserDetailsService" />
 		</beans:property>
-		<beans:property name="wrappingUserDetailsService">
-			<!--	Known registered users are maintained in the registered users table -->
-			<!--	There is no password for OpenId-authenticated users, so it is set to a random value. -->
-			<beans:bean id="openIdUserDetailsService" class="org.opendatakit.common.security.spring.UserDetailsServiceImpl">
-				<beans:property name="datastore" ref="datastore"/>
-				<beans:property name="userService" ref="user_service"/>
-				<beans:property name="passwordType" value="Random"/>
-				<beans:property name="credentialType" value="Email"/>
-			</beans:bean>
-		</beans:property>
+		<beans:property name="wrappingUserDetailsService" ref="openIdUserDetailsService"/>
 	</beans:bean>
 
+  <!-- Out-of-band support -->
+  <!-- Out-of-band support -->
+  <!-- Out-of-band support -->
+  <!-- Out-of-band support -->
 
+	<!--	Known registered users are maintained in the registered users table -->
+	<!--	There is no password for OpenId-authenticated users, so it is set to a random value. -->
+	<beans:bean id="tokenUserDetailsService" class="org.opendatakit.common.security.spring.UserDetailsServiceImpl">
+		<beans:property name="datastore" ref="datastore"/>
+		<beans:property name="userService" ref="user_service"/>
+		<beans:property name="passwordType" value="Random"/>
+		<beans:property name="credentialType" value="Token"/>
+	</beans:bean>
+
+	<!-- Out-of-band authentication relies on an out-of-band mechanism to obtain 
+		a user's mailto:username@domain.org string (via the oob_user_fetcher). This 
+		is then used to look up the OpenId user configured with that email address. 
+		If successful, that user's credentials are used when accessing the server. 
+		This can be used for portal-fronted access to the server (you still need 
+		to populate the ODK Aggregate registered users table and granted authorities 
+		table with the users and granted privileges for those users). The only provided 
+		implementation is for Google AppEngine's OAuthService-mediated access to 
+		AppEngine instances. -->
+		 
+	<beans:bean id="oobAuthFilter"
+		class="org.opendatakit.common.security.spring.OutOfBandUserFilter">
+		<beans:property name="outOfBandUserFetcher" ref="oob_user_fetcher" />
+		<beans:property name="authenticationProvider" ref="oobAuthenticationProvider" />
+	</beans:bean>
+
+	<!--	This OOB authentication implementation.  It relies upon an out-of-band -->
+	<!--    means to produce a "mailto:username@foo" (OpenId) identity.  This provider then  -->
+	<!--    determines whether the user is a registered user, using the wrappingUserDetailsService.-->
+	<!--	Finally, it adds the AUTH_OUT_OF_BAND granted authority to the set of -->
+	<!--	the registered user's granted authorities (which is empty if the user is not registered). -->
+	<beans:bean id="oobAuthenticationProvider"
+		class="org.opendatakit.common.security.spring.OutOfBandAuthenticationProvider">
+		<!--	Stub userDetailsService that accepts any authenticated party-->
+		<beans:property name="wrappingUserDetailsService" ref="tokenUserDetailsService"/>
+	</beans:bean>
+  
+  <!--  OAuth2 support -->
+  <!--  OAuth2 support -->
+  <!--  OAuth2 support -->
+  <!--  OAuth2 support -->
+  <!--  OAuth2 support -->
+
+	<beans:bean id="oauth2ResourceFilter"
+		class="org.opendatakit.common.security.spring.Oauth2ResourceFilter">
+		<beans:property name="httpClientFactory" ref="http_client_factory" />
+		<beans:property name="authenticationProvider" ref="oauth2AuthenticationProvider" />
+	</beans:bean>
+	
+	<!--	This Oauth2 authentication implementation. It relies upon the Oauth2ResourceFilter -->
+	<!--    to produce an Oauth2AuthenticationToken containing the "mailto:username@foo" (OpenId) -->
+	<!--    identity. This provider then determines whether the user is a registered user, using -->
+	<!--	the wrappingUserDetailsService. Finally, it adds the AUTH_GOOGLE_OAUTH2 granted authority -->
+	<!--    to the registered user's set of granted authorities (empty if the user is not registered). -->
+	<beans:bean id="oauth2AuthenticationProvider"
+		class="org.opendatakit.common.security.spring.Oauth2AuthenticationProvider">
+		<!--	Stub userDetailsService that accepts any authenticated party-->
+		<beans:property name="wrappingUserDetailsService" ref="tokenUserDetailsService"/>
+	</beans:bean>
+
+	<!--		This enforces the security applied to specific URLs   -->
+	<!--		This enforces the security applied to specific URLs   -->
+	<!--		This enforces the security applied to specific URLs   -->
 	<!--		This enforces the security applied to specific URLs   -->
 
 	<beans:bean id="filterSecurityInterceptor"
@@ -448,7 +526,7 @@
 		class="org.springframework.security.access.vote.AffirmativeBased">
 		<beans:property name="decisionVoters">
 			<beans:list>
-		        <beans:bean class="org.springframework.security.web.access.expression.WebExpressionVoter">
+				<beans:bean class="org.springframework.security.web.access.expression.WebExpressionVoter">
 		        	<beans:property name="expressionHandler">
 		        		<beans:bean	class="org.springframework.security.web.access.expression.DefaultWebSecurityExpressionHandler">
 			        		<beans:property name="roleHierarchy" ref="hierarchicalRoleRelationships"/>
@@ -474,6 +552,8 @@
 				<beans:ref bean="digestAuthenticationProvider" />
 				<beans:ref bean="basicAuthenticationProvider" />
 				<beans:ref bean="openIdAuthenticationProvider" />
+				<beans:ref bean="oobAuthenticationProvider" />
+				<beans:ref bean="oauth2AuthenticationProvider" />
 				<beans:ref bean="anonymousProvider" />
 			</beans:list>
 		</beans:property>

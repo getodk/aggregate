@@ -223,7 +223,7 @@ public final class RegisteredUsersTable extends CommonFieldsBase {
 	public void setIsRemoved(Boolean value) {
 		setBooleanField(IS_REMOVED, value);
 	}
-
+	
 	private static RegisteredUsersTable relation = null;
 	
 	/**

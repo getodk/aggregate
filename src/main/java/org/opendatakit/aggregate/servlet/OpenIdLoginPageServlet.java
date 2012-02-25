@@ -152,7 +152,7 @@ public class OpenIdLoginPageServlet extends ServletUtilBase {
         + "<!--\n"
         + "var pathSlash=(window.location.pathname.lastIndexOf('/') > 1) ? '/' : '';\n"
         + "document.write('<input name=\"spring-security-redirect\" type=\"hidden\" value=\"' + "
-        + "encodeURIComponent(encodeURIComponent(pathSlash + '" + redirectParamString + "' + window.location.hash)) + '\"/>');"
+        + "encodeURIComponent(pathSlash + '" + redirectParamString + "' + window.location.hash) + '\"/>');"
         + "\n-->"
         + "</script>"
         + "<input name=\"openid_identifier\" size=\"50\" maxlength=\"100\" "

@@ -49,6 +49,7 @@ import org.opendatakit.common.web.constants.HtmlConsts;
  */
 public class KmlWorkerImpl {
 
+  private final Log logger = LogFactory.getLog(KmlWorkerImpl.class);
   private final IForm form;
   private final SubmissionKey persistentResultsKey;
   private final Long attemptCount;
@@ -70,7 +71,6 @@ public class KmlWorkerImpl {
   }
 
   public void generateKml() {
-    Log logger = LogFactory.getLog(KmlWorkerImpl.class);
     logger.info("Beginning KML generation: " + persistentResultsKey.toString() +
                 " form " + form.getFormId());
 
@@ -103,13 +103,19 @@ public class KmlWorkerImpl {
       formatter = new KmlFormatterWithFilters(form, cc.getServerURL(), geopointField,
           titleField, imageField, pw, filterGroup, cc);
       
+      logger.info("after setup of KML file generation for " + form.getFormId());
       formatter.beforeProcessSubmissions(cc);
       List<Submission> submissions;
+      int count = 0;
       for (;;) {
+        count++;
+        logger.info("iteration " + Integer.toString(count) + " before issuing query for " + form.getFormId());
         submissions = query.getResultSubmissions(cc);
         if ( submissions.isEmpty()) break;
+        logger.info("iteration " + Integer.toString(count) + " before emitting kml for " + form.getFormId());
         formatter.processSubmissionSegment(submissions, cc);
       }
+      logger.info("wrapping up kml generation for " + form.getFormId());
       formatter.afterProcessSubmissions(cc);
 
       // output file
@@ -119,6 +125,7 @@ public class KmlWorkerImpl {
       // refetch because this might have taken a while...
       r = new PersistentResults(persistentResultsKey, cc);
       if (attemptCount.equals(r.getAttemptCount())) {
+        logger.info("saving kml into PersistentResults table for " + form.getFormId());
         r.setResultFile(outputFile, HtmlConsts.RESP_TYPE_KML, Long.valueOf(outputFile.length),
             form.getViewableFormNameSuitableAsFileName() + ServletConsts.KML_FILENAME_APPEND, cc);
         r.setStatus(ExportStatus.AVAILABLE);
@@ -127,6 +134,8 @@ public class KmlWorkerImpl {
           subFilterGroup.delete(cc);
         }
         r.persist(cc);
+      } else {
+        logger.warn("stale KML activity - do not save file in PersistentResults table for " + form.getFormId());
       }
     } catch (Exception e) {
       failureRecovery(e);
@@ -136,17 +145,22 @@ public class KmlWorkerImpl {
   private void failureRecovery(Exception e) {
     // three exceptions possible:
     // ODKFormNotFoundException, ODKDatastoreException, Exception
+    logger.error("Exception caught: " + e.toString() + " for " + form.getFormId());
     e.printStackTrace();
     try {
       PersistentResults r = new PersistentResults(persistentResultsKey, cc);
       if (attemptCount.equals(r.getAttemptCount())) {
+        logger.info("Exception recovery during KML generation - mark as failed for " + form.getFormId());
         r.deleteResultFile(cc);
         r.setStatus(ExportStatus.FAILED);
         r.persist(cc);
+      } else {
+        logger.warn("Exception recovery during KML generation - skipped - not the active attempt! for " + form.getFormId());
       }
     } catch (Exception ex) {
       // something is hosed -- don't attempt to continue.
       // TODO: watchdog: find this once lastRetryDate is way late?
+      logger.error("Exception during exception recovery: " + ex.toString() + " for " + form.getFormId());
     }
   }
 

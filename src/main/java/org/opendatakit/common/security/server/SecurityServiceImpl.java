@@ -37,77 +37,78 @@ import org.springframework.security.authentication.encoding.MessageDigestPasswor
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
 /**
- * GWT Server implementation for the SecurityService interface.
- * This provides privileges context to the client and is therefore
- * accessible to anyone with a ROLE_USER privilege.
- *  
+ * GWT Server implementation for the SecurityService interface. This provides
+ * privileges context to the client and is therefore accessible to anyone with a
+ * ROLE_USER privilege.
+ * 
  * @author mitchellsundt@gmail.com
- *
+ * 
  */
 public class SecurityServiceImpl extends RemoteServiceServlet implements
-org.opendatakit.common.security.client.security.SecurityService {
+    org.opendatakit.common.security.client.security.SecurityService {
 
-	/**
+  /**
 	 * 
 	 */
-	private static final long serialVersionUID = -7360632450727200941L;
+  private static final long serialVersionUID = -7360632450727200941L;
 
-	@Override
-	public UserSecurityInfo getUserInfo() throws AccessDeniedException,
-			DatastoreFailureException {
+  @Override
+  public UserSecurityInfo getUserInfo() throws AccessDeniedException, DatastoreFailureException {
 
-	    HttpServletRequest req = this.getThreadLocalRequest();
-	    CallingContext cc = ContextFactory.getCallingContext(this, req);
+    HttpServletRequest req = this.getThreadLocalRequest();
+    CallingContext cc = ContextFactory.getCallingContext(this, req);
 
-	    Datastore ds = cc.getDatastore();
-	    User user = cc.getCurrentUser();
-	    
-	    String uriUser = user.getUriUser();
-    	UserSecurityInfo info;
-		try {
-			if ( user.isRegistered() ) {
-		    	RegisteredUsersTable t;
-				t = RegisteredUsersTable.getUserByUri(uriUser, ds, user);
-				if ( t != null ) {
-					info = new UserSecurityInfo(t.getUsername(), t.getFullName(), t.getEmail(), 
-																UserSecurityInfo.UserType.REGISTERED);
-					SecurityServiceUtil.setAuthenticationLists(info, t.getUri(), cc);
-				} else {
-					throw new DatastoreFailureException("Unable to retrieve user record");
-				}
-			} else if ( user.isAnonymous() ) {
-	    		info = new UserSecurityInfo(User.ANONYMOUS_USER, User.ANONYMOUS_USER_NICKNAME, null, 
-												UserSecurityInfo.UserType.ANONYMOUS);
-	    		SecurityServiceUtil.setAuthenticationListsForSpecialUser(info, GrantedAuthorityName.USER_IS_ANONYMOUS, cc);
-			} else {
-				// should never get to this case via interactive actions...
-				throw new DatastoreFailureException("Internal error: 45443");
-	    	}
-		} catch (ODKDatastoreException e) {
-			e.printStackTrace();
-			throw new DatastoreFailureException(e);
-		}
-		return info;
-	}
+    Datastore ds = cc.getDatastore();
+    User user = cc.getCurrentUser();
 
-	@Override
-	public RealmSecurityInfo getRealmInfo(String xsrfString) throws AccessDeniedException {
+    String uriUser = user.getUriUser();
+    UserSecurityInfo info;
+    try {
+      if (user.isRegistered()) {
+        RegisteredUsersTable t;
+        t = RegisteredUsersTable.getUserByUri(uriUser, ds, user);
+        if (t != null) {
+          info = new UserSecurityInfo(t.getUsername(), t.getFullName(), t.getEmail(),
+              UserSecurityInfo.UserType.REGISTERED);
+          SecurityServiceUtil.setAuthenticationLists(info, t.getUri(), cc);
+        } else {
+          throw new DatastoreFailureException("Unable to retrieve user record");
+        }
+      } else if (user.isAnonymous()) {
+        info = new UserSecurityInfo(User.ANONYMOUS_USER, User.ANONYMOUS_USER_NICKNAME, null,
+            UserSecurityInfo.UserType.ANONYMOUS);
+        SecurityServiceUtil.setAuthenticationListsForSpecialUser(info,
+            GrantedAuthorityName.USER_IS_ANONYMOUS, cc);
+      } else {
+        // should never get to this case via interactive actions...
+        throw new DatastoreFailureException("Internal error: 45443");
+      }
+    } catch (ODKDatastoreException e) {
+      e.printStackTrace();
+      throw new DatastoreFailureException(e);
+    }
+    return info;
+  }
 
-	    HttpServletRequest req = this.getThreadLocalRequest();
-	    CallingContext cc = ContextFactory.getCallingContext(this, req);
+  @Override
+  public RealmSecurityInfo getRealmInfo(String xsrfString) throws AccessDeniedException {
 
-	    if ( !req.getSession().getId().equals(xsrfString) ) {
-			throw new AccessDeniedException("Invalid request");
-		}
+    HttpServletRequest req = this.getThreadLocalRequest();
+    CallingContext cc = ContextFactory.getCallingContext(this, req);
 
-		RealmSecurityInfo r = new RealmSecurityInfo();
-		r.setRealmString(cc.getUserService().getCurrentRealm().getRealmString());
-		MessageDigestPasswordEncoder mde = 
-			(MessageDigestPasswordEncoder) cc.getBean(SecurityBeanDefs.BASIC_AUTH_PASSWORD_ENCODER);
-		r.setBasicAuthHashEncoding(mde.getAlgorithm());
-		r.setSuperUserEmail(cc.getUserService().getSuperUserEmail());
-		// User interface layer uses this URL to submit password changes securely
-		r.setChangeUserPasswordURL(cc.getSecureServerURL() + BasicConsts.FORWARDSLASH + UserManagePasswordsServlet.ADDR);
-		return r;
-	}
+    if (!req.getSession().getId().equals(xsrfString)) {
+      throw new AccessDeniedException("Invalid request");
+    }
+
+    RealmSecurityInfo r = new RealmSecurityInfo();
+    r.setRealmString(cc.getUserService().getCurrentRealm().getRealmString());
+    MessageDigestPasswordEncoder mde = (MessageDigestPasswordEncoder) cc
+        .getBean(SecurityBeanDefs.BASIC_AUTH_PASSWORD_ENCODER);
+    r.setBasicAuthHashEncoding(mde.getAlgorithm());
+    r.setSuperUserEmail(cc.getUserService().getSuperUserEmail());
+    // User interface layer uses this URL to submit password changes securely
+    r.setChangeUserPasswordURL(cc.getSecureServerURL() + BasicConsts.FORWARDSLASH
+        + UserManagePasswordsServlet.ADDR);
+    return r;
+  }
 }

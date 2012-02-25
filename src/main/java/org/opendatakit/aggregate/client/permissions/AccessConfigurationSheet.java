@@ -122,7 +122,7 @@ public class AccessConfigurationSheet extends Composite {
     public boolean isValid(boolean prospectiveValue, UserSecurityInfo key) {
       // data collector must be an ODK account
       boolean badCollector = auth.equals(GrantedAuthorityName.GROUP_DATA_COLLECTORS)
-          && key.getUsername() == null;
+          && (key.getUsername() == null);
       // site admin must not be the anonymous user
       boolean badSiteAdmin = auth.equals(GrantedAuthorityName.GROUP_SITE_ADMINS)
           && (key.getType() == UserType.ANONYMOUS);
@@ -168,8 +168,10 @@ public class AccessConfigurationSheet extends Composite {
 
       switch (auth) {
       case GROUP_DATA_COLLECTORS:
-        // data collectors must be anonymous or an ODK account type.
-        return (info.getType() == UserType.ANONYMOUS) || (info.getUsername() != null);
+        // data collectors must be anonymous
+        // or an ODK account type
+        return (info.getType() == UserType.ANONYMOUS) ||
+               (info.getUsername() != null);
       case GROUP_DATA_VIEWERS:
         if (assignedGroups.contains(GrantedAuthorityName.GROUP_FORM_MANAGERS)
             || assignedGroups.contains(GrantedAuthorityName.GROUP_SITE_ADMINS)) {
@@ -227,7 +229,7 @@ public class AccessConfigurationSheet extends Composite {
       return 1;
     }
   }
-
+  
   private class GroupMembershipColumn extends UIEnabledValidatingCheckboxColumn<UserSecurityInfo> {
     final GrantedAuthorityName auth;
 
@@ -683,7 +685,7 @@ public class AccessConfigurationSheet extends Composite {
     UIEnabledActionColumn<UserSecurityInfo> changePassword = new UIEnabledActionColumn<UserSecurityInfo>(
         "Change Password", new EnableLocalAccountPredicate(), new ChangePasswordActionCallback());
     userTable.addColumn(changePassword, "");
-
+    
     // Type of User
     AccountTypeSelectionColumn type = new AccountTypeSelectionColumn();
     userTable.addColumn(type, "Account Type");
@@ -761,7 +763,7 @@ public class AccessConfigurationSheet extends Composite {
         ++nUnchanged;
       } else {
         u = new UserSecurityInfo(email.getUsername(), email.getFullName(), email.getEmail(),
-            UserType.REGISTERED);
+                                 UserType.REGISTERED);
         list.add(u);
         if (localUser) {
           localUsers.put(u.getUsername(), u);
