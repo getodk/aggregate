@@ -44,7 +44,7 @@ import org.opendatakit.common.web.CallingContext;
  * john.set("NAME", "John");
  * john.set("AGE", 50);
  * john.save();
- * String johnsIdentifier = john.getAggregateIdentifier();
+ * String johnsIdentifier = john.getId();
  * 
  * // retrieve the relation later
  * person = Relation.getRelation("MY_NAMESPACE", "PERSON", cc);
@@ -250,7 +250,7 @@ public class Relation {
    * 
    * @param aggregateIdentifier
    *          the identifier of the entity (you can get this by calling
-   *          {@link Entity#getAggregateIdentifier()}).
+   *          {@link Entity#getId()}).
    * @return the Entity
    * @throws ODKOverQuotaException
    * @throws ODKEntityNotFoundException
