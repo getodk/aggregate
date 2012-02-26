@@ -31,7 +31,7 @@ public class Entity {
    * @return the unique identifier of this Entity. You can later retrieve this
    *         Entity using {@link Relation#getEntity(String)}.
    */
-  public String getAggregateIdentifier() {
+  public String getId() {
     return this.entity.getUri();
   }
 
