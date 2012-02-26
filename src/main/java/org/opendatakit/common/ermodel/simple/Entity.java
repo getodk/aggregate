@@ -18,7 +18,7 @@ import org.opendatakit.common.utils.Check;
  */
 public class Entity {
   private ExtendedAbstractRelation relation;
-  private org.opendatakit.common.ermodel.Entity entity;
+  protected org.opendatakit.common.ermodel.Entity entity;
 
   private Entity(ExtendedAbstractRelation relation, org.opendatakit.common.ermodel.Entity entity) {
     Check.notNull(relation, "relation");
@@ -173,7 +173,7 @@ public class Entity {
    *           if there was a problem saving the Entity.
    * @throws ODKOverQuotaException
    */
-  public void save() throws ODKEntityPersistException, ODKOverQuotaException {
+  public void put() throws ODKEntityPersistException, ODKOverQuotaException {
     this.entity.persist(this.relation.getCC());
   }
 
