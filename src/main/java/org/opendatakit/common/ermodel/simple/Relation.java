@@ -7,6 +7,7 @@ import org.opendatakit.common.ermodel.ExtendedAbstractRelation;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
+import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
 import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.utils.Check;
 import org.opendatakit.common.web.CallingContext;
@@ -43,14 +44,14 @@ import org.opendatakit.common.web.CallingContext;
  * Entity john = person.newEntity();
  * john.set("NAME", "John");
  * john.set("AGE", 50);
- * john.save();
- * String johnsIdentifier = john.getId();
+ * person.putEntity(john);
+ * String johnsId = john.getId();
  * 
  * // retrieve the relation later
  * person = Relation.getRelation("MY_NAMESPACE", "PERSON", cc);
  * 
  * // retrieve the entity later 
- * john = person.getEntity(johnsIdentifier);
+ * john = person.getEntity(johnsId);
  * 
  * // query for entities
  * john = person.query().equal("NAME", "John").get();
@@ -122,7 +123,7 @@ public class Relation {
           attrEntity.set(AttributeRelation.TYPE, attribute.getType().name());
           attrEntity.set(AttributeRelation.NULLABLE, attribute.isNullable());
 
-          attrEntity.save();
+          attrEntity.put();
         }
       }
     }
@@ -273,7 +274,7 @@ public class Relation {
    * @return a new Entity for this Relation.
    */
   public Entity newEntity() {
-    return Entity.fromEntity(relation, relation.newEntity(relation.getCC()));
+    return Entity.fromEntity(relation, relation.newEntity(getCC()));
   }
 
   /**
@@ -283,7 +284,34 @@ public class Relation {
    * @return a new Entity for this Relation, with the given id
    */
   public Entity newEntity(String id) {
-    return Entity.fromEntity(relation, relation.newEntity(id, relation.getCC()));
+    return Entity.fromEntity(relation, relation.newEntity(id, getCC()));
+  }
+
+  public void putEntity(Entity entity) throws ODKEntityPersistException, ODKOverQuotaException {
+    relation.putEntity(entity.entity, getCC());
+  }
+
+  public void putEntities(List<Entity> entities) throws ODKEntityPersistException,
+      ODKOverQuotaException {
+    List<org.opendatakit.common.ermodel.Entity> backingEntities = new ArrayList<org.opendatakit.common.ermodel.Entity>(
+        entities.size());
+    for (Entity entity : entities) {
+      backingEntities.add(entity.entity);
+    }
+    relation.putEntities(backingEntities, getCC());
+  }
+
+  public void deleteEntity(Entity entity) throws ODKDatastoreException {
+    relation.deleteEntity(entity.entity, getCC());
+  }
+
+  public void deleteEntities(List<Entity> entities) throws ODKDatastoreException {
+    List<org.opendatakit.common.ermodel.Entity> backingEntities = new ArrayList<org.opendatakit.common.ermodel.Entity>(
+        entities.size());
+    for (Entity entity : entities) {
+      backingEntities.add(entity.entity);
+    }
+    relation.deleteEntities(backingEntities, getCC());
   }
 
   /**
