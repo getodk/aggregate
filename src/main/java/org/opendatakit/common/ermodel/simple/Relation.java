@@ -277,6 +277,16 @@ public class Relation {
   }
 
   /**
+   * @param id
+   *          the id for the new entity. There must not already be an entity
+   *          with this id.
+   * @return a new Entity for this Relation, with the given id
+   */
+  public Entity newEntity(String id) {
+    return Entity.fromEntity(relation, relation.newEntity(id, relation.getCC()));
+  }
+
+  /**
    * Completely removes this Relation and all of its Entities from the
    * datastore.
    * 
