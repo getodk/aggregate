@@ -54,6 +54,22 @@ public class Entity
     {
         return this.entity.getCreationDate();
     }
+    
+    /**
+     * @return the user who created this entity, of the form "mailto:username@domain.com"
+     */
+    public String getCreationUser()
+    {
+      return this.entity.getCreatorUriUser();
+    }
+    
+    /**
+     * @return the user who last updated this entity, of the form "mailto:username@domain.com"
+     */
+    public String getLastUpdateUser()
+    {
+      return this.entity.getLastUpdateUriUser();
+    }
 
     public Boolean getBoolean(String attributeName)
     {
