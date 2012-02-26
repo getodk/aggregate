@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
 /**
  * <p>
  * A TableEntry represents the metadata associated with a table stored in ODK
@@ -26,14 +28,15 @@ import java.util.List;
  * @author the.dylan.price@gmail.com
  * 
  */
+@XmlRootElement
 public class TableEntry {
-    private final User user;
-    private final String aggregateTableIdentifier;
-    private final String tableID;
-    private final String tableName;
-    private final String properties;
-    private final List<Column> columns;
-    private final boolean isSynchronized;
+    private User user;
+    private String aggregateTableIdentifier;
+    private String tableID;
+    private String tableName;
+    private String properties;
+    private List<Column> columns;
+    private boolean isSynchronized;
 
     /**
      * For Gson deserialization.
@@ -76,6 +79,55 @@ public class TableEntry {
 	this.properties = properties;
 	this.columns = new ArrayList<Column>(columns);
 	this.isSynchronized = isSynchronized;
+    }
+
+    /**
+     * @param user the user to set
+     */
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    /**
+     * @param aggregateTableIdentifier the aggregateTableIdentifier to set
+     */
+    public void setAggregateTableIdentifier(String aggregateTableIdentifier) {
+        this.aggregateTableIdentifier = aggregateTableIdentifier;
+    }
+
+    /**
+     * @param tableID the tableID to set
+     */
+    public void setTableID(String tableID) {
+        this.tableID = tableID;
+    }
+
+    /**
+     * @param tableName the tableName to set
+     */
+    public void setTableName(String tableName) {
+        this.tableName = tableName;
+    }
+
+    /**
+     * @param properties the properties to set
+     */
+    public void setProperties(String properties) {
+        this.properties = properties;
+    }
+
+    /**
+     * @param columns the columns to set
+     */
+    public void setColumns(List<Column> columns) {
+        this.columns = columns;
+    }
+
+    /**
+     * @param isSynchronized the isSynchronized to set
+     */
+    public void setSynchronized(boolean isSynchronized) {
+        this.isSynchronized = isSynchronized;
     }
 
     /**

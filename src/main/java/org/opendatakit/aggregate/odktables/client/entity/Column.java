@@ -1,5 +1,7 @@
 package org.opendatakit.aggregate.odktables.client.entity;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
 import org.opendatakit.common.ermodel.simple.AttributeType;
 
 /**
@@ -20,12 +22,13 @@ import org.opendatakit.common.ermodel.simple.AttributeType;
  * 
  * @author the.dylan.price@gmail.com
  */
+@XmlRootElement
 public final class Column implements Comparable<Column> {
 
-    private final String name;
-    private final AttributeType type;
-    private final boolean nullable;
-    private final String properties;
+    private String name;
+    private AttributeType type;
+    private boolean nullable;
+    private String properties;
 
     /**
      * So that Gson can serialize this class.
@@ -74,6 +77,34 @@ public final class Column implements Comparable<Column> {
      */
     public Column(String name, AttributeType type, boolean nullable) {
 	this(name, type, nullable, null);
+    }
+
+    /**
+     * @param name the name to set
+     */
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    /**
+     * @param type the type to set
+     */
+    public void setType(AttributeType type) {
+        this.type = type;
+    }
+
+    /**
+     * @param nullable the nullable to set
+     */
+    public void setNullable(boolean nullable) {
+        this.nullable = nullable;
+    }
+
+    /**
+     * @param properties the properties to set
+     */
+    public void setProperties(String properties) {
+        this.properties = properties;
     }
 
     /**
