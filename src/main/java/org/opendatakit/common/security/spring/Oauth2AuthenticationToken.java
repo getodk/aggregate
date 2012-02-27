@@ -25,6 +25,7 @@ import org.springframework.security.core.GrantedAuthority;
 
 /**
  * Authentication that is returned by Oauth 2.0 processing.
+ * Structure liberally copied from Spring OpenId and Oauth2 authentication token classes.
  * 
  * @author mitchellsundt@gmail.com
  *
