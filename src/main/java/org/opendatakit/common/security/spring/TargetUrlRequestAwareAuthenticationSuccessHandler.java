@@ -31,7 +31,7 @@ import org.springframework.security.web.savedrequest.SavedRequest;
 import org.springframework.util.StringUtils;
 
 /**
- * Copied from SavedRequestAwareAuthenticationSuccessHandler
+ * Copied from Spring Security SavedRequestAwareAuthenticationSuccessHandler
  * Prefers using the redirect target URL (coming in as a query string parameter)
  * over the saved request URL.
  * 
