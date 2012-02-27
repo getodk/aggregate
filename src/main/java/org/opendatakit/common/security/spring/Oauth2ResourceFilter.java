@@ -72,6 +72,8 @@ import org.springframework.web.filter.GenericFilterBean;
  * Ideally, we would have a custom scope in the Google Oauth 2.0 grant
  * for this Aggregate instance.  That is not yet possible.
  * 
+ * parseToken() is copied verbatim from Spring Security Oauth2 code.
+ * 
  * @author mitchellsundt@gmail.com
  *
  */
