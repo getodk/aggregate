@@ -5,7 +5,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import org.opendatakit.common.ermodel.ExtendedAbstractRelation;
+import org.opendatakit.common.ermodel.simple.Relation.RelationImpl;
+import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.Query.Direction;
 import org.opendatakit.common.persistence.Query.FilterOperation;
@@ -21,186 +22,187 @@ public class Query {
   /**
    * The Relation to query.
    */
-  private ExtendedAbstractRelation Relation;
+  private Relation relation;
 
   /**
    * The underlying datastore query.
    */
   private org.opendatakit.common.persistence.Query query;
 
-  protected Query(ExtendedAbstractRelation Relation, String loggingContextTag) {
-    Check.notNull(Relation, "Relation");
-    this.Relation = Relation;
-    this.query = Relation.createQuery(loggingContextTag);
+  protected Query(Relation relation, org.opendatakit.common.persistence.Query query) {
+    Check.notNull(relation, "relation");
+
+    this.relation = relation;
+    this.query = query;
   }
 
   /**
    * Add an equal filter to the query.
    * 
-   * @param attributeName
-   *          the name of an Attribute in the Relation.
+   * @param fieldName
+   *          the name of an field in the Relation.
    * @param value
-   *          the value the given Attribute should be equal to. This must be of
-   *          the correct type for the corresponding Attribute.
+   *          the value the given field should be equal to. This must be of the
+   *          correct type for the corresponding field.
    * @return this Query, with the equal filter added.
    */
-  public Query equal(String attributeName, Object value) {
-    return addFilter(attributeName, FilterOperation.EQUAL, value);
+  public Query equal(String fieldName, Object value) {
+    return addFilter(fieldName, FilterOperation.EQUAL, value);
   }
 
   /**
    * Add a not equal filter to the query.
    * 
-   * @param attributeName
-   *          the name of an Attribute in the Relation.
+   * @param fieldName
+   *          the name of an field in the Relation.
    * @param value
-   *          the value the given Attribute should be not equal to. This must be
-   *          of the correct type for the corresponding Attribute.
+   *          the value the given field should be not equal to. This must be of
+   *          the correct type for the corresponding field.
    * @return this Query, with the not equal filter added.
    */
-  public Query notEqual(String attributeName, Object value) {
-    return addFilter(attributeName, FilterOperation.NOT_EQUAL, value);
+  public Query notEqual(String fieldName, Object value) {
+    return addFilter(fieldName, FilterOperation.NOT_EQUAL, value);
   }
 
   /**
    * Add a greater than filter to the query.
    * 
-   * @param attributeName
-   *          the name of an Attribute in the Relation.
+   * @param fieldName
+   *          the name of an field in the Relation.
    * @param value
-   *          the value the given Attribute should greater than. This must be of
-   *          the correct type for the corresponding Attribute.
+   *          the value the given field should greater than. This must be of the
+   *          correct type for the corresponding field.
    * @return this Query, with the greater than filter added.
    */
-  public Query greaterThan(String attributeName, Object value) {
-    return addFilter(attributeName, FilterOperation.GREATER_THAN, value);
+  public Query greaterThan(String fieldName, Object value) {
+    return addFilter(fieldName, FilterOperation.GREATER_THAN, value);
   }
 
   /**
    * Add a greater than or equal filter to the query.
    * 
-   * @param attributeName
-   *          the name of an Attribute in the Relation.
+   * @param fieldName
+   *          the name of an field in the Relation.
    * @param value
-   *          the value the given Attribute should greater than or equal to.
-   *          This must be of the correct type for the corresponding Attribute.
+   *          the value the given field should greater than or equal to. This
+   *          must be of the correct type for the corresponding field.
    * @return this Query, with the greater than or equal filter added.
    */
-  public Query greaterThanOrEqual(String attributeName, Object value) {
-    return addFilter(attributeName, FilterOperation.GREATER_THAN_OR_EQUAL, value);
+  public Query greaterThanOrEqual(String fieldName, Object value) {
+    return addFilter(fieldName, FilterOperation.GREATER_THAN_OR_EQUAL, value);
   }
 
   /**
    * Add a less than filter to the query.
    * 
-   * @param attributeName
-   *          the name of an Attribute in the Relation.
+   * @param fieldName
+   *          the name of an field in the Relation.
    * @param value
-   *          the value the given Attribute should less than. This must be of
-   *          the correct type for the corresponding Attribute.
+   *          the value the given field should less than. This must be of the
+   *          correct type for the corresponding field.
    * @return this Query, with the less than filter added.
    */
-  public Query lessThan(String attributeName, Object value) {
-    return addFilter(attributeName, FilterOperation.LESS_THAN, value);
+  public Query lessThan(String fieldName, Object value) {
+    return addFilter(fieldName, FilterOperation.LESS_THAN, value);
   }
 
   /**
    * Add a less than or equal filter to the query.
    * 
-   * @param attributeName
-   *          the name of an Attribute in the Relation.
+   * @param fieldName
+   *          the name of an field in the Relation.
    * @param value
-   *          the value the given Attribute should less than or equal to. This
-   *          must be of the correct type for the corresponding Attribute.
+   *          the value the given field should less than or equal to. This must
+   *          be of the correct type for the corresponding field.
    * @return this Query, with the less than or equal filter added.
    */
-  public Query lessThanOrEqual(String attributeName, Object value) {
-    return addFilter(attributeName, FilterOperation.LESS_THAN_OR_EQUAL, value);
+  public Query lessThanOrEqual(String fieldName, Object value) {
+    return addFilter(fieldName, FilterOperation.LESS_THAN_OR_EQUAL, value);
   }
 
   /**
    * Adds a filter to the query. Alternative API to {@link #equal},
    * {@link #greaterThan}, etc.
    * 
-   * @param attributeName
-   *          the name of an Attribute in the Relation.
+   * @param fieldName
+   *          the name of an field in the Relation.
    * @param op
    *          the operation to filter with.
    * @param value
    *          the value to filter with. This must be of the correct type for the
-   *          corresponding Attribute.
+   *          corresponding field.
    * @return this Query, with the given filter added.
    */
-  public Query addFilter(String attributeName, FilterOperation op, Object value) {
-    Check.notNullOrEmpty(attributeName, "attributeName");
+  public Query addFilter(String fieldName, FilterOperation op, Object value) {
+    Check.notNullOrEmpty(fieldName, "fieldName");
     Check.notNull(op, "op");
-    DataField Attribute = Relation.getDataField(attributeName);
-    query.addFilter(Attribute, op, value);
+    DataField field = relation.getDataField(fieldName);
+    query.addFilter(field, op, value);
     return this;
   }
 
   /**
    * Adds an ascending sort to the query.
    * 
-   * @param attributeName
-   *          the name of the Attribute to sort by. This Attribute must be an
-   *          Attribute in the Relation of this query.
+   * @param fieldName
+   *          the name of the field to sort by. This field must be an field in
+   *          the Relation of this query.
    * @return this Query, with the ascending sort added.
    */
-  public Query sortAscending(String attributeName) {
-    return addSort(attributeName, Direction.ASCENDING);
+  public Query sortAscending(String fieldName) {
+    return addSort(fieldName, Direction.ASCENDING);
   }
 
   /**
    * Adds a descending sort to the query.
    * 
-   * @param attributeName
-   *          the name of the Attribute to sort by. This Attribute must be an
-   *          Attribute in the Relation of this query.
+   * @param fieldName
+   *          the name of the field to sort by. This field must be an field in
+   *          the Relation of this query.
    * @return this Query, with the descending sort added.
    */
-  public Query sortDescending(String attributeName) {
-    return addSort(attributeName, Direction.DESCENDING);
+  public Query sortDescending(String fieldName) {
+    return addSort(fieldName, Direction.DESCENDING);
   }
 
   /**
    * Adds a sort to the query. Alternative API to {@link #sortAscending} and
    * {@link #sortDescending}.
    * 
-   * @param attributeName
-   *          the name of the Attribute to sort by. This Attribute must be an
-   *          Attribute in the Relation of this query.
+   * @param fieldName
+   *          the name of the field to sort by. This field must be an field in
+   *          the Relation of this query.
    * @param direction
    *          the direction to sort by.
    * @return this Query, with the given sort added.
    */
-  public Query addSort(String attributeName, Direction direction) {
-    Check.notNullOrEmpty(attributeName, "attributeName");
+  public Query addSort(String fieldName, Direction direction) {
+    Check.notNullOrEmpty(fieldName, "fieldName");
     Check.notNull(direction, "direction");
-    DataField Attribute = Relation.getDataField(attributeName);
-    query.addSort(Attribute, direction);
+    DataField field = relation.getDataField(fieldName);
+    query.addSort(field, direction);
     return this;
   }
 
   /**
    * Narrows the scope of the query to only include entities whose value for the
-   * given attributeName is in values.
+   * given fieldName is in values.
    * 
-   * @param attributeName
-   *          the name of the Attribute to filter with. This must be an
-   *          Attribute in the Relation of this query.
+   * @param fieldName
+   *          the name of the field to filter with. This must be an field in the
+   *          Relation of this query.
    * @param values
    *          the values to filter by. This collection must be of the correct
-   *          type for the Attribute identified by attributeName. Must not be
-   *          null or empty.
+   *          type for the field identified by fieldName. Must not be null or
+   *          empty.
    * @return this Query, with the include filter added. All entities with values
    *         not in values will be excluded from the query.
    */
-  public Query include(String attributeName, Collection<?> values) {
-    Check.notNullOrEmpty(attributeName, "attributeName");
+  public Query include(String fieldName, Collection<?> values) {
+    Check.notNullOrEmpty(fieldName, "fieldName");
     Check.notNullOrEmpty(values, "values");
-    DataField Attribute = Relation.getDataField(attributeName);
-    query.addValueSetFilter(Attribute, values);
+    DataField field = relation.getDataField(fieldName);
+    query.addValueSetFilter(field, values);
     return this;
   }
 
@@ -244,27 +246,30 @@ public class Query {
    * @throws ODKDatastoreException
    */
   public List<Entity> execute() throws ODKDatastoreException {
-    List<org.opendatakit.common.ermodel.Entity> genericEntities = Relation.executeQuery(this.query);
-    List<Entity> RelationEntities = new ArrayList<Entity>();
-    for (org.opendatakit.common.ermodel.Entity genericEntity : genericEntities) {
-      Entity RelationEntity = Entity.fromEntity(Relation, genericEntity);
-      RelationEntities.add(RelationEntity);
+    try {
+      List<? extends CommonFieldsBase> list = query.executeQuery();
+      List<Entity> entities = new ArrayList<Entity>();
+      for (CommonFieldsBase b : list) {
+        entities.add(relation.new EntityImpl((RelationImpl) b));
+      }
+      return entities;
+    } catch (ODKDatastoreException e) {
+      return Collections.emptyList();
     }
-    return RelationEntities;
   }
 
   /**
-   * Retrieves all distinct values for the given Attribute, with any sort and
-   * filter criteria.
+   * Retrieves all distinct values for the given field, with any sort and filter
+   * criteria.
    * 
-   * @param attributeName
-   *          the name of the Attribute to retrieve distinct values for.
-   * @return a list of distinct values for the given Attribute, narrowed by any
+   * @param fieldName
+   *          the name of the field to retrieve distinct values for.
+   * @return a list of distinct values for the given field, narrowed by any
    *         existing filter and sort criteria.
    */
-  public List<?> getDistinct(String attributeName) {
-    Check.notNullOrEmpty(attributeName, "attributeName");
-    DataField dataField = Relation.getDataField(attributeName);
+  public List<?> getDistinct(String fieldName) {
+    Check.notNullOrEmpty(fieldName, "fieldName");
+    DataField dataField = relation.getDataField(fieldName);
     try {
       return query.executeDistinctValueForDataField(dataField);
     } catch (ODKDatastoreException e) {
