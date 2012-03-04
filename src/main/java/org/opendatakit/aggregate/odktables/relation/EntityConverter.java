@@ -363,29 +363,71 @@ public class EntityConverter {
   }
 
   /**
-   * Retrieve a list of {@link DbTable} row entities.
+   * Create a new {@link DbLogTable} row entity.
    * 
-   * @param table
-   *          the {@link DbTable} relation.
-   * @param rowIds
-   *          the ids of the rows to get.
+   * @param logTable
+   *          the {@link DbLogTable} relation.
+   * @param modificationNumber
+   *          the modification number for the row.
+   * @param row
+   *          the row
+   * @param columns
+   *          the {@link DbColumn} entities for the log table
    * @param cc
-   * @return
-   * @throws ODKEntityNotFoundException
-   *           if one of the rows does not exist
+   * @return the created entity, not yet persisted
    * @throws ODKDatastoreException
    */
-  public List<Entity> getRowEntities(Relation table, List<String> rowIds, CallingContext cc)
-      throws ODKEntityNotFoundException, ODKDatastoreException {
-    Validate.notNull(table);
-    Validate.noNullElements(rowIds);
+  public Entity newLogEntity(Relation logTable, int modificationNumber, Entity row,
+      List<Entity> columns, CallingContext cc) throws ODKDatastoreException {
+    Validate.notNull(logTable);
+    Validate.isTrue(modificationNumber >= 0);
+    Validate.notNull(row);
+    Validate.noNullElements(columns);
     Validate.notNull(cc);
 
-    val entities = new ArrayList<Entity>();
-    for (val rowId : rowIds) {
-      entities.add(table.getEntity(rowId, cc));
+    Entity entity = logTable.newEntity(cc);
+    entity.set(DbLogTable.ROW_ID, row.getId());
+    entity.set(DbLogTable.ROW_VERSION, row.getString(DbTable.ROW_VERSION));
+    entity.set(DbLogTable.MODIFICATION_NUMBER, modificationNumber);
+    entity.set(DbLogTable.GROUP_OR_USER_ID, row.getString(DbTable.GROUP_OR_USER_ID));
+    entity.set(DbLogTable.DELETED, row.getBoolean(DbTable.DELETED));
+
+    for (Entity column : columns) {
+      String idName = RUtil.convertIdentifier(column.getId());
+      String value = row.getAsString(idName);
+      entity.setAsString(idName, value);
+    }
+    return entity;
+  }
+
+  /**
+   * Create a collection of new {@link DbLogTable} entities
+   * 
+   * @param table
+   *          the {@link DbLogTable} relation
+   * @param modificationNumber
+   *          the modification number for the rows.
+   * @param rows
+   *          the rows
+   * @param columns
+   *          the {@link DbColumn} entities for the table
+   * @param cc
+   * @return the created entities, not yet persisted
+   * @throws ODKDatastoreException
+   */
+  public List<Entity> newLogEntities(Relation logTable, int modificationNumber, List<Entity> rows,
+      List<Entity> columns, CallingContext cc) throws ODKDatastoreException {
+    Validate.notNull(logTable);
+    Validate.isTrue(modificationNumber >= 0);
+    Validate.noNullElements(rows);
+    Validate.noNullElements(columns);
+    Validate.notNull(cc);
+
+    List<Entity> entities = new ArrayList<Entity>();
+    for (Entity row : rows) {
+      Entity entity = newLogEntity(logTable, modificationNumber, row, columns, cc);
+      entities.add(entity);
     }
     return entities;
   }
-
 }
