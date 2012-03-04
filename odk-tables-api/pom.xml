@@ -21,6 +21,7 @@
   </dependencies>
   <build>
       <plugins>
+
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>build-helper-maven-plugin</artifactId>
@@ -35,32 +36,14 @@
           <artifactId>maven-jar-plugin</artifactId>
           <configuration>
             <includes>
-              <include>**/odktables/command/Command.class</include>
-              <include>**/odktables/command/CommandConverter.class</include>
-              <include>**/odktables/commandresult/CommandResult*.class</include>
-              <include>**/odktables/client/**</include>
-              <include>**/odktables/command/**</include>
-              <include>**/odktables/commandresult/**</include>
-              <include>org/opendatakit/common/ermodel/simple/AttributeType.class</include>
-              <include>org/opendatakit/common/utils/Check.class</include>
+                <include>**/odktables/api/**</include>
             </includes>
+            <excludes>
+                <exclude>**/odktables/api/impl/**</exclude>
+            </excludes>
           </configuration>
         </plugin>
-        <plugin>
-            <artifactId>maven-source-plugin</artifactId>
-            <configuration>
-              <includes>
-                <include>**/odktables/command/Command.java</include>
-                <include>**/odktables/command/CommandConverter.java</include>
-                <include>**/odktables/commandresult/CommandResult*.java</include>
-                <include>**/odktables/client/**</include>
-                <include>**/odktables/command/**</include>
-                <include>**/odktables/commandresult/**</include>
-                <include>org/opendatakit/common/ermodel/simple/AttributeType.java</include>
-              <include>org/opendatakit/common/utils/Check.java</include>
-              </includes>
-            </configuration>
-        </plugin>
+
         <plugin>
           <artifactId>maven-javadoc-plugin</artifactId>
           <executions>
@@ -70,11 +53,30 @@
                 <goal>jar</goal>
               </goals>
               <configuration>
+                  <!--<sourcepath>${project.parent.build.sourceDirectory}</sourcepath>-->
+                  <sourcepath>../src/main/java</sourcepath>
                 <subpackages>org.opendatakit.aggregate.odktables</subpackages>
               </configuration>
             </execution>
           </executions>
         </plugin>
+
+      <plugin>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <executions>
+            <execution>
+                <phase>package</phase>
+                <goals>
+                    <goal>copy-dependencies</goal>
+                </goals>
+                <configuration>
+                    <outputDirectory>${project.build.directory}</outputDirectory>
+                    <includeArtifactIds>httpclient,httpcore,commons-logging,commons-lang</includeArtifactIds>
+                </configuration>
+            </execution>
+        </executions>
+      </plugin>
+
       </plugins>
   </build>
 </project>
