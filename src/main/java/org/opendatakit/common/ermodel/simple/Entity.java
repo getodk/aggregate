@@ -3,204 +3,97 @@ package org.opendatakit.common.ermodel.simple;
 import java.math.BigDecimal;
 import java.util.Date;
 
-import org.opendatakit.common.ermodel.ExtendedAbstractRelation;
-import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
 import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
-import org.opendatakit.common.utils.Check;
+import org.opendatakit.common.web.CallingContext;
 
-/**
- * Entity represents an entity in a Relation. Think of it like a row in a table.
- * 
- * @author the.dylan.price@gmail.com
- * 
- */
-public class Entity
-{
-    private ExtendedAbstractRelation relation;
-    private org.opendatakit.common.ermodel.Entity entity;
+public interface Entity {
 
-    private Entity(ExtendedAbstractRelation relation,
-            org.opendatakit.common.ermodel.Entity entity)
-    {
-        Check.notNull(relation, "relation");
-        Check.notNull(entity, "entity");
-        this.relation = relation;
-        this.entity = entity;
-    }
+  /**
+   * @return the unique identifier of this Entity. You can later retrieve this
+   *         Entity using {@link Relation#getEntity(String)}.
+   */
+  public abstract String getId();
 
-    /**
-     * @return the unique identifier of this Entity. You can later retrieve this
-     *         Entity using {@link Relation#getEntity(String)}.
-     */
-    public String getAggregateIdentifier()
-    {
-        return this.entity.getUri();
-    }
+  /**
+   * @return the Date of the last time this Entity was saved to the datastore.
+   */
+  public abstract Date getLastUpdateDate();
 
-    /**
-     * @return the Date of the last time this Entity was saved to the datastore.
-     */
-    public Date getLastUpdateDate()
-    {
-        return this.entity.getLastUpdateDate();
-    }
+  /**
+   * @return the Date that this Entity was first saved to the datastore.
+   */
+  public abstract Date getCreationDate();
 
-    /**
-     * @return the Date that this Entity was first saved to the datastore.
-     */
-    public Date getCreationDate()
-    {
-        return this.entity.getCreationDate();
-    }
+  /**
+   * @return the user who created this entity, of the form
+   *         "mailto:username@domain.com"
+   */
+  public abstract String getCreationUser();
 
-    public Boolean getBoolean(String attributeName)
-    {
-        Check.notNullOrEmpty(attributeName, "attributeName");
-        DataField field = relation.getDataField(attributeName);
-        return this.entity.getBoolean(field);
-    }
+  /**
+   * @return the user who last updated this entity, of the form
+   *         "mailto:username@domain.com"
+   */
+  public abstract String getLastUpdateUser();
 
-    public Date getDate(String attributeName)
-    {
-        Check.notNullOrEmpty(attributeName, "attributeName");
-        DataField field = relation.getDataField(attributeName);
-        return this.entity.getDate(field);
-    }
+  public abstract Boolean getBoolean(String fieldName);
 
-    public Double getDouble(String attributeName)
-    {
-        Check.notNullOrEmpty(attributeName, "attributeName");
-        DataField field = relation.getDataField(attributeName);
-        return this.entity.getDouble(field);
-    }
+  public abstract Date getDate(String fieldName);
 
-    public BigDecimal getNumeric(String attributeName)
-    {
-        Check.notNullOrEmpty(attributeName, "attributeName");
-        DataField field = relation.getDataField(attributeName);
-        return this.entity.getNumeric(field);
-    }
+  public abstract Double getDouble(String fieldName);
 
-    public Integer getInteger(String attributeName)
-    {
-        Check.notNullOrEmpty(attributeName, "attributeName");
-        DataField field = relation.getDataField(attributeName);
-        return this.entity.getInteger(field);
-    }
+  public abstract BigDecimal getNumeric(String fieldName);
 
-    public Long getLong(String attributeName)
-    {
-        Check.notNullOrEmpty(attributeName, "attributeName");
-        DataField field = relation.getDataField(attributeName);
-        return this.entity.getLong(field);
-    }
+  public abstract Integer getInteger(String fieldName);
 
-    public String getString(String attributeName)
-    {
-        Check.notNullOrEmpty(attributeName, "attributeName");
-        DataField field = relation.getDataField(attributeName);
-        return this.entity.getString(field);
-    }
+  public abstract Long getLong(String fieldName);
 
-    public void set(String attributeName, Boolean value)
-    {
-        Check.notNullOrEmpty(attributeName, "attributeName");
-        DataField field = relation.getDataField(attributeName);
-        this.entity.setBoolean(field, value);
-    }
+  public abstract String getString(String fieldName);
 
-    public void set(String attributeName, Date value)
-    {
-        Check.notNullOrEmpty(attributeName, "attributeName");
-        DataField field = relation.getDataField(attributeName);
-        this.entity.setDate(field, value);
-    }
+  public abstract void set(String fieldName, Boolean value);
 
-    public void set(String attributeName, Double value)
-    {
-        Check.notNullOrEmpty(attributeName, "attributeName");
-        DataField field = relation.getDataField(attributeName);
-        this.entity.setDouble(field, value);
-    }
+  public abstract void set(String fieldName, Date value);
 
-    public void set(String attributeName, BigDecimal value)
-    {
-        Check.notNullOrEmpty(attributeName, "attributeName");
-        DataField field = relation.getDataField(attributeName);
-        this.entity.setNumeric(field, value);
-    }
+  public abstract void set(String fieldName, Double value);
 
-    public void set(String attributeName, Integer value)
-    {
-        Check.notNullOrEmpty(attributeName, "attributeName");
-        DataField field = relation.getDataField(attributeName);
-        this.entity.setInteger(field, value);
-    }
+  public abstract void set(String fieldName, BigDecimal value);
 
-    public void set(String attributeName, Long value)
-    {
-        Check.notNullOrEmpty(attributeName, "attributeName");
-        DataField field = relation.getDataField(attributeName);
-        this.entity.setLong(field, value);
-    }
+  public abstract void set(String fieldName, Integer value);
 
-    public void set(String attributeName, String value)
-    {
-        Check.notNullOrEmpty(attributeName, "attributeName");
-        DataField field = relation.getDataField(attributeName);
-        this.entity.setString(field, value);
-    }
+  public abstract void set(String fieldName, Long value);
 
-    /**
-     * Retrieves the value of the given attribute and returns the value as a
-     * String.
-     */
-    public String getAsString(String attributeName)
-    {
-        return this.entity.getField(attributeName);
-    }
+  public abstract void set(String fieldName, String value);
 
-    /**
-     * Attempts to parse 'value' to the correct type for the given attribute and
-     * then set it on this entity.
-     */
-    public void setAsString(String attributeName, String value)
-    {
-        Check.notNullOrEmpty(attributeName, "attributeName");
-        this.entity.setField(attributeName, value);
-    }
+  /**
+   * Retrieves the value of the given attribute and returns the value as a
+   * String.
+   */
+  public abstract String getAsString(String fieldName);
 
-    /**
-     * Saves this Entity to the datastore.
-     * 
-     * @throws ODKEntityPersistException
-     *             if there was a problem saving the Entity.
-     * @throws ODKOverQuotaException 
-     */
-    public void save() throws ODKEntityPersistException, ODKOverQuotaException
-    {
-        this.entity.persist(this.relation.getCC());
-    }
+  /**
+   * Attempts to parse 'value' to the correct type for the given attribute and
+   * then set it on this entity.
+   */
+  public abstract void setAsString(String fieldName, String value);
 
-    /**
-     * Deletes this Entity from the datastore.
-     * 
-     * @throws ODKDatastoreException
-     *             if there was a problem deleting this Entity.
-     */
-    public void delete() throws ODKDatastoreException
-    {
-        this.entity.remove(this.relation.getCC());
-    }
+  /**
+   * Saves this Entity to the datastore.
+   * 
+   * @throws ODKEntityPersistException
+   *           if there was a problem saving the Entity.
+   * @throws ODKOverQuotaException
+   */
+  public abstract void put(CallingContext cc) throws ODKEntityPersistException,
+      ODKOverQuotaException;
 
-    /**
-     * Creates an Entity from an org.opendatakit.common.ermodel.Entity
-     */
-    protected static Entity fromEntity(ExtendedAbstractRelation relation,
-            org.opendatakit.common.ermodel.Entity entity)
-    {
-        return new Entity(relation, entity);
-    }
+  /**
+   * Deletes this Entity from the datastore.
+   * 
+   * @throws ODKDatastoreException
+   *           if there was a problem deleting this Entity.
+   */
+  public abstract void delete(CallingContext cc) throws ODKDatastoreException;
+
 }
