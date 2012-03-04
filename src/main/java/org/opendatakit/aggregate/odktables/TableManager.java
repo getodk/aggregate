@@ -7,6 +7,7 @@ import org.apache.commons.lang.Validate;
 import org.opendatakit.aggregate.odktables.entity.Column;
 import org.opendatakit.aggregate.odktables.entity.TableEntry;
 import org.opendatakit.aggregate.odktables.relation.DbColumn;
+import org.opendatakit.aggregate.odktables.relation.DbLogTable;
 import org.opendatakit.aggregate.odktables.relation.DbTable;
 import org.opendatakit.aggregate.odktables.relation.DbTableEntry;
 import org.opendatakit.aggregate.odktables.relation.EntityConverter;
@@ -15,6 +16,7 @@ import org.opendatakit.common.ermodel.simple.Relation;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
+import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.web.CallingContext;
 
 /**
@@ -91,8 +93,10 @@ public class TableManager {
    * @throws ODKEntityNotFoundException
    *           if no table with the given table id was found
    * @throws ODKDatastoreException
+   * @throws ODKTaskLockException
    */
-  public void deleteTable(String tableId) throws ODKEntityNotFoundException, ODKDatastoreException {
+  public void deleteTable(String tableId) throws ODKEntityNotFoundException, ODKDatastoreException,
+      ODKTaskLockException {
     Validate.notEmpty(tableId);
 
     List<Entity> entities = new ArrayList<Entity>();
@@ -103,10 +107,21 @@ public class TableManager {
     List<Entity> columns = DbColumn.query(tableId, cc);
     entities.addAll(columns);
 
-    Relation relation = DbTable.getRelation(tableId, cc);
+    Relation table = DbTable.getRelation(tableId, cc);
+    Relation logTable = DbLogTable.getRelation(tableId, cc);
 
-    Relation.deleteEntities(entities, cc);
-    relation.dropRelation(cc);
+    LockTemplate dataLock = new LockTemplate(tableId, ODKTablesTaskLockType.UPDATE_DATA, cc);
+    LockTemplate propsLock = new LockTemplate(tableId, ODKTablesTaskLockType.UPDATE_PROPERTIES, cc);
+    try {
+      dataLock.acquire();
+      propsLock.acquire();
+      Relation.deleteEntities(entities, cc);
+      table.dropRelation(cc);
+      logTable.dropRelation(cc);
+    } finally {
+      propsLock.release();
+      dataLock.release();
+    }
   }
 
 }
