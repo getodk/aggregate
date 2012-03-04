@@ -10,6 +10,7 @@ import org.apache.commons.lang.Validate;
 import org.opendatakit.aggregate.odktables.entity.Row;
 import org.opendatakit.aggregate.odktables.exception.RowVersionMismatchException;
 import org.opendatakit.aggregate.odktables.relation.DbColumn;
+import org.opendatakit.aggregate.odktables.relation.DbLogTable;
 import org.opendatakit.aggregate.odktables.relation.DbTable;
 import org.opendatakit.aggregate.odktables.relation.DbTableEntry;
 import org.opendatakit.aggregate.odktables.relation.EntityConverter;
@@ -177,10 +178,15 @@ public class DataManager {
       rowEntities = converter.updateRowEntities(table, modificationNumber, rows, columns, cc);
     }
 
+    Relation logTable = DbLogTable.getRelation(tableId, cc);
+    List<Entity> logEntities = converter.newLogEntities(logTable, modificationNumber, rowEntities,
+        columns, cc);
+
     // lock and update db
     LockTemplate lock = new LockTemplate(tableId, ODKTablesTaskLockType.UPDATE_DATA, cc);
     try {
       lock.acquire();
+      Relation.putEntities(logEntities, cc);
       Relation.putEntities(rowEntities, cc);
       entry.put(cc);
     } finally {
@@ -227,14 +233,22 @@ public class DataManager {
     modificationNumber++;
     entry.set(DbTableEntry.MODIFICATION_NUMBER, modificationNumber);
 
-    // get entities
-    List<Entity> rows = converter.getRowEntities(table, rowIds, cc);
+    // get entities and mark deleted
+    List<Entity> rows = DbTable.query(table, rowIds, cc);
+    for (val row : rows) {
+      row.set(DbTable.DELETED, true);
+    }
+
+    Relation logTable = DbLogTable.getRelation(tableId, cc);
+    List<Entity> logRows = converter
+        .newLogEntities(logTable, modificationNumber, rows, columns, cc);
 
     // lock and update db
     LockTemplate lock = new LockTemplate(tableId, ODKTablesTaskLockType.UPDATE_DATA, cc);
     try {
       lock.acquire();
-      Relation.deleteEntities(rows, cc);
+      Relation.putEntities(logRows, cc);
+      Relation.putEntities(rows, cc);
       entry.put(cc);
     } finally {
       lock.release();
