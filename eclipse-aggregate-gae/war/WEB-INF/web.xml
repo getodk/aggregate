@@ -388,22 +388,19 @@
         <servlet-name>openIdLoginPage</servlet-name>
         <url-pattern>/openid_login.html</url-pattern>
     </servlet-mapping>
-    
+
     <!-- servlet for odktables api -->
     <servlet>
-        <servlet-name>CXFServlet</servlet-name>
-        <display-name>CXF Servlet</display-name>
-        <servlet-class>
-            org.apache.cxf.transport.servlet.CXFServlet
-        </servlet-class>
+        <servlet-name>ODKTables</servlet-name>
+        <servlet-class>com.sun.jersey.spi.container.servlet.ServletContainer</servlet-class>
         <init-param>
-            <param-name>config-location</param-name>
-            <param-value>/WEB-INF/applicationContext-cxf.xml</param-value>
+            <param-name>com.sun.jersey.config.property.packages</param-name>
+            <param-value>org.opendatakit.aggregate.odktables.api</param-value>
         </init-param>
-        <load-on-startup>1</load-on-startup>
     </servlet>
+
     <servlet-mapping>
-        <servlet-name>CXFServlet</servlet-name>
+        <servlet-name>ODKTables</servlet-name>
         <url-pattern>/odktables/*</url-pattern>
     </servlet-mapping>
     
