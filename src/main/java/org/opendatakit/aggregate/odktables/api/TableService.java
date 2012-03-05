@@ -10,7 +10,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 
 import org.opendatakit.aggregate.odktables.api.entity.NewTable;
 import org.opendatakit.aggregate.odktables.api.entity.TableResource;
@@ -28,16 +27,16 @@ public interface TableService {
   @GET
   @Path("{tableId}")
   @Produces(MediaType.TEXT_XML)
-  public Response getTable(@PathParam("tableId") String tableId) throws ODKDatastoreException;
+  public TableResource getTable(@PathParam("tableId") String tableId) throws ODKDatastoreException;
 
   @PUT
   @Path("{tableId}")
   @Consumes(MediaType.TEXT_XML)
-  public Response createTable(NewTable newTable) throws ODKDatastoreException;
+  public TableResource createTable(NewTable newTable) throws ODKDatastoreException;
 
   @DELETE
   @Path("{tableId}")
-  public Response deleteTable(@PathParam("tableId") String tableId) throws ODKDatastoreException,
+  public void deleteTable(@PathParam("tableId") String tableId) throws ODKDatastoreException,
       ODKTaskLockException;
 
   @Path("{tableId}/columns")
