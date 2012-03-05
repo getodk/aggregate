@@ -13,7 +13,7 @@ import org.opendatakit.aggregate.odktables.relation.DbColumn;
 import org.opendatakit.aggregate.odktables.relation.DbLogTable;
 import org.opendatakit.aggregate.odktables.relation.DbTable;
 import org.opendatakit.aggregate.odktables.relation.DbTableEntry;
-import org.opendatakit.aggregate.odktables.relation.EntityConverter;
+import org.opendatakit.aggregate.odktables.util.EntityConverter;
 import org.opendatakit.common.ermodel.simple.Entity;
 import org.opendatakit.common.ermodel.simple.Relation;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;

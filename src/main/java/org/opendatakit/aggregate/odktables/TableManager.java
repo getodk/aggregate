@@ -10,8 +10,9 @@ import org.opendatakit.aggregate.odktables.relation.DbColumn;
 import org.opendatakit.aggregate.odktables.relation.DbLogTable;
 import org.opendatakit.aggregate.odktables.relation.DbTable;
 import org.opendatakit.aggregate.odktables.relation.DbTableEntry;
-import org.opendatakit.aggregate.odktables.relation.EntityConverter;
+import org.opendatakit.aggregate.odktables.util.EntityConverter;
 import org.opendatakit.common.ermodel.simple.Entity;
+import org.opendatakit.common.ermodel.simple.Query;
 import org.opendatakit.common.ermodel.simple.Relation;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
@@ -33,6 +34,18 @@ public class TableManager {
   public TableManager(CallingContext cc) {
     this.cc = cc;
     this.converter = new EntityConverter();
+  }
+
+  /**
+   * Retrieve a list of all table entries in the datastore.
+   * 
+   * @return a list of all table entries.
+   * @throws ODKDatastoreException
+   */
+  public List<TableEntry> getTables() throws ODKDatastoreException {
+    Query query = DbTableEntry.getRelation(cc).query("TableManager.getTables", cc);
+    List<Entity> enries = query.execute();
+    return converter.toTableEntryEntities(enries);
   }
 
   /**
