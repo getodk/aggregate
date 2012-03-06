@@ -90,8 +90,7 @@ public class DataManager {
    * 
    * @param dataEtag
    *          the data etag
-   * @return the rows which have changed or been added since the given
-   *         modification number
+   * @return the rows which have changed or been added since the given data etag
    * @throws ODKDatastoreException
    */
   public List<Row> getRowsSince(String dataEtag) throws ODKDatastoreException {
