@@ -79,11 +79,13 @@ public class TableServiceImpl implements TableService {
 		URI self = ub.clone().path(TableService.class, "getTable").build(tableId);
 		URI columns = ub.clone().path(TableService.class, "getColumns").build(tableId);
 		URI data = ub.clone().path(TableService.class, "getData").build(tableId);
+		URI diff = UriBuilder.fromUri(data).path(DataService.class, "getRowsSince").build();
 		
 		TableResource resource = new TableResource(entry);
 		resource.setSelfUri(self.toASCIIString());
 		resource.setColumnsUri(columns.toASCIIString());
 		resource.setDataUri(data.toASCIIString());
+		resource.setDiffUri(diff.toASCIIString());
 		return resource;
 	}
 }
