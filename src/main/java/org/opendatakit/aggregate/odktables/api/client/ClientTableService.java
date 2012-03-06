@@ -9,6 +9,7 @@ import javax.ws.rs.core.UriBuilder;
 import org.opendatakit.aggregate.odktables.api.ColumnService;
 import org.opendatakit.aggregate.odktables.api.TableService;
 import org.opendatakit.aggregate.odktables.entity.Column;
+import org.opendatakit.aggregate.odktables.entity.api.TableDefinition;
 import org.opendatakit.aggregate.odktables.entity.api.TableResource;
 
 import com.sun.jersey.api.client.Client;
@@ -49,7 +50,8 @@ public class ClientTableService implements TableService {
   }
 
   @Override
-  public TableResource createTable(String tableId, List<Column> columns) {
+  public TableResource createTable(String tableId, TableDefinition definition) {
+    List<Column> columns = definition.getColumns();
     WebResource r = c.resource(ub.clone().path(tableId).build());
     GenericEntity<List<Column>> entity = new GenericEntity<List<Column>>(columns) {};
     TableResource table = r.accept(MediaType.TEXT_XML, MediaType.TEXT_PLAIN)
