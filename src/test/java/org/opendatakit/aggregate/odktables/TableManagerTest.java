@@ -11,7 +11,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendatakit.aggregate.odktables.entity.Column;
-import org.opendatakit.aggregate.odktables.entity.Column.ColumnType;
 import org.opendatakit.aggregate.odktables.entity.TableEntry;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
@@ -31,12 +30,9 @@ public class TableManagerTest {
   public void setUp() throws Exception {
     CallingContext cc = TestContextFactory.getCallingContext();
     tm = new TableManager(cc);
-    this.tableId = "people";
-    this.columns = new ArrayList<Column>();
-    this.columns.add(new Column("name", ColumnType.STRING));
-    this.columns.add(new Column("age", ColumnType.INTEGER));
-    this.columns.add(new Column("weight", ColumnType.DECIMAL));
-    this.tableId2 = "people2";
+    this.tableId = T.tableId;
+    this.columns = T.columns;
+    this.tableId2 = T.tableId + "2";
   }
 
   @After
