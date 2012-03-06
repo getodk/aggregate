@@ -12,6 +12,7 @@
   <version>1.0</version>
   <packaging>jar</packaging>
   <name>API Jar for ODK Tables</name>
+  <!--
   <dependencies>
     <dependency>
       <groupId>org.opendatakit</groupId>
@@ -19,19 +20,11 @@
       <version>latest</version>
     </dependency>
   </dependencies>
+  -->
   <build>
+      <sourceDirectory>../src/main/java</sourceDirectory>
       <plugins>
 
-        <plugin>
-          <groupId>org.codehaus.mojo</groupId>
-          <artifactId>build-helper-maven-plugin</artifactId>
-          <version>${build.helper.maven.plugin.version}</version>
-          <executions>
-            <execution>
-              <id>add-java-source</id>
-            </execution>
-          </executions>
-		</plugin>
         <plugin>
           <artifactId>maven-jar-plugin</artifactId>
           <configuration>
@@ -54,29 +47,29 @@
                 <goal>jar</goal>
               </goals>
               <configuration>
-                  <!--<sourcepath>${project.parent.build.sourceDirectory}</sourcepath>-->
                   <sourcepath>../src/main/java</sourcepath>
-                <subpackages>org.opendatakit.aggregate.odktables</subpackages>
+                  <subpackages>org.opendatakit.aggregate.odktables.api:org.opendatakit.aggregate.odktables.entity</subpackages>
+                  <excludePackageNames>org.opendatakit.aggregate.odktables.api.impl.*</excludePackageNames>
               </configuration>
             </execution>
           </executions>
         </plugin>
 
-      <plugin>
-        <artifactId>maven-dependency-plugin</artifactId>
-        <executions>
-            <execution>
-                <phase>package</phase>
-                <goals>
-                    <goal>copy-dependencies</goal>
-                </goals>
-                <configuration>
-                    <outputDirectory>${project.build.directory}</outputDirectory>
-                    <includeArtifactIds>jersey-client,jersey-core,jersey-apache-client4,httpclient,httpcore,commons-logging,commons-lang</includeArtifactIds>
-                </configuration>
-            </execution>
-        </executions>
-      </plugin>
+        <plugin>
+          <artifactId>maven-dependency-plugin</artifactId>
+          <executions>
+              <execution>
+                  <phase>package</phase>
+                  <goals>
+                      <goal>copy-dependencies</goal>
+                  </goals>
+                  <configuration>
+                      <outputDirectory>${project.build.directory}</outputDirectory>
+                      <includeArtifactIds>jersey-client,jersey-core,jersey-apache-client4,httpclient,httpcore,commons-logging,commons-lang</includeArtifactIds>
+                  </configuration>
+              </execution>
+          </executions>
+        </plugin>
 
       </plugins>
   </build>
