@@ -10,7 +10,8 @@ import org.opendatakit.aggregate.odktables.relation.DbColumn;
 import org.opendatakit.aggregate.odktables.relation.DbLogTable;
 import org.opendatakit.aggregate.odktables.relation.DbTable;
 import org.opendatakit.aggregate.odktables.relation.DbTableEntry;
-import org.opendatakit.aggregate.odktables.util.EntityConverter;
+import org.opendatakit.aggregate.odktables.relation.EntityConverter;
+import org.opendatakit.aggregate.odktables.relation.EntityCreator;
 import org.opendatakit.common.ermodel.simple.Entity;
 import org.opendatakit.common.ermodel.simple.Query;
 import org.opendatakit.common.ermodel.simple.Relation;
@@ -30,10 +31,12 @@ public class TableManager {
 
   private CallingContext cc;
   private EntityConverter converter;
+  private EntityCreator creator;
 
   public TableManager(CallingContext cc) {
     this.cc = cc;
     this.converter = new EntityConverter();
+    this.creator = new EntityCreator();
   }
 
   /**
@@ -86,11 +89,11 @@ public class TableManager {
 
     List<Entity> entities = new ArrayList<Entity>();
 
-    Entity entry = converter.newTableEntryEntity(tableId, cc);
+    Entity entry = creator.newTableEntryEntity(tableId, cc);
     entities.add(entry);
 
     for (Column column : columns) {
-      entities.add(converter.newColumnEntity(tableId, column, cc));
+      entities.add(creator.newColumnEntity(tableId, column, cc));
     }
 
     Relation.putEntities(entities, cc);
