@@ -1,6 +1,9 @@
 package org.opendatakit.aggregate.odktables.api.client;
 
+import static org.junit.Assert.*;
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.Collection;
 
 import org.apache.commons.lang.StringUtils;
 
@@ -23,4 +26,16 @@ public class Util {
       throw e;
   }
 
+  /**
+   * V must implement equals.
+   */
+  public static <V> void assertCollectionSameElements(Collection<V> expected, Collection<V> actual) {
+    Collection<V> expectedCopy = new ArrayList<V>(expected);
+    Collection<V> actualCopy = new ArrayList<V>(actual);
+
+    for (V item : actualCopy) {
+      assertTrue(expectedCopy.remove(item));
+    }
+    assertTrue(expectedCopy.isEmpty());
+  }
 }
