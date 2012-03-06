@@ -64,7 +64,7 @@ public class DbTable {
    * @param rowIds
    *          the ids of the rows to get.
    * @param cc
-   * @return
+   * @return the row entities
    * @throws ODKEntityNotFoundException
    *           if one of the rows does not exist
    * @throws ODKDatastoreException

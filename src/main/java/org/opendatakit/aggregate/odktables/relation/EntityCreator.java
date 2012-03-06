@@ -279,7 +279,7 @@ public class EntityCreator {
   /**
    * Create a collection of new {@link DbLogTable} entities
    * 
-   * @param table
+   * @param logTable
    *          the {@link DbLogTable} relation
    * @param modificationNumber
    *          the modification number for the rows.
