@@ -4,8 +4,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.opendatakit.aggregate.odktables.util.StaticHelpers.list;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -157,5 +157,13 @@ public class DataManagerTest {
     dm.deleteRows(list(T.Data.DYLAN.getId(), T.Data.JOHN.getId()));
     List<Row> rows = dm.getRows();
     assertTrue(rows.isEmpty());
+  }
+
+  private static List<String> list(String... values) {
+    final java.util.ArrayList<java.lang.String> list = new ArrayList<String>();
+    for (final java.lang.String value : values) {
+      list.add(value);
+    }
+    return list;
   }
 }
