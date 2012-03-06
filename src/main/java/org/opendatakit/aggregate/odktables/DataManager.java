@@ -13,9 +13,11 @@ import org.opendatakit.aggregate.odktables.relation.DbColumn;
 import org.opendatakit.aggregate.odktables.relation.DbLogTable;
 import org.opendatakit.aggregate.odktables.relation.DbTable;
 import org.opendatakit.aggregate.odktables.relation.DbTableEntry;
-import org.opendatakit.aggregate.odktables.util.EntityConverter;
+import org.opendatakit.aggregate.odktables.relation.EntityConverter;
+import org.opendatakit.aggregate.odktables.relation.EntityCreator;
 import org.opendatakit.common.ermodel.simple.Entity;
 import org.opendatakit.common.ermodel.simple.Relation;
+import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
@@ -32,9 +34,11 @@ public class DataManager {
 
   private CallingContext cc;
   private EntityConverter converter;
+  private EntityCreator creator;
   private String tableId;
   private Entity entry;
   private Relation table;
+  private Relation logTable;
   private List<Entity> columns;
 
   /**
@@ -56,10 +60,16 @@ public class DataManager {
 
     this.cc = cc;
     this.converter = new EntityConverter();
+    this.creator = new EntityCreator();
     this.tableId = tableId;
     this.entry = DbTableEntry.getRelation(cc).getEntity(tableId, cc);
     this.table = DbTable.getRelation(tableId, cc);
+    this.logTable = DbLogTable.getRelation(tableId, cc);
     this.columns = DbColumn.query(tableId, cc);
+  }
+
+  public String getTableId() {
+    return tableId;
   }
 
   /**
@@ -73,6 +83,44 @@ public class DataManager {
     query.equal(DbTable.DELETED, false);
     val rows = query.execute();
     return converter.toRows(rows, columns);
+  }
+
+  /**
+   * Retrieve a row from the table.
+   * 
+   * @param rowId
+   *          the id of the row
+   * @return the row, or null if no such row exists
+   * @throws ODKDatastoreException
+   */
+  public Row getRow(String rowId) throws ODKDatastoreException {
+    Validate.notEmpty(rowId);
+
+    val query = table.query("DataManager.getRow", cc);
+    query.equal(CommonFieldsBase.URI_COLUMN_NAME, rowId);
+    Entity row = query.get();
+
+    if (row != null)
+      return converter.toRow(row, columns);
+    else
+      return null;
+  }
+
+  /**
+   * Retrieve a row from the table.
+   * 
+   * @param rowId
+   *          the id of the row
+   * @return the row
+   * @throws ODKEntityNotFoundException
+   *           if the row with the given id does not exist
+   * @throws ODKDatastoreException
+   */
+  public Row getRowNullSafe(String rowId) throws ODKEntityNotFoundException, ODKDatastoreException {
+    Validate.notEmpty(rowId);
+
+    val row = table.getEntity(rowId, cc);
+    return converter.toRow(row, columns);
   }
 
   /**
@@ -173,13 +221,12 @@ public class DataManager {
     // create or update entities
     List<Entity> rowEntities;
     if (insert) {
-      rowEntities = converter.newRowEntities(table, rows, modificationNumber, columns, cc);
+      rowEntities = creator.newRowEntities(table, rows, modificationNumber, columns, cc);
     } else {
-      rowEntities = converter.updateRowEntities(table, modificationNumber, rows, columns, cc);
+      rowEntities = creator.updateRowEntities(table, modificationNumber, rows, columns, cc);
     }
 
-    Relation logTable = DbLogTable.getRelation(tableId, cc);
-    List<Entity> logEntities = converter.newLogEntities(logTable, modificationNumber, rowEntities,
+    List<Entity> logEntities = creator.newLogEntities(logTable, modificationNumber, rowEntities,
         columns, cc);
 
     // lock and update db
@@ -236,12 +283,11 @@ public class DataManager {
     // get entities and mark deleted
     List<Entity> rows = DbTable.query(table, rowIds, cc);
     for (val row : rows) {
+      row.set(DbTable.ROW_VERSION, CommonFieldsBase.newUri());
       row.set(DbTable.DELETED, true);
     }
 
-    Relation logTable = DbLogTable.getRelation(tableId, cc);
-    List<Entity> logRows = converter
-        .newLogEntities(logTable, modificationNumber, rows, columns, cc);
+    List<Entity> logRows = creator.newLogEntities(logTable, modificationNumber, rows, columns, cc);
 
     // lock and update db
     LockTemplate lock = new LockTemplate(tableId, ODKTablesTaskLockType.UPDATE_DATA, cc);
