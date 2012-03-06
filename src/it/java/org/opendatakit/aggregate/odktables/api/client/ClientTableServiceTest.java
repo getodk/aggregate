@@ -9,9 +9,9 @@ import java.util.List;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.opendatakit.aggregate.odktables.api.entity.TableResource;
 import org.opendatakit.aggregate.odktables.entity.Column;
 import org.opendatakit.aggregate.odktables.entity.Column.ColumnType;
+import org.opendatakit.aggregate.odktables.entity.api.TableResource;
 
 import com.sun.jersey.api.client.ClientResponse.Status;
 import com.sun.jersey.api.client.UniformInterfaceException;
