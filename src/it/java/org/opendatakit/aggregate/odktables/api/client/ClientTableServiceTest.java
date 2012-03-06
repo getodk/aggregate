@@ -6,8 +6,6 @@ import static org.junit.Assert.assertNotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-import lombok.Getter;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -20,9 +18,7 @@ import com.sun.jersey.api.client.UniformInterfaceException;
 
 public class ClientTableServiceTest {
 
-  @Getter
   private String uri;
-  @Getter
   private ClientTableService cts;
   private String tableId;
   private List<Column> columns;
@@ -46,6 +42,14 @@ public class ClientTableServiceTest {
     } catch (UniformInterfaceException e) {
       Util.checkUniformInterfaceException(e, Status.NOT_FOUND);
     }
+  }
+
+  public String getUri() {
+    return uri;
+  }
+
+  public ClientTableService getCts() {
+    return cts;
   }
 
   @Test
