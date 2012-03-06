@@ -395,7 +395,7 @@
         <servlet-class>com.sun.jersey.spi.container.servlet.ServletContainer</servlet-class>
         <init-param>
             <param-name>javax.ws.rs.Application</param-name>
-            <param-value>org.opendatakit.aggregate.odktables.api.impl.ODKTablesAPIApplication</param-value>
+            <param-value>org.opendatakit.aggregate.odktables.impl.api.ODKTablesAPIApplication</param-value>
         </init-param>
     </servlet>
 
