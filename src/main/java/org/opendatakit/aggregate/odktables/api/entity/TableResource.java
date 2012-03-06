@@ -5,12 +5,14 @@ import javax.xml.bind.annotation.XmlRootElement;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import org.opendatakit.aggregate.odktables.entity.TableEntry;
 
 @XmlRootElement
 @NoArgsConstructor
 @Data
+@ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
 public class TableResource extends TableEntry {
 
