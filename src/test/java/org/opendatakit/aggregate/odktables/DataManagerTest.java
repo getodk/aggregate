@@ -5,14 +5,16 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendatakit.aggregate.odktables.entity.Row;
+import org.opendatakit.aggregate.odktables.entity.TableEntry;
 import org.opendatakit.aggregate.odktables.exception.RowVersionMismatchException;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
@@ -95,7 +97,7 @@ public class DataManagerTest {
   @Test
   public void testGetRow() throws ODKDatastoreException, ODKTaskLockException {
     Row expected = Row.forInsert(T.Data.DYLAN.getId(), null, T.Data.DYLAN.getValues());
-    dm.insertRow(expected);
+    expected = dm.insertRow(expected);
     Row actual = dm.getRow(T.Data.DYLAN.getId());
     assertEquals(expected, actual);
   }
@@ -110,7 +112,7 @@ public class DataManagerTest {
   public void testGetRowNullSafe() throws ODKEntityPersistException, ODKDatastoreException,
       ODKTaskLockException {
     Row expected = Row.forInsert(T.Data.DYLAN.getId(), null, T.Data.DYLAN.getValues());
-    dm.insertRow(expected);
+    expected = dm.insertRow(expected);
     Row actual = dm.getRowNullSafe(T.Data.DYLAN.getId());
     assertEquals(expected, actual);
   }
@@ -154,16 +156,38 @@ public class DataManagerTest {
   public void testDeleteRows() throws ODKEntityPersistException, ODKDatastoreException,
       ODKTaskLockException {
     dm.insertRows(rows);
-    dm.deleteRows(list(T.Data.DYLAN.getId(), T.Data.JOHN.getId()));
+    dm.deleteRows(Util.list(T.Data.DYLAN.getId(), T.Data.JOHN.getId()));
     List<Row> rows = dm.getRows();
     assertTrue(rows.isEmpty());
   }
 
-  private static List<String> list(String... values) {
-    final java.util.ArrayList<java.lang.String> list = new ArrayList<String>();
-    for (final java.lang.String value : values) {
-      list.add(value);
+  @Test
+  public void testGetRowsSince() throws ODKEntityPersistException, ODKDatastoreException,
+      ODKTaskLockException, RowVersionMismatchException {
+    TableEntry entry = tm.getTable(tableId);
+    String beginEtag = entry.getDataEtag();
+    rows = dm.insertRows(rows);
+
+    Map<String, Row> expected = new HashMap<String, Row>();
+
+    for (Row row : rows) {
+      row.getValues().put(T.Columns.age, "99");
     }
-    return list;
+
+    rows = dm.updateRows(rows);
+
+    for (Row row : rows) {
+      expected.put(row.getRowId(), row);
+    }
+
+    Row row = rows.get(0);
+    row.getValues().put(T.Columns.age, "444");
+
+    row = dm.updateRow(row);
+    expected.put(row.getRowId(), row);
+
+    List<Row> actual = dm.getRowsSince(beginEtag);
+    Util.assertCollectionSameElements(expected.values(), actual);
   }
+
 }
