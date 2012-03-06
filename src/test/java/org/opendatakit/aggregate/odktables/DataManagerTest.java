@@ -9,8 +9,6 @@ import static org.opendatakit.aggregate.odktables.util.StaticHelpers.list;
 import java.util.List;
 import java.util.UUID;
 
-import lombok.val;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -65,8 +63,8 @@ public class DataManagerTest {
     List<Row> actualRows = dm.insertRows(rows);
     assertEquals(2, actualRows.size());
     for (int i = 0; i < rows.size(); i++) {
-      val expected = rows.get(i);
-      val actual = actualRows.get(i);
+      Row expected = rows.get(i);
+      Row actual = actualRows.get(i);
       expected.setRowEtag(actual.getRowEtag());
       expected.setGroupOrUserId(actual.getGroupOrUserId());
     }
@@ -86,8 +84,8 @@ public class DataManagerTest {
     dm.insertRows(rows);
     List<Row> actualRows = dm.getRows();
     for (int i = 0; i < rows.size(); i++) {
-      val expected = rows.get(i);
-      val actual = actualRows.get(i);
+      Row expected = rows.get(i);
+      Row actual = actualRows.get(i);
       assertEquals(expected.getRowId(), actual.getRowId());
       assertEquals(expected.getGroupOrUserId(), actual.getGroupOrUserId());
       assertEquals(expected.getValues(), actual.getValues());
@@ -96,24 +94,24 @@ public class DataManagerTest {
 
   @Test
   public void testGetRow() throws ODKDatastoreException, ODKTaskLockException {
-    val expected = Row.forInsert(T.Data.DYLAN.getId(), null, T.Data.DYLAN.getValues());
+    Row expected = Row.forInsert(T.Data.DYLAN.getId(), null, T.Data.DYLAN.getValues());
     dm.insertRow(expected);
-    val actual = dm.getRow(T.Data.DYLAN.getId());
+    Row actual = dm.getRow(T.Data.DYLAN.getId());
     assertEquals(expected, actual);
   }
 
   @Test
   public void testGetRowDoeNotExist() throws ODKDatastoreException {
-    val row = dm.getRow(T.Data.DYLAN.getId());
+    Row row = dm.getRow(T.Data.DYLAN.getId());
     assertNull(row);
   }
 
   @Test
   public void testGetRowNullSafe() throws ODKEntityPersistException, ODKDatastoreException,
       ODKTaskLockException {
-    val expected = Row.forInsert(T.Data.DYLAN.getId(), null, T.Data.DYLAN.getValues());
+    Row expected = Row.forInsert(T.Data.DYLAN.getId(), null, T.Data.DYLAN.getValues());
     dm.insertRow(expected);
-    val actual = dm.getRowNullSafe(T.Data.DYLAN.getId());
+    Row actual = dm.getRowNullSafe(T.Data.DYLAN.getId());
     assertEquals(expected, actual);
   }
 
@@ -127,7 +125,7 @@ public class DataManagerTest {
   public void testUpdateRow() throws ODKEntityPersistException, ODKDatastoreException,
       ODKTaskLockException, RowVersionMismatchException {
     rows = dm.insertRows(rows);
-    val expected = rows.get(0);
+    Row expected = rows.get(0);
     expected.getValues().put(T.Columns.age, "24");
     Row actual = dm.updateRow(expected);
     assertFalse(expected.getRowEtag().equals(actual.getRowEtag()));
@@ -139,7 +137,7 @@ public class DataManagerTest {
   public void testUpdateRowVersionMismatch() throws ODKEntityPersistException,
       ODKDatastoreException, ODKTaskLockException, RowVersionMismatchException {
     rows = dm.insertRows(rows);
-    val row = rows.get(0);
+    Row row = rows.get(0);
     row.setRowEtag(UUID.randomUUID().toString());
     dm.updateRow(row);
   }
@@ -157,7 +155,7 @@ public class DataManagerTest {
       ODKTaskLockException {
     dm.insertRows(rows);
     dm.deleteRows(list(T.Data.DYLAN.getId(), T.Data.JOHN.getId()));
-    val rows = dm.getRows();
+    List<Row> rows = dm.getRows();
     assertTrue(rows.isEmpty());
   }
 }
