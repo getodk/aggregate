@@ -32,9 +32,6 @@
                 <include>**/odktables/api/**</include>
                 <include>**/odktables/entity/**</include>
             </includes>
-            <excludes>
-                <exclude>**/odktables/api/impl/**</exclude>
-            </excludes>
           </configuration>
         </plugin>
 
@@ -49,7 +46,6 @@
               <configuration>
                   <sourcepath>../src/main/java</sourcepath>
                   <subpackages>org.opendatakit.aggregate.odktables.api:org.opendatakit.aggregate.odktables.entity</subpackages>
-                  <excludePackageNames>org.opendatakit.aggregate.odktables.api.impl.*</excludePackageNames>
                   <failOnError>false</failOnError>
               </configuration>
             </execution>
@@ -66,7 +62,7 @@
                   </goals>
                   <configuration>
                       <outputDirectory>${project.build.directory}</outputDirectory>
-                      <includeArtifactIds>jersey-client,jersey-core,jersey-apache-client4,httpclient,httpcore,commons-logging,commons-lang</includeArtifactIds>
+                      <includeArtifactIds>jersey-client,jersey-core,jersey-apache-client4,httpclient,httpcore,commons-logging,commons-codec,commons-lang</includeArtifactIds>
                   </configuration>
               </execution>
           </executions>
