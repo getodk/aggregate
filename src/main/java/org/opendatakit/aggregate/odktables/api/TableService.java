@@ -10,7 +10,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import org.opendatakit.aggregate.odktables.entity.Column;
+import org.opendatakit.aggregate.odktables.entity.api.TableDefinition;
 import org.opendatakit.aggregate.odktables.entity.api.TableResource;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
@@ -28,7 +28,7 @@ public interface TableService {
 
   @PUT
   @Path("{tableId}")
-  public TableResource createTable(@PathParam("tableId") String tableId, List<Column> columns)
+  public TableResource createTable(@PathParam("tableId") String tableId, TableDefinition definition)
       throws ODKDatastoreException;
 
   @DELETE
