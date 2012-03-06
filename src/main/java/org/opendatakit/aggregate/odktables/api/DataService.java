@@ -1,5 +1,6 @@
 package org.opendatakit.aggregate.odktables.api;
 
+import java.util.Date;
 import java.util.List;
 
 import javax.ws.rs.Consumes;
@@ -9,10 +10,11 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
-import org.opendatakit.aggregate.odktables.api.entity.RowResource;
 import org.opendatakit.aggregate.odktables.entity.Row;
+import org.opendatakit.aggregate.odktables.entity.api.RowResource;
 import org.opendatakit.aggregate.odktables.exception.RowVersionMismatchException;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
@@ -22,6 +24,9 @@ public interface DataService {
 
   @GET
   public List<RowResource> getRows() throws ODKDatastoreException;
+
+//  @GET
+//  public List<RowResource> query(@QueryParam("since") Date since) throws ODKDatastoreException;
 
   @GET
   @Path("{rowId}")

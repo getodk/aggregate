@@ -6,8 +6,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriBuilder;
 
 import org.opendatakit.aggregate.odktables.api.DataService;
-import org.opendatakit.aggregate.odktables.api.entity.RowResource;
 import org.opendatakit.aggregate.odktables.entity.Row;
+import org.opendatakit.aggregate.odktables.entity.api.RowResource;
 
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.GenericType;

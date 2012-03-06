@@ -1,4 +1,4 @@
-package org.opendatakit.aggregate.odktables.api.impl;
+package org.opendatakit.aggregate.odktables.impl.api;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
