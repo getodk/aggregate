@@ -1,6 +1,5 @@
 package org.opendatakit.aggregate.odktables.api;
 
-import java.util.Date;
 import java.util.List;
 
 import javax.ws.rs.Consumes;
@@ -25,8 +24,9 @@ public interface DataService {
   @GET
   public List<RowResource> getRows() throws ODKDatastoreException;
 
-//  @GET
-//  public List<RowResource> query(@QueryParam("since") Date since) throws ODKDatastoreException;
+  @GET
+  public List<RowResource> getRowsSince(@QueryParam("since") String dataEtag)
+      throws ODKDatastoreException;
 
   @GET
   @Path("{rowId}")
