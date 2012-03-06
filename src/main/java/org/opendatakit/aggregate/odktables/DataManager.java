@@ -2,6 +2,7 @@
 package org.opendatakit.aggregate.odktables;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.lang.Validate;
@@ -82,6 +83,18 @@ public class DataManager {
     List<Entity> rows = query.execute();
     return converter.toRows(rows, columns);
   }
+  
+//  /**
+//   * 
+//   * @param since
+//   * @return
+//   */
+//  public List<Row> query(Date since)
+//  {
+//    Validate.notNull(date);
+//    Query query
+//    
+//  }
 
   /**
    * Retrieve a row from the table.

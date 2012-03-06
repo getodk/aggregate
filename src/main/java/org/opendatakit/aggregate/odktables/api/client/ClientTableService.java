@@ -8,8 +8,8 @@ import javax.ws.rs.core.UriBuilder;
 
 import org.opendatakit.aggregate.odktables.api.ColumnService;
 import org.opendatakit.aggregate.odktables.api.TableService;
-import org.opendatakit.aggregate.odktables.api.entity.TableResource;
 import org.opendatakit.aggregate.odktables.entity.Column;
+import org.opendatakit.aggregate.odktables.entity.api.TableResource;
 
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.GenericType;
