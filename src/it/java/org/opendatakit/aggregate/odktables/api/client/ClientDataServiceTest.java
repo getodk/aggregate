@@ -4,13 +4,16 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendatakit.aggregate.odktables.entity.Row;
+import org.opendatakit.aggregate.odktables.entity.TableEntry;
 import org.opendatakit.aggregate.odktables.entity.api.RowResource;
+import org.opendatakit.aggregate.odktables.entity.api.TableDefinition;
 
 import com.sun.jersey.api.client.ClientResponse.Status;
 import com.sun.jersey.api.client.UniformInterfaceException;
@@ -20,20 +23,24 @@ public class ClientDataServiceTest {
   private ClientTableServiceTest ctst;
   private String uri;
   private ClientDataService cds;
+  private String tableId;
   private Row row;
+  private Row row2;
 
   @Before
   public void setUp() throws Exception {
     this.ctst = new ClientTableServiceTest();
+    this.tableId = T.tableId;
 
     ctst.setUp();
     ClientTableService cts = ctst.getCts();
-    cts.createTable(T.tableId, T.columns);
+    cts.createTable(tableId, new TableDefinition(T.columns));
 
     this.uri = Util.buildUri(ctst.getUri(), ClientTableService.API_PATH, T.tableId,
         ClientDataService.API_PATH);
     this.cds = ctst.getCts().getData(T.tableId);
     this.row = T.rows.get(0);
+    this.row = T.rows.get(1);
   }
 
   @After
@@ -88,6 +95,28 @@ public class ClientDataServiceTest {
     assertEquals(1, resources.size());
     RowResource actual = resources.get(0);
     assertEquals(expected, actual);
+  }
+
+  @Test
+  public void testGetRowsSince() {
+    TableEntry entry = ctst.getCts().getTable(tableId);
+    String beginEtag = entry.getDataEtag();
+
+    List<RowResource> expected = new ArrayList<RowResource>();
+
+    RowResource one = cds.createOrUpdateRow(row.getRowId(), row);
+    row.setRowEtag(one.getRowEtag());
+    row.getValues().put(T.Columns.age, "999");
+    one = cds.createOrUpdateRow(row.getRowId(), row);
+
+    RowResource two = cds.createOrUpdateRow(row2.getRowId(), row2);
+
+    expected.add(one);
+    expected.add(two);
+
+    List<RowResource> actual = cds.getRowsSince(beginEtag);
+
+    Util.assertCollectionSameElements(expected, actual);
   }
 
   @Test

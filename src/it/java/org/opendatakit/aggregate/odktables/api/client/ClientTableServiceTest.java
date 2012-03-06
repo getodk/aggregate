@@ -11,6 +11,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.opendatakit.aggregate.odktables.entity.Column;
 import org.opendatakit.aggregate.odktables.entity.Column.ColumnType;
+import org.opendatakit.aggregate.odktables.entity.api.TableDefinition;
 import org.opendatakit.aggregate.odktables.entity.api.TableResource;
 
 import com.sun.jersey.api.client.ClientResponse.Status;
@@ -21,7 +22,7 @@ public class ClientTableServiceTest {
   private String uri;
   private ClientTableService cts;
   private String tableId;
-  private List<Column> columns;
+  private TableDefinition definition;
 
   @Before
   public void setUp() throws Exception {
@@ -29,10 +30,12 @@ public class ClientTableServiceTest {
     this.cts = new ClientTableService(uri, "");
 
     this.tableId = "people";
-    this.columns = new ArrayList<Column>();
-    this.columns.add(new Column("name", ColumnType.STRING));
-    this.columns.add(new Column("age", ColumnType.INTEGER));
-    this.columns.add(new Column("weight", ColumnType.DECIMAL));
+    List<Column> columns = new ArrayList<Column>();
+    columns.add(new Column("name", ColumnType.STRING));
+    columns.add(new Column("age", ColumnType.INTEGER));
+    columns.add(new Column("weight", ColumnType.DECIMAL));
+
+    this.definition = new TableDefinition(columns);
   }
 
   @After
@@ -61,14 +64,14 @@ public class ClientTableServiceTest {
   @Test
   public void testCreateTable() {
     String selfUri = Util.buildUri(this.uri, ClientTableService.API_PATH, tableId);
-    TableResource table = cts.createTable(tableId, columns);
+    TableResource table = cts.createTable(tableId, definition);
     assertEquals(tableId, table.getTableId());
     assertEquals(selfUri, table.getSelfUri());
   }
 
   @Test
   public void testGetTables() {
-    TableResource table = cts.createTable(tableId, columns);
+    TableResource table = cts.createTable(tableId, definition);
     List<TableResource> tables = cts.getTables();
     assertEquals(1, tables.size());
     assertEquals(table, tables.get(0));
@@ -76,20 +79,20 @@ public class ClientTableServiceTest {
 
   @Test
   public void testCreateTableAlreadyExists() {
-    cts.createTable(tableId, columns);
-    cts.createTable(tableId, columns);
+    cts.createTable(tableId, definition);
+    cts.createTable(tableId, definition);
   }
 
   @Test
   public void testGetTable() {
-    TableResource expected = cts.createTable(tableId, columns);
+    TableResource expected = cts.createTable(tableId, definition);
     TableResource actual = cts.getTable(tableId);
     assertEquals(expected, actual);
   }
 
   @Test(expected = UniformInterfaceException.class)
   public void testDeleteTable() {
-    cts.createTable(tableId, columns);
+    cts.createTable(tableId, definition);
     cts.deleteTable(tableId);
     cts.getTable(tableId);
   }
