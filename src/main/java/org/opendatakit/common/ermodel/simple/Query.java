@@ -209,15 +209,16 @@ public class Query {
   /**
    * Get the single entity result of the query.
    * 
-   * @return the entity which is the sole result of executing this query.
+   * @return the entity which is the sole result of executing this query, or
+   *         null if the query returned no results
    * @throws ODKDatastoreException
-   *           if the query contains no entities or greater than one entity, or
-   *           if there is a problem communicating with the datastore.
+   *           if the results contained more than one entity or if there is a
+   *           problem communicating with the datastore.
    */
   public Entity get() throws ODKDatastoreException {
     List<Entity> results = execute();
     if (results.isEmpty()) {
-      throw new ODKDatastoreException("called get() and query results contained no results");
+      return null;
     }
     if (results.size() > 1) {
       throw new ODKDatastoreException(
