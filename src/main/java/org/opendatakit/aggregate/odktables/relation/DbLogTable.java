@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.opendatakit.aggregate.odktables.util.EntityConverter;
-import org.opendatakit.aggregate.odktables.util.RUtil;
 import org.opendatakit.common.ermodel.simple.Entity;
 import org.opendatakit.common.ermodel.simple.Relation;
 import org.opendatakit.common.persistence.DataField;

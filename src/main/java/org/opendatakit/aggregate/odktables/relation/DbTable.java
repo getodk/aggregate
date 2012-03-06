@@ -5,8 +5,6 @@ import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.lang.Validate;
-import org.opendatakit.aggregate.odktables.util.EntityConverter;
-import org.opendatakit.aggregate.odktables.util.RUtil;
 import org.opendatakit.common.ermodel.simple.Entity;
 import org.opendatakit.common.ermodel.simple.Query;
 import org.opendatakit.common.ermodel.simple.Relation;
