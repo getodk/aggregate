@@ -21,13 +21,14 @@ import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 @Produces(MediaType.TEXT_XML)
 public interface DataService {
 
-  public static final String QUERY_SINCE = "since";
+  public static final String QUERY_DATA_ETAG = "data_etag";
 
   @GET
   public List<RowResource> getRows() throws ODKDatastoreException;
 
   @GET
-  public List<RowResource> getRowsSince(@QueryParam(QUERY_SINCE) String dataEtag)
+  @Path("diff")
+  public List<RowResource> getRowsSince(@QueryParam(QUERY_DATA_ETAG) String dataEtag)
       throws ODKDatastoreException;
 
   @GET
