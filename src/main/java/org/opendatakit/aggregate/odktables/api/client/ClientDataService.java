@@ -36,7 +36,7 @@ public class ClientDataService implements DataService {
 
   @Override
   public List<RowResource> getRowsSince(String dataEtag) {
-    WebResource r = c.resource(ub.queryParam(DataService.QUERY_SINCE, dataEtag).build());
+    WebResource r = c.resource(ub.queryParam(DataService.QUERY_DATA_ETAG, dataEtag).build());
     GenericType<List<RowResource>> list = new GenericType<List<RowResource>>() {};
     List<RowResource> rows = r.accept(MediaType.TEXT_XML, MediaType.TEXT_PLAIN).get(list);
     return rows;
