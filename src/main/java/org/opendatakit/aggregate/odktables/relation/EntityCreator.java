@@ -272,12 +272,14 @@ public class EntityCreator {
     Validate.notNull(row);
     Validate.noNullElements(columns);
     Validate.notNull(cc);
+    
     Entity entity = logTable.newEntity(cc);
     entity.set(DbLogTable.ROW_ID, row.getId());
     entity.set(DbLogTable.ROW_VERSION, row.getString(DbTable.ROW_VERSION));
     entity.set(DbLogTable.MODIFICATION_NUMBER, modificationNumber);
     entity.set(DbLogTable.GROUP_OR_USER_ID, row.getString(DbTable.GROUP_OR_USER_ID));
     entity.set(DbLogTable.DELETED, row.getBoolean(DbTable.DELETED));
+    
     for (Entity column : columns) {
       String idName = RUtil.convertIdentifier(column.getId());
       String value = row.getAsString(idName);
