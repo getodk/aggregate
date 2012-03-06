@@ -158,7 +158,10 @@ public class EntityConverter {
   public List<Row> toRows(List<Entity> entities, List<Entity> columns, boolean fromLogTable) {
     ArrayList<Row> rows = new ArrayList<Row>();
     for (Entity entity : entities) {
-      rows.add(toRow(entity, columns));
+      if (fromLogTable)
+        rows.add(toRowFromLogTable(entity, columns));
+      else
+        rows.add(toRow(entity, columns));
     }
     return rows;
   }
