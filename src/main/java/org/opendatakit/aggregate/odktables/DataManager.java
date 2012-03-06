@@ -2,8 +2,9 @@
 package org.opendatakit.aggregate.odktables;
 
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang.Validate;
 import org.opendatakit.aggregate.odktables.entity.Row;
@@ -72,7 +73,7 @@ public class DataManager {
   }
 
   /**
-   * Retrieve all rows of the table.
+   * Retrieve all current rows of the table.
    * 
    * @return all the rows of the table.
    * @throws ODKDatastoreException
@@ -81,20 +82,32 @@ public class DataManager {
     Query query = table.query("DataManager.getRows", cc);
     query.equal(DbTable.DELETED, false);
     List<Entity> rows = query.execute();
-    return converter.toRows(rows, columns);
+    return converter.toRows(rows, columns, false);
   }
-  
-//  /**
-//   * 
-//   * @param since
-//   * @return
-//   */
-//  public List<Row> query(Date since)
-//  {
-//    Validate.notNull(date);
-//    Query query
-//    
-//  }
+
+  /**
+   * Retrieves a set of rows representing the changes since the given data etag.
+   * 
+   * @param dataEtag
+   *          the data etag
+   * @return the rows which have changed or been added since the given
+   *         modification number
+   * @throws ODKDatastoreException
+   */
+  public List<Row> getRowsSince(String dataEtag) throws ODKDatastoreException {
+    Query query = logTable.query("DataManager.getRowsSince", cc);
+    query.greaterThanOrEqual(DbLogTable.MODIFICATION_NUMBER, Integer.parseInt(dataEtag));
+    query.sortAscending(DbLogTable.MODIFICATION_NUMBER);
+    List<Entity> results = query.execute();
+
+    List<Row> logRows = converter.toRows(results, columns, true);
+    Map<String, Row> diff = new HashMap<String, Row>();
+    for (Row logRow : logRows) {
+      diff.put(logRow.getRowId(), logRow);
+    }
+
+    return new ArrayList<Row>(diff.values());
+  }
 
   /**
    * Retrieve a row from the table.
@@ -223,10 +236,12 @@ public class DataManager {
       throws ODKEntityPersistException, ODKEntityNotFoundException, ODKDatastoreException,
       ODKTaskLockException, RowVersionMismatchException {
     Validate.noNullElements(rows);
+
     // increment modification number
     int modificationNumber = entry.getInteger(DbTableEntry.MODIFICATION_NUMBER);
     modificationNumber++;
     entry.set(DbTableEntry.MODIFICATION_NUMBER, modificationNumber);
+
     // create or update entities
     List<Entity> rowEntities;
     if (insert) {
@@ -234,8 +249,10 @@ public class DataManager {
     } else {
       rowEntities = creator.updateRowEntities(table, modificationNumber, rows, columns, cc);
     }
+
     List<Entity> logEntities = creator.newLogEntities(logTable, modificationNumber, rowEntities,
         columns, cc);
+
     // lock and update db
     LockTemplate lock = new LockTemplate(tableId, ODKTablesTaskLockType.UPDATE_DATA, cc);
     try {
@@ -246,7 +263,7 @@ public class DataManager {
     } finally {
       lock.release();
     }
-    return converter.toRows(rowEntities, columns);
+    return converter.toRows(rowEntities, columns, false);
   }
 
   /**
