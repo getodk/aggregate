@@ -6,8 +6,6 @@ import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriBuilder;
 
-import lombok.val;
-
 import org.opendatakit.aggregate.odktables.api.ColumnService;
 import org.opendatakit.aggregate.odktables.api.TableService;
 import org.opendatakit.aggregate.odktables.api.entity.TableResource;
@@ -37,30 +35,31 @@ public class ClientTableService implements TableService {
   @Override
   public List<TableResource> getTables() {
     WebResource r = c.resource(ub.build());
-    val list = new GenericType<List<TableResource>>() {};
-    val tables = r.accept(MediaType.TEXT_XML, MediaType.TEXT_PLAIN).get(list);
+    GenericType<List<TableResource>> list = new GenericType<List<TableResource>>() {};
+    List<TableResource> tables = r.accept(MediaType.TEXT_XML, MediaType.TEXT_PLAIN).get(list);
     return tables;
   }
 
   @Override
   public TableResource getTable(String tableId) {
-    val r = c.resource(ub.clone().path(tableId).build());
-    val table = r.accept(MediaType.TEXT_XML, MediaType.TEXT_PLAIN).get(TableResource.class);
+    WebResource r = c.resource(ub.clone().path(tableId).build());
+    TableResource table = r.accept(MediaType.TEXT_XML, MediaType.TEXT_PLAIN).get(
+        TableResource.class);
     return table;
   }
 
   @Override
   public TableResource createTable(String tableId, List<Column> columns) {
-    val r = c.resource(ub.clone().path(tableId).build());
-    val entity = new GenericEntity<List<Column>>(columns) {};
-    val table = r.accept(MediaType.TEXT_XML, MediaType.TEXT_PLAIN).type(MediaType.TEXT_XML)
-        .put(TableResource.class, entity);
+    WebResource r = c.resource(ub.clone().path(tableId).build());
+    GenericEntity<List<Column>> entity = new GenericEntity<List<Column>>(columns) {};
+    TableResource table = r.accept(MediaType.TEXT_XML, MediaType.TEXT_PLAIN)
+        .type(MediaType.TEXT_XML).put(TableResource.class, entity);
     return table;
   }
 
   @Override
   public void deleteTable(String tableId) {
-    val r = c.resource(ub.clone().path(tableId).build());
+    WebResource r = c.resource(ub.clone().path(tableId).build());
     r.delete();
   }
 
