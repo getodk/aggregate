@@ -43,6 +43,10 @@ public class TableManagerTest {
   public void tearDown() throws Exception {
     try {
       tm.deleteTable(tableId);
+    } catch (ODKEntityNotFoundException e) {
+      // ignore
+    }
+    try {
       tm.deleteTable(tableId2);
     } catch (ODKEntityNotFoundException e) {
       // ignore
@@ -98,16 +102,18 @@ public class TableManagerTest {
   @Test
   public void testGetTables() throws ODKEntityPersistException, ODKDatastoreException,
       ODKTaskLockException {
-    tm.createTable(tableId, columns);
-    tm.createTable(tableId2, columns);
-    List<TableEntry> tables = tm.getTables();
-    assertEquals(2, tables.size());
-    TableEntry one = tables.get(0);
-    assertEquals(tableId, one.getTableId());
-    assertNotNull(one.getDataEtag());
-    TableEntry two = tables.get(1);
-    assertEquals(tableId2, two.getTableId());
-    assertNotNull(two.getDataEtag());
+    List<TableEntry> expected = new ArrayList<TableEntry>();
+
+    TableEntry one = tm.createTable(tableId2, columns);
+    TableEntry two = tm.createTable(tableId, columns);
+
+    expected.add(one);
+    expected.add(two);
+
+    List<TableEntry> actual = tm.getTables();
+    assertEquals(2, actual.size());
+
+    Util.assertCollectionSameElements(expected, actual);
   }
 
   @Test(expected = ODKEntityNotFoundException.class)
