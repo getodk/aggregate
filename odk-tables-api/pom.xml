@@ -50,6 +50,7 @@
                   <sourcepath>../src/main/java</sourcepath>
                   <subpackages>org.opendatakit.aggregate.odktables.api:org.opendatakit.aggregate.odktables.entity</subpackages>
                   <excludePackageNames>org.opendatakit.aggregate.odktables.api.impl.*</excludePackageNames>
+                  <failOnError>false</failOnError>
               </configuration>
             </execution>
           </executions>
