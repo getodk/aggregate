@@ -108,27 +108,54 @@ public class EntityConverter {
     row.setRowEtag(entity.getString(DbTable.ROW_VERSION));
     row.setGroupOrUserId(entity.getString(DbTable.GROUP_OR_USER_ID));
     row.setDeleted(entity.getBoolean(DbTable.DELETED));
-    
+
+    row.setValues(getRowValues(entity, columns));
+    return row;
+  }
+
+  /**
+   * Convert a {@link DbLogTable} entity into a {@link Row}
+   * 
+   * @param entity
+   *          the {@link DbLogTable} entity.
+   * @param columns
+   *          the {@link DbColumn} entities of the table
+   * @return the row
+   */
+  public Row toRowFromLogTable(Entity entity, List<Entity> columns) {
+    Row row = new Row();
+    row.setRowId(entity.getString(DbLogTable.ROW_ID));
+    row.setRowEtag(entity.getString(DbLogTable.ROW_VERSION));
+    row.setGroupOrUserId(entity.getString(DbLogTable.GROUP_OR_USER_ID));
+    row.setDeleted(entity.getBoolean(DbLogTable.DELETED));
+
+    row.setValues(getRowValues(entity, columns));
+    return row;
+  }
+
+  private Map<String, String> getRowValues(Entity entity, List<Entity> columns) {
     Map<String, String> values = new HashMap<String, String>();
     for (Entity column : columns) {
       String name = column.getString(DbColumn.COLUMN_NAME);
       String value = entity.getAsString(RUtil.convertIdentifier(column.getId()));
       values.put(name, value);
     }
-    row.setValues(values);
-    return row;
+    return values;
   }
 
   /**
-   * Convert a list of {@link DbTable} entities into a list of {@link Row}
+   * Convert a list of {@link DbTable} or {@link DbLogTable} entities into a
+   * list of {@link Row}
    * 
    * @param entities
-   *          the {@link DbTable} entities
+   *          the {@link DbTable} or {@link DbLogTable} entities
    * @param columns
    *          the {@link DbColumn} of the table
+   * @param fromLogTable
+   *          true if the rows are from the {@link DbLogTable}
    * @return the converted rows
    */
-  public List<Row> toRows(List<Entity> entities, List<Entity> columns) {
+  public List<Row> toRows(List<Entity> entities, List<Entity> columns, boolean fromLogTable) {
     ArrayList<Row> rows = new ArrayList<Row>();
     for (Entity entity : entities) {
       rows.add(toRow(entity, columns));
