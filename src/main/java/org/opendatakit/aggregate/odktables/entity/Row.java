@@ -2,28 +2,30 @@ package org.opendatakit.aggregate.odktables.entity;
 
 import java.util.Map;
 
+import org.opendatakit.aggregate.odktables.entity.serialization.MapConverter;
+
 import lombok.Data;
 
 import com.thoughtworks.xstream.annotations.XStreamAlias;
-import com.thoughtworks.xstream.annotations.XStreamImplicit;
+import com.thoughtworks.xstream.annotations.XStreamConverter;
 
 @XStreamAlias("row")
 @Data
 public class Row {
-  
+
   @XStreamAlias("rowId")
   private String rowId;
-  
+
   @XStreamAlias("rowEtag")
   private String rowEtag;
-  
+
   @XStreamAlias("groupOrUserId")
   private String groupOrUserId;
-  
+
   @XStreamAlias("deleted")
   private boolean deleted;
-  
-  @XStreamImplicit(itemFieldName = "column", keyFieldName = "value")
+
+  @XStreamConverter(MapConverter.class)
   private Map<String, String> values;
 
   /**
