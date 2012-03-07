@@ -711,6 +711,11 @@
             <artifactId>jersey-apache-client4</artifactId>
             <version>${com.sun.jersey.version}</version>
         </dependency>
+        <dependency>
+            <groupId>net.sf.kxml</groupId>
+            <artifactId>kxml2-min</artifactId>
+            <version>2.3.0</version>
+        </dependency>
         <!-- /for odktables api -->
 		<!-- Test dependencies (mainly for gae) -->
 		<dependency>
