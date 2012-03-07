@@ -27,9 +27,9 @@ public class EntityConverter {
    * Convert a {@link DbTableEntry} entity to a {@link TableEntry}
    */
   public TableEntry toTableEntry(Entity entity) {
-    TableEntry entry = new TableEntry();
-    entry.setTableId(entity.getId());
-    entry.setDataEtag(entity.getAsString(DbTableEntry.MODIFICATION_NUMBER));
+    String tableId = entity.getId();
+    String dataEtag = entity.getAsString(DbTableEntry.MODIFICATION_NUMBER);
+    TableEntry entry = new TableEntry(tableId, dataEtag);
     return entry;
   }
 
