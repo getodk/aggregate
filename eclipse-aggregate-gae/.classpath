@@ -93,6 +93,6 @@
 	<classpathentry kind="lib" path="war/WEB-INF/lib/jersey-core-1.12.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/jersey-server-1.12.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/jersey-servlet-1.12.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/xstream-1.4.2.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/simple-xml-2.6.2.jar"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>
