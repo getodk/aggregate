@@ -1,79 +1,30 @@
 package org.opendatakit.aggregate.odktables.entity.api;
 
-import javax.xml.bind.annotation.XmlRootElement;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import org.opendatakit.aggregate.odktables.entity.Row;
 
-@XmlRootElement
+import com.thoughtworks.xstream.annotations.XStreamAlias;
+
+@XStreamAlias("rowResource")
+@EqualsAndHashCode(callSuper = true)
+@Data
 public class RowResource extends Row {
-	private String selfUri;
-	private String tableUri;
-	
-	public RowResource(Row row) {
-		super();
-		setRowId(row.getRowId());
-		setRowEtag(row.getRowEtag());
-		setGroupOrUserId(row.getGroupOrUserId());
-		setDeleted(row.isDeleted());
-		setValues(row.getValues());
-	}
-	
-	@java.lang.SuppressWarnings("all")
-	public RowResource() {
-	}
-	
-	@java.lang.SuppressWarnings("all")
-	public String getSelfUri() {
-		return this.selfUri;
-	}
-	
-	@java.lang.SuppressWarnings("all")
-	public String getTableUri() {
-		return this.tableUri;
-	}
-	
-	@java.lang.SuppressWarnings("all")
-	public void setSelfUri(final String selfUri) {
-		this.selfUri = selfUri;
-	}
-	
-	@java.lang.SuppressWarnings("all")
-	public void setTableUri(final String tableUri) {
-		this.tableUri = tableUri;
-	}
-	
-	@java.lang.Override
-	@java.lang.SuppressWarnings("all")
-	public java.lang.String toString() {
-		return "RowResource(super=" + super.toString() + ", selfUri=" + this.getSelfUri() + ", tableUri=" + this.getTableUri() + ")";
-	}
-	
-	@java.lang.Override
-	@java.lang.SuppressWarnings("all")
-	public boolean equals(final java.lang.Object o) {
-		if (o == this) return true;
-		if (!(o instanceof RowResource)) return false;
-		final RowResource other = (RowResource)o;
-		if (!other.canEqual((java.lang.Object)this)) return false;
-		if (!super.equals(o)) return false;
-		if (this.getSelfUri() == null ? other.getSelfUri() != null : !this.getSelfUri().equals((java.lang.Object)other.getSelfUri())) return false;
-		if (this.getTableUri() == null ? other.getTableUri() != null : !this.getTableUri().equals((java.lang.Object)other.getTableUri())) return false;
-		return true;
-	}
-	
-	@java.lang.SuppressWarnings("all")
-	public boolean canEqual(final java.lang.Object other) {
-		return other instanceof RowResource;
-	}
-	
-	@java.lang.Override
-	@java.lang.SuppressWarnings("all")
-	public int hashCode() {
-		final int PRIME = 31;
-		int result = 1;
-		result = result * PRIME + super.hashCode();
-		result = result * PRIME + (this.getSelfUri() == null ? 0 : this.getSelfUri().hashCode());
-		result = result * PRIME + (this.getTableUri() == null ? 0 : this.getTableUri().hashCode());
-		return result;
-	}
+
+  @XStreamAlias("self")
+  private String selfUri;
+
+  @XStreamAlias("table")
+  private String tableUri;
+
+  public RowResource(Row row) {
+    super();
+    setRowId(row.getRowId());
+    setRowEtag(row.getRowEtag());
+    setGroupOrUserId(row.getGroupOrUserId());
+    setDeleted(row.isDeleted());
+    setValues(row.getValues());
+  }
+
 }
