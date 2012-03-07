@@ -685,11 +685,6 @@
 		</dependency>
         <!-- for odktables api -->
         <dependency>
-            <groupId>com.thoughtworks.xstream</groupId>
-            <artifactId>xstream</artifactId>
-            <version>1.4.2</version>
-        </dependency>
-        <dependency>
             <groupId>com.sun.jersey</groupId>
             <artifactId>jersey-server</artifactId>
             <version>${com.sun.jersey.version}</version>
@@ -710,6 +705,11 @@
             <groupId>com.sun.jersey.contribs</groupId>
             <artifactId>jersey-apache-client4</artifactId>
             <version>${com.sun.jersey.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.simpleframework</groupId>
+            <artifactId>simple-xml</artifactId>
+            <version>2.6.2</version>
         </dependency>
         <!-- /for odktables api -->
 		<!-- Test dependencies (mainly for gae) -->
