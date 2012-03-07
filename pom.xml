@@ -683,6 +683,12 @@
 		  <artifactId>xml-apis</artifactId>
 		  <version>1.4.01</version>
 		</dependency>
+        <!-- for odktables api -->
+        <dependency>
+            <groupId>com.thoughtworks.xstream</groupId>
+            <artifactId>xstream</artifactId>
+            <version>1.4.2</version>
+        </dependency>
         <dependency>
             <groupId>com.sun.jersey</groupId>
             <artifactId>jersey-server</artifactId>
@@ -705,6 +711,7 @@
             <artifactId>jersey-apache-client4</artifactId>
             <version>${com.sun.jersey.version}</version>
         </dependency>
+        <!-- /for odktables api -->
 		<!-- Test dependencies (mainly for gae) -->
 		<dependency>
 			<groupId>junit</groupId>
