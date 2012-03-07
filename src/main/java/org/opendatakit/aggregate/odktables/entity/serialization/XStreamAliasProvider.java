@@ -27,7 +27,6 @@ import org.opendatakit.aggregate.odktables.entity.api.TableDefinition;
 import org.opendatakit.aggregate.odktables.entity.api.TableResource;
 
 import com.thoughtworks.xstream.XStream;
-import com.thoughtworks.xstream.io.xml.StaxDriver;
 
 @Produces(MediaType.TEXT_XML)
 @Consumes(MediaType.TEXT_XML)
@@ -37,7 +36,7 @@ public class XStreamAliasProvider implements MessageBodyReader<Object>, MessageB
   private static final Set<Class<?>> processed = new HashSet<Class<?>>();
   private static final XStream xstream;
   static {
-    xstream = new XStreamGae(new StaxDriver());
+    xstream = new XStreamGae();
     xstream.processAnnotations(new Class[] { Column.class, Row.class, TableEntry.class,
         RowResource.class, TableDefinition.class, TableResource.class });
   }
