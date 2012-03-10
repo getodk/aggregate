@@ -4,17 +4,18 @@ import java.util.List;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import org.opendatakit.aggregate.odktables.entity.Column;
+import org.simpleframework.xml.ElementList;
+import org.simpleframework.xml.Root;
 
-import com.thoughtworks.xstream.annotations.XStreamAlias;
-import com.thoughtworks.xstream.annotations.XStreamImplicit;
-
-@XStreamAlias("tableDefinition")
+@Root
+@NoArgsConstructor
 @AllArgsConstructor
 @Data
 public class TableDefinition {
-  
-  @XStreamImplicit(itemFieldName="column")
+
+  @ElementList(inline = true)
   private List<Column> columns;
 }

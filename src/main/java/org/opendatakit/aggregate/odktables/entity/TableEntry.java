@@ -2,18 +2,20 @@ package org.opendatakit.aggregate.odktables.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
-import com.thoughtworks.xstream.annotations.XStreamAlias;
+import org.simpleframework.xml.Default;
+import org.simpleframework.xml.DefaultType;
+import org.simpleframework.xml.Root;
 
-@XStreamAlias("tableEntry")
+@Root
+@Default(value = DefaultType.FIELD, required = false)
+@NoArgsConstructor
 @AllArgsConstructor
 @Data
 public class TableEntry {
   
-  @XStreamAlias("tableId")
   private String tableId;
-
-  @XStreamAlias("dataEtag")
   private String dataEtag;
 
 }
