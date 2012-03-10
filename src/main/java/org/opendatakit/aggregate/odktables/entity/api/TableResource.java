@@ -2,29 +2,28 @@ package org.opendatakit.aggregate.odktables.entity.api;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 import org.opendatakit.aggregate.odktables.entity.TableEntry;
+import org.simpleframework.xml.Default;
+import org.simpleframework.xml.DefaultType;
+import org.simpleframework.xml.Root;
 
-import com.thoughtworks.xstream.annotations.XStreamAlias;
-import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
-
-@XStreamAlias("tableResource")
+@Root
+@Default(value = DefaultType.FIELD, required = true)
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
+@NoArgsConstructor
 @Data
 public class TableResource extends TableEntry {
 
-  @XStreamAsAttribute
   private String selfUri;
 
-  @XStreamAsAttribute
   private String columnsUri;
 
-  @XStreamAsAttribute
   private String dataUri;
 
-  @XStreamAsAttribute
   private String diffUri;
 
   public TableResource(TableEntry entry) {

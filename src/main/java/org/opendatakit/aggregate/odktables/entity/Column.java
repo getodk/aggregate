@@ -2,18 +2,21 @@ package org.opendatakit.aggregate.odktables.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
-import com.thoughtworks.xstream.annotations.XStreamAlias;
+import org.simpleframework.xml.Attribute;
+import org.simpleframework.xml.Root;
 
-@XStreamAlias("column")
+@Root
+@NoArgsConstructor
 @AllArgsConstructor
 @Data
 public class Column {
 
-  @XStreamAlias("name")
+  @Attribute(required = true)
   private String name;
 
-  @XStreamAlias("type")
+  @Attribute(required = true)
   private ColumnType type;
 
   public enum ColumnType {
