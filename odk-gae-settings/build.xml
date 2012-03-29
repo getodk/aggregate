@@ -1,0 +1,38 @@
+<project name="UpdateGae" default="dist" basedir=".">
+    <description>
+        simple Ant script to build the odk-gae-settings jar
+    	and copy it into the eclipse-aggregate-gae project.
+    </description>
+  <!-- set global properties for this build -->
+  <property name="resources" location="../src/main/resources"/>
+  <property name="eclipse-gae-war-lib" location="../eclipse-aggregate-gae/war/WEB-INF/lib"/>
+  <property name="target" location="target"/>
+
+  <target name="init">
+    <!-- Create the time stamp -->
+    <tstamp/>
+    <!-- Create the build directory structure used by compile -->
+    <mkdir dir="${target}"/>
+
+  	<!-- Remove the jar file -->
+  	<touch file="${target}/odk-gae-settings-latest.jar"/>
+  	<delete file="${target}/odk-gae-settings-latest.jar"/>
+  </target>
+
+  <target name="dist" depends="init"
+        description="generate the distribution" >
+  	
+    <!-- Build the jar file -->
+    <jar jarfile="${target}/odk-gae-settings-latest.jar">
+    	   <fileset dir="${resources}/gae"/>
+    	   <fileset dir="${resources}/common"/>
+    </jar>
+  	<!-- Copy the jar to the war lib -->
+  	<copy overwrite="true" file="${target}/odk-gae-settings-latest.jar" todir="${eclipse-gae-war-lib}" />
+  </target>
+
+  <target name="clean" description="clean up" >
+    <!-- Delete the ${target} directory tree -->
+    <delete dir="${target}"/>
+  </target>
+</project>

@@ -1,0 +1,132 @@
+createUser user1
+createUser user2
+
+createSynchronizedTable user1 people
+
+printTable user1 people
+table properties: null
+column properties:
+    age null
+    name null
+    weight null
+modification: 0
+
+insertSynchronizedRows user1 people 
+
+printTable user1 people
+table properties: null
+column properties:
+    age null
+    name null
+    weight null
+modification: 1
+    row1
+        age 22
+        name Dylan
+        weight 175
+    row2
+        age 50
+        name John
+        weight 200
+
+setTablePermissions user1 user2 people true true true
+
+listAllTables user2
+tableName: people, userName: user1
+
+cloneSynchronizedTable user2 people
+
+printTable user2 people
+table properties: null
+column properties:
+    age null
+    name null
+    weight null
+modification: 1
+    row1
+        age 22
+        name Dylan
+        weight 175.0000000000
+    row2
+        age 50
+        name John
+        weight 200.0000000000
+
+updateSynchronizedRows user1 people
+
+printTable user1 people
+table properties: null
+column properties:
+    age null
+    name null
+    weight null
+modification: 2
+    row1
+        age 23
+        name DylanUpdate
+        weight 175
+    row2
+        age 50
+        name John
+        weight 200
+
+synchronize user2 people
+
+printTable user2 people
+table properties: null
+column properties:
+    age null
+    name null
+    weight null
+modification: 2
+    row1
+        age 23
+        name DylanUpdate
+        weight 175.0000000000
+    row2
+        age 50
+        name John
+        weight 200.0000000000
+
+updateSynchronizedRows user2 people
+
+printTable user2 people
+table properties: null
+column properties:
+    age null
+    name null
+    weight null
+modification: 3
+    row1
+        age 24
+        name DylanAgain
+        weight 24
+    row2
+        age 50
+        name John
+        weight 200.0000000000
+
+synchronize user1 people
+
+printTable user1 people
+table properties: null
+column properties:
+    age null
+    name null
+    weight null
+modification: 3
+    row1
+        age 24
+        name DylanAgain
+        weight 24.0000000000
+    row2
+        age 50
+        name John
+        weight 200
+
+removeTableSynchronization user2 people
+
+deleteSynchronizedTable user1 people
+
+deleteUser user1
+deleteUser user2

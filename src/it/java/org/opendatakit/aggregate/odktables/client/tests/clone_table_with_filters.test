@@ -1,0 +1,86 @@
+# Set up
+createUser user1
+createUser user2
+
+createSynchronizedTable user1 people
+    name STRING false
+    age INTEGER false
+    weight DECIMAL false
+
+insertSynchronizedRows user1 people 
+    row1
+        name Dylan
+        age 22
+        weight 175
+    row2
+        name John
+        age 50
+        weight 200
+    row3
+        name Jessica
+        age 40
+        weight 140
+
+setTablePermissions user1 user2 people true false false
+
+# Test basic filter
+cloneSynchronizedTableWithFilters user2 people
+    age GREATER_THAN 30
+    
+printTable user2 people
+    
+removeTableSynchronization user2 people
+
+# Test removing synchronization removed filters
+cloneSynchronizedTable user2 people
+
+printTable user2 people
+
+removeTableSynchronization user2 people
+
+# Test somewhat complex filter
+cloneSynchronizedTableWithFilters user2 people
+    age GREATER_THAN_OR_EQUAL 40
+    weight LESS_THAN_OR_EQUAL 140
+
+printTable user2 people
+
+# Test synchronize
+insertSynchronizedRows user1 people
+    row4
+        name JessicasTwin
+        age 40
+        weight 140
+    row5
+        name AlmostJessicasTwin
+        age 40
+        weight 140.5
+    row6
+        name DefinitelyNotJessicasTwin
+        age 40
+        weight 170
+        
+synchronize user2 people
+
+printTable user2 people
+
+# Test that we can synchronize twice in a row
+synchronize user2 people
+
+removeTableSynchronization user2 people
+
+# Test that user can't filter by non-existent column
+cloneSynchronizedTableWithFilters user2 people
+    age GREATER_THAN_OR_EQUAL 40
+    weight LESS_THAN_OR_EQUAL 140
+    nosuchcolumn EQUAL value
+
+# Test that user can't filter by values of the wrong type
+cloneSynchronizedTableWithFilters user2 people
+    age EQUAL notanumber
+
+# Clean up
+setTablePermissions user1 user2 people false false false
+deleteSynchronizedTable user1 people
+deleteUser user1
+deleteUser user2

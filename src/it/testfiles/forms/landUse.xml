@@ -1,0 +1,339 @@
+<?xml version="1.0"?>
+<h:html xmlns="http://www.w3.org/2002/xforms" xmlns:h="http://www.w3.org/1999/xhtml" xmlns:ev="http://www.w3.org/2001/xml-events" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa">
+  <h:head>
+    <h:title>Land Use</h:title>
+    <model>
+      <instance>
+        <land id="landUse">
+          <barcode/>
+          <location/>
+          <image/>
+          <use/>
+          <width/>
+          <length/>
+          <protected/>
+          <treecanopycover/>
+          <problems/>
+          <origin/>
+          <coverage/>
+          <coverageheight/>
+          <disturbances/>
+          <exploitation/>
+          <illegalfelling/>
+          <silviculture/>
+          <technologyused/>
+          <fire>
+            <occurence/>
+            <area/>
+            <type/>
+          </fire>
+        </land>
+      </instance>
+      
+      <bind nodeset="/land/barcode" type="barcode"/>
+      <bind nodeset="/land/location" type="geopoint"/>
+      <bind nodeset="/land/image" type="binary"/>
+      <bind nodeset="/land/use" type="string" />
+      <bind nodeset="/land/width" type="int" constraint=". &lt; 1000" jr:constraintMsg="number cannot be above 1000"/>
+      <bind nodeset="/land/length" type="int" constraint=". &lt; 1000" jr:constraintMsg="number cannot be above 1000" />
+      <bind nodeset="/land/protected" type="select1" />
+      <bind nodeset="/land/treecanopycover" type="select1" />
+      <bind nodeset="/land/problems" type="select"/>
+      <bind nodeset="/land/origin" type="select1"/>
+      <bind nodeset="/land/coverage" type="select1"/>
+      <bind nodeset="/land/coverageheight" type="int" constraint=". &lt; 500" jr:constraintMsg="number cannot be above 500" relevant="selected(/land/coverage,'y')" />
+      <bind nodeset="/land/disturbances" type="string"/>
+      <bind nodeset="/land/exploitation" type="select"/>
+      <bind nodeset="/land/illegalfelling" type="select1" />
+      <bind nodeset="/land/silviculture" type="select"/>
+      <bind nodeset="/land/technologyused" type="select"/>
+      <bind nodeset="/land/fire/occurence" type="select1"/>
+      <bind nodeset="/land/fire/area" type="int"  constraint=". &lt; 1000" jr:constraintMsg="number cannot be above 1000" relevant="selected(/land/fire/occurence,'y')"/>
+      <bind nodeset="/land/fire/type" type="string" relevant="selected(/land/fire/occurence,'y')"/>
+    </model>
+  </h:head>
+  
+  <h:body>
+    <input ref="/land/barcode">
+      <label>Please scan your badge barcode</label>
+      <hint>Barcode scanner hint</hint>
+    </input>
+    <input ref="/land/location">
+      <label>Record your location</label>
+      <hint>This will get location using GPS</hint>
+    </input>
+    <upload ref="/land/image" mediatype="image/*">
+      <hint>This will launch the camera.</hint>
+      <label>Please take a picture of the trees</label>
+    </upload>
+    <group>
+      <label>General</label>
+      <input ref="/land/use">
+        <label>Land use:</label>
+      </input>
+      <input ref="/land/width">
+        <label>Width:</label>
+        <hint>try entering a number &lt; 1000</hint>
+      </input>
+      <input ref="/land/length">
+        <label>Length:</label>
+        <hint>try entering a number &lt; 1000</hint>
+      </input> 
+      <select1 ref="/land/protected">
+        <label>Designation/Protection Status:</label>
+        <item>
+          <label>A</label>
+          <value>A</value>
+        </item>
+        <item>
+          <label>B</label>
+          <value>B</value>
+        </item>
+        <item>
+          <label>C</label>
+          <value>C</value>
+        </item>
+      </select1>
+      <select1 ref="/land/treecanopycover">
+        <label>Tree canopy cover:</label>
+        <item>
+          <label>Yes</label>
+          <value>y</value>
+        </item>
+        <item>
+          <label>No</label>
+          <value>n</value>
+        </item>
+      </select1>
+      <select ref="/land/problems">
+        <label>Environmental Problems:</label>
+        <item>
+          <label>Not Applicable (urban areas...)</label>
+          <value>0</value>
+        </item>
+        <item>
+          <label>Not existing</label>
+          <value>1</value>
+        </item>
+        <item>
+          <label>Loss of water levels in rivers...</label>
+          <value>2</value>
+        </item>
+        <item>
+          <label>Drought</label>
+          <value>3</value>
+        </item>
+        <item>
+          <label>Inundation</label>
+          <value>4</value>
+        </item>
+        <item>
+          <label>Poor water quality</label>
+          <value>5</value>
+        </item>
+        <item>
+          <label>Pests</label>
+          <value>6</value>
+        </item>
+        <item>
+          <label>Erosion</label>
+          <value>7</value>
+        </item>
+        <item>
+          <label>Loss of Soil Fertility</label>
+          <value>8</value>
+        </item>
+        <item>
+          <label>Burning</label>
+          <value>9</value>
+        </item>
+        <item>
+          <label>Landslide</label>
+          <value>10</value>
+        </item>
+        <item>
+          <label>Windthrow</label>
+          <value>11</value>
+        </item>
+        <item>
+          <label>Overexploiting Forest Resources</label>
+          <value>12</value>
+        </item>
+        <item>
+          <label>Overgrazing</label>
+          <value>14</value>
+        </item>
+        <item>
+          <label>Not Known</label>
+          <value>90</value>
+        </item>
+        <item>
+          <label>Other</label>
+          <value>99</value>
+        </item>
+      </select>
+    </group>
+    <group>
+      <label>Forest and Woodland management and structure</label>
+      <select1 ref="/land/origin">
+        <label>Stand origin:</label>
+          <item>
+            <label>Natural regeneration</label>
+            <value>N</value>
+          </item>
+          <item>
+            <label>Plantation</label>
+            <value>P</value>
+          </item>
+          <item>
+            <label>Coppice</label>
+            <value>C</value>
+          </item>
+          <item>
+            <label>Not known</label>
+            <value>nk</value>
+          </item>
+      </select1>
+      <select1 ref="/land/coverage">
+        <label>Shrub coverage:</label>
+        <item>
+          <label>Yes</label>
+          <value>y</value>
+        </item>
+        <item>
+          <label>No</label>
+          <value>n</value>
+        </item>
+      </select1>
+      <input ref="/land/coverageheight">
+        <label>Shrub height:</label>
+        <hint>try entering a number &lt; 1000</hint>
+      </input>
+      <input ref="/land/disturbances">
+        <label>Disturbances:</label>
+      </input>
+      <select1 ref="/land/exploitation">
+        <label>Timber Exploitation:</label>
+          <item>
+            <label>No felling</label>
+            <value>none</value>
+          </item>
+          <item>
+            <label>Clearing</label>
+            <value>clearing</value>
+          </item>
+          <item>
+            <label>Selective felling</label>
+            <value>selective</value>
+          </item>
+          <item>
+            <label>Group felling</label>
+            <value>group</value>
+          </item>
+          <item>
+            <label>Strip felling</label>
+            <value>strip</value>
+          </item>
+          <item>
+            <label>Other</label>
+            <value>other</value>
+          </item>
+      </select1>
+      <select1 ref="/land/illegalfelling" >
+        <label>Illegal Felling?</label>
+        <item>
+          <label>Yes</label>
+          <value>y</value>
+        </item>
+        <item>
+          <label>No</label>
+          <value>n</value>
+        </item>
+      </select1>
+      <select ref="/land/silviculture">
+        <label>Silviculture:</label>
+          <item>
+            <label>No practice</label>
+            <value>1</value>
+          </item>
+          <item>
+            <label>Improvement</label>
+            <value>2</value>
+          </item>
+          <item>
+            <label>Release of desirable trees</label>
+            <value>3</value>
+          </item>
+          <item>
+            <label>Removal of undesirable veg.</label>
+            <value>4</value>
+          </item>
+          <item>
+            <label>Enrichment planting</label>
+            <value>5</value>
+          </item>
+          <item>
+            <label>Sanitary cutting</label>
+            <value>6</value>
+          </item>
+          <item>
+            <label>Prescribed burning</label>
+            <value>7</value>
+          </item>
+          <item>
+            <label>Other</label>
+            <value>99</value>
+          </item>
+      </select>
+      <select ref="/land/technologyused">
+        <label>Technology used:</label>
+          <item>
+            <label>Not applicable</label>
+            <value>NA</value>
+          </item>
+          <item>
+            <label>Manual</label>
+            <value>manual</value>
+          </item>
+          <item>
+            <label>Chainsaw</label>
+            <value>chainsaw</value>
+          </item>
+          <item>
+            <label>Mechanised (tractors)</label>
+            <value>mechanised</value>
+          </item>
+          <item>
+            <label>Not known</label>
+            <value>unknown</value>
+          </item>
+          <item>
+            <label>Other</label>
+            <value>other</value>
+          </item>
+      </select>
+      <group>
+        <label>Fire</label>
+        <select1 ref="/land/fire/occurence">
+          <label>Has a fire occured?</label>
+          <item>
+            <label>Yes</label>
+            <value>y</value>
+          </item>
+          <item>
+            <label>No</label>
+            <value>n</value>
+        </item>
+        </select1>
+        <input ref="/land/fire/area">
+          <label>Area:</label>
+          <hint>try entering a number &lt; 1000</hint>
+        </input>
+        <input ref="/land/fire/type">
+          <label>Type:</label>
+        </input>
+      </group>
+    </group>
+
+  </h:body>
+</h:html>
