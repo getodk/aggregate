@@ -433,14 +433,16 @@ public class FormParserForJavaRosa {
       publicKey = p.getAttribute(BASE64_RSA_PUBLIC_KEY);
     }
 
-    // now see if we are encrypted -- if so, fake the submission element to be
+    // now see if we are encrypted -- if so, fake the submission element to
+    // be
     // the parsing of the ENCRYPTED_FORM_DEFINITION
     if (publicKey == null || publicKey.length() == 0) {
       // not encrypted...
       submissionElement = trueSubmissionElement;
     } else {
       isEncryptedForm = true;
-      // encrypted -- use the encrypted form template (above) to define the
+      // encrypted -- use the encrypted form template (above) to define
+      // the
       // storage for this form.
       formDef = parseFormDefinition(ENCRYPTED_FORM_DEFINITION, this);
 
@@ -462,13 +464,15 @@ public class FormParserForJavaRosa {
     if (persistenceStoreFormId.indexOf(':') != -1) {
       // this is likely an xmlns-style URI (http://..../)
       // remove the scheme://domain.org/ from this name, as it is likely
-      // to be common across all forms. Use the remainder as the base table
+      // to be common across all forms. Use the remainder as the base
+      // table
       // prefix candidate.
       persistenceStoreFormId = submissionElementDefn.formId.substring(submissionElementDefn.formId
           .indexOf(':') + 1);
       int idxSlashAfterDomain = persistenceStoreFormId.indexOf('/', 2);
       if (idxSlashAfterDomain != -1) {
-        // remove the domain from the xmlns -- we'll use the string after the
+        // remove the domain from the xmlns -- we'll use the string
+        // after the
         // domain for the tablespace.
         persistenceStoreFormId = persistenceStoreFormId.substring(idxSlashAfterDomain + 1);
       }
@@ -534,7 +538,8 @@ public class FormParserForJavaRosa {
     // Step 1: create or fetch the Form (FormInfo) submission
     //
     // This allows us to delete the form if upload goes bad...
-    // TODO: the following function throws an exception unless new or identical
+    // TODO: the following function throws an exception unless new or
+    // identical
     // inputXml
     byte[] xmlBytes;
     try {
@@ -543,7 +548,8 @@ public class FormParserForJavaRosa {
       throw new IllegalStateException("not reachable");
     }
 
-    // form downloads are immediately enabled unless the upload specifies that
+    // form downloads are immediately enabled unless the upload specifies
+    // that
     // they shouldn't be.
     String isIncompleteFlag = uploadedFormItems
         .getSimpleFormField(ServletConsts.TRANSFER_IS_INCOMPLETE);
@@ -585,9 +591,11 @@ public class FormParserForJavaRosa {
     }
 
     // we don't have an existing form definition
-    // -- create a submission association table entry mapping to what will be
+    // -- create a submission association table entry mapping to what will
+    // be
     // the model.
-    // -- then create the model and iterate on manifesting it in the database.
+    // -- then create the model and iterate on manifesting it in the
+    // database.
     SubmissionAssociationTable sa = SubmissionAssociationTable.assertSubmissionAssociation(formInfo
         .getKey().getKey(), submissionElementDefn, cc);
     fdmSubmissionUri = sa.getUriSubmissionDataModel();
@@ -620,7 +628,8 @@ public class FormParserForJavaRosa {
           tableNamePlaceholder, submissionElement, warnings, cc);
 
       // find a good set of names...
-      // this also ensures that the table names don't overlap existing tables
+      // this also ensures that the table names don't overlap existing
+      // tables
       // in the datastore.
       opaque.resolveNames(ds, user);
 
@@ -654,7 +663,8 @@ public class FormParserForJavaRosa {
       // size for the persistence layer.
 
       // we do this by constructing the form definition from the fdmList
-      // and then testing for successful creation of each table it defines.
+      // and then testing for successful creation of each table it
+      // defines.
       // If that table cannot be created, we subdivide it, rearranging
       // the structure of the fdmList. Repeat until no errors.
       // Very error prone!!!
@@ -668,7 +678,8 @@ public class FormParserForJavaRosa {
           for (CommonFieldsBase tbl : fd.getBackingTableSet()) {
 
             try {
-              // patch up tbl with desired lengths of string fields...
+              // patch up tbl with desired lengths of string
+              // fields...
               for (FormDataModel m : fdmList) {
                 if (m.getElementType().equals(ElementType.STRING)) {
                   DataField f = m.getBackingKey();
@@ -690,9 +701,11 @@ public class FormParserForJavaRosa {
                 // no-op
               }
               if ((tbl instanceof DynamicBase) || (tbl instanceof TopLevelDynamicBase)) {
-                badTables.add(tbl); // we know how to subdivide these
+                badTables.add(tbl); // we know how to subdivide
+                // these
               } else {
-                throw e1; // must be something amiss with database...
+                throw e1; // must be something amiss with
+                // database...
               }
             }
           }
@@ -705,7 +718,8 @@ public class FormParserForJavaRosa {
           if (badTables.isEmpty())
             break;
 
-          // reset the derived fields so that the FormDefinition construction
+          // reset the derived fields so that the FormDefinition
+          // construction
           // will work.
           for (FormDataModel m : fdmList) {
             m.resetDerivedFields();
@@ -765,9 +779,12 @@ public class FormParserForJavaRosa {
     //
     // Rather than relying on MemCache, we insert this delay here so that
     // any caller that is creating a form can know that the form definition
-    // has been propagated across the front-ends (subject to fast/slow clocks).
-    // This assumes that server clock rates never cause drifts of more than the
-    // network transmission latency between the requester and the server over 
+    // has been propagated across the front-ends (subject to fast/slow
+    // clocks).
+    // This assumes that server clock rates never cause drifts of more than
+    // the
+    // network transmission latency between the requester and the server
+    // over
     // the PersistConsts.MAX_SETTLE_MILLISECONDS time period.
     //
     // After this delay interval, the caller can be confident that the form
@@ -805,7 +822,8 @@ public class FormParserForJavaRosa {
           + "." + tbl.getTableName());
     }
 
-    // search the fdmList for the most-enclosing element that uses this tbl as
+    // search the fdmList for the most-enclosing element that uses this tbl
+    // as
     // its backingObject.
     FormDataModel parentTable = null;
 
@@ -879,7 +897,8 @@ public class FormParserForJavaRosa {
       }
     }
 
-    // If we have any decent-sized groups, we should cleave off up to 2/3 of the
+    // If we have any decent-sized groups, we should cleave off up to 2/3 of
+    // the
     // total elements that may be under a group...
     if (groups.size() > 0) {
       // order the list from high to low...
@@ -902,8 +921,9 @@ public class FormParserForJavaRosa {
       for (FormDataModel m : groups) {
         int groupSize = recursivelyCountChildrenInSameTable(m);
         if (cleaveCount + groupSize > (3 * nCol) / 4) {
-          continue; // just too big to split this way see if there is a smaller
-                    // group...
+          continue; // just too big to split this way see if there is
+          // a smaller
+          // group...
         }
         String newGroupTable;
         try {
@@ -915,14 +935,16 @@ public class FormParserForJavaRosa {
         }
         recursivelyReassignChildren(m, tbl, newGroupTable);
         cleaveCount += groupSize;
-        // and if we have cleaved over half, (divide and conquer), retry it with
+        // and if we have cleaved over half, (divide and conquer), retry
+        // it with
         // the database.
         if (cleaveCount > (nCol / 2))
           return;
       }
       // and otherwise, if we did cleave anything off, try anyway...
       // the next time through, we won't have any groups and will need
-      // to create phantom tables, so it is worth trying for this here now...
+      // to create phantom tables, so it is worth trying for this here
+      // now...
       if (cleaveCount > 0)
         return;
     }
@@ -1161,7 +1183,8 @@ public class FormParserForJavaRosa {
             treeElement.getName());
       } else if (treeElement.getNumChildren() == 0 && dmList.size() != 0) {
         // assume fields that don't have children are string fields.
-        // but exclude the top-level group, as somebody might define an empty
+        // but exclude the top-level group, as somebody might define an
+        // empty
         // form.
         // the developer likely has not set a type for the field.
         et = FormDataModel.ElementType.STRING;
@@ -1327,7 +1350,8 @@ public class FormParserForJavaRosa {
         }
       }
       // OK -- group with at least one element -- assume no value...
-      // TreeElement list has the begin and end tags for the nested groups.
+      // TreeElement list has the begin and end tags for the nested
+      // groups.
       // Swallow the end tag by looking to see if the prior and current
       // field names are the same.
       TreeElement prior = null;
@@ -1336,7 +1360,8 @@ public class FormParserForJavaRosa {
         TreeElement current = (TreeElement) treeElement.getChildAt(i);
         // TODO: make this pay attention to namespace of the tag...
         if ((prior != null) && (prior.getName().equals(current.getName()))) {
-          // it is the end-group tag... seems to happen with two adjacent repeat
+          // it is the end-group tag... seems to happen with two
+          // adjacent repeat
           // groups
           log.info("repeating tag at " + i + " skipping " + current.getName());
           prior = current;
@@ -1351,7 +1376,8 @@ public class FormParserForJavaRosa {
     case REPEAT:
       // repeating group - clears group prefix
       // and all children are emitted.
-      // TreeElement list has the begin and end tags for the nested groups.
+      // TreeElement list has the begin and end tags for the nested
+      // groups.
       // Swallow the end tag by looking to see if the prior and current
       // field names are the same.
       prior = null;
@@ -1360,7 +1386,8 @@ public class FormParserForJavaRosa {
         TreeElement current = (TreeElement) treeElement.getChildAt(i);
         // TODO: make this pay attention to namespace of the tag...
         if ((prior != null) && (prior.getName().equals(current.getName()))) {
-          // it is the end-group tag... seems to happen with two adjacent repeat
+          // it is the end-group tag... seems to happen with two
+          // adjacent repeat
           // groups
           log.info("repeating tag at " + i + " skipping " + current.getName());
           prior = current;

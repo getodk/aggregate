@@ -31,11 +31,6 @@
 			<arguments>
 			</arguments>
 		</buildCommand>
-		<buildCommand>
-			<name>com.google.appengine.eclipse.core.enhancerbuilder</name>
-			<arguments>
-			</arguments>
-		</buildCommand>
 	</buildSpec>
 	<natures>
 		<nature>org.eclipse.jdt.core.javanature</nature>
@@ -45,6 +40,11 @@
 	</natures>
 	<linkedResources>
 		<link>
+			<name>it</name>
+			<type>2</type>
+			<locationURI>PARENT_PROJECT_LOC/src/it/java</locationURI>
+		</link>
+		<link>
 			<name>src</name>
 			<type>2</type>
 			<locationURI>PARENT_PROJECT_LOC/src/main/java</locationURI>
@@ -53,11 +53,6 @@
 			<name>test</name>
 			<type>2</type>
 			<locationURI>PARENT_PROJECT_LOC/src/test/java</locationURI>
-		</link>
-		<link>
-			<name>it</name>
-			<type>2</type>
-            <locationURI>PARENT_PROJECT_LOC/src/it/java</locationURI>
 		</link>
 	</linkedResources>
 	<variableList>
