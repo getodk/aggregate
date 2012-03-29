@@ -7,8 +7,6 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.LinkedList;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.Produces;
@@ -20,10 +18,6 @@ import javax.ws.rs.ext.MessageBodyWriter;
 import javax.ws.rs.ext.Provider;
 
 import org.simpleframework.xml.Serializer;
-import org.simpleframework.xml.convert.Registry;
-import org.simpleframework.xml.convert.RegistryStrategy;
-import org.simpleframework.xml.core.Persister;
-import org.simpleframework.xml.strategy.Strategy;
 
 @Produces("text/xml")
 @Consumes("text/xml")
@@ -33,16 +27,7 @@ public class SimpleXMLMessageReaderWriter implements MessageBodyReader<Object>,
 
   private static final Serializer serializer;
   static {
-    Registry registry = new Registry();
-    Strategy strategy = new RegistryStrategy(registry);
-    serializer = new Persister(strategy);
-    ListConverter converter = new ListConverter(serializer);
-    try {
-      registry.bind(ArrayList.class, converter);
-      registry.bind(LinkedList.class, converter);
-    } catch (Exception e) {
-      throw new RuntimeException("Failed to register list converters!", e);
-    }
+    serializer = SimpleXMLSerializerForAggregate.getSerializer();
   }
   private static final String DEFAULT_ENCODING = "utf-8";
 
