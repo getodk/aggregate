@@ -1,0 +1,93 @@
+# Set up
+createUser user1
+createUser user2
+
+createSynchronizedTable user1 people
+    name STRING false
+    age INTEGER false
+    weight DECIMAL false
+    
+setTablePermissions user1 user2 people true false false
+    
+    
+# Test that user can insert rows
+insertSynchronizedRows user1 people 
+    row1
+        name Dylan
+        age 22
+        weight 175
+    row2
+        name John
+        age 50
+        weight 200
+        
+        
+# Test that user can't insert to non-existent table
+insertSynchronizedRows user1 nonexistenttable 
+    row1
+        name Dylan
+        age 22
+        weight 175
+    row2
+        name John
+        age 50
+        weight 200
+        
+        
+# Test that user can't insert to non-existent columns
+insertSynchronizedRows user1 people 
+    row3
+        name Dylan
+        age 22
+        weight 175
+        nosuchcolumn value
+    row4
+        name John
+        age 50
+        weight 200
+        nosuchcolumn value
+        
+        
+# Test that user2 can't insert without permission
+cloneSynchronizedTable user2 people
+insertSynchronizedRows user2 people
+    row3
+        name Bob
+        age 34
+        weight 150
+    row4
+        name Billy
+        age 75
+        weight 147
+        
+        
+# Test that user2 can't insert when has permission but not synchronized
+insertSynchronizedRows user1 people
+    row3
+        name Bob
+        age 34
+        weight 150
+        
+setTablePermissions user1 user2 people true true false
+
+insertSynchronizedRows user2 people
+    row4
+        name Billy
+        age 75
+        weight 147
+
+        
+# Test that user2 can insert rows when has permission and is synchronized
+synchronize user2 people
+insertSynchronizedRows user2 people
+    row4
+        name Billy
+        age 75
+        weight 147
+ 
+ 
+# Clean up
+deleteSynchronizedTable user1 people
+deleteUser user1
+deleteUser user2
+ 

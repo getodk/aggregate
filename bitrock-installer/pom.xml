@@ -1,0 +1,170 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+    <parent>
+		<groupId>org.opendatakit</groupId>
+		<artifactId>aggregate</artifactId>
+		<version>1.0</version>
+		<relativePath>../pom.xml</relativePath>
+    </parent>
+	<groupId>org.opendatakit</groupId>
+	<artifactId>ODKAggregateInstaller</artifactId>
+	<version>1.0</version>
+	<name>ODK_Aggregate</name>
+	<description>Generate an installer for ODKAggregate.</description>
+	<organization>
+		<name>Open Data Kit</name>
+		<url>http://opendatakit.org/</url>
+	</organization>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<conf.directory>${project.basedir}/files/conf</conf.directory>
+	</properties>
+	<build>
+		<resources>
+			<resource>
+				<targetPath>${conf.directory}/common</targetPath>
+				<filtering>false</filtering>
+				<directory>${toplevel.directory}/src/main/resources/common/</directory>
+				<includes>
+				  <include>**/*</include>
+				</includes>
+			</resource>
+			<resource>
+				<targetPath>${conf.directory}/mysql</targetPath>
+				<filtering>false</filtering>
+				<directory>${toplevel.directory}/src/main/resources/mysql/</directory>
+				<includes>
+				  <include>**/*</include>
+				</includes>
+			</resource>
+			<resource>
+				<targetPath>${conf.directory}/postgresql</targetPath> <!-- name changes to postgresql -->
+				<filtering>false</filtering>
+				<directory>${toplevel.directory}/src/main/resources/postgres/</directory>
+				<includes>
+				  <include>**/*</include>
+				</includes>
+			</resource>
+			<resource>
+				<targetPath>${conf.directory}/gae</targetPath>
+				<filtering>false</filtering>
+				<directory>${toplevel.directory}/src/main/resources/gae/</directory>
+				<includes>
+				  <include>**/*</include>
+				</includes>
+			</resource>
+		</resources>
+		<plugins>
+			<plugin>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<version>1.6</version>
+				<executions>
+					<execution>
+						<id>remove-copies</id>
+						<phase>clean</phase>
+						<configuration>
+							<target>
+								<!-- delete the files/conf directory -->
+								<mkdir dir="${conf.directory}" />
+								<delete includeemptydirs="true">
+									<fileset dir="${conf.directory}" includes="**/*" />
+								</delete>
+								<touch file="${project.basedir}/files/ODKAggregate.war" />
+								<delete file="${project.basedir}/files/ODKAggregate.war" />
+								<touch file="${project.basedir}/files/appengine-web.xml" />
+								<delete file="${project.basedir}/files/appengine-web.xml" />
+							</target>
+						</configuration>
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>gen-copies</id>
+						<phase>package</phase>
+						<configuration>
+							<target>
+								<mkdir dir="${project.build.directory}/exploded-war" />
+								<delete includeemptydirs="true">
+									<fileset dir="${project.build.directory}/exploded-war" includes="**/*" />
+								</delete>
+								<mkdir dir="${project.build.directory}/exploded-war" />
+								<unjar dest="${project.build.directory}/exploded-war">
+									<fileset dir="${project.basedir}" includes="*.war"/>
+								</unjar>
+								<copy file="${project.build.directory}/exploded-war/WEB-INF/appengine-web.xml"
+									tofile="${project.basedir}/files/appengine-web.xml"/>
+								<delete quiet="true">
+									<fileset dir="${project.build.directory}/exploded-war/WEB-INF/lib"
+										includes="odk*setting*.jar" />
+									<fileset dir="${project.build.directory}/exploded-war/WEB-INF/lib"
+										includes="appengine-web.xml" />
+								</delete>
+								<mkdir dir="${project.build.directory}/repackaged-war" />
+								<delete includeemptydirs="true">
+									<fileset dir="${project.build.directory}/repackaged-war" includes="**/*" />
+								</delete>
+								<mkdir dir="${project.build.directory}/repackaged-war" />
+								<war destfile="${project.build.directory}/repackaged-war/ODKAggregate.war"
+									webxml="${project.build.directory}/exploded-war/WEB-INF/web.xml">
+									<fileset dir="${project.build.directory}/exploded-war" includes="**/*" />
+								</war>
+								<touch file="${project.basedir}/files/ODKAggregate.war" />
+								<delete file="${project.basedir}/files/ODKAggregate.war" />
+								<copy file="${project.build.directory}/repackaged-war/ODKAggregate.war"
+									tofile="${project.basedir}/files/ODKAggregate.war" />
+							</target>
+						</configuration>
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>exec-maven-plugin</artifactId>
+				<version>1.1</version>
+				<executions>
+					<execution>
+						<id>windows-installer</id>
+						<phase>package</phase>
+						<configuration>
+							<executable>${bitrock.home}/bin/builder-cli.exe</executable>
+							<arguments>
+								<argument>build</argument>
+								<argument>${project.basedir}/buildWar.xml</argument>
+								<argument>windows</argument>
+							</arguments>
+						</configuration>
+					</execution>
+					<execution>
+						<id>linux-installer</id>
+						<phase>package</phase>
+						<configuration>
+							<executable>${bitrock.home}/bin/builder-cli.exe</executable>
+							<arguments>
+								<argument>build</argument>
+								<argument>${project.basedir}/buildWar.xml</argument>
+								<argument>linux</argument>
+							</arguments>
+						</configuration>
+					</execution>
+					<execution>
+						<id>osx-installer</id>
+						<phase>package</phase>
+						<configuration>
+							<executable>${bitrock.home}/bin/builder-cli.exe</executable>
+							<arguments>
+								<argument>build</argument>
+								<argument>${project.basedir}/buildWar.xml</argument>
+								<argument>osx</argument>
+							</arguments>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+</project>

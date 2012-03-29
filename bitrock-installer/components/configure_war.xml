@@ -1,0 +1,731 @@
+<component>
+    <name>build_jar</name>
+    <description>Build Configuration Jar</description>
+    <canBeEdited>1</canBeEdited>
+    <selected>1</selected>
+    <show>1</show>
+    <folderList>
+        <folder>
+            <description>temp</description>
+            <destination>${temp_dir}</destination>
+            <name>temp</name>
+            <platforms>all</platforms>
+            <distributionFileList>
+	<!-- as follows:
+			files/conf - configuration extracted from maven build tree.
+			files/mf - fake Manifest.mf directory structure
+			files/generate_uuid - GenerateUUID class for printing UUIDs to stdout
+			files/qualified_hostname - QualifiedHostname class for printing this host's fully qualified hostname to stdout
+			files/ODKAggregate.war - war file minus site-specific settings.
+			files/appengine-web.xml - copy of the appengine-web.xml (so we can update it)
+			-->
+	<distributionDirectory>
+                    <origin>files/conf</origin>
+                </distributionDirectory>
+                <distributionDirectory>
+                    <origin>files/mf</origin>
+                </distributionDirectory>
+                <distributionFile>
+                    <origin>files/ODKAggregate.war</origin>
+                </distributionFile>
+                <distributionFile>
+                    <origin>files/appengine-web.xml</origin>
+                </distributionFile>
+            </distributionFileList>
+        </folder>
+        <folder>
+            <description>Google AppEngine SDK</description>
+            <destination>${installdir}</destination>
+            <name>appengineSDK</name>
+            <platforms>all</platforms>
+            <actionList>
+                <changePermissions files="${installdir}/appengine-java-sdk/bin/*.sh" permissions="0755"/>
+            </actionList>
+            <distributionFileList>
+                <distributionDirectory>
+                    <origin>files/appengine-java-sdk</origin>
+                </distributionDirectory>
+            </distributionFileList>
+            <ruleList>
+                <compareText>
+                    <logic>equals</logic>
+                    <text>${platform}</text>
+                    <value>gae</value>
+                </compareText>
+            </ruleList>
+        </folder>
+        <folder>
+            <description>Google AppEngine Windows HTA</description>
+            <destination>${installdir}</destination>
+            <name>windowsOnlyGaeScripts</name>
+            <platforms>all</platforms>
+            <distributionFileList>
+                <distributionFile>
+                    <allowWildcards>1</allowWildcards>
+                    <origin>files/gae_scripts/*.hta</origin>
+                </distributionFile>
+            </distributionFileList>
+            <ruleList>
+                <platformTest>
+                    <type>windows</type>
+                </platformTest>
+                <compareText>
+                    <logic>equals</logic>
+                    <text>${platform}</text>
+                    <value>gae</value>
+                </compareText>
+            </ruleList>
+        </folder>
+        <folder>
+            <description>Google AppEngine OSX AppleScript</description>
+            <destination>${installdir}</destination>
+            <name>osxOnlyGaeScripts</name>
+            <platforms>all</platforms>
+            <actionList>
+                <changePermissions files="${installdir}/*.app/Contents/MacOS/applet" permissions="0755"/>
+                <changePermissions files="${installdir}/*.app/Contents/MacOS/._applet" permissions="0755"/>
+            </actionList>
+            <distributionFileList>
+                <distributionFile>
+                    <allowWildcards>1</allowWildcards>
+                    <origin>files/gae_scripts/*.app</origin>
+                </distributionFile>
+            </distributionFileList>
+            <ruleList>
+                <platformTest>
+                    <type>osx</type>
+                </platformTest>
+                <compareText>
+                    <logic>equals</logic>
+                    <text>${platform}</text>
+                    <value>gae</value>
+                </compareText>
+            </ruleList>
+        </folder>
+        <folder>
+            <description>Google AppEngine Shell Script</description>
+            <destination>${installdir}</destination>
+            <name>nonWindowsGaeScripts</name>
+            <platforms>all</platforms>
+            <actionList>
+                <changePermissions files="${installdir}/*.sh" permissions="0755"/>
+            </actionList>
+            <distributionFileList>
+                <distributionFile>
+                    <allowWildcards>1</allowWildcards>
+                    <origin>files/gae_scripts/*.sh</origin>
+                </distributionFile>
+            </distributionFileList>
+            <ruleList>
+                <platformTest>
+                    <negate>1</negate>
+                    <type>windows</type>
+                </platformTest>
+                <compareText>
+                    <logic>equals</logic>
+                    <text>${platform}</text>
+                    <value>gae</value>
+                </compareText>
+            </ruleList>
+        </folder>
+    </folderList>
+    <initializationActionList>
+        <setInstallerVariable>
+            <name>temp_dir</name>
+            <value>${system_temp_directory}/${installation_guid}</value>
+        </setInstallerVariable>
+        <createDirectory>
+            <path>${temp_dir}</path>
+        </createDirectory>
+        <createTimeStamp format="%Y-%m-%dT%H:%M:%S%z" variable="creation.timestamp"/>
+        <setInstallerVariable>
+            <name>settings_jar</name>
+            <value>${project.shortName}-settings.jar</value>
+        </setInstallerVariable>
+        <setInstallerVariable>
+            <name>html_steps_begin</name>
+            <value>&lt;html&gt;&lt;head&gt;&lt;title&gt;Remaining Configuration Steps&lt;/title&gt;&lt;/head&gt;&lt;body&gt;
+&lt;p&gt;To complete the installation, you need to:
+&lt;/p&gt;&lt;ol&gt;</value>
+        </setInstallerVariable>
+        <setInstallerVariable>
+            <name>html_steps_begin_item</name>
+            <value>&lt;li&gt;</value>
+        </setInstallerVariable>
+        <setInstallerVariable>
+            <name>html_steps_end_item</name>
+            <value>&lt;/li&gt;</value>
+        </setInstallerVariable>
+        <setInstallerVariable>
+            <name>html_steps_end</name>
+            <value>&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</value>
+        </setInstallerVariable>
+    </initializationActionList>
+    <installationAbortedActionList>
+        <deleteFile>
+            <path>${temp_dir}</path>
+        </deleteFile>
+    </installationAbortedActionList>
+    <postInstallationActionList>
+        <actionGroup>
+            <explanation>Create jdbc properties</explanation>
+            <progressText>Set innocuous jdbc property for all platforms</progressText>
+            <actionList>
+                <propertiesFileSet>
+                    <file>${temp_dir}/conf/${platform}/jdbc.properties</file>
+                    <key>jdbc.help.about</key>
+                    <value>auto-generated on ${creation.timestamp} for ${instance_display_name} ${product_fullname} ${product_version}</value>
+                </propertiesFileSet>
+            </actionList>
+        </actionGroup>
+        <actionGroup>
+	<!-- Sets the JDBC properties in jdbc.properties based on parameters -->
+	<explanation>Set jdbc properties</explanation>
+            <progressText>Setting jdbc properties</progressText>
+            <actionList>
+                <propertiesFileSet>
+                    <file>${temp_dir}/conf/${platform}/jdbc.properties</file>
+                    <key>jdbc.url</key>
+                    <value>jdbc:${platform}://${database_host_port}/${jdbc_database}?autoDeserialize=true</value>
+                </propertiesFileSet>
+                <propertiesFileSet>
+                    <file>${temp_dir}/conf/${platform}/jdbc.properties</file>
+                    <key>jdbc.username</key>
+                    <value>${jdbc_username}</value>
+                </propertiesFileSet>
+                <propertiesFileSet>
+                    <file>${temp_dir}/conf/${platform}/jdbc.properties</file>
+                    <key>jdbc.password</key>
+                    <value>${jdbc_password}</value>
+                </propertiesFileSet>
+                <propertiesFileSet>
+                    <file>${temp_dir}/conf/${platform}/jdbc.properties</file>
+                    <key>jdbc.schema</key>
+                    <value>${jdbc_schema}</value>
+                </propertiesFileSet>
+            </actionList>
+            <ruleList>
+                <compareText>
+                    <logic>does_not_equal</logic>
+                    <text>${platform}</text>
+                    <value>gae</value>
+                </compareText>
+            </ruleList>
+        </actionGroup>
+        <actionGroup>
+	<!-- Sets the security properties in security.properties
+                 based on previous user input -->
+	<explanation>Set security properties</explanation>
+            <progressText>Setting up security properties</progressText>
+            <actionList>
+                <actionGroup>
+                    <explanation>Setting security keys</explanation>
+                    <progressText>Setting security keys</progressText>
+                    <actionList>
+                        <propertiesFileSet>
+                            <file>${temp_dir}/conf/common/security.properties</file>
+                            <key>security.server.siteKey</key>
+                            <value>${security_server_siteKey}</value>
+                        </propertiesFileSet>
+                        <propertiesFileSet>
+                            <file>${temp_dir}/conf/common/security.properties</file>
+                            <key>security.server.userServiceKey</key>
+                            <value>${security_server_userServiceKey}</value>
+                        </propertiesFileSet>
+                    </actionList>
+                </actionGroup>
+                <actionGroup>
+	<!-- Sets the Authentication properties
+                         secureChannelType, deviceAuthentication, and
+                         channelType 
+
+                         Actions are as follows:                                                        
+
+                            If the checkbox ${tomcat_authentication_should_configure} was not checked
+							and ${platform} is not gae, then set:
+							
+                            security.server.deviceAuthentication=digest
+							security.server.channelType=ANY_CHANNEL 
+							security.server.secureChannelType=ANY_CHANNEL 
+
+							else 
+                            security.server.deviceAuthentication=digest
+							security.server.channelType=REQUIRES_SECURE_CHANNEL 
+							security.server.secureChannelType=REQUIRES_SECURE_CHANNEL 
+                    -->
+	<explanation>Authentication</explanation>
+                    <progressText>Setting authentication choices</progressText>
+                    <actionList>
+                        <propertiesFileSet>
+                            <file>${temp_dir}/conf/common/security.properties</file>
+                            <key>security.server.deviceAuthentication</key>
+                            <value>digest</value>
+                        </propertiesFileSet>
+                        <propertiesFileSet>
+                            <file>${temp_dir}/conf/common/security.properties</file>
+                            <key>security.server.channelType</key>
+                            <ruleEvaluationLogic>or</ruleEvaluationLogic>
+                            <value>REQUIRES_SECURE_CHANNEL</value>
+                            <ruleList>
+                                <isTrue>
+                                    <value>${tomcat_authentication_should_configure}</value>
+                                </isTrue>
+                                <compareText>
+                                    <logic>equals</logic>
+                                    <text>gae</text>
+                                    <value>${platform}</value>
+                                </compareText>
+                            </ruleList>
+                        </propertiesFileSet>
+                        <propertiesFileSet>
+                            <file>${temp_dir}/conf/common/security.properties</file>
+                            <key>security.server.channelType</key>
+                            <value>ANY_CHANNEL</value>
+                            <ruleList>
+                                <isFalse>
+                                    <value>${tomcat_authentication_should_configure}</value>
+                                </isFalse>
+                                <compareText>
+                                    <logic>does_not_equal</logic>
+                                    <text>gae</text>
+                                    <value>${platform}</value>
+                                </compareText>
+                            </ruleList>
+                        </propertiesFileSet>
+                        <propertiesFileSet>
+                            <file>${temp_dir}/conf/common/security.properties</file>
+                            <key>security.server.secureChannelType</key>
+                            <ruleEvaluationLogic>or</ruleEvaluationLogic>
+                            <value>REQUIRES_SECURE_CHANNEL</value>
+                            <ruleList>
+                                <isTrue>
+                                    <value>${tomcat_authentication_should_configure}</value>
+                                </isTrue>
+                                <compareText>
+                                    <logic>equals</logic>
+                                    <text>gae</text>
+                                    <value>${platform}</value>
+                                </compareText>
+                            </ruleList>
+                        </propertiesFileSet>
+                        <propertiesFileSet>
+                            <file>${temp_dir}/conf/common/security.properties</file>
+                            <key>security.server.secureChannelType</key>
+                            <value>ANY_CHANNEL</value>
+                            <ruleList>
+                                <isFalse>
+                                    <value>${tomcat_authentication_should_configure}</value>
+                                </isFalse>
+                                <compareText>
+                                    <logic>does_not_equal</logic>
+                                    <text>gae</text>
+                                    <value>${platform}</value>
+                                </compareText>
+                            </ruleList>
+                        </propertiesFileSet>
+                    </actionList>
+                </actionGroup>
+                <propertiesFileSet>
+                    <file>${temp_dir}/conf/common/security.properties</file>
+                    <key>security.server.port</key>
+                    <value>${http_port}</value>
+                </propertiesFileSet>
+                <propertiesFileSet>
+                    <file>${temp_dir}/conf/common/security.properties</file>
+                    <key>security.server.securePort</key>
+                    <value>${https_port}</value>
+                </propertiesFileSet>
+                <propertiesFileSet>
+                    <file>${temp_dir}/conf/common/security.properties</file>
+                    <key>security.server.hostname</key>
+                    <value>${hostname}</value>
+                </propertiesFileSet>
+                <propertiesFileSet>
+                    <file>${temp_dir}/conf/common/security.properties</file>
+                    <key>security.server.superUser</key>
+                    <value>mailto:${email}</value>
+                </propertiesFileSet>
+                <propertiesFileSet>
+                    <file>${temp_dir}/conf/common/security.properties</file>
+                    <key>security.server.realm.realmString</key>
+                    <value>${instance_display_name} ${product_fullname}</value>
+                </propertiesFileSet>
+                <propertiesFileSet>
+                    <file>${temp_dir}/conf/common/security.properties</file>
+                    <key>security.help.about</key>
+                    <value>auto-generated on ${creation.timestamp} for ${instance_display_name} ${product_fullname} ${product_version}</value>
+                </propertiesFileSet>
+            </actionList>
+        </actionGroup>
+        <deleteFile>
+            <path>${temp_dir}/cfg-war</path>
+        </deleteFile>
+        <createDirectory>
+            <path>${temp_dir}/cfg-war</path>
+        </createDirectory>
+        <unzip>
+            <destinationDirectory>${temp_dir}/cfg-war</destinationDirectory>
+            <progressText>Exploding ODKAggregate.war</progressText>
+            <zipFile>${temp_dir}/ODKAggregate.war</zipFile>
+        </unzip>
+        <deleteFile>
+            <path>${temp_dir}/jarBody</path>
+        </deleteFile>
+        <createDirectory>
+            <path>${temp_dir}/jarBody</path>
+        </createDirectory>
+        <copyFile>
+            <destination>${temp_dir}/jarBody</destination>
+            <origin>${temp_dir}/conf/common/*</origin>
+        </copyFile>
+        <copyFile>
+            <destination>${temp_dir}/jarBody</destination>
+            <origin>${temp_dir}/conf/${platform}/*</origin>
+        </copyFile>
+        <copyFile>
+            <destination>${temp_dir}/jarBody</destination>
+            <origin>${temp_dir}/mf/*</origin>
+        </copyFile>
+        <zip>
+	<!-- create the settings jar -->
+	<baseDirectory>${temp_dir}/jarBody</baseDirectory>
+            <files>${temp_dir}/jarBody/*</files>
+            <progressText>Building configuration jar</progressText>
+            <zipFile>${temp_dir}/cfg-war/WEB-INF/lib/${settings_jar}</zipFile>
+        </zip>
+        <copyFile>
+            <destination>${temp_dir}/cfg-war/WEB-INF/appengine-web.xml</destination>
+            <origin>${temp_dir}/appengine-web.xml</origin>
+        </copyFile>
+        <xmlFileSet>
+            <attribute></attribute>
+            <element>//*[local-name()="application"]</element>
+            <file>${temp_dir}/cfg-war/WEB-INF/appengine-web.xml</file>
+            <value>${app_id}</value>
+        </xmlFileSet>
+        <xmlFileSet>
+            <attribute></attribute>
+            <element>//*[local-name()="version"]</element>
+            <file>${temp_dir}/cfg-war/WEB-INF/appengine-web.xml</file>
+            <value>1</value>
+        </xmlFileSet>
+        <zip>
+            <baseDirectory>${temp_dir}/cfg-war</baseDirectory>
+            <files>${temp_dir}/cfg-war/*</files>
+            <progressText>Reassembling ODKAggregate.war</progressText>
+            <zipFile>${installdir}/ODKAggregate.war</zipFile>
+            <ruleList>
+                <compareText>
+                    <logic>does_not_equal</logic>
+                    <text>${platform}</text>
+                    <value>gae</value>
+                </compareText>
+            </ruleList>
+        </zip>
+        <deleteFile>
+            <path>${installdir}/ODKAggregate</path>
+        </deleteFile>
+        <createDirectory>
+            <path>${installdir}/ODKAggregate</path>
+            <progressText>Creating war directory</progressText>
+            <ruleList>
+                <compareText>
+                    <logic>equals</logic>
+                    <text>${platform}</text>
+                    <value>gae</value>
+                </compareText>
+            </ruleList>
+        </createDirectory>
+        <copyFile>
+            <destination>${installdir}/ODKAggregate</destination>
+            <origin>${temp_dir}/cfg-war/*</origin>
+            <progressText>Copy war files to war directory</progressText>
+            <ruleList>
+                <compareText>
+                    <logic>equals</logic>
+                    <text>${platform}</text>
+                    <value>gae</value>
+                </compareText>
+            </ruleList>
+        </copyFile>
+        <setInstallerVariable>
+            <name>host_port</name>
+            <value>${hostname}:${http_port}</value>
+        </setInstallerVariable>
+        <setInstallerVariable>
+            <name>host_port</name>
+            <value>${hostname}</value>
+            <ruleList>
+                <compareText>
+                    <logic>equals</logic>
+                    <text>${http_port}</text>
+                    <value>80</value>
+                </compareText>
+            </ruleList>
+        </setInstallerVariable>
+        <writeFile>
+            <encoding>utf-8</encoding>
+            <path>${installdir}/create_db_and_user.sql</path>
+            <progressText>Write MySQL database and user creation script</progressText>
+            <text>create database `${jdbc_database}`;
+create user '${jdbc_username}'@'${hostname}' identified by '${jdbc_password}';
+grant all on `${jdbc_database}`.* to '${jdbc_username}'@'${hostname}' identified by '${jdbc_password}';
+flush privileges;
+</text>
+            <ruleList>
+                <compareText>
+                    <logic>equals</logic>
+                    <text>${platform}</text>
+                    <value>mysql</value>
+                </compareText>
+            </ruleList>
+        </writeFile>
+        <writeFile>
+            <encoding>utf-8</encoding>
+            <path>${installdir}/create_db_and_user.sql</path>
+            <progressText>Write MySQL database and user creation script</progressText>
+            <text>create database `${jdbc_database}`;
+create user '${jdbc_username}'@'localhost' identified by '${jdbc_password}';
+grant all on `${jdbc_database}`.* to '${jdbc_username}'@'localhost' identified by '${jdbc_password}';
+flush privileges;
+</text>
+            <ruleList>
+                <compareText>
+                    <logic>equals</logic>
+                    <text>${platform}</text>
+                    <value>mysql</value>
+                </compareText>
+                <compareText>
+                    <logic>equals</logic>
+                    <text>${database_hostname}</text>
+                    <value>127.0.0.1</value>
+                </compareText>
+            </ruleList>
+        </writeFile>
+        <writeFile>
+            <encoding>utf-8</encoding>
+            <path>${installdir}/create_db_and_user.sql</path>
+            <progressText>Write PostgreSQL database and user creation script</progressText>
+            <text>create database "${jdbc_database}";
+create user "${jdbc_username}" with unencrypted password '${jdbc_password}';
+grant all privileges on database "${jdbc_database}" to "${jdbc_username}";
+alter database "${jdbc_database}" owner to "${jdbc_username}";
+\c "${jdbc_database}";
+create schema "${jdbc_schema}";
+grant all privileges on schema "${jdbc_schema}" to "${jdbc_username}";
+</text>
+            <ruleList>
+                <compareText>
+                    <logic>equals</logic>
+                    <text>${platform}</text>
+                    <value>postgresql</value>
+                </compareText>
+            </ruleList>
+        </writeFile>
+        <writeFile>
+            <encoding>utf-8</encoding>
+            <path>${installdir}/README.html</path>
+            <progressText>Write README</progressText>
+            <text>${html_steps_begin}
+${html_steps_begin_item}Execute the mysql (mysql.exe) commandline client using the root 
+account and password (the password you chose during the installation of the database), and supply the &lt;code&gt;create_db_and_user.sql&lt;/code&gt; to it.
+&lt;br/&gt;
+To open the mysql commandline client, open a cmd window (Windows), terminal window (MacOS) or
+term window (Linux) and 'cd' to the directory containing the mysql client (mysql.exe on Windows).
+Then, please type:
+&lt;pre&gt;
+mysql --user root --password
+&lt;/pre&gt;
+And enter the MySQL server root password.  You will then be within the mysql commandline client.  You should see a 'mysql&gt;' prompt. Type:
+&lt;pre&gt;
+source ${installdir.unix}/create_db_and_user.sql
+exit
+&lt;/pre&gt;
+Here is what this looks like on Windows, with what you must type in &lt;font color="red"&gt;red&lt;/font&gt;:
+&lt;pre&gt;
+Microsoft Windows [Version 6.1.7600]
+Copyright (c) 2009 Microsoft Corporation.  All rights reserved.
+
+C:\Windows\System32&gt;&lt;font color="red"&gt;cd "\Program Files\MySQL\MySQL Server 5.1\bin"&lt;/font&gt;
+
+C:\Program Files\MySQL\MySQL Server 5.1\bin&gt;&lt;font color="red"&gt;mysql.exe --user root --password&lt;/font&gt;
+Enter password: &lt;font color="red"&gt;*******&lt;/font&gt;
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 13
+Server version: 5.1.47-community MySQL Community Server (GPL)
+
+Copyright (c) 2000, 2010, Oracle and/or its affiliates. All rights reserved.
+This software comes with ABSOLUTELY NO WARRANTY. This is free software,
+and you are welcome to modify and redistribute it under the GPL v2 license
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+mysql&gt; &lt;font color="red"&gt;source ${installdir.unix}/create_db_and_user.sql&lt;/font&gt;
+Query OK, 1 row affected (0.00 sec)
+
+Query OK, 0 rows affected (0.00 sec)
+
+Query OK, 0 rows affected (0.00 sec)
+
+Query OK, 0 rows affected (0.00 sec)
+
+mysql&gt; &lt;font color="red"&gt;exit&lt;/font&gt;
+Bye
+
+C:\Program Files\MySQL\MySQL Server 5.1\bin&gt;
+&lt;/pre&gt;
+${html_steps_end_item}${html_steps_begin_item}
+copy the &lt;code&gt;ODKAggregate.war&lt;/code&gt; to the &lt;code&gt;${platform_path_separator}webapps&lt;/code&gt; directory of the Apache
+Tomcat installation.
+${html_steps_end_item}${html_steps_begin_item}
+start Apache (if not already started)
+${html_steps_end_item}${html_steps_begin_item}
+visit &lt;a href="http://${host_port}/ODKAggregate/"&gt;http://${host_port}/ODKAggregate/&lt;/a&gt; and go to the Management / Permissions tab to complete configuring the access rights for ODK Aggregate. NOTE: It may take a few moments for the Apache Tomcat server to detect the ODKAggregate.war; if you get a 404 error, wait a few moments then refresh your browser.
+${html_steps_end_item}&lt;/ol&gt;&lt;p&gt;
+If you want ODKAggregate to be reached at just &lt;code&gt;http://${host_port}/&lt;/code&gt;, you can
+rename it to ROOT.war before copying it to the &lt;code&gt;${platform_path_separator}webapps&lt;/code&gt; directory.
+${html_steps_end}</text>
+            <ruleList>
+                <compareText>
+                    <logic>equals</logic>
+                    <text>${platform}</text>
+                    <value>mysql</value>
+                </compareText>
+            </ruleList>
+        </writeFile>
+        <writeFile>
+            <encoding>utf-8</encoding>
+            <path>${installdir}/README.html</path>
+            <progressText>Write README</progressText>
+            <text>${html_steps_begin}
+${html_steps_begin_item}Execute the Postgres SQL shell (psql) commandline client using the
+postgres username and password (the password you chose during the installation of the database), and supply the &lt;code&gt;create_db_and_user.sql&lt;/code&gt; to it.
+To open the psql commandline client, open a cmd window (Windows), terminal window (MacOS) or
+term window (Linux) and 'cd' to the directory containing the psql client (psql.exe on Windows).
+Then, please type:
+&lt;pre&gt;
+psql --username postgres
+&lt;/pre&gt;
+And enter the PostgreSQL server password.  You will then be within the psql commandline client.  You should see a 'postgres=#' prompt. Type:
+&lt;pre&gt;
+\cd ${installdir.dos.unix}
+\i create_db_and_user.sql
+\q
+&lt;/pre&gt;
+Here is what this looks like on Windows, with what you must type in &lt;font color="red"&gt;red&lt;/font&gt;:
+&lt;pre&gt;
+Microsoft Windows [Version 6.1.7600]
+Copyright (c) 2009 Microsoft Corporation.  All rights reserved.
+
+C:\Windows\System32&gt;&lt;font color="red"&gt;cd "\Program Files\PostgreSQL\9.0\bin"&lt;/font&gt;
+
+C:\Program Files\PostgreSQL\9.0\bin&gt;&lt;font color="red"&gt;psql.exe --username postgres&lt;/font&gt;
+Password for user postgres:&lt;font color="red"&gt;*******&lt;/font&gt;
+psql (9.0.4)
+WARNING: Console code page (437) differs from Windows code page (1252)
+         8-bit characters might no work correctly. See psql reference
+		 page "Notes for Windows users" for details.
+Type "help" for help.
+
+postgres=# &lt;font color="red"&gt;\cd ${installdir.dos.unix}&lt;/font&gt;
+postgres=# &lt;font color="red"&gt;\i create_db_and_user.sql&lt;/font&gt;
+CREATE DATABASE
+CREATE ROLE
+GRANT
+ALTER DATABASE
+WARNING: Console code page (437) differs from Windows code page (1252)
+         8-bit characters might no work correctly. See psql reference
+		 page "Notes for Windows users" for details.
+You are now connected to database "odk_prod".
+CREATE SCHEMA
+GRANT
+odk_prod=# &lt;font color="red"&gt;\q&lt;/font&gt;
+C:\Program Files\PostgreSQL\9.0\bin&gt;
+&lt;/pre&gt;
+${html_steps_end_item}${html_steps_begin_item}
+copy the &lt;code&gt;ODKAggregate.war&lt;/code&gt; to the &lt;code&gt;${platform_path_separator}webapps&lt;/code&gt; directory of the Apache
+Tomcat installation.
+${html_steps_end_item}${html_steps_begin_item}
+start Apache (if not already started)
+${html_steps_end_item}${html_steps_begin_item}
+visit &lt;a href="http://${host_port}/ODKAggregate/"&gt;http://${host_port}/ODKAggregate/&lt;/a&gt; and go to the Management / Permissions tab to complete configuring the access rights for ODK Aggregate. NOTE: It may take a few moments for the Apache Tomcat server to detect the ODKAggregate.war; if you get a 404 error, wait a few moments then refresh your browser.
+${html_steps_end_item}&lt;/ol&gt;&lt;p&gt;
+If you want ODKAggregate to be reached at just &lt;code&gt;http://${host_port}/&lt;/code&gt;, you can
+rename it to ROOT.war before copying it to the &lt;code&gt;${platform_path_separator}webapps&lt;/code&gt; directory.
+${html_steps_end}</text>
+            <ruleList>
+                <compareText>
+                    <logic>equals</logic>
+                    <text>${platform}</text>
+                    <value>postgresql</value>
+                </compareText>
+            </ruleList>
+        </writeFile>
+        <writeFile>
+            <encoding>utf-8</encoding>
+            <path>${installdir}/README.html</path>
+            <progressText>Write README</progressText>
+            <text>${html_steps_begin}
+${html_steps_begin_item}Browse to &lt;code&gt;${installdir}&lt;/code&gt; and double-click &lt;code&gt;uploadAggregateToAppEngine.hta&lt;/code&gt; to deploy ${product_fullname} up into Google's AppEngine cloud. This script will ask for the email account with the administrative rights for your appspot instance and the password for that account. 
+${html_steps_end_item}${html_steps_begin_item}
+Visit &lt;a href="http://${hostname}"&gt;http://${hostname}/&lt;/a&gt; to complete configuring the
+access rights for ODK Aggregate.${html_steps_end_item}
+&lt;/ol&gt;&lt;p&gt;${html_steps_end}</text>
+            <ruleList>
+                <compareText>
+                    <logic>equals</logic>
+                    <text>${platform}</text>
+                    <value>gae</value>
+                </compareText>
+                <platformTest>
+                    <type>windows</type>
+                </platformTest>
+            </ruleList>
+        </writeFile>
+        <writeFile>
+            <encoding>utf-8</encoding>
+            <path>${installdir}/README.html</path>
+            <progressText>Write README</progressText>
+            <text>${html_steps_begin}
+${html_steps_begin_item}If the upload script failed, please resolve any errors that caused the failure.  Then, open &lt;b&gt;Terminal&lt;/b&gt; and execute &lt;font color="blue"&gt;&lt;code&gt;${installdir}/uploadAggregateToAppEngine.sh&lt;/code&gt;&lt;/font&gt; to deploy ${product_fullname} up into Google's AppEngine cloud. This script will ask for the email account that created or that has the administrative rights for your appspot instance, and the password for that account. 
+${html_steps_end_item}${html_steps_begin_item}After the upload script completes successfully, 
+visit &lt;a href="http://${hostname}"&gt;http://${hostname}/&lt;/a&gt; to complete configuring the
+access rights for ODK Aggregate.${html_steps_end_item}
+&lt;/ol&gt;&lt;p&gt;${html_steps_end}</text>
+            <ruleList>
+                <compareText>
+                    <logic>equals</logic>
+                    <text>${platform}</text>
+                    <value>gae</value>
+                </compareText>
+                <platformTest>
+                    <type>linux</type>
+                </platformTest>
+            </ruleList>
+        </writeFile>
+        <writeFile>
+            <encoding>utf-8</encoding>
+            <path>${installdir}/README.html</path>
+            <progressText>Write README</progressText>
+            <text>${html_steps_begin}
+${html_steps_begin_item}If the upload script failed, please resolve any errors that caused the failure.  Then, open &lt;font color="blue"&gt;&lt;code&gt;${installdir}/uploadAggregateToAppEngine.app&lt;/code&gt;&lt;/font&gt; to deploy ${product_fullname} up into Google's AppEngine cloud. This script will ask for the email account with the administrative rights for your appspot instance and the password for that account.
+${html_steps_end_item}${html_steps_begin_item}
+Visit &lt;a href="http://${hostname}"&gt;http://${hostname}/&lt;/a&gt; to complete configuring the
+access rights for ODK Aggregate.${html_steps_end_item}
+&lt;/ol&gt;&lt;p&gt;${html_steps_end}</text>
+            <ruleList>
+                <compareText>
+                    <logic>equals</logic>
+                    <text>${platform}</text>
+                    <value>gae</value>
+                </compareText>
+                <platformTest>
+                    <type>osx</type>
+                </platformTest>
+            </ruleList>
+        </writeFile>
+        <deleteFile>
+            <path>${temp_dir}</path>
+        </deleteFile>
+    </postInstallationActionList>
+</component>

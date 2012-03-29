@@ -1,0 +1,31 @@
+# Set up
+createUser user1
+createUser user2
+
+createSynchronizedTable user1 people
+    
+setTablePermissions user1 user2 people true false false
+    
+    
+# Test that user without delete permission can't delete table
+cloneSynchronizedTable user2 people
+deleteSynchronizedTable user2 people
+Exception: org.opendatakit.aggregate.odktables.client.exception.PermissionDeniedException: Requesting user does not have permission for that operation!
+
+setTablePermissions user1 user2 people true true false
+deleteSynchronizedTable user2 people
+Exception: org.opendatakit.aggregate.odktables.client.exception.PermissionDeniedException: Requesting user does not have permission for that operation!
+
+
+# Test that owner can delete table
+deleteSynchronizedTable user1 people
+
+
+# Test that table is gone
+removeTableSynchronization user2 people
+Exception: org.opendatakit.aggregate.odktables.client.exception.TableDoesNotExistException: Table with ID people does not exist!
+
+
+# Clean up
+deleteUser user1
+deleteUser user2

@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:task="http://www.springframework.org/schema/task"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans.xsd
+           http://www.springframework.org/schema/task
+           http://www.springframework.org/schema/task/spring-task-3.1.xsd">
+
+	<bean
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="locations">
+			<list>
+				<value>classpath:jdbc.properties</value>
+				<value>classpath:security.properties</value>
+				<value>WEB-INF/logging.properties</value>
+			</list>
+		</property>
+	</bean>
+
+	<!--Datasource configuration-->
+	<bean id="dataSource" destroy-method="close"
+		class="com.jolbox.bonecp.BoneCPDataSource">
+		<property name="driverClass" value="${jdbc.driverClassName}" />
+		<property name="jdbcUrl" value="${jdbc.url}" />
+		<property name="username" value="${jdbc.username}" />
+		<property name="password" value="${jdbc.password}" />
+		<property name="partitionCount" value="3" />
+		<property name="minConnectionsPerPartition" value="10" />
+		<property name="maxConnectionsPerPartition" value="40" />
+		<property name="acquireIncrement" value="5" />
+		<property name="releaseHelperThreads" value="3" />
+	</bean>
+
+	<bean id="datastore"
+		class="org.opendatakit.common.persistence.engine.pgres.DatastoreImpl">
+		<property name="dataSource" ref="dataSource" />
+		<!--		schemaName defaults to the database name.  Override this with: -->
+		<property name="schemaName" value="${jdbc.schema}" />
+	</bean>
+
+	<!--	Website domain information	-->
+	<bean id="realm" class="org.opendatakit.common.security.Realm">
+		<property name="realmString" value="${security.server.realm.realmString}" />
+		<property name="hostname" value="${security.server.hostname}" />
+		<property name="port" value="${security.server.port}" />
+		<property name="securePort" value="${security.server.securePort}" />
+		<property name="channelType" value="${security.server.channelType}" />
+		<property name="secureChannelType" value="${security.server.secureChannelType}" />
+	</bean>
+
+	<bean id="user_service" class="org.opendatakit.common.security.spring.UserServiceImpl">
+		<property name="datastore" ref="datastore" />
+		<property name="realm" ref="realm" />
+        <property name="superUserEmail" value="${security.server.superUser}" />
+		<property name="superUserUsername" value="${security.server.superUserUsername}" />
+        <property name="userServiceKey" value="${security.server.userServiceKey}" />
+	</bean>
+
+	<task:scheduler id="task_scheduler" pool-size="100" />
+
+	<bean id="worksheet_creator"
+		class="org.opendatakit.aggregate.task.tomcat.WorksheetCreatorImpl" />
+	<bean id="form_delete" class="org.opendatakit.aggregate.task.tomcat.FormDeleteImpl" />
+    <bean id="purge_submissions" class="org.opendatakit.aggregate.task.tomcat.PurgeOlderSubmissionsImpl" />
+	<bean id="upload_task"
+		class="org.opendatakit.aggregate.task.tomcat.UploadSubmissionsImpl" />
+	<bean id="kml_task" class="org.opendatakit.aggregate.task.tomcat.KmlGeneratorImpl" />
+	<bean id="csv_task" class="org.opendatakit.aggregate.task.tomcat.CsvGeneratorImpl" />
+    <bean id="http_client_factory" class="org.opendatakit.common.utils.tomcat.TomcatHttpClientFactoryImpl" />
+    <bean id="image_util" class="org.opendatakit.aggregate.util.tomcat.ImageUtilImpl" />
+	<bean id="startup" class="org.opendatakit.aggregate.AggregateStartupImpl" />
+
+	<bean id="watchdog" class="org.opendatakit.aggregate.task.tomcat.WatchdogImpl">
+		<property name="datastore" ref="datastore" />
+		<property name="userService" ref="user_service" />
+		<property name="taskScheduler" ref="task_scheduler" />
+		<property name="worksheetCreator" ref="worksheet_creator" />
+		<property name="purgeSubmissions" ref="purge_submissions" />
+		<property name="formDelete" ref="form_delete" />
+		<property name="uploadSubmissions" ref="upload_task" />
+		<property name="kmlGenerator" ref="kml_task" />
+		<property name="csvGenerator" ref="csv_task" />
+		<property name="httpClientFactory" ref="http_client_factory" />
+		<property name="imageUtil" ref="image_util" />
+	</bean>
+
+</beans>
