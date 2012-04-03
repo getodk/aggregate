@@ -2,6 +2,7 @@ package org.opendatakit.aggregate.externalservice;
 
 import org.apache.commons.logging.Log;
 import org.opendatakit.aggregate.constants.ServletConsts;
+import org.opendatakit.aggregate.exception.ODKExternalServiceCredentialsException;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
 import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.format.element.ElementFormatter;
@@ -38,7 +39,7 @@ public abstract class OAuthExternalService extends AbstractExternalService {
     String str = "Unable to set Oauth credentials";
     logger.error(str + "\nReason: " + e.getMessage());
     e.printStackTrace();
-    throw new ODKExternalServiceException(str, e);
+    throw new ODKExternalServiceCredentialsException(str, e);
   }
   
   @Override
