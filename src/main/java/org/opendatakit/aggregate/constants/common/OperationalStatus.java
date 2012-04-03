@@ -23,5 +23,6 @@ public enum OperationalStatus implements Serializable {
   ACTIVE, 
   PAUSED, 
   COMPLETED, 
-  ABANDONED
+  ABANDONED,
+  BAD_CREDENTIALS
 }

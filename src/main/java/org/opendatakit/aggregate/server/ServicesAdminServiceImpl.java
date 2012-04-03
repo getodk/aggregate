@@ -31,6 +31,7 @@ import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.common.ExternalServicePublicationOption;
 import org.opendatakit.aggregate.constants.common.FormActionStatusTimestamp;
+import org.opendatakit.aggregate.constants.common.OperationalStatus;
 import org.opendatakit.aggregate.constants.common.UIConsts;
 import org.opendatakit.aggregate.constants.externalservice.FusionTableConsts;
 import org.opendatakit.aggregate.constants.externalservice.SpreadsheetConsts;
@@ -142,6 +143,7 @@ public class ServicesAdminServiceImpl extends RemoteServiceServlet implements
       Map<String, String> params = new HashMap<String, String>();
       params.put(UIConsts.FSC_URI_PARAM, uri);
       params.put(ServletConsts.OAUTH_TOKEN_SECRET_PARAMETER, oauthParameters.getOAuthTokenSecret());
+
       String addr = cc.getServerURL() + BasicConsts.FORWARDSLASH + OAuthServlet.ADDR;
       String callbackUrl = HtmlUtil.createLinkWithProperties(addr, params);
 
@@ -305,5 +307,44 @@ public class ServicesAdminServiceImpl extends RemoteServiceServlet implements
       }
     }
     return false;
+  }
+
+  @Override
+  public String refreshCredentials(String uri) throws AccessDeniedException,
+      FormNotAvailableException, RequestFailureException, DatastoreFailureException {
+    HttpServletRequest req = this.getThreadLocalRequest();
+    CallingContext cc = ContextFactory.getCallingContext(this, req);
+
+    FormServiceCursor fsc = null;
+    ExternalService es = null;
+    try {
+      fsc = FormServiceCursor.getFormServiceCursor(uri, cc);
+      if (fsc != null) {
+        es = fsc.getExternalService(cc);
+      }
+    } catch (ODKFormNotFoundException e) {
+      e.printStackTrace();
+      throw new FormNotAvailableException(e);
+    } catch (ODKOverQuotaException e) {
+      e.printStackTrace();
+      throw new RequestFailureException(ErrorConsts.QUOTA_EXCEEDED);
+    } catch ( ODKEntityNotFoundException e) {
+      e.printStackTrace();
+      throw new RequestFailureException("Publisher not found");
+    } catch ( ODKDatastoreException e) {
+      e.printStackTrace();
+      throw new DatastoreFailureException(e);
+    }
+
+    if (es == null) {
+      throw new RequestFailureException("Service description not found for this publisher");
+    }
+    if ( fsc.getOperationalStatus() != OperationalStatus.BAD_CREDENTIALS ) {
+      throw new RequestFailureException(
+          "Credentials have not failed for this publisher -- rejecting change request");
+    }
+
+    // generate the URL for the auth sequence
+    return generateOAuthUrl(uri);
   }
 }
