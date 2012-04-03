@@ -55,7 +55,13 @@ public class PurgeUpToDatePopup extends AbstractPopupBase {
 
       @Override
       public void onValueChange(ValueChangeEvent<Date> event) {
+        if ( selectedDate != null ) {
+          picker.removeStyleFromDates("datePickerDayIsSelectedAndHighlighted", selectedDate);
+        }
         selectedDate = event.getValue();
+        if ( selectedDate != null ) {
+          picker.addTransientStyleToDates("datePickerDayIsSelectedAndHighlighted", selectedDate);
+        }
         confirm.setEnabled(selectedDate != null);
       }});
 
