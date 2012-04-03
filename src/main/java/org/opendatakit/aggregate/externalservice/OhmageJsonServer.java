@@ -29,6 +29,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.UUID;
 
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
@@ -46,6 +48,7 @@ import org.opendatakit.aggregate.constants.common.ExternalServiceType;
 import org.opendatakit.aggregate.constants.common.OperationalStatus;
 import org.opendatakit.aggregate.constants.externalservice.JsonServerConsts;
 import org.opendatakit.aggregate.constants.externalservice.OhmageJsonServerConsts;
+import org.opendatakit.aggregate.exception.ODKExternalServiceCredentialsException;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
 import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.format.element.BasicElementFormatter;
@@ -164,6 +167,18 @@ public class OhmageJsonServer extends AbstractExternalService implements
 
 			uploadSurveys(surveys, photos, cc);
 
+		} catch (ODKExternalServiceCredentialsException e) {
+		  fsc.setOperationalStatus(OperationalStatus.BAD_CREDENTIALS);
+		  try {
+		    persist(cc);
+		  } catch ( Exception ex) {
+		    ex.printStackTrace();
+		    throw new ODKExternalServiceException(
+		          "unable to persist bad credentials state", ex);
+		  }
+		  throw e;
+		} catch (ODKExternalServiceException e) {
+		  throw e;// don't wrap these
 		} catch (Exception e) {
 			throw new ODKExternalServiceException(e);
 		}
@@ -223,13 +238,28 @@ public class OhmageJsonServer extends AbstractExternalService implements
 
 		HttpResponse response = client.execute(httppost);
 		HttpEntity resEntity = response.getEntity();
-
-		Reader resReader = new InputStreamReader(resEntity.getContent());
-		OhmageJsonTypes.server_response serverResp = gson.fromJson(resReader,
+		
+		OhmageJsonTypes.server_response serverResp = null;
+		if ( resEntity != null ) {
+		  Reader resReader = new InputStreamReader(resEntity.getContent());
+		  serverResp = gson.fromJson(resReader,
 				OhmageJsonTypes.server_response.class);
-
-		if (serverResp.getResult().equals("failure"))
-			throw new ODKExternalServiceException("failure from server");
+		  // flush any remaining
+		  try {
+		    while (resReader.read() != -1);
+		  } catch ( IOException e) {
+		    // ignore...
+		  }
+		}
+		
+		int statusCode = response.getStatusLine().getStatusCode();
+		
+		if ( statusCode == HttpServletResponse.SC_UNAUTHORIZED ) {
+        throw new ODKExternalServiceCredentialsException("failure from server: " + statusCode);
+		} else if ( statusCode >= 300 || (serverResp != null &&
+		            serverResp.getResult().equals("failure"))) {
+        throw new ODKExternalServiceException("failure from server: " + statusCode);
+  	   }
 	}
 
 	/**

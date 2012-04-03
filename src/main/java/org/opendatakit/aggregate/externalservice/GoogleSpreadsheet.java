@@ -37,6 +37,7 @@ import org.opendatakit.aggregate.constants.externalservice.ExternalServiceConsts
 import org.opendatakit.aggregate.constants.externalservice.SpreadsheetConsts;
 import org.opendatakit.aggregate.datamodel.FormElementKey;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
+import org.opendatakit.aggregate.exception.ODKExternalServiceCredentialsException;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.form.IForm;
@@ -77,6 +78,7 @@ import com.google.gdata.data.spreadsheet.CellFeed;
 import com.google.gdata.data.spreadsheet.CustomElementCollection;
 import com.google.gdata.data.spreadsheet.ListEntry;
 import com.google.gdata.data.spreadsheet.WorksheetEntry;
+import com.google.gdata.util.AuthenticationException;
 import com.google.gdata.util.ServiceException;
 
 /**
@@ -118,14 +120,27 @@ public class GoogleSpreadsheet extends OAuthExternalService implements ExternalS
         cc);
     spreadsheetService = new SpreadsheetService(ServletConsts.APPLICATION_NAME);
     objectEntity = gsObject;
-    // TODO: REMOVE after bug is fixed
-    // http://code.google.com/p/gdata-java-client/issues/detail?id=103
-    spreadsheetService.setProtocolVersion(SpreadsheetService.Versions.V1);
-    spreadsheetService.setConnectTimeout(SpreadsheetConsts.SERVER_TIMEOUT);
     try {
-      spreadsheetService.setOAuthCredentials(getOAuthParams(), new OAuthHmacSha1Signer());
-    } catch (OAuthException e) {
-      logOAuthException(logger, e);
+      // TODO: REMOVE after bug is fixed
+      // http://code.google.com/p/gdata-java-client/issues/detail?id=103
+      spreadsheetService.setProtocolVersion(SpreadsheetService.Versions.V1);
+      spreadsheetService.setConnectTimeout(SpreadsheetConsts.SERVER_TIMEOUT);
+      try {
+        spreadsheetService.setOAuthCredentials(getOAuthParams(), new OAuthHmacSha1Signer());
+      } catch (OAuthException e) {
+        logOAuthException(logger, e);
+      }
+    } catch (ODKExternalServiceCredentialsException e) {
+      if ( fsc.getOperationalStatus().equals(OperationalStatus.ACTIVE) ) {
+        fsc.setOperationalStatus(OperationalStatus.BAD_CREDENTIALS);
+        try {
+          persist(cc);
+        } catch (Exception e1) {
+          logger.error("Unable to persist bad credentials status" + e1.toString());
+          throw new ODKExternalServiceException("unable to persist bad credentials status", e1);
+        }
+      }
+      throw e;
     }
   }
 
@@ -167,51 +182,64 @@ public class GoogleSpreadsheet extends OAuthExternalService implements ExternalS
       logOAuthException(logger, e);
     }
 
-    // create spreadsheet
-    com.google.gdata.data.docs.SpreadsheetEntry createdEntry = new SpreadsheetEntry();
-    createdEntry.setTitle(new PlainTextConstruct(getSpreadsheetName()));
+    boolean newlyCreated = false;
+    if ( fsc.getOperationalStatus() != OperationalStatus.BAD_CREDENTIALS ) {
+      newlyCreated = true;
 
-    com.google.gdata.data.docs.SpreadsheetEntry updatedEntry;
-    try {
-      updatedEntry = service.insert(new URL(SpreadsheetConsts.DOC_FEED), createdEntry);
-    } catch (IOException e) {
-      // try one more time
+      // create spreadsheet
+      com.google.gdata.data.docs.SpreadsheetEntry createdEntry = new SpreadsheetEntry();
+      createdEntry.setTitle(new PlainTextConstruct(getSpreadsheetName()));
+  
+      com.google.gdata.data.docs.SpreadsheetEntry updatedEntry;
       try {
         updatedEntry = service.insert(new URL(SpreadsheetConsts.DOC_FEED), createdEntry);
-      } catch (Exception e1) {
-    	e1.printStackTrace();
-        throw new ODKExternalServiceException(e1);
+      } catch (IOException e) {
+        // try one more time
+        try {
+          updatedEntry = service.insert(new URL(SpreadsheetConsts.DOC_FEED), createdEntry);
+        } catch (AuthenticationException e1) {
+          e1.printStackTrace();
+          throw new ODKExternalServiceCredentialsException(e1);
+        } catch (Exception e1) {
+      	  e1.printStackTrace();
+          throw new ODKExternalServiceException(e1);
+        }
+      } catch (AuthenticationException e) {
+        e.printStackTrace();
+        throw new ODKExternalServiceCredentialsException(e);
+      } catch (Exception e) {
+        e.printStackTrace();
+        throw new ODKExternalServiceException(e);
       }
-    } catch (Exception e) {
-      e.printStackTrace();
-      throw new ODKExternalServiceException(e);
+  
+      // get key
+      String spreadKey = updatedEntry.getDocId();
+  
+      objectEntity.setSpreadsheetKey(spreadKey);
     }
-
-    // get key
-    String spreadKey = updatedEntry.getDocId();
-
-    objectEntity.setSpreadsheetKey(spreadKey);
     fsc.setOperationalStatus(OperationalStatus.ACTIVE);
     updateReadyValue();
     persist(cc);
 
-    try {
-      // create worksheet
-      WorksheetCreator ws = (WorksheetCreator) cc.getBean(BeanDefs.WORKSHEET_BEAN);
-
-      Map<String, String> parameters = new HashMap<String, String>();
-
-      parameters.put(ExternalServiceConsts.EXT_SERV_ADDRESS, getSpreadsheetName());
-      parameters.put(ServletConsts.EXTERNAL_SERVICE_TYPE, fsc.getExternalServicePublicationOption().name());
-
-      MiscTasks m = new MiscTasks(TaskType.WORKSHEET_CREATE, form, parameters, cc);
-      m.persist(cc);
-
-      CallingContext ccDaemon = ContextFactory.duplicateContext(cc);
-      ccDaemon.setAsDaemon(true);
-      ws.createWorksheetTask(form, m, 1L, ccDaemon);
-    } catch (ODKFormNotFoundException e) {
-      e.printStackTrace();
+    if ( newlyCreated ) {
+      try {
+        // create worksheet
+        WorksheetCreator ws = (WorksheetCreator) cc.getBean(BeanDefs.WORKSHEET_BEAN);
+  
+        Map<String, String> parameters = new HashMap<String, String>();
+  
+        parameters.put(ExternalServiceConsts.EXT_SERV_ADDRESS, getSpreadsheetName());
+        parameters.put(ServletConsts.EXTERNAL_SERVICE_TYPE, fsc.getExternalServicePublicationOption().name());
+  
+        MiscTasks m = new MiscTasks(TaskType.WORKSHEET_CREATE, form, parameters, cc);
+        m.persist(cc);
+  
+        CallingContext ccDaemon = ContextFactory.duplicateContext(cc);
+        ccDaemon.setAsDaemon(true);
+        ws.createWorksheetTask(form, m, 1L, ccDaemon);
+      } catch (ODKFormNotFoundException e) {
+        e.printStackTrace();
+      }
     }
 
   }
@@ -384,9 +412,21 @@ public class GoogleSpreadsheet extends OAuthExternalService implements ExternalS
             }
           }
         }
+      } catch ( AuthenticationException e) {
+        logger.error("Unable to insert data into spreadsheet " + objectEntity.getSpreadsheetName() + " exception: " + e.getMessage());
+        e.printStackTrace();
+        fsc.setOperationalStatus(OperationalStatus.BAD_CREDENTIALS);
+        try {
+          persist(cc);
+        } catch (Exception e1) {
+          e1.printStackTrace();
+          throw new ODKExternalServiceException("Unable to set OperationalStatus to Bad Credentials: " + e.toString(), e1);
+        }
+        e.printStackTrace();
+        throw new ODKExternalServiceCredentialsException(e);
       } catch (Exception e) {
-    	e.printStackTrace();
-    	logger.error("Unable to insert data into spreadsheet " + objectEntity.getSpreadsheetName() + " exception: " + e.getMessage());
+    	  e.printStackTrace();
+    	  logger.error("Unable to insert data into spreadsheet " + objectEntity.getSpreadsheetName() + " exception: " + e.getMessage());
         throw new ODKExternalServiceException(e);
       }
     }

@@ -110,11 +110,11 @@
 		class="org.springframework.security.web.FilterChainProxy">
 		<filter-chain-map path-type="ant">
 			<filter-chain pattern="/local_login.html"
-				filters="channelProcessingFilter,securityContextHolderAwareFilter,securityContextPersistenceFilter,logoutFilter,oauth2ResourceFilter,oobAuthFilter,${security.server.deviceAuthentication}AuthFilter,requestCacheAwareFilter,anonymousFilter,sessionManagerFilter,localExceptionTranslationFilter,filterSecurityInterceptor" />
+				filters="channelProcessingFilter,securityContextPersistenceFilter,logoutFilter,oauth2ResourceFilter,oobAuthFilter,${security.server.deviceAuthentication}AuthFilter,requestCacheAwareFilter,anonymousFilter,securityContextHolderAwareFilter,sessionManagerFilter,localExceptionTranslationFilter,filterSecurityInterceptor" />
 			<filter-chain pattern="/*"
-				filters="channelProcessingFilter,securityContextHolderAwareFilter,securityContextPersistenceFilter,logoutFilter,oauth2ResourceFilter,oobAuthFilter,${security.server.deviceAuthentication}AuthFilter,openIdFilter,requestCacheAwareFilter,anonymousFilter,sessionManagerFilter,exceptionTranslationFilter,filterSecurityInterceptor" />
+				filters="channelProcessingFilter,securityContextPersistenceFilter,logoutFilter,oauth2ResourceFilter,oobAuthFilter,${security.server.deviceAuthentication}AuthFilter,openIdFilter,requestCacheAwareFilter,anonymousFilter,securityContextHolderAwareFilter,sessionManagerFilter,exceptionTranslationFilter,filterSecurityInterceptor" />
 			<filter-chain pattern="/**"
-				filters="channelProcessingFilter,securityContextHolderAwareFilter,securityContextPersistenceFilter,logoutFilter,oauth2ResourceFilter,oobAuthFilter,${security.server.deviceAuthentication}AuthFilter,openIdFilter,requestCacheAwareFilter,anonymousFilter,sessionManagerFilter,exceptionTranslationFilter,filterSecurityInterceptor" />
+				filters="channelProcessingFilter,securityContextPersistenceFilter,logoutFilter,oauth2ResourceFilter,oobAuthFilter,${security.server.deviceAuthentication}AuthFilter,openIdFilter,requestCacheAwareFilter,anonymousFilter,securityContextHolderAwareFilter,sessionManagerFilter,exceptionTranslationFilter,filterSecurityInterceptor" />
 		</filter-chain-map>
 	</beans:bean>
     
@@ -218,9 +218,11 @@
 	<beans:bean id="requestCacheAwareFilter"
 		class="org.springframework.security.web.savedrequest.RequestCacheAwareFilter" />
 
+	<!--  <beans:bean id="securityContextHolderAwareFilter"
+		class="org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter" /> -->
 	<beans:bean id="securityContextHolderAwareFilter"
-		class="org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter" />
-
+		class="org.opendatakit.common.security.spring.SecurityContextHolderAwareAuthPreservingRequestFilter" />
+	
 	<beans:bean id="sessionManagerFilter"
 		class="org.springframework.security.web.session.SessionManagementFilter">
 		<beans:constructor-arg ref="securityContextRepository" />

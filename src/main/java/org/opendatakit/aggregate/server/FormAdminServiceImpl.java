@@ -440,4 +440,70 @@ public class FormAdminServiceImpl extends RemoteServiceServlet implements
     return mediaSummaryList;
   }
 
+  @Override
+  public Date purgeSubmissionsData(String formId, Date value) throws AccessDeniedException,
+      FormNotAvailableException, DatastoreFailureException, RequestFailureException {
+    HttpServletRequest req = this.getThreadLocalRequest();
+    CallingContext cc = ContextFactory.getCallingContext(this, req);
+    
+    IForm form = null;
+    try {
+      form = FormFactory.retrieveFormByFormId(formId, cc);
+      if (!form.hasValidFormDefinition()) {
+        throw new RequestFailureException(ErrorConsts.FORM_DEFINITION_INVALID);
+      }
+    } catch (ODKFormNotFoundException e) {
+      e.printStackTrace();
+      throw new FormNotAvailableException(e);
+    } catch (ODKOverQuotaException e) {
+      e.printStackTrace();
+      throw new RequestFailureException(ErrorConsts.QUOTA_EXCEEDED);
+    } catch (ODKDatastoreException e) {
+      e.printStackTrace();
+      throw new DatastoreFailureException(e);
+    }
+
+    // any confirm parameter value means OK -- purge it!
+    PurgeOlderSubmissions pos = (PurgeOlderSubmissions) cc
+        .getBean(BeanDefs.PURGE_OLDER_SUBMISSIONS_BEAN);
+
+    if (pos == null) {
+      throw new RequestFailureException("Unable to configure task to purge submitted data for form " + formId);
+    }
+    // set up the purge request here...
+    Map<String, String> parameters = new HashMap<String, String>();
+
+    parameters.put(PurgeOlderSubmissions.PURGE_DATE, WebUtils.purgeDateString(value));
+
+    MiscTasks m;
+    try {
+      m = new MiscTasks(TaskType.PURGE_OLDER_SUBMISSIONS, form, parameters, cc);
+      m.persist(cc);
+    } catch (ODKOverQuotaException e) {
+      e.printStackTrace();
+      throw new RequestFailureException(ErrorConsts.QUOTA_EXCEEDED);
+    } catch (ODKDatastoreException e) {
+      e.printStackTrace();
+      throw new RequestFailureException(
+          "Unable to establish task to purge submitted data for form " + formId);
+    }
+    CallingContext ccDaemon = ContextFactory.getCallingContext(this, req);
+    ccDaemon.setAsDaemon(true);
+    try {
+      pos.createPurgeOlderSubmissionsTask(form, m.getSubmissionKey(), 1L, ccDaemon);
+    } catch (ODKOverQuotaException e) {
+      e.printStackTrace();
+      throw new RequestFailureException(ErrorConsts.QUOTA_EXCEEDED);
+    } catch (ODKDatastoreException e) {
+      e.printStackTrace();
+      throw new RequestFailureException(
+          "Unable to establish task to purge submitted data for form " + formId);
+    } catch (ODKFormNotFoundException e) {
+      e.printStackTrace();
+      throw new RequestFailureException(
+          "Unable to establish task to purge submitted data for form " + formId);
+    }
+    return value;
+  }
+
 }

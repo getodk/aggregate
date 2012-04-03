@@ -55,6 +55,7 @@ import org.opendatakit.aggregate.constants.format.FormatConsts;
 import org.opendatakit.aggregate.datamodel.FormElementKey;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.datamodel.FormElementModel.ElementType;
+import org.opendatakit.aggregate.exception.ODKExternalServiceCredentialsException;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
 import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.format.Row;
@@ -126,28 +127,30 @@ public class FusionTable extends OAuthExternalService implements ExternalService
     objectEntity.setAuthToken(authToken.getToken());
     objectEntity.setAuthTokenSecret(authToken.getTokenSecret());
     
-    String tableId = executeFusionTableCreation(form.getTopLevelGroupElement(), cc);
-    objectEntity.setFusionTableId(tableId);
-    
-    List<TableId> repeatIds = new ArrayList<TableId>();
-    for (FormElementModel repeatGroupElement : form.getRepeatGroupsInModel()) {
-      String id = executeFusionTableCreation(repeatGroupElement, cc);
-      repeatIds.add(new TableId(id, repeatGroupElement));
+    if ( fsc.getOperationalStatus() != OperationalStatus.BAD_CREDENTIALS ) {
+      String tableId = executeFusionTableCreation(form.getTopLevelGroupElement(), cc);
+      objectEntity.setFusionTableId(tableId);
+      
+      List<TableId> repeatIds = new ArrayList<TableId>();
+      for (FormElementModel repeatGroupElement : form.getRepeatGroupsInModel()) {
+        String id = executeFusionTableCreation(repeatGroupElement, cc);
+        repeatIds.add(new TableId(id, repeatGroupElement));
+      }
+  
+      FusionTableRepeatParameterTable frpt = FusionTableRepeatParameterTable.assertRelation(cc);
+  
+      Datastore ds = cc.getDatastore();
+      User user = cc.getCurrentUser();
+      for (TableId a : repeatIds) {
+        FusionTableRepeatParameterTable t = ds.createEntityUsingRelation(frpt, user);
+        t.setUriFusionTable(objectEntity.getUri());
+        t.setFormElementKey(a.getElement().constructFormElementKey(form));
+        t.setFusionTableId(a.getId());
+        repeatElementEntities.add(t);
+      }
+  
+      fsc.setIsExternalServicePrepared(true);
     }
-
-    FusionTableRepeatParameterTable frpt = FusionTableRepeatParameterTable.assertRelation(cc);
-
-    Datastore ds = cc.getDatastore();
-    User user = cc.getCurrentUser();
-    for (TableId a : repeatIds) {
-      FusionTableRepeatParameterTable t = ds.createEntityUsingRelation(frpt, user);
-      t.setUriFusionTable(objectEntity.getUri());
-      t.setFormElementKey(a.getElement().constructFormElementKey(form));
-      t.setFusionTableId(a.getId());
-      repeatElementEntities.add(t);
-    }
-
-    fsc.setIsExternalServicePrepared(true);
     fsc.setOperationalStatus(OperationalStatus.ACTIVE);
     persist(cc);
   }
@@ -191,6 +194,18 @@ public class FusionTable extends OAuthExternalService implements ExternalService
           + createCsvString(headers.iterator()) + FusionTableConsts.VALUES_STMT
           + createCsvString(row.getFormattedValues().iterator());
       executeStmt(insertQuery, cc);
+    } catch (ODKExternalServiceCredentialsException e) {
+      fsc.setOperationalStatus(OperationalStatus.BAD_CREDENTIALS);
+      try {
+        persist(cc);
+      } catch (Exception e1) {
+        e1.printStackTrace();
+        throw new ODKExternalServiceException("Unable to set OperationalStatus to Bad credentials: " + e1);
+      }
+      throw e;
+    } catch (ODKExternalServiceException e) {
+      e.printStackTrace();
+      throw e;
     } catch (Exception e) {
       e.printStackTrace();
       throw new ODKExternalServiceException(e);
@@ -261,7 +276,10 @@ public class FusionTable extends OAuthExternalService implements ExternalService
     while ((responseLine = reader.readLine()) != null) {
       response.append(responseLine);
     }
-    if (resp.getStatusLine().getStatusCode() != HttpServletResponse.SC_OK) {
+    int statusCode = resp.getStatusLine().getStatusCode();
+    if ( statusCode == HttpServletResponse.SC_UNAUTHORIZED ) {
+      throw new ODKExternalServiceCredentialsException(response.toString() + statement);
+    } else if (statusCode != HttpServletResponse.SC_OK) {
       throw new ODKExternalServiceException(response.toString() + statement);
     }
     return response.toString();
@@ -294,6 +312,10 @@ public class FusionTable extends OAuthExternalService implements ExternalService
     try {
       String createStmt = createFusionTableStatement(form, root);
       resultRequest = executeStmt(createStmt, cc);
+    } catch (ODKExternalServiceException e) {
+      logger.error("Failed to create fusion table: " + e.getMessage());
+      e.printStackTrace();
+      throw e;
     } catch (Exception e) {
       logger.error("Failed to create fusion table: " + e.getMessage());
       e.printStackTrace();
@@ -308,7 +330,7 @@ public class FusionTable extends OAuthExternalService implements ExternalService
     }
   }
 
-  private String createFusionTableStatement(IForm form, FormElementModel rootNode) throws ODKExternalServiceException {
+  private String createFusionTableStatement(IForm form, FormElementModel rootNode) {
 
     List<String> headers = headerFormatter.generateHeaders(form, rootNode, null);
 
