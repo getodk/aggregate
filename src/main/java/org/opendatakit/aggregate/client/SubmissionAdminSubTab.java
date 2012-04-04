@@ -8,6 +8,7 @@ import org.opendatakit.aggregate.client.form.FormSummary;
 import org.opendatakit.aggregate.client.submission.SubmissionUISummary;
 import org.opendatakit.aggregate.client.table.SubmissionAdminTable;
 import org.opendatakit.aggregate.client.widgets.FormListBox;
+import org.opendatakit.aggregate.client.widgets.PurgeUpToDateButton;
 import org.opendatakit.aggregate.client.widgets.ServletPopupButton;
 import org.opendatakit.aggregate.constants.common.HelpSliderConsts;
 import org.opendatakit.aggregate.constants.common.UIConsts;
@@ -29,6 +30,7 @@ public class SubmissionAdminSubTab extends AggregateSubTabBase {
   
   // ui elements
   private FormListBox formsBox;
+  private PurgeUpToDateButton purgeSubmission;
   private ScrollPanel submissions;
 
   // state
@@ -42,6 +44,9 @@ public class SubmissionAdminSubTab extends AggregateSubTabBase {
     submissions = new ScrollPanel();
     submissions.getElement().setId("submission_admin_list");
     
+    purgeSubmission = new PurgeUpToDateButton();
+    purgeSubmission.setSelectedForm(selectedForm);
+    
     ServletPopupButton uploadSubmission = new ServletPopupButton(SUBMISSION_BUTTON_TEXT, SUBMISSION_TXT,
         UIConsts.SUBMISSION_SERVLET_ADDR, this, SUBMISSION_TOOLTIP_TXT, SUBMISSION_BALLOON_TXT);
     
@@ -49,8 +54,9 @@ public class SubmissionAdminSubTab extends AggregateSubTabBase {
     FlexTable navTable = new FlexTable();
     navTable.getElement().setId("submission_admin_bar");
     navTable.setWidget(0, 0, formsBox);
-    navTable.setWidget(0, 1, uploadSubmission);
-    navTable.getCellFormatter().getElement(0, 1).setAttribute("align", "right");
+    navTable.setWidget(0, 1, purgeSubmission);
+    navTable.setWidget(0, 2, uploadSubmission);
+    navTable.getCellFormatter().getElement(0, 2).setAttribute("align", "right");
 
     // add to panel
     add(navTable);
@@ -78,7 +84,7 @@ public class SubmissionAdminSubTab extends AggregateSubTabBase {
       selectedForm = formsBox.getSelectedForm();
       
       // Make the call to get the published services
-      updateSubmissionsAdminTable();
+      updateContent();
     }
   };
 
@@ -95,6 +101,11 @@ public class SubmissionAdminSubTab extends AggregateSubTabBase {
       formsBox.setVisible(false);
       submissions.setVisible(false);
     }
+  }
+  
+  private void updateContent() {
+    purgeSubmission.setSelectedForm(selectedForm);
+    updateSubmissionsAdminTable();
   }
 
   public synchronized void updateSubmissionsAdminTable() {
@@ -134,7 +145,7 @@ public class SubmissionAdminSubTab extends AggregateSubTabBase {
       if(form != null) {
         selectedForm = form;
       }
-      updateSubmissionsAdminTable();
+      updateContent();
     }
   }
   

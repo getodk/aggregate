@@ -54,5 +54,7 @@ public interface FormAdminService extends RemoteService {
   
   void markSubmissionAsComplete(String submissionKeyAsString) throws AccessDeniedException, FormNotAvailableException, DatastoreFailureException, RequestFailureException;
   
-  ArrayList<MediaFileSummary> getFormMediaFileList(String formId) throws AccessDeniedException, FormNotAvailableException, DatastoreFailureException, RequestFailureException; 
+  ArrayList<MediaFileSummary> getFormMediaFileList(String formId) throws AccessDeniedException, FormNotAvailableException, DatastoreFailureException, RequestFailureException;
+
+  Date purgeSubmissionsData(String formId, Date value) throws AccessDeniedException, FormNotAvailableException, DatastoreFailureException, RequestFailureException;
 }

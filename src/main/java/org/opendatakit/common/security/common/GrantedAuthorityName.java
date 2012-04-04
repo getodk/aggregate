@@ -32,7 +32,9 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 public enum GrantedAuthorityName implements IsSerializable {
 
 	AUTH_LOCAL("any users authenticated via the locally-held (<em>Aggregate password</em>) credential"),
+   AUTH_OUT_OF_BAND("any users authenticated vio Out-of-band mechanisms"),
 	AUTH_OPENID("any users authenticated via OpenID"),
+   AUTH_GOOGLE_OAUTH2("any users authenticated via Google Oauth2 proxy"),
 	
 	USER_IS_ANONYMOUS("for unauthenticated access"),
 	USER_IS_REGISTERED("for registered users of this system (a user identified " +
