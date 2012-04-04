@@ -41,6 +41,7 @@ import org.opendatakit.aggregate.constants.common.OperationalStatus;
 import org.opendatakit.aggregate.constants.externalservice.JsonServerConsts;
 import org.opendatakit.aggregate.constants.externalservice.JsonServerType;
 import org.opendatakit.aggregate.datamodel.FormElementModel.ElementType;
+import org.opendatakit.aggregate.exception.ODKExternalServiceCredentialsException;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
 import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.format.element.BasicElementFormatter;
@@ -117,22 +118,30 @@ public class JsonServer extends AbstractExternalService implements ExternalServi
 
       HttpResponse resp = client.execute(post);
 
-      if (resp.getStatusLine().getStatusCode() == HttpServletResponse.SC_OK) {
+      if ( resp.getEntity() != null ) {
         InputStreamReader is = new InputStreamReader(resp.getEntity().getContent());
         BufferedReader reader = new BufferedReader(is);
-
+  
         String responseLine = reader.readLine();
         while (responseLine != null) {
           System.out.print(responseLine);
           responseLine = reader.readLine();
         }
         is.close();
-      } else {
-        throw new ODKExternalServiceException(resp.getStatusLine().getReasonPhrase() + " ("
-            + resp.getStatusLine().getStatusCode() + ")");
       }
+      
+      int statusCode = resp.getStatusLine().getStatusCode();
+      if (statusCode == HttpServletResponse.SC_UNAUTHORIZED) {
+        throw new ODKExternalServiceCredentialsException(resp.getStatusLine().getReasonPhrase() + " ("
+            + statusCode + ")");
+      } else if (statusCode != HttpServletResponse.SC_OK) {
+        throw new ODKExternalServiceException(resp.getStatusLine().getReasonPhrase() + " ("
+            + statusCode + ")");
+      }
+    } catch (ODKExternalServiceException e) {
+      throw e; // don't wrap these...
     } catch (Exception e) {
-      throw new ODKExternalServiceException(e);
+      throw new ODKExternalServiceException(e);// wrap...
     }
   }
 
@@ -199,7 +208,17 @@ public class JsonServer extends AbstractExternalService implements ExternalServi
 
       // TODO: PROBLEM - NOT good for only one response code check at the end
       this.sendRequest(getServerUrl(), baStream.toByteArray(), cc);
-
+    } catch (ODKExternalServiceCredentialsException e) {
+      fsc.setOperationalStatus(OperationalStatus.BAD_CREDENTIALS);
+      try {
+        persist(cc);
+      } catch ( Exception e1) {
+        e1.printStackTrace();
+        throw new ODKExternalServiceException("unable to persist bad credentials status", e1);
+      }
+      throw e; // don't wrap
+    } catch (ODKExternalServiceException e) {
+      throw e; // don't wrap
     } catch (Exception e) {
       throw new ODKExternalServiceException(e);
     }

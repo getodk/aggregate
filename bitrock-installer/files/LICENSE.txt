@@ -20,19 +20,19 @@ http://aopalliance.sourceforge.net		/Public domain/
 http://apache.org/		/Apache 2.0/
 	apache-mime4j-0.6.1.jar
 http://code.google.com/appengine/		/Apache 2.0/
-	appengine-api-1.0-sdk-1.5.5.jar
-	appengine-api-labs-1.5.5.jar
-	appengine-jsr107cache-1.5.5.jar
+	appengine-api-1.0-sdk-1.6.1.jar
+	appengine-api-labs-1.6.1.jar
+	appengine-jsr107cache-1.6.1.jar
 http://www.eclipse.org/aspectj			/Eclipse Public License - v 1.0/
 	aspectjrt-1.6.8.jar
 	aspectjweaver-1.6.8.jar
 http://jolbox.com/		/Apache 2.0/
 	bonecp-0.7.1.RELEASE.jar
 http://apache.org/		/Apache 2.0/
-	commons-codec-1.5.jar
+	commons-codec-1.6.jar
 	commons-fileupload-1.2.2.jar
 	commons-io-2.0.1.jar
-	commons-lang-2.5.jar
+	commons-lang-2.6.jar
 	commons-logging-1.1.1.jar
 http://code.google.com/apis/gdata/docs/directory.html		/Apache 2.0/
 	gdata-client-1.0-1.46.0.jar
@@ -69,6 +69,9 @@ https://github.com/stain/jai-imageio-core   /Modified BSD/ /Apache 2.0/
     jai-imageio-core-standalone-1.2-pre-dr-b04-2010-04-30.jar
 	Copyright (c) 2005 Sun Microsystems, Inc. All Rights Reserved.
 	Modifications (c) Stian Soiland-Reyes <stian@soiland-reyes.com> 2010-04-30
+http://wiki.fasterxml.com/JacksonHome      /Apache 2.0/
+	jackson-core-asl-1.8.8.jar
+	jackson-mapper-asl-1.8.8.jar
 https://bitbucket.org/javarosa/javarosa/wiki/Home		/Apache 2.0/
 	javarosa-libraries.jar
 http://code.google.com/p/atinject/  /Apache 2.0/
@@ -76,7 +79,7 @@ http://code.google.com/p/atinject/  /Apache 2.0/
 http://www.jcip.net					/Creative Commons Attribution License/
 	jcip-annotations-1.0.jar
 http://www.jdom.org/index.html		/Apache with acknowledgement clause removed/
-	jdom-1.1.jar
+	jdom-1.1.2.jar
 http://code.google.com/p/jsr-305/		/New BSD license/
 	jsr305-1.3.9.jar
 http://jug.safehaus.org/				/LGPL 2.1/
@@ -84,53 +87,52 @@ http://jug.safehaus.org/				/LGPL 2.1/
 http://kxml.sourceforge.net/kxml2/		/BSD license/
 	kxml2-2.3.0.jar
 http://nekohtml.sourceforge.net/		/Apache 2.0/
-	nekohtml-1.9.14.jar
+	nekohtml-1.9.15.jar
 http://code.google.com/p/oauth/			/Apache 2.0/
 	oauth-20090617.jar
 	oauth-consumer-20090617.jar
 	oauth-httpclient4-20090913.jar
 http://code.google.com/p/openid4java/		/Apache 2.0/
-	openid4java-nodeps-0.9.6.jar
+    Special build -- see ODK Aggregate Components
+	openid4java-nodeps-0.9.6.662.odk-SNAPSHOT.jar
 http://maven.apache.org/					/Apache 2.0/
-	openxri-client-1.2.0.jar
-	openxri-syntax-1.2.0.jar
+	openxri-client-1.2.1.jar
+	openxri-syntax-1.2.1.jar
 http://www.postgresql.org/		/Modified BSD / MIT Open Source License/
 	postgresql-9.0-801.jdbc4.jar
 http://code.google.com/p/oauth-signpost/		/Apache 2.0/
 	signpost-commonshttp4-1.2.1.1.jar
 	signpost-core-1.2.1.1.jar
 http://www.slf4j.org/		/MIT License/
-	slf4j-api-1.6.1.jar
-	slf4j-jcl-1.6.1.jar
+	slf4j-api-1.6.4.jar
+	slf4j-jcl-1.6.4.jar
 http://www.springsource.org/		/Apache 2.0/
-	spring-aop-3.0.5.RELEASE.jar
-	spring-asm-3.0.5.RELEASE.jar
-	spring-aspects-3.0.5.RELEASE.jar
-	spring-beans-3.0.5.RELEASE.jar
-	spring-context-3.0.5.RELEASE.jar
-	spring-context-support-3.0.5.RELEASE.jar
-	spring-core-3.0.5.RELEASE.jar
-	spring-expression-3.0.5.RELEASE.jar
-	spring-instrument-3.0.5.RELEASE.jar
-	spring-instrument-tomcat-3.0.5.RELEASE.jar
-	spring-jdbc-3.0.5.RELEASE.jar
+	spring-aop-3.1.0.RELEASE.jar
+	spring-asm-3.1.0.RELEASE.jar
+	spring-aspects-3.1.0.RELEASE.jar
+	spring-beans-3.1.0.RELEASE.jar
+	spring-context-3.1.0.RELEASE.jar
+	spring-context-support-3.1.0.RELEASE.jar
+	spring-core-3.1.0.RELEASE.jar
+	spring-expression-3.1.0.RELEASE.jar
+	spring-instrument-3.1.0.RELEASE.jar
+	spring-instrument-tomcat-3.1.0.RELEASE.jar
+	spring-jdbc-3.1.0.RELEASE.jar
 http://static.springsource.org/spring-security/site/		/Apache 2.0/
-	spring-security-config-3.0.5.RELEASE.jar
-	spring-security-core-3.0.5.RELEASE.jar
-	spring-security-step2-3.0.3.RELEASE.jar
-	spring-security-step2-gae-3.0.3.RELEASE.jar
-	spring-security-web-3.0.5.RELEASE.jar
+	Special build -- see ODK Aggregate Components
+	spring-security-config-3.1.0.odk-SNAPSHOT.jar
+	spring-security-core-3.1.0.odk-SNAPSHOT.jar
+	spring-security-crypto-3.1.0.odk-SNAPSHOT.jar
+	spring-security-openid-3.1.0.odk-SNAPSHOT.jar
+	spring-security-web-3.1.0.odk-SNAPSHOT.jar
 http://www.springsource.org/		/Apache 2.0/
-	spring-tx-3.0.5.RELEASE.jar
-	spring-web-3.0.5.RELEASE.jar
-http://code.google.com/p/step2/		/Apache 2.0/
-	step2-common-1-20110415.014953-11.jar
-	step2-consumer-1-20110415.015028-11.jar
+	spring-tx-3.1.0.RELEASE.jar
+	spring-web-3.1.0.RELEASE.jar
 http://xml.apache.org/xalan-j/
-	xalan-2.7.0.jar			/Apache 2.0/
+	xalan-2.7.1.jar			/Apache 2.0/
 http://apache.org/		/Apache 2.0/
-	xercesImpl-2.9.1.jar
+	xercesImpl-2.11.0.jar
 http://xml.apache.org/commons/components/external/ 		/Apache 2.0/
-	xml-apis-1.3.04.jar
-	xmlsec-1.3.0.jar
+	xml-apis-1.4.01.jar
+	xmlsec-1.4.6.jar
 	

@@ -43,4 +43,6 @@ public interface FormAdminServiceAsync {
 
   void getFormMediaFileList(String formId, AsyncCallback<ArrayList<MediaFileSummary>> callback);
 
+  void purgeSubmissionsData(String formId, Date value, AsyncCallback<Date> asyncCallback);
+
 }
