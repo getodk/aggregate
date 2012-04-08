@@ -802,6 +802,35 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
+        <!-- for odktables api -->
+        <dependency>
+            <groupId>com.sun.jersey</groupId>
+            <artifactId>jersey-server</artifactId>
+            <version>${com.sun.jersey.version}</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.jersey</groupId>
+            <artifactId>jersey-servlet</artifactId>
+            <version>${com.sun.jersey.version}</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.jersey</groupId>
+            <artifactId>jersey-client</artifactId>
+            <version>${com.sun.jersey.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.jersey.contribs</groupId>
+            <artifactId>jersey-apache-client4</artifactId>
+            <version>${com.sun.jersey.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.simpleframework</groupId>
+            <artifactId>simple-xml</artifactId>
+            <version>2.6.2</version>
+        </dependency>
+        <!-- /for odktables api -->
 		<!-- Test dependencies (mainly for gae) -->
 		<dependency>
 			<groupId>junit</groupId>
