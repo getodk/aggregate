@@ -388,14 +388,20 @@
         <servlet-name>openIdLoginPage</servlet-name>
         <url-pattern>/openid_login.html</url-pattern>
     </servlet-mapping>
-    
+
+    <!-- servlet for odktables api -->
     <servlet>
-    	<servlet-name>odktables</servlet-name>
-    	<servlet-class>org.opendatakit.aggregate.odktables.servlet.CommandServlet</servlet-class>
+        <servlet-name>ODKTables</servlet-name>
+        <servlet-class>com.sun.jersey.spi.container.servlet.ServletContainer</servlet-class>
+        <init-param>
+            <param-name>javax.ws.rs.Application</param-name>
+            <param-value>org.opendatakit.aggregate.odktables.impl.api.ODKTablesAPIApplication</param-value>
+        </init-param>
     </servlet>
+
     <servlet-mapping>
-    	<servlet-name>odktables</servlet-name>
-    	<url-pattern>/odktables/*</url-pattern>
+        <servlet-name>ODKTables</servlet-name>
+        <url-pattern>/odktables/*</url-pattern>
     </servlet-mapping>
     
     <servlet>
