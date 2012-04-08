@@ -712,7 +712,6 @@
             <version>2.6.2</version>
         </dependency>
         <!-- /for odktables api -->
-        <dependency> <groupId>org.projectlombok</groupId> <artifactId>lombok</artifactId> <version>0.11.0</version> <scope>provided</scope> </dependency>
 		<!-- Test dependencies (mainly for gae) -->
 		<dependency>
 			<groupId>junit</groupId>
