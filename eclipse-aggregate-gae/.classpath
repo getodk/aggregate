@@ -94,6 +94,5 @@
 	<classpathentry kind="lib" path="war/WEB-INF/lib/jersey-server-1.12.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/jersey-servlet-1.12.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/simple-xml-2.6.2.jar"/>
-	<classpathentry kind="lib" path="/homes/iws/dylan/.m2/repository/org/projectlombok/lombok/0.11.0/lombok-0.11.0.jar"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>
