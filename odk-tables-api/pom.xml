@@ -62,7 +62,7 @@
                   </goals>
                   <configuration>
                       <outputDirectory>${project.build.directory}</outputDirectory>
-                      <includeArtifactIds>jersey-client,jersey-core,jersey-apache-client4,xstream,httpclient,httpcore,commons-logging,commons-codec,commons-lang</includeArtifactIds>
+                      <includeArtifactIds>simple-xml</includeArtifactIds>
                   </configuration>
               </execution>
           </executions>
