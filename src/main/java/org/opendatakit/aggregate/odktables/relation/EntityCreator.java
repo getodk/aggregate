@@ -8,7 +8,7 @@ import java.util.Map.Entry;
 import org.apache.commons.lang.Validate;
 import org.opendatakit.aggregate.odktables.entity.Column;
 import org.opendatakit.aggregate.odktables.entity.Row;
-import org.opendatakit.aggregate.odktables.exception.RowVersionMismatchException;
+import org.opendatakit.aggregate.odktables.exception.RowEtagMismatchException;
 import org.opendatakit.common.ermodel.simple.Entity;
 import org.opendatakit.common.ermodel.simple.Relation;
 import org.opendatakit.common.persistence.CommonFieldsBase;
@@ -161,14 +161,14 @@ public class EntityCreator {
    * @return the updated entity, not yet persisted
    * @throws ODKEntityNotFoundException
    *           if there is no entity with the given rowId
-   * @throws RowVersionMismatchException
+   * @throws RowEtagMismatchException
    *           if currentEtag does not match the etag of the row
    * @throws ODKDatastoreException
    */
   public Entity updateRowEntity(Relation table, int modificationNumber, String rowId,
       String currentEtag, String groupOrUserId, Map<String, String> values, boolean deleted,
       List<Entity> columns, CallingContext cc) throws ODKEntityNotFoundException,
-      ODKDatastoreException, RowVersionMismatchException {
+      ODKDatastoreException, RowEtagMismatchException {
     Validate.notNull(table);
     Validate.isTrue(modificationNumber >= 0);
     Validate.notEmpty(rowId);
@@ -180,7 +180,7 @@ public class EntityCreator {
     Entity row = table.getEntity(rowId, cc);
     String rowEtag = row.getString(DbTable.ROW_VERSION);
     if (currentEtag == null || !currentEtag.equals(rowEtag)) {
-      throw new RowVersionMismatchException(String.format("%s does not match %s for rowId %s",
+      throw new RowEtagMismatchException(String.format("%s does not match %s for rowId %s",
           currentEtag, rowEtag, row.getId()));
     }
     
@@ -229,14 +229,14 @@ public class EntityCreator {
    * @return the updated entities, not yet persisted
    * @throws ODKEntityNotFoundException
    *           if one of the rows does not exist in the datastore
-   * @throws RowVersionMismatchException
+   * @throws RowEtagMismatchException
    *           if one of the row's etags does not match the etag for the row in
    *           the datastore
    * @throws ODKDatastoreException
    */
   public List<Entity> updateRowEntities(Relation table, int modificationNumber, List<Row> rows,
       List<Entity> columns, CallingContext cc) throws ODKEntityNotFoundException,
-      ODKDatastoreException, RowVersionMismatchException {
+      ODKDatastoreException, RowEtagMismatchException {
     Validate.notNull(table);
     Validate.isTrue(modificationNumber >= 0);
     Validate.noNullElements(rows);

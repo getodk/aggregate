@@ -15,6 +15,7 @@ import org.opendatakit.aggregate.odktables.relation.EntityCreator;
 import org.opendatakit.common.ermodel.simple.Entity;
 import org.opendatakit.common.ermodel.simple.Query;
 import org.opendatakit.common.ermodel.simple.Relation;
+import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
@@ -55,6 +56,25 @@ public class TableManager {
    * Retrieve the table entry for the given tableId.
    * 
    * @param tableId
+   *          the id of a table
+   * @return the table entry, or null if no such table exists
+   * @throws ODKDatastoreException
+   */
+  public TableEntry getTable(String tableId) throws ODKDatastoreException {
+    Validate.notEmpty(tableId);
+    Query query = DbTableEntry.getRelation(cc).query("TableManager.getTable", cc);
+    query.equal(CommonFieldsBase.URI_COLUMN_NAME, tableId);
+    Entity table = query.get();
+    if (table != null)
+      return converter.toTableEntry(table);
+    else
+      return null;
+  }
+
+  /**
+   * Retrieve the table entry for the given tableId.
+   * 
+   * @param tableId
    *          the id of the table previously created with
    *          {@link #createTable(String, List)}
    * @return the table entry representing the table
@@ -62,7 +82,7 @@ public class TableManager {
    *           if no table with the given table id was found
    * @throws ODKDatastoreException
    */
-  public TableEntry getTable(String tableId) throws ODKEntityNotFoundException,
+  public TableEntry getTableNullSafe(String tableId) throws ODKEntityNotFoundException,
       ODKDatastoreException {
     Validate.notEmpty(tableId);
 

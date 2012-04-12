@@ -47,7 +47,7 @@ public class TableServiceImpl implements TableService {
 
   @Override
   public TableResource getTable(String tableId) throws ODKDatastoreException {
-    TableEntry entry = tm.getTable(tableId);
+    TableEntry entry = tm.getTableNullSafe(tableId);
     TableResource resource = getResource(entry);
     return resource;
   }
