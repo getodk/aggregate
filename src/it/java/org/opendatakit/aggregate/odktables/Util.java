@@ -1,14 +1,13 @@
-package org.opendatakit.aggregate.odktables.api;
+package org.opendatakit.aggregate.odktables;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
+
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
-
-import com.sun.jersey.api.client.ClientResponse.Status;
-import com.sun.jersey.api.client.UniformInterfaceException;
 
 public class Util {
 
@@ -16,14 +15,6 @@ public class Util {
     String pathElts = StringUtils.join(path, "/");
     URI uri = URI.create(base + "/" + pathElts).normalize();
     return uri.toASCIIString();
-  }
-
-  public static void checkUniformInterfaceException(UniformInterfaceException e,
-      Status expectedStatus) {
-    int statusCode = e.getResponse().getStatus();
-    Status status = Status.fromStatusCode(statusCode);
-    if (status != expectedStatus)
-      throw e;
   }
 
   /**
@@ -37,5 +28,13 @@ public class Util {
       assertTrue(expectedCopy.remove(item));
     }
     assertTrue(expectedCopy.isEmpty());
+  }
+
+  public static <V> List<V> list(V... values) {
+    ArrayList<V> list = new ArrayList<V>();
+    for (V value : values) {
+      list.add(value);
+    }
+    return list;
   }
 }
