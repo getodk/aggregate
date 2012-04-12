@@ -6,14 +6,14 @@ import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 
 import org.opendatakit.aggregate.odktables.exception.ODKTablesException;
-import org.opendatakit.aggregate.odktables.exception.RowVersionMismatchException;
+import org.opendatakit.aggregate.odktables.exception.RowEtagMismatchException;
 
 @Provider
 public class ODKTablesExceptionMapper implements ExceptionMapper<ODKTablesException> {
 
   @Override
   public Response toResponse(ODKTablesException e) {
-    if (e instanceof RowVersionMismatchException) {
+    if (e instanceof RowEtagMismatchException) {
       return Response.status(Status.PRECONDITION_FAILED).entity(e.getMessage()).build();
     } else {
       return Response.status(Status.BAD_REQUEST).entity(e.getMessage()).build();

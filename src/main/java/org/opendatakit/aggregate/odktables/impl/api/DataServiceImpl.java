@@ -10,7 +10,7 @@ import org.opendatakit.aggregate.odktables.api.DataService;
 import org.opendatakit.aggregate.odktables.api.TableService;
 import org.opendatakit.aggregate.odktables.entity.Row;
 import org.opendatakit.aggregate.odktables.entity.api.RowResource;
-import org.opendatakit.aggregate.odktables.exception.RowVersionMismatchException;
+import org.opendatakit.aggregate.odktables.exception.RowEtagMismatchException;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
@@ -49,7 +49,7 @@ public class DataServiceImpl implements DataService {
 	@Override
 	public RowResource createOrUpdateRow(String rowId, Row row)
 			throws ODKTaskLockException, ODKDatastoreException,
-			RowVersionMismatchException {
+			RowEtagMismatchException {
 		row.setRowId(rowId);
 		Row dbRow = dm.getRow(rowId);
 		if (dbRow == null) {

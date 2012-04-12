@@ -7,7 +7,7 @@ import java.util.Map;
 
 import org.apache.commons.lang.Validate;
 import org.opendatakit.aggregate.odktables.entity.Row;
-import org.opendatakit.aggregate.odktables.exception.RowVersionMismatchException;
+import org.opendatakit.aggregate.odktables.exception.RowEtagMismatchException;
 import org.opendatakit.aggregate.odktables.relation.DbColumn;
 import org.opendatakit.aggregate.odktables.relation.DbLogTable;
 import org.opendatakit.aggregate.odktables.relation.DbTable;
@@ -147,7 +147,7 @@ public class DataManager {
    * {@link #insertRows(List)} with a list of size 1.
    * 
    * @param row
-   *          the row to insert.
+   *          the row to insert. See {@link Row#forInsert(String, String, Map)}
    * @return the row with rowEtag populated. If the passed in row had a null
    *         rowId, then the generated rowId will also be populated.
    * @throws ODKEntityPersistException
@@ -181,7 +181,7 @@ public class DataManager {
       ODKDatastoreException, ODKTaskLockException {
     try {
       return insertOrUpdateRows(rows, true);
-    } catch (RowVersionMismatchException e) {
+    } catch (RowEtagMismatchException e) {
       throw new RuntimeException("RowVersionMismatch happened on insert!", e);
     }
   }
@@ -190,18 +190,18 @@ public class DataManager {
    * Updates a row. This is equivalent to calling {@link #updateRows(List)}.
    * 
    * @param row
-   *          the row to update
+   *          the row to update. See {@link Row#forUpdate(String, String, Map)}
    * @return the row that was updated, with a new rowEtag.
    * @throws ODKEntityNotFoundException
    *           if the row does not exist
    * @throws ODKDatastoreException
    * @throws ODKTaskLockException
-   * @throws RowVersionMismatchException
+   * @throws RowEtagMismatchException
    *           if the passed in row has a different rowEtag from the row in the
    *           datastore
    */
   public Row updateRow(Row row) throws ODKEntityNotFoundException, ODKDatastoreException,
-      ODKTaskLockException, RowVersionMismatchException {
+      ODKTaskLockException, RowEtagMismatchException {
     List<Row> rows = new ArrayList<Row>();
     rows.add(row);
     rows = updateRows(rows);
@@ -221,18 +221,18 @@ public class DataManager {
    *           if one of the passed in rows does not exist
    * @throws ODKDatastoreException
    * @throws ODKTaskLockException
-   * @throws RowVersionMismatchException
+   * @throws RowEtagMismatchException
    *           if one of the passed in rows has a different rowEtag from the row
    *           in the datastore
    */
   public List<Row> updateRows(List<Row> rows) throws ODKEntityNotFoundException,
-      ODKDatastoreException, ODKTaskLockException, RowVersionMismatchException {
+      ODKDatastoreException, ODKTaskLockException, RowEtagMismatchException {
     return insertOrUpdateRows(rows, false);
   }
 
   private List<Row> insertOrUpdateRows(List<Row> rows, boolean insert)
       throws ODKEntityPersistException, ODKEntityNotFoundException, ODKDatastoreException,
-      ODKTaskLockException, RowVersionMismatchException {
+      ODKTaskLockException, RowEtagMismatchException {
     Validate.noNullElements(rows);
 
     List<Entity> rowEntities;
@@ -322,7 +322,7 @@ public class DataManager {
         row.set(DbTable.ROW_VERSION, CommonFieldsBase.newUri());
         row.set(DbTable.DELETED, true);
       }
-      
+
       // create log table entries
       List<Entity> logRows = creator
           .newLogEntities(logTable, modificationNumber, rows, columns, cc);
