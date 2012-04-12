@@ -14,7 +14,6 @@ public class LockTemplate {
   private ODKTablesTaskLockType type;
   private Datastore ds;
   private User user;
-  private int lockRetries;
   private String lockId;
 
   public LockTemplate(String tableId, ODKTablesTaskLockType type, CallingContext cc) {
@@ -22,15 +21,17 @@ public class LockTemplate {
     this.type = type;
     this.ds = cc.getDatastore();
     this.user = cc.getCurrentUser();
-    this.lockRetries = 10;
     this.lockId = UUID.randomUUID().toString();
   }
 
+  /**
+   * Spins until lock is acquired, or an error occurs.
+   * 
+   * @throws ODKTaskLockException
+   */
   public void acquire() throws ODKTaskLockException {
     TaskLock lock = ds.createTaskLock(user);
-    for (int i = 0; i < lockRetries; i++) {
-      if (lock.obtainLock(lockId, tableId, type))
-        break;
+    while (!lock.obtainLock(lockId, tableId, type)) {
       try {
         Thread.sleep(1000);
       } catch (InterruptedException e) {
@@ -39,9 +40,15 @@ public class LockTemplate {
     }
   }
 
+  /**
+   * Tries up to 10 times to release lock, then gives up. In this case the lock
+   * will eventually timeout and be forced to release.
+   * 
+   * @throws ODKTaskLockException
+   */
   public void release() throws ODKTaskLockException {
     TaskLock lock = ds.createTaskLock(user);
-    for (int i = 0; i < lockRetries; i++) {
+    for (int i = 0; i < 10; i++) {
       if (lock.releaseLock(lockId, tableId, type))
         break;
       try {
