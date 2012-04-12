@@ -81,18 +81,18 @@ public class TableManagerTest {
   @Test
   public void testGetTable() throws ODKDatastoreException {
     TableEntry expected = tm.createTable(tableId, columns);
-    TableEntry actual = tm.getTable(tableId);
+    TableEntry actual = tm.getTableNullSafe(tableId);
     assertEquals(expected, actual);
   }
 
   @Test(expected = ODKEntityNotFoundException.class)
   public void testGetTableDoesNotExist() throws ODKEntityNotFoundException, ODKDatastoreException {
-    tm.getTable(tableId);
+    tm.getTableNullSafe(tableId);
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void testGetTableNullTableId() throws ODKEntityNotFoundException, ODKDatastoreException {
-    tm.getTable(null);
+    tm.getTableNullSafe(null);
   }
 
   @Test
@@ -116,7 +116,7 @@ public class TableManagerTest {
   public void testDeleteTable() throws ODKDatastoreException, ODKTaskLockException {
     tm.createTable(tableId, columns);
     tm.deleteTable(tableId);
-    tm.getTable(tableId);
+    tm.getTableNullSafe(tableId);
   }
 
   @Test(expected = ODKEntityNotFoundException.class)
