@@ -19,6 +19,7 @@ import org.opendatakit.aggregate.odktables.entity.Column;
 import org.opendatakit.aggregate.odktables.entity.TableEntry;
 import org.opendatakit.aggregate.odktables.entity.api.TableDefinition;
 import org.opendatakit.aggregate.odktables.entity.api.TableResource;
+import org.opendatakit.aggregate.odktables.exception.TableAlreadyExistsException;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.web.CallingContext;
@@ -54,7 +55,7 @@ public class TableServiceImpl implements TableService {
 
   @Override
   public TableResource createTable(String tableId, TableDefinition definition)
-      throws ODKDatastoreException {
+      throws ODKDatastoreException, TableAlreadyExistsException {
     List<Column> columns = definition.getColumns();
     TableEntry entry = tm.createTable(tableId, columns);
     TableResource resource = getResource(entry);

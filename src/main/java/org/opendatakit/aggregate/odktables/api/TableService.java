@@ -12,6 +12,7 @@ import javax.ws.rs.core.MediaType;
 
 import org.opendatakit.aggregate.odktables.entity.api.TableDefinition;
 import org.opendatakit.aggregate.odktables.entity.api.TableResource;
+import org.opendatakit.aggregate.odktables.exception.TableAlreadyExistsException;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 
@@ -29,7 +30,7 @@ public interface TableService {
   @PUT
   @Path("{tableId}")
   public TableResource createTable(@PathParam("tableId") String tableId, TableDefinition definition)
-      throws ODKDatastoreException;
+      throws ODKDatastoreException, TableAlreadyExistsException;
 
   @DELETE
   @Path("{tableId}")
