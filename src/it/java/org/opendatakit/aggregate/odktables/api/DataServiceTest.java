@@ -8,8 +8,6 @@ import java.net.URI;
 import java.util.List;
 
 import org.junit.Test;
-import org.opendatakit.aggregate.odktables.T;
-import org.opendatakit.aggregate.odktables.Util;
 import org.opendatakit.aggregate.odktables.entity.Row;
 import org.opendatakit.aggregate.odktables.entity.api.RowResource;
 import org.opendatakit.aggregate.odktables.entity.api.TableResource;
