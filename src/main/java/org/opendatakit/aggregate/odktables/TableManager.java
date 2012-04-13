@@ -6,6 +6,7 @@ import java.util.List;
 import org.apache.commons.lang.Validate;
 import org.opendatakit.aggregate.odktables.entity.Column;
 import org.opendatakit.aggregate.odktables.entity.TableEntry;
+import org.opendatakit.aggregate.odktables.exception.TableAlreadyExistsException;
 import org.opendatakit.aggregate.odktables.relation.DbColumn;
 import org.opendatakit.aggregate.odktables.relation.DbLogTable;
 import org.opendatakit.aggregate.odktables.relation.DbTable;
@@ -98,15 +99,23 @@ public class TableManager {
    * @param columns
    *          the columns the table should have
    * @return a table entry representing the newly created table
-   * @throws ODKEntityPersistException
+   * @throws TableAlreadyExistsException
    *           if a table with the given table id already exists
+   * @throws ODKEntityPersistException
    * @throws ODKDatastoreException
    */
   public TableEntry createTable(String tableId, List<Column> columns)
-      throws ODKEntityPersistException, ODKDatastoreException {
+      throws ODKEntityPersistException, ODKDatastoreException, TableAlreadyExistsException {
     Validate.notEmpty(tableId);
     Validate.noNullElements(columns);
 
+    // check if table exists
+    if (getTable(tableId) != null) {
+      throw new TableAlreadyExistsException(String.format(
+          "Table with tableId '%s' already exists.", tableId));
+    }
+
+    // create table
     List<Entity> entities = new ArrayList<Entity>();
 
     Entity entry = creator.newTableEntryEntity(tableId, cc);
