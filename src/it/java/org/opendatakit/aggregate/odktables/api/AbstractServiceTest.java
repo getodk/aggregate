@@ -26,8 +26,7 @@ public abstract class AbstractServiceTest {
 
   @Before
   public void setUp() throws Exception {
-//    this.baseUri = URI.create("http://localhost:8888/odktables/tables/");
-    this.baseUri = URI.create("http://kiska.cs.washington.edu:8080/odktables/tables/");
+    this.baseUri = URI.create("http://localhost:8888/odktables/tables/");
 
     // RestTemplate
     this.rt = new RestTemplate();
