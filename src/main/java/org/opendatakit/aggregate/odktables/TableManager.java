@@ -11,6 +11,7 @@ import org.opendatakit.aggregate.odktables.relation.DbColumn;
 import org.opendatakit.aggregate.odktables.relation.DbLogTable;
 import org.opendatakit.aggregate.odktables.relation.DbTable;
 import org.opendatakit.aggregate.odktables.relation.DbTableEntry;
+import org.opendatakit.aggregate.odktables.relation.DbTableProperties;
 import org.opendatakit.aggregate.odktables.relation.EntityConverter;
 import org.opendatakit.aggregate.odktables.relation.EntityCreator;
 import org.opendatakit.common.ermodel.simple.Entity;
@@ -96,17 +97,23 @@ public class TableManager {
    * 
    * @param tableId
    *          the unique identifier for the table
+   * @param tableName
+   *          a human readable name for the table
    * @param columns
    *          the columns the table should have
+   * @param metadata
+   *          application defined metadata to store with the table (may be null)
    * @return a table entry representing the newly created table
    * @throws TableAlreadyExistsException
    *           if a table with the given table id already exists
    * @throws ODKEntityPersistException
    * @throws ODKDatastoreException
    */
-  public TableEntry createTable(String tableId, List<Column> columns)
-      throws ODKEntityPersistException, ODKDatastoreException, TableAlreadyExistsException {
+  public TableEntry createTable(String tableId, String tableName, List<Column> columns,
+      String metadata) throws ODKEntityPersistException, ODKDatastoreException,
+      TableAlreadyExistsException {
     Validate.notEmpty(tableId);
+    Validate.notEmpty(tableName);
     Validate.noNullElements(columns);
 
     // check if table exists
@@ -124,6 +131,9 @@ public class TableManager {
     for (Column column : columns) {
       entities.add(creator.newColumnEntity(tableId, column, cc));
     }
+
+    Entity properties = creator.newTablePropertiesEntity(tableId, tableName, metadata, cc);
+    entities.add(properties);
 
     Relation.putEntities(entities, cc);
 
@@ -151,6 +161,9 @@ public class TableManager {
 
     List<Entity> columns = DbColumn.query(tableId, cc);
     entities.addAll(columns);
+
+    Entity properties = DbTableProperties.getProperties(tableId, cc);
+    entities.add(properties);
 
     Relation table = DbTable.getRelation(tableId, cc);
     Relation logTable = DbLogTable.getRelation(tableId, cc);
