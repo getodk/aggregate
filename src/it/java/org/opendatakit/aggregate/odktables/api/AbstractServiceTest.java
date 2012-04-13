@@ -6,7 +6,6 @@ import java.util.List;
 
 import org.junit.After;
 import org.junit.Before;
-import org.opendatakit.aggregate.odktables.T;
 import org.opendatakit.aggregate.odktables.entity.api.TableDefinition;
 import org.opendatakit.aggregate.odktables.entity.api.TableResource;
 import org.opendatakit.aggregate.odktables.entity.serialization.SimpleXMLSerializerForAggregate;
@@ -27,7 +26,8 @@ public abstract class AbstractServiceTest {
 
   @Before
   public void setUp() throws Exception {
-    this.baseUri = URI.create("http://localhost:8888/odktables/tables/");
+//    this.baseUri = URI.create("http://localhost:8888/odktables/tables/");
+    this.baseUri = URI.create("http://kiska.cs.washington.edu:8080/odktables/tables/");
 
     // RestTemplate
     this.rt = new RestTemplate();

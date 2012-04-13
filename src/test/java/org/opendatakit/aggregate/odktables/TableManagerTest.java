@@ -12,6 +12,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.opendatakit.aggregate.odktables.entity.Column;
 import org.opendatakit.aggregate.odktables.entity.TableEntry;
+import org.opendatakit.aggregate.odktables.exception.TableAlreadyExistsException;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
@@ -56,30 +57,33 @@ public class TableManagerTest {
   }
 
   @Test
-  public void testCreateTable() throws ODKDatastoreException {
+  public void testCreateTable() throws ODKDatastoreException, TableAlreadyExistsException {
     TableEntry entry = tm.createTable(tableId, columns);
     assertEquals(tableId, entry.getTableId());
     assertNotNull(entry.getDataEtag());
   }
 
-  @Test(expected = ODKEntityPersistException.class)
-  public void testCreateTableAlreadyExists() throws ODKDatastoreException {
+  @Test(expected = TableAlreadyExistsException.class)
+  public void testCreateTableAlreadyExists() throws ODKDatastoreException,
+      TableAlreadyExistsException {
     tm.createTable(tableId, columns);
     tm.createTable(tableId, columns);
   }
 
   @Test(expected = IllegalArgumentException.class)
-  public void testCreateTableNullTableId() throws ODKEntityPersistException, ODKDatastoreException {
+  public void testCreateTableNullTableId() throws ODKEntityPersistException, ODKDatastoreException,
+      TableAlreadyExistsException {
     tm.createTable(null, columns);
   }
 
   @Test(expected = IllegalArgumentException.class)
-  public void testCreateTableNullColumns() throws ODKEntityPersistException, ODKDatastoreException {
+  public void testCreateTableNullColumns() throws ODKEntityPersistException, ODKDatastoreException,
+      TableAlreadyExistsException {
     tm.createTable(tableId, null);
   }
 
   @Test
-  public void testGetTable() throws ODKDatastoreException {
+  public void testGetTable() throws ODKDatastoreException, TableAlreadyExistsException {
     TableEntry expected = tm.createTable(tableId, columns);
     TableEntry actual = tm.getTableNullSafe(tableId);
     assertEquals(expected, actual);
@@ -97,7 +101,7 @@ public class TableManagerTest {
 
   @Test
   public void testGetTables() throws ODKEntityPersistException, ODKDatastoreException,
-      ODKTaskLockException {
+      ODKTaskLockException, TableAlreadyExistsException {
     List<TableEntry> expected = new ArrayList<TableEntry>();
 
     TableEntry one = tm.createTable(tableId2, columns);
@@ -113,7 +117,8 @@ public class TableManagerTest {
   }
 
   @Test(expected = ODKEntityNotFoundException.class)
-  public void testDeleteTable() throws ODKDatastoreException, ODKTaskLockException {
+  public void testDeleteTable() throws ODKDatastoreException, ODKTaskLockException,
+      TableAlreadyExistsException {
     tm.createTable(tableId, columns);
     tm.deleteTable(tableId);
     tm.getTableNullSafe(tableId);

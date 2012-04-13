@@ -7,7 +7,6 @@ import java.net.URI;
 import java.util.List;
 
 import org.junit.Test;
-import org.opendatakit.aggregate.odktables.T;
 import org.opendatakit.aggregate.odktables.entity.api.TableResource;
 import org.springframework.web.client.HttpClientErrorException;
 
@@ -29,6 +28,12 @@ public class TableServiceTest extends AbstractServiceTest {
   public void testCreateTable() {
     TableResource resource = createTable();
     assertEquals(T.tableId, resource.getTableId());
+  }
+
+  @Test(expected = HttpClientErrorException.class)
+  public void testCreateTableAlreadyExists() {
+    createTable();
+    createTable();
   }
 
   @Test
