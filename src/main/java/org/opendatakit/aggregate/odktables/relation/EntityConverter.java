@@ -29,7 +29,8 @@ public class EntityConverter {
   public TableEntry toTableEntry(Entity entity) {
     String tableId = entity.getId();
     String dataEtag = entity.getAsString(DbTableEntry.MODIFICATION_NUMBER);
-    TableEntry entry = new TableEntry(tableId, dataEtag);
+    String propertiesEtag = entity.getAsString(DbTableEntry.PROPERTIES_MOD_NUM);
+    TableEntry entry = new TableEntry(tableId, dataEtag, propertiesEtag);
     return entry;
   }
 

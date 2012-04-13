@@ -27,6 +27,8 @@ public class DataManagerTest {
 
   private CallingContext cc;
   private String tableId;
+  private String tableName;
+  private String tableProperties;
   private TableManager tm;
   private DataManager dm;
   private List<Row> rows;
@@ -36,9 +38,11 @@ public class DataManagerTest {
     this.cc = TestContextFactory.getCallingContext();
 
     this.tableId = T.tableId;
+    this.tableName = T.tableName;
+    this.tableProperties = T.tableMetadata;
     this.tm = new TableManager(cc);
 
-    tm.createTable(tableId, T.columns);
+    tm.createTable(tableId, tableName, T.columns, tableProperties);
 
     this.dm = new DataManager(tableId, cc);
     this.rows = T.rows;

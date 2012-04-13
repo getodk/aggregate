@@ -36,12 +36,13 @@ public class EntityCreator {
    */
   public Entity newTableEntryEntity(String tableId, CallingContext cc) throws ODKDatastoreException {
     Validate.notNull(cc);
-    
+
     if (tableId == null)
       tableId = CommonFieldsBase.newUri();
-    
+
     Entity entity = DbTableEntry.getRelation(cc).newEntity(tableId, cc);
     entity.set(DbTableEntry.MODIFICATION_NUMBER, 0);
+    entity.set(DbTableEntry.PROPERTIES_MOD_NUM, 0);
     return entity;
   }
 
@@ -61,12 +62,39 @@ public class EntityCreator {
     Validate.notEmpty(tableId);
     Validate.notNull(column);
     Validate.notNull(cc);
-    
+
     Entity entity = DbColumn.getRelation(cc).newEntity(cc);
     entity.set(DbColumn.TABLE_ID, tableId);
     entity.set(DbColumn.COLUMN_NAME, column.getName());
     entity.set(DbColumn.COLUMN_TYPE, column.getType().name());
-    
+
+    return entity;
+  }
+
+  /**
+   * Create a new {@link DbTableProperties} entity.
+   * 
+   * @param tableId
+   *          the id of the table for the new table properties entity
+   * @param tableName
+   *          the human readable name of the table
+   * @param metadata
+   *          arbitrary application defined metadata for the table (may be null)
+   * @param cc
+   * @return the created entity, not yet persisted
+   * @throws ODKDatastoreException
+   */
+  public Entity newTablePropertiesEntity(String tableId, String tableName, String metadata,
+      CallingContext cc) throws ODKDatastoreException {
+    Validate.notEmpty(tableId);
+    Validate.notEmpty(tableName);
+    Validate.notNull(cc);
+
+    Entity entity = DbTableProperties.getRelation(cc).newEntity(cc);
+    entity.set(DbTableProperties.TABLE_ID, tableId);
+    entity.set(DbTableProperties.TABLE_NAME, tableName);
+    entity.set(DbTableProperties.TABLE_METADATA, metadata);
+
     return entity;
   }
 
@@ -97,10 +125,10 @@ public class EntityCreator {
     Validate.noNullElements(values.keySet());
     Validate.noNullElements(columns);
     Validate.notNull(cc);
-    
+
     if (rowId == null)
       rowId = CommonFieldsBase.newUri();
-    
+
     Entity row = table.newEntity(rowId, cc);
     setRowFields(row, modificationNumber, groupOrUserId, false, values, columns);
     return row;
@@ -128,7 +156,7 @@ public class EntityCreator {
     Validate.isTrue(modificationNumber >= 0);
     Validate.noNullElements(columns);
     Validate.notNull(cc);
-    
+
     List<Entity> entities = new ArrayList<Entity>();
     for (Row row : rows) {
       Entity entity = newRowEntity(table, row.getRowId(), modificationNumber,
@@ -176,14 +204,14 @@ public class EntityCreator {
     Validate.noNullElements(values.keySet());
     Validate.noNullElements(columns);
     Validate.notNull(cc);
-    
+
     Entity row = table.getEntity(rowId, cc);
     String rowEtag = row.getString(DbTable.ROW_VERSION);
     if (currentEtag == null || !currentEtag.equals(rowEtag)) {
       throw new RowEtagMismatchException(String.format("%s does not match %s for rowId %s",
           currentEtag, rowEtag, row.getId()));
     }
-    
+
     setRowFields(row, modificationNumber, groupOrUserId, deleted, values, columns);
     return row;
   }
@@ -194,7 +222,7 @@ public class EntityCreator {
     row.set(DbTable.MODIFICATION_NUMBER, modificationNumber);
     row.set(DbTable.GROUP_OR_USER_ID, groupOrUserId);
     row.set(DbTable.DELETED, deleted);
-    
+
     for (Entry<String, String> entry : values.entrySet()) {
       String value = entry.getValue();
       String name = entry.getKey();
@@ -272,14 +300,14 @@ public class EntityCreator {
     Validate.notNull(row);
     Validate.noNullElements(columns);
     Validate.notNull(cc);
-    
+
     Entity entity = logTable.newEntity(cc);
     entity.set(DbLogTable.ROW_ID, row.getId());
     entity.set(DbLogTable.ROW_VERSION, row.getString(DbTable.ROW_VERSION));
     entity.set(DbLogTable.MODIFICATION_NUMBER, modificationNumber);
     entity.set(DbLogTable.GROUP_OR_USER_ID, row.getString(DbTable.GROUP_OR_USER_ID));
     entity.set(DbLogTable.DELETED, row.getBoolean(DbTable.DELETED));
-    
+
     for (Entity column : columns) {
       String idName = RUtil.convertIdentifier(column.getId());
       String value = row.getAsString(idName);

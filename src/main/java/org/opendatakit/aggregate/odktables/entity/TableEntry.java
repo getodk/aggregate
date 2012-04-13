@@ -10,13 +10,15 @@ public class TableEntry {
 
   private String tableId;
   private String dataEtag;
+  private String propertiesEtag;
 
   public TableEntry() {
   }
 
-  public TableEntry(final String tableId, final String dataEtag) {
+  public TableEntry(final String tableId, final String dataEtag, final String propertiesEtag) {
     this.tableId = tableId;
     this.dataEtag = dataEtag;
+    this.propertiesEtag = propertiesEtag;
   }
 
   public String getTableId() {
@@ -35,6 +37,14 @@ public class TableEntry {
     this.dataEtag = dataEtag;
   }
 
+  public String getPropertiesEtag() {
+    return propertiesEtag;
+  }
+
+  public void setPropertiesEtag(String propertiesEtag) {
+    this.propertiesEtag = propertiesEtag;
+  }
+
   @Override
   public boolean equals(Object obj) {
     if (this == obj)
@@ -49,6 +59,11 @@ public class TableEntry {
         return false;
     } else if (!dataEtag.equals(other.dataEtag))
       return false;
+    if (propertiesEtag == null) {
+      if (other.propertiesEtag != null)
+        return false;
+    } else if (!propertiesEtag.equals(other.propertiesEtag))
+      return false;
     if (tableId == null) {
       if (other.tableId != null)
         return false;
@@ -62,11 +77,14 @@ public class TableEntry {
     final int prime = 31;
     int result = 1;
     result = prime * result + ((dataEtag == null) ? 0 : dataEtag.hashCode());
+    result = prime * result + ((propertiesEtag == null) ? 0 : propertiesEtag.hashCode());
     result = prime * result + ((tableId == null) ? 0 : tableId.hashCode());
     return result;
   }
 
+  @Override
   public String toString() {
-    return "TableEntry(tableId=" + this.getTableId() + ", dataEtag=" + this.getDataEtag() + ")";
+    return "TableEntry [tableId=" + tableId + ", dataEtag=" + dataEtag + ", propertiesEtag="
+        + propertiesEtag + "]";
   }
 }

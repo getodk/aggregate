@@ -57,7 +57,8 @@ public class TableServiceImpl implements TableService {
   public TableResource createTable(String tableId, TableDefinition definition)
       throws ODKDatastoreException, TableAlreadyExistsException {
     List<Column> columns = definition.getColumns();
-    TableEntry entry = tm.createTable(tableId, columns);
+    // TODO: fix
+    TableEntry entry = tm.createTable(tableId, tableId, columns, null);
     TableResource resource = getResource(entry);
     return resource;
   }
