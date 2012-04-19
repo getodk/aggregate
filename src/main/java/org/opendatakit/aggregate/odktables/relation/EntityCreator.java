@@ -8,7 +8,7 @@ import java.util.Map.Entry;
 import org.apache.commons.lang.Validate;
 import org.opendatakit.aggregate.odktables.entity.Column;
 import org.opendatakit.aggregate.odktables.entity.Row;
-import org.opendatakit.aggregate.odktables.exception.RowEtagMismatchException;
+import org.opendatakit.aggregate.odktables.exception.EtagMismatchException;
 import org.opendatakit.common.ermodel.simple.Entity;
 import org.opendatakit.common.ermodel.simple.Relation;
 import org.opendatakit.common.persistence.CommonFieldsBase;
@@ -77,9 +77,9 @@ public class EntityCreator {
    * @param tableId
    *          the id of the table for the new table properties entity
    * @param tableName
-   *          the human readable name of the table
+   *          a human readable name for the table
    * @param metadata
-   *          arbitrary application defined metadata for the table (may be null)
+   *          application defined metadata to store with the table (may be null)
    * @param cc
    * @return the created entity, not yet persisted
    * @throws ODKDatastoreException
@@ -88,14 +88,15 @@ public class EntityCreator {
       CallingContext cc) throws ODKDatastoreException {
     Validate.notEmpty(tableId);
     Validate.notEmpty(tableName);
+    // metadata may be null
     Validate.notNull(cc);
 
-    Entity entity = DbTableProperties.getRelation(cc).newEntity(cc);
-    entity.set(DbTableProperties.TABLE_ID, tableId);
-    entity.set(DbTableProperties.TABLE_NAME, tableName);
-    entity.set(DbTableProperties.TABLE_METADATA, metadata);
+    Entity properties = DbTableProperties.getRelation(cc).newEntity(cc);
+    properties.set(DbTableProperties.TABLE_ID, tableId);
+    properties.set(DbTableProperties.TABLE_NAME, tableName);
+    properties.set(DbTableProperties.TABLE_METADATA, metadata);
 
-    return entity;
+    return properties;
   }
 
   /**
@@ -189,14 +190,14 @@ public class EntityCreator {
    * @return the updated entity, not yet persisted
    * @throws ODKEntityNotFoundException
    *           if there is no entity with the given rowId
-   * @throws RowEtagMismatchException
+   * @throws EtagMismatchException
    *           if currentEtag does not match the etag of the row
    * @throws ODKDatastoreException
    */
   public Entity updateRowEntity(Relation table, int modificationNumber, String rowId,
       String currentEtag, String groupOrUserId, Map<String, String> values, boolean deleted,
       List<Entity> columns, CallingContext cc) throws ODKEntityNotFoundException,
-      ODKDatastoreException, RowEtagMismatchException {
+      ODKDatastoreException, EtagMismatchException {
     Validate.notNull(table);
     Validate.isTrue(modificationNumber >= 0);
     Validate.notEmpty(rowId);
@@ -208,7 +209,7 @@ public class EntityCreator {
     Entity row = table.getEntity(rowId, cc);
     String rowEtag = row.getString(DbTable.ROW_VERSION);
     if (currentEtag == null || !currentEtag.equals(rowEtag)) {
-      throw new RowEtagMismatchException(String.format("%s does not match %s for rowId %s",
+      throw new EtagMismatchException(String.format("%s does not match %s for rowId %s",
           currentEtag, rowEtag, row.getId()));
     }
 
@@ -257,14 +258,14 @@ public class EntityCreator {
    * @return the updated entities, not yet persisted
    * @throws ODKEntityNotFoundException
    *           if one of the rows does not exist in the datastore
-   * @throws RowEtagMismatchException
+   * @throws EtagMismatchException
    *           if one of the row's etags does not match the etag for the row in
    *           the datastore
    * @throws ODKDatastoreException
    */
   public List<Entity> updateRowEntities(Relation table, int modificationNumber, List<Row> rows,
       List<Entity> columns, CallingContext cc) throws ODKEntityNotFoundException,
-      ODKDatastoreException, RowEtagMismatchException {
+      ODKDatastoreException, EtagMismatchException {
     Validate.notNull(table);
     Validate.isTrue(modificationNumber >= 0);
     Validate.noNullElements(rows);

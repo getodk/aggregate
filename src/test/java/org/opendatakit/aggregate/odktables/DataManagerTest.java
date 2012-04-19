@@ -15,7 +15,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.opendatakit.aggregate.odktables.entity.Row;
 import org.opendatakit.aggregate.odktables.entity.TableEntry;
-import org.opendatakit.aggregate.odktables.exception.RowEtagMismatchException;
+import org.opendatakit.aggregate.odktables.exception.EtagMismatchException;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
@@ -129,7 +129,7 @@ public class DataManagerTest {
 
   @Test
   public void testUpdateRow() throws ODKEntityPersistException, ODKDatastoreException,
-      ODKTaskLockException, RowEtagMismatchException {
+      ODKTaskLockException, EtagMismatchException {
     rows = dm.insertRows(rows);
     Row expected = rows.get(0);
     expected.getValues().put(T.Columns.age, "24");
@@ -139,9 +139,9 @@ public class DataManagerTest {
     assertEquals(expected, actual);
   }
 
-  @Test(expected = RowEtagMismatchException.class)
+  @Test(expected = EtagMismatchException.class)
   public void testUpdateRowVersionMismatch() throws ODKEntityPersistException,
-      ODKDatastoreException, ODKTaskLockException, RowEtagMismatchException {
+      ODKDatastoreException, ODKTaskLockException, EtagMismatchException {
     rows = dm.insertRows(rows);
     Row row = rows.get(0);
     row.setRowEtag(UUID.randomUUID().toString());
@@ -150,7 +150,7 @@ public class DataManagerTest {
 
   @Test(expected = ODKEntityNotFoundException.class)
   public void testUpdateRowDoesNotExist() throws ODKEntityNotFoundException, ODKDatastoreException,
-      ODKTaskLockException, RowEtagMismatchException {
+      ODKTaskLockException, EtagMismatchException {
     Row row = rows.get(0);
     row.setRowEtag(UUID.randomUUID().toString());
     dm.updateRow(row);
@@ -167,7 +167,7 @@ public class DataManagerTest {
 
   @Test
   public void testGetRowsSince() throws ODKEntityPersistException, ODKDatastoreException,
-      ODKTaskLockException, RowEtagMismatchException {
+      ODKTaskLockException, EtagMismatchException {
     TableEntry entry = tm.getTableNullSafe(tableId);
     String beginEtag = entry.getDataEtag();
     rows = dm.insertRows(rows);
