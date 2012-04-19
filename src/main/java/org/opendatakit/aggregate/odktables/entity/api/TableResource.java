@@ -14,7 +14,7 @@ public class TableResource extends TableEntry {
   private String diffUri;
 
   public TableResource(TableEntry entry) {
-    super(entry.getTableId(), entry.getDataEtag(), entry.getPropertiesEtag());
+    super(entry.getTableId(), entry.getTableName(), entry.getDataEtag(), entry.getPropertiesEtag());
   }
 
   public TableResource() {

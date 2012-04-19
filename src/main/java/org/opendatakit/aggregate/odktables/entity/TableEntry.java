@@ -9,14 +9,17 @@ import org.simpleframework.xml.Root;
 public class TableEntry {
 
   private String tableId;
+  private String tableName;
   private String dataEtag;
   private String propertiesEtag;
 
   public TableEntry() {
   }
 
-  public TableEntry(final String tableId, final String dataEtag, final String propertiesEtag) {
+  public TableEntry(final String tableId, String tableName, final String dataEtag,
+      final String propertiesEtag) {
     this.tableId = tableId;
+    this.tableName = tableName;
     this.dataEtag = dataEtag;
     this.propertiesEtag = propertiesEtag;
   }
@@ -25,12 +28,20 @@ public class TableEntry {
     return this.tableId;
   }
 
+  public String getTableName() {
+    return this.tableName;
+  }
+
   public String getDataEtag() {
     return this.dataEtag;
   }
 
   public void setTableId(final String tableId) {
     this.tableId = tableId;
+  }
+
+  public void setTablename(String tableName) {
+    this.tableName = tableName;
   }
 
   public void setDataEtag(final String dataEtag) {
@@ -69,6 +80,11 @@ public class TableEntry {
         return false;
     } else if (!tableId.equals(other.tableId))
       return false;
+    if (tableName == null) {
+      if (other.tableName != null)
+        return false;
+    } else if (!tableName.equals(other.tableName))
+      return false;
     return true;
   }
 
@@ -79,12 +95,13 @@ public class TableEntry {
     result = prime * result + ((dataEtag == null) ? 0 : dataEtag.hashCode());
     result = prime * result + ((propertiesEtag == null) ? 0 : propertiesEtag.hashCode());
     result = prime * result + ((tableId == null) ? 0 : tableId.hashCode());
+    result = prime * result + ((tableName == null) ? 0 : tableName.hashCode());
     return result;
   }
 
   @Override
   public String toString() {
-    return "TableEntry [tableId=" + tableId + ", dataEtag=" + dataEtag + ", propertiesEtag="
-        + propertiesEtag + "]";
+    return "TableEntry [tableId=" + tableId + ", tableName=" + tableName + ", dataEtag=" + dataEtag
+        + ", propertiesEtag=" + propertiesEtag + "]";
   }
 }

@@ -27,22 +27,30 @@ public class EntityConverter {
   /**
    * Convert a {@link DbTableEntry} entity to a {@link TableEntry}
    */
-  public TableEntry toTableEntry(Entity entity) {
+  public TableEntry toTableEntry(Entity entity, String tableName) {
     String tableId = entity.getId();
     String dataEtag = entity.getAsString(DbTableEntry.MODIFICATION_NUMBER);
     String propertiesEtag = entity.getAsString(DbTableEntry.PROPERTIES_MOD_NUM);
-    TableEntry entry = new TableEntry(tableId, dataEtag, propertiesEtag);
+    TableEntry entry = new TableEntry(tableId, tableName, dataEtag, propertiesEtag);
     return entry;
   }
 
   /**
    * Convert a list of {@link DbTableEntry} entities to a list of
    * {@link TableEntry}
+   * 
+   * @param entities
+   *          the entities to convert
+   * @param tableNames
+   *          each entry i in tableNames is the name of the table in entry i of
+   *          entities
    */
-  public List<TableEntry> toTableEntries(List<Entity> entities) {
+  public List<TableEntry> toTableEntries(List<Entity> entities, List<String> tableNames) {
     ArrayList<TableEntry> entries = new ArrayList<TableEntry>();
-    for (Entity entity : entities) {
-      entries.add(toTableEntry(entity));
+    for (int i = 0; i < entities.size(); i++) {
+      Entity entity = entities.get(i);
+      String tableName = tableNames.get(i);
+      entries.add(toTableEntry(entity, tableName));
     }
     return entries;
   }
