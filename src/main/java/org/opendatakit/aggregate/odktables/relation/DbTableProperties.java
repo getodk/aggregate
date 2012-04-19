@@ -23,7 +23,7 @@ public class DbTableProperties {
     dataFields = new ArrayList<DataField>();
     dataFields.add(new DataField(TABLE_ID, DataType.STRING, false));
     dataFields.add(new DataField(TABLE_NAME, DataType.STRING, false));
-    dataFields.add(new DataField(TABLE_METADATA, DataType.STRING, true));
+    dataFields.add(new DataField(TABLE_METADATA, DataType.LONG_STRING, true));
   }
 
   public static Relation getRelation(CallingContext cc) throws ODKDatastoreException {
