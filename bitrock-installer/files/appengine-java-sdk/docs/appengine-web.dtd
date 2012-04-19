@@ -34,7 +34,7 @@
 <!ELEMENT async-session-persistence (#PCDATA)>
 <!ATTLIST async-session-persistence
           enabled CDATA #REQUIRED
-          queue-name CDATA #REQUIRED>
+          queue-name CDATA #OPTIONAL>
 <!ELEMENT precompilation-enabled (#PCDATA)>
 <!ELEMENT user-permissions (permission)*>
 <!ELEMENT permission (#PCDATA)>
