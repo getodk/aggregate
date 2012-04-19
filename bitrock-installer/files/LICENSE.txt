@@ -18,11 +18,13 @@ This software includes the following jar files (libraries):
 http://aopalliance.sourceforge.net		/Public domain/
 	aopalliance-1.0.jar
 http://apache.org/		/Apache 2.0/
-	apache-mime4j-0.6.1.jar
+	apache-mime4j-0.7.1.jar
 http://code.google.com/appengine/		/Apache 2.0/
-	appengine-api-1.0-sdk-1.6.1.jar
-	appengine-api-labs-1.6.1.jar
-	appengine-jsr107cache-1.6.1.jar
+	appengine-api-1.0-sdk-1.6.4.jar
+	appengine-api-labs-1.6.4.jar
+	appengine-jsr107cache-1.6.4.jar
+http://asm.ow2.org/					/Custom/
+	asm-3.1.jar
 http://www.eclipse.org/aspectj			/Eclipse Public License - v 1.0/
 	aspectjrt-1.6.8.jar
 	aspectjweaver-1.6.8.jar
@@ -82,6 +84,12 @@ http://www.jcip.net					/Creative Commons Attribution License/
 	jcip-annotations-1.0.jar
 http://www.jdom.org/index.html		/Apache with acknowledgement clause removed/
 	jdom-1.1.2.jar
+http://jersey.java.net/				/CDDL 1.1/
+	jersey-apache-client4-1.12.jar
+	jersey-client-1.12.jar
+	jersey-core-1.12.jar
+	jersey-server-1.12.jar
+	jersey-servlet-1.12.jar
 http://code.google.com/p/jsr-305/		/New BSD license/
 	jsr305-1.3.9.jar
 http://jug.safehaus.org/				/LGPL 2.1/
@@ -101,6 +109,8 @@ http://www.postgresql.org/		/Modified BSD / MIT Open Source License/
 http://code.google.com/p/oauth-signpost/		/Apache 2.0/
 	signpost-commonshttp4-1.2.1.1.jar
 	signpost-core-1.2.1.1.jar
+http://simple.sourceforge.net/			/Apache 2.0/
+	simple-xml-2.6.2.jar
 http://www.slf4j.org/		/MIT License/
 	slf4j-api-1.6.4.jar
 	slf4j-jcl-1.6.4.jar
@@ -126,6 +136,9 @@ http://static.springsource.org/spring-security/site/		/Apache 2.0/
 http://www.springsource.org/		/Apache 2.0/
 	spring-tx-3.1.0.RELEASE.jar
 	spring-web-3.1.0.RELEASE.jar
+http://stax.codehaus.org/		/Apache 2.0/
+	stax-1.2.0.jar
+	stax-api-1.0.1.jar
 http://xml.apache.org/xalan-j/
 	xalan-2.7.0.jar			/Apache 2.0/
 http://apache.org/		/Apache 2.0/
@@ -133,4 +146,5 @@ http://apache.org/		/Apache 2.0/
 http://xml.apache.org/commons/components/external/ 		/Apache 2.0/
 	xml-apis-1.4.01.jar
 	xmlsec-1.4.6.jar
-	
+http://www.extreme.indiana.edu/xgws/xsoap/xpp/mxp1/		/Custom/
+	xpp3-1.1.3.3.jar
