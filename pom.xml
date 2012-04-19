@@ -17,7 +17,7 @@
     	<itFormsDirectory>${project.basedir}/../src/it/testfiles/forms</itFormsDirectory>
     	<itSubmissionsDirectory>${project.basedir}/../src/it/testfiles/submissions</itSubmissionsDirectory>
     	<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<gooogle.appengine.sdk.version>1.6.1</gooogle.appengine.sdk.version> <!-- NOTE: change gae.home too! -->
+		<gooogle.appengine.sdk.version>1.6.4</gooogle.appengine.sdk.version> <!-- NOTE: change gae.home too! -->
 		<google.gdata.version>1.46.0</google.gdata.version>
 		<google.gwt.version>2.4.0</google.gwt.version>
         <com.sun.jersey.version>1.12</com.sun.jersey.version>
