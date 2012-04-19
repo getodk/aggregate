@@ -34,6 +34,8 @@ http://apache.org/		/Apache 2.0/
 	commons-io-2.0.1.jar
 	commons-lang-2.6.jar
 	commons-logging-1.1.1.jar
+http://ehcache.org/		/Apache 2.0/
+	ehcache-1.2.3.jar
 http://code.google.com/apis/gdata/docs/directory.html		/Apache 2.0/
 	gdata-client-1.0-1.46.0.jar
 	gdata-client-meta-1.0-1.46.0.jar
@@ -48,7 +50,7 @@ http://code.google.com/apis/gdata/docs/directory.html		/Apache 2.0/
 http://code.google.com/p/google-gin/ 		/Apache 2.0/
 	gin-1.5.0.jar
 http://code.google.com/p/google-gson/		/Apache 2.0/
-	gson-1.7.1.jar
+	gson-2.1.jar
 http://code.google.com/p/guava-libraries/		/Apache 2.0/
 	guava-r09.jar
 http://code.google.com/p/google-guice/		/Apache 2.0/
@@ -65,13 +67,13 @@ http://apache.org/		/Apache 2.0/
 	httpmime-4.1.2.jar
 http://site.icu-project.org/  /ICU License - ICU 1.8.1 and later/
 	icu4j-3.4.4.jar
+http://wiki.fasterxml.com/JacksonHome      /Apache 2.0/
+	jackson-core-asl-1.8.8.jar
+	jackson-mapper-asl-1.8.8.jar
 https://github.com/stain/jai-imageio-core   /Modified BSD/ /Apache 2.0/
     jai-imageio-core-standalone-1.2-pre-dr-b04-2010-04-30.jar
 	Copyright (c) 2005 Sun Microsystems, Inc. All Rights Reserved.
 	Modifications (c) Stian Soiland-Reyes <stian@soiland-reyes.com> 2010-04-30
-http://wiki.fasterxml.com/JacksonHome      /Apache 2.0/
-	jackson-core-asl-1.8.8.jar
-	jackson-mapper-asl-1.8.8.jar
 https://bitbucket.org/javarosa/javarosa/wiki/Home		/Apache 2.0/
 	javarosa-libraries.jar
 http://code.google.com/p/atinject/  /Apache 2.0/
@@ -88,10 +90,6 @@ http://kxml.sourceforge.net/kxml2/		/BSD license/
 	kxml2-2.3.0.jar
 http://nekohtml.sourceforge.net/		/Apache 2.0/
 	nekohtml-1.9.15.jar
-http://code.google.com/p/oauth/			/Apache 2.0/
-	oauth-20090617.jar
-	oauth-consumer-20090617.jar
-	oauth-httpclient4-20090913.jar
 http://code.google.com/p/openid4java/		/Apache 2.0/
     Special build -- see ODK Aggregate Components
 	openid4java-nodeps-0.9.6.662.odk-SNAPSHOT.jar
@@ -129,7 +127,7 @@ http://www.springsource.org/		/Apache 2.0/
 	spring-tx-3.1.0.RELEASE.jar
 	spring-web-3.1.0.RELEASE.jar
 http://xml.apache.org/xalan-j/
-	xalan-2.7.1.jar			/Apache 2.0/
+	xalan-2.7.0.jar			/Apache 2.0/
 http://apache.org/		/Apache 2.0/
 	xercesImpl-2.11.0.jar
 http://xml.apache.org/commons/components/external/ 		/Apache 2.0/
