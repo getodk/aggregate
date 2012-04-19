@@ -46,7 +46,7 @@ public class PropertiesServiceImpl implements PropertiesService {
     String tableId = pm.getTableId();
     UriBuilder ub = info.getBaseUriBuilder();
     ub.path(TableService.class);
-    URI self = ub.clone().path(TableService.class, "getData")
+    URI self = ub.clone().path(TableService.class, "getProperties")
         .path(PropertiesService.class, "getProperties").build(tableId);
     URI table = ub.clone().path(TableService.class, "getTable").build(tableId);
 
