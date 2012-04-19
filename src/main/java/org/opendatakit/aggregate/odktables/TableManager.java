@@ -49,9 +49,23 @@ public class TableManager {
    * @throws ODKDatastoreException
    */
   public List<TableEntry> getTables() throws ODKDatastoreException {
+    // get table entries
     Query query = DbTableEntry.getRelation(cc).query("TableManager.getTables", cc);
-    List<Entity> enries = query.execute();
-    return converter.toTableEntries(enries);
+    List<Entity> entries = query.execute();
+
+    // get table names
+    List<String> tableIds = new ArrayList<String>();
+    for (Entity entry : entries) {
+      tableIds.add(entry.getId());
+    }
+    List<String> tableNames = new ArrayList<String>();
+    Query propsQuery = DbTableProperties.getRelation(cc).query("TableManager.getTables", cc);
+    propsQuery.include(DbTableProperties.TABLE_ID, tableIds);
+    List<Entity> propertiesEntities = propsQuery.execute();
+    for (Entity properties : propertiesEntities)
+      tableNames.add(properties.getString(DbTableProperties.TABLE_NAME));
+
+    return converter.toTableEntries(entries, tableNames);
   }
 
   /**
@@ -64,13 +78,21 @@ public class TableManager {
    */
   public TableEntry getTable(String tableId) throws ODKDatastoreException {
     Validate.notEmpty(tableId);
+
+    // get table entry
     Query query = DbTableEntry.getRelation(cc).query("TableManager.getTable", cc);
     query.equal(CommonFieldsBase.URI_COLUMN_NAME, tableId);
     Entity table = query.get();
-    if (table != null)
-      return converter.toTableEntry(table);
-    else
+
+    // get table name
+    Entity properties = DbTableProperties.getProperties(tableId, cc);
+
+    if (table != null && properties != null) {
+      String tableName = properties.getString(DbTableProperties.TABLE_NAME);
+      return converter.toTableEntry(table, tableName);
+    } else {
       return null;
+    }
   }
 
   /**
@@ -88,8 +110,14 @@ public class TableManager {
       ODKDatastoreException {
     Validate.notEmpty(tableId);
 
+    // get table entry
     Entity entry = DbTableEntry.getRelation(cc).getEntity(tableId, cc);
-    return converter.toTableEntry(entry);
+
+    // get table name
+    Entity properties = DbTableProperties.getProperties(tableId, cc);
+    String tableName = properties.getString(DbTableProperties.TABLE_NAME);
+
+    return converter.toTableEntry(entry, tableName);
   }
 
   /**
@@ -137,7 +165,7 @@ public class TableManager {
 
     Relation.putEntities(entities, cc);
 
-    return converter.toTableEntry(entry);
+    return converter.toTableEntry(entry, tableName);
   }
 
   /**
