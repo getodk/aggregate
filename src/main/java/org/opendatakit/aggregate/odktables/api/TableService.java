@@ -43,4 +43,8 @@ public interface TableService {
 
   @Path("{tableId}/rows")
   public DataService getData(@PathParam("tableId") String tableId) throws ODKDatastoreException;
+
+  @Path("{tableId}/properties")
+  public PropertiesService getProperties(@PathParam("tableId") String tableId)
+      throws ODKDatastoreException;
 }

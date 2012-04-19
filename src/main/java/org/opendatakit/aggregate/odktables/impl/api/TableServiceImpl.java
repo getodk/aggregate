@@ -14,6 +14,7 @@ import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.odktables.TableManager;
 import org.opendatakit.aggregate.odktables.api.ColumnService;
 import org.opendatakit.aggregate.odktables.api.DataService;
+import org.opendatakit.aggregate.odktables.api.PropertiesService;
 import org.opendatakit.aggregate.odktables.api.TableService;
 import org.opendatakit.aggregate.odktables.entity.Column;
 import org.opendatakit.aggregate.odktables.entity.TableEntry;
@@ -56,9 +57,10 @@ public class TableServiceImpl implements TableService {
   @Override
   public TableResource createTable(String tableId, TableDefinition definition)
       throws ODKDatastoreException, TableAlreadyExistsException {
+    String tableName = definition.getTableName();
     List<Column> columns = definition.getColumns();
-    // TODO: fix
-    TableEntry entry = tm.createTable(tableId, tableId, columns, null);
+    String metadata = definition.getMetadata();
+    TableEntry entry = tm.createTable(tableId, tableName, columns, metadata);
     TableResource resource = getResource(entry);
     return resource;
   }
@@ -74,6 +76,11 @@ public class TableServiceImpl implements TableService {
   }
 
   @Override
+  public PropertiesService getProperties(String tableId) throws ODKDatastoreException {
+    return new PropertiesServiceImpl(tableId, info, cc);
+  }
+
+  @Override
   public ColumnService getColumns(String tableId) throws ODKDatastoreException {
     // TODO Auto-generated method stub
     return null;
@@ -85,15 +92,16 @@ public class TableServiceImpl implements TableService {
     UriBuilder ub = info.getBaseUriBuilder();
     ub.path(TableService.class);
     URI self = ub.clone().path(TableService.class, "getTable").build(tableId);
-    URI columns = ub.clone().path(TableService.class, "getColumns").build(tableId);
+    URI properties = ub.clone().path(TableService.class, "getProperties").build(tableId);
     URI data = ub.clone().path(TableService.class, "getData").build(tableId);
     URI diff = UriBuilder.fromUri(data).path(DataService.class, "getRowsSince").build();
 
     TableResource resource = new TableResource(entry);
     resource.setSelfUri(self.toASCIIString());
-    resource.setColumnsUri(columns.toASCIIString());
+    resource.setPropertiesUri(properties.toASCIIString());
     resource.setDataUri(data.toASCIIString());
     resource.setDiffUri(diff.toASCIIString());
     return resource;
   }
+
 }

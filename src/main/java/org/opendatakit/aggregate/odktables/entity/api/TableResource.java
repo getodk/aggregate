@@ -9,7 +9,7 @@ import org.simpleframework.xml.Root;
 @Default(value = DefaultType.FIELD, required = true)
 public class TableResource extends TableEntry {
   private String selfUri;
-  private String columnsUri;
+  private String propertiesUri;
   private String dataUri;
   private String diffUri;
 
@@ -24,8 +24,8 @@ public class TableResource extends TableEntry {
     return this.selfUri;
   }
 
-  public String getColumnsUri() {
-    return this.columnsUri;
+  public String getPropertiesUri() {
+    return this.propertiesUri;
   }
 
   public String getDataUri() {
@@ -40,8 +40,8 @@ public class TableResource extends TableEntry {
     this.selfUri = selfUri;
   }
 
-  public void setColumnsUri(final String columnsUri) {
-    this.columnsUri = columnsUri;
+  public void setPropertiesUri(final String propertiesUri) {
+    this.propertiesUri = propertiesUri;
   }
 
   public void setDataUri(final String dataUri) {
@@ -66,8 +66,8 @@ public class TableResource extends TableEntry {
     if (this.getSelfUri() == null ? other.getSelfUri() != null : !this.getSelfUri().equals(
         (Object) other.getSelfUri()))
       return false;
-    if (this.getColumnsUri() == null ? other.getColumnsUri() != null : !this.getColumnsUri()
-        .equals((Object) other.getColumnsUri()))
+    if (this.getPropertiesUri() == null ? other.getPropertiesUri() != null : !this
+        .getPropertiesUri().equals((Object) other.getPropertiesUri()))
       return false;
     if (this.getDataUri() == null ? other.getDataUri() != null : !this.getDataUri().equals(
         (Object) other.getDataUri()))
@@ -88,7 +88,8 @@ public class TableResource extends TableEntry {
     int result = 1;
     result = result * PRIME + super.hashCode();
     result = result * PRIME + (this.getSelfUri() == null ? 0 : this.getSelfUri().hashCode());
-    result = result * PRIME + (this.getColumnsUri() == null ? 0 : this.getColumnsUri().hashCode());
+    result = result * PRIME
+        + (this.getPropertiesUri() == null ? 0 : this.getPropertiesUri().hashCode());
     result = result * PRIME + (this.getDataUri() == null ? 0 : this.getDataUri().hashCode());
     result = result * PRIME + (this.getDiffUri() == null ? 0 : this.getDiffUri().hashCode());
     return result;
@@ -97,7 +98,7 @@ public class TableResource extends TableEntry {
   @Override
   public String toString() {
     return "TableResource(super=" + super.toString() + ", selfUri=" + this.getSelfUri()
-        + ", columnsUri=" + this.getColumnsUri() + ", dataUri=" + this.getDataUri() + ", diffUri="
-        + this.getDiffUri() + ")";
+        + ", columnsUri=" + this.getPropertiesUri() + ", dataUri=" + this.getDataUri()
+        + ", diffUri=" + this.getDiffUri() + ")";
   }
 }

@@ -7,7 +7,7 @@ import java.util.Map;
 
 import org.apache.commons.lang.Validate;
 import org.opendatakit.aggregate.odktables.entity.Row;
-import org.opendatakit.aggregate.odktables.exception.RowEtagMismatchException;
+import org.opendatakit.aggregate.odktables.exception.EtagMismatchException;
 import org.opendatakit.aggregate.odktables.relation.DbColumn;
 import org.opendatakit.aggregate.odktables.relation.DbLogTable;
 import org.opendatakit.aggregate.odktables.relation.DbTable;
@@ -181,7 +181,7 @@ public class DataManager {
       ODKDatastoreException, ODKTaskLockException {
     try {
       return insertOrUpdateRows(rows, true);
-    } catch (RowEtagMismatchException e) {
+    } catch (EtagMismatchException e) {
       throw new RuntimeException("RowVersionMismatch happened on insert!", e);
     }
   }
@@ -196,12 +196,12 @@ public class DataManager {
    *           if the row does not exist
    * @throws ODKDatastoreException
    * @throws ODKTaskLockException
-   * @throws RowEtagMismatchException
+   * @throws EtagMismatchException
    *           if the passed in row has a different rowEtag from the row in the
    *           datastore
    */
   public Row updateRow(Row row) throws ODKEntityNotFoundException, ODKDatastoreException,
-      ODKTaskLockException, RowEtagMismatchException {
+      ODKTaskLockException, EtagMismatchException {
     List<Row> rows = new ArrayList<Row>();
     rows.add(row);
     rows = updateRows(rows);
@@ -221,18 +221,18 @@ public class DataManager {
    *           if one of the passed in rows does not exist
    * @throws ODKDatastoreException
    * @throws ODKTaskLockException
-   * @throws RowEtagMismatchException
+   * @throws EtagMismatchException
    *           if one of the passed in rows has a different rowEtag from the row
    *           in the datastore
    */
   public List<Row> updateRows(List<Row> rows) throws ODKEntityNotFoundException,
-      ODKDatastoreException, ODKTaskLockException, RowEtagMismatchException {
+      ODKDatastoreException, ODKTaskLockException, EtagMismatchException {
     return insertOrUpdateRows(rows, false);
   }
 
   private List<Row> insertOrUpdateRows(List<Row> rows, boolean insert)
       throws ODKEntityPersistException, ODKEntityNotFoundException, ODKDatastoreException,
-      ODKTaskLockException, RowEtagMismatchException {
+      ODKTaskLockException, EtagMismatchException {
     Validate.noNullElements(rows);
 
     List<Entity> rowEntities;
@@ -270,7 +270,7 @@ public class DataManager {
     }
     return converter.toRows(rowEntities, columns, false);
   }
-
+  
   /**
    * Delete a row. This is equivalent to calling {@link #deleteRows(List)} with
    * a list of size 1.

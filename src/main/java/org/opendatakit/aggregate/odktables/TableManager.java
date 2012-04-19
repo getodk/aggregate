@@ -51,7 +51,7 @@ public class TableManager {
   public List<TableEntry> getTables() throws ODKDatastoreException {
     Query query = DbTableEntry.getRelation(cc).query("TableManager.getTables", cc);
     List<Entity> enries = query.execute();
-    return converter.toTableEntryEntities(enries);
+    return converter.toTableEntries(enries);
   }
 
   /**

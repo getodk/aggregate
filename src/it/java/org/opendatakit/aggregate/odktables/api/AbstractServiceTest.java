@@ -48,6 +48,7 @@ public abstract class AbstractServiceTest {
   @After
   public void tearDown() throws Exception {
     try {
+      baseUri = baseUri.resolve("/odktables/tables/");
       URI uri = baseUri.resolve(T.tableId);
       this.rt.delete(uri);
     } catch (Exception e) {
@@ -59,7 +60,7 @@ public abstract class AbstractServiceTest {
   protected TableResource createTable() {
     URI uri = baseUri.resolve(T.tableId);
 
-    TableDefinition definition = new TableDefinition(T.columns);
+    TableDefinition definition = new TableDefinition(T.tableName, T.columns, T.tableMetadata);
 
     HttpEntity<TableDefinition> entity = entity(definition);
 

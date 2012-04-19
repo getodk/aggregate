@@ -25,12 +25,6 @@ public class DataServiceTest extends AbstractServiceTest {
     baseUri = URI.create(resource.getDataUri());
   }
   
-  @Override
-  public void tearDown() throws Exception {
-    baseUri = baseUri.resolve("/odktables/tables/");
-    super.tearDown();
-  }
-
   @Test
   public void testGetRowsNoRows() {
     List<?> rows = rt.getForObject(baseUri, List.class);

@@ -11,6 +11,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.opendatakit.aggregate.odktables.T;
 import org.opendatakit.aggregate.odktables.entity.Column.ColumnType;
+import org.opendatakit.aggregate.odktables.entity.api.PropertiesResource;
 import org.opendatakit.aggregate.odktables.entity.api.RowResource;
 import org.opendatakit.aggregate.odktables.entity.api.TableDefinition;
 import org.opendatakit.aggregate.odktables.entity.api.TableResource;
@@ -33,7 +34,7 @@ public class SerializationTest {
     serializer = new Persister(strategy);
     ListConverter converter = new ListConverter(serializer);
     registry.bind(ArrayList.class, converter);
-    
+
     writer = new StringWriter();
   }
 
@@ -68,6 +69,29 @@ public class SerializationTest {
   }
 
   @Test
+  public void testTableProperties() throws Exception {
+    TableProperties expected = new TableProperties("0", "1", "2");
+    serializer.write(expected, writer);
+    String xml = writer.toString();
+    System.out.println(xml);
+    TableProperties actual = serializer.read(TableProperties.class, xml);
+    assertEquals(expected, actual);
+  }
+
+  @Test
+  public void testTablePropertiesIsNotStrict() throws Exception {
+    TableProperties expected = new TableProperties("0", "1", "2");
+    PropertiesResource resource = new PropertiesResource(expected);
+    resource.setSelfUri("http://localhost:8080/odktables/tables/1/properties");
+    resource.setTableUri("http://localhost:8080/odktables/tables/1");
+    serializer.write(resource, writer);
+    String xml = writer.toString();
+    System.out.println(xml);
+    TableProperties actual = serializer.read(TableProperties.class, xml);
+    assertEquals(expected, actual);
+  }
+
+  @Test
   public void testRowResource() throws Exception {
     Map<String, String> values = T.Data.DYLAN.getValues();
     RowResource expected = new RowResource(Row.forInsert("1", null, values));
@@ -83,7 +107,7 @@ public class SerializationTest {
 
   @Test
   public void testTableDefinition() throws Exception {
-    TableDefinition expected = new TableDefinition(T.columns);
+    TableDefinition expected = new TableDefinition(T.tableName, T.columns, T.tableMetadata);
     serializer.write(expected, writer);
     String xml = writer.toString();
     System.out.println(xml);
@@ -97,12 +121,25 @@ public class SerializationTest {
     TableResource expected = new TableResource(entry);
     expected.setSelfUri("http://localhost:8080/odktables/tables/1");
     expected.setDataUri("http://localhost:8080/odktables/tables/1/rows");
-    expected.setColumnsUri("http://localhost:8080/odktables/tables/1/columns");
+    expected.setPropertiesUri("http://localhost:8080/odktables/tables/1/columns");
     expected.setDiffUri("http://localhost:8080/odktables/tables/1/rows/diff");
     serializer.write(expected, writer);
     String xml = writer.toString();
     System.out.println(xml);
     TableResource actual = serializer.read(TableResource.class, xml);
+    assertEquals(expected, actual);
+  }
+
+  @Test
+  public void testPropertiesResource() throws Exception {
+    TableProperties properties = new TableProperties("0", "1", "2");
+    PropertiesResource expected = new PropertiesResource(properties);
+    expected.setSelfUri("http://localhost:8080/odktables/tables/1/properties");
+    expected.setTableUri("http://localhost:8080/odktables/tables/1");
+    serializer.write(expected, writer);
+    String xml = writer.toString();
+    System.out.println(xml);
+    PropertiesResource actual = serializer.read(PropertiesResource.class, xml);
     assertEquals(expected, actual);
   }
 
@@ -117,6 +154,7 @@ public class SerializationTest {
     serializer.write(expected, writer);
     String xml = writer.toString();
     System.out.println(xml);
+    @SuppressWarnings("unchecked")
     List<Row> actual = (List<Row>) serializer.read(ArrayList.class, xml);
     assertEquals(expected, actual);
   }

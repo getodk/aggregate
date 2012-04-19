@@ -9,6 +9,7 @@ import org.opendatakit.aggregate.odktables.entity.Column;
 import org.opendatakit.aggregate.odktables.entity.Column.ColumnType;
 import org.opendatakit.aggregate.odktables.entity.Row;
 import org.opendatakit.aggregate.odktables.entity.TableEntry;
+import org.opendatakit.aggregate.odktables.entity.TableProperties;
 import org.opendatakit.common.ermodel.simple.Entity;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.DataField.DataType;
@@ -38,7 +39,7 @@ public class EntityConverter {
    * Convert a list of {@link DbTableEntry} entities to a list of
    * {@link TableEntry}
    */
-  public List<TableEntry> toTableEntryEntities(List<Entity> entities) {
+  public List<TableEntry> toTableEntries(List<Entity> entities) {
     ArrayList<TableEntry> entries = new ArrayList<TableEntry>();
     for (Entity entity : entities) {
       entries.add(toTableEntry(entity));
@@ -64,6 +65,16 @@ public class EntityConverter {
       columns.add(toColumn(entity));
     }
     return columns;
+  }
+
+  /**
+   * Convert a {@link DbTableProperties} entity to a {@link TableProperties}.
+   */
+  public TableProperties toTableProperties(Entity entity, String propertiesEtag) {
+    TableProperties properties = new TableProperties(propertiesEtag,
+        entity.getString(DbTableProperties.TABLE_NAME),
+        entity.getString(DbTableProperties.TABLE_METADATA));
+    return properties;
   }
 
   /**
