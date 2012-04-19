@@ -5,13 +5,13 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.commons.lang.Validate;
 import org.opendatakit.common.ermodel.simple.Relation.RelationImpl;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.Query.Direction;
 import org.opendatakit.common.persistence.Query.FilterOperation;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
-import org.opendatakit.common.utils.Check;
 
 /**
  * Query is a query over a Relation.
@@ -30,7 +30,7 @@ public class Query {
   private org.opendatakit.common.persistence.Query query;
 
   protected Query(Relation relation, org.opendatakit.common.persistence.Query query) {
-    Check.notNull(relation, "relation");
+    Validate.notNull(relation);
 
     this.relation = relation;
     this.query = query;
@@ -134,8 +134,8 @@ public class Query {
    * @return this Query, with the given filter added.
    */
   public Query addFilter(String fieldName, FilterOperation op, Object value) {
-    Check.notNullOrEmpty(fieldName, "fieldName");
-    Check.notNull(op, "op");
+    Validate.notEmpty(fieldName);
+    Validate.notNull(op);
     DataField field = relation.getDataField(fieldName);
     query.addFilter(field, op, value);
     return this;
@@ -177,8 +177,8 @@ public class Query {
    * @return this Query, with the given sort added.
    */
   public Query addSort(String fieldName, Direction direction) {
-    Check.notNullOrEmpty(fieldName, "fieldName");
-    Check.notNull(direction, "direction");
+    Validate.notEmpty(fieldName);
+    Validate.notNull(direction);
     DataField field = relation.getDataField(fieldName);
     query.addSort(field, direction);
     return this;
@@ -199,8 +199,8 @@ public class Query {
    *         not in values will be excluded from the query.
    */
   public Query include(String fieldName, Collection<?> values) {
-    Check.notNullOrEmpty(fieldName, "fieldName");
-    Check.notNullOrEmpty(values, "values");
+    Validate.notEmpty(fieldName);
+    Validate.noNullElements(values);
     DataField field = relation.getDataField(fieldName);
     query.addValueSetFilter(field, values);
     return this;
@@ -269,7 +269,7 @@ public class Query {
    *         existing filter and sort criteria.
    */
   public List<?> getDistinct(String fieldName) {
-    Check.notNullOrEmpty(fieldName, "fieldName");
+    Validate.notEmpty(fieldName);
     DataField dataField = relation.getDataField(fieldName);
     try {
       return query.executeDistinctValueForDataField(dataField);
