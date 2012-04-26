@@ -28,6 +28,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.Vector;
 
 import org.apache.commons.logging.Log;
@@ -44,6 +45,7 @@ import org.kxml2.kdom.Document;
 import org.kxml2.kdom.Element;
 import org.opendatakit.aggregate.constants.ParserConsts;
 import org.opendatakit.aggregate.constants.ServletConsts;
+import org.opendatakit.aggregate.constants.TaskLockType;
 import org.opendatakit.aggregate.constants.common.FormActionStatusTimestamp;
 import org.opendatakit.aggregate.constants.common.GeoPointConsts;
 import org.opendatakit.aggregate.datamodel.FormDataModel;
@@ -66,9 +68,12 @@ import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.EntityKey;
 import org.opendatakit.common.persistence.PersistConsts;
+import org.opendatakit.common.persistence.TaskLock;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
+import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.security.User;
+import org.opendatakit.common.security.server.SecurityServiceUtil;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.BasicConsts;
 import org.opendatakit.common.web.constants.HtmlConsts;
@@ -516,24 +521,95 @@ public class FormParserForJavaRosa {
       FormDef formDef, StringBuilder warnings, CallingContext cc) throws ODKDatastoreException,
       ODKFormAlreadyExistsException, ODKParseException, ODKConversionException {
 
+    // ///////////////////
+    // Step 0: ensure that form is not in the process of being deleted
     // we can't create or update a FormInfo record if there is a pending
     // deletion for this same id.
-    FormActionStatusTimestamp formDeletionStatus;
-    formDeletionStatus = MiscTasks.getFormDeletionStatusTimestampOfFormId(rootElementDefn.formId,
-        cc);
-    if (formDeletionStatus != null) {
-      throw new ODKFormAlreadyExistsException(
-          "This form and its data have not yet been fully deleted from the server. Please wait a few minutes and retry.");
-    }
-    if (!submissionElementDefn.formId.equals(rootElementDefn.formId)) {
-      formDeletionStatus = MiscTasks.getFormDeletionStatusTimestampOfFormId(
-          submissionElementDefn.formId, cc);
+    {
+      FormActionStatusTimestamp formDeletionStatus;
+      formDeletionStatus = MiscTasks.getFormDeletionStatusTimestampOfFormId(rootElementDefn.formId,
+          cc);
       if (formDeletionStatus != null) {
         throw new ODKFormAlreadyExistsException(
             "This form and its data have not yet been fully deleted from the server. Please wait a few minutes and retry.");
       }
+      if (!submissionElementDefn.formId.equals(rootElementDefn.formId)) {
+        formDeletionStatus = MiscTasks.getFormDeletionStatusTimestampOfFormId(
+            submissionElementDefn.formId, cc);
+        if (formDeletionStatus != null) {
+          throw new ODKFormAlreadyExistsException(
+              "This form and its data have not yet been fully deleted from the server. Please wait a few minutes and retry.");
+        }
+      }
     }
 
+    // gain single-access lock record in database...
+    String lockedResourceName = rootElementDefn.toString();
+    String creationLockId = UUID.randomUUID().toString();
+    Datastore ds = cc.getDatastore();
+    User user = cc.getCurrentUser();
+
+    int i = 0;
+    boolean locked = false;
+    while (!locked) {
+      if ((++i) % 10 == 0) {
+        log.warn("excessive wait count for startup serialization lock. Count: " + i);
+        try {
+          Thread.sleep(PersistConsts.MIN_SETTLE_MILLISECONDS);
+        } catch (InterruptedException e) {
+          // we remain in the loop even if we get kicked out.
+        }
+      } else if (i != 1) {
+        try {
+          Thread.sleep(PersistConsts.MIN_SETTLE_MILLISECONDS);
+        } catch (InterruptedException e) {
+          // we remain in the loop even if we get kicked out.
+        }
+      }
+      try {
+        TaskLock formCreationTaskLock = ds.createTaskLock(user);
+        if (formCreationTaskLock.obtainLock(creationLockId, lockedResourceName,
+            TaskLockType.CREATE_FORM)) {
+          locked = true;
+        }
+        formCreationTaskLock = null;
+      } catch (ODKTaskLockException e) {
+        e.printStackTrace();
+      }
+    }
+
+    // we hold the lock while we create the form here...
+    try {
+      guardedInitHelper(uploadedFormItems, xformXmlData, inputXml, title, persistenceStoreFormId,
+          isEncryptedForm, formDef, warnings, cc);
+    } finally {
+      // release the form creation serialization lock
+      try {
+        for (i = 0; i < 10; i++) {
+          TaskLock formCreationTaskLock = ds.createTaskLock(user);
+          if (formCreationTaskLock.releaseLock(creationLockId, lockedResourceName,
+              TaskLockType.STARTUP_SERIALIZATION)) {
+            break;
+          }
+          formCreationTaskLock = null;
+          try {
+            Thread.sleep(PersistConsts.MIN_SETTLE_MILLISECONDS);
+          } catch (InterruptedException e) {
+            // just move on, this retry mechanism
+            // is to make things nice
+          }
+        }
+      } catch (ODKTaskLockException e) {
+        e.printStackTrace();
+      }
+    }
+  }
+
+  private void guardedInitHelper(MultiPartFormData uploadedFormItems,
+      MultiPartFormItem xformXmlData, String inputXml, String title, String persistenceStoreFormId,
+      boolean isEncryptedForm, FormDef formDef, StringBuilder warnings, CallingContext cc)
+      throws ODKDatastoreException, ODKFormAlreadyExistsException, ODKParseException,
+      ODKConversionException {
     // ///////////////
     // Step 1: create or fetch the Form (FormInfo) submission
     //
