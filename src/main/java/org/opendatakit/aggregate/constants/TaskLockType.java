@@ -30,7 +30,7 @@ public enum TaskLockType implements ITaskLockType {
   FORM_DELETION(120000),
   PURGE_OLDER_SUBMISSIONS(120000),
   STARTUP_SERIALIZATION(120000),
-  CREATE_FORM(10000+2*PersistConsts.MAX_SETTLE_MILLISECONDS); // 10 seconds persisting, 2x settle for replication delay
+  CREATE_FORM(60000+2*PersistConsts.MAX_SETTLE_MILLISECONDS); // 60 second request timeout, 2x settle for replication delay
   
   private long timeout;
 
