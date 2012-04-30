@@ -236,22 +236,22 @@ A minimal file is:
   	  <activation><activeByDefault>true</activeByDefault></activation>
   	  <properties>
 		<temp.home>C:\\Users\\user\\AppData\\Local\\Temp</temp.home>
-	    <gae.home>\C:\\Program Files (x86)\\Google AE\\appengine-java-sdk-1.6.1</gae.home>
-		<bitrock.home>C:\Program Files (x86)\BitRock InstallBuilder Professional 8.0.1</bitrock.home>
+	    <gae.home>\C:\\Program Files (x86)\\Google AE\\appengine-java-sdk-1.6.4</gae.home>
+		<bitrock.home>C:\Program Files (x86)\BitRock InstallBuilder Professional 8.1.0</bitrock.home>
 	    <keystore.propertyfile>\C:\\Users\\user\\keystore\\jarSignerDetails.txt</keystore.propertyfile>
 		<headless.operation>no</headless.operation>
-		<mysql.client.executable>C:\\Program Files\\MySQL\\MySQL Server 5.1\\bin\\mysql.exe</mysql.client.executable>
+		<mysql.client.executable>C:\\Program Files\\MySQL\\MySQL Server 5.5\\bin\\mysql.exe</mysql.client.executable>
 		<mysql.root.password>MYSQLROOTPASSWORDHERE</mysql.root.password>
-		<postgres.client.executable>C:\\Program Files\\PostgreSQL\\9.0\\bin\\psql.exe</postgres.client.executable>
+		<postgres.client.executable>C:\\Program Files\\PostgreSQL\\9.1\\bin\\psql.exe</postgres.client.executable>
 		<postgres.root.password>POSTGRESQLROOTPASSWORDHERE</postgres.root.password>
-		<selenium.home>C:\\Users\\user\\Downloads\\selenium-java-2.9.0\\selenium-2.9.0</selenium.home>
-		<selenium.libs>C:\\Users\\user\\Downloads\\selenium-java-2.9.0\\selenium-2.9.0\\libs</selenium.libs>
+		<selenium.home>C:\\Users\\user\\Downloads\\selenium-java-2.16.1\\selenium-2.16.1</selenium.home>
+		<selenium.libs>C:\\Users\\user\\Downloads\\selenium-java-2.16.1\\selenium-2.16.1\\libs</selenium.libs>
 		<test.server.hostname>YOUR.FULLY.QUALIFIED.HOSTNAME.AND.ORG</test.server.hostname>
 		<test.server.port>7070</test.server.port>
 		<test.server.secure.port>7443</test.server.secure.port>
 		<test.server.gae.monitor.port>7075</test.server.gae.monitor.port>
 		<firefox.executable></firefox.executable>
-		<catalina.zip>file:///C:\\Users\\user\\Downloads\\apache-tomcat-6.0.32-windows-x64.zip</catalina.zip>
+		<catalina.zip>file:///C:\\Users\\user\\Downloads\\apache-tomcat-6.0.35-windows-x64.zip</catalina.zip>
 	  </properties>
   	</profile>
   </profiles>

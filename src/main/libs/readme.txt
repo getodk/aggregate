@@ -73,6 +73,11 @@ mvn install:install-file -Dfile=gdata-spreadsheet-3.0.jar -DgroupId=com.google.g
 
 mvn install:install-file -Dfile=gdata-spreadsheet-meta-3.0.jar -DgroupId=com.google.gdata -DartifactId=gdata-spreadsheet-meta-3.0 -Dversion=1.46.0 -Dpackaging=jar -DgeneratePom=true
 
+Download the "Xerces2 Java 2.11.0 - zip" from http://xerces.apache.org/mirrors.cgi
+Unzip and in the Xerces-J-bin.2.11.0/xerces-2_11_0 directory:
+rename xercesImpl.jar to xercesImpl-2.11.0.jar
+mvn install:install-file -Dfile=xercesImpl-2.11.0.jar -DgroupId=xerces -DartifactId=xercesImpl -Dversion=2.11.0 -Dpackaging=jar -DgeneratePom=true
+
 This file: jai-imageio-core-standalone-1.2-pre-dr-b04-2010-04-30.jar 
 is built from the sources here: git://github.com/stain/jai-imageio-core.git
 It is copied into the war at the time the installer is created.  This file 
