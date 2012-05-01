@@ -240,7 +240,7 @@ A minimal file is:
 		<bitrock.home>C:\Program Files (x86)\BitRock InstallBuilder Professional 8.1.0</bitrock.home>
 	    <keystore.propertyfile>\C:\\Users\\user\\keystore\\jarSignerDetails.txt</keystore.propertyfile>
 		<headless.operation>no</headless.operation>
-		<mysql.client.executable>C:\\Program Files\\MySQL\\MySQL Server 5.4\\bin\\mysql.exe</mysql.client.executable>
+		<mysql.client.executable>C:\\Program Files\\MySQL\\MySQL Server 5.5\\bin\\mysql.exe</mysql.client.executable>
 		<mysql.root.password>MYSQLROOTPASSWORDHERE</mysql.root.password>
 		<postgres.client.executable>C:\\Program Files\\PostgreSQL\\9.1\\bin\\psql.exe</postgres.client.executable>
 		<postgres.root.password>POSTGRESQLROOTPASSWORDHERE</postgres.root.password>
@@ -290,6 +290,14 @@ Windows / Preferences:
 	directory, or wherever you have configured your local 
 	Maven repository to be.
 
+  Java / Installed JREs:
+  
+    Add the JDK path. (needed only for Maven-based builds)
+	
+  Java / Installed JREs / Execution Environments:
+  
+    Choose JavaSE-1.6, check the checkbox beside the JDK. (needed only for Maven-based builds).
+	
   Server / Runtime Environments:
 
       Add: Apache Tomcat 6.0 and point it to the install location 
@@ -305,6 +313,37 @@ Windows / Preferences:
 
 	This should refresh and build without any errors.
 	
+(11) Exit eclipse.  Then edit the eclipse.ini file, located in the
+eclipse directory (e.g., C:\Users\User\eclipse\eclipse.ini).  This is 
+in the same directory as the eclipse.exe.
+
+You need to increase the Perm space of the JVM and the overall max size
+of the JVM.  The key entries are the XXMaxPermSzie 512m and the -Xmx1024m.
+
+This is my eclipse.ini:
+------------------------------start-------------------
+-startup
+plugins/org.eclipse.equinox.launcher_1.2.0.v20110502.jar
+--launcher.library
+plugins/org.eclipse.equinox.launcher.win32.win32.x86_64_1.1.100.v20110502
+-product
+org.eclipse.epp.package.jee.product
+--launcher.defaultAction
+openFile
+--launcher.XXMaxPermSize
+512M
+-showsplash
+org.eclipse.platform
+--launcher.XXMaxPermSize
+512m
+--launcher.defaultAction
+openFile
+-vmargs
+-Dosgi.requiredJavaVersion=1.5
+-Xms100m
+-Xmx1024m
+------------------------------end----------------------
+
 (12)  If you want to experiment with building Maven inside Eclipse, 
 install the m2e Eclipse plugin http://www.eclipse.org/m2e/ . The 
 Maven pom.xml files have been modified to provide missing lifecycle
