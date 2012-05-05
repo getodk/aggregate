@@ -88,11 +88,7 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/selenium-java-2.16.1.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/jersey-apache-client4-1.12.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/jersey-client-1.12.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/jersey-core-1.12.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/jersey-server-1.12.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/jersey-servlet-1.12.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/simple-xml-2.6.2.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/jaxrs-api-2.3.3.Final.jar"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>
