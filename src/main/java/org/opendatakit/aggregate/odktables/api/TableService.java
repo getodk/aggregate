@@ -47,4 +47,7 @@ public interface TableService {
   @Path("{tableId}/properties")
   public PropertiesService getProperties(@PathParam("tableId") String tableId)
       throws ODKDatastoreException;
+
+  @Path("{tableId}/diff")
+  public DiffService getDiff(@PathParam("tableId") String tableId) throws ODKDatastoreException;
 }

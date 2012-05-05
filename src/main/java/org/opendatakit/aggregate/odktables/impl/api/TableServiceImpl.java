@@ -14,6 +14,7 @@ import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.odktables.TableManager;
 import org.opendatakit.aggregate.odktables.api.ColumnService;
 import org.opendatakit.aggregate.odktables.api.DataService;
+import org.opendatakit.aggregate.odktables.api.DiffService;
 import org.opendatakit.aggregate.odktables.api.PropertiesService;
 import org.opendatakit.aggregate.odktables.api.TableService;
 import org.opendatakit.aggregate.odktables.entity.Column;
@@ -71,6 +72,12 @@ public class TableServiceImpl implements TableService {
   }
 
   @Override
+  public ColumnService getColumns(String tableId) throws ODKDatastoreException {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
   public DataService getData(String tableId) throws ODKDatastoreException {
     return new DataServiceImpl(tableId, info, cc);
   }
@@ -81,9 +88,8 @@ public class TableServiceImpl implements TableService {
   }
 
   @Override
-  public ColumnService getColumns(String tableId) throws ODKDatastoreException {
-    // TODO Auto-generated method stub
-    return null;
+  public DiffService getDiff(String tableId) throws ODKDatastoreException {
+    return new DiffServiceImpl(tableId, info, cc);
   }
 
   private TableResource getResource(TableEntry entry) {
@@ -94,7 +100,7 @@ public class TableServiceImpl implements TableService {
     URI self = ub.clone().path(TableService.class, "getTable").build(tableId);
     URI properties = ub.clone().path(TableService.class, "getProperties").build(tableId);
     URI data = ub.clone().path(TableService.class, "getData").build(tableId);
-    URI diff = UriBuilder.fromUri(data).path(DataService.class, "getRowsSince").build();
+    URI diff = UriBuilder.fromUri(data).path(TableService.class, "getDiff").build(tableId);
 
     TableResource resource = new TableResource(entry);
     resource.setSelfUri(self.toASCIIString());
@@ -103,5 +109,4 @@ public class TableServiceImpl implements TableService {
     resource.setDiffUri(diff.toASCIIString());
     return resource;
   }
-
 }
