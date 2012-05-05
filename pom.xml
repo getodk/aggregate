@@ -17,7 +17,7 @@
     	<itFormsDirectory>${project.basedir}/../src/it/testfiles/forms</itFormsDirectory>
     	<itSubmissionsDirectory>${project.basedir}/../src/it/testfiles/submissions</itSubmissionsDirectory>
     	<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<gooogle.appengine.sdk.version>1.6.1</gooogle.appengine.sdk.version> <!-- NOTE: change gae.home too! -->
+		<gooogle.appengine.sdk.version>1.6.4</gooogle.appengine.sdk.version> <!-- NOTE: change gae.home too! -->
 		<google.gdata.version>1.46.0</google.gdata.version>
 		<google.gwt.version>2.4.0</google.gwt.version>
         <com.sun.jersey.version>1.12</com.sun.jersey.version>
@@ -35,7 +35,7 @@
 		<junit.version>4.10</junit.version>
 		<org.codehaus.jackson.version>1.8.8</org.codehaus.jackson.version>
 		<org.springframework.version>3.1.0.RELEASE</org.springframework.version>
-		<oauth.signpost.version>1.2.1.1-odk-SNAPSHOT</oauth.signpost.version>
+		<oauth.signpost.version>1.2.1.1</oauth.signpost.version>
 		<org.slf4j.version>1.6.4</org.slf4j.version>
 		<log4j.version>1.2.16</log4j.version>
 		<org.springframework.security.version>3.1.0.odk-SNAPSHOT</org.springframework.security.version> <!-- could do 3.1.0.RELEASE -->
