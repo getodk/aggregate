@@ -36,7 +36,7 @@ public class DataServiceTest extends AbstractServiceTest {
     String rowId = T.Data.DYLAN.getId();
     String uri = Util.buildUri(baseUri.toASCIIString(), rowId);
 
-    Row expected = Row.forInsert(rowId, null, T.Data.DYLAN.getValues());
+    Row expected = Row.forInsert(rowId, T.Data.DYLAN.getValues());
     HttpEntity<Row> entity = super.entity(expected);
 
     ResponseEntity<RowResource> resp = rt.exchange(uri, HttpMethod.PUT, entity, RowResource.class);
