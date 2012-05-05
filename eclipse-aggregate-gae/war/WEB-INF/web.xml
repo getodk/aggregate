@@ -13,6 +13,12 @@
 		<param-value>classpath:odk-settings.xml,/WEB-INF/applicationContext-security.xml</param-value>
 	</context-param>
 
+    <context-param>
+        <param-name>resteasy.servlet.mapping.prefix</param-name>
+        <param-value>/odktables</param-value>
+        <!-- Must match the prefix set in the url-pattern of the ODKTables servlet-mapping below. -->
+    </context-param>
+
 	<security-constraint>
         <web-resource-collection>
             <url-pattern>/gae/*</url-pattern>
@@ -392,7 +398,7 @@
     <!-- servlet for odktables api -->
     <servlet>
         <servlet-name>ODKTables</servlet-name>
-        <servlet-class>com.sun.jersey.spi.container.servlet.ServletContainer</servlet-class>
+        <servlet-class>org.jboss.resteasy.plugins.server.servlet.HttpServletDispatcher</servlet-class>
         <init-param>
             <param-name>javax.ws.rs.Application</param-name>
             <param-value>org.opendatakit.aggregate.odktables.impl.api.ODKTablesAPIApplication</param-value>
