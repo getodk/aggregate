@@ -19,7 +19,6 @@ public class RowResource extends Row {
     super();
     setRowId(row.getRowId());
     setRowEtag(row.getRowEtag());
-    setGroupOrUserId(row.getGroupOrUserId());
     setDeleted(row.isDeleted());
     setValues(row.getValues());
   }
