@@ -19,7 +19,10 @@ public class DbTable {
 
   public static final String ROW_VERSION = "ROW_VERSION";
   public static final String MODIFICATION_NUMBER = "MODIFICATION_NUMBER";
-  public static final String GROUP_OR_USER_ID = "GROUP_OR_USER_ID";
+  public static final String CREATE_USER = "CREATE_USER";
+  public static final String LAST_UPDATE_USER = "LAST_UPDATE_USER";
+  public static final String USER_FILTER = "USER_FILTER";
+  public static final String GROUP_FILTER = "GROUP_FILTER";
   public static final String DELETED = "DELETED";
 
   private static final List<DataField> dataFields;
@@ -27,7 +30,10 @@ public class DbTable {
     dataFields = new ArrayList<DataField>();
     dataFields.add(new DataField(ROW_VERSION, DataType.STRING, false));
     dataFields.add(new DataField(MODIFICATION_NUMBER, DataType.INTEGER, false));
-    dataFields.add(new DataField(GROUP_OR_USER_ID, DataType.STRING, true));
+    dataFields.add(new DataField(CREATE_USER, DataType.STRING, false));
+    dataFields.add(new DataField(LAST_UPDATE_USER, DataType.STRING, false));
+    dataFields.add(new DataField(USER_FILTER, DataType.STRING, true));
+    dataFields.add(new DataField(GROUP_FILTER, DataType.STRING, true));
     dataFields.add(new DataField(DELETED, DataType.BOOLEAN, false));
   }
 
