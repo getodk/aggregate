@@ -14,6 +14,7 @@ import org.opendatakit.common.ermodel.simple.Relation;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
+import org.opendatakit.common.security.User;
 import org.opendatakit.common.web.CallingContext;
 
 /**
@@ -108,8 +109,6 @@ public class EntityCreator {
    *          the id of the new row. May be null to auto generate.
    * @param modificationNumber
    *          the modification number for this row.
-   * @param groupOrUserId
-   *          the group or user id for this row. May be null.
    * @param values
    *          the values to set on the row.
    * @param columns
@@ -119,7 +118,7 @@ public class EntityCreator {
    * @throws ODKDatastoreException
    */
   public Entity newRowEntity(Relation table, String rowId, int modificationNumber,
-      String groupOrUserId, Map<String, String> values, List<Entity> columns, CallingContext cc)
+      Map<String, String> values, List<Entity> columns, CallingContext cc)
       throws ODKDatastoreException {
     Validate.notNull(table);
     Validate.isTrue(modificationNumber >= 0);
@@ -131,7 +130,11 @@ public class EntityCreator {
       rowId = CommonFieldsBase.newUri();
 
     Entity row = table.newEntity(rowId, cc);
-    setRowFields(row, modificationNumber, groupOrUserId, false, values, columns);
+    User user = cc.getCurrentUser();
+    // TODO: change to getEmail()
+    row.set(DbTable.CREATE_USER, user.getUriUser());
+    // TODO: expose filterUser and filterGroup
+    setRowFields(row, modificationNumber, user, null, null, false, values, columns);
     return row;
   }
 
@@ -160,8 +163,8 @@ public class EntityCreator {
 
     List<Entity> entities = new ArrayList<Entity>();
     for (Row row : rows) {
-      Entity entity = newRowEntity(table, row.getRowId(), modificationNumber,
-          row.getGroupOrUserId(), row.getValues(), columns, cc);
+      Entity entity = newRowEntity(table, row.getRowId(), modificationNumber, row.getValues(),
+          columns, cc);
       entities.add(entity);
     }
     return entities;
@@ -178,8 +181,6 @@ public class EntityCreator {
    *          the id of the row
    * @param currentEtag
    *          the current etag value
-   * @param groupOrUserId
-   *          the group or user id for the row
    * @param values
    *          the values to set
    * @param deleted
@@ -195,9 +196,9 @@ public class EntityCreator {
    * @throws ODKDatastoreException
    */
   public Entity updateRowEntity(Relation table, int modificationNumber, String rowId,
-      String currentEtag, String groupOrUserId, Map<String, String> values, boolean deleted,
-      List<Entity> columns, CallingContext cc) throws ODKEntityNotFoundException,
-      ODKDatastoreException, EtagMismatchException {
+      String currentEtag, Map<String, String> values, boolean deleted, List<Entity> columns,
+      CallingContext cc) throws ODKEntityNotFoundException, ODKDatastoreException,
+      EtagMismatchException {
     Validate.notNull(table);
     Validate.isTrue(modificationNumber >= 0);
     Validate.notEmpty(rowId);
@@ -213,15 +214,20 @@ public class EntityCreator {
           currentEtag, rowEtag, row.getId()));
     }
 
-    setRowFields(row, modificationNumber, groupOrUserId, deleted, values, columns);
+    // TODO: expose filterUser and filterGroup
+    setRowFields(row, modificationNumber, cc.getCurrentUser(), null, null, deleted, values, columns);
     return row;
   }
 
-  private void setRowFields(Entity row, int modificationNumber, String groupOrUserId,
-      boolean deleted, Map<String, String> values, List<Entity> columns) {
+  private void setRowFields(Entity row, int modificationNumber, User lastUpdatedUser,
+      String userFilter, String groupFilter, boolean deleted, Map<String, String> values,
+      List<Entity> columns) {
     row.set(DbTable.ROW_VERSION, CommonFieldsBase.newUri());
     row.set(DbTable.MODIFICATION_NUMBER, modificationNumber);
-    row.set(DbTable.GROUP_OR_USER_ID, groupOrUserId);
+    // TODO: change to getEmail()
+    row.set(DbTable.LAST_UPDATE_USER, lastUpdatedUser.getUriUser());
+    row.set(DbTable.USER_FILTER, userFilter);
+    row.set(DbTable.GROUP_FILTER, groupFilter);
     row.set(DbTable.DELETED, deleted);
 
     for (Entry<String, String> entry : values.entrySet()) {
@@ -274,7 +280,7 @@ public class EntityCreator {
     List<Entity> entities = new ArrayList<Entity>();
     for (Row row : rows) {
       entities.add(updateRowEntity(table, modificationNumber, row.getRowId(), row.getRowEtag(),
-          row.getGroupOrUserId(), row.getValues(), row.isDeleted(), columns, cc));
+          row.getValues(), row.isDeleted(), columns, cc));
     }
     return entities;
   }
@@ -306,7 +312,10 @@ public class EntityCreator {
     entity.set(DbLogTable.ROW_ID, row.getId());
     entity.set(DbLogTable.ROW_VERSION, row.getString(DbTable.ROW_VERSION));
     entity.set(DbLogTable.MODIFICATION_NUMBER, modificationNumber);
-    entity.set(DbLogTable.GROUP_OR_USER_ID, row.getString(DbTable.GROUP_OR_USER_ID));
+    entity.set(DbLogTable.CREATE_USER, row.getString(DbTable.CREATE_USER));
+    entity.set(DbLogTable.LAST_UPDATE_USER, row.getString(DbTable.LAST_UPDATE_USER));
+    entity.set(DbLogTable.USER_FILTER, row.getString(DbTable.USER_FILTER));
+    entity.set(DbLogTable.GROUP_FILTER, row.getString(DbTable.GROUP_FILTER));
     entity.set(DbLogTable.DELETED, row.getBoolean(DbTable.DELETED));
 
     for (Entity column : columns) {
