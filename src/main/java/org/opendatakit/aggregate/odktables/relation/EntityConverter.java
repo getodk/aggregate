@@ -126,7 +126,6 @@ public class EntityConverter {
     Row row = new Row();
     row.setRowId(entity.getId());
     row.setRowEtag(entity.getString(DbTable.ROW_VERSION));
-    row.setGroupOrUserId(entity.getString(DbTable.GROUP_OR_USER_ID));
     row.setDeleted(entity.getBoolean(DbTable.DELETED));
 
     row.setValues(getRowValues(entity, columns));
@@ -146,7 +145,6 @@ public class EntityConverter {
     Row row = new Row();
     row.setRowId(entity.getString(DbLogTable.ROW_ID));
     row.setRowEtag(entity.getString(DbLogTable.ROW_VERSION));
-    row.setGroupOrUserId(entity.getString(DbLogTable.GROUP_OR_USER_ID));
     row.setDeleted(entity.getBoolean(DbLogTable.DELETED));
 
     row.setValues(getRowValues(entity, columns));
