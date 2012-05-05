@@ -1,5 +1,9 @@
 package org.opendatakit.aggregate.odktables.api;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,9 +17,14 @@ import org.simpleframework.xml.Serializer;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
 
 public abstract class AbstractServiceTest {
@@ -30,6 +39,7 @@ public abstract class AbstractServiceTest {
 
     // RestTemplate
     this.rt = new RestTemplate();
+    this.rt.setErrorHandler(new ErrorHandler());
     Serializer serializer = SimpleXMLSerializerForAggregate.getSerializer();
     List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
 
@@ -71,5 +81,32 @@ public abstract class AbstractServiceTest {
 
   protected <V> HttpEntity<V> entity(V entity) {
     return new HttpEntity<V>(entity, reqHeaders);
+  }
+
+  private class ErrorHandler implements ResponseErrorHandler {
+    @Override
+    public void handleError(ClientHttpResponse resp) throws IOException {
+      HttpStatus status = resp.getStatusCode();
+      String body = readInput(resp.getBody());
+      if (status.value() / 100 == 4)
+        throw new HttpClientErrorException(status, body);
+      else if (status.value() / 100 == 5)
+        throw new HttpServerErrorException(status, body);
+    }
+
+    @Override
+    public boolean hasError(ClientHttpResponse resp) throws IOException {
+      return resp.getStatusCode().value() / 100 != 2;
+    }
+
+    private String readInput(InputStream is) throws IOException {
+      BufferedReader br = new BufferedReader(new InputStreamReader(is));
+      StringBuilder sb = new StringBuilder();
+      String line;
+      while ((line = br.readLine()) != null) {
+        sb.append(line);
+      }
+      return sb.toString();
+    }
   }
 }
