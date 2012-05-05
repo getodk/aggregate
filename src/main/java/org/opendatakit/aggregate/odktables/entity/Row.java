@@ -15,9 +15,6 @@ public class Row {
   private String rowEtag;
 
   @Element(required = false)
-  private String groupOrUserId;
-
-  @Element(required = false)
   private boolean deleted;
 
   @ElementMap(entry = "entry", key = "column", attribute = true, inline = true)
@@ -27,13 +24,11 @@ public class Row {
    * Construct a row for insertion.
    * 
    * @param rowId
-   * @param groupOrUserId
    * @param values
    */
-  public static Row forInsert(String rowId, String groupOrUserId, Map<String, String> values) {
+  public static Row forInsert(String rowId, Map<String, String> values) {
     Row row = new Row();
     row.rowId = rowId;
-    row.groupOrUserId = groupOrUserId;
     row.values = values;
     return row;
   }
@@ -63,10 +58,6 @@ public class Row {
     return this.rowEtag;
   }
 
-  public String getGroupOrUserId() {
-    return this.groupOrUserId;
-  }
-
   public boolean isDeleted() {
     return this.deleted;
   }
@@ -83,10 +74,6 @@ public class Row {
     this.rowEtag = rowEtag;
   }
 
-  public void setGroupOrUserId(final String groupOrUserId) {
-    this.groupOrUserId = groupOrUserId;
-  }
-
   public void setDeleted(final boolean deleted) {
     this.deleted = deleted;
   }
@@ -100,7 +87,6 @@ public class Row {
     final int prime = 31;
     int result = 1;
     result = prime * result + (deleted ? 1231 : 1237);
-    result = prime * result + ((groupOrUserId == null) ? 0 : groupOrUserId.hashCode());
     result = prime * result + ((rowEtag == null) ? 0 : rowEtag.hashCode());
     result = prime * result + ((rowId == null) ? 0 : rowId.hashCode());
     result = prime * result + ((values == null) ? 0 : values.hashCode());
@@ -117,11 +103,6 @@ public class Row {
       return false;
     Row other = (Row) obj;
     if (deleted != other.deleted)
-      return false;
-    if (groupOrUserId == null) {
-      if (other.groupOrUserId != null)
-        return false;
-    } else if (!groupOrUserId.equals(other.groupOrUserId))
       return false;
     if (rowEtag == null) {
       if (other.rowEtag != null)
@@ -141,9 +122,9 @@ public class Row {
     return true;
   }
 
+  @Override
   public String toString() {
-    return "Row(rowId=" + this.getRowId() + ", rowEtag=" + this.getRowEtag() + ", groupOrUserId="
-        + this.getGroupOrUserId() + ", deleted=" + this.isDeleted() + ", values="
-        + this.getValues() + ")";
+    return "Row [rowId=" + rowId + ", rowEtag=" + rowEtag + ", deleted=" + deleted + ", values="
+        + values + "]";
   }
 }
