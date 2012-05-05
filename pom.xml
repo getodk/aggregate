@@ -20,7 +20,7 @@
 		<gooogle.appengine.sdk.version>1.6.4</gooogle.appengine.sdk.version> <!-- NOTE: change gae.home too! -->
 		<google.gdata.version>1.46.0</google.gdata.version>
 		<google.gwt.version>2.4.0</google.gwt.version>
-        <com.sun.jersey.version>1.12</com.sun.jersey.version>
+        <org.jboss.resteasy.version>2.3.3.Final</org.jboss.resteasy.version>
 		<emma.maven.plugin.version>1.2</emma.maven.plugin.version>
 		<maven.surefire.report.plugin.version>2.6</maven.surefire.report.plugin.version>
 		<maven.surefire.plugin.version>2.6</maven.surefire.plugin.version>
@@ -785,7 +785,7 @@
 		<dependency>
 		  <groupId>xerces</groupId>
 		  <artifactId>xercesImpl</artifactId>
-		  <version>2.11.0</version>
+		  <version>2.10.0</version>
 		</dependency>
 		<dependency>
 		  <groupId>xml-apis</groupId>
@@ -804,28 +804,22 @@
 			</exclusions>
 		</dependency>
         <!-- for odktables api -->
-        <dependency>
-            <groupId>com.sun.jersey</groupId>
-            <artifactId>jersey-server</artifactId>
-            <version>${com.sun.jersey.version}</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.sun.jersey</groupId>
-            <artifactId>jersey-servlet</artifactId>
-            <version>${com.sun.jersey.version}</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.sun.jersey</groupId>
-            <artifactId>jersey-client</artifactId>
-            <version>${com.sun.jersey.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.sun.jersey.contribs</groupId>
-            <artifactId>jersey-apache-client4</artifactId>
-            <version>${com.sun.jersey.version}</version>
-        </dependency>
+		<dependency>
+			<groupId>org.jboss.resteasy</groupId>
+			<artifactId>resteasy-jaxrs</artifactId>
+            <version>${org.jboss.resteasy.version}</version>
+			<!-- filter out unwanted jars -->
+			<exclusions>
+				<exclusion>
+					<groupId>commons-httpclient</groupId>
+					<artifactId>commons-httpclient</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>javax.servlet</groupId>
+					<artifactId>servlet-api</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
         <dependency>
             <groupId>org.simpleframework</groupId>
             <artifactId>simple-xml</artifactId>
