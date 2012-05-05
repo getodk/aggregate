@@ -94,7 +94,7 @@ public class SerializationTest {
   @Test
   public void testRowResource() throws Exception {
     Map<String, String> values = T.Data.DYLAN.getValues();
-    RowResource expected = new RowResource(Row.forInsert("1", null, values));
+    RowResource expected = new RowResource(Row.forInsert("1", values));
     expected.setSelfUri("http://localhost:8080/odktables/tables/1/rows/1");
     expected.setTableUri("http://localhost:8080/odktables/tables/1");
 
@@ -146,8 +146,8 @@ public class SerializationTest {
   @Test
   public void testListOfRow() throws Exception {
     List<Row> expected = new ArrayList<Row>();
-    Row one = Row.forInsert("1", null, T.Data.DYLAN.getValues());
-    Row two = Row.forInsert("1", null, T.Data.JOHN.getValues());
+    Row one = Row.forInsert("1", T.Data.DYLAN.getValues());
+    Row two = Row.forInsert("1", T.Data.JOHN.getValues());
     expected.add(one);
     expected.add(two);
 
