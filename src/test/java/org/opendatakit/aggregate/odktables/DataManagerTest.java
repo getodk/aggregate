@@ -72,7 +72,6 @@ public class DataManagerTest {
       Row expected = rows.get(i);
       Row actual = actualRows.get(i);
       expected.setRowEtag(actual.getRowEtag());
-      expected.setGroupOrUserId(actual.getGroupOrUserId());
     }
     assertEquals(rows.get(0), actualRows.get(0));
     assertEquals(rows.get(1), actualRows.get(1));
@@ -93,14 +92,13 @@ public class DataManagerTest {
       Row expected = rows.get(i);
       Row actual = actualRows.get(i);
       assertEquals(expected.getRowId(), actual.getRowId());
-      assertEquals(expected.getGroupOrUserId(), actual.getGroupOrUserId());
       assertEquals(expected.getValues(), actual.getValues());
     }
   }
 
   @Test
   public void testGetRow() throws ODKDatastoreException, ODKTaskLockException {
-    Row expected = Row.forInsert(T.Data.DYLAN.getId(), null, T.Data.DYLAN.getValues());
+    Row expected = Row.forInsert(T.Data.DYLAN.getId(), T.Data.DYLAN.getValues());
     expected = dm.insertRow(expected);
     Row actual = dm.getRow(T.Data.DYLAN.getId());
     assertEquals(expected, actual);
@@ -115,7 +113,7 @@ public class DataManagerTest {
   @Test
   public void testGetRowNullSafe() throws ODKEntityPersistException, ODKDatastoreException,
       ODKTaskLockException {
-    Row expected = Row.forInsert(T.Data.DYLAN.getId(), null, T.Data.DYLAN.getValues());
+    Row expected = Row.forInsert(T.Data.DYLAN.getId(), T.Data.DYLAN.getValues());
     expected = dm.insertRow(expected);
     Row actual = dm.getRowNullSafe(T.Data.DYLAN.getId());
     assertEquals(expected, actual);
