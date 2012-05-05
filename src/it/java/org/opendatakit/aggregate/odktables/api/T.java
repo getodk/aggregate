@@ -26,8 +26,8 @@ public class T {
   @SuppressWarnings("serial")
   public static final List<Row> rows = new ArrayList<Row>() {
     {
-      add(Row.forInsert(T.Data.DYLAN.getId(), null, T.Data.DYLAN.getValues()));
-      add(Row.forInsert(T.Data.JOHN.getId(), null, T.Data.JOHN.getValues()));
+      add(Row.forInsert(T.Data.DYLAN.getId(), T.Data.DYLAN.getValues()));
+      add(Row.forInsert(T.Data.JOHN.getId(), T.Data.JOHN.getValues()));
     }
   };
 
