@@ -8,6 +8,7 @@ import java.util.Map.Entry;
 import org.apache.commons.lang.Validate;
 import org.opendatakit.aggregate.odktables.entity.Column;
 import org.opendatakit.aggregate.odktables.entity.Row;
+import org.opendatakit.aggregate.odktables.entity.Scope;
 import org.opendatakit.aggregate.odktables.exception.EtagMismatchException;
 import org.opendatakit.common.ermodel.simple.Entity;
 import org.opendatakit.common.ermodel.simple.Relation;
@@ -98,6 +99,39 @@ public class EntityCreator {
     properties.set(DbTableProperties.TABLE_METADATA, metadata);
 
     return properties;
+  }
+
+  /**
+   * Create a new {@link DbTableAcl} entity.
+   * 
+   * @param tableId
+   *          the id of the table for the new table acl entity
+   * @param scopeType
+   *          the type for the scope, see {@link Scope.Type}
+   * @param scopeValue
+   *          the value for the scope of this acl entity
+   * @param permissions
+   *          the comma-separated list of permissions to be applied to the given
+   *          scope
+   * @param cc
+   * @return the created entity, not yet persisted
+   * @throws ODKDatastoreException
+   */
+  public Entity newTableAclEntity(String tableId, String scopeType, String scopeValue,
+      String permissions, CallingContext cc) throws ODKDatastoreException {
+    Validate.notEmpty(tableId);
+    Validate.notEmpty(scopeType);
+    Validate.notEmpty(scopeValue);
+    Validate.notEmpty(permissions);
+    Validate.notNull(cc);
+
+    Entity tableAcl = DbTableAcl.getRelation(cc).newEntity(cc);
+    tableAcl.set(DbTableAcl.TABLE_ID, tableId);
+    tableAcl.set(DbTableAcl.SCOPE_TYPE, scopeType);
+    tableAcl.set(DbTableAcl.SCOPE_VALUE, scopeValue);
+    tableAcl.set(DbTableAcl.PERMISSIONS, permissions);
+
+    return tableAcl;
   }
 
   /**
@@ -209,7 +243,8 @@ public class EntityCreator {
     Validate.notEmpty(rowId);
     // if currentEtag is null we will catch it later
     Validate.noNullElements(values.keySet());
-    // filterScope may be null
+    // filterType may be null
+    // filterValue may be null
     Validate.noNullElements(columns);
     Validate.notNull(cc);
 
