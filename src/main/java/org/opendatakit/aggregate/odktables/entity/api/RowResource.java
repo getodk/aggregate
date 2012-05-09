@@ -12,7 +12,8 @@ public class RowResource extends Row {
   private String selfUri;
   private String tableUri;
 
-  public RowResource() {
+  @SuppressWarnings("unused")
+  private RowResource() {
   }
 
   public RowResource(Row row) {

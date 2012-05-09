@@ -19,7 +19,8 @@ public class TableDefinition {
   @Element(required = false)
   private String metadata;
 
-  public TableDefinition() {
+  @SuppressWarnings("unused")
+  private TableDefinition() {
   }
 
   public TableDefinition(final String tableName, final List<Column> columns, final String metadata) {

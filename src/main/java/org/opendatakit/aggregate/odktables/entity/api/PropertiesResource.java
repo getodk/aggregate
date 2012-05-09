@@ -12,7 +12,8 @@ public class PropertiesResource extends TableProperties {
   private String selfUri;
   private String tableUri;
 
-  public PropertiesResource() {
+  @SuppressWarnings("unused")
+  private PropertiesResource() {
   }
 
   public PropertiesResource(TableProperties tableProperties) {
