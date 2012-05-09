@@ -20,6 +20,9 @@ public class RowResource extends Row {
     setRowId(row.getRowId());
     setRowEtag(row.getRowEtag());
     setDeleted(row.isDeleted());
+    setCreateUser(row.getCreateUser());
+    setLastUpdateUser(row.getLastUpdateUser());
+    setFilterScope(row.getFilterScope());
     setValues(row.getValues());
   }
 
