@@ -22,6 +22,8 @@ import org.simpleframework.xml.convert.RegistryStrategy;
 import org.simpleframework.xml.core.Persister;
 import org.simpleframework.xml.strategy.Strategy;
 
+import com.google.common.collect.Lists;
+
 public class SerializationTest {
 
   private Serializer serializer;
@@ -75,6 +77,18 @@ public class SerializationTest {
     String xml = writer.toString();
     System.out.println(xml);
     TableProperties actual = serializer.read(TableProperties.class, xml);
+    assertEquals(expected, actual);
+  }
+
+  @Test
+  public void testTableAcl() throws Exception {
+    List<TablePermission> permissions = Lists.newArrayList(TablePermission.READ_ROW,
+        TablePermission.READ_PROPERTIES, TablePermission.WRITE_ROW);
+    TableAcl expected = new TableAcl("0", new Scope(Scope.Type.USER, "1"), permissions);
+    serializer.write(expected, writer);
+    String xml = writer.toString();
+    System.out.println(xml);
+    TableAcl actual = serializer.read(TableAcl.class, xml);
     assertEquals(expected, actual);
   }
 
