@@ -72,6 +72,8 @@ public class DataManagerTest {
       Row expected = rows.get(i);
       Row actual = actualRows.get(i);
       expected.setRowEtag(actual.getRowEtag());
+      expected.setCreateUser(actual.getCreateUser());
+      expected.setLastUpdateUser(actual.getLastUpdateUser());
     }
     assertEquals(rows.get(0), actualRows.get(0));
     assertEquals(rows.get(1), actualRows.get(1));
