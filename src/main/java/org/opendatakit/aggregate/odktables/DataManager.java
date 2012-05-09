@@ -147,7 +147,10 @@ public class DataManager {
    * {@link #insertRows(List)} with a list of size 1.
    * 
    * @param row
-   *          the row to insert. See {@link Row#forInsert(String, String, Map)}
+   *          the row to insert. See {@link Row#forInsert(String, String, Map)}.
+   *          {@link Row#getRowEtag()}, {@link Row#isDeleted()},
+   *          {@link Row#getCreateUser()}, and {@link Row#getLastUpdateUser()}
+   *          will be ignored if they are set.
    * @return the row with rowEtag populated. If the passed in row had a null
    *         rowId, then the generated rowId will also be populated.
    * @throws ODKEntityPersistException
@@ -169,6 +172,9 @@ public class DataManager {
    * @param rows
    *          the list of rows. See
    *          {@link Row#forInsert(String, String, java.util.Map)}.
+   *          {@link Row#getRowEtag()}, {@link Row#isDeleted()},
+   *          {@link Row#getCreateUser()}, and {@link Row#getLastUpdateUser()}
+   *          will be ignored if they are set.
    * @return the list of inserted rows, with each row's rowEtag populated. For
    *         each row, if the original passed in row had a null rowId, the row
    *         will contain the generated rowId.
@@ -190,7 +196,9 @@ public class DataManager {
    * Updates a row. This is equivalent to calling {@link #updateRows(List)}.
    * 
    * @param row
-   *          the row to update. See {@link Row#forUpdate(String, String, Map)}
+   *          the row to update. See {@link Row#forUpdate(String, String, Map)}.
+   *          {@link Row#isDeleted()}, {@link Row#getCreateUser()}, and
+   *          {@link Row#getLastUpdateUser()} will be ignored if they are set.
    * @return the row that was updated, with a new rowEtag.
    * @throws ODKEntityNotFoundException
    *           if the row does not exist
@@ -215,6 +223,8 @@ public class DataManager {
    * @param rows
    *          the rows to update. See
    *          {@link Row#forUpdate(String, String, java.util.Map)}
+   *          {@link Row#isDeleted()}, {@link Row#getCreateUser()}, and
+   *          {@link Row#getLastUpdateUser()} will be ignored if they are set.
    * @return the rows that were updated, with each row's rowEtag populated with
    *         the new rowEtag.
    * @throws ODKEntityNotFoundException
@@ -270,7 +280,7 @@ public class DataManager {
     }
     return converter.toRows(rowEntities, columns, false);
   }
-  
+
   /**
    * Delete a row. This is equivalent to calling {@link #deleteRows(List)} with
    * a list of size 1.
