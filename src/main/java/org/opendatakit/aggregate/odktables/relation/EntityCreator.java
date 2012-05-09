@@ -8,7 +8,6 @@ import java.util.Map.Entry;
 import org.apache.commons.lang.Validate;
 import org.opendatakit.aggregate.odktables.entity.Column;
 import org.opendatakit.aggregate.odktables.entity.Row;
-import org.opendatakit.aggregate.odktables.entity.Scope;
 import org.opendatakit.aggregate.odktables.exception.EtagMismatchException;
 import org.opendatakit.common.ermodel.simple.Entity;
 import org.opendatakit.common.ermodel.simple.Relation;
@@ -110,8 +109,10 @@ public class EntityCreator {
    *          the id of the new row. May be null to auto generate.
    * @param modificationNumber
    *          the modification number for this row.
-   * @param filterScope
-   *          the scope of the filter to apply to this row
+   * @param filterType
+   *          the type of the filter to apply to this row
+   * @param filterValue
+   *          the value of the filter to apply to this row
    * @param values
    *          the values to set on the row.
    * @param columns
@@ -121,8 +122,8 @@ public class EntityCreator {
    * @throws ODKDatastoreException
    */
   public Entity newRowEntity(Relation table, String rowId, int modificationNumber,
-      Scope filterScope, Map<String, String> values, List<Entity> columns, CallingContext cc)
-      throws ODKDatastoreException {
+      String filterType, String filterValue, Map<String, String> values, List<Entity> columns,
+      CallingContext cc) throws ODKDatastoreException {
     Validate.notNull(table);
     Validate.isTrue(modificationNumber >= 0);
     Validate.noNullElements(values.keySet());
@@ -136,7 +137,7 @@ public class EntityCreator {
     User user = cc.getCurrentUser();
     // TODO: change to getEmail()
     row.set(DbTable.CREATE_USER, user.getUriUser());
-    setRowFields(row, modificationNumber, user, filterScope, false, values, columns);
+    setRowFields(row, modificationNumber, user, filterType, filterValue, false, values, columns);
     return row;
   }
 
@@ -165,8 +166,8 @@ public class EntityCreator {
 
     List<Entity> entities = new ArrayList<Entity>();
     for (Row row : rows) {
-      Entity entity = newRowEntity(table, row.getRowId(), modificationNumber, row.getFilterScope(),
-          row.getValues(), columns, cc);
+      Entity entity = newRowEntity(table, row.getRowId(), modificationNumber, row.getFilterScope()
+          .getType().name(), row.getFilterScope().getValue(), row.getValues(), columns, cc);
       entities.add(entity);
     }
     return entities;
@@ -185,8 +186,10 @@ public class EntityCreator {
    *          the current etag value
    * @param values
    *          the values to set
-   * @param filterScope
-   *          the scope of the filter to apply to this row
+   * @param filterType
+   *          the type of the filter to apply to this row
+   * @param filterValue
+   *          the value of the filter to apply to this row
    * @param columns
    *          the {@link DbColumn} entities for the table
    * @param cc
@@ -198,9 +201,9 @@ public class EntityCreator {
    * @throws ODKDatastoreException
    */
   public Entity updateRowEntity(Relation table, int modificationNumber, String rowId,
-      String currentEtag, Map<String, String> values, Scope filterScope, List<Entity> columns,
-      CallingContext cc) throws ODKEntityNotFoundException, ODKDatastoreException,
-      EtagMismatchException {
+      String currentEtag, Map<String, String> values, String filterType, String filterValue,
+      List<Entity> columns, CallingContext cc) throws ODKEntityNotFoundException,
+      ODKDatastoreException, EtagMismatchException {
     Validate.notNull(table);
     Validate.isTrue(modificationNumber >= 0);
     Validate.notEmpty(rowId);
@@ -217,20 +220,20 @@ public class EntityCreator {
           currentEtag, rowEtag, row.getId()));
     }
 
-    setRowFields(row, modificationNumber, cc.getCurrentUser(), filterScope, false, values, columns);
+    setRowFields(row, modificationNumber, cc.getCurrentUser(), filterType, filterValue, false,
+        values, columns);
     return row;
   }
 
   private void setRowFields(Entity row, int modificationNumber, User lastUpdatedUser,
-      Scope filterScope, boolean deleted, Map<String, String> values, List<Entity> columns) {
+      String filterType, String filterValue, boolean deleted, Map<String, String> values,
+      List<Entity> columns) {
     row.set(DbTable.ROW_VERSION, CommonFieldsBase.newUri());
     row.set(DbTable.MODIFICATION_NUMBER, modificationNumber);
     // TODO: change to getEmail()
     row.set(DbTable.LAST_UPDATE_USER, lastUpdatedUser.getUriUser());
-    if (filterScope != null) {
-      row.set(DbTable.FILTER_TYPE, filterScope.getType().name());
-      row.set(DbTable.FILTER_VALUE, filterScope.getValue());
-    }
+    row.set(DbTable.FILTER_TYPE, filterType);
+    row.set(DbTable.FILTER_VALUE, filterValue);
     row.set(DbTable.DELETED, deleted);
 
     for (Entry<String, String> entry : values.entrySet()) {
@@ -283,7 +286,8 @@ public class EntityCreator {
     List<Entity> entities = new ArrayList<Entity>();
     for (Row row : rows) {
       entities.add(updateRowEntity(table, modificationNumber, row.getRowId(), row.getRowEtag(),
-          row.getValues(), row.getFilterScope(), columns, cc));
+          row.getValues(), row.getFilterScope().getType().name(), row.getFilterScope().getValue(),
+          columns, cc));
     }
     return entities;
   }
