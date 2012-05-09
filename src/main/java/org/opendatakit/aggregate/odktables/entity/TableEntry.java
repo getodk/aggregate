@@ -13,7 +13,7 @@ public class TableEntry {
   private String dataEtag;
   private String propertiesEtag;
 
-  public TableEntry() {
+  protected TableEntry() {
   }
 
   public TableEntry(final String tableId, String tableName, final String dataEtag,

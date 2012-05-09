@@ -15,7 +15,7 @@ public class TableProperties {
   @Element(required = false)
   private String metadata;
 
-  public TableProperties() {
+  protected TableProperties() {
   }
 
   public TableProperties(String propertiesEtag, String tableName, String metadata) {
