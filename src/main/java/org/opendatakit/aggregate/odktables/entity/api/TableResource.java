@@ -17,7 +17,8 @@ public class TableResource extends TableEntry {
     super(entry.getTableId(), entry.getTableName(), entry.getDataEtag(), entry.getPropertiesEtag());
   }
 
-  public TableResource() {
+  @SuppressWarnings("unused")
+  private TableResource() {
   }
 
   public String getSelfUri() {
