@@ -8,6 +8,7 @@ import java.util.Map;
 import org.opendatakit.aggregate.odktables.entity.Column;
 import org.opendatakit.aggregate.odktables.entity.Column.ColumnType;
 import org.opendatakit.aggregate.odktables.entity.Row;
+import org.opendatakit.aggregate.odktables.entity.Scope;
 import org.opendatakit.aggregate.odktables.entity.TableEntry;
 import org.opendatakit.aggregate.odktables.entity.TableProperties;
 import org.opendatakit.common.ermodel.simple.Entity;
@@ -127,6 +128,14 @@ public class EntityConverter {
     row.setRowId(entity.getId());
     row.setRowEtag(entity.getString(DbTable.ROW_VERSION));
     row.setDeleted(entity.getBoolean(DbTable.DELETED));
+    row.setCreateUser(entity.getString(DbTable.CREATE_USER));
+    row.setLastUpdateUser(entity.getString(DbTable.LAST_UPDATE_USER));
+    String filterType = entity.getString(DbTable.FILTER_TYPE);
+    if (filterType != null) {
+      Scope.Type type = Scope.Type.valueOf(filterType);
+      String value = entity.getString(DbTable.FILTER_VALUE);
+      row.setFilterScope(new Scope(type, value));
+    }
 
     row.setValues(getRowValues(entity, columns));
     return row;
@@ -146,6 +155,14 @@ public class EntityConverter {
     row.setRowId(entity.getString(DbLogTable.ROW_ID));
     row.setRowEtag(entity.getString(DbLogTable.ROW_VERSION));
     row.setDeleted(entity.getBoolean(DbLogTable.DELETED));
+    row.setCreateUser(entity.getString(DbLogTable.CREATE_USER));
+    row.setLastUpdateUser(entity.getString(DbLogTable.LAST_UPDATE_USER));
+    String filterType = entity.getString(DbLogTable.FILTER_TYPE);
+    if (filterType != null) {
+      Scope.Type type = Scope.Type.valueOf(filterType);
+      String value = entity.getString(DbLogTable.FILTER_VALUE);
+      row.setFilterScope(new Scope(type, value));
+    }
 
     row.setValues(getRowValues(entity, columns));
     return row;
