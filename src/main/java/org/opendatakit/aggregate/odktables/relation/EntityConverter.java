@@ -9,6 +9,7 @@ import org.opendatakit.aggregate.odktables.entity.Column;
 import org.opendatakit.aggregate.odktables.entity.Column.ColumnType;
 import org.opendatakit.aggregate.odktables.entity.Row;
 import org.opendatakit.aggregate.odktables.entity.Scope;
+import org.opendatakit.aggregate.odktables.entity.TableAcl;
 import org.opendatakit.aggregate.odktables.entity.TableEntry;
 import org.opendatakit.aggregate.odktables.entity.TableProperties;
 import org.opendatakit.common.ermodel.simple.Entity;
@@ -84,6 +85,32 @@ public class EntityConverter {
         entity.getString(DbTableProperties.TABLE_NAME),
         entity.getString(DbTableProperties.TABLE_METADATA));
     return properties;
+  }
+
+  /**
+   * Convert a {@link DbTableAcl} entity to a {@link TableAcl}
+   */
+  public TableAcl toTableAcl(Entity entity) {
+    String tableId = entity.getString(DbTableAcl.TABLE_ID);
+    Scope.Type scopeType = Scope.Type.valueOf(entity.getString(DbTableAcl.SCOPE_TYPE));
+    String scopeValue = entity.getString(DbTableAcl.SCOPE_VALUE);
+    Scope scope = new Scope(scopeType, scopeValue);
+    String permissions = entity.getString(DbTableAcl.PERMISSIONS);
+    TableAcl acl = new TableAcl(tableId, scope, RUtil.toPermissionsList(permissions));
+    return acl;
+  }
+
+  /**
+   * Convert a list of {@link DbTableAcl} entities to a list of {@link TableAcl}
+   * .
+   */
+  public List<TableAcl> toTableAcls(List<Entity> entities) {
+    List<TableAcl> acls = new ArrayList<TableAcl>();
+    for (Entity entity : entities) {
+      TableAcl acl = toTableAcl(entity);
+      acls.add(acl);
+    }
+    return acls;
   }
 
   /**
