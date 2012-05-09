@@ -21,8 +21,8 @@ public class DbTable {
   public static final String MODIFICATION_NUMBER = "MODIFICATION_NUMBER";
   public static final String CREATE_USER = "CREATE_USER";
   public static final String LAST_UPDATE_USER = "LAST_UPDATE_USER";
-  public static final String USER_FILTER = "USER_FILTER";
-  public static final String GROUP_FILTER = "GROUP_FILTER";
+  public static final String FILTER_TYPE = "FILTER_TYPE";
+  public static final String FILTER_VALUE = "FILTER_VALUE";
   public static final String DELETED = "DELETED";
 
   private static final List<DataField> dataFields;
@@ -32,8 +32,8 @@ public class DbTable {
     dataFields.add(new DataField(MODIFICATION_NUMBER, DataType.INTEGER, false));
     dataFields.add(new DataField(CREATE_USER, DataType.STRING, false));
     dataFields.add(new DataField(LAST_UPDATE_USER, DataType.STRING, false));
-    dataFields.add(new DataField(USER_FILTER, DataType.STRING, true));
-    dataFields.add(new DataField(GROUP_FILTER, DataType.STRING, true));
+    dataFields.add(new DataField(FILTER_TYPE, DataType.STRING, true));
+    dataFields.add(new DataField(FILTER_VALUE, DataType.STRING, true));
     dataFields.add(new DataField(DELETED, DataType.BOOLEAN, false));
   }
 
