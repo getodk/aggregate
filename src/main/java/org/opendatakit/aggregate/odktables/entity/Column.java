@@ -21,8 +21,8 @@ public class Column {
 
   }
 
-  public Column() {
-  }
+  @SuppressWarnings("unused")
+  private Column() {}
 
   public Column(final String name, final ColumnType type) {
     this.name = name;
