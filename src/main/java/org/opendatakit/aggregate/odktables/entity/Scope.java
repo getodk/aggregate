@@ -24,6 +24,9 @@ public class Scope {
     this.value = value;
   }
 
+  @SuppressWarnings("unused")
+  private Scope() {}
+
   /**
    * @return the type
    */
