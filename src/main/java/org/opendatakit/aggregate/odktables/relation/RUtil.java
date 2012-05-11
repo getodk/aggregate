@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
-import org.opendatakit.aggregate.odktables.entity.TablePermission;
+import org.opendatakit.aggregate.odktables.entity.TableRole;
 
 /**
  * @author the.dylan.price@gmail.com
@@ -22,25 +22,4 @@ public class RUtil {
     return id.replace('-', '_').replace(':', '_').toUpperCase();
   }
 
-  /**
-   * Convert a list of {@link TablePermission} into a string as it should be
-   * stored in the datastore
-   */
-  public static String toPermissionsString(List<TablePermission> permissions) {
-    return StringUtils.join(permissions, ',');
-  }
-
-  /**
-   * Convert a string of permissions coming from the datastore to a list of
-   * {@link TablePermission}
-   */
-  public static List<TablePermission> toPermissionsList(String permissions) {
-    String[] strings = StringUtils.split(permissions, ',');
-    List<TablePermission> perms = new ArrayList<TablePermission>();
-    for (String string : strings) {
-      TablePermission permission = TablePermission.valueOf(string);
-      perms.add(permission);
-    }
-    return perms;
-  }
 }
