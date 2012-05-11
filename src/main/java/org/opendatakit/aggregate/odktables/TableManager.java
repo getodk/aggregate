@@ -5,11 +5,14 @@ import java.util.List;
 
 import org.apache.commons.lang.Validate;
 import org.opendatakit.aggregate.odktables.entity.Column;
+import org.opendatakit.aggregate.odktables.entity.Scope;
 import org.opendatakit.aggregate.odktables.entity.TableEntry;
+import org.opendatakit.aggregate.odktables.entity.TableRole;
 import org.opendatakit.aggregate.odktables.exception.TableAlreadyExistsException;
 import org.opendatakit.aggregate.odktables.relation.DbColumn;
 import org.opendatakit.aggregate.odktables.relation.DbLogTable;
 import org.opendatakit.aggregate.odktables.relation.DbTable;
+import org.opendatakit.aggregate.odktables.relation.DbTableAcl;
 import org.opendatakit.aggregate.odktables.relation.DbTableEntry;
 import org.opendatakit.aggregate.odktables.relation.DbTableProperties;
 import org.opendatakit.aggregate.odktables.relation.EntityConverter;
@@ -163,6 +166,10 @@ public class TableManager {
     Entity properties = creator.newTablePropertiesEntity(tableId, tableName, metadata, cc);
     entities.add(properties);
 
+    Entity acl = creator.newTableAclEntity(tableId, new Scope(Scope.Type.DEFAULT, null),
+        TableRole.NONE, cc);
+    entities.add(acl);
+
     Relation.putEntities(entities, cc);
 
     return converter.toTableEntry(entry, tableName);
@@ -192,6 +199,9 @@ public class TableManager {
 
     Entity properties = DbTableProperties.getProperties(tableId, cc);
     entities.add(properties);
+
+    List<Entity> acls = DbTableAcl.query(tableId, cc);
+    entities.addAll(acls);
 
     Relation table = DbTable.getRelation(tableId, cc);
     Relation logTable = DbLogTable.getRelation(tableId, cc);
