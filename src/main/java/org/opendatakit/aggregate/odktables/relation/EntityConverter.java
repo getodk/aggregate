@@ -12,6 +12,7 @@ import org.opendatakit.aggregate.odktables.entity.Scope;
 import org.opendatakit.aggregate.odktables.entity.TableAcl;
 import org.opendatakit.aggregate.odktables.entity.TableEntry;
 import org.opendatakit.aggregate.odktables.entity.TableProperties;
+import org.opendatakit.aggregate.odktables.entity.TableRole;
 import org.opendatakit.common.ermodel.simple.Entity;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.DataField.DataType;
@@ -91,12 +92,13 @@ public class EntityConverter {
    * Convert a {@link DbTableAcl} entity to a {@link TableAcl}
    */
   public TableAcl toTableAcl(Entity entity) {
-    String tableId = entity.getString(DbTableAcl.TABLE_ID);
     Scope.Type scopeType = Scope.Type.valueOf(entity.getString(DbTableAcl.SCOPE_TYPE));
     String scopeValue = entity.getString(DbTableAcl.SCOPE_VALUE);
     Scope scope = new Scope(scopeType, scopeValue);
-    String permissions = entity.getString(DbTableAcl.PERMISSIONS);
-    TableAcl acl = new TableAcl(tableId, scope, RUtil.toPermissionsList(permissions));
+    TableRole role = TableRole.valueOf(entity.getString(DbTableAcl.ROLE));
+    TableAcl acl = new TableAcl();
+    acl.setRole(role);
+    acl.setScope(scope);
     return acl;
   }
 
@@ -160,8 +162,14 @@ public class EntityConverter {
     String filterType = entity.getString(DbTable.FILTER_TYPE);
     if (filterType != null) {
       Scope.Type type = Scope.Type.valueOf(filterType);
-      String value = entity.getString(DbTable.FILTER_VALUE);
-      row.setFilterScope(new Scope(type, value));
+      if (filterType.equals(Scope.Type.DEFAULT)) {
+        row.setFilterScope(new Scope(Scope.Type.DEFAULT, null));
+      } else {
+        String value = entity.getString(DbTable.FILTER_VALUE);
+        row.setFilterScope(new Scope(type, value));
+      }
+    } else {
+      row.setFilterScope(Scope.EMPTY_SCOPE);
     }
 
     row.setValues(getRowValues(entity, columns));
@@ -187,8 +195,14 @@ public class EntityConverter {
     String filterType = entity.getString(DbLogTable.FILTER_TYPE);
     if (filterType != null) {
       Scope.Type type = Scope.Type.valueOf(filterType);
-      String value = entity.getString(DbLogTable.FILTER_VALUE);
-      row.setFilterScope(new Scope(type, value));
+      if (type.equals(Scope.Type.DEFAULT)) {
+        row.setFilterScope(new Scope(Scope.Type.DEFAULT, null));
+      } else {
+        String value = entity.getString(DbLogTable.FILTER_VALUE);
+        row.setFilterScope(new Scope(type, value));
+      }
+    } else {
+      row.setFilterScope(Scope.EMPTY_SCOPE);
     }
 
     row.setValues(getRowValues(entity, columns));
