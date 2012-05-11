@@ -9,6 +9,7 @@ import org.apache.commons.lang.Validate;
 import org.opendatakit.aggregate.odktables.entity.Column;
 import org.opendatakit.aggregate.odktables.entity.Row;
 import org.opendatakit.aggregate.odktables.entity.Scope;
+import org.opendatakit.aggregate.odktables.entity.TableRole;
 import org.opendatakit.aggregate.odktables.exception.EtagMismatchException;
 import org.opendatakit.common.ermodel.simple.Entity;
 import org.opendatakit.common.ermodel.simple.Relation;
@@ -106,30 +107,28 @@ public class EntityCreator {
    * 
    * @param tableId
    *          the id of the table for the new table acl entity
-   * @param scopeType
-   *          the type for the scope, see {@link Scope.Type}
-   * @param scopeValue
-   *          the value for the scope of this acl entity
-   * @param permissions
-   *          the comma-separated list of permissions to be applied to the given
-   *          scope
+   * @param scope
+   *          the scope of the acl
+   * @param role
+   *          the role to be applied to the given scope
    * @param cc
    * @return the created entity, not yet persisted
    * @throws ODKDatastoreException
    */
-  public Entity newTableAclEntity(String tableId, String scopeType, String scopeValue,
-      String permissions, CallingContext cc) throws ODKDatastoreException {
+  public Entity newTableAclEntity(String tableId, Scope scope, TableRole role, CallingContext cc)
+      throws ODKDatastoreException {
     Validate.notEmpty(tableId);
-    Validate.notEmpty(scopeType);
-    Validate.notEmpty(scopeValue);
-    Validate.notEmpty(permissions);
+    Validate.notNull(scope);
+    // can't have an empty scope type in an acl entity
+    Validate.notNull(scope.getType());
+    Validate.notNull(role);
     Validate.notNull(cc);
 
     Entity tableAcl = DbTableAcl.getRelation(cc).newEntity(cc);
     tableAcl.set(DbTableAcl.TABLE_ID, tableId);
-    tableAcl.set(DbTableAcl.SCOPE_TYPE, scopeType);
-    tableAcl.set(DbTableAcl.SCOPE_VALUE, scopeValue);
-    tableAcl.set(DbTableAcl.PERMISSIONS, permissions);
+    tableAcl.set(DbTableAcl.SCOPE_TYPE, scope.getType().name());
+    tableAcl.set(DbTableAcl.SCOPE_VALUE, scope.getValue());
+    tableAcl.set(DbTableAcl.ROLE, role.name());
 
     return tableAcl;
   }
@@ -143,10 +142,8 @@ public class EntityCreator {
    *          the id of the new row. May be null to auto generate.
    * @param modificationNumber
    *          the modification number for this row.
-   * @param filterType
-   *          the type of the filter to apply to this row
-   * @param filterValue
-   *          the value of the filter to apply to this row
+   * @param filter
+   *          the scope of the filter
    * @param values
    *          the values to set on the row.
    * @param columns
@@ -155,11 +152,12 @@ public class EntityCreator {
    * @return the created entity, not yet persisted
    * @throws ODKDatastoreException
    */
-  public Entity newRowEntity(Relation table, String rowId, int modificationNumber,
-      String filterType, String filterValue, Map<String, String> values, List<Entity> columns,
-      CallingContext cc) throws ODKDatastoreException {
+  public Entity newRowEntity(Relation table, String rowId, int modificationNumber, Scope filter,
+      Map<String, String> values, List<Entity> columns, CallingContext cc)
+      throws ODKDatastoreException {
     Validate.notNull(table);
     Validate.isTrue(modificationNumber >= 0);
+    Validate.notNull(filter);
     Validate.noNullElements(values.keySet());
     Validate.noNullElements(columns);
     Validate.notNull(cc);
@@ -171,7 +169,8 @@ public class EntityCreator {
     User user = cc.getCurrentUser();
     // TODO: change to getEmail()
     row.set(DbTable.CREATE_USER, user.getUriUser());
-    setRowFields(row, modificationNumber, user, filterType, filterValue, false, values, columns);
+    setRowFields(row, modificationNumber, user, filter.getType(), filter.getValue(), false, values,
+        columns);
     return row;
   }
 
@@ -200,8 +199,8 @@ public class EntityCreator {
 
     List<Entity> entities = new ArrayList<Entity>();
     for (Row row : rows) {
-      Entity entity = newRowEntity(table, row.getRowId(), modificationNumber, row.getFilterScope()
-          .getType().name(), row.getFilterScope().getValue(), row.getValues(), columns, cc);
+      Entity entity = newRowEntity(table, row.getRowId(), modificationNumber, row.getFilterScope(),
+          row.getValues(), columns, cc);
       entities.add(entity);
     }
     return entities;
@@ -220,10 +219,8 @@ public class EntityCreator {
    *          the current etag value
    * @param values
    *          the values to set
-   * @param filterType
-   *          the type of the filter to apply to this row
-   * @param filterValue
-   *          the value of the filter to apply to this row
+   * @param filter
+   *          the filter to apply to this row
    * @param columns
    *          the {@link DbColumn} entities for the table
    * @param cc
@@ -235,9 +232,9 @@ public class EntityCreator {
    * @throws ODKDatastoreException
    */
   public Entity updateRowEntity(Relation table, int modificationNumber, String rowId,
-      String currentEtag, Map<String, String> values, String filterType, String filterValue,
-      List<Entity> columns, CallingContext cc) throws ODKEntityNotFoundException,
-      ODKDatastoreException, EtagMismatchException {
+      String currentEtag, Map<String, String> values, Scope filter, List<Entity> columns,
+      CallingContext cc) throws ODKEntityNotFoundException, ODKDatastoreException,
+      EtagMismatchException {
     Validate.notNull(table);
     Validate.isTrue(modificationNumber >= 0);
     Validate.notEmpty(rowId);
@@ -255,20 +252,24 @@ public class EntityCreator {
           currentEtag, rowEtag, row.getId()));
     }
 
-    setRowFields(row, modificationNumber, cc.getCurrentUser(), filterType, filterValue, false,
-        values, columns);
+    setRowFields(row, modificationNumber, cc.getCurrentUser(), filter.getType(), filter.getValue(),
+        false, values, columns);
     return row;
   }
 
   private void setRowFields(Entity row, int modificationNumber, User lastUpdatedUser,
-      String filterType, String filterValue, boolean deleted, Map<String, String> values,
+      Scope.Type filterType, String filterValue, boolean deleted, Map<String, String> values,
       List<Entity> columns) {
     row.set(DbTable.ROW_VERSION, CommonFieldsBase.newUri());
     row.set(DbTable.MODIFICATION_NUMBER, modificationNumber);
     // TODO: change to getEmail()
     row.set(DbTable.LAST_UPDATE_USER, lastUpdatedUser.getUriUser());
-    row.set(DbTable.FILTER_TYPE, filterType);
-    row.set(DbTable.FILTER_VALUE, filterValue);
+    if (filterType != null) {
+      row.set(DbTable.FILTER_TYPE, filterType.name());
+      if (!filterType.equals(Scope.Type.DEFAULT)) {
+        row.set(DbTable.FILTER_VALUE, filterValue);
+      }
+    }
     row.set(DbTable.DELETED, deleted);
 
     for (Entry<String, String> entry : values.entrySet()) {
@@ -321,8 +322,7 @@ public class EntityCreator {
     List<Entity> entities = new ArrayList<Entity>();
     for (Row row : rows) {
       entities.add(updateRowEntity(table, modificationNumber, row.getRowId(), row.getRowEtag(),
-          row.getValues(), row.getFilterScope().getType().name(), row.getFilterScope().getValue(),
-          columns, cc));
+          row.getValues(), row.getFilterScope(), columns, cc));
     }
     return entities;
   }
