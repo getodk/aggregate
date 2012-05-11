@@ -12,6 +12,7 @@ public class TableResource extends TableEntry {
   private String propertiesUri;
   private String dataUri;
   private String diffUri;
+  private String aclUri;
 
   public TableResource(TableEntry entry) {
     super(entry.getTableId(), entry.getTableName(), entry.getDataEtag(), entry.getPropertiesEtag());
@@ -37,6 +38,10 @@ public class TableResource extends TableEntry {
     return this.diffUri;
   }
 
+  public String getAclUri() {
+    return this.aclUri;
+  }
+
   public void setSelfUri(final String selfUri) {
     this.selfUri = selfUri;
   }
@@ -53,28 +58,48 @@ public class TableResource extends TableEntry {
     this.diffUri = diffUri;
   }
 
+  public void setAclUri(final String aclUri) {
+    this.aclUri = aclUri;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see java.lang.Object#equals(java.lang.Object)
+   */
   @Override
-  public boolean equals(final Object o) {
-    if (o == this)
+  public boolean equals(Object obj) {
+    if (this == obj)
       return true;
-    if (!(o instanceof TableResource))
+    if (!super.equals(obj))
       return false;
-    final TableResource other = (TableResource) o;
-    if (!other.canEqual((Object) this))
+    if (!(obj instanceof TableResource))
       return false;
-    if (!super.equals(o))
+    TableResource other = (TableResource) obj;
+    if (aclUri == null) {
+      if (other.aclUri != null)
+        return false;
+    } else if (!aclUri.equals(other.aclUri))
       return false;
-    if (this.getSelfUri() == null ? other.getSelfUri() != null : !this.getSelfUri().equals(
-        (Object) other.getSelfUri()))
+    if (dataUri == null) {
+      if (other.dataUri != null)
+        return false;
+    } else if (!dataUri.equals(other.dataUri))
       return false;
-    if (this.getPropertiesUri() == null ? other.getPropertiesUri() != null : !this
-        .getPropertiesUri().equals((Object) other.getPropertiesUri()))
+    if (diffUri == null) {
+      if (other.diffUri != null)
+        return false;
+    } else if (!diffUri.equals(other.diffUri))
       return false;
-    if (this.getDataUri() == null ? other.getDataUri() != null : !this.getDataUri().equals(
-        (Object) other.getDataUri()))
+    if (propertiesUri == null) {
+      if (other.propertiesUri != null)
+        return false;
+    } else if (!propertiesUri.equals(other.propertiesUri))
       return false;
-    if (this.getDiffUri() == null ? other.getDiffUri() != null : !this.getDiffUri().equals(
-        (Object) other.getDiffUri()))
+    if (selfUri == null) {
+      if (other.selfUri != null)
+        return false;
+    } else if (!selfUri.equals(other.selfUri))
       return false;
     return true;
   }
@@ -83,23 +108,42 @@ public class TableResource extends TableEntry {
     return other instanceof TableResource;
   }
 
+  /*
+   * (non-Javadoc)
+   * 
+   * @see java.lang.Object#hashCode()
+   */
   @Override
   public int hashCode() {
-    final int PRIME = 31;
-    int result = 1;
-    result = result * PRIME + super.hashCode();
-    result = result * PRIME + (this.getSelfUri() == null ? 0 : this.getSelfUri().hashCode());
-    result = result * PRIME
-        + (this.getPropertiesUri() == null ? 0 : this.getPropertiesUri().hashCode());
-    result = result * PRIME + (this.getDataUri() == null ? 0 : this.getDataUri().hashCode());
-    result = result * PRIME + (this.getDiffUri() == null ? 0 : this.getDiffUri().hashCode());
+    final int prime = 31;
+    int result = super.hashCode();
+    result = prime * result + ((aclUri == null) ? 0 : aclUri.hashCode());
+    result = prime * result + ((dataUri == null) ? 0 : dataUri.hashCode());
+    result = prime * result + ((diffUri == null) ? 0 : diffUri.hashCode());
+    result = prime * result + ((propertiesUri == null) ? 0 : propertiesUri.hashCode());
+    result = prime * result + ((selfUri == null) ? 0 : selfUri.hashCode());
     return result;
   }
 
+  /*
+   * (non-Javadoc)
+   * 
+   * @see java.lang.Object#toString()
+   */
   @Override
   public String toString() {
-    return "TableResource(super=" + super.toString() + ", selfUri=" + this.getSelfUri()
-        + ", columnsUri=" + this.getPropertiesUri() + ", dataUri=" + this.getDataUri()
-        + ", diffUri=" + this.getDiffUri() + ")";
+    StringBuilder builder = new StringBuilder();
+    builder.append("TableResource [selfUri=");
+    builder.append(selfUri);
+    builder.append(", propertiesUri=");
+    builder.append(propertiesUri);
+    builder.append(", dataUri=");
+    builder.append(dataUri);
+    builder.append(", diffUri=");
+    builder.append(diffUri);
+    builder.append(", aclUri=");
+    builder.append(aclUri);
+    builder.append("]");
+    return builder.toString();
   }
 }
