@@ -1,31 +1,57 @@
 package org.opendatakit.aggregate.odktables.entity;
 
+import org.apache.commons.lang.Validate;
 import org.simpleframework.xml.Element;
 
 public class Scope {
 
+  public static final Scope EMPTY_SCOPE;
+  static {
+    EMPTY_SCOPE = new Scope();
+    EMPTY_SCOPE.initFields(null, null);
+  }
+
   public enum Type {
+    DEFAULT,
     USER,
     GROUP,
   }
 
-  @Element
+  @Element(required = false)
   private Type type;
 
-  @Element
+  @Element(required = false)
   private String value;
 
   /**
+   * Constructs a new Scope.
+   * 
    * @param type
+   *          the type of the scope. Must not be null. The empty scope may be
+   *          accessed as {@link Scope#EMPTY_SCOPE}.
    * @param value
+   *          the userId if type is {@link Type#USER}, or the groupId of type is
+   *          {@link Type#GROUP}. If type is {@link Type#DEFAULT}, value is
+   *          ignored.
    */
   public Scope(Type type, String value) {
+    Validate.notNull(type);
+    if (type.equals(Type.USER) || type.equals(Type.GROUP)) {
+      Validate.notEmpty(value);
+    } else {
+      value = null;
+    }
+
+    initFields(type, value);
+  }
+
+  private Scope() {
+  }
+
+  private void initFields(Type type, String value) {
     this.type = type;
     this.value = value;
   }
-
-  @SuppressWarnings("unused")
-  private Scope() {}
 
   /**
    * @return the type
