@@ -13,6 +13,7 @@ import org.opendatakit.aggregate.odktables.T;
 import org.opendatakit.aggregate.odktables.entity.Column.ColumnType;
 import org.opendatakit.aggregate.odktables.entity.api.PropertiesResource;
 import org.opendatakit.aggregate.odktables.entity.api.RowResource;
+import org.opendatakit.aggregate.odktables.entity.api.TableAclResource;
 import org.opendatakit.aggregate.odktables.entity.api.TableDefinition;
 import org.opendatakit.aggregate.odktables.entity.api.TableResource;
 import org.opendatakit.aggregate.odktables.entity.serialization.ListConverter;
@@ -21,8 +22,6 @@ import org.simpleframework.xml.convert.Registry;
 import org.simpleframework.xml.convert.RegistryStrategy;
 import org.simpleframework.xml.core.Persister;
 import org.simpleframework.xml.strategy.Strategy;
-
-import com.google.common.collect.Lists;
 
 public class SerializationTest {
 
@@ -82,9 +81,8 @@ public class SerializationTest {
 
   @Test
   public void testTableAcl() throws Exception {
-    List<TablePermission> permissions = Lists.newArrayList(TablePermission.READ_ROW,
-        TablePermission.READ_PROPERTIES, TablePermission.WRITE_ROW);
-    TableAcl expected = new TableAcl("0", new Scope(Scope.Type.USER, "1"), permissions);
+    TableAcl expected = new TableAcl(TableRole.FILTERED_READER);
+    expected.setScope(new Scope(Scope.Type.USER, "0"));
     serializer.write(expected, writer);
     String xml = writer.toString();
     System.out.println(xml);
@@ -137,6 +135,7 @@ public class SerializationTest {
     expected.setDataUri("http://localhost:8080/odktables/tables/1/rows");
     expected.setPropertiesUri("http://localhost:8080/odktables/tables/1/columns");
     expected.setDiffUri("http://localhost:8080/odktables/tables/1/rows/diff");
+    expected.setAclUri("http://localhost:8080/odktables/tables/1/acl");
     serializer.write(expected, writer);
     String xml = writer.toString();
     System.out.println(xml);
@@ -154,6 +153,21 @@ public class SerializationTest {
     String xml = writer.toString();
     System.out.println(xml);
     PropertiesResource actual = serializer.read(PropertiesResource.class, xml);
+    assertEquals(expected, actual);
+  }
+
+  @Test
+  public void testTableAclResource() throws Exception {
+    TableAcl acl = new TableAcl(TableRole.FILTERED_WRITER);
+    acl.setScope(new Scope(Scope.Type.USER, "0"));
+    TableAclResource expected = new TableAclResource(acl);
+    expected.setSelfUri("http://localhost:8080/odktables/tables/1/acl/user/0");
+    expected.setTableUri("http://localhost:8080/odktables/tables/1");
+    expected.setAclUri("http://localhost:8080/odktables/tables/1/acl");
+    serializer.write(expected, writer);
+    String xml = writer.toString();
+    System.out.println(xml);
+    TableAclResource actual = serializer.read(TableAclResource.class, xml);
     assertEquals(expected, actual);
   }
 
