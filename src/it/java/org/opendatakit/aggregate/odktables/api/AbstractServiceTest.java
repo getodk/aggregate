@@ -34,7 +34,7 @@ public abstract class AbstractServiceTest {
   protected HttpHeaders reqHeaders;
 
   @Before
-  public void setUp() throws Exception {
+  public void abstractServiceSetUp() throws Exception {
     this.baseUri = URI.create("http://localhost:8888/odktables/tables/");
 
     // RestTemplate
@@ -56,7 +56,7 @@ public abstract class AbstractServiceTest {
   }
 
   @After
-  public void tearDown() throws Exception {
+  public void abstractServiceTearDown() throws Exception {
     try {
       baseUri = baseUri.resolve("/odktables/tables/");
       URI uri = baseUri.resolve(T.tableId);

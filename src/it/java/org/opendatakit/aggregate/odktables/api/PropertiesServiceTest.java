@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import java.net.URI;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.opendatakit.aggregate.odktables.entity.TableProperties;
 import org.opendatakit.aggregate.odktables.entity.api.PropertiesResource;
@@ -13,9 +14,8 @@ import org.springframework.http.ResponseEntity;
 
 public class PropertiesServiceTest extends AbstractServiceTest {
 
-  @Override
+  @Before
   public void setUp() throws Exception {
-    super.setUp();
     super.createTable();
     TableResource resource = rt.getForObject(baseUri.resolve(T.tableId), TableResource.class);
     baseUri = URI.create(resource.getPropertiesUri());

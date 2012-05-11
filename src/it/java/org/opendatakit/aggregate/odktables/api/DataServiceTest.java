@@ -7,6 +7,7 @@ import static org.junit.Assert.assertTrue;
 import java.net.URI;
 import java.util.List;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.opendatakit.aggregate.odktables.entity.Row;
 import org.opendatakit.aggregate.odktables.entity.api.RowResource;
@@ -17,9 +18,8 @@ import org.springframework.http.ResponseEntity;
 
 public class DataServiceTest extends AbstractServiceTest {
 
-  @Override
+  @Before
   public void setUp() throws Exception {
-    super.setUp();
     super.createTable();
     TableResource resource = rt.getForObject(baseUri.resolve(T.tableId), TableResource.class);
     baseUri = URI.create(resource.getDataUri());
