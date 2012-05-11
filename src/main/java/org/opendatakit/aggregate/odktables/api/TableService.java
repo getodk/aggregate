@@ -50,4 +50,7 @@ public interface TableService {
 
   @Path("{tableId}/diff")
   public DiffService getDiff(@PathParam("tableId") String tableId) throws ODKDatastoreException;
+
+  @Path("{tableId}/acl")
+  public TableAclService getAcl(@PathParam("tableId") String tableId) throws ODKDatastoreException;
 }
