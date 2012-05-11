@@ -16,6 +16,7 @@ import org.opendatakit.aggregate.odktables.api.ColumnService;
 import org.opendatakit.aggregate.odktables.api.DataService;
 import org.opendatakit.aggregate.odktables.api.DiffService;
 import org.opendatakit.aggregate.odktables.api.PropertiesService;
+import org.opendatakit.aggregate.odktables.api.TableAclService;
 import org.opendatakit.aggregate.odktables.api.TableService;
 import org.opendatakit.aggregate.odktables.entity.Column;
 import org.opendatakit.aggregate.odktables.entity.TableEntry;
@@ -92,6 +93,11 @@ public class TableServiceImpl implements TableService {
     return new DiffServiceImpl(tableId, info, cc);
   }
 
+  @Override
+  public TableAclService getAcl(String tableId) throws ODKDatastoreException {
+    return new TableAclServiceImpl(tableId, info, cc);
+  }
+
   private TableResource getResource(TableEntry entry) {
     String tableId = entry.getTableId();
 
@@ -100,13 +106,16 @@ public class TableServiceImpl implements TableService {
     URI self = ub.clone().path(TableService.class, "getTable").build(tableId);
     URI properties = ub.clone().path(TableService.class, "getProperties").build(tableId);
     URI data = ub.clone().path(TableService.class, "getData").build(tableId);
-    URI diff = UriBuilder.fromUri(data).path(TableService.class, "getDiff").build(tableId);
+    URI diff = ub.clone().path(TableService.class, "getDiff").build(tableId);
+    URI acl = ub.clone().path(TableService.class, "getAcl").build(tableId);
 
     TableResource resource = new TableResource(entry);
     resource.setSelfUri(self.toASCIIString());
     resource.setPropertiesUri(properties.toASCIIString());
     resource.setDataUri(data.toASCIIString());
     resource.setDiffUri(diff.toASCIIString());
+    resource.setAclUri(acl.toASCIIString());
     return resource;
   }
+
 }
