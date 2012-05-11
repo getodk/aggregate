@@ -58,6 +58,7 @@ public class Row {
   }
 
   public Row() {
+    this.filterScope = Scope.EMPTY_SCOPE;
   }
 
   public String getRowId() {
