@@ -72,7 +72,7 @@ public class TableAclManagerTest {
     scope.setValue(scope.getValue() + "diff");
     am.setAcl(scope, role);
     List<TableAcl> acls = am.getAcls(Scope.Type.USER);
-    assertEquals(2, acls.size());
+    assertEquals(3, acls.size());
   }
 
   @Test
