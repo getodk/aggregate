@@ -20,8 +20,10 @@ import org.opendatakit.aggregate.odktables.api.TableAclService;
 import org.opendatakit.aggregate.odktables.api.TableService;
 import org.opendatakit.aggregate.odktables.entity.Column;
 import org.opendatakit.aggregate.odktables.entity.TableEntry;
+import org.opendatakit.aggregate.odktables.entity.TableRole.TablePermission;
 import org.opendatakit.aggregate.odktables.entity.api.TableDefinition;
 import org.opendatakit.aggregate.odktables.entity.api.TableResource;
+import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.exception.TableAlreadyExistsException;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
@@ -41,6 +43,7 @@ public class TableServiceImpl implements TableService {
 
   @Override
   public List<TableResource> getTables() throws ODKDatastoreException {
+    // TODO: add access control stuff
     List<TableEntry> entries = tm.getTables();
     ArrayList<TableResource> resources = new ArrayList<TableResource>();
     for (TableEntry entry : entries) {
@@ -50,7 +53,9 @@ public class TableServiceImpl implements TableService {
   }
 
   @Override
-  public TableResource getTable(String tableId) throws ODKDatastoreException {
+  public TableResource getTable(String tableId) throws ODKDatastoreException,
+      PermissionDeniedException {
+    new AuthFilter(tableId, cc).checkPermission(TablePermission.READ_TABLE_ENTRY);
     TableEntry entry = tm.getTableNullSafe(tableId);
     TableResource resource = getResource(entry);
     return resource;
@@ -59,6 +64,7 @@ public class TableServiceImpl implements TableService {
   @Override
   public TableResource createTable(String tableId, TableDefinition definition)
       throws ODKDatastoreException, TableAlreadyExistsException {
+    // TODO: add access control stuff
     String tableName = definition.getTableName();
     List<Column> columns = definition.getColumns();
     String metadata = definition.getMetadata();
@@ -68,7 +74,9 @@ public class TableServiceImpl implements TableService {
   }
 
   @Override
-  public void deleteTable(String tableId) throws ODKDatastoreException, ODKTaskLockException {
+  public void deleteTable(String tableId) throws ODKDatastoreException, ODKTaskLockException,
+      PermissionDeniedException {
+    new AuthFilter(tableId, cc).checkPermission(TablePermission.DELETE_TABLE);
     tm.deleteTable(tableId);
   }
 

@@ -12,7 +12,9 @@ import org.opendatakit.aggregate.odktables.api.DataService;
 import org.opendatakit.aggregate.odktables.api.DiffService;
 import org.opendatakit.aggregate.odktables.api.TableService;
 import org.opendatakit.aggregate.odktables.entity.Row;
+import org.opendatakit.aggregate.odktables.entity.TableRole.TablePermission;
 import org.opendatakit.aggregate.odktables.entity.api.RowResource;
+import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.web.CallingContext;
@@ -20,15 +22,19 @@ import org.opendatakit.common.web.CallingContext;
 public class DiffServiceImpl implements DiffService {
   private DataManager dm;
   private UriInfo info;
+  private AuthFilter af;
 
   public DiffServiceImpl(String tableId, UriInfo info, CallingContext cc)
       throws ODKEntityNotFoundException, ODKDatastoreException {
     this.dm = new DataManager(tableId, cc);
     this.info = info;
+    this.af = new AuthFilter(tableId, cc);
   }
 
   @Override
-  public List<RowResource> getRowsSince(String dataEtag) throws ODKDatastoreException {
+  public List<RowResource> getRowsSince(String dataEtag) throws ODKDatastoreException,
+      PermissionDeniedException {
+    af.checkPermission(TablePermission.READ_ROW);
     List<Row> rows = dm.getRowsSince(dataEtag);
     return getResources(rows);
   }
