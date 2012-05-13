@@ -166,9 +166,9 @@ public class TableManager {
     Entity properties = creator.newTablePropertiesEntity(tableId, tableName, metadata, cc);
     entities.add(properties);
 
-    Entity acl = creator.newTableAclEntity(tableId, new Scope(Scope.Type.DEFAULT, null),
-        TableRole.NONE, cc);
-    entities.add(acl);
+    Entity ownerAcl = creator.newTableAclEntity(tableId, new Scope(Scope.Type.USER, cc
+        .getCurrentUser().getUriUser()), TableRole.OWNER, cc);
+    entities.add(ownerAcl);
 
     Relation.putEntities(entities, cc);
 
