@@ -1,5 +1,6 @@
 package org.opendatakit.aggregate.odktables.entity;
 
+import java.util.Collections;
 import java.util.List;
 
 import com.google.common.collect.Lists;
@@ -9,31 +10,31 @@ public enum TableRole {
   
   FILTERED_READER("Can read properties and read filtered data .", 
       TablePermission.READ_TABLE_ENTRY,
-      TablePermission.FILTERED_ROWS, 
       TablePermission.READ_ROW, 
       TablePermission.READ_PROPERTIES),
       
   FILTERED_WRITER("Can read properties and read/write filtered data.",
       TablePermission.READ_TABLE_ENTRY, 
-      TablePermission.FILTERED_ROWS, 
       TablePermission.READ_ROW,
       TablePermission.WRITE_ROW, 
       TablePermission.DELETE_ROW, 
-      TablePermission.READ_PROPERTIES),
+      TablePermission.READ_PROPERTIES),     
       
   READER("Can read properties and all data.", 
       TablePermission.READ_TABLE_ENTRY,
+      TablePermission.UNFILTERED_ROWS, 
       TablePermission.READ_ROW, 
-      TablePermission.READ_PROPERTIES),
+      TablePermission.READ_PROPERTIES),     
       
-  WRITER("Can read properties and read/write all data.", 
+   WRITER("Can read properties and read/write all data.", 
       TablePermission.READ_TABLE_ENTRY,
+      TablePermission.UNFILTERED_ROWS, 
       TablePermission.READ_ROW, 
       TablePermission.WRITE_ROW, 
       TablePermission.DELETE_ROW,
-      TablePermission.READ_PROPERTIES),
+      TablePermission.READ_PROPERTIES),     
       
-  OWNER("All permissions. Can read/write properties, read/write all data, and read/write access control lists.",
+   OWNER("All permissions. Can delete table, read/write properties, read/write all data, and read/write access control lists.",
       TablePermission.values());
 
   private final String description;
@@ -55,15 +56,25 @@ public enum TableRole {
    * @return the permissions
    */
   public List<TablePermission> getPermissions() {
-    return permissions;
+    return Collections.unmodifiableList(permissions);
   }
-
+  
+  /**
+   * 
+   * @param permission
+   * @return true if this role has the given permission
+   */
+  public boolean hasPermission(TablePermission permission) {
+    return permissions.contains(permission);
+  }
+  
   public enum TablePermission {
     READ_TABLE_ENTRY,
+    DELETE_TABLE,
     READ_ROW,
     WRITE_ROW,
     DELETE_ROW,
-    FILTERED_ROWS,
+    UNFILTERED_ROWS,
     READ_PROPERTIES,
     WRITE_PROPERTIES,
     READ_ACL,
