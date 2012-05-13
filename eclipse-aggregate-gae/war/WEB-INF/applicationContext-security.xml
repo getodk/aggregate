@@ -100,6 +100,9 @@
 		<!--	RemoteAPI access is controlled in web.xml -->
 		<intercept-url pattern="/remote_api" access="true" /> 
 		
+		<!-- ODK Tables API -->
+		<intercept-url pattern="/odktables/**" access="true" />
+		
 		<!-- in case we forgot to mention something... -->
 		<intercept-url pattern="/**" access="isAnonymous()" />
 	</filter-security-metadata-source>
