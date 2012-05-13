@@ -9,6 +9,7 @@ import javax.ws.rs.core.MediaType;
 import org.opendatakit.aggregate.odktables.entity.TableProperties;
 import org.opendatakit.aggregate.odktables.entity.api.PropertiesResource;
 import org.opendatakit.aggregate.odktables.exception.EtagMismatchException;
+import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 
@@ -17,11 +18,11 @@ public interface PropertiesService {
 
   @GET
   @Path("")
-  public PropertiesResource getProperties() throws ODKDatastoreException;
+  public PropertiesResource getProperties() throws ODKDatastoreException, PermissionDeniedException;
 
   @PUT
   @Path("")
   public PropertiesResource setProperties(TableProperties properties) throws ODKDatastoreException,
-      ODKTaskLockException, EtagMismatchException;
+      ODKTaskLockException, EtagMismatchException, PermissionDeniedException;
 
 }

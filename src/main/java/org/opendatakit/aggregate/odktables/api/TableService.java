@@ -12,6 +12,7 @@ import javax.ws.rs.core.MediaType;
 
 import org.opendatakit.aggregate.odktables.entity.api.TableDefinition;
 import org.opendatakit.aggregate.odktables.entity.api.TableResource;
+import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.exception.TableAlreadyExistsException;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
@@ -25,17 +26,17 @@ public interface TableService {
 
   @GET
   @Path("{tableId}")
-  public TableResource getTable(@PathParam("tableId") String tableId) throws ODKDatastoreException;
+  public TableResource getTable(@PathParam("tableId") String tableId) throws ODKDatastoreException, PermissionDeniedException;
 
   @PUT
   @Path("{tableId}")
   public TableResource createTable(@PathParam("tableId") String tableId, TableDefinition definition)
-      throws ODKDatastoreException, TableAlreadyExistsException;
+      throws ODKDatastoreException, TableAlreadyExistsException, PermissionDeniedException;
 
   @DELETE
   @Path("{tableId}")
   public void deleteTable(@PathParam("tableId") String tableId) throws ODKDatastoreException,
-      ODKTaskLockException;
+      ODKTaskLockException, PermissionDeniedException;
 
   @Path("{tableId}/columns")
   public ColumnService getColumns(@PathParam("tableId") String tableId)

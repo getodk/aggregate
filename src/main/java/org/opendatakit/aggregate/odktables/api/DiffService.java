@@ -8,6 +8,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import org.opendatakit.aggregate.odktables.entity.api.RowResource;
+import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 
 @Produces(MediaType.TEXT_XML)
@@ -17,5 +18,5 @@ public interface DiffService {
 
   @GET
   public List<RowResource> getRowsSince(@QueryParam(QUERY_DATA_ETAG) String dataEtag)
-      throws ODKDatastoreException;
+      throws ODKDatastoreException, PermissionDeniedException;
 }
