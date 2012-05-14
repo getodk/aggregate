@@ -13,6 +13,7 @@ import org.opendatakit.aggregate.odktables.entity.Row;
 public class T {
 
   public static final String user = "someone@gmail.com";
+  public static final String group = "somegroup";
   public static final String tableId = "people";
   public static final String tableName = "people";
   public static final String tableMetadata = null;
