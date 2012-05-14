@@ -10,6 +10,7 @@ import org.opendatakit.aggregate.odktables.entity.Column;
 import org.opendatakit.aggregate.odktables.entity.Row;
 import org.opendatakit.aggregate.odktables.entity.Scope;
 import org.opendatakit.aggregate.odktables.entity.TableRole;
+import org.opendatakit.aggregate.odktables.exception.BadColumnNameException;
 import org.opendatakit.aggregate.odktables.exception.EtagMismatchException;
 import org.opendatakit.common.ermodel.simple.Entity;
 import org.opendatakit.common.ermodel.simple.Relation;
@@ -143,7 +144,8 @@ public class EntityCreator {
    * @param modificationNumber
    *          the modification number for this row.
    * @param filter
-   *          the scope of the filter
+   *          the scope of the filter. If null, the {@link Scope#EMPTY_SCOPE}
+   *          will be applied.
    * @param values
    *          the values to set on the row.
    * @param columns
@@ -151,13 +153,15 @@ public class EntityCreator {
    * @param cc
    * @return the created entity, not yet persisted
    * @throws ODKDatastoreException
+   * @throws BadColumnNameException
    */
   public Entity newRowEntity(Relation table, String rowId, int modificationNumber, Scope filter,
       Map<String, String> values, List<Entity> columns, CallingContext cc)
-      throws ODKDatastoreException {
+      throws ODKDatastoreException, BadColumnNameException {
     Validate.notNull(table);
     Validate.isTrue(modificationNumber >= 0);
-    Validate.notNull(filter);
+    if (filter == null)
+      filter = Scope.EMPTY_SCOPE;
     Validate.noNullElements(values.keySet());
     Validate.noNullElements(columns);
     Validate.notNull(cc);
@@ -169,8 +173,7 @@ public class EntityCreator {
     User user = cc.getCurrentUser();
     // TODO: change to getEmail()
     row.set(DbTable.CREATE_USER, user.getUriUser());
-    setRowFields(row, modificationNumber, user, filter.getType(), filter.getValue(), false, values,
-        columns);
+    setRowFields(row, modificationNumber, user, filter, false, values, columns);
     return row;
   }
 
@@ -188,9 +191,10 @@ public class EntityCreator {
    * @param cc
    * @return the created entities, not yet persisted
    * @throws ODKDatastoreException
+   * @throws BadColumnNameException
    */
   public List<Entity> newRowEntities(Relation table, List<Row> rows, int modificationNumber,
-      List<Entity> columns, CallingContext cc) throws ODKDatastoreException {
+      List<Entity> columns, CallingContext cc) throws ODKDatastoreException, BadColumnNameException {
     Validate.notNull(table);
     Validate.noNullElements(rows);
     Validate.isTrue(modificationNumber >= 0);
@@ -220,7 +224,8 @@ public class EntityCreator {
    * @param values
    *          the values to set
    * @param filter
-   *          the filter to apply to this row
+   *          the filter to apply to this row. If null then the existing filter
+   *          will not be changed.
    * @param columns
    *          the {@link DbColumn} entities for the table
    * @param cc
@@ -230,18 +235,18 @@ public class EntityCreator {
    * @throws EtagMismatchException
    *           if currentEtag does not match the etag of the row
    * @throws ODKDatastoreException
+   * @throws BadColumnNameException
    */
   public Entity updateRowEntity(Relation table, int modificationNumber, String rowId,
       String currentEtag, Map<String, String> values, Scope filter, List<Entity> columns,
       CallingContext cc) throws ODKEntityNotFoundException, ODKDatastoreException,
-      EtagMismatchException {
+      EtagMismatchException, BadColumnNameException {
     Validate.notNull(table);
     Validate.isTrue(modificationNumber >= 0);
     Validate.notEmpty(rowId);
     // if currentEtag is null we will catch it later
     Validate.noNullElements(values.keySet());
-    // filterType may be null
-    // filterValue may be null
+    // filter may be null
     Validate.noNullElements(columns);
     Validate.notNull(cc);
 
@@ -252,24 +257,37 @@ public class EntityCreator {
           currentEtag, rowEtag, row.getId()));
     }
 
-    setRowFields(row, modificationNumber, cc.getCurrentUser(), filter.getType(), filter.getValue(),
-        false, values, columns);
+    setRowFields(row, modificationNumber, cc.getCurrentUser(), filter, false, values, columns);
     return row;
   }
 
   private void setRowFields(Entity row, int modificationNumber, User lastUpdatedUser,
-      Scope.Type filterType, String filterValue, boolean deleted, Map<String, String> values,
-      List<Entity> columns) {
+      Scope filterScope, boolean deleted, Map<String, String> values, List<Entity> columns)
+      throws BadColumnNameException {
     row.set(DbTable.ROW_VERSION, CommonFieldsBase.newUri());
     row.set(DbTable.MODIFICATION_NUMBER, modificationNumber);
     // TODO: change to getEmail()
     row.set(DbTable.LAST_UPDATE_USER, lastUpdatedUser.getUriUser());
-    if (filterType != null) {
-      row.set(DbTable.FILTER_TYPE, filterType.name());
-      if (!filterType.equals(Scope.Type.DEFAULT)) {
+
+    // if filterScope is null, don't change the value
+    // if filterScope is the empty scope, set both filter type and value to null
+    // if filterScope is the default scope, make sure filter value is null
+    // else set both filter type and value to the values in filterScope
+    if (filterScope != null) {
+      Scope.Type filterType = filterScope.getType();
+      String filterValue = filterScope.getValue();
+      if (filterType == null) {
+        row.set(DbTable.FILTER_TYPE, (String) null);
+        row.set(DbTable.FILTER_VALUE, (String) null);
+      } else if (filterType.equals(Scope.Type.DEFAULT)) {
+        row.set(DbTable.FILTER_TYPE, filterType.name());
+        row.set(DbTable.FILTER_VALUE, (String) null);
+      } else {
+        row.set(DbTable.FILTER_TYPE, filterType.name());
         row.set(DbTable.FILTER_VALUE, filterValue);
       }
     }
+
     row.set(DbTable.DELETED, deleted);
 
     for (Entry<String, String> entry : values.entrySet()) {
@@ -277,7 +295,7 @@ public class EntityCreator {
       String name = entry.getKey();
       Entity column = findColumn(name, columns);
       if (column == null)
-        throw new IllegalArgumentException("Bad column name " + name);
+        throw new BadColumnNameException("Bad column name " + name);
       row.setAsString(RUtil.convertIdentifier(column.getId()), value);
     }
   }
@@ -310,10 +328,11 @@ public class EntityCreator {
    *           if one of the row's etags does not match the etag for the row in
    *           the datastore
    * @throws ODKDatastoreException
+   * @throws BadColumnNameException
    */
   public List<Entity> updateRowEntities(Relation table, int modificationNumber, List<Row> rows,
       List<Entity> columns, CallingContext cc) throws ODKEntityNotFoundException,
-      ODKDatastoreException, EtagMismatchException {
+      ODKDatastoreException, EtagMismatchException, BadColumnNameException {
     Validate.notNull(table);
     Validate.isTrue(modificationNumber >= 0);
     Validate.noNullElements(rows);
