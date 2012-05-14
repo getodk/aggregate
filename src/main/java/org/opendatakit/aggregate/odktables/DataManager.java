@@ -1,12 +1,16 @@
 package org.opendatakit.aggregate.odktables;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.Validate;
 import org.opendatakit.aggregate.odktables.entity.Row;
+import org.opendatakit.aggregate.odktables.entity.Scope;
+import org.opendatakit.aggregate.odktables.exception.BadColumnNameException;
 import org.opendatakit.aggregate.odktables.exception.EtagMismatchException;
 import org.opendatakit.aggregate.odktables.relation.DbColumn;
 import org.opendatakit.aggregate.odktables.relation.DbLogTable;
@@ -78,10 +82,51 @@ public class DataManager {
    * @throws ODKDatastoreException
    */
   public List<Row> getRows() throws ODKDatastoreException {
-    Query query = table.query("DataManager.getRows", cc);
-    query.equal(DbTable.DELETED, false);
+    Query query = buildRowsQuery();
     List<Entity> rows = query.execute();
     return converter.toRows(rows, columns, false);
+  }
+
+  /**
+   * Retrieve all current rows of the table, filtered by the given scope.
+   * 
+   * @param scope
+   *          the scope to filter by
+   * @return all the rows of the table, filtered by the given scope
+   * @throws ODKDatastoreException
+   */
+  public List<Row> getRows(Scope scope) throws ODKDatastoreException {
+    Query query = buildRowsQuery();
+    query.equal(DbTable.FILTER_TYPE, scope.getType().name());
+    query.equal(DbTable.FILTER_VALUE, scope.getValue());
+    List<Entity> rows = query.execute();
+    return converter.toRows(rows, columns, false);
+  }
+
+  /**
+   * Retrieve all current rows of the table, filtered by rows that match any of
+   * the given scopes.
+   * 
+   * @param scopes
+   *          the scopes to filter by
+   * @return all the rows of the table, filtered by the given scopes
+   * @throws ODKDatastoreException
+   */
+  public List<Row> getRows(List<Scope> scopes) throws ODKDatastoreException {
+    List<Row> rows = new ArrayList<Row>();
+    for (Scope scope : scopes) {
+      rows.addAll(getRows(scope));
+    }
+    return computeDiff(rows);
+  }
+
+  /**
+   * @return the query for current rows in the table
+   */
+  private Query buildRowsQuery() {
+    Query query = table.query("DataManager.buildRowsQuery", cc);
+    query.equal(DbTable.DELETED, false);
+    return query;
   }
 
   /**
@@ -93,17 +138,105 @@ public class DataManager {
    * @throws ODKDatastoreException
    */
   public List<Row> getRowsSince(String dataEtag) throws ODKDatastoreException {
-    Query query = logTable.query("DataManager.getRowsSince", cc);
+    Query query = buildRowsSinceQuery(dataEtag);
+    List<Entity> results = query.execute();
+    List<Row> logRows = converter.toRows(results, columns, true);
+    return computeDiff(logRows);
+  }
+
+  /**
+   * Retrieves a set of row representing the changes since the given data etag,
+   * and filtered to rows which match the given scope.
+   * 
+   * @param dataEtag
+   *          the data etag
+   * @param scope
+   *          the scope to filter to
+   * @return the rows which have changed or been added since the given data etag
+   * @throws ODKDatastoreException
+   */
+  public List<Row> getRowsSince(String dataEtag, Scope scope) throws ODKDatastoreException {
+    Query query = buildRowsSinceQuery(dataEtag);
+    query = narrowByScope(query, scope);
+    List<Entity> results = query.execute();
+    List<Row> logRows = converter.toRows(results, columns, true);
+    return computeDiff(logRows);
+  }
+
+  /**
+   * Retrieves a set of row representing the changes since the given data etag,
+   * and filtered to rows which match any of the given scopes.
+   * 
+   * @param dataEtag
+   *          the data etag
+   * @param scopes
+   *          the scopes to filter to
+   * @return the rows which have changed or been added since the given data etag
+   * @throws ODKDatastoreException
+   */
+  public List<Row> getRowsSince(String dataEtag, List<Scope> scopes) throws ODKDatastoreException {
+    List<Entity> entities = new ArrayList<Entity>();
+    for (Scope scope : scopes) {
+      Query query = buildRowsSinceQuery(dataEtag);
+      query = narrowByScope(query, scope);
+      List<Entity> results = query.execute();
+      entities.addAll(results);
+    }
+    Collections.sort(entities, new Comparator<Entity>() {
+      public int compare(Entity o1, Entity o2) {
+        int modNum1 = o1.getInteger(DbLogTable.MODIFICATION_NUMBER);
+        int modNum2 = o2.getInteger(DbLogTable.MODIFICATION_NUMBER);
+        return modNum1 - modNum2;
+      }
+    });
+    List<Row> logRows = converter.toRows(entities, columns, true);
+    return computeDiff(logRows);
+  }
+
+  /**
+   * @param dataEtag
+   * @return the query for rows which have been changed or added since the given
+   *         dataEtag
+   */
+  private Query buildRowsSinceQuery(String dataEtag) {
+    Query query = logTable.query("DataManager.buildRowsSinceQuery", cc);
     query.greaterThanOrEqual(DbLogTable.MODIFICATION_NUMBER, Integer.parseInt(dataEtag));
     query.sortAscending(DbLogTable.MODIFICATION_NUMBER);
-    List<Entity> results = query.execute();
+    return query;
+  }
 
-    List<Row> logRows = converter.toRows(results, columns, true);
+  /**
+   * Narrows the given {@link DbLogTable} query to filter to rows which match
+   * the given scope.
+   * 
+   * @param query
+   *          the query
+   * @param scope
+   *          the scope to narrow the query by
+   * @return the query
+   * @throws ODKDatastoreException
+   */
+  private Query narrowByScope(Query query, Scope scope) throws ODKDatastoreException {
+    query.equal(DbLogTable.FILTER_TYPE, scope.getType().name());
+    query.equal(DbLogTable.FILTER_VALUE, scope.getValue());
+    return query;
+  }
+
+  /**
+   * Takes a list of rows which are not necessarily all unique and returns a
+   * list of unique rows. In the case where there is more than one row with the
+   * same rowId, only the last (highest index) row is included in the returned
+   * list.
+   * 
+   * @param rows
+   *          the rows
+   * @return the list of unique rows
+   */
+  private List<Row> computeDiff(List<Row> rows) {
     Map<String, Row> diff = new HashMap<String, Row>();
-    for (Row logRow : logRows) {
+    for (Row logRow : rows) {
       diff.put(logRow.getRowId(), logRow);
     }
-
     return new ArrayList<Row>(diff.values());
   }
 
@@ -156,9 +289,12 @@ public class DataManager {
    * @throws ODKEntityPersistException
    * @throws ODKDatastoreException
    * @throws ODKTaskLockException
+   * @throws BadColumnNameException
+   *           if the passed in row set a value for a column which doesn't exist
+   *           in the table
    */
   public Row insertRow(Row row) throws ODKEntityPersistException, ODKDatastoreException,
-      ODKTaskLockException {
+      ODKTaskLockException, BadColumnNameException {
     List<Row> rows = new ArrayList<Row>();
     rows.add(row);
     rows = insertRows(rows);
@@ -182,9 +318,12 @@ public class DataManager {
    *           if the passed in rows contained a row that already exists.
    * @throws ODKDatastoreException
    * @throws ODKTaskLockException
+   * @throws BadColumnNameException
+   *           if one of the passed in rows set a value for a column which
+   *           doesn't exist in the table
    */
   public List<Row> insertRows(List<Row> rows) throws ODKEntityPersistException,
-      ODKDatastoreException, ODKTaskLockException {
+      ODKDatastoreException, ODKTaskLockException, BadColumnNameException {
     try {
       return insertOrUpdateRows(rows, true);
     } catch (EtagMismatchException e) {
@@ -207,9 +346,12 @@ public class DataManager {
    * @throws EtagMismatchException
    *           if the passed in row has a different rowEtag from the row in the
    *           datastore
+   * @throws BadColumnNameException
+   *           if the passed in row set a value for a column which doesn't exist
+   *           in the table
    */
   public Row updateRow(Row row) throws ODKEntityNotFoundException, ODKDatastoreException,
-      ODKTaskLockException, EtagMismatchException {
+      ODKTaskLockException, EtagMismatchException, BadColumnNameException {
     List<Row> rows = new ArrayList<Row>();
     rows.add(row);
     rows = updateRows(rows);
@@ -234,15 +376,19 @@ public class DataManager {
    * @throws EtagMismatchException
    *           if one of the passed in rows has a different rowEtag from the row
    *           in the datastore
+   * @throws BadColumnNameException
+   *           if one of the passed in rows set a value for a column which
+   *           doesn't exist in the table
+   * 
    */
   public List<Row> updateRows(List<Row> rows) throws ODKEntityNotFoundException,
-      ODKDatastoreException, ODKTaskLockException, EtagMismatchException {
+      ODKDatastoreException, ODKTaskLockException, EtagMismatchException, BadColumnNameException {
     return insertOrUpdateRows(rows, false);
   }
 
   private List<Row> insertOrUpdateRows(List<Row> rows, boolean insert)
       throws ODKEntityPersistException, ODKEntityNotFoundException, ODKDatastoreException,
-      ODKTaskLockException, EtagMismatchException {
+      ODKTaskLockException, EtagMismatchException, BadColumnNameException {
     Validate.noNullElements(rows);
 
     List<Entity> rowEntities;
