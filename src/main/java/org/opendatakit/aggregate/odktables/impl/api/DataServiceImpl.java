@@ -7,10 +7,12 @@ import java.util.List;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
+import org.opendatakit.aggregate.odktables.AuthFilter;
 import org.opendatakit.aggregate.odktables.DataManager;
 import org.opendatakit.aggregate.odktables.api.DataService;
 import org.opendatakit.aggregate.odktables.api.TableService;
 import org.opendatakit.aggregate.odktables.entity.Row;
+import org.opendatakit.aggregate.odktables.entity.Scope;
 import org.opendatakit.aggregate.odktables.entity.TableRole.TablePermission;
 import org.opendatakit.aggregate.odktables.entity.api.RowResource;
 import org.opendatakit.aggregate.odktables.exception.BadColumnNameException;
@@ -36,7 +38,13 @@ public class DataServiceImpl implements DataService {
   @Override
   public List<RowResource> getRows() throws ODKDatastoreException, PermissionDeniedException {
     af.checkPermission(TablePermission.READ_ROW);
-    List<Row> rows = dm.getRows();
+    List<Row> rows;
+    if (af.hasPermission(TablePermission.UNFILTERED_ROWS)) {
+      rows = dm.getRows();
+    } else {
+      List<Scope> scopes = af.getScopes();
+      rows = dm.getRows(scopes);
+    }
     return getResources(rows);
   }
 
@@ -44,6 +52,7 @@ public class DataServiceImpl implements DataService {
   public RowResource getRow(String rowId) throws ODKDatastoreException, PermissionDeniedException {
     af.checkPermission(TablePermission.READ_ROW);
     Row row = dm.getRowNullSafe(rowId);
+    af.checkFilter(row);
     RowResource resource = getResource(row);
     return resource;
   }
@@ -55,6 +64,7 @@ public class DataServiceImpl implements DataService {
     af.checkPermission(TablePermission.WRITE_ROW);
     row.setRowId(rowId);
     Row dbRow = dm.getRow(rowId);
+    af.checkFilter(dbRow);
     if (dbRow == null) {
       row = dm.insertRow(row);
     } else {
@@ -68,6 +78,8 @@ public class DataServiceImpl implements DataService {
   public void deleteRow(String rowId) throws ODKDatastoreException, ODKTaskLockException,
       PermissionDeniedException {
     af.checkPermission(TablePermission.DELETE_ROW);
+    Row row = dm.getRowNullSafe(rowId);
+    af.checkFilter(row);
     dm.deleteRow(rowId);
   }
 
