@@ -7,11 +7,13 @@ import java.util.List;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
+import org.opendatakit.aggregate.odktables.AuthFilter;
 import org.opendatakit.aggregate.odktables.DataManager;
 import org.opendatakit.aggregate.odktables.api.DataService;
 import org.opendatakit.aggregate.odktables.api.DiffService;
 import org.opendatakit.aggregate.odktables.api.TableService;
 import org.opendatakit.aggregate.odktables.entity.Row;
+import org.opendatakit.aggregate.odktables.entity.Scope;
 import org.opendatakit.aggregate.odktables.entity.TableRole.TablePermission;
 import org.opendatakit.aggregate.odktables.entity.api.RowResource;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
@@ -35,7 +37,13 @@ public class DiffServiceImpl implements DiffService {
   public List<RowResource> getRowsSince(String dataEtag) throws ODKDatastoreException,
       PermissionDeniedException {
     af.checkPermission(TablePermission.READ_ROW);
-    List<Row> rows = dm.getRowsSince(dataEtag);
+    List<Row> rows;
+    if (af.hasPermission(TablePermission.UNFILTERED_ROWS)) {
+      rows = dm.getRowsSince(dataEtag);
+    } else {
+      List<Scope> scopes = af.getScopes();
+      rows = dm.getRowsSince(dataEtag, scopes);
+    }
     return getResources(rows);
   }
 

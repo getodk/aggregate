@@ -5,6 +5,7 @@ import java.net.URI;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
+import org.opendatakit.aggregate.odktables.AuthFilter;
 import org.opendatakit.aggregate.odktables.PropertiesManager;
 import org.opendatakit.aggregate.odktables.api.PropertiesService;
 import org.opendatakit.aggregate.odktables.api.TableService;

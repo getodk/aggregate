@@ -11,6 +11,7 @@ import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
 import org.opendatakit.aggregate.ContextFactory;
+import org.opendatakit.aggregate.odktables.AuthFilter;
 import org.opendatakit.aggregate.odktables.TableManager;
 import org.opendatakit.aggregate.odktables.api.ColumnService;
 import org.opendatakit.aggregate.odktables.api.DataService;
