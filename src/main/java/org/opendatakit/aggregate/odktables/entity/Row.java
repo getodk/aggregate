@@ -1,6 +1,8 @@
 package org.opendatakit.aggregate.odktables.entity;
 
+import java.util.HashMap;
 import java.util.Map;
+
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementMap;
 import org.simpleframework.xml.Root;
@@ -39,6 +41,7 @@ public class Row {
     Row row = new Row();
     row.rowId = rowId;
     row.values = values;
+    row.filterScope = Scope.EMPTY_SCOPE;
     return row;
   }
 
@@ -58,7 +61,13 @@ public class Row {
   }
 
   public Row() {
-    this.filterScope = Scope.EMPTY_SCOPE;
+    this.rowId = null;
+    this.rowEtag = null;
+    this.deleted = false;
+    this.createUser = null;
+    this.lastUpdateUser = null;
+    this.filterScope = null;
+    this.values = new HashMap<String, String>();
   }
 
   public String getRowId() {
