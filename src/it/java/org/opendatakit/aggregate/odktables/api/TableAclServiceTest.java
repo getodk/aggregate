@@ -26,7 +26,7 @@ public class TableAclServiceTest extends AbstractServiceTest {
   }
 
   @Test
-  public void testGetAclsOnlyDefault() {
+  public void testGetAclsOnlyOwner() {
     List<?> acls = rt.getForObject(baseUri, List.class);
     assertEquals(1, acls.size());
   }
