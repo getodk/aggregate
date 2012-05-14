@@ -32,7 +32,7 @@ public class Scope {
    * @param value
    *          the userId if type is {@link Type#USER}, or the groupId of type is
    *          {@link Type#GROUP}. If type is {@link Type#DEFAULT}, value is
-   *          ignored.
+   *          ignored (set to null).
    */
   public Scope(Type type, String value) {
     Validate.notNull(type);
