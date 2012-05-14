@@ -7,6 +7,7 @@ import javax.ws.rs.ext.Provider;
 
 import org.opendatakit.aggregate.odktables.entity.api.Error;
 import org.opendatakit.aggregate.odktables.entity.api.Error.ErrorType;
+import org.opendatakit.aggregate.odktables.exception.BadColumnNameException;
 import org.opendatakit.aggregate.odktables.exception.EtagMismatchException;
 import org.opendatakit.aggregate.odktables.exception.ODKTablesException;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
@@ -26,6 +27,9 @@ public class ODKTablesExceptionMapper implements ExceptionMapper<ODKTablesExcept
     } else if (e instanceof PermissionDeniedException) {
       return Response.status(Status.FORBIDDEN)
           .entity(new Error(ErrorType.PERMISSION_DENIED, e.getMessage())).build();
+    } else if (e instanceof BadColumnNameException) {
+      return Response.status(Status.BAD_REQUEST)
+          .entity(new Error(ErrorType.BAD_COLUMN_NAME, e.getMessage())).build();
     } else {
       return Response.status(Status.BAD_REQUEST)
           .entity(new Error(ErrorType.BAD_REQUEST, e.getMessage())).build();
