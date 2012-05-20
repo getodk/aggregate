@@ -333,6 +333,15 @@
 	</servlet-mapping>
 
 	<servlet>
+		<servlet-name>JsonFileGeneratorTask</servlet-name>
+		<servlet-class>org.opendatakit.aggregate.task.gae.servlet.JsonGeneratorTaskServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>JsonFileGeneratorTask</servlet-name>
+		<url-pattern>gae/JsonFileGeneratorTask</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
 		<servlet-name>uploadSubmissionsTask</servlet-name>
 		<servlet-class>org.opendatakit.aggregate.task.gae.servlet.UploadSubmissionsTaskServlet</servlet-class>
 	</servlet>
