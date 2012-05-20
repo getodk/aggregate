@@ -37,4 +37,6 @@ public interface FormServiceAsync {
   void createKmlFromFilter(FilterGroup group, String geopointKey, String titleKey, String binaryKey,
       AsyncCallback<Boolean> callback);
 
+  void createJsonFileFromFilter(FilterGroup group, AsyncCallback<Boolean> callback);
+
 }

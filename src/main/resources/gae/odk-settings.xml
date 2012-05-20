@@ -46,6 +46,7 @@
 		class="org.opendatakit.aggregate.task.gae.UploadSubmissionsImpl" />
 	<bean id="kml_task" class="org.opendatakit.aggregate.task.gae.KmlGeneratorImpl" />
 	<bean id="csv_task" class="org.opendatakit.aggregate.task.gae.CsvGeneratorImpl" />
+	<bean id="json_file_task" class="org.opendatakit.aggregate.task.gae.JsonFileGeneratorImpl" />
     <bean id="http_client_factory" class="org.opendatakit.common.utils.gae.GaeHttpClientFactoryImpl" />
 	<bean id="image_util" class="org.opendatakit.aggregate.util.gae.ImageUtilImpl" />
 	<bean id="startup" class="org.opendatakit.aggregate.AggregateStartupImpl" />
@@ -60,6 +61,7 @@
 		<property name="uploadSubmissions" ref="upload_task" />
 		<property name="kmlGenerator" ref="kml_task" />
 		<property name="csvGenerator" ref="csv_task" />
+		<property name="jsonFileGenerator" ref="json_file_task" />
 		<property name="httpClientFactory" ref="http_client_factory" />
 		<property name="imageUtil" ref="image_util" />
 	</bean>
