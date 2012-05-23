@@ -94,7 +94,7 @@ public class JsonFileWorkerImpl {
       filterGroup.setQueryFetchLimit(ServletConsts.EXPORT_CURSOR_CHUNK_SIZE);
 
       query = new QueryByUIFilterGroup(form, filterGroup, CompletionFlag.ONLY_COMPLETE_SUBMISSIONS, cc);
-      formatter = new JsonFormatterWithFilters(pw, form, filterGroup);
+      formatter = new JsonFormatterWithFilters(pw, form, filterGroup, false, cc.getServerURL());
       
       logger.info("after setup of JSON file generation for " + form.getFormId());
       formatter.beforeProcessSubmissions(cc);

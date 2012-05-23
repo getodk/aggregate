@@ -34,10 +34,16 @@ public class JsonFormatterWithFilters implements SubmissionFormatter, RepeatCall
 
   private PrintWriter output;
 
-  public JsonFormatterWithFilters(PrintWriter printWriter, IForm form, FilterGroup filterGroup) {
+  public JsonFormatterWithFilters(PrintWriter printWriter, IForm form, FilterGroup filterGroup,
+      boolean includeBinary, String webServerUrl) {
     output = printWriter;
-    elemFormatter = new JsonElementFormatter(true, true, true);
-    
+
+    if (includeBinary) {
+      elemFormatter = new JsonElementFormatter(true, true, true, this);
+    } else {
+      elemFormatter = new JsonElementFormatter(webServerUrl,true, true, true, this);
+    }
+
     SubmissionUISummary summary = new SubmissionUISummary(form.getViewableName());
     GenerateHeaderInfo headerGenerator = new GenerateHeaderInfo(filterGroup, summary, form);
     headerGenerator.processForHeaderInfo(form.getTopLevelGroupElement());
@@ -73,20 +79,29 @@ public class JsonFormatterWithFilters implements SubmissionFormatter, RepeatCall
   @Override
   public void processRepeatedSubmssionSetsIntoRow(List<SubmissionSet> repeats,
       FormElementModel repeatElement, Row row, CallingContext cc) throws ODKDatastoreException {
-    // TODO: check what is best way to deal with ordinal
-
-    output.append(BasicConsts.LEFT_BRACE);
-    output.append(BasicConsts.QUOTE);
-    output.append(repeatElement.getElementName());
-    output.append(BasicConsts.QUOTE + BasicConsts.COLON);
-    output.append(BasicConsts.LEFT_BRACKET);
+    
+    StringBuilder jsonString = new StringBuilder();
+    jsonString.append(BasicConsts.QUOTE);
+    jsonString.append(repeatElement.getElementName());
+    jsonString.append(BasicConsts.QUOTE + BasicConsts.COLON);
+    jsonString.append(BasicConsts.LEFT_BRACKET);
     // format row elements
     for (SubmissionSet repeat : repeats) {
-      Row repeatRow = repeat.getFormattedValuesAsRow(propertyNames, elemFormatter, false, cc);
-      appendJsonObject(repeatRow.getFormattedValues().iterator());
+      Row repeatRow = repeat.getFormattedValuesAsRow(null, elemFormatter, false, cc);
+      Iterator<String> itr = repeatRow.getFormattedValues().iterator();
+      jsonString.append(BasicConsts.LEFT_BRACE);
+      while (itr.hasNext()) {        
+        jsonString.append(itr.next());
+        if (itr.hasNext()) {
+          jsonString.append(FormatConsts.JSON_VALUE_DELIMITER);
+        } else {
+          jsonString.append(BasicConsts.RIGHT_BRACE);
+        }
+      }
+      jsonString.append(FormatConsts.JSON_VALUE_DELIMITER);
     }
-    output.append(BasicConsts.RIGHT_BRACKET);
-    output.append(BasicConsts.RIGHT_BRACE);
+    jsonString.append(BasicConsts.RIGHT_BRACKET);
+    row.addFormattedValue(jsonString.toString());
   }
 
   /**
@@ -107,5 +122,4 @@ public class JsonFormatterWithFilters implements SubmissionFormatter, RepeatCall
       }
     }
   }
-
 }
