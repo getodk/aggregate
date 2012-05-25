@@ -13,6 +13,7 @@
  */
 package org.opendatakit.common.persistence;
 
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.security.MessageDigest;
@@ -37,9 +38,9 @@ import org.opendatakit.common.security.User;
  * 
  */
 public abstract class CommonFieldsBase {
-	
+
 	public static final int AUDIT_COLUMN_COUNT = 4;
-	
+
 	public static final String URI_COLUMN_NAME = "_URI";
 	public static final String LAST_UPDATE_DATE_COLUMN_NAME = "_LAST_UPDATE_DATE";
 	public static final String LAST_UPDATE_URI_USER_COLUMN_NAME = "_LAST_UPDATE_URI_USER";
@@ -47,20 +48,28 @@ public abstract class CommonFieldsBase {
 	public static final String CREATOR_URI_USER_COLUMN_NAME = "_CREATOR_URI_USER";
 
 	/** standard audit fields */
-	
+
 	/** creator */
-	private static final DataField CREATOR_URI_USER = new DataField(CREATOR_URI_USER_COLUMN_NAME,DataField.DataType.URI, false, PersistConsts.URI_STRING_LEN);
+	private static final DataField CREATOR_URI_USER = new DataField(
+			CREATOR_URI_USER_COLUMN_NAME, DataField.DataType.URI, false,
+			PersistConsts.URI_STRING_LEN);
 	/** creation date */
-	private static final DataField CREATION_DATE = new DataField(CREATION_DATE_COLUMN_NAME, DataField.DataType.DATETIME, false);
+	private static final DataField CREATION_DATE = new DataField(
+			CREATION_DATE_COLUMN_NAME, DataField.DataType.DATETIME, false);
 	/** last user to update record */
-	private static final DataField LAST_UPDATE_URI_USER = new DataField(LAST_UPDATE_URI_USER_COLUMN_NAME, DataField.DataType.URI, true, PersistConsts.URI_STRING_LEN);
+	private static final DataField LAST_UPDATE_URI_USER = new DataField(
+			LAST_UPDATE_URI_USER_COLUMN_NAME, DataField.DataType.URI, true,
+			PersistConsts.URI_STRING_LEN);
 	/** last update date */
-	private static final DataField LAST_UPDATE_DATE = new DataField(LAST_UPDATE_DATE_COLUMN_NAME, DataField.DataType.DATETIME, false).setIndexable(IndexType.ORDERED);
+	private static final DataField LAST_UPDATE_DATE = new DataField(
+			LAST_UPDATE_DATE_COLUMN_NAME, DataField.DataType.DATETIME, false)
+			.setIndexable(IndexType.ORDERED);
 
 	/** primary key for all tables */
-	private static final DataField URI = new DataField(URI_COLUMN_NAME, DataField.DataType.URI, false, PersistConsts.URI_STRING_LEN).setIndexable(IndexType.HASH);
+	private static final DataField URI = new DataField(URI_COLUMN_NAME,
+			DataField.DataType.URI, false, PersistConsts.URI_STRING_LEN)
+			.setIndexable(IndexType.HASH);
 
-	
 	/** member variables */
 	protected final String schemaName;
 	protected final String tableName;
@@ -68,7 +77,7 @@ public abstract class CommonFieldsBase {
 	private Object opaquePersistenceData = null;
 	protected final List<DataField> fieldList = new ArrayList<DataField>();
 	protected final Map<DataField, Object> fieldValueMap = new HashMap<DataField, Object>();
-	
+
 	public final DataField primaryKey;
 	public final DataField creatorUriUser;
 	public final DataField creationDate;
@@ -87,12 +96,12 @@ public abstract class CommonFieldsBase {
 		this.tableName = tableName;
 		// always primary key with the same name...
 		fieldList.add(primaryKey = new DataField(URI));
-		
+
 		// and add audit fields everywhere...
-		fieldList.add(creatorUriUser=new DataField(CREATOR_URI_USER));
-		fieldList.add(creationDate=new DataField(CREATION_DATE));
-		fieldList.add(lastUpdateUriUser=new DataField(LAST_UPDATE_URI_USER));
-		fieldList.add(lastUpdateDate=new DataField(LAST_UPDATE_DATE));
+		fieldList.add(creatorUriUser = new DataField(CREATOR_URI_USER));
+		fieldList.add(creationDate = new DataField(CREATION_DATE));
+		fieldList.add(lastUpdateUriUser = new DataField(LAST_UPDATE_URI_USER));
+		fieldList.add(lastUpdateDate = new DataField(LAST_UPDATE_DATE));
 	}
 
 	/**
@@ -104,7 +113,7 @@ public abstract class CommonFieldsBase {
 	protected CommonFieldsBase(CommonFieldsBase ref, User user) {
 		schemaName = ref.schemaName;
 		tableName = ref.tableName;
-		
+
 		primaryKey = ref.primaryKey;
 		creatorUriUser = ref.creatorUriUser;
 		creationDate = ref.creationDate;
@@ -112,19 +121,19 @@ public abstract class CommonFieldsBase {
 		lastUpdateDate = ref.lastUpdateDate;
 
 		fieldList.addAll(ref.fieldList);
-		
+
 		// populate the audit fields...
 		Date now = new Date();
 		fieldValueMap.put(creationDate, now);
 		fieldValueMap.put(lastUpdateDate, now);
-		fieldValueMap.put(creatorUriUser,  user.getUriUser());
+		fieldValueMap.put(creatorUriUser, user.getUriUser());
 		fieldValueMap.put(primaryKey, CommonFieldsBase.newUri());
 	}
 
 	public final EntityKey getEntityKey() {
-	  return new EntityKey(this, getUri());
+		return new EntityKey(this, getUri());
 	}
-	
+
 	public final String getSchemaName() {
 		return schemaName;
 	}
@@ -161,48 +170,56 @@ public abstract class CommonFieldsBase {
 	}
 
 	public final String getStringField(DataField f) {
-		if ( f == null ) {
+		if (f == null) {
 			throw new IllegalArgumentException("Field value is null!");
 		}
-		if ( !fieldList.contains(f) ) {
-			throw new IllegalArgumentException("Attempting to set a field not belonging to this object");
+		if (!fieldList.contains(f)) {
+			throw new IllegalArgumentException(
+					"Attempting to set a field not belonging to this object");
 		}
 		Object o = fieldValueMap.get(f);
-		if ( o == null ) return null;
+		if (o == null)
+			return null;
 		return (String) o;
 	}
-	
+
 	/**
-	 * Set the given field to the given value.  If the value is too long,
-	 * the prefix is stored and false is returned.
+	 * Set the given field to the given value. If the value is too long, the
+	 * prefix is stored and false is returned.
 	 * 
-	 * @param f field to set
-	 * @param value string value for field
+	 * @param f
+	 *            field to set
+	 * @param value
+	 *            string value for field
 	 * @return false if the value had to be truncated.
 	 */
 	public final boolean setStringField(DataField f, String value) {
-		if ( f == null ) {
+		if (f == null) {
 			throw new IllegalArgumentException("Field value is null!");
 		}
-		if ( !fieldList.contains(f) ) {
-			throw new IllegalArgumentException("Attempting to set a field not belonging to this object");
+		if (!fieldList.contains(f)) {
+			throw new IllegalArgumentException(
+					"Attempting to set a field not belonging to this object");
 		}
-		if (!(( f.getDataType() == DataType.STRING ) || 
-		      ( f.getDataType() == DataType.LONG_STRING ) ||
-		      ( f.getDataType() == DataType.URI )) ) {
-			throw new IllegalArgumentException("Attempting to set non-string field with a String object");
+		if (!((f.getDataType() == DataType.STRING)
+				|| (f.getDataType() == DataType.LONG_STRING) || (f
+					.getDataType() == DataType.URI))) {
+			throw new IllegalArgumentException(
+					"Attempting to set non-string field with a String object");
 		}
 		boolean noOverflow = true;
-		if ( value == null ) {
-			if ( !f.getNullable() ) {
-				throw new IllegalStateException("Attempting to set null value in non-null field");
+		if (value == null) {
+			if (!f.getNullable()) {
+				throw new IllegalStateException(
+						"Attempting to set null value in non-null field");
 			}
 			fieldValueMap.remove(f);
 			return true;
-		} else if ( f.getMaxCharLen().compareTo(Long.valueOf(value.length())) < 0 ) {
-			if ( f.getDataType() == DataType.LONG_STRING ) {
-				throw new IllegalArgumentException("overflowing a LONG_STRING!!");
-			} else if ( f.getDataType() == DataType.URI ) {
+		} else if (f.getMaxCharLen().compareTo(Long.valueOf(value.length())) < 0) {
+			if (f.getDataType() == DataType.LONG_STRING) {
+				throw new IllegalArgumentException(
+						"overflowing a LONG_STRING!!");
+			} else if (f.getDataType() == DataType.URI) {
 				throw new IllegalArgumentException("overflowing a URI!!");
 			}
 			noOverflow = false;
@@ -213,95 +230,111 @@ public abstract class CommonFieldsBase {
 	}
 
 	public final Long getLongField(DataField f) {
-		if ( f == null ) {
+		if (f == null) {
 			throw new IllegalArgumentException("Field value is null!");
 		}
-		if ( !fieldList.contains(f) ) {
-			throw new IllegalArgumentException("Attempting to set a field not belonging to this object");
+		if (!fieldList.contains(f)) {
+			throw new IllegalArgumentException(
+					"Attempting to set a field not belonging to this object");
 		}
 		Object o = fieldValueMap.get(f);
-		if ( o == null ) return null;
+		if (o == null)
+			return null;
 		return (Long) o;
 	}
-	
+
 	public final void setLongField(DataField f, Long value) {
-		if ( f == null ) {
+		if (f == null) {
 			throw new IllegalArgumentException("Field value is null!");
 		}
-		if ( !fieldList.contains(f) ) {
-			throw new IllegalArgumentException("Attempting to set a field not belonging to this object");
+		if (!fieldList.contains(f)) {
+			throw new IllegalArgumentException(
+					"Attempting to set a field not belonging to this object");
 		}
-		if ( f.getDataType() != DataType.INTEGER ) {
-			throw new IllegalArgumentException("Attempting to set non-integer field with a Long object");
+		if (f.getDataType() != DataType.INTEGER) {
+			throw new IllegalArgumentException(
+					"Attempting to set non-integer field with a Long object");
 		}
-		if ( value == null ) {
-			if ( !f.getNullable() ) {
-				throw new IllegalStateException("Attempting to set null value in non-null field");
+		if (value == null) {
+			if (!f.getNullable()) {
+				throw new IllegalStateException(
+						"Attempting to set null value in non-null field");
 			}
 			fieldValueMap.remove(f);
 			return;
 		}
 		fieldValueMap.put(f, value);
 	}
-	
+
 	public final BigDecimal getNumericField(DataField f) {
-		if ( f == null ) {
+		if (f == null) {
 			throw new IllegalArgumentException("Field value is null!");
 		}
-		if ( !fieldList.contains(f) ) {
-			throw new IllegalArgumentException("Attempting to set a field not belonging to this object");
+		if (!fieldList.contains(f)) {
+			throw new IllegalArgumentException(
+					"Attempting to set a field not belonging to this object");
 		}
 		Object o = fieldValueMap.get(f);
-		if ( o == null ) return null;
+		if (o == null)
+			return null;
 		return (BigDecimal) o;
 	}
-	
+
 	public final void setNumericField(DataField f, BigDecimal value) {
-		if ( f == null ) {
+		if (f == null) {
 			throw new IllegalArgumentException("Field value is null!");
 		}
-		if ( !fieldList.contains(f) ) {
-			throw new IllegalArgumentException("Attempting to set a field not belonging to this object");
+		if (!fieldList.contains(f)) {
+			throw new IllegalArgumentException(
+					"Attempting to set a field not belonging to this object");
 		}
-		if ( f.getDataType() != DataType.DECIMAL ) {
-			throw new IllegalArgumentException("Attempting to set non-decimal field with a BigDecimal object");
+		if (f.getDataType() != DataType.DECIMAL) {
+			throw new IllegalArgumentException(
+					"Attempting to set non-decimal field with a BigDecimal object");
 		}
-		if ( value == null ) {
-			if ( !f.getNullable() ) {
-				throw new IllegalStateException("Attempting to set null value in non-null field");
+		if (value == null) {
+			if (!f.getNullable()) {
+				throw new IllegalStateException(
+						"Attempting to set null value in non-null field");
 			}
 			fieldValueMap.remove(f);
 			return;
 		}
 		// enforce scaling here...
-		fieldValueMap.put(f, value.setScale(f.getNumericScale(), BigDecimal.ROUND_HALF_UP));
+		fieldValueMap.put(f,
+				value.setScale(f.getNumericScale(), BigDecimal.ROUND_HALF_UP));
 	}
 
 	public final Date getDateField(DataField f) {
-		if ( f == null ) {
+		if (f == null) {
 			throw new IllegalArgumentException("Field value is null!");
 		}
-		if ( !fieldList.contains(f) ) {
-			throw new IllegalArgumentException("Attempting to set a field not belonging to this object");
+		if (!fieldList.contains(f)) {
+			throw new IllegalArgumentException(
+					"Attempting to set a field not belonging to this object");
 		}
 		Object o = fieldValueMap.get(f);
-		if ( o == null ) return null;
+		if (o == null)
+			return null;
 		return (Date) o;
 	}
-	
+
 	public final void setDateField(DataField f, Date value) {
-		if ( f == null ) {
+		if (f == null) {
 			throw new IllegalArgumentException("Field value is null!");
 		}
-		if ( !fieldList.contains(f) ) {
-			throw new IllegalArgumentException("Attempting to set a field not belonging to this object");
+		if (!fieldList.contains(f)) {
+			throw new IllegalArgumentException(
+					"Attempting to set a field not belonging to this object");
 		}
-		if ( f.getDataType() != DataType.DATETIME ) {
-			throw new IllegalArgumentException("Attempting to set non-datetime field with a Date object");
+		if (f.getDataType() != DataType.DATETIME) {
+			throw new IllegalArgumentException(
+					"Attempting to set non-datetime field with a Date object");
 		}
-		if ( value == null ) {
-			if ( !f.getNullable() ) {
-				throw new IllegalStateException("Attempting to set null value in non-null field");
+		if (value == null) {
+			if (!f.getNullable()) {
+				throw new IllegalStateException(
+						"Attempting to set null value in non-null field");
 			}
 			fieldValueMap.remove(f);
 			return;
@@ -310,139 +343,159 @@ public abstract class CommonFieldsBase {
 	}
 
 	public final Boolean getBooleanField(DataField f) {
-		if ( f == null ) {
+		if (f == null) {
 			throw new IllegalArgumentException("Field value is null!");
 		}
-		if ( !fieldList.contains(f) ) {
-			throw new IllegalArgumentException("Attempting to set a field not belonging to this object");
+		if (!fieldList.contains(f)) {
+			throw new IllegalArgumentException(
+					"Attempting to set a field not belonging to this object");
 		}
 		Object o = fieldValueMap.get(f);
-		if ( o == null ) return null;
+		if (o == null)
+			return null;
 		return (Boolean) o;
 	}
-	
+
 	public final void setBooleanField(DataField f, Boolean value) {
-		if ( f == null ) {
+		if (f == null) {
 			throw new IllegalArgumentException("Field value is null!");
 		}
-		if ( !fieldList.contains(f) ) {
-			throw new IllegalArgumentException("Attempting to set a field not belonging to this object");
+		if (!fieldList.contains(f)) {
+			throw new IllegalArgumentException(
+					"Attempting to set a field not belonging to this object");
 		}
-		if ( f.getDataType() != DataType.BOOLEAN ) {
-			throw new IllegalArgumentException("Attempting to set non-boolean field with a Boolean object");
+		if (f.getDataType() != DataType.BOOLEAN) {
+			throw new IllegalArgumentException(
+					"Attempting to set non-boolean field with a Boolean object");
 		}
-		if ( value == null ) {
-			if ( !f.getNullable() ) {
-				throw new IllegalStateException("Attempting to set null value in non-null field");
+		if (value == null) {
+			if (!f.getNullable()) {
+				throw new IllegalStateException(
+						"Attempting to set null value in non-null field");
 			}
 			fieldValueMap.remove(f);
 			return;
 		}
 		fieldValueMap.put(f, value);
 	}
-	
+
 	public final byte[] getBlobField(DataField f) {
-		if ( f == null ) {
+		if (f == null) {
 			throw new IllegalArgumentException("Field value is null!");
 		}
-		if ( !fieldList.contains(f) ) {
-			throw new IllegalArgumentException("Attempting to set a field not belonging to this object");
+		if (!fieldList.contains(f)) {
+			throw new IllegalArgumentException(
+					"Attempting to set a field not belonging to this object");
 		}
 		Object o = fieldValueMap.get(f);
-		if ( o == null ) return null;
+		if (o == null)
+			return null;
 		return (byte[]) o;
 	}
-	
+
 	public final void setBlobField(DataField f, byte[] value) {
-		if ( f == null ) {
+		if (f == null) {
 			throw new IllegalArgumentException("Field value is null!");
 		}
-		if ( !fieldList.contains(f) ) {
-			throw new IllegalArgumentException("Attempting to set a field not belonging to this object");
+		if (!fieldList.contains(f)) {
+			throw new IllegalArgumentException(
+					"Attempting to set a field not belonging to this object");
 		}
-		if ( f.getDataType() != DataType.BINARY ) {
-			throw new IllegalArgumentException("Attempting to set non-blob field with byte-array object");
+		if (f.getDataType() != DataType.BINARY) {
+			throw new IllegalArgumentException(
+					"Attempting to set non-blob field with byte-array object");
 		}
-		if ( value == null ) {
-			if ( !f.getNullable() ) {
-				throw new IllegalStateException("Attempting to set null value in non-null field");
+		if (value == null) {
+			if (!f.getNullable()) {
+				throw new IllegalStateException(
+						"Attempting to set null value in non-null field");
 			}
 			fieldValueMap.remove(f);
 			return;
 		}
-		fieldValueMap.put(f,value);
+		fieldValueMap.put(f, value);
 	}
-	
+
 	public final static String newUri() {
 		String s = "uuid:" + UUID.randomUUID().toString().toLowerCase();
 		return s;
 	}
 
 	public final static String newMD5HashUri(String value) {
-        try {
+		try {
 			MessageDigest md = MessageDigest.getInstance("MD5");
-			byte[] asBytes = value.getBytes();
+			byte[] asBytes;
+			try {
+				asBytes = value.getBytes("UTF-8");
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
+				throw new IllegalStateException("unexpected", e);
+			}
 			md.update(asBytes);
-			
-            byte[] messageDigest = md.digest();
 
-            BigInteger number = new BigInteger(1, messageDigest);
-            String md5 = number.toString(16);
-            while (md5.length() < 32)
-                md5 = "0" + md5;
-            return "md5:" + md5;
-        } catch (NoSuchAlgorithmException e) {
-        	throw new IllegalStateException("Unexpected problem computing md5 hash", e);
+			byte[] messageDigest = md.digest();
+
+			BigInteger number = new BigInteger(1, messageDigest);
+			String md5 = number.toString(16);
+			while (md5.length() < 32)
+				md5 = "0" + md5;
+			return "md5:" + md5;
+		} catch (NoSuchAlgorithmException e) {
+			throw new IllegalStateException(
+					"Unexpected problem computing md5 hash", e);
 		}
 	}
 
 	public final static String newMD5HashUri(byte[] asBytes) {
-        try {
+		try {
 			MessageDigest md = MessageDigest.getInstance("MD5");
 			md.update(asBytes);
-			
-            byte[] messageDigest = md.digest();
 
-            BigInteger number = new BigInteger(1, messageDigest);
-            String md5 = number.toString(16);
-            while (md5.length() < 32)
-                md5 = "0" + md5;
-            return "md5:" + md5;
-        } catch (NoSuchAlgorithmException e) {
-        	throw new IllegalStateException("Unexpected problem computing md5 hash", e);
+			byte[] messageDigest = md.digest();
+
+			BigInteger number = new BigInteger(1, messageDigest);
+			String md5 = number.toString(16);
+			while (md5.length() < 32)
+				md5 = "0" + md5;
+			return "md5:" + md5;
+		} catch (NoSuchAlgorithmException e) {
+			throw new IllegalStateException(
+					"Unexpected problem computing md5 hash", e);
 		}
 	}
 
 	/**********************************************************************************
-	 **********************************************************************************
-	 **********************************************************************************
+	 ********************************************************************************** 
+	 ********************************************************************************** 
 	 * APIs that should only be used by the persistence layer
-	 **********************************************************************************
-	 **********************************************************************************
+	 ********************************************************************************** 
+	 ********************************************************************************** 
 	 **********************************************************************************/
 
 	/**
-	 * Method implemented in the most derived class to clone the (concrete) relation
-	 * instance to produce an empty entity.
-	 * Only called via {@link org.opendatakit.common.persistence.Datastore#createEntityUsingRelation(CommonFieldsBase, User)}
+	 * Method implemented in the most derived class to clone the (concrete)
+	 * relation instance to produce an empty entity. Only called via
+	 * {@link org.opendatakit.common.persistence.Datastore#createEntityUsingRelation(CommonFieldsBase, User)}
 	 * 
 	 * @param user
 	 * @return empty entity
 	 */
 	public abstract CommonFieldsBase getEmptyRow(User user);
-	
+
 	/**
-	 * @return true if the row contains data that originated from the persistent store.
+	 * @return true if the row contains data that originated from the persistent
+	 *         store.
 	 */
 	public final boolean isFromDatabase() {
 		return fromDatabase;
 	}
 
 	/**
-	 *	Set whether or not the row contains data that originated from the persistent store.
-	 *  This should only be called from within the persistence layer implementation.  Used
-	 *  to determine whether to INSERT or UPDATE a record in the persistent store.
-	 *   
+	 * Set whether or not the row contains data that originated from the
+	 * persistent store. This should only be called from within the persistence
+	 * layer implementation. Used to determine whether to INSERT or UPDATE a
+	 * record in the persistent store.
+	 * 
 	 * @param fromDatabase
 	 */
 	public final void setFromDatabase(boolean fromDatabase) {
@@ -457,10 +510,10 @@ public abstract class CommonFieldsBase {
 	}
 
 	/**
-	 * Associate an opaque object with this row.  This should only be called from within 
-	 * the persistence layer implementation.  Used by some persistence layers to 
-	 * associated private information to a retrieved object that will be needed if
-	 * updates to the row are requested.
+	 * Associate an opaque object with this row. This should only be called from
+	 * within the persistence layer implementation. Used by some persistence
+	 * layers to associated private information to a retrieved object that will
+	 * be needed if updates to the row are requested.
 	 * 
 	 * @param opaquePersistenceData
 	 */
@@ -471,9 +524,9 @@ public abstract class CommonFieldsBase {
 	public final boolean isNull(DataField f) {
 		return (fieldValueMap.get(f) == null);
 	}
-	
+
 	public boolean sameTable(CommonFieldsBase ref) {
-		return getSchemaName().equals(ref.getSchemaName()) &&
-				getTableName().equals(ref.getTableName());
+		return getSchemaName().equals(ref.getSchemaName())
+				&& getTableName().equals(ref.getTableName());
 	}
 }
