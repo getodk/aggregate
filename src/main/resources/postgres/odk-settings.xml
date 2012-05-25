@@ -62,7 +62,7 @@
 	<bean id="worksheet_creator"
 		class="org.opendatakit.aggregate.task.tomcat.WorksheetCreatorImpl" />
 	<bean id="form_delete" class="org.opendatakit.aggregate.task.tomcat.FormDeleteImpl" />
-    <bean id="purge_submissions" class="org.opendatakit.aggregate.task.tomcat.PurgeOlderSubmissionsImpl" />
+	<bean id="purge_submissions" class="org.opendatakit.aggregate.task.tomcat.PurgeOlderSubmissionsImpl" />
 	<bean id="upload_task"
 		class="org.opendatakit.aggregate.task.tomcat.UploadSubmissionsImpl" />
 	<bean id="kml_task" class="org.opendatakit.aggregate.task.tomcat.KmlGeneratorImpl" />
