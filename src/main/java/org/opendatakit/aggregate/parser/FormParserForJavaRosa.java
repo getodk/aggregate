@@ -639,8 +639,7 @@ public class FormParserForJavaRosa {
     for (Map.Entry<String, MultiPartFormItem> itm : fileSet) {
       if (itm.getValue() == xformXmlData)
         continue;// ignore the xform -- stored above.
-      formInfo.setXFormMediaFile(rootElementDefn.modelVersion, rootElementDefn.uiVersion,
-          itm.getValue(), cc);
+      formInfo.setXFormMediaFile(itm.getValue(), cc);
     }
     // Determine the information about the submission...
     formInfo.setIsComplete(true);
