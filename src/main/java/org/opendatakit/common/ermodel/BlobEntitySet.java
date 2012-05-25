@@ -178,21 +178,4 @@ public interface BlobEntitySet {
   public BlobSubmissionOutcome addBlob(byte[] byteArray, String contentType,
       String unrootedFilePath, CallingContext cc) throws ODKDatastoreException;
 
-  /**
-   * Insert the given blob into the Blob set and persist the change to the
-   * datastore. If the blob already exists in the Blob set, as indicated by a
-   * matching unrootedFilePath, the return value indicates whether or not the
-   * byteArray is different from that in the datastore, and
-   * <em>no update is performed</em>.
-   * 
-   * @param byteArray
-   * @param contentType
-   * @param contentLength
-   * @param unrootedFilePath
-   * @param cc
-   * @return
-   * @throws ODKDatastoreException
-   */
-  public BlobSubmissionOutcome addBlob(byte[] byteArray, String contentType, Long contentLength,
-      String unrootedFilePath, CallingContext cc) throws ODKDatastoreException;
 }

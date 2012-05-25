@@ -119,7 +119,7 @@ public class JsonFileWorkerImpl {
       r = new PersistentResults(persistentResultsKey, cc);
       if (attemptCount.equals(r.getAttemptCount())) {
         logger.info("saving JSON into PersistentResults table for " + form.getFormId());
-        r.setResultFile(outputFile, HtmlConsts.RESP_TYPE_JSON, Long.valueOf(outputFile.length),
+        r.setResultFile(outputFile, HtmlConsts.RESP_TYPE_JSON,
             form.getViewableFormNameSuitableAsFileName() + ServletConsts.JSON_FILENAME_APPEND, cc);
         r.setStatus(ExportStatus.AVAILABLE);
         r.setCompletionDate(new Date());
