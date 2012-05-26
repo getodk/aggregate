@@ -13,7 +13,6 @@
 			<list>
 				<value>classpath:jdbc.properties</value>
 				<value>classpath:security.properties</value>
-				<value>WEB-INF/logging.properties</value>
 			</list>
 		</property>
 	</bean>

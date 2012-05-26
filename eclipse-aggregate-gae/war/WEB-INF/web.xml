@@ -338,7 +338,7 @@
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>JsonFileGeneratorTask</servlet-name>
-		<url-pattern>gae/JsonFileGeneratorTask</url-pattern>
+		<url-pattern>/gae/jsonFileGeneratorTask</url-pattern>
 	</servlet-mapping>
 	
 	<servlet>
