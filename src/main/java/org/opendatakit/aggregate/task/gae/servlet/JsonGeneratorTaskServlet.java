@@ -27,7 +27,7 @@ public class JsonGeneratorTaskServlet extends ServletUtilBase {
   /**
    * URI from base
    */
-  public static final String ADDR = "gae/JsonFileGeneratorTask";
+  public static final String ADDR = "gae/jsonFileGeneratorTask";
   
   
   /**

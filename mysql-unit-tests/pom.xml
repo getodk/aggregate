@@ -83,6 +83,14 @@
 		  <version>${maven.surefire.plugin.version}</version>
 		  <inherited>true</inherited>
 		  <configuration>
+			<systemPropertyVariables>
+			  <project.artifactId>${project.artifactId}</project.artifactId>
+			  <test.forms.dir>${itFormsDirectory}</test.forms.dir>
+			  <test.submissions.dir>${itSubmissionsDirectory}</test.submissions.dir>
+			  <test.server.port>${test.server.port}</test.server.port>
+			  <test.server.hostname>${test.server.hostname}</test.server.hostname>
+			  <test.server.baseUrl>${test.server.baseUrl}</test.server.baseUrl>
+			</systemPropertyVariables>
 			<classesDirectory>${project.build.directory}/generated-classes/emma/classes</classesDirectory>
 			<excludes>
 			  <exclude>**/integration/**</exclude>
