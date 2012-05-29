@@ -33,4 +33,9 @@ public enum ExportType implements Serializable {
  	public String getDisplayText() {
  	  return displayText;
  	}
+ 	
+	public String toString() {
+		return displayText;
+	}
+
  }
