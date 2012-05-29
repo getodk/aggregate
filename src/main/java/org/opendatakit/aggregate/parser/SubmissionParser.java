@@ -563,7 +563,7 @@ public class SubmissionParser {
       // TODO: problem since we don't know how to tell what type of
       // binary without content type, defaulting to JPG
       submissionElement.setValueFromByteArray(receivedBytes, HtmlConsts.RESP_TYPE_IMAGE_JPEG,
-          Long.valueOf(receivedBytes.length), null, cc);
+          null, cc);
     } else {
       // attempt to find binary data in multi-part form submission
       // first searching by file name, then field name
@@ -581,10 +581,10 @@ public class SubmissionParser {
         }
         byte[] byteArray = binaryData.getStream().toByteArray();
         submissionElement.setValueFromByteArray(byteArray, binaryData.getContentType(),
-            binaryData.getContentLength(), fileName, cc);
+            fileName, cc);
       } else {
         // Assume the value is the filename...
-        submissionElement.setValueFromByteArray(null, null, null, value, cc);
+        submissionElement.setValueFromByteArray(null, null, value, cc);
 
         // and if we already have the content loaded, the content hash will be
         // non-null

@@ -3,6 +3,206 @@ All rights reserved.
 
 App Engine Java SDK - Release Notes
 
+Version 1.6.4
+=============
+- Billed applications that have specified additional logs retention over 1 GB
+  are now being charged for that storage at $0.24/GB/month (the first gigabyte
+  of logs storage is free). All logs beyond an application's specified storage
+  limit will be deleted. Please examine your Application Settings page to verify
+  you are retaining the desired amount of logs.
+- Datastore statistics now show the amount of storage used by application
+  indexes.
+- We have released an experimental utility for migrating your application's
+  blobs at the same time you migrate your datastore data. You can opt-in to
+  blob migration in the Admin Console when you start your migration.
+- We have updated the experimental Backup/Restore functionality to include
+  the option to backup and restore to Google Storage for Developers.
+- Version 2.0 of the App Engine DataNucleus plugin is now available as an
+  experimental release. This plugin contains support for JDO 3 and JPA 2 and
+  over 40 bug fixes. For a full list see:
+    http://code.google.com/p/datanucleus-appengine/source/browse/branches/2_0_0/dist/RELEASE_NOTES.ORM
+- Threads are available as an experimental feature via
+  com.google.appengine.api.ThreadManager.
+- The Admin Console now provides a Memcache viewer that lists Memcache stats and
+  can display Memcache content based on key.
+- Using the blobstoreService.serve method, your application can serve objects
+  hosted on Google Cloud Storage.
+- The method ApiProxy.getRemainingMillis() returns the amount of milliseconds
+  remaining before a request hits the request deadline.
+- New datastore query related callbacks - PreGet(), PreQuery(), and PostLoad()
+  are now available.
+- Omitting the <threadsafe> directive from appengine-web.xml now results in
+  a warning. Starting with the 1.6.5 release, omitting this directive will
+  result in an error.
+- You can set an RPC deadline for the Task Queue API's leaseTasks() method.
+- The Datastore Admin tab in the Admin Console now shows entities from every
+  namespace.
+    http://code.google.com/p/googleappengine/issues/detail?id=3962
+- GQL queries in the Admin Console no longer throw an error when a trailing
+  semi-colon is included.
+- Fixed an issue where setting ApiProxy delegate caused ClassCastException in
+  unit test teardown.
+    http://code.google.com/p/googleappengine/issues/detail?id=4442
+- Fixed an issue where <async-session-persistence> did not work.
+    http://code.google.com/p/googleappengine/issues/detail?id=5774
+- The Datastore Admin now shows entities from every namespace.
+    http://code.google.com/p/googleappengine/issues/detail?id=3962
+- Fixed an issue in the Java Development Server where Task Queue retry
+  parameters were ignored.
+    http://code.google.com/p/googleappengine/issues/detail?id=5200
+- Fixed an issue in the Java Pipeline API
+  (http://code.google.com/p/appengine-pipeline/) that would lead to "No object
+  found in pool with id=barrier(...)" errors when used in HRD applications.
+
+
+Version 1.6.3
+=============
+- In the Admin Console, you can use the new Traffic Splitting feature to send a
+  certain percentage of traffic to a non-default application version. The
+  traffic is split by either cookie or IP address.
+- Emails that are sent from Google Apps domains email addresses where the domain
+  has been set up to use DKIM will be signed: when an email was from a request
+  that originated on that app's domain or any time the email was sent from
+  an app adminstrator, including when that email is sent from a cron job or task
+  queue request.
+- In the Admin Console, you can now choose how much and how long you'd like to
+  store logs.  All apps get 1G for free and eventually will be able to pay for
+  more, while the amount can be increased this release we won't start charging
+  for the additional capacity until the next release at the earliest.
+- The instances screen in the Admin Console now has a button to shut down
+  a specific instance.
+- Each application log has a link to the instance that served the request. If
+  the instance is no longer serving requests, a message will be displayed.
+- The TaskQueue API now supports the ability to tag a Pull Queue task. You may
+  then lease tasks by tag. This feature is experimental.
+- Using Google Apps wildcard domain mappings, you can access alternate
+  versions of your app via a custom domain.
+- Push and Pull Queues are now listed separately in the SDK development console.
+- The PermGen size for  backend and frontend instances classes has been
+  increased. The values are as follows: F1/B1 - 44MB, F2/B2 - 108MB,
+  F4/B4 - 236MB, B8 - 492.
+- The DataNucleus Enhancer command line tool
+  (com.google.appengine.tools.enhancer.Enhance) now supports the
+  -enhancerVersion flag, which allow you to specify the version of DataNucleus
+  with which to enhance your JDO/JPA classes.
+- The dev appserver command line now supports the --generated_dir flag, which
+  allows you to specify a directory in which to write files generated by the
+  SDK.
+- Fixed a StackOverflowError when using the Remote API.
+    http://code.google.com/p/googleappengine/issues/detail?id=6349
+
+Version 1.6.2
+=============
+- The Admin Console Datastore Admin has added experimental backup and restore
+  functionality. The job occurs within your application and counts against your
+  application quota, including Instance Hours, Datastore Ops and Datastore
+  Storage.
+- Developers can now specify how long a channel token will last until it
+  expires, with the default remaining two hours. Channel API quota is now
+  measured both in calls to create a channel and the number of hours of channel
+  time requested. The maximum hours of quota is the maximum number of channel
+  creation calls * 2, so free apps get 200 hours of requested channel token
+  time.
+- Task Queue API requests now include a X-Appengine-TaskETA header, that can be
+  used to measure task delivery latency.
+- We have removed the deprecated labs version of the TaskQueue API.
+- The default API deadlines for Blobstore API calls have been raised to 15s for
+  online and 30s for offline requests, up from 5s.
+- The Images API now allows you to stretch an image without maintaining the
+  aspect ratio.
+    http://code.google.com/p/googleappengine/issues/detail?id=2220
+- Mail Quota for App Engine apps that have signed up for billing will only be
+  increased after the first payment for the app is processed.
+- Fixed an issue where the SDK did not resize images down to 512 pixels by
+  default, as it does in production.
+- Fixed an issue with the Images API where valid images were returning a
+  NotImageError.
+    http://code.google.com/p/googleappengine/issues/detail?id=5545
+
+Version 1.6.1
+=============
+- You can now configure Frontend Instance Classes from your Admin Console's
+  application settings page. Three classes are available, with increasing
+  memory, CPU limits, and associated cost. By default, all applications use the
+  basic frontend instance setting of 128MB memory and 600MHz CPU.
+- We've added new functionality to the Log API that will allow you to read your
+  application's logs programmatically.
+- We are releasing an experimental Conversion API that will allow you to convert
+  between document types including .doc, .html, .pdf, images using OCR, and
+  more.
+- The High Replication Datastore migration utility is now available as a GA
+  feature, and is no longer experimental.
+- The dev appserver now emits a warning when loading any classes that fall under
+  com.google.appengine.repackaged.*.
+- Version 2.0.0 of the DataNucleus App Engine plugin is available as an
+  experimental download from http://goo.gl/kyQiO. This release
+  adds support for JPA2 and JDO3. Installation instructions are available at
+  http://goo.gl/ELBL4.
+- The Blobstore API now supports the multiple="true" attribute to the HTML input
+  tag.
+- TaskOptions.Param now implements Serializable.
+    http://code.google.com/p/googleappengine/issues/detail?id=3712
+- Fixed an issue in the SDK where logging "null" caused a 500 error.
+- Fixed an issue with backends where SessionManager might try to save a session
+  forever under certain circumstances.
+- Fixed an issue where cached static files served to IPs on the DoS blacklist
+  consumed bandwidth quota.
+    http://code.google.com/p/googleappengine/issues/detail?id=4607
+
+Version 1.6.0
+=============
+- On November 7th, App Engine will be out of Preview. The new Terms of Service
+  and previously announced pricing changes will be in effect. Additionally, all
+  paid apps are now covered by our SLA.
+    http://code.google.com/appengine/docs/billing.html
+- Paid apps can now specify the maximum pending latency for instances and the
+  minimum number of idle instances for your application in the Admin Console.
+- Task Queue storage has been separated in to its own line item. Previously,
+  this was included in Datastore storage.
+- We have released an experimental utility, available in the Admin Console, to
+  assist in migrating your application to the High Replication datastore. This
+  utility allows you to copy the bulk of your data in the background, while the
+  source application is still serving. You then need a brief read-only period to
+  migrate your application data while you copy the data that has changed from
+  the time the original copy started.
+- Blobstore, which was previously limited to apps with billing enabled, is now
+  available for all apps.
+- We have published a new article on Datastore Index Selection and Advanced
+  Search which explains our recent improvements to the query planner that make
+  exploding indexes unnecessary.
+    http://code.google.com/appengine/articles/indexselection.html
+- Applications can now receive xmpp error stanzas at /_ah/xmpp/error.
+- In the Admin Console data viewer, you can now filter by namespace from a drop
+  down menu, if applicable.
+- In the Admin Console's Datastore Statistics, we now offer namespace suggest
+  for filtering stats.
+- Added API functionality for making calls to the Memcache API asynchronously.
+- In the Memcache API, getIdentifiable() and putIfUntouched() now support
+  batch operations.
+- We've added a page, /_ah/admin/capabilitiesstatus, to the dev console that
+  allows you to configure the capability state of the local API implementations
+  when running locally.
+- We've added LocalCapabilitiesServiceTestConfig to the testing API, which
+  allows you to configure the capability state of the local API implementations
+  in your tests.
+- The Datastore API now supports callbacks that can execute before or after
+  put() and delete() calls.
+- The queue-name argument is now optional for async-session-persistence in
+  appengine-web.xml.
+- Fixed a ClassNotFound error when using async-session-persistence.
+    http://code.google.com/p/googleappengine/issues/detail?id=5774
+- Fixed an issue with memcache serialization when using a entity key with a name
+  that points to the same reference as the key's parent.
+    http://code.google.com/p/googleappengine/issues/detail?id=2088
+- Fixed an issue where DoS stats in the Admin Console didn't work for High
+  Replication apps.
+    http://code.google.com/p/googleappengine/issues/detail?id=5237
+- WARNING: Starting with 1.6.1 (our next release, NOT this release), URLFetch
+  requests will honor the Accept-Encoding header. If your code sets this header
+  then it must be prepared to receive content of the specified type. For more
+  information please see
+    http://code.google.com/p/googleappengine/issues/detail?id=4978
+
 Version 1.5.5
 =============
 - We have increased the number of files you can upload with your application to

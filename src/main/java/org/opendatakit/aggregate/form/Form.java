@@ -118,9 +118,7 @@ class Form implements IForm {
     this.manifest = FormInfoFilesetTable.assertManifestManipulator(topLevelAuri,
         filesetRow.getUri(), cc);
 
-    XFormParameters p = new XFormParameters(infoRow.getStringField(FormInfoTable.FORM_ID),
-        filesetRow.getLongField(FormInfoFilesetTable.ROOT_ELEMENT_MODEL_VERSION),
-        filesetRow.getLongField(FormInfoFilesetTable.ROOT_ELEMENT_UI_VERSION));
+    XFormParameters p = getRootElementDefn();
 
     formDefinition = FormDefinition.getFormDefinition(p, cc);
     
@@ -171,8 +169,7 @@ class Form implements IForm {
     }
 
     this.xform = FormInfoFilesetTable.assertXformManipulator(topLevelAuri, filesetRow.getUri(), cc);
-    xform.setValueFromByteArray(xmlBytes, "text/xml", Long.valueOf(xmlBytes.length),
-        title + ".xml", cc);
+    xform.setValueFromByteArray(xmlBytes, "text/xml", title + ".xml", cc);
 
     this.manifest = FormInfoFilesetTable.assertManifestManipulator(topLevelAuri,
         filesetRow.getUri(), cc);
@@ -217,9 +214,7 @@ class Form implements IForm {
       formDefinition.deleteDataModel(cc);
     } else {
 
-      XFormParameters p = new XFormParameters(infoRow.getStringField(FormInfoTable.FORM_ID),
-          filesetRow.getLongField(FormInfoFilesetTable.ROOT_ELEMENT_MODEL_VERSION),
-          filesetRow.getLongField(FormInfoFilesetTable.ROOT_ELEMENT_UI_VERSION));
+      XFormParameters p = getRootElementDefn();
 
       FormDefinition.deleteAbnormalModel(p, cc);
     }
@@ -254,14 +249,9 @@ class Form implements IForm {
   public String getMajorMinorVersionString() {
 
     Long modelVersion = filesetRow.getLongField(FormInfoFilesetTable.ROOT_ELEMENT_MODEL_VERSION);
-    Long uiVersion = filesetRow.getLongField(FormInfoFilesetTable.ROOT_ELEMENT_UI_VERSION);
     StringBuilder b = new StringBuilder();
     if (modelVersion != null) {
       b.append(modelVersion.toString());
-    }
-    if (uiVersion != null) {
-      b.append(".");
-      b.append(uiVersion.toString());
     }
     return b.toString();
   }
@@ -316,6 +306,13 @@ class Form implements IForm {
     return name.replaceAll("[^\\p{L}0-9]", "_"); // any non-alphanumeric is
     // replaced with
     // underscore
+  }
+
+  public XFormParameters getRootElementDefn() {
+	XFormParameters p = new XFormParameters(infoRow.getStringField(FormInfoTable.FORM_ID),
+			filesetRow.getLongField(FormInfoFilesetTable.ROOT_ELEMENT_MODEL_VERSION),
+			filesetRow.getLongField(FormInfoFilesetTable.ROOT_ELEMENT_UI_VERSION));
+	return p;
   }
 
   public String getDescription() {
@@ -626,14 +623,11 @@ class Form implements IForm {
   public BlobSubmissionOutcome isSameForm(XFormParameters rootElementDefn,
       boolean isEncryptedFlag, String title, byte[] xmlBytes, CallingContext cc)
       throws ODKDatastoreException, ODKFormAlreadyExistsException {
-    String rootFormId = getFormId();
-    Long rootModel = filesetRow.getLongField(FormInfoFilesetTable.ROOT_ELEMENT_MODEL_VERSION);
-    Long rootUi = filesetRow.getLongField(FormInfoFilesetTable.ROOT_ELEMENT_UI_VERSION);
+	XFormParameters thisRootElementDefn = getRootElementDefn();
     Boolean isEncrypted = isEncryptedForm();
     String formName = getViewableName();
 
-    boolean same = rootFormId.equals(rootElementDefn.formId)
-        && sameVersion(rootModel, rootUi, rootElementDefn.modelVersion, rootElementDefn.uiVersion)
+    boolean same = rootElementDefn.equals(thisRootElementDefn)
         && isEncryptedFlag == isEncrypted && title.equals(formName);
 
     if (!same)
@@ -649,12 +643,10 @@ class Form implements IForm {
           return BlobSubmissionOutcome.FILE_UNCHANGED;
         }
       } else {
-        return xform.setValueFromByteArray(xmlBytes, "text/xml", Long.valueOf(xmlBytes.length),
-            title + ".xml", cc);
+        return xform.setValueFromByteArray(xmlBytes, "text/xml", title + ".xml", cc);
       }
     } else {
-      return xform.setValueFromByteArray(xmlBytes, "text/xml", Long.valueOf(xmlBytes.length), title
-          + ".xml", cc);
+      return xform.setValueFromByteArray(xmlBytes, "text/xml", title + ".xml", cc);
     }
   }
 
@@ -666,45 +658,25 @@ class Form implements IForm {
     return infoRow.getEntityKey();
   }
 
-  private static final boolean sameVersion(Long rootModel, Long rootUi, Long rootModelVersion,
-      Long rootUiVersion) {
-    return ((rootModelVersion == null) ? (rootModel == null)
-        : (rootModel != null && rootModelVersion.equals(rootModel)))
-        && ((rootUiVersion == null) ? (rootUi == null) : (rootUi != null && rootUiVersion
-            .equals(rootUi)));
-  }
-
   /**
    * Media files are assumed to be in a directory one level deeper than the xml
    * definition. So the filename reported on the mime item has an extra leading
    * directory. Strip that off.
    * 
-   * @param aFormDefinition
-   * @param rootModelVersion
-   * @param rootUiVersion
    * @param item
-   * @param datastore
-   * @param user
+   * @param cc
    * @return true if the files are completely new or are identical to the
    *         currently-stored ones.
    * @throws ODKDatastoreException
    */
-  public boolean setXFormMediaFile(Long rootModelVersion, Long rootUiVersion,
-      MultiPartFormItem item, CallingContext cc) throws ODKDatastoreException {
-    Long rootModel = filesetRow.getLongField(FormInfoFilesetTable.ROOT_ELEMENT_MODEL_VERSION);
-    Long rootUi = filesetRow.getLongField(FormInfoFilesetTable.ROOT_ELEMENT_UI_VERSION);
-
-    if (!sameVersion(rootModel, rootUi, rootModelVersion, rootUiVersion)) {
-      throw new ODKDatastoreException("did not find matching FileSet for media file");
-    }
+  public boolean setXFormMediaFile(MultiPartFormItem item, CallingContext cc) throws ODKDatastoreException {
 
     String filePath = item.getFilename();
     if (filePath.indexOf("/") != -1) {
       filePath = filePath.substring(filePath.indexOf("/") + 1);
     }
     boolean matchingFiles = (BlobSubmissionOutcome.NEW_FILE_VERSION != manifest
-        .setValueFromByteArray(item.getStream().toByteArray(), item.getContentType(),
-            item.getContentLength(), filePath, cc));
+        .setValueFromByteArray(item.getStream().toByteArray(), item.getContentType(), filePath, cc));
     return matchingFiles;
   }
 

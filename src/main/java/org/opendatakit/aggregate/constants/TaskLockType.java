@@ -16,6 +16,7 @@
 package org.opendatakit.aggregate.constants;
 
 import org.opendatakit.common.persistence.ITaskLockType;
+import org.opendatakit.common.persistence.PersistConsts;
 
 /**
  * 
@@ -28,7 +29,8 @@ public enum TaskLockType implements ITaskLockType {
   WORKSHEET_CREATION(120000),
   FORM_DELETION(120000),
   PURGE_OLDER_SUBMISSIONS(120000),
-  STARTUP_SERIALIZATION(120000);
+  STARTUP_SERIALIZATION(120000),
+  CREATE_FORM(60000+2*PersistConsts.MAX_SETTLE_MILLISECONDS); // 60 second request timeout, 2x settle for replication delay
   
   private long timeout;
 

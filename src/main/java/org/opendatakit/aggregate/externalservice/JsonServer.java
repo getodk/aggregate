@@ -46,7 +46,7 @@ import org.opendatakit.aggregate.exception.ODKExternalServiceException;
 import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.format.element.BasicElementFormatter;
 import org.opendatakit.aggregate.format.header.BasicHeaderFormatter;
-import org.opendatakit.aggregate.format.structure.JsonFormatter;
+import org.opendatakit.aggregate.format.structure.JsonFormatterWithFilters;
 import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
@@ -201,7 +201,7 @@ public class JsonServer extends AbstractExternalService implements ExternalServi
 
       System.out.println("Sending JSON Submissions");
 
-      JsonFormatter formatter = new JsonFormatter(pWriter, null, form, cc);
+      JsonFormatterWithFilters formatter = new JsonFormatterWithFilters(pWriter, form, null, true, null);
       formatter.processSubmissions(submissions, cc);
 
       pWriter.flush();

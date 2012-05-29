@@ -20,6 +20,7 @@
 		<gooogle.appengine.sdk.version>1.6.4</gooogle.appengine.sdk.version> <!-- NOTE: change gae.home too! -->
 		<google.gdata.version>1.46.0</google.gdata.version>
 		<google.gwt.version>2.4.0</google.gwt.version>
+        <org.jboss.resteasy.version>2.3.3.Final</org.jboss.resteasy.version>
 		<emma.maven.plugin.version>1.2</emma.maven.plugin.version>
 		<maven.surefire.report.plugin.version>2.6</maven.surefire.report.plugin.version>
 		<maven.surefire.plugin.version>2.6</maven.surefire.plugin.version>
@@ -40,7 +41,7 @@
 		<org.springframework.security.version>3.1.0.odk-SNAPSHOT</org.springframework.security.version> <!-- could do 3.1.0.RELEASE -->
 		<openid4java.version>0.9.6.662.odk-SNAPSHOT</openid4java.version>
 		<org.springframework.security.openid.version>3.1.0.odk-SNAPSHOT</org.springframework.security.openid.version>
-		<org.seleniumhq.version>2.16.1</org.seleniumhq.version>
+		<org.seleniumhq.version>2.21.0</org.seleniumhq.version>
 		<!--
 			keystore.propertyfile - define this in your settings.xml - the
 			location of the properties file for the keystore
@@ -213,6 +214,16 @@
 		  <scope>compile</scope>
 		</dependency>
 		<dependency>
+			<groupId>org.aspectj</groupId>
+			<artifactId>aspectjrt</artifactId>
+			<version>1.6.8</version>
+		</dependency>
+		<dependency>
+			<groupId>org.aspectj</groupId>
+			<artifactId>aspectjweaver</artifactId>
+			<version>1.6.8</version>
+		</dependency>
+		<dependency>
 			<groupId>com.jolbox</groupId>
 			<artifactId>bonecp</artifactId>
 			<version>0.7.1.RELEASE</version>
@@ -255,6 +266,13 @@
 		  <groupId>commons-fileupload</groupId>
 		  <artifactId>commons-fileupload</artifactId>
 		  <version>1.2.2</version>
+		  <type>jar</type>
+		  <scope>compile</scope>
+		</dependency>
+		<dependency>
+		  <groupId>commons-io</groupId>
+		  <artifactId>commons-io</artifactId>
+		  <version>2.0.1</version>
 		  <type>jar</type>
 		  <scope>compile</scope>
 		</dependency>
@@ -748,6 +766,11 @@
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-crypto</artifactId>
+			<version>${org.springframework.security.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-openid</artifactId>
 			<version>${org.springframework.security.openid.version}</version>
 			<exclusions>
@@ -769,6 +792,11 @@
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-web</artifactId>
 			<version>${org.springframework.security.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>stax</groupId>
+			<artifactId>stax</artifactId>
+			<version>1.2.0</version>
 		</dependency>
 		<dependency> <!-- needed by spring-security odk-SNAPSHOT -->
 			<groupId>xalan</groupId>
@@ -802,6 +830,34 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
+		<dependency>
+			<groupId>xpp3</groupId>
+			<artifactId>xpp3</artifactId>
+			<version>1.1.3.3</version>
+		</dependency>
+        <!-- for odktables api -->
+		<dependency>
+			<groupId>org.jboss.resteasy</groupId>
+			<artifactId>resteasy-jaxrs</artifactId>
+            <version>${org.jboss.resteasy.version}</version>
+			<!-- filter out unwanted jars -->
+			<exclusions>
+				<exclusion>
+					<groupId>commons-httpclient</groupId>
+					<artifactId>commons-httpclient</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>javax.servlet</groupId>
+					<artifactId>servlet-api</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+        <dependency>
+            <groupId>org.simpleframework</groupId>
+            <artifactId>simple-xml</artifactId>
+            <version>2.6.2</version>
+        </dependency>
+        <!-- /for odktables api -->
 		<!-- Test dependencies (mainly for gae) -->
 		<dependency>
 			<groupId>junit</groupId>
@@ -1167,11 +1223,11 @@
 						<configuration>
 						  <classpathDependencyScopeExclude>test</classpathDependencyScopeExclude>
 						  <additionalClasspathElements>
-							<additionalClasspathElement>${selenium.home}/selenium-java-2.16.1.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.home}/selenium-java-2.21.0.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/apache-mime4j-0.6.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/bsh-1.3.0.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/cglib-nodep-2.1_3.jar</additionalClasspathElement>
-							<additionalClasspathElement>${selenium.libs}/commons-codec-1.4.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.libs}/commons-codec-1.6.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/commons-collections-3.2.1.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/commons-exec-1.1.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/commons-io-2.0.1.jar</additionalClasspathElement>
@@ -1179,13 +1235,15 @@
 							<additionalClasspathElement>${selenium.libs}/commons-lang-2.6.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/commons-logging-1.1.1.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/cssparser-0.9.5.jar</additionalClasspathElement>
-							<additionalClasspathElement>${selenium.libs}/guava-10.0.1.jar</additionalClasspathElement>
-							<additionalClasspathElement>${selenium.libs}/hamcrest-all-1.1.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.libs}/guava-11.0.1.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.libs}/hamcrest-core-1.1.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.libs}/hamcrest-library-1.1.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/htmlunit-2.9.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/htmlunit-core-js-2.9.jar</additionalClasspathElement>
-							<additionalClasspathElement>${selenium.libs}/httpclient-4.1.2.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.libs}/httpclient-4.1.3.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/httpcore-4.1.3.jar</additionalClasspathElement>
-							<additionalClasspathElement>${selenium.libs}/httpmime-4.1.2.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.libs}/httpmime-4.1.3.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.libs}/ini4j-0.5.2.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/jcommander-1.13.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/jna-3.4.0.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/jna-platform-3.4.0.jar</additionalClasspathElement>
@@ -1193,11 +1251,12 @@
 							<additionalClasspathElement>${selenium.libs}/junit-dep-4.10.jar</additionalClasspathElement>
 							<additionalClasspathElement>${localRepository}/junit/junit/${junit.version}/junit-${junit.version}.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/nekohtml-1.9.15.jar</additionalClasspathElement>
-							<additionalClasspathElement>${selenium.libs}/operadriver-v0.8.1.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.libs}/operadriver-v0.11.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/protobuf-java-2.4.1.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/sac-1.3.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/serializer-2.7.1.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/testing-6.0.1-nobsh-noguice.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.libs}/webkit-0.4.6-full.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/xalan-2.7.1.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/xercesImpl-2.9.1.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/xml-apis-1.3.04.jar</additionalClasspathElement>

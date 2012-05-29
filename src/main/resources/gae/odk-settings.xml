@@ -27,27 +27,29 @@
 		<property name="channelType" value="${security.server.channelType}" />
 		<property name="secureChannelType" value="${security.server.secureChannelType}" />
 	</bean>
-	
+
 	<bean id="user_service" class="org.opendatakit.common.security.spring.UserServiceImpl">
 		<property name="datastore" ref="datastore" />
 		<property name="realm" ref="realm" />
-		<property name="superUserEmail" value="${security.server.superUser}" />
+        <property name="superUserEmail" value="${security.server.superUser}" />
 		<property name="superUserUsername" value="${security.server.superUserUsername}" />
-		<property name="userServiceKey" value="${security.server.userServiceKey}" />
+        <property name="userServiceKey" value="${security.server.userServiceKey}" />
 	</bean>
 
 <!--	<bean id="user_service" class="org.opendatakit.common.security.gae.UserServiceImpl">-->
 <!--		<property name="realm" ref="realm" />-->
 <!--	</bean>-->
-	<bean id="worksheet_creator" class="org.opendatakit.aggregate.task.gae.WorksheetCreatorImpl" />
+	<bean id="worksheet_creator"
+		class="org.opendatakit.aggregate.task.gae.WorksheetCreatorImpl" />
 	<bean id="form_delete" class="org.opendatakit.aggregate.task.gae.FormDeleteImpl" />
-    <bean id="purge_submissions" class="org.opendatakit.aggregate.task.gae.PurgeOlderSubmissionsImpl" />
+	<bean id="purge_submissions" class="org.opendatakit.aggregate.task.gae.PurgeOlderSubmissionsImpl" />
 	<bean id="upload_task"
 		class="org.opendatakit.aggregate.task.gae.UploadSubmissionsImpl" />
 	<bean id="kml_task" class="org.opendatakit.aggregate.task.gae.KmlGeneratorImpl" />
 	<bean id="csv_task" class="org.opendatakit.aggregate.task.gae.CsvGeneratorImpl" />
+	<bean id="json_file_task" class="org.opendatakit.aggregate.task.gae.JsonFileGeneratorImpl" />
     <bean id="http_client_factory" class="org.opendatakit.common.utils.gae.GaeHttpClientFactoryImpl" />
-	<bean id="image_util" class="org.opendatakit.aggregate.util.gae.ImageUtilImpl" />
+    <bean id="image_util" class="org.opendatakit.aggregate.util.gae.ImageUtilImpl" />
 	<bean id="startup" class="org.opendatakit.aggregate.AggregateStartupImpl" />
 	<bean id="oob_user_fetcher" class="org.opendatakit.common.utils.gae.GaeOutOfBandUserFetcher" />
 
@@ -60,7 +62,9 @@
 		<property name="uploadSubmissions" ref="upload_task" />
 		<property name="kmlGenerator" ref="kml_task" />
 		<property name="csvGenerator" ref="csv_task" />
+		<property name="jsonFileGenerator" ref="json_file_task" />
 		<property name="httpClientFactory" ref="http_client_factory" />
 		<property name="imageUtil" ref="image_util" />
 	</bean>
+
 </beans>

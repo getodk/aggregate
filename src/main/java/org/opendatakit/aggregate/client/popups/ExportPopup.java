@@ -35,6 +35,8 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
 
@@ -157,6 +159,7 @@ public final class ExportPopup extends AbstractPopupBase {
       enableKmlOptions();
       break;
     case CSV:
+    case JSONFILE:
       exportButton.setEnabled(true);
       disableKmlOptions();
       break;
@@ -242,17 +245,35 @@ public final class ExportPopup extends AbstractPopupBase {
         return;
       }
 
-      if (type.equals(ExportType.CSV)) {
+      if (type == ExportType.CSV) {
         SecureGWT.getFormService().createCsvFromFilter(filterGroup, new CreateExportCallback());
-      } else { // .equals(ExportType.KML.toString())
+      } else if (type == ExportType.JSONFILE) {
+        SecureGWT.getFormService().createJsonFileFromFilter(filterGroup, new CreateExportCallback());
+      } else if( type == ExportType.KML) {
         String geoPointValue = geoPointsDropDown.getElementKey();
         String titleValue = titleFieldsDropDown.getElementKey();
         String binaryValue = binaryFieldsDropDown.getElementKey();
 
         SecureGWT.getFormService().createKmlFromFilter(filterGroup, geoPointValue, titleValue, binaryValue,
             new CreateExportCallback());
+      } else {
+        new ErrorDialog().show();
       }
 
+    }
+  }
+  
+  private static class ErrorDialog extends DialogBox {
+
+    public ErrorDialog() {
+      setText("Error Unknown Export Type!! Please file an Issue on ODK website!");
+      Button ok = new Button("OK");
+      ok.addClickHandler(new ClickHandler() {
+        public void onClick(ClickEvent event) {
+          ErrorDialog.this.hide();
+        }
+      });
+      setWidget(ok);
     }
   }
 }
