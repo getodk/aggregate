@@ -18,6 +18,7 @@ import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ScrollPanel;
 
 public class SubmissionAdminSubTab extends AggregateSubTabBase {
@@ -52,14 +53,14 @@ public class SubmissionAdminSubTab extends AggregateSubTabBase {
     
     // create navigation buttons to servlet
     FlexTable navTable = new FlexTable();
-    navTable.getElement().setId("submission_admin_bar");
-    navTable.setWidget(0, 0, formsBox);
-    navTable.setWidget(0, 1, purgeSubmission);
-    navTable.setWidget(0, 2, uploadSubmission);
-    navTable.getCellFormatter().getElement(0, 2).setAttribute("align", "right");
+    navTable.setWidget(0, 0, new Label("Form: "));
+    navTable.setWidget(0, 1, formsBox);
+    navTable.setWidget(0, 2, purgeSubmission);
 
     // add to panel
+    add(uploadSubmission);
     add(navTable);
+    add(new Label("Incomplete Submissions:"));
     add(submissions);
   }
 

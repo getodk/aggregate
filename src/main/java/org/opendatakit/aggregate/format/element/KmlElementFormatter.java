@@ -56,7 +56,7 @@ public class KmlElementFormatter implements ElementFormatter {
    */
   private boolean includeAccuracy;
   
-  RepeatCallbackFormatter callbackFormatter;
+  private RepeatCallbackFormatter callbackFormatter;
   
   /**
    * Construct a KML Element Formatter

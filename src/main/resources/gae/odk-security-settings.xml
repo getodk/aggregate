@@ -10,6 +10,5 @@
 		<beans:property name="clientConnectionManagerFactory">
 		    <beans:bean class="org.opendatakit.common.security.spring.gae.GaeClientConnManagerFactory"/>
 		</beans:property>
-    </beans:bean> 
-  
+    </beans:bean>
 </beans:beans>

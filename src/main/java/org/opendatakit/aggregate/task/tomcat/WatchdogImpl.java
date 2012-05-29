@@ -23,6 +23,7 @@ import javax.servlet.ServletContext;
 import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.task.CsvGenerator;
 import org.opendatakit.aggregate.task.FormDelete;
+import org.opendatakit.aggregate.task.JsonFileGenerator;
 import org.opendatakit.aggregate.task.KmlGenerator;
 import org.opendatakit.aggregate.task.PurgeOlderSubmissions;
 import org.opendatakit.aggregate.task.UploadSubmissions;
@@ -59,6 +60,7 @@ public class WatchdogImpl implements Watchdog, SmartLifecycle, InitializingBean,
   UploadSubmissions uploadSubmissions = null;
   CsvGenerator csvGenerator = null;
   KmlGenerator kmlGenerator = null;
+  JsonFileGenerator jsonFileGenerator = null;
   PurgeOlderSubmissions purgeSubmissions = null;
   FormDelete formDelete = null;
   WorksheetCreator worksheetCreator = null;
@@ -148,6 +150,8 @@ public class WatchdogImpl implements Watchdog, SmartLifecycle, InitializingBean,
         return WatchdogImpl.this;
       } else if (BeanDefs.CSV_BEAN.equals(beanName)) {
         return csvGenerator;
+      } else if ( BeanDefs.JSON_FILE_BEAN.equals(beanName) ) {
+        return jsonFileGenerator;
       } else if (BeanDefs.DATASTORE_BEAN.equals(beanName)) {
         return datastore;
       } else if (BeanDefs.FORM_DELETE_BEAN.equals(beanName)) {
@@ -342,6 +346,14 @@ public class WatchdogImpl implements Watchdog, SmartLifecycle, InitializingBean,
     this.kmlGenerator = kmlGenerator;
   }
 
+  public JsonFileGenerator getJsonFileGenerator() {
+    return jsonFileGenerator;
+  }
+
+  public void setJsonFileGenerator(JsonFileGenerator jsonFileGenerator) {
+    this.jsonFileGenerator = jsonFileGenerator;
+  }
+
   public FormDelete getFormDelete() {
     return formDelete;
   }
@@ -397,6 +409,8 @@ public class WatchdogImpl implements Watchdog, SmartLifecycle, InitializingBean,
       throw new IllegalStateException("no csvGenerator specified");
     if (kmlGenerator == null)
       throw new IllegalStateException("no kmlGenerator specified");
+    if ( jsonFileGenerator == null ) 
+      throw new IllegalStateException("no jsonFileGenerator specified");
     if (formDelete == null)
       throw new IllegalStateException("no formDelete specified");
     if (purgeSubmissions == null)

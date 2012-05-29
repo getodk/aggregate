@@ -32,9 +32,16 @@ public class TestContextFactory {
 	    	boolean asDaemon = true; // otherwise there isn't a current user...
 
 	    	CallingContextImpl() {
-	    		webApplicationBase = "/test/stub";
-	    		serverUrl = "http://test.org" + webApplicationBase;
-	    		secureServerUrl = "https://test.org" + webApplicationBase;
+	    	    String baseUrl = System.getProperty("test.server.baseUrl","");
+	    	    if ( baseUrl.length() > 0 && !baseUrl.startsWith(BasicConsts.FORWARDSLASH)) {
+	    	    	baseUrl = BasicConsts.FORWARDSLASH + baseUrl;
+	    	    }
+	    	    webApplicationBase = baseUrl;
+	    	    String hostname = System.getProperty("test.server.hostname", "localhost");
+	    	    String port = System.getProperty("test.server.port","8888");
+	    	    String secureport = System.getProperty("test.server.secure.port","8443");
+	    		serverUrl = "http://" + hostname + ":" + port + webApplicationBase;
+	    		secureServerUrl = "https://" + hostname + ":" + secureport + webApplicationBase;
 	    		datastore = (Datastore) applicationContext.getBean(DATASTORE_BEAN);
 	    		userService = (UserService) applicationContext.getBean(USER_BEAN);
 	    	}
