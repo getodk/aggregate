@@ -64,10 +64,10 @@ public class DataServiceImpl implements DataService {
     af.checkPermission(TablePermission.WRITE_ROW);
     row.setRowId(rowId);
     Row dbRow = dm.getRow(rowId);
-    af.checkFilter(dbRow);
     if (dbRow == null) {
       row = dm.insertRow(row);
     } else {
+      af.checkFilter(dbRow);
       row = dm.updateRow(row);
     }
     RowResource resource = getResource(row);
