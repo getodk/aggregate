@@ -64,9 +64,19 @@ public class AuthFilter {
   }
 
   /**
-   * Check that the user is within the scope of the filter on the given row.
-   * Does not, for instance, check if the user has permission to read the row.
+   * Check that the user either has the given permission or is within the scope
+   * of the filter on the given row.
    * 
+   * In other words, if the user has the given permission, then they pass the
+   * check and the method returns. However, if the user does not have the given
+   * permission, then they must fall within the scope of the filter on the given
+   * row.
+   * 
+   * @param permission
+   *          the permission that guards access to the row. Should probably be
+   *          one of {@link TablePermission#UNFILTERED_READ},
+   *          {@link TablePermission#UNFILTERED_WRITE}, or
+   *          {@link TablePermission#UNFILTERED_DELETE}.
    * @param row
    *          the row to check
    * @throws ODKDatastoreException
@@ -74,7 +84,9 @@ public class AuthFilter {
    *           if the current user is not within the scope of the filter on the
    *           row
    */
-  public void checkFilter(Row row) throws ODKDatastoreException, PermissionDeniedException {
+  public void checkFilter(TablePermission permission, Row row) throws ODKDatastoreException,
+      PermissionDeniedException {
+    Validate.notNull(permission);
     Validate.notNull(row);
 
     // TODO: change to getEmail()
@@ -82,7 +94,7 @@ public class AuthFilter {
 
     Set<TablePermission> permissions = getPermissions(userUri);
 
-    if (!permissions.contains(TablePermission.UNFILTERED_ROWS)) {
+    if (!permissions.contains(permission)) {
       Scope filter = row.getFilterScope();
       if (filter == null || filter.equals(Scope.EMPTY_SCOPE)) {
         // empty scope, no one allowed
