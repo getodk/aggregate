@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang.Validate;
 import org.opendatakit.aggregate.odktables.entity.Row;
 import org.opendatakit.aggregate.odktables.entity.Scope;
 import org.opendatakit.aggregate.odktables.entity.Scope.Type;
@@ -74,6 +75,8 @@ public class AuthFilter {
    *           row
    */
   public void checkFilter(Row row) throws ODKDatastoreException, PermissionDeniedException {
+    Validate.notNull(row);
+
     // TODO: change to getEmail()
     String userUri = cc.getCurrentUser().getUriUser();
 
