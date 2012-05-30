@@ -250,13 +250,11 @@ public class DataManager {
    */
   public Row getRow(String rowId) throws ODKDatastoreException {
     Validate.notEmpty(rowId);
-    Query query = table.query("DataManager.getRow", cc);
-    query.equal(CommonFieldsBase.URI_COLUMN_NAME, rowId);
-    Entity row = query.get();
-    if (row != null)
-      return converter.toRow(row, columns);
-    else
+    try {
+      return getRowNullSafe(rowId);
+    } catch (ODKEntityNotFoundException e) {
       return null;
+    }
   }
 
   /**
