@@ -73,16 +73,16 @@ public class AuthFilter {
    * row.
    * 
    * @param permission
-   *          the permission that guards access to the row. Should probably be
-   *          one of {@link TablePermission#UNFILTERED_READ},
+   *          the permission that guards access to the row. Should be one of
+   *          {@link TablePermission#UNFILTERED_READ},
    *          {@link TablePermission#UNFILTERED_WRITE}, or
    *          {@link TablePermission#UNFILTERED_DELETE}.
    * @param row
    *          the row to check
    * @throws ODKDatastoreException
    * @throws PermissionDeniedException
-   *           if the current user is not within the scope of the filter on the
-   *           row
+   *           if the current user does not have the given permission and is not
+   *           within the scope of the filter on the row
    */
   public void checkFilter(TablePermission permission, Row row) throws ODKDatastoreException,
       PermissionDeniedException {
