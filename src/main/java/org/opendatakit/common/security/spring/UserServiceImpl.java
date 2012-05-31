@@ -203,7 +203,7 @@ public class UserServiceImpl implements org.opendatakit.common.security.UserServ
 		// ignored passed-in authorities
 		Set<GrantedAuthority> anonGroups = new HashSet<GrantedAuthority>();
 		anonGroups.add(new SimpleGrantedAuthority(GrantedAuthorityName.USER_IS_ANONYMOUS.name()));
-		match = new UserImpl(User.ANONYMOUS_USER, 
+		match = new UserImpl(User.ANONYMOUS_USER, null, 
 				User.ANONYMOUS_USER_NICKNAME, anonGroups, datastore );
 		activeUsers.put(uriUser, match);
 		return match;
@@ -212,22 +212,20 @@ public class UserServiceImpl implements org.opendatakit.common.security.UserServ
 		Set<GrantedAuthority> daemonGroups = new HashSet<GrantedAuthority>();
 		daemonGroups = new HashSet<GrantedAuthority>();
 		daemonGroups.add(new SimpleGrantedAuthority(GrantedAuthorityName.USER_IS_DAEMON.name()));
-		match = new UserImpl(User.DAEMON_USER, 
+		match = new UserImpl(User.DAEMON_USER, null,
 				User.DAEMON_USER_NICKNAME, daemonGroups, datastore );
 		activeUsers.put(uriUser, match);
 		return match;
 	} else {
 		try {
 			RegisteredUsersTable t = RegisteredUsersTable.getUserByUri(uriUser, datastore, getDaemonAccountUser());
-			match = new UserImpl( uriUser, t.getDisplayName(), authorities, datastore);
+			match = new UserImpl( uriUser, getEmail(uriUser, t.getEmail()), t.getDisplayName(), authorities, datastore);
 		} catch (ODKEntityNotFoundException e) {
-			String name = UserServiceImpl.getNickname(uriUser);
-			match = new UserImpl(uriUser, name, authorities, datastore);
+			match = new UserImpl(uriUser, getEmail(uriUser, null), getNickname(uriUser), authorities, datastore);
 		} catch (ODKDatastoreException e) {
 			e.printStackTrace();
 			// best guess...
-			String name = "--datastore error--";
-			match = new UserImpl(uriUser, name, authorities, datastore);
+			match = new UserImpl(uriUser, getEmail(uriUser, null), getNickname(uriUser), authorities, datastore);
 		}
 		activeUsers.put(uriUser, match);
 		return match;
@@ -252,12 +250,36 @@ public class UserServiceImpl implements org.opendatakit.common.security.UserServ
 	return internalGetUser(User.DAEMON_USER, null);
   }
 
-public static final String getNickname( String uriUser ) {
+  private static final String getNickname( String uriUser ) {
 	String name = uriUser;
 	if ( name.startsWith(SecurityUtils.MAILTO_COLON) ) {
 		name = name.substring(SecurityUtils.MAILTO_COLON.length());
+		int idxTimestamp = name.indexOf("|");
+		if (idxTimestamp != -1 ) {
+			name = name.substring(0,idxTimestamp);
+		}
+	} else if ( name.startsWith(RegisteredUsersTable.UID_PREFIX) ) {
+		name = name.substring(RegisteredUsersTable.UID_PREFIX.length());
+		int idxTimestamp = name.indexOf("|");
+		if (idxTimestamp != -1 ) {
+			name = name.substring(0,idxTimestamp);
+		}
 	}
 	return name;
-}
+  }
 
+  private static final String getEmail(String uriUser, String openIdEmail) {
+    if (openIdEmail != null) {
+      return openIdEmail;
+    }
+    if (uriUser.startsWith(SecurityUtils.MAILTO_COLON)) {
+      String n = uriUser;
+      int idxTimestamp = n.indexOf("|");
+      if (idxTimestamp != -1) {
+        return n.substring(0, idxTimestamp);
+      }
+      return n;
+    }
+    return null;
+  }
 }

@@ -112,6 +112,8 @@ public final class ServletConsts {
   public static final String CSV_FILENAME_APPEND = "_results.csv";
 
   public static final String KML_FILENAME_APPEND = "_results.kml";
+  
+  public static final String JSON_FILENAME_APPEND = "_results.json";
 
   public static final String RECORD_KEY = "record";
 

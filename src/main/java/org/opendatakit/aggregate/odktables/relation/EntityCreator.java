@@ -17,6 +17,7 @@ import org.opendatakit.common.ermodel.simple.Relation;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
+import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.web.CallingContext;
 
@@ -168,6 +169,17 @@ public class EntityCreator {
 
     if (rowId == null)
       rowId = CommonFieldsBase.newUri();
+    else {
+      boolean found = true;
+      try {
+        table.getEntity(rowId, cc);
+      } catch ( ODKEntityNotFoundException e ) {
+        found = false;
+      }
+      if ( found ) {
+        throw new ODKEntityPersistException("Entity exists: " + rowId);
+      }
+    }
 
     Entity row = table.newEntity(rowId, cc);
     User user = cc.getCurrentUser();

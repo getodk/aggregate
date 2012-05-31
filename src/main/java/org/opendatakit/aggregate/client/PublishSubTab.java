@@ -31,6 +31,8 @@ import org.opendatakit.common.security.common.GrantedAuthorityName;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.Label;
 
 public class PublishSubTab extends AggregateSubTabBase {
  
@@ -44,12 +46,16 @@ public class PublishSubTab extends AggregateSubTabBase {
   public PublishSubTab() {
     // vertical
     setStylePrimaryName(UIConsts.VERTICAL_FLOW_PANEL_STYLENAME);
-    
+     
     formsBox = new FormListBox(new ChangeDropDownHandler());
     publishTable = new PublishTable();
 
+    FlexTable navTable = new FlexTable();
+    navTable.setWidget(0, 0, new Label("Form: "));
+    navTable.setWidget(0, 1, formsBox);
+    
     // add tables to panels
-    add(formsBox);
+    add(navTable);
     add(publishTable);
   }
 

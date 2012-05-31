@@ -66,13 +66,13 @@ public interface SubmissionField<T> extends SubmissionValue{
    * 
    * @param byteArray - data to be stored
    * @param contentType
-   * @param contentLength
    * @param unrootedFilePath
+   * @param cc - calling context
    * @return outcome of storage attempt
    * @throws ODKDatastoreException
    */
   public BinaryContentManipulator.BlobSubmissionOutcome setValueFromByteArray(byte[] byteArray,
-		String contentType, Long contentLength, String unrootedFilePath, CallingContext cc)
+		String contentType, String unrootedFilePath, CallingContext cc)
 		throws ODKDatastoreException;
   
 }

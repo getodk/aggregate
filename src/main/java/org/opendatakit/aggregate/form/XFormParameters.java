@@ -27,7 +27,7 @@ public final class XFormParameters implements Comparable<Object> {
 
 	public final String formId;
 	public final Long modelVersion;
-	public final Long uiVersion;
+	public Long uiVersion;
 
 	public XFormParameters(String formId, Long modelVersion, Long uiVersion) {
 		if ( formId == null ) {
@@ -50,18 +50,16 @@ public final class XFormParameters implements Comparable<Object> {
 	public boolean equals(Object obj) {
 		if ( obj == null || !(obj instanceof XFormParameters) ) return false;
 		XFormParameters p = (XFormParameters) obj;
+		// uiVersion is ignored during equality tests...
 		return formId.equals(p.formId) &&
 			((modelVersion == null) ? p.modelVersion == null : 
-				((p.modelVersion != null) && modelVersion.equals(p.modelVersion))) &&
-			((uiVersion == null) ? p.uiVersion == null :
-				((p.uiVersion != null) && uiVersion.equals(p.uiVersion)));
+				((p.modelVersion != null) && modelVersion.equals(p.modelVersion)));
 	}
 
 	@Override
 	public int hashCode() {
 		return Long.valueOf(formId.hashCode() + 
-				((modelVersion == null) ? 20480L : 37*modelVersion) +
-				((uiVersion == null) ? 40965L : 91*uiVersion) ).hashCode();
+				((modelVersion == null) ? 20480L : 37*modelVersion)).hashCode();
 	}
 
 	@Override
@@ -72,16 +70,8 @@ public final class XFormParameters implements Comparable<Object> {
 		if ( cmp != 0 ) return cmp;
 		if ( ((modelVersion == null) ? (p.modelVersion == null) :
 				(p.modelVersion != null && modelVersion.equals(p.modelVersion))) ) {
-			if ( ((uiVersion == null) ? (p.uiVersion == null) :
-				    (p.uiVersion != null && uiVersion.equals(p.uiVersion))) ) {
-				return 0;
-			} else if ( uiVersion == null ) {
-				return 1;
-			} else if ( p.uiVersion == null ) {
-				return -1;
-			} else {
-				return uiVersion.compareTo(p.uiVersion);
-			}
+		   // uiVersion is ignored during comparisons and equality tests
+			return 0;
 		} else if ( modelVersion == null ) {
 			return 1;
 		} else if ( p.modelVersion == null ) {
