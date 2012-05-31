@@ -134,6 +134,9 @@ public final class HtmlConsts {
    public static final String RESP_TYPE_CSV = "text/csv; charset=utf-8";
 
    public static final String RESP_TYPE_KML = "application/vnd.google-earth.kml+xml; charset=utf-8";
+   
+   public static final String RESP_TYPE_JSON = "application/json; charset=utf-8";
+   
 	/**
 	 * Encoding scheme for servlets
 	 */

@@ -8,6 +8,7 @@ import javax.servlet.ServletContext;
 import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.task.CsvGenerator;
 import org.opendatakit.aggregate.task.FormDelete;
+import org.opendatakit.aggregate.task.JsonFileGenerator;
 import org.opendatakit.aggregate.task.KmlGenerator;
 import org.opendatakit.aggregate.task.PurgeOlderSubmissions;
 import org.opendatakit.aggregate.task.UploadSubmissions;
@@ -30,6 +31,7 @@ public class WatchdogImpl implements Watchdog, InitializingBean {
   UploadSubmissions uploadSubmissions = null;
   CsvGenerator csvGenerator = null;
   KmlGenerator kmlGenerator = null;
+  JsonFileGenerator jsonFileGenerator = null;
   PurgeOlderSubmissions purgeSubmissions = null;
   FormDelete formDelete = null;
   WorksheetCreator worksheetCreator = null;
@@ -131,6 +133,8 @@ public class WatchdogImpl implements Watchdog, InitializingBean {
            return purgeSubmissions;
         } else if ( BeanDefs.KML_BEAN.equals(beanName)) {
            return kmlGenerator;
+        } else if ( BeanDefs.JSON_FILE_BEAN.equals(beanName)) {
+            return jsonFileGenerator;
         } else if ( BeanDefs.UPLOAD_TASK_BEAN.equals(beanName)) {
            return uploadSubmissions;
         } else if ( BeanDefs.USER_BEAN.equals(beanName)) {
@@ -246,6 +250,14 @@ public class WatchdogImpl implements Watchdog, InitializingBean {
      return kmlGenerator;
   }
 
+  public void setJsonFileGenerator(JsonFileGenerator jsonFileGenerator) {
+     this.jsonFileGenerator = jsonFileGenerator;
+  }
+
+  public JsonFileGenerator setJsonFileGenerator() {
+     return jsonFileGenerator;
+  }
+
   public void setKmlGenerator(KmlGenerator kmlGenerator) {
      this.kmlGenerator = kmlGenerator;
   }
@@ -298,6 +310,7 @@ public class WatchdogImpl implements Watchdog, InitializingBean {
      if ( uploadSubmissions == null ) throw new IllegalStateException("no uploadSubmissions specified");
      if ( csvGenerator == null ) throw new IllegalStateException("no csvGenerator specified");
      if ( kmlGenerator == null ) throw new IllegalStateException("no kmlGenerator specified");
+     if ( jsonFileGenerator == null ) throw new IllegalStateException("no jsonFileGenerator specified");
      if ( formDelete == null ) throw new IllegalStateException("no formDelete specified");
      if ( purgeSubmissions == null ) throw new IllegalStateException("no purgeSubmissions specified");
      if ( worksheetCreator == null ) throw new IllegalStateException("no worksheetCreator specified");

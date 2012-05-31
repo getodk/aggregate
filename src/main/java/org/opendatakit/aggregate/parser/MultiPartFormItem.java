@@ -42,11 +42,7 @@ public final class MultiPartFormItem {
    * form data content type
    */
   private final String contentType;
-  
-  /**
-   * form data content length
-   */
-  private final Long contentLength;
+
   /**
    * form data's stream
    */
@@ -68,7 +64,6 @@ public final class MultiPartFormItem {
     this.name = fieldName;
     this.filename = fileName;
 	this.contentType = contentType;
-    this.contentLength = Long.valueOf(byteStream.size());
     this.stream = byteStream;
   }
   
@@ -111,16 +106,6 @@ public final class MultiPartFormItem {
    */
   public String getContentType() {
     return contentType;
-  }
-
-  /**
-   * Get form data content length
-   * 
-   * @return
-   *    content type
-   */
-  public Long getContentLength() {
-    return contentLength;
   }
 
   /**

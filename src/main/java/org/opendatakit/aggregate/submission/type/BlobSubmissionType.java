@@ -110,6 +110,10 @@ public class BlobSubmissionType extends SubmissionFieldBase<SubmissionKey> {
    *          key of submission set that will reference the blob
    * @param contentType
    *          type of binary data (NOTE: only used for binary data)
+   * @param unrootedFilePath
+   *          file path with anything before the first '/' stripped off.
+   * @param cc
+   *          calling context
    * @return the outcome of the storage attempt. md5 hashes are used to
    *         determine file equivalence.
    * @throws ODKDatastoreException
@@ -117,10 +121,10 @@ public class BlobSubmissionType extends SubmissionFieldBase<SubmissionKey> {
    */
   @Override
   public BinaryContentManipulator.BlobSubmissionOutcome setValueFromByteArray(byte[] byteArray,
-      String contentType, Long contentLength, String unrootedFilePath, CallingContext cc)
+      String contentType, String unrootedFilePath, CallingContext cc)
       throws ODKDatastoreException {
 
-    return bcm.setValueFromByteArray(byteArray, contentType, contentLength, unrootedFilePath, cc);
+    return bcm.setValueFromByteArray(byteArray, contentType, unrootedFilePath, cc);
   }
 
   /**

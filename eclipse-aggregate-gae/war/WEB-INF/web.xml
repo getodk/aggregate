@@ -13,6 +13,12 @@
 		<param-value>classpath:odk-settings.xml,/WEB-INF/applicationContext-security.xml</param-value>
 	</context-param>
 
+    <context-param>
+        <param-name>resteasy.servlet.mapping.prefix</param-name>
+        <param-value>/odktables</param-value>
+        <!-- Must match the prefix set in the url-pattern of the ODKTables servlet-mapping below. -->
+    </context-param>
+
 	<security-constraint>
         <web-resource-collection>
             <url-pattern>/gae/*</url-pattern>
@@ -327,6 +333,15 @@
 	</servlet-mapping>
 
 	<servlet>
+		<servlet-name>JsonFileGeneratorTask</servlet-name>
+		<servlet-class>org.opendatakit.aggregate.task.gae.servlet.JsonGeneratorTaskServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>JsonFileGeneratorTask</servlet-name>
+		<url-pattern>/gae/jsonFileGeneratorTask</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
 		<servlet-name>uploadSubmissionsTask</servlet-name>
 		<servlet-class>org.opendatakit.aggregate.task.gae.servlet.UploadSubmissionsTaskServlet</servlet-class>
 	</servlet>
@@ -388,14 +403,20 @@
         <servlet-name>openIdLoginPage</servlet-name>
         <url-pattern>/openid_login.html</url-pattern>
     </servlet-mapping>
-    
+
+    <!-- servlet for odktables api -->
     <servlet>
-    	<servlet-name>odktables</servlet-name>
-    	<servlet-class>org.opendatakit.aggregate.odktables.servlet.CommandServlet</servlet-class>
+        <servlet-name>ODKTables</servlet-name>
+        <servlet-class>org.jboss.resteasy.plugins.server.servlet.HttpServletDispatcher</servlet-class>
+        <init-param>
+            <param-name>javax.ws.rs.Application</param-name>
+            <param-value>org.opendatakit.aggregate.odktables.impl.api.ODKTablesAPIApplication</param-value>
+        </init-param>
     </servlet>
+
     <servlet-mapping>
-    	<servlet-name>odktables</servlet-name>
-    	<url-pattern>/odktables/*</url-pattern>
+        <servlet-name>ODKTables</servlet-name>
+        <url-pattern>/odktables/*</url-pattern>
     </servlet-mapping>
     
     <servlet>

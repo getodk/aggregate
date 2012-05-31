@@ -84,7 +84,7 @@ public abstract class MetadataBaseType<T> implements SubmissionField<T> {
 
 	@Override
 	public BlobSubmissionOutcome setValueFromByteArray(byte[] byteArray,
-			String contentType, Long contentLength, String unrootedFilePath,
+			String contentType, String unrootedFilePath,
 			CallingContext cc) throws ODKDatastoreException {
 		throw new IllegalStateException("unexpected call to setValueFromByteArray");
 	}
