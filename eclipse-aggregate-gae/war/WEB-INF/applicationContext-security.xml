@@ -38,7 +38,7 @@
 <!--	for those pages.  -->
 	<filter-security-metadata-source id="securityPolicy" use-expressions="true">
         <intercept-url pattern="/_ah/**" access="true" /> <!-- local GAE admin console -->
-
+        
         <intercept-url pattern="/Aggregate.html" access="hasRole('ROLE_USER') or hasRole('ROLE_SITE_ACCESS_ADMIN')" />
 
 		<!--  secure the GWT client interfaces -->
@@ -99,6 +99,9 @@
 		<intercept-url pattern="/gae/**" access="true" /> 
 		<!--	RemoteAPI access is controlled in web.xml -->
 		<intercept-url pattern="/remote_api" access="true" /> 
+		
+		<!-- ODK Tables API -->
+		<intercept-url pattern="/odktables/**" access="true" />
 		
 		<!-- in case we forgot to mention something... -->
 		<intercept-url pattern="/**" access="isAnonymous()" />

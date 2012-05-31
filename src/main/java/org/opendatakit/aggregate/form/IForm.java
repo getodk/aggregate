@@ -72,6 +72,8 @@ public interface IForm {
 
   public FormElementModel getTopLevelGroupElement();
 
+  public XFormParameters getRootElementDefn();
+  
   public String getMajorMinorVersionString();
   
   public String getOpenRosaVersionString();
@@ -222,18 +224,13 @@ public interface IForm {
    * definition. So the filename reported on the mime item has an extra leading
    * directory. Strip that off.
    * 
-   * @param aFormDefinition
-   * @param rootModelVersion
-   * @param rootUiVersion
    * @param item
-   * @param datastore
-   * @param user
+   * @param cc
    * @return true if the files are completely new or are identical to the
    *         currently-stored ones.
    * @throws ODKDatastoreException
    */
-  public boolean setXFormMediaFile(Long rootModelVersion, Long rootUiVersion,
-      MultiPartFormItem item, CallingContext cc) throws ODKDatastoreException;
+  public boolean setXFormMediaFile(MultiPartFormItem item, CallingContext cc) throws ODKDatastoreException;
   
   public String getUri();
 }

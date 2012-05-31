@@ -26,7 +26,7 @@
     <xs:simpleContent>
       <xs:extension base="xs:string">
         <xs:attribute type="xs:boolean" name="enabled" use="required"/>
-        <xs:attribute type="xs:string" name="queue-name" use="required"/>
+        <xs:attribute type="xs:string" name="queue-name" use="optional"/>
       </xs:extension>
     </xs:simpleContent>
   </xs:complexType>

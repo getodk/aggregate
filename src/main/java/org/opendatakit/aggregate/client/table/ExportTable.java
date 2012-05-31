@@ -39,7 +39,7 @@ public class ExportTable extends FlexTable {
 
   public ExportTable() {
     super();
-    this.setHTML(0, 2, "<h2 id=\"form_name\">Exported Files</h2>"); 
+    this.setHTML(0, 1, "<h2 id=\"form_name\">Exported Files</h2>"); 
     this.setText(HEADER_ROW, FILE_TYPE, "File Type");
     this.setText(HEADER_ROW, STATUS, "Status");
     this.setText(HEADER_ROW, TIME_COMPLETED, "Time Completed");

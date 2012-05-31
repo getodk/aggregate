@@ -44,6 +44,8 @@ public interface FormService extends RemoteService {
   
   Boolean createCsvFromFilter(FilterGroup group) throws AccessDeniedException, FormNotAvailableException, RequestFailureException, DatastoreFailureException;
   
+  Boolean createJsonFileFromFilter(FilterGroup group) throws AccessDeniedException, FormNotAvailableException, RequestFailureException, DatastoreFailureException;
+  
   KmlSettings getPossibleKmlSettings(String formId) throws AccessDeniedException, FormNotAvailableException, RequestFailureException, DatastoreFailureException;
 
   Boolean createKmlFromFilter(FilterGroup group, String geopointKey, String titleKey,

@@ -323,7 +323,6 @@ public class BinaryContentManipulator {
    * 
    * @param byteArray
    * @param contentType
-   * @param contentLength
    * @param unrootedFilePath
    * @param cc
    * @return COMPLETELY_NEW_FILE on successful save; FILE_UNCHANGED on hash
@@ -331,9 +330,10 @@ public class BinaryContentManipulator {
    * @throws ODKDatastoreException
    */
   public BinaryContentManipulator.BlobSubmissionOutcome setValueFromByteArray(byte[] byteArray,
-      String contentType, Long contentLength, String unrootedFilePath, CallingContext cc)
+      String contentType, String unrootedFilePath, CallingContext cc)
       throws ODKDatastoreException {
 
+	Long contentLength = (byteArray == null) ? null : Long.valueOf(byteArray.length);
     BinaryContentManipulator.BlobSubmissionOutcome outcome = BinaryContentManipulator.BlobSubmissionOutcome.FILE_UNCHANGED;
 
     boolean existingContent = false;

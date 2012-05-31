@@ -3,7 +3,6 @@
 	<name>aggregate-mysql</name>
 	<comment></comment>
 	<projects>
-		<project>odk-mysql-settings</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

@@ -299,12 +299,23 @@ Security breaches are particularly likely over unsecured WiFi hotspots.
         <parameterGroup>
             <name>tomcat_port_choice</name>
             <title>Apache Tomcat Port Configuration</title>
-            <explanation>ODK Aggregate needs to know the fully-qualified hostname and port numbers through which it can be reached in order to construct links back to its content when publishing or exporting data files.  If the hostname of the machine running Apache Tomcat is 'pc101' and your organization is 'opendatakit.org', then 'pc101.opendatakit.org' is likely the fully-qualified hostname for that machine.
-</explanation>
+            <explanation>ODK Aggregate needs to know the port numbers and the Internet-visible IP address or DNS name through which it can be reached in order to construct links back to its content when publishing or exporting data files.  
+
+Follow the ODK Aggregate Tomcat Install instructions (link below) to make your computer accessible on the web (using an Internet-visible IP address) and to establish a DNS name.</explanation>
             <value></value>
             <default></default>
             <insertAfter>${tomcat_authentication_should_configure_group}</insertAfter>
             <parameterList>
+                <linkParameter>
+                    <name>hostname_how_to</name>
+                    <description>http://opendatakit.org/use/aggregate/tomcat-install/#Configure_for_Network_Access</description>
+                    <explanation></explanation>
+                    <clickedActionList>
+                        <launchBrowser>
+                            <url>http://opendatakit.org/use/aggregate/tomcat-install/#Configure_for_Network_Access</url>
+                        </launchBrowser>
+                    </clickedActionList>
+                </linkParameter>
                 <stringParameter>
                     <name>tomcat_http_port</name>
                     <description>HTTP/1.1. Connector Port:</description>
@@ -332,7 +343,7 @@ Security breaches are particularly likely over unsecured WiFi hotspots.
                 </stringParameter>
                 <stringParameter>
                     <name>raw_hostname</name>
-                    <description>Fully-qualified hostname:</description>
+                    <description>Internet-visible IP address or DNS name:</description>
                     <explanation></explanation>
                     <value>${default_hostname}</value>
                     <default>${default_hostname}</default>

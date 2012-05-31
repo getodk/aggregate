@@ -281,7 +281,7 @@ public class KmlFormatterWithFilters implements SubmissionFormatter, RepeatCallb
       FormElementModel repeatElement, Row row, CallingContext cc) throws ODKDatastoreException {
     
     for (SubmissionSet repeatSet : repeats) {
-      Row rowFromRepeat = repeatSet.getFormattedValuesAsRow(propertyNames, elemFormatter, false, cc);
+      Row rowFromRepeat = repeatSet.getFormattedValuesAsRow(null, elemFormatter, false, cc);
       if (repeatElement.equals(gpsParent)) {
         Row clonedRow = Row.cloneRowValues(row);
         clonedRow.addDataFromRow(rowFromRepeat);
