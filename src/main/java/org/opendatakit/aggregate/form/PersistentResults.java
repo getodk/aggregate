@@ -262,11 +262,11 @@ public class PersistentResults {
   }
 
   public void setResultFile(byte[] byteArray, String contentType,
-      String unrootedFilePath, CallingContext cc) throws ODKDatastoreException {
+      String unrootedFilePath, boolean overwriteOK, CallingContext cc) throws ODKDatastoreException {
     if (bcm.getAttachmentCount(cc) > 0) {
       throw new IllegalStateException("Results are already attached!");
     }
-    bcm.setValueFromByteArray(byteArray, contentType, unrootedFilePath, cc);
+    bcm.setValueFromByteArray(byteArray, contentType, unrootedFilePath, overwriteOK, cc);
   }
 
   public String getUri() {

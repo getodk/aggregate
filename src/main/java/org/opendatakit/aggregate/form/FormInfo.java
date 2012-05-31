@@ -41,7 +41,7 @@ public class FormInfo {
 	private static final String ELEMENT_NAME_MANIFEST_FILESET = "manifestFileset";
 
 	public static final XFormParameters formInfoXFormParameters =
-		new XFormParameters(FormInfo.URI_FORM_ID_VALUE_FORM_INFO, 1L, 0L);
+		new XFormParameters(FormInfo.URI_FORM_ID_VALUE_FORM_INFO, 1L);
 	
 	public static final boolean isFormInfoForm(String formId) {
 		  return URI_FORM_ID_VALUE_FORM_INFO.equals(formId);
