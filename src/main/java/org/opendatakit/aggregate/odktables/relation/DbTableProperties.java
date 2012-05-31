@@ -8,6 +8,7 @@ import org.opendatakit.common.ermodel.simple.Query;
 import org.opendatakit.common.ermodel.simple.Relation;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.DataField.DataType;
+import org.opendatakit.common.persistence.DataField.IndexType;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
 
@@ -21,7 +22,7 @@ public class DbTableProperties {
   private static final List<DataField> dataFields;
   static {
     dataFields = new ArrayList<DataField>();
-    dataFields.add(new DataField(TABLE_ID, DataType.STRING, false));
+    dataFields.add(new DataField(TABLE_ID, DataType.STRING, false).setIndexable(IndexType.HASH));
     dataFields.add(new DataField(TABLE_NAME, DataType.STRING, false));
     dataFields.add(new DataField(TABLE_METADATA, DataType.LONG_STRING, true));
   }

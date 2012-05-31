@@ -36,7 +36,6 @@
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/guice-3.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/guice-assistedinject-3.0-rc2.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/javax.inject-1.jar"/>
-	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/odk-gae-settings-latest.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/odk-tomcatutil.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/commons-io-2.0.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/gwt-maps-1.1.1-rc1.jar"/>
@@ -89,7 +88,6 @@
 	</classpathentry>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/selenium-java-2.16.1.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/simple-xml-2.6.2.jar"/>
-    <classpathentry kind="lib" path="/home/dylan/.m2/repository/mysql/mysql-connector-java/5.1.18/mysql-connector-java-5.1.18.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/jaxrs-api-2.3.3.Final.jar"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>

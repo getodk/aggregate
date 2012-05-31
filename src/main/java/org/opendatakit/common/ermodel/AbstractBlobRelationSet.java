@@ -376,9 +376,9 @@ public class AbstractBlobRelationSet implements BlobRelationSet {
     }
 
     @Override
-    public BlobSubmissionOutcome addBlob(byte[] byteArray, String contentType, Long contentLength,
+    public BlobSubmissionOutcome addBlob(byte[] byteArray, String contentType,
         String unrootedFilePath, CallingContext cc) throws ODKDatastoreException {
-      return m.setValueFromByteArray(byteArray, contentType, contentLength, unrootedFilePath, cc);
+      return m.setValueFromByteArray(byteArray, contentType, unrootedFilePath, cc);
     }
 
     private final String uri;
@@ -390,12 +390,6 @@ public class AbstractBlobRelationSet implements BlobRelationSet {
       this.uri = uri;
       this.topLevelUri = topLevelUri;
       this.m = m;
-    }
-
-    @Override
-    public BlobSubmissionOutcome addBlob(byte[] byteArray, String contentType,
-        String unrootedFilePath, CallingContext cc) throws ODKDatastoreException {
-      return addBlob(byteArray, contentType, Long.valueOf(byteArray.length), unrootedFilePath, cc);
     }
   }
 

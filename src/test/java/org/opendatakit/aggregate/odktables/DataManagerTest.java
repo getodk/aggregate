@@ -5,6 +5,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,7 +28,6 @@ import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.TestContextFactory;
 
 import com.google.common.collect.Maps;
-import com.google.gwt.thirdparty.guava.common.collect.Lists;
 
 public class DataManagerTest {
 
@@ -122,7 +122,9 @@ public class DataManagerTest {
     List<Row> rows = setupTestRows();
     Row row1 = rows.get(0);
     Row row2 = rows.get(1);
-    List<Scope> scopes = Lists.newArrayList(row1.getFilterScope(), row2.getFilterScope());
+    List<Scope> scopes = new ArrayList<Scope>();
+    scopes.add(row1.getFilterScope());
+    scopes.add(row2.getFilterScope());
     List<Row> results = dm.getRows(scopes);
     assertEquals(2, results.size());
   }
@@ -282,7 +284,9 @@ public class DataManagerTest {
     List<Row> rows = setupTestRows();
     Row row2 = rows.get(1);
     Row row3 = rows.get(2);
-    List<Scope> scopes = Lists.newArrayList(row2.getFilterScope(), row3.getFilterScope());
+    List<Scope> scopes = new ArrayList<Scope>();
+    scopes.add(row2.getFilterScope());
+    scopes.add(row3.getFilterScope());
     List<Row> expected = dm.getRows(scopes);
     List<Row> actual = dm.getRowsSince(beginEtag, scopes);
     Util.assertCollectionSameElements(expected, actual);
@@ -291,7 +295,7 @@ public class DataManagerTest {
   private List<Row> setupTestRows() throws ODKEntityPersistException, ODKDatastoreException,
       ODKTaskLockException, EtagMismatchException, BadColumnNameException {
     Map<String, String> values = Maps.newHashMap();
-    List<Row> rows = Lists.newArrayList();
+    List<Row> rows = new ArrayList<Row>();
 
     Row row = Row.forInsert("1", values);
     row.setFilterScope(new Scope(Type.DEFAULT, null));

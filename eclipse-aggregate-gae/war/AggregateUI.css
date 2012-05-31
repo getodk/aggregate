@@ -76,10 +76,6 @@ a,a:visited,a:hover {
 	overflow: scroll;
 }
 
-#submission_admin_bar {
-	width: 100%;
-}	
-
 .error_message {
 	color: red;
 	text-align: center;

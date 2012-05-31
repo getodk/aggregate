@@ -73,7 +73,6 @@ import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.security.User;
-import org.opendatakit.common.security.server.SecurityServiceUtil;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.BasicConsts;
 import org.opendatakit.common.web.constants.HtmlConsts;
@@ -639,8 +638,7 @@ public class FormParserForJavaRosa {
     for (Map.Entry<String, MultiPartFormItem> itm : fileSet) {
       if (itm.getValue() == xformXmlData)
         continue;// ignore the xform -- stored above.
-      formInfo.setXFormMediaFile(rootElementDefn.modelVersion, rootElementDefn.uiVersion,
-          itm.getValue(), cc);
+      formInfo.setXFormMediaFile(itm.getValue(), cc);
     }
     // Determine the information about the submission...
     formInfo.setIsComplete(true);

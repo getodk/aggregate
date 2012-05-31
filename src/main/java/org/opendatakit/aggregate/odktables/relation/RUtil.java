@@ -1,10 +1,5 @@
 package org.opendatakit.aggregate.odktables.relation;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.commons.lang.StringUtils;
-import org.opendatakit.aggregate.odktables.entity.TableRole;
 
 /**
  * @author the.dylan.price@gmail.com
