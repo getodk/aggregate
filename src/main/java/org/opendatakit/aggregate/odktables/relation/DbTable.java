@@ -11,6 +11,7 @@ import org.opendatakit.common.ermodel.simple.Relation;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.DataField.DataType;
+import org.opendatakit.common.persistence.DataField.IndexType;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.web.CallingContext;
@@ -33,7 +34,7 @@ public class DbTable {
     dataFields.add(new DataField(CREATE_USER, DataType.STRING, false));
     dataFields.add(new DataField(LAST_UPDATE_USER, DataType.STRING, false));
     dataFields.add(new DataField(FILTER_TYPE, DataType.STRING, true));
-    dataFields.add(new DataField(FILTER_VALUE, DataType.STRING, true));
+    dataFields.add(new DataField(FILTER_VALUE, DataType.STRING, true).setIndexable(IndexType.HASH));
     dataFields.add(new DataField(DELETED, DataType.BOOLEAN, false));
   }
 

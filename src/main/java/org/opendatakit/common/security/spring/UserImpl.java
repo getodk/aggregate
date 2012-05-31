@@ -30,6 +30,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 public class UserImpl implements org.opendatakit.common.security.User {
 
 	final String nickName;
+	final String email;
 	final String uriUser;
 	final Set<GrantedAuthority> groups = new HashSet<GrantedAuthority>();
 	final Set<GrantedAuthority> directAuthorities = new HashSet<GrantedAuthority>();
@@ -37,10 +38,11 @@ public class UserImpl implements org.opendatakit.common.security.User {
 	Map<String, Set<GrantedAuthority> > formIdGrantedAuthorities = null;
 	
 	
-	UserImpl(String uriUser, String nickName,
+	UserImpl(String uriUser, String email, String nickName,
 			Collection<? extends GrantedAuthority> groupsAndGrantedAuthorities,
 			Datastore datastore) {
 		this.uriUser = uriUser;
+		this.email = email;
 		this.nickName = nickName;
 		this.datastore = datastore;
 		for ( GrantedAuthority g : groupsAndGrantedAuthorities ) {
@@ -56,6 +58,11 @@ public class UserImpl implements org.opendatakit.common.security.User {
 		return nickName;
 	}
 
+	@Override
+	public String getEmail() {
+		return email;
+	}
+	
 	public Set<GrantedAuthority> getGroups() {
 		return Collections.unmodifiableSet(groups);
 	}
