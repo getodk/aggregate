@@ -39,7 +39,7 @@ public class DataServiceImpl implements DataService {
   public List<RowResource> getRows() throws ODKDatastoreException, PermissionDeniedException {
     af.checkPermission(TablePermission.READ_ROW);
     List<Row> rows;
-    if (af.hasPermission(TablePermission.UNFILTERED_ROWS)) {
+    if (af.hasPermission(TablePermission.UNFILTERED_READ)) {
       rows = dm.getRows();
     } else {
       List<Scope> scopes = af.getScopes();
@@ -52,7 +52,7 @@ public class DataServiceImpl implements DataService {
   public RowResource getRow(String rowId) throws ODKDatastoreException, PermissionDeniedException {
     af.checkPermission(TablePermission.READ_ROW);
     Row row = dm.getRowNullSafe(rowId);
-    af.checkFilter(row);
+    af.checkFilter(TablePermission.UNFILTERED_READ, row);
     RowResource resource = getResource(row);
     return resource;
   }
@@ -64,10 +64,10 @@ public class DataServiceImpl implements DataService {
     af.checkPermission(TablePermission.WRITE_ROW);
     row.setRowId(rowId);
     Row dbRow = dm.getRow(rowId);
-    af.checkFilter(dbRow);
     if (dbRow == null) {
       row = dm.insertRow(row);
     } else {
+      af.checkFilter(TablePermission.UNFILTERED_WRITE, dbRow);
       row = dm.updateRow(row);
     }
     RowResource resource = getResource(row);
@@ -79,7 +79,7 @@ public class DataServiceImpl implements DataService {
       PermissionDeniedException {
     af.checkPermission(TablePermission.DELETE_ROW);
     Row row = dm.getRowNullSafe(rowId);
-    af.checkFilter(row);
+    af.checkFilter(TablePermission.UNFILTERED_DELETE, row);
     dm.deleteRow(rowId);
   }
 
