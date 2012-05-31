@@ -41,6 +41,12 @@ public interface User {
 	public String getNickname();
 	
 	/**
+	 * 
+	 * @return user@domain.com if an OpenID authenticated user.  Otherwise null.
+	 */
+	public String getEmail();
+	
+	/**
 	 * @return user id of the form "uid:username|timestamp" 
 	 * 		or "mailto:user@domain.com" (authenticated but not registered)
 	 *      or ANONYMOUS_USER or DAEMON_USER

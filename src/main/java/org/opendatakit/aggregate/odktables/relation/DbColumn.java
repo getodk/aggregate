@@ -7,6 +7,7 @@ import org.opendatakit.common.ermodel.simple.Entity;
 import org.opendatakit.common.ermodel.simple.Relation;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.DataField.DataType;
+import org.opendatakit.common.persistence.DataField.IndexType;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
 
@@ -20,7 +21,7 @@ public class DbColumn {
   private static final List<DataField> dataFields;
   static {
     dataFields = new ArrayList<DataField>();
-    dataFields.add(new DataField(TABLE_ID, DataType.STRING, false));
+    dataFields.add(new DataField(TABLE_ID, DataType.STRING, false).setIndexable(IndexType.HASH));
     dataFields.add(new DataField(COLUMN_NAME, DataType.STRING, false));
     dataFields.add(new DataField(COLUMN_TYPE, DataType.STRING, false));
   }
