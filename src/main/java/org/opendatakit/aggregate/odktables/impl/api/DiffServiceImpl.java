@@ -38,7 +38,7 @@ public class DiffServiceImpl implements DiffService {
       PermissionDeniedException {
     af.checkPermission(TablePermission.READ_ROW);
     List<Row> rows;
-    if (af.hasPermission(TablePermission.UNFILTERED_ROWS)) {
+    if (af.hasPermission(TablePermission.UNFILTERED_READ)) {
       rows = dm.getRowsSince(dataEtag);
     } else {
       List<Scope> scopes = af.getScopes();

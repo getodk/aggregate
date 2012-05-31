@@ -8,6 +8,7 @@ import org.opendatakit.common.ermodel.simple.Entity;
 import org.opendatakit.common.ermodel.simple.Relation;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.DataField.DataType;
+import org.opendatakit.common.persistence.DataField.IndexType;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
 
@@ -25,13 +26,14 @@ public class DbLogTable {
   private static final List<DataField> dataFields;
   static {
     dataFields = new ArrayList<DataField>();
-    dataFields.add(new DataField(ROW_ID, DataType.STRING, false));
+    dataFields.add(new DataField(ROW_ID, DataType.STRING, false).setIndexable(IndexType.HASH));
     dataFields.add(new DataField(ROW_VERSION, DataType.STRING, false));
-    dataFields.add(new DataField(MODIFICATION_NUMBER, DataType.INTEGER, false));
+    dataFields.add(new DataField(MODIFICATION_NUMBER, DataType.INTEGER, false)
+        .setIndexable(IndexType.ORDERED));
     dataFields.add(new DataField(CREATE_USER, DataType.STRING, false));
     dataFields.add(new DataField(LAST_UPDATE_USER, DataType.STRING, false));
     dataFields.add(new DataField(FILTER_TYPE, DataType.STRING, true));
-    dataFields.add(new DataField(FILTER_VALUE, DataType.STRING, true));
+    dataFields.add(new DataField(FILTER_VALUE, DataType.STRING, true).setIndexable(IndexType.HASH));
     dataFields.add(new DataField(DELETED, DataType.BOOLEAN, false));
   }
 

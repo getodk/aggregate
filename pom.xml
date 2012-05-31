@@ -68,6 +68,8 @@
 		<!-- aggregate-postgresql-specific -->
 		<module>aggregate-postgres</module>
 		<module>postgres-unit-tests</module>
+		<!-- odk tables client libraries -->
+		<module>odk-tables-api</module>
 	</modules>
 	<repositories>
 		<!-- main repository -->
