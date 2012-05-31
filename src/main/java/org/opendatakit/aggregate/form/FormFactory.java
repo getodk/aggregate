@@ -32,7 +32,6 @@ import org.opendatakit.aggregate.exception.ODKFormAlreadyExistsException;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.submission.SubmissionKeyPart;
 import org.opendatakit.aggregate.util.BackendActionsTable;
-import org.opendatakit.common.datamodel.BinaryContentManipulator.BlobSubmissionOutcome;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.PersistConsts;
@@ -311,7 +310,7 @@ public class FormFactory {
    * @throws ODKFormAlreadyExistsException
    */
   public static final IForm createOrFetchFormId(XFormParameters rootElementDefn,
-      boolean isEncryptedForm, String title, byte[] xmlBytes, boolean isDownloadEnabled,
+      boolean isEncryptedForm, String title, String incomingForm, boolean isDownloadEnabled,
       CallingContext cc) throws ODKOverQuotaException, ODKDatastoreException, ODKConversionException,
       ODKFormAlreadyExistsException {
 
@@ -321,13 +320,23 @@ public class FormFactory {
 
     try {
       thisForm = getForm(formUri, cc);
+      XFormParameters thisRootElementDefn = thisForm.getRootElementDefn();
+      Boolean isEncrypted = thisForm.isEncryptedForm();
+      String formName = thisForm.getViewableName();
+      
+      boolean same = rootElementDefn.equals(thisRootElementDefn)
+              && isEncryptedForm == isEncrypted && title.equals(formName);
+      
+      if (!same)
+            throw new ODKFormAlreadyExistsException();
 
-      if (thisForm.isSameForm(rootElementDefn, isEncryptedForm, title, xmlBytes, cc) != BlobSubmissionOutcome.NEW_FILE_VERSION) {
-        return thisForm;
-      }
-      throw new ODKFormAlreadyExistsException();
+      if (!thisForm.getMd5HashFormXml(cc).equals(CommonFieldsBase.newMD5HashUri(incomingForm)))
+        throw new ODKFormAlreadyExistsException();
+        
+      return thisForm;
     } catch (ODKEntityNotFoundException e) {
-      thisForm = new Form(rootElementDefn, isEncryptedForm, isDownloadEnabled, xmlBytes, title, cc);
+      thisForm = new Form(rootElementDefn, isEncryptedForm, isDownloadEnabled, title, cc);
+      thisForm.setFormXml(title + ".xml", incomingForm, cc);
     }
     return thisForm;
   }

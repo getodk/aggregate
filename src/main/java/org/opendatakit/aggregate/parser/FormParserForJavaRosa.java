@@ -19,7 +19,6 @@ package org.opendatakit.aggregate.parser;
 
 import java.io.ByteArrayInputStream;
 import java.io.Reader;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -75,7 +74,6 @@ import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.BasicConsts;
-import org.opendatakit.common.web.constants.HtmlConsts;
 
 /**
  * Parses an XML definition of an XForm based on java rosa types
@@ -292,8 +290,7 @@ public class FormParserForJavaRosa {
     }
 
     return new XFormParameters((formIdValue == null) ? defaultFormIdValue : formIdValue,
-        (versionString == null) ? null : Long.valueOf(versionString),
-        (uiVersionString == null) ? null : Long.valueOf(uiVersionString));
+        (versionString == null) ? null : Long.valueOf(versionString));
   }
 
   /**
@@ -614,14 +611,7 @@ public class FormParserForJavaRosa {
     //
     // This allows us to delete the form if upload goes bad...
     // TODO: the following function throws an exception unless new or
-    // identical
-    // inputXml
-    byte[] xmlBytes;
-    try {
-      xmlBytes = inputXml.getBytes(HtmlConsts.UTF8_ENCODE);
-    } catch (UnsupportedEncodingException e) {
-      throw new IllegalStateException("not reachable");
-    }
+    // identical inputXml
 
     // form downloads are immediately enabled unless the upload specifies
     // that
@@ -631,14 +621,14 @@ public class FormParserForJavaRosa {
     boolean isDownloadEnabled = (isIncompleteFlag == null || isIncompleteFlag.trim().length() == 0);
 
     IForm formInfo = FormFactory.createOrFetchFormId(rootElementDefn, isEncryptedForm, title,
-        xmlBytes, isDownloadEnabled, cc);
+        inputXml, isDownloadEnabled, cc);
     boolean newlyCreatedXForm = formInfo.isNewlyCreated();
 
     Set<Map.Entry<String, MultiPartFormItem>> fileSet = uploadedFormItems.getFileNameEntrySet();
     for (Map.Entry<String, MultiPartFormItem> itm : fileSet) {
       if (itm.getValue() == xformXmlData)
         continue;// ignore the xform -- stored above.
-      formInfo.setXFormMediaFile(itm.getValue(), cc);
+      formInfo.setXFormMediaFile(itm.getValue(), false, cc);
     }
     // Determine the information about the submission...
     formInfo.setIsComplete(true);
@@ -649,7 +639,7 @@ public class FormParserForJavaRosa {
 
     FormDefinition fdDefined = null;
     try {
-      fdDefined = FormDefinition.getFormDefinition(submissionElementDefn, cc);
+      fdDefined = FormDefinition.getFormDefinition(submissionElementDefn.formId, cc);
     } catch (IllegalStateException e) {
       e.printStackTrace();
       throw new ODKFormAlreadyExistsException(
@@ -745,7 +735,7 @@ public class FormParserForJavaRosa {
       //
       try {
         for (;;) {
-          FormDefinition fd = new FormDefinition(sa, submissionElementDefn, fdmList, cc);
+          FormDefinition fd = new FormDefinition(sa, submissionElementDefn.formId, fdmList, cc);
 
           List<CommonFieldsBase> badTables = new ArrayList<CommonFieldsBase>();
 
@@ -800,7 +790,7 @@ public class FormParserForJavaRosa {
           }
         }
       } catch (Exception e) {
-        FormDefinition fd = new FormDefinition(sa, submissionElementDefn, fdmList, cc);
+        FormDefinition fd = new FormDefinition(sa, submissionElementDefn.formId, fdmList, cc);
 
         for (CommonFieldsBase tbl : fd.getBackingTableSet()) {
           try {

@@ -13,6 +13,7 @@
  */
 package org.opendatakit.common.utils;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -28,6 +29,8 @@ import java.util.TimeZone;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
 import org.javarosa.core.model.utils.DateUtils;
 import org.javarosa.xform.parse.XFormParser;
 import org.kxml2.io.KXmlParser;
@@ -527,4 +530,47 @@ public class WebUtils {
         isForwardCursor);
   }
 
+  public static String readResponse( HttpResponse resp ) {
+    StringBuffer response = new StringBuffer();
+
+    HttpEntity e = resp.getEntity();
+    if ( e != null ) {
+      // TODO: this section of code is possibly causing 'WARNING: Going to buffer
+      // response body of large or unknown size. Using getResponseBodyAsStream
+      // instead is recommended.'
+      // The WARNING is most likely only happening when running appengine locally,
+      // but we should investigate to make sure
+      BufferedReader reader = null;
+      InputStreamReader isr = null;
+      try {
+        reader = new BufferedReader(isr = new InputStreamReader(e.getContent(), HtmlConsts.UTF8_ENCODE));
+        String responseLine;
+        while ((responseLine = reader.readLine()) != null) {
+          response.append(responseLine);
+        }
+      } catch (UnsupportedEncodingException ex) {
+        ex.printStackTrace();
+      } catch (IllegalStateException ex) {
+        ex.printStackTrace();
+      } catch (IOException ex) {
+        ex.printStackTrace();
+      } finally {
+        try {
+          if ( reader != null ) {
+            reader.close();
+          }
+        } catch ( IOException ex ) {
+          // no-op
+        }
+        try {
+          if ( isr != null ) {
+            isr.close();
+          }
+        } catch ( IOException ex ) {
+          // no-op
+        }
+      }
+    }
+    return response.toString();
+  }
 }
