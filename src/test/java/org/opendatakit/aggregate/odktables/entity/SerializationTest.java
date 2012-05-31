@@ -40,11 +40,23 @@ public class SerializationTest {
   }
 
   @Test
-  public void testRow() throws Exception {
+  public void testRowForUpdate() throws Exception {
     Row expected = Row.forUpdate("1", "5", T.Data.DYLAN.getValues());
     serializer.write(expected, writer);
     String xml = writer.toString();
     System.out.println(xml);
+    Row actual = serializer.read(Row.class, xml);
+    assertEquals(expected, actual);
+  }
+
+  @Test
+  public void testRowInsert() throws Exception {
+    Row expected = Row.forInsert("1", T.Data.DYLAN.getValues());
+
+    serializer.write(expected, writer);
+    String xml = writer.toString();
+    System.out.println(xml);
+
     Row actual = serializer.read(Row.class, xml);
     assertEquals(expected, actual);
   }
@@ -186,4 +198,5 @@ public class SerializationTest {
     List<Row> actual = (List<Row>) serializer.read(ArrayList.class, xml);
     assertEquals(expected, actual);
   }
+
 }
