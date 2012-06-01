@@ -22,12 +22,14 @@ import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.web.CallingContext;
 
 public class DiffServiceImpl implements DiffService {
+  private CallingContext cc;
   private DataManager dm;
   private UriInfo info;
   private AuthFilter af;
 
   public DiffServiceImpl(String tableId, UriInfo info, CallingContext cc)
       throws ODKEntityNotFoundException, ODKDatastoreException {
+    this.cc = cc;
     this.dm = new DataManager(tableId, cc);
     this.info = info;
     this.af = new AuthFilter(tableId, cc);
@@ -41,7 +43,7 @@ public class DiffServiceImpl implements DiffService {
     if (af.hasPermission(TablePermission.UNFILTERED_READ)) {
       rows = dm.getRowsSince(dataEtag);
     } else {
-      List<Scope> scopes = af.getScopes();
+      List<Scope> scopes = AuthFilter.getScopes(cc);
       rows = dm.getRowsSince(dataEtag, scopes);
     }
     return getResources(rows);

@@ -31,8 +31,8 @@ public class DbTable {
     dataFields = new ArrayList<DataField>();
     dataFields.add(new DataField(ROW_VERSION, DataType.STRING, false));
     dataFields.add(new DataField(MODIFICATION_NUMBER, DataType.INTEGER, false));
-    dataFields.add(new DataField(CREATE_USER, DataType.STRING, false));
-    dataFields.add(new DataField(LAST_UPDATE_USER, DataType.STRING, false));
+    dataFields.add(new DataField(CREATE_USER, DataType.STRING, true));
+    dataFields.add(new DataField(LAST_UPDATE_USER, DataType.STRING, true));
     dataFields.add(new DataField(FILTER_TYPE, DataType.STRING, true));
     dataFields.add(new DataField(FILTER_VALUE, DataType.STRING, true).setIndexable(IndexType.HASH));
     dataFields.add(new DataField(DELETED, DataType.BOOLEAN, false));
