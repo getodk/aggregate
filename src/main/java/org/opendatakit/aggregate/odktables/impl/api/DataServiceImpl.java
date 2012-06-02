@@ -24,12 +24,14 @@ import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.web.CallingContext;
 
 public class DataServiceImpl implements DataService {
+  private CallingContext cc;
   private DataManager dm;
   private UriInfo info;
   private AuthFilter af;
 
   public DataServiceImpl(String tableId, UriInfo info, CallingContext cc)
       throws ODKEntityNotFoundException, ODKDatastoreException {
+    this.cc = cc;
     this.dm = new DataManager(tableId, cc);
     this.info = info;
     this.af = new AuthFilter(tableId, cc);
@@ -42,7 +44,7 @@ public class DataServiceImpl implements DataService {
     if (af.hasPermission(TablePermission.UNFILTERED_READ)) {
       rows = dm.getRows();
     } else {
-      List<Scope> scopes = af.getScopes();
+      List<Scope> scopes = AuthFilter.getScopes(cc);
       rows = dm.getRows(scopes);
     }
     return getResources(rows);

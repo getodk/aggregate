@@ -36,9 +36,9 @@ public class Scope {
    */
   public Scope(Type type, String value) {
     Validate.notNull(type);
-    if (type.equals(Type.USER) || type.equals(Type.GROUP)) {
+    if (type.equals(Type.GROUP)) {
       Validate.notEmpty(value);
-    } else {
+    } else if (type.equals(Type.DEFAULT)) {
       value = null;
     }
 

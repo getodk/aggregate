@@ -6,6 +6,7 @@ import java.util.List;
 import org.apache.commons.lang.Validate;
 import org.opendatakit.aggregate.odktables.entity.Column;
 import org.opendatakit.aggregate.odktables.entity.Scope;
+import org.opendatakit.aggregate.odktables.entity.TableAcl;
 import org.opendatakit.aggregate.odktables.entity.TableEntry;
 import org.opendatakit.aggregate.odktables.entity.TableRole;
 import org.opendatakit.aggregate.odktables.exception.TableAlreadyExistsException;
@@ -56,11 +57,44 @@ public class TableManager {
     Query query = DbTableEntry.getRelation(cc).query("TableManager.getTables", cc);
     List<Entity> entries = query.execute();
 
+    return getTableEntries(entries);
+  }
+
+  /**
+   * Retrieve a list of all table entries in the datastore that the given scopes
+   * are allowed to see.
+   * 
+   * @param scopes
+   *          the scopes
+   * @return a list of table entries which the given scopes are allowed to see
+   * @throws ODKDatastoreException
+   */
+  public List<TableEntry> getTables(List<Scope> scopes) throws ODKDatastoreException {
+    // get table ids for entries that the given scopes can see
+    List<Entity> aclEntities = DbTableAcl.queryNotEqual(TableRole.NONE, cc);
+    List<String> tableIds = new ArrayList<String>();
+
+    for (Entity aclEntity : aclEntities) {
+      TableAcl acl = converter.toTableAcl(aclEntity);
+      if (scopes.contains(acl.getScope())) {
+        tableIds.add(aclEntity.getString(DbTableAcl.TABLE_ID));
+      }
+    }
+
+    Query query = DbTableEntry.getRelation(cc).query("TableManager.getTables(List<Scope>)", cc);
+    query.include(CommonFieldsBase.URI_COLUMN_NAME, tableIds);
+    List<Entity> entries = query.execute();
+
+    return getTableEntries(entries);
+  }
+
+  private List<TableEntry> getTableEntries(List<Entity> entries) throws ODKDatastoreException {
     // get table names
     List<String> tableIds = new ArrayList<String>();
     for (Entity entry : entries) {
       tableIds.add(entry.getId());
     }
+
     List<String> tableNames = new ArrayList<String>();
     Query propsQuery = DbTableProperties.getRelation(cc).query("TableManager.getTables", cc);
     propsQuery.include(DbTableProperties.TABLE_ID, tableIds);
@@ -167,7 +201,7 @@ public class TableManager {
     entities.add(properties);
 
     Entity ownerAcl = creator.newTableAclEntity(tableId, new Scope(Scope.Type.USER, cc
-        .getCurrentUser().getUriUser()), TableRole.OWNER, cc);
+        .getCurrentUser().getEmail()), TableRole.OWNER, cc);
     entities.add(ownerAcl);
 
     Relation.putEntities(entities, cc);

@@ -587,7 +587,7 @@ public class FormParserForJavaRosa {
         for (i = 0; i < 10; i++) {
           TaskLock formCreationTaskLock = ds.createTaskLock(user);
           if (formCreationTaskLock.releaseLock(creationLockId, lockedResourceName,
-              TaskLockType.STARTUP_SERIALIZATION)) {
+              TaskLockType.CREATE_FORM)) {
             break;
           }
           formCreationTaskLock = null;
