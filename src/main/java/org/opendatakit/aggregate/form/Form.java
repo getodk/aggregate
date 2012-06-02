@@ -73,9 +73,6 @@ class Form implements IForm {
    */
   private final FormDefinition formDefinition;
 
-  private final boolean newObject;
-  private boolean updatedFormXml;
-
   /**
    * NOT persisted
    */
@@ -88,9 +85,6 @@ class Form implements IForm {
     
     this.infoRow = infoRow;
     String topLevelAuri = infoRow.getUri();
-    
-    newObject = false;
-    updatedFormXml = false;
 
     Query q;
     List<? extends CommonFieldsBase> rows;
@@ -143,12 +137,9 @@ class Form implements IForm {
     infoRow.setSubmissionDate(now);
     infoRow.setMarkedAsCompleteDate(now);
     infoRow.setIsComplete(true);
-    infoRow.setModelVersion(1L);
-    infoRow.setUiVersion(0L);
+    infoRow.setModelVersion(1L); // rollback (v1.0.x) compatibility
+    infoRow.setUiVersion(0L);    // rollback (v1.0.x) compatibility
     infoRow.setStringField(FormInfoTable.FORM_ID, rootElementDefn.formId);
-
-    newObject = true;
-    updatedFormXml = false;
 
     String topLevelAuri = infoRow.getUri();
 
@@ -177,14 +168,6 @@ class Form implements IForm {
 	 if ( formDefinition != null ) {
 		populateRepeatElementMap(formDefinition.getTopLevelGroupElement());
 	 }
-  }
-
-  public boolean isNewlyCreated() {
-    return newObject;
-  }
-
-  public boolean isFormXmlVersionUpdated() {
-    return updatedFormXml;
   }
 
   public synchronized void persist(CallingContext cc) throws ODKDatastoreException {
@@ -308,9 +291,8 @@ class Form implements IForm {
   
   public String getViewableFormNameSuitableAsFileName() {
     String name = getViewableName();
-    return name.replaceAll("[^\\p{L}0-9]", "_"); // any non-alphanumeric is
-    // replaced with
-    // underscore
+    // any non-alphanumeric is replaced with underscore
+    return name.replaceAll("[^\\p{L}0-9]", "_"); 
   }
 
   public XFormParameters getRootElementDefn() {
@@ -636,7 +618,7 @@ class Form implements IForm {
     }
   }
   
-  public BlobSubmissionOutcome setFormXml( String formFilename, String xmlForm, CallingContext cc ) throws ODKDatastoreException {
+  public BlobSubmissionOutcome setFormXml( String formFilename, String xmlForm, Long modelVersion, CallingContext cc ) throws ODKDatastoreException {
     byte[] bytes;
     try {
       bytes = xmlForm.getBytes("UTF-8");
@@ -644,10 +626,10 @@ class Form implements IForm {
       e.printStackTrace();
       throw new IllegalStateException("unexpected", e);
     }
+    filesetRow.setLongField(FormInfoFilesetTable.ROOT_ELEMENT_MODEL_VERSION, modelVersion);
     if ( xform.getAttachmentCount(cc) == 0 ) {
       return xform.setValueFromByteArray(bytes, "text/xml", formFilename, false, cc);
     } else {
-      updatedFormXml = true;
       String curName = xform.getUnrootedFilename(1, cc);
       String newName = formFilename;
       if ( (newName == null) ? (curName == null) : newName.equals(curName) ) {

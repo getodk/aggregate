@@ -203,8 +203,7 @@ public class PurgeOlderSubmissionsWorkerImpl {
 
         List<SubmissionKey> keys = new ArrayList<SubmissionKey>();
         for (Submission s : submissions) {
-          keys.add(new SubmissionKey(s.getFormId(), s.getModelVersion(), s.getUiVersion(), s
-              .getFormElementModel().getElementName(), s.getKey().getKey()));
+          keys.add(new SubmissionKey(s.getFormId(), s.getFormElementModel().getElementName(), s.getKey().getKey()));
         }
 
         DeleteSubmissions delete;

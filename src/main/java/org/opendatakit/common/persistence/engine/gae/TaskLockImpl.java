@@ -80,12 +80,9 @@ public class TaskLockImpl implements TaskLock {
         }
         // see if lock id matches that of the one supplied.
         // if so, remove lock from table.
-        Object value = entity.getProperty(LOCK_ID_PROPERTY);
-        if (value instanceof String) {
-          String retrievedLockId = (String) value;
-          if (lockId.equals(retrievedLockId)) {
-            shouldDelete = true;
-          }
+        String retrievedLockId = getLockId(entity);
+        if (lockId.equals(retrievedLockId)) {
+          shouldDelete = true;
         }
         if (shouldDelete) {
           keysToDelete.add(entity.getKey());
@@ -112,6 +109,8 @@ public class TaskLockImpl implements TaskLock {
             deleteTransaction.commit();
           } else {
             deleteTransaction.rollback();
+            System.out.println("Rollback deleteLock : " + lockId + " " + formId + " "
+                + taskType.getName());
           }
         }
       }
@@ -137,11 +136,8 @@ public class TaskLockImpl implements TaskLock {
           result = true;
         } else {
           // see if the lock is ours (may be slow appearing due to GAE delays)
-          Object value = gaeEntity.getProperty(LOCK_ID_PROPERTY);
-          if (value instanceof String) {
-            String retrievedLockId = (String) value;
-            result = lockId.equals(retrievedLockId);
-          }
+          String retrievedLockId = getLockId(gaeEntity);
+          result = lockId.equals(retrievedLockId);
         }
         // else you did not get the lock
       } catch (ODKTaskLockException e) {
@@ -152,6 +148,8 @@ public class TaskLockImpl implements TaskLock {
           transaction.commit();
         } else {
           transaction.rollback();
+          System.out.println("Rollback obtainLock : " + lockId + " " + formId + " "
+              + taskType.getName());
           return result;
         }
       }
@@ -190,13 +188,32 @@ public class TaskLockImpl implements TaskLock {
     return 0L;
   }
 
-  private boolean checkForExpiration(Entity entity) {
+  private String getLockId(Entity entity) {
     if (entity == null) {
-      return false;
+      return "";
+    }
+
+    Object value = entity.getProperty(LOCK_ID_PROPERTY);
+    if (value instanceof String) {
+      String retrievedId =  (String) value;
+      return retrievedId;
+    }
+    
+    return "";
+  }
+  
+  /**
+   * 
+   * @param entity
+   * @return true if expired
+   */
+  private boolean isExpired(Entity entity) {
+    if (entity == null) {
+      return true;
     }
     Long timestamp = getTimestamp(entity);
     Long current = System.currentTimeMillis();
-    System.out.println("Time left on lock: " + Long.toString(timestamp - current));
+    System.out.println("Time left on lock: " + Long.toString(timestamp - current) );
     if (current.compareTo(timestamp) > 0) {
       return true;
     }
@@ -210,7 +227,8 @@ public class TaskLockImpl implements TaskLock {
       try {
         Entity gaeEntity = queryForLock(formId, taskType);
         if (gaeEntity != null) {
-          if (gaeEntity.getProperty(LOCK_ID_PROPERTY).equals(lockId)) {
+          String retrievedLockId = getLockId(gaeEntity);
+          if (retrievedLockId.equals(lockId)) {
             updateValuesNpersist(transaction, lockId, formId, taskType, gaeEntity);
             result = true;
           }
@@ -224,6 +242,8 @@ public class TaskLockImpl implements TaskLock {
           transaction.commit();
         } else {
           transaction.rollback();
+          System.out.println("Rollback renewLock : " + lockId + " " + formId + " "
+              + taskType.getName());
           return result;
         }
       }
@@ -259,10 +279,13 @@ public class TaskLockImpl implements TaskLock {
       if (gaeEntity == null) {
         // might have been deleted in an earlier sweep...
         result = true;
-      } else if (gaeEntity.getProperty(LOCK_ID_PROPERTY).equals(lockId)) {
-        dam.recordDeleteUsage(KIND);
-        ds.delete(transaction, gaeEntity.getKey());
-        result = true;
+      } else {
+        String retrievedLockId = getLockId(gaeEntity);
+        if (retrievedLockId.equals(lockId)) {
+          dam.recordDeleteUsage(KIND);
+          ds.delete(transaction, gaeEntity.getKey());
+          result = true;
+        }
       }
     } catch (ODKTaskLockException e) {
       throw e;
@@ -279,6 +302,7 @@ public class TaskLockImpl implements TaskLock {
       } else {
         try {
           transaction.rollback();
+          System.out.println("Rollback releaseLock : " + lockId + " " + formId + " " + taskType.getName());
         } catch (DatastoreFailureException e) {
           throw new ODKTaskLockException(OTHER_ERROR, e);
         }
@@ -294,13 +318,10 @@ public class TaskLockImpl implements TaskLock {
       throw new ODKTaskLockException("UNABLE TO LOCATE LOCK: " + lockId + " For: " + formId
           + " Task: " + taskType.getName());
     }
-    Object value = verificationEntity.getProperty(LOCK_ID_PROPERTY);
-    if (value instanceof String) {
-      String retrievedLockId = (String) value;
-      if (!lockId.equals(retrievedLockId)) {
-        throw new ODKTaskLockException("SOMEONE OVERWROTE THE LOCK" + " Actual: " + retrievedLockId
-            + " Expected: " + lockId);
-      }
+    String retrievedLockId = getLockId(verificationEntity);
+    if (!lockId.equals(retrievedLockId)) {
+      throw new ODKTaskLockException("SOMEONE OVERWROTE THE LOCK" + " Actual: " + retrievedLockId
+          + " Expected: " + lockId);
     }
   }
 
@@ -337,7 +358,7 @@ public class TaskLockImpl implements TaskLock {
       Entity active = null;
       for (Entity e : entities) {
         ++readCount;
-        if (!checkForExpiration(e)) {
+        if (!isExpired(e)) {
           if (active != null) {
             Long timestamp1 = getTimestamp(active);
             Long timestamp2 = getTimestamp(e);

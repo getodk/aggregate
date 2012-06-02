@@ -102,23 +102,6 @@ public class FormDefinition {
 			sequenceCounter = 1;
 		}
 	}
-	
-	static final void assertModel(XFormParameters p, List<FormDataModel> model, CallingContext cc) throws ODKDatastoreException {
-		FormDataModel fdm = FormDataModel.assertRelation(cc);
-		if ( model == null || model.size() == 0 ) {
-			throw new IllegalArgumentException("should never be null");
-		}
-		Datastore ds = cc.getDatastore();
-		User user = cc.getCurrentUser();
-		for ( FormDataModel m : model ) {
-			m.print(System.out);
-			try {
-				ds.getEntity(fdm, m.getUri(), user);
-			} catch ( ODKEntityNotFoundException e ) {
-				ds.putEntity(m, user);
-			}
-		}
-	}
 
 	static final FormElementModel findElement(FormElementModel group, DataField backingKey) {
 		for ( FormElementModel m : group.getChildren()) {

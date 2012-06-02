@@ -162,18 +162,18 @@ public final class SubmissionAssociationTable extends CommonFieldsBase {
 		return relation;
 	}
 	
-	public static final SubmissionAssociationTable assertSubmissionAssociation(String uriMd5FormId, XFormParameters submissionElementDefn, CallingContext cc) throws ODKDatastoreException {
+	public static final SubmissionAssociationTable assertSubmissionAssociation(String uriMd5FormId, String formId, CallingContext cc) throws ODKDatastoreException {
 		Datastore ds = cc.getDatastore();
 		User user = cc.getCurrentUser();
 		
 	    SubmissionAssociationTable sa;
 	    {
 	    	String fdmSubmissionUri = CommonFieldsBase.newUri();
-	        String submissionFormIdUri = CommonFieldsBase.newMD5HashUri(submissionElementDefn.formId); // key under which submission is located...
+	        String submissionFormIdUri = CommonFieldsBase.newMD5HashUri(formId); // key under which submission is located...
 
 	        SubmissionAssociationTable saRelation = SubmissionAssociationTable.assertRelation(cc);
 		    sa = ds.createEntityUsingRelation(saRelation, user);
-		    sa.setSubmissionFormId(submissionElementDefn.formId);
+		    sa.setSubmissionFormId(formId);
 		    sa.setIsPersistenceModelComplete(false);
 		    sa.setIsSubmissionAllowed(true);
 		    sa.setUriSubmissionDataModel(fdmSubmissionUri);
