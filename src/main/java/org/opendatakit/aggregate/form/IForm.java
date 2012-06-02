@@ -46,10 +46,6 @@ import org.opendatakit.common.web.CallingContext;
  */
 public interface IForm {
   public static final Long MAX_FORM_ID_LENGTH = PersistConsts.GUARANTEED_SEARCHABLE_LEN;
-
-  public boolean isNewlyCreated();
-  
-  public boolean isFormXmlVersionUpdated();
   
   public void persist(CallingContext cc) throws ODKDatastoreException;
 
@@ -163,11 +159,12 @@ public interface IForm {
    * 
    * @param formFilename
    * @param formXml
+   * @param modelVersion
    * @param cc
    * @return
    * @throws ODKDatastoreException
    */
-  public BlobSubmissionOutcome setFormXml( String formFilename, String formXml, CallingContext cc ) throws ODKDatastoreException;
+  public BlobSubmissionOutcome setFormXml( String formFilename, String formXml, Long modelVersion, CallingContext cc ) throws ODKDatastoreException;
   
   /**
    * Return the md5 hash of this XML.

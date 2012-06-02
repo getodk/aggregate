@@ -40,8 +40,7 @@ public class FormInfo {
 
 	private static final String ELEMENT_NAME_MANIFEST_FILESET = "manifestFileset";
 
-	public static final XFormParameters formInfoXFormParameters =
-		new XFormParameters(FormInfo.URI_FORM_ID_VALUE_FORM_INFO, 1L);
+	public static final String FORM_ID = FormInfo.URI_FORM_ID_VALUE_FORM_INFO;
 	
 	public static final boolean isFormInfoForm(String formId) {
 		  return URI_FORM_ID_VALUE_FORM_INFO.equals(formId);
@@ -64,13 +63,6 @@ public class FormInfo {
 	      }
 	      
 	      SubmissionKeyPart part;
-	      
-	      // verify 1st part is version = 1L, uiVersion =0L
-	      part = parts.get(0);
-	      if ( part.getModelVersion().compareTo(1L) != 0 ||
-	    		  part.getUiVersion().compareTo(0L) != 0 ) {
-	    	  return false;
-	      }
 	      
 	      // verify 2nd part is form info table
 	      part = parts.get(1);

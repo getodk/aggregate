@@ -28,8 +28,8 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.exception.ODKConversionException;
-import org.opendatakit.aggregate.exception.ODKFormAlreadyExistsException;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
+import org.opendatakit.aggregate.parser.FormParserForJavaRosa;
 import org.opendatakit.aggregate.submission.SubmissionKeyPart;
 import org.opendatakit.aggregate.util.BackendActionsTable;
 import org.opendatakit.common.persistence.CommonFieldsBase;
@@ -290,55 +290,32 @@ public class FormFactory {
   }
 
   /**
-   * Create or fetch the given formId. 
-   * ONLY call this from FormParserForJavaRosa (where new forms are created).
+   * Called only from FormParserForJavaRosa.  The form should not already exist.
+   * Returns the new form.
    * 
-   * @param isEncryptedForm
+   * @param incomingFormXml
    * @param rootElementDefn
-   * 
-   * @param formId
+   * @param isEncryptedForm
    * @param isDownloadEnabled
-   * @param xmlBytes
-   * @param submissionElementDefn
-   * @param ds
-   * @param user
+   * @param title
+   * @param cc
    * @return
-   * @throws ODKOverQuotaException
    * @throws ODKDatastoreException
    * @throws ODKConversionException
-   *           if formId is too long...
-   * @throws ODKFormAlreadyExistsException
    */
-  public static final IForm createOrFetchFormId(XFormParameters rootElementDefn,
-      boolean isEncryptedForm, String title, String incomingForm, boolean isDownloadEnabled,
-      CallingContext cc) throws ODKOverQuotaException, ODKDatastoreException, ODKConversionException,
-      ODKFormAlreadyExistsException {
-
+  public static IForm createFormId(String incomingFormXml, XFormParameters rootElementDefn, 
+        boolean isEncryptedForm, boolean isDownloadEnabled, String title, CallingContext cc) 
+            throws ODKDatastoreException, ODKConversionException {
     IForm thisForm = null;
 
     String formUri = CommonFieldsBase.newMD5HashUri(rootElementDefn.formId);
-
     try {
-      thisForm = getForm(formUri, cc);
-      XFormParameters thisRootElementDefn = thisForm.getRootElementDefn();
-      Boolean isEncrypted = thisForm.isEncryptedForm();
-      String formName = thisForm.getViewableName();
-      
-      boolean same = rootElementDefn.equals(thisRootElementDefn)
-              && isEncryptedForm == isEncrypted && title.equals(formName);
-      
-      if (!same)
-            throw new ODKFormAlreadyExistsException();
-
-      if (!thisForm.getMd5HashFormXml(cc).equals(CommonFieldsBase.newMD5HashUri(incomingForm)))
-        throw new ODKFormAlreadyExistsException();
-        
-      return thisForm;
+      thisForm = getForm(formUri, cc); // this SHOULD throw an exception!!!
     } catch (ODKEntityNotFoundException e) {
       thisForm = new Form(rootElementDefn, isEncryptedForm, isDownloadEnabled, title, cc);
-      thisForm.setFormXml(title + ".xml", incomingForm, cc);
+      FormParserForJavaRosa.updateFormXmlVersion(thisForm, incomingFormXml, rootElementDefn.modelVersion, cc);
     }
     return thisForm;
   }
-
 }
+
