@@ -40,8 +40,7 @@ public class AuthFilter {
   public void checkPermission(TablePermission permission) throws ODKDatastoreException,
       PermissionDeniedException {
     if (!hasPermission(permission)) {
-      // TODO: change to getEmail()
-      String userUri = cc.getCurrentUser().getUriUser();
+      String userUri = cc.getCurrentUser().getEmail();
       throw new PermissionDeniedException(String.format("Denied permission %s to user %s",
           permission, userUri));
     }
@@ -57,8 +56,7 @@ public class AuthFilter {
    * @throws ODKDatastoreException
    */
   public boolean hasPermission(TablePermission permission) throws ODKDatastoreException {
-    // TODO: change to getEmail()
-    String userUri = cc.getCurrentUser().getUriUser();
+    String userUri = cc.getCurrentUser().getEmail();
     Set<TablePermission> permissions = getPermissions(userUri);
     return permissions.contains(permission);
   }
@@ -89,8 +87,7 @@ public class AuthFilter {
     Validate.notNull(permission);
     Validate.notNull(row);
 
-    // TODO: change to getEmail()
-    String userUri = cc.getCurrentUser().getUriUser();
+    String userUri = cc.getCurrentUser().getEmail();
 
     Set<TablePermission> permissions = getPermissions(userUri);
 
@@ -102,7 +99,10 @@ public class AuthFilter {
       }
       switch (filter.getType()) {
       case USER:
-        if (!userUri.equals(filter.getValue())) {
+        String filterUser = filter.getValue();
+        if (userUri == null && filterUser != null) {
+          throwPermissionDenied(row.getRowId(), userUri);
+        } else if (userUri != null && !userUri.equals(filter.getValue())) {
           throwPermissionDenied(row.getRowId(), userUri);
         }
         break;
@@ -130,9 +130,8 @@ public class AuthFilter {
   /**
    * @return a list of all scopes which the current user is within
    */
-  public List<Scope> getScopes() {
-    // TODO: change to getEmail()
-    String userUri = cc.getCurrentUser().getUriUser();
+  public static List<Scope> getScopes(CallingContext cc) {
+    String userUri = cc.getCurrentUser().getEmail();
 
     List<Scope> scopes = Lists.newArrayList();
     scopes.add(new Scope(Type.DEFAULT, null));

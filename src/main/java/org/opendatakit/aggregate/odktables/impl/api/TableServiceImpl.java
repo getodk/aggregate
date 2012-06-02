@@ -20,6 +20,7 @@ import org.opendatakit.aggregate.odktables.api.PropertiesService;
 import org.opendatakit.aggregate.odktables.api.TableAclService;
 import org.opendatakit.aggregate.odktables.api.TableService;
 import org.opendatakit.aggregate.odktables.entity.Column;
+import org.opendatakit.aggregate.odktables.entity.Scope;
 import org.opendatakit.aggregate.odktables.entity.TableEntry;
 import org.opendatakit.aggregate.odktables.entity.TableRole.TablePermission;
 import org.opendatakit.aggregate.odktables.entity.api.TableDefinition;
@@ -37,15 +38,15 @@ public class TableServiceImpl implements TableService {
 
   public TableServiceImpl(@Context ServletContext sc, @Context HttpServletRequest req,
       @Context UriInfo info) {
-    cc = ContextFactory.getCallingContext(sc, req);
-    tm = new TableManager(cc);
+    this.cc = ContextFactory.getCallingContext(sc, req);
+    this.tm = new TableManager(cc);
     this.info = info;
   }
 
   @Override
   public List<TableResource> getTables() throws ODKDatastoreException {
-    // TODO: add access control stuff
-    List<TableEntry> entries = tm.getTables();
+    List<Scope> scopes = AuthFilter.getScopes(cc);
+    List<TableEntry> entries = tm.getTables(scopes);
     ArrayList<TableResource> resources = new ArrayList<TableResource>();
     for (TableEntry entry : entries) {
       resources.add(getResource(entry));

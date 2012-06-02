@@ -183,8 +183,7 @@ public class EntityCreator {
 
     Entity row = table.newEntity(rowId, cc);
     User user = cc.getCurrentUser();
-    // TODO: change to getEmail()
-    row.set(DbTable.CREATE_USER, user.getUriUser());
+    row.set(DbTable.CREATE_USER, user.getEmail());
     setRowFields(row, modificationNumber, user, filter, false, values, columns);
     return row;
   }
@@ -278,8 +277,7 @@ public class EntityCreator {
       throws BadColumnNameException {
     row.set(DbTable.ROW_VERSION, CommonFieldsBase.newUri());
     row.set(DbTable.MODIFICATION_NUMBER, modificationNumber);
-    // TODO: change to getEmail()
-    row.set(DbTable.LAST_UPDATE_USER, lastUpdatedUser.getUriUser());
+    row.set(DbTable.LAST_UPDATE_USER, lastUpdatedUser.getEmail());
 
     // if filterScope is null, don't change the value
     // if filterScope is the empty scope, set both filter type and value to null
