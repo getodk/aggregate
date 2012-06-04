@@ -11,7 +11,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendatakit.aggregate.odktables.entity.Column;
+import org.opendatakit.aggregate.odktables.entity.Scope;
 import org.opendatakit.aggregate.odktables.entity.TableEntry;
+import org.opendatakit.aggregate.odktables.entity.TableRole;
 import org.opendatakit.aggregate.odktables.exception.TableAlreadyExistsException;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
@@ -20,8 +22,11 @@ import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.TestContextFactory;
 
+import com.google.common.collect.Lists;
+
 public class TableManagerTest {
 
+  private CallingContext cc;
   private TableManager tm;
   private String tableId;
   private String tableName;
@@ -31,8 +36,8 @@ public class TableManagerTest {
 
   @Before
   public void setUp() throws Exception {
-    CallingContext cc = TestContextFactory.getCallingContext();
-    tm = new TableManager(cc);
+    this.cc = TestContextFactory.getCallingContext();
+    this.tm = new TableManager(cc);
     this.tableId = T.tableId;
     this.tableName = T.tableName;
     this.tableId2 = T.tableId + "2";
@@ -122,6 +127,25 @@ public class TableManagerTest {
 
     List<TableEntry> actual = tm.getTables();
     assertEquals(2, actual.size());
+
+    Util.assertCollectionSameElements(expected, actual);
+  }
+
+  @Test
+  public void testGetTablesByScopes() throws ODKEntityNotFoundException, ODKDatastoreException,
+      TableAlreadyExistsException {
+    List<TableEntry> expected = new ArrayList<TableEntry>();
+
+    TableEntry one = tm.createTable(tableId2, tableName, columns, tableProperties);
+    tm.createTable(tableId, tableName, columns, tableProperties);
+
+    TableAclManager am = new TableAclManager(one.getTableId(), cc);
+    Scope scope = new Scope(Scope.Type.DEFAULT, null);
+    am.setAcl(scope, TableRole.READER);
+
+    expected.add(one);
+
+    List<TableEntry> actual = tm.getTables(Lists.newArrayList(scope));
 
     Util.assertCollectionSameElements(expected, actual);
   }
