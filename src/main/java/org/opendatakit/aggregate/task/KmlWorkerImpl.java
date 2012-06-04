@@ -127,7 +127,7 @@ public class KmlWorkerImpl {
       if (attemptCount.equals(r.getAttemptCount())) {
         logger.info("saving kml into PersistentResults table for " + form.getFormId());
         r.setResultFile(outputFile, HtmlConsts.RESP_TYPE_KML,
-            form.getViewableFormNameSuitableAsFileName() + ServletConsts.KML_FILENAME_APPEND, cc);
+            form.getViewableFormNameSuitableAsFileName() + ServletConsts.KML_FILENAME_APPEND, false, cc);
         r.setStatus(ExportStatus.AVAILABLE);
         r.setCompletionDate(new Date());
         if(subFilterGroup != null) {

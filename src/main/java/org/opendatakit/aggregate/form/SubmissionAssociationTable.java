@@ -46,12 +46,6 @@ public final class SubmissionAssociationTable extends CommonFieldsBase {
 	private static final DataField SUBMISSION_FORM_ID = new DataField("SUBMISSION_FORM_ID",
 			DataField.DataType.STRING, true, IForm.MAX_FORM_ID_LENGTH);
 
-	private static final DataField SUBMISSION_MODEL_VERSION = new DataField("SUBMISSION_MODEL_VERSION",
-			DataField.DataType.INTEGER, true);
-
-	private static final DataField SUBMISSION_UI_VERSION = new DataField("SUBMISSION_UI_VERSION",
-			DataField.DataType.INTEGER, true);
-
 	private static final DataField IS_PERSISTENCE_MODEL_COMPLETE = new DataField("IS_PERSISTENCE_MODEL_COMPLETE",
 			DataField.DataType.BOOLEAN, true);
 
@@ -76,8 +70,6 @@ public final class SubmissionAssociationTable extends CommonFieldsBase {
 		fieldList.add(URI_MD5_SUBMISSION_FORM_ID);
 		fieldList.add(URI_MD5_FORM_ID);
 		fieldList.add(SUBMISSION_FORM_ID);
-		fieldList.add(SUBMISSION_MODEL_VERSION);
-		fieldList.add(SUBMISSION_UI_VERSION);
 		fieldList.add(IS_PERSISTENCE_MODEL_COMPLETE);
 		fieldList.add(IS_SUBMISSION_ALLOWED);
 		fieldList.add(URI_SUBMISSION_DATA_MODEL);
@@ -97,11 +89,6 @@ public final class SubmissionAssociationTable extends CommonFieldsBase {
 	@Override
 	public SubmissionAssociationTable getEmptyRow(User user) {
 		return new SubmissionAssociationTable(this, user);
-	}
-	
-	public XFormParameters getXFormParameters() {
-		return new XFormParameters( getSubmissionFormId(), 
-				getSubmissionModelVersion(), getSubmissionUiVersion());
 	}
 	
 	public String getUriMd5FormId() {
@@ -132,22 +119,6 @@ public final class SubmissionAssociationTable extends CommonFieldsBase {
 		if ( !setStringField(SUBMISSION_FORM_ID, value) ) {
 			throw new IllegalStateException("overflow submissionFormId");
 		}
-	}
-
-	public Long getSubmissionModelVersion() {
-		return getLongField(SUBMISSION_MODEL_VERSION);
-	}
-
-	public void setSubmissionModelVersion(Long value) {
-		setLongField(SUBMISSION_MODEL_VERSION, value);
-	}
-
-	public Long getSubmissionUiVersion() {
-		return getLongField(SUBMISSION_UI_VERSION);
-	}
-
-	public void setSubmissionUiVersion(Long value) {
-		setLongField(SUBMISSION_UI_VERSION, value);
 	}
 
 	public Boolean getIsPersistenceModelComplete() {
@@ -191,20 +162,18 @@ public final class SubmissionAssociationTable extends CommonFieldsBase {
 		return relation;
 	}
 	
-	public static final SubmissionAssociationTable assertSubmissionAssociation(String uriMd5FormId, XFormParameters submissionElementDefn, CallingContext cc) throws ODKDatastoreException {
+	public static final SubmissionAssociationTable assertSubmissionAssociation(String uriMd5FormId, String formId, CallingContext cc) throws ODKDatastoreException {
 		Datastore ds = cc.getDatastore();
 		User user = cc.getCurrentUser();
 		
 	    SubmissionAssociationTable sa;
 	    {
 	    	String fdmSubmissionUri = CommonFieldsBase.newUri();
-	        String submissionFormIdUri = CommonFieldsBase.newMD5HashUri(submissionElementDefn.formId); // key under which submission is located...
+	        String submissionFormIdUri = CommonFieldsBase.newMD5HashUri(formId); // key under which submission is located...
 
 	        SubmissionAssociationTable saRelation = SubmissionAssociationTable.assertRelation(cc);
 		    sa = ds.createEntityUsingRelation(saRelation, user);
-		    sa.setSubmissionFormId(submissionElementDefn.formId);
-		    sa.setSubmissionModelVersion(submissionElementDefn.modelVersion);
-		    sa.setSubmissionUiVersion(submissionElementDefn.uiVersion);
+		    sa.setSubmissionFormId(formId);
 		    sa.setIsPersistenceModelComplete(false);
 		    sa.setIsSubmissionAllowed(true);
 		    sa.setUriSubmissionDataModel(fdmSubmissionUri);
@@ -215,18 +184,18 @@ public final class SubmissionAssociationTable extends CommonFieldsBase {
 	    return sa;
 	}
 	
-	public static final List<SubmissionAssociationTable> findSubmissionAssociationsForXForm(XFormParameters params, CallingContext cc) {
+	public static final List<SubmissionAssociationTable> findSubmissionAssociationsForXForm(String formId, CallingContext cc) {
 	    List<SubmissionAssociationTable> saList = new ArrayList<SubmissionAssociationTable>();
 		try {
 			// changes here should be paralleled in the FormParserForJavaRosa
 		    SubmissionAssociationTable saRelation = SubmissionAssociationTable.assertRelation(cc);
-		    String submissionFormIdUri = CommonFieldsBase.newMD5HashUri(params.formId); // key under which submission is located...
+		    String submissionFormIdUri = CommonFieldsBase.newMD5HashUri(formId); // key under which submission is located...
 		    Query q = cc.getDatastore().createQuery(saRelation, "SubmissionAssociationTable.findSubmissionAssociationsForXForm", cc.getCurrentUser());
 		    q.addFilter(SubmissionAssociationTable.URI_MD5_SUBMISSION_FORM_ID, Query.FilterOperation.EQUAL, submissionFormIdUri);
 		    List<? extends CommonFieldsBase> l = q.executeQuery();
 		    for ( CommonFieldsBase b : l ) {
 		    	SubmissionAssociationTable t = (SubmissionAssociationTable) b;
-		    	if ( t.getXFormParameters().equals(params) ) {
+		    	if ( t.getSubmissionFormId().equals(formId) ) {
 		    		saList.add(t);
 		    	}
 		    }

@@ -254,11 +254,29 @@ public class Oauth2ResourceFilter extends GenericFilterBean {
    
            if (entity != null && entity.getContentType().getValue().toLowerCase()
                            .contains("json")) {
-             BufferedReader reader = new BufferedReader(new InputStreamReader(entity.getContent()));
-             @SuppressWarnings("unchecked")
-            Map<String,Object> userData = mapper.readValue(reader, Map.class);
-
-             return userData;
+             BufferedReader reader = null;
+             InputStreamReader isr = null;
+             try {
+               reader = new BufferedReader(isr = new InputStreamReader(entity.getContent()));
+               @SuppressWarnings("unchecked")
+               Map<String,Object> userData = mapper.readValue(reader, Map.class);
+               return userData;
+             } finally {
+               if ( reader != null ) {
+                 try { 
+                   reader.close();
+                 } catch ( IOException e ) {
+                   // ignore
+                 }
+               }
+               if ( isr != null ) {
+                 try {
+                   isr.close();
+                 } catch ( IOException e ) {
+                   // ignore
+                 }
+               }
+             }
            } else {
              logger.error("unexpected body");
              return nullData;

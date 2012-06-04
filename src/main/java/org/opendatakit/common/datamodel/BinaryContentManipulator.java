@@ -17,7 +17,9 @@ import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.Datastore;
@@ -66,7 +68,7 @@ public class BinaryContentManipulator {
 
   // implement lazy access to the attachment fields
   private boolean refreshBeforeUse = true;
-  private final List<BinaryContent> attachments = new ArrayList<BinaryContent>();
+  private final Map<Long,BinaryContent> attachments = new HashMap<Long,BinaryContent>();
 
   /**
    * Manipulator class for handling an in-memory blob
@@ -197,9 +199,17 @@ public class BinaryContentManipulator {
     this.blbRelation = blbRelation;
   }
 
+  private int internalGetAttachmentCount() {
+    Long max = 0L;
+    for ( Long v : attachments.keySet() ) {
+      max = Math.max(max, v);
+    }
+    return max.intValue();
+  }
+  
   public int getAttachmentCount(CallingContext cc) throws ODKDatastoreException {
     updateAttachments(cc);
-    return attachments.size();
+    return internalGetAttachmentCount();
   }
 
   /**
@@ -208,8 +218,8 @@ public class BinaryContentManipulator {
    */
   public Date getLastUpdateDate(int ordinal, CallingContext cc) throws ODKDatastoreException {
     updateAttachments(cc);
-    BinaryContent b = attachments.get(ordinal - 1);
-    if (!Long.valueOf(ordinal).equals(b.getOrdinalNumber())) {
+    BinaryContent b = attachments.get(Long.valueOf(ordinal));
+    if (b == null) {
       // we are somehow out of sync!
       throw new IllegalStateException("missing attachment declaration");
     }
@@ -222,8 +232,8 @@ public class BinaryContentManipulator {
    */
   public String getLastUpdateUriUser(int ordinal, CallingContext cc) throws ODKDatastoreException {
     updateAttachments(cc);
-    BinaryContent b = attachments.get(ordinal - 1);
-    if (!Long.valueOf(ordinal).equals(b.getOrdinalNumber())) {
+    BinaryContent b = attachments.get(Long.valueOf(ordinal));
+    if (b == null) {
       // we are somehow out of sync!
       throw new IllegalStateException("missing attachment declaration");
     }
@@ -236,8 +246,8 @@ public class BinaryContentManipulator {
    */
   public Date getCreationDate(int ordinal, CallingContext cc) throws ODKDatastoreException {
     updateAttachments(cc);
-    BinaryContent b = attachments.get(ordinal - 1);
-    if (!Long.valueOf(ordinal).equals(b.getOrdinalNumber())) {
+    BinaryContent b = attachments.get(Long.valueOf(ordinal));
+    if (b == null) {
       // we are somehow out of sync!
       throw new IllegalStateException("missing attachment declaration");
     }
@@ -250,8 +260,8 @@ public class BinaryContentManipulator {
    */
   public String getCreatorUriUser(int ordinal, CallingContext cc) throws ODKDatastoreException {
     updateAttachments(cc);
-    BinaryContent b = attachments.get(ordinal - 1);
-    if (!Long.valueOf(ordinal).equals(b.getOrdinalNumber())) {
+    BinaryContent b = attachments.get(Long.valueOf(ordinal));
+    if (b == null) {
       // we are somehow out of sync!
       throw new IllegalStateException("missing attachment declaration");
     }
@@ -264,8 +274,8 @@ public class BinaryContentManipulator {
    */
   public String getUnrootedFilename(int ordinal, CallingContext cc) throws ODKDatastoreException {
     updateAttachments(cc);
-    BinaryContent b = attachments.get(ordinal - 1);
-    if (!Long.valueOf(ordinal).equals(b.getOrdinalNumber())) {
+    BinaryContent b = attachments.get(Long.valueOf(ordinal));
+    if (b == null) {
       // we are somehow out of sync!
       throw new IllegalStateException("missing attachment declaration");
     }
@@ -278,18 +288,18 @@ public class BinaryContentManipulator {
    */
   public String getContentType(int ordinal, CallingContext cc) throws ODKDatastoreException {
     updateAttachments(cc);
-    BinaryContent b = attachments.get(ordinal - 1);
-    if (!Long.valueOf(ordinal).equals(b.getOrdinalNumber())) {
+    BinaryContent b = attachments.get(Long.valueOf(ordinal));
+    if (b == null) {
       // we are somehow out of sync!
       throw new IllegalStateException("missing attachment declaration");
     }
-    return b.getContentType();
+    return (b.getContentHash() != null) ? b.getContentType() : null;
   }
 
   public String getContentHash(int ordinal, CallingContext cc) throws ODKDatastoreException {
     updateAttachments(cc);
-    BinaryContent b = attachments.get(ordinal - 1);
-    if (!Long.valueOf(ordinal).equals(b.getOrdinalNumber())) {
+    BinaryContent b = attachments.get(Long.valueOf(ordinal));
+    if (b == null) {
       // we are somehow out of sync!
       throw new IllegalStateException("missing attachment declaration");
     }
@@ -298,18 +308,18 @@ public class BinaryContentManipulator {
 
   public Long getContentLength(int ordinal, CallingContext cc) throws ODKDatastoreException {
     updateAttachments(cc);
-    BinaryContent b = attachments.get(ordinal - 1);
-    if (!Long.valueOf(ordinal).equals(b.getOrdinalNumber())) {
+    BinaryContent b = attachments.get(Long.valueOf(ordinal));
+    if (b == null) {
       // we are somehow out of sync!
       throw new IllegalStateException("missing attachment declaration");
     }
-    return b.getContentLength();
+    return (b.getContentHash() != null) ? b.getContentLength() : null;
   }
 
   public byte[] getBlob(int ordinal, CallingContext cc) throws ODKDatastoreException {
     updateAttachments(cc);
-    BinaryContent b = attachments.get(ordinal - 1);
-    if (!Long.valueOf(ordinal).equals(b.getOrdinalNumber())) {
+    BinaryContent b = attachments.get(Long.valueOf(ordinal));
+    if (b == null) {
       // we are somehow out of sync!
       throw new IllegalStateException("missing attachment declaration");
     }
@@ -318,38 +328,88 @@ public class BinaryContentManipulator {
   }
 
   /**
+   * Atomically rename the given source file path to the destination path.
+   * Will fail if the destination path already exists.
+   * 
+   * @param unrootedFilePathSrc
+   * @param unrootedFilePathDest
+   * @param cc
+   * @return true if unrootedFilePathSrc doesn't exist or if the rename succeeds
+   * @throws ODKDatastoreException 
+   */
+  public boolean renameFilePath( String unrootedFilePathSrc, String unrootedFilePathDest, CallingContext cc ) throws ODKDatastoreException {
+
+    if ( (unrootedFilePathSrc == null) ? (unrootedFilePathDest == null) :
+          (unrootedFilePathDest != null && unrootedFilePathSrc.equals(unrootedFilePathDest)) ) {
+      // no-op
+      return true;
+    }
+
+    updateAttachments(cc);
+
+    // search for a matching entry for unrootedFilePath
+    BinaryContent matchedBcSrc = null;
+    BinaryContent matchedBcDest = null;
+    for (BinaryContent bc : attachments.values()) {
+      String bcFilePath = bc.getUnrootedFilePath();
+      if ((bcFilePath == null) ? (unrootedFilePathSrc == null)
+          : (unrootedFilePathSrc != null && bcFilePath.equals(unrootedFilePathSrc))) {
+        matchedBcSrc = bc;
+      }
+      if ((bcFilePath == null) ? (unrootedFilePathDest == null)
+          : (unrootedFilePathDest != null && bcFilePath.equals(unrootedFilePathDest))) {
+        matchedBcDest = bc;
+      }
+    }
+    
+    if ( matchedBcSrc != null && matchedBcDest != null ) {
+      // they both exist -- can't rename...
+      return false;
+    }
+    
+    if ( matchedBcSrc == null ) {
+      // assume that this was already renamed...
+      return true;
+    }
+    
+    matchedBcSrc.setUnrootedFilePath(unrootedFilePathDest);
+
+    Datastore ds = cc.getDatastore();
+    User user = cc.getCurrentUser();
+    
+    ds.putEntity(matchedBcSrc, user);
+    return true;
+  }
+  
+  /**
    * Save the attachment to the database. This can be called in two ways.
    * Everything non-null or unrootedFilePath non-null and everything else null.
    * 
    * @param byteArray
    * @param contentType
    * @param unrootedFilePath
+   * @param overwriteOK -- if the file exists and is different, must be true to overwrite existing value.
    * @param cc
    * @return COMPLETELY_NEW_FILE on successful save; FILE_UNCHANGED on hash
-   *         equivalence; NEW_FILE_VERSION on save not allowed.
+   *         equivalence; NEW_FILE_VERSION on updating existing file (save not allowed unless overwriteOK).
    * @throws ODKDatastoreException
    */
   public BinaryContentManipulator.BlobSubmissionOutcome setValueFromByteArray(byte[] byteArray,
-      String contentType, String unrootedFilePath, CallingContext cc)
+      String contentType, String unrootedFilePath, boolean overwriteOK, CallingContext cc)
       throws ODKDatastoreException {
 
 	Long contentLength = (byteArray == null) ? null : Long.valueOf(byteArray.length);
-    BinaryContentManipulator.BlobSubmissionOutcome outcome = BinaryContentManipulator.BlobSubmissionOutcome.FILE_UNCHANGED;
-
-    boolean existingContent = false;
-
     // search for a matching entry for unrootedFilePath
     BinaryContent matchedBc = null;
     String currentContentHash = null;
 
     updateAttachments(cc);
-    for (BinaryContent bc : attachments) {
+    for (BinaryContent bc : attachments.values()) {
       String bcFilePath = bc.getUnrootedFilePath();
       if ((bcFilePath == null) ? (unrootedFilePath == null)
           : (unrootedFilePath != null && bcFilePath.equals(unrootedFilePath))) {
         matchedBc = bc;
         currentContentHash = matchedBc.getContentHash();
-        existingContent = true;
         break;
       }
     }
@@ -357,73 +417,123 @@ public class BinaryContentManipulator {
     Datastore ds = cc.getDatastore();
     User user = cc.getCurrentUser();
 
-    if (byteArray == null && contentType == null && contentLength == null) {
+    if (byteArray == null && contentType == null) {
+      // adding a file entry without any actual file...
+
       if (matchedBc == null) {
-        // adding a new file...
-        outcome = BinaryContentManipulator.BlobSubmissionOutcome.COMPLETELY_NEW_FILE;
         // create the record...
         matchedBc = (BinaryContent) ds.createEntityUsingRelation(ctntRelation, user);
         matchedBc.setTopLevelAuri(topLevelKey);
         matchedBc.setParentAuri(parentKey);
-        matchedBc.setOrdinalNumber(attachments.size() + 1L);
+        matchedBc.setOrdinalNumber(internalGetAttachmentCount() + 1L);
         matchedBc.setUnrootedFilePath(unrootedFilePath);
-        try {
-          // persist the top level linkages...
-          ds.putEntity(matchedBc, user);
-          attachments.add(matchedBc);
 
-        } catch (ODKDatastoreException e) {
-          // there may be trash in the database upon failure.
-          throw e;
-        }
+        // persist the top level linkages...
+        ds.putEntity(matchedBc, user);
+        attachments.put(matchedBc.getOrdinalNumber(), matchedBc);
+
+        return BinaryContentManipulator.BlobSubmissionOutcome.COMPLETELY_NEW_FILE;
+      } else {
+        // record already exists (and it might have file data, too)... 
+        return BinaryContentManipulator.BlobSubmissionOutcome.FILE_UNCHANGED;
       }
-      return outcome;
-    } else if (byteArray != null && contentType != null && contentLength != null) {
-
+    } else if (byteArray != null && contentType != null) {
+      // adding a file entry with an actual file...
+      
       String md5Hash = CommonFieldsBase.newMD5HashUri(byteArray);
 
       if (matchedBc == null || currentContentHash == null) {
-        // adding a new file...
-        outcome = BinaryContentManipulator.BlobSubmissionOutcome.COMPLETELY_NEW_FILE;
-        if (matchedBc == null) {
+        // either 
+        // - create a new entry with file data
+        // or 
+        // - update an existing file entry that does not have file data...
+
+        // (0) create entry if no matchedBc
+        // (1) modify entry to be intermediate update state (null md5 hash).
+        // (2) delete the database entries for any incomplete old data.
+        // (3) create the database entries for the new data.
+        // (4) update contentHash to indicate that data is properly stored.
+        
+        boolean newBc = (matchedBc == null);
+
+        if (newBc) {
+          // Step (0)
           // create the record...
           matchedBc = (BinaryContent) ds.createEntityUsingRelation(ctntRelation, user);
-          matchedBc.setOrdinalNumber(attachments.size() + 1L);
+          matchedBc.setTopLevelAuri(topLevelKey);
+          matchedBc.setParentAuri(parentKey);
+          matchedBc.setOrdinalNumber(internalGetAttachmentCount() + 1L);
+          matchedBc.setUnrootedFilePath(unrootedFilePath);
         }
-        matchedBc.setTopLevelAuri(topLevelKey);
-        matchedBc.setParentAuri(parentKey);
-        matchedBc.setUnrootedFilePath(unrootedFilePath);
+        
+        // Step (1)
         matchedBc.setContentType(contentType);
-        matchedBc.setContentLength(contentLength);
-        matchedBc.setContentHash(md5Hash);
-        // later: attachments.add(matchedBc);
-      } else if (currentContentHash.equals(md5Hash)) {
-        return BinaryContentManipulator.BlobSubmissionOutcome.FILE_UNCHANGED;
-      } else {
-        return BinaryContentManipulator.BlobSubmissionOutcome.NEW_FILE_VERSION;
-      }
-
-      // and create the SubmissionBlob (persisting it...)
-      try {
-        // persist the top level linkages...
+        matchedBc.setContentLength(Long.valueOf(byteArray.length));
         ds.putEntity(matchedBc, user);
-        if (!existingContent) {
-          attachments.add(matchedBc);
+        
+        if (newBc) {
+          // persist was successful -- remember this new record...
+          attachments.put(matchedBc.getOrdinalNumber(), matchedBc);
         }
 
+        // Step (2) 
+        // -- should not have any data. If it does, prior request failed before step 4 completed.
+        BlobManipulator b = new BlobManipulator(matchedBc.getUri(), vrefRelation, blbRelation, cc);
+        List<EntityKey> keyList = new ArrayList<EntityKey>();
+        b.recursivelyAddKeys(keyList);
+        ds.deleteEntities(keyList, user);
+
+        // Step (3)
         // persist the binary data
         @SuppressWarnings("unused")
         BlobManipulator subBlob = new BlobManipulator(byteArray, matchedBc.getUri(), vrefRelation,
             blbRelation, topLevelKey, cc);
 
-      } catch (ODKDatastoreException e) {
-        // there may be trash in the database upon failure.
-        throw e;
+        // Step (4)
+        matchedBc.setContentHash(md5Hash);
+        ds.putEntity(matchedBc, user);
+        
+        return BinaryContentManipulator.BlobSubmissionOutcome.COMPLETELY_NEW_FILE;
+      } else if (currentContentHash.equals(md5Hash)) {
+        return BinaryContentManipulator.BlobSubmissionOutcome.FILE_UNCHANGED;
+      } else {
+        if ( !overwriteOK ) {
+          return BinaryContentManipulator.BlobSubmissionOutcome.NEW_FILE_VERSION;
+        }
+        // We are overwriting what was there.
+        // We do this by:
+        // (1) modify entry to be intermediate update state (null md5 hash).
+        // (2) delete the database entries for the old data.
+        // (3) create the database entries for the new data.
+        // (4) update contentHash to indicate that data is properly stored.
+        
+        // Step (1)
+        matchedBc.setContentHash(null);
+        matchedBc.setContentType(contentType);
+        matchedBc.setContentLength(Long.valueOf(byteArray.length));
+        ds.putEntity(matchedBc, user);
+
+        // Step (2)
+        BlobManipulator b = new BlobManipulator(matchedBc.getUri(), vrefRelation, blbRelation, cc);
+        List<EntityKey> keyList = new ArrayList<EntityKey>();
+        b.recursivelyAddKeys(keyList);
+        ds.deleteEntities(keyList, user);
+        
+        // Step (3)
+        // persist the binary data
+        @SuppressWarnings("unused")
+        BlobManipulator subBlob = new BlobManipulator(byteArray, matchedBc.getUri(), vrefRelation,
+            blbRelation, topLevelKey, cc);
+        
+        // Step (4)
+        matchedBc.setContentHash(md5Hash);
+        ds.putEntity(matchedBc, user);
+
+        return BinaryContentManipulator.BlobSubmissionOutcome.NEW_FILE_VERSION;
       }
     } else {
       throw new IllegalArgumentException("unexpected null values passed into method");
     }
-    return outcome;
   }
 
   public synchronized void updateAttachments(CallingContext cc) throws ODKDatastoreException {
@@ -441,7 +551,8 @@ public class BinaryContentManipulator {
       List<? extends CommonFieldsBase> contentHits = q.executeQuery();
       attachments.clear();
       for (CommonFieldsBase cb : contentHits) {
-        attachments.add((BinaryContent) cb);
+        BinaryContent bc = (BinaryContent) cb;
+        attachments.put(bc.getOrdinalNumber(), bc);
       }
       refreshBeforeUse = false;
     }
@@ -451,7 +562,7 @@ public class BinaryContentManipulator {
     // if we need to refresh, then we don't have anything to persist...
     if ( !refreshBeforeUse ) {
       // the items to store are the attachments vector.
-      cc.getDatastore().putEntities(attachments, cc.getCurrentUser());
+      cc.getDatastore().putEntities(attachments.values(), cc.getCurrentUser());
     }
   }
 
@@ -504,7 +615,7 @@ public class BinaryContentManipulator {
       throws ODKDatastoreException {
     
     updateAttachments(cc);
-    for (BinaryContent bc : attachments) {
+    for (BinaryContent bc : attachments.values()) {
       if (bc.getContentHash() != null) {
         BlobManipulator b = new BlobManipulator(bc.getUri(), vrefRelation, blbRelation, cc);
         b.recursivelyAddKeys(keyList);
