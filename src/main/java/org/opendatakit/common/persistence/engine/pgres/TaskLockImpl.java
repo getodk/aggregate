@@ -66,7 +66,9 @@ public class TaskLockImpl implements TaskLock {
     boolean first;
 
     final List<String> stmts = new ArrayList<String>();
-
+    
+    String uri = entity.getUri();
+    
     StringBuilder b = new StringBuilder();
     String tableName = K_BQ + datastore.getDefaultSchemaName() + K_BQ + "." + K_BQ
         + TaskLockTable.TABLE_NAME + K_BQ;
@@ -74,7 +76,7 @@ public class TaskLockImpl implements TaskLock {
     b.append("'").append(StringEscapeUtils.escapeSql(user.getUriUser())).append("'");
     String uriUserInline = b.toString();
     b.setLength(0);
-    b.append("'").append(StringEscapeUtils.escapeSql(entity.getUri())).append("'");
+    b.append("'").append(StringEscapeUtils.escapeSql(uri)).append("'");
     String uriLockInline = b.toString();
     b.setLength(0);
     b.append("'").append(StringEscapeUtils.escapeSql(entity.getFormId())).append("'");
@@ -187,12 +189,30 @@ public class TaskLockImpl implements TaskLock {
     // task type
     dam.recordDeleteUsage(TaskLockTable.TABLE_NAME);
     b.append("DELETE FROM ").append(tableName).append(" WHERE ");
-    b.append(K_BQ).append(entity.formId.getName()).append(K_BQ).append(" = ").append(formIdInline)
-        .append(" AND ");
+    b.append(K_BQ).append(entity.formId.getName()).append(K_BQ).append(" = ")
+        .append(formIdInline).append(" AND ");
     b.append(K_BQ).append(entity.taskType.getName()).append(K_BQ).append(" = ")
         .append(taskTypeInline).append(" AND ");
     b.append(K_BQ).append(entity.expirationDateTime.getName()).append(K_BQ);
     b.append(" > (SELECT MIN(t3.").append(K_BQ).append(entity.expirationDateTime.getName())
+        .append(K_BQ);
+    b.append(") FROM ").append(tableName).append(" AS t3 WHERE t3.");
+    b.append(K_BQ).append(entity.formId.getName()).append(K_BQ).append(" = ").append(formIdInline)
+        .append(" AND t3.");
+    b.append(K_BQ).append(entity.taskType.getName()).append(K_BQ).append(" = ")
+        .append(taskTypeInline).append(")");
+    stmts.add(b.toString());
+    b.setLength(0);
+    // delete our entry if it collides with another entry with exactly 
+    // this time.
+    b.append("DELETE FROM ").append(tableName).append(" WHERE ");
+    b.append(K_BQ).append(entity.formId.getName()).append(K_BQ).append(" = ")
+        .append(formIdInline).append(" AND ");
+    b.append(K_BQ).append(entity.taskType.getName()).append(K_BQ).append(" = ")
+        .append(taskTypeInline).append(" AND ");
+    b.append(K_BQ).append(entity.primaryKey.getName()).append(K_BQ).append(" = ")
+        .append(uriLockInline).append(" AND ");
+    b.append("1 < (SELECT COUNT(t3.").append(K_BQ).append(entity.expirationDateTime.getName())
         .append(K_BQ);
     b.append(") FROM ").append(tableName).append(" AS t3 WHERE t3.");
     b.append(K_BQ).append(entity.formId.getName()).append(K_BQ).append(" = ").append(formIdInline)
