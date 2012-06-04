@@ -308,6 +308,13 @@ public class TaskLockImpl implements TaskLock {
         }
       }
     }
+    if ( !result ) {
+      // if there was contention and the other party hasn't removed its lock 
+      // yet, then our queryForLock() will fail.  Call delete, which has 
+      // less restrictive logic than queryForLock().
+      deleteLock(lockId, formId, taskType);
+      System.out.println("releaseLock -- FALLBACK: deleteLock : " + lockId + " " + formId + " " + taskType.getName());
+    }
     return result;
   }
 
