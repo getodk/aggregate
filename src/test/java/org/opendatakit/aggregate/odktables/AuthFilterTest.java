@@ -41,7 +41,7 @@ public class AuthFilterTest {
 
     this.am = new TableAclManager(tableId, cc);
     this.af = new AuthFilter(tableId, cc);
-    this.currentUserScope = new Scope(Type.USER, cc.getCurrentUser().getUriUser());
+    this.currentUserScope = new Scope(Type.USER, cc.getCurrentUser().getEmail());
   }
 
   @After
@@ -129,7 +129,7 @@ public class AuthFilterTest {
 
   @Test
   public void testGetScopes() {
-    List<Scope> scopes = af.getScopes();
+    List<Scope> scopes = AuthFilter.getScopes(cc);
     assertTrue(scopes.contains(new Scope(Type.DEFAULT, null)));
     assertTrue(scopes.contains(currentUserScope));
     // TODO: assert group scopes
