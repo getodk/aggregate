@@ -3,6 +3,7 @@ package org.opendatakit.aggregate.odktables.relation;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.opendatakit.aggregate.odktables.entity.TableRole;
 import org.opendatakit.common.ermodel.simple.Entity;
 import org.opendatakit.common.ermodel.simple.Query;
 import org.opendatakit.common.ermodel.simple.Relation;
@@ -46,6 +47,14 @@ public class DbTableAcl {
     Query query = getRelation(cc).query("DbTableAcl.query()", cc);
     query.equal(DbTableAcl.TABLE_ID, tableId);
     query.equal(DbTableAcl.SCOPE_TYPE, scopeType);
+    return query.execute();
+  }
+
+  public static List<Entity> queryNotEqual(TableRole role, CallingContext cc)
+      throws ODKDatastoreException {
+    Query query = getRelation(cc).query("DbTableAcl.query(TableRole)", cc);
+    query.notEqual(ROLE, role.name());
+
     return query.execute();
   }
 

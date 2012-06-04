@@ -552,7 +552,7 @@ public class FormParserForJavaRosa {
     boolean locked = false;
     while (!locked) {
       if ((++i) % 10 == 0) {
-        log.warn("excessive wait count for startup serialization lock. Count: " + i);
+        log.warn("excessive wait count for form creation lock. Count: " + i);
         try {
           Thread.sleep(PersistConsts.MIN_SETTLE_MILLISECONDS);
         } catch (InterruptedException e) {
@@ -587,7 +587,7 @@ public class FormParserForJavaRosa {
         for (i = 0; i < 10; i++) {
           TaskLock formCreationTaskLock = ds.createTaskLock(user);
           if (formCreationTaskLock.releaseLock(creationLockId, lockedResourceName,
-              TaskLockType.STARTUP_SERIALIZATION)) {
+              TaskLockType.CREATE_FORM)) {
             break;
           }
           formCreationTaskLock = null;
