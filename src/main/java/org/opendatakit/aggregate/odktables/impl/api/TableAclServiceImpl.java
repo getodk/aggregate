@@ -60,6 +60,8 @@ public class TableAclServiceImpl implements TableAclService {
   public TableAclResource getUserAcl(String userId) throws ODKDatastoreException,
       PermissionDeniedException {
     af.checkPermission(TablePermission.READ_ACL);
+    if (userId.equals("null"))
+      userId = null;
     TableAcl acl = am.getAcl(new Scope(Scope.Type.USER, userId));
     return getResource(acl);
   }
@@ -83,6 +85,8 @@ public class TableAclServiceImpl implements TableAclService {
   public TableAclResource setUserAcl(String userId, TableAcl acl) throws ODKDatastoreException,
       PermissionDeniedException {
     af.checkPermission(TablePermission.WRITE_ACL);
+    if (userId.equals("null"))
+      userId = null;
     acl = am.setAcl(new Scope(Scope.Type.USER, userId), acl.getRole());
     return getResource(acl);
   }
@@ -126,6 +130,8 @@ public class TableAclServiceImpl implements TableAclService {
     String tableId = am.getTableId();
     Scope.Type type = acl.getScope().getType();
     String value = acl.getScope().getValue();
+    if (value == null)
+      value = "null";
 
     UriBuilder ub = info.getBaseUriBuilder();
     ub.path(TableService.class);

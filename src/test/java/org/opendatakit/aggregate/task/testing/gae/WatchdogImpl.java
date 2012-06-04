@@ -254,7 +254,7 @@ public class WatchdogImpl implements Watchdog, InitializingBean {
      this.jsonFileGenerator = jsonFileGenerator;
   }
 
-  public JsonFileGenerator setJsonFileGenerator() {
+  public JsonFileGenerator getJsonFileGenerator() {
      return jsonFileGenerator;
   }
 
