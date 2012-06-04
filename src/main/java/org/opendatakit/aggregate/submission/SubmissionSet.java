@@ -508,11 +508,7 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 		StringBuilder b = new StringBuilder();
 		if (group.getParent() == null) {
 			b.append(form.getFormId());
-			b.append("[@version=");
-			b.append(((TopLevelDynamicBase) getGroupBackingObject()).getModelVersion());
-			b.append(" and @uiVersion=");
-			b.append(((TopLevelDynamicBase) getGroupBackingObject()).getUiVersion());
-			b.append("]");
+			b.append("[@version=null and @uiVersion=null]");
 			b.append(BasicConsts.FORWARDSLASH);
 			b.append(group.getElementName());
 			b.append("[@key=");

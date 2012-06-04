@@ -63,7 +63,7 @@ public final class MultiPartFormItem {
   public MultiPartFormItem(String fieldName, String fileName, String contentType, ByteArrayOutputStream byteStream) {
     this.name = fieldName;
     this.filename = fileName;
-	this.contentType = contentType;
+    this.contentType = contentType;
     this.stream = byteStream;
   }
   

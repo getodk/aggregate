@@ -57,9 +57,6 @@ public class FormInfoFilesetTable extends DynamicBase {
 	public static final DataField ROOT_ELEMENT_MODEL_VERSION = new DataField("ROOT_ELEMENT_MODEL_VERSION",
 			DataField.DataType.INTEGER, true);
 
-	public static final DataField ROOT_ELEMENT_UI_VERSION = new DataField("ROOT_ELEMENT_UI_VERSION",
-			DataField.DataType.INTEGER, true);
-
 	public static final DataField IS_ENCRYPTED_FORM = new DataField("IS_ENCRYPTED_FORM",
 				DataField.DataType.BOOLEAN, true);
 
@@ -88,7 +85,6 @@ public class FormInfoFilesetTable extends DynamicBase {
 	private FormInfoFilesetTable(String databaseSchema) {
 		super(databaseSchema, TABLE_NAME);
 		fieldList.add(ROOT_ELEMENT_MODEL_VERSION);
-		fieldList.add(ROOT_ELEMENT_UI_VERSION);
 		fieldList.add(IS_ENCRYPTED_FORM);
 		fieldList.add(IS_DOWNLOAD_ALLOWED);
 		fieldList.add(LANGUAGE_CODE);
