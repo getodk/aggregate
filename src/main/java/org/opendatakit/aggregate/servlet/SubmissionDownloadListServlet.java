@@ -42,7 +42,7 @@ import org.opendatakit.common.persistence.QueryResult;
 import org.opendatakit.common.persistence.QueryResumePoint;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
-import org.opendatakit.common.utils.WebUtils;
+import org.opendatakit.common.utils.WebCursorUtils;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.BasicConsts;
 import org.opendatakit.common.web.constants.HtmlConsts;
@@ -122,7 +122,7 @@ public class SubmissionDownloadListServlet extends ServletUtilBase {
     
     // the cursor string
     String websafeCursorString = getParameter(req, ServletConsts.CURSOR);
-    QueryResumePoint cursor = WebUtils.parseCursorParameter(websafeCursorString);
+    QueryResumePoint cursor = WebCursorUtils.parseCursorParameter(websafeCursorString);
 
     // the number of entries
     int numEntries = DEFAULT_NUM_ENTRIES;
