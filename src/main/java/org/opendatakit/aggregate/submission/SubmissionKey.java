@@ -45,14 +45,14 @@ public class SubmissionKey {
 	 * @param topLevelGroupElementName
 	 * @param uri
 	 */
-	public SubmissionKey( String formId, Long modelVersion, Long uiVersion,
+	public SubmissionKey( String formId,
 							String topLevelGroupElementName, String uri ) {
 		StringBuilder b = new StringBuilder();
 		b.append(formId);
 		b.append(SubmissionKeyPart.K_OPEN_BRACKET_VERSION_EQUALS);
-		b.append(modelVersion);
+		b.append("null");
 		b.append(SubmissionKeyPart.K_AND_UI_VERSION_EQUALS);
-		b.append(uiVersion);
+		b.append("null");
 		b.append(SubmissionKeyPart.K_CLOSE_BRACKET);
 		b.append(SubmissionKeyPart.K_SLASH);
 		b.append(topLevelGroupElementName);

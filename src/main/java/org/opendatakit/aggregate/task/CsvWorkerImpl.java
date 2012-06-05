@@ -120,7 +120,7 @@ public class CsvWorkerImpl {
       if (attemptCount.equals(r.getAttemptCount())) {
         logger.info("saving csv into PersistentResults table for " + form.getFormId());
         r.setResultFile(outputFile, HtmlConsts.RESP_TYPE_CSV,
-            form.getViewableFormNameSuitableAsFileName() + ServletConsts.CSV_FILENAME_APPEND, cc);
+            form.getViewableFormNameSuitableAsFileName() + ServletConsts.CSV_FILENAME_APPEND, false, cc);
         r.setStatus(ExportStatus.AVAILABLE);
         r.setCompletionDate(new Date());
         if(subFilterGroup != null) {

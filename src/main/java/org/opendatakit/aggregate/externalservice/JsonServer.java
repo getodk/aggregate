@@ -17,9 +17,7 @@
 
 package org.opendatakit.aggregate.externalservice;
 
-import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
-import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.URI;
 import java.util.ArrayList;
@@ -51,6 +49,7 @@ import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.utils.HttpClientFactory;
+import org.opendatakit.common.utils.WebUtils;
 import org.opendatakit.common.web.CallingContext;
 
 import com.google.gson.JsonArray;
@@ -117,19 +116,8 @@ public class JsonServer extends AbstractExternalService implements ExternalServi
       post.setEntity(new ByteArrayEntity(postBody));
 
       HttpResponse resp = client.execute(post);
+      WebUtils.readResponse(resp);
 
-      if ( resp.getEntity() != null ) {
-        InputStreamReader is = new InputStreamReader(resp.getEntity().getContent());
-        BufferedReader reader = new BufferedReader(is);
-  
-        String responseLine = reader.readLine();
-        while (responseLine != null) {
-          System.out.print(responseLine);
-          responseLine = reader.readLine();
-        }
-        is.close();
-      }
-      
       int statusCode = resp.getStatusLine().getStatusCode();
       if (statusCode == HttpServletResponse.SC_UNAUTHORIZED) {
         throw new ODKExternalServiceCredentialsException(resp.getStatusLine().getReasonPhrase() + " ("
