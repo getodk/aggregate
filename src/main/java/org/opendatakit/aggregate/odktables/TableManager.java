@@ -1,7 +1,9 @@
 package org.opendatakit.aggregate.odktables;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang.Validate;
 import org.opendatakit.aggregate.odktables.entity.Column;
@@ -95,12 +97,15 @@ public class TableManager {
       tableIds.add(entry.getId());
     }
 
-    List<String> tableNames = new ArrayList<String>();
+    Map<String, String> tableNames = new HashMap<String, String>();
     Query propsQuery = DbTableProperties.getRelation(cc).query("TableManager.getTables", cc);
     propsQuery.include(DbTableProperties.TABLE_ID, tableIds);
     List<Entity> propertiesEntities = propsQuery.execute();
-    for (Entity properties : propertiesEntities)
-      tableNames.add(properties.getString(DbTableProperties.TABLE_NAME));
+    for (Entity properties : propertiesEntities) {
+      String tableId = properties.getString(DbTableProperties.TABLE_ID);
+      String tableName = properties.getString(DbTableProperties.TABLE_NAME);
+      tableNames.put(tableId, tableName);
+    }
 
     return converter.toTableEntries(entries, tableNames);
   }
