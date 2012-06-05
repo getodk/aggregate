@@ -7,7 +7,7 @@ import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementMap;
 import org.simpleframework.xml.Root;
 
-@Root
+@Root(strict = false)
 public class Row {
 
   @Element(name = "id", required = false)

@@ -10,6 +10,8 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.odktables.AuthFilter;
 import org.opendatakit.aggregate.odktables.TableManager;
@@ -32,6 +34,8 @@ import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.web.CallingContext;
 
 public class TableServiceImpl implements TableService {
+  private static final Log logger = LogFactory.getLog(TableServiceImpl.class);
+
   private CallingContext cc;
   private TableManager tm;
   private UriInfo info;
@@ -72,6 +76,7 @@ public class TableServiceImpl implements TableService {
     String metadata = definition.getMetadata();
     TableEntry entry = tm.createTable(tableId, tableName, columns, metadata);
     TableResource resource = getResource(entry);
+    logger.info(String.format("createTable(%s, %s)", tableId, definition));
     return resource;
   }
 
@@ -80,6 +85,7 @@ public class TableServiceImpl implements TableService {
       PermissionDeniedException {
     new AuthFilter(tableId, cc).checkPermission(TablePermission.DELETE_TABLE);
     tm.deleteTable(tableId);
+    logger.info(String.format("deleteTable(%s)", tableId));
   }
 
   @Override
