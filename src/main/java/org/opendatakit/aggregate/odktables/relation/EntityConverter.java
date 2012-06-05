@@ -45,14 +45,13 @@ public class EntityConverter {
    * @param entities
    *          the entities to convert
    * @param tableNames
-   *          each entry i in tableNames is the name of the table in entry i of
-   *          entities
+   *          a map of tableIds to tableNames
    */
-  public List<TableEntry> toTableEntries(List<Entity> entities, List<String> tableNames) {
+  public List<TableEntry> toTableEntries(List<Entity> entities, Map<String, String> tableNames) {
     ArrayList<TableEntry> entries = new ArrayList<TableEntry>();
     for (int i = 0; i < entities.size(); i++) {
       Entity entity = entities.get(i);
-      String tableName = tableNames.get(i);
+      String tableName = tableNames.get(entity.getId());
       entries.add(toTableEntry(entity, tableName));
     }
     return entries;
