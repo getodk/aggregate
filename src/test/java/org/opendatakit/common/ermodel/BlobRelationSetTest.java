@@ -58,9 +58,9 @@ public class BlobRelationSetTest {
 		assertEquals( 0, instance.getAttachmentCount(cc));
 		
 		String s = "this is a string";
-		instance.addBlob(s.getBytes(), "text/plain", null, cc);
+		instance.addBlob(s.getBytes(), "text/plain", null, false, cc);
 		String t = "another string";
-		instance.addBlob(t.getBytes(), "text/xml", "different", cc);
+		instance.addBlob(t.getBytes(), "text/xml", "different", false, cc);
 		instance.persist(cc);
 		BlobEntitySet alt = rel.getBlobEntitySet(instance.getUri(), cc);
 		assertEquals(2, alt.getAttachmentCount(cc));

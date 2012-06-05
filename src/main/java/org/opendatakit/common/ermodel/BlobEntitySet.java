@@ -166,16 +166,17 @@ public interface BlobEntitySet {
    * datastore. If the blob already exists in the Blob set, as indicated by a
    * matching unrootedFilePath, the return value indicates whether or not the
    * byteArray is different from that in the datastore, and
-   * <em>no update is performed</em>.
+   * <em>no update is performed</em> unless overwriteOK is true.
    * 
    * @param byteArray
    * @param contentType
    * @param unrootedFilePath
+   * @param overwriteOK
    * @param cc
    * @return
    * @throws ODKDatastoreException
    */
   public BlobSubmissionOutcome addBlob(byte[] byteArray, String contentType,
-      String unrootedFilePath, CallingContext cc) throws ODKDatastoreException;
+      String unrootedFilePath, boolean overwriteOK, CallingContext cc) throws ODKDatastoreException;
 
 }

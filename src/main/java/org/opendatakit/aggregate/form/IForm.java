@@ -24,7 +24,6 @@ import java.util.Map;
 
 import org.opendatakit.aggregate.client.form.FormSummary;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
-import org.opendatakit.aggregate.exception.ODKFormAlreadyExistsException;
 import org.opendatakit.aggregate.parser.MultiPartFormItem;
 import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.submission.SubmissionKeyPart;
@@ -47,8 +46,6 @@ import org.opendatakit.common.web.CallingContext;
  */
 public interface IForm {
   public static final Long MAX_FORM_ID_LENGTH = PersistConsts.GUARANTEED_SEARCHABLE_LEN;
-
-  public boolean isNewlyCreated();
   
   public void persist(CallingContext cc) throws ODKDatastoreException;
 
@@ -71,9 +68,9 @@ public interface IForm {
   public SubmissionKey getSubmissionKey();
 
   public FormElementModel getTopLevelGroupElement();
-
-  public XFormParameters getRootElementDefn();
   
+  public XFormParameters getRootElementDefn();
+
   public String getMajorMinorVersionString();
   
   public String getOpenRosaVersionString();
@@ -104,6 +101,13 @@ public interface IForm {
    * @return viewable name
    */
   public String getViewableName();
+  
+  /**
+   * Revise the viewable name of a form.
+   * 
+   * @param title
+   */
+  public void setViewableName(String title);
 
   public String getViewableFormNameSuitableAsFileName();
   
@@ -142,11 +146,35 @@ public interface IForm {
   public String getFormFilename(CallingContext cc) throws ODKDatastoreException;
 
   /**
-   * Get the original XML that specified the form
+   * Get the original XML that specified the form.
    * 
    * @return get XML definition of XForm
    */
   public String getFormXml(CallingContext cc) throws ODKDatastoreException;
+  
+  /**
+   * Set the XML for this form.
+   * Any revision to the value of the uiVersion attribute should already have
+   * been performed.
+   * 
+   * @param formFilename
+   * @param formXml
+   * @param modelVersion
+   * @param cc
+   * @return
+   * @throws ODKDatastoreException
+   */
+  public BlobSubmissionOutcome setFormXml( String formFilename, String formXml, Long modelVersion, CallingContext cc ) throws ODKDatastoreException;
+  
+  /**
+   * Return the md5 hash of this XML.
+   * 
+   * @param cc
+   * @return md5 hash
+   * @throws ODKDatastoreException
+   */
+  public String getMd5HashFormXml(CallingContext cc) throws ODKDatastoreException;
+  
   /**
    * Gets whether the form is encrypted
    * 
@@ -214,10 +242,6 @@ public interface IForm {
   public void setIsComplete(Boolean value);
 
   public EntityKey getKey();
-  
-  public BlobSubmissionOutcome isSameForm(XFormParameters rootElementDefn,
-      boolean isEncryptedFlag, String title, byte[] xmlBytes, CallingContext cc)
-      throws ODKDatastoreException, ODKFormAlreadyExistsException;
 
   /**
    * Media files are assumed to be in a directory one level deeper than the xml
@@ -225,12 +249,12 @@ public interface IForm {
    * directory. Strip that off.
    * 
    * @param item
+   * @param overwriteOK
    * @param cc
-   * @return true if the files are completely new or are identical to the
-   *         currently-stored ones.
+   * @return true if a file should be overwritten (updated); false if the file is completely new or unchanged.
    * @throws ODKDatastoreException
    */
-  public boolean setXFormMediaFile(MultiPartFormItem item, CallingContext cc) throws ODKDatastoreException;
+  public boolean setXFormMediaFile(MultiPartFormItem item, boolean overwriteOK, CallingContext cc) throws ODKDatastoreException;
   
   public String getUri();
 }
