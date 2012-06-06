@@ -10,11 +10,11 @@ import org.opendatakit.common.security.User;
 import org.opendatakit.common.web.CallingContext;
 
 public class LockTemplate {
-  // At 4 tries and 1000 initial backoff, the maximum amount of time a single
+  // At 4 tries and 250 initial backoff, the maximum amount of time a single
   // acquire or release can take is:
-  // 1000 + 2000 + 4000 + 8000 = 15000ms
+  // 250 + 500 + 1000 + 2000 = 3750
   private static final int TRIES = 4;
-  private static final int INITIAL_MAX_BACKOFF = 1000;
+  private static final int INITIAL_MAX_BACKOFF = 250;
 
   private String tableId;
   private ODKTablesTaskLockType type;
