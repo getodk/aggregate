@@ -10,6 +10,10 @@ public class Error {
   private ErrorType type;
   private String message;
 
+  @SuppressWarnings("unused")
+  private Error() {
+  }
+
   /**
    * @param type
    * @param message
