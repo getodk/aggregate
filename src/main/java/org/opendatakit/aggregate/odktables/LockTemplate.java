@@ -1,5 +1,6 @@
 package org.opendatakit.aggregate.odktables;
 
+import java.util.Random;
 import java.util.UUID;
 
 import org.opendatakit.common.persistence.Datastore;
@@ -9,14 +10,19 @@ import org.opendatakit.common.security.User;
 import org.opendatakit.common.web.CallingContext;
 
 public class LockTemplate {
-  private static final int TRIES = 5;
-  private static final long SLEEP = 1000;
+  // At 4 tries and 1000 initial backoff, the maximum amount of time a single
+  // acquire or release can take is:
+  // 1000 + 2000 + 4000 + 8000 = 15000ms
+  private static final int TRIES = 4;
+  private static final int INITIAL_MAX_BACKOFF = 1000;
 
   private String tableId;
   private ODKTablesTaskLockType type;
   private Datastore ds;
   private User user;
   private String lockId;
+  private long maxBackoffMs;
+  private Random rand;
 
   public LockTemplate(String tableId, ODKTablesTaskLockType type, CallingContext cc) {
     this.tableId = tableId;
@@ -24,6 +30,8 @@ public class LockTemplate {
     this.ds = cc.getDatastore();
     this.user = cc.getCurrentUser();
     this.lockId = UUID.randomUUID().toString();
+    this.maxBackoffMs = INITIAL_MAX_BACKOFF;
+    this.rand = new Random();
   }
 
   /**
@@ -38,10 +46,11 @@ public class LockTemplate {
     for (int i = 0; i < TRIES; i++) {
       if (lock.obtainLock(lockId, tableId, type)) {
         acquired = true;
+        maxBackoffMs = INITIAL_MAX_BACKOFF;
         break;
       } else {
         try {
-          Thread.sleep(SLEEP);
+          Thread.sleep(getNextBackoff());
         } catch (Exception e) {
           throw new ODKTaskLockException(e);
         }
@@ -61,12 +70,13 @@ public class LockTemplate {
    */
   public void release() throws ODKTaskLockException {
     TaskLock lock = ds.createTaskLock(user);
-    for (int i = 0; i < 5; i++) {
+    for (int i = 0; i < TRIES; i++) {
       if (lock.releaseLock(lockId, tableId, type)) {
+        maxBackoffMs = INITIAL_MAX_BACKOFF;
         break;
       } else {
         try {
-          Thread.sleep(SLEEP);
+          Thread.sleep(getNextBackoff());
         } catch (Exception e) {
           // just move on, this retry mechanism
           // is to make things nice
@@ -76,4 +86,9 @@ public class LockTemplate {
     }
   }
 
+  private long getNextBackoff() {
+    long backoff = (long) (rand.nextDouble() * maxBackoffMs);
+    maxBackoffMs *= 2;
+    return backoff;
+  }
 }
