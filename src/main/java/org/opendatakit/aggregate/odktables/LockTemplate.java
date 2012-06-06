@@ -34,8 +34,10 @@ public class LockTemplate {
    */
   public void acquire() throws ODKTaskLockException {
     TaskLock lock = ds.createTaskLock(user);
+    boolean acquired = false;
     for (int i = 0; i < TRIES; i++) {
       if (lock.obtainLock(lockId, tableId, type)) {
+        acquired = true;
         break;
       } else {
         try {
@@ -45,8 +47,10 @@ public class LockTemplate {
         }
       }
     }
-    throw new ODKTaskLockException(String.format("Timed out acquiring lock. "
-        + "lockId: %s, tableId: %s, type: %s", lockId, tableId, type));
+    if (!acquired) {
+      throw new ODKTaskLockException(String.format("Timed out acquiring lock. "
+          + "lockId: %s, tableId: %s, type: %s", lockId, tableId, type));
+    }
   }
 
   /**
