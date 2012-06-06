@@ -2,10 +2,10 @@ package org.opendatakit.aggregate.odktables.impl.api;
 
 import java.util.HashSet;
 import java.util.Set;
+
 import javax.ws.rs.core.Application;
 
 import org.opendatakit.aggregate.odktables.entity.serialization.SimpleXMLMessageReaderWriter;
-
 
 public class ODKTablesAPIApplication extends Application {
 
@@ -16,6 +16,7 @@ public class ODKTablesAPIApplication extends Application {
     classes.add(SimpleXMLMessageReaderWriter.class);
     classes.add(ODKDatastoreExceptionMapper.class);
     classes.add(ODKTablesExceptionMapper.class);
+    classes.add(ODKTaskLockExceptionMapper.class);
     classes.add(RuntimeExceptionMapper.class);
     return classes;
   }
