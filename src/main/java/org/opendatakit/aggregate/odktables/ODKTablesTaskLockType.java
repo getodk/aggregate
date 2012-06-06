@@ -3,7 +3,7 @@ package org.opendatakit.aggregate.odktables;
 import org.opendatakit.common.persistence.ITaskLockType;
 
 public enum ODKTablesTaskLockType implements ITaskLockType {
-  UPDATE_DATA(120000), UPDATE_PROPERTIES(120000);
+  UPDATE_DATA(30000), UPDATE_PROPERTIES(30000);
 
   private long timeout;
 
