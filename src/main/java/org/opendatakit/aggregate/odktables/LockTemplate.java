@@ -9,6 +9,8 @@ import org.opendatakit.common.security.User;
 import org.opendatakit.common.web.CallingContext;
 
 public class LockTemplate {
+  private static final int TRIES = 5;
+  private static final long SLEEP = 1000;
 
   private String tableId;
   private ODKTablesTaskLockType type;
@@ -25,19 +27,26 @@ public class LockTemplate {
   }
 
   /**
-   * Spins until lock is acquired, or an error occurs.
+   * Tries up to 5 times to acquire the lock. If unsuccessful, throws an
+   * ODKTaskLockException.
    * 
    * @throws ODKTaskLockException
    */
   public void acquire() throws ODKTaskLockException {
     TaskLock lock = ds.createTaskLock(user);
-    while (!lock.obtainLock(lockId, tableId, type)) {
-      try {
-        Thread.sleep(1000);
-      } catch (Exception e) {
-        throw new ODKTaskLockException(e);
+    for (int i = 0; i < TRIES; i++) {
+      if (lock.obtainLock(lockId, tableId, type)) {
+        break;
+      } else {
+        try {
+          Thread.sleep(SLEEP);
+        } catch (Exception e) {
+          throw new ODKTaskLockException(e);
+        }
       }
     }
+    throw new ODKTaskLockException(String.format("Timed out acquiring lock. "
+        + "lockId: %s, tableId: %s, type: %s", lockId, tableId, type));
   }
 
   /**
@@ -49,13 +58,16 @@ public class LockTemplate {
   public void release() throws ODKTaskLockException {
     TaskLock lock = ds.createTaskLock(user);
     for (int i = 0; i < 5; i++) {
-      if (lock.releaseLock(lockId, tableId, type))
+      if (lock.releaseLock(lockId, tableId, type)) {
         break;
-      try {
-        Thread.sleep(1000);
-      } catch (Exception e) {
-        // just move on, this retry mechanism
-        // is to make things nice
+      } else {
+        try {
+          Thread.sleep(SLEEP);
+        } catch (Exception e) {
+          // just move on, this retry mechanism
+          // is to make things nice
+          break;
+        }
       }
     }
   }
