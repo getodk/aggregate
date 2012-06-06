@@ -111,5 +111,6 @@ public class Error {
     BAD_COLUMN_NAME,
     INTERNAL_ERROR,
     BAD_REQUEST,
+    LOCK_TIMEOUT,
   }
 }
