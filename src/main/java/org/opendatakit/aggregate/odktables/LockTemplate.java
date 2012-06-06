@@ -9,6 +9,12 @@ import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.web.CallingContext;
 
+/**
+ * Make datastore locks a little easier. NOT threadsafe.
+ * 
+ * @author the.dylan.price@gmail.com
+ * 
+ */
 public class LockTemplate {
   // At 4 tries and 250 initial backoff, the maximum amount of time a single
   // acquire or release can take is:
@@ -43,14 +49,16 @@ public class LockTemplate {
   public void acquire() throws ODKTaskLockException {
     TaskLock lock = ds.createTaskLock(user);
     boolean acquired = false;
+    maxBackoffMs = INITIAL_MAX_BACKOFF;
     for (int i = 0; i < TRIES; i++) {
       if (lock.obtainLock(lockId, tableId, type)) {
         acquired = true;
-        maxBackoffMs = INITIAL_MAX_BACKOFF;
         break;
       } else {
         try {
           Thread.sleep(getNextBackoff());
+        } catch (RuntimeException e) {
+          throw new ODKTaskLockException(e);
         } catch (Exception e) {
           throw new ODKTaskLockException(e);
         }
@@ -70,13 +78,15 @@ public class LockTemplate {
    */
   public void release() throws ODKTaskLockException {
     TaskLock lock = ds.createTaskLock(user);
+    maxBackoffMs = INITIAL_MAX_BACKOFF;
     for (int i = 0; i < TRIES; i++) {
       if (lock.releaseLock(lockId, tableId, type)) {
-        maxBackoffMs = INITIAL_MAX_BACKOFF;
         break;
       } else {
         try {
           Thread.sleep(getNextBackoff());
+        } catch (RuntimeException e) {
+          throw new ODKTaskLockException(e);
         } catch (Exception e) {
           // just move on, this retry mechanism
           // is to make things nice
@@ -91,4 +101,5 @@ public class LockTemplate {
     maxBackoffMs *= 2;
     return backoff;
   }
+
 }
