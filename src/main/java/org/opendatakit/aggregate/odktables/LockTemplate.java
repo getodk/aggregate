@@ -34,26 +34,26 @@ public class LockTemplate {
     while (!lock.obtainLock(lockId, tableId, type)) {
       try {
         Thread.sleep(1000);
-      } catch (InterruptedException e) {
-        // ignore
+      } catch (Exception e) {
+        throw new ODKTaskLockException(e);
       }
     }
   }
 
   /**
-   * Tries up to 10 times to release lock, then gives up. In this case the lock
+   * Tries up to 5 times to release lock, then gives up. In this case the lock
    * will eventually timeout and be forced to release.
    * 
    * @throws ODKTaskLockException
    */
   public void release() throws ODKTaskLockException {
     TaskLock lock = ds.createTaskLock(user);
-    for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < 5; i++) {
       if (lock.releaseLock(lockId, tableId, type))
         break;
       try {
         Thread.sleep(1000);
-      } catch (InterruptedException e) {
+      } catch (Exception e) {
         // just move on, this retry mechanism
         // is to make things nice
       }
