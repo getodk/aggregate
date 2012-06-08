@@ -212,7 +212,7 @@ local repository.  In some cases, these are cutting edge Google libraries that
 may no longer need to be manually installed (once they get published to maven).
 
 (8) Download the Java Selenium Client Driver ( http://seleniumhq.org/download/ )
-The Maven pom.xml expects version 2.21.0.  Explode the zip and make note of 
+The Maven pom.xml expects version 2.23.0.  Explode the zip and make note of 
 the directory.
  
 (9) Edit Maven's settings.xml file (this is in the .m2 directory).
@@ -244,8 +244,8 @@ A minimal file is:
 		<mysql.root.password>MYSQLROOTPASSWORDHERE</mysql.root.password>
 		<postgres.client.executable>C:\\Program Files\\PostgreSQL\\9.1\\bin\\psql.exe</postgres.client.executable>
 		<postgres.root.password>POSTGRESQLROOTPASSWORDHERE</postgres.root.password>
-		<selenium.home>C:\\Users\\user\\Downloads\\selenium-java-2.21.0\\selenium-2.21.0</selenium.home>
-		<selenium.libs>C:\\Users\\user\\Downloads\\selenium-java-2.21.0\\selenium-2.21.0\\libs</selenium.libs>
+		<selenium.home>C:\\Users\\user\\Documents\\selenium\\selenium-2.23.1</selenium.home>
+		<selenium.libs>C:\\Users\\user\\Documents\\selenium\\selenium-2.23.1\\libs</selenium.libs>
 		<test.server.hostname>YOUR.FULLY.QUALIFIED.HOSTNAME.AND.ORG</test.server.hostname>
 		<test.server.port>7070</test.server.port>
 		<test.server.secure.port>7443</test.server.secure.port>
