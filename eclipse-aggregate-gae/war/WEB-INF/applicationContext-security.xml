@@ -194,7 +194,7 @@
 	    
 	<beans:bean id="securityContextPersistenceFilter"
 		class="org.springframework.security.web.context.SecurityContextPersistenceFilter">
-		<beans:property name="securityContextRepository" ref="securityContextRepository" />
+		<beans:constructor-arg name="repo" ref="securityContextRepository" />
 	</beans:bean>
 
 	<beans:bean id="securityContextRepository"
@@ -202,8 +202,8 @@
 
 	<beans:bean id="logoutFilter"
 		class="org.springframework.security.web.authentication.logout.LogoutFilter">
-		<beans:constructor-arg value="/logout.html" />
-		<beans:constructor-arg>
+		<beans:constructor-arg name="logoutSuccessUrl" value="/logout.html" />
+		<beans:constructor-arg name="handlers">
 			<beans:list>
 				<beans:bean
 					class="org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler">
@@ -228,7 +228,7 @@
 	
 	<beans:bean id="sessionManagerFilter"
 		class="org.springframework.security.web.session.SessionManagementFilter">
-		<beans:constructor-arg ref="securityContextRepository" />
+		<beans:constructor-arg name="securityContextRepository" ref="securityContextRepository" />
 	</beans:bean>
 
 	<!--	This class determines what authentication to initiate.  It uses the -->
@@ -252,7 +252,7 @@
 
 	<beans:bean id="delegatingAuthenticationEntryPoint"
 		class="org.springframework.security.web.authentication.DelegatingAuthenticationEntryPoint">
-		<beans:constructor-arg>
+		<beans:constructor-arg name="entryPoints">
 			<beans:map>
                       <beans:entry key="hasHeader('X-OpenRosa-Version','1.0')" value-ref="${security.server.deviceAuthentication}EntryPoint" />
 			</beans:map>
@@ -547,7 +547,7 @@
 	</beans:bean>
 	<beans:bean id="webPrivilegeEvaluator"
 		class="org.springframework.security.web.access.DefaultWebInvocationPrivilegeEvaluator">
-		<beans:constructor-arg ref="filterSecurityInterceptor" />
+		<beans:constructor-arg name="securityInterceptor" ref="filterSecurityInterceptor" />
 	</beans:bean>
 
 	<beans:bean id="authenticationManager"
