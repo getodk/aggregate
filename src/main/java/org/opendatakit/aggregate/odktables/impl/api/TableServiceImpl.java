@@ -29,6 +29,7 @@ import org.opendatakit.aggregate.odktables.entity.api.TableDefinition;
 import org.opendatakit.aggregate.odktables.entity.api.TableResource;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.exception.TableAlreadyExistsException;
+import org.opendatakit.common.persistence.engine.gae.DatastoreImpl;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.web.CallingContext;
@@ -76,7 +77,7 @@ public class TableServiceImpl implements TableService {
     String metadata = definition.getMetadata();
     TableEntry entry = tm.createTable(tableId, tableName, columns, metadata);
     TableResource resource = getResource(entry);
-    logger.info(String.format("createTable(%s, %s)", tableId, definition));
+    logger.info(String.format("tableId: %s, definition: %s", tableId, definition));
     return resource;
   }
 
@@ -85,7 +86,9 @@ public class TableServiceImpl implements TableService {
       PermissionDeniedException {
     new AuthFilter(tableId, cc).checkPermission(TablePermission.DELETE_TABLE);
     tm.deleteTable(tableId);
-    logger.info(String.format("deleteTable(%s)", tableId));
+    logger.info("tableId: " + tableId);
+    DatastoreImpl ds = (DatastoreImpl) cc.getDatastore();
+    ds.getDam().logUsage();
   }
 
   @Override

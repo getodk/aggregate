@@ -102,6 +102,7 @@
 		
 		<!-- ODK Tables API -->
 		<intercept-url pattern="/odktables/**" access="true" />
+		<intercept-url pattern="/odktablesui*" access="true" />
 		
 		<!-- in case we forgot to mention something... -->
 		<intercept-url pattern="/**" access="isAnonymous()" />
