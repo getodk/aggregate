@@ -419,16 +419,6 @@
         <url-pattern>/odktables/*</url-pattern>
     </servlet-mapping>
     
-<!-- <servlet>
-        <servlet-name>ODKTablesTestUI</servlet-name>
-        <servlet-class>org.opendatakit.aggregate.odktables.servlet.ODKTablesUIServlet</servlet-class>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>ODKTablesTestUI</servlet-name>
-        <url-pattern>/odktablesui</url-pattern>
-    </servlet-mapping>
-    -->
-    
     <servlet>
     	<servlet-name>RemoteApi</servlet-name>
 	    <servlet-class>com.google.apphosting.utils.remoteapi.RemoteApiServlet</servlet-class>
