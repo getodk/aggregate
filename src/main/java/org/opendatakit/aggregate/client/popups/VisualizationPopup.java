@@ -50,6 +50,8 @@ import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.Maps;
 import com.google.gwt.maps.client.control.LargeMapControl;
 import com.google.gwt.maps.client.event.MarkerClickHandler;
+import com.google.gwt.maps.client.event.MarkerMouseOutHandler;
+import com.google.gwt.maps.client.event.MarkerMouseOverHandler;
 import com.google.gwt.maps.client.geom.LatLng;
 import com.google.gwt.maps.client.overlay.Marker;
 import com.google.gwt.user.client.Window;
@@ -132,6 +134,9 @@ public final class VisualizationPopup extends AbstractPopupBase {
   private RadioButton tallyOccurRadio;
   private RadioButton sumColumnsRadio;
   private Label sumRadioTxt;
+  
+  // track whether the map marker was clicked or not.
+  private boolean mapMarkerClicked;
 
   public VisualizationPopup(FilterSubTab filterSubTab) {
     super();
@@ -437,10 +442,27 @@ public final class VisualizationPopup extends AbstractPopupBase {
         // marker needs to be added to the map before calling
         // InfoWindow.open(marker, ...)
         final SubmissionUI tmpSub = sub;
-        marker.addMarkerClickHandler(new MarkerClickHandler() {
-          public void onClick(MarkerClickEvent event) {
+        marker.addMarkerMouseOverHandler(new MarkerMouseOverHandler() {
+          @Override
+          public void onMouseOver(MarkerMouseOverEvent event) {
             InfoWindow info = map.getInfoWindow();
             info.open(event.getSender(), new InfoWindowContent(createInfoWindowWidget(tmpSub)));
+          }
+        });
+        marker.addMarkerMouseOutHandler(new MarkerMouseOutHandler() {
+          @Override
+          public void onMouseOut(MarkerMouseOutEvent event) {
+            if ( !mapMarkerClicked ) {
+              InfoWindow info = map.getInfoWindow();
+              info.close();
+            }
+            mapMarkerClicked = false;
+          }
+        });
+        marker.addMarkerClickHandler(new MarkerClickHandler() {
+          @Override
+          public void onClick(MarkerClickEvent event) {
+            mapMarkerClicked = true;
           }
         });
       }
