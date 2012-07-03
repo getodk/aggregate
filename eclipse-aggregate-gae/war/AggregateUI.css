@@ -186,7 +186,18 @@ a,a:visited,a:hover {
 #form_title_cell {
 	text-align: center;
 }
-
+.thumbnail {
+	height: 48px;
+	width: 64px;
+	vertical-align: middle;
+}
+.infoTableLabel {
+	text-align:left;
+	font-weight:bold;
+}
+.infoTableData {
+	text-align:right;
+}
 #form_name {
 	color: #07115A;
 	margin-top: 0px;
