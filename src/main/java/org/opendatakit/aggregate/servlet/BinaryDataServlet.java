@@ -19,6 +19,7 @@ package org.opendatakit.aggregate.servlet;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Date;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -42,6 +43,7 @@ import org.opendatakit.aggregate.submission.type.BlobSubmissionType;
 import org.opendatakit.aggregate.util.ImageUtil;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
+import org.opendatakit.common.utils.WebUtils;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.HtmlConsts;
 
@@ -96,6 +98,7 @@ public class BinaryDataServlet extends ServletUtilBase {
 
     SubmissionKey key = new SubmissionKey(keyString);
 
+    Date lastUpdateDate = null;
     byte[] imageBlob = null;
     String unrootedFileName = null;
     String contentType = null;
@@ -116,6 +119,7 @@ public class BinaryDataServlet extends ServletUtilBase {
         contentType = info.contentType;
         contentLength = info.contentLength;
         imageBlob = p.getResultFileContents(cc);
+        lastUpdateDate = p.getCompletionDate();
       } catch (ODKOverQuotaException e) {
         e.printStackTrace();
         quotaExceededError(resp);
@@ -184,6 +188,7 @@ public class BinaryDataServlet extends ServletUtilBase {
             ordinal = ord.intValue();
           }
           imageBlob = b.getBlob(ordinal, cc);
+          lastUpdateDate = b.getLastUpdateDate(ordinal, cc);
           unrootedFileName = b.getUnrootedFilename(ordinal, cc);
           contentType = b.getContentType(ordinal, cc);
           contentLength = b.getContentLength(ordinal, cc);
@@ -206,6 +211,11 @@ public class BinaryDataServlet extends ServletUtilBase {
       }
 
       if (previewSize) {
+        // cache for 1 hour...
+        resp.setHeader("Expires:", 
+              WebUtils.rfc1123Date(new Date(System.currentTimeMillis() + 3600000L)));
+        resp.setHeader("Last-Modified:",
+              WebUtils.rfc1123Date(lastUpdateDate));
         resp.setContentType(HtmlConsts.RESP_TYPE_IMAGE_JPEG);
         if (contentType.equals(HtmlConsts.RESP_TYPE_IMAGE_JPEG)) {
           // resize
@@ -217,6 +227,8 @@ public class BinaryDataServlet extends ServletUtilBase {
         }
         resp.setContentLength(imageBlob.length);
       } else {
+        resp.setHeader("Last-Modified:",
+            WebUtils.rfc1123Date(lastUpdateDate));
         resp.setContentType(contentType);
         if (contentLength != null) {
           resp.setContentLength(contentLength.intValue());

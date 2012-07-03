@@ -321,6 +321,20 @@ public class WebUtils {
     asGMTiso8601.setTimeZone(TimeZone.getTimeZone("GMT"));
     return asGMTiso8601.format(d);
   }
+  
+  /**
+   * Return the RFC1123 string representation of a date.
+   * @param d
+   * @return
+   */
+  public static final String rfc1123Date(Date d) {
+    if (d == null)
+      return null;
+    // SDF is not thread-safe
+    SimpleDateFormat asGMTrfc1123 = new SimpleDateFormat(PATTERN_RFC1123); // with time zone
+    asGMTrfc1123.setTimeZone(TimeZone.getTimeZone("GMT"));
+    return asGMTrfc1123.format(d);
+  }
 
   public static final String purgeDateString(Date d) {
     if (d == null)
