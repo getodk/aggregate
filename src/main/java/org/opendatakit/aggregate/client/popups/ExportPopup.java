@@ -59,12 +59,7 @@ public final class ExportPopup extends AbstractPopupBase {
   private static final String BINARY_BALLOON = "Choose the binary field to display.";
 
   private boolean gotKmlOptions = false;
-  // this will be the main flex table for the popups
   private final FlexTable layout;
-  // this will be the standard header across the top
-  private final FlexTable topBar;
-  // this is the bottom bar that houses the KML options
-  private final FlexTable bottomBar;
   private final EnumListBox<ExportType> fileType;
 
   private final FilterListBox filtersBox;
@@ -102,9 +97,8 @@ public final class ExportPopup extends AbstractPopupBase {
     fileType = new EnumListBox<ExportType>(ExportType.values(), FILE_TYPE_TOOLTIP,
         FILE_TYPE_BALLOON);
     fileType.addChangeHandler(new ExportTypeChangeHandler());
-    
-    // set the standard header widgets
-    topBar = new FlexTable();
+
+    FlexTable topBar = new FlexTable();
     topBar.addStyleName("stretch_header");
     topBar.setWidget(0, 0, new HTML("<h2> Form:</h2>"));
     topBar.setWidget(0, 1, new HTML(formId));
@@ -113,11 +107,8 @@ public final class ExportPopup extends AbstractPopupBase {
     topBar.setWidget(0, 4, new HTML("<h2>Filter:</h2>"));
     topBar.setWidget(0, 5, filtersBox);
     topBar.setWidget(0, 6, exportButton);
-    topBar.setWidget(0, 7, new ClosePopupButton(this));
-    
-    // set the widgets for the kml option bar
-    bottomBar = new FlexTable();
-    bottomBar.addStyleName("flexTableBorderTopStretchWidth");
+
+    FlexTable bottomBar = new FlexTable();
     bottomBar.setWidget(0, 0, new HTML("<h4>Geopoint:<h4>"));
     bottomBar.setWidget(0, 1, geoPointsDropDown);
     bottomBar.setWidget(0, 2, new HTML("<h4>Title:<h4>"));
@@ -126,8 +117,9 @@ public final class ExportPopup extends AbstractPopupBase {
     bottomBar.setWidget(0, 5, binaryFieldsDropDown);
 
     layout = new FlexTable();
-    layout.setWidget(0, 0, topBar);
-    layout.setWidget(1, 0, bottomBar);
+    layout.setWidget(0, 0, new ClosePopupButton(this));
+    layout.setWidget(0, 1, topBar);
+    layout.setWidget(1, 1, bottomBar);
 
     updateUIOptions();
 
