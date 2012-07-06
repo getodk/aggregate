@@ -266,6 +266,7 @@ public class SubmissionFilterGroup extends CommonFieldsBase {
     subFilterGroup.setName(filterGroup.getName());
     subFilterGroup.setFormId(filterGroup.getFormId());
     subFilterGroup.setIncludeMetadata(filterGroup.getIncludeMetadata());
+    subFilterGroup.setIsPublic(true); // currently is always public if involved in ui, private filters are used for exporting 
     
     for (Filter filter : filterGroup.getFilters()) {
       SubmissionFilter subFilter = SubmissionFilter.transform(filter, subFilterGroup, cc);

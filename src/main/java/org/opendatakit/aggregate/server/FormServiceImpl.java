@@ -231,7 +231,8 @@ public class FormServiceImpl extends RemoteServiceServlet implements
 
       // save the filter group
       SubmissionFilterGroup filterGrp = SubmissionFilterGroup.transform(group, cc);
-      filterGrp.setName("FilterForExport");
+      filterGrp.setName("FilterForExport-" + filterGrp.getName());
+      filterGrp.setIsPublic(false); // make the filter not visible in the UI since it's an internal filter for export
       filterGrp.persist(cc);
 
       // create csv job
