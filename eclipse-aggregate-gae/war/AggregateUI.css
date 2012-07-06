@@ -56,6 +56,16 @@ a,a:visited,a:hover {
 	background: url("images/mostly_opaque.png");
 }
 
+/**
+* This is to make a glass panel, created with the idea to
+* gray out buttons behind a popup.
+*/
+.gwt-PopupPanelGlassAggregate {
+	background-color: #F5F5F5;
+	opacity: 0.6;
+	filter: alpha(opacity=30);
+}
+
 #filters_data {
 	border-collapse: collapse;
 }
@@ -94,6 +104,17 @@ a,a:visited,a:hover {
 }
 
 .stretch_header {
+	width: 100%;
+}
+
+/**
+* This makes a border on the top of a flex table and
+* fills 100% of the width.
+* those lines.
+*/
+.flexTableBorderTopStretchWidth {
+	padding: 3px;
+	border-top: 1px solid #777984;
 	width: 100%;
 }
 
