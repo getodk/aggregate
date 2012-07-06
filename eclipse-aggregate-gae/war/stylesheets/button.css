@@ -1,10 +1,6 @@
 .gwt-Button {
 	background: #F5F5F5;
 	border: 1px solid #DEDEDE;
-	/* to round corners */
-	-moz-border-radius: 2px;
-	-webkit-border-radius: 2px;
-	/* end round corners */
 	border-top: 1px solid #EEEEEE;
 	border-left: 1px solid #EEEEEE;
 	font-family: "Lucida Grande", Tahoma, Arial, Verdana, sans-serif;
@@ -19,8 +15,6 @@
 .gwt-Button-close {
 	padding: 5px 7px 6px 7px;
 }
-
-/* the little picture that is IN the button */
 .gwt-Button img {
 	margin: 0px 3px -3px 0px;
 	padding: 0px;
@@ -36,7 +30,6 @@
 	opacity: 0.5;
 	filter: alpha(opacity = 50);
 	border: 1px solid #4E4E4E;
-	cursor: default;
 }
 
 .gwt-Button:hover {
