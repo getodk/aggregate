@@ -63,7 +63,9 @@ public class FilterServiceImpl extends RemoteServiceServlet implements FilterSer
       List<SubmissionFilterGroup> filterGroupList = SubmissionFilterGroup.getFilterGroupList(
           formId, cc);
       for (SubmissionFilterGroup group : filterGroupList) {
-        filterSet.addFilterGroup(group.transform());
+        if(group.isPublic()) {
+          filterSet.addFilterGroup(group.transform());
+        }
       }
       return filterSet;
     } catch (ODKFormNotFoundException e) {
