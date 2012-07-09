@@ -331,6 +331,16 @@ public class PersistentResults {
         + PersistentResultsTable.TABLE_NAME + "[@key=" + row.getUri() + "]");
   }
 
+  public static final PersistentResults getPersistentResult(String uri, CallingContext cc)
+      throws ODKEntityNotFoundException, ODKDatastoreException {
+    Datastore ds = cc.getDatastore();
+    User user = cc.getCurrentUser();
+    PersistentResultsTable relation = PersistentResultsTable.assertRelation(cc);
+    PersistentResultsTable p = ds.getEntity(relation, uri, user);
+    PersistentResults export = new PersistentResults(p, cc);
+    return export;
+  }
+
   public static final List<PersistentResults> getAvailablePersistentResults(CallingContext cc)
       throws ODKFormNotFoundException, ODKDatastoreException {
     Datastore ds = cc.getDatastore();

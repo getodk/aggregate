@@ -52,6 +52,7 @@ import org.opendatakit.aggregate.task.JsonFileGenerator;
 import org.opendatakit.aggregate.task.KmlGenerator;
 import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.security.client.exception.AccessDeniedException;
 import org.opendatakit.common.web.CallingContext;
@@ -128,6 +129,7 @@ public class FormServiceImpl extends RemoteServiceServlet implements
       for (PersistentResults export : results) {
         ExportSummary summary = new ExportSummary();
 
+        summary.setUri(export.getUri());
         summary.setFileType(export.getResultType());
         summary.setTimeRequested(export.getRequestDate());
         summary.setStatus(export.getStatus());
@@ -406,6 +408,27 @@ public class FormServiceImpl extends RemoteServiceServlet implements
     } catch (ODKFormNotFoundException e) {
       e.printStackTrace();
       throw new FormNotAvailableException(e);
+    } catch (ODKOverQuotaException e) {
+      e.printStackTrace();
+      throw new RequestFailureException(ErrorConsts.QUOTA_EXCEEDED);
+    } catch (ODKDatastoreException e) {
+      e.printStackTrace();
+      throw new DatastoreFailureException();
+    }
+  }
+
+  @Override
+  public void deleteExport(String uri) throws AccessDeniedException, FormNotAvailableException,
+      RequestFailureException, DatastoreFailureException {
+    HttpServletRequest req = this.getThreadLocalRequest();
+    CallingContext cc = ContextFactory.getCallingContext(this, req);
+
+    try {
+      PersistentResults r = PersistentResults.getPersistentResult(uri, cc);
+      r.delete(cc);
+    } catch (ODKEntityNotFoundException e) {
+      e.printStackTrace();
+      throw new RequestFailureException(ErrorConsts.EXPORTED_FILE_PROBLEM);
     } catch (ODKOverQuotaException e) {
       e.printStackTrace();
       throw new RequestFailureException(ErrorConsts.QUOTA_EXCEEDED);
