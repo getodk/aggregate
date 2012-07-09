@@ -37,6 +37,9 @@ import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HasHorizontalAlignment;
+import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 
@@ -61,6 +64,21 @@ public final class FilterPopup extends AbstractPopupBase {
 
 	private final FilterGroup group;
 	private final FlexTable table;
+	
+	// this will be the standard header
+	private final FlexTable topBar;
+	// this little widget will keep the "Form: name" together during stretching
+	private final FlexTable formDisplay;
+	// this will keep the filter and close buttons together during stretching
+	private final FlexTable buttons;
+	// this will have the filter options
+	private final FlexTable optionsBar;
+	// this will have the row filter options.
+	private final FlexTable rowBar;
+	// this will have the column options
+	private final FlexTable columnBar;
+	// this will be the "create filter" thing
+	private final FlexTable creationBar;
 
 	private final EnumListBox<Visibility> visibility;
 	private final EnumListBox<RowOrCol> rowCol;
@@ -70,8 +88,6 @@ public final class FilterPopup extends AbstractPopupBase {
 	private final TextBox filterValue;
 
 	private final ArrayList<Column> headers;
-
-	private final Label whereCols = new Label("where column");
 
 	public FilterPopup(SubmissionTable submissionData, FilterGroup filterGroup) {
 		super(); // do not close popup when user clicks out of it
@@ -109,14 +125,52 @@ public final class FilterPopup extends AbstractPopupBase {
 		applyFilter.addClickHandler(new ApplyFilter());
 
 		table = new FlexTable();
-		table.setWidget(0, 0, visibility);
-		table.setWidget(0, 1, rowCol);
-		table.setWidget(0, 2, whereCols);
-		table.setWidget(0, 3, columnForRowFilter);
-		table.setWidget(0, 4, filterOp);
-		table.setWidget(0, 5, filterValue);
-		table.setWidget(0, 6, new ClosePopupButton(this));
-		table.setWidget(1, 0, applyFilter);
+		
+		// this will be the header type bar across the top
+		topBar = new FlexTable();
+		topBar.addStyleName("stretch_header");
+		
+		formDisplay = new FlexTable();
+		formDisplay.setWidget(0, 0, new HTML("<h2>Form:</h2>"));
+		formDisplay.setWidget(0, 1, new HTML(filterGroup.getFormId()));
+		topBar.setWidget(0, 0, formDisplay);
+		topBar.getFlexCellFormatter().setHorizontalAlignment(0, 0, HasHorizontalAlignment.ALIGN_LEFT);
+
+		buttons = new FlexTable();
+		buttons.setWidget(0, 0, applyFilter);
+		buttons.getFlexCellFormatter().setHorizontalAlignment(0, 2, HasHorizontalAlignment.ALIGN_RIGHT);
+		buttons.setWidget(0, 1, new ClosePopupButton(this));
+		buttons.getFlexCellFormatter().setHorizontalAlignment(0, 3, HasHorizontalAlignment.ALIGN_RIGHT);
+		topBar.setWidget(0, 2, buttons);
+		topBar.getFlexCellFormatter().setHorizontalAlignment(0, 2, HasHorizontalAlignment.ALIGN_RIGHT);
+		
+		// the bar with the options. this will house everything that is NOT in the 
+		// top header bar.
+		optionsBar = new FlexTable();
+		optionsBar.addStyleName("flexTableBorderTopStretchWidth");
+		
+		creationBar = new FlexTable();
+		creationBar.setWidget(0, 0, new HTML("<h2>Create filter to "));
+		creationBar.setWidget(0, 1, visibility);
+		creationBar.setWidget(0, 2, rowCol);
+		creationBar.setWidget(0, 3, new HTML("<h2>...</h2>"));
+		
+		rowBar = new FlexTable();
+		rowBar.setWidget(0, 0, new HTML("<h3>...where </h3>"));
+		rowBar.setWidget(0, 1, columnForRowFilter);
+		rowBar.setWidget(0, 2, filterOp);
+		rowBar.setWidget(0, 3, filterValue);
+		
+		columnBar = new FlexTable();
+		columnBar.setWidget(0, 0, new HTML("<h3>...titled</h3>"));
+		columnBar.setWidget(0, 1, columnsForColumnFilter);
+		
+		optionsBar.setWidget(0, 0, creationBar);
+		optionsBar.setWidget(1, 0, rowBar);
+		optionsBar.setWidget(2, 0, columnBar);
+		
+		table.setWidget(0, 0, topBar);
+		table.setWidget(1, 0, optionsBar);
 
 		updateUIoptions();
 
@@ -125,19 +179,23 @@ public final class FilterPopup extends AbstractPopupBase {
 
 	public void updateUIoptions() {
 		if (rowCol.getSelectedValue().equals(RowOrCol.ROW)) {
-			table.setWidget(0, 2, whereCols);
-			columnForRowFilter.setVisible(true);
-			columnsForColumnFilter.setVisible(false);
-			whereCols.setVisible(true);
-			filterOp.setVisible(true);
-			filterValue.setVisible(true);
+			// they want to filter based on rows, so enable/disable appropriately
+			optionsBar.getRowFormatter().setStyleName(1, "enabledTableRow");
+			optionsBar.getRowFormatter().setStyleName(2, "disabledTableRow");
+			columnForRowFilter.setEnabled(true);
+			columnsForColumnFilter.setEnabled(false);
+			filterOp.setEnabled(true);
+			filterValue.setEnabled(true);
+			filterValue.setReadOnly(false);
 		} else {
-			table.setWidget(0, 2, columnsForColumnFilter);
-			columnForRowFilter.setVisible(false);
-			whereCols.setVisible(false);
-			columnsForColumnFilter.setVisible(true);
-			filterOp.setVisible(false);
-			filterValue.setVisible(false);
+			// they want to filter based on columns, so enable/disable appropriately
+			optionsBar.getRowFormatter().setStyleName(1, "disabledTableRow");
+			optionsBar.getRowFormatter().setStyleName(2, "enabledTableRow");
+			columnForRowFilter.setEnabled(false);
+			columnsForColumnFilter.setEnabled(true);
+			filterOp.setEnabled(false);
+			filterValue.setEnabled(false);
+			filterValue.setReadOnly(true);
 		}
 	}
 

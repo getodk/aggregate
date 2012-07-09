@@ -17,6 +17,7 @@
 
 package org.opendatakit.aggregate.submission.type;
 
+import java.util.Date;
 import java.util.List;
 
 import org.opendatakit.aggregate.constants.ErrorConsts;
@@ -71,6 +72,10 @@ public class BlobSubmissionType extends SubmissionFieldBase<SubmissionKey> {
 
   public Long getContentLength(int ordinal, CallingContext cc) throws ODKDatastoreException {
     return bcm.getContentLength(ordinal, cc);
+  }
+  
+  public Date getLastUpdateDate(int ordinal, CallingContext cc) throws ODKDatastoreException {
+    return bcm.getLastUpdateDate(ordinal, cc);
   }
 
   public byte[] getBlob(int ordinal, CallingContext cc) throws ODKDatastoreException {

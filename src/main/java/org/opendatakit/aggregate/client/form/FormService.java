@@ -53,4 +53,5 @@ public interface FormService extends RemoteService {
   
   KmlSettings getGpsCoordnates(String formId) throws AccessDeniedException, FormNotAvailableException, RequestFailureException, DatastoreFailureException;
   
+  void deleteExport(String uri) throws AccessDeniedException, FormNotAvailableException, RequestFailureException, DatastoreFailureException;
 }

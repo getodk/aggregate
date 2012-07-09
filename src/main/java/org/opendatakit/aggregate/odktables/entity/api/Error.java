@@ -10,6 +10,10 @@ public class Error {
   private ErrorType type;
   private String message;
 
+  @SuppressWarnings("unused")
+  private Error() {
+  }
+
   /**
    * @param type
    * @param message
@@ -111,5 +115,6 @@ public class Error {
     BAD_COLUMN_NAME,
     INTERNAL_ERROR,
     BAD_REQUEST,
+    LOCK_TIMEOUT,
   }
 }

@@ -13,6 +13,7 @@ import org.junit.Before;
 import org.opendatakit.aggregate.odktables.entity.api.TableDefinition;
 import org.opendatakit.aggregate.odktables.entity.api.TableResource;
 import org.opendatakit.aggregate.odktables.entity.serialization.SimpleXMLSerializerForAggregate;
+import org.opendatakit.aggregate.odktables.entity.serialization.SimpleXmlHttpMessageConverter;
 import org.simpleframework.xml.Serializer;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
