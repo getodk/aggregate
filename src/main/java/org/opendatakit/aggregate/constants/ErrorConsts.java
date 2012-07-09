@@ -92,6 +92,7 @@ public final class ErrorConsts {
   public static final String QUOTA_EXCEEDED = "Quota exceeded";
   public static final String PERSISTENCE_LAYER_PROBLEM = "Problem persisting data or accessing data";
   public static final String UPLOAD_PROBLEM = "Upload transmission unexpectedly failed";
+  public static final String EXPORTED_FILE_PROBLEM = "Problem accessing exported datafile";
   
   public static final String JAVA_ROSA_PARSING_PROBLEM = "Problem with JavaRosa Parsing Form:";
   public static final String ERROR_OBTAINING_FUSION_TABLE_ID = "ERROR CREATING FUSION TABLE - DID NOT GET A TABLE NUMBER";

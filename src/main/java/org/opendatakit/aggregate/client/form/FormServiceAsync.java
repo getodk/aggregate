@@ -39,4 +39,6 @@ public interface FormServiceAsync {
 
   void createJsonFileFromFilter(FilterGroup group, AsyncCallback<Boolean> callback);
 
+  void deleteExport(String uri, AsyncCallback<Void> callback);
+
 }
