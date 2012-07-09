@@ -40,7 +40,6 @@ import org.javarosa.xform.util.XFormUtils;
 import org.kxml2.kdom.Document;
 import org.kxml2.kdom.Element;
 import org.opendatakit.aggregate.constants.ParserConsts;
-import org.opendatakit.aggregate.exception.ODKFormAlreadyExistsException;
 import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
 import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData.Reason;
 import org.opendatakit.aggregate.form.XFormParameters;
@@ -57,6 +56,7 @@ import org.opendatakit.common.web.constants.BasicConsts;
  */
 public class BaseFormParserForJavaRosa {
 
+  private static final String LEADING_QUESTION_XML_PATTERN = "^[^<]*<\\s*\\?\\s*xml.*";
   private static final Log log = LogFactory.getLog(BaseFormParserForJavaRosa.class.getName());
   private static final String BASE64_ENCRYPTED_FIELD_KEY = "base64EncryptedFieldKey";
   private static final String BASE64_RSA_PUBLIC_KEY = "base64RsaPublicKey";
@@ -65,8 +65,10 @@ public class BaseFormParserForJavaRosa {
     XFORMS_SHARE_INSTANCE, // instances (including binding) identical; body
                            // differs
     XFORMS_SHARE_SCHEMA, // instances differ, but share common database schema
-    XFORMS_DIFFERENT // instances differ significantly enough to affect database
+    XFORMS_DIFFERENT, // instances differ significantly enough to affect database
                      // schema
+    XFORMS_MISSING_VERSION,
+    XFORMS_EARLIER_VERSION
   }
 
   private static final String[] ChangeableBindAttributes = { // bind attributes
@@ -145,14 +147,23 @@ public class BaseFormParserForJavaRosa {
   
   private static final String ODK_TIMESTAMP_COMMENT = "<!-- ODK Aggregate upload time: ";
   
-  public static String xmlWithoutTimestampComment( String xml ) {
+  private static int xmlInsertLocation( String xml ) {
     int idx = xml.indexOf(">");
-    if ( idx == -1 ) return xml;
+    if ( idx == -1 ) return -1;
+    String snip = xml.substring(0,idx).toLowerCase();
+    if ( snip.matches(LEADING_QUESTION_XML_PATTERN) ) {
+      // the file started with a <?xml...?> tag -- get the next(<html>) tag.
+      idx = xml.indexOf(">", idx+1); // <html
+      if ( idx == -1 ) return -1;
+    }
     idx = xml.indexOf(">", idx+1);
-    if ( idx == -1 ) return xml;
-    idx = xml.indexOf(">", idx+1);
-    if ( idx == -1 ) return xml;
+    if ( idx == -1 ) return -1;
     ++idx;
+    return idx;
+  }
+  
+  public static String xmlWithoutTimestampComment( String xml ) {
+    int idx = xmlInsertLocation(xml);
     
     if ( xml.startsWith(ODK_TIMESTAMP_COMMENT, idx) ) {
       int endIdx = xml.indexOf(">", idx);
@@ -165,13 +176,7 @@ public class BaseFormParserForJavaRosa {
   }
   
   public static Date xmlTimestamp( String xml ) {
-    int idx = xml.indexOf(">");
-    if ( idx == -1 ) return new Date();
-    idx = xml.indexOf(">", idx+1);
-    if ( idx == -1 ) return new Date();
-    idx = xml.indexOf(">", idx+1);
-    if ( idx == -1 ) return new Date();
-    ++idx;
+    int idx = xmlInsertLocation(xml);
     
     if ( xml.startsWith(ODK_TIMESTAMP_COMMENT, idx) ) {
       // find space after the IS8601 timestamp
@@ -191,13 +196,7 @@ public class BaseFormParserForJavaRosa {
   }
   
   public static String xmlWithTimestampComment( String xmlWithoutTimestampComment, String serverUrl ) {
-    int idx = xmlWithoutTimestampComment.indexOf(">");
-    if ( idx == -1 ) return xmlWithoutTimestampComment;
-    idx = xmlWithoutTimestampComment.indexOf(">", idx+1);
-    if ( idx == -1 ) return xmlWithoutTimestampComment;
-    idx = xmlWithoutTimestampComment.indexOf(">", idx+1);
-    if ( idx == -1 ) return xmlWithoutTimestampComment;
-    ++idx;
+    int idx = xmlInsertLocation(xmlWithoutTimestampComment);
     
     return xmlWithoutTimestampComment.substring(0, idx) +
         ODK_TIMESTAMP_COMMENT + WebUtils.iso8601Date(new Date()) + " on " + serverUrl + " -->" +
@@ -641,10 +640,9 @@ public class BaseFormParserForJavaRosa {
    *         when forms are different enough to affect database structure and/or
    *         encryption.
    * @throws ODKIncompleteSubmissionData
-   * @throws ODKFormAlreadyExistsException 
    */
   public static DifferenceResult compareXml(BaseFormParserForJavaRosa incomingParser, String existingXml, String existingTitle, boolean isWithinUpdateWindow)
-      throws ODKIncompleteSubmissionData, ODKFormAlreadyExistsException {
+      throws ODKIncompleteSubmissionData {
     if (incomingParser == null || existingXml == null) {
       throw new ODKIncompleteSubmissionData(Reason.MISSING_XML);
     }
@@ -667,14 +665,15 @@ public class BaseFormParserForJavaRosa {
     String ivs = incomingParser.rootElementDefn.versionString;
     if ( ivs == null ) {
       // if we are changing the file, the new file must have a version string
-      throw new ODKFormAlreadyExistsException(
-          "Form definition file has changed but does not specify a form version.  Update the form version and resubmit.");
+      return DifferenceResult.XFORMS_MISSING_VERSION;
     }
+
     String evs = existingParser.rootElementDefn.versionString;
     boolean modelVersionSame = (incomingParser.rootElementDefn.modelVersion == null) ?
                 (existingParser.rootElementDefn.modelVersion == null) :
                 incomingParser.rootElementDefn.modelVersion.equals(existingParser.rootElementDefn.modelVersion);
-                
+         
+    boolean isEarlierVersion = false;
     if ( !(evs == null || 
          (modelVersionSame && ivs.length() > evs.length()) || 
          (!modelVersionSame && ivs.compareTo(evs) > 0)) ) {
@@ -684,8 +683,8 @@ public class BaseFormParserForJavaRosa {
       //    and the new form has more leading zeros.
       // (3) if the existing form and new form have different model versions 
       //    and the new version string is lexically greater than the old one.
-      throw new ODKFormAlreadyExistsException(
-          "Form version is not lexically greater than existing form version.  Update the form version and resubmit.");
+      isEarlierVersion = true;
+      return DifferenceResult.XFORMS_EARLIER_VERSION;
     }
     
     /*
@@ -777,7 +776,14 @@ public class BaseFormParserForJavaRosa {
     }
 
     // return result of element-by-element instance/binding comparison
-    return (compareTreeElements(dataModel1.getRoot(), incomingParser, dataModel2.getRoot(), existingParser));
+    DifferenceResult rc = compareTreeElements(dataModel1.getRoot(), incomingParser, dataModel2.getRoot(), existingParser);
+    if ( DifferenceResult.XFORMS_DIFFERENT == rc ) {
+      return rc;
+    } else if ( isEarlierVersion ) {
+      return DifferenceResult.XFORMS_EARLIER_VERSION;
+    } else { 
+      return rc;
+    }
   }
 
   /**

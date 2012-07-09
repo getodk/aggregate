@@ -358,6 +358,14 @@ public class FormParserForJavaRosa extends BaseFormParserForJavaRosa {
             // form is not storage-compatible
             throw new ODKFormAlreadyExistsException();
           }
+          if (diffresult == DifferenceResult.XFORMS_MISSING_VERSION) {
+            throw new ODKFormAlreadyExistsException(
+                "Form definition file has changed but does not specify a form version.  Update the form version and resubmit.");
+          }
+          if (diffresult == DifferenceResult.XFORMS_EARLIER_VERSION) {
+            throw new ODKFormAlreadyExistsException(
+                "Form version is not lexically greater than existing form version.  Update the form version and resubmit.");
+          }
 
           // update the title and form definition file as needed...
           if (!thisTitle.equals(title) ) {
