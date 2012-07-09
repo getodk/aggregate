@@ -7,7 +7,11 @@ public class AbstractPopupBase extends PopupPanel {
 
   public AbstractPopupBase() {
     super(false);
-    setModal(true);
+    setModal(true); // things not in the popup are inactive
+    
+    // Set glass behind the popup so that the things behind it are grayed out.
+    this.setGlassEnabled(true);
+    this.setGlassStyleName("gwt-PopupPanelGlassAggregate");
     
   }
   

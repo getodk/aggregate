@@ -38,17 +38,17 @@ public final class FilterGroup implements Serializable {
   private int queryFetchLimit;
 
   private UIQueryResumePoint cursor;
-  
-  public FilterGroup() {
-    includeMetadata = false;
-    queryFetchLimit = DEFAULT_FETCH_LIMIT;
-  }
 
+  public FilterGroup() {
+    
+  }
+  
   public FilterGroup(String groupName, String formId, ArrayList<Filter> filtersToApply) {
-    this();
     this.uri = UIConsts.URI_DEFAULT;
     this.name = groupName;
     this.formId = formId;
+    this.includeMetadata = false;
+    this.queryFetchLimit = DEFAULT_FETCH_LIMIT;
     
     if(filtersToApply == null) {
       this.filters = new ArrayList<Filter>();
@@ -61,11 +61,13 @@ public final class FilterGroup implements Serializable {
    * This constructor should only be used by the server
    * 
    * @param uri
+   * @param metadata TODO
    */
-  public FilterGroup(String uri) {
-    this();
+  public FilterGroup(String uri, boolean metadata) {
     this.uri = uri;
+    this.includeMetadata = metadata;
     this.filters = new ArrayList<Filter>();
+    this.queryFetchLimit = DEFAULT_FETCH_LIMIT;
   }
 
   /**
