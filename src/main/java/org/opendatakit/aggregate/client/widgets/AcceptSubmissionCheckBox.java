@@ -33,7 +33,7 @@ public final class AcceptSubmissionCheckBox extends AggregateCheckBox implements
 	private final String formId;
 	
 	public AcceptSubmissionCheckBox(String formId, Boolean accept) {
-		super(null, TOOLTIP_TXT, HELP_BALLOON_TXT);
+		super(null, false, TOOLTIP_TXT, HELP_BALLOON_TXT);
 		this.formId = formId;
 		setValue(accept);
 		boolean enabled = AggregateUI.getUI().getUserInfo()

@@ -121,7 +121,10 @@ public class SubmissionFilterGroup extends CommonFieldsBase {
   }
 
   public Boolean isPublic() {
-    return getBooleanField(IS_PUBLIC);
+    // treat null values as TRUE
+    Boolean fieldValue = getBooleanField(IS_PUBLIC);
+    if ( fieldValue == null ) return Boolean.TRUE;
+    return fieldValue;
   }
 
   public void setIsPublic(Boolean value) {
@@ -129,7 +132,10 @@ public class SubmissionFilterGroup extends CommonFieldsBase {
   }
 
   public Boolean includeMetadata() {
-    return getBooleanField(INCLUDE_METADATA);
+    // treat null values as FALSE
+    Boolean fieldValue = getBooleanField(INCLUDE_METADATA);
+    if ( fieldValue == null ) return Boolean.FALSE;
+    return fieldValue;
   }
 
   public void setIncludeMetadata(Boolean value) {
