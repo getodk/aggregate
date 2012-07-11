@@ -34,6 +34,10 @@ public enum ExternalServiceType implements Serializable {
 
   private String serviceName;
 
+  private ExternalServiceType() {
+    // GWT
+  }
+  
   private ExternalServiceType(String name) {
     serviceName = name;
   }

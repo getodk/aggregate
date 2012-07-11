@@ -26,6 +26,10 @@ public enum Tabs implements Serializable {
    private String tabLabel;
    private String hashString;
    
+   private Tabs() {
+     // GWT
+   }
+   
    private Tabs(String label, String hash) {
      tabLabel = label;
      hashString = hash;

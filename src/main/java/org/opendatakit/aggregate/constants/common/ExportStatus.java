@@ -25,6 +25,10 @@ public enum ExportStatus implements Serializable {
  	ABANDONED, // task completed with failure; no more retries should occur.
  	AVAILABLE; // task completed; results are available.
  	
+ 	private ExportStatus() {
+ 	  // GWT
+ 	}
+ 	
  	public String toString() {
  		switch ( this ) {
  		case GENERATION_IN_PROGRESS:

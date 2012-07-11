@@ -34,6 +34,10 @@ public enum FormActionStatus implements Serializable {
 
 	private String displayText;
  	
+	private FormActionStatus() {
+	  // GWT
+	}
+	
  	private FormActionStatus(String display) {
  	  displayText = display;
  	}
