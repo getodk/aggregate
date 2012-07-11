@@ -72,11 +72,10 @@ public class FiltersDataPanel extends ScrollPanel {
     filterGroupButtons.setWidget(0, 2, removeButton);
     panel.add(filterGroupButtons);
 
-    HTML filterText = new HTML("<h3 id=\"filter_header\">Filters Applied</h3>");
+    HTML filterText = new HTML("<h2 id=\"filter_header\">Filters Applied</h2>");
     filterText.getElement().setId("filter_desc_title");
 
     VerticalPanel filterGlobal = new VerticalPanel();
-    filterGlobal.add(new MetadataCheckBox(parentSubTab));
     FlexTable paginationTable = new FlexTable();
     paginationTable.setHTML(0, 0, "<p id=\"filter_header\">Submissions per page</p>");
     paginationTable.setWidget(0, 1, new PaginationNumTextBox(parentSubTab));
@@ -198,6 +197,7 @@ public class FiltersDataPanel extends ScrollPanel {
     filterGroupHeader.setWidget(0, 1, addFilter);
 
     filterHeader.add(filterGroupHeader);
+    filterHeader.add(new MetadataCheckBox(group, parentSubTab));
   }
 
   private TreeItem createFilterTreeItem(Filter filter) {
