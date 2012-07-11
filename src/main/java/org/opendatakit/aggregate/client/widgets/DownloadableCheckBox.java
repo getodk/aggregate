@@ -34,7 +34,7 @@ public final class DownloadableCheckBox extends AggregateCheckBox implements
   private final String formId;
 
   public DownloadableCheckBox(String formId, Boolean downloadable) {
-    super(null, TOOLTIP_TXT, HELP_BALLOON_TXT);
+    super(null, false, TOOLTIP_TXT, HELP_BALLOON_TXT);
     this.formId = formId;
     setValue(downloadable);
     boolean enabled = AggregateUI.getUI().getUserInfo().getGrantedAuthorities()
